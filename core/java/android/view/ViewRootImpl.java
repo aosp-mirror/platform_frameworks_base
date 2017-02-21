@@ -4279,11 +4279,11 @@ public final class ViewRootImpl implements ViewParent,
                 mTranslator.translateEventInScreenToAppWindow(event);
             }
 
-            // Enter touch mode on down or scroll.
+            // Enter touch mode on down or scroll, if it is coming from a touch screen device,
+            // exit otherwise.
             final int action = event.getAction();
-            if (event.isFromSource(InputDevice.SOURCE_TOUCHSCREEN)
-                    && (action == MotionEvent.ACTION_DOWN || action == MotionEvent.ACTION_SCROLL)) {
-                ensureTouchMode(true);
+            if (action == MotionEvent.ACTION_DOWN || action == MotionEvent.ACTION_SCROLL) {
+                ensureTouchMode(event.isFromSource(InputDevice.SOURCE_TOUCHSCREEN));
             }
 
             if (action == MotionEvent.ACTION_DOWN && mAttachInfo.mTooltipHost != null) {
