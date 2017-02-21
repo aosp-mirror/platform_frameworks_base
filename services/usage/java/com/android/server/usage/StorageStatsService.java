@@ -115,6 +115,17 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
     }
 
     @Override
+    public boolean isQuotaSupported(String volumeUuid, String callingPackage) {
+        enforcePermission(Binder.getCallingUid(), callingPackage);
+
+        try {
+            return mInstaller.isQuotaSupported(volumeUuid);
+        } catch (InstallerException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    @Override
     public long getTotalBytes(String volumeUuid, String callingPackage) {
         enforcePermission(Binder.getCallingUid(), callingPackage);
 

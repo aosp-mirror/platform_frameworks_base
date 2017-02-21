@@ -24,6 +24,7 @@ import static android.content.pm.PackageManager.INSTALL_FAILED_INVALID_APK;
 import static android.system.OsConstants.O_CREAT;
 import static android.system.OsConstants.O_RDONLY;
 import static android.system.OsConstants.O_WRONLY;
+
 import static com.android.server.pm.PackageInstallerService.prepareExternalStageCid;
 import static com.android.server.pm.PackageInstallerService.prepareStageDir;
 
@@ -54,8 +55,8 @@ import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
-import android.os.SELinux;
 import android.os.UserHandle;
+import android.os.storage.StorageManager;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
@@ -66,9 +67,6 @@ import android.util.ExceptionUtils;
 import android.util.MathUtils;
 import android.util.Slog;
 
-import libcore.io.IoUtils;
-import libcore.io.Libcore;
-
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.content.NativeLibraryHelper;
 import com.android.internal.content.PackageHelper;
@@ -77,6 +75,9 @@ import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.server.pm.Installer.InstallerException;
 import com.android.server.pm.PackageInstallerService.PackageInstallObserverAdapter;
+
+import libcore.io.IoUtils;
+import libcore.io.Libcore;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -455,14 +456,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
             // If caller specified a total length, allocate it for them. Free up
             // cache space to grow, if needed.
-            if (lengthBytes > 0) {
-                final StructStat stat = Libcore.os.fstat(targetFd);
-                final long deltaBytes = lengthBytes - stat.st_size;
-                // Only need to free up space when writing to internal stage
-                if (stageDir != null && deltaBytes > 0) {
-                    mPm.freeStorage(params.volumeUuid, deltaBytes);
-                }
-                Libcore.os.posix_fallocate(targetFd, 0, lengthBytes);
+            if (stageDir != null && lengthBytes > 0) {
+                mContext.getSystemService(StorageManager.class).allocateBytes(targetFd,
+                        lengthBytes, 0);
             }
 
             if (offsetBytes > 0) {

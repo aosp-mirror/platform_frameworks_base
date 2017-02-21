@@ -174,6 +174,10 @@ package android.os {
 package android.os.storage {
 
   public class StorageManager {
+    method public deprecated long getCacheQuotaBytes();
+    method public deprecated long getCacheSizeBytes();
+    method public deprecated long getExternalCacheQuotaBytes();
+    method public deprecated long getExternalCacheSizeBytes();
     method public android.os.storage.StorageVolume getPrimaryVolume();
     method public android.os.storage.StorageVolume[] getVolumeList();
   }

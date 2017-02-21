@@ -546,6 +546,25 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
     }
 
     /**
+     * Return the filesystem path of the real file on disk that is represented
+     * by the given {@link FileDescriptor}.
+     *
+     * @hide
+     */
+    public static File getFile(FileDescriptor fd) throws IOException {
+        try {
+            final String path = Os.readlink("/proc/self/fd/" + fd.getInt$());
+            if (OsConstants.S_ISREG(Os.stat(path).st_mode)) {
+                return new File(path);
+            } else {
+                throw new IOException("Not a regular file: " + path);
+            }
+        } catch (ErrnoException e) {
+            throw e.rethrowAsIOException();
+        }
+    }
+
+    /**
      * Retrieve the actual FileDescriptor associated with this object.
      *
      * @return Returns the FileDescriptor associated with this object.
