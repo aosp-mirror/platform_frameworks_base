@@ -286,18 +286,15 @@ public final class ResourceHelper {
 
         Density density = Density.MEDIUM;
         if (value instanceof DensityBasedResourceValue) {
-            density =
-                ((DensityBasedResourceValue)value).getResourceDensity();
+            density = ((DensityBasedResourceValue) value).getResourceDensity();
         }
-
 
         if (lowerCaseValue.endsWith(NinePatch.EXTENSION_9PATCH)) {
             File file = new File(stringValue);
             if (file.isFile()) {
                 try {
-                    return getNinePatchDrawable(
-                            new FileInputStream(file), density, value.isFramework(),
-                            stringValue, context);
+                    return getNinePatchDrawable(new FileInputStream(file), density,
+                            value.isFramework(), stringValue, context);
                 } catch (IOException e) {
                     // failed to read the file, we'll return null below.
                     Bridge.getLog().error(LayoutLog.TAG_RESOURCES_READ,
@@ -306,30 +303,28 @@ public final class ResourceHelper {
             }
 
             return null;
-        } else if (lowerCaseValue.endsWith(".xml")) {
+        } else if (lowerCaseValue.endsWith(".xml") || stringValue.startsWith("@aapt:_aapt/")) {
             // create a block parser for the file
-            File f = new File(stringValue);
-            if (f.isFile()) {
-                try {
-                    // let the framework inflate the Drawable from the XML file.
-                    XmlPullParser parser = ParserFactory.create(f);
-
-                    BridgeXmlBlockParser blockParser = new BridgeXmlBlockParser(
-                            parser, context, value.isFramework());
-                    try {
-                        return Drawable.createFromXml(context.getResources(), blockParser, theme);
-                    } finally {
-                        blockParser.ensurePopped();
+            try {
+                XmlPullParser parser = context.getLayoutlibCallback().getParser(value);
+                if (parser == null) {
+                    File drawableFile = new File(stringValue);
+                    if (drawableFile.isFile()) {
+                        parser = ParserFactory.create(drawableFile);
                     }
-                } catch (Exception e) {
-                    // this is an error and not warning since the file existence is checked before
-                    // attempting to parse it.
-                    Bridge.getLog().error(null, "Failed to parse file " + stringValue,
-                            e, null /*data*/);
                 }
-            } else {
-                Bridge.getLog().error(LayoutLog.TAG_BROKEN,
-                        String.format("File %s does not exist (or is not a file)", stringValue),
+
+                BridgeXmlBlockParser blockParser =
+                        new BridgeXmlBlockParser(parser, context, value.isFramework());
+                try {
+                    return Drawable.createFromXml(context.getResources(), blockParser, theme);
+                } finally {
+                    blockParser.ensurePopped();
+                }
+            } catch (Exception e) {
+                // this is an error and not warning since the file existence is checked before
+                // attempting to parse it.
+                Bridge.getLog().error(null, "Failed to parse file " + stringValue, e,
                         null /*data*/);
             }
 
@@ -342,8 +337,8 @@ public final class ResourceHelper {
                             value.isFramework() ? null : context.getProjectKey());
 
                     if (bitmap == null) {
-                        bitmap = Bitmap_Delegate.createBitmap(bmpFile, false /*isMutable*/,
-                                density);
+                        bitmap =
+                                Bitmap_Delegate.createBitmap(bmpFile, false /*isMutable*/, density);
                         Bridge.setCachedBitmap(stringValue, bitmap,
                                 value.isFramework() ? null : context.getProjectKey());
                     }
