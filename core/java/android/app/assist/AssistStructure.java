@@ -419,7 +419,7 @@ public class AssistStructure implements Parcelable {
             mDisplayId = root.getDisplayId();
             mRoot = new ViewNode();
 
-            ViewNodeBuilder builder = new ViewNodeBuilder(assist, mRoot, false, 0);
+            ViewNodeBuilder builder = new ViewNodeBuilder(assist, mRoot, false);
             if ((root.getWindowFlags() & WindowManager.LayoutParams.FLAG_SECURE) != 0) {
                 if (forAutoFill) {
                     // NOTE: flags are currently not supported, hence 0
@@ -1187,11 +1187,10 @@ public class AssistStructure implements Parcelable {
         final ViewNode mNode;
         final boolean mAsync;
 
-        ViewNodeBuilder(AssistStructure assist, ViewNode node, boolean async, int flags) {
+        ViewNodeBuilder(AssistStructure assist, ViewNode node, boolean async) {
             mAssist = assist;
             mNode = node;
             mAsync = async;
-            mNode.mSanitized = (flags & AUTO_FILL_FLAG_SANITIZED) != 0;
         }
 
         @Override
@@ -1429,16 +1428,15 @@ public class AssistStructure implements Parcelable {
             ViewNode node = new ViewNode();
             setAutoFillId(node, forAutoFill, virtualId);
             mNode.mChildren[index] = node;
-            return new ViewNodeBuilder(mAssist, node, false, flags);
+            return new ViewNodeBuilder(mAssist, node, false);
         }
 
-        private ViewStructure asyncNewChild(int index, boolean forAutoFill, int virtualId,
-                int flags) {
+        private ViewStructure asyncNewChild(int index, boolean forAutoFill, int virtualId) {
             synchronized (mAssist) {
                 ViewNode node = new ViewNode();
                 setAutoFillId(node, forAutoFill, virtualId);
                 mNode.mChildren[index] = node;
-                ViewNodeBuilder builder = new ViewNodeBuilder(mAssist, node, true, flags);
+                ViewNodeBuilder builder = new ViewNodeBuilder(mAssist, node, true);
                 mAssist.mPendingAsyncChildren.add(builder);
                 return builder;
             }
@@ -1457,12 +1455,12 @@ public class AssistStructure implements Parcelable {
 
         @Override
         public ViewStructure asyncNewChild(int index) {
-            return asyncNewChild(index, false, 0, 0);
+            return asyncNewChild(index, false, 0);
         }
 
         @Override
         public ViewStructure asyncNewChild(int index, int virtualId, int flags) {
-            return asyncNewChild(index, true, virtualId, flags);
+            return asyncNewChild(index, true, virtualId);
         }
 
         @Override
