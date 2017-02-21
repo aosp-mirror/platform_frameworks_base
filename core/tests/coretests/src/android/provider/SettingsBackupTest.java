@@ -179,6 +179,7 @@ public class SettingsBackupTest {
                     Settings.Global.DROPBOX_TAG_PREFIX,
                     Settings.Global.EMERGENCY_AFFORDANCE_NEEDED,
                     Settings.Global.ENABLE_ACCESSIBILITY_GLOBAL_GESTURE_ENABLED,
+                    Settings.Global.ENABLE_CACHE_QUOTA_CALCULATION,
                     Settings.Global.ENABLE_CELLULAR_ON_BOOT,
                     Settings.Global.ENABLE_DISKSTATS_LOGGING,
                     Settings.Global.ENABLE_EPHEMERAL_FEATURE,
