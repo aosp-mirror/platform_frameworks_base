@@ -38,6 +38,7 @@ public class BatteryInfo {
     public long remainingTimeUs = 0;
     public String batteryPercentString;
     public String remainingLabel;
+    public String statusLabel;
     private BatteryStats mStats;
     private boolean mCharging;
     private long timePeriod;
@@ -135,6 +136,7 @@ public class BatteryInfo {
         info.batteryPercentString = Utils.formatPercentage(info.mBatteryLevel);
         info.mCharging = batteryBroadcast.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0) != 0;
         final Resources resources = context.getResources();
+        info.statusLabel = Utils.getBatteryStatus(resources, batteryBroadcast, shortString);
         if (!info.mCharging) {
             final long drainTime = stats.computeBatteryTimeRemaining(elapsedRealtimeUs);
             if (drainTime > 0) {
@@ -155,8 +157,6 @@ public class BatteryInfo {
             }
         } else {
             final long chargeTime = stats.computeChargeTimeRemaining(elapsedRealtimeUs);
-            final String statusLabel = Utils.getBatteryStatus(
-                    resources, batteryBroadcast, shortString);
             final int status = batteryBroadcast.getIntExtra(BatteryManager.EXTRA_STATUS,
                     BatteryManager.BATTERY_STATUS_UNKNOWN);
             if (chargeTime > 0 && status != BatteryManager.BATTERY_STATUS_FULL) {
@@ -184,9 +184,9 @@ public class BatteryInfo {
                 info.mChargeLabelString = resources.getString(
                         resId, info.batteryPercentString, timeString);
             } else {
-                info.remainingLabel = statusLabel;
+                info.remainingLabel = null;
                 info.mChargeLabelString = resources.getString(
-                        R.string.power_charging, info.batteryPercentString, statusLabel);
+                        R.string.power_charging, info.batteryPercentString, info.statusLabel);
             }
         }
         return info;
