@@ -36,6 +36,7 @@ import android.content.res.AssetManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.util.DisplayMetrics;
+import android.util.TypedValue;
 
 import java.lang.reflect.Field;
 import java.util.concurrent.TimeUnit;
@@ -43,6 +44,7 @@ import java.util.concurrent.TimeUnit;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -334,6 +336,7 @@ public class RenderTests extends RenderTestBase {
         AssetManager assetManager = AssetManager.getSystem();
         DisplayMetrics metrics = new DisplayMetrics();
         Configuration configuration = RenderAction.getConfiguration(params);
+        //noinspection deprecation
         Resources resources = new Resources(assetManager, metrics, configuration);
         resources.mLayoutlibCallback = params.getLayoutlibCallback();
         resources.mContext =
@@ -370,6 +373,7 @@ public class RenderTests extends RenderTestBase {
         AssetManager assetManager = AssetManager.getSystem();
         DisplayMetrics metrics = new DisplayMetrics();
         Configuration configuration = RenderAction.getConfiguration(params);
+        //noinspection deprecation
         Resources resources = new Resources(assetManager, metrics, configuration);
         resources.mLayoutlibCallback = params.getLayoutlibCallback();
         resources.mContext =
@@ -389,5 +393,35 @@ public class RenderTests extends RenderTestBase {
     public void testFonts() throws ClassNotFoundException {
         // TODO: styles seem to be broken in TextView
         renderAndVerify("fonts_test.xml", "font_test.png");
+    }
+
+    @Test
+    public void testColorTypedValue() throws Exception {
+        // Setup
+        // Create the layout pull parser for our resources (empty.xml can not be part of the test
+        // app as it won't compile).
+        LayoutPullParser parser = new LayoutPullParser("/empty.xml");
+        // Create LayoutLibCallback.
+        LayoutLibTestCallback layoutLibCallback =
+                new LayoutLibTestCallback(RenderTestBase.getLogger(), mDefaultClassLoader);
+        layoutLibCallback.initResources();
+        SessionParams params = getSessionParams(parser, ConfigGenerator.NEXUS_4,
+                layoutLibCallback, "AppTheme", true, RenderingMode.NORMAL, 22);
+        AssetManager assetManager = AssetManager.getSystem();
+        DisplayMetrics metrics = new DisplayMetrics();
+        Configuration configuration = RenderAction.getConfiguration(params);
+        //noinspection deprecation
+        Resources resources = new Resources(assetManager, metrics, configuration);
+        resources.mLayoutlibCallback = params.getLayoutlibCallback();
+        resources.mContext =
+                new BridgeContext(params.getProjectKey(), metrics, params.getResources(),
+                        params.getAssets(), params.getLayoutlibCallback(), configuration,
+                        params.getTargetSdkVersion(), params.isRtlSupported());
+
+        TypedValue outValue = new TypedValue();
+        resources.mContext.resolveThemeAttribute(android.R.attr.colorPrimary, outValue, true);
+        assertEquals(TypedValue.TYPE_INT_COLOR_ARGB8, outValue.type);
+        assertNotEquals(0, outValue.data);
+        assertTrue(sRenderMessages.isEmpty());
     }
 }
