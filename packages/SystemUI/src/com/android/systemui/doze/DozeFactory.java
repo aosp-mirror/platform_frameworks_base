@@ -23,7 +23,6 @@ import android.content.Context;
 import android.hardware.SensorManager;
 import android.os.Handler;
 import android.os.PowerManager;
-import android.os.SystemClock;
 
 import com.android.internal.hardware.AmbientDisplayConfiguration;
 import com.android.systemui.SystemUIApplication;
@@ -52,7 +51,10 @@ public class DozeFactory {
         DozeFactory.WakeLock wakeLock = new DozeFactory.WakeLock(powerManager.newWakeLock(
                 PowerManager.PARTIAL_WAKE_LOCK, "Doze"));
 
-        DozeMachine machine = new DozeMachine(dozeService, params, wakeLock);
+        DozeMachine machine = new DozeMachine(
+                DozeScreenStatePreventingAdapter.wrapIfNeeded(dozeService, params),
+                params,
+                wakeLock);
         machine.setParts(new DozeMachine.Part[]{
                 createDozeTriggers(context, sensorManager, host, config, params, handler, wakeLock,
                         machine),
