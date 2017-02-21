@@ -2820,7 +2820,9 @@ public class Activity extends ContextThemeWrapper
             return;
         }
 
-        if (!mFragments.getFragmentManager().popBackStackImmediate()) {
+        FragmentManager fragmentManager = mFragments.getFragmentManager();
+
+        if (fragmentManager.isStateSaved() || !fragmentManager.popBackStackImmediate()) {
             finishAfterTransition();
         }
     }
