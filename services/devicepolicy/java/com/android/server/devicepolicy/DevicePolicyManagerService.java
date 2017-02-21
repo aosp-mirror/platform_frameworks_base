@@ -41,6 +41,7 @@ import static android.app.admin.DevicePolicyManager.DELEGATION_KEEP_UNINSTALLED_
 import static android.app.admin.DevicePolicyManager.DELEGATION_PACKAGE_ACCESS;
 import static android.app.admin.DevicePolicyManager.DELEGATION_PERMISSION_GRANT;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_COMPLEX;
+import static android.app.admin.DevicePolicyManager.PROFILE_KEYGUARD_FEATURES_AFFECT_OWNER;
 import static android.app.admin.DevicePolicyManager.WIPE_EXTERNAL_STORAGE;
 import static android.app.admin.DevicePolicyManager.WIPE_RESET_PROTECTION_DATA;
 import static android.content.pm.PackageManager.MATCH_UNINSTALLED_PACKAGES;
@@ -329,15 +330,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         GLOBAL_SETTINGS_DEPRECATED.add(Settings.Global.NETWORK_PREFERENCE);
         GLOBAL_SETTINGS_DEPRECATED.add(Settings.Global.WIFI_ON);
     }
-
-    /**
-     * Keyguard features that when set on a managed profile that doesn't have its own challenge will
-     * affect the profile's parent user. These can also be set on the managed profile's parent DPM
-     * instance.
-     */
-    private static final int PROFILE_KEYGUARD_FEATURES_AFFECT_OWNER =
-            DevicePolicyManager.KEYGUARD_DISABLE_TRUST_AGENTS
-            | DevicePolicyManager.KEYGUARD_DISABLE_FINGERPRINT;
 
     /**
      * Keyguard features that when set on a profile affect the profile content or challenge only.
