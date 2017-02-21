@@ -42,24 +42,23 @@ interface IImsServiceController {
     int startSession(int slotId, int featureType, in PendingIntent incomingCallIntent,
             in IImsRegistrationListener listener);
     void endSession(int slotId, int featureType, int sessionId);
-    boolean isConnected(int slotId, int featureType, int sessionId, int callSessionType, int callType);
-    boolean isOpened(int slotId, int featureType, int sessionId);
+    boolean isConnected(int slotId, int featureType, int callSessionType, int callType);
+    boolean isOpened(int slotId, int featureType);
     int getFeatureStatus(int slotId, int featureType);
-    void addRegistrationListener(int slotId, int featureType, int sessionId,
+    void addRegistrationListener(int slotId, int featureType, in IImsRegistrationListener listener);
+    void removeRegistrationListener(int slotId, int featureType,
             in IImsRegistrationListener listener);
-    void removeRegistrationListener(int slotId, int featureType, int sessionId,
-            in IImsRegistrationListener listener);
-    ImsCallProfile createCallProfile(int slotId, int featureType, int sessionId, int callSessionType, int callType);
+    ImsCallProfile createCallProfile(int slotId, int featureType, int sessionId,
+            int callSessionType, int callType);
     IImsCallSession createCallSession(int slotId, int featureType, int sessionId,
             in ImsCallProfile profile, IImsCallSessionListener listener);
     IImsCallSession getPendingCallSession(int slotId, int featureType, int sessionId,
             String callId);
-    IImsUt getUtInterface(int slotId, int featureType, int sessionId);
-    IImsConfig getConfigInterface(int slotId, int featureType, int sessionId);
-    void turnOnIms(int slotId, int featureType, int sessionId);
-    void turnOffIms(int slotId, int featureType, int sessionId);
-    IImsEcbm getEcbmInterface(int slotId, int featureType, int sessionId);
-    void setUiTTYMode(int slotId, int featureType, int sessionId, int uiTtyMode,
-            in Message onComplete);
-    IImsMultiEndpoint getMultiEndpointInterface(int slotId, int featureType, int sessionId);
+    IImsUt getUtInterface(int slotId, int featureType);
+    IImsConfig getConfigInterface(int slotId, int featureType);
+    void turnOnIms(int slotId, int featureType);
+    void turnOffIms(int slotId, int featureType);
+    IImsEcbm getEcbmInterface(int slotId, int featureType);
+    void setUiTTYMode(int slotId, int featureType, int uiTtyMode, in Message onComplete);
+    IImsMultiEndpoint getMultiEndpointInterface(int slotId, int featureType);
 }
