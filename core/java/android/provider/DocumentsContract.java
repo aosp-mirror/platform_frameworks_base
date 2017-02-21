@@ -538,7 +538,9 @@ public final class DocumentsContract {
          */
         public static final String COLUMN_MIME_TYPES = "mime_types";
 
-        /** {@hide} */
+        /**
+         * MIME type for a root.
+         */
         public static final String MIME_TYPE_ITEM = "vnd.android.document/root";
 
         /**
