@@ -38,6 +38,7 @@ import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingManager;
 import com.android.systemui.statusbar.notification.FakeShadowView;
 import com.android.systemui.statusbar.notification.NotificationUtils;
+import com.android.systemui.statusbar.phone.DoubleTapHelper;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.stack.StackStateAnimator;
 
@@ -47,7 +48,6 @@ import com.android.systemui.statusbar.stack.StackStateAnimator;
  */
 public abstract class ActivatableNotificationView extends ExpandableOutlineView {
 
-    private static final long DOUBLETAP_TIMEOUT_MS = 1200;
     private static final int BACKGROUND_ANIMATION_LENGTH_MS = 220;
     private static final int ACTIVATE_ANIMATION_LENGTH = 220;
     private static final int DARK_ANIMATION_LENGTH = 170;
@@ -101,6 +101,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     private final int mLowPriorityRippleColor;
     protected final int mNormalRippleColor;
     private final AccessibilityManager mAccessibilityManager;
+    private final DoubleTapHelper mDoubleTapHelper;
 
     private boolean mDimmed;
     private boolean mDark;
@@ -113,14 +114,6 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
      * click it.
      */
     private boolean mActivated;
-
-    private float mDownX;
-    private float mDownY;
-    private final float mTouchSlop;
-
-    private float mActivationX;
-    private float mActivationY;
-    private final float mDoubleTapSlop;
 
     private OnActivatedListener mOnActivatedListener;
 
@@ -143,7 +136,6 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     private final int mLowPriorityColor;
     private boolean mIsBelowSpeedBump;
     private FalsingManager mFalsingManager;
-    private boolean mTrackTouch;
 
     private float mNormalBackgroundVisibilityAmount;
     private ValueAnimator mFadeInFromDarkAnimator;
@@ -183,8 +175,6 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
 
     public ActivatableNotificationView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
-        mDoubleTapSlop = context.getResources().getDimension(R.dimen.double_tap_slop);
         mSlowOutFastInInterpolator = new PathInterpolator(0.8f, 0.0f, 0.6f, 1.0f);
         mSlowOutLinearInInterpolator = new PathInterpolator(0.8f, 0.0f, 1.0f, 1.0f);
         setClipChildren(false);
@@ -200,6 +190,14 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
                 R.color.notification_ripple_untinted_color);
         mFalsingManager = FalsingManager.getInstance(context);
         mAccessibilityManager = AccessibilityManager.getInstance(mContext);
+
+        mDoubleTapHelper = new DoubleTapHelper(this, (active) -> {
+            if (active) {
+                makeActive();
+            } else {
+                makeInactive(true /* animate */);
+            }
+        }, this::performClick, this::handleSlideBack, mFalsingManager::onNotificationDoubleTap);
     }
 
     @Override
@@ -284,60 +282,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     }
 
     private boolean handleTouchEventDimmed(MotionEvent event) {
-        int action = event.getActionMasked();
-        switch (action) {
-            case MotionEvent.ACTION_DOWN:
-                mDownX = event.getX();
-                mDownY = event.getY();
-                mTrackTouch = true;
-                if (mDownY > getActualHeight()) {
-                    mTrackTouch = false;
-                }
-                break;
-            case MotionEvent.ACTION_MOVE:
-                if (!isWithinTouchSlop(event)) {
-                    makeInactive(true /* animate */);
-                    mTrackTouch = false;
-                }
-                break;
-            case MotionEvent.ACTION_UP:
-                if (isWithinTouchSlop(event)) {
-                    if (handleSlideBack()) {
-                        return true;
-                    }
-                    if (!mActivated) {
-                        makeActive();
-                        postDelayed(mTapTimeoutRunnable, DOUBLETAP_TIMEOUT_MS);
-                        mActivationX = event.getX();
-                        mActivationY = event.getY();
-                    } else {
-                        boolean withinDoubleTapSlop = isWithinDoubleTapSlop(event);
-                        mFalsingManager.onNotificationDoubleTap(
-                                withinDoubleTapSlop,
-                                event.getX() - mActivationX,
-                                event.getY() - mActivationY);
-                        if (withinDoubleTapSlop) {
-                            if (!performClick()) {
-                                return false;
-                            }
-                        } else {
-                            makeInactive(true /* animate */);
-                            mTrackTouch = false;
-                        }
-                    }
-                } else {
-                    makeInactive(true /* animate */);
-                    mTrackTouch = false;
-                }
-                break;
-            case MotionEvent.ACTION_CANCEL:
-                makeInactive(true /* animate */);
-                mTrackTouch = false;
-                break;
-            default:
-                break;
-        }
-        return mTrackTouch;
+        return mDoubleTapHelper.onTouchEvent(event, getActualHeight());
     }
 
     private void makeActive() {
@@ -423,21 +368,6 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
             mOnActivatedListener.onActivationReset(this);
         }
         removeCallbacks(mTapTimeoutRunnable);
-    }
-
-    private boolean isWithinTouchSlop(MotionEvent event) {
-        return Math.abs(event.getX() - mDownX) < mTouchSlop
-                && Math.abs(event.getY() - mDownY) < mTouchSlop;
-    }
-
-    private boolean isWithinDoubleTapSlop(MotionEvent event) {
-        if (!mActivated) {
-            // If we're not activated there's no double tap slop to satisfy.
-            return true;
-        }
-
-        return Math.abs(event.getX() - mActivationX) < mDoubleTapSlop
-                && Math.abs(event.getY() - mActivationY) < mDoubleTapSlop;
     }
 
     public void setDimmed(boolean dimmed, boolean fade) {
