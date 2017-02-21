@@ -36,11 +36,11 @@ import java.util.Set;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-/** Unit test for Settings. */
+/** Tests that ensure appropriate settings are backed up. */
 @TargetApi(25)
 @RunWith(AndroidJUnit4.class)
 @SmallTest
-public class SettingsTest {
+public class SettingsBackupTest {
 
     /**
      * The following blacklists contain settings that should *not* be backed up and restored to
@@ -64,7 +64,6 @@ public class SettingsTest {
                     Settings.System.NOTIFICATION_SOUND_CACHE, // internal cache
                     Settings.System.POINTER_LOCATION, // backup candidate?
                     Settings.System.RINGTONE_CACHE, // internal cache
-                    Settings.System.SCREEN_BRIGHTNESS_FOR_VR, // bug?
                     Settings.System.SETUP_WIZARD_HAS_RUN, // Only used by SuW
                     Settings.System.SHOW_GTALK_SERVICE_STATUS, // candidate for backup?
                     Settings.System.SHOW_TOUCHES, // bug?
@@ -246,6 +245,7 @@ public class SettingsTest {
                     Settings.Global.NETWORK_AVOID_BAD_WIFI,
                     Settings.Global.NETWORK_METERED_MULTIPATH_PREFERENCE,
                     Settings.Global.NETWORK_PREFERENCE,
+                    Settings.Global.NETWORK_RECOMMENDATIONS_PACKAGE,
                     Settings.Global.NETWORK_RECOMMENDATION_REQUEST_TIMEOUT_MS,
                     Settings.Global.NETWORK_SCORER_APP,
                     Settings.Global.NETWORK_SCORING_PROVISIONED,
@@ -323,6 +323,7 @@ public class SettingsTest {
                     Settings.Global.USE_GOOGLE_MAIL,
                     Settings.Global.VT_IMS_ENABLED,
                     Settings.Global.WAIT_FOR_DEBUGGER,
+                    Settings.Global.WAIT_FOR_NETWORK_TIMEOUT_MS,
                     Settings.Global.WARNING_TEMPERATURE,
                     Settings.Global.WEBVIEW_DATA_REDUCTION_PROXY_KEY,
                     Settings.Global.WEBVIEW_FALLBACK_LOGIC_ENABLED,
@@ -383,7 +384,6 @@ public class SettingsTest {
                  Settings.Secure.ASSIST_STRUCTURE_ENABLED,
                  Settings.Secure.AUTO_FILL_SERVICE,
                  Settings.Secure.AUTOMATIC_STORAGE_MANAGER_BYTES_CLEARED,
-                 Settings.Secure.AUTOMATIC_STORAGE_MANAGER_DAYS_TO_RETAIN,
                  Settings.Secure.AUTOMATIC_STORAGE_MANAGER_ENABLED,
                  Settings.Secure.AUTOMATIC_STORAGE_MANAGER_LAST_RUN,
                  Settings.Secure.BACKUP_AUTO_RESTORE,
@@ -422,6 +422,7 @@ public class SettingsTest {
                  Settings.Secure.MANAGED_PROFILE_CONTACT_REMOTE_SEARCH,
                  Settings.Secure.MULTI_PRESS_TIMEOUT,
                  Settings.Secure.NFC_PAYMENT_FOREGROUND,
+                 Settings.Secure.OVERVIEW_LAST_STACK_ACTIVE_TIME,
                  Settings.Secure.PACKAGE_VERIFIER_STATE,
                  Settings.Secure.PACKAGE_VERIFIER_USER_CONSENT,
                  Settings.Secure.PARENTAL_CONTROL_LAST_UPDATE,
@@ -460,6 +461,7 @@ public class SettingsTest {
                  Settings.Secure.TV_INPUT_CUSTOM_LABELS,
                  Settings.Secure.TV_INPUT_HIDDEN_INPUTS,
                  Settings.Secure.UI_NIGHT_MODE, // candidate?
+                 Settings.Secure.UNKNOWN_SOURCES_DEFAULT_REVERSED,
                  Settings.Secure.UNSAFE_VOLUME_MUSIC_ACTIVE_MS,
                  Settings.Secure.USB_AUDIO_AUTOMATIC_ROUTING_DISABLED,
                  Settings.Secure.USER_SETUP_COMPLETE,
