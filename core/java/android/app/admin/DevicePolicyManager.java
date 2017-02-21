@@ -6343,7 +6343,6 @@ public class DevicePolicyManager {
      * The settings that can be updated by a profile or device owner with this method are:
      * <ul>
      * <li>{@link Settings.Secure#DEFAULT_INPUT_METHOD}</li>
-     * <li>{@link Settings.Secure#INSTALL_NON_MARKET_APPS}</li>
      * <li>{@link Settings.Secure#SKIP_FIRST_USE_HINTS}</li>
      * </ul>
      * <p>
@@ -6351,6 +6350,15 @@ public class DevicePolicyManager {
      * <ul>
      * <li>{@link Settings.Secure#LOCATION_MODE}</li>
      * </ul>
+     *
+     * <strong>Note: Starting from Android O, apps should no longer call this method with the
+     * setting {@link android.provider.Settings.Secure#INSTALL_NON_MARKET_APPS}, which is
+     * deprecated. Instead, device owners or profile owners should use the restriction
+     * {@link UserManager#DISALLOW_INSTALL_UNKNOWN_SOURCES}.
+     * If any app targeting {@link android.os.Build.VERSION_CODES#O} or higher calls this method
+     * with {@link android.provider.Settings.Secure#INSTALL_NON_MARKET_APPS},
+     * an {@link UnsupportedOperationException} is thrown.
+     * </strong>
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param setting The name of the setting to update.
