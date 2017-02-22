@@ -19,9 +19,11 @@ package com.android.settingslib.applications;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.IntentFilter;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.hardware.usb.IUsbManager;
 import android.os.RemoteException;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.util.Log;
 
@@ -66,6 +68,31 @@ public class AppUtils {
         pm.getPreferredActivities(intentList, prefActList, packageName);
         Log.d(TAG, "Have " + prefActList.size() + " number of activities in preferred list");
         return prefActList.size() > 0;
+    }
+
+    /**
+     * Returns a boolean indicating whether the given package should be considered an instant app
+     */
+    public static boolean isInstant(ApplicationInfo info) {
+        if (info.isInstantApp()) {
+            return true;
+        }
+
+        // For debugging/testing, we support setting the following property to a comma-separated
+        // list of search terms (typically, but not necessarily, full package names) to match
+        // against the package names of the app.
+        String propVal = SystemProperties.get("settingsdebug.instant.packages");
+        if (propVal != null && !propVal.isEmpty() && info.packageName != null) {
+            String[] searchTerms = propVal.split(",");
+            if (searchTerms != null) {
+                for (String term : searchTerms) {
+                    if (info.packageName.contains(term)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
 }

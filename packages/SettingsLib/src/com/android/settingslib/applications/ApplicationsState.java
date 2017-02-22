@@ -98,6 +98,7 @@ public class ApplicationsState {
 
     boolean mResumed;
     boolean mHaveDisabledApps;
+    boolean mHaveInstantApps;
 
     // Information about all applications.  Synchronize on mEntriesMap
     // to protect access to these.
@@ -212,6 +213,7 @@ public class ApplicationsState {
         }
 
         mHaveDisabledApps = false;
+        mHaveInstantApps = false;
         for (int i=0; i<mApplications.size(); i++) {
             final ApplicationInfo info = mApplications.get(i);
             // Need to trim out any applications that are disabled by
@@ -224,6 +226,10 @@ public class ApplicationsState {
                 }
                 mHaveDisabledApps = true;
             }
+            if (!mHaveInstantApps && AppUtils.isInstant(info)) {
+                mHaveInstantApps = true;
+            }
+
             int userId = UserHandle.getUserId(info.uid);
             final AppEntry entry = mEntriesMap.get(userId).get(info.packageName);
             if (entry != null) {
@@ -249,6 +255,9 @@ public class ApplicationsState {
 
     public boolean haveDisabledApps() {
         return mHaveDisabledApps;
+    }
+    public boolean haveInstantApps() {
+        return mHaveInstantApps;
     }
 
     void doPauseIfNeededLocked() {
@@ -379,6 +388,9 @@ public class ApplicationsState {
                     }
                     mHaveDisabledApps = true;
                 }
+                if (AppUtils.isInstant(info)) {
+                    mHaveInstantApps = true;
+                }
                 mApplications.add(info);
                 if (!mBackgroundHandler.hasMessages(BackgroundHandler.MSG_LOAD_ENTRIES)) {
                     mBackgroundHandler.sendEmptyMessage(BackgroundHandler.MSG_LOAD_ENTRIES);
@@ -408,9 +420,18 @@ public class ApplicationsState {
                 mApplications.remove(idx);
                 if (!info.enabled) {
                     mHaveDisabledApps = false;
-                    for (int i=0; i<mApplications.size(); i++) {
-                        if (!mApplications.get(i).enabled) {
+                    for (ApplicationInfo otherInfo : mApplications) {
+                        if (!otherInfo.enabled) {
                             mHaveDisabledApps = true;
+                            break;
+                        }
+                    }
+                }
+                if (AppUtils.isInstant(info)) {
+                    mHaveInstantApps = false;
+                    for (ApplicationInfo otherInfo : mApplications) {
+                        if (AppUtils.isInstant(otherInfo)) {
+                            mHaveInstantApps = true;
                             break;
                         }
                     }
@@ -1290,6 +1311,7 @@ public class ApplicationsState {
     public static final AppFilter FILTER_PERSONAL = new AppFilter() {
         private int mCurrentUser;
 
+        @Override
         public void init() {
             mCurrentUser = ActivityManager.getCurrentUser();
         }
@@ -1301,8 +1323,9 @@ public class ApplicationsState {
     };
 
     public static final AppFilter FILTER_WITHOUT_DISABLED_UNTIL_USED = new AppFilter() {
+        @Override
         public void init() {
-            // do nothings
+            // do nothing
         }
 
         @Override
@@ -1315,6 +1338,7 @@ public class ApplicationsState {
     public static final AppFilter FILTER_WORK = new AppFilter() {
         private int mCurrentUser;
 
+        @Override
         public void init() {
             mCurrentUser = ActivityManager.getCurrentUser();
         }
@@ -1329,6 +1353,7 @@ public class ApplicationsState {
      * Displays a combined list with "downloaded" and "visible in launcher" apps only.
      */
     public static final AppFilter FILTER_DOWNLOADED_AND_LAUNCHER = new AppFilter() {
+        @Override
         public void init() {
         }
 
@@ -1348,6 +1373,7 @@ public class ApplicationsState {
     };
 
     public static final AppFilter FILTER_THIRD_PARTY = new AppFilter() {
+        @Override
         public void init() {
         }
 
@@ -1363,26 +1389,40 @@ public class ApplicationsState {
     };
 
     public static final AppFilter FILTER_DISABLED = new AppFilter() {
+        @Override
         public void init() {
         }
 
         @Override
         public boolean filterApp(AppEntry entry) {
-            return !entry.info.enabled;
+            return !entry.info.enabled && !AppUtils.isInstant(entry.info);
+        }
+    };
+
+    public static final AppFilter FILTER_INSTANT = new AppFilter() {
+        @Override
+        public void init() {
+        }
+
+        @Override
+        public boolean filterApp(AppEntry entry) {
+            return AppUtils.isInstant(entry.info);
         }
     };
 
     public static final AppFilter FILTER_ALL_ENABLED = new AppFilter() {
+        @Override
         public void init() {
         }
 
         @Override
         public boolean filterApp(AppEntry entry) {
-            return entry.info.enabled;
+            return entry.info.enabled && !AppUtils.isInstant(entry.info);
         }
     };
 
     public static final AppFilter FILTER_EVERYTHING = new AppFilter() {
+        @Override
         public void init() {
         }
 
@@ -1393,6 +1433,7 @@ public class ApplicationsState {
     };
 
     public static final AppFilter FILTER_WITH_DOMAIN_URLS = new AppFilter() {
+        @Override
         public void init() {
         }
 
@@ -1405,6 +1446,7 @@ public class ApplicationsState {
     public static final AppFilter FILTER_NOT_HIDE = new AppFilter() {
         private String[] mHidePackageNames;
 
+        @Override
         public void init(Context context) {
             mHidePackageNames = context.getResources()
                 .getStringArray(R.array.config_hideWhenDisabled_packageNames);
