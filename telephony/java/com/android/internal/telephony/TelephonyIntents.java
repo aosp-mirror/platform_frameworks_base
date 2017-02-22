@@ -16,6 +16,8 @@
 
 package com.android.internal.telephony;
 
+import android.content.Intent;
+
 /**
  * The intents that the telephony services broadcast.
  *
@@ -184,7 +186,6 @@ public class TelephonyIntents {
     public static final String ACTION_DATA_CONNECTION_FAILED
             = "android.intent.action.DATA_CONNECTION_FAILED";
 
-
     /**
      * Broadcast Action: The sim card state has changed.
      * The intent will have the following extra values:</p>
@@ -213,8 +214,7 @@ public class TelephonyIntents {
      * by the system.
      */
     public static final String ACTION_SIM_STATE_CHANGED
-            = "android.intent.action.SIM_STATE_CHANGED";
-
+            = Intent.ACTION_SIM_STATE_CHANGED;
 
     /**
      * Broadcast Action: The time was set by the carrier (typically by the NITZ string).
