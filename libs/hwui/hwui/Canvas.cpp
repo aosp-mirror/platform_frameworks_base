@@ -45,7 +45,7 @@ void Canvas::drawTextDecorations(float x, float y, float length, const SkPaint& 
     } else {
         flags = paint.getFlags();
     }
-    if (flags & (SkPaint::kUnderlineText_Flag | SkPaint::kStrikeThruText_Flag)) {
+    if (flags & (SkPaint::kUnderlineText_ReserveFlag | SkPaint::kStrikeThruText_ReserveFlag)) {
         // Same values used by Skia
         const float kStdStrikeThru_Offset   = (-6.0f / 21.0f);
         const float kStdUnderline_Offset    = (1.0f / 9.0f);
@@ -55,12 +55,12 @@ void Canvas::drawTextDecorations(float x, float y, float length, const SkPaint& 
         SkScalar right = x + length;
         float textSize = paint.getTextSize();
         float strokeWidth = fmax(textSize * kStdUnderline_Thickness, 1.0f);
-        if (flags & SkPaint::kUnderlineText_Flag) {
+        if (flags & SkPaint::kUnderlineText_ReserveFlag) {
             SkScalar top = y + textSize * kStdUnderline_Offset - 0.5f * strokeWidth;
             SkScalar bottom = y + textSize * kStdUnderline_Offset + 0.5f * strokeWidth;
             drawRect(left, top, right, bottom, paint);
         }
-        if (flags & SkPaint::kStrikeThruText_Flag) {
+        if (flags & SkPaint::kStrikeThruText_ReserveFlag) {
             SkScalar top = y + textSize * kStdStrikeThru_Offset - 0.5f * strokeWidth;
             SkScalar bottom = y + textSize * kStdStrikeThru_Offset + 0.5f * strokeWidth;
             drawRect(left, top, right, bottom, paint);

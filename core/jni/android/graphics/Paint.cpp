@@ -84,15 +84,15 @@ namespace PaintGlue {
     }
 
     static jlong init(JNIEnv* env, jobject) {
-        static_assert(1 <<  0 == SkPaint::kAntiAlias_Flag,          "paint_flags_mismatch");
-        static_assert(1 <<  2 == SkPaint::kDither_Flag,             "paint_flags_mismatch");
-        static_assert(1 <<  3 == SkPaint::kUnderlineText_Flag,      "paint_flags_mismatch");
-        static_assert(1 <<  4 == SkPaint::kStrikeThruText_Flag,     "paint_flags_mismatch");
-        static_assert(1 <<  5 == SkPaint::kFakeBoldText_Flag,       "paint_flags_mismatch");
-        static_assert(1 <<  6 == SkPaint::kLinearText_Flag,         "paint_flags_mismatch");
-        static_assert(1 <<  7 == SkPaint::kSubpixelText_Flag,       "paint_flags_mismatch");
-        static_assert(1 <<  8 == SkPaint::kDevKernText_Flag,        "paint_flags_mismatch");
-        static_assert(1 << 10 == SkPaint::kEmbeddedBitmapText_Flag, "paint_flags_mismatch");
+        static_assert(1 <<  0 == SkPaint::kAntiAlias_Flag,             "paint_flags_mismatch");
+        static_assert(1 <<  2 == SkPaint::kDither_Flag,                "paint_flags_mismatch");
+        static_assert(1 <<  3 == SkPaint::kUnderlineText_ReserveFlag,  "paint_flags_mismatch");
+        static_assert(1 <<  4 == SkPaint::kStrikeThruText_ReserveFlag, "paint_flags_mismatch");
+        static_assert(1 <<  5 == SkPaint::kFakeBoldText_Flag,          "paint_flags_mismatch");
+        static_assert(1 <<  6 == SkPaint::kLinearText_Flag,            "paint_flags_mismatch");
+        static_assert(1 <<  7 == SkPaint::kSubpixelText_Flag,          "paint_flags_mismatch");
+        static_assert(1 <<  8 == SkPaint::kDevKernText_Flag,           "paint_flags_mismatch");
+        static_assert(1 << 10 == SkPaint::kEmbeddedBitmapText_Flag,    "paint_flags_mismatch");
 
         Paint* obj = new Paint();
         defaultSettingsForAndroid(obj);
@@ -692,11 +692,25 @@ namespace PaintGlue {
     }
 
     static void setUnderlineText(jlong paintHandle, jboolean underlineText) {
-        reinterpret_cast<Paint*>(paintHandle)->setUnderlineText(underlineText);
+        Paint* paint = reinterpret_cast<Paint*>(paintHandle);
+        uint32_t flags = paint->getFlags();
+        if (underlineText) {
+            flags |= Paint::kUnderlineText_ReserveFlag;
+        } else {
+            flags &= ~Paint::kUnderlineText_ReserveFlag;
+        }
+        paint->setFlags(flags);
     }
 
     static void setStrikeThruText(jlong paintHandle, jboolean strikeThruText) {
-        reinterpret_cast<Paint*>(paintHandle)->setStrikeThruText(strikeThruText);
+        Paint* paint = reinterpret_cast<Paint*>(paintHandle);
+        uint32_t flags = paint->getFlags();
+        if (strikeThruText) {
+            flags |= Paint::kStrikeThruText_ReserveFlag;
+        } else {
+            flags &= ~Paint::kStrikeThruText_ReserveFlag;
+        }
+        paint->setFlags(flags);
     }
 
     static void setFakeBoldText(jlong paintHandle, jboolean fakeBoldText) {
