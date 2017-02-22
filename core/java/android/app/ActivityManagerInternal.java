@@ -22,7 +22,6 @@ import android.content.ComponentName;
 import android.content.IIntentSender;
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.net.NetworkPolicyManager.UidStateWithSeqObserver;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.service.voice.IVoiceInteractionSession;
@@ -234,16 +233,4 @@ public abstract class ActivityManagerInternal {
      * @see android.view.WindowManager.LayoutParams#TYPE_APPLICATION_OVERLAY
      */
     public abstract void setHasOverlayUi(int pid, boolean hasOverlayUi);
-
-    /**
-     * Set observer which listens to uid state changes. Uid state change along with the sequence
-     * number associated with it needs to be passed to {@link UidStateWithSeqObserver}.
-     */
-    public abstract void setUidStateWithSeqObserver(UidStateWithSeqObserver observer);
-
-    /**
-     * Notifies that NetworkPolicyManagerService has updated the network policy rules for
-     * a specific {@param uid} and {@param procStateSeq}.
-     */
-    public abstract void notifyNetworkPolicyRulesUpdated(int uid, long procStateSeq);
 }

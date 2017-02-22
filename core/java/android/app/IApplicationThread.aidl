@@ -153,6 +153,4 @@ oneway interface IApplicationThread {
     void handleTrustStorageUpdate();
     void attachAgent(String path);
     void scheduleApplicationInfoChanged(in ApplicationInfo ai);
-    void setBlockForNetworkState(int blockState, long procStateSeq);
-    void notifyNetworkStateUpdated(long procStateSeq);
 }
