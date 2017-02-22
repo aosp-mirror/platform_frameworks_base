@@ -612,6 +612,11 @@ interface IActivityManager {
 
     void waitForNetworkStateUpdate(long procStateSeq);
 
+    /**
+     * See {@link android.app.Activity#setDisablePreviewScreenshots}
+     */
+    void setDisablePreviewScreenshots(IBinder token, boolean disable);
+
     // WARNING: when these transactions are updated, check if they are any callers on the native
     // side. If so, make sure they are using the correct transaction ids and arguments.
     // If a transaction which will also be used on the native side is being inserted, add it

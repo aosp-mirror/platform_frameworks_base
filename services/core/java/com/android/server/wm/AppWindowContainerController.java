@@ -35,7 +35,6 @@ import android.graphics.Bitmap;
 import android.os.Debug;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
 import android.os.Trace;
 import android.util.Slog;
 import android.view.IApplicationToken;
@@ -228,7 +227,7 @@ public class AppWindowContainerController
             boolean fullscreen, boolean showForAllUsers, int targetSdk, int orientation,
             int rotationAnimationHint, int configChanges, boolean launchTaskBehind,
             boolean alwaysFocusable, AppWindowContainerController controller) {
-        return  new AppWindowToken(service, token, voiceInteraction, dc,
+        return new AppWindowToken(service, token, voiceInteraction, dc,
                 inputDispatchingTimeoutNanos, fullscreen, showForAllUsers, targetSdk, orientation,
                 rotationAnimationHint, configChanges, launchTaskBehind, alwaysFocusable,
                 controller);
@@ -295,6 +294,17 @@ public class AppWindowContainerController
             }
 
             return mContainer.getOrientationIgnoreVisibility();
+        }
+    }
+
+    public void setDisablePreviewScreenshots(boolean disable) {
+        synchronized (mWindowMap) {
+            if (mContainer == null) {
+                Slog.w(TAG_WM, "Attempted to set disable screenshots of non-existing app"
+                        + " token: " + mToken);
+                return;
+            }
+            mContainer.setDisablePreviewSnapshots(disable);
         }
     }
 

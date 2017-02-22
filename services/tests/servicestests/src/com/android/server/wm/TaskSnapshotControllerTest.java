@@ -19,6 +19,8 @@ package com.android.server.wm;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static com.android.server.wm.AppTransition.TRANSIT_UNSET;
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertTrue;
 
 import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.SmallTest;
@@ -67,5 +69,16 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
         final ArraySet<Task> closingTasks = new ArraySet<>();
         sWm.mTaskSnapshotController.getClosingTasks(closingApps, closingTasks);
         assertEquals(0, closingTasks.size());
+    }
+
+    @Test
+    public void testSnapshotsDisabled() throws Exception {
+        final WindowState disabledWindow = createWindow(null,
+                FIRST_APPLICATION_WINDOW, sDisplayContent, "disabledWindow");
+        disabledWindow.mAppToken.setDisablePreviewSnapshots(true);
+        assertFalse(sWm.mTaskSnapshotController.canSnapshotTask(disabledWindow.getTask()));
+        final WindowState normalWindow = createWindow(null,
+                FIRST_APPLICATION_WINDOW, sDisplayContent, "normalWindow");
+        assertTrue(sWm.mTaskSnapshotController.canSnapshotTask(normalWindow.getTask()));
     }
 }

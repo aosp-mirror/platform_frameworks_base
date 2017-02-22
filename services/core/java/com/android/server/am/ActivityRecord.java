@@ -1973,6 +1973,10 @@ final class ActivityRecord implements AppWindowContainerListener {
                 task.taskId, requestedOrientation);
     }
 
+    void setDisablePreviewScreenshots(boolean disable) {
+        mWindowContainerController.setDisablePreviewScreenshots(disable);
+    }
+
     /**
      * Set the last reported global configuration to the client. Should be called whenever a new
      * global configuration is sent to the client for this activity.
