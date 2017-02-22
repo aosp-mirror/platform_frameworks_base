@@ -6144,7 +6144,7 @@ public class TelephonyManager {
      * android.content.pm.PackageManager#FEATURE_TELEPHONY_CARRIERLOCK} enabled.
      *
      * @return The number of carriers set successfully. Should be length of
-     * carrierList on success; -1 on error.
+     * carrierList on success; -1 if carrierList null or on error.
      * @hide
      */
     @SystemApi
