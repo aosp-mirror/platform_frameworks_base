@@ -118,7 +118,7 @@ public class IpConnectivityMetricsTest extends TestCase {
     @SmallTest
     public void testRateLimiting() {
         final IpConnectivityLog logger = new IpConnectivityLog(mService.impl);
-        final ApfProgramEvent ev = new ApfProgramEvent(0, 0, 0, 0, 0);
+        final ApfProgramEvent ev = new ApfProgramEvent();
         final long fakeTimestamp = 1;
 
         int attempt = 100; // More than burst quota, but less than buffer size.
@@ -142,13 +142,24 @@ public class IpConnectivityMetricsTest extends TestCase {
         // TODO: instead of comparing textpb to textpb, parse textpb and compare proto to proto.
         IpConnectivityLog logger = new IpConnectivityLog(mService.impl);
 
+        ApfStats apfStats = new ApfStats();
+        apfStats.durationMs = 45000;
+        apfStats.receivedRas = 10;
+        apfStats.matchingRas = 2;
+        apfStats.droppedRas = 2;
+        apfStats.parseErrors = 2;
+        apfStats.zeroLifetimeRas = 1;
+        apfStats.programUpdates = 4;
+        apfStats.programUpdatesAll = 7;
+        apfStats.programUpdatesAllowingMulticast = 3;
+        apfStats.maxProgramSize = 2048;
         Parcelable[] events = {
             new IpReachabilityEvent("wlan0", IpReachabilityEvent.NUD_FAILED),
             new DhcpClientEvent("wlan0", "SomeState", 192),
             new DefaultNetworkEvent(102, new int[]{1,2,3}, 101, true, false),
             new IpManagerEvent("wlan0", IpManagerEvent.PROVISIONING_OK, 5678),
             new ValidationProbeEvent(120, 40730, ValidationProbeEvent.PROBE_HTTP, 204),
-            new ApfStats(45000, 10, 2, 2, 1, 2, 4, 2048),
+            apfStats,
             new RaEvent(2000, 400, 300, -1, 1000, -1)
         };
 
@@ -240,8 +251,8 @@ public class IpConnectivityMetricsTest extends TestCase {
                 "    max_program_size: 2048",
                 "    parse_errors: 2",
                 "    program_updates: 4",
-                "    program_updates_all: 0",
-                "    program_updates_allowing_multicast: 0",
+                "    program_updates_all: 7",
+                "    program_updates_allowing_multicast: 3",
                 "    received_ras: 10",
                 "    zero_lifetime_ras: 1",
                 "  >",

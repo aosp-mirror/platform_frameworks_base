@@ -93,17 +93,10 @@ public class ApfFilter {
     class ReceiveThread extends Thread {
         private final byte[] mPacket = new byte[1514];
         private final FileDescriptor mSocket;
-        private volatile boolean mStopped;
-
-        // Starting time of the RA receiver thread.
         private final long mStart = SystemClock.elapsedRealtime();
+        private final ApfStats mStats = new ApfStats();
 
-        private int mReceivedRas;     // Number of received RAs
-        private int mMatchingRas;     // Number of received RAs matching a known RA
-        private int mDroppedRas;      // Number of received RAs ignored due to the MAX_RAS limit
-        private int mParseErrors;     // Number of received RAs that could not be parsed
-        private int mZeroLifetimeRas; // Number of received RAs with a 0 lifetime
-        private int mProgramUpdates;  // Number of APF program updates triggered by receiving a RA
+        private volatile boolean mStopped;
 
         public ReceiveThread(FileDescriptor socket) {
             mSocket = socket;
@@ -134,35 +127,40 @@ public class ApfFilter {
         }
 
         private void updateStats(ProcessRaResult result) {
-            mReceivedRas++;
+            mStats.receivedRas++;
             switch(result) {
                 case MATCH:
-                    mMatchingRas++;
+                    mStats.matchingRas++;
                     return;
                 case DROPPED:
-                    mDroppedRas++;
+                    mStats.droppedRas++;
                     return;
                 case PARSE_ERROR:
-                    mParseErrors++;
+                    mStats.parseErrors++;
                     return;
                 case ZERO_LIFETIME:
-                    mZeroLifetimeRas++;
+                    mStats.zeroLifetimeRas++;
                     return;
                 case UPDATE_EXPIRY:
-                    mMatchingRas++;
-                    mProgramUpdates++;
+                    mStats.matchingRas++;
+                    mStats.programUpdates++;
                     return;
                 case UPDATE_NEW_RA:
-                    mProgramUpdates++;
+                    mStats.programUpdates++;
                     return;
             }
         }
 
         private void logStats() {
-            long durationMs = SystemClock.elapsedRealtime() - mStart;
-            int maxSize = mApfCapabilities.maximumApfProgramSize;
-            mMetricsLog.log(new ApfStats(durationMs, mReceivedRas, mMatchingRas, mDroppedRas,
-                     mZeroLifetimeRas, mParseErrors, mProgramUpdates, maxSize));
+            final long nowMs = SystemClock.elapsedRealtime();
+            synchronized (this) {
+                mStats.durationMs = nowMs - mStart;
+                mStats.maxProgramSize = mApfCapabilities.maximumApfProgramSize;
+                mStats.programUpdatesAll = mNumProgramUpdates;
+                mStats.programUpdatesAllowingMulticast = mNumProgramUpdatesAllowingMulticast;
+                mMetricsLog.log(mStats);
+                logApfProgramEventLocked(nowMs / DateUtils.SECOND_IN_MILLIS);
+            }
         }
     }
 
@@ -218,6 +216,8 @@ public class ApfFilter {
             4,    // Protocol size: 4
     };
     private static final int ARP_TARGET_IP_ADDRESS_OFFSET = ETH_HEADER_LEN + 24;
+    // Do not log ApfProgramEvents whose actual lifetimes was less than this.
+    private static final int APF_PROGRAM_EVENT_LIFETIME_THRESHOLD = 2;
 
     private final ApfCapabilities mApfCapabilities;
     private final IpManager.Callback mIpManagerCallback;
@@ -247,6 +247,7 @@ public class ApfFilter {
         mMulticastFilter = multicastFilter;
         mMetricsLog = log;
 
+        // TODO: ApfFilter should not generate programs until IpManager sends provisioning success.
         maybeStartFilter();
     }
 
@@ -661,14 +662,19 @@ public class ApfFilter {
     // How long should the last installed filter program live for? In seconds.
     @GuardedBy("this")
     private long mLastInstalledProgramMinLifetime;
+    @GuardedBy("this")
+    private ApfProgramEvent mLastInstallEvent;
 
     // For debugging only. The last program installed.
     @GuardedBy("this")
     private byte[] mLastInstalledProgram;
 
-    // For debugging only. How many times the program was updated since we started.
+    // How many times the program was updated since we started.
     @GuardedBy("this")
-    private int mNumProgramUpdates;
+    private int mNumProgramUpdates = 0;
+    // How many times the program was updated since we started for allowing multicast traffic.
+    @GuardedBy("this")
+    private int mNumProgramUpdatesAllowingMulticast = 0;
 
     /**
      * Generate filter code to process ARP packets. Execution of this code ends in either the
@@ -947,7 +953,8 @@ public class ApfFilter {
             Log.e(TAG, "Failed to generate APF program.", e);
             return;
         }
-        mLastTimeInstalledProgram = currentTimeSeconds();
+        final long now = currentTimeSeconds();
+        mLastTimeInstalledProgram = now;
         mLastInstalledProgramMinLifetime = programMinLifetime;
         mLastInstalledProgram = program;
         mNumProgramUpdates++;
@@ -956,9 +963,26 @@ public class ApfFilter {
             hexDump("Installing filter: ", program, program.length);
         }
         mIpManagerCallback.installPacketFilter(program);
-        int flags = ApfProgramEvent.flagsFor(mIPv4Address != null, mMulticastFilter);
-        mMetricsLog.log(new ApfProgramEvent(
-                programMinLifetime, rasToFilter.size(), mRas.size(), program.length, flags));
+        logApfProgramEventLocked(now);
+        mLastInstallEvent = new ApfProgramEvent();
+        mLastInstallEvent.lifetime = programMinLifetime;
+        mLastInstallEvent.filteredRas = rasToFilter.size();
+        mLastInstallEvent.currentRas = mRas.size();
+        mLastInstallEvent.programLength = program.length;
+        mLastInstallEvent.flags = ApfProgramEvent.flagsFor(mIPv4Address != null, mMulticastFilter);
+    }
+
+    private void logApfProgramEventLocked(long now) {
+        if (mLastInstallEvent == null) {
+            return;
+        }
+        ApfProgramEvent ev = mLastInstallEvent;
+        mLastInstallEvent = null;
+        ev.actualLifetime = now - mLastTimeInstalledProgram;
+        if (ev.actualLifetime < APF_PROGRAM_EVENT_LIFETIME_THRESHOLD) {
+            return;
+        }
+        mMetricsLog.log(ev);
     }
 
     /**
@@ -1078,11 +1102,15 @@ public class ApfFilter {
         mRas.clear();
     }
 
-    public synchronized void setMulticastFilter(boolean enabled) {
-        if (mMulticastFilter != enabled) {
-            mMulticastFilter = enabled;
-            installNewProgramLocked();
+    public synchronized void setMulticastFilter(boolean isEnabled) {
+        if (mMulticastFilter == isEnabled) {
+            return;
         }
+        mMulticastFilter = isEnabled;
+        if (!isEnabled) {
+            mNumProgramUpdatesAllowingMulticast++;
+        }
+        installNewProgramLocked();
     }
 
     /** Find the single IPv4 LinkAddress if there is one, otherwise return null. */
