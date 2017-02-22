@@ -726,7 +726,7 @@ final class AutoFillManagerServiceImpl {
                         Slog.d(TAG, "finishSessionLocked(): found a change on " + id + ": "
                                 + state.mAutoFillValue);
                     }
-                    mUi.showSaveUi();
+                    getUiForShowing().showSaveUi();
                     return;
                 }
             }
