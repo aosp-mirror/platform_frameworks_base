@@ -16,6 +16,7 @@
 
 package com.android.settingslib.drawer;
 
+import android.app.Activity;
 import android.app.Instrumentation;
 import android.content.Intent;
 import android.support.test.InstrumentationRegistry;
@@ -24,6 +25,8 @@ import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
 
 import com.android.settingslib.R;
+
+import com.google.common.truth.Truth;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -36,11 +39,11 @@ import static android.support.test.espresso.assertion.ViewAssertions.doesNotExis
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
 import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static android.support.test.espresso.matcher.ViewMatchers.withContentDescription;
+import static com.google.common.truth.Truth.assertThat;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class SettingsDrawerActivityTest {
-
 
     @Rule
     public ActivityTestRule<TestActivity> mActivityRule =
@@ -81,6 +84,16 @@ public class SettingsDrawerActivityTest {
 
         onView(withContentDescription(com.android.internal.R.string.action_bar_up_description))
                 .check(matches(isDisplayed()));
+    }
+
+    @Test
+    public void startActivity_shouldNotHaveNavDrawer() {
+        Instrumentation instrumentation = InstrumentationRegistry.getInstrumentation();
+        Activity activity = instrumentation.startActivitySync(
+                new Intent(instrumentation.getTargetContext(), TestActivity.class));
+
+        assertThat(((SettingsDrawerActivity) activity).isNavDrawerEnabled())
+                .isFalse();
     }
 
     /**

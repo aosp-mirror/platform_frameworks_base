@@ -465,8 +465,7 @@ public class SettingsDrawerActivity extends Activity {
     }
 
     boolean isNavDrawerEnabled() {
-        return !isDashboardFeatureEnabled()
-                || getResources().getBoolean(R.bool.config_enable_nav_drawer);
+        return getResources().getBoolean(R.bool.config_enable_nav_drawer);
     }
 
     private class PackageReceiver extends BroadcastReceiver {
