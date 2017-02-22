@@ -3590,6 +3590,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * <li><strong>Standard actions</strong> - These are actions that are reported and
      * handled by the standard UI widgets in the platform. For each standard action
      * there is a static constant defined in this class, e.g. {@link #ACTION_FOCUS}.
+     * These actions will have {@code null} labels.
      * </li>
      * <li><strong>Custom actions action</strong> - These are actions that are reported
      * and handled by custom widgets. i.e. ones that are not part of the UI toolkit. For
