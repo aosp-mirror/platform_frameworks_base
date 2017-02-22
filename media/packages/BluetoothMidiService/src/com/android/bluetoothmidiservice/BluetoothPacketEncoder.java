@@ -48,7 +48,7 @@ public class BluetoothPacketEncoder extends PacketEncoder {
 
     private boolean mWritePending;
 
-        private final Object mLock = new Object();
+    private final Object mLock = new Object();
 
     // This receives normalized data from mMidiFramer and accumulates it into a packet buffer
     private final MidiReceiver mFramedDataReceiver = new MidiReceiver() {
@@ -60,6 +60,8 @@ public class BluetoothPacketEncoder extends PacketEncoder {
                 int milliTimestamp = (int)(timestamp / MILLISECOND_NANOS) & MILLISECOND_MASK;
                 byte status = msg[offset];
                 boolean isSysExStart = (status == MidiConstants.STATUS_SYSTEM_EXCLUSIVE);
+                // Because of the MidiFramer, if it is not a status byte then it
+                // must be a continuation.
                 boolean isSysExContinuation = ((status & 0x80) == 0);
 
                 int bytesNeeded;
@@ -70,7 +72,9 @@ public class BluetoothPacketEncoder extends PacketEncoder {
                     bytesNeeded = count;
                 }
 
-                boolean needsTimestamp = (milliTimestamp != mPacketTimestamp);
+                // Status bytes must be preceded by a timestamp
+                boolean needsTimestamp = (status != mRunningStatus)
+                        || (milliTimestamp != mPacketTimestamp);
                 if (isSysExStart) {
                     // SysEx start byte must be preceded by a timestamp
                     needsTimestamp = true;
@@ -78,6 +82,7 @@ public class BluetoothPacketEncoder extends PacketEncoder {
                     // SysEx continuation packets must not have timestamp byte
                     needsTimestamp = false;
                 }
+
                 if (needsTimestamp) bytesNeeded++;  // add one for timestamp byte
                 if (status == mRunningStatus) bytesNeeded--;    // subtract one for status byte
 
