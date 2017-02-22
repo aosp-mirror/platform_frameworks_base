@@ -100,11 +100,9 @@ std::unique_ptr<ClassDefinition> GenerateManifestClass(IDiagnostics* diag,
   }
 
   std::unique_ptr<ClassDefinition> permission_class =
-      util::make_unique<ClassDefinition>("permission", ClassQualifier::Static,
-                                         false);
+      util::make_unique<ClassDefinition>("permission", ClassQualifier::kStatic, false);
   std::unique_ptr<ClassDefinition> permission_group_class =
-      util::make_unique<ClassDefinition>("permission_group",
-                                         ClassQualifier::Static, false);
+      util::make_unique<ClassDefinition>("permission_group", ClassQualifier::kStatic, false);
 
   bool error = false;
   std::vector<xml::Element*> children = el->GetChildElements();
@@ -125,8 +123,7 @@ std::unique_ptr<ClassDefinition> GenerateManifestClass(IDiagnostics* diag,
   }
 
   std::unique_ptr<ClassDefinition> manifest_class =
-      util::make_unique<ClassDefinition>("Manifest", ClassQualifier::None,
-                                         false);
+      util::make_unique<ClassDefinition>("Manifest", ClassQualifier::kNone, false);
   manifest_class->AddMember(std::move(permission_class));
   manifest_class->AddMember(std::move(permission_group_class));
   return manifest_class;

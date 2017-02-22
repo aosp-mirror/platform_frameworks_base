@@ -158,11 +158,8 @@ class ResourceTableType {
   DISALLOW_COPY_AND_ASSIGN(ResourceTableType);
 };
 
-enum class PackageType { System, Vendor, App, Dynamic };
-
 class ResourceTablePackage {
  public:
-  PackageType type = PackageType::App;
   Maybe<uint8_t> id;
   std::string name;
 
@@ -241,6 +238,19 @@ class ResourceTable {
   Maybe<SearchResult> FindResource(const ResourceNameRef& name);
 
   /**
+   * Returns the package struct with the given name, or nullptr if such a
+   * package does not
+   * exist. The empty string is a valid package and typically is used to
+   * represent the
+   * 'current' package before it is known to the ResourceTable.
+   */
+  ResourceTablePackage* FindPackage(const android::StringPiece& name);
+
+  ResourceTablePackage* FindPackageById(uint8_t id);
+
+  ResourceTablePackage* CreatePackage(const android::StringPiece& name, Maybe<uint8_t> id = {});
+
+  /**
    * The string pool used by this resource table. Values that reference strings
    * must use
    * this pool to create their strings.
@@ -259,18 +269,9 @@ class ResourceTable {
    */
   std::vector<std::unique_ptr<ResourceTablePackage>> packages;
 
-  /**
-   * Returns the package struct with the given name, or nullptr if such a
-   * package does not
-   * exist. The empty string is a valid package and typically is used to
-   * represent the
-   * 'current' package before it is known to the ResourceTable.
-   */
-  ResourceTablePackage* FindPackage(const android::StringPiece& name);
-
-  ResourceTablePackage* FindPackageById(uint8_t id);
-
-  ResourceTablePackage* CreatePackage(const android::StringPiece& name, Maybe<uint8_t> id = {});
+  // Set of dynamic packages that this table may reference. Their package names get encoded
+  // into the resources.arsc along with their compile-time assigned IDs.
+  std::map<size_t, std::string> included_packages_;
 
  private:
   ResourceTablePackage* FindOrCreatePackage(const android::StringPiece& name);

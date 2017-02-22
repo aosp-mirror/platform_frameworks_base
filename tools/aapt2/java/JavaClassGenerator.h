@@ -25,18 +25,21 @@
 #include "ResourceTable.h"
 #include "ResourceValues.h"
 #include "process/IResourceTableConsumer.h"
+#include "process/SymbolTable.h"
 
 namespace aapt {
 
 class AnnotationProcessor;
 class ClassDefinition;
+class MethodDefinition;
 
 struct JavaClassGeneratorOptions {
-  /*
-   * Specifies whether to use the 'final' modifier
-   * on resource entries. Default is true.
-   */
+  // Specifies whether to use the 'final' modifier on resource entries. Default is true.
   bool use_final = true;
+
+  // Whether to generate code to rewrite the package ID of resources.
+  // Implies use_final == true. Default is false.
+  bool generate_rewrite_callback = false;
 
   enum class SymbolTypes {
     kAll,
@@ -46,47 +49,54 @@ struct JavaClassGeneratorOptions {
 
   SymbolTypes types = SymbolTypes::kAll;
 
-  /**
-   * A list of JavaDoc annotations to add to the comments of all generated
-   * classes.
-   */
+  // A list of JavaDoc annotations to add to the comments of all generated classes.
   std::vector<std::string> javadoc_annotations;
 };
 
-/*
- * Generates the R.java file for a resource table.
- */
+// Generates the R.java file for a resource table.
 class JavaClassGenerator {
  public:
   JavaClassGenerator(IAaptContext* context, ResourceTable* table,
                      const JavaClassGeneratorOptions& options);
 
-  /*
-   * Writes the R.java file to `out`. Only symbols belonging to `package` are
-   * written.
-   * All symbols technically belong to a single package, but linked libraries
-   * will
-   * have their names mangled, denoting that they came from a different package.
-   * We need to generate these symbols in a separate file.
-   * Returns true on success.
-   */
-  bool Generate(const android::StringPiece& packageNameToGenerate, std::ostream* out);
+  // Writes the R.java file to `out`. Only symbols belonging to `package` are written.
+  // All symbols technically belong to a single package, but linked libraries will
+  // have their names mangled, denoting that they came from a different package.
+  // We need to generate these symbols in a separate file. Returns true on success.
+  bool Generate(const android::StringPiece& package_name_to_generate, std::ostream* out);
 
-  bool Generate(const android::StringPiece& packageNameToGenerate,
-                const android::StringPiece& outputPackageName, std::ostream* out);
+  bool Generate(const android::StringPiece& package_name_to_generate,
+                const android::StringPiece& output_package_name, std::ostream* out);
 
   const std::string& getError() const;
 
  private:
-  bool AddMembersToTypeClass(const android::StringPiece& packageNameToGenerate,
-                             const ResourceTablePackage* package, const ResourceTableType* type,
-                             ClassDefinition* outTypeClassDef);
-
-  void AddMembersToStyleableClass(const android::StringPiece& packageNameToGenerate,
-                                  const std::string& entryName, const Styleable* styleable,
-                                  ClassDefinition* outStyleableClassDef);
-
   bool SkipSymbol(SymbolState state);
+  bool SkipSymbol(const Maybe<SymbolTable::Symbol>& symbol);
+
+  // Returns the unmangled resource entry name if the unmangled package is the same as
+  // package_name_to_generate. Returns nothing if the resource should be skipped.
+  Maybe<std::string> UnmangleResource(const android::StringPiece& package_name,
+                                      const android::StringPiece& package_name_to_generate,
+                                      const ResourceEntry& entry);
+
+  bool ProcessType(const android::StringPiece& package_name_to_generate,
+                   const ResourceTablePackage& package, const ResourceTableType& type,
+                   ClassDefinition* out_type_class_def, MethodDefinition* out_rewrite_method_def);
+
+  // Writes a resource to the R.java file, optionally writing out a rewrite rule for its package
+  // ID if `out_rewrite_method` is not nullptr.
+  void ProcessResource(const ResourceNameRef& name, const ResourceId& id,
+                       const ResourceEntry& entry, ClassDefinition* out_class_def,
+                       MethodDefinition* out_rewrite_method);
+
+  // Writes a styleable resource to the R.java file, optionally writing out a rewrite rule for
+  // its package ID if `out_rewrite_method` is not nullptr.
+  // `package_name_to_generate` is the package
+  void ProcessStyleable(const ResourceNameRef& name, const ResourceId& id,
+                        const Styleable& styleable,
+                        const android::StringPiece& package_name_to_generate,
+                        ClassDefinition* out_class_def, MethodDefinition* out_rewrite_method);
 
   IAaptContext* context_;
   ResourceTable* table_;

@@ -33,7 +33,7 @@ namespace test {
 
 class Context : public IAaptContext {
  public:
-  Context() = default;
+  Context() : name_mangler_({}), symbols_(&name_mangler_), min_sdk_version_(0) {}
 
   SymbolTable* GetExternalSymbols() override { return &symbols_; }
 
@@ -63,9 +63,9 @@ class Context : public IAaptContext {
   Maybe<std::string> compilation_package_;
   Maybe<uint8_t> package_id_;
   StdErrDiagnostics diagnostics_;
+  NameMangler name_mangler_;
   SymbolTable symbols_;
-  NameMangler name_mangler_ = NameMangler({});
-  int min_sdk_version_ = 0;
+  int min_sdk_version_;
 };
 
 class ContextBuilder {

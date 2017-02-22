@@ -107,8 +107,8 @@ class XmlVisitor : public xml::PackageAwareVisitor {
         attr_ref.private_reference = maybe_package.value().private_namespace;
 
         std::string err_str;
-        attr.compiled_attribute = ReferenceLinker::CompileXmlAttribute(
-            attr_ref, context_->GetNameMangler(), symbols_, callsite_, &err_str);
+        attr.compiled_attribute =
+            ReferenceLinker::CompileXmlAttribute(attr_ref, symbols_, callsite_, &err_str);
 
         if (!attr.compiled_attribute) {
           context_->GetDiagnostics()->Error(DiagMessage(source) << "attribute '"

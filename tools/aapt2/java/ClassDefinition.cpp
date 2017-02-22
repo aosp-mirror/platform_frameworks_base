@@ -22,6 +22,23 @@ using android::StringPiece;
 
 namespace aapt {
 
+void ClassMember::WriteToStream(const StringPiece& prefix, bool final, std::ostream* out) const {
+  processor_.WriteToStream(out, prefix);
+}
+
+void MethodDefinition::AppendStatement(const StringPiece& statement) {
+  statements_.push_back(statement.to_string());
+}
+
+void MethodDefinition::WriteToStream(const StringPiece& prefix, bool final,
+                                     std::ostream* out) const {
+  *out << prefix << signature_ << " {\n";
+  for (const auto& statement : statements_) {
+    *out << prefix << "  " << statement << "\n";
+  }
+  *out << prefix << "}";
+}
+
 bool ClassDefinition::empty() const {
   for (const std::unique_ptr<ClassMember>& member : members_) {
     if (!member->empty()) {
@@ -40,7 +57,7 @@ void ClassDefinition::WriteToStream(const StringPiece& prefix, bool final,
   ClassMember::WriteToStream(prefix, final, out);
 
   *out << prefix << "public ";
-  if (qualifier_ == ClassQualifier::Static) {
+  if (qualifier_ == ClassQualifier::kStatic) {
     *out << "static ";
   }
   *out << "final class " << name_ << " {\n";

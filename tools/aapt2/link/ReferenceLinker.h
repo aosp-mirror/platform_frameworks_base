@@ -51,18 +51,17 @@ class ReferenceLinker : public IResourceTableConsumer {
    * Performs name mangling and looks up the resource in the symbol table.
    * Returns nullptr if the symbol was not found.
    */
-  static const SymbolTable::Symbol* ResolveSymbol(const Reference& reference,
-                                                  NameMangler* mangler,
-                                                  SymbolTable* symbols);
+  static const SymbolTable::Symbol* ResolveSymbol(const Reference& reference, SymbolTable* symbols);
 
   /**
    * Performs name mangling and looks up the resource in the symbol table. If
    * the symbol is not visible by the reference at the callsite, nullptr is
    * returned. out_error holds the error message.
    */
-  static const SymbolTable::Symbol* ResolveSymbolCheckVisibility(
-      const Reference& reference, NameMangler* name_mangler,
-      SymbolTable* symbols, CallSite* callsite, std::string* out_error);
+  static const SymbolTable::Symbol* ResolveSymbolCheckVisibility(const Reference& reference,
+                                                                 SymbolTable* symbols,
+                                                                 CallSite* callsite,
+                                                                 std::string* out_error);
 
   /**
    * Same as resolveSymbolCheckVisibility(), but also makes sure the symbol is
@@ -70,18 +69,19 @@ class ReferenceLinker : public IResourceTableConsumer {
    * That is, the return value will have a non-null value for
    * ISymbolTable::Symbol::attribute.
    */
-  static const SymbolTable::Symbol* ResolveAttributeCheckVisibility(
-      const Reference& reference, NameMangler* name_mangler,
-      SymbolTable* symbols, CallSite* callsite, std::string* out_error);
+  static const SymbolTable::Symbol* ResolveAttributeCheckVisibility(const Reference& reference,
+                                                                    SymbolTable* symbols,
+                                                                    CallSite* callsite,
+                                                                    std::string* out_error);
 
   /**
    * Resolves the attribute reference and returns an xml::AaptAttribute if
    * successful.
    * If resolution fails, outError holds the error message.
    */
-  static Maybe<xml::AaptAttribute> CompileXmlAttribute(
-      const Reference& reference, NameMangler* name_mangler,
-      SymbolTable* symbols, CallSite* callsite, std::string* out_error);
+  static Maybe<xml::AaptAttribute> CompileXmlAttribute(const Reference& reference,
+                                                       SymbolTable* symbols, CallSite* callsite,
+                                                       std::string* out_error);
 
   /**
    * Writes the resource name to the DiagMessage, using the

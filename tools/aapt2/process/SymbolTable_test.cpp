@@ -55,4 +55,19 @@ TEST(ResourceTableSymbolSourceTest, FindPrivateAttrSymbol) {
   EXPECT_NE(nullptr, s->attribute);
 }
 
+TEST(SymbolTableTest, FindByName) {
+  std::unique_ptr<ResourceTable> table =
+      test::ResourceTableBuilder()
+          .AddSimple("com.android.app:id/foo")
+          .AddSimple("com.android.app:id/" + NameMangler::MangleEntry("com.android.lib", "foo"))
+          .Build();
+
+  NameMangler mangler(NameManglerPolicy{"com.android.app", {"com.android.lib"}});
+  SymbolTable symbol_table(&mangler);
+  symbol_table.AppendSource(util::make_unique<ResourceTableSymbolSource>(table.get()));
+
+  EXPECT_NE(nullptr, symbol_table.FindByName(test::ParseNameOrDie("id/foo")));
+  EXPECT_NE(nullptr, symbol_table.FindByName(test::ParseNameOrDie("com.android.lib:id/foo")));
+}
+
 }  // namespace aapt

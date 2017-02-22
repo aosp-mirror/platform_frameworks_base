@@ -248,6 +248,12 @@ bool BinaryResourceParser::ParsePackage(const ResChunk_header* chunk) {
         }
         break;
 
+      case android::RES_TABLE_LIBRARY_TYPE:
+        if (!ParseLibrary(parser.chunk())) {
+          return false;
+        }
+        break;
+
       default:
         context_->GetDiagnostics()->Warn(
             DiagMessage(source_)
@@ -391,6 +397,21 @@ bool BinaryResourceParser::ParseType(const ResourceTablePackage* package,
     if (cache_iter == id_index_.end()) {
       id_index_.insert({res_id, name});
     }
+  }
+  return true;
+}
+
+bool BinaryResourceParser::ParseLibrary(const ResChunk_header* chunk) {
+  DynamicRefTable dynamic_ref_table;
+  if (dynamic_ref_table.load(reinterpret_cast<const ResTable_lib_header*>(chunk)) != NO_ERROR) {
+    return false;
+  }
+
+  const KeyedVector<String16, uint8_t>& entries = dynamic_ref_table.entries();
+  const size_t count = entries.size();
+  for (size_t i = 0; i < count; i++) {
+    table_->included_packages_[entries.valueAt(i)] =
+        util::Utf16ToUtf8(StringPiece16(entries.keyAt(i).string()));
   }
   return true;
 }

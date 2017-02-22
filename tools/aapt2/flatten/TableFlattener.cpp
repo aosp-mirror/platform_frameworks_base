@@ -217,16 +217,17 @@ class MapFlattenVisitor : public RawValueVisitor {
 
 class PackageFlattener {
  public:
-  PackageFlattener(IAaptContext* context, ResourceTablePackage* package, bool use_sparse_entries)
+  PackageFlattener(IAaptContext* context, ResourceTablePackage* package,
+                   const std::map<size_t, std::string>* shared_libs, bool use_sparse_entries)
       : context_(context),
         diag_(context->GetDiagnostics()),
         package_(package),
+        shared_libs_(shared_libs),
         use_sparse_entries_(use_sparse_entries) {}
 
   bool FlattenPackage(BigBuffer* buffer) {
     ChunkWriter pkg_writer(buffer);
-    ResTable_package* pkg_header =
-        pkg_writer.StartChunk<ResTable_package>(RES_TABLE_PACKAGE_TYPE);
+    ResTable_package* pkg_header = pkg_writer.StartChunk<ResTable_package>(RES_TABLE_PACKAGE_TYPE);
     pkg_header->id = util::HostToDevice32(package_->id.value());
 
     if (package_->name.size() >= arraysize(pkg_header->name)) {
@@ -252,6 +253,11 @@ class PackageFlattener {
 
     // Append the types.
     buffer->AppendBuffer(std::move(type_buffer));
+
+    // If there are libraries (or if the package ID is 0x00), encode a library chunk.
+    if (package_->id.value() == 0x00 || !shared_libs_->empty()) {
+      FlattenLibrarySpec(buffer);
+    }
 
     pkg_writer.Finish();
     return true;
@@ -470,6 +476,10 @@ class PackageFlattener {
       type_pool_.MakeRef(ToString(type->type));
 
       std::vector<ResourceEntry*> sorted_entries = CollectAndSortEntries(type);
+      if (sorted_entries.empty()) {
+        continue;
+      }
+
       if (!FlattenTypeSpec(type, &sorted_entries, buffer)) {
         return false;
       }
@@ -504,9 +514,38 @@ class PackageFlattener {
     return true;
   }
 
+  void FlattenLibrarySpec(BigBuffer* buffer) {
+    ChunkWriter lib_writer(buffer);
+    ResTable_lib_header* lib_header =
+        lib_writer.StartChunk<ResTable_lib_header>(RES_TABLE_LIBRARY_TYPE);
+
+    const size_t num_entries = (package_->id.value() == 0x00 ? 1 : 0) + shared_libs_->size();
+    CHECK(num_entries > 0);
+
+    lib_header->count = util::HostToDevice32(num_entries);
+
+    ResTable_lib_entry* lib_entry = buffer->NextBlock<ResTable_lib_entry>(num_entries);
+    if (package_->id.value() == 0x00) {
+      // Add this package
+      lib_entry->packageId = util::HostToDevice32(0x00);
+      strcpy16_htod(lib_entry->packageName, arraysize(lib_entry->packageName),
+                    util::Utf8ToUtf16(package_->name));
+      ++lib_entry;
+    }
+
+    for (auto& map_entry : *shared_libs_) {
+      lib_entry->packageId = util::HostToDevice32(map_entry.first);
+      strcpy16_htod(lib_entry->packageName, arraysize(lib_entry->packageName),
+                    util::Utf8ToUtf16(map_entry.second));
+      ++lib_entry;
+    }
+    lib_writer.Finish();
+  }
+
   IAaptContext* context_;
   IDiagnostics* diag_;
   ResourceTablePackage* package_;
+  const std::map<size_t, std::string>* shared_libs_;
   bool use_sparse_entries_;
   StringPool type_pool_;
   StringPool key_pool_;
@@ -542,7 +581,8 @@ bool TableFlattener::Consume(IAaptContext* context, ResourceTable* table) {
 
   // Flatten each package.
   for (auto& package : table->packages) {
-    PackageFlattener flattener(context, package.get(), options_.use_sparse_entries);
+    PackageFlattener flattener(context, package.get(), &table->included_packages_,
+                               options_.use_sparse_entries);
     if (!flattener.FlattenPackage(&package_buffer)) {
       return false;
     }

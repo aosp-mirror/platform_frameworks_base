@@ -41,10 +41,11 @@ class ClassMember {
 
   virtual bool empty() const = 0;
 
+  // Writes the class member to the out stream. Subclasses should derive this method
+  // to write their own data. Call this base method from the subclass to write out
+  // this member's comments/annotations.
   virtual void WriteToStream(const android::StringPiece& prefix, bool final,
-                             std::ostream* out) const {
-    processor_.WriteToStream(out, prefix);
-  }
+                             std::ostream* out) const;
 
  private:
   AnnotationProcessor processor_;
@@ -142,7 +143,29 @@ class PrimitiveArrayMember : public ClassMember {
 
 using ResourceArrayMember = PrimitiveArrayMember<ResourceId>;
 
-enum class ClassQualifier { None, Static };
+// Represents a method in a class.
+class MethodDefinition : public ClassMember {
+ public:
+  // Expected method signature example: 'public static void onResourcesLoaded(int p)'.
+  explicit MethodDefinition(const android::StringPiece& signature)
+      : signature_(signature.to_string()) {}
+
+  // Appends a single statement to the method. It should include no newlines or else
+  // formatting may be broken.
+  void AppendStatement(const android::StringPiece& statement);
+
+  // Even if the method is empty, we always want to write the method signature.
+  bool empty() const override { return false; }
+
+  void WriteToStream(const android::StringPiece& prefix, bool final,
+                     std::ostream* out) const override;
+
+ private:
+  std::string signature_;
+  std::vector<std::string> statements_;
+};
+
+enum class ClassQualifier { kNone, kStatic };
 
 class ClassDefinition : public ClassMember {
  public:
