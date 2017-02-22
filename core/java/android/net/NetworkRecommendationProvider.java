@@ -1,6 +1,8 @@
 package android.net;
 
+import android.Manifest.permission;
 import android.annotation.SystemApi;
+import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -10,8 +12,10 @@ import android.os.RemoteException;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.Preconditions;
 
 import java.util.Objects;
+import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -32,12 +36,24 @@ public abstract class NetworkRecommendationProvider {
     /**
      * Constructs a new instance.
      * @param handler indicates which thread to use when handling requests. Cannot be {@code null}.
+     * @deprecated use {@link #NetworkRecommendationProvider(Context, Executor)}
      */
     public NetworkRecommendationProvider(Handler handler) {
         if (handler == null) {
             throw new IllegalArgumentException("The provided handler cannot be null.");
         }
         mService = new ServiceWrapper(handler);
+    }
+
+    /**
+     * Constructs a new instance.
+     * @param context the current context instance. Cannot be {@code null}.
+     * @param executor used to execute the incoming requests. Cannot be {@code null}.
+     */
+    public NetworkRecommendationProvider(Context context, Executor executor) {
+        Preconditions.checkNotNull(context);
+        Preconditions.checkNotNull(executor);
+        mService = new ServiceWrapper(context, executor);
     }
 
     /**
@@ -130,17 +146,28 @@ public abstract class NetworkRecommendationProvider {
      * A wrapper around INetworkRecommendationProvider that dispatches to the provided Handler.
      */
     private final class ServiceWrapper extends INetworkRecommendationProvider.Stub {
+        private final Context mContext;
+        private final Executor mExecutor;
         private final Handler mHandler;
 
         ServiceWrapper(Handler handler) {
             mHandler = handler;
+            mExecutor = null;
+            mContext = null;
+        }
+
+        ServiceWrapper(Context context, Executor executor) {
+            mContext = context;
+            mExecutor = executor;
+            mHandler = null;
         }
 
         @Override
         public void requestRecommendation(final RecommendationRequest request,
                 final IRemoteCallback callback, final int sequence) throws RemoteException {
+            enforceCallingPermission();
             if (VERBOSE) Log.v(TAG, "requestRecommendation(seq=" + sequence + ")");
-            mHandler.post(new Runnable() {
+            execute(new Runnable() {
                 @Override
                 public void run() {
                     if (VERBOSE) {
@@ -154,13 +181,29 @@ public abstract class NetworkRecommendationProvider {
 
         @Override
         public void requestScores(final NetworkKey[] networks) throws RemoteException {
+            enforceCallingPermission();
             if (networks != null && networks.length > 0) {
-                mHandler.post(new Runnable() {
+                execute(new Runnable() {
                     @Override
                     public void run() {
                         onRequestScores(networks);
                     }
                 });
+            }
+        }
+
+        private void execute(Runnable command) {
+            if (mExecutor != null) {
+                mExecutor.execute(command);
+            } else {
+                mHandler.post(command);
+            }
+        }
+
+        private void enforceCallingPermission() {
+            if (mContext != null) {
+                mContext.enforceCallingOrSelfPermission(permission.REQUEST_NETWORK_SCORES,
+                        "Permission denied.");
             }
         }
     }
