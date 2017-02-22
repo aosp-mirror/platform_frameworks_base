@@ -187,8 +187,12 @@ public class AppCollectorTest extends AndroidTestCase {
         }).start();
         latch.await();
 
-        // This should
         assertThat(myStats).containsAllOf(stats, otherStats);
+    }
+
+    @Test(expected=NullPointerException.class)
+    public void testNullVolumeShouldCauseNPE() throws Exception {
+        AppCollector collector = new AppCollector(mContext, null);
     }
 
     private void addApplication(String packageName, String uuid) {
