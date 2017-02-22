@@ -307,6 +307,15 @@ public abstract class ViewStructure {
     public abstract void setAutoFillValue(AutoFillValue value);
 
     /**
+     * Sets the options that can be used to auto-fill this node.
+     *
+     * <p>Typically used by nodes whose {@link AutoFillType} is a list to indicate the meaning of
+     * each possible value in the list.
+     */
+    // TODO(b/33197203, b/33802548): add CTS/unit test
+    public abstract void setAutoFillOptions(String[] options);
+
+    /**
      * Marks this node as sanitized so its content are sent on {@link
      * android.service.autofill.AutoFillService#onFillRequest(android.app.assist.AssistStructure,
      * Bundle, android.os.CancellationSignal, android.service.autofill.FillCallback)}.

@@ -6984,8 +6984,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Called when assist structure is being retrieved from a view as part of an auto-fill request.
      *
      * <p>This method already provides most of what's needed for auto-fill, but should be overridden
-     * when the view contents does not include PII (Personally Identifiable Information) (so it
-     * can call {@link ViewStructure#setSanitized(boolean) ViewStructure#setSanitized(true)}).
+     * <ol>
+     * <li>The view contents does not include PII (Personally Identifiable Information), so it
+     * can call {@link ViewStructure#setSanitized(boolean)} passing {@code true}.
+     * <li>It must set fields such {@link ViewStructure#setText(CharSequence)},
+     * {@link ViewStructure#setAutoFillOptions(String[])}, or {@link ViewStructure#setUrl(String)}.
+     * </ol>
      *
      * @param structure Fill in with structured view data. The default implementation
      * fills in all data that can be inferred from the view itself.

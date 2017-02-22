@@ -41,9 +41,12 @@ import android.view.MotionEvent;
 import android.view.PointerIcon;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewStructure;
 import android.view.ViewTreeObserver;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.autofill.AutoFillType;
+import android.view.autofill.AutoFillValue;
 import android.widget.PopupWindow.OnDismissListener;
 
 import com.android.internal.R;
@@ -784,6 +787,7 @@ public class Spinner extends AbsSpinner implements OnClickListener {
         return handled;
     }
 
+    @Override
     public void onClick(DialogInterface dialog, int which) {
         setSelection(which);
         dialog.dismiss();
@@ -910,6 +914,42 @@ public class Spinner extends AbsSpinner implements OnClickListener {
             return PointerIcon.getSystemIcon(getContext(), PointerIcon.TYPE_HAND);
         }
         return super.onResolvePointerIcon(event, pointerIndex);
+    }
+
+    // TODO(b/33197203): add unit/CTS tests for auto-fill methods (and make sure they handle enable)
+
+    @Override
+    public void onProvideAutoFillStructure(ViewStructure structure, int flags) {
+        super.onProvideAutoFillStructure(structure, flags);
+        // TODO(b/33197203): implement sanitization so initial value is only sanitized when coming
+        // from resources.
+
+        final int count = getAdapter().getCount();
+        if (count > 0) {
+            final String[] options = new String[count];
+            for (int i = 0; i < count; i++) {
+                options[i] = getAdapter().getItem(i).toString();
+            }
+            structure.setAutoFillOptions(options);
+        }
+    }
+
+    @Override
+    public void autoFill(AutoFillValue value) {
+        if (!isEnabled()) return;
+
+        final int position = value.getListValue();
+        setSelection(position);
+    }
+
+    @Override
+    public AutoFillType getAutoFillType() {
+        return AutoFillType.forList();
+    }
+
+    @Override
+    public AutoFillValue getAutoFillValue() {
+        return isEnabled() ? AutoFillValue.forList(getSelectedItemPosition()) : null;
     }
 
     static class SavedState extends AbsSpinner.SavedState {

@@ -44,8 +44,6 @@ public final class AutoFillType implements Parcelable {
 
     private static final int TYPE_TEXT = 1;
     private static final int TYPE_TOGGLE = 2;
-    // TODO(b/33197203): make sure it works with Spinners and/or add a new type for them
-    // (since they're often used for credit card selection)
     private static final int TYPE_LIST = 3;
 
     // TODO(b/33197203): add others, like date picker? That would be trick, because they're set as:
