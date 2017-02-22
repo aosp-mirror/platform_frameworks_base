@@ -392,8 +392,8 @@ public class PackageManagerService extends IPackageManager.Stub {
     private static final boolean DISABLE_EPHEMERAL_APPS = false;
     private static final boolean HIDE_EPHEMERAL_APIS = false;
 
-    private static final boolean ENABLE_QUOTA =
-            SystemProperties.getBoolean("persist.fw.quota", false);
+    private static final boolean ENABLE_FREE_CACHE_V2 =
+            SystemProperties.getBoolean("fw.free_cache_v2", false);
 
     private static final int RADIO_UID = Process.PHONE_UID;
     private static final int LOG_UID = Process.LOG_UID;
@@ -3765,25 +3765,19 @@ public class PackageManagerService extends IPackageManager.Stub {
             final IPackageDataObserver observer) {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.CLEAR_APP_CACHE, null);
-        // Queue up an async operation since clearing cache may take a little while.
-        mHandler.post(new Runnable() {
-            public void run() {
-                mHandler.removeCallbacks(this);
-                boolean success = true;
-                synchronized (mInstallLock) {
-                    try {
-                        mInstaller.freeCache(volumeUuid, freeStorageSize, 0);
-                    } catch (InstallerException e) {
-                        Slog.w(TAG, "Couldn't clear application caches: " + e);
-                        success = false;
-                    }
-                }
-                if (observer != null) {
-                    try {
-                        observer.onRemoveCompleted(null, success);
-                    } catch (RemoteException e) {
-                        Slog.w(TAG, "RemoveException when invoking call back");
-                    }
+        mHandler.post(() -> {
+            boolean success = false;
+            try {
+                freeStorage(volumeUuid, freeStorageSize, 0);
+                success = true;
+            } catch (IOException e) {
+                Slog.w(TAG, e);
+            }
+            if (observer != null) {
+                try {
+                    observer.onRemoveCompleted(null, success);
+                } catch (RemoteException e) {
+                    Slog.w(TAG, e);
                 }
             }
         });
@@ -3793,43 +3787,77 @@ public class PackageManagerService extends IPackageManager.Stub {
     public void freeStorage(final String volumeUuid, final long freeStorageSize,
             final IntentSender pi) {
         mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.CLEAR_APP_CACHE, null);
-        // Queue up an async operation since clearing cache may take a little while.
-        mHandler.post(new Runnable() {
-            public void run() {
-                mHandler.removeCallbacks(this);
-                boolean success = true;
-                synchronized (mInstallLock) {
-                    try {
-                        mInstaller.freeCache(volumeUuid, freeStorageSize, 0);
-                    } catch (InstallerException e) {
-                        Slog.w(TAG, "Couldn't clear application caches: " + e);
-                        success = false;
-                    }
-                }
-                if(pi != null) {
-                    try {
-                        // Callback via pending intent
-                        int code = success ? 1 : 0;
-                        pi.sendIntent(null, code, null,
-                                null, null);
-                    } catch (SendIntentException e1) {
-                        Slog.i(TAG, "Failed to send pending intent");
-                    }
+                android.Manifest.permission.CLEAR_APP_CACHE, TAG);
+        mHandler.post(() -> {
+            boolean success = false;
+            try {
+                freeStorage(volumeUuid, freeStorageSize, 0);
+                success = true;
+            } catch (IOException e) {
+                Slog.w(TAG, e);
+            }
+            if (pi != null) {
+                try {
+                    pi.sendIntent(null, success ? 1 : 0, null, null, null);
+                } catch (SendIntentException e) {
+                    Slog.w(TAG, e);
                 }
             }
         });
     }
 
-    public void freeStorage(String volumeUuid, long freeStorageSize, int storageFlags)
-            throws IOException {
-        synchronized (mInstallLock) {
-            try {
-                mInstaller.freeCache(volumeUuid, freeStorageSize, 0);
-            } catch (InstallerException e) {
-                throw new IOException("Failed to free enough space", e);
+    /**
+     * Blocking call to clear various types of cached data across the system
+     * until the requested bytes are available.
+     */
+    public void freeStorage(String volumeUuid, long bytes, int storageFlags) throws IOException {
+        final StorageManager storage = mContext.getSystemService(StorageManager.class);
+        final File file = storage.findPathForUuid(volumeUuid);
+
+        if (ENABLE_FREE_CACHE_V2) {
+            final boolean aggressive = (storageFlags
+                    & StorageManager.FLAG_ALLOCATE_AGGRESSIVE) != 0;
+
+            // 1. Pre-flight to determine if we have any chance to succeed
+            // 2. Consider preloaded data (after 1w honeymoon, unless aggressive)
+
+            // 3. Consider parsed APK data (aggressive only)
+            if (aggressive) {
+                FileUtils.deleteContents(mCacheDir);
             }
+            if (file.getUsableSpace() >= bytes) return;
+
+            // 4. Consider cached app data (above quotas)
+            try {
+                mInstaller.freeCache(volumeUuid, bytes, Installer.FLAG_FREE_CACHE_V2);
+            } catch (InstallerException ignored) {
+            }
+            if (file.getUsableSpace() >= bytes) return;
+
+            // 5. Consider shared libraries with refcount=0 and age>2h
+            // 6. Consider dexopt output (aggressive only)
+            // 7. Consider ephemeral apps not used in last week
+
+            // 8. Consider cached app data (below quotas)
+            try {
+                mInstaller.freeCache(volumeUuid, bytes, Installer.FLAG_FREE_CACHE_V2
+                        | Installer.FLAG_FREE_CACHE_V2_DEFY_QUOTA);
+            } catch (InstallerException ignored) {
+            }
+            if (file.getUsableSpace() >= bytes) return;
+
+            // 9. Consider DropBox entries
+            // 10. Consider ephemeral cookies
+
+        } else {
+            try {
+                mInstaller.freeCache(volumeUuid, bytes, 0);
+            } catch (InstallerException ignored) {
+            }
+            if (file.getUsableSpace() >= bytes) return;
         }
+
+        throw new IOException("Failed to free " + bytes + " on storage device at " + file);
     }
 
     /**
