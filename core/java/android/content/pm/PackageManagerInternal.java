@@ -213,12 +213,11 @@ public abstract class PackageManagerInternal {
      * @param responseObj The response of the first phase of ephemeral resolution
      * @param origIntent The original intent that triggered ephemeral resolution
      * @param resolvedType The resolved type of the intent
-     * @param launchIntent The intent that would launch if there was no ephemeral application
      * @param callingPackage The name of the package requesting the ephemeral application
      * @param userId The ID of the user that triggered ephemeral resolution
      */
-    public abstract void requestEphemeralResolutionPhaseTwo(EphemeralResponse responseObj,
-            Intent origIntent, String resolvedType, Intent launchIntent, String callingPackage,
+    public abstract void requestInstantAppResolutionPhaseTwo(AuxiliaryResolveInfo responseObj,
+            Intent origIntent, String resolvedType, String callingPackage,
             int userId);
 
     /**

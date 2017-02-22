@@ -61,11 +61,12 @@ public class ResolveInfo implements Parcelable {
     public ProviderInfo providerInfo;
 
     /**
-     * The ephemeral application that corresponds to this resolution match. This will
-     * only be set in specific circumstances.
+     * An auxiliary response that may modify the resolved information. This is
+     * only set under certain circumstances; such as when resolving instant apps
+     * or components defined in un-installed splits.
      * @hide
      */
-    public EphemeralResponse ephemeralResponse;
+    public AuxiliaryResolveInfo auxiliaryInfo;
 
     /**
      * The IntentFilter that was matched for this ResolveInfo.
