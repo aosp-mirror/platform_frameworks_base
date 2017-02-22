@@ -2398,15 +2398,13 @@
   <java-symbol type="drawable" name="ic_usb_48dp" />
 
   <!-- Floating toolbar -->
-  <java-symbol type="id" name="floating_toolbar_menu_item_image_button" />
+  <java-symbol type="id" name="floating_toolbar_menu_item_image" />
+  <java-symbol type="id" name="floating_toolbar_menu_item_text" />
   <java-symbol type="id" name="overflow" />
   <java-symbol type="layout" name="floating_popup_container" />
   <java-symbol type="layout" name="floating_popup_menu_button" />
   <java-symbol type="layout" name="floating_popup_open_overflow_button" />
   <java-symbol type="layout" name="floating_popup_close_overflow_button" />
-  <java-symbol type="layout" name="floating_popup_menu_image_button" />
-  <java-symbol type="layout" name="floating_popup_overflow_list_item" />
-  <java-symbol type="layout" name="floating_popup_overflow_image_list_item" />
   <java-symbol type="layout" name="floating_popup_overflow_button" />
   <java-symbol type="string" name="floating_toolbar_open_overflow_description" />
   <java-symbol type="string" name="floating_toolbar_close_overflow_description" />
