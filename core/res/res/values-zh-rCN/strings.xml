@@ -320,14 +320,10 @@
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"允许该应用结束其他应用的后台进程。此权限可导致其他应用停止运行。"</string>
     <string name="permlab_systemAlertWindow" msgid="7238805243128138690">"此应用可显示在其他应用上方"</string>
     <string name="permdesc_systemAlertWindow" msgid="2393776099672266188">"此应用可显示在其他应用上方或屏幕的其他部分。这可能会妨碍您正常地使用应用，且其他应用的显示方式可能会受到影响。"</string>
-    <!-- no translation found for permlab_runInBackground (7365290743781858803) -->
-    <skip />
-    <!-- no translation found for permdesc_runInBackground (7370142232209999824) -->
-    <skip />
-    <!-- no translation found for permlab_useDataInBackground (8694951340794341809) -->
-    <skip />
-    <!-- no translation found for permdesc_useDataInBackground (6049514223791806027) -->
-    <skip />
+    <string name="permlab_runInBackground" msgid="7365290743781858803">"在后台运行"</string>
+    <string name="permdesc_runInBackground" msgid="7370142232209999824">"此应用可在后台运行，这样可能会加快耗电速度。"</string>
+    <string name="permlab_useDataInBackground" msgid="8694951340794341809">"在后台使用数据"</string>
+    <string name="permdesc_useDataInBackground" msgid="6049514223791806027">"此应用可在后台使用数据，这样可能会增加流量消耗。"</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"让应用始终运行"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"允许该应用在内存中持续保留其自身的某些组件。这会限制其他应用可用的内存，从而减缓平板电脑运行速度。"</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"允许应用在内存中持续保留其自身的部分组件。此权限可能会限制其他应用可用的内存，从而减缓电视运行速度。"</string>
@@ -960,11 +956,9 @@
     <string name="inputMethod" msgid="1653630062304567879">"输入法"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"文字操作"</string>
     <string name="email" msgid="4560673117055050403">"电子邮件"</string>
-    <!-- no translation found for dial (4204975095406423102) -->
-    <skip />
+    <string name="dial" msgid="4204975095406423102">"电话"</string>
     <string name="map" msgid="5441053548030107189">"地图"</string>
-    <!-- no translation found for browse (6079864138582486027) -->
-    <skip />
+    <string name="browse" msgid="6079864138582486027">"浏览"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"存储空间不足"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"某些系统功能可能无法正常使用"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"系统存储空间不足。请确保您有250MB的可用空间，然后重新启动。"</string>
@@ -1173,6 +1167,14 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"点按即可选择语言和布局"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
+    <!-- no translation found for alert_windows_notification_channel_name (7443890103456396837) -->
+    <skip />
+    <!-- no translation found for alert_windows_notification_title (5399998516035621282) -->
+    <skip />
+    <!-- no translation found for alert_windows_notification_message (2456738662997073459) -->
+    <skip />
+    <!-- no translation found for alert_windows_notification_turn_off_action (3367294525884949878) -->
+    <skip />
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"正在准备<xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"检查是否有错误"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"检测到新的<xliff:g id="NAME">%s</xliff:g>"</string>
@@ -1327,8 +1329,6 @@
     <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"使用<xliff:g id="APPLICATION_NAME">%s</xliff:g>分享"</string>
     <string name="content_description_sliding_handle" msgid="415975056159262248">"滑动手柄。触摸并按住。"</string>
     <string name="description_target_unlock_tablet" msgid="3833195335629795055">"滑动解锁。"</string>
-    <string name="keyboard_headset_required_to_hear_password" msgid="7011927352267668657">"需要插入耳机才能听到密码的按键声。"</string>
-    <string name="keyboard_password_character_no_headset" msgid="2859873770886153678">"点。"</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"导航首页"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"向上导航"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"更多选项"</string>

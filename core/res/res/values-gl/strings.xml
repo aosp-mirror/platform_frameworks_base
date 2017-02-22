@@ -320,14 +320,10 @@
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"Permite á aplicación finalizar procesos en segundo plano doutras aplicacións. É posible que esta acción provoque que outras aplicacións deixen de funcionar."</string>
     <string name="permlab_systemAlertWindow" msgid="7238805243128138690">"Esta aplicación pode aparecer sobre outras"</string>
     <string name="permdesc_systemAlertWindow" msgid="2393776099672266188">"Esta aplicación pode aparecer sobre outras aplicacións ou outras partes da pantalla, polo que é posible que interfira no uso normal das aplicacións e modifique a forma en que se mostran."</string>
-    <!-- no translation found for permlab_runInBackground (7365290743781858803) -->
-    <skip />
-    <!-- no translation found for permdesc_runInBackground (7370142232209999824) -->
-    <skip />
-    <!-- no translation found for permlab_useDataInBackground (8694951340794341809) -->
-    <skip />
-    <!-- no translation found for permdesc_useDataInBackground (6049514223791806027) -->
-    <skip />
+    <string name="permlab_runInBackground" msgid="7365290743781858803">"executar en segundo plano"</string>
+    <string name="permdesc_runInBackground" msgid="7370142232209999824">"Esta aplicación pode executarse en segundo plano. Por este motivo, quizais se esgote antes a batería."</string>
+    <string name="permlab_useDataInBackground" msgid="8694951340794341809">"usar datos en segundo plano"</string>
+    <string name="permdesc_useDataInBackground" msgid="6049514223791806027">"Esta aplicación pode usar datos en segundo plano. Por este motivo, quizais aumente o uso de datos."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"facer que a aplicación se execute sempre"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Permite á aplicación converter partes súas como persistentes na memoria. Esta acción pode limitar a cantidade memoria dispoñible para outras aplicacións e reducir a velocidade de funcionamento da tableta."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Permite que a aplicación faga que algunhas das súas partes se manteñan na memoria. Esta acción pode limitar a cantidade de memoria dispoñible para outras aplicacións e reducir a velocidade da televisión."</string>
@@ -960,11 +956,9 @@
     <string name="inputMethod" msgid="1653630062304567879">"Método de entrada"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Accións de texto"</string>
     <string name="email" msgid="4560673117055050403">"Correo electrónico"</string>
-    <!-- no translation found for dial (4204975095406423102) -->
-    <skip />
+    <string name="dial" msgid="4204975095406423102">"Teléfono"</string>
     <string name="map" msgid="5441053548030107189">"Mapa"</string>
-    <!-- no translation found for browse (6079864138582486027) -->
-    <skip />
+    <string name="browse" msgid="6079864138582486027">"Examinar"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Estase esgotando o espazo de almacenamento"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"É posible que algunhas funcións do sistema non funcionen"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Non hai almacenamento suficiente para o sistema. Asegúrate de ter un espazo libre de 250 MB e reinicia o dispositivo."</string>
@@ -1174,6 +1168,14 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Toca para seleccionar o idioma e o deseño"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNÑOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNÑOPQRSTUVWXYZ"</string>
+    <!-- no translation found for alert_windows_notification_channel_name (7443890103456396837) -->
+    <skip />
+    <!-- no translation found for alert_windows_notification_title (5399998516035621282) -->
+    <skip />
+    <!-- no translation found for alert_windows_notification_message (2456738662997073459) -->
+    <skip />
+    <!-- no translation found for alert_windows_notification_turn_off_action (3367294525884949878) -->
+    <skip />
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"Preparando a <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Comprobando se hai erros"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"Detectouse unha <xliff:g id="NAME">%s</xliff:g> nova"</string>
@@ -1328,8 +1330,6 @@
     <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Compartir con <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="content_description_sliding_handle" msgid="415975056159262248">"Mantén premida a icona de desbloqueo e pasa o dedo por ela."</string>
     <string name="description_target_unlock_tablet" msgid="3833195335629795055">"Pasa o dedo para desbloquear."</string>
-    <string name="keyboard_headset_required_to_hear_password" msgid="7011927352267668657">"Conecta uns auriculares para escoitar as teclas do contrasinal pronunciadas."</string>
-    <string name="keyboard_password_character_no_headset" msgid="2859873770886153678">"Punto"</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"Ir ao inicio"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Ir para arriba"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Máis opcións"</string>

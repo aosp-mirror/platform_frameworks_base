@@ -326,14 +326,10 @@
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"Дазваляе прыкладанню завяршаць фонавыя працэсы іншых прыкладанняў. Гэта можа спынiць працу iншых прыкладанняў."</string>
     <string name="permlab_systemAlertWindow" msgid="7238805243128138690">"Гэта праграма можа паказвацца паверх іншых праграм"</string>
     <string name="permdesc_systemAlertWindow" msgid="2393776099672266188">"Гэта праграма можа паказвацца паверх іншых праграм ці іншых частак экрана. Гэта можа перашкодзіць нармальнаму выкарыстанню праграмы і змяніць выгляд іншых праграм."</string>
-    <!-- no translation found for permlab_runInBackground (7365290743781858803) -->
-    <skip />
-    <!-- no translation found for permdesc_runInBackground (7370142232209999824) -->
-    <skip />
-    <!-- no translation found for permlab_useDataInBackground (8694951340794341809) -->
-    <skip />
-    <!-- no translation found for permdesc_useDataInBackground (6049514223791806027) -->
-    <skip />
+    <string name="permlab_runInBackground" msgid="7365290743781858803">"працаваць у фоне"</string>
+    <string name="permdesc_runInBackground" msgid="7370142232209999824">"Гэта праграма можа працаваць у фоне. Гэта можа прывесці да хутчэйшага спажывання зараду акумулятара."</string>
+    <string name="permlab_useDataInBackground" msgid="8694951340794341809">"выкарыстоўваць даныя ў фоне"</string>
+    <string name="permdesc_useDataInBackground" msgid="6049514223791806027">"Гэта праграма можа выкарыстоўваць даныя ў фоне. Гэта можа прывесці да павелічэння аб\'ёму трафіка."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"прымусіць прыкладанне працаваць заўсёды"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Дазваляе прыкладанню захоўваць некаторыя пастаянныя часткi ў памяцi. Гэта можа абмежаваць аб\'ём памяці, даступнай для іншых прыкладанняў, i запаволiць працу планшэта."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Дазваляе праграме пастаянна захоўваць некаторыя свае часткi ў памяцi. Гэта можа абмежаваць аб\'ём памяці, даступнай для іншых праграм, i запаволiць працу тэлевізара."</string>
@@ -1211,6 +1207,14 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Дакраніцеся, каб выбраць мову і раскладку"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" АБВГДЕЁЖЗІЙКЛМНОПРСТУЎФХЦЧШ\'ЫЬЭЮЯ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
+    <!-- no translation found for alert_windows_notification_channel_name (7443890103456396837) -->
+    <skip />
+    <!-- no translation found for alert_windows_notification_title (5399998516035621282) -->
+    <skip />
+    <!-- no translation found for alert_windows_notification_message (2456738662997073459) -->
+    <skip />
+    <!-- no translation found for alert_windows_notification_turn_off_action (3367294525884949878) -->
+    <skip />
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"Падрыхтоўка <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Праверка на наяўнасць памылак"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"Выяўлены новы носьбіт <xliff:g id="NAME">%s</xliff:g>"</string>
@@ -1367,8 +1371,6 @@
     <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Адправiць з дапамогай прыкладання <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="content_description_sliding_handle" msgid="415975056159262248">"Ручка для перасоўвання. Націсніце і ўтрымлівайце."</string>
     <string name="description_target_unlock_tablet" msgid="3833195335629795055">"Прагартайце, каб разблакаваць."</string>
-    <string name="keyboard_headset_required_to_hear_password" msgid="7011927352267668657">"Каб праслухаць паролi, падключыце гарнiтуру."</string>
-    <string name="keyboard_password_character_no_headset" msgid="2859873770886153678">"Кропка."</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"Перайсці да пачатковай старонкі"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Перайсці ўверх"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Больш налад"</string>

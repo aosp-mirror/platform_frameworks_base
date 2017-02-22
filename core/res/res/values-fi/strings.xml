@@ -320,14 +320,10 @@
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"Antaa sovelluksen sulkea muiden sovelluksien taustaprosesseja. Tämä voi sulkea muita sovelluksia."</string>
     <string name="permlab_systemAlertWindow" msgid="7238805243128138690">"Tämä sovellus voi näkyä muiden sovellusten päällä"</string>
     <string name="permdesc_systemAlertWindow" msgid="2393776099672266188">"Tämä sovellus voi näkyä muiden sovellusten tai näytön muiden osien päällä. Tämä voi häiritä sovellusten tavallista käyttöä ja muuttaa tapaa, jolla muut sovellukset näkyvät."</string>
-    <!-- no translation found for permlab_runInBackground (7365290743781858803) -->
-    <skip />
-    <!-- no translation found for permdesc_runInBackground (7370142232209999824) -->
-    <skip />
-    <!-- no translation found for permlab_useDataInBackground (8694951340794341809) -->
-    <skip />
-    <!-- no translation found for permdesc_useDataInBackground (6049514223791806027) -->
-    <skip />
+    <string name="permlab_runInBackground" msgid="7365290743781858803">"toimia taustalla"</string>
+    <string name="permdesc_runInBackground" msgid="7370142232209999824">"Tämä sovellus voi toimia taustalla. Tämä saattaa kuluttaa enemmän akkua."</string>
+    <string name="permlab_useDataInBackground" msgid="8694951340794341809">"käyttää dataa taustalla"</string>
+    <string name="permdesc_useDataInBackground" msgid="6049514223791806027">"Tämä sovellus voi käyttää dataa taustalla. Tämä saattaa lisätä datankulutusta."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"sovelluksen asettaminen aina käynnissä olevaksi"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Antaa sovelluksen lisätä omia osiaan muistiin pysyvästi. Tämä voi rajoittaa muiden sovellusten käytettävissä olevaa muistia ja hidastaa tablet-laitteen toimintaa."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Antaa sovelluksen lisätä omia osiaan pysyvästi muistiin. Tämä voi rajoittaa muiden sovellusten käytettävissä olevaa muistia ja hidastaa television toimintaa."</string>
@@ -1171,6 +1167,14 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Valitse kieli ja asettelu koskettamalla."</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZÅÄÖ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
+    <!-- no translation found for alert_windows_notification_channel_name (7443890103456396837) -->
+    <skip />
+    <!-- no translation found for alert_windows_notification_title (5399998516035621282) -->
+    <skip />
+    <!-- no translation found for alert_windows_notification_message (2456738662997073459) -->
+    <skip />
+    <!-- no translation found for alert_windows_notification_turn_off_action (3367294525884949878) -->
+    <skip />
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"Valmistellaan kohdetta <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Tarkistetaan virheiden varalta."</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"Uusi <xliff:g id="NAME">%s</xliff:g> on havaittu."</string>
@@ -1325,8 +1329,6 @@
     <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Jaa sovelluksessa <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="content_description_sliding_handle" msgid="415975056159262248">"Liukuva valitsin. Kosketa pitkään."</string>
     <string name="description_target_unlock_tablet" msgid="3833195335629795055">"Poista lukitus liu\'uttamalla."</string>
-    <string name="keyboard_headset_required_to_hear_password" msgid="7011927352267668657">"Liitä kuulokkeet kuullaksesi, mitä näppäimiä painat kirjoittaessasi salasanaa."</string>
-    <string name="keyboard_password_character_no_headset" msgid="2859873770886153678">"Piste."</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"Siirry etusivulle"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Siirry ylös"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Lisää asetuksia"</string>

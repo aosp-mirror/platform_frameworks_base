@@ -323,14 +323,10 @@
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"Aplikaciji omogućuje završavanje pozadinskih procesa drugih aplikacija. To može dovesti do prekida rada drugih aplikacija."</string>
     <string name="permlab_systemAlertWindow" msgid="7238805243128138690">"Aplikacija se može prikazivati povrh drugih aplikacija"</string>
     <string name="permdesc_systemAlertWindow" msgid="2393776099672266188">"Aplikacija se može prikazivati povrh drugih aplikacija ili drugih dijelova zaslona. To može omesti uobičajenu upotrebu aplikacija i promijeniti način prikaza drugih aplikacija."</string>
-    <!-- no translation found for permlab_runInBackground (7365290743781858803) -->
-    <skip />
-    <!-- no translation found for permdesc_runInBackground (7370142232209999824) -->
-    <skip />
-    <!-- no translation found for permlab_useDataInBackground (8694951340794341809) -->
-    <skip />
-    <!-- no translation found for permdesc_useDataInBackground (6049514223791806027) -->
-    <skip />
+    <string name="permlab_runInBackground" msgid="7365290743781858803">"izvoditi se u pozadini"</string>
+    <string name="permdesc_runInBackground" msgid="7370142232209999824">"Aplikacija se može izvoditi u pozadini. To može brže trošiti bateriju."</string>
+    <string name="permlab_useDataInBackground" msgid="8694951340794341809">"upotrebljavati podatke u pozadini"</string>
+    <string name="permdesc_useDataInBackground" msgid="6049514223791806027">"Aplikacija može upotrebljavati podatke u pozadini. To može povećati potrošnju podataka."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"trajni rad aplikacije"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Aplikaciji omogućuje trajnu prisutnost nekih njenih dijelova u memoriji. To može ograničiti dostupnost memorije drugim aplikacijama i usporiti tabletno računalo."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Aplikaciji omogućuje trajnu ugradnju nekih svojih dijelova u memoriju. To može ograničiti memoriju raspoloživu drugim aplikacijama i usporiti televizor."</string>
@@ -1191,6 +1187,14 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Dodirnite da biste odabrali jezik i raspored"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
+    <!-- no translation found for alert_windows_notification_channel_name (7443890103456396837) -->
+    <skip />
+    <!-- no translation found for alert_windows_notification_title (5399998516035621282) -->
+    <skip />
+    <!-- no translation found for alert_windows_notification_message (2456738662997073459) -->
+    <skip />
+    <!-- no translation found for alert_windows_notification_turn_off_action (3367294525884949878) -->
+    <skip />
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"Priprema uređaja <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Traženje pogrešaka"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"Otkriven je novi uređaj <xliff:g id="NAME">%s</xliff:g>"</string>
@@ -1346,8 +1350,6 @@
     <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Dijeli s aplikacijom <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="content_description_sliding_handle" msgid="415975056159262248">"Klizna ručka. Dodirnite i držite."</string>
     <string name="description_target_unlock_tablet" msgid="3833195335629795055">"Prijeđite prstima da biste otključali."</string>
-    <string name="keyboard_headset_required_to_hear_password" msgid="7011927352267668657">"Priključite slušalice kako biste čuli izgovaranje tipki zaporke."</string>
-    <string name="keyboard_password_character_no_headset" msgid="2859873770886153678">"Točka."</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"Kreni na početnu"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Kreni gore"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Više opcija"</string>
