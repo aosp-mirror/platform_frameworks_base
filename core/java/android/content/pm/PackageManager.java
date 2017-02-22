@@ -4468,6 +4468,27 @@ public abstract class PackageManager {
             String processName, int uid, @ComponentInfoFlags int flags);
 
     /**
+     * Same as {@link #queryContentProviders}, except when {@code metaDataKey} is not null,
+     * it only returns providers which have metadata with the {@code metaDataKey} key.
+     *
+     * <p>DO NOT USE the {@code metaDataKey} parameter, unless you're the contacts provider.
+     * You really shouldn't need it.  Other apps should use {@link #queryIntentContentProviders}
+     * instead.
+     *
+     * <p>The {@code metaDataKey} parameter was added to allow the contacts provider to quickly
+     * scan the GAL providers on the device.  Unfortunately the discovery protocol used metadata
+     * to mark GAL providers, rather than intent filters, so we can't use
+     * {@link #queryIntentContentProviders} for that.
+     *
+     * @hide
+     */
+    public List<ProviderInfo> queryContentProviders(
+            String processName, int uid, @ComponentInfoFlags int flags, String metaDataKey) {
+        // Provide the default implementation for mocks.
+        return queryContentProviders(processName, uid, flags);
+    }
+
+    /**
      * Retrieve all of the information we know about a particular
      * instrumentation class.
      *

@@ -1024,12 +1024,18 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public List<ProviderInfo> queryContentProviders(String processName,
             int uid, int flags) {
+        return queryContentProviders(processName, uid, flags, null);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public List<ProviderInfo> queryContentProviders(String processName,
+            int uid, int flags, String metaDataKey) {
         try {
             ParceledListSlice<ProviderInfo> slice =
-                    mPM.queryContentProviders(processName, uid, flags);
+                    mPM.queryContentProviders(processName, uid, flags, metaDataKey);
             return slice != null ? slice.getList() : Collections.<ProviderInfo>emptyList();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();

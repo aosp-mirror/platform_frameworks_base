@@ -213,7 +213,7 @@ interface IPackageManager {
             inout List<ProviderInfo> outInfo);
 
     ParceledListSlice queryContentProviders(
-            String processName, int uid, int flags);
+            String processName, int uid, int flags, String metaDataKey);
 
     InstrumentationInfo getInstrumentationInfo(
             in ComponentName className, int flags);
