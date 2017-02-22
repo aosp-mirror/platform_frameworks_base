@@ -16,6 +16,7 @@
 
 package com.android.server.storage;
 
+import android.annotation.NonNull;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageStatsObserver;
@@ -32,6 +33,7 @@ import android.os.UserManager;
 import android.os.storage.VolumeInfo;
 import android.util.Log;
 import com.android.internal.os.BackgroundThread;
+import com.android.internal.util.Preconditions;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,7 +58,9 @@ public class AppCollector {
      * @param context Android context used to get
      * @param volume Volume to check for apps.
      */
-    public AppCollector(Context context, VolumeInfo volume) {
+    public AppCollector(Context context, @NonNull VolumeInfo volume) {
+        Preconditions.checkNotNull(volume);
+
         mBackgroundHandler = new BackgroundHandler(BackgroundThread.get().getLooper(),
                 volume,
                 context.getPackageManager(),
@@ -117,7 +121,7 @@ public class AppCollector {
         private final PackageManager mPm;
         private final UserManager mUm;
 
-        BackgroundHandler(Looper looper, VolumeInfo volume, PackageManager pm, UserManager um) {
+        BackgroundHandler(Looper looper, @NonNull VolumeInfo volume, PackageManager pm, UserManager um) {
             super(looper);
             mVolume = volume;
             mPm = pm;
