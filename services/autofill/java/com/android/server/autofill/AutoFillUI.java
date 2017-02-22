@@ -75,9 +75,11 @@ final class AutoFillUI {
 
     void setCallbackLocked(AutoFillUiCallback callback, IBinder activityToken) {
         mHandler.post(() -> {
-            hideAllUiThread();
-            mCallback = callback;
-            mActivityToken = activityToken;
+            if (callback != mCallback && activityToken != mActivityToken) {
+                hideAllUiThread();
+                mCallback = callback;
+                mActivityToken = activityToken;
+            }
         });
     }
 

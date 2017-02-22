@@ -5220,6 +5220,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         if (needEditableForNotification) {
             sendAfterTextChanged((Editable) text);
+        } else {
+            // Always notify AutoFillManager - it will return right away if auto-fill is disabled.
+            notifyAutoFillManagerAfterTextChanged();
         }
 
         // SelectionModifierCursorController depends on textCanBeSelected, which depends on text
@@ -9112,15 +9115,19 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         // Always notify AutoFillManager - it will return right away if auto-fill is disabled.
+        notifyAutoFillManagerAfterTextChanged();
+
+        hideErrorIfUnchanged();
+    }
+
+    private void notifyAutoFillManagerAfterTextChanged() {
         final AutoFillManager afm = mContext.getSystemService(AutoFillManager.class);
         if (afm != null) {
             if (DEBUG_AUTOFILL) {
-                Log.v(LOG_TAG, "sendAfterTextChanged(): notify AFM for text=" + text);
+                Log.v(LOG_TAG, "sendAfterTextChanged(): notify AFM for text=" + mText);
             }
             afm.valueChanged(TextView.this);
         }
-
-        hideErrorIfUnchanged();
     }
 
     void updateAfterEdit() {
