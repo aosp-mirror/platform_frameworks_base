@@ -159,10 +159,8 @@ public final class SystemServer {
             "com.google.android.clockwork.ThermalObserver";
     private static final String WEAR_BLUETOOTH_SERVICE_CLASS =
             "com.google.android.clockwork.bluetooth.WearBluetoothService";
-    private static final String WEAR_WIFI_MEDIATOR_SERVICE_CLASS =
-            "com.google.android.clockwork.wifi.WearWifiMediatorService";
-    private static final String WEAR_CELLULAR_MEDIATOR_SERVICE_CLASS =
-            "com.google.android.clockwork.cellular.WearCellularMediatorService";
+    private static final String WEAR_CONNECTIVITY_SERVICE_CLASS =
+            "com.google.android.clockwork.connectivity.WearConnectivityService";
     private static final String WEAR_TIME_SERVICE_CLASS =
             "com.google.android.clockwork.time.WearTimeService";
     private static final String ACCOUNT_SERVICE_CLASS =
@@ -1193,10 +1191,7 @@ public final class SystemServer {
 
         if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH)) {
             mSystemServiceManager.startService(WEAR_BLUETOOTH_SERVICE_CLASS);
-            mSystemServiceManager.startService(WEAR_WIFI_MEDIATOR_SERVICE_CLASS);
-            if (SystemProperties.getBoolean("config.enable_cellmediator", false)) {
-                mSystemServiceManager.startService(WEAR_CELLULAR_MEDIATOR_SERVICE_CLASS);
-            }
+            mSystemServiceManager.startService(WEAR_CONNECTIVITY_SERVICE_CLASS);
           if (!disableNonCoreServices) {
               mSystemServiceManager.startService(WEAR_TIME_SERVICE_CLASS);
           }
