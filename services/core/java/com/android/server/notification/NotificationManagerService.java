@@ -1440,6 +1440,11 @@ public class NotificationManagerService extends SystemService {
                 return ;
             }
 
+            if (isCallerInstantApp(pkg)) {
+                throw new SecurityException("Instant app " + pkg
+                        + " is not allowed to create toasts");
+            }
+
             final boolean isSystemToast = isCallerSystem() || ("android".equals(pkg));
             final boolean isPackageSuspended =
                     isPackageSuspendedForUser(pkg, Binder.getCallingUid());
@@ -3123,6 +3128,13 @@ public class NotificationManagerService extends SystemService {
                         }
                         return false;
                     }
+                } else if (isCallerInstantApp(pkg)) {
+                    // Ephemeral apps have some special contraints for notifications.
+                    // They are not allowed to create new notifications however they are allowed to
+                    // update notifications created by the system (e.g. a foreground service
+                    // notification).
+                    throw new SecurityException("Instant app " + pkg
+                            + " cannot create notifications");
                 }
 
                 int count = 0;
@@ -4411,6 +4423,27 @@ public class NotificationManagerService extends SystemService {
             return;
         }
         checkCallerIsSameApp(pkg);
+    }
+
+    private boolean isCallerInstantApp(String pkg) {
+        // System is always allowed to act for ephemeral apps.
+        if (isCallerSystem()) {
+            return false;
+        }
+
+        mAppOps.checkPackage(Binder.getCallingUid(), pkg);
+
+        try {
+            ApplicationInfo ai = mPackageManager.getApplicationInfo(pkg, 0,
+                    UserHandle.getCallingUserId());
+            if (ai == null) {
+                throw new SecurityException("Unknown package " + pkg);
+            }
+            return ai.isInstantApp();
+        } catch (RemoteException re) {
+            throw new SecurityException("Unknown package " + pkg, re);
+        }
+
     }
 
     private void checkCallerIsSameApp(String pkg) {
