@@ -1677,8 +1677,8 @@ public class StorageManager {
                 "Well this is embarassing; we can't allocate " + bytes + " for " + file);
     }
 
-    private static final String XATTR_ATOMIC = "user.atomic";
-    private static final String XATTR_TOMBSTONE = "user.tombstone";
+    private static final String XATTR_CACHE_ATOMIC = "user.cache_atomic";
+    private static final String XATTR_CACHE_TOMBSTONE = "user.cache_tombstone";
 
     /** {@hide} */
     private static void setCacheBehavior(File path, String name, boolean enabled)
@@ -1736,7 +1736,7 @@ public class StorageManager {
      * to all contained files and directories.
      */
     public void setCacheBehaviorAtomic(File path, boolean atomic) throws IOException {
-        setCacheBehavior(path, XATTR_ATOMIC, atomic);
+        setCacheBehavior(path, XATTR_CACHE_ATOMIC, atomic);
     }
 
     /**
@@ -1744,7 +1744,7 @@ public class StorageManager {
      * {@link #setCacheBehaviorAtomic(File, boolean)}.
      */
     public boolean isCacheBehaviorAtomic(File path) throws IOException {
-        return isCacheBehavior(path, XATTR_ATOMIC);
+        return isCacheBehavior(path, XATTR_CACHE_ATOMIC);
     }
 
     /**
@@ -1764,7 +1764,7 @@ public class StorageManager {
      * </p>
      */
     public void setCacheBehaviorTombstone(File path, boolean tombstone) throws IOException {
-        setCacheBehavior(path, XATTR_TOMBSTONE, tombstone);
+        setCacheBehavior(path, XATTR_CACHE_TOMBSTONE, tombstone);
     }
 
     /**
@@ -1772,7 +1772,7 @@ public class StorageManager {
      * {@link #setCacheBehaviorTombstone(File, boolean)}.
      */
     public boolean isCacheBehaviorTombstone(File path) throws IOException {
-        return isCacheBehavior(path, XATTR_TOMBSTONE);
+        return isCacheBehavior(path, XATTR_CACHE_TOMBSTONE);
     }
 
     private final Object mFuseAppLoopLock = new Object();
