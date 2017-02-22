@@ -4970,7 +4970,7 @@ public final class ActivityThread {
             LoadedApk apk = ref != null ? ref.get() : null;
             if (apk != null) {
                 final ArrayList<String> oldPaths = new ArrayList<>();
-                LoadedApk.makePaths(this, apk.getApplicationInfo(), oldPaths, null /*outLibPaths*/);
+                LoadedApk.makePaths(this, apk.getApplicationInfo(), oldPaths);
                 apk.updateApplicationInfo(ai, oldPaths);
             }
 
@@ -4978,7 +4978,7 @@ public final class ActivityThread {
             apk = ref != null ? ref.get() : null;
             if (apk != null) {
                 final ArrayList<String> oldPaths = new ArrayList<>();
-                LoadedApk.makePaths(this, apk.getApplicationInfo(), oldPaths, null /*outLibPaths*/);
+                LoadedApk.makePaths(this, apk.getApplicationInfo(), oldPaths);
                 apk.updateApplicationInfo(ai, oldPaths);
             }
 
