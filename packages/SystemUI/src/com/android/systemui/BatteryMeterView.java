@@ -16,7 +16,6 @@
 package com.android.systemui;
 
 import android.content.Context;
-import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
@@ -27,8 +26,6 @@ import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Handler;
 import android.provider.Settings;
-import android.util.ArraySet;
-import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -36,7 +33,6 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.android.settingslib.graph.BatteryMeterDrawableBase;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
@@ -104,8 +100,8 @@ public class BatteryMeterView extends LinearLayout implements
         updateShowPercent();
     }
 
-    public void forceShowPercent() {
-        mForceShowPercent = true;
+    public void setForceShowPercent(boolean show) {
+        mForceShowPercent = show;
         updateShowPercent();
     }
 
