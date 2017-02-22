@@ -455,10 +455,17 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
     const SkImageInfo decodeInfo = SkImageInfo::Make(size.width(), size.height(),
             decodeColorType, decodeAlphaType, codec->computeOutputColorSpace(decodeColorType));
 
-    // When supported by the colorType, we will decode to sRGB (or linear sRGB).  However,
-    // we only want to mark the bitmap as sRGB when linear blending is enabled.
-    SkImageInfo bitmapInfo = decodeInfo.makeAlphaType(alphaType)
-            .makeColorSpace(GraphicsJNI::colorSpaceForType(decodeColorType));
+    SkImageInfo bitmapInfo = decodeInfo.makeAlphaType(alphaType);
+
+    // For wide gamut images, we will leave the color space on the SkBitmap.  Otherwise,
+    // use the default.
+    sk_sp<SkColorSpace> srgb =
+            SkColorSpace::MakeRGB(SkColorSpace::kSRGB_RenderTargetGamma,
+                                  SkColorSpace::kSRGB_Gamut,
+                                  SkColorSpace::kNonLinearBlending_ColorSpaceFlag);
+    if (decodeInfo.colorSpace() == srgb.get()) {
+        bitmapInfo = bitmapInfo.makeColorSpace(GraphicsJNI::colorSpaceForType(decodeColorType));
+    }
 
     if (decodeColorType == kGray_8_SkColorType) {
         // The legacy implementation of BitmapFactory used kAlpha8 for
