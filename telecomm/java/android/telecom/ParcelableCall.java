@@ -50,6 +50,8 @@ public final class ParcelableCall implements Parcelable {
     private final boolean mIsVideoCallProviderChanged;
     private final IVideoProvider mVideoCallProvider;
     private VideoCallImpl mVideoCall;
+    private final boolean mIsRttCallChanged;
+    private final ParcelableRttCall mRttCall;
     private final String mParentCallId;
     private final List<String> mChildCallIds;
     private final StatusHints mStatusHints;
@@ -75,6 +77,8 @@ public final class ParcelableCall implements Parcelable {
             PhoneAccountHandle accountHandle,
             boolean isVideoCallProviderChanged,
             IVideoProvider videoCallProvider,
+            boolean isRttCallChanged,
+            ParcelableRttCall rttCall,
             String parentCallId,
             List<String> childCallIds,
             StatusHints statusHints,
@@ -98,6 +102,8 @@ public final class ParcelableCall implements Parcelable {
         mAccountHandle = accountHandle;
         mIsVideoCallProviderChanged = isVideoCallProviderChanged;
         mVideoCallProvider = videoCallProvider;
+        mIsRttCallChanged = isRttCallChanged;
+        mRttCall = rttCall;
         mParentCallId = parentCallId;
         mChildCallIds = childCallIds;
         mStatusHints = statusHints;
@@ -202,6 +208,18 @@ public final class ParcelableCall implements Parcelable {
         return mVideoCall;
     }
 
+    public boolean getIsRttCallChanged() {
+        return mIsRttCallChanged;
+    }
+
+    /**
+     * RTT communication channel information
+     * @return The ParcelableRttCall
+     */
+    public ParcelableRttCall getParcelableRttCall() {
+        return mRttCall;
+    }
+
     /**
      * The conference call to which this call is conferenced. Null if not conferenced.
      */
@@ -301,6 +319,8 @@ public final class ParcelableCall implements Parcelable {
             Bundle intentExtras = source.readBundle(classLoader);
             Bundle extras = source.readBundle(classLoader);
             int supportedAudioRoutes = source.readInt();
+            boolean isRttCallChanged = source.readByte() == 1;
+            ParcelableRttCall rttCall = source.readParcelable(classLoader);
             return new ParcelableCall(
                     id,
                     state,
@@ -318,6 +338,8 @@ public final class ParcelableCall implements Parcelable {
                     accountHandle,
                     isVideoCallProviderChanged,
                     videoCallProvider,
+                    isRttCallChanged,
+                    rttCall,
                     parentCallId,
                     childCallIds,
                     statusHints,
@@ -366,6 +388,8 @@ public final class ParcelableCall implements Parcelable {
         destination.writeBundle(mIntentExtras);
         destination.writeBundle(mExtras);
         destination.writeInt(mSupportedAudioRoutes);
+        destination.writeByte((byte) (mIsRttCallChanged ? 1 : 0));
+        destination.writeParcelable(mRttCall, 0);
     }
 
     @Override

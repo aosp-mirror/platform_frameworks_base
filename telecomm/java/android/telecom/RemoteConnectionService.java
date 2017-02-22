@@ -450,11 +450,14 @@ final class RemoteConnectionService {
             ConnectionRequest request,
             boolean isIncoming) {
         final String id = UUID.randomUUID().toString();
-        final ConnectionRequest newRequest = new ConnectionRequest(
-                request.getAccountHandle(),
-                request.getAddress(),
-                request.getExtras(),
-                request.getVideoState());
+        final ConnectionRequest newRequest = new ConnectionRequest.Builder()
+                .setAccountHandle(request.getAccountHandle())
+                .setAddress(request.getAddress())
+                .setExtras(request.getExtras())
+                .setVideoState(request.getVideoState())
+                .setRttPipeFromInCall(request.getRttPipeFromInCall())
+                .setRttPipeToInCall(request.getRttPipeToInCall())
+                .build();
         try {
             if (mConnectionById.isEmpty()) {
                 mOutgoingConnectionServiceRpc.addConnectionServiceAdapter(mServant.getStub(),
