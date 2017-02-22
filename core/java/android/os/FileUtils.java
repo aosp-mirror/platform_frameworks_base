@@ -770,4 +770,17 @@ public class FileUtils {
 
         return dir.mkdir() ? dir : null;
     }
+
+    /**
+     * Round the given size of a storage device to a nice round power-of-two
+     * value, such as 256MB or 32GB. This avoids showing weird values like
+     * "29.5GB" in UI.
+     */
+    public static long roundStorageSize(long size) {
+        long res = 1;
+        while (res < size) {
+            res <<= 1;
+        }
+        return res;
+    }
 }
