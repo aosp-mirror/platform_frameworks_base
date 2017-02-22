@@ -1654,7 +1654,7 @@ public class SettingsProvider extends ContentProvider {
             return false;
         }
 
-        String oldProviders = (settingValue != null) ? settingValue.getValue() : "";
+        String oldProviders = !settingValue.isNull() ? settingValue.getValue() : "";
 
         int index = oldProviders.indexOf(value);
         int end = index + value.length();
