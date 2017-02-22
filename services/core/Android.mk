@@ -23,7 +23,9 @@ LOCAL_JAVA_LIBRARIES := \
     android.hardware.power@1.0-java \
     android.hardware.tv.cec@1.0-java
 
-LOCAL_STATIC_JAVA_LIBRARIES := tzdata_update2 \
+LOCAL_STATIC_JAVA_LIBRARIES := \
+    tzdata_shared2 \
+    tzdata_update2 \
     android.hidl.base@1.0-java-static \
     android.hardware.biometrics.fingerprint@2.1-java-static \
 
