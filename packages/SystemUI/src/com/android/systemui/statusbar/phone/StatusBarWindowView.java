@@ -34,6 +34,7 @@ import android.media.session.MediaSessionLegacyHelper;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.view.ActionMode;
 import android.view.InputQueue;
@@ -65,6 +66,7 @@ public class StatusBarWindowView extends FrameLayout {
     public static final boolean DEBUG = StatusBar.DEBUG;
 
     private DragDownHelper mDragDownHelper;
+    private DoubleTapHelper mDoubleTapHelper;
     private NotificationStackScrollLayout mStackScrollLayout;
     private NotificationPanelView mNotificationPanel;
     private View mBrightnessMirror;
@@ -89,6 +91,10 @@ public class StatusBarWindowView extends FrameLayout {
         mTransparentSrcPaint.setColor(0);
         mTransparentSrcPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC));
         mFalsingManager = FalsingManager.getInstance(context);
+        mDoubleTapHelper = new DoubleTapHelper(this, active -> {}, () -> {
+            mService.wakeUpIfDozing(SystemClock.uptimeMillis(), this);
+            return true;
+        }, null, null);
     }
 
     @Override
@@ -256,7 +262,7 @@ public class StatusBarWindowView extends FrameLayout {
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         if (mService.isDozing() && !mService.isPulsing()) {
-            // Discard all touch events in always-on.
+            // Capture all touch events in always-on.
             return true;
         }
         boolean intercept = false;
@@ -282,7 +288,11 @@ public class StatusBarWindowView extends FrameLayout {
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
-        boolean handled = mService.isDozing() && !mService.isPulsing();
+        boolean handled = false;
+        if (mService.isDozing()) {
+            mDoubleTapHelper.onTouchEvent(ev);
+            handled = true;
+        }
         if (mService.getBarState() == StatusBarState.KEYGUARD
                 && (!handled || mDragDownHelper.isDraggingDown())) {
             // we still want to finish our drag down gesture when locking the screen

@@ -4872,7 +4872,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     public void wakeUpIfDozing(long time, View where) {
-        if (mDozing && mDozeScrimController.isPulsing()) {
+        if (mDozing) {
             PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
             pm.wakeUp(time, "com.android.systemui:NODOZE");
             mWakeUpComingFromTouch = true;
