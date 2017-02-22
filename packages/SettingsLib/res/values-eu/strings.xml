@@ -25,6 +25,8 @@
     <string name="wifi_remembered" msgid="4955746899347821096">"Gordeta"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"Desgaituta"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"Ezin izan da konfiguratu IP helbidea"</string>
+    <!-- no translation found for wifi_disabled_by_recommendation_provider (5168315140978066096) -->
+    <skip />
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"Ezin izan da konektatu Wi-Fi sarera"</string>
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"Autentifikazio-arazoa"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"Urrunegi"</string>
@@ -235,6 +237,8 @@
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"Hardware-geruzen eguneratzeak"</string>
     <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"Eguneratu bitartean, hardware-geruzak berdez"</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"Araztu GPU gainidazketa"</string>
+    <!-- no translation found for debug_hw_renderer (7568529019431785816) -->
+    <skip />
     <string name="disable_overlays" msgid="2074488440505934665">"Desgaitu HW gainjartzeak"</string>
     <string name="disable_overlays_summary" msgid="3578941133710758592">"Erabili beti GPU pantaila-muntaietarako"</string>
     <string name="simulate_color_space" msgid="6745847141353345872">"Simulatu kolore-espazioa"</string>
@@ -356,4 +360,6 @@
     <string name="retail_demo_reset_message" msgid="118771671364131297">"Idatzi pasahitza jatorrizko ezarpenak demo moduan berrezartzeko"</string>
     <string name="retail_demo_reset_next" msgid="8356731459226304963">"Hurrengoa"</string>
     <string name="retail_demo_reset_title" msgid="696589204029930100">"Pasahitza behar da"</string>
+    <string name="active_input_method_subtypes" msgid="3596398805424733238">"Idazketa-metodo aktiboak"</string>
+    <string name="use_system_language_to_select_input_method_subtypes" msgid="5747329075020379587">"Erabili sistemaren hizkuntzak"</string>
 </resources>

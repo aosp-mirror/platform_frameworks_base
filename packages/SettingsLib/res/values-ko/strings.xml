@@ -25,6 +25,8 @@
     <string name="wifi_remembered" msgid="4955746899347821096">"저장됨"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"사용 중지됨"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"IP 설정 실패"</string>
+    <!-- no translation found for wifi_disabled_by_recommendation_provider (5168315140978066096) -->
+    <skip />
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"Wi-Fi 연결 실패"</string>
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"인증 문제"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"범위 내에 없음"</string>
@@ -235,6 +237,8 @@
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"하드웨어 업데이트 표시"</string>
     <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"업데이트 할 때 하드웨어 레이어 깜박이기"</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"GPU 오버드로 디버깅"</string>
+    <!-- no translation found for debug_hw_renderer (7568529019431785816) -->
+    <skip />
     <string name="disable_overlays" msgid="2074488440505934665">"HW 오버레이 사용 안함"</string>
     <string name="disable_overlays_summary" msgid="3578941133710758592">"화면 합성 목적으로 항상 GPU 사용"</string>
     <string name="simulate_color_space" msgid="6745847141353345872">"색상 공간 시뮬레이션"</string>
@@ -356,4 +360,6 @@
     <string name="retail_demo_reset_message" msgid="118771671364131297">"데모 모드에서 초기화하려면 비밀번호 입력"</string>
     <string name="retail_demo_reset_next" msgid="8356731459226304963">"다음"</string>
     <string name="retail_demo_reset_title" msgid="696589204029930100">"비밀번호 입력 필요"</string>
+    <string name="active_input_method_subtypes" msgid="3596398805424733238">"입력 방법"</string>
+    <string name="use_system_language_to_select_input_method_subtypes" msgid="5747329075020379587">"시스템 언어 사용"</string>
 </resources>

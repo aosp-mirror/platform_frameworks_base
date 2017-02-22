@@ -25,6 +25,8 @@
     <string name="wifi_remembered" msgid="4955746899347821096">"已保存"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"已停用"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"IP 配置失败"</string>
+    <!-- no translation found for wifi_disabled_by_recommendation_provider (5168315140978066096) -->
+    <skip />
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"WLAN 连接失败"</string>
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"身份验证出现问题"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"不在范围内"</string>
@@ -235,6 +237,8 @@
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"显示硬件层更新"</string>
     <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"Flash 硬件层在进行更新时会显示为绿色"</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"调试 GPU 过度绘制"</string>
+    <!-- no translation found for debug_hw_renderer (7568529019431785816) -->
+    <skip />
     <string name="disable_overlays" msgid="2074488440505934665">"停用 HW 叠加层"</string>
     <string name="disable_overlays_summary" msgid="3578941133710758592">"始终使用 GPU 进行屏幕合成"</string>
     <string name="simulate_color_space" msgid="6745847141353345872">"模拟颜色空间"</string>
@@ -356,4 +360,6 @@
     <string name="retail_demo_reset_message" msgid="118771671364131297">"输入密码即可在演示模式下恢复出厂设置"</string>
     <string name="retail_demo_reset_next" msgid="8356731459226304963">"下一步"</string>
     <string name="retail_demo_reset_title" msgid="696589204029930100">"需要输入密码"</string>
+    <string name="active_input_method_subtypes" msgid="3596398805424733238">"有效的输入法"</string>
+    <string name="use_system_language_to_select_input_method_subtypes" msgid="5747329075020379587">"使用系统语言"</string>
 </resources>

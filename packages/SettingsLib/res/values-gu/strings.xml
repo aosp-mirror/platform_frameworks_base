@@ -25,6 +25,8 @@
     <string name="wifi_remembered" msgid="4955746899347821096">"સાચવેલા"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"અક્ષમ કર્યો"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"IP કન્ફિગરેશન નિષ્ફળ"</string>
+    <!-- no translation found for wifi_disabled_by_recommendation_provider (5168315140978066096) -->
+    <skip />
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"WiFi કનેક્શન નિષ્ફળ"</string>
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"પ્રમાણીકરણ સમસ્યા"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"રેન્જમાં નથી"</string>
@@ -235,6 +237,8 @@
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"હાર્ડવેર સ્તરોનાં અપડેટ્સ બતાવો"</string>
     <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"હાર્ડવેર સ્તરો અપડેટ થાય ત્યારે તેને લીલા રંગથી પ્રકાશિત કરો"</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"GPU ઓવરડ્રો ડીબગ કરો"</string>
+    <!-- no translation found for debug_hw_renderer (7568529019431785816) -->
+    <skip />
     <string name="disable_overlays" msgid="2074488440505934665">"HW ઓવરલે અક્ષમ કરો"</string>
     <string name="disable_overlays_summary" msgid="3578941133710758592">"સ્ક્રીન જોડવા માટે હંમેશાં GPU નો ઉપયોગ કરો"</string>
     <string name="simulate_color_space" msgid="6745847141353345872">"રંગ સ્થાનનું અનુકરણ કરો"</string>
@@ -356,4 +360,6 @@
     <string name="retail_demo_reset_message" msgid="118771671364131297">"ડેમો મોડમાં ફેક્ટરી રીસેટ પાસવર્ડ દાખલ કરો"</string>
     <string name="retail_demo_reset_next" msgid="8356731459226304963">"આગલું"</string>
     <string name="retail_demo_reset_title" msgid="696589204029930100">"પાસવર્ડ આવશ્યક છે"</string>
+    <string name="active_input_method_subtypes" msgid="3596398805424733238">"ઇનપુટ પદ્ધતિઓ સક્રિય કરો"</string>
+    <string name="use_system_language_to_select_input_method_subtypes" msgid="5747329075020379587">"સિસ્ટમ ભાષાઓનો ઉપયોગ કરો"</string>
 </resources>

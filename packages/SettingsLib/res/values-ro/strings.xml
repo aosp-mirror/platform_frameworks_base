@@ -25,6 +25,8 @@
     <string name="wifi_remembered" msgid="4955746899347821096">"Salvată"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"Dezactivată"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"Eroare de configurație IP"</string>
+    <!-- no translation found for wifi_disabled_by_recommendation_provider (5168315140978066096) -->
+    <skip />
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"Eroare de conexiune Wi-Fi"</string>
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"Problemă la autentificare"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"În afara ariei de acoperire"</string>
@@ -235,6 +237,8 @@
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"Actualiz. strat. hardware"</string>
     <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"Straturile hardware clipesc verde la actualizare"</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"Depanați suprapunerea"</string>
+    <!-- no translation found for debug_hw_renderer (7568529019431785816) -->
+    <skip />
     <string name="disable_overlays" msgid="2074488440505934665">"Dezactivați suprapun. HW"</string>
     <string name="disable_overlays_summary" msgid="3578941133710758592">"Utilizați mereu GPU pentru compunerea ecranului"</string>
     <string name="simulate_color_space" msgid="6745847141353345872">"Simulați spațiu culoare"</string>
@@ -356,4 +360,6 @@
     <string name="retail_demo_reset_message" msgid="118771671364131297">"Introduceți parola pentru a reveni la setările din fabrică în modul demo"</string>
     <string name="retail_demo_reset_next" msgid="8356731459226304963">"Înainte"</string>
     <string name="retail_demo_reset_title" msgid="696589204029930100">"Trebuie să introduceți o parolă"</string>
+    <string name="active_input_method_subtypes" msgid="3596398805424733238">"Metode active de introducere de text"</string>
+    <string name="use_system_language_to_select_input_method_subtypes" msgid="5747329075020379587">"Folosește limbile sistemului"</string>
 </resources>

@@ -25,6 +25,8 @@
     <string name="wifi_remembered" msgid="4955746899347821096">"Kulondoloziwe"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"Akusebenzi"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"Ukwehluleka kokulungiswa kwe-IP"</string>
+    <!-- no translation found for wifi_disabled_by_recommendation_provider (5168315140978066096) -->
+    <skip />
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"Ukwehlulekla koxhumo le-WiFi"</string>
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"Inkinga yokufakazela ubuqiniso"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"Ayikho ebubanzini"</string>
@@ -235,6 +237,8 @@
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"Bonisa izibuyekezo zezendlalelo izingxenyekazi zekhompyutha"</string>
     <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"Izendlalelo zengxenyekazi zekhompyutha eziluhlaza uma zibuyekeza"</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"Susa iphutha lokukhipha okungaphezulu kwe-GPU"</string>
+    <!-- no translation found for debug_hw_renderer (7568529019431785816) -->
+    <skip />
     <string name="disable_overlays" msgid="2074488440505934665">"Khubaza izimbondela ze-HW"</string>
     <string name="disable_overlays_summary" msgid="3578941133710758592">"Njalo sebenzisa i-GPU ukwakha isikrini"</string>
     <string name="simulate_color_space" msgid="6745847141353345872">"Qoqa isikhala sombala"</string>
@@ -356,4 +360,6 @@
     <string name="retail_demo_reset_message" msgid="118771671364131297">"Faka iphasiwedi ukuze wenze ukusetha kwefekthri kumodi yedemo"</string>
     <string name="retail_demo_reset_next" msgid="8356731459226304963">"Okulandelayo"</string>
     <string name="retail_demo_reset_title" msgid="696589204029930100">"Iphasiwedi iyadingeka"</string>
+    <string name="active_input_method_subtypes" msgid="3596398805424733238">"Izindlela zokufakwayo okusebenzayo"</string>
+    <string name="use_system_language_to_select_input_method_subtypes" msgid="5747329075020379587">"Sebenzisa izilimi zesistimu"</string>
 </resources>
