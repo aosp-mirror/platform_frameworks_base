@@ -40,6 +40,7 @@ import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
+import android.widget.EditText;
 
 import java.util.ArrayList;
 import java.util.Stack;
@@ -306,9 +307,6 @@ public class PasswordTextView extends View {
                                                    int removedCount, int addedCount) {
         if (AccessibilityManager.getInstance(mContext).isEnabled() &&
                 (isFocused() || isSelected() && isShown())) {
-            if (!shouldSpeakPasswordsForAccessibility()) {
-                beforeText = null;
-            }
             AccessibilityEvent event =
                     AccessibilityEvent.obtain(AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED);
             event.setFromIndex(fromIndex);
@@ -324,20 +322,8 @@ public class PasswordTextView extends View {
     public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
         super.onInitializeAccessibilityEvent(event);
 
-        event.setClassName(PasswordTextView.class.getName());
+        event.setClassName(EditText.class.getName());
         event.setPassword(true);
-    }
-
-    @Override
-    public void onPopulateAccessibilityEvent(AccessibilityEvent event) {
-        super.onPopulateAccessibilityEvent(event);
-
-        if (shouldSpeakPasswordsForAccessibility()) {
-            final CharSequence text = mText;
-            if (!TextUtils.isEmpty(text)) {
-                event.getText().add(text);
-            }
-        }
     }
 
     @Override
@@ -347,23 +333,9 @@ public class PasswordTextView extends View {
         info.setClassName(PasswordTextView.class.getName());
         info.setPassword(true);
 
-        if (shouldSpeakPasswordsForAccessibility()) {
-            info.setText(mText);
-        }
-
         info.setEditable(true);
 
         info.setInputType(InputType.TYPE_NUMBER_VARIATION_PASSWORD);
-    }
-
-    /**
-     * @return true if the user has explicitly allowed accessibility services
-     * to speak passwords.
-     */
-    private boolean shouldSpeakPasswordsForAccessibility() {
-        return (Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                Settings.Secure.ACCESSIBILITY_SPEAK_PASSWORD, 0,
-                UserHandle.USER_CURRENT_OR_SELF) == 1);
     }
 
     private class CharState {

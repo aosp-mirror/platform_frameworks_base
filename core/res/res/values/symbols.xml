@@ -708,8 +708,6 @@
   <java-symbol type="string" name="js_dialog_before_unload" />
   <java-symbol type="string" name="js_dialog_title" />
   <java-symbol type="string" name="js_dialog_title_default" />
-  <java-symbol type="string" name="keyboard_headset_required_to_hear_password" />
-  <java-symbol type="string" name="keyboard_password_character_no_headset" />
   <java-symbol type="string" name="keyboardview_keycode_alt" />
   <java-symbol type="string" name="keyboardview_keycode_cancel" />
   <java-symbol type="string" name="keyboardview_keycode_delete" />

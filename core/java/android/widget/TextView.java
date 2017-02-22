@@ -63,7 +63,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.ParcelableParcel;
 import android.os.SystemClock;
-import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.BoringLayout;
 import android.text.DynamicLayout;
@@ -9854,16 +9853,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
     }
 
-    /**
-     * @return true if the user has explicitly allowed accessibility services
-     * to speak passwords.
-     */
-    private boolean shouldSpeakPasswordsForAccessibility() {
-        return (Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                Settings.Secure.ACCESSIBILITY_SPEAK_PASSWORD, 0,
-                UserHandle.USER_CURRENT_OR_SELF) == 1);
-    }
-
     @Override
     public CharSequence getAccessibilityClassName() {
         return TextView.class.getName();
@@ -10436,13 +10425,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             return mHint;
         }
 
-        // Check whether we need to bypass the transformation
-        // method and expose unobscured text.
-        if (hasPasswordTransformationMethod() && shouldSpeakPasswordsForAccessibility()) {
-            return mText;
-        }
-
-        // Otherwise, speak whatever text is being displayed.
+        // Otherwise, return whatever text is being displayed.
         return mTransformed;
     }
 
@@ -11559,9 +11542,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         + " before=" + before + " after=" + after + ": " + buffer);
             }
 
-            if (AccessibilityManager.getInstance(mContext).isEnabled()
-                    && ((!isPasswordInputType(getInputType()) && !hasPasswordTransformationMethod())
-                            || shouldSpeakPasswordsForAccessibility())) {
+            if (AccessibilityManager.getInstance(mContext).isEnabled()) {
                 mBeforeText = buffer.toString();
             }
 
