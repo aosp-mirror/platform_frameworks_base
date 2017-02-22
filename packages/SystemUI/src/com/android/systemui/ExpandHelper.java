@@ -571,6 +571,7 @@ public class ExpandHelper implements Gefingerpoken {
                 public void onAnimationEnd(Animator animation) {
                     if (!mCancelled) {
                         mCallback.setUserExpandedChild(scaledView, expand);
+                        mScaler.setView(null);
                     } else {
                         mCallback.setExpansionCancelled(scaledView);
                     }
@@ -592,6 +593,7 @@ public class ExpandHelper implements Gefingerpoken {
             }
             mCallback.setUserExpandedChild(mResizedView, nowExpanded);
             mCallback.setUserLockedChild(mResizedView, false);
+            mScaler.setView(null);
         }
 
         mExpanding = false;
