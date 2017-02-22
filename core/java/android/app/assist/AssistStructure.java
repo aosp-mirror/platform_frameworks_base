@@ -1059,6 +1059,10 @@ public class AssistStructure implements Parcelable {
          * <li>Root node (containing the URL of the HTML page)
          * <li>Child nodes that represent hyperlinks (contains the hyperlink URL).
          * </ol>
+         *
+         * <strong>WARNING:</strong> a {@link android.service.autofill.AutoFillService} should only
+         * use this URL for auto-fill purposes when it trusts the app generating it (i.e., the app
+         * defined by {@link AssistStructure#getActivityComponent()}).
          */
         public String getUrl() {
             return mUrl;

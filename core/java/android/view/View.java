@@ -6983,19 +6983,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * Called when assist structure is being retrieved from a view as part of an auto-fill request.
      *
-     * <p>When implementing this method, subclasses must also:
-     *
-     * <ol>
-     * <li>Implement {@link #autoFill(AutoFillValue)}, {@link #getAutoFillType()}
-     * and {@link #getAutoFillValue()}.
-     * <li>Call {@link android.view.autofill.AutoFillManager#virtualValueChanged(View, int,
-     * AutoFillValue)} when its value changed.
-     * </ol>
+     * <p>This method already provides most of what's needed for auto-fill, but should be overridden
+     * when the view contents does not include PII (Personally Identifiable Information) (so it
+     * can call {@link ViewStructure#setSanitized(boolean) ViewStructure#setSanitized(true)}).
      *
      * @param structure Fill in with structured view data. The default implementation
      * fills in all data that can be inferred from the view itself.
      * @param flags optional flags (currently {@code 0}).
      */
+    @CallSuper
     public void onProvideAutoFillStructure(ViewStructure structure, int flags) {
         onProvideStructureForAssistOrAutoFill(structure, true);
     }
