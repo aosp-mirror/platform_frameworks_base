@@ -30,7 +30,6 @@ import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.RemoteViews;
 import com.android.internal.R;
-import com.android.internal.R;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,7 +47,7 @@ final class DatasetPicker extends FrameLayout implements OnItemClickListener {
 
     private final ArrayAdapter<ViewItem> mAdapter;
 
-    DatasetPicker(Context context, ArraySet<Dataset> datasets, AutoFillId filteredViewId,
+    DatasetPicker(Context context, ArrayList<Dataset> datasets, AutoFillId filteredViewId,
             Listener listener) {
         super(context);
         mListener = listener;

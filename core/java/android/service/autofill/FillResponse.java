@@ -28,6 +28,8 @@ import android.view.autofill.AutoFillId;
 import android.view.autofill.AutoFillManager;
 import android.widget.RemoteViews;
 
+import java.util.ArrayList;
+
 /**
  * Response for a {@link
  * AutoFillService#onFillRequest(android.app.assist.AssistStructure,
@@ -163,7 +165,7 @@ import android.widget.RemoteViews;
  */
 public final class FillResponse implements Parcelable {
 
-    private final ArraySet<Dataset> mDatasets;
+    private final ArrayList<Dataset> mDatasets;
     private final ArraySet<AutoFillId> mSavableIds;
     private final Bundle mExtras;
     private final RemoteViews mPresentation;
@@ -183,7 +185,7 @@ public final class FillResponse implements Parcelable {
     }
 
     /** @hide */
-    public @Nullable ArraySet<Dataset> getDatasets() {
+    public @Nullable ArrayList<Dataset> getDatasets() {
         return mDatasets;
     }
 
@@ -207,7 +209,7 @@ public final class FillResponse implements Parcelable {
      * one dataset or set an authentication intent with a presentation view.
      */
     public static final class Builder {
-        private ArraySet<Dataset> mDatasets;
+        private ArrayList<Dataset> mDatasets;
         private ArraySet<AutoFillId> mSavableIds;
         private Bundle mExtras;
         private RemoteViews mPresentation;
@@ -284,7 +286,7 @@ public final class FillResponse implements Parcelable {
                 return this;
             }
             if (mDatasets == null) {
-                mDatasets = new ArraySet<>();
+                mDatasets = new ArrayList<>();
             }
             if (!mDatasets.add(dataset)) {
                 return this;
@@ -398,7 +400,7 @@ public final class FillResponse implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
-        parcel.writeTypedArraySet(mDatasets, flags);
+        parcel.writeTypedArrayList(mDatasets, flags);
         parcel.writeTypedArraySet(mSavableIds, flags);
         parcel.writeParcelable(mExtras, flags);
         parcel.writeParcelable(mPresentation, flags);
@@ -413,10 +415,10 @@ public final class FillResponse implements Parcelable {
             // the system obeys the contract of the builder to avoid attacks
             // using specially crafted parcels.
             final Builder builder = new Builder();
-            final ArraySet<Dataset> datasets = parcel.readTypedArraySet(null);
+            final ArrayList<Dataset> datasets = parcel.readTypedArrayList(null);
             final int datasetCount = (datasets != null) ? datasets.size() : 0;
             for (int i = 0; i < datasetCount; i++) {
-                builder.addDataset(datasets.valueAt(i));
+                builder.addDataset(datasets.get(i));
             }
             final ArraySet<AutoFillId> fillIds = parcel.readTypedArraySet(null);
             final int fillIdCount = (fillIds != null) ? fillIds.size() : 0;
