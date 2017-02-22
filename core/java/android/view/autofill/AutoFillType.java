@@ -21,16 +21,11 @@ import static android.view.autofill.Helper.DEBUG;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.view.View;
-import android.widget.TextView;
 
 /**
  * Defines the type of a object that can be used to auto-fill a {@link View} so the
  * {@link android.service.autofill.AutoFillService} can use the proper {@link AutoFillValue} to
  * fill it.
- *
- * <p>Some {@link AutoFillType}s can have an optional {@code sub-type}: the
- * main {@code type} defines the view's UI control category (like a text field), while the optional
- * {@code sub-type} define its semantics (like a postal address).
  */
 public final class AutoFillType implements Parcelable {
 
@@ -38,9 +33,10 @@ public final class AutoFillType implements Parcelable {
     // class idiom" (Effective Java, Item 71) to avoid memory utilization when auto-fill is not
     // enabled.
     private static class DefaultTypesHolder {
-        static final AutoFillType TOGGLE = new AutoFillType(TYPE_TOGGLE, 0);
-        static final AutoFillType LIST = new AutoFillType(TYPE_LIST, 0);
-        static final AutoFillType DATE = new AutoFillType(TYPE_DATE, 0);
+        static final AutoFillType TEXT = new AutoFillType(TYPE_TEXT);
+        static final AutoFillType TOGGLE = new AutoFillType(TYPE_TOGGLE);
+        static final AutoFillType LIST = new AutoFillType(TYPE_LIST);
+        static final AutoFillType DATE = new AutoFillType(TYPE_DATE);
     }
 
     private static final int TYPE_TEXT = 1;
@@ -49,11 +45,9 @@ public final class AutoFillType implements Parcelable {
     private static final int TYPE_DATE = 4;
 
     private final int mType;
-    private final int mSubType;
 
-    private AutoFillType(int type, int subType) {
+    private AutoFillType(int type) {
         mType = type;
-        mSubType = subType;
     }
 
     /**
@@ -62,8 +56,6 @@ public final class AutoFillType implements Parcelable {
      * <p>{@link AutoFillValue} instances for auto-filling a {@link View} can be obtained through
      * {@link AutoFillValue#forText(CharSequence)}, and the value passed to auto-fill a
      * {@link View} can be fetched through {@link AutoFillValue#getTextValue()}.
-     *
-     * <p>Sub-type for this type is the value defined by {@link TextView#getInputType()}.
      */
     public boolean isText() {
         return mType == TYPE_TEXT;
@@ -75,8 +67,6 @@ public final class AutoFillType implements Parcelable {
      * <p>{@link AutoFillValue} instances for auto-filling a {@link View} can be obtained through
      * {@link AutoFillValue#forToggle(boolean)}, and the value passed to auto-fill a
      * {@link View} can be fetched through {@link AutoFillValue#getToggleValue()}.
-     *
-     * <p>This type has no sub-types.
      */
     public boolean isToggle() {
         return mType == TYPE_TOGGLE;
@@ -89,8 +79,6 @@ public final class AutoFillType implements Parcelable {
      * <p>{@link AutoFillValue} instances for auto-filling a {@link View} can be obtained through
      * {@link AutoFillValue#forList(int)}, and the value passed to auto-fill a
      * {@link View} can be fetched through {@link AutoFillValue#getListValue()}.
-     *
-     * <p>This type has no sub-types.
      */
     public boolean isList() {
         return mType == TYPE_LIST;
@@ -111,15 +99,6 @@ public final class AutoFillType implements Parcelable {
         return mType == TYPE_DATE;
     }
 
-    /**
-     * Gets the optional sub-type, representing the {@link View}'s semantic.
-     *
-     * @return {@code 0} if type does not support sub-types.
-     */
-    public int getSubType() {
-        return mSubType;
-    }
-
     /////////////////////////////////////
     //  Object "contract" methods. //
     /////////////////////////////////////
@@ -128,14 +107,13 @@ public final class AutoFillType implements Parcelable {
     public String toString() {
         if (!DEBUG) return super.toString();
 
-        return "AutoFillType [type=" + mType + ", subType=" + mSubType + "]";
+        return "AutoFillType [type=" + mType + "]";
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + mSubType;
         result = prime * result + mType;
         return result;
     }
@@ -146,7 +124,6 @@ public final class AutoFillType implements Parcelable {
         if (obj == null) return false;
         if (getClass() != obj.getClass()) return false;
         final AutoFillType other = (AutoFillType) obj;
-        if (mSubType != other.mSubType) return false;
         if (mType != other.mType) return false;
         return true;
     }
@@ -163,12 +140,10 @@ public final class AutoFillType implements Parcelable {
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
         parcel.writeInt(mType);
-        parcel.writeInt(mSubType);
     }
 
     private AutoFillType(Parcel parcel) {
         mType = parcel.readInt();
-        mSubType = parcel.readInt();
     }
 
     public static final Parcelable.Creator<AutoFillType> CREATOR =
@@ -193,8 +168,8 @@ public final class AutoFillType implements Parcelable {
      *
      * <p>See {@link #isText()} for more info.
      */
-    public static AutoFillType forText(int inputType) {
-        return new AutoFillType(TYPE_TEXT, inputType);
+    public static AutoFillType forText() {
+        return DefaultTypesHolder.TEXT;
     }
 
     /**

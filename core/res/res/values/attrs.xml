@@ -2304,6 +2304,39 @@
             <enum name="manual" value="2" />
         </attr>
 
+        <!-- Describes the content of a view so that a auto-fill service can fill in the appropriate
+             data. Multiple flags can be combined to mean e.g. emailAddress or postalAddress. -->
+        <attr name="autoFillHint">
+            <!-- No hint. -->
+            <flag name="none" value="0" />
+            <!-- The view contains an email address. -->
+            <flag name="emailAddress" value="0x1" />
+            <!-- The view contains a real name. -->
+            <flag name="name" value="0x2" />
+            <!-- The view contains a user name. -->
+            <flag name="username" value="0x4" />
+            <!-- The view contains a password. -->
+            <flag name="password" value="0x8" />
+            <!-- The view contains a phone number. -->
+            <flag name="phone" value="0x10" />
+            <!-- The view contains a postal address. -->
+            <flag name="postalAddress" value="0x20" />
+            <!-- The view contains a postal code. -->
+            <flag name="postalCode" value="0x40" />
+            <!-- The view contains a credit card number. -->
+            <flag name="creditCardNumber" value="0x80" />
+            <!-- The view contains a credit card security code -->
+            <flag name="creditCardSecurityCode" value="0x100" />
+            <!-- The view contains a credit card expiration date -->
+            <flag name="creditCardExpirationDate" value="0x200" />
+            <!-- The view contains the month a credit card expires -->
+            <flag name="creditCardExpirationMonth" value="0x400" />
+            <!-- The view contains the year a credit card expires -->
+            <flag name="creditCardExpirationYear" value="0x800" />
+            <!-- The view contains the day a credit card expires -->
+            <flag name="creditCardExpirationDay" value="0x1000" />
+        </attr>
+
         <!-- Boolean that controls whether a view can take focus while in touch mode.
              If this is true for a view, that view can gain focus when clicked on, and can keep
              focus if another view is clicked on that doesn't have this attribute set to true. -->
