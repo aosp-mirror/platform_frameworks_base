@@ -32,6 +32,7 @@ import java.io.PrintWriter;
 public class DozeParameters {
     private static final int MAX_DURATION = 60 * 1000;
     public static final String DOZE_SENSORS_WAKE_UP_FULLY = "doze_sensors_wake_up_fully";
+    public static final boolean ALWAYS_ON_AVAILABLE = Build.IS_DEBUGGABLE;
 
     private final Context mContext;
 
@@ -57,7 +58,7 @@ public class DozeParameters {
         pw.print("    getPickupVibrationThreshold(): "); pw.println(getPickupVibrationThreshold());
         pw.print("    getPickupSubtypePerformsProxCheck(): ");pw.println(
                 dumpPickupSubtypePerformsProxCheck());
-        if (Build.IS_DEBUGGABLE) {
+        if (ALWAYS_ON_AVAILABLE) {
             pw.print("    getAlwaysOn(): "); pw.println(getAlwaysOn());
             pw.print("    getSensorsWakeUpFully(): "); pw.println(getSensorsWakeUpFully());
         }
@@ -118,13 +119,13 @@ public class DozeParameters {
     }
 
     public boolean getAlwaysOn() {
-        return Build.IS_DEBUGGABLE
+        return ALWAYS_ON_AVAILABLE
                 && Settings.Secure.getIntForUser(mContext.getContentResolver(),
                 Settings.Secure.DOZE_ALWAYS_ON, 0, UserHandle.USER_CURRENT) != 0;
     }
 
     public boolean getSensorsWakeUpFully() {
-        return Build.IS_DEBUGGABLE
+        return ALWAYS_ON_AVAILABLE
                 && Settings.Secure.getIntForUser(mContext.getContentResolver(),
                 DOZE_SENSORS_WAKE_UP_FULLY, 0, UserHandle.USER_CURRENT) != 0;
     }
