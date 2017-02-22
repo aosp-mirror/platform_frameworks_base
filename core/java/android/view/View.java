@@ -7331,6 +7331,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 structure.setChecked(true);
             }
         }
+        if (isOpaque()) {
+            structure.setOpaque(true);
+        }
         if (isContextClickable()) {
             structure.setContextClickable(true);
         }

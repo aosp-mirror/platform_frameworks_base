@@ -2935,6 +2935,7 @@ public final class ActivityThread {
         Bundle data = new Bundle();
         AssistStructure structure = null;
         AssistContent content = forAutofill ? null : new AssistContent();
+        final long startTime = SystemClock.uptimeMillis();
         ActivityClientRecord r = mActivities.get(cmd.activityToken);
         Uri referrer = null;
         if (r != null) {
@@ -2974,6 +2975,10 @@ public final class ActivityThread {
         }
 
         // TODO(b/33197203): decide if lastSessionId logic applies to autofill sessions
+
+        structure.setAcquisitionStartTime(startTime);
+        structure.setAcquisitionEndTime(SystemClock.uptimeMillis());
+
         mLastAssistStructures.add(new WeakReference<>(structure));
         IActivityManager mgr = ActivityManager.getService();
         try {
