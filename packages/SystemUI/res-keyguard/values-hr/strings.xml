@@ -42,7 +42,7 @@
     <string name="keyguard_missing_sim_instructions" msgid="7350295932015220392">"Umetnite SIM karticu."</string>
     <string name="keyguard_missing_sim_instructions_long" msgid="589889372883904477">"SIM kartica nedostaje ili nije čitljiva. Umetnite SIM karticu."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="654102080186420706">"SIM kartica nije upotrebljiva."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="4683178224791318347">"Vaša SIM kartica trajno je onemogućena.\n Obratite se svom davatelju bežičnih usluga da biste dobili drugu SIM karticu."</string>
+    <string name="keyguard_permanent_disabled_sim_instructions" msgid="4683178224791318347">"Vaša SIM kartica trajno je onemogućena.\n Zatražite drugu SIM karticu od svog davatelja bežičnih usluga."</string>
     <string name="keyguard_sim_locked_message" msgid="953766009432168127">"SIM kartica je zaključana."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="1772789643694942073">"SIM kartica je zaključana PUK-om."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="3586601150825821675">"Otključavanje SIM kartice…"</string>

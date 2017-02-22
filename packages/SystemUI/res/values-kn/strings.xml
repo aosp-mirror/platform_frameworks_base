@@ -516,9 +516,11 @@
     <string name="power_notification_controls_description" msgid="4372459941671353358">"ಪವರ್ ಅಧಿಸೂಚನೆ ನಿಯಂತ್ರಣಗಳ ಮೂಲಕ, ನೀವು ಅಪ್ಲಿಕೇಶನ್‌ಗಳ ಅಧಿಸೂಚನೆಗಳನ್ನು 0 ರಿಂದ 5 ರವರೆಗಿನ ಹಂತಗಳ ಪ್ರಾಮುಖ್ಯತೆಯನ್ನು ಹೊಂದಿಸಬಹುದು. \n\n"<b>"ಹಂತ 5"</b>" \n- ಮೇಲಿನ ಅಧಿಸೂಚನೆ ಪಟ್ಟಿಯನ್ನು ತೋರಿಸಿ \n- ಪೂರ್ಣ ಪರದೆ ಅಡಚಣೆಯನ್ನು ಅನುಮತಿಸಿ \n- ಯಾವಾಗಲು ಇಣುಕು ನೋಟ \n\n"<b>"ಹಂತ 4"</b>" \n- ಪೂರ್ಣ ಪರದೆ ಅಡಚಣೆಯನ್ನು ತಡೆಯಿರಿ \n- ಯಾವಾಗಲು ಇಣುಕು ನೋಟ\n\n"<b>"ಹಂತ 3"</b>" \n- ಪೂರ್ಣ ಪರದೆ ಅಡಚಣೆಯನ್ನು ತಡೆಯಿರಿ \n- ಎಂದಿಗೂ ಇಣುಕು ನೋಟ ಬೇಡ \n\n"<b>"ಹಂತ 2"</b>" \n- ಪೂರ್ಣ ಪರದೆ ಅಡಚಣೆಯನ್ನು ತಡೆಯಿರಿ \n- ಎಂದಿಗೂ ಇಣುಕು ನೋಟ ಬೇಡ \n- ಶಬ್ದ ಮತ್ತು ವೈಬ್ರೇಷನ್ ಎಂದಿಗೂ ಮಾಡಬೇಡಿ \n\n"<b>"ಹಂತ 1"</b>" \n- ಪೂರ್ಣ ಪರದೆ ಅಡಚಣೆಯನ್ನು ತಡೆಯಿರಿ \n- ಎಂದಿಗೂ ಇಣುಕು ನೋಟ ಬೇಡ \n- ಶಬ್ದ ಮತ್ತು ವೈಬ್ರೇಷನ್ ಎಂದಿಗೂ ಮಾಡಬೇಡಿ \n- ಸ್ಥಿತಿ ಪಟ್ಟಿ ಮತ್ತು ಲಾಕ್ ಪರದೆಯಿಂದ ಮರೆಮಾಡಿ \n- ಕೆಳಗಿನ ಅಧಿಸೂಚನೆ ಪಟ್ಟಿಯನ್ನು ತೋರಿಸಿ \n\n"<b>"ಹಂತ 0"</b>" \n- ಅಪ್ಲಿಕೇಶನ್‌ನಿಂದ ಎಲ್ಲಾ ಅಧಿಸೂಚನೆಗಳನ್ನು ನಿರ್ಬಂಧಿಸಿ"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"ಅಧಿಸೂಚನೆಗಳು"</string>
     <string name="notification_channel_disabled" msgid="5805874247999578073">"ನೀವು ಇನ್ನು ಮುಂದೆ ಈ ಅಧಿಸೂಚನೆಗಳನ್ನು ಪಡೆಯುವುದಿಲ್ಲ."</string>
-    <!-- no translation found for notification_num_channels_desc (8808748716499517938) -->
-    <!-- no translation found for notification_all_categories (5407190218055113282) -->
-    <skip />
+    <plurals name="notification_num_channels_desc" formatted="false" msgid="8808748716499517938">
+      <item quantity="one">ಈ ಅಪ್ಲಿಕೇಶನ್‌ನಿಂದ <xliff:g id="NUMBER_1">%d</xliff:g> ವರ್ಗಗಳಲ್ಲಿ 1</item>
+      <item quantity="other">ಈ ಅಪ್ಲಿಕೇಶನ್‌ನಿಂದ <xliff:g id="NUMBER_1">%d</xliff:g> ವರ್ಗಗಳಲ್ಲಿ 1</item>
+    </plurals>
+    <string name="notification_all_categories" msgid="5407190218055113282">"ಎಲ್ಲ ವರ್ಗಗಳು"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"ಹೆಚ್ಚಿನ ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
     <string name="notification_done" msgid="5279426047273930175">"ಮುಗಿದಿದೆ"</string>
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
@@ -592,31 +594,31 @@
     <string name="switch_bar_off" msgid="8803270596930432874">"ಆಫ್"</string>
     <string name="nav_bar" msgid="1993221402773877607">"ನ್ಯಾವಿಗೇಷನ್ ಬಾರ್"</string>
     <string name="nav_bar_layout" msgid="3664072994198772020">"ಲೇಔಟ್"</string>
-    <!-- no translation found for left_nav_bar_button_type (8555981238887546528) -->
-    <skip />
-    <!-- no translation found for right_nav_bar_button_type (2481056627065649656) -->
-    <skip />
+    <string name="left_nav_bar_button_type" msgid="8555981238887546528">"ಹೆಚ್ಚುವರಿ ಎಡ ಬಟನ್ ವಿಧ"</string>
+    <string name="right_nav_bar_button_type" msgid="2481056627065649656">"ಹೆಚ್ಚುವರಿ ಬಲ ಬಟನ್ ವಿಧ"</string>
     <string name="nav_bar_default" msgid="8587114043070993007">"(ಡಿಫಾಲ್ಟ್‌)"</string>
-    <!-- no translation found for nav_bar_buttons:2 (8802889973626281575) -->
-    <!-- no translation found for nav_bar_layouts:0 (8077901629964902399) -->
-    <!-- no translation found for nav_bar_layouts:1 (8256205964297588988) -->
-    <!-- no translation found for nav_bar_layouts:2 (8719936228094005878) -->
-    <!-- no translation found for nav_bar_layouts:3 (586019486955594690) -->
-    <!-- no translation found for menu_ime (4998010205321292416) -->
-    <skip />
+  <string-array name="nav_bar_buttons">
+    <item msgid="1545641631806817203">"ಕ್ಲಿಪ್‌ಬೋರ್ಡ್"</item>
+    <item msgid="5742013440802239414">"ಕೀಕೋಡ್"</item>
+    <item msgid="8802889973626281575">"ಕೀಬೋರ್ಡ್ ಬದಲಾಯಿಸುವಿಕೆ"</item>
+    <item msgid="8175437057325747277">"ಯಾವುದೂ ಅಲ್ಲ"</item>
+  </string-array>
+  <string-array name="nav_bar_layouts">
+    <item msgid="8077901629964902399">"ಸಾಮಾನ್ಯ"</item>
+    <item msgid="8256205964297588988">"ಕಾಂಪ್ಯಾಕ್ಟ್‌"</item>
+    <item msgid="8719936228094005878">"ಎಡ-ಬಾಗುವಿಕೆ"</item>
+    <item msgid="586019486955594690">"ಬಲ-ಬಾಗುವಿಕೆ"</item>
+  </string-array>
+    <string name="menu_ime" msgid="4998010205321292416">"ಕೀಬೋರ್ಡ್ ಬದಲಾಯಿಸುವಿಕೆ"</string>
     <string name="save" msgid="2311877285724540644">"ಉಳಿಸು"</string>
     <string name="reset" msgid="2448168080964209908">"ಮರುಹೊಂದಿಸು"</string>
     <string name="adjust_button_width" msgid="6138616087197632947">"ಬಟನ್ ಅಳತೆ ಹೊಂದಿಸು"</string>
     <string name="clipboard" msgid="1313879395099896312">"ಕ್ಲಿಪ್‌ಬೋರ್ಡ್"</string>
     <string name="accessibility_key" msgid="5701989859305675896">"ಕಸ್ಟಮ್ ನ್ಯಾವಿಗೇಷನ್ ಬಟನ್"</string>
-    <!-- no translation found for left_keycode (2010948862498918135) -->
-    <skip />
-    <!-- no translation found for right_keycode (708447961000848163) -->
-    <skip />
-    <!-- no translation found for left_icon (3096287125959387541) -->
-    <skip />
-    <!-- no translation found for right_icon (3952104823293824311) -->
-    <skip />
+    <string name="left_keycode" msgid="2010948862498918135">"ಎಡ ಕೀಕೋಡ್"</string>
+    <string name="right_keycode" msgid="708447961000848163">"ಬಲ ಕೀಕೋಡ್"</string>
+    <string name="left_icon" msgid="3096287125959387541">"ಎಡ ಐಕಾನ್"</string>
+    <string name="right_icon" msgid="3952104823293824311">"ಬಲ ಐಕಾನ್"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"ಟೈಲ್‌ಗಳನ್ನು ಸೇರಿಸಲು ಡ್ರ್ಯಾಗ್ ಮಾಡಿ"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"ತೆಗೆದುಹಾಕಲು ಇಲ್ಲಿ ಡ್ರ್ಯಾಗ್‌ ಮಾಡಿ"</string>
     <string name="qs_edit" msgid="2232596095725105230">"ಎಡಿಟ್"</string>
@@ -665,44 +667,34 @@
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"<xliff:g id="ID_1">%s</xliff:g> ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ತೆರೆಯಿರಿ."</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"ಸೆಟ್ಟಿಂಗ್‌ಗಳ ಕ್ರಮವನ್ನು ಎಡಿಟ್ ಮಾಡಿ."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"<xliff:g id="ID_2">%2$d</xliff:g> ರಲ್ಲಿ <xliff:g id="ID_1">%1$d</xliff:g> ಪುಟ"</string>
-    <!-- no translation found for tuner_lock_screen (5755818559638850294) -->
-    <skip />
+    <string name="tuner_lock_screen" msgid="5755818559638850294">"ಲಾಕ್ ಪರದೆ"</string>
     <string name="pip_phone_expand" msgid="5889780005575693909">"ವಿಸ್ತೃತಗೊಳಿಸು"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"ಕುಗ್ಗಿಸಿ"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"ಮುಚ್ಚಿ"</string>
     <string name="high_temp_title" msgid="4589508026407318374">"ಫೋನ್ ಬಿಸಿಯಾಗುತ್ತಿದೆ"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"ಫೋನ್ ತಣ್ಣಗಾಗುವವರೆಗೂ ಕೆಲವು ವೈಶಿಷ್ಟ್ಯಗಳನ್ನು ಸೀಮಿತಗೊಳಿಸುತ್ತದೆ"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"ನಿಮ್ಮ ಫೋನ್ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ತಣ್ಣಗಾಗಲು ಪ್ರಯತ್ನಿಸುತ್ತದೆ. ನಿಮ್ಮ ಫೋನ್ ಅನ್ನು ನೀವು ಈಗಲೂ ಬಳಸಬಹುದಾಗಿರುತ್ತದೆ, ಆದರೆ ಇದು ನಿಧಾನವಾಗಿರಬಹುದು.\n\nಒಮ್ಮೆ ನಿಮ್ಮ ಫೋನ್ ತಣ್ಣಗಾದ ನಂತರ ಇದು ಸಾಮಾನ್ಯ ರೀತಿಯಲ್ಲಿ ಕಾರ್ಯನಿರ್ವಹಿಸುತ್ತದೆ."</string>
-    <!-- no translation found for lockscreen_shortcut_left (2182769107618938629) -->
-    <skip />
-    <!-- no translation found for lockscreen_shortcut_right (3328683699505226536) -->
-    <skip />
-    <!-- no translation found for lockscreen_unlock_left (2043092136246951985) -->
-    <skip />
-    <!-- no translation found for lockscreen_unlock_right (1529992940510318775) -->
-    <skip />
-    <!-- no translation found for lockscreen_none (4783896034844841821) -->
-    <skip />
-    <!-- no translation found for tuner_launch_app (1527264114781925348) -->
-    <skip />
-    <!-- no translation found for tuner_other_apps (4726596850501162493) -->
-    <skip />
-    <!-- no translation found for tuner_circle (2340998864056901350) -->
-    <skip />
-    <!-- no translation found for tuner_plus (6792960658533229675) -->
-    <skip />
-    <!-- no translation found for tuner_minus (4806116839519226809) -->
-    <skip />
-    <!-- no translation found for tuner_left (8404287986475034806) -->
-    <skip />
-    <!-- no translation found for tuner_right (6222734772467850156) -->
-    <skip />
-    <!-- no translation found for tuner_menu (191640047241552081) -->
-    <skip />
-    <!-- no translation found for tuner_app (3507057938640108777) -->
-    <skip />
+    <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"ಎಡ ಶಾರ್ಟ್‌ಕಟ್"</string>
+    <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"ಬಲ ಶಾರ್ಟ್‌ಕಟ್"</string>
+    <string name="lockscreen_unlock_left" msgid="2043092136246951985">"ಎಡ ಶಾರ್ಟ್‌ಕಟ್ ಕೂಡ ಅನ್‌ಲಾಕ್ ಮಾಡುತ್ತದೆ"</string>
+    <string name="lockscreen_unlock_right" msgid="1529992940510318775">"ಬಲ ಶಾರ್ಟ್‌ಕಟ್ ಕೂಡ ಅನ್‌ಲಾಕ್ ಮಾಡುತ್ತದೆ"</string>
+    <string name="lockscreen_none" msgid="4783896034844841821">"ಯಾವುದೂ ಅಲ್ಲ"</string>
+    <string name="tuner_launch_app" msgid="1527264114781925348">"<xliff:g id="APP">%1$s</xliff:g> ಪ್ರಾರಂಭಿಸಿ"</string>
+    <string name="tuner_other_apps" msgid="4726596850501162493">"ಇತರ ಅಪ್ಲಿಕೇಶನ್‌ಗಳು"</string>
+    <string name="tuner_circle" msgid="2340998864056901350">"ವಲಯ"</string>
+    <string name="tuner_plus" msgid="6792960658533229675">"ಪ್ಲಸ್"</string>
+    <string name="tuner_minus" msgid="4806116839519226809">"ಮೈನಸ್"</string>
+    <string name="tuner_left" msgid="8404287986475034806">"ಎಡ"</string>
+    <string name="tuner_right" msgid="6222734772467850156">"ಬಲ"</string>
+    <string name="tuner_menu" msgid="191640047241552081">"ಮೆನು"</string>
+    <string name="tuner_app" msgid="3507057938640108777">"<xliff:g id="APP">%1$s</xliff:g> ಅಪ್ಲಿಕೇಶನ್"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"ಎಚ್ಚರಿಕೆಗಳು"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್‌ಗಳು"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"ಸಾಮಾನ್ಯ ಸಂದೇಶಗಳು"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"ಸಂಗ್ರಹಣೆ"</string>
+    <!-- no translation found for instant_apps (6647570248119804907) -->
+    <skip />
+    <!-- no translation found for instant_apps_message (8116608994995104836) -->
+    <skip />
+    <string name="app_info" msgid="6856026610594615344">"ಅಪ್ಲಿಕೇಶನ್ ಮಾಹಿತಿ"</string>
 </resources>

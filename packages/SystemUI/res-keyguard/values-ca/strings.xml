@@ -25,7 +25,7 @@
     <string name="keyguard_password_enter_puk_code" msgid="670683628782925409">"Escriu el PUK de la SIM i el codi PIN nou"</string>
     <string name="keyguard_password_enter_puk_prompt" msgid="3747778500166059332">"Codi PUK de la SIM"</string>
     <string name="keyguard_password_enter_pin_prompt" msgid="8188243197504453830">"Codi PIN de la SIM nou"</string>
-    <string name="keyguard_password_entry_touch_hint" msgid="5790410752696806482"><font size="17">"Toca i escriu la contrasenya"</font></string>
+    <string name="keyguard_password_entry_touch_hint" msgid="5790410752696806482"><font size="17">"Toca per escriure la contrasenya"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="595980919238127672">"Escriu la contrasenya per desbloquejar"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="7504123374204446086">"Escriu el PIN per desbloquejar"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"El codi PIN no és correcte."</string>
@@ -42,7 +42,7 @@
     <string name="keyguard_missing_sim_instructions" msgid="7350295932015220392">"Insereix una targeta SIM."</string>
     <string name="keyguard_missing_sim_instructions_long" msgid="589889372883904477">"Falta la targeta SIM o no es pot llegir. Insereix-ne una."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="654102080186420706">"La targeta SIM no es pot fer servir."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="4683178224791318347">"La targeta SIM s\'ha desactivat permanentment.\n Contacta amb el teu proveïdor de serveis sense fil per obtenir-ne una altra."</string>
+    <string name="keyguard_permanent_disabled_sim_instructions" msgid="4683178224791318347">"La targeta SIM s\'ha desactivat permanentment.\nContacta amb el teu proveïdor de serveis sense fil per obtenir-ne una altra."</string>
     <string name="keyguard_sim_locked_message" msgid="953766009432168127">"La targeta SIM està bloquejada."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="1772789643694942073">"La targeta SIM està bloquejada pel PUK."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="3586601150825821675">"S\'està desbloquejant la targeta SIM…"</string>
@@ -52,18 +52,18 @@
     <string name="keyguard_accessibility_next_alarm" msgid="5835196989158584991">"S\'ha definit la pròxima alarma per a l\'hora següent: <xliff:g id="ALARM">%1$s</xliff:g>"</string>
     <string name="keyboardview_keycode_delete" msgid="6883116827512721630">"Suprimeix"</string>
     <string name="keyboardview_keycode_enter" msgid="4505833604411016668">"Retorn"</string>
-    <string name="kg_forgot_pattern_button_text" msgid="534245177645252620">"Patró oblidat"</string>
+    <string name="kg_forgot_pattern_button_text" msgid="534245177645252620">"He oblidat el patró"</string>
     <string name="kg_wrong_pattern" msgid="7620081431514773802">"El patró no és correcte"</string>
-    <string name="kg_wrong_password" msgid="4580683060277329277">"La contrasenya és incorrecta"</string>
+    <string name="kg_wrong_password" msgid="4580683060277329277">"La contrasenya no és correcta"</string>
     <string name="kg_wrong_pin" msgid="4785660766909463466">"El PIN no és correcte"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="527455490371878356">"Torna-ho a provar d\'aquí a <xliff:g id="NUMBER">%d</xliff:g> segons."</string>
     <string name="kg_pattern_instructions" msgid="5547646893001491340">"Dibuixa el patró"</string>
     <string name="kg_sim_pin_instructions" msgid="1795013002231184046">"Introdueix el PIN de la SIM"</string>
-    <string name="kg_sim_pin_instructions_multi" msgid="1586316574649150223">"Introdueix el PIN de la SIM de l\'operador <xliff:g id="CARRIER">%1$s</xliff:g>"</string>
+    <string name="kg_sim_pin_instructions_multi" msgid="1586316574649150223">"Introdueix el PIN de la SIM següent: <xliff:g id="CARRIER">%1$s</xliff:g>"</string>
     <string name="kg_pin_instructions" msgid="4069609316644030034">"Introdueix el PIN"</string>
     <string name="kg_password_instructions" msgid="136952397352976538">"Introdueix la contrasenya"</string>
     <string name="kg_puk_enter_puk_hint" msgid="2288964170039899277">"La SIM està desactivada. Introdueix el codi PUK per continuar. Contacta amb l\'operador de telefonia mòbil per obtenir més informació."</string>
-    <string name="kg_puk_enter_puk_hint_multi" msgid="1373131883510840794">"La SIM de l\'operador <xliff:g id="CARRIER">%1$s</xliff:g> està desactivada. Introdueix el codi PUK per continuar. Contacta amb l\'operador de telefonia mòbil per obtenir més informació."</string>
+    <string name="kg_puk_enter_puk_hint_multi" msgid="1373131883510840794">"La SIM <xliff:g id="CARRIER">%1$s</xliff:g> està desactivada. Introdueix el codi PUK per continuar. Contacta amb l\'operador de telefonia mòbil per obtenir més informació."</string>
     <string name="kg_puk_enter_pin_hint" msgid="3137789674920391087">"Introdueix el codi PIN que vulguis"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="3089485999116759671">"Confirma el codi PIN"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="4471738151810900114">"S\'està desbloquejant la targeta SIM…"</string>
@@ -72,21 +72,21 @@
     <string name="kg_invalid_puk" msgid="5399287873762592502">"Torna a introduir el codi PUK correcte. Si ho intentes diverses vegades, es desactivarà la SIM de manera permanent."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="5672736555427444330">"Els codis PIN no coincideixen"</string>
     <string name="kg_login_too_many_attempts" msgid="6604574268387867255">"Has intentat dibuixar el patró massa vegades"</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8637788033282252027">"Has escrit malament el PIN <xliff:g id="NUMBER_0">%1$d</xliff:g> vegades. \n\nTorna-ho a provar d\'aquí a <xliff:g id="NUMBER_1">%2$d</xliff:g> segons."</string>
-    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7724148763268377734">"Has escrit malament la contrasenya <xliff:g id="NUMBER_0">%1$d</xliff:g> vegades. \n\nTorna-ho a provar d\'aquí a <xliff:g id="NUMBER_1">%2$d</xliff:g> segons."</string>
-    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4820967667848302092">"Has dibuixat el patró de desbloqueig de manera incorrecta <xliff:g id="NUMBER_0">%1$d</xliff:g> vegades. \n\nTorna-ho a provar d\'aquí a <xliff:g id="NUMBER_1">%2$d</xliff:g> segons."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1629351522209932316">"Has provat de desbloquejar la tauleta incorrectament <xliff:g id="NUMBER_0">%1$d</xliff:g> vegades. Si falles <xliff:g id="NUMBER_1">%2$d</xliff:g> vegades més, la tauleta es restablirà i se n\'esborraran totes les dades."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="3921998703529189931">"Has provat de desbloquejar el telèfon incorrectament <xliff:g id="NUMBER_0">%1$d</xliff:g> vegades. Si falles <xliff:g id="NUMBER_1">%2$d</xliff:g> vegades més, el telèfon es restablirà i se n\'esborraran totes les dades."</string>
-    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="4694232971224663735">"Has provat de desbloquejar la tauleta incorrectament <xliff:g id="NUMBER">%d</xliff:g> vegades. La tauleta es restablirà i se n\'esborraran totes les dades."</string>
-    <string name="kg_failed_attempts_now_wiping" product="default" msgid="2365964340830006961">"Has provat de desbloquejar el telèfon incorrectament <xliff:g id="NUMBER">%d</xliff:g> vegades. El telèfon es restablirà i se n\'esborraran totes les dades."</string>
-    <string name="kg_failed_attempts_almost_at_erase_user" product="tablet" msgid="1365418870560228936">"Has provat de desbloquejar la tauleta incorrectament <xliff:g id="NUMBER_0">%1$d</xliff:g> vegades. Si falles <xliff:g id="NUMBER_1">%2$d</xliff:g> vegades més, l\'usuari se suprimirà, juntament amb totes les seves dades."</string>
-    <string name="kg_failed_attempts_almost_at_erase_user" product="default" msgid="2151286957817486128">"Has provat de desbloquejar el telèfon incorrectament <xliff:g id="NUMBER_0">%1$d</xliff:g> vegades. Si falles <xliff:g id="NUMBER_1">%2$d</xliff:g> vegades més, l\'usuari se suprimirà, juntament amb totes les seves dades."</string>
-    <string name="kg_failed_attempts_now_erasing_user" product="tablet" msgid="5464020754932560928">"Has provat de desbloquejar la tauleta incorrectament <xliff:g id="NUMBER">%d</xliff:g> vegades. L\'usuari se suprimirà, juntament amb totes les seves dades."</string>
-    <string name="kg_failed_attempts_now_erasing_user" product="default" msgid="6171564974118059">"Has provat de desbloquejar el telèfon incorrectament <xliff:g id="NUMBER">%d</xliff:g> vegades. L\'usuari se suprimirà, juntament amb totes les seves dades."</string>
-    <string name="kg_failed_attempts_almost_at_erase_profile" product="tablet" msgid="9154513795928824239">"Has provat de desbloquejar la tauleta incorrectament <xliff:g id="NUMBER_0">%1$d</xliff:g> vegades. Si falles <xliff:g id="NUMBER_1">%2$d</xliff:g> vegades més, el perfil professional se suprimirà, juntament amb totes les dades que contingui."</string>
-    <string name="kg_failed_attempts_almost_at_erase_profile" product="default" msgid="2162434417489128282">"Has provat de desbloquejar el telèfon incorrectament <xliff:g id="NUMBER_0">%1$d</xliff:g> vegades. Si falles <xliff:g id="NUMBER_1">%2$d</xliff:g> vegades més, el perfil professional se suprimirà, juntament amb totes les dades que contingui."</string>
-    <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="8966727588974691544">"Has provat de desbloquejar la tauleta incorrectament <xliff:g id="NUMBER">%d</xliff:g> vegades. El perfil professional se suprimirà, juntament amb totes les dades que contingui."</string>
-    <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="8476407539834855">"Has provat de desbloquejar el telèfon incorrectament <xliff:g id="NUMBER">%d</xliff:g> vegades. El perfil professional se suprimirà, juntament amb totes les dades que contingui."</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8637788033282252027">"Has escrit el PIN <xliff:g id="NUMBER_0">%1$d</xliff:g> vegades de manera incorrecta. \n\nTorna-ho a provar d\'aquí a <xliff:g id="NUMBER_1">%2$d</xliff:g> segons."</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7724148763268377734">"Has escrit la contrasenya <xliff:g id="NUMBER_0">%1$d</xliff:g> vegades de manera incorrecta. \n\nTorna-ho a provar d\'aquí a <xliff:g id="NUMBER_1">%2$d</xliff:g> segons."</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4820967667848302092">"Has dibuixat el patró de desbloqueig <xliff:g id="NUMBER_0">%1$d</xliff:g> vegades de manera incorrecta. \n\nTorna-ho a provar d\'aquí a <xliff:g id="NUMBER_1">%2$d</xliff:g> segons."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1629351522209932316">"Has provat de desbloquejar la tauleta <xliff:g id="NUMBER_0">%1$d</xliff:g> vegades de manera incorrecta. Si falles <xliff:g id="NUMBER_1">%2$d</xliff:g> vegades més, la tauleta es restablirà i se\'n suprimiran totes les dades."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="3921998703529189931">"Has provat de desbloquejar el telèfon <xliff:g id="NUMBER_0">%1$d</xliff:g> vegades de manera incorrecta. Si falles <xliff:g id="NUMBER_1">%2$d</xliff:g> vegades més, el telèfon es restablirà i se\'n suprimiran totes les dades."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="4694232971224663735">"Has provat de desbloquejar la tauleta <xliff:g id="NUMBER">%d</xliff:g> vegades de manera incorrecta. La tauleta es restablirà i se\'n suprimiran totes les dades."</string>
+    <string name="kg_failed_attempts_now_wiping" product="default" msgid="2365964340830006961">"Has provat de desbloquejar el telèfon <xliff:g id="NUMBER">%d</xliff:g> vegades de manera incorrecta. El telèfon es restablirà i se\'n suprimiran totes les dades."</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="tablet" msgid="1365418870560228936">"Has provat de desbloquejar la tauleta <xliff:g id="NUMBER_0">%1$d</xliff:g> vegades de manera incorrecta. Si falles <xliff:g id="NUMBER_1">%2$d</xliff:g> vegades més, l\'usuari se suprimirà, juntament amb totes les seves dades."</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="default" msgid="2151286957817486128">"Has provat de desbloquejar el telèfon <xliff:g id="NUMBER_0">%1$d</xliff:g> vegades de manera incorrecta. Si falles <xliff:g id="NUMBER_1">%2$d</xliff:g> vegades més, l\'usuari se suprimirà, juntament amb totes les seves dades."</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="tablet" msgid="5464020754932560928">"Has provat de desbloquejar la tauleta <xliff:g id="NUMBER">%d</xliff:g> vegades de manera incorrecta. L\'usuari se suprimirà, juntament amb totes les seves dades."</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="default" msgid="6171564974118059">"Has provat de desbloquejar el telèfon <xliff:g id="NUMBER">%d</xliff:g> vegades de manera incorrecta. L\'usuari se suprimirà, juntament amb totes les seves dades."</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="tablet" msgid="9154513795928824239">"Has provat de desbloquejar la tauleta <xliff:g id="NUMBER_0">%1$d</xliff:g> vegades de manera incorrecta. Si falles <xliff:g id="NUMBER_1">%2$d</xliff:g> vegades més, el perfil professional se suprimirà, juntament amb totes les dades que contingui."</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="default" msgid="2162434417489128282">"Has provat de desbloquejar el telèfon <xliff:g id="NUMBER_0">%1$d</xliff:g> vegades de manera incorrecta. Si falles <xliff:g id="NUMBER_1">%2$d</xliff:g> vegades més, el perfil professional se suprimirà, juntament amb totes les dades que contingui."</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="8966727588974691544">"Has provat de desbloquejar la tauleta <xliff:g id="NUMBER">%d</xliff:g> vegades de manera incorrecta. El perfil professional se suprimirà, juntament amb totes les dades que contingui."</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="8476407539834855">"Has provat de desbloquejar el telèfon <xliff:g id="NUMBER">%d</xliff:g> vegades de manera incorrecta. El perfil professional se suprimirà, juntament amb totes les dades que contingui."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="956706236554092172">"Has dibuixat el patró de desbloqueig <xliff:g id="NUMBER_0">%1$d</xliff:g> vegades de manera incorrecta. Si falles <xliff:g id="NUMBER_1">%2$d</xliff:g> vegades més, se\'t demanarà que desbloquegis la tauleta amb un compte de correu electrònic.\n\n Torna-ho a provar d\'aquí a <xliff:g id="NUMBER_2">%3$d</xliff:g> segons."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="8364140853305528449">"Has dibuixat el patró de desbloqueig <xliff:g id="NUMBER_0">%1$d</xliff:g> vegades de manera incorrecta. Si falles <xliff:g id="NUMBER_1">%2$d</xliff:g> vegades més, se\'t demanarà que desbloquegis el telèfon amb un compte de correu electrònic.\n\n Torna-ho a provar d\'aquí a <xliff:g id="NUMBER_2">%3$d</xliff:g> segons."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="3389829202093674267">"El codi PIN de la SIM no és correcte. Contacta amb l\'operador de telefonia mòbil per desbloquejar el dispositiu."</string>
@@ -96,11 +96,11 @@
     </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="3329017604125179374">"La SIM no es pot fer servir. Contacta amb l\'operador de telefonia mòbil."</string>
     <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="2287504898931957513">
-      <item quantity="other">El codi PUK de la SIM no és correcte. Et queden <xliff:g id="NUMBER_1">%d</xliff:g> intents; si no l\'encertes, la SIM no es podrà tornar a fer servir.</item>
+      <item quantity="other">El codi PUK de la SIM no és correcte. Et queden <xliff:g id="NUMBER_1">%d</xliff:g> intents; si els esgotes tots, la SIM no es podrà tornar a fer servir.</item>
       <item quantity="one">El codi PUK de la SIM no és correcte. Et queda <xliff:g id="NUMBER_0">%d</xliff:g> intent; si no l\'encertes, la SIM no es podrà tornar a fer servir.</item>
     </plurals>
-    <string name="kg_password_pin_failed" msgid="8769990811451236223">"No s\'ha pogut dur a terme l\'operació del PIN de la SIM."</string>
-    <string name="kg_password_puk_failed" msgid="1331621440873439974">"No s\'ha pogut dur a terme l\'operació del PUK de la SIM."</string>
+    <string name="kg_password_pin_failed" msgid="8769990811451236223">"No s\'ha pogut desbloquejar la SIM amb el codi PIN."</string>
+    <string name="kg_password_puk_failed" msgid="1331621440873439974">"No s\'ha pogut desbloquejar la SIM amb el codi PUK."</string>
     <string name="kg_pin_accepted" msgid="7637293533973802143">"S\'ha acceptat el codi."</string>
     <string name="keyguard_carrier_default" msgid="4274828292998453695">"Sense servei"</string>
     <string name="accessibility_ime_switch_button" msgid="2695096475319405612">"Canvia el mètode d\'introducció"</string>

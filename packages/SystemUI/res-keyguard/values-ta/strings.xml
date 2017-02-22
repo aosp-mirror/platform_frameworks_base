@@ -62,8 +62,8 @@
     <string name="kg_sim_pin_instructions_multi" msgid="1586316574649150223">"\"<xliff:g id="CARRIER">%1$s</xliff:g>\"க்கான சிம் பின்னை உள்ளிடவும்"</string>
     <string name="kg_pin_instructions" msgid="4069609316644030034">"பின்னை உள்ளிடவும்"</string>
     <string name="kg_password_instructions" msgid="136952397352976538">"கடவுச்சொல்லை உள்ளிடவும்"</string>
-    <string name="kg_puk_enter_puk_hint" msgid="2288964170039899277">"சிம் தற்போது முடக்கப்பட்டுள்ளது. தொடர, PUK குறியீட்டை உள்ளிடவும். விவரங்களுக்கு, தொலைதொடர்பு நிறுவனத்தைத் தொடர்புகொள்ளவும்."</string>
-    <string name="kg_puk_enter_puk_hint_multi" msgid="1373131883510840794">"\"<xliff:g id="CARRIER">%1$s</xliff:g>\" சிம் தற்போது முடக்கப்பட்டுள்ளது. தொடர, PUK குறியீட்டை உள்ளிடவும். விவரங்களுக்கு, தொலைதொடர்பு நிறுவனத்தைத் தொடர்புகொள்ளவும்."</string>
+    <string name="kg_puk_enter_puk_hint" msgid="2288964170039899277">"சிம் தற்போது முடக்கப்பட்டுள்ளது. தொடர, PUK குறியீட்டை உள்ளிடவும். விவரங்களுக்கு, தொலைத்தொடர்பு நிறுவனத்தைத் தொடர்புகொள்ளவும்."</string>
+    <string name="kg_puk_enter_puk_hint_multi" msgid="1373131883510840794">"\"<xliff:g id="CARRIER">%1$s</xliff:g>\" சிம் தற்போது முடக்கப்பட்டுள்ளது. தொடர, PUK குறியீட்டை உள்ளிடவும். விவரங்களுக்கு, தொலைத்தொடர்பு நிறுவனத்தைத் தொடர்புகொள்ளவும்."</string>
     <string name="kg_puk_enter_pin_hint" msgid="3137789674920391087">"பின் குறியீட்டை உள்ளிடவும்"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="3089485999116759671">"பின் குறியீட்டை உறுதிப்படுத்தவும்"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="4471738151810900114">"சிம் கார்டைத் திறக்கிறது…"</string>
@@ -74,7 +74,7 @@
     <string name="kg_login_too_many_attempts" msgid="6604574268387867255">"பேட்டர்னை அதிக முறை தவறாக வரைந்துவிட்டீர்கள்"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8637788033282252027">"உங்கள் பின்னை <xliff:g id="NUMBER_0">%1$d</xliff:g> முறை தவறாக உள்ளிட்டுவிட்டீர்கள். \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> வினாடிகளில் மீண்டும் முயலவும்."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7724148763268377734">"உங்கள் கடவுச்சொல்லை <xliff:g id="NUMBER_0">%1$d</xliff:g> முறை தவறாக உள்ளிட்டுவிட்டீர்கள். \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> வினாடிகளில் மீண்டும் முயலவும்."</string>
-    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4820967667848302092">"திறப்பதற்கானபேட்டர்னை, <xliff:g id="NUMBER_0">%1$d</xliff:g> முறை தவறாக வரைந்துவிட்டீர்கள். \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> வினாடிகளில் மீண்டும் முயலவும்."</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4820967667848302092">"திறப்பதற்கான பேட்டர்னை, <xliff:g id="NUMBER_0">%1$d</xliff:g> முறை தவறாக வரைந்துவிட்டீர்கள். \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> வினாடிகளில் மீண்டும் முயலவும்."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1629351522209932316">"டேப்லெட்டைத் திறக்க, <xliff:g id="NUMBER_0">%1$d</xliff:g> முறை தவறாக முயன்றுவிட்டீர்கள். இன்னும் <xliff:g id="NUMBER_1">%2$d</xliff:g> முறை தவறாக முயன்றால், இந்த டேப்லெட் மீட்டமைக்கப்பட்டு, அதன் எல்லாத் தரவும் நீக்கப்படும்."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="3921998703529189931">"மொபைலைத் திறக்க, <xliff:g id="NUMBER_0">%1$d</xliff:g> முறை தவறாக முயன்றுவிட்டீர்கள். இன்னும் <xliff:g id="NUMBER_1">%2$d</xliff:g> முறை தவறாக முயன்றால், இந்த மொபைல் மீட்டமைக்கப்பட்டு, அதன் எல்லாத் தரவும் நீக்கப்படும்."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="4694232971224663735">"டேப்லெட்டைத் திறக்க, <xliff:g id="NUMBER">%d</xliff:g> முறை தவறாக முயன்றுவிட்டீர்கள். இந்த டேப்லெட் மீட்டமைக்கப்பட்டு, அதன் எல்லாத் தரவும் நீக்கப்படும்."</string>
@@ -89,15 +89,15 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="8476407539834855">"மொபைலைத் திறக்க, <xliff:g id="NUMBER">%d</xliff:g> முறை தவறாக முயன்றுவிட்டீர்கள். பணி விவரம் அகற்றப்பட்டு, எல்லாச் சுயவிவரத் தரவும் நீக்கப்படும்."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="956706236554092172">"திறப்பதற்கான பேட்டர்னை, <xliff:g id="NUMBER_0">%1$d</xliff:g> முறை தவறாக வரைந்துவிட்டீர்கள். இன்னும் <xliff:g id="NUMBER_1">%2$d</xliff:g> முறை தவறாக வரைந்தால், மின்னஞ்சல் கணக்கைப் பயன்படுத்தி டேப்லெட்டைத் திறக்கும்படி கேட்கப்படுவீர்கள்.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> வினாடிகளில் மீண்டும் முயலவும்."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="8364140853305528449">"திறப்பதற்கான பேட்டர்னை, <xliff:g id="NUMBER_0">%1$d</xliff:g> முறை தவறாக வரைந்துவிட்டீர்கள். இன்னும் <xliff:g id="NUMBER_1">%2$d</xliff:g> முறை தவறாக வரைந்தால், மின்னஞ்சல் கணக்கைப் பயன்படுத்தி மொபைலைத் திறக்கும்படி கேட்கப்படுவீர்கள்.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> வினாடிகளில் மீண்டும் முயலவும்."</string>
-    <string name="kg_password_wrong_pin_code_pukked" msgid="3389829202093674267">"சிம்மின் பின் குறியீடு தவறானது. இனி சாதனத்தைத் திறக்க, உங்கள் தொலைதொடர்பு நிறுவனத்தைத் தொடர்புகொள்ள வேண்டும்."</string>
+    <string name="kg_password_wrong_pin_code_pukked" msgid="3389829202093674267">"சிம்மின் பின் குறியீடு தவறானது. இனி சாதனத்தைத் திறக்க, உங்கள் தொலைத்தொடர்பு நிறுவனத்தைத் தொடர்புகொள்ள வேண்டும்."</string>
     <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="4314341367727055967">
       <item quantity="other">சிம்மின் பின் குறியீடு தவறானது, இன்னும் நீங்கள் <xliff:g id="NUMBER_1">%d</xliff:g> முறை முயலலாம்.</item>
-      <item quantity="one">சிம்மின் பின் குறியீடு தவறானது, மேலும் <xliff:g id="NUMBER_0">%d</xliff:g> முயற்சிகளுக்குப் பின்னர், உங்கள் தொலைதொடர்பு நிறுவனத்தைத் தொடர்பு கொண்டு மட்டுமே சாதனத்தைத் திறக்க முடியும்.</item>
+      <item quantity="one">சிம்மின் பின் குறியீடு தவறானது, மேலும் <xliff:g id="NUMBER_0">%d</xliff:g> முயற்சிகளுக்குப் பின்னர், உங்கள் தொலைத்தொடர்பு நிறுவனத்தைத் தொடர்பு கொண்டு மட்டுமே சாதனத்தைத் திறக்க முடியும்.</item>
     </plurals>
-    <string name="kg_password_wrong_puk_code_dead" msgid="3329017604125179374">"பயன்படுத்த முடியாத சிம். உங்கள் தொலைதொடர்பு நிறுவனத்தைத் தொடர்புகொள்ளவும்."</string>
+    <string name="kg_password_wrong_puk_code_dead" msgid="3329017604125179374">"பயன்படுத்த முடியாத சிம். உங்கள் தொலைத்தொடர்பு நிறுவனத்தைத் தொடர்புகொள்ளவும்."</string>
     <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="2287504898931957513">
-      <item quantity="other">சிம்மின் PUK குறியீடு தவறானது, சிம்மை நிரந்தரமாகப் பயன்படுத்த முடியாமல் போவதற்கு முன், நீங்கள் <xliff:g id="NUMBER_1">%d</xliff:g> முறை முயலலாம்.</item>
-      <item quantity="one">சிம்மின் PUK குறியீடு தவறானது, சிம்மை நிரந்தரமாகப் பயன்படுத்த முடியாமல் போவதற்கு முன், நீங்கள் <xliff:g id="NUMBER_0">%d</xliff:g> முறை முயலலாம்.</item>
+      <item quantity="other">சிம்மின் PUK குறியீடு தவறானது, மேலும் <xliff:g id="NUMBER_1">%d</xliff:g> முறை முயலலாம். தொடர்ந்து தவறான குறியீடு உள்ளிடப்பட்டால், அதன் பிறகு சிம்மை நிரந்தரமாகப் பயன்படுத்த முடியாமல் போகும்.</item>
+      <item quantity="one">சிம்மின் PUK குறியீடு தவறானது, மேலும் <xliff:g id="NUMBER_0">%d</xliff:g> முறை முயலலாம். தொடர்ந்து தவறான குறியீடு உள்ளிடப்பட்டால், அதன் பிறகு சிம்மை நிரந்தரமாகப் பயன்படுத்த முடியாமல் போகும்.</item>
     </plurals>
     <string name="kg_password_pin_failed" msgid="8769990811451236223">"சிம் பின் செயல்பாடு தோல்வியடைந்தது!"</string>
     <string name="kg_password_puk_failed" msgid="1331621440873439974">"சிம் PUK செயல்பாடு தோல்வியடைந்தது!"</string>

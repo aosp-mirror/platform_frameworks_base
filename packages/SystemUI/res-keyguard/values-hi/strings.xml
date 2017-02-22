@@ -62,15 +62,15 @@
     <string name="kg_sim_pin_instructions_multi" msgid="1586316574649150223">"\"<xliff:g id="CARRIER">%1$s</xliff:g>\" का SIM पिन डालें"</string>
     <string name="kg_pin_instructions" msgid="4069609316644030034">"पिन डालें"</string>
     <string name="kg_password_instructions" msgid="136952397352976538">"पासवर्ड डालें"</string>
-    <string name="kg_puk_enter_puk_hint" msgid="2288964170039899277">"SIM अब अक्षम हो गई है. जारी रखने के लिए PUK कोड डालें. विवरण के लिए वाहक से संपर्क करें."</string>
-    <string name="kg_puk_enter_puk_hint_multi" msgid="1373131883510840794">"\"<xliff:g id="CARRIER">%1$s</xliff:g>\" की SIM अब अक्षम हो गई है. जारी रखने के लिए PUK कोड डालें. विवरण के लिए वाहक से संपर्क करें."</string>
+    <string name="kg_puk_enter_puk_hint" msgid="2288964170039899277">"SIM अब अक्षम हो गया है. जारी रखने के लिए PUK कोड डालें. विवरण के लिए वाहक से संपर्क करें."</string>
+    <string name="kg_puk_enter_puk_hint_multi" msgid="1373131883510840794">"\"<xliff:g id="CARRIER">%1$s</xliff:g>\" का SIM अब अक्षम हो गया है. जारी रखने के लिए PUK कोड डालें. विवरण के लिए वाहक से संपर्क करें."</string>
     <string name="kg_puk_enter_pin_hint" msgid="3137789674920391087">"मनचाहा पिन कोड डालें"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="3089485999116759671">"मनचाहे पिन कोड की पुष्टि करें"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="4471738151810900114">"SIM कार्ड अनलॉक हो रहा है…"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="3057533256729513335">"कोई ऐसा पिन लिखें, जिसमें 4 से 8 अंक हों."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="6003602401368264144">"PUK कोड 8 या अधिक संख्या वाला होना चाहिए."</string>
-    <string name="kg_invalid_puk" msgid="5399287873762592502">"सही PUK कोड दोबारा डालें. बार-बार कोशिश करने से SIM हमेशा के लिए अक्षम हो जाएगी."</string>
-    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="5672736555427444330">"पिन कोड का मिलान नहीं होता"</string>
+    <string name="kg_invalid_puk" msgid="5399287873762592502">"सही PUK कोड दोबारा डालें. बार-बार कोशिश करने से SIM हमेशा के लिए अक्षम हो जाएगा."</string>
+    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="5672736555427444330">"पिन कोड का मिलान नहीं हो रहा है"</string>
     <string name="kg_login_too_many_attempts" msgid="6604574268387867255">"पैटर्न के लिए बहुत ज़्यादा बार कोशिश की गई है"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8637788033282252027">"आप अपना पिन <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत तरीके से लिख चुके हैं. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> सेकंड में फिर से कोशिश करें."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7724148763268377734">"आप अपना पासवर्ड <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत तरीके से लिख चुके हैं. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> सेकंड में फिर से कोशिश करें."</string>
@@ -94,7 +94,7 @@
       <item quantity="one">SIM पिन कोड गलत है, आप <xliff:g id="NUMBER_1">%d</xliff:g> बार और कोशिश कर सकते हैं.</item>
       <item quantity="other">SIM पिन कोड गलत है, आप <xliff:g id="NUMBER_1">%d</xliff:g> बार और कोशिश कर सकते हैं.</item>
     </plurals>
-    <string name="kg_password_wrong_puk_code_dead" msgid="3329017604125179374">"SIM बेकार हो गई है. अपने वाहक से संपर्क करें."</string>
+    <string name="kg_password_wrong_puk_code_dead" msgid="3329017604125179374">"SIM बेकार हो गया है. अपने वाहक से संपर्क करें."</string>
     <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="2287504898931957513">
       <item quantity="one">SIM PUK कोड गलत है, SIM के हमेशा के लिए बेकार हो जाने से पहले आप <xliff:g id="NUMBER_1">%d</xliff:g> बार और कोशिश कर सकते हैं.</item>
       <item quantity="other">SIM PUK कोड गलत है, SIM के हमेशा के लिए बेकार हो जाने से पहले आप <xliff:g id="NUMBER_1">%d</xliff:g> बार और कोशिश कर सकते हैं.</item>
@@ -105,9 +105,9 @@
     <string name="keyguard_carrier_default" msgid="4274828292998453695">"कोई सेवा नहीं."</string>
     <string name="accessibility_ime_switch_button" msgid="2695096475319405612">"इनपुट पद्धति‍ बदलें"</string>
     <string name="airplane_mode" msgid="3807209033737676010">"हवाई जहाज़ मोड"</string>
-    <string name="kg_prompt_reason_restart_pattern" msgid="7246972020562621506">"डिवाइस फिर से शुरू होने के बाद पैटर्न ज़रूरी है"</string>
-    <string name="kg_prompt_reason_restart_pin" msgid="6303592361322290145">"डिवाइस फिर से शुरू होने के बाद पिन ज़रूरी है"</string>
-    <string name="kg_prompt_reason_restart_password" msgid="6984641181515902406">"डिवाइस फिर से शुरू होने के बाद पासवर्ड ज़रूरी है"</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="7246972020562621506">"डिवाइस फिर से चालू होने के बाद पैटर्न ज़रूरी है"</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="6303592361322290145">"डिवाइस फिर से चालू होने के बाद पिन ज़रूरी है"</string>
+    <string name="kg_prompt_reason_restart_password" msgid="6984641181515902406">"डिवाइस फिर से चालू होने के बाद पासवर्ड ज़रूरी है"</string>
     <string name="kg_prompt_reason_timeout_pattern" msgid="5304487696073914063">"अतिरिक्‍त सुरक्षा के लिए पैटर्न ज़रूरी है"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="8851462864335757813">"अतिरिक्‍त सुरक्षा के लिए पिन ज़रूरी है"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="6563904839641583441">"अतिरिक्‍त सुरक्षा के लिए पासवर्ड ज़रूरी है"</string>

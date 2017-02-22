@@ -692,4 +692,9 @@
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"Capturas de ecrã"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"Mensagens gerais"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"Armazenamento"</string>
+    <!-- no translation found for instant_apps (6647570248119804907) -->
+    <skip />
+    <!-- no translation found for instant_apps_message (8116608994995104836) -->
+    <skip />
+    <string name="app_info" msgid="6856026610594615344">"Informações da aplicação"</string>
 </resources>

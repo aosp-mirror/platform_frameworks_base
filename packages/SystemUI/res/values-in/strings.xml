@@ -155,7 +155,7 @@
     <string name="accessibility_cell_data" msgid="7080312242791850520">"Data Seluler"</string>
     <string name="accessibility_cell_data_on" msgid="4310018593519761767">"Data Seluler Aktif"</string>
     <string name="accessibility_cell_data_off" msgid="8000803571751407635">"Data Seluler Nonaktif"</string>
-    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Penambatan bluetooth."</string>
+    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Tethering bluetooth."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Mode pesawat."</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"Tidak ada kartu SIM."</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Jaringan operator berubah."</string>
@@ -692,4 +692,9 @@
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"Screenshot"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"Pesan Umum"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"Penyimpanan"</string>
+    <!-- no translation found for instant_apps (6647570248119804907) -->
+    <skip />
+    <!-- no translation found for instant_apps_message (8116608994995104836) -->
+    <skip />
+    <string name="app_info" msgid="6856026610594615344">"Info aplikasi"</string>
 </resources>

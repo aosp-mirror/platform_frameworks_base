@@ -518,9 +518,12 @@
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Izmantojot barošanas paziņojumu vadīklas, varat lietotnes paziņojumiem iestatīt svarīguma līmeni (no 0 līdz 5). \n\n"<b>"5. līmenis"</b>" \n- Tiek rādīts paziņojumu saraksta augšdaļā \n- Tiek atļauta pilnekrāna režīma pārtraukšana \n- Ieskats vienmēr atļauts \n\n"<b>"4. līmenis"</b>" \n- Tiek novērsta pilnekrāna režīma pārtraukšana \n- Ieskats vienmēr atļauts \n\n"<b>"3. līmenis"</b>" \n- Tiek novērsta pilnekrāna režīma pārtraukšana \n- Ieskats nav atļauts \n\n"<b>"2. līmenis"</b>" \n- Tiek novērsta pilnekrāna režīma pārtraukšana \n- Ieskats nav atļauts \n- Nav atļautas skaņas un vibrosignāls \n\n"<b>"1. līmenis"</b>" \n- Tiek novērsta pilnekrāna režīma pārtraukšana \n- Ieskats nav atļauts \n- Nav atļautas skaņas un vibrosignāls \n- Paziņojumi tiek paslēpti bloķēšanas ekrānā un statusa joslā \n- Paziņojumi tiek rādīti paziņojumu saraksta apakšdaļā \n\n"<b>"0. līmenis"</b>" \n- Visi lietotnes paziņojumi tiek bloķēti"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Paziņojumi"</string>
     <string name="notification_channel_disabled" msgid="5805874247999578073">"Jūs vairs nesaņemsiet šos paziņojumus."</string>
-    <!-- no translation found for notification_num_channels_desc (8808748716499517938) -->
-    <!-- no translation found for notification_all_categories (5407190218055113282) -->
-    <skip />
+    <plurals name="notification_num_channels_desc" formatted="false" msgid="8808748716499517938">
+      <item quantity="zero">1 no <xliff:g id="NUMBER_1">%d</xliff:g> kategorijām šai lietotnei</item>
+      <item quantity="one">1 no <xliff:g id="NUMBER_1">%d</xliff:g> kategorijas šai lietotnei</item>
+      <item quantity="other">1 no <xliff:g id="NUMBER_1">%d</xliff:g> kategorijām šai lietotnei</item>
+    </plurals>
+    <string name="notification_all_categories" msgid="5407190218055113282">"Visas kategorijas"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Citi iestatījumi"</string>
     <string name="notification_done" msgid="5279426047273930175">"Gatavs"</string>
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
@@ -594,31 +597,31 @@
     <string name="switch_bar_off" msgid="8803270596930432874">"Izslēgts"</string>
     <string name="nav_bar" msgid="1993221402773877607">"Navigācijas josla"</string>
     <string name="nav_bar_layout" msgid="3664072994198772020">"Izkārtojums"</string>
-    <!-- no translation found for left_nav_bar_button_type (8555981238887546528) -->
-    <skip />
-    <!-- no translation found for right_nav_bar_button_type (2481056627065649656) -->
-    <skip />
+    <string name="left_nav_bar_button_type" msgid="8555981238887546528">"Kreisās puses papildu pogas veids"</string>
+    <string name="right_nav_bar_button_type" msgid="2481056627065649656">"Labās puses papildu pogas veids"</string>
     <string name="nav_bar_default" msgid="8587114043070993007">"(noklusējums)"</string>
-    <!-- no translation found for nav_bar_buttons:2 (8802889973626281575) -->
-    <!-- no translation found for nav_bar_layouts:0 (8077901629964902399) -->
-    <!-- no translation found for nav_bar_layouts:1 (8256205964297588988) -->
-    <!-- no translation found for nav_bar_layouts:2 (8719936228094005878) -->
-    <!-- no translation found for nav_bar_layouts:3 (586019486955594690) -->
-    <!-- no translation found for menu_ime (4998010205321292416) -->
-    <skip />
+  <string-array name="nav_bar_buttons">
+    <item msgid="1545641631806817203">"Starpliktuve"</item>
+    <item msgid="5742013440802239414">"Taustiņu kods"</item>
+    <item msgid="8802889973626281575">"Tastatūras pārslēdzējs"</item>
+    <item msgid="8175437057325747277">"Neviens"</item>
+  </string-array>
+  <string-array name="nav_bar_layouts">
+    <item msgid="8077901629964902399">"Normāls"</item>
+    <item msgid="8256205964297588988">"Kompakts"</item>
+    <item msgid="8719936228094005878">"Novirzīts pa kreisi"</item>
+    <item msgid="586019486955594690">"Novirzīts pa labi"</item>
+  </string-array>
+    <string name="menu_ime" msgid="4998010205321292416">"Tastatūras pārslēdzējs"</string>
     <string name="save" msgid="2311877285724540644">"Saglabāt"</string>
     <string name="reset" msgid="2448168080964209908">"Atiestatīt"</string>
     <string name="adjust_button_width" msgid="6138616087197632947">"Pogas platuma pielāgošana"</string>
     <string name="clipboard" msgid="1313879395099896312">"Starpliktuve"</string>
     <string name="accessibility_key" msgid="5701989859305675896">"Pielāgota navigācijas poga"</string>
-    <!-- no translation found for left_keycode (2010948862498918135) -->
-    <skip />
-    <!-- no translation found for right_keycode (708447961000848163) -->
-    <skip />
-    <!-- no translation found for left_icon (3096287125959387541) -->
-    <skip />
-    <!-- no translation found for right_icon (3952104823293824311) -->
-    <skip />
+    <string name="left_keycode" msgid="2010948862498918135">"Taustiņu kods kreisajā pusē"</string>
+    <string name="right_keycode" msgid="708447961000848163">"Taustiņu kods labajā pusē"</string>
+    <string name="left_icon" msgid="3096287125959387541">"Ikona kreisajā pusē"</string>
+    <string name="right_icon" msgid="3952104823293824311">"Ikona labajā pusē"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"Velciet elementus, lai tos pievienotu"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Lai noņemtu vienumus, velciet tos šeit."</string>
     <string name="qs_edit" msgid="2232596095725105230">"Rediģēt"</string>
@@ -667,44 +670,34 @@
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"Atvērt <xliff:g id="ID_1">%s</xliff:g> iestatījumus."</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Rediģēt iestatījumu secību."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"<xliff:g id="ID_1">%1$d</xliff:g>. lpp. no <xliff:g id="ID_2">%2$d</xliff:g>"</string>
-    <!-- no translation found for tuner_lock_screen (5755818559638850294) -->
-    <skip />
+    <string name="tuner_lock_screen" msgid="5755818559638850294">"Bloķēšanas ekrāns"</string>
     <string name="pip_phone_expand" msgid="5889780005575693909">"Izvērst"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Minimizēt"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Aizvērt"</string>
     <string name="high_temp_title" msgid="4589508026407318374">"Tālrunis kļūst silts"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Dažas funkcijas ir ierobežotas, kamēr tālrunis mēģina atdzist"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"Jūsu tālrunis automātiski mēģinās atdzist. Jūs joprojām varat izmantot tālruni, taču tas, iespējams, darbosies lēnāk.\n\nTiklīdz tālrunis būs atdzisis, tas darbosies normāli."</string>
-    <!-- no translation found for lockscreen_shortcut_left (2182769107618938629) -->
-    <skip />
-    <!-- no translation found for lockscreen_shortcut_right (3328683699505226536) -->
-    <skip />
-    <!-- no translation found for lockscreen_unlock_left (2043092136246951985) -->
-    <skip />
-    <!-- no translation found for lockscreen_unlock_right (1529992940510318775) -->
-    <skip />
-    <!-- no translation found for lockscreen_none (4783896034844841821) -->
-    <skip />
-    <!-- no translation found for tuner_launch_app (1527264114781925348) -->
-    <skip />
-    <!-- no translation found for tuner_other_apps (4726596850501162493) -->
-    <skip />
-    <!-- no translation found for tuner_circle (2340998864056901350) -->
-    <skip />
-    <!-- no translation found for tuner_plus (6792960658533229675) -->
-    <skip />
-    <!-- no translation found for tuner_minus (4806116839519226809) -->
-    <skip />
-    <!-- no translation found for tuner_left (8404287986475034806) -->
-    <skip />
-    <!-- no translation found for tuner_right (6222734772467850156) -->
-    <skip />
-    <!-- no translation found for tuner_menu (191640047241552081) -->
-    <skip />
-    <!-- no translation found for tuner_app (3507057938640108777) -->
-    <skip />
+    <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"Saīsne kreisajā pusē"</string>
+    <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"Saīsne labajā pusē"</string>
+    <string name="lockscreen_unlock_left" msgid="2043092136246951985">"Saīsne kreisajā pusē arī atbloķē"</string>
+    <string name="lockscreen_unlock_right" msgid="1529992940510318775">"Saīsne labajā pusē arī atbloķē"</string>
+    <string name="lockscreen_none" msgid="4783896034844841821">"Nav"</string>
+    <string name="tuner_launch_app" msgid="1527264114781925348">"Palaist <xliff:g id="APP">%1$s</xliff:g>"</string>
+    <string name="tuner_other_apps" msgid="4726596850501162493">"Citas lietotnes"</string>
+    <string name="tuner_circle" msgid="2340998864056901350">"Loks"</string>
+    <string name="tuner_plus" msgid="6792960658533229675">"Pluss"</string>
+    <string name="tuner_minus" msgid="4806116839519226809">"Mīnuss"</string>
+    <string name="tuner_left" msgid="8404287986475034806">"Pa kreisi"</string>
+    <string name="tuner_right" msgid="6222734772467850156">"Pa labi"</string>
+    <string name="tuner_menu" msgid="191640047241552081">"Izvēlne"</string>
+    <string name="tuner_app" msgid="3507057938640108777">"<xliff:g id="APP">%1$s</xliff:g> lietotne"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Brīdinājumi"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"Ekrānuzņēmumi"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"Vispārīgi ziņojumi"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"Krātuve"</string>
+    <!-- no translation found for instant_apps (6647570248119804907) -->
+    <skip />
+    <!-- no translation found for instant_apps_message (8116608994995104836) -->
+    <skip />
+    <string name="app_info" msgid="6856026610594615344">"Lietotnes informācija"</string>
 </resources>

@@ -517,8 +517,8 @@
     <string name="notification_header_default_channel" msgid="7506845022070889909">"အကြောင်းကြားချက်များ"</string>
     <string name="notification_channel_disabled" msgid="5805874247999578073">"သင်သည် ဤအကြောင်းကြားချက်များကို လက်ခံရရှိတော့မည် မဟုတ်ပါ။"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="8808748716499517938">
-      <item quantity="other">ဤအက်ပ်ရှိ အုပ်စု <xliff:g id="NUMBER_1">%d</xliff:g> ခုအနက်မှ ၁ ခု</item>
-      <item quantity="one">ဤအက်ပ်ရှိ အုပ်စု <xliff:g id="NUMBER_0">%d</xliff:g> ခုအနက်မှ ၁ ခု</item>
+      <item quantity="other">ဤအက်ပ်က အုပ်စု <xliff:g id="NUMBER_1">%d</xliff:g> ခုအနက်မှ ၁ ခု</item>
+      <item quantity="one">ဤအက်ပ်က အုပ်စု <xliff:g id="NUMBER_0">%d</xliff:g> ခုအနက်မှ ၁ ခု</item>
     </plurals>
     <string name="notification_all_categories" msgid="5407190218055113282">"အုပ်စုအားလုံး"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"နောက်ထပ် ဆက်တင်များ"</string>
@@ -606,8 +606,8 @@
   <string-array name="nav_bar_layouts">
     <item msgid="8077901629964902399">"ပုံမှန်"</item>
     <item msgid="8256205964297588988">"ကျစ်ကျစ်လစ်လစ်"</item>
-    <item msgid="8719936228094005878">"လက်ဝဲယိမ်း"</item>
-    <item msgid="586019486955594690">"လက်ယာယိမ်း"</item>
+    <item msgid="8719936228094005878">"လက်ဝဲဖက် ကပ်လျက်"</item>
+    <item msgid="586019486955594690">"လက်ယာဖက် ကပ်လျက်"</item>
   </string-array>
     <string name="menu_ime" msgid="4998010205321292416">"ကီးဘုတ် ပြောင်းလဲပေးသည့်စနစ်"</string>
     <string name="save" msgid="2311877285724540644">"သိမ်းရန်"</string>
@@ -692,4 +692,9 @@
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"မျက်နှာပြင်ဓာတ်ပုံများ"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"အထွေထွေ မက်ဆေ့ဂျ်များ"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"သိုလှောင်မှုများ"</string>
+    <!-- no translation found for instant_apps (6647570248119804907) -->
+    <skip />
+    <!-- no translation found for instant_apps_message (8116608994995104836) -->
+    <skip />
+    <string name="app_info" msgid="6856026610594615344">"အက်ပ်အချက်အလက်"</string>
 </resources>

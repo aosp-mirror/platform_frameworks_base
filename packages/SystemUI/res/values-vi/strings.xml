@@ -518,9 +518,11 @@
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Với các kiểm soát thông báo nguồn, bạn có thể đặt cấp độ quan trọng từ 0 đến 5 cho các thông báo của ứng dụng. \n\n"<b>"Cấp 5"</b>" \n- Hiển thị ở đầu danh sách thông báo \n- Cho phép gián đoạn ở chế độ toàn màn hình \n- Luôn xem nhanh \n\n"<b>"Cấp 4"</b>" \n- Ngăn gián đoạn ở chế độ toàn màn hình \n- Luôn xem nhanh \n\n"<b>"Cấp 3"</b>" \n- Ngăn gián đoạn ở chế độ toàn màn hình \n- Không bao giờ xem nhanh \n\n"<b>"Cấp 2"</b>" \n- Ngăn gián đoạn ở chế độ toàn màn hình \n- Không bao giờ xem nhanh \n- Không bao giờ có âm báo và rung \n\n"<b>"Cấp 1"</b>" \n- Ngăn gián đoạn ở chế độ toàn màn hình \n- Không bao giờ xem nhanh \n- Không bao giờ có âm báo và rung \n- Ẩn khỏi màn hình khóa và thanh trạng thái \n- Hiển thị ở cuối danh sách thông báo \n\n"<b>"Cấp 0"</b>" \n- Chặn tất cả các thông báo từ ứng dụng"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Thông báo"</string>
     <string name="notification_channel_disabled" msgid="5805874247999578073">"Bạn sẽ không nhận được những thông báo này nữa."</string>
-    <!-- no translation found for notification_num_channels_desc (8808748716499517938) -->
-    <!-- no translation found for notification_all_categories (5407190218055113282) -->
-    <skip />
+    <plurals name="notification_num_channels_desc" formatted="false" msgid="8808748716499517938">
+      <item quantity="other">1 / <xliff:g id="NUMBER_1">%d</xliff:g> danh mục từ ứng dụng này</item>
+      <item quantity="one">1 / <xliff:g id="NUMBER_0">%d</xliff:g> danh mục từ ứng dụng này</item>
+    </plurals>
+    <string name="notification_all_categories" msgid="5407190218055113282">"Tất cả danh mục"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Cài đặt khác"</string>
     <string name="notification_done" msgid="5279426047273930175">"Xong"</string>
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
@@ -594,31 +596,31 @@
     <string name="switch_bar_off" msgid="8803270596930432874">"Tắt"</string>
     <string name="nav_bar" msgid="1993221402773877607">"Thanh điều hướng"</string>
     <string name="nav_bar_layout" msgid="3664072994198772020">"Bố cục"</string>
-    <!-- no translation found for left_nav_bar_button_type (8555981238887546528) -->
-    <skip />
-    <!-- no translation found for right_nav_bar_button_type (2481056627065649656) -->
-    <skip />
+    <string name="left_nav_bar_button_type" msgid="8555981238887546528">"Loại nút bổ sung bên trái"</string>
+    <string name="right_nav_bar_button_type" msgid="2481056627065649656">"Loại nút bổ sung bên phải"</string>
     <string name="nav_bar_default" msgid="8587114043070993007">"(mặc định)"</string>
-    <!-- no translation found for nav_bar_buttons:2 (8802889973626281575) -->
-    <!-- no translation found for nav_bar_layouts:0 (8077901629964902399) -->
-    <!-- no translation found for nav_bar_layouts:1 (8256205964297588988) -->
-    <!-- no translation found for nav_bar_layouts:2 (8719936228094005878) -->
-    <!-- no translation found for nav_bar_layouts:3 (586019486955594690) -->
-    <!-- no translation found for menu_ime (4998010205321292416) -->
-    <skip />
+  <string-array name="nav_bar_buttons">
+    <item msgid="1545641631806817203">"Khay nhớ tạm"</item>
+    <item msgid="5742013440802239414">"Mã phím"</item>
+    <item msgid="8802889973626281575">"Trình chuyển đổi bàn phím"</item>
+    <item msgid="8175437057325747277">"Không có"</item>
+  </string-array>
+  <string-array name="nav_bar_layouts">
+    <item msgid="8077901629964902399">"Bình thường"</item>
+    <item msgid="8256205964297588988">"Cao"</item>
+    <item msgid="8719936228094005878">"Nghiêng sang trái"</item>
+    <item msgid="586019486955594690">"Nghiêng sang phải"</item>
+  </string-array>
+    <string name="menu_ime" msgid="4998010205321292416">"Trình chuyển đổi bàn phím"</string>
     <string name="save" msgid="2311877285724540644">"Lưu"</string>
     <string name="reset" msgid="2448168080964209908">"Đặt lại"</string>
     <string name="adjust_button_width" msgid="6138616087197632947">"Điều chỉnh chiều rộng nút"</string>
     <string name="clipboard" msgid="1313879395099896312">"Khay nhớ tạm"</string>
     <string name="accessibility_key" msgid="5701989859305675896">"Nút điều hướng tùy chỉnh"</string>
-    <!-- no translation found for left_keycode (2010948862498918135) -->
-    <skip />
-    <!-- no translation found for right_keycode (708447961000848163) -->
-    <skip />
-    <!-- no translation found for left_icon (3096287125959387541) -->
-    <skip />
-    <!-- no translation found for right_icon (3952104823293824311) -->
-    <skip />
+    <string name="left_keycode" msgid="2010948862498918135">"Mã phím bên trái"</string>
+    <string name="right_keycode" msgid="708447961000848163">"Mã phím bên phải"</string>
+    <string name="left_icon" msgid="3096287125959387541">"Biểu tượng bên trái"</string>
+    <string name="right_icon" msgid="3952104823293824311">"Biểu tượng bên phải"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"Kéo để thêm ô"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Kéo vào đây để xóa"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Chỉnh sửa"</string>
@@ -667,44 +669,34 @@
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"Mở cài đặt <xliff:g id="ID_1">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Chỉnh sửa thứ tự cài đặt."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Trang <xliff:g id="ID_1">%1$d</xliff:g> / <xliff:g id="ID_2">%2$d</xliff:g>"</string>
-    <!-- no translation found for tuner_lock_screen (5755818559638850294) -->
-    <skip />
+    <string name="tuner_lock_screen" msgid="5755818559638850294">"Màn hình khóa"</string>
     <string name="pip_phone_expand" msgid="5889780005575693909">"Mở rộng"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Thu nhỏ"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Đóng"</string>
     <string name="high_temp_title" msgid="4589508026407318374">"Điện thoại đang nóng lên"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Một số tính năng bị hạn chế trong khi điện thoại nguội dần"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"Điện thoại của bạn sẽ tự động nguội dần. Bạn vẫn có thể sử dụng điện thoại, nhưng điện thoại có thể chạy chậm hơn. \n\nSau khi đã nguội, điện thoại sẽ chạy bình thường."</string>
-    <!-- no translation found for lockscreen_shortcut_left (2182769107618938629) -->
-    <skip />
-    <!-- no translation found for lockscreen_shortcut_right (3328683699505226536) -->
-    <skip />
-    <!-- no translation found for lockscreen_unlock_left (2043092136246951985) -->
-    <skip />
-    <!-- no translation found for lockscreen_unlock_right (1529992940510318775) -->
-    <skip />
-    <!-- no translation found for lockscreen_none (4783896034844841821) -->
-    <skip />
-    <!-- no translation found for tuner_launch_app (1527264114781925348) -->
-    <skip />
-    <!-- no translation found for tuner_other_apps (4726596850501162493) -->
-    <skip />
-    <!-- no translation found for tuner_circle (2340998864056901350) -->
-    <skip />
-    <!-- no translation found for tuner_plus (6792960658533229675) -->
-    <skip />
-    <!-- no translation found for tuner_minus (4806116839519226809) -->
-    <skip />
-    <!-- no translation found for tuner_left (8404287986475034806) -->
-    <skip />
-    <!-- no translation found for tuner_right (6222734772467850156) -->
-    <skip />
-    <!-- no translation found for tuner_menu (191640047241552081) -->
-    <skip />
-    <!-- no translation found for tuner_app (3507057938640108777) -->
-    <skip />
+    <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"Lối tắt bên trái"</string>
+    <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"Lối tắt bên phải"</string>
+    <string name="lockscreen_unlock_left" msgid="2043092136246951985">"Lối tắt bên trái cũng mở khóa"</string>
+    <string name="lockscreen_unlock_right" msgid="1529992940510318775">"Lối tắt bên phải cũng mở khóa"</string>
+    <string name="lockscreen_none" msgid="4783896034844841821">"Không có"</string>
+    <string name="tuner_launch_app" msgid="1527264114781925348">"Khởi chạy <xliff:g id="APP">%1$s</xliff:g>"</string>
+    <string name="tuner_other_apps" msgid="4726596850501162493">"Ứng dụng khác"</string>
+    <string name="tuner_circle" msgid="2340998864056901350">"Vòng kết nối"</string>
+    <string name="tuner_plus" msgid="6792960658533229675">"Dấu cộng"</string>
+    <string name="tuner_minus" msgid="4806116839519226809">"Dấu trừ"</string>
+    <string name="tuner_left" msgid="8404287986475034806">"Bên trái"</string>
+    <string name="tuner_right" msgid="6222734772467850156">"Bên phải"</string>
+    <string name="tuner_menu" msgid="191640047241552081">"Menu"</string>
+    <string name="tuner_app" msgid="3507057938640108777">"Ứng dụng <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Cảnh báo"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"Ảnh chụp màn hình"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"Thông báo chung"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"Bộ nhớ"</string>
+    <!-- no translation found for instant_apps (6647570248119804907) -->
+    <skip />
+    <!-- no translation found for instant_apps_message (8116608994995104836) -->
+    <skip />
+    <string name="app_info" msgid="6856026610594615344">"Thông tin ứng dụng"</string>
 </resources>

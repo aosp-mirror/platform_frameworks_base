@@ -20,7 +20,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_name" msgid="3171996292755059205">"Čuvar tastature"</string>
+    <string name="app_name" msgid="3171996292755059205">"Zaključavanje tastature"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3420548423949593123">"Upišite PIN kôd"</string>
     <string name="keyguard_password_enter_puk_code" msgid="670683628782925409">"Upišite PUK kôd za SIM karticu i novi PIN kôd"</string>
     <string name="keyguard_password_enter_puk_prompt" msgid="3747778500166059332">"PUK kôd za SIM karticu"</string>
@@ -105,7 +105,7 @@
     <string name="kg_password_puk_failed" msgid="1331621440873439974">"Korištenje PUK koda za SIM karticu nije uspjelo!"</string>
     <string name="kg_pin_accepted" msgid="7637293533973802143">"Kôd je prihvaćen"</string>
     <string name="keyguard_carrier_default" msgid="4274828292998453695">"Nema mreže."</string>
-    <string name="accessibility_ime_switch_button" msgid="2695096475319405612">"Promijena način unosa"</string>
+    <string name="accessibility_ime_switch_button" msgid="2695096475319405612">"Promjena načina unosa"</string>
     <string name="airplane_mode" msgid="3807209033737676010">"Način rada u avionu"</string>
     <string name="kg_prompt_reason_restart_pattern" msgid="7246972020562621506">"Potreban je uzorak nakon što se uređaj ponovo pokrene"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="6303592361322290145">"Potreban je PIN kôd nakon što se uređaj ponovo pokrene"</string>
