@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2015 The Android Open Source Project
+// Copyright (C) 2017 The Android Open Source Project
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ toolSources = [
     "diff/Diff.cpp",
     "dump/Dump.cpp",
     "link/Link.cpp",
-    "strip/Strip.cpp",
+    "optimize/Optimize.cpp",
 ]
 
 cc_defaults {
@@ -96,11 +96,11 @@ cc_library_host_static {
         "link/ProductFilter.cpp",
         "link/PrivateAttributeMover.cpp",
         "link/ReferenceLinker.cpp",
-        "link/ResourceDeduper.cpp",
         "link/TableMerger.cpp",
-        "link/VersionCollapser.cpp",
         "link/XmlNamespaceRemover.cpp",
         "link/XmlReferenceLinker.cpp",
+        "optimize/ResourceDeduper.cpp",
+        "optimize/VersionCollapser.cpp",
         "process/SymbolTable.cpp",
         "proto/ProtoHelpers.cpp",
         "proto/TableProtoDeserializer.cpp",

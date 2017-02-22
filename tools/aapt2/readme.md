@@ -1,5 +1,20 @@
 # Android Asset Packaging Tool 2.0 (AAPT2) release notes
 
+## Version 2.9
+### `aapt2 link ...`
+- Added sparse resource type encoding, which encodes resource entries that are sparse with
+  a binary search tree representation. Only available when minSdkVersion >= API O or resource
+  qualifier of resource types is >= v26 (or whatever API level O becomes). Enabled with
+  `--enable-sparse-encoding` flag.
+### `aapt2 optimize ...`
+- Adds an optimization pass that supports:
+    - stripping out any density assets that do not match the `--target-densities` list of
+      densities.
+    - resource deduping when the resources are dominated and identical (already happens during
+      `link` phase but this covers apps built with `aapt`).
+    - new sparse resource type encoding with the `--enable-sparse-encoding` flag if possible
+      (minSdkVersion >= O or resource qualifier >= v26).
+
 ## Version 2.8
 ### `aapt2 link ...`
 - Adds shared library support. Build a shared library with the `--shared-lib` flag.
