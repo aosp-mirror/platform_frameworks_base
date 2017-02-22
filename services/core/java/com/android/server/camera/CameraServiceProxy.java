@@ -40,11 +40,11 @@ import java.util.Collection;
 import java.util.Set;
 
 /**
- * CameraService is the system_server analog to the camera service running in mediaserver.
+ * CameraServiceProxy is the system_server analog to the camera service running in mediaserver.
  *
  * @hide
  */
-public class CameraService extends SystemService
+public class CameraServiceProxy extends SystemService
         implements Handler.Callback, IBinder.DeathRecipient {
     private static final String TAG = "CameraService_proxy";
     private static final boolean DEBUG = false;
@@ -131,7 +131,7 @@ public class CameraService extends SystemService
         }
     };
 
-    public CameraService(Context context) {
+    public CameraServiceProxy(Context context) {
         super(context);
         mContext = context;
         mHandlerThread = new ServiceThread(TAG, Process.THREAD_PRIORITY_DISPLAY, /*allowTo*/false);
@@ -149,7 +149,7 @@ public class CameraService extends SystemService
                 notifySwitchWithRetries(msg.arg1);
             } break;
             default: {
-                Slog.e(TAG, "CameraService error, invalid message: " + msg.what);
+                Slog.e(TAG, "CameraServiceProxy error, invalid message: " + msg.what);
             } break;
         }
         return true;
@@ -160,7 +160,8 @@ public class CameraService extends SystemService
         mUserManager = UserManager.get(mContext);
         if (mUserManager == null) {
             // Should never see this unless someone messes up the SystemServer service boot order.
-            throw new IllegalStateException("UserManagerService must start before CameraService!");
+            throw new IllegalStateException("UserManagerService must start before" +
+                    " CameraServiceProxy!");
         }
 
         IntentFilter filter = new IntentFilter();
