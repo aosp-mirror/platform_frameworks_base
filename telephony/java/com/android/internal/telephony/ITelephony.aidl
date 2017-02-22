@@ -1227,4 +1227,12 @@ interface ITelephony {
      * @hide
      */
     List<ClientRequestStats> getClientRequestStats(String callingPackage, int subid);
+
+    /**
+     * Set SIM card power state. Request is equivalent to inserting or removing the card.
+     * @param slotId SIM slot id
+     * @param powerUp True if powering up the SIM, otherwise powering down
+     * @hide
+     * */
+    void setSimPowerStateForSlot(int slotId, boolean powerUp);
 }
