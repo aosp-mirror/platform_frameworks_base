@@ -4977,6 +4977,14 @@ public class Intent implements Parcelable, Cloneable {
     public static final int FLAG_RECEIVER_FROM_SHELL = 0x00400000;
 
     /**
+     * If set, the broadcast will be visible to receivers in Instant Apps. By default Instant Apps
+     * will not receive broadcasts.
+     *
+     * <em>This flag has no effect when used by an Instant App.</em>
+     */
+    public static final int FLAG_RECEIVER_VISIBLE_TO_INSTANT_APPS = 0x00200000;
+
+    /**
      * @hide Flags that can't be changed with PendingIntent.
      */
     public static final int IMMUTABLE_FLAGS = FLAG_GRANT_READ_URI_PERMISSION

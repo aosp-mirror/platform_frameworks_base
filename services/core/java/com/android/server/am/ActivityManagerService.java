@@ -17987,6 +17987,25 @@ public class ActivityManagerService extends IActivityManager.Stub
     // BROADCASTS
     // =========================================================
 
+    private boolean isInstantApp(ProcessRecord record, String callerPackage, int uid) {
+        if (UserHandle.getAppId(uid) < Process.FIRST_APPLICATION_UID) {
+            return false;
+        }
+        // Easy case -- we have the app's ProcessRecord.
+        if (record != null) {
+            return record.info.isInstantApp();
+        }
+        // Otherwise check with PackageManager.
+        mAppOpsService.checkPackage(uid, callerPackage);
+        try {
+            IPackageManager pm = AppGlobals.getPackageManager();
+            return pm.isInstantApp(callerPackage, UserHandle.getUserId(uid));
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Error looking up if " + callerPackage + " is an instant app.", e);
+            return true;
+        }
+    }
+
     boolean isPendingBroadcastProcessLocked(int pid) {
         return mFgBroadcastQueue.isPendingBroadcastProcessLocked(pid)
                 || mBgBroadcastQueue.isPendingBroadcastProcessLocked(pid);
@@ -18015,6 +18034,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         ProcessRecord callerApp = null;
         int callingUid;
         int callingPid;
+        boolean instantApp;
         synchronized(this) {
             if (caller != null) {
                 callerApp = getRecordForAppLocked(caller);
@@ -18038,6 +18058,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 callingPid = Binder.getCallingPid();
             }
 
+            instantApp = isInstantApp(callerApp, callerPackage, callingUid);
             userId = mUserController.handleIncomingUser(callingPid, callingUid, userId, true,
                     ALLOW_FULL_ONLY, "registerReceiver", callerPackage);
 
@@ -18073,6 +18094,11 @@ public class ActivityManagerService extends IActivityManager.Stub
             // Look for any matching sticky broadcasts...
             for (int i = 0, N = stickyIntents.size(); i < N; i++) {
                 Intent intent = stickyIntents.get(i);
+                // Don't provided intents that aren't available to instant apps.
+                if (instantApp &&
+                        (intent.getFlags() & Intent.FLAG_RECEIVER_VISIBLE_TO_INSTANT_APPS) == 0) {
+                    continue;
+                }
                 // If intent has scheme "content", it will need to acccess
                 // provider that needs to lock mProviderMap in ActivityThread
                 // and also it may need to wait application response, so we
@@ -18131,7 +18157,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         + " callerPackage is " + callerPackage);
             }
             BroadcastFilter bf = new BroadcastFilter(filter, rl, callerPackage,
-                    permission, callingUid, userId);
+                    permission, callingUid, userId, instantApp);
             rl.add(bf);
             if (!bf.debugCheck()) {
                 Slog.w(TAG, "==> For Dynamic broadcast");
@@ -18389,6 +18415,12 @@ public class ActivityManagerService extends IActivityManager.Stub
             Bundle resultExtras, String[] requiredPermissions, int appOp, Bundle bOptions,
             boolean ordered, boolean sticky, int callingPid, int callingUid, int userId) {
         intent = new Intent(intent);
+
+        final boolean callerInstantApp = isInstantApp(callerApp, callerPackage, callingUid);
+        // Instant Apps cannot use FLAG_RECEIVER_VISIBLE_TO_INSTANT_APPS
+        if (callerInstantApp) {
+            intent.setFlags(intent.getFlags() & ~Intent.FLAG_RECEIVER_VISIBLE_TO_INSTANT_APPS);
+        }
 
         // By default broadcasts do not go to stopped apps.
         intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
