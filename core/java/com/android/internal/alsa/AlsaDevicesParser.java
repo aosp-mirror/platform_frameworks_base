@@ -199,9 +199,11 @@ public class AlsaDevicesParser {
     //
     // Predicates
     //
+/*
    public boolean hasPlaybackDevices() {
         return mHasPlaybackDevices;
     }
+*/
 
     public boolean hasPlaybackDevices(int card) {
         for (AlsaDeviceRecord deviceRecord : mDeviceRecords) {
@@ -214,9 +216,11 @@ public class AlsaDevicesParser {
         return false;
     }
 
+/*
     public boolean hasCaptureDevices() {
         return mHasCaptureDevices;
     }
+*/
 
     public boolean hasCaptureDevices(int card) {
         for (AlsaDeviceRecord deviceRecord : mDeviceRecords) {
@@ -229,9 +233,11 @@ public class AlsaDevicesParser {
         return false;
     }
 
+/*
     public boolean hasMIDIDevices() {
         return mHasMIDIDevices;
     }
+*/
 
     public boolean hasMIDIDevices(int card) {
         for (AlsaDeviceRecord deviceRecord : mDeviceRecords) {

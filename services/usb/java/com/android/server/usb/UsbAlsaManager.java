@@ -497,6 +497,7 @@ public final class UsbAlsaManager {
     //
     // Devices List
     //
+/*
     public ArrayList<UsbAudioDevice> getConnectedDevices() {
         ArrayList<UsbAudioDevice> devices = new ArrayList<UsbAudioDevice>(mAudioDevices.size());
         for (HashMap.Entry<UsbDevice,UsbAudioDevice> entry : mAudioDevices.entrySet()) {
@@ -504,6 +505,7 @@ public final class UsbAlsaManager {
         }
         return devices;
     }
+*/
 
     //
     // Logging
@@ -519,6 +521,7 @@ public final class UsbAlsaManager {
         }
     }
 
+/*
     public void logDevicesList(String title) {
       if (DEBUG) {
           for (HashMap.Entry<UsbDevice,UsbAudioDevice> entry : mAudioDevices.entrySet()) {
@@ -528,15 +531,19 @@ public final class UsbAlsaManager {
               Slog.i(TAG, "" + entry.getValue());
           }
       }
-  }
+    }
+*/
 
-  // This logs a more terse (and more readable) version of the devices list
-  public void logDevices(String title) {
+    // This logs a more terse (and more readable) version of the devices list
+/*
+    public void logDevices(String title) {
       if (DEBUG) {
           Slog.i(TAG, title);
           for (HashMap.Entry<UsbDevice,UsbAudioDevice> entry : mAudioDevices.entrySet()) {
               Slog.i(TAG, entry.getValue().toShortString());
           }
       }
-  }
+    }
+*/
+
 }
