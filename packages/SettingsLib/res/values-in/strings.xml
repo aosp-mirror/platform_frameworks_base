@@ -25,6 +25,8 @@
     <string name="wifi_remembered" msgid="4955746899347821096">"Disimpan"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"Nonaktif"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"Kegagalan Konfigurasi IP"</string>
+    <!-- no translation found for wifi_disabled_by_recommendation_provider (5168315140978066096) -->
+    <skip />
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"Kegagalan Sambungan Wi-Fi"</string>
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"Masalah autentikasi"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"Tidak dalam jangkauan"</string>
@@ -87,11 +89,11 @@
     <string name="process_kernel_label" msgid="3916858646836739323">"OS Android"</string>
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"Aplikasi dihapus"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"Aplikasi dan pengguna yang dihapus"</string>
-    <string name="tether_settings_title_usb" msgid="6688416425801386511">"Penambatan USB"</string>
+    <string name="tether_settings_title_usb" msgid="6688416425801386511">"Tethering USB"</string>
     <string name="tether_settings_title_wifi" msgid="3277144155960302049">"Hotspot portabel"</string>
-    <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Penambatan bluetooth"</string>
+    <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Tethering bluetooth"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"Menambatkan"</string>
-    <string name="tether_settings_title_all" msgid="8356136101061143841">"Menambatkan &amp; hotspot portabel"</string>
+    <string name="tether_settings_title_all" msgid="8356136101061143841">"Tethering &amp; hotspot portabel"</string>
     <string name="managed_user_title" msgid="8109605045406748842">"Semua aplikasi kerja"</string>
     <string name="user_guest" msgid="8475274842845401871">"Tamu"</string>
     <string name="unknown" msgid="1592123443519355854">"Tidak diketahui"</string>
@@ -235,6 +237,8 @@
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"Tunjukkan pembaruan lapisan hardware"</string>
     <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"Lapisan hardware berkedip hijau saat memperbarui"</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"Debug overdraw oleh GPU"</string>
+    <!-- no translation found for debug_hw_renderer (7568529019431785816) -->
+    <skip />
     <string name="disable_overlays" msgid="2074488440505934665">"Nonaktifkan lapisan HW"</string>
     <string name="disable_overlays_summary" msgid="3578941133710758592">"Selalu gunakan GPU untuk pengomposisian layar"</string>
     <string name="simulate_color_space" msgid="6745847141353345872">"Simulasikan ruang warna"</string>
@@ -356,4 +360,6 @@
     <string name="retail_demo_reset_message" msgid="118771671364131297">"Masukkan sandi untuk mengembalikan ke setelan pabrik dalam mode demo"</string>
     <string name="retail_demo_reset_next" msgid="8356731459226304963">"Berikutnya"</string>
     <string name="retail_demo_reset_title" msgid="696589204029930100">"Perlu sandi"</string>
+    <string name="active_input_method_subtypes" msgid="3596398805424733238">"Metode masukan aktif"</string>
+    <string name="use_system_language_to_select_input_method_subtypes" msgid="5747329075020379587">"Gunakan bahasa sistem"</string>
 </resources>

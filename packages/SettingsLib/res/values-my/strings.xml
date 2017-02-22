@@ -25,6 +25,8 @@
     <string name="wifi_remembered" msgid="4955746899347821096">"သိမ်းဆည်းပြီး"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"သုံးမရအောင် ပိတ်ထားသည်"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"IP ပြုပြင်ခြင်း မအောင်မြင်ပါ"</string>
+    <!-- no translation found for wifi_disabled_by_recommendation_provider (5168315140978066096) -->
+    <skip />
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"WiFi ချိတ်ဆက်မှု မအောင်မြင်ပါ"</string>
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"စစ်မှန်ကြောင်းအတည်ပြုရန်၌ ပြသနာရှိခြင်း"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"စက်ကွင်းထဲတွင် မဟုတ်ပါ"</string>
@@ -235,6 +237,8 @@
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"ဟာ့ဒ်ဝဲအလွှာများအဆင်မြှင့်မှုကိုပြရန်"</string>
     <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"အပ်ဒိတ်လုပ်ချိန် ဟာ့ဒ်ဝဲအလွှာများ အစိမ်းရောင်ပြပါ"</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"GPU ပိုသုံးစွဲမှုအမှားရှာဖွေပြင်ဆင်ရန်"</string>
+    <!-- no translation found for debug_hw_renderer (7568529019431785816) -->
+    <skip />
     <string name="disable_overlays" msgid="2074488440505934665">"HWထပ်ဆင့်အရာများပိတ်ရန်"</string>
     <string name="disable_overlays_summary" msgid="3578941133710758592">"GPU ကိုမျက်နှာပြင်ခင်းကျင်းရာတွင် အမြဲသုံးပါ။"</string>
     <string name="simulate_color_space" msgid="6745847141353345872">"အရောင်နေရာတူအောင် ဖန်တီးသည်"</string>
@@ -356,4 +360,6 @@
     <string name="retail_demo_reset_message" msgid="118771671364131297">"ဒီမိုမုဒ်၌မူလဆက်တင်ထားရန် စကားဝှက်ထည့်ပါ"</string>
     <string name="retail_demo_reset_next" msgid="8356731459226304963">"ရှေ့သို့"</string>
     <string name="retail_demo_reset_title" msgid="696589204029930100">"စကားဝှက် လိုအပ်သည်"</string>
+    <string name="active_input_method_subtypes" msgid="3596398805424733238">"ရနိုင်သောထည့်သွင်းရန်နည်းလမ်းများ"</string>
+    <string name="use_system_language_to_select_input_method_subtypes" msgid="5747329075020379587">"စနစ်ဘာသာစကားများကို အသုံးပြုပါ"</string>
 </resources>

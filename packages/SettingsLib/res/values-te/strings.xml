@@ -25,6 +25,8 @@
     <string name="wifi_remembered" msgid="4955746899347821096">"సేవ్ చేయబడింది"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"నిలిపివేయబడింది"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"IP కాన్ఫిగరేషన్ వైఫల్యం"</string>
+    <!-- no translation found for wifi_disabled_by_recommendation_provider (5168315140978066096) -->
+    <skip />
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"WiFi కనెక్షన్ వైఫల్యం"</string>
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"ప్రామాణీకరణ సమస్య"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"పరిధిలో లేదు"</string>
@@ -235,6 +237,8 @@
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"హార్డ్‌వేర్ లేయర్‌ల నవీకరణలను చూపండి"</string>
     <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"హార్డ్‌వేర్ లేయర్‌లు నవీకరించబడినప్పుడు వాటిని ఆకుపచ్చ రంగులో ఫ్లాష్ చేయండి"</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"GPU ఓవర్‌డ్రాను డీబగ్ చేయండి"</string>
+    <!-- no translation found for debug_hw_renderer (7568529019431785816) -->
+    <skip />
     <string name="disable_overlays" msgid="2074488440505934665">"HW అతివ్యాప్తులను నిలిపివేయి"</string>
     <string name="disable_overlays_summary" msgid="3578941133710758592">"స్క్రీన్ కంపోజిషనింగ్ కోసం ఎల్లప్పుడూ GPUని ఉపయోగించు"</string>
     <string name="simulate_color_space" msgid="6745847141353345872">"రంగు అంతరాన్ని అనుకరించు"</string>
@@ -356,4 +360,6 @@
     <string name="retail_demo_reset_message" msgid="118771671364131297">"డెమో మోడ్‌లో ఫ్యాక్టరీ రీసెట్‌ను నిర్వహించడానికి పాస్‌వర్డ్‌ను నమోదు చేయండి"</string>
     <string name="retail_demo_reset_next" msgid="8356731459226304963">"తదుపరి"</string>
     <string name="retail_demo_reset_title" msgid="696589204029930100">"పాస్‌వర్డ్ అవసరం"</string>
+    <string name="active_input_method_subtypes" msgid="3596398805424733238">"సక్రియ ఇన్‌పుట్ పద్ధతులు"</string>
+    <string name="use_system_language_to_select_input_method_subtypes" msgid="5747329075020379587">"సిస్టమ్ భాషలను ఉపయోగించు"</string>
 </resources>

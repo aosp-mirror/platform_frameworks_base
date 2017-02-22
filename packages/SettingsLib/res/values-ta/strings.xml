@@ -25,6 +25,8 @@
     <string name="wifi_remembered" msgid="4955746899347821096">"சேமிக்கப்பட்டது"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"முடக்கப்பட்டது"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"IP உள்ளமைவில் தோல்வி"</string>
+    <!-- no translation found for wifi_disabled_by_recommendation_provider (5168315140978066096) -->
+    <skip />
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"வைஃபை இணைப்பில் தோல்வி"</string>
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"அங்கீகரிப்புச் சிக்கல்"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"தொடர்பு எல்லையில் இல்லை"</string>
@@ -235,6 +237,8 @@
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"வன்பொருள் லேயர்களின் புதுப்பிப்புகளைக் காட்டு"</string>
     <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"வன்பொருள் லேயர்களைப் புதுப்பிக்கும்போது, அவற்றைப் பச்சை நிறத்தில் காட்டு"</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"GPU ஓவர்டிராவைப் பிழைதிருத்து"</string>
+    <!-- no translation found for debug_hw_renderer (7568529019431785816) -->
+    <skip />
     <string name="disable_overlays" msgid="2074488440505934665">"HW மேலடுக்குகளை முடக்கு"</string>
     <string name="disable_overlays_summary" msgid="3578941133710758592">"திரைத் தொகுத்தலுக்கு எப்போதும் GPU ஐப் பயன்படுத்து"</string>
     <string name="simulate_color_space" msgid="6745847141353345872">"வண்ணத்தின் இடைவெளியை உருவகப்படுத்து"</string>
@@ -356,4 +360,6 @@
     <string name="retail_demo_reset_message" msgid="118771671364131297">"டெமோ பயன்முறையில் ஆரம்பநிலை மீட்டமைவைச் செயல்படுத்த, கடவுச்சொல்லை உள்ளிடவும்"</string>
     <string name="retail_demo_reset_next" msgid="8356731459226304963">"அடுத்து"</string>
     <string name="retail_demo_reset_title" msgid="696589204029930100">"கடவுச்சொல் தேவை"</string>
+    <string name="active_input_method_subtypes" msgid="3596398805424733238">"செயலில் உள்ள உள்ளீட்டு முறைகள்"</string>
+    <string name="use_system_language_to_select_input_method_subtypes" msgid="5747329075020379587">"முறைமை மொழிகளைப் பயன்படுத்து"</string>
 </resources>

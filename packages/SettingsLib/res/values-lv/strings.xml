@@ -25,6 +25,8 @@
     <string name="wifi_remembered" msgid="4955746899347821096">"Saglabāts"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"Atspējots"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"IP konfigurācijas kļūme"</string>
+    <!-- no translation found for wifi_disabled_by_recommendation_provider (5168315140978066096) -->
+    <skip />
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"Wi-Fi savienojuma kļūme"</string>
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"Autentificēšanas problēma"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"Nav diapazona ietvaros"</string>
@@ -235,6 +237,8 @@
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"Rādīt apar. slāņu atjaun."</string>
     <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"Atjaunin. aparatūras slāņiem ir jāmirgo zaļā krāsā"</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"Atkļūdot graf. proc. kapac. pārsn."</string>
+    <!-- no translation found for debug_hw_renderer (7568529019431785816) -->
+    <skip />
     <string name="disable_overlays" msgid="2074488440505934665">"Atspējot HW pārklājumus"</string>
     <string name="disable_overlays_summary" msgid="3578941133710758592">"Vienmēr izmantot GPU atveidi ekrāna salikšanai"</string>
     <string name="simulate_color_space" msgid="6745847141353345872">"Simulēt krāstelpu"</string>
@@ -356,4 +360,6 @@
     <string name="retail_demo_reset_message" msgid="118771671364131297">"Iev. paroli, lai atiest. rūpnīcas iest. dem. režīmā"</string>
     <string name="retail_demo_reset_next" msgid="8356731459226304963">"Tālāk"</string>
     <string name="retail_demo_reset_title" msgid="696589204029930100">"Nepieciešama parole"</string>
+    <string name="active_input_method_subtypes" msgid="3596398805424733238">"Aktīvās ievades metodes"</string>
+    <string name="use_system_language_to_select_input_method_subtypes" msgid="5747329075020379587">"Sistēmas valodu izmantošana"</string>
 </resources>

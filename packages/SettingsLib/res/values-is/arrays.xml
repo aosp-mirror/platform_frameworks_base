@@ -216,6 +216,8 @@
     <item msgid="7688197031296835369">"Sýna yfirteiknuð svæði"</item>
     <item msgid="2290859360633824369">"Sýna svæði fyrir litblinda"</item>
   </string-array>
+    <!-- no translation found for debug_hw_renderer_entries:0 (2578620445459945681) -->
+    <!-- no translation found for debug_hw_renderer_entries:1 (2839130076198120436) -->
   <string-array name="app_process_limit_entries">
     <item msgid="3401625457385943795">"Venjulegt hámark"</item>
     <item msgid="4071574792028999443">"Engar bakgrunnsvinnslur"</item>
