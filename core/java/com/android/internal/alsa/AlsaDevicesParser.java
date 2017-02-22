@@ -184,7 +184,7 @@ public class AlsaDevicesParser {
         }
     }
 
-    private ArrayList<AlsaDeviceRecord> mDeviceRecords = new ArrayList<AlsaDeviceRecord>();
+    private final ArrayList<AlsaDeviceRecord> mDeviceRecords = new ArrayList<AlsaDeviceRecord>();
 
     public AlsaDevicesParser() {}
 
