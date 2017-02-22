@@ -21,12 +21,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Pair;
 
+import com.android.settingslib.SettingLibRobolectricTestRunner;
 import com.android.settingslib.TestConfig;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowApplication;
 
@@ -35,7 +35,7 @@ import java.util.Map;
 
 import static com.google.common.truth.Truth.assertThat;
 
-@RunWith(RobolectricTestRunner.class)
+@RunWith(SettingLibRobolectricTestRunner.class)
 @Config(manifest = TestConfig.MANIFEST_PATH, sdk = TestConfig.SDK_VERSION)
 public class CategoryManagerTest {
 
