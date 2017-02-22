@@ -204,6 +204,18 @@ public final class PhoneAccount implements Parcelable {
     public static final int CAPABILITY_SELF_MANAGED = 0x800;
 
     /**
+     * Flag indicating that this {@link PhoneAccount} is capable of making a call with an
+     * RTT (Real-time text) session.
+     * When set, Telecom will attempt to open an RTT session on outgoing calls that specify
+     * that they should be placed with an RTT session , and the in-call app will be displayed
+     * with text entry fields for RTT. Likewise, the in-call app can request that an RTT
+     * session be opened during a call if this bit is set.
+     */
+    public static final int CAPABILITY_RTT = 0x1000;
+
+    /* NEXT CAPABILITY: 0x2000 */
+
+    /**
      * URI scheme for telephone number URIs.
      */
     public static final String SCHEME_TEL = "tel";
