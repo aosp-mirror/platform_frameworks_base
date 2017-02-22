@@ -135,6 +135,9 @@ public class BluetoothTile extends QSTile<QSTile.BooleanState>  {
         state.autoMirrorDrawable = false;
         state.minimalContentDescription =
                 mContext.getString(R.string.accessibility_quick_settings_bluetooth);
+        if (mController.getBluetoothState() == BluetoothAdapter.STATE_ON) {
+            fireToggleStateChanged(true);
+        }
         if (enabled) {
             state.label = null;
             if (connected) {
