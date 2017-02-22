@@ -76,6 +76,7 @@ public abstract class InCallService extends Service {
     private static final int MSG_ON_CAN_ADD_CALL_CHANGED = 7;
     private static final int MSG_SILENCE_RINGER = 8;
     private static final int MSG_ON_CONNECTION_EVENT = 9;
+    private static final int MSG_ON_RTT_UPGRADE_REQUEST = 10;
 
     /** Default Handler used to consolidate binder method calls onto a single thread. */
     private final Handler mHandler = new Handler(Looper.getMainLooper()) {
@@ -131,6 +132,12 @@ public abstract class InCallService extends Service {
                     } finally {
                         args.recycle();
                     }
+                    break;
+                }
+                case MSG_ON_RTT_UPGRADE_REQUEST: {
+                    String callId = (String) msg.obj;
+                    int requestId = msg.arg1;
+                    mPhone.internalOnRttUpgradeRequest(callId, requestId);
                     break;
                 }
                 default:
@@ -197,6 +204,11 @@ public abstract class InCallService extends Service {
             args.arg2 = event;
             args.arg3 = extras;
             mHandler.obtainMessage(MSG_ON_CONNECTION_EVENT, args).sendToTarget();
+        }
+
+        @Override
+        public void onRttUpgradeRequest(String callId, int id) {
+            mHandler.obtainMessage(MSG_ON_RTT_UPGRADE_REQUEST, id, 0, callId).sendToTarget();
         }
     }
 
