@@ -8,7 +8,6 @@
 #include "SkBRDAllocator.h"
 #include "SkFrontBufferedStream.h"
 #include "SkMath.h"
-#include "SkOpts.h"
 #include "SkPixelRef.h"
 #include "SkStream.h"
 #include "SkUtils.h"
@@ -229,45 +228,6 @@ static bool needsFineScale(const SkISize fullSize, const SkISize decodedSize,
            needsFineScale(fullSize.height(), decodedSize.height(), sampleSize);
 }
 
-static inline SkAlphaType computeDecodeAlphaType(SkColorType colorType, SkAlphaType alphaType) {
-#ifndef ANDROID_ENABLE_LINEAR_BLENDING
-    // Skia premultiplies linearly.  Until the framework enables linear blending,
-    // it expects a legacy premultiply.
-    if (kPremul_SkAlphaType == alphaType && kRGBA_F16_SkColorType != colorType) {
-        return kUnpremul_SkAlphaType;
-    }
-#endif
-
-    return alphaType;
-}
-
-static inline void premultiplyIfNecessary(SkBitmap* bitmap, SkPMColor* colorPtr, int* colorCount,
-        SkAlphaType alphaType, bool requireUnpremultiplied) {
-#ifndef ANDROID_ENABLE_LINEAR_BLENDING
-    if (kUnpremul_SkAlphaType != alphaType || requireUnpremultiplied) {
-        return;
-    }
-
-    switch (bitmap->colorType()) {
-        case kN32_SkColorType:
-            for (int y = 0; y < bitmap->height(); y++) {
-                SkOpts::RGBA_to_rgbA(bitmap->getAddr32(0, y), bitmap->getAddr32(0, y),
-                    bitmap->width());
-            }
-
-            return;
-        case kIndex_8_SkColorType:
-            SkOpts::RGBA_to_rgbA(colorPtr, colorPtr, *colorCount);
-            return;
-        default:
-            // kRGBA_F16 will be premultiplied by the codec if necessary.
-            // kGray_8 (alias kAlpha_8) and k565 are opaque.
-            LOG_ALWAYS_FATAL("Should be unreachable - no need for legacy premultiply.");
-            return;
-    }
-#endif
-}
-
 static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding, jobject options) {
     // This function takes ownership of the input stream.  Since the SkAndroidCodec
     // will take ownership of the stream, we don't necessarily need to take ownership
@@ -450,15 +410,13 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
     }
 
     SkAlphaType alphaType = codec->computeOutputAlphaType(requireUnpremultiplied);
-    SkAlphaType decodeAlphaType = computeDecodeAlphaType(decodeColorType, alphaType);
 
     const SkImageInfo decodeInfo = SkImageInfo::Make(size.width(), size.height(),
-            decodeColorType, decodeAlphaType, codec->computeOutputColorSpace(decodeColorType));
-
-    SkImageInfo bitmapInfo = decodeInfo.makeAlphaType(alphaType);
+            decodeColorType, alphaType, codec->computeOutputColorSpace(decodeColorType));
 
     // For wide gamut images, we will leave the color space on the SkBitmap.  Otherwise,
     // use the default.
+    SkImageInfo bitmapInfo = decodeInfo;
     sk_sp<SkColorSpace> srgb =
             SkColorSpace::MakeRGB(SkColorSpace::kSRGB_RenderTargetGamma,
                                   SkColorSpace::kSRGB_Gamut,
@@ -502,8 +460,6 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
         default:
             return nullObjectReturn("codec->getAndroidPixels() failed.");
     }
-    premultiplyIfNecessary(&decodingBitmap, colorPtr, colorCount, decodeAlphaType,
-            requireUnpremultiplied);
 
     jbyteArray ninePatchChunk = NULL;
     if (peeker.mPatch != NULL) {
