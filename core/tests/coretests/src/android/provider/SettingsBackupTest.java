@@ -324,7 +324,6 @@ public class SettingsBackupTest {
                     Settings.Global.USE_GOOGLE_MAIL,
                     Settings.Global.VT_IMS_ENABLED,
                     Settings.Global.WAIT_FOR_DEBUGGER,
-                    Settings.Global.WAIT_FOR_NETWORK_TIMEOUT_MS,
                     Settings.Global.WARNING_TEMPERATURE,
                     Settings.Global.WEBVIEW_DATA_REDUCTION_PROXY_KEY,
                     Settings.Global.WEBVIEW_FALLBACK_LOGIC_ENABLED,
