@@ -2612,6 +2612,10 @@
     <!-- True if the device supports split screen as a form of multi-window. -->
     <bool name="config_supportsSplitScreenMultiWindow">true</bool>
 
+    <!-- True if the device has no home screen. That is a launcher activity
+         where the user can launch other applications from.  -->
+    <bool name="config_noHomeScreen">false</bool>
+
     <!-- True if the device requires AppWidgetService even if it does not have
          the PackageManager.FEATURE_APP_WIDGETS feature -->
     <bool name="config_enableAppWidgetService">false</bool>

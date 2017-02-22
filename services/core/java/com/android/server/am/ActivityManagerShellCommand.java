@@ -240,6 +240,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     return runSupportsSplitScreenMultiwindow(pw);
                 case "update-appinfo":
                     return runUpdateApplicationInfo(pw);
+                case "no-home-screen":
+                    return runNoHomeScreen(pw);
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -2383,6 +2385,15 @@ final class ActivityManagerShellCommand extends ShellCommand {
         }
         mInternal.scheduleApplicationInfoChanged(packages, userid);
         pw.println("Packages updated with most recent ApplicationInfos.");
+        return 0;
+    }
+
+    int runNoHomeScreen(PrintWriter pw) throws RemoteException {
+        final Resources res = getResources(pw);
+        if (res == null) {
+            return -1;
+        }
+        pw.println(res.getBoolean(com.android.internal.R.bool.config_noHomeScreen));
         return 0;
     }
 
