@@ -242,6 +242,12 @@ public class LauncherAppsService extends SystemService {
             try {
                 UserInfo callingUserInfo = mUm.getUserInfo(callingUserId);
                 if (callingUserInfo.isManagedProfile()) {
+
+                    // STOPSHIP Remove the whitelist.
+                    if ("com.google.android.talk".equals(callingPackage)
+                            || "com.google.android.quicksearchbox".equals(callingPackage)) {
+                        return false;
+                    }
                     Slog.wtfStack(TAG, message + " by " + callingPackage + " for another profile "
                             + targetUserId + " from " + callingUserId);
 
