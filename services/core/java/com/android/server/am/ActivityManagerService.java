@@ -4235,8 +4235,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             final int registeredCallbackCount = mUidObservers.getRegisteredCallbackCount();
             for (int i = 0; i < N; ++i) {
                 final UidRecord.ChangeItem item = mActiveUidChanges[i];
-                if (item.change != UidRecord.CHANGE_GONE
-                        && item.change != UidRecord.CHANGE_GONE_IDLE) {
+                if (item.change == UidRecord.CHANGE_PROCSTATE) {
                     mUidStateWithSeqObserver.onUidStateChangedWithSeq(
                             item.uid, item.processState, item.procStateSeq);
                     if (VALIDATE_UID_STATES && registeredCallbackCount == 0) {
