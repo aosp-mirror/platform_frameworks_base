@@ -57,7 +57,7 @@ final class CoreSettingsObserver extends ContentObserver {
 
     private final ActivityManagerService mActivityManagerService;
 
-    private static final long WAIT_FOR_NETWORK_TIMEOUT_DEFAULT_MS = 0; // 0 sec
+    private static final long WAIT_FOR_NETWORK_TIMEOUT_DEFAULT_MS = 2000; // 2 sec
 
     public CoreSettingsObserver(ActivityManagerService activityManagerService) {
         super(activityManagerService.mHandler);
