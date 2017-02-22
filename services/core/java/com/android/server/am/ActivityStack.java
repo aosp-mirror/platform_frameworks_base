@@ -1526,10 +1526,11 @@ final class ActivityStack extends ConfigurationContainer implements StackWindowL
                     return false;
                 }
 
-                if (!isHomeOrRecentsStack() && r.frontOfTask
-                        && task.isOverHomeStack() && !StackId.isHomeOrRecentsStack(stackBehindId)) {
+                if (!isHomeOrRecentsStack() && r.frontOfTask && task.isOverHomeStack()
+                        && !StackId.isHomeOrRecentsStack(stackBehindId) && !isAssistantStack()) {
                     // Stack isn't translucent if it's top activity should have the home stack
-                    // behind it and the stack currently behind it isn't the home or recents stack.
+                    // behind it and the stack currently behind it isn't the home or recents stack
+                    // or the assistant stack.
                     return false;
                 }
             }
@@ -1572,10 +1573,18 @@ final class ActivityStack extends ConfigurationContainer implements StackWindowL
         }
 
         if (mStackId == DOCKED_STACK_ID) {
-            // Docked stack is always visible, except in the case where the top running activity
-            // task in the focus stack doesn't support any form of resizing but we show it for the
-            // home task even though it's not resizable.
             final ActivityRecord r = topStack.topRunningActivityLocked();
+
+            // If the assistant stack is focused and translucent, then the docked stack is always
+            // visible
+            if (topStack.isAssistantStack()
+                    && topStack.isStackTranslucent(starting, DOCKED_STACK_ID)) {
+                return STACK_VISIBLE;
+            }
+
+            // Otherwise, the docked stack is always visible, except in the case where the top
+            // running activity task in the focus stack doesn't support any form of resizing but we
+            // show it for the home task even though it's not resizable.
             final TaskRecord task = r != null ? r.task : null;
             return task == null || task.supportsSplitScreen() || task.isHomeTask() ? STACK_VISIBLE
                     : STACK_INVISIBLE;
