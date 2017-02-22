@@ -270,6 +270,19 @@ getDirectBufferPointer(JNIEnv *_env, jobject buffer) {
  */
 static int getNeededCount(GLint pname) {
     int needed = 1;
+#ifdef GL_ES_VERSION_3_0
+    // GLES 3.x pnames
+    switch (pname) {
+        case GL_MAX_VIEWPORT_DIMS:
+            needed = 2;
+            break;
+
+        case GL_PROGRAM_BINARY_FORMATS:
+            glGetIntegerv(GL_NUM_PROGRAM_BINARY_FORMATS, &needed);
+            break;
+    }
+#endif
+
 #ifdef GL_ES_VERSION_2_0
     // GLES 2.x pnames
     switch (pname) {
