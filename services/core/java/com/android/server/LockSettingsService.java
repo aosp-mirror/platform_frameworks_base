@@ -2198,18 +2198,26 @@ public class LockSettingsService extends ILockSettings.Stub {
         try {
             // Managed profile should have escrow enabled
             if (mUserManager.getUserInfo(userId).isManagedProfile()) {
+                Slog.i(TAG, "Managed profile can have escrow token");
                 return;
             }
             DevicePolicyManager dpm = (DevicePolicyManager)
                     mContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
             // Devices with Device Owner should have escrow enabled on all users.
             if (dpm.getDeviceOwnerComponentOnAnyUser() != null) {
+                Slog.i(TAG, "Corp-owned device can have escrow token");
+                return;
+            }
+            // We could also have a profile owner on the given (non-managed) user for unicorn cases
+            if (dpm.getProfileOwnerAsUser(userId) != null) {
+                Slog.i(TAG, "User with profile owner can have escrow token");
                 return;
             }
             // If the device is yet to be provisioned (still in SUW), there is still
             // a chance that Device Owner will be set on the device later, so postpone
             // disabling escrow token for now.
             if (!dpm.isDeviceProvisioned()) {
+                Slog.i(TAG, "Postpone disabling escrow tokens until device is provisioned");
                 return;
             }
             // Disable escrow token permanently on all other device/user types.
