@@ -726,9 +726,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     // mAutoSizeStepGranularityInPx.
     private boolean mHasPresetAutoSizeValues = false;
 
-    // Watcher used to notify changes to auto-fill manager.
-    private AutoFillChangeWatcher mAutoFillChangeWatcher;
-
     // Indicates whether the text was set from resources or dynamically, so it can be used to
     // sanitize auto-fill request.
     private boolean mTextFromResource = false;
@@ -9112,6 +9109,16 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 list.get(i).afterTextChanged(text);
             }
         }
+
+        // Always notify AutoFillManager - it will return right away if auto-fill is disabled.
+        final AutoFillManager afm = mContext.getSystemService(AutoFillManager.class);
+        if (afm != null) {
+            if (DEBUG_AUTOFILL) {
+                Log.v(LOG_TAG, "sendAfterTextChanged(): notify AFM for text=" + text);
+            }
+            afm.valueChanged(TextView.this);
+        }
+
         hideErrorIfUnchanged();
     }
 
@@ -9876,11 +9883,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 || isPasswordInputType(getInputType());
         if (forAutoFill) {
             structure.setSanitized(mTextFromResource);
-            if (mAutoFillChangeWatcher == null && isTextEditable()) {
-                mAutoFillChangeWatcher = new AutoFillChangeWatcher();
-                addTextChangedListener(mAutoFillChangeWatcher);
-                // TODO(b/33197203): remove mAutoFillValueListener auto-fill session is finished
-            }
         }
 
         if (!isPassword || forAutoFill) {
@@ -11504,30 +11506,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         boolean isStopped() {
             return mStatus == MARQUEE_STOPPED;
-        }
-    }
-
-    // TODO(b/33197203): implements SpanWatcher too?
-    private final class AutoFillChangeWatcher implements TextWatcher {
-
-        private final AutoFillManager mAfm = mContext.getSystemService(AutoFillManager.class);
-
-        @Override
-        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-        }
-
-        @Override
-        public void onTextChanged(CharSequence s, int start, int before, int count) {
-        }
-
-        @Override
-        public void afterTextChanged(Editable s) {
-            if (mAfm != null) {
-                if (DEBUG_AUTOFILL) {
-                    Log.v(LOG_TAG, "AutoFillChangeWatcher.afterTextChanged(): s=" + s);
-                }
-                mAfm.valueChanged(TextView.this);
-            }
         }
     }
 
