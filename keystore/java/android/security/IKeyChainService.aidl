@@ -29,8 +29,8 @@ interface IKeyChainService {
     byte[] getCertificate(String alias);
     byte[] getCaCertificates(String alias);
 
-    // APIs used by CertInstaller
-    void installCaCertificate(in byte[] caCertificate);
+    // APIs used by CertInstaller and DevicePolicyManager
+    String installCaCertificate(in byte[] caCertificate);
 
     // APIs used by DevicePolicyManager
     boolean installKeyPair(in byte[] privateKey, in byte[] userCert, in byte[] certChain, String alias);

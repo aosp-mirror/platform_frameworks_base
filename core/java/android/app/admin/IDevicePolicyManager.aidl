@@ -27,6 +27,7 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ParceledListSlice;
+import android.content.pm.StringParceledListSlice;
 import android.graphics.Bitmap;
 import android.net.ProxyInfo;
 import android.net.Uri;
@@ -349,4 +350,5 @@ interface IDevicePolicyManager {
     boolean resetPasswordWithToken(in ComponentName admin, String password, in byte[] token, int flags);
 
     boolean isDefaultInputMethodSetByOwner(in UserHandle user);
+    StringParceledListSlice getOwnerInstalledCaCerts(in UserHandle user);
 }
