@@ -766,16 +766,17 @@ public class NotificationPanelView extends PanelView implements
             mIsExpansionFromHeadsUp = true;
             MetricsLogger.count(mContext, COUNTER_PANEL_OPEN_PEEK, 1);
         }
+        boolean handled = false;
         if ((!mIsExpanding || mHintAnimationRunning)
                 && !mQsExpanded
                 && mStatusBar.getBarState() != StatusBarState.SHADE
                 && !mDozing) {
-            mAffordanceHelper.onTouchEvent(event);
+            handled |= mAffordanceHelper.onTouchEvent(event);
         }
         if (mOnlyAffordanceInThisMotion) {
             return true;
         }
-        mHeadsUpTouchHelper.onTouchEvent(event);
+        handled |= mHeadsUpTouchHelper.onTouchEvent(event);
 
         if (mQsOverscrollExpansionEnabled && !mHeadsUpTouchHelper.isTrackingHeadsUp()
                 && handleQsTouch(event)) {
@@ -784,9 +785,10 @@ public class NotificationPanelView extends PanelView implements
         if (event.getActionMasked() == MotionEvent.ACTION_DOWN && isFullyCollapsed()) {
             MetricsLogger.count(mContext, COUNTER_PANEL_OPEN, 1);
             updateVerticalPanelPosition(event.getX());
+            handled = true;
         }
-        super.onTouchEvent(event);
-        return true;
+        handled |= super.onTouchEvent(event);
+        return mDozing ? handled : true;
     }
 
     private boolean handleQsTouch(MotionEvent event) {
