@@ -1279,14 +1279,15 @@ public final class TvContract {
         /**
          * The flag indicating whether this TV channel is browsable or not.
          *
+         * <p>This column can only be set by applications having proper system permission. For
+         * other applications, this is a read-only column.
+         *
          * <p>A value of 1 indicates the channel is included in the channel list that applications
          * use to browse channels, a value of 0 indicates the channel is not included in the list.
          * If not specified, this value is set to 0 (not browsable) by default.
          *
          * <p>Type: INTEGER (boolean)
-         * @hide
          */
-        @SystemApi
         public static final String COLUMN_BROWSABLE = "browsable";
 
         /**
@@ -2609,8 +2610,8 @@ public final class TvContract {
         /**
          * The flag indicating whether this TV program is browsable or not.
          *
-         * <p>This column can only be set by system apps. For other applications, it is a read-only
-         * column. Trying to modify it may cause {@link SecurityException}.
+         * <p>This column can only be set by applications having proper system permission. For
+         * other applications, this is a read-only column.
          *
          * <p>A value of 1 indicates that the program is browsable and can be shown to users in
          * the UI. A value of 0 indicates that the program should be hidden from users and the
