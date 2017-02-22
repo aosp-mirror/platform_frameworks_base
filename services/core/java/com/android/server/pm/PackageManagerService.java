@@ -14174,88 +14174,6 @@ public class PackageManagerService extends IPackageManager.Stub {
         abstract void handleReturnCode();
     }
 
-    class MeasureParams extends HandlerParams {
-        private final PackageStats mStats;
-        private boolean mSuccess;
-
-        private final IPackageStatsObserver mObserver;
-
-        public MeasureParams(PackageStats stats, IPackageStatsObserver observer) {
-            super(new UserHandle(stats.userHandle));
-            mObserver = observer;
-            mStats = stats;
-        }
-
-        @Override
-        public String toString() {
-            return "MeasureParams{"
-                + Integer.toHexString(System.identityHashCode(this))
-                + " " + mStats.packageName + "}";
-        }
-
-        @Override
-        void handleStartCopy() throws RemoteException {
-            synchronized (mInstallLock) {
-                mSuccess = getPackageSizeInfoLI(mStats.packageName, mStats.userHandle, mStats);
-            }
-
-            if (mSuccess) {
-                boolean mounted = false;
-                try {
-                    final String status = Environment.getExternalStorageState();
-                    mounted = (Environment.MEDIA_MOUNTED.equals(status)
-                            || Environment.MEDIA_MOUNTED_READ_ONLY.equals(status));
-                } catch (Exception e) {
-                }
-
-                if (mounted) {
-                    final UserEnvironment userEnv = new UserEnvironment(mStats.userHandle);
-
-                    mStats.externalCacheSize = calculateDirectorySize(mContainerService,
-                            userEnv.buildExternalStorageAppCacheDirs(mStats.packageName));
-
-                    mStats.externalDataSize = calculateDirectorySize(mContainerService,
-                            userEnv.buildExternalStorageAppDataDirs(mStats.packageName));
-
-                    // Always subtract cache size, since it's a subdirectory
-                    mStats.externalDataSize -= mStats.externalCacheSize;
-
-                    mStats.externalMediaSize = calculateDirectorySize(mContainerService,
-                            userEnv.buildExternalStorageAppMediaDirs(mStats.packageName));
-
-                    mStats.externalObbSize = calculateDirectorySize(mContainerService,
-                            userEnv.buildExternalStorageAppObbDirs(mStats.packageName));
-                }
-            }
-        }
-
-        @Override
-        void handleReturnCode() {
-            if (mObserver != null) {
-                try {
-                    mObserver.onGetStatsCompleted(mStats, mSuccess);
-                } catch (RemoteException e) {
-                    Slog.i(TAG, "Observer no longer exists.");
-                }
-            }
-        }
-
-        @Override
-        void handleServiceError() {
-            Slog.e(TAG, "Could not measure application " + mStats.packageName
-                            + " external storage");
-        }
-    }
-
-    private static long calculateDirectorySize(IMediaContainerService mcs, File[] paths)
-            throws RemoteException {
-        long result = 0;
-        for (File path : paths) {
-            result += mcs.calculateDirectorySize(path.getAbsolutePath());
-        }
-        return result;
-    }
-
     private static void clearDirectory(IMediaContainerService mcs, File[] paths) {
         for (File path : paths) {
             try {
@@ -18711,21 +18629,11 @@ public class PackageManagerService extends IPackageManager.Stub {
     @Override
     public void getPackageSizeInfo(final String packageName, int userHandle,
             final IPackageStatsObserver observer) {
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.GET_PACKAGE_SIZE, null);
-        if (packageName == null) {
-            throw new IllegalArgumentException("Attempt to get size of null packageName");
+        Slog.w(TAG, "Shame on you for calling a hidden API. Shame!");
+        try {
+            observer.onGetStatsCompleted(null, false);
+        } catch (RemoteException ignored) {
         }
-
-        PackageStats stats = new PackageStats(packageName, userHandle);
-
-        /*
-         * Queue up an async operation since the package measurement may take a
-         * little while.
-         */
-        Message msg = mHandler.obtainMessage(INIT_COPY);
-        msg.obj = new MeasureParams(stats, observer);
-        mHandler.sendMessage(msg);
     }
 
     private boolean getPackageSizeInfoLI(String packageName, int userId, PackageStats stats) {
