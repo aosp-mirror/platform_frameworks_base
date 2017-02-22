@@ -1795,7 +1795,7 @@
     <eat-comment />
 
     <!-- Allows an app to create windows using the type
-         {@link android.view.WindowManager.LayoutParams#TYPE_SYSTEM_ALERT},
+         {@link android.view.WindowManager.LayoutParams#TYPE_APPLICATION_OVERLAY},
          shown on top of all other apps.  Very few apps
          should use this permission; these windows are intended for
          system-level interaction with the user.

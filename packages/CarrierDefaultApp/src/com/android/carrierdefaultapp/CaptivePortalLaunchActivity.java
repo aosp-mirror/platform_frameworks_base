@@ -79,7 +79,7 @@ public class CaptivePortalLaunchActivity extends Activity {
     private void showConnectingProgressDialog() {
         mProgressDialog = new ProgressDialog(getApplicationContext());
         mProgressDialog.setMessage(getString(R.string.progress_dialogue_network_connection));
-        mProgressDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+        mProgressDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
         mProgressDialog.show();
     }
 
