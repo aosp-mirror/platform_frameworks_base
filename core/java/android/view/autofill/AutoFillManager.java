@@ -179,8 +179,6 @@ public final class AutoFillManager {
      * @param view view whose focus changed.
      */
     public void valueChanged(View view) {
-        ensureServiceClientAddedIfNeeded();
-
         if (!mEnabled || !mHasSession) {
             return;
         }
@@ -199,8 +197,6 @@ public final class AutoFillManager {
      * @param value new value of the child.
      */
     public void virtualValueChanged(View parent, int childId, AutoFillValue value) {
-        ensureServiceClientAddedIfNeeded();
-
         if (!mEnabled || !mHasSession) {
             return;
         }
@@ -216,8 +212,6 @@ public final class AutoFillManager {
      * call this method after the form is submitted and another page is rendered.
      */
     public void reset() {
-        ensureServiceClientAddedIfNeeded();
-
         if (!mEnabled && !mHasSession) {
             return;
         }
