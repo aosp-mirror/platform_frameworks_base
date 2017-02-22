@@ -51,8 +51,8 @@
     <string name="keyguard_accessibility_sim_puk_area" msgid="136979425761438705">"Област за PUK за SIM"</string>
     <string name="keyguard_accessibility_next_alarm" msgid="5835196989158584991">"Следећи аларм је подешен за <xliff:g id="ALARM">%1$s</xliff:g>"</string>
     <string name="keyboardview_keycode_delete" msgid="6883116827512721630">"Избриши"</string>
-    <string name="keyboardview_keycode_enter" msgid="4505833604411016668">"Унеси"</string>
-    <string name="kg_forgot_pattern_button_text" msgid="534245177645252620">"Заборавили сте шаблон?"</string>
+    <string name="keyboardview_keycode_enter" msgid="4505833604411016668">"Enter"</string>
+    <string name="kg_forgot_pattern_button_text" msgid="534245177645252620">"Заборавио/ла сам шаблон"</string>
     <string name="kg_wrong_pattern" msgid="7620081431514773802">"Погрешан шаблон"</string>
     <string name="kg_wrong_password" msgid="4580683060277329277">"Погрешна лозинка"</string>
     <string name="kg_wrong_pin" msgid="4785660766909463466">"Погрешан PIN"</string>

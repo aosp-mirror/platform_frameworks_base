@@ -516,9 +516,11 @@
     <string name="power_notification_controls_description" msgid="4372459941671353358">"利用高级通知设置，您可以为应用通知设置从 0 级到 5 级的重要程度等级。\n\n"<b>"5 级"</b>" \n- 在通知列表顶部显示 \n- 允许全屏打扰 \n- 一律短暂显示通知 \n\n"<b>"4 级"</b>" \n- 禁止全屏打扰 \n- 一律短暂显示通知 \n\n"<b>"3 级"</b>" \n- 禁止全屏打扰 \n- 一律不短暂显示通知 \n\n"<b>"2 级"</b>" \n- 禁止全屏打扰 \n- 一律不短暂显示通知 \n- 一律不发出声音或振动 \n\n"<b>"1 级"</b>" \n- 禁止全屏打扰 \n- 一律不短暂显示通知 \n- 一律不发出声音或振动 \n- 不在锁定屏幕和状态栏中显示 \n- 在通知列表底部显示 \n\n"<b>"0 级"</b>" \n- 屏蔽应用的所有通知"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"通知"</string>
     <string name="notification_channel_disabled" msgid="5805874247999578073">"您将不会再收到这类通知。"</string>
-    <!-- no translation found for notification_num_channels_desc (8808748716499517938) -->
-    <!-- no translation found for notification_all_categories (5407190218055113282) -->
-    <skip />
+    <plurals name="notification_num_channels_desc" formatted="false" msgid="8808748716499517938">
+      <item quantity="other">由此应用定义的 1 个类别（共 <xliff:g id="NUMBER_1">%d</xliff:g> 个）</item>
+      <item quantity="one">由此应用定义的 1 个类别（共 <xliff:g id="NUMBER_0">%d</xliff:g> 个）</item>
+    </plurals>
+    <string name="notification_all_categories" msgid="5407190218055113282">"所有类别"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"更多设置"</string>
     <string name="notification_done" msgid="5279426047273930175">"完成"</string>
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g><xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
@@ -592,31 +594,31 @@
     <string name="switch_bar_off" msgid="8803270596930432874">"关闭"</string>
     <string name="nav_bar" msgid="1993221402773877607">"导航栏"</string>
     <string name="nav_bar_layout" msgid="3664072994198772020">"布局"</string>
-    <!-- no translation found for left_nav_bar_button_type (8555981238887546528) -->
-    <skip />
-    <!-- no translation found for right_nav_bar_button_type (2481056627065649656) -->
-    <skip />
+    <string name="left_nav_bar_button_type" msgid="8555981238887546528">"其他向左按钮类型"</string>
+    <string name="right_nav_bar_button_type" msgid="2481056627065649656">"其他向右按钮类型"</string>
     <string name="nav_bar_default" msgid="8587114043070993007">"（默认）"</string>
-    <!-- no translation found for nav_bar_buttons:2 (8802889973626281575) -->
-    <!-- no translation found for nav_bar_layouts:0 (8077901629964902399) -->
-    <!-- no translation found for nav_bar_layouts:1 (8256205964297588988) -->
-    <!-- no translation found for nav_bar_layouts:2 (8719936228094005878) -->
-    <!-- no translation found for nav_bar_layouts:3 (586019486955594690) -->
-    <!-- no translation found for menu_ime (4998010205321292416) -->
-    <skip />
+  <string-array name="nav_bar_buttons">
+    <item msgid="1545641631806817203">"剪贴板"</item>
+    <item msgid="5742013440802239414">"键码"</item>
+    <item msgid="8802889973626281575">"键盘切换器"</item>
+    <item msgid="8175437057325747277">"无"</item>
+  </string-array>
+  <string-array name="nav_bar_layouts">
+    <item msgid="8077901629964902399">"一般"</item>
+    <item msgid="8256205964297588988">"紧凑"</item>
+    <item msgid="8719936228094005878">"靠左"</item>
+    <item msgid="586019486955594690">"靠右"</item>
+  </string-array>
+    <string name="menu_ime" msgid="4998010205321292416">"键盘切换器"</string>
     <string name="save" msgid="2311877285724540644">"保存"</string>
     <string name="reset" msgid="2448168080964209908">"重置"</string>
     <string name="adjust_button_width" msgid="6138616087197632947">"调整按钮宽度"</string>
     <string name="clipboard" msgid="1313879395099896312">"剪贴板"</string>
     <string name="accessibility_key" msgid="5701989859305675896">"自定义导航按钮"</string>
-    <!-- no translation found for left_keycode (2010948862498918135) -->
-    <skip />
-    <!-- no translation found for right_keycode (708447961000848163) -->
-    <skip />
-    <!-- no translation found for left_icon (3096287125959387541) -->
-    <skip />
-    <!-- no translation found for right_icon (3952104823293824311) -->
-    <skip />
+    <string name="left_keycode" msgid="2010948862498918135">"向左键码"</string>
+    <string name="right_keycode" msgid="708447961000848163">"向右键码"</string>
+    <string name="left_icon" msgid="3096287125959387541">"向左图标"</string>
+    <string name="right_icon" msgid="3952104823293824311">"向右图标"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"拖动即可添加图块"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"拖动到此处即可移除"</string>
     <string name="qs_edit" msgid="2232596095725105230">"修改"</string>
@@ -665,44 +667,34 @@
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"打开<xliff:g id="ID_1">%s</xliff:g>设置。"</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"修改设置顺序。"</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"第 <xliff:g id="ID_1">%1$d</xliff:g> 页，共 <xliff:g id="ID_2">%2$d</xliff:g> 页"</string>
-    <!-- no translation found for tuner_lock_screen (5755818559638850294) -->
-    <skip />
+    <string name="tuner_lock_screen" msgid="5755818559638850294">"锁定屏幕"</string>
     <string name="pip_phone_expand" msgid="5889780005575693909">"展开"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"最小化"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"关闭"</string>
     <string name="high_temp_title" msgid="4589508026407318374">"手机温度上升中"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"手机降温时，部分功能的使用会受限制"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"您的手机将自动尝试降温。您依然可以使用您的手机，但是手机运行速度可能会更慢。\n\n手机降温后，就会恢复正常的运行速度。"</string>
-    <!-- no translation found for lockscreen_shortcut_left (2182769107618938629) -->
-    <skip />
-    <!-- no translation found for lockscreen_shortcut_right (3328683699505226536) -->
-    <skip />
-    <!-- no translation found for lockscreen_unlock_left (2043092136246951985) -->
-    <skip />
-    <!-- no translation found for lockscreen_unlock_right (1529992940510318775) -->
-    <skip />
-    <!-- no translation found for lockscreen_none (4783896034844841821) -->
-    <skip />
-    <!-- no translation found for tuner_launch_app (1527264114781925348) -->
-    <skip />
-    <!-- no translation found for tuner_other_apps (4726596850501162493) -->
-    <skip />
-    <!-- no translation found for tuner_circle (2340998864056901350) -->
-    <skip />
-    <!-- no translation found for tuner_plus (6792960658533229675) -->
-    <skip />
-    <!-- no translation found for tuner_minus (4806116839519226809) -->
-    <skip />
-    <!-- no translation found for tuner_left (8404287986475034806) -->
-    <skip />
-    <!-- no translation found for tuner_right (6222734772467850156) -->
-    <skip />
-    <!-- no translation found for tuner_menu (191640047241552081) -->
-    <skip />
-    <!-- no translation found for tuner_app (3507057938640108777) -->
-    <skip />
+    <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"向左快捷方式"</string>
+    <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"向右快捷方式"</string>
+    <string name="lockscreen_unlock_left" msgid="2043092136246951985">"向左快捷方式也可以解锁设备"</string>
+    <string name="lockscreen_unlock_right" msgid="1529992940510318775">"向右快捷方式也可以解锁设备"</string>
+    <string name="lockscreen_none" msgid="4783896034844841821">"无"</string>
+    <string name="tuner_launch_app" msgid="1527264114781925348">"启动<xliff:g id="APP">%1$s</xliff:g>"</string>
+    <string name="tuner_other_apps" msgid="4726596850501162493">"其他应用"</string>
+    <string name="tuner_circle" msgid="2340998864056901350">"圆形"</string>
+    <string name="tuner_plus" msgid="6792960658533229675">"加号"</string>
+    <string name="tuner_minus" msgid="4806116839519226809">"减号"</string>
+    <string name="tuner_left" msgid="8404287986475034806">"向左"</string>
+    <string name="tuner_right" msgid="6222734772467850156">"向右"</string>
+    <string name="tuner_menu" msgid="191640047241552081">"菜单"</string>
+    <string name="tuner_app" msgid="3507057938640108777">"<xliff:g id="APP">%1$s</xliff:g>应用"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"提醒"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"屏幕截图"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"常规消息"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"存储空间"</string>
+    <!-- no translation found for instant_apps (6647570248119804907) -->
+    <skip />
+    <!-- no translation found for instant_apps_message (8116608994995104836) -->
+    <skip />
+    <string name="app_info" msgid="6856026610594615344">"应用信息"</string>
 </resources>

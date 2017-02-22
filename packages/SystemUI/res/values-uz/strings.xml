@@ -596,8 +596,8 @@
     <string name="switch_bar_off" msgid="8803270596930432874">"O‘chiq"</string>
     <string name="nav_bar" msgid="1993221402773877607">"Navigatsiya paneli"</string>
     <string name="nav_bar_layout" msgid="3664072994198772020">"Sxema"</string>
-    <string name="left_nav_bar_button_type" msgid="8555981238887546528">"Qo‘shimcha chap tugma turi"</string>
-    <string name="right_nav_bar_button_type" msgid="2481056627065649656">"Qo‘shimcha o‘ng tugma turi"</string>
+    <string name="left_nav_bar_button_type" msgid="8555981238887546528">"Qo‘shimcha Chapga tugmasi turi"</string>
+    <string name="right_nav_bar_button_type" msgid="2481056627065649656">"Qo‘shimcha O‘ngga tugmasi turi"</string>
     <string name="nav_bar_default" msgid="8587114043070993007">"(standart)"</string>
   <string-array name="nav_bar_buttons">
     <item msgid="1545641631806817203">"Vaqtinchalik xotira"</item>
@@ -608,8 +608,8 @@
   <string-array name="nav_bar_layouts">
     <item msgid="8077901629964902399">"Odatiy"</item>
     <item msgid="8256205964297588988">"Ixcham"</item>
-    <item msgid="8719936228094005878">"Chapga og‘ishgan"</item>
-    <item msgid="586019486955594690">"O‘ngga og‘ishgan"</item>
+    <item msgid="8719936228094005878">"Chap tomonga qiya"</item>
+    <item msgid="586019486955594690">"O‘ng tomonga qiya"</item>
   </string-array>
     <string name="menu_ime" msgid="4998010205321292416">"Klaviaturani almashtirish"</string>
     <string name="save" msgid="2311877285724540644">"Saqlash"</string>
@@ -617,10 +617,10 @@
     <string name="adjust_button_width" msgid="6138616087197632947">"Tugma enini moslashtiring"</string>
     <string name="clipboard" msgid="1313879395099896312">"Vaqtinchalik xotira"</string>
     <string name="accessibility_key" msgid="5701989859305675896">"Maxsus navigatsiya tugmasi"</string>
-    <string name="left_keycode" msgid="2010948862498918135">"Chap tugma kodi"</string>
-    <string name="right_keycode" msgid="708447961000848163">"O‘ng tugma kodi"</string>
-    <string name="left_icon" msgid="3096287125959387541">"Chap nishoncha"</string>
-    <string name="right_icon" msgid="3952104823293824311">"O‘ng nishoncha"</string>
+    <string name="left_keycode" msgid="2010948862498918135">"Chapga tugmasi kodi"</string>
+    <string name="right_keycode" msgid="708447961000848163">"O‘ngga tugmasi kodi"</string>
+    <string name="left_icon" msgid="3096287125959387541">"Chapga belgisi"</string>
+    <string name="right_icon" msgid="3952104823293824311">"O‘ngga belgisi"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"Kerakli elementni tortib qo‘shing"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"O‘chirish uchun bu yerga torting"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Tahrirlash"</string>
@@ -676,22 +676,27 @@
     <string name="high_temp_title" msgid="4589508026407318374">"Telefon qizib ketdi"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Telefon sovish paytida ayrim funksiyalar ishlamasligi mumkin"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"Telefon avtomatik ravishda o‘zini sovitadi. Telefoningizdan foydalanishda davom etishingiz mumkin, lekin u sekinroq ishlashi mumkin.\n\nTelefon sovishi bilan normal holatda ishlashni boshlaydi."</string>
-    <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"Chap tugma"</string>
-    <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"O‘ng tugma"</string>
-    <string name="lockscreen_unlock_left" msgid="2043092136246951985">"Chap tugma ham qulfdan chiqaradi"</string>
-    <string name="lockscreen_unlock_right" msgid="1529992940510318775">"O‘ng tugma ham qulfdan chiqaradi"</string>
-    <string name="lockscreen_none" msgid="4783896034844841821">"Hech qaysi"</string>
+    <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"Chapga yorlig‘i"</string>
+    <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"O‘ngga yorlig‘i"</string>
+    <string name="lockscreen_unlock_left" msgid="2043092136246951985">"Chapga tugmasi ham qulfdan chiqaradi"</string>
+    <string name="lockscreen_unlock_right" msgid="1529992940510318775">"O‘ngga tugmasi ham qulfdan chiqaradi"</string>
+    <string name="lockscreen_none" msgid="4783896034844841821">"Hech biri"</string>
     <string name="tuner_launch_app" msgid="1527264114781925348">"<xliff:g id="APP">%1$s</xliff:g> ilovasini ishga tushirish"</string>
     <string name="tuner_other_apps" msgid="4726596850501162493">"Boshqa ilovalar"</string>
     <string name="tuner_circle" msgid="2340998864056901350">"Aylana"</string>
     <string name="tuner_plus" msgid="6792960658533229675">"Plus"</string>
     <string name="tuner_minus" msgid="4806116839519226809">"Minus"</string>
-    <string name="tuner_left" msgid="8404287986475034806">"Chap"</string>
-    <string name="tuner_right" msgid="6222734772467850156">"O‘ng"</string>
+    <string name="tuner_left" msgid="8404287986475034806">"Chapga"</string>
+    <string name="tuner_right" msgid="6222734772467850156">"O‘ngga"</string>
     <string name="tuner_menu" msgid="191640047241552081">"Menyu"</string>
     <string name="tuner_app" msgid="3507057938640108777">"<xliff:g id="APP">%1$s</xliff:g> ilovasi"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Ogohlantirishlar"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"Skrinshotlar"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"Umumiy xabarlar"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"Xotira"</string>
+    <!-- no translation found for instant_apps (6647570248119804907) -->
+    <skip />
+    <!-- no translation found for instant_apps_message (8116608994995104836) -->
+    <skip />
+    <string name="app_info" msgid="6856026610594615344">"Ilova haqida"</string>
 </resources>

@@ -620,7 +620,7 @@
     <string name="left_keycode" msgid="2010948862498918135">"Ezkerreko teklaren kodea"</string>
     <string name="right_keycode" msgid="708447961000848163">"Eskuineko teklaren kodea"</string>
     <string name="left_icon" msgid="3096287125959387541">"Ezkerreko ikonoa"</string>
-    <string name="right_icon" msgid="3952104823293824311">"Ezkerreko ikonoa"</string>
+    <string name="right_icon" msgid="3952104823293824311">"Eskuineko ikonoa"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"Arrastatu lauzak hemen gehitzeko"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Kentzeko, arrastatu hona"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Editatu"</string>
@@ -694,4 +694,9 @@
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"Pantaila-argazkiak"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"Mezu orokorrak"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"Memoria"</string>
+    <!-- no translation found for instant_apps (6647570248119804907) -->
+    <skip />
+    <!-- no translation found for instant_apps_message (8116608994995104836) -->
+    <skip />
+    <string name="app_info" msgid="6856026610594615344">"Aplikazioari buruzko informazioa"</string>
 </resources>

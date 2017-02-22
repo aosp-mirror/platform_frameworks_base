@@ -516,9 +516,11 @@
     <string name="power_notification_controls_description" msgid="4372459941671353358">"ส่วนควบคุมการแจ้งเตือนแบบเปิด/ปิดช่วยให้คุณตั้งค่าระดับความสำคัญสำหรับการแจ้งเตือนของแอปได้ตั้งแต่ระดับ 0-5 \n\n"<b>"ระดับ 5"</b>" \n- แสดงที่ด้านบนของรายการแจ้งเตือน \n- อนุญาตให้รบกวนแบบเต็มหน้าจอ \n- อนุญาตให้แสดงชั่วครู่ \n\n"<b>"ระดับ 4"</b>" \n- ป้องกันการรบกวนแบบเต็มหน้าจอ \n- แสดงชั่วครู่เสมอ \n\n"<b>"ระดับ 3"</b>" \n- ป้องกันการรบกวนแบบเต็มหน้าจอ \n- ไม่แสดงชั่วครู่เลย \n\n"<b>"ระดับ 2"</b>" \n- ป้องกันการรบกวนแบบเต็มหน้าจอ \n- ไม่แสดงชั่วครู่เลย \n- ไม่ส่งเสียงหรือสั่นเลย \n\n"<b>"ระดับ 1"</b>" \n- ป้องกันการรบกวนแบบเต็มหน้าจอ \n- ไม่แสดงชั่วครู่เลย \n- ไม่ส่งเสียงหรือสั่นเลย \n- ซ่อนจากหน้าจอล็อกและแถบสถานะ \n- แสดงที่ด้านล่างของรายการแจ้งเตือน \n\n"<b>"ระดับ 0"</b>" \n- บล็อกการแจ้งเตือนทั้งหมดจากแอป"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"การแจ้งเตือน"</string>
     <string name="notification_channel_disabled" msgid="5805874247999578073">"คุณจะไม่ได้รับการแจ้งเตือนเหล่านี้อีก"</string>
-    <!-- no translation found for notification_num_channels_desc (8808748716499517938) -->
-    <!-- no translation found for notification_all_categories (5407190218055113282) -->
-    <skip />
+    <plurals name="notification_num_channels_desc" formatted="false" msgid="8808748716499517938">
+      <item quantity="other">1 จาก <xliff:g id="NUMBER_1">%d</xliff:g> หมวดหมู่ของแอปนี้</item>
+      <item quantity="one">1 จาก <xliff:g id="NUMBER_0">%d</xliff:g> หมวดหมู่ของแอปนี้</item>
+    </plurals>
+    <string name="notification_all_categories" msgid="5407190218055113282">"ทุกหมวดหมู่"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"การตั้งค่าเพิ่มเติม"</string>
     <string name="notification_done" msgid="5279426047273930175">"เสร็จสิ้น"</string>
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
@@ -592,31 +594,31 @@
     <string name="switch_bar_off" msgid="8803270596930432874">"ปิด"</string>
     <string name="nav_bar" msgid="1993221402773877607">"แถบนำทาง"</string>
     <string name="nav_bar_layout" msgid="3664072994198772020">"การจัดวาง"</string>
-    <!-- no translation found for left_nav_bar_button_type (8555981238887546528) -->
-    <skip />
-    <!-- no translation found for right_nav_bar_button_type (2481056627065649656) -->
-    <skip />
+    <string name="left_nav_bar_button_type" msgid="8555981238887546528">"ประเภทปุ่มทางซ้ายเพิ่มเติม"</string>
+    <string name="right_nav_bar_button_type" msgid="2481056627065649656">"ประเภทปุ่มทางขวาเพิ่มเติม"</string>
     <string name="nav_bar_default" msgid="8587114043070993007">"(ค่าเริ่มต้น)"</string>
-    <!-- no translation found for nav_bar_buttons:2 (8802889973626281575) -->
-    <!-- no translation found for nav_bar_layouts:0 (8077901629964902399) -->
-    <!-- no translation found for nav_bar_layouts:1 (8256205964297588988) -->
-    <!-- no translation found for nav_bar_layouts:2 (8719936228094005878) -->
-    <!-- no translation found for nav_bar_layouts:3 (586019486955594690) -->
-    <!-- no translation found for menu_ime (4998010205321292416) -->
-    <skip />
+  <string-array name="nav_bar_buttons">
+    <item msgid="1545641631806817203">"คลิปบอร์ด"</item>
+    <item msgid="5742013440802239414">"Keycode"</item>
+    <item msgid="8802889973626281575">"ปุ่มสลับแป้นพิมพ์"</item>
+    <item msgid="8175437057325747277">"ไม่มี"</item>
+  </string-array>
+  <string-array name="nav_bar_layouts">
+    <item msgid="8077901629964902399">"ปกติ"</item>
+    <item msgid="8256205964297588988">"กะทัดรัด"</item>
+    <item msgid="8719936228094005878">"เอนไปทางซ้าย"</item>
+    <item msgid="586019486955594690">"เอนไปทางขวา"</item>
+  </string-array>
+    <string name="menu_ime" msgid="4998010205321292416">"ปุ่มสลับแป้นพิมพ์"</string>
     <string name="save" msgid="2311877285724540644">"บันทึก"</string>
     <string name="reset" msgid="2448168080964209908">"รีเซ็ต"</string>
     <string name="adjust_button_width" msgid="6138616087197632947">"ปรับความกว้างของปุ่ม"</string>
     <string name="clipboard" msgid="1313879395099896312">"คลิปบอร์ด"</string>
     <string name="accessibility_key" msgid="5701989859305675896">"ปุ่มนำทางที่กำหนดเอง"</string>
-    <!-- no translation found for left_keycode (2010948862498918135) -->
-    <skip />
-    <!-- no translation found for right_keycode (708447961000848163) -->
-    <skip />
-    <!-- no translation found for left_icon (3096287125959387541) -->
-    <skip />
-    <!-- no translation found for right_icon (3952104823293824311) -->
-    <skip />
+    <string name="left_keycode" msgid="2010948862498918135">"Keycode ทางซ้าย"</string>
+    <string name="right_keycode" msgid="708447961000848163">"Keycode ทางขวา"</string>
+    <string name="left_icon" msgid="3096287125959387541">"ไอคอนทางซ้าย"</string>
+    <string name="right_icon" msgid="3952104823293824311">"ไอคอนทางขวา"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"ลากเพื่อเพิ่มชิ้นส่วน"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"ลากมาที่นี่เพื่อนำออก"</string>
     <string name="qs_edit" msgid="2232596095725105230">"แก้ไข"</string>
@@ -665,44 +667,34 @@
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"เปิดการตั้งค่า <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"แก้ไขลำดับการตั้งค่า"</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"หน้า <xliff:g id="ID_1">%1$d</xliff:g> จาก <xliff:g id="ID_2">%2$d</xliff:g>"</string>
-    <!-- no translation found for tuner_lock_screen (5755818559638850294) -->
-    <skip />
+    <string name="tuner_lock_screen" msgid="5755818559638850294">"หน้าจอล็อก"</string>
     <string name="pip_phone_expand" msgid="5889780005575693909">"ขยาย"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"ย่อเล็กสุด"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"ปิด"</string>
     <string name="high_temp_title" msgid="4589508026407318374">"โทรศัพท์เริ่มเครื่องร้อน"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"คุณลักษณะบางอย่างจะใช้งานได้จำกัดขณะโทรศัพท์ลดอุณหภูมิลง"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"โทรศัพท์จะพยายามลดอุณหภูมิลงโดยอัตโนมัติ คุณยังสามารถใช้โทรศัพท์ได้ แต่โทรศัพท์อาจทำงานช้าลง\n\nโทรศัพท์จะทำงานตามปกติเมื่อเย็นลงแล้ว"</string>
-    <!-- no translation found for lockscreen_shortcut_left (2182769107618938629) -->
-    <skip />
-    <!-- no translation found for lockscreen_shortcut_right (3328683699505226536) -->
-    <skip />
-    <!-- no translation found for lockscreen_unlock_left (2043092136246951985) -->
-    <skip />
-    <!-- no translation found for lockscreen_unlock_right (1529992940510318775) -->
-    <skip />
-    <!-- no translation found for lockscreen_none (4783896034844841821) -->
-    <skip />
-    <!-- no translation found for tuner_launch_app (1527264114781925348) -->
-    <skip />
-    <!-- no translation found for tuner_other_apps (4726596850501162493) -->
-    <skip />
-    <!-- no translation found for tuner_circle (2340998864056901350) -->
-    <skip />
-    <!-- no translation found for tuner_plus (6792960658533229675) -->
-    <skip />
-    <!-- no translation found for tuner_minus (4806116839519226809) -->
-    <skip />
-    <!-- no translation found for tuner_left (8404287986475034806) -->
-    <skip />
-    <!-- no translation found for tuner_right (6222734772467850156) -->
-    <skip />
-    <!-- no translation found for tuner_menu (191640047241552081) -->
-    <skip />
-    <!-- no translation found for tuner_app (3507057938640108777) -->
-    <skip />
+    <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"ทางลัดทางซ้าย"</string>
+    <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"ทางลัดทางขวา"</string>
+    <string name="lockscreen_unlock_left" msgid="2043092136246951985">"ทางลัดทางซ้ายปลดล็อกได้ด้วย"</string>
+    <string name="lockscreen_unlock_right" msgid="1529992940510318775">"ทางลัดทางขวาปลดล็อกได้ด้วย"</string>
+    <string name="lockscreen_none" msgid="4783896034844841821">"ไม่มี"</string>
+    <string name="tuner_launch_app" msgid="1527264114781925348">"เปิดแอป <xliff:g id="APP">%1$s</xliff:g>"</string>
+    <string name="tuner_other_apps" msgid="4726596850501162493">"แอปอื่นๆ"</string>
+    <string name="tuner_circle" msgid="2340998864056901350">"แวดวง"</string>
+    <string name="tuner_plus" msgid="6792960658533229675">"เครื่องหมายบวก"</string>
+    <string name="tuner_minus" msgid="4806116839519226809">"เครื่องหมายลบ"</string>
+    <string name="tuner_left" msgid="8404287986475034806">"ซ้าย"</string>
+    <string name="tuner_right" msgid="6222734772467850156">"ขวา"</string>
+    <string name="tuner_menu" msgid="191640047241552081">"เมนู"</string>
+    <string name="tuner_app" msgid="3507057938640108777">"แอป <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"การแจ้งเตือน"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"ภาพหน้าจอ"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"ข้อความทั่วไป"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"พื้นที่เก็บข้อมูล"</string>
+    <!-- no translation found for instant_apps (6647570248119804907) -->
+    <skip />
+    <!-- no translation found for instant_apps_message (8116608994995104836) -->
+    <skip />
+    <string name="app_info" msgid="6856026610594615344">"ข้อมูลแอป"</string>
 </resources>

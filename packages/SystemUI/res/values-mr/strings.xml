@@ -516,9 +516,11 @@
     <string name="power_notification_controls_description" msgid="4372459941671353358">"उर्जा सूचना नियंत्रणांसह, आपण अॅपच्या सूचनांसाठी महत्त्व स्तर 0 ते 5 पर्यंत सेट करू शकता. \n\n"<b>"स्तर 5"</b>" \n- सूचना सूचीच्या शीर्षस्थानी दर्शवा \n- पूर्ण स्क्रीन व्यत्ययास अनुमती द्या \n- नेहमी डोकावून पहा \n\n"<b>"स्तर 4"</b>" \n- पूर्ण स्क्रीन व्यत्ययास प्रतिबंधित करा \n- नेहमी डोकावून पहा \n\n"<b>"स्तर 3"</b>" \n- पूर्ण स्क्रीन व्यत्ययास प्रतिबंधित करा \n- कधीही डोकावून पाहू नका \n\n"<b>"स्तर 2"</b>" \n- पूर्ण स्क्रीन व्यत्ययास प्रतिबंधित करा \n- कधीही डोकावून पाहू नका \n- कधीही ध्वनी किंवा कंपन करू नका \n\n"<b>"स्तर 1"</b>" \n- पूर्ण स्क्रीन व्यत्ययास प्रतिबंधित करा \n- कधीही डोकावून पाहू नका \n- कधीही ध्वनी किंवा कंपन करू नका \n- लॉक स्क्रीन आणि स्टेटस बार मधून लपवा \n- सूचना सूचीच्या तळाशी दर्शवा \n\n"<b>"स्तर 0"</b>" \n- अॅपमधील सर्व सूचना अवरोधित करा"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"सूचना"</string>
     <string name="notification_channel_disabled" msgid="5805874247999578073">"आपल्याला यापुढे या सूचना प्राप्त होणार नाहीत."</string>
-    <!-- no translation found for notification_num_channels_desc (8808748716499517938) -->
-    <!-- no translation found for notification_all_categories (5407190218055113282) -->
-    <skip />
+    <plurals name="notification_num_channels_desc" formatted="false" msgid="8808748716499517938">
+      <item quantity="one">या अ‍ॅपवरून <xliff:g id="NUMBER_1">%d</xliff:g> श्रेणीपैकी 1</item>
+      <item quantity="other">या अ‍ॅपवरून <xliff:g id="NUMBER_1">%d</xliff:g> श्रेण्यांपैकी 1</item>
+    </plurals>
+    <string name="notification_all_categories" msgid="5407190218055113282">"सर्व श्रेण्या"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"अधिक सेटिंग्ज"</string>
     <string name="notification_done" msgid="5279426047273930175">"पूर्ण झाले"</string>
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
@@ -592,31 +594,31 @@
     <string name="switch_bar_off" msgid="8803270596930432874">"बंद"</string>
     <string name="nav_bar" msgid="1993221402773877607">"नॅव्हिगेशन बार"</string>
     <string name="nav_bar_layout" msgid="3664072994198772020">"लेआउट"</string>
-    <!-- no translation found for left_nav_bar_button_type (8555981238887546528) -->
-    <skip />
-    <!-- no translation found for right_nav_bar_button_type (2481056627065649656) -->
-    <skip />
+    <string name="left_nav_bar_button_type" msgid="8555981238887546528">"अतिरिक्त डाव्या बटणाचा प्रकार"</string>
+    <string name="right_nav_bar_button_type" msgid="2481056627065649656">"अतिरिक्त उजव्या बटणाचा प्रकार"</string>
     <string name="nav_bar_default" msgid="8587114043070993007">"(डीफॉल्ट)"</string>
-    <!-- no translation found for nav_bar_buttons:2 (8802889973626281575) -->
-    <!-- no translation found for nav_bar_layouts:0 (8077901629964902399) -->
-    <!-- no translation found for nav_bar_layouts:1 (8256205964297588988) -->
-    <!-- no translation found for nav_bar_layouts:2 (8719936228094005878) -->
-    <!-- no translation found for nav_bar_layouts:3 (586019486955594690) -->
-    <!-- no translation found for menu_ime (4998010205321292416) -->
-    <skip />
+  <string-array name="nav_bar_buttons">
+    <item msgid="1545641631806817203">"क्लिपबोर्ड"</item>
+    <item msgid="5742013440802239414">"कीकोड"</item>
+    <item msgid="8802889973626281575">"कीबोर्ड स्विचर"</item>
+    <item msgid="8175437057325747277">"काहीही नाही"</item>
+  </string-array>
+  <string-array name="nav_bar_layouts">
+    <item msgid="8077901629964902399">"सामान्य"</item>
+    <item msgid="8256205964297588988">"संक्षिप्त"</item>
+    <item msgid="8719936228094005878">"डावीकडे कललेले"</item>
+    <item msgid="586019486955594690">"उजवीकडे कललेले"</item>
+  </string-array>
+    <string name="menu_ime" msgid="4998010205321292416">"कीबोर्ड स्विचर"</string>
     <string name="save" msgid="2311877285724540644">"जतन करा"</string>
     <string name="reset" msgid="2448168080964209908">"रीसेट करा"</string>
     <string name="adjust_button_width" msgid="6138616087197632947">"बटण रूंदी समायोजित करा"</string>
     <string name="clipboard" msgid="1313879395099896312">"क्लिपबोर्ड"</string>
     <string name="accessibility_key" msgid="5701989859305675896">"सानुकूल नेव्हिगेशन बटण"</string>
-    <!-- no translation found for left_keycode (2010948862498918135) -->
-    <skip />
-    <!-- no translation found for right_keycode (708447961000848163) -->
-    <skip />
-    <!-- no translation found for left_icon (3096287125959387541) -->
-    <skip />
-    <!-- no translation found for right_icon (3952104823293824311) -->
-    <skip />
+    <string name="left_keycode" msgid="2010948862498918135">"डावा कीकोड"</string>
+    <string name="right_keycode" msgid="708447961000848163">"उजवा कीकोड"</string>
+    <string name="left_icon" msgid="3096287125959387541">"डावे चिन्ह"</string>
+    <string name="right_icon" msgid="3952104823293824311">"उजवे चिन्ह"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"टाइल जोडण्यासाठी ड्रॅग करा"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"काढण्यासाठी येथे ड्रॅग करा"</string>
     <string name="qs_edit" msgid="2232596095725105230">"संपादित करा"</string>
@@ -665,44 +667,34 @@
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"<xliff:g id="ID_1">%s</xliff:g> सेटिंग्ज उघडा."</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"सेटिंग्जचा क्रम संपादित करा."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"पृष्ठ <xliff:g id="ID_2">%2$d</xliff:g> पैकी <xliff:g id="ID_1">%1$d</xliff:g>"</string>
-    <!-- no translation found for tuner_lock_screen (5755818559638850294) -->
-    <skip />
+    <string name="tuner_lock_screen" msgid="5755818559638850294">"लॉक स्‍क्रीन"</string>
     <string name="pip_phone_expand" msgid="5889780005575693909">"विस्तृत करा"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"लहान करा"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"बंद करा"</string>
     <string name="high_temp_title" msgid="4589508026407318374">"फोन ऊष्ण होत आहे"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"फोन थंड होत असताना काही वैशिष्‍ट्ये मर्यादित असतात"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"आपला फोन स्वयंचलितपणे थंड होईल. आपण अद्यापही आपला फोन वापरू शकता परंतु तो कदाचित धीमेपणे कार्य करेल.\n\nआपला फोन एकदा थंड झाला की, तो सामान्यपणे कार्य करेल."</string>
-    <!-- no translation found for lockscreen_shortcut_left (2182769107618938629) -->
-    <skip />
-    <!-- no translation found for lockscreen_shortcut_right (3328683699505226536) -->
-    <skip />
-    <!-- no translation found for lockscreen_unlock_left (2043092136246951985) -->
-    <skip />
-    <!-- no translation found for lockscreen_unlock_right (1529992940510318775) -->
-    <skip />
-    <!-- no translation found for lockscreen_none (4783896034844841821) -->
-    <skip />
-    <!-- no translation found for tuner_launch_app (1527264114781925348) -->
-    <skip />
-    <!-- no translation found for tuner_other_apps (4726596850501162493) -->
-    <skip />
-    <!-- no translation found for tuner_circle (2340998864056901350) -->
-    <skip />
-    <!-- no translation found for tuner_plus (6792960658533229675) -->
-    <skip />
-    <!-- no translation found for tuner_minus (4806116839519226809) -->
-    <skip />
-    <!-- no translation found for tuner_left (8404287986475034806) -->
-    <skip />
-    <!-- no translation found for tuner_right (6222734772467850156) -->
-    <skip />
-    <!-- no translation found for tuner_menu (191640047241552081) -->
-    <skip />
-    <!-- no translation found for tuner_app (3507057938640108777) -->
-    <skip />
+    <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"डावा शॉर्टकट"</string>
+    <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"उजवा शॉर्टकट"</string>
+    <string name="lockscreen_unlock_left" msgid="2043092136246951985">"डावा शॉर्टकट देखील अनलॉक करतो"</string>
+    <string name="lockscreen_unlock_right" msgid="1529992940510318775">"उजवा शॉर्टकट देखील अनलॉक करतो"</string>
+    <string name="lockscreen_none" msgid="4783896034844841821">"काहीही नाही"</string>
+    <string name="tuner_launch_app" msgid="1527264114781925348">"<xliff:g id="APP">%1$s</xliff:g> लाँच करा"</string>
+    <string name="tuner_other_apps" msgid="4726596850501162493">"इतर अॅप्स"</string>
+    <string name="tuner_circle" msgid="2340998864056901350">"मंडळ"</string>
+    <string name="tuner_plus" msgid="6792960658533229675">"अधिक चिन्ह"</string>
+    <string name="tuner_minus" msgid="4806116839519226809">"उणे चिन्ह"</string>
+    <string name="tuner_left" msgid="8404287986475034806">"डावा"</string>
+    <string name="tuner_right" msgid="6222734772467850156">"उजवा"</string>
+    <string name="tuner_menu" msgid="191640047241552081">"मेनू"</string>
+    <string name="tuner_app" msgid="3507057938640108777">"<xliff:g id="APP">%1$s</xliff:g> अ‍ॅप"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"सूचना"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"स्क्रीनशॉट"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"सर्वसाधारण संदेश"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"संचय"</string>
+    <!-- no translation found for instant_apps (6647570248119804907) -->
+    <skip />
+    <!-- no translation found for instant_apps_message (8116608994995104836) -->
+    <skip />
+    <string name="app_info" msgid="6856026610594615344">"अॅप माहिती"</string>
 </resources>

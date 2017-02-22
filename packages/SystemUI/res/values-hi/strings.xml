@@ -682,8 +682,8 @@
     <string name="tuner_launch_app" msgid="1527264114781925348">"<xliff:g id="APP">%1$s</xliff:g> लॉन्च करें"</string>
     <string name="tuner_other_apps" msgid="4726596850501162493">"दूसरे ऐप"</string>
     <string name="tuner_circle" msgid="2340998864056901350">"मंडली"</string>
-    <string name="tuner_plus" msgid="6792960658533229675">"धन का चिह्न"</string>
-    <string name="tuner_minus" msgid="4806116839519226809">"ऋण का चिह्न"</string>
+    <string name="tuner_plus" msgid="6792960658533229675">"जोड़ का चिह्न"</string>
+    <string name="tuner_minus" msgid="4806116839519226809">"घटाने का चिह्न"</string>
     <string name="tuner_left" msgid="8404287986475034806">"बायां"</string>
     <string name="tuner_right" msgid="6222734772467850156">"दायां"</string>
     <string name="tuner_menu" msgid="191640047241552081">"मेनू"</string>
@@ -692,4 +692,9 @@
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"स्‍क्रीनशॉट"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"सामान्य संदेश"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"जगह"</string>
+    <!-- no translation found for instant_apps (6647570248119804907) -->
+    <skip />
+    <!-- no translation found for instant_apps_message (8116608994995104836) -->
+    <skip />
+    <string name="app_info" msgid="6856026610594615344">"ऐप की जानकारी"</string>
 </resources>

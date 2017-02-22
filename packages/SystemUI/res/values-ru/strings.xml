@@ -522,9 +522,13 @@
     <string name="power_notification_controls_description" msgid="4372459941671353358">"С помощью этой функции вы можете устанавливать уровень важности уведомлений от 0 до 5 для каждого приложения.\n\n"<b>"Уровень 5"</b>\n"‒ Помещать уведомления в начало списка.\n‒ Показывать полноэкранные уведомления.\n‒ Показывать всплывающие уведомления.\nУровень 4\n"<b></b>\n"‒ Не показывать полноэкранные уведомления.\n‒ Показывать всплывающие уведомления.\nУровень 3\n"<b></b>\n"‒ Не показывать полноэкранные уведомления.\n‒ Не показывать всплывающие уведомления.\nУровень 2\n"<b></b>\n"‒ Не показывать полноэкранные уведомления.\n‒ Не показывать всплывающие уведомления.\n‒ Не использовать звук и вибрацию.\nУровень 1\n"<b></b>\n"‒ Не показывать полноэкранные уведомления.\n‒ Не показывать всплывающие уведомления.\n‒ Не использовать звук и вибрацию.\n‒ Не показывать на экране блокировки и в строке состояния.\n‒ Помещать уведомления в конец списка.\nУровень 0\n"<b></b>\n"‒ Блокировать все уведомления приложения."</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Уведомления"</string>
     <string name="notification_channel_disabled" msgid="5805874247999578073">"Вы больше не будете получать эти уведомления."</string>
-    <!-- no translation found for notification_num_channels_desc (8808748716499517938) -->
-    <!-- no translation found for notification_all_categories (5407190218055113282) -->
-    <skip />
+    <plurals name="notification_num_channels_desc" formatted="false" msgid="8808748716499517938">
+      <item quantity="one">1 из <xliff:g id="NUMBER_1">%d</xliff:g> категории в этом приложении</item>
+      <item quantity="few">1 из <xliff:g id="NUMBER_1">%d</xliff:g> категорий в этом приложении</item>
+      <item quantity="many">1 из <xliff:g id="NUMBER_1">%d</xliff:g> категорий в этом приложении</item>
+      <item quantity="other">1 из <xliff:g id="NUMBER_1">%d</xliff:g> категорий в этом приложении</item>
+    </plurals>
+    <string name="notification_all_categories" msgid="5407190218055113282">"Все категории"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Другие настройки"</string>
     <string name="notification_done" msgid="5279426047273930175">"Готово"</string>
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g>: <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
@@ -598,31 +602,31 @@
     <string name="switch_bar_off" msgid="8803270596930432874">"Отключено"</string>
     <string name="nav_bar" msgid="1993221402773877607">"Панель навигации"</string>
     <string name="nav_bar_layout" msgid="3664072994198772020">"Раскладка"</string>
-    <!-- no translation found for left_nav_bar_button_type (8555981238887546528) -->
-    <skip />
-    <!-- no translation found for right_nav_bar_button_type (2481056627065649656) -->
-    <skip />
+    <string name="left_nav_bar_button_type" msgid="8555981238887546528">"Дополнительный тип кнопки \"Влево\""</string>
+    <string name="right_nav_bar_button_type" msgid="2481056627065649656">"Дополнительный тип кнопки \"Вправо\""</string>
     <string name="nav_bar_default" msgid="8587114043070993007">"(по умолчанию)"</string>
-    <!-- no translation found for nav_bar_buttons:2 (8802889973626281575) -->
-    <!-- no translation found for nav_bar_layouts:0 (8077901629964902399) -->
-    <!-- no translation found for nav_bar_layouts:1 (8256205964297588988) -->
-    <!-- no translation found for nav_bar_layouts:2 (8719936228094005878) -->
-    <!-- no translation found for nav_bar_layouts:3 (586019486955594690) -->
-    <!-- no translation found for menu_ime (4998010205321292416) -->
-    <skip />
+  <string-array name="nav_bar_buttons">
+    <item msgid="1545641631806817203">"Буфер обмена"</item>
+    <item msgid="5742013440802239414">"Код клавиши"</item>
+    <item msgid="8802889973626281575">"Переключение раскладки"</item>
+    <item msgid="8175437057325747277">"Нет"</item>
+  </string-array>
+  <string-array name="nav_bar_layouts">
+    <item msgid="8077901629964902399">"Обычная"</item>
+    <item msgid="8256205964297588988">"Компактная"</item>
+    <item msgid="8719936228094005878">"С уклоном влево"</item>
+    <item msgid="586019486955594690">"С уклоном вправо"</item>
+  </string-array>
+    <string name="menu_ime" msgid="4998010205321292416">"Переключение раскладки"</string>
     <string name="save" msgid="2311877285724540644">"Сохранить"</string>
     <string name="reset" msgid="2448168080964209908">"Сбросить"</string>
     <string name="adjust_button_width" msgid="6138616087197632947">"Выбор ширины кнопки"</string>
     <string name="clipboard" msgid="1313879395099896312">"Буфер обмена"</string>
     <string name="accessibility_key" msgid="5701989859305675896">"Персонализированная кнопка навигации"</string>
-    <!-- no translation found for left_keycode (2010948862498918135) -->
-    <skip />
-    <!-- no translation found for right_keycode (708447961000848163) -->
-    <skip />
-    <!-- no translation found for left_icon (3096287125959387541) -->
-    <skip />
-    <!-- no translation found for right_icon (3952104823293824311) -->
-    <skip />
+    <string name="left_keycode" msgid="2010948862498918135">"Код клавиши \"Влево\""</string>
+    <string name="right_keycode" msgid="708447961000848163">"Код клавиши \"Вправо\""</string>
+    <string name="left_icon" msgid="3096287125959387541">"Значок \"Влево\""</string>
+    <string name="right_icon" msgid="3952104823293824311">"Значок \"Вправо\""</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"Перетащите нужные элементы"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Чтобы удалить, перетащите сюда"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Изменить"</string>
@@ -671,44 +675,34 @@
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"Открыть настройки <xliff:g id="ID_1">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Изменить порядок быстрых настроек."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Страница <xliff:g id="ID_1">%1$d</xliff:g> из <xliff:g id="ID_2">%2$d</xliff:g>"</string>
-    <!-- no translation found for tuner_lock_screen (5755818559638850294) -->
-    <skip />
+    <string name="tuner_lock_screen" msgid="5755818559638850294">"Заблокированный экран"</string>
     <string name="pip_phone_expand" msgid="5889780005575693909">"Развернуть"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Свернуть"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Закрыть"</string>
     <string name="high_temp_title" msgid="4589508026407318374">"Телефон нагревается"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Пока телефон не остынет, некоторые функции могут быть недоступны."</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"Ваш телефон остынет автоматически.\n\nОбратите внимание, что до тех пор он может работать медленнее, чем обычно."</string>
-    <!-- no translation found for lockscreen_shortcut_left (2182769107618938629) -->
-    <skip />
-    <!-- no translation found for lockscreen_shortcut_right (3328683699505226536) -->
-    <skip />
-    <!-- no translation found for lockscreen_unlock_left (2043092136246951985) -->
-    <skip />
-    <!-- no translation found for lockscreen_unlock_right (1529992940510318775) -->
-    <skip />
-    <!-- no translation found for lockscreen_none (4783896034844841821) -->
-    <skip />
-    <!-- no translation found for tuner_launch_app (1527264114781925348) -->
-    <skip />
-    <!-- no translation found for tuner_other_apps (4726596850501162493) -->
-    <skip />
-    <!-- no translation found for tuner_circle (2340998864056901350) -->
-    <skip />
-    <!-- no translation found for tuner_plus (6792960658533229675) -->
-    <skip />
-    <!-- no translation found for tuner_minus (4806116839519226809) -->
-    <skip />
-    <!-- no translation found for tuner_left (8404287986475034806) -->
-    <skip />
-    <!-- no translation found for tuner_right (6222734772467850156) -->
-    <skip />
-    <!-- no translation found for tuner_menu (191640047241552081) -->
-    <skip />
-    <!-- no translation found for tuner_app (3507057938640108777) -->
-    <skip />
+    <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"Ярлык \"Влево\""</string>
+    <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"Ярлык \"Вправо\""</string>
+    <string name="lockscreen_unlock_left" msgid="2043092136246951985">"Ярлык \"Влево\" также разблокирует экран"</string>
+    <string name="lockscreen_unlock_right" msgid="1529992940510318775">"Ярлык \"Вправо\" также разблокирует экран"</string>
+    <string name="lockscreen_none" msgid="4783896034844841821">"Нет"</string>
+    <string name="tuner_launch_app" msgid="1527264114781925348">"Запустить приложение \"<xliff:g id="APP">%1$s</xliff:g>\""</string>
+    <string name="tuner_other_apps" msgid="4726596850501162493">"Другие приложения"</string>
+    <string name="tuner_circle" msgid="2340998864056901350">"Круг"</string>
+    <string name="tuner_plus" msgid="6792960658533229675">"Плюс"</string>
+    <string name="tuner_minus" msgid="4806116839519226809">"Минус"</string>
+    <string name="tuner_left" msgid="8404287986475034806">"Влево"</string>
+    <string name="tuner_right" msgid="6222734772467850156">"Вправо"</string>
+    <string name="tuner_menu" msgid="191640047241552081">"Меню"</string>
+    <string name="tuner_app" msgid="3507057938640108777">"Приложение \"<xliff:g id="APP">%1$s</xliff:g>\""</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Уведомления"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"Скриншоты"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"Сообщения"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"Хранилище"</string>
+    <!-- no translation found for instant_apps (6647570248119804907) -->
+    <skip />
+    <!-- no translation found for instant_apps_message (8116608994995104836) -->
+    <skip />
+    <string name="app_info" msgid="6856026610594615344">"О приложении"</string>
 </resources>
