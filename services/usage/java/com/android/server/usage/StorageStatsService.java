@@ -21,6 +21,7 @@ import android.app.usage.ExternalStorageStats;
 import android.app.usage.IStorageStatsManager;
 import android.app.usage.StorageStats;
 import android.app.usage.UsageStatsManagerInternal;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -39,9 +40,11 @@ import android.os.UserManager;
 import android.os.storage.StorageEventListener;
 import android.os.storage.StorageManager;
 import android.os.storage.VolumeInfo;
+import android.provider.Settings;
 import android.text.format.DateUtils;
 import android.util.Slog;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.Preconditions;
 import com.android.server.IoThread;
@@ -328,6 +331,11 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
             if (DEBUG) {
                 Slog.v(TAG, ">>> handling " + msg.what);
             }
+
+            if (!isCacheQuotaCalculationsEnabled(mContext.getContentResolver())) {
+                return;
+            }
+
             switch (msg.what) {
                 case MSG_CHECK_STORAGE_DELTA: {
                     long bytesDelta = Math.abs(mPreviousBytes - mStats.getFreeBytes());
@@ -358,5 +366,11 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
             // TODO: Save cache quotas to an XML file.
             strategy.recalculateQuotas();
         }
+    }
+
+    @VisibleForTesting
+    static boolean isCacheQuotaCalculationsEnabled(ContentResolver resolver) {
+        return Settings.Global.getInt(
+                resolver, Settings.Global.ENABLE_CACHE_QUOTA_CALCULATION, 1) != 0;
     }
 }

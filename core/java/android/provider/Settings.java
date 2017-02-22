@@ -10207,6 +10207,13 @@ public final class Settings {
          * @hide
          */
         public static final String ENABLE_DISKSTATS_LOGGING = "enable_diskstats_logging";
+
+        /**
+         * Whether the cache quota calculation task is enabled/disabled.
+         * @hide
+         */
+        public static final String ENABLE_CACHE_QUOTA_CALCULATION =
+                "enable_cache_quota_calculation";
     }
 
     /**
