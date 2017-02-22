@@ -28,6 +28,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.InputType;
 import android.text.Spannable;
+import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.style.AccessibilityClickableSpan;
@@ -2421,7 +2422,7 @@ public class AccessibilityNodeInfo implements Parcelable {
             ClickableSpan[] spans =
                     ((Spanned) text).getSpans(0, text.length(), ClickableSpan.class);
             if (spans.length > 0) {
-                Spannable spannable = Spannable.Factory.getInstance().newSpannable(text);
+                Spannable spannable = new SpannableStringBuilder(text);
                 for (int i = 0; i < spans.length; i++) {
                     ClickableSpan span = spans[i];
                     if ((span instanceof AccessibilityClickableSpan)
