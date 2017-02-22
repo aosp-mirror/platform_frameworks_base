@@ -25,9 +25,9 @@
 namespace android {
 
 MinikinFontSkia::MinikinFontSkia(sk_sp<SkTypeface> typeface, const void* fontData, size_t fontSize,
-        int ttcIndex) :
+        int ttcIndex, const std::vector<minikin::FontVariation>& axes) :
     minikin::MinikinFont(typeface->uniqueID()), mTypeface(std::move(typeface)), mFontData(fontData),
-    mFontSize(fontSize), mTtcIndex(ttcIndex) {
+    mFontSize(fontSize), mTtcIndex(ttcIndex), mAxes(axes) {
 }
 
 static void MinikinFontSkia_SetSkiaPaint(const minikin::MinikinFont* font, SkPaint* skPaint,
@@ -87,6 +87,10 @@ int MinikinFontSkia::GetFontIndex() const {
     return mTtcIndex;
 }
 
+const std::vector<minikin::FontVariation>& MinikinFontSkia::GetAxes() const {
+    return mAxes;
+}
+
 minikin::MinikinFont* MinikinFontSkia::createFontWithVariation(
         const std::vector<minikin::FontVariation>& variations) const {
     SkFontMgr::FontParameters params;
@@ -106,7 +110,7 @@ minikin::MinikinFont* MinikinFontSkia::createFontWithVariation(
     sk_sp<SkFontMgr> fm(SkFontMgr::RefDefault());
     sk_sp<SkTypeface> face(fm->createFromStream(stream, params));
 
-    return new MinikinFontSkia(std::move(face), mFontData, mFontSize, ttcIndex);
+    return new MinikinFontSkia(std::move(face), mFontData, mFontSize, ttcIndex, variations);
 }
 
 uint32_t MinikinFontSkia::packPaintFlags(const SkPaint* paint) {

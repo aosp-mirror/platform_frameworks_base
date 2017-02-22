@@ -83,7 +83,8 @@ static void FontFamily_unref(jlong familyPtr) {
 static void addSkTypeface(jlong builderPtr, sk_sp<SkTypeface> face, const void* fontData,
         size_t fontSize, int ttcIndex, jint givenWeight, jboolean givenItalic) {
     minikin::MinikinFont* minikinFont =
-            new MinikinFontSkia(std::move(face), fontData, fontSize, ttcIndex);
+            new MinikinFontSkia(std::move(face), fontData, fontSize, ttcIndex,
+                    std::vector<minikin::FontVariation>());
     NativeFamilyBuilder* builder = reinterpret_cast<NativeFamilyBuilder*>(builderPtr);
     int weight = givenWeight / 100;
     bool italic = givenItalic;
@@ -208,7 +209,8 @@ static jboolean FontFamily_addFontWeightStyle(JNIEnv* env, jobject clazz, jlong 
         return false;
     }
     minikin::MinikinFont* minikinFont =
-            new MinikinFontSkia(std::move(face), fontPtr, fontSize, ttcIndex);
+            new MinikinFontSkia(std::move(face), fontPtr, fontSize, ttcIndex,
+                    std::vector<minikin::FontVariation>());
     NativeFamilyBuilder* builder = reinterpret_cast<NativeFamilyBuilder*>(builderPtr);
     builder->fonts.push_back(minikin::Font(minikinFont,
             minikin::FontStyle(weight / 100, isItalic)));
