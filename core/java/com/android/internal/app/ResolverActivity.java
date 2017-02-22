@@ -1434,7 +1434,7 @@ public class ResolverActivity extends Activity {
                     mUnfilteredResolveList = originalList;
                 }
 
-                if (N > 1) {
+                if (currentResolveList.size() > 1) {
                     setPlaceholderCount(currentResolveList.size());
                     AsyncTask<List<ResolvedComponentInfo>,
                             Void,
