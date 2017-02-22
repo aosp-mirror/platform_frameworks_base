@@ -320,14 +320,10 @@
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"Թույլ է տալիս հավելվածին վերջ տալ այլ հավելվածների հետնաշերտի գործընթացները: Սա կարող է պատճառ դառնալ, որ այլ հավելվածները դադարեն աշխատել:"</string>
     <string name="permlab_systemAlertWindow" msgid="7238805243128138690">"Այս հավելվածը կարող է ցուցադրվել այլ հավելվածների վերևում"</string>
     <string name="permdesc_systemAlertWindow" msgid="2393776099672266188">"Այս հավելվածը կարող է ցուցադրվել այլ հավելվածների կամ էկրանի այլ հատվածների վերևում: Դա կարող է խոչընդոտել հավելվածի նորմալ օգտագործմանը և փոխել այլ հավելվածների տեսքը:"</string>
-    <!-- no translation found for permlab_runInBackground (7365290743781858803) -->
-    <skip />
-    <!-- no translation found for permdesc_runInBackground (7370142232209999824) -->
-    <skip />
-    <!-- no translation found for permlab_useDataInBackground (8694951340794341809) -->
-    <skip />
-    <!-- no translation found for permdesc_useDataInBackground (6049514223791806027) -->
-    <skip />
+    <string name="permlab_runInBackground" msgid="7365290743781858803">"աշխատել ֆոնում"</string>
+    <string name="permdesc_runInBackground" msgid="7370142232209999824">"Այս հավելվածը կարող է աշխատել ֆոնում և ավելի արագ սպառել մարտկոցի լիցքը։"</string>
+    <string name="permlab_useDataInBackground" msgid="8694951340794341809">"տվյալներ օգտագործել ֆոնում"</string>
+    <string name="permdesc_useDataInBackground" msgid="6049514223791806027">"Այս հավելվածը կարող է տվյալներ օգտագործել ֆոնում և ավելացնել տվյալների օգտագործման ծավալը։"</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"միշտ աշխատեցնել հավելվածը"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Թույլ է տալիս հավելվածին մնայուն դարձնել իր մասերը հիշողության մեջ: Սա կարող է սահմանափակել այլ հավելվածներին հասանելի հիշողությունը` դանդաղեցնելով պլանշետի աշխատանքը:"</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Թույլ է տալիս հավելվածին պահել իր տարրերը հիշողության մեջ: Սա կարող է սահմանափակել այլ հավելվածների համար հատկացված հիշողությունը և դանդաղեցնել հեռուստացույցի աշխատանքը:"</string>
@@ -1171,6 +1167,14 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Հպեք՝ լեզուն և դասավորությունն ընտրելու համար"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ԱԲԳԴԵԶԷԸԹԺԻԼԽԾԿՀՁՂՃՄՅՆՇՈՉՊՋՌՍՎՏՐՑՈՒՓՔԵւՕՖ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
+    <!-- no translation found for alert_windows_notification_channel_name (7443890103456396837) -->
+    <skip />
+    <!-- no translation found for alert_windows_notification_title (5399998516035621282) -->
+    <skip />
+    <!-- no translation found for alert_windows_notification_message (2456738662997073459) -->
+    <skip />
+    <!-- no translation found for alert_windows_notification_turn_off_action (3367294525884949878) -->
+    <skip />
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"<xliff:g id="NAME">%s</xliff:g>-ի նախապատրաստում"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Սխալների ստուգում"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"Հայտնաբերվել է նոր <xliff:g id="NAME">%s</xliff:g>"</string>
@@ -1325,8 +1329,6 @@
     <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Կիսվել <xliff:g id="APPLICATION_NAME">%s</xliff:g>-ի հետ"</string>
     <string name="content_description_sliding_handle" msgid="415975056159262248">"Սահող բռնակ: Հպել &amp; պահել:"</string>
     <string name="description_target_unlock_tablet" msgid="3833195335629795055">"Սահեցրեք` ապակողպելու համար:"</string>
-    <string name="keyboard_headset_required_to_hear_password" msgid="7011927352267668657">"Միացրեք ականջակալները` արտասանվող գաղտնաբառը լսելու համար:"</string>
-    <string name="keyboard_password_character_no_headset" msgid="2859873770886153678">"Կետ:"</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"Ուղղվել տուն"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Ուղղվել վերև"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Ավելի շատ ընտրանքներ"</string>

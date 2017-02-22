@@ -320,14 +320,10 @@
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"允許應用程式終止其他應用程式的背景處理程序。這樣可能會導致其他應用程式停止運行。"</string>
     <string name="permlab_systemAlertWindow" msgid="7238805243128138690">"此應用程式可以出現在其他應用程式上"</string>
     <string name="permdesc_systemAlertWindow" msgid="2393776099672266188">"此應用程式可以出現在其他應用程式或螢幕的其他部分上。這可能會影響應用程式的正常使用，並變更其他應用程式的顯示方式。"</string>
-    <!-- no translation found for permlab_runInBackground (7365290743781858803) -->
-    <skip />
-    <!-- no translation found for permdesc_runInBackground (7370142232209999824) -->
-    <skip />
-    <!-- no translation found for permlab_useDataInBackground (8694951340794341809) -->
-    <skip />
-    <!-- no translation found for permdesc_useDataInBackground (6049514223791806027) -->
-    <skip />
+    <string name="permlab_runInBackground" msgid="7365290743781858803">"在背景中執行"</string>
+    <string name="permdesc_runInBackground" msgid="7370142232209999824">"此應用程式可在背景中執行，這可能會加速耗電。"</string>
+    <string name="permlab_useDataInBackground" msgid="8694951340794341809">"在背景中使用數據"</string>
+    <string name="permdesc_useDataInBackground" msgid="6049514223791806027">"此應用程式可在背景中使用數據，這可能會增加數據用量。"</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"一律執行應用程式"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"允許應用程式設定本身的某些部分持續佔用記憶體。這樣可能會限制其他應用程式可用的記憶體，並拖慢平板電腦的運作速度。"</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"允許應用程式長期佔用部分記憶體。這會限制其他應用程式可用的記憶體，減慢電視操作。"</string>
@@ -960,11 +956,9 @@
     <string name="inputMethod" msgid="1653630062304567879">"輸入法"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"文字操作"</string>
     <string name="email" msgid="4560673117055050403">"電郵"</string>
-    <!-- no translation found for dial (4204975095406423102) -->
-    <skip />
+    <string name="dial" msgid="4204975095406423102">"撥打電話"</string>
     <string name="map" msgid="5441053548030107189">"地圖"</string>
-    <!-- no translation found for browse (6079864138582486027) -->
-    <skip />
+    <string name="browse" msgid="6079864138582486027">"瀏覽"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"儲存空間即將用盡"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"部分系統功能可能無法運作"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"系統儲存空間不足。請確認裝置有 250 MB 的可用空間，然後重新啟動。"</string>
@@ -1173,6 +1167,14 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"輕按即可選取語言和鍵盤配置"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
+    <!-- no translation found for alert_windows_notification_channel_name (7443890103456396837) -->
+    <skip />
+    <!-- no translation found for alert_windows_notification_title (5399998516035621282) -->
+    <skip />
+    <!-- no translation found for alert_windows_notification_message (2456738662997073459) -->
+    <skip />
+    <!-- no translation found for alert_windows_notification_turn_off_action (3367294525884949878) -->
+    <skip />
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"正在準備<xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"正在檢查錯誤"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"已偵測到新<xliff:g id="NAME">%s</xliff:g>"</string>
@@ -1327,8 +1329,6 @@
     <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"與「<xliff:g id="APPLICATION_NAME">%s</xliff:g>」分享"</string>
     <string name="content_description_sliding_handle" msgid="415975056159262248">"滑動控制。持續輕觸。"</string>
     <string name="description_target_unlock_tablet" msgid="3833195335629795055">"滑動即可解鎖。"</string>
-    <string name="keyboard_headset_required_to_hear_password" msgid="7011927352267668657">"插上耳機即可聽到系統朗讀密碼鍵。"</string>
-    <string name="keyboard_password_character_no_headset" msgid="2859873770886153678">"點。"</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"瀏覽首頁"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"向上瀏覽"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"更多選項"</string>

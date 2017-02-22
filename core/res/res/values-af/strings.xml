@@ -320,14 +320,10 @@
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"Laat die program toe om agtergrondprosesse van ander programme te beëindig. Dit kan moontlik veroorsaak dat ander programme ophou werk."</string>
     <string name="permlab_systemAlertWindow" msgid="7238805243128138690">"Hierdie program kan bo-op ander programme verskyn"</string>
     <string name="permdesc_systemAlertWindow" msgid="2393776099672266188">"Hierdie program kan bokant ander programme of ander dele van die skerm verskyn. Dit kan met normale programgebruik inmeng en die voorkoms van ander programme verander."</string>
-    <!-- no translation found for permlab_runInBackground (7365290743781858803) -->
-    <skip />
-    <!-- no translation found for permdesc_runInBackground (7370142232209999824) -->
-    <skip />
-    <!-- no translation found for permlab_useDataInBackground (8694951340794341809) -->
-    <skip />
-    <!-- no translation found for permdesc_useDataInBackground (6049514223791806027) -->
-    <skip />
+    <string name="permlab_runInBackground" msgid="7365290743781858803">"loop op die agtergrond"</string>
+    <string name="permdesc_runInBackground" msgid="7370142232209999824">"Hierdie program kan op die agtergrond loop. Dit kan die battery vinniger laat pap word."</string>
+    <string name="permlab_useDataInBackground" msgid="8694951340794341809">"gebruik data op die agtergrond"</string>
+    <string name="permdesc_useDataInBackground" msgid="6049514223791806027">"Hierdie program kan data op die agtergrond gebruik. Dit kan die datagebruik vergroot."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"laat program altyd loop"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Laat die program toe om dele van ditself deurdringend in die geheue te hou. Dit kan geheue wat aan ander programme beskikbaar is, beperk, en die tablet stadiger maak."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Laat die program toe om dele van homself blywend in die berging te maak. Dit kan die berging wat beskikbaar is vir ander programme beperk, wat die TV stadiger sal maak."</string>
@@ -1171,6 +1167,14 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Tik om taal en uitleg te kies"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
+    <!-- no translation found for alert_windows_notification_channel_name (7443890103456396837) -->
+    <skip />
+    <!-- no translation found for alert_windows_notification_title (5399998516035621282) -->
+    <skip />
+    <!-- no translation found for alert_windows_notification_message (2456738662997073459) -->
+    <skip />
+    <!-- no translation found for alert_windows_notification_turn_off_action (3367294525884949878) -->
+    <skip />
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"Berei tans <xliff:g id="NAME">%s</xliff:g> voor"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Kyk tans vir foute"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"Nuwe <xliff:g id="NAME">%s</xliff:g> bespeur"</string>
@@ -1325,8 +1329,6 @@
     <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Deel met <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="content_description_sliding_handle" msgid="415975056159262248">"Skyfievatsel. Raak en hou."</string>
     <string name="description_target_unlock_tablet" msgid="3833195335629795055">"Sleep om te ontsluit."</string>
-    <string name="keyboard_headset_required_to_hear_password" msgid="7011927352267668657">"Prop \'n kopfoon in om te hoor hoe wagwoordsleutels hardop gesê word."</string>
-    <string name="keyboard_password_character_no_headset" msgid="2859873770886153678">"Punt."</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"Navigeer tuis"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Navigeer op"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Meer opsies"</string>

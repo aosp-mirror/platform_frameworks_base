@@ -320,14 +320,10 @@
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"앱이 다른 앱의 백그라운드 프로세스를 종료할 수 있도록 허용합니다. 이 경우 다른 앱이 실행 중지될 수 있습니다."</string>
     <string name="permlab_systemAlertWindow" msgid="7238805243128138690">"이 앱은 다른 앱 위에 표시될 수 있음"</string>
     <string name="permdesc_systemAlertWindow" msgid="2393776099672266188">"이 앱은 다른 앱이나 화면의 다른 부분 위에 표시될 수 있습니다. 이로 인해 일반적인 앱 사용이 방해받을 수 있으며 다른 앱이 표시되는 방식이 변경될 수 있습니다."</string>
-    <!-- no translation found for permlab_runInBackground (7365290743781858803) -->
-    <skip />
-    <!-- no translation found for permdesc_runInBackground (7370142232209999824) -->
-    <skip />
-    <!-- no translation found for permlab_useDataInBackground (8694951340794341809) -->
-    <skip />
-    <!-- no translation found for permdesc_useDataInBackground (6049514223791806027) -->
-    <skip />
+    <string name="permlab_runInBackground" msgid="7365290743781858803">"백그라운드에서 실행"</string>
+    <string name="permdesc_runInBackground" msgid="7370142232209999824">"이 앱은 백그라운드에서 실행될 수 있으며 이로 인해 배터리가 더 빨리 소모될 수도 있습니다."</string>
+    <string name="permlab_useDataInBackground" msgid="8694951340794341809">"백그라운드에서 데이터 사용"</string>
+    <string name="permdesc_useDataInBackground" msgid="6049514223791806027">"이 앱은 백그라운드에서 데이터를 사용할 수 있으며 이로 인해 데이터 사용량이 증가할 수도 있습니다."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"앱이 항상 실행되도록 설정"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"앱이 그 일부분을 영구적인 메모리로 만들 수 있도록 허용합니다. 이렇게 하면 다른 앱이 사용할 수 있는 메모리를 제한하여 태블릿의 속도를 저하시킬 수 있습니다."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"앱이 메모리를 지속적으로 사용할 수 있도록 허용합니다. 이는 TV의 속도를 늦춰 다른 앱에서 사용할 수 있는 메모리를 제한할 수 있습니다."</string>
@@ -960,11 +956,9 @@
     <string name="inputMethod" msgid="1653630062304567879">"입력 방법"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"텍스트 작업"</string>
     <string name="email" msgid="4560673117055050403">"이메일"</string>
-    <!-- no translation found for dial (4204975095406423102) -->
-    <skip />
+    <string name="dial" msgid="4204975095406423102">"전화"</string>
     <string name="map" msgid="5441053548030107189">"지도"</string>
-    <!-- no translation found for browse (6079864138582486027) -->
-    <skip />
+    <string name="browse" msgid="6079864138582486027">"탐색"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"저장 공간이 부족함"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"일부 시스템 기능이 작동하지 않을 수 있습니다."</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"시스템의 저장 공간이 부족합니다. 250MB의 여유 공간이 확보한 후 다시 시작하세요."</string>
@@ -1173,6 +1167,14 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"탭하여 언어와 레이아웃을 선택하세요."</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
+    <!-- no translation found for alert_windows_notification_channel_name (7443890103456396837) -->
+    <skip />
+    <!-- no translation found for alert_windows_notification_title (5399998516035621282) -->
+    <skip />
+    <!-- no translation found for alert_windows_notification_message (2456738662997073459) -->
+    <skip />
+    <!-- no translation found for alert_windows_notification_turn_off_action (3367294525884949878) -->
+    <skip />
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"<xliff:g id="NAME">%s</xliff:g> 준비 중"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"오류 확인 중"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"새로운 <xliff:g id="NAME">%s</xliff:g> 감지됨"</string>
@@ -1327,8 +1329,6 @@
     <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"<xliff:g id="APPLICATION_NAME">%s</xliff:g>와(과) 공유"</string>
     <string name="content_description_sliding_handle" msgid="415975056159262248">"슬라이딩 핸들을 길게 터치하세요."</string>
     <string name="description_target_unlock_tablet" msgid="3833195335629795055">"스와이프하여 잠급니다."</string>
-    <string name="keyboard_headset_required_to_hear_password" msgid="7011927352267668657">"비밀번호 키를 음성으로 들으려면 헤드셋을 연결하세요."</string>
-    <string name="keyboard_password_character_no_headset" msgid="2859873770886153678">"점"</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"홈 탐색"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"위로 탐색"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"옵션 더보기"</string>
