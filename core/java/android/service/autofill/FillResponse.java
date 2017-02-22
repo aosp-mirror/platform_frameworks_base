@@ -45,8 +45,7 @@ import java.util.ArrayList;
  *
  * <pre class="prettyprint">
  *  new FillResponse.Builder()
- *      .add(new Dataset.Builder()
- *          .setPresentation(createPresentation())
+ *      .add(new Dataset.Builder(createPresentation())
  *          .setTextFieldValue(id1, "homer")
  *          .setTextFieldValue(id2, "D'OH!")
  *          .build())
@@ -57,13 +56,11 @@ import java.util.ArrayList;
  *
  * <pre class="prettyprint">
  *  new FillResponse.Builder()
- *      .add(new Dataset.Builder()
- *          .setPresentation(createFirstPresentation())
+ *      .add(new Dataset.Builder(createFirstPresentation())
  *          .setTextFieldValue(id1, "homer")
  *          .setTextFieldValue(id2, "D'OH!")
  *          .build())
- *      .add(new Dataset.Builder()
- *          .setPresentation(createSecondPresentation())
+ *      .add(new Dataset.Builder(createSecondPresentation())
  *          .setTextFieldValue(id1, "elbarto")
  *          .setTextFieldValue(id2, "cowabonga")
  *          .build())
@@ -87,8 +84,7 @@ import java.util.ArrayList;
  *
  * <pre class="prettyprint">
  *   new FillResponse.Builder()
- *       .add(new Dataset.Builder(")
- *          .setPresentation(createPresentation())
+ *       .add(new Dataset.Builder(createPresentation())
  *          .setTextFieldValue(id1, "Homer")                  // first name
  *          .setTextFieldValue(id2, "Simpson")                // last name
  *          .setTextFieldValue(id3, "742 Evergreen Terrace")  // street
@@ -116,13 +112,11 @@ import java.util.ArrayList;
  *
  * <pre class="prettyprint">
  *  new FillResponse.Builder()
- *      .add(new Dataset.Builder()
- *          .setPresentation(createFirstPresentation())
+ *      .add(new Dataset.Builder(createFirstPresentation())
  *          .setTextFieldValue(id1, "Homer")
  *          .setTextFieldValue(id2, "Simpson")
  *          .build())
- *      .add(new Dataset.Builder()
- *          .setPresentation(createSecondPresentation())
+ *      .add(new Dataset.Builder(createSecondPresentation())
  *          .setTextFieldValue(id1, "Bart")
  *          .setTextFieldValue(id2, "Simpson")
  *          .build())
@@ -134,13 +128,11 @@ import java.util.ArrayList;
  *
  * <pre class="prettyprint">
  *  new FillResponse.Builder()
- *      .add(new Dataset.Builder()
- *          .setPresentation(createThirdPresentation())
+ *      .add(new Dataset.Builder(createThirdPresentation())
  *          .setTextFieldValue(id3, "742 Evergreen Terrace")
  *          .setTextFieldValue(id4, "Springfield")
  *          .build())
- *      .add(new Dataset.Builder()
- *          .setPresentation(createFourthPresentation())
+ *      .add(new Dataset.Builder(createFourthPresentation())
  *          .setTextFieldValue(id3, "Springfield Power Plant")
  *          .setTextFieldValue(id4, "Springfield")
  *          .build())
@@ -217,23 +209,6 @@ public final class FillResponse implements Parcelable {
         private boolean mDestroyed;
 
         /**
-         * Sets the presentation used to visualize this response. You should
-         * set this only if you need an authentication as this is the only
-         * case the response needs to be presented to the user.
-         *
-         * @param presentation The presentation view.
-         *
-         * @return This builder.
-         *
-         * @see #setAuthentication(IntentSender)
-         */
-        public @NonNull
-        FillResponse.Builder setPresentation(@Nullable RemoteViews presentation) {
-            mPresentation = presentation;
-            return this;
-        }
-
-        /**
          * Requires a fill response authentication before auto-filling the activity with
          * any data set in this response.
          *
@@ -259,19 +234,29 @@ public final class FillResponse implements Parcelable {
          * available data sets some of which may need to be further authenticated, for
          * example a credit card whose CVV needs to be entered.</p>
          *
+         * <p>If you provide an authentication intent you must also provide a presentation
+         * which is used to visualize visualize the response for triggering the authentication
+         * flow.</p>
+         *
          * <p></><strong>Note:</strong> Do not make the provided pending intent
          * immutable by using {@link android.app.PendingIntent#FLAG_IMMUTABLE} as the
          * platform needs to fill in the authentication arguments.</p>
          *
          * @param authentication Intent to an activity with your authentication flow.
+         * @param presentation The presentation to visualize the response.
          * @return This builder.
          *
          * @see android.app.PendingIntent#getIntentSender()
-         * @see #setPresentation(RemoteViews)
          */
-        public @NonNull Builder setAuthentication(@Nullable IntentSender authentication) {
+        public @NonNull Builder setAuthentication(@Nullable IntentSender authentication,
+                @Nullable RemoteViews presentation) {
             throwIfDestroyed();
+            if (authentication == null ^ presentation == null) {
+                throw new IllegalArgumentException("authentication and presentation"
+                        + " must be both non-null or null");
+            }
             mAuthentication = authentication;
+            mPresentation = presentation;
             return this;
         }
 
@@ -355,10 +340,6 @@ public final class FillResponse implements Parcelable {
          */
         public FillResponse build() {
             throwIfDestroyed();
-            if (mAuthentication == null ^ mPresentation == null) {
-                throw new IllegalArgumentException("authentication and presentation"
-                        + " must be both non-null or null");
-            }
             if (mAuthentication == null && mDatasets == null && mSavableIds == null) {
                 throw new IllegalArgumentException("need to provide at least one"
                         + " data set or savable ids or an authentication with a presentation");
@@ -403,8 +384,8 @@ public final class FillResponse implements Parcelable {
         parcel.writeTypedArrayList(mDatasets, flags);
         parcel.writeTypedArraySet(mSavableIds, flags);
         parcel.writeParcelable(mExtras, flags);
-        parcel.writeParcelable(mPresentation, flags);
         parcel.writeParcelable(mAuthentication, flags);
+        parcel.writeParcelable(mPresentation, flags);
     }
 
     public static final Parcelable.Creator<FillResponse> CREATOR =
@@ -426,8 +407,8 @@ public final class FillResponse implements Parcelable {
                 builder.addSavableFields(fillIds.valueAt(i));
             }
             builder.setExtras(parcel.readParcelable(null));
-            builder.setPresentation(parcel.readParcelable(null));
-            builder.setAuthentication(parcel.readParcelable(null));
+            builder.setAuthentication(parcel.readParcelable(null),
+                    parcel.readParcelable(null));
             return builder.build();
         }
 

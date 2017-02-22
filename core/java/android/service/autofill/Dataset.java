@@ -106,15 +106,13 @@ public final class Dataset implements Parcelable {
         private boolean mDestroyed;
 
         /**
-         * Sets the presentation used to visualize this dataset.
+         * Creates a new builder.
          *
-         * @param presentation The presentation view.
-         *
-         * @return This builder.
+         * @param presentation The presentation used to visualize this dataset.
          */
-        public @NonNull Builder setPresentation(@Nullable RemoteViews presentation) {
+        public Builder(@NonNull RemoteViews presentation) {
+            Preconditions.checkNotNull(presentation, "presentation must be non-null");
             mPresentation = presentation;
-            return this;
         }
 
         /**
@@ -201,9 +199,6 @@ public final class Dataset implements Parcelable {
                 throw new IllegalArgumentException(
                         "at least one value must be set");
             }
-            if (mPresentation == null) {
-                throw new IllegalArgumentException("presentation must be set");
-            }
             return new Dataset(this);
         }
 
@@ -225,9 +220,9 @@ public final class Dataset implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
+        parcel.writeParcelable(mPresentation, flags);
         parcel.writeTypedArrayList(mFieldIds, flags);
         parcel.writeTypedArrayList(mFieldValues, flags);
-        parcel.writeParcelable(mPresentation, flags);
         parcel.writeParcelable(mAuthentication, flags);
     }
 
@@ -237,7 +232,7 @@ public final class Dataset implements Parcelable {
             // Always go through the builder to ensure the data ingested by
             // the system obeys the contract of the builder to avoid attacks
             // using specially crafted parcels.
-            final Builder builder = new Builder();
+            final Builder builder = new Builder(parcel.readParcelable(null));
             final ArrayList<AutoFillId> ids = parcel.readTypedArrayList(null);
             final ArrayList<AutoFillValue> values = parcel.readTypedArrayList(null);
             final int idCount = (ids != null) ? ids.size() : 0;
@@ -247,7 +242,6 @@ public final class Dataset implements Parcelable {
                 AutoFillValue value = (valueCount > i) ? values.get(i) : null;
                 builder.setValue(id, value);
             }
-            builder.setPresentation(parcel.readParcelable(null));
             builder.setAuthentication(parcel.readParcelable(null));
             return builder.build();
         }
