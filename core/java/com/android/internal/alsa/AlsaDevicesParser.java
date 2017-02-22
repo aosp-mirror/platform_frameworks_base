@@ -155,6 +155,7 @@ public class AlsaDevicesParser {
 
             switch (mDeviceType) {
             case kDeviceType_Unknown:
+            default:
                 sb.append(" N/A");
                 break;
             case kDeviceType_Audio:
@@ -170,6 +171,7 @@ public class AlsaDevicesParser {
 
             switch (mDeviceDir) {
             case kDeviceDir_Unknown:
+            default:
                 sb.append(" N/A");
                 break;
             case kDeviceDir_Capture:
