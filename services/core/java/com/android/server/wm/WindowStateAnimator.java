@@ -172,7 +172,7 @@ class WindowStateAnimator {
     private boolean mAnimateMove = false;
 
     float mDsDx=1, mDtDx=0, mDsDy=0, mDtDy=1;
-    float mLastDsDx=1, mLastDtDx=0, mLastDsDy=0, mLastDtDy=1;
+    private float mLastDsDx=1, mLastDtDx=0, mLastDsDy=0, mLastDtDy=1;
 
     boolean mHaveMatrix;
 
@@ -945,8 +945,8 @@ class WindowStateAnimator {
             tmpMatrix.getValues(tmpFloats);
             mDsDx = tmpFloats[Matrix.MSCALE_X];
             mDtDx = tmpFloats[Matrix.MSKEW_Y];
-            mDsDy = tmpFloats[Matrix.MSKEW_X];
-            mDtDy = tmpFloats[Matrix.MSCALE_Y];
+            mDtDy = tmpFloats[Matrix.MSKEW_X];
+            mDsDy = tmpFloats[Matrix.MSCALE_Y];
             float x = tmpFloats[Matrix.MTRANS_X];
             float y = tmpFloats[Matrix.MTRANS_Y];
             mWin.mShownPosition.set(Math.round(x), Math.round(y));
@@ -959,7 +959,7 @@ class WindowStateAnimator {
             mShownAlpha = mAlpha;
             if (!mService.mLimitedAlphaCompositing
                     || (!PixelFormat.formatHasAlpha(mWin.mAttrs.format)
-                    || (mWin.isIdentityMatrix(mDsDx, mDtDx, mDsDy, mDtDy)
+                    || (mWin.isIdentityMatrix(mDsDx, mDtDx, mDtDy, mDsDy)
                             && x == frame.left && y == frame.top))) {
                 //Slog.i(TAG_WM, "Applying alpha transform");
                 if (selfTransformation) {
@@ -1038,8 +1038,8 @@ class WindowStateAnimator {
             mHaveMatrix = true;
             mDsDx = tmpFloats[Matrix.MSCALE_X];
             mDtDx = tmpFloats[Matrix.MSKEW_Y];
-            mDsDy = tmpFloats[Matrix.MSKEW_X];
-            mDtDy = tmpFloats[Matrix.MSCALE_Y];
+            mDtDy = tmpFloats[Matrix.MSKEW_X];
+            mDsDy = tmpFloats[Matrix.MSCALE_Y];
             float x = tmpFloats[Matrix.MTRANS_X];
             float y = tmpFloats[Matrix.MTRANS_Y];
             mWin.mShownPosition.set(Math.round(x), Math.round(y));
@@ -1054,8 +1054,8 @@ class WindowStateAnimator {
             mHaveMatrix = false;
             mDsDx = mWin.mGlobalScale;
             mDtDx = 0;
-            mDsDy = 0;
-            mDtDy = mWin.mGlobalScale;
+            mDtDy = 0;
+            mDsDy = mWin.mGlobalScale;
         }
     }
 
@@ -1384,8 +1384,8 @@ class WindowStateAnimator {
             applyCrop(clipRect, finalClipRect, recoveringMemory);
             mSurfaceController.setMatrixInTransaction(mDsDx * w.mHScale * mExtraHScale,
                     mDtDx * w.mVScale * mExtraVScale,
-                    mDsDy * w.mHScale * mExtraHScale,
-                    mDtDy * w.mVScale * mExtraVScale, recoveringMemory);
+                    mDtDy * w.mHScale * mExtraHScale,
+                    mDsDy * w.mVScale * mExtraVScale, recoveringMemory);
         }
 
         if (mSurfaceResized) {
@@ -1467,15 +1467,15 @@ class WindowStateAnimator {
                     "alpha=" + mShownAlpha + " layer=" + mAnimLayer
                     + " matrix=[" + mDsDx + "*" + w.mHScale
                     + "," + mDtDx + "*" + w.mVScale
-                    + "][" + mDsDy + "*" + w.mHScale
-                    + "," + mDtDy + "*" + w.mVScale + "]", false);
+                    + "][" + mDtDy + "*" + w.mHScale
+                    + "," + mDsDy + "*" + w.mVScale + "]", false);
 
             boolean prepared =
                 mSurfaceController.prepareToShowInTransaction(mShownAlpha, mAnimLayer,
                         mDsDx * w.mHScale * mExtraHScale,
                         mDtDx * w.mVScale * mExtraVScale,
-                        mDsDy * w.mHScale * mExtraHScale,
-                        mDtDy * w.mVScale * mExtraVScale,
+                        mDtDy * w.mHScale * mExtraHScale,
+                        mDsDy * w.mVScale * mExtraVScale,
                         recoveringMemory);
 
             if (prepared && mLastHidden && mDrawState == HAS_DRAWN) {
@@ -1777,8 +1777,8 @@ class WindowStateAnimator {
             pw.print(prefix); pw.print("mGlobalScale="); pw.print(mWin.mGlobalScale);
                     pw.print(" mDsDx="); pw.print(mDsDx);
                     pw.print(" mDtDx="); pw.print(mDtDx);
-                    pw.print(" mDsDy="); pw.print(mDsDy);
-                    pw.print(" mDtDy="); pw.println(mDtDy);
+                    pw.print(" mDtDy="); pw.print(mDtDy);
+                    pw.print(" mDsDy="); pw.println(mDsDy);
         }
         if (mAnimationStartDelayed) {
             pw.print(prefix); pw.print("mAnimationStartDelayed="); pw.print(mAnimationStartDelayed);
@@ -1926,15 +1926,15 @@ class WindowStateAnimator {
 
             float DsDx = mService.mTmpFloats[Matrix.MSCALE_X];
             float DtDx = mService.mTmpFloats[Matrix.MSKEW_Y];
-            float DsDy = mService.mTmpFloats[Matrix.MSKEW_X];
-            float DtDy = mService.mTmpFloats[Matrix.MSCALE_Y];
+            float DtDy = mService.mTmpFloats[Matrix.MSKEW_X];
+            float DsDy = mService.mTmpFloats[Matrix.MSCALE_Y];
             float nx = mService.mTmpFloats[Matrix.MTRANS_X];
             float ny = mService.mTmpFloats[Matrix.MTRANS_Y];
             mSurfaceController.setPositionInTransaction(nx, ny, false);
             mSurfaceController.setMatrixInTransaction(DsDx * w.mHScale,
                     DtDx * w.mVScale,
-                    DsDy * w.mHScale,
-                    DtDy * w.mVScale, false);
+                    DtDy * w.mHScale,
+                    DsDy * w.mVScale, false);
         }
     }
 

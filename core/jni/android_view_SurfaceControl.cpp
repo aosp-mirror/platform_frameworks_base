@@ -356,9 +356,9 @@ static void nativeSetAlpha(JNIEnv* env, jclass clazz, jlong nativeObject, jfloat
 }
 
 static void nativeSetMatrix(JNIEnv* env, jclass clazz, jlong nativeObject,
-        jfloat dsdx, jfloat dtdx, jfloat dsdy, jfloat dtdy) {
+        jfloat dsdx, jfloat dtdx, jfloat dtdy, jfloat dsdy) {
     SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
-    status_t err = ctrl->setMatrix(dsdx, dtdx, dsdy, dtdy);
+    status_t err = ctrl->setMatrix(dsdx, dtdx, dtdy, dsdy);
     if (err < 0 && err != NO_INIT) {
         doThrowIAE(env);
     }

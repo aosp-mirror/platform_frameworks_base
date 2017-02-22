@@ -508,9 +508,9 @@ public class SurfaceControl {
         nativeSetAlpha(mNativeObject, alpha);
     }
 
-    public void setMatrix(float dsdx, float dtdx, float dsdy, float dtdy) {
+    public void setMatrix(float dsdx, float dtdx, float dtdy, float dsdy) {
         checkNotReleased();
-        nativeSetMatrix(mNativeObject, dsdx, dtdx, dsdy, dtdy);
+        nativeSetMatrix(mNativeObject, dsdx, dtdx, dtdy, dsdy);
     }
 
     public void setWindowCrop(Rect crop) {
