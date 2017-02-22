@@ -29,6 +29,7 @@ import android.os.BatteryManager;
 import android.os.Environment;
 import android.os.Environment.UserEnvironment;
 import android.os.UserHandle;
+import android.os.storage.VolumeInfo;
 import android.provider.Settings;
 import android.util.Log;
 
@@ -61,10 +62,16 @@ public class DiskStatsLoggingService extends JobService {
             return false;
         }
 
+
+        VolumeInfo volume = getPackageManager().getPrimaryStorageCurrentVolume();
+        // volume is null if the primary storage is not yet mounted.
+        if (volume == null) {
+            return false;
+        }
+        AppCollector collector = new AppCollector(this, volume);
+
         final int userId = UserHandle.myUserId();
         UserEnvironment environment = new UserEnvironment(userId);
-        AppCollector collector = new AppCollector(this,
-                getPackageManager().getPrimaryStorageCurrentVolume());
         LogRunnable task = new LogRunnable();
         task.setRootDirectory(environment.getExternalStorageDirectory());
         task.setDownloadsDirectory(
