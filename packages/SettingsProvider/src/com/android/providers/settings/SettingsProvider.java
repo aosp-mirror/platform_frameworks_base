@@ -32,6 +32,8 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.content.pm.ServiceInfo;
 import android.content.pm.UserInfo;
 import android.database.Cursor;
 import android.database.MatrixCursor;
@@ -58,7 +60,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.UserManagerInternal;
 import android.provider.Settings;
-import android.provider.Settings.Global;
+import android.service.notification.NotificationListenerService;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -2735,7 +2737,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 140;
+            private static final int SETTINGS_VERSION = 141;
 
             private final int mUserId;
 
@@ -3202,6 +3204,62 @@ public class SettingsProvider extends ContentProvider {
                     secureSettings.updateSettingLocked(Settings.Secure.ACCESSIBILITY_SPEAK_PASSWORD,
                             "1", null, true, SettingsState.SYSTEM_PACKAGE_NAME);
                     currentVersion = 140;
+                }
+
+                if (currentVersion == 140) {
+                    // Version 141: One-time grant of notification listener privileges
+                    // to packages specified in overlay.
+                    String defaultListenerAccess = getContext().getResources().getString(
+                            com.android.internal.R.string.config_defaultListenerAccessPackages);
+                    if (defaultListenerAccess != null) {
+                        StringBuffer newListeners = new StringBuffer();
+                        for (String whitelistPkg : defaultListenerAccess.split(":")) {
+                            // Gather all notification listener components for candidate pkgs.
+                            Intent serviceIntent =
+                                    new Intent(NotificationListenerService.SERVICE_INTERFACE)
+                                            .setPackage(whitelistPkg);
+                            List<ResolveInfo> installedServices =
+                                    getContext().getPackageManager().queryIntentServicesAsUser(
+                                            serviceIntent,
+                                            PackageManager.GET_SERVICES
+                                                    | PackageManager.GET_META_DATA
+                                                    | PackageManager.MATCH_DIRECT_BOOT_AWARE
+                                                    | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
+                                            userId);
+
+                            for (int i = 0, count = installedServices.size(); i < count; i++) {
+                                ResolveInfo resolveInfo = installedServices.get(i);
+                                ServiceInfo info = resolveInfo.serviceInfo;
+                                if (!android.Manifest.permission.BIND_NOTIFICATION_LISTENER_SERVICE
+                                        .equals(info.permission)) {
+                                    continue;
+                                }
+                                newListeners.append(":")
+                                        .append(info.getComponentName().flattenToString());
+                            }
+                        }
+
+                        if (newListeners.length() > 0) {
+                            final SettingsState secureSetting = getSecureSettingsLocked(userId);
+                            final Setting existingSetting = secureSetting.getSettingLocked(
+                                    Settings.Secure.ENABLED_NOTIFICATION_LISTENERS);
+                            if (existingSetting.isNull()) {
+                                secureSetting.insertSettingLocked(
+                                        Settings.Secure.ENABLED_NOTIFICATION_LISTENERS,
+                                        newListeners.toString(), null, true,
+                                        SettingsState.SYSTEM_PACKAGE_NAME);
+                            } else {
+                                StringBuilder currentSetting =
+                                        new StringBuilder(existingSetting.getValue());
+                                currentSetting.append(newListeners.toString());
+                                secureSetting.updateSettingLocked(
+                                        Settings.Secure.ENABLED_NOTIFICATION_LISTENERS,
+                                        currentSetting.toString(), null, true,
+                                        SettingsState.SYSTEM_PACKAGE_NAME);
+                            }
+                        }
+                    }
+                    currentVersion = 141;
                 }
 
                 if (currentVersion != newVersion) {

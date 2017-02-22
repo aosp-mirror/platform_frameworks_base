@@ -2764,4 +2764,7 @@
          and followed the pertinent sections of the escrow tokens section of the CDD <link>-->
     <!-- TODO(b/35230407) complete the link field -->
     <bool name="config_allowEscrowTokenForTrustAgent">false</bool>
+
+    <!-- Colon separated list of package names that should be granted Notification Listener access -->
+    <string name="config_defaultListenerAccessPackages" translatable="false"></string>
 </resources>
