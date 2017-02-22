@@ -38,8 +38,6 @@ public final class VolumeShaper {
     /* member variables */
     private int mId;
     private final WeakReference<PlayerBase> mWeakPlayerBase;
-    private final WeakReference<PlayerProxy> mWeakPlayerProxy;
-    private PlayerProxy mPlayerProxy;
 
     /**
      * Constructs a {@code VolumeShaper} from a {@link VolumeShaper.Configuration} and an
@@ -66,35 +64,6 @@ public final class VolumeShaper {
     /* package */ VolumeShaper(
             @NonNull Configuration configuration, @NonNull PlayerBase playerBase) {
         mWeakPlayerBase = new WeakReference<PlayerBase>(playerBase);
-        mPlayerProxy = null;
-        mWeakPlayerProxy = null;
-        mId = applyPlayer(configuration, new Operation.Builder().defer().build());
-    }
-
-    /**
-     * @hide
-     * Constructs a {@code VolumeShaper} from a {@link VolumeShaper.Configuration} and a
-     * {@code PlayerProxy} object.  The PlayerProxy object requires that the configuration
-     * be set with a system VolumeShaper id (this is a reserved value).
-     *
-     * @param configuration
-     * @param playerProxy
-     */
-    public VolumeShaper(
-            @NonNull Configuration configuration,
-            @NonNull PlayerProxy playerProxy,
-            boolean keepReference) {
-        if (configuration.getId() < 0) {
-            throw new IllegalArgumentException("playerProxy configuration id must be specified");
-        }
-        if (keepReference) {
-            mPlayerProxy = playerProxy;
-            mWeakPlayerProxy = null;
-        } else {
-            mWeakPlayerProxy = new WeakReference<PlayerProxy>(playerProxy);
-            mPlayerProxy = null;
-        }
-        mWeakPlayerBase = null;
         mId = applyPlayer(configuration, new Operation.Builder().defer().build());
     }
 
@@ -155,10 +124,6 @@ public final class VolumeShaper {
         if (mWeakPlayerBase != null) {
             mWeakPlayerBase.clear();
         }
-        if (mWeakPlayerProxy != null) {
-            mWeakPlayerProxy.clear();
-        }
-        mPlayerProxy = null;
     }
 
     @Override
@@ -177,20 +142,7 @@ public final class VolumeShaper {
             @NonNull VolumeShaper.Configuration configuration,
             @NonNull VolumeShaper.Operation operation) {
         final int id;
-        if (mPlayerProxy != null || mWeakPlayerProxy != null) {
-            // The PlayerProxy accepts only one way transactions so
-            // the Configuration must have an id set to one of the system
-            // ids (a positive value less than 16).
-            PlayerProxy player = mWeakPlayerProxy != null ? mWeakPlayerProxy.get() : mPlayerProxy;
-            if (player == null) {
-                throw new IllegalStateException("player deallocated");
-            }
-            id = configuration.getId();
-            if (id < 0) {
-                throw new IllegalArgumentException("proxy requires configuration with id");
-            }
-            player.applyVolumeShaper(configuration, operation);
-        } else if (mWeakPlayerBase != null) {
+        if (mWeakPlayerBase != null) {
             PlayerBase player = mWeakPlayerBase.get();
             if (player == null) {
                 throw new IllegalStateException("player deallocated");
@@ -220,9 +172,7 @@ public final class VolumeShaper {
      */
     private @NonNull VolumeShaper.State getStatePlayer(int id) {
         final VolumeShaper.State state;
-        if (mPlayerProxy != null || mWeakPlayerProxy != null) {
-            throw new IllegalStateException("getStatePlayer not permitted through proxy");
-        } else if (mWeakPlayerBase != null) {
+        if (mWeakPlayerBase != null) {
             PlayerBase player = mWeakPlayerBase.get();
             if (player == null) {
                 throw new IllegalStateException("player deallocated");
@@ -510,6 +460,7 @@ public final class VolumeShaper {
         };
 
         /**
+         * @hide
          * Constructs a volume shaper from an id.
          *
          * This is an opaque handle for controlling a {@code VolumeShaper} that has
@@ -522,7 +473,7 @@ public final class VolumeShaper {
          * @param id
          * @throws IllegalArgumentException if id is negative.
          */
-        private Configuration(int id) {
+        public Configuration(int id) {
             if (id < 0) {
                 throw new IllegalArgumentException("negative id " + id);
             }
@@ -1039,6 +990,13 @@ public final class VolumeShaper {
          */
         private static final int FLAG_DEFER = 1 << 3;
 
+        /**
+         * Use the id specified in the configuration, creating
+         * VolumeShaper as needed; the configuration should be
+         * TYPE_SCALE.
+         */
+        private static final int FLAG_CREATE_IF_NEEDED = 1 << 4;
+
         private static final int FLAG_PUBLIC_ALL = FLAG_REVERSE | FLAG_TERMINATE;
 
         private final int mFlags;
@@ -1171,6 +1129,17 @@ public final class VolumeShaper {
              */
             public @NonNull Builder reverse() {
                 mFlags ^= FLAG_REVERSE;
+                return this;
+            }
+
+            /**
+             * Use the id specified in the configuration, creating
+             * VolumeShaper as needed; the configuration should be
+             * TYPE_SCALE.
+             * @return the same Builder instance.
+             */
+            public @NonNull Builder createIfNeeded() {
+                mFlags |= FLAG_CREATE_IF_NEEDED;
                 return this;
             }
 
