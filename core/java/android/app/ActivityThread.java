@@ -180,7 +180,6 @@ public final class ActivityThread {
     public static final boolean DEBUG_CONFIGURATION = false;
     private static final boolean DEBUG_SERVICE = false;
     private static final boolean DEBUG_MEMORY_TRIM = false;
-    private static final boolean DEBUG_NETWORK = false;
     private static final boolean DEBUG_PROVIDER = false;
     private static final boolean DEBUG_ORDER = false;
     private static final long MIN_TIME_BETWEEN_GCS = 5*1000;
@@ -202,55 +201,6 @@ public final class ActivityThread {
 
     // Whether to invoke an activity callback after delivering new configuration.
     private static final boolean REPORT_TO_ACTIVITY = true;
-
-    /**
-     * This is the time main thread waits for the NetworkPolicyManagerService to notify
-     * that network is unrestricted. After this the app components will be launched anyway.
-     */
-    private long mWaitForNetworkTimeoutMs;
-
-    /**
-     * This is only for logging purposes. This will help us identify if the waiting for network
-     * is responsible for any lag that user might see.
-     */
-    private static final int WAIT_FOR_NETWORK_THRESHOLD_MS = 100; // 0.1 sec
-
-    /**
-     * State indicating that there is no need for any blocking for network.
-     */
-    public static final int NETWORK_STATE_NO_CHANGE = 0;
-
-    /**
-     * State indicating that main thread should wait for ActivityManagerService to notify
-     * before the app components are launched.
-     */
-    public static final int NETWORK_STATE_BLOCK = 1;
-
-    /**
-     * State indicating that any threads waiting for ActivityManagerService to notify should
-     * be unblocked.
-     */
-    public static final int NETWORK_STATE_UNBLOCK = 2;
-
-    /**
-     * Constant for indicating a invalid sequence number.
-     */
-    public static final long INVALID_PROC_STATE_SEQ = -1;
-
-    /**
-     * Current sequence number associated with the process state change.
-     */
-    @GuardedBy("mNetworkPolicyLock")
-    private long mCurProcStateSeq;
-
-    /**
-     * Indicates whether any component being launched should block for network before
-     * proceeding.
-     */
-    @GuardedBy("mNetworkPolicyLock")
-    private boolean mShouldBlockForNetwork;
-
-    private Object mNetworkPolicyLock = new Object();
 
     private ContextImpl mSystemContext;
 
@@ -1363,18 +1313,6 @@ public final class ActivityThread {
         }
 
         @Override
-        public void setBlockForNetworkState(int blockState, long targetProcStateSeq) {
-            synchronized (mNetworkPolicyLock) {
-                if (blockState == NETWORK_STATE_UNBLOCK) {
-                    unblockForNetworkAccessLN(targetProcStateSeq);
-                } else if (blockState == NETWORK_STATE_BLOCK) {
-                    mShouldBlockForNetwork = true;
-                }
-                mCurProcStateSeq = targetProcStateSeq;
-            }
-        }
-
-        @Override
         public void scheduleInstallProvider(ProviderInfo provider) {
             sendMessage(H.INSTALL_PROVIDER, provider);
         }
@@ -1456,13 +1394,6 @@ public final class ActivityThread {
         @Override
         public void handleTrustStorageUpdate() {
             NetworkSecurityPolicy.getInstance().handleTrustStorageUpdate();
-        }
-
-        @Override
-        public void notifyNetworkStateUpdated(long curProcStateSeq) {
-            synchronized (mNetworkPolicyLock) {
-                unblockForNetworkAccessLN(curProcStateSeq);
-            }
         }
     }
 
@@ -2163,79 +2094,6 @@ public final class ActivityThread {
         }
     }
 
-    void blockForNetworkAccessInForegroundService(long procStateSeq) {
-        synchronized (mNetworkPolicyLock) {
-            if (mCurProcStateSeq >= procStateSeq) {
-                if (mShouldBlockForNetwork) {
-                    blockForNetworkAccessLN();
-                }
-            } else {
-                mCurProcStateSeq = procStateSeq;
-                mShouldBlockForNetwork = true;
-                blockForNetworkAccessLN();
-            }
-        }
-    }
-
-    /**
-     * Block for unrestricted network. It will register a listener to AMS and wait for it to
-     * notify that network policy rules are updated. This method is called before relevant app
-     * components are launched.
-     */
-    private void blockForNetworkAccessLN() {
-        try {
-            if (ActivityManager.getService().registerNetworkRulesUpdateListener(
-                    mAppThread, mCurProcStateSeq)) {
-                try {
-                    Slog.d(TAG, "Uid: " + mBoundApplication.appInfo.uid
-                            + " seq: " + mCurProcStateSeq
-                            + ". Blocking for network. callers: " + Debug.getCallers(3));
-                    final long blockStartTime = SystemClock.elapsedRealtime();
-                    mNetworkPolicyLock.wait(mWaitForNetworkTimeoutMs);
-                    final long totalWaitTime = (SystemClock.elapsedRealtime() - blockStartTime);
-                    if (totalWaitTime >= mWaitForNetworkTimeoutMs) {
-                        Slog.wtf(TAG, "Timed out waiting for the network rules to get updated."
-                                + " Uid: " + mBoundApplication.appInfo.uid + " seq: "
-                                + mCurProcStateSeq);
-                    } else if (totalWaitTime >= WAIT_FOR_NETWORK_THRESHOLD_MS) {
-                        Slog.d(TAG, "Waited for time greater than threshold."
-                                + " Uid: " + mBoundApplication.appInfo.uid + " seq: "
-                                + mCurProcStateSeq);
-                    }
-                    if (DEBUG_NETWORK) {
-                        Slog.d(TAG, "Uid: " + mBoundApplication.appInfo.uid
-                                + " seq: " + mCurProcStateSeq
-                                + ". Time waited for network: " + totalWaitTime);
-                    }
-                } catch (InterruptedException ignored) {
-                }
-            }
-        } catch (RemoteException ignored) {
-        }
-    }
-
-    public void checkAndBlockForNetworkAccess() {
-        synchronized (mNetworkPolicyLock) {
-            if (mWaitForNetworkTimeoutMs > 0 && mShouldBlockForNetwork) {
-                blockForNetworkAccessLN();
-            }
-        }
-    }
-
-    /**
-     * Unblock the main thread if it is waiting for network.
-     */
-    private void unblockForNetworkAccessLN(long procStateSeq) {
-        if (mShouldBlockForNetwork && procStateSeq >= mCurProcStateSeq) {
-            if (DEBUG_NETWORK) {
-                Slog.d(TAG, "Unblocking threads waiting for network. uid: "
-                        + mBoundApplication.appInfo.uid + " procStateSeq: " + procStateSeq);
-            }
-            mNetworkPolicyLock.notifyAll();
-            mShouldBlockForNetwork = false;
-        }
-    }
-
     ActivityThread() {
         mResourcesManager = ResourcesManager.getInstance();
     }
@@ -2828,7 +2686,6 @@ public final class ActivityThread {
                     activity.mIntent = customIntent;
                 }
                 r.lastNonConfigurationInstances = null;
-                checkAndBlockForNetworkAccess();
                 activity.mStartedActivity = false;
                 int theme = r.activityInfo.getThemeResource();
                 if (theme != 0) {
@@ -5563,9 +5420,6 @@ public final class ActivityThread {
 
         View.mDebugViewAttributes =
                 mCoreSettings.getInt(Settings.Global.DEBUG_VIEW_ATTRIBUTES, 0) != 0;
-
-        mWaitForNetworkTimeoutMs = mCoreSettings.getLong(
-                Settings.Global.WAIT_FOR_NETWORK_TIMEOUT_MS);
 
         /**
          * For system applications on userdebug/eng builds, log stack

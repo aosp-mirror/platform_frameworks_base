@@ -683,28 +683,26 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
      * flag if killing your service would be disruptive to the user, such as
      * if your service is performing background music playback, so the user
      * would notice if their music stopped playing.
-     *
+     * 
      * <p>If you need your application to run on platform versions prior to API
      * level 5, you can use the following model to call the the older setForeground()
      * or this modern method as appropriate:
-     *
+     * 
      * {@sample development/samples/ApiDemos/src/com/example/android/apis/app/ForegroundService.java
      *   foreground_compatibility}
-     *
+     * 
      * @param id The identifier for this notification as per
      * {@link NotificationManager#notify(int, Notification)
      * NotificationManager.notify(int, Notification)}; must not be 0.
      * @param notification The Notification to be displayed.
-     *
+     * 
      * @see #stopForeground(boolean)
      */
     public final void startForeground(int id, Notification notification) {
         try {
-            final long procStateSeq = mActivityManager.setServiceForeground(
-                    new ComponentName(this, mClassName), mToken, id, notification, 0);
-            if (procStateSeq != ActivityThread.INVALID_PROC_STATE_SEQ && mThread != null) {
-                mThread.blockForNetworkAccessInForegroundService(procStateSeq);
-            }
+            mActivityManager.setServiceForeground(
+                    new ComponentName(this, mClassName), mToken, id,
+                    notification, 0);
         } catch (RemoteException ex) {
         }
     }

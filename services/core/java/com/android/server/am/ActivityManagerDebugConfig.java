@@ -63,7 +63,6 @@ class ActivityManagerDebugConfig {
     static final boolean DEBUG_LOCKTASK = DEBUG_ALL || false;
     static final boolean DEBUG_LRU = DEBUG_ALL || false;
     static final boolean DEBUG_MU = DEBUG_ALL || false;
-    static final boolean DEBUG_NETWORK = DEBUG_ALL || false;
     static final boolean DEBUG_OOM_ADJ = DEBUG_ALL || false;
     static final boolean DEBUG_PAUSE = DEBUG_ALL || false;
     static final boolean DEBUG_POWER = DEBUG_ALL || false;
@@ -108,7 +107,6 @@ class ActivityManagerDebugConfig {
     static final String POSTFIX_LOCKTASK = (APPEND_CATEGORY_NAME) ? "_LockTask" : "";
     static final String POSTFIX_LRU = (APPEND_CATEGORY_NAME) ? "_LRU" : "";
     static final String POSTFIX_MU = "_MU";
-    static final String POSTFIX_NETWORK = "_Network";
     static final String POSTFIX_OOM_ADJ = (APPEND_CATEGORY_NAME) ? "_OomAdj" : "";
     static final String POSTFIX_PAUSE = (APPEND_CATEGORY_NAME) ? "_Pause" : "";
     static final String POSTFIX_POWER = (APPEND_CATEGORY_NAME) ? "_Power" : "";

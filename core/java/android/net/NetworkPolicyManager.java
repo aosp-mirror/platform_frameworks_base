@@ -19,7 +19,6 @@ package android.net;
 import static android.content.pm.PackageManager.GET_SIGNATURES;
 import static android.net.NetworkPolicy.CYCLE_NONE;
 
-import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -66,8 +65,6 @@ public class NetworkPolicyManager {
      *
      * See network-policy-restrictions.md for more info.
      */
-    /** Not a valid rule */
-    public static final int RULE_INVALID = -1;
     /** No specific rule was set */
     public static final int RULE_NONE = 0;
     /** Allow traffic on metered networks. */
@@ -363,8 +360,6 @@ public class NetworkPolicyManager {
         final StringBuilder string = new StringBuilder().append(uidRules).append(" (");
         if (uidRules == RULE_NONE) {
             string.append("NONE");
-        } else if (uidRules == RULE_INVALID) {
-            string.append("INVALID");
         } else {
             string.append(DebugUtils.flagsToString(NetworkPolicyManager.class, "RULE_", uidRules));
         }
@@ -385,26 +380,5 @@ public class NetworkPolicyManager {
         }
         string.append(")");
         return string.toString();
-    }
-
-    /**
-     * @hide
-     */
-    public static boolean isProcStateAllowedWhileIdleOrPowerSaveMode(int procState) {
-        return procState <= ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE;
-    }
-
-    /**
-     * @hide
-     */
-    public static boolean isProcStateAllowedWhileRestrictBackgroundOn(int procState) {
-        return procState <= ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE;
-    }
-
-    /**
-     * @hide
-     */
-    public interface UidStateWithSeqObserver {
-        void onUidStateChangedWithSeq(int uid, int procState, long seq);
     }
 }

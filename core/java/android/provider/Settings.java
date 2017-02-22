@@ -9625,16 +9625,6 @@ public final class Settings {
         public static final String RETAIL_DEMO_MODE_CONSTANTS = "retail_demo_mode_constants";
 
         /**
-         * When blocked for the network policy rules to get updated, the maximum time that the
-         * {@link ActivityThread} have to wait before unblocking.
-         *
-         * Type: long
-         *
-         * @hide
-         */
-        public static final String WAIT_FOR_NETWORK_TIMEOUT_MS = "wait_for_network_timeout_ms";
-
-        /**
          * The reason for the settings database being downgraded. This is only for
          * troubleshooting purposes and its value should not be interpreted in any way.
          *
