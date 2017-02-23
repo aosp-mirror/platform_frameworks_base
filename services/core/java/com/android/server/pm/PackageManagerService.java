@@ -4012,8 +4012,17 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     /**
      * Update given flags when being used to request {@link ResolveInfo}.
+     * <p>Instant apps are resolved specially, depending upon context. Minimally,
+     * {@code}flags{@code} must have the {@link PackageManager#MATCH_INSTANT}
+     * flag set. However, this flag is only honoured in three circumstances:
+     * <ul>
+     * <li>when called from a system process</li>
+     * <li>when the caller holds the permission {@code android.permission.ACCESS_INSTANT_APPS}</li>
+     * <li>when resolution occurs to start an activity with a {@code android.intent.action.VIEW}
+     * action and a {@code android.intent.category.BROWSABLE} category</li>
+     * </ul>
      */
-    int updateFlagsForResolve(int flags, int userId, Object cookie) {
+    int updateFlagsForResolve(int flags, int userId, Intent intent, boolean includeInstantApp) {
         // Safe mode means we shouldn't match any third-party components
         if (mSafeMode) {
             flags |= PackageManager.MATCH_SYSTEM_ONLY;
@@ -4025,15 +4034,24 @@ public class PackageManagerService extends IPackageManager.Stub {
             flags |= PackageManager.MATCH_INSTANT;
         } else {
             // Otherwise, prevent leaking ephemeral components
+            final boolean isSpecialProcess =
+                    callingUid == Process.SYSTEM_UID
+                    || callingUid == Process.SHELL_UID
+                    || callingUid == 0;
+            final boolean allowMatchInstant =
+                    (includeInstantApp
+                            && Intent.ACTION_VIEW.equals(intent.getAction())
+                            && intent.hasCategory(Intent.CATEGORY_BROWSABLE)
+                            && hasWebURI(intent))
+                    || isSpecialProcess
+                    || mContext.checkCallingOrSelfPermission(
+                            android.Manifest.permission.ACCESS_INSTANT_APPS) == PERMISSION_GRANTED;
             flags &= ~PackageManager.MATCH_VISIBLE_TO_INSTANT_APP_ONLY;
-            if (callingUid != Process.SYSTEM_UID
-                    && callingUid != Process.SHELL_UID
-                    && callingUid != 0) {
-                // Unless called from the system process
+            if (!allowMatchInstant) {
                 flags &= ~PackageManager.MATCH_INSTANT;
             }
         }
-        return updateFlagsForComponent(flags, userId, cookie);
+        return updateFlagsForComponent(flags, userId, intent /*cookie*/);
     }
 
     @Override
@@ -5558,17 +5576,23 @@ public class PackageManagerService extends IPackageManager.Stub {
     @Override
     public ResolveInfo resolveIntent(Intent intent, String resolvedType,
             int flags, int userId) {
+        return resolveIntentInternal(
+                intent, resolvedType, flags, userId, false /*includeInstantApp*/);
+    }
+
+    private ResolveInfo resolveIntentInternal(Intent intent, String resolvedType,
+            int flags, int userId, boolean includeInstantApp) {
         try {
             Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "resolveIntent");
 
             if (!sUserManager.exists(userId)) return null;
-            flags = updateFlagsForResolve(flags, userId, intent);
+            flags = updateFlagsForResolve(flags, userId, intent, includeInstantApp);
             enforceCrossUserPermission(Binder.getCallingUid(), userId,
                     false /*requireFullPermission*/, false /*checkShell*/, "resolve intent");
 
             Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "queryIntentActivities");
             final List<ResolveInfo> query = queryIntentActivitiesInternal(intent, resolvedType,
-                    flags, userId);
+                    flags, userId, includeInstantApp);
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
 
             final ResolveInfo bestChoice =
@@ -5590,7 +5614,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
         intent = updateIntentForResolve(intent);
         final String resolvedType = intent.resolveTypeIfNeeded(mContext.getContentResolver());
-        final int flags = updateFlagsForResolve(0, userId, intent);
+        final int flags = updateFlagsForResolve(0, userId, intent, false);
         final List<ResolveInfo> query = queryIntentActivitiesInternal(intent, resolvedType, flags,
                 userId);
         synchronized (mPackages) {
@@ -5749,6 +5773,13 @@ public class PackageManagerService extends IPackageManager.Stub {
                 if (ri != null) {
                     return ri;
                 }
+                // If we have an ephemeral app, use it
+                for (int i = 0; i < N; i++) {
+                    ri = query.get(i);
+                    if (ri.activityInfo.applicationInfo.isInstantApp()) {
+                        return ri;
+                    }
+                }
                 ri = new ResolveInfo(mResolveInfo);
                 ri.activityInfo = new ActivityInfo(ri.activityInfo);
                 ri.activityInfo.labelRes = ResolverActivity.getLabelRes(intent.getAction());
@@ -5867,7 +5898,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             List<ResolveInfo> query, int priority, boolean always,
             boolean removeMatches, boolean debug, int userId) {
         if (!sUserManager.exists(userId)) return null;
-        flags = updateFlagsForResolve(flags, userId, intent);
+        flags = updateFlagsForResolve(flags, userId, intent, false);
         intent = updateIntentForResolve(intent);
         // writer
         synchronized (mPackages) {
@@ -6035,7 +6066,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             // cross-profile app linking works only towards the parent.
             final UserInfo parent = getProfileParent(sourceUserId);
             synchronized(mPackages) {
-                int flags = updateFlagsForResolve(0, parent.id, intent);
+                int flags = updateFlagsForResolve(0, parent.id, intent, false);
                 CrossProfileDomainInfo xpDomainInfo = getCrossProfileDomainPreferredLpr(
                         intent, resolvedType, flags, sourceUserId, parent.id);
                 return xpDomainInfo != null;
@@ -6094,9 +6125,14 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     private @NonNull List<ResolveInfo> queryIntentActivitiesInternal(Intent intent,
             String resolvedType, int flags, int userId) {
+        return queryIntentActivitiesInternal(intent, resolvedType, flags, userId, false);
+    }
+
+    private @NonNull List<ResolveInfo> queryIntentActivitiesInternal(Intent intent,
+            String resolvedType, int flags, int userId, boolean includeInstantApp) {
         if (!sUserManager.exists(userId)) return Collections.emptyList();
         final String instantAppPkgName = getInstantAppPackageName(Binder.getCallingUid());
-        flags = updateFlagsForResolve(flags, userId, intent);
+        flags = updateFlagsForResolve(flags, userId, intent, includeInstantApp);
         enforceCrossUserPermission(Binder.getCallingUid(), userId,
                 false /* requireFullPermission */, false /* checkShell */,
                 "query intent activities");
@@ -6723,7 +6759,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             Intent[] specifics, String[] specificTypes, Intent intent,
             String resolvedType, int flags, int userId) {
         if (!sUserManager.exists(userId)) return Collections.emptyList();
-        flags = updateFlagsForResolve(flags, userId, intent);
+        flags = updateFlagsForResolve(flags, userId, intent, false);
         enforceCrossUserPermission(Binder.getCallingUid(), userId,
                 false /* requireFullPermission */, false /* checkShell */,
                 "query intent activity options");
@@ -6903,7 +6939,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     private @NonNull List<ResolveInfo> queryIntentReceiversInternal(Intent intent,
             String resolvedType, int flags, int userId) {
         if (!sUserManager.exists(userId)) return Collections.emptyList();
-        flags = updateFlagsForResolve(flags, userId, intent);
+        flags = updateFlagsForResolve(flags, userId, intent, false);
         ComponentName comp = intent.getComponent();
         if (comp == null) {
             if (intent.getSelector() != null) {
@@ -6940,7 +6976,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     @Override
     public ResolveInfo resolveService(Intent intent, String resolvedType, int flags, int userId) {
         if (!sUserManager.exists(userId)) return null;
-        flags = updateFlagsForResolve(flags, userId, intent);
+        flags = updateFlagsForResolve(flags, userId, intent, false);
         List<ResolveInfo> query = queryIntentServicesInternal(intent, resolvedType, flags, userId);
         if (query != null) {
             if (query.size() >= 1) {
@@ -6962,7 +6998,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     private @NonNull List<ResolveInfo> queryIntentServicesInternal(Intent intent,
             String resolvedType, int flags, int userId) {
         if (!sUserManager.exists(userId)) return Collections.emptyList();
-        flags = updateFlagsForResolve(flags, userId, intent);
+        flags = updateFlagsForResolve(flags, userId, intent, false);
         ComponentName comp = intent.getComponent();
         if (comp == null) {
             if (intent.getSelector() != null) {
@@ -7006,7 +7042,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     private @NonNull List<ResolveInfo> queryIntentContentProvidersInternal(
             Intent intent, String resolvedType, int flags, int userId) {
         if (!sUserManager.exists(userId)) return Collections.emptyList();
-        flags = updateFlagsForResolve(flags, userId, intent);
+        flags = updateFlagsForResolve(flags, userId, intent, false);
         ComponentName comp = intent.getComponent();
         if (comp == null) {
             if (intent.getSelector() != null) {
@@ -23003,12 +23039,17 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
             return targetPackages;
         }
 
-
         @Override
         public boolean setEnabledOverlayPackages(int userId, String targetPackageName,
                 List<String> overlayPackageNames) {
             // TODO: implement when we integrate OMS properly
             return false;
+        }
+
+        public ResolveInfo resolveIntent(Intent intent, String resolvedType,
+                int flags, int userId) {
+            return resolveIntentInternal(
+                    intent, resolvedType, flags, userId, true /*includeInstantApp*/);
         }
     }
 
