@@ -579,7 +579,7 @@ RENDERTHREAD_OPENGL_PIPELINE_TEST(FrameBuilder, textStrikethrough) {
         SkPaint textPaint;
         textPaint.setAntiAlias(true);
         textPaint.setTextSize(20);
-        textPaint.setStrikeThruText(true);
+        textPaint.setFlags(textPaint.getFlags() | SkPaint::kStrikeThruText_ReserveFlag);
         textPaint.setTextEncoding(SkPaint::kGlyphID_TextEncoding);
         for (int i = 0; i < LOOPS; i++) {
             TestUtils::drawUtf8ToCanvas(&canvas, "test text", textPaint, 10, 100 * (i + 1));
