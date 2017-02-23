@@ -2289,14 +2289,12 @@
 
         <!-- Controls the auto-fill behavior for this view -->
         <attr name="autoFillMode">
-            <!-- Inherit the behavior from the parent. If there is no parent it is auto. This is the
-                 default value for this attribute.-->
+            <!-- Inherit the behavior from the parent. If there is no parent it is auto. -->
             <enum name="inherit" value="0" />
             <!-- Allows this view to automatically trigger an auto-fill request when it get focus.
                  -->
             <enum name="auto" value="1" />
-            <!-- Do not trigger an auto-fill request when this view is focused. The user can still
-                 manually force an auto-fill request for this view. -->
+            <!-- The user has to manually force an auto-fill request for this view. -->
             <enum name="manual" value="2" />
         </attr>
 
