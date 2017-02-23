@@ -339,8 +339,7 @@ public final class DisplayManager {
     private Display getOrCreateDisplayLocked(int displayId, boolean assumeValid) {
         Display display = mDisplays.get(displayId);
         if (display == null) {
-            display = mGlobal.getCompatibleDisplay(displayId,
-                    mContext.getDisplayAdjustments(displayId));
+            display = mGlobal.getCompatibleDisplay(displayId, mContext.getResources());
             if (display != null) {
                 mDisplays.put(displayId, display);
             }
