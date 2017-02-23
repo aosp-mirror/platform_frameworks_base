@@ -18,13 +18,19 @@ package android.content.pm;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.Intent;
 import android.content.IntentFilter;
 
 /**
- * Ephemeral application resolution response.
+ * Auxiliary application resolution response.
+ * <p>
+ * Used when resolution occurs, but, the target is not actually on the device.
+ * This happens resolving instant apps that haven't been installed yet or if
+ * the application consists of multiple feature splits and the needed split
+ * hasn't been installed.
  * @hide
  */
-public final class EphemeralResponse extends IntentFilter {
+public final class AuxiliaryResolveInfo extends IntentFilter {
     /** Resolved information returned from the external ephemeral resolver */
     public final EphemeralResolveInfo resolveInfo;
     /** The resolved package. Copied from {@link #resolveInfo}. */
@@ -32,11 +38,14 @@ public final class EphemeralResponse extends IntentFilter {
     /** The resolve split. Copied from the matched filter in {@link #resolveInfo}. */
     public final String splitName;
     /** Whether or not ephemeral resolution needs the second phase */
-    public final boolean needsPhase2;
+    public final boolean needsPhaseTwo;
     /** Opaque token to track the ephemeral application resolution */
     public final String token;
+    /** The version code of the package */
+    public final int versionCode;
 
-    public EphemeralResponse(@NonNull EphemeralResolveInfo resolveInfo,
+    /** Create a response for installing an instant application. */
+    public AuxiliaryResolveInfo(@NonNull EphemeralResolveInfo resolveInfo,
             @NonNull IntentFilter orig,
             @Nullable String splitName,
             @NonNull String token,
@@ -46,6 +55,20 @@ public final class EphemeralResponse extends IntentFilter {
         this.packageName = resolveInfo.getPackageName();
         this.splitName = splitName;
         this.token = token;
-        this.needsPhase2 = needsPhase2;
+        this.needsPhaseTwo = needsPhase2;
+        this.versionCode = resolveInfo.getVersionCode();
+    }
+
+    /** Create a response for installing a split on demand. */
+    public AuxiliaryResolveInfo(@NonNull String packageName,
+            @Nullable String splitName,
+            int versionCode) {
+        super();
+        this.packageName = packageName;
+        this.splitName = splitName;
+        this.versionCode = versionCode;
+        this.resolveInfo = null;
+        this.token = null;
+        this.needsPhaseTwo = false;
     }
 }

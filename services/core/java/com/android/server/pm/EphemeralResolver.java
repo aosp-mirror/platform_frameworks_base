@@ -16,8 +16,9 @@
 
 package com.android.server.pm;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActivityManager;
-import android.app.ActivityManagerNative;
 import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
@@ -29,7 +30,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.EphemeralIntentFilter;
 import android.content.pm.EphemeralRequest;
 import android.content.pm.EphemeralResolveInfo;
-import android.content.pm.EphemeralResponse;
+import android.content.pm.AuxiliaryResolveInfo;
 import android.content.pm.EphemeralResolveInfo.EphemeralDigest;
 import android.os.Binder;
 import android.os.Handler;
@@ -46,7 +47,7 @@ import java.util.UUID;
 
 /** @hide */
 public abstract class EphemeralResolver {
-    public static EphemeralResponse doEphemeralResolutionPhaseOne(Context context,
+    public static AuxiliaryResolveInfo doEphemeralResolutionPhaseOne(Context context,
             EphemeralResolverConnection connection, EphemeralRequest requestObj) {
         final Intent intent = requestObj.origIntent;
         final EphemeralDigest digest =
@@ -83,7 +84,7 @@ public abstract class EphemeralResolver {
                     final ArrayList<EphemeralResolveInfo> ephemeralResolveInfoList =
                             new ArrayList<EphemeralResolveInfo>(1);
                     ephemeralResolveInfoList.add(ephemeralResolveInfo);
-                    final EphemeralResponse ephemeralIntentInfo =
+                    final AuxiliaryResolveInfo ephemeralIntentInfo =
                             EphemeralResolver.filterEphemeralIntent(
                                     ephemeralResolveInfoList, intent, null /*resolvedType*/,
                                     0 /*userId*/, intent.getPackage(), digest,
@@ -104,7 +105,6 @@ public abstract class EphemeralResolver {
                     versionCode = -1;
                 }
                 final Intent installerIntent = buildEphemeralInstallerIntent(
-                        requestObj.launchIntent,
                         requestObj.origIntent,
                         requestObj.callingPackage,
                         requestObj.resolvedType,
@@ -126,35 +126,41 @@ public abstract class EphemeralResolver {
     /**
      * Builds and returns an intent to launch the ephemeral installer.
      */
-    public static Intent buildEphemeralInstallerIntent(Intent launchIntent, Intent origIntent,
-            String callingPackage, String resolvedType, int userId, String ephemeralPackageName,
-            String ephemeralSplitName, int versionCode, String token, boolean needsPhaseTwo) {
+    public static Intent buildEphemeralInstallerIntent(@NonNull Intent origIntent,
+            @NonNull String callingPackage,
+            @NonNull String resolvedType,
+            int userId,
+            @NonNull String ephemeralPackageName,
+            @Nullable String ephemeralSplitName,
+            int versionCode,
+            @Nullable String token,
+            boolean needsPhaseTwo) {
         // Construct the intent that launches the ephemeral installer
-        int flags = launchIntent.getFlags();
+        int flags = origIntent.getFlags();
         final Intent intent = new Intent();
         intent.setFlags(flags
                 | Intent.FLAG_ACTIVITY_NEW_TASK
                 | Intent.FLAG_ACTIVITY_CLEAR_TASK
                 | Intent.FLAG_ACTIVITY_NO_HISTORY
                 | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
-        // TODO: Remove when the platform has fully implemented ephemeral apps
-        intent.setData(origIntent.getData().buildUpon().clearQuery().build());
-        intent.putExtra(Intent.EXTRA_EPHEMERAL_TOKEN, token);
-        intent.putExtra(Intent.EXTRA_EPHEMERAL_HOSTNAME, origIntent.getData().getHost());
+        if (token != null) {
+            intent.putExtra(Intent.EXTRA_EPHEMERAL_TOKEN, token);
+        }
+        if (origIntent.getData() != null) {
+            intent.putExtra(Intent.EXTRA_EPHEMERAL_HOSTNAME, origIntent.getData().getHost());
+        }
 
+        // We have all of the data we need; just start the installer without a second phase
         if (!needsPhaseTwo) {
-            // We have all of the data we need; just start the installer without a second phase
-            final Intent nonEphemeralIntent = new Intent(origIntent);
-            nonEphemeralIntent.setFlags(
-                    nonEphemeralIntent.getFlags() | Intent.FLAG_IGNORE_EPHEMERAL);
-            // Intent that is launched if the ephemeral package couldn't be installed
-            // for any reason.
+            // Intent that is launched if the package couldn't be installed for any reason.
+            final Intent failureIntent = new Intent(origIntent);
+            failureIntent.setFlags(failureIntent.getFlags() | Intent.FLAG_IGNORE_EPHEMERAL);
             try {
-                final IIntentSender failureIntentTarget = ActivityManagerNative.getDefault()
+                final IIntentSender failureIntentTarget = ActivityManager.getService()
                         .getIntentSender(
                                 ActivityManager.INTENT_SENDER_ACTIVITY, callingPackage,
                                 null /*token*/, null /*resultWho*/, 1 /*requestCode*/,
-                                new Intent[] { nonEphemeralIntent },
+                                new Intent[] { failureIntent },
                                 new String[] { resolvedType },
                                 PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_ONE_SHOT
                                         | PendingIntent.FLAG_IMMUTABLE,
@@ -163,19 +169,14 @@ public abstract class EphemeralResolver {
                         new IntentSender(failureIntentTarget));
             } catch (RemoteException ignore) { /* ignore; same process */ }
 
-            // Success intent goes back to the installer
-            final Intent ephemeralIntent = new Intent(launchIntent)
-                    .setComponent(null)
-                    .setPackage(ephemeralPackageName);
-            // Intent that is eventually launched if the ephemeral package was
-            // installed successfully. This will actually be launched by a platform
-            // broadcast receiver.
+            // Intent that is launched if the package was installed successfully.
+            final Intent successIntent = new Intent(origIntent);
             try {
-                final IIntentSender successIntentTarget = ActivityManagerNative.getDefault()
+                final IIntentSender successIntentTarget = ActivityManager.getService()
                         .getIntentSender(
                                 ActivityManager.INTENT_SENDER_ACTIVITY, callingPackage,
                                 null /*token*/, null /*resultWho*/, 0 /*requestCode*/,
-                                new Intent[] { ephemeralIntent },
+                                new Intent[] { successIntent },
                                 new String[] { resolvedType },
                                 PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_ONE_SHOT
                                         | PendingIntent.FLAG_IMMUTABLE,
@@ -192,7 +193,7 @@ public abstract class EphemeralResolver {
         return intent;
     }
 
-    private static EphemeralResponse filterEphemeralIntent(
+    private static AuxiliaryResolveInfo filterEphemeralIntent(
             List<EphemeralResolveInfo> ephemeralResolveInfoList,
             Intent intent, String resolvedType, int userId, String packageName,
             EphemeralDigest digest, String token) {
@@ -212,7 +213,7 @@ public abstract class EphemeralResolver {
                         ephemeralInfo.getIntentFilters();
                 // No filters; we need to start phase two
                 if (ephemeralFilters == null || ephemeralFilters.isEmpty()) {
-                    return new EphemeralResponse(ephemeralInfo,
+                    return new AuxiliaryResolveInfo(ephemeralInfo,
                             new IntentFilter(Intent.ACTION_VIEW) /*intentFilter*/,
                             null /*splitName*/, token, true /*needsPhase2*/);
                 }
@@ -226,14 +227,14 @@ public abstract class EphemeralResolver {
                         continue;
                     }
                     for (int k = splitFilters.size() - 1; k >= 0; --k) {
-                        final EphemeralResponse intentInfo =
-                                new EphemeralResponse(ephemeralInfo,
+                        final AuxiliaryResolveInfo intentInfo =
+                                new AuxiliaryResolveInfo(ephemeralInfo,
                                         splitFilters.get(k), ephemeralFilter.getSplitName(),
                                         token, false /*needsPhase2*/);
                         ephemeralResolver.addFilter(intentInfo);
                     }
                 }
-                List<EphemeralResponse> matchedResolveInfoList = ephemeralResolver.queryIntent(
+                List<AuxiliaryResolveInfo> matchedResolveInfoList = ephemeralResolver.queryIntent(
                         intent, resolvedType, false /*defaultOnly*/, userId);
                 if (!matchedResolveInfoList.isEmpty()) {
                     return matchedResolveInfoList.get(0);

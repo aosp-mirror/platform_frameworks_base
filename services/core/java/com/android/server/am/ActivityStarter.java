@@ -82,6 +82,7 @@ import static com.android.server.am.ActivityStackSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.am.ActivityStackSupervisor.TAG_TASKS;
 import static com.android.server.am.EventLogTags.AM_NEW_INTENT;
 
+import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.AppGlobals;
@@ -98,7 +99,9 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.AuxiliaryResolveInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
 import android.content.res.Configuration;
@@ -456,22 +459,9 @@ class ActivityStarter {
         // Instead, launch the ephemeral installer. Once the installer is finished, it
         // starts either the intent we resolved here [on install error] or the ephemeral
         // app [on install success].
-        if (rInfo != null && rInfo.ephemeralResponse != null) {
-            final String packageName =
-                    rInfo.ephemeralResponse.resolveInfo.getPackageName();
-            final String splitName = rInfo.ephemeralResponse.splitName;
-            final boolean needsPhaseTwo = rInfo.ephemeralResponse.needsPhase2;
-            final String token = rInfo.ephemeralResponse.token;
-            final int versionCode = rInfo.ephemeralResponse.resolveInfo.getVersionCode();
-            if (needsPhaseTwo) {
-                // request phase two resolution
-                mService.getPackageManagerInternalLocked().requestEphemeralResolutionPhaseTwo(
-                        rInfo.ephemeralResponse, ephemeralIntent, resolvedType, intent,
-                        callingPackage, userId);
-            }
-            intent = EphemeralResolver.buildEphemeralInstallerIntent(intent, ephemeralIntent,
-                    callingPackage, resolvedType, userId, packageName, splitName, versionCode,
-                    token, needsPhaseTwo);
+        if (rInfo != null && rInfo.auxiliaryInfo != null) {
+            intent = createLaunchIntent(rInfo.auxiliaryInfo, ephemeralIntent,
+                    callingPackage, resolvedType, userId);
             resolvedType = null;
             callingUid = realCallingUid;
             callingPid = realCallingPid;
@@ -528,6 +518,21 @@ class ActivityStarter {
         }
         postStartActivityUncheckedProcessing(r, err, stack.mStackId, mSourceRecord, mTargetStack);
         return err;
+    }
+
+    /** Creates a launch intent for the given auxiliary resolution data. */
+    private @NonNull Intent createLaunchIntent(@NonNull AuxiliaryResolveInfo auxiliaryResponse,
+            Intent originalIntent, String callingPackage,
+            String resolvedType, int userId) {
+        if (auxiliaryResponse.needsPhaseTwo) {
+            // request phase two resolution
+            mService.getPackageManagerInternalLocked().requestInstantAppResolutionPhaseTwo(
+                    auxiliaryResponse, originalIntent, resolvedType, callingPackage, userId);
+        }
+        return EphemeralResolver.buildEphemeralInstallerIntent(originalIntent,
+                callingPackage, resolvedType, userId, auxiliaryResponse.packageName,
+                auxiliaryResponse.splitName, auxiliaryResponse.versionCode,
+                auxiliaryResponse.token, auxiliaryResponse.needsPhaseTwo);
     }
 
     void postStartActivityUncheckedProcessing(

@@ -131,7 +131,7 @@ import android.content.pm.ComponentInfo;
 import android.content.pm.InstantAppInfo;
 import android.content.pm.EphemeralRequest;
 import android.content.pm.EphemeralResolveInfo;
-import android.content.pm.EphemeralResponse;
+import android.content.pm.AuxiliaryResolveInfo;
 import android.content.pm.FallbackCategoryProvider;
 import android.content.pm.FeatureInfo;
 import android.content.pm.IOnPermissionsChangeListener;
@@ -837,12 +837,12 @@ public class PackageManagerService extends IPackageManager.Stub {
     private int mIntentFilterVerificationToken = 0;
 
     /** The service connection to the ephemeral resolver */
-    final EphemeralResolverConnection mEphemeralResolverConnection;
+    final EphemeralResolverConnection mInstantAppResolverConnection;
 
     /** Component used to install ephemeral applications */
-    ComponentName mEphemeralInstallerComponent;
-    final ActivityInfo mEphemeralInstallerActivity = new ActivityInfo();
-    final ResolveInfo mEphemeralInstallerInfo = new ResolveInfo();
+    ComponentName mInstantAppInstallerComponent;
+    final ActivityInfo mInstantAppInstallerActivity = new ActivityInfo();
+    final ResolveInfo mInstantAppInstallerInfo = new ResolveInfo();
 
     final SparseArray<IntentFilterVerificationState> mIntentFilterVerificationStates
             = new SparseArray<IntentFilterVerificationState>();
@@ -1164,7 +1164,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     static final int START_INTENT_FILTER_VERIFICATIONS = 17;
     static final int INTENT_FILTER_VERIFIED = 18;
     static final int WRITE_PACKAGE_LIST = 19;
-    static final int EPHEMERAL_RESOLUTION_PHASE_TWO = 20;
+    static final int INSTANT_APP_RESOLUTION_PHASE_TWO = 20;
 
     static final int WRITE_SETTINGS_DELAY = 10*1000;  // 10 seconds
 
@@ -1735,11 +1735,11 @@ public class PackageManagerService extends IPackageManager.Stub {
 
                     break;
                 }
-                case EPHEMERAL_RESOLUTION_PHASE_TWO: {
+                case INSTANT_APP_RESOLUTION_PHASE_TWO: {
                     EphemeralResolver.doEphemeralResolutionPhaseTwo(mContext,
-                            mEphemeralResolverConnection,
+                            mInstantAppResolverConnection,
                             (EphemeralRequest) msg.obj,
-                            mEphemeralInstallerActivity,
+                            mInstantAppInstallerActivity,
                             mHandler);
                 }
             }
@@ -2890,17 +2890,17 @@ public class PackageManagerService extends IPackageManager.Stub {
                 if (DEBUG_EPHEMERAL) {
                     Slog.i(TAG, "Ephemeral resolver: " + ephemeralResolverComponent);
                 }
-                mEphemeralResolverConnection =
+                mInstantAppResolverConnection =
                         new EphemeralResolverConnection(mContext, ephemeralResolverComponent);
             } else {
-                mEphemeralResolverConnection = null;
+                mInstantAppResolverConnection = null;
             }
-            mEphemeralInstallerComponent = getEphemeralInstallerLPr();
-            if (mEphemeralInstallerComponent != null) {
+            mInstantAppInstallerComponent = getEphemeralInstallerLPr();
+            if (mInstantAppInstallerComponent != null) {
                 if (DEBUG_EPHEMERAL) {
-                    Slog.i(TAG, "Ephemeral installer: " + mEphemeralInstallerComponent);
+                    Slog.i(TAG, "Ephemeral installer: " + mInstantAppInstallerComponent);
                 }
-                setUpEphemeralInstallerActivityLP(mEphemeralInstallerComponent);
+                setUpInstantAppInstallerActivityLP(mInstantAppInstallerComponent);
             }
 
             // Read and update the usage of dex files.
@@ -4026,7 +4026,9 @@ public class PackageManagerService extends IPackageManager.Stub {
         } else {
             // Otherwise, prevent leaking ephemeral components
             flags &= ~PackageManager.MATCH_VISIBLE_TO_INSTANT_APP_ONLY;
-            if (callingUid != Process.SYSTEM_UID && callingUid != 0) {
+            if (callingUid != Process.SYSTEM_UID
+                    && callingUid != Process.SHELL_UID
+                    && callingUid != 0) {
                 // Unless called from the system process
                 flags &= ~PackageManager.MATCH_INSTANT;
             }
@@ -5659,10 +5661,10 @@ public class PackageManagerService extends IPackageManager.Stub {
         if (callingUser != UserHandle.USER_SYSTEM) {
             return false;
         }
-        if (mEphemeralResolverConnection == null) {
+        if (mInstantAppResolverConnection == null) {
             return false;
         }
-        if (mEphemeralInstallerComponent == null) {
+        if (mInstantAppInstallerComponent == null) {
             return false;
         }
         if (intent.getComponent() != null) {
@@ -5679,6 +5681,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             return false;
         }
         // Deny ephemeral apps if the user chose _ALWAYS or _ALWAYS_ASK for intent resolution.
+        // Or if there's already an ephemeral app installed that handles the action
         synchronized (mPackages) {
             final int count = (resolvedActivities == null ? 0 : resolvedActivities.size());
             for (int n = 0; n < count; n++) {
@@ -5697,6 +5700,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                         }
                         return false;
                     }
+                    if (ps.getInstantApp(userId)) {
+                        return false;
+                    }
                 }
             }
         }
@@ -5704,11 +5710,11 @@ public class PackageManagerService extends IPackageManager.Stub {
         return true;
     }
 
-    private void requestEphemeralResolutionPhaseTwo(EphemeralResponse responseObj,
-            Intent origIntent, String resolvedType, Intent launchIntent, String callingPackage,
+    private void requestInstantAppResolutionPhaseTwo(AuxiliaryResolveInfo responseObj,
+            Intent origIntent, String resolvedType, String callingPackage,
             int userId) {
-        final Message msg = mHandler.obtainMessage(EPHEMERAL_RESOLUTION_PHASE_TWO,
-                new EphemeralRequest(responseObj, origIntent, resolvedType, launchIntent,
+        final Message msg = mHandler.obtainMessage(INSTANT_APP_RESOLUTION_PHASE_TWO,
+                new EphemeralRequest(responseObj, origIntent, resolvedType,
                         callingPackage, userId));
         mHandler.sendMessage(msg);
     }
@@ -6134,7 +6140,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     list.add(ri);
                 }
             }
-            return list;
+            return applyPostResolutionFilter(list, instantAppPkgName);
         }
 
         // reader
@@ -6152,7 +6158,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 if (xpResolveInfo != null) {
                     List<ResolveInfo> xpResult = new ArrayList<ResolveInfo>(1);
                     xpResult.add(xpResolveInfo);
-                    return filterForEphemeral(
+                    return applyPostResolutionFilter(
                             filterIfNotSystemUser(xpResult, userId), instantAppPkgName);
                 }
 
@@ -6193,13 +6199,13 @@ public class PackageManagerService extends IPackageManager.Stub {
                             // And we are not going to add emphemeral app, so we can return the
                             // result straight away.
                             result.add(xpDomainInfo.resolveInfo);
-                            return filterForEphemeral(result, instantAppPkgName);
+                            return applyPostResolutionFilter(result, instantAppPkgName);
                         }
                     } else if (result.size() <= 1 && !addEphemeral) {
                         // No result in parent user and <= 1 result in current profile, and we
                         // are not going to add emphemeral app, so we can return the result without
                         // further processing.
-                        return filterForEphemeral(result, instantAppPkgName);
+                        return applyPostResolutionFilter(result, instantAppPkgName);
                     }
                     // We have more than one candidate (combining results from current and parent
                     // profile), so we need filtering and sorting.
@@ -6210,7 +6216,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             } else {
                 final PackageParser.Package pkg = mPackages.get(pkgName);
                 if (pkg != null) {
-                    result = filterForEphemeral(filterIfNotSystemUser(
+                    result = applyPostResolutionFilter(filterIfNotSystemUser(
                             mActivities.queryIntentForPackage(
                                     intent, resolvedType, flags, pkg.activities, userId),
                             userId), instantAppPkgName);
@@ -6227,15 +6233,16 @@ public class PackageManagerService extends IPackageManager.Stub {
             Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "resolveEphemeral");
             final EphemeralRequest requestObject = new EphemeralRequest(
                     null /*responseObj*/, intent /*origIntent*/, resolvedType,
-                    null /*launchIntent*/, null /*callingPackage*/, userId);
-            final EphemeralResponse intentInfo = EphemeralResolver.doEphemeralResolutionPhaseOne(
-                    mContext, mEphemeralResolverConnection, requestObject);
-            if (intentInfo != null) {
+                    null /*callingPackage*/, userId);
+            final AuxiliaryResolveInfo auxiliaryResponse =
+                    EphemeralResolver.doEphemeralResolutionPhaseOne(
+                            mContext, mInstantAppResolverConnection, requestObject);
+            if (auxiliaryResponse != null) {
                 if (DEBUG_EPHEMERAL) {
                     Slog.v(TAG, "Adding ephemeral installer to the ResolveInfo list");
                 }
-                final ResolveInfo ephemeralInstaller = new ResolveInfo(mEphemeralInstallerInfo);
-                ephemeralInstaller.ephemeralResponse = intentInfo;
+                final ResolveInfo ephemeralInstaller = new ResolveInfo(mInstantAppInstallerInfo);
+                ephemeralInstaller.auxiliaryInfo = auxiliaryResponse;
                 // make sure this resolver is the default
                 ephemeralInstaller.isDefault = true;
                 ephemeralInstaller.match = IntentFilter.MATCH_CATEGORY_SCHEME_SPECIFIC_PART
@@ -6251,7 +6258,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         if (sortResult) {
             Collections.sort(result, mResolvePrioritySorter);
         }
-        return filterForEphemeral(result, instantAppPkgName);
+        return applyPostResolutionFilter(result, instantAppPkgName);
     }
 
     private static class CrossProfileDomainInfo {
@@ -6359,16 +6366,40 @@ public class PackageManagerService extends IPackageManager.Stub {
      *          is performed.
      * @return A filtered list of resolved activities.
      */
-    private List<ResolveInfo> filterForEphemeral(List<ResolveInfo> resolveInfos,
+    private List<ResolveInfo> applyPostResolutionFilter(List<ResolveInfo> resolveInfos,
             String ephemeralPkgName) {
+        // TODO: When adding on-demand split support for non-instant apps, remove this check
+        // and always apply post filtering
         if (ephemeralPkgName == null) {
             return resolveInfos;
         }
         for (int i = resolveInfos.size() - 1; i >= 0; i--) {
-            ResolveInfo info = resolveInfos.get(i);
+            final ResolveInfo info = resolveInfos.get(i);
             final boolean isEphemeralApp = info.activityInfo.applicationInfo.isInstantApp();
             // allow activities that are defined in the provided package
             if (isEphemeralApp && ephemeralPkgName.equals(info.activityInfo.packageName)) {
+                if (info.activityInfo.splitName != null
+                        && !ArrayUtils.contains(info.activityInfo.applicationInfo.splitNames,
+                                info.activityInfo.splitName)) {
+                    // requested activity is defined in a split that hasn't been installed yet.
+                    // add the installer to the resolve list
+                    if (DEBUG_EPHEMERAL) {
+                        Slog.v(TAG, "Adding ephemeral installer to the ResolveInfo list");
+                    }
+                    final ResolveInfo installerInfo = new ResolveInfo(mInstantAppInstallerInfo);
+                    installerInfo.auxiliaryInfo = new AuxiliaryResolveInfo(
+                            info.activityInfo.packageName, info.activityInfo.splitName,
+                            info.activityInfo.applicationInfo.versionCode);
+                    // make sure this resolver is the default
+                    installerInfo.isDefault = true;
+                    installerInfo.match = IntentFilter.MATCH_CATEGORY_SCHEME_SPECIFIC_PART
+                            | IntentFilter.MATCH_ADJUSTMENT_NORMAL;
+                    // add a non-generic filter
+                    installerInfo.filter = new IntentFilter();
+                    // load resources from the correct package
+                    installerInfo.resolvePackageName = info.getComponentInfo().packageName;
+                    resolveInfos.set(i, installerInfo);
+                }
                 continue;
             }
             // allow activities that have been explicitly exposed to ephemeral apps
@@ -10699,12 +10730,12 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-    private void setUpEphemeralInstallerActivityLP(ComponentName installerComponent) {
+    private void setUpInstantAppInstallerActivityLP(ComponentName installerComponent) {
         if (installerComponent == null) {
             if (DEBUG_EPHEMERAL) {
                 Slog.d(TAG, "Clear ephemeral installer activity");
             }
-            mEphemeralInstallerActivity.applicationInfo = null;
+            mInstantAppInstallerActivity.applicationInfo = null;
             return;
         }
 
@@ -10713,21 +10744,21 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
         final PackageParser.Package pkg = mPackages.get(installerComponent.getPackageName());
         // Set up information for ephemeral installer activity
-        mEphemeralInstallerActivity.applicationInfo = pkg.applicationInfo;
-        mEphemeralInstallerActivity.name = installerComponent.getClassName();
-        mEphemeralInstallerActivity.packageName = pkg.applicationInfo.packageName;
-        mEphemeralInstallerActivity.processName = pkg.applicationInfo.packageName;
-        mEphemeralInstallerActivity.launchMode = ActivityInfo.LAUNCH_MULTIPLE;
-        mEphemeralInstallerActivity.flags = ActivityInfo.FLAG_EXCLUDE_FROM_RECENTS
+        mInstantAppInstallerActivity.applicationInfo = pkg.applicationInfo;
+        mInstantAppInstallerActivity.name = installerComponent.getClassName();
+        mInstantAppInstallerActivity.packageName = pkg.applicationInfo.packageName;
+        mInstantAppInstallerActivity.processName = pkg.applicationInfo.packageName;
+        mInstantAppInstallerActivity.launchMode = ActivityInfo.LAUNCH_MULTIPLE;
+        mInstantAppInstallerActivity.flags = ActivityInfo.FLAG_EXCLUDE_FROM_RECENTS
                 | ActivityInfo.FLAG_FINISH_ON_CLOSE_SYSTEM_DIALOGS;
-        mEphemeralInstallerActivity.theme = 0;
-        mEphemeralInstallerActivity.exported = true;
-        mEphemeralInstallerActivity.enabled = true;
-        mEphemeralInstallerInfo.activityInfo = mEphemeralInstallerActivity;
-        mEphemeralInstallerInfo.priority = 0;
-        mEphemeralInstallerInfo.preferredOrder = 1;
-        mEphemeralInstallerInfo.isDefault = true;
-        mEphemeralInstallerInfo.match = IntentFilter.MATCH_CATEGORY_SCHEME_SPECIFIC_PART
+        mInstantAppInstallerActivity.theme = 0;
+        mInstantAppInstallerActivity.exported = true;
+        mInstantAppInstallerActivity.enabled = true;
+        mInstantAppInstallerInfo.activityInfo = mInstantAppInstallerActivity;
+        mInstantAppInstallerInfo.priority = 0;
+        mInstantAppInstallerInfo.preferredOrder = 1;
+        mInstantAppInstallerInfo.isDefault = true;
+        mInstantAppInstallerInfo.match = IntentFilter.MATCH_CATEGORY_SCHEME_SPECIFIC_PART
                 | IntentFilter.MATCH_ADJUSTMENT_NORMAL;
     }
 
@@ -12769,7 +12800,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     static final class EphemeralIntentResolver
-            extends IntentResolver<EphemeralResponse, EphemeralResponse> {
+            extends IntentResolver<AuxiliaryResolveInfo, AuxiliaryResolveInfo> {
         /**
          * The result that has the highest defined order. Ordering applies on a
          * per-package basis. Mapping is from package name to Pair of order and
@@ -12784,17 +12815,17 @@ public class PackageManagerService extends IPackageManager.Stub {
         final ArrayMap<String, Pair<Integer, EphemeralResolveInfo>> mOrderResult = new ArrayMap<>();
 
         @Override
-        protected EphemeralResponse[] newArray(int size) {
-            return new EphemeralResponse[size];
+        protected AuxiliaryResolveInfo[] newArray(int size) {
+            return new AuxiliaryResolveInfo[size];
         }
 
         @Override
-        protected boolean isPackageForFilter(String packageName, EphemeralResponse responseObj) {
+        protected boolean isPackageForFilter(String packageName, AuxiliaryResolveInfo responseObj) {
             return true;
         }
 
         @Override
-        protected EphemeralResponse newResult(EphemeralResponse responseObj, int match,
+        protected AuxiliaryResolveInfo newResult(AuxiliaryResolveInfo responseObj, int match,
                 int userId) {
             if (!sUserManager.exists(userId)) {
                 return null;
@@ -12816,7 +12847,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         @Override
-        protected void filterResults(List<EphemeralResponse> results) {
+        protected void filterResults(List<AuxiliaryResolveInfo> results) {
             // only do work if ordering is enabled [most of the time it won't be]
             if (mOrderResult.size() == 0) {
                 return;
@@ -22898,11 +22929,10 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         }
 
         @Override
-        public void requestEphemeralResolutionPhaseTwo(EphemeralResponse responseObj,
-                Intent origIntent, String resolvedType, Intent launchIntent,
-                String callingPackage, int userId) {
-            PackageManagerService.this.requestEphemeralResolutionPhaseTwo(
-                    responseObj, origIntent, resolvedType, launchIntent, callingPackage, userId);
+        public void requestInstantAppResolutionPhaseTwo(AuxiliaryResolveInfo responseObj,
+                Intent origIntent, String resolvedType, String callingPackage, int userId) {
+            PackageManagerService.this.requestInstantAppResolutionPhaseTwo(
+                    responseObj, origIntent, resolvedType, callingPackage, userId);
         }
 
         @Override

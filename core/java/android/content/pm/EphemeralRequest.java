@@ -24,24 +24,21 @@ import android.content.Intent;
  */
 public final class EphemeralRequest {
     /** Response from the first phase of ephemeral application resolution */
-    public final EphemeralResponse responseObj;
+    public final AuxiliaryResolveInfo responseObj;
     /** The original intent that triggered ephemeral application resolution */
     public final Intent origIntent;
     /** Resolved type of the intent */
     public final String resolvedType;
-    /** The intent that would launch if there were no ephemeral applications */
-    public final Intent launchIntent;
     /** The name of the package requesting the ephemeral application */
     public final String callingPackage;
     /** ID of the user requesting the ephemeral application */
     public final int userId;
 
-    public EphemeralRequest(EphemeralResponse responseObj, Intent origIntent,
-            String resolvedType, Intent launchIntent, String callingPackage, int userId) {
+    public EphemeralRequest(AuxiliaryResolveInfo responseObj, Intent origIntent,
+            String resolvedType, String callingPackage, int userId) {
         this.responseObj = responseObj;
         this.origIntent = origIntent;
         this.resolvedType = resolvedType;
-        this.launchIntent = launchIntent;
         this.callingPackage = callingPackage;
         this.userId = userId;
     }
