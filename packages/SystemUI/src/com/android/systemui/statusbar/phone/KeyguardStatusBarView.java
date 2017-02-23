@@ -18,6 +18,10 @@ package com.android.systemui.statusbar.phone;
 
 import static com.android.systemui.ScreenDecorations.DisplayCutoutView.boundsFromDirection;
 
+import android.animation.Animator;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
+import android.animation.AnimatorListenerAdapter;
 import android.annotation.ColorInt;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -25,6 +29,8 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.Pair;
 import android.util.TypedValue;
@@ -100,6 +106,8 @@ public class KeyguardStatusBarView extends RelativeLayout
      * Draw this many pixels into the left/right side of the cutout to optimally use the space
      */
     private int mCutoutSideNudge = 0;
+
+    private boolean mHideContents;
 
     public KeyguardStatusBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -187,11 +195,16 @@ public class KeyguardStatusBarView extends RelativeLayout
             // by the user.
             if (mMultiUserSwitch.isMultiUserEnabled()) {
                 mMultiUserSwitch.setVisibility(View.VISIBLE);
+            } else if (mMultiUserSwitch.isMultiUserEnabled()) {
+                mMultiUserSwitch.setVisibility(mHideContents ? View.INVISIBLE : View.VISIBLE);
             } else {
                 mMultiUserSwitch.setVisibility(View.GONE);
             }
         }
         mBatteryView.setForceShowPercent(mBatteryCharging && mShowPercentAvailable);
+        if (mCarrierLabel != null) {
+            mCarrierLabel.setVisibility(mHideContents ? View.INVISIBLE : View.VISIBLE);
+        }
     }
 
     private void updateSystemIconsLayoutParams() {
@@ -490,6 +503,98 @@ public class KeyguardStatusBarView extends RelativeLayout
         pw.println("  mLayoutState: " + mLayoutState);
         if (mBatteryView != null) {
             mBatteryView.dump(fd, pw, args);
+        }
+    }
+
+    public void toggleContents(boolean hideContents) {
+        boolean shouldShowContents = Settings.System.getIntForUser(
+                getContext().getContentResolver(), Settings.System.LOCK_SHOW_STATUS_BAR, 1,
+                UserHandle.USER_CURRENT) == 1;
+        if (shouldShowContents) {
+            hideContents = false;
+        }
+        if (mHideContents == hideContents) {
+            return;
+        }
+
+        mHideContents = hideContents;
+        if (mHideContents) {
+            Animator fadeAnimator1 = null;
+            if (mMultiUserSwitch.getVisibility() != View.GONE) {
+                fadeAnimator1 = ObjectAnimator.ofFloat(mMultiUserSwitch, "alpha", 1f, 0f);
+                fadeAnimator1.setDuration(500);
+                fadeAnimator1.setInterpolator(Interpolators.ALPHA_OUT);
+                fadeAnimator1.addListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        mMultiUserSwitch.setVisibility(View.INVISIBLE);
+                    }
+                });
+            }
+            Animator fadeAnimator2 = ObjectAnimator.ofFloat(mSystemIconsContainer, "alpha", 1f, 0f);
+            fadeAnimator2.setDuration(500);
+            fadeAnimator2.setInterpolator(Interpolators.ALPHA_OUT);
+            fadeAnimator2.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    mSystemIconsContainer.setVisibility(View.INVISIBLE);
+                }
+            });
+            Animator fadeAnimator3 = null;
+            if (mCarrierLabel.getVisibility() != View.GONE) {
+                fadeAnimator3 = ObjectAnimator.ofFloat(mCarrierLabel, "alpha", 1f, 0f);
+                fadeAnimator3.setDuration(500);
+                fadeAnimator3.setInterpolator(Interpolators.ALPHA_OUT);
+                fadeAnimator3.addListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        mCarrierLabel.setVisibility(View.INVISIBLE);
+                    }
+                });
+            }
+            AnimatorSet set = new AnimatorSet();
+            set.playTogether(fadeAnimator2);
+            if (fadeAnimator3 != null) {
+                set.playTogether(fadeAnimator3);
+            }
+            if (fadeAnimator1 != null) {
+                set.playTogether(fadeAnimator1);
+            }
+            set.start();
+        } else {
+            Animator fadeAnimator1 = null;
+            if (mMultiUserSwitch.getVisibility() != View.GONE) {
+                mMultiUserSwitch.setAlpha(0f);
+                mMultiUserSwitch.setVisibility(View.VISIBLE);
+                fadeAnimator1 = ObjectAnimator.ofFloat(mMultiUserSwitch, "alpha", 0f, 1f);
+                fadeAnimator1.setDuration(500);
+                fadeAnimator1.setInterpolator(Interpolators.ALPHA_IN);
+            }
+
+            mSystemIconsContainer.setAlpha(0f);
+            mSystemIconsContainer.setVisibility(View.VISIBLE);
+            Animator fadeAnimator2 = ObjectAnimator.ofFloat(mSystemIconsContainer, "alpha", 0f, 1f);
+            fadeAnimator2.setDuration(500);
+            fadeAnimator2.setInterpolator(Interpolators.ALPHA_IN);
+
+            Animator fadeAnimator3 = null;
+            if (mCarrierLabel.getVisibility() != View.GONE) {
+                mCarrierLabel.setAlpha(0f);
+                mCarrierLabel.setVisibility(View.VISIBLE);
+                fadeAnimator3 = ObjectAnimator.ofFloat(mCarrierLabel, "alpha", 0f, 1f);
+                fadeAnimator3.setDuration(500);
+                fadeAnimator3.setInterpolator(Interpolators.ALPHA_IN);
+            }
+
+            AnimatorSet set = new AnimatorSet();
+            set.playTogether(fadeAnimator2);
+            if (fadeAnimator3 != null) {
+                set.playTogether(fadeAnimator3);
+            }
+            if (fadeAnimator1 != null) {
+                set.playTogether(fadeAnimator1);
+            }
+            set.start();
         }
     }
 }
