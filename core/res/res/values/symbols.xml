@@ -2741,5 +2741,5 @@
 <!-- Network Recommendation -->
   <java-symbol type="array" name="config_networkRecommendationPackageNames" />
 
-  <java-symbol type="string" name="config_defaultCellBroadcastReceiverComponent" />
+  <java-symbol type="string" name="config_defaultCellBroadcastReceiverPkg" />
 </resources>
