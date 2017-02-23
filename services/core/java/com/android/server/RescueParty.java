@@ -19,13 +19,9 @@ package com.android.server;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.UserInfo;
-import android.os.BatteryManager;
-import android.os.BatteryProperties;
 import android.os.Build;
-import android.os.IBatteryPropertiesListener;
-import android.os.IBatteryPropertiesRegistrar;
+import android.os.FileUtils;
 import android.os.RecoverySystem;
-import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
@@ -34,14 +30,12 @@ import android.provider.Settings;
 import android.text.format.DateUtils;
 import android.util.ExceptionUtils;
 import android.util.MathUtils;
-import android.util.MutableBoolean;
 import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.util.ArrayUtils;
 
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
+import java.io.File;
 
 /**
  * Utilities to help rescue the system from crash loops. Callers are expected to
@@ -325,30 +319,13 @@ public class RescueParty {
 
     /**
      * Hacky test to check if the device has an active USB connection, which is
-     * a good proxy for someone doing local development work. It uses a low
-     * level call since we may not have started {@link BatteryManager} yet.
+     * a good proxy for someone doing local development work.
      */
     private static boolean isUsbActive() {
-        final MutableBoolean res = new MutableBoolean(false);
-        final CountDownLatch latch = new CountDownLatch(1);
-        final IBatteryPropertiesListener listener = new IBatteryPropertiesListener.Stub() {
-            @Override
-            public void batteryPropertiesChanged(BatteryProperties props) {
-                res.value = props.chargerUsbOnline;
-                latch.countDown();
-            }
-        };
-
         try {
-            final IBatteryPropertiesRegistrar bpr = IBatteryPropertiesRegistrar.Stub
-                    .asInterface(ServiceManager.getService("batteryproperties"));
-            bpr.registerListener(listener);
-            try {
-                latch.await(5, TimeUnit.SECONDS);
-            } finally {
-                bpr.unregisterListener(listener);
-            }
-            return res.value;
+            final String state = FileUtils
+                    .readTextFile(new File("/sys/class/android_usb/android0/state"), 128, "");
+            return "CONFIGURED".equals(state.trim());
         } catch (Throwable t) {
             Slog.w(TAG, "Failed to determine if device was on USB", t);
             return false;
