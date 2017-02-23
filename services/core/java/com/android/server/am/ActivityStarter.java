@@ -76,11 +76,16 @@ import static com.android.server.am.ActivityRecord.RECENTS_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityStack.ActivityState.RESUMED;
 import static com.android.server.am.ActivityStack.STACK_INVISIBLE;
 import static com.android.server.am.ActivityStackSupervisor.CREATE_IF_NEEDED;
+import static com.android.server.am.ActivityStackSupervisor.DEFER_RESUME;
 import static com.android.server.am.ActivityStackSupervisor.FORCE_FOCUS;
 import static com.android.server.am.ActivityStackSupervisor.ON_TOP;
 import static com.android.server.am.ActivityStackSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.am.ActivityStackSupervisor.TAG_TASKS;
 import static com.android.server.am.EventLogTags.AM_NEW_INTENT;
+import static com.android.server.am.TaskRecord.REPARENT_KEEP_STACK_AT_FRONT;
+import static com.android.server.am.TaskRecord.REPARENT_MOVE_STACK_TO_FRONT;
+
+import static java.lang.Integer.MAX_VALUE;
 
 import android.annotation.NonNull;
 import android.app.ActivityManager;
@@ -1461,9 +1466,9 @@ class ActivityStarter {
                         if ((mLaunchFlags & FLAG_ACTIVITY_LAUNCH_ADJACENT) != 0) {
                             // If we want to launch adjacent and mTargetStack is not the computed
                             // launch stack - move task to top of computed stack.
-                            mSupervisor.moveTaskToStackLocked(intentActivity.task.taskId,
-                                    launchStack.mStackId, ON_TOP, FORCE_FOCUS, "launchToSide",
-                                    ANIMATE);
+                            intentActivity.task.reparent(launchStack.mStackId, ON_TOP,
+                                    REPARENT_MOVE_STACK_TO_FRONT, ANIMATE, DEFER_RESUME,
+                                    "launchToSide");
                         } else {
                             // TODO: This should be reevaluated in MW v2.
                             // We choose to move task to front instead of launching it adjacent
@@ -1678,8 +1683,8 @@ class ActivityStarter {
         if (mTargetStack == null) {
             mTargetStack = sourceStack;
         } else if (mTargetStack != sourceStack) {
-            mSupervisor.moveTaskToStackLocked(sourceTask.taskId, mTargetStack.mStackId,
-                    ON_TOP, FORCE_FOCUS, "launchToSide", !ANIMATE);
+            sourceTask.reparent(mTargetStack.mStackId, ON_TOP, REPARENT_MOVE_STACK_TO_FRONT,
+                    !ANIMATE, DEFER_RESUME, "launchToSide");
         }
 
         final TaskRecord topTask = mTargetStack.topTask();
@@ -1745,9 +1750,9 @@ class ActivityStarter {
             mInTask.updateOverrideConfiguration(mLaunchBounds);
             int stackId = mInTask.getLaunchStackId();
             if (stackId != mInTask.getStackId()) {
-                final ActivityStack stack = mSupervisor.moveTaskToStackUncheckedLocked(mInTask,
-                        stackId, ON_TOP, !FORCE_FOCUS, "inTaskToFront");
-                stackId = stack.mStackId;
+                mInTask.reparent(stackId, ON_TOP, REPARENT_KEEP_STACK_AT_FRONT, !ANIMATE,
+                        DEFER_RESUME, "inTaskToFront");
+                stackId = mInTask.getStackId();
             }
             if (StackId.resizeStackWithLaunchBounds(stackId)) {
                 mService.resizeStack(stackId, mLaunchBounds, true, !PRESERVE_WINDOWS, ANIMATE, -1);

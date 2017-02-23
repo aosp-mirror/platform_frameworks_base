@@ -797,6 +797,15 @@ final class ActivityRecord implements AppWindowContainerListener {
                     + " is already the parent of r=" + this);
         }
 
+        // TODO: Ensure that we do not directly reparent activities across stacks, as that may leave
+        //       the stacks in strange states. For now, we should use Task.reparent() to ensure that
+        //       the stack is left in an OK state.
+        if (prevTask != null && newTask != null && prevTask.getStack() != newTask.getStack()) {
+            throw new IllegalArgumentException(reason + ": task=" + newTask
+                    + " is in a different stack (" + newTask.getStackId() + ") than the parent of"
+                    + " r=" + this + " (" + prevTask.getStackId() + ")");
+        }
+
         // Must reparent first in window manager
         mWindowContainerController.reparent(newTask.getWindowContainerController(), position);
 
