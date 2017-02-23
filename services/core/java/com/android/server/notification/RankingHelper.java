@@ -32,6 +32,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ParceledListSlice;
 import android.os.Build;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.service.notification.NotificationListenerService.Ranking;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -515,6 +516,10 @@ public class RankingHelper implements RankingConfig {
         }
         if (!r.showBadge) {
             channel.setShowBadge(false);
+        }
+        if (channel.getSound() == null) {
+            channel.setSound(Settings.System.DEFAULT_NOTIFICATION_URI,
+                    Notification.AUDIO_ATTRIBUTES_DEFAULT);
         }
         r.channels.put(channel.getId(), channel);
         updateConfig();

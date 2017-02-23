@@ -776,6 +776,26 @@ public class RankingHelperTest {
     }
 
     @Test
+    public void testCreateChannel_addMissingSound() throws Exception {
+        final NotificationChannel channel =
+                new NotificationChannel("id2", "name2", IMPORTANCE_LOW);
+        mHelper.createNotificationChannel(pkg, uid, channel, true);
+        assertNotNull(mHelper.getNotificationChannel(
+                pkg, uid, channel.getId(), false).getSound());
+    }
+
+    @Test
+    public void testCreateChannel_noOverrideSound() throws Exception {
+        Uri sound = new Uri.Builder().scheme("test").build();
+        final NotificationChannel channel = new NotificationChannel("id2", "name2",
+                 NotificationManager.IMPORTANCE_DEFAULT);
+        channel.setSound(sound, mAudioAttributes);
+        mHelper.createNotificationChannel(pkg, uid, channel, true);
+        assertEquals(sound, mHelper.getNotificationChannel(
+                pkg, uid, channel.getId(), false).getSound());
+    }
+
+    @Test
     public void testPermanentlyDeleteChannels() throws Exception {
         NotificationChannel channel1 =
                 new NotificationChannel("id1", "name1", NotificationManager.IMPORTANCE_HIGH);
