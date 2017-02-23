@@ -749,7 +749,7 @@ public class UsbDeviceManager {
                         mMidiCard = scanner.nextInt();
                         mMidiDevice = scanner.nextInt();
                     } catch (FileNotFoundException e) {
-                        Slog.e(TAG, "could not open MIDI PCM file", e);
+                        Slog.e(TAG, "could not open MIDI file", e);
                         enabled = false;
                     } finally {
                         if (scanner != null) {
