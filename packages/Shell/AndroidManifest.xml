@@ -118,6 +118,8 @@
     <uses-permission android:name="android.permission.SUBSTITUTE_NOTIFICATION_APP_NAME" />
     <!-- Permission needed to hold a wakelock in dumpstate.cpp (drop_root_user()) -->
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <!-- Permission needed to enable/disable overlays -->
+    <uses-permission android:name="android.permission.CHANGE_OVERLAY_PACKAGES" />
 
     <application android:label="@string/app_label"
                  android:defaultToDeviceProtectedStorage="true"
