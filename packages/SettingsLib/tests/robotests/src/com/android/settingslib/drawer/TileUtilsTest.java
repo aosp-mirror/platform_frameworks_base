@@ -282,26 +282,11 @@ public class TileUtilsTest {
         when(mPackageManager.queryIntentActivitiesAsUser(eq(intent), anyInt(), anyInt()))
                 .thenReturn(info);
 
-        Bundle bundle = new Bundle();
-        bundle.putInt("com.android.settings.icon", 161803);
-        bundle.putString("com.android.settings.icon_package", "abc");
-        bundle.putString("com.android.settings.summary", "dynamic-summary");
-        when(mIContentProvider.call(anyString(),
-                eq(TileUtils.getMethodFromUri(Uri.parse(URI_GET_ICON))), eq(URI_GET_ICON), any()))
-                .thenReturn(bundle);
-        when(mIContentProvider.call(anyString(),
-                eq(TileUtils.getMethodFromUri(Uri.parse(URI_GET_SUMMARY))), eq(URI_GET_SUMMARY),
-                any())).thenReturn(bundle);
-        when(mContentResolver.acquireProvider(anyString())).thenReturn(mIContentProvider);
-        when(mContentResolver.acquireProvider(any(Uri.class))).thenReturn(mIContentProvider);
-
         TileUtils.getTilesForIntent(mContext, UserHandle.CURRENT, intent, addedCache,
                 null /* defaultCategory */, outTiles, false /* usePriority */,
                 false /* checkCategory */);
 
         assertThat(outTiles.size()).isEqualTo(1);
-        assertThat(outTiles.get(0).icon.getResId()).isEqualTo(161803);
-        assertThat(outTiles.get(0).summary).isEqualTo("dynamic-summary");
     }
 
     public static ResolveInfo newInfo(boolean systemApp, String category) {

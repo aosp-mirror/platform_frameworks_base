@@ -33,7 +33,6 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings.Global;
 import android.text.TextUtils;
-import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Pair;
 
@@ -353,10 +352,7 @@ public class TileUtils {
             CharSequence title = null;
             String summary = null;
             String keyHint = null;
-            String uriString = null;
             Uri uri = null;
-            // Several resources can be using the same provider. Only acquire a single provider.
-            Map<String, IContentProvider> providerMap = new ArrayMap<>();
 
             // Get the activity's meta-data
             try {
@@ -365,11 +361,7 @@ public class TileUtils {
                 Bundle metaData = activityInfo.metaData;
 
                 if (res != null && metaData != null) {
-                    if (metaData.containsKey(META_DATA_PREFERENCE_ICON_URI)) {
-                        iconFromUri = getIconFromUri(context, activityInfo.packageName,
-                                metaData.getString(META_DATA_PREFERENCE_ICON_URI), providerMap);
-                    }
-                    if (iconFromUri == null && metaData.containsKey(META_DATA_PREFERENCE_ICON)) {
+                    if (metaData.containsKey(META_DATA_PREFERENCE_ICON)) {
                         icon = metaData.getInt(META_DATA_PREFERENCE_ICON);
                     }
                     if (metaData.containsKey(META_DATA_PREFERENCE_TITLE)) {
@@ -379,13 +371,7 @@ public class TileUtils {
                             title = metaData.getString(META_DATA_PREFERENCE_TITLE);
                         }
                     }
-                    if (metaData.containsKey(META_DATA_PREFERENCE_SUMMARY_URI)) {
-                        summary = getTextFromUri(context,
-                                metaData.getString(META_DATA_PREFERENCE_SUMMARY_URI), providerMap,
-                                META_DATA_PREFERENCE_SUMMARY);
-                    }
-                    if (TextUtils.isEmpty(summary)
-                            && metaData.containsKey(META_DATA_PREFERENCE_SUMMARY)) {
+                    if (metaData.containsKey(META_DATA_PREFERENCE_SUMMARY)) {
                         if (metaData.get(META_DATA_PREFERENCE_SUMMARY) instanceof Integer) {
                             summary = res.getString(metaData.getInt(META_DATA_PREFERENCE_SUMMARY));
                         } else {
