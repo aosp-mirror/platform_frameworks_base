@@ -880,8 +880,8 @@ final class ActivityRecord implements AppWindowContainerListener {
     /**
      * @return Stack value from current task, null if there is no task.
      */
-    ActivityStack getStack() {
-        return task != null ? task.getStack() : null;
+    <T extends ActivityStack> T getStack() {
+        return task != null ? (T) task.getStack() : null;
     }
 
     boolean changeWindowTranslucency(boolean toOpaque) {
