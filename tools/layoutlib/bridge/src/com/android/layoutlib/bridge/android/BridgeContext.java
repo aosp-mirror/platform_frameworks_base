@@ -640,6 +640,10 @@ public class BridgeContext extends Context {
             return AccessibilityManager.getInstance(this);
         }
 
+        if (AUTO_FILL_MANAGER_SERVICE.equals(service)) {
+            return null;
+        }
+
         throw new UnsupportedOperationException("Unsupported Service: " + service);
     }
 
