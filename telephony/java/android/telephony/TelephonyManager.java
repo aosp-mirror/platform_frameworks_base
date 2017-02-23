@@ -5040,7 +5040,9 @@ public class TelephonyManager {
      *         0 request was handled succesfully, but no response data
      *         positive value success, data length of response
      * @hide
+     * @deprecated OEM needs a vendor-extension hal and their apps should use that instead
      */
+    @Deprecated
     public int invokeOemRilRequestRaw(byte[] oemReq, byte[] oemResp) {
         try {
             ITelephony telephony = getITelephony();
