@@ -1445,6 +1445,7 @@ extern int register_android_media_ImageReader(JNIEnv *env);
 extern int register_android_media_ImageWriter(JNIEnv *env);
 extern int register_android_media_Crypto(JNIEnv *env);
 extern int register_android_media_Drm(JNIEnv *env);
+extern int register_android_media_Descrambler(JNIEnv *env);
 extern int register_android_media_MediaCodec(JNIEnv *env);
 extern int register_android_media_MediaExtractor(JNIEnv *env);
 extern int register_android_media_MediaCodecList(JNIEnv *env);
@@ -1558,6 +1559,11 @@ jint JNI_OnLoad(JavaVM* vm, void* /* reserved */)
 
     if (register_android_media_Drm(env) < 0) {
         ALOGE("ERROR: MediaDrm native registration failed");
+        goto bail;
+    }
+
+    if (register_android_media_Descrambler(env) < 0) {
+        ALOGE("ERROR: MediaDescrambler native registration failed");
         goto bail;
     }
 

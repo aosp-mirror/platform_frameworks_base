@@ -408,6 +408,10 @@ LOCAL_SRC_FILES += \
 	location/java/android/location/INetInitiatedListener.aidl \
 	location/java/com/android/internal/location/ILocationProvider.aidl \
 	media/java/android/media/IAudioService.aidl \
+	media/java/android/media/ICas.aidl \
+	media/java/android/media/ICasListener.aidl \
+	media/java/android/media/IDescrambler.aidl \
+	media/java/android/media/IMediaCasService.aidl \
 	media/java/android/media/IAudioFocusDispatcher.aidl \
 	media/java/android/media/IAudioRoutesObserver.aidl \
 	media/java/android/media/IMediaHTTPConnection.aidl \

@@ -25,8 +25,11 @@
 #include "android_media_Utils.h"
 #include "android_runtime/AndroidRuntime.h"
 #include "android_runtime/android_view_Surface.h"
+#include "android_util_Binder.h"
 #include "jni.h"
 #include "JNIHelp.h"
+
+#include <android/media/IDescrambler.h>
 
 #include <cutils/compiler.h>
 
@@ -269,6 +272,7 @@ status_t JMediaCodec::configure(
         const sp<AMessage> &format,
         const sp<IGraphicBufferProducer> &bufferProducer,
         const sp<ICrypto> &crypto,
+        const sp<IDescrambler> &descrambler,
         int flags) {
     sp<Surface> client;
     if (bufferProducer != NULL) {
@@ -278,7 +282,8 @@ status_t JMediaCodec::configure(
         mSurfaceTextureClient.clear();
     }
 
-    return mCodec->configure(format, mSurfaceTextureClient, crypto, flags);
+    return mCodec->configure(
+            format, mSurfaceTextureClient, crypto, descrambler, flags);
 }
 
 status_t JMediaCodec::setSurface(
@@ -967,6 +972,7 @@ static void android_media_MediaCodec_native_configure(
         jobjectArray keys, jobjectArray values,
         jobject jsurface,
         jobject jcrypto,
+        jobject descramblerBinderObj,
         jint flags) {
     sp<JMediaCodec> codec = getMediaCodec(env, thiz);
 
@@ -1002,7 +1008,13 @@ static void android_media_MediaCodec_native_configure(
         crypto = JCrypto::GetCrypto(env, jcrypto);
     }
 
-    err = codec->configure(format, bufferProducer, crypto, flags);
+    sp<IDescrambler> descrambler;
+    if (descramblerBinderObj != NULL) {
+        sp<IBinder> binder = ibinderForJavaObject(env, descramblerBinderObj);
+        descrambler = interface_cast<IDescrambler>(binder);
+    }
+
+    err = codec->configure(format, bufferProducer, crypto, descrambler, flags);
 
     throwExceptionAsNecessary(env, err);
 }
@@ -1942,7 +1954,7 @@ static const JNINativeMethod gMethods[] = {
 
     { "native_configure",
       "([Ljava/lang/String;[Ljava/lang/Object;Landroid/view/Surface;"
-      "Landroid/media/MediaCrypto;I)V",
+      "Landroid/media/MediaCrypto;Landroid/os/IBinder;I)V",
       (void *)android_media_MediaCodec_native_configure },
 
     { "native_setSurface",

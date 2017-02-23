@@ -105,6 +105,8 @@ public final class MediaFormat {
     public static final String MIMETYPE_VIDEO_H263 = "video/3gpp";
     public static final String MIMETYPE_VIDEO_MPEG2 = "video/mpeg2";
     public static final String MIMETYPE_VIDEO_RAW = "video/raw";
+    public static final String MIMETYPE_VIDEO_DOLBY_VISION = "video/dolby-vision";
+    public static final String MIMETYPE_VIDEO_SCRAMBLED = "video/scrambled";
 
     public static final String MIMETYPE_AUDIO_AMR_NB = "audio/3gpp";
     public static final String MIMETYPE_AUDIO_AMR_WB = "audio/amr-wb";
@@ -120,7 +122,7 @@ public final class MediaFormat {
     public static final String MIMETYPE_AUDIO_MSGSM = "audio/gsm";
     public static final String MIMETYPE_AUDIO_AC3 = "audio/ac3";
     public static final String MIMETYPE_AUDIO_EAC3 = "audio/eac3";
-    public static final String MIMETYPE_VIDEO_DOLBY_VISION = "video/dolby-vision";
+    public static final String MIMETYPE_AUDIO_SCRAMBLED = "audio/scrambled";
 
     /**
      * MIME type for WebVTT subtitle data.
