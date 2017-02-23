@@ -24,6 +24,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewStructure;
 import android.view.autofill.AutoFillManager;
 import android.view.autofill.AutoFillType;
 import android.view.autofill.AutoFillValue;
@@ -66,6 +67,10 @@ public class RadioGroup extends LinearLayout {
     private OnCheckedChangeListener mOnCheckedChangeListener;
     private PassThroughHierarchyChangeListener mPassThroughListener;
 
+    // Indicates whether the child was set from resources or dynamically, so it can be used
+    // to sanitize auto-fill requests.
+    private int mInitialCheckedId = View.NO_ID;
+
     /**
      * {@inheritDoc}
      */
@@ -89,8 +94,8 @@ public class RadioGroup extends LinearLayout {
         int value = attributes.getResourceId(R.styleable.RadioGroup_checkedButton, View.NO_ID);
         if (value != View.NO_ID) {
             mCheckedId = value;
+            mInitialCheckedId = value;
         }
-
         final int index = attributes.getInt(com.android.internal.R.styleable.RadioGroup_orientation, VERTICAL);
         setOrientation(index);
 
@@ -409,6 +414,12 @@ public class RadioGroup extends LinearLayout {
     }
 
     // TODO(b/33197203): add unit/CTS tests for auto-fill methods (and make sure they handle enable)
+
+    @Override
+    public void onProvideAutoFillStructure(ViewStructure structure, int flags) {
+        super.onProvideAutoFillStructure(structure, flags);
+        structure.setSanitized(mCheckedId == mInitialCheckedId);
+    }
 
     @Override
     public void autoFill(AutoFillValue value) {
