@@ -88,10 +88,24 @@ bool Reference::Equals(const Value* value) const {
 }
 
 bool Reference::Flatten(android::Res_value* out_value) const {
-  out_value->dataType = (reference_type == Reference::Type::kResource)
-                            ? android::Res_value::TYPE_REFERENCE
-                            : android::Res_value::TYPE_ATTRIBUTE;
-  out_value->data = util::HostToDevice32(id ? id.value().id : 0);
+  const ResourceId resid = id.value_or_default(ResourceId(0));
+  const bool dynamic =
+      (resid.package_id() != kFrameworkPackageId && resid.package_id() != kAppPackageId);
+
+  if (reference_type == Reference::Type::kResource) {
+    if (dynamic) {
+      out_value->dataType = android::Res_value::TYPE_DYNAMIC_REFERENCE;
+    } else {
+      out_value->dataType = android::Res_value::TYPE_REFERENCE;
+    }
+  } else {
+    if (dynamic) {
+      out_value->dataType = android::Res_value::TYPE_DYNAMIC_ATTRIBUTE;
+    } else {
+      out_value->dataType = android::Res_value::TYPE_ATTRIBUTE;
+    }
+  }
+  out_value->data = util::HostToDevice32(resid.id);
   return true;
 }
 

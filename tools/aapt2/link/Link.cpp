@@ -1097,18 +1097,15 @@ class LinkCommand {
       return false;
     }
 
-    std::unique_ptr<ResourceTable> table =
-        LoadTablePbFromCollection(collection.get());
+    std::unique_ptr<ResourceTable> table = LoadTablePbFromCollection(collection.get());
     if (!table) {
-      context_->GetDiagnostics()->Error(DiagMessage(input)
-                                        << "invalid static library");
+      context_->GetDiagnostics()->Error(DiagMessage(input) << "invalid static library");
       return false;
     }
 
     ResourceTablePackage* pkg = table->FindPackageById(0x7f);
     if (!pkg) {
-      context_->GetDiagnostics()->Error(DiagMessage(input)
-                                        << "static library has no package");
+      context_->GetDiagnostics()->Error(DiagMessage(input) << "static library has no package");
       return false;
     }
 
@@ -1125,11 +1122,9 @@ class LinkCommand {
 
       pkg->name = "";
       if (override) {
-        result = table_merger_->MergeOverlay(Source(input), table.get(),
-                                             collection.get());
+        result = table_merger_->MergeOverlay(Source(input), table.get(), collection.get());
       } else {
-        result =
-            table_merger_->Merge(Source(input), table.get(), collection.get());
+        result = table_merger_->Merge(Source(input), table.get(), collection.get());
       }
 
     } else {
@@ -1782,17 +1777,21 @@ class LinkCommand {
     }
 
     if (options_.generate_java_class_path) {
-      JavaClassGeneratorOptions options;
-      options.types = JavaClassGeneratorOptions::SymbolTypes::kAll;
-      options.javadoc_annotations = options_.javadoc_annotations;
+      // The set of packages whose R class to call in the main classes
+      // onResourcesLoaded callback.
+      std::vector<std::string> packages_to_callback;
+
+      JavaClassGeneratorOptions template_options;
+      template_options.types = JavaClassGeneratorOptions::SymbolTypes::kAll;
+      template_options.javadoc_annotations = options_.javadoc_annotations;
 
       if (options_.package_type == PackageType::kStaticLib || options_.generate_non_final_ids) {
-        options.use_final = false;
+        template_options.use_final = false;
       }
 
       if (options_.package_type == PackageType::kSharedLib) {
-        options.use_final = false;
-        options.generate_rewrite_callback = true;
+        template_options.use_final = false;
+        template_options.rewrite_callback_options = OnResourcesLoadedCallbackOptions{};
       }
 
       const StringPiece actual_package = context_->GetCompilationPackage();
@@ -1802,36 +1801,51 @@ class LinkCommand {
         output_package = options_.custom_java_package.value();
       }
 
+      // Generate the private symbols if required.
       if (options_.private_symbols) {
+        packages_to_callback.push_back(options_.private_symbols.value());
+
         // If we defined a private symbols package, we only emit Public symbols
         // to the original package, and private and public symbols to the
         // private package.
-
-        options.types = JavaClassGeneratorOptions::SymbolTypes::kPublic;
-        if (!WriteJavaFile(&final_table_, context_->GetCompilationPackage(),
-                           output_package, options)) {
-          return 1;
-        }
-
+        JavaClassGeneratorOptions options = template_options;
         options.types = JavaClassGeneratorOptions::SymbolTypes::kPublicPrivate;
-        output_package = options_.private_symbols.value();
-      }
-
-      if (!WriteJavaFile(&final_table_, actual_package, output_package,
-                         options)) {
-        return 1;
-      }
-
-      for (const std::string& extra_package : options_.extra_java_packages) {
-        if (!WriteJavaFile(&final_table_, actual_package, extra_package,
+        if (!WriteJavaFile(&final_table_, actual_package, options_.private_symbols.value(),
                            options)) {
           return 1;
         }
       }
+
+      // Generate all the symbols for all extra packages.
+      for (const std::string& extra_package : options_.extra_java_packages) {
+        packages_to_callback.push_back(extra_package);
+
+        JavaClassGeneratorOptions options = template_options;
+        options.types = JavaClassGeneratorOptions::SymbolTypes::kAll;
+        if (!WriteJavaFile(&final_table_, actual_package, extra_package, options)) {
+          return 1;
+        }
+      }
+
+      // Generate the main public R class.
+      JavaClassGeneratorOptions options = template_options;
+
+      // Only generate public symbols if we have a private package.
+      if (options_.private_symbols) {
+        options.types = JavaClassGeneratorOptions::SymbolTypes::kPublic;
+      }
+
+      if (options.rewrite_callback_options) {
+        options.rewrite_callback_options.value().packages_to_callback =
+            std::move(packages_to_callback);
+      }
+
+      if (!WriteJavaFile(&final_table_, actual_package, output_package, options)) {
+        return 1;
+      }
     }
 
-    if (!WriteProguardFile(options_.generate_proguard_rules_path,
-                           proguard_keep_set)) {
+    if (!WriteProguardFile(options_.generate_proguard_rules_path, proguard_keep_set)) {
       return 1;
     }
 

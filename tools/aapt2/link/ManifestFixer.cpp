@@ -79,6 +79,17 @@ static bool RequiredNameIsJavaPackage(xml::Element* el, SourcePathDiagnostics* d
   return false;
 }
 
+static xml::XmlNodeAction::ActionFuncWithDiag RequiredAndroidAttribute(const std::string& attr) {
+  return [=](xml::Element* el, SourcePathDiagnostics* diag) -> bool {
+    if (el->FindAttribute(xml::kSchemaAndroid, attr) == nullptr) {
+      diag->Error(DiagMessage(el->line_number)
+                  << "<" << el->name << "> is missing required attribute 'android:" << attr << "'");
+      return false;
+    }
+    return true;
+  };
+}
+
 static bool VerifyManifest(xml::Element* el, SourcePathDiagnostics* diag) {
   xml::Attribute* attr = el->FindAttribute({}, "package");
   if (!attr) {
@@ -272,6 +283,16 @@ bool ManifestFixer::BuildRules(xml::XmlActionExecutor* executor,
 
   application_action["uses-library"].Action(RequiredNameIsJavaPackage);
   application_action["library"].Action(RequiredNameIsJavaPackage);
+
+  xml::XmlNodeAction& static_library_action = application_action["static-library"];
+  static_library_action.Action(RequiredNameIsJavaPackage);
+  static_library_action.Action(RequiredAndroidAttribute("version"));
+
+  xml::XmlNodeAction& uses_static_library_action = application_action["uses-static-library"];
+  uses_static_library_action.Action(RequiredNameIsJavaPackage);
+  uses_static_library_action.Action(RequiredAndroidAttribute("version"));
+  uses_static_library_action.Action(RequiredAndroidAttribute("certDigest"));
+
   application_action["meta-data"] = meta_data_action;
   application_action["activity"] = component_action;
   application_action["activity-alias"] = component_action;

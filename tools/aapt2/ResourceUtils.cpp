@@ -533,6 +533,7 @@ uint32_t AndroidTypeToAttributeTypeMask(uint16_t type) {
     case android::Res_value::TYPE_REFERENCE:
     case android::Res_value::TYPE_ATTRIBUTE:
     case android::Res_value::TYPE_DYNAMIC_REFERENCE:
+    case android::Res_value::TYPE_DYNAMIC_ATTRIBUTE:
       return android::ResTable_map::TYPE_REFERENCE;
 
     case android::Res_value::TYPE_STRING:

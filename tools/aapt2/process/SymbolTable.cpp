@@ -293,6 +293,11 @@ static Maybe<ResourceName> GetResourceName(const android::ResTable& table,
 
 std::unique_ptr<SymbolTable::Symbol> AssetManagerSymbolSource::FindById(
     ResourceId id) {
+  if (!id.is_valid()) {
+    // Exit early and avoid the error logs from AssetManager.
+    return {};
+  }
+
   const android::ResTable& table = assets_.getResources(false);
   Maybe<ResourceName> maybe_name = GetResourceName(table, id);
   if (!maybe_name) {

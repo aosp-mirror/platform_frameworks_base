@@ -33,13 +33,19 @@ class AnnotationProcessor;
 class ClassDefinition;
 class MethodDefinition;
 
+// Options for generating onResourcesLoaded callback in R.java.
+struct OnResourcesLoadedCallbackOptions {
+  // Other R classes to delegate the same callback to (with the same package ID).
+  std::vector<std::string> packages_to_callback;
+};
+
 struct JavaClassGeneratorOptions {
   // Specifies whether to use the 'final' modifier on resource entries. Default is true.
   bool use_final = true;
 
-  // Whether to generate code to rewrite the package ID of resources.
-  // Implies use_final == true. Default is false.
-  bool generate_rewrite_callback = false;
+  // If set, generates code to rewrite the package ID of resources.
+  // Implies use_final == true. Default is unset.
+  Maybe<OnResourcesLoadedCallbackOptions> rewrite_callback_options;
 
   enum class SymbolTypes {
     kAll,

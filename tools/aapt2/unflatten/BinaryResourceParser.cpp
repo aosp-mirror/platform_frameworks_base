@@ -458,10 +458,14 @@ std::unique_ptr<Item> BinaryResourceParser::ParseValue(
   }
 
   if (value->dataType == Res_value::TYPE_REFERENCE ||
-      value->dataType == Res_value::TYPE_ATTRIBUTE) {
-    const Reference::Type type = (value->dataType == Res_value::TYPE_REFERENCE)
-                                     ? Reference::Type::kResource
-                                     : Reference::Type::kAttribute;
+      value->dataType == Res_value::TYPE_ATTRIBUTE ||
+      value->dataType == Res_value::TYPE_DYNAMIC_REFERENCE ||
+      value->dataType == Res_value::TYPE_DYNAMIC_ATTRIBUTE) {
+    Reference::Type type = Reference::Type::kResource;
+    if (value->dataType == Res_value::TYPE_ATTRIBUTE ||
+        value->dataType == Res_value::TYPE_DYNAMIC_ATTRIBUTE) {
+      type = Reference::Type::kAttribute;
+    }
 
     if (data == 0) {
       // A reference of 0, must be the magic @null reference.
