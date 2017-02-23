@@ -297,6 +297,7 @@ public class NotificationTestList extends TestActivity
                     Notification n = new Notification.Builder(NotificationTestList.this)
                             .setSmallIcon(R.drawable.icon2)
                             .setContentTitle("Low priority")
+                            .setTimeout(60000)
                             .setLights(0xff0000ff, 1, 0)
                             .setPriority(Notification.PRIORITY_LOW)
                             .build();
