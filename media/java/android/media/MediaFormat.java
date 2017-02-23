@@ -53,6 +53,7 @@ import java.util.Map;
  *         time-interval between key frames.
  *         Float support added in {@link android.os.Build.VERSION_CODES#N_MR1}</td></tr>
  * <tr><td>{@link #KEY_INTRA_REFRESH_PERIOD}</td><td>Integer</td><td><b>encoder-only</b>, optional</td></tr>
+ * <tr><td>{@link #KEY_LATENCY}</td><td>Integer</td><td><b>encoder-only</b>, optional</td></tr>
  * <tr><td>{@link #KEY_MAX_WIDTH}</td><td>Integer</td><td><b>decoder-only</b>, optional, max-resolution width</td></tr>
  * <tr><td>{@link #KEY_MAX_HEIGHT}</td><td>Integer</td><td><b>decoder-only</b>, optional, max-resolution height</td></tr>
  * <tr><td>{@link #KEY_REPEAT_PREVIOUS_FRAME_AFTER}</td><td>Long</td><td><b>encoder in surface-mode
@@ -575,6 +576,18 @@ public final class MediaFormat {
      * @see MediaCodecInfo.CodecCapabilities#profileLevels
      */
     public static final String KEY_LEVEL = "level";
+
+    /**
+    * An optional key describing the desired encoder latency in frames. This is an optional
+    * parameter that applies only to video encoders. If encoder supports it, it should ouput
+    * at least one output frame after being queued the specified number of frames. This key
+    * is ignored if the video encoder does not support the latency feature. Use the output
+    * format to verify that this feature was enabled and the actual value used by the encoder.
+    * <p>
+    * If the key is not specified, the default latency will be implenmentation specific.
+    * The associated value is an integer.
+    */
+    public static final String KEY_LATENCY = "latency";
 
     /**
      * A key describing the desired clockwise rotation on an output surface.
