@@ -58,7 +58,7 @@ public abstract class PlayerBase {
     protected float mAuxEffectSendLevel = 0.0f;
 
     // for AppOps
-    private IAppOpsService mAppOps;
+    private IAppOpsService mAppOps; // may be null
     private IAppOpsCallback mAppOpsCallback;
     private boolean mHasAppOpsPlayAudio = true; // sync'd on mLock
     private final Object mLock = new Object();
@@ -251,7 +251,9 @@ public abstract class PlayerBase {
             Log.e(TAG, "Error talking to audio service, the player will still be tracked", e);
         }
         try {
-            mAppOps.stopWatchingMode(mAppOpsCallback);
+            if (mAppOps != null) {
+                mAppOps.stopWatchingMode(mAppOpsCallback);
+            }
         } catch (RemoteException e) {
             // nothing to do here, the object is supposed to be released anyway
         }
@@ -264,9 +266,12 @@ public abstract class PlayerBase {
     void updateAppOpsPlayAudio_sync() {
         boolean oldHasAppOpsPlayAudio = mHasAppOpsPlayAudio;
         try {
-            final int mode = mAppOps.checkAudioOperation(AppOpsManager.OP_PLAY_AUDIO,
+            int mode = AppOpsManager.MODE_IGNORED;
+            if (mAppOps != null) {
+                mode = mAppOps.checkAudioOperation(AppOpsManager.OP_PLAY_AUDIO,
                     mAttributes.getUsage(),
                     Process.myUid(), ActivityThread.currentPackageName());
+            }
             mHasAppOpsPlayAudio = (mode == AppOpsManager.MODE_ALLOWED);
         } catch (RemoteException e) {
             mHasAppOpsPlayAudio = false;
