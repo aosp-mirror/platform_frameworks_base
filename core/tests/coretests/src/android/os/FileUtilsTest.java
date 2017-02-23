@@ -311,6 +311,28 @@ public class FileUtilsTest extends AndroidTestCase {
         assertNameEquals("test.foo (1).bar", FileUtils.buildUniqueFile(mTarget, "test.foo.bar"));
     }
 
+    public void testRoundStorageSize() throws Exception {
+        final long M128 = 134217728L;
+        final long M256 = M128 * 2;
+        final long M512 = M256 * 2;
+        final long M1024 = M512 * 2;
+        final long G16 = M1024 * 16;
+        final long G32 = M1024 * 32;
+        final long G64 = M1024 * 64;
+
+        assertEquals(M128, FileUtils.roundStorageSize(M128));
+        assertEquals(M256, FileUtils.roundStorageSize(M128 + 1));
+        assertEquals(M256, FileUtils.roundStorageSize(M256 - 1));
+        assertEquals(M256, FileUtils.roundStorageSize(M256));
+        assertEquals(M512, FileUtils.roundStorageSize(M256 + 1));
+
+        assertEquals(G16, FileUtils.roundStorageSize(G16));
+        assertEquals(G32, FileUtils.roundStorageSize(G16 + 1));
+        assertEquals(G32, FileUtils.roundStorageSize(G32 - 1));
+        assertEquals(G32, FileUtils.roundStorageSize(G32));
+        assertEquals(G64, FileUtils.roundStorageSize(G32 + 1));
+    }
+
     private static void assertNameEquals(String expected, File actual) {
         assertEquals(expected, actual.getName());
     }

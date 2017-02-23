@@ -19,6 +19,7 @@ package android.app.usage;
 import android.annotation.WorkerThread;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.os.RemoteException;
 import android.os.UserHandle;
 
@@ -94,6 +95,37 @@ public class StorageStatsManager {
     public long getFreeBytes(String volumeUuid) {
         try {
             return mService.getFreeBytes(volumeUuid, mContext.getOpPackageName());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Return storage statistics for a specific package on the requested storage
+     * volume.
+     * <p>
+     * This method may take several seconds to calculate the requested values,
+     * so it should only be called from a worker thread.
+     * <p class="note">
+     * Note: if the requested package uses the {@code android:sharedUserId}
+     * manifest feature, this call will be forced into a slower manual
+     * calculation path. If possible, consider always using
+     * {@link #queryStatsForUid(String, int)}, which is typically faster.
+     * </p>
+     *
+     * @param volumeUuid the UUID of the storage volume you're interested in, or
+     *            {@code null} to specify the default internal storage.
+     * @param packageName the package name you're interested in.
+     * @param user the user you're interested in.
+     * @see ApplicationInfo#volumeUuid
+     * @see PackageInfo#packageName
+     */
+    @WorkerThread
+    public StorageStats queryStatsForPackage(String volumeUuid, String packageName,
+            UserHandle user) {
+        try {
+            return mService.queryStatsForPackage(volumeUuid, packageName, user.getIdentifier(),
+                    mContext.getOpPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

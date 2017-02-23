@@ -30,6 +30,7 @@ import android.content.pm.PackageStats;
 import android.content.pm.UserInfo;
 import android.os.Binder;
 import android.os.Environment;
+import android.os.FileUtils;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -148,11 +149,10 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
         enforcePermission(Binder.getCallingUid(), callingPackage);
 
         if (volumeUuid == StorageManager.UUID_PRIVATE_INTERNAL) {
-            // TODO: round total size to nearest power of two
-            return mStorage.getPrimaryStorageSize();
+            return FileUtils.roundStorageSize(mStorage.getPrimaryStorageSize());
         } else {
             final VolumeInfo vol = mStorage.findVolumeByUuid(volumeUuid);
-            return vol.disk.size;
+            return FileUtils.roundStorageSize(vol.disk.size);
         }
     }
 
@@ -171,6 +171,43 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
         } else {
             final VolumeInfo vol = mStorage.findVolumeByUuid(volumeUuid);
             return vol.getPath().getFreeSpace() + cacheBytes;
+        }
+    }
+
+    @Override
+    public StorageStats queryStatsForPackage(String volumeUuid, String packageName, int userId,
+            String callingPackage) {
+        enforcePermission(Binder.getCallingUid(), callingPackage);
+        if (userId != UserHandle.getCallingUserId()) {
+            mContext.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.INTERACT_ACROSS_USERS, TAG);
+        }
+
+        final ApplicationInfo appInfo;
+        try {
+            appInfo = mPackage.getApplicationInfoAsUser(packageName, 0, userId);
+        } catch (NameNotFoundException e) {
+            throw new IllegalStateException(e);
+        }
+
+        if (mPackage.getPackagesForUid(appInfo.uid).length == 1) {
+            // Only one package inside UID means we can fast-path
+            return queryStatsForUid(volumeUuid, appInfo.uid, callingPackage);
+        } else {
+            // Multiple packages means we need to go manual
+            final int appId = UserHandle.getUserId(appInfo.uid);
+            final String[] packageNames = new String[] { packageName };
+            final long[] ceDataInodes = new long[1];
+            final String[] codePaths = new String[] { appInfo.getCodePath() };
+
+            final PackageStats stats = new PackageStats(TAG);
+            try {
+                mInstaller.getAppSize(volumeUuid, packageNames, userId, 0,
+                        appId, ceDataInodes, codePaths, stats);
+            } catch (InstallerException e) {
+                throw new IllegalStateException(e);
+            }
+            return translate(stats);
         }
     }
 
