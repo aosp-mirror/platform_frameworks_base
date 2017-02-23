@@ -313,6 +313,12 @@ public class ImsReasonInfo implements Parcelable {
     public static final int CODE_WIFI_LOST = 1407;
 
     /**
+     * Indicates the registration attempt on IWLAN failed due to IKEv2 authetication failure
+     * during tunnel establishment.
+     */
+    public static final int CODE_IKEV2_AUTH_FAILURE = 1408;
+
+    /**
      * Network string error messages.
      * mExtraMessage may have these values.
      */
