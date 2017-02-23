@@ -237,6 +237,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     // Screen state we reported to policy. Must be one of REPORTED_TO_POLICY_SCREEN_* fields.
     private int mReportedScreenStateToPolicy;
 
+    // If the last recorded screen state was dozing or not.
+    private boolean mDozing;
+
     // Remembers whether certain kinds of brightness adjustments
     // were recently applied so that we can decide how to transition.
     private boolean mAppliedAutoBrightness;
@@ -246,6 +249,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     // Brightness animation ramp rates in brightness units per second
     private final int mBrightnessRampRateFast;
     private final int mBrightnessRampRateSlow;
+
+    // Brightness animation ramp flags
+    private final boolean mSkipScreenOnBrightnessRamp;
 
     // The controller for the automatic brightness level.
     private AutomaticBrightnessController mAutomaticBrightnessController;
@@ -310,6 +316,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 com.android.internal.R.integer.config_brightness_ramp_rate_fast);
         mBrightnessRampRateSlow = resources.getInteger(
                 com.android.internal.R.integer.config_brightness_ramp_rate_slow);
+        mSkipScreenOnBrightnessRamp = resources.getBoolean(
+                com.android.internal.R.bool.config_skipScreenOnBrightnessRamp);
 
         int lightSensorRate = resources.getInteger(
                 com.android.internal.R.integer.config_autoBrightnessLightSensorRate);
@@ -738,9 +746,11 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         }
 
         // Animate the screen brightness when the screen is on or dozing.
-        // Skip the animation when the screen is off or suspended.
+        // Skip the animation when the screen is off, suspended, or if configs say otherwise.
         if (!mPendingScreenOff) {
-            if (state == Display.STATE_ON || state == Display.STATE_DOZE) {
+            boolean skipScreenRamp = mSkipScreenOnBrightnessRamp && mDozing
+                    && state == Display.STATE_ON;
+            if (state == Display.STATE_ON && !skipScreenRamp || state == Display.STATE_DOZE) {
                 animateScreenBrightness(brightness,
                         slowChange ? mBrightnessRampRateSlow : mBrightnessRampRateFast);
             } else {
@@ -798,6 +808,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             mUnfinishedBusiness = false;
             mCallbacks.releaseSuspendBlocker();
         }
+
+        // Record if dozing for future comparison.
+        mDozing = state != Display.STATE_ON;
     }
 
     @Override

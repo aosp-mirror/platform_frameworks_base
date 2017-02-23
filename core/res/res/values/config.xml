@@ -1028,6 +1028,9 @@
     -->
     <integer name="config_doubleTapOnHomeBehavior">0</integer>
 
+    <!-- Whether or not to skip the brightness ramp when the display transitions to STATE_ON. -->
+    <bool name="config_skipScreenOnBrightnessRamp">false</bool>
+
     <!-- Minimum screen brightness setting allowed by the power manager.
          The user is forbidden from setting the brightness below this level. -->
     <integer name="config_screenBrightnessSettingMinimum">10</integer>
