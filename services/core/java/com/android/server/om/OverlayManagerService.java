@@ -664,38 +664,7 @@ public final class OverlayManagerService extends SystemService {
     }
 
     private void updateAssets(final int userId, List<String> targetPackageNames) {
-        final PackageManagerInternal pm = LocalServices.getService(PackageManagerInternal.class);
-        final boolean updateFrameworkRes = targetPackageNames.contains("android");
-        if (updateFrameworkRes) {
-            targetPackageNames = pm.getTargetPackageNames(userId);
-        }
-
-        final Map<String, List<String>> pendingChanges = new ArrayMap<>(targetPackageNames.size());
-        synchronized (mLock) {
-            final int N = targetPackageNames.size();
-            for (int i = 0; i < N; i++) {
-                final String targetPackageName = targetPackageNames.get(i);
-                pendingChanges.put(targetPackageName,
-                        mImpl.getEnabledOverlayPackageNames(targetPackageName, userId));
-            }
-        }
-
-        final int N = targetPackageNames.size();
-        for (int i = 0; i < N; i++) {
-            final String targetPackageName = targetPackageNames.get(i);
-            if (!pm.setEnabledOverlayPackages(
-                        userId, targetPackageName, pendingChanges.get(targetPackageName))) {
-                Slog.e(TAG, String.format("Failed to change enabled overlays for %s user %d",
-                            targetPackageName, userId));
-            }
-        }
-
-        final IActivityManager am = ActivityManagerNative.getDefault();
-        try {
-            am.scheduleApplicationInfoChanged(targetPackageNames, userId);
-        } catch (RemoteException e) {
-            // Intentionally left empty.
-        }
+        // TODO: implement when we integrate OMS properly
     }
 
     private void schedulePersistSettings() {
