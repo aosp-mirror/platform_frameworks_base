@@ -122,8 +122,7 @@ class ReferenceLinkerVisitor : public ValueVisitor {
           DiagMessage msg(entry.key.GetSource());
 
           // Call the matches method again, this time with a DiagMessage so we
-          // fill
-          // in the actual error message.
+          // fill in the actual error message.
           symbol->attribute->Matches(entry.value.get(), &msg);
           context_->GetDiagnostics()->Error(msg);
           error_ = true;

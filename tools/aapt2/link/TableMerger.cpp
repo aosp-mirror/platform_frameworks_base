@@ -39,14 +39,12 @@ TableMerger::TableMerger(IAaptContext* context, ResourceTable* out_table,
 
 bool TableMerger::Merge(const Source& src, ResourceTable* table,
                         io::IFileCollection* collection) {
-  return MergeImpl(src, table, collection, false /* overlay */,
-                   true /* allow new */);
+  return MergeImpl(src, table, collection, false /* overlay */, true /* allow new */);
 }
 
 bool TableMerger::MergeOverlay(const Source& src, ResourceTable* table,
                                io::IFileCollection* collection) {
-  return MergeImpl(src, table, collection, true /* overlay */,
-                   options_.auto_add_overlay);
+  return MergeImpl(src, table, collection, true /* overlay */, options_.auto_add_overlay);
 }
 
 /**
@@ -55,25 +53,13 @@ bool TableMerger::MergeOverlay(const Source& src, ResourceTable* table,
 bool TableMerger::MergeImpl(const Source& src, ResourceTable* table,
                             io::IFileCollection* collection, bool overlay,
                             bool allow_new) {
-  const uint8_t desired_package_id = context_->GetPackageId();
-
   bool error = false;
   for (auto& package : table->packages) {
-    // Warn of packages with an unrelated ID.
-    const Maybe<ResourceId>& id = package->id;
-    if (id && id.value() != 0x0 && id.value() != desired_package_id) {
-      context_->GetDiagnostics()->Warn(DiagMessage(src) << "ignoring package "
-                                                        << package->name);
-      continue;
-    }
-
     // Only merge an empty package or the package we're building.
     // Other packages may exist, which likely contain attribute definitions.
     // This is because at compile time it is unknown if the attributes are
-    // simply
-    // uses of the attribute or definitions.
-    if (package->name.empty() ||
-        context_->GetCompilationPackage() == package->name) {
+    // simply uses of the attribute or definitions.
+    if (package->name.empty() || context_->GetCompilationPackage() == package->name) {
       FileMergeCallback callback;
       if (collection) {
         callback = [&](const ResourceNameRef& name,
@@ -83,8 +69,7 @@ bool TableMerger::MergeImpl(const Source& src, ResourceTable* table,
           io::IFile* f = collection->FindFile(*old_file->path);
           if (!f) {
             context_->GetDiagnostics()->Error(DiagMessage(src)
-                                              << "file '" << *old_file->path
-                                              << "' not found");
+                                              << "file '" << *old_file->path << "' not found");
             return false;
           }
 

@@ -533,9 +533,14 @@ bool JavaClassGenerator::Generate(const StringPiece& package_name_to_generate,
   std::unique_ptr<MethodDefinition> rewrite_method;
 
   // Generate an onResourcesLoaded() callback if requested.
-  if (options_.generate_rewrite_callback) {
+  if (options_.rewrite_callback_options) {
     rewrite_method =
         util::make_unique<MethodDefinition>("public static void onResourcesLoaded(int p)");
+    for (const std::string& package_to_callback :
+         options_.rewrite_callback_options.value().packages_to_callback) {
+      rewrite_method->AppendStatement(
+          StringPrintf("%s.R.onResourcesLoaded(p);", package_to_callback.data()));
+    }
   }
 
   for (const auto& package : table_->packages) {

@@ -381,7 +381,9 @@ TEST(JavaClassGeneratorTest, GenerateOnResourcesLoadedCallbackForSharedLibrary) 
 
   JavaClassGeneratorOptions options;
   options.use_final = false;
-  options.generate_rewrite_callback = true;
+  options.rewrite_callback_options = OnResourcesLoadedCallbackOptions{
+      {"com.foo", "com.boo"},
+  };
   JavaClassGenerator generator(context.get(), table.get(), options);
 
   std::stringstream out;
@@ -389,7 +391,9 @@ TEST(JavaClassGeneratorTest, GenerateOnResourcesLoadedCallbackForSharedLibrary) 
 
   std::string actual = out.str();
 
-  EXPECT_NE(std::string::npos, actual.find("onResourcesLoaded"));
+  EXPECT_NE(std::string::npos, actual.find("void onResourcesLoaded"));
+  EXPECT_NE(std::string::npos, actual.find("com.foo.R.onResourcesLoaded"));
+  EXPECT_NE(std::string::npos, actual.find("com.boo.R.onResourcesLoaded"));
 }
 
 }  // namespace aapt

@@ -118,6 +118,9 @@ struct ResourceNameRef {
   bool is_valid() const;
 };
 
+constexpr const uint8_t kAppPackageId = 0x7fu;
+constexpr const uint8_t kFrameworkPackageId = 0x01u;
+
 /**
  * A binary identifier representing a resource. Internally it
  * is a 32bit integer split as follows:
