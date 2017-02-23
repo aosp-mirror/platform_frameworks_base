@@ -430,6 +430,15 @@ public class RadioGroup extends LinearLayout {
 
     @Override
     public AutoFillValue getAutoFillValue() {
-        return isEnabled() ? AutoFillValue.forList(getCheckedRadioButtonId()) : null;
+        if (!isEnabled()) return null;
+
+        final int count = getChildCount();
+        for (int i = 0; i < count; i++) {
+            final View child = getChildAt(i);
+            if (child.getId() == mCheckedId) {
+                return AutoFillValue.forList(i);
+            }
+        }
+        return null;
     }
 }

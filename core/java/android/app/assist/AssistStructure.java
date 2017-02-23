@@ -538,6 +538,7 @@ public class AssistStructure implements Parcelable {
         AutoFillId mAutoFillId;
         AutoFillType mAutoFillType;
         AutoFillValue mAutoFillValue;
+        String[] mAutoFillOptions;
         boolean mSanitized;
         int mX;
         int mY;
@@ -618,6 +619,7 @@ public class AssistStructure implements Parcelable {
                 mAutoFillId = in.readParcelable(null);
                 mAutoFillType = in.readParcelable(null);
                 mAutoFillValue = in.readParcelable(null);
+                mAutoFillOptions = in.readStringArray();
             }
             if ((flags&FLAGS_HAS_LARGE_COORDS) != 0) {
                 mX = in.readInt();
@@ -738,6 +740,7 @@ public class AssistStructure implements Parcelable {
                 out.writeParcelable(mAutoFillType,  0);
                 final AutoFillValue sanitizedValue = writeSensitive ? mAutoFillValue : null;
                 out.writeParcelable(sanitizedValue,  0);
+                out.writeStringArray(mAutoFillOptions);
             }
             if ((flags&FLAGS_HAS_LARGE_COORDS) != 0) {
                 out.writeInt(mX);
@@ -842,6 +845,19 @@ public class AssistStructure implements Parcelable {
         // TODO(b/33197203, b/33802548): add CTS/unit test
         public AutoFillValue getAutoFillValue() {
             return mAutoFillValue;
+        }
+
+        /**
+         * Gets the options that can be used to auto-fill this structure.
+         *
+         * <p>Typically used by nodes whose {@link AutoFillType} is a list to indicate the meaning
+         * of each possible value in the list.
+         *
+         * <p>It's only set when the {@link AssistStructure} is used for auto-filling purposes, not
+         * for assist.
+         */
+        public String[] getAutoFillOptions() {
+            return mAutoFillOptions;
         }
 
         /** @hide */
@@ -1504,6 +1520,11 @@ public class AssistStructure implements Parcelable {
         @Override
         public void setAutoFillValue(AutoFillValue value) {
             mNode.mAutoFillValue = value;
+        }
+
+        @Override
+        public void setAutoFillOptions(String[] options) {
+            mNode.mAutoFillOptions = options;
         }
 
         /**
