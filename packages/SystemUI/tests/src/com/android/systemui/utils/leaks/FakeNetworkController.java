@@ -47,11 +47,6 @@ public class FakeNetworkController extends BaseLeakChecker<SignalCallback>
     }
 
     @Override
-    public void setUserSetupComplete(boolean userSetup) {
-
-    }
-
-    @Override
     public boolean hasEmergencyCryptKeeperText() {
         return false;
     }
