@@ -1295,6 +1295,7 @@ public class WifiConfiguration implements Parcelable {
             setConnectChoice(source.getConnectChoice());
             setConnectChoiceTimestamp(source.getConnectChoiceTimestamp());
             setHasEverConnected(source.getHasEverConnected());
+            setNotRecommended(source.isNotRecommended());
         }
 
         public void writeToParcel(Parcel dest) {
