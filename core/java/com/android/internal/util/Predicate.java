@@ -25,7 +25,10 @@ package com.android.internal.util;
  * <p/>
  * Implementors of Predicate which may cause side effects upon evaluation are
  * strongly encouraged to state this fact clearly in their API documentation.
+ *
+ * @deprecated Use {@code java.util.function.Predicate} instead.
  */
+@Deprecated
 public interface Predicate<T> {
 
     boolean apply(T t);
