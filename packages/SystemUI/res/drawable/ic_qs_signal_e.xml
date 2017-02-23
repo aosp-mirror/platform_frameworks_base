@@ -16,9 +16,12 @@ Copyright (C) 2014 The Android Open Source Project
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
         android:width="32dp"
         android:height="32dp"
-        android:viewportWidth="5.0"
-        android:viewportHeight="5.0">
+        android:viewportWidth="13.0"
+        android:viewportHeight="13.0">
+  <group
+    android:translateX="3.5" >
     <path
-        android:fillColor="#FFFFFFFF"
-        android:pathData="M4.400000,7.300000L1.700000,7.300000l0.000000,2.400000l3.300000,0.000000L5.000000,11.000000L0.000000,11.000000L0.000000,2.500000l4.900000,0.000000l0.000000,1.300000L1.700000,3.800000l0.000000,2.100000l2.800000,0.000000L4.500000,7.300000z"/>
+      android:fillColor="#FFFFFFFF"
+      android:pathData="M4.400000,7.300000L1.700000,7.300000l0.000000,2.400000l3.300000,0.000000L5.000000,11.000000L0.000000,11.000000L0.000000,2.500000l4.900000,0.000000l0.000000,1.300000L1.700000,3.800000l0.000000,2.100000l2.800000,0.000000L4.500000,7.300000z"/>
+  </group>
 </vector>
