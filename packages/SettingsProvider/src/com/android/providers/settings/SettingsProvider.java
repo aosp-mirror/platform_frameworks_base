@@ -2737,7 +2737,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 141;
+            private static final int SETTINGS_VERSION = 142;
 
             private final int mUserId;
 
@@ -3262,6 +3262,26 @@ public class SettingsProvider extends ContentProvider {
                     currentVersion = 141;
                 }
 
+                if (currentVersion == 141) {
+                    // Version 141: We added the notion of a default and whether the system set
+                    // the setting. This is used for resetting the internal state and we need
+                    // to make sure this value is updated for the existing settings, otherwise
+                    // we would delete system set settings while they should stay unmodified.
+                    SettingsState globalSettings = getGlobalSettingsLocked();
+                    ensureLegacyDefaultValueAndSystemSetUpdatedLocked(globalSettings);
+                    globalSettings.persistSyncLocked();
+
+                    SettingsState secureSettings = getSecureSettingsLocked(mUserId);
+                    ensureLegacyDefaultValueAndSystemSetUpdatedLocked(secureSettings);
+                    secureSettings.persistSyncLocked();
+
+                    SettingsState systemSettings = getSystemSettingsLocked(mUserId);
+                    ensureLegacyDefaultValueAndSystemSetUpdatedLocked(systemSettings);
+                    systemSettings.persistSyncLocked();
+
+                    currentVersion = 142;
+                }
+
                 if (currentVersion != newVersion) {
                     Slog.wtf("SettingsProvider", "warning: upgrading settings database to version "
                             + newVersion + " left it at "
@@ -3275,6 +3295,23 @@ public class SettingsProvider extends ContentProvider {
 
                 // Return the current version.
                 return currentVersion;
+            }
+        }
+
+        private void ensureLegacyDefaultValueAndSystemSetUpdatedLocked(SettingsState settings) {
+            List<String> names = settings.getSettingNamesLocked();
+            final int nameCount = names.size();
+            for (int i = 0; i < nameCount; i++) {
+                String name = names.get(i);
+                Setting setting = settings.getSettingLocked(name);
+                if (setting.getDefaultValue() == null) {
+                    boolean systemSet = SettingsState.isSystemPackage(getContext(),
+                            setting.getPackageName());
+                    if (systemSet) {
+                        settings.insertSettingLocked(name, setting.getValue(),
+                                setting.getTag(), true, setting.getPackageName());
+                    }
+                }
             }
         }
     }
