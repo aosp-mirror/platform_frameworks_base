@@ -14,11 +14,9 @@
 
 package com.android.systemui.utils;
 
-import android.content.pm.ApplicationInfo;
 import android.graphics.PixelFormat;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
@@ -29,19 +27,18 @@ import com.android.systemui.SysuiTestCase;
 public class ViewUtils {
 
     public static void attachView(View view) {
-        // Make sure hardware acceleration isn't turned on.
-        view.getContext().getApplicationInfo().flags &=
-                ~(ApplicationInfo.FLAG_HARDWARE_ACCELERATED);
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
                 LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT,
                 LayoutParams.TYPE_APPLICATION_OVERLAY,
                 0, PixelFormat.TRANSLUCENT);
-        InstrumentationRegistry.getContext()
-                .getSystemService(WindowManager.class).addView(view, lp);
+        Handler handler = new Handler(Looper.getMainLooper());
+        handler.post(() -> InstrumentationRegistry.getContext()
+                .getSystemService(WindowManager.class).addView(view, lp));
     }
 
     public static void detachView(View view) {
-        InstrumentationRegistry.getContext()
-                .getSystemService(WindowManager.class).removeViewImmediate(view);
+        Handler handler = new Handler(Looper.getMainLooper());
+        handler.post(() -> InstrumentationRegistry.getContext()
+                .getSystemService(WindowManager.class).removeView(view));
     }
 }
