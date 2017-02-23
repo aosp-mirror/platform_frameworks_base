@@ -397,6 +397,19 @@ public abstract class FragmentManager {
     public void invalidateOptionsMenu() { }
 
     /**
+     * Returns {@code true} if the FragmentManager's state has already been saved
+     * by its host. Any operations that would change saved state should not be performed
+     * if this method returns true. For example, any popBackStack() method, such as
+     * {@link #popBackStackImmediate()} or any FragmentTransaction using
+     * {@link FragmentTransaction#commit()} instead of
+     * {@link FragmentTransaction#commitAllowingStateLoss()} will change
+     * the state and will result in an error.
+     *
+     * @return true if this FragmentManager's state has already been saved by its host
+     */
+    public abstract boolean isStateSaved();
+
+    /**
      * Callback interface for listening to fragment state changes that happen
      * within a given FragmentManager.
      */
@@ -1787,6 +1800,7 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
         }
     }
 
+    @Override
     public boolean isStateSaved() {
         return mStateSaved;
     }
