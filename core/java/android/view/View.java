@@ -953,7 +953,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public @interface AutoFillMode {}
 
     /**
-     * This view inherits the autofill state from it's parent. If there is no parent it is
+     * This view inherits the auto-fill state from it's parent. If there is no parent it is
      * {@link #AUTO_FILL_MODE_AUTO}.
      * Use with {@link #setAutoFillMode(int)} and <a href="#attr_android:autoFillMode">
      * {@code android:autoFillMode}.
@@ -968,7 +968,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public static final int AUTO_FILL_MODE_AUTO = 1;
 
     /**
-     * Require the user to manually force an auto-fill request.
+     * Do not trigger an auto-fill request if this view is focused. The user can still force
+     * an auto-fill request.
+     * <p>This does not prevent this field from being auto-filled if an auto-fill operation is
+     * triggered from a different view.</p>
+     *
      * Use with {@link #setAutoFillMode(int)} and <a href="#attr_android:autoFillMode">{@code
      * android:autoFillMode}.
      */
@@ -6523,7 +6527,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (isAutoFillable()) {
             AutoFillManager afm = getAutoFillManager();
             if (afm != null) {
-                afm.focusChanged(this, gainFocus);
+                boolean adjGainFocus = gainFocus;
+                if (adjGainFocus && getResolvedAutoFillMode() == AUTO_FILL_MODE_MANUAL) {
+                    adjGainFocus = false;
+                }
+
+                afm.focusChanged(this, adjGainFocus);
             }
         }
 
@@ -9300,6 +9309,30 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @AutoFillMode
     public int getAutoFillMode() {
         return (mPrivateFlags3 & PFLAG3_AUTO_FILL_MODE_MASK) >> PFLAG3_AUTO_FILL_MODE_SHIFT;
+    }
+
+    /**
+     * Returns the resolved auto-fill mode for this view.
+     *
+     * This is the same as {@link #getAutoFillMode()} but if the mode is
+     * {@link #AUTO_FILL_MODE_INHERIT} the parents auto-fill mode will be returned.
+     *
+     * @return One of {@link #AUTO_FILL_MODE_AUTO}, or {@link #AUTO_FILL_MODE_MANUAL}.
+     *
+     * @hide
+     */
+    public @AutoFillMode int getResolvedAutoFillMode() {
+        @AutoFillMode int autoFillMode = getAutoFillMode();
+
+        if (autoFillMode == AUTO_FILL_MODE_INHERIT) {
+            if (mParent == null) {
+                throw new IllegalStateException("View is detached, cannot resolve autoFillMode");
+            } else {
+                return mParent.getResolvedAutoFillMode();
+            }
+        } else {
+            return autoFillMode;
+        }
     }
 
     /**
