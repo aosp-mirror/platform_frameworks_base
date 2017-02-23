@@ -266,7 +266,7 @@ public final class LoadedApk {
         setApplicationInfo(aInfo);
 
         final List<String> newPaths = new ArrayList<>();
-        makePaths(mActivityThread, aInfo, newPaths, null /*libPaths*/);
+        makePaths(mActivityThread, aInfo, newPaths);
         final List<String> addedPaths = new ArrayList<>(newPaths.size());
 
         if (oldPaths != null) {
@@ -314,8 +314,17 @@ public final class LoadedApk {
         mCredentialProtectedDataDirFile = FileUtils.newFileOrNull(aInfo.credentialProtectedDataDir);
     }
 
-    public static void makePaths(ActivityThread activityThread, ApplicationInfo aInfo,
-            List<String> outZipPaths, List<String> outLibPaths) {
+    public static void makePaths(ActivityThread activityThread,
+                                 ApplicationInfo aInfo,
+                                 List<String> outZipPaths) {
+        makePaths(activityThread, false, aInfo, outZipPaths, null);
+    }
+
+    public static void makePaths(ActivityThread activityThread,
+                                 boolean isBundledApp,
+                                 ApplicationInfo aInfo,
+                                 List<String> outZipPaths,
+                                 List<String> outLibPaths) {
         final String appDir = aInfo.sourceDir;
         final String[] splitAppDirs = aInfo.splitSourceDirs;
         final String libDir = aInfo.nativeLibraryDir;
@@ -398,7 +407,7 @@ public final class LoadedApk {
                 }
             }
 
-            if (aInfo.isSystemApp() && !aInfo.isUpdatedSystemApp()) {
+            if (isBundledApp) {
                 // Add path to system libraries to libPaths;
                 // Access to system libs should be limited
                 // to bundled applications; this is why updated
@@ -471,10 +480,11 @@ public final class LoadedApk {
         // space and initialize to a small value (instead of incurring growth code).
         final List<String> zipPaths = new ArrayList<>(10);
         final List<String> libPaths = new ArrayList<>(10);
-        makePaths(mActivityThread, mApplicationInfo, zipPaths, libPaths);
 
         final boolean isBundledApp = mApplicationInfo.isSystemApp()
                 && !mApplicationInfo.isUpdatedSystemApp();
+
+        makePaths(mActivityThread, isBundledApp, mApplicationInfo, zipPaths, libPaths);
 
         String libraryPermittedPath = mDataDir;
         if (isBundledApp) {
