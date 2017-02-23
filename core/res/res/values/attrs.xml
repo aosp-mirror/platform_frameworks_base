@@ -430,10 +430,9 @@
             <flag name="adjustNothing" value="0x30" />
         </attr>
 
-        <!-- Flag allowing you to disable the preview animation for a window.
-             The default value is false; if set to true, the system can never
-             use the window's theme to show a preview of it before your
-             actual instance is shown to the user. -->
+        <!-- Flag allowing you to disable the splash screen for a window. The default value is
+             false; if set to true, the system can never use the window's theme to show a splash
+             screen before your actual instance is shown to the user. -->
         <attr name="windowDisablePreview" format="boolean" />
 
         <!-- Flag indicating that this window should not be displayed at all.
@@ -2049,6 +2048,17 @@
              Corresponds to setting {@link android.view.View#SYSTEM_UI_FLAG_LIGHT_STATUS_BAR} on
              the decor view. -->
         <attr name="windowLightStatusBar" format="boolean" />
+
+        <!-- Reference to a drawable to be used as the splash screen content of the window. This
+             drawable will be placed on top of the {@link android.R.attr#windowBackground} with its
+             bounds inset by the system bars. If the drawable should not be inset by the system
+             bars, use a fullscreen theme.
+             <p>
+             Note that even if no splashscreen content is set on the theme, the system may still
+             show a splash screen using the other attributes on the theme, like the
+             {@link android.R.attr#windowBackground}.
+             -->
+        <attr name="windowSplashscreenContent" format="reference" />
     </declare-styleable>
 
     <!-- The set of attributes that describe a AlertDialog's theme. -->
