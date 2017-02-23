@@ -722,7 +722,14 @@ public class AssistStructure implements Parcelable {
             }
 
             pwriter.writeString(mClassName);
-            out.writeInt(flags);
+
+            int writtenFlags = flags;
+            if ((flags&FLAGS_HAS_AUTO_FILL_DATA) != 0 && (mSanitized || !sanitizeOnWrite)) {
+                // Remove 'checked' from sanitized auto-fill request.
+                writtenFlags = flags & ~FLAGS_CHECKED;
+            }
+
+            out.writeInt(writtenFlags);
             if ((flags&FLAGS_HAS_ID) != 0) {
                 out.writeInt(mId);
                 if (mId != 0) {

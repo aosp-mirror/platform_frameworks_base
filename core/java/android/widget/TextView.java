@@ -727,7 +727,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private boolean mHasPresetAutoSizeValues = false;
 
     // Indicates whether the text was set from resources or dynamically, so it can be used to
-    // sanitize auto-fill request.
+    // sanitize auto-fill requests.
     private boolean mTextFromResource = false;
 
     /**

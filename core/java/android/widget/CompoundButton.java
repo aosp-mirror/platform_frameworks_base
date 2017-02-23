@@ -32,6 +32,7 @@ import android.view.Gravity;
 import android.view.SoundEffectConstants;
 import android.view.ViewDebug;
 import android.view.ViewHierarchyEncoder;
+import android.view.ViewStructure;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.autofill.AutoFillManager;
@@ -67,6 +68,10 @@ public abstract class CompoundButton extends Button implements Checkable {
 
     private OnCheckedChangeListener mOnCheckedChangeListener;
     private OnCheckedChangeListener mOnCheckedChangeWidgetListener;
+
+    // Indicates whether the toggle state was set from resources or dynamically, so it can be used
+    // to sanitize auto-fill requests.
+    private boolean mCheckedFromResource = false;
 
     private static final int[] CHECKED_STATE_SET = {
         R.attr.state_checked
@@ -109,6 +114,7 @@ public abstract class CompoundButton extends Button implements Checkable {
         final boolean checked = a.getBoolean(
                 com.android.internal.R.styleable.CompoundButton_checked, false);
         setChecked(checked);
+        mCheckedFromResource = true;
 
         a.recycle();
 
@@ -148,6 +154,7 @@ public abstract class CompoundButton extends Button implements Checkable {
     @Override
     public void setChecked(boolean checked) {
         if (mChecked != checked) {
+            mCheckedFromResource = false;
             mChecked = checked;
             refreshDrawableState();
             notifyViewAccessibilityStateChangedIfNeeded(
@@ -567,6 +574,13 @@ public abstract class CompoundButton extends Button implements Checkable {
     }
 
     // TODO(b/33197203): add unit/CTS tests for auto-fill methods (and make sure they handle enable)
+
+    @Override
+    public void onProvideAutoFillStructure(ViewStructure structure, int flags) {
+        super.onProvideAutoFillStructure(structure, flags);
+
+        structure.setSanitized(mCheckedFromResource);
+    }
 
     @Override
     public void autoFill(AutoFillValue value) {
