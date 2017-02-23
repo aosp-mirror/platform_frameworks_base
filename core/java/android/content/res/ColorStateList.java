@@ -508,8 +508,8 @@ public class ColorStateList extends ComplexColor implements Parcelable {
     }
 
     /**
-     * Indicates whether this color state list contains more than one state spec
-     * and will change color based on state.
+     * Indicates whether this color state list contains at least one state spec
+     * and the first spec is not empty (e.g. match-all).
      *
      * @return True if this color state list changes color based on state, false
      *         otherwise.
@@ -517,7 +517,7 @@ public class ColorStateList extends ComplexColor implements Parcelable {
      */
     @Override
     public boolean isStateful() {
-        return mStateSpecs.length > 1;
+        return mStateSpecs.length >= 1 && mStateSpecs[0].length > 0;
     }
 
     /**
