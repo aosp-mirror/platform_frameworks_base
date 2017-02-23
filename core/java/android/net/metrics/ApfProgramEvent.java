@@ -17,7 +17,6 @@
 package android.net.metrics;
 
 import android.annotation.IntDef;
-import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -36,7 +35,6 @@ import java.util.List;
  * the APF program in place with a new APF program.
  * {@hide}
  */
-@SystemApi
 public final class ApfProgramEvent implements Parcelable {
 
     // Bitflag constants describing what an Apf program filters.
@@ -55,7 +53,6 @@ public final class ApfProgramEvent implements Parcelable {
     public final int programLength; // Length of the APF program in bytes
     public final int flags;         // Bitfield compound of FLAG_* constants
 
-    /** {@hide} */
     public ApfProgramEvent(
             long lifetime, int filteredRas, int currentRas, int programLength, @Flags int flags) {
         this.lifetime = lifetime;
@@ -105,7 +102,6 @@ public final class ApfProgramEvent implements Parcelable {
         }
     };
 
-    /** {@hide} */
     public static @Flags int flagsFor(boolean hasIPv4, boolean multicastFilterOn) {
         int bitfield = 0;
         if (hasIPv4) {

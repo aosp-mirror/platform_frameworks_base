@@ -16,7 +16,6 @@
 
 package android.net.metrics;
 
-import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.SparseArray;
@@ -27,7 +26,6 @@ import com.android.internal.util.MessageUtils;
  * Event class used to record error events when parsing DHCP response packets.
  * {@hide}
  */
-@SystemApi
 public final class DhcpErrorEvent implements Parcelable {
     public static final int L2_ERROR   = 1;
     public static final int L3_ERROR   = 2;
@@ -50,12 +48,10 @@ public final class DhcpErrorEvent implements Parcelable {
     public static final int DHCP_INVALID_OPTION_LENGTH = makeErrorCode(DHCP_ERROR, 3);
     public static final int DHCP_NO_MSG_TYPE           = makeErrorCode(DHCP_ERROR, 4);
     public static final int DHCP_UNKNOWN_MSG_TYPE      = makeErrorCode(DHCP_ERROR, 5);
-    /** {@hide} */
     public static final int DHCP_NO_COOKIE             = makeErrorCode(DHCP_ERROR, 6);
 
     public static final int BUFFER_UNDERFLOW           = makeErrorCode(MISC_ERROR, 1);
     public static final int RECEIVE_ERROR              = makeErrorCode(MISC_ERROR, 2);
-    /** {@hide} */
     public static final int PARSING_ERROR              = makeErrorCode(MISC_ERROR, 3);
 
     public final String ifName;
@@ -66,7 +62,6 @@ public final class DhcpErrorEvent implements Parcelable {
     // byte 3: optional code
     public final int errorCode;
 
-    /** {@hide} */
     public DhcpErrorEvent(String ifName, int errorCode) {
         this.ifName = ifName;
         this.errorCode = errorCode;
@@ -98,12 +93,6 @@ public final class DhcpErrorEvent implements Parcelable {
             return new DhcpErrorEvent[size];
         }
     };
-
-    public static void logParseError(String ifName, int errorCode) {
-    }
-
-    public static void logReceiveError(String ifName) {
-    }
 
     public static int errorCodeWithOption(int errorCode, int option) {
         return (0xFFFF0000 & errorCode) | (0xFF & option);

@@ -17,7 +17,6 @@
 package android.net.metrics;
 
 import android.annotation.IntDef;
-import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.SparseArray;
@@ -31,14 +30,12 @@ import java.lang.annotation.RetentionPolicy;
  * An event recorded by NetworkMonitor when sending a probe for finding captive portals.
  * {@hide}
  */
-@SystemApi
 public final class ValidationProbeEvent implements Parcelable {
 
     public static final int PROBE_DNS       = 0;
     public static final int PROBE_HTTP      = 1;
     public static final int PROBE_HTTPS     = 2;
     public static final int PROBE_PAC       = 3;
-    /** {@hide} */
     public static final int PROBE_FALLBACK  = 4;
 
     public static final int DNS_FAILURE = 0;
@@ -47,7 +44,6 @@ public final class ValidationProbeEvent implements Parcelable {
     private static final int FIRST_VALIDATION  = 1 << 8;
     private static final int REVALIDATION      = 2 << 8;
 
-    /** {@hide} */
     @IntDef(value = {DNS_FAILURE, DNS_SUCCESS})
     @Retention(RetentionPolicy.SOURCE)
     public @interface ReturnCode {}
@@ -62,7 +58,6 @@ public final class ValidationProbeEvent implements Parcelable {
     public final int probeType;
     public final @ReturnCode int returnCode;
 
-    /** {@hide} */
     public ValidationProbeEvent(
             int netId, long durationMs, int probeType, @ReturnCode int returnCode) {
         this.netId = netId;
@@ -102,22 +97,16 @@ public final class ValidationProbeEvent implements Parcelable {
         }
     };
 
-    /** @hide */
     public static int makeProbeType(int probeType, boolean firstValidation) {
         return (probeType & 0xff) | (firstValidation ? FIRST_VALIDATION : REVALIDATION);
     }
 
-    /** @hide */
     public static String getProbeName(int probeType) {
         return Decoder.constants.get(probeType & 0xff, "PROBE_???");
     }
 
-    /** @hide */
     public static String getValidationStage(int probeType) {
         return Decoder.constants.get(probeType & 0xff00, "UNKNOWN");
-    }
-
-    public static void logEvent(int netId, long durationMs, int probeType, int returnCode) {
     }
 
     @Override

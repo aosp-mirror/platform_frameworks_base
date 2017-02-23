@@ -17,101 +17,59 @@
 package com.android.server.connectivity;
 
 import android.net.ConnectivityMetricsEvent;
-import android.net.ConnectivityMetricsLogger;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import java.util.function.Consumer;
 
 abstract public class MetricsTestUtil {
     private MetricsTestUtil() {
     }
 
-    static ConnectivityMetricsEvent ipEv(Parcelable p) {
-        return ev(ConnectivityMetricsLogger.COMPONENT_TAG_CONNECTIVITY, p);
+    static ConnectivityMetricsEvent ev(Parcelable p) {
+        return new ConnectivityMetricsEvent(1L, 0, 0, p);
     }
 
-    static ConnectivityMetricsEvent telephonyEv() {
-        return ev(ConnectivityMetricsLogger.COMPONENT_TAG_TELEPHONY, new Bundle());
-    }
-
-    static ConnectivityMetricsEvent ev(int tag, Parcelable p) {
-        return new ConnectivityMetricsEvent(1L, tag, 0, p);
-    }
-
-    // Utiliy interface for describing the content of a Parcel. This relies on
-    // the implementation defails of Parcelable and on the fact that the fully
-    // qualified Parcelable class names are written as string in the Parcels.
-    interface ParcelField {
-        void write(Parcel p);
-    }
-
-    static ConnectivityMetricsEvent describeIpEvent(ParcelField... fs) {
+    static ConnectivityMetricsEvent describeIpEvent(Consumer<Parcel>... fs) {
         Parcel p = Parcel.obtain();
-        for (ParcelField f : fs) {
-            f.write(p);
+        for (Consumer<Parcel> f : fs) {
+            f.accept(p);
         }
         p.setDataPosition(0);
-        return ipEv(p.readParcelable(ClassLoader.getSystemClassLoader()));
+        return ev(p.readParcelable(ClassLoader.getSystemClassLoader()));
     }
 
-    static ParcelField aType(Class<?> c) {
-        return new ParcelField() {
-            public void write(Parcel p) {
-                p.writeString(c.getName());
-            }
-        };
+    static Consumer<Parcel> aType(Class<?> c) {
+        return aString(c.getName());
     }
 
-    static ParcelField aBool(boolean b) {
+    static Consumer<Parcel> aBool(boolean b) {
         return aByte((byte) (b ? 1 : 0));
     }
 
-    static ParcelField aByte(byte b) {
-        return new ParcelField() {
-            public void write(Parcel p) {
-                p.writeByte(b);
-            }
-        };
+    static Consumer<Parcel> aByte(byte b) {
+        return (p) -> p.writeByte(b);
     }
 
-    static ParcelField anInt(int i) {
-        return new ParcelField() {
-            public void write(Parcel p) {
-                p.writeInt(i);
-            }
-        };
+    static Consumer<Parcel> anInt(int i) {
+        return (p) -> p.writeInt(i);
     }
 
-    static ParcelField aLong(long l) {
-        return new ParcelField() {
-            public void write(Parcel p) {
-                p.writeLong(l);
-            }
-        };
+    static Consumer<Parcel> aLong(long l) {
+        return (p) -> p.writeLong(l);
     }
 
-    static ParcelField aString(String s) {
-        return new ParcelField() {
-            public void write(Parcel p) {
-                p.writeString(s);
-            }
-        };
+    static Consumer<Parcel> aString(String s) {
+        return (p) -> p.writeString(s);
     }
 
-    static ParcelField aByteArray(byte... ary) {
-        return new ParcelField() {
-            public void write(Parcel p) {
-                p.writeByteArray(ary);
-            }
-        };
+    static Consumer<Parcel> aByteArray(byte... ary) {
+        return (p) -> p.writeByteArray(ary);
     }
 
-    static ParcelField anIntArray(int... ary) {
-        return new ParcelField() {
-            public void write(Parcel p) {
-                p.writeIntArray(ary);
-            }
-        };
+    static Consumer<Parcel> anIntArray(int... ary) {
+        return (p) -> p.writeIntArray(ary);
     }
 
     static byte b(int i) {

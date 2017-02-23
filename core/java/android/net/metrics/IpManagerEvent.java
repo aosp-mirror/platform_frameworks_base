@@ -17,7 +17,6 @@
 package android.net.metrics;
 
 import android.annotation.IntDef;
-import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.SparseArray;
@@ -32,17 +31,15 @@ import java.lang.annotation.RetentionPolicy;
  * when a network disconnects.
  * {@hide}
  */
-@SystemApi
 public final class IpManagerEvent implements Parcelable {
 
-    public static final int PROVISIONING_OK    = 1;
-    public static final int PROVISIONING_FAIL  = 2;
-    public static final int COMPLETE_LIFECYCLE = 3;
-    /** @hide */ public static final int ERROR_STARTING_IPV4 = 4;
-    /** @hide */ public static final int ERROR_STARTING_IPV6 = 5;
-    /** @hide */ public static final int ERROR_STARTING_IPREACHABILITYMONITOR = 6;
+    public static final int PROVISIONING_OK                       = 1;
+    public static final int PROVISIONING_FAIL                     = 2;
+    public static final int COMPLETE_LIFECYCLE                    = 3;
+    public static final int ERROR_STARTING_IPV4                   = 4;
+    public static final int ERROR_STARTING_IPV6                   = 5;
+    public static final int ERROR_STARTING_IPREACHABILITYMONITOR  = 6;
 
-    /** {@hide} */
     @IntDef(value = {
             PROVISIONING_OK, PROVISIONING_FAIL, COMPLETE_LIFECYCLE,
             ERROR_STARTING_IPV4, ERROR_STARTING_IPV6, ERROR_STARTING_IPREACHABILITYMONITOR,
@@ -54,7 +51,6 @@ public final class IpManagerEvent implements Parcelable {
     public final @EventType int eventType;
     public final long durationMs;
 
-    /** {@hide} */
     public IpManagerEvent(String ifName, @EventType int eventType, long duration) {
         this.ifName = ifName;
         this.eventType = eventType;
@@ -89,9 +85,6 @@ public final class IpManagerEvent implements Parcelable {
             return new IpManagerEvent[size];
         }
     };
-
-    public static void logEvent(int eventType, String ifName, long durationMs) {
-    }
 
     @Override
     public String toString() {

@@ -16,12 +16,10 @@
 
 package android.net;
 
-import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 /** {@hide} */
-@SystemApi
 public final class ConnectivityMetricsEvent implements Parcelable {
 
     /**  The time when this event was collected, as returned by System.currentTimeMillis(). */
@@ -67,7 +65,6 @@ public final class ConnectivityMetricsEvent implements Parcelable {
         return 0;
     }
 
-    /** Implement the Parcelable interface */
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeLong(timestamp);
@@ -79,52 +76,5 @@ public final class ConnectivityMetricsEvent implements Parcelable {
     public String toString() {
         return String.format("ConnectivityMetricsEvent(%tT.%tL, %d, %d): %s",
                 timestamp, timestamp, componentTag, eventTag, data);
-    }
-
-    /** {@hide} */
-    @SystemApi
-    public final static class Reference implements Parcelable {
-
-        private long mValue;
-
-        public Reference(long ref) {
-            this.mValue = ref;
-        }
-
-        /** Implement the Parcelable interface */
-        public static final Parcelable.Creator<Reference> CREATOR
-                = new Parcelable.Creator<Reference> (){
-            public Reference createFromParcel(Parcel source) {
-                return new Reference(source.readLong());
-            }
-
-            public Reference[] newArray(int size) {
-                return new Reference[size];
-            }
-        };
-
-        /** Implement the Parcelable interface */
-        @Override
-        public int describeContents() {
-            return 0;
-        }
-
-        /** Implement the Parcelable interface */
-        @Override
-        public void writeToParcel(Parcel dest, int flags) {
-            dest.writeLong(mValue);
-        }
-
-        public void readFromParcel(Parcel in) {
-            mValue = in.readLong();
-        }
-
-        public long getValue() {
-            return mValue;
-        }
-
-        public void setValue(long val) {
-            mValue = val;
-        }
     }
 }
