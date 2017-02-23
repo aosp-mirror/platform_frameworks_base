@@ -2682,19 +2682,32 @@ public class BackupManagerService {
             mStateDir = new File(mBaseStateDir, dirName);
             mCurrentOpToken = generateToken();
 
-            mCurrentState = BackupState.INITIAL;
             mFinished = false;
 
-            CountDownLatch latch = new CountDownLatch(1);
-            String[] fullBackups =
-                    mPendingFullBackups.toArray(new String[mPendingFullBackups.size()]);
-            mFullBackupTask =
-                    new PerformFullTransportBackupTask(/*fullBackupRestoreObserver*/ null,
-                            fullBackups, /*updateSchedule*/ false, /*runningJob*/ null, latch,
-                            mObserver, mMonitor,mUserInitiated);
+            synchronized (mCurrentOpLock) {
+                if (isBackupOperationInProgress()) {
+                    if (DEBUG) {
+                        Slog.d(TAG, "Skipping backup since one is already in progress.");
+                    }
+                    mCancelAll = true;
+                    mFullBackupTask = null;
+                    mCurrentState = BackupState.FINAL;
+                    addBackupTrace("Skipped. Backup already in progress.");
+                } else {
+                    mCurrentState = BackupState.INITIAL;
+                    CountDownLatch latch = new CountDownLatch(1);
+                    String[] fullBackups =
+                            mPendingFullBackups.toArray(new String[mPendingFullBackups.size()]);
+                    mFullBackupTask =
+                            new PerformFullTransportBackupTask(/*fullBackupRestoreObserver*/ null,
+                                    fullBackups, /*updateSchedule*/ false, /*runningJob*/ null,
+                                    latch,
+                                    mObserver, mMonitor, mUserInitiated);
 
-            registerTask();
-            addBackupTrace("STATE => INITIAL");
+                    registerTask();
+                    addBackupTrace("STATE => INITIAL");
+                }
+            }
         }
 
         /**
@@ -3077,7 +3090,9 @@ public class BackupManagerService {
                 mWakelock.acquire();
                 (new Thread(mFullBackupTask, "full-transport-requested")).start();
             } else if (mCancelAll) {
-                mFullBackupTask.unregisterTask();
+                if (mFullBackupTask != null) {
+                    mFullBackupTask.unregisterTask();
+                }
                 sendBackupFinished(mObserver, BackupManager.ERROR_BACKUP_CANCELLED);
             } else {
                 mFullBackupTask.unregisterTask();
@@ -3559,6 +3574,18 @@ public class BackupManagerService {
             Message msg = mBackupHandler.obtainMessage(MSG_BACKUP_RESTORE_STEP, this);
             mBackupHandler.sendMessage(msg);
         }
+    }
+
+    private boolean isBackupOperationInProgress() {
+        synchronized (mCurrentOpLock) {
+            for (int i = 0; i < mCurrentOperations.size(); i++) {
+                Operation op = mCurrentOperations.valueAt(i);
+                if (op.type == OP_TYPE_BACKUP && op.state == OP_PENDING) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
 
@@ -4542,6 +4569,14 @@ public class BackupManagerService {
             mUserInitiated = userInitiated;
             mCurrentOpToken = generateToken();
             mBackupRunnerOpToken = generateToken();
+
+            if (isBackupOperationInProgress()) {
+                if (DEBUG) {
+                    Slog.d(TAG, "Skipping full backup. A backup is already in progress.");
+                }
+                mCancelAll = true;
+                return;
+            }
 
             registerTask();
 
