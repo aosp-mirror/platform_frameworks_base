@@ -8592,6 +8592,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             } catch (InstallerException e) {
                 Slog.w(TAG, String.valueOf(e));
             }
+            mDexManager.notifyPackageDataDestroyed(pkg.packageName, userId);
         }
     }
 
@@ -16109,6 +16110,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                 setInstantAppForUser(ps, user.getIdentifier(), instantApp, fullApp);
                 prepareAppDataAfterInstallLIF(newPackage);
                 addedPkg = true;
+                mDexManager.notifyPackageUpdated(newPackage.packageName,
+                        newPackage.baseCodePath, newPackage.splitCodePaths);
             } catch (PackageManagerException e) {
                 res.setError("Package couldn't be installed in " + pkg.codePath, e);
             }
@@ -16258,6 +16261,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                 updateSettingsLI(newPackage, installerPackageName, allUsers, res, user,
                         installReason);
                 prepareAppDataAfterInstallLIF(newPackage);
+
+                mDexManager.notifyPackageUpdated(newPackage.packageName,
+                            newPackage.baseCodePath, newPackage.splitCodePaths);
             }
         } catch (PackageManagerException e) {
             res.setReturnCode(INSTALL_FAILED_INTERNAL_ERROR);
