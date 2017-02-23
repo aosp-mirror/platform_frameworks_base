@@ -25,7 +25,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(SysUIRunner.class)
-@RunWithLooper
+@RunWithLooper(setAsMainLooper = true)
 public class NotificationMenuRowTest extends LeakCheckedTest {
 
     @Before
