@@ -200,8 +200,10 @@ OPENGL_PIPELINE_TEST(RecordingCanvas, drawGlyphs_strikeThruAndUnderline) {
         paint.setTextEncoding(SkPaint::kGlyphID_TextEncoding);
         for (int i = 0; i < 2; i++) {
             for (int j = 0; j < 2; j++) {
-                paint.setUnderlineText(i != 0);
-                paint.setStrikeThruText(j != 0);
+                uint32_t flags = paint.getFlags();
+                if (i != 0) flags |= SkPaint::kUnderlineText_ReserveFlag;
+                if (j != 0) flags |= SkPaint::kStrikeThruText_ReserveFlag;
+                paint.setFlags(flags);
                 TestUtils::drawUtf8ToCanvas(&canvas, "test text", paint, 25, 25);
             }
         }
