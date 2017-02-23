@@ -528,14 +528,6 @@ public final class OverlayManagerService extends SystemService {
         }
 
         @Override
-        public void onShellCommand(@NonNull final FileDescriptor in,
-                @NonNull final FileDescriptor out, @NonNull final FileDescriptor err,
-                @NonNull final String[] args, @NonNull final ResultReceiver resultReceiver) {
-            (new OverlayManagerShellCommand(this)).exec(
-                    this, in, out, err, args, resultReceiver);
-        }
-
-        @Override
         protected void dump(@NonNull final FileDescriptor fd, @NonNull final PrintWriter pw,
                 @NonNull final String[] argv) {
             enforceDumpPermission("dump");
