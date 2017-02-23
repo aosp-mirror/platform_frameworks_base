@@ -14,7 +14,9 @@ EMOJI_VS = 0xFE0F
 
 LANG_TO_SCRIPT = {
     'as': 'Beng',
+    'bg': 'Cyrl',
     'bn': 'Beng',
+    'cu': 'Cyrl',
     'cy': 'Latn',
     'da': 'Latn',
     'de': 'Latn',
