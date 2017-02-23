@@ -31,7 +31,7 @@
     <application android:label="@string/app_name" >
         <receiver android:name="com.android.carrierdefaultapp.CarrierDefaultBroadcastReceiver">
             <intent-filter>
-                <action android:name="android.intent.action.CARRIER_SIGNAL_REDIRECTED" />
+                <action android:name="com.android.internal.telephony.CARRIER_SIGNAL_REDIRECTED" />
             </intent-filter>
         </receiver>
         <activity android:name="com.android.carrierdefaultapp.CaptivePortalLaunchActivity"
