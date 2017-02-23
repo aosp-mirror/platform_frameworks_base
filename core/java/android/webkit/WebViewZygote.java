@@ -176,7 +176,7 @@ public class WebViewZygote {
             // paths and pass them to the zygote as strings.
             final List<String> zipPaths = new ArrayList<>(10);
             final List<String> libPaths = new ArrayList<>(10);
-            LoadedApk.makePaths(null, sPackage.applicationInfo, zipPaths, libPaths);
+            LoadedApk.makePaths(null, false, sPackage.applicationInfo, zipPaths, libPaths);
             final String librarySearchPath = TextUtils.join(File.pathSeparator, libPaths);
             final String zip = (zipPaths.size() == 1) ? zipPaths.get(0) :
                     TextUtils.join(File.pathSeparator, zipPaths);
