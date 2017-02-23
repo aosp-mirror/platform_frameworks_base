@@ -23,6 +23,7 @@ import static android.app.StatusBarManager.WINDOW_STATE_HIDDEN;
 import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
 import static android.app.StatusBarManager.windowStateToString;
 
+import static com.android.systemui.statusbar.notification.NotificationInflater.InflationExceptionHandler;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT_TRANSPARENT;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_OPAQUE;
@@ -171,6 +172,7 @@ import com.android.systemui.statusbar.ScrimView;
 import com.android.systemui.statusbar.SignalClusterView;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.InflationException;
+import com.android.systemui.statusbar.notification.NotificationInflater;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.phone.StatusBarIconController.IconManager;
 import com.android.systemui.statusbar.phone.UnlockMethodCache.OnUnlockMethodChangedListener;
@@ -716,6 +718,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private LockscreenGestureLogger mLockscreenGestureLogger = new LockscreenGestureLogger();
     private NotificationIconAreaController mNotificationIconAreaController;
     private ConfigurationListener mDensityChangeListener;
+    private InflationExceptionHandler mInflationExceptionHandler = this::handleInflationException;
 
     private void recycleAllVisibilityObjects(ArraySet<NotificationVisibility> array) {
         final int N = array.size();
@@ -6091,6 +6094,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             row.setRemoteInputController(mRemoteInputController);
             row.setOnExpandClickListener(this);
             row.setRemoteViewClickHandler(mOnClickHandler);
+            row.setInflateExceptionHandler(mInflationExceptionHandler);
 
             // Get the app name.
             // Note that Notification.Builder#bindHeaderAppName has similar logic

@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar;
 
+import static com.android.systemui.statusbar.notification.NotificationInflater.InflationExceptionHandler;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
@@ -306,14 +308,19 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         mEntry = entry;
         mStatusBarNotification = entry.notification;
         mNotificationInflater.inflateNotificationViews();
+        onNotificationUpdated();
+    }
+
+    private void onNotificationUpdated() {
         for (NotificationContentView l : mLayouts) {
-            l.onNotificationUpdated(entry);
+            l.onNotificationUpdated(mEntry);
         }
         mIsColorized = mStatusBarNotification.getNotification().isColorized();
         mShowingPublicInitialized = false;
         updateNotificationColor();
         if (mIsSummaryWithChildren) {
-            mChildrenContainer.recreateNotificationHeader(mExpandClickListener, mEntry.notification);
+            mChildrenContainer.recreateNotificationHeader(mExpandClickListener,
+                    mEntry.notification);
             mChildrenContainer.onNotificationUpdated();
         }
         if (mIconAnimationRunning) {
@@ -463,6 +470,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         boolean childInGroup = StatusBar.ENABLE_CHILD_NOTIFICATIONS && isChildInGroup;
         mNotificationParent = childInGroup ? parent : null;
         mPrivateLayout.setIsChildInGroup(childInGroup);
+        if (mNotificationInflater.setIsChildInGroup(childInGroup)) {
+            onNotificationUpdated();
+        }
         resetBackgroundAlpha();
         updateBackgroundForGroupState();
         updateClickAndFocus();
@@ -1033,6 +1043,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
 
     public void setRemoteViewClickHandler(RemoteViews.OnClickHandler remoteViewClickHandler) {
         mNotificationInflater.setRemoteViewClickHandler(remoteViewClickHandler);
+    }
+
+    public void setInflateExceptionHandler(InflationExceptionHandler inflateExceptionHandler) {
+        mNotificationInflater.setInflateExceptionHandler(inflateExceptionHandler);
     }
 
     public interface ExpansionLogger {
