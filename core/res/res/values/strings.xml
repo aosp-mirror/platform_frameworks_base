@@ -4510,4 +4510,11 @@
     <!-- Accessibility string used for describing the button in time picker that changes the dialog to circular clock mode. [CHAR LIMIT=NONE] -->
     <string name="time_picker_radial_mode_description">Switch to clock mode for the time input.</string>
 
+    <!-- Title for the auto-fill save dialog shown when the user entered savable text [CHAR LIMIT=NONE] -->
+    <string name="autofill_save_title">Save to <xliff:g id="label" example="MyPass">%1$s</xliff:g>?</string>
+    <!-- Label for the auto-fill save button [CHAR LIMIT=NONE] -->
+    <string name="autofill_save_yes">Save</string>
+    <!-- Label for the auto-fill cancel button [CHAR LIMIT=NONE] -->
+    <string name="autofill_save_no">No thanks</string>
+
 </resources>

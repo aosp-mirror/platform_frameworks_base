@@ -70,6 +70,7 @@ import android.view.autofill.IAutoFillManagerClient;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.HandlerCaller;
 import com.android.internal.os.IResultReceiver;
+import com.android.server.autofill.ui.AutoFillUI;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -272,8 +273,8 @@ final class AutoFillManagerServiceImpl {
         }
     }
 
-    void startSessionLocked(IBinder activityToken, IBinder appCallbackToken, AutoFillId autoFillId,
-            Rect bounds, AutoFillValue value) {
+    void startSessionLocked(IBinder activityToken, IBinder windowToken, IBinder appCallbackToken,
+            AutoFillId autoFillId,  Rect bounds, AutoFillValue value) {
         if (!hasService()) {
             return;
         }
@@ -290,7 +291,8 @@ final class AutoFillManagerServiceImpl {
             return;
         }
 
-        final Session newSession = createSessionByTokenLocked(activityToken, appCallbackToken);
+        final Session newSession = createSessionByTokenLocked(activityToken,
+                windowToken, appCallbackToken);
         newSession.updateLocked(autoFillId, bounds, value, FLAG_START_SESSION);
     }
 
@@ -308,8 +310,10 @@ final class AutoFillManagerServiceImpl {
         session.showSaveLocked();
     }
 
-    private Session createSessionByTokenLocked(IBinder activityToken, IBinder appCallbackToken) {
-        final Session newSession = new Session(mContext, activityToken, appCallbackToken);
+    private Session createSessionByTokenLocked(IBinder activityToken, IBinder windowToken,
+            IBinder appCallbackToken) {
+        final Session newSession = new Session(mContext, activityToken,
+                windowToken, appCallbackToken);
         mSessions.put(activityToken, newSession);
 
         /*
@@ -556,6 +560,7 @@ final class AutoFillManagerServiceImpl {
     final class Session implements RemoteFillService.FillServiceCallbacks, ViewState.Listener,
             AutoFillUI.AutoFillUiCallback {
         private final IBinder mActivityToken;
+        private final IBinder mWindowToken;
 
         @GuardedBy("mLock")
         private final Map<AutoFillId, ViewState> mViewStates = new ArrayMap<>();
@@ -587,10 +592,12 @@ final class AutoFillManagerServiceImpl {
         @GuardedBy("mLock")
         private AssistStructure mStructure;
 
-        private Session(Context context, IBinder activityToken, IBinder client) {
+        private Session(Context context, IBinder activityToken, IBinder windowToken,
+                IBinder client) {
             mRemoteFillService = new RemoteFillService(context,
                     mInfo.getServiceInfo().getComponentName(), mUserId, this);
             mActivityToken = activityToken;
+            mWindowToken = windowToken;
 
             mClient = IAutoFillManagerClient.Stub.asInterface(client);
             try {
@@ -662,7 +669,9 @@ final class AutoFillManagerServiceImpl {
         // AutoFillUiCallback
         @Override
         public void fill(Dataset dataset) {
-            autoFill(dataset);
+            mHandlerCaller.getHandler().post(() -> {
+                autoFill(dataset);
+            });
         }
 
         // AutoFillUiCallback
@@ -726,7 +735,8 @@ final class AutoFillManagerServiceImpl {
                         Slog.d(TAG, "finishSessionLocked(): found a change on " + id + ": "
                                 + state.mAutoFillValue);
                     }
-                    getUiForShowing().showSaveUi();
+                    getUiForShowing().showSaveUi(mInfo.getServiceInfo()
+                            .loadLabel(mContext.getPackageManager()));
                     return;
                 }
             }
@@ -810,8 +820,9 @@ final class AutoFillManagerServiceImpl {
                     viewState.mAutoFillValue = value;
 
                     // Update the chooser UI
-                    mUi.updateFillUi(value.coerceToString());
+                    getUiForShowing().filterFillUi(value.coerceToString());
                 }
+
                 return;
             }
 
@@ -955,7 +966,7 @@ final class AutoFillManagerServiceImpl {
 
         private AutoFillUI getUiForShowing() {
             synchronized (mLock) {
-                mUi.setCallbackLocked(this, mActivityToken);
+                mUi.setCallback(this, mWindowToken);
                 return mUi;
             }
         }
@@ -995,7 +1006,7 @@ final class AutoFillManagerServiceImpl {
 
         private void destroyLocked() {
             mRemoteFillService.destroy();
-            mUi.setCallbackLocked(null, null);
+            mUi.setCallback(null, null);
         }
 
         private void removeSelf() {

@@ -14,44 +14,79 @@
      limitations under the License.
 -->
 
-<!-- TODO(b/33197203) remove hardcoded color once color is final -->
-<RelativeLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
+    android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:paddingStart="16dip"
     android:paddingEnd="16dip"
     android:paddingTop="16dip"
     android:paddingBottom="16dip"
-    android:background="#FDF8C8">
+    android:elevation="16dp"
+    android:background="?android:attr/colorBackground"
+    android:orientation="vertical">
 
-  <!-- TODO(b/33197203) use.R.string once final wording is done -->
-  <TextView
-      android:id="@+id/autofill_save_title"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:text="Save for autofill?"
-      android:singleLine="true"/>
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
 
-  <TextView
-      android:id="@+id/autofill_save_no"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_below="@+id/autofill_save_title"
-      android:layout_toLeftOf="@+id/autofill_save_yes"
-      android:layout_marginRight="16dip"
-      android:text="No thanks"
-      android:textAllCaps="true"
-      android:singleLine="true"/>
+        <TextView
+            android:id="@+id/autofill_save_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/autofill_save_title"
+            android:singleLine="true">
+        </TextView>
 
-    <TextView
-      android:id="@+id/autofill_save_yes"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_below="@+id/autofill_save_title"
-      android:layout_alignParentRight="true"
-      android:text="Save"
-      android:textAllCaps="true"
-      android:singleLine="true"/>
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:visibility="invisible" >
+        </Space>
 
-</RelativeLayout>
+        <ImageView
+            android:id="@+id/autofill_save_close"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@android:drawable/ic_close"
+            android:background="?android:attr/selectableItemBackgroundBorderless">
+        </ImageView>
+
+    </LinearLayout>
+
+    <com.android.internal.widget.ButtonBarLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:layout_marginTop="16dp"
+        android:layout_weight="1"
+        android:orientation="horizontal">
+
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:visibility="invisible" >
+        </Space>
+
+        <Button
+            android:id="@+id/autofill_save_no"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="?android:attr/buttonBarButtonStyle"
+            android:text="@string/autofill_save_no" >
+        </Button>
+
+        <Button
+            android:id="@+id/autofill_save_yes"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="?android:attr/buttonBarButtonStyle"
+            android:text="@string/autofill_save_yes" >
+        </Button>
+
+   </com.android.internal.widget.ButtonBarLayout>
+
+</LinearLayout>

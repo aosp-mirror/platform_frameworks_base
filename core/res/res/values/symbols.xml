@@ -2842,6 +2842,10 @@
   <java-symbol type="id" name="autofill_save_title" />
   <java-symbol type="id" name="autofill_save_no" />
   <java-symbol type="id" name="autofill_save_yes" />
+  <java-symbol type="id" name="autofill_save_close" />
+  <java-symbol type="string" name="autofill_save_title" />
+  <java-symbol type="string" name="autofill_save_yes" />
+  <java-symbol type="string" name="autofill_save_no" />
 
   <!-- Accessibility fingerprint gestures -->
   <java-symbol type="string" name="capability_title_canCaptureFingerprintGestures" />

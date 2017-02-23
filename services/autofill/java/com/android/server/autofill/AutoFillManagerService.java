@@ -57,6 +57,7 @@ import com.android.internal.os.IResultReceiver;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.autofill.ui.AutoFillUI;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -271,8 +272,8 @@ public final class AutoFillManagerService extends SystemService {
         }
 
         @Override
-        public void startSession(IBinder activityToken, IBinder appCallback, AutoFillId autoFillId,
-                Rect bounds, AutoFillValue value, int userId) {
+        public void startSession(IBinder activityToken, IBinder windowToken, IBinder appCallback,
+                AutoFillId autoFillId, Rect bounds, AutoFillValue value, int userId) {
             // TODO(b/33197203): make sure it's called by resumed / focused activity
 
             if (VERBOSE) {
@@ -282,7 +283,8 @@ public final class AutoFillManagerService extends SystemService {
 
             synchronized (mLock) {
                 final AutoFillManagerServiceImpl service = getServiceForUserLocked(userId);
-                service.startSessionLocked(activityToken, appCallback, autoFillId, bounds, value);
+                service.startSessionLocked(activityToken, windowToken, appCallback,
+                        autoFillId, bounds, value);
             }
         }
 
