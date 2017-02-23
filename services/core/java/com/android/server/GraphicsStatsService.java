@@ -137,16 +137,21 @@ public class GraphicsStatsService extends IGraphicsStats.Stub {
     }
 
     private void onAlarm() {
+        // We need to make a copy since some of the callbacks won't be proxy and thus
+        // can result in a re-entrant acquisition of mLock that would result in a modification
+        // of mActive during iteration.
+        ActiveBuffer[] activeCopy;
         synchronized (mLock) {
             mRotateIsScheduled = false;
             scheduleRotateLocked();
-            for (ActiveBuffer active : mActive) {
-                try {
-                    active.mCallback.onRotateGraphicsStatsBuffer();
-                } catch (RemoteException e) {
-                    Log.w(TAG, String.format("Failed to notify '%s' (pid=%d) to rotate buffers",
-                            active.mInfo.packageName, active.mPid), e);
-                }
+            activeCopy = mActive.toArray(new ActiveBuffer[0]);
+        }
+        for (ActiveBuffer active : activeCopy) {
+            try {
+                active.mCallback.onRotateGraphicsStatsBuffer();
+            } catch (RemoteException e) {
+                Log.w(TAG, String.format("Failed to notify '%s' (pid=%d) to rotate buffers",
+                        active.mInfo.packageName, active.mPid), e);
             }
         }
         // Give a few seconds for everyone to rotate before doing the cleanup
