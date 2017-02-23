@@ -2183,6 +2183,11 @@ public class Editor {
     }
 
     void onTouchUpEvent(MotionEvent event) {
+        if (getSelectionActionModeHelper().resetOriginalSelection(
+                getTextView().getOffsetForPosition(event.getX(), event.getY()))) {
+            return;
+        }
+
         boolean selectAllGotFocus = mSelectAllOnFocus && mTextView.didTouchFocusSelect();
         hideCursorAndSpanControllers();
         stopTextActionMode();
@@ -3916,7 +3921,7 @@ public class Editor {
         @Override
         public void onDestroyActionMode(ActionMode mode) {
             // Clear mTextActionMode not to recursively destroy action mode by clearing selection.
-            getSelectionActionModeHelper().cancelAsyncTask();
+            getSelectionActionModeHelper().onDestroyActionMode();
             mTextActionMode = null;
             Callback customCallback = getCustomCallback();
             if (customCallback != null) {
