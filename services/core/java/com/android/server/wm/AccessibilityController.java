@@ -226,8 +226,8 @@ final class AccessibilityController {
             Matrix outMatrix) {
         sTempFloats[Matrix.MSCALE_X] = windowState.mWinAnimator.mDsDx;
         sTempFloats[Matrix.MSKEW_Y] = windowState.mWinAnimator.mDtDx;
-        sTempFloats[Matrix.MSKEW_X] = windowState.mWinAnimator.mDsDy;
-        sTempFloats[Matrix.MSCALE_Y] = windowState.mWinAnimator.mDtDy;
+        sTempFloats[Matrix.MSKEW_X] = windowState.mWinAnimator.mDtDy;
+        sTempFloats[Matrix.MSCALE_Y] = windowState.mWinAnimator.mDsDy;
         sTempFloats[Matrix.MTRANS_X] = windowState.mShownPosition.x;
         sTempFloats[Matrix.MTRANS_Y] = windowState.mShownPosition.y;
         sTempFloats[Matrix.MPERSP_0] = 0;
