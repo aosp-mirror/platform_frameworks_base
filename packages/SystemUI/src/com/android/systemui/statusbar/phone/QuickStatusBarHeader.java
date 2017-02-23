@@ -29,7 +29,6 @@ import android.graphics.drawable.RippleDrawable;
 import android.os.UserManager;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
-import android.telephony.SubscriptionInfo;
 import android.util.AttributeSet;
 import android.util.SparseBooleanArray;
 import android.view.View;
@@ -64,8 +63,6 @@ import com.android.systemui.statusbar.policy.NextAlarmController.NextAlarmChange
 import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.statusbar.policy.UserInfoController.OnUserInfoChangedListener;
 import com.android.systemui.tuner.TunerService;
-
-import java.util.List;
 
 public class QuickStatusBarHeader extends BaseStatusBarHeader implements
         NextAlarmChangeCallback, OnClickListener, OnUserInfoChangedListener, EmergencyListener,
@@ -443,20 +440,10 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
         }
     }
 
-    @Override
-    public void setSubs(List<SubscriptionInfo> subs) {
-        mRoamingsBySubId.clear();
-        updateRoaming();
-    }
-
     public void setMobileDataIndicators(IconState statusIcon, IconState qsIcon, int statusType,
             int qsType, boolean activityIn, boolean activityOut, String typeContentDescription,
             String description, boolean isWide, int subId, boolean roaming) {
         mRoamingsBySubId.put(subId, roaming);
-        updateRoaming();
-    }
-
-    private void updateRoaming() {
         boolean isRoaming = calculateRoaming();
         if (mIsRoaming != isRoaming) {
             mIsRoaming = isRoaming;
