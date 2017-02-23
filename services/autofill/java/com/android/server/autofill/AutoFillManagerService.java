@@ -18,7 +18,6 @@ package com.android.server.autofill;
 
 import static android.Manifest.permission.MANAGE_AUTO_FILL;
 import static android.content.Context.AUTO_FILL_MANAGER_SERVICE;
-import static com.android.server.autofill.Helper.DEBUG;
 import static com.android.server.autofill.Helper.VERBOSE;
 
 import android.Manifest;
@@ -101,14 +100,16 @@ public final class AutoFillManagerService extends SystemService {
     private SparseArray<AutoFillManagerServiceImpl> mServicesCache = new SparseArray<>();
 
     // TODO(b/33197203): set a different max (or disable it) on low-memory devices.
-    private final LocalLog mRequestsHistory = new LocalLog(100);
+    private final LocalLog mRequestsHistory = new LocalLog(20);
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(intent.getAction())) {
                 final String reason = intent.getStringExtra("reason");
-                if (DEBUG) Slog.d(TAG, "close system dialogs: " + reason);
+                if (VERBOSE) {
+                    Slog.v(TAG, "close system dialogs: " + reason);
+                }
                 mUi.hideAll();
             }
         }
@@ -247,7 +248,9 @@ public final class AutoFillManagerService extends SystemService {
     private IBinder getTopActivityForUser() {
         final List<IBinder> topActivities = LocalServices
                 .getService(ActivityManagerInternal.class).getTopVisibleActivities();
-        if (DEBUG) Slog.d(TAG, "Top activities (" + topActivities.size() + "): " + topActivities);
+        if (VERBOSE) {
+            Slog.v(TAG, "Top activities (" + topActivities.size() + "): " + topActivities);
+        }
         if (topActivities.isEmpty()) {
             Slog.w(TAG, "Could not get top activity");
             return null;
@@ -276,11 +279,6 @@ public final class AutoFillManagerService extends SystemService {
                 AutoFillId autoFillId, Rect bounds, AutoFillValue value, int userId) {
             // TODO(b/33197203): make sure it's called by resumed / focused activity
 
-            if (VERBOSE) {
-                Slog.v(TAG, "startSession: autoFillId=" + autoFillId + ", bounds=" + bounds
-                        + ", value=" + value);
-            }
-
             synchronized (mLock) {
                 final AutoFillManagerServiceImpl service = getServiceForUserLocked(userId);
                 service.startSessionLocked(activityToken, windowToken, appCallback,
@@ -291,11 +289,6 @@ public final class AutoFillManagerService extends SystemService {
         @Override
         public void updateSession(IBinder activityToken, AutoFillId id, Rect bounds,
                 AutoFillValue value, int flags, int userId) {
-            if (DEBUG) {
-                Slog.d(TAG, "updateSession: flags=" + flags + ", autoFillId=" + id
-                        + ", bounds=" + bounds + ", value=" + value);
-            }
-
             synchronized (mLock) {
                 final AutoFillManagerServiceImpl service = mServicesCache.get(
                         UserHandle.getCallingUserId());
@@ -307,8 +300,6 @@ public final class AutoFillManagerService extends SystemService {
 
         @Override
         public void finishSession(IBinder activityToken, int userId) {
-            if (VERBOSE) Slog.v(TAG, "finishSession(): " + activityToken);
-
             synchronized (mLock) {
                 final AutoFillManagerServiceImpl service = mServicesCache.get(
                         UserHandle.getCallingUserId());

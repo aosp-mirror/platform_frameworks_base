@@ -17,6 +17,7 @@
 package android.view.autofill;
 
 import static android.view.autofill.Helper.DEBUG;
+import static android.view.autofill.Helper.VERBOSE;
 
 import android.content.Context;
 import android.content.Intent;
@@ -255,7 +256,7 @@ public final class AutoFillManager {
     private void startSession(AutoFillId id, IBinder windowToken,
             Rect bounds, AutoFillValue value) {
         if (DEBUG) {
-            Log.v(TAG, "startSession(): id=" + id + ", bounds=" + bounds + ", value=" + value);
+            Log.d(TAG, "startSession(): id=" + id + ", bounds=" + bounds + ", value=" + value);
         }
         try {
             mService.startSession(mContext.getActivityToken(), windowToken,
@@ -272,7 +273,7 @@ public final class AutoFillManager {
 
     private void finishSession() {
         if (DEBUG) {
-            Log.v(TAG, "finishSession()");
+            Log.d(TAG, "finishSession()");
         }
         mHasSession = false;
         try {
@@ -284,9 +285,12 @@ public final class AutoFillManager {
 
     private void updateSession(AutoFillId id, Rect bounds, AutoFillValue value, int flags) {
         if (DEBUG) {
-            Log.v(TAG, "updateSession(): id=" + id + ", bounds=" + bounds + ", value=" + value
+            if (VERBOSE || (flags & FLAG_FOCUS_LOST) != 0) {
+                Log.d(TAG, "updateSession(): id=" + id + ", bounds=" + bounds + ", value=" + value
                     + ", flags=" + flags);
+            }
         }
+
         try {
             mService.updateSession(mContext.getActivityToken(), id, bounds, value, flags,
                     mContext.getUserId());
