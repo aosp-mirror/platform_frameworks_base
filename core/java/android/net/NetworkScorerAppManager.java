@@ -26,6 +26,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.content.pm.ServiceInfo;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
@@ -60,21 +61,30 @@ public class NetworkScorerAppManager {
         /** UID of the scorer app. */
         public final int packageUid;
         private final ComponentName mRecommendationService;
+        /**
+         * The {@link ComponentName} of the Activity to start before enabling the "connect to open
+         * wifi networks automatically" feature.
+         */
+        private final ComponentName mEnableUseOpenWifiActivity;
 
-        public NetworkScorerAppData(int packageUid, ComponentName recommendationServiceComp) {
+        public NetworkScorerAppData(int packageUid, ComponentName recommendationServiceComp,
+                ComponentName enableUseOpenWifiActivity) {
             this.packageUid = packageUid;
             this.mRecommendationService = recommendationServiceComp;
+            this.mEnableUseOpenWifiActivity = enableUseOpenWifiActivity;
         }
 
         protected NetworkScorerAppData(Parcel in) {
             packageUid = in.readInt();
             mRecommendationService = ComponentName.readFromParcel(in);
+            mEnableUseOpenWifiActivity = ComponentName.readFromParcel(in);
         }
 
         @Override
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeInt(packageUid);
             ComponentName.writeToParcel(mRecommendationService, dest);
+            ComponentName.writeToParcel(mEnableUseOpenWifiActivity, dest);
         }
 
         @Override
@@ -103,11 +113,16 @@ public class NetworkScorerAppManager {
             return mRecommendationService;
         }
 
+        @Nullable public ComponentName getEnableUseOpenWifiActivity() {
+            return mEnableUseOpenWifiActivity;
+        }
+
         @Override
         public String toString() {
             return "NetworkScorerAppData{" +
                     "packageUid=" + packageUid +
                     ", mRecommendationService=" + mRecommendationService +
+                    ", mEnableUseOpenWifiActivity=" + mEnableUseOpenWifiActivity +
                     '}';
         }
 
@@ -117,12 +132,13 @@ public class NetworkScorerAppManager {
             if (o == null || getClass() != o.getClass()) return false;
             NetworkScorerAppData that = (NetworkScorerAppData) o;
             return packageUid == that.packageUid &&
-                    Objects.equals(mRecommendationService, that.mRecommendationService);
+                    Objects.equals(mRecommendationService, that.mRecommendationService) &&
+                    Objects.equals(mEnableUseOpenWifiActivity, that.mEnableUseOpenWifiActivity);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(packageUid, mRecommendationService);
+            return Objects.hash(packageUid, mRecommendationService, mEnableUseOpenWifiActivity);
         }
     }
 
@@ -165,12 +181,14 @@ public class NetworkScorerAppManager {
             final String potentialPkg = potentialPkgs.get(i);
 
             // Look for the recommendation service class and required receiver.
-            final ResolveInfo resolveServiceInfo = findRecommendationService(potentialPkg);
-            if (resolveServiceInfo != null) {
-                final ComponentName componentName =
-                        new ComponentName(potentialPkg, resolveServiceInfo.serviceInfo.name);
-                return new NetworkScorerAppData(resolveServiceInfo.serviceInfo.applicationInfo.uid,
-                        componentName);
+            final ServiceInfo serviceInfo = findRecommendationService(potentialPkg);
+            if (serviceInfo != null) {
+                final ComponentName serviceComponentName =
+                    new ComponentName(potentialPkg, serviceInfo.name);
+                final ComponentName useOpenWifiNetworksActivity =
+                        findUseOpenWifiNetworksActivity(serviceInfo);
+                return new NetworkScorerAppData(serviceInfo.applicationInfo.uid,
+                    serviceComponentName, useOpenWifiNetworksActivity);
             } else {
                 if (DEBUG) {
                     Log.d(TAG, potentialPkg + " does not have the required components, skipping.");
@@ -179,6 +197,36 @@ public class NetworkScorerAppManager {
         }
 
         // None of the configured packages are valid.
+        return null;
+    }
+
+    @Nullable private ComponentName findUseOpenWifiNetworksActivity(ServiceInfo serviceInfo) {
+        if (serviceInfo.metaData == null) {
+            if (DEBUG) {
+                Log.d(TAG, "No metadata found on recommendation service.");
+            }
+            return null;
+        }
+        final String useOpenWifiPackage = serviceInfo.metaData
+                .getString(NetworkScoreManager.USE_OPEN_WIFI_PACKAGE_META_DATA);
+        if (TextUtils.isEmpty(useOpenWifiPackage)) {
+            if (DEBUG) {
+                Log.d(TAG, "No use_open_wifi_package metadata found.");
+            }
+            return null;
+        }
+        final Intent enableUseOpenWifiIntent = new Intent(NetworkScoreManager.ACTION_CUSTOM_ENABLE)
+                .setPackage(useOpenWifiPackage);
+        final ResolveInfo resolveActivityInfo = mContext.getPackageManager()
+                .resolveActivity(enableUseOpenWifiIntent, 0 /* flags */);
+        if (VERBOSE) {
+            Log.d(TAG, "Resolved " + enableUseOpenWifiIntent + " to " + serviceInfo);
+        }
+
+        if (resolveActivityInfo != null && resolveActivityInfo.activityInfo != null) {
+            return resolveActivityInfo.activityInfo.getComponentName();
+        }
+
         return null;
     }
 
@@ -220,10 +268,9 @@ public class NetworkScorerAppManager {
         return packages;
     }
 
-    private ResolveInfo findRecommendationService(String packageName) {
+    @Nullable private ServiceInfo findRecommendationService(String packageName) {
         final PackageManager pm = mContext.getPackageManager();
-        final int resolveFlags = 0;
-
+        final int resolveFlags = PackageManager.GET_META_DATA;
         final Intent serviceIntent = new Intent(NetworkScoreManager.ACTION_RECOMMEND_NETWORKS);
         serviceIntent.setPackage(packageName);
         final ResolveInfo resolveServiceInfo =
@@ -234,7 +281,7 @@ public class NetworkScorerAppManager {
         }
 
         if (resolveServiceInfo != null && resolveServiceInfo.serviceInfo != null) {
-            return resolveServiceInfo;
+            return resolveServiceInfo.serviceInfo;
         }
 
         if (VERBOSE) {

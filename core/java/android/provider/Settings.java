@@ -8258,6 +8258,15 @@ public final class Settings {
         public static final String CURATE_SAVED_OPEN_NETWORKS = "curate_saved_open_networks";
 
         /**
+         * The package name of the application that connect and secures high quality open wifi
+         * networks automatically.
+         *
+         * Type: string package name or null if the feature is either not provided or disabled.
+         * @hide
+         */
+        public static final String USE_OPEN_WIFI_PACKAGE = "use_open_wifi_package";
+
+        /**
          * The number of milliseconds the {@link com.android.server.NetworkScoreService}
          * will give a recommendation request to complete before returning a default response.
          *
@@ -9679,6 +9688,7 @@ public final class Settings {
             CURATE_SAVED_OPEN_NETWORKS,
             WIFI_WAKEUP_ENABLED,
             WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON,
+            USE_OPEN_WIFI_PACKAGE,
             WIFI_WATCHDOG_POOR_NETWORK_TEST_ENABLED,
             EMERGENCY_TONE,
             CALL_AUTO_RETRY,
