@@ -103,7 +103,7 @@ final class AutoFillManagerServiceImpl {
                 handleSessionSave((IBinder) msg.obj);
                 break;
             default:
-                Slog.d(TAG, "invalid msg: " + msg);
+                Slog.w(TAG, "invalid msg on handler: " + msg);
         }
     };
 
@@ -127,17 +127,18 @@ final class AutoFillManagerServiceImpl {
     private final IResultReceiver mAssistReceiver = new IResultReceiver.Stub() {
         @Override
         public void send(int resultCode, Bundle resultData) throws RemoteException {
-            if (DEBUG) Slog.d(TAG, "resultCode on mAssistReceiver: " + resultCode);
+            if (VERBOSE) {
+                Slog.v(TAG, "resultCode on mAssistReceiver: " + resultCode);
+            }
 
             final AssistStructure structure = resultData.getParcelable(KEY_STRUCTURE);
             if (structure == null) {
-                Slog.w(TAG, "no assist structure for id " + resultCode);
+                Slog.wtf(TAG, "no assist structure for id " + resultCode);
                 return;
             }
 
             final Bundle receiverExtras = resultData.getBundle(KEY_RECEIVER_EXTRAS);
             if (receiverExtras == null) {
-                // Should not happen
                 Slog.wtf(TAG, "No " + KEY_RECEIVER_EXTRAS + " on receiver");
                 return;
             }
@@ -194,7 +195,7 @@ final class AutoFillManagerServiceImpl {
             final ApplicationInfo info = pm.getApplicationInfo(packageName, 0);
             return pm.getApplicationLabel(info);
         } catch (Exception e) {
-            Slog.w(TAG, "Could not get label for " + packageName + ": " + e);
+            Slog.e(TAG, "Could not get label for " + packageName + ": " + e);
             return packageName;
         }
     }
@@ -210,7 +211,7 @@ final class AutoFillManagerServiceImpl {
                 serviceInfo = AppGlobals.getPackageManager().getServiceInfo(serviceComponent,
                         0, mUserId);
             } catch (RuntimeException | RemoteException e) {
-                Slog.e(TAG, "Bad auto-fill service name " + componentName, e);
+                Slog.e(TAG, "Bad auto-fill service name " + componentName + ": " + e);
                 return;
             }
         }
@@ -234,7 +235,7 @@ final class AutoFillManagerServiceImpl {
                 sendStateToClients();
             }
         } catch (PackageManager.NameNotFoundException e) {
-            Slog.e(TAG, "Bad auto-fill service name " + componentName, e);
+            Slog.e(TAG, "Bad auto-fill service name " + componentName + ": " + e);
         }
     }
 
@@ -278,9 +279,9 @@ final class AutoFillManagerServiceImpl {
             return;
         }
 
-        final String historyItem = "s=" + new ComponentName(mInfo.getServiceInfo().packageName,
-                mInfo.getServiceInfo().name) + " u=" + mUserId + " a=" + activityToken
-                + " i=" + autoFillId + " b=" + bounds + " v=" + value;
+        final String historyItem = "s=" + mInfo.getServiceInfo().packageName
+                + " u=" + mUserId + " a=" + activityToken
+                + " i=" + autoFillId + " b=" + bounds;
         mRequestsHistory.log(historyItem);
 
         // TODO(b/33197203): Handle partitioning
@@ -327,8 +328,6 @@ final class AutoFillManagerServiceImpl {
             try {
                 if (!ActivityManager.getService().requestAutoFillData(mAssistReceiver,
                         receiverExtras, activityToken)) {
-                    // TODO(b/33197203): might need a way to warn user (perhaps a new method on
-                    // AutoFillService).
                     Slog.w(TAG, "failed to request auto-fill data for " + activityToken);
                 }
             } finally {
@@ -345,7 +344,9 @@ final class AutoFillManagerServiceImpl {
         // TODO(b/33197203): add MetricsLogger call
         final Session session = mSessions.get(activityToken);
         if (session == null) {
-            Slog.w(TAG, "updateSessionLocked(): session gone for " + activityToken);
+            if (VERBOSE) {
+                Slog.v(TAG, "updateSessionLocked(): session gone for " + activityToken);
+            }
             return;
         }
 
@@ -365,7 +366,9 @@ final class AutoFillManagerServiceImpl {
     }
 
     void destroyLocked() {
-        if (VERBOSE) Slog.v(TAG, "destroyLocked()");
+        if (VERBOSE) {
+            Slog.v(TAG, "destroyLocked()");
+        }
 
         for (Session session : mSessions.values()) {
             session.destroyLocked();
@@ -376,7 +379,7 @@ final class AutoFillManagerServiceImpl {
     void dumpLocked(String prefix, PrintWriter pw) {
         final String prefix2 = prefix + "  ";
 
-        pw.print(prefix); pw.println("Component:"); pw.println(mInfo != null
+        pw.print(prefix); pw.print("Component:"); pw.println(mInfo != null
                 ? mInfo.getServiceInfo().getComponentName() : null);
 
         if (VERBOSE) {
@@ -522,8 +525,6 @@ final class AutoFillManagerServiceImpl {
 
         @Override
         public String toString() {
-            if (!DEBUG) return super.toString();
-
             return "ViewState: [id=" + mId + ", value=" + mAutoFillValue + ", bounds=" + mBounds
                     + ", updated = " + mValueUpdated + "]";
         }
@@ -595,7 +596,9 @@ final class AutoFillManagerServiceImpl {
             mClient = IAutoFillManagerClient.Stub.asInterface(client);
             try {
                 client.linkToDeath(() -> {
-                    if (DEBUG) Slog.d(TAG, "app binder died");
+                    if (DEBUG) {
+                        Slog.d(TAG, "app binder died");
+                    }
 
                     removeSelf();
                 }, 0);
@@ -696,20 +699,23 @@ final class AutoFillManagerServiceImpl {
          */
         public void showSaveLocked() {
             if (mStructure == null) {
-                // Sanity check; should not happen...
                 Slog.wtf(TAG, "showSaveLocked(): no mStructure");
                 return;
             }
             if (mCurrentResponse == null) {
-                // Happens when the activity / session was finished before the service replied.
-                Slog.d(TAG, "showSaveLocked(): no mCurrentResponse yet");
+                // Happens when the activity / session was finished before the service replied, or
+                // when the service cannot auto-fill it (and returned a null response).
+                if (DEBUG) {
+                    Slog.d(TAG, "showSaveLocked(): no mCurrentResponse");
+                }
                 return;
             }
             final ArraySet<AutoFillId> savableIds = mCurrentResponse.getSavableIds();
-            if (VERBOSE) Slog.v(TAG, "showSaveLocked(): savableIds=" + savableIds);
+            if (DEBUG) {
+                Slog.d(TAG, "showSaveLocked(): savableIds=" + savableIds);
+            }
 
-            if (savableIds.isEmpty()) {
-                if (DEBUG) Slog.d(TAG, "showSaveLocked(): service doesn't want to save");
+            if (savableIds == null || savableIds.isEmpty()) {
                 return;
             }
 
@@ -732,21 +738,27 @@ final class AutoFillManagerServiceImpl {
             }
 
             // Nothing changed...
-            if (DEBUG) Slog.d(TAG, "showSaveLocked(): with no changes, comes no responsibilities");
+            if (DEBUG) {
+                Slog.d(TAG, "showSaveLocked(): with no changes, comes no responsibilities");
+            }
         }
 
         /**
          * Calls service when user requested save.
          */
         private void callSaveLocked() {
-            if (DEBUG) Slog.d(TAG, "callSaveLocked(): mViewStates=" + mViewStates);
+            if (DEBUG) {
+                Slog.d(TAG, "callSaveLocked(): mViewStates=" + mViewStates);
+            }
 
             final Bundle extras = this.mCurrentResponse.getExtras();
 
             for (Entry<AutoFillId, ViewState> entry : mViewStates.entrySet()) {
                 final AutoFillValue value = entry.getValue().mAutoFillValue;
                 if (value == null) {
-                    if (VERBOSE) Slog.v(TAG, "callSaveLocked(): skipping " + entry.getKey());
+                    if (VERBOSE) {
+                        Slog.v(TAG, "callSaveLocked(): skipping " + entry.getKey());
+                    }
                     continue;
                 }
                 final AutoFillId id = entry.getKey();
@@ -755,7 +767,9 @@ final class AutoFillManagerServiceImpl {
                     Slog.w(TAG, "callSaveLocked(): did not find node with id " + id);
                     continue;
                 }
-                if (DEBUG) Slog.d(TAG, "callSaveLocked(): updating " + id + " to " + value);
+                if (VERBOSE) {
+                    Slog.v(TAG, "callSaveLocked(): updating " + id + " to " + value);
+                }
 
                 node.updateAutoFillValue(value);
             }
@@ -771,11 +785,9 @@ final class AutoFillManagerServiceImpl {
         }
 
         void updateLocked(AutoFillId id, Rect bounds, AutoFillValue value, int flags) {
-            if (DEBUG) Slog.d(TAG, "updateLocked(): id=" + id + ", flags=" + flags);
-
             if (mAutoFilledDataset != null && (flags & FLAG_VALUE_CHANGED) == 0) {
                 // TODO(b/33197203): ignoring because we don't support partitions yet
-                if (DEBUG) Slog.d(TAG, "updateLocked(): ignoring " + flags + " after auto-filled");
+                Slog.d(TAG, "updateLocked(): ignoring " + flags + " after app was auto-filled");
                 return;
             }
 
@@ -841,7 +853,7 @@ final class AutoFillManagerServiceImpl {
                 return;
             }
 
-            Slog.w(TAG, "unknown flags " + flags);
+            Slog.w(TAG, "updateLocked(): unknown flags " + flags);
         }
 
         @Override
@@ -860,8 +872,10 @@ final class AutoFillManagerServiceImpl {
         }
 
         private void processResponseLocked(FillResponse response) {
-            if (DEBUG) Slog.d(TAG, "processResponseLocked(authRequired="
-                    + response.getAuthentication() + "):" + response);
+            if (DEBUG) {
+                Slog.d(TAG, "processResponseLocked(auth=" + response.getAuthentication()
+                    + "):" + response);
+            }
 
             // TODO(b/33197203): add MetricsLogger calls
 
@@ -945,7 +959,9 @@ final class AutoFillManagerServiceImpl {
         void autoFillApp(Dataset dataset) {
             synchronized (mLock) {
                 try {
-                    if (DEBUG) Slog.d(TAG, "autoFillApp(): the buck is on the app: " + dataset);
+                    if (DEBUG) {
+                        Slog.d(TAG, "autoFillApp(): the buck is on the app: " + dataset);
+                    }
                     mClient.autoFill(dataset.getFieldIds(), dataset.getFieldValues());
                 } catch (RemoteException e) {
                     Slog.w(TAG, "Error auto-filling activity: " + e);
@@ -999,7 +1015,9 @@ final class AutoFillManagerServiceImpl {
         }
 
         private void removeSelf() {
-            if (VERBOSE) Slog.v(TAG, "removeSelf()");
+            if (VERBOSE) {
+                Slog.v(TAG, "removeSelf()");
+            }
 
             synchronized (mLock) {
                 destroyLocked();
