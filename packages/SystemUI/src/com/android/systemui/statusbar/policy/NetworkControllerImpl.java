@@ -551,17 +551,11 @@ public class NetworkControllerImpl extends BroadcastReceiver
         updateAirplaneMode(true /* force */);
     }
 
-    public void setUserSetupComplete(final boolean userSetup) {
-        mReceiverHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                handleSetUserSetupComplete(userSetup);
-            }
-        });
+    private void setUserSetupComplete(final boolean userSetup) {
+        mReceiverHandler.post(() -> handleSetUserSetupComplete(userSetup));
     }
 
-    @VisibleForTesting
-    void handleSetUserSetupComplete(boolean userSetup) {
+    private void handleSetUserSetupComplete(boolean userSetup) {
         mUserSetup = userSetup;
         for (MobileSignalController controller : mMobileSignalControllers.values()) {
             controller.setUserSetupComplete(mUserSetup);

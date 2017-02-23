@@ -1,16 +1,19 @@
 package com.android.systemui.statusbar.policy;
 
+import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import android.net.NetworkCapabilities;
 import android.os.Looper;
 import android.support.test.runner.AndroidJUnit4;
 import android.telephony.TelephonyManager;
 import android.test.suitebuilder.annotation.SmallTest;
+
 import com.android.settingslib.net.DataUsageController;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -106,7 +109,7 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
     @Test
     public void testDataDisabledIcon() {
         setupNetworkController();
-        Mockito.when(mMockTm.getDataEnabled(mSubId)).thenReturn(false);
+        when(mMockTm.getDataEnabled(mSubId)).thenReturn(false);
         setupDefaultSignal();
         updateDataConnectionState(TelephonyManager.DATA_DISCONNECTED, 0);
         setConnectivity(NetworkCapabilities.TRANSPORT_CELLULAR, false, false);
@@ -118,11 +121,12 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
     @Test
     public void testDataDisabledIcon_UserNotSetup() {
         setupNetworkController();
-        Mockito.when(mMockTm.getDataEnabled(mSubId)).thenReturn(false);
+        when(mMockTm.getDataEnabled(mSubId)).thenReturn(false);
         setupDefaultSignal();
         updateDataConnectionState(TelephonyManager.DATA_DISCONNECTED, 0);
         setConnectivity(NetworkCapabilities.TRANSPORT_CELLULAR, false, false);
-        mNetworkController.handleSetUserSetupComplete(false);
+        when(mMockProvisionController.isUserSetup(anyInt())).thenReturn(false);
+        mUserCallback.onUserSetupChanged();
 
         // Don't show the X until the device is setup.
         verifyDataIndicators(0, 0);
@@ -154,7 +158,7 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
         verifyDataIndicators(TelephonyIcons.DATA_LTE[1][0 /* No direction */],
                 TelephonyIcons.QS_DATA_LTE);
 
-        Mockito.when(mServiceState.getDataNetworkType())
+        when(mServiceState.getDataNetworkType())
                 .thenReturn(TelephonyManager.NETWORK_TYPE_HSPA);
         updateServiceState();
         verifyDataIndicators(TelephonyIcons.DATA_H[1][0 /* No direction */],
