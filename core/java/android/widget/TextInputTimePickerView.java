@@ -177,14 +177,14 @@ public class TextInputTimePickerView extends RelativeLayout {
 
         mAmPmSpinner.setVisibility(is24Hour ? View.INVISIBLE : View.VISIBLE);
 
-        mHourEditText.setText(String.format(format, localizedHour));
-        mMinuteEditText.setText(String.format(format, minute));
-
         if (amOrPm == AM) {
             mAmPmSpinner.setSelection(0);
         } else {
             mAmPmSpinner.setSelection(1);
         }
+
+        mHourEditText.setText(String.format(format, localizedHour));
+        mMinuteEditText.setText(String.format(format, minute));
 
         if (mErrorShowing) {
             validateInput();
