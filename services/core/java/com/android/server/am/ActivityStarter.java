@@ -1544,6 +1544,9 @@ class ActivityStarter {
                 // running, and the caller has asked to clear the current task to have this
                 // activity at the top.
                 mAddingToTask = true;
+
+                // We are no longer placing the activity in the task we previously thought we were.
+                mStartActivity.task = null;
                 // Now pretend like this activity is being started by the top of its task, so it
                 // is put in the right place.
                 mSourceRecord = intentActivity;
