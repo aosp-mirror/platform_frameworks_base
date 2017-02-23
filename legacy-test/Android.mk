@@ -50,5 +50,5 @@ include $(CLEAR_VARS)
 LOCAL_SRC_FILES := src/android/test/PerformanceTestCase.java
 LOCAL_MODULE := legacy-performance-test-hostdex
 
-include $(BUILD_HOST_DALVIK_JAVA_LIBRARY)
+include $(BUILD_HOST_DALVIK_STATIC_JAVA_LIBRARY)
 endif  # HOST_OS == linux
