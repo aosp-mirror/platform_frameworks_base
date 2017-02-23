@@ -220,7 +220,6 @@ LOCAL_C_INCLUDES += \
     external/skia/src/effects \
     external/skia/src/image \
     external/skia/src/images \
-    external/skia/src/utils \
     external/sqlite/dist \
     external/sqlite/android \
     external/tremor/Tremor \
