@@ -38,15 +38,15 @@ import android.app.backup.BackupProgress;
 import android.app.backup.BackupTransport;
 import android.app.backup.FullBackup;
 import android.app.backup.FullBackupDataOutput;
-import android.app.backup.IBackupObserver;
-import android.app.backup.IBackupManagerMonitor;
-import android.app.backup.RestoreDescription;
-import android.app.backup.RestoreSet;
 import android.app.backup.IBackupManager;
+import android.app.backup.IBackupManagerMonitor;
+import android.app.backup.IBackupObserver;
 import android.app.backup.IFullBackupRestoreObserver;
 import android.app.backup.IRestoreObserver;
 import android.app.backup.IRestoreSession;
 import android.app.backup.ISelectBackupTransportCallback;
+import android.app.backup.RestoreDescription;
+import android.app.backup.RestoreSet;
 import android.app.backup.SelectBackupTransportCallback;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
@@ -136,6 +136,7 @@ import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.text.SimpleDateFormat;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -146,6 +147,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Queue;
 import java.util.Random;
 import java.util.Set;
 import java.util.TreeMap;
@@ -326,6 +328,11 @@ public class BackupManagerService {
     // A similar synchronization mechanism around clearing apps' data for restore
     final Object mClearDataLock = new Object();
     volatile boolean mClearingData;
+
+    @GuardedBy("mPendingRestores")
+    private boolean mIsRestoreInProgress;
+    @GuardedBy("mPendingRestores")
+    private final Queue<PerformUnifiedRestoreTask> mPendingRestores = new ArrayDeque<>();
 
     ActiveRestoreSession mActiveRestoreSession;
 
@@ -909,11 +916,28 @@ public class BackupManagerService {
             {
                 RestoreParams params = (RestoreParams)msg.obj;
                 Slog.d(TAG, "MSG_RUN_RESTORE observer=" + params.observer);
-                BackupRestoreTask task = new PerformUnifiedRestoreTask(params.transport,
+
+                PerformUnifiedRestoreTask task = new PerformUnifiedRestoreTask(params.transport,
                         params.observer, params.monitor, params.token, params.pkgInfo,
                         params.pmToken, params.isSystemRestore, params.filterSet);
-                Message restoreMsg = obtainMessage(MSG_BACKUP_RESTORE_STEP, task);
-                sendMessage(restoreMsg);
+
+                synchronized (mPendingRestores) {
+                    if (mIsRestoreInProgress) {
+                        if (DEBUG) {
+                            Slog.d(TAG, "Restore in progress, queueing.");
+                        }
+                        mPendingRestores.add(task);
+                        // This task will be picked up and executed when the the currently running
+                        // restore task finishes.
+                    } else {
+                        if (DEBUG) {
+                            Slog.d(TAG, "Starting restore.");
+                        }
+                        mIsRestoreInProgress = true;
+                        Message restoreMsg = obtainMessage(MSG_BACKUP_RESTORE_STEP, task);
+                        sendMessage(restoreMsg);
+                    }
+                }
                 break;
             }
 
@@ -9148,6 +9172,24 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
 
             // done; we can finally release the wakelock and be legitimately done.
             Slog.i(TAG, "Restore complete.");
+
+            synchronized (mPendingRestores) {
+                if (mPendingRestores.size() > 0) {
+                    if (DEBUG) {
+                        Slog.d(TAG, "Starting next pending restore.");
+                    }
+                    PerformUnifiedRestoreTask task = mPendingRestores.remove();
+                    mBackupHandler.sendMessage(
+                            mBackupHandler.obtainMessage(MSG_BACKUP_RESTORE_STEP, task));
+
+                } else {
+                    mIsRestoreInProgress = false;
+                    if (MORE_DEBUG) {
+                        Slog.d(TAG, "No pending restores.");
+                    }
+                }
+            }
+
             mWakelock.release();
         }
 
