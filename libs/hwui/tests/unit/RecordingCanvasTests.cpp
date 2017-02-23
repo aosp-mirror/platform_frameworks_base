@@ -201,8 +201,16 @@ OPENGL_PIPELINE_TEST(RecordingCanvas, drawGlyphs_strikeThruAndUnderline) {
         for (int i = 0; i < 2; i++) {
             for (int j = 0; j < 2; j++) {
                 uint32_t flags = paint.getFlags();
-                if (i != 0) flags |= SkPaint::kUnderlineText_ReserveFlag;
-                if (j != 0) flags |= SkPaint::kStrikeThruText_ReserveFlag;
+                if (i != 0) {
+                    flags |= SkPaint::kUnderlineText_ReserveFlag;
+                } else {
+                    flags &= ~SkPaint::kUnderlineText_ReserveFlag;
+                }
+                if (j != 0) {
+                    flags |= SkPaint::kStrikeThruText_ReserveFlag;
+                } else {
+                    flags &= ~SkPaint::kStrikeThruText_ReserveFlag;
+                }
                 paint.setFlags(flags);
                 TestUtils::drawUtf8ToCanvas(&canvas, "test text", paint, 25, 25);
             }
