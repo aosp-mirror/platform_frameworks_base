@@ -2065,11 +2065,20 @@ public class PackageParser {
                         com.android.internal.R.styleable.AndroidManifestResourceOverlay);
                 pkg.mOverlayTarget = sa.getString(
                         com.android.internal.R.styleable.AndroidManifestResourceOverlay_targetPackage);
+                pkg.mOverlayPriority = sa.getInt(
+                        com.android.internal.R.styleable.AndroidManifestResourceOverlay_priority,
+                        -1);
                 sa.recycle();
 
                 if (pkg.mOverlayTarget == null) {
                     outError[0] = "<overlay> does not specify a target package";
                     mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
+                    return null;
+                }
+                if (pkg.mOverlayPriority < 0 || pkg.mOverlayPriority > 9999) {
+                    outError[0] = "<overlay> priority must be between 0 and 9999";
+                    mParseError =
+                        PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
                     return null;
                 }
                 XmlUtils.skipCurrentTag(parser);
@@ -5509,6 +5518,7 @@ public class PackageParser {
         public String mRequiredAccountType;
 
         public String mOverlayTarget;
+        public int mOverlayPriority;
         public boolean mTrustedOverlay;
 
         /**
@@ -5985,6 +5995,7 @@ public class PackageParser {
             mRestrictedAccountType = dest.readString();
             mRequiredAccountType = dest.readString();
             mOverlayTarget = dest.readString();
+            mOverlayPriority = dest.readInt();
             mTrustedOverlay = (dest.readInt() == 1);
             mSigningKeys = (ArraySet<PublicKey>) dest.readArraySet(boot);
             mUpgradeKeySets = (ArraySet<String>) dest.readArraySet(boot);
@@ -6100,6 +6111,7 @@ public class PackageParser {
             dest.writeString(mRestrictedAccountType);
             dest.writeString(mRequiredAccountType);
             dest.writeString(mOverlayTarget);
+            dest.writeInt(mOverlayPriority);
             dest.writeInt(mTrustedOverlay ? 1 : 0);
             dest.writeArraySet(mSigningKeys);
             dest.writeArraySet(mUpgradeKeySets);
@@ -6548,7 +6560,6 @@ public class PackageParser {
             ai.category = FallbackCategoryProvider.getFallbackCategory(ai.packageName);
         }
         ai.seInfoUser = SELinuxUtil.assignSeinfoUser(state);
-        ai.resourceDirs = state.resourceDirs;
     }
 
     public static ApplicationInfo generateApplicationInfo(Package p, int flags,

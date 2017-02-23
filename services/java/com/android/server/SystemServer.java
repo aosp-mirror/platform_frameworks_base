@@ -82,7 +82,6 @@ import com.android.server.media.projection.MediaProjectionManagerService;
 import com.android.server.net.NetworkPolicyManagerService;
 import com.android.server.net.NetworkStatsService;
 import com.android.server.notification.NotificationManagerService;
-import com.android.server.om.OverlayManagerService;
 import com.android.server.os.DeviceIdentifiersPolicyService;
 import com.android.server.os.SchedulingPolicyService;
 import com.android.server.pm.Installer;
@@ -591,11 +590,6 @@ public final class SystemServer {
         // Set up the Application instance for the system process and get started.
         traceBeginAndSlog("SetSystemProcess");
         mActivityManagerService.setSystemProcess();
-        traceEnd();
-
-        // Manages Overlay packages
-        traceBeginAndSlog("StartOverlayManagerService");
-        mSystemServiceManager.startService(new OverlayManagerService(mSystemContext, installer));
         traceEnd();
 
         // The sensor service needs access to package manager service, app ops
