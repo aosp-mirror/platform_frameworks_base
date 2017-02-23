@@ -244,9 +244,11 @@ public class TestableLooper {
                 mLooper.setAsMainLooper();
             }
 
-            mBase.evaluate();
-
-            mLooper.destroy();
+            try {
+                mBase.evaluate();
+            } finally {
+                mLooper.destroy();
+            }
         }
     }
 
