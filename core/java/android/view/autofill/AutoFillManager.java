@@ -23,10 +23,8 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.graphics.Rect;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.os.Parcelable;
 import android.os.RemoteException;
-import android.util.ArrayMap;
 import android.util.Log;
 import android.view.View;
 
@@ -70,21 +68,12 @@ public final class AutoFillManager {
     /** @hide */ public static final int FLAG_FOCUS_LOST = 0x4;
     /** @hide */ public static final int FLAG_VALUE_CHANGED = 0x8;
 
-    // These are activities that may have auto-fill UI which are keyed off their tokens.
-    // This is done instead of the activity setting the client in the auto-fill manager
-    // to avoid unnecessary instantiation of the manager and do this only if there is an
-    // auto-fillable focused. This has only the cost of loading the class vs creating an
-    // auto-fill manager for every activity even one that cannot be filled.
-    private static final ArrayMap<IBinder, AutoFillClient> sPendingClients = new ArrayMap<>();
-
     private final Rect mTempRect = new Rect();
 
     private final IAutoFillManager mService;
     private IAutoFillManagerClient mServiceClient;
 
     private Context mContext;
-
-    private AutoFillClient mClient;
 
     private boolean mHasSession;
     private boolean mEnabled;
@@ -106,6 +95,11 @@ public final class AutoFillManager {
          * @param fillInIntent The authentication fill-in intent.
          */
         void authenticate(IntentSender intent, Intent fillInIntent);
+
+        /**
+         * Tells the client this manager has state to be reset.
+         */
+        void resetableStateAvailable();
     }
 
     /**
@@ -219,25 +213,11 @@ public final class AutoFillManager {
         finishSession();
     }
 
-    /** @hide */
-    public static void addClient(IBinder token, AutoFillClient client) {
-        sPendingClients.put(token, client);
-    }
-
-    /** @hide */
-    public static boolean isClientActive(IBinder token) {
-        return !sPendingClients.containsKey(token);
-    }
-
-    private void activateClient() {
-        mClient = sPendingClients.remove(mContext.getActivityToken());
-    }
-
     private AutoFillClient getClient() {
-        if (mClient == null) {
-            return sPendingClients.get(mContext.getActivityToken());
+        if (mContext instanceof AutoFillClient) {
+            return (AutoFillClient) mContext;
         }
-        return mClient;
+        return null;
     }
 
     /** @hide */
@@ -278,8 +258,11 @@ public final class AutoFillManager {
         try {
             mService.startSession(mContext.getActivityToken(), mServiceClient.asBinder(),
                     id, bounds, value, mContext.getUserId());
+            AutoFillClient client = getClient();
+            if (client != null) {
+                client.resetableStateAvailable();
+            }
             mHasSession = true;
-            activateClient();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

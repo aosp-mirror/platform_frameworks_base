@@ -844,6 +844,8 @@ public class Activity extends ContextThemeWrapper
 
     private boolean mHasCurrentPermissionsRequest;
 
+    private boolean mAutoFillResetNeeded;
+
     private static native String getDlWarning();
 
     /** Return the intent that started this activity. */
@@ -1780,7 +1782,7 @@ public class Activity extends ContextThemeWrapper
         getApplication().dispatchActivityStopped(this);
         mTranslucentCallback = null;
         mCalled = true;
-        if (isFinishing() && AutoFillManager.isClientActive(getActivityToken())) {
+        if (isFinishing() && mAutoFillResetNeeded) {
             getSystemService(AutoFillManager.class).reset();
         }
     }
@@ -6746,8 +6748,6 @@ public class Activity extends ContextThemeWrapper
         mCurrentConfig = config;
 
         mWindow.setColorMode(info.colorMode);
-
-        AutoFillManager.addClient(token, this);
     }
 
     /** @hide */
@@ -7212,6 +7212,12 @@ public class Activity extends ContextThemeWrapper
         } catch (IntentSender.SendIntentException e) {
             Log.e(TAG, "authenticate() failed for intent:" + intent, e);
         }
+    }
+
+    /** @hide */
+    @Override
+    public void resetableStateAvailable() {
+        mAutoFillResetNeeded = true;
     }
 
     class HostCallbacks extends FragmentHostCallback<Activity> {
