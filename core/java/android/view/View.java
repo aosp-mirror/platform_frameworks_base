@@ -953,7 +953,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public @interface AutoFillMode {}
 
     /**
-     * This view inherits the autofill state from it's parent. If there is no parent it is
+     * This view inherits the auto-fill state from it's parent. If there is no parent it is
      * {@link #AUTO_FILL_MODE_AUTO}.
      * Use with {@link #setAutoFillMode(int)} and <a href="#attr_android:autoFillMode">
      * {@code android:autoFillMode}.
@@ -968,7 +968,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public static final int AUTO_FILL_MODE_AUTO = 1;
 
     /**
-     * Require the user to manually force an auto-fill request.
+     * Do not trigger an auto-fill request if this view is focused. The user can still force
+     * an auto-fill request.
+     * <p>This does not prevent this field from being auto-filled if an auto-fill operation is
+     * triggered from a different view.</p>
+     *
      * Use with {@link #setAutoFillMode(int)} and <a href="#attr_android:autoFillMode">{@code
      * android:autoFillMode}.
      */
@@ -6670,13 +6674,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             imm.focusIn(this);
         }
 
-        if (isAutoFillable()) {
-            AutoFillManager afm = getAutoFillManager();
-            if (afm != null) {
-                afm.focusChanged(this, gainFocus);
-            }
-        }
-
         invalidate(true);
         ListenerInfo li = mListenerInfo;
         if (li != null && li.mOnFocusChangeListener != null) {
@@ -6685,6 +6682,18 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         if (mAttachInfo != null) {
             mAttachInfo.mKeyDispatchState.reset(this);
+        }
+
+        if (isAutoFillable() && isAttachedToWindow()
+                && getResolvedAutoFillMode() == AUTO_FILL_MODE_AUTO) {
+            AutoFillManager afm = getAutoFillManager();
+            if (afm != null) {
+                if (gainFocus) {
+                    afm.startAutoFillRequest(this);
+                } else {
+                    afm.stopAutoFillRequest(this);
+                }
+            }
         }
     }
 
@@ -7248,8 +7257,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * <ol>
      * <li>Also implement {@link #autoFillVirtual(int, AutoFillValue)} to auto-fill the virtual
      * children.
-     * <li>Call {@link android.view.autofill.AutoFillManager#virtualFocusChanged(View, int, Rect,
-     * boolean)} when the focus inside the view changed.
+     * <li>Call
+     * {@link android.view.autofill.AutoFillManager#startAutoFillRequestOnVirtualView} and
+     * {@link android.view.autofill.AutoFillManager#stopAutoFillRequestOnVirtualView(View, int)}
+     * when the focus inside the view changed.
      * <li>Call {@link android.view.autofill.AutoFillManager#virtualValueChanged(View, int,
      * AutoFillValue)} when the value of a child changed.
      * <li>Call {@link android.view.autofill.AutoFillManager#reset()} when the auto-fill context
@@ -9481,6 +9492,31 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @AutoFillMode
     public int getAutoFillMode() {
         return (mPrivateFlags3 & PFLAG3_AUTO_FILL_MODE_MASK) >> PFLAG3_AUTO_FILL_MODE_SHIFT;
+    }
+
+    /**
+     * Returns the resolved auto-fill mode for this view.
+     *
+     * This is the same as {@link #getAutoFillMode()} but if the mode is
+     * {@link #AUTO_FILL_MODE_INHERIT} the parents auto-fill mode will be returned.
+     *
+     * @return One of {@link #AUTO_FILL_MODE_AUTO}, or {@link #AUTO_FILL_MODE_MANUAL}. If the auto-
+     *         fill mode can not be resolved e.g. {@link #getAutoFillMode()} is
+     *         {@link #AUTO_FILL_MODE_INHERIT} and the {@link View} is detached
+     *         {@link #AUTO_FILL_MODE_AUTO} is returned.
+     */
+    public @AutoFillMode int getResolvedAutoFillMode() {
+        @AutoFillMode int autoFillMode = getAutoFillMode();
+
+        if (autoFillMode == AUTO_FILL_MODE_INHERIT) {
+            if (mParent == null) {
+                return AUTO_FILL_MODE_AUTO;
+            } else {
+                return mParent.getResolvedAutoFillMode();
+            }
+        } else {
+            return autoFillMode;
+        }
     }
 
     /**
@@ -16619,6 +16655,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             refreshDrawableState();
         }
         needGlobalAttributesUpdate(false);
+
+        if (isAutoFillable() && isFocused() && getResolvedAutoFillMode() == AUTO_FILL_MODE_AUTO) {
+            AutoFillManager afm = getAutoFillManager();
+            if (afm != null) {
+                afm.startAutoFillRequest(this);
+            }
+        }
     }
 
     void dispatchDetachedFromWindow() {
@@ -16664,6 +16707,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         mAttachInfo = null;
         if (mOverlay != null) {
             mOverlay.getOverlayView().dispatchDetachedFromWindow();
+        }
+
+        if (isAutoFillable() && isFocused() && getResolvedAutoFillMode() == AUTO_FILL_MODE_AUTO) {
+            AutoFillManager afm = getAutoFillManager();
+            if (afm != null) {
+                afm.stopAutoFillRequest(this);
+            }
         }
     }
 

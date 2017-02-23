@@ -19,6 +19,7 @@ package android.view.autofill;
 import static android.view.autofill.Helper.DEBUG;
 import static android.view.autofill.Helper.VERBOSE;
 
+import android.annotation.NonNull;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
@@ -113,12 +114,11 @@ public final class AutoFillManager {
     }
 
     /**
-     * Called to indicate the focus on an auto-fillable {@link View} changed.
+     * Called when an auto-fill operation on a {@link View} should start.
      *
-     * @param view view whose focus changed.
-     * @param gainFocus whether focus was gained or lost.
+     * @param view {@link View} that triggered the auto-fill request.
      */
-    public void focusChanged(View view, boolean gainFocus) {
+    public void startAutoFillRequest(@NonNull View view) {
         ensureServiceClientAddedIfNeeded();
 
         if (!mEnabled) {
@@ -131,25 +131,40 @@ public final class AutoFillManager {
         final AutoFillValue value = view.getAutoFillValue();
 
         if (!mHasSession) {
-            if (gainFocus) {
-                // Starts new session.
-                startSession(id, view.getWindowToken(), bounds, value);
-            }
+            // Starts new session.
+            startSession(id, view.getWindowToken(), bounds, value);
         } else {
             // Update focus on existing session.
-            updateSession(id, bounds, value, gainFocus ? FLAG_FOCUS_GAINED : FLAG_FOCUS_LOST);
+            updateSession(id, bounds, value, FLAG_FOCUS_GAINED);
         }
     }
 
     /**
-     * Called to indicate the focus on an auto-fillable virtual {@link View} changed.
+     * Called when an auto-fill operation on a {@link View} should stop.
      *
-     * @param parent parent view whose focus changed.
+     * @param view {@link View} that triggered the auto-fill request in
+     *             {@link #startAutoFillRequest(View)}.
+     */
+    public void stopAutoFillRequest(@NonNull View view) {
+        ensureServiceClientAddedIfNeeded();
+
+        if (mEnabled && mHasSession) {
+            final AutoFillId id = getAutoFillId(view);
+
+            // Update focus on existing session.
+            updateSession(id, null, null, FLAG_FOCUS_LOST);
+        }
+    }
+
+    /**
+     * Called when an auto-fill operation on a virtual {@link View} should start.
+     *
+     * @param parent parent of the {@link View} that triggered the auto-fill request.
      * @param childId id identifying the virtual child inside the parent view.
      * @param bounds child boundaries, relative to the top window.
-     * @param gainFocus whether focus was gained or lost.
      */
-    public void virtualFocusChanged(View parent, int childId, Rect bounds, boolean gainFocus) {
+    public void startAutoFillRequestOnVirtualView(@NonNull View parent, int childId,
+            @NonNull Rect bounds) {
         ensureServiceClientAddedIfNeeded();
 
         if (!mEnabled) {
@@ -159,20 +174,36 @@ public final class AutoFillManager {
         final AutoFillId id = getAutoFillId(parent, childId);
 
         if (!mHasSession) {
-            if (gainFocus) {
-                // Starts new session.
-                startSession(id, parent.getWindowToken(), bounds, null);
-            }
+            // Starts new session.
+            startSession(id, parent.getWindowToken(), bounds, null);
         } else {
             // Update focus on existing session.
-            updateSession(id, bounds, null, gainFocus ? FLAG_FOCUS_GAINED : FLAG_FOCUS_LOST);
+            updateSession(id, bounds, null, FLAG_FOCUS_GAINED);
+        }
+    }
+
+    /**
+     * Called when an auto-fill operation on a virtual {@link View} should stop.
+     *
+     * @param parent parent of the {@link View} that triggered the auto-fill request in
+     *               {@link #startAutoFillRequestOnVirtualView(View, int, Rect)}.
+     * @param childId id identifying the virtual child inside the parent view.
+     */
+    public void stopAutoFillRequestOnVirtualView(@NonNull View parent, int childId) {
+        ensureServiceClientAddedIfNeeded();
+
+        if (mEnabled && mHasSession) {
+            final AutoFillId id = getAutoFillId(parent, childId);
+
+            // Update focus on existing session.
+            updateSession(id, null, null, FLAG_FOCUS_LOST);
         }
     }
 
     /**
      * Called to indicate the value of an auto-fillable {@link View} changed.
      *
-     * @param view view whose focus changed.
+     * @param view view whose value changed.
      */
     public void valueChanged(View view) {
         if (!mEnabled || !mHasSession) {
