@@ -38,7 +38,11 @@ import java.util.Collections;
 /**
  * Build suites based on a combination of included packages, excluded packages,
  * and predicates that must be satisfied.
+ *
+ * @deprecated New tests should be written using the
+ * <a href="{@docRoot}tools/testing-support-library/index.html">Android Testing Support Library</a>.
  */
+@Deprecated
 public class TestSuiteBuilder {
 
     private Context context;
@@ -223,7 +227,11 @@ public class TestSuiteBuilder {
     /**
      * A special {@link junit.framework.TestCase} used to indicate a failure during the build()
      * step.
+     *
+     * @deprecated New tests should be written using the
+     * <a href="{@docRoot}tools/testing-support-library/index.html">Android Testing Support Library</a>.
      */
+    @Deprecated
     public static class FailedToCreateTests extends TestCase {
         private final Exception exception;
 
