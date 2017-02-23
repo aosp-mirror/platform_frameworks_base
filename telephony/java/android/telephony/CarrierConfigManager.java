@@ -1197,7 +1197,6 @@ public class CarrierConfigManager {
      * Indicates whether the carrier supports 3gpp call forwarding MMI codes while roaming. If
      * false, the user will be notified that call forwarding is not available when the MMI code
      * fails.
-     * @hide
      */
     public static final String KEY_SUPPORT_3GPP_CALL_FORWARDING_WHILE_ROAMING_BOOL =
         "support_3gpp_call_forwarding_while_roaming_bool";
