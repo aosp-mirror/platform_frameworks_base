@@ -496,6 +496,7 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
                 } finally {
                     args.recycle();
                 }
+                return;
             }
             case DO_REQUEST_UPDATE_CURSOR_ANCHOR_INFO: {
                 SomeArgs args = (SomeArgs)msg.obj;
