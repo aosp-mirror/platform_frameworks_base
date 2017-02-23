@@ -17,8 +17,11 @@ package com.android.systemui.statusbar.policy;
 
 import android.content.Context;
 import android.content.Intent;
+import android.database.ContentObserver;
 import android.net.NetworkCapabilities;
+import android.os.Handler;
 import android.os.Looper;
+import android.provider.Settings.Global;
 import android.telephony.PhoneStateListener;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
@@ -49,6 +52,7 @@ public class MobileSignalController extends SignalController<
     private final SubscriptionDefaults mDefaults;
     private final String mNetworkNameDefault;
     private final String mNetworkNameSeparator;
+    private final ContentObserver mObserver;
     @VisibleForTesting
     final PhoneStateListener mPhoneStateListener;
     // Save entire info for logging, we only use the id.
@@ -97,6 +101,12 @@ public class MobileSignalController extends SignalController<
         mLastState.iconGroup = mCurrentState.iconGroup = mDefaultIcons;
         // Get initial data sim state.
         updateDataSim();
+        mObserver = new ContentObserver(new Handler(receiverLooper)) {
+            @Override
+            public void onChange(boolean selfChange) {
+                updateTelephony();
+            }
+        };
     }
 
     public void setConfiguration(Config config) {
@@ -144,6 +154,11 @@ public class MobileSignalController extends SignalController<
                         | PhoneStateListener.LISTEN_DATA_CONNECTION_STATE
                         | PhoneStateListener.LISTEN_DATA_ACTIVITY
                         | PhoneStateListener.LISTEN_CARRIER_NETWORK_CHANGE);
+        mContext.getContentResolver().registerContentObserver(Global.getUriFor(Global.MOBILE_DATA),
+                true, mObserver);
+        mContext.getContentResolver().registerContentObserver(Global.getUriFor(
+                Global.MOBILE_DATA + mSubscriptionInfo.getSubscriptionId()),
+                true, mObserver);
     }
 
     /**
@@ -151,6 +166,7 @@ public class MobileSignalController extends SignalController<
      */
     public void unregisterListener() {
         mPhone.listen(mPhoneStateListener, 0);
+        mContext.getContentResolver().unregisterContentObserver(mObserver);
     }
 
     /**
@@ -242,11 +258,11 @@ public class MobileSignalController extends SignalController<
             description = mCurrentState.isEmergency ? null : mCurrentState.networkName;
         }
         boolean activityIn = mCurrentState.dataConnected
-                        && !mCurrentState.carrierNetworkChangeMode
-                        && mCurrentState.activityIn;
+                && !mCurrentState.carrierNetworkChangeMode
+                && mCurrentState.activityIn;
         boolean activityOut = mCurrentState.dataConnected
-                        && !mCurrentState.carrierNetworkChangeMode
-                        && mCurrentState.activityOut;
+                && !mCurrentState.carrierNetworkChangeMode
+                && mCurrentState.activityOut;
         showDataIcon &= mCurrentState.isDefault || dataDisabled;
         int typeIcon = showDataIcon ? icons.mDataType : 0;
         callback.setMobileDataIndicators(statusIcon, qsIcon, typeIcon, qsTypeIcon,
@@ -294,7 +310,7 @@ public class MobileSignalController extends SignalController<
             final int iconMode = mServiceState.getCdmaEriIconMode();
             return mServiceState.getCdmaEriIconIndex() != EriInfo.ROAMING_INDICATOR_OFF
                     && (iconMode == EriInfo.ROAMING_ICON_MODE_NORMAL
-                        || iconMode == EriInfo.ROAMING_ICON_MODE_FLASH);
+                    || iconMode == EriInfo.ROAMING_ICON_MODE_FLASH);
         } else {
             return mServiceState != null && mServiceState.getRoaming();
         }

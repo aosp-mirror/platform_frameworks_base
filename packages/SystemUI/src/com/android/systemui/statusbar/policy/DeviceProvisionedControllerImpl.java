@@ -66,6 +66,8 @@ public class DeviceProvisionedControllerImpl extends CurrentUserTracker implemen
         if (mListeners.size() == 1) {
             startListening(getCurrentUser());
         }
+        listener.onUserSetupChanged();
+        listener.onDeviceProvisionedChanged();
     }
 
     @Override

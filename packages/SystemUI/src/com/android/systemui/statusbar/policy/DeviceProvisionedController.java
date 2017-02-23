@@ -26,7 +26,9 @@ public interface DeviceProvisionedController extends CallbackController<DevicePr
 
     interface DeviceProvisionedListener {
         default void onDeviceProvisionedChanged() { }
-        default void onUserSwitched() { }
+        default void onUserSwitched() {
+            onUserSetupChanged();
+        }
         default void onUserSetupChanged() { }
     }
 }

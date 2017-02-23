@@ -31,6 +31,7 @@ import android.telephony.TelephonyManager;
 import android.util.Log;
 import com.android.internal.telephony.cdma.EriInfo;
 import com.android.settingslib.net.DataUsageController;
+import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceProvisionedListener;
 import com.android.systemui.statusbar.policy.NetworkController.IconState;
 import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
 import com.android.systemui.statusbar.policy.NetworkControllerImpl.Config;
@@ -43,6 +44,8 @@ import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -56,6 +59,7 @@ import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -82,6 +86,8 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
     protected CallbackHandler mCallbackHandler;
     protected SubscriptionDefaults mMockSubDefaults;
     protected NetworkScoreManager mMockNetworkScoreManager;
+    protected DeviceProvisionedController mMockProvisionController;
+    protected DeviceProvisionedListener mUserCallback;
 
     protected int mSubId;
 
@@ -120,11 +126,21 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
         mConfig = new Config();
         mConfig.hspaDataDistinguishable = true;
         mCallbackHandler = mock(CallbackHandler.class);
+
+        mMockProvisionController = mock(DeviceProvisionedController.class);
+        when(mMockProvisionController.isUserSetup(anyInt())).thenReturn(true);
+        doAnswer(invocation -> {
+            mUserCallback = (DeviceProvisionedListener) invocation.getArguments()[0];
+            mUserCallback.onUserSetupChanged();
+            mUserCallback.onDeviceProvisionedChanged();
+            return null;
+        }).when(mMockProvisionController).addCallback(any());
+
         mNetworkController = new NetworkControllerImpl(mContext, mMockCm, mMockNetworkScoreManager,
                 mMockTm, mMockWm, mMockSm,
                 mConfig, Looper.getMainLooper(), mCallbackHandler,
                 mock(AccessPointControllerImpl.class), mock(DataUsageController.class),
-                mMockSubDefaults, mock(DeviceProvisionedController.class));
+                mMockSubDefaults, mMockProvisionController);
         setupNetworkController();
 
         // Trigger blank callbacks to always get the current state (some tests don't trigger
@@ -139,7 +155,6 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
         when(mMockTm.getDataEnabled(mSubId)).thenReturn(true);
         setDefaultSubId(mSubId);
         setSubscriptions(mSubId);
-        mNetworkController.handleSetUserSetupComplete(true);
         mMobileSignalController = mNetworkController.mMobileSignalControllers.get(mSubId);
         mPhoneStateListener = mMobileSignalController.mPhoneStateListener;
     }
