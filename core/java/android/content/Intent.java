@@ -9238,6 +9238,13 @@ public class Intent implements Parcelable, Cloneable {
             mClipData.prepareToLeaveProcess(leavingPackage, getFlags());
         }
 
+        if (mExtras != null && !mExtras.isParcelled()) {
+            final Object intent = mExtras.get(Intent.EXTRA_INTENT);
+            if (intent instanceof Intent) {
+                ((Intent) intent).prepareToLeaveProcess(leavingPackage);
+            }
+        }
+
         if (mAction != null && mData != null && StrictMode.vmFileUriExposureEnabled()
                 && leavingPackage) {
             switch (mAction) {
