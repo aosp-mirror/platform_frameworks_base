@@ -117,7 +117,7 @@ public class FocusFinder {
     public View findNextKeyboardNavigationCluster(
             @NonNull View root,
             @Nullable View currentCluster,
-            int direction) {
+            @View.FocusDirection int direction) {
         View next = null;
 
         final ArrayList<View> clusters = mTempList;
@@ -206,7 +206,7 @@ public class FocusFinder {
             View root,
             View currentCluster,
             List<View> clusters,
-            int direction) {
+            @View.FocusDirection int direction) {
         final int count = clusters.size();
 
         switch (direction) {
