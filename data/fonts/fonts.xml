@@ -1,8 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    All fonts without names are added to the default list. Fonts are chosen
-    based on a match: full BCP-47 language tag including script, then just
-    language, and finally order (the first font containing the glyph).
+    WARNING: Parsing of this file by third-party apps is not supported. The
+    file, and the font files it refers to, will be renamed and/or moved out
+    from their respective location in the next Android release, and/or the
+    format or syntax of the file may change significantly. You must not
+    parse this file for information about system fonts. Instead, you must
+    call android.text.FontManager#getSystemFonts(). For example, it can be
+    called as context.getSystemService(FontManager.class).getSystemFonts().
+    Note that the returned FontConfig includes data on all the defined font
+    families and all the details about weight, style, etc. It also provides
+    an open file descriptor to each font file. Note that callers of the API
+    should ensure they close the given file descriptors once they are done
+    using them.
+
+    In this file, all fonts without names are added to the default list.
+    Fonts are chosen based on a match: full BCP-47 language tag including
+    script, then just language, and finally order (the first font containing
+    the glyph).
 
     Order of appearance is also the tiebreaker for weight matching. This is
     the reason why the 900 weights of Roboto precede the 700 weights - we
