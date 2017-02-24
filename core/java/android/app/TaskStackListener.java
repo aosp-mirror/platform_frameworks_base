@@ -39,6 +39,10 @@ public abstract class TaskStackListener extends ITaskStackListener.Stub {
     }
 
     @Override
+    public void onPinnedStackAnimationStarted() throws RemoteException {
+    }
+
+    @Override
     public void onPinnedStackAnimationEnded() throws RemoteException {
     }
 

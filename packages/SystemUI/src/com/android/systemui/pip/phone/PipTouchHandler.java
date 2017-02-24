@@ -181,6 +181,10 @@ public class PipTouchHandler {
         registerInputConsumer();
     }
 
+    public void setTouchEnabled(boolean enabled) {
+        mTouchState.setAllowTouches(enabled);
+    }
+
     public void onActivityPinned() {
         // Reset some states once we are pinned
         if (mIsTappingThrough) {
@@ -294,6 +298,7 @@ public class PipTouchHandler {
                 // Fall through to clean up
             }
             case MotionEvent.ACTION_CANCEL: {
+                mTouchState.reset();
                 break;
             }
         }
@@ -418,6 +423,10 @@ public class PipTouchHandler {
 
         @Override
         public void onDown(PipTouchState touchState) {
+            if (!touchState.isUserInteracting()) {
+                return;
+            }
+
             if (ENABLE_DRAG_TO_DISMISS) {
                 mDismissViewController.createDismissTarget();
                 mHandler.postDelayed(mShowDismissAffordance, SHOW_DISMISS_AFFORDANCE_DELAY);
@@ -426,6 +435,10 @@ public class PipTouchHandler {
 
         @Override
         boolean onMove(PipTouchState touchState) {
+            if (!touchState.isUserInteracting()) {
+                return false;
+            }
+
             if (touchState.startedDragging()) {
                 mSavedSnapFraction = -1f;
             }
@@ -458,6 +471,10 @@ public class PipTouchHandler {
 
         @Override
         public boolean onUp(PipTouchState touchState) {
+            if (!touchState.isUserInteracting()) {
+                return false;
+            }
+
             try {
                 if (ENABLE_DRAG_TO_DISMISS) {
                     mHandler.removeCallbacks(mShowDismissAffordance);

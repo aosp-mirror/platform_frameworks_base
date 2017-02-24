@@ -71,8 +71,15 @@ public class PipManager implements BasePipManager {
         }
 
         @Override
+        public void onPinnedStackAnimationStarted() {
+            // Disable touches while the animation is running
+            mTouchHandler.setTouchEnabled(false);
+        }
+
+        @Override
         public void onPinnedStackAnimationEnded() {
-            // TODO(winsonc): Disable touch interaction with the PiP until the animation ends
+            // Re-enable touches after the animation completes
+            mTouchHandler.setTouchEnabled(true);
         }
 
         @Override

@@ -154,6 +154,7 @@ public class SystemServicesProxy {
         public void onTaskSnapshotChanged(int taskId, TaskSnapshot snapshot) { }
         public void onActivityPinned() { }
         public void onPinnedActivityRestartAttempt(String launchedFromPackage) { }
+        public void onPinnedStackAnimationStarted() { }
         public void onPinnedStackAnimationEnded() { }
         public void onActivityForcedResizable(String packageName, int taskId) { }
         public void onActivityDismissingDockedStack() { }
@@ -203,6 +204,12 @@ public class SystemServicesProxy {
             mHandler.removeMessages(H.ON_PINNED_ACTIVITY_RESTART_ATTEMPT);
             mHandler.obtainMessage(H.ON_PINNED_ACTIVITY_RESTART_ATTEMPT, launchedFromPackage)
                     .sendToTarget();
+        }
+
+        @Override
+        public void onPinnedStackAnimationStarted() throws RemoteException {
+            mHandler.removeMessages(H.ON_PINNED_STACK_ANIMATION_STARTED);
+            mHandler.sendEmptyMessage(H.ON_PINNED_STACK_ANIMATION_STARTED);
         }
 
         @Override
@@ -1219,6 +1226,7 @@ public class SystemServicesProxy {
         private static final int ON_ACTIVITY_FORCED_RESIZABLE = 6;
         private static final int ON_ACTIVITY_DISMISSING_DOCKED_STACK = 7;
         private static final int ON_TASK_PROFILE_LOCKED = 8;
+        private static final int ON_PINNED_STACK_ANIMATION_STARTED = 9;
 
         @Override
         public void handleMessage(Message msg) {
@@ -1245,6 +1253,12 @@ public class SystemServicesProxy {
                 case ON_PINNED_ACTIVITY_RESTART_ATTEMPT: {
                     for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
                         mTaskStackListeners.get(i).onPinnedActivityRestartAttempt((String) msg.obj);
+                    }
+                    break;
+                }
+                case ON_PINNED_STACK_ANIMATION_STARTED: {
+                    for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
+                        mTaskStackListeners.get(i).onPinnedStackAnimationStarted();
                     }
                     break;
                 }

@@ -38,6 +38,11 @@ oneway interface ITaskStackListener {
     void onPinnedActivityRestartAttempt(String launchedFromPackage);
 
     /**
+     * Called whenever the pinned stack is starting animating a resize.
+     */
+    void onPinnedStackAnimationStarted();
+
+    /**
      * Called whenever the pinned stack is done animating a resize.
      */
     void onPinnedStackAnimationEnded();

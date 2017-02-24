@@ -1439,6 +1439,14 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
             mBoundsAnimating = true;
             mBoundsAnimatingToFullscreen = toFullscreen;
         }
+
+        if (mStackId == PINNED_STACK_ID) {
+            try {
+                mService.mActivityManager.notifyPinnedStackAnimationStarted();
+            } catch (RemoteException e) {
+                // I don't believe you...
+            }
+        }
     }
 
     @Override  // AnimatesBounds
@@ -1448,6 +1456,7 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
             mBoundsAnimationTarget.setEmpty();
             mService.requestTraversal();
         }
+
         if (mStackId == PINNED_STACK_ID) {
             try {
                 mService.mActivityManager.notifyPinnedStackAnimationEnded();

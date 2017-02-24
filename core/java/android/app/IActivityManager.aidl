@@ -522,6 +522,7 @@ interface IActivityManager {
     void startLocalVoiceInteraction(in IBinder token, in Bundle options);
     void stopLocalVoiceInteraction(in IBinder token);
     boolean supportsLocalVoiceInteraction();
+    void notifyPinnedStackAnimationStarted();
     void notifyPinnedStackAnimationEnded();
     void removeStack(int stackId);
     void makePackageIdle(String packageName, int userId);
