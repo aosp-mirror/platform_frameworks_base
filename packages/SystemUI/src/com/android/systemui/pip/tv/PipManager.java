@@ -68,34 +68,10 @@ public class PipManager implements BasePipManager {
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     private static final boolean DEBUG_FORCE_ONBOARDING =
             SystemProperties.getBoolean("debug.tv.pip_force_onboarding", false);
+    private static final String SETTINGS_PACKAGE_AND_CLASS_DELIMITER = "/";
 
     private static PipManager sPipManager;
-
-    /**
-     * List of package and class name which are considered as Settings,
-     * so PIP location should be adjusted to the left of the side panel.
-     */
-    private static final List<Pair<String, String>> sSettingsPackageAndClassNamePairList;
-    static {
-        sSettingsPackageAndClassNamePairList = new ArrayList<>();
-        sSettingsPackageAndClassNamePairList.add(new Pair<String, String>(
-                "com.android.tv.settings", null));
-        sSettingsPackageAndClassNamePairList.add(new Pair<String, String>(
-                "com.google.android.leanbacklauncher",
-                "com.google.android.leanbacklauncher.settings.HomeScreenSettingsActivity"));
-        sSettingsPackageAndClassNamePairList.add(new Pair<String, String>(
-                "com.google.android.apps.mediashell",
-                "com.google.android.apps.mediashell.settings.CastSettingsActivity"));
-        sSettingsPackageAndClassNamePairList.add(new Pair<String, String>(
-                "com.google.android.katniss",
-                "com.google.android.katniss.setting.SpeechSettingsActivity"));
-        sSettingsPackageAndClassNamePairList.add(new Pair<String, String>(
-                "com.google.android.katniss",
-                "com.google.android.katniss.setting.SearchSettingsActivity"));
-        sSettingsPackageAndClassNamePairList.add(new Pair<String, String>(
-                "com.google.android.gsf.notouch",
-                "com.google.android.gsf.notouch.UsageDiagnosticsSettingActivity"));
-    }
+    private static List<Pair<String, String>> sSettingsPackageAndClassNamePairList;
 
     /**
      * State when there's no PIP.
@@ -251,6 +227,31 @@ public class PipManager implements BasePipManager {
         mContext.registerReceiver(mBroadcastReceiver, intentFilter);
         mOnboardingShown = Prefs.getBoolean(
                 mContext, TV_PICTURE_IN_PICTURE_ONBOARDING_SHOWN, false);
+
+        if (sSettingsPackageAndClassNamePairList == null) {
+            String[] settings = mContext.getResources().getStringArray(
+                    R.array.tv_pip_settings_class_name);
+            sSettingsPackageAndClassNamePairList = new ArrayList<>();
+            if (settings != null) {
+                for (int i = 0; i < settings.length; i++) {
+                    Pair<String, String> entry = null;
+                    String[] packageAndClassName =
+                            settings[i].split(SETTINGS_PACKAGE_AND_CLASS_DELIMITER);
+                    switch (packageAndClassName.length) {
+                        case 1:
+                            entry = Pair.<String, String>create(packageAndClassName[0], null);
+                            break;
+                        case 2:
+                            entry = Pair.<String, String>create(
+                                    packageAndClassName[0],
+                                    packageAndClassName[0] + packageAndClassName[1]);
+                    }
+                    if (entry != null) {
+                        sSettingsPackageAndClassNamePairList.add(entry);
+                    }
+                }
+            }
+        }
 
         loadConfigurationsAndApply();
         mPipRecentsOverlayManager = new PipRecentsOverlayManager(context);
