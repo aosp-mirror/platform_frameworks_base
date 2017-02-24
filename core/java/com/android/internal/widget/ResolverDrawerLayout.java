@@ -748,6 +748,10 @@ public class ResolverDrawerLayout extends ViewGroup {
         final int widthSpec = MeasureSpec.makeMeasureSpec(widthSize, MeasureSpec.EXACTLY);
         final int heightSpec = MeasureSpec.makeMeasureSpec(heightSize, MeasureSpec.EXACTLY);
         final int widthPadding = getPaddingLeft() + getPaddingRight();
+
+        // Currently we allot more height than is really needed so that the entirety of the
+        // sheet may be pulled up.
+        // TODO: Restrict the height here to be the right value.
         int heightUsed = getPaddingTop() + getPaddingBottom();
 
         // Measure always-show children first.
@@ -757,7 +761,7 @@ public class ResolverDrawerLayout extends ViewGroup {
             final LayoutParams lp = (LayoutParams) child.getLayoutParams();
             if (lp.alwaysShow && child.getVisibility() != GONE) {
                 measureChildWithMargins(child, widthSpec, widthPadding, heightSpec, heightUsed);
-                heightUsed += getHeightUsed(child);
+                heightUsed += child.getMeasuredHeight();
             }
         }
 
@@ -769,7 +773,7 @@ public class ResolverDrawerLayout extends ViewGroup {
             final LayoutParams lp = (LayoutParams) child.getLayoutParams();
             if (!lp.alwaysShow && child.getVisibility() != GONE) {
                 measureChildWithMargins(child, widthSpec, widthPadding, heightSpec, heightUsed);
-                heightUsed += getHeightUsed(child);
+                heightUsed += child.getMeasuredHeight();
             }
         }
 
@@ -783,36 +787,6 @@ public class ResolverDrawerLayout extends ViewGroup {
         mTopOffset = Math.max(0, heightSize - heightUsed) + (int) mCollapseOffset;
 
         setMeasuredDimension(sourceWidth, heightSize);
-    }
-
-    private int getHeightUsed(View child) {
-        // This method exists because we're taking a fast path at measuring ListViews that
-        // lets us get away with not doing the more expensive wrap_content measurement which
-        // imposes double child view measurement costs. If we're looking at a ListView, we can
-        // check against the lowest child view plus padding and margin instead of the actual
-        // measured height of the ListView. This lets the ListView hang off the edge when
-        // all of the content would fit on-screen.
-
-        int heightUsed = child.getMeasuredHeight();
-        if (child instanceof AbsListView) {
-            final AbsListView lv = (AbsListView) child;
-            final int lvPaddingBottom = lv.getPaddingBottom();
-
-            int lowest = 0;
-            for (int i = 0, N = lv.getChildCount(); i < N; i++) {
-                final int bottom = lv.getChildAt(i).getBottom() + lvPaddingBottom;
-                if (bottom > lowest) {
-                    lowest = bottom;
-                }
-            }
-
-            if (lowest < heightUsed) {
-                heightUsed = lowest;
-            }
-        }
-
-        final LayoutParams lp = (LayoutParams) child.getLayoutParams();
-        return lp.topMargin + heightUsed + lp.bottomMargin;
     }
 
     @Override
