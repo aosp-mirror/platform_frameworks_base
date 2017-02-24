@@ -16,6 +16,17 @@
 
 package com.android.settingslib;
 
+import static android.app.admin.DevicePolicyManager.KEYGUARD_DISABLE_FEATURES_NONE;
+import static android.app.admin.DevicePolicyManager.KEYGUARD_DISABLE_FINGERPRINT;
+import static android.app.admin.DevicePolicyManager.KEYGUARD_DISABLE_REMOTE_INPUT;
+import static android.app.admin.DevicePolicyManager.KEYGUARD_DISABLE_UNREDACTED_NOTIFICATIONS;
+import static com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
+import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.when;
+
 import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -25,17 +36,12 @@ import android.os.UserManager;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.annotation.Config;
 
 import java.util.Arrays;
-
-import static android.app.admin.DevicePolicyManager.KEYGUARD_DISABLE_FINGERPRINT;
-import static android.app.admin.DevicePolicyManager.KEYGUARD_DISABLE_REMOTE_INPUT;
-import static com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
-import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.Mockito.when;
 
 @RunWith(SettingLibRobolectricTestRunner.class)
 @Config(manifest = TestConfig.MANIFEST_PATH, sdk = TestConfig.SDK_VERSION)
@@ -47,8 +53,11 @@ public class RestrictedLockUtilsTest {
     private DevicePolicyManager mDevicePolicyManager;
     @Mock
     private UserManager mUserManager;
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
+    private RestrictedLockUtils.Proxy mProxy;
 
     private static final int mUserId = 194;
+    private static final int mProfileId = 160;
     private static final ComponentName mAdmin1 = new ComponentName("admin1", "admin1class");
     private static final ComponentName mAdmin2 = new ComponentName("admin2", "admin2class");
 
@@ -60,12 +69,13 @@ public class RestrictedLockUtilsTest {
                 .thenReturn(mDevicePolicyManager);
         when(mContext.getSystemService(Context.USER_SERVICE))
                 .thenReturn(mUserManager);
+
+        RestrictedLockUtils.sProxy = mProxy;
     }
 
     @Test
     public void checkIfKeyguardFeaturesDisabled_noEnforcedAdminForManagedProfile() {
-        setUpManagedProfile(mUserId);
-        setUpActiveAdmins(mUserId, new ComponentName[] {mAdmin1, mAdmin2});
+        setUpManagedProfile(mUserId, new ComponentName[] {mAdmin1, mAdmin2});
 
         final EnforcedAdmin enforcedAdmin = RestrictedLockUtils.checkIfKeyguardFeaturesDisabled(
                 mContext, KEYGUARD_DISABLE_FINGERPRINT, mUserId);
@@ -75,8 +85,7 @@ public class RestrictedLockUtilsTest {
 
     @Test
     public void checkIfKeyguardFeaturesDisabled_oneEnforcedAdminForManagedProfile() {
-        setUpManagedProfile(mUserId);
-        setUpActiveAdmins(mUserId, new ComponentName[] {mAdmin1, mAdmin2});
+        setUpManagedProfile(mUserId, new ComponentName[] {mAdmin1, mAdmin2});
 
         when(mDevicePolicyManager.getKeyguardDisabledFeatures(mAdmin1, mUserId))
                 .thenReturn(KEYGUARD_DISABLE_FINGERPRINT);
@@ -89,8 +98,7 @@ public class RestrictedLockUtilsTest {
 
     @Test
     public void checkIfKeyguardFeaturesDisabled_multipleEnforcedAdminForManagedProfile() {
-        setUpManagedProfile(mUserId);
-        setUpActiveAdmins(mUserId, new ComponentName[] {mAdmin1, mAdmin2});
+        setUpManagedProfile(mUserId, new ComponentName[] {mAdmin1, mAdmin2});
 
         when(mDevicePolicyManager.getKeyguardDisabledFeatures(mAdmin1, mUserId))
                 .thenReturn(KEYGUARD_DISABLE_REMOTE_INPUT);
@@ -103,9 +111,129 @@ public class RestrictedLockUtilsTest {
         assertThat(enforcedAdmin).isEqualTo(EnforcedAdmin.MULTIPLE_ENFORCED_ADMIN);
     }
 
-    private UserInfo setUpManagedProfile(int userId) {
-        final UserInfo userInfo = new UserInfo(userId, "myuser", UserInfo.FLAG_MANAGED_PROFILE);
+    @Test
+    public void checkIfKeyguardFeaturesAreDisabled_doesMatchAllowedFeature_unifiedManagedProfile() {
+        UserInfo userInfo = setUpUser(mUserId, new ComponentName[] {mAdmin1});
+        UserInfo profileInfo = setUpManagedProfile(mProfileId, new ComponentName[] {mAdmin2});
+        when(mUserManager.getProfiles(mUserId)).thenReturn(Arrays.asList(new UserInfo[] {
+                userInfo, profileInfo}));
+
+        when(mDevicePolicyManager.getKeyguardDisabledFeatures(mAdmin1, mUserId))
+                .thenReturn(KEYGUARD_DISABLE_FEATURES_NONE);
+        when(mDevicePolicyManager.getKeyguardDisabledFeatures(mAdmin2, mProfileId))
+                .thenReturn(KEYGUARD_DISABLE_FINGERPRINT);
+
+        // Querying the parent should return the policy, since it affects the parent.
+        EnforcedAdmin parent = RestrictedLockUtils.checkIfKeyguardFeaturesDisabled(
+                mContext, KEYGUARD_DISABLE_FINGERPRINT, mUserId);
+        assertThat(parent).isEqualTo(new EnforcedAdmin(mAdmin2, mProfileId));
+
+        // Querying the child should return that too.
+        EnforcedAdmin profile = RestrictedLockUtils.checkIfKeyguardFeaturesDisabled(
+                mContext, KEYGUARD_DISABLE_FINGERPRINT, mProfileId);
+        assertThat(profile).isEqualTo(new EnforcedAdmin(mAdmin2, mProfileId));
+
+        // Querying for some unrelated feature should return nothing. Nothing!
+        assertThat(RestrictedLockUtils.checkIfKeyguardFeaturesDisabled(
+                mContext, KEYGUARD_DISABLE_REMOTE_INPUT, mUserId)).isNull();
+        assertThat(RestrictedLockUtils.checkIfKeyguardFeaturesDisabled(
+                mContext, KEYGUARD_DISABLE_REMOTE_INPUT, mProfileId)).isNull();
+    }
+
+    @Test
+    public void checkIfKeyguardFeaturesAreDisabled_notMatchOtherFeatures_unifiedManagedProfile() {
+        UserInfo userInfo = setUpUser(mUserId, new ComponentName[] {mAdmin1});
+        UserInfo profileInfo = setUpManagedProfile(mProfileId, new ComponentName[] {mAdmin2});
+        when(mUserManager.getProfiles(mUserId)).thenReturn(Arrays.asList(new UserInfo[] {
+                userInfo, profileInfo}));
+
+        when(mDevicePolicyManager.getKeyguardDisabledFeatures(mAdmin1, mUserId))
+                .thenReturn(KEYGUARD_DISABLE_FEATURES_NONE);
+        when(mDevicePolicyManager.getKeyguardDisabledFeatures(mAdmin2, mProfileId))
+                .thenReturn(KEYGUARD_DISABLE_UNREDACTED_NOTIFICATIONS);
+
+        // Querying the parent should not return the policy, because it's not a policy that should
+        // affect parents even when the lock screen is unified.
+        EnforcedAdmin primary = RestrictedLockUtils.checkIfKeyguardFeaturesDisabled(
+                mContext, KEYGUARD_DISABLE_UNREDACTED_NOTIFICATIONS, mUserId);
+        assertThat(primary).isNull();
+
+        // Querying the child should still return the policy.
+        EnforcedAdmin profile = RestrictedLockUtils.checkIfKeyguardFeaturesDisabled(
+                mContext, KEYGUARD_DISABLE_UNREDACTED_NOTIFICATIONS, mProfileId);
+        assertThat(profile).isEqualTo(new EnforcedAdmin(mAdmin2, mProfileId));
+    }
+
+    @Test
+    public void checkIfKeyguardFeaturesAreDisabled_onlyMatchesProfile_separateManagedProfile() {
+        UserInfo userInfo = setUpUser(mUserId, new ComponentName[] {mAdmin1});
+        UserInfo profileInfo = setUpManagedProfile(mProfileId, new ComponentName[] {mAdmin2});
+        when(mUserManager.getProfiles(mUserId)).thenReturn(Arrays.asList(new UserInfo[] {
+                userInfo, profileInfo}));
+
+        when(mDevicePolicyManager.getKeyguardDisabledFeatures(mAdmin1, mUserId))
+                .thenReturn(KEYGUARD_DISABLE_FEATURES_NONE);
+        when(mDevicePolicyManager.getKeyguardDisabledFeatures(mAdmin2, mProfileId))
+                .thenReturn(KEYGUARD_DISABLE_FINGERPRINT);
+
+        // Crucially for this test, isSeparateWorkChallengeEnabled => true.
+        doReturn(true).when(mProxy).isSeparateProfileChallengeEnabled(any(), eq(mProfileId));
+
+        // Querying the parent should not return the policy, even though it's shared by default,
+        // because the parent doesn't share a lock screen with the profile any more.
+        EnforcedAdmin parent = RestrictedLockUtils.checkIfKeyguardFeaturesDisabled(
+                mContext, KEYGUARD_DISABLE_FINGERPRINT, mUserId);
+        assertThat(parent).isNull();
+
+        // Querying the child should still return the policy.
+        EnforcedAdmin profile = RestrictedLockUtils.checkIfKeyguardFeaturesDisabled(
+                mContext, KEYGUARD_DISABLE_FINGERPRINT, mProfileId);
+        assertThat(profile).isEqualTo(new EnforcedAdmin(mAdmin2, mProfileId));
+    }
+
+    /**
+     * This test works great. The real world implementation is sketchy though.
+     * <p>
+     * DevicePolicyManager.getParentProfileInstance(UserInfo) does not do what it looks like it does
+     * (which would be to get an instance for the parent of the user that's passed in to it.)
+     * <p>
+     * Instead it just always returns a parent instance for the current user.
+     * <p>
+     * Still, the test works.
+     */
+    @Test
+    public void checkIfKeyguardFeaturesAreDisabled_onlyMatchesParent_profileParentPolicy() {
+        UserInfo userInfo = setUpUser(mUserId, new ComponentName[] {mAdmin1});
+        UserInfo profileInfo = setUpManagedProfile(mProfileId, new ComponentName[] {mAdmin2});
+        when(mUserManager.getProfiles(mUserId)).thenReturn(Arrays.asList(new UserInfo[] {
+                userInfo, profileInfo}));
+
+        when(mProxy.getParentProfileInstance(any(DevicePolicyManager.class), any())
+                .getKeyguardDisabledFeatures(mAdmin2, mProfileId))
+                .thenReturn(KEYGUARD_DISABLE_FINGERPRINT);
+
+        // Parent should get the policy.
+        EnforcedAdmin parent = RestrictedLockUtils.checkIfKeyguardFeaturesDisabled(
+                mContext, KEYGUARD_DISABLE_FINGERPRINT, mUserId);
+        assertThat(parent).isEqualTo(new EnforcedAdmin(mAdmin2, mProfileId));
+
+        // Profile should not get the policy.
+        EnforcedAdmin profile = RestrictedLockUtils.checkIfKeyguardFeaturesDisabled(
+                mContext, KEYGUARD_DISABLE_FINGERPRINT, mProfileId);
+        assertThat(profile).isNull();
+    }
+
+    private UserInfo setUpUser(int userId, ComponentName[] admins) {
+        UserInfo userInfo = new UserInfo(userId, "primary", 0);
         when(mUserManager.getUserInfo(userId)).thenReturn(userInfo);
+        setUpActiveAdmins(userId, admins);
+        return userInfo;
+    }
+
+    private UserInfo setUpManagedProfile(int userId, ComponentName[] admins) {
+        UserInfo userInfo = new UserInfo(userId, "profile", UserInfo.FLAG_MANAGED_PROFILE);
+        when(mUserManager.getUserInfo(userId)).thenReturn(userInfo);
+        setUpActiveAdmins(userId, admins);
         return userInfo;
     }
 

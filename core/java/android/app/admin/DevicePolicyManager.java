@@ -3346,6 +3346,17 @@ public class DevicePolicyManager {
     public static final int KEYGUARD_DISABLE_FEATURES_ALL = 0x7fffffff;
 
     /**
+     * Keyguard features that when set on a managed profile that doesn't have its own challenge will
+     * affect the profile's parent user. These can also be set on the managed profile's parent
+     * {@link DevicePolicyManager} instance.
+     *
+     * @hide
+     */
+    public static final int PROFILE_KEYGUARD_FEATURES_AFFECT_OWNER =
+            DevicePolicyManager.KEYGUARD_DISABLE_TRUST_AGENTS
+            | DevicePolicyManager.KEYGUARD_DISABLE_FINGERPRINT;
+
+    /**
      * Called by an application that is administering the device to request that the storage system
      * be encrypted.
      * <p>
