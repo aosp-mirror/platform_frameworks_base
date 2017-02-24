@@ -20,6 +20,8 @@ import static android.net.ConnectivityManager.TYPE_MOBILE_DUN;
 import static android.net.ConnectivityManager.TYPE_MOBILE_HIPRI;
 
 import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
 import android.net.ConnectivityManager;
 import android.net.ConnectivityManager.NetworkCallback;
 import android.net.LinkProperties;
@@ -72,6 +74,7 @@ public class UpstreamNetworkMonitor {
 
     private final Context mContext;
     private final StateMachine mTarget;
+    private final Handler mHandler;
     private final int mWhat;
     private final HashMap<Network, NetworkState> mNetworkMap = new HashMap<>();
     private ConnectivityManager mCM;
@@ -84,6 +87,7 @@ public class UpstreamNetworkMonitor {
     public UpstreamNetworkMonitor(Context ctx, StateMachine tgt, int what) {
         mContext = ctx;
         mTarget = tgt;
+        mHandler = mTarget.getHandler();
         mWhat = what;
     }
 
@@ -99,10 +103,10 @@ public class UpstreamNetworkMonitor {
         final NetworkRequest listenAllRequest = new NetworkRequest.Builder()
                 .clearCapabilities().build();
         mListenAllCallback = new UpstreamNetworkCallback(CALLBACK_LISTEN_ALL);
-        cm().registerNetworkCallback(listenAllRequest, mListenAllCallback);
+        cm().registerNetworkCallback(listenAllRequest, mListenAllCallback, mHandler);
 
         mDefaultNetworkCallback = new UpstreamNetworkCallback(CALLBACK_TRACK_DEFAULT);
-        cm().registerDefaultNetworkCallback(mDefaultNetworkCallback);
+        cm().registerDefaultNetworkCallback(mDefaultNetworkCallback, mHandler);
     }
 
     public void stop() {
@@ -154,7 +158,7 @@ public class UpstreamNetworkMonitor {
         // Additionally, we log a message to aid in any subsequent debugging.
         Log.d(TAG, "requesting mobile upstream network: " + mobileUpstreamRequest);
 
-        cm().requestNetwork(mobileUpstreamRequest, mMobileNetworkCallback, 0, legacyType);
+        cm().requestNetwork(mobileUpstreamRequest, mMobileNetworkCallback, 0, legacyType, mHandler);
     }
 
     public void releaseMobileNetworkRequest() {
@@ -185,11 +189,13 @@ public class UpstreamNetworkMonitor {
             case CALLBACK_TRACK_DEFAULT:
                 if (mDefaultNetworkCallback == null) {
                     // The callback was unregistered in the interval between
-                    // ConnectivityService calling onAvailable() and our
-                    // handling of it here on the mTarget.getHandler() thread.
+                    // ConnectivityService enqueueing onAvailable() and our
+                    // handling of it here on the mHandler thread.
+                    //
                     // Clean-up of this network entry is deferred to the
                     // handling of onLost() by other callbacks.
-                    // TODO: change to Log.wtf() after oag/331764 is merged.
+                    //
+                    // These request*() calls can be deleted post oag/339444.
                     return;
                 }
 
@@ -200,11 +206,13 @@ public class UpstreamNetworkMonitor {
             case CALLBACK_MOBILE_REQUEST:
                 if (mMobileNetworkCallback == null) {
                     // The callback was unregistered in the interval between
-                    // ConnectivityService calling onAvailable() and our
-                    // handling of it here on the mTarget.getHandler() thread.
+                    // ConnectivityService enqueueing onAvailable() and our
+                    // handling of it here on the mHandler thread.
+                    //
                     // Clean-up of this network entry is deferred to the
                     // handling of onLost() by other callbacks.
-                    // TODO: change to Log.wtf() after oag/331764 is merged.
+                    //
+                    // These request*() calls can be deleted post oag/339444.
                     return;
                 }
 
@@ -312,8 +320,9 @@ public class UpstreamNetworkMonitor {
     }
 
     /**
-     * A NetworkCallback class that relays information of interest to the
-     * tethering master state machine thread for subsequent processing.
+     * A NetworkCallback class that handles information of interest directly
+     * in the thread on which it is invoked. To avoid locking, this MUST be
+     * run on the same thread as the target state machine's handler.
      */
     private class UpstreamNetworkCallback extends NetworkCallback {
         private final int mCallbackType;
@@ -324,22 +333,35 @@ public class UpstreamNetworkMonitor {
 
         @Override
         public void onAvailable(Network network) {
-            mTarget.getHandler().post(() -> handleAvailable(mCallbackType, network));
+            checkExpectedThread();
+            handleAvailable(mCallbackType, network);
         }
 
         @Override
         public void onCapabilitiesChanged(Network network, NetworkCapabilities newNc) {
-            mTarget.getHandler().post(() -> handleNetCap(network, newNc));
+            checkExpectedThread();
+            handleNetCap(network, newNc);
         }
 
         @Override
         public void onLinkPropertiesChanged(Network network, LinkProperties newLp) {
-            mTarget.getHandler().post(() -> handleLinkProp(network, newLp));
+            checkExpectedThread();
+            handleLinkProp(network, newLp);
         }
+
+        // TODO: Handle onNetworkSuspended();
+        // TODO: Handle onNetworkResumed();
 
         @Override
         public void onLost(Network network) {
-            mTarget.getHandler().post(() -> handleLost(mCallbackType, network));
+            checkExpectedThread();
+            handleLost(mCallbackType, network);
+        }
+
+        private void checkExpectedThread() {
+            if (Looper.myLooper() != mHandler.getLooper()) {
+                Log.wtf(TAG, "Handling callback in unexpected thread.");
+            }
         }
     }
 
