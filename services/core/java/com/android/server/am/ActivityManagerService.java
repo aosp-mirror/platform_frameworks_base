@@ -47,6 +47,8 @@ import static android.os.Process.PROC_CHAR;
 import static android.os.Process.PROC_OUT_LONG;
 import static android.os.Process.PROC_PARENS;
 import static android.os.Process.PROC_SPACE_TERM;
+import static android.net.NetworkPolicyManager.isProcStateAllowedWhileIdleOrPowerSaveMode;
+import static android.net.NetworkPolicyManager.isProcStateAllowedWhileOnRestrictBackground;
 import static android.provider.Settings.Global.ALWAYS_FINISH_ACTIVITIES;
 import static android.provider.Settings.Global.DEBUG_APP;
 import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT;
@@ -319,6 +321,7 @@ import com.google.android.collect.Maps;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.AssistUtils;
 import com.android.internal.app.DumpHeapActivity;
 import com.android.internal.app.IAppOpsCallback;
@@ -1439,6 +1442,17 @@ public class ActivityManagerService extends IActivityManager.Stub
     final long[] mTmpLong = new long[2];
 
     private final ArraySet<BroadcastQueue> mTmpBroadcastQueue = new ArraySet();
+
+    /**
+     * A global counter for generating sequence numbers.
+     * This value will be used when incrementing sequence numbers in individual uidRecords.
+     *
+     * Having a global counter ensures that seq numbers are monotonically increasing for a
+     * particular uid even when the uidRecord is re-created.
+     */
+    @GuardedBy("this")
+    @VisibleForTesting
+    long mProcStateSeqCounter = 0;
 
     static final class ProcessChangeItem {
         static final int CHANGE_ACTIVITIES = 1<<0;
@@ -2601,6 +2615,33 @@ public class ActivityManagerService extends IActivityManager.Stub
         public ActivityManagerService getService() {
             return mService;
         }
+    }
+
+    @VisibleForTesting
+    public ActivityManagerService() {
+        GL_ES_VERSION = 0;
+        mActivityStarter = null;
+        mAppErrors = null;
+        mAppOpsService = null;
+        mBatteryStatsService = null;
+        mCompatModePackages = null;
+        mConstants = null;
+        mGrantFile = null;
+        mHandler = null;
+        mHandlerThread = null;
+        mIntentFirewall = null;
+        mKeyguardController = null;
+        mPermissionReviewRequired = false;
+        mProcessCpuThread = null;
+        mProcessStats = null;
+        mProviderMap = null;
+        mRecentTasks = null;
+        mServices = null;
+        mStackSupervisor = null;
+        mSystemThread = null;
+        mTaskChangeNotificationController = null;
+        mUiHandler = null;
+        mUserController = null;
     }
 
     // Note: This method is invoked on the main thread but may need to attach various
@@ -21736,6 +21777,10 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
 
+        for (int i = mActiveUids.size() - 1; i >= 0; --i) {
+            incrementProcStateSeqIfNeeded(mActiveUids.valueAt(i));
+        }
+
         mNumServiceProcs = mNewNumServiceProcs;
 
         // Now determine the memory trimming level of background processes.
@@ -22083,6 +22128,42 @@ public class ActivityManagerService extends IActivityManager.Stub
                         nextTime + BACKGROUND_SETTLE_TIME - nowElapsed);
             }
         }
+    }
+
+    /**
+     * If {@link UidRecord#curProcStateSeq} needs to be updated, then increments the global seq
+     * counter {@link #mProcStateSeqCounter} and uses that value for {@param uidRec}.
+     */
+    @VisibleForTesting
+    void incrementProcStateSeqIfNeeded(UidRecord uidRec) {
+        if (uidRec.curProcState != uidRec.setProcState && shouldIncrementProcStateSeq(uidRec)) {
+            uidRec.curProcStateSeq = ++mProcStateSeqCounter;
+        }
+    }
+
+    /**
+     * Checks if {@link UidRecord#curProcStateSeq} needs to be incremented depending on whether
+     * the uid is coming from background to foreground state or vice versa.
+     *
+     * @return Returns true if the uid is coming from background to foreground state or vice versa,
+     *                 false otherwise.
+     */
+    @VisibleForTesting
+    boolean shouldIncrementProcStateSeq(UidRecord uidRec) {
+        final boolean isAllowedOnRestrictBackground
+                = isProcStateAllowedWhileOnRestrictBackground(uidRec.curProcState);
+        final boolean isAllowedOnDeviceIdleOrPowerSaveMode
+                = isProcStateAllowedWhileIdleOrPowerSaveMode(uidRec.curProcState);
+
+        final boolean wasAllowedOnRestrictBackground
+                = isProcStateAllowedWhileOnRestrictBackground(uidRec.setProcState);
+        final boolean wasAllowedOnDeviceIdleOrPowerSaveMode
+                = isProcStateAllowedWhileIdleOrPowerSaveMode(uidRec.setProcState);
+
+        // If the uid is coming from background to foreground or vice versa,
+        // then return true. Otherwise false.
+        return (wasAllowedOnDeviceIdleOrPowerSaveMode != isAllowedOnDeviceIdleOrPowerSaveMode)
+                || (wasAllowedOnRestrictBackground != isAllowedOnRestrictBackground);
     }
 
     final void runInBackgroundDisabled(int uid) {
