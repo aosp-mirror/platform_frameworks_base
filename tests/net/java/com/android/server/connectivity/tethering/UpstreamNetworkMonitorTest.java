@@ -32,6 +32,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import android.content.Context;
+import android.os.Handler;
+import android.os.Message;
 import android.net.ConnectivityManager;
 import android.net.ConnectivityManager.NetworkCallback;
 import android.net.IConnectivityManager;
@@ -42,6 +44,10 @@ import android.net.NetworkRequest;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
+import com.android.internal.util.State;
+import com.android.internal.util.StateMachine;
+
+import org.junit.After;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.junit.Test;
@@ -49,6 +55,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -63,6 +70,7 @@ public class UpstreamNetworkMonitorTest {
     @Mock private Context mContext;
     @Mock private IConnectivityManager mCS;
 
+    private TestStateMachine mSM;
     private TestConnectivityManager mCM;
     private UpstreamNetworkMonitor mUNM;
 
@@ -72,7 +80,15 @@ public class UpstreamNetworkMonitorTest {
         reset(mCS);
 
         mCM = spy(new TestConnectivityManager(mContext, mCS));
-        mUNM = new UpstreamNetworkMonitor(null, EVENT_UNM_UPDATE, (ConnectivityManager) mCM);
+        mSM = new TestStateMachine();
+        mUNM = new UpstreamNetworkMonitor(mSM, EVENT_UNM_UPDATE, (ConnectivityManager) mCM);
+    }
+
+    @After public void tearDown() throws Exception {
+        if (mSM != null) {
+            mSM.quit();
+            mSM = null;
+        }
     }
 
     @Test
@@ -139,15 +155,17 @@ public class UpstreamNetworkMonitorTest {
 
         mUNM.start();
         verify(mCM, Mockito.times(1)).registerNetworkCallback(
-                any(NetworkRequest.class), any(NetworkCallback.class));
-        verify(mCM, Mockito.times(1)).registerDefaultNetworkCallback(any(NetworkCallback.class));
+                any(NetworkRequest.class), any(NetworkCallback.class), any(Handler.class));
+        verify(mCM, Mockito.times(1)).registerDefaultNetworkCallback(
+                any(NetworkCallback.class), any(Handler.class));
         assertFalse(mUNM.mobileNetworkRequested());
         assertEquals(0, mCM.requested.size());
 
         mUNM.updateMobileRequiresDun(true);
         mUNM.registerMobileNetworkRequest();
         verify(mCM, Mockito.times(1)).requestNetwork(
-                any(NetworkRequest.class), any(NetworkCallback.class), anyInt(), anyInt());
+                any(NetworkRequest.class), any(NetworkCallback.class), anyInt(), anyInt(),
+                any(Handler.class));
 
         assertTrue(mUNM.mobileNetworkRequested());
         assertUpstreamTypeRequested(TYPE_MOBILE_DUN);
@@ -224,6 +242,7 @@ public class UpstreamNetworkMonitorTest {
     }
 
     public static class TestConnectivityManager extends ConnectivityManager {
+        public Map<NetworkCallback, Handler> allCallbacks = new HashMap<>();
         public Set<NetworkCallback> trackingDefault = new HashSet<>();
         public Map<NetworkCallback, NetworkRequest> listening = new HashMap<>();
         public Map<NetworkCallback, NetworkRequest> requested = new HashMap<>();
@@ -234,7 +253,8 @@ public class UpstreamNetworkMonitorTest {
         }
 
         boolean hasNoCallbacks() {
-            return trackingDefault.isEmpty() &&
+            return allCallbacks.isEmpty() &&
+                   trackingDefault.isEmpty() &&
                    listening.isEmpty() &&
                    requested.isEmpty() &&
                    legacyTypeMap.isEmpty();
@@ -262,14 +282,23 @@ public class UpstreamNetworkMonitorTest {
         }
 
         @Override
-        public void requestNetwork(NetworkRequest req, NetworkCallback cb) {
+        public void requestNetwork(NetworkRequest req, NetworkCallback cb, Handler h) {
+            assertFalse(allCallbacks.containsKey(cb));
+            allCallbacks.put(cb, h);
             assertFalse(requested.containsKey(cb));
             requested.put(cb, req);
         }
 
         @Override
+        public void requestNetwork(NetworkRequest req, NetworkCallback cb) {
+            fail("Should never be called.");
+        }
+
+        @Override
         public void requestNetwork(NetworkRequest req, NetworkCallback cb,
-                int timeoutMs, int legacyType) {
+                int timeoutMs, int legacyType, Handler h) {
+            assertFalse(allCallbacks.containsKey(cb));
+            allCallbacks.put(cb, h);
             assertFalse(requested.containsKey(cb));
             requested.put(cb, req);
             assertFalse(legacyTypeMap.containsKey(cb));
@@ -279,15 +308,29 @@ public class UpstreamNetworkMonitorTest {
         }
 
         @Override
-        public void registerNetworkCallback(NetworkRequest req, NetworkCallback cb) {
+        public void registerNetworkCallback(NetworkRequest req, NetworkCallback cb, Handler h) {
+            assertFalse(allCallbacks.containsKey(cb));
+            allCallbacks.put(cb, h);
             assertFalse(listening.containsKey(cb));
             listening.put(cb, req);
         }
 
         @Override
-        public void registerDefaultNetworkCallback(NetworkCallback cb) {
+        public void registerNetworkCallback(NetworkRequest req, NetworkCallback cb) {
+            fail("Should never be called.");
+        }
+
+        @Override
+        public void registerDefaultNetworkCallback(NetworkCallback cb, Handler h) {
+            assertFalse(allCallbacks.containsKey(cb));
+            allCallbacks.put(cb, h);
             assertFalse(trackingDefault.contains(cb));
             trackingDefault.add(cb);
+        }
+
+        @Override
+        public void registerDefaultNetworkCallback(NetworkCallback cb) {
+            fail("Should never be called.");
         }
 
         @Override
@@ -302,10 +345,35 @@ public class UpstreamNetworkMonitorTest {
             } else {
                 fail("Unexpected callback removed");
             }
+            allCallbacks.remove(cb);
 
+            assertFalse(allCallbacks.containsKey(cb));
             assertFalse(trackingDefault.contains(cb));
             assertFalse(listening.containsKey(cb));
             assertFalse(requested.containsKey(cb));
+        }
+    }
+
+    public static class TestStateMachine extends StateMachine {
+        public final ArrayList<Message> messages = new ArrayList<>();
+        private final State mLoggingState = new LoggingState();
+
+        class LoggingState extends State {
+            @Override public void enter() { messages.clear(); }
+
+            @Override public void exit() { messages.clear(); }
+
+            @Override public boolean processMessage(Message msg) {
+                messages.add(msg);
+                return true;
+            }
+        }
+
+        public TestStateMachine() {
+            super("UpstreamNetworkMonitor.TestStateMachine");
+            addState(mLoggingState);
+            setInitialState(mLoggingState);
+            super.start();
         }
     }
 }
