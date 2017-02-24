@@ -39,6 +39,7 @@ import android.view.MotionEvent;
 import android.view.NotificationHeaderView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.view.ViewStub;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -1748,7 +1749,17 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
 
     @Override
     public void setActualHeight(int height, boolean notifyListeners) {
+        boolean changed = height != getActualHeight();
         super.setActualHeight(height, notifyListeners);
+        if (changed && isRemoved()) {
+            // TODO: remove this once we found the gfx bug for this.
+            // This is a hack since a removed view sometimes would just stay blank. it occured
+            // when sending yourself a message and then clicking on it.
+            ViewGroup parent = (ViewGroup) getParent();
+            if (parent != null) {
+                parent.invalidate();
+            }
+        }
         if (mGuts != null && mGuts.isExposed()) {
             mGuts.setActualHeight(height);
             return;

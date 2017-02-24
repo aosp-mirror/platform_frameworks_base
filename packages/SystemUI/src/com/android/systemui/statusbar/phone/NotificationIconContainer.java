@@ -524,11 +524,5 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
                 iconColor = ((StatusBarIconView) view).getStaticDrawableColor();
             }
         }
-
-        protected void onYTranslationAnimationFinished(View view) {
-            if (hidden) {
-                view.setVisibility(INVISIBLE);
-            }
-        }
     }
 }

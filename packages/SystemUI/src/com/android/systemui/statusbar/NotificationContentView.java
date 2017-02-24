@@ -1184,7 +1184,8 @@ public class NotificationContentView extends FrameLayout {
         mExpandable = expandable;
         // if the expanded child has the same height as the collapsed one we hide it.
         if (mExpandedChild != null && mExpandedChild.getHeight() != 0) {
-            if (!mIsHeadsUp || mHeadsUpChild == null || mContainingNotification.isOnKeyguard()) {
+            if ((!mIsHeadsUp && !mHeadsUpAnimatingAway)
+                    || mHeadsUpChild == null || mContainingNotification.isOnKeyguard()) {
                 if (mExpandedChild.getHeight() == mContractedChild.getHeight()) {
                     expandable = false;
                 }
