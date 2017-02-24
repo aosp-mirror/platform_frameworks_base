@@ -867,7 +867,7 @@ public class CarrierConfigManager {
 
     /**
      * Defines carrier-specific actions which act upon
-     * android.intent.action.CARRIER_SIGNAL_REDIRECTED, used for customization of the
+     * com.android.internal.telephony.CARRIER_SIGNAL_REDIRECTED, used for customization of the
      * default carrier app
      * Format: "CARRIER_ACTION_IDX, ..."
      * Where {@code CARRIER_ACTION_IDX} is an integer defined in
@@ -882,7 +882,7 @@ public class CarrierConfigManager {
 
     /**
      * Defines carrier-specific actions which act upon
-     * android.intent.action.CARRIER_SIGNAL_REQUEST_NETWORK_FAILED
+     * com.android.internal.telephony.CARRIER_SIGNAL_REQUEST_NETWORK_FAILED
      * and configured signal args:
      * {@link com.android.internal.telephony.TelephonyIntents#EXTRA_APN_TYPE_KEY apnType},
      * {@link com.android.internal.telephony.TelephonyIntents#EXTRA_ERROR_CODE_KEY errorCode}
@@ -923,11 +923,11 @@ public class CarrierConfigManager {
      * @see com.android.internal.telephony.TelephonyIntents
      * Example:
      * <item>com.google.android.carrierAPK/.CarrierSignalReceiverA:
-     * android.intent.action.CARRIER_SIGNAL_REDIRECTED,
-     * android.intent.action.CARRIER_SIGNAL_PCO_VALUE
+     * com.android.internal.telephony.CARRIER_SIGNAL_REDIRECTED,
+     * com.android.internal.telephony.CARRIER_SIGNAL_PCO_VALUE
      * </item>
      * <item>com.google.android.carrierAPK/.CarrierSignalReceiverB:
-     * android.intent.action.CARRIER_SIGNAL_PCO_VALUE
+     * com.android.internal.telephony.CARRIER_SIGNAL_PCO_VALUE
      * </item>
      * @hide
      */
@@ -942,11 +942,11 @@ public class CarrierConfigManager {
      * @see com.android.internal.telephony.TelephonyIntents
      * Example:
      * <item>com.google.android.carrierAPK/.CarrierSignalReceiverA:
-     * android.intent.action.CARRIER_SIGNAL_REQUEST_NETWORK_FAILED,
-     * android.intent.action.CARRIER_SIGNAL_PCO_VALUE
+     * com.android.internal.telephony.CARRIER_SIGNAL_REQUEST_NETWORK_FAILED,
+     * com.android.internal.telephony.CARRIER_SIGNAL_PCO_VALUE
      * </item>
      * <item>com.google.android.carrierAPK/.CarrierSignalReceiverB:
-     * android.intent.action.CARRIER_SIGNAL_REQUEST_NETWORK_FAILED
+     * com.android.internal.telephony.CARRIER_SIGNAL_REQUEST_NETWORK_FAILED
      * </item>
      * @hide
      */
@@ -1392,7 +1392,7 @@ public class CarrierConfigManager {
         sDefaults.putStringArray(KEY_CARRIER_APP_WAKE_SIGNAL_CONFIG_STRING_ARRAY,
                 new String[]{
                         "com.android.carrierdefaultapp/.CarrierDefaultBroadcastReceiver:" +
-                                "android.intent.action.CARRIER_SIGNAL_REDIRECTED"
+                                "com.android.internal.telephony.CARRIER_SIGNAL_REDIRECTED"
                 });
         sDefaults.putStringArray(KEY_CARRIER_APP_NO_WAKE_SIGNAL_CONFIG_STRING_ARRAY, null);
 
