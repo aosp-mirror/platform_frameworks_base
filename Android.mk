@@ -931,6 +931,7 @@ framework_docs_LOCAL_DROIDDOC_OPTIONS := \
     -since $(SRC_API_DIR)/23.txt 23 \
     -since $(SRC_API_DIR)/24.txt 24 \
     -since $(SRC_API_DIR)/25.txt 25 \
+    -since ./frameworks/base/api/current.txt O \
 		-werror -hide 111 -hide 113 \
 		-overview $(LOCAL_PATH)/core/java/overview.html
 
