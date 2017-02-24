@@ -23,6 +23,8 @@ import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -1495,13 +1497,24 @@ public class StateMachine {
     }
 
     /**
-     * @return number of log records
+     * @return the number of log records currently readable
      */
     public final int getLogRecSize() {
         // mSmHandler can be null if the state machine has quit.
         SmHandler smh = mSmHandler;
         if (smh == null) return 0;
         return smh.mLogRecords.size();
+    }
+
+    /**
+     * @return the number of log records we can store
+     */
+    @VisibleForTesting
+    public final int getLogRecMaxSize() {
+        // mSmHandler can be null if the state machine has quit.
+        SmHandler smh = mSmHandler;
+        if (smh == null) return 0;
+        return smh.mLogRecords.mMaxSize;
     }
 
     /**
