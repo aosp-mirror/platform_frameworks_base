@@ -24,6 +24,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.service.autofill.Dataset;
 import android.service.autofill.FillResponse;
+import android.service.autofill.SaveInfo;
 import android.text.TextUtils;
 import android.view.autofill.AutoFillId;
 import android.widget.Toast;
@@ -172,13 +173,13 @@ public final class AutoFillUI {
     /**
      * Shows the UI asking the user to save for auto-fill.
      */
-    public void showSaveUi(@NonNull CharSequence providerLabel) {
+    public void showSaveUi(@NonNull CharSequence providerLabel, @NonNull SaveInfo info) {
         mHandler.post(() -> {
             if (!hasCallback()) {
                 return;
             }
             hideAllUiThread();
-            mSaveUi = new SaveUi(mContext, providerLabel,
+            mSaveUi = new SaveUi(mContext, providerLabel, info,
                     new SaveUi.OnSaveListener() {
                 @Override
                 public void onSave() {

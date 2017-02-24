@@ -188,7 +188,7 @@ public final class FillResponse implements Parcelable {
             // Handle the the case where service didn't call setSavableIds() because it would
             // contain just the ids from the datasets.
             if (saveInfo == null && mDatasets != null) {
-                saveInfo = new SaveInfo.Builder(SaveInfo.SAVE_UI_TYPE_GENERIC).build();
+                saveInfo = new SaveInfo.Builder(SaveInfo.SAVE_DATA_TYPE_GENERIC).build();
             }
             if (saveInfo != null) {
                 saveInfo.addSavableIds(mDatasets);
@@ -324,7 +324,7 @@ public final class FillResponse implements Parcelable {
                 throw new IllegalStateException("setSaveInfo() already called");
             }
             if (mSaveInfoBuilder == null) {
-                mSaveInfoBuilder = new SaveInfo.Builder(SaveInfo.SAVE_UI_TYPE_GENERIC);
+                mSaveInfoBuilder = new SaveInfo.Builder(SaveInfo.SAVE_DATA_TYPE_GENERIC);
             }
             mSaveInfoBuilder.addSavableIds(ids);
 

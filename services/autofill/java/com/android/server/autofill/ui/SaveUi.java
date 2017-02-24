@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.app.Dialog;
 import android.content.Context;
 import android.os.Handler;
+import android.service.autofill.SaveInfo;
 import android.text.format.DateUtils;
 import android.view.Gravity;
 import android.view.Window;
@@ -50,15 +51,41 @@ final class SaveUi {
 
     private boolean mDestroyed;
 
-    SaveUi(@NonNull Context context, @NonNull CharSequence providerLabel,
+    SaveUi(@NonNull Context context, @NonNull CharSequence providerLabel, @NonNull SaveInfo info,
             @NonNull OnSaveListener listener) {
         mListener = listener;
 
         final LayoutInflater inflater = LayoutInflater.from(context);
         final View view = inflater.inflate(R.layout.autofill_save, null);
 
-        final TextView title = (TextView) view.findViewById(R.id.autofill_save_title);
-        title.setText(context.getString(R.string.autofill_save_title, providerLabel));
+        final TextView titleView = (TextView) view.findViewById(R.id.autofill_save_title);
+        final String type;
+
+        switch(info.getType()) {
+            case SaveInfo.SAVE_DATA_TYPE_PASSWORD:
+                type = context.getString(R.string.autofill_save_type_password);
+                break;
+            case SaveInfo.SAVE_DATA_TYPE_ADDRESS:
+                type = context.getString(R.string.autofill_save_type_address);
+                break;
+            case SaveInfo.SAVE_DATA_TYPE_CREDIT_CARD:
+                type = context.getString(R.string.autofill_save_type_credit_card);
+                break;
+            default:
+                type = null;
+        }
+
+        final String title = (type == null)
+                ? context.getString(R.string.autofill_save_title, providerLabel)
+                : context.getString(R.string.autofill_save_title_with_type, type, providerLabel);
+
+        titleView.setText(title);
+        final CharSequence subTitle = info.getDescription();
+        if (subTitle != null) {
+            final TextView subTitleView = (TextView) view.findViewById(R.id.autofill_save_subtitle);
+            subTitleView.setText(subTitle);
+            subTitleView.setVisibility(View.VISIBLE);
+        }
 
         final View noButton = view.findViewById(R.id.autofill_save_no);
         noButton.setOnClickListener((v) -> mListener.onCancel());

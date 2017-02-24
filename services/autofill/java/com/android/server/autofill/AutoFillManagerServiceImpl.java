@@ -743,8 +743,9 @@ final class AutoFillManagerServiceImpl {
                         Slog.d(TAG, "finishSessionLocked(): found a change on " + id + ": "
                                 + state.mAutoFillValue);
                     }
-                    getUiForShowing().showSaveUi(mInfo.getServiceInfo()
-                            .loadLabel(mContext.getPackageManager()));
+                    getUiForShowing().showSaveUi(
+                            mInfo.getServiceInfo().loadLabel(mContext.getPackageManager()),
+                            saveInfo);
                     return;
                 }
             }
