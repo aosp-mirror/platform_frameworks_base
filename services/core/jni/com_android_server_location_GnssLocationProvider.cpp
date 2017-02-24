@@ -1036,7 +1036,7 @@ static void android_location_GnssLocationProvider_class_init_native(JNIEnv* env,
     }
 
     // TODO(b/31632518)
-    gnssHal = IGnss::getService("gnss");
+    gnssHal = IGnss::getService();
     if (gnssHal != nullptr) {
         auto gnssXtra = gnssHal->getExtensionXtra();
         if (!gnssXtra.isOk()) {
