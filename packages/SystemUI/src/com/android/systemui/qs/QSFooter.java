@@ -37,7 +37,7 @@ import android.widget.TextView;
 import com.android.systemui.Dependency;
 import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
-import com.android.systemui.ActivityStarter;
+import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.statusbar.phone.QSTileHost;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.statusbar.policy.SecurityController;

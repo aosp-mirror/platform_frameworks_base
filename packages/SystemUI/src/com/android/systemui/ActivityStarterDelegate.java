@@ -17,6 +17,8 @@ package com.android.systemui;
 import android.app.PendingIntent;
 import android.content.Intent;
 
+import com.android.systemui.plugins.ActivityStarter;
+
 /**
  * Single common instance of ActivityStarter that can be gotten and referenced from anywhere, but
  * delegates to an actual implementation such as StatusBar, assuming it exists.

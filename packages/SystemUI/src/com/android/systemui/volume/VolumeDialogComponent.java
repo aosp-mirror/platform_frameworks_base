@@ -25,7 +25,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.view.WindowManager;
 
-import com.android.systemui.ActivityStarter;
+import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.Dependency;
 import com.android.systemui.SystemUI;
 import com.android.systemui.SystemUIFactory;

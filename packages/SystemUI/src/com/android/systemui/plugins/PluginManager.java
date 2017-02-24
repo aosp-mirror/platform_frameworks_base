@@ -29,6 +29,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.SystemProperties;
@@ -39,6 +40,7 @@ import android.util.ArraySet;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
+import com.android.systemui.Dependency;
 import com.android.systemui.plugins.PluginInstanceManager.PluginContextWrapper;
 import com.android.systemui.plugins.PluginInstanceManager.PluginInfo;
 import com.android.systemui.plugins.annotations.ProvidesInterface;
@@ -93,6 +95,14 @@ public class PluginManager extends BroadcastReceiver {
         PluginExceptionHandler uncaughtExceptionHandler = new PluginExceptionHandler(
                 defaultHandler);
         Thread.setDefaultUncaughtExceptionHandler(uncaughtExceptionHandler);
+        if (isDebuggable) {
+            new Handler(mBackgroundThread.getLooper()).post(() -> {
+                // Plugin dependencies that don't have another good home can go here, but
+                // dependencies that have better places to init can happen elsewhere.
+                Dependency.get(PluginDependencyProvider.class)
+                        .allowPluginDependency(ActivityStarter.class);
+            });
+        }
     }
 
     public <T extends Plugin> T getOneShotPlugin(Class<T> cls) {
@@ -268,11 +278,6 @@ public class PluginManager extends BroadcastReceiver {
         return mParentClassLoader;
     }
 
-    public Context getAllPluginContext(Context context) {
-        return new PluginContextWrapper(context,
-                new AllPluginClassLoader(context.getClassLoader()));
-    }
-
     public Context getContext(ApplicationInfo info, String pkg) throws NameNotFoundException {
         ClassLoader classLoader = getClassLoader(info.sourceDir, pkg);
         return new PluginContextWrapper(mContext.createApplicationContext(info, 0), classLoader);
@@ -289,26 +294,13 @@ public class PluginManager extends BroadcastReceiver {
         return info.action();
     }
 
-    private class AllPluginClassLoader extends ClassLoader {
-        public AllPluginClassLoader(ClassLoader classLoader) {
-            super(classLoader);
-        }
-
-        @Override
-        public Class<?> loadClass(String s) throws ClassNotFoundException {
-            try {
-                return super.loadClass(s);
-            } catch (ClassNotFoundException e) {
-                for (ClassLoader classLoader : mClassLoaders.values()) {
-                    try {
-                        return classLoader.loadClass(s);
-                    } catch (ClassNotFoundException e1) {
-                        // Will re-throw e if all fail.
-                    }
-                }
-                throw e;
+    public <T> boolean dependsOn(Plugin p, Class<T> cls) {
+        for (int i = 0; i < mPluginMap.size(); i++) {
+            if (mPluginMap.valueAt(i).dependsOn(p, cls)) {
+                return true;
             }
         }
+        return false;
     }
 
     @VisibleForTesting

@@ -32,7 +32,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.settingslib.RestrictedLockUtils;
 import com.android.systemui.Dependency;
-import com.android.systemui.ActivityStarter;
+import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.QS.DetailAdapter;
 import com.android.systemui.qs.QSTile.State;
 import com.android.systemui.qs.external.TileServices;
@@ -44,8 +44,6 @@ import java.util.Objects;
 import com.android.settingslib.Utils;
 
 import static com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
-
-import com.android.systemui.R;
 
 /**
  * Base quick-settings tile, extend this to create a new tile.
