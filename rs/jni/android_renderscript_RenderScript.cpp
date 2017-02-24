@@ -35,8 +35,8 @@
 #include "android_runtime/android_util_AssetManager.h"
 #include "android/graphics/GraphicsJNI.h"
 
-#include <rs.h>
 #include <rsEnv.h>
+#include <rsApiStubs.h>
 #include <gui/Surface.h>
 #include <gui/GLConsumer.h>
 #include <android_runtime/android_graphics_SurfaceTexture.h>
@@ -1134,7 +1134,7 @@ nElementGetNativeData(JNIEnv *_env, jobject _this, jlong con, jlong id, jintArra
     // we will pack mType; mKind; mNormalized; mVectorSize; NumSubElements
     assert(dataSize == 5);
 
-    uintptr_t elementData[5];
+    uint32_t elementData[5];
     rsaElementGetNativeData((RsContext)con, (RsElement)id, elementData, dataSize);
 
     for(jint i = 0; i < dataSize; i ++) {
@@ -1157,7 +1157,7 @@ nElementGetSubElements(JNIEnv *_env, jobject _this, jlong con, jlong id,
 
     uintptr_t *ids = (uintptr_t*)malloc(dataSize * sizeof(uintptr_t));
     const char **names = (const char **)malloc(dataSize * sizeof(const char *));
-    uint32_t *arraySizes = (uint32_t *)malloc(dataSize * sizeof(uint32_t));
+    size_t *arraySizes = (size_t *)malloc(dataSize * sizeof(size_t));
 
     rsaElementGetSubElements((RsContext)con, (RsElement)id, ids, names, arraySizes,
                              (uint32_t)dataSize);
