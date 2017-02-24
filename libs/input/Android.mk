@@ -28,7 +28,8 @@ LOCAL_SHARED_LIBRARIES := \
     libgui \
     libui \
     libinput \
-    libinputflinger
+    libinputflinger \
+    libnativewindow
 
 LOCAL_C_INCLUDES := \
     frameworks/native/services

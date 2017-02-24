@@ -11,12 +11,10 @@ LOCAL_SRC_FILES:= \
     asset_manager.cpp \
     choreographer.cpp \
     configuration.cpp \
-    hardware_buffer.cpp \
     hardware_buffer_jni.cpp \
     input.cpp \
     looper.cpp \
     native_activity.cpp \
-    native_window.cpp \
     native_window_jni.cpp \
     net.c \
     obb.cpp \
@@ -38,7 +36,10 @@ LOCAL_SHARED_LIBRARIES := \
 
 LOCAL_STATIC_LIBRARIES := \
     libstorage \
-    libarect
+    libarect \
+
+LOCAL_WHOLE_STATIC_LIBRARIES := \
+    libnativewindow
 
 LOCAL_C_INCLUDES += \
     frameworks/base/native/include \
@@ -46,7 +47,9 @@ LOCAL_C_INCLUDES += \
     bionic/libc/dns/include \
     system/netd/include \
 
-LOCAL_EXPORT_STATIC_LIBRARY_HEADERS := libarect
+LOCAL_EXPORT_STATIC_LIBRARY_HEADERS := \
+    libarect \
+    libnativewindow \
 
 LOCAL_MODULE := libandroid
 

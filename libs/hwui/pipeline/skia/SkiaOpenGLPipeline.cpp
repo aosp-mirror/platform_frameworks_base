@@ -26,7 +26,6 @@
 #include "SkiaProfileRenderer.h"
 #include "utils/TraceUtils.h"
 
-#include <android/native_window.h>
 #include <cutils/properties.h>
 #include <strings.h>
 
