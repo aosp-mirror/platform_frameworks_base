@@ -23,7 +23,9 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.le.ScanFilter;
+import android.net.wifi.ScanResult;
 import android.os.ParcelUuid;
+import android.os.Parcelable;
 import android.util.Log;
 
 import java.util.Arrays;
@@ -96,12 +98,47 @@ public class BluetoothDeviceFilterUtils {
         return result;
     }
 
-    private static void debugLogMatchResult(
-            boolean result, BluetoothDevice device, Object criteria) {
-        Log.i(LOG_TAG, getDeviceDisplayName(device) + (result ? " ~ " : " !~ ") + criteria);
+    static boolean matchesName(@Nullable Pattern namePattern, ScanResult device) {
+        boolean result;
+        if (namePattern == null)  {
+            result = true;
+        } else if (device == null) {
+            result = false;
+        } else {
+            final String name = device.SSID;
+            result = name != null && namePattern.matcher(name).find();
+        }
+        if (DEBUG) debugLogMatchResult(result, device, namePattern);
+        return result;
     }
 
-    public static String getDeviceDisplayName(@NonNull BluetoothDevice device) {
+    private static void debugLogMatchResult(
+            boolean result, BluetoothDevice device, Object criteria) {
+        Log.i(LOG_TAG, getDeviceDisplayNameInternal(device) + (result ? " ~ " : " !~ ") + criteria);
+    }
+
+    private static void debugLogMatchResult(
+            boolean result, ScanResult device, Object criteria) {
+        Log.i(LOG_TAG, getDeviceDisplayNameInternal(device) + (result ? " ~ " : " !~ ") + criteria);
+    }
+
+    public static String getDeviceDisplayNameInternal(@NonNull BluetoothDevice device) {
         return firstNotEmpty(device.getAliasName(), device.getAddress());
+    }
+
+    public static String getDeviceDisplayNameInternal(@NonNull ScanResult device) {
+        return firstNotEmpty(device.SSID, device.BSSID);
+    }
+
+    public static String getDeviceMacAddress(@NonNull Parcelable device) {
+        if (device instanceof BluetoothDevice) {
+            return ((BluetoothDevice) device).getAddress();
+        } else if (device instanceof ScanResult) {
+            return ((ScanResult) device).BSSID;
+        } else if (device instanceof android.bluetooth.le.ScanResult) {
+            return getDeviceMacAddress(((android.bluetooth.le.ScanResult) device).getDevice());
+        } else {
+            throw new IllegalArgumentException("Unknown device type: " + device);
+        }
     }
 }

@@ -237,6 +237,35 @@ public class ArrayUtils {
         return false;
     }
 
+    @NonNull
+    public static <T> List<T> filter(@Nullable List<?> list, Class<T> c) {
+        if (isEmpty(list)) return Collections.emptyList();
+        ArrayList<T> result = null;
+        for (int i = 0; i < list.size(); i++) {
+            final Object item = list.get(i);
+            if (c.isInstance(item)) {
+                result = add(result, (T) item);
+            }
+        }
+        return emptyIfNull(result);
+    }
+
+    public static <T> boolean any(@Nullable List<T> items,
+            java.util.function.Predicate<T> predicate) {
+        return find(items, predicate) != null;
+    }
+
+    @Nullable
+    public static <T> T find(@Nullable List<T> items,
+            java.util.function.Predicate<T> predicate) {
+        if (isEmpty(items)) return null;
+        for (int i = 0; i < items.size(); i++) {
+            final T item = items.get(i);
+            if (predicate.test(item)) return item;
+        }
+        return null;
+    }
+
     public static long total(@Nullable long[] array) {
         long total = 0;
         if (array != null) {
