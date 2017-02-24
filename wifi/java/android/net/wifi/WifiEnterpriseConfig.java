@@ -236,11 +236,11 @@ public class WifiEnterpriseConfig implements Parcelable {
         public static final int TTLS    = 2;
         /** EAP-Password */
         public static final int PWD     = 3;
-        /** EAP-Subscriber Identity Module */
+        /** EAP-Subscriber Identity Module [RFC-4186] */
         public static final int SIM     = 4;
-        /** EAP-Authentication and Key Agreement */
+        /** EAP-Authentication and Key Agreement [RFC-4187] */
         public static final int AKA     = 5;
-        /** EAP-Authentication and Key Agreement Prime */
+        /** EAP-Authentication and Key Agreement Prime [RFC-5448] */
         public static final int AKA_PRIME = 6;
         /** Hotspot 2.0 r2 OSEN */
         public static final int UNAUTH_TLS = 7;
@@ -263,11 +263,11 @@ public class WifiEnterpriseConfig implements Parcelable {
         public static final int MSCHAPV2    = 3;
         /** Generic Token Card */
         public static final int GTC         = 4;
-        /** EAP-Subscriber Identity Module */
+        /** EAP-Subscriber Identity Module [RFC-4186] */
         public static final int SIM         = 5;
-        /** EAP-Authentication and Key Agreement */
+        /** EAP-Authentication and Key Agreement [RFC-4187] */
         public static final int AKA         = 6;
-        /** EAP-Authentication and Key Agreement Prime */
+        /** EAP-Authentication and Key Agreement Prime [RFC-5448] */
         public static final int AKA_PRIME   = 7;
         private static final String AUTH_PREFIX = "auth=";
         private static final String AUTHEAP_PREFIX = "autheap=";
@@ -756,8 +756,8 @@ public class WifiEnterpriseConfig implements Parcelable {
      * key entry when the config is saved and removing the key entry when
      * the config is removed.
 
-     * @param privateKey
-     * @param clientCertificate
+     * @param privateKey a PrivateKey instance for the end certificate.
+     * @param clientCertificate an X509Certificate representing the end certificate.
      * @throws IllegalArgumentException for an invalid key or certificate.
      */
     public void setClientKeyEntry(PrivateKey privateKey, X509Certificate clientCertificate) {
@@ -775,9 +775,11 @@ public class WifiEnterpriseConfig implements Parcelable {
      * with this configuration.  The framework takes care of installing the
      * key entry when the config is saved and removing the key entry when
      * the config is removed.
-
-     * @param privateKey
-     * @param clientCertificateChain
+     *
+     * @param privateKey a PrivateKey instance for the end certificate.
+     * @param clientCertificateChain an array of X509Certificate instances which starts with
+     *         end certificate and continues with additional CA certificates necessary to
+     *         link the end certificate with some root certificate known by the authenticator.
      * @throws IllegalArgumentException for an invalid key or certificate.
      */
     public void setClientKeyEntryWithCertificateChain(PrivateKey privateKey,
@@ -835,7 +837,15 @@ public class WifiEnterpriseConfig implements Parcelable {
     }
 
     /**
-     * Get the complete client certificate chain
+     * Get the complete client certificate chain in the same order as it was last supplied.
+     *
+     * <p>If the chain was last supplied by a call to
+     * {@link #setClientKeyEntry(java.security.PrivateKey, java.security.cert.X509Certificate)}
+     * with a non-null * certificate instance, a single-element array containing the certificate
+     * will be * returned. If {@link #setClientKeyEntryWithCertificateChain(
+     * java.security.PrivateKey, java.security.cert.X509Certificate[])} was last called with a
+     * non-empty array, this array will be returned in the same order as it was supplied.
+     * Otherwise, {@code null} will be returned.
      *
      * @return X.509 client certificates
      */

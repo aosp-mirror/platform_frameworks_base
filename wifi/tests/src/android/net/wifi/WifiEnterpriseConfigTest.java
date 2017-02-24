@@ -89,11 +89,29 @@ public class WifiEnterpriseConfigTest {
     @Test
     public void testSetClientKeyEntryWithNull() {
         mEnterpriseConfig.setClientKeyEntry(null, null);
-        assertEquals(null, mEnterpriseConfig.getClientCertificateChain());
-        assertEquals(null, mEnterpriseConfig.getClientCertificate());
+        assertNull(mEnterpriseConfig.getClientCertificateChain());
+        assertNull(mEnterpriseConfig.getClientCertificate());
         mEnterpriseConfig.setClientKeyEntryWithCertificateChain(null, null);
-        assertEquals(null, mEnterpriseConfig.getClientCertificateChain());
-        assertEquals(null, mEnterpriseConfig.getClientCertificate());
+        assertNull(mEnterpriseConfig.getClientCertificateChain());
+        assertNull(mEnterpriseConfig.getClientCertificate());
+
+        // Setting the client certificate to null should clear the existing chain.
+        PrivateKey clientKey = FakeKeys.RSA_KEY1;
+        X509Certificate clientCert0 = FakeKeys.CLIENT_CERT;
+        X509Certificate clientCert1 = FakeKeys.CA_CERT1;
+        mEnterpriseConfig.setClientKeyEntry(clientKey, clientCert0);
+        assertNotNull(mEnterpriseConfig.getClientCertificate());
+        mEnterpriseConfig.setClientKeyEntry(null, null);
+        assertNull(mEnterpriseConfig.getClientCertificate());
+        assertNull(mEnterpriseConfig.getClientCertificateChain());
+
+        // Setting the chain to null should clear the existing chain.
+        X509Certificate[] clientChain = new X509Certificate[] {clientCert0, clientCert1};
+        mEnterpriseConfig.setClientKeyEntryWithCertificateChain(clientKey, clientChain);
+        assertNotNull(mEnterpriseConfig.getClientCertificateChain());
+        mEnterpriseConfig.setClientKeyEntryWithCertificateChain(null, null);
+        assertNull(mEnterpriseConfig.getClientCertificate());
+        assertNull(mEnterpriseConfig.getClientCertificateChain());
     }
 
     @Test
