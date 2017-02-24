@@ -184,10 +184,7 @@ public class Utils {
 
     @ColorInt
     public static int getColorError(Context context) {
-        TypedArray ta = context.obtainStyledAttributes(new int[]{android.R.attr.textColorError});
-        @ColorInt int colorError = ta.getColor(0, 0);
-        ta.recycle();
-        return colorError;
+        return getColorAttr(context, android.R.attr.colorError);
     }
 
     @ColorInt

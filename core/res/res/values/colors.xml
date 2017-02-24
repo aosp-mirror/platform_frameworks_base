@@ -75,8 +75,6 @@
     <drawable name="input_method_fullscreen_background">#fff9f9f9</drawable>
     <color name="input_method_navigation_guard">#ff000000</color>
 
-    <color name="system_error">#fff4511e</color> <!-- deep orange 600 -->
-
     <!-- For date picker widget -->
     <drawable name="selected_day_background">#ff0092f4</drawable>
 
@@ -88,7 +86,6 @@
     <color name="perms_dangerous_grp_color">#33b5e5</color>
     <color name="perms_dangerous_perm_color">#33b5e5</color>
     <color name="shadow">#cc222222</color>
-    <color name="perms_costs_money">#fff4511e</color>
 
     <!-- For search-related UIs -->
     <color name="search_url_text_normal">#7fa87f</color>
@@ -121,7 +118,6 @@
     <!-- LockPatternView -->
     <color name="lock_pattern_view_regular_color">#ffffffff</color>
     <color name="lock_pattern_view_success_color">#ffffffff</color>
-    <color name="lock_pattern_view_error_color">@color/system_error</color>
 
     <!-- FaceLock -->
     <color name="facelock_spotlight_mask">#CC000000</color>
@@ -156,7 +152,6 @@
     <color name="accessibility_focus_highlight">#bf39b500</color>
 
     <color name="system_notification_accent_color">#ff607D8B</color>
-    <color name="battery_saver_mode_color">#fff4511e</color><!-- deep orange 600 -->
 
     <!-- Default user icon colors -->
     <color name="user_icon_1">#ff00bcd4</color><!-- cyan 500 -->

@@ -33,6 +33,7 @@ import android.os.SystemClock;
 import android.util.Log;
 import android.view.View;
 
+import com.android.settingslib.Utils;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 
@@ -167,7 +168,7 @@ public class BarTransitions {
                 mSemiTransparent = context.getColor(
                         com.android.internal.R.color.system_bar_background_semi_transparent);
                 mTransparent = context.getColor(R.color.system_bar_background_transparent);
-                mWarning = context.getColor(com.android.internal.R.color.battery_saver_mode_color);
+                mWarning = Utils.getColorAttr(context, android.R.attr.colorError);
             }
             mGradient = context.getDrawable(gradientResourceId);
         }

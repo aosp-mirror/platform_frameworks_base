@@ -30,7 +30,7 @@
 
     <!-- Recents theme -->
     <style name="RecentsTheme.Wallpaper">
-        <item name="android:windowBackground">@color/transparent</item>
+        <item name="android:windowBackground">@*android:color/transparent</item>
         <item name="android:colorBackgroundCacheHint">@null</item>
         <item name="android:windowShowWallpaper">true</item>
         <item name="android:windowDisablePreview">true</item>
@@ -52,7 +52,7 @@
     <!-- Theme used for the activity that shows when the system forced an app to be resizable -->
     <style name="ForcedResizableTheme" parent="@android:style/Theme.Translucent.NoTitleBar">
         <item name="android:windowBackground">@drawable/forced_resizable_background</item>
-        <item name="android:statusBarColor">@color/transparent</item>
+        <item name="android:statusBarColor">@*android:color/transparent</item>
         <item name="android:windowAnimationStyle">@style/Animation.ForcedResizable</item>
     </style>
 
@@ -70,7 +70,7 @@
         <item name="android:windowContentOverlay">@null</item>
         <item name="android:windowBackground">@null</item>
         <item name="android:colorBackgroundCacheHint">@null</item>
-        <item name="android:statusBarColor">@color/transparent</item>
+        <item name="android:statusBarColor">@*android:color/transparent</item>
         <item name="android:windowAnimationStyle">@style/Animation.PipPhoneOverlayControl</item>
     </style>
 
@@ -164,7 +164,7 @@
 
     <style name="TextAppearance.QS.Warning">
         <item name="android:textSize">14sp</item>
-        <item name="android:textColor">@color/system_warning_color</item>
+        <item name="android:textColor">?android:attr/colorError</item>
     </style>
 
     <style name="TextAppearance.QS.DetailButton">
@@ -366,7 +366,7 @@
     </style>
 
     <style name="TextAppearance.NotificationGuts.SecondaryWarning">
-        <item name="android:textColor">@color/system_warning_color</item>
+        <item name="android:textColor">?android:attr/colorError</item>
         <item name="android:textSize">12sp</item>
     </style>
 

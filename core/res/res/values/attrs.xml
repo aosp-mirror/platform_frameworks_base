@@ -66,6 +66,9 @@
         <attr name="primaryContentAlpha" format="float" />
         <!-- The alpha applied to the foreground color to create the secondary text color. -->
         <attr name="secondaryContentAlpha" format="float" />
+        <!-- Color used for error states and things that need to be drawn to
+             the users attention.. -->
+        <attr name="colorError" format="reference|color" />
         <!-- Default background dim amount when a menu, dialog, or something similar pops up. -->
         <attr name="backgroundDimAmount" format="float" />
         <!-- Control whether dimming behind the window is enabled.  The default
@@ -134,9 +137,6 @@
 
         <!-- Color of list item text in alert dialogs. -->
         <attr name="textColorAlertDialogListItem" format="reference|color" />
-
-        <!-- Text color for errors. -->
-        <attr name="textColorError" format="reference|color" />
 
         <!-- Search widget more corpus result item background. -->
         <attr name="searchWidgetCorpusItemBackground" format="reference|color" />
@@ -8531,4 +8531,6 @@
         <attr name="reverseLayout" format="boolean" />
         <attr name="stackFromEnd" format="boolean" />
     </declare-styleable>
+
+    <attr name="lockPatternStyle" format="reference" />
 </resources>

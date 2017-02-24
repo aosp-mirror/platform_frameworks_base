@@ -42,6 +42,7 @@ import android.view.ViewGroup;
 import com.android.internal.app.IBatteryStats;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
+import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.phone.KeyguardIndicationTextView;
@@ -365,7 +366,7 @@ public class KeyguardIndicationController {
             if (!updateMonitor.isUnlockingWithFingerprintAllowed()) {
                 return;
             }
-            int errorColor = mContext.getResources().getColor(R.color.system_warning_color, null);
+            int errorColor = Utils.getColorError(mContext);
             if (mStatusBarKeyguardViewManager.isBouncerShowing()) {
                 mStatusBarKeyguardViewManager.showBouncerMessage(helpString, errorColor);
             } else if (updateMonitor.isDeviceInteractive()
@@ -388,7 +389,7 @@ public class KeyguardIndicationController {
                     || msgId == FingerprintManager.FINGERPRINT_ERROR_CANCELED) {
                 return;
             }
-            int errorColor = mContext.getResources().getColor(R.color.system_warning_color, null);
+            int errorColor = Utils.getColorError(mContext);
             if (mStatusBarKeyguardViewManager.isBouncerShowing()) {
                 // When swiping up right after receiving a fingerprint error, the bouncer calls
                 // authenticate leading to the same message being shown again on the bouncer.
@@ -411,8 +412,7 @@ public class KeyguardIndicationController {
         @Override
         public void onScreenTurnedOn() {
             if (mMessageToShowOnScreenOn != null) {
-                int errorColor = mContext.getResources().getColor(R.color.system_warning_color,
-                        null);
+                int errorColor = Utils.getColorError(mContext);
                 showTransientIndication(mMessageToShowOnScreenOn, errorColor);
                 // We want to keep this message around in case the screen was off
                 mHandler.removeMessages(MSG_HIDE_TRANSIENT);

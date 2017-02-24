@@ -278,7 +278,8 @@ public class LockPatternView extends View {
     public LockPatternView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
-        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.LockPatternView);
+        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.LockPatternView,
+                R.attr.lockPatternStyle, R.style.Widget_LockPatternView);
 
         final String aspect = a.getString(R.styleable.LockPatternView_aspect);
 
@@ -298,12 +299,9 @@ public class LockPatternView extends View {
         mPathPaint.setAntiAlias(true);
         mPathPaint.setDither(true);
 
-        mRegularColor = context.getColor(R.color.lock_pattern_view_regular_color);
-        mErrorColor = context.getColor(R.color.lock_pattern_view_error_color);
-        mSuccessColor = context.getColor(R.color.lock_pattern_view_success_color);
-        mRegularColor = a.getColor(R.styleable.LockPatternView_regularColor, mRegularColor);
-        mErrorColor = a.getColor(R.styleable.LockPatternView_errorColor, mErrorColor);
-        mSuccessColor = a.getColor(R.styleable.LockPatternView_successColor, mSuccessColor);
+        mRegularColor = a.getColor(R.styleable.LockPatternView_regularColor, 0);
+        mErrorColor = a.getColor(R.styleable.LockPatternView_errorColor, 0);
+        mSuccessColor = a.getColor(R.styleable.LockPatternView_successColor, 0);
 
         int pathColor = a.getColor(R.styleable.LockPatternView_pathColor, mRegularColor);
         mPathPaint.setColor(pathColor);
