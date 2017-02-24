@@ -44,6 +44,7 @@ import java.util.zip.ZipOutputStream;
 import libcore.io.Streams;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.app.ChooserActivity;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.FastPrintWriter;
@@ -943,8 +944,13 @@ public class BugreportProgressService extends Service {
     }
 
     static void sendShareIntent(Context context, Intent intent) {
-        context.startActivity(Intent.createChooser(intent,
-                context.getResources().getText(R.string.bugreport_intent_chooser_title)));
+        final Intent chooserIntent = Intent.createChooser(intent,
+                context.getResources().getText(R.string.bugreport_intent_chooser_title));
+
+        // Since we may be launched behind lockscreen, make sure that ChooserActivity doesn't finish
+        // itself in onStop.
+        chooserIntent.putExtra(ChooserActivity.EXTRA_PRIVATE_RETAIN_IN_ON_STOP, true);
+        context.startActivity(chooserIntent);
     }
 
     /**

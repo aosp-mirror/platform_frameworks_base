@@ -84,6 +84,14 @@ import java.util.List;
 public class ChooserActivity extends ResolverActivity {
     private static final String TAG = "ChooserActivity";
 
+    /**
+     * Boolean extra to change the following behavior: Normally, ChooserActivity finishes itself
+     * in onStop when launched in a new task. If this extra is set to true, we do not finish
+     * ourselves when onStop gets called.
+     */
+    public static final String EXTRA_PRIVATE_RETAIN_IN_ON_STOP
+            = "com.android.internal.app.ChooserActivity.EXTRA_PRIVATE_RETAIN_IN_ON_STOP";
+
     private static final boolean DEBUG = false;
 
     private static final int QUERY_TARGET_SERVICE_LIMIT = 5;
@@ -260,6 +268,7 @@ public class ChooserActivity extends ResolverActivity {
         }
 
         mPinnedSharedPrefs = getPinnedSharedPrefs(this);
+        setRetainInOnStop(intent.getBooleanExtra(EXTRA_PRIVATE_RETAIN_IN_ON_STOP, false));
         super.onCreate(savedInstanceState, target, title, defaultTitleRes, initialIntents,
                 null, false);
 

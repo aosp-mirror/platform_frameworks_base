@@ -116,6 +116,10 @@ public class ResolverActivity extends Activity {
     private Runnable mPostListReadyRunnable;
 
     private boolean mRegistered;
+
+    /** See {@link #setRetainInOnStop}. */
+    private boolean mRetainInOnStop;
+
     private final PackageMonitor mPackageMonitor = new PackageMonitor() {
         @Override public void onSomePackagesChanged() {
             mAdapter.handlePackagesChanged();
@@ -502,7 +506,7 @@ public class ResolverActivity extends Activity {
         }
         final Intent intent = getIntent();
         if ((intent.getFlags() & FLAG_ACTIVITY_NEW_TASK) != 0 && !isVoiceInteraction()
-                && !mResolvingHome) {
+                && !mResolvingHome && !mRetainInOnStop) {
             // This resolver is in the unusual situation where it has been
             // launched at the top of a new task.  We don't let it be added
             // to the recent tasks shown to the user, and we need to make sure
@@ -1026,6 +1030,14 @@ public class ResolverActivity extends Activity {
 
     private boolean useLayoutWithDefault() {
         return mSupportsAlwaysUseOption && mAdapter.hasFilteredItem();
+    }
+
+    /**
+     * If {@code retainInOnStop} is set to true, we will not finish ourselves when onStop gets
+     * called and we are launched in a new task.
+     */
+    protected void setRetainInOnStop(boolean retainInOnStop) {
+        mRetainInOnStop = retainInOnStop;
     }
 
     /**
