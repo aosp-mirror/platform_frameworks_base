@@ -607,6 +607,12 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
                     + "to use the PackageManager.INSTALL_GRANT_RUNTIME_PERMISSIONS flag");
         }
 
+        if ((params.installFlags & PackageManager.INSTALL_FORWARD_LOCK) != 0
+                || (params.installFlags & PackageManager.INSTALL_EXTERNAL) != 0) {
+            throw new IllegalArgumentException(
+                    "New installs into ASEC containers no longer supported");
+        }
+
         // Defensively resize giant app icons
         if (params.appIcon != null) {
             final ActivityManager am = (ActivityManager) mContext.getSystemService(
