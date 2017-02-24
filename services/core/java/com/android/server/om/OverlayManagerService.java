@@ -26,7 +26,6 @@ import static android.content.pm.PackageManager.SIGNATURE_MATCH;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
-import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -42,7 +41,6 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.Environment;
 import android.os.IBinder;
-import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
@@ -646,7 +644,7 @@ public final class OverlayManagerService extends SystemService {
                     Slog.d(TAG, String.format("send broadcast %s", intent));
                 }
                 try {
-                    ActivityManagerNative.getDefault().broadcastIntent(null, intent, null, null, 0,
+                    ActivityManager.getService().broadcastIntent(null, intent, null, null, 0,
                             null, null, null, android.app.AppOpsManager.OP_NONE, null, false, false,
                             userId);
                 } catch (RemoteException e) {
@@ -664,7 +662,38 @@ public final class OverlayManagerService extends SystemService {
     }
 
     private void updateAssets(final int userId, List<String> targetPackageNames) {
-        // TODO: implement when we integrate OMS properly
+        final PackageManagerInternal pm = LocalServices.getService(PackageManagerInternal.class);
+        final boolean updateFrameworkRes = targetPackageNames.contains("android");
+        if (updateFrameworkRes) {
+            targetPackageNames = pm.getTargetPackageNames(userId);
+        }
+
+        final Map<String, List<String>> pendingChanges = new ArrayMap<>(targetPackageNames.size());
+        synchronized (mLock) {
+            final int N = targetPackageNames.size();
+            for (int i = 0; i < N; i++) {
+                final String targetPackageName = targetPackageNames.get(i);
+                pendingChanges.put(targetPackageName,
+                        mImpl.getEnabledOverlayPackageNames(targetPackageName, userId));
+            }
+        }
+
+        final int N = targetPackageNames.size();
+        for (int i = 0; i < N; i++) {
+            final String targetPackageName = targetPackageNames.get(i);
+            if (!pm.setEnabledOverlayPackages(
+                        userId, targetPackageName, pendingChanges.get(targetPackageName))) {
+                Slog.e(TAG, String.format("Failed to change enabled overlays for %s user %d",
+                            targetPackageName, userId));
+            }
+        }
+
+        final IActivityManager am = ActivityManager.getService();
+        try {
+            am.scheduleApplicationInfoChanged(targetPackageNames, userId);
+        } catch (RemoteException e) {
+            // Intentionally left empty.
+        }
     }
 
     private void schedulePersistSettings() {

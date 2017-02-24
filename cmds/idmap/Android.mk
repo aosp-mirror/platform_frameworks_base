@@ -15,7 +15,7 @@
 LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
-LOCAL_SRC_FILES := idmap.cpp create.cpp scan.cpp inspect.cpp
+LOCAL_SRC_FILES := idmap.cpp create.cpp inspect.cpp
 
 LOCAL_SHARED_LIBRARIES := liblog libutils libandroidfw
 
