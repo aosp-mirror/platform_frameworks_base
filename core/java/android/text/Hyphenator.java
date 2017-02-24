@@ -189,7 +189,9 @@ public class Hyphenator {
         // TODO: replace this with a discovery-based method that looks into /system/usr/hyphen-data
         String[] availableLanguages = {
             "as",
+            "bg",
             "bn",
+            "cu",
             "cy",
             "da",
             "de-1901", "de-1996", "de-CH-1901",
