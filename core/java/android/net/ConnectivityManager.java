@@ -2930,15 +2930,6 @@ public class ConnectivityManager {
      * @hide
      */
     public void requestNetwork(NetworkRequest request, NetworkCallback networkCallback,
-            int timeoutMs, int legacyType) {
-        requestNetwork(request, networkCallback, timeoutMs, legacyType, getDefaultHandler());
-    }
-
-    /**
-     * Helper function to request a network with a particular legacy type.
-     * @hide
-     */
-    private void requestNetwork(NetworkRequest request, NetworkCallback networkCallback,
             int timeoutMs, int legacyType, Handler handler) {
         CallbackHandler cbHandler = new CallbackHandler(handler);
         NetworkCapabilities nc = request.networkCapabilities;
@@ -3040,7 +3031,7 @@ public class ConnectivityManager {
     public void requestNetwork(NetworkRequest request, NetworkCallback networkCallback,
             int timeoutMs) {
         int legacyType = inferLegacyTypeForNetworkCapabilities(request.networkCapabilities);
-        requestNetwork(request, networkCallback, timeoutMs, legacyType);
+        requestNetwork(request, networkCallback, timeoutMs, legacyType, getDefaultHandler());
     }
 
 
