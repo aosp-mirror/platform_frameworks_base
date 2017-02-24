@@ -3,61 +3,62 @@ package android.net;
 import static android.net.NetworkRecommendationProvider.EXTRA_RECOMMENDATION_RESULT;
 import static android.net.NetworkRecommendationProvider.EXTRA_SEQUENCE;
 
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertSame;
+import static junit.framework.Assert.fail;
+import static junit.framework.TestCase.assertEquals;
+
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+
+import android.Manifest.permission;
 import android.content.Context;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.IRemoteCallback;
-import android.test.InstrumentationTestCase;
-import android.test.suitebuilder.annotation.MediumTest;
-import android.test.suitebuilder.annotation.SmallTest;
+import android.support.test.runner.AndroidJUnit4;
 
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 /**
  * Unit test for the {@link NetworkRecommendationProvider}.
  */
-public class NetworkRecommendationProviderTest extends InstrumentationTestCase {
+@RunWith(AndroidJUnit4.class)
+public class NetworkRecommendationProviderTest {
     @Mock private IRemoteCallback mMockRemoteCallback;
+    @Mock private Context mContext;
     private NetworkRecProvider mRecProvider;
-    private Handler mHandler;
     private INetworkRecommendationProvider mStub;
     private CountDownLatch mRecRequestLatch;
     private CountDownLatch mScoreRequestLatch;
     private NetworkKey[] mTestNetworkKeys;
 
-    @Override
+    @Before
     public void setUp() throws Exception {
-        super.setUp();
-
-        // Configuration needed to make mockito/dexcache work.
-        final Context context = getInstrumentation().getTargetContext();
-        System.setProperty("dexmaker.dexcache",
-                context.getCacheDir().getPath());
-        ClassLoader newClassLoader = getInstrumentation().getClass().getClassLoader();
-        Thread.currentThread().setContextClassLoader(newClassLoader);
-
         MockitoAnnotations.initMocks(this);
 
-        HandlerThread thread = new HandlerThread("NetworkRecommendationProviderTest");
-        thread.start();
+        Executor executor = Executors.newSingleThreadExecutor();
         mRecRequestLatch = new CountDownLatch(1);
         mScoreRequestLatch = new CountDownLatch(1);
-        mHandler = new Handler(thread.getLooper());
-        mRecProvider = new NetworkRecProvider(mHandler, mRecRequestLatch, mScoreRequestLatch);
+        mRecProvider = new NetworkRecProvider(mContext, executor, mRecRequestLatch,
+                mScoreRequestLatch);
         mStub = INetworkRecommendationProvider.Stub.asInterface(mRecProvider.getBinder());
         mTestNetworkKeys = new NetworkKey[2];
         mTestNetworkKeys[0] = new NetworkKey(new WifiKey("\"ssid_01\"", "00:00:00:00:00:11"));
         mTestNetworkKeys[1] = new NetworkKey(new WifiKey("\"ssid_02\"", "00:00:00:00:00:22"));
     }
 
-    @MediumTest
+    @Test
     public void testRecommendationRequestReceived() throws Exception {
         final RecommendationRequest request = new RecommendationRequest.Builder().build();
         final int sequence = 100;
@@ -71,7 +72,23 @@ public class NetworkRecommendationProviderTest extends InstrumentationTestCase {
         assertEquals(expectedResultCallback, mRecProvider.mCapturedCallback);
     }
 
-    @SmallTest
+    @Test
+    public void testRecommendationRequest_permissionsEnforced() throws Exception {
+        final RecommendationRequest request = new RecommendationRequest.Builder().build();
+        final int sequence = 100;
+        Mockito.doThrow(new SecurityException())
+                .when(mContext)
+                .enforceCallingOrSelfPermission(eq(permission.REQUEST_NETWORK_SCORES), anyString());
+
+        try {
+            mStub.requestRecommendation(request, mMockRemoteCallback, sequence);
+            fail("SecurityException expected.");
+        } catch (SecurityException e) {
+            // expected
+        }
+    }
+
+    @Test
     public void testResultCallbackOnResult() throws Exception {
         final int sequence = 100;
         final NetworkRecommendationProvider.ResultCallback callback =
@@ -87,7 +104,7 @@ public class NetworkRecommendationProviderTest extends InstrumentationTestCase {
         assertSame(result, capturedBundle.getParcelable(EXTRA_RECOMMENDATION_RESULT));
     }
 
-    @SmallTest
+    @Test
     public void testResultCallbackOnResult_runTwice_throwsException() throws Exception {
         final int sequence = 100;
         final NetworkRecommendationProvider.ResultCallback callback =
@@ -104,7 +121,7 @@ public class NetworkRecommendationProviderTest extends InstrumentationTestCase {
         }
     }
 
-    @MediumTest
+    @Test
     public void testScoreRequestReceived() throws Exception {
         mStub.requestScores(mTestNetworkKeys);
 
@@ -114,7 +131,7 @@ public class NetworkRecommendationProviderTest extends InstrumentationTestCase {
         assertSame(mTestNetworkKeys, mRecProvider.mCapturedNetworks);
     }
 
-    @MediumTest
+    @Test
     public void testScoreRequest_nullInput() throws Exception {
         mStub.requestScores(null);
 
@@ -122,12 +139,26 @@ public class NetworkRecommendationProviderTest extends InstrumentationTestCase {
         assertFalse(mScoreRequestLatch.await(200, TimeUnit.MILLISECONDS));
     }
 
-    @MediumTest
+    @Test
     public void testScoreRequest_emptyInput() throws Exception {
         mStub.requestScores(new NetworkKey[0]);
 
         // onRequestScores() should never be called
         assertFalse(mScoreRequestLatch.await(200, TimeUnit.MILLISECONDS));
+    }
+
+    @Test
+    public void testScoreRequest_permissionsEnforced() throws Exception {
+        Mockito.doThrow(new SecurityException())
+                .when(mContext)
+                .enforceCallingOrSelfPermission(eq(permission.REQUEST_NETWORK_SCORES), anyString());
+
+        try {
+            mStub.requestScores(mTestNetworkKeys);
+            fail("SecurityException expected.");
+        } catch (SecurityException e) {
+            // expected
+        }
     }
 
     private static class NetworkRecProvider extends NetworkRecommendationProvider {
@@ -137,9 +168,9 @@ public class NetworkRecommendationProviderTest extends InstrumentationTestCase {
         ResultCallback mCapturedCallback;
         NetworkKey[] mCapturedNetworks;
 
-        NetworkRecProvider(Handler handler, CountDownLatch recRequestLatch,
+        NetworkRecProvider(Context context, Executor executor, CountDownLatch recRequestLatch,
             CountDownLatch networkRequestLatch) {
-            super(handler);
+            super(context, executor);
             mRecRequestLatch = recRequestLatch;
             mScoreRequestLatch = networkRequestLatch;
         }
