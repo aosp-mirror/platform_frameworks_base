@@ -79,6 +79,7 @@ import com.android.internal.annotations.GuardedBy;
  */
 public class AudioTrack extends PlayerBase
                         implements AudioRouting
+                                 , VolumeAutomation
 {
     //---------------------------------------------------------
     // Constants
@@ -1751,6 +1752,12 @@ public class AudioTrack extends PlayerBase
     @Override
     /* package */ @Nullable VolumeShaper.State playerGetVolumeShaperState(int id) {
         return native_getVolumeShaperState(id);
+    }
+
+    @Override
+    public @NonNull VolumeShaper createVolumeShaper(
+            @NonNull VolumeShaper.Configuration configuration) {
+        return new VolumeShaper(configuration, this);
     }
 
     /**

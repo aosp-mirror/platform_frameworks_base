@@ -23,43 +23,21 @@ import android.os.Parcelable;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.AutoCloseable;
 import java.lang.ref.WeakReference;
 import java.util.Objects;
 
 /**
- * TODO: remove @hide
  * The {@code VolumeShaper} class is used to automatically control audio volume during media
- * playback, allowing for simple implementation of transition effects and ducking.
+ * playback, allowing simple implementation of transition effects and ducking.
  *
  * The {@link VolumeShaper} appears as an additional scaling on the audio output,
- * and can be used independently of track or stream volume controls.
+ * and adjusts independently of track or stream volume controls.
  */
-public final class VolumeShaper {
+public final class VolumeShaper implements AutoCloseable {
     /* member variables */
     private int mId;
     private final WeakReference<PlayerBase> mWeakPlayerBase;
-
-    /**
-     * Constructs a {@code VolumeShaper} from a {@link VolumeShaper.Configuration} and an
-     * {@link AudioTrack}.
-     *
-     * @param configuration
-     * @param audioTrack
-     */
-    public VolumeShaper(@NonNull Configuration configuration, @NonNull AudioTrack audioTrack) {
-        this(configuration, (PlayerBase)audioTrack);
-    }
-
-    /**
-     * Constructs a {@code VolumeShaper} from a {@link VolumeShaper.Configuration} and a
-     * {@link MediaPlayer}.
-     *
-     * @param configuration
-     * @param mediaPlayer
-     */
-    public VolumeShaper(@NonNull Configuration configuration, @NonNull MediaPlayer mediaPlayer) {
-        this(configuration, (PlayerBase)mediaPlayer);
-    }
 
     /* package */ VolumeShaper(
             @NonNull Configuration configuration, @NonNull PlayerBase playerBase) {
@@ -73,7 +51,7 @@ public final class VolumeShaper {
 
     /**
      * Applies the {@link VolumeShaper.Operation} to the {@code VolumeShaper}.
-     * @param operation
+     * @param operation the {@code operation} to apply.
      */
     public void apply(@NonNull Operation operation) {
         /* void */ applyPlayer(new VolumeShaper.Configuration(mId), operation);
@@ -81,17 +59,16 @@ public final class VolumeShaper {
 
     /**
      * Replaces the current {@code VolumeShaper}
-     * configuration with a new configuration.
+     * {@code configuration} with a new {@code configuration}.
      *
-     * This can be used to dynamically change the {@code VolumeShaper}
-     * configuration by joining several
-     * {@code VolumeShaper} configurations together.
-     * This is useful if the user changes the volume while the
-     * {@code VolumeShaper} is in effect.
+     * This allows the user to change the volume shape
+     * while the existing {@code VolumeShaper} is in effect.
      *
-     * @param configuration
-     * @param operation
-     * @param join
+     * @param configuration the new {@code configuration} to use.
+     * @param operation the operation to apply to the {@code VolumeShaper}
+     * @param join if true, match the start volume of the
+     *             new {@code configuration} to the current volume of the existing
+     *             {@code VolumeShaper}, to avoid discontinuity.
      */
     public void replace(
             @NonNull Configuration configuration, @NonNull Operation operation, boolean join) {
@@ -110,10 +87,11 @@ public final class VolumeShaper {
     }
 
     /**
-     * Releases the {@code VolumeShaper}. Any volume scale due to the
+     * Releases the {@code VolumeShaper} object; any volume scale due to the
      * {@code VolumeShaper} is removed.
      */
-    public void release() {
+    @Override
+    public void close() {
         try {
             /* void */ applyPlayer(
                     new VolumeShaper.Configuration(mId),
@@ -128,7 +106,7 @@ public final class VolumeShaper {
 
     @Override
     protected void finalize() {
-        release(); // ensure we remove the native volume shaper
+        close(); // ensure we remove the native volume shaper
     }
 
     /**
@@ -188,11 +166,17 @@ public final class VolumeShaper {
     }
 
     /**
-     * The {@code VolumeShaper.Configuration} class contains curve shape
-     * and parameter information for constructing a {@code VolumeShaper}.
-     * This curve shape and parameter information is specified
-     * on {@code VolumeShaper} creation
-     * and may be replaced through {@link VolumeShaper#replace}.
+     * The {@code VolumeShaper.Configuration} class contains curve
+     * and duration information.
+     * It is constructed by the {@link VolumeShaper.Configuration.Builder}.
+     * <p>
+     * A {@code VolumeShaper.Configuration} is used by
+     * {@link VolumeAutomation#createVolumeShaper(Configuration)
+     * VolumeAutomation#createVolumeShaper(Configuration)} to create
+     * a {@code VolumeShaper} and
+     * by {@link VolumeShaper#replace(Configuration, Operation, boolean)
+     * VolumeShaper#replace(Configuration, Operation, boolean)}
+     * to replace an existing {@code configuration}.
      */
     public static final class Configuration implements Parcelable {
         private static final int MAXIMUM_CURVE_POINTS = 16;
@@ -260,9 +244,9 @@ public final class VolumeShaper {
 
         /**
          * Cubic interpolated volume curve
-         * with local monotonicity preservation.
+         * that preserves local monotonicity.
          * So long as the control points are locally monotonic,
-         * the curve interpolation will also be locally monotonic.
+         * the curve interpolation between those points are monotonic.
          * This is useful for cubic spline interpolated
          * volume ramps and ducks.
          */
@@ -278,6 +262,7 @@ public final class VolumeShaper {
         public @interface OptionFlag {}
 
         /**
+         * @hide
          * Use a dB full scale volume range for the volume curve.
          *<p>
          * The volume scale is typically from 0.f to 1.f on a linear scale;
@@ -287,6 +272,7 @@ public final class VolumeShaper {
         public static final int OPTION_FLAG_VOLUME_IN_DBFS = (1 << 0);
 
         /**
+         * @hide
          * Use clock time instead of media time.
          *<p>
          * The default implementation of {@code VolumeShaper} is to apply
@@ -304,7 +290,8 @@ public final class VolumeShaper {
 
         /**
          * A one second linear ramp from silence to full volume.
-         * Use {@link VolumeShaper.Builder#reflectTimes()} to generate
+         * Use {@link VolumeShaper.Builder#reflectTimes()}
+         * or {@link VolumeShaper.Builder#invertVolumes()} to generate
          * the matching linear duck.
          */
         public static final Configuration LINEAR_RAMP = new VolumeShaper.Configuration.Builder()
@@ -316,7 +303,8 @@ public final class VolumeShaper {
 
         /**
          * A one second cubic ramp from silence to full volume.
-         * Use {@link VolumeShaper.Builder#reflectTimes()} to generate
+         * Use {@link VolumeShaper.Builder#reflectTimes()}
+         * or {@link VolumeShaper.Builder#invertVolumes()} to generate
          * the matching cubic duck.
          */
         public static final Configuration CUBIC_RAMP = new VolumeShaper.Configuration.Builder()
@@ -327,17 +315,19 @@ public final class VolumeShaper {
                 .build();
 
         /**
-         * A one second sine curve for energy preserving cross fades.
+         * A one second sine curve
+         * from silence to full volume for energy preserving cross fades.
          * Use {@link VolumeShaper.Builder#reflectTimes()} to generate
          * the matching cosine duck.
          */
         public static final Configuration SINE_RAMP;
 
         /**
-         * A one second sine-squared s-curve ramp.
+         * A one second sine-squared s-curve ramp
+         * from silence to full volume.
          * Use {@link VolumeShaper.Builder#reflectTimes()}
          * or {@link VolumeShaper.Builder#invertVolumes()} to generate
-         * the matching s-curve duck.
+         * the matching sine-squared s-curve duck.
          */
         public static final Configuration SCURVE_RAMP;
 
@@ -508,6 +498,7 @@ public final class VolumeShaper {
         }
 
         /**
+         * @hide
          * Returns the {@code VolumeShaper} type.
          */
         public @Type int getType() {
@@ -530,6 +521,7 @@ public final class VolumeShaper {
         }
 
         /**
+         * @hide
          * Returns the option flags
          */
         public @OptionFlag int getOptionFlags() {
@@ -541,7 +533,7 @@ public final class VolumeShaper {
         }
 
         /**
-         * Returns the duration of the effect in milliseconds.
+         * Returns the duration of the volume shape in milliseconds.
          */
         public double getDurationMs() {
             return mDurationMs;
@@ -663,21 +655,22 @@ public final class VolumeShaper {
             private int mType = TYPE_SCALE;
             private int mId = -1; // invalid
             private int mInterpolatorType = INTERPOLATOR_TYPE_CUBIC;
-            private int mOptionFlags = 0;
+            private int mOptionFlags = OPTION_FLAG_CLOCK_TIME;
             private double mDurationMs = 1000.;
             private float[] mTimes = null;
             private float[] mVolumes = null;
 
             /**
-             * Constructs a new Builder with the defaults.
+             * Constructs a new {@code Builder} with the defaults.
              */
             public Builder() {
             }
 
             /**
-             * Constructs a new Builder from a given {@code VolumeShaper.Configuration}
+             * Constructs a new {@code Builder} with settings
+             * copied from a given {@code VolumeShaper.Configuration}.
              * @param configuration prototypical configuration
-             *        which will be reused in the new Builder.
+             *        which will be reused in the new {@code Builder}.
              */
             public Builder(@NonNull Configuration configuration) {
                 mType = configuration.getType();
@@ -691,8 +684,6 @@ public final class VolumeShaper {
 
             /**
              * @hide
-             * TODO make SystemApi
-             *
              * Set the id for system defined shapers.
              * @param id
              * @return
@@ -708,7 +699,11 @@ public final class VolumeShaper {
              * If omitted the interplator type is {@link #INTERPOLATOR_TYPE_CUBIC}.
              *
              * @param interpolatorType method of interpolation used for the volume curve.
-             * @return the same Builder instance.
+             *        One of {@link #INTERPOLATOR_TYPE_STEP},
+             *        {@link #INTERPOLATOR_TYPE_LINEAR},
+             *        {@link #INTERPOLATOR_TYPE_CUBIC},
+             *        {@link #INTERPOLATOR_TYPE_CUBIC_MONOTONIC}.
+             * @return the same {@code Builder} instance.
              * @throws IllegalArgumentException if {@code interpolatorType} is not valid.
              */
             public @NonNull Builder setInterpolatorType(@InterpolatorType int interpolatorType) {
@@ -727,6 +722,7 @@ public final class VolumeShaper {
             }
 
             /**
+             * @hide
              * Sets the optional flags
              *
              * If omitted, flags are 0. If {@link #OPTION_FLAG_VOLUME_IN_DBFS} has
@@ -734,7 +730,7 @@ public final class VolumeShaper {
              * volume domain has changed.
              *
              * @param optionFlags new value to replace the old {@code optionFlags}.
-             * @return the same Builder instance.
+             * @return the same {@code Builder} instance.
              * @throws IllegalArgumentException if flag is not recognized.
              */
             public @NonNull Builder setOptionFlags(@OptionFlag int optionFlags) {
@@ -751,8 +747,9 @@ public final class VolumeShaper {
              * If omitted, the default duration is 1 second.
              *
              * @param durationMs
-             * @return the same Builder instance.
-             * @throws IllegalArgumentException if duration is not positive.
+             * @return the same {@code Builder} instance.
+             * @throws IllegalArgumentException if {@code durationMs}
+             *         is not strictly positive.
              */
             public @NonNull Builder setDurationMs(double durationMs) {
                 if (durationMs <= 0.) {
@@ -774,19 +771,23 @@ public final class VolumeShaper {
              * and no greater than {@link VolumeShaper.Configuration#getMaximumCurvePoints()}.
              * <p>
              * The volume curve is normalized as follows:
-             * (1) time (x) coordinates should be monotonically increasing, from 0.f to 1.f;
-             * (2) volume (y) coordinates must be within 0.f to 1.f for linear and be non-positive
-             *     for log scaling.
+             * time (x) coordinates should be monotonically increasing, from 0.f to 1.f;
+             * volume (y) coordinates must be within 0.f to 1.f.
              * <p>
-             * The time scale is set by {@link #setDurationMs} in seconds.
+             * The time scale is set by {@link #setDurationMs}.
              * <p>
              * @param times an array of float values representing
              *        the time line of the volume curve.
              * @param volumes an array of float values representing
              *        the amplitude of the volume curve.
-             * @return the same Builder instance.
+             * @return the same {@code Builder} instance.
              * @throws IllegalArgumentException if {@code times} or {@code volumes} is invalid.
              */
+
+            /* Note: volume (y) coordinates must be non-positive for log scaling,
+             * if {@link VolumeShaper.Configuration#OPTION_FLAG_VOLUME_IN_DBFS} is set.
+             */
+
             public @NonNull Builder setCurve(@NonNull float[] times, @NonNull float[] volumes) {
                 String error = checkCurveForErrors(
                         times, volumes, (mOptionFlags & OPTION_FLAG_VOLUME_IN_DBFS) != 0);
@@ -803,7 +804,7 @@ public final class VolumeShaper {
              * the shaper changes volume from the end
              * to the start.
              *
-             * @return the same Builder instance.
+             * @return the same {@code Builder} instance.
              */
             public @NonNull Builder reflectTimes() {
                 int i;
@@ -822,7 +823,7 @@ public final class VolumeShaper {
              * Inverts the volume curve so that the max volume
              * becomes the min volume and vice versa.
              *
-             * @return the same Builder instance.
+             * @return the same {@code Builder} instance.
              */
             public @NonNull Builder invertVolumes() {
                 if (mVolumes.length >= 2) {
@@ -850,8 +851,9 @@ public final class VolumeShaper {
              * Keeps the start volume the same.
              * This works best if the volume curve is monotonic.
              *
-             * @return the same Builder instance.
-             * @throws IllegalArgumentException if volume is not valid.
+             * @param volume the target end volume to use.
+             * @return the same {@code Builder} instance.
+             * @throws IllegalArgumentException if {@code volume} is not valid.
              */
             public @NonNull Builder scaleToEndVolume(float volume) {
                 final boolean log = (mOptionFlags & OPTION_FLAG_VOLUME_IN_DBFS) != 0;
@@ -881,8 +883,9 @@ public final class VolumeShaper {
              * Keeps the end volume the same.
              * This works best if the volume curve is monotonic.
              *
-             * @return the same Builder instance.
-             * @throws IllegalArgumentException if volume is not valid.
+             * @param volume the target start volume to use.
+             * @return the same {@code Builder} instance.
+             * @throws IllegalArgumentException if {@code volume} is not valid.
              */
             public @NonNull Builder scaleToStartVolume(float volume) {
                 final boolean log = (mOptionFlags & OPTION_FLAG_VOLUME_IN_DBFS) != 0;
@@ -929,6 +932,8 @@ public final class VolumeShaper {
     public static final class Operation implements Parcelable {
         /**
          * Forward playback from current volume time position.
+         * At the end of the {@code VolumeShaper} curve,
+         * the last volume value persists.
          */
         public static final Operation PLAY =
                 new VolumeShaper.Operation.Builder()
@@ -936,6 +941,8 @@ public final class VolumeShaper {
 
         /**
          * Reverse playback from current volume time position.
+         * When the position reaches the start of the {@code VolumeShaper} curve,
+         * the first volume value persists.
          */
         public static final Operation REVERSE =
                 new VolumeShaper.Operation.Builder()
@@ -1084,15 +1091,13 @@ public final class VolumeShaper {
             }
 
             /**
-             * Replaces the previous {@code VolumeShaper}.
+             * Replaces the previous {@code VolumeShaper} specified by id.
              * It has no other effect if the {@code VolumeShaper} is
-             * already expired. If the replaceId is the same as the id associated with
-             * the {@code VolumeShaper} in a {@code setVolumeShaper()} call,
-             * an error is returned.
-             * @param handle is a previous volumeShaper {@code VolumeShaper}.
-             * @param join the start to match the current volume of the previous
-             * shaper.
-             * @return the same Builder instance.
+             * already expired.
+             * @param id the id of the previous {@code VolumeShaper}.
+             * @param join if true, match the volume of the previous
+             * shaper to the start volume of the new {@code VolumeShaper}.
+             * @return the same {@code Builder} instance.
              */
             public @NonNull Builder replace(int id, boolean join) {
                 mReplaceId = id;
@@ -1106,7 +1111,7 @@ public final class VolumeShaper {
 
             /**
              * Defers all operations.
-             * @return the same Builder instance.
+             * @return the same {@code Builder} instance.
              */
             public @NonNull Builder defer() {
                 mFlags |= FLAG_DEFER;
@@ -1116,7 +1121,7 @@ public final class VolumeShaper {
             /**
              * Terminates the VolumeShaper.
              * Do not call directly, use {@link VolumeShaper#release()}.
-             * @return the same Builder instance.
+             * @return the same {@code Builder} instance.
              */
             public @NonNull Builder terminate() {
                 mFlags |= FLAG_TERMINATE;
@@ -1125,7 +1130,7 @@ public final class VolumeShaper {
 
             /**
              * Reverses direction.
-             * @return the same Builder instance.
+             * @return the same {@code Builder} instance.
              */
             public @NonNull Builder reverse() {
                 mFlags ^= FLAG_REVERSE;
@@ -1136,7 +1141,7 @@ public final class VolumeShaper {
              * Use the id specified in the configuration, creating
              * VolumeShaper as needed; the configuration should be
              * TYPE_SCALE.
-             * @return the same Builder instance.
+             * @return the same {@code Builder} instance.
              */
             public @NonNull Builder createIfNeeded() {
                 mFlags |= FLAG_CREATE_IF_NEEDED;
@@ -1148,7 +1153,7 @@ public final class VolumeShaper {
              * other builder methods.
              *
              * @param flags new value for {@code flags}, consisting of ORed flags.
-             * @return the same Builder instance.
+             * @return the same {@code Builder} instance.
              */
             private @NonNull Builder setFlags(@Flag int flags) {
                 if ((flags & ~FLAG_PUBLIC_ALL) != 0) {
