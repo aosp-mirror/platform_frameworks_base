@@ -19,9 +19,10 @@ package com.android.systemui.statusbar.phone;
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_CLICK;
 import static android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 
+import static com.android.systemui.tuner.LockscreenFragment.LOCKSCREEN_LEFT_BUTTON;
 import static com.android.systemui.tuner.LockscreenFragment.LOCKSCREEN_LEFT_UNLOCK;
+import static com.android.systemui.tuner.LockscreenFragment.LOCKSCREEN_RIGHT_BUTTON;
 import static com.android.systemui.tuner.LockscreenFragment.LOCKSCREEN_RIGHT_UNLOCK;
-import static com.android.systemui.tuner.LockscreenFragment.getIntentButton;
 
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
@@ -79,9 +80,12 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.KeyguardAffordanceView;
 import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.policy.AccessibilityController;
+import com.android.systemui.statusbar.policy.ExtensionController;
+import com.android.systemui.statusbar.policy.ExtensionController.Extension;
 import com.android.systemui.statusbar.policy.FlashlightController;
 import com.android.systemui.statusbar.policy.PreviewInflater;
 import com.android.systemui.tuner.LockscreenFragment;
+import com.android.systemui.tuner.LockscreenFragment.LockButtonFactory;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
 
@@ -91,8 +95,7 @@ import com.android.systemui.tuner.TunerService.Tunable;
  */
 public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickListener,
         UnlockMethodCache.OnUnlockMethodChangedListener,
-        AccessibilityController.AccessibilityStateChangedCallback, View.OnLongClickListener,
-        Tunable {
+        AccessibilityController.AccessibilityStateChangedCallback, View.OnLongClickListener {
 
     final static String TAG = "StatusBar/KeyguardBottomAreaView";
 
@@ -159,12 +162,10 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     private Drawable mLeftAssistIcon;
 
     private IntentButton mRightButton = new DefaultRightButton();
-    private IntentButton mRightDefault = mRightButton;
-    private IntentButton mRightPlugin;
+    private Extension<IntentButton> mRightExtension;
     private String mRightButtonStr;
     private IntentButton mLeftButton = new DefaultLeftButton();
-    private IntentButton mLeftDefault = mLeftButton;
-    private IntentButton mLeftPlugin;
+    private Extension<IntentButton> mLeftExtension;
     private String mLeftButtonStr;
     private LockscreenGestureLogger mLockscreenGestureLogger = new LockscreenGestureLogger();
     private boolean mDozing;
@@ -261,21 +262,28 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         mAccessibilityController.addStateChangedCallback(this);
-        Dependency.get(PluginManager.class).addPluginListener(RIGHT_BUTTON_PLUGIN,
-                mRightListener, IntentButtonProvider.class, false /* Only allow one */);
-        Dependency.get(PluginManager.class).addPluginListener(LEFT_BUTTON_PLUGIN,
-                mLeftListener, IntentButtonProvider.class, false /* Only allow one */);
-        Dependency.get(TunerService.class).addTunable(this, LockscreenFragment.LOCKSCREEN_LEFT_BUTTON,
-                LockscreenFragment.LOCKSCREEN_RIGHT_BUTTON);
+        mRightExtension = Dependency.get(ExtensionController.class).newExtension(IntentButton.class)
+                .withPlugin(IntentButtonProvider.class, RIGHT_BUTTON_PLUGIN,
+                        p -> p.getIntentButton())
+                .withTunerFactory(new LockButtonFactory(mContext, LOCKSCREEN_RIGHT_BUTTON))
+                .withDefault(() -> new DefaultRightButton())
+                .withCallback(button -> setRightButton(button))
+                .build();
+        mLeftExtension = Dependency.get(ExtensionController.class).newExtension(IntentButton.class)
+                .withPlugin(IntentButtonProvider.class, LEFT_BUTTON_PLUGIN,
+                        p -> p.getIntentButton())
+                .withTunerFactory(new LockButtonFactory(mContext, LOCKSCREEN_LEFT_BUTTON))
+                .withDefault(() -> new DefaultLeftButton())
+                .withCallback(button -> setLeftButton(button))
+                .build();
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         mAccessibilityController.removeStateChangedCallback(this);
-        Dependency.get(PluginManager.class).removePluginListener(mRightListener);
-        Dependency.get(PluginManager.class).removePluginListener(mLeftListener);
-        Dependency.get(TunerService.class).removeTunable(this);
+        mRightExtension.destroy();
+        mLeftExtension.destroy();
     }
 
     private void initAccessibility() {
@@ -790,62 +798,20 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         inflateCameraPreview();
     }
 
-    @Override
-    public void onTuningChanged(String key, String newValue) {
-        if (LockscreenFragment.LOCKSCREEN_LEFT_BUTTON.equals(key)) {
-            mLeftButtonStr = newValue;
-            mLeftIsVoiceAssist = TextUtils.isEmpty(mLeftButtonStr) && mLeftPlugin == null;
-            mLeftButton = getIntentButton(mContext, mLeftButtonStr, mLeftPlugin, mLeftDefault);
-            updateLeftAffordance();
-        } else {
-            mRightButtonStr = newValue;
-            mRightButton = getIntentButton(mContext, mRightButtonStr, mRightPlugin, mRightDefault);
-            updateRightAffordanceIcon();
-            updateCameraVisibility();
-            inflateCameraPreview();
-        }
-    }
-
     private void setRightButton(IntentButton button) {
-        mRightPlugin = button;
-        mRightButton = getIntentButton(mContext, mRightButtonStr, mRightPlugin, mRightDefault);
+        mRightButton = button;
         updateRightAffordanceIcon();
         updateCameraVisibility();
         inflateCameraPreview();
     }
 
     private void setLeftButton(IntentButton button) {
-        mLeftPlugin = button;
-        mLeftButton = getIntentButton(mContext, mLeftButtonStr, mLeftPlugin, mLeftDefault);
-        mLeftIsVoiceAssist = false;
+        mLeftButton = button;
+        if (!(mLeftButton instanceof DefaultLeftButton)) {
+            mLeftIsVoiceAssist = false;
+        }
         updateLeftAffordance();
     }
-
-    private final PluginListener<IntentButtonProvider> mRightListener =
-            new PluginListener<IntentButtonProvider>() {
-        @Override
-        public void onPluginConnected(IntentButtonProvider plugin, Context pluginContext) {
-            setRightButton(plugin.getIntentButton());
-        }
-
-        @Override
-        public void onPluginDisconnected(IntentButtonProvider plugin) {
-            setRightButton(null);
-        }
-    };
-
-    private final PluginListener<IntentButtonProvider> mLeftListener =
-            new PluginListener<IntentButtonProvider>() {
-        @Override
-        public void onPluginConnected(IntentButtonProvider plugin, Context pluginContext) {
-            setLeftButton(plugin.getIntentButton());
-        }
-
-        @Override
-        public void onPluginDisconnected(IntentButtonProvider plugin) {
-            setLeftButton(null);
-        }
-    };
 
     public void setDozing(boolean dozing, boolean animate) {
         mDozing = dozing;

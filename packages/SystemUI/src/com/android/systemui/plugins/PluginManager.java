@@ -133,14 +133,7 @@ public class PluginManager extends BroadcastReceiver {
 
     public <T extends Plugin> void addPluginListener(PluginListener<T> listener, Class<?> cls,
             boolean allowMultiple) {
-        ProvidesInterface info = cls.getDeclaredAnnotation(ProvidesInterface.class);
-        if (info == null) {
-            throw new RuntimeException(cls + " doesn't provide an interface");
-        }
-        if (TextUtils.isEmpty(info.action())) {
-            throw new RuntimeException(cls + " doesn't provide an action");
-        }
-        addPluginListener(info.action(), listener, cls, allowMultiple);
+        addPluginListener(getAction(cls), listener, cls, allowMultiple);
     }
 
     public <T extends Plugin> void addPluginListener(String action, PluginListener<T> listener,
@@ -283,6 +276,17 @@ public class PluginManager extends BroadcastReceiver {
     public Context getContext(ApplicationInfo info, String pkg) throws NameNotFoundException {
         ClassLoader classLoader = getClassLoader(info.sourceDir, pkg);
         return new PluginContextWrapper(mContext.createApplicationContext(info, 0), classLoader);
+    }
+
+    public static <P> String getAction(Class<P> cls) {
+        ProvidesInterface info = cls.getDeclaredAnnotation(ProvidesInterface.class);
+        if (info == null) {
+            throw new RuntimeException(cls + " doesn't provide an interface");
+        }
+        if (TextUtils.isEmpty(info.action())) {
+            throw new RuntimeException(cls + " doesn't provide an action");
+        }
+        return info.action();
     }
 
     private class AllPluginClassLoader extends ClassLoader {
