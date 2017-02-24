@@ -624,8 +624,10 @@ public abstract class PackageManager {
      * should be installed as forward locked, i.e. only the app itself should
      * have access to its code and non-resource assets.
      *
+     * @deprecated new installs into ASEC containers are no longer supported.
      * @hide
      */
+    @Deprecated
     public static final int INSTALL_FORWARD_LOCK = 0x00000001;
 
     /**
@@ -648,8 +650,11 @@ public abstract class PackageManager {
      * Flag parameter for {@link #installPackage} to indicate that this package
      * must be installed to an ASEC on a {@link VolumeInfo#TYPE_PUBLIC}.
      *
+     * @deprecated new installs into ASEC containers are no longer supported;
+     *             use adoptable storage instead.
      * @hide
      */
+    @Deprecated
     public static final int INSTALL_EXTERNAL = 0x00000008;
 
     /**

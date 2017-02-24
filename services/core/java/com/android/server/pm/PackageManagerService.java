@@ -12998,6 +12998,12 @@ public class PackageManagerService extends IPackageManager.Stub {
                     + "to use the PackageManager.INSTALL_GRANT_RUNTIME_PERMISSIONS flag");
         }
 
+        if ((installFlags & PackageManager.INSTALL_FORWARD_LOCK) != 0
+                || (installFlags & PackageManager.INSTALL_EXTERNAL) != 0) {
+            throw new IllegalArgumentException(
+                    "New installs into ASEC containers no longer supported");
+        }
+
         final File originFile = new File(originPath);
         final OriginInfo origin = OriginInfo.fromUntrustedFile(originFile);
 
