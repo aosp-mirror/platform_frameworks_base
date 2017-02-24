@@ -887,9 +887,9 @@ final class Settings {
         }
         if (p.appId < 0) {
             PackageManagerService.reportSettingsProblem(Log.WARN,
-                    "Package " + p.name + " could not be assigned a valid uid");
+                    "Package " + p.name + " could not be assigned a valid UID");
             throw new PackageManagerException(INSTALL_FAILED_INSUFFICIENT_STORAGE,
-                    "Creating application package " + p.name + " failed");
+                    "Package " + p.name + " could not be assigned a valid UID");
         }
     }
 
