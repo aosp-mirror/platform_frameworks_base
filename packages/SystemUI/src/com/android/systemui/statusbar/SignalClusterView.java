@@ -632,7 +632,7 @@ public class SignalClusterView extends LinearLayout implements NetworkController
                 DarkIconDispatcher.getDarkIntensity(mTintArea, mWifi, mDarkIntensity),
                 mWifi, mWifiDark);
         setTint(mWifiActivity,
-                StatusBarIconController.getTint(mTintArea, mWifiActivity, mIconTint));
+                DarkIconDispatcher.getTint(mTintArea, mWifiActivity, mIconTint));
         applyDarkIntensity(
                 DarkIconDispatcher.getDarkIntensity(mTintArea, mEthernet, mDarkIntensity),
                 mEthernet, mEthernetDark);
@@ -787,7 +787,7 @@ public class SignalClusterView extends LinearLayout implements NetworkController
             setTint(mMobileRoaming, DarkIconDispatcher.getTint(tintArea, mMobileRoaming,
                     tint));
             setTint(mMobileActivity,
-                    StatusBarIconController.getTint(tintArea, mMobileActivity, tint));
+                    DarkIconDispatcher.getTint(tintArea, mMobileActivity, tint));
         }
     }
 }
