@@ -18702,7 +18702,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         Slog.w(TAG, "Shame on you for calling a hidden API. Shame!");
         try {
             observer.onGetStatsCompleted(null, false);
-        } catch (RemoteException ignored) {
+        } catch (Throwable ignored) {
         }
     }
 
