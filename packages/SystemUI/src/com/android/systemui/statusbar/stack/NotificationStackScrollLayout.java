@@ -3416,6 +3416,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         for (View view : mClearOverlayViewsWhenFinished) {
             StackStateAnimator.removeFromOverlay(view);
         }
+        mClearOverlayViewsWhenFinished.clear();
     }
 
     private void runAnimationFinishedRunnables() {
