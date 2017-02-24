@@ -166,7 +166,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
         }
 
         public String toString() {
-            return android.text.format.DateFormat.format("MM-dd hh:mm:ss ", mTimestamp) +
+            return android.text.format.DateFormat.format("MM-dd HH:mm:ss ", mTimestamp) +
                     (mEnable ? "  Enabled " : " Disabled ") + " by " + mPackageName;
         }
 
