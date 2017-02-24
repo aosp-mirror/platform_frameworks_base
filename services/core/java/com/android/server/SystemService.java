@@ -19,6 +19,7 @@ package com.android.server;
 import android.content.Context;
 import android.os.IBinder;
 import android.os.ServiceManager;
+import android.os.UserManager;
 
 /**
  * The base class for services running in the system process. Override and implement
@@ -133,9 +134,16 @@ public abstract class SystemService {
     public void onStartUser(int userHandle) {}
 
     /**
-     * Called when an existing user is unlocked. This means the
-     * credential-encrypted storage for that user is now available, and
-     * encryption-aware component filtering is no longer in effect.
+     * Called when an existing user is in the process of being unlocked. This
+     * means the credential-encrypted storage for that user is now available,
+     * and encryption-aware component filtering is no longer in effect.
+     * <p>
+     * While dispatching this event to services, the user is in the
+     * {@code STATE_RUNNING_UNLOCKING} state, and once dispatching is finished
+     * the user will transition into the {@code STATE_RUNNING_UNLOCKED} state.
+     * Code written inside system services should use
+     * {@link UserManager#isUserUnlockingOrUnlocked(int)} to handle both of
+     * these states.
      *
      * @param userHandle The identifier of the user.
      */

@@ -1097,40 +1097,6 @@ public class UserManager {
         }
     }
 
-    /** @removed */
-    @Deprecated
-    public boolean isUserRunningAndLocked() {
-        return isUserRunningAndLocked(Process.myUserHandle());
-    }
-
-    /** @removed */
-    @Deprecated
-    public boolean isUserRunningAndLocked(UserHandle user) {
-        try {
-            return ActivityManager.getService().isUserRunning(
-                    user.getIdentifier(), ActivityManager.FLAG_AND_LOCKED);
-        } catch (RemoteException re) {
-            throw re.rethrowFromSystemServer();
-        }
-    }
-
-    /** @removed */
-    @Deprecated
-    public boolean isUserRunningAndUnlocked() {
-        return isUserRunningAndUnlocked(Process.myUserHandle());
-    }
-
-    /** @removed */
-    @Deprecated
-    public boolean isUserRunningAndUnlocked(UserHandle user) {
-        try {
-            return ActivityManager.getService().isUserRunning(
-                    user.getIdentifier(), ActivityManager.FLAG_AND_UNLOCKED);
-        } catch (RemoteException re) {
-            throw re.rethrowFromSystemServer();
-        }
-    }
-
     /**
      * Return whether the calling user is running in an "unlocked" state.
      * <p>
