@@ -2138,7 +2138,7 @@
          runtime resource overlays.
          @hide -->
     <permission android:name="android.permission.CHANGE_OVERLAY_PACKAGES"
-        android:protectionLevel="signature|privileged|development" />
+        android:protectionLevel="signature|privileged" />
 
     <!-- ========================================= -->
     <!-- Permissions for special development tools -->
