@@ -413,9 +413,7 @@ public class PackageParserTest {
         assertTrue(Arrays.equals(a.sharedLibraryFiles, that.sharedLibraryFiles));
         assertEquals(a.dataDir, that.dataDir);
         assertEquals(a.deviceProtectedDataDir, that.deviceProtectedDataDir);
-        assertEquals(a.deviceEncryptedDataDir, that.deviceEncryptedDataDir);
         assertEquals(a.credentialProtectedDataDir, that.credentialProtectedDataDir);
-        assertEquals(a.credentialEncryptedDataDir, that.credentialEncryptedDataDir);
         assertEquals(a.nativeLibraryDir, that.nativeLibraryDir);
         assertEquals(a.secondaryNativeLibraryDir, that.secondaryNativeLibraryDir);
         assertEquals(a.nativeLibraryRootDir, that.nativeLibraryRootDir);

@@ -420,12 +420,6 @@ public class PreferenceManager {
         mSharedPreferences = null;
     }
 
-    /** @removed */
-    @Deprecated
-    public void setStorageDeviceEncrypted() {
-        setStorageDeviceProtected();
-    }
-
     /**
      * Explicitly set the storage location used internally by this class to be
      * credential-protected storage. This is the default storage area for apps
@@ -443,12 +437,6 @@ public class PreferenceManager {
     public void setStorageCredentialProtected() {
         mStorage = STORAGE_CREDENTIAL_PROTECTED;
         mSharedPreferences = null;
-    }
-
-    /** @removed */
-    @Deprecated
-    public void setStorageCredentialEncrypted() {
-        setStorageCredentialProtected();
     }
 
     /**

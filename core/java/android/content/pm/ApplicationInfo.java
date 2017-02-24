@@ -720,10 +720,6 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      */
     public String deviceProtectedDataDir;
 
-    /** @removed */
-    @Deprecated
-    public String deviceEncryptedDataDir;
-
     /**
      * Full path to the credential-protected directory assigned to the package
      * for its persistent data.
@@ -732,10 +728,6 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      */
     @SystemApi
     public String credentialProtectedDataDir;
-
-    /** @removed */
-    @Deprecated
-    public String credentialEncryptedDataDir;
 
     /**
      * Full path to the directory where native JNI libraries are stored.
@@ -1140,8 +1132,8 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         seInfoUser = orig.seInfoUser;
         sharedLibraryFiles = orig.sharedLibraryFiles;
         dataDir = orig.dataDir;
-        deviceEncryptedDataDir = deviceProtectedDataDir = orig.deviceProtectedDataDir;
-        credentialEncryptedDataDir = credentialProtectedDataDir = orig.credentialProtectedDataDir;
+        deviceProtectedDataDir = orig.deviceProtectedDataDir;
+        credentialProtectedDataDir = orig.credentialProtectedDataDir;
         uid = orig.uid;
         minSdkVersion = orig.minSdkVersion;
         targetSdkVersion = orig.targetSdkVersion;
@@ -1264,8 +1256,8 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         seInfoUser = source.readString();
         sharedLibraryFiles = source.readStringArray();
         dataDir = source.readString();
-        deviceEncryptedDataDir = deviceProtectedDataDir = source.readString();
-        credentialEncryptedDataDir = credentialProtectedDataDir = source.readString();
+        deviceProtectedDataDir = source.readString();
+        credentialProtectedDataDir = source.readString();
         uid = source.readInt();
         minSdkVersion = source.readInt();
         targetSdkVersion = source.readInt();
@@ -1336,10 +1328,10 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
             return;
         }
 
-        deviceEncryptedDataDir = deviceProtectedDataDir = Environment
+        deviceProtectedDataDir = Environment
                 .getDataUserDePackageDirectory(volumeUuid, userId, packageName)
                 .getAbsolutePath();
-        credentialEncryptedDataDir = credentialProtectedDataDir = Environment
+        credentialProtectedDataDir = Environment
                 .getDataUserCePackageDirectory(volumeUuid, userId, packageName)
                 .getAbsolutePath();
 
