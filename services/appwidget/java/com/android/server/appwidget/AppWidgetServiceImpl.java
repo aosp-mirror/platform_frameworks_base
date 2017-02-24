@@ -709,7 +709,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     }
 
     private boolean isUserRunningAndUnlocked(@UserIdInt int userId) {
-        return mUserManager.isUserRunning(userId) && StorageManager.isUserKeyUnlocked(userId);
+        return mUserManager.isUserUnlockingOrUnlocked(userId);
     }
 
     @Override
