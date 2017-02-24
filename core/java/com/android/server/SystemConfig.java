@@ -59,6 +59,7 @@ public class SystemConfig {
     private static final int ALLOW_LIBS = 0x02;
     private static final int ALLOW_PERMISSIONS = 0x04;
     private static final int ALLOW_APP_CONFIGS = 0x08;
+    private static final int ALLOW_PRIVAPP_PERMISSIONS = 0x10;
     private static final int ALLOW_ALL = ~0;
 
     // Group-ids that are given to all packages as read from etc/permissions/*.xml.
@@ -225,6 +226,13 @@ public class SystemConfig {
         // Read configuration from the old permissions dir
         readPermissions(Environment.buildPath(
                 Environment.getRootDirectory(), "etc", "permissions"), ALLOW_ALL);
+        // Allow Vendor to customize system configs around libs, features, permissions and apps
+        int vendorPermissionFlag = ALLOW_LIBS | ALLOW_FEATURES | ALLOW_PERMISSIONS |
+                ALLOW_APP_CONFIGS;
+        readPermissions(Environment.buildPath(
+                Environment.getVendorDirectory(), "etc", "sysconfig"), vendorPermissionFlag);
+        readPermissions(Environment.buildPath(
+                Environment.getVendorDirectory(), "etc", "permissions"), vendorPermissionFlag);
         // Allow ODM to customize system configs around libs, features and apps
         int odmPermissionFlag = ALLOW_LIBS | ALLOW_FEATURES | ALLOW_APP_CONFIGS;
         readPermissions(Environment.buildPath(
@@ -313,6 +321,7 @@ public class SystemConfig {
             boolean allowFeatures = (permissionFlag & ALLOW_FEATURES) != 0;
             boolean allowPermissions = (permissionFlag & ALLOW_PERMISSIONS) != 0;
             boolean allowAppConfigs = (permissionFlag & ALLOW_APP_CONFIGS) != 0;
+            boolean allowPrivappPermissions = (permissionFlag & ALLOW_PRIVAPP_PERMISSIONS) != 0;
             while (true) {
                 XmlUtils.nextElement(parser);
                 if (parser.getEventType() == XmlPullParser.END_DOCUMENT) {
@@ -553,7 +562,7 @@ public class SystemConfig {
                         associatedPkgs.add(pkgname);
                     }
                     XmlUtils.skipCurrentTag(parser);
-                } else if ("privapp-permissions".equals(name) && allowAppConfigs) {
+                } else if ("privapp-permissions".equals(name) && allowPrivappPermissions) {
                     readPrivAppPermissions(parser);
                 } else {
                     XmlUtils.skipCurrentTag(parser);
