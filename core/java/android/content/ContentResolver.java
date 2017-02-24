@@ -500,6 +500,7 @@ public abstract class ContentResolver {
     public ContentResolver(Context context) {
         mContext = context != null ? context : ActivityThread.currentApplication();
         mPackageName = mContext.getOpPackageName();
+        mTargetSdkVersion = mContext.getApplicationInfo().targetSdkVersion;
     }
 
     /** @hide */
@@ -1868,13 +1869,18 @@ public abstract class ContentResolver {
     /**
      * Register an observer class that gets callbacks when data identified by a
      * given content URI changes.
+     * <p>
+     * Starting in {@link android.os.Build.VERSION_CODES#O}, all content
+     * notifications must be backed by a valid {@link ContentProvider}.
      *
-     * @param uri The URI to watch for changes. This can be a specific row URI, or a base URI
-     * for a whole class of content.
-     * @param notifyForDescendants When false, the observer will be notified whenever a
-     * change occurs to the exact URI specified by <code>uri</code> or to one of the
-     * URI's ancestors in the path hierarchy.  When true, the observer will also be notified
-     * whenever a change occurs to the URI's descendants in the path hierarchy.
+     * @param uri The URI to watch for changes. This can be a specific row URI,
+     *            or a base URI for a whole class of content.
+     * @param notifyForDescendants When false, the observer will be notified
+     *            whenever a change occurs to the exact URI specified by
+     *            <code>uri</code> or to one of the URI's ancestors in the path
+     *            hierarchy. When true, the observer will also be notified
+     *            whenever a change occurs to the URI's descendants in the path
+     *            hierarchy.
      * @param observer The object that receives callbacks when changes occur.
      * @see #unregisterContentObserver
      */
@@ -1894,7 +1900,7 @@ public abstract class ContentResolver {
             ContentObserver observer, @UserIdInt int userHandle) {
         try {
             getContentService().registerContentObserver(uri, notifyForDescendents,
-                    observer.getContentObserver(), userHandle);
+                    observer.getContentObserver(), userHandle, mTargetSdkVersion);
         } catch (RemoteException e) {
         }
     }
@@ -1918,16 +1924,22 @@ public abstract class ContentResolver {
     }
 
     /**
-     * Notify registered observers that a row was updated and attempt to sync changes
-     * to the network.
-     * To register, call {@link #registerContentObserver(android.net.Uri , boolean, android.database.ContentObserver) registerContentObserver()}.
-     * By default, CursorAdapter objects will get this notification.
+     * Notify registered observers that a row was updated and attempt to sync
+     * changes to the network.
+     * <p>
+     * To observe events sent through this call, use
+     * {@link #registerContentObserver(Uri, boolean, ContentObserver)}.
+     * <p>
+     * Starting in {@link android.os.Build.VERSION_CODES#O}, all content
+     * notifications must be backed by a valid {@link ContentProvider}.
      *
      * @param uri The uri of the content that was changed.
-     * @param observer The observer that originated the change, may be <code>null</null>.
-     * The observer that originated the change will only receive the notification if it
-     * has requested to receive self-change notifications by implementing
-     * {@link ContentObserver#deliverSelfNotifications()} to return true.
+     * @param observer The observer that originated the change, may be
+     *            <code>null</null>. The observer that originated the change
+     *            will only receive the notification if it has requested to
+     *            receive self-change notifications by implementing
+     *            {@link ContentObserver#deliverSelfNotifications()} to return
+     *            true.
      */
     public void notifyChange(@NonNull Uri uri, @Nullable ContentObserver observer) {
         notifyChange(uri, observer, true /* sync to network */);
@@ -1935,17 +1947,25 @@ public abstract class ContentResolver {
 
     /**
      * Notify registered observers that a row was updated.
-     * To register, call {@link #registerContentObserver(android.net.Uri , boolean, android.database.ContentObserver) registerContentObserver()}.
-     * By default, CursorAdapter objects will get this notification.
-     * If syncToNetwork is true, this will attempt to schedule a local sync using the sync
-     * adapter that's registered for the authority of the provided uri. No account will be
-     * passed to the sync adapter, so all matching accounts will be synchronized.
+     * <p>
+     * To observe events sent through this call, use
+     * {@link #registerContentObserver(Uri, boolean, ContentObserver)}.
+     * <p>
+     * If syncToNetwork is true, this will attempt to schedule a local sync
+     * using the sync adapter that's registered for the authority of the
+     * provided uri. No account will be passed to the sync adapter, so all
+     * matching accounts will be synchronized.
+     * <p>
+     * Starting in {@link android.os.Build.VERSION_CODES#O}, all content
+     * notifications must be backed by a valid {@link ContentProvider}.
      *
      * @param uri The uri of the content that was changed.
-     * @param observer The observer that originated the change, may be <code>null</null>.
-     * The observer that originated the change will only receive the notification if it
-     * has requested to receive self-change notifications by implementing
-     * {@link ContentObserver#deliverSelfNotifications()} to return true.
+     * @param observer The observer that originated the change, may be
+     *            <code>null</null>. The observer that originated the change
+     *            will only receive the notification if it has requested to
+     *            receive self-change notifications by implementing
+     *            {@link ContentObserver#deliverSelfNotifications()} to return
+     *            true.
      * @param syncToNetwork If true, same as {@link #NOTIFY_SYNC_TO_NETWORK}.
      * @see #requestSync(android.accounts.Account, String, android.os.Bundle)
      */
@@ -1961,17 +1981,25 @@ public abstract class ContentResolver {
 
     /**
      * Notify registered observers that a row was updated.
-     * To register, call {@link #registerContentObserver(android.net.Uri, boolean, android.database.ContentObserver) registerContentObserver()}.
-     * By default, CursorAdapter objects will get this notification.
-     * If syncToNetwork is true, this will attempt to schedule a local sync using the sync
-     * adapter that's registered for the authority of the provided uri. No account will be
-     * passed to the sync adapter, so all matching accounts will be synchronized.
+     * <p>
+     * To observe events sent through this call, use
+     * {@link #registerContentObserver(Uri, boolean, ContentObserver)}.
+     * <p>
+     * If syncToNetwork is true, this will attempt to schedule a local sync
+     * using the sync adapter that's registered for the authority of the
+     * provided uri. No account will be passed to the sync adapter, so all
+     * matching accounts will be synchronized.
+     * <p>
+     * Starting in {@link android.os.Build.VERSION_CODES#O}, all content
+     * notifications must be backed by a valid {@link ContentProvider}.
      *
      * @param uri The uri of the content that was changed.
-     * @param observer The observer that originated the change, may be <code>null</null>.
-     * The observer that originated the change will only receive the notification if it
-     * has requested to receive self-change notifications by implementing
-     * {@link ContentObserver#deliverSelfNotifications()} to return true.
+     * @param observer The observer that originated the change, may be
+     *            <code>null</null>. The observer that originated the change
+     *            will only receive the notification if it has requested to
+     *            receive self-change notifications by implementing
+     *            {@link ContentObserver#deliverSelfNotifications()} to return
+     *            true.
      * @param flags Additional flags: {@link #NOTIFY_SYNC_TO_NETWORK}.
      * @see #requestSync(android.accounts.Account, String, android.os.Bundle)
      */
@@ -1997,7 +2025,7 @@ public abstract class ContentResolver {
                     uri, observer == null ? null : observer.getContentObserver(),
                     observer != null && observer.deliverSelfNotifications(),
                     syncToNetwork ? NOTIFY_SYNC_TO_NETWORK : 0,
-                    userHandle);
+                    userHandle, mTargetSdkVersion);
         } catch (RemoteException e) {
         }
     }
@@ -2013,7 +2041,7 @@ public abstract class ContentResolver {
             getContentService().notifyChange(
                     uri, observer == null ? null : observer.getContentObserver(),
                     observer != null && observer.deliverSelfNotifications(), flags,
-                    userHandle);
+                    userHandle, mTargetSdkVersion);
         } catch (RemoteException e) {
         }
     }
@@ -2932,6 +2960,7 @@ public abstract class ContentResolver {
     private final Context mContext;
 
     final String mPackageName;
+    final int mTargetSdkVersion;
 
     private static final String TAG = "ContentResolver";
 

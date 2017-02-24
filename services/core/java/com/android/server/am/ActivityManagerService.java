@@ -10708,10 +10708,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         } catch (RemoteException ignored) {
         }
         if (cpi == null) {
-            // TODO: make this an outright failure in a future platform release;
-            // until then anonymous content notifications are unprotected
-            //return "Failed to find provider " + authority + " for user " + userId;
-            return null;
+            return "Failed to find provider " + authority + " for user " + userId;
         }
 
         ProcessRecord r = null;
