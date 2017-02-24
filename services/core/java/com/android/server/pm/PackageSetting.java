@@ -19,6 +19,9 @@ package com.android.server.pm;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
+import android.content.pm.UserInfo;
+import android.service.pm.PackageProto;
+import android.util.proto.ProtoOutputStream;
 
 import java.io.File;
 import java.util.List;
@@ -127,5 +130,33 @@ final class PackageSetting extends PackageSettingBase {
             return isSystem();
         }
         return true;
+    }
+
+    public void writeToProto(ProtoOutputStream proto, long fieldId, List<UserInfo> users) {
+        final long packageToken = proto.start(fieldId);
+        proto.write(PackageProto.NAME, (realName != null ? realName : name));
+        proto.write(PackageProto.UID, appId);
+        proto.write(PackageProto.VERSION_CODE, versionCode);
+        proto.write(PackageProto.VERSION_STRING, pkg.mVersionName);
+        proto.write(PackageProto.INSTALL_TIME_MS, firstInstallTime);
+        proto.write(PackageProto.UPDATE_TIME_MS, lastUpdateTime);
+        proto.write(PackageProto.INSTALLER_NAME, installerPackageName);
+
+        if (pkg != null) {
+            long splitToken = proto.start(PackageProto.SPLITS);
+            proto.write(PackageProto.SplitProto.NAME, "base");
+            proto.write(PackageProto.SplitProto.REVISION_CODE, pkg.baseRevisionCode);
+            proto.end(splitToken);
+            if (pkg.splitNames != null) {
+                for (int i = 0; i < pkg.splitNames.length; i++) {
+                    splitToken = proto.start(PackageProto.SPLITS);
+                    proto.write(PackageProto.SplitProto.NAME, pkg.splitNames[i]);
+                    proto.write(PackageProto.SplitProto.REVISION_CODE, pkg.splitRevisionCodes[i]);
+                    proto.end(splitToken);
+                }
+            }
+        }
+        writeUsersInfoToProto(proto, PackageProto.USERS);
+        proto.end(packageToken);
     }
 }

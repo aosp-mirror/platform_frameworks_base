@@ -1,0 +1,120 @@
+/*
+ * Copyright (C) 2017 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto3";
+
+package android.service.pm;
+
+option java_multiple_files = true;
+option java_outer_classname = "PackageServiceProto";
+
+message PackageServiceDumpProto {
+    message PackageShortProto {
+        // Name of package. e.g. "com.android.providers.telephony".
+        string name = 1;
+        // UID for this package as assigned by Android OS.
+        int32 uid = 2;
+    }
+    message SharedLibraryProto {
+        string name = 1;
+        // True if library path is not null (jar), false otherwise (apk)
+        bool is_jar = 2;
+        // Should be filled if is_jar is true
+        string path = 3;
+        // Should be filled if is_jar is false
+        string apk = 4;
+    }
+    message FeatureProto {
+        string name = 1;
+        int32 version = 2;
+    }
+    message SharedUserProto {
+        int32 user_id = 1;
+        string name = 2;
+    }
+
+    // Installed packages.
+    PackageShortProto required_verifier_package = 1;
+    PackageShortProto verifier_package = 2;
+    repeated SharedLibraryProto shared_libraries = 3;
+    repeated FeatureProto features = 4;
+    repeated PackageProto packages = 5;
+    repeated SharedUserProto shared_users = 6;
+    // Messages from the settings problem file
+    repeated string messages = 7;
+}
+
+message PackageProto {
+    message SplitProto {
+        string name = 1;
+        int32 revision_code = 2;
+    }
+    message UserInfoProto {
+        enum InstallType {
+            NOT_INSTALLED_FOR_USER = 0;
+            FULL_APP_INSTALL = 1;
+            INSTANT_APP_INSTALL = 2;
+        }
+        // Enum values gotten from PackageManger.java
+        enum EnabledState {
+            // This component or application is in its default enabled state
+            // (as specified in its manifest).
+            COMPONENT_ENABLED_STATE_DEFAULT = 0;
+            // This component or application has been explictily enabled, regardless
+            // of what it has specified in its manifest.
+            COMPONENT_ENABLED_STATE_ENABLED = 1;
+            // This component or application has been explicitly disabled, regardless of
+            // what it has specified in its manifest.
+            COMPONENT_ENABLED_STATE_DISABLED = 2;
+            // The user has explicitly disabled the application, regardless of what it has
+            // specified in its manifest.
+            COMPONENT_ENABLED_STATE_DISABLED_USER = 3;
+            // This application should be considered, until the point where the user actually
+            // wants to use it.
+            COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED = 4;
+        }
+
+        int32 id = 1;
+        InstallType install_type = 2;
+        // Is the app restricted by owner / admin
+        bool is_hidden = 3;
+        bool is_suspended = 4;
+        bool is_stopped = 5;
+        bool is_launched = 6;
+        EnabledState enabled_state = 7;
+        string last_disabled_app_caller = 8;
+    }
+
+    // Name of package. e.g. "com.android.providers.telephony".
+    string name = 1;
+    // UID for this package as assigned by Android OS.
+    int32 uid = 2;
+    // Package's reported version.
+    int32 version_code = 3;
+    // Package's reported version string (what's displayed to the user).
+    string version_string = 4;
+    // UTC timestamp of install
+    int64 install_time_ms = 5;
+    // Millisecond UTC timestamp of latest update adjusted to Google's server clock.
+    int64 update_time_ms = 6;
+    // From "dumpsys package" - name of package which installed this one.
+    // Typically "" if system app or "com.android.vending" if Play Store.
+    string installer_name = 7;
+    // Split APKs.
+    repeated SplitProto splits = 8;
+    // Per-user package info.
+    repeated UserInfoProto users = 9;
+}
