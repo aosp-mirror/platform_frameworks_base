@@ -18,6 +18,7 @@ package com.android.server.notification;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -27,6 +28,7 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 import android.support.test.InstrumentationRegistry;
@@ -71,8 +73,11 @@ public class SnoozeHelperTest {
     public void testSnoozeForTime() throws Exception {
         NotificationRecord r = getNotificationRecord("pkg", 1, "one", UserHandle.SYSTEM);
         mSnoozeHelper.snooze(r, 1000);
+        ArgumentCaptor<Long> captor = ArgumentCaptor.forClass(Long.class);
         verify(mAm, times(1)).setExactAndAllowWhileIdle(
-                anyInt(), eq((long) 1000), any(PendingIntent.class));
+                anyInt(), captor.capture(), any(PendingIntent.class));
+        long actualSnoozedUntilDuration = captor.getValue() - SystemClock.elapsedRealtime();
+        assertTrue(Math.abs(actualSnoozedUntilDuration - 1000) < 2);
         assertTrue(mSnoozeHelper.isSnoozed(
                 UserHandle.USER_SYSTEM, r.sbn.getPackageName(), r.getKey()));
     }

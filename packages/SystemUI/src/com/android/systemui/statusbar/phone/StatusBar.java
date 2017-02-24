@@ -5742,9 +5742,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         if (snoozeOption.criterion != null) {
             mNotificationListener.snoozeNotification(sbn.getKey(), snoozeOption.criterion.getId());
         } else {
-            GregorianCalendar snoozeUntil = new GregorianCalendar();
-            snoozeUntil.add(Calendar.MINUTE, snoozeOption.snoozeForMinutes);
-            mNotificationListener.snoozeNotification(sbn.getKey(), snoozeUntil.getTimeInMillis());
+            mNotificationListener.snoozeNotification(sbn.getKey(),
+                    snoozeOption.snoozeForMinutes * 60 * 1000);
         }
     }
 

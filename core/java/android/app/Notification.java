@@ -2702,11 +2702,11 @@ public class Notification implements Parcelable
         }
 
         /**
-         * Specifies the time at which this notification should be canceled, if it is not already
-         * canceled.
+         * Specifies a duration in milliseconds after which this notification should be canceled,
+         * if it is not already canceled.
          */
-        public Builder setTimeout(long when) {
-            mN.mTimeout = when;
+        public Builder setTimeout(long durationMs) {
+            mN.mTimeout = durationMs;
             return this;
         }
 

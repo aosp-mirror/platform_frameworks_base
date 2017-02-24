@@ -2029,11 +2029,11 @@ public class NotificationManagerService extends SystemService {
          */
         @Override
         public void snoozeNotificationUntilFromListener(INotificationListener token, String key,
-                long snoozeUntil) {
+                long duration) {
             long identity = Binder.clearCallingIdentity();
             try {
                 final ManagedServiceInfo info = mListeners.checkServiceTokenLocked(token);
-                snoozeNotificationInt(key, snoozeUntil, null, info);
+                snoozeNotificationInt(key, duration, null, info);
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
@@ -3409,7 +3409,7 @@ public class NotificationManagerService extends SystemService {
 
     @VisibleForTesting
     void scheduleTimeoutLocked(NotificationRecord record) {
-        if (record.getNotification().getTimeout() > System.currentTimeMillis()) {
+        if (record.getNotification().getTimeout() > 0) {
             final PendingIntent pi = PendingIntent.getBroadcast(getContext(),
                     REQUEST_CODE_TIMEOUT,
                     new Intent(ACTION_NOTIFICATION_TIMEOUT)
@@ -3418,8 +3418,8 @@ public class NotificationManagerService extends SystemService {
                             .addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
                             .putExtra(EXTRA_KEY, record.getKey()),
                     PendingIntent.FLAG_UPDATE_CURRENT);
-            mAlarmManager.setExactAndAllowWhileIdle(
-                    AlarmManager.RTC_WAKEUP, record.getNotification().getTimeout(), pi);
+            mAlarmManager.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                    SystemClock.elapsedRealtime() + record.getNotification().getTimeout(), pi);
         }
     }
 
@@ -4185,16 +4185,16 @@ public class NotificationManagerService extends SystemService {
         }
     }
 
-    void snoozeNotificationInt(String key, long until, String snoozeCriterionId,
+    void snoozeNotificationInt(String key, long duration, String snoozeCriterionId,
             ManagedServiceInfo listener) {
         String listenerName = listener == null ? null : listener.component.toShortString();
-        if (until < System.currentTimeMillis() && snoozeCriterionId == null) {
+        if (duration <= 0 && snoozeCriterionId == null) {
             return;
         }
 
         if (DBG) {
-            Slog.d(TAG, String.format("snooze event(%s, %d, %s, %s)", key, until, snoozeCriterionId,
-                    listenerName));
+            Slog.d(TAG, String.format("snooze event(%s, %d, %s, %s)", key, duration,
+                    snoozeCriterionId, listenerName));
         }
         // Needs to post so that it can cancel notifications not yet enqueued.
         mHandler.post(new Runnable() {
@@ -4215,7 +4215,7 @@ public class NotificationManagerService extends SystemService {
                                     snoozeCriterionId);
                             mSnoozeHelper.snooze(r);
                         } else {
-                            mSnoozeHelper.snooze(r, until);
+                            mSnoozeHelper.snooze(r, duration);
                         }
                         savePolicyFile();
                     }

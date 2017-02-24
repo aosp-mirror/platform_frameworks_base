@@ -32,6 +32,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 import android.util.ArrayMap;
@@ -125,9 +126,9 @@ public class SnoozeHelper {
     /**
      * Snoozes a notification and schedules an alarm to repost at that time.
      */
-    protected void snooze(NotificationRecord record, long until) {
+    protected void snooze(NotificationRecord record, long duration) {
         snooze(record);
-        scheduleRepost(record.sbn.getPackageName(), record.getKey(), record.getUserId(), until);
+        scheduleRepost(record.sbn.getPackageName(), record.getKey(), record.getUserId(), duration);
     }
 
     /**
@@ -291,13 +292,14 @@ public class SnoozeHelper {
                 PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
-    private void scheduleRepost(String pkg, String key, int userId, long time) {
+    private void scheduleRepost(String pkg, String key, int userId, long duration) {
         long identity = Binder.clearCallingIdentity();
         try {
             final PendingIntent pi = createPendingIntent(pkg, key, userId);
             mAm.cancel(pi);
+            long time = SystemClock.elapsedRealtime() + duration;
             if (DEBUG) Slog.d(TAG, "Scheduling evaluate for " + new Date(time));
-            mAm.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, time, pi);
+            mAm.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, time, pi);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
