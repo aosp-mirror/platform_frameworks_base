@@ -38,6 +38,7 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.AssetManager;
+import android.content.res.CompatResources;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -49,6 +50,7 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
+import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.Environment;
@@ -1925,8 +1927,8 @@ class ContextImpl extends Context {
             final int displayId = mDisplay != null
                     ? mDisplay.getDisplayId() : Display.DEFAULT_DISPLAY;
 
-            c.mResources = createResources(mActivityToken, pi, displayId, null,
-                    getDisplayAdjustments(displayId).getCompatibilityInfo());
+            c.setResources(createResources(mActivityToken, pi, displayId, null,
+                    getDisplayAdjustments(displayId).getCompatibilityInfo()));
             if (c.mResources != null) {
                 return c;
             }
@@ -1962,8 +1964,8 @@ class ContextImpl extends Context {
             final int displayId = mDisplay != null
                     ? mDisplay.getDisplayId() : Display.DEFAULT_DISPLAY;
 
-            c.mResources = createResources(mActivityToken, pi, displayId, null,
-                    getDisplayAdjustments(displayId).getCompatibilityInfo());
+            c.setResources(createResources(mActivityToken, pi, displayId, null,
+                    getDisplayAdjustments(displayId).getCompatibilityInfo()));
             if (c.mResources != null) {
                 return c;
             }
@@ -1990,7 +1992,7 @@ class ContextImpl extends Context {
         final int displayId = mDisplay != null
                 ? mDisplay.getDisplayId() : Display.DEFAULT_DISPLAY;
 
-        context.mResources = ResourcesManager.getInstance().getResources(
+        context.setResources(ResourcesManager.getInstance().getResources(
                 mActivityToken,
                 mPackageInfo.getResDir(),
                 paths,
@@ -1999,7 +2001,7 @@ class ContextImpl extends Context {
                 displayId,
                 null,
                 mPackageInfo.getCompatibilityInfo(),
-                classLoader);
+                classLoader));
         return context;
     }
 
@@ -2013,8 +2015,8 @@ class ContextImpl extends Context {
                 mUser, mFlags, mClassLoader);
 
         final int displayId = mDisplay != null ? mDisplay.getDisplayId() : Display.DEFAULT_DISPLAY;
-        context.mResources = createResources(mActivityToken, mPackageInfo, displayId,
-                overrideConfiguration, getDisplayAdjustments(displayId).getCompatibilityInfo());
+        context.setResources(createResources(mActivityToken, mPackageInfo, displayId,
+                overrideConfiguration, getDisplayAdjustments(displayId).getCompatibilityInfo()));
         return context;
     }
 
@@ -2028,8 +2030,8 @@ class ContextImpl extends Context {
                 mUser, mFlags, mClassLoader);
 
         final int displayId = display.getDisplayId();
-        context.mResources = createResources(mActivityToken, mPackageInfo, displayId, null,
-                getDisplayAdjustments(displayId).getCompatibilityInfo());
+        context.setResources(createResources(mActivityToken, mPackageInfo, displayId, null,
+                getDisplayAdjustments(displayId).getCompatibilityInfo()));
         context.mDisplay = display;
         return context;
     }
@@ -2136,7 +2138,7 @@ class ContextImpl extends Context {
         LoadedApk packageInfo = new LoadedApk(mainThread);
         ContextImpl context = new ContextImpl(null, mainThread, packageInfo, null, null, 0,
                 null);
-        context.mResources = packageInfo.getResources();
+        context.setResources(packageInfo.getResources());
         context.mResources.updateConfiguration(context.mResourcesManager.getConfiguration(),
                 context.mResourcesManager.getDisplayMetrics());
         return context;
@@ -2146,7 +2148,7 @@ class ContextImpl extends Context {
         if (packageInfo == null) throw new IllegalArgumentException("packageInfo");
         ContextImpl context = new ContextImpl(null, mainThread, packageInfo, null, null, 0,
                 null);
-        context.mResources = packageInfo.getResources();
+        context.setResources(packageInfo.getResources());
         return context;
     }
 
@@ -2185,7 +2187,7 @@ class ContextImpl extends Context {
 
         // Create the base resources for which all configuration contexts for this Activity
         // will be rebased upon.
-        context.mResources = resourcesManager.createBaseActivityResources(activityToken,
+        context.setResources(resourcesManager.createBaseActivityResources(activityToken,
                 packageInfo.getResDir(),
                 splitDirs,
                 packageInfo.getOverlayDirs(),
@@ -2193,7 +2195,7 @@ class ContextImpl extends Context {
                 displayId,
                 overrideConfiguration,
                 compatInfo,
-                classLoader);
+                classLoader));
         context.mDisplay = resourcesManager.getAdjustedDisplay(displayId,
                 context.getResources());
         return context;
@@ -2232,7 +2234,7 @@ class ContextImpl extends Context {
         if (container != null) {
             mBasePackageName = container.mBasePackageName;
             mOpPackageName = container.mOpPackageName;
-            mResources = container.mResources;
+            setResources(container.mResources);
             mDisplay = container.mDisplay;
         } else {
             mBasePackageName = packageInfo.mPackageName;
@@ -2249,6 +2251,14 @@ class ContextImpl extends Context {
         }
 
         mContentResolver = new ApplicationContentResolver(this, mainThread, user);
+    }
+
+    void setResources(Resources r) {
+        if (mPackageInfo.getTargetSdkVersion() < VERSION_CODES.O) {
+            mResources = new CompatResources(r, this);
+        } else {
+            mResources = r;
+        }
     }
 
     void installSystemApplicationInfo(ApplicationInfo info, ClassLoader classLoader) {
