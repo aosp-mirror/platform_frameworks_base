@@ -1291,28 +1291,14 @@ public class LauncherApps {
         public @interface RequestType {}
 
         private final int mRequestType;
-        private final ShortcutInfo mShortcutInfo;
-        private final AppWidgetProviderInfo mAppWidgetInfo;
         private final IPinItemRequest mInner;
 
         /**
          * @hide
          */
-        public PinItemRequest(ShortcutInfo shortcutInfo, IPinItemRequest inner) {
-            mRequestType = REQUEST_TYPE_SHORTCUT;
-            mShortcutInfo = shortcutInfo;
-            mAppWidgetInfo = null;
+        public PinItemRequest(IPinItemRequest inner, int type) {
             mInner = inner;
-        }
-
-        /**
-         * @hide
-         */
-        public PinItemRequest(AppWidgetProviderInfo appWidgetInfo, IPinItemRequest inner) {
-            mRequestType = REQUEST_TYPE_APPWIDGET;
-            mShortcutInfo = null;
-            mAppWidgetInfo = appWidgetInfo;
-            mInner = inner;
+            mRequestType = type;
         }
 
         /**
@@ -1330,7 +1316,11 @@ public class LauncherApps {
          */
         @Nullable
         public ShortcutInfo getShortcutInfo() {
-            return mShortcutInfo;
+            try {
+                return mInner.getShortcutInfo();
+            } catch (RemoteException e) {
+                throw e.rethrowAsRuntimeException();
+            }
         }
 
         /**
@@ -1339,12 +1329,16 @@ public class LauncherApps {
          */
         @Nullable
         public AppWidgetProviderInfo getAppWidgetProviderInfo(Context context) {
-            if (mAppWidgetInfo != null) {
-                AppWidgetProviderInfo info = mAppWidgetInfo.clone();
+            try {
+                final AppWidgetProviderInfo info = mInner.getAppWidgetProviderInfo();
+                if (info == null) {
+                    return null;
+                }
                 info.updateDimensions(context.getResources().getDisplayMetrics());
                 return info;
+            } catch (RemoteException e) {
+                throw e.rethrowAsRuntimeException();
             }
-            return null;
         }
 
         /**
@@ -1381,22 +1375,12 @@ public class LauncherApps {
             final ClassLoader cl = getClass().getClassLoader();
 
             mRequestType = source.readInt();
-            mShortcutInfo = mRequestType == REQUEST_TYPE_SHORTCUT ?
-                (ShortcutInfo) source.readParcelable(cl) : null;
-            mAppWidgetInfo = mRequestType == REQUEST_TYPE_APPWIDGET ?
-                (AppWidgetProviderInfo) source.readParcelable(cl) : null;
             mInner = IPinItemRequest.Stub.asInterface(source.readStrongBinder());
         }
 
         @Override
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeInt(mRequestType);
-            if (mRequestType == REQUEST_TYPE_SHORTCUT) {
-                dest.writeParcelable(mShortcutInfo, flags);
-            }
-            if (mRequestType == REQUEST_TYPE_APPWIDGET) {
-                dest.writeParcelable(mAppWidgetInfo, flags);
-            }
             dest.writeStrongBinder(mInner.asBinder());
         }
 
