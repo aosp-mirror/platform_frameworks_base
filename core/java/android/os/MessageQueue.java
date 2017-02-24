@@ -18,9 +18,11 @@ package android.os;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.os.MessageQueueProto;
 import android.util.Log;
 import android.util.Printer;
 import android.util.SparseArray;
+import android.util.proto.ProtoOutputStream;
 
 import java.io.FileDescriptor;
 import java.lang.annotation.Retention;
@@ -31,7 +33,7 @@ import java.util.ArrayList;
  * Low-level class holding the list of messages to be dispatched by a
  * {@link Looper}.  Messages are not added directly to a MessageQueue,
  * but rather through {@link Handler} objects associated with the Looper.
- * 
+ *
  * <p>You can retrieve the MessageQueue for the current thread with
  * {@link Looper#myQueue() Looper.myQueue()}.
  */
@@ -768,6 +770,18 @@ public final class MessageQueue {
             pw.println(prefix + "(Total messages: " + n + ", polling=" + isPollingLocked()
                     + ", quitting=" + mQuitting + ")");
         }
+    }
+
+    void writeToProto(ProtoOutputStream proto, long fieldId) {
+        final long messageQueueToken = proto.start(fieldId);
+        synchronized (this) {
+            for (Message msg = mMessages; msg != null; msg = msg.next) {
+                msg.writeToProto(proto, MessageQueueProto.MESSAGES);
+            }
+            proto.write(MessageQueueProto.IS_POLLING_LOCKED, isPollingLocked());
+            proto.write(MessageQueueProto.IS_QUITTING, mQuitting);
+        }
+        proto.end(messageQueueToken);
     }
 
     /**
