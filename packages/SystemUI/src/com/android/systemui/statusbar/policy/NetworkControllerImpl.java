@@ -690,6 +690,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
             mDemoMode = true;
             mDemoInetCondition = mInetCondition;
             mDemoWifiState = mWifiSignalController.getState();
+            mDemoWifiState.ssid = "DemoMode";
         } else if (mDemoMode && command.equals(COMMAND_EXIT)) {
             if (DEBUG) Log.d(TAG, "Exiting demo mode");
             mDemoMode = false;
@@ -734,6 +735,25 @@ public class NetworkControllerImpl extends BroadcastReceiver
                     mDemoWifiState.level = level.equals("null") ? -1
                             : Math.min(Integer.parseInt(level), WifiIcons.WIFI_LEVEL_COUNT - 1);
                     mDemoWifiState.connected = mDemoWifiState.level >= 0;
+                }
+                String activity = args.getString("activity");
+                if (activity != null) {
+                    switch (activity) {
+                        case "inout":
+                            mWifiSignalController.setActivity(WifiManager.DATA_ACTIVITY_INOUT);
+                            break;
+                        case "in":
+                            mWifiSignalController.setActivity(WifiManager.DATA_ACTIVITY_IN);
+                            break;
+                        case "out":
+                            mWifiSignalController.setActivity(WifiManager.DATA_ACTIVITY_OUT);
+                            break;
+                        default:
+                            mWifiSignalController.setActivity(WifiManager.DATA_ACTIVITY_NONE);
+                            break;
+                    }
+                } else {
+                    mWifiSignalController.setActivity(WifiManager.DATA_ACTIVITY_NONE);
                 }
                 mDemoWifiState.enabled = show;
                 mWifiSignalController.notifyListeners();
@@ -801,7 +821,23 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 }
                 String activity = args.getString("activity");
                 if (activity != null) {
-                    controller.setActivity(Integer.parseInt(activity));
+                    controller.getState().dataConnected = true;
+                    switch (activity) {
+                        case "inout":
+                            controller.setActivity(TelephonyManager.DATA_ACTIVITY_INOUT);
+                            break;
+                        case "in":
+                            controller.setActivity(TelephonyManager.DATA_ACTIVITY_IN);
+                            break;
+                        case "out":
+                            controller.setActivity(TelephonyManager.DATA_ACTIVITY_OUT);
+                            break;
+                        default:
+                            controller.setActivity(TelephonyManager.DATA_ACTIVITY_NONE);
+                            break;
+                    }
+                } else {
+                    controller.setActivity(TelephonyManager.DATA_ACTIVITY_NONE);
                 }
                 controller.getState().enabled = show;
                 controller.notifyListeners();

@@ -70,6 +70,11 @@
             android:layout_width="wrap_content"
             android:alpha="0.0"
             />
+        <ImageView
+            android:id="@+id/wifi_inout"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            />
     </FrameLayout>
     <View
         android:id="@+id/wifi_signal_spacer"
