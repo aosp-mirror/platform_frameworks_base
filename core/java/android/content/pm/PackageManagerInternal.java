@@ -306,4 +306,10 @@ public abstract class PackageManagerInternal {
      */
     public abstract boolean setEnabledOverlayPackages(int userId, String targetPackageName,
             List<String> overlayPackageNames);
+
+    /**
+     * Resolves an intent, allowing instant apps to be resolved.
+     */
+    public abstract ResolveInfo resolveIntent(Intent intent, String resolvedType,
+            int flags, int userId);
 }
