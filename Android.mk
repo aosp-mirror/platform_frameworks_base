@@ -935,6 +935,28 @@ framework_docs_LOCAL_DROIDDOC_OPTIONS := \
 		-werror -hide 111 -hide 113 \
 		-overview $(LOCAL_PATH)/core/java/overview.html
 
+SUPPORT_API_DIR := ./frameworks/support/api
+
+# More API Level information for the Support Library, which is currently
+# included as part of the core framework docs build.
+framework_docs_LOCAL_DROIDDOC_OPTIONS += \
+    -since $(SUPPORT_API_DIR)/22.0.0.txt 22.0.0 \
+    -since $(SUPPORT_API_DIR)/22.0.0.txt 22.0.0 \
+    -since $(SUPPORT_API_DIR)/22.1.0.txt 22.1.0 \
+    -since $(SUPPORT_API_DIR)/22.2.0.txt 22.2.0 \
+    -since $(SUPPORT_API_DIR)/22.2.1.txt 22.2.1 \
+    -since $(SUPPORT_API_DIR)/23.0.0.txt 23.0.0 \
+    -since $(SUPPORT_API_DIR)/23.1.0.txt 23.1.0 \
+    -since $(SUPPORT_API_DIR)/23.1.1.txt 23.1.1 \
+    -since $(SUPPORT_API_DIR)/23.2.0.txt 23.2.0 \
+    -since $(SUPPORT_API_DIR)/23.2.1.txt 23.2.1 \
+    -since $(SUPPORT_API_DIR)/23.4.0.txt 23.4.0 \
+    -since $(SUPPORT_API_DIR)/24.0.0.txt 24.0.0 \
+    -since $(SUPPORT_API_DIR)/24.1.0.txt 24.1.0 \
+    -since $(SUPPORT_API_DIR)/24.2.0.txt 24.2.0 \
+    -since $(SUPPORT_API_DIR)/25.0.0.txt 25.0.0 \
+    -since $(SUPPORT_API_DIR)/25.1.0.txt 25.1.0
+
 framework_docs_LOCAL_API_CHECK_ADDITIONAL_JAVA_DIR:= \
 	$(call intermediates-dir-for,JAVA_LIBRARIES,framework,,COMMON)
 
