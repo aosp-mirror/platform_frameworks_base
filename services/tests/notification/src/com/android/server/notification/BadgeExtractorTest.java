@@ -89,6 +89,7 @@ public class BadgeExtractorTest {
         when(mConfig.canShowBadge(mPkg, mUid)).thenReturn(true);
         NotificationChannel channel =
                 new NotificationChannel("a", "a", NotificationManager.IMPORTANCE_UNSPECIFIED);
+        when(mConfig.getNotificationChannel(mPkg, mUid, "a", false)).thenReturn(channel);
         channel.setShowBadge(false);
 
         NotificationRecord r = getNotificationRecord(channel);
@@ -107,6 +108,7 @@ public class BadgeExtractorTest {
         NotificationChannel channel =
                 new NotificationChannel("a", "a", NotificationManager.IMPORTANCE_HIGH);
         channel.setShowBadge(true);
+        when(mConfig.getNotificationChannel(mPkg, mUid, "a", false)).thenReturn(channel);
 
         NotificationRecord r = getNotificationRecord(channel);
 
@@ -124,6 +126,7 @@ public class BadgeExtractorTest {
         NotificationChannel channel =
                 new NotificationChannel("a", "a", NotificationManager.IMPORTANCE_UNSPECIFIED);
         channel.setShowBadge(true);
+        when(mConfig.getNotificationChannel(mPkg, mUid, "a", false)).thenReturn(channel);
 
         NotificationRecord r = getNotificationRecord(channel);
 
@@ -141,6 +144,7 @@ public class BadgeExtractorTest {
         NotificationChannel channel =
                 new NotificationChannel("a", "a", NotificationManager.IMPORTANCE_UNSPECIFIED);
         channel.setShowBadge(false);
+        when(mConfig.getNotificationChannel(mPkg, mUid, "a", false)).thenReturn(channel);
 
         NotificationRecord r = getNotificationRecord(channel);
 
