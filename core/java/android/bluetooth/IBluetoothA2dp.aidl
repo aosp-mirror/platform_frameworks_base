@@ -40,4 +40,6 @@ interface IBluetoothA2dp {
     boolean isA2dpPlaying(in BluetoothDevice device);
     BluetoothCodecStatus getCodecStatus();
     oneway void setCodecConfigPreference(in BluetoothCodecConfig codecConfig);
+    oneway void enableOptionalCodecs();
+    oneway void disableOptionalCodecs();
 }
