@@ -2209,11 +2209,11 @@ public class AudioManager {
      */
     public static final int AUDIOFOCUS_REQUEST_GRANTED = 1;
      /**
-      * @hide
       * A focus change request whose granting is delayed: the request was successful, but the
       * requester will only be granted audio focus once the condition that prevented immediate
       * granting has ended.
-      * See {@link #requestAudioFocus(OnAudioFocusChangeListener, AudioAttributes, int, int)}
+      * See {@link #requestAudioFocus(AudioFocusRequest)} and
+      * {@link AudioFocusRequest.Builder#setAcceptsDelayedFocusGain(boolean)}
       */
     public static final int AUDIOFOCUS_REQUEST_DELAYED = 2;
 
@@ -2291,6 +2291,44 @@ public class AudioManager {
     /** @hide */
     public static final int AUDIOFOCUS_FLAGS_SYSTEM = AUDIOFOCUS_FLAG_DELAY_OK
             | AUDIOFOCUS_FLAG_PAUSES_ON_DUCKABLE_LOSS | AUDIOFOCUS_FLAG_LOCK;
+
+    /**
+     * Request audio focus.
+     * See the {@link AudioFocusRequest} for information about the options available to configure
+     * your request, and notification of focus gain and loss.
+     * @param focusRequest a {@link AudioFocusRequest} instance used to configure how focus is
+     *   requested.
+     * @return {@link #AUDIOFOCUS_REQUEST_FAILED}, {@link #AUDIOFOCUS_REQUEST_GRANTED}
+     *     or {@link #AUDIOFOCUS_REQUEST_DELAYED}.
+     *     <br>Note that the return value is never {@link #AUDIOFOCUS_REQUEST_DELAYED} when focus
+     *     is requested without building the {@link AudioFocusRequest} with
+     *     {@link AudioFocusRequest.Builder#setAcceptsDelayedFocusGain(boolean)} set to
+     *     {@code true}.
+     * @throws IllegalArgumentException if passed a null argument
+     */
+    public int requestAudioFocus(@NonNull AudioFocusRequest focusRequest) {
+        if (focusRequest == null) {
+            throw new IllegalArgumentException("Illegal null AudioFocusRequest");
+        }
+        return requestAudioFocus(focusRequest.getOnAudioFocusChangeListener(),
+                focusRequest.getAudioAttributes(),
+                focusRequest.getFocusGain(), focusRequest.getFlags(), null /* no AudioPolicy*/);
+    }
+
+    /**
+     *  Abandon audio focus. Causes the previous focus owner, if any, to receive focus.
+     *  @param focusRequest the {@link AudioFocusRequest} that was used when requesting focus
+     *      with {@link #requestAudioFocus(AudioFocusRequest)}.
+     *  @return {@link #AUDIOFOCUS_REQUEST_FAILED} or {@link #AUDIOFOCUS_REQUEST_GRANTED}
+     *  @throws IllegalArgumentException if passed a null argument
+     */
+    public int abandonAudioFocusRequest(@NonNull AudioFocusRequest focusRequest) {
+        if (focusRequest == null) {
+            throw new IllegalArgumentException("Illegal null AudioFocusRequest");
+        }
+        return abandonAudioFocus(focusRequest.getOnAudioFocusChangeListener(),
+                focusRequest.getAudioAttributes());
+    }
 
     /**
      * @hide
@@ -2372,8 +2410,7 @@ public class AudioManager {
         if (requestAttributes == null) {
             throw new IllegalArgumentException("Illegal null AudioAttributes argument");
         }
-        if ((durationHint < AUDIOFOCUS_GAIN) ||
-                (durationHint > AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE)) {
+        if (!AudioFocusRequest.isValidFocusGain(durationHint)) {
             throw new IllegalArgumentException("Invalid duration hint");
         }
         if (flags != (flags & AUDIOFOCUS_FLAGS_SYSTEM)) {
