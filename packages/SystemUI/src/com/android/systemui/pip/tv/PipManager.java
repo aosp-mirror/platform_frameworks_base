@@ -242,12 +242,17 @@ public class PipManager implements BasePipManager {
                             entry = Pair.<String, String>create(packageAndClassName[0], null);
                             break;
                         case 2:
-                            entry = Pair.<String, String>create(
-                                    packageAndClassName[0],
-                                    packageAndClassName[0] + packageAndClassName[1]);
+                            if (packageAndClassName[1] != null
+                                    && packageAndClassName[1].startsWith(".")) {
+                                entry = Pair.<String, String>create(
+                                        packageAndClassName[0],
+                                        packageAndClassName[0] + packageAndClassName[1]);
+                            }
                     }
                     if (entry != null) {
                         sSettingsPackageAndClassNamePairList.add(entry);
+                    } else {
+                        Log.w(TAG, "Ignoring malformed settings name " + settings[i]);
                     }
                 }
             }
