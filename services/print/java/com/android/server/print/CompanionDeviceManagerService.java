@@ -141,7 +141,7 @@ public class CompanionDeviceManagerService extends SystemService {
     }
 
     private ServiceConnection getServiceConnection(
-            final AssociationRequest<?> request,
+            final AssociationRequest request,
             final IFindDeviceCallback findDeviceCallback,
             final String callingPackage) {
         return new ServiceConnection() {
