@@ -732,27 +732,17 @@ public class FocusFinder {
             getRect(first, mFirstRect);
             getRect(second, mSecondRect);
 
-            if (mFirstRect.top < mSecondRect.top) {
-                return -1;
-            } else if (mFirstRect.top > mSecondRect.top) {
-                return 1;
-            } else if (mFirstRect.left < mSecondRect.left) {
-                return mIsLayoutRtl ? 1 : -1;
-            } else if (mFirstRect.left > mSecondRect.left) {
-                return mIsLayoutRtl ? -1 : 1;
-            } else if (mFirstRect.bottom < mSecondRect.bottom) {
-                return -1;
-            } else if (mFirstRect.bottom > mSecondRect.bottom) {
-                return 1;
-            } else if (mFirstRect.right < mSecondRect.right) {
-                return mIsLayoutRtl ? 1 : -1;
-            } else if (mFirstRect.right > mSecondRect.right) {
-                return mIsLayoutRtl ? -1 : 1;
+            boolean overlapsVertically = (mFirstRect.top < mSecondRect.top
+                    && mFirstRect.bottom > mSecondRect.top)
+                    || (mFirstRect.top > mSecondRect.top
+                    && mFirstRect.top < mSecondRect.bottom);
+            boolean alignedVertically = (mFirstRect.left > mSecondRect.left)
+                    == (mFirstRect.right < mSecondRect.right);
+            if (overlapsVertically && !alignedVertically) {
+                int rtl = mIsLayoutRtl ? -1 : 1;
+                return rtl * (mFirstRect.left - mSecondRect.left);
             } else {
-                // The view are distinct but completely coincident so we consider
-                // them equal for our purposes.  Since the sort is stable, this
-                // means that the views will retain their layout order relative to one another.
-                return 0;
+                return mFirstRect.top - mSecondRect.top;
             }
         }
 
