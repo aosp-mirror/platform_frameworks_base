@@ -208,7 +208,9 @@ public class PhoneStateListener {
      *
      * @see #onOemHookRawEvent
      * @hide
+     * @deprecated OEM needs a vendor-extension hal and their apps should use that instead
      */
+    @Deprecated
     public static final int LISTEN_OEM_HOOK_RAW_EVENT                       = 0x00008000;
 
     /**
