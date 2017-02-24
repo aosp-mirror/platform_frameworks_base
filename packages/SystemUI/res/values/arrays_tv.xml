@@ -17,9 +17,13 @@
  */
 -->
 <resources>
-    <!-- List of package name or class name which are considered as Settings,
+    <!-- List of package names or class names which are considered as Settings,
          so PIP location should be adjusted to the left of the side panel.
-         This can be overriden in an overlay -->
+         If it should be applied for all activities in a package, add the package name.
+         If it should be applied for an activity in a package, add its class name with package name.
+         The class name must follow format 'package_name/.class_name' ('/.' in between).
+         This can be overriden in an overlay.
+         -->
     <string-array name="tv_pip_settings_class_name" translatable="false">
         <item>com.android.tv.settings</item>
         <item>com.google.android.leanbacklauncher/.settings.HomeScreenSettingsActivity</item>
