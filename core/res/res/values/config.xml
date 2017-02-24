@@ -1273,19 +1273,6 @@
          config_enableFusedLocationOverlay is false. -->
     <string name="config_fusedLocationProviderPackageName" translatable="false">com.android.location.fused</string>
 
-    <!-- A list of potential packages, in priority order, that may contain a
-         network recommendation provider. A network recommendation provider must:
-             * Be granted the SCORE_NETWORKS permission.
-             * Include a Service for the android.net.scoring.RECOMMEND_NETWORKS action
-               protected by the BIND_NETWORK_RECOMMENDATION_SERVICE permission.
-
-         This may be empty if network scoring and recommending isn't supported.
-         -->
-    <string-array name="config_networkRecommendationPackageNames" translatable="false">
-        <!-- The standard AOSP network recommendation provider -->
-        <item>com.android.networkrecommendation</item>
-    </string-array>
-
     <!-- The package name of the default network recommendation app.
          A network recommendation provider must:
              * Be granted the SCORE_NETWORKS permission.

@@ -2785,7 +2785,6 @@
   <java-symbol type="layout" name="notification_template_material_ambient" />
 
   <!-- Network Recommendation -->
-  <java-symbol type="array" name="config_networkRecommendationPackageNames" />
   <java-symbol type="string" name="config_defaultNetworkRecommendationProviderPackage" />
 
   <!-- Whether allow 3rd party apps on internal storage. -->
