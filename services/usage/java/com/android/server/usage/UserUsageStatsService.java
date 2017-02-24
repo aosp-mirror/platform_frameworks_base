@@ -529,7 +529,6 @@ class UserUsageStatsService {
         pw.decreaseIndent();
 
         pw.println();
-        pw.increaseIndent();
         pw.println("ChooserCounts");
         pw.increaseIndent();
         for (UsageStats usageStats : pkgStats.values()) {
@@ -553,6 +552,7 @@ class UserUsageStatsService {
             }
             pw.println();
         }
+        pw.decreaseIndent();
 
         pw.println("configurations");
         pw.increaseIndent();
