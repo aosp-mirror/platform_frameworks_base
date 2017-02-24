@@ -16,7 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
 import static android.Manifest.permission.MANAGE_APP_TOKENS;
 import static android.Manifest.permission.REGISTER_WINDOW_MANAGER_LISTENERS;
 import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
@@ -30,7 +29,6 @@ import static android.content.Intent.EXTRA_PACKAGE_NAME;
 import static android.content.Intent.EXTRA_UID;
 import static android.content.Intent.EXTRA_USER_HANDLE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
-import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.UserHandle.USER_NULL;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.DOCKED_INVALID;
@@ -69,8 +67,6 @@ import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 import static com.android.server.wm.AppTransition.TRANSIT_UNSET;
 import static com.android.server.wm.AppWindowAnimator.PROLONG_ANIMATION_AT_END;
 import static com.android.server.wm.AppWindowAnimator.PROLONG_ANIMATION_AT_START;
-import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_DOCKED_DIVIDER;
-import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_FREEFORM;
 import static com.android.server.wm.KeyguardDisableHandler.KEYGUARD_POLICY_CHANGED;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
@@ -112,7 +108,6 @@ import android.app.ActivityManager.TaskSnapshot;
 import android.app.ActivityManagerInternal;
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
-import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -626,9 +621,14 @@ public class WindowManagerService extends IWindowManager.Stub
     WindowState mCurrentFocus = null;
     WindowState mLastFocus = null;
 
-    /** This just indicates the window the input method is on top of, not
-     * necessarily the window its input is going to. */
+    // TODO: All the IME window tracking should be moved to DisplayContent and tracked per display.
+    // This just indicates the window the input method is on top of, not necessarily the window its
+    // input is going to.
     WindowState mInputMethodTarget = null;
+    // The binder token currently using the IME as determined by the input method service.
+    // Window manager uses this to determine the final input method target
+    // (almost always this candidate) for z-ordering.
+    IBinder mInputMethodTargetCandidate = null;
 
     /** If true hold off on modifying the animation layer of mInputMethodTarget */
     boolean mInputMethodTargetWaitingAnim;
@@ -6951,8 +6951,9 @@ public class WindowManagerService extends IWindowManager.Stub
             pw.print("  mLastFocus="); pw.println(mLastFocus);
         }
         pw.print("  mFocusedApp="); pw.println(mFocusedApp);
-        if (mInputMethodTarget != null) {
-            pw.print("  mInputMethodTarget="); pw.println(mInputMethodTarget);
+        if (mInputMethodTarget != null || mInputMethodTargetCandidate != null) {
+            pw.println("  mInputMethodTarget=" + mInputMethodTarget
+                    + " mInputMethodTargetCandidate=" + getWindow(mInputMethodTargetCandidate));
         }
         pw.print("  mInTouchMode="); pw.print(mInTouchMode);
                 pw.print(" mLayoutSeq="); pw.println(mLayoutSeq);
@@ -7819,11 +7820,28 @@ public class WindowManagerService extends IWindowManager.Stub
         @Override
         public void updateInputMethodWindowStatus(@NonNull IBinder imeToken,
                 boolean imeWindowVisible, @Nullable IBinder targetWindowToken) {
-            // TODO (b/34628091): Use this method to address the window animation issue.
-            if (DEBUG_INPUT_METHOD) {
-                Slog.w(TAG_WM, "updateInputMethodWindowStatus: imeToken=" + imeToken
-                        + " imeWindowVisible=" + imeWindowVisible
-                        + " targetWindowToken=" + targetWindowToken);
+            synchronized (mWindowMap) {
+                final WindowState newTargetWin = getWindow(targetWindowToken);
+                final WindowState currentTargetWin = getWindow(mInputMethodTargetCandidate);
+
+                if (DEBUG_INPUT_METHOD) Slog.w(TAG_WM, "updateInputMethodWindowStatus: imeToken="
+                        + imeToken + " imeWindowVisible=" + imeWindowVisible
+                        + " targetWindowToken=" + targetWindowToken
+                        + " newTargetWin=" + newTargetWin
+                        + " currentTargetWin=" + currentTargetWin);
+
+                if (newTargetWin == currentTargetWin) {
+                    return;
+                }
+
+                final DisplayContent dc = newTargetWin != null
+                        ? newTargetWin.getDisplayContent() : currentTargetWin.getDisplayContent();
+
+                // It is possible the window for the target candidate isn't added yet, so we
+                // remember the token instead and use it to look-up the window each time we compute
+                // the ime target.
+                mInputMethodTargetCandidate = targetWindowToken;
+                dc.computeImeTarget(true /* updateImeTarget */);
             }
         }
 
@@ -7867,6 +7885,10 @@ public class WindowManagerService extends IWindowManager.Stub
                 accessibilityController.performComputeChangedWindowsNotLocked();
             }
         }
+    }
+
+    WindowState getWindow(IBinder binder) {
+        return binder == null ? null : mWindowMap.get(binder);
     }
 
     void registerAppFreezeListener(AppFreezeListener listener) {
