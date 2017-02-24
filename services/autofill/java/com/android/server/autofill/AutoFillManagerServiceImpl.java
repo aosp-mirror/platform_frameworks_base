@@ -56,6 +56,7 @@ import android.service.autofill.AutoFillServiceInfo;
 import android.service.autofill.Dataset;
 import android.service.autofill.FillResponse;
 import android.service.autofill.IAutoFillService;
+import android.service.autofill.SaveInfo;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -719,18 +720,19 @@ final class AutoFillManagerServiceImpl {
                 }
                 return;
             }
-            final ArraySet<AutoFillId> savableIds = mCurrentResponse.getSavableIds();
+            final SaveInfo saveInfo = mCurrentResponse.getSaveInfo();
             if (DEBUG) {
-                Slog.d(TAG, "showSaveLocked(): savableIds=" + savableIds);
+                Slog.d(TAG, "showSaveLocked(): saveInfo=" + saveInfo);
             }
 
-            if (savableIds == null || savableIds.isEmpty()) {
+            if (saveInfo == null || saveInfo.getSavableIds() == null
+                    || saveInfo.getSavableIds().isEmpty()) {
                 return;
             }
 
-            final int size = savableIds.size();
+            final int size = saveInfo.getSavableIds().size();
             for (int i = 0; i < size; i++) {
-                final AutoFillId id = savableIds.valueAt(i);
+                final AutoFillId id = saveInfo.getSavableIds().valueAt(i);
                 final ViewState state = mViewStates.get(id);
                 if (state != null && state.mValueUpdated) {
                     final AutoFillValue filledValue = findValue(mAutoFilledDataset, id);
