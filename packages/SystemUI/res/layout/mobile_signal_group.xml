@@ -54,4 +54,10 @@
         android:src="@drawable/stat_sys_roaming"
         android:contentDescription="@string/accessibility_data_connection_roaming"
         android:visibility="gone" />
+    <ImageView
+        android:id="@+id/mobile_inout"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:visibility="gone"
+        />
 </FrameLayout>
