@@ -115,7 +115,6 @@ public class ListMenuItemView extends LinearLayout implements MenuView.ItemView 
         setEnabled(itemData.isEnabled());
         setSubMenuArrowVisible(itemData.hasSubMenu());
         setContentDescription(itemData.getContentDescription());
-        setTooltipText(itemData.getTooltipText());
     }
 
     public void setForceShowIcon(boolean forceShow) {

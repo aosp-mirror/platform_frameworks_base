@@ -1195,6 +1195,8 @@ public final class FloatingToolbar {
                     }
 
                     setButtonTagAndClickListener(menuItemButton, menuItem);
+                    // Set tooltips for main panel items, but not overflow items (b/35726766).
+                    menuItemButton.setTooltipText(menuItem.getTooltipText());
                     mMainPanel.addView(menuItemButton);
                     final ViewGroup.LayoutParams params = menuItemButton.getLayoutParams();
                     params.width = menuItemButtonWidth + extraPadding / 2;
@@ -1635,7 +1637,6 @@ public final class FloatingToolbar {
                 buttonText.setPaddingRelative(iconTextSpacing, 0, 0, 0);
             }
         }
-        menuItemButton.setTooltipText(menuItem.getTooltipText());
         final CharSequence contentDescription = menuItem.getContentDescription();
         if (TextUtils.isEmpty(contentDescription)) {
             menuItemButton.setContentDescription(menuItem.getTitle());
