@@ -271,7 +271,6 @@ public class WifiTracker {
         if (mWifiManager.isWifiEnabled()) {
             mScanner.resume();
         }
-        mWorkHandler.sendEmptyMessage(WorkHandler.MSG_UPDATE_ACCESS_POINTS);
     }
 
     /**
@@ -715,9 +714,9 @@ public class WifiTracker {
 
                 mMainHandler.sendEmptyMessage(MainHandler.MSG_CONNECTED_CHANGED);
 
-                mWorkHandler.sendEmptyMessage(WorkHandler.MSG_UPDATE_ACCESS_POINTS);
                 mWorkHandler.obtainMessage(WorkHandler.MSG_UPDATE_NETWORK_INFO, info)
                         .sendToTarget();
+                mWorkHandler.sendEmptyMessage(WorkHandler.MSG_UPDATE_ACCESS_POINTS);
             }
         }
     };

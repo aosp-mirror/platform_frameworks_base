@@ -265,6 +265,9 @@ public class AccessPoint implements Comparable<AccessPoint> {
     public String toString() {
         StringBuilder builder = new StringBuilder().append("AccessPoint(")
                 .append(ssid);
+        if (bssid != null) {
+            builder.append(":").append(bssid);
+        }
         if (isSaved()) {
             builder.append(',').append("saved");
         }
@@ -280,6 +283,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
         if (security != SECURITY_NONE) {
             builder.append(',').append(securityToString(security, pskType));
         }
+        builder.append(",level=").append(getLevel());
         builder.append(",rankingScore=").append(mRankingScore);
         builder.append(",badge=").append(mBadge);
 
