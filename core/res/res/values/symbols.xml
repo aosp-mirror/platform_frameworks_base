@@ -2796,7 +2796,7 @@
   <java-symbol type="drawable" name="lockscreen_selected" />
 
   <java-symbol type="string" name="notification_header_divider_symbol_with_spaces" />
-  <java-symbol type="string" name="config_defaultCellBroadcastReceiverComponent" />
+  <java-symbol type="string" name="config_defaultCellBroadcastReceiverPkg" />
 
   <java-symbol type="color" name="notification_primary_text_color_light" />
   <java-symbol type="color" name="notification_primary_text_color_dark" />
@@ -2851,7 +2851,7 @@
 
   <!-- android.service.trust -->
   <java-symbol type="bool" name="config_allowEscrowTokenForTrustAgent"/>
-  
+
   <!-- Time picker -->
   <java-symbol type="id" name="toggle_mode"/>
   <java-symbol type="id" name="input_mode"/>

@@ -2748,8 +2748,8 @@
     <!-- Flag indicates that whether non-system apps can be installed on internal storage. -->
     <bool name="config_allow3rdPartyAppOnInternal">true</bool>
 
-    <!-- Component name of the default cell broadcast receiver -->
-    <string name="config_defaultCellBroadcastReceiverComponent" translatable="false">com.android.cellbroadcastreceiver/.PrivilegedCellBroadcastReceiver</string>
+    <!-- Package name of the default cell broadcast receiver -->
+    <string name="config_defaultCellBroadcastReceiverPkg" translatable="false">com.android.cellbroadcastreceiver</string>
 
     <!-- Specifies the path that is used by AdaptiveIconDrawable class to crop launcher icons. -->
     <string name="config_icon_mask" translatable="false">"M50,0L100,0 100,100 0,100 0,0z"</string>

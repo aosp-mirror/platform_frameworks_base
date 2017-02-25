@@ -393,6 +393,7 @@ public class SettingsBackupTest {
                  Settings.Secure.BACKUP_TRANSPORT,
                  Settings.Secure.BLUETOOTH_HCI_LOG,
                  Settings.Secure.CARRIER_APPS_HANDLED,
+                 Settings.Secure.CMAS_ADDITIONAL_BROADCAST_PKG,
                  Settings.Secure.COMPLETED_CATEGORY_PREFIX,
                  Settings.Secure.CONNECTIVITY_RELEASE_PENDING_INTENT_DELAY_MS,
                  Settings.Secure.DEFAULT_INPUT_METHOD,
