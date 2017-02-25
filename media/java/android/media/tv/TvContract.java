@@ -25,6 +25,7 @@ import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.BaseColumns;
 import android.text.TextUtils;
@@ -70,6 +71,98 @@ public final class TvContract {
     private static final String PATH_RECORDED_PROGRAM = "recorded_program";
     private static final String PATH_PREVIEW_PROGRAM = "preview_program";
     private static final String PATH_PASSTHROUGH = "passthrough";
+
+    /**
+     * The method name to get existing columns in the given table of the specified content provider.
+     *
+     * <p>The method caller must provide the following parameter:
+     * <ul>
+     *     <li>{@code arg}: The content URI of the target table as a {@link String}.</li>
+     * </ul>
+
+     * <p>On success, the returned {@link android.os.Bundle} will include existing column names
+     * with the key {@link #EXTRA_EXISTING_COLUMN_NAMES}. Otherwise, the return value will be {@code null}.
+     *
+     * @see ContentResolver#call(Uri, String, String, Bundle)
+     * @see #EXTRA_EXISTING_COLUMN_NAMES
+     * @hide
+     */
+    @SystemApi
+    public static final String METHOD_GET_COLUMNS = "get_columns";
+
+    /**
+     * The method name to add a new column in the given table of the specified content provider.
+     *
+     * <p>The method caller must provide the following parameter:
+     * <ul>
+     *     <li>{@code arg}: The content URI of the target table as a {@link String}.</li>
+     *     <li>{@code extra}: Name, data type, and default value of the new column in a Bundle:
+     *         <ul>
+     *             <li>{@link #EXTRA_COLUMN_NAME} the column name as a {@link String}.</li>
+     *             <li>{@link #EXTRA_DATA_TYPE} the data type as a {@link String}.</li>
+     *             <li>{@link #EXTRA_DEFAULT_VALUE} the default value as a {@link String}.
+     *                 (optional)</li>
+     *         </ul>
+     *     </li>
+     * </ul>
+     *
+     * <p>On success, the returned {@link android.os.Bundle} will include current colum names after
+     * the addition operation with the key {@link #EXTRA_EXISTING_COLUMN_NAMES}. Otherwise, the
+     * return value will be {@code null}.
+     *
+     * @see ContentResolver#call(Uri, String, String, Bundle)
+     * @see #EXTRA_COLUMN_NAME
+     * @see #EXTRA_DATA_TYPE
+     * @see #EXTRA_DEFAULT_VALUE
+     * @see #EXTRA_EXISTING_COLUMN_NAMES
+     * @hide
+     */
+    @SystemApi
+    public static final String METHOD_ADD_COLUMN = "add_column";
+
+    /**
+     * The key for a returned {@link Bundle} value containing existing column names in the given
+     * table as an {@link ArrayList} of {@link String}.
+     *
+     * @see #METHOD_GET_COLUMNS
+     * @see #METHOD_ADD_COLUMN
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_EXISTING_COLUMN_NAMES =
+            "android.media.tv.extra.EXISTING_COLUMN_NAMES";
+
+    /**
+     * The key for a {@link Bundle} parameter containing the new column name to be added in the
+     * given table as a non-empty {@link CharSequence}.
+     *
+     * @see #METHOD_ADD_COLUMN
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_COLUMN_NAME = "android.media.tv.extra.COLUMN_NAME";
+
+    /**
+     * The key for a {@link Bundle} parameter containing the data type of the new column to be added
+     * in the given table as a non-empty {@link CharSequence}, which should be one of the following
+     * values: {@code "TEXT"}, {@code "INTEGER"}, {@code "REAL"}, or {@code "BLOB"}.
+     *
+     * @see #METHOD_ADD_COLUMN
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_DATA_TYPE = "android.media.tv.extra.DATA_TYPE";
+
+    /**
+     * The key for a {@link Bundle} parameter containing the default value of the new column to be
+     * added in the given table as a {@link CharSequence}, which represents a valid default value
+     * according to the data type provided with {@link #EXTRA_DATA_TYPE}.
+     *
+     * @see #METHOD_ADD_COLUMN
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_DEFAULT_VALUE = "android.media.tv.extra.DEFAULT_VALUE";
 
     /**
      * An optional query, update or delete URI parameter that allows the caller to specify TV input
