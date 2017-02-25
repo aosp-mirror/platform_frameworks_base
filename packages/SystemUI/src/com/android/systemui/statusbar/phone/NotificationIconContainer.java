@@ -227,6 +227,7 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
             ViewState iconState = mIconStates.get(view);
             iconState.initFrom(view);
             iconState.alpha = 1.0f;
+            iconState.hidden = false;
         }
     }
 

@@ -4040,15 +4040,23 @@ public class Notification implements Parcelable
         }
 
         /**
-         * Construct a RemoteViews for the final notification header only
+         * Construct a RemoteViews for the final notification header only. This will not be
+         * colorized.
          *
          * @hide
          */
         public RemoteViews makeNotificationHeader() {
+            Boolean colorized = (Boolean) mN.extras.get(EXTRA_COLORIZED);
+            mN.extras.putBoolean(EXTRA_COLORIZED, false);
             RemoteViews header = new BuilderRemoteViews(mContext.getApplicationInfo(),
                     R.layout.notification_template_header);
             resetNotificationHeader(header);
             bindNotificationHeader(header, false /* ambient */);
+            if (colorized != null) {
+                mN.extras.putBoolean(EXTRA_COLORIZED, colorized);
+            } else {
+                mN.extras.remove(EXTRA_COLORIZED);
+            }
             return header;
         }
 
@@ -4167,8 +4175,6 @@ public class Notification implements Parcelable
                     mN.extras.putCharSequence(EXTRA_SUB_TEXT, newSummary);
                 }
             }
-            Boolean colorized = (Boolean) mN.extras.get(EXTRA_COLORIZED);
-            mN.extras.putBoolean(EXTRA_COLORIZED, false);
 
             RemoteViews header = makeNotificationHeader();
 
@@ -4176,11 +4182,6 @@ public class Notification implements Parcelable
                 mN.extras.putCharSequence(EXTRA_SUB_TEXT, summary);
             } else {
                 mN.extras.remove(EXTRA_SUB_TEXT);
-            }
-            if (colorized != null) {
-                mN.extras.putBoolean(EXTRA_COLORIZED, colorized);
-            } else {
-                mN.extras.remove(EXTRA_COLORIZED);
             }
             mN.color = color;
             return header;

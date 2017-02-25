@@ -631,7 +631,7 @@ public class NotificationContentView extends FrameLayout {
     }
 
     public int getMinHeight(boolean likeGroupExpanded) {
-        if (likeGroupExpanded || !mIsChildInGroup || isGroupExpanded() || mIsLowPriority) {
+        if (likeGroupExpanded || !mIsChildInGroup || isGroupExpanded()) {
             return mContractedChild.getHeight();
         } else {
             return mSingleLineView.getHeight();
@@ -905,7 +905,7 @@ public class NotificationContentView extends FrameLayout {
                 height = mContentHeight;
             }
             int expandedVisualType = getVisualTypeForHeight(height);
-            int collapsedVisualType = mIsChildInGroup && !isGroupExpanded() && !mIsLowPriority
+            int collapsedVisualType = mIsChildInGroup && !isGroupExpanded()
                     ? VISIBLE_TYPE_SINGLELINE
                     : getVisualTypeForHeight(mContainingNotification.getCollapsedHeight());
             return mTransformationStartVisibleType == collapsedVisualType
@@ -926,7 +926,7 @@ public class NotificationContentView extends FrameLayout {
         if (!noExpandedChild && viewHeight == mExpandedChild.getHeight()) {
             return VISIBLE_TYPE_EXPANDED;
         }
-        if (!mUserExpanding && mIsChildInGroup && !isGroupExpanded() && !mIsLowPriority) {
+        if (!mUserExpanding && mIsChildInGroup && !isGroupExpanded()) {
             return VISIBLE_TYPE_SINGLELINE;
         }
 
@@ -1005,6 +1005,18 @@ public class NotificationContentView extends FrameLayout {
 
     public void setIsChildInGroup(boolean isChildInGroup) {
         mIsChildInGroup = isChildInGroup;
+        if (mContractedChild != null) {
+            mContractedWrapper.setIsChildInGroup(mIsChildInGroup);
+        }
+        if (mExpandedChild != null) {
+            mExpandedWrapper.setIsChildInGroup(mIsChildInGroup);
+        }
+        if (mHeadsUpChild != null) {
+            mHeadsUpWrapper.setIsChildInGroup(mIsChildInGroup);
+        }
+        if (mAmbientChild != null) {
+            mAmbientWrapper.setIsChildInGroup(mIsChildInGroup);
+        }
         updateSingleLineView();
     }
 
@@ -1013,16 +1025,16 @@ public class NotificationContentView extends FrameLayout {
         mBeforeN = entry.targetSdk < Build.VERSION_CODES.N;
         updateSingleLineView();
         if (mContractedChild != null) {
-            mContractedWrapper.notifyContentUpdated(entry.notification, mIsLowPriority);
+            mContractedWrapper.notifyContentUpdated(entry.row);
         }
         if (mExpandedChild != null) {
-            mExpandedWrapper.notifyContentUpdated(entry.notification, mIsLowPriority);
+            mExpandedWrapper.notifyContentUpdated(entry.row);
         }
         if (mHeadsUpChild != null) {
-            mHeadsUpWrapper.notifyContentUpdated(entry.notification, mIsLowPriority);
+            mHeadsUpWrapper.notifyContentUpdated(entry.row);
         }
         if (mAmbientChild != null) {
-            mAmbientWrapper.notifyContentUpdated(entry.notification, mIsLowPriority);
+            mAmbientWrapper.notifyContentUpdated(entry.row);
         }
         applyRemoteInput(entry);
         updateLegacy();

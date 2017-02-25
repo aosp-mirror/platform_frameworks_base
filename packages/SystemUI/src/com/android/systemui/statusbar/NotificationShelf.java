@@ -443,7 +443,8 @@ public class NotificationShelf extends ActivatableNotificationView {
             }
             int shelfColor = icon.getStaticDrawableColor();
             if (!noIcon && shelfColor != StatusBarIconView.NO_COLOR) {
-                int notificationColor = row.getNotificationHeader().getOriginalNotificationColor();
+                int notificationColor
+                        = row.getVisibleNotificationHeader().getOriginalNotificationColor();
                 shelfColor = NotificationUtils.interpolateColors(notificationColor, shelfColor,
                         iconState.iconAppearAmount);
             }

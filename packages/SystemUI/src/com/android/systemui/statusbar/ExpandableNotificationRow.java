@@ -39,7 +39,6 @@ import android.view.MotionEvent;
 import android.view.NotificationHeaderView;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewParent;
 import android.view.ViewStub;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -159,14 +158,15 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     private OnClickListener mExpandClickListener = new OnClickListener() {
         @Override
         public void onClick(View v) {
-            if (!mShowingPublic && mGroupManager.isSummaryOfGroup(mStatusBarNotification)) {
+            if (!mShowingPublic && (!mIsLowPriority || isExpanded())
+                    && mGroupManager.isSummaryOfGroup(mStatusBarNotification)) {
                 mGroupExpansionChanging = true;
                 final boolean wasExpanded = mGroupManager.isGroupExpanded(mStatusBarNotification);
                 boolean nowExpanded = mGroupManager.toggleGroupExpansion(mStatusBarNotification);
                 mOnExpandClickListener.onExpandClicked(mEntry, nowExpanded);
                 MetricsLogger.action(mContext, MetricsEvent.ACTION_NOTIFICATION_GROUP_EXPANDER,
                         nowExpanded);
-                logExpansionEvent(true /* userAction */, wasExpanded);
+                onExpansionChanged(true /* userAction */, wasExpanded);
             } else {
                 if (v.isAccessibilityFocused()) {
                     mPrivateLayout.setFocusOnVisibilityChange();
@@ -253,6 +253,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         }
         if (mIsSummaryWithChildren) {
             setIconAnimationRunningForChild(running, mChildrenContainer.getHeaderView());
+            setIconAnimationRunningForChild(running, mChildrenContainer.getLowPriorityHeaderView());
             List<ExpandableNotificationRow> notificationChildren =
                     mChildrenContainer.getNotificationChildren();
             for (int i = 0; i < notificationChildren.size(); i++) {
@@ -320,8 +321,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         mShowingPublicInitialized = false;
         updateNotificationColor();
         if (mIsSummaryWithChildren) {
-            mChildrenContainer.recreateNotificationHeader(mExpandClickListener,
-                    mEntry.notification);
+            mChildrenContainer.recreateNotificationHeader(mExpandClickListener);
             mChildrenContainer.onNotificationUpdated();
         }
         if (mIconAnimationRunning) {
@@ -687,9 +687,13 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         return mPrivateLayout.getNotificationHeader();
     }
 
-    private NotificationHeaderView getVisibleNotificationHeader() {
+    /**
+     * @return the currently visible notification header. This can be different from
+     * {@link #getNotificationHeader()} in case it is a low-priority group.
+     */
+    public NotificationHeaderView getVisibleNotificationHeader() {
         if (mIsSummaryWithChildren && !mShowingPublic) {
-            return mChildrenContainer.getHeaderView();
+            return mChildrenContainer.getVisibleHeader();
         }
         return getShowingLayout().getVisibleNotificationHeader();
     }
@@ -909,7 +913,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     }
 
     public View getNotificationIcon() {
-        NotificationHeaderView notificationHeader = getNotificationHeader();
+        NotificationHeaderView notificationHeader = getVisibleNotificationHeader();
         if (notificationHeader != null) {
             return notificationHeader.getIcon();
         }
@@ -1032,6 +1036,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         }
     }
 
+    public boolean isLowPriority() {
+        return mIsLowPriority;
+    }
+
     public void setUseIncreasedCollapsedHeight(boolean use) {
         mUseIncreasedCollapsedHeight = use;
         mNotificationInflater.setUsesIncreasedHeight(use);
@@ -1136,7 +1144,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
             public void onInflate(ViewStub stub, View inflated) {
                 mChildrenContainer = (NotificationChildrenContainer) inflated;
                 mChildrenContainer.setIsLowPriority(mIsLowPriority);
-                mChildrenContainer.setNotificationParent(ExpandableNotificationRow.this);
+                mChildrenContainer.setContainingNotification(ExpandableNotificationRow.this);
                 mChildrenContainer.onNotificationUpdated();
                 mTranslateableViews.add(mChildrenContainer);
             }
@@ -1265,9 +1273,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         if (mChildrenContainer != null) {
             mChildrenContainer.setVisibility(!mShowingPublic && mIsSummaryWithChildren ? VISIBLE
                     : INVISIBLE);
-            mChildrenContainer.updateHeaderVisibility(!mShowingPublic && mIsSummaryWithChildren
-                    ? VISIBLE
-                    : INVISIBLE);
+            mChildrenContainer.setHeaderVisible(!mShowingPublic && mIsSummaryWithChildren);
         }
         // The limits might have changed if the view suddenly became a group or vice versa
         updateLimits();
@@ -1335,7 +1341,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
      */
     public void setUserExpanded(boolean userExpanded) {
         setUserExpanded(userExpanded, false /* allowChildExpansion */);
-        updateShelfIconColor();
     }
 
     /**
@@ -1346,22 +1351,28 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
      */
     public void setUserExpanded(boolean userExpanded, boolean allowChildExpansion) {
         mFalsingManager.setNotificationExpanded();
-        if (mIsSummaryWithChildren && !mShowingPublic && allowChildExpansion) {
+        if (mIsSummaryWithChildren && !mShowingPublic && allowChildExpansion
+                && !mChildrenContainer.showingAsLowPriority()) {
             final boolean wasExpanded = mGroupManager.isGroupExpanded(mStatusBarNotification);
             mGroupManager.setGroupExpanded(mStatusBarNotification, userExpanded);
-            logExpansionEvent(true /* userAction */, wasExpanded);
+            onExpansionChanged(true /* userAction */, wasExpanded);
             return;
         }
         if (userExpanded && !mExpandable) return;
         final boolean wasExpanded = isExpanded();
         mHasUserChangedExpansion = true;
         mUserExpanded = userExpanded;
-        logExpansionEvent(true, wasExpanded);
+        onExpansionChanged(true /* userAction */, wasExpanded);
     }
 
     public void resetUserExpansion() {
+        boolean changed = mUserExpanded;
         mHasUserChangedExpansion = false;
         mUserExpanded = false;
+        if (changed && mIsSummaryWithChildren) {
+            mChildrenContainer.onExpansionChanged();
+        }
+        updateShelfIconColor();
     }
 
     public boolean isUserLocked() {
@@ -1395,9 +1406,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         if (expand != mIsSystemExpanded) {
             final boolean wasExpanded = isExpanded();
             mIsSystemExpanded = expand;
-            updateShelfIconColor();
             notifyHeightChanged(false /* needsAnimation */);
-            logExpansionEvent(false, wasExpanded);
+            onExpansionChanged(false /* userAction */, wasExpanded);
             if (mIsSummaryWithChildren) {
                 mChildrenContainer.updateGroupOverflow();
             }
@@ -1411,7 +1421,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         if (onKeyguard != mOnKeyguard) {
             final boolean wasExpanded = isExpanded();
             mOnKeyguard = onKeyguard;
-            logExpansionEvent(false, wasExpanded);
+            onExpansionChanged(false /* userAction */, wasExpanded);
             if (wasExpanded != isExpanded()) {
                 if (mIsSummaryWithChildren) {
                     mChildrenContainer.updateGroupOverflow();
@@ -1482,8 +1492,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         mIsSummaryWithChildren = StatusBar.ENABLE_CHILD_NOTIFICATIONS
                 && mChildrenContainer != null && mChildrenContainer.getNotificationChildCount() > 0;
         if (mIsSummaryWithChildren && mChildrenContainer.getHeaderView() == null) {
-            mChildrenContainer.recreateNotificationHeader(mExpandClickListener,
-                    mEntry.notification);
+            mChildrenContainer.recreateNotificationHeader(mExpandClickListener
+            );
         }
         getShowingLayout().updateBackgroundColor(false /* animate */);
         mPrivateLayout.updateExpandButtons(isExpandable());
@@ -1538,7 +1548,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
      * the top.
      */
     private void updateContentShiftHeight() {
-        NotificationHeaderView notificationHeader = getNotificationHeader();
+        NotificationHeaderView notificationHeader = getVisibleNotificationHeader();
         if (notificationHeader != null) {
             CachingIconView icon = notificationHeader.getIcon();
             mIconTransformContentShift = getRelativeTopPadding(icon) + icon.getHeight();
@@ -1932,7 +1942,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
             if (isGroupExpanded()) {
                 return 1.0f;
             } else if (isUserLocked()) {
-                return mChildrenContainer.getGroupExpandFraction();
+                return mChildrenContainer.getIncreasedPaddingAmount();
             }
         } else if (isColorized() && (!mIsLowPriority || isExpanded())) {
             return -1.0f;
@@ -1955,13 +1965,19 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         return super.disallowSingleClick(event);
     }
 
-    private void logExpansionEvent(boolean userAction, boolean wasExpanded) {
+    private void onExpansionChanged(boolean userAction, boolean wasExpanded) {
         boolean nowExpanded = isExpanded();
-        if (mIsSummaryWithChildren) {
+        if (mIsSummaryWithChildren && (!mIsLowPriority || wasExpanded)) {
             nowExpanded = mGroupManager.isGroupExpanded(mStatusBarNotification);
         }
-        if (wasExpanded != nowExpanded && mLogger != null) {
-            mLogger.logNotificationExpansion(mLoggingKey, userAction, nowExpanded) ;
+        if (nowExpanded != wasExpanded) {
+            updateShelfIconColor();
+            if (mLogger != null) {
+                mLogger.logNotificationExpansion(mLoggingKey, userAction, nowExpanded);
+            }
+            if (mIsSummaryWithChildren) {
+                mChildrenContainer.onExpansionChanged();
+            }
         }
     }
 

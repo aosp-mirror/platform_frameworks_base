@@ -21,7 +21,6 @@ import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.TransformableView;
 
 import android.content.Context;
-import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.TextView;
@@ -71,11 +70,11 @@ public class NotificationMessagingTemplateViewWrapper extends NotificationTempla
     }
 
     @Override
-    public void notifyContentUpdated(StatusBarNotification notification, boolean isLowPriority) {
+    public void notifyContentUpdated(ExpandableNotificationRow row) {
         // Reinspect the notification. Before the super call, because the super call also updates
         // the transformation types and we need to have our values set by then.
         resolveViews();
-        super.notifyContentUpdated(notification, isLowPriority);
+        super.notifyContentUpdated(row);
     }
 
     @Override
