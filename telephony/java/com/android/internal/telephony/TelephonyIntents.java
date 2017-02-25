@@ -264,15 +264,6 @@ public class TelephonyIntents {
             = "android.intent.action.ACTION_SHOW_NOTICE_ECM_BLOCK_OTHERS";
 
     /**
-     * Activity Action: Start this activity to invoke the carrier setup app.
-     * The carrier app must be signed using a certificate that matches the UICC access rules.
-     *
-     * <p class="note">Callers of this should hold the android.permission.INVOKE_CARRIER_SETUP
-     * permission.</p>
-     */
-    public static final String ACTION_CARRIER_SETUP = "android.intent.action.ACTION_CARRIER_SETUP";
-
-    /**
      * <p>Broadcast Action: Indicates that the action is forbidden by network.
      * <p class="note">
      * This is for the OEM applications to understand about possible provisioning issues.
