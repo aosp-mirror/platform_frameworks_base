@@ -680,10 +680,10 @@ public class VrManagerService extends SystemService implements EnabledComponentC
                 }
             }
 
-            mCurrentVrModeComponent = calling;
             if (calling != null && !Objects.equals(calling, mCurrentVrModeComponent)) {
                 sendUpdatedCaller = true;
             }
+            mCurrentVrModeComponent = calling;
 
             if (mCurrentVrModeUser != userId) {
                 mCurrentVrModeUser = userId;
