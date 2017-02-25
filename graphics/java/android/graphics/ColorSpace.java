@@ -805,7 +805,8 @@ public abstract class ColorSpace {
      */
     public enum Adaptation {
         /**
-         * Bradford matrix for the von Kries chromatic adaptation transform.
+         * Bradford chromatic adaptation transform, as defined in the
+         * CIECAM97s color appearance model.
          */
         BRADFORD(new float[] {
                  0.8951f, -0.7502f,  0.0389f,
@@ -813,12 +814,21 @@ public abstract class ColorSpace {
                 -0.1614f,  0.0367f,  1.0296f
         }),
         /**
-         * von Kries matrix for the von Kries chromatic adaptation transform.
+         * von Kries chromatic adaptation transform.
          */
         VON_KRIES(new float[] {
                  0.40024f, -0.22630f, 0.00000f,
                  0.70760f,  1.16532f, 0.00000f,
                 -0.08081f,  0.04570f, 0.91822f
+        }),
+        /**
+         * CIECAT02 chromatic adaption transform, as defined in the
+         * CIECAM02 color appearance model.
+         */
+        CIECAT02(new float[] {
+                 0.7328f, -0.7036f,  0.0030f,
+                 0.4296f,  1.6975f,  0.0136f,
+                -0.1624f,  0.0061f,  0.9834f
         });
 
         final float[] mTransform;
