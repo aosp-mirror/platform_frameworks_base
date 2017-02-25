@@ -11904,7 +11904,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 if (!mHasPerformedLongPress) {
                     // This is a tap, so remove the longpress check
                     removeLongPressCallback();
-                    return performClick();
+                    if (!event.isCanceled()) {
+                        return performClick();
+                    }
                 }
             }
         }

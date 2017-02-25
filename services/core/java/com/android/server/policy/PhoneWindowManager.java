@@ -26,7 +26,7 @@ import static android.app.AppOpsManager.OP_TOAST_WINDOW;
 import static android.content.Context.DISPLAY_SERVICE;
 import static android.content.Context.WINDOW_SERVICE;
 import static android.content.pm.PackageManager.FEATURE_PICTURE_IN_PICTURE;
-import static android.content.pm.PackageManager.FEATURE_TELEVISION;
+import static android.content.pm.PackageManager.FEATURE_LEANBACK;
 import static android.content.pm.PackageManager.FEATURE_WATCH;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.content.res.Configuration.EMPTY;
@@ -416,6 +416,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     BurnInProtectionHelper mBurnInProtectionHelper;
     AppOpsManager mAppOpsManager;
     private boolean mHasFeatureWatch;
+    private boolean mHasFeatureLeanback;
 
     // Assigned on main thread, accessed on UI thread
     volatile VrManagerInternal mVrManagerInternal;
@@ -767,6 +768,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private boolean mScreenshotChordPowerKeyTriggered;
     private long mScreenshotChordPowerKeyTime;
 
+    private static final long BUGREPORT_TV_GESTURE_TIMEOUT_MILLIS = 1000;
+
+    private boolean mBugreportTvKey1Pressed;
+    private boolean mBugreportTvKey2Pressed;
+    private boolean mBugreportTvScheduled;
+
     /* The number of steps between min and max brightness */
     private static final int BRIGHTNESS_STEPS = 10;
 
@@ -810,6 +817,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private static final int MSG_DISPOSE_INPUT_CONSUMER = 19;
     private static final int MSG_BACK_DELAYED_PRESS = 20;
     private static final int MSG_ACCESSIBILITY_SHORTCUT = 21;
+    private static final int MSG_BUGREPORT_TV = 22;
 
     private static final int MSG_REQUEST_TRANSIENT_BARS_ARG_STATUS = 0;
     private static final int MSG_REQUEST_TRANSIENT_BARS_ARG_NAVIGATION = 1;
@@ -887,6 +895,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     break;
                 case MSG_ACCESSIBILITY_SHORTCUT:
                     accessibilityShortcutActivated();
+                    break;
+                case MSG_BUGREPORT_TV:
+                    takeBugreport();
                     break;
             }
         }
@@ -1753,6 +1764,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mPowerManagerInternal = LocalServices.getService(PowerManagerInternal.class);
         mAppOpsManager = (AppOpsManager) mContext.getSystemService(Context.APP_OPS_SERVICE);
         mHasFeatureWatch = mContext.getPackageManager().hasSystemFeature(FEATURE_WATCH);
+        mHasFeatureLeanback = mContext.getPackageManager().hasSystemFeature(FEATURE_LEANBACK);
         mAccessibilityShortcutController =
                 new AccessibilityShortcutController(mContext, new Handler());
         // Init display burn-in protection
@@ -3482,6 +3494,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         } else if (keyCode == KeyEvent.KEYCODE_TAB && event.isMetaPressed()) {
             // Pass through keyboard navigation keys.
             return 0;
+        } else if (mHasFeatureLeanback && interceptBugreportGestureTv(keyCode, down)) {
+            return -1;
         }
 
         // Toggle Caps Lock on META-ALT.
@@ -3672,6 +3686,45 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         // Let the application handle the key.
         return 0;
+    }
+
+    /**
+     * TV only: recognizes a remote control gesture for capturing a bug report.
+     */
+    private boolean interceptBugreportGestureTv(int keyCode, boolean down) {
+        // The bugreport capture chord is a long press on DPAD CENTER and BACK simultaneously.
+        if (keyCode == KeyEvent.KEYCODE_DPAD_CENTER) {
+            mBugreportTvKey1Pressed = down;
+        } else if (keyCode == KeyEvent.KEYCODE_BACK) {
+            mBugreportTvKey2Pressed = down;
+        }
+
+        if (mBugreportTvKey1Pressed && mBugreportTvKey2Pressed) {
+            if (!mBugreportTvScheduled) {
+                mBugreportTvScheduled = true;
+                Message msg = Message.obtain(mHandler, MSG_BUGREPORT_TV);
+                msg.setAsynchronous(true);
+                mHandler.sendMessageDelayed(msg, BUGREPORT_TV_GESTURE_TIMEOUT_MILLIS);
+            }
+        } else if (mBugreportTvScheduled) {
+            mHandler.removeMessages(MSG_BUGREPORT_TV);
+            mBugreportTvScheduled = false;
+        }
+
+        return mBugreportTvScheduled;
+    }
+
+    private void takeBugreport() {
+        if ("1".equals(SystemProperties.get("ro.debuggable"))
+                || Settings.Global.getInt(mContext.getContentResolver(),
+                        Settings.Global.DEVELOPMENT_SETTINGS_ENABLED, 0) == 1) {
+            try {
+                ActivityManager.getService()
+                        .requestBugReport(ActivityManager.BUGREPORT_OPTION_INTERACTIVE);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Error taking bugreport", e);
+            }
+        }
     }
 
     /** {@inheritDoc} */
@@ -7083,7 +7136,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             @Override public void run() {
                 if (mBootMsgDialog == null) {
                     int theme;
-                    if (mContext.getPackageManager().hasSystemFeature(FEATURE_TELEVISION)) {
+                    if (mContext.getPackageManager().hasSystemFeature(FEATURE_LEANBACK)) {
                         theme = com.android.internal.R.style.Theme_Leanback_Dialog_Alert;
                     } else {
                         theme = 0;
