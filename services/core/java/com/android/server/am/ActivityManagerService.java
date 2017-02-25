@@ -18031,15 +18031,18 @@ public class ActivityManagerService extends IActivityManager.Stub
             } else if (rl.uid != callingUid) {
                 throw new IllegalArgumentException(
                         "Receiver requested to register for uid " + callingUid
-                        + " was previously registered for uid " + rl.uid);
+                        + " was previously registered for uid " + rl.uid
+                        + " callerPackage is " + callerPackage);
             } else if (rl.pid != callingPid) {
                 throw new IllegalArgumentException(
                         "Receiver requested to register for pid " + callingPid
-                        + " was previously registered for pid " + rl.pid);
+                        + " was previously registered for pid " + rl.pid
+                        + " callerPackage is " + callerPackage);
             } else if (rl.userId != userId) {
                 throw new IllegalArgumentException(
                         "Receiver requested to register for user " + userId
-                        + " was previously registered for user " + rl.userId);
+                        + " was previously registered for user " + rl.userId
+                        + " callerPackage is " + callerPackage);
             }
             BroadcastFilter bf = new BroadcastFilter(filter, rl, callerPackage,
                     permission, callingUid, userId);
