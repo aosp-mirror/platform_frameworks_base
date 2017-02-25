@@ -2763,5 +2763,5 @@
   <java-symbol type="drawable" name="lockscreen_notselected" />
   <java-symbol type="drawable" name="lockscreen_selected" />
 
-  <java-symbol type="string" name="config_defaultCellBroadcastReceiverComponent" />
+  <java-symbol type="string" name="config_defaultCellBroadcastReceiverPkg" />
 </resources>
