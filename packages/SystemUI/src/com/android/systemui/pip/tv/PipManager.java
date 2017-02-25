@@ -337,12 +337,11 @@ public class PipManager implements BasePipManager {
      * Moves the PIPed activity to the fullscreen and closes PIP system UI.
      */
     void movePipToFullscreen() {
-        mState = STATE_NO_PIP;
         mPipTaskId = TASK_ID_NO_PIP;
         for (int i = mListeners.size() - 1; i >= 0; --i) {
             mListeners.get(i).onMoveToFullscreen();
         }
-        resizePinnedStack(mState);
+        resizePinnedStack(STATE_NO_PIP);
         updatePipVisibility(false);
     }
 
@@ -388,6 +387,7 @@ public class PipManager implements BasePipManager {
         if (DEBUG) Log.d(TAG, "resizePinnedStack() state=" + state);
         boolean wasRecentsShown =
                 (mState == STATE_PIP_RECENTS || mState == STATE_PIP_RECENTS_FOCUSED);
+        boolean wasStateNoPip = (mState == STATE_NO_PIP);
         mState = state;
         for (int i = mListeners.size() - 1; i >= 0; --i) {
             mListeners.get(i).onPipResizeAboutToStart();
@@ -401,6 +401,11 @@ public class PipManager implements BasePipManager {
         switch (mState) {
             case STATE_NO_PIP:
                 mCurrentPipBounds = null;
+                // If the state was already STATE_NO_PIP, then do not resize the stack below as it
+                // will not exist
+                if (wasStateNoPip) {
+                    return;
+                }
                 break;
             case STATE_PIP_MENU:
                 mCurrentPipBounds = mMenuModePipBounds;
@@ -418,18 +423,16 @@ public class PipManager implements BasePipManager {
                 mCurrentPipBounds = mPipBounds;
                 break;
         }
-        if (mCurrentPipBounds != null) {
-            try {
-                int animationDurationMs = -1;
-                if (wasRecentsShown
-                        && (mState == STATE_PIP_RECENTS || mState == STATE_PIP_RECENTS_FOCUSED)) {
-                    animationDurationMs = mRecentsFocusChangedAnimationDurationMs;
-                }
-                mActivityManager.resizeStack(PINNED_STACK_ID, mCurrentPipBounds,
-                        true, true, true, animationDurationMs);
-            } catch (RemoteException e) {
-                Log.e(TAG, "resizeStack failed", e);
+        try {
+            int animationDurationMs = -1;
+            if (wasRecentsShown
+                    && (mState == STATE_PIP_RECENTS || mState == STATE_PIP_RECENTS_FOCUSED)) {
+                animationDurationMs = mRecentsFocusChangedAnimationDurationMs;
             }
+            mActivityManager.resizeStack(PINNED_STACK_ID, mCurrentPipBounds,
+                    true, true, true, animationDurationMs);
+        } catch (RemoteException e) {
+            Log.e(TAG, "resizeStack failed", e);
         }
     }
 
