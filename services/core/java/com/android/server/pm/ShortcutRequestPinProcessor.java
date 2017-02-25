@@ -48,7 +48,7 @@ class ShortcutRequestPinProcessor {
     /**
      * Internal for {@link android.content.pm.LauncherApps.PinItemRequest} which receives callbacks.
      */
-    private static class PinItemRequestInner extends IPinItemRequest.Stub {
+    private abstract static class PinItemRequestInner extends IPinItemRequest.Stub {
         protected final ShortcutRequestPinProcessor mProcessor;
         private final IntentSender mResultIntent;
         private final int mLauncherUid;
@@ -61,6 +61,14 @@ class ShortcutRequestPinProcessor {
             mProcessor = processor;
             mResultIntent = resultIntent;
             mLauncherUid = launcherUid;
+        }
+
+        public ShortcutInfo getShortcutInfo() {
+            return null;
+        }
+
+        public AppWidgetProviderInfo getAppWidgetProviderInfo() {
+            return null;
         }
 
         /**
@@ -126,6 +134,26 @@ class ShortcutRequestPinProcessor {
     /**
      * Internal for {@link android.content.pm.LauncherApps.PinItemRequest} which receives callbacks.
      */
+    private static class PinAppWidgetRequestInner extends PinItemRequestInner {
+        final AppWidgetProviderInfo mAppWidgetProviderInfo;
+
+        private PinAppWidgetRequestInner(ShortcutRequestPinProcessor processor,
+                IntentSender resultIntent, int launcherUid,
+                AppWidgetProviderInfo appWidgetProviderInfo) {
+            super(processor, resultIntent, launcherUid);
+
+            mAppWidgetProviderInfo = appWidgetProviderInfo;
+        }
+
+        @Override
+        public AppWidgetProviderInfo getAppWidgetProviderInfo() {
+            return mAppWidgetProviderInfo;
+        }
+    }
+
+    /**
+     * Internal for {@link android.content.pm.LauncherApps.PinItemRequest} which receives callbacks.
+     */
     private static class PinShortcutRequestInner extends PinItemRequestInner {
         /** Original shortcut passed by the app. */
         public final ShortcutInfo shortcutOriginal;
@@ -150,6 +178,11 @@ class ShortcutRequestPinProcessor {
             this.launcherPackage = launcherPackage;
             this.launcherUserId = launcherUserId;
             this.preExisting = preExisting;
+        }
+
+        @Override
+        public ShortcutInfo getShortcutInfo() {
+            return shortcutForLauncher;
         }
 
         @Override
@@ -208,8 +241,9 @@ class ShortcutRequestPinProcessor {
         } else {
             int launcherUid = mService.injectGetPackageUid(
                     confirmActivity.first.getPackageName(), launcherUserId);
-            request = new PinItemRequest(inAppWidget,
-                    new PinItemRequestInner(this, resultIntent, launcherUid));
+            request = new PinItemRequest(
+                    new PinAppWidgetRequestInner(this, resultIntent, launcherUid, inAppWidget),
+                    PinItemRequest.REQUEST_TYPE_APPWIDGET);
         }
         return startRequestConfirmActivity(confirmActivity.first, launcherUserId, request,
                 requestType);
@@ -319,7 +353,7 @@ class ShortcutRequestPinProcessor {
                         mService.injectGetPackageUid(launcherPackage, launcherUserId),
                         existsAlready);
 
-        return new PinItemRequest(shortcutForLauncher, inner);
+        return new PinItemRequest(inner, PinItemRequest.REQUEST_TYPE_SHORTCUT);
     }
 
     private void validateExistingShortcut(ShortcutInfo shortcutInfo) {

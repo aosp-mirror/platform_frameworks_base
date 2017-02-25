@@ -16,6 +16,8 @@
 package android.content.pm;
 
 import android.os.Bundle;
+import android.appwidget.AppWidgetProviderInfo;
+import android.content.pm.ShortcutInfo;
 
 /**
  * {@hide}
@@ -23,4 +25,6 @@ import android.os.Bundle;
 interface IPinItemRequest {
     boolean isValid();
     boolean accept(in Bundle options);
+    ShortcutInfo getShortcutInfo();
+    AppWidgetProviderInfo getAppWidgetProviderInfo();
 }
