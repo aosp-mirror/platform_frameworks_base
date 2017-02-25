@@ -76,13 +76,26 @@ class SecurityLogMonitor implements Runnable {
      * Internally how often should the monitor poll the security logs from logd.
      */
     private static final long POLLING_INTERVAL_MILLISECONDS = TimeUnit.MINUTES.toMillis(1);
+    /**
+     * Overlap between two subsequent log requests, required to avoid losing out of order events.
+     */
+    private static final long OVERLAP_NANOS = TimeUnit.SECONDS.toNanos(3);
+
 
     @GuardedBy("mLock")
     private Thread mMonitorThread = null;
     @GuardedBy("mLock")
-    private ArrayList<SecurityEvent> mPendingLogs = new ArrayList<SecurityEvent>();
+    private ArrayList<SecurityEvent> mPendingLogs = new ArrayList<>();
     @GuardedBy("mLock")
     private boolean mAllowedToRetrieve = false;
+
+    /**
+     * Last events fetched from log to check for overlap between batches. We can leave it empty if
+     * we are sure there will be no overlap anymore, e.g. when we get empty batch.
+     */
+    private final ArrayList<SecurityEvent> mLastEvents = new ArrayList<>();
+    /** Timestamp of the very last event, -1 means request from the beginning of time. */
+    private long mLastEventNanos = -1;
 
     /**
      * When DO will be allowed to retrieve the log, in milliseconds since boot (as per
@@ -98,7 +111,7 @@ class SecurityLogMonitor implements Runnable {
         mLock.lock();
         try {
             if (mMonitorThread == null) {
-                mPendingLogs = new ArrayList<SecurityEvent>();
+                mPendingLogs = new ArrayList<>();
                 mAllowedToRetrieve = false;
                 mNextAllowedRetrievalTimeMillis = -1;
                 mPaused = false;
@@ -123,7 +136,7 @@ class SecurityLogMonitor implements Runnable {
                     Log.e(TAG, "Interrupted while waiting for thread to stop", e);
                 }
                 // Reset state and clear buffer
-                mPendingLogs = new ArrayList<SecurityEvent>();
+                mPendingLogs = new ArrayList<>();
                 mAllowedToRetrieve = false;
                 mNextAllowedRetrievalTimeMillis = -1;
                 mPaused = false;
@@ -181,7 +194,7 @@ class SecurityLogMonitor implements Runnable {
     void discardLogs() {
         mLock.lock();
         mAllowedToRetrieve = false;
-        mPendingLogs = new ArrayList<SecurityEvent>();
+        mPendingLogs = new ArrayList<>();
         mLock.unlock();
         Slog.i(TAG, "Discarded all logs.");
     }
@@ -198,7 +211,7 @@ class SecurityLogMonitor implements Runnable {
                 mNextAllowedRetrievalTimeMillis = SystemClock.elapsedRealtime()
                         + RATE_LIMIT_INTERVAL_MILLISECONDS;
                 List<SecurityEvent> result = mPendingLogs;
-                mPendingLogs = new ArrayList<SecurityEvent>();
+                mPendingLogs = new ArrayList<>();
                 return result;
             } else {
                 return null;
@@ -208,45 +221,141 @@ class SecurityLogMonitor implements Runnable {
         }
     }
 
+    /**
+     * Requests the next (or the first) batch of events from the log with appropriate timestamp.
+     */
+    private void getNextBatch(ArrayList<SecurityEvent> newLogs)
+            throws IOException, InterruptedException {
+        if (mLastEventNanos < 0) {
+            // Non-blocking read that returns all logs immediately.
+            if (DEBUG) Slog.d(TAG, "SecurityLog.readEvents");
+            SecurityLog.readEvents(newLogs);
+        } else {
+            // If we have last events from the previous batch, request log events with time overlap
+            // with previously retrieved messages to avoid losing events due to reordering in logd.
+            final long startNanos = mLastEvents.isEmpty()
+                    ? mLastEventNanos : Math.max(0, mLastEventNanos - OVERLAP_NANOS);
+            if (DEBUG) Slog.d(TAG, "SecurityLog.readEventsSince: " + startNanos);
+            // Non-blocking read that returns all logs with timestamps >= startNanos immediately.
+            SecurityLog.readEventsSince(startNanos, newLogs);
+        }
+
+        // Sometimes events may be reordered in logd due to simultaneous readers and writers. In
+        // this case, we have to sort it to make overlap checking work. This is very unlikely.
+        for (int i = 0; i < newLogs.size() - 1; i++) {
+            if (newLogs.get(i).getTimeNanos() > newLogs.get(i+1).getTimeNanos()) {
+                if (DEBUG) Slog.d(TAG, "Got out of order events, sorting.");
+                // Sort using comparator that compares timestamps.
+                newLogs.sort((e1, e2) -> Long.signum(e1.getTimeNanos() - e2.getTimeNanos()));
+                break;
+            }
+        }
+
+        if (DEBUG) Slog.d(TAG, "Got " + newLogs.size() + " new events.");
+    }
+
+    /**
+     * Save the last events for overlap checking with the next batch.
+     */
+    private void saveLastEvents(ArrayList<SecurityEvent> newLogs) {
+        mLastEvents.clear();
+        if (newLogs.isEmpty()) {
+            // This can happen if no events were logged yet or the buffer got cleared. In this case
+            // we aren't going to have any overlap next time, leave mLastEvents events empty.
+            return;
+        }
+
+        // Save the last timestamp.
+        mLastEventNanos = newLogs.get(newLogs.size() - 1).getTimeNanos();
+        // Position of the earliest event that has to be saved. Start from the penultimate event,
+        // going backward.
+        int pos = newLogs.size() - 2;
+        while (pos >= 0 && mLastEventNanos - newLogs.get(pos).getTimeNanos() < OVERLAP_NANOS) {
+            pos--;
+        }
+        // We either run past the start of the list or encountered an event that is too old to keep.
+        pos++;
+        mLastEvents.addAll(newLogs.subList(pos, newLogs.size()));
+        if (DEBUG) Slog.d(TAG, mLastEvents.size() + " events saved for overlap check");
+    }
+
+    /**
+     * Merges a new batch into already fetched logs and deals with overlapping and out of order
+     * events.
+     */
+    @GuardedBy("mLock")
+    private void mergeBatchLocked(final ArrayList<SecurityEvent> newLogs) {
+        // Reserve capacity so that copying doesn't occur.
+        mPendingLogs.ensureCapacity(mPendingLogs.size() + newLogs.size());
+        // Run through the first events of the batch to check if there is an overlap with previous
+        // batch and if so, skip overlapping events. Events are sorted by timestamp, so we can
+        // compare it in linear time by advancing two pointers, one for each batch.
+        int curPos = 0;
+        int lastPos = 0;
+        // For the first batch mLastEvents will be empty, so no iterations will happen.
+        while (lastPos < mLastEvents.size() && curPos < newLogs.size()) {
+            final SecurityEvent curEvent = newLogs.get(curPos);
+            final long currentNanos = curEvent.getTimeNanos();
+            if (currentNanos > mLastEventNanos) {
+                // We got past the last event of the last batch, no overlap possible anymore.
+                break;
+            }
+            final SecurityEvent lastEvent = mLastEvents.get(lastPos);
+            final long lastNanos = lastEvent.getTimeNanos();
+            if (lastNanos > currentNanos) {
+                // New event older than the last we've seen so far, must be due to reordering.
+                if (DEBUG) Slog.d(TAG, "New event in the overlap: " + currentNanos);
+                mPendingLogs.add(curEvent);
+                curPos++;
+            } else if (lastNanos < currentNanos) {
+                if (DEBUG) Slog.d(TAG, "Event disappeared from the overlap: " + lastNanos);
+                lastPos++;
+            } else {
+                // Two events have the same timestamp, check if they are the same.
+                if (lastEvent.equals(curEvent)) {
+                    // Actual overlap, just skip the event.
+                    if (DEBUG) Slog.d(TAG, "Skipped dup event with timestamp: " + lastNanos);
+                } else {
+                    // Wow, what a coincidence, or probably the clock is too coarse.
+                    mPendingLogs.add(curEvent);
+                    if (DEBUG) Slog.d(TAG, "Event timestamp collision: " + lastNanos);
+                }
+                lastPos++;
+                curPos++;
+            }
+        }
+        // Save the rest of the new batch.
+        mPendingLogs.addAll(newLogs.subList(curPos, newLogs.size()));
+
+        if (mPendingLogs.size() > BUFFER_ENTRIES_MAXIMUM_LEVEL) {
+            // Truncate buffer down to half of BUFFER_ENTRIES_MAXIMUM_LEVEL.
+            mPendingLogs = new ArrayList<>(mPendingLogs.subList(
+                    mPendingLogs.size() - (BUFFER_ENTRIES_MAXIMUM_LEVEL / 2),
+                    mPendingLogs.size()));
+            Slog.i(TAG, "Pending logs buffer full. Discarding old logs.");
+        }
+        if (DEBUG) Slog.d(TAG, mPendingLogs.size() + " pending events in the buffer after merging");
+    }
+
     @Override
     public void run() {
         Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
 
-        ArrayList<SecurityEvent> logs = new ArrayList<SecurityEvent>();
-        // The timestamp of the latest log entry that has been read, in nanoseconds
-        long lastLogTimestampNanos = -1;
+        ArrayList<SecurityEvent> newLogs = new ArrayList<>();
         while (!Thread.currentThread().isInterrupted()) {
             try {
                 Thread.sleep(POLLING_INTERVAL_MILLISECONDS);
+                getNextBatch(newLogs);
 
-                if (lastLogTimestampNanos < 0) {
-                    // Non-blocking read that returns all logs immediately.
-                    if (DEBUG) Slog.d(TAG, "SecurityLog.readEvents");
-                    SecurityLog.readEvents(logs);
-                } else {
-                    if (DEBUG) Slog.d(TAG,
-                            "SecurityLog.readEventsSince: " + lastLogTimestampNanos);
-                    // Non-blocking read that returns all logs >= the  timestamp immediately.
-                    SecurityLog.readEventsSince(lastLogTimestampNanos + 1, logs);
+                mLock.lockInterruptibly();
+                try {
+                    mergeBatchLocked(newLogs);
+                } finally {
+                    mLock.unlock();
                 }
-                if (!logs.isEmpty()) {
-                    if (DEBUG) Slog.d(TAG, "processing new logs. Events: " + logs.size());
-                    mLock.lockInterruptibly();
-                    try {
-                        mPendingLogs.addAll(logs);
-                        if (mPendingLogs.size() > BUFFER_ENTRIES_MAXIMUM_LEVEL) {
-                            // Truncate buffer down to half of BUFFER_ENTRIES_MAXIMUM_LEVEL
-                            mPendingLogs = new ArrayList<SecurityEvent>(mPendingLogs.subList(
-                                    mPendingLogs.size() - (BUFFER_ENTRIES_MAXIMUM_LEVEL / 2),
-                                    mPendingLogs.size()));
-                            Slog.i(TAG, "Pending logs buffer full. Discarding old logs.");
-                        }
-                    } finally {
-                        mLock.unlock();
-                    }
-                    lastLogTimestampNanos = logs.get(logs.size() - 1).getTimeNanos();
-                    logs.clear();
-                }
+
+                saveLastEvents(newLogs);
+                newLogs.clear();
                 notifyDeviceOwnerIfNeeded();
             } catch (IOException e) {
                 Log.e(TAG, "Failed to read security log", e);
@@ -256,6 +365,15 @@ class SecurityLogMonitor implements Runnable {
                 break;
             }
         }
+
+        // Discard previous batch info.
+        mLastEvents.clear();
+        if (mLastEventNanos != -1) {
+            // Make sure we don't read old events if logging is re-enabled. Since mLastEvents is
+            // empty, the next request will be done without overlap, so it is enough to add 1 ns.
+            mLastEventNanos += 1;
+        }
+
         Slog.i(TAG, "MonitorThread exit.");
     }
 

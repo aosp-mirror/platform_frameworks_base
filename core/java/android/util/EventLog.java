@@ -201,6 +201,29 @@ public class EventLog {
         public void clearError() {
             mLastWtf = null;
         }
+
+        /**
+         * @hide
+         */
+        @Override
+        public boolean equals(Object o) {
+            // Not using ByteBuffer.equals since it takes buffer position into account and we
+            // always use absolute positions here.
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Event other = (Event) o;
+            return Arrays.equals(mBuffer.array(), other.mBuffer.array());
+        }
+
+        /**
+         * @hide
+         */
+        @Override
+        public int hashCode() {
+            // Not using ByteBuffer.hashCode since it takes buffer position into account and we
+            // always use absolute positions here.
+            return Arrays.hashCode(mBuffer.array());
+        }
     }
 
     // We assume that the native methods deal with any concurrency issues.
