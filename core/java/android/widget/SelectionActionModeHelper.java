@@ -54,6 +54,8 @@ final class SelectionActionModeHelper {
     private TextClassificationResult mTextClassificationResult;
     private AsyncTask mTextClassificationAsyncTask;
 
+    private final SelectionInfo mSelectionInfo = new SelectionInfo();
+
     SelectionActionModeHelper(@NonNull Editor editor) {
         mEditor = Preconditions.checkNotNull(editor);
         final TextView textView = mEditor.getTextView();
@@ -94,12 +96,12 @@ final class SelectionActionModeHelper {
         }
     }
 
-    public void cancelAsyncTask() {
-        if (mTextClassificationAsyncTask != null) {
-            mTextClassificationAsyncTask.cancel(true);
-            mTextClassificationAsyncTask = null;
+    public boolean resetOriginalSelection(int textIndex) {
+        if (mSelectionInfo.resetOriginalSelection(textIndex, mEditor.getTextView().getText())) {
+            invalidateActionModeAsync();
+            return true;
         }
-        mTextClassificationResult = null;
+        return false;
     }
 
     @Nullable
@@ -107,12 +109,28 @@ final class SelectionActionModeHelper {
         return mTextClassificationResult;
     }
 
+    public void onDestroyActionMode() {
+        mSelectionInfo.onSelectionDestroyed();
+        cancelAsyncTask();
+    }
+
+    private void cancelAsyncTask() {
+        if (mTextClassificationAsyncTask != null) {
+            mTextClassificationAsyncTask.cancel(true);
+            mTextClassificationAsyncTask = null;
+        }
+        mTextClassificationResult = null;
+    }
+
     private boolean isNoOpTextClassifier() {
         return mEditor.getTextView().getTextClassifier() == TextClassifier.NO_OP;
     }
 
     private void startActionMode(@Nullable SelectionResult result) {
-        final CharSequence text = mEditor.getTextView().getText();
+        final TextView textView = mEditor.getTextView();
+        final CharSequence text = textView.getText();
+        mSelectionInfo.setOriginalSelection(
+                textView.getSelectionStart(), textView.getSelectionEnd());
         if (result != null && text instanceof Spannable) {
             Selection.setSelection((Spannable) text, result.mStart, result.mEnd);
             mTextClassificationResult = result.mResult;
@@ -123,6 +141,9 @@ final class SelectionActionModeHelper {
             final SelectionModifierCursorController controller = mEditor.getSelectionController();
             if (controller != null) {
                 controller.show();
+            }
+            if (result != null) {
+                mSelectionInfo.onSelectionStarted(result.mStart, result.mEnd);
             }
         }
         mEditor.setRestartActionModeOnNextRefresh(false);
@@ -135,6 +156,8 @@ final class SelectionActionModeHelper {
         if (actionMode != null) {
             actionMode.invalidate();
         }
+        final TextView textView = mEditor.getTextView();
+        mSelectionInfo.onSelectionUpdated(textView.getSelectionStart(), textView.getSelectionEnd());
         mTextClassificationAsyncTask = null;
     }
 
@@ -142,6 +165,56 @@ final class SelectionActionModeHelper {
         final TextView textView = mEditor.getTextView();
         mTextClassificationHelper.reset(textView.getTextClassifier(), textView.getText(),
                 textView.getSelectionStart(), textView.getSelectionEnd());
+    }
+
+    /**
+     * Holds information about the selection and uses it to decide on whether or not to update
+     * the selection when resetOriginalSelection is called.
+     * The expected UX here is to allow the user to re-snap the selection back to the original word
+     * that was selected with one tap on that word.
+     */
+    private static final class SelectionInfo {
+
+        private int mOriginalStart;
+        private int mOriginalEnd;
+        private int mSelectionStart;
+        private int mSelectionEnd;
+
+        private boolean mResetOriginal;
+
+        public void setOriginalSelection(int selectionStart, int selectionEnd) {
+            mOriginalStart = selectionStart;
+            mOriginalEnd = selectionEnd;
+            mResetOriginal = false;
+        }
+
+        public void onSelectionStarted(int selectionStart, int selectionEnd) {
+            // Set the reset flag to true if the selection changed.
+            mSelectionStart = selectionStart;
+            mSelectionEnd = selectionEnd;
+            mResetOriginal = mSelectionStart != mOriginalStart || mSelectionEnd != mOriginalEnd;
+        }
+
+        public void onSelectionUpdated(int selectionStart, int selectionEnd) {
+            // If the selection did not change, maintain the reset state. Otherwise, disable reset.
+            mResetOriginal &= selectionStart == mSelectionStart && selectionEnd == mSelectionEnd;
+        }
+
+        public void onSelectionDestroyed() {
+            mResetOriginal = false;
+        }
+
+        public boolean resetOriginalSelection(int textIndex, CharSequence text) {
+            if (mResetOriginal
+                    && textIndex >= mOriginalStart && textIndex <= mOriginalEnd
+                    && text instanceof Spannable) {
+                Selection.setSelection((Spannable) text, mOriginalStart, mOriginalEnd);
+                // Only allow a reset once.
+                mResetOriginal = false;
+                return true;
+            }
+            return false;
+        }
     }
 
     /**
