@@ -14,13 +14,22 @@
  * limitations under the License
  */
 
-package android.net;
+package com.android.server;
 
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertNull;
+import static junit.framework.Assert.assertTrue;
+
+import static org.junit.Assert.assertFalse;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.Manifest.permission;
 import android.content.ComponentName;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -29,126 +38,57 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.res.Resources;
-import android.net.NetworkScorerAppManager.NetworkScorerAppData;
+import android.net.NetworkScoreManager;
+import android.net.NetworkScorerAppData;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.test.InstrumentationTestCase;
+import android.support.test.runner.AndroidJUnit4;
 
 import com.android.internal.R;
 
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public class NetworkScorerAppManagerTest extends InstrumentationTestCase {
+@RunWith(AndroidJUnit4.class)
+public class NetworkScorerAppManagerTest {
     @Mock private Context mMockContext;
     @Mock private PackageManager mMockPm;
     @Mock private Resources mResources;
-    @Mock private ContentResolver mContentResolver;
-    private Context mTargetContext;
+    @Mock private NetworkScorerAppManager.SettingsFacade mSettingsFacade;
     private NetworkScorerAppManager mNetworkScorerAppManager;
+    private List<ResolveInfo> mAvailableServices;
 
-    @Override
+    @Before
     public void setUp() throws Exception {
-        super.setUp();
-
-        // Configuration needed to make mockito/dexcache work.
-        mTargetContext = getInstrumentation().getTargetContext();
-        System.setProperty("dexmaker.dexcache", mTargetContext.getCacheDir().getPath());
-        ClassLoader newClassLoader = getInstrumentation().getClass().getClassLoader();
-        Thread.currentThread().setContextClassLoader(newClassLoader);
-
         MockitoAnnotations.initMocks(this);
+        mAvailableServices = new ArrayList<>();
         when(mMockContext.getPackageManager()).thenReturn(mMockPm);
+        when(mMockPm.queryIntentServices(Mockito.argThat(new ArgumentMatcher<Intent>() {
+            @Override
+            public boolean matches(Object object) {
+                Intent intent = (Intent) object;
+                return NetworkScoreManager.ACTION_RECOMMEND_NETWORKS.equals(intent.getAction());
+            }
+        }), eq(PackageManager.GET_META_DATA))).thenReturn(mAvailableServices);
         when(mMockContext.getResources()).thenReturn(mResources);
-        when(mMockContext.getContentResolver()).thenReturn(mTargetContext.getContentResolver());
-        mNetworkScorerAppManager = new NetworkScorerAppManager(mMockContext);
+
+        mNetworkScorerAppManager = new NetworkScorerAppManager(mMockContext, mSettingsFacade);
     }
 
-    public void testGetPotentialRecommendationProviderPackages_emptyConfig() throws Exception {
-        setNetworkRecommendationPackageNames(/*no configured packages*/);
-        assertTrue(mNetworkScorerAppManager.getPotentialRecommendationProviderPackages().isEmpty());
-    }
-
-    public void testGetPotentialRecommendationProviderPackages_permissionNotGranted()
-            throws Exception {
-        setNetworkRecommendationPackageNames("package1");
-        mockScoreNetworksDenied("package1");
-
-        assertTrue(mNetworkScorerAppManager.getPotentialRecommendationProviderPackages().isEmpty());
-    }
-
-    public void testGetPotentialRecommendationProviderPackages_permissionGranted()
-            throws Exception {
-        setNetworkRecommendationPackageNames("package1");
-        mockScoreNetworksGranted("package1");
-
-        List<String> potentialProviderPackages =
-                mNetworkScorerAppManager.getPotentialRecommendationProviderPackages();
-
-        assertFalse(potentialProviderPackages.isEmpty());
-        assertEquals("package1", potentialProviderPackages.get(0));
-    }
-
-    public void testGetPotentialRecommendationProviderPackages_multipleConfigured()
-            throws Exception {
-        setNetworkRecommendationPackageNames("package1", "package2");
-        mockScoreNetworksDenied("package1");
-        mockScoreNetworksGranted("package2");
-
-        List<String> potentialProviderPackages =
-                mNetworkScorerAppManager.getPotentialRecommendationProviderPackages();
-
-        assertEquals(1, potentialProviderPackages.size());
-        assertEquals("package2", potentialProviderPackages.get(0));
-    }
-
-    public void testGetNetworkRecommendationProviderData_noPotentialPackages() throws Exception {
-        setNetworkRecommendationPackageNames(/*no configured packages*/);
-        assertNull(mNetworkScorerAppManager.getNetworkRecommendationProviderData());
-    }
-
-    public void testGetNetworkRecommendationProviderData_serviceMissing() throws Exception {
-        setNetworkRecommendationPackageNames("package1");
-        mockScoreNetworksGranted("package1");
-
-        assertNull(mNetworkScorerAppManager.getNetworkRecommendationProviderData());
-    }
-
-    public void testGetNetworkRecommendationProviderData_scoreNetworksNotGranted()
-            throws Exception {
-        final ComponentName recoComponent = new ComponentName("package1", "class1");
-        setNetworkRecommendationPackageNames(recoComponent.getPackageName());
-        mockScoreNetworksDenied(recoComponent.getPackageName());
-        mockRecommendationServiceAvailable(recoComponent, 924 /* packageUid */);
-
-        assertNull(mNetworkScorerAppManager.getNetworkRecommendationProviderData());
-    }
-
-    public void testGetNetworkRecommendationProviderData_available() throws Exception {
-        final ComponentName recoComponent = new ComponentName("package1", "class1");
-        setNetworkRecommendationPackageNames(recoComponent.getPackageName());
-        mockScoreNetworksGranted(recoComponent.getPackageName());
-        mockRecommendationServiceAvailable(recoComponent, 924 /* packageUid */);
-
-        NetworkScorerAppData appData =
-                mNetworkScorerAppManager.getNetworkRecommendationProviderData();
-        assertNotNull(appData);
-        assertEquals(recoComponent, appData.getRecommendationServiceComponent());
-        assertEquals(924, appData.packageUid);
-    }
-
+    @Test
     public void testGetActiveScorer_providerAvailable() throws Exception {
         final ComponentName recoComponent = new ComponentName("package1", "class1");
-        setNetworkRecommendationPackageNames(recoComponent.getPackageName());
+        setNetworkRecoPackageSetting(recoComponent.getPackageName());
         mockScoreNetworksGranted(recoComponent.getPackageName());
         mockRecommendationServiceAvailable(recoComponent, 924 /* packageUid */);
-
-        ContentResolver cr = mTargetContext.getContentResolver();
-        Settings.Global.putInt(cr, Settings.Global.NETWORK_RECOMMENDATIONS_ENABLED, 1);
 
         final NetworkScorerAppData activeScorer = mNetworkScorerAppManager.getActiveScorer();
         assertNotNull(activeScorer);
@@ -156,17 +96,26 @@ public class NetworkScorerAppManagerTest extends InstrumentationTestCase {
         assertEquals(924, activeScorer.packageUid);
     }
 
+    @Test
+    public void testGetActiveScorer_permissionMissing() throws Exception {
+        final ComponentName recoComponent = new ComponentName("package1", "class1");
+        setNetworkRecoPackageSetting(recoComponent.getPackageName());
+        mockScoreNetworksDenied(recoComponent.getPackageName());
+        mockRecommendationServiceAvailable(recoComponent, 924 /* packageUid */);
+
+        final NetworkScorerAppData activeScorer = mNetworkScorerAppManager.getActiveScorer();
+        assertNull(activeScorer);
+    }
+
+    @Test
     public void testGetActiveScorer_providerAvailable_enableUseOpenWifiActivityNotSet()
             throws Exception {
         final ComponentName recoComponent = new ComponentName("package1", "class1");
-        setNetworkRecommendationPackageNames(recoComponent.getPackageName());
+        setNetworkRecoPackageSetting(recoComponent.getPackageName());
         mockScoreNetworksGranted(recoComponent.getPackageName());
         mockRecommendationServiceAvailable(recoComponent, 924 /* packageUid */,
                 null /* enableUseOpenWifiPackageActivityPackage*/);
 
-        ContentResolver cr = mTargetContext.getContentResolver();
-        Settings.Global.putInt(cr, Settings.Global.NETWORK_RECOMMENDATIONS_ENABLED, 1);
-
         final NetworkScorerAppData activeScorer = mNetworkScorerAppManager.getActiveScorer();
         assertNotNull(activeScorer);
         assertEquals(recoComponent, activeScorer.getRecommendationServiceComponent());
@@ -174,17 +123,15 @@ public class NetworkScorerAppManagerTest extends InstrumentationTestCase {
         assertNull(activeScorer.getEnableUseOpenWifiActivity());
     }
 
+    @Test
     public void testGetActiveScorer_providerAvailable_enableUseOpenWifiActivityNotResolved()
             throws Exception {
         final ComponentName recoComponent = new ComponentName("package1", "class1");
-        setNetworkRecommendationPackageNames(recoComponent.getPackageName());
+        setNetworkRecoPackageSetting(recoComponent.getPackageName());
         mockScoreNetworksGranted(recoComponent.getPackageName());
         mockRecommendationServiceAvailable(recoComponent, 924 /* packageUid */,
                 "package2" /* enableUseOpenWifiPackageActivityPackage*/);
 
-        ContentResolver cr = mTargetContext.getContentResolver();
-        Settings.Global.putInt(cr, Settings.Global.NETWORK_RECOMMENDATIONS_ENABLED, 1);
-
         final NetworkScorerAppData activeScorer = mNetworkScorerAppManager.getActiveScorer();
         assertNotNull(activeScorer);
         assertEquals(recoComponent, activeScorer.getRecommendationServiceComponent());
@@ -192,18 +139,16 @@ public class NetworkScorerAppManagerTest extends InstrumentationTestCase {
         assertNull(activeScorer.getEnableUseOpenWifiActivity());
     }
 
+    @Test
     public void testGetActiveScorer_providerAvailable_enableUseOpenWifiActivityResolved()
             throws Exception {
         final ComponentName recoComponent = new ComponentName("package1", "class1");
         final ComponentName enableUseOpenWifiComponent = new ComponentName("package2", "class2");
-        setNetworkRecommendationPackageNames(recoComponent.getPackageName());
+        setNetworkRecoPackageSetting(recoComponent.getPackageName());
         mockScoreNetworksGranted(recoComponent.getPackageName());
         mockRecommendationServiceAvailable(recoComponent, 924 /* packageUid */,
                 enableUseOpenWifiComponent.getPackageName());
         mockEnableUseOpenWifiActivity(enableUseOpenWifiComponent);
-
-        ContentResolver cr = mTargetContext.getContentResolver();
-        Settings.Global.putInt(cr, Settings.Global.NETWORK_RECOMMENDATIONS_ENABLED, 1);
 
         final NetworkScorerAppData activeScorer = mNetworkScorerAppManager.getActiveScorer();
         assertNotNull(activeScorer);
@@ -212,33 +157,105 @@ public class NetworkScorerAppManagerTest extends InstrumentationTestCase {
         assertEquals(enableUseOpenWifiComponent, activeScorer.getEnableUseOpenWifiActivity());
     }
 
-    public void testGetActiveScorer_providerNotAvailable()
+    @Test
+    public void testGetActiveScorer_packageSettingIsNull()
             throws Exception {
-        ContentResolver cr = mTargetContext.getContentResolver();
-        Settings.Global.putInt(cr, Settings.Global.NETWORK_RECOMMENDATIONS_ENABLED, 1);
+        // NETWORK_RECOMMENDATIONS_PACKAGE is null
 
         final NetworkScorerAppData activeScorer = mNetworkScorerAppManager.getActiveScorer();
         assertNull(activeScorer);
     }
 
-    public void testGetActiveScorer_recommendationsDisabled() throws Exception {
+    @Test
+    public void testGetActiveScorer_packageSettingIsInvalid() throws Exception {
         final ComponentName recoComponent = new ComponentName("package1", "class1");
-        setNetworkRecommendationPackageNames(recoComponent.getPackageName());
+        setDefaultNetworkRecommendationPackage(recoComponent.getPackageName());
         mockScoreNetworksGranted(recoComponent.getPackageName());
-        mockRecommendationServiceAvailable(recoComponent, 924 /* packageUid */);
-        ContentResolver cr = mTargetContext.getContentResolver();
-        Settings.Global.putInt(cr, Settings.Global.NETWORK_RECOMMENDATIONS_ENABLED, 0);
+        // NETWORK_RECOMMENDATIONS_PACKAGE is set to a package that isn't a recommender.
 
         final NetworkScorerAppData activeScorer = mNetworkScorerAppManager.getActiveScorer();
         assertNull(activeScorer);
     }
 
-    private void setNetworkRecommendationPackageNames(String... names) {
-        if (names == null) {
-            names = new String[0];
-        }
-        when(mResources.getStringArray(R.array.config_networkRecommendationPackageNames))
-                .thenReturn(names);
+    @Test
+    public void testSetActiveScorer_noChange() throws Exception {
+        String packageName = "package";
+        setNetworkRecoPackageSetting(packageName);
+
+        assertTrue(mNetworkScorerAppManager.setActiveScorer(packageName));
+        verify(mSettingsFacade, never()).putString(any(), any(), any());
+    }
+
+    @Test
+    public void testSetActiveScorer_nullPackage() throws Exception {
+        String packageName = "package";
+        String defaultPackage = "defaultPackage";
+        setNetworkRecoPackageSetting(packageName);
+        setDefaultNetworkRecommendationPackage(defaultPackage);
+
+        assertTrue(mNetworkScorerAppManager.setActiveScorer(null));
+        verify(mSettingsFacade).putString(mMockContext,
+                Settings.Global.NETWORK_RECOMMENDATIONS_PACKAGE, defaultPackage);
+    }
+
+    @Test
+    public void testSetActiveScorer_validPackage() throws Exception {
+        String packageName = "package";
+        String newPackage = "newPackage";
+        setNetworkRecoPackageSetting(packageName);
+        final ComponentName recoComponent = new ComponentName(newPackage, "class1");
+        mockScoreNetworksGranted(recoComponent.getPackageName());
+        mockRecommendationServiceAvailable(recoComponent, 924 /* packageUid */, null);
+
+        assertTrue(mNetworkScorerAppManager.setActiveScorer(newPackage));
+        verify(mSettingsFacade).putString(mMockContext,
+                Settings.Global.NETWORK_RECOMMENDATIONS_PACKAGE, newPackage);
+    }
+
+    @Test
+    public void testSetActiveScorer_invalidPackage() throws Exception {
+        String packageName = "package";
+        String newPackage = "newPackage";
+        setNetworkRecoPackageSetting(packageName);
+        // newPackage doesn't resolve to a valid recommender
+
+        assertFalse(mNetworkScorerAppManager.setActiveScorer(newPackage));
+        verify(mSettingsFacade, never()).putString(any(), any(), any());
+    }
+
+
+    @Test
+    public void testRevertToDefaultIfNoActive_notActive() throws Exception {
+        String defaultPackage = "defaultPackage";
+        setDefaultNetworkRecommendationPackage(defaultPackage);
+
+        mNetworkScorerAppManager.revertToDefaultIfNoActive();
+
+        verify(mSettingsFacade).putString(mMockContext,
+                Settings.Global.NETWORK_RECOMMENDATIONS_PACKAGE, defaultPackage);
+    }
+
+    @Test
+    public void testRevertToDefaultIfNoActive_active() throws Exception {
+        String packageName = "package";
+        setNetworkRecoPackageSetting(packageName);
+        final ComponentName recoComponent = new ComponentName(packageName, "class1");
+        mockScoreNetworksGranted(recoComponent.getPackageName());
+        mockRecommendationServiceAvailable(recoComponent, 924 /* packageUid */, null);
+
+        mNetworkScorerAppManager.revertToDefaultIfNoActive();
+
+        verify(mSettingsFacade, never()).putString(any(), any(), any());
+    }
+
+    private void setNetworkRecoPackageSetting(String packageName) {
+        when(mSettingsFacade.getString(mMockContext,
+                Settings.Global.NETWORK_RECOMMENDATIONS_PACKAGE)).thenReturn(packageName);
+    }
+
+    private void setDefaultNetworkRecommendationPackage(String name) {
+        when(mResources.getString(R.string.config_defaultNetworkRecommendationProviderPackage))
+                .thenReturn(name);
     }
 
     private void mockScoreNetworksGranted(String packageName) {
@@ -281,6 +298,8 @@ public class NetworkScorerAppManagerTest extends InstrumentationTestCase {
                                 && compName.getPackageName().equals(intent.getPackage());
                     }
                 }), Mockito.eq(flags))).thenReturn(serviceInfo);
+
+        mAvailableServices.add(serviceInfo);
     }
 
     private void mockEnableUseOpenWifiActivity(final ComponentName useOpenWifiComp) {

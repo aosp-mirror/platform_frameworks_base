@@ -56,8 +56,7 @@ import android.net.INetworkRecommendationProvider;
 import android.net.INetworkScoreCache;
 import android.net.NetworkKey;
 import android.net.NetworkScoreManager;
-import android.net.NetworkScorerAppManager;
-import android.net.NetworkScorerAppManager.NetworkScorerAppData;
+import android.net.NetworkScorerAppData;
 import android.net.RecommendationRequest;
 import android.net.RecommendationResult;
 import android.net.ScoredNetwork;
@@ -201,10 +200,10 @@ public class NetworkScoreServiceTest {
     }
 
     @Test
-    public void testSystemRunning() {
+    public void testOnUserUnlocked() {
         when(mNetworkScorerAppManager.getActiveScorer()).thenReturn(NEW_SCORER);
 
-        mNetworkScoreService.systemRunning();
+        mNetworkScoreService.onUserUnlocked(0);
 
         verify(mContext).bindServiceAsUser(MockUtils.checkIntent(
                 new Intent(NetworkScoreManager.ACTION_RECOMMEND_NETWORKS)
@@ -549,9 +548,9 @@ public class NetworkScoreServiceTest {
     }
 
     @Test
-    public void testSetActiveScorer_noScoreNetworksPermission() {
-        doThrow(new SecurityException()).when(mContext)
-                .enforceCallingOrSelfPermission(eq(permission.SCORE_NETWORKS), anyString());
+    public void testSetActiveScorer_noRequestNetworkScoresPermission() {
+        when(mContext.checkCallingOrSelfPermission(permission.REQUEST_NETWORK_SCORES))
+                .thenReturn(PackageManager.PERMISSION_DENIED);
 
         try {
             mNetworkScoreService.setActiveScorer(null);
@@ -630,7 +629,7 @@ public class NetworkScoreServiceTest {
 
     @Test
     public void testIsCallerActiveScorer_noBoundService() throws Exception {
-        mNetworkScoreService.systemRunning();
+        mNetworkScoreService.onUserUnlocked(0);
 
         assertFalse(mNetworkScoreService.isCallerActiveScorer(Binder.getCallingUid()));
     }
@@ -651,7 +650,7 @@ public class NetworkScoreServiceTest {
 
     @Test
     public void testGetActiveScorerPackage_notActive() throws Exception {
-        mNetworkScoreService.systemRunning();
+        mNetworkScoreService.onUserUnlocked(0);
 
         assertNull(mNetworkScoreService.getActiveScorerPackage());
     }
@@ -659,7 +658,7 @@ public class NetworkScoreServiceTest {
     @Test
     public void testGetActiveScorerPackage_active() throws Exception {
         when(mNetworkScorerAppManager.getActiveScorer()).thenReturn(NEW_SCORER);
-        mNetworkScoreService.systemRunning();
+        mNetworkScoreService.onUserUnlocked(0);
 
         assertEquals(NEW_SCORER.getRecommendationServicePackageName(),
                 mNetworkScoreService.getActiveScorerPackage());
@@ -960,7 +959,7 @@ public class NetworkScoreServiceTest {
                 return true;
             }
         });
-        mNetworkScoreService.systemRunning();
+        mNetworkScoreService.onUserUnlocked(0);
     }
 
     private void bindToScorer(boolean callerIsScorer) {
@@ -974,7 +973,7 @@ public class NetworkScoreServiceTest {
         when(mNetworkScorerAppManager.getActiveScorer()).thenReturn(appData);
         when(mContext.bindServiceAsUser(isA(Intent.class), isA(ServiceConnection.class), anyInt(),
                 isA(UserHandle.class))).thenReturn(true);
-        mNetworkScoreService.systemRunning();
+        mNetworkScoreService.onUserUnlocked(0);
     }
 
     private static class OnResultListener implements RemoteCallback.OnResultListener {

@@ -16,4 +16,4 @@
 
 package android.net;
 
-parcelable NetworkScorerAppManager.NetworkScorerAppData;
+parcelable NetworkScorerAppData;
