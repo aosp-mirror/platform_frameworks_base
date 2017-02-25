@@ -1096,6 +1096,15 @@ public class Intent implements Parcelable, Cloneable {
     public static final String ACTION_SIM_ACTIVATION_REQUEST =
             "android.intent.action.SIM_ACTIVATION_REQUEST";
     /**
+     * Activity Action: Main entry point for carrier setup apps.
+     * <p>Carrier apps that provide an implementation for this action may be invoked to configure
+     * carrier service and typically require
+     * {@link android.telephony.TelephonyManager#hasCarrierPrivileges() carrier privileges} to
+     * fulfill their duties.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_CARRIER_SETUP = "android.intent.action.CARRIER_SETUP";
+    /**
      * Activity Action: Send a message to someone specified by the data.
      * <p>Input: {@link #getData} is URI describing the target.
      * <p>Output: nothing.
