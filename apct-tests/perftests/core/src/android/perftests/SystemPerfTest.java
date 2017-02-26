@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package java.lang.perftests;
+package android.perftests;
 
 import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.PerfStatusReporter;
