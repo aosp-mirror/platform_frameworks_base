@@ -51,14 +51,36 @@ public final class PlaybackActivityMonitor
     private final static boolean DEBUG = false;
     private final static int VOLUME_SHAPER_SYSTEM_DUCK_ID = 1;
 
-    private ArrayList<PlayMonitorClient> mClients = new ArrayList<PlayMonitorClient>();
+    private final VolumeShaper.Configuration DUCK_VSHAPE =
+            new VolumeShaper.Configuration.Builder()
+                .setId(VOLUME_SHAPER_SYSTEM_DUCK_ID)
+                .setCurve(new float[] { 0.f, 1.f } /* times */,
+                    new float[] { 1.f, 0.2f } /* volumes */)
+                .setOptionFlags(VolumeShaper.Configuration.OPTION_FLAG_CLOCK_TIME)
+                .setDurationMs(MediaFocusControl.getFocusRampTimeMs(
+                    AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK,
+                    new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                            .build()))
+                .build();
+    private final VolumeShaper.Configuration DUCK_ID =
+            new VolumeShaper.Configuration(VOLUME_SHAPER_SYSTEM_DUCK_ID);
+    private final VolumeShaper.Operation PLAY_CREATE_IF_NEEDED =
+            new VolumeShaper.Operation.Builder(VolumeShaper.Operation.PLAY)
+                    .createIfNeeded()
+                    .build();
+    private final VolumeShaper.Operation TERMINATE =
+            new VolumeShaper.Operation.Builder()
+                    .terminate()
+                    .build();
+
+    private final ArrayList<PlayMonitorClient> mClients = new ArrayList<PlayMonitorClient>();
     // a public client is one that needs an anonymized version of the playback configurations, we
     // keep track of whether there is at least one to know when we need to create the list of
     // playback configurations that do not contain uid/pid/package name information.
     private boolean mHasPublicClients = false;
 
     private final Object mPlayerLock = new Object();
-    private HashMap<Integer, AudioPlaybackConfiguration> mPlayers =
+    private final HashMap<Integer, AudioPlaybackConfiguration> mPlayers =
             new HashMap<Integer, AudioPlaybackConfiguration>();
 
     PlaybackActivityMonitor() {
@@ -130,12 +152,10 @@ public final class PlaybackActivityMonitor
         synchronized(mPlayerLock) {
             final AudioPlaybackConfiguration apc = mPlayers.get(new Integer(piid));
             if (checkConfigurationCaller(piid, apc, binderUid)) {
+                apc.getPlayerProxy().applyVolumeShaper(
+                        DUCK_ID,
+                        TERMINATE);
                 mPlayers.remove(new Integer(piid));
-                final VolumeShaper vs = mDuckVolumeShapers.get(new Integer(piid));
-                if (vs != null) {
-                    vs.release();
-                    mDuckVolumeShapers.remove(new Integer(piid));
-                }
             } else {
                 Log.e(TAG, "Error releasing player " + piid);
             }
@@ -252,20 +272,6 @@ public final class PlaybackActivityMonitor
     private final ArrayList<Integer> mDuckedPlayers = new ArrayList<Integer>();
     private final ArrayList<Integer> mMutedPlayers = new ArrayList<Integer>();
 
-    private final VolumeShaper.Configuration DUCK_VSHAPE =
-            new VolumeShaper.Configuration.Builder()
-                .setId(VOLUME_SHAPER_SYSTEM_DUCK_ID)
-                .setCurve(new float[] { 0.f, 1.f } /* times */,
-                    new float[] { 1.f, 0.2f } /* volumes */)
-                .setDurationMs(MediaFocusControl.getFocusRampTimeMs(
-                    AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK,
-                    new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_NOTIFICATION)
-                            .build()))
-                .build();
-
-    private final HashMap<Integer, VolumeShaper> mDuckVolumeShapers =
-            new HashMap<Integer, VolumeShaper>();
-
     @Override
     public boolean duckPlayers(FocusRequester winner, FocusRequester loser) {
         if (DEBUG) {
@@ -302,17 +308,9 @@ public final class PlaybackActivityMonitor
                     } else {
                         try {
                             if (DEBUG) { Log.v(TAG, "ducking player " + piid); }
-                            final VolumeShaper ducker;
-                            if (mDuckVolumeShapers.containsKey(new Integer(piid))) {
-                                ducker = mDuckVolumeShapers.get(new Integer(piid));
-                            } else {
-                                ducker = new VolumeShaper(
-                                        DUCK_VSHAPE,
-                                        apc.getPlayerProxy(),
-                                        true /* keepReference */);
-                                mDuckVolumeShapers.put(new Integer(piid), ducker);
-                            }
-                            ducker.apply(VolumeShaper.Operation.PLAY); // duck
+                            apc.getPlayerProxy().applyVolumeShaper(
+                                    DUCK_VSHAPE,
+                                    PLAY_CREATE_IF_NEEDED);
                             mDuckedPlayers.add(piid);
                         } catch (Exception e) {
                             Log.e(TAG, "Error ducking player " + piid, e);
@@ -341,10 +339,9 @@ public final class PlaybackActivityMonitor
                     try {
                         if (DEBUG) { Log.v(TAG, "unducking player" + piid); }
                         mDuckedPlayers.remove(new Integer(piid));
-                        if (mDuckVolumeShapers.containsKey(new Integer(piid))) {
-                            final VolumeShaper ducker = mDuckVolumeShapers.get(new Integer(piid));
-                            ducker.apply(VolumeShaper.Operation.REVERSE); // unduck
-                        }
+                        apc.getPlayerProxy().applyVolumeShaper(
+                                DUCK_ID,
+                                VolumeShaper.Operation.REVERSE);
                     } catch (Exception e) {
                         Log.e(TAG, "Error unducking player " + piid, e);
                     }

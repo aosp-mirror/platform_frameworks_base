@@ -579,6 +579,7 @@ import java.util.Vector;
  */
 public class MediaPlayer extends PlayerBase
                          implements SubtitleController.Listener
+                                  , VolumeAutomation
 {
     /**
        Constant to retrieve only the new metadata since the last
@@ -1371,6 +1372,12 @@ public class MediaPlayer extends PlayerBase
     @Override
     /* package */ @Nullable VolumeShaper.State playerGetVolumeShaperState(int id) {
         return native_getVolumeShaperState(id);
+    }
+
+    @Override
+    public @NonNull VolumeShaper createVolumeShaper(
+            @NonNull VolumeShaper.Configuration configuration) {
+        return new VolumeShaper(configuration, this);
     }
 
     private native int native_applyVolumeShaper(
