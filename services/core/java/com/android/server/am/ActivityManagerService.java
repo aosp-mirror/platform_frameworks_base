@@ -10711,6 +10711,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         try {
             cpi = AppGlobals.getPackageManager().resolveContentProvider(authority,
                     STOCK_PM_FLAGS | PackageManager.GET_URI_PERMISSION_PATTERNS
+                            | PackageManager.MATCH_DISABLED_COMPONENTS
                             | PackageManager.MATCH_DIRECT_BOOT_AWARE
                             | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
                     userId);
