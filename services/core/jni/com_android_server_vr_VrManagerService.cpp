@@ -38,7 +38,7 @@ static void init_native(JNIEnv* /* env */, jclass /* clazz */) {
         return;
     }
 
-    gVr = IVr::getService("vr");
+    gVr = IVr::getService();
     if (gVr == nullptr) {
         ALOGW("%s: Could not open IVr interface", __FUNCTION__);
         return;
