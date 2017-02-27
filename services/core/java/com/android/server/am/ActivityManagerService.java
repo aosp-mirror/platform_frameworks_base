@@ -10645,7 +10645,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             providers = AppGlobals.getPackageManager()
                     .queryContentProviders(app.processName, app.uid,
                             STOCK_PM_FLAGS | PackageManager.GET_URI_PERMISSION_PATTERNS
-                                    | MATCH_DEBUG_TRIAGED_MISSING)
+                                    | MATCH_DEBUG_TRIAGED_MISSING, /*metadastaKey=*/ null)
                     .getList();
         } catch (RemoteException ex) {
         }

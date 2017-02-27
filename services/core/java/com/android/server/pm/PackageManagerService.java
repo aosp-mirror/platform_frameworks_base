@@ -7469,7 +7469,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     @Override
     public @NonNull ParceledListSlice<ProviderInfo> queryContentProviders(String processName,
-            int uid, int flags) {
+            int uid, int flags, String metaDataKey) {
         final int userId = processName != null ? UserHandle.getUserId(uid)
                 : UserHandle.getCallingUserId();
         if (!sUserManager.exists(userId)) return ParceledListSlice.emptyList();
@@ -7487,6 +7487,14 @@ public class PackageManagerService extends IPackageManager.Stub {
                                 || (p.info.processName.equals(processName)
                                         && UserHandle.isSameApp(p.info.applicationInfo.uid, uid)))
                         && mSettings.isEnabledAndMatchLPr(p.info, flags, userId)) {
+
+                    // See PM.queryContentProviders()'s javadoc for why we have the metaData
+                    // parameter.
+                    if (metaDataKey != null
+                            && (p.metaData == null || !p.metaData.containsKey(metaDataKey))) {
+                        continue;
+                    }
+
                     if (finalList == null) {
                         finalList = new ArrayList<ProviderInfo>(3);
                     }
