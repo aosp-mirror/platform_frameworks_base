@@ -131,6 +131,8 @@ public final class JobSchedulerService extends com.android.server.SystemService
     final List<JobServiceContext> mActiveServices = new ArrayList<>();
     /** List of controllers that will notify this service of updates to jobs. */
     List<StateController> mControllers;
+    /** Need direct access to this for testing. */
+    BatteryController mBatteryController;
     /**
      * Queue of pending jobs. The JobServiceContext class will receive jobs from this list
      * when ready to execute them.
@@ -194,6 +196,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
         // Key names stored in the settings value.
         private static final String KEY_MIN_IDLE_COUNT = "min_idle_count";
         private static final String KEY_MIN_CHARGING_COUNT = "min_charging_count";
+        private static final String KEY_MIN_BATTERY_NOT_LOW_COUNT = "min_battery_not_low_count";
         private static final String KEY_MIN_CONNECTIVITY_COUNT = "min_connectivity_count";
         private static final String KEY_MIN_CONTENT_COUNT = "min_content_count";
         private static final String KEY_MIN_READY_JOBS_COUNT = "min_ready_jobs_count";
@@ -207,6 +210,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
 
         private static final int DEFAULT_MIN_IDLE_COUNT = 1;
         private static final int DEFAULT_MIN_CHARGING_COUNT = 1;
+        private static final int DEFAULT_MIN_BATTERY_NOT_LOW_COUNT = 1;
         private static final int DEFAULT_MIN_CONNECTIVITY_COUNT = 1;
         private static final int DEFAULT_MIN_CONTENT_COUNT = 1;
         private static final int DEFAULT_MIN_READY_JOBS_COUNT = 1;
@@ -228,6 +232,11 @@ public final class JobSchedulerService extends com.android.server.SystemService
          * things early.
          */
         int MIN_CHARGING_COUNT = DEFAULT_MIN_CHARGING_COUNT;
+        /**
+         * Minimum # of "battery not low" jobs that must be ready in order to force the JMS to
+         * schedule things early.
+         */
+        int MIN_BATTERY_NOT_LOW_COUNT = DEFAULT_MIN_BATTERY_NOT_LOW_COUNT;
         /**
          * Minimum # of connectivity jobs that must be ready in order to force the JMS to schedule
          * things early.  1 == Run connectivity jobs as soon as ready.
@@ -312,6 +321,8 @@ public final class JobSchedulerService extends com.android.server.SystemService
                         DEFAULT_MIN_IDLE_COUNT);
                 MIN_CHARGING_COUNT = mParser.getInt(KEY_MIN_CHARGING_COUNT,
                         DEFAULT_MIN_CHARGING_COUNT);
+                MIN_BATTERY_NOT_LOW_COUNT = mParser.getInt(KEY_MIN_BATTERY_NOT_LOW_COUNT,
+                        DEFAULT_MIN_BATTERY_NOT_LOW_COUNT);
                 MIN_CONNECTIVITY_COUNT = mParser.getInt(KEY_MIN_CONNECTIVITY_COUNT,
                         DEFAULT_MIN_CONNECTIVITY_COUNT);
                 MIN_CONTENT_COUNT = mParser.getInt(KEY_MIN_CONTENT_COUNT,
@@ -355,6 +366,9 @@ public final class JobSchedulerService extends com.android.server.SystemService
 
             pw.print("    "); pw.print(KEY_MIN_CHARGING_COUNT); pw.print("=");
             pw.print(MIN_CHARGING_COUNT); pw.println();
+
+            pw.print("    "); pw.print(KEY_MIN_BATTERY_NOT_LOW_COUNT); pw.print("=");
+            pw.print(MIN_BATTERY_NOT_LOW_COUNT); pw.println();
 
             pw.print("    "); pw.print(KEY_MIN_CONNECTIVITY_COUNT); pw.print("=");
             pw.print(MIN_CONNECTIVITY_COUNT); pw.println();
@@ -785,7 +799,8 @@ public final class JobSchedulerService extends com.android.server.SystemService
         mControllers.add(ConnectivityController.get(this));
         mControllers.add(TimeController.get(this));
         mControllers.add(IdleController.get(this));
-        mControllers.add(BatteryController.get(this));
+        mBatteryController = BatteryController.get(this);
+        mControllers.add(mBatteryController);
         mControllers.add(AppIdleController.get(this));
         mControllers.add(ContentObserverController.get(this));
         mControllers.add(DeviceIdleJobsController.get(this));
@@ -1186,6 +1201,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
          */
         class MaybeReadyJobQueueFunctor implements JobStatusFunctor {
             int chargingCount;
+            int batteryNotLowCount;
             int idleCount;
             int backoffCount;
             int connectivityCount;
@@ -1223,6 +1239,9 @@ public final class JobSchedulerService extends com.android.server.SystemService
                     if (job.hasChargingConstraint()) {
                         chargingCount++;
                     }
+                    if (job.hasBatteryNotLowConstraint()) {
+                        batteryNotLowCount++;
+                    }
                     if (job.hasContentTriggerConstraint()) {
                         contentCount++;
                     }
@@ -1241,6 +1260,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
                         idleCount >= mConstants.MIN_IDLE_COUNT ||
                         connectivityCount >= mConstants.MIN_CONNECTIVITY_COUNT ||
                         chargingCount >= mConstants.MIN_CHARGING_COUNT ||
+                        batteryNotLowCount >= mConstants.MIN_BATTERY_NOT_LOW_COUNT ||
                         contentCount >= mConstants.MIN_CONTENT_COUNT ||
                         (runnableJobs != null
                                 && runnableJobs.size() >= mConstants.MIN_READY_JOBS_COUNT)) {
@@ -1264,6 +1284,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
                 idleCount =  0;
                 backoffCount = 0;
                 connectivityCount = 0;
+                batteryNotLowCount = 0;
                 contentCount = 0;
                 runnableJobs = null;
             }
@@ -1762,6 +1783,34 @@ public final class JobSchedulerService extends com.android.server.SystemService
             // can't happen
         }
         return 0;
+    }
+
+    void setMonitorBattery(boolean enabled) {
+        synchronized (mLock) {
+            if (mBatteryController != null) {
+                mBatteryController.getTracker().setMonitorBatteryLocked(enabled);
+            }
+        }
+    }
+
+    int getBatterySeq() {
+        synchronized (mLock) {
+            return mBatteryController != null ? mBatteryController.getTracker().getSeq() : -1;
+        }
+    }
+
+    boolean getBatteryCharging() {
+        synchronized (mLock) {
+            return mBatteryController != null
+                    ? mBatteryController.getTracker().isOnStablePower() : false;
+        }
+    }
+
+    boolean getBatteryNotLow() {
+        synchronized (mLock) {
+            return mBatteryController != null
+                    ? mBatteryController.getTracker().isBatteryNotLow() : false;
+        }
     }
 
     private String printContextIdToJobMap(JobStatus[] map, String initial) {

@@ -437,7 +437,7 @@ public final class JobPackageTracker {
         for (int i=0; i<size; i++) {
             final int index = mEventIndices.indexOf(i);
             final int uid = mEventUids[index];
-            if (filterUid != -1 && filterUid != UserHandle.getAppId(filterUid)) {
+            if (filterUid != -1 && filterUid != UserHandle.getAppId(uid)) {
                 continue;
             }
             final int cmd = mEventCmds[index];

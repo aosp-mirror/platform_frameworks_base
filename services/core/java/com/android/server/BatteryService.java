@@ -130,6 +130,8 @@ public final class BatteryService extends SystemService {
     private int mLastMaxChargingVoltage;
     private int mLastChargeCounter;
 
+    private int mSequence = 1;
+
     private int mInvalidCharger;
     private int mLastInvalidCharger;
 
@@ -448,27 +450,29 @@ public final class BatteryService extends SystemService {
                 }
             }
 
-            sendIntentLocked();
+            mSequence++;
 
             // Separate broadcast is sent for power connected / not connected
             // since the standard intent will not wake any applications and some
             // applications may want to have smart behavior based on this.
             if (mPlugType != 0 && mLastPlugType == 0) {
+                final Intent statusIntent = new Intent(Intent.ACTION_POWER_CONNECTED);
+                statusIntent.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+                statusIntent.putExtra(BatteryManager.EXTRA_SEQUENCE, mSequence);
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        Intent statusIntent = new Intent(Intent.ACTION_POWER_CONNECTED);
-                        statusIntent.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
                         mContext.sendBroadcastAsUser(statusIntent, UserHandle.ALL);
                     }
                 });
             }
             else if (mPlugType == 0 && mLastPlugType != 0) {
+                final Intent statusIntent = new Intent(Intent.ACTION_POWER_DISCONNECTED);
+                statusIntent.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+                statusIntent.putExtra(BatteryManager.EXTRA_SEQUENCE, mSequence);
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        Intent statusIntent = new Intent(Intent.ACTION_POWER_DISCONNECTED);
-                        statusIntent.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
                         mContext.sendBroadcastAsUser(statusIntent, UserHandle.ALL);
                     }
                 });
@@ -476,25 +480,32 @@ public final class BatteryService extends SystemService {
 
             if (shouldSendBatteryLowLocked()) {
                 mSentLowBatteryBroadcast = true;
+                final Intent statusIntent = new Intent(Intent.ACTION_BATTERY_LOW);
+                statusIntent.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+                statusIntent.putExtra(BatteryManager.EXTRA_SEQUENCE, mSequence);
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        Intent statusIntent = new Intent(Intent.ACTION_BATTERY_LOW);
-                        statusIntent.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
                         mContext.sendBroadcastAsUser(statusIntent, UserHandle.ALL);
                     }
                 });
             } else if (mSentLowBatteryBroadcast && mLastBatteryLevel >= mLowBatteryCloseWarningLevel) {
                 mSentLowBatteryBroadcast = false;
+                final Intent statusIntent = new Intent(Intent.ACTION_BATTERY_OKAY);
+                statusIntent.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+                statusIntent.putExtra(BatteryManager.EXTRA_SEQUENCE, mSequence);
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        Intent statusIntent = new Intent(Intent.ACTION_BATTERY_OKAY);
-                        statusIntent.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
                         mContext.sendBroadcastAsUser(statusIntent, UserHandle.ALL);
                     }
                 });
             }
+
+            // We are doing this after sending the above broadcasts, so anything processing
+            // them will get the new sequence number at that point.  (See for example how testing
+            // of JobScheduler's BatteryController works.)
+            sendIntentLocked();
 
             // Update the battery LED
             mLed.updateLightsLocked();
@@ -527,6 +538,7 @@ public final class BatteryService extends SystemService {
 
         int icon = getIconLocked(mBatteryProps.batteryLevel);
 
+        intent.putExtra(BatteryManager.EXTRA_SEQUENCE, mSequence);
         intent.putExtra(BatteryManager.EXTRA_STATUS, mBatteryProps.batteryStatus);
         intent.putExtra(BatteryManager.EXTRA_HEALTH, mBatteryProps.batteryHealth);
         intent.putExtra(BatteryManager.EXTRA_PRESENT, mBatteryProps.batteryPresent);
@@ -666,12 +678,28 @@ public final class BatteryService extends SystemService {
         pw.println("Battery service (battery) commands:");
         pw.println("  help");
         pw.println("    Print this help text.");
-        pw.println("  set [ac|usb|wireless|status|level|invalid] <value>");
+        pw.println("  set [-f] [ac|usb|wireless|status|level|invalid] <value>");
         pw.println("    Force a battery property value, freezing battery state.");
-        pw.println("  unplug");
+        pw.println("    -f: force a battery change broadcast be sent, prints new sequence.");
+        pw.println("  unplug [-f]");
         pw.println("    Force battery unplugged, freezing battery state.");
-        pw.println("  reset");
+        pw.println("    -f: force a battery change broadcast be sent, prints new sequence.");
+        pw.println("  reset [-f]");
         pw.println("    Unfreeze battery state, returning to current hardware values.");
+        pw.println("    -f: force a battery change broadcast be sent, prints new sequence.");
+    }
+
+    static final int OPTION_FORCE_UPDATE = 1<<0;
+
+    int parseOptions(Shell shell) {
+        String opt;
+        int opts = 0;
+        while ((opt = shell.getNextOption()) != null) {
+            if ("-f".equals(opt)) {
+                opts |= OPTION_FORCE_UPDATE;
+            }
+        }
+        return opts;
     }
 
     int onShellCommand(Shell shell, String cmd) {
@@ -681,6 +709,7 @@ public final class BatteryService extends SystemService {
         PrintWriter pw = shell.getOutPrintWriter();
         switch (cmd) {
             case "unplug": {
+                int opts = parseOptions(shell);
                 getContext().enforceCallingOrSelfPermission(
                         android.Manifest.permission.DEVICE_POWER, null);
                 if (!mUpdatesStopped) {
@@ -692,12 +721,13 @@ public final class BatteryService extends SystemService {
                 long ident = Binder.clearCallingIdentity();
                 try {
                     mUpdatesStopped = true;
-                    processValuesLocked(false);
+                    processValuesFromShellLocked(pw, opts);
                 } finally {
                     Binder.restoreCallingIdentity(ident);
                 }
             } break;
             case "set": {
+                int opts = parseOptions(shell);
                 getContext().enforceCallingOrSelfPermission(
                         android.Manifest.permission.DEVICE_POWER, null);
                 final String key = shell.getNextArg();
@@ -745,7 +775,7 @@ public final class BatteryService extends SystemService {
                         long ident = Binder.clearCallingIdentity();
                         try {
                             mUpdatesStopped = true;
-                            processValuesLocked(false);
+                            processValuesFromShellLocked(pw, opts);
                         } finally {
                             Binder.restoreCallingIdentity(ident);
                         }
@@ -756,6 +786,7 @@ public final class BatteryService extends SystemService {
                 }
             } break;
             case "reset": {
+                int opts = parseOptions(shell);
                 getContext().enforceCallingOrSelfPermission(
                         android.Manifest.permission.DEVICE_POWER, null);
                 long ident = Binder.clearCallingIdentity();
@@ -763,7 +794,7 @@ public final class BatteryService extends SystemService {
                     if (mUpdatesStopped) {
                         mUpdatesStopped = false;
                         mBatteryProps.set(mLastBatteryProps);
-                        processValuesLocked(false);
+                        processValuesFromShellLocked(pw, opts);
                     }
                 } finally {
                     Binder.restoreCallingIdentity(ident);
@@ -773,6 +804,13 @@ public final class BatteryService extends SystemService {
                 return shell.handleDefaultCommands(cmd);
         }
         return 0;
+    }
+
+    private void processValuesFromShellLocked(PrintWriter pw, int opts) {
+        processValuesLocked((opts & OPTION_FORCE_UPDATE) != 0);
+        if ((opts & OPTION_FORCE_UPDATE) != 0) {
+            pw.println(mSequence);
+        }
     }
 
     private void dumpInternal(FileDescriptor fd, PrintWriter pw, String[] args) {

@@ -46,16 +46,17 @@ public final class JobStatus {
     public static final long NO_LATEST_RUNTIME = Long.MAX_VALUE;
     public static final long NO_EARLIEST_RUNTIME = 0L;
 
-    static final int CONSTRAINT_CHARGING = 1<<0;
-    static final int CONSTRAINT_TIMING_DELAY = 1<<1;
-    static final int CONSTRAINT_DEADLINE = 1<<2;
-    static final int CONSTRAINT_IDLE = 1<<3;
-    static final int CONSTRAINT_UNMETERED = 1<<4;
-    static final int CONSTRAINT_CONNECTIVITY = 1<<5;
-    static final int CONSTRAINT_APP_NOT_IDLE = 1<<6;
-    static final int CONSTRAINT_CONTENT_TRIGGER = 1<<7;
-    static final int CONSTRAINT_DEVICE_NOT_DOZING = 1<<8;
-    static final int CONSTRAINT_NOT_ROAMING = 1<<9;
+    static final int CONSTRAINT_CHARGING = JobInfo.CONSTRAINT_FLAG_CHARGING;
+    static final int CONSTRAINT_IDLE = JobInfo.CONSTRAINT_FLAG_DEVICE_IDLE;
+    static final int CONSTRAINT_BATTERY_NOT_LOW = JobInfo.CONSTRAINT_FLAG_BATTERY_NOT_LOW;
+    static final int CONSTRAINT_TIMING_DELAY = 1<<31;
+    static final int CONSTRAINT_DEADLINE = 1<<30;
+    static final int CONSTRAINT_UNMETERED = 1<<29;
+    static final int CONSTRAINT_CONNECTIVITY = 1<<28;
+    static final int CONSTRAINT_APP_NOT_IDLE = 1<<27;
+    static final int CONSTRAINT_CONTENT_TRIGGER = 1<<26;
+    static final int CONSTRAINT_DEVICE_NOT_DOZING = 1<<25;
+    static final int CONSTRAINT_NOT_ROAMING = 1<<24;
 
     // Soft override: ignore constraints like time that don't affect API availability
     public static final int OVERRIDE_SOFT = 1;
@@ -163,7 +164,7 @@ public final class JobStatus {
         this.latestRunTimeElapsedMillis = latestRunTimeElapsedMillis;
         this.numFailures = numFailures;
 
-        int requiredConstraints = 0;
+        int requiredConstraints = job.getConstraintFlags();
         if (job.getNetworkType() == JobInfo.NETWORK_TYPE_ANY) {
             requiredConstraints |= CONSTRAINT_CONNECTIVITY;
         }
@@ -173,17 +174,11 @@ public final class JobStatus {
         if (job.getNetworkType() == JobInfo.NETWORK_TYPE_NOT_ROAMING) {
             requiredConstraints |= CONSTRAINT_NOT_ROAMING;
         }
-        if (job.isRequireCharging()) {
-            requiredConstraints |= CONSTRAINT_CHARGING;
-        }
         if (earliestRunTimeElapsedMillis != NO_EARLIEST_RUNTIME) {
             requiredConstraints |= CONSTRAINT_TIMING_DELAY;
         }
         if (latestRunTimeElapsedMillis != NO_LATEST_RUNTIME) {
             requiredConstraints |= CONSTRAINT_DEADLINE;
-        }
-        if (job.isRequireDeviceIdle()) {
-            requiredConstraints |= CONSTRAINT_IDLE;
         }
         if (job.getTriggerContentUris() != null) {
             requiredConstraints |= CONSTRAINT_CONTENT_TRIGGER;
@@ -331,6 +326,14 @@ public final class JobStatus {
         return (requiredConstraints&CONSTRAINT_CHARGING) != 0;
     }
 
+    public boolean hasBatteryNotLowConstraint() {
+        return (requiredConstraints&CONSTRAINT_BATTERY_NOT_LOW) != 0;
+    }
+
+    public boolean hasPowerConstraint() {
+        return (requiredConstraints&(CONSTRAINT_CHARGING|CONSTRAINT_BATTERY_NOT_LOW)) != 0;
+    }
+
     public boolean hasTimingDelayConstraint() {
         return (requiredConstraints&CONSTRAINT_TIMING_DELAY) != 0;
     }
@@ -377,6 +380,10 @@ public final class JobStatus {
 
     boolean setChargingConstraintSatisfied(boolean state) {
         return setConstraintSatisfied(CONSTRAINT_CHARGING, state);
+    }
+
+    boolean setBatteryNotLowConstraintSatisfied(boolean state) {
+        return setConstraintSatisfied(CONSTRAINT_BATTERY_NOT_LOW, state);
     }
 
     boolean setTimingDelayConstraintSatisfied(boolean state) {
@@ -453,13 +460,14 @@ public final class JobStatus {
     }
 
     static final int CONSTRAINTS_OF_INTEREST =
-            CONSTRAINT_CHARGING | CONSTRAINT_TIMING_DELAY |
+            CONSTRAINT_CHARGING | CONSTRAINT_BATTERY_NOT_LOW | CONSTRAINT_TIMING_DELAY |
             CONSTRAINT_CONNECTIVITY | CONSTRAINT_UNMETERED | CONSTRAINT_NOT_ROAMING |
             CONSTRAINT_IDLE | CONSTRAINT_CONTENT_TRIGGER;
 
     // Soft override covers all non-"functional" constraints
     static final int SOFT_OVERRIDE_CONSTRAINTS =
-            CONSTRAINT_CHARGING | CONSTRAINT_TIMING_DELAY | CONSTRAINT_IDLE;
+            CONSTRAINT_CHARGING | CONSTRAINT_BATTERY_NOT_LOW
+                    | CONSTRAINT_TIMING_DELAY | CONSTRAINT_IDLE;
 
     /**
      * @return Whether the constraints set on this job are satisfied.
@@ -495,6 +503,7 @@ public final class JobStatus {
                 + ",R=(" + formatRunTime(earliestRunTimeElapsedMillis, NO_EARLIEST_RUNTIME)
                 + "," + formatRunTime(latestRunTimeElapsedMillis, NO_LATEST_RUNTIME) + ")"
                 + ",N=" + job.getNetworkType() + ",C=" + job.isRequireCharging()
+                + ",BL=" + job.isRequireBatteryNotLow()
                 + ",I=" + job.isRequireDeviceIdle()
                 + ",U=" + (job.getTriggerContentUris() != null)
                 + ",F=" + numFailures + ",P=" + job.isPersisted()
@@ -549,6 +558,9 @@ public final class JobStatus {
     void dumpConstraints(PrintWriter pw, int constraints) {
         if ((constraints&CONSTRAINT_CHARGING) != 0) {
             pw.print(" CHARGING");
+        }
+        if ((constraints& CONSTRAINT_BATTERY_NOT_LOW) != 0) {
+            pw.print(" BATTERY_NOT_LOW");
         }
         if ((constraints&CONSTRAINT_TIMING_DELAY) != 0) {
             pw.print(" TIMING_DELAY");
@@ -607,7 +619,8 @@ public final class JobStatus {
                 pw.println(Integer.toHexString(job.getFlags()));
             }
             pw.print(prefix); pw.print("  Requires: charging=");
-            pw.print(job.isRequireCharging()); pw.print(" deviceIdle=");
+            pw.print(job.isRequireCharging()); pw.print(" batteryNotLow=");
+            pw.print(job.isRequireBatteryNotLow()); pw.print(" deviceIdle=");
             pw.println(job.isRequireDeviceIdle());
             if (job.getTriggerContentUris() != null) {
                 pw.print(prefix); pw.println("  Trigger content URIs:");

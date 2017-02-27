@@ -80,30 +80,36 @@ public class BatteryController extends StateController {
 
     @Override
     public void maybeStartTrackingJobLocked(JobStatus taskStatus, JobStatus lastJob) {
-        final boolean isOnStablePower = mChargeTracker.isOnStablePower();
-        if (taskStatus.hasChargingConstraint()) {
+        if (taskStatus.hasPowerConstraint()) {
             mTrackedTasks.add(taskStatus);
-            taskStatus.setChargingConstraintSatisfied(isOnStablePower);
+            taskStatus.setChargingConstraintSatisfied(mChargeTracker.isOnStablePower());
+            taskStatus.setBatteryNotLowConstraintSatisfied(mChargeTracker.isBatteryNotLow());
         }
     }
 
     @Override
     public void maybeStopTrackingJobLocked(JobStatus taskStatus, JobStatus incomingJob, boolean forUpdate) {
-        if (taskStatus.hasChargingConstraint()) {
+        if (taskStatus.hasPowerConstraint()) {
             mTrackedTasks.remove(taskStatus);
         }
     }
 
     private void maybeReportNewChargingState() {
         final boolean stablePower = mChargeTracker.isOnStablePower();
+        final boolean batteryNotLow = mChargeTracker.isBatteryNotLow();
         if (DEBUG) {
             Slog.d(TAG, "maybeReportNewChargingState: " + stablePower);
         }
         boolean reportChange = false;
         synchronized (mLock) {
-            for (JobStatus ts : mTrackedTasks) {
+            for (int i = mTrackedTasks.size() - 1; i >= 0; i--) {
+                final JobStatus ts = mTrackedTasks.get(i);
                 boolean previous = ts.setChargingConstraintSatisfied(stablePower);
                 if (previous != stablePower) {
+                    reportChange = true;
+                }
+                previous = ts.setBatteryNotLowConstraintSatisfied(batteryNotLow);
+                if (previous != batteryNotLow) {
                     reportChange = true;
                 }
             }
@@ -127,6 +133,10 @@ public class BatteryController extends StateController {
         private boolean mCharging;
         /** Keep track of whether the battery is charged enough that we want to do work. */
         private boolean mBatteryHealthy;
+        /** Sequence number of last broadcast. */
+        private int mLastBatterySeq = -1;
+
+        private BroadcastReceiver mMonitor;
 
         public ChargingTracker() {
         }
@@ -149,8 +159,40 @@ public class BatteryController extends StateController {
             mCharging = batteryManagerInternal.isPowered(BatteryManager.BATTERY_PLUGGED_ANY);
         }
 
-        boolean isOnStablePower() {
+        public void setMonitorBatteryLocked(boolean enabled) {
+            if (enabled) {
+                if (mMonitor == null) {
+                    mMonitor = new BroadcastReceiver() {
+                        @Override public void onReceive(Context context, Intent intent) {
+                            ChargingTracker.this.onReceive(context, intent);
+                        }
+                    };
+                    IntentFilter filter = new IntentFilter();
+                    filter.addAction(Intent.ACTION_BATTERY_CHANGED);
+                    mContext.registerReceiver(mMonitor, filter);
+                }
+            } else {
+                if (mMonitor != null) {
+                    mContext.unregisterReceiver(mMonitor);
+                    mMonitor = null;
+                }
+            }
+        }
+
+        public boolean isOnStablePower() {
             return mCharging && mBatteryHealthy;
+        }
+
+        public boolean isBatteryNotLow() {
+            return mBatteryHealthy;
+        }
+
+        public boolean isMonitoring() {
+            return mMonitor != null;
+        }
+
+        public int getSeq() {
+            return mLastBatterySeq;
         }
 
         @Override
@@ -191,13 +233,20 @@ public class BatteryController extends StateController {
                 mCharging = false;
                 maybeReportNewChargingState();
             }
+            mLastBatterySeq = intent.getIntExtra(BatteryManager.EXTRA_SEQUENCE, mLastBatterySeq);
         }
     }
 
     @Override
     public void dumpControllerStateLocked(PrintWriter pw, int filterUid) {
         pw.print("Battery: stable power = ");
-        pw.println(mChargeTracker.isOnStablePower());
+        pw.print(mChargeTracker.isOnStablePower());
+        pw.print(", not low = ");
+        pw.println(mChargeTracker.isBatteryNotLow());
+        if (mChargeTracker.isMonitoring()) {
+            pw.print("MONITORING: seq=");
+            pw.println(mChargeTracker.getSeq());
+        }
         pw.print("Tracking ");
         pw.print(mTrackedTasks.size());
         pw.println(":");

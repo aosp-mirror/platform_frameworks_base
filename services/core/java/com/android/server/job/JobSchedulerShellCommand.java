@@ -43,10 +43,19 @@ public class JobSchedulerShellCommand extends ShellCommand {
     public int onCommand(String cmd) {
         final PrintWriter pw = getOutPrintWriter();
         try {
-            if ("run".equals(cmd)) {
-                return runJob();
-            } else {
-                return handleDefaultCommands(cmd);
+            switch (cmd != null ? cmd : "") {
+                case "run":
+                    return runJob(pw);
+                case "monitor-battery":
+                    return runMonitorBattery(pw);
+                case "get-battery-seq":
+                    return runGetBatterySeq(pw);
+                case "get-battery-charging":
+                    return runGetBatteryCharging(pw);
+                case "get-battery-not-low":
+                    return runGetBatteryNotLow(pw);
+                default:
+                    return handleDefaultCommands(cmd);
             }
         } catch (Exception e) {
             pw.println("Exception: " + e);
@@ -54,20 +63,23 @@ public class JobSchedulerShellCommand extends ShellCommand {
         return -1;
     }
 
-    private int runJob() {
-        try {
-            final int uid = Binder.getCallingUid();
-            final int perm = mPM.checkUidPermission(
-                    "android.permission.CHANGE_APP_IDLE_STATE", uid);
-            if (perm != PackageManager.PERMISSION_GRANTED) {
-                throw new SecurityException("Uid " + uid
-                        + " not permitted to force scheduled jobs");
-            }
-        } catch (RemoteException e) {
-            // Can't happen
+    private void checkPermission(String operation) throws Exception {
+        final int uid = Binder.getCallingUid();
+        if (uid == 0) {
+            // Root can do anything.
+            return;
         }
+        final int perm = mPM.checkUidPermission(
+                "android.permission.CHANGE_APP_IDLE_STATE", uid);
+        if (perm != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Uid " + uid
+                    + " not permitted to " + operation);
+        }
+    }
 
-        final PrintWriter pw = getOutPrintWriter();
+    private int runJob(PrintWriter pw) throws Exception {
+        checkPermission("force scheduled jobs");
+
         boolean force = false;
         int userId = UserHandle.USER_SYSTEM;
 
@@ -133,6 +145,42 @@ public class JobSchedulerShellCommand extends ShellCommand {
         return ret;
     }
 
+    private int runMonitorBattery(PrintWriter pw) throws Exception {
+        checkPermission("change battery monitoring");
+        String opt = getNextArgRequired();
+        boolean enabled;
+        if ("on".equals(opt)) {
+            enabled = true;
+        } else if ("off".equals(opt)) {
+            enabled = false;
+        } else {
+            getErrPrintWriter().println("Error: unknown option " + opt);
+            return 1;
+        }
+        mInternal.setMonitorBattery(enabled);
+        if (enabled) pw.println("Battery monitoring enabled");
+        else pw.println("Battery monitoring disabled");
+        return 0;
+    }
+
+    private int runGetBatterySeq(PrintWriter pw) {
+        int seq = mInternal.getBatterySeq();
+        pw.println(seq);
+        return 0;
+    }
+
+    private int runGetBatteryCharging(PrintWriter pw) {
+        boolean val = mInternal.getBatteryCharging();
+        pw.println(val);
+        return 0;
+    }
+
+    private int runGetBatteryNotLow(PrintWriter pw) {
+        boolean val = mInternal.getBatteryNotLow();
+        pw.println(val);
+        return 0;
+    }
+
     @Override
     public void onHelp() {
         final PrintWriter pw = getOutPrintWriter();
@@ -140,7 +188,6 @@ public class JobSchedulerShellCommand extends ShellCommand {
         pw.println("Job scheduler (jobscheduler) commands:");
         pw.println("  help");
         pw.println("    Print this help text.");
-        pw.println();
         pw.println("  run [-f | --force] [-u | --user USER_ID] PACKAGE JOB_ID");
         pw.println("    Trigger immediate execution of a specific scheduled job.");
         pw.println("    Options:");
@@ -148,6 +195,15 @@ public class JobSchedulerShellCommand extends ShellCommand {
         pw.println("         connectivity are not currently met");
         pw.println("      -u or --user: specify which user's job is to be run; the default is");
         pw.println("         the primary or system user");
+        pw.println("  monitor-battery [on|off]");
+        pw.println("    Control monitoring of all battery changes.  Off by default.  Turning");
+        pw.println("    on makes get-battery-seq useful.");
+        pw.println("  get-battery-seq");
+        pw.println("    Return the last battery update sequence number that was received.");
+        pw.println("  get-battery-charging");
+        pw.println("    Return whether the battery is currently considered to be charging.");
+        pw.println("  get-battery-not-low");
+        pw.println("    Return whether the battery is currently considered to not be low.");
         pw.println();
     }
 
