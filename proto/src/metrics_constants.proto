@@ -3472,6 +3472,11 @@ message MetricsEvent {
     // FIELD: Whether developer mode has already been enabled when clicking build number preference
     FIELD_SETTINGS_BUILD_NUMBER_DEVELOPER_MODE_ENABLED = 848;
 
+    // OPEN: Settings > Wi-Fi > Network Details (click on Access Point)
+    // CATEGORY: SETTINGS
+    // OS: O
+    WIFI_NETWORK_DETAILS = 849;
+
     // ---- End O Constants, all O constants go above this line ----
 
     // Add new aosp constants above this line.
