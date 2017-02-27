@@ -197,6 +197,7 @@ public class TaskViewThumbnail extends View {
                     bm.getHeight() - thumbnailData.insets.top - thumbnailData.insets.bottom);
             mThumbnailData = thumbnailData;
             updateThumbnailMatrix();
+            updateThumbnailPaintFilter();
         } else {
             mBitmapShader = null;
             mDrawPaint.setShader(null);
