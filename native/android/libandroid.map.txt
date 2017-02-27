@@ -186,6 +186,9 @@ LIBANDROID {
     ASensor_getType;
     ASensor_getVendor;
     ASensor_isWakeUpSensor; # introduced=21
+    ASharedMemory_create; # introduced=26
+    ASharedMemory_getSize; # introduced=26
+    ASharedMemory_setProt; # introduced=26
     AStorageManager_delete;
     AStorageManager_getMountedObbPath;
     AStorageManager_isObbMounted;

@@ -19,6 +19,7 @@ LOCAL_SRC_FILES:= \
     net.c \
     obb.cpp \
     sensor.cpp \
+    sharedmem.cpp \
     storage_manager.cpp \
     trace.cpp \
 
