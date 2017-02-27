@@ -69,6 +69,11 @@ public class ResolveInfo implements Parcelable {
     public AuxiliaryResolveInfo auxiliaryInfo;
 
     /**
+     * Whether or not an instant app is available for the resolved intent.
+     */
+    public boolean instantAppAvailable;
+
+    /**
      * The IntentFilter that was matched for this ResolveInfo.
      */
     public IntentFilter filter;
@@ -325,6 +330,7 @@ public class ResolveInfo implements Parcelable {
         system = orig.system;
         targetUserId = orig.targetUserId;
         handleAllWebDataURI = orig.handleAllWebDataURI;
+        instantAppAvailable = orig.instantAppAvailable;
     }
 
     public String toString() {
@@ -388,6 +394,7 @@ public class ResolveInfo implements Parcelable {
         dest.writeInt(noResourceId ? 1 : 0);
         dest.writeInt(iconResourceId);
         dest.writeInt(handleAllWebDataURI ? 1 : 0);
+        dest.writeInt(instantAppAvailable ? 1 : 0);
     }
 
     public static final Creator<ResolveInfo> CREATOR
@@ -435,6 +442,7 @@ public class ResolveInfo implements Parcelable {
         noResourceId = source.readInt() != 0;
         iconResourceId = source.readInt();
         handleAllWebDataURI = source.readInt() != 0;
+        instantAppAvailable = source.readInt() != 0;
     }
 
     public static class DisplayNameComparator
