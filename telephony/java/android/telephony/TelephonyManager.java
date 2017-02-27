@@ -5189,23 +5189,42 @@ public class TelephonyManager {
         }
     }
 
+
+    /**
+     * @deprecated use {@link #isDataEnabled()} instead.
+     * @hide
+     */
+    @SystemApi
+    @Deprecated
+    public boolean getDataEnabled() {
+        return isDataEnabled();
+    }
+
     /**
      * Returns whether mobile data is enabled or not.
      *
-     * <p>Requires Permission:
-     *     {@link android.Manifest.permission#ACCESS_NETWORK_STATE ACCESS_NETWORK_STATE},
-     *     {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}, or that the
-     *     calling app has carrier privileges.
+     * <p>Requires one of the following permissions:
+     * {@link android.Manifest.permission#ACCESS_NETWORK_STATE ACCESS_NETWORK_STATE},
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}, or that the
+     * calling app has carrier privileges.
+     *
+     * <p>Note that this does not take into account any data restrictions that may be present on the
+     * calling app. Such restrictions may be inspected with
+     * {@link ConnectivityManager#getRestrictBackgroundStatus}.
      *
      * @return true if mobile data is enabled.
      *
      * @see #hasCarrierPrivileges
      */
-    public boolean getDataEnabled() {
+    @SuppressWarnings("deprecation")
+    public boolean isDataEnabled() {
         return getDataEnabled(getSubId());
     }
 
-    /** @hide */
+    /**
+     * @deprecated use {@link #isDataEnabled(int)} instead.
+     * @hide
+     */
     @SystemApi
     public boolean getDataEnabled(int subId) {
         boolean retVal = false;
