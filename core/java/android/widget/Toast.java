@@ -299,7 +299,7 @@ public class Toast {
         if (mNextView == null) {
             throw new RuntimeException("This Toast was not created with Toast.makeText()");
         }
-        TextView tv = (TextView) mNextView.findViewById(com.android.internal.R.id.message);
+        TextView tv = mNextView.findViewById(com.android.internal.R.id.message);
         if (tv == null) {
             throw new RuntimeException("This Toast was not created with Toast.makeText()");
         }
