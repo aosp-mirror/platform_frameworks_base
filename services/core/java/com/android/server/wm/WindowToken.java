@@ -151,21 +151,6 @@ class WindowToken extends WindowContainer<WindowState> {
         }
     }
 
-    int adjustAnimLayer(int adj) {
-        int highestAnimLayer = -1;
-        for (int j = mChildren.size() - 1; j >= 0; j--) {
-            final WindowState w = mChildren.get(j);
-            final int winHighestAnimLayer = w.adjustAnimLayer(adj);
-            if (winHighestAnimLayer > highestAnimLayer) {
-                highestAnimLayer = winHighestAnimLayer;
-            }
-            if (w == mService.mInputMethodTarget && !mService.mInputMethodTargetWaitingAnim) {
-                mDisplayContent.setInputMethodAnimLayerAdjustment(adj);
-            }
-        }
-        return highestAnimLayer;
-    }
-
     /**
      * Returns true if the new window is considered greater than the existing window in terms of
      * z-order.
@@ -195,6 +180,11 @@ class WindowToken extends WindowContainer<WindowState> {
     /** Returns true if the token windows list is empty. */
     boolean isEmpty() {
         return mChildren.isEmpty();
+    }
+
+    // Used by AppWindowToken.
+    int getAnimLayerAdjustment() {
+        return 0;
     }
 
     WindowState getReplacingWindow() {

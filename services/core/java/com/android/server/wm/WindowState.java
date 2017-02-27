@@ -1923,16 +1923,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (mIsImWindow && mService.mInputMethodTarget != null) {
             final AppWindowToken appToken = mService.mInputMethodTarget.mAppToken;
             if (appToken != null) {
-                return appToken.mAppAnimator.animLayerAdjustment;
+                return appToken.getAnimLayerAdjustment();
             }
         }
 
-        if (mAppToken != null) {
-            return mAppToken.mAppAnimator.animLayerAdjustment;
-        }
-
-        // Nothing is animating, so there is no animation adjustment.
-        return 0;
+        return mToken.getAnimLayerAdjustment();
     }
 
     int getSpecialWindowAnimLayerAdjustment() {
@@ -3858,20 +3853,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             }
         }
         return highest;
-    }
-
-    int adjustAnimLayer(int adj) {
-        int highestAnimLayer = mWinAnimator.mAnimLayer = mLayer + adj;
-        if (DEBUG_LAYERS || DEBUG_WALLPAPER) Slog.v(TAG_WM,
-                "adjustAnimLayer win=" + this + " anim layer: " + mWinAnimator.mAnimLayer);
-        for (int i = mChildren.size() - 1; i >= 0; i--) {
-            final WindowState childWindow = mChildren.get(i);
-            childWindow.adjustAnimLayer(adj);
-            if (childWindow.mWinAnimator.mAnimLayer > highestAnimLayer) {
-                highestAnimLayer = childWindow.mWinAnimator.mAnimLayer;
-            }
-        }
-        return highestAnimLayer;
     }
 
     @Override

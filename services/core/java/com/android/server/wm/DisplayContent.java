@@ -341,9 +341,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
     };
 
-    private final Consumer<WindowState> mSetInputMethodAnimLayerAdjustment =
-            w -> w.adjustAnimLayer(mInputMethodAnimLayerAdjustment);
-
     private final Consumer<WindowState> mScheduleToastTimeout = w -> {
         final int lostFocusUid = mTmpWindow.mOwnerUid;
         final Handler handler = mService.mH;
@@ -1281,8 +1278,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     void setInputMethodAnimLayerAdjustment(int adj) {
         if (DEBUG_LAYERS) Slog.v(TAG_WM, "Setting im layer adj to " + adj);
         mInputMethodAnimLayerAdjustment = adj;
-        mImeWindowsContainers.forAllWindows(mSetInputMethodAnimLayerAdjustment,
-                true /* traverseTopToBottom */);
+        assignWindowLayers(false /* relayoutNeeded */);
     }
 
     /**
@@ -1688,7 +1684,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             if (DEBUG_INPUT_METHOD) Slog.w(TAG_WM, "Moving IM target from " + curTarget + " to "
                     + target + (SHOW_STACK_CRAWLS ? " Callers=" + Debug.getCallers(4) : ""));
             setInputMethodTarget(target, false, target.mAppToken != null
-                    ? target.mAppToken.mAppAnimator.animLayerAdjustment : 0);
+                    ? target.mAppToken.getAnimLayerAdjustment() : 0);
         }
 
         return target;

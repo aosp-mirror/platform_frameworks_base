@@ -102,14 +102,28 @@ public class WindowTokenTests extends WindowTestsBase {
         final WindowState window2 = createWindow(null, TYPE_APPLICATION, token, "window2");
         final WindowState window3 = createWindow(null, TYPE_APPLICATION, token, "window3");
 
-        final int adj = 50;
-        final int window2StartLayer = window2.mLayer = 100;
-        final int window3StartLayer = window3.mLayer = 200;
-        final int highestLayer = token.adjustAnimLayer(adj);
+        window2.mLayer = 100;
+        window3.mLayer = 200;
 
-        assertEquals(adj, window1.mWinAnimator.mAnimLayer);
-        assertEquals(adj, window11.mWinAnimator.mAnimLayer);
-        assertEquals(adj, window12.mWinAnimator.mAnimLayer);
+        // We assign layers once, to get the base values computed by
+        // the controller.
+        sLayersController.assignWindowLayers(sDisplayContent);
+
+        final int window1StartLayer = window1.mWinAnimator.mAnimLayer;
+        final int window11StartLayer = window11.mWinAnimator.mAnimLayer;
+        final int window12StartLayer = window12.mWinAnimator.mAnimLayer;
+        final int window2StartLayer = window2.mWinAnimator.mAnimLayer;
+        final int window3StartLayer = window3.mWinAnimator.mAnimLayer;
+
+        // Then we set an adjustment, and assign them again, they should
+        // be offset.
+        int adj = token.adj = 50;
+        sLayersController.assignWindowLayers(sDisplayContent);
+        final int highestLayer = token.getHighestAnimLayer();
+
+        assertEquals(window1StartLayer + adj, window1.mWinAnimator.mAnimLayer);
+        assertEquals(window11StartLayer + adj, window11.mWinAnimator.mAnimLayer);
+        assertEquals(window12StartLayer + adj, window12.mWinAnimator.mAnimLayer);
         assertEquals(window2StartLayer + adj, window2.mWinAnimator.mAnimLayer);
         assertEquals(window3StartLayer + adj, window3.mWinAnimator.mAnimLayer);
         assertEquals(window3StartLayer + adj, highestLayer);
