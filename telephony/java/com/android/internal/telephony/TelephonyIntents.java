@@ -270,7 +270,7 @@ public class TelephonyIntents {
      * Used in OMA-DM applications.
      */
     public static final String ACTION_FORBIDDEN_NO_SERVICE_AUTHORIZATION
-            = "android.intent.action.ACTION_FORBIDDEN_NO_SERVICE_AUTHORIZATION";
+            = "com.android.internal.intent.action.ACTION_FORBIDDEN_NO_SERVICE_AUTHORIZATION";
 
     /**
      * Broadcast Action: A "secret code" has been entered in the dialer. Secret codes are

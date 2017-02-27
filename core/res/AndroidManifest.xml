@@ -3489,7 +3489,7 @@
         <receiver android:name="com.android.server.updates.ApnDbInstallReceiver"
                 android:permission="android.permission.UPDATE_CONFIG">
             <intent-filter>
-                <action android:name="android.intent.action.UPDATE_APN_DB" />
+                <action android:name="com.android.internal.intent.action.UPDATE_APN_DB" />
                 <data android:scheme="content" android:host="*" android:mimeType="*/*" />
             </intent-filter>
         </receiver>
