@@ -663,12 +663,12 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
     @Override
     public boolean setActiveScorer(String packageName) {
         // Only the system can set the active scorer
-        if (isCallerSystemProcess(getCallingUid()) || callerCanRequestScores()) {
-            return mNetworkScorerAppManager.setActiveScorer(packageName);
-        } else {
+        if (!isCallerSystemProcess(getCallingUid()) || !callerCanRequestScores()) {
             throw new SecurityException(
                     "Caller is neither the system process nor a score requester.");
         }
+
+        return mNetworkScorerAppManager.setActiveScorer(packageName);
     }
 
     /**
@@ -732,23 +732,23 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
     @Override
     public List<NetworkScorerAppData> getAllValidScorers() {
         // Only the system can access this data.
-        if (isCallerSystemProcess(getCallingUid()) || callerCanRequestScores()) {
-            return mNetworkScorerAppManager.getAllValidScorers();
-        } else {
+        if (!isCallerSystemProcess(getCallingUid()) || !callerCanRequestScores()) {
             throw new SecurityException(
                     "Caller is neither the system process nor a score requester.");
         }
+
+        return mNetworkScorerAppManager.getAllValidScorers();
     }
 
     @Override
     public void disableScoring() {
         // Only the active scorer or the system should be allowed to disable scoring.
-        if (isCallerActiveScorer(getCallingUid()) || callerCanRequestScores()) {
-            // no-op for now but we could write to the setting if needed.
-        } else {
+        if (!isCallerActiveScorer(getCallingUid()) || !callerCanRequestScores()) {
             throw new SecurityException(
                     "Caller is neither the active scorer nor the scorer manager.");
         }
+
+        // no-op for now but we could write to the setting if needed.
     }
 
     /** Clear scores. Callers are responsible for checking permissions as appropriate. */
