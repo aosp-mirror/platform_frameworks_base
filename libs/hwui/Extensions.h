@@ -17,11 +17,6 @@
 #ifndef ANDROID_HWUI_EXTENSIONS_H
 #define ANDROID_HWUI_EXTENSIONS_H
 
-#include <cutils/compiler.h>
-
-#include <string>
-#include <unordered_set>
-
 namespace android {
 namespace uirenderer {
 
@@ -45,6 +40,7 @@ public:
     inline bool hasFloatTextures() const { return mVersionMajor >= 3; }
     inline bool hasSRGB() const { return mHasSRGB; }
     inline bool hasSRGBWriteControl() const { return hasSRGB() && mHasSRGBWriteControl; }
+    inline bool hasLinearBlending() const { return hasSRGB() && mHasLinearBlending; }
 
     inline int getMajorGlVersion() const { return mVersionMajor; }
     inline int getMinorGlVersion() const { return mVersionMinor; }
@@ -59,6 +55,7 @@ private:
     bool mHasUnpackSubImage;
     bool mHasSRGB;
     bool mHasSRGBWriteControl;
+    bool mHasLinearBlending;
 
     int mVersionMajor;
     int mVersionMinor;

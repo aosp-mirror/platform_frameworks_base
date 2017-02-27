@@ -9,6 +9,7 @@
 #include "SkColor.h"
 #include "SkColorPriv.h"
 #include "SkHalf.h"
+#include "SkMatrix44.h"
 #include "SkPM4f.h"
 #include "SkPM4fPriv.h"
 #include "GraphicsJNI.h"
@@ -1168,6 +1169,61 @@ static jobject Bitmap_extractAlpha(JNIEnv* env, jobject clazz,
 
 ///////////////////////////////////////////////////////////////////////////////
 
+static jboolean Bitmap_isSRGB(JNIEnv* env, jobject, jlong bitmapHandle) {
+    LocalScopedBitmap bitmapHolder(bitmapHandle);
+    if (!bitmapHolder.valid()) return JNI_TRUE;
+
+    SkColorSpace* colorSpace = bitmapHolder->info().colorSpace();
+    return colorSpace == nullptr ||
+           colorSpace == SkColorSpace::MakeSRGB().get() ||
+           colorSpace == SkColorSpace::MakeRGB(
+                  SkColorSpace::kSRGB_RenderTargetGamma,
+                  SkColorSpace::kSRGB_Gamut,
+                  SkColorSpace::kNonLinearBlending_ColorSpaceFlag).get();
+}
+
+static jboolean Bitmap_getColorSpace(JNIEnv* env, jobject, jlong bitmapHandle,
+        jfloatArray xyzArray, jfloatArray paramsArray) {
+
+    LocalScopedBitmap bitmapHolder(bitmapHandle);
+    if (!bitmapHolder.valid()) return JNI_FALSE;
+
+    SkColorSpace* colorSpace = bitmapHolder->info().colorSpace();
+    if (colorSpace == nullptr) return JNI_FALSE;
+
+    SkMatrix44 xyzMatrix(SkMatrix44::kUninitialized_Constructor);
+    if (!colorSpace->toXYZD50(&xyzMatrix)) return JNI_FALSE;
+
+    jfloat* xyz = env->GetFloatArrayElements(xyzArray, NULL);
+    xyz[0] = xyzMatrix.getFloat(0, 0);
+    xyz[1] = xyzMatrix.getFloat(1, 0);
+    xyz[2] = xyzMatrix.getFloat(2, 0);
+    xyz[3] = xyzMatrix.getFloat(0, 1);
+    xyz[4] = xyzMatrix.getFloat(1, 1);
+    xyz[5] = xyzMatrix.getFloat(2, 1);
+    xyz[6] = xyzMatrix.getFloat(0, 2);
+    xyz[7] = xyzMatrix.getFloat(1, 2);
+    xyz[8] = xyzMatrix.getFloat(2, 2);
+    env->ReleaseFloatArrayElements(xyzArray, xyz, 0);
+
+    SkColorSpaceTransferFn transferParams;
+    if (!colorSpace->isNumericalTransferFn(&transferParams)) return JNI_FALSE;
+
+    jfloat* params = env->GetFloatArrayElements(paramsArray, NULL);
+    params[0] = transferParams.fA;
+    params[1] = transferParams.fB;
+    params[2] = transferParams.fC;
+    params[3] = transferParams.fD;
+    params[4] = transferParams.fE;
+    params[5] = transferParams.fF;
+    params[6] = transferParams.fG;
+    env->ReleaseFloatArrayElements(paramsArray, params, 0);
+
+    return JNI_TRUE;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 static jint Bitmap_getPixel(JNIEnv* env, jobject, jlong bitmapHandle,
         jint x, jint y) {
     SkBitmap bitmap;
@@ -1459,7 +1515,9 @@ static const JNINativeMethod gBitmapMethods[] = {
     {   "nativeCreateHardwareBitmap", "(Landroid/graphics/GraphicBuffer;)Landroid/graphics/Bitmap;",
         (void*) Bitmap_createHardwareBitmap },
     {   "nativeCreateGraphicBufferHandle", "(J)Landroid/graphics/GraphicBuffer;",
-        (void*) Bitmap_createGraphicBufferHandle }
+        (void*) Bitmap_createGraphicBufferHandle },
+    {   "nativeGetColorSpace",      "(J[F[F)Z", (void*)Bitmap_getColorSpace },
+    {   "nativeIsSRGB",             "(J)Z", (void*)Bitmap_isSRGB },
 };
 
 int register_android_graphics_Bitmap(JNIEnv* env)

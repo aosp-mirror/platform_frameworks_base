@@ -20,8 +20,8 @@ import android.annotation.AnyThread;
 import android.annotation.ColorInt;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
-import android.annotation.Size;
 import android.annotation.Nullable;
+import android.annotation.Size;
 import android.util.Pair;
 
 import java.util.ArrayList;
@@ -263,18 +263,18 @@ public abstract class ColorSpace {
          *     <tr><td>Name</td><td colspan="4">sRGB IEC61966-2.1</td></tr>
          *     <tr><td>CIE standard illuminant</td><td colspan="4">D65</td></tr>
          *     <tr>
-         *         <td>Opto-electronic transfer function</td>
+         *         <td>Opto-electronic transfer function (OETF)</td>
          *         <td colspan="4">\(\begin{equation}
-         *             C_{sRGB} = \begin{cases} 12.92 \times C_{linear} & C_{linear} \le 0.0031308 \\
-         *             1.055 \times C_{linear}^{\frac{1}{2.4}} - 0.055 & C_{linear} \gt 0.0031308 \end{cases}
+         *             C_{sRGB} = \begin{cases} 12.92 \times C_{linear} & C_{linear} \lt 0.0031308 \\
+         *             1.055 \times C_{linear}^{\frac{1}{2.4}} - 0.055 & C_{linear} \ge 0.0031308 \end{cases}
          *             \end{equation}\)
          *         </td>
          *     </tr>
          *     <tr>
-         *         <td>Electro-optical transfer function</td>
+         *         <td>Electro-optical transfer function (EOTF)</td>
          *         <td colspan="4">\(\begin{equation}
-         *             C_{linear} = \begin{cases}\frac{C_{sRGB}}{12.92} & C_{sRGB} \le 0.04045 \\
-         *             \left( \frac{C_{sRGB} + 0.055}{1.055} \right) ^{2.4} & C_{sRGB} \gt 0.04045 \end{cases}
+         *             C_{linear} = \begin{cases}\frac{C_{sRGB}}{12.92} & C_{sRGB} \lt 0.04045 \\
+         *             \left( \frac{C_{sRGB} + 0.055}{1.055} \right) ^{2.4} & C_{sRGB} \ge 0.04045 \end{cases}
          *             \end{equation}\)
          *         </td>
          *     </tr>
@@ -298,11 +298,11 @@ public abstract class ColorSpace {
          *     <tr><td>Name</td><td colspan="4">sRGB IEC61966-2.1 (Linear)</td></tr>
          *     <tr><td>CIE standard illuminant</td><td colspan="4">D65</td></tr>
          *     <tr>
-         *         <td>Opto-electronic transfer function</td>
+         *         <td>Opto-electronic transfer function (OETF)</td>
          *         <td colspan="4">\(C_{sRGB} = C_{linear}\)</td>
          *     </tr>
          *     <tr>
-         *         <td>Electro-optical transfer function</td>
+         *         <td>Electro-optical transfer function (EOTF)</td>
          *         <td colspan="4">\(C_{linear} = C_{sRGB}\)</td>
          *     </tr>
          *     <tr><td>Range</td><td colspan="4">\([0..1]\)</td></tr>
@@ -325,22 +325,22 @@ public abstract class ColorSpace {
          *     <tr><td>Name</td><td colspan="4">scRGB-nl IEC 61966-2-2:2003</td></tr>
          *     <tr><td>CIE standard illuminant</td><td colspan="4">D65</td></tr>
          *     <tr>
-         *         <td>Opto-electronic transfer function</td>
+         *         <td>Opto-electronic transfer function (OETF)</td>
          *         <td colspan="4">\(\begin{equation}
          *             C_{scRGB} = \begin{cases} sign(C_{linear}) 12.92 \times \left| C_{linear} \right| &
-         *                      \left| C_{linear} \right| \le 0.0031308 \\
+         *                      \left| C_{linear} \right| \lt 0.0031308 \\
          *             sign(C_{linear}) 1.055 \times \left| C_{linear} \right| ^{\frac{1}{2.4}} - 0.055 &
-         *                      \left| C_{linear} \right| \gt 0.0031308 \end{cases}
+         *                      \left| C_{linear} \right| \ge 0.0031308 \end{cases}
          *             \end{equation}\)
          *         </td>
          *     </tr>
          *     <tr>
-         *         <td>Electro-optical transfer function</td>
+         *         <td>Electro-optical transfer function (EOTF)</td>
          *         <td colspan="4">\(\begin{equation}
          *             C_{linear} = \begin{cases}sign(C_{scRGB}) \frac{\left| C_{scRGB} \right|}{12.92} &
-         *                  \left| C_{scRGB} \right| \le 0.04045 \\
+         *                  \left| C_{scRGB} \right| \lt 0.04045 \\
          *             sign(C_{scRGB}) \left( \frac{\left| C_{scRGB} \right| + 0.055}{1.055} \right) ^{2.4} &
-         *                  \left| C_{scRGB} \right| \gt 0.04045 \end{cases}
+         *                  \left| C_{scRGB} \right| \ge 0.04045 \end{cases}
          *             \end{equation}\)
          *         </td>
          *     </tr>
@@ -364,11 +364,11 @@ public abstract class ColorSpace {
          *     <tr><td>Name</td><td colspan="4">scRGB IEC 61966-2-2:2003</td></tr>
          *     <tr><td>CIE standard illuminant</td><td colspan="4">D65</td></tr>
          *     <tr>
-         *         <td>Opto-electronic transfer function</td>
+         *         <td>Opto-electronic transfer function (OETF)</td>
          *         <td colspan="4">\(C_{scRGB} = C_{linear}\)</td>
          *     </tr>
          *     <tr>
-         *         <td>Electro-optical transfer function</td>
+         *         <td>Electro-optical transfer function (EOTF)</td>
          *         <td colspan="4">\(C_{linear} = C_{scRGB}\)</td>
          *     </tr>
          *     <tr><td>Range</td><td colspan="4">\([-0.5..7.499[\)</td></tr>
@@ -391,7 +391,7 @@ public abstract class ColorSpace {
          *     <tr><td>Name</td><td colspan="4">Rec. ITU-R BT.709-5</td></tr>
          *     <tr><td>CIE standard illuminant</td><td colspan="4">D65</td></tr>
          *     <tr>
-         *         <td>Opto-electronic transfer function</td>
+         *         <td>Opto-electronic transfer function (OETF)</td>
          *         <td colspan="4">\(\begin{equation}
          *             C_{BT709} = \begin{cases} 4.5 \times C_{linear} & C_{linear} \lt 0.018 \\
          *             1.099 \times C_{linear}^{\frac{1}{2.2}} - 0.099 & C_{linear} \ge 0.018 \end{cases}
@@ -399,7 +399,7 @@ public abstract class ColorSpace {
          *         </td>
          *     </tr>
          *     <tr>
-         *         <td>Electro-optical transfer function</td>
+         *         <td>Electro-optical transfer function (EOTF)</td>
          *         <td colspan="4">\(\begin{equation}
          *             C_{linear} = \begin{cases}\frac{C_{BT709}}{4.5} & C_{BT709} \lt 0.081 \\
          *             \left( \frac{C_{BT709} + 0.099}{1.099} \right) ^{2.2} & C_{BT709} \ge 0.081 \end{cases}
@@ -426,7 +426,7 @@ public abstract class ColorSpace {
          *     <tr><td>Name</td><td colspan="4">Rec. ITU-R BT.2020-1</td></tr>
          *     <tr><td>CIE standard illuminant</td><td colspan="4">D65</td></tr>
          *     <tr>
-         *         <td>Opto-electronic transfer function</td>
+         *         <td>Opto-electronic transfer function (OETF)</td>
          *         <td colspan="4">\(\begin{equation}
          *             C_{BT2020} = \begin{cases} 4.5 \times C_{linear} & C_{linear} \lt 0.0181 \\
          *             1.0993 \times C_{linear}^{\frac{1}{2.2}} - 0.0993 & C_{linear} \ge 0.0181 \end{cases}
@@ -434,7 +434,7 @@ public abstract class ColorSpace {
          *         </td>
          *     </tr>
          *     <tr>
-         *         <td>Electro-optical transfer function</td>
+         *         <td>Electro-optical transfer function (EOTF)</td>
          *         <td colspan="4">\(\begin{equation}
          *             C_{linear} = \begin{cases}\frac{C_{BT2020}}{4.5} & C_{BT2020} \lt 0.08145 \\
          *             \left( \frac{C_{BT2020} + 0.0993}{1.0993} \right) ^{2.2} & C_{BT2020} \ge 0.08145 \end{cases}
@@ -461,11 +461,11 @@ public abstract class ColorSpace {
          *     <tr><td>Name</td><td colspan="4">SMPTE RP 431-2-2007 DCI (P3)</td></tr>
          *     <tr><td>CIE standard illuminant</td><td colspan="4">N/A</td></tr>
          *     <tr>
-         *         <td>Opto-electronic transfer function</td>
+         *         <td>Opto-electronic transfer function (OETF)</td>
          *         <td colspan="4">\(C_{P3} = C_{linear}^{\frac{1}{2.6}}\)</td>
          *     </tr>
          *     <tr>
-         *         <td>Electro-optical transfer function</td>
+         *         <td>Electro-optical transfer function (EOTF)</td>
          *         <td colspan="4">\(C_{linear} = C_{P3}^{2.6}\)</td>
          *     </tr>
          *     <tr><td>Range</td><td colspan="4">\([0..1]\)</td></tr>
@@ -488,18 +488,18 @@ public abstract class ColorSpace {
          *     <tr><td>Name</td><td colspan="4">Display P3</td></tr>
          *     <tr><td>CIE standard illuminant</td><td colspan="4">D65</td></tr>
          *     <tr>
-         *         <td>Opto-electronic transfer function</td>
+         *         <td>Opto-electronic transfer function (OETF)</td>
          *         <td colspan="4">\(\begin{equation}
-         *             C_{sRGB} = \begin{cases} 12.92 \times C_{linear} & C_{linear} \le 0.0031308 \\
-         *             1.055 \times C_{linear}^{\frac{1}{2.4}} - 0.055 & C_{linear} \gt 0.0031308 \end{cases}
+         *             C_{sRGB} = \begin{cases} 12.92 \times C_{linear} & C_{linear} \lt 0.0031308 \\
+         *             1.055 \times C_{linear}^{\frac{1}{2.4}} - 0.055 & C_{linear} \ge 0.0031308 \end{cases}
          *             \end{equation}\)
          *         </td>
          *     </tr>
          *     <tr>
-         *         <td>Electro-optical transfer function</td>
+         *         <td>Electro-optical transfer function (EOTF)</td>
          *         <td colspan="4">\(\begin{equation}
-         *             C_{linear} = \begin{cases}\frac{C_{sRGB}}{12.92} & C_{sRGB} \le 0.04045 \\
-         *             \left( \frac{C_{sRGB} + 0.055}{1.055} \right) ^{2.4} & C_{sRGB} \gt 0.04045 \end{cases}
+         *             C_{linear} = \begin{cases}\frac{C_{sRGB}}{12.92} & C_{sRGB} \lt 0.04045 \\
+         *             \left( \frac{C_{sRGB} + 0.055}{1.055} \right) ^{2.4} & C_{sRGB} \ge 0.04045 \end{cases}
          *             \end{equation}\)
          *         </td>
          *     </tr>
@@ -523,7 +523,7 @@ public abstract class ColorSpace {
          *     <tr><td>Name</td><td colspan="4">NTSC (1953)</td></tr>
          *     <tr><td>CIE standard illuminant</td><td colspan="4">C</td></tr>
          *     <tr>
-         *         <td>Opto-electronic transfer function</td>
+         *         <td>Opto-electronic transfer function (OETF)</td>
          *         <td colspan="4">\(\begin{equation}
          *             C_{BT709} = \begin{cases} 4.5 \times C_{linear} & C_{linear} \lt 0.018 \\
          *             1.099 \times C_{linear}^{\frac{1}{2.2}} - 0.099 & C_{linear} \ge 0.018 \end{cases}
@@ -531,7 +531,7 @@ public abstract class ColorSpace {
          *         </td>
          *     </tr>
          *     <tr>
-         *         <td>Electro-optical transfer function</td>
+         *         <td>Electro-optical transfer function (EOTF)</td>
          *         <td colspan="4">\(\begin{equation}
          *             C_{linear} = \begin{cases}\frac{C_{BT709}}{4.5} & C_{BT709} \lt 0.081 \\
          *             \left( \frac{C_{BT709} + 0.099}{1.099} \right) ^{2.2} & C_{BT709} \ge 0.081 \end{cases}
@@ -558,7 +558,7 @@ public abstract class ColorSpace {
          *     <tr><td>Name</td><td colspan="4">SMPTE-C RGB</td></tr>
          *     <tr><td>CIE standard illuminant</td><td colspan="4">D65</td></tr>
          *     <tr>
-         *         <td>Opto-electronic transfer function</td>
+         *         <td>Opto-electronic transfer function (OETF)</td>
          *         <td colspan="4">\(\begin{equation}
          *             C_{BT709} = \begin{cases} 4.5 \times C_{linear} & C_{linear} \lt 0.018 \\
          *             1.099 \times C_{linear}^{\frac{1}{2.2}} - 0.099 & C_{linear} \ge 0.018 \end{cases}
@@ -566,7 +566,7 @@ public abstract class ColorSpace {
          *         </td>
          *     </tr>
          *     <tr>
-         *         <td>Electro-optical transfer function</td>
+         *         <td>Electro-optical transfer function (EOTF)</td>
          *         <td colspan="4">\(\begin{equation}
          *             C_{linear} = \begin{cases}\frac{C_{BT709}}{4.5} & C_{BT709} \lt 0.081 \\
          *             \left( \frac{C_{BT709} + 0.099}{1.099} \right) ^{2.2} & C_{BT709} \ge 0.081 \end{cases}
@@ -593,11 +593,11 @@ public abstract class ColorSpace {
          *     <tr><td>Name</td><td colspan="4">Adobe RGB (1998)</td></tr>
          *     <tr><td>CIE standard illuminant</td><td colspan="4">D65</td></tr>
          *     <tr>
-         *         <td>Opto-electronic transfer function</td>
+         *         <td>Opto-electronic transfer function (OETF)</td>
          *         <td colspan="4">\(C_{RGB} = C_{linear}^{\frac{1}{2.2}}\)</td>
          *     </tr>
          *     <tr>
-         *         <td>Electro-optical transfer function</td>
+         *         <td>Electro-optical transfer function (EOTF)</td>
          *         <td colspan="4">\(C_{linear} = C_{RGB}^{2.2}\)</td>
          *     </tr>
          *     <tr><td>Range</td><td colspan="4">\([0..1]\)</td></tr>
@@ -620,7 +620,7 @@ public abstract class ColorSpace {
          *     <tr><td>Name</td><td colspan="4">ROMM RGB ISO 22028-2:2013</td></tr>
          *     <tr><td>CIE standard illuminant</td><td colspan="4">D50</td></tr>
          *     <tr>
-         *         <td>Opto-electronic transfer function</td>
+         *         <td>Opto-electronic transfer function (OETF)</td>
          *         <td colspan="4">\(\begin{equation}
          *             C_{ROMM} = \begin{cases} 16 \times C_{linear} & C_{linear} \lt 0.001953 \\
          *             C_{linear}^{\frac{1}{1.8}} & C_{linear} \ge 0.001953 \end{cases}
@@ -628,7 +628,7 @@ public abstract class ColorSpace {
          *         </td>
          *     </tr>
          *     <tr>
-         *         <td>Electro-optical transfer function</td>
+         *         <td>Electro-optical transfer function (EOTF)</td>
          *         <td colspan="4">\(\begin{equation}
          *             C_{linear} = \begin{cases}\frac{C_{ROMM}}{16} & C_{ROMM} \lt 0.031248 \\
          *             C_{ROMM}^{1.8} & C_{ROMM} \ge 0.031248 \end{cases}
@@ -655,11 +655,11 @@ public abstract class ColorSpace {
          *     <tr><td>Name</td><td colspan="4">SMPTE ST 2065-1:2012 ACES</td></tr>
          *     <tr><td>CIE standard illuminant</td><td colspan="4">D60</td></tr>
          *     <tr>
-         *         <td>Opto-electronic transfer function</td>
+         *         <td>Opto-electronic transfer function (OETF)</td>
          *         <td colspan="4">\(C_{ACES} = C_{linear}\)</td>
          *     </tr>
          *     <tr>
-         *         <td>Electro-optical transfer function</td>
+         *         <td>Electro-optical transfer function (EOTF)</td>
          *         <td colspan="4">\(C_{linear} = C_{ACES}\)</td>
          *     </tr>
          *     <tr><td>Range</td><td colspan="4">\([-65504.0, 65504.0]\)</td></tr>
@@ -682,11 +682,11 @@ public abstract class ColorSpace {
          *     <tr><td>Name</td><td colspan="4">Academy S-2014-004 ACEScg</td></tr>
          *     <tr><td>CIE standard illuminant</td><td colspan="4">D60</td></tr>
          *     <tr>
-         *         <td>Opto-electronic transfer function</td>
+         *         <td>Opto-electronic transfer function (OETF)</td>
          *         <td colspan="4">\(C_{ACEScg} = C_{linear}\)</td>
          *     </tr>
          *     <tr>
-         *         <td>Electro-optical transfer function</td>
+         *         <td>Electro-optical transfer function (EOTF)</td>
          *         <td colspan="4">\(C_{linear} = C_{ACEScg}\)</td>
          *     </tr>
          *     <tr><td>Range</td><td colspan="4">\([-65504.0, 65504.0]\)</td></tr>
@@ -1379,6 +1379,37 @@ public abstract class ColorSpace {
     }
 
     /**
+     * <p>Returns a {@link Named} instance of {@link ColorSpace} that matches
+     * the specified RGB to CIE XYZ transform and transfer functions. If no
+     * instance can be found, this method returns null.</p>
+     *
+     * <p>The color transform matrix is assumed to target the CIE XYZ space
+     * a {@link #ILLUMINANT_D50 D50} standard illuminant.</p>
+     *
+     * @param toXYZD50 3x3 column-major transform matrix from RGB to the profile
+     *                 connection space CIE XYZ as an array of 9 floats, cannot be null
+     * @param function Parameters for the transfer functions
+     * @return A non-null {@link ColorSpace} if a match is found, null otherwise
+     */
+    @Nullable
+    public static ColorSpace match(
+            @NonNull @Size(9) float[] toXYZD50,
+            @NonNull Rgb.TransferParameters function) {
+
+        for (ColorSpace colorSpace : sNamedColorSpaces) {
+            if (colorSpace.getModel() == Model.RGB) {
+                ColorSpace.Rgb rgb = (ColorSpace.Rgb) adapt(colorSpace, ILLUMINANT_D50_XYZ);
+                if (compare(toXYZD50, rgb.mTransform) &&
+                        compare(function, rgb.mTransferParameters)) {
+                    return colorSpace;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * <p>Creates a new {@link Renderer} that can be used to visualize and
      * debug color spaces. See the documentation of {@link Renderer} for
      * more information.</p>
@@ -1397,17 +1428,14 @@ public abstract class ColorSpace {
                 "sRGB IEC61966-2.1",
                 SRGB_PRIMARIES,
                 ILLUMINANT_D65,
-                x -> rcpResponse(x, 2.4, 1 / 1.055, 0.055 / 1.055, 1 / 12.92, 0.04045),
-                x -> response(x, 2.4, 1 / 1.055, 0.055 / 1.055, 1 / 12.92, 0.04045),
-                0.0f, 1.0f,
+                new Rgb.TransferParameters(1 / 1.055, 0.055 / 1.055, 1 / 12.92, 0.04045, 2.4),
                 Named.SRGB.ordinal()
         );
         sNamedColorSpaces[Named.LINEAR_SRGB.ordinal()] = new ColorSpace.Rgb(
                 "sRGB IEC61966-2.1 (Linear)",
                 SRGB_PRIMARIES,
                 ILLUMINANT_D65,
-                DoubleUnaryOperator.identity(),
-                DoubleUnaryOperator.identity(),
+                1.0,
                 0.0f, 1.0f,
                 Named.LINEAR_SRGB.ordinal()
         );
@@ -1415,17 +1443,16 @@ public abstract class ColorSpace {
                 "scRGB-nl IEC 61966-2-2:2003",
                 SRGB_PRIMARIES,
                 ILLUMINANT_D65,
-                x -> absRcpResponse(x, 2.4, 1 / 1.055, 0.055 / 1.055, 1 / 12.92, 0.04045),
-                x -> absResponse(x, 2.4, 1 / 1.055, 0.055 / 1.055, 1 / 12.92, 0.04045),
+                x -> absRcpResponse(x, 1 / 1.055, 0.055 / 1.055, 1 / 12.92, 0.04045, 2.4),
+                x -> absResponse(x, 1 / 1.055, 0.055 / 1.055, 1 / 12.92, 0.04045, 2.4),
                 -0.799f, 2.399f,
                 Named.EXTENDED_SRGB.ordinal()
         );
         sNamedColorSpaces[Named.LINEAR_EXTENDED_SRGB.ordinal()] = new ColorSpace.Rgb(
-                "scRGB- IEC 61966-2-2:2003",
+                "scRGB IEC 61966-2-2:2003",
                 SRGB_PRIMARIES,
                 ILLUMINANT_D65,
-                DoubleUnaryOperator.identity(),
-                DoubleUnaryOperator.identity(),
+                1.0,
                 -0.5f, 7.499f,
                 Named.LINEAR_EXTENDED_SRGB.ordinal()
         );
@@ -1433,26 +1460,21 @@ public abstract class ColorSpace {
                 "Rec. ITU-R BT.709-5",
                 new float[] { 0.640f, 0.330f, 0.300f, 0.600f, 0.150f, 0.060f },
                 ILLUMINANT_D65,
-                x -> rcpResponse(x, 1 / 0.45, 1 / 1.099, 0.099 / 1.099, 1 / 4.5, 0.081),
-                x -> response(x, 1 / 0.45, 1 / 1.099, 0.099 / 1.099, 1 / 4.5, 0.081),
-                0.0f, 1.0f,
+                new Rgb.TransferParameters(1 / 1.099, 0.099 / 1.099, 1 / 4.5, 0.081, 1 / 0.45),
                 Named.BT709.ordinal()
         );
         sNamedColorSpaces[Named.BT2020.ordinal()] = new ColorSpace.Rgb(
                 "Rec. ITU-R BT.2020-1",
                 new float[] { 0.708f, 0.292f, 0.170f, 0.797f, 0.131f, 0.046f },
                 ILLUMINANT_D65,
-                x -> rcpResponse(x, 1 / 0.45, 1 / 1.0993, 0.0993 / 1.0993, 1 / 4.5, 0.08145),
-                x -> response(x, 1 / 0.45, 1 / 1.0993, 0.099 / 1.0993, 1 / 4.5, 0.08145),
-                0.0f, 1.0f,
+                new Rgb.TransferParameters(1 / 1.0993, 0.0993 / 1.0993, 1 / 4.5, 0.08145, 1 / 0.45),
                 Named.BT2020.ordinal()
         );
         sNamedColorSpaces[Named.DCI_P3.ordinal()] = new ColorSpace.Rgb(
                 "SMPTE RP 431-2-2007 DCI (P3)",
                 new float[] { 0.680f, 0.320f, 0.265f, 0.690f, 0.150f, 0.060f },
                 new float[] { 0.314f, 0.351f },
-                x -> Math.pow(x < 0.0f ? 0.0f : x, 1 / 2.6),
-                x -> Math.pow(x < 0.0f ? 0.0f : x, 2.6),
+                2.6,
                 0.0f, 1.0f,
                 Named.DCI_P3.ordinal()
         );
@@ -1460,35 +1482,28 @@ public abstract class ColorSpace {
                 "Display P3",
                 new float[] { 0.680f, 0.320f, 0.265f, 0.690f, 0.150f, 0.060f },
                 ILLUMINANT_D65,
-                x -> rcpResponse(x, 2.4, 1 / 1.055, 0.055 / 1.055, 1 / 12.92, 0.04045),
-                x -> response(x, 2.4, 1 / 1.055, 0.055 / 1.055, 1 / 12.92, 0.04045),
-                0.0f, 1.0f,
+                new Rgb.TransferParameters(1 / 1.055, 0.055 / 1.055, 1 / 12.92, 0.04045, 2.4),
                 Named.DISPLAY_P3.ordinal()
         );
         sNamedColorSpaces[Named.NTSC_1953.ordinal()] = new ColorSpace.Rgb(
                 "NTSC (1953)",
                 NTSC_1953_PRIMARIES,
                 ILLUMINANT_C,
-                x -> rcpResponse(x, 1 / 0.45, 1 / 1.099, 0.099 / 1.099, 1 / 4.5, 0.081),
-                x -> response(x, 1 / 0.45, 1 / 1.099, 0.099 / 1.099, 1 / 4.5, 0.081),
-                0.0f, 1.0f,
+                new Rgb.TransferParameters(1 / 1.099, 0.099 / 1.099, 1 / 4.5, 0.081, 1 / 0.45),
                 Named.NTSC_1953.ordinal()
         );
         sNamedColorSpaces[Named.SMPTE_C.ordinal()] = new ColorSpace.Rgb(
                 "SMPTE-C RGB",
                 new float[] { 0.630f, 0.340f, 0.310f, 0.595f, 0.155f, 0.070f },
                 ILLUMINANT_D65,
-                x -> rcpResponse(x, 1 / 0.45, 1 / 1.099, 0.099 / 1.099, 1 / 4.5, 0.081),
-                x -> response(x, 1 / 0.45, 1 / 1.099, 0.099 / 1.099, 1 / 4.5, 0.081),
-                0.0f, 1.0f,
+                new Rgb.TransferParameters(1 / 1.099, 0.099 / 1.099, 1 / 4.5, 0.081, 1 / 0.45),
                 Named.SMPTE_C.ordinal()
         );
         sNamedColorSpaces[Named.ADOBE_RGB.ordinal()] = new ColorSpace.Rgb(
                 "Adobe RGB (1998)",
                 new float[] { 0.64f, 0.33f, 0.21f, 0.71f, 0.15f, 0.06f },
                 ILLUMINANT_D65,
-                x -> Math.pow(x < 0.0f ? 0.0f : x, 1 / 2.2),
-                x -> Math.pow(x < 0.0f ? 0.0f : x, 2.2),
+                2.2,
                 0.0f, 1.0f,
                 Named.ADOBE_RGB.ordinal()
         );
@@ -1496,17 +1511,14 @@ public abstract class ColorSpace {
                 "ROMM RGB ISO 22028-2:2013",
                 new float[] { 0.7347f, 0.2653f, 0.1596f, 0.8404f, 0.0366f, 0.0001f },
                 ILLUMINANT_D50,
-                x -> rcpResponse(x, 1.8, 1.0, 0.0, 1 / 16.0, 0.031248),
-                x -> response(x, 1.8, 1.0, 0.0, 1 / 16.0, 0.031248),
-                0.0f, 1.0f,
+                new Rgb.TransferParameters(1.0, 0.0, 1 / 16.0, 0.031248, 1.8),
                 Named.PRO_PHOTO_RGB.ordinal()
         );
         sNamedColorSpaces[Named.ACES.ordinal()] = new ColorSpace.Rgb(
                 "SMPTE ST 2065-1:2012 ACES",
                 new float[] { 0.73470f, 0.26530f, 0.0f, 1.0f, 0.00010f, -0.0770f },
                 ILLUMINANT_D60,
-                DoubleUnaryOperator.identity(),
-                DoubleUnaryOperator.identity(),
+                1.0,
                 -65504.0f, 65504.0f,
                 Named.ACES.ordinal()
         );
@@ -1514,8 +1526,7 @@ public abstract class ColorSpace {
                 "Academy S-2014-004 ACEScg",
                 new float[] { 0.713f, 0.293f, 0.165f, 0.830f, 0.128f, 0.044f },
                 ILLUMINANT_D60,
-                DoubleUnaryOperator.identity(),
-                DoubleUnaryOperator.identity(),
+                1.0,
                 -65504.0f, 65504.0f,
                 Named.ACESCG.ordinal()
         );
@@ -1530,27 +1541,61 @@ public abstract class ColorSpace {
     }
 
     // Reciprocal piecewise gamma response
-    private static double rcpResponse(double x, double g,double a, double b, double c, double d) {
+    private static double rcpResponse(double x, double a, double b, double c, double d, double g) {
         return x >= d * c ? (Math.pow(x, 1.0 / g) - b) / a : x / c;
     }
 
     // Piecewise gamma response
-    private static double response(double x, double g, double a, double b, double c, double d) {
+    private static double response(double x, double a, double b, double c, double d, double g) {
         return x >= d ? Math.pow(a * x + b, g) : c * x;
+    }
+
+    // Reciprocal piecewise gamma response
+    private static double rcpResponse(double x, double a, double b, double c, double d,
+            double e, double f, double g) {
+        return x >= d * c ? (Math.pow(x - e, 1.0 / g) - b) / a : (x - f) / c;
+    }
+
+    // Piecewise gamma response
+    private static double response(double x, double a, double b, double c, double d,
+            double e, double f, double g) {
+        return x >= d ? Math.pow(a * x + b, g) + e : c * x + f;
     }
 
     // Reciprocal piecewise gamma response, encoded as sign(x).f(abs(x)) for color
     // spaces that allow negative values
     @SuppressWarnings("SameParameterValue")
-    private static double absRcpResponse(double x, double g, double a, double b, double c, double d) {
-        return Math.copySign(rcpResponse(x < 0.0 ? -x : x, g, a, b, c, d), x);
+    private static double absRcpResponse(double x, double a, double b, double c, double d, double g) {
+        return Math.copySign(rcpResponse(x < 0.0 ? -x : x, a, b, c, d, g), x);
     }
 
     // Piecewise gamma response, encoded as sign(x).f(abs(x)) for color spaces that
     // allow negative values
     @SuppressWarnings("SameParameterValue")
-    private static double absResponse(double x, double g, double a, double b, double c, double d) {
-        return Math.copySign(response(x < 0.0 ? -x : x, g, a, b, c, d), x);
+    private static double absResponse(double x, double a, double b, double c, double d, double g) {
+        return Math.copySign(response(x < 0.0 ? -x : x, a, b, c, d, g), x);
+    }
+
+    /**
+     * Compares two sets of parametric transfer functions parameters with a precision of 1e-3.
+     *
+     * @param a The first set of parameters to compare
+     * @param b The second set of parameters to compare
+     * @return True if the two sets are equal, false otherwise
+     */
+    private static boolean compare(
+            @Nullable Rgb.TransferParameters a,
+            @Nullable Rgb.TransferParameters b) {
+        //noinspection SimplifiableIfStatement
+        if (a == null && b == null) return true;
+        return a != null && b != null &&
+                Math.abs(a.a - b.a) < 1e-3 &&
+                Math.abs(a.b - b.b) < 1e-3 &&
+                Math.abs(a.c - b.c) < 1e-3 &&
+                Math.abs(a.d - b.d) < 1e-3 &&
+                Math.abs(a.e - b.e) < 1e-3 &&
+                Math.abs(a.f - b.f) < 1e-3 &&
+                Math.abs(a.g - b.g) < 1e-3;
     }
 
     /**
@@ -1710,7 +1755,7 @@ public abstract class ColorSpace {
      * <p>Computes the chromatic adaptation transform from the specified
      * source white point to the specified destination white point.</p>
      *
-     * <p>The transform is computed using the von Kris method, described
+     * <p>The transform is computed using the von Kries method, described
      * in more details in the documentation of {@link Adaptation}. The
      * {@link Adaptation} enum provides different matrices that can be
      * used to perform the adaptation.</p>
@@ -1925,6 +1970,11 @@ public abstract class ColorSpace {
      *
      * $$RGB_{out} = OETF(f(EOTF(RGB_{in})))$$
      *
+     * <p>If the transfer functions of the color space can be expressed as an
+     * ICC parametric curve as defined in ICC.1:2004-10, the numeric parameters
+     * can be retrieved by calling {@link #getTransferParameters()}. This can
+     * be useful to match color spaces for instance.</p>
+     *
      * <p class="note">Some RGB color spaces, such as {@link Named#ACES} and
      * {@link Named#LINEAR_EXTENDED_SRGB scRGB}, are said to be linear because
      * their transfer functions are the identity function: \(f(x) = x\).
@@ -1967,13 +2017,174 @@ public abstract class ColorSpace {
      */
     @AnyThread
     public static class Rgb extends ColorSpace {
+        /**
+         * {@usesMathJax}
+         *
+         * <p>Defines the parameters for the ICC parametric curve type 4, as
+         * defined in ICC.1:2004-10, section 10.15.</p>
+         *
+         * <p>The EOTF is of the form:</p>
+         *
+         * \(\begin{equation}
+         * Y = \begin{cases}c X + f & X \lt d \\
+         * \left( a X + b \right) ^{g} + e & X \ge d \end{cases}
+         * \end{equation}\)
+         *
+         * <p>The corresponding OETF is simply the inverse function.</p>
+         *
+         * <p>The parameters defined by this class form a valid transfer
+         * function only if all the following conditions are met:</p>
+         * <ul>
+         *     <li>No parameter is a {@link Double#isNaN(double) Not-a-Number}</li>
+         *     <li>\(d\) is in the range \([0..1]\)</li>
+         *     <li>The function is not constant</li>
+         *     <li>The function is positive and increasing</li>
+         * </ul>
+         */
+        public static class TransferParameters {
+            /** Variable \(a\) in the equation of the EOTF described above. */
+            public final double a;
+            /** Variable \(b\) in the equation of the EOTF described above. */
+            public final double b;
+            /** Variable \(c\) in the equation of the EOTF described above. */
+            public final double c;
+            /** Variable \(d\) in the equation of the EOTF described above. */
+            public final double d;
+            /** Variable \(e\) in the equation of the EOTF described above. */
+            public final double e;
+            /** Variable \(f\) in the equation of the EOTF described above. */
+            public final double f;
+            /** Variable \(g\) in the equation of the EOTF described above. */
+            public final double g;
+
+            /**
+             * <p>Defines the parameters for the ICC parametric curve type 3, as
+             * defined in ICC.1:2004-10, section 10.15.</p>
+             *
+             * <p>The EOTF is of the form:</p>
+             *
+             * \(\begin{equation}
+             * Y = \begin{cases}c X & X \lt d \\
+             * \left( a X + b \right) ^{g} & X \ge d \end{cases}
+             * \end{equation}\)
+             *
+             * <p>This constructor is equivalent to setting  \(e\) and \(f\) to 0.</p>
+             *
+             * @param a The value of \(a\) in the equation of the EOTF described above
+             * @param b The value of \(b\) in the equation of the EOTF described above
+             * @param c The value of \(c\) in the equation of the EOTF described above
+             * @param d The value of \(d\) in the equation of the EOTF described above
+             * @param g The value of \(g\) in the equation of the EOTF described above
+             *
+             * @throws IllegalArgumentException If the parameters form an invalid transfer function
+             */
+            public TransferParameters(double a, double b, double c, double d, double g) {
+                this(a, b, c, d, 0.0, 0.0, g);
+            }
+
+            /**
+             * <p>Defines the parameters for the ICC parametric curve type 4, as
+             * defined in ICC.1:2004-10, section 10.15.</p>
+             *
+             * @param a The value of \(a\) in the equation of the EOTF described above
+             * @param b The value of \(b\) in the equation of the EOTF described above
+             * @param c The value of \(c\) in the equation of the EOTF described above
+             * @param d The value of \(d\) in the equation of the EOTF described above
+             * @param e The value of \(e\) in the equation of the EOTF described above
+             * @param f The value of \(f\) in the equation of the EOTF described above
+             * @param g The value of \(g\) in the equation of the EOTF described above
+             *
+             * @throws IllegalArgumentException If the parameters form an invalid transfer function
+             */
+            public TransferParameters(double a, double b, double c, double d, double e,
+                    double f, double g) {
+
+                if (Double.isNaN(a) || Double.isNaN(b) || Double.isNaN(c) ||
+                        Double.isNaN(d) || Double.isNaN(e) || Double.isNaN(f) ||
+                        Double.isNaN(g)) {
+                    throw new IllegalArgumentException("Parameters cannot be NaN");
+                }
+
+                if (!(d >= 0.0 && d <= 1.0 + Math.ulp(1.0))) {
+                    throw new IllegalArgumentException("Parameter d must be in the range [0..1]");
+                }
+
+                if (d == 0.0 && (a == 0.0 || g == 0.0)) {
+                    throw new IllegalArgumentException(
+                            "Parameter a or g is zero, the transfer function is constant");
+                }
+
+                if (d >= 1.0 && c == 0.0) {
+                    throw new IllegalArgumentException(
+                            "Parameter c is zero, the transfer function is constant");
+                }
+
+                if ((a == 0.0 || g == 0.0) && c == 0.0) {
+                    throw new IllegalArgumentException("Parameter a or g is zero," +
+                            " and c is zero, the transfer function is constant");
+                }
+
+                if (c < 0.0) {
+                    throw new IllegalArgumentException("The transfer function must be increasing");
+                }
+
+                if (a < 0.0 || g < 0.0) {
+                    throw new IllegalArgumentException("The transfer function must be " +
+                            "positive or increasing");
+                }
+
+                this.a = a;
+                this.b = b;
+                this.c = c;
+                this.d = d;
+                this.e = e;
+                this.f = f;
+                this.g = g;
+            }
+
+            @SuppressWarnings("SimplifiableIfStatement")
+            @Override
+            public boolean equals(Object o) {
+                if (this == o) return true;
+                if (o == null || getClass() != o.getClass()) return false;
+
+                TransferParameters that = (TransferParameters) o;
+
+                if (Double.compare(that.a, a) != 0) return false;
+                if (Double.compare(that.b, b) != 0) return false;
+                if (Double.compare(that.c, c) != 0) return false;
+                if (Double.compare(that.d, d) != 0) return false;
+                if (Double.compare(that.e, e) != 0) return false;
+                if (Double.compare(that.f, f) != 0) return false;
+                return Double.compare(that.g, g) == 0;
+            }
+
+            @Override
+            public int hashCode() {
+                int result;
+                long temp;
+                temp = Double.doubleToLongBits(a);
+                result = (int) (temp ^ (temp >>> 32));
+                temp = Double.doubleToLongBits(b);
+                result = 31 * result + (int) (temp ^ (temp >>> 32));
+                temp = Double.doubleToLongBits(c);
+                result = 31 * result + (int) (temp ^ (temp >>> 32));
+                temp = Double.doubleToLongBits(d);
+                result = 31 * result + (int) (temp ^ (temp >>> 32));
+                temp = Double.doubleToLongBits(e);
+                result = 31 * result + (int) (temp ^ (temp >>> 32));
+                temp = Double.doubleToLongBits(f);
+                result = 31 * result + (int) (temp ^ (temp >>> 32));
+                temp = Double.doubleToLongBits(g);
+                result = 31 * result + (int) (temp ^ (temp >>> 32));
+                return result;
+            }
+        }
+
         @NonNull private final float[] mWhitePoint;
         @NonNull private final float[] mPrimaries;
         @NonNull private final float[] mTransform;
         @NonNull private final float[] mInverseTransform;
-
-        @NonNull private final boolean mIsWideGamut;
-        @NonNull private final boolean mIsSrgb;
 
         @NonNull private final DoubleUnaryOperator mOetf;
         @NonNull private final DoubleUnaryOperator mEotf;
@@ -1982,6 +2193,11 @@ public abstract class ColorSpace {
 
         private final float mMin;
         private final float mMax;
+
+        private final boolean mIsWideGamut;
+        private final boolean mIsSrgb;
+
+        @Nullable private TransferParameters mTransferParameters;
 
         /**
          * <p>Creates a new RGB color space using a 3x3 column-major transform matrix.
@@ -2010,7 +2226,7 @@ public abstract class ColorSpace {
                 @NonNull @Size(9) float[] toXYZ,
                 @NonNull DoubleUnaryOperator oetf,
                 @NonNull DoubleUnaryOperator eotf) {
-            this(name, computePrimaries(toXYZ, eotf), computeWhitePoint(toXYZ, eotf),
+            this(name, computePrimaries(toXYZ), computeWhitePoint(toXYZ),
                     oetf, eotf, 0.0f, 1.0f, MIN_ID);
         }
 
@@ -2062,6 +2278,251 @@ public abstract class ColorSpace {
                 float min,
                 float max) {
             this(name, primaries, whitePoint, oetf, eotf, min, max, MIN_ID);
+        }
+
+        /**
+         * <p>Creates a new RGB color space using a 3x3 column-major transform matrix.
+         * The transform matrix must convert from the RGB space to the profile connection
+         * space CIE XYZ.</p>
+         *
+         * <p class="note">The range of the color space is imposed to be \([0..1]\).</p>
+         *
+         * @param name Name of the color space, cannot be null, its length must be >= 1
+         * @param toXYZ 3x3 column-major transform matrix from RGB to the profile
+         *              connection space CIE XYZ as an array of 9 floats, cannot be null
+         * @param function Parameters for the transfer functions
+         *
+         * @throws IllegalArgumentException If any of the following conditions is met:
+         * <ul>
+         *     <li>The name is null or has a length of 0.</li>
+         *     <li>Gamma is negative.</li>
+         * </ul>
+         *
+         * @see #get(Named)
+         */
+        public Rgb(
+                @NonNull @Size(min = 1) String name,
+                @NonNull @Size(9) float[] toXYZ,
+                @NonNull TransferParameters function) {
+            this(name, computePrimaries(toXYZ), computeWhitePoint(toXYZ), function, MIN_ID);
+        }
+
+        /**
+         * <p>Creates a new RGB color space using a specified set of primaries
+         * and a specified white point.</p>
+         *
+         * <p>The primaries and white point can be specified in the CIE xyY space
+         * or in CIE XYZ. The length of the arrays depends on the chosen space:</p>
+         *
+         * <table summary="Parameters length">
+         *     <tr><th>Space</th><th>Primaries length</th><th>White point length</th></tr>
+         *     <tr><td>xyY</td><td>6</td><td>2</td></tr>
+         *     <tr><td>XYZ</td><td>9</td><td>3</td></tr>
+         * </table>
+         *
+         * <p>When the primaries and/or white point are specified in xyY, the Y component
+         * does not need to be specified and is assumed to be 1.0. Only the xy components
+         * are required.</p>
+         *
+         * @param name Name of the color space, cannot be null, its length must be >= 1
+         * @param primaries RGB primaries as an array of 6 (xy) or 9 (XYZ) floats
+         * @param whitePoint Reference white as an array of 2 (xy) or 3 (XYZ) floats
+         * @param function Parameters for the transfer functions
+         *
+         * @throws IllegalArgumentException If any of the following conditions is met:
+         * <ul>
+         *     <li>The name is null or has a length of 0.</li>
+         *     <li>The primaries array is null or has a length that is neither 6 or 9.</li>
+         *     <li>The white point array is null or has a length that is neither 2 or 3.</li>
+         *     <li>The transfer parameters are invalid.</li>
+         * </ul>
+         *
+         * @see #get(Named)
+         */
+        public Rgb(
+                @NonNull @Size(min = 1) String name,
+                @NonNull @Size(min = 6, max = 9) float[] primaries,
+                @NonNull @Size(min = 2, max = 3) float[] whitePoint,
+                @NonNull TransferParameters function) {
+            this(name, primaries, whitePoint, function, MIN_ID);
+        }
+
+        /**
+         * <p>Creates a new RGB color space using a specified set of primaries
+         * and a specified white point.</p>
+         *
+         * <p>The primaries and white point can be specified in the CIE xyY space
+         * or in CIE XYZ. The length of the arrays depends on the chosen space:</p>
+         *
+         * <table summary="Parameters length">
+         *     <tr><th>Space</th><th>Primaries length</th><th>White point length</th></tr>
+         *     <tr><td>xyY</td><td>6</td><td>2</td></tr>
+         *     <tr><td>XYZ</td><td>9</td><td>3</td></tr>
+         * </table>
+         *
+         * <p>When the primaries and/or white point are specified in xyY, the Y component
+         * does not need to be specified and is assumed to be 1.0. Only the xy components
+         * are required.</p>
+         *
+         * @param name Name of the color space, cannot be null, its length must be >= 1
+         * @param primaries RGB primaries as an array of 6 (xy) or 9 (XYZ) floats
+         * @param whitePoint Reference white as an array of 2 (xy) or 3 (XYZ) floats
+         * @param function Parameters for the transfer functions
+         * @param id ID of this color space as an integer between {@link #MIN_ID} and {@link #MAX_ID}
+         *
+         * @throws IllegalArgumentException If any of the following conditions is met:
+         * <ul>
+         *     <li>The name is null or has a length of 0.</li>
+         *     <li>The primaries array is null or has a length that is neither 6 or 9.</li>
+         *     <li>The white point array is null or has a length that is neither 2 or 3.</li>
+         *     <li>The ID is not between {@link #MIN_ID} and {@link #MAX_ID}.</li>
+         *     <li>The transfer parameters are invalid.</li>
+         * </ul>
+         *
+         * @see #get(Named)
+         */
+        private Rgb(
+                @NonNull @Size(min = 1) String name,
+                @NonNull @Size(min = 6, max = 9) float[] primaries,
+                @NonNull @Size(min = 2, max = 3) float[] whitePoint,
+                @NonNull TransferParameters function,
+                @IntRange(from = MIN_ID, to = MAX_ID) int id) {
+            this(name, primaries, whitePoint,
+                    function.e == 0.0 && function.f == 0.0 ?
+                            x -> rcpResponse(x, function.a, function.b,
+                                    function.c, function.d, function.g) :
+                            x -> rcpResponse(x, function.a, function.b, function.c,
+                                    function.d, function.e, function.f, function.g),
+                    function.e == 0.0 && function.f == 0.0 ?
+                            x -> response(x, function.a, function.b,
+                                    function.c, function.d, function.g) :
+                            x -> response(x, function.a, function.b, function.c,
+                                    function.d, function.e, function.f, function.g),
+                    0.0f, 1.0f, id);
+            mTransferParameters = function;
+        }
+
+        /**
+         * <p>Creates a new RGB color space using a 3x3 column-major transform matrix.
+         * The transform matrix must convert from the RGB space to the profile connection
+         * space CIE XYZ.</p>
+         *
+         * <p class="note">The range of the color space is imposed to be \([0..1]\).</p>
+         *
+         * @param name Name of the color space, cannot be null, its length must be >= 1
+         * @param toXYZ 3x3 column-major transform matrix from RGB to the profile
+         *              connection space CIE XYZ as an array of 9 floats, cannot be null
+         * @param gamma Gamma to use as the transfer function
+         *
+         * @throws IllegalArgumentException If any of the following conditions is met:
+         * <ul>
+         *     <li>The name is null or has a length of 0.</li>
+         *     <li>Gamma is negative.</li>
+         * </ul>
+         *
+         * @see #get(Named)
+         */
+        public Rgb(
+                @NonNull @Size(min = 1) String name,
+                @NonNull @Size(9) float[] toXYZ,
+                double gamma) {
+            this(name, computePrimaries(toXYZ), computeWhitePoint(toXYZ), gamma, 0.0f, 1.0f, MIN_ID);
+        }
+
+        /**
+         * <p>Creates a new RGB color space using a specified set of primaries
+         * and a specified white point.</p>
+         *
+         * <p>The primaries and white point can be specified in the CIE xyY space
+         * or in CIE XYZ. The length of the arrays depends on the chosen space:</p>
+         *
+         * <table summary="Parameters length">
+         *     <tr><th>Space</th><th>Primaries length</th><th>White point length</th></tr>
+         *     <tr><td>xyY</td><td>6</td><td>2</td></tr>
+         *     <tr><td>XYZ</td><td>9</td><td>3</td></tr>
+         * </table>
+         *
+         * <p>When the primaries and/or white point are specified in xyY, the Y component
+         * does not need to be specified and is assumed to be 1.0. Only the xy components
+         * are required.</p>
+         *
+         * @param name Name of the color space, cannot be null, its length must be >= 1
+         * @param primaries RGB primaries as an array of 6 (xy) or 9 (XYZ) floats
+         * @param whitePoint Reference white as an array of 2 (xy) or 3 (XYZ) floats
+         * @param gamma Gamma to use as the transfer function
+         *
+         * @throws IllegalArgumentException If any of the following conditions is met:
+         * <ul>
+         *     <li>The name is null or has a length of 0.</li>
+         *     <li>The primaries array is null or has a length that is neither 6 or 9.</li>
+         *     <li>The white point array is null or has a length that is neither 2 or 3.</li>
+         *     <li>Gamma is negative.</li>
+         * </ul>
+         *
+         * @see #get(Named)
+         */
+        public Rgb(
+                @NonNull @Size(min = 1) String name,
+                @NonNull @Size(min = 6, max = 9) float[] primaries,
+                @NonNull @Size(min = 2, max = 3) float[] whitePoint,
+                double gamma) {
+            this(name, primaries, whitePoint, gamma, 0.0f, 1.0f, MIN_ID);
+        }
+
+        /**
+         * <p>Creates a new RGB color space using a specified set of primaries
+         * and a specified white point.</p>
+         *
+         * <p>The primaries and white point can be specified in the CIE xyY space
+         * or in CIE XYZ. The length of the arrays depends on the chosen space:</p>
+         *
+         * <table summary="Parameters length">
+         *     <tr><th>Space</th><th>Primaries length</th><th>White point length</th></tr>
+         *     <tr><td>xyY</td><td>6</td><td>2</td></tr>
+         *     <tr><td>XYZ</td><td>9</td><td>3</td></tr>
+         * </table>
+         *
+         * <p>When the primaries and/or white point are specified in xyY, the Y component
+         * does not need to be specified and is assumed to be 1.0. Only the xy components
+         * are required.</p>
+         *
+         * @param name Name of the color space, cannot be null, its length must be >= 1
+         * @param primaries RGB primaries as an array of 6 (xy) or 9 (XYZ) floats
+         * @param whitePoint Reference white as an array of 2 (xy) or 3 (XYZ) floats
+         * @param gamma Gamma to use as the transfer function
+         * @param min The minimum valid value in this color space's RGB range
+         * @param max The maximum valid value in this color space's RGB range
+         * @param id ID of this color space as an integer between {@link #MIN_ID} and {@link #MAX_ID}
+         *
+         * @throws IllegalArgumentException If any of the following conditions is met:
+         * <ul>
+         *     <li>The name is null or has a length of 0.</li>
+         *     <li>The primaries array is null or has a length that is neither 6 or 9.</li>
+         *     <li>The white point array is null or has a length that is neither 2 or 3.</li>
+         *     <li>The minimum valid value is >= the maximum valid value.</li>
+         *     <li>The ID is not between {@link #MIN_ID} and {@link #MAX_ID}.</li>
+         *     <li>Gamma is negative.</li>
+         * </ul>
+         *
+         * @see #get(Named)
+         */
+        private Rgb(
+                @NonNull @Size(min = 1) String name,
+                @NonNull @Size(min = 6, max = 9) float[] primaries,
+                @NonNull @Size(min = 2, max = 3) float[] whitePoint,
+                double gamma,
+                float min,
+                float max,
+                @IntRange(from = MIN_ID, to = MAX_ID) int id) {
+            this(name, primaries, whitePoint,
+                    gamma == 1.0 ? DoubleUnaryOperator.identity() :
+                            x -> Math.pow(x < 0.0 ? 0.0 : x, 1 / gamma),
+                    gamma == 1.0 ? DoubleUnaryOperator.identity() :
+                            x -> Math.pow(x < 0.0 ? 0.0 : x, gamma),
+                    min, max, id);
+            mTransferParameters = gamma == 1.0 ?
+                    new TransferParameters(0.0, 0.0, 1.0, 1.0 + Math.ulp(1.0), gamma) :
+                    new TransferParameters(1.0, 0.0, 0.0, 0.0, gamma);
         }
 
         /**
@@ -2183,6 +2644,8 @@ public abstract class ColorSpace {
 
             mIsWideGamut = colorSpace.mIsWideGamut;
             mIsSrgb = colorSpace.mIsSrgb;
+
+            mTransferParameters = colorSpace.mTransferParameters;
         }
 
         /**
@@ -2360,6 +2823,7 @@ public abstract class ColorSpace {
          * @return A transfer function that converts from linear space to "gamma space"
          *
          * @see #getEotf()
+         * @see #getTransferParameters()
          */
         @NonNull
         public DoubleUnaryOperator getOetf() {
@@ -2383,10 +2847,29 @@ public abstract class ColorSpace {
          * @return A transfer function that converts from "gamma space" to linear space
          *
          * @see #getOetf()
+         * @see #getTransferParameters()
          */
         @NonNull
         public DoubleUnaryOperator getEotf() {
             return mClampedEotf;
+        }
+
+        /**
+         * <p>Returns the parameters used by the {@link #getEotf() electro-optical}
+         * and {@link #getOetf() opto-electronic} transfer functions. If the transfer
+         * functions do not match the ICC parametric curves defined in ICC.1:2004-10
+         * (section 10.15), this method returns null.</p>
+         *
+         * <p>See {@link TransferParameters} for a full description of the transfer
+         * functions.</p>
+         *
+         * @return An instance of {@link TransferParameters} or null if this color
+         *         space's transfer functions do not match the equation defined in
+         *         {@link TransferParameters}
+         */
+        @Nullable
+        public TransferParameters getTransferParameters() {
+            return mTransferParameters;
         }
 
         @Override
@@ -2544,6 +3027,11 @@ public abstract class ColorSpace {
             if (Float.compare(rgb.mMax, mMax) != 0) return false;
             if (!Arrays.equals(mWhitePoint, rgb.mWhitePoint)) return false;
             if (!Arrays.equals(mPrimaries, rgb.mPrimaries)) return false;
+            if (mTransferParameters != null) {
+                return mTransferParameters.equals(rgb.mTransferParameters);
+            } else if (rgb.mTransferParameters == null) {
+                return true;
+            }
             //noinspection SimplifiableIfStatement
             if (!mOetf.equals(rgb.mOetf)) return false;
             return mEotf.equals(rgb.mEotf);
@@ -2554,10 +3042,14 @@ public abstract class ColorSpace {
             int result = super.hashCode();
             result = 31 * result + Arrays.hashCode(mWhitePoint);
             result = 31 * result + Arrays.hashCode(mPrimaries);
-            result = 31 * result + mOetf.hashCode();
-            result = 31 * result + mEotf.hashCode();
             result = 31 * result + (mMin != +0.0f ? Float.floatToIntBits(mMin) : 0);
             result = 31 * result + (mMax != +0.0f ? Float.floatToIntBits(mMax) : 0);
+            result = 31 * result +
+                    (mTransferParameters != null ? mTransferParameters.hashCode() : 0);
+            if (mTransferParameters == null) {
+                result = 31 * result + mOetf.hashCode();
+                result = 31 * result + mEotf.hashCode();
+            }
             return result;
         }
 
@@ -2746,18 +3238,15 @@ public abstract class ColorSpace {
          * range of the color space is [0..1].
          *
          * @param toXYZ The color space's 3x3 transform matrix to XYZ
-         * @param EOTF The color space's electro-optical transfer function
          * @return A new array of 6 floats containing the color space's
          *         primaries in CIE xyY
          */
         @NonNull
         @Size(6)
-        private static float[] computePrimaries(@NonNull @Size(9) float[] toXYZ,
-                DoubleUnaryOperator EOTF) {
-            float one = (float) EOTF.applyAsDouble(1.0);
-            float[] r = mul3x3Float3(toXYZ, new float[] { one, 0.0f, 0.0f });
-            float[] g = mul3x3Float3(toXYZ, new float[] { 0.0f, one, 0.0f });
-            float[] b = mul3x3Float3(toXYZ, new float[] { 0.0f, 0.0f, one });
+        private static float[] computePrimaries(@NonNull @Size(9) float[] toXYZ) {
+            float[] r = mul3x3Float3(toXYZ, new float[] { 1.0f, 0.0f, 0.0f });
+            float[] g = mul3x3Float3(toXYZ, new float[] { 0.0f, 1.0f, 0.0f });
+            float[] b = mul3x3Float3(toXYZ, new float[] { 0.0f, 0.0f, 1.0f });
 
             float rSum = r[0] + r[1] + r[2];
             float gSum = g[0] + g[1] + g[2];
@@ -2776,16 +3265,13 @@ public abstract class ColorSpace {
          * range of the color space is [0..1].
          *
          * @param toXYZ The color space's 3x3 transform matrix to XYZ
-         * @param EOTF The color space's electro-optical transfer function
          * @return A new array of 2 floats containing the color space's
          *         white point in CIE xyY
          */
         @NonNull
         @Size(2)
-        private static float[] computeWhitePoint(@NonNull @Size(9) float[] toXYZ,
-                @NonNull DoubleUnaryOperator EOTF) {
-            float one = (float) EOTF.applyAsDouble(1.0);
-            float[] w = mul3x3Float3(toXYZ, new float[] { one, one, one });
+        private static float[] computeWhitePoint(@NonNull @Size(9) float[] toXYZ) {
+            float[] w = mul3x3Float3(toXYZ, new float[] { 1.0f, 1.0f, 1.0f });
             float sum = w[0] + w[1] + w[2];
             return new float[] { w[0] / sum, w[1] / sum };
         }
@@ -2988,6 +3474,7 @@ public abstract class ColorSpace {
          * Computes an extra transform to apply in XYZ space depending on the
          * selected rendering intent.
          */
+        @Nullable
         private static float[] computeTransform(@NonNull ColorSpace source,
                 @NonNull ColorSpace destination, @NonNull RenderIntent intent) {
             if (intent != RenderIntent.ABSOLUTE) return null;

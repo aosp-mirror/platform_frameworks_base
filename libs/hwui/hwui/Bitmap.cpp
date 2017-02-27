@@ -234,7 +234,7 @@ sk_sp<Bitmap> Bitmap::allocateHardwareBitmap(uirenderer::renderthread::RenderThr
 
     sk_sp<SkColorSpace> sRGB = SkColorSpace::MakeSRGB();
     bool needSRGB = skBitmap.info().colorSpace() == sRGB.get();
-    bool hasSRGB = caches.extensions().hasSRGB();
+    bool hasLinearBlending = caches.extensions().hasLinearBlending();
     GLint format, type, internalFormat;
     uirenderer::Texture::colorTypeToGlFormatAndType(caches, skBitmap.colorType(),
             needSRGB, &internalFormat, &format, &type);
@@ -252,8 +252,8 @@ sk_sp<Bitmap> Bitmap::allocateHardwareBitmap(uirenderer::renderthread::RenderThr
 
     SkBitmap bitmap;
     if (CC_UNLIKELY(uirenderer::Texture::hasUnsupportedColorType(skBitmap.info(),
-            hasSRGB, sRGB.get()))) {
-        bitmap = uirenderer::Texture::uploadToN32(skBitmap, hasSRGB, std::move(sRGB));
+            hasLinearBlending, sRGB.get()))) {
+        bitmap = uirenderer::Texture::uploadToN32(skBitmap, hasLinearBlending, std::move(sRGB));
     } else {
         bitmap = skBitmap;
     }

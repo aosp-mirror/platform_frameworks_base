@@ -19,12 +19,12 @@ package android.graphics;
 import android.annotation.CheckResult;
 import android.annotation.ColorInt;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.Trace;
 import android.util.DisplayMetrics;
 import android.util.Log;
-
 import libcore.util.NativeAllocationRegistry;
 
 import java.io.OutputStream;
@@ -72,6 +72,8 @@ public final class Bitmap implements Parcelable {
     private int mWidth;
     private int mHeight;
     private boolean mRecycled;
+
+    private ColorSpace mColorSpace;
 
     /** @hide */
     public int mDensity = getDefaultDensity();
@@ -1435,6 +1437,47 @@ public final class Bitmap implements Parcelable {
     }
 
     /**
+     * Returns the color space associated with this bitmap. If the color
+     * space is unknown, this method returns null.
+     */
+    @Nullable
+    public final ColorSpace getColorSpace() {
+        // A reconfigure can change the configuration and rgba16f is
+        // always linear scRGB at this time
+        if (getConfig() == Config.RGBA_F16) {
+            // Reset the color space for potential future reconfigurations
+            mColorSpace = null;
+            return ColorSpace.get(ColorSpace.Named.LINEAR_EXTENDED_SRGB);
+        }
+
+        // Cache the color space retrieval since it can be fairly expensive
+        if (mColorSpace == null) {
+            if (nativeIsSRGB(mNativePtr)) {
+                mColorSpace = ColorSpace.get(ColorSpace.Named.SRGB);
+            } else {
+                float[] xyz = new float[9];
+                float[] params = new float[7];
+
+                boolean hasColorSpace = nativeGetColorSpace(mNativePtr, xyz, params);
+                if (hasColorSpace) {
+                    ColorSpace.Rgb.TransferParameters parameters =
+                            new ColorSpace.Rgb.TransferParameters(
+                                    params[0], params[1], params[2],
+                                    params[3], params[4], params[5], params[6]);
+                    ColorSpace cs = ColorSpace.match(xyz, parameters);
+                    if (cs != null) {
+                        mColorSpace = cs;
+                    } else {
+                        mColorSpace = new ColorSpace.Rgb("Unknown", xyz, parameters);
+                    }
+                }
+            }
+        }
+
+        return mColorSpace;
+    }
+
+    /**
      * Fills the bitmap's pixels with the specified {@link Color}.
      *
      * @throws IllegalStateException if the bitmap is not mutable.
@@ -1816,4 +1859,6 @@ public final class Bitmap implements Parcelable {
     private static native Bitmap nativeCopyPreserveInternalConfig(long nativeBitmap);
     private static native Bitmap nativeCreateHardwareBitmap(GraphicBuffer buffer);
     private static native GraphicBuffer nativeCreateGraphicBufferHandle(long nativeBitmap);
+    private static native boolean nativeGetColorSpace(long nativePtr, float[] xyz, float[] params);
+    private static native boolean nativeIsSRGB(long nativePtr);
 }

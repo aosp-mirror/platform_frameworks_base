@@ -20,6 +20,8 @@
 #include "Properties.h"
 #include "utils/StringUtils.h"
 
+#include <cutils/compiler.h>
+
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 
@@ -27,14 +29,6 @@
 
 namespace android {
 namespace uirenderer {
-
-// Debug
-#if DEBUG_EXTENSIONS
-    #define EXT_LOGD(...) ALOGD(__VA_ARGS__)
-#else
-    #define EXT_LOGD(...)
-#endif
-
 
 Extensions::Extensions() {
     const char* version = (const char*) glGetString(GL_VERSION);
@@ -66,17 +60,18 @@ Extensions::Extensions() {
     mHas4BitStencil = extensions.has("GL_OES_stencil4");
     mHasUnpackSubImage = extensions.has("GL_EXT_unpack_subimage");
 
-#ifdef ANDROID_ENABLE_LINEAR_BLENDING
     mHasSRGB = mVersionMajor >= 3 || extensions.has("GL_EXT_sRGB");
     mHasSRGBWriteControl = extensions.has("GL_EXT_sRGB_write_control");
 
+#ifdef ANDROID_ENABLE_LINEAR_BLENDING
     // If linear blending is enabled, the device must have (ES3.0 or EXT_sRGB)
     // and EXT_sRGB_write_control
     LOG_ALWAYS_FATAL_IF(!mHasSRGB, "Linear blending requires ES 3.0 or EXT_sRGB");
     LOG_ALWAYS_FATAL_IF(!mHasSRGBWriteControl, "Linear blending requires EXT_sRGB_write_control");
+
+    mHasLinearBlending = true;
 #else
-    mHasSRGB = false;
-    mHasSRGBWriteControl = false;
+    mHasLinearBlending = false;
 #endif
 }
 

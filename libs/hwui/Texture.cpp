@@ -241,21 +241,23 @@ void Texture::colorTypeToGlFormatAndType(const Caches& caches, SkColorType color
     }
 }
 
-SkBitmap Texture::uploadToN32(const SkBitmap& bitmap, bool hasSRGB, sk_sp<SkColorSpace> sRGB) {
+SkBitmap Texture::uploadToN32(const SkBitmap& bitmap, bool hasLinearBlending,
+        sk_sp<SkColorSpace> sRGB) {
     SkBitmap rgbaBitmap;
     rgbaBitmap.allocPixels(SkImageInfo::MakeN32(bitmap.width(), bitmap.height(),
-            bitmap.info().alphaType(), hasSRGB ? sRGB : nullptr));
+            bitmap.info().alphaType(), hasLinearBlending ? sRGB : nullptr));
     rgbaBitmap.eraseColor(0);
     SkCanvas canvas(rgbaBitmap);
     canvas.drawBitmap(bitmap, 0.0f, 0.0f, nullptr);
     return rgbaBitmap;
 }
 
-bool Texture::hasUnsupportedColorType(const SkImageInfo& info, bool hasSRGB, SkColorSpace* sRGB) {
+bool Texture::hasUnsupportedColorType(const SkImageInfo& info, bool hasLinearBlending,
+        SkColorSpace* sRGB) {
     bool needSRGB = info.colorSpace() == sRGB;
     return info.colorType() == kARGB_4444_SkColorType
         || info.colorType() == kIndex_8_SkColorType
-        || (info.colorType() == kRGB_565_SkColorType && hasSRGB && needSRGB);
+        || (info.colorType() == kRGB_565_SkColorType && hasLinearBlending && needSRGB);
 }
 
 
@@ -295,11 +297,11 @@ void Texture::upload(Bitmap& bitmap) {
     mCaches.textureState().bindTexture(mTarget, mId);
 
     // TODO: Handle sRGB gray bitmaps
-    bool hasSRGB = mCaches.extensions().hasSRGB();
-    if (CC_UNLIKELY(hasUnsupportedColorType(bitmap.info(), hasSRGB, sRGB.get()))) {
+    bool hasLinearBlending = mCaches.extensions().hasLinearBlending();
+    if (CC_UNLIKELY(hasUnsupportedColorType(bitmap.info(), hasLinearBlending, sRGB.get()))) {
         SkBitmap skBitmap;
         bitmap.getSkBitmap(&skBitmap);
-        SkBitmap rgbaBitmap = uploadToN32(skBitmap, hasSRGB, std::move(sRGB));
+        SkBitmap rgbaBitmap = uploadToN32(skBitmap, hasLinearBlending, std::move(sRGB));
         uploadToTexture(needsAlloc, internalFormat, format, type, rgbaBitmap.rowBytesAsPixels(),
                 rgbaBitmap.bytesPerPixel(), rgbaBitmap.width(),
                 rgbaBitmap.height(), rgbaBitmap.getPixels());

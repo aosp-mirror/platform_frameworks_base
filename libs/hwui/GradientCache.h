@@ -170,7 +170,7 @@ private:
     GLint mMaxTextureSize;
     bool mUseFloatTexture;
     bool mHasNpot;
-    bool mHasSRGB;
+    bool mHasLinearBlending;
 
     mutable Mutex mLock;
 }; // class GradientCache

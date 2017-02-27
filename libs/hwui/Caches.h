@@ -133,7 +133,7 @@ public:
      * this function returns GL_SRGB8_ALPHA8, otherwise it returns GL_RGBA
      */
     constexpr GLint rgbaInternalFormat(bool needSRGB = true) const {
-        return extensions().hasSRGB() && needSRGB ? GL_SRGB8_ALPHA8 : GL_RGBA;
+        return extensions().hasLinearBlending() && needSRGB ? GL_SRGB8_ALPHA8 : GL_RGBA;
     }
 
     /**
