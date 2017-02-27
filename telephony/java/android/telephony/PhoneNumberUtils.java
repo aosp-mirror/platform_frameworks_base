@@ -1140,6 +1140,8 @@ public class PhoneNumberUtils
 
     private static final String KOREA_ISO_COUNTRY_CODE = "KR";
 
+    private static final String JAPAN_ISO_COUNTRY_CODE = "JP";
+
     /**
      * Breaks the given number down and formats it according to the rules
      * for the country the number is from.
@@ -1460,15 +1462,25 @@ public class PhoneNumberUtils
         String result = null;
         try {
             PhoneNumber pn = util.parseAndKeepRawInput(phoneNumber, defaultCountryIso);
-            /**
-             * Need to reformat any local Korean phone numbers (when the user is in Korea) with
-             * country code to corresponding national format which would replace the leading
-             * +82 with 0.
-             */
-            if (KOREA_ISO_COUNTRY_CODE.equals(defaultCountryIso) &&
+
+            if (KOREA_ISO_COUNTRY_CODE.equalsIgnoreCase(defaultCountryIso) &&
                     (pn.getCountryCode() == util.getCountryCodeForRegion(KOREA_ISO_COUNTRY_CODE)) &&
                     (pn.getCountryCodeSource() ==
                             PhoneNumber.CountryCodeSource.FROM_NUMBER_WITH_PLUS_SIGN)) {
+                /**
+                 * Need to reformat any local Korean phone numbers (when the user is in Korea) with
+                 * country code to corresponding national format which would replace the leading
+                 * +82 with 0.
+                 */
+                result = util.format(pn, PhoneNumberUtil.PhoneNumberFormat.NATIONAL);
+            } else if (JAPAN_ISO_COUNTRY_CODE.equalsIgnoreCase(defaultCountryIso) &&
+                    pn.getCountryCode() == util.getCountryCodeForRegion(JAPAN_ISO_COUNTRY_CODE) &&
+                    (pn.getCountryCodeSource() ==
+                            PhoneNumber.CountryCodeSource.FROM_NUMBER_WITH_PLUS_SIGN)) {
+                /**
+                 * Need to reformat Japanese phone numbers (when user is in Japan) with the national
+                 * dialing format.
+                 */
                 result = util.format(pn, PhoneNumberUtil.PhoneNumberFormat.NATIONAL);
             } else {
                 result = util.formatInOriginalFormat(pn, defaultCountryIso);
