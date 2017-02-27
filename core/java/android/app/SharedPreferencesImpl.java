@@ -139,8 +139,8 @@ final class SharedPreferencesImpl implements SharedPreferences {
                     str = new BufferedInputStream(
                             new FileInputStream(mFile), 16*1024);
                     map = XmlUtils.readMapXml(str);
-                } catch (XmlPullParserException | IOException e) {
-                    Log.w(TAG, "getSharedPreferences", e);
+                } catch (Exception e) {
+                    Log.w(TAG, "Cannot read " + mFile.getAbsolutePath(), e);
                 } finally {
                     IoUtils.closeQuietly(str);
                 }
