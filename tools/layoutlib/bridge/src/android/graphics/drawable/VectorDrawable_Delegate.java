@@ -571,6 +571,8 @@ public class VectorDrawable_Delegate {
         @NonNull
         public Consumer<Float> getFloatPropertySetter(int propertyIdx) {
             switch (propertyIdx) {
+                case STROKE_WIDTH_INDEX:
+                    return this::setStrokeWidth;
                 case STROKE_ALPHA_INDEX:
                     return this::setStrokeAlpha;
                 case FILL_ALPHA_INDEX:
