@@ -11711,7 +11711,8 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (!whitelisted) {
                 Slog.w(TAG, "Privileged permission " + perm + " for package "
                         + pkg.packageName + " - not in privapp-permissions whitelist");
-                if (!mSystemReady) {
+                // Only report violations for apps on system image
+                if (!mSystemReady && !pkg.isUpdatedSystemApp()) {
                     if (mPrivappPermissionsViolations == null) {
                         mPrivappPermissionsViolations = new ArraySet<>();
                     }
