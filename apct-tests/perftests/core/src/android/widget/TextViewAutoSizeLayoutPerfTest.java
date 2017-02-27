@@ -89,7 +89,7 @@ public class TextViewAutoSizeLayoutPerfTest {
 
             while (state.keepRunning()) {
                 TextView textView = new TextView(activity);
-                // TextView#onMeasure() gets called, which triggers TextView#autoSizeText()
+                // TextView#onLayout() gets called, which triggers TextView#autoSizeText()
                 // which is the method we want to benchmark.
                 textView.requestLayout();
             }
