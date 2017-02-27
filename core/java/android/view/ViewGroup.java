@@ -1148,18 +1148,21 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
     @Override
     boolean hasFocusable(boolean allowAutoFocus, boolean dispatchExplicit) {
+        // This should probably be super.hasFocusable, but that would change
+        // behavior. Historically, we have not checked the ancestor views for
+        // shouldBlockFocusForTouchscreen() in ViewGroup.hasFocusable.
+
+        // Invisible and gone views are never focusable.
         if ((mViewFlags & VISIBILITY_MASK) != VISIBLE) {
             return false;
         }
 
-        // TODO This should probably be super.hasFocusable, but that would change behavior.
-        // The below is a much simpler check than we do in the superclass implementation,
-        // but it's been this way for a long time and other code likely relies on it.
-        if ((allowAutoFocus ? getFocusable() != NOT_FOCUSABLE : getFocusable() == FOCUSABLE)
-                && isFocusable()) {
+        // Only use effective focusable value when allowed.
+        if ((allowAutoFocus || getFocusable() != FOCUSABLE_AUTO) && isFocusable()) {
             return true;
         }
 
+        // Determine whether we have a focused descendant.
         final int descendantFocusability = getDescendantFocusability();
         if (descendantFocusability != FOCUS_BLOCK_DESCENDANTS) {
             final int count = mChildrenCount;
