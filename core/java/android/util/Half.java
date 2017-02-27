@@ -17,9 +17,13 @@
 package android.util;
 
 import android.annotation.HalfFloat;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+
+import sun.misc.FloatingDecimal;
 
 /**
- * <p>Half is a utility class to manipulate half-precision 16-bit
+ * <p>The {@code Half} class is a wrapper and a utility class to manipulate half-precision 16-bit
  * <a href="https://en.wikipedia.org/wiki/Half-precision_floating-point_format">IEEE 754</a>
  * floating point data types (also called fp16 or binary16). A half-precision float can be
  * created from or converted to single-precision floats, and is stored in a short data type.
@@ -88,7 +92,7 @@ import android.annotation.HalfFloat;
  * <p>This table shows that numbers higher than 1024 lose all fractional precision.</p>
  */
 @SuppressWarnings("SimplifiableIfStatement")
-public final class Half {
+public final class Half extends Number implements Comparable<Half> {
     /**
      * The number of bits used to represent a half-precision float value.
      */
@@ -164,7 +168,332 @@ public final class Half {
     private static final int FP32_DENORMAL_MAGIC = 126 << 23;
     private static final float FP32_DENORMAL_FLOAT = Float.intBitsToFloat(FP32_DENORMAL_MAGIC);
 
-    private Half() {
+    private final @HalfFloat short mValue;
+
+    /**
+     * Constructs a newly allocated {@code Half} object that represents the
+     * half-precision float type argument.
+     *
+     * @param value The value to be represented by the {@code Half}
+     */
+    public Half(@HalfFloat short value) {
+        mValue = value;
+    }
+
+    /**
+     * Constructs a newly allocated {@code Half} object that represents the
+     * argument converted to a half-precision float.
+     *
+     * @param value The value to be represented by the {@code Half}
+     *
+     * @see #toHalf(float)
+     */
+    public Half(float value) {
+        mValue = toHalf(value);
+    }
+
+    /**
+     * Constructs a newly allocated {@code Half} object that
+     * represents the argument converted to a half-precision float.
+     *
+     * @param value The value to be represented by the {@code Half}
+     *
+     * @see #toHalf(float)
+     */
+    public Half(double value) {
+        mValue = toHalf((float) value);
+    }
+
+    /**
+     * <p>Constructs a newly allocated {@code Half} object that represents the
+     * half-precision float value represented by the string.
+     * The string is converted to a half-precision float value as if by the
+     * {@link #valueOf(String)} method.</p>
+     *
+     * <p>Calling this constructor is equivalent to calling:</p>
+     * <pre>
+     *     new Half(Float.parseFloat(value))
+     * </pre>
+     *
+     * @param value A string to be converted to a {@code Half}
+     * @throws NumberFormatException if the string does not contain a parsable number
+     *
+     * @see Float#valueOf(java.lang.String)
+     * @see #toHalf(float)
+     */
+    public Half(@NonNull String value) throws NumberFormatException {
+        mValue = toHalf(Float.parseFloat(value));
+    }
+
+    /**
+     * Returns the half-precision value of this {@code Half} as a {@code short}
+     * containing the bit representation described in {@link Half}.
+     *
+     * @return The half-precision float value represented by this object
+     */
+    public @HalfFloat short halfValue() {
+        return mValue;
+    }
+
+    /**
+     * Returns the value of this {@code Half} as a {@code byte} after
+     * a narrowing primitive conversion.
+     *
+     * @return The half-precision float value represented by this object
+     *         converted to type {@code byte}
+     */
+    @Override
+    public byte byteValue() {
+        return (byte) toFloat(mValue);
+    }
+
+    /**
+     * Returns the value of this {@code Half} as a {@code short} after
+     * a narrowing primitive conversion.
+     *
+     * @return The half-precision float value represented by this object
+     *         converted to type {@code short}
+     */
+    @Override
+    public short shortValue() {
+        return (short) toFloat(mValue);
+    }
+
+    /**
+     * Returns the value of this {@code Half} as a {@code int} after
+     * a narrowing primitive conversion.
+     *
+     * @return The half-precision float value represented by this object
+     *         converted to type {@code int}
+     */
+    @Override
+    public int intValue() {
+        return (int) toFloat(mValue);
+    }
+
+    /**
+     * Returns the value of this {@code Half} as a {@code long} after
+     * a narrowing primitive conversion.
+     *
+     * @return The half-precision float value represented by this object
+     *         converted to type {@code long}
+     */
+    @Override
+    public long longValue() {
+        return (long) toFloat(mValue);
+    }
+
+    /**
+     * Returns the value of this {@code Half} as a {@code float} after
+     * a widening primitive conversion.
+     *
+     * @return The half-precision float value represented by this object
+     *         converted to type {@code float}
+     */
+    @Override
+    public float floatValue() {
+        return toFloat(mValue);
+    }
+
+    /**
+     * Returns the value of this {@code Half} as a {@code double} after
+     * a widening primitive conversion.
+     *
+     * @return The half-precision float value represented by this object
+     *         converted to type {@code double}
+     */
+    @Override
+    public double doubleValue() {
+        return toFloat(mValue);
+    }
+
+    /**
+     * Returns true if this {@code Half} value represents a Not-a-Number,
+     * false otherwise.
+     *
+     * @return True if the value is a NaN, false otherwise
+     */
+    public boolean isNaN() {
+        return isNaN(mValue);
+    }
+
+    /**
+     * Compares this object against the specified object. The result is {@code true}
+     * if and only if the argument is not {@code null} and is a {@code Half} object
+     * that represents the same half-precision value as the this object. Two
+     * half-precision values are considered to be the same if and only if the method
+     * {@link #halfToIntBits(short)} returns an identical {@code int} value for both.
+     *
+     * @param o The object to compare
+     * @return True if the objects are the same, false otherwise
+     *
+     * @see #halfToIntBits(short)
+     */
+    @Override
+    public boolean equals(@Nullable Object o) {
+        return (o instanceof Half) &&
+                (halfToIntBits(((Half) o).mValue) == halfToIntBits(mValue));
+    }
+
+    /**
+     * Returns a hash code for this {@code Half} object. The result is the
+     * integer bit representation, exactly as produced by the method
+     * {@link #halfToIntBits(short)}, of the primitive half-precision float
+     * value represented by this {@code Half} object.
+     *
+     * @return A hash code value for this object
+     */
+    @Override
+    public int hashCode() {
+        return hashCode(mValue);
+    }
+
+    /**
+     * Returns a string representation of the specified half-precision
+     * float value. See {@link #toString(short)} for more information.
+     *
+     * @return A string representation of this {@code Half} object
+     */
+    @NonNull
+    @Override
+    public String toString() {
+        return toString(mValue);
+    }
+
+    /**
+     * <p>Compares the two specified half-precision float values. The following
+     * conditions apply during the comparison:</p>
+     *
+     * <ul>
+     * <li>{@link #NaN} is considered by this method to be equal to itself and greater
+     * than all other half-precision float values (including {@code #POSITIVE_INFINITY})</li>
+     * <li>{@link #POSITIVE_ZERO} is considered by this method to be greater than
+     * {@link #NEGATIVE_ZERO}.</li>
+     * </ul>
+     *
+     * @param h The half-precision float value to compare to the half-precision value
+     *          represented by this {@code Half} object
+     *
+     * @return  The value {@code 0} if {@code x} is numerically equal to {@code y}; a
+     *          value less than {@code 0} if {@code x} is numerically less than {@code y};
+     *          and a value greater than {@code 0} if {@code x} is numerically greater
+     *          than {@code y}
+     */
+    @Override
+    public int compareTo(@NonNull Half h) {
+        return compare(mValue, h.mValue);
+    }
+
+    /**
+     * Returns a hash code for a half-precision float value.
+     *
+     * @param h The value to hash
+     *
+     * @return A hash code value for a half-precision float value
+     */
+    public static int hashCode(@HalfFloat short h) {
+        return halfToIntBits(h);
+    }
+
+    /**
+     * <p>Compares the two specified half-precision float values. The following
+     * conditions apply during the comparison:</p>
+     *
+     * <ul>
+     * <li>{@link #NaN} is considered by this method to be equal to itself and greater
+     * than all other half-precision float values (including {@code #POSITIVE_INFINITY})</li>
+     * <li>{@link #POSITIVE_ZERO} is considered by this method to be greater than
+     * {@link #NEGATIVE_ZERO}.</li>
+     * </ul>
+     *
+     * @param x The first half-precision float value to compare.
+     * @param y The second half-precision float value to compare
+     *
+     * @return  The value {@code 0} if {@code x} is numerically equal to {@code y}, a
+     *          value less than {@code 0} if {@code x} is numerically less than {@code y},
+     *          and a value greater than {@code 0} if {@code x} is numerically greater
+     *          than {@code y}
+     */
+    public static int compare(@HalfFloat short x, @HalfFloat short y) {
+        if (less(x, y)) return -1;
+        if (greater(x, y)) return 1;
+
+        // Collapse NaNs, akin to halfToIntBits(), but we want to keep
+        // (signed) short value types to preserve the ordering of -0.0
+        // and +0.0
+        short xBits = (x & FP16_COMBINED) > FP16_EXPONENT_MAX ? NaN : x;
+        short yBits = (y & FP16_COMBINED) > FP16_EXPONENT_MAX ? NaN : y;
+
+        return (xBits == yBits ? 0 : (xBits < yBits ? -1 : 1));
+    }
+
+    /**
+     * <p>Returns a representation of the specified half-precision float value
+     * according to the bit layout described in {@link Half}.</p>
+     *
+     * <p>Similar to {@link #halfToIntBits(short)}, this method collapses all
+     * possible Not-a-Number values to a single canonical Not-a-Number value
+     * defined by {@link #NaN}.</p>
+     *
+     * @param h A half-precision float value
+     * @return The bits that represent the half-precision float value
+     *
+     * @see #halfToIntBits(short)
+     */
+    public static @HalfFloat short halfToShortBits(@HalfFloat short h) {
+        return (h & FP16_COMBINED) > FP16_EXPONENT_MAX ? NaN : h;
+    }
+
+    /**
+     * <p>Returns a representation of the specified half-precision float value
+     * according to the bit layout described in {@link Half}.</p>
+     *
+     * <p>Unlike {@link #halfToRawIntBits(short)}, this method collapses all
+     * possible Not-a-Number values to a single canonical Not-a-Number value
+     * defined by {@link #NaN}.</p>
+     *
+     * @param h A half-precision float value
+     * @return The bits that represent the half-precision float value
+     *
+     * @see #halfToRawIntBits(short)
+     * @see #halfToShortBits(short)
+     * @see #intBitsToHalf(int)
+     */
+    public static int halfToIntBits(@HalfFloat short h) {
+        return (h & FP16_COMBINED) > FP16_EXPONENT_MAX ? NaN : h & 0xffff;
+    }
+
+    /**
+     * <p>Returns a representation of the specified half-precision float value
+     * according to the bit layout described in {@link Half}.</p>
+     *
+     * <p>The argument is considered to be a representation of a half-precision
+     * float value according to the bit layout described in {@link Half}. The 16
+     * most significant bits of the returned value are set to 0.</p>
+     *
+     * @param h A half-precision float value
+     * @return The bits that represent the half-precision float value
+     *
+     * @see #halfToIntBits(short)
+     * @see #intBitsToHalf(int)
+     */
+    public static int halfToRawIntBits(@HalfFloat short h) {
+        return h & 0xffff;
+    }
+
+    /**
+     * <p>Returns the half-precision float value corresponding to a given
+     * bit representation.</p>
+     *
+     * <p>The argument is considered to be a representation of a half-precision
+     * float value according to the bit layout described in {@link Half}. The 16
+     * most significant bits of the argument are ignored.</p>
+     *
+     * @param bits An integer
+     * @return The half-precision float value with the same bit pattern
+     */
+    public static @HalfFloat short intBitsToHalf(int bits) {
+        return (short) (bits & 0xffff);
     }
 
     /**
@@ -509,7 +838,7 @@ public final class Half {
      * infinity, false otherwise.
      *
      * @param h A half-precision float value
-     * @return true if the value is positive infinity or negative infinity,
+     * @return True if the value is positive infinity or negative infinity,
      *         false otherwise
      */
     public static boolean isInfinite(@HalfFloat short h) {
@@ -521,7 +850,7 @@ public final class Half {
      * a Not-a-Number, false otherwise.
      *
      * @param h A half-precision float value
-     * @return true if the value is a NaN, false otherwise
+     * @return True if the value is a NaN, false otherwise
      */
     public static boolean isNaN(@HalfFloat short h) {
         return (h & FP16_COMBINED) > FP16_EXPONENT_MAX;
@@ -535,7 +864,7 @@ public final class Half {
      * number, this method returns false.
      *
      * @param h A half-precision float value
-     * @return true if the value is normalized, false otherwise
+     * @return True if the value is normalized, false otherwise
      */
     public static boolean isNormalized(@HalfFloat short h) {
         return (h & FP16_EXPONENT_MAX) != 0 && (h & FP16_EXPONENT_MAX) != FP16_EXPONENT_MAX;
@@ -608,7 +937,7 @@ public final class Half {
      * @return A half-precision float value
      */
     @SuppressWarnings("StatementWithEmptyBody")
-    public static @HalfFloat short valueOf(float f) {
+    public static @HalfFloat short toHalf(float f) {
         int bits = Float.floatToRawIntBits(f);
         int s = (bits >>> FP32_SIGN_SHIFT    );
         int e = (bits >>> FP32_EXPONENT_SHIFT) & FP32_EXPONENT_MASK;
@@ -650,6 +979,57 @@ public final class Half {
     }
 
     /**
+     * Returns a {@code Half} instance representing the specified
+     * half-precision float value.
+     *
+     * @param h A half-precision float value
+     * @return a {@code Half} instance representing {@code h}
+     */
+    public static @NonNull Half valueOf(@HalfFloat short h) {
+        return new Half(h);
+    }
+
+    /**
+     * Returns a {@code Half} instance representing the specified float value.
+     *
+     * @param f A float value
+     * @return a {@code Half} instance representing {@code f}
+     */
+    public static @NonNull Half valueOf(float f) {
+        return new Half(f);
+    }
+
+    /**
+     * Returns a {@code Half} instance representing the specified string value.
+     * Calling this method is equivalent to calling
+     * <code>toHalf(Float.parseString(h))</code>. See {@link Float#valueOf(String)}
+     * for more information on the format of the string representation.
+     *
+     * @param s The string to be parsed
+     * @return a {@code Half} instance representing {@code h}
+     * @throws NumberFormatException if the string does not contain a parsable
+     *         half-precision float value
+     */
+    public static @NonNull Half valueOf(@NonNull String s) {
+        return new Half(s);
+    }
+
+    /**
+     * Returns the half-precision float value represented by the specified string.
+     * Calling this method is equivalent to calling
+     * <code>toHalf(Float.parseString(h))</code>. See {@link Float#valueOf(String)}
+     * for more information on the format of the string representation.
+     *
+     * @param s The string to be parsed
+     * @return A half-precision float value represented by the string
+     * @throws NumberFormatException if the string does not contain a parsable
+     *         half-precision float value
+     */
+    public static @HalfFloat short parseHalf(@NonNull String s) throws NumberFormatException {
+        return toHalf(FloatingDecimal.parseFloat(s));
+    }
+
+    /**
      * Returns a string representation of the specified half-precision
      * float value. Calling this method is equivalent to calling
      * <code>Float.toString(toFloat(h))</code>. See {@link Float#toString(float)}
@@ -658,6 +1038,7 @@ public final class Half {
      * @param h A half-precision float value
      * @return A string representation of the specified value
      */
+    @NonNull
     public static String toString(@HalfFloat short h) {
         return Float.toString(toFloat(h));
     }
@@ -688,6 +1069,7 @@ public final class Half {
      * @param h A half-precision float value
      * @return A hexadecimal string representation of the specified value
      */
+    @NonNull
     public static String toHexString(@HalfFloat short h) {
         StringBuilder o = new StringBuilder();
 

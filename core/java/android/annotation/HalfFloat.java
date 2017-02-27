@@ -37,7 +37,7 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
  * }</pre>
  *
  * @see android.util.Half
- * @see android.util.Half#valueOf(float)
+ * @see android.util.Half#toHalf(float)
  * @see android.util.Half#toFloat(short)
  *
  * @hide

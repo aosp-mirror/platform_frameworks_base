@@ -1023,9 +1023,9 @@ public class Color {
                     "The color space must use a color model with at most 3 components");
         }
 
-        @HalfFloat short r = Half.valueOf(red);
-        @HalfFloat short g = Half.valueOf(green);
-        @HalfFloat short b = Half.valueOf(blue);
+        @HalfFloat short r = Half.toHalf(red);
+        @HalfFloat short g = Half.toHalf(green);
+        @HalfFloat short b = Half.toHalf(blue);
 
         int a = (int) (Math.max(0.0f, Math.min(alpha, 1.0f)) * 1023.0f + 0.5f);
 
