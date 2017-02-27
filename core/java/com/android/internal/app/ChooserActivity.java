@@ -23,15 +23,21 @@ import android.app.usage.UsageStatsManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.IntentSender.SendIntentException;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.LabeledIntent;
+import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.ParceledListSlice;
 import android.content.pm.ResolveInfo;
+import android.content.pm.ShortcutInfo;
+import android.content.pm.ShortcutManager;
 import android.database.DataSetObserver;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
@@ -356,6 +362,7 @@ public class ChooserActivity extends ResolverActivity {
             mChooserListAdapter.addServiceResults(null, Lists.newArrayList(mCallerChooserTargets));
         }
         mChooserRowAdapter = new ChooserRowAdapter(mChooserListAdapter);
+        mChooserRowAdapter.updateRowScales();
         mChooserRowAdapter.registerDataSetObserver(new OffsetDataSetObserver(adapterView));
         adapterView.setAdapter(mChooserRowAdapter);
         if (listView != null) {
@@ -842,7 +849,9 @@ public class ChooserActivity extends ResolverActivity {
                 return false;
             }
             intent.setComponent(mChooserTarget.getComponentName());
-            intent.putExtras(mChooserTarget.getIntentExtras());
+            if (mChooserTarget.getIntentExtras() != null) {
+                intent.putExtras(mChooserTarget.getIntentExtras());
+            }
 
             // Important: we will ignore the target security checks in ActivityManager
             // if and only if the ChooserTarget's target package is the same package
@@ -924,6 +933,8 @@ public class ChooserActivity extends ResolverActivity {
 
         private static final int MAX_SERVICE_TARGETS = 8;
         private static final int MAX_TARGETS_PER_SERVICE = 4;
+
+        private boolean mAreChooserShortcutsRetrieved;
 
         private final List<ChooserTargetInfo> mServiceTargets = new ArrayList<>();
         private final List<TargetInfo> mCallerTargets = new ArrayList<>();
@@ -1016,6 +1027,20 @@ public class ChooserActivity extends ResolverActivity {
             if (mServiceTargets != null) {
                 pruneServiceTargets();
             }
+
+            if (DEBUG) Log.d(TAG, "Adding pushed chooser targets");
+
+            if (!mAreChooserShortcutsRetrieved) {
+                LauncherApps launcherApps = getLauncherApps();
+                LauncherApps.ShortcutQuery query = new LauncherApps.ShortcutQuery();
+                query.setIntent(getTargetIntent());
+                query.setQueryFlags(LauncherApps.ShortcutQuery.FLAG_MATCH_CHOOSER);
+                List<ShortcutInfo> shortcuts = launcherApps.getShortcuts(query, UserHandle.SYSTEM);
+                if (DEBUG) Log.d(TAG, "Adding " + shortcuts.size() + " chooser shortcuts");
+                addShortcuts(shortcuts);
+                mAreChooserShortcutsRetrieved = true;
+            }
+
             if (DEBUG) Log.d(TAG, "List built querying services");
             queryTargetServices(this);
         }
@@ -1041,6 +1066,7 @@ public class ChooserActivity extends ResolverActivity {
 
         public int getServiceTargetCount() {
             if (!mShowServiceTargets) {
+                if (DEBUG) Log.d("TAG", "Hiding service targets");
                 return 0;
             }
             return Math.min(mServiceTargets.size(), MAX_SERVICE_TARGETS);
@@ -1130,6 +1156,71 @@ public class ChooserActivity extends ResolverActivity {
             mLateFee *= 0.95f;
 
             notifyDataSetChanged();
+        }
+
+        // TODO: Pushed targets need to be scored correctly
+        public void addShortcuts(List<ShortcutInfo> infos) {
+            for (ShortcutInfo info : infos) {
+                List<ChooserTarget> newTargets = new ArrayList<>();
+                final ComponentName cn = info.getActivity();
+                ActivityInfo ai;
+                ResolveInfo ri = new ResolveInfo();
+                if (cn != null) {
+                    try {
+                        ai = getPackageManager().getActivityInfo(cn, 0);
+                        ri.activityInfo = ai;
+                        UserManager userManager =
+                                (UserManager) getSystemService(Context.USER_SERVICE);
+                        ri.iconResourceId = ai.icon;
+                        ri.labelRes = ai.labelRes;
+                        ri.resolvePackageName = ai.packageName;
+                        ri.activityInfo.applicationInfo = new ApplicationInfo(
+                                ri.activityInfo.applicationInfo);
+                        ri.activityInfo.applicationInfo = ai.applicationInfo;
+                        ri.activityInfo.applicationInfo.uid = getUserId();
+                    } catch (PackageManager.NameNotFoundException ignored) {
+                        if (DEBUG) Log.d(TAG, "Package not found, skipping this shortcut");
+                        continue;
+                    }
+                }
+
+                DisplayResolveInfo resolveInfo = new DisplayResolveInfo(getTargetIntent(),
+                        ri,
+                        info.getShortLabel(),
+                        info.getLongLabel(),
+                        getTargetIntent());
+
+                int bestMatch = 0;
+                ComponentName bestComponent = null;
+                for (int i = 0; i < info.getChooserIntentFilters().length; i++) {
+                    int newMatch = info.getChooserIntentFilters()[i]
+                            .match(getContentResolver(), getTargetIntent(), false, TAG);
+                    if (DEBUG) Log.d(TAG, "A match was found with value: " + newMatch);
+                    if (newMatch > bestMatch) {
+                        bestMatch = newMatch;
+                        bestComponent = info.getChooserComponentNames()[i];
+                    }
+                }
+                if (bestMatch == 0) {
+                    Log.e(TAG, "Unexpectedly, no match was found for the provided chooser intent");
+                    return;
+                }
+
+                Bundle extrasToAdd =
+                        info.getChooserExtras() == null ? null: new Bundle(info.getChooserExtras());
+                if (DEBUG) Log.d(TAG, "Adding service target " + info.getShortLabel());
+                newTargets.add(new ChooserTarget(
+                        info.getShortLabel(),
+                        info.getIcon(),
+                        1,
+                        bestComponent,
+                        extrasToAdd));
+                addServiceResults(resolveInfo, newTargets);
+            }
+            if (mChooserRowAdapter != null) {
+                mChooserRowAdapter.updateRowScales();
+            }
+            setShowServiceTargets(true);
         }
 
         /**
@@ -1246,37 +1337,7 @@ public class ChooserActivity extends ResolverActivity {
                 @Override
                 public void onChanged() {
                     super.onChanged();
-                    final int rcount = getServiceTargetRowCount();
-                    if (mServiceTargetScale == null
-                            || mServiceTargetScale.length != rcount) {
-                        RowScale[] old = mServiceTargetScale;
-                        int oldRCount = old != null ? old.length : 0;
-                        mServiceTargetScale = new RowScale[rcount];
-                        if (old != null && rcount > 0) {
-                            System.arraycopy(old, 0, mServiceTargetScale, 0,
-                                    Math.min(old.length, rcount));
-                        }
-
-                        for (int i = rcount; i < oldRCount; i++) {
-                            old[i].cancelAnimation();
-                        }
-
-                        for (int i = oldRCount; i < rcount; i++) {
-                            final RowScale rs = new RowScale(ChooserRowAdapter.this, 0.f, 1.f)
-                                    .setInterpolator(mInterpolator);
-                            mServiceTargetScale[i] = rs;
-                        }
-
-                        // Start the animations in a separate loop.
-                        // The process of starting animations will result in
-                        // binding views to set up initial values, and we must
-                        // have ALL of the new RowScale objects created above before
-                        // we get started.
-                        for (int i = oldRCount; i < rcount; i++) {
-                            mServiceTargetScale[i].startAnimation();
-                        }
-                    }
-
+                    updateRowScales();
                     notifyDataSetChanged();
                 }
 
@@ -1291,6 +1352,40 @@ public class ChooserActivity extends ResolverActivity {
                     }
                 }
             });
+        }
+
+         void updateRowScales() {
+            final int rcount = getServiceTargetRowCount();
+            if (mServiceTargetScale == null
+                    || mServiceTargetScale.length != rcount) {
+                if (DEBUG) Log.d(TAG, "Row scales need adjusting to " + rcount + " rows.");
+                RowScale[] old = mServiceTargetScale;
+                int oldRCount = old != null ? old.length : 0;
+                mServiceTargetScale = new RowScale[rcount];
+                if (old != null && rcount > 0) {
+                    System.arraycopy(old, 0, mServiceTargetScale, 0,
+                            Math.min(old.length, rcount));
+                }
+
+                for (int i = rcount; i < oldRCount; i++) {
+                    old[i].cancelAnimation();
+                }
+
+                for (int i = oldRCount; i < rcount; i++) {
+                    final RowScale rs = new RowScale(ChooserRowAdapter.this, 0.f, 1.f)
+                            .setInterpolator(mInterpolator);
+                    mServiceTargetScale[i] = rs;
+                }
+
+                // Start the animations in a separate loop.
+                // The process of starting animations will result in
+                // binding views to set up initial values, and we must
+                // have ALL of the new RowScale objects created above before
+                // we get started.
+                for (int i = oldRCount; i < rcount; i++) {
+                    mServiceTargetScale[i].startAnimation();
+                }
+            }
         }
 
         private float getRowScale(int rowPosition) {
@@ -1561,6 +1656,10 @@ public class ChooserActivity extends ResolverActivity {
                     ? mOriginalTarget.getResolveInfo().activityInfo.toString()
                     : "<connection destroyed>") + "}";
         }
+    }
+
+    public LauncherApps getLauncherApps() {
+        return (LauncherApps) getSystemService(Context.LAUNCHER_APPS_SERVICE);
     }
 
     static class ServiceResultInfo {

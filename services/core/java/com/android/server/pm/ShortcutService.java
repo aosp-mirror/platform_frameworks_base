@@ -27,6 +27,7 @@ import android.app.usage.UsageStatsManagerInternal;
 import android.appwidget.AppWidgetProviderInfo;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -64,6 +65,7 @@ import android.os.FileUtils;
 import android.os.Handler;
 import android.os.LocaleList;
 import android.os.Looper;
+import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.os.Process;
@@ -1750,6 +1752,7 @@ public class ShortcutService extends IShortcutService.Stub {
             ps.clearAllImplicitRanks();
             assignImplicitRanks(newShortcuts);
 
+            // TODO: Consider removing Chooser fields. If so, the FLAG_CHOOSER should be removed
             for (int i = 0; i < size; i++) {
                 final ShortcutInfo source = newShortcuts.get(i);
                 fixUpIncomingShortcutInfo(source, /* forUpdate= */ true);
@@ -1788,6 +1791,13 @@ public class ShortcutService extends IShortcutService.Stub {
                 // the values.
                 if (replacingIcon || source.hasStringResources()) {
                     fixUpShortcutResourceNamesAndValues(target);
+                }
+
+                // While updating, we keep the dynamic flag as it previously was, but refresh the
+                // chooser flag.
+                // TODO: If we support clearing Chooser fields, we should also remove the flag.
+                if (target.getChooserIntentFilters() != null) {
+                    target.addFlags(ShortcutInfo.FLAG_CHOOSER);
                 }
             }
 
@@ -1852,6 +1862,7 @@ public class ShortcutService extends IShortcutService.Stub {
         return true;
     }
 
+    // TODO: Ensure non-launchable shortcuts can not be pinned
     @Override
     public boolean requestPinShortcut(String packageName, ShortcutInfo shortcut,
             IntentSender resultIntent, int userId) {
@@ -2007,7 +2018,7 @@ public class ShortcutService extends IShortcutService.Stub {
 
             return getShortcutsWithQueryLocked(
                     packageName, userId, ShortcutInfo.CLONE_REMOVE_FOR_CREATOR,
-                    ShortcutInfo::isDynamic);
+                    ShortcutInfo::isDynamicOrChooser);
         }
     }
 
@@ -2200,6 +2211,14 @@ public class ShortcutService extends IShortcutService.Stub {
         synchronized (mLock) {
             throwIfUserLockedL(userId);
 
+            // For the chooser, we just check is the system is calling.
+            // STOPSHIP: We need to implement a new permission here rather than this terrible check.
+            //           The packageName check is to try to distinguish between when an actual
+            //           launcher is making the call, and when it's the system.
+            if (isCallerSystem() && packageName.equals("android")) {
+                return true;
+            }
+
             final ShortcutUser user = getUserShortcutsLocked(userId);
 
             // Always trust the cached component.
@@ -2372,7 +2391,7 @@ public class ShortcutService extends IShortcutService.Stub {
         public List<ShortcutInfo> getShortcuts(int launcherUserId,
                 @NonNull String callingPackage, long changedSince,
                 @Nullable String packageName, @Nullable List<String> shortcutIds,
-                @Nullable ComponentName componentName,
+                @Nullable ComponentName componentName, @Nullable Intent intent,
                 int queryFlags, int userId) {
             final ArrayList<ShortcutInfo> ret = new ArrayList<>();
 
@@ -2394,13 +2413,13 @@ public class ShortcutService extends IShortcutService.Stub {
                 if (packageName != null) {
                     getShortcutsInnerLocked(launcherUserId,
                             callingPackage, packageName, shortcutIds, changedSince,
-                            componentName, queryFlags, userId, ret, cloneFlag);
+                            componentName, intent, queryFlags, userId, ret, cloneFlag);
                 } else {
                     final List<String> shortcutIdsF = shortcutIds;
                     getUserShortcutsLocked(userId).forAllPackages(p -> {
                         getShortcutsInnerLocked(launcherUserId,
                                 callingPackage, p.getPackageName(), shortcutIdsF, changedSince,
-                                componentName, queryFlags, userId, ret, cloneFlag);
+                                componentName, intent, queryFlags, userId, ret, cloneFlag);
                     });
                 }
             }
@@ -2409,7 +2428,7 @@ public class ShortcutService extends IShortcutService.Stub {
 
         private void getShortcutsInnerLocked(int launcherUserId, @NonNull String callingPackage,
                 @Nullable String packageName, @Nullable List<String> shortcutIds, long changedSince,
-                @Nullable ComponentName componentName, int queryFlags,
+                @Nullable ComponentName componentName, Intent intent, int queryFlags,
                 int userId, ArrayList<ShortcutInfo> ret, int cloneFlag) {
             final ArraySet<String> ids = shortcutIds == null ? null
                     : new ArraySet<>(shortcutIds);
@@ -2433,6 +2452,15 @@ public class ShortcutService extends IShortcutService.Stub {
                                     && !si.getActivity().equals(componentName)) {
                                 return false;
                             }
+                        }
+                        if (intent != null
+                                && !si.hasMatchingFilter(mContext.getContentResolver(), intent)) {
+                            return false;
+                        }
+
+                        if (((queryFlags & ShortcutQuery.FLAG_MATCH_CHOOSER) != 0)
+                                && si.isChooser()) {
+                            return true;
                         }
                         if (((queryFlags & ShortcutQuery.FLAG_GET_DYNAMIC) != 0)
                                 && si.isDynamic()) {

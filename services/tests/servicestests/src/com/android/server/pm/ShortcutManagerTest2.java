@@ -34,6 +34,7 @@ import android.Manifest.permission;
 import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ShortcutInfo;
 import android.content.res.Resources;
 import android.graphics.BitmapFactory;
@@ -93,11 +94,6 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
 
         assertExpectException(
                 RuntimeException.class,
-                "intents cannot contain null",
-                () -> new ShortcutInfo.Builder(getTestContext(), "id").setIntent(null));
-
-        assertExpectException(
-                RuntimeException.class,
                 "action must be set",
                 () -> new ShortcutInfo.Builder(getTestContext(), "id").setIntent(new Intent()));
 
@@ -141,6 +137,19 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
                 RuntimeException.class,
                 "disabledMessage cannot be empty",
                 () -> new ShortcutInfo.Builder(getTestContext(), "id").setDisabledMessage(""));
+
+
+        assertExpectException(
+                RuntimeException.class,
+                "component name cannot be null",
+                () -> new ShortcutInfo.Builder(getTestContext(), "id")
+                        .addChooserIntentFilter(new IntentFilter(Intent.ACTION_SEND), null));
+
+        assertExpectException(
+                RuntimeException.class,
+                "intent filter cannot be null",
+                () -> new ShortcutInfo.Builder(getTestContext(), "id")
+                        .addChooserIntentFilter(null, new ComponentName("xxx", "s")));
 
         assertExpectException(NullPointerException.class, "action must be set",
                 () -> new ShortcutInfo.Builder(getTestContext(), "id").setIntent(new Intent()));
@@ -240,6 +249,10 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
 
         PersistableBundle pb = new PersistableBundle();
         pb.putInt("k", 1);
+        IntentFilter chooserFilter = new IntentFilter();
+        chooserFilter.addAction(Intent.ACTION_VIEW);
+        PersistableBundle pb2 = new PersistableBundle();
+        pb2.putInt("l", 1);
 
         si = new ShortcutInfo.Builder(getTestContext())
                 .setId("id")
@@ -252,6 +265,8 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
                 .setCategories(set(ShortcutInfo.SHORTCUT_CATEGORY_CONVERSATION, "xyz"))
                 .setRank(123)
                 .setExtras(pb)
+                .addChooserIntentFilter(chooserFilter, new ComponentName("a", "b"))
+                .setChooserExtras(pb2)
                 .build();
         si.addFlags(ShortcutInfo.FLAG_PINNED);
         si.setBitmapPath("abc");
@@ -282,6 +297,12 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         assertEquals(null, si.getTextResName());
         assertEquals(0, si.getDisabledMessageResourceId());
         assertEquals(null, si.getDisabledMessageResName());
+
+        assertEquals(1, si.getChooserIntentFilters().length);
+        assertEquals(Intent.ACTION_VIEW, si.getChooserIntentFilters()[0].getAction(0));
+        assertEquals(1, si.getChooserComponentNames().length);
+        assertEquals(new ComponentName("a", "b"), si.getChooserComponentNames()[0]);
+        assertEquals(1, si.getChooserExtras().getInt("l"));
     }
 
     public void testShortcutInfoParcel_resId() {
@@ -290,6 +311,10 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
 
         PersistableBundle pb = new PersistableBundle();
         pb.putInt("k", 1);
+        IntentFilter chooserFilter = new IntentFilter();
+        chooserFilter.addAction(Intent.ACTION_VIEW);
+        PersistableBundle pb2 = new PersistableBundle();
+        pb2.putInt("l", 1);
 
         si = new ShortcutInfo.Builder(getTestContext())
                 .setId("id")
@@ -302,6 +327,8 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
                 .setCategories(set(ShortcutInfo.SHORTCUT_CATEGORY_CONVERSATION, "xyz"))
                 .setRank(123)
                 .setExtras(pb)
+                .addChooserIntentFilter(chooserFilter, new ComponentName("a", "b"))
+                .setChooserExtras(pb2)
                 .build();
         si.addFlags(ShortcutInfo.FLAG_PINNED);
         si.setBitmapPath("abc");
@@ -338,6 +365,11 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
 
         PersistableBundle pb = new PersistableBundle();
         pb.putInt("k", 1);
+        IntentFilter chooserFilter = new IntentFilter();
+        chooserFilter.addAction(Intent.ACTION_VIEW);
+        PersistableBundle pb2 = new PersistableBundle();
+        pb2.putInt("l", 1);
+
         ShortcutInfo sorig = new ShortcutInfo.Builder(mClientContext)
                 .setId("id")
                 .setActivity(new ComponentName("a", "b"))
@@ -349,6 +381,8 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
                 .setIntent(makeIntent("action", ShortcutActivity.class, "key", "val"))
                 .setRank(123)
                 .setExtras(pb)
+                .addChooserIntentFilter(chooserFilter, new ComponentName("a", "b"))
+                .setChooserExtras(pb2)
                 .build();
         sorig.addFlags(ShortcutInfo.FLAG_PINNED);
         sorig.setBitmapPath("abc");
@@ -377,6 +411,12 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         assertEquals("abc", si.getBitmapPath());
         assertEquals(456, si.getIconResourceId());
         assertEquals("string/r456", si.getIconResName());
+
+        assertEquals(1, si.getChooserIntentFilters().length);
+        assertEquals(Intent.ACTION_VIEW, si.getChooserIntentFilters()[0].getAction(0));
+        assertEquals(1, si.getChooserComponentNames().length);
+        assertEquals(new ComponentName("a", "b"), si.getChooserComponentNames()[0]);
+        assertEquals(1, si.getChooserExtras().getInt("l"));
 
         si = sorig.clone(ShortcutInfo.CLONE_REMOVE_FOR_CREATOR);
 
@@ -445,6 +485,10 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
 
         PersistableBundle pb = new PersistableBundle();
         pb.putInt("k", 1);
+        IntentFilter chooserFilter = new IntentFilter();
+        chooserFilter.addAction(Intent.ACTION_VIEW);
+        PersistableBundle pb2 = new PersistableBundle();
+        pb2.putInt("l", 1);
         ShortcutInfo sorig = new ShortcutInfo.Builder(mClientContext)
                 .setId("id")
                 .setActivity(new ComponentName("a", "b"))
@@ -456,6 +500,8 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
                 .setIntent(makeIntent("action", ShortcutActivity.class, "key", "val"))
                 .setRank(123)
                 .setExtras(pb)
+                .addChooserIntentFilter(chooserFilter, new ComponentName("a", "b"))
+                .setChooserExtras(pb2)
                 .build();
         sorig.addFlags(ShortcutInfo.FLAG_PINNED);
         sorig.setBitmapPath("abc");
@@ -487,6 +533,12 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         assertEquals("abc", si.getBitmapPath());
         assertEquals(456, si.getIconResourceId());
         assertEquals("string/r456", si.getIconResName());
+
+        assertEquals(1, si.getChooserIntentFilters().length);
+        assertEquals(Intent.ACTION_VIEW, si.getChooserIntentFilters()[0].getAction(0));
+        assertEquals(1, si.getChooserComponentNames().length);
+        assertEquals(new ComponentName("a", "b"), si.getChooserComponentNames()[0]);
+        assertEquals(1, si.getChooserExtras().getInt("l"));
 
         si = sorig.clone(ShortcutInfo.CLONE_REMOVE_FOR_CREATOR);
 
@@ -603,6 +655,10 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
     public void testShortcutInfoCopyNonNullFieldsFrom() throws InterruptedException {
         PersistableBundle pb = new PersistableBundle();
         pb.putInt("k", 1);
+        IntentFilter chooserFilter = new IntentFilter();
+        chooserFilter.addAction(Intent.ACTION_VIEW);
+        PersistableBundle pb2 = new PersistableBundle();
+        pb2.putInt("l", 1);
         ShortcutInfo sorig = new ShortcutInfo.Builder(getTestContext())
                 .setId("id")
                 .setActivity(new ComponentName("a", "b"))
@@ -714,12 +770,12 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         assertEquals(999, si.getRank());
 
 
-        PersistableBundle pb2 = new PersistableBundle();
-        pb2.putInt("x", 99);
+        PersistableBundle pb3 = new PersistableBundle();
+        pb3.putInt("x", 99);
 
         si = sorig.clone(/* flags=*/ 0);
         si.copyNonNullFieldsFrom(new ShortcutInfo.Builder(getTestContext()).setId("id")
-                .setExtras(pb2).build());
+                .setExtras(pb3).build());
         assertEquals("text", si.getText());
         assertEquals(99, si.getExtras().getInt("x"));
     }

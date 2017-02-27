@@ -508,6 +508,13 @@ public class ShortcutManagerTestUtils {
         return actualShortcuts;
     }
 
+    public static List<ShortcutInfo> assertAllChooser(List<ShortcutInfo> actualShortcuts) {
+        for (ShortcutInfo s : actualShortcuts) {
+            assertTrue("ID " + s.getId(), s.isChooser());
+        }
+        return actualShortcuts;
+    }
+
     public static List<ShortcutInfo> assertAllPinned(List<ShortcutInfo> actualShortcuts) {
         for (ShortcutInfo s : actualShortcuts) {
             assertTrue("ID " + s.getId(), s.isPinned());
