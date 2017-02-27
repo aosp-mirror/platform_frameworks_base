@@ -121,7 +121,8 @@ static void nFinishBuilder(JNIEnv*, jclass, jlong nativePtr) {
     b->finish();
 }
 
-static jlong nLoadHyphenator(JNIEnv* env, jclass, jobject buffer, jint offset) {
+static jlong nLoadHyphenator(JNIEnv* env, jclass, jobject buffer, jint offset,
+        jint minPrefix, jint minSuffix) {
     const uint8_t* bytebuf = nullptr;
     if (buffer != nullptr) {
         void* rawbuf = env->GetDirectBufferAddress(buffer);
@@ -131,7 +132,8 @@ static jlong nLoadHyphenator(JNIEnv* env, jclass, jobject buffer, jint offset) {
             ALOGE("failed to get direct buffer address");
         }
     }
-    minikin::Hyphenator* hyphenator = minikin::Hyphenator::loadBinary(bytebuf);
+    minikin::Hyphenator* hyphenator = minikin::Hyphenator::loadBinary(
+            bytebuf, minPrefix, minSuffix);
     return reinterpret_cast<jlong>(hyphenator);
 }
 
@@ -191,7 +193,7 @@ static const JNINativeMethod gMethods[] = {
     {"nNewBuilder", "()J", (void*) nNewBuilder},
     {"nFreeBuilder", "(J)V", (void*) nFreeBuilder},
     {"nFinishBuilder", "(J)V", (void*) nFinishBuilder},
-    {"nLoadHyphenator", "(Ljava/nio/ByteBuffer;I)J", (void*) nLoadHyphenator},
+    {"nLoadHyphenator", "(Ljava/nio/ByteBuffer;III)J", (void*) nLoadHyphenator},
     {"nSetLocale", "(JLjava/lang/String;J)V", (void*) nSetLocale},
     {"nSetupParagraph", "(J[CIFIF[IIIIZ)V", (void*) nSetupParagraph},
     {"nSetIndents", "(J[I)V", (void*) nSetIndents},

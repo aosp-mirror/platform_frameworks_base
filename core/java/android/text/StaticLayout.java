@@ -1290,7 +1290,8 @@ public class StaticLayout extends Layout {
     private static native void nFreeBuilder(long nativePtr);
     private static native void nFinishBuilder(long nativePtr);
 
-    /* package */ static native long nLoadHyphenator(ByteBuffer buf, int offset);
+    /* package */ static native long nLoadHyphenator(ByteBuffer buf, int offset,
+            int minPrefix, int minSuffix);
 
     private static native void nSetLocale(long nativePtr, String locale, long nativeHyphenator);
 
