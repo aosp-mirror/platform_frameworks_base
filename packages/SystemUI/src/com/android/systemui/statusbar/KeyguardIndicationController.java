@@ -340,17 +340,23 @@ public class KeyguardIndicationController {
     }
 
     protected class BaseKeyguardCallback extends KeyguardUpdateMonitorCallback {
+        public static final int HIDE_DELAY_MS = 5000;
         private int mLastSuccessiveErrorMessage = -1;
 
         @Override
         public void onRefreshBatteryInfo(KeyguardUpdateMonitor.BatteryStatus status) {
             boolean isChargingOrFull = status.status == BatteryManager.BATTERY_STATUS_CHARGING
                     || status.status == BatteryManager.BATTERY_STATUS_FULL;
+            boolean wasPluggedIn = mPowerPluggedIn;
             mPowerPluggedIn = status.isPluggedIn() && isChargingOrFull;
             mPowerCharged = status.isCharged();
             mChargingWattage = status.maxChargingWattage;
             mChargingSpeed = status.getChargingSpeed(mSlowThreshold, mFastThreshold);
             updateIndication();
+            if (!wasPluggedIn && mPowerPluggedIn && mDozing) {
+                showTransientIndication(computePowerIndication());
+                hideTransientIndicationDelayed(HIDE_DELAY_MS);
+            }
         }
 
         @Override
@@ -402,7 +408,7 @@ public class KeyguardIndicationController {
                 showTransientIndication(errString, errorColor);
                 // We want to keep this message around in case the screen was off
                 mHandler.removeMessages(MSG_HIDE_TRANSIENT);
-                hideTransientIndicationDelayed(5000);
+                hideTransientIndicationDelayed(HIDE_DELAY_MS);
             } else {
                 mMessageToShowOnScreenOn = errString;
             }
@@ -416,7 +422,7 @@ public class KeyguardIndicationController {
                 showTransientIndication(mMessageToShowOnScreenOn, errorColor);
                 // We want to keep this message around in case the screen was off
                 mHandler.removeMessages(MSG_HIDE_TRANSIENT);
-                hideTransientIndicationDelayed(5000);
+                hideTransientIndicationDelayed(HIDE_DELAY_MS);
                 mMessageToShowOnScreenOn = null;
             }
         }

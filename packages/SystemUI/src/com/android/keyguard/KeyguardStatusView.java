@@ -35,6 +35,7 @@ import android.widget.TextClock;
 import android.widget.TextView;
 
 import com.android.internal.widget.LockPatternUtils;
+import com.android.systemui.ChargingView;
 
 import java.util.Locale;
 
@@ -50,6 +51,7 @@ public class KeyguardStatusView extends GridLayout {
     private TextClock mClockView;
     private TextView mOwnerInfo;
     private ViewGroup mClockContainer;
+    private ChargingView mBatteryDoze;
 
     private KeyguardUpdateMonitorCallback mInfoCallback = new KeyguardUpdateMonitorCallback() {
 
@@ -114,6 +116,7 @@ public class KeyguardStatusView extends GridLayout {
         mDateView.setShowCurrentUserTime(true);
         mClockView.setShowCurrentUserTime(true);
         mOwnerInfo = (TextView) findViewById(R.id.owner_info);
+        mBatteryDoze = (ChargingView) findViewById(R.id.battery_doze);
 
         boolean shouldMarquee = KeyguardUpdateMonitor.getInstance(mContext).isDeviceInteractive();
         setEnableMarquee(shouldMarquee);
@@ -273,10 +276,11 @@ public class KeyguardStatusView extends GridLayout {
         final int N = mClockContainer.getChildCount();
         for (int i = 0; i < N; i++) {
             View child = mClockContainer.getChildAt(i);
-            if (child == mClockView) {
+            if (child == mClockView || child == mBatteryDoze) {
                 continue;
             }
             child.setAlpha(dark ? 0 : 1);
         }
+        mBatteryDoze.setDark(dark);
     }
 }

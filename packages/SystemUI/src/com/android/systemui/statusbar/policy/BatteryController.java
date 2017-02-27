@@ -45,7 +45,7 @@ public interface BatteryController extends DemoMode, Dumpable,
      * has occurred.
      */
     interface BatteryStateChangeCallback {
-        void onBatteryLevelChanged(int level, boolean pluggedIn, boolean charging);
-        void onPowerSaveChanged(boolean isPowerSave);
+        default void onBatteryLevelChanged(int level, boolean pluggedIn, boolean charging) {}
+        default void onPowerSaveChanged(boolean isPowerSave) {}
     }
 }

@@ -72,6 +72,7 @@ import android.view.WindowManagerPolicy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.IBatteryStats;
+import com.android.internal.hardware.AmbientDisplayConfiguration;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.EventLogTags;
@@ -194,6 +195,7 @@ public final class PowerManagerService extends SystemService
     private final Context mContext;
     private final ServiceThread mHandlerThread;
     private final PowerManagerHandler mHandler;
+    private final AmbientDisplayConfiguration mAmbientDisplayConfiguration;
     private final BatterySaverPolicy mBatterySaverPolicy;
 
     private LightsManager mLightsManager;
@@ -516,6 +518,9 @@ public final class PowerManagerService extends SystemService
     // True if theater mode is enabled
     private boolean mTheaterModeEnabled;
 
+    // True if always on display is enabled
+    private boolean mAlwaysOnEnabled;
+
     // True if double tap to wake is enabled
     private boolean mDoubleTapWakeEnabled;
 
@@ -608,6 +613,7 @@ public final class PowerManagerService extends SystemService
         mHandlerThread.start();
         mHandler = new PowerManagerHandler(mHandlerThread.getLooper());
         mConstants = new Constants(mHandler);
+        mAmbientDisplayConfiguration = new AmbientDisplayConfiguration(mContext);
         mBatterySaverPolicy = new BatterySaverPolicy(mHandler);
 
         synchronized (mLock) {
@@ -640,6 +646,7 @@ public final class PowerManagerService extends SystemService
         mHandlerThread.start();
         mHandler = new PowerManagerHandler(mHandlerThread.getLooper());
         mConstants = new Constants(mHandler);
+        mAmbientDisplayConfiguration = new AmbientDisplayConfiguration(mContext);
         mDisplaySuspendBlocker = null;
         mWakeLockSuspendBlocker = null;
     }
@@ -766,6 +773,9 @@ public final class PowerManagerService extends SystemService
                 Settings.Global.THEATER_MODE_ON),
                 false, mSettingsObserver, UserHandle.USER_ALL);
         resolver.registerContentObserver(Settings.Secure.getUriFor(
+                Settings.Secure.DOZE_ALWAYS_ON),
+                false, mSettingsObserver, UserHandle.USER_ALL);
+        resolver.registerContentObserver(Settings.Secure.getUriFor(
                 Settings.Secure.DOUBLE_TAP_TO_WAKE),
                 false, mSettingsObserver, UserHandle.USER_ALL);
         IVrManager vrManager = (IVrManager) getBinderService(Context.VR_SERVICE);
@@ -863,6 +873,7 @@ public final class PowerManagerService extends SystemService
                 Settings.Global.STAY_ON_WHILE_PLUGGED_IN, BatteryManager.BATTERY_PLUGGED_AC);
         mTheaterModeEnabled = Settings.Global.getInt(mContext.getContentResolver(),
                 Settings.Global.THEATER_MODE_ON, 0) == 1;
+        mAlwaysOnEnabled = mAmbientDisplayConfiguration.alwaysOnEnabled(UserHandle.USER_CURRENT);
 
         if (mSupportsDoubleTapWakeConfig) {
             boolean doubleTapWakeEnabled = Settings.Secure.getIntForUser(resolver,
@@ -1699,6 +1710,11 @@ public final class PowerManagerService extends SystemService
 
         // Don't wake while theater mode is enabled.
         if (mTheaterModeEnabled && !mWakeUpWhenPluggedOrUnpluggedInTheaterModeConfig) {
+            return false;
+        }
+
+        // On Always On Display, SystemUI shows the charging indicator
+        if (mAlwaysOnEnabled && mWakefulness == WAKEFULNESS_DOZING) {
             return false;
         }
 
