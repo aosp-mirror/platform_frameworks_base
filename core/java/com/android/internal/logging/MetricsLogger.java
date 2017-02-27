@@ -29,8 +29,10 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
  */
 public class MetricsLogger {
     // define metric categories in frameworks/base/proto/src/metrics_constants.proto.
+    // mirror changes in native version at system/core/libmetricslogger/metrics_logger.cpp
 
     public static final int VIEW_UNKNOWN = MetricsEvent.VIEW_UNKNOWN;
+    public static final int LOGTAG = EventLogTags.SYSUI_MULTI_ACTION;
 
     public static void visible(Context context, int category) throws IllegalArgumentException {
         if (Build.IS_DEBUGGABLE && category == VIEW_UNKNOWN) {
@@ -125,6 +127,7 @@ public class MetricsLogger {
 
     /** Increment the bucket with the integer label on the histogram with the given name. */
     public static void histogram(Context context, String name, int bucket) {
+        // see LogHistogram in system/core/libmetricslogger/metrics_logger.cpp
         EventLogTags.writeSysuiHistogram(name, bucket);
         EventLogTags.writeSysuiMultiAction(
                 new LogMaker(MetricsEvent.RESERVED_FOR_LOGBUILDER_HISTOGRAM)
