@@ -4500,6 +4500,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     break;
                 case com.android.internal.R.styleable.View_focusableInTouchMode:
                     if (a.getBoolean(attr, false)) {
+                        // unset auto focus since focusableInTouchMode implies explicit focusable
+                        viewFlagValues &= ~FOCUSABLE_AUTO;
                         viewFlagValues |= FOCUSABLE_IN_TOUCH_MODE | FOCUSABLE;
                         viewFlagMasks |= FOCUSABLE_IN_TOUCH_MODE | FOCUSABLE_MASK;
                     }
@@ -6471,12 +6473,18 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 }
             }
         }
+
+        // Invisible and gone views are never focusable.
         if ((mViewFlags & VISIBILITY_MASK) != VISIBLE) {
             return false;
         }
-        return (allowAutoFocus
-                ? getFocusable() != NOT_FOCUSABLE
-                : getFocusable() == FOCUSABLE) && isFocusable();
+
+        // Only use effective focusable value when allowed.
+        if ((allowAutoFocus || getFocusable() != FOCUSABLE_AUTO) && isFocusable()) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -8666,7 +8674,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         // which, in touch mode, will not successfully request focus on this view
         // because the focusable in touch mode flag is not set
         setFlags(focusableInTouchMode ? FOCUSABLE_IN_TOUCH_MODE : 0, FOCUSABLE_IN_TOUCH_MODE);
+
+        // Clear FOCUSABLE_AUTO if set.
         if (focusableInTouchMode) {
+            // Clears FOCUSABLE_AUTO if set.
             setFlags(FOCUSABLE, FOCUSABLE_MASK);
         }
     }
@@ -12264,12 +12275,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         // If focusable is auto, update the FOCUSABLE bit.
         int focusableChangedByAuto = 0;
         if (((mViewFlags & FOCUSABLE_AUTO) != 0)
-                && (changed & (FOCUSABLE_MASK | CLICKABLE | FOCUSABLE_IN_TOUCH_MODE)) != 0) {
-            int newFocus = NOT_FOCUSABLE;
-            if ((mViewFlags & (CLICKABLE | FOCUSABLE_IN_TOUCH_MODE)) != 0) {
+                && (changed & (FOCUSABLE_MASK | CLICKABLE)) != 0) {
+            // Heuristic only takes into account whether view is clickable.
+            final int newFocus;
+            if ((mViewFlags & CLICKABLE) != 0) {
                 newFocus = FOCUSABLE;
             } else {
-                mViewFlags = (mViewFlags & ~FOCUSABLE_IN_TOUCH_MODE);
+                newFocus = NOT_FOCUSABLE;
             }
             mViewFlags = (mViewFlags & ~FOCUSABLE) | newFocus;
             focusableChangedByAuto = (old & FOCUSABLE) ^ (newFocus & FOCUSABLE);
