@@ -411,17 +411,6 @@ public abstract class PackageManager {
      */
     public static final int MATCH_DIRECT_BOOT_AWARE = 0x00080000;
 
-    /** @removed */
-    @Deprecated
-    public static final int MATCH_ENCRYPTION_UNAWARE = 0x00040000;
-    /** @removed */
-    @Deprecated
-    public static final int MATCH_ENCRYPTION_AWARE = 0x00080000;
-    /** @removed */
-    @Deprecated
-    public static final int MATCH_ENCRYPTION_AWARE_AND_UNAWARE = MATCH_ENCRYPTION_AWARE
-            | MATCH_ENCRYPTION_UNAWARE;
-
     /**
      * Querying flag: include only components from applications that are marked
      * with {@link ApplicationInfo#FLAG_SYSTEM}.

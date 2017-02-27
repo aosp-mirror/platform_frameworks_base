@@ -730,12 +730,6 @@ public abstract class Context {
      */
     public abstract boolean moveSharedPreferencesFrom(Context sourceContext, String name);
 
-    /** @removed */
-    @Deprecated
-    public boolean migrateSharedPreferencesFrom(Context sourceContext, String name) {
-        return moveSharedPreferencesFrom(sourceContext, name);
-    }
-
     /**
      * Delete an existing shared preferences file.
      *
@@ -1450,12 +1444,6 @@ public abstract class Context {
      * @see #createDeviceProtectedStorageContext()
      */
     public abstract boolean moveDatabaseFrom(Context sourceContext, String name);
-
-    /** @removed */
-    @Deprecated
-    public boolean migrateDatabaseFrom(Context sourceContext, String name) {
-        return moveDatabaseFrom(sourceContext, name);
-    }
 
     /**
      * Delete an existing private SQLiteDatabase associated with this Context's
@@ -4382,12 +4370,6 @@ public abstract class Context {
      */
     public abstract Context createDeviceProtectedStorageContext();
 
-    /** @removed */
-    @Deprecated
-    public Context createDeviceEncryptedStorageContext() {
-        return createDeviceProtectedStorageContext();
-    }
-
     /**
      * Return a new Context object for the current Context but whose storage
      * APIs are backed by credential-protected storage. This is the default
@@ -4415,12 +4397,6 @@ public abstract class Context {
      */
     @SystemApi
     public abstract Context createCredentialProtectedStorageContext();
-
-    /** @removed */
-    @Deprecated
-    public Context createCredentialEncryptedStorageContext() {
-        return createCredentialProtectedStorageContext();
-    }
 
     /**
      * Gets the display adjustments holder for this context.  This information
@@ -4462,12 +4438,6 @@ public abstract class Context {
      */
     public abstract boolean isDeviceProtectedStorage();
 
-    /** @removed */
-    @Deprecated
-    public boolean isDeviceEncryptedStorage() {
-        return isDeviceProtectedStorage();
-    }
-
     /**
      * Indicates if the storage APIs of this Context are backed by
      * credential-protected storage.
@@ -4477,12 +4447,6 @@ public abstract class Context {
      */
     @SystemApi
     public abstract boolean isCredentialProtectedStorage();
-
-    /** @removed */
-    @Deprecated
-    public boolean isCredentialEncryptedStorage() {
-        return isCredentialProtectedStorage();
-    }
 
     /**
      * @hide

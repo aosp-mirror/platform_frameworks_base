@@ -87,7 +87,7 @@ public class CustomTile extends QSTile<QSTile.State> implements TileChangeListen
     private void setTileIcon() {
         try {
             PackageManager pm = mContext.getPackageManager();
-            int flags = PackageManager.MATCH_ENCRYPTION_AWARE_AND_UNAWARE;
+            int flags = PackageManager.MATCH_DIRECT_BOOT_UNAWARE | PackageManager.MATCH_DIRECT_BOOT_AWARE;
             if (isSystemApp(pm)) {
                 flags |= PackageManager.MATCH_DISABLED_COMPONENTS;
             }
