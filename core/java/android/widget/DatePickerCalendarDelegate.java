@@ -115,10 +115,10 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate {
         mDelegator.addView(mContainer);
 
         // Set up header views.
-        final ViewGroup header = (ViewGroup) mContainer.findViewById(R.id.date_picker_header);
-        mHeaderYear = (TextView) header.findViewById(R.id.date_picker_header_year);
+        final ViewGroup header = mContainer.findViewById(R.id.date_picker_header);
+        mHeaderYear = header.findViewById(R.id.date_picker_header_year);
         mHeaderYear.setOnClickListener(mOnHeaderClickListener);
-        mHeaderMonthDay = (TextView) header.findViewById(R.id.date_picker_header_date);
+        mHeaderMonthDay = header.findViewById(R.id.date_picker_header_date);
         mHeaderMonthDay.setOnClickListener(mOnHeaderClickListener);
 
         // For the sake of backwards compatibility, attempt to extract the text
@@ -154,10 +154,10 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate {
         a.recycle();
 
         // Set up picker container.
-        mAnimator = (ViewAnimator) mContainer.findViewById(R.id.animator);
+        mAnimator = mContainer.findViewById(R.id.animator);
 
         // Set up day picker view.
-        mDayPickerView = (DayPickerView) mAnimator.findViewById(R.id.date_picker_day_picker);
+        mDayPickerView = mAnimator.findViewById(R.id.date_picker_day_picker);
         mDayPickerView.setFirstDayOfWeek(mFirstDayOfWeek);
         mDayPickerView.setMinDate(mMinDate.getTimeInMillis());
         mDayPickerView.setMaxDate(mMaxDate.getTimeInMillis());
@@ -165,7 +165,7 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate {
         mDayPickerView.setOnDaySelectedListener(mOnDaySelectedListener);
 
         // Set up year picker view.
-        mYearPickerView = (YearPickerView) mAnimator.findViewById(R.id.date_picker_year_picker);
+        mYearPickerView = mAnimator.findViewById(R.id.date_picker_year_picker);
         mYearPickerView.setRange(mMinDate, mMaxDate);
         mYearPickerView.setYear(mCurrentDate.get(Calendar.YEAR));
         mYearPickerView.setOnYearSelectedListener(mOnYearSelectedListener);

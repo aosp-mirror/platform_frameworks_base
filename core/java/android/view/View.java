@@ -20260,9 +20260,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return the view of the specified id, null if cannot be found
      * @hide
      */
-    protected View findViewTraversal(@IdRes int id) {
+    protected <T extends View> T findViewTraversal(@IdRes int id) {
         if (id == mID) {
-            return this;
+            return (T) this;
         }
         return null;
     }
@@ -20272,9 +20272,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return the view of specified tag, null if cannot be found
      * @hide
      */
-    protected View findViewWithTagTraversal(Object tag) {
+    protected <T extends View> T findViewWithTagTraversal(Object tag) {
         if (tag != null && tag.equals(mTag)) {
-            return this;
+            return (T) this;
         }
         return null;
     }
@@ -20285,9 +20285,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return The first view that matches the predicate or null.
      * @hide
      */
-    protected View findViewByPredicateTraversal(Predicate<View> predicate, View childToSkip) {
+    protected <T extends View> T findViewByPredicateTraversal(Predicate<View> predicate,
+            View childToSkip) {
         if (predicate.test(this)) {
-            return this;
+            return (T) this;
         }
         return null;
     }
@@ -20300,7 +20301,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return The view that has the given id in the hierarchy or null
      */
     @Nullable
-    public final View findViewById(@IdRes int id) {
+    public final <T extends View> T findViewById(@IdRes int id) {
         if (id < 0) {
             return null;
         }
@@ -20313,11 +20314,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param accessibilityId The searched accessibility id.
      * @return The found view.
      */
-    final View findViewByAccessibilityId(int accessibilityId) {
+    final <T extends View> T  findViewByAccessibilityId(int accessibilityId) {
         if (accessibilityId < 0) {
             return null;
         }
-        View view = findViewByAccessibilityIdTraversal(accessibilityId);
+        T view = findViewByAccessibilityIdTraversal(accessibilityId);
         if (view != null) {
             return view.includeForAccessibility() ? view : null;
         }
@@ -20336,12 +20337,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @param accessibilityId The accessibility id.
      * @return The found view.
-     *
      * @hide
      */
-    public View findViewByAccessibilityIdTraversal(int accessibilityId) {
+    public <T extends View> T findViewByAccessibilityIdTraversal(int accessibilityId) {
         if (getAccessibilityViewId() == accessibilityId) {
-            return this;
+            return (T) this;
         }
         return null;
     }
@@ -20353,7 +20353,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param tag The tag to search for, using "tag.equals(getTag())".
      * @return The View that has the given tag in the hierarchy or null
      */
-    public final View findViewWithTag(Object tag) {
+    public final <T extends View> T findViewWithTag(Object tag) {
         if (tag == null) {
             return null;
         }
@@ -20368,7 +20368,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return The first view that matches the predicate or null.
      * @hide
      */
-    public final View findViewByPredicate(Predicate<View> predicate) {
+    public final <T extends View> T findViewByPredicate(Predicate<View> predicate) {
         return findViewByPredicateTraversal(predicate, null);
     }
 
@@ -20388,10 +20388,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return The first view that matches the predicate or null.
      * @hide
      */
-    public final View findViewByPredicateInsideOut(View start, Predicate<View> predicate) {
+    public final <T extends View> T findViewByPredicateInsideOut(
+            View start, Predicate<View> predicate) {
         View childToSkip = null;
         for (;;) {
-            View view = start.findViewByPredicateTraversal(predicate, childToSkip);
+            T view = start.findViewByPredicateTraversal(predicate, childToSkip);
             if (view != null || start == this) {
                 return view;
             }

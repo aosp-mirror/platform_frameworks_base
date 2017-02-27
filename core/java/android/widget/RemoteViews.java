@@ -1578,7 +1578,7 @@ public class RemoteViews implements Parcelable, Filter {
         @Override
         public void apply(View root, ViewGroup rootParent, OnClickHandler handler) {
             final Context context = root.getContext();
-            final ViewGroup target = (ViewGroup) root.findViewById(viewId);
+            final ViewGroup target = root.findViewById(viewId);
             if (target == null) return;
             if (nestedViews != null) {
                 // Inflate nested views and add as children
@@ -1757,7 +1757,7 @@ public class RemoteViews implements Parcelable, Filter {
 
         @Override
         public void apply(View root, ViewGroup rootParent, OnClickHandler handler) {
-            final TextView target = (TextView) root.findViewById(viewId);
+            final TextView target = root.findViewById(viewId);
             if (target == null) return;
             if (drawablesLoaded) {
                 if (isRelative) {
@@ -1857,7 +1857,7 @@ public class RemoteViews implements Parcelable, Filter {
 
         @Override
         public void apply(View root, ViewGroup rootParent, OnClickHandler handler) {
-            final TextView target = (TextView) root.findViewById(viewId);
+            final TextView target = root.findViewById(viewId);
             if (target == null) return;
             target.setTextSize(units, size);
         }
@@ -2045,7 +2045,7 @@ public class RemoteViews implements Parcelable, Filter {
 
         @Override
         public void apply(View root, ViewGroup rootParent, OnClickHandler handler) {
-            final TextView target = (TextView) root.findViewById(viewId);
+            final TextView target = root.findViewById(viewId);
             if (target == null) return;
             Drawable[] drawables = isRelative
                     ? target.getCompoundDrawablesRelative()
