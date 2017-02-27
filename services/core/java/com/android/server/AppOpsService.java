@@ -167,14 +167,10 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
     }
 
-    final SparseArray<ArrayList<Callback>> mOpModeWatchers
-            = new SparseArray<ArrayList<Callback>>();
-    final ArrayMap<String, ArrayList<Callback>> mPackageModeWatchers
-            = new ArrayMap<String, ArrayList<Callback>>();
-    final ArrayMap<IBinder, Callback> mModeWatchers
-            = new ArrayMap<IBinder, Callback>();
-    final SparseArray<SparseArray<Restriction>> mAudioRestrictions
-            = new SparseArray<SparseArray<Restriction>>();
+    final SparseArray<ArraySet<Callback>> mOpModeWatchers = new SparseArray<>();
+    final ArrayMap<String, ArraySet<Callback>> mPackageModeWatchers = new ArrayMap<>();
+    final ArrayMap<IBinder, Callback> mModeWatchers = new ArrayMap<>();
+    final SparseArray<SparseArray<Restriction>> mAudioRestrictions = new SparseArray<>();
 
     public final class Callback implements DeathRecipient {
         final IAppOpsCallback mCallback;
@@ -545,11 +541,11 @@ public class AppOpsService extends IAppOpsService.Stub {
         ArrayMap<Callback, ArraySet<String>> callbackSpecs = null;
 
         synchronized (this) {
-            ArrayList<Callback> callbacks = mOpModeWatchers.get(code);
+            ArraySet<Callback> callbacks = mOpModeWatchers.get(code);
             if (callbacks != null) {
                 final int callbackCount = callbacks.size();
                 for (int i = 0; i < callbackCount; i++) {
-                    Callback callback = callbacks.get(i);
+                    Callback callback = callbacks.valueAt(i);
                     ArraySet<String> changedPackages = new ArraySet<>();
                     Collections.addAll(changedPackages, uidPackageNames);
                     callbackSpecs = new ArrayMap<>();
@@ -565,7 +561,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                     }
                     final int callbackCount = callbacks.size();
                     for (int i = 0; i < callbackCount; i++) {
-                        Callback callback = callbacks.get(i);
+                        Callback callback = callbacks.valueAt(i);
                         ArraySet<String> changedPackages = callbackSpecs.get(callback);
                         if (changedPackages == null) {
                             changedPackages = new ArraySet<>();
@@ -623,17 +619,17 @@ public class AppOpsService extends IAppOpsService.Stub {
             if (op != null) {
                 if (op.mode != mode) {
                     op.mode = mode;
-                    ArrayList<Callback> cbs = mOpModeWatchers.get(code);
+                    ArraySet<Callback> cbs = mOpModeWatchers.get(code);
                     if (cbs != null) {
                         if (repCbs == null) {
-                            repCbs = new ArrayList<Callback>();
+                            repCbs = new ArrayList<>();
                         }
                         repCbs.addAll(cbs);
                     }
                     cbs = mPackageModeWatchers.get(packageName);
                     if (cbs != null) {
                         if (repCbs == null) {
-                            repCbs = new ArrayList<Callback>();
+                            repCbs = new ArrayList<>();
                         }
                         repCbs.addAll(cbs);
                     }
@@ -666,7 +662,7 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     private static HashMap<Callback, ArrayList<ChangeRec>> addCallbacks(
             HashMap<Callback, ArrayList<ChangeRec>> callbacks,
-            int op, int uid, String packageName, ArrayList<Callback> cbs) {
+            int op, int uid, String packageName, ArraySet<Callback> cbs) {
         if (cbs == null) {
             return callbacks;
         }
@@ -674,8 +670,9 @@ public class AppOpsService extends IAppOpsService.Stub {
             callbacks = new HashMap<>();
         }
         boolean duplicate = false;
-        for (int i=0; i<cbs.size(); i++) {
-            Callback cb = cbs.get(i);
+        final int N = cbs.size();
+        for (int i=0; i<N; i++) {
+            Callback cb = cbs.valueAt(i);
             ArrayList<ChangeRec> reports = callbacks.get(cb);
             if (reports == null) {
                 reports = new ArrayList<>();
@@ -830,17 +827,17 @@ public class AppOpsService extends IAppOpsService.Stub {
                 mModeWatchers.put(callback.asBinder(), cb);
             }
             if (op != AppOpsManager.OP_NONE) {
-                ArrayList<Callback> cbs = mOpModeWatchers.get(op);
+                ArraySet<Callback> cbs = mOpModeWatchers.get(op);
                 if (cbs == null) {
-                    cbs = new ArrayList<Callback>();
+                    cbs = new ArraySet<>();
                     mOpModeWatchers.put(op, cbs);
                 }
                 cbs.add(cb);
             }
             if (packageName != null) {
-                ArrayList<Callback> cbs = mPackageModeWatchers.get(packageName);
+                ArraySet<Callback> cbs = mPackageModeWatchers.get(packageName);
                 if (cbs == null) {
-                    cbs = new ArrayList<Callback>();
+                    cbs = new ArraySet<>();
                     mPackageModeWatchers.put(packageName, cbs);
                 }
                 cbs.add(cb);
@@ -858,14 +855,14 @@ public class AppOpsService extends IAppOpsService.Stub {
             if (cb != null) {
                 cb.unlinkToDeath();
                 for (int i=mOpModeWatchers.size()-1; i>=0; i--) {
-                    ArrayList<Callback> cbs = mOpModeWatchers.valueAt(i);
+                    ArraySet<Callback> cbs = mOpModeWatchers.valueAt(i);
                     cbs.remove(cb);
                     if (cbs.size() <= 0) {
                         mOpModeWatchers.removeAt(i);
                     }
                 }
                 for (int i=mPackageModeWatchers.size()-1; i>=0; i--) {
-                    ArrayList<Callback> cbs = mPackageModeWatchers.valueAt(i);
+                    ArraySet<Callback> cbs = mPackageModeWatchers.valueAt(i);
                     cbs.remove(cb);
                     if (cbs.size() <= 0) {
                         mPackageModeWatchers.removeAt(i);
@@ -2066,10 +2063,10 @@ public class AppOpsService extends IAppOpsService.Stub {
                 for (int i=0; i<mOpModeWatchers.size(); i++) {
                     pw.print("    Op "); pw.print(AppOpsManager.opToName(mOpModeWatchers.keyAt(i)));
                     pw.println(":");
-                    ArrayList<Callback> callbacks = mOpModeWatchers.valueAt(i);
+                    ArraySet<Callback> callbacks = mOpModeWatchers.valueAt(i);
                     for (int j=0; j<callbacks.size(); j++) {
                         pw.print("      #"); pw.print(j); pw.print(": ");
-                        pw.println(callbacks.get(j));
+                        pw.println(callbacks.valueAt(j));
                     }
                 }
             }
@@ -2079,10 +2076,10 @@ public class AppOpsService extends IAppOpsService.Stub {
                 for (int i=0; i<mPackageModeWatchers.size(); i++) {
                     pw.print("    Pkg "); pw.print(mPackageModeWatchers.keyAt(i));
                     pw.println(":");
-                    ArrayList<Callback> callbacks = mPackageModeWatchers.valueAt(i);
+                    ArraySet<Callback> callbacks = mPackageModeWatchers.valueAt(i);
                     for (int j=0; j<callbacks.size(); j++) {
                         pw.print("      #"); pw.print(j); pw.print(": ");
-                        pw.println(callbacks.get(j));
+                        pw.println(callbacks.valueAt(j));
                     }
                 }
             }
@@ -2310,23 +2307,23 @@ public class AppOpsService extends IAppOpsService.Stub {
     }
 
     private void notifyWatchersOfChange(int code) {
-        final ArrayList<Callback> clonedCallbacks;
+        final ArraySet<Callback> clonedCallbacks;
         synchronized (this) {
-            ArrayList<Callback> callbacks = mOpModeWatchers.get(code);
+            ArraySet<Callback> callbacks = mOpModeWatchers.get(code);
             if (callbacks == null) {
                 return;
             }
-            clonedCallbacks = new ArrayList<>(callbacks);
+            clonedCallbacks = new ArraySet<>(callbacks);
         }
 
         // There are components watching for mode changes such as window manager
         // and location manager which are in our process. The callbacks in these
-        // components may require permissions our remote caller does not have.s
+        // components may require permissions our remote caller does not have.
         final long identity = Binder.clearCallingIdentity();
         try {
             final int callbackCount = clonedCallbacks.size();
             for (int i = 0; i < callbackCount; i++) {
-                Callback callback = clonedCallbacks.get(i);
+                Callback callback = clonedCallbacks.valueAt(i);
                 try {
                     callback.mCallback.opChanged(code, -1, null);
                 } catch (RemoteException e) {
