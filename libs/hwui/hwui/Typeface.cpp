@@ -64,7 +64,6 @@ Typeface* Typeface::createFromTypeface(Typeface* src, SkTypeface::Style style) {
     Typeface* result = new Typeface;
     if (result != nullptr) {
         result->fFontCollection = resolvedFace->fFontCollection;
-        result->fFontCollection->Ref();
         result->fSkiaStyle = style;
         result->fBaseWeight = resolvedFace->fBaseWeight;
         resolveStyle(result);
@@ -83,7 +82,6 @@ Typeface* Typeface::createFromTypefaceWithVariation(Typeface* src,
             // None of passed axes are supported by this collection.
             // So we will reuse the same collection with incrementing reference count.
             result->fFontCollection = resolvedFace->fFontCollection;
-            result->fFontCollection->Ref();
         }
         result->fSkiaStyle = resolvedFace->fSkiaStyle;
         result->fBaseWeight = resolvedFace->fBaseWeight;
@@ -97,7 +95,6 @@ Typeface* Typeface::createWeightAlias(Typeface* src, int weight) {
     Typeface* result = new Typeface;
     if (result != nullptr) {
         result->fFontCollection = resolvedFace->fFontCollection;
-        result->fFontCollection->Ref();
         result->fSkiaStyle = resolvedFace->fSkiaStyle;
         result->fBaseWeight = weight;
         resolveStyle(result);
@@ -105,18 +102,19 @@ Typeface* Typeface::createWeightAlias(Typeface* src, int weight) {
     return result;
 }
 
-Typeface* Typeface::createFromFamilies(const std::vector<minikin::FontFamily*>& families) {
+Typeface* Typeface::createFromFamilies(
+        std::vector<std::shared_ptr<minikin::FontFamily>>&& families) {
     Typeface* result = new Typeface;
-    result->fFontCollection = new minikin::FontCollection(families);
+    result->fFontCollection.reset(new minikin::FontCollection(families));
     if (families.empty()) {
         ALOGW("createFromFamilies creating empty collection");
         result->fSkiaStyle = SkTypeface::kNormal;
     } else {
         const minikin::FontStyle defaultStyle;
-        minikin::FontFamily* firstFamily = reinterpret_cast<minikin::FontFamily*>(families[0]);
-        minikin::MinikinFont* mf = firstFamily->getClosestMatch(defaultStyle).font;
-        if (mf != NULL) {
-            SkTypeface* skTypeface = reinterpret_cast<MinikinFontSkia*>(mf)->GetSkTypeface();
+        const std::shared_ptr<minikin::FontFamily>& firstFamily = families[0];
+        const minikin::MinikinFont* mf = firstFamily->getClosestMatch(defaultStyle).font;
+        if (mf != nullptr) {
+            SkTypeface* skTypeface = reinterpret_cast<const MinikinFontSkia*>(mf)->GetSkTypeface();
             // TODO: probably better to query more precise style from family, will be important
             // when we open up API to access 100..900 weights
             result->fSkiaStyle = skTypeface->style();
@@ -127,11 +125,6 @@ Typeface* Typeface::createFromFamilies(const std::vector<minikin::FontFamily*>& 
     result->fBaseWeight = 400;
     resolveStyle(result);
     return result;
-}
-
-void Typeface::unref() {
-    fFontCollection->Unref();
-    delete this;
 }
 
 void Typeface::setDefault(Typeface* face) {
@@ -150,15 +143,12 @@ void Typeface::setRobotoTypefaceForTest() {
     sk_sp<SkTypeface> typeface = SkTypeface::MakeFromStream(fontData.release());
     LOG_ALWAYS_FATAL_IF(typeface == nullptr, "Failed to make typeface from %s", kRobotoFont);
 
-    minikin::MinikinFont* font = new MinikinFontSkia(std::move(typeface), data, st.st_size, 0,
-            std::vector<minikin::FontVariation>());
-    minikin::FontFamily* family = new minikin::FontFamily(
-                 std::vector<minikin::Font>({ minikin::Font(font, minikin::FontStyle()) }));
-    font->Unref();
-
-    std::vector<minikin::FontFamily*> typefaces = { family };
-    minikin::FontCollection *collection = new minikin::FontCollection(typefaces);
-    family->Unref();
+    std::shared_ptr<minikin::MinikinFont> font = std::make_shared<MinikinFontSkia>(
+            std::move(typeface), data, st.st_size, 0, std::vector<minikin::FontVariation>());
+    std::shared_ptr<minikin::FontFamily> family = std::make_shared<minikin::FontFamily>(
+            std::vector<minikin::Font>({ minikin::Font(std::move(font), minikin::FontStyle()) }));
+    std::shared_ptr<minikin::FontCollection> collection =
+            std::make_shared<minikin::FontCollection>(std::move(family));
 
     Typeface* hwTypeface = new Typeface();
     hwTypeface->fFontCollection = collection;

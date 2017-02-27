@@ -18,8 +18,18 @@
 #define _ANDROID_GRAPHICS_FONT_UTILS_H_
 
 #include <jni.h>
+#include <memory>
+
+namespace minikin {
+class FontFamily;
+}  // namespace minikin
 
 namespace android {
+
+struct FontFamilyWrapper {
+  FontFamilyWrapper(std::shared_ptr<minikin::FontFamily>&& family) : family(family) {}
+  std::shared_ptr<minikin::FontFamily> family;
+};
 
 // Utility wrapper for java.util.List
 class ListHelper {

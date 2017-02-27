@@ -23,11 +23,12 @@
 #include <cutils/compiler.h>
 #include <minikin/FontCollection.h>
 #include <vector>
+#include <memory>
 
 namespace android {
 
 struct ANDROID_API Typeface {
-  minikin::FontCollection *fFontCollection;
+    std::shared_ptr<minikin::FontCollection> fFontCollection;
 
     // style used for constructing and querying Typeface objects
     SkTypeface::Style fSkiaStyle;
@@ -36,8 +37,6 @@ struct ANDROID_API Typeface {
 
     // resolved style actually used for rendering
     minikin::FontStyle fStyle;
-
-    void unref();
 
     static Typeface* resolveDefault(Typeface* src);
 
@@ -48,7 +47,8 @@ struct ANDROID_API Typeface {
 
     static Typeface* createWeightAlias(Typeface* src, int baseweight);
 
-    static Typeface* createFromFamilies(const std::vector<minikin::FontFamily*>& families);
+    static Typeface* createFromFamilies(
+            std::vector<std::shared_ptr<minikin::FontFamily>>&& families);
 
     static void setDefault(Typeface* face);
 

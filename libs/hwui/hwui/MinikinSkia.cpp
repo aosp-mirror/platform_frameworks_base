@@ -91,7 +91,7 @@ const std::vector<minikin::FontVariation>& MinikinFontSkia::GetAxes() const {
     return mAxes;
 }
 
-minikin::MinikinFont* MinikinFontSkia::createFontWithVariation(
+std::shared_ptr<minikin::MinikinFont> MinikinFontSkia::createFontWithVariation(
         const std::vector<minikin::FontVariation>& variations) const {
     SkFontMgr::FontParameters params;
 
@@ -110,7 +110,8 @@ minikin::MinikinFont* MinikinFontSkia::createFontWithVariation(
     sk_sp<SkFontMgr> fm(SkFontMgr::RefDefault());
     sk_sp<SkTypeface> face(fm->createFromStream(stream, params));
 
-    return new MinikinFontSkia(std::move(face), mFontData, mFontSize, ttcIndex, variations);
+    return std::make_shared<MinikinFontSkia>(std::move(face), mFontData, mFontSize, ttcIndex,
+            variations);
 }
 
 uint32_t MinikinFontSkia::packPaintFlags(const SkPaint* paint) {
