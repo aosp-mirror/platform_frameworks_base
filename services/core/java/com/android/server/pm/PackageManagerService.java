@@ -5684,6 +5684,11 @@ public class PackageManagerService extends IPackageManager.Stub {
                 false, false, false, userId);
     }
 
+    /**
+     * Returns whether or not instant apps have been disabled remotely.
+     * <p><em>IMPORTANT</em> This should not be called with the package manager lock
+     * held. Otherwise we run the risk of deadlock.
+     */
     private boolean isEphemeralDisabled() {
         // ephemeral apps have been disabled across the board
         if (DISABLE_EPHEMERAL_APPS) {
@@ -5704,10 +5709,6 @@ public class PackageManagerService extends IPackageManager.Stub {
     private boolean isEphemeralAllowed(
             Intent intent, List<ResolveInfo> resolvedActivities, int userId,
             boolean skipPackageCheck) {
-        // Short circuit and return early if possible.
-        if (isEphemeralDisabled()) {
-            return false;
-        }
         final int callingUser = UserHandle.getCallingUserId();
         if (callingUser != UserHandle.USER_SYSTEM) {
             return false;
@@ -6211,6 +6212,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         boolean addEphemeral = false;
         List<ResolveInfo> result;
         final String pkgName = intent.getPackage();
+        final boolean ephemeralDisabled = isEphemeralDisabled();
         synchronized (mPackages) {
             if (pkgName == null) {
                 List<CrossProfileIntentFilter> matchingFilters =
@@ -6228,8 +6230,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                 // Check for results in the current profile.
                 result = filterIfNotSystemUser(mActivities.queryIntent(
                         intent, resolvedType, flags, userId), userId);
-                addEphemeral =
-                        isEphemeralAllowed(intent, result, userId, false /*skipPackageCheck*/);
+                addEphemeral = !ephemeralDisabled
+                        && isEphemeralAllowed(intent, result, userId, false /*skipPackageCheck*/);
 
                 // Check for cross profile results.
                 boolean hasNonNegativePriorityResult = hasNonNegativePriority(result);
@@ -6286,8 +6288,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                 } else {
                     // the caller wants to resolve for a particular package; however, there
                     // were no installed results, so, try to find an ephemeral result
-                    addEphemeral = isEphemeralAllowed(
-                            intent, null /*result*/, userId, true /*skipPackageCheck*/);
+                    addEphemeral =  !ephemeralDisabled
+                            && isEphemeralAllowed(
+                                    intent, null /*result*/, userId, true /*skipPackageCheck*/);
                     result = new ArrayList<ResolveInfo>();
                 }
             }
