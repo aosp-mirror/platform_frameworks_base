@@ -36,6 +36,7 @@ import android.database.IContentObserver;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.DeadObjectException;
@@ -500,7 +501,12 @@ public abstract class ContentResolver {
     public ContentResolver(Context context) {
         mContext = context != null ? context : ActivityThread.currentApplication();
         mPackageName = mContext.getOpPackageName();
-        mTargetSdkVersion = mContext.getApplicationInfo().targetSdkVersion;
+        if (android.os.Process.myUid() == android.os.Process.PHONE_UID) {
+            // STOPSHIP: Telephony needs to fix b/35792675
+            mTargetSdkVersion = Build.VERSION_CODES.N_MR1;
+        } else {
+            mTargetSdkVersion = mContext.getApplicationInfo().targetSdkVersion;
+        }
     }
 
     /** @hide */
