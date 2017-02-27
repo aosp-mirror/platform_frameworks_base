@@ -118,6 +118,7 @@ import android.os.health.SystemHealthManager;
 import android.os.storage.StorageManager;
 import android.print.IPrintManager;
 import android.print.PrintManager;
+import android.telephony.euicc.EuiccManager;
 import android.view.autofill.AutofillManager;
 import android.view.autofill.IAutoFillManager;
 import android.service.persistentdata.IPersistentDataBlockService;
@@ -491,6 +492,13 @@ final class SystemServiceRegistry {
             @Override
             public TelecomManager createService(ContextImpl ctx) {
                 return new TelecomManager(ctx.getOuterContext());
+            }});
+
+        registerService(Context.EUICC_SERVICE, EuiccManager.class,
+                new CachedServiceFetcher<EuiccManager>() {
+            @Override
+            public EuiccManager createService(ContextImpl ctx) {
+                return new EuiccManager(ctx.getOuterContext());
             }});
 
         registerService(Context.UI_MODE_SERVICE, UiModeManager.class,
