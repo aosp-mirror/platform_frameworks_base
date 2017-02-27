@@ -203,16 +203,28 @@ public class QSDetailItems extends FrameLayout {
                     }
                 }
             });
-            final ImageView disconnect = (ImageView) view.findViewById(android.R.id.icon2);
-            disconnect.setVisibility(item.canDisconnect ? VISIBLE : GONE);
-            disconnect.setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (mCallback != null) {
-                        mCallback.onDetailItemDisconnect(item);
+
+            final ImageView icon2 = (ImageView) view.findViewById(android.R.id.icon2);
+            if (item.canDisconnect) {
+                icon2.setImageResource(R.drawable.ic_qs_cancel);
+                icon2.setVisibility(VISIBLE);
+                icon2.setClickable(true);
+                icon2.setOnClickListener(new OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (mCallback != null) {
+                            mCallback.onDetailItemDisconnect(item);
+                        }
                     }
-                }
-            });
+                });
+            } else if (item.icon2 != -1) {
+                icon2.setVisibility(VISIBLE);
+                icon2.setImageResource(item.icon2);
+                icon2.setClickable(false);
+            } else {
+                icon2.setVisibility(GONE);
+            }
+
             return view;
         }
     };
@@ -245,6 +257,7 @@ public class QSDetailItems extends FrameLayout {
         public CharSequence line2;
         public Object tag;
         public boolean canDisconnect;
+        public int icon2 = -1;
     }
 
     public interface Callback {
