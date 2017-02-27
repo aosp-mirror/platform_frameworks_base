@@ -4851,19 +4851,15 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     private void sendPrivateKeyAliasResponse(final String alias, final IBinder responseBinder) {
         final IKeyChainAliasCallback keyChainAliasResponse =
                 IKeyChainAliasCallback.Stub.asInterface(responseBinder);
-        new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(Void... unused) {
-                try {
-                    keyChainAliasResponse.alias(alias);
-                } catch (Exception e) {
-                    // Catch everything (not just RemoteException): caller could throw a
-                    // RuntimeException back across processes.
-                    Log.e(LOG_TAG, "error while responding to callback", e);
-                }
-                return null;
-            }
-        }.execute();
+        // Send the response. It's OK to do this from the main thread because IKeyChainAliasCallback
+        // is oneway, which means it won't block if the recipient lives in another process.
+        try {
+            keyChainAliasResponse.alias(alias);
+        } catch (Exception e) {
+            // Caller could throw RuntimeException or RemoteException back across processes. Catch
+            // everything just to be sure.
+            Log.e(LOG_TAG, "error while responding to callback", e);
+        }
     }
 
     /**
