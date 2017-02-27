@@ -5172,7 +5172,7 @@ public class WindowManagerService extends IWindowManager.Stub
     // Async Handler
     // -------------------------------------------------------------
 
-    final class H extends Handler {
+    final class H extends android.os.Handler {
         public static final int REPORT_FOCUS_CHANGE = 2;
         public static final int REPORT_LOSING_FOCUS = 3;
         public static final int DO_TRAVERSAL = 4;
