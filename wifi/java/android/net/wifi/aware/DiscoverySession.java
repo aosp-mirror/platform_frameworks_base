@@ -31,8 +31,7 @@ import java.lang.ref.WeakReference;
  * {@link PublishDiscoverySession} and {@link SubscribeDiscoverySession}. This
  * class provides functionality common to both publish and subscribe discovery sessions:
  * <ul>
- *     <li>Sending messages: {@link #sendMessage(PeerHandle, int, byte[])} or
- *     {@link #sendMessage(PeerHandle, int, byte[], int)} methods.
+ *     <li>Sending messages: {@link #sendMessage(PeerHandle, int, byte[])}.
  *     <li>Creating a network-specifier when requesting a Aware connection:
  *     {@link #createNetworkSpecifier(PeerHandle, byte[])}.
  * </ul>
@@ -62,6 +61,8 @@ public class DiscoverySession {
      * {@link #sendMessage(PeerHandle, int, byte[], int)}.
      *
      * @return Maximum retry count when sending messages.
+     *
+     * @hide
      */
     public static int getMaxSendRetryCount() {
         return MAX_SEND_RETRY_COUNT;
@@ -163,6 +164,8 @@ public class DiscoverySession {
      *            or MAC level) retries should be attempted if there is no ACK from the receiver
      *            (note: no retransmissions are attempted in other failure cases). A value of 0
      *            indicates no retries. Max permitted value is {@link #getMaxSendRetryCount()}.
+     *
+     * @hide
      */
     public void sendMessage(@NonNull PeerHandle peerHandle, int messageId,
             @Nullable byte[] message, int retryCount) {
@@ -195,8 +198,6 @@ public class DiscoverySession {
      * The peer will get a callback indicating a message was received using
      * {@link DiscoverySessionCallback#onMessageReceived(PeerHandle,
      * byte[])}.
-     * Equivalent to {@link #sendMessage(PeerHandle, int, byte[], int)}
-     * with a {@code retryCount} of 0.
      *
      * @param peerHandle The peer's handle for the message. Must be a result of an
      * {@link DiscoverySessionCallback#onServiceDiscovered(PeerHandle,
