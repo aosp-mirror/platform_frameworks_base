@@ -44,6 +44,7 @@ import android.view.Display;
 import com.android.systemui.SysUIRunner;
 import com.android.systemui.UiThreadTest;
 import com.android.internal.hardware.AmbientDisplayConfiguration;
+import com.android.systemui.util.wakelock.WakeLockFake;
 
 import org.junit.Before;
 import org.junit.Test;

@@ -36,6 +36,7 @@ import com.android.internal.hardware.AmbientDisplayConfiguration;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.systemui.statusbar.phone.DozeParameters;
+import com.android.systemui.util.wakelock.WakeLock;
 
 import java.io.PrintWriter;
 import java.util.List;
@@ -53,14 +54,14 @@ public class DozeSensors {
     private final TriggerSensor mPickupSensor;
     private final DozeParameters mDozeParameters;
     private final AmbientDisplayConfiguration mConfig;
-    private final DozeFactory.WakeLock mWakeLock;
+    private final WakeLock mWakeLock;
     private final Callback mCallback;
 
     private final Handler mHandler = new Handler();
 
 
     public DozeSensors(Context context, SensorManager sensorManager, DozeParameters dozeParameters,
-            AmbientDisplayConfiguration config, DozeFactory.WakeLock wakeLock, Callback callback) {
+            AmbientDisplayConfiguration config, WakeLock wakeLock, Callback callback) {
         mContext = context;
         mSensorManager = sensorManager;
         mDozeParameters = dozeParameters;

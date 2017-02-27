@@ -24,6 +24,7 @@ import android.view.Display;
 import com.android.internal.hardware.AmbientDisplayConfiguration;
 import com.android.internal.util.Preconditions;
 import com.android.systemui.util.Assert;
+import com.android.systemui.util.wakelock.WakeLock;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -95,7 +96,7 @@ public class DozeMachine {
     }
 
     private final Service mDozeService;
-    private final DozeFactory.WakeLock mWakeLock;
+    private final WakeLock mWakeLock;
     private final AmbientDisplayConfiguration mConfig;
     private Part[] mParts;
 
@@ -104,7 +105,7 @@ public class DozeMachine {
     private boolean mWakeLockHeldForCurrentState = false;
 
     public DozeMachine(Service service, AmbientDisplayConfiguration config,
-            DozeFactory.WakeLock wakeLock) {
+            WakeLock wakeLock) {
         mDozeService = service;
         mConfig = config;
         mWakeLock = wakeLock;

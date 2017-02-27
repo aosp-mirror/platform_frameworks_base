@@ -29,6 +29,7 @@ import android.os.BatteryManager;
 import android.os.BatteryStats;
 import android.os.Handler;
 import android.os.Message;
+import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
@@ -39,6 +40,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IBatteryStats;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
@@ -49,6 +51,8 @@ import com.android.systemui.statusbar.phone.KeyguardIndicationTextView;
 import com.android.systemui.statusbar.phone.LockIcon;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.policy.UserInfoController;
+import com.android.systemui.util.wakelock.SettableWakeLock;
+import com.android.systemui.util.wakelock.WakeLock;
 
 /**
  * Controls the indications and error messages shown on the Keyguard
@@ -68,6 +72,7 @@ public class KeyguardIndicationController {
     private final KeyguardIndicationTextView mDisclosure;
     private final UserManager mUserManager;
     private final IBatteryStats mBatteryInfo;
+    private final SettableWakeLock mWakeLock;
 
     private final int mSlowThreshold;
     private final int mFastThreshold;
@@ -92,6 +97,13 @@ public class KeyguardIndicationController {
 
     public KeyguardIndicationController(Context context, ViewGroup indicationArea,
             LockIcon lockIcon) {
+        this(context, indicationArea, lockIcon,
+                WakeLock.createPartial(context, "Doze:KeyguardIndication"));
+    }
+
+    @VisibleForTesting
+    KeyguardIndicationController(Context context, ViewGroup indicationArea, LockIcon lockIcon,
+                WakeLock wakeLock) {
         mContext = context;
         mIndicationArea = indicationArea;
         mTextView = (KeyguardIndicationTextView) indicationArea.findViewById(
@@ -99,6 +111,7 @@ public class KeyguardIndicationController {
         mDisclosure = (KeyguardIndicationTextView) indicationArea.findViewById(
                 R.id.keyguard_indication_enterprise_disclosure);
         mLockIcon = lockIcon;
+        mWakeLock = new SettableWakeLock(wakeLock);
 
         Resources res = context.getResources();
         mSlowThreshold = res.getInteger(R.integer.config_chargingSlowlyThreshold);
@@ -208,6 +221,11 @@ public class KeyguardIndicationController {
         mTransientIndication = transientIndication;
         mTransientTextColor = textColor;
         mHandler.removeMessages(MSG_HIDE_TRANSIENT);
+        if (mDozing && !TextUtils.isEmpty(mTransientIndication)) {
+            // Make sure this doesn't get stuck and burns in. Acquire wakelock until its cleared.
+            mWakeLock.setAcquired(true);
+            hideTransientIndicationDelayed(BaseKeyguardCallback.HIDE_DELAY_MS);
+        }
         updateIndication();
     }
 
@@ -223,6 +241,10 @@ public class KeyguardIndicationController {
     }
 
     private void updateIndication() {
+        if (TextUtils.isEmpty(mTransientIndication)) {
+            mWakeLock.setAcquired(false);
+        }
+
         if (mVisible) {
             // Walk down a precedence-ordered list of what should indication
             // should be shown based on user or device state
@@ -323,9 +345,8 @@ public class KeyguardIndicationController {
     private final Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
-            if (msg.what == MSG_HIDE_TRANSIENT && mTransientIndication != null) {
-                mTransientIndication = null;
-                updateIndication();
+            if (msg.what == MSG_HIDE_TRANSIENT) {
+                hideTransientIndication();
             } else if (msg.what == MSG_CLEAR_FP_MSG) {
                 mLockIcon.setTransientFpError(false);
                 hideTransientIndication();
@@ -353,9 +374,13 @@ public class KeyguardIndicationController {
             mChargingWattage = status.maxChargingWattage;
             mChargingSpeed = status.getChargingSpeed(mSlowThreshold, mFastThreshold);
             updateIndication();
-            if (!wasPluggedIn && mPowerPluggedIn && mDozing) {
-                showTransientIndication(computePowerIndication());
-                hideTransientIndicationDelayed(HIDE_DELAY_MS);
+            if (mDozing) {
+                if (!wasPluggedIn && mPowerPluggedIn) {
+                    showTransientIndication(computePowerIndication());
+                    hideTransientIndicationDelayed(HIDE_DELAY_MS);
+                } else if (wasPluggedIn && !mPowerPluggedIn) {
+                    hideTransientIndication();
+                }
             }
         }
 
@@ -407,7 +432,6 @@ public class KeyguardIndicationController {
             } else if (updateMonitor.isDeviceInteractive()) {
                 showTransientIndication(errString, errorColor);
                 // We want to keep this message around in case the screen was off
-                mHandler.removeMessages(MSG_HIDE_TRANSIENT);
                 hideTransientIndicationDelayed(HIDE_DELAY_MS);
             } else {
                 mMessageToShowOnScreenOn = errString;
@@ -421,7 +445,6 @@ public class KeyguardIndicationController {
                 int errorColor = Utils.getColorError(mContext);
                 showTransientIndication(mMessageToShowOnScreenOn, errorColor);
                 // We want to keep this message around in case the screen was off
-                mHandler.removeMessages(MSG_HIDE_TRANSIENT);
                 hideTransientIndicationDelayed(HIDE_DELAY_MS);
                 mMessageToShowOnScreenOn = null;
             }
