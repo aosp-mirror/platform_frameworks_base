@@ -89,15 +89,15 @@ public class AccessPoint implements Comparable<AccessPoint> {
             new ConcurrentHashMap<String, ScanResult>(32);
     private static final long MAX_SCAN_RESULT_AGE_MS = 15000;
 
-    private static final String KEY_NETWORKINFO = "key_networkinfo";
-    private static final String KEY_WIFIINFO = "key_wifiinfo";
-    private static final String KEY_SCANRESULT = "key_scanresult";
-    private static final String KEY_SSID = "key_ssid";
-    private static final String KEY_SECURITY = "key_security";
-    private static final String KEY_PSKTYPE = "key_psktype";
-    private static final String KEY_SCANRESULTCACHE = "key_scanresultcache";
-    private static final String KEY_CONFIG = "key_config";
-    private static final AtomicInteger sLastId = new AtomicInteger(0);
+    static final String KEY_NETWORKINFO = "key_networkinfo";
+    static final String KEY_WIFIINFO = "key_wifiinfo";
+    static final String KEY_SCANRESULT = "key_scanresult";
+    static final String KEY_SSID = "key_ssid";
+    static final String KEY_SECURITY = "key_security";
+    static final String KEY_PSKTYPE = "key_psktype";
+    static final String KEY_SCANRESULTCACHE = "key_scanresultcache";
+    static final String KEY_CONFIG = "key_config";
+    static final AtomicInteger sLastId = new AtomicInteger(0);
 
     /**
      * These values are matched in string arrays -- changes must be kept in sync
@@ -114,6 +114,8 @@ public class AccessPoint implements Comparable<AccessPoint> {
 
     public static final int SIGNAL_LEVELS = 4;
 
+    static final int UNREACHABLE_RSSI = Integer.MAX_VALUE;
+
     private final Context mContext;
 
     private String ssid;
@@ -125,7 +127,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
 
     private WifiConfiguration mConfig;
 
-    private int mRssi = Integer.MAX_VALUE;
+    private int mRssi = UNREACHABLE_RSSI;
     private long mSeen = 0;
 
     private WifiInfo mInfo;
@@ -214,6 +216,21 @@ public class AccessPoint implements Comparable<AccessPoint> {
         this.mRankingScore = that.mRankingScore;
     }
 
+    /**
+    * Returns a negative integer, zero, or a positive integer if this AccessPoint is less than,
+    * equal to, or greater than the other AccessPoint.
+    *
+    * Sort order rules for AccessPoints:
+    *   1. Active before inactive
+    *   2. Reachable before unreachable
+    *   3. Saved before unsaved
+    *   4. (Internal only) Network ranking score
+    *   5. Stronger signal before weaker signal
+    *   6. SSID alphabetically
+    *
+    * Note that AccessPoints with a signal are usually also Reachable,
+    * and will thus appear before unreachable saved AccessPoints.
+    */
     @Override
     public int compareTo(@NonNull AccessPoint other) {
         // Active one goes first.
@@ -221,18 +238,16 @@ public class AccessPoint implements Comparable<AccessPoint> {
         if (!isActive() && other.isActive()) return 1;
 
         // Reachable one goes before unreachable one.
-        if (mRssi != Integer.MAX_VALUE && other.mRssi == Integer.MAX_VALUE) return -1;
-        if (mRssi == Integer.MAX_VALUE && other.mRssi != Integer.MAX_VALUE) return 1;
+        if (isReachable() && !other.isReachable()) return -1;
+        if (!isReachable() && other.isReachable()) return 1;
 
         // Configured (saved) one goes before unconfigured one.
-        if (networkId != WifiConfiguration.INVALID_NETWORK_ID
-                && other.networkId == WifiConfiguration.INVALID_NETWORK_ID) return -1;
-        if (networkId == WifiConfiguration.INVALID_NETWORK_ID
-                && other.networkId != WifiConfiguration.INVALID_NETWORK_ID) return 1;
+        if (isSaved() && !other.isSaved()) return -1;
+        if (!isSaved() && other.isSaved()) return 1;
 
         // Higher scores go before lower scores
-        if (mRankingScore != other.mRankingScore) {
-            return (mRankingScore > other.mRankingScore) ? -1 : 1;
+        if (getRankingScore() != other.getRankingScore()) {
+            return (getRankingScore() > other.getRankingScore()) ? -1 : 1;
         }
 
         // Sort by signal strength, bucketed by level
@@ -242,7 +257,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
             return difference;
         }
         // Sort by ssid.
-        return ssid.compareToIgnoreCase(other.ssid);
+        return getSsidStr().compareToIgnoreCase(other.getSsidStr());
     }
 
     @Override
@@ -355,7 +370,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
     }
 
     public int getLevel() {
-        if (mRssi == Integer.MAX_VALUE) {
+        if (!isReachable()) {
             return -1;
         }
         return WifiManager.calculateSignalLevel(mRssi, SIGNAL_LEVELS);
@@ -531,7 +546,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
             }
         } else if (config != null && config.getNetworkSelectionStatus().isNotRecommended()) {
             summary.append(mContext.getString(R.string.wifi_disabled_by_recommendation_provider));
-        } else if (mRssi == Integer.MAX_VALUE) { // Wifi out of range
+        } else if (!isReachable()) { // Wifi out of range
             summary.append(mContext.getString(R.string.wifi_not_in_range));
         } else { // In range, not disabled.
             if (config != null) { // Is saved network
@@ -872,6 +887,11 @@ public class AccessPoint implements Comparable<AccessPoint> {
 
     int getBadge() {
         return mBadge;
+    }
+
+    /** Return true if the current RSSI is reachable, and false otherwise. */
+    boolean isReachable() {
+        return mRssi != UNREACHABLE_RSSI;
     }
 
     public static String getSummary(Context context, String ssid, DetailedState state,
