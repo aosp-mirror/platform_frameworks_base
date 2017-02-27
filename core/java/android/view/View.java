@@ -11730,7 +11730,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 && isOnScrollbar(event.getX(), event.getY())) {
             awakenScrollBars();
         }
-        if (isHoverable()) {
+
+        // If we consider ourself hoverable, or if we we're already hovered,
+        // handle changing state in response to ENTER and EXIT events.
+        if (isHoverable() || isHovered()) {
             switch (action) {
                 case MotionEvent.ACTION_HOVER_ENTER:
                     setHovered(true);
