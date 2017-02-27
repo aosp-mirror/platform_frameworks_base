@@ -266,7 +266,7 @@ import java.util.Locale;
  * @attr ref android.R.styleable#TextView_fontFeatureSettings
  * @attr ref android.R.styleable#TextView_breakStrategy
  * @attr ref android.R.styleable#TextView_hyphenationFrequency
- * @attr ref android.R.styleable#TextView_autoSizeText
+ * @attr ref android.R.styleable#TextView_autoSizeTextType
  * @attr ref android.R.styleable#TextView_autoSizeMinTextSize
  * @attr ref android.R.styleable#TextView_autoSizeMaxTextSize
  * @attr ref android.R.styleable#TextView_autoSizeStepGranularity
@@ -691,18 +691,24 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     private int mDeviceProvisionedState = DEVICE_PROVISIONED_UNKNOWN;
 
-    // The TextView does not auto-size text (default).
+    /**
+     * The TextView does not auto-size text (default).
+     */
     public static final int AUTO_SIZE_TEXT_TYPE_NONE = 0;
-    // The TextView performs uniform horizontal and vertical text size scaling to fit within the
-    // container.
+
+    /**
+     * The TextView scales text size both horizontally and vertically to fit within the
+     * container.
+     */
     public static final int AUTO_SIZE_TEXT_TYPE_UNIFORM = 1;
+
     /** @hide */
     @IntDef({AUTO_SIZE_TEXT_TYPE_NONE, AUTO_SIZE_TEXT_TYPE_UNIFORM})
     @Retention(RetentionPolicy.SOURCE)
     public @interface AutoSizeTextType {}
-    // Default minimum size for auto-sizing text in scaled pixels. {@see #setAutoSizeMinTextSize}.
+    // Default minimum size for auto-sizing text in scaled pixels.
     private static final int DEFAULT_AUTO_SIZE_MIN_TEXT_SIZE_IN_SP = 12;
-    // Default maximum size for auto-sizing text in scaled pixels. {@see #setAutoSizeMaxTextSize}.
+    // Default maximum size for auto-sizing text in scaled pixels.
     private static final int DEFAULT_AUTO_SIZE_MAX_TEXT_SIZE_IN_SP = 112;
     // Default value for the step size in pixels.
     private static final int DEFAULT_AUTO_SIZE_GRANULARITY_IN_PX = 1;
@@ -1308,7 +1314,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     mHyphenationFrequency = a.getInt(attr, Layout.HYPHENATION_FREQUENCY_NONE);
                     break;
 
-                case com.android.internal.R.styleable.TextView_autoSizeText:
+                case com.android.internal.R.styleable.TextView_autoSizeTextType:
                     mAutoSizeTextType = a.getInt(attr, AUTO_SIZE_TEXT_TYPE_NONE);
                     break;
 
@@ -1660,7 +1666,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      *        {@link TextView#AUTO_SIZE_TEXT_TYPE_NONE} or
      *        {@link TextView#AUTO_SIZE_TEXT_TYPE_UNIFORM}
      *
-     * @attr ref android.R.styleable#TextView_autoSizeText
+     * @attr ref android.R.styleable#TextView_autoSizeTextType
      *
      * @see #getAutoSizeTextType()
      */
@@ -1709,7 +1715,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      *
      * @throws IllegalArgumentException if any of the configuration params are invalid.
      *
-     * @attr ref android.R.styleable#TextView_autoSizeText
+     * @attr ref android.R.styleable#TextView_autoSizeTextType
      * @attr ref android.R.styleable#TextView_autoSizeMinTextSize
      * @attr ref android.R.styleable#TextView_autoSizeMaxTextSize
      * @attr ref android.R.styleable#TextView_autoSizeStepGranularity
@@ -1753,7 +1759,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      *
      * @throws IllegalArgumentException if all of the <code>presetSizes</code> are invalid.
      *
-     * @attr ref android.R.styleable#TextView_autoSizeText
+     * @attr ref android.R.styleable#TextView_autoSizeTextType
      * @attr ref android.R.styleable#TextView_autoSizePresetSizes
      *
      * @see #setAutoSizeTextTypeWithDefaults(int)
@@ -1806,7 +1812,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      *         {@link TextView#AUTO_SIZE_TEXT_TYPE_NONE} or
      *         {@link TextView#AUTO_SIZE_TEXT_TYPE_UNIFORM}
      *
-     * @attr ref android.R.styleable#TextView_autoSizeText
+     * @attr ref android.R.styleable#TextView_autoSizeTextType
      *
      * @see #setAutoSizeTextTypeWithDefaults(int)
      * @see #setAutoSizeTextTypeUniformWithConfiguration(int, int, int, int)

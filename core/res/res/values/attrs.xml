@@ -4721,18 +4721,19 @@
         </attr>
         <!-- Specify the type of auto-size. Note that this feature is not supported by EditText,
         works only for TextView -->
-        <attr name="autoSizeText" format="enum">
+        <attr name="autoSizeTextType" format="enum">
             <!-- No auto-sizing (default). -->
             <enum name="none" value="0" />
-            <!-- Uniform horizontal and vertical scaling. -->
+            <!-- Uniform horizontal and vertical text size scaling to fit within the
+            container -->
             <enum name="uniform" value="1" />
         </attr>
-        <!-- Specify the auto-size step size if <code>autoSizeText</code> is set to
-        <code>xy</code>. The default is 1px. Overwrites
+        <!-- Specify the auto-size step size if <code>autoSizeTextType</code> is set to
+        <code>uniform</code>. The default is 1px. Overwrites
         <code>autoSizePresetSizes</code> if set. -->
         <attr name="autoSizeStepGranularity" format="dimension" />
-        <!-- Array of dimensions to be used in conjunction with
-        <code>autoSizeText</code> set to <code>xy</code>. Overwrites
+        <!-- Resource array of dimensions to be used in conjunction with
+        <code>autoSizeTextType</code> set to <code>uniform</code>. Overrides
         <code>autoSizeStepGranularity</code> if set. -->
         <attr name="autoSizePresetSizes"/>
         <!-- The minimum text size constraint to be used when auto-sizing text -->
