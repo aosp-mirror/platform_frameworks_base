@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar.phone;
 
 import android.content.Context;
-import android.os.Build;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -25,6 +24,7 @@ import android.text.TextUtils;
 import android.util.MathUtils;
 import android.util.SparseBooleanArray;
 
+import com.android.internal.hardware.AmbientDisplayConfiguration;
 import com.android.systemui.R;
 
 import java.io.PrintWriter;
@@ -32,14 +32,15 @@ import java.io.PrintWriter;
 public class DozeParameters {
     private static final int MAX_DURATION = 60 * 1000;
     public static final String DOZE_SENSORS_WAKE_UP_FULLY = "doze_sensors_wake_up_fully";
-    public static final boolean ALWAYS_ON_AVAILABLE = Build.IS_DEBUGGABLE;
 
     private final Context mContext;
+    private final AmbientDisplayConfiguration mAmbientDisplayConfiguration;
 
     private static IntInOutMatcher sPickupSubtypePerformsProxMatcher;
 
     public DozeParameters(Context context) {
         mContext = context;
+        mAmbientDisplayConfiguration = new AmbientDisplayConfiguration(mContext);
     }
 
     public void dump(PrintWriter pw) {
@@ -58,8 +59,7 @@ public class DozeParameters {
         pw.print("    getPickupVibrationThreshold(): "); pw.println(getPickupVibrationThreshold());
         pw.print("    getPickupSubtypePerformsProxCheck(): ");pw.println(
                 dumpPickupSubtypePerformsProxCheck());
-        if (ALWAYS_ON_AVAILABLE) {
-            pw.print("    getAlwaysOn(): "); pw.println(getAlwaysOn());
+        if (mAmbientDisplayConfiguration.alwaysOnAvailable()) {
             pw.print("    getSensorsWakeUpFully(): "); pw.println(getSensorsWakeUpFully());
         }
     }
@@ -119,13 +119,11 @@ public class DozeParameters {
     }
 
     public boolean getAlwaysOn() {
-        return ALWAYS_ON_AVAILABLE
-                && Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                Settings.Secure.DOZE_ALWAYS_ON, 0, UserHandle.USER_CURRENT) != 0;
+        return mAmbientDisplayConfiguration.alwaysOnEnabled(UserHandle.USER_CURRENT);
     }
 
     public boolean getSensorsWakeUpFully() {
-        return ALWAYS_ON_AVAILABLE
+        return mAmbientDisplayConfiguration.alwaysOnAvailable()
                 && Settings.Secure.getIntForUser(mContext.getContentResolver(),
                 DOZE_SENSORS_WAKE_UP_FULLY, 0, UserHandle.USER_CURRENT) != 0;
     }

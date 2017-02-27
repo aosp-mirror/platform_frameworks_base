@@ -28,8 +28,9 @@ import static com.android.systemui.doze.DozeMachine.State.UNINITIALIZED;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -42,7 +43,7 @@ import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.view.Display;
 
-import com.android.systemui.statusbar.phone.DozeParameters;
+import com.android.internal.hardware.AmbientDisplayConfiguration;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -56,17 +57,17 @@ public class DozeMachineTest {
 
     private DozeServiceFake mServiceFake;
     private WakeLockFake mWakeLockFake;
-    private DozeParameters mParamsMock;
+    private AmbientDisplayConfiguration mConfigMock;
     private DozeMachine.Part mPartMock;
 
     @Before
     public void setUp() {
         mServiceFake = new DozeServiceFake();
         mWakeLockFake = new WakeLockFake();
-        mParamsMock = mock(DozeParameters.class);
+        mConfigMock = mock(AmbientDisplayConfiguration.class);
         mPartMock = mock(DozeMachine.Part.class);
 
-        mMachine = new DozeMachine(mServiceFake, mParamsMock, mWakeLockFake);
+        mMachine = new DozeMachine(mServiceFake, mConfigMock, mWakeLockFake);
 
         mMachine.setParts(new DozeMachine.Part[]{mPartMock});
     }
@@ -82,7 +83,7 @@ public class DozeMachineTest {
     @Test
     @UiThreadTest
     public void testInitialize_goesToDoze() {
-        when(mParamsMock.getAlwaysOn()).thenReturn(false);
+        when(mConfigMock.alwaysOnEnabled(anyInt())).thenReturn(false);
 
         mMachine.requestState(INITIALIZED);
 
@@ -93,7 +94,7 @@ public class DozeMachineTest {
     @Test
     @UiThreadTest
     public void testInitialize_goesToAod() {
-        when(mParamsMock.getAlwaysOn()).thenReturn(true);
+        when(mConfigMock.alwaysOnEnabled(anyInt())).thenReturn(true);
 
         mMachine.requestState(INITIALIZED);
 
@@ -104,7 +105,7 @@ public class DozeMachineTest {
     @Test
     @UiThreadTest
     public void testPulseDone_goesToDoze() {
-        when(mParamsMock.getAlwaysOn()).thenReturn(false);
+        when(mConfigMock.alwaysOnEnabled(anyInt())).thenReturn(false);
         mMachine.requestState(INITIALIZED);
         mMachine.requestState(DOZE_REQUEST_PULSE);
         mMachine.requestState(DOZE_PULSING);
@@ -118,7 +119,7 @@ public class DozeMachineTest {
     @Test
     @UiThreadTest
     public void testPulseDone_goesToAoD() {
-        when(mParamsMock.getAlwaysOn()).thenReturn(true);
+        when(mConfigMock.alwaysOnEnabled(anyInt())).thenReturn(true);
         mMachine.requestState(INITIALIZED);
         mMachine.requestState(DOZE_REQUEST_PULSE);
         mMachine.requestState(DOZE_PULSING);
