@@ -52,48 +52,59 @@ public final class SaveInfo implements Parcelable {
      * Type used on when the service can save the contents of an activity, but cannot describe what
      * the content is for.
      */
-    public static final int SAVE_UI_TYPE_GENERIC = 0;
+    public static final int SAVE_DATA_TYPE_GENERIC = 0;
 
     /**
-     * Type used when the {@link FillResponse} represents user credentials (such as username and
-     * password).
+     * Type used when the {@link FillResponse} represents user credentials that have a password.
      */
-    public static final int SAVE_UI_TYPE_CREDENTIALS = 1;
+    public static final int SAVE_DATA_TYPE_PASSWORD = 1;
+
 
     /**
      * Type used on when the {@link FillResponse} represents a physical address (such as street,
      * city, state, etc).
      */
-    public static final int SAVE_UI_TYPE_ADDRESS = 2;
+    public static final int SAVE_DATA_TYPE_ADDRESS = 2;
 
     /**
-     * Type used when the {@link FillResponse} represents a payment (such as credit card number
-     * and expiration date).
+     * Type used when the {@link FillResponse} represents a credit card.
      */
-    public static final int SAVE_UI_TYPE_PAYMENT = 3;
+    public static final int SAVE_DATA_TYPE_CREDIT_CARD = 3;
 
-    private final @SaveUiType int mType;
+    private final @SaveDataType int mType;
     private ArraySet<AutoFillId> mSavableIds;
+    private final CharSequence mDescription;
 
     /** @hide */
     @IntDef({
-        SAVE_UI_TYPE_GENERIC,
-        SAVE_UI_TYPE_CREDENTIALS,
-        SAVE_UI_TYPE_ADDRESS,
-        SAVE_UI_TYPE_PAYMENT
+        SAVE_DATA_TYPE_GENERIC,
+        SAVE_DATA_TYPE_PASSWORD,
+        SAVE_DATA_TYPE_ADDRESS,
+        SAVE_DATA_TYPE_CREDIT_CARD
     })
     @Retention(RetentionPolicy.SOURCE)
-    public @interface SaveUiType {
+    public @interface SaveDataType {
     }
 
     private SaveInfo(Builder builder) {
         mType = builder.mType;
         mSavableIds = builder.mSavableIds;
+        mDescription = builder.mDescription;
     }
 
     /** @hide */
     public @Nullable ArraySet<AutoFillId> getSavableIds() {
         return mSavableIds;
+    }
+
+    /** @hide */
+    public int getType() {
+        return mType;
+    }
+
+    /** @hide */
+    public CharSequence getDescription() {
+        return mDescription;
     }
 
     /** @hide */
@@ -120,27 +131,28 @@ public final class SaveInfo implements Parcelable {
      */
     public static final class Builder {
 
-        private final @SaveUiType int mType;
+        private final @SaveDataType int mType;
         private ArraySet<AutoFillId> mSavableIds;
+        private CharSequence mDescription;
         private boolean mDestroyed;
 
         /**
          * Creates a new builder.
          *
          * @param type the type of information the associated {@link FillResponse} represents. Must
-         * be {@link SaveInfo#SAVE_UI_TYPE_GENERIC}, {@link SaveInfo#SAVE_UI_TYPE_CREDENTIALS},
-         * {@link SaveInfo#SAVE_UI_TYPE_ADDRESS}, or {@link SaveInfo#SAVE_UI_TYPE_PAYMENT};
-         * otherwise it will assume {@link SaveInfo#SAVE_UI_TYPE_GENERIC}.
+         * be {@link SaveInfo#SAVE_DATA_TYPE_GENERIC}, {@link SaveInfo#SAVE_DATA_TYPE_PASSWORD},
+         * {@link SaveInfo#SAVE_DATA_TYPE_ADDRESS}, or {@link SaveInfo#SAVE_DATA_TYPE_CREDIT_CARD};
+         * otherwise it will assume {@link SaveInfo#SAVE_DATA_TYPE_GENERIC}.
          */
-        public Builder(@SaveUiType int type) {
+        public Builder(@SaveDataType int type) {
             switch (type) {
-                case SAVE_UI_TYPE_CREDENTIALS:
-                case SAVE_UI_TYPE_ADDRESS:
-                case SAVE_UI_TYPE_PAYMENT:
+                case SAVE_DATA_TYPE_PASSWORD:
+                case SAVE_DATA_TYPE_ADDRESS:
+                case SAVE_DATA_TYPE_CREDIT_CARD:
                     mType = type;
                     break;
                 default:
-                    mType = SAVE_UI_TYPE_GENERIC;
+                    mType = SAVE_DATA_TYPE_GENERIC;
             }
         }
 
@@ -165,6 +177,20 @@ public final class SaveInfo implements Parcelable {
                 }
                 mSavableIds.add(id);
             }
+            return this;
+        }
+
+        /**
+         * Sets an optional description to be shown in the UI when the user is asked to save.
+         *
+         * <p>Typically, it describes how the data will be stored by the service, so it can help
+         * users to decide whether they can trust the service to save their data.
+         *
+         * @param description a succint description.
+         * @return This Builder.
+         */
+        public @NonNull Builder setDescription(@Nullable CharSequence description) {
+            mDescription = description;
             return this;
         }
 
@@ -210,6 +236,7 @@ public final class SaveInfo implements Parcelable {
     public void writeToParcel(Parcel parcel, int flags) {
         parcel.writeInt(mType);
         parcel.writeTypedArraySet(mSavableIds, flags);
+        parcel.writeCharSequence(mDescription);
     }
 
     public static final Parcelable.Creator<SaveInfo> CREATOR = new Parcelable.Creator<SaveInfo>() {
@@ -224,7 +251,7 @@ public final class SaveInfo implements Parcelable {
             for (int i = 0; i < savableIdsCount; i++) {
                 builder.addSavableIds(savableIds.valueAt(i));
             }
-
+            builder.setDescription(parcel.readCharSequence());
             return builder.build();
         }
 
