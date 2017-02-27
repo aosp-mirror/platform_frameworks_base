@@ -31,7 +31,11 @@ import android.text.format.DateUtils;
 import android.util.AttributeSet;
 import android.util.SparseArray;
 import android.view.View;
+import android.view.ViewStructure;
 import android.view.accessibility.AccessibilityEvent;
+import android.view.autofill.AutoFillManager;
+import android.view.autofill.AutoFillType;
+import android.view.autofill.AutoFillValue;
 
 import com.android.internal.R;
 
@@ -170,6 +174,13 @@ public class DatePicker extends FrameLayout {
         if (firstDayOfWeek != 0) {
             setFirstDayOfWeek(firstDayOfWeek);
         }
+
+        mDelegate.setAutoFillChangeListener((v, y, m, d) -> {
+            final AutoFillManager afm = context.getSystemService(AutoFillManager.class);
+            if (afm != null) {
+                afm.valueChanged(this);
+            }
+        });
     }
 
     private DatePickerDelegate createSpinnerUIDelegate(Context context, AttributeSet attrs,
@@ -503,12 +514,15 @@ public class DatePicker extends FrameLayout {
                   OnDateChangedListener onDateChangedListener);
 
         void setOnDateChangedListener(OnDateChangedListener onDateChangedListener);
+        void setAutoFillChangeListener(OnDateChangedListener onDateChangedListener);
 
         void updateDate(int year, int month, int dayOfMonth);
+        void updateDate(long date);
 
         int getYear();
         int getMonth();
         int getDayOfMonth();
+        long getDate();
 
         void setFirstDayOfWeek(int firstDayOfWeek);
         int getFirstDayOfWeek();
@@ -558,6 +572,7 @@ public class DatePicker extends FrameLayout {
 
         // Callbacks
         protected OnDateChangedListener mOnDateChangedListener;
+        protected OnDateChangedListener mAutoFillChangeListener;
         protected ValidationCallback mValidationCallback;
 
         public AbstractDatePickerDelegate(DatePicker delegator, Context context) {
@@ -580,8 +595,26 @@ public class DatePicker extends FrameLayout {
         }
 
         @Override
+        public void setAutoFillChangeListener(OnDateChangedListener callback) {
+            mAutoFillChangeListener = callback;
+        }
+
+        @Override
         public void setValidationCallback(ValidationCallback callback) {
             mValidationCallback = callback;
+        }
+
+        @Override
+        public void updateDate(long date) {
+            Calendar cal = Calendar.getInstance(mCurrentLocale);
+            cal.setTimeInMillis(date);
+            updateDate(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH),
+                    cal.get(Calendar.DAY_OF_MONTH));
+        }
+
+        @Override
+        public long getDate() {
+            return mCurrentDate.getTimeInMillis();
         }
 
         protected void onValidationChanged(boolean valid) {
@@ -722,5 +755,32 @@ public class DatePicker extends FrameLayout {
      */
     public interface ValidationCallback {
         void onValidationChanged(boolean valid);
+    }
+
+    // TODO(b/33197203): add unit/CTS tests for auto-fill methods (and make sure they handle enable)
+
+    @Override
+    public void dispatchProvideAutoFillStructure(ViewStructure structure, int flags) {
+        // This view is self-sufficient for auto-fill, so it needs to call
+        // onProvideAutoFillStructure() to fill itself, but it does not need to call
+        // dispatchProvideAutoFillStructure() to fill its children.
+        onProvideAutoFillStructure(structure, flags);
+    }
+
+    @Override
+    public void autoFill(AutoFillValue value) {
+        if (!isEnabled()) return;
+
+        mDelegate.updateDate(value.getDateValue());
+    }
+
+    @Override
+    public AutoFillType getAutoFillType() {
+        return isEnabled() ? AutoFillType.forDate() : null;
+    }
+
+    @Override
+    public AutoFillValue getAutoFillValue() {
+        return isEnabled() ? AutoFillValue.forDate(mDelegate.getDate()) : null;
     }
 }

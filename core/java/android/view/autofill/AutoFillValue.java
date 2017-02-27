@@ -35,11 +35,13 @@ public final class AutoFillValue implements Parcelable {
     private final String mText;
     private final int mListIndex;
     private final boolean mToggle;
+    private final long mDate;
 
-    private AutoFillValue(CharSequence text, int listIndex, boolean toggle) {
+    private AutoFillValue(CharSequence text, int listIndex, boolean toggle, long date) {
         mText = (text == null) ? null : text.toString();
         mListIndex = listIndex;
         mToggle = toggle;
+        mDate = date;
     }
 
     /**
@@ -69,6 +71,17 @@ public final class AutoFillValue implements Parcelable {
         return mListIndex;
     }
 
+    /**
+     * Gets the value representing the the number of milliseconds since the standard base time known
+     * as "the epoch", namely January 1, 1970, 00:00:00 GMT (see {@link java.util.Date#getTime()}
+     * of a date field.
+     *
+     * <p>See {@link AutoFillType#isDate()} for more info.
+     */
+    public long getDateValue() {
+        return mDate;
+    }
+
     /////////////////////////////////////
     //  Object "contract" methods. //
     /////////////////////////////////////
@@ -77,9 +90,10 @@ public final class AutoFillValue implements Parcelable {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + mListIndex;
         result = prime * result + ((mText == null) ? 0 : mText.hashCode());
+        result = prime * result + mListIndex;
         result = prime * result + (mToggle ? 1231 : 1237);
+        result = prime * result + (int) (mDate ^ (mDate >>> 32));
         return result;
     }
 
@@ -89,13 +103,14 @@ public final class AutoFillValue implements Parcelable {
         if (obj == null) return false;
         if (getClass() != obj.getClass()) return false;
         final AutoFillValue other = (AutoFillValue) obj;
-        if (mListIndex != other.mListIndex) return false;
         if (mText == null) {
             if (other.mText != null) return false;
         } else {
             if (!mText.equals(other.mText)) return false;
         }
+        if (mListIndex != other.mListIndex) return false;
         if (mToggle != other.mToggle) return false;
+        if (mDate != other.mDate) return false;
         return true;
     }
 
@@ -113,7 +128,7 @@ public final class AutoFillValue implements Parcelable {
             return mText.length() + "_chars";
         }
 
-        return "[listIndex=" + mListIndex + ", toggle=" + mToggle + "]";
+        return "[l=" + mListIndex + ", t=" + mToggle + ", d=" + mDate + "]";
     }
 
     /////////////////////////////////////
@@ -130,12 +145,14 @@ public final class AutoFillValue implements Parcelable {
         parcel.writeString(mText);
         parcel.writeInt(mListIndex);
         parcel.writeInt(mToggle ? 1 : 0);
+        parcel.writeLong(mDate);
     }
 
     private AutoFillValue(Parcel parcel) {
         mText = parcel.readString();
         mListIndex = parcel.readInt();
         mToggle = parcel.readInt() == 1;
+        mDate = parcel.readLong();
     }
 
     public static final Parcelable.Creator<AutoFillValue> CREATOR =
@@ -157,31 +174,42 @@ public final class AutoFillValue implements Parcelable {
 
     // TODO(b/33197203): add unit tests for each supported type (new / get should return same value)
     /**
-     * Creates a new {@link AutoFillValue} to auto-fill a text field.
+     * Creates a new {@link AutoFillValue} to auto-fill a {@link View} representing a text field.
      *
      * <p>See {@link AutoFillType#isText()} for more info.
      */
     // TODO(b/33197203): use cache
     @Nullable
     public static AutoFillValue forText(@Nullable CharSequence value) {
-        return value == null ? null : new AutoFillValue(value, 0, false);
+        return value == null ? null : new AutoFillValue(value, 0, false, 0);
     }
 
     /**
-     * Creates a new {@link AutoFillValue} to auto-fill a toggable field.
+     * Creates a new {@link AutoFillValue} to auto-fill a {@link View} representing a toggable
+     * field.
      *
      * <p>See {@link AutoFillType#isToggle()} for more info.
      */
     public static AutoFillValue forToggle(boolean value) {
-        return new AutoFillValue(null, 0, value);
+        return new AutoFillValue(null, 0, value, 0);
     }
 
     /**
-     * Creates a new {@link AutoFillValue} to auto-fill a selection list field.
+     * Creates a new {@link AutoFillValue} to auto-fill a {@link View} representing a selection
+     * list.
      *
      * <p>See {@link AutoFillType#isList()} for more info.
      */
     public static AutoFillValue forList(int value) {
-        return new AutoFillValue(null, value, false);
+        return new AutoFillValue(null, value, false, 0);
+    }
+
+    /**
+     * Creates a new {@link AutoFillValue} to auto-fill a {@link View} representing a date.
+     *
+     * <p>See {@link AutoFillType#isDate()} for more info.
+     */
+    public static AutoFillValue forDate(long date) {
+        return new AutoFillValue(null, 0, false, date);
     }
 }

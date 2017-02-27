@@ -390,10 +390,16 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate {
     private void onDateChanged(boolean fromUser, boolean callbackToClient) {
         final int year = mCurrentDate.get(Calendar.YEAR);
 
-        if (callbackToClient && mOnDateChangedListener != null) {
+        if (callbackToClient
+                && (mOnDateChangedListener != null || mAutoFillChangeListener != null)) {
             final int monthOfYear = mCurrentDate.get(Calendar.MONTH);
             final int dayOfMonth = mCurrentDate.get(Calendar.DAY_OF_MONTH);
-            mOnDateChangedListener.onDateChanged(mDelegator, year, monthOfYear, dayOfMonth);
+            if (mOnDateChangedListener != null) {
+                mOnDateChangedListener.onDateChanged(mDelegator, year, monthOfYear, dayOfMonth);
+            }
+            if (mAutoFillChangeListener != null) {
+                mAutoFillChangeListener.onDateChanged(mDelegator, year, monthOfYear, dayOfMonth);
+            }
         }
 
         mDayPickerView.setDate(mCurrentDate.getTimeInMillis());

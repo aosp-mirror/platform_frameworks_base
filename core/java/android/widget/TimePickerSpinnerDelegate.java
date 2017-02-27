@@ -495,6 +495,9 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate {
             mOnTimeChangedListener.onTimeChanged(mDelegator, getHour(),
                     getMinute());
         }
+        if (mAutoFillChangeListener != null) {
+            mAutoFillChangeListener.onTimeChanged(mDelegator, getHour(), getMinute());
+        }
     }
 
     private void updateHourControl() {

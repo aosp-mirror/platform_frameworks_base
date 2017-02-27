@@ -576,6 +576,10 @@ class DatePickerSpinnerDelegate extends AbstractDatePickerDelegate {
             mOnDateChangedListener.onDateChanged(mDelegator, getYear(), getMonth(),
                     getDayOfMonth());
         }
+        if (mAutoFillChangeListener != null) {
+            mAutoFillChangeListener.onDateChanged(mDelegator, getYear(), getMonth(),
+                    getDayOfMonth());
+        }
     }
 
     /**

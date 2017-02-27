@@ -23,12 +23,17 @@ import android.annotation.TestApi;
 import android.annotation.Widget;
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.icu.util.Calendar;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.util.MathUtils;
 import android.view.View;
+import android.view.ViewStructure;
 import android.view.accessibility.AccessibilityEvent;
+import android.view.autofill.AutoFillManager;
+import android.view.autofill.AutoFillType;
+import android.view.autofill.AutoFillValue;
 
 import com.android.internal.R;
 
@@ -132,6 +137,12 @@ public class TimePicker extends FrameLayout {
                         this, context, attrs, defStyleAttr, defStyleRes);
                 break;
         }
+        mDelegate.setAutoFillChangeListener((v, h, m) -> {
+            final AutoFillManager afm = context.getSystemService(AutoFillManager.class);
+            if (afm != null) {
+                afm.valueChanged(this);
+            }
+        });
     }
 
     /**
@@ -348,12 +359,16 @@ public class TimePicker extends FrameLayout {
         void setMinute(@IntRange(from = 0, to = 59) int minute);
         int getMinute();
 
+        void setDate(long date);
+        long getDate();
+
         void setIs24Hour(boolean is24Hour);
         boolean is24Hour();
 
         boolean validateInput();
 
         void setOnTimeChangedListener(OnTimeChangedListener onTimeChangedListener);
+        void setAutoFillChangeListener(OnTimeChangedListener autoFillChangeListener);
 
         void setEnabled(boolean enabled);
         boolean isEnabled();
@@ -398,6 +413,7 @@ public class TimePicker extends FrameLayout {
         protected final Locale mLocale;
 
         protected OnTimeChangedListener mOnTimeChangedListener;
+        protected OnTimeChangedListener mAutoFillChangeListener;
 
         public AbstractTimePickerDelegate(@NonNull TimePicker delegator, @NonNull Context context) {
             mDelegator = delegator;
@@ -408,6 +424,27 @@ public class TimePicker extends FrameLayout {
         @Override
         public void setOnTimeChangedListener(OnTimeChangedListener callback) {
             mOnTimeChangedListener = callback;
+        }
+
+        @Override
+        public void setAutoFillChangeListener(OnTimeChangedListener callback) {
+            mAutoFillChangeListener = callback;
+        }
+
+        @Override
+        public void setDate(long date) {
+            Calendar cal = Calendar.getInstance(mLocale);
+            cal.setTimeInMillis(date);
+            setHour(cal.get(Calendar.HOUR_OF_DAY));
+            setMinute(cal.get(Calendar.MINUTE));
+        }
+
+        @Override
+        public long getDate() {
+            Calendar cal = Calendar.getInstance(mLocale);
+            cal.set(Calendar.HOUR_OF_DAY, getHour());
+            cal.set(Calendar.MINUTE, getMinute());
+            return cal.getTimeInMillis();
         }
 
         protected static class SavedState extends View.BaseSavedState {
@@ -473,5 +510,32 @@ public class TimePicker extends FrameLayout {
                 }
             };
         }
+    }
+
+    // TODO(b/33197203): add unit/CTS tests for auto-fill methods (and make sure they handle enable)
+
+    @Override
+    public void dispatchProvideAutoFillStructure(ViewStructure structure, int flags) {
+        // This view is self-sufficient for auto-fill, so it needs to call
+        // onProvideAutoFillStructure() to fill itself, but it does not need to call
+        // dispatchProvideAutoFillStructure() to fill its children.
+        onProvideAutoFillStructure(structure, flags);
+    }
+
+    @Override
+    public void autoFill(AutoFillValue value) {
+        if (!isEnabled()) return;
+
+        mDelegate.setDate(value.getDateValue());
+    }
+
+    @Override
+    public AutoFillType getAutoFillType() {
+        return isEnabled() ? AutoFillType.forDate() : null;
+    }
+
+    @Override
+    public AutoFillValue getAutoFillValue() {
+        return isEnabled() ? AutoFillValue.forDate(mDelegate.getDate()) : null;
     }
 }
