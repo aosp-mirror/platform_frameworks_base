@@ -54,7 +54,7 @@ public class DisplayContentTests extends WindowTestsBase {
                 sDisplayContent, "exiting app");
         final AppWindowToken exitingAppToken = exitingAppWindow.mAppToken;
         exitingAppToken.mIsExiting = true;
-        exitingAppToken.mTask.mStack.mExitingAppTokens.add(exitingAppToken);
+        exitingAppToken.getTask().mStack.mExitingAppTokens.add(exitingAppToken);
 
         assertForAllWindowsOrder(Arrays.asList(
                 sWallpaperWindow,

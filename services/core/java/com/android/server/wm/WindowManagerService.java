@@ -1445,9 +1445,9 @@ public class WindowManagerService extends IWindowManager.Stub
             if (displayContent.isDefaultDisplay) {
                 final DisplayInfo displayInfo = displayContent.getDisplayInfo();
                 final Rect taskBounds;
-                if (atoken != null && atoken.mTask != null) {
+                if (atoken != null && atoken.getTask() != null) {
                     taskBounds = mTmpRect;
-                    atoken.mTask.getBounds(mTmpRect);
+                    atoken.getTask().getBounds(mTmpRect);
                 } else {
                     taskBounds = null;
                 }
@@ -2292,7 +2292,7 @@ public class WindowManagerService extends IWindowManager.Stub
         // is running.
         Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "WM#applyAnimationLocked");
         if (okToDisplay()) {
-            final DisplayContent displayContent = atoken.mTask.getDisplayContent();
+            final DisplayContent displayContent = atoken.getTask().getDisplayContent();
             final DisplayInfo displayInfo = displayContent.getDisplayInfo();
             final int width = displayInfo.appWidth;
             final int height = displayInfo.appHeight;
@@ -2333,7 +2333,7 @@ public class WindowManagerService extends IWindowManager.Stub
             final Configuration displayConfig = displayContent.getConfiguration();
             Animation a = mAppTransition.loadAnimation(lp, transit, enter, displayConfig.uiMode,
                     displayConfig.orientation, frame, displayFrame, insets, surfaceInsets,
-                    isVoiceInteraction, freeform, atoken.mTask.mTaskId);
+                    isVoiceInteraction, freeform, atoken.getTask().mTaskId);
             if (a != null) {
                 if (DEBUG_ANIM) logWithStack(TAG, "Loaded animation " + a + " for " + atoken);
                 final int containingWidth = frame.width();
@@ -2553,8 +2553,8 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     void setFocusTaskRegionLocked(AppWindowToken previousFocus) {
-        final Task focusedTask = mFocusedApp != null ? mFocusedApp.mTask : null;
-        final Task previousTask = previousFocus != null ? previousFocus.mTask : null;
+        final Task focusedTask = mFocusedApp != null ? mFocusedApp.getTask() : null;
+        final Task previousTask = previousFocus != null ? previousFocus.getTask() : null;
         final DisplayContent focusedDisplayContent =
                 focusedTask != null ? focusedTask.getDisplayContent() : null;
         final DisplayContent previousDisplayContent =
@@ -5085,8 +5085,8 @@ public class WindowManagerService extends IWindowManager.Stub
         // Also don't use mInputMethodTarget's stack, because some window with FLAG_NOT_FOCUSABLE
         // and FLAG_ALT_FOCUSABLE_IM flags both set might be set to IME target so they're moved
         // to make room for IME, but the window is not the focused window that's taking input.
-        return (mFocusedApp != null && mFocusedApp.mTask != null) ?
-                mFocusedApp.mTask.mStack : null;
+        return (mFocusedApp != null && mFocusedApp.getTask() != null) ?
+                mFocusedApp.getTask().mStack : null;
     }
 
     public boolean detectSafeMode() {

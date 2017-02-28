@@ -106,8 +106,8 @@ class TaskSnapshotCache {
         if (taskId != null) {
             removeRunningEntry(taskId);
         }
-        if (wtoken.mTask != null) {
-            mRetrievalCache.remove(wtoken.mTask.mTaskId);
+        if (wtoken.getTask() != null) {
+            mRetrievalCache.remove(wtoken.getTask().mTaskId);
         }
     }
 

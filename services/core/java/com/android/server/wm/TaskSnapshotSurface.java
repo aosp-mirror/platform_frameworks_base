@@ -96,9 +96,11 @@ class TaskSnapshotSurface implements StartingSurface {
             // TODO: Inherit behavior whether to draw behind status bar/nav bar.
             layoutParams.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                     | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
-            layoutParams.setTitle(String.format(TITLE_FORMAT, token.mTask.mTaskId));
-            if (token.mTask != null) {
-                final TaskDescription taskDescription = token.mTask.getTaskDescription();
+            final Task task = token.getTask();
+            if (task != null) {
+                layoutParams.setTitle(String.format(TITLE_FORMAT,task.mTaskId));
+
+                final TaskDescription taskDescription = task.getTaskDescription();
                 if (taskDescription != null) {
                     fillBackgroundColor = taskDescription.getBackgroundColor();
                 }

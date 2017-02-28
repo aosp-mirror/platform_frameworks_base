@@ -644,7 +644,7 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
         }
         for (int appNdx = mExitingAppTokens.size() - 1; appNdx >= 0; --appNdx) {
             final AppWindowToken wtoken = mExitingAppTokens.get(appNdx);
-            if (wtoken.mTask == task) {
+            if (wtoken.getTask() == task) {
                 wtoken.mIsExiting = false;
                 mExitingAppTokens.remove(appNdx);
             }

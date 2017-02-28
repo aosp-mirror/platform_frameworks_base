@@ -85,12 +85,16 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     final boolean mVoiceInteraction;
 
     // TODO: Use getParent instead?
-    Task mTask;
+    private Task mTask;
     /** @see WindowContainer#fillsParent() */
     private boolean mFillsParent;
     boolean layoutConfigChanges;
     boolean mShowForAllUsers;
     int mTargetSdk;
+
+    // Flag set while reparenting to prevent actions normally triggered by an individual parent
+    // change.
+    private boolean mReparenting;
 
     // The input dispatching timeout for this application token in nanoseconds.
     long mInputDispatchingTimeoutNanos;
@@ -426,10 +430,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     void removeIfPossible() {
         mIsExiting = false;
         removeAllWindowsIfPossible();
-        if (mTask != null) {
-            mTask.mStack.mExitingAppTokens.remove(this);
-            removeImmediately();
-        }
+        removeImmediately();
     }
 
     @Override
@@ -483,6 +484,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
         removed = true;
         stopFreezingScreen(true, true);
+
         if (mService.mFocusedApp == this) {
             if (DEBUG_FOCUS_LIGHT) Slog.v(TAG_WM, "Removing focused app token:" + this);
             mService.mFocusedApp = null;
@@ -662,6 +664,37 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         allDrawn = false;
         deferClearAllDrawn = false;
         allDrawnExcludingSaved = false;
+    }
+
+    Task getTask() {
+        return mTask;
+    }
+
+    /**
+     * Sets the associated task, cleaning up dependencies when unset.
+     */
+    void setTask(Task task) {
+        // Note: the following code assumes that the previous task's stack is the same as the
+        // new task's stack.
+        if (!mReparenting && mTask != null && mTask.mStack != null) {
+            mTask.mStack.mExitingAppTokens.remove(this);
+        }
+
+        mTask = task;
+    }
+
+    @Override
+    void onParentSet() {
+        super.onParentSet();
+
+        // When the associated task is {@code null}, the {@link AppWindowToken} can no longer
+        // access visual elements like the {@link DisplayContent}. We must remove any associations
+        // such as animations.
+        if (!mReparenting && mTask == null) {
+            // It is possible we have been marked as a closing app earlier. We must remove ourselves
+            // from this list so we do not participate in any future animations.
+            mService.mClosingApps.remove(this);
+        }
     }
 
     void postWindowRemoveStartingWindowCleanup(WindowState win) {
@@ -866,12 +899,23 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             throw new IllegalArgumentException(
                     "window token=" + this + " already child of task=" + mTask);
         }
+
+        if (mTask.mStack != task.mStack) {
+            throw new IllegalArgumentException(
+                    "window token=" + this + " current task=" + mTask
+                        + " belongs to a different stack than " + task);
+        }
+
         if (DEBUG_ADD_REMOVE) Slog.i(TAG, "reParentWindowToken: removing window token=" + this
                 + " from task=" + mTask);
         final DisplayContent prevDisplayContent = getDisplayContent();
 
+        mReparenting = true;
+
         getParent().removeChild(this);
         task.addChild(this, position);
+
+        mReparenting = false;
 
         // Relayout display(s).
         final DisplayContent displayContent = task.getDisplayContent();

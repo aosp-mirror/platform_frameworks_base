@@ -138,19 +138,18 @@ public class AppWindowContainerControllerTests extends WindowTestsBase {
 
     @Test
     public void testReparent() throws Exception {
+        final StackWindowController stackController =
+            createStackControllerOnDisplay(sDisplayContent);
         final TestTaskWindowContainerController taskController1 =
-                new TestTaskWindowContainerController(
-                        createStackControllerOnDisplay(sDisplayContent));
+                new TestTaskWindowContainerController(stackController);
         final TestAppWindowContainerController appWindowController1 = createAppWindowController(
                 taskController1);
         final TestTaskWindowContainerController taskController2 =
-                new TestTaskWindowContainerController(
-                        createStackControllerOnDisplay(sDisplayContent));
+                new TestTaskWindowContainerController(stackController);
         final TestAppWindowContainerController appWindowController2 = createAppWindowController(
                 taskController2);
         final TestTaskWindowContainerController taskController3 =
-                new TestTaskWindowContainerController(
-                        createStackControllerOnDisplay(sDisplayContent));
+                new TestTaskWindowContainerController(stackController);
 
         try {
             appWindowController1.reparent(taskController1, 0);
