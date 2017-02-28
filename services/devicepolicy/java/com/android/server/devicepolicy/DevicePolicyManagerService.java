@@ -4863,6 +4863,28 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     /**
+     * Determine whether DPMS should check if a delegate package is already installed before
+     * granting it new delegations via {@link #setDelegatedScopes}.
+     */
+    private static boolean shouldCheckIfDelegatePackageIsInstalled(String delegatePackage,
+            int targetSdk, List<String> scopes) {
+        // 1) Never skip is installed check from N.
+        if (targetSdk >= Build.VERSION_CODES.N) {
+            return true;
+        }
+        // 2) Skip if DELEGATION_CERT_INSTALL is the only scope being given.
+        if (scopes.size() == 1 && scopes.get(0).equals(DELEGATION_CERT_INSTALL)) {
+            return false;
+        }
+        // 3) Skip if all previously granted scopes are being cleared.
+        if (scopes.isEmpty()) {
+            return false;
+        }
+        // Otherwise it should check that delegatePackage is installed.
+        return true;
+    }
+
+    /**
      * Set the scopes of a device owner or profile owner delegate.
      *
      * @param who the device owner or profile owner.
@@ -4888,8 +4910,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             // Ensure calling process is device/profile owner.
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
             // Ensure the delegate is installed (skip this for DELEGATION_CERT_INSTALL in pre-N).
-            if (scopes.size() == 1 && scopes.get(0).equals(DELEGATION_CERT_INSTALL) ||
-                    getTargetSdk(who.getPackageName(), userId) >= Build.VERSION_CODES.N) {
+            if (shouldCheckIfDelegatePackageIsInstalled(delegatePackage,
+                        getTargetSdk(who.getPackageName(), userId), scopes)) {
                 // Throw when the delegate package is not installed.
                 if (!isPackageInstalledForUser(delegatePackage, userId)) {
                     throw new IllegalArgumentException("Package " + delegatePackage
@@ -5107,8 +5129,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 final String currentPackage = policy.mDelegationMap.keyAt(i);
                 final List<String> currentScopes = policy.mDelegationMap.valueAt(i);
 
-                if (!currentPackage.equals(delegatePackage) && currentScopes.remove(scope)) {
-                    setDelegatedScopes(who, currentPackage, currentScopes);
+                if (!currentPackage.equals(delegatePackage) && currentScopes.contains(scope)) {
+                    final List<String> newScopes = new ArrayList(currentScopes);
+                    newScopes.remove(scope);
+                    setDelegatedScopes(who, currentPackage, newScopes);
                 }
             }
         }
