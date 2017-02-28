@@ -19733,7 +19733,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mStackSupervisor.setDisplayOverrideConfiguration(mTempConfig, displayId);
 
         final boolean isDensityChange = (changes & ActivityInfo.CONFIG_DENSITY) != 0;
-        if (isDensityChange) {
+        if (isDensityChange && displayId == DEFAULT_DISPLAY) {
             // Reset the unsupported display size dialog.
             mUiHandler.sendEmptyMessage(SHOW_UNSUPPORTED_DISPLAY_SIZE_DIALOG_MSG);
 
