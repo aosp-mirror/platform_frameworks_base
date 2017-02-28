@@ -53,6 +53,7 @@ public class PipManager implements BasePipManager {
 
     private final PinnedStackListener mPinnedStackListener = new PinnedStackListener();
 
+    private InputConsumerController mInputConsumerController;
     private PipMenuActivityController mMenuController;
     private PipMediaController mMediaController;
     private PipTouchHandler mTouchHandler;
@@ -68,6 +69,7 @@ public class PipManager implements BasePipManager {
             }
             mTouchHandler.onActivityPinned();
             mMediaController.onActivityPinned();
+            mMenuController.onActivityPinned();
         }
 
         @Override
@@ -151,11 +153,12 @@ public class PipManager implements BasePipManager {
         }
         SystemServicesProxy.getInstance(mContext).registerTaskStackListener(mTaskStackListener);
 
+        mInputConsumerController = new InputConsumerController(mWindowManager);
         mMediaController = new PipMediaController(context, mActivityManager);
-        mMenuController = new PipMenuActivityController(context, mActivityManager, mWindowManager,
-                mMediaController);
-        mTouchHandler = new PipTouchHandler(context, mMenuController, mActivityManager,
-                mWindowManager);
+        mMenuController = new PipMenuActivityController(context, mActivityManager, mMediaController,
+                mInputConsumerController);
+        mTouchHandler = new PipTouchHandler(context, mActivityManager, mMenuController,
+                mInputConsumerController);
     }
 
     /**
@@ -178,6 +181,7 @@ public class PipManager implements BasePipManager {
     public void dump(PrintWriter pw) {
         final String innerPrefix = "  ";
         pw.println(TAG);
+        mInputConsumerController.dump(pw, innerPrefix);
         mMenuController.dump(pw, innerPrefix);
         mTouchHandler.dump(pw, innerPrefix);
     }

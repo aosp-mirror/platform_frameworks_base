@@ -139,6 +139,11 @@ public class PipMenuActivity extends Activity {
     }
 
     @Override
+    public void onUserInteraction() {
+        repostDelayedFinish(POST_INTERACTION_DISMISS_DELAY);
+    }
+
+    @Override
     protected void onUserLeaveHint() {
         super.onUserLeaveHint();
 
@@ -164,11 +169,6 @@ public class PipMenuActivity extends Activity {
     }
 
     @Override
-    public void onUserInteraction() {
-        repostDelayedFinish(POST_INTERACTION_DISMISS_DELAY);
-    }
-
-    @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
         // On the first action outside the window, hide the menu
         switch (ev.getAction()) {
@@ -177,13 +177,16 @@ public class PipMenuActivity extends Activity {
                 break;
             case MotionEvent.ACTION_DOWN:
                 mDownPosition.set(ev.getX(), ev.getY());
+                mDownDelta.set(0f, 0f);
                 break;
             case MotionEvent.ACTION_MOVE:
                 mDownDelta.set(ev.getX() - mDownPosition.x, ev.getY() - mDownPosition.y);
                 if (mDownDelta.length() > mViewConfig.getScaledTouchSlop() && mMenuVisible) {
-                    hideMenu();
-                    mMenuVisible = false;
+                    // Restore the input consumer and let that drive the movement of this menu
+                    notifyRegisterInputConsumer();
+                    cancelDelayedFinish();
                 }
+                break;
         }
         return super.dispatchTouchEvent(ev);
     }
@@ -219,17 +222,21 @@ public class PipMenuActivity extends Activity {
                 }
             });
             mMenuContainerAnimator.start();
+        } else {
+            repostDelayedFinish(POST_INTERACTION_DISMISS_DELAY);
         }
     }
 
     private void hideMenu() {
-        hideMenu(null /* animationFinishedRunnable */);
+        hideMenu(null /* animationFinishedRunnable */, true /* notifyMenuVisibility */);
     }
 
-    private void hideMenu(final Runnable animationFinishedRunnable) {
+    private void hideMenu(final Runnable animationFinishedRunnable, boolean notifyMenuVisibility) {
         if (mMenuVisible) {
             cancelDelayedFinish();
-            notifyMenuVisibility(false);
+            if (notifyMenuVisibility) {
+                notifyMenuVisibility(false);
+            }
             mMenuContainerAnimator = ObjectAnimator.ofFloat(mMenuContainer, View.ALPHA,
                     mMenuContainer.getAlpha(), 0f);
             mMenuContainerAnimator.setInterpolator(Interpolators.ALPHA_OUT);
@@ -291,6 +298,12 @@ public class PipMenuActivity extends Activity {
         }
     }
 
+    private void notifyRegisterInputConsumer() {
+        Message m = Message.obtain();
+        m.what = PipMenuActivityController.MESSAGE_REGISTER_INPUT_CONSUMER;
+        sendMessage(m, "Could not notify controller to register input consumer");
+    }
+
     private void notifyMenuVisibility(boolean visible) {
         mMenuVisible = visible;
         Message m = Message.obtain();
@@ -300,10 +313,12 @@ public class PipMenuActivity extends Activity {
     }
 
     private void expandPip() {
+        // Do not notify menu visibility when hiding the menu, the controller will do this when it
+        // handles the message
         hideMenu(() -> {
             sendEmptyMessage(PipMenuActivityController.MESSAGE_EXPAND_PIP,
                     "Could not notify controller to expand PIP");
-        });
+        }, false /* notifyMenuVisibility */);
     }
 
     private void minimizePip() {
@@ -312,10 +327,12 @@ public class PipMenuActivity extends Activity {
     }
 
     private void dismissPip() {
+        // Do not notify menu visibility when hiding the menu, the controller will do this when it
+        // handles the message
         hideMenu(() -> {
             sendEmptyMessage(PipMenuActivityController.MESSAGE_DISMISS_PIP,
                     "Could not notify controller to dismiss PIP");
-        });
+        }, false /* notifyMenuVisibility */);
     }
 
     private void notifyActivityCallback(Messenger callback) {

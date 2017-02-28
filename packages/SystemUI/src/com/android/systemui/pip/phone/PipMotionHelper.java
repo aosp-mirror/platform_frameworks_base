@@ -217,19 +217,12 @@ public class PipMotionHelper {
     /**
      * Animates the PiP to the minimized state, slightly offscreen.
      */
-    Rect animateToClosestMinimizedState(Rect movementBounds,
-            final PipMenuActivityController menuController) {
+    Rect animateToClosestMinimizedState(Rect movementBounds) {
         cancelAnimations();
         Rect toBounds = getClosestMinimizedBounds(mBounds, movementBounds);
         if (!mBounds.equals(toBounds)) {
             mBoundsAnimator = createAnimationToBounds(mBounds, toBounds,
                     MINIMIZE_STACK_MAX_DURATION, LINEAR_OUT_SLOW_IN, mUpdateBoundsListener);
-            mBoundsAnimator.addListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationStart(Animator animation) {
-                    menuController.hideMenu();
-                }
-            });
             mBoundsAnimator.start();
         }
         return toBounds;
@@ -274,9 +267,7 @@ public class PipMotionHelper {
             Rect expandedMovementBounds) {
         float savedSnapFraction = mSnapAlgorithm.getSnapFraction(new Rect(mBounds), movementBounds);
         mSnapAlgorithm.applySnapFraction(expandedBounds, expandedMovementBounds, savedSnapFraction);
-        mBoundsAnimator = createAnimationToBounds(mBounds, expandedBounds,
-                EXPAND_STACK_TO_MENU_DURATION, FAST_OUT_SLOW_IN, mUpdateBoundsListener);
-        mBoundsAnimator.start();
+        resizeAndAnimatePipUnchecked(expandedBounds, EXPAND_STACK_TO_MENU_DURATION);
         return savedSnapFraction;
     }
 
@@ -284,15 +275,17 @@ public class PipMotionHelper {
      * Animates the PiP from the expanded state to the normal state after the menu is hidden.
      */
     void animateToUnexpandedState(Rect normalBounds, float savedSnapFraction,
-            Rect normalMovementBounds) {
-        if (savedSnapFraction >= 0f) {
-            mSnapAlgorithm.applySnapFraction(normalBounds, normalMovementBounds, savedSnapFraction);
-            mBoundsAnimator = createAnimationToBounds(mBounds, normalBounds,
-                    SHRINK_STACK_FROM_MENU_DURATION, FAST_OUT_SLOW_IN, mUpdateBoundsListener);
-            mBoundsAnimator.start();
-        } else {
-            animateToClosestSnapTarget(normalMovementBounds);
+            Rect normalMovementBounds, Rect currentMovementBounds, boolean minimized) {
+        if (savedSnapFraction < 0f) {
+            // If there are no saved snap fractions, then just use the current bounds
+            savedSnapFraction = mSnapAlgorithm.getSnapFraction(new Rect(mBounds),
+                    currentMovementBounds);
         }
+        mSnapAlgorithm.applySnapFraction(normalBounds, normalMovementBounds, savedSnapFraction);
+        if (minimized) {
+            normalBounds = getClosestMinimizedBounds(normalBounds, normalMovementBounds);
+        }
+        resizeAndAnimatePipUnchecked(normalBounds, SHRINK_STACK_FROM_MENU_DURATION);
     }
 
     /**
@@ -365,7 +358,32 @@ public class PipMotionHelper {
                     mActivityManager.resizePinnedStack(toBounds, null /* tempPinnedTaskBounds */);
                     mBounds.set(toBounds);
                 } catch (RemoteException e) {
-                    Log.e(TAG, "Could not move pinned stack to bounds: " + toBounds, e);
+                    Log.e(TAG, "Could not resize pinned stack to bounds: " + toBounds, e);
+                }
+            });
+        }
+    }
+
+    /**
+     * Directly resizes the PiP to the given {@param bounds}.
+     */
+    private void resizeAndAnimatePipUnchecked(Rect toBounds, int duration) {
+        if (!toBounds.equals(mBounds)) {
+            mHandler.post(() -> {
+                try {
+                    StackInfo stackInfo = mActivityManager.getStackInfo(PINNED_STACK_ID);
+                    if (stackInfo == null) {
+                        // In the case where we've already re-expanded or dismissed the PiP, then
+                        // just skip the resize
+                        return;
+                    }
+
+                    mActivityManager.resizeStack(PINNED_STACK_ID, toBounds,
+                            false /* allowResizeInDockedMode */, true /* preserveWindows */,
+                            true /* animate */, duration);
+                    mBounds.set(toBounds);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Could not animate resize pinned stack to bounds: " + toBounds, e);
                 }
             });
         }

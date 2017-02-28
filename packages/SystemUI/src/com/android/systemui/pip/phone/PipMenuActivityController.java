@@ -57,6 +57,7 @@ public class PipMenuActivityController {
     public static final int MESSAGE_MINIMIZE_PIP = 102;
     public static final int MESSAGE_DISMISS_PIP = 103;
     public static final int MESSAGE_UPDATE_ACTIVITY_CALLBACK = 104;
+    public static final int MESSAGE_REGISTER_INPUT_CONSUMER = 105;
 
     /**
      * A listener interface to receive notification on changes in PIP.
@@ -64,8 +65,11 @@ public class PipMenuActivityController {
     public interface Listener {
         /**
          * Called when the PIP menu visibility changes.
+         *
+         * @param menuVisible whether or not the menu is visible
+         * @param resize whether or not to resize the PiP with the visibility change
          */
-        void onPipMenuVisibilityChanged(boolean visible);
+        void onPipMenuVisibilityChanged(boolean menuVisible, boolean resize);
 
         /**
          * Called when the PIP requested to be expanded.
@@ -85,13 +89,13 @@ public class PipMenuActivityController {
 
     private Context mContext;
     private IActivityManager mActivityManager;
-    private IWindowManager mWindowManager;
     private PipMediaController mMediaController;
+    private InputConsumerController mInputConsumerController;
 
     private ArrayList<Listener> mListeners = new ArrayList<>();
     private ParceledListSlice mAppActions;
     private ParceledListSlice mMediaActions;
-    private boolean mVisible;
+    private boolean mMenuVisible;
 
     private Messenger mToActivityMessenger;
     private Messenger mMessenger = new Messenger(new Handler() {
@@ -100,13 +104,14 @@ public class PipMenuActivityController {
             switch (msg.what) {
                 case MESSAGE_MENU_VISIBILITY_CHANGED: {
                     boolean visible = msg.arg1 > 0;
-                    onMenuVisibilityChanged(visible);
+                    onMenuVisibilityChanged(visible, true /* resize */);
                     break;
                 }
                 case MESSAGE_EXPAND_PIP: {
                     mListeners.forEach(l -> l.onPipExpand());
-                    // Preemptively mark the menu as invisible once we expand the PiP
-                    onMenuVisibilityChanged(false);
+                    // Preemptively mark the menu as invisible once we expand the PiP, but don't
+                    // resize as we will be animating the stack
+                    onMenuVisibilityChanged(false, false /* resize */);
                     break;
                 }
                 case MESSAGE_MINIMIZE_PIP: {
@@ -115,15 +120,20 @@ public class PipMenuActivityController {
                 }
                 case MESSAGE_DISMISS_PIP: {
                     mListeners.forEach(l -> l.onPipDismiss());
-                    // Preemptively mark the menu as invisible once we dismiss the PiP
-                    onMenuVisibilityChanged(false);
+                    // Preemptively mark the menu as invisible once we dismiss the PiP, but don't
+                    // resize as we'll be removing the stack in place
+                    onMenuVisibilityChanged(false, false /* resize */);
+                    break;
+                }
+                case MESSAGE_REGISTER_INPUT_CONSUMER: {
+                    mInputConsumerController.registerInputConsumer();
                     break;
                 }
                 case MESSAGE_UPDATE_ACTIVITY_CALLBACK: {
                     mToActivityMessenger = msg.replyTo;
                     // Mark the menu as invisible once the activity finishes as well
                     if (mToActivityMessenger == null) {
-                        onMenuVisibilityChanged(false);
+                        onMenuVisibilityChanged(false, true /* resize */);
                     }
                     break;
                 }
@@ -140,11 +150,19 @@ public class PipMenuActivityController {
     };
 
     public PipMenuActivityController(Context context, IActivityManager activityManager,
-            IWindowManager windowManager, PipMediaController mediaController) {
+            PipMediaController mediaController, InputConsumerController inputConsumerController) {
         mContext = context;
         mActivityManager = activityManager;
-        mWindowManager = windowManager;
         mMediaController = mediaController;
+        mInputConsumerController = inputConsumerController;
+    }
+
+    public void onActivityPinned() {
+        if (!mMenuVisible) {
+            // If the menu is not visible, then re-register the input consumer if it is not already
+            // registered
+            mInputConsumerController.registerInputConsumer();
+        }
     }
 
     /**
@@ -207,6 +225,13 @@ public class PipMenuActivityController {
     }
 
     /**
+     * @return whether the menu is currently visible.
+     */
+    public boolean isMenuVisible() {
+        return mMenuVisible;
+    }
+
+    /**
      * Sets the menu actions to the actions provided by the current PiP activity.
      */
     public void setAppActions(ParceledListSlice appActions) {
@@ -250,9 +275,14 @@ public class PipMenuActivityController {
     /**
      * Handles changes in menu visibility.
      */
-    private void onMenuVisibilityChanged(boolean visible) {
-        mListeners.forEach(l -> l.onPipMenuVisibilityChanged(visible));
-        if (visible != mVisible) {
+    private void onMenuVisibilityChanged(boolean visible, boolean resize) {
+        if (visible) {
+            mInputConsumerController.unregisterInputConsumer();
+        } else {
+            mInputConsumerController.registerInputConsumer();
+        }
+        if (visible != mMenuVisible) {
+            mListeners.forEach(l -> l.onPipMenuVisibilityChanged(visible, resize));
             if (visible) {
                 // Once visible, start listening for media action changes. This call will trigger
                 // the menu actions to be updated again.
@@ -263,13 +293,13 @@ public class PipMenuActivityController {
                 mMediaController.removeListener(mMediaActionListener);
             }
         }
-        mVisible = visible;
+        mMenuVisible = visible;
     }
 
     public void dump(PrintWriter pw, String prefix) {
         final String innerPrefix = prefix + "  ";
         pw.println(prefix + TAG);
-        pw.println(innerPrefix + "mVisible=" + mVisible);
+        pw.println(innerPrefix + "mMenuVisible=" + mMenuVisible);
         pw.println(innerPrefix + "mListeners=" + mListeners.size());
     }
 }

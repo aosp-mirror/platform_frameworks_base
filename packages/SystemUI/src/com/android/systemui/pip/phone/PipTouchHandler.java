@@ -16,21 +16,15 @@
 
 package com.android.systemui.pip.phone;
 
-import static android.view.WindowManager.INPUT_CONSUMER_PIP;
-
 import android.app.IActivityManager;
 import android.content.Context;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.IPinnedStackController;
 import android.view.IWindowManager;
-import android.view.InputChannel;
-import android.view.InputEvent;
-import android.view.InputEventReceiver;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
 
@@ -59,12 +53,10 @@ public class PipTouchHandler {
 
     private final Context mContext;
     private final IActivityManager mActivityManager;
-    private final IWindowManager mWindowManager;
     private final ViewConfiguration mViewConfig;
     private final PipMenuListener mMenuListener = new PipMenuListener();
     private IPinnedStackController mPinnedStackController;
 
-    private PipInputEventReceiver mInputEventReceiver;
     private final PipMenuActivityController mMenuController;
     private final PipDismissViewController mDismissViewController;
     private final PipSnapAlgorithm mSnapAlgorithm;
@@ -89,9 +81,8 @@ public class PipTouchHandler {
     };
 
     // Behaviour states
-    private boolean mIsTappingThrough;
-    private boolean mIsMinimized;
     private boolean mIsMenuVisible;
+    private boolean mIsMinimized;
     private boolean mIsImeShowing;
     private int mImeHeight;
     private float mSavedSnapFraction = -1f;
@@ -106,36 +97,12 @@ public class PipTouchHandler {
     private final Rect mTmpBounds = new Rect();
 
     /**
-     * Input handler used for Pip windows.
-     */
-    private final class PipInputEventReceiver extends InputEventReceiver {
-
-        public PipInputEventReceiver(InputChannel inputChannel, Looper looper) {
-            super(inputChannel, looper);
-        }
-
-        @Override
-        public void onInputEvent(InputEvent event) {
-            boolean handled = true;
-            try {
-                // To be implemented for input handling over Pip windows
-                if (event instanceof MotionEvent) {
-                    MotionEvent ev = (MotionEvent) event;
-                    handled = handleTouchEvent(ev);
-                }
-            } finally {
-                finishInputEvent(event, handled);
-            }
-        }
-    }
-
-    /**
      * A listener for the PIP menu activity.
      */
     private class PipMenuListener implements PipMenuActivityController.Listener {
         @Override
-        public void onPipMenuVisibilityChanged(boolean visible) {
-            setMenuVisibilityState(visible);
+        public void onPipMenuVisibilityChanged(boolean menuVisible, boolean resize) {
+            setMenuVisibilityState(menuVisible, resize);
         }
 
         @Override
@@ -148,7 +115,7 @@ public class PipTouchHandler {
         @Override
         public void onPipMinimize() {
             setMinimizedStateInternal(true);
-            mMotionHelper.animateToClosestMinimizedState(mMovementBounds, mMenuController);
+            mMotionHelper.animateToClosestMinimizedState(mMovementBounds);
         }
 
         @Override
@@ -159,13 +126,13 @@ public class PipTouchHandler {
         }
     }
 
-    public PipTouchHandler(Context context, PipMenuActivityController menuController,
-            IActivityManager activityManager, IWindowManager windowManager) {
+    public PipTouchHandler(Context context, IActivityManager activityManager,
+            PipMenuActivityController menuController,
+            InputConsumerController inputConsumerController) {
 
         // Initialize the Pip input consumer
         mContext = context;
         mActivityManager = activityManager;
-        mWindowManager = windowManager;
         mViewConfig = ViewConfiguration.get(context);
         mMenuController = menuController;
         mMenuController.addListener(mMenuListener);
@@ -178,7 +145,9 @@ public class PipTouchHandler {
         };
         mMotionHelper = new PipMotionHelper(mContext, mActivityManager, mSnapAlgorithm,
                 mFlingAnimationUtils);
-        registerInputConsumer();
+
+        // Register the listener for input consumer touch events
+        inputConsumerController.setTouchListener(this::handleTouchEvent);
     }
 
     public void setTouchEnabled(boolean enabled) {
@@ -187,9 +156,8 @@ public class PipTouchHandler {
 
     public void onActivityPinned() {
         // Reset some states once we are pinned
-        if (mIsTappingThrough) {
-            mIsTappingThrough = false;
-            registerInputConsumer();
+        if (mIsMenuVisible) {
+            mIsMenuVisible = false;
         }
         if (mIsMinimized) {
             setMinimizedStateInternal(false);
@@ -255,7 +223,7 @@ public class PipTouchHandler {
         // above
         mNormalMovementBounds = normalMovementBounds;
         mExpandedMovementBounds = expandedMovementBounds;
-        updateMovementBounds();
+        updateMovementBounds(mIsMenuVisible);
     }
 
     private boolean handleTouchEvent(MotionEvent ev) {
@@ -287,7 +255,7 @@ public class PipTouchHandler {
             case MotionEvent.ACTION_UP: {
                 // Update the movement bounds again if the state has changed since the user started
                 // dragging (ie. when the IME shows)
-                updateMovementBounds();
+                updateMovementBounds(mIsMenuVisible);
 
                 for (PipTouchGesture gesture : mGestures) {
                     if (gesture.onUp(mTouchState)) {
@@ -302,38 +270,7 @@ public class PipTouchHandler {
                 break;
             }
         }
-        return !mIsTappingThrough;
-    }
-
-    /**
-     * Registers the input consumer.
-     */
-    private void registerInputConsumer() {
-        if (mInputEventReceiver == null) {
-            final InputChannel inputChannel = new InputChannel();
-            try {
-                mWindowManager.destroyInputConsumer(INPUT_CONSUMER_PIP);
-                mWindowManager.createInputConsumer(INPUT_CONSUMER_PIP, inputChannel);
-            } catch (RemoteException e) {
-                Log.e(TAG, "Failed to create PIP input consumer", e);
-            }
-            mInputEventReceiver = new PipInputEventReceiver(inputChannel, Looper.myLooper());
-        }
-    }
-
-    /**
-     * Unregisters the input consumer.
-     */
-    private void unregisterInputConsumer() {
-        if (mInputEventReceiver != null) {
-            try {
-                mWindowManager.destroyInputConsumer(INPUT_CONSUMER_PIP);
-            } catch (RemoteException e) {
-                Log.e(TAG, "Failed to destroy PIP input consumer", e);
-            }
-            mInputEventReceiver.dispose();
-            mInputEventReceiver = null;
-        }
+        return !mIsMenuVisible;
     }
 
     /**
@@ -379,34 +316,30 @@ public class PipTouchHandler {
     /**
      * Sets the menu visibility.
      */
-    void setMenuVisibilityState(boolean isMenuVisible) {
-        if (!isMenuVisible) {
-            mIsTappingThrough = false;
-            registerInputConsumer();
-        } else {
-            unregisterInputConsumer();
-        }
-        MetricsLogger.visibility(mContext, MetricsEvent.ACTION_PICTURE_IN_PICTURE_MENU,
-                isMenuVisible);
-
-        if (isMenuVisible != mIsMenuVisible) {
-            if (isMenuVisible) {
-                // Save the current snap fraction and if we do not drag or move the PiP, then
-                // we store back to this snap fraction.  Otherwise, we'll reset the snap
-                // fraction and snap to the closest edge
-                Rect expandedBounds = new Rect(mExpandedBounds);
+    void setMenuVisibilityState(boolean menuVisible, boolean resize) {
+        if (menuVisible) {
+            // Save the current snap fraction and if we do not drag or move the PiP, then
+            // we store back to this snap fraction.  Otherwise, we'll reset the snap
+            // fraction and snap to the closest edge
+            Rect expandedBounds = new Rect(mExpandedBounds);
+            if (resize) {
                 mSavedSnapFraction = mMotionHelper.animateToExpandedState(expandedBounds,
                         mMovementBounds, mExpandedMovementBounds);
-            } else {
-                // Try and restore the PiP to the closest edge, using the saved snap fraction
-                // if possible
+            }
+        } else {
+            // Try and restore the PiP to the closest edge, using the saved snap fraction
+            // if possible
+            if (resize) {
                 Rect normalBounds = new Rect(mNormalBounds);
                 mMotionHelper.animateToUnexpandedState(normalBounds, mSavedSnapFraction,
-                        mNormalMovementBounds);
+                        mNormalMovementBounds, mMovementBounds, mIsMinimized);
             }
-            mIsMenuVisible = isMenuVisible;
-            updateMovementBounds();
+            mSavedSnapFraction = -1f;
         }
+        mIsMenuVisible = menuVisible;
+        updateMovementBounds(menuVisible);
+        MetricsLogger.visibility(mContext, MetricsEvent.ACTION_PICTURE_IN_PICTURE_MENU,
+                menuVisible);
     }
 
     /**
@@ -495,19 +428,33 @@ public class PipTouchHandler {
             } finally {
                 mDismissViewController.destroyDismissTarget();
             }
+
             if (touchState.isDragging()) {
                 PointF vel = mTouchState.getVelocity();
                 if (!mIsMinimized && (mMotionHelper.shouldMinimizePip()
                         || isHorizontalFlingTowardsCurrentEdge(vel))) {
                     // Pip should be minimized
                     setMinimizedStateInternal(true);
-                    mMotionHelper.animateToClosestMinimizedState(mMovementBounds, mMenuController);
+                    if (mMenuController.isMenuVisible()) {
+                        // If the user dragged the expanded PiP to the edge, then hiding the menu
+                        // will trigger the PiP to be scaled back to the normal size with the
+                        // minimize offset adjusted
+                        mMenuController.hideMenu();
+                    } else {
+                        mMotionHelper.animateToClosestMinimizedState(mMovementBounds);
+                    }
                     return true;
                 }
                 if (mIsMinimized) {
-                    // If we're dragging and it wasn't a minimize gesture
-                    // then we shouldn't be minimized.
+                    // If we're dragging and it wasn't a minimize gesture then we shouldn't be
+                    // minimized.
                     setMinimizedStateInternal(false);
+                }
+
+                // If the menu is still visible, and we aren't minimized, then just poke the menu
+                // so that it will timeout after the user stops touching it
+                if (mMenuController.isMenuVisible()) {
+                    mMenuController.showMenu();
                 }
 
                 final float velocity = PointF.length(vel.x, vel.y);
@@ -520,9 +467,8 @@ public class PipTouchHandler {
                 // This was a tap, so no longer minimized
                 mMotionHelper.animateToClosestSnapTarget(mMovementBounds);
                 setMinimizedStateInternal(false);
-            } else if (!mIsTappingThrough) {
+            } else if (!mIsMenuVisible) {
                 mMenuController.showMenu();
-                mIsTappingThrough = true;
             } else {
                 mMotionHelper.expandPip();
             }
@@ -559,8 +505,8 @@ public class PipTouchHandler {
     /**
      * Updates the current movement bounds based on whether the menu is currently visible.
      */
-    private void updateMovementBounds() {
-        mMovementBounds = mIsMenuVisible
+    private void updateMovementBounds(boolean isExpanded) {
+        mMovementBounds = isExpanded
                 ? mExpandedMovementBounds
                 : mNormalMovementBounds;
     }
@@ -573,9 +519,8 @@ public class PipTouchHandler {
         pw.println(innerPrefix + "mNormalMovementBounds=" + mNormalMovementBounds);
         pw.println(innerPrefix + "mExpandedBounds=" + mExpandedBounds);
         pw.println(innerPrefix + "mExpandedMovementBounds=" + mExpandedMovementBounds);
-        pw.println(innerPrefix + "mIsTappingThrough=" + mIsTappingThrough);
-        pw.println(innerPrefix + "mIsMinimized=" + mIsMinimized);
         pw.println(innerPrefix + "mIsMenuVisible=" + mIsMenuVisible);
+        pw.println(innerPrefix + "mIsMinimized=" + mIsMinimized);
         pw.println(innerPrefix + "mIsImeShowing=" + mIsImeShowing);
         pw.println(innerPrefix + "mImeHeight=" + mImeHeight);
         pw.println(innerPrefix + "mSavedSnapFraction=" + mSavedSnapFraction);
