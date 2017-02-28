@@ -813,8 +813,12 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate {
     private final OnValueSelectedListener mOnValueSelectedListener = new OnValueSelectedListener() {
         @Override
         public void onValueSelected(int pickerType, int newValue, boolean autoAdvance) {
+            boolean valueChanged = false;
             switch (pickerType) {
                 case RadialTimePickerView.HOURS:
+                    if (getHour() != newValue) {
+                        valueChanged = true;
+                    }
                     final boolean isTransition = mAllowAutoAdvance && autoAdvance;
                     setHourInternal(newValue, FROM_RADIAL_PICKER, !isTransition);
                     if (isTransition) {
@@ -825,11 +829,14 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate {
                     }
                     break;
                 case RadialTimePickerView.MINUTES:
+                    if (getMinute() != newValue) {
+                        valueChanged = true;
+                    }
                     setMinuteInternal(newValue, FROM_RADIAL_PICKER);
                     break;
             }
 
-            if (mOnTimeChangedListener != null) {
+            if (mOnTimeChangedListener != null && valueChanged) {
                 mOnTimeChangedListener.onTimeChanged(mDelegator, getHour(), getMinute());
             }
         }
