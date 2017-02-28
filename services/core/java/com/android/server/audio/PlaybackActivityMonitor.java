@@ -152,9 +152,11 @@ public final class PlaybackActivityMonitor
         synchronized(mPlayerLock) {
             final AudioPlaybackConfiguration apc = mPlayers.get(new Integer(piid));
             if (checkConfigurationCaller(piid, apc, binderUid)) {
-                apc.getPlayerProxy().applyVolumeShaper(
-                        DUCK_ID,
-                        TERMINATE);
+                try {
+                    apc.getPlayerProxy().applyVolumeShaper(
+                            DUCK_ID,
+                            TERMINATE);
+                } catch (Exception e) { /* silent failure, happens happens with binder failure */ }
                 mPlayers.remove(new Integer(piid));
             } else {
                 Log.e(TAG, "Error releasing player " + piid);
