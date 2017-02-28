@@ -819,6 +819,21 @@ public class TelephonyManager {
     public static final String EVENT_DOWNGRADE_DATA_DISABLED =
             "android.telephony.event.EVENT_DOWNGRADE_DATA_DISABLED";
 
+    /**
+     * {@link android.telecom.Connection} event used to indicate that the InCall UI should notify
+     * the user when an international call is placed while on WFC only.
+     * <p>
+     * Used when the carrier config value
+     * {@link CarrierConfigManager#KEY_NOTIFY_INTERNATIONAL_CALL_ON_WFC_BOOL} is true, the device
+     * is on WFC (VoLTE not available) and an international number is dialed.
+     * <p>
+     * Sent via {@link android.telecom.Connection#sendConnectionEvent(String, Bundle)}.
+     * The {@link Bundle} parameter is expected to be null when this connection event is used.
+     * @hide
+     */
+    public static final String EVENT_NOTIFY_INTERNATIONAL_CALL_ON_WFC =
+            "android.telephony.event.EVENT_NOTIFY_INTERNATIONAL_CALL_ON_WFC";
+
     /* Visual voicemail protocols */
 
     /**
