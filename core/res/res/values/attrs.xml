@@ -3148,19 +3148,19 @@
               If both layout_marginHorizontal and any of layout_marginLeft,
               layout_marginRight, layout_marginStart, and layout_marginEnd are
               also specified, the layout_marginHorizontal value will take precedence over the
-              edge-specific values. Also, layout_margin will always take precendent over
+              edge-specific values. Also, layout_margin will always take precedence over
               any of these values, including layout_marginHorizontal.
               This space is outside this view's bounds.
               Margin values should be positive.-->
         <attr name="layout_marginHorizontal" format="dimension"  />
-        <!--  Specifies extra space on the tyop and bottom sides of this view.
+        <!--  Specifies extra space on the top and bottom sides of this view.
               Specifying layout_marginVertical is equivalent to specifying
               layout_marginTop and layout_marginBottom with that same value.
               If both layout_marginVertical and either/both layout_marginTop and
               layout_marginBottom are also specified, the layout_marginVertical value
               will take precedence over the edge-specific values.
-              Also, layout_margin will always take precendent over
-              any of these values, including layout_marginHorizontal.
+              Also, layout_margin will always take precedence over
+              any of these values, including layout_marginVertical.
               This space is outside this view's bounds.
               Margin values should be positive.-->
         <attr name="layout_marginVertical" format="dimension"  />
