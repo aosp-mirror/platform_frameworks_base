@@ -692,9 +692,7 @@
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"ภาพหน้าจอ"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"ข้อความทั่วไป"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"พื้นที่เก็บข้อมูล"</string>
-    <!-- no translation found for instant_apps (6647570248119804907) -->
-    <skip />
-    <!-- no translation found for instant_apps_message (8116608994995104836) -->
-    <skip />
+    <string name="instant_apps" msgid="6647570248119804907">"Instant App"</string>
+    <string name="instant_apps_message" msgid="8116608994995104836">"Instant Apps ไม่ต้องใช้การติดตั้ง"</string>
     <string name="app_info" msgid="6856026610594615344">"ข้อมูลแอป"</string>
 </resources>
