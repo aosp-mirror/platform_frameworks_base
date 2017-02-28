@@ -455,9 +455,9 @@ public class UsbPortManager {
 
         public void notifyRoleSwitchStatus(String portName, PortRole role, int retval) {
             if (retval == Status.SUCCESS) {
-                logAndPrint(Log.INFO, pw, portName + "role switch successful");
+                logAndPrint(Log.INFO, pw, portName + " role switch successful");
             } else {
-                logAndPrint(Log.ERROR, pw, portName + "role switch failed");
+                logAndPrint(Log.ERROR, pw, portName + " role switch failed");
             }
         }
     };
@@ -498,11 +498,12 @@ public class UsbPortManager {
                 mProxy.setCallback(mHALCallback);
                 mProxy.queryPortStatus();
             } catch (NoSuchElementException e) {
-                logAndPrint(Log.ERROR, pw, sSERVICENAME + "not found."
-                        + " Did the service failed to start ?");
+                logAndPrint(Log.ERROR, pw, sSERVICENAME + " not found."
+                        + " Did the service fail to start?");
                 Thread.dumpStack();
             } catch (RemoteException e) {
-                logAndPrint(Log.ERROR, pw, sSERVICENAME + "connectToProxy: Service not responding");
+                logAndPrint(Log.ERROR, pw, sSERVICENAME
+                        + " connectToProxy: Service not responding");
                 Thread.dumpStack();
             }
         }
