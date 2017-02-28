@@ -26,6 +26,7 @@ import android.content.pm.ResolveInfo;
 import android.graphics.drawable.Drawable;
 import android.icu.text.BreakIterator;
 import android.net.Uri;
+import android.os.LocaleList;
 import android.os.ParcelFileDescriptor;
 import android.provider.Browser;
 import android.text.Spannable;
@@ -74,7 +75,8 @@ final class TextClassifierImpl implements TextClassifier {
 
     @Override
     public TextSelection suggestSelection(
-            @NonNull CharSequence text, int selectionStartIndex, int selectionEndIndex) {
+            @NonNull CharSequence text, int selectionStartIndex, int selectionEndIndex,
+            LocaleList defaultLocales) {
         validateInput(text, selectionStartIndex, selectionEndIndex);
         try {
             if (text.length() > 0) {
@@ -101,12 +103,12 @@ final class TextClassifierImpl implements TextClassifier {
         }
         // Getting here means something went wrong, return a NO_OP result.
         return TextClassifier.NO_OP.suggestSelection(
-                text, selectionStartIndex, selectionEndIndex);
+                text, selectionStartIndex, selectionEndIndex, defaultLocales);
     }
 
     @Override
     public TextClassificationResult getTextClassificationResult(
-            @NonNull CharSequence text, int startIndex, int endIndex) {
+            @NonNull CharSequence text, int startIndex, int endIndex, LocaleList defaultLocales) {
         validateInput(text, startIndex, endIndex);
         try {
             if (text.length() > 0) {
@@ -125,11 +127,12 @@ final class TextClassifierImpl implements TextClassifier {
             Log.e(LOG_TAG, "Error getting assist info.", t);
         }
         // Getting here means something went wrong, return a NO_OP result.
-        return TextClassifier.NO_OP.getTextClassificationResult(text, startIndex, endIndex);
+        return TextClassifier.NO_OP.getTextClassificationResult(
+                text, startIndex, endIndex, defaultLocales);
     }
 
     @Override
-    public LinksInfo getLinks(CharSequence text, int linkMask) {
+    public LinksInfo getLinks(CharSequence text, int linkMask, LocaleList defaultLocales) {
         Preconditions.checkArgument(text != null);
         try {
             return LinksInfoFactory.create(
@@ -139,7 +142,27 @@ final class TextClassifierImpl implements TextClassifier {
             Log.e(LOG_TAG, "Error getting links info.", t);
         }
         // Getting here means something went wrong, return a NO_OP result.
-        return TextClassifier.NO_OP.getLinks(text, linkMask);
+        return TextClassifier.NO_OP.getLinks(text, linkMask, defaultLocales);
+    }
+
+    // TODO: Remove
+    @Override
+    public TextSelection suggestSelection(
+            CharSequence text, int selectionStartIndex, int selectionEndIndex) {
+        throw new UnsupportedOperationException("Removed");
+    }
+
+    // TODO: Remove
+    @Override
+    public TextClassificationResult getTextClassificationResult(
+            CharSequence text, int startIndex, int endIndex) {
+        throw new UnsupportedOperationException("Removed");
+    }
+
+    // TODO: Remove
+    @Override
+    public LinksInfo getLinks(CharSequence text, int linkMask) {
+        throw new UnsupportedOperationException("Removed");
     }
 
     private SmartSelection getSmartSelection() throws FileNotFoundException {
@@ -195,7 +218,7 @@ final class TextClassifierImpl implements TextClassifier {
 
     /**
      * @throws IllegalArgumentException if text is null; startIndex is negative;
-     *      endIndex is greater than text.length() or less than startIndex
+     *      endIndex is greater than text.length() or is not greater than startIndex
      */
     private static void validateInput(@NonNull CharSequence text, int startIndex, int endIndex) {
         Preconditions.checkArgument(text != null);

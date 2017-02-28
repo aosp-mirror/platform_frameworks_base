@@ -18,7 +18,9 @@ package android.view.textclassifier;
 
 import android.annotation.IntRange;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.StringDef;
+import android.os.LocaleList;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -51,19 +53,42 @@ public interface TextClassifier {
 
         @Override
         public TextSelection suggestSelection(
-                CharSequence text, int selectionStartIndex, int selectionEndIndex) {
+                CharSequence text,
+                int selectionStartIndex,
+                int selectionEndIndex,
+                LocaleList defaultLocales) {
             return new TextSelection.Builder(selectionStartIndex, selectionEndIndex).build();
         }
 
         @Override
         public TextClassificationResult getTextClassificationResult(
-                CharSequence text, int startIndex, int endIndex) {
+                CharSequence text, int startIndex, int endIndex, LocaleList defaultLocales) {
             return TextClassificationResult.EMPTY;
         }
 
         @Override
-        public LinksInfo getLinks(CharSequence text, int linkMask) {
+        public LinksInfo getLinks(CharSequence text, int linkMask, LocaleList defaultLocales) {
             return LinksInfo.NO_OP;
+        }
+
+        // TODO: Remove
+        @Override
+        public TextSelection suggestSelection(
+                CharSequence text, int selectionStartIndex, int selectionEndIndex) {
+            throw new UnsupportedOperationException("Removed");
+        }
+
+        // TODO: Remove
+        @Override
+        public TextClassificationResult getTextClassificationResult(
+                CharSequence text, int startIndex, int endIndex) {
+            throw new UnsupportedOperationException("Removed");
+        }
+
+        // TODO: Remove
+        @Override
+        public LinksInfo getLinks(CharSequence text, int linkMask) {
+            throw new UnsupportedOperationException("Removed");
         }
     };
 
@@ -75,15 +100,20 @@ public interface TextClassifier {
      *      by the sub sequence starting at selectionStartIndex and ending at selectionEndIndex)
      * @param selectionStartIndex start index of the selected part of text
      * @param selectionEndIndex end index of the selected part of text
+     * @param defaultLocales ordered list of locale preferences that can be used to disambiguate
+     *      the provided text. If no locale preferences exist, set this to null or an empty locale
+     *      list in which case the classifier will decide whether to use no locale information, use
+     *      a default locale, or use the system default.
      *
      * @throws IllegalArgumentException if text is null; selectionStartIndex is negative;
-     *      selectionEndIndex is greater than text.length() or less than selectionStartIndex
+     *      selectionEndIndex is greater than text.length() or not greater than selectionStartIndex
      */
     @NonNull
     TextSelection suggestSelection(
             @NonNull CharSequence text,
             @IntRange(from = 0) int selectionStartIndex,
-            @IntRange(from = 0) int selectionEndIndex);
+            @IntRange(from = 0) int selectionEndIndex,
+            @Nullable LocaleList defaultLocales);
 
     /**
      * Returns a {@link TextClassificationResult} object that can be used to generate a widget for
@@ -93,13 +123,20 @@ public interface TextClassifier {
      *      by the sub sequence starting at startIndex and ending at endIndex)
      * @param startIndex start index of the text to classify
      * @param endIndex end index of the text to classify
+     * @param defaultLocales ordered list of locale preferences that can be used to disambiguate
+     *      the provided text. If no locale preferences exist, set this to null or an empty locale
+     *      list in which case the classifier will decide whether to use no locale information, use
+     *      a default locale, or use the system default.
      *
      * @throws IllegalArgumentException if text is null; startIndex is negative;
-     *      endIndex is greater than text.length() or less than startIndex
+     *      endIndex is greater than text.length() or not greater than startIndex
      */
     @NonNull
     TextClassificationResult getTextClassificationResult(
-            @NonNull CharSequence text, int startIndex, int endIndex);
+            @NonNull CharSequence text,
+            @IntRange(from = 0) int startIndex,
+            @IntRange(from = 0) int endIndex,
+            @Nullable LocaleList defaultLocales);
 
     /**
      * Returns a {@link LinksInfo} that may be applied to the text to annotate it with links
@@ -108,8 +145,25 @@ public interface TextClassifier {
      * @param text the text to generate annotations for
      * @param linkMask See {@link android.text.util.Linkify} for a list of linkMasks that may be
      *      specified. Subclasses of this interface may specify additional linkMasks
+     * @param defaultLocales  ordered list of locale preferences that can be used to disambiguate
+     *      the provided text. If no locale preferences exist, set this to null or an empty locale
+     *      list in which case the classifier will decide whether to use no locale information, use
+     *      a default locale, or use the system default.
      *
      * @throws IllegalArgumentException if text is null
      */
-    LinksInfo getLinks(@NonNull CharSequence text, int linkMask);
+    LinksInfo getLinks(
+            @NonNull CharSequence text, int linkMask, @Nullable LocaleList defaultLocales);
+
+    // TODO: Remove
+    /** @removed */
+    TextSelection suggestSelection(
+            CharSequence text, int selectionStartIndex, int selectionEndIndex);
+    // TODO: Remove
+    /** @removed */
+    TextClassificationResult getTextClassificationResult(
+            CharSequence text, int startIndex, int endIndex);
+    // TODO: Remove
+    /** @removed */
+    LinksInfo getLinks(CharSequence text, int linkMask);
 }
