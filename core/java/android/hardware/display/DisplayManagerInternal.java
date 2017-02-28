@@ -213,6 +213,10 @@ public abstract class DisplayManagerInternal {
         // If true, scales the brightness to half of desired.
         public boolean lowPowerMode;
 
+        // The factor to adjust the screen brightness in low power mode in the range
+        // 0 (screen off) to 1 (no change)
+        public float screenLowPowerBrightnessFactor;
+
         // If true, applies a brightness boost.
         public boolean boostScreenBrightness;
 
@@ -235,6 +239,7 @@ public abstract class DisplayManagerInternal {
             useProximitySensor = false;
             screenBrightness = PowerManager.BRIGHTNESS_ON;
             screenAutoBrightnessAdjustment = 0.0f;
+            screenLowPowerBrightnessFactor = 0.5f;
             useAutoBrightness = false;
             blockScreenOn = false;
             dozeScreenBrightness = PowerManager.BRIGHTNESS_DEFAULT;
@@ -258,6 +263,7 @@ public abstract class DisplayManagerInternal {
             useProximitySensor = other.useProximitySensor;
             screenBrightness = other.screenBrightness;
             screenAutoBrightnessAdjustment = other.screenAutoBrightnessAdjustment;
+            screenLowPowerBrightnessFactor = other.screenLowPowerBrightnessFactor;
             brightnessSetByUser = other.brightnessSetByUser;
             useAutoBrightness = other.useAutoBrightness;
             blockScreenOn = other.blockScreenOn;
@@ -279,6 +285,8 @@ public abstract class DisplayManagerInternal {
                     && useProximitySensor == other.useProximitySensor
                     && screenBrightness == other.screenBrightness
                     && screenAutoBrightnessAdjustment == other.screenAutoBrightnessAdjustment
+                    && screenLowPowerBrightnessFactor
+                    == other.screenLowPowerBrightnessFactor
                     && brightnessSetByUser == other.brightnessSetByUser
                     && useAutoBrightness == other.useAutoBrightness
                     && blockScreenOn == other.blockScreenOn
@@ -299,6 +307,7 @@ public abstract class DisplayManagerInternal {
                     + ", useProximitySensor=" + useProximitySensor
                     + ", screenBrightness=" + screenBrightness
                     + ", screenAutoBrightnessAdjustment=" + screenAutoBrightnessAdjustment
+                    + ", screenLowPowerBrightnessFactor=" + screenLowPowerBrightnessFactor
                     + ", brightnessSetByUser=" + brightnessSetByUser
                     + ", useAutoBrightness=" + useAutoBrightness
                     + ", blockScreenOn=" + blockScreenOn
