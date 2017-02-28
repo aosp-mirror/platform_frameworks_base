@@ -7723,6 +7723,16 @@ public final class Settings {
         public static final String NETWORK_RECOMMENDATION_REQUEST_TIMEOUT_MS =
                 "network_recommendation_request_timeout_ms";
 
+        /**
+         * The expiration time in milliseconds for the {@link android.net.WifiKey} request cache in
+         * {@link com.android.server.wifi.RecommendedNetworkEvaluator}.
+         *
+         * Type: long
+         * @hide
+         */
+        public static final String RECOMMENDED_NETWORK_EVALUATOR_CACHE_EXPIRY_MS =
+                "recommended_network_evaluator_cache_expiry_ms";
+
        /**
         * Settings to allow BLE scans to be enabled even when Bluetooth is turned off for
         * connectivity.
