@@ -1144,7 +1144,7 @@ static jboolean android_location_GnssLocationProvider_init(JNIEnv* env, jobject 
     }
 
     auto result = gnssHal->setCallback(gnssCbIface);
-    if ((!result) || (!result.isOk())) {
+    if (!result.isOk() || !result) {
         ALOGE("SetCallback for Gnss Interface fails\n");
         return JNI_FALSE;
     }
@@ -1154,7 +1154,7 @@ static jboolean android_location_GnssLocationProvider_init(JNIEnv* env, jobject 
         ALOGE("Unable to initialize GNSS Xtra interface\n");
     } else {
         result = gnssXtraIface->setCallback(gnssXtraCbIface);
-        if ((!result) || (!result.isOk())) {
+        if (!result.isOk() || !result) {
             gnssXtraIface = nullptr;
             ALOGE("SetCallback for Gnss Xtra Interface fails\n");
         }
@@ -1344,7 +1344,7 @@ static void android_location_GnssLocationProvider_inject_time(JNIEnv* /* env */,
         jlong time, jlong timeReference, jint uncertainty) {
     if (gnssHal != nullptr) {
         auto result = gnssHal->injectTime(time, timeReference, uncertainty);
-        if (!result || !result.isOk()) {
+        if (!result.isOk() || !result) {
             ALOGE("%s: Gnss injectTime() failed", __func__);
         }
     }
@@ -1354,7 +1354,7 @@ static void android_location_GnssLocationProvider_inject_location(JNIEnv* /* env
         jobject /* obj */, jdouble latitude, jdouble longitude, jfloat accuracy) {
     if (gnssHal != nullptr) {
         auto result = gnssHal->injectLocation(latitude, longitude, accuracy);
-        if (!result || !result.isOk()) {
+        if (!result.isOk() || !result) {
             ALOGE("%s: Gnss injectLocation() failed", __func__);
         }
     }
@@ -1391,7 +1391,7 @@ static void android_location_GnssLocationProvider_agps_data_conn_open(
     const char *apnStr = env->GetStringUTFChars(apn, NULL);
 
     auto result = agnssIface->dataConnOpen(apnStr, static_cast<IAGnss::ApnIpType>(apnIpType));
-    if ((!result) || (!result.isOk())) {
+    if (!result.isOk() || !result){
         ALOGE("%s: Failed to set APN and its IP type", __func__);
     }
     env->ReleaseStringUTFChars(apn, apnStr);
@@ -1405,7 +1405,7 @@ static void android_location_GnssLocationProvider_agps_data_conn_closed(JNIEnv* 
     }
 
     auto result = agnssIface->dataConnClosed();
-    if ((!result) || (!result.isOk())) {
+    if (!result.isOk() || !result) {
         ALOGE("%s: Failed to close AGnss data connection", __func__);
     }
 }
@@ -1418,7 +1418,7 @@ static void android_location_GnssLocationProvider_agps_data_conn_failed(JNIEnv* 
     }
 
     auto result = agnssIface->dataConnFailed();
-    if ((!result) || (!result.isOk())) {
+    if (!result.isOk() || !result) {
         ALOGE("%s: Failed to notify unavailability of AGnss data connection", __func__);
     }
 }
@@ -1434,7 +1434,7 @@ static void android_location_GnssLocationProvider_set_agps_server(JNIEnv* env, j
     auto result = agnssIface->setServer(static_cast<IAGnssCallback::AGnssType>(type),
                                        c_hostname,
                                        port);
-    if ((!result) || (!result.isOk())) {
+    if (!result.isOk() || !result) {
         ALOGE("%s: Failed to set AGnss host name and port", __func__);
     }
 
@@ -1512,13 +1512,13 @@ static void android_location_GnssLocationProvider_update_network_state(JNIEnv* e
         auto result = agnssRilIface->updateNetworkState(connected,
                                                        static_cast<IAGnssRil::NetworkType>(type),
                                                        roaming);
-        if ((!result) || (!result.isOk())) {
+        if (!result.isOk() || !result) {
             ALOGE("updateNetworkState failed");
         }
 
         const char *c_apn = env->GetStringUTFChars(apn, NULL);
         result = agnssRilIface->updateNetworkAvailability(available, c_apn);
-        if ((!result) || (!result.isOk())) {
+        if (!result.isOk() || !result) {
             ALOGE("updateNetworkAvailability failed");
         }
 
