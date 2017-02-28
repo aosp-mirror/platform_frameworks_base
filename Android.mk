@@ -408,10 +408,10 @@ LOCAL_SRC_FILES += \
 	location/java/android/location/INetInitiatedListener.aidl \
 	location/java/com/android/internal/location/ILocationProvider.aidl \
 	media/java/android/media/IAudioService.aidl \
-	media/java/android/media/ICas.aidl \
-	media/java/android/media/ICasListener.aidl \
-	media/java/android/media/IDescrambler.aidl \
-	media/java/android/media/IMediaCasService.aidl \
+	../av/drm/libmediadrm/aidl/android/media/ICas.aidl \
+	../av/drm/libmediadrm/aidl/android/media/ICasListener.aidl \
+	../av/drm/libmediadrm/aidl/android/media/IDescrambler.aidl \
+	../av/drm/libmediadrm/aidl/android/media/IMediaCasService.aidl \
 	media/java/android/media/IAudioFocusDispatcher.aidl \
 	media/java/android/media/IAudioRoutesObserver.aidl \
 	media/java/android/media/IMediaHTTPConnection.aidl \
@@ -537,6 +537,7 @@ LOCAL_AIDL_INCLUDES += \
 
 LOCAL_AIDL_INCLUDES += \
 	frameworks/av/camera/aidl \
+	frameworks/av/drm/libmediadrm/aidl \
 	frameworks/native/aidl/gui \
 	system/netd/server/binder
 
