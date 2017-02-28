@@ -18,6 +18,7 @@ package android.telephony.ims;
 
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.RemoteException;
@@ -43,6 +44,7 @@ import com.android.internal.annotations.VisibleForTesting;
 
 import static android.Manifest.permission.MODIFY_PHONE_STATE;
 import static android.Manifest.permission.READ_PHONE_STATE;
+import static android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE;
 
 /**
  * Main ImsService implementation, which binds via the Telephony ImsResolver. Services that extend
@@ -137,7 +139,7 @@ public abstract class ImsService extends ImsServiceBase {
         @Override
         public boolean isConnected(int slotId, int featureType, int callSessionType, int callType)
                 throws RemoteException {
-            enforceCallingOrSelfPermission(READ_PHONE_STATE, "isConnected");
+            enforceReadPhoneStatePermission("isConnected");
             synchronized (mFeatures) {
                 MMTelFeature feature = resolveMMTelFeature(slotId, featureType);
                 if (feature != null) {
@@ -149,7 +151,7 @@ public abstract class ImsService extends ImsServiceBase {
 
         @Override
         public boolean isOpened(int slotId, int featureType) throws RemoteException {
-            enforceCallingOrSelfPermission(READ_PHONE_STATE, "isOpened");
+            enforceReadPhoneStatePermission("isOpened");
             synchronized (mFeatures) {
                 MMTelFeature feature = resolveMMTelFeature(slotId, featureType);
                 if (feature != null) {
@@ -161,7 +163,7 @@ public abstract class ImsService extends ImsServiceBase {
 
         @Override
         public int getFeatureStatus(int slotId, int featureType) throws RemoteException {
-            enforceCallingOrSelfPermission(READ_PHONE_STATE, "getFeatureStatus");
+            enforceReadPhoneStatePermission("getFeatureStatus");
             int status = ImsFeature.STATE_NOT_AVAILABLE;
             synchronized (mFeatures) {
                 SparseArray<ImsFeature> featureMap = mFeatures.get(slotId);
@@ -178,7 +180,7 @@ public abstract class ImsService extends ImsServiceBase {
         @Override
         public void addRegistrationListener(int slotId, int featureType,
                 IImsRegistrationListener listener) throws RemoteException {
-            enforceCallingOrSelfPermission(READ_PHONE_STATE, "addRegistrationListener");
+            enforceReadPhoneStatePermission("addRegistrationListener");
             synchronized (mFeatures) {
                 MMTelFeature feature = resolveMMTelFeature(slotId, featureType);
                 if (feature != null) {
@@ -190,7 +192,7 @@ public abstract class ImsService extends ImsServiceBase {
         @Override
         public void removeRegistrationListener(int slotId, int featureType,
                 IImsRegistrationListener listener) throws RemoteException {
-            enforceCallingOrSelfPermission(READ_PHONE_STATE, "removeRegistrationListener");
+            enforceReadPhoneStatePermission("removeRegistrationListener");
             synchronized (mFeatures) {
                 MMTelFeature feature = resolveMMTelFeature(slotId, featureType);
                 if (feature != null) {
@@ -351,6 +353,8 @@ public abstract class ImsService extends ImsServiceBase {
         }
         ImsFeature f = makeImsFeature(slotId, featureType);
         if (f != null) {
+            f.setContext(this);
+            f.setSlotId(slotId);
             f.setImsFeatureStatusCallback(c);
             featureMap.put(featureType, f);
         }
@@ -431,6 +435,17 @@ public abstract class ImsService extends ImsServiceBase {
         }
         // Tried to create feature that is not defined.
         return null;
+    }
+
+    /**
+     * Check for both READ_PHONE_STATE and READ_PRIVILEGED_PHONE_STATE. READ_PHONE_STATE is a
+     * public permission and READ_PRIVILEGED_PHONE_STATE is only granted to system apps.
+     */
+    private void enforceReadPhoneStatePermission(String fn) {
+        if (checkCallingOrSelfPermission(READ_PRIVILEGED_PHONE_STATE)
+                != PackageManager.PERMISSION_GRANTED) {
+            enforceCallingOrSelfPermission(READ_PHONE_STATE, fn);
+        }
     }
 
     /**
