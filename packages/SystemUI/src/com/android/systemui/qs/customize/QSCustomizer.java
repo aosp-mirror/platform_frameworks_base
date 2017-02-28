@@ -20,6 +20,8 @@ import android.animation.Animator.AnimatorListener;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -69,6 +71,7 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
     private boolean mCustomizing;
     private NotificationsQuickSettingsContainer mNotifQsContainer;
     private QS mQs;
+    private boolean mFinishedFetchingTiles = false;
 
     public QSCustomizer(Context context, AttributeSet attrs) {
         super(new ContextThemeWrapper(context, R.style.edit_theme), attrs);
@@ -136,13 +139,22 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
             setTileSpecs();
             setVisibility(View.VISIBLE);
             mClipper.animateCircularClip(x, y, true, mExpandAnimationListener);
-            new TileQueryHelper(mContext, mHost).setListener(mTileAdapter);
+            queryTiles();
             mNotifQsContainer.setCustomizerAnimating(true);
             mNotifQsContainer.setCustomizerShowing(true);
             announceForAccessibility(mContext.getString(
                     R.string.accessibility_desc_quick_settings_edit));
             Dependency.get(KeyguardMonitor.class).addCallback(mKeyguardCallback);
         }
+    }
+
+    private void queryTiles() {
+        mFinishedFetchingTiles = false;
+        Runnable tileQueryFetchCompletion = () -> {
+            Handler mainHandler = new Handler(Looper.getMainLooper());
+            mainHandler.post(() -> mFinishedFetchingTiles = true);
+        };
+        new TileQueryHelper(mContext, mHost, mTileAdapter, tileQueryFetchCompletion);
     }
 
     public void hide(int x, int y) {
@@ -204,7 +216,9 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
     }
 
     private void save() {
-        mTileAdapter.saveSpecs(mHost);
+        if (mFinishedFetchingTiles) {
+            mTileAdapter.saveSpecs(mHost);
+        }
     }
 
     private final Callback mKeyguardCallback = () -> {
