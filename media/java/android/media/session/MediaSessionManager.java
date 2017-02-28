@@ -439,6 +439,9 @@ public final class MediaSessionManager {
     public interface OnMediaKeyListener {
         /**
          * Called when the media key is pressed.
+         * <p>If the listener consumes the initial down event (i.e. ACTION_DOWN with
+         * repeat count zero), it must also comsume all following key events.
+         * (i.e. ACTION_DOWN with repeat count more than zero, and ACTION_UP).
          * <p>If it takes more than 1s to return, the key event will be sent to
          * other media sessions.
          */
@@ -534,9 +537,11 @@ public final class MediaSessionManager {
                 public void run() {
                     boolean handled = mListener.onMediaKey(event);
                     Log.d(TAG, "The media key listener is returned " + handled);
-                    result.send(
-                            handled ? RESULT_MEDIA_KEY_HANDLED : RESULT_MEDIA_KEY_NOT_HANDLED,
-                            null);
+                    if (result != null) {
+                        result.send(
+                                handled ? RESULT_MEDIA_KEY_HANDLED : RESULT_MEDIA_KEY_NOT_HANDLED,
+                                null);
+                    }
                 }
             });
         }

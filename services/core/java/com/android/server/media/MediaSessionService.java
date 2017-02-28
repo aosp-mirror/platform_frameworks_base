@@ -811,10 +811,26 @@ public class MediaSessionService extends SystemService implements Monitor {
                                 + "to the global priority session.");
                         return;
                     }
+                    if (!isGlobalPriorityActive) {
+                        // Only consider full user.
+                        UserRecord user = mUserRecords.get(mCurrentUserIdList.get(0));
+                        if (user.mOnMediaKeyListener != null) {
+                            if (DEBUG_KEY_EVENT) {
+                                Log.d(TAG, "Send " + keyEvent + " to media key listener");
+                            }
+                            try {
+                                user.mOnMediaKeyListener.onMediaKey(keyEvent,
+                                        new MediaKeyListenerResultReceiver(keyEvent, needWakeLock));
+                                return;
+                            } catch (RemoteException e) {
+                                Log.w(TAG, "Failed to send " + keyEvent + " to media key listener");
+                            }
+                        }
+                    }
                     if (!isGlobalPriorityActive && isVoiceKey(keyEvent.getKeyCode())) {
                         handleVoiceKeyEventLocked(keyEvent, needWakeLock);
                     } else {
-                        dispatchMediaKeyEventLocked(keyEvent, needWakeLock, true);
+                        dispatchMediaKeyEventLocked(keyEvent, needWakeLock);
                     }
                 }
             } finally {
@@ -1193,15 +1209,14 @@ public class MediaSessionService extends SystemService implements Monitor {
                     if (!mVoiceButtonHandled && !keyEvent.isCanceled()) {
                         // Resend the down then send this event through
                         KeyEvent downEvent = KeyEvent.changeAction(keyEvent, KeyEvent.ACTION_DOWN);
-                        dispatchMediaKeyEventLocked(downEvent, needWakeLock, true);
-                        dispatchMediaKeyEventLocked(keyEvent, needWakeLock, true);
+                        dispatchMediaKeyEventLocked(downEvent, needWakeLock);
+                        dispatchMediaKeyEventLocked(keyEvent, needWakeLock);
                     }
                 }
             }
         }
 
-        private void dispatchMediaKeyEventLocked(KeyEvent keyEvent, boolean needWakeLock,
-                boolean checkMediaKeyListener) {
+        private void dispatchMediaKeyEventLocked(KeyEvent keyEvent, boolean needWakeLock) {
             // If we don't have a media button receiver to fall back on
             // include non-playing sessions for dispatching.
             boolean useNotPlayingSessions = true;
@@ -1220,25 +1235,6 @@ public class MediaSessionService extends SystemService implements Monitor {
 
             MediaSessionRecord session = mPriorityStack.getDefaultMediaButtonSession(
                     mCurrentUserIdList, useNotPlayingSessions);
-
-            if ((session == null
-                    || !session.hasFlag(MediaSession.FLAG_EXCLUSIVE_GLOBAL_PRIORITY))
-                    && checkMediaKeyListener) {
-                // Only consider full user.
-                UserRecord user = mUserRecords.get(mCurrentUserIdList.get(0));
-                if (user.mOnMediaKeyListener != null) {
-                    if (DEBUG_KEY_EVENT) {
-                        Log.d(TAG, "Send " + keyEvent + " to media key listener");
-                    }
-                    try {
-                        user.mOnMediaKeyListener.onMediaKey(keyEvent,
-                                new MediaKeyListenerResultReceiver(keyEvent, needWakeLock));
-                        return;
-                    } catch (RemoteException e) {
-                        Log.w(TAG, "Failed to send " + keyEvent + " to media key listener");
-                    }
-                }
-            }
             if (session != null) {
                 if (DEBUG_KEY_EVENT) {
                     Log.d(TAG, "Sending " + keyEvent + " to " + session);
@@ -1397,7 +1393,12 @@ public class MediaSessionService extends SystemService implements Monitor {
                 mHandled = true;
                 mHandler.removeCallbacks(this);
                 synchronized (mLock) {
-                    dispatchMediaKeyEventLocked(mKeyEvent, mNeedWakeLock, false);
+                    if (!mPriorityStack.isGlobalPriorityActive()
+                            && isVoiceKey(mKeyEvent.getKeyCode())) {
+                        handleVoiceKeyEventLocked(mKeyEvent, mNeedWakeLock);
+                    } else {
+                        dispatchMediaKeyEventLocked(mKeyEvent, mNeedWakeLock);
+                    }
                 }
             }
         }
