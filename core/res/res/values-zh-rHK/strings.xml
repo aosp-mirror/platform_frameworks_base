@@ -1167,14 +1167,10 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"輕按即可選取語言和鍵盤配置"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <!-- no translation found for alert_windows_notification_channel_name (7443890103456396837) -->
-    <skip />
-    <!-- no translation found for alert_windows_notification_title (5399998516035621282) -->
-    <skip />
-    <!-- no translation found for alert_windows_notification_message (2456738662997073459) -->
-    <skip />
-    <!-- no translation found for alert_windows_notification_turn_off_action (3367294525884949878) -->
-    <skip />
+    <string name="alert_windows_notification_channel_name" msgid="7443890103456396837">"「<xliff:g id="NAME">%s</xliff:g>」會覆蓋其他應用程式"</string>
+    <string name="alert_windows_notification_title" msgid="5399998516035621282">"「<xliff:g id="NAME">%s</xliff:g>」應用程式目前在最上層顯示。"</string>
+    <string name="alert_windows_notification_message" msgid="2456738662997073459">"畫面上可能會一直保持顯示此應用程式的某些部分。如果此功能無法正常運作，請將其關閉。"</string>
+    <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"關閉"</string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"正在準備<xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"正在檢查錯誤"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"已偵測到新<xliff:g id="NAME">%s</xliff:g>"</string>
@@ -1712,4 +1708,18 @@
     <string name="time_picker_prompt_label" msgid="7588093983899966783">"輸入時間"</string>
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"切換至文字輸入模式即可輸入時間。"</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"切換至時鐘模式即可輸入時間。"</string>
+    <!-- no translation found for autofill_save_title (7081244500504163245) -->
+    <skip />
+    <!-- no translation found for autofill_save_title_with_type (4977385733042555659) -->
+    <skip />
+    <!-- no translation found for autofill_save_yes (6398026094049005921) -->
+    <skip />
+    <!-- no translation found for autofill_save_no (2625132258725581787) -->
+    <skip />
+    <!-- no translation found for autofill_save_type_password (5288448918465971568) -->
+    <skip />
+    <!-- no translation found for autofill_save_type_address (4936707762193009542) -->
+    <skip />
+    <!-- no translation found for autofill_save_type_credit_card (7127694776265563071) -->
+    <skip />
 </resources>

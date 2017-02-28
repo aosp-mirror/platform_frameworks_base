@@ -322,8 +322,8 @@
     <string name="permdesc_systemAlertWindow" msgid="2393776099672266188">"แอปนี้สามารถปรากฏเหนือแอปอื่นๆ หรือส่วนอื่นของหน้าจอ ซึ่งอาจรบกวนการใช้งานตามปกติของแอปและทำให้ลักษณะการแสดงแอปอื่นๆ เปลี่ยนไป"</string>
     <string name="permlab_runInBackground" msgid="7365290743781858803">"ทำงานในพื้นหลัง"</string>
     <string name="permdesc_runInBackground" msgid="7370142232209999824">"แอปนี้สามารถทำงานในพื้นหลัง ซึ่งอาจทำให้แบตเตอรี่หมดเร็วขึ้น"</string>
-    <string name="permlab_useDataInBackground" msgid="8694951340794341809">"ใช้เน็ตมือถือในพื้นหลัง"</string>
-    <string name="permdesc_useDataInBackground" msgid="6049514223791806027">"แอปนี้สามารถใช้เน็ตมือถือในพื้นหลัง ซึ่งอาจเพิ่มปริมาณการใช้อินเทอร์เน็ต"</string>
+    <string name="permlab_useDataInBackground" msgid="8694951340794341809">"ใช้เน็ตในพื้นหลัง"</string>
+    <string name="permdesc_useDataInBackground" msgid="6049514223791806027">"แอปนี้สามารถใช้เน็ตในพื้นหลัง ซึ่งอาจเพิ่มปริมาณการใช้อินเทอร์เน็ต"</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"ทำให้แอปพลิเคชันทำงานเสมอ"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"อนุญาตให้แอปพลิเคชันทำให้ส่วนหนึ่งของตัวเองคงอยู่ถาวรในหน่วยความจำ ซึ่งจะจำกัดพื้นที่หน่วยความจำที่ใช้งานได้ของแอปพลิเคชันอื่นๆ และทำให้แท็บเล็ตทำงานช้าลง"</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"อนุญาตให้แอปทำให้บางส่วนของแอปนั้นอยู่ในหน่วยความจำเสมอ ซึ่งอาจจำกัดพื้นที่หน่วยความจำสำหรับแอปอื่นและทำให้ทีวีช้าลง"</string>
@@ -1167,14 +1167,10 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"แตะเพื่อเลือกภาษาและรูปแบบ"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" กขฃคฅฆงจฉชซฌญฎฏฐฑฒณดตถทธนบปผฝพฟภมยรลวศษสหฬอฮ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" กขฃคฅฆงจฉชซฌญฎฏฐฑฒณดตถทธนบปผฝพฟภมยรลวศษสหฬอฮ"</string>
-    <!-- no translation found for alert_windows_notification_channel_name (7443890103456396837) -->
-    <skip />
-    <!-- no translation found for alert_windows_notification_title (5399998516035621282) -->
-    <skip />
-    <!-- no translation found for alert_windows_notification_message (2456738662997073459) -->
-    <skip />
-    <!-- no translation found for alert_windows_notification_turn_off_action (3367294525884949878) -->
-    <skip />
+    <string name="alert_windows_notification_channel_name" msgid="7443890103456396837">"<xliff:g id="NAME">%s</xliff:g> แสดงทับแอปอื่น"</string>
+    <string name="alert_windows_notification_title" msgid="5399998516035621282">"แอป <xliff:g id="NAME">%s</xliff:g> แสดงอยู่ด้านบนสุด"</string>
+    <string name="alert_windows_notification_message" msgid="2456738662997073459">"ส่วนต่างๆ ของแอปนี้อาจปรากฏอยู่ตลอดเวลา หากคุณลักษณะนี้ไม่ทำงานอย่างถูกต้อง ให้ปิดแอป"</string>
+    <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"ปิด"</string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"กำลังเตรียม <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"กำลังตรวจหาข้อผิดพลาด"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"ตรวจพบ <xliff:g id="NAME">%s</xliff:g> ใหม่"</string>
@@ -1712,4 +1708,18 @@
     <string name="time_picker_prompt_label" msgid="7588093983899966783">"พิมพ์เวลา"</string>
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"สลับไปโหมดป้อนข้อความเพื่อป้อนเวลา"</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"สลับไปโหมดนาฬิกาเพื่อป้อนเวลา"</string>
+    <!-- no translation found for autofill_save_title (7081244500504163245) -->
+    <skip />
+    <!-- no translation found for autofill_save_title_with_type (4977385733042555659) -->
+    <skip />
+    <!-- no translation found for autofill_save_yes (6398026094049005921) -->
+    <skip />
+    <!-- no translation found for autofill_save_no (2625132258725581787) -->
+    <skip />
+    <!-- no translation found for autofill_save_type_password (5288448918465971568) -->
+    <skip />
+    <!-- no translation found for autofill_save_type_address (4936707762193009542) -->
+    <skip />
+    <!-- no translation found for autofill_save_type_credit_card (7127694776265563071) -->
+    <skip />
 </resources>

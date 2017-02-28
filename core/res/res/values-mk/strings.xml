@@ -83,10 +83,10 @@
     <string name="RuacMmi" msgid="7827887459138308886">"Одбивање несакани вознемирувачки повици"</string>
     <string name="CndMmi" msgid="3116446237081575808">"Испорака на повикувачки број"</string>
     <string name="DndMmi" msgid="1265478932418334331">"Не вознемирувај"</string>
-    <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"Стандардно, повикувачот со овој ИД е ограничен. Следен повик: ограничен"</string>
-    <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"Стандардно, повикувачот со овој ИД е ограничен. Следен повик: не е ограничен"</string>
-    <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"Стандардно, повикувачот со овој ИД не е ограничен. Следен повик: ограничен"</string>
-    <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"Стандардно, повикувачот со овој ИД не е ограничен. Следен повик: не е ограничен"</string>
+    <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"Стандардно, повикувачот со овој ID е ограничен. Следен повик: ограничен"</string>
+    <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"Стандардно, повикувачот со овој ID е ограничен. Следен повик: не е ограничен"</string>
+    <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"Стандардно, повикувачот со овој ID не е ограничен. Следен повик: ограничен"</string>
+    <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"Стандардно, повикувачот со овој ID не е ограничен. Следен повик: не е ограничен"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Услугата не е предвидена."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Не може да го промените поставувањето за ID на повикувач."</string>
     <string name="RestrictedOnData" msgid="8653794784690065540">"Услугата за податоци е блокирана."</string>
@@ -1168,14 +1168,10 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Допрете за избирање јазик и распоред"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <!-- no translation found for alert_windows_notification_channel_name (7443890103456396837) -->
-    <skip />
-    <!-- no translation found for alert_windows_notification_title (5399998516035621282) -->
-    <skip />
-    <!-- no translation found for alert_windows_notification_message (2456738662997073459) -->
-    <skip />
-    <!-- no translation found for alert_windows_notification_turn_off_action (3367294525884949878) -->
-    <skip />
+    <string name="alert_windows_notification_channel_name" msgid="7443890103456396837">"<xliff:g id="NAME">%s</xliff:g> пишува врз други апликации"</string>
+    <string name="alert_windows_notification_title" msgid="5399998516035621282">"Апликацијата <xliff:g id="NAME">%s</xliff:g> е одозгора."</string>
+    <string name="alert_windows_notification_message" msgid="2456738662997073459">"Делови од апликацијава може да бидат видливи цело време. Ако функцијава не работи правилно, исклучете ја."</string>
+    <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"ИСКЛУЧИ"</string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"Се подготвува <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Се проверува за грешки"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"Откриена е нова <xliff:g id="NAME">%s</xliff:g>"</string>
@@ -1715,4 +1711,18 @@
     <string name="time_picker_prompt_label" msgid="7588093983899966783">"Внесете време"</string>
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"Префрлете се на режимот за внесување текст за да внесете време."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"Префрлете се на режимот за часовник за да внесете време."</string>
+    <!-- no translation found for autofill_save_title (7081244500504163245) -->
+    <skip />
+    <!-- no translation found for autofill_save_title_with_type (4977385733042555659) -->
+    <skip />
+    <!-- no translation found for autofill_save_yes (6398026094049005921) -->
+    <skip />
+    <!-- no translation found for autofill_save_no (2625132258725581787) -->
+    <skip />
+    <!-- no translation found for autofill_save_type_password (5288448918465971568) -->
+    <skip />
+    <!-- no translation found for autofill_save_type_address (4936707762193009542) -->
+    <skip />
+    <!-- no translation found for autofill_save_type_credit_card (7127694776265563071) -->
+    <skip />
 </resources>
