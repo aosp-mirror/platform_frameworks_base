@@ -10241,13 +10241,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     mWindowManager.setDockedStackCreateState(DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT,
                             null /* initialBounds */);
                 }
-
-                final boolean successful = task.reparent(stackId, toTop,
+                task.reparent(stackId, toTop,
                         REPARENT_KEEP_STACK_AT_FRONT, ANIMATE, !DEFER_RESUME, "moveTaskToStack");
-                if (successful && stackId == DOCKED_STACK_ID) {
-                    // If task moved to docked stack - show recents if needed.
-                    mWindowManager.showRecentApps(false /* fromHome */);
-                }
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -10320,7 +10315,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     @Override
     public boolean moveTaskToDockedStack(int taskId, int createMode, boolean toTop, boolean animate,
-            Rect initialBounds, boolean moveHomeStackFront) {
+            Rect initialBounds) {
         enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "moveTaskToDockedStack()");
         synchronized (this) {
             long ident = Binder.clearCallingIdentity();
@@ -10337,12 +10332,9 @@ public class ActivityManagerService extends IActivityManager.Stub
 
                 // Defer resuming until we move the home stack to the front below
                 final boolean moved = task.reparent(DOCKED_STACK_ID, toTop,
-                        REPARENT_KEEP_STACK_AT_FRONT, animate, DEFER_RESUME,
+                        REPARENT_KEEP_STACK_AT_FRONT, animate, !DEFER_RESUME,
                         "moveTaskToDockedStack");
                 if (moved) {
-                    if (moveHomeStackFront) {
-                        mStackSupervisor.moveHomeStackToFront("moveTaskToDockedStack");
-                    }
                     mStackSupervisor.ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
                 }
                 return moved;

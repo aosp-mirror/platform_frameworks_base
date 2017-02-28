@@ -33,6 +33,7 @@ import static android.app.ActivityManager.StackId.HOME_STACK_ID;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.app.ActivityManager.StackId.LAST_STATIC_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
+import static android.app.ActivityManager.StackId.RECENTS_STACK_ID;
 import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
@@ -668,6 +669,13 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
     void moveHomeStackToFront(String reason) {
         mHomeStack.moveToFront(reason);
+    }
+
+    void moveRecentsStackToFront(String reason) {
+        final ActivityStack recentsStack = getStack(RECENTS_STACK_ID);
+        if (recentsStack != null) {
+            recentsStack.moveToFront(reason);
+        }
     }
 
     /** Returns true if the focus activity was adjusted to the home stack top activity. */
@@ -2047,6 +2055,11 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         }
         if (!createStaticStackIfNeeded || !StackId.isStaticStack(stackId)) {
             return null;
+        }
+        if (stackId == DOCKED_STACK_ID) {
+            // Make sure recents stack exist when creating a dock stack as it normally need to be on
+            // the other side of the docked stack and we make visibility decisions based on that.
+            getStack(RECENTS_STACK_ID, CREATE_IF_NEEDED, createOnTop);
         }
         return (T) createStackOnDisplay(stackId, DEFAULT_DISPLAY, createOnTop);
     }

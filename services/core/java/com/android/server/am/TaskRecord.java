@@ -690,6 +690,11 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
                 }
                 kept = resize(bounds, RESIZE_MODE_FORCED, !mightReplaceWindow, deferResume);
             } else if (stackId == DOCKED_STACK_ID || stackId == PINNED_STACK_ID) {
+                if (stackId == DOCKED_STACK_ID && moveStackMode == REPARENT_KEEP_STACK_AT_FRONT) {
+                    // Move recents to front so it is not behind home stack when going into docked
+                    // mode
+                    mService.mStackSupervisor.moveRecentsStackToFront(reason);
+                }
                 kept = resize(toStack.mBounds, RESIZE_MODE_SYSTEM, !mightReplaceWindow,
                         deferResume);
             }
@@ -713,7 +718,12 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
 
         supervisor.handleNonResizableTaskIfNeeded(this, preferredStackId, stackId);
 
-        return (preferredStackId == stackId);
+        boolean successful = (preferredStackId == stackId);
+        if (successful && stackId == DOCKED_STACK_ID) {
+            // If task moved to docked stack - show recents if needed.
+            mService.mWindowManager.showRecentApps(false /* fromHome */);
+        }
+        return successful;
     }
 
     void cancelWindowTransition() {
