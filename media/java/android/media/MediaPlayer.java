@@ -1251,6 +1251,11 @@ public class MediaPlayer extends PlayerBase
     public void prepare() throws IOException, IllegalStateException {
         _prepare();
         scanInternalSubtitleTracks();
+
+        // DrmInfo, if any, has been resolved by now.
+        synchronized (mDrmLock) {
+            mDrmInfoResolved = true;
+        }
     }
 
     private native void _prepare() throws IOException, IllegalStateException;
@@ -3149,12 +3154,6 @@ public class MediaPlayer extends PlayerBase
                     sendMessage(msg2);
                 }
 
-                // MEDIA_DRM_INFO is fired (if available) before MEDIA_PREPARED.
-                // An empty mDrmInfo indicates prepared is done but the source is not DRM protected.
-                // Setting this before the callback so onPreparedListener can call getDrmInfo to
-                // get the right state
-                mDrmInfoResolved = true;
-
                 OnPreparedListener onPreparedListener = mOnPreparedListener;
                 if (onPreparedListener != null)
                     onPreparedListener.onPrepared(mMediaPlayer);
@@ -3166,12 +3165,14 @@ public class MediaPlayer extends PlayerBase
                 if (msg.obj == null) {
                     Log.w(TAG, "MEDIA_DRM_INFO msg.obj=NULL");
                 } else if (msg.obj instanceof Parcel) {
-                    Parcel parcel = (Parcel)msg.obj;
-                    DrmInfo drmInfo = new DrmInfo(parcel);
+                    // The parcel was parsed already in postEventFromNative
+                    DrmInfo drmInfo = null;
 
                     OnDrmInfoHandlerDelegate onDrmInfoHandlerDelegate;
                     synchronized (mDrmLock) {
-                        mDrmInfo = drmInfo.makeCopy();
+                        if (mOnDrmInfoHandlerDelegate != null && mDrmInfo != null) {
+                            drmInfo = mDrmInfo.makeCopy();
+                        }
                         // local copy while keeping the lock
                         onDrmInfoHandlerDelegate = mOnDrmInfoHandlerDelegate;
                     }
@@ -3366,10 +3367,43 @@ public class MediaPlayer extends PlayerBase
             return;
         }
 
-        if (what == MEDIA_INFO && arg1 == MEDIA_INFO_STARTED_AS_NEXT) {
-            // this acquires the wakelock if needed, and sets the client side state
-            mp.start();
+        switch (what) {
+        case MEDIA_INFO:
+            if (arg1 == MEDIA_INFO_STARTED_AS_NEXT) {
+                // this acquires the wakelock if needed, and sets the client side state
+                mp.start();
+            }
+            break;
+
+        case MEDIA_DRM_INFO:
+            // We need to derive mDrmInfo before prepare() returns so processing it here
+            // before the notification is sent to EventHandler below. EventHandler runs in the
+            // notification looper so its handleMessage might process the event after prepare()
+            // has returned.
+            Log.v(TAG, "postEventFromNative MEDIA_DRM_INFO");
+            if (obj instanceof Parcel) {
+                Parcel parcel = (Parcel)obj;
+                DrmInfo drmInfo = new DrmInfo(parcel);
+                synchronized (mp.mDrmLock) {
+                    mp.mDrmInfo = drmInfo;
+                }
+            } else {
+                Log.w(TAG, "MEDIA_DRM_INFO msg.obj of unexpected type " + obj);
+            }
+            break;
+
+        case MEDIA_PREPARED:
+            // By this time, we've learned about DrmInfo's presence or absence. This is meant
+            // mainly for prepareAsync() use case. For prepare(), this still can run to a race
+            // condition b/c MediaPlayerNative releases the prepare() lock before calling notify
+            // so we also set mDrmInfoResolved in prepare().
+            synchronized (mp.mDrmLock) {
+                mp.mDrmInfoResolved = true;
+            }
+            break;
+
         }
+
         if (mp.mEventHandler != null) {
             Message m = mp.mEventHandler.obtainMessage(what, arg1, arg2, obj);
             mp.mEventHandler.sendMessage(m);
@@ -4093,16 +4127,16 @@ public class MediaPlayer extends PlayerBase
      * If the device has not been provisioned before, this call also provisions the device
      * which involves accessing the provisioning server and can take a variable time to
      * complete depending on the network connectivity.
-     * If OnDrmPreparedListener is registered, prepareDrm() runs in non-blocking
+     * If {@code OnDrmPreparedListener} is registered, prepareDrm() runs in non-blocking
      * mode by launching the provisioning in the background and returning. The listener
      * will be called when provisioning and preperation has finished. If a
-     * OnDrmPreparedListener is not registered, prepareDrm() waits till provisioning
+     * {@code OnDrmPreparedListener} is not registered, prepareDrm() waits till provisioning
      * and preperation has finished, i.e., runs in blocking mode.
      * <p>
-     * If OnDrmPreparedListener is registered, it is called to indicated the DRM session
-     * being ready regardless of blocking or non-blocking mode. The application should
-     * not make any assumption about its call sequence (e.g., before or after prepareDrm
-     * returns) or the thread context that will execute the listener.
+     * If {@code OnDrmPreparedListener} is registered, it is called to indicate the DRM
+     * session being ready. The application should not make any assumption about its call
+     * sequence (e.g., before or after prepareDrm returns), or the thread context that will
+     * execute the listener (unless the listener is registered with a handler thread).
      * <p>
      *
      * @param uuid The UUID of the crypto scheme.
