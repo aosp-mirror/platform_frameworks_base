@@ -71,6 +71,7 @@ public final class MediaSessionManager {
 
     private Context mContext;
 
+    private CallbackImpl mCallback;
     private OnVolumeKeyLongPressListenerImpl mOnVolumeKeyLongPressListener;
     private OnMediaKeyListenerImpl mOnMediaKeyListener;
 
@@ -411,6 +412,36 @@ public final class MediaSessionManager {
     }
 
     /**
+     * Set a {@link Callback}.
+     *
+     * <p>System can only have a single callback, and the callback can only be set by
+     * Bluetooth service process.
+     *
+     * @param callback A {@link Callback}. {@code null} to reset.
+     * @param handler The handler on which the callback should be invoked, or {@code null}
+     *            if the callback should be invoked on the calling thread's looper.
+     * @hide
+     */
+    public void setCallback(@Nullable Callback callback, @Nullable Handler handler) {
+        synchronized (mLock) {
+            try {
+                if (callback == null) {
+                    mCallback = null;
+                    mService.setCallback(null);
+                } else {
+                    if (handler == null) {
+                        handler = new Handler();
+                    }
+                    mCallback = new CallbackImpl(callback, handler);
+                    mService.setCallback(mCallback);
+                }
+            } catch (RemoteException e) {
+                Log.e(TAG, "Failed to set media key callback", e);
+            }
+        }
+    }
+
+    /**
      * Listens for changes to the list of active sessions. This can be added
      * using {@link #addOnActiveSessionsChangedListener}.
      */
@@ -446,6 +477,56 @@ public final class MediaSessionManager {
          * other media sessions.
          */
         boolean onMediaKey(KeyEvent event);
+    }
+
+    /**
+     * Callbacks for the media session service.
+     *
+     * <p>Called when a media key event is dispatched or the addressed player is changed.
+     * The addressed player is either the media session or the media button receiver that will
+     * receive media key events.
+     * @hide
+     */
+    public static abstract class Callback {
+        /**
+         * Called when a media key event is dispatched to the media session
+         * through the media session service.
+         *
+         * @param event Dispatched media key event.
+         * @param sessionToken The media session's token.
+         */
+        public abstract void onMediaKeyEventDispatched(KeyEvent event,
+                MediaSession.Token sessionToken);
+
+        /**
+         * Called when a media key event is dispatched to the media button receiver
+         * through the media session service.
+         * <p>MediaSessionService may broadcast key events to the media button receiver
+         * when reviving playback after the media session is released.
+         *
+         * @param event Dispatched media key event.
+         * @param mediaButtonReceiver The media button receiver.
+         */
+        public abstract void onMediaKeyEventDispatched(KeyEvent event,
+                ComponentName mediaButtonReceiver);
+
+        /**
+         * Called when the addressed player is changed to a media session.
+         * <p>One of the {@ #onAddressedPlayerChanged} will be also called immediately after
+         * {@link #setCallback} if the addressed player exists.
+         *
+         * @param sessionToken The media session's token.
+         */
+        public abstract void onAddressedPlayerChanged(MediaSession.Token sessionToken);
+
+        /**
+         * Called when the addressed player is changed to the media button receiver.
+         * <p>One of the {@ #onAddressedPlayerChanged} will be also called immediately after
+         * {@link #setCallback} if the addressed player exists.
+         *
+         * @param mediaButtonReceiver The media button receiver.
+         */
+        public abstract void onAddressedPlayerChanged(ComponentName mediaButtonReceiver);
     }
 
     private static final class SessionsChangedWrapper {
@@ -542,6 +623,59 @@ public final class MediaSessionManager {
                                 handled ? RESULT_MEDIA_KEY_HANDLED : RESULT_MEDIA_KEY_NOT_HANDLED,
                                 null);
                     }
+                }
+            });
+        }
+    }
+
+    private static final class CallbackImpl extends ICallback.Stub {
+        private final Callback mCallback;
+        private final Handler mHandler;
+
+        public CallbackImpl(@NonNull Callback callback, @NonNull Handler handler) {
+            mCallback = callback;
+            mHandler = handler;
+        }
+
+        @Override
+        public void onMediaKeyEventDispatchedToMediaSession(KeyEvent event,
+                MediaSession.Token sessionToken) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mCallback.onMediaKeyEventDispatched(event, sessionToken);
+                }
+            });
+        }
+
+        @Override
+        public void onMediaKeyEventDispatchedToMediaButtonReceiver(KeyEvent event,
+                ComponentName mediaButtonReceiver) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mCallback.onMediaKeyEventDispatched(event, mediaButtonReceiver);
+                }
+            });
+        }
+
+        @Override
+        public void onAddressedPlayerChangedToMediaSession(MediaSession.Token sessionToken) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mCallback.onAddressedPlayerChanged(sessionToken);
+                }
+            });
+        }
+
+        @Override
+        public void onAddressedPlayerChangedToMediaButtonReceiver(
+                ComponentName mediaButtonReceiver) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mCallback.onAddressedPlayerChanged(mediaButtonReceiver);
                 }
             });
         }
