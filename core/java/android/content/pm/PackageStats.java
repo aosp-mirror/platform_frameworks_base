@@ -19,6 +19,9 @@ package android.content.pm;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.UserHandle;
+import android.text.TextUtils;
+
+import java.util.Objects;
 
 /**
  * implementation of PackageStats associated with a
@@ -173,4 +176,31 @@ public class PackageStats implements Parcelable {
         dest.writeLong(externalMediaSize);
         dest.writeLong(externalObbSize);
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof PackageStats)) {
+            return false;
+        }
+
+        final PackageStats otherStats = (PackageStats) obj;
+        return ((TextUtils.equals(packageName, otherStats.packageName))
+                && userHandle == otherStats.userHandle
+                && codeSize == otherStats.codeSize
+                && dataSize == otherStats.dataSize
+                && cacheSize == otherStats.cacheSize
+                && externalCodeSize == otherStats.externalCodeSize
+                && externalDataSize == otherStats.externalDataSize
+                && externalCacheSize == otherStats.externalCacheSize
+                && externalMediaSize == otherStats.externalMediaSize
+                && externalObbSize == otherStats.externalObbSize);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(packageName, userHandle, codeSize, dataSize,
+                cacheSize, externalCodeSize, externalDataSize, externalCacheSize, externalMediaSize,
+                externalObbSize);
+    }
+
 }
