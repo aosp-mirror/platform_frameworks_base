@@ -2398,8 +2398,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
              * permission to add alert windows that aren't
              * {@link android.view.WindowManager.LayoutParams#TYPE_APPLICATION_OVERLAY}.
              */
-            return (mContext.checkCallingPermission(INTERNAL_SYSTEM_WINDOW) == PERMISSION_GRANTED)
-                    ? ADD_OKAY : ADD_PERMISSION_DENIED;
+            return (mContext.checkCallingOrSelfPermission(INTERNAL_SYSTEM_WINDOW)
+                    == PERMISSION_GRANTED) ? ADD_OKAY : ADD_PERMISSION_DENIED;
         }
 
         // check if user has enabled this operation. SecurityException will be thrown if this app
@@ -2420,8 +2420,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             default:
                 // in the default mode, we will make a decision here based on
                 // checkCallingPermission()
-                return (mContext.checkCallingPermission(SYSTEM_ALERT_WINDOW) == PERMISSION_GRANTED)
-                        ? ADD_OKAY : ADD_PERMISSION_DENIED;
+                return (mContext.checkCallingOrSelfPermission(SYSTEM_ALERT_WINDOW)
+                        == PERMISSION_GRANTED) ? ADD_OKAY : ADD_PERMISSION_DENIED;
         }
     }
 
