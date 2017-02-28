@@ -17,6 +17,7 @@
 package android.view;
 
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_ARGUMENT_ACCESSIBLE_CLICKABLE_SPAN;
+import static android.view.accessibility.AccessibilityNodeInfo.EXTRA_DATA_REQUESTED_KEY;
 import static android.view.accessibility.AccessibilityNodeInfo.EXTRA_DATA_TEXT_CHARACTER_LOCATION_KEY;
 
 import android.graphics.Point;
@@ -34,13 +35,17 @@ import android.os.RemoteException;
 import android.text.style.AccessibilityClickableSpan;
 import android.text.style.ClickableSpan;
 import android.util.LongSparseArray;
+import android.util.Slog;
 import android.view.View.AttachInfo;
 import android.view.accessibility.AccessibilityInteractionClient;
+import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeProvider;
+import android.view.accessibility.AccessibilityRequestPreparer;
 import android.view.accessibility.IAccessibilityInteractionConnectionCallback;
 
 import com.android.internal.R;
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.SomeArgs;
 
 import java.util.ArrayList;
@@ -61,10 +66,23 @@ import java.util.function.Predicate;
  */
 final class AccessibilityInteractionController {
 
+    private static final String LOG_TAG = "AccessibilityInteractionController";
+
+    // Debugging flag
     private static final boolean ENFORCE_NODE_TREE_CONSISTENT = false;
+
+    // Constants for readability
+    private static final boolean IGNORE_REQUEST_PREPARERS = true;
+    private static final boolean CONSIDER_REQUEST_PREPARERS = false;
+
+    // If an app holds off accessibility for longer than this, the hold-off is canceled to prevent
+    // accessibility from hanging
+    private static final long REQUEST_PREPARER_TIMEOUT_MS = 500;
 
     private final ArrayList<AccessibilityNodeInfo> mTempAccessibilityNodeInfoList =
         new ArrayList<AccessibilityNodeInfo>();
+
+    private final Object mLock = new Object();
 
     private final Handler mHandler;
 
@@ -76,6 +94,8 @@ final class AccessibilityInteractionController {
 
     private final int mMyProcessId;
 
+    private final AccessibilityManager mA11yManager;
+
     private final ArrayList<View> mTempArrayList = new ArrayList<View>();
 
     private final Point mTempPoint = new Point();
@@ -85,6 +105,13 @@ final class AccessibilityInteractionController {
 
     private AddNodeInfosForViewId mAddNodeInfosForViewId;
 
+    @GuardedBy("mLock")
+    private int mNumActiveRequestPreparers;
+    @GuardedBy("mLock")
+    private List<MessageHolder> mMessagesWaitingForRequestPreparer;
+    @GuardedBy("mLock")
+    private int mActiveRequestPreparerId;
+
     public AccessibilityInteractionController(ViewRootImpl viewRootImpl) {
         Looper looper =  viewRootImpl.mHandler.getLooper();
         mMyLooperThreadId = looper.getThread().getId();
@@ -92,18 +119,23 @@ final class AccessibilityInteractionController {
         mHandler = new PrivateHandler(looper);
         mViewRootImpl = viewRootImpl;
         mPrefetcher = new AccessibilityNodePrefetcher();
+        mA11yManager = mViewRootImpl.mContext.getSystemService(AccessibilityManager.class);
     }
 
-    private void scheduleMessage(Message message, int interrogatingPid, long interrogatingTid) {
-        // If the interrogation is performed by the same thread as the main UI
-        // thread in this process, set the message as a static reference so
-        // after this call completes the same thread but in the interrogating
-        // client can handle the message to generate the result.
-        if (interrogatingPid == mMyProcessId && interrogatingTid == mMyLooperThreadId) {
-            AccessibilityInteractionClient.getInstanceForThread(
-                    interrogatingTid).setSameThreadMessage(message);
-        } else {
-            mHandler.sendMessage(message);
+    private void scheduleMessage(Message message, int interrogatingPid, long interrogatingTid,
+            boolean ignoreRequestPreparers) {
+        if (ignoreRequestPreparers
+                || !holdOffMessageIfNeeded(message, interrogatingPid, interrogatingTid)) {
+            // If the interrogation is performed by the same thread as the main UI
+            // thread in this process, set the message as a static reference so
+            // after this call completes the same thread but in the interrogating
+            // client can handle the message to generate the result.
+            if (interrogatingPid == mMyProcessId && interrogatingTid == mMyLooperThreadId) {
+                AccessibilityInteractionClient.getInstanceForThread(
+                        interrogatingTid).setSameThreadMessage(message);
+            } else {
+                mHandler.sendMessage(message);
+            }
         }
     }
 
@@ -121,11 +153,11 @@ final class AccessibilityInteractionController {
             long accessibilityNodeId, Region interactiveRegion, int interactionId,
             IAccessibilityInteractionConnectionCallback callback, int flags, int interrogatingPid,
             long interrogatingTid, MagnificationSpec spec, Bundle arguments) {
-        Message message = mHandler.obtainMessage();
+        final Message message = mHandler.obtainMessage();
         message.what = PrivateHandler.MSG_FIND_ACCESSIBILITY_NODE_INFO_BY_ACCESSIBILITY_ID;
         message.arg1 = flags;
 
-        SomeArgs args = SomeArgs.obtain();
+        final SomeArgs args = SomeArgs.obtain();
         args.argi1 = AccessibilityNodeInfo.getAccessibilityViewId(accessibilityNodeId);
         args.argi2 = AccessibilityNodeInfo.getVirtualDescendantId(accessibilityNodeId);
         args.argi3 = interactionId;
@@ -135,7 +167,141 @@ final class AccessibilityInteractionController {
         args.arg4 = arguments;
         message.obj = args;
 
-        scheduleMessage(message, interrogatingPid, interrogatingTid);
+        scheduleMessage(message, interrogatingPid, interrogatingTid, CONSIDER_REQUEST_PREPARERS);
+    }
+
+    /**
+     * Check if this message needs to be held off while the app prepares to meet either this
+     * request, or a request ahead of it.
+     *
+     * @param originalMessage The message to be processed
+     * @param callingPid The calling process id
+     * @param callingTid The calling thread id
+     *
+     * @return {@code true} if the message is held off and will be processed later, {@code false} if
+     *         the message should be posted.
+     */
+    private boolean holdOffMessageIfNeeded(
+            Message originalMessage, int callingPid, long callingTid) {
+        synchronized (mLock) {
+            // If a request is already pending, queue this request for when it's finished
+            if (mNumActiveRequestPreparers != 0) {
+                queueMessageToHandleOncePrepared(originalMessage, callingPid, callingTid);
+                return true;
+            }
+
+            // Currently the only message that can hold things off is findByA11yId with extra data.
+            if (originalMessage.what
+                    != PrivateHandler.MSG_FIND_ACCESSIBILITY_NODE_INFO_BY_ACCESSIBILITY_ID) {
+                return false;
+            }
+            SomeArgs originalMessageArgs = (SomeArgs) originalMessage.obj;
+            Bundle requestArguments = (Bundle) originalMessageArgs.arg4;
+            if (requestArguments == null) {
+                return false;
+            }
+
+            // If nothing it registered for this view, nothing to do
+            int accessibilityViewId = originalMessageArgs.argi1;
+            final List<AccessibilityRequestPreparer> preparers =
+                    mA11yManager.getRequestPreparersForAccessibilityId(accessibilityViewId);
+            if (preparers == null) {
+                return false;
+            }
+
+            // If the bundle doesn't request the extra data, nothing to do
+            final String extraDataKey = requestArguments.getString(EXTRA_DATA_REQUESTED_KEY);
+            if (extraDataKey == null) {
+                return false;
+            }
+
+            // Send the request to the AccessibilityRequestPreparers on the UI thread
+            mNumActiveRequestPreparers = preparers.size();
+            for (int i = 0; i < preparers.size(); i++) {
+                final Message requestPreparerMessage = mHandler.obtainMessage(
+                        PrivateHandler.MSG_PREPARE_FOR_EXTRA_DATA_REQUEST);
+                final SomeArgs requestPreparerArgs = SomeArgs.obtain();
+                // virtualDescendentId
+                requestPreparerArgs.argi1 =
+                        (originalMessageArgs.argi2 == AccessibilityNodeInfo.UNDEFINED_ITEM_ID)
+                        ? AccessibilityNodeProvider.HOST_VIEW_ID : originalMessageArgs.argi2;
+                requestPreparerArgs.arg1 = preparers.get(i);
+                requestPreparerArgs.arg2 = extraDataKey;
+                requestPreparerArgs.arg3 = requestArguments;
+                Message preparationFinishedMessage = mHandler.obtainMessage(
+                        PrivateHandler.MSG_APP_PREPARATION_FINISHED);
+                preparationFinishedMessage.arg1 = ++mActiveRequestPreparerId;
+                requestPreparerArgs.arg4 = preparationFinishedMessage;
+
+                requestPreparerMessage.obj = requestPreparerArgs;
+                scheduleMessage(requestPreparerMessage, callingPid, callingTid,
+                        IGNORE_REQUEST_PREPARERS);
+                mHandler.obtainMessage(PrivateHandler.MSG_APP_PREPARATION_TIMEOUT);
+                mHandler.sendEmptyMessageDelayed(PrivateHandler.MSG_APP_PREPARATION_TIMEOUT,
+                        REQUEST_PREPARER_TIMEOUT_MS);
+            }
+
+            // Set the initial request aside
+            queueMessageToHandleOncePrepared(originalMessage, callingPid, callingTid);
+            return true;
+        }
+    }
+
+    private void prepareForExtraDataRequestUiThread(Message message) {
+        SomeArgs args = (SomeArgs) message.obj;
+        final int virtualDescendantId = args.argi1;
+        final AccessibilityRequestPreparer preparer = (AccessibilityRequestPreparer) args.arg1;
+        final String extraDataKey = (String) args.arg2;
+        final Bundle requestArguments = (Bundle) args.arg3;
+        final Message preparationFinishedMessage = (Message) args.arg4;
+
+        preparer.onPrepareExtraData(virtualDescendantId, extraDataKey,
+                requestArguments, preparationFinishedMessage);
+    }
+
+    private void queueMessageToHandleOncePrepared(Message message, int interrogatingPid,
+            long interrogatingTid) {
+        if (mMessagesWaitingForRequestPreparer == null) {
+            mMessagesWaitingForRequestPreparer = new ArrayList<>(1);
+        }
+        MessageHolder messageHolder =
+                new MessageHolder(message, interrogatingPid, interrogatingTid);
+        mMessagesWaitingForRequestPreparer.add(messageHolder);
+    }
+
+    private void requestPreparerDoneUiThread(Message message) {
+        synchronized (mLock) {
+            if (message.arg1 != mActiveRequestPreparerId) {
+                Slog.e(LOG_TAG, "Surprising AccessibilityRequestPreparer callback (likely late)");
+                return;
+            }
+            mNumActiveRequestPreparers--;
+            if (mNumActiveRequestPreparers <= 0) {
+                mHandler.removeMessages(PrivateHandler.MSG_APP_PREPARATION_TIMEOUT);
+                scheduleAllMessagesWaitingForRequestPreparerLocked();
+            }
+        }
+    }
+
+    private void requestPreparerTimeoutUiThread() {
+        synchronized (mLock) {
+            Slog.e(LOG_TAG, "AccessibilityRequestPreparer timed out");
+            scheduleAllMessagesWaitingForRequestPreparerLocked();
+        }
+    }
+
+    @GuardedBy("mLock")
+    private void scheduleAllMessagesWaitingForRequestPreparerLocked() {
+        int numMessages = mMessagesWaitingForRequestPreparer.size();
+        for (int i = 0; i < numMessages; i++) {
+            MessageHolder request = mMessagesWaitingForRequestPreparer.get(i);
+            scheduleMessage(request.mMessage, request.mInterrogatingPid,
+                    request.mInterrogatingTid,
+                    (i == 0) /* the app is ready for the first request */);
+        }
+        mMessagesWaitingForRequestPreparer.clear();
+        mNumActiveRequestPreparers = 0; // Just to be safe - should be unnecessary
+        mActiveRequestPreparerId = -1;
     }
 
     private void findAccessibilityNodeInfoByAccessibilityIdUiThread(Message message) {
@@ -193,7 +359,7 @@ final class AccessibilityInteractionController {
         args.arg4 = interactiveRegion;
         message.obj = args;
 
-        scheduleMessage(message, interrogatingPid, interrogatingTid);
+        scheduleMessage(message, interrogatingPid, interrogatingTid, CONSIDER_REQUEST_PREPARERS);
     }
 
     private void findAccessibilityNodeInfosByViewIdUiThread(Message message) {
@@ -259,7 +425,7 @@ final class AccessibilityInteractionController {
         args.arg4 = interactiveRegion;
         message.obj = args;
 
-        scheduleMessage(message, interrogatingPid, interrogatingTid);
+        scheduleMessage(message, interrogatingPid, interrogatingTid, CONSIDER_REQUEST_PREPARERS);
     }
 
     private void findAccessibilityNodeInfosByTextUiThread(Message message) {
@@ -347,7 +513,7 @@ final class AccessibilityInteractionController {
 
         message.obj = args;
 
-        scheduleMessage(message, interrogatingPid, interrogatingTid);
+        scheduleMessage(message, interrogatingPid, interrogatingTid, CONSIDER_REQUEST_PREPARERS);
     }
 
     private void findFocusUiThread(Message message) {
@@ -442,7 +608,7 @@ final class AccessibilityInteractionController {
 
         message.obj = args;
 
-        scheduleMessage(message, interrogatingPid, interrogatingTid);
+        scheduleMessage(message, interrogatingPid, interrogatingTid, CONSIDER_REQUEST_PREPARERS);
     }
 
     private void focusSearchUiThread(Message message) {
@@ -501,7 +667,7 @@ final class AccessibilityInteractionController {
 
         message.obj = args;
 
-        scheduleMessage(message, interrogatingPid, interrogatingTid);
+        scheduleMessage(message, interrogatingPid, interrogatingTid, CONSIDER_REQUEST_PREPARERS);
     }
 
     private void performAccessibilityActionUiThread(Message message) {
@@ -787,7 +953,7 @@ final class AccessibilityInteractionController {
             AccessibilityNodeProvider provider = view.getAccessibilityNodeProvider();
             // Determine if we'll be populating extra data
             final String extraDataRequested = (arguments == null) ? null
-                    : arguments.getString(AccessibilityNodeInfo.EXTRA_DATA_REQUESTED_KEY);
+                    : arguments.getString(EXTRA_DATA_REQUESTED_KEY);
             if (provider == null) {
                 AccessibilityNodeInfo root = view.createAccessibilityNodeInfo();
                 if (root != null) {
@@ -1115,6 +1281,9 @@ final class AccessibilityInteractionController {
         private static final int MSG_FIND_ACCESSIBILITY_NODE_INFO_BY_TEXT = 4;
         private static final int MSG_FIND_FOCUS = 5;
         private static final int MSG_FOCUS_SEARCH = 6;
+        private static final int MSG_PREPARE_FOR_EXTRA_DATA_REQUEST = 7;
+        private static final int MSG_APP_PREPARATION_FINISHED = 8;
+        private static final int MSG_APP_PREPARATION_TIMEOUT = 9;
 
         public PrivateHandler(Looper looper) {
             super(looper);
@@ -1136,6 +1305,12 @@ final class AccessibilityInteractionController {
                     return "MSG_FIND_FOCUS";
                 case MSG_FOCUS_SEARCH:
                     return "MSG_FOCUS_SEARCH";
+                case MSG_PREPARE_FOR_EXTRA_DATA_REQUEST:
+                    return "MSG_PREPARE_FOR_EXTRA_DATA_REQUEST";
+                case MSG_APP_PREPARATION_FINISHED:
+                    return "MSG_APP_PREPARATION_FINISHED";
+                case MSG_APP_PREPARATION_TIMEOUT:
+                    return "MSG_APP_PREPARATION_TIMEOUT";
                 default:
                     throw new IllegalArgumentException("Unknown message type: " + type);
             }
@@ -1163,6 +1338,15 @@ final class AccessibilityInteractionController {
                 case MSG_FOCUS_SEARCH: {
                     focusSearchUiThread(message);
                 } break;
+                case MSG_PREPARE_FOR_EXTRA_DATA_REQUEST: {
+                    prepareForExtraDataRequestUiThread(message);
+                } break;
+                case MSG_APP_PREPARATION_FINISHED: {
+                    requestPreparerDoneUiThread(message);
+                } break;
+                case MSG_APP_PREPARATION_TIMEOUT: {
+                    requestPreparerTimeoutUiThread();
+                } break;
                 default:
                     throw new IllegalArgumentException("Unknown message type: " + type);
             }
@@ -1189,6 +1373,18 @@ final class AccessibilityInteractionController {
                 mInfos.add(view.createAccessibilityNodeInfo());
             }
             return false;
+        }
+    }
+
+    private static final class MessageHolder {
+        final Message mMessage;
+        final int mInterrogatingPid;
+        final long mInterrogatingTid;
+
+        MessageHolder(Message message, int interrogatingPid, long interrogatingTid) {
+            mMessage = message;
+            mInterrogatingPid = interrogatingPid;
+            mInterrogatingTid = interrogatingTid;
         }
     }
 }

@@ -37,6 +37,7 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.IWindow;
 import android.view.View;
 
@@ -128,6 +129,12 @@ public final class AccessibilityManager {
 
     private final CopyOnWriteArrayList<AccessibilityServicesStateChangeListener>
             mServicesStateChangeListeners = new CopyOnWriteArrayList<>();
+
+    /**
+     * Map from a view's accessibility id to the list of request preparers set for that view
+     */
+    private SparseArray<List<AccessibilityRequestPreparer>> mRequestPreparerLists;
+
     /**
      * Listener for the system accessibility state. To listen for changes to the
      * accessibility state on the device, implement this interface and register
@@ -601,6 +608,54 @@ public final class AccessibilityManager {
             @NonNull AccessibilityServicesStateChangeListener listener) {
         // Final CopyOnWriteArrayList - no lock needed.
         return mServicesStateChangeListeners.remove(listener);
+    }
+
+    /**
+     * Registers a {@link AccessibilityRequestPreparer}.
+     */
+    public void addAccessibilityRequestPreparer(AccessibilityRequestPreparer preparer) {
+        if (mRequestPreparerLists == null) {
+            mRequestPreparerLists = new SparseArray<>(1);
+        }
+        int id = preparer.getView().getAccessibilityViewId();
+        List<AccessibilityRequestPreparer> requestPreparerList = mRequestPreparerLists.get(id);
+        if (requestPreparerList == null) {
+            requestPreparerList = new ArrayList<>(1);
+            mRequestPreparerLists.put(id, requestPreparerList);
+        }
+        requestPreparerList.add(preparer);
+    }
+
+    /**
+     * Unregisters a {@link AccessibilityRequestPreparer}.
+     */
+    public void removeAccessibilityRequestPreparer(AccessibilityRequestPreparer preparer) {
+        if (mRequestPreparerLists == null) {
+            return;
+        }
+        int viewId = preparer.getView().getAccessibilityViewId();
+        List<AccessibilityRequestPreparer> requestPreparerList = mRequestPreparerLists.get(viewId);
+        if (requestPreparerList != null) {
+            requestPreparerList.remove(preparer);
+            if (requestPreparerList.isEmpty()) {
+                mRequestPreparerLists.remove(viewId);
+            }
+        }
+    }
+
+    /**
+     * Get the preparers that are registered for an accessibility ID
+     *
+     * @param id The ID of interest
+     * @return The list of preparers, or {@code null} if there are none.
+     *
+     * @hide
+     */
+    public List<AccessibilityRequestPreparer> getRequestPreparersForAccessibilityId(int id) {
+        if (mRequestPreparerLists == null) {
+            return null;
+        }
+        return mRequestPreparerLists.get(id);
     }
 
     /**

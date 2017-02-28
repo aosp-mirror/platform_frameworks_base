@@ -25135,8 +25135,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          * </p>
          * <p>
          * The default implementation behaves as
-         * {@link View#addExtraDataToAccessibilityNodeInfo(AccessibilityNodeInfo, int) for
-         * the case where no accessibility delegate is set.
+         * {@link View#addExtraDataToAccessibilityNodeInfo(AccessibilityNodeInfo, String, Bundle)
+         * for the case where no accessibility delegate is set.
          * </p>
          *
          * @param host The View hosting the delegate. Never {@code null}.
