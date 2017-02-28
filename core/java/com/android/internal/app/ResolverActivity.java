@@ -535,16 +535,7 @@ public class ResolverActivity extends Activity {
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        if (mSupportsAlwaysUseOption) {
-            final int checkedPos = mAdapterView.getCheckedItemPosition();
-            final boolean hasValidSelection = checkedPos != ListView.INVALID_POSITION;
-            mLastSelected = checkedPos;
-            setAlwaysButtonEnabled(hasValidSelection, checkedPos, true);
-            mOnceButton.setEnabled(hasValidSelection);
-            if (hasValidSelection) {
-                mAdapterView.setSelection(checkedPos);
-            }
-        }
+        resetAlwaysOrOnceButtonBar();
     }
 
     private boolean hasManagedProfile() {
@@ -581,7 +572,13 @@ public class ResolverActivity extends Activity {
         boolean enabled = false;
         if (hasValidSelection) {
             ResolveInfo ri = mAdapter.resolveInfoForPosition(checkedPos, filtered);
-            if (ri.targetUserId == UserHandle.USER_CURRENT) {
+            if (ri == null) {
+                Log.e(TAG, "Invalid position supplied to setAlwaysButtonEnabled");
+                return;
+            } else if (ri.targetUserId != UserHandle.USER_CURRENT) {
+                Log.e(TAG, "Attempted to set selection to resolve info for another user");
+                return;
+            } else {
                 enabled = true;
             }
         }
