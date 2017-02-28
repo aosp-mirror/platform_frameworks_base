@@ -69,7 +69,6 @@ import java.util.LinkedList;
 class WindowTestsBase {
     static WindowManagerService sWm = null;
     static TestWindowManagerPolicy sPolicy = null;
-    private final static IWindow sIWindow = new TestIWindow();
     private final static Session sMockSession = mock(Session.class);
     private static int sNextDisplayId = Display.DEFAULT_DISPLAY + 1;
     static int sNextStackId = FIRST_DYNAMIC_STACK_ID;
@@ -148,6 +147,7 @@ class WindowTestsBase {
         }
 
         sWm.mInputMethodTarget = null;
+        sWm.mInputMethodTargetCandidate = null;
     }
 
     private static WindowState createCommonWindow(WindowState parent, int type, String name) {
@@ -237,11 +237,12 @@ class WindowTestsBase {
         final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(type);
         attrs.setTitle(name);
 
-        final WindowState w = new WindowState(sWm, sMockSession, sIWindow, token, parent, OP_NONE,
-                0, attrs, 0, 0, ownerCanAddInternalSystemWindow);
+        final WindowState w = new WindowState(sWm, sMockSession, new TestIWindow(), token, parent,
+                OP_NONE, 0, attrs, 0, 0, ownerCanAddInternalSystemWindow);
         // TODO: Probably better to make this call in the WindowState ctor to avoid errors with
         // adding it to the token...
         token.addWindow(w);
+        sWm.mWindowMap.put(w.mClient.asBinder(), w);
         return w;
     }
 
@@ -463,8 +464,9 @@ class WindowTestsBase {
         boolean resizeReported;
 
         TestWindowState(WindowManager.LayoutParams attrs, WindowToken token) {
-            super(sWm, sMockSession, sIWindow, token, null, OP_NONE, 0, attrs, 0, 0,
+            super(sWm, sMockSession, new TestIWindow(), token, null, OP_NONE, 0, attrs, 0, 0,
                     false /* ownerCanAddInternalSystemWindow */);
+            sWm.mWindowMap.put(mClient.asBinder(), this);
         }
 
         @Override

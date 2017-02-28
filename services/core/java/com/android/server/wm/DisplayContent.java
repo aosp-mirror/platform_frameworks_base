@@ -1588,9 +1588,24 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         // TODO(multidisplay): Needs some serious rethought when the target and IME are not on the
         // same display. Or even when the current IME/target are not on the same screen as the next
         // IME/target. For now only look for input windows on the main screen.
-        mUpdateImeTarget = updateImeTarget;
-        WindowState target = getWindow(mComputeImeTargetPredicate);
 
+        // The target candidate provided by the IME tells us which window token, but not which
+        // window within the token (e.g. child windows...). So, we use the token to look-up the
+        // best target window.
+        // TODO: Have the input method service report the right window with the token vs. just the
+        // base window of the token.
+        final WindowState baseWin = mService.getWindow(mService.mInputMethodTargetCandidate);
+        final WindowToken targetToken = baseWin != null ? baseWin.mToken : null;
+        WindowState target = targetToken != null ?
+                targetToken.getWindow(mComputeImeTargetPredicate) : null;
+        // If there isn't a better candidate in the token (maybe because they are not visible), then
+        // fall back to targeting the base window of the token, so the IME can still maintain the
+        // right z-order based on the last person that set it vs. changing its z-order to the very
+        // up since there if target is null.
+        // TODO: Consider z-ordering IME to bottom instead of top if there is no visible target.
+        // Also, consider tying the visible the visibility of the IME to the current target. I.e if
+        // target isn't visible, then IME shouldn't be visible.
+        target = target == null ? baseWin : target;
 
         // Yet more tricksyness!  If this window is a "starting" window, we do actually want
         // to be on top of it, but it is not -really- where input will go. So look down below

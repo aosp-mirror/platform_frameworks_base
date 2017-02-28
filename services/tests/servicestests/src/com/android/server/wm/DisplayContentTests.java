@@ -22,6 +22,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_VOICE_INTERACTION;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
@@ -146,6 +147,7 @@ public class DisplayContentTests extends WindowTestsBase {
         final WindowState appWin = createWindow(null, TYPE_APPLICATION, sDisplayContent, "appWin");
         appWin.setHasSurface(true);
         assertTrue(appWin.canBeImeTarget());
+        sWm.mInputMethodTargetCandidate = appWin.mClient.asBinder();
         WindowState imeTarget = sDisplayContent.computeImeTarget(false /* updateImeTarget */);
         assertEquals(appWin, imeTarget);
 
@@ -156,6 +158,20 @@ public class DisplayContentTests extends WindowTestsBase {
         assertTrue(childWin.canBeImeTarget());
         imeTarget = sDisplayContent.computeImeTarget(false /* updateImeTarget */);
         assertEquals(childWin, imeTarget);
+
+        final WindowState appWin2 =
+                createWindow(null, TYPE_APPLICATION, sDisplayContent, "appWin2");
+        appWin2.setHasSurface(true);
+        assertTrue(appWin2.canBeImeTarget());
+        // Verify that the IME target isn't adjusted since mInputMethodTargetCandidate didn't change
+        // to the new app.
+        imeTarget = sDisplayContent.computeImeTarget(false /* updateImeTarget */);
+        assertNotEquals(appWin2, imeTarget);
+
+        sWm.mInputMethodTargetCandidate = appWin2.mClient.asBinder();
+        // Verify app is not IME target since its token is set as a candidate.
+        imeTarget = sDisplayContent.computeImeTarget(false /* updateImeTarget */);
+        assertEquals(appWin2, imeTarget);
     }
 
     /**
