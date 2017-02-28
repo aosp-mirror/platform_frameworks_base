@@ -321,9 +321,9 @@
     <string name="permlab_systemAlertWindow" msgid="7238805243128138690">"這個應用程式可顯示在其他應用程式上方"</string>
     <string name="permdesc_systemAlertWindow" msgid="2393776099672266188">"這個應用程式可顯示在其他應用程式上方或畫面中的其他位置。你可能會無法照常使用應用程式，且其他應用程式的顯示方式可能會受到影響。"</string>
     <string name="permlab_runInBackground" msgid="7365290743781858803">"在背景執行"</string>
-    <string name="permdesc_runInBackground" msgid="7370142232209999824">"這個應用程式可在背景執行，這樣可能會加快耗電速度。"</string>
+    <string name="permdesc_runInBackground" msgid="7370142232209999824">"這個應用程式可在背景執行，這樣可能導致耗電速度加快。"</string>
     <string name="permlab_useDataInBackground" msgid="8694951340794341809">"在背景使用行動數據連線"</string>
-    <string name="permdesc_useDataInBackground" msgid="6049514223791806027">"這個應用程式可在背景使用行動數據連線，這樣可能會增加數據用量。"</string>
+    <string name="permdesc_useDataInBackground" msgid="6049514223791806027">"這個應用程式可在背景使用行動數據連線，這樣可能導致數據用量增加。"</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"一律執行應用程式"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"允許應用程式的部分內容常駐在記憶體中。這項設定可能會限制其他應用程式可用的記憶體，並拖慢平板電腦運作速度。"</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"允許應用程式的部分內容常駐在記憶體中。這項設定可能會限制其他應用程式可用的記憶體，造成電視的運作速度變慢。"</string>
@@ -1167,14 +1167,10 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"輕觸即可選取語言和版面配置"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <!-- no translation found for alert_windows_notification_channel_name (7443890103456396837) -->
-    <skip />
-    <!-- no translation found for alert_windows_notification_title (5399998516035621282) -->
-    <skip />
-    <!-- no translation found for alert_windows_notification_message (2456738662997073459) -->
-    <skip />
-    <!-- no translation found for alert_windows_notification_turn_off_action (3367294525884949878) -->
-    <skip />
+    <string name="alert_windows_notification_channel_name" msgid="7443890103456396837">"<xliff:g id="NAME">%s</xliff:g>會在其他應用程式上層繪製內容"</string>
+    <string name="alert_windows_notification_title" msgid="5399998516035621282">"<xliff:g id="NAME">%s</xliff:g>應用程式目前顯示在最上層。"</string>
+    <string name="alert_windows_notification_message" msgid="2456738662997073459">"這個應用程式的某些部分會一直保持顯示。如果這項功能未正常運作，請將它關閉。"</string>
+    <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"關閉"</string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"正在準備「<xliff:g id="NAME">%s</xliff:g>」"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"正在檢查錯誤"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"偵測到新的「<xliff:g id="NAME">%s</xliff:g>」"</string>
@@ -1712,4 +1708,18 @@
     <string name="time_picker_prompt_label" msgid="7588093983899966783">"輸入時間"</string>
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"切換至文字輸入模式來輸入時間。"</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"切換至時鐘模式來輸入時間。"</string>
+    <!-- no translation found for autofill_save_title (7081244500504163245) -->
+    <skip />
+    <!-- no translation found for autofill_save_title_with_type (4977385733042555659) -->
+    <skip />
+    <!-- no translation found for autofill_save_yes (6398026094049005921) -->
+    <skip />
+    <!-- no translation found for autofill_save_no (2625132258725581787) -->
+    <skip />
+    <!-- no translation found for autofill_save_type_password (5288448918465971568) -->
+    <skip />
+    <!-- no translation found for autofill_save_type_address (4936707762193009542) -->
+    <skip />
+    <!-- no translation found for autofill_save_type_credit_card (7127694776265563071) -->
+    <skip />
 </resources>

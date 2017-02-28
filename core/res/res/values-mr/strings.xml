@@ -515,8 +515,8 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"होल्‍डरला वाहकद्वारे-प्रदान केलेल्या कॉन्फिगरेशन अ‍ॅपची विनंती करण्‍याची अनुमती देते. सामान्‍य अ‍ॅप्‍ससाठी कधीही आवश्‍यक नसावे."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"नेटवर्क स्‍थितींवरील निरीक्षणांसाठी ऐका"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"अनु्प्रयोगाला नेटवर्क स्‍थितींवरील निरीक्षणे ऐकण्‍यासाठी अनुमती देते. सामान्‍य अ‍ॅप्‍ससाठी कधीही आवश्‍यक नसावे."</string>
-    <string name="permlab_setInputCalibration" msgid="4902620118878467615">"इनपुट डिव्हाइस अंशांकन बदला"</string>
-    <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"स्पर्श स्क्रीनची मापन प्राचले सुधारित करण्यासाठी अॅप ला अनुमती देते. सामान्य अॅप्स साठी कधीही आवश्यक नसते."</string>
+    <string name="permlab_setInputCalibration" msgid="4902620118878467615">"इनपुट डिव्हाइस कॅलिब्रेशन बदला"</string>
+    <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"स्पर्श स्क्रीनची कॅलिब्रेशन प्राचले सुधारित करण्यासाठी अॅप ला अनुमती देते. सामान्य अॅप्स साठी कधीही आवश्यक नसते."</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"DRM प्रमाणपत्रांवर प्रवेश करा"</string>
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"DRM प्रमाणपत्रांची तरतूद करण्यासाठी आणि वापरण्यासाठी अनुप्रयोगास अनुमती देते. सामान्य अॅप्सकरिता कधीही आवश्यकता नसते."</string>
     <string name="permlab_handoverStatus" msgid="7820353257219300883">"Android बीम स्थानांतरण स्थिती प्राप्त करा"</string>
@@ -1168,14 +1168,10 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"भाषा आणि लेआउट निवडण्यासाठी टॅप करा"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <!-- no translation found for alert_windows_notification_channel_name (7443890103456396837) -->
-    <skip />
-    <!-- no translation found for alert_windows_notification_title (5399998516035621282) -->
-    <skip />
-    <!-- no translation found for alert_windows_notification_message (2456738662997073459) -->
-    <skip />
-    <!-- no translation found for alert_windows_notification_turn_off_action (3367294525884949878) -->
-    <skip />
+    <string name="alert_windows_notification_channel_name" msgid="7443890103456396837">"<xliff:g id="NAME">%s</xliff:g> इतर अॅप्सवर काढा"</string>
+    <string name="alert_windows_notification_title" msgid="5399998516035621282">"<xliff:g id="NAME">%s</xliff:g> अ‍ॅप शीर्षस्थानी प्रदर्शित होत आहे"</string>
+    <string name="alert_windows_notification_message" msgid="2456738662997073459">"या अ‍ॅपचे भाग सर्व वेळी दृश्यमान असू शकतात. हे वैशिष्ट्य बरोबर काम करत नसल्यास, ते बंद करा."</string>
+    <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"बंद करा"</string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"<xliff:g id="NAME">%s</xliff:g> तयार करीत आहे"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"त्रुटींसाठी तपासत आहे"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"नवीन <xliff:g id="NAME">%s</xliff:g> आढळले"</string>
@@ -1713,4 +1709,18 @@
     <string name="time_picker_prompt_label" msgid="7588093983899966783">"वेळ टाइप करा"</string>
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"वेळ इनपुटसाठी मजकूर इनपुट मोडवर स्विच करा."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"वेळ इनपुटसाठी घड्याळ मोडवर स्विच करा."</string>
+    <!-- no translation found for autofill_save_title (7081244500504163245) -->
+    <skip />
+    <!-- no translation found for autofill_save_title_with_type (4977385733042555659) -->
+    <skip />
+    <!-- no translation found for autofill_save_yes (6398026094049005921) -->
+    <skip />
+    <!-- no translation found for autofill_save_no (2625132258725581787) -->
+    <skip />
+    <!-- no translation found for autofill_save_type_password (5288448918465971568) -->
+    <skip />
+    <!-- no translation found for autofill_save_type_address (4936707762193009542) -->
+    <skip />
+    <!-- no translation found for autofill_save_type_credit_card (7127694776265563071) -->
+    <skip />
 </resources>

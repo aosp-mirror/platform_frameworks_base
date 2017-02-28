@@ -296,8 +296,8 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"SMSメッセージの受信と処理をアプリに許可します。これにより、アプリが端末に届いたメッセージを表示することなく監視または削除できるようになります。"</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"テキストメッセージ（MMS）の受信"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"MMSメッセージの受信と処理をアプリに許可します。これにより、アプリが端末に届いたメッセージを表示することなく監視または削除できるようになります。"</string>
-    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"緊急警報SMSの読み取り"</string>
-    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"端末で受信した緊急警報SMSの読み取りをアプリに許可します。緊急警報は、緊急事態を警告する目的で一部の地域に配信されます。緊急警報の受信時に、悪意のあるアプリによって端末の動作や処理が妨害される恐れがあります。"</string>
+    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"緊急速報メール SMS の読み取り"</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"端末で受信した緊急速報メール SMS の読み取りをアプリに許可します。緊急速報メールは、緊急事態を警告する目的で一部の地域に配信されます。緊急速報メールの受信時に、悪意のあるアプリによって端末の動作や処理が妨害される恐れがあります。"</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"登録したフィードの読み取り"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"現在同期されているフィードの詳細を取得することをアプリに許可します。"</string>
     <string name="permlab_sendSms" msgid="7544599214260982981">"SMSメッセージの送信と表示"</string>
@@ -1167,14 +1167,10 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"タップして言語とレイアウトを選択してください"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <!-- no translation found for alert_windows_notification_channel_name (7443890103456396837) -->
-    <skip />
-    <!-- no translation found for alert_windows_notification_title (5399998516035621282) -->
-    <skip />
-    <!-- no translation found for alert_windows_notification_message (2456738662997073459) -->
-    <skip />
-    <!-- no translation found for alert_windows_notification_turn_off_action (3367294525884949878) -->
-    <skip />
+    <string name="alert_windows_notification_channel_name" msgid="7443890103456396837">"<xliff:g id="NAME">%s</xliff:g>を他のアプリの上に重ねて表示"</string>
+    <string name="alert_windows_notification_title" msgid="5399998516035621282">"<xliff:g id="NAME">%s</xliff:g>を重ねて表示中"</string>
+    <string name="alert_windows_notification_message" msgid="2456738662997073459">"このアプリの一部は常に表示され続けます。この機能が正常に動作しない場合は OFF にしてください。"</string>
+    <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"OFF にする"</string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"<xliff:g id="NAME">%s</xliff:g>を準備中"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"エラーを確認中"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"新しい<xliff:g id="NAME">%s</xliff:g>が検出されました"</string>
@@ -1712,4 +1708,18 @@
     <string name="time_picker_prompt_label" msgid="7588093983899966783">"時刻を入力"</string>
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"時刻をテキストで入力するモードに切り替えます。"</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"時刻を時計で入力するモードに切り替えます。"</string>
+    <!-- no translation found for autofill_save_title (7081244500504163245) -->
+    <skip />
+    <!-- no translation found for autofill_save_title_with_type (4977385733042555659) -->
+    <skip />
+    <!-- no translation found for autofill_save_yes (6398026094049005921) -->
+    <skip />
+    <!-- no translation found for autofill_save_no (2625132258725581787) -->
+    <skip />
+    <!-- no translation found for autofill_save_type_password (5288448918465971568) -->
+    <skip />
+    <!-- no translation found for autofill_save_type_address (4936707762193009542) -->
+    <skip />
+    <!-- no translation found for autofill_save_type_credit_card (7127694776265563071) -->
+    <skip />
 </resources>

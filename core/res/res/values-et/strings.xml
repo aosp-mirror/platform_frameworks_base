@@ -1167,14 +1167,10 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Puudutage keele ja paigutuse valimiseks"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSŠZŽTUVWÕÄÖÜXY"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSŠZŽTUVWÕÄÖÜXY"</string>
-    <!-- no translation found for alert_windows_notification_channel_name (7443890103456396837) -->
-    <skip />
-    <!-- no translation found for alert_windows_notification_title (5399998516035621282) -->
-    <skip />
-    <!-- no translation found for alert_windows_notification_message (2456738662997073459) -->
-    <skip />
-    <!-- no translation found for alert_windows_notification_turn_off_action (3367294525884949878) -->
-    <skip />
+    <string name="alert_windows_notification_channel_name" msgid="7443890103456396837">"Rakendus <xliff:g id="NAME">%s</xliff:g> joonistab teiste rakenduste peale"</string>
+    <string name="alert_windows_notification_title" msgid="5399998516035621282">"Rakend. <xliff:g id="NAME">%s</xliff:g> kuvatakse kõige peal."</string>
+    <string name="alert_windows_notification_message" msgid="2456738662997073459">"Selle rakenduse osad võivad alati nähtaval olla. Kui see funktsioon ei tööta korralikult, lülitage see välja."</string>
+    <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"LÜLITA VÄLJA"</string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"Üksuse <xliff:g id="NAME">%s</xliff:g> ettevalmistamine"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Vigade kontrollimine"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"Tuvastati uus üksus <xliff:g id="NAME">%s</xliff:g>"</string>
@@ -1712,4 +1708,18 @@
     <string name="time_picker_prompt_label" msgid="7588093983899966783">"Sisestage kellaaeg"</string>
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"Aktiveerige kellaaja sisestamiseks tekstisisestusrežiim."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"Aktiveerige kellaaja sisestamiseks kellarežiim."</string>
+    <!-- no translation found for autofill_save_title (7081244500504163245) -->
+    <skip />
+    <!-- no translation found for autofill_save_title_with_type (4977385733042555659) -->
+    <skip />
+    <!-- no translation found for autofill_save_yes (6398026094049005921) -->
+    <skip />
+    <!-- no translation found for autofill_save_no (2625132258725581787) -->
+    <skip />
+    <!-- no translation found for autofill_save_type_password (5288448918465971568) -->
+    <skip />
+    <!-- no translation found for autofill_save_type_address (4936707762193009542) -->
+    <skip />
+    <!-- no translation found for autofill_save_type_credit_card (7127694776265563071) -->
+    <skip />
 </resources>
