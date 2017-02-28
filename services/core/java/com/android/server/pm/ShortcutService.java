@@ -60,6 +60,7 @@ import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Environment;
 import android.os.FileUtils;
 import android.os.Handler;
@@ -1868,7 +1869,7 @@ public class ShortcutService extends IShortcutService.Stub {
             IntentSender resultIntent, int userId) {
         Preconditions.checkNotNull(shortcut);
         Preconditions.checkArgument(shortcut.isEnabled(), "Shortcut must be enabled");
-        return requestPinItem(packageName, userId, shortcut, null, resultIntent);
+        return requestPinItem(packageName, userId, shortcut, null, null, resultIntent);
     }
 
     @Override
@@ -1895,8 +1896,8 @@ public class ShortcutService extends IShortcutService.Stub {
      * After validating the caller, it passes the request to {@link #mShortcutRequestPinProcessor}.
      * Either {@param shortcut} or {@param appWidget} should be non-null.
      */
-    private boolean requestPinItem(String packageName, int userId,
-            ShortcutInfo shortcut, AppWidgetProviderInfo appWidget, IntentSender resultIntent) {
+    private boolean requestPinItem(String packageName, int userId, ShortcutInfo shortcut,
+            AppWidgetProviderInfo appWidget, Bundle extras, IntentSender resultIntent) {
         verifyCaller(packageName, userId);
 
         final boolean ret;
@@ -1907,8 +1908,8 @@ public class ShortcutService extends IShortcutService.Stub {
                     "Calling application must have a foreground activity or a foreground service");
 
             // Send request to the launcher, if supported.
-            ret = mShortcutRequestPinProcessor.requestPinItemLocked(shortcut, appWidget, userId,
-                    resultIntent);
+            ret = mShortcutRequestPinProcessor.requestPinItemLocked(shortcut, appWidget, extras,
+                    userId, resultIntent);
         }
 
         verifyStates();
@@ -2650,10 +2651,10 @@ public class ShortcutService extends IShortcutService.Stub {
 
         @Override
         public boolean requestPinAppWidget(@NonNull String callingPackage,
-                @NonNull AppWidgetProviderInfo appWidget, @Nullable IntentSender resultIntent,
-                int userId) {
+                @NonNull AppWidgetProviderInfo appWidget, @Nullable Bundle extras,
+                @Nullable IntentSender resultIntent, int userId) {
             Preconditions.checkNotNull(appWidget);
-            return requestPinItem(callingPackage, userId, null, appWidget, resultIntent);
+            return requestPinItem(callingPackage, userId, null, appWidget, extras, resultIntent);
         }
 
         @Override

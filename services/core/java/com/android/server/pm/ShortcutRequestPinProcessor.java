@@ -26,6 +26,7 @@ import android.content.pm.LauncherApps;
 import android.content.pm.LauncherApps.PinItemRequest;
 import android.content.pm.ShortcutInfo;
 import android.os.Bundle;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Log;
 import android.util.Pair;
@@ -63,11 +64,18 @@ class ShortcutRequestPinProcessor {
             mLauncherUid = launcherUid;
         }
 
+        @Override
         public ShortcutInfo getShortcutInfo() {
             return null;
         }
 
+        @Override
         public AppWidgetProviderInfo getAppWidgetProviderInfo() {
+            return null;
+        }
+
+        @Override
+        public Bundle getExtras() {
             return null;
         }
 
@@ -136,18 +144,25 @@ class ShortcutRequestPinProcessor {
      */
     private static class PinAppWidgetRequestInner extends PinItemRequestInner {
         final AppWidgetProviderInfo mAppWidgetProviderInfo;
+        final Bundle mExtras;
 
         private PinAppWidgetRequestInner(ShortcutRequestPinProcessor processor,
                 IntentSender resultIntent, int launcherUid,
-                AppWidgetProviderInfo appWidgetProviderInfo) {
+                AppWidgetProviderInfo appWidgetProviderInfo, Bundle extras) {
             super(processor, resultIntent, launcherUid);
 
             mAppWidgetProviderInfo = appWidgetProviderInfo;
+            mExtras = extras;
         }
 
         @Override
         public AppWidgetProviderInfo getAppWidgetProviderInfo() {
             return mAppWidgetProviderInfo;
+        }
+
+        @Override
+        public Bundle getExtras() {
+            return mExtras;
         }
     }
 
@@ -212,7 +227,7 @@ class ShortcutRequestPinProcessor {
      * always null.
      */
     public boolean requestPinItemLocked(ShortcutInfo inShortcut, AppWidgetProviderInfo inAppWidget,
-        int userId, IntentSender resultIntent) {
+        Bundle extras, int userId, IntentSender resultIntent) {
 
         // First, make sure the launcher supports it.
 
@@ -242,7 +257,8 @@ class ShortcutRequestPinProcessor {
             int launcherUid = mService.injectGetPackageUid(
                     confirmActivity.first.getPackageName(), launcherUserId);
             request = new PinItemRequest(
-                    new PinAppWidgetRequestInner(this, resultIntent, launcherUid, inAppWidget),
+                    new PinAppWidgetRequestInner(this, resultIntent, launcherUid, inAppWidget,
+                            extras),
                     PinItemRequest.REQUEST_TYPE_APPWIDGET);
         }
         return startRequestConfirmActivity(confirmActivity.first, launcherUserId, request,
