@@ -168,7 +168,6 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.JournaledFile;
-import com.android.internal.util.ParcelableString;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
 import com.android.internal.widget.LockPatternUtils;

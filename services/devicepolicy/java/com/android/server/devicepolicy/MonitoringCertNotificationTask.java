@@ -35,7 +35,6 @@ import android.security.KeyChain.KeyChainConnection;
 import android.util.Log;
 
 import com.android.internal.R;
-import com.android.internal.util.ParcelableString;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -150,12 +149,7 @@ public class MonitoringCertNotificationTask extends AsyncTask<Integer, Void, Voi
     private List<String> getInstalledCaCertificates(UserHandle userHandle)
             throws RemoteException, RuntimeException {
         try (KeyChainConnection conn = mInjector.keyChainBindAsUser(userHandle)) {
-            List<ParcelableString> aliases = conn.getService().getUserCaAliases().getList();
-            List<String> result = new ArrayList<>(aliases.size());
-            for (int i = 0; i < aliases.size(); i++) {
-                result.add(aliases.get(i).string);
-            }
-            return result;
+            return conn.getService().getUserCaAliases().getList();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             return null;
