@@ -26,9 +26,6 @@
     <!-- Whether to send a custom package name with the PSD.-->
     <bool name="config_sendPackageName">false</bool>
 
-    <!-- Whether to enable the left nav drawer in all Settings UI.-->
-    <bool name="config_enable_nav_drawer">false</bool>
-
     <!-- Name for the set of keys associating package names -->
     <string name="config_helpPackageNameKey" translatable="false"></string>
 
