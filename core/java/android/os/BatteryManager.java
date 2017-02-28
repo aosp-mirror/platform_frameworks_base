@@ -204,7 +204,7 @@ public class BatteryManager {
     /**
      * Battery charge status, from a BATTERY_STATUS_* value.
      */
-    public static final int BATTERY_PROPERTY_BATTERY_STATUS = 6;
+    public static final int BATTERY_PROPERTY_STATUS = 6;
 
     private final IBatteryStats mBatteryStats;
     private final IBatteryPropertiesRegistrar mBatteryPropertiesRegistrar;
