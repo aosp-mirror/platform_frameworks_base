@@ -547,6 +547,12 @@ public final class Pm {
                         throw new IllegalArgumentException("Missing inherit package name");
                     }
                     break;
+                case "--pkg":
+                    sessionParams.appPackageName = nextOptionData();
+                    if (sessionParams.appPackageName == null) {
+                        throw new IllegalArgumentException("Missing package name");
+                    }
+                    break;
                 case "-S":
                     final long sizeBytes = Long.parseLong(nextOptionData());
                     if (sizeBytes <= 0) {

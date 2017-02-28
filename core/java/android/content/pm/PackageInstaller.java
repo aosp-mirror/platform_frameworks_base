@@ -95,6 +95,18 @@ public class PackageInstaller {
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_SESSION_DETAILS = "android.content.pm.action.SESSION_DETAILS";
 
+    /**
+     * Broadcast Action: Explicit broadcast sent to the last known default launcher when a session
+     * for a new install is committed. For managed profile, this is sent to the default launcher
+     * of the primary profile.
+     * <p>
+     * The associated session is defined in {@link #EXTRA_SESSION} and the user for which this
+     * session was created in {@link Intent#EXTRA_USER}.
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_SESSION_COMMITTED =
+            "android.content.pm.action.SESSION_COMMITTED";
+
     /** {@hide} */
     public static final String
             ACTION_CONFIRM_PERMISSIONS = "android.content.pm.action.CONFIRM_PERMISSIONS";
@@ -105,6 +117,13 @@ public class PackageInstaller {
      * @see Intent#getIntExtra(String, int)
      */
     public static final String EXTRA_SESSION_ID = "android.content.pm.extra.SESSION_ID";
+
+    /**
+     * {@link SessionInfo} that an operation is working with.
+     *
+     * @see Intent#getParcelableExtra(String)
+     */
+    public static final String EXTRA_SESSION = "android.content.pm.extra.SESSION";
 
     /**
      * Package name that an operation is working with.
@@ -1184,6 +1203,8 @@ public class PackageInstaller {
         /** {@hide} */
         public int mode;
         /** {@hide} */
+        public int installReason;
+        /** {@hide} */
         public long sizeBytes;
         /** {@hide} */
         public String appPackageName;
@@ -1206,6 +1227,7 @@ public class PackageInstaller {
             active = source.readInt() != 0;
 
             mode = source.readInt();
+            installReason = source.readInt();
             sizeBytes = source.readLong();
             appPackageName = source.readString();
             appIcon = source.readParcelable(null);
@@ -1254,6 +1276,15 @@ public class PackageInstaller {
          */
         public boolean isActive() {
             return active;
+        }
+
+        /**
+         * Return the reason for installing this package.
+         *
+         * @see PackageManager#INSTALL_REASON_UNKNOWN
+         */
+        public int getInstallReason() {
+            return installReason;
         }
 
         /** {@hide} */
@@ -1324,6 +1355,7 @@ public class PackageInstaller {
             dest.writeInt(active ? 1 : 0);
 
             dest.writeInt(mode);
+            dest.writeInt(installReason);
             dest.writeLong(sizeBytes);
             dest.writeString(appPackageName);
             dest.writeParcelable(appIcon, flags);

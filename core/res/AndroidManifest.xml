@@ -522,6 +522,8 @@
     <protected-broadcast android:name="android.app.action.APPLICATION_DELEGATION_SCOPES_CHANGED" />
     <protected-broadcast android:name="com.android.server.wm.ACTION_REVOKE_SYSTEM_ALERT_WINDOW_PERMISSION" />
 
+    <protected-broadcast android:name="android.content.pm.action.SESSION_COMMITTED" />
+
     <!-- ====================================================================== -->
     <!--                          RUNTIME PERMISSIONS                           -->
     <!-- ====================================================================== -->
