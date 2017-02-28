@@ -57,6 +57,8 @@ namespace android
 static bool wakeup_init = false;
 static sem_t wakeup_sem;
 extern sp<IPower> gPowerHal;
+extern std::mutex gPowerHalMutex;
+extern bool getPowerHal();
 
 static void wakeup_callback(bool success)
 {
@@ -191,41 +193,26 @@ static jint getPlatformLowPowerStats(JNIEnv* env, jobject /* clazz */, jobject o
         return -1;
     }
 
-    if (gPowerHal == nullptr) {
-        ALOGE("gPowerHal not loaded");
-        return -1;
-    }
+    {
+        std::lock_guard<std::mutex> lock(gPowerHalMutex);
+        if (!getPowerHal()) {
+            ALOGE("Power Hal not loaded");
+            return -1;
+        }
 
-    gPowerHal->getPlatformLowPowerStats(
-        [&offset, &remaining, &total_added](hidl_vec<PowerStatePlatformSleepState> states,
-                Status status) {
-            if (status != Status::SUCCESS)
-                return;
-            for (size_t i = 0; i < states.size(); i++) {
-                int added;
-                const PowerStatePlatformSleepState& state = states[i];
+        Return<void> ret = gPowerHal->getPlatformLowPowerStats(
+            [&offset, &remaining, &total_added](hidl_vec<PowerStatePlatformSleepState> states,
+                    Status status) {
+                if (status != Status::SUCCESS)
+                    return;
+                for (size_t i = 0; i < states.size(); i++) {
+                    int added;
+                    const PowerStatePlatformSleepState& state = states[i];
 
-                added = snprintf(offset, remaining,
-                    "state_%zu name=%s time=%" PRIu64 " count=%" PRIu64 " ",
-                    i + 1, state.name.c_str(), state.residencyInMsecSinceBoot,
-                    state.totalTransitions);
-                if (added < 0) {
-                    break;
-                }
-                if (added > remaining) {
-                    added = remaining;
-                }
-                offset += added;
-                remaining -= added;
-                total_added += added;
-
-                for (size_t j = 0; j < state.voters.size(); j++) {
-                    const PowerStateVoter& voter = state.voters[j];
                     added = snprintf(offset, remaining,
-                            "voter_%zu name=%s time=%" PRIu64 " count=%" PRIu64 " ",
-                            j + 1, voter.name.c_str(),
-                            voter.totalTimeInMsecVotedForSinceBoot,
-                            voter.totalNumberOfTimesVotedSinceBoot);
+                        "state_%zu name=%s time=%" PRIu64 " count=%" PRIu64 " ",
+                        i + 1, state.name.c_str(), state.residencyInMsecSinceBoot,
+                        state.totalTransitions);
                     if (added < 0) {
                         break;
                     }
@@ -235,18 +222,42 @@ static jint getPlatformLowPowerStats(JNIEnv* env, jobject /* clazz */, jobject o
                     offset += added;
                     remaining -= added;
                     total_added += added;
-                }
 
-                if (remaining <= 0) {
-                    /* rewrite NULL character*/
-                    offset--;
-                    total_added--;
-                    ALOGE("PowerHal: buffer not enough");
-                    break;
+                    for (size_t j = 0; j < state.voters.size(); j++) {
+                        const PowerStateVoter& voter = state.voters[j];
+                        added = snprintf(offset, remaining,
+                                "voter_%zu name=%s time=%" PRIu64 " count=%" PRIu64 " ",
+                                j + 1, voter.name.c_str(),
+                                voter.totalTimeInMsecVotedForSinceBoot,
+                                voter.totalNumberOfTimesVotedSinceBoot);
+                        if (added < 0) {
+                            break;
+                        }
+                        if (added > remaining) {
+                            added = remaining;
+                        }
+                        offset += added;
+                        remaining -= added;
+                        total_added += added;
+                    }
+
+                    if (remaining <= 0) {
+                        /* rewrite NULL character*/
+                        offset--;
+                        total_added--;
+                        ALOGE("PowerHal: buffer not enough");
+                        break;
+                    }
                 }
             }
+        );
+
+        if (!ret.isOk()) {
+            ALOGE("getPlatformLowPowerStats() failed: power HAL service not available");
+            gPowerHal = nullptr;
+            return -1;
         }
-    );
+    }
     *offset = 0;
     total_added += 1;
     return total_added;
