@@ -16824,11 +16824,20 @@ public class PackageManagerService extends IPackageManager.Stub {
                 res.origUsers = ps.queryInstalledUsers(sUserManager.getUserIds(), true);
             }
 
-            // Check whether the newly-scanned package wants to define an already-defined perm
             int N = pkg.permissions.size();
             for (int i = N-1; i >= 0; i--) {
                 PackageParser.Permission perm = pkg.permissions.get(i);
                 BasePermission bp = mSettings.mPermissions.get(perm.info.name);
+
+                // Don't allow anyone but the platform to define ephemeral permissions.
+                if ((perm.info.protectionLevel & PermissionInfo.PROTECTION_FLAG_EPHEMERAL) != 0
+                        && !PLATFORM_PACKAGE_NAME.equals(pkg.packageName)) {
+                    Slog.w(TAG, "Package " + pkg.packageName
+                            + " attempting to delcare ephemeral permission "
+                            + perm.info.name + "; Removing ephemeral.");
+                    perm.info.protectionLevel &= ~PermissionInfo.PROTECTION_FLAG_EPHEMERAL;
+                }
+                // Check whether the newly-scanned package wants to define an already-defined perm
                 if (bp != null) {
                     // If the defining package is signed with our cert, it's okay.  This
                     // also includes the "updating the same package" case, of course.
