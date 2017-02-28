@@ -73,7 +73,7 @@ jint JNI_OnLoad(JavaVM* jvm, void*) {
         return JNI_ERR;
     }
 
-    if (registerNativeMethods(env, "java/lang/perftests/SystemPerfTest",
+    if (registerNativeMethods(env, "android/perftests/SystemPerfTest",
             sMethods, NELEM(sMethods)) == -1) {
         return JNI_ERR;
     }
