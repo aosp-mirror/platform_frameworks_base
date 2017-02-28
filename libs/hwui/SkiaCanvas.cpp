@@ -73,6 +73,24 @@ void SkiaCanvas::reset(SkCanvas* skiaCanvas) {
 // Canvas state operations: Replace Bitmap
 // ----------------------------------------------------------------------------
 
+class ClipCopier : public SkCanvas::ClipVisitor {
+public:
+    explicit ClipCopier(SkCanvas* dstCanvas) : m_dstCanvas(dstCanvas) {}
+
+    virtual void clipRect(const SkRect& rect, SkClipOp op, bool antialias) {
+        m_dstCanvas->clipRect(rect, op, antialias);
+    }
+    virtual void clipRRect(const SkRRect& rrect, SkClipOp op, bool antialias) {
+        m_dstCanvas->clipRRect(rrect, op, antialias);
+    }
+    virtual void clipPath(const SkPath& path, SkClipOp op, bool antialias) {
+        m_dstCanvas->clipPath(path, op, antialias);
+    }
+
+private:
+    SkCanvas* m_dstCanvas;
+};
+
 void SkiaCanvas::setBitmap(const SkBitmap& bitmap) {
     SkCanvas* newCanvas = new SkCanvas(bitmap);
 
@@ -80,9 +98,8 @@ void SkiaCanvas::setBitmap(const SkBitmap& bitmap) {
         // Copy the canvas matrix & clip state.
         newCanvas->setMatrix(mCanvas->getTotalMatrix());
 
-        SkRegion rgn;
-        mCanvas->temporary_internal_getRgnClip(&rgn);
-        newCanvas->clipRegion(rgn, SkClipOp::kIntersect);
+        ClipCopier copier(newCanvas);
+        mCanvas->replayClips(&copier);
     }
 
     // deletes the previously owned canvas (if any)
