@@ -700,9 +700,7 @@
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"Snímky obrazovek"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"Všeobecné zprávy"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"Úložiště"</string>
-    <!-- no translation found for instant_apps (6647570248119804907) -->
-    <skip />
-    <!-- no translation found for instant_apps_message (8116608994995104836) -->
-    <skip />
+    <string name="instant_apps" msgid="6647570248119804907">"Okamžité aplikace"</string>
+    <string name="instant_apps_message" msgid="8116608994995104836">"Okamžité aplikace není třeba instalovat."</string>
     <string name="app_info" msgid="6856026610594615344">"Informace o aplikaci"</string>
 </resources>
