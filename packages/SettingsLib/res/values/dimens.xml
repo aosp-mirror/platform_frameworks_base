@@ -51,12 +51,6 @@
 
     <dimen name="usage_graph_dot_size">.75dp</dimen>
     <dimen name="usage_graph_dot_interval">7dp</dimen>
-    <dimen name="drawer_icon_size">24dp</dimen>
-    <dimen name="normal_icon_size">24dp</dimen>
-    <dimen name="drawer_icon_margin">24dp</dimen>
-    <dimen name="drawer_width">300dp</dimen>
-    <dimen name="drawer_item_top_bottom_margin">4dp</dimen>
-    <dimen name="drawer_spacer_height">32dp</dimen>
 
     <dimen name="battery_height">14.5dp</dimen>
     <dimen name="battery_width">9.5dp</dimen>

@@ -86,16 +86,6 @@ public class SettingsDrawerActivityTest {
                 .check(matches(isDisplayed()));
     }
 
-    @Test
-    public void startActivity_shouldNotHaveNavDrawer() {
-        Instrumentation instrumentation = InstrumentationRegistry.getInstrumentation();
-        Activity activity = instrumentation.startActivitySync(
-                new Intent(instrumentation.getTargetContext(), TestActivity.class));
-
-        assertThat(((SettingsDrawerActivity) activity).isNavDrawerEnabled())
-                .isFalse();
-    }
-
     /**
      * Test Activity in this test.
      *
