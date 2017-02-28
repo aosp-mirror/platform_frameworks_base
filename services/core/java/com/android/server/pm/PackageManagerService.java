@@ -15901,14 +15901,6 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             final PackageSetting ps = mSettings.mPackages.get(pkgName);
 
-            // don't allow an upgrade from full to ephemeral
-            if (isInstantApp && !ps.getInstantApp(user.getIdentifier())) {
-                // can't downgrade from full to instant
-                Slog.w(TAG, "Can't replace app with instant app: " + pkgName);
-                res.setReturnCode(PackageManager.INSTALL_FAILED_INSTANT_APP_INVALID);
-                return;
-            }
-
             // verify signatures are valid
             if (shouldCheckUpgradeKeySetLP(ps, scanFlags)) {
                 if (!checkUpgradeKeySetLP(ps, pkg)) {
@@ -15966,6 +15958,27 @@ public class PackageManagerService extends IPackageManager.Stub {
             // In case of rollback, remember per-user/profile install state
             allUsers = sUserManager.getUserIds();
             installedUsers = ps.queryInstalledUsers(allUsers, true);
+
+            // don't allow an upgrade from full to ephemeral
+            if (isInstantApp) {
+                if (user == null || user.getIdentifier() == UserHandle.USER_ALL) {
+                    for (int currentUser : allUsers) {
+                        if (!ps.getInstantApp(currentUser)) {
+                            // can't downgrade from full to instant
+                            Slog.w(TAG, "Can't replace full app with instant app: " + pkgName
+                                    + " for user: " + currentUser);
+                            res.setReturnCode(PackageManager.INSTALL_FAILED_INSTANT_APP_INVALID);
+                            return;
+                        }
+                    }
+                } else if (!ps.getInstantApp(user.getIdentifier())) {
+                    // can't downgrade from full to instant
+                    Slog.w(TAG, "Can't replace full app with instant app: " + pkgName
+                            + " for user: " + user.getIdentifier());
+                    res.setReturnCode(PackageManager.INSTALL_FAILED_INSTANT_APP_INVALID);
+                    return;
+                }
+            }
         }
 
         // Update what is removed
