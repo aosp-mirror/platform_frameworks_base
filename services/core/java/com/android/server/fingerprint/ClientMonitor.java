@@ -68,7 +68,9 @@ public abstract class ClientMonitor implements IBinder.DeathRecipient {
         mIsRestricted = restricted;
         mOwner = owner;
         try {
-            token.linkToDeath(this, 0);
+            if (token != null) {
+                token.linkToDeath(this, 0);
+            }
         } catch (RemoteException e) {
             Slog.w(TAG, "caught remote exception in linkToDeath: ", e);
         }
