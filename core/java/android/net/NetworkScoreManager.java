@@ -265,8 +265,8 @@ public class NetworkScoreManager {
      * the {@link #ACTION_CHANGE_ACTIVE} broadcast, or using a custom configuration activity.
      *
      * @return true if the operation succeeded, or false if the new package is not a valid scorer.
-     * @throws SecurityException if the caller does not hold the
-     *         {@link android.Manifest.permission#SCORE_NETWORKS} permission.
+     * @throws SecurityException if the caller is not a system process or does not hold the
+     *         {@link android.Manifest.permission#REQUEST_NETWORK_SCORES} permission
      * @hide
      */
     @SystemApi
