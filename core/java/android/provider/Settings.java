@@ -1121,7 +1121,7 @@ public final class Settings {
     public static final String ACTION_ZEN_MODE_SETTINGS = "android.settings.ZEN_MODE_SETTINGS";
 
     /**
-     * Activity Action: Show Zen Mode priority configuration settings.
+     * Activity Action: Show Zen Mode (aka Do Not Disturb) priority configuration settings.
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_ZEN_MODE_PRIORITY_SETTINGS

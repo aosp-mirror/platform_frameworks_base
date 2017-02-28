@@ -127,7 +127,7 @@ public abstract class ConditionProviderService extends Service {
     }
 
     /**
-     * Request that the provider be rebound, after a previous call to (@link requestUnbind).
+     * Request that the provider be rebound, after a previous call to (@link #requestUnbind).
      *
      * <p>This method will fail for providers that have not been granted the permission by the user.
      */
