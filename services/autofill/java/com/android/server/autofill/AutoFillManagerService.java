@@ -186,6 +186,29 @@ public final class AutoFillManagerService extends SystemService {
     }
 
     // Called by Shell command.
+    void destroySessions(int userId, IResultReceiver receiver) {
+        Slog.i(TAG, "destroySessions() for userId " + userId);
+        mContext.enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
+
+        synchronized (mLock) {
+            if (userId != UserHandle.USER_ALL) {
+                mServicesCache.get(userId).destroySessionsLocked();
+            } else {
+                final int size = mServicesCache.size();
+                for (int i = 0; i < size; i++) {
+                    mServicesCache.valueAt(i).destroySessionsLocked();
+                }
+            }
+        }
+
+        try {
+            receiver.send(0, new Bundle());
+        } catch (RemoteException e) {
+            // Just ignore it...
+        }
+    }
+
+    // Called by Shell command.
     void listSessions(int userId, IResultReceiver receiver) {
         Slog.i(TAG, "listSessions() for userId " + userId);
         mContext.enforceCallingPermission(MANAGE_AUTO_FILL, TAG);

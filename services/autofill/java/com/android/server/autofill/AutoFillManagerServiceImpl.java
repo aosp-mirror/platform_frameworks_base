@@ -405,6 +405,12 @@ final class AutoFillManagerServiceImpl {
         }
     }
 
+    void destroySessionsLocked() {
+        for (Session session : mSessions.values()) {
+            session.removeSelf();
+        }
+    }
+
     void listSessionsLocked(ArrayList<String> output) {
         for (IBinder activityToken : mSessions.keySet()) {
             output.add((mInfo != null ? mInfo.getServiceInfo().getComponentName()
@@ -662,6 +668,28 @@ final class AutoFillManagerServiceImpl {
             mHandlerCaller.getHandler().post(() -> {
                 startAuthentication(intent, fillInIntent);
             });
+        }
+
+        // FillServiceCallbacks
+        @Override
+        public void onDisableSelf() {
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                final String autoFillService = Settings.Secure.getStringForUser(
+                        mContext.getContentResolver(),
+                        Settings.Secure.AUTO_FILL_SERVICE, mUserId);
+                if (mInfo.getServiceInfo().getComponentName().equals(
+                        ComponentName.unflattenFromString(autoFillService))) {
+                    Settings.Secure.putStringForUser(mContext.getContentResolver(),
+                            Settings.Secure.AUTO_FILL_SERVICE, null, mUserId);
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+            synchronized (mLock) {
+                destroyLocked();
+                mSessions.remove(this);
+            }
         }
 
         // FillServiceCallbacks

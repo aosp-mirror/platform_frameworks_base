@@ -18,6 +18,7 @@ package android.service.autofill;
 
 import android.app.assist.AssistStructure;
 import android.os.Bundle;
+import android.service.autofill.IAutoFillServiceConnection;
 import android.service.autofill.IFillCallback;
 import android.service.autofill.ISaveCallback;
 import com.android.internal.os.IResultReceiver;
@@ -28,10 +29,9 @@ import com.android.internal.os.IResultReceiver;
  * @hide
  */
 oneway interface IAutoFillService {
+    void onInit(in IAutoFillServiceConnection connection);
     void onFillRequest(in AssistStructure structure, in Bundle extras,
             in IFillCallback callback);
     void onSaveRequest(in AssistStructure structure, in Bundle extras,
             in ISaveCallback callback);
-    void onConnected();
-    void onDisconnected();
 }
