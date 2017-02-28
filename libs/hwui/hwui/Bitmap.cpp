@@ -30,8 +30,6 @@
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 
-#include <gui/IGraphicBufferAlloc.h>
-#include <gui/ISurfaceComposer.h>
 #include <private/gui/ComposerService.h>
 #include <binder/IServiceManager.h>
 #include <ui/PixelFormat.h>
@@ -219,13 +217,6 @@ sk_sp<Bitmap> Bitmap::allocateHardwareBitmap(uirenderer::renderthread::RenderThr
     renderThread.eglManager().initialize();
     uirenderer::Caches& caches = uirenderer::Caches::getInstance();
 
-    sp<ISurfaceComposer> composer(ComposerService::getComposerService());
-    sp<IGraphicBufferAlloc> alloc(composer->createGraphicBufferAlloc());
-    if (alloc == NULL) {
-        ALOGW("createGraphicBufferAlloc() failed in GraphicBuffer.create()");
-        return nullptr;
-    }
-
     const SkImageInfo& info = skBitmap.info();
     if (info.colorType() == kUnknown_SkColorType || info.colorType() == kAlpha_8_SkColorType) {
         ALOGW("unable to create hardware bitmap of colortype: %d", info.colorType());
@@ -240,12 +231,14 @@ sk_sp<Bitmap> Bitmap::allocateHardwareBitmap(uirenderer::renderthread::RenderThr
             needSRGB, &internalFormat, &format, &type);
 
     PixelFormat pixelFormat = internalFormatToPixelFormat(internalFormat);
-    status_t error;
-    sp<GraphicBuffer> buffer = alloc->createGraphicBuffer(info.width(), info.height(), pixelFormat,
-            1, GraphicBuffer::USAGE_HW_TEXTURE | GraphicBuffer::USAGE_SW_WRITE_NEVER
-            | GraphicBuffer::USAGE_SW_READ_NEVER , &error);
+    sp<GraphicBuffer> buffer = new GraphicBuffer(info.width(), info.height(), pixelFormat,
+            GraphicBuffer::USAGE_HW_TEXTURE |
+            GraphicBuffer::USAGE_SW_WRITE_NEVER |
+            GraphicBuffer::USAGE_SW_READ_NEVER,
+            std::string("Bitmap::allocateHardwareBitmap pid [") + std::to_string(getpid()) + "]");
 
-    if (!buffer.get()) {
+    status_t error = buffer->initCheck();
+    if (error < 0) {
         ALOGW("createGraphicBuffer() failed in GraphicBuffer.create()");
         return nullptr;
     }
