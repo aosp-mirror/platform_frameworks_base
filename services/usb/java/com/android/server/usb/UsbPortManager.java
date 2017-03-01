@@ -117,7 +117,7 @@ public class UsbPortManager {
     public UsbPortManager(Context context) {
         mContext = context;
         try {
-            boolean ret = IServiceManager.getService("manager")
+            boolean ret = IServiceManager.getService()
                     .registerForNotifications("android.hardware.usb@1.0::IUsb",
                     "", mServiceNotification);
             if (!ret) {
