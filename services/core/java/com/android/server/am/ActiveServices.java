@@ -2810,14 +2810,13 @@ public final class ActiveServices {
     }
 
     List<ActivityManager.RunningServiceInfo> getRunningServiceInfoLocked(int maxNum, int flags,
-        int callingUid, boolean allowed) {
+        int callingUid, boolean allowed, boolean canInteractAcrossUsers) {
         ArrayList<ActivityManager.RunningServiceInfo> res
                 = new ArrayList<ActivityManager.RunningServiceInfo>();
 
         final long ident = Binder.clearCallingIdentity();
         try {
-            if (ActivityManager.checkUidPermission(INTERACT_ACROSS_USERS_FULL, callingUid)
-                == PERMISSION_GRANTED) {
+            if (canInteractAcrossUsers) {
                 int[] users = mAm.mUserController.getUsers();
                 for (int ui=0; ui<users.length && res.size() < maxNum; ui++) {
                     ArrayMap<ComponentName, ServiceRecord> alls = getServicesLocked(users[ui]);
