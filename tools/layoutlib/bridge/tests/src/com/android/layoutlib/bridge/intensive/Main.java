@@ -34,7 +34,7 @@ import android.util.BridgeXmlPullAttributesTest;
 @SuiteClasses({
         RenderTests.class, LayoutParserWrapperTest.class,
         BridgeXmlBlockParserTest.class, BridgeXmlPullAttributesTest.class,
-        Matrix_DelegateTest.class, TestDelegates.class
+        Matrix_DelegateTest.class, TestDelegates.class, PerformanceTests.class
 })
 public class Main {
 }
