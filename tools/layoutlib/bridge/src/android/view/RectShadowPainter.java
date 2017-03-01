@@ -52,6 +52,8 @@ public class RectShadowPainter {
             throw new IllegalArgumentException("Outline is not a rect shadow");
         }
 
+        // TODO replacing the algorithm here to create better shadow
+
         float shadowSize = elevationToShadow(elevation);
         int saved = modifyCanvas(canvas, shadowSize);
         if (saved == -1) {
