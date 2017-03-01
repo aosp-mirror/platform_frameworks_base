@@ -356,7 +356,7 @@ public class CameraDeviceImpl extends CameraDevice
             outputConfigs.add(new OutputConfiguration(s));
         }
         configureStreamsChecked(/*inputConfig*/null, outputConfigs,
-                /*isConstrainedHighSpeed*/false);
+                /*operatingMode*/ICameraDeviceUser.NORMAL_MODE);
 
     }
 
@@ -374,13 +374,14 @@ public class CameraDeviceImpl extends CameraDevice
      *
      * @param inputConfig input configuration or {@code null} for no input
      * @param outputs a list of one or more surfaces, or {@code null} to unconfigure
-     * @param isConstrainedHighSpeed If the streams configuration is for constrained high speed output.
+     * @param operatingMode If the stream configuration is for a normal session,
+     *     a constrained high speed session, or something else.
      * @return whether or not the configuration was successful
      *
      * @throws CameraAccessException if there were any unexpected problems during configuration
      */
     public boolean configureStreamsChecked(InputConfiguration inputConfig,
-            List<OutputConfiguration> outputs, boolean isConstrainedHighSpeed)
+            List<OutputConfiguration> outputs, int operatingMode)
                     throws CameraAccessException {
         // Treat a null input the same an empty list
         if (outputs == null) {
@@ -456,7 +457,7 @@ public class CameraDeviceImpl extends CameraDevice
                     }
                 }
 
-                mRemoteDevice.endConfigure(isConstrainedHighSpeed);
+                mRemoteDevice.endConfigure(operatingMode);
 
                 success = true;
             } catch (IllegalArgumentException e) {
@@ -492,7 +493,7 @@ public class CameraDeviceImpl extends CameraDevice
             outConfigurations.add(new OutputConfiguration(surface));
         }
         createCaptureSessionInternal(null, outConfigurations, callback, handler,
-                /*isConstrainedHighSpeed*/false);
+                /*operatingMode*/ICameraDeviceUser.NORMAL_MODE);
     }
 
     @Override
@@ -508,7 +509,7 @@ public class CameraDeviceImpl extends CameraDevice
         List<OutputConfiguration> currentOutputs = new ArrayList<>(outputConfigurations);
 
         createCaptureSessionInternal(null, currentOutputs, callback, handler,
-                /*isConstrainedHighSpeed*/false);
+                /*operatingMode*/ICameraDeviceUser.NORMAL_MODE);
     }
 
     @Override
@@ -528,7 +529,7 @@ public class CameraDeviceImpl extends CameraDevice
             outConfigurations.add(new OutputConfiguration(surface));
         }
         createCaptureSessionInternal(inputConfig, outConfigurations, callback, handler,
-                /*isConstrainedHighSpeed*/false);
+                /*operatingMode*/ICameraDeviceUser.NORMAL_MODE);
     }
 
     @Override
@@ -556,7 +557,7 @@ public class CameraDeviceImpl extends CameraDevice
             currentOutputs.add(new OutputConfiguration(output));
         }
         createCaptureSessionInternal(inputConfig, currentOutputs,
-                callback, handler, /*isConstrainedHighSpeed*/false);
+                callback, handler, /*operatingMode*/ICameraDeviceUser.NORMAL_MODE);
     }
 
     @Override
@@ -576,13 +577,26 @@ public class CameraDeviceImpl extends CameraDevice
             outConfigurations.add(new OutputConfiguration(surface));
         }
         createCaptureSessionInternal(null, outConfigurations, callback, handler,
-                /*isConstrainedHighSpeed*/true);
+                /*operatingMode*/ICameraDeviceUser.CONSTRAINED_HIGH_SPEED_MODE);
+    }
+
+    @Override
+    public void createCustomCaptureSession(InputConfiguration inputConfig,
+            List<OutputConfiguration> outputs,
+            int operatingMode,
+            android.hardware.camera2.CameraCaptureSession.StateCallback callback,
+            Handler handler) throws CameraAccessException {
+        List<OutputConfiguration> currentOutputs = new ArrayList<OutputConfiguration>();
+        for (OutputConfiguration output : outputs) {
+            currentOutputs.add(new OutputConfiguration(output));
+        }
+        createCaptureSessionInternal(inputConfig, currentOutputs, callback, handler, operatingMode);
     }
 
     private void createCaptureSessionInternal(InputConfiguration inputConfig,
             List<OutputConfiguration> outputConfigurations,
             CameraCaptureSession.StateCallback callback, Handler handler,
-            boolean isConstrainedHighSpeed) throws CameraAccessException {
+            int operatingMode) throws CameraAccessException {
         synchronized(mInterfaceLock) {
             if (DEBUG) {
                 Log.d(TAG, "createCaptureSessionInternal");
@@ -590,6 +604,8 @@ public class CameraDeviceImpl extends CameraDevice
 
             checkIfCameraClosedOrInError();
 
+            boolean isConstrainedHighSpeed =
+                    (operatingMode == ICameraDeviceUser.CONSTRAINED_HIGH_SPEED_MODE);
             if (isConstrainedHighSpeed && inputConfig != null) {
                 throw new IllegalArgumentException("Constrained high speed session doesn't support"
                         + " input configuration yet.");
@@ -608,7 +624,7 @@ public class CameraDeviceImpl extends CameraDevice
             try {
                 // configure streams and then block until IDLE
                 configureSuccess = configureStreamsChecked(inputConfig, outputConfigurations,
-                        isConstrainedHighSpeed);
+                        operatingMode);
                 if (configureSuccess == true && inputConfig != null) {
                     input = mRemoteDevice.getInputSurface();
                 }

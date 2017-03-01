@@ -719,6 +719,40 @@ public abstract class CameraDevice implements AutoCloseable {
             throws CameraAccessException;
 
     /**
+     * Create a new camera capture session with a custom operating mode.
+     *
+     * @param inputConfig The configuration for the input {@link Surface} if a reprocessing session
+     *                is desired, or {@code null} otherwise.
+     * @param outputs The new set of {@link OutputConfiguration OutputConfigurations} that should be
+     *                made available as targets for captured image data.
+     * @param operatingMode The custom operating mode to use; a nonnegative value.
+     * @param callback The callback to notify about the status of the new capture session.
+     * @param handler The handler on which the callback should be invoked, or {@code null} to use
+     *                the current thread's {@link android.os.Looper looper}.
+     *
+     * @throws IllegalArgumentException if the input configuration is null or not supported, the set
+     *                                  of output Surfaces do not meet the requirements, the
+     *                                  callback is null, or the handler is null but the current
+     *                                  thread has no looper.
+     * @throws CameraAccessException if the camera device is no longer connected or has
+     *                               encountered a fatal error
+     * @throws IllegalStateException if the camera device has been closed
+     *
+     * @see #createCaptureSession
+     * @see #createReprocessableCaptureSession
+     * @see CameraCaptureSession
+     * @see OutputConfiguration
+     * @hide
+     */
+    public abstract void createCustomCaptureSession(
+            InputConfiguration inputConfig,
+            @NonNull List<OutputConfiguration> outputs,
+            int operatingMode,
+            @NonNull CameraCaptureSession.StateCallback callback,
+            @Nullable Handler handler)
+            throws CameraAccessException;
+
+    /**
      * <p>Create a {@link CaptureRequest.Builder} for new capture requests,
      * initialized with template for a target use case. The settings are chosen
      * to be the best options for the specific camera device, so it is not
