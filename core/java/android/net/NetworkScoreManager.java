@@ -103,6 +103,14 @@ public class NetworkScoreManager {
     public static final String ACTION_CUSTOM_ENABLE = "android.net.scoring.CUSTOM_ENABLE";
 
     /**
+     * Meta-data specified on a {@link NetworkRecommendationProvider} that provides a user-visible
+     * label of the recommendation service.
+     * @hide
+     */
+    public static final String RECOMMENDATION_SERVICE_LABEL_META_DATA =
+            "android.net.scoring.recommendation_service_label";
+
+    /**
      * Meta-data specified on a {@link NetworkRecommendationProvider} that specified the package
      * name of the application that connects and secures open wifi networks automatically. The
      * specified package must provide an Activity for {@link #ACTION_CUSTOM_ENABLE}.

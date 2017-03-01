@@ -85,11 +85,12 @@ public class NetworkScorerAppManager {
                 }
                 final ComponentName serviceComponentName =
                         new ComponentName(serviceInfo.packageName, serviceInfo.name);
+                final String serviceLabel = getRecommendationServiceLabel(serviceInfo, pm);
                 final ComponentName useOpenWifiNetworksActivity =
                         findUseOpenWifiNetworksActivity(serviceInfo);
                 appDataList.add(
                         new NetworkScorerAppData(serviceInfo.applicationInfo.uid,
-                                serviceComponentName, useOpenWifiNetworksActivity));
+                                serviceComponentName, serviceLabel, useOpenWifiNetworksActivity));
             } else {
                 if (VERBOSE) Log.v(TAG, serviceInfo.packageName
                         + " is NOT a valid scorer/recommender.");
@@ -97,6 +98,19 @@ public class NetworkScorerAppManager {
         }
 
         return appDataList;
+    }
+
+    @Nullable
+    private String getRecommendationServiceLabel(ServiceInfo serviceInfo, PackageManager pm) {
+        if (serviceInfo.metaData != null) {
+            final String label = serviceInfo.metaData
+                    .getString(NetworkScoreManager.RECOMMENDATION_SERVICE_LABEL_META_DATA);
+            if (!TextUtils.isEmpty(label)) {
+                return label;
+            }
+        }
+        CharSequence label = serviceInfo.loadLabel(pm);
+        return label == null ? null : label.toString();
     }
 
     @Nullable
