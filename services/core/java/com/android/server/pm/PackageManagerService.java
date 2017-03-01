@@ -7310,12 +7310,17 @@ public class PackageManagerService extends IPackageManager.Stub {
             return false;
         }
 
-        if (!isCallerSameApp(packageName)) {
-            return false;
-        }
         synchronized (mPackages) {
             final PackageSetting ps = mSettings.mPackages.get(packageName);
-            if (ps != null) {
+            final boolean returnAllowed =
+                    ps != null
+                    && (isCallerSameApp(packageName)
+                            || mContext.checkCallingOrSelfPermission(
+                                    android.Manifest.permission.ACCESS_INSTANT_APPS)
+                                            == PERMISSION_GRANTED
+                            || mInstantAppRegistry.isInstantAccessGranted(
+                                    userId, UserHandle.getAppId(Binder.getCallingUid()), ps.appId));
+            if (returnAllowed) {
                 return ps.getInstantApp(userId);
             }
         }
