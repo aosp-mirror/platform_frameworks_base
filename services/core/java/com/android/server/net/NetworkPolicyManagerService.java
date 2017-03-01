@@ -2608,8 +2608,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     // (mPowerSaveTempWhitelistAppIds) for whitelisting, we can reuse their logic in this method.
     private void updateRulesForWhitelistedPowerSaveUL(int uid, boolean enabled, int chain) {
         if (enabled) {
-            if (isWhitelistedBatterySaverUL(uid)
-                    || isProcStateAllowedWhileIdleOrPowerSaveMode(mUidState.get(uid))) {
+            if (isWhitelistedBatterySaverUL(uid) || isUidForegroundOnRestrictPowerUL(uid)) {
                 setUidFirewallRule(chain, uid, FIREWALL_RULE_ALLOW);
             } else {
                 setUidFirewallRule(chain, uid, FIREWALL_RULE_DEFAULT);
