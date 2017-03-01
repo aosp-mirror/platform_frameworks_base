@@ -94,6 +94,7 @@ public class NotificationHeaderView extends ViewGroup {
             }
         }
     };
+    private boolean mAcceptAllTouches;
 
     public NotificationHeaderView(Context context) {
         this(context, null);
@@ -374,6 +375,8 @@ public class NotificationHeaderView extends ViewGroup {
                 case MotionEvent.ACTION_DOWN:
                     mTrackGesture = false;
                     if (isInside(x, y)) {
+                        mDownX = x;
+                        mDownY = y;
                         mTrackGesture = true;
                         return true;
                     }
@@ -396,11 +399,12 @@ public class NotificationHeaderView extends ViewGroup {
         }
 
         private boolean isInside(float x, float y) {
+            if (mAcceptAllTouches) {
+                return true;
+            }
             for (int i = 0; i < mTouchRects.size(); i++) {
                 Rect r = mTouchRects.get(i);
                 if (r.contains((int) x, (int) y)) {
-                    mDownX = x;
-                    mDownY = y;
                     return true;
                 }
             }
@@ -432,5 +436,10 @@ public class NotificationHeaderView extends ViewGroup {
             return false;
         }
         return mTouchListener.isInside(x, y);
+    }
+
+    @RemotableViewMethod
+    public void setAcceptAllTouches(boolean acceptAllTouches) {
+        mAcceptAllTouches = acceptAllTouches;
     }
 }

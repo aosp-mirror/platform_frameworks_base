@@ -4177,7 +4177,7 @@ public class Notification implements Parcelable
             }
 
             RemoteViews header = makeNotificationHeader();
-
+            header.setBoolean(R.id.notification_header, "setAcceptAllTouches", true);
             if (summary != null) {
                 mN.extras.putCharSequence(EXTRA_SUB_TEXT, summary);
             } else {
