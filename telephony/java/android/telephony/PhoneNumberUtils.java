@@ -1440,6 +1440,30 @@ public class PhoneNumberUtils
     }
 
     /**
+     * Determines if a {@param phoneNumber} is international if dialed from
+     * {@param defaultCountryIso}.
+     *
+     * @param phoneNumber The phone number.
+     * @param defaultCountryIso The current country ISO.
+     * @return {@code true} if the number is international, {@code false} otherwise.
+     * @hide
+     */
+    public static boolean isInternationalNumber(String phoneNumber, String defaultCountryIso) {
+        // If it starts with # or * its not international.
+        if (phoneNumber.startsWith("#") || phoneNumber.startsWith("*")) {
+            return false;
+        }
+
+        PhoneNumberUtil util = PhoneNumberUtil.getInstance();
+        try {
+            PhoneNumber pn = util.parseAndKeepRawInput(phoneNumber, defaultCountryIso);
+            return pn.getCountryCode() != util.getCountryCodeForRegion(defaultCountryIso);
+        } catch (NumberParseException e) {
+            return false;
+        }
+    }
+
+    /**
      * Format a phone number.
      * <p>
      * If the given number doesn't have the country code, the phone will be
