@@ -60,6 +60,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
@@ -96,6 +97,8 @@ public class UsageStatsService extends SystemService implements
         UserUsageStatsService.StatsUpdatedListener {
 
     static final String TAG = "UsageStatsService";
+    public static final boolean ENABLE_TIME_CHANGE_CORRECTION
+            = SystemProperties.getBoolean("debug.time_change_correction", true);
 
     static final boolean DEBUG = false; // Never submit with true
     static final boolean COMPRESS_TIME = false;
@@ -658,7 +661,8 @@ public class UsageStatsService extends SystemService implements
         final long actualRealtime = SystemClock.elapsedRealtime();
         final long expectedSystemTime = (actualRealtime - mRealTimeSnapshot) + mSystemTimeSnapshot;
         final long diffSystemTime = actualSystemTime - expectedSystemTime;
-        if (Math.abs(diffSystemTime) > TIME_CHANGE_THRESHOLD_MILLIS) {
+        if (Math.abs(diffSystemTime) > TIME_CHANGE_THRESHOLD_MILLIS
+                && ENABLE_TIME_CHANGE_CORRECTION) {
             // The time has changed.
             Slog.i(TAG, "Time changed in UsageStats by " + (diffSystemTime / 1000) + " seconds");
             final int userCount = mUserState.size();
