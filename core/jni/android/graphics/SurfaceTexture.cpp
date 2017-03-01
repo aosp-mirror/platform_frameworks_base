@@ -29,6 +29,7 @@
 
 #include "core_jni_helpers.h"
 
+#include <cutils/atomic.h>
 #include <utils/Log.h>
 #include <utils/misc.h>
 
