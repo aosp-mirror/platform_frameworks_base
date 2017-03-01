@@ -177,6 +177,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -4903,7 +4904,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 setResizingDuringAnimation(task);
             }
 
-            mService.mActivityStarter.postStartActivityProcessing(task.getTopActivity(),
+            mService.mActivityStarter.postStartActivityUncheckedProcessing(task.getTopActivity(),
                     ActivityManager.START_TASK_TO_FRONT,
                     sourceRecord != null ? sourceRecord.task.getStackId() : INVALID_STACK_ID,
                     sourceRecord, task.getStack());
