@@ -46,7 +46,6 @@ import android.test.MoreAsserts;
 import android.test.suitebuilder.annotation.SmallTest;
 
 import com.android.frameworks.servicestests.R;
-import com.android.server.pm.ShortcutService.ConfigConstants;
 import com.android.server.pm.ShortcutUser.PackageWithUser;
 
 import java.io.File;
@@ -993,7 +992,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
 
         setCaller(CALLING_PACKAGE_1, USER_10);
 
-        final Icon bmp32x32 = Icon.createWithMaskableBitmap(BitmapFactory.decodeResource(
+        final Icon bmp32x32 = Icon.createWithAdaptiveBitmap(BitmapFactory.decodeResource(
             getTestContext().getResources(), R.drawable.black_32x32));
 
         PersistableBundle pb = new PersistableBundle();
@@ -1047,7 +1046,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         assertEquals(1, si.getExtras().getInt("k"));
 
         assertEquals(ShortcutInfo.FLAG_DYNAMIC | ShortcutInfo.FLAG_HAS_ICON_FILE
-            | ShortcutInfo.FLAG_STRINGS_RESOLVED | ShortcutInfo.FLAG_MASKABLE_BITMAP,
+            | ShortcutInfo.FLAG_STRINGS_RESOLVED | ShortcutInfo.FLAG_ADAPTIVE_BITMAP,
             si.getFlags());
         assertNotNull(si.getBitmapPath()); // Something should be set.
         assertEquals(0, si.getIconResourceId());

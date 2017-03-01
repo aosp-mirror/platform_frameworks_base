@@ -247,7 +247,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         final Icon icon1 = Icon.createWithResource(getTestContext(), R.drawable.icon1);
         final Icon icon2 = Icon.createWithBitmap(BitmapFactory.decodeResource(
                 getTestContext().getResources(), R.drawable.icon2));
-        final Icon icon3 = Icon.createWithMaskableBitmap(BitmapFactory.decodeResource(
+        final Icon icon3 = Icon.createWithAdaptiveBitmap(BitmapFactory.decodeResource(
             getTestContext().getResources(), R.drawable.icon2));
 
         final ShortcutInfo si1 = makeShortcut(
@@ -567,7 +567,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
 
         final Icon bmp32x32 = Icon.createWithBitmap(BitmapFactory.decodeResource(
                 getTestContext().getResources(), R.drawable.black_32x32));
-        final Icon bmp64x64_maskable = Icon.createWithMaskableBitmap(BitmapFactory.decodeResource(
+        final Icon bmp64x64_maskable = Icon.createWithAdaptiveBitmap(BitmapFactory.decodeResource(
                 getTestContext().getResources(), R.drawable.black_64x64));
         final Icon bmp512x512 = Icon.createWithBitmap(BitmapFactory.decodeResource(
                 getTestContext().getResources(), R.drawable.black_512x512));

@@ -108,13 +108,13 @@ public class IconTest extends AndroidTestCase {
     }
 
     @SmallTest
-    public void testWithMaskableBitmap() throws Exception {
+    public void testWithAdaptiveBitmap() throws Exception {
         final Bitmap bm1 = Bitmap.createBitmap(150, 150, Bitmap.Config.ARGB_8888);
 
         final Canvas can1 = new Canvas(bm1);
         can1.drawColor(0xFFFF0000);
 
-        final Icon im1 = Icon.createWithMaskableBitmap(bm1);
+        final Icon im1 = Icon.createWithAdaptiveBitmap(bm1);
 
         final AdaptiveIconDrawable draw1 = (AdaptiveIconDrawable) im1.loadDrawable(mContext);
 
@@ -132,12 +132,12 @@ public class IconTest extends AndroidTestCase {
         L("writing temp bitmaps to %s...", dir);
 
         bm1.compress(Bitmap.CompressFormat.PNG, 100,
-            new FileOutputStream(new File(dir, "maskable-bitmap1-original.png")));
+            new FileOutputStream(new File(dir, "adaptive-bitmap1-original.png")));
         test1.compress(Bitmap.CompressFormat.PNG, 100,
-            new FileOutputStream(new File(dir, "maskable-bitmap1-test.png")));
+            new FileOutputStream(new File(dir, "adaptive-bitmap1-test.png")));
         if (!equalBitmaps(bm1, test1, draw1.getSafeZone())) {
             findBitmapDifferences(bm1, test1);
-            fail("maskable bitmap1 differs, check " + dir);
+            fail("adaptive bitmap1 differs, check " + dir);
         }
     }
 

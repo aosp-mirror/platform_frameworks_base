@@ -96,7 +96,7 @@ public final class ShortcutInfo implements Parcelable {
     public static final int FLAG_IMMUTABLE = 1 << 8;
 
     /** @hide */
-    public static final int FLAG_MASKABLE_BITMAP = 1 << 9;
+    public static final int FLAG_ADAPTIVE_BITMAP = 1 << 9;
 
     /** @hide */
     public static final int FLAG_CHOOSER = 1 << 10;
@@ -118,7 +118,7 @@ public final class ShortcutInfo implements Parcelable {
             FLAG_DISABLED,
             FLAG_STRINGS_RESOLVED,
             FLAG_IMMUTABLE,
-            FLAG_MASKABLE_BITMAP,
+            FLAG_ADAPTIVE_BITMAP,
             FLAG_CHOOSER,
     })
     @Retention(RetentionPolicy.SOURCE)
@@ -784,7 +784,7 @@ public final class ShortcutInfo implements Parcelable {
         switch (icon.getType()) {
             case Icon.TYPE_RESOURCE:
             case Icon.TYPE_BITMAP:
-            case Icon.TYPE_BITMAP_MASKABLE:
+            case Icon.TYPE_ADAPTIVE_BITMAP:
                 break; // OK
             default:
                 throw getInvalidIconException();
@@ -917,7 +917,7 @@ public final class ShortcutInfo implements Parcelable {
          * and will be ignored.
          *
          * <p>Only icons created with {@link Icon#createWithBitmap(Bitmap)},
-         * {@link Icon#createWithMaskableBitmap(Bitmap)}
+         * {@link Icon#createWithAdaptiveBitmap(Bitmap)}
          * and {@link Icon#createWithResource} are supported.
          * Other types, such as URI-based icons, are not supported.
          *
@@ -1615,12 +1615,13 @@ public final class ShortcutInfo implements Parcelable {
     }
 
     /**
-     * Return whether a shortcut's icon is maskable.
+     * Return whether a shortcut's icon is adaptive bitmap following design guideline
+     * defined in {@link AdaptiveIconDrawable}.
      *
      * @hide internal/unit tests only
      */
-    public boolean hasMaskableBitmap() {
-        return hasFlags(FLAG_MASKABLE_BITMAP);
+    public boolean hasAdaptiveBitmap() {
+        return hasFlags(FLAG_ADAPTIVE_BITMAP);
     }
 
     /**
