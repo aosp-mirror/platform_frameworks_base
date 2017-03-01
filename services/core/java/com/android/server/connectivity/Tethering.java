@@ -950,6 +950,8 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
         // Events from NetworkCallbacks that we process on the master state
         // machine thread on behalf of the UpstreamNetworkMonitor.
         static final int EVENT_UPSTREAM_CALLBACK                = BASE_MASTER + 5;
+        // we treated the error and want now to clear it
+        static final int CMD_CLEAR_ERROR                        = BASE_MASTER + 6;
 
         private State mInitialState;
         private State mTetherModeAliveState;
@@ -1496,6 +1498,10 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
                         TetherInterfaceStateMachine who = (TetherInterfaceStateMachine)message.obj;
                         who.sendMessage(mErrorNotification);
                         break;
+                    case CMD_CLEAR_ERROR:
+                        mErrorNotification = ConnectivityManager.TETHER_ERROR_NO_ERROR;
+                        transitionTo(mInitialState);
+                        break;
                     default:
                        retValue = false;
                 }
@@ -1640,6 +1646,12 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
             // Not really very much we can do here.
         }
 
+        // If TetherMasterSM is in ErrorState, TetherMasterSM stays there.
+        // Thus we give a chance for TetherMasterSM to recover to InitialState
+        // by sending CMD_CLEAR_ERROR
+        if (error == ConnectivityManager.TETHER_ERROR_MASTER_ERROR) {
+            mTetherMasterSM.sendMessage(TetherMasterSM.CMD_CLEAR_ERROR, who);
+        }
         switch (state) {
             case IControlsTethering.STATE_UNAVAILABLE:
             case IControlsTethering.STATE_AVAILABLE:
