@@ -19,6 +19,7 @@ package android.net;
 import static android.content.pm.PackageManager.GET_SIGNATURES;
 import static android.net.NetworkPolicy.CYCLE_NONE;
 
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -380,5 +381,21 @@ public class NetworkPolicyManager {
         }
         string.append(")");
         return string.toString();
+    }
+
+    /**
+     * Returns true if {@param procState} is considered foreground and as such will be allowed
+     * to access network when the device is idle or in battery saver mode. Otherwise, false.
+     */
+    public static boolean isProcStateAllowedWhileIdleOrPowerSaveMode(int procState) {
+        return procState <= ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE;
+    }
+
+    /**
+     * Returns true if {@param procState} is considered foreground and as such will be allowed
+     * to access network when the device is in data saver mode. Otherwise, false.
+     */
+    public static boolean isProcStateAllowedWhileOnRestrictBackground(int procState) {
+        return procState <= ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE;
     }
 }

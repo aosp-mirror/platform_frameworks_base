@@ -58,6 +58,8 @@ import static android.net.NetworkPolicyManager.RULE_REJECT_ALL;
 import static android.net.NetworkPolicyManager.RULE_REJECT_METERED;
 import static android.net.NetworkPolicyManager.RULE_TEMPORARY_ALLOW_METERED;
 import static android.net.NetworkPolicyManager.computeLastCycleBoundary;
+import static android.net.NetworkPolicyManager.isProcStateAllowedWhileIdleOrPowerSaveMode;
+import static android.net.NetworkPolicyManager.isProcStateAllowedWhileOnRestrictBackground;
 import static android.net.NetworkPolicyManager.uidPoliciesToString;
 import static android.net.NetworkPolicyManager.uidRulesToString;
 import static android.net.NetworkTemplate.MATCH_MOBILE_3G_LOWER;
@@ -2525,14 +2527,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         if (oldForeground != newForeground) {
             updateRulesForDataUsageRestrictionsUL(uid);
         }
-    }
-
-    static boolean isProcStateAllowedWhileIdleOrPowerSaveMode(int procState) {
-        return procState <= ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE;
-    }
-
-    static boolean isProcStateAllowedWhileOnRestrictBackground(int procState) {
-        return procState <= ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE;
     }
 
     void updateRulesForPowerSaveUL() {
