@@ -197,12 +197,12 @@ void RenderNodeDrawable::drawContent(SkCanvas* canvas) const {
             if (needsLayer) {
                 canvas->saveLayer(bounds, &paint);
             }
-            canvas->drawDrawable(displayList->mDrawable.get());
+            displayList->draw(canvas);
             if (needsLayer) {
                 canvas->restore();
             }
         } else {
-            canvas->drawDrawable(displayList->mDrawable.get());
+            displayList->draw(canvas);
         }
     }
 }

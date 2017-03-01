@@ -27,10 +27,6 @@ namespace android {
 namespace uirenderer {
 namespace skiapipeline {
 
-SkiaDisplayList::SkiaDisplayList(SkRect bounds) : mDrawable(SkLiteDL::New(bounds)) {
-    SkASSERT(projectionReceiveIndex == -1);
-}
-
 void SkiaDisplayList::syncContents() {
     for (auto& functor : mChildFunctors) {
         functor.syncFunctor();
@@ -41,7 +37,7 @@ void SkiaDisplayList::syncContents() {
 }
 
 bool SkiaDisplayList::reuseDisplayList(RenderNode* node, renderthread::CanvasContext* context) {
-    reset(SkRect::MakeEmpty());
+    reset();
     node->attachAvailableList(this);
     return true;
 }
@@ -102,10 +98,10 @@ bool SkiaDisplayList::prepareListAndChildren(TreeObserver& observer, TreeInfo& i
     return isDirty;
 }
 
-void SkiaDisplayList::reset(SkRect bounds) {
+void SkiaDisplayList::reset() {
     mProjectionReceiver = nullptr;
 
-    mDrawable->reset(bounds);
+    mDisplayList.reset();
 
     mMutableImages.clear();
     mVectorDrawables.clear();
@@ -119,7 +115,7 @@ void SkiaDisplayList::reset(SkRect bounds) {
 
 void SkiaDisplayList::output(std::ostream& output, uint32_t level) {
     DumpOpsCanvas canvas(output, level, *this);
-    mDrawable->draw(&canvas, nullptr);
+    mDisplayList.draw(&canvas);
 }
 
 }; // namespace skiapipeline

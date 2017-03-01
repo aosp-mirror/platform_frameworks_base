@@ -44,9 +44,9 @@ TEST(RenderNodeDrawable, create) {
                 canvas.drawColor(Color::Red_500, SkBlendMode::kSrcOver);
             });
 
-    auto skLiteDL = SkLiteDL::New(SkRect::MakeWH(1, 1));
+    SkLiteDL skLiteDL;
     SkLiteRecorder canvas;
-    canvas.reset(skLiteDL.get());
+    canvas.reset(&skLiteDL, SkIRect::MakeWH(1, 1));
     canvas.translate(100, 100);
     RenderNodeDrawable drawable(rootNode.get(), &canvas);
 
