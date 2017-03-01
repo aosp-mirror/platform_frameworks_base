@@ -1083,13 +1083,6 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
 
     /** @return true if this was the last activity in the task */
     boolean removeActivity(ActivityRecord r) {
-        if (r.task != this) {
-            throw new IllegalArgumentException(
-                "Activity=" + r + " does not belong to task=" + this);
-        }
-
-        r.task = null;
-
         if (mActivities.remove(r) && r.fullscreen) {
             // Was previously in list.
             numFullscreen--;

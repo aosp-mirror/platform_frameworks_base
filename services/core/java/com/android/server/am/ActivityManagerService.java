@@ -3023,24 +3023,15 @@ public class ActivityManagerService extends IActivityManager.Stub
             startRunningVoiceLocked(r.task.voiceSession, r.info.applicationInfo.uid);
         } else {
             finishRunningVoiceLocked();
-
-            if (mLastResumedActivity != null) {
-                final IVoiceInteractionSession session;
-
-                if (mLastResumedActivity.task != null
-                    && mLastResumedActivity.task.voiceSession != null) {
-                    session = mLastResumedActivity.task.voiceSession;
-                } else {
-                    session = mLastResumedActivity.voiceSession;
-                }
-
-                if (session != null) {
-                    // We had been in a voice interaction session, but now focused has
-                    // move to something different.  Just finish the session, we can't
-                    // return to it and retain the proper state and synchronization with
-                    // the voice interaction service.
-                    finishVoiceTask(session);
-                }
+            IVoiceInteractionSession session;
+            if (mLastResumedActivity != null
+                    && ((session = mLastResumedActivity.task.voiceSession) != null
+                    || (session = mLastResumedActivity.voiceSession) != null)) {
+                // We had been in a voice interaction session, but now focused has
+                // move to something different.  Just finish the session, we can't
+                // return to it and retain the proper state and synchronization with
+                // the voice interaction service.
+                finishVoiceTask(session);
             }
         }
 

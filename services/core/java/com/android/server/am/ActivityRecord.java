@@ -802,7 +802,10 @@ final class ActivityRecord implements AppWindowContainerListener {
 
         // Remove the activity from the old task and add it to the new task
         prevTask.removeActivity(this);
-
+        // TODO(b/34179495): This should really be set to null in removeActivity() call above,
+        // but really bad things that I can't track down right now happen when I do that.
+        // So, setting it here now and will change later when there is time for investigation.
+        task = null;
         newTask.addActivityAtIndex(position, this);
     }
 
