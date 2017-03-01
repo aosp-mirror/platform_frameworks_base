@@ -75,7 +75,7 @@ public final class InstantAppInfo implements Parcelable {
     }
 
     /**
-     * @return The pakcage name.
+     * @return The package name.
      */
     public @NonNull String getPackageName() {
         if (mApplicationInfo != null) {
