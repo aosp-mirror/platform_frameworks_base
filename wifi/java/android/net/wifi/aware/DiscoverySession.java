@@ -31,7 +31,7 @@ import java.lang.ref.WeakReference;
  * {@link PublishDiscoverySession} and {@link SubscribeDiscoverySession}. This
  * class provides functionality common to both publish and subscribe discovery sessions:
  * <ul>
- *     <li>Sending messages: {@link #sendMessage(PeerHandle, int, byte[])}.
+ *     <li>Sending messages: {@link #sendMessage(PeerHandle, int, byte[])} method.
  *     <li>Creating a network-specifier when requesting a Aware connection:
  *     {@link #createNetworkSpecifier(PeerHandle, byte[])}.
  * </ul>
@@ -247,8 +247,8 @@ public class DiscoverySession {
     }
 
     /**
-     * Create a {@link android.net.NetworkRequest.Builder#setNetworkSpecifier(String)} for a
-     * WiFi Aware connection to the specified peer. The
+     * Create a {@link android.net.NetworkRequest.Builder#setNetworkSpecifier(String)} for an
+     * unencrypted WiFi Aware connection (link) to the specified peer. The
      * {@link android.net.NetworkRequest.Builder#addTransportType(int)} should be set to
      * {@link android.net.NetworkCapabilities#TRANSPORT_WIFI_AWARE}.
      * <p>
@@ -256,7 +256,58 @@ public class DiscoverySession {
      * discovery or communication (in such scenarios the MAC address of the peer is shielded by
      * an opaque peer ID handle). If a Aware connection is needed to a peer discovered using other
      * OOB (out-of-band) mechanism then use the alternative
-     * {@link WifiAwareSession#createNetworkSpecifier(int, byte[], byte[])} method - which uses the
+     * {@link WifiAwareSession#createNetworkSpecifierOpen(int, byte[])} method - which uses the
+     * peer's MAC address.
+     * <p>
+     * Note: per the Wi-Fi Aware specification the roles are fixed - a Subscriber is an INITIATOR
+     * and a Publisher is a RESPONDER.
+     *
+     * @param peerHandle The peer's handle obtained through
+     * {@link DiscoverySessionCallback#onServiceDiscovered(PeerHandle, byte[], java.util.List)}
+     *                   or
+     *                   {@link DiscoverySessionCallback#onMessageReceived(PeerHandle, byte[])}.
+     *                   On a RESPONDER this value is used to gate the acceptance of a connection
+     *                   request from only that peer. A RESPONDER may specify a null - indicating
+     *                   that it will accept connection requests from any device.
+     *
+     * @return A string to be used to construct
+     * {@link android.net.NetworkRequest.Builder#setNetworkSpecifier(String)} to pass to
+     * {@link android.net.ConnectivityManager#requestNetwork(android.net.NetworkRequest,
+     * android.net.ConnectivityManager.NetworkCallback)}
+     * [or other varieties of that API].
+     *
+     * @hide
+     */
+    public String createNetworkSpecifierOpen(@Nullable PeerHandle peerHandle) {
+        if (mTerminated) {
+            Log.w(TAG, "createNetworkSpecifierOpen: called on terminated session");
+            return null;
+        } else {
+            WifiAwareManager mgr = mMgr.get();
+            if (mgr == null) {
+                Log.w(TAG, "createNetworkSpecifierOpen: called post GC on WifiAwareManager");
+                return null;
+            }
+
+            int role = this instanceof SubscribeDiscoverySession
+                    ? WifiAwareManager.WIFI_AWARE_DATA_PATH_ROLE_INITIATOR
+                    : WifiAwareManager.WIFI_AWARE_DATA_PATH_ROLE_RESPONDER;
+
+            return mgr.createNetworkSpecifier(mClientId, role, mSessionId, peerHandle, null);
+        }
+    }
+
+    /**
+     * Create a {@link android.net.NetworkRequest.Builder#setNetworkSpecifier(String)} for an
+     * encrypted WiFi Aware connection (link) to the specified peer. The
+     * {@link android.net.NetworkRequest.Builder#addTransportType(int)} should be set to
+     * {@link android.net.NetworkCapabilities#TRANSPORT_WIFI_AWARE}.
+     * <p>
+     * This method should be used when setting up a connection with a peer discovered through Aware
+     * discovery or communication (in such scenarios the MAC address of the peer is shielded by
+     * an opaque peer ID handle). If a Aware connection is needed to a peer discovered using other
+     * OOB (out-of-band) mechanism then use the alternative
+     * {@link WifiAwareSession#createNetworkSpecifierPmk(int, byte[], byte[])} method - which uses the
      * peer's MAC address.
      * <p>
      * Note: per the Wi-Fi Aware specification the roles are fixed - a Subscriber is an INITIATOR
@@ -267,29 +318,34 @@ public class DiscoverySession {
      * byte[], java.util.List)} or
      * {@link DiscoverySessionCallback#onMessageReceived(PeerHandle,
      * byte[])}. On a RESPONDER this value is used to gate the acceptance of a connection request
-     *                   from only that peer. A RESPONDER may specified a null - indicating that
+     *                   from only that peer. A RESPONDER may specify a null - indicating that
      *                   it will accept connection requests from any device.
-     * @param token An arbitrary token (message) to be used to match connection initiation request
-     *              to a responder setup. A RESPONDER is set up with a {@code token} which must
-     *              be matched by the token provided by the INITIATOR. A null token is permitted
-     *              on the RESPONDER and matches any peer token. An empty ({@code ""}) token is
-     *              not the same as a null token and requires the peer token to be empty as well.
+     * @param pmk A PMK (pairwise master key, see IEEE 802.11i) specifying the key to use for
+     *            encrypting the data-path. Use the
+     *            {@link #createNetworkSpecifierOpen(PeerHandle)} to specify an open (unencrypted)
+     *            link.
      *
      * @return A string to be used to construct
      * {@link android.net.NetworkRequest.Builder#setNetworkSpecifier(String)} to pass to
      * {@link android.net.ConnectivityManager#requestNetwork(android.net.NetworkRequest,
      * android.net.ConnectivityManager.NetworkCallback)}
      * [or other varieties of that API].
+     *
+     * @hide
      */
-    public String createNetworkSpecifier(@Nullable PeerHandle peerHandle,
-            @Nullable byte[] token) {
+    public String createNetworkSpecifierPmk(@Nullable PeerHandle peerHandle,
+            @NonNull byte[] pmk) {
+        if (pmk == null || pmk.length == 0) {
+            throw new IllegalArgumentException("PMK must not be null or empty");
+        }
+
         if (mTerminated) {
-            Log.w(TAG, "createNetworkSpecifier: called on terminated session");
+            Log.w(TAG, "createNetworkSpecifierPmk: called on terminated session");
             return null;
         } else {
             WifiAwareManager mgr = mMgr.get();
             if (mgr == null) {
-                Log.w(TAG, "createNetworkSpecifier: called post GC on WifiAwareManager");
+                Log.w(TAG, "createNetworkSpecifierPmk: called post GC on WifiAwareManager");
                 return null;
             }
 
@@ -297,7 +353,30 @@ public class DiscoverySession {
                     ? WifiAwareManager.WIFI_AWARE_DATA_PATH_ROLE_INITIATOR
                     : WifiAwareManager.WIFI_AWARE_DATA_PATH_ROLE_RESPONDER;
 
-            return mgr.createNetworkSpecifier(mClientId, role, mSessionId, peerHandle, token);
+            return mgr.createNetworkSpecifier(mClientId, role, mSessionId, peerHandle, pmk);
         }
+    }
+
+    /**
+     * Place-holder for {@code createNetworkSpecifierOpen(PeerHandle)}. Present to enable
+     * development of replacements CL without causing an API change. Will be removed when new
+     * APIs are exposed.
+     *
+     * @param peerHandle The peer's handle obtained through
+     * {@link DiscoverySessionCallback#onServiceDiscovered(PeerHandle,
+     * byte[], java.util.List)} or
+     * {@link DiscoverySessionCallback#onMessageReceived(PeerHandle,
+     * byte[])}. On a RESPONDER this value is used to gate the acceptance of a connection request
+     *                   from only that peer. A RESPONDER may specify a null - indicating that
+     *                   it will accept connection requests from any device.
+     * @param token Deprecated and ignored.
+     * @return A string to be used to construct
+     * {@link android.net.NetworkRequest.Builder#setNetworkSpecifier(String)} to pass to
+     * {@link android.net.ConnectivityManager#requestNetwork(android.net.NetworkRequest,
+     * android.net.ConnectivityManager.NetworkCallback)}
+     * [or other varieties of that API].
+     */
+    public String createNetworkSpecifier(@Nullable PeerHandle peerHandle, @Nullable byte[] token) {
+        return createNetworkSpecifierOpen(peerHandle);
     }
 }
