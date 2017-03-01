@@ -18827,7 +18827,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         final boolean replacePending =
                 (intent.getFlags()&Intent.FLAG_RECEIVER_REPLACE_PENDING) != 0;
 
-        if (DEBUG_BROADCAST) Slog.v(TAG_BROADCAST, "Enqueing broadcast: " + intent.getAction()
+        if (DEBUG_BROADCAST) Slog.v(TAG_BROADCAST, "Enqueueing broadcast: " + intent.getAction()
                 + " replacePending=" + replacePending);
 
         int NR = registeredReceivers != null ? registeredReceivers.size() : 0;
@@ -19135,14 +19135,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
 
             if (doNext) {
-                if (Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
-                    Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
-                      String.format("ProcessBroadcast from %s (%s) %s", r.callerPackage,
-                        r.callerApp == null ? "caller unknown" : r.callerApp.toShortString(),
-                        r.intent == null ? "" : r.intent.toString()));
-                }
                 r.queue.processNextBroadcast(false);
-                Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
             }
             trimApplications();
         } finally {
