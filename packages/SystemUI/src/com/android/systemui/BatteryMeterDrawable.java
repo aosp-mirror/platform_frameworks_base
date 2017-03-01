@@ -805,13 +805,13 @@ public class BatteryMeterDrawable extends Drawable implements
         final Drawable p = mBatteryDrawable.findDrawableByLayerId(R.id.battery_powersave_indicator);
         if (p instanceof BitmapDrawable) {
             final BitmapDrawable bpd = (BitmapDrawable) p;
-            bpd.getPaint().set(!mPowerSaveEnabled || (mPowerSaveEnabled && mShowPercent == 1)
+            bpd.getPaint().set((mLevel <= mCriticalLevel) || !mPowerSaveEnabled || (mPowerSaveEnabled && mShowPercent == 1)
                     ? mClearPaint : mTextAndBoltPaint);
             if (mIsBatteryTile) {
                 mPlusDrawable.setTint(getPlusColor());
             }
         } else {
-            p.setAlpha(!mPowerSaveEnabled || (mPowerSaveEnabled && mShowPercent == 1) ? 0 : 255);
+            p.setAlpha((mLevel <= mCriticalLevel) || !mPowerSaveEnabled || (mPowerSaveEnabled && mShowPercent == 1) ? 0 : 255);
         }
     }
 
