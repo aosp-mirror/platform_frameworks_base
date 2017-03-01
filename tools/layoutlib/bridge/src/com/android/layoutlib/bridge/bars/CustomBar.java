@@ -49,7 +49,7 @@ import android.widget.TextView;
 import java.io.IOException;
 import java.io.InputStream;
 
-import static android.os.Build.VERSION_CODES.LOLLIPOP;
+import static android.os._Original_Build.VERSION_CODES.LOLLIPOP;
 
 /**
  * Base "bar" class for the window decor around the the edited layout.

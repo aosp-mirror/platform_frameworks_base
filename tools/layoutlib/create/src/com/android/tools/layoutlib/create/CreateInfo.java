@@ -36,63 +36,39 @@ import java.util.Set;
  */
 public final class CreateInfo implements ICreateInfo {
 
-    /**
-     * Returns the list of class from layoutlib_create to inject in layoutlib.
-     * The list can be empty but must not be null.
-     */
     @Override
     public Class<?>[] getInjectedClasses() {
         return INJECTED_CLASSES;
     }
 
-    /**
-     * Returns the list of methods to rewrite as delegates.
-     * The list can be empty but must not be null.
-     */
     @Override
     public String[] getDelegateMethods() {
         return DELEGATE_METHODS;
     }
 
-    /**
-     * Returns the list of classes on which to delegate all native methods.
-     * The list can be empty but must not be null.
-     */
     @Override
     public String[] getDelegateClassNatives() {
         return DELEGATE_CLASS_NATIVES;
     }
 
-    /**
-     * Returns the list of classes to rename, must be an even list: the binary FQCN
-     * of class to replace followed by the new FQCN.
-     * The list can be empty but must not be null.
-     */
     @Override
     public String[] getRenamedClasses() {
         return RENAMED_CLASSES;
     }
 
-    /**
-     * Returns the list of classes for which the methods returning them should be deleted.
-     * The array contains a list of null terminated section starting with the name of the class
-     * to rename in which the methods are deleted, followed by a list of return types identifying
-     * the methods to delete.
-     * The list can be empty but must not be null.
-     */
     @Override
     public String[] getDeleteReturns() {
         return DELETE_RETURNS;
     }
 
-    /**
-     * Returns the list of classes to refactor, must be an even list: the binary FQCN of class to
-     * replace followed by the new FQCN. All references to the old class should be updated to the
-     * new class. The list can be empty but must not be null.
-     */
     @Override
     public String[] getJavaPkgClasses() {
       return JAVA_PKG_CLASSES;
+    }
+
+    @Override
+    public String[] getRefactoredClasses() {
+        return REFACTOR_CLASSES;
     }
 
     @Override
@@ -333,10 +309,22 @@ public final class CreateInfo implements ICreateInfo {
             "java.text.SimpleDateFormat",                      "android.icu.text.SimpleDateFormat",
         };
 
+    /**
+     * List of classes to refactor. This is similar to combining {@link #getRenamedClasses()} and
+     * {@link #getJavaPkgClasses()}.
+     * Classes included here will be renamed and then all their references in any other classes
+     * will be also modified.
+     * FQCN of class to refactor followed by its new FQCN.
+     */
+    private final static String[] REFACTOR_CLASSES =
+            new String[] {
+                    "android.os.Build",                                "android.os._Original_Build",
+            };
+
     private final static String[] EXCLUDED_CLASSES =
         new String[] {
             "android.preference.PreferenceActivity",
-            "org.kxml2.io.KXmlParser"
+            "org.kxml2.io.KXmlParser",
         };
 
     /**

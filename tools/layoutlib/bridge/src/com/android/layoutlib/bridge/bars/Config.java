@@ -16,13 +16,13 @@
 
 package com.android.layoutlib.bridge.bars;
 
-import android.os.Build.VERSION_CODES;
+import android.os._Original_Build.VERSION_CODES;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static android.os.Build.VERSION_CODES.*;
+import static android.os._Original_Build.VERSION_CODES.*;
 
 /**
  * Various helper methods to simulate older versions of platform.
