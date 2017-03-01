@@ -41,7 +41,7 @@ using android::String16;
 /*****************************************************************************/
 #define ERROR_INVALID_PARAMETER(message) ALOGE("%s: " message, __func__)
 
-// frequently used check
+// frequently used checks
 #define RETURN_IF_MANAGER_IS_NULL(retval) do {\
         if (manager == nullptr) { \
             ERROR_INVALID_PARAMETER("manager cannot be NULL"); \
@@ -54,14 +54,18 @@ using android::String16;
             return retval; \
         } \
     } while (false)
+#define RETURN_IF_QUEUE_IS_NULL(retval) do {\
+        if (queue == nullptr) { \
+            ERROR_INVALID_PARAMETER("queue cannot be NULL"); \
+            return retval; \
+        } \
+    } while (false)
 
-ASensorManager* ASensorManager_getInstance()
-{
-    return ASensorManager_getInstanceForPackage(NULL);
+ASensorManager* ASensorManager_getInstance() {
+    return ASensorManager_getInstanceForPackage(nullptr);
 }
 
-ASensorManager* ASensorManager_getInstanceForPackage(const char* packageName)
-{
+ASensorManager* ASensorManager_getInstanceForPackage(const char* packageName) {
     if (packageName) {
         return &SensorManager::getInstanceForPackage(String16(packageName));
     } else {
@@ -69,9 +73,8 @@ ASensorManager* ASensorManager_getInstanceForPackage(const char* packageName)
     }
 }
 
-int ASensorManager_getSensorList(ASensorManager* manager,
-        ASensorList* list)
-{
+int ASensorManager_getSensorList(ASensorManager* manager, ASensorList* list) {
+    RETURN_IF_MANAGER_IS_NULL(android::BAD_VALUE);
     Sensor const* const* l;
     int c = static_cast<SensorManager*>(manager)->getSensorList(&l);
     if (list) {
@@ -80,13 +83,13 @@ int ASensorManager_getSensorList(ASensorManager* manager,
     return c;
 }
 
-ASensor const* ASensorManager_getDefaultSensor(ASensorManager* manager, int type)
-{
+ASensor const* ASensorManager_getDefaultSensor(ASensorManager* manager, int type) {
+    RETURN_IF_MANAGER_IS_NULL(nullptr);
     return static_cast<SensorManager*>(manager)->getDefaultSensor(type);
 }
 
-ASensor const* ASensorManager_getDefaultSensorEx(ASensorManager* manager,
-        int type, bool wakeUp) {
+ASensor const* ASensorManager_getDefaultSensorEx(ASensorManager* manager, int type, bool wakeUp) {
+    RETURN_IF_MANAGER_IS_NULL(nullptr);
     Sensor const* const* sensorList;
     size_t size = static_cast<SensorManager*>(manager)->getSensorList(&sensorList);
     for (size_t i = 0; i < size; ++i) {
@@ -95,12 +98,18 @@ ASensor const* ASensorManager_getDefaultSensorEx(ASensorManager* manager,
             return reinterpret_cast<ASensor const *>(sensorList[i]);
        }
     }
-    return NULL;
+    return nullptr;
 }
 
 ASensorEventQueue* ASensorManager_createEventQueue(ASensorManager* manager,
-        ALooper* looper, int ident, ALooper_callbackFunc callback, void* data)
-{
+        ALooper* looper, int ident, ALooper_callbackFunc callback, void* data) {
+    RETURN_IF_MANAGER_IS_NULL(nullptr);
+
+    if (looper == nullptr) {
+        ERROR_INVALID_PARAMETER("looper cannot be NULL");
+        return nullptr;
+    }
+
     sp<SensorEventQueue> queue =
             static_cast<SensorManager*>(manager)->createEventQueue();
     if (queue != 0) {
@@ -111,17 +120,17 @@ ASensorEventQueue* ASensorManager_createEventQueue(ASensorManager* manager,
     return static_cast<ASensorEventQueue*>(queue.get());
 }
 
-int ASensorManager_destroyEventQueue(ASensorManager* manager,
-        ASensorEventQueue* inQueue)
-{
-    sp<SensorEventQueue> queue = static_cast<SensorEventQueue*>(inQueue);
-    ALooper_removeFd(queue->looper, queue->getFd());
-    queue->decStrong(manager);
+int ASensorManager_destroyEventQueue(ASensorManager* manager, ASensorEventQueue* queue) {
+    RETURN_IF_MANAGER_IS_NULL(android::BAD_VALUE);
+    RETURN_IF_QUEUE_IS_NULL(android::BAD_VALUE);
+
+    sp<SensorEventQueue> q = static_cast<SensorEventQueue*>(queue);
+    ALooper_removeFd(q->looper, q->getFd());
+    q->decStrong(manager);
     return 0;
 }
 
-int ASensorManager_createSharedMemoryDirectChannel(
-        ASensorManager *manager, int fd, size_t size) {
+int ASensorManager_createSharedMemoryDirectChannel(ASensorManager *manager, int fd, size_t size) {
     RETURN_IF_MANAGER_IS_NULL(android::BAD_VALUE);
 
     if (fd < 0) {
@@ -131,6 +140,7 @@ int ASensorManager_createSharedMemoryDirectChannel(
 
     if (size < sizeof(ASensorEvent)) {
         ERROR_INVALID_PARAMETER("size has to be greater or equal to sizeof(ASensorEvent).");
+        return android::BAD_VALUE;
     }
 
     native_handle_t *resourceHandle = native_handle_create(1 /* nFd */, 0 /* nInt */);
@@ -156,6 +166,7 @@ int ASensorManager_createHardwareBufferDirectChannel(
 
     if (size < sizeof(ASensorEvent)) {
         ERROR_INVALID_PARAMETER("size has to be greater or equal to sizeof(ASensorEvent).");
+        return android::BAD_VALUE;
     }
 
     const native_handle_t *resourceHandle = AHardwareBuffer_getNativeHandle(buffer);
@@ -195,34 +206,51 @@ int ASensorManager_configureDirectReport(
 /*****************************************************************************/
 
 int ASensorEventQueue_registerSensor(ASensorEventQueue* queue, ASensor const* sensor,
-        int32_t samplingPeriodUs, int maxBatchReportLatencyUs)
-{
+        int32_t samplingPeriodUs, int64_t maxBatchReportLatencyUs) {
+    RETURN_IF_QUEUE_IS_NULL(android::BAD_VALUE);
+    RETURN_IF_SENSOR_IS_NULL(android::BAD_VALUE);
+    if (samplingPeriodUs < 0 || maxBatchReportLatencyUs < 0) {
+        ERROR_INVALID_PARAMETER("samplingPeriodUs and maxBatchReportLatencyUs cannot be negative");
+        return android::BAD_VALUE;
+    }
+
     return static_cast<SensorEventQueue*>(queue)->enableSensor(
             static_cast<Sensor const*>(sensor)->getHandle(), samplingPeriodUs,
                     maxBatchReportLatencyUs, 0);
 }
 
-int ASensorEventQueue_enableSensor(ASensorEventQueue* queue, ASensor const* sensor)
-{
+int ASensorEventQueue_enableSensor(ASensorEventQueue* queue, ASensor const* sensor) {
+    RETURN_IF_QUEUE_IS_NULL(android::BAD_VALUE);
+    RETURN_IF_SENSOR_IS_NULL(android::BAD_VALUE);
+
     return static_cast<SensorEventQueue*>(queue)->enableSensor(
             static_cast<Sensor const*>(sensor));
 }
 
-int ASensorEventQueue_disableSensor(ASensorEventQueue* queue, ASensor const* sensor)
-{
+int ASensorEventQueue_disableSensor(ASensorEventQueue* queue, ASensor const* sensor) {
+    RETURN_IF_QUEUE_IS_NULL(android::BAD_VALUE);
+    RETURN_IF_SENSOR_IS_NULL(android::BAD_VALUE);
+
     return static_cast<SensorEventQueue*>(queue)->disableSensor(
             static_cast<Sensor const*>(sensor));
 }
 
-int ASensorEventQueue_setEventRate(ASensorEventQueue* queue, ASensor const* sensor,
-        int32_t usec)
-{
+int ASensorEventQueue_setEventRate(ASensorEventQueue* queue, ASensor const* sensor, int32_t usec) {
+    RETURN_IF_QUEUE_IS_NULL(android::BAD_VALUE);
+    RETURN_IF_SENSOR_IS_NULL(android::BAD_VALUE);
+
+    if (usec < 0) {
+        ERROR_INVALID_PARAMETER("usec cannot be negative");
+        return android::BAD_VALUE;
+    }
+
     return static_cast<SensorEventQueue*>(queue)->setEventRate(
             static_cast<Sensor const*>(sensor), us2ns(usec));
 }
 
-int ASensorEventQueue_hasEvents(ASensorEventQueue* queue)
-{
+int ASensorEventQueue_hasEvents(ASensorEventQueue* queue) {
+    RETURN_IF_QUEUE_IS_NULL(android::BAD_VALUE);
+
     struct pollfd pfd;
     pfd.fd = static_cast<SensorEventQueue*>(queue)->getFd();
     pfd.events = POLLIN;
@@ -239,9 +267,13 @@ int ASensorEventQueue_hasEvents(ASensorEventQueue* queue)
     return (nfd == 0) ? 0 : 1;
 }
 
-ssize_t ASensorEventQueue_getEvents(ASensorEventQueue* queue,
-                ASensorEvent* events, size_t count)
-{
+ssize_t ASensorEventQueue_getEvents(ASensorEventQueue* queue, ASensorEvent* events, size_t count) {
+    RETURN_IF_QUEUE_IS_NULL(android::BAD_VALUE);
+    if (events == nullptr) {
+        ERROR_INVALID_PARAMETER("events cannot be NULL");
+        return android::BAD_VALUE;
+    }
+
     ssize_t actual = static_cast<SensorEventQueue*>(queue)->read(events, count);
     if (actual > 0) {
         static_cast<SensorEventQueue*>(queue)->sendAck(events, actual);
@@ -251,53 +283,53 @@ ssize_t ASensorEventQueue_getEvents(ASensorEventQueue* queue,
 
 /*****************************************************************************/
 
-const char* ASensor_getName(ASensor const* sensor)
-{
+const char* ASensor_getName(ASensor const* sensor) {
+    RETURN_IF_SENSOR_IS_NULL(nullptr);
     return static_cast<Sensor const*>(sensor)->getName().string();
 }
 
-const char* ASensor_getVendor(ASensor const* sensor)
-{
+const char* ASensor_getVendor(ASensor const* sensor) {
+    RETURN_IF_SENSOR_IS_NULL(nullptr);
     return static_cast<Sensor const*>(sensor)->getVendor().string();
 }
 
-int ASensor_getType(ASensor const* sensor)
-{
+int ASensor_getType(ASensor const* sensor) {
+    RETURN_IF_SENSOR_IS_NULL(ASENSOR_TYPE_INVALID);
     return static_cast<Sensor const*>(sensor)->getType();
 }
 
-float ASensor_getResolution(ASensor const* sensor)
-{
+float ASensor_getResolution(ASensor const* sensor) {
+    RETURN_IF_SENSOR_IS_NULL(ASENSOR_RESOLUTION_INVALID);
     return static_cast<Sensor const*>(sensor)->getResolution();
 }
 
-int ASensor_getMinDelay(ASensor const* sensor)
-{
+int ASensor_getMinDelay(ASensor const* sensor) {
+    RETURN_IF_SENSOR_IS_NULL(ASENSOR_DELAY_INVALID);
     return static_cast<Sensor const*>(sensor)->getMinDelay();
 }
 
-int ASensor_getFifoMaxEventCount(ASensor const* sensor)
-{
+int ASensor_getFifoMaxEventCount(ASensor const* sensor) {
+    RETURN_IF_SENSOR_IS_NULL(ASENSOR_FIFO_COUNT_INVALID);
     return static_cast<Sensor const*>(sensor)->getFifoMaxEventCount();
 }
 
-int ASensor_getFifoReservedEventCount(ASensor const* sensor)
-{
+int ASensor_getFifoReservedEventCount(ASensor const* sensor) {
+    RETURN_IF_SENSOR_IS_NULL(ASENSOR_FIFO_COUNT_INVALID);
     return static_cast<Sensor const*>(sensor)->getFifoReservedEventCount();
 }
 
-const char* ASensor_getStringType(ASensor const* sensor)
-{
+const char* ASensor_getStringType(ASensor const* sensor) {
+    RETURN_IF_SENSOR_IS_NULL(nullptr);
     return static_cast<Sensor const*>(sensor)->getStringType().string();
 }
 
-int ASensor_getReportingMode(ASensor const* sensor)
-{
+int ASensor_getReportingMode(ASensor const* sensor) {
+    RETURN_IF_SENSOR_IS_NULL(AREPORTING_MODE_INVALID);
     return static_cast<Sensor const*>(sensor)->getReportingMode();
 }
 
-bool ASensor_isWakeUpSensor(ASensor const* sensor)
-{
+bool ASensor_isWakeUpSensor(ASensor const* sensor) {
+    RETURN_IF_SENSOR_IS_NULL(false);
     return static_cast<Sensor const*>(sensor)->isWakeUpSensor();
 }
 
