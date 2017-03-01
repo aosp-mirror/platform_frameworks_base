@@ -38,11 +38,11 @@ public class BitmapTest extends TestCase {
 
         assertEquals("rowbytes", 400, bm1.getRowBytes());
         assertEquals("rowbytes", 200, bm2.getRowBytes());
-        assertEquals("rowbytes", 200, bm3.getRowBytes());
-        
+        assertEquals("rowbytes", 400, bm3.getRowBytes());
+
         assertEquals("byteCount", 80000, bm1.getByteCount());
         assertEquals("byteCount", 40000, bm2.getByteCount());
-        assertEquals("byteCount", 40000, bm3.getByteCount());
+        assertEquals("byteCount", 80000, bm3.getByteCount());
 
         assertEquals("height", 200, bm1.getHeight());
         assertEquals("height", 200, bm2.getHeight());
@@ -51,10 +51,10 @@ public class BitmapTest extends TestCase {
         assertTrue("hasAlpha", bm1.hasAlpha());
         assertFalse("hasAlpha", bm2.hasAlpha());
         assertTrue("hasAlpha", bm3.hasAlpha());
-        
+
         assertTrue("getConfig", bm1.getConfig() == Bitmap.Config.ARGB_8888);
         assertTrue("getConfig", bm2.getConfig() == Bitmap.Config.RGB_565);
-        assertTrue("getConfig", bm3.getConfig() == Bitmap.Config.ARGB_4444);
+        assertTrue("getConfig", bm3.getConfig() == Bitmap.Config.ARGB_8888);
     }
 
     @SmallTest
@@ -181,12 +181,12 @@ public class BitmapTest extends TestCase {
         for (int i = 0; i < 256; i++) {
             colors[i] = (i << 24) | (0xFF << 16) | (0x80 << 8) | 0;
         }
-        
+
         Bitmap.Config config = Bitmap.Config.ARGB_8888;
 
         // create a bitmap with the color array specified
         Bitmap bm1 = Bitmap.createBitmap(colors, 16, 16, config);
-        
+
         // create a bitmap with no colors, but then call setPixels
         Bitmap bm2 = Bitmap.createBitmap(16, 16, config);
         bm2.setPixels(colors, 0, 16, 0, 0, 16, 16);
@@ -197,32 +197,32 @@ public class BitmapTest extends TestCase {
             int c0 = colors[i];
             int c1 = bm1.getPixel(i % 16, i / 16);
             int c2 = bm2.getPixel(i % 16, i / 16);
-            
+
             // these two should always be identical
             assertEquals("getPixel", c1, c2);
-            
+
             // comparing the original (c0) with the returned color is tricky,
             // since it gets premultiplied during the set(), and unpremultiplied
             // by the get().
             int a0 = Color.alpha(c0);
             int a1 = Color.alpha(c1);
             assertEquals("alpha", a0, a1);
-            
+
             int r0 = Color.red(c0);
             int r1 = Color.red(c1);
             int rr = computePrePostMul(a0, r0);
             assertTrue("red", Math.abs(rr - r1) <= tolerance);
-            
+
             int g0 = Color.green(c0);
             int g1 = Color.green(c1);
             int gg = computePrePostMul(a0, g0);
             assertTrue("green", Math.abs(gg - g1) <= tolerance);
-            
+
             int b0 = Color.blue(c0);
             int b1 = Color.blue(c1);
             int bb = computePrePostMul(a0, b0);
             assertTrue("blue", Math.abs(bb - b1) <= tolerance);
-            
+
             if (false) {
                 int cc = Color.argb(a0, rr, gg, bb);
                 android.util.Log.d("skia", "original " + Integer.toHexString(c0) +
@@ -230,5 +230,17 @@ public class BitmapTest extends TestCase {
                                " local " + Integer.toHexString(cc));
             }
         }
+    }
+
+    @SmallTest
+    public void testCreateHardwareBitmapFromGraphicBuffer() {
+        GraphicBuffer buffer = GraphicBuffer.create(10, 10, PixelFormat.RGBA_8888,
+                GraphicBuffer.USAGE_HW_TEXTURE | GraphicBuffer.USAGE_SOFTWARE_MASK);
+        Canvas canvas = buffer.lockCanvas();
+        canvas.drawColor(Color.YELLOW);
+        buffer.unlockCanvasAndPost(canvas);
+        Bitmap hardwareBitmap = Bitmap.createHardwareBitmap(buffer);
+        assertTrue(hardwareBitmap.isPremultiplied());
+        assertFalse(hardwareBitmap.isMutable());
     }
 }

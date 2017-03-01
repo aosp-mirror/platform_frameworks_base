@@ -643,7 +643,7 @@ static jobject Bitmap_copy(JNIEnv* env, jobject, jlong srcHandle,
         if (!bitmap.get()) {
             return NULL;
         }
-        return createBitmap(env, bitmap.release(), kBitmapCreateFlag_None);
+        return createBitmap(env, bitmap.release(), getPremulBitmapCreateFlags(isMutable));
     }
 
     SkColorType dstCT = GraphicsJNI::legacyBitmapConfigToColorType(dstConfigHandle);
@@ -1306,7 +1306,7 @@ static jobject Bitmap_copyPreserveInternalConfig(JNIEnv* env, jobject, jlong bit
         doThrowRE(env, "Could not copy a hardware bitmap.");
         return NULL;
     }
-    return createBitmap(env, allocator.getStorageObjAndReset(), kBitmapCreateFlag_None);
+    return createBitmap(env, allocator.getStorageObjAndReset(), getPremulBitmapCreateFlags(false));
 }
 
 static jobject Bitmap_createHardwareBitmap(JNIEnv* env, jobject, jobject graphicBuffer) {
@@ -1316,7 +1316,7 @@ static jobject Bitmap_createHardwareBitmap(JNIEnv* env, jobject, jobject graphic
         ALOGW("failed to create hardware bitmap from graphic buffer");
         return NULL;
     }
-    return bitmap::createBitmap(env, bitmap.release(), android::bitmap::kBitmapCreateFlag_None);
+    return bitmap::createBitmap(env, bitmap.release(), getPremulBitmapCreateFlags(false));
 }
 
 static jobject Bitmap_createGraphicBufferHandle(JNIEnv* env, jobject, jlong bitmapPtr) {
