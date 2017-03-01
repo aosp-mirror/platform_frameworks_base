@@ -6318,6 +6318,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 ephemeralInstaller.filter = new IntentFilter(intent.getAction());
                 ephemeralInstaller.filter.addDataPath(
                         intent.getData().getPath(), PatternMatcher.PATTERN_LITERAL);
+                ephemeralInstaller.instantAppAvailable = true;
                 result.add(ephemeralInstaller);
             }
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
@@ -12335,6 +12336,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
             res.iconResourceId = info.icon;
             res.system = res.activityInfo.applicationInfo.isSystemApp();
+            res.instantAppAvailable = userState.instantApp;
             return res;
         }
 
