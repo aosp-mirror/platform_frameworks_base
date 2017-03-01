@@ -170,14 +170,20 @@ LIBANDROID {
     ASensorEventQueue_getEvents;
     ASensorEventQueue_hasEvents;
     ASensorEventQueue_setEventRate;
+    ASensorManager_configureDirectReport; # introduced=26
     ASensorManager_createEventQueue;
+    ASensorManager_createHardwareBufferDirectChannel; # introduced=26
+    ASensorManager_createSharedMemoryDirectChannel; # introduced=26
+    ASensorManager_destroyDirectChannel; # introduced=26
     ASensorManager_destroyEventQueue;
     ASensorManager_getDefaultSensor;
     ASensorManager_getDefaultSensorEx; # introduced=21
     ASensorManager_getInstance;
+    ASensorManager_getInstanceForPackage; # introduced=26
     ASensorManager_getSensorList;
     ASensor_getFifoMaxEventCount; # introduced=21
     ASensor_getFifoReservedEventCount; # introduced=21
+    ASensor_getHighestDirectReportRateLevel; # introduced=26
     ASensor_getMinDelay;
     ASensor_getName;
     ASensor_getReportingMode; # introduced=21
@@ -185,6 +191,7 @@ LIBANDROID {
     ASensor_getStringType; # introduced=21
     ASensor_getType;
     ASensor_getVendor;
+    ASensor_isDirectChannelTypeSupported; # introduced=26
     ASensor_isWakeUpSensor; # introduced=21
     ASharedMemory_create; # introduced=26
     ASharedMemory_getSize; # introduced=26
