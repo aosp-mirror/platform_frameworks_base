@@ -587,6 +587,48 @@
     <!-- Text shown in place of notification contents when the notification is hidden by policy on a secure lockscreen -->
     <string name="notification_hidden_by_policy_text">Contents hidden by policy</string>
 
+    <!-- Text shown when viewing channel settings for notifications related to the virtual keyboard -->
+    <string name="notification_channel_virtual_keyboard">Virtual keyboard</string>
+
+    <!-- Text shown when viewing channel settings for notifications related to the hardware keyboard -->
+    <string name="notification_channel_physical_keyboard">Physical keyboard</string>
+
+    <!-- Text shown when viewing channel settings for notifications related to security -->
+    <string name="notification_channel_security">Security</string>
+
+    <!-- Text shown when viewing channel settings for notifications related to car mode -->
+    <string name="notification_channel_car_mode">Car mode</string>
+
+    <!-- Text shown when viewing channel settings for notifications related to account status -->
+    <string name="notification_channel_account">Account status</string>
+
+    <!-- Text shown when viewing channel settings for notifications related to developers -->
+    <string name="notification_channel_developer">Developer messages</string>
+
+    <!-- Text shown when viewing channel settings for notifications related to system updates -->
+    <string name="notification_channel_updates">Updates</string>
+
+    <!-- Text shown when viewing channel settings for notifications related to network status -->
+    <string name="notification_channel_network_status">Network status</string>
+
+    <!-- Text shown when viewing channel settings for notifications related to network alerts -->
+    <string name="notification_channel_network_alerts">Network alerts</string>
+
+    <!-- Text shown when viewing channel settings for notifications related to vpn status -->
+    <string name="notification_channel_vpn">VPN status</string>
+
+    <!-- Text shown when viewing channel settings for notifications related to remote device administration -->
+    <string name="notification_channel_device_admin">Device administration</string>
+
+    <!-- Text shown when viewing channel settings for notifications related to important alerts -->
+    <string name="notification_channel_alerts">Alerts</string>
+
+    <!-- Text shown when viewing channel settings for notifications related to being in retail mode -->
+    <string name="notification_channel_retail_mode">Retail demo</string>
+
+    <!-- Text shown when viewing channel settings for notifications related to a usb connection -->
+    <string name="notification_channel_usb">USB connection</string>
+
     <!-- Displayed to the user to tell them that they have started up the phone in "safe mode" -->
     <string name="safeMode">Safe mode</string>
 

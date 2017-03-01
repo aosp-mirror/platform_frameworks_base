@@ -23,6 +23,7 @@ import android.os.ShellCallback;
 import android.util.Log;
 import android.view.Display;
 import com.android.internal.inputmethod.InputMethodSubtypeHandle;
+import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.R;
 import com.android.internal.util.Preconditions;
@@ -973,17 +974,17 @@ public class InputManagerService extends IInputManager.Stub
                     intent, 0, null, UserHandle.CURRENT);
 
             Resources r = mContext.getResources();
-            Notification notification = new Notification.Builder(mContext)
-                    .setContentTitle(r.getString(
-                            R.string.select_keyboard_layout_notification_title))
-                    .setContentText(r.getString(
-                            R.string.select_keyboard_layout_notification_message))
-                    .setContentIntent(keyboardLayoutIntent)
-                    .setSmallIcon(R.drawable.ic_settings_language)
-                    .setPriority(Notification.PRIORITY_LOW)
-                    .setColor(mContext.getColor(
-                            com.android.internal.R.color.system_notification_accent_color))
-                    .build();
+            Notification notification =
+                    new Notification.Builder(mContext, SystemNotificationChannels.PHYSICAL_KEYBOARD)
+                            .setContentTitle(r.getString(
+                                    R.string.select_keyboard_layout_notification_title))
+                            .setContentText(r.getString(
+                                    R.string.select_keyboard_layout_notification_message))
+                            .setContentIntent(keyboardLayoutIntent)
+                            .setSmallIcon(R.drawable.ic_settings_language)
+                            .setColor(mContext.getColor(
+                                    com.android.internal.R.color.system_notification_accent_color))
+                            .build();
             mNotificationManager.notifyAsUser(null,
                     R.string.select_keyboard_layout_notification_title,
                     notification, UserHandle.ALL);

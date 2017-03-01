@@ -17,6 +17,7 @@
 package com.android.server.storage;
 
 import android.app.NotificationChannel;
+import com.android.internal.notification.SystemNotificationChannels;
 import com.android.server.EventLogTags;
 import com.android.server.SystemService;
 import com.android.server.pm.InstructionSets;
@@ -141,7 +142,7 @@ public class DeviceStorageMonitorService extends SystemService {
      */
     static final String SERVICE = "devicestoragemonitor";
 
-    private static final String NOTIFICATION_CHANNEL_ID = SERVICE;
+    private static final String TV_NOTIFICATION_CHANNEL_ID = "devicestoragemonitor.tv";
 
     /**
     * Handler that checks the amount of disk space on the device and sends a
@@ -388,14 +389,13 @@ public class DeviceStorageMonitorService extends SystemService {
         PackageManager packageManager = context.getPackageManager();
         boolean isTv = packageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK);
 
-        int importance = isTv
-            ? NotificationManager.IMPORTANCE_HIGH   // Do not change: this is TV-specific
-            : NotificationManager.IMPORTANCE_LOW;
-        notificationMgr.createNotificationChannel(
-            new NotificationChannel(NOTIFICATION_CHANNEL_ID,
-                context.getString(
-                    com.android.internal.R.string.device_storage_monitor_notification_channel),
-                importance));
+        if (isTv) {
+            notificationMgr.createNotificationChannel(new NotificationChannel(
+                    TV_NOTIFICATION_CHANNEL_ID,
+                    context.getString(
+                        com.android.internal.R.string.device_storage_monitor_notification_channel),
+                    NotificationManager.IMPORTANCE_HIGH));
+        }
 
         publishBinderService(SERVICE, mRemoteService);
         publishLocalService(DeviceStorageMonitorInternal.class, mLocalService);
@@ -495,21 +495,22 @@ public class DeviceStorageMonitorService extends SystemService {
                 : com.android.internal.R.string.low_internal_storage_view_text_no_boot);
         PendingIntent intent = PendingIntent.getActivityAsUser(context, 0,  lowMemIntent, 0,
                 null, UserHandle.CURRENT);
-        Notification notification = new Notification.Builder(context)
-                .setSmallIcon(com.android.internal.R.drawable.stat_notify_disk_full)
-                .setTicker(title)
-                .setColor(context.getColor(
-                    com.android.internal.R.color.system_notification_accent_color))
-                .setContentTitle(title)
-                .setContentText(details)
-                .setContentIntent(intent)
-                .setStyle(new Notification.BigTextStyle()
-                      .bigText(details))
-                .setVisibility(Notification.VISIBILITY_PUBLIC)
-                .setCategory(Notification.CATEGORY_SYSTEM)
-                .setChannel(NOTIFICATION_CHANNEL_ID)
-                .extend(new Notification.TvExtender())
-                .build();
+        Notification notification =
+                new Notification.Builder(context, SystemNotificationChannels.ALERTS)
+                        .setSmallIcon(com.android.internal.R.drawable.stat_notify_disk_full)
+                        .setTicker(title)
+                        .setColor(context.getColor(
+                            com.android.internal.R.color.system_notification_accent_color))
+                        .setContentTitle(title)
+                        .setContentText(details)
+                        .setContentIntent(intent)
+                        .setStyle(new Notification.BigTextStyle()
+                              .bigText(details))
+                        .setVisibility(Notification.VISIBILITY_PUBLIC)
+                        .setCategory(Notification.CATEGORY_SYSTEM)
+                        .extend(new Notification.TvExtender()
+                                .setChannel(TV_NOTIFICATION_CHANNEL_ID))
+                        .build();
         notification.flags |= Notification.FLAG_NO_CLEAR;
         notificationMgr.notifyAsUser(null, LOW_MEMORY_NOTIFICATION_ID, notification,
                 UserHandle.ALL);

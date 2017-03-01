@@ -88,6 +88,7 @@ import libcore.io.IoUtils;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.content.PackageHelper;
+import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.ImageUtils;
 import com.android.internal.util.IndentingPrintWriter;
@@ -1103,7 +1104,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
                 context.getResources().getDimensionPixelSize(
                         android.R.dimen.notification_large_icon_height));
         CharSequence packageLabel = packageInfo.applicationInfo.loadLabel(pm);
-        return new Notification.Builder(context)
+        return new Notification.Builder(context, SystemNotificationChannels.DEVICE_ADMIN)
                 .setSmallIcon(R.drawable.ic_check_circle_24px)
                 .setColor(context.getResources().getColor(
                         R.color.system_notification_accent_color))

@@ -51,6 +51,8 @@ import static org.mockito.Mockito.when;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class SnoozeHelperTest {
+    private static final String TEST_CHANNEL_ID = "test_channel_id";
+
     @Mock SnoozeHelper.Callback mCallback;
     @Mock AlarmManager mAm;
     @Mock ManagedServices.UserProfiles mUserProfiles;
@@ -232,20 +234,16 @@ public class SnoozeHelperTest {
 
     private NotificationRecord getNotificationRecord(String pkg, int id, String tag,
             UserHandle user) {
-        Notification n = new Notification.Builder(getContext())
+        Notification n = new Notification.Builder(getContext(), TEST_CHANNEL_ID)
                 .setContentTitle("A")
                 .setGroup("G")
                 .setSortKey("A")
                 .setWhen(1205)
                 .build();
+        final NotificationChannel notificationChannel = new NotificationChannel(
+                TEST_CHANNEL_ID, "name", NotificationManager.IMPORTANCE_LOW);
         return new NotificationRecord(getContext(), new StatusBarNotification(
                 pkg, pkg, id, tag, 0, 0, n, user, null,
-                System.currentTimeMillis()), getDefaultChannel());
+                System.currentTimeMillis()), notificationChannel);
     }
-
-    private NotificationChannel getDefaultChannel() {
-        return new NotificationChannel(NotificationChannel.DEFAULT_CHANNEL_ID, "name",
-                NotificationManager.IMPORTANCE_LOW);
-    }
-
 }

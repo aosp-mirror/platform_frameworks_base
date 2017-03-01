@@ -61,6 +61,7 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.KeyValueListParser;
 import android.util.Slog;
+import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
@@ -818,7 +819,7 @@ public class RetailDemoModeService extends SystemService {
         }
 
         Notification createResetNotification() {
-            return new Notification.Builder(getContext())
+            return new Notification.Builder(getContext(), SystemNotificationChannels.RETAIL_MODE)
                     .setContentTitle(getContext().getString(R.string.reset_retail_demo_mode_title))
                     .setContentText(getContext().getString(R.string.reset_retail_demo_mode_text))
                     .setOngoing(true)

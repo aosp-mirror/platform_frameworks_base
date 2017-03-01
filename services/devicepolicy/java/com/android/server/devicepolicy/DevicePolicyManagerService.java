@@ -165,6 +165,7 @@ import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.JournaledFile;
@@ -5292,13 +5293,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     private void sendWipeProfileNotification() {
         String contentText = mContext.getString(R.string.work_profile_deleted_description_dpm_wipe);
-        Notification notification = new Notification.Builder(mContext)
-                .setSmallIcon(android.R.drawable.stat_sys_warning)
-                .setContentTitle(mContext.getString(R.string.work_profile_deleted))
-                .setContentText(contentText)
-                .setColor(mContext.getColor(R.color.system_notification_accent_color))
-                .setStyle(new Notification.BigTextStyle().bigText(contentText))
-                .build();
+        Notification notification =
+                new Notification.Builder(mContext, SystemNotificationChannels.DEVICE_ADMIN)
+                        .setSmallIcon(android.R.drawable.stat_sys_warning)
+                        .setContentTitle(mContext.getString(R.string.work_profile_deleted))
+                        .setContentText(contentText)
+                        .setColor(mContext.getColor(R.color.system_notification_accent_color))
+                        .setStyle(new Notification.BigTextStyle().bigText(contentText))
+                        .build();
         mInjector.getNotificationManager().notify(PROFILE_WIPED_NOTIFICATION_ID, notification);
     }
 
@@ -10718,7 +10720,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         intent.setPackage("com.android.systemui");
         final PendingIntent pendingIntent = PendingIntent.getBroadcastAsUser(mContext, 0, intent, 0,
                 UserHandle.CURRENT);
-        Notification notification = new Notification.Builder(mContext)
+        Notification notification =
+                new Notification.Builder(mContext, SystemNotificationChannels.DEVICE_ADMIN)
                 .setSmallIcon(R.drawable.ic_qs_network_logging)
                 .setContentTitle(mContext.getString(R.string.network_logging_notification_title))
                 .setContentText(mContext.getString(R.string.network_logging_notification_text))
