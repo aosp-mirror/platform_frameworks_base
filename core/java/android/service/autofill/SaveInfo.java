@@ -21,6 +21,7 @@ import static android.view.autofill.Helper.DEBUG;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.IntentSender;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -72,6 +73,8 @@ public final class SaveInfo implements Parcelable {
     public static final int SAVE_DATA_TYPE_CREDIT_CARD = 3;
 
     private final @SaveDataType int mType;
+    private CharSequence mNegativeActionTitle;
+    private IntentSender mNegativeActionListener;
     private ArraySet<AutoFillId> mSavableIds;
     private final CharSequence mDescription;
 
@@ -88,8 +91,20 @@ public final class SaveInfo implements Parcelable {
 
     private SaveInfo(Builder builder) {
         mType = builder.mType;
+        mNegativeActionTitle = builder.mNegativeActionTitle;
+        mNegativeActionListener = builder.mNegativeActionListener;
         mSavableIds = builder.mSavableIds;
         mDescription = builder.mDescription;
+    }
+
+    /** @hide */
+    public @Nullable CharSequence getNegativeActionTitle() {
+        return mNegativeActionTitle;
+    }
+
+    /** @hide */
+    public @Nullable IntentSender getNegativeActionListener() {
+        return mNegativeActionListener;
     }
 
     /** @hide */
@@ -132,6 +147,8 @@ public final class SaveInfo implements Parcelable {
     public static final class Builder {
 
         private final @SaveDataType int mType;
+        private CharSequence mNegativeActionTitle;
+        private IntentSender mNegativeActionListener;
         private ArraySet<AutoFillId> mSavableIds;
         private CharSequence mDescription;
         private boolean mDestroyed;
@@ -195,6 +212,42 @@ public final class SaveInfo implements Parcelable {
         }
 
         /**
+         * Sets the title and listener for the negative save action.
+         *
+         * <p>This allows a fill-provider to customize the text and be
+         * notified when the user selects the negative action in the save
+         * UI. Note that selecting the negative action regardless of its text
+         * and listener being customized would dismiss the save UI and if a
+         * custom listener intent is provided then this intent will be
+         * started.</p>
+         *
+         * <p>This customization could be useful for providing additional
+         * semantics to the negative action. For example, a fill-provider
+         * can use this mechanism to add a "Disable" function or a "More info"
+         * function, etc. Note that the save action is exclusively controlled
+         * by the platform to ensure user consent is collected to release
+         * data from the filled app to the fill-provider.</p>
+         *
+         * @param title The action title.
+         * @param listener The action listener.
+         * @return This builder.
+         *
+         * @throws IllegalArgumentException If the title and the listener
+         *     are not both either null or non-null.
+         */
+        public @NonNull Builder setNegativeAction(@Nullable CharSequence title,
+                @Nullable IntentSender listener) {
+            throwIfDestroyed();
+            if (title == null ^ listener == null) {
+                throw new IllegalArgumentException("title and listener"
+                        + " must be both non-null or null");
+            }
+            mNegativeActionTitle = title;
+            mNegativeActionListener = listener;
+            return this;
+        }
+
+        /**
          * Builds a new {@link SaveInfo} instance.
          */
         public SaveInfo build() {
@@ -235,6 +288,8 @@ public final class SaveInfo implements Parcelable {
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
         parcel.writeInt(mType);
+        parcel.writeCharSequence(mNegativeActionTitle);
+        parcel.writeParcelable(mNegativeActionListener, flags);
         parcel.writeTypedArraySet(mSavableIds, flags);
         parcel.writeCharSequence(mDescription);
     }
@@ -246,6 +301,7 @@ public final class SaveInfo implements Parcelable {
             // the system obeys the contract of the builder to avoid attacks
             // using specially crafted parcels.
             final Builder builder = new Builder(parcel.readInt());
+            builder.setNegativeAction(parcel.readCharSequence(), parcel.readParcelable(null));
             final ArraySet<AutoFillId> savableIds = parcel.readTypedArraySet(null);
             final int savableIdsCount = (savableIds != null) ? savableIds.size() : 0;
             for (int i = 0; i < savableIdsCount; i++) {

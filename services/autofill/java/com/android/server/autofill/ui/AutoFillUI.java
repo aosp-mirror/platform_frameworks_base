@@ -26,6 +26,7 @@ import android.service.autofill.Dataset;
 import android.service.autofill.FillResponse;
 import android.service.autofill.SaveInfo;
 import android.text.TextUtils;
+import android.util.Slog;
 import android.view.autofill.AutoFillId;
 import android.widget.Toast;
 
@@ -41,6 +42,8 @@ import java.io.PrintWriter;
  * managing saving of user edits.
  */
 public final class AutoFillUI {
+    private static final String TAG = "AutoFillUI";
+
     private final Handler mHandler = UiThread.getHandler();
     private final @NonNull Context mContext;
 
@@ -191,9 +194,17 @@ public final class AutoFillUI {
                 }
 
                 @Override
-                public void onCancel() {
+                public void onCancel(IntentSender listener) {
                     // TODO(b/33197203): add MetricsLogger call
                     hideSaveUiUiThread();
+                    if (listener != null) {
+                        try {
+                            listener.sendIntent(mContext, 0, null, null, null);
+                        } catch (IntentSender.SendIntentException e) {
+                            Slog.e(TAG, "Error starting negative action listener: "
+                                    + listener, e);
+                        }
+                    }
                 }
             });
         });

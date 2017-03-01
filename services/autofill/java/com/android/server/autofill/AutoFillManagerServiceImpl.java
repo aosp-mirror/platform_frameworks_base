@@ -59,7 +59,6 @@ import android.service.autofill.IAutoFillService;
 import android.service.autofill.SaveInfo;
 import android.text.TextUtils;
 import android.util.ArrayMap;
-import android.util.ArraySet;
 import android.util.LocalLog;
 import android.util.PrintWriterPrinter;
 import android.util.Slog;

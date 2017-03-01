@@ -19,6 +19,7 @@ package com.android.server.autofill.ui;
 import android.annotation.NonNull;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.IntentSender;
 import android.os.Handler;
 import android.service.autofill.SaveInfo;
 import android.text.format.DateUtils;
@@ -38,7 +39,7 @@ import com.android.server.UiThread;
 final class SaveUi {
     public interface OnSaveListener {
         void onSave();
-        void onCancel();
+        void onCancel(IntentSender listener);
     }
 
     private static final long LIFETIME_MILLIS = 5 * DateUtils.SECOND_IN_MILLIS;
@@ -87,14 +88,20 @@ final class SaveUi {
             subTitleView.setVisibility(View.VISIBLE);
         }
 
-        final View noButton = view.findViewById(R.id.autofill_save_no);
-        noButton.setOnClickListener((v) -> mListener.onCancel());
+        final TextView noButton = view.findViewById(R.id.autofill_save_no);
+        if (info.getNegativeActionTitle() != null) {
+            noButton.setText(info.getNegativeActionTitle());
+            noButton.setOnClickListener((v) -> mListener.onCancel(
+                    info.getNegativeActionListener()));
+        } else {
+            noButton.setOnClickListener((v) -> mListener.onCancel(null));
+        }
 
         final View yesButton = view.findViewById(R.id.autofill_save_yes);
         yesButton.setOnClickListener((v) -> mListener.onSave());
 
         final View closeButton = view.findViewById(R.id.autofill_save_close);
-        closeButton.setOnClickListener((v) -> mListener.onCancel());
+        closeButton.setOnClickListener((v) -> mListener.onCancel(null));
 
         mDialog = new Dialog(context, R.style.Theme_Material_Panel);
         mDialog.setContentView(view);
@@ -112,7 +119,7 @@ final class SaveUi {
 
         mDialog.show();
 
-        mHandler.postDelayed(() -> mListener.onCancel(), LIFETIME_MILLIS);
+        mHandler.postDelayed(() -> mListener.onCancel(null), LIFETIME_MILLIS);
     }
 
     void destroy() {
