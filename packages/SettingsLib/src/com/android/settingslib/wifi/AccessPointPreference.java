@@ -23,6 +23,7 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.StateListDrawable;
 import android.net.NetworkBadging;
 import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiManager;
 import android.os.Looper;
 import android.os.UserHandle;
 import android.support.v7.preference.Preference;
@@ -222,7 +223,7 @@ public class AccessPointPreference extends Preference {
         }
 
         final Context context = getContext();
-        int level = mAccessPoint.getLevel();
+        int level = WifiManager.calculateSignalLevel(mAccessPoint.getRssi(), 5 /* levels */);
         int wifiBadge = mAccessPoint.getBadge();
         if (level != mLevel || wifiBadge != mWifiBadge) {
             mLevel = level;
