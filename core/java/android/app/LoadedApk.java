@@ -286,7 +286,7 @@ public final class LoadedApk {
                 final String apkName = path.substring(path.lastIndexOf(File.separator));
                 boolean match = false;
                 for (String oldPath : oldPaths) {
-                    final String oldApkName = oldPath.substring(path.lastIndexOf(File.separator));
+                    final String oldApkName = oldPath.substring(oldPath.lastIndexOf(File.separator));
                     if (apkName.equals(oldApkName)) {
                         match = true;
                         break;

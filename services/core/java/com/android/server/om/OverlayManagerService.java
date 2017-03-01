@@ -44,8 +44,11 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
+import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.text.TextUtils;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -70,6 +73,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -193,6 +197,14 @@ public final class OverlayManagerService extends SystemService {
 
     static final String PERMISSION_DENIED = "Operation not permitted for user shell";
 
+    /**
+     * The system property that specifies the default overlays to apply.
+     * This is a semicolon separated list of package names.
+     *
+     * Ex: com.android.vendor.overlay_one;com.android.vendor.overlay_two
+     */
+    private static final String DEFAULT_OVERLAYS_PROP = "ro.boot.vendor.overlay.theme";
+
     private final Object mLock = new Object();
 
     private final AtomicFile mSettingsFile;
@@ -216,7 +228,8 @@ public final class OverlayManagerService extends SystemService {
         mUserManager = UserManagerService.getInstance();
         IdmapManager im = new IdmapManager(installer);
         mSettings = new OverlayManagerSettings();
-        mImpl = new OverlayManagerServiceImpl(mPackageManager, im, mSettings);
+        mImpl = new OverlayManagerServiceImpl(mPackageManager, im, mSettings,
+                getDefaultOverlayPackages());
 
         final IntentFilter packageFilter = new IntentFilter();
         packageFilter.addAction(ACTION_PACKAGE_ADDED);
@@ -255,6 +268,21 @@ public final class OverlayManagerService extends SystemService {
             targets = mImpl.onSwitchUser(newUserId);
         }
         updateAssets(newUserId, targets);
+    }
+
+    private static Set<String> getDefaultOverlayPackages() {
+        final String str = SystemProperties.get(DEFAULT_OVERLAYS_PROP);
+        if (TextUtils.isEmpty(str)) {
+            return Collections.emptySet();
+        }
+
+        final ArraySet<String> defaultPackages = new ArraySet<>();
+        for (String packageName : str.split(";")) {
+            if (!TextUtils.isEmpty(packageName)) {
+                defaultPackages.add(packageName);
+            }
+        }
+        return defaultPackages;
     }
 
     private final class PackageReceiver extends BroadcastReceiver {
