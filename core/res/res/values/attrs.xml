@@ -804,16 +804,20 @@
         <!-- Action bar styles   -->
         <!-- =================== -->
         <eat-comment />
-        <!-- Default style for tabs within an action bar -->
+        <!-- Default style for tabs within an action bar. -->
         <attr name="actionBarTabStyle" format="reference" />
+        <!-- Reference to a style for the Action Bar Tab Bar. -->
         <attr name="actionBarTabBarStyle" format="reference" />
+        <!-- Reference to a style for the Action Bar Tab text. -->
         <attr name="actionBarTabTextStyle" format="reference" />
+        <!-- Reference to a style for Action Bar overflow buttons. -->
         <attr name="actionOverflowButtonStyle" format="reference" />
+        <!-- Reference to a style for the Action Bar menu. -->
         <attr name="actionOverflowMenuStyle" format="reference" />
         <!-- Reference to a theme that should be used to inflate popups
              shown by widgets in the action bar. -->
         <attr name="actionBarPopupTheme" format="reference" />
-        <!-- Reference to a style for the Action Bar -->
+        <!-- Reference to a style for the Action Bar. -->
         <attr name="actionBarStyle" format="reference" />
         <!-- Reference to a style for the split Action Bar. This style
              controls the split component that holds the menu/action
@@ -851,28 +855,30 @@
         <!-- Action mode styles  -->
         <!-- =================== -->
         <eat-comment />
+        <!-- Reference to a style for the Action Mode. -->
         <attr name="actionModeStyle" format="reference" />
+        <!-- Reference to a style for the Action Mode close button. -->
         <attr name="actionModeCloseButtonStyle" format="reference" />
-        <!-- Background drawable to use for action mode UI -->
+        <!-- Background drawable to use for action mode UI. -->
         <attr name="actionModeBackground" format="reference" />
-        <!-- Background drawable to use for action mode UI in the lower split bar -->
+        <!-- Background drawable to use for action mode UI in the lower split bar. -->
         <attr name="actionModeSplitBackground" format="reference" />
-        <!-- Drawable to use for the close action mode button -->
+        <!-- Drawable to use for the close action mode button. -->
         <attr name="actionModeCloseDrawable" format="reference" />
 
-        <!-- Drawable to use for the Cut action button in Contextual Action Bar -->
+        <!-- Drawable to use for the Cut action button in Contextual Action Bar. -->
         <attr name="actionModeCutDrawable" format="reference" />
-        <!-- Drawable to use for the Copy action button in Contextual Action Bar -->
+        <!-- Drawable to use for the Copy action button in Contextual Action Bar. -->
         <attr name="actionModeCopyDrawable" format="reference" />
-        <!-- Drawable to use for the Paste action button in Contextual Action Bar -->
+        <!-- Drawable to use for the Paste action button in Contextual Action Bar. -->
         <attr name="actionModePasteDrawable" format="reference" />
-        <!-- Drawable to use for the Select all action button in Contextual Action Bar -->
+        <!-- Drawable to use for the Select all action button in Contextual Action Bar. -->
         <attr name="actionModeSelectAllDrawable" format="reference" />
-        <!-- Drawable to use for the Share action button in WebView selection action modes -->
+        <!-- Drawable to use for the Share action button in WebView selection action modes. -->
         <attr name="actionModeShareDrawable" format="reference" />
-        <!-- Drawable to use for the Find action button in WebView selection action modes -->
+        <!-- Drawable to use for the Find action button in WebView selection action modes. -->
         <attr name="actionModeFindDrawable" format="reference" />
-        <!-- Drawable to use for the Web Search action button in WebView selection action modes -->
+        <!-- Drawable to use for the Web Search action button in WebView selection action modes. -->
         <attr name="actionModeWebSearchDrawable" format="reference" />
 
         <!-- PopupWindow style to use for action modes when showing as a window overlay. -->
@@ -969,7 +975,7 @@
 
         <!-- Theme to use for alert dialogs spawned from this theme. -->
         <attr name="alertDialogTheme" format="reference" />
-        <!-- Icon drawable to use for alerts -->
+        <!-- Icon drawable to use for alerts. -->
         <attr name="alertDialogIcon" format="reference" />
 
         <!-- Theme to use for presentations spawned from this theme. -->
@@ -981,19 +987,19 @@
         <!-- Drawable to use for generic horizontal dividers. -->
         <attr name="dividerHorizontal" format="reference" />
 
-        <!-- Style for button bars -->
+        <!-- Style for button bars. -->
         <attr name="buttonBarStyle" format="reference" />
 
-        <!-- Style for buttons within button bars -->
+        <!-- Style for buttons within button bars. -->
         <attr name="buttonBarButtonStyle" format="reference" />
 
-        <!-- Style for the "positive" buttons within button bars -->
+        <!-- Style for the "positive" buttons within button bars. -->
         <attr name="buttonBarPositiveButtonStyle" format="reference" />
 
-        <!-- Style for the "negative" buttons within button bars -->
+        <!-- Style for the "negative" buttons within button bars. -->
         <attr name="buttonBarNegativeButtonStyle" format="reference" />
 
-        <!-- Style for the "neutral" buttons within button bars -->
+        <!-- Style for the "neutral" buttons within button bars. -->
         <attr name="buttonBarNeutralButtonStyle" format="reference" />
 
         <!-- Style for the search query widget. -->
@@ -1012,19 +1018,19 @@
         <!-- Style for buttons without an explicit border, often used in groups. -->
         <attr name="borderlessButtonStyle" format="reference" />
 
-        <!-- Background to use for toasts -->
+        <!-- Background to use for toasts. -->
         <attr name="toastFrameBackground" format="reference" />
 
-        <!-- Background to use for tooltip popups -->
+        <!-- Background to use for tooltip popups. -->
         <attr name="tooltipFrameBackground" format="reference" />
 
-        <!-- Foreground color to use for tooltip popups -->
+        <!-- Foreground color to use for tooltip popups. -->
         <attr name="tooltipForegroundColor" format="reference|color" />
 
-        <!-- Background color to use for tooltip popups -->
+        <!-- Background color to use for tooltip popups. -->
         <attr name="tooltipBackgroundColor" format="reference|color" />
 
-        <!-- Theme to use for Search Dialogs -->
+        <!-- Theme to use for Search Dialogs. -->
         <attr name="searchDialogTheme" format="reference" />
 
         <!-- Specifies a drawable to use for the 'home as up' indicator. -->
@@ -2287,7 +2293,7 @@
             <enum name="auto" value="0x00000010" />
         </attr>
 
-        <!-- Controls the auto-fill behavior for this view -->
+        <!-- Controls the auto-fill behavior for this view. -->
         <attr name="autoFillMode">
             <!-- Inherit the behavior from the parent. If there is no parent it is auto. -->
             <enum name="inherit" value="0" />
@@ -2338,13 +2344,13 @@
              to appear at the edge of the view, ignoring the padding, then you can
              use outsideOverlay or outsideInset.-->
         <attr name="scrollbarStyle">
-            <!-- Inside the padding and overlaid -->
+            <!-- Inside the padding and overlaid. -->
             <enum name="insideOverlay" value="0x0" />
-            <!-- Inside the padding and inset -->
+            <!-- Inside the padding and inset. -->
             <enum name="insideInset" value="0x01000000" />
-            <!-- Edge of the view and overlaid -->
+            <!-- Edge of the view and overlaid. -->
             <enum name="outsideOverlay" value="0x02000000" />
-            <!-- Edge of the view and inset -->
+            <!-- Edge of the view and inset. -->
             <enum name="outsideInset" value="0x03000000" />
         </attr>
 
@@ -2548,7 +2554,7 @@
              (completely opaque). -->
         <attr name="alpha" format="float" />
 
-        <!-- base z depth of the view -->
+        <!-- base z depth of the view. -->
         <attr name="elevation" format="dimension" />
 
         <!-- translation in x of the view. This value is added post-layout to the left
@@ -2617,19 +2623,19 @@
              to inherit, "locale" is used. "locale" falls back to "en-US". "ltr" is the direction
              used in "en-US". The default for this attribute is "inherit". -->
         <attr name="layoutDirection">
-            <!-- Left-to-Right -->
+            <!-- Left-to-Right. -->
             <enum name="ltr" value="0" />
-            <!-- Right-to-Left -->
+            <!-- Right-to-Left. -->
             <enum name="rtl" value="1" />
-            <!-- Inherit from parent -->
+            <!-- Inherit from parent. -->
             <enum name="inherit" value="2" />
-            <!-- Locale -->
+            <!-- Locale. -->
             <enum name="locale" value="3" />
         </attr>
 
         <!-- Defines the direction of the text. -->
          <attr name="textDirection" format="integer">
-            <!-- Default -->
+            <!-- Default. -->
             <enum name="inherit" value="0" />
             <!-- Default for the root view. The first strong directional character determines the
                  paragraph direction.  If there is no strong directional character, the paragraph
@@ -2655,23 +2661,23 @@
 
         <!-- Defines the alignment of the text. -->
         <attr name="textAlignment" format="integer">
-            <!-- Default -->
+            <!-- Default. -->
             <enum name="inherit" value="0" />
             <!-- Default for the root view. The gravity determines the alignment, ALIGN_NORMAL,
                 ALIGN_CENTER, or ALIGN_OPPOSITE, which are relative to each paragraph’s
-                text direction -->
+                text direction. -->
             <enum name="gravity" value="1" />
-            <!-- Align to the start of the paragraph, e.g. ALIGN_NORMAL. -->
+            <!-- Align to the start of the paragraph, for example: ALIGN_NORMAL. -->
             <enum name="textStart" value="2" />
-            <!-- Align to the end of the paragraph, e.g. ALIGN_OPPOSITE. -->
+            <!-- Align to the end of the paragraph, for example: ALIGN_OPPOSITE. -->
             <enum name="textEnd" value="3" />
-            <!-- Center the paragraph, e.g. ALIGN_CENTER. -->
+            <!-- Center the paragraph, for example: ALIGN_CENTER. -->
             <enum name="center" value="4" />
             <!-- Align to the start of the view, which is ALIGN_LEFT if the view’s resolved
                 layoutDirection is LTR, and ALIGN_RIGHT otherwise. -->
             <enum name="viewStart" value="5" />
             <!-- Align to the end of the view, which is ALIGN_RIGHT if the view’s resolved
-                layoutDirection is LTR, and ALIGN_LEFT otherwise -->
+                layoutDirection is LTR, and ALIGN_LEFT otherwise. -->
             <enum name="viewEnd" value="6" />
         </attr>
 
@@ -3181,7 +3187,7 @@
              method should be considered an option as the default. -->
         <attr name="isDefault" format="boolean" />
         <!-- Set to true if this input method supports ways to switch to
-             a next input method (e.g. a globe key.). When this is true and
+             a next input method (for example, a globe key.). When this is true and
              InputMethodManager#shouldOfferSwitchingToNextInputMethod() returns true,
              the IME has to offer ways to invoke InputMethodManager#switchToNextInputMethod()
              accordingly.
@@ -3190,7 +3196,7 @@
              between IMEs and subtypes. -->
         <attr name="supportsSwitchingToNextInputMethod" format="boolean" />
         <!-- Set to true if this input method supports ways to dismiss the windows assigned to
-             the input method (e.g. a dismiss button rendered by the input method itself).  The
+             the input method (for example, a dismiss button rendered by the input method itself).  The
              System UI may optimize the UI by not showing system-level dismiss button if this
              value is true.
              <p> Must be a boolean value, either "true" or "false". The default value is "false".
@@ -3203,21 +3209,21 @@
         <attr name="supportsDismissingWindow" format="boolean" />
     </declare-styleable>
 
-    <!-- This is the subtype of InputMethod. Subtype can describe locales (e.g. en_US, fr_FR...)
-         and modes (e.g. voice, keyboard...), and is used for IME switch. This subtype allows
-         the system to call the specified subtype of the IME directly. -->
+    <!-- This is the subtype of InputMethod. Subtype can describe locales (for example, en_US and
+         fr_FR) and modes (for example, voice and keyboard), and is used for IME switch. This
+         subtype allows the system to call the specified subtype of the IME directly. -->
     <declare-styleable name="InputMethod_Subtype">
         <!-- The name of the subtype. -->
         <attr name="label" />
         <!-- The icon of the subtype. -->
         <attr name="icon" />
-        <!-- The locale of the subtype. This string should be a locale (e.g. en_US, fr_FR...)
+        <!-- The locale of the subtype. This string should be a locale (for example en_US and fr_FR)
              and will be passed to the IME when the framework calls the IME
              with the subtype. This is also used by the framework to know the supported locales
              of the IME.  -->
         <attr name="imeSubtypeLocale" format="string" />
-        <!-- The mode of the subtype. This string can be a mode (e.g. voice, keyboard...) and this
-             string will be passed to the IME when the framework calls the IME with the
+        <!-- The mode of the subtype. This string can be a mode (for example, voice and keyboard)
+             and this string will be passed to the IME when the framework calls the IME with the
              subtype.  {@link android.view.inputmethod.InputMethodSubtype#getLocale()} returns the
              value specified in this attribute.  -->
         <attr name="imeSubtypeMode" format="string" />
@@ -3264,12 +3270,13 @@
         <attr name="settingsActivity"/>
     </declare-styleable>
 
-    <!-- This is the subtype of the spell checker. Subtype can describe locales (e.g. en_US, fr_FR...) -->
+    <!-- This is the subtype of the spell checker. Subtype can describe locales (for example,
+             en_US and fr_FR). -->
     <declare-styleable name="SpellChecker_Subtype">
         <!-- The name of the subtype. -->
         <attr name="label" />
-        <!-- The locale of the subtype. This string should be a locale (e.g. en_US, fr_FR...)
-             This is also used by the framework to know the supported locales
+        <!-- The locale of the subtype. This string should be a locale (for example, en_US and
+             fr_FR). This is also used by the framework to know the supported locales
              of the spell checker. {@link android.view.textservice.SpellCheckerSubtype#getLocale()}
              returns the value specified in this attribute.  -->
         <attr name="subtypeLocale" format="string" />
@@ -3387,25 +3394,25 @@
              {@link android.accessibilityservice.AccessibilityService#setServiceInfo(android.accessibilityservice.AccessibilityServiceInfo)
              android.accessibilityservice.AccessibilityService.setServiceInfo(android.accessibilityservice.AccessibilityServiceInfo)}. -->
         <attr name="accessibilityFlags">
-            <!-- Has flag {@link android.accessibilityservice.AccessibilityServiceInfo#DEFAULT} -->
+            <!-- Has flag {@link android.accessibilityservice.AccessibilityServiceInfo#DEFAULT}. -->
             <flag name="flagDefault" value="0x00000001" />
-            <!-- Has flag {@link android.accessibilityservice.AccessibilityServiceInfo#FLAG_INCLUDE_NOT_IMPORTANT_VIEWS} -->
+            <!-- Has flag {@link android.accessibilityservice.AccessibilityServiceInfo#FLAG_INCLUDE_NOT_IMPORTANT_VIEWS}. -->
             <flag name="flagIncludeNotImportantViews" value="0x00000002" />
-            <!-- Has flag {@link android.accessibilityservice.AccessibilityServiceInfo#FLAG_REQUEST_TOUCH_EXPLORATION_MODE} -->
+            <!-- Has flag {@link android.accessibilityservice.AccessibilityServiceInfo#FLAG_REQUEST_TOUCH_EXPLORATION_MODE}. -->
             <flag name="flagRequestTouchExplorationMode" value="0x00000004" />
-            <!-- Has flag {@link android.accessibilityservice.AccessibilityServiceInfo#FLAG_REQUEST_ENHANCED_WEB_ACCESSIBILITY} -->
+            <!-- Has flag {@link android.accessibilityservice.AccessibilityServiceInfo#FLAG_REQUEST_ENHANCED_WEB_ACCESSIBILITY}. -->
             <flag name="flagRequestEnhancedWebAccessibility" value="0x00000008" />
-            <!-- Has flag {@link android.accessibilityservice.AccessibilityServiceInfo#FLAG_REPORT_VIEW_IDS} -->
+            <!-- Has flag {@link android.accessibilityservice.AccessibilityServiceInfo#FLAG_REPORT_VIEW_IDS}. -->
             <flag name="flagReportViewIds" value="0x00000010" />
-            <!-- Has flag {@link android.accessibilityservice.AccessibilityServiceInfo#FLAG_REQUEST_FILTER_KEY_EVENTS} -->
+            <!-- Has flag {@link android.accessibilityservice.AccessibilityServiceInfo#FLAG_REQUEST_FILTER_KEY_EVENTS}. -->
             <flag name="flagRequestFilterKeyEvents" value="0x00000020" />
-            <!-- Has flag {@link android.accessibilityservice.AccessibilityServiceInfo#FLAG_RETRIEVE_INTERACTIVE_WINDOWS} -->
+            <!-- Has flag {@link android.accessibilityservice.AccessibilityServiceInfo#FLAG_RETRIEVE_INTERACTIVE_WINDOWS}. -->
             <flag name="flagRetrieveInteractiveWindows" value="0x00000040" />
-            <!-- Has flag {@link android.accessibilityservice.AccessibilityServiceInfo#FLAG_ENABLE_ACCESSIBILITY_VOLUME} -->
+            <!-- Has flag {@link android.accessibilityservice.AccessibilityServiceInfo#FLAG_ENABLE_ACCESSIBILITY_VOLUME}. -->
             <flag name="flagEnableAccessibilityVolume" value="0x00000080" />
-            <!-- Has flag {@link android.accessibilityservice.AccessibilityServiceInfo#FLAG_REQUEST_ACCESSIBILITY_BUTTON} -->
+            <!-- Has flag {@link android.accessibilityservice.AccessibilityServiceInfo#FLAG_REQUEST_ACCESSIBILITY_BUTTON}. -->
             <flag name="flagRequestAccessibilityButton" value="0x00000100" />
-            <!-- Has flag {@link android.accessibilityservice.AccessibilityServiceInfo#FLAG_CAPTURE_FINGERPRINT_GESTURES} -->
+            <!-- Has flag {@link android.accessibilityservice.AccessibilityServiceInfo#FLAG_CAPTURE_FINGERPRINT_GESTURES}. -->
             <flag name="flagCaptureFingerprintGestures" value="0x00000200" />
         </attr>
         <!-- Component name of an activity that allows the user to modify
@@ -3682,7 +3689,7 @@
     <declare-styleable name="CompoundButton">
         <!-- Indicates the initial checked state of this button. -->
         <attr name="checked" format="boolean" />
-        <!-- Drawable used for the button graphic (e.g. checkbox, radio button, etc). -->
+        <!-- Drawable used for the button graphic (for example, checkbox and radio button). -->
         <attr name="button" format="reference" />
         <!-- Tint to apply to the button graphic. -->
         <attr name="buttonTint" format="color" />
@@ -4105,11 +4112,11 @@
         <attr name="minHeight" format="dimension" />
         <attr name="maxHeight" />
         <attr name="interpolator" format="reference" />
-        <!-- Timeout between frames of animation in milliseconds
-             {@deprecated Not used by the framework.} -->
+        <!-- Timeout between frames of animation in milliseconds.
+             {@deprecated Not used by the framework}. -->
         <attr name="animationResolution" format="integer" />
         <!-- Defines if the associated drawables need to be mirrored when in RTL mode.
-             Default is false -->
+             Default is false. -->
         <attr name="mirrorForRtl" format="boolean" />
         <!-- Tint to apply to the progress indicator. -->
         <attr name="progressTint" format="color" />
@@ -4720,12 +4727,12 @@
             <enum name="full" value="2" />
         </attr>
         <!-- Specify the type of auto-size. Note that this feature is not supported by EditText,
-        works only for TextView -->
+        works only for TextView. -->
         <attr name="autoSizeTextType" format="enum">
             <!-- No auto-sizing (default). -->
             <enum name="none" value="0" />
             <!-- Uniform horizontal and vertical text size scaling to fit within the
-            container -->
+            container. -->
             <enum name="uniform" value="1" />
         </attr>
         <!-- Specify the auto-size step size if <code>autoSizeTextType</code> is set to
@@ -4736,9 +4743,9 @@
         <code>autoSizeTextType</code> set to <code>uniform</code>. Overrides
         <code>autoSizeStepGranularity</code> if set. -->
         <attr name="autoSizePresetSizes"/>
-        <!-- The minimum text size constraint to be used when auto-sizing text -->
+        <!-- The minimum text size constraint to be used when auto-sizing text. -->
         <attr name="autoSizeMinTextSize" format="dimension" />
-        <!-- The maximum text size constraint to be used when auto-sizing text -->
+        <!-- The maximum text size constraint to be used when auto-sizing text. -->
         <attr name="autoSizeMaxTextSize" format="dimension" />
     </declare-styleable>
     <declare-styleable name="TextViewAppearance">
@@ -4840,7 +4847,7 @@
     </declare-styleable>
     <declare-styleable name="ViewFlipper">
         <attr name="flipInterval" format="integer" min="0" />
-        <!-- When true, automatically start animating -->
+        <!-- When true, automatically start animating. -->
         <attr name="autoStart" format="boolean" />
     </declare-styleable>
     <declare-styleable name="AdapterViewAnimator">
@@ -4857,7 +4864,7 @@
     </declare-styleable>
     <declare-styleable name="AdapterViewFlipper">
         <attr name="flipInterval" />
-        <!-- When true, automatically start animating -->
+        <!-- When true, automatically start animating. -->
         <attr name="autoStart" />
     </declare-styleable>
     <declare-styleable name="ViewSwitcher">
@@ -5624,7 +5631,7 @@
             <!-- Indicates that the layer is opaque and contains no transparent
                  nor translucent pixels. -->
             <enum name="opaque" value="-1" />
-            <!-- The layer is completely transparent (no pixel will be drawn.) -->
+            <!-- The layer is completely transparent (no pixel will be drawn). -->
             <enum name="transparent" value="-2" />
             <!-- The layer has translucent pixels. -->
             <enum name="translucent" value="-3" />
@@ -5649,10 +5656,10 @@
         <!-- Explicit right padding. Overrides child padding. -->
         <attr name="paddingRight" />
         <!-- Explicit start padding. Overrides child padding. Takes precedence
-             over absolute padding (e.g. left when layout direction is LTR). -->
+             over absolute padding (for example, left when layout direction is LTR). -->
         <attr name="paddingStart" />
         <!-- Explicit end padding. Overrides child padding. Takes precedence
-             over absolute padding (e.g. right when layout direction is LTR). -->
+             over absolute padding (for example, right when layout direction is LTR). -->
         <attr name="paddingEnd" />
     </declare-styleable>
 
@@ -5674,7 +5681,7 @@
         <attr name="end" format="dimension" />
         <!-- Width of the layer. Defaults to the layer's intrinsic width. -->
         <attr name="width" />
-        <!-- Height of the layer. Defaults to the layer's intrinsic height -->
+        <!-- Height of the layer. Defaults to the layer's intrinsic height. -->
         <attr name="height" />
         <!-- Gravity used to align the layer within its container. If no value
              is specified, the default behavior depends on whether an explicit
@@ -5995,7 +6002,7 @@
         <attr name="viewportWidth" format="float"/>
         <!-- The height of the canvas the drawing is on. -->
         <attr name="viewportHeight" format="float"/>
-        <!-- The name of this vector drawable -->
+        <!-- The name of this vector drawable. -->
         <attr name="name" />
         <!-- The opacity of the whole vector drawable, as a value between 0
              (completely transparent) and 1 (completely opaque). -->
@@ -6016,64 +6023,64 @@
 
     <!-- Defines the group used in VectorDrawables. -->
     <declare-styleable name="VectorDrawableGroup">
-        <!-- The name of this group -->
+        <!-- The name of this group. -->
         <attr name="name" />
-        <!-- The amount to rotate the group -->
+        <!-- The amount to rotate the group. -->
         <attr name="rotation" />
-        <!-- The X coordinate of the center of rotation of a group -->
+        <!-- The X coordinate of the center of rotation of a group. -->
         <attr name="pivotX" />
-        <!-- The Y coordinate of the center of rotation of a group -->
+        <!-- The Y coordinate of the center of rotation of a group. -->
         <attr name="pivotY" />
-        <!-- The amount to translate the group on X coordinate -->
+        <!-- The amount to translate the group on X coordinate. -->
         <attr name="translateX" format="float"/>
-        <!-- The amount to translate the group on Y coordinate -->
+        <!-- The amount to translate the group on Y coordinate. -->
         <attr name="translateY" format="float"/>
-        <!-- The amount to scale the group on X coordinate -->
+        <!-- The amount to scale the group on X coordinate. -->
         <attr name="scaleX" />
-        <!-- The amount to scale the group on X coordinate -->
+        <!-- The amount to scale the group on X coordinate. -->
         <attr name="scaleY" />
     </declare-styleable>
 
     <!-- Defines the path used in VectorDrawables. -->
     <declare-styleable name="VectorDrawablePath">
-        <!-- The name of this path -->
+        <!-- The name of this path. -->
         <attr name="name" />
-        <!-- The width a path stroke -->
+        <!-- The width a path stroke. -->
         <attr name="strokeWidth" format="float" />
-        <!-- The color to stroke the path if not defined implies no stroke-->
+        <!-- The color to stroke the path if not defined implies no stroke. -->
         <attr name="strokeColor" format="color" />
         <!-- The opacity of a path stroke, as a value between 0 (completely transparent)
-             and 1 (completely opaque) -->
+             and 1 (completely opaque). -->
         <attr name="strokeAlpha" format="float" />
-        <!-- The color to fill the path if not defined implies no fill-->
+        <!-- The color to fill the path if not defined implies no fill. -->
         <attr name="fillColor" format="color" />
         <!-- The alpha of the path fill, as a value between 0 (completely transparent)
-             and 1 (completely opaque)-->
+             and 1 (completely opaque). -->
         <attr name="fillAlpha" format="float" />
-        <!-- The specification of the operations that define the path  -->
+        <!-- The specification of the operations that define the path. -->
         <attr name="pathData" format="string" />
-        <!-- The fraction of the path to trim from the start from 0 to 1 -->
+        <!-- The fraction of the path to trim from the start from 0 to 1. -->
         <attr name="trimPathStart" format="float" />
-        <!-- The fraction of the path to trim from the end from 0 to 1  -->
+        <!-- The fraction of the path to trim from the end from 0 to 1 . -->
         <attr name="trimPathEnd" format="float" />
-        <!-- Shift trim region (allows visible region to include the start and end) from 0 to 1  -->
+        <!-- Shift trim region (allows visible region to include the start and end) from 0 to 1. -->
         <attr name="trimPathOffset" format="float" />
-        <!-- sets the linecap for a stroked path -->
+        <!-- sets the linecap for a stroked path. -->
         <attr name="strokeLineCap" format="enum">
             <enum name="butt" value="0"/>
             <enum name="round" value="1"/>
             <enum name="square" value="2"/>
         </attr>
-        <!-- sets the lineJoin for a stroked path -->
+        <!-- sets the lineJoin for a stroked path. -->
         <attr name="strokeLineJoin" format="enum">
             <enum name="miter" value="0"/>
             <enum name="round" value="1"/>
             <enum name="bevel" value="2"/>
         </attr>
-        <!-- sets the Miter limit for a stroked path -->
+        <!-- sets the Miter limit for a stroked path. -->
         <attr name="strokeMiterLimit" format="float"/>
         <!-- sets the fillType for a path. It is the same as SVG's "fill-rule" properties.
-             For more details, see https://www.w3.org/TR/SVG/painting.html#FillRuleProperty -->
+             For more details, see https://www.w3.org/TR/SVG/painting.html#FillRuleProperty. -->
         <attr name="fillType" format="enum">
             <enum name="nonZero" value="0"/>
             <enum name="evenOdd" value="1"/>
@@ -6082,9 +6089,9 @@
 
     <!-- Defines the clip path used in VectorDrawables. -->
     <declare-styleable name="VectorDrawableClipPath">
-        <!-- The Name of this path -->
+        <!-- The Name of this path. -->
         <attr name="name" />
-        <!-- The specification of the operations that define the path  -->
+        <!-- The specification of the operations that define the path. -->
         <attr name="pathData"/>
     </declare-styleable>
 
@@ -6101,9 +6108,9 @@
 
     <!-- Defines the target used in the AnimatedVectorDrawable. -->
     <declare-styleable name="AnimatedVectorDrawableTarget">
-        <!-- The name of the target path, group or vector drawable -->
+        <!-- The name of the target path, group or vector drawable. -->
         <attr name="name" />
-        <!-- The animation for the target path, group or vector drawable -->
+        <!-- The animation for the target path, group or vector drawable. -->
         <attr name="animation" />
     </declare-styleable>
 
@@ -6282,13 +6289,13 @@
     </declare-styleable>
 
     <declare-styleable name="PathInterpolator">
-        <!-- The x coordinate of the first control point of the cubic Bezier -->
+        <!-- The x coordinate of the first control point of the cubic Bezier. -->
         <attr name="controlX1" format="float" />
-        <!-- The y coordinate of the first control point of the cubic Bezier -->
+        <!-- The y coordinate of the first control point of the cubic Bezier. -->
         <attr name="controlY1" format="float" />
-        <!-- The x coordinate of the second control point of the cubic Bezier -->
+        <!-- The x coordinate of the second control point of the cubic Bezier. -->
         <attr name="controlX2" format="float" />
-        <!-- The y coordinate of the second control point of the cubic Bezier -->
+        <!-- The y coordinate of the second control point of the cubic Bezier. -->
         <attr name="controlY2" format="float" />
         <!-- The control points defined as a path.
              When pathData is defined, then both of the control points of the
@@ -6526,7 +6533,7 @@
         <attr name="value" />
         <attr name="fraction" format="float" />
         <!-- Defines a per-interval interpolator for this keyframe. This interpolator will be used
-             to interpolate between this keyframe and the previous keyframe.-->
+             to interpolate between this keyframe and the previous keyframe. -->
         <attr name="interpolator" />
     </declare-styleable>
 
@@ -6542,7 +6549,7 @@
         <attr name="propertyXName" format="string"/>
         <!-- Name of the property being animated as the Y coordinate of the pathData. -->
         <attr name="propertyYName" format="string"/>
-        <!-- The path used to animate the properties in the ObjectAnimator -->
+        <!-- The path used to animate the properties in the ObjectAnimator. -->
         <attr name="pathData"/>
     </declare-styleable>
 
@@ -6787,8 +6794,8 @@
 
         <!-- If provided, this is the trigger indicating that the searchable activity
             provides suggestions as well.  The value must be a fully-qualified content provider
-            authority (e.g. "com.example.android.apis.SuggestionProvider") and should match the
-            "android:authorities" tag in your content provider's manifest entry.  <i>Optional
+            authority (for example, "com.example.android.apis.SuggestionProvider") and should match
+            the "android:authorities" tag in your content provider's manifest entry.  <i>Optional
             attribute.</i> -->
         <attr name="searchSuggestAuthority" format="string" />
         <!-- If provided, this will be inserted in the suggestions query Uri, after the authority
@@ -6996,12 +7003,12 @@
             <flag name="FUNCTION" value="0x8" />
         </attr>
 
-        <!-- The numeric shortcut key.  This is the shortcut when using a numeric (e.g., 12-key)
-             keyboard. -->
+        <!-- The numeric shortcut key.  This is the shortcut when using a numeric (for example,
+             12-key) keyboard. -->
         <attr name="numericShortcut" format="string" />
 
-        <!-- The numeric modifier key. This is the modifier when using a numeric (e.g., 12-key)
-             keyboard. The values should be kept in sync with KeyEvent -->
+        <!-- The numeric modifier key. This is the modifier when using a numeric (for example,
+             12-key) keyboard. The values should be kept in sync with KeyEvent -->
         <attr name="numericModifiers">
             <flag name="META" value="0x10000" />
             <flag name="CTRL" value="0x1000" />
@@ -7121,13 +7128,13 @@
     </declare-styleable>
 
     <!-- WARNING:  If adding attributes to Preference, make sure it does not conflict
-                   with a View's attributes.  Some subclasses (e.g., EditTextPreference)
+                   with a View's attributes.  Some subclasses (for example, EditTextPreference)
                    proxy all attributes to its EditText widget. -->
     <eat-comment />
 
     <!-- Base attributes available to Preference. -->
     <declare-styleable name="Preference">
-        <!-- The optional icon for the preference -->
+        <!-- The optional icon for the preference. -->
         <attr name="icon" />
         <!-- The key to store the Preference value. -->
         <attr name="key" format="string" />
@@ -7549,16 +7556,19 @@
         <!-- Reference to the wallpaper's thumbnail bitmap. -->
         <attr name="thumbnail" format="reference" />
 
-        <!-- Name of the author and/or source/collection of this component, e.g. Art Collection, Picasso. -->
+        <!-- Name of the author and/or source/collection of this component, for example,
+             Art Collection, Picasso. -->
         <attr name="author" format="reference" />
 
         <!-- Short description of the component's purpose or behavior. -->
         <attr name="description" />
 
-        <!-- Uri that specifies a link for further context of this wallpaper, e.g. http://www.picasso.org. -->
+        <!-- Uri that specifies a link for further context of this wallpaper, for example,
+             http://www.picasso.org. -->
         <attr name="contextUri" format="reference" />
 
-        <!-- Title of the uri that specifies a link for further context of this wallpaper, e.g. Explore collection. -->
+        <!-- Title of the uri that specifies a link for further context of this wallpaper,
+             for example, Explore collection. -->
         <attr name="contextDescription" format="reference" />
 
         <!-- Whether to show any metadata when previewing the wallpaper. If this value is
@@ -7703,7 +7713,7 @@
         <attr name="detailColumn" format="string" />
         <!-- Flag indicating that detail should be built from SocialProvider. -->
         <attr name="detailSocialSummary" format="boolean" />
-        <!-- Resource representing the term "All Contacts" (e.g. "All Friends" or
+        <!-- Resource representing the term "All Contacts" (for example, "All Friends" or
         "All connections"). Optional (Default is "All Contacts"). -->
         <attr name="allContactsName" format="string" />
     </declare-styleable>
@@ -7728,7 +7738,7 @@
         <attr name="targetDescriptions" format="reference" />
 
         <!-- Reference to an array resource that be used to announce the directions with targets around the circle.
-             {@deprecated Removed.}-->
+             {@deprecated Removed.} -->
         <attr name="directionDescriptions" format="reference" />
     </declare-styleable>
 
@@ -7828,7 +7838,7 @@
     <declare-styleable name="ActionBar">
         <!-- The type of navigation to use. -->
         <attr name="navigationMode">
-            <!-- Normal static title text -->
+            <!-- Normal static title text. -->
             <enum name="normal" value="0" />
             <!-- The action bar will use a selection list for navigation. -->
             <enum name="listMode" value="1" />
@@ -7845,9 +7855,9 @@
             <flag name="showCustom" value="0x10" />
             <flag name="disableHome" value="0x20" />
         </attr>
-        <!-- Specifies title text used for navigationMode="normal" -->
+        <!-- Specifies title text used for navigationMode="normal". -->
         <attr name="title" />
-        <!-- Specifies subtitle text used for navigationMode="normal" -->
+        <!-- Specifies subtitle text used for navigationMode="normal". -->
         <attr name="subtitle" format="string" />
         <!-- Specifies a style to use for title text. -->
         <attr name="titleTextStyle" format="reference" />
@@ -7877,7 +7887,7 @@
         <attr name="indeterminateProgressStyle" format="reference" />
         <!-- Specifies the horizontal padding on either end for an embedded progress bar. -->
         <attr name="progressBarPadding" format="dimension" />
-        <!-- Up navigation glyph -->
+        <!-- Up navigation glyph. -->
         <attr name="homeAsUpIndicator" />
         <!-- Specifies padding that should be applied to the left and right sides of
              system-provided items in the bar. -->
@@ -7902,7 +7912,7 @@
         <!-- Minimum inset for content views within a bar when actions from a menu
              are present. Only valid for some themes and configurations. -->
         <attr name="contentInsetEndWithActions" format="dimension" />
-        <!-- Elevation for the action bar itself -->
+        <!-- Elevation for the action bar itself. -->
         <attr name="elevation" />
         <!-- Reference to a theme that should be used to inflate popups
              shown by widgets in the action bar. -->
@@ -7942,23 +7952,23 @@
         <attr name="imeOptions" />
         <!-- The input type to set on the query text field. -->
         <attr name="inputType" />
-        <!-- Close button icon -->
+        <!-- Close button icon. -->
         <attr name="closeIcon" format="reference" />
-        <!-- Go button icon -->
+        <!-- Go button icon. -->
         <attr name="goIcon" format="reference" />
-        <!-- Search icon -->
+        <!-- Search icon. -->
         <attr name="searchIcon" format="reference" />
-        <!-- Search icon displayed as a text field hint -->
+        <!-- Search icon displayed as a text field hint. -->
         <attr name="searchHintIcon" format="reference" />
-        <!-- Voice button icon -->
+        <!-- Voice button icon. -->
         <attr name="voiceIcon" format="reference" />
-        <!-- Commit icon shown in the query suggestion row -->
+        <!-- Commit icon shown in the query suggestion row. -->
         <attr name="commitIcon" format="reference" />
-        <!-- Layout for query suggestion rows -->
+        <!-- Layout for query suggestion rows. -->
         <attr name="suggestionRowLayout" format="reference" />
-        <!-- Background for the section containing the search query -->
+        <!-- Background for the section containing the search query. -->
         <attr name="queryBackground" format="reference" />
-        <!-- Background for the section containing the action (e.g. voice search) -->
+        <!-- Background for the section containing the action (for example, voice search). -->
         <attr name="submitBackground" format="reference" />
     </declare-styleable>
 
@@ -8001,9 +8011,9 @@
         <attr name="thumbTextPadding" format="dimension" />
         <!-- TextAppearance style for text displayed on the switch thumb. -->
         <attr name="switchTextAppearance" format="reference" />
-        <!-- Minimum width for the switch component -->
+        <!-- Minimum width for the switch component. -->
         <attr name="switchMinWidth" format="dimension" />
-        <!-- Minimum space between the switch and caption text -->
+        <!-- Minimum space between the switch and caption text. -->
         <attr name="switchPadding" format="dimension" />
         <!-- Whether to split the track and leave a gap for the thumb drawable. -->
         <attr name="splitTrack" />
@@ -8012,53 +8022,53 @@
     </declare-styleable>
 
     <declare-styleable name="Pointer">
-        <!-- Reference to a pointer icon drawable with STYLE_ARROW -->
+        <!-- Reference to a pointer icon drawable with STYLE_ARROW. -->
         <attr name="pointerIconArrow" format="reference" />
-        <!-- Reference to a pointer icon drawable with STYLE_SPOT_HOVER -->
+        <!-- Reference to a pointer icon drawable with STYLE_SPOT_HOVER. -->
         <attr name="pointerIconSpotHover" format="reference" />
-        <!-- Reference to a pointer icon drawable with STYLE_SPOT_TOUCH -->
+        <!-- Reference to a pointer icon drawable with STYLE_SPOT_TOUCH. -->
         <attr name="pointerIconSpotTouch" format="reference" />
-        <!-- Reference to a pointer icon drawable with STYLE_SPOT_ANCHOR -->
+        <!-- Reference to a pointer icon drawable with STYLE_SPOT_ANCHOR. -->
         <attr name="pointerIconSpotAnchor" format="reference" />
-        <!-- Reference to a pointer drawable with STYLE_CONTEXT_MENU -->
+        <!-- Reference to a pointer drawable with STYLE_CONTEXT_MENU. -->
         <attr name="pointerIconContextMenu" format="reference"/>
-        <!-- Reference to a pointer drawable with STYLE_HAND -->
+        <!-- Reference to a pointer drawable with STYLE_HAND. -->
         <attr name="pointerIconHand" format="reference"/>
-        <!-- Reference to a pointer drawable with STYLE_HELP -->
+        <!-- Reference to a pointer drawable with STYLE_HELP. -->
         <attr name="pointerIconHelp" format="reference"/>
-        <!-- Reference to a pointer drawable with STYLE_WAIT -->
+        <!-- Reference to a pointer drawable with STYLE_WAIT. -->
         <attr name="pointerIconWait" format="reference"/>
-        <!-- Reference to a pointer drawable with STYLE_CELL -->
+        <!-- Reference to a pointer drawable with STYLE_CELL. -->
         <attr name="pointerIconCell" format="reference"/>
-        <!-- Reference to a pointer drawable with STYLE_CROSSHAIR -->
+        <!-- Reference to a pointer drawable with STYLE_CROSSHAIR. -->
         <attr name="pointerIconCrosshair" format="reference"/>
-        <!-- Reference to a pointer drawable with STYLE_TEXT -->
+        <!-- Reference to a pointer drawable with STYLE_TEXT. -->
         <attr name="pointerIconText" format="reference"/>
-        <!-- Reference to a pointer drawable with STYLE_VERTICAL_TEXT -->
+        <!-- Reference to a pointer drawable with STYLE_VERTICAL_TEXT. -->
         <attr name="pointerIconVerticalText" format="reference"/>
-        <!-- Reference to a pointer drawable with STYLE_ALIAS -->
+        <!-- Reference to a pointer drawable with STYLE_ALIAS. -->
         <attr name="pointerIconAlias" format="reference"/>
-        <!-- Reference to a pointer drawable with STYLE_COPY -->
+        <!-- Reference to a pointer drawable with STYLE_COPY. -->
         <attr name="pointerIconCopy" format="reference"/>
-        <!-- Reference to a pointer drawable with STYLE_NODROP -->
+        <!-- Reference to a pointer drawable with STYLE_NODROP. -->
         <attr name="pointerIconNodrop" format="reference"/>
-        <!-- Reference to a pointer drawable with STYLE_ALL_SCROLL -->
+        <!-- Reference to a pointer drawable with STYLE_ALL_SCROLL. -->
         <attr name="pointerIconAllScroll" format="reference"/>
-        <!-- Reference to a pointer drawable with STYLE_HORIZONTAL_DOUBLE_ARROW -->
+        <!-- Reference to a pointer drawable with STYLE_HORIZONTAL_DOUBLE_ARROW. -->
         <attr name="pointerIconHorizontalDoubleArrow" format="reference"/>
-        <!-- Reference to a pointer drawable with STYLE_VERTICAL_DOUBLE_ARROW -->
+        <!-- Reference to a pointer drawable with STYLE_VERTICAL_DOUBLE_ARROW. -->
         <attr name="pointerIconVerticalDoubleArrow" format="reference"/>
-        <!-- Reference to a pointer drawable with STYLE_TOP_RIGHT_DIAGONAL_DOUBLE_ARROW -->
+        <!-- Reference to a pointer drawable with STYLE_TOP_RIGHT_DIAGONAL_DOUBLE_ARROW. -->
         <attr name="pointerIconTopRightDiagonalDoubleArrow" format="reference"/>
-        <!-- Reference to a pointer drawable with STYLE_TOP_LEFT_DIAGONAL_DOUBLE_ARROW -->
+        <!-- Reference to a pointer drawable with STYLE_TOP_LEFT_DIAGONAL_DOUBLE_ARROW. -->
         <attr name="pointerIconTopLeftDiagonalDoubleArrow" format="reference"/>
-        <!-- Reference to a pointer drawable with STYLE_ZOOM_IN -->
+        <!-- Reference to a pointer drawable with STYLE_ZOOM_IN. -->
         <attr name="pointerIconZoomIn" format="reference"/>
-        <!-- Reference to a pointer drawable with STYLE_ZOOM_OUT -->
+        <!-- Reference to a pointer drawable with STYLE_ZOOM_OUT. -->
         <attr name="pointerIconZoomOut" format="reference"/>
-        <!-- Reference to a pointer drawable with STYLE_GRAB -->
+        <!-- Reference to a pointer drawable with STYLE_GRAB. -->
         <attr name="pointerIconGrab" format="reference"/>
-        <!-- Reference to a pointer drawable with STYLE_GRABBING -->
+        <!-- Reference to a pointer drawable with STYLE_GRABBING. -->
         <attr name="pointerIconGrabbing" format="reference"/>
     </declare-styleable>
 
@@ -8072,22 +8082,22 @@
     </declare-styleable>
 
     <declare-styleable name="Storage">
-        <!-- path to mount point for the storage -->
+        <!-- path to mount point for the storage. -->
         <attr name="mountPoint" format="string" />
-        <!-- user visible description of the storage -->
+        <!-- user visible description of the storage. -->
         <attr name="storageDescription" format="string" />
-        <!-- true if the storage is the primary external storage -->
+        <!-- true if the storage is the primary external storage. -->
         <attr name="primary" format="boolean" />
-        <!-- true if the storage is removable -->
+        <!-- true if the storage is removable. -->
         <attr name="removable" format="boolean" />
-        <!-- true if the storage is emulated via the FUSE sdcard daemon -->
+        <!-- true if the storage is emulated via the FUSE sdcard daemon. -->
         <attr name="emulated" format="boolean" />
         <!-- number of megabytes of storage MTP should reserve for free storage
-             (used for emulated storage that is shared with system's data partition) -->
+             (used for emulated storage that is shared with system's data partition). -->
         <attr name="mtpReserve" format="integer" />
-        <!-- true if the storage can be shared via USB mass storage -->
+        <!-- true if the storage can be shared via USB mass storage. -->
         <attr name="allowMassStorage" format="boolean" />
-        <!-- maximum file size for the volume in megabytes, zero or unspecified if it is unbounded -->
+        <!-- maximum file size for the volume in megabytes, zero or unspecified if it is unbounded. -->
         <attr name="maxFileSize" format="integer" />
     </declare-styleable>
 
@@ -8114,9 +8124,9 @@
     <declare-styleable name="SeekBarPreference">
         <attr name="layout" />
         <!-- Attribute indicating whether the slider within this preference can be adjusted, that is
-        pressing left/right keys when this preference is focused will move the slider accordingly (e.g.
-        inline adjustable preferences). False, if the slider within the preference is read-only and
-        cannot be adjusted. By default, the seekbar is adjustable. -->
+        pressing left/right keys when this preference is focused will move the slider accordingly
+        (for example, inline adjustable preferences). False, if the slider within the preference is
+        read-only and cannot be adjusted. By default, the seekbar is adjustable. -->
         <attr name="adjustable" format="boolean" />
         <!-- Flag indicating whether the TextView next to the seekbar that shows the current seekbar value will be
         displayed. If true, the view is VISIBLE; if false, the view will be GONE. By default, this view is VISIBLE. -->
@@ -8208,7 +8218,7 @@
     <declare-styleable name="PagedView">
         <!-- The space between adjacent pages of the PagedView. -->
         <attr name="pageSpacing" format="dimension" />
-        <!-- The padding for the scroll indicator area -->
+        <!-- The padding for the scroll indicator area. -->
         <attr name="scrollIndicatorPaddingLeft" format="dimension" />
         <attr name="scrollIndicatorPaddingRight" format="dimension" />
     </declare-styleable>
@@ -8473,7 +8483,7 @@
 
     <!-- Describes an item of a GradientColor. Minimally need 2 items to define the gradient
          Colors defined in <item> override the simple color attributes such as
-         "startColor / centerColor / endColor" are ignored -->
+         "startColor / centerColor / endColor" are ignored. -->
     <declare-styleable name="GradientColorItem">
         <!-- The offset (or ratio) of this current color item inside the gradient.
              The value is only meaningful when it is between 0 and 1. -->
@@ -8517,7 +8527,7 @@
         <attr name="fontWeight" format="integer" />
     </declare-styleable>
 
-    <!-- Attributes that are read when parsing a <fontfamily> tag, -->
+    <!-- Attributes that are read when parsing a <fontfamily> tag. -->
     <declare-styleable name="FontFamily">
         <attr name="fontProviderAuthority" format="string" />
         <attr name="fontProviderQuery" format="string" />
