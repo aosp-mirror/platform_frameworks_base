@@ -103,6 +103,10 @@ public class VersionInfo {
         return null;
     }
 
+    public <T> boolean hasClass(Class<T> cls) {
+        return mVersions.containsKey(cls);
+    }
+
     public static class InvalidVersionException extends RuntimeException {
         private final boolean mTooNew;
 

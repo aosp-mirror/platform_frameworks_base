@@ -76,7 +76,7 @@ public class PluginManagerTest extends SysuiTestCase {
     public void testOneShot() {
         Plugin mockPlugin = mock(Plugin.class);
         when(mMockPluginInstance.getPlugin()).thenReturn(new PluginInfo(null, null, mockPlugin,
-                null));
+                null, null));
         Plugin result = mPluginManager.getOneShotPlugin("myAction", TestPlugin.class);
         assertTrue(result == mockPlugin);
     }

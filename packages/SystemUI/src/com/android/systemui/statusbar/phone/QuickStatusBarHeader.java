@@ -43,7 +43,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.keyguard.KeyguardStatusView;
 import com.android.settingslib.Utils;
-import com.android.systemui.ActivityStarter;
+import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.BatteryMeterView;
 import com.android.systemui.Dependency;
 import com.android.systemui.FontSizeUtils;

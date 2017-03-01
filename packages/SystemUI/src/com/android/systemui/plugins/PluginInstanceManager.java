@@ -161,6 +161,16 @@ public class PluginInstanceManager<T extends Plugin> {
         mContext.sendBroadcast(intent);
     }
 
+    public <T> boolean dependsOn(Plugin p, Class<T> cls) {
+        ArrayList<PluginInfo> plugins = new ArrayList<>(mPluginHandler.mPlugins);
+        for (PluginInfo info : plugins) {
+            if (info.mPlugin.getClass().getName().equals(p.getClass().getName())) {
+                return info.mVersion != null && info.mVersion.hasClass(cls);
+            }
+        }
+        return false;
+    }
+
     private class MainHandler extends Handler {
         private static final int PLUGIN_CONNECTED = 1;
         private static final int PLUGIN_DISCONNECTED = 2;
@@ -304,9 +314,9 @@ public class PluginInstanceManager<T extends Plugin> {
                 // legacy version check.
                 T plugin = (T) pluginClass.newInstance();
                 try {
-                    checkVersion(pluginClass, plugin, mVersion);
+                    VersionInfo version = checkVersion(pluginClass, plugin, mVersion);
                     if (DEBUG) Log.d(TAG, "createPlugin");
-                    return new PluginInfo(pkg, cls, plugin, pluginContext);
+                    return new PluginInfo(pkg, cls, plugin, pluginContext, version);
                 } catch (InvalidVersionException e) {
                     final int icon = mContext.getResources().getIdentifier("tuner", "drawable",
                             mContext.getPackageName());
@@ -354,7 +364,7 @@ public class PluginInstanceManager<T extends Plugin> {
             }
         }
 
-        private void checkVersion(Class<?> pluginClass, T plugin, VersionInfo version)
+        private VersionInfo checkVersion(Class<?> pluginClass, T plugin, VersionInfo version)
                 throws InvalidVersionException {
             VersionInfo pv = new VersionInfo().addClass(pluginClass);
             if (pv.hasVersionInfo()) {
@@ -364,7 +374,9 @@ public class PluginInstanceManager<T extends Plugin> {
                 if (fallbackVersion != version.getDefaultVersion()) {
                     throw new InvalidVersionException("Invalid legacy version", false);
                 }
+                return null;
             }
+            return pv;
         }
     }
 
@@ -396,15 +408,18 @@ public class PluginInstanceManager<T extends Plugin> {
 
     static class PluginInfo<T> {
         private final Context mPluginContext;
+        private final VersionInfo mVersion;
         private String mClass;
         T mPlugin;
         String mPackage;
 
-        public PluginInfo(String pkg, String cls, T plugin, Context pluginContext) {
+        public PluginInfo(String pkg, String cls, T plugin, Context pluginContext,
+                VersionInfo info) {
             mPlugin = plugin;
             mClass = cls;
             mPackage = pkg;
             mPluginContext = pluginContext;
+            mVersion = info;
         }
     }
 }

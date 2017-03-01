@@ -37,7 +37,7 @@ import com.android.systemui.Dependency;
 import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
 import com.android.systemui.SysUiServiceProvider;
-import com.android.systemui.ActivityStarter;
+import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.QS.BaseStatusBarHeader;
 import com.android.systemui.plugins.qs.QS.Callback;
 import com.android.systemui.plugins.qs.QS.DetailAdapter;

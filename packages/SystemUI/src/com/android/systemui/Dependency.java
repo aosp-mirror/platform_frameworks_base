@@ -25,8 +25,9 @@ import android.util.ArrayMap;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
 import com.android.systemui.assist.AssistManager;
-import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.fragments.FragmentService;
+import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.plugins.PluginDependencyProvider;
 import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.statusbar.phone.ConfigurationControllerImpl;
 import com.android.systemui.statusbar.phone.DarkIconDispatcherImpl;
@@ -237,6 +238,9 @@ public class Dependency extends SystemUI {
 
         mProviders.put(ExtensionController.class, () ->
                 new ExtensionControllerImpl());
+
+        mProviders.put(PluginDependencyProvider.class, () ->
+                new PluginDependencyProvider(get(PluginManager.class)));
 
         // Put all dependencies above here so the factory can override them if it wants.
         SystemUIFactory.getInstance().injectDependencies(mProviders, mContext);

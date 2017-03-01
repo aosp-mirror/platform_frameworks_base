@@ -59,7 +59,7 @@ import com.android.systemui.SystemUI;
 import com.android.systemui.SystemUISecondaryUserService;
 import com.android.systemui.plugins.qs.QS.DetailAdapter;
 import com.android.systemui.qs.tiles.UserDetailView;
-import com.android.systemui.ActivityStarter;
+import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.util.NotificationChannels;
 
