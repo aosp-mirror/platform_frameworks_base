@@ -19,6 +19,10 @@ package android.hardware.camera2;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.IntDef;
+import android.annotation.SystemApi;
+import android.annotation.TestApi;
+import static android.hardware.camera2.ICameraDeviceUser.NORMAL_MODE;
+import static android.hardware.camera2.ICameraDeviceUser.CONSTRAINED_HIGH_SPEED_MODE;
 import android.hardware.camera2.params.InputConfiguration;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.hardware.camera2.params.OutputConfiguration;
@@ -719,13 +723,55 @@ public abstract class CameraDevice implements AutoCloseable {
             throws CameraAccessException;
 
     /**
+     * Standard camera operation mode.
+     *
+     * @see #createCustomCaptureSession
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    public static final int SESSION_OPERATION_MODE_NORMAL =
+            ICameraDeviceUser.NORMAL_MODE;
+
+    /**
+     * Constrained high-speed operation mode.
+     *
+     * @see #createCustomCaptureSession
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    public static final int SESSION_OPERATION_MODE_CONSTRAINED_HIGH_SPEED =
+            ICameraDeviceUser.CONSTRAINED_HIGH_SPEED_MODE;
+
+    /**
+     * First vendor-specific operating mode
+     *
+     * @see #createCustomCaptureSession
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    public static final int SESSION_OPERATION_MODE_VENDOR_START =
+            ICameraDeviceUser.VENDOR_MODE_START;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(
+            {SESSION_OPERATION_MODE_NORMAL,
+             SESSION_OPERATION_MODE_CONSTRAINED_HIGH_SPEED,
+             SESSION_OPERATION_MODE_VENDOR_START})
+    public @interface SessionOperatingMode {};
+
+    /**
      * Create a new camera capture session with a custom operating mode.
      *
      * @param inputConfig The configuration for the input {@link Surface} if a reprocessing session
      *                is desired, or {@code null} otherwise.
      * @param outputs The new set of {@link OutputConfiguration OutputConfigurations} that should be
      *                made available as targets for captured image data.
-     * @param operatingMode The custom operating mode to use; a nonnegative value.
+     * @param operatingMode The custom operating mode to use; a nonnegative value, either a custom
+     *                vendor value or one of the SESSION_OPERATION_MODE_* values.
      * @param callback The callback to notify about the status of the new capture session.
      * @param handler The handler on which the callback should be invoked, or {@code null} to use
      *                the current thread's {@link android.os.Looper looper}.
@@ -744,10 +790,12 @@ public abstract class CameraDevice implements AutoCloseable {
      * @see OutputConfiguration
      * @hide
      */
+    @SystemApi
+    @TestApi
     public abstract void createCustomCaptureSession(
             InputConfiguration inputConfig,
             @NonNull List<OutputConfiguration> outputs,
-            int operatingMode,
+            @SessionOperatingMode int operatingMode,
             @NonNull CameraCaptureSession.StateCallback callback,
             @Nullable Handler handler)
             throws CameraAccessException;
