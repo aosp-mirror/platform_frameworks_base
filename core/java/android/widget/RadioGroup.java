@@ -436,7 +436,7 @@ public class RadioGroup extends LinearLayout {
 
     @Override
     public AutoFillType getAutoFillType() {
-        return AutoFillType.forList();
+        return isEnabled() ? AutoFillType.forList() : null;
     }
 
     @Override

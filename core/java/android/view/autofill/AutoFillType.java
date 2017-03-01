@@ -40,18 +40,13 @@ public final class AutoFillType implements Parcelable {
     private static class DefaultTypesHolder {
         static final AutoFillType TOGGLE = new AutoFillType(TYPE_TOGGLE, 0);
         static final AutoFillType LIST = new AutoFillType(TYPE_LIST, 0);
+        static final AutoFillType DATE = new AutoFillType(TYPE_DATE, 0);
     }
 
     private static final int TYPE_TEXT = 1;
     private static final int TYPE_TOGGLE = 2;
     private static final int TYPE_LIST = 3;
-
-    // TODO(b/33197203): add others, like date picker? That would be trick, because they're set as:
-    // updateDate(int year, int month, int dayOfMonth)
-    // So, we would have to either use a long representing the Date.time(), or a custom long
-    // representing:
-    // year * 10000 + month * 100 + day
-    // Then a custom getDatePickerValue(Bundle) that returns an immutable object with these 3 fields
+    private static final int TYPE_DATE = 4;
 
     private final int mType;
     private final int mSubType;
@@ -65,7 +60,7 @@ public final class AutoFillType implements Parcelable {
      * Checks if this is a type for a text field, which is filled by a {@link CharSequence}.
      *
      * <p>{@link AutoFillValue} instances for auto-filling a {@link View} can be obtained through
-     * {@link AutoFillValue#forText(CharSequence)}, and the value of a bundle passed to auto-fill a
+     * {@link AutoFillValue#forText(CharSequence)}, and the value passed to auto-fill a
      * {@link View} can be fetched through {@link AutoFillValue#getTextValue()}.
      *
      * <p>Sub-type for this type is the value defined by {@link TextView#getInputType()}.
@@ -78,7 +73,7 @@ public final class AutoFillType implements Parcelable {
      * Checks if this is a a type for a togglable field, which is filled by a {@code boolean}.
      *
      * <p>{@link AutoFillValue} instances for auto-filling a {@link View} can be obtained through
-     * {@link AutoFillValue#forToggle(boolean)}, and the value of a bundle passed to auto-fill a
+     * {@link AutoFillValue#forToggle(boolean)}, and the value passed to auto-fill a
      * {@link View} can be fetched through {@link AutoFillValue#getToggleValue()}.
      *
      * <p>This type has no sub-types.
@@ -92,7 +87,7 @@ public final class AutoFillType implements Parcelable {
      * representing the element index inside the list (starting at {@code 0}.
      *
      * <p>{@link AutoFillValue} instances for auto-filling a {@link View} can be obtained through
-     * {@link AutoFillValue#forList(int)}, and the value of a bundle passed to auto-fill a
+     * {@link AutoFillValue#forList(int)}, and the value passed to auto-fill a
      * {@link View} can be fetched through {@link AutoFillValue#getListValue()}.
      *
      * <p>This type has no sub-types.
@@ -101,6 +96,20 @@ public final class AutoFillType implements Parcelable {
         return mType == TYPE_LIST;
     }
 
+    /**
+     * Checks if this is a type for a date and time, which is represented by a long representing
+     * the number of milliseconds since the standard base time known as "the epoch", namely
+     * January 1, 1970, 00:00:00 GMT (see {@link java.util.Date#getTime()}.
+     *
+     * <p>{@link AutoFillValue} instances for auto-filling a {@link View} can be obtained through
+     * {@link AutoFillValue#forDate(long)}, and the values passed to
+     * auto-fill a {@link View} can be fetched through {@link AutoFillValue#getDateValue()}.
+     *
+     * <p>This type has no sub-types.
+     */
+    public boolean isDate() {
+        return mType == TYPE_DATE;
+    }
 
     /**
      * Gets the optional sub-type, representing the {@link View}'s semantic.
@@ -205,5 +214,14 @@ public final class AutoFillType implements Parcelable {
      */
     public static AutoFillType forList() {
         return DefaultTypesHolder.LIST;
+    }
+
+    /**
+     * Creates a type that represents a date.
+     *
+     * <p>See {@link #isDate()} for more info.
+     */
+    public static AutoFillType forDate() {
+        return DefaultTypesHolder.DATE;
     }
 }

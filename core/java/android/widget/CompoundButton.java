@@ -591,7 +591,7 @@ public abstract class CompoundButton extends Button implements Checkable {
 
     @Override
     public AutoFillType getAutoFillType() {
-        return AutoFillType.forToggle();
+        return isEnabled() ? AutoFillType.forToggle() : null;
     }
 
     @Override

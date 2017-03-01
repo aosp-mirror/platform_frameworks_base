@@ -671,6 +671,9 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate {
         if (mOnTimeChangedListener != null) {
             mOnTimeChangedListener.onTimeChanged(mDelegator, getHour(), getMinute());
         }
+        if (mAutoFillChangeListener != null) {
+            mAutoFillChangeListener.onTimeChanged(mDelegator, getHour(), getMinute());
+        }
     }
 
     private void tryVibrate() {
