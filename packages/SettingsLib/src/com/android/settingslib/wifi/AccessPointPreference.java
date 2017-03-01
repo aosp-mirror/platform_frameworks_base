@@ -223,7 +223,8 @@ public class AccessPointPreference extends Preference {
         }
 
         final Context context = getContext();
-        int level = WifiManager.calculateSignalLevel(mAccessPoint.getRssi(), 5 /* levels */);
+        int level = WifiManager.calculateSignalLevel(
+                mAccessPoint.getRssi(), WifiManager.RSSI_LEVELS);
         int wifiBadge = mAccessPoint.getBadge();
         if (level != mLevel || wifiBadge != mWifiBadge) {
             mLevel = level;
