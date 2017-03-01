@@ -365,6 +365,12 @@ public class MockPackageManager extends PackageManager {
 
     /** @hide */
     @Override
+    public boolean isInstantApp(String packageName) {
+        throw new UnsupportedOperationException();
+    }
+
+    /** @hide */
+    @Override
     public int getInstantAppCookieMaxSize() {
         throw new UnsupportedOperationException();
     }

@@ -321,6 +321,11 @@ public class BridgePackageManager extends PackageManager {
     }
 
     @Override
+    public boolean isInstantApp(String packageName) {
+        return false;
+    }
+
+    @Override
     public int getInstantAppCookieMaxSize() {
         return 0;
     }
