@@ -3521,22 +3521,24 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
      * Dumps the activities matching the given {@param name} in the either the focused stack
      * or all visible stacks if {@param dumpVisibleStacks} is true.
      */
-    ArrayList<ActivityRecord> getDumpActivitiesLocked(String name, boolean dumpVisibleStacks) {
-        if (dumpVisibleStacks) {
+    ArrayList<ActivityRecord> getDumpActivitiesLocked(String name, boolean dumpVisibleStacksOnly,
+            boolean dumpFocusedStackOnly) {
+        if (dumpFocusedStackOnly) {
+            return mFocusedStack.getDumpActivitiesLocked(name);
+        } else {
             ArrayList<ActivityRecord> activities = new ArrayList<>();
             int numDisplays = mActivityDisplays.size();
             for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
                 ArrayList<ActivityStack> stacks = mActivityDisplays.valueAt(displayNdx).mStacks;
                 for (int stackNdx = stacks.size() - 1; stackNdx >= 0; --stackNdx) {
                     ActivityStack stack = stacks.get(stackNdx);
-                    if (stack.getStackVisibilityLocked(null) == STACK_VISIBLE) {
+                    if (!dumpVisibleStacksOnly ||
+                            stack.getStackVisibilityLocked(null) == STACK_VISIBLE) {
                         activities.addAll(stack.getDumpActivitiesLocked(name));
                     }
                 }
             }
             return activities;
-        } else {
-            return mFocusedStack.getDumpActivitiesLocked(name);
         }
     }
 

@@ -4819,7 +4819,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     }
 
     ArrayList<ActivityRecord> getDumpActivitiesLocked(String name) {
-        ArrayList<ActivityRecord> activities = new ArrayList<ActivityRecord>();
+        ArrayList<ActivityRecord> activities = new ArrayList<>();
 
         if ("all".equals(name)) {
             for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
