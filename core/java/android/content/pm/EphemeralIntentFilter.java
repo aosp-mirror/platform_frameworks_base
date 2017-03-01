@@ -30,31 +30,34 @@ import java.util.List;
  * Information about an ephemeral application intent filter.
  * @hide
  */
+@Deprecated
 @SystemApi
 public final class EphemeralIntentFilter implements Parcelable {
-    private final String mSplitName;
-    /** The filters used to match domain */
-    private final List<IntentFilter> mFilters = new ArrayList<IntentFilter>();
+    private final InstantAppIntentFilter mInstantAppIntentFilter;
 
     public EphemeralIntentFilter(@Nullable String splitName, @NonNull List<IntentFilter> filters) {
-        if (filters == null || filters.size() == 0) {
-            throw new IllegalArgumentException();
-        }
-        mSplitName = splitName;
-        mFilters.addAll(filters);
+        mInstantAppIntentFilter = new InstantAppIntentFilter(splitName, filters);
+    }
+
+    EphemeralIntentFilter(@NonNull InstantAppIntentFilter intentFilter) {
+        mInstantAppIntentFilter = intentFilter;
     }
 
     EphemeralIntentFilter(Parcel in) {
-        mSplitName = in.readString();
-        in.readList(mFilters, null /*loader*/);
+        mInstantAppIntentFilter = in.readParcelable(null /*loader*/);
     }
 
     public String getSplitName() {
-        return mSplitName;
+        return mInstantAppIntentFilter.getSplitName();
     }
 
     public List<IntentFilter> getFilters() {
-        return mFilters;
+        return mInstantAppIntentFilter.getFilters();
+    }
+
+    /** @hide */
+    InstantAppIntentFilter getInstantAppIntentFilter() {
+        return mInstantAppIntentFilter;
     }
 
     @Override
@@ -64,33 +67,18 @@ public final class EphemeralIntentFilter implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel out, int flags) {
-        out.writeString(mSplitName);
-        out.writeList(mFilters);
+        out.writeParcelable(mInstantAppIntentFilter, flags);
     }
 
     public static final Parcelable.Creator<EphemeralIntentFilter> CREATOR
             = new Parcelable.Creator<EphemeralIntentFilter>() {
+        @Override
         public EphemeralIntentFilter createFromParcel(Parcel in) {
             return new EphemeralIntentFilter(in);
         }
-
+        @Override
         public EphemeralIntentFilter[] newArray(int size) {
             return new EphemeralIntentFilter[size];
         }
     };
-
-    /** @hide */
-    public static final class EphemeralResolveIntentInfo extends IntentFilter {
-        private final EphemeralIntentFilter mResolveInfo;
-
-        public EphemeralResolveIntentInfo(@NonNull IntentFilter orig,
-                @NonNull EphemeralIntentFilter resolveInfo) {
-            super(orig);
-            this.mResolveInfo = resolveInfo;
-        }
-
-        public EphemeralIntentFilter getEphemeralResolveInfo() {
-            return mResolveInfo;
-        }
-    }
 }

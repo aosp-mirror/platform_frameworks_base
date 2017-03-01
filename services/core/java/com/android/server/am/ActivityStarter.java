@@ -122,7 +122,7 @@ import android.view.Display;
 import com.android.internal.app.HeavyWeightSwitcherActivity;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.server.am.ActivityStackSupervisor.PendingActivityLaunch;
-import com.android.server.pm.EphemeralResolver;
+import com.android.server.pm.InstantAppResolver;
 import com.android.server.wm.WindowManagerService;
 
 import java.util.ArrayList;
@@ -529,10 +529,10 @@ class ActivityStarter {
             mService.getPackageManagerInternalLocked().requestInstantAppResolutionPhaseTwo(
                     auxiliaryResponse, originalIntent, resolvedType, callingPackage, userId);
         }
-        return EphemeralResolver.buildEphemeralInstallerIntent(originalIntent,
-                callingPackage, resolvedType, userId, auxiliaryResponse.packageName,
-                auxiliaryResponse.splitName, auxiliaryResponse.versionCode,
-                auxiliaryResponse.token, auxiliaryResponse.needsPhaseTwo);
+        return InstantAppResolver.buildEphemeralInstallerIntent(originalIntent,
+            callingPackage, resolvedType, userId, auxiliaryResponse.packageName,
+            auxiliaryResponse.splitName, auxiliaryResponse.versionCode,
+            auxiliaryResponse.token, auxiliaryResponse.needsPhaseTwo);
     }
 
     void postStartActivityUncheckedProcessing(

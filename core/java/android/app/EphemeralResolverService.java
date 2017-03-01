@@ -18,9 +18,11 @@ package android.app;
 
 import android.annotation.SystemApi;
 import android.app.Service;
+import android.app.InstantAppResolverService.InstantAppResolutionCallback;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.EphemeralResolveInfo;
+import android.content.pm.InstantAppResolveInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -29,20 +31,17 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Base class for implementing the resolver service.
  * @hide
+ * @deprecated use InstantAppResolverService instead
  */
+@Deprecated
 @SystemApi
-public abstract class EphemeralResolverService extends Service {
-    public static final String EXTRA_RESOLVE_INFO = "android.app.extra.RESOLVE_INFO";
-    public static final String EXTRA_SEQUENCE = "android.app.extra.SEQUENCE";
-    private static final String EXTRA_PREFIX = "android.app.PREFIX";
-    private static final String EXTRA_HOSTNAME = "android.app.HOSTNAME";
-    private Handler mHandler;
-
+public abstract class EphemeralResolverService extends InstantAppResolverService {
     /**
      * Called to retrieve resolve info for ephemeral applications.
      *
@@ -74,90 +73,28 @@ public abstract class EphemeralResolverService extends Service {
         throw new IllegalStateException("Must define");
     }
 
-    /**
-     * Returns a {@link Looper} to perform service operations on.
-     */
+    @Override
     public Looper getLooper() {
-        return getBaseContext().getMainLooper();
+        return super.getLooper();
     }
 
     @Override
-    public final void attachBaseContext(Context base) {
-        super.attachBaseContext(base);
-        mHandler = new ServiceHandler(getLooper());
+    void _onGetInstantAppResolveInfo(int[] digestPrefix, InstantAppResolutionCallback callback) {
+        final List<EphemeralResolveInfo> response = onGetEphemeralResolveInfo(digestPrefix);
+        final int responseSize = response == null ? 0 : response.size();
+        final List<InstantAppResolveInfo> resultList = new ArrayList<>(responseSize);
+        for (int i = 0; i < responseSize; i++) {
+            resultList.add(response.get(i).getInstantAppResolveInfo());
+        }
+        callback.onInstantAppResolveInfo(resultList);
     }
 
     @Override
-    public final IBinder onBind(Intent intent) {
-        return new IEphemeralResolver.Stub() {
-            @Override
-            public void getEphemeralResolveInfoList(
-                    IRemoteCallback callback, int digestPrefix[], int sequence) {
-                final Message msg = mHandler.obtainMessage(
-                        ServiceHandler.MSG_GET_EPHEMERAL_RESOLVE_INFO, sequence, 0, callback);
-                final Bundle data = new Bundle();
-                data.putIntArray(EXTRA_PREFIX, digestPrefix);
-                msg.setData(data);
-                msg.sendToTarget();
-            }
-
-            @Override
-            public void getEphemeralIntentFilterList(
-                    IRemoteCallback callback, String hostName, int sequence) {
-                final Message msg = mHandler.obtainMessage(
-                        ServiceHandler.MSG_GET_EPHEMERAL_INTENT_FILTER, sequence, 0, callback);
-                final Bundle data = new Bundle();
-                data.putString(EXTRA_HOSTNAME, hostName);
-                msg.setData(data);
-                msg.sendToTarget();
-            }
-        };
-    }
-
-    private final class ServiceHandler extends Handler {
-        public static final int MSG_GET_EPHEMERAL_RESOLVE_INFO = 1;
-        public static final int MSG_GET_EPHEMERAL_INTENT_FILTER = 2;
-
-        public ServiceHandler(Looper looper) {
-            super(looper, null /*callback*/, true /*async*/);
-        }
-
-        @Override
-        @SuppressWarnings("unchecked")
-        public void handleMessage(Message message) {
-            final int action = message.what;
-            switch (action) {
-                case MSG_GET_EPHEMERAL_RESOLVE_INFO: {
-                    final IRemoteCallback callback = (IRemoteCallback) message.obj;
-                    final int[] digestPrefix = message.getData().getIntArray(EXTRA_PREFIX);
-                    final List<EphemeralResolveInfo> resolveInfo =
-                            onGetEphemeralResolveInfo(digestPrefix);
-                    final Bundle data = new Bundle();
-                    data.putInt(EXTRA_SEQUENCE, message.arg1);
-                    data.putParcelableList(EXTRA_RESOLVE_INFO, resolveInfo);
-                    try {
-                        callback.sendResult(data);
-                    } catch (RemoteException e) {
-                    }
-                } break;
-
-                case MSG_GET_EPHEMERAL_INTENT_FILTER: {
-                    final IRemoteCallback callback = (IRemoteCallback) message.obj;
-                    final String hostName = message.getData().getString(EXTRA_HOSTNAME);
-                    final EphemeralResolveInfo resolveInfo = onGetEphemeralIntentFilter(hostName);
-                    final Bundle data = new Bundle();
-                    data.putInt(EXTRA_SEQUENCE, message.arg1);
-                    data.putParcelable(EXTRA_RESOLVE_INFO, resolveInfo);
-                    try {
-                        callback.sendResult(data);
-                    } catch (RemoteException e) {
-                    }
-                } break;
-
-                default: {
-                    throw new IllegalArgumentException("Unknown message: " + action);
-                }
-            }
-        }
+    void _onGetInstantAppIntentFilter(int[] digestPrefix, String hostName,
+            InstantAppResolutionCallback callback) {
+        final EphemeralResolveInfo response = onGetEphemeralIntentFilter(hostName);
+        final List<InstantAppResolveInfo> resultList = new ArrayList<>(1);
+        resultList.add(response.getInstantAppResolveInfo());
+        callback.onInstantAppResolveInfo(resultList);
     }
 }

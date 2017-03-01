@@ -16,4 +16,5 @@
 
 package android.app;
 
+/** @deprecated */
 parcelable EphemeralResolveInfo;
