@@ -396,7 +396,7 @@ public class InputMethodAndSubtypeUtil {
                             .applicationInfo);
         }
         return LocaleHelper.toSentenceCase(
-                ListFormatter.getInstance(locale).format(subtypeNames), locale);
+                ListFormatter.getInstance(locale).format((Object[]) subtypeNames), locale);
     }
 
     @NonNull
