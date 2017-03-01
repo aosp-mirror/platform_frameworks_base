@@ -435,7 +435,7 @@ public class VolumeInfo implements Parcelable {
             return null;
         }
 
-        final Intent intent = new Intent(DocumentsContract.ACTION_BROWSE);
+        final Intent intent = new Intent(Intent.ACTION_VIEW);
         intent.addCategory(Intent.CATEGORY_DEFAULT);
         intent.setDataAndType(uri, DocumentsContract.Root.MIME_TYPE_ITEM);
 
