@@ -165,6 +165,11 @@ interface ITelecomService {
     boolean isInCall(String callingPackage);
 
     /**
+     * @see TelecomServiceImpl#isInManagedCall
+     */
+    boolean isInManagedCall(String callingPackage);
+
+    /**
      * @see TelecomServiceImpl#isRinging
      */
     boolean isRinging(String callingPackage);
