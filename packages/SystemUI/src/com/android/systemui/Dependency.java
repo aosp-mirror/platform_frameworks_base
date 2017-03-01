@@ -23,6 +23,7 @@ import android.os.Process;
 import android.util.ArrayMap;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.app.NightDisplayController;
 import com.android.internal.util.Preconditions;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.fragments.FragmentService;
@@ -179,6 +180,9 @@ public class Dependency extends SystemUI {
 
         mProviders.put(BatteryController.class, () ->
                 new BatteryControllerImpl(mContext));
+
+        mProviders.put(NightDisplayController.class, () ->
+                new NightDisplayController(mContext));
 
         mProviders.put(ManagedProfileController.class, () ->
                 new ManagedProfileControllerImpl(mContext));
