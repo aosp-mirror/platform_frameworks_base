@@ -344,7 +344,7 @@ static jobject JHwBinder_native_getService(
               << serviceName;
 
     ::android::vintf::Transport transport =
-            ::android::hardware::getTransport(ifaceName);
+            ::android::hardware::getTransport(ifaceName, serviceName);
     if (   transport != ::android::vintf::Transport::EMPTY
         && transport != ::android::vintf::Transport::HWBINDER) {
         LOG(ERROR) << "service " << ifaceName << " declares transport method "
