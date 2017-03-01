@@ -14439,7 +14439,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         boolean dumpClient = false;
         boolean dumpCheckin = false;
         boolean dumpCheckinFormat = false;
-        boolean dumpVisibleStacks = false;
+        boolean dumpVisibleStacksOnly = false;
+        boolean dumpFocusedStackOnly = false;
         String dumpPackage = null;
 
         int opti = 0;
@@ -14454,7 +14455,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             } else if ("-c".equals(opt)) {
                 dumpClient = true;
             } else if ("-v".equals(opt)) {
-                dumpVisibleStacks = true;
+                dumpVisibleStacksOnly = true;
+            } else if ("-f".equals(opt)) {
+                dumpFocusedStackOnly = true;
             } else if ("-p".equals(opt)) {
                 if (opti < args.length) {
                     dumpPackage = args[opti];
@@ -14645,7 +14648,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 LockGuard.dump(fd, pw, args);
             } else {
                 // Dumping a single activity?
-                if (!dumpActivity(fd, pw, cmd, args, opti, dumpAll, dumpVisibleStacks)) {
+                if (!dumpActivity(fd, pw, cmd, args, opti, dumpAll, dumpVisibleStacksOnly,
+                        dumpFocusedStackOnly)) {
                     ActivityManagerShellCommand shell = new ActivityManagerShellCommand(this, true);
                     int res = shell.exec(this, null, fd, null, args, null,
                             new ResultReceiver(null));
@@ -15584,13 +15588,17 @@ public class ActivityManagerService extends IActivityManager.Stub
      *  - the cmd arg isn't the flattened component name of an existing activity:
      *    dump all activity whose component contains the cmd as a substring
      *  - A hex number of the ActivityRecord object instance.
+     *
+     *  @param dumpVisibleStacksOnly dump activity with {@param name} only if in a visible stack
+     *  @param dumpFocusedStackOnly dump activity with {@param name} only if in the focused stack
      */
     protected boolean dumpActivity(FileDescriptor fd, PrintWriter pw, String name, String[] args,
-            int opti, boolean dumpAll, boolean dumpVisibleStacks) {
+            int opti, boolean dumpAll, boolean dumpVisibleStacksOnly, boolean dumpFocusedStackOnly) {
         ArrayList<ActivityRecord> activities;
 
         synchronized (this) {
-            activities = mStackSupervisor.getDumpActivitiesLocked(name, dumpVisibleStacks);
+            activities = mStackSupervisor.getDumpActivitiesLocked(name, dumpVisibleStacksOnly,
+                    dumpFocusedStackOnly);
         }
 
         if (activities.size() <= 0) {
