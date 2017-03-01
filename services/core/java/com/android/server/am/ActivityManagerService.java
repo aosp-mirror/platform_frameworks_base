@@ -2625,11 +2625,11 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @VisibleForTesting
-    public ActivityManagerService() {
+    public ActivityManagerService(AppOpsService appOpsService) {
         GL_ES_VERSION = 0;
         mActivityStarter = null;
         mAppErrors = null;
-        mAppOpsService = null;
+        mAppOpsService = appOpsService;
         mBatteryStatsService = null;
         mCompatModePackages = null;
         mConstants = null;
@@ -4255,7 +4255,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         mProcessObservers.finishBroadcast();
     }
 
-    private void dispatchUidsChanged() {
+    @VisibleForTesting
+    void dispatchUidsChanged() {
         int N;
         synchronized (this) {
             N = mPendingUidChanges.size();
