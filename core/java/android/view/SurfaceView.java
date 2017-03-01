@@ -404,6 +404,15 @@ public class SurfaceView extends View {
         }
     }
 
+    private Rect getParentSurfaceInsets() {
+        final ViewRootImpl root = getViewRootImpl();
+        if (root == null) {
+            return null;
+        } else {
+            return root.mWindowAttributes.surfaceInsets;
+        }
+    }
+
     /** @hide */
     protected void updateSurface() {
         if (!mHaveFrame) {
@@ -458,6 +467,9 @@ public class SurfaceView extends View {
                 if (mTranslator != null) {
                     mTranslator.translateRectInAppWindowToScreen(mScreenRect);
                 }
+
+                final Rect surfaceInsets = getParentSurfaceInsets();
+                mScreenRect.offset(surfaceInsets.left, surfaceInsets.top);
 
                 if (creating) {
                     mSurfaceSession = new SurfaceSession(viewRoot.mSurface);
@@ -615,7 +627,7 @@ public class SurfaceView extends View {
         } else {
             // Calculate the window position in case RT loses the window
             // and we need to fallback to a UI-thread driven position update
-            getLocationInWindow(mLocation);
+            getLocationInSurface(mLocation);
             final boolean positionChanged = mWindowSpaceLeft != mLocation[0]
                     || mWindowSpaceTop != mLocation[1];
             final boolean layoutSizeChanged = getWidth() != mScreenRect.width()
@@ -627,8 +639,6 @@ public class SurfaceView extends View {
                 // in view local space.
                 mLocation[0] = getWidth();
                 mLocation[1] = getHeight();
-
-                transformFromViewToWindowSpace(mLocation);
 
                 mScreenRect.set(mWindowSpaceLeft, mWindowSpaceTop,
                         mLocation[0], mLocation[1]);
@@ -688,6 +698,7 @@ public class SurfaceView extends View {
         if (mSurfaceControl == null) {
             return;
         }
+
         // TODO: This is teensy bit racey in that a brand new SurfaceView moving on
         // its 2nd frame if RenderThread is running slowly could potentially see
         // this as false, enter the branch, get pre-empted, then this comes along
