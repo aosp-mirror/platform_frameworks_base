@@ -594,7 +594,7 @@ public class ViewState {
     }
 
     protected void onYTranslationAnimationFinished(View view) {
-        if (hidden) {
+        if (hidden && !gone) {
             view.setVisibility(View.INVISIBLE);
         }
     }
