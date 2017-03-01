@@ -2199,6 +2199,15 @@ public class WindowManagerService extends IWindowManager.Stub
         if (mAccessibilityController != null && win.getDisplayId() == DEFAULT_DISPLAY) {
             mAccessibilityController.onWindowTransitionLocked(win, transit);
         }
+
+        // When we start the exit animation we take the Surface from the client
+        // so it will stop perturbing it. We need to likewise takeaway the SurfaceFlinger
+        // side child surfaces, so they will remain preserved in their current state
+        // (rather than be cleaned up immediately by the app code).
+        SurfaceControl.openTransaction();
+        winAnimator.detachChildren();
+        SurfaceControl.closeTransaction();
+
         return focusMayChange;
     }
 
