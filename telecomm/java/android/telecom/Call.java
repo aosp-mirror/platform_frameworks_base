@@ -871,6 +871,7 @@ public final class Call {
      * party, if it is active.
      */
     public static final class RttCall {
+        /** @hide */
         @Retention(RetentionPolicy.SOURCE)
         @IntDef({RTT_MODE_INVALID, RTT_MODE_FULL, RTT_MODE_HCO, RTT_MODE_VCO})
         public @interface RttAudioMode {}
