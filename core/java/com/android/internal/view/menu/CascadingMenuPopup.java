@@ -388,14 +388,22 @@ final class CascadingMenuPopup extends MenuPopup implements MenuPresenter, OnKey
             final boolean showOnRight = nextMenuPosition == HORIZ_POSITION_RIGHT;
             mLastPosition = nextMenuPosition;
 
-            final int[] tempLocation = new int[2];
+            // A popup anchored to mAnchorView with (0,0) offset would be shown at this position.
+            final int[] offsetOrigin = new int[2];
+            mAnchorView.getLocationOnScreen(offsetOrigin);
+            offsetOrigin[1] += mAnchorView.getHeight();
 
-            // This popup menu will be positioned relative to the top-left edge
-            // of the view representing its parent menu.
-            parentView.getLocationInWindow(tempLocation);
-            final int parentOffsetLeft = parentInfo.window.getHorizontalOffset() + tempLocation[0];
-            final int parentOffsetTop = parentInfo.window.getVerticalOffset() + tempLocation[1];
+            final int[] parentViewScreenLocation = new int[2];
+            parentView.getLocationOnScreen(parentViewScreenLocation);
 
+            // Translate the parent view location into the offset coordinate space.
+            // If used as horizontal/vertical offsets, these values would position the submenu
+            // at the exact same position as the parent item.
+            final int parentOffsetLeft = parentViewScreenLocation[0] - offsetOrigin[0];
+            final int parentOffsetTop = parentViewScreenLocation[1] - offsetOrigin[1];
+
+            // Adjust the horizontal offset to display the submenu to the right or to the left
+            // of the parent item.
             // By now, mDropDownGravity is the resolved absolute gravity, so
             // this should work in both LTR and RTL.
             final int x;
@@ -412,11 +420,10 @@ final class CascadingMenuPopup extends MenuPopup implements MenuPresenter, OnKey
                     x = parentOffsetLeft - menuWidth;
                 }
             }
-
             popupWindow.setHorizontalOffset(x);
 
-            final int y = parentOffsetTop;
-            popupWindow.setVerticalOffset(y);
+            // Use the same vertical offset as the parent item.
+            popupWindow.setVerticalOffset(parentOffsetTop);
         } else {
             if (mHasXOffset) {
                 popupWindow.setHorizontalOffset(mXOffset);
