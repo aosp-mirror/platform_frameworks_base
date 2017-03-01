@@ -20,6 +20,7 @@ import android.app.usage.StorageStats;
 import android.app.usage.StorageStatsManager;
 import android.content.Context;
 import android.os.UserHandle;
+import android.support.annotation.VisibleForTesting;
 
 /**
  * StorageStatsSource wraps the StorageStatsManager for testability purposes.
@@ -40,6 +41,12 @@ public class StorageStatsSource {
         return new StorageStatsSource.AppStorageStatsImpl(mStorageStatsManager.queryStatsForUid(volumeUuid, uid));
     }
 
+    public StorageStatsSource.AppStorageStats getStatsForPackage(
+            String volumeUuid, String packageName, UserHandle user) {
+        return new StorageStatsSource.AppStorageStatsImpl(
+                mStorageStatsManager.queryStatsForPackage(volumeUuid, packageName, user));
+    }
+
     /**
      * Static class that provides methods for querying the amount of external storage available as
      * well as breaking it up into several media types.
@@ -50,11 +57,10 @@ public class StorageStatsSource {
         public long videoBytes;
         public long imageBytes;
 
-        /**
-         * Convenience method for testing.
-         */
-        public ExternalStorageStats(long totalBytes, long audioBytes, long videoBytes,
-                long imageBytes) {
+        /** Convenience method for testing. */
+        @VisibleForTesting
+        public ExternalStorageStats(
+                long totalBytes, long audioBytes, long videoBytes, long imageBytes) {
             this.totalBytes = totalBytes;
             this.audioBytes = audioBytes;
             this.videoBytes = videoBytes;
