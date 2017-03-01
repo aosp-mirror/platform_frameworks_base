@@ -331,7 +331,9 @@ struct ContextHubServiceCallback : IContexthubCallback {
 
     virtual Return<void> handleAppsInfo(
             const android::hardware::hidl_vec<HubAppInfo>& apps) {
+        TransactionResult result = TransactionResult::SUCCESS;
         handleQueryAppsResponse(apps,mContextHubId);
+        passOnOsResponse(mContextHubId, CONTEXT_HUB_QUERY_APPS, result, nullptr, 0);
         return android::hardware::Void();
     }
 
