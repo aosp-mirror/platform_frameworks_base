@@ -582,7 +582,8 @@ public class PackageManagerService extends IPackageManager.Stub {
             Manifest.permission.RECEIVE_MMS,
             Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
-            Manifest.permission.READ_PHONE_NUMBER);
+            Manifest.permission.READ_PHONE_NUMBER,
+            Manifest.permission.ANSWER_PHONE_CALLS);
 
 
     /**

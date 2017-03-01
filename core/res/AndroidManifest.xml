@@ -897,6 +897,17 @@
         android:description="@string/permdesc_processOutgoingCalls"
         android:protectionLevel="dangerous" />
 
+
+    <!-- Allows the app to answer an incoming phone call.
+         <p>Protection level: dangerous
+    -->
+    <permission android:name="android.permission.ANSWER_PHONE_CALLS"
+        android:permissionGroup="android.permission-group.PHONE"
+        android:label="@string/permlab_answerPhoneCalls"
+        android:description="@string/permdesc_answerPhoneCalls"
+        android:protectionLevel="dangerous" />
+
+
     <!-- ====================================================================== -->
     <!-- Permissions for accessing the device microphone                        -->
     <!-- ====================================================================== -->

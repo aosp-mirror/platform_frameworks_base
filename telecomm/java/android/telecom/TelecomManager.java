@@ -1130,18 +1130,22 @@ public class TelecomManager {
 
     /**
      * If there is a ringing incoming call, this method accepts the call on behalf of the user.
-     * TODO: L-release - need to convert all invocation of ITelecmmService#answerRingingCall to use
-     * this method (clockwork & gearhead).
+     *
      * If the incoming call is a video call, the call will be answered with the same video state as
      * the incoming call requests.  This means, for example, that an incoming call requesting
      * {@link VideoProfile#STATE_BIDIRECTIONAL} will be answered, accepting that state.
-     * @hide
+     *
+     * Requires permission: {@link android.Manifest.permission#MODIFY_PHONE_STATE} or
+     * {@link android.Manifest.permission#ANSWER_PHONE_CALLS}
      */
-    @SystemApi
+    //TODO: L-release - need to convert all invocation of ITelecmmService#answerRingingCall to use
+    // this method (clockwork & gearhead).
+    @RequiresPermission(anyOf =
+            {Manifest.permission.ANSWER_PHONE_CALLS, Manifest.permission.MODIFY_PHONE_STATE})
     public void acceptRingingCall() {
         try {
             if (isServiceConnected()) {
-                getTelecomService().acceptRingingCall();
+                getTelecomService().acceptRingingCall(mContext.getPackageName());
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelecomService#acceptRingingCall", e);
@@ -1152,14 +1156,18 @@ public class TelecomManager {
      * If there is a ringing incoming call, this method accepts the call on behalf of the user,
      * with the specified video state.
      *
+     * Requires permission: {@link android.Manifest.permission#MODIFY_PHONE_STATE} or
+     * {@link android.Manifest.permission#ANSWER_PHONE_CALLS}
+     *
      * @param videoState The desired video state to answer the call with.
-     * @hide
      */
-    @SystemApi
+    @RequiresPermission(anyOf =
+            {Manifest.permission.ANSWER_PHONE_CALLS, Manifest.permission.MODIFY_PHONE_STATE})
     public void acceptRingingCall(int videoState) {
         try {
             if (isServiceConnected()) {
-                getTelecomService().acceptRingingCallWithVideoState(videoState);
+                getTelecomService().acceptRingingCallWithVideoState(
+                        mContext.getPackageName(), videoState);
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelecomService#acceptRingingCallWithVideoState", e);

@@ -728,6 +728,11 @@
         the call to a different number or abort the call altogether.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_answerPhoneCalls">answer phone calls</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_answerPhoneCalls">Allows the app to answer an incoming phone call.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_receiveSms">receive text messages (SMS)</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_receiveSms">Allows the app to receive and process SMS
