@@ -66,6 +66,7 @@ public class RankingHelper implements RankingConfig {
 
     private static final String ATT_VERSION = "version";
     private static final String ATT_NAME = "name";
+    private static final String ATT_NAME_RES_ID = "name_res_id";
     private static final String ATT_UID = "uid";
     private static final String ATT_ID = "id";
     private static final String ATT_PRIORITY = "priority";
@@ -201,12 +202,19 @@ public class RankingHelper implements RankingConfig {
                             if (TAG_CHANNEL.equals(tagName)) {
                                 String id = parser.getAttributeValue(null, ATT_ID);
                                 CharSequence channelName = parser.getAttributeValue(null, ATT_NAME);
+                                int channelNameRes = safeInt(parser, ATT_NAME_RES_ID, -1);
                                 int channelImportance =
                                         safeInt(parser, ATT_IMPORTANCE, DEFAULT_IMPORTANCE);
 
                                 if (!TextUtils.isEmpty(id)) {
-                                    final NotificationChannel channel = new NotificationChannel(id,
-                                            channelName, channelImportance);
+                                    NotificationChannel channel;
+                                    if (channelName != null) {
+                                        channel = new NotificationChannel(id, channelName,
+                                                channelImportance);
+                                    } else {
+                                        channel = new NotificationChannel(id, channelNameRes,
+                                                channelImportance);
+                                    }
                                     channel.populateFromXml(parser);
                                     r.channels.put(id, channel);
                                 }
@@ -286,7 +294,7 @@ public class RankingHelper implements RankingConfig {
             NotificationChannel channel;
             channel = new NotificationChannel(
                     NotificationChannel.DEFAULT_CHANNEL_ID,
-                    mContext.getString(R.string.default_notification_channel_label),
+                    R.string.default_notification_channel_label,
                     r.importance);
             channel.setBypassDnd(r.priority == Notification.PRIORITY_MAX);
             channel.setLockscreenVisibility(r.visibility);
@@ -480,7 +488,8 @@ public class RankingHelper implements RankingConfig {
         Preconditions.checkNotNull(pkg);
         Preconditions.checkNotNull(channel);
         Preconditions.checkNotNull(channel.getId());
-        Preconditions.checkNotNull(channel.getName());
+        Preconditions.checkArgument(!TextUtils.isEmpty(channel.getName())
+                || channel.getNameResId() != 0);
         Record r = getOrCreateRecord(pkg, uid);
         if (r == null) {
             throw new IllegalArgumentException("Invalid package");

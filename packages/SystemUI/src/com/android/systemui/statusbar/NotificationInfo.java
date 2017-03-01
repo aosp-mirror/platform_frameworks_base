@@ -72,11 +72,6 @@ public class NotificationInfo extends LinearLayout implements GutsContent {
     private StatusBarNotification mStatusBarNotification;
     private NotificationChannel mNotificationChannel;
 
-    private ImageView mAutoButton;
-    private TextView mImportanceSummary;
-    private TextView mImportanceTitle;
-    private boolean mAuto;
-
     private TextView mNumChannelsView;
     private View mChannelDisabledView;
     private Switch mChannelEnabledSwitch;
@@ -105,8 +100,10 @@ public class NotificationInfo extends LinearLayout implements GutsContent {
         int appUid = -1;
         String appName = pkg;
         Drawable pkgicon = null;
+        CharSequence channelNameText = "";
+        ApplicationInfo info = null;
         try {
-            final ApplicationInfo info = pm.getApplicationInfo(pkg,
+            info = pm.getApplicationInfo(pkg,
                     PackageManager.MATCH_UNINSTALLED_PACKAGES
                             | PackageManager.MATCH_DISABLED_COMPONENTS
                             | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
@@ -115,6 +112,7 @@ public class NotificationInfo extends LinearLayout implements GutsContent {
                 appUid = info.uid;
                 appName = String.valueOf(pm.getApplicationLabel(info));
                 pkgicon = pm.getApplicationIcon(info);
+
             }
         } catch (PackageManager.NameNotFoundException e) {
             // app is gone, just show package name and generic icon
@@ -135,11 +133,15 @@ public class NotificationInfo extends LinearLayout implements GutsContent {
                 R.plurals.notification_num_channels_desc, numChannels), numChannels));
 
         // If this is the placeholder channel, don't use our channel-specific text.
-        CharSequence channelNameText;
         if (channel.getId().equals(NotificationChannel.DEFAULT_CHANNEL_ID)) {
             channelNameText = mContext.getString(R.string.notification_header_default_channel);
         } else {
-            channelNameText = channel.getName();
+            if (info != null && channel.getNameResId() != 0) {
+                channelNameText = pm.getText(pkg, channel.getNameResId(), info);
+            }
+            if (channel.getName() != null) {
+                channelNameText = channel.getName();
+            }
         }
         ((TextView) findViewById(R.id.pkgname)).setText(appName);
         ((TextView) findViewById(R.id.channel_name)).setText(channelNameText);
@@ -171,8 +173,8 @@ public class NotificationInfo extends LinearLayout implements GutsContent {
 
         boolean nonBlockable = false;
         try {
-            final PackageInfo info = pm.getPackageInfo(pkg, PackageManager.GET_SIGNATURES);
-            nonBlockable = Utils.isSystemPackage(getResources(), pm, info);
+            final PackageInfo pkgInfo = pm.getPackageInfo(pkg, PackageManager.GET_SIGNATURES);
+            nonBlockable = Utils.isSystemPackage(getResources(), pm, pkgInfo);
         } catch (PackageManager.NameNotFoundException e) {
             // unlikely.
         }

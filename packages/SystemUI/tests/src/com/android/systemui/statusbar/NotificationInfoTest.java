@@ -19,6 +19,8 @@ package com.android.systemui.statusbar;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
+
+import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyBoolean;
 import static org.mockito.Mockito.anyInt;
@@ -98,6 +100,9 @@ public class NotificationInfoTest extends SysuiTestCase {
         mNotificationChannel = new NotificationChannel(
                 TEST_CHANNEL, TEST_CHANNEL_NAME, NotificationManager.IMPORTANCE_LOW);
         when(mMockStatusBarNotification.getPackageName()).thenReturn(TEST_PACKAGE_NAME);
+        when(mMockPackageManager.getText(eq(TEST_PACKAGE_NAME),
+                eq(R.string.notification_menu_accessibility), anyObject())).thenReturn(
+                        getContext().getString(R.string.notification_menu_accessibility));
 
         when(mMockINotificationManager.getNumNotificationChannelsForPackage(
                 eq(TEST_PACKAGE_NAME), anyInt(), anyBoolean())).thenReturn(1);
@@ -174,6 +179,19 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mMockStatusBarNotification, mNotificationChannel, null, null, null);
         final TextView textView = (TextView) mNotificationInfo.findViewById(R.id.channel_name);
         assertEquals(TEST_CHANNEL_NAME, textView.getText());
+    }
+
+    @Test
+    @UiThreadTest
+    public void testBindNotification_SetsTextChannelName_resId() throws Exception {
+        NotificationChannel notificationChannelResId = new NotificationChannel(
+                TEST_CHANNEL, R.string.notification_menu_accessibility,
+                NotificationManager.IMPORTANCE_LOW);
+        mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
+                mMockStatusBarNotification, notificationChannelResId, null, null, null);
+        final TextView textView = mNotificationInfo.findViewById(R.id.channel_name);
+        assertEquals(getContext().getString(R.string.notification_menu_accessibility),
+                textView.getText());
     }
 
     @Test
