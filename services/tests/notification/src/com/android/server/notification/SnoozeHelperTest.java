@@ -77,7 +77,7 @@ public class SnoozeHelperTest {
         verify(mAm, times(1)).setExactAndAllowWhileIdle(
                 anyInt(), captor.capture(), any(PendingIntent.class));
         long actualSnoozedUntilDuration = captor.getValue() - SystemClock.elapsedRealtime();
-        assertTrue(Math.abs(actualSnoozedUntilDuration - 1000) < 2);
+        assertTrue(Math.abs(actualSnoozedUntilDuration - 1000) < 25);
         assertTrue(mSnoozeHelper.isSnoozed(
                 UserHandle.USER_SYSTEM, r.sbn.getPackageName(), r.getKey()));
     }
