@@ -1214,6 +1214,14 @@ public class CarrierConfigManager {
     public static final String KEY_CALL_FORWARDING_BLOCKS_WHILE_ROAMING_STRING_ARRAY =
             "call_forwarding_blocks_while_roaming_string_array";
 
+    /**
+     * When {@code true}, the user will be notified when they attempt to place an international call
+     * when the call is placed using wifi calling.
+     * @hide
+     */
+    public static final String KEY_NOTIFY_INTERNATIONAL_CALL_ON_WFC_BOOL =
+            "notify_international_call_on_wfc_bool";
+
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
 
@@ -1428,6 +1436,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_EDITABLE_TETHER_APN_BOOL, false);
         sDefaults.putBoolean(KEY_SUPPORT_3GPP_CALL_FORWARDING_WHILE_ROAMING_BOOL, true);
         sDefaults.putStringArray(KEY_CALL_FORWARDING_BLOCKS_WHILE_ROAMING_STRING_ARRAY, null);
+        sDefaults.putBoolean(KEY_NOTIFY_INTERNATIONAL_CALL_ON_WFC_BOOL, false);
     }
 
     /**
