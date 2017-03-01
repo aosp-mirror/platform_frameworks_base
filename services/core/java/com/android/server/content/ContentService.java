@@ -297,7 +297,7 @@ public final class ContentService extends IContentService.Stub {
         final int pid = Binder.getCallingPid();
 
         userHandle = handleIncomingUser(uri, pid, uid,
-                Intent.FLAG_GRANT_READ_URI_PERMISSION, userHandle);
+                Intent.FLAG_GRANT_READ_URI_PERMISSION, true, userHandle);
 
         final String msg = LocalServices.getService(ActivityManagerInternal.class)
                 .checkContentProviderAccess(uri.getAuthority(), userHandle);
@@ -364,7 +364,7 @@ public final class ContentService extends IContentService.Stub {
         final int callingUserHandle = UserHandle.getCallingUserId();
 
         userHandle = handleIncomingUser(uri, pid, uid,
-                Intent.FLAG_GRANT_WRITE_URI_PERMISSION, userHandle);
+                Intent.FLAG_GRANT_WRITE_URI_PERMISSION, true, userHandle);
 
         final String msg = LocalServices.getService(ActivityManagerInternal.class)
                 .checkContentProviderAccess(uri.getAuthority(), userHandle);
@@ -1144,7 +1144,8 @@ public final class ContentService extends IContentService.Stub {
         }
     }
 
-    private int handleIncomingUser(Uri uri, int pid, int uid, int modeFlags, int userId) {
+    private int handleIncomingUser(Uri uri, int pid, int uid, int modeFlags, boolean allowNonFull,
+            int userId) {
         if (userId == UserHandle.USER_CURRENT) {
             userId = ActivityManager.getCurrentUser();
         }
@@ -1157,8 +1158,24 @@ public final class ContentService extends IContentService.Stub {
         } else if (userId != UserHandle.getCallingUserId()) {
             if (checkUriPermission(uri, pid, uid, modeFlags,
                     userId) != PackageManager.PERMISSION_GRANTED) {
-                mContext.enforceCallingOrSelfPermission(
-                        Manifest.permission.INTERACT_ACROSS_USERS_FULL, TAG);
+                boolean allow = false;
+                if (mContext.checkCallingOrSelfPermission(
+                        Manifest.permission.INTERACT_ACROSS_USERS_FULL)
+                                == PackageManager.PERMISSION_GRANTED) {
+                    allow = true;
+                } else if (allowNonFull && mContext.checkCallingOrSelfPermission(
+                        Manifest.permission.INTERACT_ACROSS_USERS)
+                                == PackageManager.PERMISSION_GRANTED) {
+                    allow = true;
+                }
+                if (!allow) {
+                    final String permissions = allowNonFull
+                            ? (Manifest.permission.INTERACT_ACROSS_USERS_FULL + " or " +
+                                    Manifest.permission.INTERACT_ACROSS_USERS)
+                            : Manifest.permission.INTERACT_ACROSS_USERS_FULL;
+                    throw new SecurityException(TAG + "Neither user " + uid
+                            + " nor current process has " + permissions);
+                }
             }
         }
 

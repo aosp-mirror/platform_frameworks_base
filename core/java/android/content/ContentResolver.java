@@ -1898,7 +1898,7 @@ public abstract class ContentResolver {
                 ContentProvider.getUriWithoutUserId(uri),
                 notifyForDescendants,
                 observer,
-                ContentProvider.getUserIdFromUri(uri, UserHandle.myUserId()));
+                ContentProvider.getUserIdFromUri(uri, mContext.getUserId()));
     }
 
     /** @hide - designated user version */
@@ -1982,7 +1982,7 @@ public abstract class ContentResolver {
                 ContentProvider.getUriWithoutUserId(uri),
                 observer,
                 syncToNetwork,
-                ContentProvider.getUserIdFromUri(uri, UserHandle.myUserId()));
+                ContentProvider.getUserIdFromUri(uri, mContext.getUserId()));
     }
 
     /**
@@ -2016,7 +2016,7 @@ public abstract class ContentResolver {
                 ContentProvider.getUriWithoutUserId(uri),
                 observer,
                 flags,
-                ContentProvider.getUserIdFromUri(uri, UserHandle.myUserId()));
+                ContentProvider.getUserIdFromUri(uri, mContext.getUserId()));
     }
 
     /**
