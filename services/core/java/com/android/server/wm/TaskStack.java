@@ -1425,16 +1425,6 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
     }
 
     public boolean setPinnedStackSize(Rect bounds, Rect tempTaskBounds) {
-        synchronized (mService.mWindowMap) {
-            if (mDisplayContent == null) {
-                return false;
-            }
-            if (mStackId != PINNED_STACK_ID) {
-                Slog.w(TAG_WM, "Attempt to use pinned stack resize animation helper on"
-                        + "non pinned stack");
-                return false;
-            }
-        }
         try {
             mService.mActivityManager.resizePinnedStack(bounds, tempTaskBounds);
         } catch (RemoteException e) {
