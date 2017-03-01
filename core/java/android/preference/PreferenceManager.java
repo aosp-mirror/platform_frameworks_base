@@ -208,10 +208,13 @@ public class PreferenceManager {
 
     /**
      * Sets a {@link PreferenceDataStore} to be used by all Preferences associated with this manager
-     * that don't have a custom {@link PreferenceDataStore} assigned. Also if the data store is set,
-     * the Preferences will no longer use {@link android.content.SharedPreferences}.
+     * that don't have a custom {@link PreferenceDataStore} assigned via
+     * {@link Preference#setPreferenceDataStore(PreferenceDataStore)}. Also if the data store is
+     * set, the child preferences won't use {@link android.content.SharedPreferences} as long as
+     * they are assigned to this manager.
      *
      * @param dataStore The {@link PreferenceDataStore} to be used by this manager.
+     * @see Preference#setPreferenceDataStore(PreferenceDataStore)
      */
     public void setPreferenceDataStore(PreferenceDataStore dataStore) {
         mPreferenceDataStore = dataStore;
@@ -219,9 +222,10 @@ public class PreferenceManager {
 
     /**
      * Returns the {@link PreferenceDataStore} associated with this manager or {@code null} if
-     * {@link android.content.SharedPreferences} are used instead.
+     * the default {@link android.content.SharedPreferences} are used instead.
      *
      * @return The {@link PreferenceDataStore} associated with this manager or {@code null} if none.
+     * @see #setPreferenceDataStore(PreferenceDataStore)
      */
     @Nullable
     public PreferenceDataStore getPreferenceDataStore() {
@@ -358,8 +362,11 @@ public class PreferenceManager {
      * Sets the name of the SharedPreferences file that preferences managed by this
      * will use.
      *
+     * <p>If custom {@link PreferenceDataStore} is set, this won't override its usage.
+     *
      * @param sharedPreferencesName The name of the SharedPreferences file.
      * @see Context#getSharedPreferences(String, int)
+     * @see #setPreferenceDataStore(PreferenceDataStore)
      */
     public void setSharedPreferencesName(String sharedPreferencesName) {
         mSharedPreferencesName = sharedPreferencesName;

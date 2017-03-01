@@ -410,11 +410,13 @@ public class Preference implements Comparable<Preference> {
     /**
      * Sets a {@link PreferenceDataStore} to be used by this Preference instead of using
      * {@link android.content.SharedPreferences}.
-     * <p>
-     * The data store will remain assigned even if the Preference is moved between multiple
-     * instances of {@link PreferenceFragment}.
+     *
+     * <p>The data store will remain assigned even if the Preference is moved around the preference
+     * hierarchy. It will also override a data store propagated from the {@link PreferenceManager}
+     * that owns this Preference.
      *
      * @param dataStore The {@link PreferenceDataStore} to be used by this Preference.
+     * @see PreferenceManager#setPreferenceDataStore(PreferenceDataStore)
      */
     public void setPreferenceDataStore(PreferenceDataStore dataStore) {
         mPreferenceDataStore = dataStore;
@@ -423,6 +425,12 @@ public class Preference implements Comparable<Preference> {
     /**
      * Returns {@link PreferenceDataStore} used by this Preference. Returns {@code null} if
      * {@link android.content.SharedPreferences} is used instead.
+     *
+     * <p>By default preferences always use {@link android.content.SharedPreferences}. To make this
+     * preference to use the {@link PreferenceDataStore} you need to assign your implementation
+     * to the Preference itself via {@link #setPreferenceDataStore(PreferenceDataStore)} or to its
+     * {@link PreferenceManager} via
+     * {@link PreferenceManager#setPreferenceDataStore(PreferenceDataStore)}.
      *
      * @return The {@link PreferenceDataStore} used by this Preference or {@code null} if none.
      */
@@ -1457,12 +1465,12 @@ public class Preference implements Comparable<Preference> {
     }
 
     /**
-     * Implement this to set the initial value of the Preference. 
+     * Implement this to set the initial value of the Preference.
      * <p>
-     * If <var>restorePersistedValue</var> is true, you should restore the 
-     * Preference value from the {@link android.content.SharedPreferences}. If 
-     * <var>restorePersistedValue</var> is false, you should set the Preference 
-     * value to defaultValue that is given (and possibly store to SharedPreferences 
+     * If <var>restorePersistedValue</var> is true, you should restore the
+     * Preference value from the {@link android.content.SharedPreferences}. If
+     * <var>restorePersistedValue</var> is false, you should set the Preference
+     * value to defaultValue that is given (and possibly store to SharedPreferences
      * if {@link #shouldPersist()} is true).
      * <p>
      * This may not always be called. One example is if it should not persist
