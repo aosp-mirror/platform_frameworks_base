@@ -4983,6 +4983,7 @@ public abstract class PackageManager {
      */
     public PackageInfo getPackageArchiveInfo(String archiveFilePath, @PackageInfoFlags int flags) {
         final PackageParser parser = new PackageParser();
+        parser.setCallback(new PackageParser.CallbackImpl(this));
         final File apkFile = new File(archiveFilePath);
         try {
             if ((flags & (MATCH_DIRECT_BOOT_UNAWARE | MATCH_DIRECT_BOOT_AWARE)) != 0) {

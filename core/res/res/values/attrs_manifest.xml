@@ -1534,6 +1534,14 @@
              of Android higher than the number given here, the permission will not
              be requested.  -->
         <attr name="maxSdkVersion" format="integer" />
+        <!-- Optional: the system must support this feature for the permission to be
+        requested.  If it doesn't support the feature, it will be as if the manifest didn't
+        request it at all. -->
+        <attr name="requiredFeature" format="string" />
+        <!-- Optional: the system must NOT support this feature for the permission to be
+        requested.  If it does support the feature, it will be as if the manifest didn't
+        request it at all. -->
+        <attr name="requiredNotFeature" format="string" />
     </declare-styleable>
 
     <!-- The <code>uses-configuration</code> tag specifies

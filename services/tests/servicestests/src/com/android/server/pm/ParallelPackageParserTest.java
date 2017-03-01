@@ -69,7 +69,7 @@ public class ParallelPackageParserTest {
     class TestParallelPackageParser extends ParallelPackageParser {
 
         TestParallelPackageParser() {
-            super(null, false, null, null);
+            super(null, false, null, null, null);
         }
 
         @Override

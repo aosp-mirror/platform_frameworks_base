@@ -2797,6 +2797,10 @@
         <public name="fontProviderAuthority" />
         <public name="fontProviderQuery" />
         <public name="autoFillMode" />
+        <public name="primaryContentAlpha" />
+        <public name="secondaryContentAlpha" />
+        <public name="requiredFeature" />
+        <public name="requiredNotFeature" />
     </public-group>
 
     <public-group type="style" first-id="0x010302e0">
@@ -2805,9 +2809,6 @@
     <public-group type="id" first-id="0x01020041">
         <public name="textAssist" />
     </public-group>
-
-    <public type="attr" name="primaryContentAlpha" />
-    <public type="attr" name="secondaryContentAlpha" />
 
 
   <!-- ===============================================================
