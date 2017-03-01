@@ -43,13 +43,6 @@ public class SystemBars extends SystemUI {
     }
 
     @Override
-    protected void onConfigurationChanged(Configuration newConfig) {
-        if (mStatusBar != null) {
-            mStatusBar.onConfigurationChanged(newConfig);
-        }
-    }
-
-    @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (mStatusBar != null) {
             mStatusBar.dump(fd, pw, args);

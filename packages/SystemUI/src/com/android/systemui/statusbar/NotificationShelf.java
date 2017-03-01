@@ -41,7 +41,8 @@ import com.android.systemui.statusbar.stack.ViewState;
  * A notification shelf view that is placed inside the notification scroller. It manages the
  * overflow icons that don't fit into the regular list anymore.
  */
-public class NotificationShelf extends ActivatableNotificationView {
+public class NotificationShelf extends ActivatableNotificationView implements
+        View.OnLayoutChangeListener {
 
     public static final boolean SHOW_AMBIENT_ICONS = true;
     private static final boolean USE_ANIMATIONS_WHEN_OPENING =
@@ -494,6 +495,10 @@ public class NotificationShelf extends ActivatableNotificationView {
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
+        updateRelativeOffset();
+    }
+
+    private void updateRelativeOffset() {
         mCollapsedIcons.getLocationOnScreen(mTmp);
         mRelativeOffset = mTmp[0];
         getLocationOnScreen(mTmp);
@@ -560,6 +565,7 @@ public class NotificationShelf extends ActivatableNotificationView {
 
     public void setCollapsedIcons(NotificationIconContainer collapsedIcons) {
         mCollapsedIcons = collapsedIcons;
+        mCollapsedIcons.addOnLayoutChangeListener(this);
     }
 
     public void setStatusBarState(int statusBarState) {
@@ -593,6 +599,12 @@ public class NotificationShelf extends ActivatableNotificationView {
             // we need to wait with enabling the animations until the first frame has passed
             mShelfIcons.setAnimationsEnabled(false);
         }
+    }
+
+    @Override
+    public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft,
+            int oldTop, int oldRight, int oldBottom) {
+        updateRelativeOffset();
     }
 
     private class ShelfState extends ExpandableViewState {
