@@ -45,7 +45,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.Map;
 
 /**
  * Data structure representing the current state of all overlay packages in the
