@@ -18,8 +18,10 @@ package android.graphics;
 
 import android.test.suitebuilder.annotation.SmallTest;
 import android.text.FontConfig;
-import java.util.List;
+
 import junit.framework.TestCase;
+
+import java.util.List;
 
 
 public class VariationParserTest extends TestCase {

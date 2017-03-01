@@ -26,14 +26,13 @@ import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Log;
 
+import com.android.frameworks.coretests.R;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.lang.Override;
-import java.util.Arrays;
 import java.util.ArrayList;
-
-import com.android.frameworks.graphicstests.R;
+import java.util.Arrays;
 
 public class IconTest extends AndroidTestCase {
     public static final String TAG = IconTest.class.getSimpleName();

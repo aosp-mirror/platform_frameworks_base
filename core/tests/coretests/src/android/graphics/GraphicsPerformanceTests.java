@@ -16,19 +16,15 @@
 
 package android.graphics;
 
-import junit.framework.Assert;
 import android.content.Context;
 import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Paint;
 import android.test.AndroidTestCase;
 import android.test.PerformanceTestCase;
 import android.test.suitebuilder.annotation.Suppress;
-import android.util.Log;
 
-import com.android.frameworks.graphicstests.R;
+import com.android.frameworks.coretests.R;
+
+import junit.framework.Assert;
 
 /**
  * Graphics Performance Tests

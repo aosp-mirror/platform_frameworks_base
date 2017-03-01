@@ -17,6 +17,7 @@
 package android.graphics;
 
 import android.test.suitebuilder.annotation.SmallTest;
+
 import junit.framework.TestCase;
 
 
