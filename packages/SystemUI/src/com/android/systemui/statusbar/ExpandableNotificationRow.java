@@ -2018,7 +2018,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
 
     @Override
     public boolean isAboveShelf() {
-        return mIsPinned || mHeadsupDisappearRunning || (mIsHeadsUp && mAboveShelf);
+        return !isOnKeyguard()
+                && (mIsPinned || mHeadsupDisappearRunning || (mIsHeadsUp && mAboveShelf));
     }
 
     public void setShowAmbient(boolean showAmbient) {
