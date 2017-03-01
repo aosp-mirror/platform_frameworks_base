@@ -167,7 +167,8 @@ public class TetherInterfaceStateMachine extends StateMachine {
     private void maybeLogMessage(State state, int what) {
         if (DBG) {
             Log.d(TAG, state.getName() + " got " +
-                    sMagicDecoderRing.get(what, Integer.toString(what)));
+                    sMagicDecoderRing.get(what, Integer.toString(what)) + ", Iface = " +
+                    mIfaceName);
         }
     }
 
