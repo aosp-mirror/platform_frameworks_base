@@ -52,6 +52,15 @@ public interface ICreateInfo {
     String[] getRenamedClasses();
 
     /**
+     * List of classes to refactor. This is similar to combining {@link #getRenamedClasses()} and
+     * {@link #getJavaPkgClasses()}.
+     * Classes included here will be renamed and then all their references in any other classes
+     * will be also modified.
+     * FQCN of class to refactor followed by its new FQCN.
+     */
+    String[] getRefactoredClasses();
+
+    /**
      * Returns the list of classes for which the methods returning them should be deleted.
      * The array contains a list of null terminated section starting with the name of the class
      * to rename in which the methods are deleted, followed by a list of return types identifying

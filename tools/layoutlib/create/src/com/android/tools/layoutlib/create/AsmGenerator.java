@@ -37,6 +37,7 @@ import java.util.TreeMap;
 import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Class that generates a new JAR from a list of classes, some of which are to be kept as-is
@@ -127,7 +128,10 @@ public class AsmGenerator {
         // Create the map of classes to rename.
         mRenameClasses = new HashMap<>();
         mClassesNotRenamed = new HashSet<>();
-        String[] renameClasses = createInfo.getRenamedClasses();
+        String[] renameClasses = Stream.concat(
+                Arrays.stream(createInfo.getRenamedClasses()),
+                Arrays.stream(createInfo.getRefactoredClasses()))
+                .toArray(String[]::new);
         int n = renameClasses.length;
         for (int i = 0; i < n; i += 2) {
             assert i + 1 < n;
@@ -140,7 +144,10 @@ public class AsmGenerator {
 
         // Create a map of classes to be refactored.
         mRefactorClasses = new HashMap<>();
-        String[] refactorClasses = createInfo.getJavaPkgClasses();
+        String[] refactorClasses = Stream.concat(
+                Arrays.stream(createInfo.getJavaPkgClasses()),
+                Arrays.stream(createInfo.getRefactoredClasses()))
+                .toArray(String[]::new);
         n = refactorClasses.length;
         for (int i = 0; i < n; i += 2) {
             assert i + 1 < n;
