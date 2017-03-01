@@ -248,8 +248,9 @@ public class AppWindowAnimator {
         }
     }
 
-    void updateLayers() {
-        thumbnailLayer = mAppToken.adjustAnimLayer(animLayerAdjustment);
+    private void updateLayers() {
+        mAppToken.getDisplayContent().assignWindowLayers(false /* relayoutNeeded */);
+        thumbnailLayer = mAppToken.getHighestAnimLayer();
     }
 
     private void stepThumbnailAnimation(long currentTime) {

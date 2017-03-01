@@ -142,7 +142,6 @@ class WallpaperWindowToken extends WindowToken {
 
             // First, make sure the client has the current visibility state.
             wallpaper.dispatchWallpaperVisibility(visible);
-            wallpaper.adjustAnimLayer(animLayerAdj);
 
             if (DEBUG_LAYERS || DEBUG_WALLPAPER_LIGHT) Slog.v(TAG, "adjustWallpaper win "
                     + wallpaper + " anim layer: " + wallpaper.mWinAnimator.mAnimLayer);

@@ -129,7 +129,7 @@ class WindowLayersController {
             final WindowStateAnimator winAnimator = w.mWinAnimator;
             Slog.v(TAG_WM, "Assign layer " + w + ": " + "mBase=" + w.mBaseLayer
                     + " mLayer=" + w.mLayer + (w.mAppToken == null
-                    ? "" : " mAppLayer=" + w.mAppToken.mAppAnimator.animLayerAdjustment)
+                    ? "" : " mAppLayer=" + w.mAppToken.getAnimLayerAdjustment())
                     + " =mAnimLayer=" + winAnimator.mAnimLayer);
         }, false /* traverseTopToBottom */);
     }

@@ -547,6 +547,7 @@ class WallpaperController {
         for (int curTokenNdx = mWallpaperTokens.size() - 1; curTokenNdx >= 0; curTokenNdx--) {
             final WallpaperWindowToken token = mWallpaperTokens.get(curTokenNdx);
             token.updateWallpaperWindows(visible, mWallpaperAnimLayerAdjustment);
+            token.getDisplayContent().assignWindowLayers(false);
         }
     }
 
@@ -568,7 +569,7 @@ class WallpaperController {
             // Only do this if we are not transferring between two wallpaper targets.
             mWallpaperAnimLayerAdjustment =
                     (mPrevWallpaperTarget == null && mWallpaperTarget.mAppToken != null)
-                            ? mWallpaperTarget.mAppToken.mAppAnimator.animLayerAdjustment : 0;
+                            ? mWallpaperTarget.mAppToken.getAnimLayerAdjustment() : 0;
 
             if (mWallpaperTarget.mWallpaperX >= 0) {
                 mLastWallpaperX = mWallpaperTarget.mWallpaperX;

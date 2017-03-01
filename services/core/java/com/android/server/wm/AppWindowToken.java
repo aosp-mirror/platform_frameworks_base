@@ -1419,6 +1419,11 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     }
 
     @Override
+    int getAnimLayerAdjustment() {
+        return mAppAnimator.animLayerAdjustment;
+    }
+
+    @Override
     void dump(PrintWriter pw, String prefix) {
         super.dump(pw, prefix);
         if (appToken != null) {
