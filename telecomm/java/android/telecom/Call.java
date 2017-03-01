@@ -321,8 +321,15 @@ public final class Call {
          */
         public static final int PROPERTY_HAS_CDMA_VOICE_PRIVACY = 0x00000080;
 
+        /**
+         * Indicates that the call is from a self-managed {@link ConnectionService}.
+         * <p>
+         * See also {@link Connection#PROPERTY_SELF_MANAGED}
+         */
+        public static final int PROPERTY_SELF_MANAGED = 0x00000100;
+
         //******************************************************************************************
-        // Next PROPERTY value: 0x00000100
+        // Next PROPERTY value: 0x00000200
         //******************************************************************************************
 
         private final String mTelecomCallId;
