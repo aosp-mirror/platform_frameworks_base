@@ -19,10 +19,10 @@ package android.graphics;
 import android.os.ParcelFileDescriptor;
 import android.test.suitebuilder.annotation.SmallTest;
 
+import junit.framework.TestCase;
+
 import java.io.ByteArrayOutputStream;
 import java.io.FileDescriptor;
-
-import junit.framework.TestCase;
 
 
 public class BitmapFactoryTest extends TestCase {

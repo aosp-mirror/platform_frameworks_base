@@ -16,12 +16,12 @@
 
 package android.graphics;
 
-import com.android.frameworks.graphicstests.R;
-
-import android.content.res.Resources;
 import android.content.res.ColorStateList;
+import android.content.res.Resources;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
+
+import com.android.frameworks.coretests.R;
 
 /**
  * Tests of {@link android.graphics.ColorStateList}

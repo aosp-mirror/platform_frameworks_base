@@ -16,13 +16,13 @@
 
 package android.graphics.drawable;
 
-import junit.framework.TestCase;
-
 import android.R;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.util.StateSet;
 import android.view.MockView;
+
+import junit.framework.TestCase;
 
 /**
  * Tests for StateListDrawable

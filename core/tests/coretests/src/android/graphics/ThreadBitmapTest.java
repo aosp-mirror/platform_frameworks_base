@@ -16,9 +16,9 @@
 
 package android.graphics;
 
-import junit.framework.TestCase;
-import android.graphics.Bitmap;
 import android.test.suitebuilder.annotation.LargeTest;
+
+import junit.framework.TestCase;
 
 public class ThreadBitmapTest extends TestCase {
 
