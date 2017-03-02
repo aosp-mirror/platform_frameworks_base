@@ -376,10 +376,84 @@ public class PackageDexUsage extends AbstractStatsBase<Void> {
         }
     }
 
+    /**
+     * Remove all the records about package {@code packageName} belonging to user {@code userId}.
+     * @return true if the record was found and actually deleted,
+     *         false if the record doesn't exist
+     */
+    public boolean removeUserPackage(String packageName, int userId) {
+        synchronized (mPackageUseInfoMap) {
+            PackageUseInfo packageUseInfo = mPackageUseInfoMap.get(packageName);
+            if (packageUseInfo == null) {
+                return false;
+            }
+            boolean updated = false;
+            Iterator<Map.Entry<String, DexUseInfo>> dIt =
+                            packageUseInfo.mDexUseInfoMap.entrySet().iterator();
+            while (dIt.hasNext()) {
+                DexUseInfo dexUseInfo = dIt.next().getValue();
+                if (dexUseInfo.mOwnerUserId == userId) {
+                    dIt.remove();
+                    updated = true;
+                }
+            }
+            return updated;
+        }
+    }
+
+    /**
+     * Remove the secondary dex file record belonging to the package {@code packageName}
+     * and user {@code userId}.
+     * @return true if the record was found and actually deleted,
+     *         false if the record doesn't exist
+     */
+    public boolean removeDexFile(String packageName, String dexFile, int userId) {
+        synchronized (mPackageUseInfoMap) {
+            PackageUseInfo packageUseInfo = mPackageUseInfoMap.get(packageName);
+            if (packageUseInfo == null) {
+                return false;
+            }
+            return removeDexFile(packageUseInfo, dexFile, userId);
+        }
+    }
+
+    private boolean removeDexFile(PackageUseInfo packageUseInfo, String dexFile, int userId) {
+        DexUseInfo dexUseInfo = packageUseInfo.mDexUseInfoMap.get(dexFile);
+        if (dexUseInfo == null) {
+            return false;
+        }
+        if (dexUseInfo.mOwnerUserId == userId) {
+            packageUseInfo.mDexUseInfoMap.remove(dexFile);
+            return true;
+        }
+        return false;
+    }
+
     public PackageUseInfo getPackageUseInfo(String packageName) {
         synchronized (mPackageUseInfoMap) {
-            return mPackageUseInfoMap.get(packageName);
+            PackageUseInfo useInfo = mPackageUseInfoMap.get(packageName);
+            // The useInfo contains a map for secondary dex files which could be modified
+            // concurrently after this method returns and thus outside the locking we do here.
+            // (i.e. the map is updated when new class loaders are created, which can happen anytime
+            // after this method returns)
+            // Make a defensive copy to be sure we don't get concurrent modifications.
+            return useInfo == null ? null : new PackageUseInfo(useInfo);
         }
+    }
+
+    /**
+     * Return all packages that contain records of secondary dex files.
+     */
+    public Set<String> getAllPackagesWithSecondaryDexFiles() {
+        Set<String> packages = new HashSet<>();
+        synchronized (mPackageUseInfoMap) {
+            for (Map.Entry<String, PackageUseInfo> entry : mPackageUseInfoMap.entrySet()) {
+                if (!entry.getValue().mDexUseInfoMap.isEmpty()) {
+                    packages.add(entry.getKey());
+                }
+            }
+        }
+        return packages;
     }
 
     public void clear() {

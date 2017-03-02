@@ -256,6 +256,32 @@ public class PackageDexUsageTests {
         assertNull(mPackageDexUsage.getPackageUseInfo(mFooBaseUser0.mPackageName));
     }
 
+    @Test
+    public void testRemoveUserPackage() {
+        // Record Bar secondaries for two different users.
+        assertTrue(record(mBarSecondary1User0));
+        assertTrue(record(mBarSecondary2User1));
+
+        // Remove user 0 files.
+        assertTrue(mPackageDexUsage.removeUserPackage(mBarSecondary1User0.mPackageName,
+                mBarSecondary1User0.mOwnerUserId));
+        // Assert that only user 1 files are there.
+        assertPackageDexUsage(null, mBarSecondary2User1);
+    }
+
+    @Test
+    public void testRemoveDexFile() {
+        // Record Bar secondaries for two different users.
+        assertTrue(record(mBarSecondary1User0));
+        assertTrue(record(mBarSecondary2User1));
+
+        // Remove mBarSecondary1User0 file.
+        assertTrue(mPackageDexUsage.removeDexFile(mBarSecondary1User0.mPackageName,
+                mBarSecondary1User0.mDexFile, mBarSecondary1User0.mOwnerUserId));
+        // Assert that only user 1 files are there.
+        assertPackageDexUsage(null, mBarSecondary2User1);
+    }
+
     private void assertPackageDexUsage(TestData primary, TestData... secondaries) {
         String packageName = primary == null ? secondaries[0].mPackageName : primary.mPackageName;
         boolean primaryUsedByOtherApps = primary == null ? false : primary.mUsedByOtherApps;

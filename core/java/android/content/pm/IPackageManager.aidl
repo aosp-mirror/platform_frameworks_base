@@ -482,6 +482,7 @@ interface IPackageManager {
      */
     boolean performDexOpt(String packageName, boolean checkProfiles,
             int compileReason, boolean force);
+
     /**
      * Ask the package manager to perform a dex-opt with the given compiler filter.
      *
@@ -492,11 +493,33 @@ interface IPackageManager {
             String targetCompilerFilter, boolean force);
 
     /**
+     * Ask the package manager to perform a dex-opt with the given compiler filter on the
+     * secondary dex files belonging to the given package.
+     *
+     * Note: exposed only for the shell command to allow moving packages explicitly to a
+     *       definite state.
+     */
+    boolean performDexOptSecondary(String packageName,
+            String targetCompilerFilter, boolean force);
+
+    /**
      * Ask the package manager to dump profiles associated with a package.
      */
     void dumpProfiles(String packageName);
 
     void forceDexOpt(String packageName);
+
+    /**
+     * Execute the background dexopt job immediately.
+     */
+    boolean runBackgroundDexoptJob();
+
+    /**
+     * Reconcile the information we have about the secondary dex files belonging to
+     * {@code packagName} and the actual dex files. For all dex files that were
+     * deleted, update the internal records and delete the generated oat files.
+     */
+    void reconcileSecondaryDexFiles(String packageName);
 
     /**
      * Update status of external media on the package manager to scan and

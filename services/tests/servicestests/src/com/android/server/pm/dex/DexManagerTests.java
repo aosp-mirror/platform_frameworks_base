@@ -73,8 +73,7 @@ public class DexManagerTests {
         mInvalidIsa = new TestData("INVALID", "INVALID_ISA", mUser0);
         mDoesNotExist = new TestData("DOES.NOT.EXIST", isa, mUser1);
 
-
-        mDexManager = new DexManager();
+        mDexManager = new DexManager(null, null, null, null);
 
         // Foo and Bar are available to user0.
         // Only Bar is available to user1;
@@ -202,6 +201,46 @@ public class DexManagerTests {
         // still check that nothing goes unexpected in DexManager.
         notifyDexLoad(mBarUser0, mFooUser0.getBaseAndSplitDexPaths(), mUser1);
         assertNull(getPackageUseInfo(mBarUser1));
+    }
+
+    @Test
+    public void testNotifyPackageInstallUsedByOther() {
+        TestData newPackage = new TestData("newPackage",
+                VMRuntime.getInstructionSet(Build.SUPPORTED_ABIS[0]), mUser0);
+
+        List<String> newSecondaries = newPackage.getSecondaryDexPaths();
+        // Before we notify about the installation of the newPackage if mFoo
+        // is trying to load something from it we should not find it.
+        notifyDexLoad(mFooUser0, newSecondaries, mUser0);
+        assertNull(getPackageUseInfo(newPackage));
+
+        // Notify about newPackage install and let mFoo load its dexes.
+        mDexManager.notifyPackageInstalled(newPackage.mPackageInfo, mUser0);
+        notifyDexLoad(mFooUser0, newSecondaries, mUser0);
+
+        // We should get back the right info.
+        PackageUseInfo pui = getPackageUseInfo(newPackage);
+        assertNotNull(pui);
+        assertFalse(pui.isUsedByOtherApps());
+        assertEquals(newSecondaries.size(), pui.getDexUseInfoMap().size());
+        assertSecondaryUse(newPackage, pui, newSecondaries, /*isUsedByOtherApps*/true, mUser0);
+    }
+
+    @Test
+    public void testNotifyPackageInstallSelfUse() {
+        TestData newPackage = new TestData("newPackage",
+                VMRuntime.getInstructionSet(Build.SUPPORTED_ABIS[0]), mUser0);
+
+        List<String> newSecondaries = newPackage.getSecondaryDexPaths();
+        // Packages should be able to find their own dex files even if the notification about
+        // their installation is delayed.
+        notifyDexLoad(newPackage, newSecondaries, mUser0);
+
+        PackageUseInfo pui = getPackageUseInfo(newPackage);
+        assertNotNull(pui);
+        assertFalse(pui.isUsedByOtherApps());
+        assertEquals(newSecondaries.size(), pui.getDexUseInfoMap().size());
+        assertSecondaryUse(newPackage, pui, newSecondaries, /*isUsedByOtherApps*/false, mUser0);
     }
 
     private void assertSecondaryUse(TestData testData, PackageUseInfo pui,

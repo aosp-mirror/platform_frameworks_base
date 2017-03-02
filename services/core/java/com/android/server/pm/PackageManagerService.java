@@ -1787,6 +1787,18 @@ public class PackageManagerService extends IPackageManager.Stub {
                     res.removedInfo.args.doPostDeleteLI(true);
                 }
             }
+
+            if (!isEphemeral(res.pkg)) {
+                // Notify DexManager that the package was installed for new users.
+                // The updated users should already be indexed and the package code paths
+                // should not change.
+                // Don't notify the manager for ephemeral apps as they are not expected to
+                // survive long enough to benefit of background optimizations.
+                for (int userId : firstUsers) {
+                    PackageInfo info = getPackageInfo(packageName, /*flags*/ 0, userId);
+                    mDexManager.notifyPackageInstalled(info, userId);
+                }
+            }
         }
 
         // If someone is watching installs - notify them
@@ -2121,7 +2133,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         mInstaller = installer;
         mPackageDexOptimizer = new PackageDexOptimizer(installer, mInstallLock, context,
                 "*dexopt*");
-        mDexManager = new DexManager();
+        mDexManager = new DexManager(this, mPackageDexOptimizer, installer, mInstallLock);
         mMoveCallbacks = new MoveCallbacks(FgThread.get().getLooper());
 
         mOnPermissionChangeListeners = new OnPermissionChangeListeners(
@@ -7494,6 +7506,39 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
         return pdo.performDexOpt(p, p.usesLibraryFiles, instructionSets, checkProfiles,
                 targetCompilerFilter, getOrCreateCompilerPackageStats(p));
+    }
+
+    // Performs dexopt on the used secondary dex files belonging to the given package.
+    // Returns true if all dex files were process successfully (which could mean either dexopt or
+    // skip). Returns false if any of the files caused errors.
+    @Override
+    public boolean performDexOptSecondary(String packageName, String compilerFilter,
+            boolean force) {
+        return mDexManager.dexoptSecondaryDex(packageName, compilerFilter, force);
+    }
+
+    /**
+     * Reconcile the information we have about the secondary dex files belonging to
+     * {@code packagName} and the actual dex files. For all dex files that were
+     * deleted, update the internal records and delete the generated oat files.
+     */
+    @Override
+    public void reconcileSecondaryDexFiles(String packageName) {
+        mDexManager.reconcileSecondaryDexFiles(packageName);
+    }
+
+    // TODO(calin): this is only needed for BackgroundDexOptService. Find a cleaner way to inject
+    // a reference there.
+    /*package*/ DexManager getDexManager() {
+        return mDexManager;
+    }
+
+    /**
+     * Execute the background dexopt job immediately.
+     */
+    @Override
+    public boolean runBackgroundDexoptJob() {
+        return BackgroundDexOptService.runIdleOptimizationsNow(this, mContext);
     }
 
     Collection<PackageParser.Package> findSharedNonSystemLibraries(PackageParser.Package p) {

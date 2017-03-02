@@ -110,6 +110,10 @@ class PackageManagerShellCommand extends ShellCommand {
                     return runInstallWrite();
                 case "compile":
                     return runCompile();
+                case "reconcile-secondary-dex-files":
+                    return runreconcileSecondaryDexFiles();
+                case "bg-dexopt-job":
+                    return runDexoptJob();
                 case "dump-profiles":
                     return runDumpProfiles();
                 case "list":
@@ -281,6 +285,7 @@ class PackageManagerShellCommand extends ShellCommand {
         String compilerFilter = null;
         String compilationReason = null;
         String checkProfilesRaw = null;
+        boolean secondaryDex = false;
 
         String opt;
         while ((opt = getNextOption()) != null) {
@@ -307,6 +312,9 @@ class PackageManagerShellCommand extends ShellCommand {
                     forceCompilation = true;
                     clearProfileData = true;
                     compilationReason = "install";
+                    break;
+                case "--secondary-dex":
+                    secondaryDex = true;
                     break;
                 default:
                     pw.println("Error: Unknown option: " + opt);
@@ -380,8 +388,11 @@ class PackageManagerShellCommand extends ShellCommand {
                 mInterface.clearApplicationProfileData(packageName);
             }
 
-            boolean result = mInterface.performDexOptMode(packageName,
-                    checkProfiles, targetCompilerFilter, forceCompilation);
+            boolean result = secondaryDex
+                    ? mInterface.performDexOptSecondary(packageName,
+                            targetCompilerFilter, forceCompilation)
+                    : mInterface.performDexOptMode(packageName,
+                            checkProfiles, targetCompilerFilter, forceCompilation);
             if (!result) {
                 failedPackages.add(packageName);
             }
@@ -407,6 +418,17 @@ class PackageManagerShellCommand extends ShellCommand {
             pw.println();
             return 1;
         }
+    }
+
+    private int runreconcileSecondaryDexFiles() throws RemoteException {
+        String packageName = getNextArg();
+        mInterface.reconcileSecondaryDexFiles(packageName);
+        return 0;
+    }
+
+    private int runDexoptJob() throws RemoteException {
+        boolean result = mInterface.runBackgroundDexoptJob();
+        return result ? 0 : -1;
     }
 
     private int runDumpProfiles() throws RemoteException {
@@ -1441,6 +1463,13 @@ class PackageManagerShellCommand extends ShellCommand {
         }
         pw.println("      --reset: restore package to its post-install state");
         pw.println("      --check-prof (true | false): look at profiles when doing dexopt?");
+        pw.println("      --secondary-dex: compile app secondary dex files");
+        pw.println("  bg-dexopt-job");
+        pw.println("    Execute the background optimizations immediately.");
+        pw.println("    Note that the command only runs the background optimizer logic. It may");
+        pw.println("    overlap with the actual job but the job scheduler will not be able to");
+        pw.println("    cancel it. It will also run even if the device is not in the idle");
+        pw.println("    maintenance mode.");
         pw.println("  list features");
         pw.println("    Prints all features of the system.");
         pw.println("  list instrumentation [-f] [TARGET-PACKAGE]");
@@ -1460,6 +1489,8 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("      -3: filter to only show third party packages");
         pw.println("      -i: see the installer for the packages");
         pw.println("      -u: also include uninstalled packages");
+        pw.println("  reconcile-secondary-dex-files TARGET-PACKAGE");
+        pw.println("    Reconciles the package secondary dex files with the generated oat files.");
         pw.println("  list permission-groups");
         pw.println("    Prints all known permission groups.");
         pw.println("  list permissions [-g] [-f] [-d] [-u] [GROUP]");
