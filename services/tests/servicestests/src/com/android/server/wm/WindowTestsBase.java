@@ -158,21 +158,6 @@ class WindowTestsBase {
         return win;
     }
 
-    /**
-     * Creates a window for a task on a the given {@param stackId}.
-     */
-    private WindowState createStackWindow(int stackId, String name) {
-        final StackWindowController stackController = createStackControllerOnStackOnDisplay(stackId,
-                sDisplayContent);
-        final TestTaskWindowContainerController taskController =
-                new TestTaskWindowContainerController(stackController);
-        TestAppWindowToken appWinToken = new TestAppWindowToken(sDisplayContent);
-        appWinToken.setTask(taskController.mContainer);
-        final WindowState win = createWindow(null, TYPE_BASE_APPLICATION, name);
-        win.mAppToken = appWinToken;
-        return win;
-    }
-
     /** Asserts that the first entry is greater than the second entry. */
     void assertGreaterThan(int first, int second) throws Exception {
         Assert.assertTrue("Excepted " + first + " to be greater than " + second, first > second);

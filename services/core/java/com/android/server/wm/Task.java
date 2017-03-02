@@ -133,7 +133,6 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
     void addChild(AppWindowToken wtoken, int position) {
         position = getAdjustedAddPosition(position);
         super.addChild(wtoken, position);
-        wtoken.setTask(this);
         mDeferRemoval = false;
     }
 
@@ -244,8 +243,6 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
                 removeIfPossible();
             }
         }
-
-        token.setTask(null /*task*/);
     }
 
     void setSendingToBottom(boolean toBottom) {
