@@ -18028,7 +18028,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     public Intent registerReceiver(IApplicationThread caller, String callerPackage,
-            IIntentReceiver receiver, IntentFilter filter, String permission, int userId) {
+            IIntentReceiver receiver, IntentFilter filter, String permission, int userId,
+            boolean visibleToInstantApps) {
         enforceNotIsolatedCaller("registerReceiver");
         ArrayList<Intent> stickyIntents = null;
         ProcessRecord callerApp = null;
@@ -18157,7 +18158,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         + " callerPackage is " + callerPackage);
             }
             BroadcastFilter bf = new BroadcastFilter(filter, rl, callerPackage,
-                    permission, callingUid, userId, instantApp);
+                    permission, callingUid, userId, instantApp, visibleToInstantApps);
             rl.add(bf);
             if (!bf.debugCheck()) {
                 Slog.w(TAG, "==> For Dynamic broadcast");
@@ -18175,7 +18176,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     Intent intent = allSticky.get(i);
                     BroadcastQueue queue = broadcastQueueForIntent(intent);
                     BroadcastRecord r = new BroadcastRecord(queue, intent, null,
-                            null, -1, -1, null, null, AppOpsManager.OP_NONE, null, receivers,
+                            null, -1, -1, false, null, null, AppOpsManager.OP_NONE, null, receivers,
                             null, 0, null, null, false, true, true, -1);
                     queue.enqueueParallelBroadcastLocked(r);
                     queue.scheduleBroadcastsLocked();
@@ -18911,9 +18912,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             final BroadcastQueue queue = broadcastQueueForIntent(intent);
             BroadcastRecord r = new BroadcastRecord(queue, intent, callerApp,
-                    callerPackage, callingPid, callingUid, resolvedType, requiredPermissions,
-                    appOp, brOptions, registeredReceivers, resultTo, resultCode, resultData,
-                    resultExtras, ordered, sticky, false, userId);
+                    callerPackage, callingPid, callingUid, callerInstantApp, resolvedType,
+                    requiredPermissions, appOp, brOptions, registeredReceivers, resultTo,
+                    resultCode, resultData, resultExtras, ordered, sticky, false, userId);
             if (DEBUG_BROADCAST) Slog.v(TAG_BROADCAST, "Enqueueing parallel broadcast " + r);
             final boolean replaced = replacePending
                     && (queue.replaceParallelBroadcastLocked(r) != null);
@@ -19007,7 +19008,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 || resultTo != null) {
             BroadcastQueue queue = broadcastQueueForIntent(intent);
             BroadcastRecord r = new BroadcastRecord(queue, intent, callerApp,
-                    callerPackage, callingPid, callingUid, resolvedType,
+                    callerPackage, callingPid, callingUid, callerInstantApp, resolvedType,
                     requiredPermissions, appOp, brOptions, receivers, resultTo, resultCode,
                     resultData, resultExtras, ordered, sticky, false, userId);
 

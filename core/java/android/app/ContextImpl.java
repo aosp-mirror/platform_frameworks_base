@@ -1327,21 +1327,34 @@ class ContextImpl extends Context {
 
     @Override
     public Intent registerReceiver(BroadcastReceiver receiver, IntentFilter filter,
+            boolean visibleToInstantApps) {
+        return registerReceiver(receiver, filter, null, null, visibleToInstantApps);
+    }
+
+    @Override
+    public Intent registerReceiver(BroadcastReceiver receiver, IntentFilter filter,
             String broadcastPermission, Handler scheduler) {
         return registerReceiverInternal(receiver, getUserId(),
-                filter, broadcastPermission, scheduler, getOuterContext());
+                filter, broadcastPermission, scheduler, getOuterContext(), false);
+    }
+
+    @Override
+    public Intent registerReceiver(BroadcastReceiver receiver, IntentFilter filter,
+            String broadcastPermission, Handler scheduler, boolean visibleToInstantApps) {
+        return registerReceiverInternal(receiver, getUserId(),
+                filter, broadcastPermission, scheduler, getOuterContext(), visibleToInstantApps);
     }
 
     @Override
     public Intent registerReceiverAsUser(BroadcastReceiver receiver, UserHandle user,
             IntentFilter filter, String broadcastPermission, Handler scheduler) {
         return registerReceiverInternal(receiver, user.getIdentifier(),
-                filter, broadcastPermission, scheduler, getOuterContext());
+                filter, broadcastPermission, scheduler, getOuterContext(), false);
     }
 
     private Intent registerReceiverInternal(BroadcastReceiver receiver, int userId,
             IntentFilter filter, String broadcastPermission,
-            Handler scheduler, Context context) {
+            Handler scheduler, Context context, boolean visibleToInstantApps) {
         IIntentReceiver rd = null;
         if (receiver != null) {
             if (mPackageInfo != null && context != null) {
@@ -1362,7 +1375,7 @@ class ContextImpl extends Context {
         try {
             final Intent intent = ActivityManager.getService().registerReceiver(
                     mMainThread.getApplicationThread(), mBasePackageName, rd, filter,
-                    broadcastPermission, userId);
+                    broadcastPermission, userId, visibleToInstantApps);
             if (intent != null) {
                 intent.setExtrasClassLoader(getClassLoader());
                 intent.prepareToEnterProcess();
