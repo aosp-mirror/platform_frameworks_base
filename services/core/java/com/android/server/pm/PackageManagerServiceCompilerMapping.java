@@ -80,9 +80,7 @@ class PackageManagerServiceCompilerMapping {
             try {
                 // Check that the system property name is legal.
                 String sysPropName = getSystemPropertyName(reason);
-                if (sysPropName == null ||
-                        sysPropName.isEmpty() ||
-                        sysPropName.length() > SystemProperties.PROP_NAME_MAX) {
+                if (sysPropName == null || sysPropName.isEmpty()) {
                     throw new IllegalStateException("Reason system property name \"" +
                             sysPropName +"\" for reason " + REASON_STRINGS[reason]);
                 }
