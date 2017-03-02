@@ -153,7 +153,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     }
 
     private boolean shouldHideNotificationIcons() {
-        return !mStatusBar.isClosed() && mStatusBarComponent.shouldHideNotificationIcons();
+        return !mStatusBar.isClosed() && mStatusBarComponent.hideStatusBarIconsWhenExpanded();
     }
 
     public void hideSystemIconArea(boolean animate) {

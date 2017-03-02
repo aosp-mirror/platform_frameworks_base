@@ -26,7 +26,6 @@ import android.app.StatusBarManager;
 import android.content.Context;
 import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -47,7 +46,6 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.keyguard.KeyguardStatusView;
 import com.android.systemui.DejankUtils;
-import com.android.systemui.EventLogConstants;
 import com.android.systemui.EventLogTags;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
@@ -179,7 +177,7 @@ public class NotificationPanelView extends PanelView implements
     private boolean mKeyguardStatusViewAnimating;
     private ValueAnimator mQsSizeChangeAnimator;
 
-    private boolean mShadeEmpty;
+    private boolean mShowEmptyShadeView;
 
     private boolean mQsScrimEnabled = true;
     private boolean mLastAnnouncementWasQuickSettings;
@@ -211,11 +209,12 @@ public class NotificationPanelView extends PanelView implements
         }
     };
     private NotificationGroupManager mGroupManager;
-    private boolean mOpening;
+    private boolean mShowIconsWhenExpanded;
     private int mIndicationBottomPadding;
     private boolean mIsFullWidth;
     private boolean mDark;
     private LockscreenGestureLogger mLockscreenGestureLogger = new LockscreenGestureLogger();
+    private boolean mNoVisibleNotifications = true;
 
     public NotificationPanelView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -1518,7 +1517,7 @@ public class NotificationPanelView extends PanelView implements
         // it in expanded QS state as well so we don't run into troubles when fading the view in/out
         // and expanding/collapsing the whole panel from/to quick settings.
         if (mNotificationStackScroller.getNotGoneChildCount() == 0
-                && mShadeEmpty) {
+                && mShowEmptyShadeView) {
             notificationHeight = mNotificationStackScroller.getEmptyShadeViewHeight();
         }
         int maxQsHeight = mQsMaxExpansionHeight;
@@ -2118,15 +2117,15 @@ public class NotificationPanelView extends PanelView implements
         return mDozing;
     }
 
-    public void setShadeEmpty(boolean shadeEmpty) {
-        mShadeEmpty = shadeEmpty;
+    public void showEmptyShadeView(boolean emptyShadeViewVisible) {
+        mShowEmptyShadeView = emptyShadeViewVisible;
         updateEmptyShadeView();
     }
 
     private void updateEmptyShadeView() {
 
         // Hide "No notifications" in QS.
-        mNotificationStackScroller.updateEmptyShadeView(mShadeEmpty && !mQsExpanded);
+        mNotificationStackScroller.updateEmptyShadeView(mShowEmptyShadeView && !mQsExpanded);
     }
 
     public void setQsScrimEnabled(boolean qsScrimEnabled) {
@@ -2306,7 +2305,7 @@ public class NotificationPanelView extends PanelView implements
         }
         mNotificationStackScroller.setExpandedHeight(expandedHeight);
         updateKeyguardBottomAreaAlpha();
-        setOpening(isFullWidth() && expandedHeight < getOpeningHeight());
+        updateStatusBarIcons();
     }
 
     /**
@@ -2317,11 +2316,19 @@ public class NotificationPanelView extends PanelView implements
         return mIsFullWidth;
     }
 
-    private void setOpening(boolean opening) {
-        if (opening != mOpening) {
-            mOpening = opening;
+    private void updateStatusBarIcons() {
+        boolean showIconsWhenExpanded = isFullWidth() && getExpandedHeight() < getOpeningHeight();
+        if (showIconsWhenExpanded && mNoVisibleNotifications && isOnKeyguard()) {
+            showIconsWhenExpanded = false;
+        }
+        if (showIconsWhenExpanded != mShowIconsWhenExpanded) {
+            mShowIconsWhenExpanded = showIconsWhenExpanded;
             mStatusBar.recomputeDisableFlags(false);
         }
+    }
+
+    private boolean isOnKeyguard() {
+        return mStatusBar.getBarState() == StatusBarState.KEYGUARD;
     }
 
     public void setPanelScrimMinFraction(float minFraction) {
@@ -2426,12 +2433,8 @@ public class NotificationPanelView extends PanelView implements
         mGroupManager = groupManager;
     }
 
-    public boolean shouldHideNotificationIcons() {
-        return !isFullWidth() || (!mOpening && !isFullyCollapsed());
-    }
-
-    public boolean shouldAnimateIconHiding() {
-        return !isFullWidth();
+    public boolean hideStatusBarIconsWhenExpanded() {
+        return !isFullWidth() || !mShowIconsWhenExpanded;
     }
 
     private final FragmentListener mFragmentListener = new FragmentListener() {
@@ -2472,5 +2475,9 @@ public class NotificationPanelView extends PanelView implements
         mDark = dark;
         mKeyguardStatusView.setDark(dark);
         positionClockAndNotifications();
+    }
+
+    public void setNoVisibleNotifications(boolean noNotifications) {
+        mNoVisibleNotifications = noNotifications;
     }
 }
