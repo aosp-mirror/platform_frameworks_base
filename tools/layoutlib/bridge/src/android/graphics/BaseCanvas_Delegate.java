@@ -161,17 +161,22 @@ public class BaseCanvas_Delegate {
     @LayoutlibDelegate
     /*package*/ static void nDrawPoint(long nativeCanvas, float x, float y,
             long nativePaint) {
-        // FIXME
-        Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
-                "Canvas.drawPoint is not supported.", null, null /*data*/);
+        // TODO: need to support the attribute (e.g. stroke width) of paint
+        draw(nativeCanvas, nativePaint, false /*compositeOnly*/, false /*forceSrcMode*/,
+                (graphics, paintDelegate) -> graphics.fillRect((int)x, (int)y, 1, 1));
     }
 
     @LayoutlibDelegate
     /*package*/ static void nDrawPoints(long nativeCanvas, float[] pts, int offset, int count,
             long nativePaint) {
-        // FIXME
-        Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
-                "Canvas.drawPoint is not supported.", null, null /*data*/);
+        if (offset < 0 || count < 0 || offset + count > pts.length) {
+            throw new IllegalArgumentException("Invalid argument set");
+        }
+        // ignore the last point if the count is odd (It means it is not paired).
+        count = (count >> 1) << 1;
+        for (int i = offset; i < offset + count; i += 2) {
+            nDrawPoint(nativeCanvas, pts[i], pts[i + 1], nativePaint);
+        }
     }
 
     @LayoutlibDelegate
