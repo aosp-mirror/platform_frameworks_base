@@ -27,11 +27,17 @@ import java.lang.ref.WeakReference;
  */
 public class CompatResources extends Resources {
 
-    private final WeakReference<Context> mContext;
+    private WeakReference<Context> mContext;
 
-    public CompatResources(Resources base, Context context) {
-        super(base.getClassLoader());
-        setImpl(base.getImpl());
+    public CompatResources(ClassLoader cls) {
+        super(cls);
+        mContext = new WeakReference<>(null);
+    }
+
+    /**
+     * @hide
+     */
+    public void setContext(Context context) {
         mContext = new WeakReference<>(context);
     }
 
