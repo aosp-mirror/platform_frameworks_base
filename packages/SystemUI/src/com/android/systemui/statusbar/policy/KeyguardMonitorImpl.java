@@ -116,19 +116,20 @@ public class KeyguardMonitorImpl extends KeyguardUpdateMonitorCallback
     }
 
     private void notifyKeyguardChanged() {
-        mCallbacks.forEach(Callback::onKeyguardShowingChanged);
+        // Copy the list to allow removal during callback.
+        new ArrayList<Callback>(mCallbacks).forEach(Callback::onKeyguardShowingChanged);
     }
 
     public void notifyKeyguardFadingAway(long delay, long fadeoutDuration) {
         mKeyguardFadingAway = true;
         mKeyguardFadingAwayDelay = delay;
         mKeyguardFadingAwayDuration = fadeoutDuration;
-        mCallbacks.forEach(Callback::onKeyguardShowingChanged);
+        notifyKeyguardChanged();
     }
 
     public void notifyKeyguardDoneFading() {
         mKeyguardFadingAway = false;
-        mCallbacks.forEach(Callback::onKeyguardShowingChanged);
+        notifyKeyguardChanged();
     }
 
     @Override
