@@ -91,8 +91,6 @@ public:
     LayerUpdateQueue* layerUpdateQueue = nullptr;
     ErrorHandler* errorHandler = nullptr;
 
-    int32_t windowInsetLeft = 0;
-    int32_t windowInsetTop = 0;
     bool updateWindowPositions = false;
 
     struct Out {

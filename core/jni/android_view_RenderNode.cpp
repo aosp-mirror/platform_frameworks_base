@@ -452,10 +452,6 @@ static void android_view_RenderNode_requestPositionUpdates(JNIEnv* env, jobject,
             const RenderProperties& props = node.properties();
             uirenderer::Rect bounds(props.getWidth(), props.getHeight());
             transform.mapRect(bounds);
-            bounds.left -= info.windowInsetLeft;
-            bounds.right -= info.windowInsetLeft;
-            bounds.top -= info.windowInsetTop;
-            bounds.bottom -= info.windowInsetTop;
 
             if (CC_LIKELY(transform.isPureTranslate())) {
                 // snap/round the computed bounds, so they match the rounding behavior
