@@ -35,7 +35,6 @@ public class SystemProperties {
     private static final String TAG = "SystemProperties";
     private static final boolean TRACK_KEY_ACCESS = false;
 
-    public static final int PROP_NAME_MAX = 31;
     public static final int PROP_VALUE_MAX = 91;
 
     private static final ArrayList<Runnable> sChangeCallbacks = new ArrayList<Runnable>();
@@ -82,12 +81,8 @@ public class SystemProperties {
     /**
      * Get the value for the given key.
      * @return an empty string if the key isn't found
-     * @throws IllegalArgumentException if the key exceeds 32 characters
      */
     public static String get(String key) {
-        if (key.length() > PROP_NAME_MAX) {
-            throw newKeyTooLargeException(key);
-        }
         if (TRACK_KEY_ACCESS) onKeyAccess(key);
         return native_get(key);
     }
@@ -95,12 +90,8 @@ public class SystemProperties {
     /**
      * Get the value for the given key.
      * @return if the key isn't found, return def if it isn't null, or an empty string otherwise
-     * @throws IllegalArgumentException if the key exceeds 32 characters
      */
     public static String get(String key, String def) {
-        if (key.length() > PROP_NAME_MAX) {
-            throw newKeyTooLargeException(key);
-        }
         if (TRACK_KEY_ACCESS) onKeyAccess(key);
         return native_get(key, def);
     }
@@ -111,12 +102,8 @@ public class SystemProperties {
      * @param def a default value to return
      * @return the key parsed as an integer, or def if the key isn't found or
      *         cannot be parsed
-     * @throws IllegalArgumentException if the key exceeds 32 characters
      */
     public static int getInt(String key, int def) {
-        if (key.length() > PROP_NAME_MAX) {
-            throw newKeyTooLargeException(key);
-        }
         if (TRACK_KEY_ACCESS) onKeyAccess(key);
         return native_get_int(key, def);
     }
@@ -127,12 +114,8 @@ public class SystemProperties {
      * @param def a default value to return
      * @return the key parsed as a long, or def if the key isn't found or
      *         cannot be parsed
-     * @throws IllegalArgumentException if the key exceeds 32 characters
      */
     public static long getLong(String key, long def) {
-        if (key.length() > PROP_NAME_MAX) {
-            throw newKeyTooLargeException(key);
-        }
         if (TRACK_KEY_ACCESS) onKeyAccess(key);
         return native_get_long(key, def);
     }
@@ -148,25 +131,17 @@ public class SystemProperties {
      * @param def a default value to return
      * @return the key parsed as a boolean, or def if the key isn't found or is
      *         not able to be parsed as a boolean.
-     * @throws IllegalArgumentException if the key exceeds 32 characters
      */
     public static boolean getBoolean(String key, boolean def) {
-        if (key.length() > PROP_NAME_MAX) {
-            throw newKeyTooLargeException(key);
-        }
         if (TRACK_KEY_ACCESS) onKeyAccess(key);
         return native_get_boolean(key, def);
     }
 
     /**
      * Set the value for the given key.
-     * @throws IllegalArgumentException if the key exceeds 32 characters
      * @throws IllegalArgumentException if the value exceeds 92 characters
      */
     public static void set(String key, String val) {
-        if (key.length() > PROP_NAME_MAX) {
-            throw newKeyTooLargeException(key);
-        }
         if (val != null && val.length() > PROP_VALUE_MAX) {
             throw newValueTooLargeException(key, val);
         }
@@ -194,11 +169,6 @@ public class SystemProperties {
                 callbacks.get(i).run();
             }
         }
-    }
-
-    private static IllegalArgumentException newKeyTooLargeException(String key) {
-        return new IllegalArgumentException("system property key '" + key + "' is longer than "
-                + PROP_NAME_MAX + " characters");
     }
 
     private static IllegalArgumentException newValueTooLargeException(String key, String value) {
