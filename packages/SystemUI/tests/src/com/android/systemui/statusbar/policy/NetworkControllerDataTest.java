@@ -12,6 +12,7 @@ import android.test.suitebuilder.annotation.SmallTest;
 
 import com.android.settingslib.net.DataUsageController;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -106,6 +107,7 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
                 TelephonyIcons.QS_DATA_4G);
     }
 
+    @Ignore("Flaky")
     @Test
     public void testDataDisabledIcon() {
         setupNetworkController();
