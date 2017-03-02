@@ -17,6 +17,7 @@
 #define BITMAP_H_
 
 #include <jni.h>
+#include <android/bitmap.h>
 #include <SkBitmap.h>
 #include <SkColorTable.h>
 #include <SkImageInfo.h>
@@ -43,6 +44,13 @@ void toSkBitmap(jlong bitmapHandle, SkBitmap* outBitmap);
 
 Bitmap& toBitmap(JNIEnv* env, jobject bitmap);
 Bitmap& toBitmap(JNIEnv* env, jlong bitmapHandle);
+
+// NDK access
+void imageInfo(JNIEnv* env, jobject bitmap, AndroidBitmapInfo* info);
+// Returns a pointer to the pixels or nullptr if the bitmap is not valid
+void* lockPixels(JNIEnv* env, jobject bitmap);
+// Returns true if unlocked, false if the bitmap is no longer valid (destroyed)
+bool unlockPixels(JNIEnv* env, jobject bitmap);
 
 /** Reinitialize a bitmap. bitmap must already have its SkAlphaType set in
     sync with isPremultiplied
