@@ -26,6 +26,7 @@ import android.view.autofill.AutoFillType;
 import android.view.autofill.AutoFillValue;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * Assist data automatically created by the platform's implementation
@@ -533,6 +534,7 @@ public class AssistStructure implements Parcelable {
         String mIdPackage;
         String mIdType;
         String mIdEntry;
+
         // TODO(b/33197203): once we have more flags, it might be better to store the individual
         // fields (viewId and childId) of the field.
         AutoFillId mAutoFillId;
@@ -540,6 +542,7 @@ public class AssistStructure implements Parcelable {
         AutoFillValue mAutoFillValue;
         String[] mAutoFillOptions;
         boolean mSanitized;
+
         int mX;
         int mY;
         int mScrollX;
@@ -581,6 +584,7 @@ public class AssistStructure implements Parcelable {
         static final int FLAGS_HAS_ID = 0x00200000;
         static final int FLAGS_HAS_CHILDREN = 0x00100000;
         static final int FLAGS_HAS_URL = 0x00080000;
+        static final int FLAGS_HAS_INPUT_TYPE = 0x00040000;
         static final int FLAGS_ALL_CONTROL = 0xfff00000;
 
         int mFlags;
@@ -589,6 +593,7 @@ public class AssistStructure implements Parcelable {
         CharSequence mContentDescription;
 
         ViewNodeText mText;
+        int mInputType;
         String mUrl;
         Bundle mExtras;
 
@@ -655,6 +660,9 @@ public class AssistStructure implements Parcelable {
             if ((flags&FLAGS_HAS_TEXT) != 0) {
                 mText = new ViewNodeText(in, (flags&FLAGS_HAS_COMPLEX_TEXT) == 0);
             }
+            if ((flags&FLAGS_HAS_INPUT_TYPE) != 0) {
+                mInputType = in.readInt();
+            }
             if ((flags&FLAGS_HAS_URL) != 0) {
                 mUrl = in.readString();
             }
@@ -710,6 +718,9 @@ public class AssistStructure implements Parcelable {
                 if (!mText.isSimple()) {
                     flags |= FLAGS_HAS_COMPLEX_TEXT;
                 }
+            }
+            if (mInputType != 0) {
+                flags |= FLAGS_HAS_INPUT_TYPE;
             }
             if (mUrl != null) {
                 flags |= FLAGS_HAS_URL;
@@ -778,6 +789,10 @@ public class AssistStructure implements Parcelable {
             if ((flags&FLAGS_HAS_TEXT) != 0) {
                 mText.writeToParcel(out, (flags&FLAGS_HAS_COMPLEX_TEXT) == 0, writeSensitive);
             }
+            if ((flags&FLAGS_HAS_INPUT_TYPE) != 0) {
+                out.writeInt(mInputType);
+            }
+
             if ((flags&FLAGS_HAS_URL) != 0) {
                 out.writeString(mUrl);
             }
@@ -865,6 +880,15 @@ public class AssistStructure implements Parcelable {
          */
         public String[] getAutoFillOptions() {
             return mAutoFillOptions;
+        }
+
+        /**
+         * Gets the {@link android.text.InputType} bits of this structure.
+         *
+         * @return bits as defined by {@link android.text.InputType}.
+         */
+        public int getInputType() {
+            return mInputType;
         }
 
         /** @hide */
@@ -1534,6 +1558,11 @@ public class AssistStructure implements Parcelable {
             mNode.mAutoFillOptions = options;
         }
 
+        @Override
+        public void setInputType(int inputType) {
+            mNode.mInputType = inputType;
+        }
+
         /**
          * @hide
          */
@@ -1664,6 +1693,8 @@ public class AssistStructure implements Parcelable {
         } else {
             Log.i(TAG, prefix + "AutoFill info: id= " + autoFillId
                     + ", type=" + node.getAutoFillType()
+                    + ", options=" + Arrays.toString(node.getAutoFillOptions())
+                    + ", inputType=" + node.getInputType()
                     + ", value=" + node.getAutoFillValue()
                     + ", sanitized=" + node.isSanitized());
         }

@@ -10002,6 +10002,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     AssistStructure.ViewNode.TEXT_COLOR_UNDEFINED /* bgColor */, style);
         }
         structure.setHint(getHint());
+        structure.setInputType(getInputType());
     }
 
     // TODO(b/33197203): add unit/CTS tests for auto-fill methods

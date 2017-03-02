@@ -316,6 +316,13 @@ public abstract class ViewStructure {
     public abstract void setAutoFillOptions(String[] options);
 
     /**
+     * Sets the {@link android.text.InputType} bits of this node.
+     *
+     * @param inputType inputType bits as defined by {@link android.text.InputType}.
+     */
+    public abstract void setInputType(int inputType);
+
+    /**
      * Marks this node as sanitized so its content are sent on {@link
      * android.service.autofill.AutoFillService#onFillRequest(android.app.assist.AssistStructure,
      * Bundle, android.os.CancellationSignal, android.service.autofill.FillCallback)}.
