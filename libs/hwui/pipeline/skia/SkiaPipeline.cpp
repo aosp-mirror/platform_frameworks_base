@@ -80,7 +80,7 @@ void SkiaPipeline::renderLayers(const FrameBuilder::LightGeometry& lightGeometry
 void SkiaPipeline::renderLayersImpl(const LayerUpdateQueue& layers, bool opaque) {
     // Render all layers that need to be updated, in order.
     for (size_t i = 0; i < layers.entries().size(); i++) {
-        RenderNode* layerNode = layers.entries()[i].renderNode;
+        RenderNode* layerNode = layers.entries()[i].renderNode.get();
         // only schedule repaint if node still on layer - possible it may have been
         // removed during a dropped frame, but layers may still remain scheduled so
         // as not to lose info on what portion is damaged

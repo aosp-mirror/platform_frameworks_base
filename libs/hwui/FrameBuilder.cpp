@@ -78,7 +78,7 @@ void FrameBuilder::deferLayers(const LayerUpdateQueue& layers) {
     // Render all layers to be updated, in order. Defer in reverse order, so that they'll be
     // updated in the order they're passed in (mLayerBuilders are issued to Renderer in reverse)
     for (int i = layers.entries().size() - 1; i >= 0; i--) {
-        RenderNode* layerNode = layers.entries()[i].renderNode;
+        RenderNode* layerNode = layers.entries()[i].renderNode.get();
         // only schedule repaint if node still on layer - possible it may have been
         // removed during a dropped frame, but layers may still remain scheduled so
         // as not to lose info on what portion is damaged
