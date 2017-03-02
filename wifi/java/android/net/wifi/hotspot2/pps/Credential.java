@@ -122,12 +122,22 @@ public final class Credential implements Parcelable {
         private static final int MAX_PASSWORD_BYTES = 255;
 
         /**
+         * Supported authentication methods.
+         * @hide
+         */
+        public static final String AUTH_METHOD_PAP = "PAP";
+        /** @hide */
+        public static final String AUTH_METHOD_MSCHAP = "MS-CHAP";
+        /** @hide */
+        public static final String AUTH_METHOD_MSCHAPV2 = "MS-CHAP-V2";
+
+        /**
          * Supported Non-EAP inner methods.  Refer to
          * Credential/UsernamePassword/EAPMethod/InnerEAPType in Hotspot 2.0 Release 2 Technical
          * Specification Section 9.1 for more info.
          */
-        private static final Set<String> SUPPORTED_AUTH =
-                new HashSet<String>(Arrays.asList("PAP", "CHAP", "MS-CHAP", "MS-CHAP-V2"));
+        private static final Set<String> SUPPORTED_AUTH = new HashSet<String>(
+                Arrays.asList(AUTH_METHOD_PAP, AUTH_METHOD_MSCHAP, AUTH_METHOD_MSCHAPV2));
 
         /**
          * Username of the credential.
@@ -348,8 +358,9 @@ public final class Credential implements Parcelable {
     public static final class CertificateCredential implements Parcelable {
         /**
          * Supported certificate types.
+         * @hide
          */
-        private static final String CERT_TYPE_X509V3 = "x509v3";
+        public static final String CERT_TYPE_X509V3 = "x509v3";
 
         /**
          * Certificate SHA-256 fingerprint length.
