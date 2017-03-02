@@ -46,8 +46,8 @@ public class ReceiverActivity extends Activity {
                 final Uri uri = DocumentsContract.buildRootUri(
                         MtpDocumentsProvider.AUTHORITY, deviceRootId);
 
-                final Intent intent = new Intent(DocumentsContract.ACTION_BROWSE);
-                intent.setData(uri);
+                final Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setDataAndType(uri, DocumentsContract.Root.MIME_TYPE_ITEM);
                 intent.addCategory(Intent.CATEGORY_DEFAULT);
                 this.startActivity(intent);
             } catch (IOException exception) {
