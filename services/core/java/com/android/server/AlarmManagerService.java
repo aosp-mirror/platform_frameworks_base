@@ -99,6 +99,7 @@ class AlarmManagerService extends SystemService {
     static final boolean DEBUG_VALIDATE = localLOGV || false;
     static final boolean DEBUG_ALARM_CLOCK = localLOGV || false;
     static final boolean DEBUG_LISTENER_CALLBACK = localLOGV || false;
+    static final boolean DEBUG_WAKELOCK = localLOGV || false;
     static final boolean RECORD_ALARMS_IN_HISTORY = true;
     static final boolean RECORD_DEVICE_IDLE_ALARMS = false;
     static final int ALARM_EVENT = 1;
@@ -2934,6 +2935,9 @@ class AlarmManagerService extends SystemService {
                 updateStatsLocked(inflight);
             }
             mBroadcastRefCount--;
+            if (DEBUG_WAKELOCK) {
+                Slog.d(TAG, "mBroadcastRefCount -> " + mBroadcastRefCount);
+            }
             if (mBroadcastRefCount == 0) {
                 mHandler.obtainMessage(AlarmHandler.REPORT_ALARMS_ACTIVE, 0).sendToTarget();
                 mWakeLock.release();
@@ -3074,6 +3078,9 @@ class AlarmManagerService extends SystemService {
             }
 
             // The alarm is now in flight; now arrange wakelock and stats tracking
+            if (DEBUG_WAKELOCK) {
+                Slog.d(TAG, "mBroadcastRefCount -> " + (mBroadcastRefCount + 1));
+            }
             if (mBroadcastRefCount == 0) {
                 setWakelockWorkSource(alarm.operation, alarm.workSource,
                         alarm.type, alarm.statsTag, (alarm.operation == null) ? alarm.uid : -1,

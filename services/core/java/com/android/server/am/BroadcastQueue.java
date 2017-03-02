@@ -239,33 +239,37 @@ public final class BroadcastQueue {
         }
     }
 
-    public final boolean replaceParallelBroadcastLocked(BroadcastRecord r) {
-        final Intent intent = r.intent;
-        for (int i = mParallelBroadcasts.size() - 1; i >= 0; i--) {
-            final Intent curIntent = mParallelBroadcasts.get(i).intent;
-            if (intent.filterEquals(curIntent)) {
-                if (DEBUG_BROADCAST) Slog.v(TAG_BROADCAST,
-                        "***** DROPPING PARALLEL ["
-                + mQueueName + "]: " + intent);
-                mParallelBroadcasts.set(i, r);
-                return true;
-            }
-        }
-        return false;
+    /**
+     * Find the same intent from queued parallel broadcast, replace with a new one and return
+     * the old one.
+     */
+    public final BroadcastRecord replaceParallelBroadcastLocked(BroadcastRecord r) {
+        return replaceBroadcastLocked(mParallelBroadcasts, r, "PARALLEL");
     }
 
-    public final boolean replaceOrderedBroadcastLocked(BroadcastRecord r) {
+    /**
+     * Find the same intent from queued ordered broadcast, replace with a new one and return
+     * the old one.
+     */
+    public final BroadcastRecord replaceOrderedBroadcastLocked(BroadcastRecord r) {
+        return replaceBroadcastLocked(mOrderedBroadcasts, r, "ORDERED");
+    }
+
+    private BroadcastRecord replaceBroadcastLocked(ArrayList<BroadcastRecord> queue,
+            BroadcastRecord r, String typeForLogging) {
         final Intent intent = r.intent;
-        for (int i = mOrderedBroadcasts.size() - 1; i > 0; i--) {
-            if (intent.filterEquals(mOrderedBroadcasts.get(i).intent)) {
-                if (DEBUG_BROADCAST) Slog.v(TAG_BROADCAST,
-                        "***** DROPPING ORDERED ["
-                        + mQueueName + "]: " + intent);
-                mOrderedBroadcasts.set(i, r);
-                return true;
+        for (int i = queue.size() - 1; i > 0; i--) {
+            final BroadcastRecord old = queue.get(i);
+            if (old.userId == r.userId && intent.filterEquals(old.intent)) {
+                if (DEBUG_BROADCAST) {
+                    Slog.v(TAG_BROADCAST, "***** DROPPING "
+                            + typeForLogging + " [" + mQueueName + "]: " + intent);
+                }
+                queue.set(i, r);
+                return old;
             }
         }
-        return false;
+        return null;
     }
 
     private final void processCurBroadcastLocked(BroadcastRecord r,
