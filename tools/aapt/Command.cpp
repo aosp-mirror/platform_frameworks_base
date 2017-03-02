@@ -309,6 +309,8 @@ enum {
     CATEGORY_ATTR = 0x010103e8,
     BANNER_ATTR = 0x10103f2,
     ISGAME_ATTR = 0x10103f4,
+    REQUIRED_FEATURE_ATTR = 0x1010557,
+    REQUIRED_NOT_FEATURE_ATTR = 0x1010558,
 };
 
 String8 getComponentName(String8 &pkgName, String8 &componentName) {
@@ -366,10 +368,18 @@ static void printCompatibleScreens(ResXMLTree& tree, String8* outError) {
     printf("\n");
 }
 
-static void printUsesPermission(const String8& name, bool optional=false, int maxSdkVersion=-1) {
+static void printUsesPermission(const String8& name, bool optional=false, int maxSdkVersion=-1,
+        const String8& requiredFeature = String8::empty(),
+        const String8& requiredNotFeature = String8::empty()) {
     printf("uses-permission: name='%s'", ResTable::normalizeForOutput(name.string()).string());
     if (maxSdkVersion != -1) {
          printf(" maxSdkVersion='%d'", maxSdkVersion);
+    }
+    if (requiredFeature.length() > 0) {
+         printf(" requiredFeature='%s'", requiredFeature.string());
+    }
+    if (requiredNotFeature.length() > 0) {
+         printf(" requiredNotFeature='%s'", requiredNotFeature.string());
     }
     printf("\n");
 
@@ -1545,6 +1555,10 @@ int doDump(Bundle* bundle)
 
                         const int32_t maxSdkVersion =
                                 AaptXml::getIntegerAttribute(tree, MAX_SDK_VERSION_ATTR, -1);
+                        const String8 requiredFeature = AaptXml::getAttribute(tree,
+                                REQUIRED_FEATURE_ATTR, &error);
+                        const String8 requiredNotFeature = AaptXml::getAttribute(tree,
+                                REQUIRED_NOT_FEATURE_ATTR, &error);
 
                         if (name == "android.permission.WRITE_EXTERNAL_STORAGE") {
                             hasWriteExternalStoragePermission = true;
@@ -1565,7 +1579,7 @@ int doDump(Bundle* bundle)
 
                         printUsesPermission(name,
                                 AaptXml::getIntegerAttribute(tree, REQUIRED_ATTR, 1) == 0,
-                                maxSdkVersion);
+                                maxSdkVersion, requiredFeature, requiredNotFeature);
 
                     } else if (tag == "uses-permission-sdk-23" || tag == "uses-permission-sdk-m") {
                         String8 name = AaptXml::getAttribute(tree, NAME_ATTR, &error);

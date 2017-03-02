@@ -746,6 +746,12 @@ public class PackageManagerService extends IPackageManager.Stub {
     @GuardedBy("mPackages")
     final SparseArray<Map<String, Integer>> mChangedPackagesSequenceNumbers = new SparseArray<>();
 
+    final PackageParser.Callback mPackageParserCallback = new PackageParser.Callback() {
+        @Override public boolean hasFeature(String feature) {
+            return PackageManagerService.this.hasSystemFeature(feature, 0);
+        }
+    };
+
     public static final class SharedLibraryEntry {
         public final String path;
         public final String apk;
@@ -7584,7 +7590,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     + " flags=0x" + Integer.toHexString(parseFlags));
         }
         ParallelPackageParser parallelPackageParser = new ParallelPackageParser(
-                mSeparateProcesses, mOnlyCore, mMetrics, mCacheDir);
+                mSeparateProcesses, mOnlyCore, mMetrics, mCacheDir, mPackageParserCallback);
 
         // Submit files for parsing in parallel
         int fileCount = 0;
@@ -7753,6 +7759,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         pp.setSeparateProcesses(mSeparateProcesses);
         pp.setOnlyCoreApps(mOnlyCore);
         pp.setDisplayMetrics(mMetrics);
+        pp.setCallback(mPackageParserCallback);
 
         if ((scanFlags & SCAN_TRUSTED_OVERLAY) != 0) {
             parseFlags |= PackageParser.PARSE_TRUSTED_OVERLAY;
@@ -9616,7 +9623,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     /**
      * Asserts the parsed package is valid according to the given policy. If the
-     * package is invalid, for whatever reason, throws {@link PackgeManagerException}.
+     * package is invalid, for whatever reason, throws {@link PackageManagerException}.
      * <p>
      * Implementation detail: This method must NOT have any side effects. It would
      * ideally be static, but, it requires locks to read system state.
@@ -12814,7 +12821,7 @@ public class PackageManagerService extends IPackageManager.Stub {
          * By having a field variable, we're able to track filter ordering as soon as
          * a non-zero order is defined. Otherwise, multiple loops across the result set
          * would be needed to apply ordering. If the intent resolver becomes re-entrant,
-         * this needs to be contained entirely within {@link #filterResults()}.
+         * this needs to be contained entirely within {@link #filterResults}.
          */
         final ArrayMap<String, Pair<Integer, EphemeralResolveInfo>> mOrderResult = new ArrayMap<>();
 
@@ -16636,6 +16643,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         PackageParser pp = new PackageParser();
         pp.setSeparateProcesses(mSeparateProcesses);
         pp.setDisplayMetrics(mMetrics);
+        pp.setCallback(mPackageParserCallback);
 
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "parsePackage");
         final PackageParser.Package pkg;
