@@ -2019,12 +2019,6 @@ final class ActivityRecord implements AppWindowContainerListener {
 
         // Okay we now are going to make this activity have the new config.
         // But then we need to figure out how it needs to deal with that.
-
-        // Find changes between last reported merged configuration and the current one. This is used
-        // to decide whether to relaunch an activity or just report a configuration change.
-        final int changes = getTaskConfigurationChanges(mTmpConfig1);
-
-        // Update last reported values.
         final Configuration newGlobalConfig = service.getGlobalConfiguration();
         final Configuration newTaskMergedOverrideConfig = task.getMergedOverrideConfiguration();
         mTmpConfig1.setTo(mLastReportedConfiguration);
@@ -2032,6 +2026,9 @@ final class ActivityRecord implements AppWindowContainerListener {
         mLastReportedConfiguration.setTo(newGlobalConfig);
         mLastReportedOverrideConfiguration.setTo(newTaskMergedOverrideConfig);
 
+        int taskChanges = getTaskConfigurationChanges(this, newTaskMergedOverrideConfig,
+                mTmpConfig2);
+        final int changes = mTmpConfig1.diff(newGlobalConfig) | taskChanges;
         if (changes == 0 && !forceNewConfig) {
             if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
                     "Configuration no differences in " + this);
@@ -2046,7 +2043,8 @@ final class ActivityRecord implements AppWindowContainerListener {
         }
 
         if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
-                "Configuration changes for " + this + ", allChanges="
+                "Configuration changes for " + this + " ; taskChanges="
+                        + Configuration.configurationDiffToString(taskChanges) + ", allChanges="
                         + Configuration.configurationDiffToString(changes));
 
         // If the activity isn't currently running, just leave the new configuration and it will
@@ -2144,27 +2142,40 @@ final class ActivityRecord implements AppWindowContainerListener {
         return (changes&(~configChanged)) != 0;
     }
 
-    private int getTaskConfigurationChanges(Configuration newTaskConfig) {
+    private static int getTaskConfigurationChanges(ActivityRecord record, Configuration taskConfig,
+            Configuration oldTaskOverride) {
+        // If we went from full-screen to non-full-screen, make sure to use the correct
+        // configuration task diff, so the diff stays as small as possible.
+        if (Configuration.EMPTY.equals(oldTaskOverride)
+                && !Configuration.EMPTY.equals(taskConfig)) {
+            oldTaskOverride = record.task.extractOverrideConfig(record.mLastReportedConfiguration);
+        }
+
+        // Conversely, do the same when going the other direction.
+        if (Configuration.EMPTY.equals(taskConfig)
+                && !Configuration.EMPTY.equals(oldTaskOverride)) {
+            taskConfig = record.task.extractOverrideConfig(record.mLastReportedConfiguration);
+        }
+
         // Determine what has changed.  May be nothing, if this is a config that has come back from
         // the app after going idle.  In that case we just want to leave the official config object
         // now in the activity and do nothing else.
-        final Configuration oldTaskConfig = task.getConfiguration();
-        int taskChanges = oldTaskConfig.diff(newTaskConfig, true /* skipUndefined */);
+        int taskChanges = oldTaskOverride.diff(taskConfig, true /* skipUndefined */);
         // We don't want to use size changes if they don't cross boundaries that are important to
         // the app.
         if ((taskChanges & CONFIG_SCREEN_SIZE) != 0) {
-            final boolean crosses = crossesHorizontalSizeThreshold(oldTaskConfig.screenWidthDp,
-                    newTaskConfig.screenWidthDp)
-                    || crossesVerticalSizeThreshold(oldTaskConfig.screenHeightDp,
-                    newTaskConfig.screenHeightDp);
+            final boolean crosses = record.crossesHorizontalSizeThreshold(
+                    oldTaskOverride.screenWidthDp, taskConfig.screenWidthDp)
+                    || record.crossesVerticalSizeThreshold(
+                    oldTaskOverride.screenHeightDp, taskConfig.screenHeightDp);
             if (!crosses) {
                 taskChanges &= ~CONFIG_SCREEN_SIZE;
             }
         }
         if ((taskChanges & CONFIG_SMALLEST_SCREEN_SIZE) != 0) {
-            final int oldSmallest = oldTaskConfig.smallestScreenWidthDp;
-            final int newSmallest = newTaskConfig.smallestScreenWidthDp;
-            if (!crossesSmallestSizeThreshold(oldSmallest, newSmallest)) {
+            final int oldSmallest = oldTaskOverride.smallestScreenWidthDp;
+            final int newSmallest = taskConfig.smallestScreenWidthDp;
+            if (!record.crossesSmallestSizeThreshold(oldSmallest, newSmallest)) {
                 taskChanges &= ~CONFIG_SMALLEST_SCREEN_SIZE;
             }
         }
