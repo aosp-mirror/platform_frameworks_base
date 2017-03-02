@@ -23,16 +23,18 @@ import android.service.quicksettings.Tile;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.RelativeSizeSpan;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnAttachStateChangeListener;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.Checkable;
 import android.widget.ImageView;
+import android.widget.Switch;
 import android.widget.TextView;
+
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.settingslib.BatteryInfo;
 import com.android.settingslib.graph.BatteryMeterDrawableBase;
@@ -43,9 +45,8 @@ import com.android.systemui.plugins.qs.QS.DetailAdapter;
 import com.android.systemui.qs.QSTile;
 import com.android.systemui.statusbar.policy.BatteryController;
 
-import java.text.NumberFormat;
-
-public class BatteryTile extends QSTile<QSTile.State> implements BatteryController.BatteryStateChangeCallback {
+public class BatterySaverTile extends QSTile<QSTile.BooleanState> implements
+        BatteryController.BatteryStateChangeCallback {
 
     private final BatteryController mBatteryController;
     private final BatteryDetail mBatteryDetail = new BatteryDetail();
@@ -56,19 +57,14 @@ public class BatteryTile extends QSTile<QSTile.State> implements BatteryControll
     private boolean mDetailShown;
     private boolean mPluggedIn;
 
-    public BatteryTile(Host host) {
+    public BatterySaverTile(Host host) {
         super(host);
         mBatteryController = Dependency.get(BatteryController.class);
     }
 
     @Override
-    public State newTileState() {
-        return new QSTile.State();
-    }
-
-    @Override
-    public DetailAdapter getDetailAdapter() {
-        return mBatteryDetail;
+    public BooleanState newTileState() {
+        return new BooleanState();
     }
 
     @Override
@@ -109,22 +105,15 @@ public class BatteryTile extends QSTile<QSTile.State> implements BatteryControll
     }
 
     @Override
-    protected void handleUpdateState(State state, Object arg) {
-        int level = (arg != null) ? (Integer) arg : mLevel;
-        String percentage = NumberFormat.getPercentInstance().format((double) level / 100.0);
-
+    protected void handleUpdateState(BooleanState state, Object arg) {
         state.state = mCharging ? Tile.STATE_UNAVAILABLE
                 : mPowerSave ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
         state.icon = ResourceIcon.get(R.drawable.ic_qs_battery_saver);
         state.label = mContext.getString(R.string.battery_detail_switch_title);
-        state.contentDescription = mContext.getString(R.string.accessibility_quick_settings_battery,
-                percentage) + "," +
-                (mPowerSave ? mContext.getString(R.string.battery_saver_notification_title)
-                        : mCharging ? mContext.getString(R.string.expanded_header_battery_charging)
-                                : "")
-                + "," + mContext.getString(R.string.accessibility_battery_details);
+        state.contentDescription = state.label;
+        state.value = mPowerSave;
         state.minimalAccessibilityClassName = state.expandedAccessibilityClassName
-                = Button.class.getName();
+                = Switch.class.getName();
     }
 
     @Override
