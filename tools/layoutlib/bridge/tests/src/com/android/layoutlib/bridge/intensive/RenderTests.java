@@ -424,4 +424,9 @@ public class RenderTests extends RenderTestBase {
         assertNotEquals(0, outValue.data);
         assertTrue(sRenderMessages.isEmpty());
     }
+
+    @Test
+    public void testRectangleShadow() throws Exception {
+        renderAndVerify("shadows_test.xml", "shadows_test.png");
+    }
 }
