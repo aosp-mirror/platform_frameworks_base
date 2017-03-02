@@ -1536,12 +1536,14 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
             boolean loadersRunning = false;
 
             // Must add them in the proper order. mActive fragments may be out of order
-            final int numAdded = mAdded.size();
-            for (int i = 0; i < numAdded; i++) {
-                Fragment f = mAdded.get(i);
-                moveFragmentToExpectedState(f);
-                if (f.mLoaderManager != null) {
-                    loadersRunning |= f.mLoaderManager.hasRunningLoaders();
+            if (mAdded != null) {
+                final int numAdded = mAdded.size();
+                for (int i = 0; i < numAdded; i++) {
+                    Fragment f = mAdded.get(i);
+                    moveFragmentToExpectedState(f);
+                    if (f.mLoaderManager != null) {
+                        loadersRunning |= f.mLoaderManager.hasRunningLoaders();
+                    }
                 }
             }
 
