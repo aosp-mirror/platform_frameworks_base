@@ -92,6 +92,8 @@ public final class Zygote {
           int[][] rlimits, int mountExternal, String seInfo, String niceName, int[] fdsToClose,
           String instructionSet, String appDataDir) {
         VM_HOOKS.preFork();
+        // Resets nice priority for zygote process.
+        resetNicePriority();
         int pid = nativeForkAndSpecialize(
                   uid, gid, gids, debugFlags, rlimits, mountExternal, seInfo, niceName, fdsToClose,
                   instructionSet, appDataDir);
@@ -136,6 +138,8 @@ public final class Zygote {
     public static int forkSystemServer(int uid, int gid, int[] gids, int debugFlags,
             int[][] rlimits, long permittedCapabilities, long effectiveCapabilities) {
         VM_HOOKS.preFork();
+        // Resets nice priority for zygote process.
+        resetNicePriority();
         int pid = nativeForkSystemServer(
                 uid, gid, gids, debugFlags, rlimits, permittedCapabilities, effectiveCapabilities);
         // Enable tracing as soon as we enter the system_server.
@@ -160,6 +164,14 @@ public final class Zygote {
         VM_HOOKS.postForkChild(debugFlags, isSystemServer, instructionSet);
     }
 
+    /**
+     * Resets the calling thread priority to the default value (Thread.NORM_PRIORITY
+     * or nice value 0). This updates both the priority value in java.lang.Thread and
+     * the nice value (setpriority).
+     */
+    static void resetNicePriority() {
+        Thread.currentThread().setPriority(Thread.NORM_PRIORITY);
+    }
 
     /**
      * Executes "/system/bin/sh -c &lt;command&gt;" using the exec() system call.
