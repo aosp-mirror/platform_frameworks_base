@@ -138,8 +138,6 @@ public final class KeymasterDefs {
     public static final int KM_PURPOSE_DECRYPT = 1;
     public static final int KM_PURPOSE_SIGN = 2;
     public static final int KM_PURPOSE_VERIFY = 3;
-    public static final int KM_PURPOSE_DERIVE_KEY = 4;
-    public static final int KM_PURPOSE_WRAP_KEY = 5;
 
     // Key formats.
     public static final int KM_KEY_FORMAT_X509 = 0;
