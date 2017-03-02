@@ -30,16 +30,13 @@ using namespace android::uirenderer::renderthread;
 using namespace android::uirenderer::skiapipeline;
 
 TEST(SkiaDisplayList, create) {
-    SkRect bounds = SkRect::MakeWH(200, 200);
-    SkiaDisplayList skiaDL(bounds);
+    SkiaDisplayList skiaDL;
     ASSERT_TRUE(skiaDL.isEmpty());
     ASSERT_FALSE(skiaDL.mProjectionReceiver);
-    ASSERT_EQ(skiaDL.mDrawable->getBounds(), bounds);
 }
 
 TEST(SkiaDisplayList, reset) {
-    SkRect bounds = SkRect::MakeWH(200, 200);
-    SkiaDisplayList skiaDL(bounds);
+    SkiaDisplayList skiaDL;
 
     SkCanvas dummyCanvas;
     RenderNodeDrawable drawable(nullptr, &dummyCanvas);
@@ -47,10 +44,9 @@ TEST(SkiaDisplayList, reset) {
     skiaDL.mChildFunctors.emplace_back(nullptr, nullptr, &dummyCanvas);
     skiaDL.mMutableImages.push_back(nullptr);
     skiaDL.mVectorDrawables.push_back(nullptr);
-    skiaDL.mDrawable->drawAnnotation(bounds, "testAnnotation", nullptr);
+    skiaDL.mDisplayList.drawAnnotation(SkRect::MakeWH(200, 200), "testAnnotation", nullptr);
     skiaDL.mProjectionReceiver = &drawable;
 
-    ASSERT_EQ(skiaDL.mDrawable->getBounds(), bounds);
     ASSERT_FALSE(skiaDL.mChildNodes.empty());
     ASSERT_FALSE(skiaDL.mChildFunctors.empty());
     ASSERT_FALSE(skiaDL.mMutableImages.empty());
@@ -58,10 +54,8 @@ TEST(SkiaDisplayList, reset) {
     ASSERT_FALSE(skiaDL.isEmpty());
     ASSERT_TRUE(skiaDL.mProjectionReceiver);
 
-    bounds = SkRect::MakeWH(100, 100);
-    skiaDL.reset(bounds);
+    skiaDL.reset();
 
-    ASSERT_EQ(skiaDL.mDrawable->getBounds(), bounds);
     ASSERT_TRUE(skiaDL.mChildNodes.empty());
     ASSERT_TRUE(skiaDL.mChildFunctors.empty());
     ASSERT_TRUE(skiaDL.mMutableImages.empty());
@@ -79,7 +73,7 @@ TEST(SkiaDisplayList, reuseDisplayList) {
     ASSERT_EQ(availableList.get(), nullptr);
 
     // attach a displayList for reuse
-    SkiaDisplayList skiaDL(SkRect::MakeWH(200, 200));
+    SkiaDisplayList skiaDL;
     ASSERT_TRUE(skiaDL.reuseDisplayList(renderNode.get(), nullptr));
 
     // detach the list that you just attempted to reuse
@@ -93,13 +87,13 @@ TEST(SkiaDisplayList, reuseDisplayList) {
 }
 
 TEST(SkiaDisplayList, syncContexts) {
-    SkRect bounds = SkRect::MakeWH(200, 200);
-    SkiaDisplayList skiaDL(bounds);
+    SkiaDisplayList skiaDL;
 
     SkCanvas dummyCanvas;
     TestUtils::MockFunctor functor;
     skiaDL.mChildFunctors.emplace_back(&functor, nullptr, &dummyCanvas);
 
+    SkRect bounds = SkRect::MakeWH(200, 200);
     VectorDrawableRoot vectorDrawable(new VectorDrawable::Group());
     vectorDrawable.mutateStagingProperties()->setBounds(bounds);
     skiaDL.mVectorDrawables.push_back(&vectorDrawable);
@@ -127,7 +121,7 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaDisplayList, prepareListAndChildren) {
     DamageAccumulator damageAccumulator;
     info.damageAccumulator = &damageAccumulator;
 
-    SkiaDisplayList skiaDL(SkRect::MakeWH(200, 200));
+    SkiaDisplayList skiaDL;
 
     // prepare with a clean VD
     VectorDrawableRoot cleanVD(new VectorDrawable::Group());
@@ -170,8 +164,7 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaDisplayList, prepareListAndChildren) {
 }
 
 TEST(SkiaDisplayList, updateChildren) {
-    SkRect bounds = SkRect::MakeWH(200, 200);
-    SkiaDisplayList skiaDL(bounds);
+    SkiaDisplayList skiaDL;
 
     sp<RenderNode> renderNode = new RenderNode();
     SkCanvas dummyCanvas;

@@ -22,7 +22,7 @@
 
 #include <deque>
 #include <SkLiteDL.h>
-#include <SkPictureRecorder.h>
+#include <SkLiteRecorder.h>
 
 namespace android {
 namespace uirenderer {
@@ -39,22 +39,22 @@ namespace skiapipeline {
  */
 class SkiaDisplayList : public DisplayList {
 public:
-    SkiaDisplayList(SkRect bounds);
+    SkiaDisplayList() { SkASSERT(projectionReceiveIndex == -1); }
     virtual ~SkiaDisplayList() {
         /* Given that we are using a LinearStdAllocator to store some of the
          * SkDrawable contents we must ensure that any other object that is
          * holding a reference to those drawables is destroyed prior to their
          * deletion.
          */
-        mDrawable.reset();
+        mDisplayList.reset();
     }
 
     /**
      * This resets the DisplayList so that it behaves as if the object were newly
-     * constructed with the provided bounds.  The reuse avoids any overhead
-     * associated with destroying the SkLiteDL as well as the deques and vectors.
+     * constructed.  The reuse avoids any overhead associated with destroying
+     * the SkLiteDL as well as the deques and vectors.
      */
-    void reset(SkRect bounds);
+    void reset();
 
     /**
      * Use the linear allocator to create any SkDrawables needed by the display
@@ -72,7 +72,7 @@ public:
     /**
      * Returns true if the DisplayList does not have any recorded content
      */
-    bool isEmpty() const override { return mDrawable->empty(); }
+    bool isEmpty() const override { return mDisplayList.empty(); }
 
     /**
      * Returns true if this list directly contains a GLFunctor drawing command.
@@ -126,18 +126,24 @@ public:
      */
     inline bool containsProjectionReceiver() const { return mProjectionReceiver; }
 
+    void attachRecorder(SkLiteRecorder* recorder, const SkIRect& bounds) {
+        recorder->reset(&mDisplayList, bounds);
+    }
+
+    void draw(SkCanvas* canvas) { mDisplayList.draw(canvas); }
+
     void output(std::ostream& output, uint32_t level) override;
 
     /**
      * We use std::deque here because (1) we need to iterate through these
-     * elements and (2) mDrawable holds pointers to the elements, so they cannot
-     * relocate.
+     * elements and (2) mDisplayList holds pointers to the elements, so they
+     * cannot relocate.
      */
     std::deque<RenderNodeDrawable> mChildNodes;
     std::deque<GLFunctorDrawable> mChildFunctors;
     std::vector<SkImage*> mMutableImages;
     std::vector<VectorDrawableRoot*> mVectorDrawables;
-    sk_sp<SkLiteDL> mDrawable;
+    SkLiteDL mDisplayList;
 
     //mProjectionReceiver points to a child node (stored in mChildNodes) that is as a projection
     //receiver. It is set at record time and used at both prepare and draw tree traversals to
