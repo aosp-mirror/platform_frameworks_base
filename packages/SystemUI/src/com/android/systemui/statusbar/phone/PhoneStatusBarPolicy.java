@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar.phone;
 
 import android.app.ActivityManager;
-import android.app.ActivityManager.RunningAppProcessInfo;
 import android.app.ActivityManager.StackId;
 import android.app.ActivityManager.StackInfo;
 import android.app.AlarmManager;
@@ -25,8 +24,6 @@ import android.app.AlarmManager.AlarmClockInfo;
 import android.app.AppGlobals;
 import android.app.Notification;
 import android.app.Notification.Action;
-import android.app.Notification.BigTextStyle;
-import android.app.Notification.Style;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.SynchronousUserSwitchObserver;
@@ -37,7 +34,6 @@ import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.UserInfo;
 import android.graphics.drawable.Icon;
 import android.media.AudioManager;
@@ -51,7 +47,6 @@ import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.service.notification.StatusBarNotification;
 import android.telecom.TelecomManager;
-import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.Pair;
@@ -61,11 +56,9 @@ import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
-import com.android.systemui.R.string;
 import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.qs.tiles.DndTile;
 import com.android.systemui.qs.tiles.RotationLockTile;
-import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.misc.SystemServicesProxy.TaskStackListener;
 import com.android.systemui.statusbar.CommandQueue;
@@ -86,9 +79,6 @@ import com.android.systemui.statusbar.policy.RotationLockController.RotationLock
 import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.util.NotificationChannels;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * This class contains all of the policy about which icons are installed in the status
@@ -136,8 +126,6 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
     private boolean mZenVisible;
     private boolean mVolumeVisible;
     private boolean mCurrentUserSetup;
-
-    private int mZen;
 
     private boolean mManagedProfileFocused = false;
     private boolean mManagedProfileIconVisible = false;
@@ -275,14 +263,14 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
 
     @Override
     public void onZenChanged(int zen) {
-        mZen = zen;
         updateVolumeZen();
     }
 
     private void updateAlarm() {
         final AlarmClockInfo alarm = mAlarmManager.getNextAlarmClock(UserHandle.USER_CURRENT);
         final boolean hasAlarm = alarm != null && alarm.getTriggerTime() > 0;
-        final boolean zenNone = mZen == Global.ZEN_MODE_NO_INTERRUPTIONS;
+        int zen = mZenController.getZen();
+        final boolean zenNone = zen == Global.ZEN_MODE_NO_INTERRUPTIONS;
         mIconController.setIcon(mSlotAlarmClock, zenNone ? R.drawable.stat_sys_alarm_dim
                 : R.drawable.stat_sys_alarm, null);
         mIconController.setIconVisibility(mSlotAlarmClock, mCurrentUserSetup && hasAlarm);
@@ -323,17 +311,18 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
         boolean volumeVisible = false;
         int volumeIconId = 0;
         String volumeDescription = null;
+        int zen = mZenController.getZen();
 
         if (DndTile.isVisible(mContext) || DndTile.isCombinedIcon(mContext)) {
-            zenVisible = mZen != Global.ZEN_MODE_OFF;
-            zenIconId = mZen == Global.ZEN_MODE_NO_INTERRUPTIONS
+            zenVisible = zen != Global.ZEN_MODE_OFF;
+            zenIconId = zen == Global.ZEN_MODE_NO_INTERRUPTIONS
                     ? R.drawable.stat_sys_dnd_total_silence : R.drawable.stat_sys_dnd;
             zenDescription = mContext.getString(R.string.quick_settings_dnd_label);
-        } else if (mZen == Global.ZEN_MODE_NO_INTERRUPTIONS) {
+        } else if (zen == Global.ZEN_MODE_NO_INTERRUPTIONS) {
             zenVisible = true;
             zenIconId = R.drawable.stat_sys_zen_none;
             zenDescription = mContext.getString(R.string.interruption_level_none);
-        } else if (mZen == Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS) {
+        } else if (zen == Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS) {
             zenVisible = true;
             zenIconId = R.drawable.stat_sys_zen_important;
             zenDescription = mContext.getString(R.string.interruption_level_priority);
@@ -344,7 +333,7 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
             volumeVisible = true;
             volumeIconId = R.drawable.stat_sys_ringer_silent;
             volumeDescription = mContext.getString(R.string.accessibility_ringer_silent);
-        } else if (mZen != Global.ZEN_MODE_NO_INTERRUPTIONS && mZen != Global.ZEN_MODE_ALARMS &&
+        } else if (zen != Global.ZEN_MODE_NO_INTERRUPTIONS && zen != Global.ZEN_MODE_ALARMS &&
                 audioManager.getRingerModeInternal() == AudioManager.RINGER_MODE_VIBRATE) {
             volumeVisible = true;
             volumeIconId = R.drawable.stat_sys_ringer_vibrate;
