@@ -20,8 +20,10 @@ import org.json.JSONObject;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlSerializer;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.StringRes;
 import android.annotation.SystemApi;
-import android.graphics.Color;
 import android.media.AudioAttributes;
 import android.net.Uri;
 import android.os.Parcel;
@@ -45,6 +47,7 @@ public final class NotificationChannel implements Parcelable {
 
     private static final String TAG_CHANNEL = "channel";
     private static final String ATT_NAME = "name";
+    private static final String ATT_NAME_RES_ID = "name_res_id";
     private static final String ATT_ID = "id";
     private static final String ATT_DELETED = "deleted";
     private static final String ATT_PRIORITY = "priority";
@@ -138,6 +141,7 @@ public final class NotificationChannel implements Parcelable {
 
     private final String mId;
     private CharSequence mName;
+    private int mNameResId = 0;
     private int mImportance = DEFAULT_IMPORTANCE;
     private boolean mBypassDnd;
     private int mLockscreenVisibility = DEFAULT_VISIBILITY;
@@ -156,7 +160,9 @@ public final class NotificationChannel implements Parcelable {
      * Creates a notification channel.
      *
      * @param id The id of the channel. Must be unique per package.
-     * @param name The user visible name of the channel.
+     * @param name The user visible name of the channel. Unchangeable once created; use this
+     *             constructor if the channel represents a user-defined category that does not
+     *             need to be translated.
      * @param importance The importance of the channel. This controls how interruptive notifications
      *                   posted to this channel are. See e.g.
      *                   {@link NotificationManager#IMPORTANCE_DEFAULT}.
@@ -167,6 +173,21 @@ public final class NotificationChannel implements Parcelable {
         this.mImportance = importance;
     }
 
+    /**
+     * Creates a notification channel.
+     *
+     * @param id The id of the channel. Must be unique per package.
+     * @param nameResId The resource id of the string containing the channel name.
+     * @param importance The importance of the channel. This controls how interruptive notifications
+     *                   posted to this channel are. See e.g.
+     *                   {@link NotificationManager#IMPORTANCE_DEFAULT}.
+     */
+    public NotificationChannel(String id, @StringRes int nameResId, int importance) {
+        this.mId = id;
+        this.mNameResId = nameResId;
+        this.mImportance = importance;
+    }
+
     protected NotificationChannel(Parcel in) {
         if (in.readByte() != 0) {
             mId = in.readString();
@@ -174,6 +195,7 @@ public final class NotificationChannel implements Parcelable {
             mId = null;
         }
         mName = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
+        mNameResId = in.readInt();
         mImportance = in.readInt();
         mBypassDnd = in.readByte() != 0;
         mLockscreenVisibility = in.readInt();
@@ -206,6 +228,7 @@ public final class NotificationChannel implements Parcelable {
             dest.writeByte((byte) 0);
         }
         TextUtils.writeToParcel(mName, dest, flags);
+        dest.writeInt(mNameResId);
         dest.writeInt(mImportance);
         dest.writeByte(mBypassDnd ? (byte) 1 : (byte) 0);
         dest.writeInt(mLockscreenVisibility);
@@ -382,8 +405,15 @@ public final class NotificationChannel implements Parcelable {
     /**
      * Returns the user visible name of this channel.
      */
-    public CharSequence getName() {
+    public @Nullable CharSequence getName() {
         return mName;
+    }
+
+    /**
+     * Returns the resource id of the user visible name of this channel.
+     */
+    public int getNameResId() {
+        return mNameResId;
     }
 
     /**
@@ -516,7 +546,10 @@ public final class NotificationChannel implements Parcelable {
     public void writeXml(XmlSerializer out) throws IOException {
         out.startTag(null, TAG_CHANNEL);
         out.attribute(null, ATT_ID, getId());
-        out.attribute(null, ATT_NAME, getName().toString());
+        if (getName() != null) {
+            out.attribute(null, ATT_NAME, getName().toString());
+        }
+        out.attribute(null, ATT_NAME_RES_ID, Integer.toString(getNameResId()));
         if (getImportance() != DEFAULT_IMPORTANCE) {
             out.attribute(
                     null, ATT_IMPORTANCE, Integer.toString(getImportance()));
@@ -574,6 +607,7 @@ public final class NotificationChannel implements Parcelable {
         JSONObject record = new JSONObject();
         record.put(ATT_ID, getId());
         record.put(ATT_NAME, getName());
+        record.put(ATT_NAME_RES_ID, getNameResId());
         if (getImportance() != DEFAULT_IMPORTANCE) {
             record.put(ATT_IMPORTANCE,
                     NotificationListenerService.Ranking.importanceToString(getImportance()));
@@ -691,6 +725,7 @@ public final class NotificationChannel implements Parcelable {
 
         NotificationChannel that = (NotificationChannel) o;
 
+        if (getNameResId() != that.getNameResId()) return false;
         if (getImportance() != that.getImportance()) return false;
         if (mBypassDnd != that.mBypassDnd) return false;
         if (getLockscreenVisibility() != that.getLockscreenVisibility()) return false;
@@ -720,6 +755,7 @@ public final class NotificationChannel implements Parcelable {
     public int hashCode() {
         int result = getId() != null ? getId().hashCode() : 0;
         result = 31 * result + (getName() != null ? getName().hashCode() : 0);
+        result = 31 * result + getNameResId();
         result = 31 * result + getImportance();
         result = 31 * result + (mBypassDnd ? 1 : 0);
         result = 31 * result + getLockscreenVisibility();
@@ -741,6 +777,7 @@ public final class NotificationChannel implements Parcelable {
         return "NotificationChannel{" +
                 "mId='" + mId + '\'' +
                 ", mName=" + mName +
+                ", mNameResId=" + mNameResId +
                 ", mImportance=" + mImportance +
                 ", mBypassDnd=" + mBypassDnd +
                 ", mLockscreenVisibility=" + mLockscreenVisibility +

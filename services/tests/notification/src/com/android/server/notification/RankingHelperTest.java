@@ -196,6 +196,7 @@ public class RankingHelperTest {
     private void compareChannels(NotificationChannel expected, NotificationChannel actual) {
         assertEquals(expected.getId(), actual.getId());
         assertEquals(expected.getName(), actual.getName());
+        assertEquals(expected.getNameResId(), actual.getNameResId());
         assertEquals(expected.shouldVibrate(), actual.shouldVibrate());
         assertEquals(expected.shouldShowLights(), actual.shouldShowLights());
         assertEquals(expected.getImportance(), actual.getImportance());
@@ -260,11 +261,13 @@ public class RankingHelperTest {
 
     @Test
     public void testChannelXml() throws Exception {
+        int nameResId = 924896;
+
         NotificationChannelGroup ncg = new NotificationChannelGroup("1", "2");
         NotificationChannel channel1 =
                 new NotificationChannel("id1", "name1", NotificationManager.IMPORTANCE_HIGH);
         NotificationChannel channel2 =
-                new NotificationChannel("id2", "name2", IMPORTANCE_LOW);
+                new NotificationChannel("id2", nameResId, IMPORTANCE_LOW);
         channel2.setSound(new Uri.Builder().scheme("test").build(), mAudioAttributes);
         channel2.enableLights(true);
         channel2.setBypassDnd(true);
