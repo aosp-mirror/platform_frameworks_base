@@ -35,16 +35,16 @@ public class NotificationMediaTemplateViewWrapper extends NotificationTemplateVi
 
     View mActions;
 
-    private void resolveViews(StatusBarNotification notification) {
+    private void resolveViews() {
         mActions = mView.findViewById(com.android.internal.R.id.media_actions);
     }
 
     @Override
-    public void notifyContentUpdated(StatusBarNotification notification, boolean isLowPriority) {
+    public void notifyContentUpdated(ExpandableNotificationRow row) {
         // Reinspect the notification. Before the super call, because the super call also updates
         // the transformation types and we need to have our values set by then.
-        resolveViews(notification);
-        super.notifyContentUpdated(notification, isLowPriority);
+        resolveViews();
+        super.notifyContentUpdated(row);
     }
 
     @Override

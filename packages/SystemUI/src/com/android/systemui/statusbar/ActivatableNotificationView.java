@@ -923,12 +923,6 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         mOnActivatedListener = onActivatedListener;
     }
 
-    public void reset() {
-        setTintColor(0);
-        resetBackgroundAlpha();
-        setBelowSpeedBump(false);
-    }
-
     public boolean hasSameBgColor(ActivatableNotificationView otherView) {
         return calculateBgColor() == otherView.calculateBgColor();
     }

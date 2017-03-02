@@ -48,6 +48,7 @@ public abstract class NotificationViewWrapper implements TransformableView {
     private int mBackgroundColor = 0;
     protected boolean mShouldInvertDark;
     protected boolean mDarkInitialized = false;
+    private boolean mForcedInvisible;
 
     public static NotificationViewWrapper wrap(Context ctx, View v, ExpandableNotificationRow row) {
         if (v.getId() == com.android.internal.R.id.status_bar_latest_event_content) {
@@ -87,10 +88,9 @@ public abstract class NotificationViewWrapper implements TransformableView {
 
     /**
      * Notifies this wrapper that the content of the view might have changed.
-     * @param notification the notification this is wrapped around
-     * @param isLowPriority is this notification low priority
+     * @param row the row this wrapper is attached to
      */
-    public void notifyContentUpdated(StatusBarNotification notification, boolean isLowPriority) {
+    public void notifyContentUpdated(ExpandableNotificationRow row) {
         mDarkInitialized = false;
         Drawable background = mView.getBackground();
         if (shouldClearBackgroundOnReapply()) {
@@ -185,12 +185,15 @@ public abstract class NotificationViewWrapper implements TransformableView {
         return mRow.isSummaryWithChildren() ? 0 : mBackgroundColor;
     }
 
-    public void setShowingLegacyBackground(boolean showing) {
+    public void setLegacy(boolean legacy) {
     }
 
     public void setContentHeight(int contentHeight, int minHeightHint) {
     }
 
     public void setRemoteInputVisible(boolean visible) {
+    }
+
+    public void setIsChildInGroup(boolean isChildInGroup) {
     }
 }

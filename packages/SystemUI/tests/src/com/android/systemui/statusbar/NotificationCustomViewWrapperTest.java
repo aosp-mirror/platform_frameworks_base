@@ -52,10 +52,10 @@ public class NotificationCustomViewWrapperTest {
         RemoteViews views = new RemoteViews(mContext.getPackageName(), R.layout.custom_view_dark);
         View v = views.apply(mContext, null);
         NotificationViewWrapper wrap = NotificationCustomViewWrapper.wrap(mContext, v, mRow);
-        wrap.notifyContentUpdated(null, false /* isLowPriority */);
+        wrap.notifyContentUpdated(mRow);
         Assert.assertTrue(wrap.getCustomBackgroundColor() != 0);
         views.reapply(mContext, v);
-        wrap.notifyContentUpdated(null, false /* isLowPriority */);
+        wrap.notifyContentUpdated(mRow);
         Assert.assertTrue(wrap.getCustomBackgroundColor() != 0);
     }
 

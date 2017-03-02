@@ -136,7 +136,7 @@ public class ViewState {
         yTranslation = view.getTranslationY();
         zTranslation = view.getTranslationZ();
         gone = view.getVisibility() == View.GONE;
-        hidden = false;
+        hidden = view.getVisibility() == View.INVISIBLE;
         scaleX = view.getScaleX();
         scaleY = view.getScaleY();
     }
@@ -594,7 +594,7 @@ public class ViewState {
     }
 
     protected void onYTranslationAnimationFinished(View view) {
-        if (hidden) {
+        if (hidden && !gone) {
             view.setVisibility(View.INVISIBLE);
         }
     }

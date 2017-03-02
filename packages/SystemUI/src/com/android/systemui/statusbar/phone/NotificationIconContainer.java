@@ -227,6 +227,7 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
             ViewState iconState = mIconStates.get(view);
             iconState.initFrom(view);
             iconState.alpha = 1.0f;
+            iconState.hidden = false;
         }
     }
 
@@ -522,12 +523,6 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
             super.initFrom(view);
             if (view instanceof StatusBarIconView) {
                 iconColor = ((StatusBarIconView) view).getStaticDrawableColor();
-            }
-        }
-
-        protected void onYTranslationAnimationFinished(View view) {
-            if (hidden) {
-                view.setVisibility(INVISIBLE);
             }
         }
     }
