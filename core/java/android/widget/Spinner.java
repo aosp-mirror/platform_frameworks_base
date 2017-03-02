@@ -45,7 +45,6 @@ import android.view.ViewStructure;
 import android.view.ViewTreeObserver;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.view.accessibility.AccessibilityNodeInfo;
-import android.view.autofill.AutoFillValue;
 import android.widget.PopupWindow.OnDismissListener;
 
 import com.android.internal.R;
@@ -934,24 +933,6 @@ public class Spinner extends AbsSpinner implements OnClickListener {
             }
             structure.setAutoFillOptions(options);
         }
-    }
-
-    @Override
-    public void autoFill(AutoFillValue value) {
-        if (!isEnabled()) return;
-
-        final int position = value.getListValue();
-        setSelection(position);
-    }
-
-    @Override
-    public @AutofillType int getAutofillType() {
-        return isEnabled() ? AUTOFILL_TYPE_LIST : AUTOFILL_TYPE_NONE;
-    }
-
-    @Override
-    public AutoFillValue getAutoFillValue() {
-        return isEnabled() ? AutoFillValue.forList(getSelectedItemPosition()) : null;
     }
 
     static class SavedState extends AbsSpinner.SavedState {

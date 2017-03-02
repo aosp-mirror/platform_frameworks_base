@@ -630,6 +630,12 @@ public class WebView extends AbsoluteLayout
     protected WebView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes,
             Map<String, Object> javaScriptInterfaces, boolean privateBrowsing) {
         super(context, attrs, defStyleAttr, defStyleRes);
+
+        // WebView is important by default, unless app developer overrode attribute.
+        if (getImportantForAutofill() == IMPORTANT_FOR_AUTOFILL_AUTO) {
+            setImportantForAutofill(IMPORTANT_FOR_AUTOFILL_YES);
+        }
+
         if (context == null) {
             throw new IllegalArgumentException("Invalid context argument");
         }
