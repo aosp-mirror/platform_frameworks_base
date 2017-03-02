@@ -3827,7 +3827,9 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         r.app = null;
         r.removeWindowContainer();
         final TaskRecord task = r.task;
-        if (task != null && task.removeActivity(r)) {
+        final boolean lastActivity = task != null ? task.removeActivity(r) : false;
+
+        if (lastActivity) {
             if (DEBUG_STACK) Slog.i(TAG_STACK,
                     "removeActivityFromHistoryLocked: last activity removed from " + this);
             if (mStackSupervisor.isFocusedStack(this) && task == topTask() &&

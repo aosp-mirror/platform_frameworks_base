@@ -17,6 +17,7 @@
 package com.android.server.am;
 
 import static android.app.Activity.RESULT_CANCELED;
+import static android.app.ActivityManager.START_CANCELED;
 import static android.app.ActivityManager.START_CLASS_NOT_FOUND;
 import static android.app.ActivityManager.START_DELIVERED_TO_TOP;
 import static android.app.ActivityManager.START_FLAG_ONLY_IF_NEEDED;
@@ -88,12 +89,10 @@ import android.app.ActivityOptions;
 import android.app.AppGlobals;
 import android.app.IActivityContainer;
 import android.app.IApplicationThread;
-import android.app.KeyguardManager;
 import android.app.PendingIntent;
 import android.app.ProfilerInfo;
 import android.app.WaitResult;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.IIntentSender;
 import android.content.Intent;
 import android.content.IntentSender;
@@ -101,7 +100,6 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.AuxiliaryResolveInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
 import android.content.res.Configuration;
@@ -509,21 +507,15 @@ class ActivityStarter {
 
         doPendingActivityLaunchesLocked(false);
 
-        try {
-            mService.mWindowManager.deferSurfaceLayout();
-            err = startActivityUnchecked(r, sourceRecord, voiceSession, voiceInteractor, startFlags,
-                    true, options, inTask);
-        } finally {
-            mService.mWindowManager.continueSurfaceLayout();
-        }
-        postStartActivityUncheckedProcessing(r, err, stack.mStackId, mSourceRecord, mTargetStack);
-        return err;
+        return startActivity(r, sourceRecord, voiceSession, voiceInteractor, startFlags, true,
+                options, inTask);
     }
 
-    /** Creates a launch intent for the given auxiliary resolution data. */
+    /**
+     * Creates a launch intent for the given auxiliary resolution data.
+     */
     private @NonNull Intent createLaunchIntent(@NonNull AuxiliaryResolveInfo auxiliaryResponse,
-            Intent originalIntent, String callingPackage,
-            String resolvedType, int userId) {
+            Intent originalIntent, String callingPackage, String resolvedType, int userId) {
         if (auxiliaryResponse.needsPhaseTwo) {
             // request phase two resolution
             mService.getPackageManagerInternalLocked().requestInstantAppResolutionPhaseTwo(
@@ -535,7 +527,7 @@ class ActivityStarter {
                 auxiliaryResponse.token, auxiliaryResponse.needsPhaseTwo);
     }
 
-    void postStartActivityUncheckedProcessing(
+    void postStartActivityProcessing(
             ActivityRecord r, int result, int prevFocusedStackId, ActivityRecord sourceRecord,
             ActivityStack targetStack) {
 
@@ -937,6 +929,31 @@ class ActivityStarter {
         }
     }
 
+    private int startActivity(final ActivityRecord r, ActivityRecord sourceRecord,
+            IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor,
+            int startFlags, boolean doResume, ActivityOptions options, TaskRecord inTask) {
+        int result = START_CANCELED;
+        try {
+            mService.mWindowManager.deferSurfaceLayout();
+            result = startActivityUnchecked(r, sourceRecord, voiceSession, voiceInteractor,
+                    startFlags, doResume, options, inTask);
+        } finally {
+            // If we are not able to proceed, disassociate the activity from the task. Leaving an
+            // activity in an incomplete state can lead to issues, such as performing operations
+            // without a window container.
+            if (result != START_SUCCESS && mStartActivity.task != null) {
+                mStartActivity.task.removeActivity(mStartActivity);
+            }
+            mService.mWindowManager.continueSurfaceLayout();
+        }
+
+        postStartActivityProcessing(r, result, mSupervisor.mFocusedStack.mStackId,  mSourceRecord,
+                mTargetStack);
+
+        return result;
+    }
+
+    // Note: This method should only be called from {@link startActivity}.
     private int startActivityUnchecked(final ActivityRecord r, ActivityRecord sourceRecord,
             IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor,
             int startFlags, boolean doResume, ActivityOptions options, TaskRecord inTask) {
@@ -982,11 +999,22 @@ class ActivityStarter {
             if ((mLaunchFlags & FLAG_ACTIVITY_CLEAR_TOP) != 0
                     || isDocumentLaunchesIntoExisting(mLaunchFlags)
                     || mLaunchSingleInstance || mLaunchSingleTask) {
+                final TaskRecord task = mReusedActivity.task;
+
                 // In this situation we want to remove all activities from the task up to the one
                 // being started. In most cases this means we are resetting the task to its initial
                 // state.
-                final ActivityRecord top = mReusedActivity.task.performClearTaskForReuseLocked(
-                        mStartActivity, mLaunchFlags);
+                final ActivityRecord top = task.performClearTaskForReuseLocked(mStartActivity,
+                        mLaunchFlags);
+
+                // The above code can remove {@code mReusedActivity} from the task, leading to the
+                // the {@code ActivityRecord} removing its reference to the {@code TaskRecord}. The
+                // task reference is needed in the call below to
+                // {@link setTargetStackAndMoveToFrontIfNeeded}.
+                if (mReusedActivity.task == null) {
+                    mReusedActivity.task = task;
+                }
+
                 if (top != null) {
                     if (top.frontOfTask) {
                         // Activity aliases may mean we use different intents for the top activity,
@@ -1846,11 +1874,8 @@ class ActivityStarter {
             final PendingActivityLaunch pal = mPendingActivityLaunches.remove(0);
             final boolean resume = doResume && mPendingActivityLaunches.isEmpty();
             try {
-                final int result = startActivityUnchecked(
-                        pal.r, pal.sourceRecord, null, null, pal.startFlags, resume, null, null);
-                postStartActivityUncheckedProcessing(
-                        pal.r, result, mSupervisor.mFocusedStack.mStackId, mSourceRecord,
-                        mTargetStack);
+                startActivity(pal.r, pal.sourceRecord, null, null, pal.startFlags, resume, null,
+                        null);
             } catch (Exception e) {
                 Slog.e(TAG, "Exception during pending activity launch pal=" + pal, e);
                 pal.sendErrorResult(e.getMessage());
