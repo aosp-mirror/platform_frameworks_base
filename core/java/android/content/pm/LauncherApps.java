@@ -829,7 +829,7 @@ public class LauncherApps {
                 final Bitmap bmp = BitmapFactory.decodeFileDescriptor(pfd.getFileDescriptor());
                 if (bmp != null) {
                     BitmapDrawable dr = new BitmapDrawable(mContext.getResources(), bmp);
-                    if (shortcut.hasMaskableBitmap()) {
+                    if (shortcut.hasAdaptiveBitmap()) {
                         return new AdaptiveIconDrawable(null, dr);
                     } else {
                         return dr;
@@ -854,7 +854,7 @@ public class LauncherApps {
                             icon.getResId(), shortcut.getUserHandle(), density);
                 }
                 case Icon.TYPE_BITMAP:
-                case Icon.TYPE_BITMAP_MASKABLE: {
+                case Icon.TYPE_ADAPTIVE_BITMAP: {
                     return icon.loadDrawable(mContext);
                 }
                 default:

@@ -46,7 +46,6 @@ import android.content.pm.PackageManagerInternal;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ShortcutInfo;
-import android.content.pm.ShortcutManager;
 import android.content.pm.ShortcutServiceInternal;
 import android.content.pm.ShortcutServiceInternal.ShortcutChangeListener;
 import android.content.pm.UserInfo;
@@ -1219,7 +1218,7 @@ public class ShortcutService extends IShortcutService.Stub {
         shortcut.setIconResourceId(0);
         shortcut.setIconResName(null);
         shortcut.clearFlags(ShortcutInfo.FLAG_HAS_ICON_FILE |
-            ShortcutInfo.FLAG_MASKABLE_BITMAP | ShortcutInfo.FLAG_HAS_ICON_RES);
+            ShortcutInfo.FLAG_ADAPTIVE_BITMAP | ShortcutInfo.FLAG_HAS_ICON_RES);
     }
 
     public void cleanupBitmapsForPackage(@UserIdInt int userId, String packageName) {
@@ -1355,7 +1354,7 @@ public class ShortcutService extends IShortcutService.Stub {
                         return;
                     }
                     case Icon.TYPE_BITMAP:
-                    case Icon.TYPE_BITMAP_MASKABLE: {
+                    case Icon.TYPE_ADAPTIVE_BITMAP: {
                         bitmap = icon.getBitmap(); // Don't recycle in this case.
                         break;
                     }
@@ -1386,8 +1385,8 @@ public class ShortcutService extends IShortcutService.Stub {
 
                         shortcut.setBitmapPath(out.getFile().getAbsolutePath());
                         shortcut.addFlags(ShortcutInfo.FLAG_HAS_ICON_FILE);
-                        if (icon.getType() == Icon.TYPE_BITMAP_MASKABLE) {
-                            shortcut.addFlags(ShortcutInfo.FLAG_MASKABLE_BITMAP);
+                        if (icon.getType() == Icon.TYPE_ADAPTIVE_BITMAP) {
+                            shortcut.addFlags(ShortcutInfo.FLAG_ADAPTIVE_BITMAP);
                         }
                     } finally {
                         IoUtils.closeQuietly(out);
