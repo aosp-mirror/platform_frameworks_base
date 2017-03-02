@@ -2157,7 +2157,7 @@ message MetricsEvent {
 
     // ACTION: Settings -> Select summary tab.
     // CATEGORY: SETTINGS
-    ACTION_SELECT_SUMMARY=476;
+    ACTION_SELECT_SUMMARY = 476;
 
     // ACTION: Settings -> Select support tab.
     // CATEGORY: SETTINGS
@@ -2208,7 +2208,7 @@ message MetricsEvent {
     NIGHT_DISPLAY_SETTINGS = 488;
 
     // ACTION: Settings -> Storage -> Manage storage -> Click Storage Manager
-        //   SUBTYPE: false is off, true is on
+    //   SUBTYPE: false is off, true is on
     ACTION_TOGGLE_STORAGE_MANAGER = 489;
 
     // Settings launched from collapsed quick settings.
@@ -3476,6 +3476,15 @@ message MetricsEvent {
     // CATEGORY: SETTINGS
     // OS: O
     WIFI_NETWORK_DETAILS = 849;
+
+    // ACTION: Settings > Battery > Menu > Usage Alerts
+    ACTION_SETTINGS_MENU_BATTERY_USAGE_ALERTS = 850;
+
+    // ACTION: Settings > Battery > Menu > Optimization
+    ACTION_SETTINGS_MENU_BATTERY_OPTIMIZATION = 851;
+
+    // ACTION: Settings > Battery > Menu > Apps Toggle
+    ACTION_SETTINGS_MENU_BATTERY_APPS_TOGGLE = 852;
 
     // ---- End O Constants, all O constants go above this line ----
 
