@@ -28,12 +28,20 @@ import android.os.UserHandle;
 import android.util.Log;
 
 import com.android.settingslib.R;
+import com.android.settingslib.applications.instantapps.InstantAppDataProvider;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class AppUtils {
     private static final String TAG = "AppUtils";
+
+    /**
+     * This should normally only be set in robolectric tests, to avoid getting a method not found
+     * exception when calling the isInstantApp method of the ApplicationInfo class, because
+     * robolectric does not yet have an implementation of it.
+     */
+    private static InstantAppDataProvider sInstantAppDataProvider = null;
 
     public static CharSequence getLaunchByDefaultSummary(ApplicationsState.AppEntry appEntry,
             IUsbManager usbManager, PackageManager pm, Context context) {
@@ -74,7 +82,11 @@ public class AppUtils {
      * Returns a boolean indicating whether the given package should be considered an instant app
      */
     public static boolean isInstant(ApplicationInfo info) {
-        if (info.isInstantApp()) {
+        if (sInstantAppDataProvider != null) {
+            if (sInstantAppDataProvider.isInstantApp(info)) {
+                return true;
+            }
+        } else if (info.isInstantApp()) {
             return true;
         }
 
