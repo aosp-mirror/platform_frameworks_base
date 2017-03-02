@@ -23,6 +23,8 @@ import com.android.internal.telecom.IVideoProvider;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.app.Notification;
+import android.content.Intent;
 import android.hardware.camera2.CameraManager;
 import android.net.Uri;
 import android.os.Binder;
@@ -1005,7 +1007,7 @@ public abstract class Connection extends Conferenceable {
                         try {
                             onSetCamera((String) args.arg1);
                             onSetCamera((String) args.arg1, (String) args.arg2, args.argi1,
-                                    args.argi2);
+                                    args.argi2, args.argi3);
                         } finally {
                             args.recycle();
                         }
@@ -1065,7 +1067,9 @@ public abstract class Connection extends Conferenceable {
                         MSG_REMOVE_VIDEO_CALLBACK, videoCallbackBinder).sendToTarget();
             }
 
-            public void setCamera(String cameraId, String callingPackageName) {
+            public void setCamera(String cameraId, String callingPackageName,
+                                  int targetSdkVersion) {
+
                 SomeArgs args = SomeArgs.obtain();
                 args.arg1 = cameraId;
                 // Propagate the calling package; originally determined in
@@ -1077,6 +1081,9 @@ public abstract class Connection extends Conferenceable {
                 // check to see if the calling app is able to use the camera.
                 args.argi1 = Binder.getCallingUid();
                 args.argi2 = Binder.getCallingPid();
+                // Pass along the target SDK version of the calling InCallService.  This is used to
+                // maintain backwards compatibility of the API for older callers.
+                args.argi3 = targetSdkVersion;
                 mMessageHandler.obtainMessage(MSG_SET_CAMERA, args).sendToTarget();
             }
 
@@ -1179,10 +1186,11 @@ public abstract class Connection extends Conferenceable {
          * @param callingPackageName The AppOpps package name of the caller.
          * @param callingUid The UID of the caller.
          * @param callingPid The PID of the caller.
+         * @param targetSdkVersion The target SDK version of the caller.
          * @hide
          */
         public void onSetCamera(String cameraId, String callingPackageName, int callingUid,
-                int callingPid) {}
+                int callingPid, int targetSdkVersion) {}
 
         /**
          * Sets the surface to be used for displaying a preview of what the user's camera is
@@ -2592,6 +2600,41 @@ public abstract class Connection extends Conferenceable {
      * regular {@link ConnectionService}, the Telecom framework will display its own incoming call
      * user interface to allow the user to choose whether to answer the new incoming call and
      * disconnect other ongoing calls, or to reject the new incoming call.
+     * <p>
+     * You should trigger the display of the incoming call user interface for your application by
+     * showing a {@link Notification} with a full-screen {@link Intent} specified.
+     * For example:
+     * <pre><code>
+     *     // Create an intent which triggers your fullscreen incoming call user interface.
+     *     Intent intent = new Intent(Intent.ACTION_MAIN, null);
+     *     intent.setFlags(Intent.FLAG_ACTIVITY_NO_USER_ACTION | Intent.FLAG_ACTIVITY_NEW_TASK);
+     *     intent.setClass(context, YourIncomingCallActivity.class);
+     *     PendingIntent pendingIntent = PendingIntent.getActivity(context, 1, intent, 0);
+     *
+     *     // Build the notification as an ongoing high priority item; this ensures it will show as
+     *     // a heads up notification which slides down over top of the current content.
+     *     final Notification.Builder builder = new Notification.Builder(context);
+     *     builder.setOngoing(true);
+     *     builder.setPriority(Notification.PRIORITY_HIGH);
+     *
+     *     // Set notification content intent to take user to fullscreen UI if user taps on the
+     *     // notification body.
+     *     builder.setContentIntent(pendingIntent);
+     *     // Set full screen intent to trigger display of the fullscreen UI when the notification
+     *     // manager deems it appropriate.
+     *     builder.setFullScreenIntent(pendingIntent, true);
+     *
+     *     // Setup notification content.
+     *     builder.setSmallIcon( yourIconResourceId );
+     *     builder.setContentTitle("Your notification title");
+     *     builder.setContentText("Your notification content.");
+     *
+     *     // Use builder.addAction(..) to add buttons to answer or reject the call.
+     *
+     *     NotificationManager notificationManager = mContext.getSystemService(
+     *         NotificationManager.class);
+     *     notificationManager.notify(YOUR_TAG, YOUR_ID, builder.build());
+     * </code></pre>
      */
     public void onShowIncomingCallUi() {}
 

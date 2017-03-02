@@ -89,7 +89,8 @@ public abstract class InCallService extends Service {
             switch (msg.what) {
                 case MSG_SET_IN_CALL_ADAPTER:
                     String callingPackage = getApplicationContext().getOpPackageName();
-                    mPhone = new Phone(new InCallAdapter((IInCallAdapter) msg.obj), callingPackage);
+                    mPhone = new Phone(new InCallAdapter((IInCallAdapter) msg.obj), callingPackage,
+                            getApplicationContext().getApplicationInfo().targetSdkVersion);
                     mPhone.addListener(mPhoneListener);
                     onPhoneCreated(mPhone);
                     break;
