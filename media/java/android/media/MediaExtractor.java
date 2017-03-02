@@ -656,6 +656,33 @@ final public class MediaExtractor {
      * @return the set of keys and values available for the media being
      * handled by this instance of MediaExtractor
      *
+     *  <table style="width: 0%">
+     *   <thead>
+     *    <tr>
+     *     <th>Key</th>
+     *     <th>Type</th>
+     *     <th>Description</th>
+     *    </tr>
+     *   </thead>
+     *   <tbody>
+     *    <tr>
+     *     <td>{@code "fmt"}</td>
+     *     <td>String</td>
+     *     <td>The container format (which determines the handler)</td>
+     *    </tr><tr>
+     *     <td>{@code "mime"}</td>
+     *     <td>String</td>
+     *     <td>Mime type of the container.</td>
+     *    </tr><tr>
+     *     <td>{@code "ntrk"}</td>
+     *     <td>Integer</td>
+     *     <td>Number of tracks in the container</td>
+     *    </tr>
+     *   </tbody>
+     *  </table>
+     *
+     *  Additional fields specific to individual codecs will also appear in
+     *  the return value.
      */
     public native Bundle getMetrics();
 

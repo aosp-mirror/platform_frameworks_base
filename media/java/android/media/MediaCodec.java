@@ -3188,9 +3188,55 @@ final public class MediaCodec {
     /**
      *  Returns Analytics/Metrics data about the current content being
      *
-     * @return a Bundle containint the set of attributes and values available
+     * @return a Bundle containing the set of attributes and values available
      * for the media being handled by this instance of MediaCodec
      *
+     *  <table style="width: 0%">
+     *   <thead>
+     *    <tr>
+     *     <th>Key</th>
+     *     <th>Type</th>
+     *     <th>Description</th>
+     *    </tr>
+     *   </thead>
+     *   <tbody>
+     *    <tr>
+     *     <td>{@code "codec"}</td>
+     *     <td>String</td>
+     *     <td>Identifies the particular codec in use</td>
+     *    </tr><tr>
+     *     <td>{@code "mime"}</td>
+     *     <td>String</td>
+     *     <td>Mime type of the media being encoded/decoded</td>
+     *    </tr><tr>
+     *     <td>{@code "mode"}</td>
+     *     <td>String</td>
+     *     <td>"Audio" or "Video"</td>
+     *    </tr><tr>
+     *     <td>{@code "secure"}</td>
+     *     <td>Integer</td>
+     *     <td>Indicates whether the code is operating on secure content and
+     *         may also use capabilities in android.media.MediaCrypto</td>
+     *    </tr><tr>
+     *     <td>{@code "height"}</td>
+     *     <td>Integer</td>
+     *     <td>Height (pixels); valid only when mode=video</td>
+     *    </tr><tr>
+     *     <td>{@code "width"}</td>
+     *     <td>Integer</td>
+     *     <td>Width (pixels); valid only when mode=video</td>
+     *    </tr><tr>
+     *     <td>{@code "rotation"}</td>
+     *     <td>Integer</td>
+     *     <td>rotation (degrees) to orient the video onto the target surface;
+     *         valid only when mode=video. Note there may be additional
+     *         rotations applied when the surface is mapped to the screen.</td>
+     *    </tr>
+     *   </tbody>
+     *  </table>
+     *
+     *  Additional fields specific to individual codecs will also appear in
+     *  the return value.
      */
     public native Bundle getMetrics();
 
