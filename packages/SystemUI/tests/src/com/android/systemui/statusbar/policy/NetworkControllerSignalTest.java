@@ -94,6 +94,14 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
     }
 
     @Test
+    public void testNoEmergencyOnlyWrongSubscription() {
+        setupDefaultSignal();
+        setDefaultSubId(42);
+        mNetworkController.recalculateEmergency();
+        verifyEmergencyOnly(false);
+    }
+
+    @Test
     public void testNoEmengencyNoSubscriptions() {
         setupDefaultSignal();
         setSubscriptions();
@@ -286,12 +294,12 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
         for (int i = 0; i < testSubscriptions.length; i++) {
             if (i == indexToSkipController) {
                 // Make sure a controller was created despite us not adding one.
-                assertTrue(mNetworkController.mMobileSignalControllers.containsKey(
-                        testSubscriptions[i]));
+                assertTrue(mNetworkController.mMobileSignalControllers.indexOfKey(
+                        testSubscriptions[i]) >= 0);
             } else if (i == indexToSkipSubscription) {
                 // Make sure the controller that did exist was removed
-                assertFalse(mNetworkController.mMobileSignalControllers.containsKey(
-                        testSubscriptions[i]));
+                assertFalse(mNetworkController.mMobileSignalControllers.indexOfKey(
+                        testSubscriptions[i]) >= 0);
             } else {
                 // If a MobileSignalController is around it needs to not be unregistered.
                 Mockito.verify(mobileSignalControllers[i], Mockito.never())
