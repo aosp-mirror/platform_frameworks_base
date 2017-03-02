@@ -52,7 +52,7 @@ public class DocumentsProviderTest extends ProviderTestCase2<TestDocumentsProvid
         mResolver = getMockContentResolver();
     }
 
-    public void testFindPath_docUri() throws Exception {
+    public void testFindDocumentPath_docUri() throws Exception {
         final Path expected = new Path(ROOT_ID, Arrays.asList(PARENT_DOCUMENT_ID, DOCUMENT_ID));
         mProvider.nextPath = expected;
 
@@ -65,7 +65,7 @@ public class DocumentsProviderTest extends ProviderTestCase2<TestDocumentsProvid
         }
     }
 
-    public void testFindPath_treeUri() throws Exception {
+    public void testFindDocumentPath_treeUri() throws Exception {
         mProvider.nextIsChildDocument = true;
 
         final Path expected = new Path(null, Arrays.asList(PARENT_DOCUMENT_ID, DOCUMENT_ID));
@@ -73,12 +73,13 @@ public class DocumentsProviderTest extends ProviderTestCase2<TestDocumentsProvid
 
         final Uri docUri = buildTreeDocumentUri(
                 TestDocumentsProvider.AUTHORITY, PARENT_DOCUMENT_ID, DOCUMENT_ID);
-        final List<String> actual = DocumentsContract.findDocumentPath(mResolver, docUri);
+        final Path actual = DocumentsContract.findDocumentPath(mResolver, docUri);
 
-        assertEquals(expected.getPath(), actual);
+        assertNull(actual.getRootId());
+        assertEquals(expected.getPath(), actual.getPath());
     }
 
-    public void testFindPath_treeUri_throwsOnNonChildDocument() throws Exception {
+    public void testFindDocumentPath_treeUri_throwsOnNonChildDocument() throws Exception {
         mProvider.nextPath = new Path(null, Arrays.asList(PARENT_DOCUMENT_ID, DOCUMENT_ID));
 
         final Uri docUri = buildTreeDocumentUri(
@@ -86,18 +87,28 @@ public class DocumentsProviderTest extends ProviderTestCase2<TestDocumentsProvid
         assertNull(DocumentsContract.findDocumentPath(mResolver, docUri));
     }
 
-    public void testFindPath_treeUri_erasesNonNullRootId() throws Exception {
+    public void testFindDocumentPath_treeUri_erasesNonNullRootId() throws Exception {
         mProvider.nextIsChildDocument = true;
 
         mProvider.nextPath = new Path(ROOT_ID, Arrays.asList(PARENT_DOCUMENT_ID, DOCUMENT_ID));
 
         final Uri docUri = buildTreeDocumentUri(
                 TestDocumentsProvider.AUTHORITY, PARENT_DOCUMENT_ID, DOCUMENT_ID);
-        try (ContentProviderClient client =
-                     mResolver.acquireUnstableContentProviderClient(docUri)) {
-            Path path = DocumentsContract.findDocumentPath(client, docUri);
-            assertNull(path.getRootId());
-        }
+        Path path = DocumentsContract.findDocumentPath(mResolver, docUri);
+        assertNull(path.getRootId());
+        assertEquals(Arrays.asList(PARENT_DOCUMENT_ID, DOCUMENT_ID), path.getPath());
+    }
+
+    public void testFindDocumentPath_treeUri_erasesDocsOutsideTree() throws Exception {
+        mProvider.nextIsChildDocument = true;
+
+        mProvider.nextPath = new Path(
+                null, Arrays.asList(ANCESTOR_DOCUMENT_ID, PARENT_DOCUMENT_ID, DOCUMENT_ID));
+
+        final Uri docUri = buildTreeDocumentUri(
+                TestDocumentsProvider.AUTHORITY, PARENT_DOCUMENT_ID, DOCUMENT_ID);
+        Path path = DocumentsContract.findDocumentPath(mResolver, docUri);
+        assertEquals(Arrays.asList(PARENT_DOCUMENT_ID, DOCUMENT_ID), path.getPath());
     }
 
     private static Uri buildTreeDocumentUri(String authority, String parentDocId, String docId) {

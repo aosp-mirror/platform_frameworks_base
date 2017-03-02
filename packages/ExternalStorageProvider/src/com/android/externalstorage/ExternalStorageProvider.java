@@ -19,24 +19,14 @@ package com.android.externalstorage;
 import android.annotation.Nullable;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.Intent;
 import android.content.UriPermission;
-import android.content.pm.ParceledListSlice;
-import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.database.MatrixCursor.RowBuilder;
-import android.graphics.Point;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
-import android.os.CancellationSignal;
 import android.os.Environment;
-import android.os.FileObserver;
-import android.os.FileUtils;
-import android.os.Handler;
-import android.os.ParcelFileDescriptor;
-import android.os.ParcelFileDescriptor.OnCloseListener;
 import android.os.UserHandle;
 import android.os.storage.DiskInfo;
 import android.os.storage.StorageManager;
@@ -45,15 +35,12 @@ import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
 import android.provider.DocumentsContract.Path;
 import android.provider.DocumentsContract.Root;
-import android.provider.DocumentsProvider;
-import android.provider.MediaStore;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.DebugUtils;
 import android.util.Log;
 import android.util.Pair;
-import android.webkit.MimeTypeMap;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.content.FileSystemProvider;
@@ -62,10 +49,8 @@ import com.android.internal.util.IndentingPrintWriter;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
@@ -408,7 +393,7 @@ public class ExternalStorageProvider extends FileSystemProvider {
     }
 
     @Override
-    public Path findDocumentPath(String childDocId, @Nullable String parentDocId)
+    public Path findDocumentPath(@Nullable String parentDocId, String childDocId)
             throws FileNotFoundException {
         final Pair<RootInfo, File> resolvedDocId = resolveDocId(childDocId, false);
         final RootInfo root = resolvedDocId.first;

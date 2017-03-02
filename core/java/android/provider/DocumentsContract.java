@@ -1364,24 +1364,25 @@ public final class DocumentsContract {
     }
 
     /**
-     * Finds the canonical path to the top of the tree. The return value starts
-     * from the top of the tree or the root document to the requested document,
-     * both inclusive.
+     * Finds the canonical path from the top of the document tree.
      *
-     * Document ID should be unique across roots.
+     * The {@link Path#getPath()} of the return value contains the document ID
+     * of all documents along the path from the top the document tree to the
+     * requested document, both inclusive.
+     *
+     * The {@link Path#getRootId()} of the return value returns {@code null}.
      *
      * @param treeUri treeUri of the document which path is requested.
-     * @return a list of documents ID starting from the top of the tree to the
-     *      requested document, or {@code null} if failed.
+     * @return the path of the document, or {@code null} if failed.
      * @see DocumentsProvider#findDocumentPath(String, String)
      */
-    public static List<String> findDocumentPath(ContentResolver resolver, Uri treeUri) {
+    public static Path findDocumentPath(ContentResolver resolver, Uri treeUri) {
         checkArgument(isTreeUri(treeUri), treeUri + " is not a tree uri.");
 
         final ContentProviderClient client = resolver.acquireUnstableContentProviderClient(
                 treeUri.getAuthority());
         try {
-            return findDocumentPath(client, treeUri).getPath();
+            return findDocumentPath(client, treeUri);
         } catch (Exception e) {
             Log.w(TAG, "Failed to find path", e);
             return null;
@@ -1391,12 +1392,14 @@ public final class DocumentsContract {
     }
 
     /**
-     * Finds the canonical path. If uri is a document uri returns path to a root and
-     * its associated root id. If uri is a tree uri returns the path to the top of
-     * the tree. The {@link Path#getPath()} in the return value starts from the top of
-     * the tree or the root document to the requested document, both inclusive.
+     * Finds the canonical path. If uri is a document uri returns path from a root and
+     * its associated root id. If uri is a tree uri returns the path from the top of
+     * the tree. The {@link Path#getPath()} of the return value contains document ID
+     * starts from the top of the tree or the root document to the requested document,
+     * both inclusive.
      *
-     * Document id should be unique across roots.
+     * Callers can expect the root ID returned from multiple calls to this method is
+     * consistent.
      *
      * @param uri uri of the document which path is requested. It can be either a
      *          plain document uri or a tree uri.
