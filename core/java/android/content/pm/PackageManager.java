@@ -3737,15 +3737,29 @@ public abstract class PackageManager {
     public abstract @Nullable Drawable getInstantAppIcon(String packageName);
 
     /**
-     * Gets whether the caller is an instant app.
+     * Gets whether this application is an instant app.
      *
      * @return Whether caller is an instant app.
      *
+     * @see #isInstantApp(String)
      * @see #setInstantAppCookie(byte[])
      * @see #getInstantAppCookie()
      * @see #getInstantAppCookieMaxSize()
      */
     public abstract boolean isInstantApp();
+
+    /**
+     * Gets whether the given package is an instant app.
+     *
+     * @param packageName The package to check
+     * @return Whether the given package is an instant app.
+     *
+     * @see #isInstantApp()
+     * @see #setInstantAppCookie(byte[])
+     * @see #getInstantAppCookie()
+     * @see #getInstantAppCookieMaxSize()
+     */
+    public abstract boolean isInstantApp(String packageName);
 
     /**
      * Gets the maximum size in bytes of the cookie data an instant app
@@ -3754,6 +3768,7 @@ public abstract class PackageManager {
      * @return The max cookie size in bytes.
      *
      * @see #isInstantApp()
+     * @see #isInstantApp(String)
      * @see #setInstantAppCookie(byte[])
      * @see #getInstantAppCookie()
      */
@@ -3770,6 +3785,7 @@ public abstract class PackageManager {
      * @return The cookie.
      *
      * @see #isInstantApp()
+     * @see #isInstantApp(String)
      * @see #setInstantAppCookie(byte[])
      * @see #getInstantAppCookieMaxSize()
      */
@@ -3792,6 +3808,7 @@ public abstract class PackageManager {
      * @return Whether the cookie was set.
      *
      * @see #isInstantApp()
+     * @see #isInstantApp(String)
      * @see #getInstantAppCookieMaxSize()
      * @see #getInstantAppCookie()
      */

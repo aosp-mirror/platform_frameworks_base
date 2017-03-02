@@ -805,9 +805,13 @@ public class ApplicationPackageManager extends PackageManager {
 
     @Override
     public boolean isInstantApp() {
+        return isInstantApp(mContext.getPackageName());
+    }
+
+    @Override
+    public boolean isInstantApp(String packageName) {
         try {
-            return mPM.isInstantApp(mContext.getPackageName(),
-                    mContext.getUserId());
+            return mPM.isInstantApp(packageName, mContext.getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
