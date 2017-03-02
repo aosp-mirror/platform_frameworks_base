@@ -141,11 +141,12 @@ class TaskSnapshotController {
         outClosingTasks.clear();
         for (int i = closingApps.size() - 1; i >= 0; i--) {
             final AppWindowToken atoken = closingApps.valueAt(i);
+            final Task task = atoken.getTask();
 
             // If the task of the app is not visible anymore, it means no other app in that task
             // is opening. Thus, the task is closing.
-            if (atoken.mTask != null && !atoken.mTask.isVisible()) {
-                outClosingTasks.add(closingApps.valueAt(i).mTask);
+            if (task != null && !task.isVisible()) {
+                outClosingTasks.add(task);
             }
         }
     }

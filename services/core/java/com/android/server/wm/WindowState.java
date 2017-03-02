@@ -1202,7 +1202,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     Task getTask() {
-        return mAppToken != null ? mAppToken.mTask : null;
+        return mAppToken != null ? mAppToken.getTask() : null;
     }
 
     TaskStack getStack() {
@@ -2378,8 +2378,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     /** @return true if this window desires touch events. */
     boolean canReceiveTouchInput() {
-        return mAppToken != null && mAppToken.mTask != null
-                && mAppToken.mTask.mStack.shouldIgnoreInput();
+        return mAppToken != null && mAppToken.getTask() != null
+                && mAppToken.getTask().mStack.shouldIgnoreInput();
     }
 
     @Override

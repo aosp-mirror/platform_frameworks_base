@@ -167,7 +167,7 @@ class WindowTestsBase {
         final TestTaskWindowContainerController taskController =
                 new TestTaskWindowContainerController(stackController);
         TestAppWindowToken appWinToken = new TestAppWindowToken(sDisplayContent);
-        appWinToken.mTask = taskController.mContainer;
+        appWinToken.setTask(taskController.mContainer);
         final WindowState win = createWindow(null, TYPE_BASE_APPLICATION, name);
         win.mAppToken = appWinToken;
         return win;

@@ -651,7 +651,7 @@ class WindowSurfacePlacer {
         if (openingAppAnimator == null || openingAppAnimator.animation == null) {
             return;
         }
-        final int taskId = appToken.mTask.mTaskId;
+        final int taskId = appToken.getTask().mTaskId;
         Bitmap thumbnailHeader = mService.mAppTransition.getAppTransitionThumbnailHeader(taskId);
         if (thumbnailHeader == null || thumbnailHeader.getConfig() == Bitmap.Config.ALPHA_8) {
             if (DEBUG_APP_TRANSITIONS) Slog.d(TAG, "No thumbnail header bitmap for: " + taskId);

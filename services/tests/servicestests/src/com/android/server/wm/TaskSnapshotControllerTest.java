@@ -49,7 +49,7 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
         final ArraySet<Task> closingTasks = new ArraySet<>();
         sWm.mTaskSnapshotController.getClosingTasks(closingApps, closingTasks);
         assertEquals(1, closingTasks.size());
-        assertEquals(closingWindow.mAppToken.mTask, closingTasks.valueAt(0));
+        assertEquals(closingWindow.mAppToken.getTask(), closingTasks.valueAt(0));
     }
 
     @Test
