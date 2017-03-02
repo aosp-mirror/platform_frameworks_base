@@ -477,7 +477,7 @@ public final class StrictMode {
             }
 
             /**
-             * Detect unbuffered input/output operations.
+             * Disable detection of unbuffered input/output operations.
              */
             public Builder permitUnbufferedIo() {
                 return disable(DETECT_UNBUFFERED_IO);
