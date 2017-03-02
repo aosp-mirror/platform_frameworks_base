@@ -16656,13 +16656,19 @@ public class PackageManagerService extends IPackageManager.Stub {
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
         }
 
-//        // Ephemeral apps must have target SDK >= O.
-//        // TODO: Update conditional and error message when O gets locked down
-//        if (instantApp && pkg.applicationInfo.targetSdkVersion <= Build.VERSION_CODES.N_MR1) {
-//            res.setError(PackageManager.INSTALL_FAILED_EPHEMERAL_INVALID,
-//                    "Ephemeral apps must have target SDK version of at least O");
-//            return;
-//        }
+        // Instant apps must have target SDK >= O and have targetSanboxVersion >= 2
+        if (instantApp && pkg.applicationInfo.targetSdkVersion <= Build.VERSION_CODES.N_MR1) {
+            Slog.w(TAG, "Instant app package " + pkg.packageName
+                    + " does not target O, this will be a fatal error.");
+            // STOPSHIP: Make this a fatal error
+            pkg.applicationInfo.targetSdkVersion = Build.VERSION_CODES.O;
+        }
+        if (instantApp && pkg.applicationInfo.targetSandboxVersion != 2) {
+            Slog.w(TAG, "Instant app package " + pkg.packageName
+                    + " does not target targetSandboxVersion 2, this will be a fatal error.");
+            // STOPSHIP: Make this a fatal error
+            pkg.applicationInfo.targetSandboxVersion = 2;
+        }
 
         if (pkg.applicationInfo.isStaticSharedLibrary()) {
             // Static shared libraries have synthetic package names
