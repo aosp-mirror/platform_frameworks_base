@@ -22,7 +22,7 @@ package android.view.textclassifier;
 final class LangId {
 
     static {
-        System.loadLibrary("smart-selection_jni");
+        System.loadLibrary("textclassifier");
     }
 
     private final long mModelPtr;
