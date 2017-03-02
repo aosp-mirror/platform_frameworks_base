@@ -17,6 +17,7 @@
 package android.app;
 
 import android.annotation.Nullable;
+import android.graphics.Rect;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -35,10 +36,18 @@ public final class PictureInPictureArgs implements Parcelable {
     private Float mAspectRatio;
 
     /**
-     * The set of actions that are associated with this activity when in picture in picture.
+     * The set of actions that are associated with this activity when in picture-in-picture.
      */
     @Nullable
     private List<RemoteAction> mUserActions;
+
+    /**
+     * The source bounds hint used when entering picture-in-picture, relative to the window bounds.
+     * We can use this internally for the transition into picture-in-picture to ensure that a
+     * particular source rect is visible throughout the whole transition.
+     */
+    @Nullable
+    private Rect mSourceRectHint;
 
     PictureInPictureArgs(Parcel in) {
         if (in.readInt() != 0) {
@@ -47,6 +56,9 @@ public final class PictureInPictureArgs implements Parcelable {
         if (in.readInt() != 0) {
             mUserActions = new ArrayList<>();
             in.readParcelableList(mUserActions, RemoteAction.class.getClassLoader());
+        }
+        if (in.readInt() != 0) {
+            mSourceRectHint = Rect.CREATOR.createFromParcel(in);
         }
     }
 
@@ -78,6 +90,9 @@ public final class PictureInPictureArgs implements Parcelable {
         }
         if (otherArgs.hasSetActions()) {
             mUserActions = otherArgs.mUserActions;
+        }
+        if (otherArgs.hasSourceBoundsHint()) {
+            mSourceRectHint = new Rect(otherArgs.getSourceRectHint());
         }
     }
 
@@ -137,9 +152,43 @@ public final class PictureInPictureArgs implements Parcelable {
         return mUserActions != null;
     }
 
+    /**
+     * Sets the source bounds hint. These bounds are only used when an activity first enters
+     * picture-in-picture, and describe the bounds in window coordinates of activity entering
+     * picture-in-picture that will be visible following the transition. For the best effect, these
+     * bounds should also match the aspect ratio in the arguments.
+     */
+    public void setSourceRectHint(Rect launchBounds) {
+        if (launchBounds == null) {
+            mSourceRectHint = null;
+        } else {
+            mSourceRectHint = new Rect(launchBounds);
+        }
+    }
+
+    /**
+     * @return the launch bounds
+     * @hide
+     */
+    public Rect getSourceRectHint() {
+        return mSourceRectHint;
+    }
+
+    /**
+     * @return whether there are launch bounds set
+     * @hide
+     */
+    public boolean hasSourceBoundsHint() {
+        return mSourceRectHint != null && !mSourceRectHint.isEmpty();
+    }
+
     @Override
     public PictureInPictureArgs clone() {
-        return new PictureInPictureArgs(mAspectRatio, mUserActions);
+        PictureInPictureArgs args = new PictureInPictureArgs(mAspectRatio, mUserActions);
+        if (mSourceRectHint != null) {
+            args.setSourceRectHint(mSourceRectHint);
+        }
+        return args;
     }
 
     @Override
@@ -158,6 +207,12 @@ public final class PictureInPictureArgs implements Parcelable {
         if (mUserActions != null) {
             out.writeInt(1);
             out.writeParcelableList(mUserActions, 0);
+        } else {
+            out.writeInt(0);
+        }
+        if (mSourceRectHint != null) {
+            out.writeInt(1);
+            mSourceRectHint.writeToParcel(out, 0);
         } else {
             out.writeInt(0);
         }

@@ -2794,7 +2794,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         }
     }
 
-    boolean moveTopStackActivityToPinnedStackLocked(int stackId, Rect bounds) {
+    boolean moveTopStackActivityToPinnedStackLocked(int stackId, Rect destBounds) {
         final ActivityStack stack = getStack(stackId, !CREATE_IF_NEEDED, !ON_TOP);
         if (stack == null) {
             throw new IllegalArgumentException(
@@ -2815,13 +2815,14 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             return false;
         }
 
-        moveActivityToPinnedStackLocked(r, "moveTopActivityToPinnedStack", bounds,
-                true /* moveHomeStackToFront */);
+        moveActivityToPinnedStackLocked(r, null /* sourceBounds */, destBounds,
+                true /* moveHomeStackToFront */, "moveTopActivityToPinnedStack");
         return true;
     }
 
-    void moveActivityToPinnedStackLocked(ActivityRecord r, String reason, Rect bounds,
-            boolean moveHomeStackToFront) {
+    void moveActivityToPinnedStackLocked(ActivityRecord r, Rect sourceBounds, Rect destBounds,
+            boolean moveHomeStackToFront, String reason) {
+
         mWindowManager.deferSurfaceLayout();
 
         // Need to make sure the pinned stack exist so we can resize it below...
@@ -2889,7 +2890,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
         resumeFocusedStackTopActivityLocked();
 
-        stack.animateResizePinnedStack(bounds, -1 /* animationDuration */);
+        stack.animateResizePinnedStack(sourceBounds, destBounds, -1 /* animationDuration */);
         mService.mTaskChangeNotificationController.notifyActivityPinned(r.packageName);
     }
 

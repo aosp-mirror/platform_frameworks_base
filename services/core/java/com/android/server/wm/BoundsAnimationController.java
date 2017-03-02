@@ -121,8 +121,8 @@ public class BoundsAnimationController {
         private final int mFrozenTaskWidth;
         private final int mFrozenTaskHeight;
 
-        BoundsAnimator(AnimateBoundsUser target, Rect from, Rect to,
-                boolean moveToFullScreen, boolean replacement) {
+        BoundsAnimator(AnimateBoundsUser target, Rect from, Rect to, boolean moveToFullScreen,
+                boolean replacement) {
             super();
             mTarget = target;
             mFrom.set(from);

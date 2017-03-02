@@ -7870,10 +7870,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                     r.pictureInPictureArgs.copyOnlySet(args);
                     final float aspectRatio = r.pictureInPictureArgs.getAspectRatio();
                     final List<RemoteAction> actions = r.pictureInPictureArgs.getActions();
-                    final Rect bounds = mWindowManager.getPictureInPictureBounds(DEFAULT_DISPLAY,
+                    final Rect sourceBounds = r.pictureInPictureArgs.getSourceRectHint();
+                    final Rect destBounds = mWindowManager.getPictureInPictureBounds(DEFAULT_DISPLAY,
                             aspectRatio);
-                    mStackSupervisor.moveActivityToPinnedStackLocked(r, "enterPictureInPictureMode",
-                            bounds, true /* moveHomeStackToFront */);
+                    mStackSupervisor.moveActivityToPinnedStackLocked(r, sourceBounds, destBounds,
+                            true /* moveHomeStackToFront */, "enterPictureInPictureMode");
                     final PinnedActivityStack stack = mStackSupervisor.getStack(PINNED_STACK_ID);
                     stack.setPictureInPictureAspectRatio(aspectRatio);
                     stack.setPictureInPictureActions(actions);
@@ -10525,7 +10526,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
-    public void resizeStack(int stackId, Rect bounds, boolean allowResizeInDockedMode,
+    public void resizeStack(int stackId, Rect destBounds, boolean allowResizeInDockedMode,
             boolean preserveWindows, boolean animate, int animationDuration) {
         enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "resizeStack()");
         long ident = Binder.clearCallingIdentity();
@@ -10535,13 +10536,14 @@ public class ActivityManagerService extends IActivityManager.Stub
                     if (stackId == PINNED_STACK_ID) {
                         final PinnedActivityStack pinnedStack =
                                 mStackSupervisor.getStack(PINNED_STACK_ID);
-                        pinnedStack.animateResizePinnedStack(bounds, animationDuration);
+                        pinnedStack.animateResizePinnedStack(null /* sourceBounds */, destBounds,
+                                animationDuration);
                     } else {
                         throw new IllegalArgumentException("Stack: " + stackId
                                 + " doesn't support animated resize.");
                     }
                 } else {
-                    mStackSupervisor.resizeStackLocked(stackId, bounds, null /* tempTaskBounds */,
+                    mStackSupervisor.resizeStackLocked(stackId, destBounds, null /* tempTaskBounds */,
                             null /* tempTaskInsetBounds */, preserveWindows,
                             allowResizeInDockedMode, !DEFER_RESUME);
                 }

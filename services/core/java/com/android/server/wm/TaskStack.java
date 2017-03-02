@@ -19,7 +19,6 @@ package com.android.server.wm;
 import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
 import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIGHT;
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
-import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.HOME_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
@@ -128,6 +127,7 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
     private boolean mBoundsAnimating = false;
     private boolean mBoundsAnimatingToFullscreen = false;
     private Rect mBoundsAnimationTarget = new Rect();
+    private Rect mBoundsAnimationSourceBounds = new Rect();
 
     // Temporary storage for the new bounds that should be used after the configuration change.
     // Will be cleared once the client retrieves the new bounds via getBoundsForNewConfiguration().
@@ -323,12 +323,28 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
      * Sets the bounds animation target bounds.  This can't currently be done in onAnimationStart()
      * since that is started on the UiThread.
      */
-    void setAnimatingBounds(Rect bounds) {
-        if (bounds != null) {
-            mBoundsAnimationTarget.set(bounds);
+    void setAnimatingBounds(Rect sourceBounds, Rect destBounds) {
+        if (sourceBounds != null) {
+            mBoundsAnimationSourceBounds.set(sourceBounds);
+        } else {
+            mBoundsAnimationSourceBounds.setEmpty();
+        }
+        if (destBounds != null) {
+            mBoundsAnimationTarget.set(destBounds);
         } else {
             mBoundsAnimationTarget.setEmpty();
         }
+    }
+
+    /**
+     * @return the source bounds for the bounds animation.
+     */
+    void getAnimatingSourceBounds(Rect outBounds) {
+        if (mBoundsAnimationSourceBounds != null) {
+            outBounds.set(mBoundsAnimationSourceBounds);
+            return;
+        }
+        outBounds.setEmpty();
     }
 
     /**
@@ -1465,7 +1481,6 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
     public void onAnimationEnd() {
         synchronized (mService.mWindowMap) {
             mBoundsAnimating = false;
-            mBoundsAnimationTarget.setEmpty();
             mService.requestTraversal();
         }
 

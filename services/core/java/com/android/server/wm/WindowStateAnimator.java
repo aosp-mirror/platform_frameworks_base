@@ -67,8 +67,6 @@ import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Transformation;
 
-import com.android.server.wm.WindowManagerService.H;
-
 import java.io.PrintWriter;
 import java.io.FileDescriptor;
 
@@ -156,6 +154,8 @@ class WindowStateAnimator {
     Rect mLastClipRect = new Rect();
     Rect mLastFinalClipRect = new Rect();
     Rect mTmpStackBounds = new Rect();
+    private Rect mTmpAnimatingBounds = new Rect();
+    private Rect mTmpSourceBounds = new Rect();
 
     /**
      * This is rectangle of the window's surface that is not covered by
@@ -1282,6 +1282,7 @@ class WindowStateAnimator {
 
     void setSurfaceBoundariesLocked(final boolean recoveringMemory) {
         final WindowState w = mWin;
+        final LayoutParams attrs = mWin.getAttrs();
         final Task task = w.getTask();
 
         // We got resized, so block all updates until we got the new surface.
@@ -1290,7 +1291,7 @@ class WindowStateAnimator {
         }
 
         mTmpSize.set(w.mShownPosition.x, w.mShownPosition.y, 0, 0);
-        calculateSurfaceBounds(w, w.getAttrs());
+        calculateSurfaceBounds(w, attrs);
 
         mExtraHScale = (float) 1.0;
         mExtraVScale = (float) 1.0;
@@ -1329,23 +1330,59 @@ class WindowStateAnimator {
         float surfaceHeight = mSurfaceController.getHeight();
 
         if (isForceScaled()) {
-            int hInsets = w.getAttrs().surfaceInsets.left + w.getAttrs().surfaceInsets.right;
-            int vInsets = w.getAttrs().surfaceInsets.top + w.getAttrs().surfaceInsets.bottom;
+            int hInsets = attrs.surfaceInsets.left + attrs.surfaceInsets.right;
+            int vInsets = attrs.surfaceInsets.top + attrs.surfaceInsets.bottom;
+            float surfaceContentWidth = surfaceWidth - hInsets;
+            float surfaceContentHeight = surfaceHeight - vInsets;
             if (!mForceScaleUntilResize) {
                 mSurfaceController.forceScaleableInTransaction(true);
             }
 
+            int posX = mTmpSize.left;
+            int posY = mTmpSize.top;
             task.mStack.getDimBounds(mTmpStackBounds);
-            // We want to calculate the scaling based on the content area, not based on
-            // the entire surface, so that we scale in sync with windows that don't have insets.
-            mExtraHScale = mTmpStackBounds.width() / (float)(surfaceWidth - hInsets);
-            mExtraVScale = mTmpStackBounds.height() / (float)(surfaceHeight - vInsets);
+            task.mStack.getAnimatingSourceBounds(mTmpSourceBounds);
+            if (!mTmpSourceBounds.isEmpty()) {
+                // Get the final target stack bounds, if we are not animating, this is just the
+                // current stack bounds
+                task.mStack.getAnimatingBounds(mTmpAnimatingBounds);
+
+                // Calculate the current progress and interpolate the difference between the target
+                // and source bounds
+                float finalWidth = mTmpAnimatingBounds.width();
+                float initialWidth = mTmpSourceBounds.width();
+                float t = (surfaceContentWidth - mTmpStackBounds.width())
+                        / (surfaceContentWidth - mTmpAnimatingBounds.width());
+                mExtraHScale = (initialWidth + t * (finalWidth - initialWidth)) / initialWidth;
+                mExtraVScale = mExtraHScale;
+
+                // Adjust the position to account for the inset bounds
+                posX -= (int) (t * mExtraHScale * mTmpSourceBounds.left);
+                posY -= (int) (t * mExtraVScale * mTmpSourceBounds.top);
+
+                // Always clip to the stack bounds since the surface can be larger with the current
+                // scale
+                clipRect = null;
+                finalClipRect = mTmpStackBounds;
+            } else {
+                // We want to calculate the scaling based on the content area, not based on
+                // the entire surface, so that we scale in sync with windows that don't have insets.
+                mExtraHScale = mTmpStackBounds.width() / surfaceContentWidth;
+                mExtraVScale = mTmpStackBounds.height() / surfaceContentHeight;
+
+                // Since we are scaled to fit in our previously desired crop, we can now
+                // expose the whole window in buffer space, and not risk extending
+                // past where the system would have cropped us
+                clipRect = null;
+                finalClipRect = null;
+            }
 
             // In the case of ForceScaleToStack we scale entire tasks together,
             // and so we need to scale our offsets relative to the task bounds
             // or parent and child windows would fall out of alignment.
-            int posX = (int) (mTmpSize.left - w.mAttrs.x * (1 - mExtraHScale));
-            int posY = (int) (mTmpSize.top - w.mAttrs.y * (1 - mExtraVScale));
+            posX -= (int) (attrs.x * (1 - mExtraHScale));
+            posY -= (int) (attrs.y * (1 - mExtraVScale));
+
             // Imagine we are scaling down. As we scale the buffer down, we decrease the
             // distance between the surface top left, and the start of the surface contents
             // (previously it was surfaceInsets.left pixels in screen space but now it
@@ -1353,17 +1390,11 @@ class WindowStateAnimator {
             // non inset content at the same position, we have to shift the whole window
             // forward. Likewise for scaling up, we've increased this distance, and we need
             // to shift by a negative number to compensate.
-            posX += w.getAttrs().surfaceInsets.left * (1 - mExtraHScale);
-            posY += w.getAttrs().surfaceInsets.top * (1 - mExtraVScale);
+            posX += attrs.surfaceInsets.left * (1 - mExtraHScale);
+            posY += attrs.surfaceInsets.top * (1 - mExtraVScale);
 
-            mSurfaceController.setPositionInTransaction((float)Math.floor(posX),
-                    (float)Math.floor(posY), recoveringMemory);
-
-            // Since we are scaled to fit in our previously desired crop, we can now
-            // expose the whole window in buffer space, and not risk extending
-            // past where the system would have cropped us
-            clipRect = null;
-            finalClipRect = null;
+            mSurfaceController.setPositionInTransaction((float) Math.floor(posX),
+                    (float) Math.floor(posY), recoveringMemory);
 
             // Various surfaces in the scaled stack may resize at different times.
             // We need to ensure for each surface, that we disable transformation matrix
