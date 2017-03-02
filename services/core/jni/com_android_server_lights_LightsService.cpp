@@ -43,26 +43,84 @@ static sp<ILight> gLight;
 static bool validate(jint light, jint flash, jint brightness) {
     bool valid = true;
 
-    if (light < 0 || light >= static_cast<int>(Type::COUNT)) {
+    if (light < 0 || light >= static_cast<jint>(Type::COUNT)) {
         ALOGE("Invalid light parameter %d.", light);
         valid = false;
     }
 
-    if (flash != static_cast<int>(Flash::NONE) &&
-        flash != static_cast<int>(Flash::TIMED) &&
-        flash != static_cast<int>(Flash::HARDWARE)) {
+    if (flash != static_cast<jint>(Flash::NONE) &&
+        flash != static_cast<jint>(Flash::TIMED) &&
+        flash != static_cast<jint>(Flash::HARDWARE)) {
         ALOGE("Invalid flash parameter %d.", flash);
         valid = false;
     }
 
-    if (brightness != static_cast<int>(Brightness::USER) &&
-        brightness != static_cast<int>(Brightness::SENSOR) &&
-        brightness != static_cast<int>(Brightness::LOW_PERSISTENCE)) {
+    if (brightness != static_cast<jint>(Brightness::USER) &&
+        brightness != static_cast<jint>(Brightness::SENSOR) &&
+        brightness != static_cast<jint>(Brightness::LOW_PERSISTENCE)) {
         ALOGE("Invalid brightness parameter %d.", brightness);
         valid = false;
     }
 
+    if (brightness == static_cast<jint>(Brightness::LOW_PERSISTENCE) &&
+        light != static_cast<jint>(Type::BACKLIGHT)) {
+        ALOGE("Cannot set low-persistence mode for non-backlight device.");
+        valid = false;
+    }
+
     return valid;
+}
+
+static LightState constructState(
+        jint colorARGB,
+        jint flashMode,
+        jint onMS,
+        jint offMS,
+        jint brightnessMode){
+    Flash flash = static_cast<Flash>(flashMode);
+    Brightness brightness = static_cast<Brightness>(brightnessMode);
+
+    LightState state{};
+
+    if (brightness == Brightness::LOW_PERSISTENCE) {
+        state.flashMode = Flash::NONE;
+    } else {
+        // Only set non-brightness settings when not in low-persistence mode
+        state.flashMode = flash;
+        state.flashOnMs = onMS;
+        state.flashOffMs = offMS;
+    }
+
+    state.color = colorARGB;
+    state.brightnessMode = brightness;
+
+    return state;
+}
+
+static void processReturn(
+        const Return<Status> &ret,
+        Type type,
+        const LightState &state) {
+    if (!ret.isOk()) {
+        ALOGE("Failed to issue set light command.");
+        gLight = nullptr;
+        return;
+    }
+
+    switch (static_cast<Status>(ret)) {
+        case Status::SUCCESS:
+            break;
+        case Status::LIGHT_NOT_SUPPORTED:
+            ALOGE("Light requested not available on this device. %d", type);
+            break;
+        case Status::BRIGHTNESS_NOT_SUPPORTED:
+            ALOGE("Brightness parameter not supported on this device: %d",
+                state.brightnessMode);
+            break;
+        case Status::UNKNOWN:
+        default:
+            ALOGE("Unknown error setting light.");
+    }
 }
 
 static void setLight_native(
@@ -79,63 +137,23 @@ static void setLight_native(
         return;
     }
 
-    // TODO(b/31632518)
-    if (gLight == nullptr) {
+    if (gLight == nullptr || !gLight->ping().isOk()) {
         gLight = ILight::getService();
     }
 
     if (gLight == nullptr) {
-        ALOGE("LightService unable to get ILight interface.");
+        ALOGE("Unable to get ILight interface.");
         return;
     }
 
     Type type = static_cast<Type>(light);
-    Flash flash = static_cast<Flash>(flashMode);
-    Brightness brightness = static_cast<Brightness>(brightnessMode);
+    LightState state = constructState(
+        colorARGB, flashMode, onMS, offMS, brightnessMode);
 
-    LightState state{};
-
-    if (brightnessMode == static_cast<int>(Brightness::LOW_PERSISTENCE)) {
-        if (light != static_cast<int>(Type::BACKLIGHT)) {
-            ALOGE("Cannot set low-persistence mode for non-backlight device.");
-            return;
-        }
-        state.flashMode = Flash::NONE;
-    } else {
-        // Only set non-brightness settings when not in low-persistence mode
-        state.flashMode = flash;
-        state.flashOnMs = onMS;
-        state.flashOffMs = offMS;
-    }
-
-    state.color = colorARGB;
-    state.brightnessMode = brightness;
-
-    Status status;
     {
         ALOGD_IF_SLOW(50, "Excessive delay setting light");
         Return<Status> ret = gLight->setLight(type, state);
-
-        if (!ret.isOk()) {
-            ALOGE("Failed to issue set light command.");
-            return;
-        }
-
-        status = static_cast<Status>(ret); // hal status
-    }
-
-    switch (status) {
-        case Status::SUCCESS:
-            break;
-        case Status::LIGHT_NOT_SUPPORTED:
-            ALOGE("Light requested not availale on this device.");
-            break;
-        case Status::BRIGHTNESS_NOT_SUPPORTED:
-            ALOGE("Brightness parameter not supported on this device.");
-            break;
-        case Status::UNKNOWN:
-        default:
-            ALOGE("Unknown error setting light.");
+        processReturn(ret, type, state);
     }
 }
 
