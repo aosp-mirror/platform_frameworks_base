@@ -856,6 +856,19 @@ class AlarmManagerService extends SystemService {
             mFilterStats = fs;
             mAlarmType = alarmType;
         }
+
+        @Override
+        public String toString() {
+            return "InFlight{"
+                    + "pendingIntent=" + mPendingIntent
+                    + ", workSource=" + mWorkSource
+                    + ", uid=" + mUid
+                    + ", tag=" + mTag
+                    + ", broadcastStats=" + mBroadcastStats
+                    + ", filterStats=" + mFilterStats
+                    + ", alarmType=" + mAlarmType
+                    + "}";
+        }
     }
 
     static final class FilterStats {
@@ -873,6 +886,19 @@ class AlarmManagerService extends SystemService {
             mBroadcastStats = broadcastStats;
             mTag = tag;
         }
+
+        @Override
+        public String toString() {
+            return "FilterStats{"
+                    + "tag=" + mTag
+                    + ", lastTime=" + lastTime
+                    + ", aggregateTime=" + aggregateTime
+                    + ", count=" + count
+                    + ", numWakeup=" + numWakeup
+                    + ", startTime=" + startTime
+                    + ", nesting=" + nesting
+                    + "}";
+        }
     }
 
     static final class BroadcastStats {
@@ -889,6 +915,19 @@ class AlarmManagerService extends SystemService {
         BroadcastStats(int uid, String packageName) {
             mUid = uid;
             mPackageName = packageName;
+        }
+
+        @Override
+        public String toString() {
+            return "BroadcastStats{"
+                    + "uid=" + mUid
+                    + ", packageName=" + mPackageName
+                    + ", aggregateTime=" + aggregateTime
+                    + ", count=" + count
+                    + ", numWakeup=" + numWakeup
+                    + ", startTime=" + startTime
+                    + ", nesting=" + nesting
+                    + "}";
         }
     }
 
