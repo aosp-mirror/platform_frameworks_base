@@ -745,7 +745,8 @@ public abstract class PackageManager {
     public static final int DONT_KILL_APP = 0x00000001;
 
     /** @hide */
-    @IntDef({INSTALL_REASON_UNKNOWN, INSTALL_REASON_POLICY})
+    @IntDef({INSTALL_REASON_UNKNOWN, INSTALL_REASON_POLICY, INSTALL_REASON_DEVICE_RESTORE,
+            INSTALL_REASON_DEVICE_SETUP, INSTALL_REASON_USER})
     @Retention(RetentionPolicy.SOURCE)
     public @interface InstallReason {}
 
@@ -758,6 +759,21 @@ public abstract class PackageManager {
      * Code indicating that this package was installed due to enterprise policy.
      */
     public static final int INSTALL_REASON_POLICY = 1;
+
+    /**
+     * Code indicating that this package was installed as part of restoring from another device.
+     */
+    public static final int INSTALL_REASON_DEVICE_RESTORE = 2;
+
+    /**
+     * Code indicating that this package was installed as part of device setup.
+     */
+    public static final int INSTALL_REASON_DEVICE_SETUP = 3;
+
+    /**
+     * Code indicating that the package installation was initiated by the user.
+     */
+    public static final int INSTALL_REASON_USER = 4;
 
     /**
      * Installation return code: this is passed to the
@@ -6126,6 +6142,9 @@ public abstract class PackageManager {
      *
      * @see #INSTALL_REASON_UNKNOWN
      * @see #INSTALL_REASON_POLICY
+     * @see #INSTALL_REASON_DEVICE_RESTORE
+     * @see #INSTALL_REASON_DEVICE_SETUP
+     * @see #INSTALL_REASON_USER
      *
      * @hide
      */
