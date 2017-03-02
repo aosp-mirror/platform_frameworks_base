@@ -844,20 +844,24 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // Make sure the content and visible frames are inside of the
         // final window frame.
         if (windowsAreFloating && !mFrame.isEmpty()) {
+            // For pinned workspace the frame isn't limited in any particular
+            // way since SystemUI controls the bounds. For freeform however
+            // we want to keep things inside the content frame.
+            final Rect limitFrame = task.inPinnedWorkspace() ? mFrame : mContentFrame;
             // Keep the frame out of the blocked system area, limit it in size to the content area
             // and make sure that there is always a minimum visible so that the user can drag it
             // into a usable area..
-            final int height = Math.min(mFrame.height(), mContentFrame.height());
-            final int width = Math.min(mContentFrame.width(), mFrame.width());
+            final int height = Math.min(mFrame.height(), limitFrame.height());
+            final int width = Math.min(limitFrame.width(), mFrame.width());
             final DisplayMetrics displayMetrics = getDisplayContent().getDisplayMetrics();
             final int minVisibleHeight = Math.min(height, WindowManagerService.dipToPixel(
                     MINIMUM_VISIBLE_HEIGHT_IN_DP, displayMetrics));
             final int minVisibleWidth = Math.min(width, WindowManagerService.dipToPixel(
                     MINIMUM_VISIBLE_WIDTH_IN_DP, displayMetrics));
-            final int top = Math.max(mContentFrame.top,
-                    Math.min(mFrame.top, mContentFrame.bottom - minVisibleHeight));
-            final int left = Math.max(mContentFrame.left + minVisibleWidth - width,
-                    Math.min(mFrame.left, mContentFrame.right - minVisibleWidth));
+            final int top = Math.max(limitFrame.top,
+                    Math.min(mFrame.top, limitFrame.bottom - minVisibleHeight));
+            final int left = Math.max(limitFrame.left + minVisibleWidth - width,
+                    Math.min(mFrame.left, limitFrame.right - minVisibleWidth));
             mFrame.set(left, top, left + width, top + height);
             mContentFrame.set(mFrame);
             mVisibleFrame.set(mContentFrame);
@@ -2712,29 +2716,32 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             destroyedSomething |= c.destroySurface(cleanupOnResume, appStopped);
         }
 
-        if (appStopped || mWindowRemovalAllowed || cleanupOnResume) {
-
-            mWinAnimator.destroyPreservedSurfaceLocked();
-
-            if (mDestroying) {
-                if (DEBUG_ADD_REMOVE) Slog.e(TAG_WM, "win=" + this
-                        + " destroySurfaces: appStopped=" + appStopped
-                        + " win.mWindowRemovalAllowed=" + mWindowRemovalAllowed
-                        + " win.mRemoveOnExit=" + mRemoveOnExit);
-
-                if (!cleanupOnResume || mRemoveOnExit) {
-                    destroyOrSaveSurface();
-                }
-                if (mRemoveOnExit) {
-                    removeImmediately();
-                }
-                if (cleanupOnResume) {
-                    requestUpdateWallpaperIfNeeded();
-                }
-                mDestroying = false;
-                destroyedSomething = true;
-            }
+        if (!(appStopped || mWindowRemovalAllowed || cleanupOnResume)) {
+            return destroyedSomething;
         }
+
+        if (appStopped || mWindowRemovalAllowed) {
+            mWinAnimator.destroyPreservedSurfaceLocked();
+        }
+
+        if (mDestroying) {
+            if (DEBUG_ADD_REMOVE) Slog.e(TAG_WM, "win=" + this
+                    + " destroySurfaces: appStopped=" + appStopped
+                    + " win.mWindowRemovalAllowed=" + mWindowRemovalAllowed
+                    + " win.mRemoveOnExit=" + mRemoveOnExit);
+            if (!cleanupOnResume || mRemoveOnExit) {
+                destroyOrSaveSurface();
+            }
+            if (mRemoveOnExit) {
+                removeImmediately();
+            }
+            if (cleanupOnResume) {
+                requestUpdateWallpaperIfNeeded();
+            }
+            mDestroying = false;
+            destroyedSomething = true;
+        }
+
         return destroyedSomething;
     }
 
@@ -4378,7 +4385,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // will keep their surface and its size may change over time.
             if (mHasSurface && !isChildWindow()) {
                 mWinAnimator.preserveSurfaceLocked();
-                result |= RELAYOUT_RES_FIRST_TIME;
+                result |= RELAYOUT_RES_SURFACE_CHANGED |
+                    RELAYOUT_RES_FIRST_TIME;
             }
         }
         final boolean freeformResizing = isDragResizing()
