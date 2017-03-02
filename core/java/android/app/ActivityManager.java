@@ -3024,14 +3024,22 @@ public class ActivityManager {
 
         /**
          * Constant for {@link #importance}: This process process contains
-         * background code that is expendable.
+         * cached code that is expendable, not actively running any app components
+         * we care about.
          */
-        public static final int IMPORTANCE_BACKGROUND = 400;
+        public static final int IMPORTANCE_CACHED = 400;
+
+        /**
+         * @deprecated Renamed to {@link #IMPORTANCE_CACHED}.
+         */
+        public static final int IMPORTANCE_BACKGROUND = IMPORTANCE_CACHED;
 
         /**
          * Constant for {@link #importance}: This process is empty of any
          * actively running code.
+         * @deprecated This value is no longer reported, use {@link #IMPORTANCE_CACHED} instead.
          */
+        @Deprecated
         public static final int IMPORTANCE_EMPTY = 500;
 
         /**
@@ -3044,7 +3052,7 @@ public class ActivityManager {
             if (procState == PROCESS_STATE_NONEXISTENT) {
                 return IMPORTANCE_GONE;
             } else if (procState >= PROCESS_STATE_HOME) {
-                return IMPORTANCE_BACKGROUND;
+                return IMPORTANCE_CACHED;
             } else if (procState >= PROCESS_STATE_SERVICE) {
                 return IMPORTANCE_SERVICE;
             } else if (procState > PROCESS_STATE_HEAVY_WEIGHT) {
@@ -3066,7 +3074,7 @@ public class ActivityManager {
         public static int importanceToProcState(int importance) {
             if (importance == IMPORTANCE_GONE) {
                 return PROCESS_STATE_NONEXISTENT;
-            } else if (importance >= IMPORTANCE_BACKGROUND) {
+            } else if (importance >= IMPORTANCE_CACHED) {
                 return PROCESS_STATE_HOME;
             } else if (importance >= IMPORTANCE_SERVICE) {
                 return PROCESS_STATE_SERVICE;
@@ -3088,8 +3096,8 @@ public class ActivityManager {
         /**
          * The relative importance level that the system places on this
          * process.  May be one of {@link #IMPORTANCE_FOREGROUND},
-         * {@link #IMPORTANCE_VISIBLE}, {@link #IMPORTANCE_SERVICE},
-         * {@link #IMPORTANCE_BACKGROUND}, or {@link #IMPORTANCE_EMPTY}.  These
+         * {@link #IMPORTANCE_VISIBLE}, {@link #IMPORTANCE_SERVICE}, or
+         * {@link #IMPORTANCE_CACHED}.  These
          * constants are numbered so that "more important" values are always
          * smaller than "less important" values.
          */
@@ -3101,7 +3109,7 @@ public class ActivityManager {
          * utility of processes within a category.  This number means nothing
          * except that a smaller values are more recently used (and thus
          * more important).  Currently an LRU value is only maintained for
-         * the {@link #IMPORTANCE_BACKGROUND} category, though others may
+         * the {@link #IMPORTANCE_CACHED} category, though others may
          * be maintained in the future.
          */
         public int lru;
