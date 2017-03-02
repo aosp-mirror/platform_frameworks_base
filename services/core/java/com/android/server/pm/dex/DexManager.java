@@ -22,6 +22,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageParser;
 import android.os.RemoteException;
 import android.os.storage.StorageManager;
+import android.os.UserHandle;
 
 import android.util.Slog;
 
@@ -179,17 +180,64 @@ public class DexManager {
         }
     }
 
-    public void notifyPackageInstalled(PackageInfo info, int userId) {
-        cachePackageCodeLocation(info, userId);
+    /**
+     * Notifies that a new package was installed for {@code userId}.
+     * {@code userId} must not be {@code UserHandle.USER_ALL}.
+     *
+     * @throws IllegalArgumentException if {@code userId} is {@code UserHandle.USER_ALL}.
+     */
+    public void notifyPackageInstalled(PackageInfo pi, int userId) {
+        if (userId == UserHandle.USER_ALL) {
+            throw new IllegalArgumentException(
+                "notifyPackageInstalled called with USER_ALL");
+        }
+        cachePackageCodeLocation(pi.packageName, pi.applicationInfo.sourceDir,
+                pi.applicationInfo.splitSourceDirs, pi.applicationInfo.dataDir, userId);
     }
 
-    private void cachePackageCodeLocation(PackageInfo info, int userId) {
-        PackageCodeLocations pcl = mPackageCodeLocationsCache.get(info.packageName);
-        if (pcl != null) {
-            pcl.mergeAppDataDirs(info.applicationInfo, userId);
-        } else {
-            mPackageCodeLocationsCache.put(info.packageName,
-                new PackageCodeLocations(info.applicationInfo, userId));
+    /**
+     * Notifies that package {@code packageName} was updated.
+     * This will clear the UsedByOtherApps mark if it exists.
+     */
+    public void notifyPackageUpdated(String packageName, String baseCodePath,
+            String[] splitCodePaths) {
+        cachePackageCodeLocation(packageName, baseCodePath, splitCodePaths, null, /*userId*/ -1);
+        // In case there was an update, write the package use info to disk async.
+        // Note that we do the writing here and not in PackageDexUsage in order to be
+        // consistent with other methods in DexManager (e.g. reconcileSecondaryDexFiles performs
+        // multiple updates in PackaeDexUsage before writing it).
+        if (mPackageDexUsage.clearUsedByOtherApps(packageName)) {
+            mPackageDexUsage.maybeWriteAsync();
+        }
+    }
+
+    /**
+     * Notifies that the user {@code userId} data for package {@code packageName}
+     * was destroyed. This will remove all usage info associated with the package
+     * for the given user.
+     * {@code userId} is allowed to be {@code UserHandle.USER_ALL} in which case
+     * all usage information for the package will be removed.
+     */
+    public void notifyPackageDataDestroyed(String packageName, int userId) {
+        boolean updated = userId == UserHandle.USER_ALL
+            ? mPackageDexUsage.removePackage(packageName)
+            : mPackageDexUsage.removeUserPackage(packageName, userId);
+        // In case there was an update, write the package use info to disk async.
+        // Note that we do the writing here and not in PackageDexUsage in order to be
+        // consistent with other methods in DexManager (e.g. reconcileSecondaryDexFiles performs
+        // multiple updates in PackaeDexUsage before writing it).
+        if (updated) {
+            mPackageDexUsage.maybeWriteAsync();
+        }
+    }
+
+    public void cachePackageCodeLocation(String packageName, String baseCodePath,
+            String[] splitCodePaths, String dataDir, int userId) {
+        PackageCodeLocations pcl = putIfAbsent(mPackageCodeLocationsCache, packageName,
+                new PackageCodeLocations(packageName, baseCodePath, splitCodePaths));
+        pcl.updateCodeLocation(baseCodePath, splitCodePaths);
+        if (dataDir != null) {
+            pcl.mergeAppDataDirs(dataDir, userId);
         }
     }
 
@@ -202,7 +250,8 @@ public class DexManager {
             int userId = entry.getKey();
             for (PackageInfo pi : packageInfoList) {
                 // Cache the code locations.
-                cachePackageCodeLocation(pi, userId);
+                cachePackageCodeLocation(pi.packageName, pi.applicationInfo.sourceDir,
+                        pi.applicationInfo.splitSourceDirs, pi.applicationInfo.dataDir, userId);
 
                 // Cache a map from package name to the set of user ids who installed the package.
                 // We will use it to sync the data and remove obsolete entries from
@@ -425,27 +474,36 @@ public class DexManager {
      */
     private static class PackageCodeLocations {
         private final String mPackageName;
-        private final String mBaseCodePath;
+        private String mBaseCodePath;
         private final Set<String> mSplitCodePaths;
         // Maps user id to the application private directory.
         private final Map<Integer, Set<String>> mAppDataDirs;
 
         public PackageCodeLocations(ApplicationInfo ai, int userId) {
-            mPackageName = ai.packageName;
-            mBaseCodePath = ai.sourceDir;
+            this(ai.packageName, ai.sourceDir, ai.splitSourceDirs);
+            mergeAppDataDirs(ai.dataDir, userId);
+        }
+        public PackageCodeLocations(String packageName, String baseCodePath,
+                String[] splitCodePaths) {
+            mPackageName = packageName;
             mSplitCodePaths = new HashSet<>();
-            if (ai.splitSourceDirs != null) {
-                for (String split : ai.splitSourceDirs) {
+            mAppDataDirs = new HashMap<>();
+            updateCodeLocation(baseCodePath, splitCodePaths);
+        }
+
+        public void updateCodeLocation(String baseCodePath, String[] splitCodePaths) {
+            mBaseCodePath = baseCodePath;
+            mSplitCodePaths.clear();
+            if (splitCodePaths != null) {
+                for (String split : splitCodePaths) {
                     mSplitCodePaths.add(split);
                 }
             }
-            mAppDataDirs = new HashMap<>();
-            mergeAppDataDirs(ai, userId);
         }
 
-        public void mergeAppDataDirs(ApplicationInfo ai, int userId) {
+        public void mergeAppDataDirs(String dataDir, int userId) {
             Set<String> dataDirs = putIfAbsent(mAppDataDirs, userId, new HashSet<>());
-            dataDirs.add(ai.dataDir);
+            dataDirs.add(dataDir);
         }
 
         public int searchDex(String dexPath, int userId) {
