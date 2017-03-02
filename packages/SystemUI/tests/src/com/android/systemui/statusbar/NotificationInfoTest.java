@@ -100,10 +100,6 @@ public class NotificationInfoTest extends SysuiTestCase {
         mNotificationChannel = new NotificationChannel(
                 TEST_CHANNEL, TEST_CHANNEL_NAME, NotificationManager.IMPORTANCE_LOW);
         when(mMockStatusBarNotification.getPackageName()).thenReturn(TEST_PACKAGE_NAME);
-        when(mMockPackageManager.getText(eq(TEST_PACKAGE_NAME),
-                eq(R.string.notification_menu_accessibility), anyObject())).thenReturn(
-                        getContext().getString(R.string.notification_menu_accessibility));
-
         when(mMockINotificationManager.getNumNotificationChannelsForPackage(
                 eq(TEST_PACKAGE_NAME), anyInt(), anyBoolean())).thenReturn(1);
     }
@@ -174,6 +170,28 @@ public class NotificationInfoTest extends SysuiTestCase {
 
     @Test
     @UiThreadTest
+    public void testBindNotification_SetsGroupName_resId() throws Exception {
+        when(mMockPackageManager.getText(eq(TEST_PACKAGE_NAME),
+                eq(R.string.legacy_vpn_name), anyObject())).thenReturn(
+                getContext().getString(R.string.legacy_vpn_name));
+        mNotificationChannel.setGroup("test_group_id");
+        final NotificationChannelGroup notificationChannelGroup =
+                new NotificationChannelGroup("test_group_id", R.string.legacy_vpn_name);
+        when(mMockINotificationManager.getNotificationChannelGroupForPackage(
+                eq("test_group_id"), eq(TEST_PACKAGE_NAME), anyInt()))
+                .thenReturn(notificationChannelGroup);
+        mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
+                mMockStatusBarNotification, mNotificationChannel, null, null, null);
+        final TextView groupNameView = (TextView) mNotificationInfo.findViewById(R.id.group_name);
+        assertEquals(View.VISIBLE, groupNameView.getVisibility());
+        assertEquals(mContext.getString(R.string.legacy_vpn_name), groupNameView.getText());
+        final TextView groupDividerView =
+                (TextView) mNotificationInfo.findViewById(R.id.pkg_group_divider);
+        assertEquals(View.VISIBLE, groupDividerView.getVisibility());
+    }
+
+    @Test
+    @UiThreadTest
     public void testBindNotification_SetsTextChannelName() throws Exception {
         mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
                 mMockStatusBarNotification, mNotificationChannel, null, null, null);
@@ -184,6 +202,9 @@ public class NotificationInfoTest extends SysuiTestCase {
     @Test
     @UiThreadTest
     public void testBindNotification_SetsTextChannelName_resId() throws Exception {
+        when(mMockPackageManager.getText(eq(TEST_PACKAGE_NAME),
+                eq(R.string.notification_menu_accessibility), anyObject())).thenReturn(
+                getContext().getString(R.string.notification_menu_accessibility));
         NotificationChannel notificationChannelResId = new NotificationChannel(
                 TEST_CHANNEL, R.string.notification_menu_accessibility,
                 NotificationManager.IMPORTANCE_LOW);

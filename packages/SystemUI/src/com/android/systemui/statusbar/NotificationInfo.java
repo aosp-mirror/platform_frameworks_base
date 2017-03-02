@@ -154,7 +154,12 @@ public class NotificationInfo extends LinearLayout implements GutsContent {
                         iNotificationManager.getNotificationChannelGroupForPackage(
                                 channel.getGroup(), pkg, appUid);
                 if (notificationChannelGroup != null) {
-                    groupName = notificationChannelGroup.getName();
+                    if (info != null && notificationChannelGroup.getNameResId() != 0) {
+                        groupName = pm.getText(pkg, notificationChannelGroup.getNameResId(), info);
+                    }
+                    if (notificationChannelGroup.getName() != null) {
+                        groupName = notificationChannelGroup.getName();
+                    }
                 }
             } catch (RemoteException e) {
                 Log.e(TAG, e.toString());
