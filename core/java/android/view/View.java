@@ -61,6 +61,7 @@ import android.graphics.Shader;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.hardware.display.DisplayManagerGlobal;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -3951,14 +3952,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * When this flag is used with {@link #DRAG_FLAG_GLOBAL}, the drag recipient will be able to
      * request read access to the content URI(s) contained in the {@link ClipData} object.
-     * @see android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION
+     * @see android.content.Intent#FLAG_GRANT_READ_URI_PERMISSION
      */
     public static final int DRAG_FLAG_GLOBAL_URI_READ = Intent.FLAG_GRANT_READ_URI_PERMISSION;
 
     /**
      * When this flag is used with {@link #DRAG_FLAG_GLOBAL}, the drag recipient will be able to
      * request write access to the content URI(s) contained in the {@link ClipData} object.
-     * @see android.content.Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+     * @see android.content.Intent#FLAG_GRANT_WRITE_URI_PERMISSION
      */
     public static final int DRAG_FLAG_GLOBAL_URI_WRITE = Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
 
@@ -3966,8 +3967,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * When this flag is used with {@link #DRAG_FLAG_GLOBAL_URI_READ} and/or {@link
      * #DRAG_FLAG_GLOBAL_URI_WRITE}, the URI permission grant can be persisted across device
      * reboots until explicitly revoked with
-     * {@link android.content.Context#revokeUriPermission(Uri,int) Context.revokeUriPermission}.
-     * @see android.content.Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
+     * {@link android.content.Context#revokeUriPermission(Uri, int)} Context.revokeUriPermission}.
+     * @see android.content.Intent#FLAG_GRANT_PERSISTABLE_URI_PERMISSION
      */
     public static final int DRAG_FLAG_GLOBAL_PERSISTABLE_URI_PERMISSION =
             Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION;
@@ -3976,7 +3977,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * When this flag is used with {@link #DRAG_FLAG_GLOBAL_URI_READ} and/or {@link
      * #DRAG_FLAG_GLOBAL_URI_WRITE}, the URI permission grant applies to any URI that is a prefix
      * match against the original granted URI.
-     * @see android.content.Intent.FLAG_GRANT_PREFIX_URI_PERMISSION
+     * @see android.content.Intent#FLAG_GRANT_PREFIX_URI_PERMISSION
      */
     public static final int DRAG_FLAG_GLOBAL_PREFIX_URI_PERMISSION =
             Intent.FLAG_GRANT_PREFIX_URI_PERMISSION;
@@ -7476,7 +7477,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param arguments A {@link Bundle} holding any arguments relevant for this request. May be
      *                  {@code null} if the service provided no arguments.
      *
-     * @see AccessibilityNodeInfo#setExtraAvailableData
+     * @see AccessibilityNodeInfo#setAvailableExtraData(List)
      */
     public void addExtraDataToAccessibilityNodeInfo(
             @NonNull AccessibilityNodeInfo info, @NonNull String extraDataKey,
@@ -9380,7 +9381,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Focus gets restored for a view hierarchy when the root of the hierarchy gets added to a
      * window or serves as a target of cluster navigation.
      *
-     * @see #restoreDefaultFocus(int)
+     * @see #restoreDefaultFocus()
      *
      * @return {@code true} if this view is the default-focus view, {@code false} otherwise
      * @attr ref android.R.styleable#View_focusedByDefault
@@ -9400,7 +9401,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param isFocusedByDefault {@code true} to set this view as the default-focus view,
      *                           {@code false} otherwise.
      *
-     * @see #restoreDefaultFocus(int)
+     * @see #restoreDefaultFocus()
      *
      * @attr ref android.R.styleable#View_focusedByDefault
      */
