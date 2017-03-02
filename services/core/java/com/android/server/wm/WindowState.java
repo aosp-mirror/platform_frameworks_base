@@ -2721,29 +2721,32 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             destroyedSomething |= c.destroySurface(cleanupOnResume, appStopped);
         }
 
-        if (appStopped || mWindowRemovalAllowed || cleanupOnResume) {
-
-            mWinAnimator.destroyPreservedSurfaceLocked();
-
-            if (mDestroying) {
-                if (DEBUG_ADD_REMOVE) Slog.e(TAG_WM, "win=" + this
-                        + " destroySurfaces: appStopped=" + appStopped
-                        + " win.mWindowRemovalAllowed=" + mWindowRemovalAllowed
-                        + " win.mRemoveOnExit=" + mRemoveOnExit);
-
-                if (!cleanupOnResume || mRemoveOnExit) {
-                    destroyOrSaveSurface();
-                }
-                if (mRemoveOnExit) {
-                    removeImmediately();
-                }
-                if (cleanupOnResume) {
-                    requestUpdateWallpaperIfNeeded();
-                }
-                mDestroying = false;
-                destroyedSomething = true;
-            }
+        if (!(appStopped || mWindowRemovalAllowed || cleanupOnResume)) {
+            return destroyedSomething;
         }
+
+        if (appStopped || mWindowRemovalAllowed) {
+            mWinAnimator.destroyPreservedSurfaceLocked();
+        }
+
+        if (mDestroying) {
+            if (DEBUG_ADD_REMOVE) Slog.e(TAG_WM, "win=" + this
+                    + " destroySurfaces: appStopped=" + appStopped
+                    + " win.mWindowRemovalAllowed=" + mWindowRemovalAllowed
+                    + " win.mRemoveOnExit=" + mRemoveOnExit);
+            if (!cleanupOnResume || mRemoveOnExit) {
+                destroyOrSaveSurface();
+            }
+            if (mRemoveOnExit) {
+                removeImmediately();
+            }
+            if (cleanupOnResume) {
+                requestUpdateWallpaperIfNeeded();
+            }
+            mDestroying = false;
+            destroyedSomething = true;
+        }
+
         return destroyedSomething;
     }
 
@@ -4401,7 +4404,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // will keep their surface and its size may change over time.
             if (mHasSurface && !isChildWindow()) {
                 mWinAnimator.preserveSurfaceLocked();
-                result |= RELAYOUT_RES_FIRST_TIME;
+                result |= RELAYOUT_RES_SURFACE_CHANGED |
+                    RELAYOUT_RES_FIRST_TIME;
             }
         }
         final boolean freeformResizing = isDragResizing()
