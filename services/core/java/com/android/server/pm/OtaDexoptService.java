@@ -314,7 +314,8 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
         optimizer.performDexOpt(pkg, libraryDependencies,
                 null /* ISAs */, false /* checkProfiles */,
                 getCompilerFilterForReason(compilationReason),
-                null /* CompilerStats.PackageStats */);
+                null /* CompilerStats.PackageStats */,
+                mPackageManagerService.getDexManager().isUsedByOtherApps(pkg.packageName));
 
         return commands;
     }

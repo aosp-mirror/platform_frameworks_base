@@ -133,7 +133,8 @@ public class PackageManagerServiceUtils {
                 sortTemp, packageManagerService);
 
         // Give priority to apps used by other apps.
-        applyPackageFilter((pkg) -> PackageDexOptimizer.isUsedByOtherApps(pkg), result,
+        applyPackageFilter((pkg) ->
+                packageManagerService.getDexManager().isUsedByOtherApps(pkg.packageName), result,
                 remainingPkgs, sortTemp, packageManagerService);
 
         // Filter out packages that aren't recently used, add all remaining apps.
