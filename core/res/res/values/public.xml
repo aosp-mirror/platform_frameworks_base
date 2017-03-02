@@ -2806,6 +2806,7 @@
         <public name="fontProviderPackage" />
         <public name="importantForAutofill" />
         <public name="recycleEnabled"/>
+        <public name="isStatic" />
     </public-group>
 
     <public-group type="style" first-id="0x010302e0">

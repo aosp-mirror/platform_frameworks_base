@@ -9,6 +9,7 @@
 #include <androidfw/ResourceTypes.h>
 #include <androidfw/StreamingZipInflater.h>
 #include <androidfw/ZipFileRO.h>
+#include <cutils/jstring.h>
 #include <private/android_filesystem_config.h> // for AID_SYSTEM
 #include <utils/SortedVector.h>
 #include <utils/String16.h>
@@ -81,7 +82,8 @@ namespace {
         return String8(tmp);
     }
 
-    int parse_overlay_tag(const ResXMLTree& parser, const char *target_package_name)
+    int parse_overlay_tag(const ResXMLTree& parser, const char *target_package_name,
+            bool* is_static_overlay)
     {
         const size_t N = parser.getAttributeCount();
         String16 target;
@@ -102,12 +104,39 @@ namespace {
                         return -1;
                     }
                 }
+            } else if (key == String16("isStatic")) {
+                Res_value v;
+                if (parser.getAttributeValue(i, &v) == sizeof(Res_value)) {
+                    *is_static_overlay = (v.data != 0);
+                }
             }
         }
         if (target == String16(target_package_name)) {
             return priority;
         }
         return NO_OVERLAY_TAG;
+    }
+
+    String16 parse_package_name(const ResXMLTree& parser)
+    {
+        const size_t N = parser.getAttributeCount();
+        String16 package_name;
+        for (size_t i = 0; i < N; ++i) {
+            size_t len;
+            String16 key(parser.getAttributeName(i, &len));
+            if (key == String16("package")) {
+                const char16_t *p = parser.getAttributeStringValue(i, &len);
+                if (p != NULL) {
+                    package_name = String16(p, len);
+                }
+            }
+        }
+        return package_name;
+    }
+
+    bool isValidStaticOverlayPackage(const String16& package_name) {
+        // TODO(b/35742444): Need to support selection method based on a package name.
+        return package_name.size() > 0;
     }
 
     int parse_manifest(const void *data, size_t size, const char *target_package_name)
@@ -120,17 +149,26 @@ namespace {
         }
 
         ResXMLParser::event_code_t type;
+        String16 package_name;
+        bool is_static_overlay = false;
+        int priority = NO_OVERLAY_TAG;
         do {
             type = parser.next();
             if (type == ResXMLParser::START_TAG) {
                 size_t len;
                 String16 tag(parser.getElementName(&len));
-                if (tag == String16("overlay")) {
-                    return parse_overlay_tag(parser, target_package_name);
+                if (tag == String16("manifest")) {
+                    package_name = parse_package_name(parser);
+                } else if (tag == String16("overlay")) {
+                    priority = parse_overlay_tag(parser, target_package_name, &is_static_overlay);
+                    break;
                 }
             }
         } while (type != ResXMLParser::BAD_DOCUMENT && type != ResXMLParser::END_DOCUMENT);
 
+        if (is_static_overlay && isValidStaticOverlayPackage(package_name)) {
+            return priority;
+        }
         return NO_OVERLAY_TAG;
     }
 

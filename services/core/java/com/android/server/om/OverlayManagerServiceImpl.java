@@ -288,6 +288,10 @@ final class OverlayManagerServiceImpl {
         if (overlayPackage == null) {
             return false;
         }
+        // Static overlay is always being enabled.
+        if (!enable && overlayPackage.isStaticOverlay) {
+            return false;
+        }
 
         try {
             final OverlayInfo oi = mSettings.getOverlayInfo(packageName, userId);
@@ -333,17 +337,28 @@ final class OverlayManagerServiceImpl {
         }
     }
 
+    boolean isPackageUpdatableOverlay(@NonNull final String packageName, final int userId) {
+        final PackageInfo overlayPackage = mPackageManager.getPackageInfo(packageName, userId);
+        if (overlayPackage == null || overlayPackage.isStaticOverlay) {
+            return false;
+        }
+        return true;
+    }
+
     boolean setPriority(@NonNull final String packageName,
             @NonNull final String newParentPackageName, final int userId) {
-        return mSettings.setPriority(packageName, newParentPackageName, userId);
+        return isPackageUpdatableOverlay(packageName, userId) &&
+                mSettings.setPriority(packageName, newParentPackageName, userId);
     }
 
     boolean setHighestPriority(@NonNull final String packageName, final int userId) {
-        return mSettings.setHighestPriority(packageName, userId);
+        return isPackageUpdatableOverlay(packageName, userId) &&
+                mSettings.setHighestPriority(packageName, userId);
     }
 
     boolean setLowestPriority(@NonNull final String packageName, final int userId) {
-        return mSettings.setLowestPriority(packageName, userId);
+        return isPackageUpdatableOverlay(packageName, userId) &&
+                mSettings.setLowestPriority(packageName, userId);
     }
 
     void onDump(@NonNull final PrintWriter pw) {
@@ -368,7 +383,9 @@ final class OverlayManagerServiceImpl {
     private void updateState(@Nullable final PackageInfo targetPackage,
             @NonNull final PackageInfo overlayPackage, final int userId)
         throws OverlayManagerSettings.BadKeyException {
-        if (targetPackage != null) {
+        // Static RROs targeting to "android", ie framework-res.apk, are handled by native layers.
+        if (targetPackage != null &&
+                !("android".equals(targetPackage.packageName) && overlayPackage.isStaticOverlay)) {
             mIdmapManager.createIdmap(targetPackage, overlayPackage, userId);
         }
 
