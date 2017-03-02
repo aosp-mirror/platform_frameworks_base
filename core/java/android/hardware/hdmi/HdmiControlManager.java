@@ -338,6 +338,20 @@ public final class HdmiControlManager {
     }
 
     /**
+     * Controls standby mode of the system. It will also try to turn on/off the connected devices if
+     * necessary.
+     *
+     * @param isStandbyModeOn target status of the system's standby mode
+     */
+    public void setStandbyMode(boolean isStandbyModeOn) {
+        try {
+            mService.setStandbyMode(isStandbyModeOn);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Listener used to get hotplug event from HDMI port.
      */
     public interface HotplugEventListener {
