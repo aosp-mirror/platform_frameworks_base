@@ -119,6 +119,9 @@ public final class DocumentsContract {
      * <p>Location should specify a document URI or a tree URI with document ID. If
      * this URI identifies a non-directory, document navigator will attempt to use the parent
      * of the document as the initial location.
+     *
+     * <p>The initial location is system specific if this extra is missing or document navigator
+     * failed to locate the desired initial location.
      */
     public static final String EXTRA_INITIAL_URI = "android.provider.extra.INITIAL_URI";
 
