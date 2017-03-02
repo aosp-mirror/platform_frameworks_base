@@ -18,8 +18,6 @@ package android.net;
 import static com.android.internal.util.Preconditions.checkNotNull;
 
 import android.annotation.SystemApi;
-import android.content.Context;
-import android.os.INetworkManagementService;
 import android.os.ParcelFileDescriptor;
 import android.util.AndroidException;
 import dalvik.system.CloseGuard;
@@ -79,11 +77,10 @@ public final class IpSecManager {
         }
     }
 
-    private final Context mContext;
-    private final INetworkManagementService mService;
+    private final IIpSecService mService;
 
     public static final class SecurityParameterIndex implements AutoCloseable {
-        private final Context mContext;
+        private final IIpSecService mService;
         private final InetAddress mDestinationAddress;
         private final CloseGuard mCloseGuard = CloseGuard.get();
         private int mSpi;
@@ -93,9 +90,10 @@ public final class IpSecManager {
             return mSpi;
         }
 
-        private SecurityParameterIndex(Context context, InetAddress destinationAddress, int spi)
+        private SecurityParameterIndex(
+                IIpSecService service, InetAddress destinationAddress, int spi)
                 throws ResourceUnavailableException, SpiUnavailableException {
-            mContext = context;
+            mService = service;
             mDestinationAddress = destinationAddress;
             mSpi = spi;
             mCloseGuard.open("open");
@@ -152,7 +150,7 @@ public final class IpSecManager {
     public SecurityParameterIndex reserveSecurityParameterIndex(
             InetAddress destinationAddress, int requestedSpi)
             throws SpiUnavailableException, ResourceUnavailableException {
-        return new SecurityParameterIndex(mContext, destinationAddress, requestedSpi);
+        return new SecurityParameterIndex(mService, destinationAddress, requestedSpi);
     }
 
     /**
@@ -260,19 +258,19 @@ public final class IpSecManager {
      */
     public static final class UdpEncapsulationSocket implements AutoCloseable {
         private final FileDescriptor mFd;
-        private final Context mContext;
+        private final IIpSecService mService;
         private final CloseGuard mCloseGuard = CloseGuard.get();
 
-        private UdpEncapsulationSocket(Context context, int port)
+        private UdpEncapsulationSocket(IIpSecService service, int port)
                 throws ResourceUnavailableException {
-            mContext = context;
+            mService = service;
             mCloseGuard.open("constructor");
             // TODO: go down to the kernel and get a socket on the specified
             mFd = new FileDescriptor();
         }
 
-        private UdpEncapsulationSocket(Context context) throws ResourceUnavailableException {
-            mContext = context;
+        private UdpEncapsulationSocket(IIpSecService service) throws ResourceUnavailableException {
+            mService = service;
             mCloseGuard.open("constructor");
             // TODO: go get a random socket on a random port
             mFd = new FileDescriptor();
@@ -339,7 +337,7 @@ public final class IpSecManager {
     public UdpEncapsulationSocket openUdpEncapsulationSocket(int port)
             throws IOException, ResourceUnavailableException {
         // Temporary code
-        return new UdpEncapsulationSocket(mContext, port);
+        return new UdpEncapsulationSocket(mService, port);
     }
 
     /**
@@ -363,7 +361,7 @@ public final class IpSecManager {
     public UdpEncapsulationSocket openUdpEncapsulationSocket()
             throws IOException, ResourceUnavailableException {
         // Temporary code
-        return new UdpEncapsulationSocket(mContext);
+        return new UdpEncapsulationSocket(mService);
     }
 
     /**
@@ -372,8 +370,7 @@ public final class IpSecManager {
      * @param context the application context for this manager
      * @hide
      */
-    public IpSecManager(Context context, INetworkManagementService service) {
-        mContext = checkNotNull(context, "missing context");
+    public IpSecManager(IIpSecService service) {
         mService = checkNotNull(service, "missing service");
     }
 }
