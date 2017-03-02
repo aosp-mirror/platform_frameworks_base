@@ -232,6 +232,73 @@ Bitmap& toBitmap(JNIEnv* env, jlong bitmapHandle) {
     return localBitmap->bitmap();
 }
 
+void imageInfo(JNIEnv* env, jobject bitmap, AndroidBitmapInfo* info) {
+    SkASSERT(info);
+    SkASSERT(env);
+    SkASSERT(bitmap);
+    SkASSERT(env->IsInstanceOf(bitmap, gBitmap_class));
+    jlong bitmapHandle = env->GetLongField(bitmap, gBitmap_nativePtr);
+    LocalScopedBitmap localBitmap(bitmapHandle);
+
+    const SkImageInfo& imageInfo = localBitmap->info();
+    info->width = imageInfo.width();
+    info->height = imageInfo.height();
+    info->stride = localBitmap->rowBytes();
+    info->flags = 0;
+    switch (imageInfo.colorType()) {
+        case kN32_SkColorType:
+            info->format = ANDROID_BITMAP_FORMAT_RGBA_8888;
+            break;
+        case kRGB_565_SkColorType:
+            info->format = ANDROID_BITMAP_FORMAT_RGB_565;
+            break;
+        case kARGB_4444_SkColorType:
+            info->format = ANDROID_BITMAP_FORMAT_RGBA_4444;
+            break;
+        case kAlpha_8_SkColorType:
+            info->format = ANDROID_BITMAP_FORMAT_A_8;
+            break;
+        default:
+            info->format = ANDROID_BITMAP_FORMAT_NONE;
+            break;
+    }
+}
+
+void* lockPixels(JNIEnv* env, jobject bitmap) {
+    SkASSERT(env);
+    SkASSERT(bitmap);
+    SkASSERT(env->IsInstanceOf(bitmap, gBitmap_class));
+    jlong bitmapHandle = env->GetLongField(bitmap, gBitmap_nativePtr);
+
+    LocalScopedBitmap localBitmap(bitmapHandle);
+    if (!localBitmap->valid()) return nullptr;
+
+    SkPixelRef& pixelRef = localBitmap->bitmap();
+    pixelRef.lockPixels();
+    if (!pixelRef.pixels()) {
+        pixelRef.unlockPixels();
+        return nullptr;
+    }
+    pixelRef.ref();
+    return pixelRef.pixels();
+}
+
+bool unlockPixels(JNIEnv* env, jobject bitmap) {
+    SkASSERT(env);
+    SkASSERT(bitmap);
+    SkASSERT(env->IsInstanceOf(bitmap, gBitmap_class));
+    jlong bitmapHandle = env->GetLongField(bitmap, gBitmap_nativePtr);
+
+    LocalScopedBitmap localBitmap(bitmapHandle);
+    if (!localBitmap->valid()) return false;
+
+    SkPixelRef& pixelRef = localBitmap->bitmap();
+    pixelRef.notifyPixelsChanged();
+    pixelRef.unlockPixels();
+    pixelRef.unref();
+    return true;
+}
+
 } // namespace bitmap
 
 } // namespace android
