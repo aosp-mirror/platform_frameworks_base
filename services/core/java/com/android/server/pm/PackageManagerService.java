@@ -8434,11 +8434,13 @@ public class PackageManagerService extends IPackageManager.Stub {
                 pdo.performDexOpt(depPackage, null /* sharedLibraries */, instructionSets,
                         false /* checkProfiles */,
                         getCompilerFilterForReason(REASON_NON_SYSTEM_LIBRARY),
-                        getOrCreateCompilerPackageStats(depPackage));
+                        getOrCreateCompilerPackageStats(depPackage),
+                        mDexManager.isUsedByOtherApps(p.packageName));
             }
         }
         return pdo.performDexOpt(p, p.usesLibraryFiles, instructionSets, checkProfiles,
-                targetCompilerFilter, getOrCreateCompilerPackageStats(p));
+                targetCompilerFilter, getOrCreateCompilerPackageStats(p),
+                mDexManager.isUsedByOtherApps(p.packageName));
     }
 
     // Performs dexopt on the used secondary dex files belonging to the given package.
@@ -16951,7 +16953,8 @@ public class PackageManagerService extends IPackageManager.Stub {
             mPackageDexOptimizer.performDexOpt(pkg, pkg.usesLibraryFiles,
                     null /* instructionSets */, false /* checkProfiles */,
                     getCompilerFilterForReason(REASON_INSTALL),
-                    getOrCreateCompilerPackageStats(pkg));
+                    getOrCreateCompilerPackageStats(pkg),
+                    mDexManager.isUsedByOtherApps(pkg.packageName));
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
 
             // Notify BackgroundDexOptJobService that the package has been changed.
