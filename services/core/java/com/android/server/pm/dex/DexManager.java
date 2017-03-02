@@ -359,6 +359,23 @@ public class DexManager {
     }
 
     /**
+     * Return true if the profiling data collected for the given app indicate
+     * that the apps's APK has been loaded by another app.
+     * Note that this returns false for all apps without any collected profiling data.
+    */
+    public boolean isUsedByOtherApps(String packageName) {
+        PackageUseInfo useInfo = getPackageUseInfo(packageName);
+        if (useInfo == null) {
+            // No use info, means the package was not used or it was used but not by other apps.
+            // Note that right now we might prune packages which are not used by other apps.
+            // TODO(calin): maybe we should not (prune) so we can have an accurate view when we try
+            // to access the package use.
+            return false;
+        }
+        return useInfo.isUsedByOtherApps();
+    }
+
+    /**
      * Retrieves the package which owns the given dexPath.
      */
     private DexSearchResult getDexPackage(
