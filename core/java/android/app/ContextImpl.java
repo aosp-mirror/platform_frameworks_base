@@ -2254,11 +2254,10 @@ class ContextImpl extends Context {
     }
 
     void setResources(Resources r) {
-        if (mPackageInfo.getTargetSdkVersion() < VERSION_CODES.O) {
-            mResources = new CompatResources(r, this);
-        } else {
-            mResources = r;
+        if (r instanceof CompatResources) {
+            ((CompatResources) r).setContext(this);
         }
+        mResources = r;
     }
 
     void installSystemApplicationInfo(ApplicationInfo info, ClassLoader classLoader) {
