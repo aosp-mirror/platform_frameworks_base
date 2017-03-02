@@ -16,7 +16,6 @@
 
 package com.android.server.am;
 
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_MU;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 
@@ -80,10 +79,11 @@ public final class UserState {
     }
 
     public void setState(int newState) {
-        if (DEBUG_MU) {
-            Slog.i(TAG, "User " + mHandle.getIdentifier() + " state changed from "
-                    + stateToString(state) + " to " + stateToString(newState));
+        if (newState == state) {
+            return;
         }
+        Slog.i(TAG, "User " + mHandle.getIdentifier() + " state changed from "
+                + stateToString(state) + " to " + stateToString(newState));
         lastState = state;
         state = newState;
     }
