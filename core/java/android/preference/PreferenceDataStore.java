@@ -21,15 +21,31 @@ import android.annotation.Nullable;
 import java.util.Set;
 
 /**
- * A data store interface to be implemented and provided to the Preferences framework.
+ * A data store interface to be implemented and provided to the Preferences framework. This can be
+ * used to replace the default {@link android.content.SharedPreferences}, if needed.
  *
- * Use this to replace the default {@link android.content.SharedPreferences}. By default, all "put"
- * methods throw {@link UnsupportedOperationException}.
+ * <p>In most cases you want to use {@link android.content.SharedPreferences} as it is automatically
+ * backed up and migrated to new devices. However, providing custom data store to preferences can be
+ * useful if your app stores its preferences in a local db, cloud or they are device specific like
+ * "Developer settings". It might be also useful when you want to use the preferences UI but
+ * the data are not supposed to be stored at all because they are valid per session only.
+ *
+ * <p>Once a put method is called it is full responsibility of the data store implementation to
+ * safely store the given values. Time expensive operations need to be done in the background to
+ * prevent from blocking the UI. You also need to have a plan on how to serialize the data in case
+ * the activity holding this object gets destroyed.
+ *
+ * <p>By default, all "put" methods throw {@link UnsupportedOperationException}.
+ *
+ * @see Preference#setPreferenceDataStore(PreferenceDataStore)
+ * @see PreferenceManager#setPreferenceDataStore(PreferenceDataStore)
  */
 public interface PreferenceDataStore {
 
     /**
      * Set a String value to the data store.
+     *
+     * <p>Once the value is set the data store is responsible for holding it.
      *
      * @param key The name of the preference to modify.
      * @param value The new value for the preference.
@@ -42,6 +58,8 @@ public interface PreferenceDataStore {
     /**
      * Set a set of String value to the data store.
      *
+     * <p>Once the value is set the data store is responsible for holding it.
+     *
      * @param key The name of the preference to modify.
      * @param values The set of new values for the preference.
      * @see #getStringSet(String, Set)
@@ -52,6 +70,8 @@ public interface PreferenceDataStore {
 
     /**
      * Set an int value to the data store.
+     *
+     * <p>Once the value is set the data store is responsible for holding it.
      *
      * @param key The name of the preference to modify.
      * @param value The new value for the preference.
@@ -64,6 +84,8 @@ public interface PreferenceDataStore {
     /**
      * Set a long value to the data store.
      *
+     * <p>Once the value is set the data store is responsible for holding it.
+     *
      * @param key The name of the preference to modify.
      * @param value The new value for the preference.
      * @see #getLong(String, long)
@@ -75,6 +97,8 @@ public interface PreferenceDataStore {
     /**
      * Set a float value to the data store.
      *
+     * <p>Once the value is set the data store is responsible for holding it.
+     *
      * @param key The name of the preference to modify.
      * @param value The new value for the preference.
      * @see #getFloat(String, float)
@@ -85,6 +109,8 @@ public interface PreferenceDataStore {
 
     /**
      * Set a boolean value to the data store.
+     *
+     * <p>Once the value is set the data store is responsible for holding it.
      *
      * @param key The name of the preference to modify.
      * @param value The new value for the preference.
