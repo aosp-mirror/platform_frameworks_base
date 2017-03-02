@@ -126,7 +126,9 @@ public class TileService extends Service {
     public static final String EXTRA_TOKEN = "token";
 
     /**
-     * @hide
+     * May be included when {@link #ACTION_QS_TILE_PREFERENCES} is launched from a tile.
+     * This extra may contain the {@link ComponentName} of the tile that triggered
+     * the preferences to be opened.
      */
     public static final String EXTRA_COMPONENT = "android.service.quicksettings.extra.COMPONENT";
 
