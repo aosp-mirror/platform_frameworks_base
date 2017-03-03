@@ -41,6 +41,7 @@ import com.android.internal.backup.IBackupTransport;
 import com.android.server.EventLogTags;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -103,13 +104,18 @@ class TransportManager {
         // been removed from mBoundTransports because onServiceDisconnected would already been
         // called on TransportConnection objects.
         synchronized (mTransportLock) {
-            for (ComponentName transport : mValidTransports.keySet()) {
-                if (transport.getPackageName().equals(packageName)) {
-                    TransportConnection removed = mValidTransports.remove(transport);
-                    if (removed != null) {
-                        mContext.unbindService(removed);
-                        log_verbose("Package removed, Removing transport: " +
-                                transport.flattenToShortString());
+            Iterator<Map.Entry<ComponentName, TransportConnection>> iter =
+                    mValidTransports.entrySet().iterator();
+            while (iter.hasNext()) {
+                Map.Entry<ComponentName, TransportConnection> validTransport = iter.next();
+                ComponentName componentName = validTransport.getKey();
+                if (componentName.getPackageName().equals(packageName)) {
+                    TransportConnection transportConnection = validTransport.getValue();
+                    iter.remove();
+                    if (transportConnection != null) {
+                        mContext.unbindService(transportConnection);
+                        log_verbose("Package removed, removing transport: "
+                                + componentName.flattenToShortString());
                     }
                 }
             }
@@ -278,15 +284,16 @@ class TransportManager {
     }
 
     private void tryBindTransport(ServiceInfo transport) {
-        Slog.d(TAG, "Binding to transport: " + transport.getComponentName().flattenToShortString());
+        final ComponentName transportComponentName = transport.getComponentName();
+        Slog.d(TAG, "Binding to transport: " + transportComponentName.flattenToShortString());
         // TODO: b/22388012 (Multi user backup and restore)
-        TransportConnection connection = new TransportConnection(transport.getComponentName());
-        if (bindToTransport(transport.getComponentName(), connection)) {
+        TransportConnection connection = new TransportConnection(transportComponentName);
+        if (bindToTransport(transportComponentName, connection)) {
             synchronized (mTransportLock) {
-                mValidTransports.put(transport.getComponentName(), connection);
+                mValidTransports.put(transportComponentName, connection);
             }
         } else {
-            Slog.w(TAG, "Couldn't bind to transport " + transport.getComponentName());
+            Slog.w(TAG, "Couldn't bind to transport " + transportComponentName);
         }
     }
 
