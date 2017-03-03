@@ -58,7 +58,7 @@ public abstract class QSTile<TState extends State> {
 
     protected final Host mHost;
     protected final Context mContext;
-    protected final H mHandler;
+    protected final H mHandler = new H(Dependency.get(Dependency.BG_LOOPER));
     protected final Handler mUiHandler = new Handler(Looper.getMainLooper());
     private final ArraySet<Object> mListeners = new ArraySet<>();
 
@@ -86,7 +86,6 @@ public abstract class QSTile<TState extends State> {
     protected QSTile(Host host) {
         mHost = host;
         mContext = host.getContext();
-        mHandler = new H(Dependency.get(Dependency.BG_LOOPER));
     }
 
     /**
@@ -170,7 +169,7 @@ public abstract class QSTile<TState extends State> {
         mHandler.obtainMessage(H.SHOW_DETAIL, show ? 1 : 0, 0).sendToTarget();
     }
 
-    public final void refreshState() {
+    public void refreshState() {
         refreshState(null);
     }
 
@@ -178,7 +177,7 @@ public abstract class QSTile<TState extends State> {
         mHandler.obtainMessage(H.REFRESH_STATE, arg).sendToTarget();
     }
 
-    public final void clearState() {
+    public void clearState() {
         mHandler.sendEmptyMessage(H.CLEAR_STATE);
     }
 
