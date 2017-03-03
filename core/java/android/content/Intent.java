@@ -1324,6 +1324,7 @@ public class Intent implements Parcelable, Cloneable {
      * Output: nothing.
      * @hide
      */
+    @SystemApi
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_VOICE_ASSIST = "android.intent.action.VOICE_ASSIST";
 
