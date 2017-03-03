@@ -510,6 +510,13 @@ interface IPackageManager {
     void forceDexOpt(String packageName);
 
     /**
+     * Reconcile the information we have about the secondary dex files belonging to
+     * {@code packagName} and the actual dex files. For all dex files that were
+     * deleted, update the internal records and delete the generated oat files.
+     */
+    void reconcileSecondaryDexFiles(String packageName);
+
+    /**
      * Update status of external media on the package manager to scan and
      * install packages installed on the external media. Like say the
      * MountService uses this to call into the package manager to update

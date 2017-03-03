@@ -73,7 +73,7 @@ public class DexManagerTests {
         mInvalidIsa = new TestData("INVALID", "INVALID_ISA", mUser0);
         mDoesNotExist = new TestData("DOES.NOT.EXIST", isa, mUser1);
 
-        mDexManager = new DexManager(null, null);
+        mDexManager = new DexManager(null, null, null, null);
 
         // Foo and Bar are available to user0.
         // Only Bar is available to user1;
