@@ -79,7 +79,9 @@ public class NotificationIconAreaController implements DarkReceiver {
         for (int i = 0; i < mNotificationIcons.getChildCount(); i++) {
             View child = mNotificationIcons.getChildAt(i);
             child.setLayoutParams(params);
-            child = mShelfIcons.getChildAt(i);
+        }
+        for (int i = 0; i < mShelfIcons.getChildCount(); i++) {
+            View child = mShelfIcons.getChildAt(i);
             child.setLayoutParams(params);
         }
     }

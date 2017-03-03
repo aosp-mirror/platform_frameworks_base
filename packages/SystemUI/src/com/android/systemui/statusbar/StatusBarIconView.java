@@ -612,8 +612,10 @@ public class StatusBarIconView extends AnimatedImageView {
     }
 
     public void setIconAppearAmount(float iconAppearAmount) {
-        mIconAppearAmount = iconAppearAmount;
-        invalidate();
+        if (mIconAppearAmount != iconAppearAmount) {
+            mIconAppearAmount = iconAppearAmount;
+            invalidate();
+        }
     }
 
     public float getIconAppearAmount() {
@@ -625,8 +627,10 @@ public class StatusBarIconView extends AnimatedImageView {
     }
 
     public void setDotAppearAmount(float dotAppearAmount) {
-        mDotAppearAmount = dotAppearAmount;
-        invalidate();
+        if (mDotAppearAmount != dotAppearAmount) {
+            mDotAppearAmount = dotAppearAmount;
+            invalidate();
+        }
     }
 
     @Override

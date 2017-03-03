@@ -172,7 +172,6 @@ import com.android.systemui.statusbar.ScrimView;
 import com.android.systemui.statusbar.SignalClusterView;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.InflationException;
-import com.android.systemui.statusbar.notification.NotificationInflater;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.phone.StatusBarIconController.IconManager;
 import com.android.systemui.statusbar.phone.UnlockMethodCache.OnUnlockMethodChangedListener;
@@ -717,7 +716,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private LogMaker mStatusBarStateLog;
     private LockscreenGestureLogger mLockscreenGestureLogger = new LockscreenGestureLogger();
     private NotificationIconAreaController mNotificationIconAreaController;
-    private ConfigurationListener mDensityChangeListener;
+    private ConfigurationListener mConfigurationListener;
     private InflationExceptionHandler mInflationExceptionHandler = this::handleInflationException;
 
     private void recycleAllVisibilityObjects(ArraySet<NotificationVisibility> array) {
@@ -945,13 +944,18 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         Dependency.get(ActivityStarterDelegate.class).setActivityStarterImpl(this);
 
-        mDensityChangeListener = new ConfigurationListener() {
+        mConfigurationListener = new ConfigurationListener() {
+            @Override
+            public void onConfigChanged(Configuration newConfig) {
+                StatusBar.this.onConfigurationChanged(newConfig);
+            }
+
             @Override
             public void onDensityOrFontScaleChanged() {
                 StatusBar.this.onDensityOrFontScaleChanged();
             }
         };
-        Dependency.get(ConfigurationController.class).addCallback(mDensityChangeListener);
+        Dependency.get(ConfigurationController.class).addCallback(mConfigurationListener);
     }
 
     protected void createIconController() {
@@ -2034,10 +2038,10 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     private void updateEmptyShadeView() {
-        boolean showEmptyShade =
+        boolean showEmptyShadeView =
                 mState != StatusBarState.KEYGUARD &&
                         mNotificationData.getActiveNotifications().size() == 0;
-        mNotificationPanel.setShadeEmpty(showEmptyShade);
+        mNotificationPanel.showEmptyShadeView(showEmptyShadeView);
     }
 
     private void updateSpeedBumpIndex() {
@@ -2720,8 +2724,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         return mLaunchTransitionFadingAway;
     }
 
-    public boolean shouldHideNotificationIcons() {
-        return mNotificationPanel.shouldHideNotificationIcons();
+    public boolean hideStatusBarIconsWhenExpanded() {
+        return mNotificationPanel.hideStatusBarIconsWhenExpanded();
     }
 
     /**
@@ -2963,17 +2967,13 @@ public class StatusBar extends SystemUI implements DemoMode,
         runPostCollapseRunnables();
         setInteracting(StatusBarManager.WINDOW_STATUS_BAR, false);
         showBouncerIfKeyguard();
-        recomputeDisableFlags(shouldAnimatIconHiding() /* animate */);
+        recomputeDisableFlags(mNotificationPanel.hideStatusBarIconsWhenExpanded() /* animate */);
 
         // Trimming will happen later if Keyguard is showing - doing it here might cause a jank in
         // the bouncer appear animation.
         if (!mStatusBarKeyguardViewManager.isShowing()) {
             WindowManagerGlobal.getInstance().trimMemory(ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN);
         }
-    }
-
-    private boolean shouldAnimatIconHiding() {
-        return mNotificationPanel.shouldAnimateIconHiding();
     }
 
     public boolean interceptTouchEvent(MotionEvent event) {
@@ -3910,7 +3910,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
         Dependency.get(ActivityStarterDelegate.class).setActivityStarterImpl(null);
         mDeviceProvisionedController.removeCallback(mUserSetupObserver);
-        Dependency.get(ConfigurationController.class).removeCallback(mDensityChangeListener);
+        Dependency.get(ConfigurationController.class).removeCallback(mConfigurationListener);
     }
 
     private boolean mDemoModeAllowed;
@@ -6570,6 +6570,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 }
             }
         }
+        mNotificationPanel.setNoVisibleNotifications(visibleNotifications == 0);
 
         mStackScroller.changeViewPosition(mDismissView, mStackScroller.getChildCount() - 1);
         mStackScroller.changeViewPosition(mEmptyShadeView, mStackScroller.getChildCount() - 2);
