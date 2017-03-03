@@ -79,6 +79,9 @@ public final class AutoFillType implements Parcelable {
      * <p>{@link AutoFillValue} instances for auto-filling a {@link View} can be obtained through
      * {@link AutoFillValue#forList(int)}, and the value passed to auto-fill a
      * {@link View} can be fetched through {@link AutoFillValue#getListValue()}.
+     *
+     * <p>The available options in the selection list are typically provided by
+     * {@link android.app.assist.AssistStructure.ViewNode#getAutoFillOptions()}.
      */
     public boolean isList() {
         return mType == TYPE_LIST;

@@ -1585,9 +1585,6 @@ public class AssistStructure implements Parcelable {
             mNode.mInputType = inputType;
         }
 
-        /**
-         * @hide
-         */
         @Override
         public void setSanitized(boolean sanitized) {
             mNode.mSanitized = sanitized;
