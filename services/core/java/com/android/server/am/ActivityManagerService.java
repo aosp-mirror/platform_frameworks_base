@@ -12111,6 +12111,12 @@ public class ActivityManagerService extends IActivityManager.Stub
         mRecentTasks.notifyTaskPersisterLocked(task, flush);
     }
 
+    /** Notifies all listeners when the pinned stack animation starts. */
+    @Override
+    public void notifyPinnedStackAnimationStarted() {
+        mTaskChangeNotificationController.notifyPinnedStackAnimationStarted();
+    }
+
     /** Notifies all listeners when the pinned stack animation ends. */
     @Override
     public void notifyPinnedStackAnimationEnded() {

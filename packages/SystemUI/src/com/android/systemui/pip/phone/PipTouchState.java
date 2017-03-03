@@ -37,6 +37,7 @@ public class PipTouchState {
     private final PointF mLastTouch = new PointF();
     private final PointF mLastDelta = new PointF();
     private final PointF mVelocity = new PointF();
+    private boolean mAllowTouches = true;
     private boolean mIsUserInteracting = false;
     private boolean mIsDragging = false;
     private boolean mStartedDragging = false;
@@ -48,23 +49,41 @@ public class PipTouchState {
     }
 
     /**
+     * Resets this state.
+     */
+    public void reset() {
+        mAllowDraggingOffscreen = false;
+        mIsDragging = false;
+        mStartedDragging = false;
+        mIsUserInteracting = false;
+    }
+
+    /**
      * Processess a given touch event and updates the state.
      */
     public void onTouchEvent(MotionEvent ev) {
         switch (ev.getAction()) {
             case MotionEvent.ACTION_DOWN: {
+                if (!mAllowTouches) {
+                    return;
+                }
+
                 // Initialize the velocity tracker
                 initOrResetVelocityTracker();
+
                 mActivePointerId = ev.getPointerId(0);
                 mLastTouch.set(ev.getX(), ev.getY());
                 mDownTouch.set(mLastTouch);
-                mIsDragging = false;
-                mStartedDragging = false;
                 mAllowDraggingOffscreen = true;
                 mIsUserInteracting = true;
                 break;
             }
             case MotionEvent.ACTION_MOVE: {
+                // Skip event if we did not start processing this touch gesture
+                if (!mIsUserInteracting) {
+                    break;
+                }
+
                 // Update the velocity tracker
                 mVelocityTracker.addMovement(ev);
                 int pointerIndex = ev.findPointerIndex(mActivePointerId);
@@ -86,6 +105,11 @@ public class PipTouchState {
                 break;
             }
             case MotionEvent.ACTION_POINTER_UP: {
+                // Skip event if we did not start processing this touch gesture
+                if (!mIsUserInteracting) {
+                    break;
+                }
+
                 // Update the velocity tracker
                 mVelocityTracker.addMovement(ev);
 
@@ -100,6 +124,11 @@ public class PipTouchState {
                 break;
             }
             case MotionEvent.ACTION_UP: {
+                // Skip event if we did not start processing this touch gesture
+                if (!mIsUserInteracting) {
+                    break;
+                }
+
                 // Update the velocity tracker
                 mVelocityTracker.addMovement(ev);
                 mVelocityTracker.computeCurrentVelocity(1000,
@@ -112,7 +141,6 @@ public class PipTouchState {
                 // Fall through to clean up
             }
             case MotionEvent.ACTION_CANCEL: {
-                mIsUserInteracting = false;
                 recycleVelocityTracker();
                 break;
             }
@@ -171,6 +199,19 @@ public class PipTouchState {
     }
 
     /**
+     * Sets whether touching is currently allowed.
+     */
+    public void setAllowTouches(boolean allowTouches) {
+        mAllowTouches = allowTouches;
+
+        // If the user happens to touch down before this is sent from the system during a transition
+        // then block any additional handling by resetting the state now
+        if (mIsUserInteracting) {
+            reset();
+        }
+    }
+
+    /**
      * Disallows dragging offscreen for the duration of the current gesture.
      */
     public void setDisallowDraggingOffscreen() {
@@ -202,6 +243,7 @@ public class PipTouchState {
     public void dump(PrintWriter pw, String prefix) {
         final String innerPrefix = prefix + "  ";
         pw.println(prefix + TAG);
+        pw.println(innerPrefix + "mAllowTouches=" + mAllowTouches);
         pw.println(innerPrefix + "mDownTouch=" + mDownTouch);
         pw.println(innerPrefix + "mDownDelta=" + mDownDelta);
         pw.println(innerPrefix + "mLastTouch=" + mLastTouch);
