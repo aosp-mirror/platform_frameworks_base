@@ -288,7 +288,7 @@ public class CustomTile extends QSTile<QSTile.State> implements TileChangeListen
             drawable = mTile.getIcon().loadDrawable(mContext);
         } catch (Exception e) {
             Log.w(TAG, "Invalid icon, forcing into unavailable state");
-            tileState = Tile.STATE_UNAVAILABLE;
+            state.state = Tile.STATE_UNAVAILABLE;
             drawable = mDefaultIcon.loadDrawable(mContext);
         }
         state.icon = new DrawableIcon(drawable);
