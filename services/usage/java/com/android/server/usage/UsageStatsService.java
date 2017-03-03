@@ -98,7 +98,7 @@ public class UsageStatsService extends SystemService implements
 
     static final String TAG = "UsageStatsService";
     public static final boolean ENABLE_TIME_CHANGE_CORRECTION
-            = SystemProperties.getBoolean("debug.time_change_correction", true);
+            = SystemProperties.getBoolean("persist.debug.time_correction", true);
 
     static final boolean DEBUG = false; // Never submit with true
     static final boolean COMPRESS_TIME = false;
