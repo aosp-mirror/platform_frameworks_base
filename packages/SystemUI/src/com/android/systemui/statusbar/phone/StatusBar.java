@@ -718,6 +718,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private NotificationIconAreaController mNotificationIconAreaController;
     private ConfigurationListener mConfigurationListener;
     private InflationExceptionHandler mInflationExceptionHandler = this::handleInflationException;
+    private boolean mReinflateNotificationsOnUserSwitched;
 
     private void recycleAllVisibilityObjects(ArraySet<NotificationVisibility> array) {
         final int N = array.size();
@@ -1277,16 +1278,10 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     protected void onDensityOrFontScaleChanged() {
         // start old BaseStatusBar.onDensityOrFontScaleChanged().
-        ArrayList<Entry> activeNotifications = mNotificationData.getActiveNotifications();
-        for (int i = 0; i < activeNotifications.size(); i++) {
-            Entry entry = activeNotifications.get(i);
-            boolean exposedGuts = mNotificationGutsExposed != null
-                    && entry.row.getGuts() == mNotificationGutsExposed;
-            entry.row.onDensityOrFontScaleChanged();
-            if (exposedGuts) {
-                mNotificationGutsExposed = entry.row.getGuts();
-                bindGuts(entry.row, mGutsMenuItem);
-            }
+        if (!KeyguardUpdateMonitor.getInstance(mContext).isSwitchingUser()) {
+            updateNotificationsOnDensityOrFontScaleChanged();
+        } else {
+            mReinflateNotificationsOnUserSwitched = true;
         }
         // end old BaseStatusBar.onDensityOrFontScaleChanged().
         mScrimController.onDensityOrFontScaleChanged();
@@ -1308,6 +1303,20 @@ public class StatusBar extends SystemUI implements DemoMode,
         Dependency.get(UserSwitcherController.class).onDensityOrFontScaleChanged();
         if (mKeyguardUserSwitcher != null) {
             mKeyguardUserSwitcher.onDensityOrFontScaleChanged();
+        }
+    }
+
+    private void updateNotificationsOnDensityOrFontScaleChanged() {
+        ArrayList<Entry> activeNotifications = mNotificationData.getActiveNotifications();
+        for (int i = 0; i < activeNotifications.size(); i++) {
+            Entry entry = activeNotifications.get(i);
+            boolean exposedGuts = mNotificationGutsExposed != null
+                    && entry.row.getGuts() == mNotificationGutsExposed;
+            entry.row.onDensityOrFontScaleChanged();
+            if (exposedGuts) {
+                mNotificationGutsExposed = entry.row.getGuts();
+                bindGuts(entry.row, mGutsMenuItem);
+            }
         }
     }
 
@@ -3601,7 +3610,12 @@ public class StatusBar extends SystemUI implements DemoMode,
         if (MULTIUSER_DEBUG) mNotificationPanelDebugText.setText("USER " + newUserId);
         animateCollapsePanels();
         updatePublicMode();
-        updateNotifications();
+        mNotificationData.filterAndSort();
+        if (mReinflateNotificationsOnUserSwitched) {
+            updateNotificationsOnDensityOrFontScaleChanged();
+            mReinflateNotificationsOnUserSwitched = false;
+        }
+        updateNotificationShade();
         clearCurrentMediaNotification();
         setLockscreenUser(newUserId);
     }
