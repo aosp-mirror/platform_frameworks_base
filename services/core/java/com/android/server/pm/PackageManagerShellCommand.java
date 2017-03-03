@@ -112,6 +112,8 @@ class PackageManagerShellCommand extends ShellCommand {
                     return runCompile();
                 case "reconcile-secondary-dex-files":
                     return runreconcileSecondaryDexFiles();
+                case "bg-dexopt-job":
+                    return runDexoptJob();
                 case "dump-profiles":
                     return runDumpProfiles();
                 case "list":
@@ -429,6 +431,11 @@ class PackageManagerShellCommand extends ShellCommand {
         String packageName = getNextArg();
         mInterface.reconcileSecondaryDexFiles(packageName);
         return 0;
+    }
+
+    private int runDexoptJob() throws RemoteException {
+        boolean result = mInterface.runBackgroundDexoptJob();
+        return result ? 0 : -1;
     }
 
     private int runDumpProfiles() throws RemoteException {
@@ -1463,7 +1470,13 @@ class PackageManagerShellCommand extends ShellCommand {
         }
         pw.println("      --reset: restore package to its post-install state");
         pw.println("      --check-prof (true | false): look at profiles when doing dexopt?");
-        pw.println("      --secondary-dex: copmile app secondary dex files");
+        pw.println("      --secondary-dex: compile app secondary dex files");
+        pw.println("  bg-dexopt-job");
+        pw.println("    Execute the background optimizations immediately.");
+        pw.println("    Note that the command only runs the background optimizer logic. It may");
+        pw.println("    overlap with the actual job but the job scheduler will not be able to");
+        pw.println("    cancel it. It will also run even if the device is not in the idle");
+        pw.println("    maintenance mode.");
         pw.println("  list features");
         pw.println("    Prints all features of the system.");
         pw.println("  list instrumentation [-f] [TARGET-PACKAGE]");

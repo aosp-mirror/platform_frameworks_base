@@ -280,6 +280,17 @@ public class BackgroundDexOptService extends JobService {
         return false;
     }
 
+    /**
+     * Execute the idle optimizations immediately.
+     */
+    public static boolean runIdleOptimizationsNow(PackageManagerService pm, Context context) {
+        // Create a new object to make sure we don't interfere with the scheduled jobs.
+        // Note that this may still run at the same time with the job scheduled by the
+        // JobScheduler but the scheduler will not be able to cancel it.
+        BackgroundDexOptService bdos = new BackgroundDexOptService();
+        return bdos.idleOptimization(pm, pm.getOptimizablePackages(), context);
+    }
+
     @Override
     public boolean onStartJob(JobParameters params) {
         if (DEBUG_DEXOPT) {
