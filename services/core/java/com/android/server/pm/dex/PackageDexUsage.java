@@ -378,6 +378,8 @@ public class PackageDexUsage extends AbstractStatsBase<Void> {
 
     /**
      * Remove all the records about package {@code packageName} belonging to user {@code userId}.
+     * @return true if the record was found and actually deleted,
+     *         false if the record doesn't exist
      */
     public boolean removeUserPackage(String packageName, int userId) {
         synchronized (mPackageUseInfoMap) {
@@ -402,6 +404,8 @@ public class PackageDexUsage extends AbstractStatsBase<Void> {
     /**
      * Remove the secondary dex file record belonging to the package {@code packageName}
      * and user {@code userId}.
+     * @return true if the record was found and actually deleted,
+     *         false if the record doesn't exist
      */
     public boolean removeDexFile(String packageName, String dexFile, int userId) {
         synchronized (mPackageUseInfoMap) {
