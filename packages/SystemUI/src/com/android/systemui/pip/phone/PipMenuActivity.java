@@ -49,6 +49,7 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.WindowManager.LayoutParams;
+import android.view.accessibility.AccessibilityManager;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -143,6 +144,7 @@ public class PipMenuActivity extends Activity {
         mExpandButton = (ImageView) findViewById(R.id.expand_button);
 
         updateFromIntent(getIntent());
+        setTitle(R.string.pip_menu_title);
         notifyActivityCallback(mMessenger);
     }
 
@@ -261,6 +263,9 @@ public class PipMenuActivity extends Activity {
                 public void onAnimationEnd(Animator animation) {
                     if (animationFinishedRunnable != null) {
                         animationFinishedRunnable.run();
+                    }
+                    if (getSystemService(AccessibilityManager.class).isEnabled()) {
+                        finish();
                     }
                 }
             });

@@ -74,7 +74,15 @@ public final class AccessibilityWindowInfo implements Parcelable {
      */
     public static final int TYPE_SPLIT_SCREEN_DIVIDER = 5;
 
-    private static final int UNDEFINED = -1;
+    /* Special values for window IDs */
+    /** @hide */
+    public static final int ACTIVE_WINDOW_ID = Integer.MAX_VALUE;
+    /** @hide */
+    public static final int UNDEFINED_WINDOW_ID = -1;
+    /** @hide */
+    public static final int ANY_WINDOW_ID = -2;
+    /** @hide */
+    public static final int PICTURE_IN_PICTURE_ACTION_REPLACER_WINDOW_ID = -3;
 
     private static final int BOOLEAN_PROPERTY_ACTIVE = 1 << 0;
     private static final int BOOLEAN_PROPERTY_FOCUSED = 1 << 1;
@@ -87,17 +95,18 @@ public final class AccessibilityWindowInfo implements Parcelable {
     private static AtomicInteger sNumInstancesInUse;
 
     // Data.
-    private int mType = UNDEFINED;
-    private int mLayer = UNDEFINED;
+    private int mType = UNDEFINED_WINDOW_ID;
+    private int mLayer = UNDEFINED_WINDOW_ID;
     private int mBooleanProperties;
-    private int mId = UNDEFINED;
-    private int mParentId = UNDEFINED;
+    private int mId = UNDEFINED_WINDOW_ID;
+    private int mParentId = UNDEFINED_WINDOW_ID;
     private final Rect mBoundsInScreen = new Rect();
     private LongArray mChildIds;
     private CharSequence mTitle;
-    private int mAnchorId = UNDEFINED;
+    private int mAnchorId = UNDEFINED_WINDOW_ID;
+    private boolean mInPictureInPicture;
 
-    private int mConnectionId = UNDEFINED;
+    private int mConnectionId = UNDEFINED_WINDOW_ID;
 
     private AccessibilityWindowInfo() {
         /* do nothing - hide constructor */
@@ -177,7 +186,7 @@ public final class AccessibilityWindowInfo implements Parcelable {
      * @return The root node.
      */
     public AccessibilityNodeInfo getRoot() {
-        if (mConnectionId == UNDEFINED) {
+        if (mConnectionId == UNDEFINED_WINDOW_ID) {
             return null;
         }
         AccessibilityInteractionClient client = AccessibilityInteractionClient.getInstance();
@@ -203,7 +212,8 @@ public final class AccessibilityWindowInfo implements Parcelable {
      * @return The anchor node, or {@code null} if none exists.
      */
     public AccessibilityNodeInfo getAnchor() {
-        if ((mConnectionId == UNDEFINED) || (mAnchorId == UNDEFINED) || (mParentId == UNDEFINED)) {
+        if ((mConnectionId == UNDEFINED_WINDOW_ID) || (mAnchorId == UNDEFINED_WINDOW_ID)
+                || (mParentId == UNDEFINED_WINDOW_ID)) {
             return null;
         }
 
@@ -212,13 +222,27 @@ public final class AccessibilityWindowInfo implements Parcelable {
                 mParentId, mAnchorId, true, 0, null);
     }
 
+    /** @hide */
+    public void setPictureInPicture(boolean pictureInPicture) {
+        mInPictureInPicture = pictureInPicture;
+    }
+
+    /**
+     * Check if the window is in picture-in-picture mode.
+     *
+     * @return {@code true} if the window is in picture-in-picture mode, {@code false} otherwise.
+     */
+    public boolean inPictureInPicture() {
+        return mInPictureInPicture;
+    }
+
     /**
      * Gets the parent window.
      *
      * @return The parent window, or {@code null} if none exists.
      */
     public AccessibilityWindowInfo getParent() {
-        if (mConnectionId == UNDEFINED || mParentId == UNDEFINED) {
+        if (mConnectionId == UNDEFINED_WINDOW_ID || mParentId == UNDEFINED_WINDOW_ID) {
             return null;
         }
         AccessibilityInteractionClient client = AccessibilityInteractionClient.getInstance();
@@ -371,7 +395,7 @@ public final class AccessibilityWindowInfo implements Parcelable {
         if (mChildIds == null) {
             throw new IndexOutOfBoundsException();
         }
-        if (mConnectionId == UNDEFINED) {
+        if (mConnectionId == UNDEFINED_WINDOW_ID) {
             return null;
         }
         final int childId = (int) mChildIds.get(index);
@@ -429,6 +453,7 @@ public final class AccessibilityWindowInfo implements Parcelable {
         infoClone.mBoundsInScreen.set(info.mBoundsInScreen);
         infoClone.mTitle = info.mTitle;
         infoClone.mAnchorId = info.mAnchorId;
+        infoClone.mInPictureInPicture = info.mInPictureInPicture;
 
         if (info.mChildIds != null && info.mChildIds.size() > 0) {
             if (infoClone.mChildIds == null) {
@@ -486,6 +511,7 @@ public final class AccessibilityWindowInfo implements Parcelable {
         mBoundsInScreen.writeToParcel(parcel, flags);
         parcel.writeCharSequence(mTitle);
         parcel.writeInt(mAnchorId);
+        parcel.writeInt(mInPictureInPicture ? 1 : 0);
 
         final LongArray childIds = mChildIds;
         if (childIds == null) {
@@ -510,6 +536,7 @@ public final class AccessibilityWindowInfo implements Parcelable {
         mBoundsInScreen.readFromParcel(parcel);
         mTitle = parcel.readCharSequence();
         mAnchorId = parcel.readInt();
+        mInPictureInPicture = parcel.readInt() == 1;
 
         final int childCount = parcel.readInt();
         if (childCount > 0) {
@@ -556,6 +583,7 @@ public final class AccessibilityWindowInfo implements Parcelable {
         builder.append(", bounds=").append(mBoundsInScreen);
         builder.append(", focused=").append(isFocused());
         builder.append(", active=").append(isActive());
+        builder.append(", pictureInPicture=").append(inPictureInPicture());
         if (DEBUG) {
             builder.append(", parent=").append(mParentId);
             builder.append(", children=[");
@@ -572,8 +600,8 @@ public final class AccessibilityWindowInfo implements Parcelable {
             }
             builder.append(']');
         } else {
-            builder.append(", hasParent=").append(mParentId != UNDEFINED);
-            builder.append(", isAnchored=").append(mAnchorId != UNDEFINED);
+            builder.append(", hasParent=").append(mParentId != UNDEFINED_WINDOW_ID);
+            builder.append(", isAnchored=").append(mAnchorId != UNDEFINED_WINDOW_ID);
             builder.append(", hasChildren=").append(mChildIds != null
                     && mChildIds.size() > 0);
         }
@@ -585,17 +613,18 @@ public final class AccessibilityWindowInfo implements Parcelable {
      * Clears the internal state.
      */
     private void clear() {
-        mType = UNDEFINED;
-        mLayer = UNDEFINED;
+        mType = UNDEFINED_WINDOW_ID;
+        mLayer = UNDEFINED_WINDOW_ID;
         mBooleanProperties = 0;
-        mId = UNDEFINED;
-        mParentId = UNDEFINED;
+        mId = UNDEFINED_WINDOW_ID;
+        mParentId = UNDEFINED_WINDOW_ID;
         mBoundsInScreen.setEmpty();
         if (mChildIds != null) {
             mChildIds.clear();
         }
-        mConnectionId = UNDEFINED;
-        mAnchorId = UNDEFINED;
+        mConnectionId = UNDEFINED_WINDOW_ID;
+        mAnchorId = UNDEFINED_WINDOW_ID;
+        mInPictureInPicture = false;
         mTitle = null;
     }
 

@@ -177,6 +177,9 @@
 
     <uses-permission android:name="android.permission.MODIFY_THEME_OVERLAY" />
 
+    <!-- accessibility -->
+    <uses-permission android:name="android.permission.MODIFY_ACCESSIBILITY_DATA" />
+
     <application
         android:name=".SystemUIApplication"
         android:persistent="true"

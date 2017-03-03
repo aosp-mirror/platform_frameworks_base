@@ -2305,6 +2305,10 @@
     <permission android:name="android.permission.RETRIEVE_WINDOW_TOKEN"
         android:protectionLevel="signature" />
 
+    <!-- @hide Allows an application to modify accessibility information from another app. -->
+    <permission android:name="android.permission.MODIFY_ACCESSIBILITY_DATA"
+                android:protectionLevel="signature" />
+
     <!-- @hide Allows an application to collect frame statistics -->
     <permission android:name="android.permission.FRAME_STATS"
          android:protectionLevel="signature" />

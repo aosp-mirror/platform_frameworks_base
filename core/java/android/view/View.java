@@ -94,6 +94,7 @@ import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 import android.view.accessibility.AccessibilityNodeProvider;
+import android.view.accessibility.AccessibilityWindowInfo;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Transformation;
@@ -8099,7 +8100,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public int getAccessibilityWindowId() {
         return mAttachInfo != null ? mAttachInfo.mAccessibilityWindowId
-                : AccessibilityNodeInfo.UNDEFINED_ITEM_ID;
+                : AccessibilityWindowInfo.UNDEFINED_WINDOW_ID;
     }
 
     /**
@@ -24652,7 +24653,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         /**
          * The id of the window for accessibility purposes.
          */
-        int mAccessibilityWindowId = AccessibilityNodeInfo.UNDEFINED_ITEM_ID;
+        int mAccessibilityWindowId = AccessibilityWindowInfo.UNDEFINED_WINDOW_ID;
 
         /**
          * Flags related to accessibility processing.

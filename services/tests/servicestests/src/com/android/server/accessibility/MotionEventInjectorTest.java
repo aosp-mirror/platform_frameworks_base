@@ -396,7 +396,7 @@ public class MotionEventInjectorTest {
                 hasEventTime(downTime + CONTINUED_LINE_INTERVAL)));
         // Timing will restart when the gesture continues
         long secondSequenceStart = events.get(2).getEventTime();
-        assertTrue(secondSequenceStart > events.get(1).getEventTime());
+        assertTrue(secondSequenceStart >= events.get(1).getEventTime());
         assertThat(events.get(2), allOf(isAtPoint(CONTINUED_LINE_MID2), IS_ACTION_MOVE));
         assertThat(events.get(3), allOf(isAtPoint(CONTINUED_LINE_END), IS_ACTION_MOVE,
                 hasEventTime(secondSequenceStart + CONTINUED_LINE_INTERVAL)));

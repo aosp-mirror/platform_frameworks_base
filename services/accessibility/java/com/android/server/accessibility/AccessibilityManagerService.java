@@ -82,6 +82,7 @@ import android.view.InputDevice;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.MagnificationSpec;
+import android.view.View;
 import android.view.WindowInfo;
 import android.view.WindowManager;
 import android.view.WindowManagerInternal;
@@ -97,6 +98,7 @@ import android.view.accessibility.IAccessibilityManager;
 import android.view.accessibility.IAccessibilityManagerClient;
 
 import com.android.internal.R;
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.SomeArgs;
 import com.android.server.LocalServices;
@@ -149,6 +151,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
     private static final String GET_WINDOW_TOKEN = "getWindowToken";
 
+    private static final String SET_PIP_ACTION_REPLACEMENT =
+            "setPictureInPictureActionReplacingConnection";
+
     private static final ComponentName sFakeAccessibilityServiceComponentName =
             new ComponentName("foo.bar", "FakeService");
 
@@ -157,8 +162,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
     private static final char COMPONENT_NAME_SEPARATOR = ':';
 
     private static final int OWN_PROCESS_ID = android.os.Process.myPid();
-
-    private static final int WINDOW_ID_UNKNOWN = -1;
 
     // Each service has an ID. Also provide one for magnification gesture handling
     public static final int MAGNIFICATION_GESTURE_HANDLER_ID = 0;
@@ -219,6 +222,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
     private final SparseArray<AccessibilityConnectionWrapper> mGlobalInteractionConnections =
             new SparseArray<>();
+
+    private AccessibilityConnectionWrapper mPictureInPictureActionReplacingConnection;
 
     private final SparseArray<IBinder> mGlobalWindowTokens = new SparseArray<>();
 
@@ -465,6 +470,25 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         boolean dispatchEvent = false;
 
         synchronized (mLock) {
+            if (event.getWindowId() ==
+                AccessibilityWindowInfo.PICTURE_IN_PICTURE_ACTION_REPLACER_WINDOW_ID) {
+                // The replacer window isn't shown to services. Move its events into the pip.
+                AccessibilityWindowInfo pip = mSecurityPolicy.getPictureInPictureWindow();
+                if (pip != null) {
+                    int pipId = pip.getId();
+                    event.setWindowId(pipId);
+                    event.setSealed(true);
+                    AccessibilityNodeInfo info = event.getSource();
+                    info.setSealed(false);
+                    event.setSealed(false);
+                    if (info != null) {
+                        info.setSourceNodeId(info.getSourceNodeId(), pipId);
+                        event.setSource(info);
+                        info.recycle();
+                    }
+                }
+            }
+
             // We treat calls from a profile as if made by its parent as profiles
             // share the accessibility state of the parent. The call below
             // performs the current profile parent resolution..
@@ -691,6 +715,27 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             }
         }
         return -1;
+    }
+
+    @Override
+    public void setPictureInPictureActionReplacingConnection(
+            IAccessibilityInteractionConnection connection) throws RemoteException {
+        mSecurityPolicy.enforceCallingPermission(Manifest.permission.MODIFY_ACCESSIBILITY_DATA,
+                SET_PIP_ACTION_REPLACEMENT);
+        synchronized (mLock) {
+            if (mPictureInPictureActionReplacingConnection != null) {
+                mPictureInPictureActionReplacingConnection.unlinkToDeath();
+                mPictureInPictureActionReplacingConnection = null;
+            }
+            if (connection != null) {
+                AccessibilityConnectionWrapper wrapper = new AccessibilityConnectionWrapper(
+                        AccessibilityWindowInfo.PICTURE_IN_PICTURE_ACTION_REPLACER_WINDOW_ID,
+                        connection, UserHandle.USER_ALL);
+                mPictureInPictureActionReplacingConnection = wrapper;
+                wrapper.linkToDeath();
+            }
+            mSecurityPolicy.notifyWindowsChanged();
+        }
     }
 
     @Override
@@ -1293,9 +1338,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             return false;
         }
 
-        if (event.getWindowId() != WINDOW_ID_UNKNOWN && !event.isImportantForAccessibility()
-                && (service.mFetchFlags
-                        & AccessibilityNodeInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS) == 0) {
+        if ((event.getWindowId() != AccessibilityWindowInfo.UNDEFINED_WINDOW_ID)
+                && !event.isImportantForAccessibility()
+                && (service.mFetchFlags & AccessibilityNodeInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS)
+                        == 0) {
             return false;
         }
 
@@ -2035,6 +2081,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         }
     }
 
+    @GuardedBy("mLock")
     private MagnificationSpec getCompatibleMagnificationSpecLocked(int windowId) {
         IBinder windowToken = mGlobalWindowTokens.get(windowId);
         if (windowToken == null) {
@@ -2846,6 +2893,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             final int resolvedWindowId;
             IAccessibilityInteractionConnection connection = null;
             Region partialInteractiveRegion = Region.obtain();
+            MagnificationSpec spec;
             synchronized (mLock) {
                 mUsesAccessibilityCache = true;
                 if (!isCalledForCurrentUserLocked()) {
@@ -2867,10 +2915,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     partialInteractiveRegion.recycle();
                     partialInteractiveRegion = null;
                 }
+                spec = getCompatibleMagnificationSpecLocked(resolvedWindowId);
             }
             final int interrogatingPid = Binder.getCallingPid();
+            callback = replaceCallbackIfNeeded(callback, resolvedWindowId, interactionId,
+                    interrogatingPid, interrogatingTid);
             final long identityToken = Binder.clearCallingIdentity();
-            MagnificationSpec spec = getCompatibleMagnificationSpecLocked(resolvedWindowId);
             try {
                 connection.findAccessibilityNodeInfosByViewId(accessibilityNodeId, viewIdResName,
                         partialInteractiveRegion, interactionId, callback, mFetchFlags,
@@ -2898,6 +2948,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             final int resolvedWindowId;
             IAccessibilityInteractionConnection connection = null;
             Region partialInteractiveRegion = Region.obtain();
+            MagnificationSpec spec;
             synchronized (mLock) {
                 mUsesAccessibilityCache = true;
                 if (!isCalledForCurrentUserLocked()) {
@@ -2919,10 +2970,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     partialInteractiveRegion.recycle();
                     partialInteractiveRegion = null;
                 }
+                spec = getCompatibleMagnificationSpecLocked(resolvedWindowId);
             }
             final int interrogatingPid = Binder.getCallingPid();
+            callback = replaceCallbackIfNeeded(callback, resolvedWindowId, interactionId,
+                    interrogatingPid, interrogatingTid);
             final long identityToken = Binder.clearCallingIdentity();
-            MagnificationSpec spec = getCompatibleMagnificationSpecLocked(resolvedWindowId);
             try {
                 connection.findAccessibilityNodeInfosByText(accessibilityNodeId, text,
                         partialInteractiveRegion, interactionId, callback, mFetchFlags,
@@ -2950,6 +3003,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             final int resolvedWindowId;
             IAccessibilityInteractionConnection connection = null;
             Region partialInteractiveRegion = Region.obtain();
+            MagnificationSpec spec;
             synchronized (mLock) {
                 mUsesAccessibilityCache = true;
                 if (!isCalledForCurrentUserLocked()) {
@@ -2971,10 +3025,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     partialInteractiveRegion.recycle();
                     partialInteractiveRegion = null;
                 }
+                spec = getCompatibleMagnificationSpecLocked(resolvedWindowId);
             }
             final int interrogatingPid = Binder.getCallingPid();
+            callback = replaceCallbackIfNeeded(callback, resolvedWindowId, interactionId,
+                    interrogatingPid, interrogatingTid);
             final long identityToken = Binder.clearCallingIdentity();
-            MagnificationSpec spec = getCompatibleMagnificationSpecLocked(resolvedWindowId);
             try {
                 connection.findAccessibilityNodeInfoByAccessibilityId(accessibilityNodeId,
                         partialInteractiveRegion, interactionId, callback, mFetchFlags | flags,
@@ -3002,6 +3058,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             final int resolvedWindowId;
             IAccessibilityInteractionConnection connection = null;
             Region partialInteractiveRegion = Region.obtain();
+            MagnificationSpec spec;
             synchronized (mLock) {
                 if (!isCalledForCurrentUserLocked()) {
                     return false;
@@ -3023,10 +3080,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     partialInteractiveRegion.recycle();
                     partialInteractiveRegion = null;
                 }
+                spec = getCompatibleMagnificationSpecLocked(resolvedWindowId);
             }
             final int interrogatingPid = Binder.getCallingPid();
+            callback = replaceCallbackIfNeeded(callback, resolvedWindowId, interactionId,
+                    interrogatingPid, interrogatingTid);
             final long identityToken = Binder.clearCallingIdentity();
-            MagnificationSpec spec = getCompatibleMagnificationSpecLocked(resolvedWindowId);
             try {
                 connection.findFocus(accessibilityNodeId, focusType, partialInteractiveRegion,
                         interactionId, callback, mFetchFlags, interrogatingPid, interrogatingTid,
@@ -3054,6 +3113,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             final int resolvedWindowId;
             IAccessibilityInteractionConnection connection = null;
             Region partialInteractiveRegion = Region.obtain();
+            MagnificationSpec spec;
             synchronized (mLock) {
                 if (!isCalledForCurrentUserLocked()) {
                     return false;
@@ -3074,10 +3134,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     partialInteractiveRegion.recycle();
                     partialInteractiveRegion = null;
                 }
+                spec = getCompatibleMagnificationSpecLocked(resolvedWindowId);
             }
             final int interrogatingPid = Binder.getCallingPid();
+            callback = replaceCallbackIfNeeded(callback, resolvedWindowId, interactionId,
+                    interrogatingPid, interrogatingTid);
             final long identityToken = Binder.clearCallingIdentity();
-            MagnificationSpec spec = getCompatibleMagnificationSpecLocked(resolvedWindowId);
             try {
                 connection.focusSearch(accessibilityNodeId, direction, partialInteractiveRegion,
                         interactionId, callback, mFetchFlags, interrogatingPid, interrogatingTid,
@@ -3148,6 +3210,18 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     connection = getConnectionLocked(resolvedWindowId);
                     if (connection == null) {
                         return false;
+                    }
+                    AccessibilityWindowInfo windowInfo =
+                            mSecurityPolicy.findWindowById(resolvedWindowId);
+                    if ((windowInfo != null) && windowInfo.inPictureInPicture()) {
+                        boolean isA11yFocusAction =
+                                (action == AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS)
+                                || (action ==
+                                        AccessibilityNodeInfo.ACTION_CLEAR_ACCESSIBILITY_FOCUS);
+                        if ((mPictureInPictureActionReplacingConnection != null)
+                                && !isA11yFocusAction) {
+                            connection = mPictureInPictureActionReplacingConnection.mConnection;
+                        }
                     }
                 }
             }
@@ -3562,7 +3636,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 if (mSecurityPolicy.canRetrieveWindowContentLocked(this)) {
                     event.setConnectionId(mId);
                 } else {
-                    event.setSource(null);
+                    event.setSource((View) null);
                 }
                 event.setSealed(true);
             }
@@ -3790,17 +3864,17 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         }
 
         private int resolveAccessibilityWindowIdLocked(int accessibilityWindowId) {
-            if (accessibilityWindowId == AccessibilityNodeInfo.ACTIVE_WINDOW_ID) {
+            if (accessibilityWindowId == AccessibilityWindowInfo.ACTIVE_WINDOW_ID) {
                 return mSecurityPolicy.getActiveWindowId();
             }
             return accessibilityWindowId;
         }
 
         private int resolveAccessibilityWindowIdForFindFocusLocked(int windowId, int focusType) {
-            if (windowId == AccessibilityNodeInfo.ACTIVE_WINDOW_ID) {
+            if (windowId == AccessibilityWindowInfo.ACTIVE_WINDOW_ID) {
                 return mSecurityPolicy.mActiveWindowId;
             }
-            if (windowId == AccessibilityNodeInfo.ANY_WINDOW_ID) {
+            if (windowId == AccessibilityWindowInfo.ANY_WINDOW_ID) {
                 if (focusType == AccessibilityNodeInfo.FOCUS_INPUT) {
                     return mSecurityPolicy.mFocusedWindowId;
                 } else if (focusType == AccessibilityNodeInfo.FOCUS_ACCESSIBILITY) {
@@ -3808,6 +3882,20 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 }
             }
             return windowId;
+        }
+
+        private IAccessibilityInteractionConnectionCallback replaceCallbackIfNeeded(
+                IAccessibilityInteractionConnectionCallback originalCallback,
+                int resolvedWindowId, int interactionId, int interrogatingPid,
+                long interrogatingTid) {
+            AccessibilityWindowInfo windowInfo = mSecurityPolicy.findWindowById(resolvedWindowId);
+            if ((windowInfo == null) || !windowInfo.inPictureInPicture()
+                    || (mPictureInPictureActionReplacingConnection == null)) {
+                return originalCallback;
+            }
+            return new ActionReplacingCallback(originalCallback,
+                    mPictureInPictureActionReplacingConnection.mConnection, interactionId,
+                    interrogatingPid, interrogatingTid);
         }
 
         private final class InvocationHandler extends Handler {
@@ -3960,6 +4048,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             reportedWindow.setBoundsInScreen(window.boundsInScreen);
             reportedWindow.setTitle(window.title);
             reportedWindow.setAnchorId(window.accessibilityIdOfAnchor);
+            reportedWindow.setPictureInPicture(window.inPictureInPicture);
 
             final int parentId = findWindowIdLocked(window.parentToken);
             if (parentId >= 0) {
@@ -4157,7 +4246,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             | AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED
             | AccessibilityEvent.TYPE_VIEW_TEXT_TRAVERSED_AT_MOVEMENT_GRANULARITY;
 
+        // In Z order
         public List<AccessibilityWindowInfo> mWindows;
+        public SparseArray<AccessibilityWindowInfo> mWindowsById = new SparseArray<>();
 
         public int mActiveWindowId = INVALID_WINDOW_ID;
         public int mFocusedWindowId = INVALID_WINDOW_ID;
@@ -4217,6 +4308,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             for (int i = oldWindowCount - 1; i >= 0; i--) {
                 mWindows.remove(i).recycle();
             }
+            mWindowsById.clear();
 
             mFocusedWindowId = INVALID_WINDOW_ID;
             if (!mTouchInteractionInProgress) {
@@ -4245,6 +4337,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                         }
                     }
                     mWindows.add(window);
+                    mWindowsById.put(windowId, window);
                 }
 
                 if (mTouchInteractionInProgress && activeWindowGone) {
@@ -4306,7 +4399,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
         public void updateEventSourceLocked(AccessibilityEvent event) {
             if ((event.getEventType() & RETRIEVAL_ALLOWING_EVENT_TYPES) == 0) {
-                event.setSource(null);
+                event.setSource((View) null);
             }
         }
 
@@ -4446,7 +4539,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             }
         }
 
-        private void notifyWindowsChanged() {
+        public void notifyWindowsChanged() {
             if (mWindowsForAccessibilityCallback == null) {
                 return;
             }
@@ -4560,11 +4653,15 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         }
 
         private AccessibilityWindowInfo findWindowById(int windowId) {
+            return mWindowsById.get(windowId);
+        }
+
+        private AccessibilityWindowInfo getPictureInPictureWindow() {
             if (mWindows != null) {
                 final int windowCount = mWindows.size();
                 for (int i = 0; i < windowCount; i++) {
                     AccessibilityWindowInfo window = mWindows.get(i);
-                    if (window.getId() == windowId) {
+                    if (window.inPictureInPicture()) {
                         return window;
                     }
                 }

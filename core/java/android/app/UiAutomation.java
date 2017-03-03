@@ -381,7 +381,7 @@ public final class UiAutomation {
      */
     public AccessibilityNodeInfo findFocus(int focus) {
         return AccessibilityInteractionClient.getInstance().findFocus(mConnectionId,
-                AccessibilityNodeInfo.ANY_WINDOW_ID, AccessibilityNodeInfo.ROOT_NODE_ID, focus);
+                AccessibilityWindowInfo.ANY_WINDOW_ID, AccessibilityNodeInfo.ROOT_NODE_ID, focus);
     }
 
     /**

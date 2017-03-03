@@ -21,6 +21,7 @@ import static android.accessibilityservice.AccessibilityServiceInfo.FLAG_ENABLE_
 import android.Manifest;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -819,6 +820,31 @@ public final class AccessibilityManager {
             service.notifyAccessibilityButtonAvailabilityChanged(available);
         } catch (RemoteException re) {
             Log.e(LOG_TAG, "Error while dispatching accessibility button availability change", re);
+        }
+    }
+
+    /**
+     * Set an IAccessibilityInteractionConnection to replace the actions of a picture-in-picture
+     * window. Intended for use by the System UI only.
+     *
+     * @param connection The connection to handle the actions. Set to {@code null} to avoid
+     * affecting the actions.
+     *
+     * @hide
+     */
+    public void setPictureInPictureActionReplacingConnection(
+            @Nullable IAccessibilityInteractionConnection connection) {
+        final IAccessibilityManager service;
+        synchronized (mLock) {
+            service = getServiceLocked();
+            if (service == null) {
+                return;
+            }
+        }
+        try {
+            service.setPictureInPictureActionReplacingConnection(connection);
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error setting picture in picture action replacement", re);
         }
     }
 

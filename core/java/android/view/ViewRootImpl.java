@@ -82,6 +82,7 @@ import android.view.accessibility.AccessibilityManager.HighTextContrastChangeLis
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 import android.view.accessibility.AccessibilityNodeProvider;
+import android.view.accessibility.AccessibilityWindowInfo;
 import android.view.accessibility.IAccessibilityInteractionConnection;
 import android.view.accessibility.IAccessibilityInteractionConnectionCallback;
 import android.view.animation.AccelerateDecelerateInterpolator;
@@ -6880,12 +6881,7 @@ public final class ViewRootImpl implements ViewParent,
                         final int virtualNodeId = AccessibilityNodeInfo.getVirtualDescendantId(
                                 sourceNodeId);
                         final AccessibilityNodeInfo node;
-                        if (virtualNodeId == AccessibilityNodeInfo.UNDEFINED_ITEM_ID) {
-                            node = provider.createAccessibilityNodeInfo(
-                                    AccessibilityNodeProvider.HOST_VIEW_ID);
-                        } else {
-                            node = provider.createAccessibilityNodeInfo(virtualNodeId);
-                        }
+                        node = provider.createAccessibilityNodeInfo(virtualNodeId);
                         setAccessibilityFocus(source, node);
                     }
                 }
@@ -6971,10 +6967,6 @@ public final class ViewRootImpl implements ViewParent,
 
         final long focusedSourceNodeId = mAccessibilityFocusedVirtualView.getSourceNodeId();
         int focusedChildId = AccessibilityNodeInfo.getVirtualDescendantId(focusedSourceNodeId);
-        if (focusedChildId == AccessibilityNodeInfo.UNDEFINED_ITEM_ID) {
-            // TODO: Should we clear the focused virtual view?
-            focusedChildId = AccessibilityNodeProvider.HOST_VIEW_ID;
-        }
 
         // Refresh the node for the focused virtual view.
         final Rect oldBounds = mTempRect;
@@ -7495,8 +7487,8 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         public void ensureConnection() {
-            final boolean registered =
-                    mAttachInfo.mAccessibilityWindowId != AccessibilityNodeInfo.UNDEFINED_ITEM_ID;
+            final boolean registered = mAttachInfo.mAccessibilityWindowId
+                    != AccessibilityWindowInfo.UNDEFINED_WINDOW_ID;
             if (!registered) {
                 mAttachInfo.mAccessibilityWindowId =
                         mAccessibilityManager.addAccessibilityInteractionConnection(mWindow,
@@ -7505,10 +7497,10 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         public void ensureNoConnection() {
-            final boolean registered =
-                mAttachInfo.mAccessibilityWindowId != AccessibilityNodeInfo.UNDEFINED_ITEM_ID;
+            final boolean registered = mAttachInfo.mAccessibilityWindowId
+                    != AccessibilityWindowInfo.UNDEFINED_WINDOW_ID;
             if (registered) {
-                mAttachInfo.mAccessibilityWindowId = AccessibilityNodeInfo.UNDEFINED_ITEM_ID;
+                mAttachInfo.mAccessibilityWindowId = AccessibilityWindowInfo.UNDEFINED_WINDOW_ID;
                 mAccessibilityManager.removeAccessibilityInteractionConnection(mWindow);
             }
         }
