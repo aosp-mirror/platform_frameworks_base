@@ -587,8 +587,7 @@ class ActivityStarter {
             // The activity was already running in the pinned stack so it wasn't started, but either
             // brought to the front or the new intent was delivered to it since it was already in
             // front. Notify anyone interested in this piece of information.
-            mService.mTaskChangeNotificationController.notifyPinnedActivityRestartAttempt(
-                    sourceRecord.launchedFromPackage);
+            mService.mTaskChangeNotificationController.notifyPinnedActivityRestartAttempt();
             return;
         }
     }
