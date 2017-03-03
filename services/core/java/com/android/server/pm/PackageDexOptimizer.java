@@ -66,6 +66,9 @@ public class PackageDexOptimizer {
     public static final int DEX_OPT_PERFORMED = 1;
     public static final int DEX_OPT_FAILED = -1;
 
+    /** Special library name that skips shared libraries check during compilation. */
+    public static final String SKIP_SHARED_LIBRARY_CHECK = "&";
+
     private final Installer mInstaller;
     private final Object mInstallLock;
 
@@ -101,7 +104,7 @@ public class PackageDexOptimizer {
      */
     int performDexOpt(PackageParser.Package pkg, String[] sharedLibraries,
             String[] instructionSets, boolean checkProfiles, String targetCompilationFilter,
-            CompilerStats.PackageStats packageStats) {
+            CompilerStats.PackageStats packageStats, boolean isUsedByOtherApps) {
         if (!canOptimizePackage(pkg)) {
             return DEX_OPT_SKIPPED;
         }
@@ -116,7 +119,7 @@ public class PackageDexOptimizer {
             }
             try {
                 return performDexOptLI(pkg, sharedLibraries, instructionSets, checkProfiles,
-                        targetCompilationFilter, packageStats);
+                        targetCompilationFilter, packageStats, isUsedByOtherApps);
             } finally {
                 if (useLock) {
                     mDexoptWakeLock.release();
@@ -132,7 +135,8 @@ public class PackageDexOptimizer {
     @GuardedBy("mInstallLock")
     private int performDexOptLI(PackageParser.Package pkg, String[] sharedLibraries,
             String[] targetInstructionSets, boolean checkForProfileUpdates,
-            String targetCompilerFilter, CompilerStats.PackageStats packageStats) {
+            String targetCompilerFilter, CompilerStats.PackageStats packageStats,
+            boolean isUsedByOtherApps) {
         final String[] instructionSets = targetInstructionSets != null ?
                 targetInstructionSets : getAppDexInstructionSets(pkg.applicationInfo);
         final String[] dexCodeInstructionSets = getDexCodeInstructionSets(instructionSets);
@@ -140,7 +144,7 @@ public class PackageDexOptimizer {
         final int sharedGid = UserHandle.getSharedAppGid(pkg.applicationInfo.uid);
 
         final String compilerFilter = getRealCompilerFilter(pkg.applicationInfo,
-                targetCompilerFilter, isUsedByOtherApps(pkg));
+                targetCompilerFilter, isUsedByOtherApps);
         final boolean profileUpdated = checkForProfileUpdates &&
                 isProfileUpdated(pkg, sharedGid, compilerFilter);
 
@@ -274,7 +278,7 @@ public class PackageDexOptimizer {
                 // TODO(calin): maybe add a separate call.
                 mInstaller.dexopt(path, info.uid, info.packageName, isa, /*dexoptNeeded*/ 0,
                         /*oatDir*/ null, dexoptFlags,
-                        compilerFilter, info.volumeUuid, /*sharedLibrariesPath*/ null);
+                        compilerFilter, info.volumeUuid, SKIP_SHARED_LIBRARY_CHECK);
             }
 
             return DEX_OPT_PERFORMED;
@@ -472,40 +476,6 @@ public class PackageDexOptimizer {
 
     void systemReady() {
         mSystemReady = true;
-    }
-
-    /**
-     * Returns true if the profiling data collected for the given app indicate
-     * that the apps's APK has been loaded by another app.
-     * Note that this returns false for all forward-locked apps and apps without
-     * any collected profiling data.
-     */
-    public static boolean isUsedByOtherApps(PackageParser.Package pkg) {
-        if (pkg.isForwardLocked()) {
-            // Skip the check for forward locked packages since they don't share their code.
-            return false;
-        }
-
-        for (String apkPath : pkg.getAllCodePathsExcludingResourceOnly()) {
-            try {
-                apkPath = PackageManagerServiceUtils.realpath(new File(apkPath));
-            } catch (IOException e) {
-                // Log an error but continue without it.
-                Slog.w(TAG, "Failed to get canonical path", e);
-                continue;
-            }
-            String useMarker = apkPath.replace('/', '@');
-            final int[] currentUserIds = UserManagerService.getInstance().getUserIds();
-            for (int i = 0; i < currentUserIds.length; i++) {
-                File profileDir =
-                        Environment.getDataProfilesDeForeignDexDirectory(currentUserIds[i]);
-                File foreignUseMark = new File(profileDir, useMarker);
-                if (foreignUseMark.exists()) {
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 
     private String printDexoptFlags(int flags) {
