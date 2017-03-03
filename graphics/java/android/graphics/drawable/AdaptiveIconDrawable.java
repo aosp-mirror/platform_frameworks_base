@@ -256,9 +256,12 @@ public class AdaptiveIconDrawable extends Drawable implements Drawable.Callback 
         }
     }
 
+    /**
+     * Set the child layer bounds bigger than the view port size by {@link #DEFAULT_VIEW_PORT_SCALE}
+     */
     private void updateLayerBoundsInternal(Rect bounds) {
-        int cX = bounds.centerX();
-        int cY = bounds.centerY();
+        int cX = bounds.width() / 2;
+        int cY = bounds.height() / 2;
 
         for (int i = 0, count = mLayerState.N_CHILDREN; i < count; i++) {
             final ChildDrawable r = mLayerState.mChildren[i];
@@ -283,7 +286,11 @@ public class AdaptiveIconDrawable extends Drawable implements Drawable.Callback 
         mMaskMatrix.setScale(b.width() / MASK_SIZE, b.height() / MASK_SIZE);
         sMask.transform(mMaskMatrix, mMask);
 
-        mMaskBitmap = Bitmap.createBitmap(b.width(), b.height(), Bitmap.Config.ALPHA_8);
+        if (mMaskBitmap == null || mMaskBitmap.getWidth() != b.width() ||
+            mMaskBitmap.getHeight() != b.height()) {
+            mMaskBitmap = Bitmap.createBitmap(b.width(), b.height(), Bitmap.Config.ALPHA_8);
+            mLayersBitmap = Bitmap.createBitmap(b.width(), b.height(), Bitmap.Config.ARGB_8888);
+        }
         mCanvas.setBitmap(mMaskBitmap);
         mPaint.setShader(null);
         mCanvas.drawPath(mMask, mPaint);
@@ -291,7 +298,6 @@ public class AdaptiveIconDrawable extends Drawable implements Drawable.Callback 
         // reset everything that depends on the view bounds
         mTransparentRegion.setEmpty();
         mLayersShader = null;
-        mLayersBitmap = Bitmap.createBitmap(b.width(), b.height(), Bitmap.Config.ARGB_8888);
     }
 
     @Override
@@ -310,7 +316,10 @@ public class AdaptiveIconDrawable extends Drawable implements Drawable.Callback 
             mLayersShader = new BitmapShader(mLayersBitmap, TileMode.CLAMP, TileMode.CLAMP);
             mPaint.setShader(mLayersShader);
         }
-        canvas.drawBitmap(mMaskBitmap, 0.0f, 0.0f, mPaint);
+        if (mMaskBitmap != null) {
+            Rect bounds = getBounds();
+            canvas.drawBitmap(mMaskBitmap, bounds.left, bounds.top, mPaint);
+        }
     }
 
     @Override
