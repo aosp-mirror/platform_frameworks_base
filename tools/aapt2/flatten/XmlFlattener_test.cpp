@@ -76,7 +76,7 @@ TEST_F(XmlFlattenerTest, FlattenXmlWithNoCompiledAttributes) {
             <View xmlns:test="http://com.test"
                   attr="hey">
               <Layout test:hello="hi" />
-              <Layout>Some text</Layout>
+              <Layout>Some text\\</Layout>
             </View>)EOF");
 
   android::ResXMLTree tree;
@@ -128,7 +128,7 @@ TEST_F(XmlFlattenerTest, FlattenXmlWithNoCompiledAttributes) {
 
   ASSERT_EQ(tree.next(), android::ResXMLTree::TEXT);
   const char16_t* text = tree.getText(&len);
-  EXPECT_EQ(StringPiece16(text, len), u"Some text");
+  EXPECT_EQ(StringPiece16(text, len), u"Some text\\");
 
   ASSERT_EQ(tree.next(), android::ResXMLTree::END_TAG);
   ASSERT_EQ(tree.getElementNamespace(&len), nullptr);

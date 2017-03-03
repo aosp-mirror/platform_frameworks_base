@@ -18,7 +18,6 @@
 
 #include <expat.h>
 
-#include <cassert>
 #include <memory>
 #include <stack>
 #include <string>
@@ -41,6 +40,8 @@ struct Stack {
   std::unique_ptr<xml::Node> root;
   std::stack<xml::Node*> node_stack;
   std::string pending_comment;
+  std::unique_ptr<xml::Text> last_text_node;
+  util::StringBuilder pending_text;
 };
 
 /**
@@ -59,6 +60,19 @@ static void SplitName(const char* name, std::string* out_ns,
   } else {
     out_ns->assign(name, (p - name));
     out_name->assign(p + 1);
+  }
+}
+
+static void FinishPendingText(Stack* stack) {
+  if (stack->last_text_node != nullptr) {
+    if (!stack->pending_text.IsEmpty()) {
+      stack->last_text_node->text = stack->pending_text.ToString();
+      stack->pending_text = {};
+      stack->node_stack.top()->AppendChild(std::move(stack->last_text_node));
+    } else {
+      // Drop an empty text node.
+      stack->last_text_node = nullptr;
+    }
   }
 }
 
@@ -83,6 +97,7 @@ static void XMLCALL StartNamespaceHandler(void* user_data, const char* prefix,
                                           const char* uri) {
   XML_Parser parser = reinterpret_cast<XML_Parser>(user_data);
   Stack* stack = reinterpret_cast<Stack*>(XML_GetUserData(parser));
+  FinishPendingText(stack);
 
   std::unique_ptr<Namespace> ns = util::make_unique<Namespace>();
   if (prefix) {
@@ -99,6 +114,7 @@ static void XMLCALL StartNamespaceHandler(void* user_data, const char* prefix,
 static void XMLCALL EndNamespaceHandler(void* user_data, const char* prefix) {
   XML_Parser parser = reinterpret_cast<XML_Parser>(user_data);
   Stack* stack = reinterpret_cast<Stack*>(XML_GetUserData(parser));
+  FinishPendingText(stack);
 
   CHECK(!stack->node_stack.empty());
   stack->node_stack.pop();
@@ -113,6 +129,7 @@ static void XMLCALL StartElementHandler(void* user_data, const char* name,
                                         const char** attrs) {
   XML_Parser parser = reinterpret_cast<XML_Parser>(user_data);
   Stack* stack = reinterpret_cast<Stack*>(XML_GetUserData(parser));
+  FinishPendingText(stack);
 
   std::unique_ptr<Element> el = util::make_unique<Element>();
   SplitName(name, &el->namespace_uri, &el->name);
@@ -120,7 +137,9 @@ static void XMLCALL StartElementHandler(void* user_data, const char* name,
   while (*attrs) {
     Attribute attribute;
     SplitName(*attrs++, &attribute.namespace_uri, &attribute.name);
-    attribute.value = *attrs++;
+    util::StringBuilder builder;
+    builder.Append(*attrs++);
+    attribute.value = builder.ToString();
 
     // Insert in sorted order.
     auto iter = std::lower_bound(el->attributes.begin(), el->attributes.end(),
@@ -135,41 +154,38 @@ static void XMLCALL StartElementHandler(void* user_data, const char* name,
 static void XMLCALL EndElementHandler(void* user_data, const char* name) {
   XML_Parser parser = reinterpret_cast<XML_Parser>(user_data);
   Stack* stack = reinterpret_cast<Stack*>(XML_GetUserData(parser));
+  FinishPendingText(stack);
 
   CHECK(!stack->node_stack.empty());
   // stack->nodeStack.top()->comment = std::move(stack->pendingComment);
   stack->node_stack.pop();
 }
 
-static void XMLCALL CharacterDataHandler(void* user_data, const char* s,
-                                         int len) {
+static void XMLCALL CharacterDataHandler(void* user_data, const char* s, int len) {
   XML_Parser parser = reinterpret_cast<XML_Parser>(user_data);
   Stack* stack = reinterpret_cast<Stack*>(XML_GetUserData(parser));
 
-  if (!s || len <= 0) {
+  const StringPiece str(s, len);
+  if (str.empty()) {
     return;
   }
 
   // See if we can just append the text to a previous text node.
-  if (!stack->node_stack.empty()) {
-    Node* currentParent = stack->node_stack.top();
-    if (!currentParent->children.empty()) {
-      Node* last_child = currentParent->children.back().get();
-      if (Text* text = NodeCast<Text>(last_child)) {
-        text->text.append(s, len);
-        return;
-      }
-    }
+  if (stack->last_text_node != nullptr) {
+    stack->pending_text.Append(str);
+    return;
   }
 
-  std::unique_ptr<Text> text = util::make_unique<Text>();
-  text->text.assign(s, len);
-  AddToStack(stack, parser, std::move(text));
+  stack->last_text_node = util::make_unique<Text>();
+  stack->last_text_node->line_number = XML_GetCurrentLineNumber(parser);
+  stack->last_text_node->column_number = XML_GetCurrentColumnNumber(parser);
+  stack->pending_text.Append(str);
 }
 
 static void XMLCALL CommentDataHandler(void* user_data, const char* comment) {
   XML_Parser parser = reinterpret_cast<XML_Parser>(user_data);
   Stack* stack = reinterpret_cast<Stack*>(XML_GetUserData(parser));
+  FinishPendingText(stack);
 
   if (!stack->pending_comment.empty()) {
     stack->pending_comment += '\n';
