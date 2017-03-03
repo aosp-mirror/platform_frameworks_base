@@ -89,6 +89,9 @@ import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_LAUNCHABLE;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_LAUNCHABLE_PRIV;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_PINNABLE;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_WHITELISTED;
+import static com.android.server.am.TaskRecord.REPARENT_KEEP_STACK_AT_FRONT;
+import static com.android.server.am.TaskRecord.REPARENT_LEAVE_STACK_IN_PLACE;
+import static com.android.server.am.TaskRecord.REPARENT_MOVE_STACK_TO_FRONT;
 import static com.android.server.wm.AppTransition.TRANSIT_DOCK_TASK_FROM_RECENTS;
 import static java.lang.Integer.MAX_VALUE;
 
@@ -1992,8 +1995,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                     stackId = task.getLaunchStackId();
                 }
                 if (stackId != currentStack.mStackId) {
-                    currentStack = moveTaskToStackUncheckedLocked(task, stackId, ON_TOP,
-                            !FORCE_FOCUS, reason);
+                    task.reparent(stackId, ON_TOP, REPARENT_KEEP_STACK_AT_FRONT, !ANIMATE,
+                            DEFER_RESUME, "findTaskToMoveToFrontLocked");
                     stackId = currentStack.mStackId;
                     // moveTaskToStackUncheckedLocked() should already placed the task on top,
                     // still need moveTaskToFrontLocked() below for any transition settings.
@@ -2278,6 +2281,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             if (onTop) {
                 for (int i = 0; i < size; i++) {
                     final TaskRecord task = tasks.get(i);
+                    final boolean isTopTask = i == (size - 1);
                     if (fromStackId == PINNED_STACK_ID) {
                         // Update the return-to to reflect where the pinned stack task was moved
                         // from so that we retain the stack that was previously visible if the
@@ -2287,22 +2291,25 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                         MetricsLogger.action(mService.mContext,
                                 MetricsEvent.ACTION_PICTURE_IN_PICTURE_EXPANDED_TO_FULLSCREEN);
                     }
-                    moveTaskToStackLocked(tasks.get(i).taskId,
-                            FULLSCREEN_WORKSPACE_STACK_ID, onTop, onTop /*forceFocus*/,
-                            "moveTasksToFullscreenStack - onTop", ANIMATE, DEFER_RESUME);
+                    // Defer resume until all the tasks have been moved to the fullscreen stack
+                    task.reparent(FULLSCREEN_WORKSPACE_STACK_ID, ON_TOP,
+                            REPARENT_MOVE_STACK_TO_FRONT, isTopTask /* animate */, DEFER_RESUME,
+                            "moveTasksToFullscreenStack - onTop");
                 }
-
-                ensureActivitiesVisibleLocked(null, 0, PRESERVE_WINDOWS);
-                resumeFocusedStackTopActivityLocked();
             } else {
                 for (int i = 0; i < size; i++) {
                     final TaskRecord task = tasks.get(i);
-                    final int position = fullscreenStack != null ?
-                            Math.max(fullscreenStack.getAllTasks().size() - 1, 0) : 0;
+                    final int position = fullscreenStack != null
+                            ? Math.max(fullscreenStack.getAllTasks().size() - 1, 0) : 0;
+                    // Defer resume until all the tasks have been moved to the fullscreen stack
                     task.reparent(FULLSCREEN_WORKSPACE_STACK_ID, position,
-                            "moveTasksToFullscreenStack - NOT_onTop");
+                            REPARENT_LEAVE_STACK_IN_PLACE, !ANIMATE,
+                            DEFER_RESUME, "moveTasksToFullscreenStack - NOT_onTop");
                 }
             }
+
+            ensureActivitiesVisibleLocked(null, 0, PRESERVE_WINDOWS);
+            resumeFocusedStackTopActivityLocked();
         } finally {
             mAllowDockedStackResize = true;
             mWindowManager.continueSurfaceLayout();
@@ -2445,14 +2452,16 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                             ? Math.max(0, fullscreenStack.getChildCount() - 1)
                             : fullscreenStack.getChildCount();
                     final TaskRecord task = tasks.get(i);
-                    task.reparent(FULLSCREEN_WORKSPACE_STACK_ID, insertPosition, "removeStack");
+                    // Defer resume until we remove all the tasks
+                    task.reparent(FULLSCREEN_WORKSPACE_STACK_ID, insertPosition,
+                            REPARENT_LEAVE_STACK_IN_PLACE, !ANIMATE, DEFER_RESUME, "removeStack");
                 }
                 ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
                 resumeFocusedStackTopActivityLocked();
             } else {
                 // If there is no fullscreen stack, then create the stack and move all the tasks
                 // onto the stack
-                moveTasksToFullscreenStackLocked(PINNED_STACK_ID, false /* onTop */);
+                moveTasksToFullscreenStackLocked(PINNED_STACK_ID, !ON_TOP);
             }
         } else {
             for (int i = tasks.size() - 1; i >= 0; i--) {
@@ -2657,168 +2666,52 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     }
 
     /**
-     * Moves the specified task record to the input stack id.
-     * WARNING: This method performs an unchecked/raw move of the task and
-     * can leave the system in an unstable state if used incorrectly.
-     * Use {@link #moveTaskToStackLocked} to perform safe task movement to a stack.
-     * @param task Task to move.
-     * @param stackId Id of stack to move task to.
-     * @param toTop True if the task should be placed at the top of the stack.
-     * @param forceFocus if focus should be moved to the new stack
-     * @param reason Reason the task is been moved.
-     * @return The stack the task was moved to.
+     * Returns the reparent target stack, creating the stack if necessary.  This call also enforces
+     * the various checks on tasks that are going to be reparented from one stack to another.
      */
-    ActivityStack moveTaskToStackUncheckedLocked(TaskRecord task, int stackId, boolean toTop,
-            boolean forceFocus, String reason) {
-
-        if (StackId.isMultiWindowStack(stackId) && !mService.mSupportsMultiWindow) {
-            throw new IllegalStateException("moveTaskToStackUncheckedLocked: Device doesn't "
-                    + "support multi-window task=" + task + " to stackId=" + stackId);
-        }
-
-        final ActivityRecord r = task.topRunningActivityLocked();
+    ActivityStack getReparentTargetStack(TaskRecord task, int stackId, boolean toTop) {
         final ActivityStack prevStack = task.getStack();
-        final boolean wasFocused = isFocusedStack(prevStack) && (topRunningActivityLocked() == r);
-        final boolean wasResumed = prevStack.mResumedActivity == r;
-        final boolean wasPaused = prevStack.mPausingActivity == r;
-        // In some cases the focused stack isn't the front stack. E.g. pinned stack.
-        // Whenever we are moving the top activity from the front stack we want to make sure to move
-        // the stack to the front.
-        final boolean wasFront = isFrontStackOnDisplay(prevStack)
-                && (prevStack.topRunningActivityLocked() == r);
 
-        if (stackId == DOCKED_STACK_ID && !task.isResizeable()) {
-            // We don't allow moving a unresizeable task to the docked stack since the docked
-            // stack is used for split-screen mode and will cause things like the docked divider to
-            // show up. We instead leave the task in its current stack or move it to the fullscreen
-            // stack if it isn't currently in a stack.
-            stackId = (prevStack != null) ? prevStack.mStackId : FULLSCREEN_WORKSPACE_STACK_ID;
-            Slog.w(TAG, "Can not move unresizeable task=" + task
-                    + " to docked stack. Moving to stackId=" + stackId + " instead.");
+        // Check that we aren't reparenting to the same stack that the task is already in
+        if (prevStack != null && prevStack.mStackId == stackId) {
+            Slog.w(TAG, "Can not reparent to same stack, task=" + task
+                    + " already in stackId=" + stackId);
+            return prevStack;
         }
 
-        // Temporarily disable resizeablility of task we are moving. We don't want it to be resized
-        // if a docked stack is created below which will lead to the stack we are moving from and
-        // its resizeable tasks being resized.
-        task.mTemporarilyUnresizable = true;
-        final ActivityStack stack = getStack(stackId, CREATE_IF_NEEDED, toTop);
-        task.mTemporarilyUnresizable = false;
-        task.reparent(stack.mStackId, toTop ? MAX_VALUE : 0, reason);
-
-        // Reset the resumed activity on the previous stack
-        if (wasResumed) {
-            prevStack.mResumedActivity = null;
-        }
-        // Reset the paused activity on the previous stack
-        if (wasPaused) {
-            prevStack.mPausingActivity = null;
-            prevStack.removeTimeoutsForActivityLocked(r);
+        // Ensure that we aren't trying to move into a multi-window stack without multi-window
+        // support
+        if (StackId.isMultiWindowStack(stackId) && !mService.mSupportsMultiWindow) {
+            throw new IllegalArgumentException("Device doesn't support multi-window, can not"
+                    + " reparent task=" + task + " to stackId=" + stackId);
         }
 
-        // If the task had focus before (or we're requested to move focus),
-        // move focus to the new stack by moving the stack to the front.
-        stack.moveToFrontAndResumeStateIfNeeded(r, forceFocus || wasFocused || wasFront, wasResumed,
-                wasPaused, reason);
-
-        return stack;
-    }
-
-    boolean moveTaskToStackLocked(int taskId, int stackId, boolean toTop, boolean forceFocus,
-            String reason, boolean animate) {
-        return moveTaskToStackLocked(taskId, stackId, toTop, forceFocus, reason, animate,
-                false /* deferResume */);
-    }
-
-    boolean moveTaskToStackLocked(int taskId, int stackId, boolean toTop, boolean forceFocus,
-            String reason, boolean animate, boolean deferResume) {
-        final TaskRecord task = anyTaskForIdLocked(taskId);
-        if (task == null) {
-            Slog.w(TAG, "moveTaskToStack: no task for id=" + taskId);
-            return false;
-        }
-
-        final ActivityStack currentStack = task.getStack();
-        if (currentStack != null && currentStack.mStackId == stackId) {
-            // You are already in the right stack silly...
-            Slog.i(TAG, "moveTaskToStack: taskId=" + taskId + " already in stackId=" + stackId);
-            return true;
-        }
-
+        // Ensure that we aren't trying to move into a freeform stack without freeform
+        // support
         if (stackId == FREEFORM_WORKSPACE_STACK_ID && !mService.mSupportsFreeformWindowManagement) {
-            throw new IllegalArgumentException("moveTaskToStack:"
-                    + "Attempt to move task " + taskId + " to unsupported freeform stack");
+            throw new IllegalArgumentException("Device doesn't support freeform, can not reparent"
+                    + " task=" + task);
         }
 
-        final ActivityRecord topActivity = task.getTopActivity();
-        final int sourceStackId = task.getStackId();
-        final boolean mightReplaceWindow =
-                StackId.replaceWindowsOnTaskMove(sourceStackId, stackId) && topActivity != null;
-        if (mightReplaceWindow) {
-            // We are about to relaunch the activity because its configuration changed due to
-            // being maximized, i.e. size change. The activity will first remove the old window
-            // and then add a new one. This call will tell window manager about this, so it can
-            // preserve the old window until the new one is drawn. This prevents having a gap
-            // between the removal and addition, in which no window is visible. We also want the
-            // entrance of the new window to be properly animated.
-            // Note here we always set the replacing window first, as the flags might be needed
-            // during the relaunch. If we end up not doing any relaunch, we clear the flags later.
-            mWindowManager.setWillReplaceWindow(topActivity.appToken, animate);
+        // We don't allow moving a unresizeable task to the docked stack since the docked stack is
+        // used for split-screen mode and will cause things like the docked divider to show up. We
+        // instead leave the task in its current stack or move it to the fullscreen stack if it
+        // isn't currently in a stack.
+        if (stackId == DOCKED_STACK_ID && !task.isResizeable()) {
+            stackId = (prevStack != null) ? prevStack.mStackId : FULLSCREEN_WORKSPACE_STACK_ID;
+            Slog.w(TAG, "Can not move unresizeable task=" + task + " to docked stack."
+                    + " Moving to stackId=" + stackId + " instead.");
         }
 
-        mWindowManager.deferSurfaceLayout();
-        final int preferredLaunchStackId = stackId;
-        boolean kept = true;
+        // Temporarily disable resizeablility of the task as we don't want it to be resized if, for
+        // example, a docked stack is created which will lead to the stack we are moving from being
+        // resized and and its resizeable tasks being resized.
         try {
-            final ActivityStack stack = moveTaskToStackUncheckedLocked(
-                    task, stackId, toTop, forceFocus, reason + " moveTaskToStack");
-            stackId = stack.mStackId;
-
-            if (!animate) {
-                stack.mNoAnimActivities.add(topActivity);
-            }
-
-            // We might trigger a configuration change. Save the current task bounds for freezing.
-            // TODO: Should this call be moved inside the resize method in WM?
-            stack.prepareFreezingTaskBounds();
-
-            // Make sure the task has the appropriate bounds/size for the stack it is in.
-            if (stackId == FULLSCREEN_WORKSPACE_STACK_ID
-                    && !Objects.equals(task.mBounds, stack.mBounds)) {
-                kept = task.resize(stack.mBounds, RESIZE_MODE_SYSTEM, !mightReplaceWindow,
-                        deferResume);
-            } else if (stackId == FREEFORM_WORKSPACE_STACK_ID) {
-                Rect bounds = task.getLaunchBounds();
-                if (bounds == null) {
-                    stack.layoutTaskInStack(task, null);
-                    bounds = task.mBounds;
-                }
-                kept = task.resize(bounds, RESIZE_MODE_FORCED, !mightReplaceWindow, deferResume);
-            } else if (stackId == DOCKED_STACK_ID || stackId == PINNED_STACK_ID) {
-                kept = task.resize(stack.mBounds, RESIZE_MODE_SYSTEM, !mightReplaceWindow,
-                        deferResume);
-            }
+            task.mTemporarilyUnresizable = true;
+            return getStack(stackId, CREATE_IF_NEEDED, toTop);
         } finally {
-            mWindowManager.continueSurfaceLayout();
+            task.mTemporarilyUnresizable = false;
         }
-
-        if (mightReplaceWindow) {
-            // If we didn't actual do a relaunch (indicated by kept==true meaning we kept the old
-            // window), we need to clear the replace window settings. Otherwise, we schedule a
-            // timeout to remove the old window if the replacing window is not coming in time.
-            mWindowManager.scheduleClearWillReplaceWindows(topActivity.appToken, !kept);
-        }
-
-        if (!deferResume) {
-
-            // The task might have already been running and its visibility needs to be synchronized with
-            // the visibility of the stack / windows.
-            ensureActivitiesVisibleLocked(null, 0, !mightReplaceWindow);
-            resumeFocusedStackTopActivityLocked();
-        }
-
-        handleNonResizableTaskIfNeeded(task, preferredLaunchStackId, stackId);
-
-        return (preferredLaunchStackId == stackId);
     }
 
     boolean moveTopStackActivityToPinnedStackLocked(int stackId, Rect bounds) {
@@ -2849,8 +2742,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
     void moveActivityToPinnedStackLocked(ActivityRecord r, String reason, Rect bounds,
             boolean moveHomeStackToFront) {
-
         mWindowManager.deferSurfaceLayout();
+
         // Need to make sure the pinned stack exist so we can resize it below...
         final PinnedActivityStack stack = getStack(PINNED_STACK_ID, CREATE_IF_NEEDED, ON_TOP);
 
@@ -2882,12 +2775,26 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                     // was launched from home so home should be visible behind it.
                     moveHomeStackToFront(reason);
                 }
-                moveTaskToStackLocked(
-                        task.taskId, PINNED_STACK_ID, ON_TOP, FORCE_FOCUS, reason, !ANIMATE);
+                // Defer resume until below
+                task.reparent(PINNED_STACK_ID, ON_TOP, REPARENT_MOVE_STACK_TO_FRONT, !ANIMATE,
+                        DEFER_RESUME, reason);
             } else {
                 // There are multiple activities in the task and moving the top activity should
-                // reveal/leave the other activities in their original task
-                stack.moveActivityToStack(r);
+                // reveal/leave the other activities in their original task.
+
+                // Currently, we don't support reparenting activities across tasks in two different
+                // stacks, so instead, just create a new task in the same stack, reparent the
+                // activity into that task, and then reparent the whole task to the new stack. This
+                // ensures that all the necessary work to migrate states in the old and new stacks
+                // is also done.
+                final TaskRecord newTask = task.getStack().createTaskRecord(
+                        getNextTaskIdForUserLocked(r.userId), r.info, r.intent, null, null, true,
+                        r.mActivityType);
+                r.reparent(newTask, MAX_VALUE, "moveActivityToStack");
+
+                // Defer resume until below
+                newTask.reparent(PINNED_STACK_ID, ON_TOP, REPARENT_MOVE_STACK_TO_FRONT, !ANIMATE,
+                        DEFER_RESUME, reason);
             }
 
             // Reset the state that indicates it can enter PiP while pausing after we've moved it
@@ -4880,9 +4787,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
         if (launchStackId != INVALID_STACK_ID) {
             if (task.getStackId() != launchStackId) {
-                moveTaskToStackLocked(
-                        taskId, launchStackId, ON_TOP, FORCE_FOCUS, "startActivityFromRecents",
-                        ANIMATE);
+                task.reparent(launchStackId, ON_TOP, REPARENT_MOVE_STACK_TO_FRONT, ANIMATE,
+                        DEFER_RESUME, "startActivityFromRecents");
             }
         }
 

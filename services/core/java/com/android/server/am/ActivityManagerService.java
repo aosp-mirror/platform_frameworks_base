@@ -135,6 +135,8 @@ import static com.android.server.am.TaskRecord.INVALID_TASK_ID;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_DONT_LOCK;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_LAUNCHABLE_PRIV;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_PINNABLE;
+import static com.android.server.am.TaskRecord.REPARENT_KEEP_STACK_AT_FRONT;
+import static com.android.server.am.TaskRecord.REPARENT_LEAVE_STACK_IN_PLACE;
 import static com.android.server.wm.AppTransition.TRANSIT_ACTIVITY_OPEN;
 import static com.android.server.wm.AppTransition.TRANSIT_ACTIVITY_RELAUNCH;
 import static com.android.server.wm.AppTransition.TRANSIT_NONE;
@@ -143,6 +145,8 @@ import static com.android.server.wm.AppTransition.TRANSIT_TASK_OPEN;
 import static com.android.server.wm.AppTransition.TRANSIT_TASK_TO_FRONT;
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
+
+import static java.lang.Integer.MAX_VALUE;
 
 import android.Manifest;
 import android.Manifest.permission;
@@ -9808,14 +9812,19 @@ public class ActivityManagerService extends IActivityManager.Stub
                 } else if (bounds != null && stackId != FREEFORM_WORKSPACE_STACK_ID ) {
                     stackId = FREEFORM_WORKSPACE_STACK_ID;
                 }
+
+                // Reparent the task to the right stack if necessary
                 boolean preserveWindow = (resizeMode & RESIZE_MODE_PRESERVE_WINDOW) != 0;
                 if (stackId != task.getStackId()) {
-                    mStackSupervisor.moveTaskToStackUncheckedLocked(task, stackId, ON_TOP,
-                            !FORCE_FOCUS, "resizeTask");
+                    // Defer resume until the task is resized below
+                    task.reparent(stackId, ON_TOP, REPARENT_KEEP_STACK_AT_FRONT, ANIMATE,
+                            DEFER_RESUME, "resizeTask");
                     preserveWindow = false;
                 }
 
-                task.resize(bounds, resizeMode, preserveWindow, false /* deferResume */);
+                // After reparenting (which only resizes the task to the stack bounds), resize the
+                // task to the actual bounds provided
+                task.resize(bounds, resizeMode, preserveWindow, !DEFER_RESUME);
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -10194,14 +10203,16 @@ public class ActivityManagerService extends IActivityManager.Stub
                     throw new IllegalArgumentException(
                             "exitFreeformMode: No activity record matching token=" + token);
                 }
-                final ActivityStack stack = r.getStackLocked(token);
+
+                final ActivityStack stack = r.getStack();
                 if (stack == null || stack.mStackId != FREEFORM_WORKSPACE_STACK_ID) {
                     throw new IllegalStateException(
                             "exitFreeformMode: You can only go fullscreen from freeform.");
                 }
+
                 if (DEBUG_STACK) Slog.d(TAG_STACK, "exitFreeformMode: " + r);
-                mStackSupervisor.moveTaskToStackLocked(r.task.taskId, FULLSCREEN_WORKSPACE_STACK_ID,
-                        ON_TOP, !FORCE_FOCUS, "exitFreeformMode", ANIMATE);
+                r.task.reparent(FULLSCREEN_WORKSPACE_STACK_ID, ON_TOP, REPARENT_KEEP_STACK_AT_FRONT,
+                        ANIMATE, !DEFER_RESUME, "exitFreeformMode");
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -10218,15 +10229,22 @@ public class ActivityManagerService extends IActivityManager.Stub
         synchronized (this) {
             long ident = Binder.clearCallingIdentity();
             try {
+                final TaskRecord task = mStackSupervisor.anyTaskForIdLocked(taskId);
+                if (task == null) {
+                    Slog.w(TAG, "moveTaskToStack: No task for id=" + taskId);
+                    return;
+                }
+
                 if (DEBUG_STACK) Slog.d(TAG_STACK, "moveTaskToStack: moving task=" + taskId
                         + " to stackId=" + stackId + " toTop=" + toTop);
                 if (stackId == DOCKED_STACK_ID) {
                     mWindowManager.setDockedStackCreateState(DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT,
                             null /* initialBounds */);
                 }
-                boolean result = mStackSupervisor.moveTaskToStackLocked(taskId, stackId, toTop,
-                        !FORCE_FOCUS, "moveTaskToStack", ANIMATE);
-                if (result && stackId == DOCKED_STACK_ID) {
+
+                final boolean successful = task.reparent(stackId, toTop,
+                        REPARENT_KEEP_STACK_AT_FRONT, ANIMATE, !DEFER_RESUME, "moveTaskToStack");
+                if (successful && stackId == DOCKED_STACK_ID) {
                     // If task moved to docked stack - show recents if needed.
                     mWindowManager.showRecentApps(false /* fromHome */);
                 }
@@ -10258,22 +10276,23 @@ public class ActivityManagerService extends IActivityManager.Stub
                 // TODO: App transition
                 mWindowManager.prepareAppTransition(TRANSIT_ACTIVITY_RELAUNCH, false);
 
-                // Defer the resume so resume/pausing while moving stacks is dangerous.
-                mStackSupervisor.moveTaskToStackLocked(topTask.taskId, DOCKED_STACK_ID,
-                        false /* toTop */, !FORCE_FOCUS, "swapDockedAndFullscreenStack",
-                        ANIMATE, true /* deferResume */);
+                // Defer the resume until we move all the docked tasks to the fullscreen stack below
+                topTask.reparent(DOCKED_STACK_ID, ON_TOP, REPARENT_KEEP_STACK_AT_FRONT, ANIMATE,
+                        DEFER_RESUME, "swapDockedAndFullscreenStack - DOCKED_STACK");
                 final int size = tasks.size();
                 for (int i = 0; i < size; i++) {
                     final int id = tasks.get(i).taskId;
                     if (id == topTask.taskId) {
                         continue;
                     }
-                    mStackSupervisor.moveTaskToStackLocked(id,
-                            FULLSCREEN_WORKSPACE_STACK_ID, true /* toTop */, !FORCE_FOCUS,
-                            "swapDockedAndFullscreenStack", ANIMATE, true /* deferResume */);
+
+                    // Defer the resume until after all the tasks have been moved
+                    tasks.get(i).reparent(FULLSCREEN_WORKSPACE_STACK_ID, ON_TOP,
+                            REPARENT_KEEP_STACK_AT_FRONT, ANIMATE, DEFER_RESUME,
+                            "swapDockedAndFullscreenStack - FULLSCREEN_STACK");
                 }
 
-                // Because we deferred the resume, to avoid conflicts with stack switches while
+                // Because we deferred the resume to avoid conflicts with stack switches while
                 // resuming, we need to do it after all the tasks are moved.
                 mStackSupervisor.ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
                 mStackSupervisor.resumeFocusedStackTopActivityLocked();
@@ -10306,12 +10325,20 @@ public class ActivityManagerService extends IActivityManager.Stub
         synchronized (this) {
             long ident = Binder.clearCallingIdentity();
             try {
+                final TaskRecord task = mStackSupervisor.anyTaskForIdLocked(taskId);
+                if (task == null) {
+                    Slog.w(TAG, "moveTaskToDockedStack: No task for id=" + taskId);
+                    return false;
+                }
+
                 if (DEBUG_STACK) Slog.d(TAG_STACK, "moveTaskToDockedStack: moving task=" + taskId
                         + " to createMode=" + createMode + " toTop=" + toTop);
                 mWindowManager.setDockedStackCreateState(createMode, initialBounds);
-                final boolean moved = mStackSupervisor.moveTaskToStackLocked(
-                        taskId, DOCKED_STACK_ID, toTop, !FORCE_FOCUS, "moveTaskToDockedStack",
-                        animate, DEFER_RESUME);
+
+                // Defer resuming until we move the home stack to the front below
+                final boolean moved = task.reparent(DOCKED_STACK_ID, toTop,
+                        REPARENT_KEEP_STACK_AT_FRONT, animate, DEFER_RESUME,
+                        "moveTaskToDockedStack");
                 if (moved) {
                     if (moveHomeStackFront) {
                         mStackSupervisor.moveHomeStackToFront("moveTaskToDockedStack");
@@ -10445,7 +10472,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     stack.positionChildAt(task, position);
                 } else {
                     // Reparent to new stack.
-                    task.reparent(stackId, position, "positionTaskInStack");
+                    task.reparent(stackId, position, REPARENT_LEAVE_STACK_IN_PLACE,
+                            !ANIMATE, !DEFER_RESUME, "positionTaskInStack");
                 }
             } finally {
                 Binder.restoreCallingIdentity(ident);

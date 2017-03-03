@@ -16,6 +16,7 @@
 
 package com.android.server.am;
 
+import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -54,6 +55,7 @@ import com.android.server.wm.AppWindowContainerController;
 import com.android.server.wm.StackWindowController;
 import com.android.server.wm.TaskWindowContainerController;
 import com.android.server.wm.TaskWindowContainerListener;
+import com.android.server.wm.WindowManagerService;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -62,10 +64,13 @@ import org.xmlpull.v1.XmlSerializer;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Objects;
 
 import static android.app.ActivityManager.RESIZE_MODE_FORCED;
+import static android.app.ActivityManager.RESIZE_MODE_SYSTEM;
 import static android.app.ActivityManager.StackId.ASSISTANT_STACK_ID;
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
@@ -107,8 +112,9 @@ import static com.android.server.am.ActivityRecord.HOME_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityRecord.RECENTS_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityRecord.STARTING_WINDOW_SHOWN;
 import static com.android.server.am.ActivityStack.REMOVE_TASK_MODE_MOVING;
-import static com.android.server.am.ActivityStackSupervisor.CREATE_IF_NEEDED;
 import static com.android.server.am.ActivityStackSupervisor.PRESERVE_WINDOWS;
+
+import static java.lang.Integer.MAX_VALUE;
 
 final class TaskRecord extends ConfigurationContainer implements TaskWindowContainerListener {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "TaskRecord" : TAG_AM;
@@ -159,6 +165,24 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
 
     static final int INVALID_TASK_ID = -1;
     private static final int INVALID_MIN_SIZE = -1;
+
+    /**
+     * The modes to control how the stack is moved to the front when calling
+     * {@link TaskRecord#reparent}.
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({
+            REPARENT_MOVE_STACK_TO_FRONT,
+            REPARENT_KEEP_STACK_AT_FRONT,
+            REPARENT_LEAVE_STACK_IN_PLACE
+    })
+    public @interface ReparentMoveStackMode {}
+    // Moves the stack to the front if it was not at the front
+    public static final int REPARENT_MOVE_STACK_TO_FRONT = 0;
+    // Only moves the stack to the front if it was focused or front most already
+    public static final int REPARENT_KEEP_STACK_AT_FRONT = 1;
+    // Do not move the stack as a part of reparenting
+    public static final int REPARENT_LEAVE_STACK_IN_PLACE = 2;
 
     final int taskId;       // Unique identifier for this task.
     String affinity;        // The affinity name for this task, or null; may change identity.
@@ -537,36 +561,159 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
         mWindowContainerController.getBounds(bounds);
     }
 
-    // TODO: Should we be doing all the stuff in ASS.moveTaskToStackLocked?
-    void reparent(int stackId, int position, String reason) {
-        mService.mWindowManager.deferSurfaceLayout();
+    /**
+     * Convenience method to reparent a task to the top or bottom position of the stack.
+     */
+    boolean reparent(int preferredStackId, boolean toTop, @ReparentMoveStackMode int moveStackMode,
+            boolean animate, boolean deferResume, String reason) {
+        return reparent(preferredStackId, toTop ? MAX_VALUE : 0, moveStackMode, animate,
+                deferResume, reason);
+    }
 
+    /**
+     * Reparents the task into a preferred stack, creating it if necessary.
+     *
+     * @param preferredStackId the stack id of the target stack to move this task
+     * @param position the position to place this task in the new stack
+     * @param animate whether or not we should wait for the new window created as a part of the
+     *                reparenting to be drawn and animated in
+     * @param moveStackMode whether or not to move the stack to the front always, only if it was
+     *                      previously focused & in front, or never
+     * @param deferResume whether or not to update the visibility of other tasks and stacks that may
+     *                    have changed as a result of this reparenting
+     * @param reason the caller of this reparenting
+     * @return
+     */
+    boolean reparent(int preferredStackId, int position, @ReparentMoveStackMode int moveStackMode,
+            boolean animate, boolean deferResume, String reason) {
+        final ActivityStackSupervisor supervisor = mService.mStackSupervisor;
+        final WindowManagerService windowManager = mService.mWindowManager;
+        final ActivityStack sourceStack = getStack();
+        final ActivityStack toStack = supervisor.getReparentTargetStack(this, preferredStackId,
+                position == MAX_VALUE);
+        if (toStack == sourceStack) {
+            return false;
+        }
+
+        final int sourceStackId = getStackId();
+        final int stackId = toStack.getStackId();
+        final ActivityRecord topActivity = getTopActivity();
+
+        final boolean mightReplaceWindow = StackId.replaceWindowsOnTaskMove(sourceStackId, stackId)
+                && topActivity != null;
+        if (mightReplaceWindow) {
+            // We are about to relaunch the activity because its configuration changed due to
+            // being maximized, i.e. size change. The activity will first remove the old window
+            // and then add a new one. This call will tell window manager about this, so it can
+            // preserve the old window until the new one is drawn. This prevents having a gap
+            // between the removal and addition, in which no window is visible. We also want the
+            // entrance of the new window to be properly animated.
+            // Note here we always set the replacing window first, as the flags might be needed
+            // during the relaunch. If we end up not doing any relaunch, we clear the flags later.
+            windowManager.setWillReplaceWindow(topActivity.appToken, animate);
+        }
+
+        windowManager.deferSurfaceLayout();
+        boolean kept = true;
         try {
-            final ActivityStackSupervisor supervisor = mService.mStackSupervisor;
-            final ActivityStack newStack = supervisor.getStack(stackId,
-                    CREATE_IF_NEEDED, false /* toTop */);
+            final ActivityRecord r = topRunningActivityLocked();
+            final boolean wasFocused = supervisor.isFocusedStack(sourceStack)
+                    && (topRunningActivityLocked() == r);
+            final boolean wasResumed = sourceStack.mResumedActivity == r;
+            final boolean wasPaused = sourceStack.mPausingActivity == r;
+
+            // In some cases the focused stack isn't the front stack. E.g. pinned stack.
+            // Whenever we are moving the top activity from the front stack we want to make sure to
+            // move the stack to the front.
+            final boolean wasFront = supervisor.isFrontStackOnDisplay(sourceStack)
+                    && (sourceStack.topRunningActivityLocked() == r);
+
             // Adjust the position for the new parent stack as needed.
-            position = newStack.getAdjustedPositionForTask(this, position, null /* starting */);
+            position = toStack.getAdjustedPositionForTask(this, position, null /* starting */);
 
             // Must reparent first in window manager to avoid a situation where AM can delete the
             // we are coming from in WM before we reparent because it became empty.
-            mWindowContainerController.reparent(newStack.getWindowContainerController(), position);
+            mWindowContainerController.reparent(toStack.getWindowContainerController(), position);
 
-            final ActivityStack prevStack = mStack;
-            prevStack.removeTask(this, reason, REMOVE_TASK_MODE_MOVING);
-            newStack.addTask(this, position, reason);
+            // Reset the resumed activity on the previous stack
+            if (wasResumed) {
+                sourceStack.mResumedActivity = null;
+            }
 
-            supervisor.scheduleReportPictureInPictureModeChangedIfNeeded(this, prevStack);
+            // Reset the paused activity on the previous stack
+            if (wasPaused) {
+                sourceStack.mPausingActivity = null;
+                sourceStack.removeTimeoutsForActivityLocked(r);
+            }
 
+            // Move the task
+            sourceStack.removeTask(this, reason, REMOVE_TASK_MODE_MOVING);
+            toStack.addTask(this, position, reason);
+
+            // TODO: Ensure that this is actually necessary here
+            // Notify of picture-in-picture mode changes
+            supervisor.scheduleReportPictureInPictureModeChangedIfNeeded(this, sourceStack);
+
+            // TODO: Ensure that this is actually necessary here
+            // Notify the voice session if required
             if (voiceSession != null) {
                 try {
                     voiceSession.taskStarted(intent, taskId);
                 } catch (RemoteException e) {
                 }
             }
+
+            // If the task had focus before (or we're requested to move focus), move focus to the
+            // new stack by moving the stack to the front.
+            final boolean moveStackToFront = moveStackMode == REPARENT_MOVE_STACK_TO_FRONT
+                    || (moveStackMode == REPARENT_KEEP_STACK_AT_FRONT && (wasFocused || wasFront));
+            toStack.moveToFrontAndResumeStateIfNeeded(r, moveStackToFront, wasResumed, wasPaused,
+                    reason);
+            if (!animate) {
+                toStack.mNoAnimActivities.add(topActivity);
+            }
+
+            // We might trigger a configuration change. Save the current task bounds for freezing.
+            // TODO: Should this call be moved inside the resize method in WM?
+            toStack.prepareFreezingTaskBounds();
+
+            // Make sure the task has the appropriate bounds/size for the stack it is in.
+            if (stackId == FULLSCREEN_WORKSPACE_STACK_ID
+                    && !Objects.equals(mBounds, toStack.mBounds)) {
+                kept = resize(toStack.mBounds, RESIZE_MODE_SYSTEM, !mightReplaceWindow,
+                        deferResume);
+            } else if (stackId == FREEFORM_WORKSPACE_STACK_ID) {
+                Rect bounds = getLaunchBounds();
+                if (bounds == null) {
+                    toStack.layoutTaskInStack(this, null);
+                    bounds = mBounds;
+                }
+                kept = resize(bounds, RESIZE_MODE_FORCED, !mightReplaceWindow, deferResume);
+            } else if (stackId == DOCKED_STACK_ID || stackId == PINNED_STACK_ID) {
+                kept = resize(toStack.mBounds, RESIZE_MODE_SYSTEM, !mightReplaceWindow,
+                        deferResume);
+            }
         } finally {
-            mService.mWindowManager.continueSurfaceLayout();
+            windowManager.continueSurfaceLayout();
         }
+
+        if (mightReplaceWindow) {
+            // If we didn't actual do a relaunch (indicated by kept==true meaning we kept the old
+            // window), we need to clear the replace window settings. Otherwise, we schedule a
+            // timeout to remove the old window if the replacing window is not coming in time.
+            windowManager.scheduleClearWillReplaceWindows(topActivity.appToken, !kept);
+        }
+
+        if (!deferResume) {
+            // The task might have already been running and its visibility needs to be synchronized
+            // with the visibility of the stack / windows.
+            supervisor.ensureActivitiesVisibleLocked(null, 0, !mightReplaceWindow);
+            supervisor.resumeFocusedStackTopActivityLocked();
+        }
+
+        supervisor.handleNonResizableTaskIfNeeded(this, preferredStackId, stackId);
+
+        return (preferredStackId == stackId);
     }
 
     void cancelWindowTransition() {
