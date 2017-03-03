@@ -900,8 +900,8 @@ public class Preference implements Comparable<Preference> {
     }
 
     /**
-     * Sets the key for this Preference, which is used as a key to the
-     * {@link SharedPreferences}. This should be unique for the package.
+     * Sets the key for this Preference, which is used as a key to the {@link SharedPreferences} or
+     * {@link PreferenceDataStore}. This should be unique for the package.
      *
      * @param key The key for the preference.
      */
@@ -914,8 +914,8 @@ public class Preference implements Comparable<Preference> {
     }
 
     /**
-     * Gets the key for this Preference, which is also the key used for storing
-     * values into SharedPreferences.
+     * Gets the key for this Preference, which is also the key used for storing values into
+     * {@link SharedPreferences} or {@link PreferenceDataStore}.
      *
      * @return The key.
      */
@@ -925,8 +925,7 @@ public class Preference implements Comparable<Preference> {
 
     /**
      * Checks whether the key is present, and if it isn't throws an
-     * exception. This should be called by subclasses that store preferences in
-     * the {@link SharedPreferences}.
+     * exception. This should be called by subclasses that persist their preferences.
      *
      * @throws IllegalStateException If there is no key assigned.
      */
@@ -949,7 +948,8 @@ public class Preference implements Comparable<Preference> {
 
     /**
      * Checks whether this Preference is persistent. If it is, it stores its value(s) into
-     * the persistent {@link SharedPreferences} storage.
+     * the persistent {@link SharedPreferences} storage by default or into
+     * {@link PreferenceDataStore} if assigned.
      *
      * @return True if it is persistent.
      */
@@ -958,11 +958,10 @@ public class Preference implements Comparable<Preference> {
     }
 
     /**
-     * Checks whether, at the given time this method is called,
-     * this Preference should store/restore its value(s) into the
-     * {@link SharedPreferences}. This, at minimum, checks whether this
-     * Preference is persistent and it currently has a key. Before you
-     * save/restore from the {@link SharedPreferences}, check this first.
+     * Checks whether, at the given time this method is called, this Preference should store/restore
+     * its value(s) into the {@link SharedPreferences} or into {@link PreferenceDataStore} if
+     * assigned. This, at minimum, checks whether this Preference is persistent and it currently has
+     * a key. Before you save/restore from the storage, check this first.
      *
      * @return True if it should persist the value.
      */
@@ -971,9 +970,9 @@ public class Preference implements Comparable<Preference> {
     }
 
     /**
-     * Sets whether this Preference is persistent. When persistent,
-     * it stores its value(s) into the persistent {@link SharedPreferences}
-     * storage.
+     * Sets whether this Preference is persistent. When persistent, it stores its value(s) into
+     * the persistent {@link SharedPreferences} storage by default or into
+     * {@link PreferenceDataStore} if assigned.
      *
      * @param persistent Set true if it should store its value(s) into the {@link SharedPreferences}.
      */
@@ -990,7 +989,7 @@ public class Preference implements Comparable<Preference> {
      *         value (and persisted).
      */
     protected boolean callChangeListener(Object newValue) {
-        return mOnChangeListener == null ? true : mOnChangeListener.onPreferenceChange(this, newValue);
+        return mOnChangeListener == null || mOnChangeListener.onPreferenceChange(this, newValue);
     }
 
     /**
@@ -1079,7 +1078,7 @@ public class Preference implements Comparable<Preference> {
     }
 
     /**
-     * Returns the {@link android.content.Context} of this Preference. 
+     * Returns the {@link android.content.Context} of this Preference.
      * Each Preference in a Preference hierarchy can be
      * from different Context (for example, if multiple activities provide preferences into a single
      * {@link PreferenceActivity}). This Context will be used to save the Preference values.
@@ -1103,12 +1102,14 @@ public class Preference implements Comparable<Preference> {
      * {@link SharedPreferences}, this is intended behavior to improve
      * performance.
      *
-     * @return The {@link SharedPreferences} where this Preference reads its
-     *         value(s), or null if it isn't attached to a Preference hierarchy.
+     * @return The {@link SharedPreferences} where this Preference reads its value(s), or null if it
+     *         isn't attached to a Preference hierarchy or if {@link PreferenceDataStore} is used
+     *         instead.
      * @see #getEditor()
+     * @see #setPreferenceDataStore(PreferenceDataStore)
      */
     public SharedPreferences getSharedPreferences() {
-        if (mPreferenceManager == null) {
+        if (mPreferenceManager == null || getPreferenceDataStore() != null) {
             return null;
         }
 
@@ -1128,14 +1129,15 @@ public class Preference implements Comparable<Preference> {
      * not show up in the SharedPreferences, this is intended behavior to
      * improve performance.
      *
-     * @return A {@link SharedPreferences.Editor} where this preference saves
-     *         its value(s), or null if it isn't attached to a Preference
-     *         hierarchy.
+     * @return A {@link SharedPreferences.Editor} where this preference saves its value(s), or null
+     *         if it isn't attached to a Preference hierarchy or if {@link PreferenceDataStore} is
+     *         used instead.
      * @see #shouldCommit()
      * @see #getSharedPreferences()
+     * @see #setPreferenceDataStore(PreferenceDataStore)
      */
     public SharedPreferences.Editor getEditor() {
-        if (mPreferenceManager == null) {
+        if (mPreferenceManager == null || getPreferenceDataStore() != null) {
             return null;
         }
 
@@ -1146,6 +1148,8 @@ public class Preference implements Comparable<Preference> {
      * Returns whether the {@link Preference} should commit its saved value(s) in
      * {@link #getEditor()}. This may return false in situations where batch
      * committing is being done (by the manager) to improve performance.
+     *
+     * <p>If this preference is using {@link PreferenceDataStore} this value should be irrelevant.
      *
      * @return Whether the Preference should commit its saved value(s).
      * @see #getEditor()
@@ -1453,6 +1457,11 @@ public class Preference implements Comparable<Preference> {
     }
 
     private void dispatchSetInitialValue() {
+        if (getPreferenceDataStore() != null) {
+            onSetInitialValue(true, mDefaultValue);
+            return;
+        }
+
         // By now, we know if we are persistent.
         final boolean shouldPersist = shouldPersist();
         if (!shouldPersist || !getSharedPreferences().contains(mKey)) {
@@ -1466,14 +1475,17 @@ public class Preference implements Comparable<Preference> {
 
     /**
      * Implement this to set the initial value of the Preference.
-     * <p>
-     * If <var>restorePersistedValue</var> is true, you should restore the
+     *
+     * <p>If <var>restorePersistedValue</var> is true, you should restore the
      * Preference value from the {@link android.content.SharedPreferences}. If
      * <var>restorePersistedValue</var> is false, you should set the Preference
      * value to defaultValue that is given (and possibly store to SharedPreferences
      * if {@link #shouldPersist()} is true).
-     * <p>
-     * This may not always be called. One example is if it should not persist
+     *
+     * <p>In case of using {@link PreferenceDataStore}, the <var>restorePersistedValue</var> is
+     * always false. But the default value (if provided) is set.
+     *
+     * <p>This may not always be called. One example is if it should not persist
      * but there is no default value given.
      *
      * @param restorePersistedValue True to restore the persisted value;
@@ -1869,8 +1881,8 @@ public class Preference implements Comparable<Preference> {
     }
 
     /**
-     * Called by {@link #saveHierarchyState} to store the instance for this Preference and its children.
-     * May be overridden to modify how the save happens for children. For example, some
+     * Called by {@link #saveHierarchyState} to store the instance for this Preference and its
+     * children. May be overridden to modify how the save happens for children. For example, some
      * Preference objects may want to not store an instance for their children.
      *
      * @param container The Bundle in which to save the instance of this Preference.
