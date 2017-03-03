@@ -84,7 +84,6 @@ public class QSTileView extends QSTileBaseView {
         mLabel = (TextView) mLabelContainer.findViewById(R.id.tile_label);
         mPadLock = (ImageView) mLabelContainer.findViewById(R.id.restricted_padlock);
 
-        mLabelContainer.setBackground(newTileBackground());
         addView(mLabelContainer);
     }
 
@@ -102,6 +101,11 @@ public class QSTileView extends QSTileBaseView {
             mLabel.setText(state.label);
         }
         mDivider.setVisibility(state.dualTarget ? View.VISIBLE : View.INVISIBLE);
+        if (state.dualTarget != mLabelContainer.isClickable()) {
+            mLabelContainer.setClickable(state.dualTarget);
+            mLabelContainer.setLongClickable(state.dualTarget);
+            mLabelContainer.setBackground(state.dualTarget ? newTileBackground() : null);
+        }
         mLabel.setEnabled(!state.disabledByPolicy);
         mPadLock.setVisibility(state.disabledByPolicy ? View.VISIBLE : View.GONE);
     }
@@ -110,7 +114,9 @@ public class QSTileView extends QSTileBaseView {
     public void init(OnClickListener click, OnClickListener secondaryClick,
             OnLongClickListener longClick) {
         super.init(click, secondaryClick, longClick);
-        mLabelContainer.setClickable(true);
         mLabelContainer.setOnClickListener(secondaryClick);
+        mLabelContainer.setOnLongClickListener(longClick);
+        mLabelContainer.setClickable(false);
+        mLabelContainer.setLongClickable(false);
     }
 }
