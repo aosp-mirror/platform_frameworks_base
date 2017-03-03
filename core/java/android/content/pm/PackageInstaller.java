@@ -465,6 +465,7 @@ public class PackageInstaller {
     }
 
     /** {@hide} */
+    @SystemApi
     public void setPermissionsResult(int sessionId, boolean accepted) {
         try {
             mInstaller.setPermissionsResult(sessionId, accepted);
@@ -845,9 +846,9 @@ public class PackageInstaller {
          * user intervention, and so it may not happen immediately. The final
          * result of the commit will be reported through the given callback.
          * <p>
-         * Once this method is called, no additional mutations may be performed
-         * on the session. If the device reboots before the session has been
-         * finalized, you may commit the session again.
+         * Once this method is called, the session is sealed and no additional
+         * mutations may be performed on the session. If the device reboots
+         * before the session has been finalized, you may commit the session again.
          *
          * @throws SecurityException if streams opened through
          *             {@link #openWrite(String, long, long)} are still open.
@@ -1276,6 +1277,16 @@ public class PackageInstaller {
          */
         public boolean isActive() {
             return active;
+        }
+
+        /**
+         * Return if this session is sealed.
+         * <p>
+         * Once sealed, no further changes may be made to the session. A session
+         * is sealed the moment {@link Session#commit(IntentSender)} is called.
+         */
+        public boolean isSealed() {
+            return sealed;
         }
 
         /**
