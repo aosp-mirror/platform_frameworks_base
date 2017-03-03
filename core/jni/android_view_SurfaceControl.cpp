@@ -693,33 +693,13 @@ static jboolean nativeGetAnimationFrameStats(JNIEnv* env, jclass clazz, jobject 
     return JNI_TRUE;
 }
 
+
 static void nativeDeferTransactionUntil(JNIEnv* env, jclass clazz, jlong nativeObject,
         jobject handleObject, jlong frameNumber) {
     auto ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
     sp<IBinder> handle = ibinderForJavaObject(env, handleObject);
 
     ctrl->deferTransactionUntil(handle, frameNumber);
-}
-
-static void nativeDeferTransactionUntilSurface(JNIEnv* env, jclass clazz, jlong nativeObject,
-        jobject surfaceObject, jlong frameNumber) {
-    auto ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
-    sp<Surface> barrier = reinterpret_cast<Surface *>(surfaceObject);
-
-    ctrl->deferTransactionUntil(barrier, frameNumber);
-}
-
-static void nativeReparentChildren(JNIEnv* env, jclass clazz, jlong nativeObject,
-        jobject newParentObject) {
-    auto ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
-    sp<IBinder> handle = ibinderForJavaObject(env, newParentObject);
-
-    ctrl->reparentChildren(handle);
-}
-
-static void nativeSeverChildren(JNIEnv* env, jclass clazz, jlong nativeObject) {
-    auto ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
-    ctrl->detachChildren();
 }
 
 static void nativeSetOverrideScalingMode(JNIEnv* env, jclass clazz, jlong nativeObject,
@@ -844,12 +824,6 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetDisplayPowerMode },
     {"nativeDeferTransactionUntil", "(JLandroid/os/IBinder;J)V",
             (void*)nativeDeferTransactionUntil },
-    {"nativeDeferTransactionUntilSurface", "(JJJ)V",
-            (void*)nativeDeferTransactionUntilSurface },
-    {"nativeReparentChildren", "(JLandroid/os/IBinder;)V",
-            (void*)nativeReparentChildren } ,
-    {"nativeSeverChildren", "(J)V",
-            (void*)nativeSeverChildren } ,
     {"nativeSetOverrideScalingMode", "(JI)V",
             (void*)nativeSetOverrideScalingMode },
     {"nativeGetHandle", "(J)Landroid/os/IBinder;",
