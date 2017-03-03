@@ -1195,6 +1195,8 @@ public final class BroadcastQueue {
                                 && r.intent.getPackage() == null
                                 && ((r.intent.getFlags()
                                         & Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND) == 0))) {
+                        mService.addBackgroundCheckViolationLocked(r.intent.getAction(),
+                                component.getPackageName());
                         Slog.w(TAG, "Background execution not allowed: receiving "
                                 + r.intent + " to "
                                 + component.flattenToShortString());

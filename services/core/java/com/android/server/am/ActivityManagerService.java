@@ -19019,8 +19019,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         return ActivityManager.BROADCAST_SUCCESS;
     }
 
-    final void addBroadcastStatLocked(String action, String srcPackage, int receiveCount,
-            int skipCount, long dispatchTime) {
+    final void rotateBroadcastStatsIfNeededLocked() {
         final long now = SystemClock.elapsedRealtime();
         if (mCurBroadcastStats == null ||
                 (mCurBroadcastStats.mStartRealtime +(24*60*60*1000) < now)) {
@@ -19031,7 +19030,17 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             mCurBroadcastStats = new BroadcastStats();
         }
+    }
+
+    final void addBroadcastStatLocked(String action, String srcPackage, int receiveCount,
+            int skipCount, long dispatchTime) {
+        rotateBroadcastStatsIfNeededLocked();
         mCurBroadcastStats.addBroadcast(action, srcPackage, receiveCount, skipCount, dispatchTime);
+    }
+
+    final void addBackgroundCheckViolationLocked(String action, String targetPackage) {
+        rotateBroadcastStatsIfNeededLocked();
+        mCurBroadcastStats.addBackgroundCheckViolation(action, targetPackage);
     }
 
     final Intent verifyBroadcastLocked(Intent intent) {
