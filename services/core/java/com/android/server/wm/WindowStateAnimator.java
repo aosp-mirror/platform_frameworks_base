@@ -566,20 +566,6 @@ class WindowStateAnimator {
         if (!mDestroyPreservedSurfaceUponRedraw) {
             return;
         }
-        if (mSurfaceController != null) {
-            if (mPendingDestroySurface != null) {
-                // If we are preserving a surface but we aren't relaunching that means
-                // we are just doing an in-place switch. In that case any SurfaceFlinger side
-                // child layers need to be reparented to the new surface to make this
-                // transparent to the app.
-                if (mWin.mAppToken == null || mWin.mAppToken.isRelaunching() == false) {
-                    SurfaceControl.openTransaction();
-                    mPendingDestroySurface.reparentChildrenInTransaction(mSurfaceController);
-                    SurfaceControl.closeTransaction();
-                }
-            }
-        }
-
         destroyDeferredSurfaceLocked();
         mDestroyPreservedSurfaceUponRedraw = false;
     }
@@ -1978,11 +1964,5 @@ class WindowStateAnimator {
             return true;
         }
         return mForceScaleUntilResize;
-    }
-
-    void detachChildren() {
-        if (mSurfaceController != null) {
-            mSurfaceController.detachChildren();
-        }
     }
 }

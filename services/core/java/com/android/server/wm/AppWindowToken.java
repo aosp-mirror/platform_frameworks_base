@@ -795,16 +795,6 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         if (canFreezeBounds()) {
             freezeBounds();
         }
-
-        // In the process of tearing down before relaunching, the app will
-        // try and clean up it's child surfaces. We need to prevent this from
-        // happening, so we sever the children, transfering their ownership
-        // from the client it-self to the parent surface (owned by us).
-        for (int i = mChildren.size() - 1; i >= 0; i--) {
-            final WindowState w = mChildren.get(i);
-            w.mWinAnimator.detachChildren();
-        }
-
         mPendingRelaunchCount++;
     }
 
