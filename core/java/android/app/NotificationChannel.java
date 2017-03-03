@@ -275,6 +275,13 @@ public final class NotificationChannel implements Parcelable {
         mDeleted = deleted;
     }
 
+    /**
+     * @hide
+     */
+    public void setNameResId(@StringRes int nameResId) {
+        this.mNameResId = nameResId;
+    }
+
     // Modifiable by a notification ranker.
 
     /**
