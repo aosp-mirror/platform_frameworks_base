@@ -2792,6 +2792,7 @@ public class NotificationManagerService extends SystemService {
             dump.put("bans", mRankingHelper.dumpBansJson(filter));
             dump.put("ranking", mRankingHelper.dumpJson(filter));
             dump.put("stats", mUsageStats.dumpJson(filter));
+            dump.put("channels", mRankingHelper.dumpChannelsJson(filter));
         } catch (JSONException e) {
             e.printStackTrace();
         }

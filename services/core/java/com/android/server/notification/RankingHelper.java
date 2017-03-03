@@ -19,6 +19,8 @@ import static android.app.NotificationManager.IMPORTANCE_NONE;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.nano.MetricsProto;
 import com.android.internal.util.Preconditions;
 
 import android.app.Notification;
@@ -30,6 +32,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ParceledListSlice;
+import android.metrics.LogMaker;
 import android.os.Build;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -485,6 +488,12 @@ public class RankingHelper implements RankingConfig {
         if (r == null) {
             throw new IllegalArgumentException("Invalid package");
         }
+        LogMaker lm = new LogMaker(MetricsProto.MetricsEvent.ACTION_NOTIFICATION_CHANNEL_GROUP)
+                .setType(MetricsProto.MetricsEvent.TYPE_UPDATE)
+                .addTaggedData(MetricsProto.MetricsEvent.FIELD_NOTIFICATION_CHANNEL_GROUP_ID,
+                        group.getId())
+                .setPackageName(pkg);
+        MetricsLogger.action(lm);
         r.groups.put(group.getId(), group);
         updateConfig();
     }
@@ -516,8 +525,11 @@ public class RankingHelper implements RankingConfig {
         if (existing != null) {
             if (existing.isDeleted()) {
                 existing.setDeleted(false);
-                updateConfig();
             }
+
+            MetricsLogger.action(getChannelLog(channel, pkg));
+
+            updateConfig();
             return;
         }
         if (channel.getImportance() < NotificationManager.IMPORTANCE_NONE
@@ -541,6 +553,8 @@ public class RankingHelper implements RankingConfig {
                     Notification.AUDIO_ATTRIBUTES_DEFAULT);
         }
         r.channels.put(channel.getId(), channel);
+        MetricsLogger.action(getChannelLog(channel, pkg).setType(
+                MetricsProto.MetricsEvent.TYPE_OPEN));
         updateConfig();
     }
 
@@ -568,6 +582,8 @@ public class RankingHelper implements RankingConfig {
             updatedChannel.setLockscreenVisibility(Ranking.VISIBILITY_NO_OVERRIDE);
         }
         r.channels.put(updatedChannel.getId(), updatedChannel);
+
+        MetricsLogger.action(getChannelLog(updatedChannel, pkg));
         updateConfig();
     }
 
@@ -615,6 +631,7 @@ public class RankingHelper implements RankingConfig {
         }
         // Assistant cannot change the group
 
+        MetricsLogger.action(getChannelLog(channel, pkg));
         r.channels.put(channel.getId(), channel);
         updateConfig();
     }
@@ -664,6 +681,9 @@ public class RankingHelper implements RankingConfig {
         if (channel != null) {
             channel.setDeleted(true);
         }
+        LogMaker lm = getChannelLog(channel, pkg);
+        lm.setType(MetricsProto.MetricsEvent.TYPE_CLOSE);
+        MetricsLogger.action(lm);
     }
 
     @Override
@@ -935,6 +955,49 @@ public class RankingHelper implements RankingConfig {
         return packageBans;
     }
 
+    /**
+     * Dump only the channel information as structured JSON for the stats collector.
+     *
+     * This is intentionally redundant with {#link dumpJson} because the old
+     * scraper will expect this format.
+     *
+     * @param filter
+     * @return
+     */
+    public JSONArray dumpChannelsJson(NotificationManagerService.DumpFilter filter) {
+        JSONArray channels = new JSONArray();
+        Map<String, Integer> packageChannels = getPackageChannels();
+        for(Entry<String, Integer> channelCount : packageChannels.entrySet()) {
+            final String packageName = channelCount.getKey();
+            if (filter == null || filter.matches(packageName)) {
+                JSONObject channelCountJson = new JSONObject();
+                try {
+                    channelCountJson.put("packageName", packageName);
+                    channelCountJson.put("channelCount", channelCount.getValue());
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                channels.put(channelCountJson);
+            }
+        }
+        return channels;
+    }
+
+    private Map<String, Integer> getPackageChannels() {
+        ArrayMap<String, Integer> packageChannels = new ArrayMap<>();
+        for (int i = 0; i < mRecords.size(); i++) {
+            final Record r = mRecords.valueAt(i);
+            int channelCount = 0;
+            for (int j = 0; j < r.channels.size();j++) {
+                if (!r.channels.valueAt(j).isDeleted()) {
+                    channelCount++;
+                }
+            }
+            packageChannels.put(r.pkg, channelCount);
+        }
+        return packageChannels;
+    }
+
     public void onPackagesChanged(boolean removingPackage, int changeUserId, String[] pkgList,
             int[] uidList) {
         if (pkgList == null || pkgList.length == 0) {
@@ -980,6 +1043,16 @@ public class RankingHelper implements RankingConfig {
         if (updated) {
             updateConfig();
         }
+    }
+
+    private LogMaker getChannelLog(NotificationChannel channel, String pkg) {
+        return new LogMaker(MetricsProto.MetricsEvent.ACTION_NOTIFICATION_CHANNEL)
+                .setType(MetricsProto.MetricsEvent.TYPE_UPDATE)
+                .setPackageName(pkg)
+                .addTaggedData(MetricsProto.MetricsEvent.FIELD_NOTIFICATION_CHANNEL_ID,
+                        channel.getId())
+                .addTaggedData(MetricsProto.MetricsEvent.FIELD_NOTIFICATION_CHANNEL_IMPORTANCE,
+                        channel.getImportance());
     }
 
     private static class Record {
