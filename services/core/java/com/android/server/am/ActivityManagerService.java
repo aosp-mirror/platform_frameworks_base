@@ -18877,7 +18877,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                     appOp, brOptions, registeredReceivers, resultTo, resultCode, resultData,
                     resultExtras, ordered, sticky, false, userId);
             if (DEBUG_BROADCAST) Slog.v(TAG_BROADCAST, "Enqueueing parallel broadcast " + r);
-            final boolean replaced = replacePending && queue.replaceParallelBroadcastLocked(r);
+            final boolean replaced = replacePending
+                    && (queue.replaceParallelBroadcastLocked(r) != null);
+            // Note: We assume resultTo is null for non-ordered broadcasts.
             if (!replaced) {
                 queue.enqueueParallelBroadcastLocked(r);
                 queue.scheduleBroadcastsLocked();
@@ -18976,8 +18978,25 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (DEBUG_BROADCAST) Slog.i(TAG_BROADCAST,
                     "Enqueueing broadcast " + r.intent.getAction());
 
-            boolean replaced = replacePending && queue.replaceOrderedBroadcastLocked(r);
-            if (!replaced) {
+            final BroadcastRecord oldRecord =
+                    replacePending ? queue.replaceOrderedBroadcastLocked(r) : null;
+            if (oldRecord != null) {
+                // Replaced, fire the result-to receiver.
+                if (oldRecord.resultTo != null) {
+                    final BroadcastQueue oldQueue = broadcastQueueForIntent(oldRecord.intent);
+                    try {
+                        oldQueue.performReceiveLocked(oldRecord.callerApp, oldRecord.resultTo,
+                                oldRecord.intent,
+                                Activity.RESULT_CANCELED, null, null,
+                                false, false, oldRecord.userId);
+                    } catch (RemoteException e) {
+                        Slog.w(TAG, "Failure ["
+                                + queue.mQueueName + "] sending broadcast result of "
+                                + intent, e);
+
+                    }
+                }
+            } else {
                 queue.enqueueOrderedBroadcastLocked(r);
                 queue.scheduleBroadcastsLocked();
             }
