@@ -18,6 +18,7 @@
 
 #include <gtest/gtest.h>
 #include <RecordingCanvas.h>
+#include <SkBlurDrawLooper.h>
 #include <SkPicture.h>
 #include <SkPictureRecorder.h>
 
@@ -58,4 +59,22 @@ OPENGL_PIPELINE_TEST(SkiaCanvasProxy, drawGlyphsViaPicture) {
     EXPECT_EQ(directOp->opId, pictureOp->opId);
     EXPECT_EQ(directOp->unmappedBounds, pictureOp->unmappedBounds);
     EXPECT_EQ(directOp->localMatrix, pictureOp->localMatrix);
+}
+
+TEST(SkiaCanvas, drawShadowLayer) {
+    auto surface = SkSurface::MakeRasterN32Premul(10, 10);
+    SkiaCanvas canvas(surface->getCanvas());
+
+    // clear to white
+    canvas.drawColor(SK_ColorWHITE, SkBlendMode::kSrc);
+
+    SkPaint paint;
+    // it is transparent to ensure that we still draw the rect since it has a looper
+    paint.setColor(SK_ColorTRANSPARENT);
+    // this is how view's shadow layers are implemented
+    paint.setLooper(SkBlurDrawLooper::Make(0xF0000000, 6.0f, 0, 10));
+    canvas.drawRect(3, 3, 7, 7, paint);
+
+    ASSERT_EQ(TestUtils::getColor(surface, 0, 0), SK_ColorWHITE);
+    ASSERT_NE(TestUtils::getColor(surface, 5, 5), SK_ColorWHITE);
 }
