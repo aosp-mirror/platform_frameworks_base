@@ -222,12 +222,27 @@ public class BackupManagerService {
     // 2 : no format change per se; version bump to facilitate PBKDF2 version skew detection
     // 3 : introduced "_meta" metadata file; no other format change per se
     // 4 : added support for new device-encrypted storage locations
-    static final int BACKUP_FILE_VERSION = 4;
+    // 5 : added support for key-value packages
+    static final int BACKUP_FILE_VERSION = 5;
     static final String BACKUP_FILE_HEADER_MAGIC = "ANDROID BACKUP\n";
     static final int BACKUP_PW_FILE_VERSION = 2;
     static final String BACKUP_METADATA_FILENAME = "_meta";
     static final int BACKUP_METADATA_VERSION = 1;
     static final int BACKUP_WIDGET_METADATA_TOKEN = 0x01FFED01;
+
+    static final int TAR_HEADER_LONG_RADIX = 8;
+    static final int TAR_HEADER_OFFSET_FILESIZE = 124;
+    static final int TAR_HEADER_LENGTH_FILESIZE = 12;
+    static final int TAR_HEADER_OFFSET_MODTIME = 136;
+    static final int TAR_HEADER_LENGTH_MODTIME = 12;
+    static final int TAR_HEADER_OFFSET_MODE = 100;
+    static final int TAR_HEADER_LENGTH_MODE = 8;
+    static final int TAR_HEADER_OFFSET_PATH_PREFIX = 345;
+    static final int TAR_HEADER_LENGTH_PATH_PREFIX = 155;
+    static final int TAR_HEADER_OFFSET_PATH = 0;
+    static final int TAR_HEADER_LENGTH_PATH = 100;
+    static final int TAR_HEADER_OFFSET_TYPE_CHAR = 156;
+
     static final boolean COMPRESS_FULL_BACKUPS = true; // should be true in production
 
     static final String SETTINGS_PACKAGE = "com.android.providers.settings";
@@ -553,19 +568,20 @@ public class BackupManagerService {
         }
     }
 
-    class FullParams {
+    // Parameters used by adbBackup() and adbRestore()
+    class AdbParams {
         public ParcelFileDescriptor fd;
         public final AtomicBoolean latch;
         public IFullBackupRestoreObserver observer;
         public String curPassword;     // filled in by the confirmation step
         public String encryptPassword;
 
-        FullParams() {
+        AdbParams() {
             latch = new AtomicBoolean(false);
         }
     }
 
-    class FullBackupParams extends FullParams {
+    class AdbBackupParams extends AdbParams {
         public boolean includeApks;
         public boolean includeObbs;
         public boolean includeShared;
@@ -573,11 +589,12 @@ public class BackupManagerService {
         public boolean allApps;
         public boolean includeSystem;
         public boolean doCompress;
+        public boolean includeKeyValue;
         public String[] packages;
 
-        FullBackupParams(ParcelFileDescriptor output, boolean saveApks, boolean saveObbs,
+        AdbBackupParams(ParcelFileDescriptor output, boolean saveApks, boolean saveObbs,
                 boolean saveShared, boolean alsoWidgets, boolean doAllApps, boolean doSystem,
-                boolean compress, String[] pkgList) {
+                boolean compress, boolean doKeyValue, String[] pkgList) {
             fd = output;
             includeApks = saveApks;
             includeObbs = saveObbs;
@@ -586,12 +603,13 @@ public class BackupManagerService {
             allApps = doAllApps;
             includeSystem = doSystem;
             doCompress = compress;
+            includeKeyValue = doKeyValue;
             packages = pkgList;
         }
     }
 
-    class FullRestoreParams extends FullParams {
-        FullRestoreParams(ParcelFileDescriptor input) {
+    class AdbRestoreParams extends AdbParams {
+        AdbRestoreParams(ParcelFileDescriptor input) {
             fd = input;
         }
     }
@@ -627,10 +645,10 @@ public class BackupManagerService {
     static final int OP_TIMEOUT = -1;
 
     // Waiting for backup agent to respond during backup operation.
-    private static final int OP_TYPE_BACKUP_WAIT = 0;
+    static final int OP_TYPE_BACKUP_WAIT = 0;
 
     // Waiting for backup agent to respond during restore operation.
-    private static final int OP_TYPE_RESTORE_WAIT = 1;
+    static final int OP_TYPE_RESTORE_WAIT = 1;
 
     // An entire backup operation spanning multiple packages.
     private static final int OP_TYPE_BACKUP = 2;
@@ -672,7 +690,7 @@ public class BackupManagerService {
     final Object mCurrentOpLock = new Object();
     final Random mTokenGenerator = new Random();
 
-    final SparseArray<FullParams> mFullConfirmations = new SparseArray<FullParams>();
+    final SparseArray<AdbParams> mAdbBackupRestoreConfirmations = new SparseArray<AdbParams>();
 
     // Where we keep our journal files and other bookkeeping
     File mBaseStateDir;
@@ -791,15 +809,9 @@ public class BackupManagerService {
     }
 
     /* adb backup: is this app only capable of doing key/value?  We say otherwise if
-     * the app has a backup agent and does not say fullBackupOnly, *unless* it
-     * is a package that we know _a priori_ explicitly supports both key/value and
-     * full-data backup.
+     * the app has a backup agent and does not say fullBackupOnly,
      */
     private static boolean appIsKeyValueOnly(PackageInfo pkg) {
-        if ("com.android.providers.settings".equals(pkg.packageName)) {
-            return false;
-        }
-
         return !appGetsFullBackup(pkg);
     }
 
@@ -912,13 +924,12 @@ public class BackupManagerService {
             {
                 // TODO: refactor full backup to be a looper-based state machine
                 // similar to normal backup/restore.
-                FullBackupParams params = (FullBackupParams)msg.obj;
+                AdbBackupParams params = (AdbBackupParams)msg.obj;
                 PerformAdbBackupTask task = new PerformAdbBackupTask(params.fd,
                         params.observer, params.includeApks, params.includeObbs,
-                        params.includeShared, params.doWidgets,
-                        params.curPassword, params.encryptPassword,
-                        params.allApps, params.includeSystem, params.doCompress,
-                        params.packages, params.latch);
+                        params.includeShared, params.doWidgets, params.curPassword,
+                        params.encryptPassword, params.allApps, params.includeSystem,
+                        params.doCompress, params.includeKeyValue, params.packages, params.latch);
                 (new Thread(task, "adb-backup")).start();
                 break;
             }
@@ -963,7 +974,7 @@ public class BackupManagerService {
             {
                 // TODO: refactor full restore to be a looper-based state machine
                 // similar to normal backup/restore.
-                FullRestoreParams params = (FullRestoreParams)msg.obj;
+                AdbRestoreParams params = (AdbRestoreParams)msg.obj;
                 PerformAdbRestoreTask task = new PerformAdbRestoreTask(params.fd,
                         params.curPassword, params.encryptPassword,
                         params.observer, params.latch);
@@ -1071,16 +1082,16 @@ public class BackupManagerService {
 
             case MSG_FULL_CONFIRMATION_TIMEOUT:
             {
-                synchronized (mFullConfirmations) {
-                    FullParams params = mFullConfirmations.get(msg.arg1);
+                synchronized (mAdbBackupRestoreConfirmations) {
+                    AdbParams params = mAdbBackupRestoreConfirmations.get(msg.arg1);
                     if (params != null) {
                         Slog.i(TAG, "Full backup/restore timed out waiting for user confirmation");
 
                         // Release the waiter; timeout == completion
-                        signalFullBackupRestoreCompletion(params);
+                        signalAdbBackupRestoreCompletion(params);
 
                         // Remove the token from the set
-                        mFullConfirmations.delete(msg.arg1);
+                        mAdbBackupRestoreConfirmations.delete(msg.arg1);
 
                         // Report a timeout to the observer, if any
                         if (params.observer != null) {
@@ -3719,7 +3730,7 @@ public class BackupManagerService {
 
     }
 
-    private void routeSocketDataToOutput(ParcelFileDescriptor inPipe, OutputStream out)
+    static void routeSocketDataToOutput(ParcelFileDescriptor inPipe, OutputStream out)
             throws IOException {
         // We do not take close() responsibility for the pipe FD
         FileInputStream raw = new FileInputStream(inPipe.getFileDescriptor());
@@ -3822,7 +3833,7 @@ public class BackupManagerService {
                     if (mWriteManifest) {
                         final boolean writeWidgetData = mWidgetData != null;
                         if (MORE_DEBUG) Slog.d(TAG, "Writing manifest for " + mPackage.packageName);
-                        writeAppManifest(mPackage, mManifestFile, mSendApk, writeWidgetData);
+                        writeAppManifest(mPackage, mPackageManager, mManifestFile, mSendApk, writeWidgetData);
                         FullBackup.backupToTar(mPackage.packageName, null, null,
                                 mFilesDir.getAbsolutePath(),
                                 mManifestFile.getAbsolutePath(),
@@ -4006,52 +4017,6 @@ public class BackupManagerService {
             }
         }
 
-        private void writeAppManifest(PackageInfo pkg, File manifestFile,
-                boolean withApk, boolean withWidgets) throws IOException {
-            // Manifest format. All data are strings ending in LF:
-            //     BACKUP_MANIFEST_VERSION, currently 1
-            //
-            // Version 1:
-            //     package name
-            //     package's versionCode
-            //     platform versionCode
-            //     getInstallerPackageName() for this package (maybe empty)
-            //     boolean: "1" if archive includes .apk; any other string means not
-            //     number of signatures == N
-            // N*:    signature byte array in ascii format per Signature.toCharsString()
-            StringBuilder builder = new StringBuilder(4096);
-            StringBuilderPrinter printer = new StringBuilderPrinter(builder);
-
-            printer.println(Integer.toString(BACKUP_MANIFEST_VERSION));
-            printer.println(pkg.packageName);
-            printer.println(Integer.toString(pkg.versionCode));
-            printer.println(Integer.toString(Build.VERSION.SDK_INT));
-
-            String installerName = mPackageManager.getInstallerPackageName(pkg.packageName);
-            printer.println((installerName != null) ? installerName : "");
-
-            printer.println(withApk ? "1" : "0");
-            if (pkg.signatures == null) {
-                printer.println("0");
-            } else {
-                printer.println(Integer.toString(pkg.signatures.length));
-                for (Signature sig : pkg.signatures) {
-                    printer.println(sig.toCharsString());
-                }
-            }
-
-            FileOutputStream outstream = new FileOutputStream(manifestFile);
-            outstream.write(builder.toString().getBytes());
-            outstream.close();
-
-            // We want the manifest block in the archive stream to be idempotent:
-            // each time we generate a backup stream for the app, we want the manifest
-            // block to be identical.  The underlying tar mechanism sees it as a file,
-            // though, and will propagate its mtime, causing the tar header to vary.
-            // Avoid this problem by pinning the mtime to zero.
-            manifestFile.setLastModified(0);
-        }
-
         // Widget metadata format. All header entries are strings ending in LF:
         //
         // Version 1 header:
@@ -4098,6 +4063,52 @@ public class BackupManagerService {
                 tearDownAgentAndKill(mPkg.applicationInfo);
             }
         }
+    }
+
+    static void writeAppManifest(PackageInfo pkg, PackageManager packageManager, File manifestFile,
+            boolean withApk, boolean withWidgets) throws IOException {
+        // Manifest format. All data are strings ending in LF:
+        //     BACKUP_MANIFEST_VERSION, currently 1
+        //
+        // Version 1:
+        //     package name
+        //     package's versionCode
+        //     platform versionCode
+        //     getInstallerPackageName() for this package (maybe empty)
+        //     boolean: "1" if archive includes .apk; any other string means not
+        //     number of signatures == N
+        // N*:    signature byte array in ascii format per Signature.toCharsString()
+        StringBuilder builder = new StringBuilder(4096);
+        StringBuilderPrinter printer = new StringBuilderPrinter(builder);
+
+        printer.println(Integer.toString(BACKUP_MANIFEST_VERSION));
+        printer.println(pkg.packageName);
+        printer.println(Integer.toString(pkg.versionCode));
+        printer.println(Integer.toString(Build.VERSION.SDK_INT));
+
+        String installerName = packageManager.getInstallerPackageName(pkg.packageName);
+        printer.println((installerName != null) ? installerName : "");
+
+        printer.println(withApk ? "1" : "0");
+        if (pkg.signatures == null) {
+            printer.println("0");
+        } else {
+            printer.println(Integer.toString(pkg.signatures.length));
+            for (Signature sig : pkg.signatures) {
+                printer.println(sig.toCharsString());
+            }
+        }
+
+        FileOutputStream outstream = new FileOutputStream(manifestFile);
+        outstream.write(builder.toString().getBytes());
+        outstream.close();
+
+        // We want the manifest block in the archive stream to be idempotent:
+        // each time we generate a backup stream for the app, we want the manifest
+        // block to be identical.  The underlying tar mechanism sees it as a file,
+        // though, and will propagate its mtime, causing the tar header to vary.
+        // Avoid this problem by pinning the mtime to zero.
+        manifestFile.setLastModified(0);
     }
 
     // Generic driver skeleton for full backup operations
@@ -4172,6 +4183,7 @@ public class BackupManagerService {
         boolean mAllApps;
         boolean mIncludeSystem;
         boolean mCompress;
+        boolean mKeyValue;
         ArrayList<String> mPackages;
         PackageInfo mCurrentTarget;
         String mCurrentPassword;
@@ -4179,9 +4191,9 @@ public class BackupManagerService {
         private final int mCurrentOpToken;
 
         PerformAdbBackupTask(ParcelFileDescriptor fd, IFullBackupRestoreObserver observer,
-                boolean includeApks, boolean includeObbs, boolean includeShared,
-                boolean doWidgets, String curPassword, String encryptPassword, boolean doAllApps,
-                boolean doSystem, boolean doCompress, String[] packages, AtomicBoolean latch) {
+                boolean includeApks, boolean includeObbs, boolean includeShared, boolean doWidgets,
+                String curPassword, String encryptPassword, boolean doAllApps, boolean doSystem,
+                boolean doCompress, boolean doKeyValue, String[] packages, AtomicBoolean latch) {
             super(observer);
             mCurrentOpToken = generateToken();
             mLatch = latch;
@@ -4210,6 +4222,7 @@ public class BackupManagerService {
                 Slog.w(TAG, "Encrypting backup with passphrase=" + mEncryptPassword);
             }
             mCompress = doCompress;
+            mKeyValue = doKeyValue;
         }
 
         void addPackagesToSet(TreeMap<String, PackageInfo> set, List<String> pkgNames) {
@@ -4309,7 +4322,8 @@ public class BackupManagerService {
 
         @Override
         public void run() {
-            Slog.i(TAG, "--- Performing full-dataset adb backup ---");
+            String includeKeyValue = mKeyValue ? ", including key-value backups" : "";
+            Slog.i(TAG, "--- Performing adb backup" + includeKeyValue + " ---");
 
             TreeMap<String, PackageInfo> packagesToBackup = new TreeMap<String, PackageInfo>();
             FullBackupObbConnection obbConnection = new FullBackupObbConnection();
@@ -4361,14 +4375,26 @@ public class BackupManagerService {
 
             // Now we cull any inapplicable / inappropriate packages from the set.  This
             // includes the special shared-storage agent package; we handle that one
-            // explicitly at the end of the backup pass.
+            // explicitly at the end of the backup pass. Packages supporting key-value backup are
+            // added to their own queue, and handled after packages supporting fullbackup.
+            ArrayList<PackageInfo> keyValueBackupQueue = new ArrayList<>();
             Iterator<Entry<String, PackageInfo>> iter = packagesToBackup.entrySet().iterator();
             while (iter.hasNext()) {
                 PackageInfo pkg = iter.next().getValue();
                 if (!appIsEligibleForBackup(pkg.applicationInfo)
-                        || appIsStopped(pkg.applicationInfo)
-                        || appIsKeyValueOnly(pkg)) {
+                        || appIsStopped(pkg.applicationInfo)) {
                     iter.remove();
+                    if (DEBUG) {
+                        Slog.i(TAG, "Package " + pkg.packageName
+                                + " is not eligible for backup, removing.");
+                    }
+                } else if (appIsKeyValueOnly(pkg)) {
+                    iter.remove();
+                    if (DEBUG) {
+                        Slog.i(TAG, "Package " + pkg.packageName
+                                + " is key-value.");
+                    }
+                    keyValueBackupQueue.add(pkg);
                 }
             }
 
@@ -4402,7 +4428,7 @@ public class BackupManagerService {
                 // final '\n'.
                 //
                 // line 1: "ANDROID BACKUP"
-                // line 2: backup file format version, currently "2"
+                // line 2: backup file format version, currently "5"
                 // line 3: compressed?  "0" if not compressed, "1" if compressed.
                 // line 4: name of encryption algorithm [currently only "none" or "AES-256"]
                 //
@@ -4462,10 +4488,14 @@ public class BackupManagerService {
                     }
                 }
 
-                // Now actually run the constructed backup sequence
+                // Now actually run the constructed backup sequence for full backup
                 int N = backupQueue.size();
                 for (int i = 0; i < N; i++) {
                     pkg = backupQueue.get(i);
+                    if (DEBUG) {
+                        Slog.i(TAG,"--- Performing full backup for package " + pkg.packageName
+                                + " ---");
+                    }
                     final boolean isSharedStorage =
                             pkg.packageName.equals(SHARED_BACKUP_AGENT_PACKAGE);
 
@@ -4483,6 +4513,21 @@ public class BackupManagerService {
                         if (!obbOkay) {
                             throw new RuntimeException("Failure writing OBB stack for " + pkg);
                         }
+                    }
+                }
+                // And for key-value backup if enabled
+                if (mKeyValue) {
+                    for (PackageInfo keyValuePackage : keyValueBackupQueue) {
+                        if (DEBUG) {
+                            Slog.i(TAG, "--- Performing key-value backup for package "
+                                    + keyValuePackage.packageName + " ---");
+                        }
+                        KeyValueAdbBackupEngine kvBackupEngine =
+                                new KeyValueAdbBackupEngine(out, keyValuePackage,
+                                        BackupManagerService.this,
+                                        mPackageManager, mBaseStateDir, mDataDir);
+                        sendOnBackupPackage(keyValuePackage.packageName);
+                        kvBackupEngine.backupOnePackage();
                     }
                 }
 
@@ -6693,19 +6738,24 @@ public class BackupManagerService {
                 try {
                     // okay, presume we're okay, and extract the various metadata
                     info = new FileMetadata();
-                    info.size = extractRadix(block, 124, 12, 8);
-                    info.mtime = extractRadix(block, 136, 12, 8);
-                    info.mode = extractRadix(block, 100, 8, 8);
+                    info.size = extractRadix(block, TAR_HEADER_OFFSET_FILESIZE,
+                            TAR_HEADER_LENGTH_FILESIZE, TAR_HEADER_LONG_RADIX);
+                    info.mtime = extractRadix(block, TAR_HEADER_OFFSET_MODTIME,
+                            TAR_HEADER_LENGTH_MODTIME, TAR_HEADER_LONG_RADIX);
+                    info.mode = extractRadix(block, TAR_HEADER_OFFSET_MODE,
+                            TAR_HEADER_LENGTH_MODE, TAR_HEADER_LONG_RADIX);
 
-                    info.path = extractString(block, 345, 155); // prefix
-                    String path = extractString(block, 0, 100);
+                    info.path = extractString(block, TAR_HEADER_OFFSET_PATH_PREFIX,
+                            TAR_HEADER_LENGTH_PATH_PREFIX);
+                    String path = extractString(block, TAR_HEADER_OFFSET_PATH,
+                            TAR_HEADER_LENGTH_PATH);
                     if (path.length() > 0) {
                         if (info.path.length() > 0) info.path += '/';
                         info.path += path;
                     }
 
                     // tar link indicator field: 1 byte at offset 156 in the header.
-                    int typeChar = block[156];
+                    int typeChar = block[TAR_HEADER_OFFSET_TYPE_CHAR];
                     if (typeChar == 'x') {
                         // pax extended header, so we need to read that
                         gotHeader = readPaxExtendedHeader(instream, info);
@@ -6716,7 +6766,7 @@ public class BackupManagerService {
                         }
                         if (!gotHeader) throw new IOException("Bad or missing pax header");
 
-                        typeChar = block[156];
+                        typeChar = block[TAR_HEADER_OFFSET_TYPE_CHAR];
                     }
 
                     switch (typeChar) {
@@ -7037,6 +7087,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
         IFullBackupRestoreObserver mObserver;
         AtomicBoolean mLatchObject;
         IBackupAgent mAgent;
+        PackageManagerBackupAgent mPackageManagerBackupAgent;
         String mAgentPackage;
         ApplicationInfo mTargetApp;
         FullBackupObbConnection mObbConnection = null;
@@ -7088,6 +7139,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
             mObserver = observer;
             mLatchObject = latch;
             mAgent = null;
+            mPackageManagerBackupAgent = new PackageManagerBackupAgent(mPackageManager);
             mAgentPackage = null;
             mTargetApp = null;
             mObbConnection = new FullBackupObbConnection();
@@ -7505,14 +7557,21 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                             long toCopy = info.size;
                             final int token = generateToken();
                             try {
-                                prepareOperationTimeout(token, TIMEOUT_FULL_BACKUP_INTERVAL, null,
+                                prepareOperationTimeout(token, TIMEOUT_RESTORE_INTERVAL, null,
                                         OP_TYPE_RESTORE_WAIT);
-                                if (info.domain.equals(FullBackup.OBB_TREE_TOKEN)) {
+                                if (FullBackup.OBB_TREE_TOKEN.equals(info.domain)) {
                                     if (DEBUG) Slog.d(TAG, "Restoring OBB file for " + pkg
                                             + " : " + info.path);
                                     mObbConnection.restoreObbFile(pkg, mPipes[0],
                                             info.size, info.type, info.path, info.mode,
                                             info.mtime, token, mBackupManagerBinder);
+                                } else if (FullBackup.KEY_VALUE_DATA_TOKEN.equals(info.domain)) {
+                                    if (DEBUG) Slog.d(TAG, "Restoring key-value file for " + pkg
+                                            + " : " + info.path);
+                                    KeyValueAdbRestoreEngine restoreEngine =
+                                            new KeyValueAdbRestoreEngine(BackupManagerService.this,
+                                                    mDataDir, info, mPipes[0], mAgent, token);
+                                    new Thread(restoreEngine, "restore-key-value-runner").start();
                                 } else {
                                     if (DEBUG) Slog.d(TAG, "Invoking agent to restore file "
                                             + info.path);
@@ -8100,6 +8159,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                 Slog.i(TAG, b.toString());
             }
         }
+
         // Consume a tar file header block [sequence] and accumulate the relevant metadata
         FileMetadata readTarHeaders(InputStream instream) throws IOException {
             byte[] block = new byte[512];
@@ -9920,16 +9980,16 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
         return (Settings.Global.getInt(resolver, Settings.Global.DEVICE_PROVISIONED, 0) != 0);
     }
 
-    // Run a *full* backup pass for the given packages, writing the resulting data stream
+    // Run a backup pass for the given packages, writing the resulting data stream
     // to the supplied file descriptor.  This method is synchronous and does not return
     // to the caller until the backup has been completed.
     //
     // This is the variant used by 'adb backup'; it requires on-screen confirmation
     // by the user because it can be used to offload data over untrusted USB.
-    public void fullBackup(ParcelFileDescriptor fd, boolean includeApks,
-            boolean includeObbs, boolean includeShared, boolean doWidgets,
-            boolean doAllApps, boolean includeSystem, boolean compress, String[] pkgList) {
-        mContext.enforceCallingPermission(android.Manifest.permission.BACKUP, "fullBackup");
+    public void adbBackup(ParcelFileDescriptor fd, boolean includeApks, boolean includeObbs,
+            boolean includeShared, boolean doWidgets, boolean doAllApps, boolean includeSystem,
+            boolean compress, boolean doKeyValue, String[] pkgList) {
+        mContext.enforceCallingPermission(android.Manifest.permission.BACKUP, "adbBackup");
 
         final int callingUserHandle = UserHandle.getCallingUserId();
         // TODO: http://b/22388012
@@ -9954,27 +10014,28 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
         try {
             // Doesn't make sense to do a full backup prior to setup
             if (!deviceIsProvisioned()) {
-                Slog.i(TAG, "Full backup not supported before setup");
+                Slog.i(TAG, "Backup not supported before setup");
                 return;
             }
 
-            if (DEBUG) Slog.v(TAG, "Requesting full backup: apks=" + includeApks
-                    + " obb=" + includeObbs + " shared=" + includeShared + " all=" + doAllApps
-                    + " system=" + includeSystem + " pkgs=" + pkgList);
-            Slog.i(TAG, "Beginning full backup...");
+            if (DEBUG) Slog.v(TAG, "Requesting backup: apks=" + includeApks + " obb=" + includeObbs
+                    + " shared=" + includeShared + " all=" + doAllApps + " system="
+                    + includeSystem + " includekeyvalue=" + doKeyValue + " pkgs=" + pkgList);
+            Slog.i(TAG, "Beginning adb backup...");
 
-            FullBackupParams params = new FullBackupParams(fd, includeApks, includeObbs,
-                    includeShared, doWidgets, doAllApps, includeSystem, compress, pkgList);
+            AdbBackupParams params = new AdbBackupParams(fd, includeApks, includeObbs,
+                    includeShared, doWidgets, doAllApps, includeSystem, compress, doKeyValue,
+                    pkgList);
             final int token = generateToken();
-            synchronized (mFullConfirmations) {
-                mFullConfirmations.put(token, params);
+            synchronized (mAdbBackupRestoreConfirmations) {
+                mAdbBackupRestoreConfirmations.put(token, params);
             }
 
             // start up the confirmation UI
             if (DEBUG) Slog.d(TAG, "Starting backup confirmation UI, token=" + token);
             if (!startConfirmationUi(token, FullBackup.FULL_BACKUP_INTENT_ACTION)) {
-                Slog.e(TAG, "Unable to launch full backup confirmation");
-                mFullConfirmations.delete(token);
+                Slog.e(TAG, "Unable to launch backup confirmation UI");
+                mAdbBackupRestoreConfirmations.delete(token);
                 return;
             }
 
@@ -9987,7 +10048,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
             startConfirmationTimeout(token, params);
 
             // wait for the backup to be performed
-            if (DEBUG) Slog.d(TAG, "Waiting for full backup completion...");
+            if (DEBUG) Slog.d(TAG, "Waiting for backup completion...");
             waitForCompletion(params);
         } finally {
             try {
@@ -9996,7 +10057,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                 // just eat it
             }
             Binder.restoreCallingIdentity(oldId);
-            Slog.d(TAG, "Full backup processing complete.");
+            Slog.d(TAG, "Adb backup processing complete.");
         }
     }
 
@@ -10049,8 +10110,8 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
         }
     }
 
-    public void fullRestore(ParcelFileDescriptor fd) {
-        mContext.enforceCallingPermission(android.Manifest.permission.BACKUP, "fullRestore");
+    public void adbRestore(ParcelFileDescriptor fd) {
+        mContext.enforceCallingPermission(android.Manifest.permission.BACKUP, "adbRestore");
 
         final int callingUserHandle = UserHandle.getCallingUserId();
         // TODO: http://b/22388012
@@ -10068,19 +10129,19 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                 return;
             }
 
-            Slog.i(TAG, "Beginning full restore...");
+            Slog.i(TAG, "Beginning restore...");
 
-            FullRestoreParams params = new FullRestoreParams(fd);
+            AdbRestoreParams params = new AdbRestoreParams(fd);
             final int token = generateToken();
-            synchronized (mFullConfirmations) {
-                mFullConfirmations.put(token, params);
+            synchronized (mAdbBackupRestoreConfirmations) {
+                mAdbBackupRestoreConfirmations.put(token, params);
             }
 
             // start up the confirmation UI
             if (DEBUG) Slog.d(TAG, "Starting restore confirmation UI, token=" + token);
             if (!startConfirmationUi(token, FullBackup.FULL_RESTORE_INTENT_ACTION)) {
-                Slog.e(TAG, "Unable to launch full restore confirmation");
-                mFullConfirmations.delete(token);
+                Slog.e(TAG, "Unable to launch restore confirmation");
+                mAdbBackupRestoreConfirmations.delete(token);
                 return;
             }
 
@@ -10093,16 +10154,16 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
             startConfirmationTimeout(token, params);
 
             // wait for the restore to be performed
-            if (DEBUG) Slog.d(TAG, "Waiting for full restore completion...");
+            if (DEBUG) Slog.d(TAG, "Waiting for restore completion...");
             waitForCompletion(params);
         } finally {
             try {
                 fd.close();
             } catch (IOException e) {
-                Slog.w(TAG, "Error trying to close fd after full restore: " + e);
+                Slog.w(TAG, "Error trying to close fd after adb restore: " + e);
             }
             Binder.restoreCallingIdentity(oldId);
-            Slog.i(TAG, "Full restore processing complete.");
+            Slog.i(TAG, "adb restore processing complete.");
         }
     }
 
@@ -10120,7 +10181,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
         return true;
     }
 
-    void startConfirmationTimeout(int token, FullParams params) {
+    void startConfirmationTimeout(int token, AdbParams params) {
         if (MORE_DEBUG) Slog.d(TAG, "Posting conf timeout msg after "
                 + TIMEOUT_FULL_CONFIRMATION + " millis");
         Message msg = mBackupHandler.obtainMessage(MSG_FULL_CONFIRMATION_TIMEOUT,
@@ -10128,7 +10189,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
         mBackupHandler.sendMessageDelayed(msg, TIMEOUT_FULL_CONFIRMATION);
     }
 
-    void waitForCompletion(FullParams params) {
+    void waitForCompletion(AdbParams params) {
         synchronized (params.latch) {
             while (params.latch.get() == false) {
                 try {
@@ -10138,7 +10199,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
         }
     }
 
-    void signalFullBackupRestoreCompletion(FullParams params) {
+    void signalAdbBackupRestoreCompletion(AdbParams params) {
         synchronized (params.latch) {
             params.latch.set(true);
             params.latch.notifyAll();
@@ -10147,27 +10208,27 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
 
     // Confirm that the previously-requested full backup/restore operation can proceed.  This
     // is used to require a user-facing disclosure about the operation.
-    public void acknowledgeFullBackupOrRestore(int token, boolean allow,
+    public void acknowledgeAdbBackupOrRestore(int token, boolean allow,
             String curPassword, String encPpassword, IFullBackupRestoreObserver observer) {
-        if (DEBUG) Slog.d(TAG, "acknowledgeFullBackupOrRestore : token=" + token
+        if (DEBUG) Slog.d(TAG, "acknowledgeAdbBackupOrRestore : token=" + token
                 + " allow=" + allow);
 
         // TODO: possibly require not just this signature-only permission, but even
         // require that the specific designated confirmation-UI app uid is the caller?
-        mContext.enforceCallingPermission(android.Manifest.permission.BACKUP, "acknowledgeFullBackupOrRestore");
+        mContext.enforceCallingPermission(android.Manifest.permission.BACKUP, "acknowledgeAdbBackupOrRestore");
 
         long oldId = Binder.clearCallingIdentity();
         try {
 
-            FullParams params;
-            synchronized (mFullConfirmations) {
-                params = mFullConfirmations.get(token);
+            AdbParams params;
+            synchronized (mAdbBackupRestoreConfirmations) {
+                params = mAdbBackupRestoreConfirmations.get(token);
                 if (params != null) {
                     mBackupHandler.removeMessages(MSG_FULL_CONFIRMATION_TIMEOUT, params);
-                    mFullConfirmations.delete(token);
+                    mAdbBackupRestoreConfirmations.delete(token);
 
                     if (allow) {
-                        final int verb = params instanceof FullBackupParams
+                        final int verb = params instanceof AdbBackupParams
                                 ? MSG_RUN_ADB_BACKUP
                                 : MSG_RUN_ADB_RESTORE;
 
@@ -10183,7 +10244,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                     } else {
                         Slog.w(TAG, "User rejected full backup/restore operation");
                         // indicate completion without having actually transferred any data
-                        signalFullBackupRestoreCompletion(params);
+                        signalAdbBackupRestoreCompletion(params);
                     }
                 } else {
                     Slog.w(TAG, "Attempted to ack full backup/restore with invalid token");
