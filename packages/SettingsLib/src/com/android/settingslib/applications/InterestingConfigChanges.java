@@ -31,7 +31,8 @@ public class InterestingConfigChanges {
 
     public InterestingConfigChanges(int extraFlags) {
         mFlags = extraFlags | ActivityInfo.CONFIG_LOCALE
-                | ActivityInfo.CONFIG_UI_MODE | ActivityInfo.CONFIG_SCREEN_LAYOUT;
+                | ActivityInfo.CONFIG_UI_MODE | ActivityInfo.CONFIG_SCREEN_LAYOUT
+                | ActivityInfo.CONFIG_ASSETS_PATHS;
     }
 
     public boolean applyNewConfig(Resources res) {

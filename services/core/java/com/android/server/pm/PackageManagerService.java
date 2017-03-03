@@ -496,18 +496,6 @@ public class PackageManagerService extends IPackageManager.Stub {
     private static final String PACKAGE_SCHEME = "package";
 
     private static final String VENDOR_OVERLAY_DIR = "/vendor/overlay";
-    /**
-     * If VENDOR_OVERLAY_THEME_PROPERTY is set, search for runtime resource overlay APKs also in
-     * VENDOR_OVERLAY_DIR/<value of VENDOR_OVERLAY_THEME_PROPERTY> in addition to
-     * VENDOR_OVERLAY_DIR.
-     */
-    private static final String VENDOR_OVERLAY_THEME_PROPERTY = "ro.boot.vendor.overlay.theme";
-    /**
-     * Same as VENDOR_OVERLAY_THEME_PROPERTY, except persistent. If set will override whatever
-     * is in VENDOR_OVERLAY_THEME_PROPERTY.
-     */
-    private static final String VENDOR_OVERLAY_THEME_PERSIST_PROPERTY
-            = "persist.vendor.overlay.theme";
 
     /** Permission grant: not grant the permission. */
     private static final int GRANT_DENIED = 1;
@@ -2476,16 +2464,6 @@ public class PackageManagerService extends IPackageManager.Stub {
             // Collect vendor overlay packages. (Do this before scanning any apps.)
             // For security and version matching reason, only consider
             // overlay packages if they reside in the right directory.
-            String overlayThemeDir = SystemProperties.get(VENDOR_OVERLAY_THEME_PERSIST_PROPERTY);
-            if (overlayThemeDir.isEmpty()) {
-                overlayThemeDir = SystemProperties.get(VENDOR_OVERLAY_THEME_PROPERTY);
-            }
-            if (!overlayThemeDir.isEmpty()) {
-                scanDirTracedLI(new File(VENDOR_OVERLAY_DIR, overlayThemeDir), mDefParseFlags
-                        | PackageParser.PARSE_IS_SYSTEM
-                        | PackageParser.PARSE_IS_SYSTEM_DIR
-                        | PackageParser.PARSE_TRUSTED_OVERLAY, scanFlags | SCAN_TRUSTED_OVERLAY, 0);
-            }
             scanDirTracedLI(new File(VENDOR_OVERLAY_DIR), mDefParseFlags
                     | PackageParser.PARSE_IS_SYSTEM
                     | PackageParser.PARSE_IS_SYSTEM_DIR
@@ -3415,6 +3393,8 @@ public class PackageManagerService extends IPackageManager.Stub {
             return null;
         }
 
+        rebaseEnabledOverlays(packageInfo.applicationInfo, userId);
+
         packageInfo.packageName = packageInfo.applicationInfo.packageName =
                 resolveExternalPackageNameLPr(p);
 
@@ -4147,8 +4127,12 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (a != null && mSettings.isEnabledAndMatchLPr(a.info, flags, userId)) {
                 PackageSetting ps = mSettings.mPackages.get(component.getPackageName());
                 if (ps == null) return null;
-                return PackageParser.generateActivityInfo(a, flags, ps.readUserState(userId),
-                        userId);
+                ActivityInfo ri = PackageParser.generateActivityInfo(a, flags,
+                        ps.readUserState(userId), userId);
+                if (ri != null) {
+                    rebaseEnabledOverlays(ri.applicationInfo, userId);
+                }
+                return ri;
             }
         }
         return null;
@@ -4274,8 +4258,12 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (s != null && mSettings.isEnabledAndMatchLPr(s.info, flags, userId)) {
                 PackageSetting ps = mSettings.mPackages.get(component.getPackageName());
                 if (ps == null) return null;
-                return PackageParser.generateServiceInfo(s, flags, ps.readUserState(userId),
-                        userId);
+                ServiceInfo si = PackageParser.generateServiceInfo(s, flags,
+                        ps.readUserState(userId), userId);
+                if (si != null) {
+                    rebaseEnabledOverlays(si.applicationInfo, userId);
+                }
+                return si;
             }
         }
         return null;
@@ -4294,8 +4282,12 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (p != null && mSettings.isEnabledAndMatchLPr(p.info, flags, userId)) {
                 PackageSetting ps = mSettings.mPackages.get(component.getPackageName());
                 if (ps == null) return null;
-                return PackageParser.generateProviderInfo(p, flags, ps.readUserState(userId),
-                        userId);
+                ProviderInfo pi = PackageParser.generateProviderInfo(p, flags,
+                        ps.readUserState(userId), userId);
+                if (pi != null) {
+                    rebaseEnabledOverlays(pi.applicationInfo, userId);
+                }
+                return pi;
             }
         }
         return null;
@@ -23220,7 +23212,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                 ArrayList<String> paths = null;
                 if (overlayPackageNames != null) {
                     final int N = overlayPackageNames.size();
-                    paths = new ArrayList<String>(N);
+                    paths = new ArrayList<>(N);
                     for (int i = 0; i < N; i++) {
                         final String packageName = overlayPackageNames.get(i);
                         final PackageParser.Package pkg = mPackages.get(packageName);
@@ -23235,7 +23227,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                 ArrayMap<String, ArrayList<String>> userSpecificOverlays =
                     mEnabledOverlayPaths.get(userId);
                 if (userSpecificOverlays == null) {
-                    userSpecificOverlays = new ArrayMap<String, ArrayList<String>>();
+                    userSpecificOverlays = new ArrayMap<>();
                     mEnabledOverlayPaths.put(userId, userSpecificOverlays);
                 }
 

@@ -27,8 +27,8 @@ import static com.android.server.om.OverlayManagerService.TAG;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.om.OverlayInfo;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
@@ -53,13 +53,16 @@ final class OverlayManagerServiceImpl {
     private final PackageManagerHelper mPackageManager;
     private final IdmapManager mIdmapManager;
     private final OverlayManagerSettings mSettings;
+    private final Set<String> mDefaultOverlays;
 
     OverlayManagerServiceImpl(@NonNull final PackageManagerHelper packageManager,
             @NonNull final IdmapManager idmapManager,
-            @NonNull final OverlayManagerSettings settings) {
+            @NonNull final OverlayManagerSettings settings,
+            @NonNull final Set<String> defaultOverlays) {
         mPackageManager = packageManager;
         mIdmapManager = idmapManager;
         mSettings = settings;
+        mDefaultOverlays = defaultOverlays;
     }
 
     /*
@@ -92,12 +95,22 @@ final class OverlayManagerServiceImpl {
             final PackageInfo overlayPackage = overlayPackages.get(i);
             final OverlayInfo oi = storedOverlayInfos.get(overlayPackage.packageName);
             if (oi == null || !oi.targetPackageName.equals(overlayPackage.overlayTarget)) {
-                if (oi != null) {
-                    packagesToUpdateAssets.add(oi.targetPackageName);
-                }
+                // Update the overlay if it didn't exist or had the wrong target package.
                 mSettings.init(overlayPackage.packageName, newUserId,
                         overlayPackage.overlayTarget,
                         overlayPackage.applicationInfo.getBaseCodePath());
+
+                if (oi == null) {
+                    // This overlay does not exist in our settings.
+                    if (mDefaultOverlays.contains(overlayPackage.packageName)) {
+                        // Enable this overlay by default.
+                        mSettings.setEnabled(overlayPackage.packageName, newUserId, true);
+                    }
+                } else {
+                    // The targetPackageName we have stored doesn't match the overlay's target.
+                    // Queue the old target for an update as well.
+                    packagesToUpdateAssets.add(oi.targetPackageName);
+                }
             }
 
             try {
@@ -132,7 +145,7 @@ final class OverlayManagerServiceImpl {
             }
         }
 
-        return new ArrayList<String>(packagesToUpdateAssets);
+        return new ArrayList<>(packagesToUpdateAssets);
     }
 
     void onUserRemoved(final int userId) {
@@ -303,6 +316,7 @@ final class OverlayManagerServiceImpl {
 
     void onDump(@NonNull final PrintWriter pw) {
         mSettings.dump(pw);
+        pw.println("Default overlays: " + TextUtils.join(";", mDefaultOverlays));
     }
 
     List<String> getEnabledOverlayPackageNames(@NonNull final String targetPackageName,
