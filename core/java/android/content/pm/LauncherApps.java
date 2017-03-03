@@ -1365,6 +1365,18 @@ public class LauncherApps {
         }
 
         /**
+         * Any extras sent by the requesting app.
+         */
+        @Nullable
+        public Bundle getExtras() {
+            try {
+                return mInner.getExtras();
+            } catch (RemoteException e) {
+                throw e.rethrowAsRuntimeException();
+            }
+        }
+
+        /**
          * Return {@code TRUE} if a request is valid -- i.e. {@link #accept(Bundle)} has not been
          * called yet.
          */

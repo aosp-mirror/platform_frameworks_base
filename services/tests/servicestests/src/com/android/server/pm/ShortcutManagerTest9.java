@@ -95,7 +95,7 @@ public class ShortcutManagerTest9 extends BaseShortcutManagerTest {
 
             assertExpectException(IllegalStateException.class, "foreground activity", () -> {
                 mInternal.requestPinAppWidget(CALLING_PACKAGE_1, makeProviderInfo("dummy"),
-            /* resultIntent= */ null, USER_P0);
+                        null /* extras */, null /* resultIntent= */, USER_P0);
             });
 
             verify(mServiceContext, times(0)).sendIntentSender(any(IntentSender.class));
@@ -111,7 +111,7 @@ public class ShortcutManagerTest9 extends BaseShortcutManagerTest {
         runWithCaller(CALLING_PACKAGE_1, USER_P0, () -> {
             AppWidgetProviderInfo info = makeProviderInfo("c1");
 
-            assertTrue(mInternal.requestPinAppWidget(CALLING_PACKAGE_1, info,
+            assertTrue(mInternal.requestPinAppWidget(CALLING_PACKAGE_1, info, null,
                     resultIntent == null ? null : resultIntent.getIntentSender(), USER_P0));
 
             verify(mServiceContext, times(0)).sendIntentSender(any(IntentSender.class));

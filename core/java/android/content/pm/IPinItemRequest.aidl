@@ -27,4 +27,5 @@ interface IPinItemRequest {
     boolean accept(in Bundle options);
     ShortcutInfo getShortcutInfo();
     AppWidgetProviderInfo getAppWidgetProviderInfo();
+    Bundle getExtras();
 }

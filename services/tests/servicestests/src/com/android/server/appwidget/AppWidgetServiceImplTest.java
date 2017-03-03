@@ -38,6 +38,7 @@ import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.LauncherApps;
 import android.content.pm.ShortcutServiceInternal;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.UserHandle;
 import android.test.InstrumentationTestCase;
@@ -104,21 +105,21 @@ public class AppWidgetServiceImplTest extends InstrumentationTestCase {
         if (otherProvider == null) {
             // No other provider found. Ignore this test.
         }
-        assertFalse(mManager.requestPinAppWidget(otherProvider, null));
+        assertFalse(mManager.requestPinAppWidget(otherProvider, null, null));
     }
 
     public void testRequestPinAppWidget() {
         ComponentName provider = new ComponentName(mTestContext, DummyAppWidget.class);
         // Set up users.
         when(mMockShortcutService.requestPinAppWidget(anyString(),
-                any(AppWidgetProviderInfo.class), any(IntentSender.class), anyInt()))
+                any(AppWidgetProviderInfo.class), any(Bundle.class), any(IntentSender.class), anyInt()))
                 .thenReturn(true);
-        assertTrue(mManager.requestPinAppWidget(provider, null));
+        assertTrue(mManager.requestPinAppWidget(provider, null, null));
 
         final ArgumentCaptor<AppWidgetProviderInfo> providerCaptor =
                 ArgumentCaptor.forClass(AppWidgetProviderInfo.class);
         verify(mMockShortcutService, times(1)).requestPinAppWidget(anyString(),
-                providerCaptor.capture(), eq(null), anyInt());
+                providerCaptor.capture(), any(null), eq(null), anyInt());
         assertEquals(provider, providerCaptor.getValue().provider);
     }
 

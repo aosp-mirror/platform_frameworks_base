@@ -417,6 +417,17 @@ public class AppWidgetManager {
     public static final String EXTRA_APPWIDGET_OLD_IDS = "appWidgetOldIds";
 
     /**
+     * An extra that can be passed to
+     * {@link #requestPinAppWidget(ComponentName, Bundle, PendingIntent)}. This would allow the
+     * launcher app to present a custom preview to the user.
+     *
+     * <p>
+     * The value should be a {@link RemoteViews} similar to what is used with
+     * {@link #updateAppWidget} calls.
+     */
+    public static final String EXTRA_APPWIDGET_PREVIEW = "appWidgetPreview";
+
+    /**
      * Field for the manifest meta-data tag.
      *
      * @see AppWidgetProviderInfo
@@ -1073,7 +1084,7 @@ public class AppWidgetManager {
 
     /**
      * Return {@code TRUE} if the default launcher supports
-     * {@link #requestPinAppWidget(ComponentName, PendingIntent)}
+     * {@link #requestPinAppWidget(ComponentName, Bundle, PendingIntent)}
      */
     public boolean isRequestPinAppWidgetSupported() {
         try {
@@ -1081,6 +1092,15 @@ public class AppWidgetManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Only used during development. Can be deleted before release.
+     * @hide
+     */
+    public boolean requestPinAppWidget(@NonNull ComponentName provider,
+            @Nullable PendingIntent successCallback) {
+        return requestPinAppWidget(provider, null, successCallback);
     }
 
     /**
@@ -1099,6 +1119,8 @@ public class AppWidgetManager {
      *
      * @param provider The {@link ComponentName} for the {@link
      *    android.content.BroadcastReceiver BroadcastReceiver} provider for your AppWidget.
+     * @param extras In not null, this is passed to the launcher app. For eg {@link
+     *    #EXTRA_APPWIDGET_PREVIEW} can be used for a custom preview.
      * @param successCallback If not null, this intent will be sent when the widget is created.
      *
      * @return {@code TRUE} if the launcher supports this feature. Note the API will return without
@@ -1113,10 +1135,10 @@ public class AppWidgetManager {
      * service or when the user is locked.
      */
     public boolean requestPinAppWidget(@NonNull ComponentName provider,
-            @Nullable PendingIntent successCallback) {
+            @Nullable Bundle extras, @Nullable PendingIntent successCallback) {
         try {
-            return mService.requestPinAppWidget(mPackageName, provider,
-                successCallback == null ? null : successCallback.getIntentSender());
+            return mService.requestPinAppWidget(mPackageName, provider, extras,
+                    successCallback == null ? null : successCallback.getIntentSender());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

@@ -1603,7 +1603,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
 
     @Override
     public boolean requestPinAppWidget(String callingPackage, ComponentName componentName,
-            IntentSender resultSender) {
+            Bundle extras, IntentSender resultSender) {
         final int callingUid = Binder.getCallingUid();
         final int userId = UserHandle.getUserId(callingUid);
 
@@ -1628,7 +1628,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
 
         return LocalServices.getService(ShortcutServiceInternal.class)
-                .requestPinAppWidget(callingPackage, info, resultSender, userId);
+                .requestPinAppWidget(callingPackage, info, extras, resultSender, userId);
     }
 
     @Override

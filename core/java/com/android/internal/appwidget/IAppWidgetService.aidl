@@ -68,7 +68,7 @@ interface IAppWidgetService {
     int[] getAppWidgetIds(in ComponentName providerComponent);
     boolean isBoundWidgetPackage(String packageName, int userId);
     boolean requestPinAppWidget(String packageName, in ComponentName providerComponent,
-            in IntentSender resultIntent);
+            in Bundle extras, in IntentSender resultIntent);
     boolean isRequestPinAppWidgetSupported();
 }
 
