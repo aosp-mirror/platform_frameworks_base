@@ -2510,7 +2510,7 @@ public class StatusBar extends SystemUI implements DemoMode,
      * This needs to be called if state used by {@link #adjustDisableFlags} changes.
      */
     public void recomputeDisableFlags(boolean animate) {
-        mCommandQueue.disable(mDisabledUnmodified1, mDisabledUnmodified2, animate);
+        mCommandQueue.recomputeDisableFlags(animate);
     }
 
     protected H createHandler() {

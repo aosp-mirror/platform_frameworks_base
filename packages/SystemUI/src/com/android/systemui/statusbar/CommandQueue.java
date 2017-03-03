@@ -177,6 +177,10 @@ public class CommandQueue extends IStatusBar.Stub {
         disable(state1, state2, true);
     }
 
+    public void recomputeDisableFlags(boolean animate) {
+        disable(mDisable1, mDisable2, animate);
+    }
+
     public void animateExpandNotificationsPanel() {
         synchronized (mLock) {
             mHandler.removeMessages(MSG_EXPAND_NOTIFICATIONS);
