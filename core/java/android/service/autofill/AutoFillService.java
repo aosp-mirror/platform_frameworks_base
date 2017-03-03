@@ -15,9 +15,12 @@
  */
 package android.service.autofill;
 
+import android.accessibilityservice.IAccessibilityServiceConnection;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.os.Message;
 import android.os.RemoteException;
+import android.view.accessibility.AccessibilityInteractionClient;
 import com.android.internal.os.HandlerCaller;
 import android.annotation.SdkConstant;
 import android.app.Activity;
@@ -79,6 +82,15 @@ public abstract class AutoFillService extends Service {
 
     private final IAutoFillService mInterface = new IAutoFillService.Stub() {
         @Override
+        public void onInit(IAutoFillServiceConnection connection) {
+            if (connection != null) {
+                mHandlerCaller.obtainMessageO(MSG_CONNECT, connection).sendToTarget();
+            } else {
+                mHandlerCaller.obtainMessage(MSG_DISCONNECT).sendToTarget();
+            }
+        }
+
+        @Override
         public void onFillRequest(AssistStructure structure, Bundle extras,
                 IFillCallback callback) {
             ICancellationSignal transport = CancellationSignal.createTransport();
@@ -98,21 +110,12 @@ public abstract class AutoFillService extends Service {
             mHandlerCaller.obtainMessageOOO(MSG_ON_SAVE_REQUEST, structure,
                     extras, callback).sendToTarget();
         }
-
-        @Override
-        public void onConnected() {
-            mHandlerCaller.sendMessage(mHandlerCaller.obtainMessage(MSG_CONNECT));
-        }
-
-        @Override
-        public void onDisconnected() {
-            mHandlerCaller.sendMessage(mHandlerCaller.obtainMessage(MSG_DISCONNECT));
-        }
     };
 
     private final HandlerCaller.Callback mHandlerCallback = (msg) -> {
         switch (msg.what) {
             case MSG_CONNECT: {
+                mConnection = (IAutoFillServiceConnection) msg.obj;
                 onConnected();
                 break;
             } case MSG_ON_FILL_REQUEST: {
@@ -136,6 +139,7 @@ public abstract class AutoFillService extends Service {
                 break;
             } case MSG_DISCONNECT: {
                 onDisconnected();
+                mConnection = null;
                 break;
             } default: {
                 Log.w(TAG, "MyCallbacks received invalid message type: " + msg);
@@ -144,6 +148,8 @@ public abstract class AutoFillService extends Service {
     };
 
     private HandlerCaller mHandlerCaller;
+
+    private IAutoFillServiceConnection mConnection;
 
     /**
      * {@inheritDoc}
@@ -222,5 +228,23 @@ public abstract class AutoFillService extends Service {
      */
     public void onDisconnected() {
         //TODO(b/33197203): is not called anymore, fix it!
+    }
+
+    /**
+     * Disables the service. After calling this method, the service will
+     * be disabled and settings will show that it is turned off.
+     *
+     * <p>You should call this method only after a call to {@link #onConnected()}
+     * and before the corresponding call to {@link #onDisconnected()}. In other words
+     * you can disable your service only while the system is connected to it.</p>
+     */
+    public final void disableSelf() {
+        if (mConnection != null) {
+            try {
+                mConnection.disableSelf();
+            } catch (RemoteException re) {
+                throw re.rethrowFromSystemServer();
+            }
+        }
     }
 }

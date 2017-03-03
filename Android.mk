@@ -265,6 +265,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/security/IKeystoreService.aidl \
 	core/java/android/security/keymaster/IKeyAttestationApplicationIdProvider.aidl \
 	core/java/android/service/autofill/IAutoFillService.aidl \
+	core/java/android/service/autofill/IAutoFillServiceConnection.aidl \
 	core/java/android/service/autofill/IFillCallback.aidl \
 	core/java/android/service/autofill/ISaveCallback.aidl \
 	core/java/android/service/carrier/ICarrierService.aidl \
