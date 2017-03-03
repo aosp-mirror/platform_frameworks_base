@@ -437,6 +437,21 @@ public class PackageDexUsage extends AbstractStatsBase<Void> {
         }
     }
 
+    /**
+     * Return all packages that contain records of secondary dex files.
+     */
+    public Set<String> getAllPackagesWithSecondaryDexFiles() {
+        Set<String> packages = new HashSet<>();
+        synchronized (mPackageUseInfoMap) {
+            for (Map.Entry<String, PackageUseInfo> entry : mPackageUseInfoMap.entrySet()) {
+                if (!entry.getValue().mDexUseInfoMap.isEmpty()) {
+                    packages.add(entry.getKey());
+                }
+            }
+        }
+        return packages;
+    }
+
     public void clear() {
         synchronized (mPackageUseInfoMap) {
             mPackageUseInfoMap.clear();
