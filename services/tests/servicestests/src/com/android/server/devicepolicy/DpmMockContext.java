@@ -316,6 +316,41 @@ public class DpmMockContext extends MockContext {
 
     public ApplicationInfo applicationInfo = null;
 
+    // We have to keep track of broadcast receivers registered for a given intent ourselves as the
+    // DPM unit tests mock out the package manager and PackageManager.queryBroadcastReceivers() does
+    // not work.
+    private class BroadcastReceiverRegistration {
+        public final BroadcastReceiver receiver;
+        public final IntentFilter filter;
+        public final Handler scheduler;
+
+        public BroadcastReceiverRegistration(BroadcastReceiver receiver, IntentFilter filter,
+                Handler scheduler) {
+            this.receiver = receiver;
+            this.filter = filter;
+            this.scheduler = scheduler;
+        }
+
+        public void sendBroadcastIfApplicable(int userId, Intent intent) {
+            final BroadcastReceiver.PendingResult result = new BroadcastReceiver.PendingResult(
+                    0 /* resultCode */, null /* resultData */, null /* resultExtras */,
+                    0 /* type */, false /* ordered */, false /* sticky */, null /* token */, userId,
+                    0 /* flags */);
+            if (filter.match(null, intent, false, "DpmMockContext") > 0) {
+                if (scheduler != null) {
+                    scheduler.post(() -> {
+                        receiver.setPendingResult(result);
+                        receiver.onReceive(DpmMockContext.this, intent);
+                    });
+                } else {
+                    receiver.setPendingResult(result);
+                    receiver.onReceive(DpmMockContext.this, intent);
+                }
+            }
+        }
+    }
+    private List<BroadcastReceiverRegistration> mBroadcastReceivers = new ArrayList<>();
+
     public DpmMockContext(Context context, File dataDir) {
         realTestContext = context;
 
@@ -474,6 +509,13 @@ public class DpmMockContext extends MockContext {
     public void setUserRunning(int userId, boolean isRunning) {
         when(userManager.isUserRunning(MockUtils.checkUserHandle(userId)))
                 .thenReturn(isRunning);
+    }
+
+    public void injectBroadcast(Intent intent) {
+        final int userId = UserHandle.getUserId(binder.getCallingUid());
+        for (final BroadcastReceiverRegistration receiver : mBroadcastReceivers) {
+            receiver.sendBroadcastIfApplicable(userId, intent);
+        }
     }
 
     @Override
@@ -681,24 +723,28 @@ public class DpmMockContext extends MockContext {
 
     @Override
     public Intent registerReceiver(BroadcastReceiver receiver, IntentFilter filter) {
+        mBroadcastReceivers.add(new BroadcastReceiverRegistration(receiver, filter, null));
         return spiedContext.registerReceiver(receiver, filter);
     }
 
     @Override
     public Intent registerReceiver(BroadcastReceiver receiver, IntentFilter filter,
             String broadcastPermission, Handler scheduler) {
+        mBroadcastReceivers.add(new BroadcastReceiverRegistration(receiver, filter, scheduler));
         return spiedContext.registerReceiver(receiver, filter, broadcastPermission, scheduler);
     }
 
     @Override
     public Intent registerReceiverAsUser(BroadcastReceiver receiver, UserHandle user,
             IntentFilter filter, String broadcastPermission, Handler scheduler) {
+        mBroadcastReceivers.add(new BroadcastReceiverRegistration(receiver, filter, scheduler));
         return spiedContext.registerReceiverAsUser(receiver, user, filter, broadcastPermission,
                 scheduler);
     }
 
     @Override
     public void unregisterReceiver(BroadcastReceiver receiver) {
+        mBroadcastReceivers.removeIf(r -> r.receiver == receiver);
         spiedContext.unregisterReceiver(receiver);
     }
 

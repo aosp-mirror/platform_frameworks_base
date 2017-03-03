@@ -7958,4 +7958,28 @@ public class DevicePolicyManager {
             throw re.rethrowFromSystemServer();
         }
     }
+
+
+    /**
+     * Called by the system to get a list of CA certificates that were installed by the device or
+     * profile owner.
+     *
+     * <p> The caller must be the target user's Device Owner/Profile owner or hold the
+     * {@link android.Manifest.permission#INTERACT_ACROSS_USERS_FULL} permission.
+     *
+     * @param user The user for whom to retrieve information.
+     * @return list of aliases identifying CA certificates installed by the device or profile owner
+     * @throws SecurityException if the caller does not have permission to retrieve information
+     *         about the given user's CA certificates.
+     *
+     * @hide
+     */
+    @TestApi
+    public List<String> getOwnerInstalledCaCerts(@NonNull UserHandle user) {
+        try {
+            return mService.getOwnerInstalledCaCerts(user).getList();
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
 }
