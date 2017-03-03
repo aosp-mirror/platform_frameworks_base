@@ -245,7 +245,7 @@ public class Build {
          * Magic version number for a current development build, which has
          * not yet turned into an official release.
          */
-        public static final int CUR_DEVELOPMENT = 10000;
+        public static final int CUR_DEVELOPMENT = VMRuntime.SDK_VERSION_CUR_DEVELOPMENT;
 
         /**
          * October 2008: The original, first, version of Android.  Yay!
