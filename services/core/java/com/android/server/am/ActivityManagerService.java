@@ -4157,13 +4157,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         synchronized (this) {
             for (int i=mLruProcesses.size()-1; i>=0; i--) {
                 final ProcessRecord proc = mLruProcesses.get(i);
-                if (procState == ActivityManager.PROCESS_STATE_NONEXISTENT
-                        || procState > proc.setProcState) {
-                    if (proc.pkgList.containsKey(packageName)) {
-                        procState = proc.setProcState;
-                        break;
-                    }
-                    if (proc.pkgDeps != null && proc.pkgDeps.contains(packageName)) {
+                if (procState > proc.setProcState) {
+                    if (proc.pkgList.containsKey(packageName) ||
+                            (proc.pkgDeps != null && proc.pkgDeps.contains(packageName))) {
                         procState = proc.setProcState;
                     }
                 }
