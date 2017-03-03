@@ -143,6 +143,8 @@ final class SettingsState {
     @GuardedBy("sLock")
     private static Signature sSystemSignature;
 
+    private final Object mWriteLock = new Object();
+
     private final Object mLock;
 
     private final Handler mHandler;
@@ -551,62 +553,66 @@ final class SettingsState {
     }
 
     private void doWriteState() {
-        if (DEBUG_PERSISTENCE) {
-            Slog.i(LOG_TAG, "[PERSIST START]");
-        }
-
-        AtomicFile destination = new AtomicFile(mStatePersistFile);
-
-        final int version;
-        final ArrayMap<String, Setting> settings;
-
-        synchronized (mLock) {
-            version = mVersion;
-            settings = new ArrayMap<>(mSettings);
-            mDirty = false;
-            mWriteScheduled = false;
-        }
-
-        FileOutputStream out = null;
-        try {
-            out = destination.startWrite();
-
-            XmlSerializer serializer = Xml.newSerializer();
-            serializer.setOutput(out, StandardCharsets.UTF_8.name());
-            serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
-            serializer.startDocument(null, true);
-            serializer.startTag(null, TAG_SETTINGS);
-            serializer.attribute(null, ATTR_VERSION, String.valueOf(version));
-
-            final int settingCount = settings.size();
-            for (int i = 0; i < settingCount; i++) {
-                Setting setting = settings.valueAt(i);
-
-                writeSingleSetting(mVersion, serializer, setting.getId(), setting.getName(),
-                        setting.getValue(), setting.getDefaultValue(), setting.getPackageName(),
-                        setting.getTag(), setting.isDefaultFromSystem());
-
-                if (DEBUG_PERSISTENCE) {
-                    Slog.i(LOG_TAG, "[PERSISTED]" + setting.getName() + "=" + setting.getValue());
-                }
+        synchronized (mWriteLock) {
+            if (DEBUG_PERSISTENCE) {
+                Slog.i(LOG_TAG, "[PERSIST START]");
             }
 
-            serializer.endTag(null, TAG_SETTINGS);
-            serializer.endDocument();
-            destination.finishWrite(out);
+            AtomicFile destination = new AtomicFile(mStatePersistFile);
+
+            final int version;
+            final ArrayMap<String, Setting> settings;
 
             synchronized (mLock) {
-                addHistoricalOperationLocked(HISTORICAL_OPERATION_PERSIST, null);
+                version = mVersion;
+                settings = new ArrayMap<>(mSettings);
+                mDirty = false;
+                mWriteScheduled = false;
             }
 
-            if (DEBUG_PERSISTENCE) {
-                Slog.i(LOG_TAG, "[PERSIST END]");
+            FileOutputStream out = null;
+            try {
+                out = destination.startWrite();
+
+                XmlSerializer serializer = Xml.newSerializer();
+                serializer.setOutput(out, StandardCharsets.UTF_8.name());
+                serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output",
+                        true);
+                serializer.startDocument(null, true);
+                serializer.startTag(null, TAG_SETTINGS);
+                serializer.attribute(null, ATTR_VERSION, String.valueOf(version));
+
+                final int settingCount = settings.size();
+                for (int i = 0; i < settingCount; i++) {
+                    Setting setting = settings.valueAt(i);
+
+                    writeSingleSetting(mVersion, serializer, setting.getId(), setting.getName(),
+                            setting.getValue(), setting.getDefaultValue(), setting.getPackageName(),
+                            setting.getTag(), setting.isDefaultFromSystem());
+
+                    if (DEBUG_PERSISTENCE) {
+                        Slog.i(LOG_TAG, "[PERSISTED]" + setting.getName() + "="
+                                + setting.getValue());
+                    }
+                }
+
+                serializer.endTag(null, TAG_SETTINGS);
+                serializer.endDocument();
+                destination.finishWrite(out);
+
+                synchronized (mLock) {
+                    addHistoricalOperationLocked(HISTORICAL_OPERATION_PERSIST, null);
+                }
+
+                if (DEBUG_PERSISTENCE) {
+                    Slog.i(LOG_TAG, "[PERSIST END]");
+                }
+            } catch (Throwable t) {
+                Slog.wtf(LOG_TAG, "Failed to write settings, restoring backup", t);
+                destination.failWrite(out);
+            } finally {
+                IoUtils.closeQuietly(out);
             }
-        } catch (Throwable t) {
-            Slog.wtf(LOG_TAG, "Failed to write settings, restoring backup", t);
-            destination.failWrite(out);
-        } finally {
-            IoUtils.closeQuietly(out);
         }
     }
 
