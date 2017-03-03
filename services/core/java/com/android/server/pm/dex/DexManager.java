@@ -16,13 +16,16 @@
 
 package com.android.server.pm.dex;
 
+import android.content.pm.ApplicationInfo;
+import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageParser;
-import android.content.pm.ApplicationInfo;
-
+import android.os.RemoteException;
 import android.util.Slog;
 
+import com.android.server.pm.PackageDexOptimizer;
 import com.android.server.pm.PackageManagerServiceUtils;
+import com.android.server.pm.PackageManagerServiceCompilerMapping;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,6 +34,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
+import static com.android.server.pm.dex.PackageDexUsage.PackageUseInfo;
+import static com.android.server.pm.dex.PackageDexUsage.DexUseInfo;
 
 /**
  * This class keeps track of how dex files are used.
@@ -54,15 +60,20 @@ public class DexManager {
     // encode and save the dex usage data.
     private final PackageDexUsage mPackageDexUsage;
 
+    private final IPackageManager mPackageManager;
+    private final PackageDexOptimizer mPackageDexOptimizer;
+
     // Possible outcomes of a dex search.
     private static int DEX_SEARCH_NOT_FOUND = 0;  // dex file not found
     private static int DEX_SEARCH_FOUND_PRIMARY = 1;  // dex file is the primary/base apk
     private static int DEX_SEARCH_FOUND_SPLIT = 2;  // dex file is a split apk
     private static int DEX_SEARCH_FOUND_SECONDARY = 3;  // dex file is a secondary dex
 
-    public DexManager() {
+    public DexManager(IPackageManager pms, PackageDexOptimizer pdo) {
       mPackageCodeLocationsCache = new HashMap<>();
       mPackageDexUsage = new PackageDexUsage();
+      mPackageManager = pms;
+      mPackageDexOptimizer = pdo;
     }
 
     /**
@@ -199,8 +210,59 @@ public class DexManager {
      * Get the package dex usage for the given package name.
      * @return the package data or null if there is no data available for this package.
      */
-    public PackageDexUsage.PackageUseInfo getPackageUseInfo(String packageName) {
+    public PackageUseInfo getPackageUseInfo(String packageName) {
         return mPackageDexUsage.getPackageUseInfo(packageName);
+    }
+
+    /**
+     * Perform dexopt on the package {@code packageName} secondary dex files.
+     * @return true if all secondary dex files were processed successfully (compiled or skipped
+     *         because they don't need to be compiled)..
+     */
+    public boolean dexoptSecondaryDex(String packageName, String compilerFilter, boolean force) {
+        // Select the dex optimizer based on the force parameter.
+        // Forced compilation is done through ForcedUpdatePackageDexOptimizer which will adjust
+        // the necessary dexopt flags to make sure that compilation is not skipped. This avoid
+        // passing the force flag through the multitude of layers.
+        // Note: The force option is rarely used (cmdline input for testing, mostly), so it's OK to
+        //       allocate an object here.
+        PackageDexOptimizer pdo = force
+                ? new PackageDexOptimizer.ForcedUpdatePackageDexOptimizer(mPackageDexOptimizer)
+                : mPackageDexOptimizer;
+        PackageUseInfo useInfo = getPackageUseInfo(packageName);
+        if (useInfo == null || useInfo.getDexUseInfoMap().isEmpty()) {
+            if (DEBUG) {
+                Slog.d(TAG, "No secondary dex use for package:" + packageName);
+            }
+            // Nothing to compile, return true.
+            return true;
+        }
+        boolean success = true;
+        for (Map.Entry<String, DexUseInfo> entry : useInfo.getDexUseInfoMap().entrySet()) {
+            String dexPath = entry.getKey();
+            DexUseInfo dexUseInfo = entry.getValue();
+            PackageInfo pkg = null;
+            try {
+                pkg = mPackageManager.getPackageInfo(packageName, /*flags*/0,
+                    dexUseInfo.getOwnerUserId());
+            } catch (RemoteException e) {
+                throw new AssertionError(e);
+            }
+            // It may be that the package gets uninstalled while we try to compile its
+            // secondary dex files. If that's the case, just ignore.
+            // Note that we don't break the entire loop because the package might still be
+            // installed for other users.
+            if (pkg == null) {
+                Slog.d(TAG, "Could not find package when compiling secondary dex " + packageName
+                        + " for user " + dexUseInfo.getOwnerUserId());
+                // Skip over it, another user might still have the package.
+                continue;
+            }
+            int result = pdo.dexOptSecondaryDexPath(pkg.applicationInfo, dexPath,
+                    dexUseInfo.getLoaderIsas(), compilerFilter, dexUseInfo.isUsedByOtherApps());
+            success = success && (result != PackageDexOptimizer.DEX_OPT_FAILED);
+        }
+        return success;
     }
 
     /**

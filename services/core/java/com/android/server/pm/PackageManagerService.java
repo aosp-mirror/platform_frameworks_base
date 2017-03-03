@@ -2133,7 +2133,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         mInstaller = installer;
         mPackageDexOptimizer = new PackageDexOptimizer(installer, mInstallLock, context,
                 "*dexopt*");
-        mDexManager = new DexManager();
+        mDexManager = new DexManager(this, mPackageDexOptimizer);
         mMoveCallbacks = new MoveCallbacks(FgThread.get().getLooper());
 
         mOnPermissionChangeListeners = new OnPermissionChangeListeners(
@@ -7538,6 +7538,15 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
         return pdo.performDexOpt(p, p.usesLibraryFiles, instructionSets, checkProfiles,
                 targetCompilerFilter, getOrCreateCompilerPackageStats(p));
+    }
+
+    // Performs dexopt on the used secondary dex files belonging to the given package.
+    // Returns true if all dex files were process successfully (which could mean either dexopt or
+    // skip). Returns false if any of the files caused errors.
+    @Override
+    public boolean performDexOptSecondary(String packageName, String compilerFilter,
+            boolean force) {
+        return mDexManager.dexoptSecondaryDex(packageName, compilerFilter, force);
     }
 
     Collection<PackageParser.Package> findSharedNonSystemLibraries(PackageParser.Package p) {
