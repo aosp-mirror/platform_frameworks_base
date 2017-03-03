@@ -566,7 +566,10 @@ class WindowSurfaceController {
         pw.print(" rect=("); pw.print(mSurfaceX);
         pw.print(","); pw.print(mSurfaceY);
         pw.print(") "); pw.print(mSurfaceW);
-        pw.print(" x "); pw.println(mSurfaceH);
+        pw.print(" x "); pw.print(mSurfaceH);
+        pw.print(" transform=("); pw.print(mLastDsdx); pw.print(", ");
+        pw.print(mLastDtdx); pw.print(", "); pw.print(mLastDsdy);
+        pw.print(", "); pw.print(mLastDtdy); pw.println(")");
     }
 
     @Override
