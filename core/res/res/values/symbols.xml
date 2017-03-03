@@ -2877,6 +2877,9 @@
   <java-symbol type="string" name="alert_windows_notification_turn_off_action" />
   <java-symbol type="drawable" name="alert_window_layer" />
 
+  <java-symbol type="string" name="expand_button_content_description_collapsed" />
+  <java-symbol type="string" name="expand_button_content_description_expanded" />
+
   <!-- Colon separated list of package names that should be granted Notification Listener access -->
   <java-symbol type="string" name="config_defaultListenerAccessPackages" />
 </resources>

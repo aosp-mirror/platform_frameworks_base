@@ -4335,8 +4335,11 @@
     <!-- Content description of the work profile icon in the notification. -->
     <string name="notification_work_profile_content_description">Work profile</string>
 
-    <!-- Content description of the expand button icon in the notification.-->
-    <string name="expand_button_content_description">Expand button</string>
+    <!-- Content description of the expand button icon in the notification when collaped.-->
+    <string name="expand_button_content_description_collapsed">Expand</string>
+
+    <!-- Content description of the expand button icon in the notification when expanded.-->
+    <string name="expand_button_content_description_expanded">Collapse</string>
 
     <!-- Accessibility action description on the expand button. -->
     <string name="expand_action_accessibility">toggle expansion</string>

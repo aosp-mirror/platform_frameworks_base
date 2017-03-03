@@ -131,6 +131,7 @@ public class NotificationContentView extends FrameLayout {
     private boolean mIconsVisible;
     private int mClipBottomAmount;
     private boolean mIsLowPriority;
+    private boolean mIsContentExpandable;
 
 
     public NotificationContentView(Context context, AttributeSet attrs) {
@@ -949,7 +950,7 @@ public class NotificationContentView extends FrameLayout {
     }
 
     public boolean isContentExpandable() {
-        return mExpandedChild != null;
+        return mIsContentExpandable;
     }
 
     public void setDark(boolean dark, boolean fade, long delay) {
@@ -1214,6 +1215,7 @@ public class NotificationContentView extends FrameLayout {
         if (mHeadsUpChild != null) {
             mHeadsUpWrapper.updateExpandability(expandable,  mExpandClickListener);
         }
+        mIsContentExpandable = expandable;
     }
 
     public NotificationHeaderView getNotificationHeader() {
