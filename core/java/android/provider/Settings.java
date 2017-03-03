@@ -6743,6 +6743,13 @@ public final class Settings {
         public static final String ASSIST_GESTURE_ENABLED = "assist_gesture_enabled";
 
         /**
+         * Sensitivity control for the assist gesture.
+         *
+         * @hide
+         */
+        public static final String ASSIST_GESTURE_SENSITIVITY = "assist_gesture_sensitivity";
+
+        /**
          * Control whether Night display is currently activated.
          * @hide
          */
@@ -7001,6 +7008,7 @@ public final class Settings {
             NFC_PAYMENT_DEFAULT_COMPONENT,
             AUTOMATIC_STORAGE_MANAGER_DAYS_TO_RETAIN,
             ASSIST_GESTURE_ENABLED,
+            ASSIST_GESTURE_SENSITIVITY,
             VR_DISPLAY_MODE
         };
 
