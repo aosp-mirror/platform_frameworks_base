@@ -15,6 +15,9 @@
  */
 package com.android.server.autofill.ui;
 
+import static android.view.autofill.AutoFillManager.AutofillCallback.EVENT_INPUT_HIDDEN;
+import static android.view.autofill.AutoFillManager.AutofillCallback.EVENT_INPUT_SHOWN;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
@@ -26,8 +29,8 @@ import android.service.autofill.Dataset;
 import android.service.autofill.FillResponse;
 import android.service.autofill.SaveInfo;
 import android.text.TextUtils;
-import android.util.Slog;
 import android.text.format.DateUtils;
+import android.util.Slog;
 import android.view.autofill.AutoFillId;
 import android.widget.Toast;
 
@@ -62,6 +65,7 @@ public final class AutoFillUI {
         void authenticate(@NonNull IntentSender intent);
         void fill(@NonNull Dataset dataset);
         void save();
+        void onEvent(AutoFillId id, int event);
     }
 
     public AutoFillUI(@NonNull Context context) {
@@ -97,8 +101,13 @@ public final class AutoFillUI {
     /**
      * Hides the fill UI.
      */
-    public void hideFillUi() {
-        mHandler.post(this::hideFillUiUiThread);
+    public void hideFillUi(AutoFillId id) {
+        mHandler.post(() -> {
+            hideFillUiUiThread();
+            if (mCallback != null) {
+                mCallback.onEvent(id, EVENT_INPUT_HIDDEN);
+            }
+        });
     }
 
     /**
@@ -175,6 +184,7 @@ public final class AutoFillUI {
                     // TODO(b/33197203): add MetricsLogger call
                 }
             });
+            mCallback.onEvent(focusedId, EVENT_INPUT_SHOWN);
         });
     }
 

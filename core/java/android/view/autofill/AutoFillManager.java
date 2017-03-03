@@ -19,7 +19,9 @@ package android.view.autofill;
 import static android.view.autofill.Helper.DEBUG;
 import static android.view.autofill.Helper.VERBOSE;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
@@ -30,7 +32,10 @@ import android.os.Parcelable;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManagerGlobal;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
 import java.util.List;
 
@@ -75,6 +80,8 @@ public final class AutoFillManager {
 
     private final IAutoFillManager mService;
     private IAutoFillManagerClient mServiceClient;
+
+    private AutofillCallback mCallback;
 
     private Context mContext;
 
@@ -276,11 +283,11 @@ public final class AutoFillManager {
         }
     }
 
-    private AutoFillId getAutoFillId(View view) {
+    private static AutoFillId getAutoFillId(View view) {
         return new AutoFillId(view.getAccessibilityViewId());
     }
 
-    private AutoFillId getAutoFillId(View parent, int childId) {
+    private static AutoFillId getAutoFillId(View parent, int childId) {
         return new AutoFillId(parent.getAccessibilityViewId(), childId);
     }
 
@@ -289,10 +296,12 @@ public final class AutoFillManager {
         if (DEBUG) {
             Log.d(TAG, "startSession(): id=" + id + ", bounds=" + bounds + ", value=" + value);
         }
+
         try {
             mService.startSession(mContext.getActivityToken(), windowToken,
-                    mServiceClient.asBinder(), id, bounds, value, mContext.getUserId());
-            AutoFillClient client = getClient();
+                    mServiceClient.asBinder(), id, bounds, value, mContext.getUserId(),
+                    mCallback != null);
+            final AutoFillClient client = getClient();
             if (client != null) {
                 client.resetableStateAvailable();
             }
@@ -344,6 +353,119 @@ public final class AutoFillManager {
         }
     }
 
+    /**
+     * Registers a {@link AutofillCallback} to receive autofill events.
+     *
+     * @param callback callback to receive events.
+     */
+    public void registerCallback(@Nullable AutofillCallback callback) {
+        if (callback == null) return;
+
+        final boolean hadCallback = mCallback != null;
+        mCallback = callback;
+
+        if (mHasSession && !hadCallback) {
+            try {
+                mService.setHasCallback(mContext.getActivityToken(), mContext.getUserId(), true);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Unregisters a {@link AutofillCallback} to receive autofill events.
+     *
+     * @param callback callback to stop receiving events.
+     */
+    public void unregisterCallback(@Nullable AutofillCallback callback) {
+        if (callback == null || mCallback == null || callback != mCallback) return;
+
+        mCallback = null;
+
+        if (mHasSession) {
+            try {
+                mService.setHasCallback(mContext.getActivityToken(), mContext.getUserId(), false);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    private void onAutofillEvent(IBinder windowToken, AutoFillId id, int event) {
+        if (mCallback == null) return;
+        if (id == null) {
+            Log.w(TAG, "onAutofillEvent(): no id for event " + event);
+            return;
+        }
+
+        final View root = WindowManagerGlobal.getInstance().getWindowView(windowToken);
+        if (root == null) {
+            Log.w(TAG, "onAutofillEvent() for " + id + ": root view gone");
+            return;
+        }
+        final View view = root.findViewByAccessibilityIdTraversal(id.getViewId());
+        if (view == null) {
+            Log.w(TAG, "onAutofillEvent() for " + id + ": view gone");
+            return;
+        }
+        if (id.isVirtual()) {
+            mCallback.onAutofillEventVirtual(view, id.getVirtualChildId(), event);
+        } else {
+            mCallback.onAutofillEvent(view, event);
+        }
+    }
+
+    /**
+     * Callback for auto-fill related events.
+     *
+     * <p>Typically used for applications that display their own "auto-complete" views, so they can
+     * enable / disable such views when the auto-fill UI affordance is shown / hidden.
+     */
+    public abstract static class AutofillCallback {
+
+        /** @hide */
+        @IntDef({EVENT_INPUT_SHOWN, EVENT_INPUT_HIDDEN})
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface AutofillEventType {}
+
+        /**
+         * The auto-fill input UI affordance associated with the view was shown.
+         *
+         * <p>If the view provides its own auto-complete UI affordance and its currently shown, it
+         * should be hidden upon receiving this event.
+         */
+        public static final int EVENT_INPUT_SHOWN = 1;
+
+        /**
+         * The auto-fill input UI affordance associated with the view was hidden.
+         *
+         * <p>If the view provides its own auto-complete UI affordance that was hidden upon a
+         * {@link #EVENT_INPUT_SHOWN} event, it could be shown again now.
+         */
+        public static final int EVENT_INPUT_HIDDEN = 2;
+
+        /**
+         * Called after a change in the autofill state associated with a view.
+         *
+         * @param view view associated with the change.
+         *
+         * @param event currently either {@link #EVENT_INPUT_SHOWN} or {@link #EVENT_INPUT_HIDDEN}.
+         */
+        public void onAutofillEvent(@NonNull View view, @AutofillEventType int event) {}
+
+        /**
+         * Called after a change in the autofill state associated with a virtual view.
+         *
+         * @param view parent view associated with the change.
+         * @param childId id identifying the virtual child inside the parent view.
+         *
+         * @param event currently either {@link #EVENT_INPUT_SHOWN} or {@link #EVENT_INPUT_HIDDEN}.
+         */
+        public void onAutofillEventVirtual(@NonNull View view, int childId,
+                @AutofillEventType int event) {}
+    }
+
     private static final class AutoFillManagerClient extends IAutoFillManagerClient.Stub {
         private final WeakReference<AutoFillManager> mAutoFillManager;
 
@@ -381,6 +503,18 @@ public final class AutoFillManager {
                 autoFillManager.mContext.getMainThreadHandler().post(() -> {
                     if (autoFillManager.getClient() != null) {
                         autoFillManager.getClient().authenticate(intent, fillInIntent);
+                    }
+                });
+            }
+        }
+
+        @Override
+        public void onAutofillEvent(IBinder windowToken, AutoFillId id, int event) {
+            final AutoFillManager autoFillManager = mAutoFillManager.get();
+            if (autoFillManager != null) {
+                autoFillManager.mContext.getMainThreadHandler().post(() -> {
+                    if (autoFillManager.getClient() != null) {
+                        autoFillManager.onAutofillEvent(windowToken, id, event);
                     }
                 });
             }
