@@ -76,12 +76,14 @@ public class HelpUtils {
     public static boolean prepareHelpMenuItem(Activity activity, Menu menu, String helpUri,
             String backupContext) {
         MenuItem helpItem = menu.add(0, MENU_HELP, 0, R.string.help_feedback_label);
+        helpItem.setIcon(R.drawable.ic_help_actionbar);
         return prepareHelpMenuItem(activity, helpItem, helpUri, backupContext);
     }
 
     public static boolean prepareHelpMenuItem(Activity activity, Menu menu, int helpUriResource,
             String backupContext) {
         MenuItem helpItem = menu.add(0, MENU_HELP, 0, R.string.help_feedback_label);
+        helpItem.setIcon(R.drawable.ic_help_actionbar);
         return prepareHelpMenuItem(activity, helpItem, activity.getString(helpUriResource),
                 backupContext);
     }
@@ -125,7 +127,7 @@ public class HelpUtils {
                         return true;
                     }
                 });
-                helpMenuItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
+                helpMenuItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
                 helpMenuItem.setVisible(true);
             } else {
                 helpMenuItem.setVisible(false);
@@ -209,7 +211,7 @@ public class HelpUtils {
      * of the app's package as gotten via the context.
      * @return the uri with added query parameters
      */
-    public static Uri uriWithAddedParameters(Context context, Uri baseUri) {
+    private static Uri uriWithAddedParameters(Context context, Uri baseUri) {
         Uri.Builder builder = baseUri.buildUpon();
 
         // Add in the preferred language
