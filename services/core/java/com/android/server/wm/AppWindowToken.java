@@ -84,8 +84,6 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
     final boolean mVoiceInteraction;
 
-    // TODO: Use getParent instead?
-    private Task mTask;
     /** @see WindowContainer#fillsParent() */
     private boolean mFillsParent;
     boolean layoutConfigChanges;
@@ -411,7 +409,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     }
 
     boolean windowsAreFocusable() {
-        return StackId.canReceiveKeys(mTask.mStack.mStackId) || mAlwaysFocusable;
+        return StackId.canReceiveKeys(getTask().mStack.mStackId) || mAlwaysFocusable;
     }
 
     AppWindowContainerController getController() {
@@ -467,7 +465,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             getController().removeStartingWindow();
         }
 
-        final TaskStack stack = mTask.mStack;
+        final TaskStack stack = getTask().mStack;
         if (delayed && !isEmpty()) {
             // set the token aside because it has an active animation to be finished
             if (DEBUG_ADD_REMOVE || DEBUG_TOKEN_MOVEMENT) Slog.v(TAG_WM,
@@ -667,20 +665,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     }
 
     Task getTask() {
-        return mTask;
-    }
-
-    /**
-     * Sets the associated task, cleaning up dependencies when unset.
-     */
-    void setTask(Task task) {
-        // Note: the following code assumes that the previous task's stack is the same as the
-        // new task's stack.
-        if (!mReparenting && mTask != null && mTask.mStack != null) {
-            mTask.mStack.mExitingAppTokens.remove(this);
-        }
-
-        mTask = task;
+        return (Task) getParent();
     }
 
     @Override
@@ -690,10 +675,15 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         // When the associated task is {@code null}, the {@link AppWindowToken} can no longer
         // access visual elements like the {@link DisplayContent}. We must remove any associations
         // such as animations.
-        if (!mReparenting && mTask == null) {
-            // It is possible we have been marked as a closing app earlier. We must remove ourselves
-            // from this list so we do not participate in any future animations.
-            mService.mClosingApps.remove(this);
+        if (!mReparenting) {
+            final Task task = getTask();
+            if (task == null) {
+                // It is possible we have been marked as a closing app earlier. We must remove ourselves
+                // from this list so we do not participate in any future animations.
+                mService.mClosingApps.remove(this);
+            } else if (task.mStack != null) {
+                task.mStack.mExitingAppTokens.remove(this);
+            }
         }
     }
 
@@ -885,19 +875,20 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     }
 
     void reparent(Task task, int position) {
-        if (task == mTask) {
+        final Task currentTask = getTask();
+        if (task == currentTask) {
             throw new IllegalArgumentException(
-                    "window token=" + this + " already child of task=" + mTask);
+                    "window token=" + this + " already child of task=" + currentTask);
         }
 
-        if (mTask.mStack != task.mStack) {
+        if (currentTask.mStack != task.mStack) {
             throw new IllegalArgumentException(
-                    "window token=" + this + " current task=" + mTask
+                    "window token=" + this + " current task=" + currentTask
                         + " belongs to a different stack than " + task);
         }
 
         if (DEBUG_ADD_REMOVE) Slog.i(TAG, "reParentWindowToken: removing window token=" + this
-                + " from task=" + mTask);
+                + " from task=" + currentTask);
         final DisplayContent prevDisplayContent = getDisplayContent();
 
         mReparenting = true;
@@ -917,9 +908,11 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     }
 
     private boolean canFreezeBounds() {
+        final Task task = getTask();
+
         // For freeform windows, we can't freeze the bounds at the moment because this would make
         // the resizing unresponsive.
-        return mTask != null && !mTask.inFreeformWorkspace();
+        return task != null && !task.inFreeformWorkspace();
     }
 
     /**
@@ -929,16 +922,17 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
      * with a queue.
      */
     private void freezeBounds() {
-        mFrozenBounds.offer(new Rect(mTask.mPreparedFrozenBounds));
+        final Task task = getTask();
+        mFrozenBounds.offer(new Rect(task.mPreparedFrozenBounds));
 
-        if (mTask.mPreparedFrozenMergedConfig.equals(Configuration.EMPTY)) {
+        if (task.mPreparedFrozenMergedConfig.equals(Configuration.EMPTY)) {
             // We didn't call prepareFreezingBounds on the task, so use the current value.
-            mFrozenMergedConfig.offer(new Configuration(mTask.getConfiguration()));
+            mFrozenMergedConfig.offer(new Configuration(task.getConfiguration()));
         } else {
-            mFrozenMergedConfig.offer(new Configuration(mTask.mPreparedFrozenMergedConfig));
+            mFrozenMergedConfig.offer(new Configuration(task.mPreparedFrozenMergedConfig));
         }
         // Calling unset() to make it equal to Configuration.EMPTY.
-        mTask.mPreparedFrozenMergedConfig.unset();
+        task.mPreparedFrozenMergedConfig.unset();
     }
 
     /**
@@ -1463,7 +1457,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         if (appToken != null) {
             pw.println(prefix + "app=true mVoiceInteraction=" + mVoiceInteraction);
         }
-        pw.print(prefix); pw.print("task="); pw.println(mTask);
+        pw.print(prefix); pw.print("task="); pw.println(getTask());
         pw.print(prefix); pw.print(" mFillsParent="); pw.print(mFillsParent);
                 pw.print(" mOrientation="); pw.println(mOrientation);
         pw.print(prefix); pw.print("hiddenRequested="); pw.print(hiddenRequested);
