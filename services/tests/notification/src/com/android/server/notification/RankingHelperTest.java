@@ -209,6 +209,12 @@ public class RankingHelperTest {
         assertEquals(expected.getLightColor(), actual.getLightColor());
     }
 
+    private void compareGroups(NotificationChannelGroup expected, NotificationChannelGroup actual) {
+        assertEquals(expected.getId(), actual.getId());
+        assertEquals(expected.getName(), actual.getName());
+        assertEquals(expected.getNameResId(), actual.getNameResId());
+    }
+
     @Test
     public void testFindAfterRankingWithASplitGroup() throws Exception {
         ArrayList<NotificationRecord> notificationList = new ArrayList<NotificationRecord>(3);
@@ -262,8 +268,10 @@ public class RankingHelperTest {
     @Test
     public void testChannelXml() throws Exception {
         int nameResId = 924896;
+        int groupNameResId = 426272;
 
-        NotificationChannelGroup ncg = new NotificationChannelGroup("1", "2");
+        NotificationChannelGroup ncg = new NotificationChannelGroup("1", groupNameResId);
+        NotificationChannelGroup ncg2 = new NotificationChannelGroup("2", "hello");
         NotificationChannel channel1 =
                 new NotificationChannel("id1", "name1", NotificationManager.IMPORTANCE_HIGH);
         NotificationChannel channel2 =
@@ -278,6 +286,7 @@ public class RankingHelperTest {
         channel2.setLightColor(Color.BLUE);
 
         mHelper.createNotificationChannelGroup(pkg, uid, ncg, true);
+        mHelper.createNotificationChannelGroup(pkg, uid, ncg2, true);
         mHelper.createNotificationChannel(pkg, uid, channel1, true);
         mHelper.createNotificationChannel(pkg, uid, channel2, false);
 
@@ -308,7 +317,9 @@ public class RankingHelperTest {
         for (NotificationChannelGroup actual : actualGroups) {
             if (ncg.getId().equals(actual.getId())) {
                 foundNcg = true;
-                 break;
+                compareGroups(ncg, actual);
+            } else if (ncg2.getId().equals(actual.getId())) {
+                compareGroups(ncg2, actual);
             }
         }
         assertTrue(foundNcg);

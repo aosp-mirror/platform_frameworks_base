@@ -15,6 +15,7 @@
  */
 package android.app;
 
+import android.annotation.StringRes;
 import android.annotation.SystemApi;
 import android.net.Uri;
 import android.os.Parcel;
@@ -40,21 +41,36 @@ public final class NotificationChannelGroup implements Parcelable {
 
     private static final String TAG_GROUP = "channelGroup";
     private static final String ATT_NAME = "name";
+    private static final String ATT_NAME_RES_ID = "name_res_id";
     private static final String ATT_ID = "id";
 
     private final String mId;
     private CharSequence mName;
+    private int mNameResId = 0;
     private List<NotificationChannel> mChannels = new ArrayList<>();
 
     /**
      * Creates a notification channel.
      *
      * @param id The id of the group. Must be unique per package.
-     * @param name The user visible name of the group.
+     * @param name The user visible name of the group. Unchangeable once created; use this
+     *             constructor if the group represents something user-defined that does not
+     *             need to be translated.
      */
     public NotificationChannelGroup(String id, CharSequence name) {
         this.mId = id;
         this.mName = name;
+    }
+
+    /**
+     * Creates a notification channel.
+     *
+     * @param id The id of the group. Must be unique per package.
+     * @param nameResId String resource id of the user visible name of the group.
+     */
+    public NotificationChannelGroup(String id, @StringRes int nameResId) {
+        this.mId = id;
+        this.mNameResId = nameResId;
     }
 
     protected NotificationChannelGroup(Parcel in) {
@@ -64,6 +80,7 @@ public final class NotificationChannelGroup implements Parcelable {
             mId = null;
         }
         mName = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
+        mNameResId = in.readInt();
         in.readParcelableList(mChannels, NotificationChannel.class.getClassLoader());
     }
 
@@ -76,6 +93,7 @@ public final class NotificationChannelGroup implements Parcelable {
             dest.writeByte((byte) 0);
         }
         TextUtils.writeToParcel(mName, dest, flags);
+        dest.writeInt(mNameResId);
         dest.writeParcelableList(mChannels, flags);
     }
 
@@ -91,6 +109,13 @@ public final class NotificationChannelGroup implements Parcelable {
      */
     public CharSequence getName() {
         return mName;
+    }
+
+    /**
+     * Returns the resource id of the user visible name of this group.
+     */
+    public @StringRes int getNameResId() {
+        return mNameResId;
     }
 
     /*
@@ -119,7 +144,12 @@ public final class NotificationChannelGroup implements Parcelable {
         out.startTag(null, TAG_GROUP);
 
         out.attribute(null, ATT_ID, getId());
-        out.attribute(null, ATT_NAME, getName().toString());
+        if (getName() != null) {
+            out.attribute(null, ATT_NAME, getName().toString());
+        }
+        if (getNameResId() != 0) {
+            out.attribute(null, ATT_NAME_RES_ID, Integer.toString(getNameResId()));
+        }
 
         out.endTag(null, TAG_GROUP);
     }
@@ -132,6 +162,7 @@ public final class NotificationChannelGroup implements Parcelable {
         JSONObject record = new JSONObject();
         record.put(ATT_ID, getId());
         record.put(ATT_NAME, getName());
+        record.put(ATT_NAME_RES_ID, getNameResId());
         return record;
     }
 
@@ -160,6 +191,7 @@ public final class NotificationChannelGroup implements Parcelable {
 
         NotificationChannelGroup that = (NotificationChannelGroup) o;
 
+        if (getNameResId() != that.getNameResId()) return false;
         if (getId() != null ? !getId().equals(that.getId()) : that.getId() != null) return false;
         if (getName() != null ? !getName().equals(that.getName()) : that.getName() != null) {
             return false;
@@ -171,13 +203,18 @@ public final class NotificationChannelGroup implements Parcelable {
 
     @Override
     public NotificationChannelGroup clone() {
-        return new NotificationChannelGroup(getId(), getName());
+        if (getName() != null) {
+            return new NotificationChannelGroup(getId(), getName());
+        } else {
+            return new NotificationChannelGroup(getId(), getNameResId());
+        }
     }
 
     @Override
     public int hashCode() {
         int result = getId() != null ? getId().hashCode() : 0;
         result = 31 * result + (getName() != null ? getName().hashCode() : 0);
+        result = 31 * result + getNameResId();
         result = 31 * result + (getChannels() != null ? getChannels().hashCode() : 0);
         return result;
     }
@@ -187,6 +224,8 @@ public final class NotificationChannelGroup implements Parcelable {
         return "NotificationChannelGroup{" +
                 "mId='" + mId + '\'' +
                 ", mName=" + mName +
+                ", mNameResId=" + mNameResId +
+                ", mChannels=" + mChannels +
                 '}';
     }
 }

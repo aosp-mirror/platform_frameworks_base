@@ -192,9 +192,14 @@ public class RankingHelper implements RankingConfig {
                             if (TAG_GROUP.equals(tagName)) {
                                 String id = parser.getAttributeValue(null, ATT_ID);
                                 CharSequence groupName = parser.getAttributeValue(null, ATT_NAME);
+                                int groupNameRes = safeInt(parser, ATT_NAME_RES_ID, 0);
                                 if (!TextUtils.isEmpty(id)) {
-                                    final NotificationChannelGroup group =
-                                            new NotificationChannelGroup(id, groupName);
+                                    NotificationChannelGroup group = null;
+                                    if (groupName != null) {
+                                        group = new NotificationChannelGroup(id, groupName);
+                                    } else {
+                                        group = new NotificationChannelGroup(id, groupNameRes);
+                                    }
                                     r.groups.put(id, group);
                                 }
                             }
@@ -202,7 +207,7 @@ public class RankingHelper implements RankingConfig {
                             if (TAG_CHANNEL.equals(tagName)) {
                                 String id = parser.getAttributeValue(null, ATT_ID);
                                 CharSequence channelName = parser.getAttributeValue(null, ATT_NAME);
-                                int channelNameRes = safeInt(parser, ATT_NAME_RES_ID, -1);
+                                int channelNameRes = safeInt(parser, ATT_NAME_RES_ID, 0);
                                 int channelImportance =
                                         safeInt(parser, ATT_IMPORTANCE, DEFAULT_IMPORTANCE);
 
@@ -473,7 +478,8 @@ public class RankingHelper implements RankingConfig {
         Preconditions.checkNotNull(pkg);
         Preconditions.checkNotNull(group);
         Preconditions.checkNotNull(group.getId());
-        Preconditions.checkNotNull(group.getName());
+        Preconditions.checkNotNull(!TextUtils.isEmpty(group.getName())
+                || group.getNameResId() != 0);
         Record r = getOrCreateRecord(pkg, uid);
         if (r == null) {
             throw new IllegalArgumentException("Invalid package");
