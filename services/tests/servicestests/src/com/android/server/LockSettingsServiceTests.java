@@ -98,12 +98,18 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
         mService.setSeparateProfileChallengeEnabled(MANAGED_PROFILE_USER_ID, false, null);
         final long primarySid = mGateKeeperService.getSecureUserId(PRIMARY_USER_ID);
         final long profileSid = mGateKeeperService.getSecureUserId(MANAGED_PROFILE_USER_ID);
+        final long turnedOffprofileSid =
+                mGateKeeperService.getSecureUserId(TURNED_OFF_PROFILE_USER_ID);
         assertTrue(primarySid != 0);
         assertTrue(profileSid != 0);
         assertTrue(profileSid != primarySid);
+        assertTrue(turnedOffprofileSid != 0);
+        assertTrue(turnedOffprofileSid != primarySid);
+        assertTrue(turnedOffprofileSid != profileSid);
 
         // clear auth token and wait for verify challenge from primary user to re-generate it.
         mGateKeeperService.clearAuthToken(MANAGED_PROFILE_USER_ID);
+        mGateKeeperService.clearAuthToken(TURNED_OFF_PROFILE_USER_ID);
         // verify credential
         assertEquals(VerifyCredentialResponse.RESPONSE_OK, mService.verifyCredential(
                 UnifiedPassword, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, 0, PRIMARY_USER_ID)
@@ -112,6 +118,9 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
         // Verify that we have a new auth token for the profile
         assertNotNull(mGateKeeperService.getAuthToken(MANAGED_PROFILE_USER_ID));
         assertEquals(profileSid, mGateKeeperService.getSecureUserId(MANAGED_PROFILE_USER_ID));
+
+        // Verify that profile which arent't running (e.g. turn off work) don't get unlocked
+        assertNull(mGateKeeperService.getAuthToken(TURNED_OFF_PROFILE_USER_ID));
 
         /* Currently in LockSettingsService.setLockCredential, unlockUser() is called with the new
          * credential as part of verifyCredential() before the new credential is committed in
@@ -123,12 +132,14 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
                 UnifiedPassword, PRIMARY_USER_ID);
         mStorageManager.setIgnoreBadUnlock(false);
         assertEquals(profileSid, mGateKeeperService.getSecureUserId(MANAGED_PROFILE_USER_ID));
+        assertNull(mGateKeeperService.getAuthToken(TURNED_OFF_PROFILE_USER_ID));
 
-        //Clear unified challenge
+        // Clear unified challenge
         mService.setLockCredential(null, LockPatternUtils.CREDENTIAL_TYPE_NONE, UnifiedPassword,
                 PRIMARY_USER_ID);
         assertEquals(0, mGateKeeperService.getSecureUserId(PRIMARY_USER_ID));
         assertEquals(0, mGateKeeperService.getSecureUserId(MANAGED_PROFILE_USER_ID));
+        assertEquals(0, mGateKeeperService.getSecureUserId(TURNED_OFF_PROFILE_USER_ID));
     }
 
     public void testManagedProfileSeparateChallenge() throws RemoteException {
