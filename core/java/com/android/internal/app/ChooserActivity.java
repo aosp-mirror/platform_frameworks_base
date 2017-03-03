@@ -1035,7 +1035,8 @@ public class ChooserActivity extends ResolverActivity {
                 LauncherApps.ShortcutQuery query = new LauncherApps.ShortcutQuery();
                 query.setIntent(getTargetIntent());
                 query.setQueryFlags(LauncherApps.ShortcutQuery.FLAG_MATCH_CHOOSER);
-                List<ShortcutInfo> shortcuts = launcherApps.getShortcuts(query, UserHandle.SYSTEM);
+                List<ShortcutInfo> shortcuts = launcherApps.getShortcuts(query,
+                        android.os.Process.myUserHandle());
                 if (DEBUG) Log.d(TAG, "Adding " + shortcuts.size() + " chooser shortcuts");
                 addShortcuts(shortcuts);
                 mAreChooserShortcutsRetrieved = true;
