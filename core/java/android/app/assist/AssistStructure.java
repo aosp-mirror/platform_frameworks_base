@@ -1517,7 +1517,7 @@ public class AssistStructure implements Parcelable {
 
         // TODO(b/33197203, b/33802548): add CTS/unit test
         @Override
-        public ViewStructure newChild(int index, int virtualId, int flags) {
+        public ViewStructure newChildForAutoFill(int index, int virtualId, int flags) {
             return newChild(index, true, virtualId, flags);
         }
 
@@ -1527,7 +1527,7 @@ public class AssistStructure implements Parcelable {
         }
 
         @Override
-        public ViewStructure asyncNewChild(int index, int virtualId, int flags) {
+        public ViewStructure asyncNewChildForAutoFill(int index, int virtualId, int flags) {
             return asyncNewChild(index, true, virtualId);
         }
 
