@@ -17,14 +17,11 @@
 package com.android.internal.view;
 
 import android.os.RemoteException;
-import android.view.IWindow;
-import android.view.IWindowSession;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 
 public class SurfaceCallbackHelper {
-    IWindowSession mSession;
-    IWindow.Stub mWindow;
+    Runnable mRunnable;
 
     int mFinishDrawingCollected = 0;
     int mFinishDrawingExpected = 0;
@@ -37,26 +34,18 @@ public class SurfaceCallbackHelper {
                     if (mFinishDrawingCollected < mFinishDrawingExpected) {
                         return;
                     }
-                    try {
-                        mSession.finishDrawing(mWindow);
-                    } catch (RemoteException e) {
-                    }
+                    mRunnable.run();
                 }
             }
     };
 
-    public SurfaceCallbackHelper(IWindowSession session,
-            IWindow.Stub window) {
-        mSession = session;
-        mWindow = window;
+    public SurfaceCallbackHelper(Runnable callbacksCollected) {
+        mRunnable = callbacksCollected;
     }
 
     public void dispatchSurfaceRedrawNeededAsync(SurfaceHolder holder, SurfaceHolder.Callback callbacks[]) {
         if (callbacks == null || callbacks.length == 0) {
-            try {
-                mSession.finishDrawing(mWindow);
-            } catch (RemoteException e) {
-            }
+            mRunnable.run();
             return;
         }
 
