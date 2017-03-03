@@ -26,6 +26,7 @@
 #include <sys/un.h>
 #include <unistd.h>
 
+#include <android-base/logging.h>
 #include <android-base/strings.h>
 #include <cutils/log.h>
 
@@ -224,6 +225,7 @@ FileDescriptorInfo* FileDescriptorInfo::CreateFromFd(int fd) {
 bool FileDescriptorInfo::Restat() const {
   struct stat f_stat;
   if (TEMP_FAILURE_RETRY(fstat(fd, &f_stat)) == -1) {
+    PLOG(ERROR) << "Unable to restat fd " << fd;
     return false;
   }
 
@@ -312,7 +314,10 @@ bool FileDescriptorInfo::Readlink(const int fd, std::string* result) {
   // ext2 and ext4 both have PAGE_SIZE limitations, so we assume that here.
   char buf[4096];
   ssize_t len = readlink(path, buf, sizeof(buf));
-  if (len == -1) return false;
+  if (len == -1) {
+    PLOG(ERROR) << "Readlink on " << fd << " failed.";
+    return false;
+  }
 
   result->assign(buf, len);
   return true;
