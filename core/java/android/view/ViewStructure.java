@@ -301,6 +301,13 @@ public abstract class ViewStructure {
     public abstract void setAutoFillType(AutoFillType info);
 
     /**
+     * Sets the a hint that helps the auto-fill service to select the appropriate data to fill the
+     * view.
+     */
+    // TODO(b/35364993): add CTS/unit test
+    public abstract void setAutoFillHint(@View.AutoFillHint int hint);
+
+    /**
      * Sets the {@link AutoFillValue} representing the current value of this node.
      */
     // TODO(b/33197203, b/33802548): add CTS/unit test

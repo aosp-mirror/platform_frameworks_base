@@ -539,6 +539,7 @@ public class AssistStructure implements Parcelable {
         // fields (viewId and childId) of the field.
         AutoFillId mAutoFillId;
         AutoFillType mAutoFillType;
+        @View.AutoFillHint int mAutoFillHint;
         AutoFillValue mAutoFillValue;
         String[] mAutoFillOptions;
         boolean mSanitized;
@@ -623,6 +624,7 @@ public class AssistStructure implements Parcelable {
                 mSanitized = in.readInt() == 1;
                 mAutoFillId = in.readParcelable(null);
                 mAutoFillType = in.readParcelable(null);
+                mAutoFillHint = in.readInt();
                 mAutoFillValue = in.readParcelable(null);
                 mAutoFillOptions = in.readStringArray();
             }
@@ -756,6 +758,7 @@ public class AssistStructure implements Parcelable {
                 out.writeInt(mSanitized ? 1 : 0);
                 out.writeParcelable(mAutoFillId, 0);
                 out.writeParcelable(mAutoFillType,  0);
+                out.writeInt(mAutoFillHint);
                 final AutoFillValue sanitizedValue = writeSensitive ? mAutoFillValue : null;
                 out.writeParcelable(sanitizedValue,  0);
                 out.writeStringArray(mAutoFillOptions);
@@ -856,6 +859,20 @@ public class AssistStructure implements Parcelable {
         // TODO(b/33197203, b/33802548): add CTS/unit test
         public AutoFillType getAutoFillType() {
             return mAutoFillType;
+        }
+
+        /**
+         * Describes the content of a view so that a auto-fill service can fill in the appropriate
+         * data.
+         *
+         * <p>It's only set when the {@link AssistStructure} is used for auto-filling purposes, not
+         * for assist.</p>
+         *
+         * @return The hint for this view
+         */
+        // TODO(b/35364993): add CTS/unit test
+        @View.AutoFillHint public int getAutoFillHint() {
+            return mAutoFillHint;
         }
 
         /**
@@ -1549,6 +1566,11 @@ public class AssistStructure implements Parcelable {
         }
 
         @Override
+        public void setAutoFillHint(@View.AutoFillHint int hint) {
+            mNode.mAutoFillHint = hint;
+        }
+
+        @Override
         public void setAutoFillValue(AutoFillValue value) {
             mNode.mAutoFillValue = value;
         }
@@ -1695,6 +1717,7 @@ public class AssistStructure implements Parcelable {
                     + ", type=" + node.getAutoFillType()
                     + ", options=" + Arrays.toString(node.getAutoFillOptions())
                     + ", inputType=" + node.getInputType()
+                    + ", hint=" + Integer.toHexString(node.getAutoFillHint())
                     + ", value=" + node.getAutoFillValue()
                     + ", sanitized=" + node.isSanitized());
         }

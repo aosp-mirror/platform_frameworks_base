@@ -10019,7 +10019,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     @Override
     @Nullable
     public AutoFillType getAutoFillType() {
-        return isTextEditable() ? AutoFillType.forText(getInputType()) : null;
+        return isTextEditable() ? AutoFillType.forText() : null;
     }
 
     @Override

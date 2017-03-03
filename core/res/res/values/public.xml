@@ -2801,6 +2801,7 @@
         <public name="secondaryContentAlpha" />
         <public name="requiredFeature" />
         <public name="requiredNotFeature" />
+        <public name="autoFillHint" />
     </public-group>
 
     <public-group type="style" first-id="0x010302e0">
