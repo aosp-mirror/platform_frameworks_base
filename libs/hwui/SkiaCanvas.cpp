@@ -443,7 +443,7 @@ void SkiaCanvas::drawPaint(const SkPaint& paint) {
 
 void SkiaCanvas::drawPoints(const float* points, int count, const SkPaint& paint,
                             SkCanvas::PointMode mode) {
-    if (CC_UNLIKELY(count < 2 || PaintUtils::paintWillNotDraw(paint))) return;
+    if (CC_UNLIKELY(count < 2 || paint.nothingToDraw())) return;
     // convert the floats into SkPoints
     count >>= 1;    // now it is the number of points
     std::unique_ptr<SkPoint[]> pts(new SkPoint[count]);
@@ -469,49 +469,49 @@ void SkiaCanvas::drawLine(float startX, float startY, float stopX, float stopY,
 }
 
 void SkiaCanvas::drawLines(const float* points, int count, const SkPaint& paint) {
-    if (CC_UNLIKELY(count < 4 || PaintUtils::paintWillNotDraw(paint))) return;
+    if (CC_UNLIKELY(count < 4 || paint.nothingToDraw())) return;
     this->drawPoints(points, count, paint, SkCanvas::kLines_PointMode);
 }
 
 void SkiaCanvas::drawRect(float left, float top, float right, float bottom,
         const SkPaint& paint) {
-    if (CC_UNLIKELY(PaintUtils::paintWillNotDraw(paint))) return;
+    if (CC_UNLIKELY(paint.nothingToDraw())) return;
     mCanvas->drawRectCoords(left, top, right, bottom, paint);
 
 }
 
 void SkiaCanvas::drawRegion(const SkRegion& region, const SkPaint& paint) {
-    if (CC_UNLIKELY(PaintUtils::paintWillNotDraw(paint))) return;
+    if (CC_UNLIKELY(paint.nothingToDraw())) return;
     mCanvas->drawRegion(region, paint);
 }
 
 void SkiaCanvas::drawRoundRect(float left, float top, float right, float bottom,
         float rx, float ry, const SkPaint& paint) {
-    if (CC_UNLIKELY(PaintUtils::paintWillNotDraw(paint))) return;
+    if (CC_UNLIKELY(paint.nothingToDraw())) return;
     SkRect rect = SkRect::MakeLTRB(left, top, right, bottom);
     mCanvas->drawRoundRect(rect, rx, ry, paint);
 }
 
 void SkiaCanvas::drawCircle(float x, float y, float radius, const SkPaint& paint) {
-    if (CC_UNLIKELY(radius <= 0 || PaintUtils::paintWillNotDraw(paint))) return;
+    if (CC_UNLIKELY(radius <= 0 || paint.nothingToDraw())) return;
     mCanvas->drawCircle(x, y, radius, paint);
 }
 
 void SkiaCanvas::drawOval(float left, float top, float right, float bottom, const SkPaint& paint) {
-    if (CC_UNLIKELY(PaintUtils::paintWillNotDraw(paint))) return;
+    if (CC_UNLIKELY(paint.nothingToDraw())) return;
     SkRect oval = SkRect::MakeLTRB(left, top, right, bottom);
     mCanvas->drawOval(oval, paint);
 }
 
 void SkiaCanvas::drawArc(float left, float top, float right, float bottom,
         float startAngle, float sweepAngle, bool useCenter, const SkPaint& paint) {
-    if (CC_UNLIKELY(PaintUtils::paintWillNotDraw(paint))) return;
+    if (CC_UNLIKELY(paint.nothingToDraw())) return;
     SkRect arc = SkRect::MakeLTRB(left, top, right, bottom);
     mCanvas->drawArc(arc, startAngle, sweepAngle, useCenter, paint);
 }
 
 void SkiaCanvas::drawPath(const SkPath& path, const SkPaint& paint) {
-    if (CC_UNLIKELY(PaintUtils::paintWillNotDraw(paint))) return;
+    if (CC_UNLIKELY(paint.nothingToDraw())) return;
     SkRect rect;
     SkRRect roundRect;
     if (path.isOval(&rect)) {
@@ -698,7 +698,7 @@ void SkiaCanvas::drawGlyphs(const uint16_t* text, const float* positions, int co
         const SkPaint& paint, float x, float y,
         float boundsLeft, float boundsTop, float boundsRight, float boundsBottom,
         float totalAdvance) {
-     if (!text || !positions || count <= 0 || PaintUtils::paintWillNotDrawText(paint)) return;
+     if (!text || !positions || count <= 0 || paint.nothingToDraw()) return;
     // Set align to left for drawing, as we don't want individual
     // glyphs centered or right-aligned; the offset above takes
     // care of all alignment.

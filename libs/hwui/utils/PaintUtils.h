@@ -39,21 +39,6 @@ public:
         return GL_NEAREST;
     }
 
-    // TODO: move to a method on android:Paint? replace with SkPaint::nothingToDraw()?
-    static inline bool paintWillNotDraw(const SkPaint& paint) {
-        return paint.getAlpha() == 0
-                && !paint.getColorFilter()
-                && paint.getBlendMode() == SkBlendMode::kSrcOver;
-    }
-
-    // TODO: move to a method on android:Paint? replace with SkPaint::nothingToDraw()?
-    static inline bool paintWillNotDrawText(const SkPaint& paint) {
-        return paint.getAlpha() == 0
-                && paint.getLooper() == nullptr
-                && !paint.getColorFilter()
-                && paint.getBlendMode() == SkBlendMode::kSrcOver;
-    }
-
     static bool isOpaquePaint(const SkPaint* paint) {
         if (!paint) return true; // default (paintless) behavior is SrcOver, black
 
