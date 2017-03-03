@@ -24,17 +24,19 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.Dependency;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
-import com.android.systemui.qs.QSTile;
+import com.android.systemui.qs.QSHost;
+import com.android.systemui.plugins.qs.QSTile.BooleanState;
+import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.statusbar.policy.DataSaverController;
 import com.android.systemui.statusbar.policy.NetworkController;
 
-public class DataSaverTile extends QSTile<QSTile.BooleanState> implements
+public class DataSaverTile extends QSTileImpl<BooleanState> implements
         DataSaverController.Listener{
 
     private final DataSaverController mDataSaverController;
 
-    public DataSaverTile(Host host) {
+    public DataSaverTile(QSHost host) {
         super(host);
         mDataSaverController = Dependency.get(NetworkController.class).getDataSaverController();
     }
@@ -104,8 +106,7 @@ public class DataSaverTile extends QSTile<QSTile.BooleanState> implements
         state.contentDescription = state.label;
         state.icon = ResourceIcon.get(state.value ? R.drawable.ic_data_saver
                 : R.drawable.ic_data_saver_off);
-        state.minimalAccessibilityClassName = state.expandedAccessibilityClassName
-                = Switch.class.getName();
+        state.expandedAccessibilityClassName = Switch.class.getName();
     }
 
     @Override

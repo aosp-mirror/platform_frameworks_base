@@ -27,13 +27,15 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.plugins.ActivityStarter;
-import com.android.systemui.qs.QSTile;
+import com.android.systemui.qs.QSHost;
+import com.android.systemui.plugins.qs.QSTile.BooleanState;
+import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
 import com.android.systemui.statusbar.policy.LocationController;
 import com.android.systemui.statusbar.policy.LocationController.LocationSettingsChangeCallback;
 
 /** Quick settings tile: Location **/
-public class LocationTile extends QSTile<QSTile.BooleanState> {
+public class LocationTile extends QSTileImpl<BooleanState> {
 
     private final AnimationIcon mEnable =
             new AnimationIcon(R.drawable.ic_signal_location_enable_animation,
@@ -46,7 +48,7 @@ public class LocationTile extends QSTile<QSTile.BooleanState> {
     private final KeyguardMonitor mKeyguard;
     private final Callback mCallback = new Callback();
 
-    public LocationTile(Host host) {
+    public LocationTile(QSHost host) {
         super(host);
         mController = Dependency.get(LocationController.class);
         mKeyguard = Dependency.get(KeyguardMonitor.class);
@@ -115,8 +117,7 @@ public class LocationTile extends QSTile<QSTile.BooleanState> {
                     R.string.accessibility_quick_settings_location_off);
         }
         state.state = state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
-        state.minimalAccessibilityClassName = state.expandedAccessibilityClassName
-                = Switch.class.getName();
+        state.expandedAccessibilityClassName = Switch.class.getName();
     }
 
     @Override

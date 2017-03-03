@@ -28,12 +28,14 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
-import com.android.systemui.qs.QSTile;
+import com.android.systemui.qs.QSHost;
+import com.android.systemui.plugins.qs.QSTile.BooleanState;
+import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.policy.RotationLockController;
 import com.android.systemui.statusbar.policy.RotationLockController.RotationLockControllerCallback;
 
 /** Quick settings tile: Rotation **/
-public class RotationLockTile extends QSTile<QSTile.BooleanState> {
+public class RotationLockTile extends QSTileImpl<BooleanState> {
     private final AnimationIcon mPortraitToAuto
             = new AnimationIcon(R.drawable.ic_portrait_to_auto_rotate_animation,
             R.drawable.ic_portrait_from_auto_rotate);
@@ -50,7 +52,7 @@ public class RotationLockTile extends QSTile<QSTile.BooleanState> {
 
     private final RotationLockController mController;
 
-    public RotationLockTile(Host host) {
+    public RotationLockTile(QSHost host) {
         super(host);
         mController = Dependency.get(RotationLockController.class);
     }
@@ -106,8 +108,7 @@ public class RotationLockTile extends QSTile<QSTile.BooleanState> {
             state.icon = portrait ? mPortraitToAuto : mLandscapeToAuto;
         }
         state.contentDescription = getAccessibilityString(rotationLocked);
-        state.minimalAccessibilityClassName = state.expandedAccessibilityClassName
-                = Switch.class.getName();
+        state.expandedAccessibilityClassName = Switch.class.getName();
         state.state = state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
     }
 

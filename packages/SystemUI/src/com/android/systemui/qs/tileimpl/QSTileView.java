@@ -1,40 +1,35 @@
 /*
- * Copyright (C) 2014 The Android Open Source Project
+ * Copyright (C) 2017 The Android Open Source Project
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
+ * except in compliance with the License. You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the specific language governing
+ * permissions and limitations under the License.
  */
 
-package com.android.systemui.qs;
-
-import static com.android.systemui.qs.QSTile.getColorForState;
+package com.android.systemui.qs.tileimpl;
 
 import android.content.Context;
 import android.content.res.Configuration;
-import android.graphics.drawable.RippleDrawable;
 import android.service.quicksettings.Tile;
 import android.text.SpannableStringBuilder;
 import android.text.style.ForegroundColorSpan;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewGroup.LayoutParams;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
+import com.android.systemui.plugins.qs.QSIconView;
+import com.android.systemui.plugins.qs.QSTile;
 
 import libcore.util.Objects;
 
@@ -76,6 +71,11 @@ public class QSTileView extends QSTileBaseView {
         FontSizeUtils.updateFontSize(mLabel, R.dimen.qs_tile_text_size);
     }
 
+    @Override
+    public int getDetailY() {
+        return getTop() + mLabelContainer.getTop() + mLabelContainer.getHeight() / 2;
+    }
+
     protected void createLabel() {
         mLabelContainer = (ViewGroup) LayoutInflater.from(getContext())
                 .inflate(R.layout.qs_tile_label, this, false);
@@ -92,7 +92,7 @@ public class QSTileView extends QSTileBaseView {
         super.handleStateChanged(state);
         if (!Objects.equal(mLabel.getText(), state.label) || mState != state.state) {
             if (state.state == Tile.STATE_UNAVAILABLE) {
-                int color = getColorForState(getContext(), state.state);
+                int color = QSTileImpl.getColorForState(getContext(), state.state);
                 state.label = new SpannableStringBuilder().append(state.label,
                         new ForegroundColorSpan(color),
                         SpannableStringBuilder.SPAN_INCLUSIVE_INCLUSIVE);

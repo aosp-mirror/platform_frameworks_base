@@ -1,20 +1,20 @@
 /*
- * Copyright (C) 2014 The Android Open Source Project
+ * Copyright (C) 2017 The Android Open Source Project
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
+ * except in compliance with the License. You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the specific language governing
+ * permissions and limitations under the License.
  */
 
-package com.android.systemui.qs;
+package com.android.systemui.qs.tileimpl;
+
+import static com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
 
 import android.app.ActivityManager;
 import android.content.Context;
@@ -31,19 +31,16 @@ import android.util.SparseArray;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.settingslib.RestrictedLockUtils;
+import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.QS.DetailAdapter;
-import com.android.systemui.qs.QSTile.State;
-import com.android.systemui.qs.external.TileServices;
+import com.android.systemui.plugins.qs.QSIconView;
+import com.android.systemui.plugins.qs.QSTile;
+import com.android.systemui.plugins.qs.QSTile.State;
+import com.android.systemui.qs.QSHost;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Objects;
-
-import com.android.settingslib.Utils;
-
-import static com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
 
 /**
  * Base quick-settings tile, extend this to create a new tile.
@@ -52,11 +49,11 @@ import static com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
  * handleUpdateState.  Callbacks affecting state should use refreshState to trigger another
  * state update pass on tile looper.
  */
-public abstract class QSTile<TState extends State> {
+public abstract class QSTileImpl<TState extends State> implements QSTile {
     protected final String TAG = "Tile." + getClass().getSimpleName();
     protected static final boolean DEBUG = Log.isLoggable("Tile", Log.DEBUG);
 
-    protected final Host mHost;
+    protected final QSHost mHost;
     protected final Context mContext;
     protected final H mHandler = new H(Dependency.get(Dependency.BG_LOOPER));
     protected final Handler mUiHandler = new Handler(Looper.getMainLooper());
@@ -68,6 +65,7 @@ public abstract class QSTile<TState extends State> {
     private boolean mAnnounceNextStateChange;
 
     private String mTileSpec;
+    private EnforcedAdmin mEnforcedAdmin;
 
     public abstract TState newTileState();
 
@@ -83,7 +81,7 @@ public abstract class QSTile<TState extends State> {
      */
     abstract public int getMetricsCategory();
 
-    protected QSTile(Host host) {
+    protected QSTileImpl(QSHost host) {
         mHost = host;
         mContext = host.getContext();
     }
@@ -114,12 +112,12 @@ public abstract class QSTile<TState extends State> {
         mTileSpec = tileSpec;
     }
 
-    public Host getHost() {
+    public QSHost getHost() {
         return mHost;
     }
 
     public QSIconView createTileView(Context context) {
-        return new QSIconView(context);
+        return new QSIconViewImpl(context);
     }
 
     public DetailAdapter getDetailAdapter() {
@@ -305,10 +303,10 @@ public abstract class QSTile<TState extends State> {
         if (admin != null && !RestrictedLockUtils.hasBaseUserRestriction(mContext,
                 userRestriction, ActivityManager.getCurrentUser())) {
             state.disabledByPolicy = true;
-            state.enforcedAdmin = admin;
+            mEnforcedAdmin = admin;
         } else {
             state.disabledByPolicy = false;
-            state.enforcedAdmin = null;
+            mEnforcedAdmin = null;
         }
     }
 
@@ -367,7 +365,7 @@ public abstract class QSTile<TState extends State> {
                     name = "handleClick";
                     if (mState.disabledByPolicy) {
                         Intent intent = RestrictedLockUtils.getShowAdminSupportDetailsIntent(
-                                mContext, mState.enforcedAdmin);
+                                mContext, mEnforcedAdmin);
                         Dependency.get(ActivityStarter.class).postStartActivityDismissingKeyguard(
                                 intent, 0);
                     } else {
@@ -412,47 +410,6 @@ public abstract class QSTile<TState extends State> {
                 Log.w(TAG, error, t);
                 mHost.warn(error, t);
             }
-        }
-    }
-
-    public interface Callback {
-        void onStateChanged(State state);
-        void onShowDetail(boolean show);
-        void onToggleStateChanged(boolean state);
-        void onScanStateChanged(boolean state);
-        void onAnnouncementRequested(CharSequence announcement);
-    }
-
-    public interface Host {
-        void warn(String message, Throwable t);
-        void collapsePanels();
-        void openPanels();
-        Context getContext();
-        Collection<QSTile<?>> getTiles();
-        void addCallback(Callback callback);
-        void removeCallback(Callback callback);
-        TileServices getTileServices();
-        void removeTile(String tileSpec);
-
-        interface Callback {
-            void onTilesChanged();
-        }
-    }
-
-    public static abstract class Icon {
-        abstract public Drawable getDrawable(Context context);
-
-        public Drawable getInvisibleDrawable(Context context) {
-            return getDrawable(context);
-        }
-
-        @Override
-        public int hashCode() {
-            return Icon.class.hashCode();
-        }
-
-        public int getPadding() {
-            return 0;
         }
     }
 
@@ -534,147 +491,6 @@ public abstract class QSTile<TState extends State> {
         public Drawable getDrawable(Context context) {
             // workaround: get a clean state for every new AVD
             return context.getDrawable(mAnimatedResId).getConstantState().newDrawable();
-        }
-    }
-
-    public static class State {
-        public Icon icon;
-        public int state = Tile.STATE_ACTIVE;
-        public CharSequence label;
-        public CharSequence contentDescription;
-        public CharSequence dualLabelContentDescription;
-        public CharSequence minimalContentDescription;
-        public boolean autoMirrorDrawable = true;
-        public boolean disabledByPolicy;
-        public boolean dualTarget = false;
-        public EnforcedAdmin enforcedAdmin;
-        public String minimalAccessibilityClassName;
-        public String expandedAccessibilityClassName;
-
-        public boolean copyTo(State other) {
-            if (other == null) throw new IllegalArgumentException();
-            if (!other.getClass().equals(getClass())) throw new IllegalArgumentException();
-            final boolean changed = !Objects.equals(other.icon, icon)
-                    || !Objects.equals(other.label, label)
-                    || !Objects.equals(other.contentDescription, contentDescription)
-                    || !Objects.equals(other.autoMirrorDrawable, autoMirrorDrawable)
-                    || !Objects.equals(other.dualLabelContentDescription,
-                    dualLabelContentDescription)
-                    || !Objects.equals(other.minimalContentDescription,
-                    minimalContentDescription)
-                    || !Objects.equals(other.minimalAccessibilityClassName,
-                    minimalAccessibilityClassName)
-                    || !Objects.equals(other.expandedAccessibilityClassName,
-                    expandedAccessibilityClassName)
-                    || !Objects.equals(other.disabledByPolicy, disabledByPolicy)
-                    || !Objects.equals(other.state, state)
-                    || !Objects.equals(other.enforcedAdmin, enforcedAdmin)
-                    || !Objects.equals(other.dualTarget, dualTarget);
-            other.icon = icon;
-            other.label = label;
-            other.contentDescription = contentDescription;
-            other.dualLabelContentDescription = dualLabelContentDescription;
-            other.minimalContentDescription = minimalContentDescription;
-            other.minimalAccessibilityClassName = minimalAccessibilityClassName;
-            other.expandedAccessibilityClassName = expandedAccessibilityClassName;
-            other.autoMirrorDrawable = autoMirrorDrawable;
-            other.disabledByPolicy = disabledByPolicy;
-            other.state = state;
-            other.dualTarget = dualTarget;
-            if (enforcedAdmin == null) {
-                other.enforcedAdmin = null;
-            } else if (other.enforcedAdmin == null) {
-                other.enforcedAdmin = new EnforcedAdmin(enforcedAdmin);
-            } else {
-                enforcedAdmin.copyTo(other.enforcedAdmin);
-            }
-            return changed;
-        }
-
-        @Override
-        public String toString() {
-            return toStringBuilder().toString();
-        }
-
-        protected StringBuilder toStringBuilder() {
-            final StringBuilder sb = new StringBuilder(getClass().getSimpleName()).append('[');
-            sb.append(",icon=").append(icon);
-            sb.append(",label=").append(label);
-            sb.append(",contentDescription=").append(contentDescription);
-            sb.append(",dualLabelContentDescription=").append(dualLabelContentDescription);
-            sb.append(",minimalContentDescription=").append(minimalContentDescription);
-            sb.append(",minimalAccessibilityClassName=").append(minimalAccessibilityClassName);
-            sb.append(",expandedAccessibilityClassName=").append(expandedAccessibilityClassName);
-            sb.append(",autoMirrorDrawable=").append(autoMirrorDrawable);
-            sb.append(",disabledByPolicy=").append(disabledByPolicy);
-            sb.append(",enforcedAdmin=").append(enforcedAdmin);
-            sb.append(",dualTarget=").append(dualTarget);
-            sb.append(",state=").append(state);
-            return sb.append(']');
-        }
-    }
-
-    public static class BooleanState extends State {
-        public boolean value;
-
-        @Override
-        public boolean copyTo(State other) {
-            final BooleanState o = (BooleanState) other;
-            final boolean changed = super.copyTo(other) || o.value != value;
-            o.value = value;
-            return changed;
-        }
-
-        @Override
-        protected StringBuilder toStringBuilder() {
-            final StringBuilder rt = super.toStringBuilder();
-            rt.insert(rt.length() - 1, ",value=" + value);
-            return rt;
-        }
-    }
-
-    public static class AirplaneBooleanState extends BooleanState {
-        public boolean isAirplaneMode;
-
-        @Override
-        public boolean copyTo(State other) {
-            final AirplaneBooleanState o = (AirplaneBooleanState) other;
-            final boolean changed = super.copyTo(other) || o.isAirplaneMode != isAirplaneMode;
-            o.isAirplaneMode = isAirplaneMode;
-            return changed;
-        }
-    }
-
-    public static final class SignalState extends BooleanState {
-        public boolean connected;
-        public boolean activityIn;
-        public boolean activityOut;
-        public boolean filter;
-        public boolean isOverlayIconWide;
-
-        @Override
-        public boolean copyTo(State other) {
-            final SignalState o = (SignalState) other;
-            final boolean changed = o.connected != connected || o.activityIn != activityIn
-                    || o.activityOut != activityOut
-                    || o.isOverlayIconWide != isOverlayIconWide;
-            o.connected = connected;
-            o.activityIn = activityIn;
-            o.activityOut = activityOut;
-            o.filter = filter;
-            o.isOverlayIconWide = isOverlayIconWide;
-            return super.copyTo(other) || changed;
-        }
-
-        @Override
-        protected StringBuilder toStringBuilder() {
-            final StringBuilder rt = super.toStringBuilder();
-            rt.insert(rt.length() - 1, ",connected=" + connected);
-            rt.insert(rt.length() - 1, ",activityIn=" + activityIn);
-            rt.insert(rt.length() - 1, ",activityOut=" + activityOut);
-            rt.insert(rt.length() - 1, ",filter=" + filter);
-            rt.insert(rt.length() - 1, ",wideOverlayIcon=" + isOverlayIconWide);
-            return rt;
         }
     }
 }

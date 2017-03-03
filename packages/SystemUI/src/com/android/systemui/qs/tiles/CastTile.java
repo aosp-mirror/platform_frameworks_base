@@ -34,7 +34,9 @@ import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.QS.DetailAdapter;
 import com.android.systemui.qs.QSDetailItems;
 import com.android.systemui.qs.QSDetailItems.Item;
-import com.android.systemui.qs.QSTile;
+import com.android.systemui.qs.QSHost;
+import com.android.systemui.plugins.qs.QSTile.BooleanState;
+import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.CastController.CastDevice;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
@@ -43,7 +45,7 @@ import java.util.LinkedHashMap;
 import java.util.Set;
 
 /** Quick settings tile: Cast **/
-public class CastTile extends QSTile<QSTile.BooleanState> {
+public class CastTile extends QSTileImpl<BooleanState> {
     private static final Intent CAST_SETTINGS =
             new Intent(Settings.ACTION_CAST_SETTINGS);
 
@@ -53,7 +55,7 @@ public class CastTile extends QSTile<QSTile.BooleanState> {
     private final Callback mCallback = new Callback();
     private final ActivityStarter mActivityStarter;
 
-    public CastTile(Host host) {
+    public CastTile(QSHost host) {
         super(host);
         mController = Dependency.get(CastController.class);
         mDetailAdapter = new CastDetailAdapter();
@@ -126,7 +128,6 @@ public class CastTile extends QSTile<QSTile.BooleanState> {
         state.label = mContext.getString(R.string.quick_settings_cast_title);
         state.contentDescription = state.label;
         state.value = false;
-        state.autoMirrorDrawable = false;
         final Set<CastDevice> devices = mController.getCastDevices();
         boolean connecting = false;
         for (CastDevice device : devices) {
@@ -146,8 +147,7 @@ public class CastTile extends QSTile<QSTile.BooleanState> {
         state.icon = ResourceIcon.get(state.value ? R.drawable.ic_qs_cast_on
                 : R.drawable.ic_qs_cast_off);
         mDetailAdapter.updateItems(devices);
-        state.minimalAccessibilityClassName = state.expandedAccessibilityClassName =
-                Button.class.getName();
+        state.expandedAccessibilityClassName = Button.class.getName();
         state.contentDescription = state.contentDescription + ","
                 + mContext.getString(R.string.accessibility_quick_settings_open_details);
     }

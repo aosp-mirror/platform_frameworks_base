@@ -32,10 +32,16 @@ import android.util.Log;
 
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
-import com.android.systemui.qs.QSTile;
+import com.android.systemui.plugins.PluginListener;
+import com.android.systemui.plugins.PluginManager;
+import com.android.systemui.plugins.qs.QSFactory;
+import com.android.systemui.plugins.qs.QSTileView;
+import com.android.systemui.qs.QSHost;
+import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.qs.external.TileLifecycleManager;
 import com.android.systemui.qs.external.TileServices;
+import com.android.systemui.qs.tileimpl.QSFactoryImpl;
 import com.android.systemui.qs.tiles.AirplaneModeTile;
 import com.android.systemui.qs.tiles.BatterySaverTile;
 import com.android.systemui.qs.tiles.BluetoothTile;
@@ -64,7 +70,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 /** Platform implementation of the quick settings tile host **/
-public class QSTileHost implements QSTile.Host, Tunable {
+public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory> {
     private static final String TAG = "QSTileHost";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
@@ -72,13 +78,14 @@ public class QSTileHost implements QSTile.Host, Tunable {
 
     private final Context mContext;
     private final StatusBar mStatusBar;
-    private final LinkedHashMap<String, QSTile<?>> mTiles = new LinkedHashMap<>();
+    private final LinkedHashMap<String, QSTile> mTiles = new LinkedHashMap<>();
     protected final ArrayList<String> mTileSpecs = new ArrayList<>();
     private final TileServices mServices;
 
     private final List<Callback> mCallbacks = new ArrayList<>();
     private final AutoTileManager mAutoTiles;
     private final StatusBarIconController mIconController;
+    private final ArrayList<QSFactory> mQsFactories = new ArrayList<>();
     private int mCurrentUser;
 
     public QSTileHost(Context context, StatusBar statusBar,
@@ -88,6 +95,9 @@ public class QSTileHost implements QSTile.Host, Tunable {
         mStatusBar = statusBar;
 
         mServices = new TileServices(this, Dependency.get(Dependency.BG_LOOPER));
+
+        mQsFactories.add(new QSFactoryImpl(this));
+        Dependency.get(PluginManager.class).addPluginListener(this, QSFactory.class, true);
 
         Dependency.get(TunerService.class).addTunable(this, TILES_SETTING);
         // AutoTileManager can modify mTiles so make sure mTiles has already been initialized.
@@ -103,6 +113,26 @@ public class QSTileHost implements QSTile.Host, Tunable {
         mAutoTiles.destroy();
         Dependency.get(TunerService.class).removeTunable(this);
         mServices.destroy();
+        Dependency.get(PluginManager.class).removePluginListener(this);
+    }
+
+    @Override
+    public void onPluginConnected(QSFactory plugin, Context pluginContext) {
+        // Give plugins priority over creation so they can override if they wish.
+        mQsFactories.add(0, plugin);
+        String value = Dependency.get(TunerService.class).getValue(TILES_SETTING);
+        // Force remove and recreate of all tiles.
+        onTuningChanged(TILES_SETTING, "");
+        onTuningChanged(TILES_SETTING, value);
+    }
+
+    @Override
+    public void onPluginDisconnected(QSFactory plugin) {
+        mQsFactories.remove(plugin);
+        // Force remove and recreate of all tiles.
+        String value = Dependency.get(TunerService.class).getValue(TILES_SETTING);
+        onTuningChanged(TILES_SETTING, "");
+        onTuningChanged(TILES_SETTING, value);
     }
 
     @Override
@@ -116,7 +146,7 @@ public class QSTileHost implements QSTile.Host, Tunable {
     }
 
     @Override
-    public Collection<QSTile<?>> getTiles() {
+    public Collection<QSTile> getTiles() {
         return mTiles.values();
     }
 
@@ -162,9 +192,9 @@ public class QSTileHost implements QSTile.Host, Tunable {
                     if (DEBUG) Log.d(TAG, "Destroying tile: " + tile.getKey());
                     tile.getValue().destroy();
                 });
-        final LinkedHashMap<String, QSTile<?>> newTiles = new LinkedHashMap<>();
+        final LinkedHashMap<String, QSTile> newTiles = new LinkedHashMap<>();
         for (String tileSpec : tileSpecs) {
-            QSTile<?> tile = mTiles.get(tileSpec);
+            QSTile tile = mTiles.get(tileSpec);
             if (tile != null && (!(tile instanceof CustomTile)
                     || ((CustomTile) tile).getUser() == currentUser)) {
                 if (tile.isAvailable()) {
@@ -259,31 +289,24 @@ public class QSTileHost implements QSTile.Host, Tunable {
                 TextUtils.join(",", newTiles), ActivityManager.getCurrentUser());
     }
 
-    public QSTile<?> createTile(String tileSpec) {
-        if (tileSpec.equals("wifi")) return new WifiTile(this);
-        else if (tileSpec.equals("bt")) return new BluetoothTile(this);
-        else if (tileSpec.equals("cell")) return new CellularTile(this);
-        else if (tileSpec.equals("dnd")) return new DndTile(this);
-        else if (tileSpec.equals("inversion")) return new ColorInversionTile(this);
-        else if (tileSpec.equals("airplane")) return new AirplaneModeTile(this);
-        else if (tileSpec.equals("work")) return new WorkModeTile(this);
-        else if (tileSpec.equals("rotation")) return new RotationLockTile(this);
-        else if (tileSpec.equals("flashlight")) return new FlashlightTile(this);
-        else if (tileSpec.equals("location")) return new LocationTile(this);
-        else if (tileSpec.equals("cast")) return new CastTile(this);
-        else if (tileSpec.equals("hotspot")) return new HotspotTile(this);
-        else if (tileSpec.equals("user")) return new UserTile(this);
-        else if (tileSpec.equals("battery")) return new BatterySaverTile(this);
-        else if (tileSpec.equals("saver")) return new DataSaverTile(this);
-        else if (tileSpec.equals("night")) return new NightDisplayTile(this);
-        else if (tileSpec.equals("nfc")) return new NfcTile(this);
-        // Intent tiles.
-        else if (tileSpec.startsWith(IntentTile.PREFIX)) return IntentTile.create(this,tileSpec);
-        else if (tileSpec.startsWith(CustomTile.PREFIX)) return CustomTile.create(this,tileSpec);
-        else {
-            Log.w(TAG, "Bad tile spec: " + tileSpec);
-            return null;
+    public QSTile createTile(String tileSpec) {
+        for (int i = 0; i < mQsFactories.size(); i++) {
+            QSTile t = mQsFactories.get(i).createTile(tileSpec);
+            if (t != null) {
+                return t;
+            }
         }
+        return null;
+    }
+
+    public QSTileView createTileView(QSTile tile, boolean collapsedView) {
+        for (int i = 0; i < mQsFactories.size(); i++) {
+            QSTileView view = mQsFactories.get(i).createTileView(tile, collapsedView);
+            if (view != null) {
+                return view;
+            }
+        }
+        throw new RuntimeException("Default factory didn't create view for " + tile.getTileSpec());
     }
 
     protected List<String> loadTileSpecs(Context context, String tileList) {

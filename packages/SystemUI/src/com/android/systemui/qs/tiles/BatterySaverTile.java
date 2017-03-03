@@ -23,7 +23,6 @@ import android.service.quicksettings.Tile;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.RelativeSizeSpan;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -42,10 +41,12 @@ import com.android.settingslib.graph.UsageView;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.plugins.qs.QS.DetailAdapter;
-import com.android.systemui.qs.QSTile;
+import com.android.systemui.qs.QSHost;
+import com.android.systemui.plugins.qs.QSTile.BooleanState;
+import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.policy.BatteryController;
 
-public class BatterySaverTile extends QSTile<QSTile.BooleanState> implements
+public class BatterySaverTile extends QSTileImpl<BooleanState> implements
         BatteryController.BatteryStateChangeCallback {
 
     private final BatteryController mBatteryController;
@@ -57,7 +58,7 @@ public class BatterySaverTile extends QSTile<QSTile.BooleanState> implements
     private boolean mDetailShown;
     private boolean mPluggedIn;
 
-    public BatterySaverTile(Host host) {
+    public BatterySaverTile(QSHost host) {
         super(host);
         mBatteryController = Dependency.get(BatteryController.class);
     }
@@ -112,8 +113,7 @@ public class BatterySaverTile extends QSTile<QSTile.BooleanState> implements
         state.label = mContext.getString(R.string.battery_detail_switch_title);
         state.contentDescription = state.label;
         state.value = mPowerSave;
-        state.minimalAccessibilityClassName = state.expandedAccessibilityClassName
-                = Switch.class.getName();
+        state.expandedAccessibilityClassName = Switch.class.getName();
     }
 
     @Override

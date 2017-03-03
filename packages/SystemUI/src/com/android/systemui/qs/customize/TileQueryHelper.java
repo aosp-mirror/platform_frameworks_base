@@ -31,9 +31,9 @@ import android.widget.Button;
 
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
-import com.android.systemui.qs.QSTile;
-import com.android.systemui.qs.QSTile.DrawableIcon;
-import com.android.systemui.qs.QSTile.State;
+import com.android.systemui.plugins.qs.QSTile;
+import com.android.systemui.plugins.qs.QSTile.State;
+import com.android.systemui.qs.tileimpl.QSTileImpl.DrawableIcon;
 import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.statusbar.phone.QSTileHost;
 
@@ -77,7 +77,7 @@ public class TileQueryHelper {
         String[] possibleTiles = possible.split(",");
         for (int i = 0; i < possibleTiles.length; i++) {
             final String spec = possibleTiles[i];
-            final QSTile<?> tile = mHost.createTile(spec);
+            final QSTile tile = mHost.createTile(spec);
             if (tile == null) {
                 continue;
             } else if (!tile.isAvailable()) {
@@ -91,8 +91,7 @@ public class TileQueryHelper {
             bgHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    final QSTile.State state = tile.newTileState();
-                    tile.getState().copyTo(state);
+                    final QSTile.State state = tile.getState().copy();
                     // Ignore the current state and get the generic label instead.
                     state.label = tile.getTileLabel();
                     tile.destroy();
@@ -154,9 +153,7 @@ public class TileQueryHelper {
     private State getState(Collection<QSTile<?>> tiles, String spec) {
         for (QSTile<?> tile : tiles) {
             if (spec.equals(tile.getTileSpec())) {
-                final QSTile.State state = tile.newTileState();
-                tile.getState().copyTo(state);
-                return state;
+                return tile.getState().copy();
             }
         }
         return null;

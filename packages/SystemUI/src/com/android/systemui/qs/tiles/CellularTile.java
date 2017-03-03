@@ -33,15 +33,17 @@ import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.QS.DetailAdapter;
-import com.android.systemui.qs.QSIconView;
-import com.android.systemui.qs.QSTile;
+import com.android.systemui.qs.QSHost;
+import com.android.systemui.plugins.qs.QSIconView;
+import com.android.systemui.plugins.qs.QSTile.SignalState;
+import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.qs.SignalTileView;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.NetworkController.IconState;
 import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
 
 /** Quick settings tile: Cellular **/
-public class CellularTile extends QSTile<QSTile.SignalState> {
+public class CellularTile extends QSTileImpl<SignalState> {
     static final Intent CELLULAR_SETTINGS = new Intent().setComponent(new ComponentName(
             "com.android.settings", "com.android.settings.Settings$DataUsageSummaryActivity"));
 
@@ -52,7 +54,7 @@ public class CellularTile extends QSTile<QSTile.SignalState> {
     private final CellSignalCallback mSignalCallback = new CellSignalCallback();
     private final ActivityStarter mActivityStarter;
 
-    public CellularTile(Host host) {
+    public CellularTile(QSHost host) {
         super(host);
         mController = Dependency.get(NetworkController.class);
         mActivityStarter = Dependency.get(ActivityStarter.class);
@@ -127,9 +129,6 @@ public class CellularTile extends QSTile<QSTile.SignalState> {
             state.icon = ResourceIcon.get(iconId);
         }
         state.dualTarget = true;
-        state.isOverlayIconWide = cb.isDataTypeIconWide;
-        state.autoMirrorDrawable = !cb.noSim;
-        state.filter = iconId != R.drawable.ic_qs_no_sim;
         state.activityIn = cb.enabled && cb.activityIn;
         state.activityOut = cb.enabled && cb.activityOut;
 
@@ -151,15 +150,10 @@ public class CellularTile extends QSTile<QSTile.SignalState> {
                     R.string.accessibility_quick_settings_mobile,
                     enabledDesc, signalContentDesc,
                     state.label);
-            state.minimalContentDescription = r.getString(
-                    R.string.accessibility_quick_settings_mobile,
-                    r.getString(R.string.accessibility_cell_data), signalContentDesc,
-                    state.label);
         }
         state.contentDescription = state.contentDescription + "," + r.getString(
                 R.string.accessibility_quick_settings_open_settings, getTileLabel());
-        state.minimalAccessibilityClassName = state.expandedAccessibilityClassName
-                = Button.class.getName();
+        state.expandedAccessibilityClassName = Button.class.getName();
         state.value = mDataController.isMobileDataSupported()
                 && mDataController.isMobileDataEnabled();
         state.state = state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;

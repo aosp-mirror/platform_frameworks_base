@@ -16,18 +16,13 @@
 
 package com.android.systemui.qs.tiles;
 
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.UserManager;
 
-import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.service.quicksettings.Tile;
-import android.text.SpannableStringBuilder;
-import android.text.style.ForegroundColorSpan;
 import android.widget.Switch;
 
 import com.android.internal.logging.MetricsLogger;
@@ -35,11 +30,13 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.qs.GlobalSetting;
-import com.android.systemui.qs.QSTile;
+import com.android.systemui.qs.QSHost;
+import com.android.systemui.plugins.qs.QSTile.AirplaneBooleanState;
+import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.policy.HotspotController;
 
 /** Quick settings tile: Hotspot **/
-public class HotspotTile extends QSTile<QSTile.AirplaneBooleanState> {
+public class HotspotTile extends QSTileImpl<AirplaneBooleanState> {
     static final Intent TETHER_SETTINGS = new Intent().setComponent(new ComponentName(
              "com.android.settings", "com.android.settings.TetherSettings"));
 
@@ -57,7 +54,7 @@ public class HotspotTile extends QSTile<QSTile.AirplaneBooleanState> {
     private final GlobalSetting mAirplaneMode;
     private boolean mListening;
 
-    public HotspotTile(Host host) {
+    public HotspotTile(QSHost host) {
         super(host);
         mController = Dependency.get(HotspotController.class);
         mAirplaneMode = new GlobalSetting(mContext, mHandler, Global.AIRPLANE_MODE_ON) {
@@ -136,8 +133,7 @@ public class HotspotTile extends QSTile<QSTile.AirplaneBooleanState> {
         } else if (wasAirplane) {
             state.icon = mDisableNoAnimation;
         }
-        state.minimalAccessibilityClassName = state.expandedAccessibilityClassName
-                = Switch.class.getName();
+        state.expandedAccessibilityClassName = Switch.class.getName();
         state.contentDescription = state.label;
         state.state = state.isAirplaneMode ? Tile.STATE_UNAVAILABLE
                 : state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;

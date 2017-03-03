@@ -45,6 +45,7 @@ public class VersionInfo {
     }
 
     private void addClass(Class<?> cls, boolean required) {
+        if (mVersions.containsKey(cls)) return;
         ProvidesInterface provider = cls.getDeclaredAnnotation(ProvidesInterface.class);
         if (provider != null) {
             mVersions.put(cls, new Version(provider.version(), true));

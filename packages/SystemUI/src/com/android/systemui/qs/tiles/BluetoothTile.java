@@ -26,7 +26,6 @@ import android.service.quicksettings.Tile;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.Switch;
 
 import com.android.internal.logging.MetricsLogger;
@@ -38,21 +37,23 @@ import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.QS.DetailAdapter;
 import com.android.systemui.qs.QSDetailItems;
 import com.android.systemui.qs.QSDetailItems.Item;
-import com.android.systemui.qs.QSTile;
+import com.android.systemui.qs.QSHost;
+import com.android.systemui.plugins.qs.QSTile.BooleanState;
+import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.policy.BluetoothController;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
 /** Quick settings tile: Bluetooth **/
-public class BluetoothTile extends QSTile<QSTile.BooleanState>  {
+public class BluetoothTile extends QSTileImpl<BooleanState> {
     private static final Intent BLUETOOTH_SETTINGS = new Intent(Settings.ACTION_BLUETOOTH_SETTINGS);
 
     private final BluetoothController mController;
     private final BluetoothDetailAdapter mDetailAdapter;
     private final ActivityStarter mActivityStarter;
 
-    public BluetoothTile(Host host) {
+    public BluetoothTile(QSHost host) {
         super(host);
         mController = Dependency.get(BluetoothController.class);
         mActivityStarter = Dependency.get(ActivityStarter.class);
@@ -117,9 +118,6 @@ public class BluetoothTile extends QSTile<QSTile.BooleanState>  {
         final boolean connecting = mController.isBluetoothConnecting();
         state.dualTarget = true;
         state.value = enabled;
-        state.autoMirrorDrawable = false;
-        state.minimalContentDescription =
-                mContext.getString(R.string.accessibility_quick_settings_bluetooth);
         if (enabled) {
             state.label = null;
             if (connected) {
@@ -127,21 +125,15 @@ public class BluetoothTile extends QSTile<QSTile.BooleanState>  {
                 state.label = mController.getLastDeviceName();
                 state.contentDescription = mContext.getString(
                         R.string.accessibility_bluetooth_name, state.label);
-                state.minimalContentDescription = state.minimalContentDescription + ","
-                        + state.contentDescription;
             } else if (connecting) {
                 state.icon = ResourceIcon.get(R.drawable.ic_qs_bluetooth_connecting);
                 state.contentDescription = mContext.getString(
                         R.string.accessibility_quick_settings_bluetooth_connecting);
                 state.label = mContext.getString(R.string.quick_settings_bluetooth_label);
-                state.minimalContentDescription = state.minimalContentDescription + ","
-                        + state.contentDescription;
             } else {
                 state.icon = ResourceIcon.get(R.drawable.ic_qs_bluetooth_on);
                 state.contentDescription = mContext.getString(
                         R.string.accessibility_quick_settings_bluetooth_on) + ","
-                        + mContext.getString(R.string.accessibility_not_connected);
-                state.minimalContentDescription = state.minimalContentDescription + ","
                         + mContext.getString(R.string.accessibility_not_connected);
             }
             if (TextUtils.isEmpty(state.label)) {
@@ -164,8 +156,7 @@ public class BluetoothTile extends QSTile<QSTile.BooleanState>  {
         state.dualLabelContentDescription = bluetoothName;
         state.contentDescription = state.contentDescription + "," + mContext.getString(
                 R.string.accessibility_quick_settings_open_settings, getTileLabel());
-        state.expandedAccessibilityClassName = Button.class.getName();
-        state.minimalAccessibilityClassName = Switch.class.getName();
+        state.expandedAccessibilityClassName = Switch.class.getName();
     }
 
     @Override

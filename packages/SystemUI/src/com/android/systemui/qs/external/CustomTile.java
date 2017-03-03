@@ -37,7 +37,9 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.Dependency;
 import com.android.systemui.plugins.ActivityStarter;
-import com.android.systemui.qs.QSTile;
+import com.android.systemui.plugins.qs.QSTile;
+import com.android.systemui.plugins.qs.QSTile.State;
+import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.qs.external.TileLifecycleManager.TileChangeListener;
 import com.android.systemui.statusbar.phone.QSTileHost;
 import libcore.util.Objects;
@@ -45,7 +47,7 @@ import libcore.util.Objects;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_QS_DIALOG;
 
-public class CustomTile extends QSTile<QSTile.State> implements TileChangeListener {
+public class CustomTile extends QSTileImpl<State> implements TileChangeListener {
     public static final String PREFIX = "custom(";
 
     private static final boolean DEBUG = false;
@@ -223,7 +225,6 @@ public class CustomTile extends QSTile<QSTile.State> implements TileChangeListen
     @Override
     public State newTileState() {
         State state = new State();
-        state.autoMirrorDrawable = false;
         return state;
     }
 
@@ -326,7 +327,7 @@ public class CustomTile extends QSTile<QSTile.State> implements TileChangeListen
         return ComponentName.unflattenFromString(action);
     }
 
-    public static QSTile<?> create(QSTileHost host, String spec) {
+    public static QSTile create(QSTileHost host, String spec) {
         if (spec == null || !spec.startsWith(PREFIX) || !spec.endsWith(")")) {
             throw new IllegalArgumentException("Bad custom tile spec: " + spec);
         }

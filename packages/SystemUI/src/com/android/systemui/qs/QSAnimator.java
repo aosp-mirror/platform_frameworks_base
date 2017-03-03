@@ -18,13 +18,13 @@ import android.util.Log;
 import android.view.View;
 import android.view.View.OnAttachStateChangeListener;
 import android.view.View.OnLayoutChangeListener;
-import android.widget.TextView;
 
 import com.android.systemui.Dependency;
-import com.android.systemui.plugins.qs.QS;
+import com.android.systemui.plugins.qs.*;
+import com.android.systemui.plugins.qs.QSTileView;
 import com.android.systemui.qs.PagedTileLayout.PageListener;
 import com.android.systemui.qs.QSPanel.QSTileLayout;
-import com.android.systemui.qs.QSTile.Host.Callback;
+import com.android.systemui.qs.QSHost.Callback;
 import com.android.systemui.qs.TouchAnimator.Builder;
 import com.android.systemui.qs.TouchAnimator.Listener;
 import com.android.systemui.statusbar.phone.QSTileHost;
@@ -149,7 +149,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
         TouchAnimator.Builder translationYBuilder = new Builder();
 
         if (mQsPanel.getHost() == null) return;
-        Collection<QSTile<?>> tiles = mQsPanel.getHost().getTiles();
+        Collection<QSTile> tiles = mQsPanel.getHost().getTiles();
         int count = 0;
         int[] loc1 = new int[2];
         int[] loc2 = new int[2];
@@ -164,8 +164,8 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
         mAllViews.add((View) tileLayout);
         firstPageBuilder.addFloat(tileLayout, "translationY", mQsPanel.getHeight(), 0);
 
-        for (QSTile<?> tile : tiles) {
-            QSTileBaseView tileView = mQsPanel.getTileView(tile);
+        for (QSTile tile : tiles) {
+            QSTileView tileView = mQsPanel.getTileView(tile);
             if (tileView == null) {
                 Log.e(TAG, "tileView is null " + tile.getTileSpec());
                 continue;
@@ -174,7 +174,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
             View view = mQs.getView();
             if (count < mNumQuickTiles && mAllowFancy) {
                 // Quick tiles.
-                QSTileBaseView quickTileView = mQuickQsPanel.getTileView(tile);
+                com.android.systemui.plugins.qs.QSTileView quickTileView = mQuickQsPanel.getTileView(tile);
 
                 lastX = loc1[0];
                 getRelativePosition(loc1, quickTileView.getIcon().getIconView(), view);

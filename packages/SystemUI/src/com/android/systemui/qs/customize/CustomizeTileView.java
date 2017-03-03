@@ -19,8 +19,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
 import com.android.systemui.R;
-import com.android.systemui.qs.QSIconView;
-import com.android.systemui.qs.QSTileView;
+import com.android.systemui.plugins.qs.QSIconView;
+import com.android.systemui.qs.tileimpl.QSTileView;
 import libcore.util.Objects;
 
 public class CustomizeTileView extends QSTileView {

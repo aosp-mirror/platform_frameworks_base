@@ -42,7 +42,7 @@ import android.widget.TextView;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.systemui.R;
-import com.android.systemui.qs.QSIconView;
+import com.android.systemui.qs.tileimpl.QSIconViewImpl;
 import com.android.systemui.qs.customize.TileAdapter.Holder;
 import com.android.systemui.qs.customize.TileQueryHelper.TileInfo;
 import com.android.systemui.qs.customize.TileQueryHelper.TileStateListener;
@@ -190,7 +190,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         }
         FrameLayout frame = (FrameLayout) inflater.inflate(R.layout.qs_customize_tile_frame, parent,
                 false);
-        frame.addView(new CustomizeTileView(context, new QSIconView(context)));
+        frame.addView(new CustomizeTileView(context, new QSIconViewImpl(context)));
         return new Holder(frame);
     }
 

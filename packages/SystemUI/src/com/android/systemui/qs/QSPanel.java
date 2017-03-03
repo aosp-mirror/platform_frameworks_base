@@ -33,7 +33,9 @@ import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.plugins.qs.QS.DetailAdapter;
-import com.android.systemui.qs.QSTile.Host.Callback;
+import com.android.systemui.plugins.qs.QSTile;
+import com.android.systemui.plugins.qs.QSTileView;
+import com.android.systemui.qs.QSHost.Callback;
 import com.android.systemui.qs.customize.QSCustomizer;
 import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.settings.BrightnessController;
@@ -159,11 +161,11 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
     }
 
     public void openDetails(String subPanel) {
-        QSTile<?> tile = getTile(subPanel);
+        QSTile tile = getTile(subPanel);
         showDetailAdapter(true, tile.getDetailAdapter(), new int[] {getWidth() / 2, 0});
     }
 
-    private QSTile<?> getTile(String subPanel) {
+    private QSTile getTile(String subPanel) {
         for (int i = 0; i < mRecords.size(); i++) {
             if (subPanel.equals(mRecords.get(i).tile.getTileSpec())) {
                 return mRecords.get(i).tile;
@@ -301,17 +303,17 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
         mHandler.obtainMessage(H.SHOW_DETAIL, show ? 1 : 0, 0, r).sendToTarget();
     }
 
-    public void setTiles(Collection<QSTile<?>> tiles) {
+    public void setTiles(Collection<QSTile> tiles) {
         setTiles(tiles, false);
     }
 
-    public void setTiles(Collection<QSTile<?>> tiles, boolean collapsedView) {
+    public void setTiles(Collection<QSTile> tiles, boolean collapsedView) {
         for (TileRecord record : mRecords) {
             mTileLayout.removeTile(record);
             record.tile.removeCallback(record.callback);
         }
         mRecords.clear();
-        for (QSTile<?> tile : tiles) {
+        for (QSTile tile : tiles) {
             addTile(tile, collapsedView);
         }
     }
@@ -320,15 +322,15 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
         r.tileView.onStateChanged(state);
     }
 
-    protected QSTileBaseView createTileView(QSTile<?> tile, boolean collapsedView) {
-        return new QSTileView(mContext, tile.createTileView(mContext), collapsedView);
+    protected QSTileView createTileView(QSTile tile, boolean collapsedView) {
+        return mHost.createTileView(tile, collapsedView);
     }
 
     protected boolean shouldShowDetail() {
         return mExpanded;
     }
 
-    protected TileRecord addTile(final QSTile<?> tile, boolean collapsedView) {
+    protected TileRecord addTile(final QSTile tile, boolean collapsedView) {
         final TileRecord r = new TileRecord();
         r.tile = tile;
         r.tileView = createTileView(tile, collapsedView);
@@ -372,10 +374,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
         };
         r.tile.addCallback(callback);
         r.callback = callback;
-        r.tileView.init(v -> r.tile.click(), v -> r.tile.secondaryClick(), v -> {
-            r.tile.longClick();
-            return true;
-        });
+        r.tileView.init(r.tile);
         r.tile.refreshState();
         mRecords.add(r);
 
@@ -441,15 +440,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
         }
         r.tile.setDetailListening(show);
         int x = r.tileView.getLeft() + r.tileView.getWidth() / 2;
-        int y;
-        if (r.tileView instanceof QSTileView) {
-            View labelContainer = (View) ((QSTileView) r.tileView).getLabel().getParent();
-            y = r.tileView.getTop() + mTileLayout.getOffsetTop(r) + getTop()
-                    + labelContainer.getTop() + labelContainer.getHeight() / 2;
-        } else {
-            y = r.tileView.getTop() + mTileLayout.getOffsetTop(r) + r.tileView.getHeight() / 2
-                    + getTop();
-        }
+        int y = r.tileView.getDetailY() + mTileLayout.getOffsetTop(r) + getTop();
         handleShowDetailImpl(r, show, x, y);
     }
 
@@ -515,7 +506,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
         return mTileLayout;
     }
 
-    QSTileBaseView getTileView(QSTile<?> tile) {
+    QSTileView getTileView(QSTile tile) {
         for (TileRecord r : mRecords) {
             if (r.tile == tile) {
                 return r.tileView;
@@ -553,8 +544,8 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
     }
 
     public static final class TileRecord extends Record {
-        public QSTile<?> tile;
-        public QSTileBaseView tileView;
+        public QSTile tile;
+        public com.android.systemui.plugins.qs.QSTileView tileView;
         public boolean scanState;
         public QSTile.Callback callback;
     }

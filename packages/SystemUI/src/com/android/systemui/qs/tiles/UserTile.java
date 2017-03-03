@@ -24,17 +24,20 @@ import android.util.Pair;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.Dependency;
 import com.android.systemui.plugins.qs.QS.DetailAdapter;
-import com.android.systemui.qs.QSTile;
+import com.android.systemui.qs.QSHost;
+import com.android.systemui.plugins.qs.QSTile;
+import com.android.systemui.plugins.qs.QSTile.State;
+import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 
-public class UserTile extends QSTile<QSTile.State> implements UserInfoController.OnUserInfoChangedListener {
+public class UserTile extends QSTileImpl<State> implements UserInfoController.OnUserInfoChangedListener {
 
     private final UserSwitcherController mUserSwitcherController;
     private final UserInfoController mUserInfoController;
     private Pair<String, Drawable> mLastUpdate;
 
-    public UserTile(Host host) {
+    public UserTile(QSHost host) {
         super(host);
         mUserSwitcherController = Dependency.get(UserSwitcherController.class);
         mUserInfoController = Dependency.get(UserInfoController.class);

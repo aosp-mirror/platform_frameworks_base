@@ -17,7 +17,6 @@
 package com.android.systemui.qs;
 
 import android.content.Context;
-import android.content.res.Configuration;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.View;
@@ -26,9 +25,12 @@ import android.widget.Space;
 
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
-import com.android.systemui.qs.QSTile.SignalState;
-import com.android.systemui.qs.QSTile.State;
+import com.android.systemui.plugins.qs.*;
+import com.android.systemui.plugins.qs.QSTile.SignalState;
+import com.android.systemui.plugins.qs.QSTile.State;
+import com.android.systemui.plugins.qs.QSTileView;
 import com.android.systemui.qs.customize.QSCustomizer;
+import com.android.systemui.qs.tileimpl.QSTileBaseView;
 import com.android.systemui.statusbar.phone.QSTileHost;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
@@ -88,19 +90,14 @@ public class QuickQSPanel extends QSPanel {
     @Override
     protected void drawTile(TileRecord r, State state) {
         if (state instanceof SignalState) {
-            State copy = r.tile.newTileState();
+            SignalState copy = new SignalState();
             state.copyTo(copy);
             // No activity shown in the quick panel.
-            ((SignalState) copy).activityIn = false;
-            ((SignalState) copy).activityOut = false;
+            copy.activityIn = false;
+            copy.activityOut = false;
             state = copy;
         }
         super.drawTile(r, state);
-    }
-
-    @Override
-    protected QSTileBaseView createTileView(QSTile<?> tile, boolean collapsedView) {
-        return new QSTileBaseView(mContext, tile.createTileView(mContext), collapsedView);
     }
 
     @Override
@@ -126,9 +123,9 @@ public class QuickQSPanel extends QSPanel {
     }
 
     @Override
-    public void setTiles(Collection<QSTile<?>> tiles) {
-        ArrayList<QSTile<?>> quickTiles = new ArrayList<>();
-        for (QSTile<?> tile : tiles) {
+    public void setTiles(Collection<QSTile> tiles) {
+        ArrayList<QSTile> quickTiles = new ArrayList<>();
+        for (QSTile tile : tiles) {
             quickTiles.add(tile);
             if (quickTiles.size() == mMaxTiles) {
                 break;
@@ -209,7 +206,7 @@ public class QuickQSPanel extends QSPanel {
             tile.tile.setListening(this, false);
         }
 
-        private int getChildIndex(QSTileBaseView tileView) {
+        private int getChildIndex(QSTileView tileView) {
             final int N = getChildCount();
             for (int i = 0; i < N; i++) {
                 if (getChildAt(i) == tileView) {

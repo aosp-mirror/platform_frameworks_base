@@ -41,12 +41,15 @@ import com.android.systemui.R;
 import com.android.systemui.SysUIToast;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.QS.DetailAdapter;
-import com.android.systemui.qs.QSTile;
+import com.android.systemui.qs.QSHost;
+import com.android.systemui.plugins.qs.QSTile;
+import com.android.systemui.plugins.qs.QSTile.BooleanState;
+import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.volume.ZenModePanel;
 
 /** Quick settings tile: Do not disturb **/
-public class DndTile extends QSTile<QSTile.BooleanState> {
+public class DndTile extends QSTileImpl<BooleanState> {
 
     private static final Intent ZEN_SETTINGS =
             new Intent(Settings.ACTION_ZEN_MODE_SETTINGS);
@@ -74,7 +77,7 @@ public class DndTile extends QSTile<QSTile.BooleanState> {
     private boolean mShowingDetail;
     private boolean mReceiverRegistered;
 
-    public DndTile(Host host) {
+    public DndTile(QSHost host) {
         super(host);
         mController = Dependency.get(ZenModeController.class);
         mDetailAdapter = new DndDetailAdapter();
@@ -195,8 +198,7 @@ public class DndTile extends QSTile<QSTile.BooleanState> {
         if (valueChanged) {
             fireToggleStateChanged(state.value);
         }
-        state.minimalAccessibilityClassName = state.expandedAccessibilityClassName
-                = Switch.class.getName();
+        state.expandedAccessibilityClassName = Switch.class.getName();
     }
 
     @Override
