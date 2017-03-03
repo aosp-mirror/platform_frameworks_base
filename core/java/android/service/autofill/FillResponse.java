@@ -171,7 +171,7 @@ public final class FillResponse implements Parcelable {
 
         if (false) {
             // TODO(b/33197203, 35727295): this is how mSaveInfo will be set once we don't support
-            // FillResponse.setSavableIds()
+            // FillResponse.addSavableIds()
             mSaveInfo = builder.mSaveInfo;
             if (mSaveInfo != null) {
                 mSaveInfo.addSavableIds(mDatasets);
@@ -181,11 +181,11 @@ public final class FillResponse implements Parcelable {
                 }
             }
         } else {
-            // Temporary workaround to support FillResponse.setSavableIds()
+            // Temporary workaround to support FillResponse.addSavableIds()
             SaveInfo saveInfo = builder.mSaveInfoBuilder != null ? builder.mSaveInfoBuilder.build()
                     : builder.mSaveInfo;
 
-            // Handle the the case where service didn't call setSavableIds() because it would
+            // Handle the the case where service didn't call addSavableIds() because it would
             // contain just the ids from the datasets.
             if (saveInfo == null && mDatasets != null) {
                 saveInfo = new SaveInfo.Builder(SaveInfo.SAVE_DATA_TYPE_GENERIC).build();
