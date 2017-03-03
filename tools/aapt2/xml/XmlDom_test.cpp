@@ -49,4 +49,23 @@ TEST(XmlDomTest, Inflate) {
   EXPECT_EQ(ns->namespace_prefix, "android");
 }
 
+TEST(XmlDomTest, HandleEscapes) {
+  std::unique_ptr<xml::XmlResource> doc = test::BuildXmlDom(
+      R"EOF(<shortcode pattern="\\d{5}">\\d{5}</shortcode>)EOF");
+
+  xml::Element* el = xml::FindRootElement(doc->root.get());
+  ASSERT_NE(nullptr, el);
+
+  xml::Attribute* attr = el->FindAttribute({}, "pattern");
+  ASSERT_NE(nullptr, attr);
+
+  EXPECT_EQ("\\d{5}", attr->value);
+
+  ASSERT_EQ(1u, el->children.size());
+
+  xml::Text* text = xml::NodeCast<xml::Text>(el->children[0].get());
+  ASSERT_NE(nullptr, text);
+  EXPECT_EQ("\\d{5}", text->text);
+}
+
 }  // namespace aapt

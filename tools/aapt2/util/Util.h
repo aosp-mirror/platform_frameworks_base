@@ -164,6 +164,7 @@ class StringBuilder {
   StringBuilder& Append(const android::StringPiece& str);
   const std::string& ToString() const;
   const std::string& Error() const;
+  bool IsEmpty() const;
 
   // When building StyledStrings, we need UTF-16 indices into the string,
   // which is what the Java layer expects when dealing with java
@@ -184,6 +185,8 @@ class StringBuilder {
 inline const std::string& StringBuilder::ToString() const { return str_; }
 
 inline const std::string& StringBuilder::Error() const { return error_; }
+
+inline bool StringBuilder::IsEmpty() const { return str_.empty(); }
 
 inline size_t StringBuilder::Utf16Len() const { return utf16_len_; }
 
