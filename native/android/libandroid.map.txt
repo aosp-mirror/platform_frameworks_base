@@ -139,16 +139,27 @@ LIBANDROID {
     ANativeActivity_setWindowFlags;
     ANativeActivity_setWindowFormat;
     ANativeActivity_showSoftInput;
-    ANativeWindow_acquire; # removed=26
-    ANativeWindow_fromSurface; # removed=26
-    ANativeWindow_fromSurfaceTexture; # removed=26
-    ANativeWindow_getFormat; # removed=26
-    ANativeWindow_getHeight; # removed=26
-    ANativeWindow_getWidth; # removed=26
-    ANativeWindow_lock; # removed=26
-    ANativeWindow_release; # removed=26
-    ANativeWindow_setBuffersGeometry; # removed=26
-    ANativeWindow_unlockAndPost; # removed=26
+    AHardwareBuffer_acquire; # introduced=26
+    AHardwareBuffer_allocate; # introduced=26
+    AHardwareBuffer_describe; # introduced=26
+    AHardwareBuffer_fromHardwareBuffer; # introduced=26
+    AHardwareBuffer_getNativeHandle; # introduced=26
+    AHardwareBuffer_lock; # introduced=26
+    AHardwareBuffer_recvHandleFromUnixSocket; # introduced=26
+    AHardwareBuffer_release; # introduced=26
+    AHardwareBuffer_sendHandleToUnixSocket; # introduced=26
+    AHardwareBuffer_toHardwareBuffer; # introduced=26
+    AHardwareBuffer_unlock; # introduced=26
+    ANativeWindow_acquire;
+    ANativeWindow_fromSurface;
+    ANativeWindow_fromSurfaceTexture; # introduced-arm=13 introduced-mips=13 introduced-x86=13
+    ANativeWindow_getFormat;
+    ANativeWindow_getHeight;
+    ANativeWindow_getWidth;
+    ANativeWindow_lock;
+    ANativeWindow_release;
+    ANativeWindow_setBuffersGeometry;
+    ANativeWindow_unlockAndPost;
     AObbInfo_delete;
     AObbInfo_getFlags;
     AObbInfo_getPackageName;
