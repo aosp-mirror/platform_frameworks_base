@@ -251,6 +251,7 @@ public final class UpdateParameter implements Parcelable {
      * Validate UpdateParameter data.
      *
      * @return true on success
+     * @hide
      */
     public boolean validate() {
         if (mUpdateIntervalInMinutes == Long.MIN_VALUE) {

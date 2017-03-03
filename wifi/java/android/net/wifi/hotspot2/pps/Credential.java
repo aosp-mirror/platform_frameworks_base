@@ -286,6 +286,7 @@ public final class Credential implements Parcelable {
          * Validate the configuration data.
          *
          * @return true on success or false on failure
+         * @hide
          */
         public boolean validate() {
             if (TextUtils.isEmpty(mUsername)) {
@@ -443,6 +444,7 @@ public final class Credential implements Parcelable {
          * Validate the configuration data.
          *
          * @return true on success or false on failure
+         * @hide
          */
         public boolean validate() {
             if (!TextUtils.equals(CERT_TYPE_X509V3, mCertType)) {
@@ -569,6 +571,7 @@ public final class Credential implements Parcelable {
          * Validate the configuration data.
          *
          * @return true on success or false on failure
+         * @hide
          */
         public boolean validate() {
             // Note: this only validate the format of IMSI string itself.  Additional verification
@@ -768,6 +771,7 @@ public final class Credential implements Parcelable {
      * Validate the configuration data.
      *
      * @return true on success or false on failure
+     * @hide
      */
     public boolean validate() {
         if (TextUtils.isEmpty(mRealm)) {
