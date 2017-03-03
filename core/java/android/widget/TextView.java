@@ -1341,10 +1341,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 case com.android.internal.R.styleable.TextView_autoSizePresetSizes:
                     final int autoSizeStepSizeArrayResId = a.getResourceId(attr, 0);
                     if (autoSizeStepSizeArrayResId > 0) {
-                        final TypedArray autoSizePreDefTextSizes = a.getResources()
+                        final TypedArray autoSizePresetTextSizes = a.getResources()
                                 .obtainTypedArray(autoSizeStepSizeArrayResId);
-                        setupAutoSizeUniformPresetSizes(autoSizePreDefTextSizes);
-                        autoSizePreDefTextSizes.recycle();
+                        setupAutoSizeUniformPresetSizes(autoSizePresetTextSizes);
+                        autoSizePresetTextSizes.recycle();
                     }
                     break;
             }
@@ -1647,7 +1647,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                                 displayMetrics);
                     }
 
-                    if (autoSizeMinTextSizeInPx == UNSET_AUTO_SIZE_UNIFORM_CONFIGURATION_VALUE) {
+                    if (autoSizeStepGranularityInPx
+                            == UNSET_AUTO_SIZE_UNIFORM_CONFIGURATION_VALUE) {
                         autoSizeStepGranularityInPx = DEFAULT_AUTO_SIZE_GRANULARITY_IN_PX;
                     }
 
@@ -1792,16 +1793,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 }
 
                 mAutoSizeTextSizesInPx = cleanupAutoSizePresetSizes(presetSizesInPx);
-                final int sizesLength = mAutoSizeTextSizesInPx.length;
-                mHasPresetAutoSizeValues = sizesLength > 0;
-                if (mHasPresetAutoSizeValues) {
-                    mAutoSizeTextType = AUTO_SIZE_TEXT_TYPE_UNIFORM;
-                    mAutoSizeMinTextSizeInPx = mAutoSizeTextSizesInPx[0];
-                    mAutoSizeMaxTextSizeInPx = mAutoSizeTextSizesInPx[sizesLength - 1];
-                    mAutoSizeStepGranularityInPx = UNSET_AUTO_SIZE_UNIFORM_CONFIGURATION_VALUE;
-                } else {
+                if (!setupAutoSizeUniformPresetSizesConfiguration()) {
                     throw new IllegalArgumentException("None of the preset sizes is valid: "
-                        + Arrays.toString(presetSizes));
+                            + Arrays.toString(presetSizes));
                 }
             } else {
                 mHasPresetAutoSizeValues = false;
@@ -1884,8 +1878,20 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 parsedSizes[i] = textSizes.getDimensionPixelSize(i, -1);
             }
             mAutoSizeTextSizesInPx = cleanupAutoSizePresetSizes(parsedSizes);
-            mHasPresetAutoSizeValues = mAutoSizeTextSizesInPx.length > 0;
+            setupAutoSizeUniformPresetSizesConfiguration();
         }
+    }
+
+    private boolean setupAutoSizeUniformPresetSizesConfiguration() {
+        final int sizesLength = mAutoSizeTextSizesInPx.length;
+        mHasPresetAutoSizeValues = sizesLength > 0;
+        if (mHasPresetAutoSizeValues) {
+            mAutoSizeTextType = AUTO_SIZE_TEXT_TYPE_UNIFORM;
+            mAutoSizeMinTextSizeInPx = mAutoSizeTextSizesInPx[0];
+            mAutoSizeMaxTextSizeInPx = mAutoSizeTextSizesInPx[sizesLength - 1];
+            mAutoSizeStepGranularityInPx = UNSET_AUTO_SIZE_UNIFORM_CONFIGURATION_VALUE;
+        }
+        return mHasPresetAutoSizeValues;
     }
 
     /**
@@ -1900,7 +1906,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         // First validate.
         if (autoSizeMinTextSizeInPx <= 0) {
             throw new IllegalArgumentException("Minimum auto-size text size ("
-                + autoSizeMinTextSizeInPx  + "px) is less or equal to 0px)");
+                + autoSizeMinTextSizeInPx  + "px) is less or equal to (0px)");
         }
 
         if (autoSizeMaxTextSizeInPx <= autoSizeMinTextSizeInPx) {
@@ -1910,8 +1916,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         if (autoSizeStepGranularityInPx <= 0) {
-            throw new IllegalArgumentException("Minimum auto-size text size ("
-                + autoSizeStepGranularityInPx + "px) is less or equal to 0px)");
+            throw new IllegalArgumentException("The auto-size step granularity ("
+                + autoSizeStepGranularityInPx + "px) is less or equal to (0px)");
         }
 
         // All good, persist the configuration.
@@ -8096,13 +8102,20 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             return mTempTextPaint.getFontSpacing() <= availableSpace.bottom
                     && mTempTextPaint.measureText(text, 0, text.length()) <= availableSpace.right;
         } else {
-            StaticLayout.Builder layoutBuilder = StaticLayout.Builder.obtain(text, 0, text.length(),
-                    mTempTextPaint,
+            final StaticLayout.Builder layoutBuilder = StaticLayout.Builder.obtain(
+                    text, 0, text.length(),  mTempTextPaint,
                     getMeasuredWidth() - getTotalPaddingLeft() - getTotalPaddingRight());
-            layoutBuilder.setAlignment(getLayoutAlignment());
-            layoutBuilder.setLineSpacing(getLineSpacingExtra(), getLineSpacingMultiplier());
-            layoutBuilder.setIncludePad(true);
-            StaticLayout layout = layoutBuilder.build();
+
+            layoutBuilder.setAlignment(getLayoutAlignment())
+                    .setLineSpacing(getLineSpacingExtra(), getLineSpacingMultiplier())
+                    .setIncludePad(getIncludeFontPadding())
+                    .setBreakStrategy(getBreakStrategy())
+                    .setHyphenationFrequency(getHyphenationFrequency())
+                    .setJustify(getJustify())
+                    .setMaxLines(mMaxMode == LINES ? mMaximum : Integer.MAX_VALUE)
+                    .setTextDirection(getTextDirectionHeuristic());
+
+            final StaticLayout layout = layoutBuilder.build();
 
             // Lines overflow.
             if (maxLines != -1 && layout.getLineCount() > maxLines) {
