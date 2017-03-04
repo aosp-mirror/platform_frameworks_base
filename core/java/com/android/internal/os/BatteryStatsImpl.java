@@ -8870,6 +8870,10 @@ public class BatteryStatsImpl extends BatteryStats {
                 if (entry.rxBytes != 0) {
                     u.noteNetworkActivityLocked(NETWORK_WIFI_RX_DATA, entry.rxBytes,
                             entry.rxPackets);
+                    if (entry.set == NetworkStats.SET_DEFAULT) { // Background transfers
+                        u.noteNetworkActivityLocked(NETWORK_WIFI_BG_RX_DATA, entry.rxBytes,
+                                entry.rxPackets);
+                    }
                     mNetworkByteActivityCounters[NETWORK_WIFI_RX_DATA].addCountLocked(
                             entry.rxBytes);
                     mNetworkPacketActivityCounters[NETWORK_WIFI_RX_DATA].addCountLocked(
@@ -8885,6 +8889,10 @@ public class BatteryStatsImpl extends BatteryStats {
                 if (entry.txBytes != 0) {
                     u.noteNetworkActivityLocked(NETWORK_WIFI_TX_DATA, entry.txBytes,
                             entry.txPackets);
+                    if (entry.set == NetworkStats.SET_DEFAULT) { // Background transfers
+                        u.noteNetworkActivityLocked(NETWORK_WIFI_BG_TX_DATA, entry.txBytes,
+                                entry.txPackets);
+                    }
                     mNetworkByteActivityCounters[NETWORK_WIFI_TX_DATA].addCountLocked(
                             entry.txBytes);
                     mNetworkPacketActivityCounters[NETWORK_WIFI_TX_DATA].addCountLocked(
@@ -9104,6 +9112,12 @@ public class BatteryStatsImpl extends BatteryStats {
                 final Uid u = getUidStatsLocked(mapUid(entry.uid));
                 u.noteNetworkActivityLocked(NETWORK_MOBILE_RX_DATA, entry.rxBytes, entry.rxPackets);
                 u.noteNetworkActivityLocked(NETWORK_MOBILE_TX_DATA, entry.txBytes, entry.txPackets);
+                if (entry.set == NetworkStats.SET_DEFAULT) { // Background transfers
+                    u.noteNetworkActivityLocked(NETWORK_MOBILE_BG_RX_DATA,
+                            entry.rxBytes, entry.rxPackets);
+                    u.noteNetworkActivityLocked(NETWORK_MOBILE_BG_TX_DATA,
+                            entry.txBytes, entry.txPackets);
+                }
 
                 mNetworkByteActivityCounters[NETWORK_MOBILE_RX_DATA].addCountLocked(
                         entry.rxBytes);
