@@ -219,6 +219,8 @@ LOCAL_C_INCLUDES += \
 
 LOCAL_STATIC_LIBRARIES := \
     libseccomp_policy \
+    libselinux \
+    libcrypto \
 
 LOCAL_SHARED_LIBRARIES := \
     libmemtrack \
