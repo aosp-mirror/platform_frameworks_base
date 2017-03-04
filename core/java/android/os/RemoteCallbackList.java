@@ -329,15 +329,38 @@ public class RemoteCallbackList<E extends IInterface> {
     }
 
     /**
-     * Return the cookies associated with a currently registered callback.  Note that this is
-     * <em>not</em> the same as {@link #getBroadcastCookie} and should not be used
-     * interchangeably with it.  This method returns the current cookied registered at the given
+     * Return a currently registered callback.  Note that this is
+     * <em>not</em> the same as {@link #getBroadcastItem} and should not be used
+     * interchangeably with it.  This method returns the registered callback at the given
      * index, not the current broadcast state.  This means that it is not itself thread-safe:
      * any call to {@link #register} or {@link #unregister} will change these indices, so you
      * must do your own thread safety between these to protect from such changes.
      *
-     * @param index Index of which registration cookie to return from 0 to
-     * {@link #getRegisteredCallbackCount()}.
+     * @param index Index of which callback registration to return, from 0 to
+     * {@link #getRegisteredCallbackCount()} - 1.
+     *
+     * @return Returns whatever callback is associated with this index, or null if
+     * {@link #kill()} has been called.
+     */
+    public E getRegisteredCallbackItem(int index) {
+        synchronized (mCallbacks) {
+            if (mKilled) {
+                return null;
+            }
+            return mCallbacks.valueAt(index).mCallback;
+        }
+    }
+
+    /**
+     * Return any cookie associated with a currently registered callback.  Note that this is
+     * <em>not</em> the same as {@link #getBroadcastCookie} and should not be used
+     * interchangeably with it.  This method returns the current cookie registered at the given
+     * index, not the current broadcast state.  This means that it is not itself thread-safe:
+     * any call to {@link #register} or {@link #unregister} will change these indices, so you
+     * must do your own thread safety between these to protect from such changes.
+     *
+     * @param index Index of which registration cookie to return, from 0 to
+     * {@link #getRegisteredCallbackCount()} - 1.
      *
      * @return Returns whatever cookie object is associated with this index, or null if
      * {@link #kill()} has been called.
