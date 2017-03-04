@@ -606,19 +606,17 @@ public final class LoadedApk {
         }
 
         final File profileFile = getPrimaryProfileFile(mPackageName);
-        final File foreignDexProfilesFile =
-                Environment.getDataProfilesDeForeignDexDirectory(UserHandle.myUserId());
 
-        VMRuntime.registerAppInfo(profileFile.getPath(), mApplicationInfo.dataDir,
-                codePaths.toArray(new String[codePaths.size()]), foreignDexProfilesFile.getPath());
+        VMRuntime.registerAppInfo(profileFile.getPath(),
+                codePaths.toArray(new String[codePaths.size()]));
 
         // Setup the reporter to notify package manager of any relevant dex loads.
         // At this point the primary apk is loaded and will not be reported.
         // Anything loaded from now on will be tracked as a potential secondary
         // or foreign dex file. The goal is to enable:
         //    1) monitoring and compilation of secondary dex file
-        //    2) track foreign dex file usage (used to determined the
-        //       compilation filter of apks).
+        //    2) track whether or not a dex file is used by other apps (used to
+        //       determined the compilation filter of apks).
         if (BaseDexClassLoader.getReporter() != DexLoadReporter.INSTANCE) {
             // Set the dex load reporter if not already set.
             // Note that during the app's life cycle different LoadedApks may be
