@@ -41,6 +41,10 @@ import android.util.Log;
  * the SMS filtering chain and may intercept the visual voicemail SMS before it reaches this
  * service.
  * <p>
+ * To extend this class, The service must be declared in the manifest file with
+ * the {@link android.Manifest.permission#BIND_VISUAL_VOICEMAIL_SERVICE} permission and include an
+ * intent filter with the {@link #SERVICE_INTERFACE} action.
+ * <p>
  * Below is an example manifest registration for a {@code VisualVoicemailService}.
  * <pre>
  * {@code
@@ -260,6 +264,9 @@ public abstract class VisualVoicemailService extends Service {
      * @param port The destination port for data SMS, or 0 for text SMS.
      * @param text The message content. For data sms, it will be encoded as a UTF-8 byte stream.
      * @param sentIntent The sent intent passed to the {@link SmsManager}
+     *
+     * @throws SecurityException if the caller is not the current default dialer
+     *
      * @see SmsManager#sendDataMessage(String, String, short, byte[], PendingIntent, PendingIntent)
      * @see SmsManager#sendTextMessage(String, String, String, PendingIntent, PendingIntent)
      */
