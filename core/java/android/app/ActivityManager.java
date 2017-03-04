@@ -133,7 +133,7 @@ public class ActivityManager {
     public final static boolean ENABLE_TASK_SNAPSHOTS;
 
     static {
-        ENABLE_TASK_SNAPSHOTS = SystemProperties.getBoolean("persist.enable_task_snapshots", false);
+        ENABLE_TASK_SNAPSHOTS = SystemProperties.getBoolean("persist.enable_task_snapshots", true);
     }
 
     static final class UidObserver extends IUidObserver.Stub {

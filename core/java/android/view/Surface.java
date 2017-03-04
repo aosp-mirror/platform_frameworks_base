@@ -19,6 +19,7 @@ package android.view;
 import android.annotation.IntDef;
 import android.content.res.CompatibilityInfo.Translator;
 import android.graphics.Canvas;
+import android.graphics.GraphicBuffer;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
@@ -72,6 +73,7 @@ public class Surface implements Parcelable {
     private static native int nativeSetScalingMode(long nativeObject, int scalingMode);
     private static native void nativeSetBuffersTransform(long nativeObject, long transform);
     private static native int nativeForceScopedDisconnect(long nativeObject);
+    private static native int nativeAttachAndQueueBuffer(long nativeObject, GraphicBuffer buffer);
 
     public static final Parcelable.Creator<Surface> CREATOR =
             new Parcelable.Creator<Surface>() {
@@ -557,6 +559,21 @@ public class Surface implements Parcelable {
             int err = nativeForceScopedDisconnect(mNativeObject);
             if (err != 0) {
                 throw new RuntimeException("Failed to disconnect Surface instance (bad object?)");
+            }
+        }
+    }
+
+    /**
+     * Transfer ownership of buffer and present it on the Surface.
+     * @hide
+     */
+    public void attachAndQueueBuffer(GraphicBuffer buffer) {
+        synchronized (mLock) {
+            checkNotReleasedLocked();
+            int err = nativeAttachAndQueueBuffer(mNativeObject, buffer);
+            if (err != 0) {
+                throw new RuntimeException(
+                        "Failed to attach and queue buffer to Surface (bad object?)");
             }
         }
     }
