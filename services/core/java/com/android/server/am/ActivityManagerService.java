@@ -4368,7 +4368,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                             if (reg.lastProcStates != null) {
                                 reg.lastProcStates.put(item.uid, item.processState);
                             }
-                            observer.onUidStateChanged(item.uid, item.processState);
+                            observer.onUidStateChanged(item.uid, item.processState,
+                                    item.procStateSeq);
                         }
                     }
                 }
@@ -21480,6 +21481,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         pendingChange.processState = uidRec != null
                 ? uidRec.setProcState : ActivityManager.PROCESS_STATE_NONEXISTENT;
         pendingChange.ephemeral = uidRec.ephemeral;
+        pendingChange.procStateSeq = uidRec != null ? uidRec.curProcStateSeq : 0;
 
         // Directly update the power manager, since we sit on top of it and it is critical
         // it be kept in sync (so wake locks will be held as soon as appropriate).

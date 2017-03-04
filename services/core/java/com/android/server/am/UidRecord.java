@@ -53,6 +53,7 @@ public final class UidRecord {
         int change;
         int processState;
         boolean ephemeral;
+        long procStateSeq;
     }
 
     ChangeItem pendingChange;

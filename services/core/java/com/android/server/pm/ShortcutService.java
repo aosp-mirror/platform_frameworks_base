@@ -476,7 +476,8 @@ public class ShortcutService extends IShortcutService.Stub {
 
     final private IUidObserver mUidObserver = new IUidObserver.Stub() {
         @Override
-        public void onUidStateChanged(int uid, int procState) throws RemoteException {
+        public void onUidStateChanged(int uid, int procState, long procStateSeq)
+                throws RemoteException {
             handleOnUidStateChanged(uid, procState);
         }
 

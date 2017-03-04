@@ -518,7 +518,8 @@ public final class JobSchedulerService extends com.android.server.SystemService
     }
 
     final private IUidObserver mUidObserver = new IUidObserver.Stub() {
-        @Override public void onUidStateChanged(int uid, int procState) throws RemoteException {
+        @Override public void onUidStateChanged(int uid, int procState,
+                long procStateSeq) throws RemoteException {
             updateUidState(uid, procState);
         }
 

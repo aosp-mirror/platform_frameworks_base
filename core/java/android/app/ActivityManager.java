@@ -144,7 +144,7 @@ public class ActivityManager {
         }
 
         @Override
-        public void onUidStateChanged(int uid, int procState) {
+        public void onUidStateChanged(int uid, int procState, long procStateSeq) {
             mListener.onUidImportance(uid, RunningAppProcessInfo.procStateToImportance(procState));
         }
 

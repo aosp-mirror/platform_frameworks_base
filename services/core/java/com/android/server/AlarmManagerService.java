@@ -2839,7 +2839,8 @@ class AlarmManagerService extends SystemService {
     }
 
     final class UidObserver extends IUidObserver.Stub {
-        @Override public void onUidStateChanged(int uid, int procState) throws RemoteException {
+        @Override public void onUidStateChanged(int uid, int procState,
+                long procStateSeq) throws RemoteException {
         }
 
         @Override public void onUidGone(int uid, boolean disabled) throws RemoteException {

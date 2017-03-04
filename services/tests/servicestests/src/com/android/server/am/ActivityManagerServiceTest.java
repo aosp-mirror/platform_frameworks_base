@@ -226,6 +226,7 @@ public class ActivityManagerServiceTest {
             pendingChange.change = changesForPendingUidRecords[i];
             pendingChange.uid = i;
             pendingChange.processState = procStatesForPendingUidRecords[i];
+            pendingChange.procStateSeq = i;
             changeItems.put(changesForPendingUidRecords[i], pendingChange);
             ams.mPendingUidChanges.add(pendingChange);
         }
@@ -281,8 +282,8 @@ public class ActivityManagerServiceTest {
                 };
                 verifyObserverReceivedChanges(observerToTest, changesToVerify, changeItems,
                         (observer, changeItem) -> {
-                            verify(observer).onUidStateChanged(
-                                    changeItem.uid, changeItem.processState);
+                            verify(observer).onUidStateChanged(changeItem.uid,
+                                    changeItem.processState, changeItem.procStateSeq);
                         });
             }
             // Verify there are no other callbacks for this observer.
@@ -325,12 +326,13 @@ public class ActivityManagerServiceTest {
         changeItem.uid = TEST_UID;
         changeItem.change = UidRecord.CHANGE_PROCSTATE;
         changeItem.processState = ActivityManager.PROCESS_STATE_LAST_ACTIVITY;
+        changeItem.procStateSeq = 111;
         ams.mPendingUidChanges.add(changeItem);
         ams.dispatchUidsChanged();
         // First process state message is always delivered regardless of whether the process state
         // change is above or below the cutpoint (PROCESS_STATE_SERVICE).
         verify(observer).onUidStateChanged(TEST_UID,
-                ActivityManager.PROCESS_STATE_LAST_ACTIVITY);
+                changeItem.processState, changeItem.procStateSeq);
         verifyNoMoreInteractions(observer);
 
         changeItem.processState = ActivityManager.PROCESS_STATE_RECEIVER;
@@ -347,7 +349,7 @@ public class ActivityManagerServiceTest {
         // the current process state change is above cutpoint, so callback will be invoked with the
         // current process state change.
         verify(observer).onUidStateChanged(TEST_UID,
-                ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE);
+                changeItem.processState, changeItem.procStateSeq);
         verifyNoMoreInteractions(observer);
 
         changeItem.processState = ActivityManager.PROCESS_STATE_TOP;
@@ -363,7 +365,8 @@ public class ActivityManagerServiceTest {
         // Previous process state change is above cutpoint (PROCESS_STATE_SERVICE) and
         // the current process state change is below cutpoint, so callback will be invoked with the
         // current process state change.
-        verify(observer).onUidStateChanged(TEST_UID, ActivityManager.PROCESS_STATE_CACHED_EMPTY);
+        verify(observer).onUidStateChanged(TEST_UID,
+                changeItem.processState, changeItem.procStateSeq);
         verifyNoMoreInteractions(observer);
     }
 

@@ -2119,7 +2119,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
     protected void makeCallerForeground() {
         try {
             mService.mUidObserver.onUidStateChanged(
-                    mInjectedCallingUid, ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE);
+                    mInjectedCallingUid, ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE, 0);
         } catch (RemoteException e) {
             e.rethrowAsRuntimeException();
         }
@@ -2128,7 +2128,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
     protected void makeCallerBackground() {
         try {
             mService.mUidObserver.onUidStateChanged(
-                    mInjectedCallingUid, ActivityManager.PROCESS_STATE_TOP_SLEEPING);
+                    mInjectedCallingUid, ActivityManager.PROCESS_STATE_TOP_SLEEPING, 0);
         } catch (RemoteException e) {
             e.rethrowAsRuntimeException();
         }

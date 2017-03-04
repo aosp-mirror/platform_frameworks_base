@@ -20,8 +20,13 @@ package android.app;
 oneway interface IUidObserver {
     /**
      * General report of a state change of an uid.
+     *
+     * @param uid The uid for which the state change is being reported.
+     * @param procState The updated process state for the uid.
+     * @param procStateSeq The sequence no. associated with process state change of the uid,
+     *                     see UidRecord.procStateSeq for details.
      */
-    void onUidStateChanged(int uid, int procState);
+    void onUidStateChanged(int uid, int procState, long procStateSeq);
 
     /**
      * Report that there are no longer any processes running for a uid.

@@ -709,7 +709,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     final private IUidObserver mUidObserver = new IUidObserver.Stub() {
-        @Override public void onUidStateChanged(int uid, int procState) throws RemoteException {
+        @Override public void onUidStateChanged(int uid, int procState,
+                long procStateSeq) throws RemoteException {
             Trace.traceBegin(Trace.TRACE_TAG_NETWORK, "onUidStateChanged");
             try {
                 synchronized (mUidRulesFirstLock) {

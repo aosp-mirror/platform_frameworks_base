@@ -594,19 +594,19 @@ public class NetworkPolicyManagerServiceTest {
     @Test
     public void testUidForeground() throws Exception {
         // push all uids into background
-        mUidObserver.onUidStateChanged(UID_A, ActivityManager.PROCESS_STATE_SERVICE);
-        mUidObserver.onUidStateChanged(UID_B, ActivityManager.PROCESS_STATE_SERVICE);
+        mUidObserver.onUidStateChanged(UID_A, ActivityManager.PROCESS_STATE_SERVICE, 0);
+        mUidObserver.onUidStateChanged(UID_B, ActivityManager.PROCESS_STATE_SERVICE, 0);
         assertFalse(mService.isUidForeground(UID_A));
         assertFalse(mService.isUidForeground(UID_B));
 
         // push one of the uids into foreground
-        mUidObserver.onUidStateChanged(UID_A, ActivityManager.PROCESS_STATE_TOP);
+        mUidObserver.onUidStateChanged(UID_A, ActivityManager.PROCESS_STATE_TOP, 0);
         assertTrue(mService.isUidForeground(UID_A));
         assertFalse(mService.isUidForeground(UID_B));
 
         // and swap another uid into foreground
-        mUidObserver.onUidStateChanged(UID_A, ActivityManager.PROCESS_STATE_SERVICE);
-        mUidObserver.onUidStateChanged(UID_B, ActivityManager.PROCESS_STATE_TOP);
+        mUidObserver.onUidStateChanged(UID_A, ActivityManager.PROCESS_STATE_SERVICE, 0);
+        mUidObserver.onUidStateChanged(UID_B, ActivityManager.PROCESS_STATE_TOP, 0);
         assertFalse(mService.isUidForeground(UID_A));
         assertTrue(mService.isUidForeground(UID_B));
     }
