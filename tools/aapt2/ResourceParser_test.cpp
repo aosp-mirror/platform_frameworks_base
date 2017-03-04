@@ -582,6 +582,16 @@ TEST_F(ResourceParserTest, ParsePlural) {
       "  <item quantity=\"one\">apple</item>\n"
       "</plurals>";
   ASSERT_TRUE(TestParse(input));
+
+  Plural* plural = test::GetValue<Plural>(&table_, "plurals/foo");
+  ASSERT_NE(nullptr, plural);
+  EXPECT_EQ(nullptr, plural->values[Plural::Zero]);
+  EXPECT_EQ(nullptr, plural->values[Plural::Two]);
+  EXPECT_EQ(nullptr, plural->values[Plural::Few]);
+  EXPECT_EQ(nullptr, plural->values[Plural::Many]);
+
+  EXPECT_NE(nullptr, plural->values[Plural::One]);
+  EXPECT_NE(nullptr, plural->values[Plural::Other]);
 }
 
 TEST_F(ResourceParserTest, ParseCommentsWithResource) {

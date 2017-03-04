@@ -341,7 +341,7 @@ Attribute::Attribute(bool w, uint32_t t)
 }
 
 template <typename T>
-T* addPointer(T& val) {
+constexpr T* add_pointer(T& val) {
   return &val;
 }
 
@@ -362,7 +362,7 @@ bool Attribute::Equals(const Value* value) const {
 
   std::vector<const Symbol*> sorted_a;
   std::transform(symbols.begin(), symbols.end(), std::back_inserter(sorted_a),
-                 addPointer<const Symbol>);
+                 add_pointer<const Symbol>);
   std::sort(sorted_a.begin(), sorted_a.end(),
             [](const Symbol* a, const Symbol* b) -> bool {
               return a->symbol.name < b->symbol.name;
@@ -370,7 +370,7 @@ bool Attribute::Equals(const Value* value) const {
 
   std::vector<const Symbol*> sorted_b;
   std::transform(other->symbols.begin(), other->symbols.end(),
-                 std::back_inserter(sorted_b), addPointer<const Symbol>);
+                 std::back_inserter(sorted_b), add_pointer<const Symbol>);
   std::sort(sorted_b.begin(), sorted_b.end(),
             [](const Symbol* a, const Symbol* b) -> bool {
               return a->symbol.name < b->symbol.name;
@@ -599,7 +599,7 @@ bool Style::Equals(const Value* value) const {
 
   std::vector<const Entry*> sorted_a;
   std::transform(entries.begin(), entries.end(), std::back_inserter(sorted_a),
-                 addPointer<const Entry>);
+                 add_pointer<const Entry>);
   std::sort(sorted_a.begin(), sorted_a.end(),
             [](const Entry* a, const Entry* b) -> bool {
               return a->key.name < b->key.name;
@@ -607,7 +607,7 @@ bool Style::Equals(const Value* value) const {
 
   std::vector<const Entry*> sorted_b;
   std::transform(other->entries.begin(), other->entries.end(),
-                 std::back_inserter(sorted_b), addPointer<const Entry>);
+                 std::back_inserter(sorted_b), add_pointer<const Entry>);
   std::sort(sorted_b.begin(), sorted_b.end(),
             [](const Entry* a, const Entry* b) -> bool {
               return a->key.name < b->key.name;
@@ -695,18 +695,21 @@ bool Plural::Equals(const Value* value) const {
     return false;
   }
 
-  if (values.size() != other->values.size()) {
-    return false;
+  auto one_iter = values.begin();
+  auto one_end_iter = values.end();
+  auto two_iter = other->values.begin();
+  for (; one_iter != one_end_iter; ++one_iter, ++two_iter) {
+    const std::unique_ptr<Item>& a = *one_iter;
+    const std::unique_ptr<Item>& b = *two_iter;
+    if (a != nullptr && b != nullptr) {
+      if (!a->Equals(b.get())) {
+        return false;
+      }
+    } else if (a != b) {
+      return false;
+    }
   }
-
-  return std::equal(values.begin(), values.end(), other->values.begin(),
-                    [](const std::unique_ptr<Item>& a,
-                       const std::unique_ptr<Item>& b) -> bool {
-                      if (bool(a) != bool(b)) {
-                        return false;
-                      }
-                      return bool(a) == bool(b) || a->Equals(b.get());
-                    });
+  return true;
 }
 
 Plural* Plural::Clone(StringPool* new_pool) const {
@@ -742,6 +745,10 @@ void Plural::Print(std::ostream* out) const {
 
   if (values[Many]) {
     *out << " many=" << *values[Many];
+  }
+
+  if (values[Other]) {
+    *out << " other=" << *values[Other];
   }
 }
 
