@@ -17,9 +17,16 @@
 #include "core_jni_helpers.h"
 #include "JniConstants.h"
 #include "utils/Log.h"
+#include <selinux/selinux.h>
+
 #include "seccomp_policy.h"
 
 static void Seccomp_setPolicy(JNIEnv* /*env*/) {
+    if (security_getenforce() == 0) {
+        ALOGI("seccomp disabled by setenforce 0");
+        return;
+    }
+
     if (!set_seccomp_filter()) {
         ALOGE("Failed to set seccomp policy - killing");
         exit(1);
