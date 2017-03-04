@@ -14767,7 +14767,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                          */
                         verification.setComponent(requiredVerifierComponent);
                         idleController.addPowerSaveTempWhitelistApp(Process.myUid(),
-                                requiredVerifierComponent.getPackageName(), idleDuration,
+                                mRequiredVerifierPackage, idleDuration,
                                 verifierUser.getIdentifier(), false, "package verifier");
                         mContext.sendOrderedBroadcastAsUser(verification, verifierUser,
                                 android.Manifest.permission.PACKAGE_VERIFICATION_AGENT,
