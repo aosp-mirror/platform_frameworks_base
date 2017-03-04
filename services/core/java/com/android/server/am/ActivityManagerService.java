@@ -4279,101 +4279,101 @@ public class ActivityManagerService extends IActivityManager.Stub
         int i = mUidObservers.beginBroadcast();
         while (i > 0) {
             i--;
-            final IUidObserver observer = mUidObservers.getBroadcastItem(i);
-            final UidObserverRegistration reg = (UidObserverRegistration)
-                    mUidObservers.getBroadcastCookie(i);
-            if (observer != null) {
-                try {
-                    for (int j=0; j<N; j++) {
-                        UidRecord.ChangeItem item = mActiveUidChanges[j];
-                        final int change = item.change;
-                        UidRecord validateUid = null;
-                        if (VALIDATE_UID_STATES && i == 0) {
-                            validateUid = mValidateUids.get(item.uid);
-                            if (validateUid == null && change != UidRecord.CHANGE_GONE
-                                    && change != UidRecord.CHANGE_GONE_IDLE) {
-                                validateUid = new UidRecord(item.uid);
-                                mValidateUids.put(item.uid, validateUid);
-                            }
-                        }
-                        if (change == UidRecord.CHANGE_IDLE
-                                || change == UidRecord.CHANGE_GONE_IDLE) {
-                            if ((reg.which & ActivityManager.UID_OBSERVER_IDLE) != 0) {
-                                if (DEBUG_UID_OBSERVERS) Slog.i(TAG_UID_OBSERVERS,
-                                        "UID idle uid=" + item.uid);
-                                observer.onUidIdle(item.uid, item.ephemeral);
-                            }
-                            if (VALIDATE_UID_STATES && i == 0) {
-                                if (validateUid != null) {
-                                    validateUid.idle = true;
-                                }
-                            }
-                        } else if (change == UidRecord.CHANGE_ACTIVE) {
-                            if ((reg.which & ActivityManager.UID_OBSERVER_ACTIVE) != 0) {
-                                if (DEBUG_UID_OBSERVERS) Slog.i(TAG_UID_OBSERVERS,
-                                        "UID active uid=" + item.uid);
-                                observer.onUidActive(item.uid);
-                            }
-                            if (VALIDATE_UID_STATES && i == 0) {
-                                validateUid.idle = false;
-                            }
-                        }
-                        if (change == UidRecord.CHANGE_GONE
-                                || change == UidRecord.CHANGE_GONE_IDLE) {
-                            if ((reg.which & ActivityManager.UID_OBSERVER_GONE) != 0) {
-                                if (DEBUG_UID_OBSERVERS) Slog.i(TAG_UID_OBSERVERS,
-                                        "UID gone uid=" + item.uid);
-                                observer.onUidGone(item.uid, item.ephemeral);
-                            }
-                            if (reg.lastProcStates != null) {
-                                reg.lastProcStates.delete(item.uid);
-                            }
-                            if (VALIDATE_UID_STATES && i == 0) {
-                                if (validateUid != null) {
-                                    mValidateUids.remove(item.uid);
-                                }
-                            }
-                        } else {
-                            if ((reg.which & ActivityManager.UID_OBSERVER_PROCSTATE) != 0) {
-                                if (DEBUG_UID_OBSERVERS) Slog.i(TAG_UID_OBSERVERS,
-                                        "UID CHANGED uid=" + item.uid
-                                                + ": " + item.processState);
-                                boolean doReport = true;
-                                if (reg.cutpoint >= ActivityManager.MIN_PROCESS_STATE) {
-                                    final int lastState = reg.lastProcStates.get(item.uid,
-                                            ActivityManager.PROCESS_STATE_UNKNOWN);
-                                    if (lastState != ActivityManager.PROCESS_STATE_UNKNOWN) {
-                                        final boolean lastAboveCut = lastState <= reg.cutpoint;
-                                        final boolean newAboveCut = item.processState <= reg.cutpoint;
-                                        doReport = lastAboveCut != newAboveCut;
-                                    } else {
-                                        doReport = item.processState
-                                                != ActivityManager.PROCESS_STATE_NONEXISTENT;
-                                    }
-                                }
-                                if (doReport) {
-                                    if (reg.lastProcStates != null) {
-                                        reg.lastProcStates.put(item.uid, item.processState);
-                                    }
-                                    observer.onUidStateChanged(item.uid, item.processState);
-                                }
-                            }
-                            if (VALIDATE_UID_STATES && i == 0) {
-                                validateUid.curProcState = validateUid.setProcState
-                                        = item.processState;
-                            }
-                        }
-                    }
-                } catch (RemoteException e) {
-                }
-            }
+            dispatchUidsChangedForObserver(mUidObservers.getBroadcastItem(i),
+                    (UidObserverRegistration) mUidObservers.getBroadcastCookie(i), N);
         }
         mUidObservers.finishBroadcast();
 
+        if (VALIDATE_UID_STATES && mUidObservers.getRegisteredCallbackCount() > 0) {
+            for (int j = 0; j < N; ++j) {
+                final UidRecord.ChangeItem item = mActiveUidChanges[j];
+                if (item.change == UidRecord.CHANGE_GONE
+                        || item.change == UidRecord.CHANGE_GONE_IDLE) {
+                    mValidateUids.remove(item.uid);
+                } else {
+                    UidRecord validateUid = mValidateUids.get(item.uid);
+                    if (validateUid == null) {
+                        validateUid = new UidRecord(item.uid);
+                        mValidateUids.put(item.uid, validateUid);
+                    }
+                    if (item.change == UidRecord.CHANGE_IDLE) {
+                        validateUid.idle = true;
+                    } else if (item.change == UidRecord.CHANGE_ACTIVE) {
+                        validateUid.idle = false;
+                    }
+                    validateUid.curProcState = validateUid.setProcState = item.processState;
+                }
+            }
+        }
+
         synchronized (this) {
-            for (int j=0; j<N; j++) {
+            for (int j = 0; j < N; j++) {
                 mAvailUidChanges.add(mActiveUidChanges[j]);
             }
+        }
+    }
+
+    private void dispatchUidsChangedForObserver(IUidObserver observer,
+            UidObserverRegistration reg, int changesSize) {
+        if (observer == null) {
+            return;
+        }
+        try {
+            for (int j = 0; j < changesSize; j++) {
+                UidRecord.ChangeItem item = mActiveUidChanges[j];
+                final int change = item.change;
+                if (change == UidRecord.CHANGE_IDLE
+                        || change == UidRecord.CHANGE_GONE_IDLE) {
+                    if ((reg.which & ActivityManager.UID_OBSERVER_IDLE) != 0) {
+                        if (DEBUG_UID_OBSERVERS) Slog.i(TAG_UID_OBSERVERS,
+                                "UID idle uid=" + item.uid);
+                        observer.onUidIdle(item.uid, item.ephemeral);
+                    }
+                } else if (change == UidRecord.CHANGE_ACTIVE) {
+                    if ((reg.which & ActivityManager.UID_OBSERVER_ACTIVE) != 0) {
+                        if (DEBUG_UID_OBSERVERS) Slog.i(TAG_UID_OBSERVERS,
+                                "UID active uid=" + item.uid);
+                        observer.onUidActive(item.uid);
+                    }
+                }
+                if (change == UidRecord.CHANGE_GONE
+                        || change == UidRecord.CHANGE_GONE_IDLE) {
+                    if ((reg.which & ActivityManager.UID_OBSERVER_GONE) != 0) {
+                        if (DEBUG_UID_OBSERVERS) Slog.i(TAG_UID_OBSERVERS,
+                                "UID gone uid=" + item.uid);
+                        observer.onUidGone(item.uid, item.ephemeral);
+                    }
+                    if (reg.lastProcStates != null) {
+                        reg.lastProcStates.delete(item.uid);
+                    }
+                } else {
+                    if ((reg.which & ActivityManager.UID_OBSERVER_PROCSTATE) != 0) {
+                        if (DEBUG_UID_OBSERVERS) Slog.i(TAG_UID_OBSERVERS,
+                                "UID CHANGED uid=" + item.uid
+                                        + ": " + item.processState);
+                        boolean doReport = true;
+                        if (reg.cutpoint >= ActivityManager.MIN_PROCESS_STATE) {
+                            final int lastState = reg.lastProcStates.get(item.uid,
+                                    ActivityManager.PROCESS_STATE_UNKNOWN);
+                            if (lastState != ActivityManager.PROCESS_STATE_UNKNOWN) {
+                                final boolean lastAboveCut = lastState <= reg.cutpoint;
+                                final boolean newAboveCut = item.processState <= reg.cutpoint;
+                                doReport = lastAboveCut != newAboveCut;
+                            } else {
+                                doReport = item.processState
+                                        != ActivityManager.PROCESS_STATE_NONEXISTENT;
+                            }
+                        }
+                        if (doReport) {
+                            if (reg.lastProcStates != null) {
+                                reg.lastProcStates.put(item.uid, item.processState);
+                            }
+                            observer.onUidStateChanged(item.uid, item.processState);
+                        }
+                    }
+                }
+            }
+        } catch (RemoteException e) {
         }
     }
 
