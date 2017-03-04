@@ -3285,6 +3285,11 @@
     <permission android:name="android.permission.SUBSTITUTE_NOTIFICATION_APP_NAME"
                 android:protectionLevel="signature|privileged" />
 
+    <!-- @SystemApi Allows an application to show notifications before the device is provisioned.
+         @hide  <p>Not for use by third-party applications.</p> -->
+    <permission android:name="android.permission.NOTIFICATION_DURING_SETUP"
+                android:protectionLevel="signature|privileged" />
+
     <!-- @SystemApi Allows an application to manage auto-fill sessions.
          @hide  <p>Not for use by third-party applications.</p> -->
     <permission android:name="android.permission.MANAGE_AUTO_FILL"

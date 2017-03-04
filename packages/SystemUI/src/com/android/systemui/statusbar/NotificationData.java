@@ -16,11 +16,15 @@
 
 package com.android.systemui.statusbar;
 
+import android.app.AppGlobals;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.content.pm.IPackageManager;
+import android.content.pm.PackageManager;
 import android.content.Context;
 import android.graphics.drawable.Icon;
+import android.os.RemoteException;
 import android.os.SystemClock;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationListenerService.Ranking;
@@ -31,7 +35,9 @@ import android.util.ArrayMap;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.RemoteViews;
+import android.Manifest;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.util.NotificationColorUtil;
 import com.android.systemui.statusbar.notification.InflationException;
@@ -453,11 +459,28 @@ public class NotificationData {
     }
 
     // Q: What kinds of notifications should show during setup?
-    // A: Almost none! Only things coming from the system (package is "android") that also
-    // have special "kind" tags marking them as relevant for setup (see below).
+    // A: Almost none! Only things coming from packages with permission
+    // android.permission.NOTIFICATION_DURING_SETUP that also have special "kind" tags marking them
+    // as relevant for setup (see below).
     public static boolean showNotificationEvenIfUnprovisioned(StatusBarNotification sbn) {
-        return "android".equals(sbn.getPackageName())
+        return showNotificationEvenIfUnprovisioned(AppGlobals.getPackageManager(), sbn);
+    }
+
+    @VisibleForTesting
+    static boolean showNotificationEvenIfUnprovisioned(IPackageManager packageManager,
+            StatusBarNotification sbn) {
+        return checkUidPermission(packageManager, Manifest.permission.NOTIFICATION_DURING_SETUP,
+                sbn.getUid()) == PackageManager.PERMISSION_GRANTED
                 && sbn.getNotification().extras.getBoolean(Notification.EXTRA_ALLOW_DURING_SETUP);
+    }
+
+    private static int checkUidPermission(IPackageManager packageManager, String permission,
+            int uid) {
+        try {
+            return packageManager.checkUidPermission(permission, uid);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     public void dump(PrintWriter pw, String indent) {
