@@ -50,6 +50,7 @@
             <enum name="small" value="1" />
             <enum name="gone" value="2" />
         </attr>
+        <attr name="showDark" format="boolean" />
     </declare-styleable>
     <attr name="orientation">
         <enum name="horizontal" value="0" />

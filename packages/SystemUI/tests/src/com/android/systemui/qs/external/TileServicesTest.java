@@ -27,7 +27,7 @@ import android.test.suitebuilder.annotation.SmallTest;
 
 import com.android.systemui.SysUIRunner;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.statusbar.phone.QSTileHost;
+import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.utils.TestableLooper;
 import com.android.systemui.utils.TestableLooper.RunWithLooper;

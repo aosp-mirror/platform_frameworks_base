@@ -37,7 +37,7 @@ import android.util.Log;
 
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.systemui.Dependency;
-import com.android.systemui.statusbar.phone.QSTileHost;
+import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
 

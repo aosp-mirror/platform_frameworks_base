@@ -30,8 +30,6 @@ import com.android.systemui.plugins.qs.QSTile.SignalState;
 import com.android.systemui.plugins.qs.QSTile.State;
 import com.android.systemui.plugins.qs.QSTileView;
 import com.android.systemui.qs.customize.QSCustomizer;
-import com.android.systemui.qs.tileimpl.QSTileBaseView;
-import com.android.systemui.statusbar.phone.QSTileHost;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
 
@@ -47,7 +45,6 @@ public class QuickQSPanel extends QSPanel {
 
     private int mMaxTiles;
     protected QSPanel mFullPanel;
-    private View mHeader;
 
     public QuickQSPanel(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -66,6 +63,10 @@ public class QuickQSPanel extends QSPanel {
     }
 
     @Override
+    protected void addDivider() {
+    }
+
+    @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         Dependency.get(TunerService.class).addTunable(mNumTiles, NUM_QUICK_TILES);
@@ -79,7 +80,6 @@ public class QuickQSPanel extends QSPanel {
 
     public void setQSPanelAndHeader(QSPanel fullPanel, View header) {
         mFullPanel = fullPanel;
-        mHeader = header;
     }
 
     @Override
@@ -141,7 +141,7 @@ public class QuickQSPanel extends QSPanel {
         }
     };
 
-    public int getNumQuickTiles(Context context) {
+    public static int getNumQuickTiles(Context context) {
         return Dependency.get(TunerService.class).getValue(NUM_QUICK_TILES, 6);
     }
 

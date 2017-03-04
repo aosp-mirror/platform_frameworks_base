@@ -30,6 +30,7 @@ import android.widget.ImageView.ScaleType;
 import com.android.systemui.R;
 import com.android.systemui.plugins.qs.QSIconView;
 import com.android.systemui.plugins.qs.QSTile;
+import com.android.systemui.plugins.qs.QSTile.State;
 
 import java.util.Objects;
 
@@ -81,7 +82,7 @@ public class QSIconViewImpl extends QSIconView {
         setIcon((ImageView) mIcon, state);
     }
 
-    protected void setIcon(ImageView iv, QSTile.State state) {
+    protected void updateIcon(ImageView iv, State state) {
         if (!Objects.equals(state.icon, iv.getTag(R.id.qs_icon_tag))) {
             Drawable d = state.icon != null
                     ? iv.isShown() && mAnimationEnabled ? state.icon.getDrawable(mContext)
@@ -101,13 +102,17 @@ public class QSIconViewImpl extends QSIconView {
                 }
             }
         }
+    }
+
+    protected void setIcon(ImageView iv, QSTile.State state) {
+        updateIcon(iv, state);
         if (state.disabledByPolicy) {
             iv.setColorFilter(getContext().getColor(R.color.qs_tile_disabled_color));
         } else {
             iv.clearColorFilter();
         }
         if (state.state != mState) {
-            int color = getColorForState(getContext(), state.state);
+            int color = getColor(state.state);
             mState = state.state;
             if (iv.isShown()) {
                 animateGrayScale(mTint, color, iv);
@@ -117,6 +122,10 @@ public class QSIconViewImpl extends QSIconView {
                 mTint = color;
             }
         }
+    }
+
+    protected int getColor(int state) {
+        return getColorForState(getContext(), state);
     }
 
     public static void animateGrayScale(int fromColor, int toColor, ImageView iv) {

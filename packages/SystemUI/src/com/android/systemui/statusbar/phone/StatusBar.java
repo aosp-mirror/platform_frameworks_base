@@ -140,11 +140,11 @@ import com.android.systemui.fragments.PluginFragmentListener;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.plugins.ActivityStarter;
-import com.android.systemui.plugins.qs.QS.BaseStatusBarHeader;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowProvider.SnoozeListener;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowProvider.SnoozeOption;
 import com.android.systemui.qs.QSFragment;
 import com.android.systemui.qs.QSPanel;
+import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.recents.ScreenPinningRequest;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.AppTransitionFinishedEvent;
@@ -204,10 +204,8 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -436,7 +434,6 @@ public class StatusBar extends SystemUI implements DemoMode,
     private QSPanel mQSPanel;
 
     // top bar
-    BaseStatusBarHeader mHeader;
     protected KeyguardStatusBarView mKeyguardStatusBar;
     KeyguardStatusView mKeyguardStatusView;
     KeyguardBottomAreaView mKeyguardBottomArea;

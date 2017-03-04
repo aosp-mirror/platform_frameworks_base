@@ -1,20 +1,18 @@
 /*
- * Copyright (C) 2014 The Android Open Source Project
+ * Copyright (C) 2017 The Android Open Source Project
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
+ * except in compliance with the License. You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the specific language governing
+ * permissions and limitations under the License.
  */
 
-package com.android.systemui.statusbar.phone;
+package com.android.systemui.qs;
 
 import android.app.ActivityManager;
 import android.content.ComponentName;
@@ -36,30 +34,14 @@ import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.plugins.qs.QSFactory;
 import com.android.systemui.plugins.qs.QSTileView;
-import com.android.systemui.qs.QSHost;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.qs.external.TileLifecycleManager;
 import com.android.systemui.qs.external.TileServices;
 import com.android.systemui.qs.tileimpl.QSFactoryImpl;
-import com.android.systemui.qs.tiles.AirplaneModeTile;
-import com.android.systemui.qs.tiles.BatterySaverTile;
-import com.android.systemui.qs.tiles.BluetoothTile;
-import com.android.systemui.qs.tiles.CastTile;
-import com.android.systemui.qs.tiles.CellularTile;
-import com.android.systemui.qs.tiles.ColorInversionTile;
-import com.android.systemui.qs.tiles.DataSaverTile;
-import com.android.systemui.qs.tiles.DndTile;
-import com.android.systemui.qs.tiles.FlashlightTile;
-import com.android.systemui.qs.tiles.HotspotTile;
-import com.android.systemui.qs.tiles.IntentTile;
-import com.android.systemui.qs.tiles.LocationTile;
-import com.android.systemui.qs.tiles.NfcTile;
-import com.android.systemui.qs.tiles.NightDisplayTile;
-import com.android.systemui.qs.tiles.RotationLockTile;
-import com.android.systemui.qs.tiles.UserTile;
-import com.android.systemui.qs.tiles.WifiTile;
-import com.android.systemui.qs.tiles.WorkModeTile;
+import com.android.systemui.statusbar.phone.AutoTileManager;
+import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
 

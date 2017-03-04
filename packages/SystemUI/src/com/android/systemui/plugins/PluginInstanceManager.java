@@ -358,7 +358,7 @@ public class PluginInstanceManager<T extends Plugin> {
                             + ", expected " + mVersion);
                     return null;
                 }
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 Log.w(TAG, "Couldn't load plugin: " + pkg, e);
                 return null;
             }

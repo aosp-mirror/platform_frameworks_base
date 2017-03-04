@@ -23,7 +23,7 @@ import android.util.Pair;
 
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.Dependency;
-import com.android.systemui.plugins.qs.QS.DetailAdapter;
+import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTile.State;

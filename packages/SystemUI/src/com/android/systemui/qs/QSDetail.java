@@ -38,11 +38,8 @@ import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
 import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.plugins.ActivityStarter;
-import com.android.systemui.plugins.qs.QS.BaseStatusBarHeader;
-import com.android.systemui.plugins.qs.QS.Callback;
-import com.android.systemui.plugins.qs.QS.DetailAdapter;
+import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.statusbar.CommandQueue;
-import com.android.systemui.statusbar.phone.QSTileHost;
 
 public class QSDetail extends LinearLayout {
 
@@ -68,7 +65,7 @@ public class QSDetail extends LinearLayout {
     private boolean mScanState;
     private boolean mClosingDetail;
     private boolean mFullyExpanded;
-    private BaseStatusBarHeader mHeader;
+    private QuickStatusBarHeader mHeader;
     private boolean mTriggeredExpand;
     private int mOpenX;
     private int mOpenY;
@@ -117,7 +114,7 @@ public class QSDetail extends LinearLayout {
         mDetailDoneButton.setOnClickListener(doneListener);
     }
 
-    public void setQsPanel(QSPanel panel, BaseStatusBarHeader header) {
+    public void setQsPanel(QSPanel panel, QuickStatusBarHeader header) {
         mQsPanel = panel;
         mHeader = header;
         mHeader.setCallback(mQsPanelCallback);
@@ -154,7 +151,11 @@ public class QSDetail extends LinearLayout {
         return mClosingDetail;
     }
 
-
+    public interface Callback {
+        void onShowingDetail(DetailAdapter detail, int x, int y);
+        void onToggleStateChanged(boolean state);
+        void onScanStateChanged(boolean state);
+    }
 
     public void handleShowingDetail(final DetailAdapter adapter, int x, int y,
             boolean toggleQs) {

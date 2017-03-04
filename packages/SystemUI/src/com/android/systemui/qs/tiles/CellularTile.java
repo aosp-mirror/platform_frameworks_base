@@ -24,7 +24,7 @@ import android.service.quicksettings.Tile;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
+import android.widget.Switch;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
@@ -32,12 +32,12 @@ import com.android.settingslib.net.DataUsageController;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.plugins.ActivityStarter;
-import com.android.systemui.plugins.qs.QS.DetailAdapter;
-import com.android.systemui.qs.QSHost;
+import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.plugins.qs.QSIconView;
 import com.android.systemui.plugins.qs.QSTile.SignalState;
+import com.android.systemui.qs.CellTileView;
+import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
-import com.android.systemui.qs.SignalTileView;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.NetworkController.IconState;
 import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
@@ -83,7 +83,7 @@ public class CellularTile extends QSTileImpl<SignalState> {
 
     @Override
     public QSIconView createTileView(Context context) {
-        return new SignalTileView(context);
+        return new CellTileView(context);
     }
 
     @Override
@@ -128,32 +128,13 @@ public class CellularTile extends QSTileImpl<SignalState> {
         } else {
             state.icon = ResourceIcon.get(iconId);
         }
-        state.dualTarget = true;
         state.activityIn = cb.enabled && cb.activityIn;
         state.activityOut = cb.enabled && cb.activityOut;
 
-        state.label = cb.enabled
-                ? removeTrailingPeriod(cb.enabledDesc)
-                : r.getString(R.string.quick_settings_rssi_emergency_only);
+        state.label = r.getString(R.string.mobile_data);
 
-        final String signalContentDesc = cb.enabled && (cb.mobileSignalIconId > 0)
-                ? cb.signalContentDescription
-                : r.getString(R.string.accessibility_no_signal);
-
-        if (cb.noSim) {
-            state.contentDescription = state.label;
-        } else {
-            String enabledDesc = cb.enabled ? r.getString(R.string.accessibility_cell_data_on)
-                    : r.getString(R.string.accessibility_cell_data_off);
-
-            state.contentDescription = r.getString(
-                    R.string.accessibility_quick_settings_mobile,
-                    enabledDesc, signalContentDesc,
-                    state.label);
-        }
-        state.contentDescription = state.contentDescription + "," + r.getString(
-                R.string.accessibility_quick_settings_open_settings, getTileLabel());
-        state.expandedAccessibilityClassName = Button.class.getName();
+        state.contentDescription = state.label;
+        state.expandedAccessibilityClassName = Switch.class.getName();
         state.value = mDataController.isMobileDataSupported()
                 && mDataController.isMobileDataEnabled();
         state.state = state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;

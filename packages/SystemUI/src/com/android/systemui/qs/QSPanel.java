@@ -16,12 +16,15 @@
 
 package com.android.systemui.qs;
 
+import static com.android.systemui.qs.tileimpl.QSTileImpl.getColorForState;
+
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.Handler;
 import android.os.Message;
+import android.service.quicksettings.Tile;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -31,8 +34,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
-import com.android.systemui.plugins.qs.QS;
-import com.android.systemui.plugins.qs.QS.DetailAdapter;
+import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTileView;
 import com.android.systemui.qs.QSHost.Callback;
@@ -40,7 +42,6 @@ import com.android.systemui.qs.customize.QSCustomizer;
 import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.settings.BrightnessController;
 import com.android.systemui.settings.ToggleSliderView;
-import com.android.systemui.statusbar.phone.QSTileHost;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
@@ -64,11 +65,11 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
     protected boolean mExpanded;
     protected boolean mListening;
 
-    private QS.Callback mCallback;
+    private QSDetail.Callback mCallback;
     private BrightnessController mBrightnessController;
     protected QSTileHost mHost;
 
-    protected QSFooter mFooter;
+    protected QSSecurityFooter mFooter;
     private boolean mGridContentVisible = true;
 
     protected QSTileLayout mTileLayout;
@@ -77,6 +78,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
     private Record mDetailRecord;
 
     private BrightnessMirrorController mBrightnessMirrorController;
+    private View mDivider;
 
     public QSPanel(Context context) {
         this(context, null);
@@ -94,7 +96,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
 
         setupTileLayout();
 
-        mFooter = new QSFooter(this, context);
+        mFooter = new QSSecurityFooter(this, context);
         addView(mFooter.getView());
 
         mPageIndicator = LayoutInflater.from(context).inflate(
@@ -104,11 +106,23 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
             ((PagedTileLayout) mTileLayout).setPageIndicator((PageIndicator) mPageIndicator);
         }
 
+        addDivider();
+
         updateResources();
 
         mBrightnessController = new BrightnessController(getContext(),
-                (ImageView) findViewById(R.id.brightness_icon),
-                (ToggleSliderView) findViewById(R.id.brightness_slider));
+                findViewById(R.id.brightness_icon),
+                findViewById(R.id.brightness_slider));
+    }
+
+    protected void addDivider() {
+        mDivider = LayoutInflater.from(mContext).inflate(R.layout.qs_divider, this, false);
+        mDivider.setBackgroundColor(getColorForState(mContext, Tile.STATE_INACTIVE));
+        addView(mDivider);
+    }
+
+    public View getDivider() {
+        return mDivider;
     }
 
     public View getPageIndicator() {
@@ -176,8 +190,8 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
 
     public void setBrightnessMirror(BrightnessMirrorController c) {
         mBrightnessMirrorController = c;
-        ToggleSliderView brightnessSlider = (ToggleSliderView) findViewById(R.id.brightness_slider);
-        ToggleSliderView mirror = (ToggleSliderView) c.getMirror().findViewById(
+        ToggleSliderView brightnessSlider = findViewById(R.id.brightness_slider);
+        ToggleSliderView mirror = c.getMirror().findViewById(
                 R.id.brightness_slider);
         brightnessSlider.setMirror(mirror);
         brightnessSlider.setMirrorController(c);
@@ -187,7 +201,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
         return mBrightnessView;
     }
 
-    public void setCallback(QS.Callback callback) {
+    public void setCallback(QSDetail.Callback callback) {
         mCallback = callback;
     }
 
@@ -515,7 +529,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
         return null;
     }
 
-    public QSFooter getFooter() {
+    public QSSecurityFooter getFooter() {
         return mFooter;
     }
 

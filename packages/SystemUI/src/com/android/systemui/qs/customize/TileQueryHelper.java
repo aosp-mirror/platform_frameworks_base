@@ -35,7 +35,7 @@ import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTile.State;
 import com.android.systemui.qs.tileimpl.QSTileImpl.DrawableIcon;
 import com.android.systemui.qs.external.CustomTile;
-import com.android.systemui.statusbar.phone.QSTileHost;
+import com.android.systemui.qs.QSTileHost;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -109,7 +109,7 @@ public class TileQueryHelper {
 
     private void addPackageTiles(Handler mainHandler, Handler bgHandler) {
         bgHandler.post(() -> {
-            Collection<QSTile<?>> params = mHost.getTiles();
+            Collection<QSTile> params = mHost.getTiles();
             PackageManager pm = mContext.getPackageManager();
             List<ResolveInfo> services = pm.queryIntentServicesAsUser(
                     new Intent(TileService.ACTION_QS_TILE), 0, ActivityManager.getCurrentUser());
@@ -150,8 +150,8 @@ public class TileQueryHelper {
         });
     }
 
-    private State getState(Collection<QSTile<?>> tiles, String spec) {
-        for (QSTile<?> tile : tiles) {
+    private State getState(Collection<QSTile> tiles, String spec) {
+        for (QSTile tile : tiles) {
             if (spec.equals(tile.getTileSpec())) {
                 return tile.getState().copy();
             }
@@ -165,7 +165,7 @@ public class TileQueryHelper {
         }
         TileInfo info = new TileInfo();
         info.state = state;
-        info.state.minimalAccessibilityClassName = info.state.expandedAccessibilityClassName =
+        info.state.expandedAccessibilityClassName =
                 Button.class.getName();
         info.spec = spec;
         info.appLabel = appLabel;
@@ -180,7 +180,6 @@ public class TileQueryHelper {
         state.label = label;
         state.contentDescription = label;
         state.icon = new DrawableIcon(drawable);
-        state.autoMirrorDrawable = false;
         addTile(spec, appLabel, state, false);
     }
 

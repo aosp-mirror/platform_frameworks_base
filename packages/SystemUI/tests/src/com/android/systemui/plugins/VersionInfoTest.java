@@ -21,8 +21,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.VersionInfo.InvalidVersionException;
 import com.android.systemui.plugins.annotations.Requires;
 import com.android.systemui.plugins.qs.QS;
-import com.android.systemui.plugins.qs.QS.Callback;
-import com.android.systemui.plugins.qs.QS.DetailAdapter;
+import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.plugins.qs.QS.HeightListener;
 
 import org.junit.Rule;
@@ -95,7 +94,6 @@ public class VersionInfoTest extends SysuiTestCase {
     }
 
     @Requires(target = QS.class, version = QS.VERSION)
-    @Requires(target = Callback.class, version = Callback.VERSION)
     @Requires(target = HeightListener.class, version = HeightListener.VERSION)
     @Requires(target = DetailAdapter.class, version = DetailAdapter.VERSION)
     public static class QSImpl {

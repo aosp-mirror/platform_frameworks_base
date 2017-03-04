@@ -34,7 +34,8 @@ import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.qs.QSIconView;
 import com.android.systemui.plugins.qs.QSTile;
-import com.android.systemui.plugins.qs.QSTileView;
+import com.android.systemui.qs.tileimpl.QSIconViewImpl;
+import com.android.systemui.qs.tileimpl.QSTileView;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -59,7 +60,7 @@ public class TileLayoutTest extends SysuiTestCase {
     private QSPanel.TileRecord createTileRecord() {
         QSPanel.TileRecord tileRecord = new QSPanel.TileRecord();
         tileRecord.tile = mock(QSTile.class);
-        tileRecord.tileView = spy(new QSTileView(mContext, new QSIconView(mContext)));
+        tileRecord.tileView = spy(new QSTileView(mContext, new QSIconViewImpl(mContext)));
         return tileRecord;
     }
 

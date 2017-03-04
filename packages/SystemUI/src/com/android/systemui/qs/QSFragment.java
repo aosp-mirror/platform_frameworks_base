@@ -24,6 +24,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.FrameLayout.LayoutParams;
@@ -33,8 +34,6 @@ import com.android.systemui.R;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.qs.customize.QSCustomizer;
 import com.android.systemui.statusbar.phone.NotificationsQuickSettingsContainer;
-import com.android.systemui.statusbar.phone.QSTileHost;
-import com.android.systemui.statusbar.phone.QuickStatusBarHeader;
 import com.android.systemui.statusbar.stack.StackStateAnimator;
 
 public class QSFragment extends Fragment implements QS {
@@ -58,6 +57,7 @@ public class QSFragment extends Fragment implements QS {
     private boolean mListening;
     private QSContainerImpl mContainer;
     private int mLayoutDirection;
+    private QSFooter mFooter;
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
@@ -68,9 +68,10 @@ public class QSFragment extends Fragment implements QS {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mQSPanel = (QSPanel) view.findViewById(R.id.quick_settings_panel);
-        mQSDetail = (QSDetail) view.findViewById(R.id.qs_detail);
-        mHeader = (QuickStatusBarHeader) view.findViewById(R.id.header);
+        mQSPanel = view.findViewById(R.id.quick_settings_panel);
+        mQSDetail = view.findViewById(R.id.qs_detail);
+        mHeader = view.findViewById(R.id.header);
+        mFooter = view.findViewById(R.id.qs_footer);
         mContainer = (QSContainerImpl) view;
 
         mQSDetail.setQsPanel(mQSPanel, mHeader);
@@ -79,11 +80,16 @@ public class QSFragment extends Fragment implements QS {
         // the row to the full QS panel.
         if (getResources().getBoolean(R.bool.config_showQuickSettingsRow)) {
             mQSAnimator = new QSAnimator(this,
-                    (QuickQSPanel) mHeader.findViewById(R.id.quick_qs_panel), mQSPanel);
+                    mHeader.findViewById(R.id.quick_qs_panel), mQSPanel);
         }
 
-        mQSCustomizer = (QSCustomizer) view.findViewById(R.id.qs_customize);
+        mQSCustomizer = view.findViewById(R.id.qs_customize);
         mQSCustomizer.setQs(this);
+    }
+
+    @Override
+    public View getHeader() {
+        return mHeader;
     }
 
     public void setPanelView(HeightListener panelView) {
@@ -116,6 +122,7 @@ public class QSFragment extends Fragment implements QS {
     public void setHost(QSTileHost qsh) {
         mQSPanel.setHost(qsh, mQSCustomizer);
         mHeader.setQSPanel(mQSPanel);
+        mFooter.setQSPanel(mQSPanel);
         mQSDetail.setHost(qsh);
 
         if (mQSAnimator != null) {
@@ -133,11 +140,12 @@ public class QSFragment extends Fragment implements QS {
                 : View.INVISIBLE);
         mHeader.setExpanded((mKeyguardShowing && !mHeaderAnimating)
                 || (mQsExpanded && !mStackScrollerOverscrolling));
+        mFooter.setVisibility((mQsExpanded || !mKeyguardShowing || mHeaderAnimating)
+                ? View.VISIBLE
+                : View.INVISIBLE);
+        mFooter.setExpanded((mKeyguardShowing && !mHeaderAnimating)
+                || (mQsExpanded && !mStackScrollerOverscrolling));
         mQSPanel.setVisibility(expandVisually ? View.VISIBLE : View.INVISIBLE);
-    }
-
-    public BaseStatusBarHeader getHeader() {
-        return mHeader;
     }
 
     public QSPanel getQsPanel() {
@@ -155,6 +163,7 @@ public class QSFragment extends Fragment implements QS {
     public void setHeaderClickable(boolean clickable) {
         if (DEBUG) Log.d(TAG, "setHeaderClickable " + clickable);
         mHeader.setClickable(clickable);
+        mFooter.setClickable(clickable);
     }
 
     public void setExpanded(boolean expanded) {
@@ -185,11 +194,13 @@ public class QSFragment extends Fragment implements QS {
         if (DEBUG) Log.d(TAG, "setListening " + listening);
         mListening = listening;
         mHeader.setListening(listening);
+        mFooter.setListening(listening);
         mQSPanel.setListening(mListening && mQsExpanded);
     }
 
     public void setHeaderListening(boolean listening) {
         mHeader.setListening(listening);
+        mFooter.setListening(listening);
     }
 
     public void setQsExpansion(float expansion, float headerTranslation) {
@@ -201,7 +212,9 @@ public class QSFragment extends Fragment implements QS {
                     : headerTranslation);
         }
         mHeader.setExpansion(mKeyguardShowing ? 1 : expansion);
-        mQSPanel.setTranslationY(translationScaleY * mQSPanel.getHeight());
+        mFooter.setExpansion(mKeyguardShowing ? 1 : expansion);
+        int heightDiff = mQSPanel.getBottom() - mHeader.getBottom() + mHeader.getPaddingBottom();
+        mQSPanel.setTranslationY(translationScaleY * heightDiff);
         mQSDetail.setFullyExpanded(expansion == 1);
 
         if (mQSAnimator != null) {
@@ -209,7 +222,7 @@ public class QSFragment extends Fragment implements QS {
         }
 
         // Set bounds on the QS panel so it doesn't run over the header.
-        mQsBounds.top = (int) (mQSPanel.getHeight() * (1 - expansion));
+        mQsBounds.top = (int) (mHeader.getBottom() * (1 - expansion));
         mQsBounds.right = mQSPanel.getWidth();
         mQsBounds.bottom = mQSPanel.getHeight();
         mQSPanel.setClipBounds(mQsBounds);
@@ -245,6 +258,11 @@ public class QSFragment extends Fragment implements QS {
     }
 
     @Override
+    public void setExpandClickListener(OnClickListener onClickListener) {
+        mFooter.getExpandView().setOnClickListener(onClickListener);
+    }
+
+    @Override
     public void closeDetail() {
         mQSPanel.closeDetail();
     }
@@ -254,6 +272,7 @@ public class QSFragment extends Fragment implements QS {
         mContainer.updateBottom();
         mQSPanel.setVisibility(!mQSCustomizer.isCustomizing() ? View.VISIBLE : View.INVISIBLE);
         mHeader.setVisibility(!mQSCustomizer.isCustomizing() ? View.VISIBLE : View.INVISIBLE);
+        mFooter.setVisibility(!mQSCustomizer.isCustomizing() ? View.VISIBLE : View.INVISIBLE);
         // Let the panel know the position changed and it needs to update where notifications
         // and whatnot are.
         mPanelView.onQsHeightChanged();
@@ -268,7 +287,8 @@ public class QSFragment extends Fragment implements QS {
             return getView().getHeight();
         }
         if (mQSDetail.isClosingDetail()) {
-            int panelHeight = ((LayoutParams) mQSPanel.getLayoutParams()).topMargin
+            LayoutParams layoutParams = (LayoutParams) mQSPanel.getLayoutParams();
+            int panelHeight = layoutParams.topMargin + layoutParams.bottomMargin +
                     + mQSPanel.getMeasuredHeight();
             return panelHeight + getView().getPaddingBottom();
         } else {

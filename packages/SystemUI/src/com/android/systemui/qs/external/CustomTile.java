@@ -41,7 +41,7 @@ import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTile.State;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.qs.external.TileLifecycleManager.TileChangeListener;
-import com.android.systemui.statusbar.phone.QSTileHost;
+import com.android.systemui.qs.QSTileHost;
 import libcore.util.Objects;
 
 import static android.view.Display.DEFAULT_DISPLAY;

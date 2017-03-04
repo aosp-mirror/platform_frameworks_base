@@ -1819,4 +1819,7 @@
     <!-- Action label for launching app info on the specified app [CHAR LIMIT=20] -->
     <string name="app_info">App info</string>
 
+    <!-- Quick settings tile for toggling mobile data [CHAR LIMIT=20] -->
+    <string name="mobile_data">Mobile data</string>
+
 </resources>

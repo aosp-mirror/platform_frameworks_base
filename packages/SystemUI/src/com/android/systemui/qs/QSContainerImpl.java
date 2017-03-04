@@ -38,6 +38,7 @@ public class QSContainerImpl extends FrameLayout {
     protected View mHeader;
     protected float mQsExpansion;
     private QSCustomizer mQSCustomizer;
+    private QSFooter mQSFooter;
 
     public QSContainerImpl(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -49,7 +50,8 @@ public class QSContainerImpl extends FrameLayout {
         mQSPanel = findViewById(R.id.quick_settings_panel);
         mQSDetail = findViewById(R.id.qs_detail);
         mHeader = findViewById(R.id.header);
-        mQSCustomizer = (QSCustomizer) findViewById(R.id.qs_customize);
+        mQSCustomizer = findViewById(R.id.qs_customize);
+        mQSFooter = findViewById(R.id.qs_footer);
     }
 
     @Override
@@ -60,7 +62,8 @@ public class QSContainerImpl extends FrameLayout {
         mQSPanel.measure(widthMeasureSpec, MeasureSpec.makeMeasureSpec(
                 MeasureSpec.getSize(heightMeasureSpec), MeasureSpec.UNSPECIFIED));
         int width = mQSPanel.getMeasuredWidth();
-        int height = ((LayoutParams) mQSPanel.getLayoutParams()).topMargin
+        LayoutParams layoutParams = (LayoutParams) mQSPanel.getLayoutParams();
+        int height = layoutParams.topMargin + layoutParams.bottomMargin
                 + mQSPanel.getMeasuredHeight();
         super.onMeasure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
                 MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
@@ -93,6 +96,8 @@ public class QSContainerImpl extends FrameLayout {
         int height = calculateContainerHeight();
         setBottom(getTop() + height);
         mQSDetail.setBottom(getTop() + height);
+        // Pin QS Footer to the bottom of the panel.
+        mQSFooter.setTranslationY(height - mQSFooter.getHeight());
     }
 
     protected int calculateContainerHeight() {

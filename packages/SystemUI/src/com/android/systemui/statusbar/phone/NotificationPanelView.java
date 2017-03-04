@@ -295,7 +295,6 @@ public class NotificationPanelView extends PanelView implements
             lp.width = panelWidth;
             lp.gravity = panelGravity;
             mQsFrame.setLayoutParams(lp);
-            post(mUpdateHeader);
         }
 
         lp = (FrameLayout.LayoutParams) mNotificationStackScroller.getLayoutParams();
@@ -2140,13 +2139,6 @@ public class NotificationPanelView extends PanelView implements
         mKeyguardUserSwitcher = keyguardUserSwitcher;
     }
 
-    private final Runnable mUpdateHeader = new Runnable() {
-        @Override
-        public void run() {
-            mQs.getHeader().updateEverything();
-        }
-    };
-
     public void onScreenTurningOn() {
         mKeyguardStatusView.refreshTime();
     }
@@ -2442,7 +2434,7 @@ public class NotificationPanelView extends PanelView implements
         public void onFragmentViewCreated(String tag, Fragment fragment) {
             mQs = (QS) fragment;
             mQs.setPanelView(NotificationPanelView.this);
-            mQs.getHeader().getExpandView().setOnClickListener(NotificationPanelView.this);
+            mQs.setExpandClickListener(NotificationPanelView.this);
             mQs.setHeaderClickable(mQsExpansionEnabled);
             mQs.setKeyguardShowing(mKeyguardShowing);
             mQs.setOverscrolling(mStackScrollerOverscrolling);

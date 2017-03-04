@@ -24,6 +24,7 @@ import com.android.systemui.Prefs;
 import com.android.systemui.Prefs.Key;
 import com.android.systemui.SysUIRunner;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.qs.QSTileHost;
 
 import org.junit.After;
 import org.junit.Before;

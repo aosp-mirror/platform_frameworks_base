@@ -20,7 +20,6 @@ import android.service.quicksettings.Tile;
 
 import com.android.systemui.plugins.annotations.DependsOn;
 import com.android.systemui.plugins.annotations.ProvidesInterface;
-import com.android.systemui.plugins.qs.QS.DetailAdapter;
 import com.android.systemui.plugins.qs.QSTile.Callback;
 import com.android.systemui.plugins.qs.QSTile.Icon;
 import com.android.systemui.plugins.qs.QSTile.State;

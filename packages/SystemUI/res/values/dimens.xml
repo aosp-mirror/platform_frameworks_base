@@ -179,10 +179,10 @@
     <dimen name="close_handle_underlap">32dp</dimen>
 
     <!-- Height of the status bar header bar -->
-    <dimen name="status_bar_header_height">126dp</dimen>
+    <dimen name="status_bar_header_height">124dp</dimen>
 
     <!-- Height of the status bar header bar when expanded -->
-    <dimen name="status_bar_header_height_expanded">116dp</dimen>
+    <dimen name="status_bar_header_height_expanded">124dp</dimen>
 
     <!-- Height of the status bar header bar when on Keyguard -->
     <dimen name="status_bar_header_height_keyguard">40dp</dimen>
@@ -238,7 +238,7 @@
     <dimen name="qs_tile_padding_below_icon">12dp</dimen>
     <dimen name="qs_tile_padding_bottom">16dp</dimen>
     <dimen name="qs_tile_spacing">4dp</dimen>
-    <dimen name="qs_panel_padding_bottom">8dp</dimen>
+    <dimen name="qs_panel_padding_bottom">0dp</dimen>
     <dimen name="qs_detail_header_height">56dp</dimen>
     <dimen name="qs_detail_header_padding">0dp</dimen>
     <dimen name="qs_detail_header_bottom_padding">0dp</dimen>
@@ -428,7 +428,7 @@
     <dimen name="multi_user_avatar_keyguard_size">22dp</dimen>
 
     <!-- The width of user avatar when expanded -->
-    <dimen name="multi_user_avatar_expanded_size">24dp</dimen>
+    <dimen name="multi_user_avatar_expanded_size">16dp</dimen>
 
     <!-- The font size of the time when collapsed in QS -->
     <dimen name="qs_time_collapsed_size">14sp</dimen>
@@ -730,5 +730,8 @@
 
     <!-- The size of the PIP drag-to-dismiss target. -->
     <dimen name="pip_dismiss_target_size">48dp</dimen>
+
+    <dimen name="default_gear_space">18dp</dimen>
+    <dimen name="cell_overlay_padding">18dp</dimen>
 
 </resources>

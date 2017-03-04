@@ -19,15 +19,13 @@ import static org.mockito.Mockito.mock;
 
 import android.os.Looper;
 
+import com.android.keyguard.CarrierText;
 import com.android.systemui.Dependency;
 import com.android.systemui.FragmentTestCase;
 import com.android.systemui.R;
 import com.android.systemui.SysUIRunner;
-import com.android.systemui.statusbar.phone.QSTileHost;
-import com.android.systemui.statusbar.phone.QuickStatusBarHeader;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
-import com.android.systemui.tuner.TunerService;
 import com.android.systemui.util.LayoutInflaterBuilder;
 import com.android.systemui.utils.TestableLooper;
 import com.android.systemui.utils.TestableLooper.RunWithLooper;
@@ -37,9 +35,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import android.content.Context;
-import android.os.Handler;
-import android.os.Looper;
-import android.support.test.runner.AndroidJUnit4;
 import android.view.View;
 import android.widget.FrameLayout;
 
@@ -58,6 +53,7 @@ public class QSFragmentTest extends FragmentTestCase {
                         .replace("com.android.systemui.statusbar.policy.SplitClockView",
                                 FrameLayout.class)
                         .replace("TextClock", View.class)
+                        .replace(CarrierText.class, View.class)
                         .build());
 
         injectTestDependency(Dependency.BG_LOOPER, TestableLooper.get(this).getLooper());

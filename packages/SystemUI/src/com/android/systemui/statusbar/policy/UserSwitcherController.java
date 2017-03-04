@@ -57,7 +57,7 @@ import com.android.systemui.GuestResumeSessionReceiver;
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
 import com.android.systemui.SystemUISecondaryUserService;
-import com.android.systemui.plugins.qs.QS.DetailAdapter;
+import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.qs.tiles.UserDetailView;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
@@ -662,6 +662,27 @@ public class UserSwitcherController {
             mController = controller;
             mKeyguardMonitor = Dependency.get(KeyguardMonitor.class);
             controller.addAdapter(new WeakReference<>(this));
+        }
+
+        public int getUserCount() {
+            boolean secureKeyguardShowing = mKeyguardMonitor.isShowing()
+                    && mKeyguardMonitor.isSecure()
+                    && !mKeyguardMonitor.canSkipBouncer();
+            if (!secureKeyguardShowing) {
+                return mController.getUsers().size();
+            }
+            // The lock screen is secure and showing. Filter out restricted records.
+            final int N = mController.getUsers().size();
+            int count = 0;
+            for (int i = 0; i < N; i++) {
+                if (mController.getUsers().get(i).isGuest) continue;
+                if (mController.getUsers().get(i).isRestricted) {
+                    break;
+                } else {
+                    count++;
+                }
+            }
+            return count;
         }
 
         @Override

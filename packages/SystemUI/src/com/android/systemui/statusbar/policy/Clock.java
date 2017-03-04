@@ -81,6 +81,7 @@ public class Clock extends TextView implements DemoMode, Tunable, CommandQueue.C
     private static final int AM_PM_STYLE_GONE    = 2;
 
     private final int mAmPmStyle;
+    private final boolean mShowDark;
     private boolean mShowSeconds;
     private Handler mSecondsHandler;
 
@@ -100,6 +101,7 @@ public class Clock extends TextView implements DemoMode, Tunable, CommandQueue.C
                 0, 0);
         try {
             mAmPmStyle = a.getInt(R.styleable.Clock_amPmStyle, AM_PM_STYLE_GONE);
+            mShowDark = a.getBoolean(R.styleable.Clock_showDark, true);
         } finally {
             a.recycle();
         }
@@ -124,7 +126,9 @@ public class Clock extends TextView implements DemoMode, Tunable, CommandQueue.C
             Dependency.get(TunerService.class).addTunable(this, CLOCK_SECONDS,
                     StatusBarIconController.ICON_BLACKLIST);
             SysUiServiceProvider.getComponent(getContext(), CommandQueue.class).addCallbacks(this);
-            Dependency.get(DarkIconDispatcher.class).addDarkReceiver(this);
+            if (mShowDark) {
+                Dependency.get(DarkIconDispatcher.class).addDarkReceiver(this);
+            }
         }
 
         // NOTE: It's safe to do these after registering the receiver since the receiver always runs
@@ -147,7 +151,9 @@ public class Clock extends TextView implements DemoMode, Tunable, CommandQueue.C
             Dependency.get(TunerService.class).removeTunable(this);
             SysUiServiceProvider.getComponent(getContext(), CommandQueue.class)
                     .removeCallbacks(this);
-            Dependency.get(DarkIconDispatcher.class).removeDarkReceiver(this);
+            if (mShowDark) {
+                Dependency.get(DarkIconDispatcher.class).removeDarkReceiver(this);
+            }
         }
     }
 

@@ -44,7 +44,7 @@ import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.qs.QSDetailClipper;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.statusbar.phone.NotificationsQuickSettingsContainer;
-import com.android.systemui.statusbar.phone.QSTileHost;
+import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
 import com.android.systemui.statusbar.policy.KeyguardMonitor.Callback;
 
@@ -72,6 +72,8 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
     private NotificationsQuickSettingsContainer mNotifQsContainer;
     private QS mQs;
     private boolean mFinishedFetchingTiles = false;
+    private int mX;
+    private int mY;
 
     public QSCustomizer(Context context, AttributeSet attrs) {
         super(new ContextThemeWrapper(context, R.style.edit_theme), attrs);
@@ -134,6 +136,8 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
 
     public void show(int x, int y) {
         if (!isShown) {
+            mX = x;
+            mY = y;
             MetricsLogger.visible(getContext(), MetricsProto.MetricsEvent.QS_EDIT);
             isShown = true;
             setTileSpecs();
@@ -164,7 +168,7 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
             mToolbar.dismissPopupMenus();
             setCustomizing(false);
             save();
-            mClipper.animateCircularClip(x, y, false, mCollapseAnimationListener);
+            mClipper.animateCircularClip(mX, mY, false, mCollapseAnimationListener);
             mNotifQsContainer.setCustomizerAnimating(true);
             mNotifQsContainer.setCustomizerShowing(false);
             announceForAccessibility(mContext.getString(

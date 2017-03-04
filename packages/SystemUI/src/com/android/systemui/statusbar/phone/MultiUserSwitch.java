@@ -32,7 +32,7 @@ import android.widget.FrameLayout;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.plugins.ActivityStarter;
-import com.android.systemui.plugins.qs.QS.DetailAdapter;
+import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.qs.QSPanel;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcher;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
@@ -74,7 +74,7 @@ public class MultiUserSwitch extends FrameLayout implements View.OnClickListener
         if (mUserListener == null) {
             return false;
         }
-        return mUserListener.getCount() != 0;
+        return mUserListener.getUserCount() > 1;
     }
 
     public void setUserSwitcherController(UserSwitcherController userSwitcherController) {

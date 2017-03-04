@@ -42,7 +42,7 @@ import org.junit.runner.RunWith;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class QSFooterTest extends SysuiTestCase {
+public class QSSecurityFooterTest extends SysuiTestCase {
 
     private final String MANAGING_ORGANIZATION = "organization";
     private final String DEVICE_OWNER_PACKAGE = "TestDPC";
@@ -52,7 +52,7 @@ public class QSFooterTest extends SysuiTestCase {
     private TextView mFooterText;
     private TestableImageView mFooterIcon;
     private TestableImageView mFooterIcon2;
-    private QSFooter mFooter;
+    private QSSecurityFooter mFooter;
     private SecurityController mSecurityController = mock(SecurityController.class);
 
     @Before
@@ -64,7 +64,7 @@ public class QSFooterTest extends SysuiTestCase {
                         .replace("ImageView", TestableImageView.class)
                         .build());
         Handler h = new Handler(Looper.getMainLooper());
-        h.post(() -> mFooter = new QSFooter(null, mContext));
+        h.post(() -> mFooter = new QSSecurityFooter(null, mContext));
         waitForIdleSync(h);
         mRootView = (ViewGroup) mFooter.getView();
         mFooterText = (TextView) mRootView.findViewById(R.id.footer_text);

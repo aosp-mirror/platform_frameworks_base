@@ -15,28 +15,26 @@
 package com.android.systemui.qs.customize;
 
 import static junit.framework.Assert.assertEquals;
-
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.os.Message;
-import android.test.suitebuilder.annotation.SmallTest;
-
 import com.android.systemui.Dependency;
 import com.android.systemui.SysUIRunner;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.qs.QSTile;
-import com.android.systemui.qs.QSTile.State;
-import com.android.systemui.statusbar.phone.QSTileHost;
-
+import com.android.systemui.plugins.qs.QSTile;
+import com.android.systemui.plugins.qs.QSTile.State;
+import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.utils.TestableLooper;
-import com.android.systemui.utils.TestableLooper.MessageHandler;
 import com.android.systemui.utils.TestableLooper.RunWithLooper;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import android.os.Message;
+import android.test.suitebuilder.annotation.SmallTest;
 
 @SmallTest
 @RunWith(SysUIRunner.class)
@@ -65,7 +63,7 @@ public class TileQueryHelperTest extends SysuiTestCase {
     public void testCompletionCalledAfterTilesFetched() {
         QSTile mockTile = mock(QSTile.class);
         State mockState = mock(State.class);
-        when(mockTile.newTileState()).thenReturn(mockState);
+        when(mockState.copy()).thenReturn(mockState);
         when(mockTile.getState()).thenReturn(mockState);
         when(mockTile.isAvailable()).thenReturn(true);
 
