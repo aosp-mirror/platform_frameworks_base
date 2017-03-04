@@ -42,8 +42,6 @@ final class SaveUi {
         void onCancel(IntentSender listener);
     }
 
-    private static final long LIFETIME_MILLIS = 5 * DateUtils.SECOND_IN_MILLIS;
-
     private final Handler mHandler = UiThread.getHandler();
 
     private final @NonNull Dialog mDialog;
@@ -53,7 +51,7 @@ final class SaveUi {
     private boolean mDestroyed;
 
     SaveUi(@NonNull Context context, @NonNull CharSequence providerLabel, @NonNull SaveInfo info,
-            @NonNull OnSaveListener listener) {
+            @NonNull OnSaveListener listener, int lifeTimeMs) {
         mListener = listener;
 
         final LayoutInflater inflater = LayoutInflater.from(context);
@@ -119,7 +117,7 @@ final class SaveUi {
 
         mDialog.show();
 
-        mHandler.postDelayed(() -> mListener.onCancel(null), LIFETIME_MILLIS);
+        mHandler.postDelayed(() -> mListener.onCancel(null), lifeTimeMs);
     }
 
     void destroy() {

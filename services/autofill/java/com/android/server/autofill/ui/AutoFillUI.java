@@ -27,6 +27,7 @@ import android.service.autofill.FillResponse;
 import android.service.autofill.SaveInfo;
 import android.text.TextUtils;
 import android.util.Slog;
+import android.text.format.DateUtils;
 import android.view.autofill.AutoFillId;
 import android.widget.Toast;
 
@@ -44,6 +45,8 @@ import java.io.PrintWriter;
 public final class AutoFillUI {
     private static final String TAG = "AutoFillUI";
 
+    private static final int MAX_SAVE_TIMEOUT_MS = (int) (30 * DateUtils.SECOND_IN_MILLIS);
+
     private final Handler mHandler = UiThread.getHandler();
     private final @NonNull Context mContext;
 
@@ -52,6 +55,8 @@ public final class AutoFillUI {
 
     private @Nullable AutoFillUiCallback mCallback;
     private @Nullable IBinder mWindowToken;
+
+    private int mSaveTimeoutMs = (int) (5 * DateUtils.SECOND_IN_MILLIS);
 
     public interface AutoFillUiCallback {
         void authenticate(@NonNull IntentSender intent);
@@ -206,7 +211,7 @@ public final class AutoFillUI {
                         }
                     }
                 }
-            });
+            }, mSaveTimeoutMs);
         });
     }
 
@@ -217,11 +222,22 @@ public final class AutoFillUI {
         mHandler.post(this::hideAllUiThread);
     }
 
+    public void setSaveTimeout(int timeout) {
+        if (timeout > MAX_SAVE_TIMEOUT_MS) {
+            throw new IllegalArgumentException("Maximum value is " + MAX_SAVE_TIMEOUT_MS + "ms");
+        }
+        if (timeout <= 0) {
+            throw new IllegalArgumentException("Must be a positive value");
+        }
+        mSaveTimeoutMs = timeout;
+    }
+
     public void dump(PrintWriter pw) {
         pw.println("AufoFill UI");
         final String prefix = "  ";
         pw.print(prefix); pw.print("showsFillUi: "); pw.println(mFillUi != null);
         pw.print(prefix); pw.print("showsSaveUi: "); pw.println(mSaveUi != null);
+        pw.print(prefix); pw.print("save timeout: "); pw.println(mSaveTimeoutMs);
     }
 
     @android.annotation.UiThread
