@@ -981,6 +981,7 @@ framework_docs_SDK_VERSION:=7.0
 framework_docs_SDK_REL_ID:=1
 
 framework_docs_LOCAL_DROIDDOC_OPTIONS += \
+		-hdf dac true \
 		-hdf sdk.codename N \
 		-hdf sdk.preview.version 5 \
 		-hdf sdk.version $(framework_docs_SDK_VERSION) \
