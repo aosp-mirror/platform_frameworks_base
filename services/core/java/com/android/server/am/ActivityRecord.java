@@ -2391,6 +2391,10 @@ final class ActivityRecord implements AppWindowContainerListener {
         return (config.uiMode & Configuration.UI_MODE_TYPE_MASK) == UI_MODE_TYPE_VR_HEADSET;
     }
 
+    int getUid() {
+        return info.applicationInfo.uid;
+    }
+
     @Override
     public String toString() {
         if (stringName != null) {

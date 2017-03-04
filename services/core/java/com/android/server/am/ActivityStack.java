@@ -741,8 +741,10 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     /** Checks if there are tasks with specific UID in the stack. */
     boolean isUidPresent(int uid) {
         for (TaskRecord task : mTaskHistory) {
-            if (task.effectiveUid == uid) {
-                return true;
+            for (ActivityRecord r : task.mActivities) {
+                if (r.getUid() == uid) {
+                    return true;
+                }
             }
         }
         return false;
@@ -751,7 +753,9 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     /** Get all UIDs that are present in the stack. */
     void getPresentUIDs(IntArray presentUIDs) {
         for (TaskRecord task : mTaskHistory) {
-            presentUIDs.add(task.effectiveUid);
+            for (ActivityRecord r : task.mActivities) {
+                presentUIDs.add(r.getUid());
+            }
         }
     }
 
