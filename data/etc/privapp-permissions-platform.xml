@@ -263,6 +263,7 @@ applications that come with the platform
         <permission name="android.permission.INSTALL_LOCATION_PROVIDER"/>
         <permission name="android.permission.INSTALL_PACKAGES"/>
         <permission name="android.permission.INTERACT_ACROSS_USERS"/>
+        <permission name="android.permission.LOCAL_MAC_ADDRESS"/>
         <permission name="android.permission.MANAGE_ACTIVITY_STACKS"/>
         <permission name="android.permission.MANAGE_DEVICE_ADMINS"/>
         <permission name="android.permission.MANAGE_USB"/>
