@@ -425,8 +425,8 @@ public class JobInfo implements Parcelable {
 
     private JobInfo(JobInfo.Builder b) {
         jobId = b.mJobId;
-        extras = b.mExtras.deepcopy();
-        transientExtras = b.mTransientExtras.deepcopy();
+        extras = b.mExtras.deepCopy();
+        transientExtras = b.mTransientExtras.deepCopy();
         service = b.mJobService;
         constraintFlags = b.mConstraintFlags;
         triggerContentUris = b.mTriggerContentUris != null
