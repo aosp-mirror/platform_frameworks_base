@@ -7445,8 +7445,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * </pre>
      *
      * @param value value to be autofilled.
+     *
+     * @return {@code true} if the view was successfully autofilled, {@code false} otherwise
      */
-    public void autofill(@SuppressWarnings("unused") AutofillValue value) {
+    public boolean autofill(@SuppressWarnings("unused") AutofillValue value) {
+        return false;
     }
 
     /**
@@ -7457,9 +7460,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @param value value to be autofilled.
      * @param virtualId id identifying the virtual child inside the custom view.
+     *
+     * @return {@code true} if the view was successfully autofilled, {@code false} otherwise
      */
-    public void autofillVirtual(@SuppressWarnings("unused") int virtualId,
+    public boolean autofillVirtual(@SuppressWarnings("unused") int virtualId,
             @SuppressWarnings("unused") AutofillValue value) {
+        return false;
     }
 
     /**

@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.metrics.LogMaker;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillValue;
@@ -23,6 +24,8 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.app.ToolbarActionBar;
 import com.android.internal.app.WindowDecorActionBar;
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.nano.MetricsProto;
 import com.android.internal.policy.PhoneWindow;
 
 import android.annotation.CallSuper;
@@ -765,6 +768,7 @@ public class Activity extends ContextThemeWrapper
     /*package*/ Configuration mCurrentConfig;
     private SearchManager mSearchManager;
     private MenuInflater mMenuInflater;
+    private final MetricsLogger mMetricsLogger = new MetricsLogger();
 
     static final class NonConfigurationInstances {
         Object activity;
@@ -7188,6 +7192,8 @@ public class Activity extends ContextThemeWrapper
     public void autofill(List<AutofillId> ids, List<AutofillValue> values) {
         final View root = getWindow().getDecorView();
         final int itemCount = ids.size();
+        int numApplied = 0;
+
         for (int i = 0; i < itemCount; i++) {
             final AutofillId id = ids.get(i);
             final AutofillValue value = values.get(i);
@@ -7197,12 +7203,22 @@ public class Activity extends ContextThemeWrapper
                 Log.w(TAG, "autofill(): no View with id " + viewId);
                 continue;
             }
+            final boolean wasApplied;
             if (id.isVirtual()) {
-                view.autofillVirtual(id.getVirtualChildId(), value);
+                wasApplied = view.autofillVirtual(id.getVirtualChildId(), value);
             } else {
-                view.autofill(value);
+                wasApplied = view.autofill(value);
+            }
+
+            if (wasApplied) {
+                numApplied++;
             }
         }
+
+        LogMaker log = new LogMaker(MetricsProto.MetricsEvent.AUTOFILL_DATASET_APPLIED);
+        log.addTaggedData(MetricsProto.MetricsEvent.FIELD_AUTOFILL_NUM_VALUES, itemCount);
+        log.addTaggedData(MetricsProto.MetricsEvent.FIELD_AUTOFILL_NUM_VIEWS_FILLED, numApplied);
+        mMetricsLogger.write(log);
     }
 
     /** @hide */

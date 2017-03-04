@@ -28,6 +28,7 @@ import static com.android.server.autofill.Helper.DEBUG;
 import static com.android.server.autofill.Helper.VERBOSE;
 import static com.android.server.autofill.Helper.findValue;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -43,6 +44,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
 import android.graphics.Rect;
+import android.metrics.LogMaker;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -68,6 +70,8 @@ import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillValue;
 import android.view.autofill.IAutoFillManagerClient;
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.nano.MetricsProto;
 import com.android.internal.os.HandlerCaller;
 import com.android.internal.os.IResultReceiver;
 import com.android.server.autofill.ui.AutoFillUI;
@@ -92,6 +96,7 @@ final class AutofillManagerServiceImpl {
     private final Context mContext;
     private final Object mLock;
     private final AutoFillUI mUi;
+    private final MetricsLogger mMetricsLogger = new MetricsLogger();
 
     private RemoteCallbackList<IAutoFillManagerClient> mClients;
     private AutofillServiceInfo mInfo;
@@ -284,9 +289,10 @@ final class AutofillManagerServiceImpl {
         }
     }
 
-    void startSessionLocked(IBinder activityToken, IBinder windowToken, IBinder appCallbackToken,
-            AutofillId autofillId,  Rect bounds, AutofillValue value, boolean hasCallback,
-            int flags) {
+    void startSessionLocked(@NonNull IBinder activityToken, @Nullable IBinder windowToken,
+            @NonNull IBinder appCallbackToken, @NonNull AutofillId autofillId, @NonNull Rect bounds,
+            @Nullable AutofillValue value, boolean hasCallback, int flags,
+            @NonNull String packageName) {
         if (!hasService()) {
             return;
         }
@@ -305,7 +311,7 @@ final class AutofillManagerServiceImpl {
         }
 
         final Session newSession = createSessionByTokenLocked(activityToken,
-                windowToken, appCallbackToken, hasCallback, flags);
+                windowToken, appCallbackToken, hasCallback, flags, packageName);
         newSession.updateLocked(autofillId, bounds, value, FLAG_START_SESSION);
     }
 
@@ -337,10 +343,11 @@ final class AutofillManagerServiceImpl {
         session.destroyLocked();
     }
 
-    private Session createSessionByTokenLocked(IBinder activityToken, IBinder windowToken,
-            IBinder appCallbackToken, boolean hasCallback, int flags) {
+    private Session createSessionByTokenLocked(@NonNull IBinder activityToken,
+            @Nullable IBinder windowToken, @NonNull IBinder appCallbackToken, boolean hasCallback,
+            int flags, @NonNull String packageName) {
         final Session newSession = new Session(mContext, activityToken,
-                windowToken, appCallbackToken, hasCallback, flags);
+                windowToken, appCallbackToken, hasCallback, flags, packageName);
         mSessions.put(activityToken, newSession);
 
         /*
@@ -351,7 +358,6 @@ final class AutofillManagerServiceImpl {
          * - display disclosure if needed
          */
         try {
-            // TODO(b/33197203): add MetricsLogger call
             final Bundle receiverExtras = new Bundle();
             receiverExtras.putBinder(EXTRA_ACTIVITY_TOKEN, activityToken);
             final long identity = Binder.clearCallingIdentity();
@@ -371,7 +377,6 @@ final class AutofillManagerServiceImpl {
 
     void updateSessionLocked(IBinder activityToken, AutofillId autofillId, Rect bounds,
             AutofillValue value, int flags) {
-        // TODO(b/33197203): add MetricsLogger call
         final Session session = mSessions.get(activityToken);
         if (session == null) {
             if (VERBOSE) {
@@ -595,6 +600,9 @@ final class AutofillManagerServiceImpl {
         private final IBinder mActivityToken;
         private final IBinder mWindowToken;
 
+        /** Package name of the app that is auto-filled */
+        @NonNull private final String mPackageName;
+
         @GuardedBy("mLock")
         private final Map<AutofillId, ViewState> mViewStates = new ArrayMap<>();
 
@@ -634,15 +642,16 @@ final class AutofillManagerServiceImpl {
          * Flags used to start the session.
          */
         private int mFlags;
-
-        private Session(Context context, IBinder activityToken, IBinder windowToken,
-                IBinder client, boolean hasCallback, int flags) {
+        private Session(@NonNull Context context, @NonNull IBinder activityToken,
+                @Nullable IBinder windowToken, @NonNull IBinder client, boolean hasCallback,
+                int flags, @NonNull String packageName) {
             mRemoteFillService = new RemoteFillService(context,
                     mInfo.getServiceInfo().getComponentName(), mUserId, this);
             mActivityToken = activityToken;
             mWindowToken = windowToken;
             mHasCallback = hasCallback;
             mFlags = flags;
+            mPackageName = packageName;
 
             mClient = IAutoFillManagerClient.Stub.asInterface(client);
             try {
@@ -656,12 +665,14 @@ final class AutofillManagerServiceImpl {
             } catch (RemoteException e) {
                 Slog.w(TAG, "linkToDeath() on mClient failed: " + e);
             }
+
+            mMetricsLogger.action(MetricsProto.MetricsEvent.AUTOFILL_SESSION_STARTED, mPackageName);
         }
 
         // FillServiceCallbacks
         @Override
-        public void onFillRequestSuccess(FillResponse response) {
-            // TODO(b/33197203): add MetricsLogger call
+        public void onFillRequestSuccess(@Nullable FillResponse response,
+                @NonNull String servicePackageName) {
             if (response == null) {
                 removeSelf();
                 return;
@@ -669,28 +680,59 @@ final class AutofillManagerServiceImpl {
             synchronized (mLock) {
                 processResponseLocked(response);
             }
+
+            LogMaker log = (new LogMaker(MetricsProto.MetricsEvent.AUTOFILL_REQUEST))
+                    .setType(MetricsProto.MetricsEvent.TYPE_SUCCESS)
+                    .setPackageName(mPackageName)
+                    .addTaggedData(MetricsProto.MetricsEvent.FIELD_AUTOFILL_NUM_DATASETS,
+                            response.getDatasets() == null ? 0 : response.getDatasets().size())
+                    .addTaggedData(MetricsProto.MetricsEvent.FIELD_AUTOFILL_SERVICE,
+                            servicePackageName);
+            mMetricsLogger.write(log);
         }
 
         // FillServiceCallbacks
         @Override
-        public void onFillRequestFailure(CharSequence message) {
-            // TODO(b/33197203): add MetricsLogger call
+        public void onFillRequestFailure(@Nullable CharSequence message,
+                @NonNull String servicePackageName) {
+            LogMaker log = (new LogMaker(MetricsProto.MetricsEvent.AUTOFILL_REQUEST))
+                    .setType(MetricsProto.MetricsEvent.TYPE_FAILURE)
+                    .setPackageName(mPackageName)
+                    .addTaggedData(MetricsProto.MetricsEvent.FIELD_AUTOFILL_SERVICE,
+                            servicePackageName);
+            mMetricsLogger.write(log);
+
             getUiForShowing().showError(message);
             removeSelf();
         }
 
         // FillServiceCallbacks
         @Override
-        public void onSaveRequestSuccess() {
-            // TODO(b/33197203): add MetricsLogger call
+        public void onSaveRequestSuccess(@NonNull String servicePackageName) {
+            LogMaker log = (new LogMaker(
+                    MetricsProto.MetricsEvent.AUTOFILL_DATA_SAVE_REQUEST))
+                    .setType(MetricsProto.MetricsEvent.TYPE_SUCCESS)
+                    .setPackageName(mPackageName)
+                    .addTaggedData(MetricsProto.MetricsEvent.FIELD_AUTOFILL_SERVICE,
+                            servicePackageName);
+            mMetricsLogger.write(log);
+
             // Nothing left to do...
             removeSelf();
         }
 
         // FillServiceCallbacks
         @Override
-        public void onSaveRequestFailure(CharSequence message) {
-            // TODO(b/33197203): add MetricsLogger call
+        public void onSaveRequestFailure(@Nullable CharSequence message,
+                @NonNull String servicePackageName) {
+            LogMaker log = (new LogMaker(
+                    MetricsProto.MetricsEvent.AUTOFILL_DATA_SAVE_REQUEST))
+                    .setType(MetricsProto.MetricsEvent.TYPE_FAILURE)
+                    .setPackageName(mPackageName)
+                    .addTaggedData(MetricsProto.MetricsEvent.FIELD_AUTOFILL_SERVICE,
+                            servicePackageName);
+            mMetricsLogger.write(log);
+
             getUiForShowing().showError(message);
             removeSelf();
         }
@@ -773,6 +815,9 @@ final class AutofillManagerServiceImpl {
                 Parcelable result = data.getParcelable(
                         AutofillManager.EXTRA_AUTHENTICATION_RESULT);
                 if (result instanceof FillResponse) {
+                    mMetricsLogger.action(MetricsProto.MetricsEvent.AUTOFILL_AUTHENTICATED,
+                            mPackageName);
+
                     mCurrentResponse = (FillResponse) result;
                     processResponseLocked(mCurrentResponse);
                 } else if (result instanceof Dataset) {
@@ -894,7 +939,7 @@ final class AutofillManagerServiceImpl {
                 if (atLeastOneChanged) {
                     getUiForShowing().showSaveUi(
                             mInfo.getServiceInfo().loadLabel(mContext.getPackageManager()),
-                            saveInfo);
+                            saveInfo, mPackageName);
                     return;
                 }
             }
@@ -1034,7 +1079,7 @@ final class AutofillManagerServiceImpl {
                 filterText = value.getTextValue().toString();
             }
 
-            getUiForShowing().showFillUi(filledId, response, bounds, filterText);
+            getUiForShowing().showFillUi(filledId, response, bounds, filterText, mPackageName);
         }
 
         private void notifyChangeToClient(AutofillId id, int event) {
@@ -1051,8 +1096,6 @@ final class AutofillManagerServiceImpl {
                 Slog.d(TAG, "processResponseLocked(auth=" + response.getAuthentication()
                     + "):" + response);
             }
-
-            // TODO(b/33197203): add MetricsLogger calls
 
             if (mCurrentViewState == null) {
                 // TODO(b/33197203): temporary sanity check; should never happen
@@ -1188,6 +1231,9 @@ final class AutofillManagerServiceImpl {
         private void destroyLocked() {
             mRemoteFillService.destroy();
             mUi.setCallback(null, null);
+
+            mMetricsLogger.action(MetricsProto.MetricsEvent.AUTOFILL_SESSION_FINISHED,
+                    mPackageName);
         }
 
         private void removeSelf() {

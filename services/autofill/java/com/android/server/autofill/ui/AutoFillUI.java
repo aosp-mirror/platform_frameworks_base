@@ -23,6 +23,7 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.content.IntentSender;
 import android.graphics.Rect;
+import android.metrics.LogMaker;
 import android.os.Handler;
 import android.os.IBinder;
 import android.service.autofill.Dataset;
@@ -34,6 +35,8 @@ import android.util.Slog;
 import android.view.autofill.AutofillId;
 import android.widget.Toast;
 
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.nano.MetricsProto;
 import com.android.server.UiThread;
 
 import java.io.PrintWriter;
@@ -60,6 +63,7 @@ public final class AutoFillUI {
     private @Nullable IBinder mWindowToken;
 
     private int mSaveTimeoutMs = (int) (5 * DateUtils.SECOND_IN_MILLIS);
+    private final MetricsLogger mMetricsLogger = new MetricsLogger();
 
     public interface AutoFillUiCallback {
         void authenticate(@NonNull IntentSender intent);
@@ -152,9 +156,17 @@ public final class AutoFillUI {
      * @param response the current fill response
      * @param anchorBounds bounds of the focused view
      * @param filterText text of the view to be filled
+     * @param packageName package name of the activity that is filled
      */
     public void showFillUi(@NonNull AutofillId focusedId, @NonNull FillResponse response,
-            @NonNull Rect anchorBounds, @Nullable String filterText) {
+            @NonNull Rect anchorBounds, @Nullable String filterText, @NonNull String packageName) {
+        LogMaker log = (new LogMaker(MetricsProto.MetricsEvent.AUTOFILL_FILL_UI))
+                .setPackageName(packageName)
+                .addTaggedData(MetricsProto.MetricsEvent.FIELD_AUTOFILL_FILTERTEXT_LEN,
+                        filterText == null ? 0 : filterText.length())
+                .addTaggedData(MetricsProto.MetricsEvent.FIELD_AUTOFILL_NUM_DATASETS,
+                        response.getDatasets() == null ? 0 : response.getDatasets().size());
+
         mHandler.post(() -> {
             if (!hasCallback()) {
                 return;
@@ -164,6 +176,7 @@ public final class AutoFillUI {
                     mWindowToken, anchorBounds, filterText, new FillUi.Callback() {
                 @Override
                 public void onResponsePicked(FillResponse response) {
+                    log.setType(MetricsProto.MetricsEvent.TYPE_DETAIL);
                     hideFillUiUiThread();
                     if (mCallback != null) {
                         mCallback.authenticate(response.getAuthentication());
@@ -172,17 +185,25 @@ public final class AutoFillUI {
 
                 @Override
                 public void onDatasetPicked(Dataset dataset) {
+                    log.setType(MetricsProto.MetricsEvent.TYPE_ACTION);
                     hideFillUiUiThread();
                     if (mCallback != null) {
                         mCallback.fill(dataset);
                     }
-                    // TODO(b/33197203): add MetricsLogger call
                 }
 
                 @Override
                 public void onCanceled() {
+                    log.setType(MetricsProto.MetricsEvent.TYPE_DISMISS);
                     hideFillUiUiThread();
-                    // TODO(b/33197203): add MetricsLogger call
+                }
+
+                @Override
+                public void onDestroy() {
+                    if (log.getType() == MetricsProto.MetricsEvent.TYPE_UNKNOWN) {
+                        log.setType(MetricsProto.MetricsEvent.TYPE_CLOSE);
+                    }
+                    mMetricsLogger.write(log);
                 }
             });
             mCallback.onEvent(focusedId, EVENT_INPUT_SHOWN);
@@ -192,7 +213,16 @@ public final class AutoFillUI {
     /**
      * Shows the UI asking the user to save for autofill.
      */
-    public void showSaveUi(@NonNull CharSequence providerLabel, @NonNull SaveInfo info) {
+    public void showSaveUi(@NonNull CharSequence providerLabel, @NonNull SaveInfo info,
+            @NonNull String packageName) {
+        int numIds = 0;
+        numIds += info.getRequiredIds() == null ? 0 : info.getRequiredIds().length;
+        numIds += info.getOptionalIds() == null ? 0 : info.getOptionalIds().length;
+
+        LogMaker log = (new LogMaker(MetricsProto.MetricsEvent.AUTOFILL_SAVE_UI))
+                .setPackageName(packageName).addTaggedData(
+                        MetricsProto.MetricsEvent.FIELD_AUTOFILL_NUM_IDS, numIds);
+
         mHandler.post(() -> {
             if (!hasCallback()) {
                 return;
@@ -202,16 +232,16 @@ public final class AutoFillUI {
                     new SaveUi.OnSaveListener() {
                 @Override
                 public void onSave() {
+                    log.setType(MetricsProto.MetricsEvent.TYPE_ACTION);
                     hideSaveUiUiThread();
                     if (mCallback != null) {
                         mCallback.save();
                     }
-                    // TODO(b/33197203): add MetricsLogger call
                 }
 
                 @Override
                 public void onCancel(IntentSender listener) {
-                    // TODO(b/33197203): add MetricsLogger call
+                    log.setType(MetricsProto.MetricsEvent.TYPE_DISMISS);
                     hideSaveUiUiThread();
                     if (listener != null) {
                         try {
@@ -224,6 +254,14 @@ public final class AutoFillUI {
                     if (mCallback != null) {
                         mCallback.cancelSave();
                     }
+                }
+
+                @Override
+                public void onDestroy() {
+                    if (log.getType() == MetricsProto.MetricsEvent.TYPE_UNKNOWN) {
+                        log.setType(MetricsProto.MetricsEvent.TYPE_CLOSE);
+                    }
+                    mMetricsLogger.write(log);
                 }
             }, mSaveTimeoutMs);
         });

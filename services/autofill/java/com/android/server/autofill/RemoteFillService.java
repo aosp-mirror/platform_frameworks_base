@@ -87,10 +87,10 @@ final class RemoteFillService implements DeathRecipient {
     private PendingRequest mPendingRequest;
 
     public interface FillServiceCallbacks {
-        void onFillRequestSuccess(FillResponse response);
-        void onFillRequestFailure(CharSequence message);
-        void onSaveRequestSuccess();
-        void onSaveRequestFailure(CharSequence message);
+        void onFillRequestSuccess(@Nullable FillResponse response, @NonNull String servicePackageName);
+        void onFillRequestFailure(@Nullable CharSequence message, @NonNull String servicePackageName);
+        void onSaveRequestSuccess(@NonNull String servicePackageName);
+        void onSaveRequestFailure(@Nullable CharSequence message, @NonNull String servicePackageName);
         void onServiceDied(RemoteFillService service);
         void onDisableSelf();
     }
@@ -262,7 +262,7 @@ final class RemoteFillService implements DeathRecipient {
             FillResponse response) {
         mHandler.getHandler().post(() -> {
             if (handleResponseCallbackCommon(pendingRequest)) {
-                mCallbacks.onFillRequestSuccess(response);
+                mCallbacks.onFillRequestSuccess(response, mComponentName.getPackageName());
             }
         });
     }
@@ -271,7 +271,7 @@ final class RemoteFillService implements DeathRecipient {
             CharSequence message) {
         mHandler.getHandler().post(() -> {
             if (handleResponseCallbackCommon(pendingRequest)) {
-                mCallbacks.onFillRequestFailure(message);
+                mCallbacks.onFillRequestFailure(message, mComponentName.getPackageName());
             }
         });
     }
@@ -279,7 +279,7 @@ final class RemoteFillService implements DeathRecipient {
     private void dispatchOnSaveRequestSuccess(PendingRequest pendingRequest) {
         mHandler.getHandler().post(() -> {
             if (handleResponseCallbackCommon(pendingRequest)) {
-                mCallbacks.onSaveRequestSuccess();
+                mCallbacks.onSaveRequestSuccess(mComponentName.getPackageName());
             }
         });
     }
@@ -288,7 +288,7 @@ final class RemoteFillService implements DeathRecipient {
             CharSequence message) {
         mHandler.getHandler().post(() -> {
             if (handleResponseCallbackCommon(pendingRequest)) {
-                mCallbacks.onSaveRequestFailure(message);
+                mCallbacks.onSaveRequestFailure(message, mComponentName.getPackageName());
             }
         });
     }

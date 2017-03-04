@@ -83,7 +83,7 @@ public final class AutofillManager {
     /** @hide */ public static final int FLAG_VIEW_EXITED =   0x20000000;
     /** @hide */ public static final int FLAG_VALUE_CHANGED = 0x10000000;
 
-    private final Rect mTempRect = new Rect();
+    @NonNull private final Rect mTempRect = new Rect();
 
     private final IAutoFillManager mService;
     private IAutoFillManagerClient mServiceClient;
@@ -371,8 +371,8 @@ public final class AutofillManager {
         return new AutofillId(parent.getAccessibilityViewId(), childId);
     }
 
-    private void startSession(AutofillId id, IBinder windowToken, Rect bounds,
-            AutofillValue value, int flags) {
+    private void startSession(@NonNull AutofillId id, @NonNull IBinder windowToken,
+            @NonNull Rect bounds, @NonNull AutofillValue value, int flags) {
         if (DEBUG) {
             Log.d(TAG, "startSession(): id=" + id + ", bounds=" + bounds + ", value=" + value
                     + ", flags=" + flags);
@@ -381,8 +381,8 @@ public final class AutofillManager {
         try {
             mService.startSession(mContext.getActivityToken(), windowToken,
                     mServiceClient.asBinder(), id, bounds, value, mContext.getUserId(),
-                    mCallback != null, flags);
-            final AutofillClient client = getClient();
+                    mCallback != null, flags, mContext.getOpPackageName());
+            AutofillClient client = getClient();
             if (client != null) {
                 client.resetableStateAvailable();
             }

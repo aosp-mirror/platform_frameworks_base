@@ -56,6 +56,12 @@ message MetricsEvent {
     // Type for APP_TRANSITION event: The transition brought an already existing activity to the
     // front.
     TYPE_TRANSITION_HOT_LAUNCH = 9;
+
+    // The action was successful
+    TYPE_SUCCESS = 10;
+
+    // The action failed
+    TYPE_FAILURE = 11;
   }
 
   // Known visual elements: views or controls.
@@ -3701,6 +3707,75 @@ message MetricsEvent {
     // FIELD - Whether or not the launched activity is part of an instant application
     // OS: O
     APP_TRANSITION_IS_EPHEMERAL = 905;
+
+    // An autofill session was started
+    // Package: Package of app that is autofilled
+    AUTOFILL_SESSION_STARTED = 906;
+
+    // An autofill request was processed by a service
+    // Type TYPE_SUCCESS: The request succeeded
+    // Type TYPE_FAILURE: The request failed
+    // Package: Package of app that is autofilled
+    // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
+    // Tag FIELD_AUTOFILL_NUM_DATASET: The number of datasets returned (only in success case)
+    AUTOFILL_REQUEST = 907;
+
+    // Tag of a field for a package of an autofill service
+    FIELD_AUTOFILL_SERVICE = 908;
+
+    // Tag of a field for the number of datasets
+    FIELD_AUTOFILL_NUM_DATASETS = 909;
+
+    // An autofill dataset selection UI was shown
+    // Type TYPE_DISMISS: UI was explicityly canceled by the user
+    // Type TYPE_CLOSE: UI was destroyed without influence of the user
+    // Type TYPE_ACTION: dataset was selected
+    // Type TYPE_DETAIL: authentication was selected
+    // Package: Package of app that was autofilled
+    // Tag FIELD_AUTOFILL_FILTERTEXT_LEN: The length of the filter text
+    // Tag FIELD_AUTOFILL_NUM_DATASETS: The number of datasets shown
+    AUTOFILL_FILL_UI = 910;
+
+    // Tag of a field for the length of the filter text
+    FIELD_AUTOFILL_FILTERTEXT_LEN = 911;
+
+    // An autofill authentification succeeded
+    // Package: Package of app that was autofilled
+    AUTOFILL_AUTHENTICATED = 912;
+
+    // An activity was autofilled and all values could be applied
+    // Package: Package of app that is autofilled
+    // Tag FIELD_AUTOFILL_NUM_VALUES: Number of values that were suggested to be autofilled
+    // Tag FIELD_AUTOFILL_NUM_VIEWS_FILLED: Number of views that could be filled
+    AUTOFILL_DATASET_APPLIED = 913;
+
+    // Tag of a field for the number values to be filled in
+    FIELD_AUTOFILL_NUM_VALUES = 914;
+
+    // Tag of a field for the number of views that were filled
+    FIELD_AUTOFILL_NUM_VIEWS_FILLED = 915;
+
+    // An autofill save UI was shown
+    // Type TYPE_DISMISS: UI was explicityly canceled by the user
+    // Type TYPE_CLOSE: UI was destroyed without influence of the user
+    // Type TYPE_ACTION: data was saved
+    // Package: Package of app that was autofilled
+    // Tag FIELD_AUTOFILL_NUM_ID: The number of ids that are saved
+    AUTOFILL_SAVE_UI = 916;
+
+    // Tag of a field for the number of saveable ids
+    FIELD_AUTOFILL_NUM_IDS = 917;
+
+    // ACTION: An autofill service was reqiested to save data
+    // Type TYPE_SUCCESS: The request succeeded
+    // Type TYPE_FAILURE: The request failed
+    // Package: Package of app that was autofilled
+    // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
+    AUTOFILL_DATA_SAVE_REQUEST = 918;
+
+    // An auto-fill session was finished
+    // Package: Package of app that was autofilled
+    AUTOFILL_SESSION_FINISHED = 919;
 
     // ---- End O Constants, all O constants go above this line ----
 
