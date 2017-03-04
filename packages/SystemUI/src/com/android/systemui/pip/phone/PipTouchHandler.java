@@ -180,7 +180,7 @@ public class PipTouchHandler {
         mImeHeight = imeHeight;
     }
 
-    public void onMovementBoundsChanged(Rect insetBounds, Rect normalBounds,
+    public void onMovementBoundsChanged(Rect insetBounds, Rect normalBounds, Rect animatingBounds,
             boolean fromImeAdjustement) {
         // Re-calculate the expanded bounds
         mNormalBounds = normalBounds;
@@ -207,7 +207,7 @@ public class PipTouchHandler {
                 // Defer the update of the current movement bounds until after the user finishes
                 // touching the screen
             } else {
-                final Rect bounds = new Rect(mMotionHelper.getBounds());
+                final Rect bounds = new Rect(animatingBounds);
                 final Rect toMovementBounds = mIsMenuVisible
                         ? expandedMovementBounds
                         : normalMovementBounds;
@@ -227,7 +227,7 @@ public class PipTouchHandler {
                         bounds.offsetTo(bounds.left, toMovementBounds.bottom);
                     }
                 }
-                mMotionHelper.animateToBounds(bounds);
+                mMotionHelper.animateToIMEOffset(bounds);
             }
         }
 

@@ -23,12 +23,15 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.animation.Animator;
 import android.animation.ValueAnimator;
+import android.content.Context;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Debug;
 import android.util.ArrayMap;
 import android.util.Slog;
+import android.view.animation.AnimationUtils;
+import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
 import android.view.WindowManagerInternal;
 
@@ -50,6 +53,8 @@ public class BoundsAnimationController {
     private static final String TAG = TAG_WITH_CLASS_NAME || DEBUG_LOCAL
             ? "BoundsAnimationController" : TAG_WM;
     private static final int DEBUG_ANIMATION_SLOW_DOWN_FACTOR = 1;
+
+    private static final int DEFAULT_TRANSITION_DURATION = 425;
 
     // Only accessed on UI thread.
     private ArrayMap<AnimateBoundsUser, BoundsAnimator> mRunningAnimations = new ArrayMap<>();
@@ -85,12 +90,15 @@ public class BoundsAnimationController {
     private final Handler mHandler;
     private final AppTransition mAppTransition;
     private final AppTransitionNotifier mAppTransitionNotifier = new AppTransitionNotifier();
+    private final Interpolator mFastOutSlowInInterpolator;
     private boolean mFinishAnimationAfterTransition = false;
 
-    BoundsAnimationController(AppTransition transition, Handler handler) {
+    BoundsAnimationController(Context context, AppTransition transition, Handler handler) {
         mHandler = handler;
         mAppTransition = transition;
         mAppTransition.registerListenerLocked(mAppTransitionNotifier);
+        mFastOutSlowInInterpolator = AnimationUtils.loadInterpolator(context,
+                com.android.internal.R.interpolator.fast_out_slow_in);
     }
 
     private final class BoundsAnimator extends ValueAnimator
@@ -297,8 +305,8 @@ public class BoundsAnimationController {
         mRunningAnimations.put(target, animator);
         animator.setFloatValues(0f, 1f);
         animator.setDuration((animationDuration != -1 ? animationDuration
-                : DEFAULT_APP_TRANSITION_DURATION) * DEBUG_ANIMATION_SLOW_DOWN_FACTOR);
-        animator.setInterpolator(new LinearInterpolator());
+                : DEFAULT_TRANSITION_DURATION) * DEBUG_ANIMATION_SLOW_DOWN_FACTOR);
+        animator.setInterpolator(mFastOutSlowInInterpolator);
         animator.start();
     }
 }

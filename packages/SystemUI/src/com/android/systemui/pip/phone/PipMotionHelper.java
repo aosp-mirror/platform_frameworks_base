@@ -57,10 +57,11 @@ public class PipMotionHelper {
     private static final int DEFAULT_MOVE_STACK_DURATION = 225;
     private static final int SNAP_STACK_DURATION = 225;
     private static final int DISMISS_STACK_DURATION = 375;
-    private static final int SHRINK_STACK_FROM_MENU_DURATION = 150;
-    private static final int EXPAND_STACK_TO_MENU_DURATION = 150;
-    private static final int EXPAND_STACK_TO_FULLSCREEN_DURATION = 225;
+    private static final int SHRINK_STACK_FROM_MENU_DURATION = 250;
+    private static final int EXPAND_STACK_TO_MENU_DURATION = 250;
+    private static final int EXPAND_STACK_TO_FULLSCREEN_DURATION = 300;
     private static final int MINIMIZE_STACK_MAX_DURATION = 200;
+    private static final int IME_SHIFT_DURATION = 300;
 
     // The fraction of the stack width that the user has to drag offscreen to minimize the PiP
     private static final float MINIMIZE_OFFSCREEN_FRACTION = 0.2f;
@@ -289,6 +290,14 @@ public class PipMotionHelper {
     }
 
     /**
+     * Animates the PiP to offset it from the IME.
+     */
+    void animateToIMEOffset(Rect toBounds) {
+        cancelAnimations();
+        resizeAndAnimatePipUnchecked(toBounds, IME_SHIFT_DURATION);
+    }
+
+    /**
      * Animates the dismissal of the PiP over the dismiss target bounds.
      */
     Rect animateDismissFromDrag(Rect dismissBounds) {
@@ -307,18 +316,6 @@ public class PipMotionHelper {
         });
         mBoundsAnimator.start();
         return toBounds;
-    }
-
-    /**
-     * Animates the PiP to some given bounds.
-     */
-    void animateToBounds(Rect toBounds) {
-        cancelAnimations();
-        if (!mBounds.equals(toBounds)) {
-            mBoundsAnimator = createAnimationToBounds(mBounds, toBounds,
-                    DEFAULT_MOVE_STACK_DURATION, FAST_OUT_LINEAR_IN, mUpdateBoundsListener);
-            mBoundsAnimator.start();
-        }
     }
 
     /**
