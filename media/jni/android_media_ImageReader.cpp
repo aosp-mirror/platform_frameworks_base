@@ -17,6 +17,7 @@
 //#define LOG_NDEBUG 0
 #define LOG_TAG "ImageReader_JNI"
 #include "android_media_Utils.h"
+#include <cutils/atomic.h>
 #include <utils/Log.h>
 #include <utils/misc.h>
 #include <utils/List.h>
