@@ -921,6 +921,9 @@ public class Spinner extends AbsSpinner implements OnClickListener {
     @Override
     public void onProvideAutoFillStructure(ViewStructure structure, int flags) {
         super.onProvideAutoFillStructure(structure, flags);
+
+        if (getAdapter() == null) return;
+
         // TODO(b/33197203): implement sanitization so initial value is only sanitized when coming
         // from resources.
 
