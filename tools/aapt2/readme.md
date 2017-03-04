@@ -1,5 +1,13 @@
 # Android Asset Packaging Tool 2.0 (AAPT2) release notes
 
+## Version 2.10
+### `aapt2 link ...`
+- Add ability to specify package ID to compile with for regular apps (not shared or static libs).
+  This package ID is limited to the range 0x7f-0xff inclusive. Specified with the --package-id
+  flag.
+- Fixed issue with <plurals> resources being stripped for locales and other configuration.
+- Fixed issue with escaping strings in XML resources.
+
 ## Version 2.9
 ### `aapt2 link ...`
 - Added sparse resource type encoding, which encodes resource entries that are sparse with

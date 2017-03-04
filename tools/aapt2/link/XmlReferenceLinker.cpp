@@ -42,12 +42,12 @@ class ReferenceVisitor : public ValueVisitor {
  public:
   using ValueVisitor::Visit;
 
-  ReferenceVisitor(IAaptContext* context, SymbolTable* symbols, xml::IPackageDeclStack* decls,
-                   CallSite* callsite)
-      : context_(context), symbols_(symbols), decls_(decls), callsite_(callsite), error_(false) {}
+  ReferenceVisitor(const CallSite& callsite, IAaptContext* context, SymbolTable* symbols,
+                   xml::IPackageDeclStack* decls)
+      : callsite_(callsite), context_(context), symbols_(symbols), decls_(decls), error_(false) {}
 
   void Visit(Reference* ref) override {
-    if (!ReferenceLinker::LinkReference(ref, context_, symbols_, decls_, callsite_)) {
+    if (!ReferenceLinker::LinkReference(callsite_, ref, context_, symbols_, decls_)) {
       error_ = true;
     }
   }
@@ -57,10 +57,10 @@ class ReferenceVisitor : public ValueVisitor {
  private:
   DISALLOW_COPY_AND_ASSIGN(ReferenceVisitor);
 
+  const CallSite& callsite_;
   IAaptContext* context_;
   SymbolTable* symbols_;
   xml::IPackageDeclStack* decls_;
-  CallSite* callsite_;
   bool error_;
 };
 
@@ -71,14 +71,14 @@ class XmlVisitor : public xml::PackageAwareVisitor {
  public:
   using xml::PackageAwareVisitor::Visit;
 
-  XmlVisitor(IAaptContext* context, SymbolTable* symbols, const Source& source,
-             std::set<int>* sdk_levels_found, CallSite* callsite)
-      : context_(context),
-        symbols_(symbols),
-        source_(source),
-        sdk_levels_found_(sdk_levels_found),
+  XmlVisitor(const Source& source, const CallSite& callsite, IAaptContext* context,
+             SymbolTable* symbols, std::set<int>* sdk_levels_found)
+      : source_(source),
         callsite_(callsite),
-        reference_visitor_(context, symbols, this, callsite) {}
+        context_(context),
+        symbols_(symbols),
+        sdk_levels_found_(sdk_levels_found),
+        reference_visitor_(callsite, context, symbols, this) {}
 
   void Visit(xml::Element* el) override {
     // The default Attribute allows everything except enums or flags.
@@ -108,7 +108,7 @@ class XmlVisitor : public xml::PackageAwareVisitor {
 
         std::string err_str;
         attr.compiled_attribute =
-            ReferenceLinker::CompileXmlAttribute(attr_ref, symbols_, callsite_, &err_str);
+            ReferenceLinker::CompileXmlAttribute(attr_ref, callsite_, symbols_, &err_str);
 
         if (!attr.compiled_attribute) {
           context_->GetDiagnostics()->Error(DiagMessage(source) << "attribute '"
@@ -159,11 +159,12 @@ class XmlVisitor : public xml::PackageAwareVisitor {
  private:
   DISALLOW_COPY_AND_ASSIGN(XmlVisitor);
 
+  Source source_;
+  const CallSite& callsite_;
   IAaptContext* context_;
   SymbolTable* symbols_;
-  Source source_;
+
   std::set<int>* sdk_levels_found_;
-  CallSite* callsite_;
   ReferenceVisitor reference_visitor_;
   bool error_ = false;
 };
@@ -172,9 +173,9 @@ class XmlVisitor : public xml::PackageAwareVisitor {
 
 bool XmlReferenceLinker::Consume(IAaptContext* context, xml::XmlResource* resource) {
   sdk_levels_found_.clear();
-  CallSite callsite = {resource->file.name};
-  XmlVisitor visitor(context, context->GetExternalSymbols(), resource->file.source,
-                     &sdk_levels_found_, &callsite);
+  const CallSite callsite = {resource->file.name};
+  XmlVisitor visitor(resource->file.source, callsite, context, context->GetExternalSymbols(),
+                     &sdk_levels_found_);
   if (resource->root) {
     resource->root->Accept(&visitor);
     return !visitor.HasError();

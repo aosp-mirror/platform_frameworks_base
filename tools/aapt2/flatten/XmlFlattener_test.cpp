@@ -30,23 +30,20 @@ namespace aapt {
 class XmlFlattenerTest : public ::testing::Test {
  public:
   void SetUp() override {
-    context_ =
-        test::ContextBuilder()
-            .SetCompilationPackage("com.app.test")
-            .SetNameManglerPolicy(NameManglerPolicy{"com.app.test"})
-            .AddSymbolSource(
-                test::StaticSymbolSourceBuilder()
-                    .AddSymbol("android:attr/id", ResourceId(0x010100d0),
-                               test::AttributeBuilder().Build())
-                    .AddSymbol("com.app.test:id/id", ResourceId(0x7f020000))
-                    .AddSymbol("android:attr/paddingStart",
-                               ResourceId(0x010103b3),
-                               test::AttributeBuilder().Build())
-                    .AddSymbol("android:attr/colorAccent",
-                               ResourceId(0x01010435),
-                               test::AttributeBuilder().Build())
-                    .Build())
-            .Build();
+    context_ = test::ContextBuilder()
+                   .SetCompilationPackage("com.app.test")
+                   .SetNameManglerPolicy(NameManglerPolicy{"com.app.test"})
+                   .AddSymbolSource(
+                       test::StaticSymbolSourceBuilder()
+                           .AddSymbol("android:attr/id", ResourceId(0x010100d0),
+                                      test::AttributeBuilder().Build())
+                           .AddSymbol("com.app.test:id/id", ResourceId(0x7f020000))
+                           .AddPublicSymbol("android:attr/paddingStart", ResourceId(0x010103b3),
+                                            test::AttributeBuilder().Build())
+                           .AddPublicSymbol("android:attr/colorAccent", ResourceId(0x01010435),
+                                            test::AttributeBuilder().Build())
+                           .Build())
+                   .Build();
   }
 
   ::testing::AssertionResult Flatten(xml::XmlResource* doc,
