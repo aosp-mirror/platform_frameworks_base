@@ -4,9 +4,7 @@ include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES := \
 	../../java/android/media/midi/IMidiDeviceServer.aidl \
-	midi.cpp \
-	MidiDeviceRegistry.cpp \
-	MidiPortRegistry.cpp
+	midi.cpp
 
 LOCAL_AIDL_INCLUDES := \
 	$(FRAMEWORKS_BASE_JAVA_SRC_DIRS) \

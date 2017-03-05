@@ -18,32 +18,33 @@
 #define LOG_TAG "Midi-JNI"
 
 #include <android_util_Binder.h>
-#include <midi/MidiDeviceRegistry.h>
+#include <midi/midi_internal.h>
 #include <nativehelper/jni.h>
 #include <utils/Log.h>
 
 using namespace android;
 using namespace android::media::midi;
 
-extern "C" jint Java_android_media_midi_MidiDevice_mirrorToNative(
-        JNIEnv *env, jobject thiz, jobject midiDeviceServer, jint id)
+extern "C" jlong Java_android_media_midi_MidiDevice_native_1mirrorToNative(
+        JNIEnv *env, jobject, jobject midiDeviceServer, jint id)
 {
-    (void)thiz;
+    // ALOGI("native_mirrorToNative(%p)...", midiDeviceServer);
     sp<IBinder> serverBinder = ibinderForJavaObject(env, midiDeviceServer);
     if (serverBinder.get() == NULL) {
         ALOGE("Could not obtain IBinder from passed jobject");
         return -EINVAL;
     }
-    // return MidiDeviceManager::getInstance().addDevice(serverBinder, uid);
-    return MidiDeviceRegistry::getInstance().addDevice(
-               new BpMidiDeviceServer(serverBinder), id);
+
+    AMIDI_Device* devicePtr = new AMIDI_Device;
+    devicePtr->server = new BpMidiDeviceServer(serverBinder);
+    devicePtr->deviceId = id;
+
+    return (jlong)devicePtr;
 }
 
-extern "C" jint Java_android_media_midi_MidiDevice_removeFromNative(
-        JNIEnv *env, jobject thiz, jint uid)
+extern "C" void Java_android_media_midi_MidiDevice_native_removeFromNative(
+        JNIEnv *, jobject , jlong nativeToken)
 {
-    (void)env;
-    (void)thiz;
-    // return MidiDeviceManager::getInstance().removeDevice(uid);
-    return MidiDeviceRegistry::getInstance().removeDevice(uid);
+    AMIDI_Device* devicePtr = (AMIDI_Device*)nativeToken;
+    delete devicePtr;
 }

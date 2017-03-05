@@ -25,10 +25,9 @@
 
 #include "android/media/midi/BpMidiDeviceServer.h"
 #include "media/MidiDeviceInfo.h"
-#include "MidiDeviceRegistry.h"
-#include "MidiPortRegistry.h"
 
 #include "midi.h"
+#include "midi_internal.h"
 
 using android::IBinder;
 using android::BBinder;
@@ -37,12 +36,27 @@ using android::sp;
 using android::status_t;
 using android::base::unique_fd;
 using android::binder::Status;
-using android::media::midi::BpMidiDeviceServer;
 using android::media::midi::MidiDeviceInfo;
-using android::media::midi::MidiDeviceRegistry;
-using android::media::midi::MidiPortRegistry;
+
+struct AMIDI_Port {
+    std::atomic_int state;
+    AMIDI_Device    *device;
+    sp<IBinder>     binderToken;
+    unique_fd       ufd;
+};
 
 #define SIZE_MIDIRECEIVEBUFFER AMIDI_BUFFER_SIZE
+
+enum {
+    MIDI_PORT_STATE_CLOSED = 0,
+    MIDI_PORT_STATE_OPEN_IDLE,
+    MIDI_PORT_STATE_OPEN_ACTIVE
+};
+
+enum {
+    PORTTYPE_OUTPUT = 0,
+    PORTTYPE_INPUT = 1
+};
 
 /* TRANSFER PACKET FORMAT (as defined in MidiPortImpl.java)
  *
@@ -63,20 +77,12 @@ using android::media::midi::MidiPortRegistry;
  *  So 'read()' always returns a whole message.
  */
 
-status_t AMIDI_getDeviceById(int32_t id, AMIDI_Device *devicePtr) {
-    return MidiDeviceRegistry::getInstance().obtainDeviceToken(id, devicePtr);
-}
-
-status_t AMIDI_getDeviceInfo(AMIDI_Device device, AMIDI_DeviceInfo *deviceInfoPtr) {
-    sp<BpMidiDeviceServer> deviceServer;
-    status_t result = MidiDeviceRegistry::getInstance().getDeviceByToken(device, &deviceServer);
-    if (result != OK) {
-        ALOGE("AMIDI_getDeviceInfo bad device token %d: %d", device, result);
-        return result;
-    }
-
+/*
+ * Device Functions
+ */
+status_t AMIDI_getDeviceInfo(AMIDI_Device *device, AMIDI_DeviceInfo *deviceInfoPtr) {
     MidiDeviceInfo deviceInfo;
-    Status txResult = deviceServer->getDeviceInfo(&deviceInfo);
+    Status txResult = device->server->getDeviceInfo(&deviceInfo);
     if (!txResult.isOk()) {
         ALOGE("AMIDI_getDeviceInfo transaction error: %d", txResult.transactionError());
         return txResult.transactionError();
@@ -87,49 +93,74 @@ status_t AMIDI_getDeviceInfo(AMIDI_Device device, AMIDI_DeviceInfo *deviceInfoPt
     deviceInfoPtr->isPrivate = deviceInfo.isPrivate();
     deviceInfoPtr->inputPortCount = deviceInfo.getInputPortNames().size();
     deviceInfoPtr->outputPortCount = deviceInfo.getOutputPortNames().size();
+
+    return OK;
+}
+
+/*
+ * Port Helpers
+ */
+static status_t AMIDI_openPort(AMIDI_Device *device, int portNumber, int type,
+        AMIDI_Port **portPtr) {
+    sp<BBinder> portToken(new BBinder());
+    unique_fd ufd;
+    Status txResult = type == PORTTYPE_OUTPUT
+            ? device->server->openOutputPort(portToken, portNumber, &ufd)
+            : device->server->openInputPort(portToken, portNumber, &ufd);
+    if (!txResult.isOk()) {
+        ALOGE("AMIDI_openPort transaction error: %d", txResult.transactionError());
+        return txResult.transactionError();
+    }
+
+    AMIDI_Port* port = new AMIDI_Port;
+    port->state = MIDI_PORT_STATE_OPEN_IDLE;
+    port->device = device;
+    port->binderToken = portToken;
+    port->ufd = std::move(ufd);
+
+    *portPtr = port;
+
+    return OK;
+}
+
+static status_t AMIDI_closePort(AMIDI_Port *port) {
+    int portState = MIDI_PORT_STATE_OPEN_IDLE;
+    while (!port->state.compare_exchange_weak(portState, MIDI_PORT_STATE_CLOSED)) {
+        if (portState == MIDI_PORT_STATE_CLOSED) {
+            return -EINVAL; // Already closed
+        }
+    }
+
+    Status txResult = port->device->server->closePort(port->binderToken);
+    if (!txResult.isOk()) {
+        return txResult.transactionError();
+    }
+
+    delete port;
+
     return OK;
 }
 
 /*
  * Output (receiving) API
  */
-status_t AMIDI_openOutputPort(AMIDI_Device device, int portNumber, AMIDI_OutputPort *outputPortPtr) {
-    sp<BpMidiDeviceServer> deviceServer;
-    status_t result = MidiDeviceRegistry::getInstance().getDeviceByToken(device, &deviceServer);
-    if (result != OK) {
-        ALOGE("AMIDI_openOutputPort bad device token %d: %d", device, result);
-        return result;
-    }
-
-    sp<BBinder> portToken(new BBinder());
-    unique_fd ufd;
-    Status txResult = deviceServer->openOutputPort(portToken, portNumber, &ufd);
-    if (!txResult.isOk()) {
-        ALOGE("AMIDI_openOutputPort transaction error: %d", txResult.transactionError());
-        return txResult.transactionError();
-    }
-
-    result = MidiPortRegistry::getInstance().addOutputPort(
-            device, portToken, std::move(ufd), outputPortPtr);
-    if (result != OK) {
-        ALOGE("AMIDI_openOutputPort port registration error: %d", result);
-        // Close port
-        return result;
-    }
-    return OK;
+status_t AMIDI_openOutputPort(AMIDI_Device *device, int portNumber,
+        AMIDI_OutputPort **outputPortPtr) {
+    return AMIDI_openPort(device, portNumber, PORTTYPE_OUTPUT, (AMIDI_Port**)outputPortPtr);
 }
 
-ssize_t AMIDI_receive(AMIDI_OutputPort outputPort, AMIDI_Message *messages, ssize_t maxMessages) {
-    unique_fd *ufd;
-    // TODO: May return a nicer self-unlocking object
-    status_t result = MidiPortRegistry::getInstance().getOutputPortFdAndLock(outputPort, &ufd);
-    if (result != OK) {
-        return result;
+ssize_t AMIDI_receive(AMIDI_OutputPort *outputPort, AMIDI_Message *messages, ssize_t maxMessages) {
+    AMIDI_Port *port = (AMIDI_Port*)outputPort;
+    int portState = MIDI_PORT_STATE_OPEN_IDLE;
+    if (!port->state.compare_exchange_strong(portState, MIDI_PORT_STATE_OPEN_ACTIVE)) {
+        // The port has been closed.
+        return -EPIPE;
     }
 
+    status_t result = OK;
     ssize_t messagesRead = 0;
     while (messagesRead < maxMessages) {
-        struct pollfd checkFds[1] = { { *ufd, POLLIN, 0 } };
+        struct pollfd checkFds[1] = { { port->ufd, POLLIN, 0 } };
         int pollResult = poll(checkFds, 1, 0);
         if (pollResult < 1) {
             result = android::INVALID_OPERATION;
@@ -139,7 +170,7 @@ ssize_t AMIDI_receive(AMIDI_OutputPort outputPort, AMIDI_Message *messages, ssiz
         AMIDI_Message *message = &messages[messagesRead];
         uint8_t readBuffer[AMIDI_PACKET_SIZE];
         memset(readBuffer, 0, sizeof(readBuffer));
-        ssize_t readCount = read(*ufd, readBuffer, sizeof(readBuffer));
+        ssize_t readCount = read(port->ufd, readBuffer, sizeof(readBuffer));
         if (readCount == EINTR) {
             continue;
         }
@@ -157,100 +188,38 @@ ssize_t AMIDI_receive(AMIDI_OutputPort outputPort, AMIDI_Message *messages, ssiz
             if (dataSize) {
                 memcpy(message->buffer, readBuffer + 1, dataSize);
             }
-            message->timestamp = *(uint64_t*) (readBuffer + readCount - sizeof(uint64_t));
+            message->timestamp = *(uint64_t*)(readBuffer + readCount - sizeof(uint64_t));
         }
         message->len = dataSize;
         ++messagesRead;
     }
 
-    MidiPortRegistry::getInstance().unlockOutputPort(outputPort);
+    port->state.store(MIDI_PORT_STATE_OPEN_IDLE);
+
     return result == OK ? messagesRead : result;
 }
 
-status_t AMIDI_closeOutputPort(AMIDI_OutputPort outputPort) {
-    AMIDI_Device device;
-    sp<IBinder> portToken;
-    status_t result =
-        MidiPortRegistry::getInstance().removeOutputPort(outputPort, &device, &portToken);
-    if (result != OK) {
-        return result;
-    }
-
-    sp<BpMidiDeviceServer> deviceServer;
-    result = MidiDeviceRegistry::getInstance().getDeviceByToken(device, &deviceServer);
-    if (result != OK) {
-        return result;
-    }
-
-    Status txResult = deviceServer->closePort(portToken);
-    if (!txResult.isOk()) {
-        return txResult.transactionError();
-    }
-    return OK;
+status_t AMIDI_closeOutputPort(AMIDI_OutputPort *outputPort) {
+    return AMIDI_closePort((AMIDI_Port*)outputPort);
 }
 
 /*
  * Input (sending) API
  */
-status_t AMIDI_openInputPort(AMIDI_Device device, int portNumber, AMIDI_InputPort *inputPortPtr) {
-    sp<BpMidiDeviceServer> deviceServer;
-    status_t result = MidiDeviceRegistry::getInstance().getDeviceByToken(device, &deviceServer);
-    if (result != OK) {
-        ALOGE("AMIDI_openInputPort bad device token %d: %d", device, result);
-        return result;
-    }
-
-    sp<BBinder> portToken(new BBinder());
-    unique_fd ufd; // this is the file descriptor of the "receive" port s
-    Status txResult = deviceServer->openInputPort(portToken, portNumber, &ufd);
-    if (!txResult.isOk()) {
-        ALOGE("AMIDI_openInputPort transaction error: %d", txResult.transactionError());
-        return txResult.transactionError();
-    }
-
-    result = MidiPortRegistry::getInstance().addInputPort(
-            device, portToken, std::move(ufd), inputPortPtr);
-    if (result != OK) {
-        ALOGE("AMIDI_openInputPort port registration error: %d", result);
-        // Close port
-        return result;
-    }
-
-    return OK;
+status_t AMIDI_openInputPort(AMIDI_Device *device, int portNumber, AMIDI_InputPort **inputPortPtr) {
+    return AMIDI_openPort(device, portNumber, PORTTYPE_INPUT, (AMIDI_Port**)inputPortPtr);
 }
 
-status_t AMIDI_closeInputPort(AMIDI_InputPort inputPort) {
-    AMIDI_Device device;
-    sp<IBinder> portToken;
-    status_t result = MidiPortRegistry::getInstance().removeInputPort(
-            inputPort, &device, &portToken);
-    if (result != OK) {
-        ALOGE("AMIDI_closeInputPort remove port error: %d", result);
-        return result;
-    }
-
-    sp<BpMidiDeviceServer> deviceServer;
-    result = MidiDeviceRegistry::getInstance().getDeviceByToken(device, &deviceServer);
-    if (result != OK) {
-        ALOGE("AMIDI_closeInputPort can't find device error: %d", result);
-        return result;
-    }
-
-    Status txResult = deviceServer->closePort(portToken);
-    if (!txResult.isOk()) {
-        result = txResult.transactionError();
-        ALOGE("AMIDI_closeInputPort transaction error: %d", result);
-        return result;
-    }
-
-    return OK;
+status_t AMIDI_closeInputPort(AMIDI_InputPort *inputPort) {
+    return AMIDI_closePort((AMIDI_Port*)inputPort);
 }
 
-ssize_t AMIDI_getMaxMessageSizeInBytes(AMIDI_InputPort /*inputPort*/) {
+ssize_t AMIDI_getMaxMessageSizeInBytes(AMIDI_InputPort */*inputPort*/) {
     return SIZE_MIDIRECEIVEBUFFER;
 }
 
-static ssize_t AMIDI_makeSendBuffer(uint8_t *buffer, uint8_t *data, ssize_t numBytes, uint64_t timestamp) {
+static ssize_t AMIDI_makeSendBuffer(
+        uint8_t *buffer, uint8_t *data, ssize_t numBytes,uint64_t timestamp) {
     buffer[0] = AMIDI_OPCODE_DATA;
     memcpy(buffer + 1, data, numBytes);
     memcpy(buffer + 1 + numBytes, &timestamp, sizeof(timestamp));
@@ -264,11 +233,11 @@ static ssize_t AMIDI_makeSendBuffer(uint8_t *buffer, uint8_t *data, ssize_t numB
 //    }
 //}
 
-ssize_t AMIDI_send(AMIDI_InputPort inputPort, uint8_t *buffer, ssize_t numBytes) {
+ssize_t AMIDI_send(AMIDI_InputPort *inputPort, uint8_t *buffer, ssize_t numBytes) {
     return AMIDI_sendWithTimestamp(inputPort, buffer, numBytes, 0);
 }
 
-ssize_t AMIDI_sendWithTimestamp(AMIDI_InputPort inputPort, uint8_t *data,
+ssize_t AMIDI_sendWithTimestamp(AMIDI_InputPort *inputPort, uint8_t *data,
         ssize_t numBytes, int64_t timestamp) {
 
     if (numBytes > SIZE_MIDIRECEIVEBUFFER) {
@@ -277,15 +246,9 @@ ssize_t AMIDI_sendWithTimestamp(AMIDI_InputPort inputPort, uint8_t *data,
 
     // AMIDI_logBuffer(data, numBytes);
 
-    unique_fd *ufd = NULL;
-    status_t result = MidiPortRegistry::getInstance().getInputPortFd(inputPort, &ufd);
-    if (result != OK) {
-        return result;
-    }
-
     uint8_t writeBuffer[SIZE_MIDIRECEIVEBUFFER + AMIDI_PACKET_OVERHEAD];
     ssize_t numTransferBytes = AMIDI_makeSendBuffer(writeBuffer, data, numBytes, timestamp);
-    ssize_t numWritten = write(*ufd, writeBuffer, numTransferBytes);
+    ssize_t numWritten = write(((AMIDI_Port*)inputPort)->ufd, writeBuffer, numTransferBytes);
 
     if (numWritten < numTransferBytes) {
         ALOGE("AMIDI_sendWithTimestamp Couldn't write MIDI data buffer. requested:%zu, written%zu",
@@ -295,16 +258,10 @@ ssize_t AMIDI_sendWithTimestamp(AMIDI_InputPort inputPort, uint8_t *data,
     return numWritten - AMIDI_PACKET_OVERHEAD;
 }
 
-status_t AMIDI_flush(AMIDI_InputPort inputPort) {
-    unique_fd *ufd = NULL;
-    status_t result = MidiPortRegistry::getInstance().getInputPortFd(inputPort, &ufd);
-    if (result != OK) {
-        return result;
-    }
-
+status_t AMIDI_flush(AMIDI_InputPort *inputPort) {
     uint8_t opCode = AMIDI_OPCODE_FLUSH;
     ssize_t numTransferBytes = 1;
-    ssize_t numWritten = write(*ufd, &opCode, numTransferBytes);
+    ssize_t numWritten = write(((AMIDI_Port*)inputPort)->ufd, &opCode, numTransferBytes);
 
     if (numWritten < numTransferBytes) {
         ALOGE("AMIDI_flush Couldn't write MIDI flush. requested:%zu, written%zu",
