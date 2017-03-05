@@ -137,6 +137,7 @@ public abstract class MediaBrowserService extends Service {
      *
      * @see #onLoadChildren
      * @see #onLoadItem
+     * @see #onSearch
      */
     public class Result<T> {
         private Object mDebug;
@@ -544,16 +545,16 @@ public abstract class MediaBrowserService extends Service {
      * media browser service when connecting and retrieving the root id for browsing, or null if
      * none. The contents of this bundle may affect the information returned when browsing.
      *
-     * @throws IllegalStateException If this method is called outside of {@link #onLoadChildren}
-     *             or {@link #onLoadItem}
+     * @throws IllegalStateException If this method is called outside of {@link #onLoadChildren},
+     *             {@link #onLoadItem} or {@link #onSearch}.
      * @see MediaBrowserService.BrowserRoot#EXTRA_RECENT
      * @see MediaBrowserService.BrowserRoot#EXTRA_OFFLINE
      * @see MediaBrowserService.BrowserRoot#EXTRA_SUGGESTED
      */
     public final Bundle getBrowserRootHints() {
         if (mCurConnection == null) {
-            throw new IllegalStateException("This should be called inside of onLoadChildren or"
-                    + " onLoadItem methods");
+            throw new IllegalStateException("This should be called inside of onLoadChildren,"
+                    + " onLoadItem or onSearch methods");
         }
         return mCurConnection.rootHints == null ? null : new Bundle(mCurConnection.rootHints);
     }
