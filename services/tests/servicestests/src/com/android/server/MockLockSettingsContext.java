@@ -17,6 +17,7 @@
 package com.android.server;
 
 import android.app.NotificationManager;
+import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.os.UserManager;
@@ -25,12 +26,14 @@ public class MockLockSettingsContext extends ContextWrapper {
 
     private UserManager mUserManager;
     private NotificationManager mNotificationManager;
+    private DevicePolicyManager mDevicePolicyManager;
 
     public MockLockSettingsContext(Context base, UserManager userManager,
-            NotificationManager notificationManager) {
+            NotificationManager notificationManager, DevicePolicyManager devicePolicyManager) {
         super(base);
         mUserManager = userManager;
         mNotificationManager = notificationManager;
+        mDevicePolicyManager = devicePolicyManager;
     }
 
     @Override
@@ -39,6 +42,8 @@ public class MockLockSettingsContext extends ContextWrapper {
             return mUserManager;
         } else if (NOTIFICATION_SERVICE.equals(name)) {
             return mNotificationManager;
+        } else if (DEVICE_POLICY_SERVICE.equals(name)) {
+            return mDevicePolicyManager;
         } else {
             throw new RuntimeException("System service not mocked: " + name);
         }

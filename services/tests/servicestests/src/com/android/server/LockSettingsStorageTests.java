@@ -21,6 +21,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.app.NotificationManager;
+import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.pm.UserInfo;
@@ -68,7 +69,7 @@ public class LockSettingsStorageTests extends AndroidTestCase {
         when(mockUserManager.getProfileParent(eq(3))).thenReturn(new UserInfo(0, "name", 0));
 
         MockLockSettingsContext context = new MockLockSettingsContext(getContext(), mockUserManager,
-                mock(NotificationManager.class));
+                mock(NotificationManager.class), mock(DevicePolicyManager.class));
         mStorage = new LockSettingsStorageTestable(context,
                 new File(getContext().getFilesDir(), "locksettings"));
         mStorage.setDatabaseOnCreateCallback(new LockSettingsStorage.Callback() {

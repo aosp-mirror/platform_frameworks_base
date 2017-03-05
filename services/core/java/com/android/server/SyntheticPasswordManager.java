@@ -526,7 +526,7 @@ public class SyntheticPasswordManager {
      * RESPONSE_OK, since user authentication failures are detected earlier when trying to
      * decrypt SP.
      */
-    public VerifyCredentialResponse verifyChallenge(IGateKeeperService gatekeeper,
+    public @Nullable VerifyCredentialResponse verifyChallenge(IGateKeeperService gatekeeper,
             @NonNull AuthenticationToken auth, long challenge, int userId) throws RemoteException {
         byte[] spHandle = loadSyntheticPasswordHandle(userId);
         if (spHandle == null) {

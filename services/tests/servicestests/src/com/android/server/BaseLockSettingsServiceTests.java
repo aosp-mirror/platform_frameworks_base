@@ -25,6 +25,8 @@ import static org.mockito.Mockito.when;
 
 import android.app.IActivityManager;
 import android.app.NotificationManager;
+import android.app.admin.DevicePolicyManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.UserInfo;
 import android.database.sqlite.SQLiteDatabase;
@@ -76,7 +78,7 @@ public class BaseLockSettingsServiceTests extends AndroidTestCase {
     UserManager mUserManager;
     MockStorageManager mStorageManager;
     IActivityManager mActivityManager;
-
+    DevicePolicyManager mDevicePolicyManager;
     KeyStore mKeyStore;
 
     @Override
@@ -89,7 +91,9 @@ public class BaseLockSettingsServiceTests extends AndroidTestCase {
         mUserManager = mock(UserManager.class);
         mStorageManager = new MockStorageManager();
         mActivityManager = mock(IActivityManager.class);
-        mContext = new MockLockSettingsContext(getContext(), mUserManager, mNotificationManager);
+        mDevicePolicyManager = mock(DevicePolicyManager.class);
+        mContext = new MockLockSettingsContext(getContext(), mUserManager, mNotificationManager,
+                mDevicePolicyManager);
         mStorage = new LockSettingsStorageTestable(mContext,
                 new File(getContext().getFilesDir(), "locksettings"));
         File storageDir = mStorage.mStorageDir;
@@ -122,6 +126,10 @@ public class BaseLockSettingsServiceTests extends AndroidTestCase {
         });
 
         when(mLockPatternUtils.getLockSettings()).thenReturn(mService);
+
+        // Adding a fake Device Owner app which will enable escrow token support in LSS.
+        when(mDevicePolicyManager.getDeviceOwnerComponentOnAnyUser()).thenReturn(
+                new ComponentName("com.dummy.package", ".FakeDeviceOwner"));
     }
 
     @Override
