@@ -1266,10 +1266,10 @@ nAllocationGetSurface(JNIEnv *_env, jobject _this, jlong con, jlong a)
         ALOGD("nAllocationGetSurface, con(%p), a(%p)", (RsContext)con, (RsAllocation)a);
     }
 
-    IGraphicBufferProducer *v = (IGraphicBufferProducer *)rsAllocationGetSurface((RsContext)con,
-                                                                                 (RsAllocation)a);
-    sp<IGraphicBufferProducer> bp = v;
-    v->decStrong(nullptr);
+    ANativeWindow *anw = (ANativeWindow *)rsAllocationGetSurface((RsContext)con, (RsAllocation)a);
+
+    sp<Surface> surface(static_cast<Surface*>(anw));
+    sp<IGraphicBufferProducer> bp = surface->getIGraphicBufferProducer();
 
     jobject o = android_view_Surface_createFromIGraphicBufferProducer(_env, bp);
     return o;
