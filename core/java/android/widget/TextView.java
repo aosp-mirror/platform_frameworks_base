@@ -140,8 +140,8 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.animation.AnimationUtils;
-import android.view.autofill.AutoFillManager;
-import android.view.autofill.AutoFillValue;
+import android.view.autofill.AutofillManager;
+import android.view.autofill.AutofillValue;
 import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.CorrectionInfo;
@@ -732,7 +732,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private boolean mHasPresetAutoSizeValues = false;
 
     // Indicates whether the text was set from resources or dynamically, so it can be used to
-    // sanitize auto-fill requests.
+    // sanitize autofill requests.
     private boolean mTextFromResource = false;
 
     /**
@@ -5231,7 +5231,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (needEditableForNotification) {
             sendAfterTextChanged((Editable) text);
         } else {
-            // Always notify AutoFillManager - it will return right away if auto-fill is disabled.
+            // Always notify AutoFillManager - it will return right away if autofill is disabled.
             notifyAutoFillManagerAfterTextChanged();
         }
 
@@ -9124,14 +9124,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
         }
 
-        // Always notify AutoFillManager - it will return right away if auto-fill is disabled.
+        // Always notify AutoFillManager - it will return right away if autofill is disabled.
         notifyAutoFillManagerAfterTextChanged();
 
         hideErrorIfUnchanged();
     }
 
     private void notifyAutoFillManagerAfterTextChanged() {
-        final AutoFillManager afm = mContext.getSystemService(AutoFillManager.class);
+        final AutofillManager afm = mContext.getSystemService(AutofillManager.class);
         if (afm != null) {
             if (DEBUG_AUTOFILL) {
                 Log.v(LOG_TAG, "sendAfterTextChanged(): notify AFM for text=" + mText);
@@ -9886,24 +9886,24 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     @Override
     public void onProvideStructure(ViewStructure structure) {
         super.onProvideStructure(structure);
-        onProvideAutoStructureForAssistOrAutoFill(structure, false);
+        onProvideAutoStructureForAssistOrAutofill(structure, false);
     }
 
     @Override
-    public void onProvideAutoFillStructure(ViewStructure structure, int flags) {
-        super.onProvideAutoFillStructure(structure, flags);
-        onProvideAutoStructureForAssistOrAutoFill(structure, true);
+    public void onProvideAutofillStructure(ViewStructure structure, int flags) {
+        super.onProvideAutofillStructure(structure, flags);
+        onProvideAutoStructureForAssistOrAutofill(structure, true);
     }
 
-    private void onProvideAutoStructureForAssistOrAutoFill(ViewStructure structure,
-            boolean forAutoFill) {
+    private void onProvideAutoStructureForAssistOrAutofill(ViewStructure structure,
+            boolean forAutofill) {
         final boolean isPassword = hasPasswordTransformationMethod()
                 || isPasswordInputType(getInputType());
-        if (forAutoFill) {
+        if (forAutofill) {
             structure.setSanitized(mTextFromResource);
         }
 
-        if (!isPassword || forAutoFill) {
+        if (!isPassword || forAutofill) {
             if (mLayout == null) {
                 assumeLayout();
             }
@@ -10010,10 +10010,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         structure.setInputType(getInputType());
     }
 
-    // TODO(b/33197203): add unit/CTS tests for auto-fill methods
+    // TODO(b/33197203): add unit/CTS tests for autofill methods
 
     @Override
-    public void autoFill(AutoFillValue value) {
+    public void autofill(AutofillValue value) {
         final CharSequence text = value.getTextValue();
 
         if (text != null && isTextEditable()) {
@@ -10028,8 +10028,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     @Override
     @Nullable
-    public AutoFillValue getAutoFillValue() {
-        return isTextEditable() ? AutoFillValue.forText(getText()) : null;
+    public AutofillValue getAutofillValue() {
+        return isTextEditable() ? AutofillValue.forText(getText()) : null;
     }
 
     /** @hide */

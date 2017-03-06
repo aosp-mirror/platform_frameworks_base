@@ -3337,8 +3337,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * default {@link View} implementation.
      */
     @Override
-    public void dispatchProvideAutoFillStructure(ViewStructure structure, int flags) {
-        super.dispatchProvideAutoFillStructure(structure, flags);
+    public void dispatchProvideAutofillStructure(ViewStructure structure, int flags) {
+        super.dispatchProvideAutofillStructure(structure, flags);
         dispatchProvideStructureForAssistOrAutoFill(structure, true);
     }
 
@@ -3363,8 +3363,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     private void dispatchProvideStructureForAssistOrAutoFill(ViewStructure structure,
-            boolean forAutoFill) {
-        boolean blocked = forAutoFill ? isAutoFillBlocked() : isAssistBlocked();
+            boolean forAutofill) {
+        boolean blocked = forAutofill ? isAutofillBlocked() : isAssistBlocked();
         if (blocked || structure.getChildCount() != 0) {
             return;
         }
@@ -3372,7 +3372,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         final ArrayList<View> childrenList;
         final int childrenCount;
 
-        if (forAutoFill) {
+        if (forAutofill) {
             childrenArray = null;
             // TODO(b/33197203): the current algorithm allocates a new list for each children that
             // is a view group; ideally, we should use mAttachInfo.mTempArrayList instead, but that
@@ -3432,7 +3432,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                             preorderedList = new ArrayList<>(childrenCount);
                             for (int j = 0; j < childrenCount; j++) {
                                 final int index = permutation[j];
-                                final View child = forAutoFill
+                                final View child = forAutofill
                                         ? childrenList.get(index)
                                         : childrenArray[index];
                                 preorderedList.add(child);
@@ -3443,15 +3443,15 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     }
                 }
 
-                final View child = forAutoFill
+                final View child = forAutofill
                         ? getAndVerifyPreorderedView(preorderedList, childrenList, childIndex)
                         : getAndVerifyPreorderedView(preorderedList, childrenArray, childIndex);
                 final ViewStructure cstructure = structure.newChild(i);
 
                 // Must explicitly check which recursive method to call.
-                if (forAutoFill) {
+                if (forAutofill) {
                     // NOTE: flags are not currently supported, hence 0
-                    child.dispatchProvideAutoFillStructure(cstructure, 0);
+                    child.dispatchProvideAutofillStructure(cstructure, 0);
                 } else {
                     child.dispatchProvideStructure(cstructure);
                 }

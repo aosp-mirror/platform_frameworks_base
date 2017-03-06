@@ -533,8 +533,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     // on getting this result before starting to launch its UI).
     static final int PENDING_ASSIST_EXTRAS_LONG_TIMEOUT = 2000;
 
-    // How long to wait in getAutoFillAssistStructure() for the activity to respond with the result.
-    static final int PENDING_AUTO_FILL_ASSIST_STRUCTURE_TIMEOUT = 2000;
+    // How long to wait in getAutofillAssistStructure() for the activity to respond with the result.
+    static final int PENDING_AUTOFILL_ASSIST_STRUCTURE_TIMEOUT = 2000;
 
     // Maximum number of persisted Uri grants a package is allowed
     static final int MAX_PERSISTED_URI_GRANTS = 128;
@@ -12654,16 +12654,16 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
-    public boolean requestAutoFillData(IResultReceiver receiver, Bundle receiverExtras,
+    public boolean requestAutofillData(IResultReceiver receiver, Bundle receiverExtras,
             IBinder activityToken) {
         // NOTE: we could always use ActivityManager.ASSIST_CONTEXT_FULL and let ActivityThread
         // rely on the flags to decide whether the handleRequestAssistContextExtras() is for
-        // auto-fill, but it's safer to explicitly use new AutoFill types, in case the Assist
+        // autofill, but it's safer to explicitly use new AutoFill types, in case the Assist
         // requests use flags in the future as well (since their flags value might collide with the
-        // auto-fill flag values).
-        return enqueueAssistContext(ActivityManager.ASSIST_CONTEXT_AUTO_FILL, null, null,
+        // autofill flag values).
+        return enqueueAssistContext(ActivityManager.ASSIST_CONTEXT_AUTOFILL, null, null,
                 receiver, receiverExtras, activityToken, true, true, UserHandle.getCallingUserId(),
-                null, PENDING_AUTO_FILL_ASSIST_STRUCTURE_TIMEOUT) != null;
+                null, PENDING_AUTOFILL_ASSIST_STRUCTURE_TIMEOUT) != null;
     }
 
     private PendingAssistExtras enqueueAssistContext(int requestType, Intent intent, String hint,

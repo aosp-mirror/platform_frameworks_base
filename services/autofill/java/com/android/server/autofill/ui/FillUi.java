@@ -32,11 +32,10 @@ import android.view.View;
 import android.view.View.MeasureSpec;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.view.autofill.AutoFillId;
-import android.view.autofill.AutoFillValue;
+import android.view.autofill.AutofillId;
+import android.view.autofill.AutofillValue;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import com.android.internal.R;
 import com.android.internal.R;
 import libcore.util.Objects;
 
@@ -67,7 +66,7 @@ final class FillUi {
     private boolean mDestroyed;
 
     FillUi(@NonNull Context context, @NonNull FillResponse response,
-            @NonNull AutoFillId focusedViewId, @NonNull IBinder windowToken,
+            @NonNull AutofillId focusedViewId, @NonNull IBinder windowToken,
             @NonNull Rect anchorBounds, @Nullable String filterText,
             @NonNull Callback callback) {
         mAnchorBounds.set(anchorBounds);
@@ -101,7 +100,7 @@ final class FillUi {
                 final Dataset dataset = response.getDatasets().get(i);
                 final int index = dataset.getFieldIds().indexOf(focusedViewId);
                 if (index >= 0) {
-                    AutoFillValue value = dataset.getFieldValues().get(index);
+                    final AutofillValue value = dataset.getFieldValues().get(index);
                     final View view;
                     try {
                         view = dataset.getPresentation().apply(context, null);

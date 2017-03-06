@@ -15,67 +15,26 @@
  */
 package android.view.autofill;
 
-import static android.view.autofill.Helper.DEBUG;
-
 import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * A unique identifier for an auto-fill node inside an {@link android.app.Activity}.
+ * @hide
+ * @deprecated TODO(b/35956626): remove once clients use getAutoFilltype
  */
+@Deprecated
 public final class AutoFillId implements Parcelable {
 
-    private int mViewId;
-    private boolean mVirtual;
-    private int mVirtualId;
-
-    // TODO(b/33197203): use factory and cache values, since they're immutable
-    /** @hide */
-    public AutoFillId(int id) {
-        mVirtual = false;
-        mViewId = id;
-    }
+    private final AutofillId mRealId;
 
     /** @hide */
-    public AutoFillId(AutoFillId parent, int virtualChildId) {
-        mVirtual = true;
-        mViewId = parent.mViewId;
-        mVirtualId = virtualChildId;
+    public AutoFillId(AutofillId daRealId) {
+        this.mRealId = daRealId;
     }
-
-    /** @hide */
-    public AutoFillId(int parentId, int virtualChildId) {
-        mVirtual = true;
-        mViewId = parentId;
-        mVirtualId = virtualChildId;
-    }
-
-    /** @hide */
-    public int getViewId() {
-        return mViewId;
-    }
-
-    /** @hide */
-    public int getVirtualChildId() {
-        return mVirtualId;
-    }
-
-    /** @hide */
-    public boolean isVirtual() {
-        return mVirtual;
-    }
-
-    /////////////////////////////////
-    //  Object "contract" methods. //
-    /////////////////////////////////
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + mViewId;
-        result = prime * result + mVirtualId;
-        return result;
+        return mRealId.hashCode();
     }
 
     @Override
@@ -84,20 +43,7 @@ public final class AutoFillId implements Parcelable {
         if (obj == null) return false;
         if (getClass() != obj.getClass()) return false;
         final AutoFillId other = (AutoFillId) obj;
-        if (mViewId != other.mViewId) return false;
-        if (mVirtualId != other.mVirtualId) return false;
-        return true;
-    }
-
-    @Override
-    public String toString() {
-        if (!DEBUG) return super.toString();
-
-        final StringBuilder builder = new StringBuilder().append(mViewId);
-        if (mVirtual) {
-            builder.append(":").append(mVirtualId);
-        }
-        return builder.toString();
+        return mRealId.equals(other.mRealId);
     }
 
     @Override
@@ -107,15 +53,21 @@ public final class AutoFillId implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
-        parcel.writeInt(mViewId);
-        parcel.writeInt(mVirtual ? 1 : 0);
-        parcel.writeInt(mVirtualId);
+        parcel.writeParcelable(mRealId, 0);
     }
 
     private AutoFillId(Parcel parcel) {
-        mViewId = parcel.readInt();
-        mVirtual = parcel.readInt() == 1;
-        mVirtualId = parcel.readInt();
+        mRealId = parcel.readParcelable(null);
+    }
+
+    /** @hide */
+    public AutofillId getDaRealId() {
+        return mRealId;
+    }
+
+    /** @hide */
+    public static AutoFillId forDaRealId(AutofillId id) {
+        return id == null ? null : new AutoFillId(id);
     }
 
     public static final Parcelable.Creator<AutoFillId> CREATOR =

@@ -341,7 +341,7 @@ message SecureSettingsProto {
     SettingProto input_methods_subtype_history = 5;
     SettingProto input_method_selector_visibility = 6;
     SettingProto voice_interaction_service = 7;
-    SettingProto auto_fill_service = 8;
+    SettingProto autofill_service = 8;
     SettingProto bluetooth_hci_log = 9;
     SettingProto user_setup_complete = 10;
     SettingProto completed_category_prefix = 11;

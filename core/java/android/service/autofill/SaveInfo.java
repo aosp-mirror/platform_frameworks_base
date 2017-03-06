@@ -27,6 +27,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.ArraySet;
 import android.view.autofill.AutoFillId;
+import android.view.autofill.AutofillId;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -39,12 +40,12 @@ import java.util.ArrayList;
  * <p>A {@link SaveInfo} is always associated with a {@link FillResponse}.
  *
  * <p>A {@link SaveInfo} must define the type it represents, and contain at least one
- * {@code savableId}. A {@code savableId} is the {@link AutoFillId} of a view the service is
+ * {@code savableId}. A {@code savableId} is the {@link AutofillId} of a view the service is
  * interested to save in a {@code onSaveRequest()}; the ids of all {@link Dataset} present in the
  * {@link FillResponse} associated with this {@link SaveInfo} are already marked as savable,
- * but additional ids can be added through {@link Builder#addSavableIds(AutoFillId...)}.
+ * but additional ids can be added through {@link Builder#addSavableIds(AutofillId...)}.
  *
- * <p>See {@link AutoFillService#onSaveRequest(android.app.assist.AssistStructure, Bundle,
+ * <p>See {@link AutofillService#onSaveRequest(android.app.assist.AssistStructure, Bundle,
  * SaveCallback)} and {@link FillResponse} for more info.
  */
 public final class SaveInfo implements Parcelable {
@@ -75,7 +76,7 @@ public final class SaveInfo implements Parcelable {
     private final @SaveDataType int mType;
     private CharSequence mNegativeActionTitle;
     private IntentSender mNegativeActionListener;
-    private ArraySet<AutoFillId> mSavableIds;
+    private ArraySet<AutofillId> mSavableIds;
     private final CharSequence mDescription;
 
     /** @hide */
@@ -108,7 +109,7 @@ public final class SaveInfo implements Parcelable {
     }
 
     /** @hide */
-    public @Nullable ArraySet<AutoFillId> getSavableIds() {
+    public @Nullable ArraySet<AutofillId> getSavableIds() {
         return mSavableIds;
     }
 
@@ -126,11 +127,11 @@ public final class SaveInfo implements Parcelable {
     public void addSavableIds(@Nullable ArrayList<Dataset> datasets) {
         if (datasets != null) {
             for (Dataset dataset : datasets) {
-                final ArrayList<AutoFillId> ids = dataset.getFieldIds();
+                final ArrayList<AutofillId> ids = dataset.getFieldIds();
                 if (ids != null) {
                     final int fieldCount = ids.size();
                     for (int i = 0; i < fieldCount; i++) {
-                        final AutoFillId id = ids.get(i);
+                        final AutofillId id = ids.get(i);
                         if (mSavableIds == null) {
                             mSavableIds = new ArraySet<>();
                         }
@@ -149,7 +150,7 @@ public final class SaveInfo implements Parcelable {
         private final @SaveDataType int mType;
         private CharSequence mNegativeActionTitle;
         private IntentSender mNegativeActionListener;
-        private ArraySet<AutoFillId> mSavableIds;
+        private ArraySet<AutofillId> mSavableIds;
         private CharSequence mDescription;
         private boolean mDestroyed;
 
@@ -182,13 +183,13 @@ public final class SaveInfo implements Parcelable {
          *
          * @see FillResponse
          */
-        public @NonNull Builder addSavableIds(@Nullable AutoFillId... ids) {
+        public @NonNull Builder addSavableIds(@Nullable AutofillId... ids) {
             throwIfDestroyed();
 
             if (ids == null) {
                 return this;
             }
-            for (AutoFillId id : ids) {
+            for (AutofillId id : ids) {
                 if (mSavableIds == null) {
                     mSavableIds = new ArraySet<>();
                 }
@@ -302,7 +303,7 @@ public final class SaveInfo implements Parcelable {
             // using specially crafted parcels.
             final Builder builder = new Builder(parcel.readInt());
             builder.setNegativeAction(parcel.readCharSequence(), parcel.readParcelable(null));
-            final ArraySet<AutoFillId> savableIds = parcel.readTypedArraySet(null);
+            final ArraySet<AutofillId> savableIds = parcel.readTypedArraySet(null);
             final int savableIdsCount = (savableIds != null) ? savableIds.size() : 0;
             for (int i = 0; i < savableIdsCount; i++) {
                 builder.addSavableIds(savableIds.valueAt(i));

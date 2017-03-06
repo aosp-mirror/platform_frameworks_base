@@ -2293,22 +2293,22 @@
             <enum name="auto" value="0x00000010" />
         </attr>
 
-        <!-- Controls the auto-fill behavior for this view. -->
-        <attr name="autoFillMode">
+        <!-- Controls the autofill behavior for this view. -->
+        <attr name="autofillMode">
             <!-- Inherit the behavior from the parent. If there is no parent it is auto. This is the
                  default value for this attribute.-->
             <enum name="inherit" value="0" />
-            <!-- Allows this view to automatically trigger an auto-fill request when it get focus.
+            <!-- Allows this view to automatically trigger an autofill request when it get focus.
                  -->
             <enum name="auto" value="1" />
-            <!-- Do not trigger an auto-fill request when this view is focused. The user can still
-                 manually force an auto-fill request for this view. -->
+            <!-- Do not trigger an autofill request when this view is focused. The user can still
+                 manually force an autofill request for this view. -->
             <enum name="manual" value="2" />
         </attr>
 
-        <!-- Describes the content of a view so that a auto-fill service can fill in the appropriate
+        <!-- Describes the content of a view so that a autofill service can fill in the appropriate
              data. Multiple flags can be combined to mean e.g. emailAddress or postalAddress. -->
-        <attr name="autoFillHint">
+        <attr name="autofillHint">
             <!-- No hint. -->
             <flag name="none" value="0" />
             <!-- The view contains an email address. -->
@@ -7717,14 +7717,21 @@
     </declare-styleable>
 
     <!-- =============================== -->
-    <!-- AutoFill attributes -->
+    <!-- Autofill attributes -->
     <!-- =============================== -->
     <eat-comment />
 
     <!-- Use <code>autofill-service</code> as the root tag of the XML resource that describes a
-         {@link android.service.autofill.AutoFillService}, which is referenced from its
+         {@link android.service.autofill.AutofillService}, which is referenced from its
          {@link android.service.autofill#SERVICE_META_DATA} meta-data entry.
     -->
+    <declare-styleable name="AutofillService">
+        <!-- Fully qualified class name of an activity that allows the user to modify
+             the settings for this service. -->
+        <attr name="settingsActivity" />
+    </declare-styleable>
+
+    <!--  TODO(b/35956626): temporary until clients change to AutofillService -->
     <declare-styleable name="AutoFillService">
         <!-- Fully qualified class name of an activity that allows the user to modify
              the settings for this service. -->

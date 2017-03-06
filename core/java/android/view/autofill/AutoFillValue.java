@@ -24,24 +24,15 @@ import android.os.Parcelable;
 import android.view.View;
 
 /**
- * Abstracts how a {@link View} can be auto-filled by an
- * {@link android.service.autofill.AutoFillService}.
- *
- * <p>Each {@link AutoFillValue} has a {@code type} and optionally a {@code sub-type}: the
- * {@code type} defines the view's UI control category (like a text field), while the optional
- * {@code sub-type} define its semantics (like a postal address).
+ * @hide
+ * @deprecated TODO(b/35956626): remove once clients use AutofillValue
  */
+@Deprecated
 public final class AutoFillValue implements Parcelable {
-    private final String mText;
-    private final int mListIndex;
-    private final boolean mToggle;
-    private final long mDate;
+    private final AutofillValue mRealValue;
 
-    private AutoFillValue(CharSequence text, int listIndex, boolean toggle, long date) {
-        mText = (text == null) ? null : text.toString();
-        mListIndex = listIndex;
-        mToggle = toggle;
-        mDate = date;
+    private AutoFillValue(AutofillValue daRealValue) {
+        this.mRealValue = daRealValue;
     }
 
     /**
@@ -50,7 +41,7 @@ public final class AutoFillValue implements Parcelable {
      * <p>See {@link View#AUTOFILL_TYPE_TEXT} for more info.
      */
     public CharSequence getTextValue() {
-        return mText;
+        return mRealValue.getTextValue();
     }
 
     /**
@@ -59,7 +50,7 @@ public final class AutoFillValue implements Parcelable {
      * <p>See {@link View#AUTOFILL_TYPE_TOGGLE} for more info.
      */
     public boolean getToggleValue() {
-        return mToggle;
+        return mRealValue.getToggleValue();
     }
 
     /**
@@ -68,7 +59,7 @@ public final class AutoFillValue implements Parcelable {
      * <p>See {@link View#AUTOFILL_TYPE_LIST} for more info.
      */
     public int getListValue() {
-        return mListIndex;
+        return mRealValue.getListValue();
     }
 
     /**
@@ -77,7 +68,7 @@ public final class AutoFillValue implements Parcelable {
      * <p>See {@link View#AUTOFILL_TYPE_DATE} for more info.
      */
     public long getDateValue() {
-        return mDate;
+        return mRealValue.getDateValue();
     }
 
     /////////////////////////////////////
@@ -86,13 +77,7 @@ public final class AutoFillValue implements Parcelable {
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((mText == null) ? 0 : mText.hashCode());
-        result = prime * result + mListIndex;
-        result = prime * result + (mToggle ? 1231 : 1237);
-        result = prime * result + (int) (mDate ^ (mDate >>> 32));
-        return result;
+        return mRealValue.hashCode();
     }
 
     @Override
@@ -101,32 +86,19 @@ public final class AutoFillValue implements Parcelable {
         if (obj == null) return false;
         if (getClass() != obj.getClass()) return false;
         final AutoFillValue other = (AutoFillValue) obj;
-        if (mText == null) {
-            if (other.mText != null) return false;
-        } else {
-            if (!mText.equals(other.mText)) return false;
-        }
-        if (mListIndex != other.mListIndex) return false;
-        if (mToggle != other.mToggle) return false;
-        if (mDate != other.mDate) return false;
-        return true;
+        return mRealValue.equals(other.mRealValue);
     }
 
     /** @hide */
     public String coerceToString() {
-        // TODO(b/33197203): How can we filter on toggles or list values?
-        return mText;
+        return mRealValue.coerceToString();
     }
 
     @Override
     public String toString() {
         if (!DEBUG) return super.toString();
 
-        if (mText != null) {
-            return mText.length() + "_chars";
-        }
-
-        return "[l=" + mListIndex + ", t=" + mToggle + ", d=" + mDate + "]";
+        return mRealValue.toString();
     }
 
     /////////////////////////////////////
@@ -140,17 +112,11 @@ public final class AutoFillValue implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
-        parcel.writeString(mText);
-        parcel.writeInt(mListIndex);
-        parcel.writeInt(mToggle ? 1 : 0);
-        parcel.writeLong(mDate);
+        parcel.writeParcelable(mRealValue, 0);
     }
 
     private AutoFillValue(Parcel parcel) {
-        mText = parcel.readString();
-        mListIndex = parcel.readInt();
-        mToggle = parcel.readInt() == 1;
-        mDate = parcel.readLong();
+        mRealValue = parcel.readParcelable(null);
     }
 
     public static final Parcelable.Creator<AutoFillValue> CREATOR =
@@ -169,17 +135,14 @@ public final class AutoFillValue implements Parcelable {
     ////////////////////
     // Factory methods //
     ////////////////////
-
-    // TODO(b/33197203): add unit tests for each supported type (new / get should return same value)
     /**
      * Creates a new {@link AutoFillValue} to autofill a {@link View} representing a text field.
      *
      * <p>See {@link View#AUTOFILL_TYPE_TEXT} for more info.
      */
-    // TODO(b/33197203): use cache
     @Nullable
     public static AutoFillValue forText(@Nullable CharSequence value) {
-        return value == null ? null : new AutoFillValue(value, 0, false, 0);
+        return value == null ? null : new AutoFillValue(AutofillValue.forText(value));
     }
 
     /**
@@ -189,7 +152,7 @@ public final class AutoFillValue implements Parcelable {
      * <p>See {@link View#AUTOFILL_TYPE_TOGGLE} for more info.
      */
     public static AutoFillValue forToggle(boolean value) {
-        return new AutoFillValue(null, 0, value, 0);
+        return new AutoFillValue(AutofillValue.forToggle(value));
     }
 
     /**
@@ -199,7 +162,7 @@ public final class AutoFillValue implements Parcelable {
      * <p>See {@link View#AUTOFILL_TYPE_LIST} for more info.
      */
     public static AutoFillValue forList(int value) {
-        return new AutoFillValue(null, value, false, 0);
+        return new AutoFillValue(AutofillValue.forList(value));
     }
 
     /**
@@ -208,6 +171,16 @@ public final class AutoFillValue implements Parcelable {
      * <p>See {@link View#AUTOFILL_TYPE_DATE} for more info.
      */
     public static AutoFillValue forDate(long date) {
-        return new AutoFillValue(null, 0, false, date);
+        return new AutoFillValue(AutofillValue.forDate(date));
+    }
+
+    /** @hide */
+    public static AutoFillValue forDaRealValue(AutofillValue daRealValue) {
+        return new AutoFillValue(daRealValue);
+    }
+
+    /** @hide */
+    public AutofillValue getDaRealValue() {
+        return mRealValue;
     }
 }

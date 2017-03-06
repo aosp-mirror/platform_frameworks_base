@@ -30,7 +30,7 @@ import android.os.ICancellationSignal;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.service.autofill.AutoFillService;
+import android.service.autofill.AutofillService;
 import android.service.autofill.FillResponse;
 import android.service.autofill.IAutoFillService;
 import android.service.autofill.IAutoFillServiceConnection;
@@ -100,8 +100,7 @@ final class RemoteFillService implements DeathRecipient {
         mContext = context;
         mCallbacks = callbacks;
         mComponentName = componentName;
-        mIntent = new Intent(AutoFillService.SERVICE_INTERFACE)
-                .setComponent(mComponentName);
+        mIntent = new Intent(AutofillService.SERVICE_INTERFACE).setComponent(mComponentName);
         mUserId = userId;
         mHandler = new MyHandler(context);
     }

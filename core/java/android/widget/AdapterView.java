@@ -34,7 +34,7 @@ import android.view.ViewHierarchyEncoder;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
-import android.view.autofill.AutoFillManager;
+import android.view.autofill.AutofillManager;
 
 /**
  * An AdapterView is a view whose children are determined by an {@link Adapter}.
@@ -915,8 +915,8 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
                 dispatchOnItemSelected();
             }
         }
-        // Always notify AutoFillManager - it will return right away if auto-fill is disabled.
-        final AutoFillManager afm = mContext.getSystemService(AutoFillManager.class);
+        // Always notify AutoFillManager - it will return right away if autofill is disabled.
+        final AutofillManager afm = mContext.getSystemService(AutofillManager.class);
         if (afm != null) {
             afm.valueChanged(this);
         }

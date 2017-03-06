@@ -25,13 +25,15 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.view.autofill.AutoFillId;
 import android.view.autofill.AutoFillValue;
+import android.view.autofill.AutofillId;
+import android.view.autofill.AutofillValue;
 import android.widget.RemoteViews;
 import com.android.internal.util.Preconditions;
 
 import java.util.ArrayList;
 
 /**
- * A set of data that can be used to auto-fill an {@link android.app.Activity}.
+ * A set of data that can be used to autofill an {@link android.app.Activity}.
  *
  * <p>It contains:
  *
@@ -45,8 +47,8 @@ import java.util.ArrayList;
  */
 public final class Dataset implements Parcelable {
 
-    private final ArrayList<AutoFillId> mFieldIds;
-    private final ArrayList<AutoFillValue> mFieldValues;
+    private final ArrayList<AutofillId> mFieldIds;
+    private final ArrayList<AutofillValue> mFieldValues;
     private final RemoteViews mPresentation;
     private final IntentSender mAuthentication;
 
@@ -58,12 +60,12 @@ public final class Dataset implements Parcelable {
     }
 
     /** @hide */
-    public @Nullable ArrayList<AutoFillId> getFieldIds() {
+    public @Nullable ArrayList<AutofillId> getFieldIds() {
         return mFieldIds;
     }
 
     /** @hide */
-    public @Nullable ArrayList<AutoFillValue> getFieldValues() {
+    public @Nullable ArrayList<AutofillValue> getFieldValues() {
         return mFieldValues;
     }
 
@@ -99,8 +101,8 @@ public final class Dataset implements Parcelable {
      * one value for a field or set an authentication intent.
      */
     public static final class Builder {
-        private ArrayList<AutoFillId> mFieldIds;
-        private ArrayList<AutoFillValue> mFieldValues;
+        private ArrayList<AutofillId> mFieldIds;
+        private ArrayList<AutofillValue> mFieldValues;
         private RemoteViews mPresentation;
         private IntentSender mAuthentication;
         private boolean mDestroyed;
@@ -116,7 +118,7 @@ public final class Dataset implements Parcelable {
         }
 
         /**
-         * Requires a dataset authentication before auto-filling the activity with this dataset.
+         * Requires a dataset authentication before autofilling the activity with this dataset.
          *
          * <p>This method is called when you need to provide an authentication
          * UI for the data set. For example, when a data set contains credit card information
@@ -131,13 +133,13 @@ public final class Dataset implements Parcelable {
          * the items with these labels is chosen. Note that if you use sensitive data as
          * a label, for example an email address, then it should also be encrypted.</p>
          *
-         * <p>When a user triggers auto-fill, the system launches the provided intent
+         * <p>When a user triggers autofill, the system launches the provided intent
          * whose extras will have the {@link
-         * android.view.autofill.AutoFillManager#EXTRA_ASSIST_STRUCTURE screen content}. Once
+         * android.view.autofill.AutofillManager#EXTRA_ASSIST_STRUCTURE screen content}. Once
          * you complete your authentication flow you should set the activity result to {@link
          * android.app.Activity#RESULT_OK} and provide the fully populated {@link Dataset
          * dataset} by setting it to the {@link
-         * android.view.autofill.AutoFillManager#EXTRA_AUTHENTICATION_RESULT} extra. For example,
+         * android.view.autofill.AutofillManager#EXTRA_AUTHENTICATION_RESULT} extra. For example,
          * if you provided credit card information without the CVV for the data set in the
          * {@link FillResponse response} then the returned data set should contain the
          * CVV entry.</p>
@@ -158,14 +160,22 @@ public final class Dataset implements Parcelable {
         }
 
         /**
+         * @hide
+         * @deprecated TODO(b/35956626): remove once clients use other setValue()
+         */
+       @Deprecated
+        public @NonNull Builder setValue(@NonNull AutoFillId id, @NonNull AutoFillValue value) {
+            return setValue(id.getDaRealId(), value.getDaRealValue());
+        }
+        /**
          * Sets the value of a field.
          *
          * @param id id returned by {@link
-         *         android.app.assist.AssistStructure.ViewNode#getAutoFillId()}.
+         *         android.app.assist.AssistStructure.ViewNode#getAutofillId()}.
          * @param value value to be auto filled.
          * @return This builder.
          */
-        public @NonNull Builder setValue(@NonNull AutoFillId id, @NonNull AutoFillValue value) {
+        public @NonNull Builder setValue(@NonNull AutofillId id, @NonNull AutofillValue value) {
             throwIfDestroyed();
             Preconditions.checkNotNull(id, "id cannot be null");
             Preconditions.checkNotNull(value, "value cannot be null");
@@ -233,13 +243,13 @@ public final class Dataset implements Parcelable {
             // the system obeys the contract of the builder to avoid attacks
             // using specially crafted parcels.
             final Builder builder = new Builder(parcel.readParcelable(null));
-            final ArrayList<AutoFillId> ids = parcel.readTypedArrayList(null);
-            final ArrayList<AutoFillValue> values = parcel.readTypedArrayList(null);
+            final ArrayList<AutofillId> ids = parcel.readTypedArrayList(null);
+            final ArrayList<AutofillValue> values = parcel.readTypedArrayList(null);
             final int idCount = (ids != null) ? ids.size() : 0;
             final int valueCount = (values != null) ? values.size() : 0;
             for (int i = 0; i < idCount; i++) {
-                AutoFillId id = ids.get(i);
-                AutoFillValue value = (valueCount > i) ? values.get(i) : null;
+                final AutofillId id = ids.get(i);
+                final AutofillValue value = (valueCount > i) ? values.get(i) : null;
                 builder.setValue(id, value);
             }
             builder.setAuthentication(parcel.readParcelable(null));

@@ -114,7 +114,7 @@ import android.os.health.SystemHealthManager;
 import android.os.storage.StorageManager;
 import android.print.IPrintManager;
 import android.print.PrintManager;
-import android.view.autofill.AutoFillManager;
+import android.view.autofill.AutofillManager;
 import android.view.autofill.IAutoFillManager;
 import android.service.persistentdata.IPersistentDataBlockService;
 import android.service.persistentdata.PersistentDataBlockManager;
@@ -821,13 +821,13 @@ final class SystemServiceRegistry {
                         IBinder b = ServiceManager.getServiceOrThrow(Context.FONT_SERVICE);
                         return new FontManager(IFontManager.Stub.asInterface(b));
                     }});
-        registerService(Context.AUTO_FILL_MANAGER_SERVICE, AutoFillManager.class,
-                new CachedServiceFetcher<AutoFillManager>() {
+        registerService(Context.AUTOFILL_MANAGER_SERVICE, AutofillManager.class,
+                new CachedServiceFetcher<AutofillManager>() {
             @Override
-            public AutoFillManager createService(ContextImpl ctx) throws ServiceNotFoundException {
-                IBinder b = ServiceManager.getServiceOrThrow(Context.AUTO_FILL_MANAGER_SERVICE);
+            public AutofillManager createService(ContextImpl ctx) throws ServiceNotFoundException {
+                IBinder b = ServiceManager.getServiceOrThrow(Context.AUTOFILL_MANAGER_SERVICE);
                 IAutoFillManager service = IAutoFillManager.Stub.asInterface(b);
-                return new AutoFillManager(ctx.getOuterContext(), service);
+                return new AutofillManager(ctx.getOuterContext(), service);
             }});
 
         registerService(Context.VR_SERVICE, VrManager.class, new CachedServiceFetcher<VrManager>() {

@@ -502,8 +502,8 @@ public class ActivityManager {
     /** @hide requestType for assist context: generate full AssistStructure. */
     public static final int ASSIST_CONTEXT_FULL = 1;
 
-    /** @hide requestType for assist context: generate full AssistStructure for auto-fill. */
-    public static final int ASSIST_CONTEXT_AUTO_FILL = 2;
+    /** @hide requestType for assist context: generate full AssistStructure for autofill. */
+    public static final int ASSIST_CONTEXT_AUTOFILL = 2;
 
     /** @hide Flag for registerUidObserver: report changes in process state. */
     public static final int UID_OBSERVER_PROCSTATE = 1<<0;

@@ -2913,13 +2913,13 @@ public final class ActivityThread {
     }
 
     public void handleRequestAssistContextExtras(RequestAssistContextExtras cmd) {
-        // Filling for auto-fill has a few differences:
+        // Filling for autofill has a few differences:
         // - it does not need an AssistContent
         // - it does not call onProvideAssistData()
         // - it needs an IAutoFillCallback
-        boolean forAutoFill = cmd.requestType == ActivityManager.ASSIST_CONTEXT_AUTO_FILL;
+        boolean forAutofill = cmd.requestType == ActivityManager.ASSIST_CONTEXT_AUTOFILL;
 
-        // TODO(b/33197203): decide if lastSessionId logic applies to auto-fill sessions
+        // TODO(b/33197203): decide if lastSessionId logic applies to autofill sessions
         if (mLastSessionId != cmd.sessionId) {
             // Clear the existing structures
             mLastSessionId = cmd.sessionId;
@@ -2934,25 +2934,25 @@ public final class ActivityThread {
 
         Bundle data = new Bundle();
         AssistStructure structure = null;
-        AssistContent content = forAutoFill ? null : new AssistContent();
+        AssistContent content = forAutofill ? null : new AssistContent();
         ActivityClientRecord r = mActivities.get(cmd.activityToken);
         Uri referrer = null;
         if (r != null) {
-            if (!forAutoFill) {
+            if (!forAutofill) {
                 r.activity.getApplication().dispatchOnProvideAssistData(r.activity, data);
                 r.activity.onProvideAssistData(data);
                 referrer = r.activity.onProvideReferrer();
             }
-            if (cmd.requestType == ActivityManager.ASSIST_CONTEXT_FULL || forAutoFill) {
-                structure = new AssistStructure(r.activity, forAutoFill);
+            if (cmd.requestType == ActivityManager.ASSIST_CONTEXT_FULL || forAutofill) {
+                structure = new AssistStructure(r.activity, forAutofill);
                 Intent activityIntent = r.activity.getIntent();
-                // TODO(b/33197203): re-evaluate conditions below for auto-fill. In particular,
+                // TODO(b/33197203): re-evaluate conditions below for autofill. In particular,
                 // FLAG_SECURE might be allowed on AUTO_FILL but not on AUTO_FILL_SAVE)
                 boolean notSecure = r.window == null ||
                         (r.window.getAttributes().flags
                                 & WindowManager.LayoutParams.FLAG_SECURE) == 0;
                 if (activityIntent != null && notSecure) {
-                    if (!forAutoFill) {
+                    if (!forAutofill) {
                         Intent intent = new Intent(activityIntent);
                         intent.setFlags(intent.getFlags() & ~(Intent.FLAG_GRANT_WRITE_URI_PERMISSION
                                 | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION));
@@ -2960,11 +2960,11 @@ public final class ActivityThread {
                         content.setDefaultIntent(intent);
                     }
                 } else {
-                    if (!forAutoFill) {
+                    if (!forAutofill) {
                         content.setDefaultIntent(new Intent());
                     }
                 }
-                if (!forAutoFill) {
+                if (!forAutofill) {
                     r.activity.onProvideAssistContent(content);
                 }
             }
@@ -2973,7 +2973,7 @@ public final class ActivityThread {
             structure = new AssistStructure();
         }
 
-        // TODO(b/33197203): decide if lastSessionId logic applies to auto-fill sessions
+        // TODO(b/33197203): decide if lastSessionId logic applies to autofill sessions
         mLastAssistStructures.add(new WeakReference<>(structure));
         IActivityManager mgr = ActivityManager.getService();
         try {

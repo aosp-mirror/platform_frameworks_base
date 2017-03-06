@@ -31,8 +31,8 @@ import android.util.MathUtils;
 import android.view.View;
 import android.view.ViewStructure;
 import android.view.accessibility.AccessibilityEvent;
-import android.view.autofill.AutoFillManager;
-import android.view.autofill.AutoFillValue;
+import android.view.autofill.AutofillManager;
+import android.view.autofill.AutofillValue;
 
 import com.android.internal.R;
 
@@ -142,7 +142,7 @@ public class TimePicker extends FrameLayout {
                 break;
         }
         mDelegate.setAutoFillChangeListener((v, h, m) -> {
-            final AutoFillManager afm = context.getSystemService(AutoFillManager.class);
+            final AutofillManager afm = context.getSystemService(AutofillManager.class);
             if (afm != null) {
                 afm.valueChanged(this);
             }
@@ -516,18 +516,18 @@ public class TimePicker extends FrameLayout {
         }
     }
 
-    // TODO(b/33197203): add unit/CTS tests for auto-fill methods (and make sure they handle enable)
+    // TODO(b/33197203): add unit/CTS tests for autofill methods (and make sure they handle enable)
 
     @Override
-    public void dispatchProvideAutoFillStructure(ViewStructure structure, int flags) {
-        // This view is self-sufficient for auto-fill, so it needs to call
+    public void dispatchProvideAutofillStructure(ViewStructure structure, int flags) {
+        // This view is self-sufficient for autofill, so it needs to call
         // onProvideAutoFillStructure() to fill itself, but it does not need to call
         // dispatchProvideAutoFillStructure() to fill its children.
-        onProvideAutoFillStructure(structure, flags);
+        onProvideAutofillStructure(structure, flags);
     }
 
     @Override
-    public void autoFill(AutoFillValue value) {
+    public void autofill(AutofillValue value) {
         if (!isEnabled()) return;
 
         mDelegate.setDate(value.getDateValue());
@@ -539,7 +539,7 @@ public class TimePicker extends FrameLayout {
     }
 
     @Override
-    public AutoFillValue getAutoFillValue() {
-        return isEnabled() ? AutoFillValue.forDate(mDelegate.getDate()) : null;
+    public AutofillValue getAutofillValue() {
+        return isEnabled() ? AutofillValue.forDate(mDelegate.getDate()) : null;
     }
 }

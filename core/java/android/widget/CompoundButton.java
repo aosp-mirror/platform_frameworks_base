@@ -35,8 +35,8 @@ import android.view.ViewHierarchyEncoder;
 import android.view.ViewStructure;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
-import android.view.autofill.AutoFillManager;
-import android.view.autofill.AutoFillValue;
+import android.view.autofill.AutofillManager;
+import android.view.autofill.AutofillValue;
 
 import com.android.internal.R;
 
@@ -69,7 +69,7 @@ public abstract class CompoundButton extends Button implements Checkable {
     private OnCheckedChangeListener mOnCheckedChangeWidgetListener;
 
     // Indicates whether the toggle state was set from resources or dynamically, so it can be used
-    // to sanitize auto-fill requests.
+    // to sanitize autofill requests.
     private boolean mCheckedFromResource = false;
 
     private static final int[] CHECKED_STATE_SET = {
@@ -171,7 +171,7 @@ public abstract class CompoundButton extends Button implements Checkable {
             if (mOnCheckedChangeWidgetListener != null) {
                 mOnCheckedChangeWidgetListener.onCheckedChanged(this, mChecked);
             }
-            final AutoFillManager afm = mContext.getSystemService(AutoFillManager.class);
+            final AutofillManager afm = mContext.getSystemService(AutofillManager.class);
             if (afm != null) {
                 afm.valueChanged(this);
             }
@@ -572,17 +572,17 @@ public abstract class CompoundButton extends Button implements Checkable {
         stream.addProperty("checked", isChecked());
     }
 
-    // TODO(b/33197203): add unit/CTS tests for auto-fill methods (and make sure they handle enable)
+    // TODO(b/33197203): add unit/CTS tests for autofill methods (and make sure they handle enable)
 
     @Override
-    public void onProvideAutoFillStructure(ViewStructure structure, int flags) {
-        super.onProvideAutoFillStructure(structure, flags);
+    public void onProvideAutofillStructure(ViewStructure structure, int flags) {
+        super.onProvideAutofillStructure(structure, flags);
 
         structure.setSanitized(mCheckedFromResource);
     }
 
     @Override
-    public void autoFill(AutoFillValue value) {
+    public void autofill(AutofillValue value) {
         if (!isEnabled()) return;
 
         setChecked(value.getToggleValue());
@@ -594,7 +594,7 @@ public abstract class CompoundButton extends Button implements Checkable {
     }
 
     @Override
-    public AutoFillValue getAutoFillValue() {
-        return isEnabled() ? AutoFillValue.forToggle(isChecked()) : null;
+    public AutofillValue getAutofillValue() {
+        return isEnabled() ? AutofillValue.forToggle(isChecked()) : null;
     }
 }

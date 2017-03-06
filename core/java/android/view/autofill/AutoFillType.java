@@ -23,16 +23,18 @@ import android.os.Parcelable;
 import android.view.View;
 
 /**
- * Defines the type of a object that can be used to auto-fill a {@link View} so the
- * {@link android.service.autofill.AutoFillService} can use the proper {@link AutoFillValue} to
+ * Defines the type of a object that can be used to autofill a {@link View} so the
+ * {@link android.service.autofill.AutofillService} can use the proper {@link AutofillValue} to
  * fill it.
  *
- * TODO(b/35956626): remove once clients use getAutoFilltype
+ * @hide
+ * @deprecated TODO(b/35956626): remove once clients use getAutoFilltype
  */
+@Deprecated
 public final class AutoFillType implements Parcelable {
 
     // Cached instance for types that don't have subtype; it uses the "lazy initialization holder
-    // class idiom" (Effective Java, Item 71) to avoid memory utilization when auto-fill is not
+    // class idiom" (Effective Java, Item 71) to avoid memory utilization when autofill is not
     // enabled.
     private static class DefaultTypesHolder {
         static final AutoFillType TEXT = new AutoFillType(TYPE_TEXT);
@@ -54,10 +56,6 @@ public final class AutoFillType implements Parcelable {
 
     /**
      * Checks if this is a type for a text field, which is filled by a {@link CharSequence}.
-     *
-     * <p>{@link AutoFillValue} instances for auto-filling a {@link View} can be obtained through
-     * {@link AutoFillValue#forText(CharSequence)}, and the value passed to auto-fill a
-     * {@link View} can be fetched through {@link AutoFillValue#getTextValue()}.
      */
     public boolean isText() {
         return mType == TYPE_TEXT;
@@ -65,10 +63,6 @@ public final class AutoFillType implements Parcelable {
 
     /**
      * Checks if this is a a type for a togglable field, which is filled by a {@code boolean}.
-     *
-     * <p>{@link AutoFillValue} instances for auto-filling a {@link View} can be obtained through
-     * {@link AutoFillValue#forToggle(boolean)}, and the value passed to auto-fill a
-     * {@link View} can be fetched through {@link AutoFillValue#getToggleValue()}.
      */
     public boolean isToggle() {
         return mType == TYPE_TOGGLE;
@@ -77,14 +71,7 @@ public final class AutoFillType implements Parcelable {
     /**
      * Checks if this is a type for a selection list field, which is filled by a {@code integer}
      * representing the element index inside the list (starting at {@code 0}.
-     *
-     * <p>{@link AutoFillValue} instances for auto-filling a {@link View} can be obtained through
-     * {@link AutoFillValue#forList(int)}, and the value passed to auto-fill a
-     * {@link View} can be fetched through {@link AutoFillValue#getListValue()}.
-     *
-     * <p>The available options in the selection list are typically provided by
-     * {@link android.app.assist.AssistStructure.ViewNode#getAutoFillOptions()}.
-     */
+      */
     public boolean isList() {
         return mType == TYPE_LIST;
     }
@@ -93,10 +80,6 @@ public final class AutoFillType implements Parcelable {
      * Checks if this is a type for a date and time, which is represented by a long representing
      * the number of milliseconds since the standard base time known as "the epoch", namely
      * January 1, 1970, 00:00:00 GMT (see {@link java.util.Date#getTime()}.
-     *
-     * <p>{@link AutoFillValue} instances for auto-filling a {@link View} can be obtained through
-     * {@link AutoFillValue#forDate(long)}, and the values passed to
-     * auto-fill a {@link View} can be fetched through {@link AutoFillValue#getDateValue()}.
      */
     public boolean isDate() {
         return mType == TYPE_DATE;

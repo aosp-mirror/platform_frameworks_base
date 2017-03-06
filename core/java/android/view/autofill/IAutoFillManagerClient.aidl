@@ -21,24 +21,24 @@ import java.util.List;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.os.IBinder;
-import android.view.autofill.AutoFillId;
-import android.view.autofill.AutoFillValue;
+import android.view.autofill.AutofillId;
+import android.view.autofill.AutofillValue;
 
 /**
- * Object running in the application process and responsible for auto-filling it.
+ * Object running in the application process and responsible for autofilling it.
  *
  * @hide
  */
 oneway interface IAutoFillManagerClient {
     /**
-     * Notifies the client when the auto-fill enabled state changed.
+     * Notifies the client when the autofill enabled state changed.
      */
     void setState(boolean enabled);
 
     /**
-      * Auto-fills the activity with the contents of a dataset.
+      * Autofills the activity with the contents of a dataset.
       */
-    void autoFill(in List<AutoFillId> ids, in List<AutoFillValue> values);
+    void autofill(in List<AutofillId> ids, in List<AutofillValue> values);
 
     /**
       * Authenticates a fill response or a data set.
@@ -48,5 +48,5 @@ oneway interface IAutoFillManagerClient {
     /**
      * Notifies the client when the auto-fill UI changed.
      */
-    void onAutofillEvent(in IBinder windowToken, in AutoFillId id, int event);
+    void onAutofillEvent(in IBinder windowToken, in AutofillId id, int event);
 }

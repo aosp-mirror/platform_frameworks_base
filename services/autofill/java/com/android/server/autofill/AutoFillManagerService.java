@@ -17,7 +17,7 @@
 package com.android.server.autofill;
 
 import static android.Manifest.permission.MANAGE_AUTO_FILL;
-import static android.content.Context.AUTO_FILL_MANAGER_SERVICE;
+import static android.content.Context.AUTOFILL_MANAGER_SERVICE;
 import static com.android.server.autofill.Helper.VERBOSE;
 
 import android.Manifest;
@@ -45,8 +45,8 @@ import android.util.LocalLog;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.view.autofill.AutoFillId;
-import android.view.autofill.AutoFillValue;
+import android.view.autofill.AutofillId;
+import android.view.autofill.AutofillValue;
 
 import android.view.autofill.IAutoFillManager;
 import android.view.autofill.IAutoFillManagerClient;
@@ -64,7 +64,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Entry point service for auto-fill management.
+ * Entry point service for autofill management.
  *
  * <p>This service provides the {@link IAutoFillManager} implementation and keeps a list of
  * {@link AutoFillManagerServiceImpl} per user; the real work is done by
@@ -91,8 +91,8 @@ public final class AutoFillManagerService extends SystemService {
      * <p>
      * Entries on this cache are added on demand and removed when:
      * <ol>
-     *   <li>An auto-fill service app is removed.
-     *   <li>The {@link android.provider.Settings.Secure#AUTO_FILL_SERVICE} for an user change.\
+     *   <li>An autofill service app is removed.
+     *   <li>The {@link android.provider.Settings.Secure#AUTOFILL_SERVICE} for an user change.
      * </ol>
      */
     // TODO(b/33197203): Update the above comment
@@ -128,7 +128,7 @@ public final class AutoFillManagerService extends SystemService {
 
     @Override
     public void onStart() {
-        publishBinderService(AUTO_FILL_MANAGER_SERVICE, new AutoFillManagerServiceStub());
+        publishBinderService(AUTOFILL_MANAGER_SERVICE, new AutoFillManagerServiceStub());
     }
 
     @Override
@@ -314,20 +314,20 @@ public final class AutoFillManagerService extends SystemService {
 
         @Override
         public void startSession(IBinder activityToken, IBinder windowToken, IBinder appCallback,
-                AutoFillId autoFillId, Rect bounds, AutoFillValue value, int userId,
+                AutofillId autofillId, Rect bounds, AutofillValue value, int userId,
                 boolean hasCallback) {
             // TODO(b/33197203): make sure it's called by resumed / focused activity
 
             synchronized (mLock) {
                 final AutoFillManagerServiceImpl service = getServiceForUserLocked(userId);
                 service.startSessionLocked(activityToken, windowToken, appCallback,
-                        autoFillId, bounds, value, hasCallback);
+                        autofillId, bounds, value, hasCallback);
             }
         }
 
         @Override
-        public void updateSession(IBinder activityToken, AutoFillId id, Rect bounds,
-                AutoFillValue value, int flags, int userId) {
+        public void updateSession(IBinder activityToken, AutofillId id, Rect bounds,
+                AutofillValue value, int flags, int userId) {
             synchronized (mLock) {
                 final AutoFillManagerServiceImpl service = mServicesCache.get(
                         UserHandle.getCallingUserId());
@@ -389,7 +389,7 @@ public final class AutoFillManagerService extends SystemService {
             super(handler);
             ContentResolver resolver = mContext.getContentResolver();
             resolver.registerContentObserver(Settings.Secure.getUriFor(
-                    Settings.Secure.AUTO_FILL_SERVICE), false, this, UserHandle.USER_ALL);
+                    Settings.Secure.AUTOFILL_SERVICE), false, this, UserHandle.USER_ALL);
         }
 
         @Override

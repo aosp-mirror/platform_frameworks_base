@@ -16,4 +16,5 @@
 
 package android.view.autofill;
 
+//  @deprecated TODO(b/35956626): remove once clients use AutofillValue
 parcelable AutoFillValue;
