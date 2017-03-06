@@ -507,6 +507,9 @@ public class RankingHelper implements RankingConfig {
         if (channel.getGroup() != null && !r.groups.containsKey(channel.getGroup())) {
             throw new IllegalArgumentException("NotificationChannelGroup doesn't exist");
         }
+        if (NotificationChannel.DEFAULT_CHANNEL_ID.equals(channel.getId())) {
+            throw new IllegalArgumentException("Reserved id");
+        }
 
         NotificationChannel existing = r.channels.get(channel.getId());
         // Keep existing settings

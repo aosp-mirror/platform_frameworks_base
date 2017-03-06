@@ -15,6 +15,7 @@
  */
 package com.android.server.notification;
 
+import static android.app.NotificationManager.IMPORTANCE_HIGH;
 import static android.app.NotificationManager.IMPORTANCE_LOW;
 
 import static junit.framework.Assert.assertNull;
@@ -768,6 +769,17 @@ public class RankingHelperTest {
         // No long deleted, using old settings
         compareChannels(channel,
                 mHelper.getNotificationChannel(pkg, uid, newChannel.getId(), false));
+    }
+
+    @Test
+    public void testCreateChannel_defaultChannelId() throws Exception {
+        try {
+            mHelper.createNotificationChannel(pkg2, uid2, new NotificationChannel(
+                    NotificationChannel.DEFAULT_CHANNEL_ID, "ha", IMPORTANCE_HIGH), true);
+            fail("Allowed to create default channel");
+        } catch (IllegalArgumentException e) {
+            // pass
+        }
     }
 
     @Test
