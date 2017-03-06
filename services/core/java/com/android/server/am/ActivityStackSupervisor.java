@@ -2142,20 +2142,6 @@ public final class ActivityStackSupervisor implements DisplayListener {
         mWindowManager.deferSurfaceLayout();
         try {
             if (fromStackId == DOCKED_STACK_ID) {
-
-                // We are moving all tasks from the docked stack to the fullscreen stack,
-                // which is dismissing the docked stack, so resize all other stacks to
-                // fullscreen here already so we don't end up with resize trashing.
-                for (int i = FIRST_STATIC_STACK_ID; i <= LAST_STATIC_STACK_ID; i++) {
-                    if (StackId.isResizeableByDockedStack(i)) {
-                        ActivityStack otherStack = getStack(i);
-                        if (otherStack != null) {
-                            resizeStackLocked(i, null, null, null, PRESERVE_WINDOWS,
-                                    true /* allowResizeInDockedMode */, DEFER_RESUME);
-                        }
-                    }
-                }
-
                 // Also disable docked stack resizing since we have manually adjusted the
                 // size of other stacks above and we don't want to trigger a docked stack
                 // resize when we remove task from it below and it is detached from the
@@ -2177,6 +2163,20 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 for (int i = size - 1; i >= 0; i--) {
                     positionTaskInStackLocked(tasks.get(i).taskId,
                             FULLSCREEN_WORKSPACE_STACK_ID, 0);
+                }
+            }
+            // We are moving all tasks from the docked stack to the fullscreen stack,
+            // which is dismissing the docked stack, so resize all other stacks to
+            // fullscreen here already so we don't end up with resize trashing.
+            if (fromStackId == DOCKED_STACK_ID)  {
+                for (int i = FIRST_STATIC_STACK_ID; i <= LAST_STATIC_STACK_ID; i++) {
+                    if (StackId.isResizeableByDockedStack(i)) {
+                        ActivityStack otherStack = getStack(i);
+                        if (otherStack != null) {
+                            resizeStackLocked(i, null/* fullscreen */, null, null, PRESERVE_WINDOWS,
+                                    true /* allowResizeInDockedMode */, !DEFER_RESUME);
+                        }
+                    }
                 }
             }
         } finally {
