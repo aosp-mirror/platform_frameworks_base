@@ -3517,6 +3517,11 @@ message MetricsEvent {
     // Tagged data for notification channel group. String.
     FIELD_NOTIFICATION_CHANNEL_GROUP_ID = 860;
 
+    // OPEN: Settings > Wi-Fi > Wifi Preferences -> Advanced -> Network Scorer
+    // CATEGORY: SETTINGS
+    // OS: O
+    SETTINGS_NETWORK_SCORER = 861;
+
     // ---- End O Constants, all O constants go above this line ----
 
     // Add new aosp constants above this line.
