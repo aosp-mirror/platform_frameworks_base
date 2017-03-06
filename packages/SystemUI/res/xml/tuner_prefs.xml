@@ -133,7 +133,7 @@
         <com.android.systemui.tuner.TunerSwitch
           android:key="doze_sensors_wake_up_fully"
           android:title="@string/tuner_doze_sensors_wake_up_fully"
-          sysui:defValue="false" />
+          sysui:defValue="true" />
 
     </PreferenceScreen>
 
