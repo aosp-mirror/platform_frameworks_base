@@ -16,7 +16,6 @@
 package android.telephony;
 
 import android.content.Context;
-import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -55,8 +54,17 @@ public final class VisualVoicemailSmsFilterSettings implements Parcelable {
      */
     public static final int DESTINATION_PORT_DATA_SMS = -2;
 
+    /**
+     * @hide
+     */
     public static final String DEFAULT_CLIENT_PREFIX = "//VVM";
+    /**
+     * @hide
+     */
     public static final List<String> DEFAULT_ORIGINATING_NUMBERS = Collections.emptyList();
+    /**
+     * @hide
+     */
     public static final int DEFAULT_DESTINATION_PORT = DESTINATION_PORT_ANY;
 
     /**

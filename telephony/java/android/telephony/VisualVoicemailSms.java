@@ -63,7 +63,8 @@ public final class VisualVoicemailSms implements Parcelable {
 
     /**
      * The key-value pairs sent by the SMS, or {@code null} if the framework cannot parse the SMS as
-     * voicemail but the carrier pattern indicates it is.
+     * voicemail but the carrier pattern indicates it is. The interpretation of the fields is
+     * carrier dependent.
      */
     public Bundle getFields() {
         return mFields;
