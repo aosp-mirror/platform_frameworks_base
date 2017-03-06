@@ -25,8 +25,7 @@
     <string name="wifi_remembered" msgid="4955746899347821096">"저장됨"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"사용 중지됨"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"IP 설정 실패"</string>
-    <!-- no translation found for wifi_disabled_by_recommendation_provider (5168315140978066096) -->
-    <skip />
+    <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"저품질 네트워크로 인해 연결되지 않음"</string>
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"Wi-Fi 연결 실패"</string>
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"인증 문제"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"범위 내에 없음"</string>
@@ -219,6 +218,8 @@
     <string name="no_application" msgid="2813387563129153880">"없음"</string>
     <string name="wait_for_debugger" msgid="1202370874528893091">"디버거 연결을 위해 대기"</string>
     <string name="wait_for_debugger_summary" msgid="1766918303462746804">"디버깅된 애플리케이션이 실행되기 전에 디버거 연결을 위해 대기"</string>
+    <string name="telephony_monitor_switch" msgid="1764958220062121194">"통신 모니터"</string>
+    <string name="telephony_monitor_switch_summary" msgid="7695552966547975635">"통신 모니터는 통신/모뎀 기능에서 문제가 감지될 경우 로그를 수집하며 사용자에게 버그를 신고하라는 알림을 표시합니다."</string>
     <string name="debug_input_category" msgid="1811069939601180246">"입력"</string>
     <string name="debug_drawing_category" msgid="6755716469267367852">"그림"</string>
     <string name="debug_hw_drawing_category" msgid="6220174216912308658">"하드웨어 가속 렌더링"</string>
@@ -237,8 +238,7 @@
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"하드웨어 업데이트 표시"</string>
     <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"업데이트 할 때 하드웨어 레이어 깜박이기"</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"GPU 오버드로 디버깅"</string>
-    <!-- no translation found for debug_hw_renderer (7568529019431785816) -->
-    <skip />
+    <string name="debug_hw_renderer" msgid="7568529019431785816">"GPU 렌더기 설정"</string>
     <string name="disable_overlays" msgid="2074488440505934665">"HW 오버레이 사용 안함"</string>
     <string name="disable_overlays_summary" msgid="3578941133710758592">"화면 합성 목적으로 항상 GPU 사용"</string>
     <string name="simulate_color_space" msgid="6745847141353345872">"색상 공간 시뮬레이션"</string>

@@ -25,8 +25,7 @@
     <string name="wifi_remembered" msgid="4955746899347821096">"បាន​រក្សាទុក"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"បាន​បិទ"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"ការ​កំណត់​រចនាសម្ព័ន្ធ IP បរាជ័យ"</string>
-    <!-- no translation found for wifi_disabled_by_recommendation_provider (5168315140978066096) -->
-    <skip />
+    <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"មិន​អាច​ភ្ជាប់​បាន​ទេ ដោយសារ​បណ្តាញ​មាន​គុណភាព​សេវា​ខ្សោយ"</string>
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"ការ​ភ្ជាប់​ WiFi បរាជ័យ"</string>
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"បញ្ហា​ក្នុង​ការ​ផ្ទៀងផ្ទាត់"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"នៅ​ក្រៅ​តំបន់"</string>
@@ -219,6 +218,8 @@
     <string name="no_application" msgid="2813387563129153880">"គ្មាន​អ្វីទេ"</string>
     <string name="wait_for_debugger" msgid="1202370874528893091">"រង់ចាំ​កម្មវិធី​កែ​កំហុស"</string>
     <string name="wait_for_debugger_summary" msgid="1766918303462746804">"កម្មវិធី​បាន​កែ​កំហុស​រង់ចាំ​ឲ្យ​ភ្ជាប់​កម្មវិធី​កែ​កំហុស​មុន​ពេល​អនុវត្ត"</string>
+    <string name="telephony_monitor_switch" msgid="1764958220062121194">"Telephony Monitor"</string>
+    <string name="telephony_monitor_switch_summary" msgid="7695552966547975635">"TelephonyMonitor នឹង​ប្រមូល​កំណត់​ហេតុ នៅពេល​វា​រកឃើញ​បញ្ហា​ទាក់ទង​នឹង​មុខងារ​ទូរសព្ទ/ម៉ូដឹម និង​បញ្ជូនការ​ជូន​ដំណឹង​ទៅកាន់​អ្នក​ប្រើប្រាស់​ដើម្បី​រាយការណ៍​ពី​បញ្ហា​"</string>
     <string name="debug_input_category" msgid="1811069939601180246">"បញ្ចូល"</string>
     <string name="debug_drawing_category" msgid="6755716469267367852">"គំនូរ"</string>
     <string name="debug_hw_drawing_category" msgid="6220174216912308658">"បង្ហាញ​ផ្នែក​រឹង​បាន​បង្កើន​ល្បឿន"</string>
@@ -237,8 +238,7 @@
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"បង្ហាញ​​បច្ចុប្បន្នភាព​ស្រទាប់​ផ្នែក​រឹង"</string>
     <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"ស្រទាប់​ផ្នែក​រឹង​បញ្ចេញ​ពន្លឺ​បៃ​តង​ ពេល​ពួក​វា​ធ្វើ​បច្ចុប្បន្នភាព"</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"កែ​កំហុស​ការ​លើស GPU"</string>
-    <!-- no translation found for debug_hw_renderer (7568529019431785816) -->
-    <skip />
+    <string name="debug_hw_renderer" msgid="7568529019431785816">"កំណត់​កម្មវិធី​បំប្លែង GPU"</string>
     <string name="disable_overlays" msgid="2074488440505934665">"បិទ​ការ​ត្រួត HW"</string>
     <string name="disable_overlays_summary" msgid="3578941133710758592">"ប្រើ GPU ជា​និច្ច​សម្រាប់​​ផ្សំ​អេក្រង់"</string>
     <string name="simulate_color_space" msgid="6745847141353345872">"ក្លែង​ធ្វើ​ចន្លោះ​ពណ៌"</string>

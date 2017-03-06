@@ -25,8 +25,7 @@
     <string name="wifi_remembered" msgid="4955746899347821096">"Išsaugotas"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"Neleidžiama"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"IP konfigūracijos triktis"</string>
-    <!-- no translation found for wifi_disabled_by_recommendation_provider (5168315140978066096) -->
-    <skip />
+    <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"Neprisijungta dėl žemos kokybės tinklo"</string>
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"„Wi-Fi“ ryšio triktis"</string>
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"Autentifikavimo problema"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"Ne diapazone"</string>
@@ -219,6 +218,8 @@
     <string name="no_application" msgid="2813387563129153880">"Nieko"</string>
     <string name="wait_for_debugger" msgid="1202370874528893091">"Laukti derintuvės"</string>
     <string name="wait_for_debugger_summary" msgid="1766918303462746804">"Derinta progr. laukia derint., kad galėtų tęsti."</string>
+    <string name="telephony_monitor_switch" msgid="1764958220062121194">"Telefonijos stebėjimo priemonė"</string>
+    <string name="telephony_monitor_switch_summary" msgid="7695552966547975635">"Telefonijos stebėjimo priemonė rinks žurnalus, kai aptiks problemą dėl telefonijos / modemo funkcijų, ir naudotojui pateiks raginimą pranešti apie riktą"</string>
     <string name="debug_input_category" msgid="1811069939601180246">"Įvestis"</string>
     <string name="debug_drawing_category" msgid="6755716469267367852">"Atvaizdavimas"</string>
     <string name="debug_hw_drawing_category" msgid="6220174216912308658">"Aparatinės įrangos paspartintas pateikimas"</string>
@@ -237,8 +238,7 @@
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"Rod. apar. įr. sl. nauj."</string>
     <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"Kai atsin. apar. įr. sl., rod. juos blyks. ž. sp."</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"Derinti GPU perdangą"</string>
-    <!-- no translation found for debug_hw_renderer (7568529019431785816) -->
-    <skip />
+    <string name="debug_hw_renderer" msgid="7568529019431785816">"Nust. graf. proc. pateik."</string>
     <string name="disable_overlays" msgid="2074488440505934665">"Neleisti HW perdangų"</string>
     <string name="disable_overlays_summary" msgid="3578941133710758592">"Komponuojant ekraną visada naudoti GPU"</string>
     <string name="simulate_color_space" msgid="6745847141353345872">"Imituoti spalvų erdvę"</string>

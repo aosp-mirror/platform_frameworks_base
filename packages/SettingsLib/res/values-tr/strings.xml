@@ -25,8 +25,7 @@
     <string name="wifi_remembered" msgid="4955746899347821096">"Kaydedildi"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"Devre dışı"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"IP Yapılandırması Hatası"</string>
-    <!-- no translation found for wifi_disabled_by_recommendation_provider (5168315140978066096) -->
-    <skip />
+    <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"Ağ kalitesi düşük olduğundan bağlanamadı"</string>
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"Kablosuz Bağlantı Hatası"</string>
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"Kimlik doğrulama sorunu"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"Kapsama alanı dışında"</string>
@@ -219,6 +218,8 @@
     <string name="no_application" msgid="2813387563129153880">"Hiçbiri"</string>
     <string name="wait_for_debugger" msgid="1202370874528893091">"Hata ayıklayıcıyı bekle"</string>
     <string name="wait_for_debugger_summary" msgid="1766918303462746804">"Hata ayıklanan uygulama, çalıştırılmadan önce hata ayıklayıcının eklenmesini bekler"</string>
+    <string name="telephony_monitor_switch" msgid="1764958220062121194">"Telephony Monitor"</string>
+    <string name="telephony_monitor_switch_summary" msgid="7695552966547975635">"TelephonyMonitor, telefon/modem işleviyle ilgili bir sorun algıladığında günlükleri toplar ve hatayı bildirmesi için kullanıcıya bir bildirim gösterir."</string>
     <string name="debug_input_category" msgid="1811069939601180246">"Girdi"</string>
     <string name="debug_drawing_category" msgid="6755716469267367852">"Çizim"</string>
     <string name="debug_hw_drawing_category" msgid="6220174216912308658">"Donanım hızlandırmalı oluşturma"</string>
@@ -237,8 +238,7 @@
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"Donanım katmanı güncellemelerini göster"</string>
     <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"Flash donanım katmanları güncellendiğinde yeşildir"</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"GPU fazla çizim hatasını ayıkla"</string>
-    <!-- no translation found for debug_hw_renderer (7568529019431785816) -->
-    <skip />
+    <string name="debug_hw_renderer" msgid="7568529019431785816">"GPU Oluşturucu\'yu ayarla"</string>
     <string name="disable_overlays" msgid="2074488440505934665">"Donanım katmanlarını devre dışı bırak"</string>
     <string name="disable_overlays_summary" msgid="3578941133710758592">"Ekran oluştururken her zaman GPU\'yu kullan"</string>
     <string name="simulate_color_space" msgid="6745847141353345872">"Renk uzayını simüle et"</string>
