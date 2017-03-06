@@ -243,7 +243,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     private static final String TAG_ADMIN_BROADCAST_PENDING = "admin-broadcast-pending";
 
-    private static final String TAG_DEFAULT_INPUT_METHOD_SET = "default-ime-set";
+    private static final String TAG_CURRENT_INPUT_METHOD_SET = "current-ime-set";
 
     private static final String TAG_OWNER_INSTALLED_CA_CERT = "owner-installed-ca-cert";
 
@@ -509,7 +509,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         long mLastNetworkLogsRetrievalTime = -1;
 
-        boolean mDefaultInputMethodSet = false;
+        boolean mCurrentInputMethodSet = false;
 
         // TODO(b/35385311): Keep track of metadata in TrustedCertificateStore instead.
         Set<String> mOwnerInstalledCaCerts = new ArraySet<>();
@@ -2607,9 +2607,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 out.endTag(null, TAG_PASSWORD_TOKEN_HANDLE);
             }
 
-            if (policy.mDefaultInputMethodSet) {
-                out.startTag(null, TAG_DEFAULT_INPUT_METHOD_SET);
-                out.endTag(null, TAG_DEFAULT_INPUT_METHOD_SET);
+            if (policy.mCurrentInputMethodSet) {
+                out.startTag(null, TAG_CURRENT_INPUT_METHOD_SET);
+                out.endTag(null, TAG_CURRENT_INPUT_METHOD_SET);
             }
 
             for (final String cert : policy.mOwnerInstalledCaCerts) {
@@ -2828,8 +2828,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 } else if (TAG_PASSWORD_TOKEN_HANDLE.equals(tag)) {
                     policy.mPasswordTokenHandle = Long.parseLong(
                             parser.getAttributeValue(null, ATTR_VALUE));
-                } else if (TAG_DEFAULT_INPUT_METHOD_SET.equals(tag)) {
-                    policy.mDefaultInputMethodSet = true;
+                } else if (TAG_CURRENT_INPUT_METHOD_SET.equals(tag)) {
+                    policy.mCurrentInputMethodSet = true;
                 } else if (TAG_OWNER_INSTALLED_CA_CERT.equals(tag)) {
                     policy.mOwnerInstalledCaCerts.add(parser.getAttributeValue(null, ATTR_ALIAS));
                 } else {
@@ -6680,7 +6680,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             mUserManagerInternal.setForceEphemeralUsers(admin.forceEphemeralUsers);
         }
         final DevicePolicyData policyData = getUserData(userId);
-        policyData.mDefaultInputMethodSet = false;
+        policyData.mCurrentInputMethodSet = false;
         saveSettingsLocked(userId);
         final DevicePolicyData systemPolicyData = getUserData(UserHandle.USER_SYSTEM);
         systemPolicyData.mLastSecurityLogRetrievalTime = -1;
@@ -6785,7 +6785,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             admin.defaultEnabledRestrictionsAlreadySet.clear();
         }
         final DevicePolicyData policyData = getUserData(userId);
-        policyData.mDefaultInputMethodSet = false;
+        policyData.mCurrentInputMethodSet = false;
         policyData.mOwnerInstalledCaCerts.clear();
         saveSettingsLocked(userId);
         clearUserPoliciesLocked(userId);
@@ -7231,9 +7231,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         enforceManageUsers();
     }
 
-    private void enforceProfileOwnerOrSystemUser(ComponentName admin) {
+    private void enforceProfileOwnerOrSystemUser() {
         synchronized (this) {
-            if (getActiveAdminWithPolicyForUidLocked(admin,
+            if (getActiveAdminWithPolicyForUidLocked(null,
                     DeviceAdminInfo.USES_POLICY_PROFILE_OWNER, mInjector.binderGetCallingUid())
                             != null) {
                 return;
@@ -8887,7 +8887,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                         // to trigger. This is a corner case that will have no impact in practice.
                         mSetupContentObserver.addPendingChangeByOwnerLocked(callingUserId);
                     }
-                    getUserData(callingUserId).mDefaultInputMethodSet = true;
+                    getUserData(callingUserId).mCurrentInputMethodSet = true;
                     saveSettingsLocked(callingUserId);
                 }
                 mInjector.settingsSecurePutStringForUser(setting, value, callingUserId);
@@ -9071,13 +9071,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             } else if (mDefaultImeChanged.equals(uri)) {
                 synchronized (DevicePolicyManagerService.this) {
                     if (mUserIdsWithPendingChangesByOwner.contains(userId)) {
-                        // This change notification was triggered by the owner changing the default
+                        // This change notification was triggered by the owner changing the current
                         // IME. Ignore it.
                         mUserIdsWithPendingChangesByOwner.remove(userId);
                     } else {
                         // This change notification was triggered by the user manually changing the
-                        // default IME.
-                        getUserData(userId).mDefaultInputMethodSet = false;
+                        // current IME.
+                        getUserData(userId).mCurrentInputMethodSet = false;
                         saveSettingsLocked(userId);
                     }
                 }
@@ -10962,14 +10962,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public boolean isDefaultInputMethodSetByOwner(@NonNull UserHandle user) {
-        final int userId = user.getIdentifier();
-        enforceProfileOwnerOrSystemUser(null);
-        if (!isCallerWithSystemUid() && mInjector.userHandleGetCallingUserId() != userId) {
-            throw new SecurityException(
-                    "Only the system can use this method to query information about another user");
-        }
-        return getUserData(userId).mDefaultInputMethodSet;
+    public boolean isCurrentInputMethodSetByOwner() {
+        enforceProfileOwnerOrSystemUser();
+        return getUserData(mInjector.userHandleGetCallingUserId()).mCurrentInputMethodSet;
     }
 
     @Override

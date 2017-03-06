@@ -7937,34 +7937,29 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by the system to find out whether the user's IME was set by the device/profile owner
-     * or the user.
+     * Called by the system to find out whether the current user's IME was set by the device/profile
+     * owner or the user.
      *
-     * @param user The user for whom to retrieve information.
      * @return {@code true} if the user's IME was set by the device or profile owner, {@code false}
      *         otherwise.
-     * @throws SecurityException if the caller does not have permission to retrieve information
-     *         about the given user's default IME. Device Owner and Profile Owner can retrieve
-     *         information about the user they run on; the System can retrieve information about any
-     *         user.
+     * @throws SecurityException if the caller is not the device owner/profile owner.
      *
      * @hide
      */
     @TestApi
-    public boolean isDefaultInputMethodSetByOwner(@NonNull UserHandle user) {
+    public boolean isCurrentInputMethodSetByOwner() {
         try {
-            return mService.isDefaultInputMethodSetByOwner(user);
+            return mService.isCurrentInputMethodSetByOwner();
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
     }
 
-
     /**
      * Called by the system to get a list of CA certificates that were installed by the device or
      * profile owner.
      *
-     * <p> The caller must be the target user's Device Owner/Profile owner or hold the
+     * <p> The caller must be the target user's device owner/profile Owner or hold the
      * {@link android.Manifest.permission#INTERACT_ACROSS_USERS_FULL} permission.
      *
      * @param user The user for whom to retrieve information.
