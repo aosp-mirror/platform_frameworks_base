@@ -23,6 +23,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.WorkerThread;
 import android.annotation.SystemApi;
 import android.app.ActivityThread;
 import android.app.PendingIntent;
@@ -1495,7 +1496,10 @@ public class TelephonyManager {
 
 
     /**
-     * Returns the network specifier of the subscription ID pinned to the TelephonyManager.
+     * Returns the network specifier of the subscription ID pinned to the TelephonyManager. The
+     * network specifier is used by {@link
+     * android.net.NetworkRequest.Builder#setNetworkSpecifier(String)} to create a {@link
+     * android.net.NetworkRequest} that connects through the subscription.
      *
      * @see android.net.NetworkRequest.Builder#setNetworkSpecifier(String)
      * @see #createForSubscriptionId(int)
@@ -1506,7 +1510,9 @@ public class TelephonyManager {
     }
 
     /**
-     * Returns the carrier config of the subscription ID pinned to the TelephonyManager.
+     * Returns the carrier config of the subscription ID pinned to the TelephonyManager. If an
+     * invalid subscription ID is pinned to the TelephonyManager, the returned config will contain
+     * default values.
      *
      * <p>Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE
      * READ_PHONE_STATE}
@@ -1515,6 +1521,7 @@ public class TelephonyManager {
      * @see #createForSubscriptionId(int)
      * @see #createForPhoneAccountHandle(PhoneAccountHandle)
      */
+    @WorkerThread
     public PersistableBundle getCarrierConfig() {
         CarrierConfigManager carrierConfigManager = mContext
                 .getSystemService(CarrierConfigManager.class);
@@ -2705,19 +2712,24 @@ public class TelephonyManager {
 
 
     /**
-     * Returns the package responsible of processing visual voicemail for the phone account.
+     * Returns the package responsible of processing visual voicemail for the subscription ID pinned
+     * to the TelephonyManager. Returns {@code null} when there is no package responsible for
+     * processing visual voicemail for the subscription.
      *
      * <p>Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE
      * READ_PHONE_STATE}
+     *
+     * @see #createForSubscriptionId(int)
+     * @see #createForPhoneAccountHandle(PhoneAccountHandle)
+     * @see VisualVoicemailService
      */
     @Nullable
-    public String getVisualVoicemailPackageName(PhoneAccountHandle phoneAccountHandle) {
+    public String getVisualVoicemailPackageName() {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
                 return telephony
-                        .getVisualVoicemailPackageName(mContext.getOpPackageName(),
-                                phoneAccountHandle);
+                        .getVisualVoicemailPackageName(mContext.getOpPackageName(), mSubId);
             }
         } catch (RemoteException ex) {
         } catch (NullPointerException ex) {
