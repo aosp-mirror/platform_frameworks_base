@@ -1053,7 +1053,7 @@ public class MediaSessionService extends SystemService implements Monitor {
             final int uid = Binder.getCallingUid();
             final long token = Binder.clearCallingIdentity();
 
-            if (DEBUG) {
+            if (DEBUG_KEY_EVENT) {
                 Log.d(TAG, "dispatchVolumeKeyEvent, pid=" + pid + ", uid=" + uid + ", event="
                         + keyEvent);
             }
@@ -1242,7 +1242,7 @@ public class MediaSessionService extends SystemService implements Monitor {
                     && AudioSystem.isStreamActive(suggestedStream, 0)) {
                 preferSuggestedStream = true;
             }
-            if (DEBUG) {
+            if (DEBUG_KEY_EVENT) {
                 Log.d(TAG, "Adjusting " + session + " by " + direction + ". flags="
                         + flags + ", suggestedStream=" + suggestedStream
                         + ", preferSuggestedStream=" + preferSuggestedStream);
