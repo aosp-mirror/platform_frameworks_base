@@ -3486,6 +3486,15 @@ message MetricsEvent {
     // ACTION: Settings > Battery > Menu > Apps Toggle
     ACTION_SETTINGS_MENU_BATTERY_APPS_TOGGLE = 852;
 
+    // ACTION: Settings > Any preference is changed
+    ACTION_SETTINGS_PREFERENCE_CHANGE = 853;
+
+    // FIELD: The name of preference when it is changed in Settings
+    FIELD_SETTINGS_PREFERENCE_CHANGE_NAME = 854;
+
+    // FIELD: The new value of preference when it is changed in Settings
+    FIELD_SETTINGS_PREFERENCE_CHANGE_VALUE = 855;
+
     // ---- End O Constants, all O constants go above this line ----
 
     // Add new aosp constants above this line.
