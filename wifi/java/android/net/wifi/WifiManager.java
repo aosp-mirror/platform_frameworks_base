@@ -1013,10 +1013,13 @@ public class WifiManager {
     }
 
     /**
-     * Query for a Hotspot 2.0 release 2 OSU icon file.
+     * Query for a Hotspot 2.0 release 2 OSU icon file. An {@link #ACTION_PASSPOINT_ICON} intent
+     * will be broadcasted once the request is completed.  The return value of
+     * {@link IconInfo#getData} from the intent extra will indicate the result of the request.
+     * A value of {@code null} will indicate a failure.
      *
      * @param bssid The BSSID of the AP
-     * @param fileName File name of the icon to query
+     * @param fileName Name of the icon file (remote file) to query from the AP
      */
     public void queryPasspointIcon(long bssid, String fileName) {
         try {
