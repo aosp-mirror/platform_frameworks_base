@@ -2580,12 +2580,14 @@
     <integer name="config_defaultPictureInPictureGravity">0x55</integer>
 
     <!-- The minimum aspect ratio (width/height) that is supported for picture-in-picture.  Any
-         ratio smaller than this is considered too tall and thin to be usable. -->
-    <item name="config_pictureInPictureMinAspectRatio" format="float" type="dimen">0.5</item>
+         ratio smaller than this is considered too tall and thin to be usable. Currently, this
+         is the inverse of the max landscape aspect ratio (1:2.39), but this is an extremely
+         skinny aspect ratio that is not expected to be widely used. -->
+    <item name="config_pictureInPictureMinAspectRatio" format="float" type="dimen">0.41841004184</item>
 
     <!-- The minimum aspect ratio (width/height) that is supported for picture-in-picture. Any
-         ratio larger than this is considered to wide and short to be usable. -->
-    <item name="config_pictureInPictureMaxAspectRatio" format="float" type="dimen">2.35</item>
+         ratio larger than this is considered to wide and short to be usable. Currently 2.39:1. -->
+    <item name="config_pictureInPictureMaxAspectRatio" format="float" type="dimen">2.39</item>
 
     <!-- The snap mode to use for picture-in-picture. These values correspond to constants defined
          in PipSnapAlgorithm and should not be changed independently.
