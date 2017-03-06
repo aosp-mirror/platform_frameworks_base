@@ -349,6 +349,6 @@ interface IDevicePolicyManager {
     boolean isResetPasswordTokenActive(in ComponentName admin);
     boolean resetPasswordWithToken(in ComponentName admin, String password, in byte[] token, int flags);
 
-    boolean isDefaultInputMethodSetByOwner(in UserHandle user);
+    boolean isCurrentInputMethodSetByOwner();
     StringParceledListSlice getOwnerInstalledCaCerts(in UserHandle user);
 }
