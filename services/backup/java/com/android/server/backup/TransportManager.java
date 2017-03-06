@@ -27,9 +27,13 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
+import android.os.Message;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.EventLog;
@@ -55,10 +59,15 @@ class TransportManager {
 
     private static final String SERVICE_ACTION_TRANSPORT_HOST = "android.backup.TRANSPORT_HOST";
 
+    private static final long REBINDING_TIMEOUT_UNPROVISIONED_MS = 30 * 1000; // 30 sec
+    private static final long REBINDING_TIMEOUT_PROVISIONED_MS = 5 * 60 * 1000; // 5 mins
+    private static final int REBINDING_TIMEOUT_MSG = 1;
+
     private final Intent mTransportServiceIntent = new Intent(SERVICE_ACTION_TRANSPORT_HOST);
     private final Context mContext;
     private final PackageManager mPackageManager;
     private final Set<ComponentName> mTransportWhitelist;
+    private final Handler mHandler;
 
     /**
      * This listener is called after we bind to any transport. If it returns true, this is a valid
@@ -83,12 +92,13 @@ class TransportManager {
     private final Map<String, ComponentName> mBoundTransports = new ArrayMap<>();
 
     TransportManager(Context context, Set<ComponentName> whitelist, String defaultTransport,
-            TransportBoundListener listener) {
+            TransportBoundListener listener, Looper looper) {
         mContext = context;
         mPackageManager = context.getPackageManager();
         mTransportWhitelist = (whitelist != null) ? whitelist : new ArraySet<>();
         mCurrentTransportName = defaultTransport;
         mTransportBoundListener = listener;
+        mHandler = new RebindOnTimeoutHandler(looper);
     }
 
     void onPackageAdded(String packageName) {
@@ -242,12 +252,12 @@ class TransportManager {
                 intent, 0, UserHandle.USER_SYSTEM);
         if (hosts != null) {
             for (ResolveInfo host : hosts) {
-                final ServiceInfo info = host.serviceInfo;
+                final ComponentName infoComponentName = host.serviceInfo.getComponentName();
                 boolean shouldBind = false;
                 if (components != null && packageName != null) {
                     for (String component : components) {
                         ComponentName cn = new ComponentName(pkgInfo.packageName, component);
-                        if (info.getComponentName().equals(cn)) {
+                        if (infoComponentName.equals(cn)) {
                             shouldBind = true;
                             break;
                         }
@@ -255,8 +265,8 @@ class TransportManager {
                 } else {
                     shouldBind = true;
                 }
-                if (shouldBind && isTransportTrusted(info.getComponentName())) {
-                    tryBindTransport(info);
+                if (shouldBind && isTransportTrusted(infoComponentName)) {
+                    tryBindTransport(infoComponentName);
                 }
             }
         }
@@ -283,8 +293,7 @@ class TransportManager {
         return true;
     }
 
-    private void tryBindTransport(ServiceInfo transport) {
-        final ComponentName transportComponentName = transport.getComponentName();
+    private void tryBindTransport(ComponentName transportComponentName) {
         Slog.d(TAG, "Binding to transport: " + transportComponentName.flattenToShortString());
         // TODO: b/22388012 (Multi user backup and restore)
         TransportConnection connection = new TransportConnection(transportComponentName);
@@ -335,17 +344,22 @@ class TransportManager {
                     success = false;
                     Slog.e(TAG, "Couldn't get transport name.", e);
                 } finally {
+                    // we need to intern() the String of the component, so that we can use it with
+                    // Handler's removeMessages(), which uses == operator to compare the tokens
+                    String componentShortString = component.flattenToShortString().intern();
                     if (success) {
-                        Slog.d(TAG, "Bound to transport: " + component.flattenToShortString());
+                        Slog.d(TAG, "Bound to transport: " + componentShortString);
                         mBoundTransports.put(mTransportName, component);
                         for (SelectBackupTransportCallback listener : mListeners) {
                             listener.onSuccess(mTransportName);
                         }
+                        // cancel rebinding on timeout for this component as we've already connected
+                        mHandler.removeMessages(REBINDING_TIMEOUT_MSG, componentShortString);
                     } else {
-                        Slog.w(TAG, "Bound to transport " + component.flattenToShortString() +
+                        Slog.w(TAG, "Bound to transport " + componentShortString +
                                 " but it is invalid");
                         EventLog.writeEvent(EventLogTags.BACKUP_TRANSPORT_LIFECYCLE,
-                                component.flattenToShortString(), 0);
+                                componentShortString, 0);
                         mContext.unbindService(this);
                         mValidTransports.remove(component);
                         mBinder = null;
@@ -364,9 +378,27 @@ class TransportManager {
                 mBinder = null;
                 mBoundTransports.remove(mTransportName);
             }
-            EventLog.writeEvent(EventLogTags.BACKUP_TRANSPORT_LIFECYCLE,
-                    component.flattenToShortString(), 0);
-            Slog.w(TAG, "Disconnected from transport " + component.flattenToShortString());
+            String componentShortString = component.flattenToShortString();
+            EventLog.writeEvent(EventLogTags.BACKUP_TRANSPORT_LIFECYCLE, componentShortString, 0);
+            Slog.w(TAG, "Disconnected from transport " + componentShortString);
+            scheduleRebindTimeout(component);
+        }
+
+        /**
+         * We'll attempt to explicitly rebind to a transport if it hasn't happened automatically
+         * for a few minutes after the binding went away.
+         */
+        private void scheduleRebindTimeout(ComponentName component) {
+            // we need to intern() the String of the component, so that we can use it with Handler's
+            // removeMessages(), which uses == operator to compare the tokens
+            final String componentShortString = component.flattenToShortString().intern();
+            final long rebindTimeout = getRebindTimeout();
+            mHandler.removeMessages(REBINDING_TIMEOUT_MSG, componentShortString);
+            Message msg = mHandler.obtainMessage(REBINDING_TIMEOUT_MSG);
+            msg.obj = componentShortString;
+            mHandler.sendMessageDelayed(msg, rebindTimeout);
+            Slog.d(TAG, "Scheduled explicit rebinding for " + componentShortString + " in "
+                    + rebindTimeout + "ms");
         }
 
         private IBackupTransport getBinder() {
@@ -403,11 +435,56 @@ class TransportManager {
                 }
             }
         }
+
+        private long getRebindTimeout() {
+            final boolean isDeviceProvisioned = Settings.Global.getInt(mContext.getContentResolver(),
+                    Settings.Global.DEVICE_PROVISIONED, 0) != 0;
+            return isDeviceProvisioned
+                    ? REBINDING_TIMEOUT_PROVISIONED_MS
+                    : REBINDING_TIMEOUT_UNPROVISIONED_MS;
+        }
     }
 
     interface TransportBoundListener {
         /** Should return true if this is a valid transport. */
         boolean onTransportBound(IBackupTransport binder);
+    }
+
+    private class RebindOnTimeoutHandler extends Handler {
+
+        RebindOnTimeoutHandler(Looper looper) {
+            super(looper);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            if (msg.what == REBINDING_TIMEOUT_MSG) {
+                String componentShortString = (String) msg.obj;
+                ComponentName transportComponent =
+                        ComponentName.unflattenFromString(componentShortString);
+                synchronized (mTransportLock) {
+                    if (mBoundTransports.containsValue(transportComponent)) {
+                        Slog.d(TAG, "Explicit rebinding timeout passed, but already bound to "
+                            + componentShortString + " so not attempting to rebind");
+                        return;
+                    }
+                    Slog.d(TAG, "Explicit rebinding timeout passed, attempting rebinding to: "
+                            + componentShortString);
+                    // unbind the existing (broken) connection
+                    TransportConnection conn = mValidTransports.get(transportComponent);
+                    if (conn != null) {
+                        mContext.unbindService(conn);
+                        Slog.d(TAG, "Unbinding the existing (broken) connection to transport: "
+                                + componentShortString);
+                    }
+                }
+                // rebind to transport
+                tryBindTransport(transportComponent);
+            } else {
+                Slog.e(TAG, "Unknown message sent to RebindOnTimeoutHandler, msg.what: "
+                        + msg.what);
+            }
+        }
     }
 
     private static void log_verbose(String message) {
