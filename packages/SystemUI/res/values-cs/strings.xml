@@ -703,4 +703,6 @@
     <string name="instant_apps" msgid="6647570248119804907">"Okamžité aplikace"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"Okamžité aplikace není třeba instalovat."</string>
     <string name="app_info" msgid="6856026610594615344">"Informace o aplikaci"</string>
+    <!-- no translation found for mobile_data (7094582042819250762) -->
+    <skip />
 </resources>

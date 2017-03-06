@@ -695,4 +695,6 @@
     <string name="instant_apps" msgid="6647570248119804907">"ઝટપટ ઍપ્લિકેશનો"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"ઝટપટ ઍપ્લિકેશનો માટે ઇન્સ્ટૉલેશનની જરૂર નથી."</string>
     <string name="app_info" msgid="6856026610594615344">"ઍપ્લિકેશન માહિતી"</string>
+    <!-- no translation found for mobile_data (7094582042819250762) -->
+    <skip />
 </resources>

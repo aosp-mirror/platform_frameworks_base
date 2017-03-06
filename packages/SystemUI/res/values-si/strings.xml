@@ -695,4 +695,6 @@
     <string name="instant_apps" msgid="6647570248119804907">"ක්ෂණික යෙදුම්"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"ක්ෂණික යෙදුම් ස්ථාපනය කිරීම අවශ්‍ය නොවේ."</string>
     <string name="app_info" msgid="6856026610594615344">"යෙදුම් තොරතුරු"</string>
+    <!-- no translation found for mobile_data (7094582042819250762) -->
+    <skip />
 </resources>
