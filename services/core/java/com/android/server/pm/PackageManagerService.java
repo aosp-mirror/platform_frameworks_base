@@ -17409,6 +17409,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         PackageSetting uninstalledPs = null;
+        PackageParser.Package pkg = null;
 
         // for the uninstall-updates case and restricted profiles, remember the per-
         // user handle installed state
@@ -17429,7 +17430,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             // Static shared libs can be declared by any package, so let us not
             // allow removing a package if it provides a lib others depend on.
-            PackageParser.Package pkg = mPackages.get(packageName);
+            pkg = mPackages.get(packageName);
             if (pkg != null && pkg.staticSharedLibName != null) {
                 SharedLibraryEntry libEntry = getSharedLibraryEntryLPr(pkg.staticSharedLibName,
                         pkg.staticSharedLibVersion);
@@ -17468,8 +17469,9 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
             synchronized (mPackages) {
                 if (res) {
-                    mInstantAppRegistry.onPackageUninstalledLPw(uninstalledPs.pkg,
-                            info.removedUsers);
+                    if (pkg != null) {
+                        mInstantAppRegistry.onPackageUninstalledLPw(pkg, info.removedUsers);
+                    }
                     updateSequenceNumberLP(packageName, info.removedUsers);
                 }
             }
