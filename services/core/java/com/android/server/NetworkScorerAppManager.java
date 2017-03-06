@@ -155,6 +155,11 @@ public class NetworkScorerAppManager {
     @Nullable
     @VisibleForTesting
     public NetworkScorerAppData getActiveScorer() {
+        final int enabledSetting = getNetworkRecommendationsEnabledSetting();
+        if (enabledSetting == NetworkScoreManager.RECOMMENDATIONS_ENABLED_FORCED_OFF) {
+            return null;
+        }
+
         return getScorer(getNetworkRecommendationsPackage());
     }
 
@@ -194,39 +199,73 @@ public class NetworkScorerAppManager {
      */
     @VisibleForTesting
     public boolean setActiveScorer(String packageName) {
-        String oldPackageName = getNetworkRecommendationsPackage();
+        final String oldPackageName = getNetworkRecommendationsPackage();
+
         if (TextUtils.equals(oldPackageName, packageName)) {
             // No change.
             return true;
         }
 
-        Log.i(TAG, "Changing network scorer from " + oldPackageName + " to " + packageName);
-
         if (packageName == null) {
             // revert to the default setting.
-            setNetworkRecommendationsPackage(getDefaultPackageSetting());
+            packageName = getDefaultPackageSetting();
+        }
+
+        Log.i(TAG, "Changing network scorer from " + oldPackageName + " to " + packageName);
+
+        // We only make the change if the new package is valid.
+        if (getScorer(packageName) != null) {
+            setNetworkRecommendationsPackage(packageName);
             return true;
         } else {
-            // We only make the change if the new package is valid.
-            if (getScorer(packageName) != null) {
-                setNetworkRecommendationsPackage(packageName);
-                return true;
-            } else {
-                Log.w(TAG, "Requested network scorer is not valid: " + packageName);
-                return false;
-            }
+            Log.w(TAG, "Requested network scorer is not valid: " + packageName);
+            return false;
         }
     }
 
     /**
-     * If the active scorer is null then revert to the default scorer.
+     * Ensures the {@link Settings.Global#NETWORK_RECOMMENDATIONS_PACKAGE} setting points to a valid
+     * package and {@link Settings.Global#NETWORK_RECOMMENDATIONS_ENABLED} is consistent.
+     *
+     * If {@link Settings.Global#NETWORK_RECOMMENDATIONS_PACKAGE} doesn't point to a valid package
+     * then it will be reverted to the default package specified by
+     * {@link R.string#config_defaultNetworkRecommendationProviderPackage}. If the default package
+     * is no longer valid then {@link Settings.Global#NETWORK_RECOMMENDATIONS_ENABLED} will be set
+     * to <code>0</code> (disabled).
      */
     @VisibleForTesting
-    public void revertToDefaultIfNoActive() {
-        if (getActiveScorer() == null) {
-            final String defaultPackage = getDefaultPackageSetting();
-            setNetworkRecommendationsPackage(defaultPackage);
-            Log.i(TAG, "Defaulted the network recommendations app to: " + defaultPackage);
+    public void updateState() {
+        final int enabledSetting = getNetworkRecommendationsEnabledSetting();
+        if (enabledSetting == NetworkScoreManager.RECOMMENDATIONS_ENABLED_FORCED_OFF) {
+            // Don't change anything if it's forced off.
+            if (DEBUG) Log.d(TAG, "Recommendations forced off.");
+            return;
+        }
+
+        // First, see if the current package is still valid. If so, then we can exit early.
+        final String currentPackageName = getNetworkRecommendationsPackage();
+        if (getScorer(currentPackageName) != null) {
+            if (VERBOSE) Log.v(TAG, currentPackageName + " is the active scorer.");
+            setNetworkRecommendationsEnabledSetting(NetworkScoreManager.RECOMMENDATIONS_ENABLED_ON);
+            return;
+        }
+
+        // the active scorer isn't valid, revert to the default if it's different
+        final String defaultPackageName = getDefaultPackageSetting();
+        if (!TextUtils.equals(currentPackageName, defaultPackageName)) {
+            setNetworkRecommendationsPackage(defaultPackageName);
+            if (DEBUG) {
+                Log.d(TAG, "Defaulted the network recommendations app to: " + defaultPackageName);
+            }
+            if (getScorer(defaultPackageName) != null) { // the default is valid
+                if (DEBUG) Log.d(TAG, defaultPackageName + " is now the active scorer.");
+                setNetworkRecommendationsEnabledSetting(
+                        NetworkScoreManager.RECOMMENDATIONS_ENABLED_ON);
+            } else { // the default isn't valid either, we're disabled at this point
+                if (DEBUG) Log.d(TAG, defaultPackageName + " is not an active scorer.");
+                setNetworkRecommendationsEnabledSetting(
+                        NetworkScoreManager.RECOMMENDATIONS_ENABLED_OFF);
+            }
         }
     }
 
@@ -244,6 +283,15 @@ public class NetworkScorerAppManager {
                 Settings.Global.NETWORK_RECOMMENDATIONS_PACKAGE, packageName);
     }
 
+    private int getNetworkRecommendationsEnabledSetting() {
+        return mSettingsFacade.getInt(mContext, Settings.Global.NETWORK_RECOMMENDATIONS_ENABLED, 0);
+    }
+
+    private void setNetworkRecommendationsEnabledSetting(int value) {
+        mSettingsFacade.putInt(mContext,
+                Settings.Global.NETWORK_RECOMMENDATIONS_ENABLED, value);
+    }
+
     /**
      * Wrapper around Settings to make testing easier.
      */
@@ -254,6 +302,14 @@ public class NetworkScorerAppManager {
 
         public String getString(Context context, String name) {
             return Settings.Global.getString(context.getContentResolver(), name);
+        }
+
+        public boolean putInt(Context context, String name, int value) {
+            return Settings.Global.putInt(context.getContentResolver(), name, value);
+        }
+
+        public int getInt(Context context, String name, int defaultValue) {
+            return Settings.Global.getInt(context.getContentResolver(), name, defaultValue);
         }
     }
 }
