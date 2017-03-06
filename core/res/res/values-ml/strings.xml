@@ -244,6 +244,32 @@
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="notification_hidden_text" msgid="1135169301897151909">"കോൺടാക്‌റ്റുകൾ മറച്ചു"</string>
     <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"നയം അനുസരിച്ച് ഉള്ളടക്കം മറച്ചിരിക്കുന്നു"</string>
+    <!-- no translation found for notification_channel_virtual_keyboard (6969925135507955575) -->
+    <skip />
+    <!-- no translation found for notification_channel_physical_keyboard (7297661826966861459) -->
+    <skip />
+    <string name="notification_channel_security" msgid="7345516133431326347">"സുരക്ഷ"</string>
+    <!-- no translation found for notification_channel_car_mode (3553380307619874564) -->
+    <skip />
+    <!-- no translation found for notification_channel_account (7577959168463122027) -->
+    <skip />
+    <!-- no translation found for notification_channel_developer (7579606426860206060) -->
+    <skip />
+    <!-- no translation found for notification_channel_updates (4794517569035110397) -->
+    <skip />
+    <!-- no translation found for notification_channel_network_status (5025648583129035447) -->
+    <skip />
+    <!-- no translation found for notification_channel_network_alerts (2895141221414156525) -->
+    <skip />
+    <!-- no translation found for notification_channel_vpn (8330103431055860618) -->
+    <skip />
+    <!-- no translation found for notification_channel_device_admin (1568154104368069249) -->
+    <skip />
+    <string name="notification_channel_alerts" msgid="4496839309318519037">"അലേർട്ടുകൾ"</string>
+    <!-- no translation found for notification_channel_retail_mode (6088920674914038779) -->
+    <skip />
+    <!-- no translation found for notification_channel_usb (9006850475328924681) -->
+    <skip />
     <string name="safeMode" msgid="2788228061547930246">"സുരക്ഷിത മോഡ്"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android സിസ്റ്റം"</string>
     <string name="user_owner_label" msgid="1119010402169916617">"വ്യക്തിഗത പ്രൊഫൈലിലേക്ക് മാറുക"</string>
@@ -292,6 +318,10 @@
     <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"ഉപയോക്തൃ ഇടപെടലില്ലാതെ ഹോംസ്‌ക്രീൻ കുറുക്കുവഴികൾ നീക്കംചെയ്യാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"ഔട്ട്‌ഗോയിംഗ് കോളുകൾ വീണ്ടും റൂട്ടുചെയ്യുക"</string>
     <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"മറ്റ് നമ്പരിലേക്ക് കോൾ റീഡയറക്‌ടുചെയ്യുന്നതിനോ എല്ലാ കോളുകളും ഒപ്പം ഇല്ലാതാക്കുന്നതിനോ ഉള്ള ആയ ഓപ്‌ഷൻ ഉപയോഗിക്കുന്ന ഔട്ട്ഗോയിംഗ് കോളിൽ ഡയൽ ചെയ്യുന്ന നമ്പർ കാണുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
+    <!-- no translation found for permlab_answerPhoneCalls (4077162841226223337) -->
+    <skip />
+    <!-- no translation found for permdesc_answerPhoneCalls (2901889867993572266) -->
+    <skip />
     <string name="permlab_receiveSms" msgid="8673471768947895082">"വാചക സന്ദേശം നേടുക (SMS)"</string>
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"SMS സന്ദേശങ്ങൾ നേടാനും പ്രോസസ്സുചെയ്യാനും അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. നിങ്ങളുടെ ഉപകരണത്തിലേക്ക് അയയ്‌ക്കുന്ന സന്ദേശങ്ങൾ നിങ്ങൾക്ക് ദൃശ്യമാക്കാതെ തന്നെ അപ്ലിക്കേഷന് നിരീക്ഷിക്കാനോ ഇല്ലാതാക്കാനോ കഴിയുമെന്നാണ് ഇതിനർത്ഥം."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"വാചക സന്ദേശം നേടുക (MMS)"</string>
@@ -1709,18 +1739,11 @@
     <string name="time_picker_prompt_label" msgid="7588093983899966783">"സമയത്തിൽ ടൈപ്പുചെയ്യുക"</string>
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"സമയം നൽകുന്നതിന് ടെക്സ്റ്റ് ഇൻപുട്ട് ‌മോ‌ഡിലേക്ക് ‌മാറുക."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"‌സമയം നൽകുന്നതിന് ക്ലോക്ക് മോഡിലേക്ക് ‌മാറുക."</string>
-    <!-- no translation found for autofill_save_title (7081244500504163245) -->
-    <skip />
-    <!-- no translation found for autofill_save_title_with_type (4977385733042555659) -->
-    <skip />
-    <!-- no translation found for autofill_save_yes (6398026094049005921) -->
-    <skip />
-    <!-- no translation found for autofill_save_no (2625132258725581787) -->
-    <skip />
-    <!-- no translation found for autofill_save_type_password (5288448918465971568) -->
-    <skip />
-    <!-- no translation found for autofill_save_type_address (4936707762193009542) -->
-    <skip />
-    <!-- no translation found for autofill_save_type_credit_card (7127694776265563071) -->
-    <skip />
+    <string name="autofill_save_title" msgid="7081244500504163245">"<xliff:g id="LABEL">%1$s</xliff:g> എന്നതിലേക്ക് സംരക്ഷിക്കണോ?"</string>
+    <string name="autofill_save_title_with_type" msgid="4977385733042555659">"<xliff:g id="TYPE">%1$s</xliff:g> <xliff:g id="LABEL">%2$s</xliff:g> എന്നതിലേക്ക് സംരക്ഷിക്കണോ?"</string>
+    <string name="autofill_save_yes" msgid="6398026094049005921">"സംരക്ഷിക്കുക"</string>
+    <string name="autofill_save_no" msgid="2625132258725581787">"വേണ്ട, നന്ദി"</string>
+    <string name="autofill_save_type_password" msgid="5288448918465971568">"പാസ്‌വേഡ്"</string>
+    <string name="autofill_save_type_address" msgid="4936707762193009542">"വിലാസം"</string>
+    <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"ക്രെഡിറ്റ് കാർഡ്"</string>
 </resources>

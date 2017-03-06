@@ -244,6 +244,32 @@
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"৯৯৯+"</string>
     <string name="notification_hidden_text" msgid="1135169301897151909">"লুকানো বিষয়বস্তু"</string>
     <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"নীতির কারণে সামগ্রী লুকানো আছে"</string>
+    <!-- no translation found for notification_channel_virtual_keyboard (6969925135507955575) -->
+    <skip />
+    <!-- no translation found for notification_channel_physical_keyboard (7297661826966861459) -->
+    <skip />
+    <string name="notification_channel_security" msgid="7345516133431326347">"নিরাপত্তা"</string>
+    <!-- no translation found for notification_channel_car_mode (3553380307619874564) -->
+    <skip />
+    <!-- no translation found for notification_channel_account (7577959168463122027) -->
+    <skip />
+    <!-- no translation found for notification_channel_developer (7579606426860206060) -->
+    <skip />
+    <!-- no translation found for notification_channel_updates (4794517569035110397) -->
+    <skip />
+    <!-- no translation found for notification_channel_network_status (5025648583129035447) -->
+    <skip />
+    <!-- no translation found for notification_channel_network_alerts (2895141221414156525) -->
+    <skip />
+    <!-- no translation found for notification_channel_vpn (8330103431055860618) -->
+    <skip />
+    <!-- no translation found for notification_channel_device_admin (1568154104368069249) -->
+    <skip />
+    <string name="notification_channel_alerts" msgid="4496839309318519037">"সতর্কতাগুলি"</string>
+    <!-- no translation found for notification_channel_retail_mode (6088920674914038779) -->
+    <skip />
+    <!-- no translation found for notification_channel_usb (9006850475328924681) -->
+    <skip />
     <string name="safeMode" msgid="2788228061547930246">"নিরাপদ মোড"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android সিস্টেম"</string>
     <string name="user_owner_label" msgid="1119010402169916617">"ব্যক্তিগততে পাল্টান"</string>
@@ -292,6 +318,10 @@
     <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"অ্যাপ্লিকেশানটিকে ব্যবহারকারীর হস্তক্ষেপ ছাড়াই হোমস্ক্রীণের শর্টকাটগুলি সরানোর অনুমতি দেয়৷"</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"আউটগোয়িং কলগুলি পুনঃচালিত করুন"</string>
     <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"অ্যাপ্লিকেশানকে কল চলাকালীন অন্য একটি নম্বরে কল পুনঃনির্দেশ বা কলটি একসথে বন্ধ করার সাথে ডায়াল করা নম্বরটি দেখতে দেয়৷"</string>
+    <!-- no translation found for permlab_answerPhoneCalls (4077162841226223337) -->
+    <skip />
+    <!-- no translation found for permdesc_answerPhoneCalls (2901889867993572266) -->
+    <skip />
     <string name="permlab_receiveSms" msgid="8673471768947895082">"পাঠ্য বার্তা পান (SMS)"</string>
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"অ্যাপ্লিকেশানটিকে এসএমএস প্রাপ্ত করার এবং প্রক্রিয়া করার অনুমতি দেয়৷ এর মানে হল অ্যাপ্লিকেশানটি আপনার ডিভাইস থেকে পাঠানো বার্তাগুলিকে পর্যবেক্ষণ করতে পারে এবং মুছতে পারে সেগুলিকে আপনাকে না দেখিয়ে৷"</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"পাঠ্য বার্তা পান (MMS)"</string>
@@ -1709,18 +1739,11 @@
     <string name="time_picker_prompt_label" msgid="7588093983899966783">"সময় টাইপ করুন"</string>
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"সময় ইনপুট দেওয়ার জন্য পাঠ্য ইনপুট মোডে যান।"</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"সময় ইনপুট দেওয়ার জন্য ঘড়ি মোডে যান।"</string>
-    <!-- no translation found for autofill_save_title (7081244500504163245) -->
-    <skip />
-    <!-- no translation found for autofill_save_title_with_type (4977385733042555659) -->
-    <skip />
-    <!-- no translation found for autofill_save_yes (6398026094049005921) -->
-    <skip />
-    <!-- no translation found for autofill_save_no (2625132258725581787) -->
-    <skip />
-    <!-- no translation found for autofill_save_type_password (5288448918465971568) -->
-    <skip />
-    <!-- no translation found for autofill_save_type_address (4936707762193009542) -->
-    <skip />
-    <!-- no translation found for autofill_save_type_credit_card (7127694776265563071) -->
-    <skip />
+    <string name="autofill_save_title" msgid="7081244500504163245">"<xliff:g id="LABEL">%1$s</xliff:g> এ সংরক্ষণ করবেন?"</string>
+    <string name="autofill_save_title_with_type" msgid="4977385733042555659">"<xliff:g id="LABEL">%2$s</xliff:g> এ <xliff:g id="TYPE">%1$s</xliff:g> সংরক্ষণ করবেন?"</string>
+    <string name="autofill_save_yes" msgid="6398026094049005921">"সংরক্ষণ করুন"</string>
+    <string name="autofill_save_no" msgid="2625132258725581787">"না থাক"</string>
+    <string name="autofill_save_type_password" msgid="5288448918465971568">"পাসওয়ার্ড"</string>
+    <string name="autofill_save_type_address" msgid="4936707762193009542">"ঠিকানা"</string>
+    <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"ক্রেডিট কার্ড"</string>
 </resources>
