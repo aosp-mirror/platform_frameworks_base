@@ -25,8 +25,7 @@
     <string name="wifi_remembered" msgid="4955746899347821096">"Shranjeno"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"Onemogočeno"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"Konfiguracija IP-ja ni uspela"</string>
-    <!-- no translation found for wifi_disabled_by_recommendation_provider (5168315140978066096) -->
-    <skip />
+    <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"Ni povezano zaradi slabe kakovosti omrežja"</string>
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"Povezava prek Wi-Fi-ja ni uspela"</string>
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"Težava s preverjanjem pristnosti"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"Ni v obsegu"</string>
@@ -219,6 +218,8 @@
     <string name="no_application" msgid="2813387563129153880">"Nič"</string>
     <string name="wait_for_debugger" msgid="1202370874528893091">"Počakajte na iskalnik napak"</string>
     <string name="wait_for_debugger_summary" msgid="1766918303462746804">"Aplikacija, v kateri iščete napako, pred izvajanjem čaka na povezavo z iskalnikom napak"</string>
+    <string name="telephony_monitor_switch" msgid="1764958220062121194">"Nadziranje telefonije"</string>
+    <string name="telephony_monitor_switch_summary" msgid="7695552966547975635">"Funkcija Nadziranje telefonije pridobi dnevnike, ko zazna težavo s funkcijami telefonije/modema, in uporabnika z obvestilom pozove, naj prijavi napako."</string>
     <string name="debug_input_category" msgid="1811069939601180246">"Vnos"</string>
     <string name="debug_drawing_category" msgid="6755716469267367852">"Risba"</string>
     <string name="debug_hw_drawing_category" msgid="6220174216912308658">"Upodabljanje s strojnim pospeševanjem"</string>
@@ -237,8 +238,7 @@
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"Pokaži pos. sl. str. opr."</string>
     <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"Obarvaj sloje strojne opreme zeleno ob posodobitvi"</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"Prekoračitev območja GPE"</string>
-    <!-- no translation found for debug_hw_renderer (7568529019431785816) -->
-    <skip />
+    <string name="debug_hw_renderer" msgid="7568529019431785816">"Nastavi upodabljalnik GPE"</string>
     <string name="disable_overlays" msgid="2074488440505934665">"Onem. strojni medp."</string>
     <string name="disable_overlays_summary" msgid="3578941133710758592">"Za sestavljanje slike vedno uporabi graf. procesor"</string>
     <string name="simulate_color_space" msgid="6745847141353345872">"Simul. barvnega prostora"</string>

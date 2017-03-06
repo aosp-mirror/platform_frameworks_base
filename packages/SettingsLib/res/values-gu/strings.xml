@@ -25,8 +25,7 @@
     <string name="wifi_remembered" msgid="4955746899347821096">"સાચવેલા"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"અક્ષમ કર્યો"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"IP કન્ફિગરેશન નિષ્ફળ"</string>
-    <!-- no translation found for wifi_disabled_by_recommendation_provider (5168315140978066096) -->
-    <skip />
+    <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"ઓછી ગુણવત્તાવાળા નેટવર્કના લીધે કનેક્ટ થયું નથી"</string>
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"WiFi કનેક્શન નિષ્ફળ"</string>
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"પ્રમાણીકરણ સમસ્યા"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"રેન્જમાં નથી"</string>
@@ -219,6 +218,8 @@
     <string name="no_application" msgid="2813387563129153880">"કંઈ નહીં"</string>
     <string name="wait_for_debugger" msgid="1202370874528893091">"ડીબગર માટે રાહ જુઓ"</string>
     <string name="wait_for_debugger_summary" msgid="1766918303462746804">"ડીબગ કરેલ ઍપ્લિકેશનો ક્રિયાન્વિત થતા પહેલાં ડીબગર જોડાઈ તેની રાહ જુએ છે"</string>
+    <string name="telephony_monitor_switch" msgid="1764958220062121194">"Telephony Monitor"</string>
+    <string name="telephony_monitor_switch_summary" msgid="7695552966547975635">"TelephonyMonitor ને જ્યારે ટેલિફોની/મૉડેમની કાર્યક્ષમતામાં કોઈ સમસ્યા મળે ત્યારે તે લૉગ એકત્રિત કરશે અને વપરાશકર્તાને બગની જાણ કરવાની સૂચનાનો સંકેત આપશે"</string>
     <string name="debug_input_category" msgid="1811069939601180246">"ઇનપુટ"</string>
     <string name="debug_drawing_category" msgid="6755716469267367852">"રેખાંકન"</string>
     <string name="debug_hw_drawing_category" msgid="6220174216912308658">"હાર્ડવેર પ્રવેગક રેન્ડરિંગ"</string>
@@ -237,8 +238,7 @@
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"હાર્ડવેર સ્તરોનાં અપડેટ્સ બતાવો"</string>
     <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"હાર્ડવેર સ્તરો અપડેટ થાય ત્યારે તેને લીલા રંગથી પ્રકાશિત કરો"</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"GPU ઓવરડ્રો ડીબગ કરો"</string>
-    <!-- no translation found for debug_hw_renderer (7568529019431785816) -->
-    <skip />
+    <string name="debug_hw_renderer" msgid="7568529019431785816">"GPU રેન્ડરર સેટ કરો"</string>
     <string name="disable_overlays" msgid="2074488440505934665">"HW ઓવરલે અક્ષમ કરો"</string>
     <string name="disable_overlays_summary" msgid="3578941133710758592">"સ્ક્રીન જોડવા માટે હંમેશાં GPU નો ઉપયોગ કરો"</string>
     <string name="simulate_color_space" msgid="6745847141353345872">"રંગ સ્થાનનું અનુકરણ કરો"</string>

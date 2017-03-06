@@ -25,8 +25,7 @@
     <string name="wifi_remembered" msgid="4955746899347821096">"Disimpan"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"Dinyahdayakan"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"Kegagalan Konfigurasi IP"</string>
-    <!-- no translation found for wifi_disabled_by_recommendation_provider (5168315140978066096) -->
-    <skip />
+    <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"Tidak disambungkan kerana rangkaian berkualiti rendah"</string>
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"Kegagalan Sambungan WiFi"</string>
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"Masalah pengesahan"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"Tidak dalam liputan"</string>
@@ -219,6 +218,8 @@
     <string name="no_application" msgid="2813387563129153880">"Tiada apa-apa"</string>
     <string name="wait_for_debugger" msgid="1202370874528893091">"Nantikan penyahpepijat"</string>
     <string name="wait_for_debugger_summary" msgid="1766918303462746804">"Menanti penyahpepijat sebelum aplikasi melaksana"</string>
+    <string name="telephony_monitor_switch" msgid="1764958220062121194">"Telephony Monitor"</string>
+    <string name="telephony_monitor_switch_summary" msgid="7695552966547975635">"TelephonyMonitor akan mengumpulkan log apabila apl ini mengesan masalah berhubung kefungsian telefoni/modem dan memaparkan pemberitahuan kepada pengguna supaya memfailkan pepijat"</string>
     <string name="debug_input_category" msgid="1811069939601180246">"Input"</string>
     <string name="debug_drawing_category" msgid="6755716469267367852">"Lukisan"</string>
     <string name="debug_hw_drawing_category" msgid="6220174216912308658">"Pemaparan dipercepat perkakasan"</string>
@@ -237,8 +238,7 @@
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"Tunjukkan kemas kini perkakasan"</string>
     <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"Denyar hijau lapisan perkakasan yang dikemas kini"</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"Nyahpepijat lebih lukis GPU"</string>
-    <!-- no translation found for debug_hw_renderer (7568529019431785816) -->
-    <skip />
+    <string name="debug_hw_renderer" msgid="7568529019431785816">"Tetapkan Pemapar GPU"</string>
     <string name="disable_overlays" msgid="2074488440505934665">"Lumpuhkan tindihan HW"</string>
     <string name="disable_overlays_summary" msgid="3578941133710758592">"Sentiasa gunakan GPU untuk komposit skrin"</string>
     <string name="simulate_color_space" msgid="6745847141353345872">"Tiru ruang warna"</string>

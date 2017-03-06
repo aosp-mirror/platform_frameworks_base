@@ -25,8 +25,7 @@
     <string name="wifi_remembered" msgid="4955746899347821096">"บันทึกแล้ว"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"ปิดอยู่"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"การกำหนดค่า IP ล้มเหลว"</string>
-    <!-- no translation found for wifi_disabled_by_recommendation_provider (5168315140978066096) -->
-    <skip />
+    <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"ไม่ได้เชื่อมต่อเนื่องจากเครือข่ายคุณภาพต่ำ"</string>
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"การเชื่อมต่อ Wi-Fi ล้มเหลว"</string>
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"ปัญหาในการตรวจสอบสิทธิ์"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"ไม่อยู่ในพื้นที่ให้บริการ"</string>
@@ -219,6 +218,8 @@
     <string name="no_application" msgid="2813387563129153880">"ไม่มี"</string>
     <string name="wait_for_debugger" msgid="1202370874528893091">"รอโปรแกรมแก้ไขข้อบกพร่อง"</string>
     <string name="wait_for_debugger_summary" msgid="1766918303462746804">"แอปพลิเคชันที่มีการแก้ปัญหาจะรอให้โปรแกรมแก้ไขข้อบกพร่องแนบข้อมูลก่อนปฏิบัติการ"</string>
+    <string name="telephony_monitor_switch" msgid="1764958220062121194">"การตรวจสอบโทรศัพท์"</string>
+    <string name="telephony_monitor_switch_summary" msgid="7695552966547975635">"การตรวจสอบโทรศัพท์จะรวบรวมบันทึกเมื่อตรวจพบปัญหาด้านฟังก์ชันการทำงานของโทรศัพท์/โมเด็มและแจ้งเตือนให้ผู้ใช้ส่งข้อบกพร่อง"</string>
     <string name="debug_input_category" msgid="1811069939601180246">"อินพุต"</string>
     <string name="debug_drawing_category" msgid="6755716469267367852">"การวาดภาพ"</string>
     <string name="debug_hw_drawing_category" msgid="6220174216912308658">"การแสดงผลที่มีการเร่งด้วยฮาร์ดแวร์"</string>
@@ -237,8 +238,7 @@
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"แสดงอัปเดตเลเยอร์ฮาร์ดแวร์"</string>
     <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"เลเยอร์ฮาร์ดแวร์กะพริบเป็นสีเขียว เมื่อมีการอัปเดต"</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"แก้ปัญหาการวาดทับด้วย GPU"</string>
-    <!-- no translation found for debug_hw_renderer (7568529019431785816) -->
-    <skip />
+    <string name="debug_hw_renderer" msgid="7568529019431785816">"ตั้งค่า GPU Renderer"</string>
     <string name="disable_overlays" msgid="2074488440505934665">"ปิดใช้งานการวางซ้อน HW"</string>
     <string name="disable_overlays_summary" msgid="3578941133710758592">"ใช้ GPU ในการจัดวางองค์ประกอบหน้าจอเสมอ"</string>
     <string name="simulate_color_space" msgid="6745847141353345872">"จำลองระบบสี"</string>

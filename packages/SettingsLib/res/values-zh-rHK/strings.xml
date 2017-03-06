@@ -25,8 +25,7 @@
     <string name="wifi_remembered" msgid="4955746899347821096">"已儲存"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"已停用"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"IP 設定失敗"</string>
-    <!-- no translation found for wifi_disabled_by_recommendation_provider (5168315140978066096) -->
-    <skip />
+    <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"網絡品質欠佳，因此無法連線"</string>
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"WiFi 連線失敗"</string>
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"驗證問題"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"超出可用範圍"</string>
@@ -219,6 +218,8 @@
     <string name="no_application" msgid="2813387563129153880">"無"</string>
     <string name="wait_for_debugger" msgid="1202370874528893091">"等待除錯程式"</string>
     <string name="wait_for_debugger_summary" msgid="1766918303462746804">"執行已除錯的應用程式前等待附加除錯程式"</string>
+    <string name="telephony_monitor_switch" msgid="1764958220062121194">"電話監控工具"</string>
+    <string name="telephony_monitor_switch_summary" msgid="7695552966547975635">"「電話監控工具」會在偵測到電話/數據機功能發生問題時收集記錄，並向使用者發出通知，以便舉報錯誤"</string>
     <string name="debug_input_category" msgid="1811069939601180246">"輸入"</string>
     <string name="debug_drawing_category" msgid="6755716469267367852">"繪圖"</string>
     <string name="debug_hw_drawing_category" msgid="6220174216912308658">"硬件加速轉譯"</string>
@@ -237,8 +238,7 @@
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"顯示硬件層更新"</string>
     <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"在硬件層更新時閃動綠燈"</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"GPU 透支偵錯"</string>
-    <!-- no translation found for debug_hw_renderer (7568529019431785816) -->
-    <skip />
+    <string name="debug_hw_renderer" msgid="7568529019431785816">"設定 GPU 轉譯器"</string>
     <string name="disable_overlays" msgid="2074488440505934665">"停用 HW 重疊效果"</string>
     <string name="disable_overlays_summary" msgid="3578941133710758592">"永遠使用 GPU 進行畫面合成"</string>
     <string name="simulate_color_space" msgid="6745847141353345872">"模擬色彩空間"</string>

@@ -25,8 +25,7 @@
     <string name="wifi_remembered" msgid="4955746899347821096">"محفوظ کردیا گیا"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"غیر فعال"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"‏IP کنفیگریشن کی ناکامی"</string>
-    <!-- no translation found for wifi_disabled_by_recommendation_provider (5168315140978066096) -->
-    <skip />
+    <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"کم معیاری نیٹ ورک کی وجہ سے منسلک نہیں ہے"</string>
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"‏WiFi کنکشن کی ناکامی"</string>
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"توثیق کا مسئلہ"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"رینج میں نہیں ہے"</string>
@@ -219,6 +218,8 @@
     <string name="no_application" msgid="2813387563129153880">"کچھ نہیں"</string>
     <string name="wait_for_debugger" msgid="1202370874528893091">"ڈیبگر کا انتظار کریں"</string>
     <string name="wait_for_debugger_summary" msgid="1766918303462746804">"ڈیبگ کردہ ایپلیکیشن کاروائی سے پہلے ڈیبگر کے منسلک ہونے کا انتظار کرتی ہے"</string>
+    <string name="telephony_monitor_switch" msgid="1764958220062121194">"Telephony Monitor"</string>
+    <string name="telephony_monitor_switch_summary" msgid="7695552966547975635">"‏ٹیلیفونی/موڈم کی فعالیت کے ساتھ در پیش مسئلہ کا پتہ چلنے پر TelephonyMonitor لاگز اکٹھا کر کے بگ دائر کرنے کیلئے صارف کو اطلاع بھیجے گا"</string>
     <string name="debug_input_category" msgid="1811069939601180246">"ان پٹ"</string>
     <string name="debug_drawing_category" msgid="6755716469267367852">"ڈرائنگ"</string>
     <string name="debug_hw_drawing_category" msgid="6220174216912308658">"ہارڈ ویئر کے ذریعے تیز کردہ رینڈرنگ"</string>
@@ -237,8 +238,7 @@
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"ہارڈویئر پرتوں کی اپ ڈیٹس دکھائیں"</string>
     <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"ہارڈویئر پرتیں اپ ڈیٹ ہونے پر سبز رنگ میں جھلملائیں"</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"‏GPU اوور ڈرا کو ڈیبگ کریں"</string>
-    <!-- no translation found for debug_hw_renderer (7568529019431785816) -->
-    <skip />
+    <string name="debug_hw_renderer" msgid="7568529019431785816">"‏GPU رینڈرر سیٹ کریں"</string>
     <string name="disable_overlays" msgid="2074488440505934665">"‏HW اوور لیز غیر فعال کریں"</string>
     <string name="disable_overlays_summary" msgid="3578941133710758592">"‏سکرین کی ساخت بنانے کیلئے ہمیشہ GPU استعمال کریں"</string>
     <string name="simulate_color_space" msgid="6745847141353345872">"رنگ کی جگہ کو تحریک دیں"</string>

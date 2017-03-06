@@ -25,8 +25,7 @@
     <string name="wifi_remembered" msgid="4955746899347821096">"जतन केले"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"अक्षम"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"IP कॉन्फिगरेशन अयशस्वी"</string>
-    <!-- no translation found for wifi_disabled_by_recommendation_provider (5168315140978066096) -->
-    <skip />
+    <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"कमी दर्जाच्या नेटवर्कमुळे कनेक्ट केलेले नाही"</string>
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"WiFi कनेक्शन अयशस्वी"</string>
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"प्रमाणीकरण समस्या"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"परिक्षेत्रामध्ये नाही"</string>
@@ -205,7 +204,7 @@
     <string name="dev_settings_warning_title" msgid="7244607768088540165">"विकास सेटिंग्जला अनुमती द्यायची?"</string>
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"या सेटिंग्जचा हेतू फक्त विकास करण्याच्या वापरासाठी आहे. त्यामुळे आपले डिव्हाइस आणि त्यावरील अनुप्रयोग विघटित होऊ शकतात किंवा गैरवर्तन करू शकतात."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"USB वरील अॅप्स सत्यापित करा"</string>
-    <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"हानीकारक वर्तनासाठी ADB/ADT द्वारे स्थापित अॅप्स तपासा."</string>
+    <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"हानिकारक वर्तनासाठी ADB/ADT द्वारे स्थापित अॅप्स तपासा."</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"दूरस्थ डिव्हाइसेसमध्ये सहन न होणारा मोठा आवाज किंवा नियंत्रणचा अभाव यासारखी आवाजाची समस्या असल्यास ब्लूटुथ संपूर्ण आवाज वैशिष्ट्य अक्षम करते."</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"स्थानिक टर्मिनल"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"स्थानिक शेल प्रवेश देणारा टर्मिनल अॅप सक्षम करा"</string>
@@ -219,6 +218,8 @@
     <string name="no_application" msgid="2813387563129153880">"काहीही नाही"</string>
     <string name="wait_for_debugger" msgid="1202370874528893091">"डीबगरची प्रतीक्षा करा"</string>
     <string name="wait_for_debugger_summary" msgid="1766918303462746804">"डीबग केलेला अनुप्रयोग अंमलात आणण्यापूर्वी डीबगर संलग्न करण्याची प्रतीक्षा करतो"</string>
+    <string name="telephony_monitor_switch" msgid="1764958220062121194">"टेलिफोनी मॉनिटर"</string>
+    <string name="telephony_monitor_switch_summary" msgid="7695552966547975635">"टेलिफोनी/मोडेमच्‍या कार्यक्षमतेत समस्‍या आढळल्‍यावर टेलिफोनी मॉनिटर लॉग्‍ज गोळा करेल आणि दोष फाइल करण्‍यासाठी वापरकर्त्याला सूचनेचे संकेत देईल"</string>
     <string name="debug_input_category" msgid="1811069939601180246">"इनपुट"</string>
     <string name="debug_drawing_category" msgid="6755716469267367852">"रेखांकन"</string>
     <string name="debug_hw_drawing_category" msgid="6220174216912308658">"हार्डवेअर प्रवेगक प्रस्तुती"</string>
@@ -237,8 +238,7 @@
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"हार्डवेअर स्तर अद्यतने दर्शवा"</string>
     <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"हार्डवेअर स्तर अद्ययावत झाल्यावर ते हिरव्या रंगात फ्लॅश करा"</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"GPU अधोरेखांकित डीबग करा"</string>
-    <!-- no translation found for debug_hw_renderer (7568529019431785816) -->
-    <skip />
+    <string name="debug_hw_renderer" msgid="7568529019431785816">"GPU प्रदाता सेट करा"</string>
     <string name="disable_overlays" msgid="2074488440505934665">"HW आच्छादने अक्षम करा"</string>
     <string name="disable_overlays_summary" msgid="3578941133710758592">"स्क्रीन तयार करण्यासाठी नेहमी GPU वापरा"</string>
     <string name="simulate_color_space" msgid="6745847141353345872">"रंग स्थानाची बतावणी करा"</string>

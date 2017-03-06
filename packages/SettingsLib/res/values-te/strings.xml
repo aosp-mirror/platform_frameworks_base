@@ -25,8 +25,7 @@
     <string name="wifi_remembered" msgid="4955746899347821096">"సేవ్ చేయబడింది"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"నిలిపివేయబడింది"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"IP కాన్ఫిగరేషన్ వైఫల్యం"</string>
-    <!-- no translation found for wifi_disabled_by_recommendation_provider (5168315140978066096) -->
-    <skip />
+    <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"తక్కువ నాణ్యతా నెట్‌వర్క్ కారణంగా కనెక్ట్ చేయబడలేదు"</string>
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"WiFi కనెక్షన్ వైఫల్యం"</string>
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"ప్రామాణీకరణ సమస్య"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"పరిధిలో లేదు"</string>
@@ -219,6 +218,8 @@
     <string name="no_application" msgid="2813387563129153880">"ఏదీ వద్దు"</string>
     <string name="wait_for_debugger" msgid="1202370874528893091">"డీబగ్గర్ కోసం వేచి ఉండండి"</string>
     <string name="wait_for_debugger_summary" msgid="1766918303462746804">"డీబగ్ చేయబడిన అనువర్తనం అమలు కావడానికి ముందు జోడించాల్సిన డీబగ్గర్ కోసం వేచి ఉంటుంది"</string>
+    <string name="telephony_monitor_switch" msgid="1764958220062121194">"టెలిఫోనీ మానిటర్"</string>
+    <string name="telephony_monitor_switch_summary" msgid="7695552966547975635">"టెలిఫోనీ/మోడెమ్ కార్యాచరణలో సమస్యను గుర్తించినప్పుడు TelephonyMonitor లాగ్‌లను సేకరిస్తుంది మరియు బగ్‌ని ఫైల్ చేయమని వినియోగదారును ప్రోత్సహిస్తుంది"</string>
     <string name="debug_input_category" msgid="1811069939601180246">"ఇన్‌పుట్"</string>
     <string name="debug_drawing_category" msgid="6755716469267367852">"డ్రాయింగ్"</string>
     <string name="debug_hw_drawing_category" msgid="6220174216912308658">"హార్డ్‌వేర్ వేగవంతమైన భాషాంతరీకరణ"</string>
@@ -237,8 +238,7 @@
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"హార్డ్‌వేర్ లేయర్‌ల నవీకరణలను చూపండి"</string>
     <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"హార్డ్‌వేర్ లేయర్‌లు నవీకరించబడినప్పుడు వాటిని ఆకుపచ్చ రంగులో ఫ్లాష్ చేయండి"</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"GPU ఓవర్‌డ్రాను డీబగ్ చేయండి"</string>
-    <!-- no translation found for debug_hw_renderer (7568529019431785816) -->
-    <skip />
+    <string name="debug_hw_renderer" msgid="7568529019431785816">"GPU Rendererని సెట్ చేయండి"</string>
     <string name="disable_overlays" msgid="2074488440505934665">"HW అతివ్యాప్తులను నిలిపివేయి"</string>
     <string name="disable_overlays_summary" msgid="3578941133710758592">"స్క్రీన్ కంపోజిషనింగ్ కోసం ఎల్లప్పుడూ GPUని ఉపయోగించు"</string>
     <string name="simulate_color_space" msgid="6745847141353345872">"రంగు అంతరాన్ని అనుకరించు"</string>
