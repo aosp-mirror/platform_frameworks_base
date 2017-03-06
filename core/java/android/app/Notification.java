@@ -72,6 +72,7 @@ import android.widget.RemoteViews;
 import com.android.internal.R;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.NotificationColorUtil;
+import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -4068,7 +4069,7 @@ public class Notification implements Parcelable
         public RemoteViews makeAmbientNotification() {
             RemoteViews ambient = applyStandardTemplateWithActions(
                     R.layout.notification_template_material_ambient,
-                    mParams.reset().fillTextsFrom(this).hasProgress(false).ambient(true));
+                    mParams.reset().ambient(true).fillTextsFrom(this).hasProgress(false));
             return ambient;
         }
 
@@ -4381,7 +4382,13 @@ public class Notification implements Parcelable
         }
 
         private CharSequence processLegacyText(CharSequence charSequence) {
-            if (isLegacy() || textColorsNeedInversion()) {
+            return processLegacyText(charSequence, false /* ambient */);
+        }
+
+        private CharSequence processLegacyText(CharSequence charSequence, boolean ambient) {
+            boolean isAlreadyLightText = isLegacy() || textColorsNeedInversion();
+            boolean wantLightText = ambient;
+            if (isAlreadyLightText != wantLightText) {
                 return getColorUtil().invertCharSequenceColors(charSequence);
             } else {
                 return charSequence;
@@ -7853,14 +7860,15 @@ public class Notification implements Parcelable
         }
 
         final StandardTemplateParams ambient(boolean ambient) {
+            Preconditions.checkState(title == null && text == null, "must set ambient before text");
             this.ambient = ambient;
             return this;
         }
 
         final StandardTemplateParams fillTextsFrom(Builder b) {
             Bundle extras = b.mN.extras;
-            title = b.processLegacyText(extras.getCharSequence(EXTRA_TITLE));
-            text = b.processLegacyText(extras.getCharSequence(EXTRA_TEXT));
+            title = b.processLegacyText(extras.getCharSequence(EXTRA_TITLE), ambient);
+            text = b.processLegacyText(extras.getCharSequence(EXTRA_TEXT), ambient);
             return this;
         }
     }
