@@ -470,7 +470,6 @@ public class SettingsBackupTest {
                  Settings.Secure.USER_SETUP_COMPLETE,
                  Settings.Secure.VOICE_INTERACTION_SERVICE,
                  Settings.Secure.VOICE_RECOGNITION_SERVICE,
-                 Settings.Secure.VR_DISPLAY_MODE, // Candidate?
                  Settings.Secure.WEB_ACTION_ENABLED);
 
     @Test

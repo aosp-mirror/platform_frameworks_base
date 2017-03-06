@@ -6998,7 +6998,8 @@ public final class Settings {
             DOZE_PULSE_ON_DOUBLE_TAP,
             NFC_PAYMENT_DEFAULT_COMPONENT,
             AUTOMATIC_STORAGE_MANAGER_DAYS_TO_RETAIN,
-            ASSIST_GESTURE_ENABLED
+            ASSIST_GESTURE_ENABLED,
+            VR_DISPLAY_MODE
         };
 
         /**
