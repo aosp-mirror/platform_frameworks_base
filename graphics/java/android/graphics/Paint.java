@@ -340,6 +340,20 @@ public class Paint {
     private static final int CURSOR_OPT_MAX_VALUE = CURSOR_AT;
 
     /**
+     * Mask for hyphen edits that happen at the end of a line. Keep in sync with the definition in
+     * Minikin's Hyphenator.h.
+     * @hide
+     */
+    public static final int HYPHENEDIT_MASK_END_OF_LINE = 0x07;
+
+    /**
+     * Mask for hyphen edits that happen at the start of a line. Keep in sync with the definition in
+     * Minikin's Hyphenator.h.
+     * @hide
+     */
+    public static final int HYPHENEDIT_MASK_START_OF_LINE = 0x03 << 3;
+
+    /**
      * The Style specifies if the primitive being drawn is filled, stroked, or
      * both (in the same color). The default is FILL.
      */
@@ -1540,7 +1554,8 @@ public class Paint {
      * Set a hyphen edit on the paint (causes a hyphen to be added to text when
      * measured or drawn).
      *
-     * @param hyphen 0 for no edit, 1 for adding a hyphen (other values in future)
+     * @param hyphen 0 for no edit, 1 for adding a hyphen at the end, etc.
+     *        Definition of various values are in the HyphenEdit class in Minikin's Hyphenator.h.
      *
      * @hide
      */
