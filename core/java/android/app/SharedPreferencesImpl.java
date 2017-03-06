@@ -28,6 +28,7 @@ import android.util.Log;
 import com.google.android.collect.Maps;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.ExponentiallyBucketedHistogram;
 import com.android.internal.util.XmlUtils;
 
 import dalvik.system.BlockGuard;
@@ -53,8 +54,11 @@ import libcore.io.IoUtils;
 
 final class SharedPreferencesImpl implements SharedPreferences {
     private static final String TAG = "SharedPreferencesImpl";
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
     private static final Object CONTENT = new Object();
+
+    /** If a fsync takes more than {@value #MAX_FSYNC_DURATION_MILLIS} ms, warn */
+    private static final long MAX_FSYNC_DURATION_MILLIS = 256;
 
     // Lock ordering rules:
     //  - acquire SharedPreferencesImpl.mLock before EditorImpl.mLock
@@ -92,6 +96,11 @@ final class SharedPreferencesImpl implements SharedPreferences {
     /** Latest memory state that was committed to disk */
     @GuardedBy("mWritingToDiskLock")
     private long mDiskStateGeneration;
+
+    /** Time (and number of instances) of file-system sync requests */
+    @GuardedBy("mWritingToDiskLock")
+    private final ExponentiallyBucketedHistogram mSyncTimes = new ExponentiallyBucketedHistogram(16);
+    private int mNumSync = 0;
 
     SharedPreferencesImpl(File file, int mode) {
         mFile = file;
@@ -719,15 +728,11 @@ final class SharedPreferencesImpl implements SharedPreferences {
             }
             XmlUtils.writeMapXml(mcr.mapToWriteToDisk, str);
 
-            if (DEBUG) {
-                writeTime = System.currentTimeMillis();
-            }
+            writeTime = System.currentTimeMillis();
 
             FileUtils.sync(str);
 
-            if (DEBUG) {
-                fsyncTime = System.currentTimeMillis();
-            }
+            fsyncTime = System.currentTimeMillis();
 
             str.close();
             ContextImpl.setFilePermissionsFromMode(mFile.getPath(), mMode, 0);
@@ -761,14 +766,24 @@ final class SharedPreferencesImpl implements SharedPreferences {
 
             mcr.setDiskWriteResult(true, true);
 
-            Log.d(TAG, "write: " + (existsTime - startTime) + "/"
-                    + (backupExistsTime - startTime) + "/"
-                    + (outputStreamCreateTime - startTime) + "/"
-                    + (writeTime - startTime) + "/"
-                    + (fsyncTime - startTime) + "/"
-                    + (setPermTime - startTime) + "/"
-                    + (fstatTime - startTime) + "/"
-                    + (deleteTime - startTime));
+            if (DEBUG) {
+                Log.d(TAG, "write: " + (existsTime - startTime) + "/"
+                        + (backupExistsTime - startTime) + "/"
+                        + (outputStreamCreateTime - startTime) + "/"
+                        + (writeTime - startTime) + "/"
+                        + (fsyncTime - startTime) + "/"
+                        + (setPermTime - startTime) + "/"
+                        + (fstatTime - startTime) + "/"
+                        + (deleteTime - startTime));
+            }
+
+            long fsyncDuration = fsyncTime - writeTime;
+            mSyncTimes.add(Long.valueOf(fsyncDuration).intValue());
+            mNumSync++;
+
+            if (DEBUG || mNumSync % 1024 == 0 || fsyncDuration > MAX_FSYNC_DURATION_MILLIS) {
+                mSyncTimes.log(TAG, "Time required to fsync " + mFile + ": ");
+            }
 
             return;
         } catch (XmlPullParserException e) {
