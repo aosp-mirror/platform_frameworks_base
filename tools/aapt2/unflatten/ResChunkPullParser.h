@@ -78,9 +78,9 @@ class ResChunkPullParser {
   std::string error_;
 };
 
-template <typename T>
+template <typename T, size_t MinSize = sizeof(T)>
 inline static const T* ConvertTo(const android::ResChunk_header* chunk) {
-  if (util::DeviceToHost16(chunk->headerSize) < sizeof(T)) {
+  if (util::DeviceToHost16(chunk->headerSize) < MinSize) {
     return nullptr;
   }
   return reinterpret_cast<const T*>(chunk);

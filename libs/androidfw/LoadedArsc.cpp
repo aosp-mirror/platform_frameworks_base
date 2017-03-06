@@ -212,7 +212,7 @@ const LoadedPackage* LoadedArsc::GetPackageForId(uint32_t resid) const {
 
 static bool VerifyType(const Chunk& chunk) {
   ATRACE_CALL();
-  const ResTable_type* header = chunk.header<ResTable_type>();
+  const ResTable_type* header = chunk.header<ResTable_type, kResTableTypeMinSize>();
 
   const size_t entry_count = dtohl(header->entryCount);
   if (entry_count > std::numeric_limits<uint16_t>::max()) {
@@ -533,7 +533,7 @@ std::unique_ptr<LoadedPackage> LoadedPackage::Load(const Chunk& chunk) {
       } break;
 
       case RES_TABLE_TYPE_TYPE: {
-        const ResTable_type* type = child_chunk.header<ResTable_type>();
+        const ResTable_type* type = child_chunk.header<ResTable_type, kResTableTypeMinSize>();
         if (type == nullptr) {
           LOG(ERROR) << "Chunk RES_TABLE_TYPE_TYPE is too small.";
           return {};

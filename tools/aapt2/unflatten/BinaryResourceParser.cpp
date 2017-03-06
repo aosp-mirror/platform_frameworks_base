@@ -313,7 +313,9 @@ bool BinaryResourceParser::ParseType(const ResourceTablePackage* package,
     return false;
   }
 
-  const ResTable_type* type = ConvertTo<ResTable_type>(chunk);
+  // Specify a manual size, because ResTable_type contains ResTable_config, which changes
+  // a lot and has its own code to handle variable size.
+  const ResTable_type* type = ConvertTo<ResTable_type, kResTableTypeMinSize>(chunk);
   if (!type) {
     context_->GetDiagnostics()->Error(DiagMessage(source_)
                                       << "corrupt ResTable_type chunk");

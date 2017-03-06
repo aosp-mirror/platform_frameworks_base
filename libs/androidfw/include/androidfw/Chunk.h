@@ -48,9 +48,9 @@ class Chunk {
   // Returns the size of the header. Caller need not worry about endianness.
   inline size_t header_size() const { return dtohs(device_chunk_->headerSize); }
 
-  template <typename T>
+  template <typename T, size_t MinSize = sizeof(T)>
   inline const T* header() const {
-    if (header_size() >= sizeof(T)) {
+    if (header_size() >= MinSize) {
       return reinterpret_cast<const T*>(device_chunk_);
     }
     return nullptr;

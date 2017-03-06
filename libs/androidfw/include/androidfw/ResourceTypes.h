@@ -1391,10 +1391,19 @@ struct ResTable_type
 
     // Offset from header where ResTable_entry data starts.
     uint32_t entriesStart;
-    
-    // Configuration this collection of entries is designed for.
+
+    // Configuration this collection of entries is designed for. This must always be last.
     ResTable_config config;
 };
+
+// The minimum size required to read any version of ResTable_type.
+constexpr size_t kResTableTypeMinSize =
+    sizeof(ResTable_type) - sizeof(ResTable_config) + sizeof(ResTable_config::size);
+
+// Assert that the ResTable_config is always the last field. This poses a problem for extending
+// ResTable_type in the future, as ResTable_config is variable (over different releases).
+static_assert(sizeof(ResTable_type) == offsetof(ResTable_type, config) + sizeof(ResTable_config),
+              "ResTable_config must be last field in ResTable_type");
 
 /**
  * An entry in a ResTable_type with the flag `FLAG_SPARSE` set.
