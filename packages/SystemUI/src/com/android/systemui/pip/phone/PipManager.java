@@ -83,27 +83,12 @@ public class PipManager implements BasePipManager {
         }
 
         @Override
-        public void onPinnedActivityRestartAttempt(String launchedFromPackage) {
+        public void onPinnedActivityRestartAttempt() {
             if (!checkCurrentUserId(false /* debug */)) {
                 return;
             }
 
-            // Expand the activity back to fullscreen only if it was attempted to be restarted from
-            // another package than the top activity in the stack
-            boolean expandPipToFullscreen = true;
-            if (launchedFromPackage != null) {
-                ComponentName topActivity = PipUtils.getTopPinnedActivity(mContext,
-                        mActivityManager);
-                if (topActivity != null
-                        && topActivity.getPackageName().equals(launchedFromPackage)) {
-                    expandPipToFullscreen = false;
-                }
-            }
-            if (expandPipToFullscreen) {
-                mTouchHandler.getMotionHelper().expandPip();
-            } else {
-                Log.w(TAG, "Can not expand PiP to fullscreen via intent from the same package.");
-            }
+            mTouchHandler.getMotionHelper().expandPip();
         }
     };
 
