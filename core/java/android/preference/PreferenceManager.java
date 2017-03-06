@@ -285,7 +285,7 @@ public class PreferenceManager {
                     context = mContext.createPackageContext(activityInfo.packageName, 0);
                 } catch (NameNotFoundException e) {
                     Log.w(TAG, "Could not create context for " + activityInfo.packageName + ": "
-                        + Log.getStackTraceString(e));
+                            + Log.getStackTraceString(e));
                     continue;
                 }
 
@@ -482,14 +482,13 @@ public class PreferenceManager {
     }
 
     /**
-     * Gets a SharedPreferences instance that preferences managed by this will
-     * use.
+     * Gets a {@link SharedPreferences} instance that preferences managed by this will use.
      *
-     * @return A SharedPreferences instance pointing to the file that contains
-     *         the values of preferences that are managed by this.
+     * @return A {@link SharedPreferences} instance pointing to the file that contains the values of
+     * preferences that are managed by this or null if {@link PreferenceDataStore} is used instead.
      */
     public SharedPreferences getSharedPreferences() {
-        if (mSharedPreferences == null) {
+        if (mSharedPreferences == null && getPreferenceDataStore() == null) {
             final Context storageContext;
             switch (mStorage) {
                 case STORAGE_DEVICE_PROTECTED:
@@ -511,12 +510,12 @@ public class PreferenceManager {
     }
 
     /**
-     * Gets a SharedPreferences instance that points to the default file that is
-     * used by the preference framework in the given context.
+     * Gets a {@link SharedPreferences} instance that points to the default file that is used by
+     * the preference framework in the given context.
      *
      * @param context The context of the preferences whose values are wanted.
-     * @return A SharedPreferences instance that can be used to retrieve and
-     *         listen to values of the preferences.
+     * @return A {@link SharedPreferences} instance that can be used to retrieve and listen
+     *         to values of the preferences.
      */
     public static SharedPreferences getDefaultSharedPreferences(Context context) {
         return context.getSharedPreferences(getDefaultSharedPreferencesName(context),
@@ -663,10 +662,14 @@ public class PreferenceManager {
      * <p>
      * Do NOT commit unless {@link #shouldCommit()} returns true.
      *
-     * @return An editor to use to write to shared preferences.
+     * @return An editor to use to write to shared preferences or null if
+     * {@link PreferenceDataStore} is used instead.
      * @see #shouldCommit()
      */
     SharedPreferences.Editor getEditor() {
+        if (mPreferenceDataStore != null) {
+            return null;
+        }
 
         if (mNoCommit) {
             if (mEditor == null) {
