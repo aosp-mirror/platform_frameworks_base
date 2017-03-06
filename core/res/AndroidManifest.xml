@@ -3226,7 +3226,7 @@
     <!-- Allows the holder to access the instant applications on the device.
     @hide -->
     <permission android:name="android.permission.ACCESS_INSTANT_APPS"
-            android:protectionLevel="signature|installer" />
+            android:protectionLevel="signature|installer|verifier" />
 
     <!-- Allows receiving the usage of media resource e.g. video/audio codec and
          graphic memory.
