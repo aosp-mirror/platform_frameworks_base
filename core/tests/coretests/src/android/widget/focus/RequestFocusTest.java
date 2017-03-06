@@ -16,8 +16,8 @@
 
 package android.widget.focus;
 
-import static com.google.testing.littlemock.LittleMock.inOrder;
-import static com.google.testing.littlemock.LittleMock.mock;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
 
 import android.os.Handler;
 import android.test.ActivityInstrumentationTestCase2;
@@ -31,7 +31,7 @@ import android.view.ViewTreeObserver.OnGlobalFocusChangeListener;
 import android.widget.Button;
 
 import com.android.frameworks.coretests.R;
-import com.google.testing.littlemock.LittleMock.InOrder;
+import org.mockito.InOrder;
 
 /**
  * {@link RequestFocusTest} is set up to exercise cases where the views that
