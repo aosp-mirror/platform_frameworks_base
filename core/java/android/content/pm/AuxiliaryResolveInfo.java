@@ -31,21 +31,21 @@ import android.content.IntentFilter;
  * @hide
  */
 public final class AuxiliaryResolveInfo extends IntentFilter {
-    /** Resolved information returned from the external ephemeral resolver */
-    public final EphemeralResolveInfo resolveInfo;
+    /** Resolved information returned from the external instant resolver */
+    public final InstantAppResolveInfo resolveInfo;
     /** The resolved package. Copied from {@link #resolveInfo}. */
     public final String packageName;
     /** The resolve split. Copied from the matched filter in {@link #resolveInfo}. */
     public final String splitName;
-    /** Whether or not ephemeral resolution needs the second phase */
+    /** Whether or not instant resolution needs the second phase */
     public final boolean needsPhaseTwo;
-    /** Opaque token to track the ephemeral application resolution */
+    /** Opaque token to track the instant application resolution */
     public final String token;
     /** The version code of the package */
     public final int versionCode;
 
     /** Create a response for installing an instant application. */
-    public AuxiliaryResolveInfo(@NonNull EphemeralResolveInfo resolveInfo,
+    public AuxiliaryResolveInfo(@NonNull InstantAppResolveInfo resolveInfo,
             @NonNull IntentFilter orig,
             @Nullable String splitName,
             @NonNull String token,

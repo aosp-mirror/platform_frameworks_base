@@ -16,13 +16,13 @@
 
 package com.android.server.pm;
 
-import android.app.EphemeralResolverService;
-import android.app.IEphemeralResolver;
+import android.app.IInstantAppResolver;
+import android.app.InstantAppResolverService;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.content.pm.EphemeralResolveInfo;
+import android.content.pm.InstantAppResolveInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -61,14 +61,14 @@ final class EphemeralResolverConnection {
     private final Intent mIntent;
 
     private volatile boolean mBindRequested;
-    private IEphemeralResolver mRemoteInstance;
+    private IInstantAppResolver mRemoteInstance;
 
     public EphemeralResolverConnection(Context context, ComponentName componentName) {
         mContext = context;
         mIntent = new Intent(Intent.ACTION_RESOLVE_EPHEMERAL_PACKAGE).setComponent(componentName);
     }
 
-    public final List<EphemeralResolveInfo> getEphemeralResolveInfoList(int hashPrefix[]) {
+    public final List<InstantAppResolveInfo> getInstantAppResolveInfoList(int hashPrefix[]) {
         throwIfCalledOnMainThread();
         try {
             return mGetEphemeralResolveInfoCaller.getEphemeralResolveInfoList(
@@ -83,24 +83,25 @@ final class EphemeralResolverConnection {
         return null;
     }
 
-    public final void getEphemeralIntentFilterList(String hostName, PhaseTwoCallback callback,
-            Handler callbackHandler, final int sequence) {
+    public final void getInstantAppIntentFilterList(int hashPrefix[], String hostName,
+            PhaseTwoCallback callback, Handler callbackHandler, final int sequence) {
         final IRemoteCallback remoteCallback = new IRemoteCallback.Stub() {
             @Override
             public void sendResult(Bundle data) throws RemoteException {
-                final EphemeralResolveInfo ephemeralResolveInfo =
-                        data.getParcelable(EphemeralResolverService.EXTRA_RESOLVE_INFO);
+                final ArrayList<InstantAppResolveInfo> resolveList =
+                        data.getParcelableArrayList(
+                                InstantAppResolverService.EXTRA_RESOLVE_INFO);
                 callbackHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        callback.onPhaseTwoResolved(ephemeralResolveInfo, sequence);
+                        callback.onPhaseTwoResolved(resolveList, sequence);
                     }
                 });
             }
         };
         try {
             getRemoteInstanceLazy()
-                    .getEphemeralIntentFilterList(remoteCallback, hostName, sequence);
+                    .getInstantAppIntentFilterList(hashPrefix, sequence, hostName, remoteCallback);
         } catch (RemoteException re) {
         } catch (TimeoutException te) {
         }
@@ -121,7 +122,7 @@ final class EphemeralResolverConnection {
         }
     }
 
-    private IEphemeralResolver getRemoteInstanceLazy() throws TimeoutException {
+    private IInstantAppResolver getRemoteInstanceLazy() throws TimeoutException {
         synchronized (mLock) {
             if (mRemoteInstance != null) {
                 return mRemoteInstance;
@@ -172,14 +173,15 @@ final class EphemeralResolverConnection {
      * Asynchronous callback when results come back from ephemeral resolution phase two.
      */
     public abstract static class PhaseTwoCallback {
-        abstract void onPhaseTwoResolved(EphemeralResolveInfo ephemeralResolveInfo, int sequence);
+        abstract void onPhaseTwoResolved(
+                List<InstantAppResolveInfo> instantAppResolveInfoList, int sequence);
     }
 
     private final class MyServiceConnection implements ServiceConnection {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             synchronized (mLock) {
-                mRemoteInstance = IEphemeralResolver.Stub.asInterface(service);
+                mRemoteInstance = IInstantAppResolver.Stub.asInterface(service);
                 mLock.notifyAll();
             }
         }
@@ -193,7 +195,7 @@ final class EphemeralResolverConnection {
     }
 
     private static final class GetEphemeralResolveInfoCaller
-            extends TimedRemoteCaller<List<EphemeralResolveInfo>> {
+            extends TimedRemoteCaller<List<InstantAppResolveInfo>> {
         private final IRemoteCallback mCallback;
 
         public GetEphemeralResolveInfoCaller() {
@@ -201,21 +203,21 @@ final class EphemeralResolverConnection {
             mCallback = new IRemoteCallback.Stub() {
                     @Override
                     public void sendResult(Bundle data) throws RemoteException {
-                        final ArrayList<EphemeralResolveInfo> resolveList =
+                        final ArrayList<InstantAppResolveInfo> resolveList =
                                 data.getParcelableArrayList(
-                                        EphemeralResolverService.EXTRA_RESOLVE_INFO);
+                                        InstantAppResolverService.EXTRA_RESOLVE_INFO);
                         int sequence =
-                                data.getInt(EphemeralResolverService.EXTRA_SEQUENCE, -1);
+                                data.getInt(InstantAppResolverService.EXTRA_SEQUENCE, -1);
                         onRemoteMethodResult(resolveList, sequence);
                     }
             };
         }
 
-        public List<EphemeralResolveInfo> getEphemeralResolveInfoList(
-                IEphemeralResolver target, int hashPrefix[])
+        public List<InstantAppResolveInfo> getEphemeralResolveInfoList(
+                IInstantAppResolver target, int hashPrefix[])
                         throws RemoteException, TimeoutException {
             final int sequence = onBeforeRemoteCall();
-            target.getEphemeralResolveInfoList(mCallback, hashPrefix, sequence);
+            target.getInstantAppResolveInfoList(hashPrefix, sequence, mCallback);
             return getResultTimed(sequence);
         }
     }

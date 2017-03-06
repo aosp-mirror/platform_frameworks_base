@@ -18,7 +18,7 @@ package android.app;
 
 import android.os.IRemoteCallback;
 
-/** @hide */
+/** @hide @deprecated */
 oneway interface IEphemeralResolver {
     void getEphemeralResolveInfoList(IRemoteCallback callback, in int[] digestPrefix,
             int sequence);

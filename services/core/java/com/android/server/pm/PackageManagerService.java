@@ -128,8 +128,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.AppsQueryHelper;
 import android.content.pm.ChangedPackages;
 import android.content.pm.ComponentInfo;
-import android.content.pm.EphemeralRequest;
-import android.content.pm.EphemeralResolveInfo;
+import android.content.pm.InstantAppRequest;
 import android.content.pm.AuxiliaryResolveInfo;
 import android.content.pm.FallbackCategoryProvider;
 import android.content.pm.FeatureInfo;
@@ -143,6 +142,7 @@ import android.content.pm.IPackageManager;
 import android.content.pm.IPackageMoveObserver;
 import android.content.pm.IPackageStatsObserver;
 import android.content.pm.InstantAppInfo;
+import android.content.pm.InstantAppResolveInfo;
 import android.content.pm.InstrumentationInfo;
 import android.content.pm.IntentFilterVerificationInfo;
 import android.content.pm.KeySet;
@@ -1736,9 +1736,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                     break;
                 }
                 case INSTANT_APP_RESOLUTION_PHASE_TWO: {
-                    EphemeralResolver.doEphemeralResolutionPhaseTwo(mContext,
+                    InstantAppResolver.doInstantAppResolutionPhaseTwo(mContext,
                             mInstantAppResolverConnection,
-                            (EphemeralRequest) msg.obj,
+                            (InstantAppRequest) msg.obj,
                             mInstantAppInstallerActivity,
                             mHandler);
                 }
@@ -5765,7 +5765,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             Intent origIntent, String resolvedType, String callingPackage,
             int userId) {
         final Message msg = mHandler.obtainMessage(INSTANT_APP_RESOLUTION_PHASE_TWO,
-                new EphemeralRequest(responseObj, origIntent, resolvedType,
+                new InstantAppRequest(responseObj, origIntent, resolvedType,
                         callingPackage, userId));
         mHandler.sendMessage(msg);
     }
@@ -6296,11 +6296,11 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
         if (addEphemeral) {
             Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "resolveEphemeral");
-            final EphemeralRequest requestObject = new EphemeralRequest(
+            final InstantAppRequest requestObject = new InstantAppRequest(
                     null /*responseObj*/, intent /*origIntent*/, resolvedType,
                     null /*callingPackage*/, userId);
             final AuxiliaryResolveInfo auxiliaryResponse =
-                    EphemeralResolver.doEphemeralResolutionPhaseOne(
+                    InstantAppResolver.doInstantAppResolutionPhaseOne(
                             mContext, mInstantAppResolverConnection, requestObject);
             if (auxiliaryResponse != null) {
                 if (DEBUG_EPHEMERAL) {
@@ -12818,7 +12818,7 @@ public class PackageManagerService extends IPackageManager.Stub {
          * would be needed to apply ordering. If the intent resolver becomes re-entrant,
          * this needs to be contained entirely within {@link #filterResults}.
          */
-        final ArrayMap<String, Pair<Integer, EphemeralResolveInfo>> mOrderResult = new ArrayMap<>();
+        final ArrayMap<String, Pair<Integer, InstantAppResolveInfo>> mOrderResult = new ArrayMap<>();
 
         @Override
         protected AuxiliaryResolveInfo[] newArray(int size) {
@@ -12838,13 +12838,13 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
             final String packageName = responseObj.resolveInfo.getPackageName();
             final Integer order = responseObj.getOrder();
-            final Pair<Integer, EphemeralResolveInfo> lastOrderResult =
+            final Pair<Integer, InstantAppResolveInfo> lastOrderResult =
                     mOrderResult.get(packageName);
             // ordering is enabled and this item's order isn't high enough
             if (lastOrderResult != null && lastOrderResult.first >= order) {
                 return null;
             }
-            final EphemeralResolveInfo res = responseObj.resolveInfo;
+            final InstantAppResolveInfo res = responseObj.resolveInfo;
             if (order > 0) {
                 // non-zero order, enable ordering
                 mOrderResult.put(packageName, new Pair<>(order, res));
@@ -12860,9 +12860,9 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
             int resultSize = results.size();
             for (int i = 0; i < resultSize; i++) {
-                final EphemeralResolveInfo info = results.get(i).resolveInfo;
+                final InstantAppResolveInfo info = results.get(i).resolveInfo;
                 final String packageName = info.getPackageName();
-                final Pair<Integer, EphemeralResolveInfo> savedInfo = mOrderResult.get(packageName);
+                final Pair<Integer, InstantAppResolveInfo> savedInfo = mOrderResult.get(packageName);
                 if (savedInfo == null) {
                     // package doesn't having ordering
                     continue;
