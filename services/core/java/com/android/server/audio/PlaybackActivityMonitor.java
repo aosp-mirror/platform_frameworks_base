@@ -156,7 +156,7 @@ public final class PlaybackActivityMonitor
                     apc.getPlayerProxy().applyVolumeShaper(
                             DUCK_ID,
                             TERMINATE);
-                } catch (Exception e) { /* silent failure, happens happens with binder failure */ }
+                } catch (Exception e) { /* silent failure, happens with binder failure */ }
                 mPlayers.remove(new Integer(piid));
             } else {
                 Log.e(TAG, "Error releasing player " + piid);
