@@ -924,12 +924,15 @@ public class WifiManager {
      * Name).  In the case when there is an existing configuration with the same
      * FQDN, the new configuration will replace the existing configuration.
      *
+     * An {@link IllegalArgumentException} will be thrown on failure.
+     *
      * @param config The Passpoint configuration to be added
-     * @return true on success
      */
-    public boolean addOrUpdatePasspointConfiguration(PasspointConfiguration config) {
+    public void addOrUpdatePasspointConfiguration(PasspointConfiguration config) {
         try {
-            return mService.addOrUpdatePasspointConfiguration(config);
+            if (!mService.addOrUpdatePasspointConfiguration(config)) {
+                throw new IllegalArgumentException();
+            }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -938,12 +941,15 @@ public class WifiManager {
     /**
      * Remove the Passpoint configuration identified by its FQDN (Fully Qualified Domain Name).
      *
+     * An {@link IllegalArgumentException} will be thrown on failure.
+     *
      * @param fqdn The FQDN of the passpoint configuration to be removed
-     * @return true on success
      */
-    public boolean removePasspointConfiguration(String fqdn) {
+    public void removePasspointConfiguration(String fqdn) {
         try {
-            return mService.removePasspointConfiguration(fqdn);
+            if (!mService.removePasspointConfiguration(fqdn)) {
+                throw new IllegalArgumentException();
+            }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
