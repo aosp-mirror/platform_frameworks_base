@@ -19,6 +19,7 @@ package android.content;
 import android.content.pm.UserInfo;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.support.test.filters.LargeTest;
 
 /**
  * To run the tests, use
@@ -33,6 +34,7 @@ import android.os.UserHandle;
  * Run: adb shell am instrument -e class android.content.ManagedUserContentResolverTest -w \
  *     com.android.frameworks.coretests/android.support.test.runner.AndroidJUnitRunner
  */
+@LargeTest
 public class ManagedUserContentResolverTest extends AbstractCrossUserContentResolverTest {
     @Override
     protected UserInfo createUser() throws RemoteException {
