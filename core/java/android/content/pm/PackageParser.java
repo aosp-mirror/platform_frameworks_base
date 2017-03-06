@@ -4867,6 +4867,13 @@ public class PackageParser {
                             PatternMatcher.PATTERN_SIMPLE_GLOB, readPermission, writePermission);
                 }
 
+                path = sa.getNonConfigurationString(
+                        com.android.internal.R.styleable.AndroidManifestPathPermission_pathAdvancedPattern, 0);
+                if (path != null) {
+                    pa = new PathPermission(path,
+                            PatternMatcher.PATTERN_ADVANCED_GLOB, readPermission, writePermission);
+                }
+
                 sa.recycle();
 
                 if (pa != null) {
@@ -5387,6 +5394,16 @@ public class PackageParser {
                         return false;
                     }
                     outInfo.addDataPath(str, PatternMatcher.PATTERN_SIMPLE_GLOB);
+                }
+
+                str = sa.getNonConfigurationString(
+                        com.android.internal.R.styleable.AndroidManifestData_pathAdvancedPattern, 0);
+                if (str != null) {
+                    if (!allowGlobs) {
+                        outError[0] = "pathAdvancedPattern not allowed here; path must be literal";
+                        return false;
+                    }
+                    outInfo.addDataPath(str, PatternMatcher.PATTERN_ADVANCED_GLOB);
                 }
 
                 sa.recycle();
