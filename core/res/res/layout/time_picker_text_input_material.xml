@@ -44,6 +44,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/input_hour"
             android:layout_alignStart="@id/input_hour"
+            android:labelFor="@+id/input_hour"
             android:text="@string/time_picker_hour_label"/>
 
         <TextView
@@ -68,6 +69,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/input_minute"
             android:layout_alignStart="@id/input_minute"
+            android:labelFor="@+id/input_minute"
             android:text="@string/time_picker_minute_label"/>
 
         <TextView
