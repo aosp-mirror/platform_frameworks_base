@@ -2462,12 +2462,10 @@ public class BackupManagerService {
                         operationsToCancel.add(token);
                     }
                 }
-
-                for (Integer token : operationsToCancel) {
-                    handleCancel(token, true /* cancelAll */);
-                }
             }
-
+            for (Integer token : operationsToCancel) {
+                handleCancel(token, true /* cancelAll */);
+            }
             // We don't want the backup jobs to kick in any time soon.
             // Reschedules them to run in the distant future.
             KeyValueBackupJob.schedule(mContext, BUSY_BACKOFF_MIN_MILLIS);
