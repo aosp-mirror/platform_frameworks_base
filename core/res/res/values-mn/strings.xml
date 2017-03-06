@@ -220,7 +220,7 @@
     <string name="global_action_lock" msgid="2844945191792119712">"Дэлгэцний түгжээ"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Унтраах"</string>
     <string name="global_action_emergency" msgid="7112311161137421166">"Яаралтай тусламж"</string>
-    <string name="global_action_bug_report" msgid="7934010578922304799">"Алдаа мэдээллэх"</string>
+    <string name="global_action_bug_report" msgid="7934010578922304799">"Алдаа мэдээлэх"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Согог репорт авах"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Энэ таны төхөөрөмжийн одоогийн статусын талаарх мэдээллийг цуглуулах ба имэйл мессеж болгон илгээнэ. Алдааны мэдэгдлээс эхэлж илгээхэд бэлэн болоход хэсэг хугацаа зарцуулагдана тэвчээртэй байна уу."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Интерактив тайлан"</string>
@@ -244,6 +244,32 @@
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="notification_hidden_text" msgid="1135169301897151909">"Контентыг нуусан"</string>
     <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"Удирдамжийн дагуу нуусан агуулга"</string>
+    <!-- no translation found for notification_channel_virtual_keyboard (6969925135507955575) -->
+    <skip />
+    <!-- no translation found for notification_channel_physical_keyboard (7297661826966861459) -->
+    <skip />
+    <string name="notification_channel_security" msgid="7345516133431326347">"Аюулгүй байдал"</string>
+    <!-- no translation found for notification_channel_car_mode (3553380307619874564) -->
+    <skip />
+    <!-- no translation found for notification_channel_account (7577959168463122027) -->
+    <skip />
+    <!-- no translation found for notification_channel_developer (7579606426860206060) -->
+    <skip />
+    <!-- no translation found for notification_channel_updates (4794517569035110397) -->
+    <skip />
+    <!-- no translation found for notification_channel_network_status (5025648583129035447) -->
+    <skip />
+    <!-- no translation found for notification_channel_network_alerts (2895141221414156525) -->
+    <skip />
+    <!-- no translation found for notification_channel_vpn (8330103431055860618) -->
+    <skip />
+    <!-- no translation found for notification_channel_device_admin (1568154104368069249) -->
+    <skip />
+    <string name="notification_channel_alerts" msgid="4496839309318519037">"Сануулга"</string>
+    <!-- no translation found for notification_channel_retail_mode (6088920674914038779) -->
+    <skip />
+    <!-- no translation found for notification_channel_usb (9006850475328924681) -->
+    <skip />
     <string name="safeMode" msgid="2788228061547930246">"Аюулгүй горим"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Андройд систем"</string>
     <string name="user_owner_label" msgid="1119010402169916617">"\"Хувийн\" руу шилжих"</string>
@@ -270,7 +296,7 @@
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Таны харилцан үйлчлэх цонхны контентоос шалгах."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Хүрч танихыг асаах"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Товшсон зүйлсийг чангаар хэлэх ба дэлгэцийг дохио ашиглан таних боломжтой."</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Сайжруулсан веб хандалтыг асаах"</string>
+    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Сайжруулсан вэб хандалтыг асаах"</string>
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Апп контентод илүү хялбар хандуулахын тулд скриптыг суулгана."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Бичсэн текстээ ажиглах"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Кредит картын дугаар болон нууц үг зэрэг хувийн датаг агуулж байна."</string>
@@ -292,6 +318,10 @@
     <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Аппликешн нь хэрэглэгчийн оролцоогүйгээр Нүүр дэлгэцний товчлолыг устгаж чадна."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"гарсан дуудлагыг чиглэлийг өөрчлөх"</string>
     <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"Гадагш дуудлага хийх үед залгасан дугаарыг харах, дуудлагыг өөр дугаар руу шилжүүлэх, таслах боломжтой болгоно."</string>
+    <!-- no translation found for permlab_answerPhoneCalls (4077162841226223337) -->
+    <skip />
+    <!-- no translation found for permdesc_answerPhoneCalls (2901889867993572266) -->
+    <skip />
     <string name="permlab_receiveSms" msgid="8673471768947895082">"текст мессеж(SMS) хүлээж авах"</string>
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Апп нь SMS мессежийг хүлээн авах болон гүйцэтгэх боломжтой. Ингэснээр апп нь таны төхөөрөмжрүү илгээсэн мессежийг танд үзүүлэхгүйгээр хянах болон устгаж чадна."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"текст мессеж(МMS) хүлээж авах"</string>
@@ -807,9 +837,9 @@
     <string name="autofill_parish" msgid="8202206105468820057">"Мөргөлч"</string>
     <string name="autofill_area" msgid="3547409050889952423">"Хэсэг"</string>
     <string name="autofill_emirate" msgid="2893880978835698818">"Эмират"</string>
-    <string name="permlab_readHistoryBookmarks" msgid="3775265775405106983">"өөрийн Веб хавчуурга болон түүхийг унших"</string>
+    <string name="permlab_readHistoryBookmarks" msgid="3775265775405106983">"өөрийн Вэб хавчуурга болон түүхийг унших"</string>
     <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"Апп нь Хөтчийн зочилж байсан бүх URL-н түүх болон Хөтчийн бүх хавчуургыг унших боломжтой. Анхаар: Энэ зөвшөөрөл нь гуравдагч талын хөтөч эсвэл вебээр хөтөчлөх чадавхтай аппликешнүүдэд ашиглагдахгүй байх боломжтой."</string>
-    <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"веб хавчуурга болон түүхийг бичих"</string>
+    <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"вэб хавчуурга болон түүхийг бичих"</string>
     <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"Апп нь таны таблет дээр хадгалагдсан Хөтчийн түүх эсвэл хавчуургыг өөрчлөх боломжтой. Энэ нь апп-д Хөтчийн датаг арилгах эсвэл өөрчлөх боломжийг олгоно. Анхаар: Энэ зөвшөөрөл нь гуравдагч талын хөтөч эсвэл вебээр хөтөчлөх чадвартай аппликешнд ажиллахгүй байх боломжтой."</string>
     <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="7007393823197766548">"Апп-д телевиз-д хадгалагдсан Вэб хөтчийн түүх, хавчуургыг өөрчлөхийг зөвшөөрдөг. Энэ нь апп-д Вэб хөтчийн датаг устгах эсвэо өөрчлөхийг зөвшөөрч болох юм. Жич: энэ зөвшөөрөл нь гуравдагч вэб хөтөч эсвэл вэб хайлт хийх чадвартай апп-ны хувьд үйлчлэхгүй."</string>
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Апп нь таны утсан дээр хадгалагдсан Хөтчийн түүх эсвэл хавчуургыг өөрчлөх боломжтой. Энэ нь апп-д Хөтчийн датаг арилгах эсвэл өөрчлөх боломжийг олгоно. Анхаар: Энэ зөвшөөрөл нь гуравдагч талын хөтөч эсвэл вебээр хөтөчлөх чадвартай аппликешнд ажиллахгүй байх боломжтой."</string>
@@ -818,7 +848,7 @@
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"дуут шуудан нэмэх"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Таны дуут шуудангийн ирсэн мэйлд зурвас нэмэхийг апп-д зөвшөөрөх."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"Хөтчийн геобайршлын зөвшөөрлийг өөрчлөх"</string>
-    <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Апп нь Хөтчийн гео байршлын зөвшөөрлийг өөрчлөх боломжтой. Хортой апп нь энийг ашиглан дурын веб хуудасруу байршлын мэдээллийг илгээх боломжтой."</string>
+    <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Апп нь Хөтчийн гео байршлын зөвшөөрлийг өөрчлөх боломжтой. Хортой апп нь энийг ашиглан дурын вэб хуудасруу байршлын мэдээллийг илгээх боломжтой."</string>
     <string name="save_password_message" msgid="767344687139195790">"Та хөтчид энэ нууц үгийг сануулах уу?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Одоо биш"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Санах"</string>
@@ -1278,7 +1308,7 @@
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"SD картыг цэвэрлэж байна…"</string>
     <string name="share" msgid="1778686618230011964">"Хуваалцах"</string>
     <string name="find" msgid="4808270900322985960">"Олох"</string>
-    <string name="websearch" msgid="4337157977400211589">"Веб хайлт"</string>
+    <string name="websearch" msgid="4337157977400211589">"Вэб хайлт"</string>
     <string name="find_next" msgid="5742124618942193978">"Дараагийнхыг хайх"</string>
     <string name="find_previous" msgid="2196723669388360506">"Өмнөхөөс олох"</string>
     <string name="gpsNotifTicker" msgid="5622683912616496172">"<xliff:g id="NAME">%s</xliff:g>-н байршлын хүсэлт"</string>
@@ -1706,18 +1736,11 @@
     <string name="time_picker_prompt_label" msgid="7588093983899966783">"Хугацааг бичнэ үү"</string>
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"Цагийг оруулахын тулд текст оруулах горимд шилжүүлнэ үү."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"Цагийг оруулахын тулд цагийн горимд шилжүүлнэ үү."</string>
-    <!-- no translation found for autofill_save_title (7081244500504163245) -->
-    <skip />
-    <!-- no translation found for autofill_save_title_with_type (4977385733042555659) -->
-    <skip />
-    <!-- no translation found for autofill_save_yes (6398026094049005921) -->
-    <skip />
-    <!-- no translation found for autofill_save_no (2625132258725581787) -->
-    <skip />
-    <!-- no translation found for autofill_save_type_password (5288448918465971568) -->
-    <skip />
-    <!-- no translation found for autofill_save_type_address (4936707762193009542) -->
-    <skip />
-    <!-- no translation found for autofill_save_type_credit_card (7127694776265563071) -->
-    <skip />
+    <string name="autofill_save_title" msgid="7081244500504163245">"<xliff:g id="LABEL">%1$s</xliff:g>-д хадгалах уу?"</string>
+    <string name="autofill_save_title_with_type" msgid="4977385733042555659">"<xliff:g id="TYPE">%1$s</xliff:g>-г <xliff:g id="LABEL">%2$s</xliff:g>-д хадгалах уу?"</string>
+    <string name="autofill_save_yes" msgid="6398026094049005921">"Хадгалах"</string>
+    <string name="autofill_save_no" msgid="2625132258725581787">"Үгүй, баярлалаа"</string>
+    <string name="autofill_save_type_password" msgid="5288448918465971568">"нууц үг"</string>
+    <string name="autofill_save_type_address" msgid="4936707762193009542">"хаяг"</string>
+    <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"кредит карт"</string>
 </resources>

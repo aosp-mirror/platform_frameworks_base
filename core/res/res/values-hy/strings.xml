@@ -244,6 +244,32 @@
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="notification_hidden_text" msgid="1135169301897151909">"Բովանդակությունը թաքցված է"</string>
     <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"Բովանդակությունը թաքցվել է ըստ քաղաքականության"</string>
+    <!-- no translation found for notification_channel_virtual_keyboard (6969925135507955575) -->
+    <skip />
+    <!-- no translation found for notification_channel_physical_keyboard (7297661826966861459) -->
+    <skip />
+    <string name="notification_channel_security" msgid="7345516133431326347">"Անվտանգություն"</string>
+    <!-- no translation found for notification_channel_car_mode (3553380307619874564) -->
+    <skip />
+    <!-- no translation found for notification_channel_account (7577959168463122027) -->
+    <skip />
+    <!-- no translation found for notification_channel_developer (7579606426860206060) -->
+    <skip />
+    <!-- no translation found for notification_channel_updates (4794517569035110397) -->
+    <skip />
+    <!-- no translation found for notification_channel_network_status (5025648583129035447) -->
+    <skip />
+    <!-- no translation found for notification_channel_network_alerts (2895141221414156525) -->
+    <skip />
+    <!-- no translation found for notification_channel_vpn (8330103431055860618) -->
+    <skip />
+    <!-- no translation found for notification_channel_device_admin (1568154104368069249) -->
+    <skip />
+    <string name="notification_channel_alerts" msgid="4496839309318519037">"Ծանուցումներ"</string>
+    <!-- no translation found for notification_channel_retail_mode (6088920674914038779) -->
+    <skip />
+    <!-- no translation found for notification_channel_usb (9006850475328924681) -->
+    <skip />
     <string name="safeMode" msgid="2788228061547930246">"Անվտանգ ռեժիմ"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android համակարգ"</string>
     <string name="user_owner_label" msgid="1119010402169916617">"Անցնել անհատական պրոֆիլին"</string>
@@ -292,6 +318,10 @@
     <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Հավելվածին թույլ է տալիս հեռացնել գլխավոր էկրանի դյուրանցումները՝ առանց օգտագործողի միջամտության:"</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"վերաուղղել ելքային զանգերը"</string>
     <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"Թույլ է տալիս ծրագրին ելքային զանգի ընթացքում տեսնել արդեն հավաքած համարը՝ հնարավորություն տալով վերահղել կամ անջատել զանգը։"</string>
+    <!-- no translation found for permlab_answerPhoneCalls (4077162841226223337) -->
+    <skip />
+    <!-- no translation found for permdesc_answerPhoneCalls (2901889867993572266) -->
+    <skip />
     <string name="permlab_receiveSms" msgid="8673471768947895082">"ստանալ տեքստային հաղորդագրություններ (SMS)"</string>
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Թույլ է տալիս հավելվածին ստանալ և մշակել SMS հաղորդագրությունները: Սա նշանակում է, որ հավելվածը կարող է ստուգել կամ ջնջել ձեր սարքին ուղարկված հաղորդագրությունները` առանց դրանք ձեզ ցուցադրելու:"</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"ստանալ տեքստային հաղորդագրություններ (MMS)"</string>
@@ -723,9 +753,9 @@
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"Դուք <xliff:g id="NUMBER_0">%1$d</xliff:g> անգամ սխալ եք հավաքել ձեր ապակողպման սխեման: <xliff:g id="NUMBER_1">%2$d</xliff:g> անգամից ավել անհաջող փորձերից հետո ձեզ կառաջարկվի ապակողպել ձեր պլանշետը` օգտագործելով ձեր Google-ի մուտքի օգտանունը:\n \n Փորձեք կրկին <xliff:g id="NUMBER_2">%3$d</xliff:g> վայրկյանից:"</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="5316664559603394684">"Դուք <xliff:g id="NUMBER_0">%1$d</xliff:g> անգամ սխալ եք գծել ապակողպման նախշը: Եվս <xliff:g id="NUMBER_1">%2$d</xliff:g> անհաջող փորձից հետո հեռուստացույցը կկարողանաք ապակողպել միայն մուտք գործելով ձեր Google հաշիվ:\n\n Նորից փորձեք <xliff:g id="NUMBER_2">%3$d</xliff:g> վայրկյանից:"</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"Դուք <xliff:g id="NUMBER_0">%1$d</xliff:g> անգամ սխալ եք հավաքել ձեր ապակողպման սխեման: Եվս <xliff:g id="NUMBER_1">%2$d</xliff:g> անհաջող փորձից հետո ձեզ կառաջարկվի ապակողպել ձեր հեռախոսը` օգտագործելով Google-ի ձեր մուտքը:\n \n Փորձեք կրկին <xliff:g id="NUMBER_2">%3$d</xliff:g> վայրկյանից:"</string>
-    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Դուք <xliff:g id="NUMBER_0">%1$d</xliff:g> անգամ գրասալիկն ապակողպելու սխալ փորձ եք արել: Եվս <xliff:g id="NUMBER_1">%2$d</xliff:g> անհաջող փորձից հետո պլանշետը կվերակարգավորվի գործարանային լռելյայնի, և օգտատիրոջ բոլոր տվյալները կկորեն:"</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Դուք <xliff:g id="NUMBER_0">%1$d</xliff:g> անգամ գրասալիկն ապակողպելու սխալ փորձ եք արել: Եվս <xliff:g id="NUMBER_1">%2$d</xliff:g> անհաջող փորձից հետո պլանշետը կվերակարգավորվի գործարանային լռելյայնի, և օգտատիրոջ բոլոր տվյալները կկորչեն:"</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="950408382418270260">"Դուք հեռուստացույցն ապակողպելու <xliff:g id="NUMBER_0">%1$d</xliff:g> սխալ փորձ եք կատարել: Եվս <xliff:g id="NUMBER_1">%2$d</xliff:g> անհաջող փորձից հետո հեռուստացույցի գործարանային կարգավորումները կվերականգնվեն և օգտատիրոջ բոլոր տվյալները կջնջվեն:"</string>
-    <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"Դուք <xliff:g id="NUMBER_0">%1$d</xliff:g> անգամ հեռախոսը ապակողպելու սխալ փորձ եք արել: Եվս <xliff:g id="NUMBER_1">%2$d</xliff:g> անհաջող փորձից հետո հեռախոսը կվերակարգավորվի գործարանային սկզբնադիր ռեժիմի, և օգտատիրոջ բոլոր տվյալները կկորեն:"</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"Դուք <xliff:g id="NUMBER_0">%1$d</xliff:g> անգամ հեռախոսը ապակողպելու սխալ փորձ եք արել: Եվս <xliff:g id="NUMBER_1">%2$d</xliff:g> անհաջող փորձից հետո հեռախոսը կվերակարգավորվի գործարանային սկզբնադիր ռեժիմի, և օգտատիրոջ բոլոր տվյալները կկորչեն:"</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"Դուք <xliff:g id="NUMBER">%d</xliff:g> անգամ սխալ փորձ եք արել գրասալիկն ապակողպելու համար: Գրասալիկն այժմ կվերակարգավորվի գործարանային լռելյայնի:"</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="3195755534096192191">"Դուք հեռուստացույցն ապակողպելու <xliff:g id="NUMBER">%d</xliff:g> սխալ փորձ եք կատարել: Այժմ կվերականգնվեն հեռուստացույցի գործարանային կարգավորումները:"</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"Դուք <xliff:g id="NUMBER">%d</xliff:g> անգամ հեռախոսը ապակողպելու սխալ փորձ եք արել: Հեռախոսն այժմ կվերակարգավորվի գործարանային սկզբնադիր ռեժիմի:"</string>
@@ -1428,9 +1458,9 @@
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Դուք <xliff:g id="NUMBER_0">%1$d</xliff:g> անգամ սխալ եք մուտքագրել ձեր PIN-ը: \n\nՓորձեք կրկին <xliff:g id="NUMBER_1">%2$d</xliff:g> վայրկյանից:"</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Դուք սխալ եք մուտքագրել ձեր գաղտնաբառը <xliff:g id="NUMBER_0">%1$d</xliff:g> անգամ: \n\nՓորձեք կրկին <xliff:g id="NUMBER_1">%2$d</xliff:g> վայրկյանից:"</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Դուք <xliff:g id="NUMBER_0">%1$d</xliff:g> անգամ սխալ եք հավաքել ձեր ապակողպման սխեման: \n\nՓորձեք կրկին <xliff:g id="NUMBER_1">%2$d</xliff:g> վայրկյանից:"</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Դուք <xliff:g id="NUMBER_0">%1$d</xliff:g> անգամ սխալ փորձ եք արել գրասալիկն ապակողպելու համար: <xliff:g id="NUMBER_1">%2$d</xliff:g> անգամից ավել անհաջող փորձերից հետո պլանշետը կվերակարգավորվի գործարանային լռելյայնի, և օգտատիրոջ բոլոր տվյալները կկորեն:"</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Դուք <xliff:g id="NUMBER_0">%1$d</xliff:g> անգամ սխալ փորձ եք արել գրասալիկն ապակողպելու համար: <xliff:g id="NUMBER_1">%2$d</xliff:g> անգամից ավել անհաջող փորձերից հետո պլանշետը կվերակարգավորվի գործարանային լռելյայնի, և օգտատիրոջ բոլոր տվյալները կկորչեն:"</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="5621231220154419413">"Դուք հեռուստացույցն ապակողպելու <xliff:g id="NUMBER_0">%1$d</xliff:g> սխալ փորձ եք կատարել: Եվս <xliff:g id="NUMBER_1">%2$d</xliff:g> անհաջող փորձից հետո հեռուստացույցի գործարանային կարգավորումները կվերականգնվեն և օգտատիրոջ բոլոր տվյալները կջնջվեն:"</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Դուք <xliff:g id="NUMBER_0">%1$d</xliff:g> անգամ սխալ փորձ եք արել հեռախոսն ապակողպելու համար: <xliff:g id="NUMBER_1">%2$d</xliff:g> անգամից ավել անհաջող փորձերից հետո հեռախոսը կվերակարգավորվի գործարանային լռելյայնի, և օգտատիրոջ բոլոր տվյալները կկորեն:"</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Դուք <xliff:g id="NUMBER_0">%1$d</xliff:g> անգամ սխալ փորձ եք արել հեռախոսն ապակողպելու համար: <xliff:g id="NUMBER_1">%2$d</xliff:g> անգամից ավել անհաջող փորձերից հետո հեռախոսը կվերակարգավորվի գործարանային լռելյայնի, և օգտատիրոջ բոլոր տվյալները կկորչեն:"</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"Դուք <xliff:g id="NUMBER">%d</xliff:g> անգամ սխալ փորձ եք արել գրասալիկն ապակողպելու համար: Գրասալիկն այժմ կվերակարգավորվի գործարանային լռելյայնի:"</string>
     <string name="kg_failed_attempts_now_wiping" product="tv" msgid="4987878286750741463">"Դուք հեռուստացույցն ապակողպելու <xliff:g id="NUMBER">%d</xliff:g> սխալ փորձ եք կատարել: Այժմ կվերականգնվեն հեռուստացույցի գործարանային կարգավորումները:"</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Դուք <xliff:g id="NUMBER">%d</xliff:g> անգամ սխալ փորձ եք արել հեռախոսն ապակողպելու համար: Հեռախոսն այժմ կվերակարգավորվի գործարանային լռելյայնի:"</string>
@@ -1708,18 +1738,11 @@
     <string name="time_picker_prompt_label" msgid="7588093983899966783">"Մուտքագրեք ժամը"</string>
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"Ժամը մուտքագրելու համար միացրեք տեքստի մուտքագրման ռեժիմը:"</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"Ժամը մուտքագրելու համար միացրեք ժամացույցի ռեժիմը:"</string>
-    <!-- no translation found for autofill_save_title (7081244500504163245) -->
-    <skip />
-    <!-- no translation found for autofill_save_title_with_type (4977385733042555659) -->
-    <skip />
-    <!-- no translation found for autofill_save_yes (6398026094049005921) -->
-    <skip />
-    <!-- no translation found for autofill_save_no (2625132258725581787) -->
-    <skip />
-    <!-- no translation found for autofill_save_type_password (5288448918465971568) -->
-    <skip />
-    <!-- no translation found for autofill_save_type_address (4936707762193009542) -->
-    <skip />
-    <!-- no translation found for autofill_save_type_credit_card (7127694776265563071) -->
-    <skip />
+    <string name="autofill_save_title" msgid="7081244500504163245">"Պահե՞լ <xliff:g id="LABEL">%1$s</xliff:g>-ում։"</string>
+    <string name="autofill_save_title_with_type" msgid="4977385733042555659">"Պահե՞լ <xliff:g id="TYPE">%1$s</xliff:g> <xliff:g id="LABEL">%2$s</xliff:g>-ում։"</string>
+    <string name="autofill_save_yes" msgid="6398026094049005921">"Պահել"</string>
+    <string name="autofill_save_no" msgid="2625132258725581787">"Ոչ"</string>
+    <string name="autofill_save_type_password" msgid="5288448918465971568">"գաղտնաբառ"</string>
+    <string name="autofill_save_type_address" msgid="4936707762193009542">"հասցե"</string>
+    <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"վարկային քարտ"</string>
 </resources>
