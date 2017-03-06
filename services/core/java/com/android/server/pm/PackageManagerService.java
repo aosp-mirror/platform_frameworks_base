@@ -13840,13 +13840,6 @@ public class PackageManagerService extends IPackageManager.Stub {
         if (!DEFAULT_VERIFY_ENABLE) {
             return false;
         }
-        // Ephemeral apps don't get the full verification treatment
-        if ((installFlags & PackageManager.INSTALL_INSTANT_APP) != 0) {
-            if (DEBUG_EPHEMERAL) {
-                Slog.d(TAG, "INSTALL_EPHEMERAL so skipping verification");
-            }
-            return false;
-        }
 
         boolean ensureVerifyAppsEnabled = isUserRestricted(userId, UserManager.ENSURE_VERIFY_APPS);
 
