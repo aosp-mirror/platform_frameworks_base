@@ -204,11 +204,19 @@ public class TrustAgentWrapper {
                     byte[] eToken = msg.getData().getByteArray(DATA_ESCROW_TOKEN);
                     int userId = msg.getData().getInt(DATA_USER_ID);
                     long handle = mTrustManagerService.addEscrowToken(eToken, userId);
+                    boolean resultDeliverred = false;
                     try {
-                        mTrustAgentService.onEscrowTokenAdded(
-                                eToken, handle, UserHandle.of(userId));
+                        if (mTrustAgentService != null) {
+                            mTrustAgentService.onEscrowTokenAdded(
+                                    eToken, handle, UserHandle.of(userId));
+                            resultDeliverred = true;
+                        }
                     } catch (RemoteException e) {
                         onError(e);
+                    }
+
+                    if (!resultDeliverred) {
+                        mTrustManagerService.removeEscrowToken(handle, userId);
                     }
                     break;
                 }
@@ -217,9 +225,11 @@ public class TrustAgentWrapper {
                     int userId = msg.getData().getInt(DATA_USER_ID);
                     boolean active = mTrustManagerService.isEscrowTokenActive(handle, userId);
                     try {
-                        mTrustAgentService.onTokenStateReceived(handle,
-                            active ? TrustAgentService.TOKEN_STATE_ACTIVE
-                                : TrustAgentService.TOKEN_STATE_INACTIVE);
+                        if (mTrustAgentService != null) {
+                            mTrustAgentService.onTokenStateReceived(handle,
+                                    active ? TrustAgentService.TOKEN_STATE_ACTIVE
+                                            : TrustAgentService.TOKEN_STATE_INACTIVE);
+                        }
                     } catch (RemoteException e) {
                         onError(e);
                     }
@@ -230,7 +240,9 @@ public class TrustAgentWrapper {
                     int userId = msg.getData().getInt(DATA_USER_ID);
                     boolean success = mTrustManagerService.removeEscrowToken(handle, userId);
                     try {
-                        mTrustAgentService.onEscrowTokenRemoved(handle, success);
+                        if (mTrustAgentService != null) {
+                            mTrustAgentService.onEscrowTokenRemoved(handle, success);
+                        }
                     } catch (RemoteException e) {
                         onError(e);
                     }
@@ -283,8 +295,7 @@ public class TrustAgentWrapper {
         public void addEscrowToken(byte[] token, int userId) {
             if (mContext.getResources()
                     .getBoolean(com.android.internal.R.bool.config_allowEscrowTokenForTrustAgent)) {
-                Slog.e(TAG, "Escrow token API is not allowed.");
-                return;
+                throw  new SecurityException("Escrow token API is not allowed.");
             }
 
             if (DEBUG) Slog.d(TAG, "adding escrow token for user " + userId);
@@ -298,8 +309,7 @@ public class TrustAgentWrapper {
         public void isEscrowTokenActive(long handle, int userId) {
             if (mContext.getResources()
                     .getBoolean(com.android.internal.R.bool.config_allowEscrowTokenForTrustAgent)) {
-                Slog.e(TAG, "Escrow token API is not allowed.");
-                return;
+                throw new SecurityException("Escrow token API is not allowed.");
             }
 
             if (DEBUG) Slog.d(TAG, "checking the state of escrow token on user " + userId);
@@ -313,8 +323,7 @@ public class TrustAgentWrapper {
         public void removeEscrowToken(long handle, int userId) {
             if (mContext.getResources()
                     .getBoolean(com.android.internal.R.bool.config_allowEscrowTokenForTrustAgent)) {
-                Slog.e(TAG, "Escrow token API is not allowed.");
-                return;
+                throw new SecurityException("Escrow token API is not allowed.");
             }
 
             if (DEBUG) Slog.d(TAG, "removing escrow token on user " + userId);
@@ -328,8 +337,7 @@ public class TrustAgentWrapper {
         public void unlockUserWithToken(long handle, byte[] token, int userId) {
             if (mContext.getResources()
                     .getBoolean(com.android.internal.R.bool.config_allowEscrowTokenForTrustAgent)) {
-                Slog.e(TAG, "Escrow token API is not allowed.");
-                return;
+                throw new SecurityException("Escrow token API is not allowed.");
             }
 
             if (DEBUG) Slog.d(TAG, "unlocking user " + userId);
