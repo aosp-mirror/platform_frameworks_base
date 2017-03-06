@@ -321,6 +321,10 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
         Transition viewsTransition = null;
         if (mTransitioningViews != null && !mTransitioningViews.isEmpty()) {
             viewsTransition = configureTransition(getViewsTransition(), true);
+            removeExcludedViews(viewsTransition, mTransitioningViews);
+            if (mTransitioningViews.isEmpty()) {
+                viewsTransition = null;
+            }
         }
         if (viewsTransition == null) {
             viewsTransitionComplete();

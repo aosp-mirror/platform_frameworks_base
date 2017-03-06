@@ -28,6 +28,7 @@ import android.transition.TransitionListenerAdapter;
 import android.transition.TransitionSet;
 import android.transition.Visibility;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.view.GhostView;
 import android.view.View;
 import android.view.ViewGroup;
@@ -392,6 +393,60 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
         }
         noLayoutSuppressionForVisibilityTransitions(transition);
         return transition;
+    }
+
+    /**
+     * Looks through the transition to see which Views have been included and which have been
+     * excluded. {@code views} will be modified to contain only those Views that are included
+     * in the transition. If {@code transition} is a TransitionSet, it will search through all
+     * contained Transitions to find targeted Views.
+     *
+     * @param transition The transition to look through for inclusion of Views
+     * @param views The list of Views that are to be checked for inclusion. Will be modified
+     *              to remove all excluded Views, possibly leaving an empty list.
+     */
+    protected static void removeExcludedViews(Transition transition, ArrayList<View> views) {
+        ArraySet<View> included = new ArraySet<>();
+        findIncludedViews(transition, views, included);
+        views.clear();
+        views.addAll(included);
+    }
+
+    /**
+     * Looks through the transition to see which Views have been included. Only {@code views}
+     * will be examined for inclusion. If {@code transition} is a TransitionSet, it will search
+     * through all contained Transitions to find targeted Views.
+     *
+     * @param transition The transition to look through for inclusion of Views
+     * @param views The list of Views that are to be checked for inclusion.
+     * @param included Modified to contain all Views in views that have at least one Transition
+     *                 that affects it.
+     */
+    private static void findIncludedViews(Transition transition, ArrayList<View> views,
+            ArraySet<View> included) {
+        if (transition instanceof TransitionSet) {
+            TransitionSet set = (TransitionSet) transition;
+            ArrayList<View> includedViews = new ArrayList<>();
+            final int numViews = views.size();
+            for (int i = 0; i < numViews; i++) {
+                final View view = views.get(i);
+                if (transition.isValidTarget(view)) {
+                    includedViews.add(view);
+                }
+            }
+            final int count = set.getTransitionCount();
+            for (int i = 0; i < count; i++) {
+                findIncludedViews(set.getTransitionAt(i), includedViews, included);
+            }
+        } else {
+            final int numViews = views.size();
+            for (int i = 0; i < numViews; i++) {
+                final View view = views.get(i);
+                if (transition.isValidTarget(view)) {
+                    included.add(view);
+                }
+            }
+        }
     }
 
     protected static Transition mergeTransitions(Transition transition1, Transition transition2) {

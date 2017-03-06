@@ -799,8 +799,10 @@ public abstract class Transition implements Cloneable {
      * targetId list. If the target parameter is null, then the target list
      * is not checked (this is in the case of ListView items, where the
      * views are ignored and only the ids are used).
+     *
+     * @hide
      */
-    boolean isValidTarget(View target) {
+    public boolean isValidTarget(View target) {
         if (target == null) {
             return false;
         }
