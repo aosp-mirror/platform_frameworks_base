@@ -35,7 +35,7 @@ TEST(ResolvedRenderState, construct) {
     {
         // recorded with transform, no parent transform
         auto parentSnapshot = TestUtils::makeSnapshot(Matrix4::identity(), Rect(100, 200));
-        ResolvedRenderState state(allocator, *parentSnapshot, recordedOp, false);
+        ResolvedRenderState state(allocator, *parentSnapshot, recordedOp, false, false);
         EXPECT_MATRIX_APPROX_EQ(state.transform, translate10x20);
         EXPECT_EQ(Rect(100, 200), state.clipRect());
         EXPECT_EQ(Rect(40, 60, 100, 200), state.clippedBounds); // translated and also clipped
@@ -44,7 +44,7 @@ TEST(ResolvedRenderState, construct) {
     {
         // recorded with transform and parent transform
         auto parentSnapshot = TestUtils::makeSnapshot(translate10x20, Rect(100, 200));
-        ResolvedRenderState state(allocator, *parentSnapshot, recordedOp, false);
+        ResolvedRenderState state(allocator, *parentSnapshot, recordedOp, false, false);
 
         Matrix4 expectedTranslate;
         expectedTranslate.loadTranslate(20, 40, 0);
@@ -70,14 +70,14 @@ TEST(ResolvedRenderState, computeLocalSpaceClip) {
     {
         // recorded with transform, no parent transform
         auto parentSnapshot = TestUtils::makeSnapshot(Matrix4::identity(), Rect(100, 200));
-        ResolvedRenderState state(allocator, *parentSnapshot, recordedOp, false);
+        ResolvedRenderState state(allocator, *parentSnapshot, recordedOp, false, false);
         EXPECT_EQ(Rect(-10, -20, 90, 180), state.computeLocalSpaceClip())
             << "Local clip rect should be 100x200, offset by -10,-20";
     }
     {
         // recorded with transform + parent transform
         auto parentSnapshot = TestUtils::makeSnapshot(translate10x20, Rect(100, 200));
-        ResolvedRenderState state(allocator, *parentSnapshot, recordedOp, false);
+        ResolvedRenderState state(allocator, *parentSnapshot, recordedOp, false, false);
         EXPECT_EQ(Rect(-10, -20, 80, 160), state.computeLocalSpaceClip())
             << "Local clip rect should be 90x190, offset by -10,-20";
     }
@@ -170,7 +170,7 @@ TEST(ResolvedRenderState, construct_expandForStroke) {
         snapshotMatrix.loadScale(testCase.scale, testCase.scale, 1);
         auto parentSnapshot = TestUtils::makeSnapshot(snapshotMatrix, Rect(200, 200));
 
-        ResolvedRenderState state(allocator, *parentSnapshot, recordedOp, true);
+        ResolvedRenderState state(allocator, *parentSnapshot, recordedOp, true, false);
         testCase.validator(state);
     }
 }
@@ -234,7 +234,7 @@ TEST(BakedOpState, tryStrokeableOpConstruct) {
         RectOp rejectOp(Rect(100, 200), Matrix4::identity(), &clip, &paint);
         auto snapshot = TestUtils::makeSnapshot(Matrix4::identity(), Rect()); // Note: empty clip
         auto bakedState = BakedOpState::tryStrokeableOpConstruct(allocator, *snapshot, rejectOp,
-                BakedOpState::StrokeBehavior::StyleDefined);
+                BakedOpState::StrokeBehavior::StyleDefined, false);
 
         EXPECT_EQ(nullptr, bakedState);
         EXPECT_GT(8u, allocator.usedSize()); // no significant allocation space used for rejected op
@@ -248,7 +248,7 @@ TEST(BakedOpState, tryStrokeableOpConstruct) {
         RectOp rejectOp(Rect(50, 50, 150, 150), Matrix4::identity(), &clip, &paint);
         auto snapshot = TestUtils::makeSnapshot(Matrix4::identity(), Rect(200, 200));
         auto bakedState = BakedOpState::tryStrokeableOpConstruct(allocator, *snapshot, rejectOp,
-                BakedOpState::StrokeBehavior::StyleDefined);
+                BakedOpState::StrokeBehavior::StyleDefined, false);
 
         ASSERT_NE(nullptr, bakedState);
         EXPECT_EQ(Rect(45, 45, 155, 155), bakedState->computedState.clippedBounds);
@@ -263,7 +263,7 @@ TEST(BakedOpState, tryStrokeableOpConstruct) {
         RectOp rejectOp(Rect(50, 50, 150, 150), Matrix4::identity(), &clip, &paint);
         auto snapshot = TestUtils::makeSnapshot(Matrix4::identity(), Rect(200, 200));
         auto bakedState = BakedOpState::tryStrokeableOpConstruct(allocator, *snapshot, rejectOp,
-                BakedOpState::StrokeBehavior::Forced);
+                BakedOpState::StrokeBehavior::Forced, false);
 
         ASSERT_NE(nullptr, bakedState);
         EXPECT_EQ(Rect(45, 45, 155, 155), bakedState->computedState.clippedBounds);
