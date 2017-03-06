@@ -45,7 +45,6 @@ import android.view.ViewStructure;
 import android.view.ViewTreeObserver;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.view.accessibility.AccessibilityNodeInfo;
-import android.view.autofill.AutoFillType;
 import android.view.autofill.AutoFillValue;
 import android.widget.PopupWindow.OnDismissListener;
 
@@ -946,8 +945,8 @@ public class Spinner extends AbsSpinner implements OnClickListener {
     }
 
     @Override
-    public AutoFillType getAutoFillType() {
-        return AutoFillType.forList();
+    public @AutofillType int getAutofillType() {
+        return isEnabled() ? AUTOFILL_TYPE_LIST : AUTOFILL_TYPE_NONE;
     }
 
     @Override

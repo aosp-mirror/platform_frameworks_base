@@ -1115,6 +1115,65 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     @AutoFillHint private int mAutoFillHint;
 
+    /** @hide */
+    @IntDef({
+            AUTOFILL_TYPE_NONE,
+            AUTOFILL_TYPE_TEXT,
+            AUTOFILL_TYPE_TOGGLE,
+            AUTOFILL_TYPE_LIST,
+            AUTOFILL_TYPE_DATE
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface AutofillType {}
+
+    /**
+     * Autofill type for views that cannot be autofilled.
+     */
+    public static final int AUTOFILL_TYPE_NONE = 0;
+
+    /**
+     * Autofill type for a text field, which is filled by a {@link CharSequence}.
+     *
+     * <p>{@link AutoFillValue} instances for autofilling a {@link View} can be obtained through
+     * {@link AutoFillValue#forText(CharSequence)}, and the value passed to auto-fill a
+     * {@link View} can be fetched through {@link AutoFillValue#getTextValue()}.
+     */
+    public static final int AUTOFILL_TYPE_TEXT = 1;
+
+    /**
+     * Autofill type for a togglable field, which is filled by a {@code boolean}.
+     *
+     * <p>{@link AutoFillValue} instances for auto-filling a {@link View} can be obtained through
+     * {@link AutoFillValue#forToggle(boolean)}, and the value passed to auto-fill a
+     * {@link View} can be fetched through {@link AutoFillValue#getToggleValue()}.
+     */
+    public static final int AUTOFILL_TYPE_TOGGLE = 2;
+
+    /**
+     * Autofill type for a selection list field, which is filled by an {@code int}
+     * representing the element index inside the list (starting at {@code 0}).
+     *
+     * <p>{@link AutoFillValue} instances for autofilling a {@link View} can be obtained through
+     * {@link AutoFillValue#forList(int)}, and the value passed to auto-fill a
+     * {@link View} can be fetched through {@link AutoFillValue#getListValue()}.
+     *
+     * <p>The available options in the selection list are typically provided by
+     * {@link android.app.assist.AssistStructure.ViewNode#getAutoFillOptions()}.
+     */
+    public static final int AUTOFILL_TYPE_LIST = 3;
+
+
+    /**
+     * Autofill type for a field that contains a date, which is represented by a long representing
+     * the number of milliseconds since the standard base time known as "the epoch", namely
+     * January 1, 1970, 00:00:00 GMT (see {@link java.util.Date#getTime()}.
+     *
+     * <p>{@link AutoFillValue} instances for autofilling a {@link View} can be obtained through
+     * {@link AutoFillValue#forDate(long)}, and the values passed to
+     * auto-fill a {@link View} can be fetched through {@link AutoFillValue#getDateValue()}.
+     */
+    public static final int AUTOFILL_TYPE_DATE = 4;
+
     /**
      * This view is enabled. Interpretation varies by subclass.
      * Use with ENABLED_MASK when calling setFlags.
@@ -7178,14 +7237,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
 
         if (forAutoFill) {
-            final AutoFillType autoFillType = getAutoFillType();
+            final @AutofillType int autofillType = getAutofillType();
             // Don't need to fill auto-fill info if view does not support it.
             // For example, only TextViews that are editable support auto-fill
-            if (autoFillType != null) {
+            if (autofillType != AUTOFILL_TYPE_NONE) {
                 // The auto-fill id needs to be unique, but its value doesn't matter, so it's better
                 // to reuse the accessibility id to save space.
                 structure.setAutoFillId(getAccessibilityViewId());
-                structure.setAutoFillType(autoFillType);
+                structure.setAutofillType(autofillType);
                 structure.setAutoFillHint(getAutoFillHint());
                 structure.setAutoFillValue(getAutoFillValue());
             }
@@ -7291,7 +7350,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * Automatically fills the content of this view with the {@code value}.
      *
-     * <p>By default does nothing, but views should override it (and {@link #getAutoFillType()},
+     * <p>By default does nothing, but views should override it (and {@link #getAutofillType()},
      * {@link #getAutoFillValue()}, and {@link #onProvideAutoFillStructure(ViewStructure, int)}
      * to support the AutoFill Framework.
      *
@@ -7330,15 +7389,34 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * @deprecated TODO(b/35956626): remove once clients use getAutoFilltype
+     */
+    @Deprecated
+    @Nullable
+    public final AutoFillType getAutoFillType() {
+        switch (getAutofillType()) {
+            case AUTOFILL_TYPE_TEXT:
+                return AutoFillType.forText();
+            case AUTOFILL_TYPE_TOGGLE:
+                return AutoFillType.forToggle();
+            case AUTOFILL_TYPE_LIST:
+                return AutoFillType.forList();
+            case AUTOFILL_TYPE_DATE:
+                return AutoFillType.forDate();
+            default:
+                return null;
+        }
+    }
+
+    /**
      * Describes the auto-fill type that should be used on calls to
      * {@link #autoFill(AutoFillValue)} and {@link #autoFillVirtual(int, AutoFillValue)}.
      *
-     * <p>By default returns {@code null}, but views should override it (and
+     * <p>By default returns {@link #AUTOFILL_TYPE_NONE}, but views should override it (and
      * {@link #autoFill(AutoFillValue)} to support the AutoFill Framework.
      */
-    @Nullable
-    public AutoFillType getAutoFillType() {
-        return null;
+    public @AutofillType int getAutofillType() {
+        return AUTOFILL_TYPE_NONE;
     }
 
     /**
@@ -7357,7 +7435,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Gets the {@link View}'s current auto-fill value.
      *
      * <p>By default returns {@code null}, but views should override it (and
-     * {@link #autoFill(AutoFillValue)}, and {@link #getAutoFillType()} to support the AutoFill
+     * {@link #autoFill(AutoFillValue)}, and {@link #getAutofillType()} to support the AutoFill
      * Framework.
      */
     @Nullable
@@ -7371,7 +7449,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     private boolean isAutoFillable() {
-        return getAutoFillType() != null && !isAutoFillBlocked();
+        return getAutofillType() != AUTOFILL_TYPE_NONE && !isAutoFillBlocked();
     }
 
     private void populateVirtualStructure(ViewStructure structure,

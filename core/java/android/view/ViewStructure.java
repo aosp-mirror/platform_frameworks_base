@@ -311,10 +311,15 @@ public abstract class ViewStructure {
     public abstract ViewStructure asyncNewChildForAutoFill(int index, int virtualId, int flags);
 
     /**
-     * Sets the {@link AutoFillType} that can be used to auto-fill this node.
+     * @deprecated TODO(b/35956626): remove once clients use setAutoFilltype()
      */
-    // TODO(b/33197203, b/33802548): add CTS/unit test
+    @Deprecated
     public abstract void setAutoFillType(AutoFillType info);
+
+    /**
+     * Sets the {@link View#getAutofillType()} that can be used to autofill this node.
+     */
+    public abstract void setAutofillType(@View.AutofillType int type);
 
     /**
      * Sets the a hint that helps the auto-fill service to select the appropriate data to fill the

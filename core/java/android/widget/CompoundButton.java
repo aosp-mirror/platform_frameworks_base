@@ -36,7 +36,6 @@ import android.view.ViewStructure;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.autofill.AutoFillManager;
-import android.view.autofill.AutoFillType;
 import android.view.autofill.AutoFillValue;
 
 import com.android.internal.R;
@@ -590,8 +589,8 @@ public abstract class CompoundButton extends Button implements Checkable {
     }
 
     @Override
-    public AutoFillType getAutoFillType() {
-        return isEnabled() ? AutoFillType.forToggle() : null;
+    public @AutofillType int getAutofillType() {
+        return isEnabled() ? AUTOFILL_TYPE_TOGGLE : AUTOFILL_TYPE_NONE;
     }
 
     @Override

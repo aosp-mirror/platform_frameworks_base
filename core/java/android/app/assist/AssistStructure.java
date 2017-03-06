@@ -538,7 +538,7 @@ public class AssistStructure implements Parcelable {
         // TODO(b/33197203): once we have more flags, it might be better to store the individual
         // fields (viewId and childId) of the field.
         AutoFillId mAutoFillId;
-        AutoFillType mAutoFillType;
+        @View.AutofillType int mAutofillType;
         @View.AutoFillHint int mAutoFillHint;
         AutoFillValue mAutoFillValue;
         String[] mAutoFillOptions;
@@ -623,7 +623,7 @@ public class AssistStructure implements Parcelable {
             if ((flags&FLAGS_HAS_AUTO_FILL_DATA) != 0) {
                 mSanitized = in.readInt() == 1;
                 mAutoFillId = in.readParcelable(null);
-                mAutoFillType = in.readParcelable(null);
+                mAutofillType = in.readInt();
                 mAutoFillHint = in.readInt();
                 mAutoFillValue = in.readParcelable(null);
                 mAutoFillOptions = in.readStringArray();
@@ -757,7 +757,7 @@ public class AssistStructure implements Parcelable {
                 writeSensitive = mSanitized || !sanitizeOnWrite;
                 out.writeInt(mSanitized ? 1 : 0);
                 out.writeParcelable(mAutoFillId, 0);
-                out.writeParcelable(mAutoFillType,  0);
+                out.writeInt(mAutofillType);
                 out.writeInt(mAutoFillHint);
                 final AutoFillValue sanitizedValue = writeSensitive ? mAutoFillValue : null;
                 out.writeParcelable(sanitizedValue,  0);
@@ -851,14 +851,32 @@ public class AssistStructure implements Parcelable {
         }
 
         /**
+         * @deprecated TODO(b/35956626): remove once clients use getAutoFilltype()
+         */
+        @Deprecated
+        public AutoFillType getAutoFillType() {
+            switch (getAutofillType()) {
+                case View.AUTOFILL_TYPE_TEXT:
+                    return AutoFillType.forText();
+                case View.AUTOFILL_TYPE_TOGGLE:
+                    return AutoFillType.forToggle();
+                case View.AUTOFILL_TYPE_LIST:
+                    return AutoFillType.forList();
+                case View.AUTOFILL_TYPE_DATE:
+                    return AutoFillType.forDate();
+                default:
+                    return null;
+            }
+        }
+
+        /**
          * Gets the the type of value that can be used to auto-fill the view contents.
          *
          * <p>It's only set when the {@link AssistStructure} is used for auto-filling purposes, not
          * for assist.
          */
-        // TODO(b/33197203, b/33802548): add CTS/unit test
-        public AutoFillType getAutoFillType() {
-            return mAutoFillType;
+        public @View.AutofillType int getAutofillType() {
+            return mAutofillType;
         }
 
         /**
@@ -1562,7 +1580,22 @@ public class AssistStructure implements Parcelable {
 
         @Override
         public void setAutoFillType(AutoFillType type) {
-           mNode.mAutoFillType = type;
+            if (type == null) return;
+
+            if (type.isText()) {
+                mNode.mAutofillType = View.AUTOFILL_TYPE_TEXT;
+            } else if (type.isToggle()) {
+                mNode.mAutofillType = View.AUTOFILL_TYPE_TOGGLE;
+            } else if (type.isList()) {
+                mNode.mAutofillType = View.AUTOFILL_TYPE_LIST;
+            } else if (type.isDate()) {
+                mNode.mAutofillType = View.AUTOFILL_TYPE_DATE;
+            }
+        }
+
+        @Override
+        public void setAutofillType(@View.AutofillType int type) {
+            mNode.mAutofillType = type;
         }
 
         @Override
@@ -1711,7 +1744,7 @@ public class AssistStructure implements Parcelable {
             Log.i(TAG, prefix + " NO AUTO-FILL ID");
         } else {
             Log.i(TAG, prefix + "AutoFill info: id= " + autoFillId
-                    + ", type=" + node.getAutoFillType()
+                    + ", type=" + node.getAutofillType()
                     + ", options=" + Arrays.toString(node.getAutoFillOptions())
                     + ", inputType=" + node.getInputType()
                     + ", hint=" + Integer.toHexString(node.getAutoFillHint())
