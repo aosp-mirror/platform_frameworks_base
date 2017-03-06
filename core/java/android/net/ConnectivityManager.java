@@ -2884,14 +2884,11 @@ public class ConnectivityManager {
         if (callback == null) {
             throw new IllegalArgumentException("null NetworkCallback");
         }
-        if ((need == null) && (action != REQUEST)) {
+        if (need == null && action != REQUEST) {
             throw new IllegalArgumentException("null NetworkCapabilities");
         }
-        final int targetSdk = mContext.getApplicationInfo().targetSdkVersion;
-        if ((targetSdk > VERSION_CODES.N_MR1) && (callback.networkRequest != null)) {
-            // http://b/20701525
-            throw new IllegalArgumentException("NetworkCallback already registered");
-        }
+        // TODO: throw an exception if callback.networkRequest is not null.
+        // http://b/20701525
         final NetworkRequest request;
         try {
             synchronized(sCallbacks) {
