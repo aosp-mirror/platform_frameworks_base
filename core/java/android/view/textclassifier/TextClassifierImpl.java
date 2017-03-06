@@ -201,7 +201,7 @@ final class TextClassifierImpl implements TextClassifier {
         Preconditions.checkArgument(text != null);
         Preconditions.checkArgument(startIndex >= 0);
         Preconditions.checkArgument(endIndex <= text.length());
-        Preconditions.checkArgument(endIndex >= startIndex);
+        Preconditions.checkArgument(endIndex > startIndex);
     }
 
     /**

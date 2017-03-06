@@ -60,14 +60,14 @@ final class SelectionActionModeHelper {
         mEditor = Preconditions.checkNotNull(editor);
         final TextView textView = mEditor.getTextView();
         mTextClassificationHelper = new TextClassificationHelper(
-                textView.getTextClassifier(), textView.getText(),
-                textView.getSelectionStart(), textView.getSelectionEnd());
+                textView.getTextClassifier(), textView.getText(), 0, 1);
     }
 
     public void startActionModeAsync() {
         cancelAsyncTask();
-        if (isNoOpTextClassifier()) {
+        if (isNoOpTextClassifier() || !hasSelection()) {
             // No need to make an async call for a no-op TextClassifier.
+            // Do not call the TextClassifier if there is no selection.
             startActionMode(null);
         } else {
             resetTextClassificationHelper();
@@ -84,8 +84,9 @@ final class SelectionActionModeHelper {
 
     public void invalidateActionModeAsync() {
         cancelAsyncTask();
-        if (isNoOpTextClassifier()) {
+        if (isNoOpTextClassifier() || !hasSelection()) {
             // No need to make an async call for a no-op TextClassifier.
+            // Do not call the TextClassifier if there is no selection.
             invalidateActionMode(null);
         } else {
             resetTextClassificationHelper();
@@ -124,6 +125,11 @@ final class SelectionActionModeHelper {
 
     private boolean isNoOpTextClassifier() {
         return mEditor.getTextView().getTextClassifier() == TextClassifier.NO_OP;
+    }
+
+    private boolean hasSelection() {
+        final TextView textView = mEditor.getTextView();
+        return textView.getSelectionEnd() > textView.getSelectionStart();
     }
 
     private void startActionMode(@Nullable SelectionResult result) {
@@ -311,6 +317,7 @@ final class SelectionActionModeHelper {
                 CharSequence text, int selectionStart, int selectionEnd) {
             mTextClassifier = Preconditions.checkNotNull(textClassifier);
             mText = Preconditions.checkNotNull(text).toString();
+            Preconditions.checkArgument(selectionEnd > selectionStart);
             mSelectionStart = selectionStart;
             mSelectionEnd = selectionEnd;
         }
