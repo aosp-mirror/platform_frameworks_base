@@ -638,6 +638,9 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
         if (appCount == 0 && mEnable) {
             disableBleScanMode();
         }
+        if (appCount == 0 && !mEnableExternal) {
+            sendBrEdrDownCallback();
+        }
         return appCount;
     }
 
@@ -693,7 +696,14 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
             return;
         }
 
-        if (isBleAppPresent() == false) {
+        if (isBleAppPresent()) {
+            // Need to stay at BLE ON. Disconnect all Gatt connections
+            try {
+                mBluetoothGatt.unregAll();
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Unable to disconnect all apps.", e);
+            }
+        } else {
             try {
                 mBluetoothLock.readLock().lock();
                 if (mBluetooth != null) mBluetooth.onBrEdrDown();
@@ -702,14 +712,8 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
             } finally {
                 mBluetoothLock.readLock().unlock();
             }
-        } else {
-            // Need to stay at BLE ON. Disconnect all Gatt connections
-            try {
-                mBluetoothGatt.unregAll();
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Unable to disconnect all apps.", e);
-            }
         }
+
     }
 
     public boolean enableNoAutoConnect(String packageName)
