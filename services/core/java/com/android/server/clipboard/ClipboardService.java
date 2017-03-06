@@ -255,8 +255,8 @@ public class ClipboardService extends SystemService {
                         clip.getItemAt(0).getText().toString());
                 }
                 final int callingUid = Binder.getCallingUid();
-                if (mAppOps.noteOp(AppOpsManager.OP_WRITE_CLIPBOARD, callingUid,
-                        callingPackage) != AppOpsManager.MODE_ALLOWED) {
+                if (!clipboardAccessAllowed(AppOpsManager.OP_WRITE_CLIPBOARD, callingPackage,
+                            callingUid)) {
                     return;
                 }
                 checkDataOwnerLocked(clip, callingUid);
@@ -304,8 +304,8 @@ public class ClipboardService extends SystemService {
         @Override
         public ClipData getPrimaryClip(String pkg) {
             synchronized (this) {
-                if (mAppOps.noteOp(AppOpsManager.OP_READ_CLIPBOARD, Binder.getCallingUid(),
-                        pkg) != AppOpsManager.MODE_ALLOWED) {
+                if (!clipboardAccessAllowed(AppOpsManager.OP_READ_CLIPBOARD, pkg,
+                            Binder.getCallingUid())) {
                     return null;
                 }
                 addActiveOwnerLocked(Binder.getCallingUid(), pkg);
@@ -316,8 +316,8 @@ public class ClipboardService extends SystemService {
         @Override
         public ClipDescription getPrimaryClipDescription(String callingPackage) {
             synchronized (this) {
-                if (mAppOps.checkOp(AppOpsManager.OP_READ_CLIPBOARD, Binder.getCallingUid(),
-                        callingPackage) != AppOpsManager.MODE_ALLOWED) {
+                if (!clipboardAccessAllowed(AppOpsManager.OP_READ_CLIPBOARD, callingPackage,
+                            Binder.getCallingUid())) {
                     return null;
                 }
                 PerUserClipboard clipboard = getClipboard();
@@ -328,8 +328,8 @@ public class ClipboardService extends SystemService {
         @Override
         public boolean hasPrimaryClip(String callingPackage) {
             synchronized (this) {
-                if (mAppOps.checkOp(AppOpsManager.OP_READ_CLIPBOARD, Binder.getCallingUid(),
-                        callingPackage) != AppOpsManager.MODE_ALLOWED) {
+                if (!clipboardAccessAllowed(AppOpsManager.OP_READ_CLIPBOARD, callingPackage,
+                            Binder.getCallingUid())) {
                     return false;
                 }
                 return getClipboard().primaryClip != null;
@@ -355,8 +355,8 @@ public class ClipboardService extends SystemService {
         @Override
         public boolean hasClipboardText(String callingPackage) {
             synchronized (this) {
-                if (mAppOps.checkOp(AppOpsManager.OP_READ_CLIPBOARD, Binder.getCallingUid(),
-                        callingPackage) != AppOpsManager.MODE_ALLOWED) {
+                if (!clipboardAccessAllowed(AppOpsManager.OP_READ_CLIPBOARD, callingPackage,
+                            Binder.getCallingUid())) {
                     return false;
                 }
                 PerUserClipboard clipboard = getClipboard();
@@ -417,8 +417,9 @@ public class ClipboardService extends SystemService {
                 try {
                     ListenerInfo li = (ListenerInfo)
                             clipboard.primaryClipListeners.getBroadcastCookie(i);
-                    if (mAppOps.checkOpNoThrow(AppOpsManager.OP_READ_CLIPBOARD, li.mUid,
-                            li.mPackageName) == AppOpsManager.MODE_ALLOWED) {
+
+                    if (clipboardAccessAllowed(AppOpsManager.OP_READ_CLIPBOARD, li.mPackageName,
+                                li.mUid)) {
                         clipboard.primaryClipListeners.getBroadcastItem(i)
                                 .dispatchPrimaryClipChanged();
                     }
@@ -549,6 +550,26 @@ public class ClipboardService extends SystemService {
         final int N = clipboard.primaryClip.getItemCount();
         for (int i=0; i<N; i++) {
             revokeItemLocked(clipboard.primaryClip.getItemAt(i));
+        }
+    }
+
+    private boolean clipboardAccessAllowed(int op, String callingPackage, int callingUid) {
+        // Check the AppOp.
+        if (mAppOps.checkOp(op, callingUid, callingPackage) != AppOpsManager.MODE_ALLOWED) {
+            return false;
+        }
+        try {
+            // Installed apps can access the clipboard at any time.
+            if (!AppGlobals.getPackageManager().isInstantApp(callingPackage,
+                        UserHandle.getUserId(callingUid))) {
+                return true;
+            }
+            // Instant apps can only access the clipboard if they are in the foreground.
+            return mAm.isAppForeground(callingUid);
+        } catch (RemoteException e) {
+            Slog.e("clipboard", "Failed to get Instant App status for package " + callingPackage,
+                    e);
+            return false;
         }
     }
 }
