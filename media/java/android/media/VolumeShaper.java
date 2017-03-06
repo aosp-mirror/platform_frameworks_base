@@ -25,6 +25,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.AutoCloseable;
 import java.lang.ref.WeakReference;
+import java.util.Arrays;
 import java.util.Objects;
 
 /**
@@ -115,6 +116,7 @@ public final class VolumeShaper implements AutoCloseable {
      * @param configuration
      * @param operation
      * @return id a non-negative shaper id.
+     * @throws IllegalStateException if the player has been deallocated or is uninitialized.
      */
     private int applyPlayer(
             @NonNull VolumeShaper.Configuration configuration,
@@ -147,6 +149,7 @@ public final class VolumeShaper implements AutoCloseable {
      * Internal call to retrieve the current VolumeShaper state.
      * @param id
      * @return the current {@vode VolumeShaper.State}
+     * @throws IllegalStateException if the player has been deallocated or is uninitialized.
      */
     private @NonNull VolumeShaper.State getStatePlayer(int id) {
         final VolumeShaper.State state;
@@ -172,10 +175,10 @@ public final class VolumeShaper implements AutoCloseable {
      * <p>
      * A {@code VolumeShaper.Configuration} is used by
      * {@link VolumeAutomation#createVolumeShaper(Configuration)
-     * VolumeAutomation#createVolumeShaper(Configuration)} to create
+     * VolumeAutomation.createVolumeShaper(Configuration)} to create
      * a {@code VolumeShaper} and
      * by {@link VolumeShaper#replace(Configuration, Operation, boolean)
-     * VolumeShaper#replace(Configuration, Operation, boolean)}
+     * VolumeShaper.replace(Configuration, Operation, boolean)}
      * to replace an existing {@code configuration}.
      */
     public static final class Configuration implements Parcelable {
@@ -365,31 +368,34 @@ public final class VolumeShaper implements AutoCloseable {
         private final int mId;
 
         // valid when mType is TYPE_SCALE
-        private final int mInterpolatorType;
         private final int mOptionFlags;
         private final double mDurationMs;
+        private final int mInterpolatorType;
         private final float[] mTimes;
         private final float[] mVolumes;
 
         @Override
         public String toString() {
-            return "VolumeShaper.Configuration["
-                    + "mType=" + mType
+            return "VolumeShaper.Configuration{"
+                    + "mType = " + mType
+                    + ", mId = " + mId
                     + (mType == TYPE_ID
-                    ? ",mId" + mId
-                    : ",mInterpolatorType=" + mInterpolatorType
-                    + ",mOptionFlags=" + mOptionFlags
-                    + ",mDurationMs=" + mDurationMs
-                    + ",mTimes[]=" + mTimes
-                    + ",mVolumes[]=" + mVolumes
-                    + "]");
+                        ? "}"
+                        : ", mOptionFlags = 0x" + Integer.toHexString(mOptionFlags).toUpperCase()
+                        + ", mDurationMs = " + mDurationMs
+                        + ", mInterpolatorType = " + mInterpolatorType
+                        + ", mTimes[] = " + Arrays.toString(mTimes)
+                        + ", mVolumes[] = " + Arrays.toString(mVolumes)
+                        + "}");
         }
 
         @Override
         public int hashCode() {
             return mType == TYPE_ID
                     ? Objects.hash(mType, mId)
-                    : Objects.hash(mType, mInterpolatorType, mDurationMs, mTimes, mVolumes);
+                    : Objects.hash(mType, mId,
+                            mOptionFlags, mDurationMs, mInterpolatorType,
+                            Arrays.hashCode(mTimes), Arrays.hashCode(mVolumes));
         }
 
         @Override
@@ -397,12 +403,17 @@ public final class VolumeShaper implements AutoCloseable {
             if (!(o instanceof Configuration)) return false;
             if (o == this) return true;
             final Configuration other = (Configuration) o;
-            return mType == other.mType &&
-                    (mType == TYPE_ID ? mId == other.mId
-                    : mInterpolatorType == other.mInterpolatorType
-                    && mDurationMs == other.mDurationMs
-                    && mTimes == other.mTimes
-                    && mVolumes == other.mVolumes);
+            // Note that exact floating point equality may not be guaranteed
+            // for a theoretically idempotent operation; for example,
+            // there are many cases where a + b - b != a.
+            return mType == other.mType
+                    && mId == other.mId
+                    && (mType == TYPE_ID
+                        ||  (mOptionFlags == other.mOptionFlags
+                            && mDurationMs == other.mDurationMs
+                            && mInterpolatorType == other.mInterpolatorType
+                            && Arrays.equals(mTimes, other.mTimes)
+                            && Arrays.equals(mVolumes, other.mVolumes)));
         }
 
         @Override
@@ -412,14 +423,22 @@ public final class VolumeShaper implements AutoCloseable {
 
         @Override
         public void writeToParcel(Parcel dest, int flags) {
+            // this needs to match the native VolumeShaper.Configuration parceling
             dest.writeInt(mType);
             dest.writeInt(mId);
             if (mType != TYPE_ID) {
-                dest.writeInt(mInterpolatorType);
                 dest.writeInt(mOptionFlags);
                 dest.writeDouble(mDurationMs);
-                dest.writeFloatArray(mTimes);
-                dest.writeFloatArray(mVolumes);
+                // this needs to match the native Interpolator parceling
+                dest.writeInt(mInterpolatorType);
+                dest.writeFloat(0.f); // first slope
+                dest.writeFloat(0.f); // last slope
+                // mTimes and mVolumes should have the same length.
+                dest.writeInt(mTimes.length);
+                for (int i = 0; i < mTimes.length; ++i) {
+                    dest.writeFloat(mTimes[i]);
+                    dest.writeFloat(mVolumes[i]);
+                }
             }
         }
 
@@ -427,19 +446,34 @@ public final class VolumeShaper implements AutoCloseable {
                 = new Parcelable.Creator<VolumeShaper.Configuration>() {
             @Override
             public VolumeShaper.Configuration createFromParcel(Parcel p) {
+                // this needs to match the native VolumeShaper.Configuration parceling
                 final int type = p.readInt();
                 final int id = p.readInt();
                 if (type == TYPE_ID) {
                     return new VolumeShaper.Configuration(id);
                 } else {
+                    final int optionFlags = p.readInt();
+                    final double durationMs = p.readDouble();
+                    // this needs to match the native Interpolator parceling
+                    final int interpolatorType = p.readInt();
+                    final float firstSlope = p.readFloat(); // ignored
+                    final float lastSlope = p.readFloat();  // ignored
+                    final int length = p.readInt();
+                    final float[] times = new float[length];
+                    final float[] volumes = new float[length];
+                    for (int i = 0; i < length; ++i) {
+                        times[i] = p.readFloat();
+                        volumes[i] = p.readFloat();
+                    }
+
                     return new VolumeShaper.Configuration(
                         type,
-                        id,                    // id
-                        p.readInt(),           // interpolatorType
-                        p.readInt(),           // optionFlags
-                        p.readDouble(),        // durationMs
-                        p.createFloatArray(),  // times
-                        p.createFloatArray()); // volumes
+                        id,
+                        optionFlags,
+                        durationMs,
+                        interpolatorType,
+                        times,
+                        volumes);
                 }
             }
 
@@ -482,16 +516,16 @@ public final class VolumeShaper implements AutoCloseable {
          */
         private Configuration(@Type int type,
                 int id,
-                @InterpolatorType int interpolatorType,
                 @OptionFlag int optionFlags,
                 double durationMs,
+                @InterpolatorType int interpolatorType,
                 @NonNull float[] times,
                 @NonNull float[] volumes) {
             mType = type;
             mId = id;
-            mInterpolatorType = interpolatorType;
             mOptionFlags = optionFlags;
             mDurationMs = durationMs;
+            mInterpolatorType = interpolatorType;
             // Builder should have cloned these arrays already.
             mTimes = times;
             mVolumes = volumes;
@@ -568,8 +602,12 @@ public final class VolumeShaper implements AutoCloseable {
          * @return null if no error, or the reason in a {@code String} for an error.
          */
         private static @Nullable String checkCurveForErrors(
-                @NonNull float[] times, @NonNull float[] volumes, boolean log) {
-            if (times.length != volumes.length) {
+                @Nullable float[] times, @Nullable float[] volumes, boolean log) {
+            if (times == null) {
+                return "times array must be non-null";
+            } else if (volumes == null) {
+                return "volumes array must be non-null";
+            } else if (times.length != volumes.length) {
                 return "array length must match";
             } else if (times.length < 2) {
                 return "array length must be at least 2";
@@ -605,7 +643,15 @@ public final class VolumeShaper implements AutoCloseable {
             return null; // no errors
         }
 
-        private static void checkValidVolume(float volume, boolean log) {
+        private static void checkCurveForErrorsAndThrowException(
+                @Nullable float[] times, @Nullable float[] volumes, boolean log) {
+            final String error = checkCurveForErrors(times, volumes, log);
+            if (error != null) {
+                throw new IllegalArgumentException(error);
+            }
+        }
+
+        private static void checkValidVolumeAndThrowException(float volume, boolean log) {
             if (log) {
                 if (!(volume <= 0.f) /* handle nan */) {
                     throw new IllegalArgumentException("dbfs volume must be 0.f or less");
@@ -678,17 +724,22 @@ public final class VolumeShaper implements AutoCloseable {
                 mOptionFlags = configuration.getAllOptionFlags();
                 mInterpolatorType = configuration.getInterpolatorType();
                 mDurationMs = configuration.getDurationMs();
-                mTimes = configuration.getTimes();
-                mVolumes = configuration.getVolumes();
+                mTimes = configuration.getTimes().clone();
+                mVolumes = configuration.getVolumes().clone();
             }
 
             /**
              * @hide
-             * Set the id for system defined shapers.
-             * @param id
-             * @return
+             * Set the {@code id} for system defined shapers.
+             * @param id the {@code id} to set. If non-negative, then it is used.
+             *        If -1, then the system is expected to assign one.
+             * @return the same {@code Builder} instance.
+             * @throws IllegalArgumentException if {@code id} < -1.
              */
             public @NonNull Builder setId(int id) {
+                if (id < -1) {
+                    throw new IllegalArgumentException("invalid id: " + id);
+                }
                 mId = id;
                 return this;
             }
@@ -789,11 +840,8 @@ public final class VolumeShaper implements AutoCloseable {
              */
 
             public @NonNull Builder setCurve(@NonNull float[] times, @NonNull float[] volumes) {
-                String error = checkCurveForErrors(
+                checkCurveForErrorsAndThrowException(
                         times, volumes, (mOptionFlags & OPTION_FLAG_VOLUME_IN_DBFS) != 0);
-                if (error != null) {
-                    throw new IllegalArgumentException(error);
-                }
                 mTimes = times.clone();
                 mVolumes = volumes.clone();
                 return this;
@@ -805,13 +853,19 @@ public final class VolumeShaper implements AutoCloseable {
              * to the start.
              *
              * @return the same {@code Builder} instance.
+             * @throws IllegalArgumentException if curve has not been set.
              */
             public @NonNull Builder reflectTimes() {
+                checkCurveForErrorsAndThrowException(
+                        mTimes, mVolumes, (mOptionFlags & OPTION_FLAG_VOLUME_IN_DBFS) != 0);
                 int i;
                 for (i = 0; i < mTimes.length / 2; ++i) {
-                    float temp = mTimes[0];
+                    float temp = mTimes[i];
                     mTimes[i] = 1.f - mTimes[mTimes.length - 1 - i];
                     mTimes[mTimes.length - 1 - i] = 1.f - temp;
+                    temp = mVolumes[i];
+                    mVolumes[i] = mVolumes[mVolumes.length - 1 - i];
+                    mVolumes[mVolumes.length - 1 - i] = temp;
                 }
                 if ((mTimes.length & 1) != 0) {
                     mTimes[i] = 1.f - mTimes[i];
@@ -824,23 +878,24 @@ public final class VolumeShaper implements AutoCloseable {
              * becomes the min volume and vice versa.
              *
              * @return the same {@code Builder} instance.
+             * @throws IllegalArgumentException if curve has not been set.
              */
             public @NonNull Builder invertVolumes() {
-                if (mVolumes.length >= 2) {
-                    float min = mVolumes[0];
-                    float max = mVolumes[0];
-                    for (int i = 1; i < mVolumes.length; ++i) {
-                        if (mVolumes[i] < min) {
-                            min = mVolumes[i];
-                        } else if (mVolumes[i] > max) {
-                            max = mVolumes[i];
-                        }
+                checkCurveForErrorsAndThrowException(
+                        mTimes, mVolumes, (mOptionFlags & OPTION_FLAG_VOLUME_IN_DBFS) != 0);
+                float min = mVolumes[0];
+                float max = mVolumes[0];
+                for (int i = 1; i < mVolumes.length; ++i) {
+                    if (mVolumes[i] < min) {
+                        min = mVolumes[i];
+                    } else if (mVolumes[i] > max) {
+                        max = mVolumes[i];
                     }
+                }
 
-                    final float maxmin = max + min;
-                    for (int i = 0; i < mVolumes.length; ++i) {
-                        mVolumes[i] = maxmin - mVolumes[i];
-                    }
+                final float maxmin = max + min;
+                for (int i = 0; i < mVolumes.length; ++i) {
+                    mVolumes[i] = maxmin - mVolumes[i];
                 }
                 return this;
             }
@@ -853,11 +908,13 @@ public final class VolumeShaper implements AutoCloseable {
              *
              * @param volume the target end volume to use.
              * @return the same {@code Builder} instance.
-             * @throws IllegalArgumentException if {@code volume} is not valid.
+             * @throws IllegalArgumentException if {@code volume}
+             *         is not valid or if curve has not been set.
              */
             public @NonNull Builder scaleToEndVolume(float volume) {
                 final boolean log = (mOptionFlags & OPTION_FLAG_VOLUME_IN_DBFS) != 0;
-                checkValidVolume(volume, log);
+                checkCurveForErrorsAndThrowException(mTimes, mVolumes, log);
+                checkValidVolumeAndThrowException(volume, log);
                 final float startVolume = mVolumes[0];
                 final float endVolume = mVolumes[mVolumes.length - 1];
                 if (endVolume == startVolume) {
@@ -885,11 +942,13 @@ public final class VolumeShaper implements AutoCloseable {
              *
              * @param volume the target start volume to use.
              * @return the same {@code Builder} instance.
-             * @throws IllegalArgumentException if {@code volume} is not valid.
+             * @throws IllegalArgumentException if {@code volume}
+             *         is not valid or if curve has not been set.
              */
             public @NonNull Builder scaleToStartVolume(float volume) {
                 final boolean log = (mOptionFlags & OPTION_FLAG_VOLUME_IN_DBFS) != 0;
-                checkValidVolume(volume, log);
+                checkCurveForErrorsAndThrowException(mTimes, mVolumes, log);
+                checkValidVolumeAndThrowException(volume, log);
                 final float startVolume = mVolumes[0];
                 final float endVolume = mVolumes[mVolumes.length - 1];
                 if (endVolume == startVolume) {
@@ -911,16 +970,14 @@ public final class VolumeShaper implements AutoCloseable {
             /**
              * Builds a new {@link VolumeShaper} object.
              *
-             * @return a new {@link VolumeShaper} object
+             * @return a new {@link VolumeShaper} object.
+             * @throws IllegalArgumentException if curve is not properly set.
              */
             public @NonNull Configuration build() {
-                String error = checkCurveForErrors(
+                checkCurveForErrorsAndThrowException(
                         mTimes, mVolumes, (mOptionFlags & OPTION_FLAG_VOLUME_IN_DBFS) != 0);
-                if (error != null) {
-                    throw new IllegalArgumentException(error);
-                }
-                return new Configuration(mType, mId, mInterpolatorType, mOptionFlags,
-                        mDurationMs, mTimes, mVolumes);
+                return new Configuration(mType, mId, mOptionFlags, mDurationMs,
+                        mInterpolatorType, mTimes, mVolumes);
             }
         } // Configuration.Builder
     } // Configuration
@@ -1011,10 +1068,10 @@ public final class VolumeShaper implements AutoCloseable {
 
         @Override
         public String toString() {
-            return "VolumeShaper.Operation["
-                    + "mFlags=" + mFlags
-                    + ",mReplaceId" + mReplaceId
-                    + "]";
+            return "VolumeShaper.Operation{"
+                    + "mFlags = 0x" + Integer.toHexString(mFlags).toUpperCase()
+                    + ", mReplaceId = " + mReplaceId
+                    + "}";
         }
 
         @Override
@@ -1027,6 +1084,8 @@ public final class VolumeShaper implements AutoCloseable {
             if (!(o instanceof Operation)) return false;
             if (o == this) return true;
             final Operation other = (Operation) o;
+            // if xOffset (native field only) is brought into Java
+            // we need to do proper NaN comparison as that is allowed.
             return mFlags == other.mFlags
                     && mReplaceId == other.mReplaceId;
         }
@@ -1038,17 +1097,24 @@ public final class VolumeShaper implements AutoCloseable {
 
         @Override
         public void writeToParcel(Parcel dest, int flags) {
+            // this needs to match the native VolumeShaper.Operation parceling
             dest.writeInt(mFlags);
             dest.writeInt(mReplaceId);
+            dest.writeFloat(Float.NaN); // xOffset (ignored at Java level)
         }
 
         public static final Parcelable.Creator<VolumeShaper.Operation> CREATOR
                 = new Parcelable.Creator<VolumeShaper.Operation>() {
             @Override
             public VolumeShaper.Operation createFromParcel(Parcel p) {
+                // this needs to match the native VolumeShaper.Operation parceling
+                final int flags = p.readInt();
+                final int replaceId = p.readInt();
+                final float xOffset = p.readFloat(); // ignored at Java level
+
                 return new VolumeShaper.Operation(
-                        p.readInt()     // flags
-                        , p.readInt()); // replaceId
+                        flags
+                        , replaceId);
             }
 
             @Override
@@ -1154,6 +1220,7 @@ public final class VolumeShaper implements AutoCloseable {
              *
              * @param flags new value for {@code flags}, consisting of ORed flags.
              * @return the same {@code Builder} instance.
+             * @throws IllegalArgumentException if {@code flags} contains invalid set bits.
              */
             private @NonNull Builder setFlags(@Flag int flags) {
                 if ((flags & ~FLAG_PUBLIC_ALL) != 0) {
@@ -1187,10 +1254,10 @@ public final class VolumeShaper implements AutoCloseable {
 
         @Override
         public String toString() {
-            return "VolumeShaper.State["
-                    + "mVolume=" + mVolume
-                    + ",mXOffset" + mXOffset
-                    + "]";
+            return "VolumeShaper.State{"
+                    + "mVolume = " + mVolume
+                    + ", mXOffset = " + mXOffset
+                    + "}";
         }
 
         @Override
