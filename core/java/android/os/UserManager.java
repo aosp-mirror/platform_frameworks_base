@@ -1057,12 +1057,17 @@ public class UserManager {
      * allowed to run code through scheduled alarms, receiving broadcasts,
      * etc.  A started user may be either the current foreground user or a
      * background user; the result here does not distinguish between the two.
-     * <p>Requires {@code android.permission.MANAGE_USERS} or
-     * {@code android.permission.INTERACT_ACROSS_USERS}, otherwise specified {@link UserHandle user}
-     * must be the calling user or a managed profile associated with it.
+     *
+     * <p>Note prior to Android Nougat MR1 (SDK version <= 24;
+     * {@link android.os.Build.VERSION_CODES#N), this API required a system permission
+     * in order to check other profile's status.
+     * Since Android Nougat MR1 (SDK version >= 25;
+     * {@link android.os.Build.VERSION_CODES#N_MR1)), the restriction has been relaxed, and now
+     * it'll accept any {@link UserHandle} within the same profile group as the caller.
      *
      * @param user The user to retrieve the running state for.
      */
+    // Note this requires either INTERACT_ACROSS_USERS or MANAGE_USERS.
     public boolean isUserRunning(UserHandle user) {
         return isUserRunning(user.getIdentifier());
     }
@@ -1081,12 +1086,17 @@ public class UserManager {
      * This is like {@link #isUserRunning(UserHandle)}, but will also return
      * true if the user had been running but is in the process of being stopped
      * (but is not yet fully stopped, and still running some code).
-     * <p>Requires {@code android.permission.MANAGE_USERS} or
-     * {@code android.permission.INTERACT_ACROSS_USERS}, otherwise specified {@link UserHandle user}
-     * must be the calling user or a managed profile associated with it.
+     *
+     * <p>Note prior to Android Nougat MR1 (SDK version <= 24;
+     * {@link android.os.Build.VERSION_CODES#N), this API required a system permission
+     * in order to check other profile's status.
+     * Since Android Nougat MR1 (SDK version >= 25;
+     * {@link android.os.Build.VERSION_CODES#N_MR1)), the restriction has been relaxed, and now
+     * it'll accept any {@link UserHandle} within the same profile group as the caller.
      *
      * @param user The user to retrieve the running state for.
      */
+    // Note this requires either INTERACT_ACROSS_USERS or MANAGE_USERS.
     public boolean isUserRunningOrStopping(UserHandle user) {
         try {
             // TODO: reconcile stopped vs stopping?
