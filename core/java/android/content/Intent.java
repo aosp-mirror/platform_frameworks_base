@@ -1455,7 +1455,7 @@ public class Intent implements Parcelable, Cloneable {
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_SHOW_KEYBOARD_SHORTCUTS =
-            "android.intent.action.SHOW_KEYBOARD_SHORTCUTS";
+            "com.android.intent.action.SHOW_KEYBOARD_SHORTCUTS";
 
     /**
      * Activity Action: Dismiss the Keyboard Shortcuts Helper screen.
@@ -1465,7 +1465,7 @@ public class Intent implements Parcelable, Cloneable {
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_DISMISS_KEYBOARD_SHORTCUTS =
-            "android.intent.action.DISMISS_KEYBOARD_SHORTCUTS";
+            "com.android.intent.action.DISMISS_KEYBOARD_SHORTCUTS";
 
     /**
      * Activity Action: Show settings for managing network data usage of a
@@ -3113,7 +3113,7 @@ public class Intent implements Parcelable, Cloneable {
      * @hide
      */
     public static final String ACTION_SHOW_BRIGHTNESS_DIALOG =
-            "android.intent.action.SHOW_BRIGHTNESS_DIALOG";
+            "com.android.intent.action.SHOW_BRIGHTNESS_DIALOG";
 
     /**
      * Broadcast Action:  A global button was pressed.  Includes a single
