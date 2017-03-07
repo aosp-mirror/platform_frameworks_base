@@ -46,9 +46,9 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
 
     /**
      * set to true so the framework enforces ducking itself, without communicating to apps
-     * that they lost focus.
+     * that they lost focus for most use cases.
      */
-    static final boolean ENFORCE_DUCKING = false;
+    static final boolean ENFORCE_DUCKING = true;
     /**
      * set to true so the framework enforces muting media/game itself when the device is ringing
      * or in a call.

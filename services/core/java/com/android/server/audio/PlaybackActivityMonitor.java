@@ -309,7 +309,7 @@ public final class PlaybackActivityMonitor
                         return false;
                     } else {
                         try {
-                            if (DEBUG) { Log.v(TAG, "ducking player " + piid); }
+                            Log.v(TAG, "ducking player " + piid);
                             apc.getPlayerProxy().applyVolumeShaper(
                                     DUCK_VSHAPE,
                                     PLAY_CREATE_IF_NEEDED);
@@ -339,7 +339,7 @@ public final class PlaybackActivityMonitor
                 if (apc != null
                         && winner.hasSameUid(apc.getClientUid())) {
                     try {
-                        if (DEBUG) { Log.v(TAG, "unducking player" + piid); }
+                        Log.v(TAG, "unducking player" + piid);
                         mDuckedPlayers.remove(new Integer(piid));
                         apc.getPlayerProxy().applyVolumeShaper(
                                 DUCK_ID,
@@ -381,11 +381,11 @@ public final class PlaybackActivityMonitor
                 }
                 if (mute) {
                     try {
-                        if (DEBUG) { Log.v(TAG, "muting player" + piid); }
+                        Log.v(TAG, "call: muting player" + piid);
                         apc.getPlayerProxy().setVolume(0.0f);
                         mMutedPlayers.add(piid);
                     } catch (Exception e) {
-                        Log.e(TAG, "Error muting player " + piid, e);
+                        Log.e(TAG, "call: error muting player " + piid, e);
                     }
                 }
             }
@@ -405,10 +405,10 @@ public final class PlaybackActivityMonitor
                 final AudioPlaybackConfiguration apc = mPlayers.get(piid);
                 if (apc != null) {
                     try {
-                        if (DEBUG) { Log.v(TAG, "unmuting player" + piid); }
+                        Log.v(TAG, "call: unmuting player" + piid);
                         apc.getPlayerProxy().setVolume(1.0f);
                     } catch (Exception e) {
-                        Log.e(TAG, "Error unmuting player " + piid, e);
+                        Log.e(TAG, "call: error unmuting player " + piid, e);
                     }
                 }
             }
