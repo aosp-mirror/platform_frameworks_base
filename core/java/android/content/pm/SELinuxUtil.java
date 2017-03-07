@@ -32,11 +32,10 @@ public final class SELinuxUtil {
 
     /** @hide */
     public static String assignSeinfoUser(PackageUserState userState) {
-        String seInfo = "";
-        if (userState.instantApp)
-            seInfo += INSTANT_APP_STR;
-        seInfo += COMPLETE_STR;
-        return seInfo;
+        if (userState.instantApp) {
+           return INSTANT_APP_STR + COMPLETE_STR;
+        }
+        return COMPLETE_STR;
     }
 
 }
