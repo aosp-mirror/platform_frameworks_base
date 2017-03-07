@@ -75,6 +75,7 @@ public class ListPopupWindow implements ShowableListMenu {
     private int mDropDownWindowLayoutType = WindowManager.LayoutParams.TYPE_APPLICATION_SUB_PANEL;
     private boolean mDropDownVerticalOffsetSet;
     private boolean mIsAnimatedFromAnchor = true;
+    private boolean mOverlapAnchor;
 
     private int mDropDownGravity = Gravity.NO_GRAVITY;
 
@@ -668,6 +669,7 @@ public class ListPopupWindow implements ShowableListMenu {
             mPopup.setOutsideTouchable(!mForceIgnoreOutsideTouch && !mDropDownAlwaysVisible);
             mPopup.setTouchInterceptor(mTouchInterceptor);
             mPopup.setEpicenterBounds(mEpicenterBounds);
+            mPopup.setOverlapAnchor(mOverlapAnchor);
             mPopup.showAsDropDown(getAnchorView(), mDropDownHorizontalOffset,
                     mDropDownVerticalOffset, mDropDownGravity);
             mDropDownList.setSelection(ListView.INVALID_POSITION);
@@ -1239,6 +1241,13 @@ public class ListPopupWindow implements ShowableListMenu {
         }
 
         return listContent + otherHeights;
+    }
+
+    /**
+     * @hide
+     */
+    public void setOverlapAnchor(boolean overlap) {
+        mOverlapAnchor = overlap;
     }
 
     private class PopupDataSetObserver extends DataSetObserver {
