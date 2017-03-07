@@ -68,7 +68,7 @@ GradientCache::GradientCache(Extensions& extensions)
         , mMaxSize(Properties::gradientCacheSize)
         , mUseFloatTexture(extensions.hasFloatTextures())
         , mHasNpot(extensions.hasNPot())
-        , mHasSRGB(extensions.hasSRGB()) {
+        , mHasLinearBlending(extensions.hasLinearBlending()) {
     glGetIntegerv(GL_MAX_TEXTURE_SIZE, &mMaxTextureSize);
 
     mCache.setOnEntryRemovedListener(this);
@@ -263,7 +263,7 @@ void GradientCache::generateTexture(uint32_t* colors, float* positions,
     if (mUseFloatTexture) {
         texture->upload(GL_RGBA16F, width, height, GL_RGBA, GL_FLOAT, pixels);
     } else {
-        GLint internalFormat = mHasSRGB ? GL_SRGB8_ALPHA8 : GL_RGBA;
+        GLint internalFormat = mHasLinearBlending ? GL_SRGB8_ALPHA8 : GL_RGBA;
         texture->upload(internalFormat, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
     }
 

@@ -59,7 +59,7 @@ private:
     std::map<programid, std::unique_ptr<Program>> mCache;
 
     const bool mHasES3;
-    const bool mHasSRGB;
+    const bool mHasLinearBlending;
 }; // class ProgramCache
 
 }; // namespace uirenderer

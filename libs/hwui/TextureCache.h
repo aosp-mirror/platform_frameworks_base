@@ -19,6 +19,8 @@
 
 #include <SkBitmap.h>
 
+#include <cutils/compiler.h>
+
 #include <utils/LruCache.h>
 #include <utils/Mutex.h>
 

@@ -40,8 +40,10 @@ class Layer;
  */
 class Texture : public GpuMemoryTracker {
 public:
-    static SkBitmap uploadToN32(const SkBitmap& bitmap, bool hasSRGB, sk_sp<SkColorSpace> sRGB);
-    static bool hasUnsupportedColorType(const SkImageInfo& info, bool hasSRGB, SkColorSpace* sRGB);
+    static SkBitmap uploadToN32(const SkBitmap& bitmap,
+            bool hasLinearBlending, sk_sp<SkColorSpace> sRGB);
+    static bool hasUnsupportedColorType(const SkImageInfo& info,
+            bool hasLinearBlending, SkColorSpace* sRGB);
     static void colorTypeToGlFormatAndType(const Caches& caches, SkColorType colorType,
             bool needSRGB, GLint* outInternalFormat, GLint* outFormat, GLint* outType);
 

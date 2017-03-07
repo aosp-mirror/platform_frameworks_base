@@ -174,13 +174,15 @@ void RenderState::interruptForFunctorInvoke() {
     meshState().disableTexCoordsVertexArray();
     debugOverdraw(false, false);
     // TODO: We need a way to know whether the functor is sRGB aware (b/32072673)
-    if (mCaches->extensions().hasSRGBWriteControl()) {
+    if (mCaches->extensions().hasLinearBlending() &&
+            mCaches->extensions().hasSRGBWriteControl()) {
         glDisable(GL_FRAMEBUFFER_SRGB_EXT);
     }
 }
 
 void RenderState::resumeFromFunctorInvoke() {
-    if (mCaches->extensions().hasSRGBWriteControl()) {
+    if (mCaches->extensions().hasLinearBlending() &&
+            mCaches->extensions().hasSRGBWriteControl()) {
         glEnable(GL_FRAMEBUFFER_SRGB_EXT);
     }
 

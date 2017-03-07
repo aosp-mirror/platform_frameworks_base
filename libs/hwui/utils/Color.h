@@ -121,4 +121,4 @@ namespace uirenderer {
 } /* namespace uirenderer */
 } /* namespace android */
 
-#endif /* TEST_UTILS_H */
+#endif /* COLOR_H */

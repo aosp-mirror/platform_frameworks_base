@@ -418,7 +418,7 @@ const char* gBlendOps[18] = {
 
 ProgramCache::ProgramCache(Extensions& extensions)
         : mHasES3(extensions.getMajorGlVersion() >= 3)
-        , mHasSRGB(extensions.hasSRGB()) {
+        , mHasLinearBlending(extensions.hasLinearBlending()) {
 }
 
 ProgramCache::~ProgramCache() {
@@ -642,11 +642,11 @@ String8 ProgramCache::generateFragmentShader(const ProgramDescription& descripti
     }
     if (description.hasBitmap || ((description.hasTexture || description.hasExternalTexture) &&
             !description.hasAlpha8Texture)) {
-        shader.append(gFS_OETF[description.hasLinearTexture && !mHasSRGB]);
+        shader.append(gFS_OETF[description.hasLinearTexture && !mHasLinearBlending]);
     }
     if (description.hasGradient) {
         shader.append(gFS_Gradient_Functions);
-        shader.append(gFS_Gradient_Preamble[mHasSRGB]);
+        shader.append(gFS_Gradient_Preamble[mHasLinearBlending]);
     }
 
     // Begin the shader
