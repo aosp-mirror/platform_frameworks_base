@@ -1933,20 +1933,6 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         dfltNetworkCallback.expectAvailableAndSuspendedCallbacks(mCellNetworkAgent);
         dfltNetworkCallback.assertNoCallback();
 
-        // Request a NetworkCapabilities update; only the requesting callback is notified.
-        // TODO: Delete this together with Connectivity{Manager,Service} code.
-        mCm.requestNetworkCapabilities(dfltNetworkCallback);
-        dfltNetworkCallback.expectCallback(CallbackState.NETWORK_CAPABILITIES, mCellNetworkAgent);
-        cellNetworkCallback.assertNoCallback();
-        dfltNetworkCallback.assertNoCallback();
-
-        // Request a LinkProperties update; only the requesting callback is notified.
-        // TODO: Delete this together with Connectivity{Manager,Service} code.
-        mCm.requestLinkProperties(dfltNetworkCallback);
-        dfltNetworkCallback.expectCallback(CallbackState.LINK_PROPERTIES, mCellNetworkAgent);
-        cellNetworkCallback.assertNoCallback();
-        dfltNetworkCallback.assertNoCallback();
-
         mCm.unregisterNetworkCallback(dfltNetworkCallback);
         mCm.unregisterNetworkCallback(cellNetworkCallback);
     }

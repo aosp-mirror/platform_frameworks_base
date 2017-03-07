@@ -1069,28 +1069,6 @@ public class ConnectivityManager {
     }
 
     /**
-     * Request that this callback be invoked at ConnectivityService's earliest
-     * convenience with the current satisfying network's LinkProperties.
-     * If no such network exists no callback invocation is performed.
-     *
-     * The callback must have been registered with #requestNetwork() or
-     * #registerDefaultNetworkCallback(); callbacks registered with
-     * registerNetworkCallback() are not specific to any particular Network so
-     * do not cause any updates.
-     *
-     * TODO: Delete once callers are updated.
-     *
-     * @hide
-     */
-    public void requestLinkProperties(NetworkCallback networkCallback) {
-        try {
-            mService.requestLinkProperties(networkCallback.networkRequest);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
      * Get the {@link android.net.NetworkCapabilities} for the given {@link Network}.  This
      * will return {@code null} if the network is unknown.
      * <p>This method requires the caller to hold the permission
@@ -1102,28 +1080,6 @@ public class ConnectivityManager {
     public NetworkCapabilities getNetworkCapabilities(Network network) {
         try {
             return mService.getNetworkCapabilities(network);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Request that this callback be invoked at ConnectivityService's earliest
-     * convenience with the current satisfying network's NetworkCapabilities.
-     * If no such network exists no callback invocation is performed.
-     *
-     * The callback must have been registered with #requestNetwork() or
-     * #registerDefaultNetworkCallback(); callbacks registered with
-     * registerNetworkCallback() are not specific to any particular Network so
-     * do not cause any updates.
-     *
-     * TODO: Delete once callers are updated.
-     *
-     * @hide
-     */
-    public void requestNetworkCapabilities(NetworkCallback networkCallback) {
-        try {
-            mService.requestNetworkCapabilities(networkCallback.networkRequest);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
