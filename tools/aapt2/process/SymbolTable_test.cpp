@@ -30,10 +30,8 @@ TEST(ResourceTableSymbolSourceTest, FindSymbols) {
           .Build();
 
   ResourceTableSymbolSource symbol_source(table.get());
-  EXPECT_NE(nullptr,
-            symbol_source.FindByName(test::ParseNameOrDie("android:id/foo")));
-  EXPECT_NE(nullptr,
-            symbol_source.FindByName(test::ParseNameOrDie("android:id/bar")));
+  EXPECT_NE(nullptr, symbol_source.FindByName(test::ParseNameOrDie("android:id/foo")));
+  EXPECT_NE(nullptr, symbol_source.FindByName(test::ParseNameOrDie("android:id/bar")));
 
   std::unique_ptr<SymbolTable::Symbol> s =
       symbol_source.FindByName(test::ParseNameOrDie("android:attr/foo"));

@@ -25,7 +25,7 @@ namespace aapt {
 static const char* sMajorVersion = "2";
 
 // Update minor version whenever a feature or flag is added.
-static const char* sMinorVersion = "9";
+static const char* sMinorVersion = "10";
 
 int PrintVersion() {
   std::cerr << "Android Asset Packaging Tool (aapt) " << sMajorVersion << "."

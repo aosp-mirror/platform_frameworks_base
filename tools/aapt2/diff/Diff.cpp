@@ -331,7 +331,7 @@ class ZeroingReferenceVisitor : public ValueVisitor {
 
   void Visit(Reference* ref) override {
     if (ref->name && ref->id) {
-      if (ref->id.value().package_id() == 0x7f) {
+      if (ref->id.value().package_id() == kAppPackageId) {
         ref->id = {};
       }
     }

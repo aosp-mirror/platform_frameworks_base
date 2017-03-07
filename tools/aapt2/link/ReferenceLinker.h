@@ -59,8 +59,8 @@ class ReferenceLinker : public IResourceTableConsumer {
    * returned. out_error holds the error message.
    */
   static const SymbolTable::Symbol* ResolveSymbolCheckVisibility(const Reference& reference,
+                                                                 const CallSite& callsite,
                                                                  SymbolTable* symbols,
-                                                                 CallSite* callsite,
                                                                  std::string* out_error);
 
   /**
@@ -70,8 +70,8 @@ class ReferenceLinker : public IResourceTableConsumer {
    * ISymbolTable::Symbol::attribute.
    */
   static const SymbolTable::Symbol* ResolveAttributeCheckVisibility(const Reference& reference,
+                                                                    const CallSite& callsite,
                                                                     SymbolTable* symbols,
-                                                                    CallSite* callsite,
                                                                     std::string* out_error);
 
   /**
@@ -80,7 +80,8 @@ class ReferenceLinker : public IResourceTableConsumer {
    * If resolution fails, outError holds the error message.
    */
   static Maybe<xml::AaptAttribute> CompileXmlAttribute(const Reference& reference,
-                                                       SymbolTable* symbols, CallSite* callsite,
+                                                       const CallSite& callsite,
+                                                       SymbolTable* symbols,
                                                        std::string* out_error);
 
   /**
@@ -99,9 +100,8 @@ class ReferenceLinker : public IResourceTableConsumer {
    * Returns false on failure, and an error message is logged to the
    * IDiagnostics in the context.
    */
-  static bool LinkReference(Reference* reference, IAaptContext* context,
-                            SymbolTable* symbols, xml::IPackageDeclStack* decls,
-                            CallSite* callsite);
+  static bool LinkReference(const CallSite& callsite, Reference* reference, IAaptContext* context,
+                            SymbolTable* symbols, xml::IPackageDeclStack* decls);
 
   /**
    * Links all references in the ResourceTable.

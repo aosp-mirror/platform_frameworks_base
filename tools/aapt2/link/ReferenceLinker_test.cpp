@@ -53,21 +53,20 @@ TEST(ReferenceLinkerTest, LinkSimpleReferences) {
   ReferenceLinker linker;
   ASSERT_TRUE(linker.Consume(context.get(), table.get()));
 
-  Reference* ref =
-      test::GetValue<Reference>(table.get(), "com.app.test:string/foo");
-  ASSERT_NE(ref, nullptr);
+  Reference* ref = test::GetValue<Reference>(table.get(), "com.app.test:string/foo");
+  ASSERT_NE(nullptr, ref);
   AAPT_ASSERT_TRUE(ref->id);
-  EXPECT_EQ(ref->id.value(), ResourceId(0x7f020001));
+  EXPECT_EQ(ResourceId(0x7f020001), ref->id.value());
 
   ref = test::GetValue<Reference>(table.get(), "com.app.test:string/bar");
-  ASSERT_NE(ref, nullptr);
+  ASSERT_NE(nullptr, ref);
   AAPT_ASSERT_TRUE(ref->id);
-  EXPECT_EQ(ref->id.value(), ResourceId(0x7f020002));
+  EXPECT_EQ(ResourceId(0x7f020002), ref->id.value());
 
   ref = test::GetValue<Reference>(table.get(), "com.app.test:string/baz");
-  ASSERT_NE(ref, nullptr);
+  ASSERT_NE(nullptr, ref);
   AAPT_ASSERT_TRUE(ref->id);
-  EXPECT_EQ(ref->id.value(), ResourceId(0x01040034));
+  EXPECT_EQ(ResourceId(0x01040034), ref->id.value());
 }
 
 TEST(ReferenceLinkerTest, LinkStyleAttributes) {
@@ -87,9 +86,8 @@ TEST(ReferenceLinkerTest, LinkStyleAttributes) {
     // We need to fill in the value for the attribute android:attr/bar after we
     // build the
     // table, because we need access to the string pool.
-    Style* style =
-        test::GetValue<Style>(table.get(), "com.app.test:style/Theme");
-    ASSERT_NE(style, nullptr);
+    Style* style = test::GetValue<Style>(table.get(), "com.app.test:style/Theme");
+    ASSERT_NE(nullptr, style);
     style->entries.back().value =
         util::make_unique<RawString>(table->string_pool.MakeRef("one|two"));
   }
@@ -120,20 +118,20 @@ TEST(ReferenceLinkerTest, LinkStyleAttributes) {
   ASSERT_TRUE(linker.Consume(context.get(), table.get()));
 
   Style* style = test::GetValue<Style>(table.get(), "com.app.test:style/Theme");
-  ASSERT_NE(style, nullptr);
+  ASSERT_NE(nullptr, style);
   AAPT_ASSERT_TRUE(style->parent);
   AAPT_ASSERT_TRUE(style->parent.value().id);
-  EXPECT_EQ(style->parent.value().id.value(), ResourceId(0x01060000));
+  EXPECT_EQ(ResourceId(0x01060000), style->parent.value().id.value());
 
   ASSERT_EQ(2u, style->entries.size());
 
   AAPT_ASSERT_TRUE(style->entries[0].key.id);
-  EXPECT_EQ(style->entries[0].key.id.value(), ResourceId(0x01010001));
-  ASSERT_NE(ValueCast<BinaryPrimitive>(style->entries[0].value.get()), nullptr);
+  EXPECT_EQ(ResourceId(0x01010001), style->entries[0].key.id.value());
+  ASSERT_NE(nullptr, ValueCast<BinaryPrimitive>(style->entries[0].value.get()));
 
   AAPT_ASSERT_TRUE(style->entries[1].key.id);
-  EXPECT_EQ(style->entries[1].key.id.value(), ResourceId(0x01010002));
-  ASSERT_NE(ValueCast<BinaryPrimitive>(style->entries[1].value.get()), nullptr);
+  EXPECT_EQ(ResourceId(0x01010002), style->entries[1].key.id.value());
+  ASSERT_NE(nullptr, ValueCast<BinaryPrimitive>(style->entries[1].value.get()));
 }
 
 TEST(ReferenceLinkerTest, LinkMangledReferencesAndAttributes) {
@@ -167,10 +165,10 @@ TEST(ReferenceLinkerTest, LinkMangledReferencesAndAttributes) {
   ASSERT_TRUE(linker.Consume(context.get(), table.get()));
 
   Style* style = test::GetValue<Style>(table.get(), "com.app.test:style/Theme");
-  ASSERT_NE(style, nullptr);
+  ASSERT_NE(nullptr, style);
   ASSERT_EQ(1u, style->entries.size());
   AAPT_ASSERT_TRUE(style->entries.front().key.id);
-  EXPECT_EQ(style->entries.front().key.id.value(), ResourceId(0x7f010000));
+  EXPECT_EQ(ResourceId(0x7f010000), style->entries.front().key.id.value());
 }
 
 TEST(ReferenceLinkerTest, FailToLinkPrivateSymbols) {
@@ -255,6 +253,44 @@ TEST(ReferenceLinkerTest, FailToLinkPrivateStyleAttributes) {
 
   ReferenceLinker linker;
   ASSERT_FALSE(linker.Consume(context.get(), table.get()));
+}
+
+TEST(ReferenceLinkerTest, AppsWithSamePackageButDifferentIdAreVisibleNonPublic) {
+  NameMangler mangler(NameManglerPolicy{"com.app.test"});
+  SymbolTable table(&mangler);
+  table.AppendSource(test::StaticSymbolSourceBuilder()
+                         .AddSymbol("com.app.test:string/foo", ResourceId(0x7f010000))
+                         .Build());
+
+  std::string error;
+  const CallSite call_site{ResourceNameRef("com.app.test", ResourceType::kString, "foo")};
+  const SymbolTable::Symbol* symbol = ReferenceLinker::ResolveSymbolCheckVisibility(
+      *test::BuildReference("com.app.test:string/foo"), call_site, &table, &error);
+  ASSERT_NE(nullptr, symbol);
+  EXPECT_TRUE(error.empty());
+}
+
+TEST(ReferenceLinkerTest, AppsWithDifferentPackageCanNotUseEachOthersAttribute) {
+  NameMangler mangler(NameManglerPolicy{"com.app.ext"});
+  SymbolTable table(&mangler);
+  table.AppendSource(test::StaticSymbolSourceBuilder()
+                         .AddSymbol("com.app.test:attr/foo", ResourceId(0x7f010000),
+                                    test::AttributeBuilder().Build())
+                         .AddPublicSymbol("com.app.test:attr/public_foo", ResourceId(0x7f010001),
+                                          test::AttributeBuilder().Build())
+                         .Build());
+
+  std::string error;
+  const CallSite call_site{ResourceNameRef("com.app.ext", ResourceType::kLayout, "foo")};
+
+  AAPT_EXPECT_FALSE(ReferenceLinker::CompileXmlAttribute(
+      *test::BuildReference("com.app.test:attr/foo"), call_site, &table, &error));
+  EXPECT_FALSE(error.empty());
+
+  error = "";
+  AAPT_ASSERT_TRUE(ReferenceLinker::CompileXmlAttribute(
+      *test::BuildReference("com.app.test:attr/public_foo"), call_site, &table, &error));
+  EXPECT_TRUE(error.empty());
 }
 
 }  // namespace aapt

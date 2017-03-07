@@ -51,18 +51,16 @@ class ReferenceLinkerVisitor : public ValueVisitor {
  public:
   using ValueVisitor::Visit;
 
-  ReferenceLinkerVisitor(IAaptContext* context, SymbolTable* symbols,
-                         StringPool* string_pool, xml::IPackageDeclStack* decl,
-                         CallSite* callsite)
-      : context_(context),
+  ReferenceLinkerVisitor(const CallSite& callsite, IAaptContext* context, SymbolTable* symbols,
+                         StringPool* string_pool, xml::IPackageDeclStack* decl)
+      : callsite_(callsite),
+        context_(context),
         symbols_(symbols),
         package_decls_(decl),
-        string_pool_(string_pool),
-        callsite_(callsite) {}
+        string_pool_(string_pool) {}
 
   void Visit(Reference* ref) override {
-    if (!ReferenceLinker::LinkReference(ref, context_, symbols_, package_decls_,
-                                        callsite_)) {
+    if (!ReferenceLinker::LinkReference(callsite_, ref, context_, symbols_, package_decls_)) {
       error_ = true;
     }
   }
@@ -97,7 +95,7 @@ class ReferenceLinkerVisitor : public ValueVisitor {
       // Find the attribute in the symbol table and check if it is visible from
       // this callsite.
       const SymbolTable::Symbol* symbol = ReferenceLinker::ResolveAttributeCheckVisibility(
-          transformed_reference, symbols_, callsite_, &err_str);
+          transformed_reference, callsite_, symbols_, &err_str);
       if (symbol) {
         // Assign our style key the correct ID.
         // The ID may not exist.
@@ -105,8 +103,7 @@ class ReferenceLinkerVisitor : public ValueVisitor {
 
         // Try to convert the value to a more specific, typed value based on the
         // attribute it is set to.
-        entry.value = ParseValueWithAttribute(std::move(entry.value),
-                                              symbol->attribute.get());
+        entry.value = ParseValueWithAttribute(std::move(entry.value), symbol->attribute.get());
 
         // Link/resolve the final value (mostly if it's a reference).
         entry.value->Accept(this);
@@ -131,8 +128,7 @@ class ReferenceLinkerVisitor : public ValueVisitor {
       } else {
         DiagMessage msg(entry.key.GetSource());
         msg << "style attribute '";
-        ReferenceLinker::WriteResourceName(&msg, entry.key,
-                                           transformed_reference);
+        ReferenceLinker::WriteResourceName(&msg, entry.key, transformed_reference);
         msg << "' " << err_str;
         context_->GetDiagnostics()->Error(msg);
         error_ = true;
@@ -158,28 +154,26 @@ class ReferenceLinkerVisitor : public ValueVisitor {
           ResourceUtils::TryParseItemForAttribute(*raw_string->value, attr);
 
       // If we could not parse as any specific type, try a basic STRING.
-      if (!transformed &&
-          (attr->type_mask & android::ResTable_map::TYPE_STRING)) {
+      if (!transformed && (attr->type_mask & android::ResTable_map::TYPE_STRING)) {
         util::StringBuilder string_builder;
         string_builder.Append(*raw_string->value);
         if (string_builder) {
-          transformed = util::make_unique<String>(
-              string_pool_->MakeRef(string_builder.ToString()));
+          transformed = util::make_unique<String>(string_pool_->MakeRef(string_builder.ToString()));
         }
       }
 
       if (transformed) {
         return transformed;
       }
-    };
+    }
     return value;
   }
 
+  const CallSite& callsite_;
   IAaptContext* context_;
   SymbolTable* symbols_;
   xml::IPackageDeclStack* package_decls_;
   StringPool* string_pool_;
-  CallSite* callsite_;
   bool error_ = false;
 };
 
@@ -234,8 +228,8 @@ const SymbolTable::Symbol* ReferenceLinker::ResolveSymbol(const Reference& refer
 }
 
 const SymbolTable::Symbol* ReferenceLinker::ResolveSymbolCheckVisibility(const Reference& reference,
+                                                                         const CallSite& callsite,
                                                                          SymbolTable* symbols,
-                                                                         CallSite* callsite,
                                                                          std::string* out_error) {
   const SymbolTable::Symbol* symbol = ResolveSymbol(reference, symbols);
   if (!symbol) {
@@ -243,7 +237,7 @@ const SymbolTable::Symbol* ReferenceLinker::ResolveSymbolCheckVisibility(const R
     return nullptr;
   }
 
-  if (!IsSymbolVisible(*symbol, reference, *callsite)) {
+  if (!IsSymbolVisible(*symbol, reference, callsite)) {
     if (out_error) *out_error = "is private";
     return nullptr;
   }
@@ -251,9 +245,10 @@ const SymbolTable::Symbol* ReferenceLinker::ResolveSymbolCheckVisibility(const R
 }
 
 const SymbolTable::Symbol* ReferenceLinker::ResolveAttributeCheckVisibility(
-    const Reference& reference, SymbolTable* symbols, CallSite* callsite, std::string* out_error) {
+    const Reference& reference, const CallSite& callsite, SymbolTable* symbols,
+    std::string* out_error) {
   const SymbolTable::Symbol* symbol =
-      ResolveSymbolCheckVisibility(reference, symbols, callsite, out_error);
+      ResolveSymbolCheckVisibility(reference, callsite, symbols, out_error);
   if (!symbol) {
     return nullptr;
   }
@@ -266,12 +261,12 @@ const SymbolTable::Symbol* ReferenceLinker::ResolveAttributeCheckVisibility(
 }
 
 Maybe<xml::AaptAttribute> ReferenceLinker::CompileXmlAttribute(const Reference& reference,
+                                                               const CallSite& callsite,
                                                                SymbolTable* symbols,
-                                                               CallSite* callsite,
                                                                std::string* out_error) {
-  const SymbolTable::Symbol* symbol = ResolveSymbol(reference, symbols);
+  const SymbolTable::Symbol* symbol =
+      ResolveAttributeCheckVisibility(reference, callsite, symbols, out_error);
   if (!symbol) {
-    if (out_error) *out_error = "not found";
     return {};
   }
 
@@ -297,10 +292,9 @@ void ReferenceLinker::WriteResourceName(DiagMessage* out_msg,
   }
 }
 
-bool ReferenceLinker::LinkReference(Reference* reference, IAaptContext* context,
-                                    SymbolTable* symbols,
-                                    xml::IPackageDeclStack* decls,
-                                    CallSite* callsite) {
+bool ReferenceLinker::LinkReference(const CallSite& callsite, Reference* reference,
+                                    IAaptContext* context, SymbolTable* symbols,
+                                    xml::IPackageDeclStack* decls) {
   CHECK(reference != nullptr);
   CHECK(reference->name || reference->id);
 
@@ -309,7 +303,7 @@ bool ReferenceLinker::LinkReference(Reference* reference, IAaptContext* context,
 
   std::string err_str;
   const SymbolTable::Symbol* s =
-      ResolveSymbolCheckVisibility(transformed_reference, symbols, callsite, &err_str);
+      ResolveSymbolCheckVisibility(transformed_reference, callsite, symbols, &err_str);
   if (s) {
     // The ID may not exist. This is fine because of the possibility of building
     // against libraries without assigned IDs.
@@ -344,11 +338,9 @@ bool ReferenceLinker::Consume(IAaptContext* context, ResourceTable* table) {
           error = true;
         }
 
-        CallSite callsite = {
-            ResourceNameRef(package->name, type->type, entry->name)};
-        ReferenceLinkerVisitor visitor(context, context->GetExternalSymbols(),
-                                       &table->string_pool, &decl_stack,
-                                       &callsite);
+        CallSite callsite = {ResourceNameRef(package->name, type->type, entry->name)};
+        ReferenceLinkerVisitor visitor(callsite, context, context->GetExternalSymbols(),
+                                       &table->string_pool, &decl_stack);
 
         for (auto& config_value : entry->values) {
           config_value->value->Accept(&visitor);
