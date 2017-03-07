@@ -300,20 +300,6 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".recents.tv.RecentsTvActivity"
-                  android:label="@string/accessibility_desc_recent_apps"
-                  android:exported="false"
-                  android:launchMode="singleInstance"
-                  android:excludeFromRecents="true"
-                  android:stateNotNeeded="true"
-                  android:resumeWhilePausing="true"
-                  android:screenOrientation="behind"
-                  android:theme="@style/RecentsTvTheme.Wallpaper">
-            <intent-filter>
-                <action android:name="com.android.systemui.recents.TOGGLE_RECENTS" />
-            </intent-filter>
-        </activity>
-
         <activity
             android:name=".stackdivider.ForcedResizableInfoActivity"
             android:theme="@style/ForcedResizableTheme"

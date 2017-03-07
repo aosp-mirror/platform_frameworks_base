@@ -2058,15 +2058,7 @@ public class AppTransition implements Dump {
      * @return whether the transition should show the thumbnail being scaled down.
      */
     private boolean shouldScaleDownThumbnailTransition(int uiMode, int orientation) {
-        return isTvUiMode(uiMode)
-                || mGridLayoutRecentsEnabled
+        return mGridLayoutRecentsEnabled
                 || orientation == Configuration.ORIENTATION_PORTRAIT;
-    }
-
-    /**
-     * @return whether the specified {@param uiMode} is the TV mode.
-     */
-    private boolean isTvUiMode(int uiMode) {
-        return (uiMode & Configuration.UI_MODE_TYPE_TELEVISION) > 0;
     }
 }

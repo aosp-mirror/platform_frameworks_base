@@ -86,14 +86,6 @@ public class PipManager implements BasePipManager {
      * State when PIP menu dialog is shown.
      */
     public static final int STATE_PIP_MENU = 2;
-    /**
-     * State when PIP is shown in Recents.
-     */
-    public static final int STATE_PIP_RECENTS = 3;
-    /**
-     * State when PIP is shown in Recents and it's focused to allow an user to control.
-     */
-    public static final int STATE_PIP_RECENTS_FOCUSED = 4;
 
     private static final int TASK_ID_NO_PIP = -1;
     private static final int INVALID_RESOURCE_TYPE = -1;
@@ -119,7 +111,6 @@ public class PipManager implements BasePipManager {
     private int mSuspendPipResizingReason;
 
     private Context mContext;
-    private PipRecentsOverlayManager mPipRecentsOverlayManager;
     private IActivityManager mActivityManager;
     private IWindowManager mWindowManager;
     private MediaSessionManager mMediaSessionManager;
@@ -132,9 +123,6 @@ public class PipManager implements BasePipManager {
     private Rect mDefaultPipBounds = new Rect();
     private Rect mSettingsPipBounds;
     private Rect mMenuModePipBounds;
-    private Rect mRecentsPipBounds;
-    private Rect mRecentsFocusedPipBounds;
-    private int mRecentsFocusChangedAnimationDurationMs;
     private boolean mInitialized;
     private int mPipTaskId = TASK_ID_NO_PIP;
     private ComponentName mPipComponentName;
@@ -259,7 +247,6 @@ public class PipManager implements BasePipManager {
         }
 
         loadConfigurationsAndApply();
-        mPipRecentsOverlayManager = new PipRecentsOverlayManager(context);
         mMediaSessionManager =
                 (MediaSessionManager) mContext.getSystemService(Context.MEDIA_SESSION_SERVICE);
 
@@ -276,12 +263,6 @@ public class PipManager implements BasePipManager {
                 R.string.pip_settings_bounds));
         mMenuModePipBounds = Rect.unflattenFromString(res.getString(
                 R.string.pip_menu_bounds));
-        mRecentsPipBounds = Rect.unflattenFromString(res.getString(
-                R.string.pip_recents_bounds));
-        mRecentsFocusedPipBounds = Rect.unflattenFromString(res.getString(
-                R.string.pip_recents_focused_bounds));
-        mRecentsFocusChangedAnimationDurationMs = res.getInteger(
-                R.integer.recents_tv_pip_focus_anim_duration);
 
         // Reset the PIP bounds and apply. PIP bounds can be changed by two reasons.
         //   1. Configuration changed due to the language change (RTL <-> RTL)
@@ -295,7 +276,6 @@ public class PipManager implements BasePipManager {
      */
     public void onConfigurationChanged() {
         loadConfigurationsAndApply();
-        mPipRecentsOverlayManager.onConfigurationChanged(mContext);
     }
 
     /**
@@ -385,8 +365,6 @@ public class PipManager implements BasePipManager {
      */
     void resizePinnedStack(int state) {
         if (DEBUG) Log.d(TAG, "resizePinnedStack() state=" + state);
-        boolean wasRecentsShown =
-                (mState == STATE_PIP_RECENTS || mState == STATE_PIP_RECENTS_FOCUSED);
         boolean wasStateNoPip = (mState == STATE_NO_PIP);
         mState = state;
         for (int i = mListeners.size() - 1; i >= 0; --i) {
@@ -413,22 +391,12 @@ public class PipManager implements BasePipManager {
             case STATE_PIP_OVERLAY:
                 mCurrentPipBounds = mPipBounds;
                 break;
-            case STATE_PIP_RECENTS:
-                mCurrentPipBounds = mRecentsPipBounds;
-                break;
-            case STATE_PIP_RECENTS_FOCUSED:
-                mCurrentPipBounds = mRecentsFocusedPipBounds;
-                break;
             default:
                 mCurrentPipBounds = mPipBounds;
                 break;
         }
         try {
             int animationDurationMs = -1;
-            if (wasRecentsShown
-                    && (mState == STATE_PIP_RECENTS || mState == STATE_PIP_RECENTS_FOCUSED)) {
-                animationDurationMs = mRecentsFocusChangedAnimationDurationMs;
-            }
             mActivityManager.resizeStack(PINNED_STACK_ID, mCurrentPipBounds,
                     true, true, true, animationDurationMs);
         } catch (RemoteException e) {
@@ -444,23 +412,11 @@ public class PipManager implements BasePipManager {
     }
 
     /**
-     * Returns the focused PIP bound while Recents is shown.
-     * This is used to place PIP controls in Recents.
-     */
-    public Rect getRecentsFocusedPipBounds() {
-        return mRecentsFocusedPipBounds;
-    }
-
-    /**
      * Shows PIP menu UI by launching {@link PipMenuActivity}. It also locates the pinned
      * stack to the centered PIP bound {@link R.config_centeredPictureInPictureBounds}.
      */
     private void showPipMenu() {
         if (DEBUG) Log.d(TAG, "showPipMenu()");
-        if (mPipRecentsOverlayManager.isRecentsShown()) {
-            if (DEBUG) Log.d(TAG, "Ignore showing PIP menu");
-            return;
-        }
         mState = STATE_PIP_MENU;
         for (int i = mListeners.size() - 1; i >= 0; --i) {
             mListeners.get(i).onShowPipMenu();
@@ -692,11 +648,6 @@ public class PipManager implements BasePipManager {
             mMediaSessionManager.addOnActiveSessionsChangedListener(
                     mActiveMediaSessionListener, null);
             updateMediaController(mMediaSessionManager.getActiveSessions(null));
-            if (mPipRecentsOverlayManager.isRecentsShown()) {
-                // If an activity becomes PIPed again after the fullscreen, the Recents is shown
-                // behind so we need to resize the pinned stack and show the correct overlay.
-                resizePinnedStack(STATE_PIP_RECENTS);
-            }
             for (int i = mListeners.size() - 1; i >= 0; i--) {
                 mListeners.get(i).onPipEntered();
             }
@@ -721,18 +672,7 @@ public class PipManager implements BasePipManager {
             }
             switch (mState) {
                 case STATE_PIP_OVERLAY:
-                    if (!mPipRecentsOverlayManager.isRecentsShown()) {
-                        showPipOverlay();
-                        break;
-                    } else {
-                        // This happens only if an activity is PIPed after the Recents is shown.
-                        // See {@link PipRecentsOverlayManager.requestFocus} for more details.
-                        resizePinnedStack(mState);
-                        break;
-                    }
-                case STATE_PIP_RECENTS:
-                case STATE_PIP_RECENTS_FOCUSED:
-                    mPipRecentsOverlayManager.addPipRecentsOverlayView();
+                    showPipOverlay();
                     break;
                 case STATE_PIP_MENU:
                     showPipMenu();
@@ -778,13 +718,6 @@ public class PipManager implements BasePipManager {
             sPipManager = new PipManager();
         }
         return sPipManager;
-    }
-
-    /**
-     * Gets an instance of {@link PipRecentsOverlayManager}.
-     */
-    public PipRecentsOverlayManager getPipRecentsOverlayManager() {
-        return mPipRecentsOverlayManager;
     }
 
     private void updatePipVisibility(final boolean visible) {
