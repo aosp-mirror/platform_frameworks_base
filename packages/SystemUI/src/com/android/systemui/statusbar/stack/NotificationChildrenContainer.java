@@ -323,6 +323,7 @@ public class NotificationChildrenContainer extends ViewGroup {
             }
             mNotificationHeaderWrapperLowPriority.notifyContentUpdated(mContainingNotification);
         } else {
+            removeView(mNotificationHeaderLowPriority);
             mNotificationHeaderLowPriority = null;
             mNotificationHeaderWrapperLowPriority = null;
         }
