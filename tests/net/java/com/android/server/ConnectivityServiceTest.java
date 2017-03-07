@@ -1176,15 +1176,11 @@ public class ConnectivityServiceTest extends AndroidTestCase {
 
         void expectAvailableCallbacks(MockNetworkAgent agent, boolean expectSuspended, int timeoutMs) {
             expectCallback(CallbackState.AVAILABLE, agent, timeoutMs);
-
-            final boolean HAS_DATASYNC_ON_AVAILABLE = false;
-            if (HAS_DATASYNC_ON_AVAILABLE) {
-                if (expectSuspended) {
-                    expectCallback(CallbackState.SUSPENDED, agent, timeoutMs);
-                }
-                expectCallback(CallbackState.NETWORK_CAPABILITIES, agent, timeoutMs);
-                expectCallback(CallbackState.LINK_PROPERTIES, agent, timeoutMs);
+            if (expectSuspended) {
+                expectCallback(CallbackState.SUSPENDED, agent, timeoutMs);
             }
+            expectCallback(CallbackState.NETWORK_CAPABILITIES, agent, timeoutMs);
+            expectCallback(CallbackState.LINK_PROPERTIES, agent, timeoutMs);
         }
 
         void expectAvailableCallbacks(MockNetworkAgent agent) {
@@ -1196,7 +1192,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         }
 
         void expectAvailableAndValidatedCallbacks(MockNetworkAgent agent) {
-            expectAvailableCallbacks(agent, true, TIMEOUT_MS);
+            expectAvailableCallbacks(agent, false, TIMEOUT_MS);
             expectCapabilitiesWith(NET_CAPABILITY_VALIDATED, agent);
         }
 
