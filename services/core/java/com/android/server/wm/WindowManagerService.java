@@ -1026,8 +1026,8 @@ public class WindowManagerService extends IWindowManager.Stub
         mAppTransition = new AppTransition(context, this);
         mAppTransition.registerListenerLocked(mActivityManagerAppTransitionNotifier);
 
-        mBoundsAnimationController =
-                new BoundsAnimationController(mAppTransition, UiThread.getHandler());
+        mBoundsAnimationController = new BoundsAnimationController(context, mAppTransition,
+                UiThread.getHandler());
 
         mActivityManager = ActivityManager.getService();
         mAmInternal = LocalServices.getService(ActivityManagerInternal.class);

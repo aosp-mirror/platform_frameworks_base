@@ -38,9 +38,11 @@ oneway interface IPinnedStackListener {
      * to be changed (ie. after configuration change, aspect ratio change, etc). It then provides
      * the components that allow the listener to calculate the movement bounds itself. The
      * {@param normalBounds} are also the default bounds that the PiP would be entered in its
-     * current state with the aspect ratio applied.
+     * current state with the aspect ratio applied.  The {@param animatingBounds} are provided
+     * to indicate the current target bounds of the pinned stack (the final bounds if animating,
+     * the current bounds if not), which may be helpful in calculating dependent animation bounds.
      */
-    void onMovementBoundsChanged(in Rect insetBounds, in Rect normalBounds,
+    void onMovementBoundsChanged(in Rect insetBounds, in Rect normalBounds, in Rect animatingBounds,
             boolean fromImeAdjustement);
 
     /**

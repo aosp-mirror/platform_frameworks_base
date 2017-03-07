@@ -197,7 +197,7 @@ public class PipManager implements BasePipManager {
 
         @Override
         public void onMovementBoundsChanged(Rect insetBounds, Rect normalBounds,
-                boolean fromImeAdjustement) {
+                Rect animatingBounds, boolean fromImeAdjustement) {
             mHandler.post(() -> {
                 mDefaultPipBounds.set(normalBounds);
             });

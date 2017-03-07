@@ -233,8 +233,8 @@ class PinnedStackController {
 
         final Rect defaultBounds = new Rect();
         final Size size = getSize(mDefaultAspectRatio);
-        Gravity.apply(mDefaultStackGravity, size.getWidth(), size.getHeight(), insetBounds, 0, 0,
-                defaultBounds);
+        Gravity.apply(mDefaultStackGravity, size.getWidth(), size.getHeight(), insetBounds,
+                0, mIsImeShowing ? mImeHeight : 0, defaultBounds);
         return defaultBounds;
     }
 
@@ -353,14 +353,21 @@ class PinnedStackController {
     private void notifyMovementBoundsChanged(boolean fromImeAdjustement) {
         if (mPinnedStackListener != null) {
             try {
-                Rect insetBounds = new Rect();
+                final Rect insetBounds = new Rect();
                 getInsetBounds(insetBounds);
-                Rect normalBounds = getDefaultBounds();
+                final Rect normalBounds = getDefaultBounds();
                 if (isValidPictureInPictureAspectRatio(mAspectRatio)) {
                     transformBoundsToAspectRatio(normalBounds, mAspectRatio);
                 }
+                final Rect animatingBounds = mTmpRect;
+                final TaskStack pinnedStack = mDisplayContent.getStackById(PINNED_STACK_ID);
+                if (pinnedStack != null) {
+                    pinnedStack.getAnimatingBounds(animatingBounds);
+                } else {
+                    animatingBounds.set(normalBounds);
+                }
                 mPinnedStackListener.onMovementBoundsChanged(insetBounds, normalBounds,
-                        fromImeAdjustement);
+                        animatingBounds, fromImeAdjustement);
             } catch (RemoteException e) {
                 Slog.e(TAG_WM, "Error delivering actions changed event.", e);
             }
