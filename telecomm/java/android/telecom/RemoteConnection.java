@@ -446,6 +446,8 @@ public final class RemoteConnection {
 
         private final String mCallingPackage;
 
+        private final int mTargetSdkVersion;
+
         /**
          * ConcurrentHashMap constructor params: 8 is initial table size, 0.9f is
          * load factor before resizing, 1 means we only expect a single thread to
@@ -454,9 +456,12 @@ public final class RemoteConnection {
         private final Set<Callback> mCallbacks = Collections.newSetFromMap(
                 new ConcurrentHashMap<Callback, Boolean>(8, 0.9f, 1));
 
-        VideoProvider(IVideoProvider videoProviderBinder, String callingPackage) {
+        VideoProvider(IVideoProvider videoProviderBinder, String callingPackage,
+                      int targetSdkVersion) {
+
             mVideoProviderBinder = videoProviderBinder;
             mCallingPackage = callingPackage;
+            mTargetSdkVersion = targetSdkVersion;
             try {
                 mVideoProviderBinder.addVideoCallback(mVideoCallbackServant.getStub().asBinder());
             } catch (RemoteException e) {
@@ -491,7 +496,7 @@ public final class RemoteConnection {
          */
         public void setCamera(String cameraId) {
             try {
-                mVideoProviderBinder.setCamera(cameraId, mCallingPackage);
+                mVideoProviderBinder.setCamera(cameraId, mCallingPackage, mTargetSdkVersion);
             } catch (RemoteException e) {
             }
         }
@@ -667,7 +672,7 @@ public final class RemoteConnection {
      * @hide
      */
     RemoteConnection(String callId, IConnectionService connectionService,
-            ParcelableConnection connection, String callingPackage) {
+            ParcelableConnection connection, String callingPackage, int targetSdkVersion) {
         mConnectionId = callId;
         mConnectionService = connectionService;
         mConnected = true;
@@ -679,7 +684,8 @@ public final class RemoteConnection {
         mVideoState = connection.getVideoState();
         IVideoProvider videoProvider = connection.getVideoProvider();
         if (videoProvider != null) {
-            mVideoProvider = new RemoteConnection.VideoProvider(videoProvider, callingPackage);
+            mVideoProvider = new RemoteConnection.VideoProvider(videoProvider, callingPackage,
+                    targetSdkVersion);
         } else {
             mVideoProvider = null;
         }

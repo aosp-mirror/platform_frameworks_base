@@ -127,14 +127,20 @@ public final class Phone {
 
     private final String mCallingPackage;
 
-    Phone(InCallAdapter adapter, String callingPackage) {
+    /**
+     * The Target SDK version of the InCallService implementation.
+     */
+    private final int mTargetSdkVersion;
+
+    Phone(InCallAdapter adapter, String callingPackage, int targetSdkVersion) {
         mInCallAdapter = adapter;
         mCallingPackage = callingPackage;
+        mTargetSdkVersion = targetSdkVersion;
     }
 
     final void internalAddCall(ParcelableCall parcelableCall) {
         Call call = new Call(this, parcelableCall.getId(), mInCallAdapter,
-                parcelableCall.getState(), mCallingPackage);
+                parcelableCall.getState(), mCallingPackage, mTargetSdkVersion);
         mCallByTelecomCallId.put(parcelableCall.getId(), call);
         mCalls.add(call);
         checkCallTree(parcelableCall);

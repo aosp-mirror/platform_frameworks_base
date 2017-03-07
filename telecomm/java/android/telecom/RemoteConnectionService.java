@@ -286,10 +286,11 @@ final class RemoteConnectionService {
 
             String callingPackage = mOurConnectionServiceImpl.getApplicationContext()
                     .getOpPackageName();
+            int targetSdkVersion = mOurConnectionServiceImpl.getApplicationInfo().targetSdkVersion;
             RemoteConnection.VideoProvider remoteVideoProvider = null;
             if (videoProvider != null) {
                 remoteVideoProvider = new RemoteConnection.VideoProvider(videoProvider,
-                        callingPackage);
+                        callingPackage, targetSdkVersion);
             }
             findConnectionForAction(callId, "setVideoProvider")
                     .setVideoProvider(remoteVideoProvider);
@@ -357,8 +358,11 @@ final class RemoteConnectionService {
                 Session.Info sessionInfo) {
             String callingPackage = mOurConnectionServiceImpl.getApplicationContext().
                     getOpPackageName();
+            int callingTargetSdkVersion = mOurConnectionServiceImpl.getApplicationInfo()
+                    .targetSdkVersion;
             RemoteConnection remoteConnection = new RemoteConnection(callId,
-                    mOutgoingConnectionServiceRpc, connection, callingPackage);
+                    mOutgoingConnectionServiceRpc, connection, callingPackage,
+                    callingTargetSdkVersion);
             mConnectionById.put(callId, remoteConnection);
             remoteConnection.registerCallback(new RemoteConnection.Callback() {
                 @Override

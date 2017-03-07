@@ -1026,6 +1026,7 @@ public final class Call {
     private int mState;
     private List<String> mCannedTextResponses = null;
     private String mCallingPackage;
+    private int mTargetSdkVersion;
     private String mRemainingPostDialSequence;
     private VideoCallImpl mVideoCallImpl;
     private RttCall mRttCall;
@@ -1559,22 +1560,25 @@ public final class Call {
     }
 
     /** {@hide} */
-    Call(Phone phone, String telecomCallId, InCallAdapter inCallAdapter, String callingPackage) {
+    Call(Phone phone, String telecomCallId, InCallAdapter inCallAdapter, String callingPackage,
+         int targetSdkVersion) {
         mPhone = phone;
         mTelecomCallId = telecomCallId;
         mInCallAdapter = inCallAdapter;
         mState = STATE_NEW;
         mCallingPackage = callingPackage;
+        mTargetSdkVersion = targetSdkVersion;
     }
 
     /** {@hide} */
     Call(Phone phone, String telecomCallId, InCallAdapter inCallAdapter, int state,
-            String callingPackage) {
+            String callingPackage, int targetSdkVersion) {
         mPhone = phone;
         mTelecomCallId = telecomCallId;
         mInCallAdapter = inCallAdapter;
         mState = state;
         mCallingPackage = callingPackage;
+        mTargetSdkVersion = targetSdkVersion;
     }
 
     /** {@hide} */
@@ -1600,7 +1604,8 @@ public final class Call {
             cannedTextResponsesChanged = true;
         }
 
-        VideoCallImpl newVideoCallImpl = parcelableCall.getVideoCallImpl(mCallingPackage);
+        VideoCallImpl newVideoCallImpl = parcelableCall.getVideoCallImpl(mCallingPackage,
+                mTargetSdkVersion);
         boolean videoCallChanged = parcelableCall.isVideoCallProviderChanged() &&
                 !Objects.equals(mVideoCallImpl, newVideoCallImpl);
         if (videoCallChanged) {
