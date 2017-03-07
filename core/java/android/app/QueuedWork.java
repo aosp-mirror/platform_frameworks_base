@@ -21,6 +21,7 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
+import android.os.StrictMode;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
@@ -159,7 +160,12 @@ public class QueuedWork {
             sCanDelay = false;
         }
 
-        processPendingWork();
+        StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskWrites();
+        try {
+            processPendingWork();
+        } finally {
+            StrictMode.setThreadPolicy(oldPolicy);
+        }
 
         try {
             while (true) {
