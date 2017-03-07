@@ -104,4 +104,15 @@ public class ExpandableNotificationRowTest {
         Assert.assertFalse(mRow.isShowingIcon());
     }
 
+    @Test
+    public void testNotificationHeaderVisibleWhenAnimating() {
+        mRow.setSensitive(true, true);
+        mRow.addChildNotification(createNotification());
+        mRow.addChildNotification(createNotification());
+        mRow.setHideSensitive(true, false, 0, 0);
+        mRow.setHideSensitive(false, true, 0, 0);
+        Assert.assertTrue(
+                mRow.getChildrenContainer().getVisibleHeader().getVisibility() == View.VISIBLE);
+    }
+
 }
