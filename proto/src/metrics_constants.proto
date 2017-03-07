@@ -3522,6 +3522,9 @@ message MetricsEvent {
     // OS: O
     SETTINGS_NETWORK_SCORER = 861;
 
+    // OPEN: Settings > About device > Model > Hardware info dialog
+    DIALOG_SETTINGS_HARDWARE_INFO = 862;
+
     // ---- End O Constants, all O constants go above this line ----
 
     // Add new aosp constants above this line.
