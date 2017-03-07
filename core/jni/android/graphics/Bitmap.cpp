@@ -924,7 +924,13 @@ static jobject Bitmap_createFromParcel(JNIEnv* env, jobject, jobject parcel) {
     const bool        isMutable = p->readInt32() != 0;
     const SkColorType colorType = (SkColorType)p->readInt32();
     const SkAlphaType alphaType = (SkAlphaType)p->readInt32();
-    const bool        isSRGB = p->readInt32() != 0;
+    const uint32_t    colorSpaceSize = p->readUint32();
+    sk_sp<SkColorSpace> colorSpace;
+    if (kRGBA_F16_SkColorType == colorType) {
+        colorSpace = SkColorSpace::MakeSRGBLinear();
+    } else if (colorSpaceSize > 0) {
+        colorSpace = SkColorSpace::Deserialize(p->readInplace(colorSpaceSize), colorSpaceSize);
+    }
     const int         width = p->readInt32();
     const int         height = p->readInt32();
     const int         rowBytes = p->readInt32();
@@ -941,14 +947,6 @@ static jobject Bitmap_createFromParcel(JNIEnv* env, jobject, jobject parcel) {
     }
 
     std::unique_ptr<SkBitmap> bitmap(new SkBitmap);
-
-    sk_sp<SkColorSpace> colorSpace;
-    if (kRGBA_F16_SkColorType == colorType) {
-        colorSpace = SkColorSpace::MakeSRGBLinear();
-    } else {
-        colorSpace = isSRGB ? SkColorSpace::MakeSRGB() : nullptr;
-    }
-
     if (!bitmap->setInfo(SkImageInfo::Make(width, height, colorType, alphaType, colorSpace),
             rowBytes)) {
         return NULL;
@@ -1065,13 +1063,20 @@ static jboolean Bitmap_writeToParcel(JNIEnv* env, jobject,
     auto bitmapWrapper = reinterpret_cast<BitmapWrapper*>(bitmapHandle);
     bitmapWrapper->getSkBitmap(&bitmap);
 
-    sk_sp<SkColorSpace> sRGB = SkColorSpace::MakeSRGB();
-    bool isSRGB = bitmap.colorSpace() == sRGB.get();
-
     p->writeInt32(isMutable);
     p->writeInt32(bitmap.colorType());
     p->writeInt32(bitmap.alphaType());
-    p->writeInt32(isSRGB); // TODO: We should write the color space (b/32072280)
+    SkColorSpace* colorSpace = bitmap.colorSpace();
+    if (colorSpace != nullptr && bitmap.colorType() != kRGBA_F16_SkColorType) {
+        sk_sp<SkData> data = colorSpace->serialize();
+        size_t size = data->size();
+        p->writeUint32(size);
+        if (size > 0) {
+            p->write(data->data(), size);
+        }
+    } else {
+        p->writeUint32(0);
+    }
     p->writeInt32(bitmap.width());
     p->writeInt32(bitmap.height());
     p->writeInt32(bitmap.rowBytes());
