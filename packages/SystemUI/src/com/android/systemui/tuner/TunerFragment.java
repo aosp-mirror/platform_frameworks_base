@@ -26,11 +26,11 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
-import com.android.internal.hardware.AmbientDisplayConfiguration;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
 import com.android.systemui.plugins.PluginPrefs;
+import com.android.systemui.statusbar.phone.DozeParameters;
 
 public class TunerFragment extends PreferenceFragment {
 
@@ -65,7 +65,7 @@ public class TunerFragment extends PreferenceFragment {
         if (!PluginPrefs.hasPlugins(getContext())) {
             getPreferenceScreen().removePreference(findPreference(KEY_PLUGINS));
         }
-        if (!alwaysOnAvailable()) {
+        if (!DozeParameters.ALWAYS_ON_AVAILABLE) {
             getPreferenceScreen().removePreference(findPreference(KEY_DOZE));
         }
 
@@ -75,10 +75,6 @@ public class TunerFragment extends PreferenceFragment {
                 new TunerWarningFragment().show(getFragmentManager(), WARNING_TAG);
             }
         }
-    }
-
-    private boolean alwaysOnAvailable() {
-        return new AmbientDisplayConfiguration(getContext()).alwaysOnAvailable();
     }
 
     @Override

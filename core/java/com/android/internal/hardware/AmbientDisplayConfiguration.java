@@ -19,7 +19,6 @@ package com.android.internal.hardware;
 import com.android.internal.R;
 
 import android.content.Context;
-import android.os.Build;
 import android.provider.Settings;
 import android.text.TextUtils;
 
@@ -34,8 +33,7 @@ public class AmbientDisplayConfiguration {
     public boolean enabled(int user) {
         return pulseOnNotificationEnabled(user)
                 || pulseOnPickupEnabled(user)
-                || pulseOnDoubleTapEnabled(user)
-                || alwaysOnEnabled(user);
+                || pulseOnDoubleTapEnabled(user);
     }
     
     public boolean available() {
@@ -72,16 +70,6 @@ public class AmbientDisplayConfiguration {
 
     public String doubleTapSensorType() {
         return mContext.getResources().getString(R.string.config_dozeDoubleTapSensorType);
-    }
-
-    public boolean alwaysOnEnabled(int user) {
-        return boolSetting(Settings.Secure.DOZE_ALWAYS_ON, user)
-                && alwaysOnAvailable();
-    }
-
-    public boolean alwaysOnAvailable() {
-        // TODO: introduce config_dozeAlwaysOnAvailable. For now just debuggable builds.
-        return Build.IS_DEBUGGABLE && ambientDisplayAvailable();
     }
 
     public String ambientDisplayComponent() {

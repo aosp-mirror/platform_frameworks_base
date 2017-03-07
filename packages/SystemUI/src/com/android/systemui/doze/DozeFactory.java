@@ -53,7 +53,7 @@ public class DozeFactory {
 
         DozeMachine machine = new DozeMachine(
                 DozeScreenStatePreventingAdapter.wrapIfNeeded(dozeService, params),
-                config,
+                params,
                 wakeLock);
         machine.setParts(new DozeMachine.Part[]{
                 createDozeTriggers(context, sensorManager, host, config, params, handler, wakeLock,
