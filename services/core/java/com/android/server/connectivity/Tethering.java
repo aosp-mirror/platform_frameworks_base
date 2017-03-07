@@ -77,6 +77,7 @@ import com.android.internal.util.StateMachine;
 import com.android.server.connectivity.tethering.IControlsTethering;
 import com.android.server.connectivity.tethering.IPv6TetheringCoordinator;
 import com.android.server.connectivity.tethering.IPv6TetheringInterfaceServices;
+import com.android.server.connectivity.tethering.OffloadController;
 import com.android.server.connectivity.tethering.TetheringConfiguration;
 import com.android.server.connectivity.tethering.TetherInterfaceStateMachine;
 import com.android.server.connectivity.tethering.UpstreamNetworkMonitor;
@@ -146,6 +147,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
             .getSystem().getString(com.android.internal.R.string.config_wifi_tether_enable));
 
     private final StateMachine mTetherMasterSM;
+    private final OffloadController mOffloadController;
     private final UpstreamNetworkMonitor mUpstreamNetworkMonitor;
     private String mCurrentUpstreamIface;
 
@@ -176,6 +178,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
         mTetherMasterSM = new TetherMasterSM("TetherMaster", mLooper);
         mTetherMasterSM.start();
 
+        mOffloadController = new OffloadController(mTetherMasterSM.getHandler());
         mUpstreamNetworkMonitor = new UpstreamNetworkMonitor(
                 mContext, mTetherMasterSM, TetherMasterSM.EVENT_UPSTREAM_CALLBACK);
 
@@ -1205,6 +1208,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
 
             protected void handleNewUpstreamNetworkState(NetworkState ns) {
                 mIPv6TetheringCoordinator.updateUpstreamNetworkState(ns);
+                mOffloadController.setUpstreamLinkProperties(ns.linkProperties);
             }
         }
 
@@ -1361,12 +1365,14 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
         class TetherModeAliveState extends TetherMasterUtilState {
             final SimChangeListener simChange = new SimChangeListener(mContext);
             boolean mTryCell = true;
+
             @Override
             public void enter() {
                 // TODO: examine if we should check the return value.
                 turnOnMasterTetherSettings(); // may transition us out
                 simChange.startListening();
                 mUpstreamNetworkMonitor.start();
+                mOffloadController.start();
 
                 // Better try something first pass or crazy tests cases will fail.
                 chooseUpstreamType(true);
@@ -1375,6 +1381,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
 
             @Override
             public void exit() {
+                mOffloadController.stop();
                 unrequestUpstreamMobileConnection();
                 mUpstreamNetworkMonitor.stop();
                 simChange.stopListening();
