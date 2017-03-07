@@ -53,8 +53,9 @@ public class StaticLayout_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static long nLoadHyphenator(ByteBuffer buf, int offset) {
-        return Hyphenator_Delegate.loadHyphenator(buf, offset);
+    /*package*/ static long nLoadHyphenator(ByteBuffer buf, int offset, int minPrefix,
+            int minSuffix) {
+        return Hyphenator_Delegate.loadHyphenator(buf, offset, minPrefix, minSuffix);
     }
 
     @LayoutlibDelegate
