@@ -2607,10 +2607,12 @@ public class ConnectivityManager {
         public void onLost(Network network) {}
 
         /**
-         * Called if no network is found in the given timeout time.  If no timeout is given,
-         * this will not be called. The associated {@link NetworkRequest} will have already
-         * been removed and released, as if {@link #unregisterNetworkCallback} had been called.
-         * @hide
+         * Called if no network is found in the timeout time specified in
+         * {@link #requestNetwork(NetworkRequest, int, NetworkCallback)} call. This callback is not
+         * called for the version of {@link #requestNetwork(NetworkRequest, NetworkCallback)}
+         * without timeout. When this callback is invoked the associated
+         * {@link NetworkRequest} will have already been removed and released, as if
+         * {@link #unregisterNetworkCallback(NetworkCallback)} had been called.
          */
         public void onUnavailable() {}
 
@@ -2893,7 +2895,9 @@ public class ConnectivityManager {
      * Request a network to satisfy a set of {@link android.net.NetworkCapabilities}.
      *
      * This {@link NetworkRequest} will live until released via
-     * {@link #unregisterNetworkCallback(NetworkCallback)} or the calling application exits.
+     * {@link #unregisterNetworkCallback(NetworkCallback)} or the calling application exits. A
+     * version of the method which takes a timeout is
+     * {@link #requestNetwork(NetworkRequest, int, NetworkCallback)}.
      * Status of the request can be followed by listening to the various
      * callbacks described in {@link NetworkCallback}.  The {@link Network}
      * can be used to direct traffic to the network.
@@ -2926,7 +2930,9 @@ public class ConnectivityManager {
      * Request a network to satisfy a set of {@link android.net.NetworkCapabilities}.
      *
      * This {@link NetworkRequest} will live until released via
-     * {@link #unregisterNetworkCallback(NetworkCallback)} or the calling application exits.
+     * {@link #unregisterNetworkCallback(NetworkCallback)} or the calling application exits. A
+     * version of the method which takes a timeout is
+     * {@link #requestNetwork(NetworkRequest, int, NetworkCallback)}.
      * Status of the request can be followed by listening to the various
      * callbacks described in {@link NetworkCallback}.  The {@link Network}
      * can be used to direct traffic to the network.
@@ -2960,13 +2966,25 @@ public class ConnectivityManager {
     }
 
     /**
+     * Note: this is a deprecated version of
+     * {@link #requestNetwork(NetworkRequest, int, NetworkCallback)} - please transition code to use
+     * the unhidden version of the function.
+     * TODO: replace all callers with the new version of the API
+     *
      * Request a network to satisfy a set of {@link android.net.NetworkCapabilities}, limited
      * by a timeout.
      *
-     * This function behaves identically to the non-timedout version, but if a suitable
-     * network is not found within the given time (in milliseconds) the
-     * {@link NetworkCallback#onUnavailable()} callback is called.  The request must
-     * still be released normally by calling {@link #unregisterNetworkCallback(NetworkCallback)}.
+     * This function behaves identically to the non-timed-out version
+     * {@link #requestNetwork(NetworkRequest, NetworkCallback)}, but if a suitable network
+     * is not found within the given time (in milliseconds) the
+     * {@link NetworkCallback#onUnavailable()} callback is called. The request can still be
+     * released normally by calling {@link #unregisterNetworkCallback(NetworkCallback)} but does
+     * not have to be released if timed-out (it is automatically released). Unregistering a
+     * request that timed out is not an error.
+     *
+     * <p>Do not use this method to poll for the existence of specific networks (e.g. with a small
+     * timeout) - the {@link #registerNetworkCallback(NetworkRequest, NetworkCallback)} is provided
+     * for that purpose. Calling this method will attempt to bring up the requested network.
      *
      * <p>This method requires the caller to hold either the
      * {@link android.Manifest.permission#CHANGE_NETWORK_STATE} permission
@@ -2974,15 +2992,56 @@ public class ConnectivityManager {
      * {@link android.provider.Settings.System#canWrite}.</p>
      *
      * @param request {@link NetworkRequest} describing this request.
-     * @param networkCallback The {@link NetworkCallback} to be utilized for this request. Note
-     *                        the callback must not be shared - it uniquely specifies this request.
-     *                        The callback is invoked on the default internal Handler.
+     * @param networkCallback The callbacks to be utilized for this request.  Note
+     *                        the callbacks must not be shared - they uniquely specify
+     *                        this request.
      * @param timeoutMs The time in milliseconds to attempt looking for a suitable network
-     *                  before {@link NetworkCallback#onUnavailable()} is called.
+     *                  before {@link NetworkCallback#onUnavailable()} is called. The timeout must
+     *                  be a positive value (i.e. >0).
      * @hide
      */
     public void requestNetwork(NetworkRequest request, NetworkCallback networkCallback,
             int timeoutMs) {
+        if (timeoutMs <= 0) {
+            throw new IllegalArgumentException("Non-positive timeoutMs: " + timeoutMs);
+        }
+        int legacyType = inferLegacyTypeForNetworkCapabilities(request.networkCapabilities);
+        requestNetwork(request, networkCallback, timeoutMs, legacyType, getDefaultHandler());
+    }
+
+    /**
+     * Request a network to satisfy a set of {@link android.net.NetworkCapabilities}, limited
+     * by a timeout.
+     *
+     * This function behaves identically to the non-timed-out version
+     * {@link #requestNetwork(NetworkRequest, NetworkCallback)}, but if a suitable network
+     * is not found within the given time (in milliseconds) the
+     * {@link NetworkCallback#onUnavailable()} callback is called. The request can still be
+     * released normally by calling {@link #unregisterNetworkCallback(NetworkCallback)} but does
+     * not have to be released if timed-out (it is automatically released). Unregistering a
+     * request that timed out is not an error.
+     *
+     * <p>Do not use this method to poll for the existence of specific networks (e.g. with a small
+     * timeout) - {@link #registerNetworkCallback(NetworkRequest, NetworkCallback)} is provided
+     * for that purpose. Calling this method will attempt to bring up the requested network.
+     *
+     * <p>This method requires the caller to hold either the
+     * {@link android.Manifest.permission#CHANGE_NETWORK_STATE} permission
+     * or the ability to modify system settings as determined by
+     * {@link android.provider.Settings.System#canWrite}.</p>
+     *
+     * @param request {@link NetworkRequest} describing this request.
+     * @param timeoutMs The time in milliseconds to attempt looking for a suitable network
+     *                  before {@link NetworkCallback#onUnavailable()} is called. The timeout must
+     *                  be a positive value (i.e. >0).
+     * @param networkCallback The {@link NetworkCallback} to be utilized for this request. Note
+     *                        the callback must not be shared - it uniquely specifies this request.
+     */
+    public void requestNetwork(NetworkRequest request, int timeoutMs,
+            NetworkCallback networkCallback) {
+        if (timeoutMs <= 0) {
+            throw new IllegalArgumentException("Non-positive timeoutMs: " + timeoutMs);
+        }
         int legacyType = inferLegacyTypeForNetworkCapabilities(request.networkCapabilities);
         requestNetwork(request, networkCallback, timeoutMs, legacyType, getDefaultHandler());
     }
@@ -2994,8 +3053,14 @@ public class ConnectivityManager {
      *
      * This function behaves identically to the non-timedout version, but if a suitable
      * network is not found within the given time (in milliseconds) the
-     * {@link NetworkCallback#onUnavailable} callback is called.  The request must
-     * still be released normally by calling {@link unregisterNetworkCallback(NetworkCallback)}.
+     * {@link NetworkCallback#onUnavailable} callback is called. The request can still be
+     * released normally by calling {@link #unregisterNetworkCallback(NetworkCallback)} but does
+     * not have to be released if timed-out (it is automatically released). Unregistering a
+     * request that timed out is not an error.
+     *
+     * <p>Do not use this method to poll for the existence of specific networks (e.g. with a small
+     * timeout) - {@link #registerNetworkCallback(NetworkRequest, NetworkCallback)} is provided
+     * for that purpose. Calling this method will attempt to bring up the requested network.
      *
      * <p>This method requires the caller to hold either the
      * {@link android.Manifest.permission#CHANGE_NETWORK_STATE} permission
@@ -3003,16 +3068,19 @@ public class ConnectivityManager {
      * {@link android.provider.Settings.System#canWrite}.</p>
      *
      * @param request {@link NetworkRequest} describing this request.
-     * @param networkCallback The {@link NetworkCallback} to be utilized for this request. Note
-     *                        the callback must not be shared - it uniquely specifies this request.
      * @param timeoutMs The time in milliseconds to attempt looking for a suitable network
      *                  before {@link NetworkCallback#onUnavailable} is called.
+     * @param networkCallback The {@link NetworkCallback} to be utilized for this request. Note
+     *                        the callback must not be shared - it uniquely specifies this request.
      * @param handler {@link Handler} to specify the thread upon which the callback will be invoked.
      *
      * @hide
      */
-    public void requestNetwork(NetworkRequest request, NetworkCallback networkCallback,
-            int timeoutMs, Handler handler) {
+    public void requestNetwork(NetworkRequest request, int timeoutMs,
+            NetworkCallback networkCallback, Handler handler) {
+        if (timeoutMs <= 0) {
+            throw new IllegalArgumentException("Non-positive timeoutMs");
+        }
         int legacyType = inferLegacyTypeForNetworkCapabilities(request.networkCapabilities);
         CallbackHandler cbHandler = new CallbackHandler(handler);
         requestNetwork(request, networkCallback, timeoutMs, legacyType, cbHandler);
