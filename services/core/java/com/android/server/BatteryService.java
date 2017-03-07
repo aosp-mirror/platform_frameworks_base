@@ -678,7 +678,7 @@ public final class BatteryService extends SystemService {
         pw.println("Battery service (battery) commands:");
         pw.println("  help");
         pw.println("    Print this help text.");
-        pw.println("  set [-f] [ac|usb|wireless|status|level|invalid] <value>");
+        pw.println("  set [-f] [ac|usb|wireless|status|level|present|invalid] <value>");
         pw.println("    Force a battery property value, freezing battery state.");
         pw.println("    -f: force a battery change broadcast be sent, prints new sequence.");
         pw.println("  unplug [-f]");
@@ -748,6 +748,9 @@ public final class BatteryService extends SystemService {
                     }
                     boolean update = true;
                     switch (key) {
+                        case "present":
+                            mBatteryProps.batteryPresent = Integer.parseInt(value) != 0;
+                            break;
                         case "ac":
                             mBatteryProps.chargerAcOnline = Integer.parseInt(value) != 0;
                             break;
