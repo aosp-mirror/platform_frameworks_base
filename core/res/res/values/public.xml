@@ -2802,6 +2802,7 @@
         <public name="requiredFeature" />
         <public name="requiredNotFeature" />
         <public name="autoFillHint" />
+        <public name="fontProviderPackage" />
     </public-group>
 
     <public-group type="style" first-id="0x010302e0">

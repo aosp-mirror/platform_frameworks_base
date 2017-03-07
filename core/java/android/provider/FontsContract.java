@@ -19,9 +19,12 @@ import android.app.ActivityThread;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Context;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ProviderInfo;
+import android.content.pm.Signature;
 import android.database.Cursor;
+import android.graphics.Typeface;
 import android.graphics.fonts.FontRequest;
 import android.graphics.fonts.FontResult;
 import android.net.Uri;
@@ -34,9 +37,13 @@ import android.os.ResultReceiver;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Utility class to deal with Font ContentProviders.
@@ -107,6 +114,13 @@ public class FontsContract {
         mPackageManager = mContext.getPackageManager();
     }
 
+    /** @hide */
+    @VisibleForTesting
+    public FontsContract(Context context, PackageManager packageManager) {
+        mContext = context;
+        mPackageManager = packageManager;
+    }
+
     // We use a background thread to post the content resolving work for all requests on. This
     // thread should be quit/stopped after all requests are done.
     private final Runnable mReplaceDispatcherThreadRunnable = new Runnable() {
@@ -133,31 +147,79 @@ public class FontsContract {
                 mHandler = new Handler(mThread.getLooper());
             }
             mHandler.post(() -> {
-                String providerAuthority = request.getProviderAuthority();
-                // TODO: Implement cert checking for non-system apps
-                ProviderInfo providerInfo = mPackageManager.resolveContentProvider(
-                        providerAuthority, PackageManager.MATCH_SYSTEM_ONLY);
+                ProviderInfo providerInfo = getProvider(request);
                 if (providerInfo == null) {
                     receiver.send(RESULT_CODE_PROVIDER_NOT_FOUND, null);
                     return;
                 }
-                Bundle result = getFontFromProvider(request, receiver, providerInfo);
-                if (result == null) {
-                    receiver.send(RESULT_CODE_FONT_NOT_FOUND, null);
-                    return;
-                }
-                receiver.send(RESULT_CODE_OK, result);
+                getFontFromProvider(request, receiver, providerInfo.authority);
             });
             mHandler.removeCallbacks(mReplaceDispatcherThreadRunnable);
             mHandler.postDelayed(mReplaceDispatcherThreadRunnable, THREAD_RENEWAL_THRESHOLD_MS);
         }
     }
 
-    private Bundle getFontFromProvider(FontRequest request, ResultReceiver receiver,
-            ProviderInfo providerInfo) {
+    /** @hide */
+    @VisibleForTesting
+    public ProviderInfo getProvider(FontRequest request) {
+        String providerAuthority = request.getProviderAuthority();
+        ProviderInfo info = mPackageManager.resolveContentProvider(providerAuthority, 0);
+        if (info == null) {
+            Log.e(TAG, "Can't find content provider " + providerAuthority);
+            return null;
+        }
+
+        if (!info.packageName.equals(request.getProviderPackage())) {
+            Log.e(TAG, "Found content provider " + providerAuthority + ", but package was not "
+                    + request.getProviderPackage());
+            return null;
+        }
+        // Trust system apps without signature checks
+        if (info.applicationInfo.isSystemApp()) {
+            return info;
+        }
+
+        Set<byte[]> signatures;
+        try {
+            PackageInfo packageInfo = mPackageManager.getPackageInfo(info.packageName,
+                    PackageManager.GET_SIGNATURES);
+            signatures = convertToSet(packageInfo.signatures);
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.e(TAG, "Can't find content provider " + providerAuthority, e);
+            return null;
+        }
+        List<List<byte[]>> requestCertificatesList = request.getCertificates();
+        for (int i = 0; i < requestCertificatesList.size(); ++i) {
+            final Set<byte[]> requestCertificates = convertToSet(requestCertificatesList.get(i));
+            if (signatures.equals(requestCertificates)) {
+                return info;
+            }
+        }
+        Log.e(TAG, "Certificates don't match for given provider " + providerAuthority);
+        return null;
+    }
+
+    private Set<byte[]> convertToSet(Signature[] signatures) {
+        Set<byte[]> shas = new HashSet<>();
+        for (int i = 0; i < signatures.length; ++i) {
+            shas.add(signatures[i].toByteArray());
+        }
+        return shas;
+    }
+
+    private Set<byte[]> convertToSet(List<byte[]> certs) {
+        Set<byte[]> shas = new HashSet<>();
+        shas.addAll(certs);
+        return shas;
+    }
+
+    /** @hide */
+    @VisibleForTesting
+    public void getFontFromProvider(FontRequest request, ResultReceiver receiver,
+            String authority) {
         ArrayList<FontResult> result = null;
         Uri uri = new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT)
-                .authority(providerInfo.authority)
+                .authority(authority)
                 .build();
         try (Cursor cursor = mContext.getContentResolver().query(uri, new String[] { Columns._ID,
                         Columns.TTC_INDEX, Columns.VARIATION_SETTINGS, Columns.STYLE },
@@ -176,13 +238,16 @@ public class FontsContract {
                     try {
                         ParcelFileDescriptor pfd =
                                 mContext.getContentResolver().openFileDescriptor(fileUri, "r");
-                        final int ttcIndex = cursor.getInt(ttcIndexColumnIndex);
-                        final String variationSettings = cursor.getString(vsColumnIndex);
-                        final int style = cursor.getInt(styleColumnIndex);
+                        final int ttcIndex = ttcIndexColumnIndex != -1
+                                ? cursor.getInt(ttcIndexColumnIndex) : 0;
+                        final String variationSettings = vsColumnIndex != -1
+                                ? cursor.getString(vsColumnIndex) : null;
+                        final int style = styleColumnIndex != -1
+                                ? cursor.getInt(styleColumnIndex) : Typeface.NORMAL;
                         result.add(new FontResult(pfd, ttcIndex, variationSettings, style));
                     } catch (FileNotFoundException e) {
                         Log.e(TAG, "FileNotFoundException raised when interacting with content "
-                                + "provider " + providerInfo.authority, e);
+                                + "provider " + authority, e);
                     }
                 }
             }
@@ -190,8 +255,9 @@ public class FontsContract {
         if (result != null && !result.isEmpty()) {
             Bundle bundle = new Bundle();
             bundle.putParcelableArrayList(PARCEL_FONT_RESULTS, result);
-            return bundle;
+            receiver.send(RESULT_CODE_OK, bundle);
+            return;
         }
-        return null;
+        receiver.send(RESULT_CODE_FONT_NOT_FOUND, null);
     }
 }

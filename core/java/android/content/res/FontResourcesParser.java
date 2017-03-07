@@ -67,13 +67,14 @@ public class FontResourcesParser {
         AttributeSet attrs = Xml.asAttributeSet(parser);
         TypedArray array = resources.obtainAttributes(attrs, R.styleable.FontFamily);
         String authority = array.getString(R.styleable.FontFamily_fontProviderAuthority);
+        String providerPackage = array.getString(R.styleable.FontFamily_fontProviderPackage);
         String query = array.getString(R.styleable.FontFamily_fontProviderQuery);
         array.recycle();
-        if (authority != null && query != null) {
+        if (authority != null && providerPackage != null && query != null) {
             while (parser.next() != XmlPullParser.END_TAG) {
                 skip(parser);
             }
-            return new FontConfig.Family(authority, query);
+            return new FontConfig.Family(authority, providerPackage, query);
         }
         List<FontConfig.Font> fonts = new ArrayList<>();
         while (parser.next() != XmlPullParser.END_TAG) {
