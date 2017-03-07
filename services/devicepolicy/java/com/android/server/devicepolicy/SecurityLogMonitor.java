@@ -69,6 +69,10 @@ class SecurityLogMonitor implements Runnable {
      */
     private static final long RATE_LIMIT_INTERVAL_MILLISECONDS = TimeUnit.HOURS.toMillis(2);
     /**
+     * How often to retry the notification about available logs if it is ignored or missed by DO.
+     */
+    private static final long BROADCAST_RETRY_INTERVAL_MILLISECONDS = TimeUnit.MINUTES.toMillis(30);
+    /**
      * Internally how often should the monitor poll the security logs from logd.
      */
     private static final long POLLING_INTERVAL_MILLISECONDS = TimeUnit.MINUTES.toMillis(1);
@@ -82,7 +86,7 @@ class SecurityLogMonitor implements Runnable {
 
     /**
      * When DO will be allowed to retrieve the log, in milliseconds since boot (as per
-     * {@link SystemClock#elapsedRealtime()})
+     * {@link SystemClock#elapsedRealtime()}). After that it will mark the time to retry broadcast.
      */
     @GuardedBy("mLock")
     private long mNextAllowedRetrievalTimeMillis = -1;
@@ -256,36 +260,35 @@ class SecurityLogMonitor implements Runnable {
     }
 
     private void notifyDeviceOwnerIfNeeded() throws InterruptedException {
-        boolean shouldNotifyDO = false;
-        boolean allowToRetrieveNow = false;
+        boolean allowRetrievalAndNotifyDO = false;
         mLock.lockInterruptibly();
         try {
             if (mPaused) {
                 return;
             }
-
-            // STOPSHIP(b/34186771): If the previous notification didn't reach the DO and logs were
-            // not retrieved (e.g. the broadcast was sent before the user was unlocked), no more
-            // subsequent callbacks will be sent. We should make sure that the DO gets notified
-            // before logs are lost.
-            int logSize = mPendingLogs.size();
+            final int logSize = mPendingLogs.size();
             if (logSize >= BUFFER_ENTRIES_NOTIFICATION_LEVEL) {
                 // Allow DO to retrieve logs if too many pending logs
-                allowToRetrieveNow = true;
-                if (DEBUG) Slog.d(TAG, "Number of log entries over threshold: " + logSize);
-            } else if (logSize > 0) {
-                if (SystemClock.elapsedRealtime() >= mNextAllowedRetrievalTimeMillis) {
-                    // Rate limit reset
-                    allowToRetrieveNow = true;
-                    if (DEBUG) Slog.d(TAG, "Timeout reached");
+                if (!mAllowedToRetrieve) {
+                    allowRetrievalAndNotifyDO = true;
                 }
+                if (DEBUG) Slog.d(TAG, "Number of log entries over threshold: " + logSize);
             }
-            shouldNotifyDO = (!mAllowedToRetrieve) && allowToRetrieveNow;
-            mAllowedToRetrieve = allowToRetrieveNow;
+            if (logSize > 0 && SystemClock.elapsedRealtime() >= mNextAllowedRetrievalTimeMillis) {
+                // Rate limit reset
+                allowRetrievalAndNotifyDO = true;
+                if (DEBUG) Slog.d(TAG, "Timeout reached");
+            }
+            if (allowRetrievalAndNotifyDO) {
+                mAllowedToRetrieve = true;
+                // Set the timeout to retry the notification if the DO misses it.
+                mNextAllowedRetrievalTimeMillis = SystemClock.elapsedRealtime()
+                        + BROADCAST_RETRY_INTERVAL_MILLISECONDS;
+            }
         } finally {
             mLock.unlock();
         }
-        if (shouldNotifyDO) {
+        if (allowRetrievalAndNotifyDO) {
             Slog.i(TAG, "notify DO");
             mService.sendDeviceOwnerCommand(DeviceAdminReceiver.ACTION_SECURITY_LOGS_AVAILABLE,
                     null);

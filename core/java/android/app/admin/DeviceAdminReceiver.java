@@ -779,6 +779,8 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * become affiliated again (even if security logging is enabled).
      * See {@link DevicePolicyManager#setAffiliationIds}
      *
+     * <p>This callback will be re-triggered if the logs are not retrieved.
+     *
      * <p>This callback is only applicable to device owners.
      *
      * @param context The running context as per {@link #onReceive}.
