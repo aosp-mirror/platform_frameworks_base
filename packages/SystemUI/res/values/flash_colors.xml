@@ -63,4 +63,8 @@
     <!-- Keyguard affordance circle background -->
     <color name="keyguard_affordance_circle_background">@android:color/white</color>
 
+    <!-- Used by selector -->
+    <color name="card_pressed">#7e3c3c3c</color>
+    <color name="screenshot_flash_color">#4D3367d6</color>
+    <color name="screenshot_background_color">#ff000000</color>
 </resources>
