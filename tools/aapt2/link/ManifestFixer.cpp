@@ -29,10 +29,7 @@ using android::StringPiece;
 
 namespace aapt {
 
-/**
- * This is how PackageManager builds class names from AndroidManifest.xml
- * entries.
- */
+// This is how PackageManager builds class names from AndroidManifest.xml entries.
 static bool NameIsJavaClassName(xml::Element* el, xml::Attribute* attr,
                                 SourcePathDiagnostics* diag) {
   // We allow unqualified class names (ie: .HelloActivity)
@@ -90,6 +87,36 @@ static xml::XmlNodeAction::ActionFuncWithDiag RequiredAndroidAttribute(const std
   };
 }
 
+static bool AutoGenerateIsFeatureSplit(xml::Element* el, SourcePathDiagnostics* diag) {
+  constexpr const char* kFeatureSplit = "featureSplit";
+  constexpr const char* kIsFeatureSplit = "isFeatureSplit";
+
+  xml::Attribute* attr = el->FindAttribute({}, kFeatureSplit);
+  if (attr != nullptr) {
+    // Rewrite the featureSplit attribute to be "split". This is what the
+    // platform recognizes.
+    attr->name = "split";
+
+    // Now inject the android:isFeatureSplit="true" attribute.
+    xml::Attribute* attr = el->FindAttribute(xml::kSchemaAndroid, kIsFeatureSplit);
+    if (attr != nullptr) {
+      if (!ResourceUtils::ParseBool(attr->value).value_or_default(false)) {
+        // The isFeatureSplit attribute is false, which conflicts with the use
+        // of "featureSplit".
+        diag->Error(DiagMessage(el->line_number)
+                    << "attribute 'featureSplit' used in <manifest> but 'android:isFeatureSplit' "
+                       "is not 'true'");
+        return false;
+      }
+
+      // The attribute is already there and set to true, nothing to do.
+    } else {
+      el->attributes.push_back(xml::Attribute{xml::kSchemaAndroid, kIsFeatureSplit, "true"});
+    }
+  }
+  return true;
+}
+
 static bool VerifyManifest(xml::Element* el, SourcePathDiagnostics* diag) {
   xml::Attribute* attr = el->FindAttribute({}, "package");
   if (!attr) {
@@ -97,31 +124,34 @@ static bool VerifyManifest(xml::Element* el, SourcePathDiagnostics* diag) {
                 << "<manifest> tag is missing 'package' attribute");
     return false;
   } else if (ResourceUtils::IsReference(attr->value)) {
-    diag->Error(
-        DiagMessage(el->line_number)
-        << "attribute 'package' in <manifest> tag must not be a reference");
+    diag->Error(DiagMessage(el->line_number)
+                << "attribute 'package' in <manifest> tag must not be a reference");
     return false;
   } else if (!util::IsJavaPackageName(attr->value)) {
     diag->Error(DiagMessage(el->line_number)
-                << "attribute 'package' in <manifest> tag is not a valid Java "
-                   "package name: '"
+                << "attribute 'package' in <manifest> tag is not a valid Java package name: '"
                 << attr->value << "'");
     return false;
+  }
+
+  attr = el->FindAttribute({}, "split");
+  if (attr) {
+    if (!util::IsJavaPackageName(attr->value)) {
+      diag->Error(DiagMessage(el->line_number) << "attribute 'split' in <manifest> tag is not a "
+                                                  "valid split name");
+      return false;
+    }
   }
   return true;
 }
 
-/**
- * The coreApp attribute in <manifest> is not a regular AAPT attribute, so type
- * checking on it is manual.
- */
+// The coreApp attribute in <manifest> is not a regular AAPT attribute, so type
+// checking on it is manual.
 static bool FixCoreAppAttribute(xml::Element* el, SourcePathDiagnostics* diag) {
   if (xml::Attribute* attr = el->FindAttribute("", "coreApp")) {
-    std::unique_ptr<BinaryPrimitive> result =
-        ResourceUtils::TryParseBool(attr->value);
+    std::unique_ptr<BinaryPrimitive> result = ResourceUtils::TryParseBool(attr->value);
     if (!result) {
-      diag->Error(DiagMessage(el->line_number)
-                  << "attribute coreApp must be a boolean");
+      diag->Error(DiagMessage(el->line_number) << "attribute coreApp must be a boolean");
       return false;
     }
     attr->compiled_value = std::move(result);
@@ -172,8 +202,7 @@ bool ManifestFixer::BuildRules(xml::XmlActionExecutor* executor,
   }
 
   if (options_.rename_instrumentation_target_package) {
-    if (!util::IsJavaPackageName(
-            options_.rename_instrumentation_target_package.value())) {
+    if (!util::IsJavaPackageName(options_.rename_instrumentation_target_package.value())) {
       diag->Error(DiagMessage()
                   << "invalid instrumentation target package override '"
                   << options_.rename_instrumentation_target_package.value()
@@ -203,6 +232,7 @@ bool ManifestFixer::BuildRules(xml::XmlActionExecutor* executor,
 
   // Manifest actions.
   xml::XmlNodeAction& manifest_action = (*executor)["manifest"];
+  manifest_action.Action(AutoGenerateIsFeatureSplit);
   manifest_action.Action(VerifyManifest);
   manifest_action.Action(FixCoreAppAttribute);
   manifest_action.Action([&](xml::Element* el) -> bool {
@@ -276,6 +306,7 @@ bool ManifestFixer::BuildRules(xml::XmlActionExecutor* executor,
   manifest_action["compatible-screens"]["screen"];
   manifest_action["supports-gl-texture"];
   manifest_action["meta-data"] = meta_data_action;
+  manifest_action["uses-split"].Action(RequiredNameIsJavaPackage);
 
   // Application actions.
   xml::XmlNodeAction& application_action = manifest_action["application"];
@@ -311,15 +342,13 @@ class FullyQualifiedClassNameVisitor : public xml::Visitor {
  public:
   using xml::Visitor::Visit;
 
-  explicit FullyQualifiedClassNameVisitor(const StringPiece& package)
-      : package_(package) {}
+  explicit FullyQualifiedClassNameVisitor(const StringPiece& package) : package_(package) {}
 
   void Visit(xml::Element* el) override {
     for (xml::Attribute& attr : el->attributes) {
       if (attr.namespace_uri == xml::kSchemaAndroid &&
           class_attributes_.find(attr.name) != class_attributes_.end()) {
-        if (Maybe<std::string> new_value =
-                util::GetFullyQualifiedClassName(package_, attr.value)) {
+        if (Maybe<std::string> new_value = util::GetFullyQualifiedClassName(package_, attr.value)) {
           attr.value = std::move(new_value.value());
         }
       }
@@ -334,8 +363,7 @@ class FullyQualifiedClassNameVisitor : public xml::Visitor {
   std::unordered_set<StringPiece> class_attributes_ = {"name"};
 };
 
-static bool RenameManifestPackage(const StringPiece& package_override,
-                                  xml::Element* manifest_el) {
+static bool RenameManifestPackage(const StringPiece& package_override, xml::Element* manifest_el) {
   xml::Attribute* attr = manifest_el->FindAttribute({}, "package");
 
   // We've already verified that the manifest element is present, with a package
@@ -358,8 +386,7 @@ bool ManifestFixer::Consume(IAaptContext* context, xml::XmlResource* doc) {
     return false;
   }
 
-  if ((options_.min_sdk_version_default ||
-       options_.target_sdk_version_default) &&
+  if ((options_.min_sdk_version_default || options_.target_sdk_version_default) &&
       root->FindChild({}, "uses-sdk") == nullptr) {
     // Auto insert a <uses-sdk> element. This must be inserted before the
     // <application> tag. The device runtime PackageParser will make SDK version
@@ -374,8 +401,7 @@ bool ManifestFixer::Consume(IAaptContext* context, xml::XmlResource* doc) {
     return false;
   }
 
-  if (!executor.Execute(xml::XmlActionExecutorPolicy::kWhitelist,
-                        context->GetDiagnostics(), doc)) {
+  if (!executor.Execute(xml::XmlActionExecutorPolicy::kWhitelist, context->GetDiagnostics(), doc)) {
     return false;
   }
 
@@ -383,8 +409,7 @@ bool ManifestFixer::Consume(IAaptContext* context, xml::XmlResource* doc) {
     // Rename manifest package outside of the XmlActionExecutor.
     // We need to extract the old package name and FullyQualify all class
     // names.
-    if (!RenameManifestPackage(options_.rename_manifest_package.value(),
-                               root)) {
+    if (!RenameManifestPackage(options_.rename_manifest_package.value(), root)) {
       return false;
     }
   }
