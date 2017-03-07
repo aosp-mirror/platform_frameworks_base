@@ -1715,6 +1715,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
 
     @Override
     public boolean isContentExpandable() {
+        if (mIsSummaryWithChildren && !mShowingPublic) {
+            return true;
+        }
         NotificationContentView showingLayout = getShowingLayout();
         return showingLayout.isContentExpandable();
     }
@@ -1982,6 +1985,26 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         if (canViewBeDismissed()) {
             info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_DISMISS);
         }
+        boolean expandable = mShowingPublic;
+        boolean isExpanded = false;
+        if (!expandable) {
+            if (mIsSummaryWithChildren) {
+                expandable = true;
+                if (!mIsLowPriority || isExpanded()) {
+                    isExpanded = isGroupExpanded();
+                }
+            } else {
+                expandable = mPrivateLayout.isContentExpandable();
+                isExpanded = isExpanded();
+            }
+        }
+        if (expandable) {
+            if (isExpanded) {
+                info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_COLLAPSE);
+            } else {
+                info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_EXPAND);
+            }
+        }
     }
 
     @Override
@@ -1993,6 +2016,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
             case AccessibilityNodeInfo.ACTION_DISMISS:
                 NotificationStackScrollLayout.performDismiss(this, mGroupManager,
                         true /* fromAccessibility */);
+                return true;
+            case AccessibilityNodeInfo.ACTION_COLLAPSE:
+            case AccessibilityNodeInfo.ACTION_EXPAND:
+                mExpandClickListener.onClick(this);
                 return true;
         }
         return false;

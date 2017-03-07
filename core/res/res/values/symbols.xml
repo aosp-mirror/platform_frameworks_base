@@ -2888,6 +2888,9 @@
   <java-symbol type="style" name="Widget.LockPatternView" />
   <java-symbol type="attr" name="lockPatternStyle" />
 
+  <java-symbol type="string" name="expand_button_content_description_collapsed" />
+  <java-symbol type="string" name="expand_button_content_description_expanded" />
+
   <!-- Colon separated list of package names that should be granted Notification Listener access -->
   <java-symbol type="string" name="config_defaultListenerAccessPackages" />
 
