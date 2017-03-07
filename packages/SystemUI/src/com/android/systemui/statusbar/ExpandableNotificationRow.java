@@ -927,12 +927,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         if (areGutsExposed()) {
             return false;
         }
-        if (mIsSummaryWithChildren) {
-            return true;
-        }
-        NotificationContentView showingLayout = getShowingLayout();
-        NotificationHeaderView notificationHeader = showingLayout.getVisibleNotificationHeader();
-        return notificationHeader != null;
+        return getVisibleNotificationHeader() != null;
     }
 
     /**
