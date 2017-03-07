@@ -532,6 +532,9 @@ interface ITelephony {
     // Send the special dialer code. The IPC caller must be the current default dialer.
     boolean sendDialerCode(String callingPackageName, String inputCode);
 
+    // Send the special dialer code. The IPC caller must be the current default dialer.
+    void sendDialerSpecialCode(String callingPackageName, String inputCode);
+
     /**
      * Returns the network type for data transmission
      * Legacy call, permission-free
