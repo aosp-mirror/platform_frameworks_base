@@ -17,6 +17,8 @@
 package com.android.server.storage;
 
 import android.annotation.NonNull;
+import android.app.usage.StorageStats;
+import android.app.usage.StorageStatsManager;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageStatsObserver;
@@ -64,7 +66,8 @@ public class AppCollector {
         mBackgroundHandler = new BackgroundHandler(BackgroundThread.get().getLooper(),
                 volume,
                 context.getPackageManager(),
-                (UserManager) context.getSystemService(Context.USER_SERVICE));
+                (UserManager) context.getSystemService(Context.USER_SERVICE),
+                (StorageStatsManager) context.getSystemService(Context.STORAGE_STATS_SERVICE));
     }
 
     /**
@@ -93,39 +96,20 @@ public class AppCollector {
         return value;
     }
 
-    private class StatsObserver extends IPackageStatsObserver.Stub {
-        private AtomicInteger mCount;
-        private final ArrayList<PackageStats> mPackageStats;
-
-        public StatsObserver(int count) {
-            mCount = new AtomicInteger(count);
-            mPackageStats = new ArrayList<>(count);
-        }
-
-        @Override
-        public void onGetStatsCompleted(PackageStats packageStats, boolean succeeded)
-                throws RemoteException {
-            if (succeeded) {
-                mPackageStats.add(packageStats);
-            }
-
-            if (mCount.decrementAndGet() == 0) {
-                mStats.complete(mPackageStats);
-            }
-        }
-    }
-
     private class BackgroundHandler extends Handler {
         static final int MSG_START_LOADING_SIZES = 0;
         private final VolumeInfo mVolume;
         private final PackageManager mPm;
         private final UserManager mUm;
+        private final StorageStatsManager mStorageStatsManager;
 
-        BackgroundHandler(Looper looper, @NonNull VolumeInfo volume, PackageManager pm, UserManager um) {
+        BackgroundHandler(Looper looper, @NonNull VolumeInfo volume,
+                PackageManager pm, UserManager um, StorageStatsManager storageStatsManager) {
             super(looper);
             mVolume = volume;
             mPm = pm;
             mUm = um;
+            mStorageStatsManager = storageStatsManager;
         }
 
         @Override
@@ -149,14 +133,20 @@ public class AppCollector {
                         mStats.complete(new ArrayList<>());
                     }
 
-                    // Kick off the async package size query for all apps.
-                    final StatsObserver observer = new StatsObserver(count);
+                    List<PackageStats> stats = new ArrayList<>();
                     for (UserInfo user : users) {
                         for (ApplicationInfo app : volumeApps) {
-                            mPm.getPackageSizeInfoAsUser(app.packageName, user.id,
-                                    observer);
+                            PackageStats packageStats = new PackageStats(app.packageName, user.id);
+                            StorageStats storageStats = mStorageStatsManager.queryStatsForPackage(
+                                    app.volumeUuid, app.packageName, user.getUserHandle());
+                            packageStats.cacheSize = storageStats.getCacheBytes();
+                            packageStats.codeSize = storageStats.getCodeBytes();
+                            packageStats.dataSize = storageStats.getDataBytes();
+                            stats.add(packageStats);
                         }
                     }
+
+                    mStats.complete(stats);
                 }
             }
         }

@@ -16,12 +16,15 @@
 
 package com.android.server.storage;
 
+import android.app.usage.StorageStats;
+import android.app.usage.StorageStatsManager;
 import android.content.pm.UserInfo;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageStatsObserver;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageStats;
+import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.VolumeInfo;
 import android.test.AndroidTestCase;
@@ -53,6 +56,7 @@ public class AppCollectorTest extends AndroidTestCase {
     @Mock private Context mContext;
     @Mock private PackageManager mPm;
     @Mock private UserManager mUm;
+    @Mock private StorageStatsManager mSsm;
     private List<ApplicationInfo> mApps;
     private List<UserInfo> mUsers;
 
@@ -63,6 +67,7 @@ public class AppCollectorTest extends AndroidTestCase {
         mApps = new ArrayList<>();
         when(mContext.getPackageManager()).thenReturn(mPm);
         when(mContext.getSystemService(Context.USER_SERVICE)).thenReturn(mUm);
+        when(mContext.getSystemService(Context.STORAGE_STATS_SERVICE)).thenReturn(mSsm);
 
         // Set up the app list.
         when(mPm.getInstalledApplications(anyInt())).thenReturn(mApps);
@@ -100,39 +105,9 @@ public class AppCollectorTest extends AndroidTestCase {
         AppCollector collector = new AppCollector(mContext, volume);
         PackageStats stats = new PackageStats("com.test.app");
 
-        // Set up this to handle the asynchronous call to the PackageManager. This returns the
-        // package info for the specified package.
-        doAnswer(new Answer<Void>() {
-             @Override
-             public Void answer(InvocationOnMock invocation) {
-                 try {
-                     ((IPackageStatsObserver.Stub) invocation.getArguments()[2])
-                             .onGetStatsCompleted(stats, true);
-                 } catch (Exception e) {
-                     // We fail instead of just letting the exception fly because throwing
-                     // out of the callback like this on the background thread causes the test
-                     // runner to crash, rather than reporting the failure.
-                     fail();
-                 }
-                 return null;
-             }
-        }).when(mPm).getPackageSizeInfoAsUser(eq("com.test.app"), eq(0), any());
-
-
-        // Because getPackageStats is a blocking call, we block execution of the test until the
-        // call finishes. In order to finish the call, we need the above answer to execute.
-        List<PackageStats> myStats = new ArrayList<>();
-        CountDownLatch latch = new CountDownLatch(1);
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                myStats.addAll(collector.getPackageStats(TIMEOUT));
-                latch.countDown();
-            }
-        }).start();
-        latch.await();
-
-        assertThat(myStats).containsExactly(stats);
+        when(mSsm.queryStatsForPackage(eq("testuuid"),
+                eq("com.test.app"), eq(UserHandle.of(0)))).thenReturn(new StorageStats());
+        assertThat(collector.getPackageStats(TIMEOUT)).containsExactly(stats);
     }
 
     @Test
@@ -151,43 +126,11 @@ public class AppCollectorTest extends AndroidTestCase {
         PackageStats otherStats = new PackageStats("com.test.app");
         otherStats.userHandle = 1;
 
-        // Set up this to handle the asynchronous call to the PackageManager. This returns the
-        // package info for our packages.
-        doAnswer(new Answer<Void>() {
-             @Override
-             public Void answer(InvocationOnMock invocation) {
-                 try {
-                     ((IPackageStatsObserver.Stub) invocation.getArguments()[2])
-                             .onGetStatsCompleted(stats, true);
-
-                     // Now callback for the other uid.
-                     ((IPackageStatsObserver.Stub) invocation.getArguments()[2])
-                             .onGetStatsCompleted(otherStats, true);
-                 } catch (Exception e) {
-                     // We fail instead of just letting the exception fly because throwing
-                     // out of the callback like this on the background thread causes the test
-                     // runner to crash, rather than reporting the failure.
-                     fail();
-                 }
-                 return null;
-             }
-        }).when(mPm).getPackageSizeInfoAsUser(eq("com.test.app"), eq(0), any());
-
-
-        // Because getPackageStats is a blocking call, we block execution of the test until the
-        // call finishes. In order to finish the call, we need the above answer to execute.
-        List<PackageStats> myStats = new ArrayList<>();
-        CountDownLatch latch = new CountDownLatch(1);
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                myStats.addAll(collector.getPackageStats(TIMEOUT));
-                latch.countDown();
-            }
-        }).start();
-        latch.await();
-
-        assertThat(myStats).containsAllOf(stats, otherStats);
+        when(mSsm.queryStatsForPackage(eq("testuuid"),
+                eq("com.test.app"), eq(UserHandle.of(0)))).thenReturn(new StorageStats());
+        when(mSsm.queryStatsForPackage(eq("testuuid"),
+                eq("com.test.app"), eq(UserHandle.of(1)))).thenReturn(new StorageStats());
+        assertThat(collector.getPackageStats(TIMEOUT)).containsExactly(stats, otherStats);
     }
 
     @Test(expected=NullPointerException.class)
