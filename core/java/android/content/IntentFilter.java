@@ -16,6 +16,7 @@
 
 package android.content;
 
+import android.annotation.SystemApi;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -138,6 +139,7 @@ import java.util.Set;
  * will only match an Intent that does not have any categories.
  */
 public class IntentFilter implements Parcelable {
+    private static final String AGLOB_STR = "aglob";
     private static final String SGLOB_STR = "sglob";
     private static final String PREFIX_STR = "prefix";
     private static final String LITERAL_STR = "literal";
@@ -482,11 +484,13 @@ public class IntentFilter implements Parcelable {
     }
 
     /** @hide */
+    @SystemApi
     public final void setOrder(int order) {
         mOrder = order;
     }
 
     /** @hide */
+    @SystemApi
     public final int getOrder() {
         return mOrder;
     }
@@ -1594,6 +1598,9 @@ public class IntentFilter implements Parcelable {
                 case PatternMatcher.PATTERN_SIMPLE_GLOB:
                     serializer.attribute(null, SGLOB_STR, pe.getPath());
                     break;
+                case PatternMatcher.PATTERN_ADVANCED_GLOB:
+                    serializer.attribute(null, AGLOB_STR, pe.getPath());
+                    break;
             }
             serializer.endTag(null, SSP_STR);
         }
@@ -1620,6 +1627,9 @@ public class IntentFilter implements Parcelable {
                     break;
                 case PatternMatcher.PATTERN_SIMPLE_GLOB:
                     serializer.attribute(null, SGLOB_STR, pe.getPath());
+                    break;
+                case PatternMatcher.PATTERN_ADVANCED_GLOB:
+                    serializer.attribute(null, AGLOB_STR, pe.getPath());
                     break;
             }
             serializer.endTag(null, PATH_STR);
@@ -1673,6 +1683,8 @@ public class IntentFilter implements Parcelable {
                     addDataSchemeSpecificPart(ssp, PatternMatcher.PATTERN_PREFIX);
                 } else if ((ssp=parser.getAttributeValue(null, SGLOB_STR)) != null) {
                     addDataSchemeSpecificPart(ssp, PatternMatcher.PATTERN_SIMPLE_GLOB);
+                } else if ((ssp=parser.getAttributeValue(null, AGLOB_STR)) != null) {
+                    addDataSchemeSpecificPart(ssp, PatternMatcher.PATTERN_ADVANCED_GLOB);
                 }
             } else if (tagName.equals(AUTH_STR)) {
                 String host = parser.getAttributeValue(null, HOST_STR);
@@ -1688,6 +1700,8 @@ public class IntentFilter implements Parcelable {
                     addDataPath(path, PatternMatcher.PATTERN_PREFIX);
                 } else if ((path=parser.getAttributeValue(null, SGLOB_STR)) != null) {
                     addDataPath(path, PatternMatcher.PATTERN_SIMPLE_GLOB);
+                } else if ((path=parser.getAttributeValue(null, AGLOB_STR)) != null) {
+                    addDataPath(path, PatternMatcher.PATTERN_ADVANCED_GLOB);
                 }
             } else {
                 Log.w("IntentFilter", "Unknown tag parsing IntentFilter: " + tagName);

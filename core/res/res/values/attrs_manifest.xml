@@ -1891,6 +1891,7 @@
         <attr name="path" />
         <attr name="pathPrefix" />
         <attr name="pathPattern" />
+        <attr name="pathAdvancedPattern" />
         <attr name="permission" />
         <attr name="readPermission" />
         <attr name="writePermission" />
@@ -2280,6 +2281,17 @@
              "\\\\".  This is basically the same as what you would need to
              write if constructing the string in Java code. -->
         <attr name="pathPattern" />
+        <!-- Specify a URI path that matches an advanced pattern, as per
+             {@link android.content.IntentFilter#addDataPath
+             IntentFilter.addDataPath()} with
+             {@link android.os.PatternMatcher#PATTERN_ADVANCED_GLOB}.
+             Note that because '\' is used as an escape character when
+             reading the string from XML (before it is parsed as a pattern),
+             you will need to double-escape: for example a literal "*" would
+             be written as "\\*" and a literal "\" would be written as
+             "\\\\".  This is basically the same as what you would need to
+             write if constructing the string in Java code. -->
+        <attr name="pathAdvancedPattern" />
     </declare-styleable>
 
     <!-- Attributes that can be supplied in an AndroidManifest.xml

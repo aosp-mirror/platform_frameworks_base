@@ -133,6 +133,7 @@ public abstract class PackageManager {
             MATCH_SYSTEM_ONLY,
             MATCH_FACTORY_ONLY,
             MATCH_DEBUG_TRIAGED_MISSING,
+            MATCH_INSTANT,
             GET_DISABLED_COMPONENTS,
             GET_DISABLED_UNTIL_USED_COMPONENTS,
             GET_UNINSTALLED_PACKAGES,
@@ -148,6 +149,7 @@ public abstract class PackageManager {
             MATCH_SYSTEM_ONLY,
             MATCH_DEBUG_TRIAGED_MISSING,
             MATCH_DISABLED_UNTIL_USED_COMPONENTS,
+            MATCH_INSTANT,
             GET_DISABLED_UNTIL_USED_COMPONENTS,
             GET_UNINSTALLED_PACKAGES,
     })
@@ -167,6 +169,7 @@ public abstract class PackageManager {
             MATCH_DIRECT_BOOT_UNAWARE,
             MATCH_SYSTEM_ONLY,
             MATCH_UNINSTALLED_PACKAGES,
+            MATCH_INSTANT,
             GET_DISABLED_COMPONENTS,
             GET_DISABLED_UNTIL_USED_COMPONENTS,
             GET_UNINSTALLED_PACKAGES,
@@ -188,6 +191,7 @@ public abstract class PackageManager {
             MATCH_DIRECT_BOOT_UNAWARE,
             MATCH_SYSTEM_ONLY,
             MATCH_UNINSTALLED_PACKAGES,
+            MATCH_INSTANT,
             GET_DISABLED_COMPONENTS,
             GET_DISABLED_UNTIL_USED_COMPONENTS,
             GET_UNINSTALLED_PACKAGES,
@@ -444,6 +448,7 @@ public abstract class PackageManager {
      * instant app. By default, instant app components are not matched.
      * @hide
      */
+    @SystemApi
     public static final int MATCH_INSTANT = 0x00800000;
 
     /**
@@ -3739,6 +3744,7 @@ public abstract class PackageManager {
      *
      * @hide
      */
+    @SystemApi
     @RequiresPermission(Manifest.permission.ACCESS_INSTANT_APPS)
     public abstract @NonNull List<InstantAppInfo> getInstantApps();
 
@@ -3749,6 +3755,7 @@ public abstract class PackageManager {
      *
      * @hide
      */
+    @SystemApi
     @RequiresPermission(Manifest.permission.ACCESS_INSTANT_APPS)
     public abstract @Nullable Drawable getInstantAppIcon(String packageName);
 
