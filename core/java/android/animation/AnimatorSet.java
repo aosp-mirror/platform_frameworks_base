@@ -714,8 +714,8 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
         mReversing = inReverse;
 
         // Now that all dependencies are set up, start the animations that should be started.
-        boolean isZeroDuration = ValueAnimator.getDurationScale() == 0f || isEmptySet(this);
-        if (!isZeroDuration) {
+        boolean isEmptySet = isEmptySet(this);
+        if (!isEmptySet) {
             startAnimation();
         }
 
@@ -727,7 +727,7 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
                 tmpListeners.get(i).onAnimationStart(this, inReverse);
             }
         }
-        if (isZeroDuration) {
+        if (isEmptySet) {
             // In the case of empty AnimatorSet, or 0 duration scale, we will trigger the
             // onAnimationEnd() right away.
             forceToEnd();
@@ -979,7 +979,7 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
     public boolean doAnimationFrame(long frameTime) {
         float durationScale = ValueAnimator.getDurationScale();
         if (durationScale == 0f) {
-            // Duration scale changed to 0 amid animation, end the animation right away.
+            // Duration scale is 0, end the animation right away.
             forceToEnd();
             return true;
         }
