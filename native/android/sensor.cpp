@@ -22,9 +22,9 @@
 #include <android/sensor.h>
 #include <android/sharedmem.h>
 #include <cutils/native_handle.h>
-#include <gui/Sensor.h>
-#include <gui/SensorManager.h>
-#include <gui/SensorEventQueue.h>
+#include <sensor/Sensor.h>
+#include <sensor/SensorManager.h>
+#include <sensor/SensorEventQueue.h>
 #include <utils/Looper.h>
 #include <utils/RefBase.h>
 #include <utils/Timers.h>

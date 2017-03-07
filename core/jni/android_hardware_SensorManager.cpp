@@ -23,9 +23,9 @@
 #include <ScopedUtfChars.h>
 #include <ScopedLocalRef.h>
 #include <android_runtime/AndroidRuntime.h>
-#include <gui/Sensor.h>
-#include <gui/SensorEventQueue.h>
-#include <gui/SensorManager.h>
+#include <sensor/Sensor.h>
+#include <sensor/SensorEventQueue.h>
+#include <sensor/SensorManager.h>
 #include <cutils/native_handle.h>
 #include <utils/Log.h>
 #include <utils/Looper.h>
