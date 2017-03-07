@@ -208,6 +208,13 @@ public final class Phone {
         }
     }
 
+    final void internalOnRttInitiationFailure(String callId, int reason) {
+        Call call = mCallByTelecomCallId.get(callId);
+        if (call != null) {
+            call.internalOnRttInitiationFailure(reason);
+        }
+    }
+
     /**
      * Called to destroy the phone and cleanup any lingering calls.
      */
