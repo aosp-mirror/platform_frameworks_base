@@ -40,6 +40,7 @@ import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.util.Xml;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -75,12 +76,11 @@ import java.util.List;
  * however vary; currently there are two major approaches it may take:
  *
  * <ul>
- * <li>On a small screen it may display only the headers as a single list
- * when first launched.  Selecting one of the header items will re-launch
- * the activity with it only showing the PreferenceFragment of that header.
- * <li>On a large screen in may display both the headers and current
- * PreferenceFragment together as panes.  Selecting a header item switches
- * to showing the correct PreferenceFragment for that item.
+ * <li>On a small screen it may display only the headers as a single list when first launched.
+ * Selecting one of the header items will only show the PreferenceFragment of that header (on
+ * Android N and lower a new Activity is launched).
+ * <li>On a large screen in may display both the headers and current PreferenceFragment together as
+ * panes. Selecting a header item switches to showing the correct PreferenceFragment for that item.
  * </ul>
  *
  * <p>Subclasses of PreferenceActivity should implement
@@ -537,6 +537,16 @@ public abstract class PreferenceActivity extends ListActivity implements
                 return new Header[size];
             }
         };
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            // Override home navigation button to call onBackPressed (b/35152749).
+            onBackPressed();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
