@@ -2770,7 +2770,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 // while pausing because that changes the focused stack and may prevent the new
                 // starting activity from resuming.
                 if (moveHomeStackToFront && task.getTaskToReturnTo() == HOME_ACTIVITY_TYPE
-                        && !r.supportsPictureInPictureWhilePausing) {
+                        && (r.state == RESUMED || !r.supportsPictureInPictureWhilePausing)) {
                     // Move the home stack forward if the task we just moved to the pinned stack
                     // was launched from home so home should be visible behind it.
                     moveHomeStackToFront(reason);
