@@ -778,9 +778,9 @@ public final class NotificationRecord {
                     .addTaggedData(MetricsEvent.NOTIFICATION_TAG, sbn.getTag());
         }
         return mLogMaker
-                .setCategory(MetricsEvent.VIEW_UNKNOWN)
-                .setType(MetricsEvent.TYPE_UNKNOWN)
-                .setSubtype(0)
+                .clearCategory()
+                .clearType()
+                .clearSubtype()
                 .clearTaggedData(MetricsEvent.NOTIFICATION_SHADE_INDEX)
                 .addTaggedData(MetricsEvent.NOTIFICATION_SINCE_CREATE_MILLIS, getLifespanMs(now))
                 .addTaggedData(MetricsEvent.NOTIFICATION_SINCE_UPDATE_MILLIS, getFreshnessMs(now))
