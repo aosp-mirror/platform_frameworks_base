@@ -2747,6 +2747,9 @@ public final class ActivityStackSupervisor implements DisplayListener {
             }
         }
         checkReadyForSleepLocked();
+        if (mGoingToSleep.isHeld()) {
+            mGoingToSleep.release();
+        }
     }
 
     boolean shutdownLocked(int timeout) {
@@ -2856,9 +2859,6 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
         removeSleepTimeouts();
 
-        if (mGoingToSleep.isHeld()) {
-            mGoingToSleep.release();
-        }
         if (mService.mShuttingDown) {
             mService.notifyAll();
         }
