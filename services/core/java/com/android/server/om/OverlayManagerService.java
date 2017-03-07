@@ -53,9 +53,11 @@ import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.SparseArray;
 
+import com.android.internal.util.ConcurrentUtils;
 import com.android.server.FgThread;
 import com.android.server.IoThread;
 import com.android.server.LocalServices;
+import com.android.server.SystemServerInitThreadPool;
 import com.android.server.SystemService;
 import com.android.server.pm.Installer;
 import com.android.server.pm.UserManagerService;
@@ -74,6 +76,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -219,6 +222,8 @@ public final class OverlayManagerService extends SystemService {
 
     private final AtomicBoolean mPersistSettingsScheduled = new AtomicBoolean(false);
 
+    private Future<?> mInitCompleteSignal;
+
     public OverlayManagerService(@NonNull final Context context,
             @NonNull final Installer installer) {
         super(context);
@@ -230,33 +235,43 @@ public final class OverlayManagerService extends SystemService {
         mSettings = new OverlayManagerSettings();
         mImpl = new OverlayManagerServiceImpl(mPackageManager, im, mSettings,
                 getDefaultOverlayPackages());
+        mInitCompleteSignal = SystemServerInitThreadPool.get().submit(() -> {
+            final IntentFilter packageFilter = new IntentFilter();
+            packageFilter.addAction(ACTION_PACKAGE_ADDED);
+            packageFilter.addAction(ACTION_PACKAGE_CHANGED);
+            packageFilter.addAction(ACTION_PACKAGE_REMOVED);
+            packageFilter.addDataScheme("package");
+            getContext().registerReceiverAsUser(new PackageReceiver(), UserHandle.ALL,
+                    packageFilter, null, null);
 
-        final IntentFilter packageFilter = new IntentFilter();
-        packageFilter.addAction(ACTION_PACKAGE_ADDED);
-        packageFilter.addAction(ACTION_PACKAGE_CHANGED);
-        packageFilter.addAction(ACTION_PACKAGE_REMOVED);
-        packageFilter.addDataScheme("package");
-        getContext().registerReceiverAsUser(new PackageReceiver(), UserHandle.ALL,
-                packageFilter, null, null);
+            final IntentFilter userFilter = new IntentFilter();
+            userFilter.addAction(ACTION_USER_REMOVED);
+            getContext().registerReceiverAsUser(new UserReceiver(), UserHandle.ALL,
+                    userFilter, null, null);
 
-        final IntentFilter userFilter = new IntentFilter();
-        userFilter.addAction(ACTION_USER_REMOVED);
-        getContext().registerReceiverAsUser(new UserReceiver(), UserHandle.ALL,
-                userFilter, null, null);
+            restoreSettings();
+            onSwitchUser(UserHandle.USER_SYSTEM);
+            schedulePersistSettings();
 
-        restoreSettings();
-        onSwitchUser(UserHandle.USER_SYSTEM);
-        schedulePersistSettings();
+            mSettings.addChangeListener(new OverlayChangeListener());
 
-        mSettings.addChangeListener(new OverlayChangeListener());
-
-        publishBinderService(Context.OVERLAY_SERVICE, mService);
-        publishLocalService(OverlayManagerService.class, this);
+            publishBinderService(Context.OVERLAY_SERVICE, mService);
+            publishLocalService(OverlayManagerService.class, this);
+        }, "Init OverlayManagerService");
     }
 
     @Override
     public void onStart() {
         // Intentionally left empty.
+    }
+
+    @Override
+    public void onBootPhase(int phase) {
+        if (phase == PHASE_SYSTEM_SERVICES_READY) {
+            ConcurrentUtils.waitForFutureNoInterrupt(mInitCompleteSignal,
+                    "Wait for OverlayManagerService init");
+            mInitCompleteSignal = null;
+        }
     }
 
     @Override
