@@ -3336,7 +3336,7 @@
          {@link android.accessibilityservice.AccessibilityService#SERVICE_META_DATA}
          meta-data entry. -->
     <declare-styleable name="AccessibilityService">
-        <!-- The event types this serivce would like to receive as specified in
+        <!-- The event types this service would like to receive as specified in
              {@link android.view.accessibility.AccessibilityEvent}. This setting
              can be changed at runtime by calling
              {@link android.accessibilityservice.AccessibilityService#setServiceInfo(android.accessibilityservice.AccessibilityServiceInfo)
@@ -3395,11 +3395,11 @@
             <!-- Receives {@link android.view.accessibility.AccessibilityEvent#TYPES_ALL_MASK} i.e. all events. -->
             <flag name="typeAllMask" value="0xffffffff" />
         </attr>
-        <!-- Comma separated package names from which this serivce would like to receive events (leave out for all packages).
+        <!-- Comma separated package names from which this service would like to receive events (leave out for all packages).
              {@link android.accessibilityservice.AccessibilityService#setServiceInfo(android.accessibilityservice.AccessibilityServiceInfo)
              android.accessibilityservice.AccessibilityService.setServiceInfo(android.accessibilityservice.AccessibilityServiceInfo)}. -->
         <attr name="packageNames" format="string" />
-        <!-- The feedback types this serivce provides as specified in
+        <!-- The feedback types this service provides as specified in
              {@link android.accessibilityservice.AccessibilityServiceInfo}. This setting
              can be changed at runtime by calling
              {@link android.accessibilityservice.AccessibilityService#setServiceInfo(android.accessibilityservice.AccessibilityServiceInfo)
@@ -3419,7 +3419,7 @@
             <flag name="feedbackAllMask" value="0xffffffff" />
         </attr>
         <!-- The minimal period in milliseconds between two accessibility events of the same type
-             are sent to this serivce. This setting can be changed at runtime by calling
+             are sent to this service. This setting can be changed at runtime by calling
              {@link android.accessibilityservice.AccessibilityService#setServiceInfo(android.accessibilityservice.AccessibilityServiceInfo)
              android.accessibilityservice.AccessibilityService.setServiceInfo(android.accessibilityservice.AccessibilityServiceInfo)}. -->
         <attr name="notificationTimeout" format="integer" />
@@ -3498,6 +3498,8 @@
         <attr name="canCaptureFingerprintGestures" format="boolean" />
         <!-- Short description of the accessibility service purpose or behavior.-->
         <attr name="description" />
+        <!-- Brief summary of the accessibility service purpose or behavior. -->
+        <attr name="summary" />
     </declare-styleable>
 
     <!-- Use <code>print-service</code> as the root tag of the XML resource that
