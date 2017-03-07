@@ -2212,6 +2212,12 @@ public class LockSettingsService extends ILockSettings.Stub {
             if (!dpm.isDeviceProvisioned()) {
                 return;
             }
+
+            // Escrow tokens are enabled on automotive builds.
+            if (mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE)) {
+                return;
+            }
+
             // Disable escrow token permanently on all other device/user types.
             Slog.i(TAG, "Disabling escrow token on user " + userId);
             if (isSyntheticPasswordBasedCredentialLocked(userId)) {
