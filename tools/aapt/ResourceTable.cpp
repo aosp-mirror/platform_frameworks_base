@@ -4764,6 +4764,7 @@ status_t ResourceTable::modifyForCompat(const Bundle* bundle,
                                         const sp<XMLNode>& root) {
     const String16 vector16("vector");
     const String16 animatedVector16("animated-vector");
+    const String16 pathInterpolator16("pathInterpolator");
 
     const int minSdk = getMinSdkVersion(bundle);
     if (minSdk >= SDK_LOLLIPOP_MR1) {
@@ -4789,7 +4790,8 @@ status_t ResourceTable::modifyForCompat(const Bundle* bundle,
         nodesToVisit.pop();
 
         if (bundle->getNoVersionVectors() && (node->getElementName() == vector16 ||
-                    node->getElementName() == animatedVector16)) {
+                    node->getElementName() == animatedVector16 ||
+                    node->getElementName() == pathInterpolator16)) {
             // We were told not to version vector tags, so skip the children here.
             continue;
         }
