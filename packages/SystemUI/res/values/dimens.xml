@@ -731,6 +731,13 @@
     <!-- The size of the PIP drag-to-dismiss target. -->
     <dimen name="pip_dismiss_target_size">48dp</dimen>
 
+    <!-- The shortest-edge size of the expanded PiP. -->
+    <dimen name="pip_expanded_shortest_edge_size">160dp</dimen>
+
+    <!-- The padding between actions in the PiP in landscape  Note that the PiP does not reflect
+         the configuration of the device, so we can't use -land resources. -->
+    <dimen name="pip_between_action_padding_land">8dp</dimen>
+
     <dimen name="default_gear_space">18dp</dimen>
     <dimen name="cell_overlay_padding">18dp</dimen>
 

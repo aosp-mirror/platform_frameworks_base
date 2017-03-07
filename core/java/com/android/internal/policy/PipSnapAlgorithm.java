@@ -18,9 +18,11 @@ package com.android.internal.policy;
 
 import android.content.Context;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
+import android.util.Size;
 import android.view.Gravity;
 import android.view.ViewConfiguration;
 import android.widget.Scroller;
@@ -56,6 +58,10 @@ public class PipSnapAlgorithm {
     private final int mDefaultSnapMode = SNAP_MODE_CORNERS_AND_EDGES;
     private int mSnapMode = mDefaultSnapMode;
 
+    private final float mDefaultSizePercent;
+    private final float mMinAspectRatioForMinSize;
+    private final float mMaxAspectRatioForMinSize;
+
     private Scroller mScroller;
     private int mOrientation = Configuration.ORIENTATION_UNDEFINED;
 
@@ -63,9 +69,15 @@ public class PipSnapAlgorithm {
     private boolean mIsMinimized;
 
     public PipSnapAlgorithm(Context context) {
+        Resources res = context.getResources();
         mContext = context;
-        mMinimizedVisibleSize = context.getResources().getDimensionPixelSize(
+        mMinimizedVisibleSize = res.getDimensionPixelSize(
                 com.android.internal.R.dimen.pip_minimized_visible_size);
+        mDefaultSizePercent = res.getFloat(
+                com.android.internal.R.dimen.config_pictureInPictureDefaultSizePercent);
+        mMaxAspectRatioForMinSize = res.getFloat(
+                com.android.internal.R.dimen.config_pictureInPictureAspectRatioLimitForMinSize);
+        mMinAspectRatioForMinSize = 1f / mMaxAspectRatioForMinSize;
         onConfigurationChanged();
     }
 
@@ -239,6 +251,40 @@ public class PipSnapAlgorithm {
         movementBoundsOut.bottom = Math.max(insetBounds.top, insetBounds.bottom -
                 stackBounds.height());
         movementBoundsOut.bottom -= imeHeight;
+    }
+
+    /**
+     * @return the size of the PiP at the given {@param aspectRatio}, ensuring that the minimum edge
+     * is at least {@param minEdgeSize}.
+     */
+    public Size getSizeForAspectRatio(float aspectRatio, float minEdgeSize, int displayWidth,
+            int displayHeight) {
+        final int smallestDisplaySize = Math.min(displayWidth, displayHeight);
+        final int minSize = (int) Math.max(minEdgeSize, smallestDisplaySize * mDefaultSizePercent);
+
+        final int width;
+        final int height;
+        if (aspectRatio <= mMinAspectRatioForMinSize || aspectRatio > mMaxAspectRatioForMinSize) {
+            // Beyond these points, we can just use the min size as the shorter edge
+            if (aspectRatio <= 1) {
+                // Portrait, width is the minimum size
+                width = minSize;
+                height = Math.round(width / aspectRatio);
+            } else {
+                // Landscape, height is the minimum size
+                height = minSize;
+                width = Math.round(height * aspectRatio);
+            }
+        } else {
+            // Within these points, we ensure that the bounds fit within the radius of the limits
+            // at the points
+            final float widthAtMaxAspectRatioForMinSize = mMaxAspectRatioForMinSize * minSize;
+            final float radius = PointF.length(widthAtMaxAspectRatioForMinSize, minSize);
+            height = (int) Math.round(Math.sqrt((radius * radius) /
+                    (aspectRatio * aspectRatio + 1)));
+            width = Math.round(height * aspectRatio);
+        }
+        return new Size(width, height);
     }
 
     /**

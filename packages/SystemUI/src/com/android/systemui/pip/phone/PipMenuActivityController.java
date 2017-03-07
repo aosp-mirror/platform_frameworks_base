@@ -210,6 +210,21 @@ public class PipMenuActivityController {
     }
 
     /**
+     * Pokes the menu, indicating that the user is interacting with it.
+     */
+    public void pokeMenu() {
+        if (mToActivityMessenger != null) {
+            Message m = Message.obtain();
+            m.what = PipMenuActivity.MESSAGE_POKE_MENU;
+            try {
+                mToActivityMessenger.send(m);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Could not notify poke menu", e);
+            }
+        }
+    }
+
+    /**
      * Hides the menu activity.
      */
     public void hideMenu() {

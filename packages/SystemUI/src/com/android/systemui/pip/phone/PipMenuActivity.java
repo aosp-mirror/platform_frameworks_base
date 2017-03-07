@@ -40,8 +40,9 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.WindowManager.LayoutParams;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.TextView;
+import android.widget.LinearLayout;
 
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
@@ -57,8 +58,9 @@ public class PipMenuActivity extends Activity {
     private static final String TAG = "PipMenuActivity";
 
     public static final int MESSAGE_SHOW_MENU = 1;
-    public static final int MESSAGE_HIDE_MENU = 2;
-    public static final int MESSAGE_UPDATE_ACTIONS = 3;
+    public static final int MESSAGE_POKE_MENU = 2;
+    public static final int MESSAGE_HIDE_MENU = 3;
+    public static final int MESSAGE_UPDATE_ACTIONS = 4;
 
     private static final long INITIAL_DISMISS_DELAY = 2000;
     private static final long POST_INTERACTION_DISMISS_DELAY = 1500;
@@ -67,7 +69,9 @@ public class PipMenuActivity extends Activity {
     private boolean mMenuVisible;
     private final List<RemoteAction> mActions = new ArrayList<>();
     private View mMenuContainer;
+    private LinearLayout mActionsGroup;
     private View mDismissButton;
+    private int mBetweenActionPaddingLand;
 
     private ObjectAnimator mMenuContainerAnimator;
 
@@ -82,6 +86,9 @@ public class PipMenuActivity extends Activity {
             switch (msg.what) {
                 case MESSAGE_SHOW_MENU:
                     showMenu();
+                    break;
+                case MESSAGE_POKE_MENU:
+                    cancelDelayedFinish();
                     break;
                 case MESSAGE_HIDE_MENU:
                     hideMenu();
@@ -127,6 +134,9 @@ public class PipMenuActivity extends Activity {
         mDismissButton.setOnClickListener((v) -> {
             dismissPip();
         });
+        mActionsGroup = (LinearLayout) findViewById(R.id.actions_group);
+        mBetweenActionPaddingLand = getResources().getDimensionPixelSize(
+                R.dimen.pip_between_action_padding_land);
 
         notifyActivityCallback(mMessenger);
         showMenu();
@@ -260,26 +270,30 @@ public class PipMenuActivity extends Activity {
     }
 
     private void updateActionViews() {
+        ViewGroup expandContainer = (ViewGroup) findViewById(R.id.expand_container);
         ViewGroup actionsContainer = (ViewGroup) findViewById(R.id.actions_container);
         actionsContainer.setOnTouchListener((v, ev) -> {
             // Do nothing, prevent click through to parent
             return true;
         });
 
+        int actionsContainerHeight = 0;
         if (mActions.isEmpty()) {
             actionsContainer.setVisibility(View.INVISIBLE);
         } else {
             actionsContainer.setVisibility(View.VISIBLE);
-            ViewGroup actionsGroup = (ViewGroup) findViewById(R.id.actions);
-            if (actionsGroup != null) {
-                actionsGroup.removeAllViews();
+            if (mActionsGroup != null) {
+                mActionsGroup.removeAllViews();
 
                 // Recreate the layout
+                final View decorView = getWindow().getDecorView();
+                final boolean isLandscapePip = decorView.getMeasuredWidth()
+                        > decorView.getMeasuredHeight();
                 final LayoutInflater inflater = LayoutInflater.from(this);
                 for (int i = 0; i < mActions.size(); i++) {
                     final RemoteAction action = mActions.get(i);
                     final ImageView actionView = (ImageView) inflater.inflate(
-                            R.layout.pip_menu_action, actionsGroup, false);
+                            R.layout.pip_menu_action, mActionsGroup, false);
                     action.getIcon().loadDrawableAsync(this, d -> {
                         d.setTint(Color.WHITE);
                         actionView.setImageDrawable(d);
@@ -292,10 +306,21 @@ public class PipMenuActivity extends Activity {
                             Log.w(TAG, "Failed to send action", e);
                         }
                     });
-                    actionsGroup.addView(actionView);
+                    if (isLandscapePip && i > 0) {
+                        LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams)
+                                actionView.getLayoutParams();
+                        lp.leftMargin = mBetweenActionPaddingLand;
+                    }
+                    mActionsGroup.addView(actionView);
                 }
             }
+            actionsContainerHeight = actionsContainer.getLayoutParams().height;
         }
+
+        // Update the expand container margin to account for the existence of the action container
+        ((FrameLayout.LayoutParams) expandContainer.getLayoutParams()).bottomMargin =
+                actionsContainerHeight;
+        expandContainer.requestLayout();
     }
 
     private void notifyRegisterInputConsumer() {

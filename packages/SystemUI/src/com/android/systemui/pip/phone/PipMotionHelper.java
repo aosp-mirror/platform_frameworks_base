@@ -57,8 +57,8 @@ public class PipMotionHelper {
     private static final int DEFAULT_MOVE_STACK_DURATION = 225;
     private static final int SNAP_STACK_DURATION = 225;
     private static final int DISMISS_STACK_DURATION = 375;
-    private static final int SHRINK_STACK_FROM_MENU_DURATION = 175;
-    private static final int EXPAND_STACK_TO_MENU_DURATION = 175;
+    private static final int SHRINK_STACK_FROM_MENU_DURATION = 150;
+    private static final int EXPAND_STACK_TO_MENU_DURATION = 150;
     private static final int EXPAND_STACK_TO_FULLSCREEN_DURATION = 225;
     private static final int MINIMIZE_STACK_MAX_DURATION = 200;
 

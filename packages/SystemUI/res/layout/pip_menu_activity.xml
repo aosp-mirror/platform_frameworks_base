@@ -32,19 +32,32 @@
         android:background="?android:selectableItemBackgroundBorderless" />
 
     <FrameLayout
+        android:id="@+id/expand_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <ImageView
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_gravity="center"
+            android:contentDescription="@string/pip_phone_expand"
+            android:src="@drawable/pip_expand"
+            android:background="?android:selectableItemBackgroundBorderless" />
+    </FrameLayout>
+
+    <FrameLayout
         android:id="@+id/actions_container"
         android:layout_width="match_parent"
         android:layout_height="48dp"
         android:layout_gravity="bottom"
-        android:paddingStart="24dp"
-        android:paddingEnd="24dp"
         android:background="#66000000"
         android:visibility="invisible">
         <LinearLayout
-            android:id="@+id/actions"
+            android:id="@+id/actions_group"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_gravity="center_horizontal"
-            android:orientation="horizontal" />
+            android:orientation="horizontal"
+            android:divider="@android:color/transparent"
+            android:showDividers="middle" />
     </FrameLayout>
 </FrameLayout>
