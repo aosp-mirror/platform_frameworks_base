@@ -193,13 +193,16 @@ public final class ParcelableCall implements Parcelable {
 
     /**
      * Returns an object for remotely communicating through the video call provider's binder.
-
+     *
+     * @param callingPackageName the package name of the calling InCallService.
+     * @param targetSdkVersion the target SDK version of the calling InCallService.
      * @return The video call.
      */
-    public VideoCallImpl getVideoCallImpl(String callingPackageName) {
+    public VideoCallImpl getVideoCallImpl(String callingPackageName, int targetSdkVersion) {
         if (mVideoCall == null && mVideoCallProvider != null) {
             try {
-                mVideoCall = new VideoCallImpl(mVideoCallProvider, callingPackageName);
+                mVideoCall = new VideoCallImpl(mVideoCallProvider, callingPackageName,
+                        targetSdkVersion);
             } catch (RemoteException ignored) {
                 // Ignore RemoteException.
             }
