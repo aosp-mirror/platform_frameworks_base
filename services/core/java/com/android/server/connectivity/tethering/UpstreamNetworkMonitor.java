@@ -186,6 +186,7 @@ public class UpstreamNetworkMonitor {
         switch (callbackType) {
             case CALLBACK_LISTEN_ALL:
                 break;
+
             case CALLBACK_TRACK_DEFAULT:
                 if (mDefaultNetworkCallback == null) {
                     // The callback was unregistered in the interval between
@@ -198,11 +199,9 @@ public class UpstreamNetworkMonitor {
                     // These request*() calls can be deleted post oag/339444.
                     return;
                 }
-
-                cm().requestNetworkCapabilities(mDefaultNetworkCallback);
-                cm().requestLinkProperties(mDefaultNetworkCallback);
                 mCurrentDefault = network;
                 break;
+
             case CALLBACK_MOBILE_REQUEST:
                 if (mMobileNetworkCallback == null) {
                     // The callback was unregistered in the interval between
@@ -211,13 +210,8 @@ public class UpstreamNetworkMonitor {
                     //
                     // Clean-up of this network entry is deferred to the
                     // handling of onLost() by other callbacks.
-                    //
-                    // These request*() calls can be deleted post oag/339444.
                     return;
                 }
-
-                cm().requestNetworkCapabilities(mMobileNetworkCallback);
-                cm().requestLinkProperties(mMobileNetworkCallback);
                 break;
         }
 
