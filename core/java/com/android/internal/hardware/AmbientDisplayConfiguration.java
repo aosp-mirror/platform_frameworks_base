@@ -30,21 +30,21 @@ public class AmbientDisplayConfiguration {
     public AmbientDisplayConfiguration(Context context) {
         mContext = context;
     }
-    
+
     public boolean enabled(int user) {
         return pulseOnNotificationEnabled(user)
                 || pulseOnPickupEnabled(user)
                 || pulseOnDoubleTapEnabled(user)
                 || alwaysOnEnabled(user);
     }
-    
+
     public boolean available() {
         return pulseOnNotificationAvailable() || pulseOnPickupAvailable()
                 || pulseOnDoubleTapAvailable();
     }
-    
+
     public boolean pulseOnNotificationEnabled(int user) {
-        return boolSetting(Settings.Secure.DOZE_ENABLED, user) && pulseOnNotificationAvailable();
+        return boolSettingDefaultOn(Settings.Secure.DOZE_ENABLED, user) && pulseOnNotificationAvailable();
     }
 
     public boolean pulseOnNotificationAvailable() {
@@ -52,17 +52,17 @@ public class AmbientDisplayConfiguration {
     }
 
     public boolean pulseOnPickupEnabled(int user) {
-        return boolSetting(Settings.Secure.DOZE_PULSE_ON_PICK_UP, user)
+        return boolSettingDefaultOn(Settings.Secure.DOZE_PULSE_ON_PICK_UP, user)
                 && pulseOnPickupAvailable();
     }
-    
+
     public boolean pulseOnPickupAvailable() {
         return mContext.getResources().getBoolean(R.bool.config_dozePulsePickup)
                 && ambientDisplayAvailable();
     }
-    
+
     public boolean pulseOnDoubleTapEnabled(int user) {
-        return boolSetting(Settings.Secure.DOZE_PULSE_ON_DOUBLE_TAP, user)
+        return boolSettingDefaultOn(Settings.Secure.DOZE_PULSE_ON_DOUBLE_TAP, user)
                 && pulseOnDoubleTapAvailable();
     }
 
@@ -75,7 +75,7 @@ public class AmbientDisplayConfiguration {
     }
 
     public boolean alwaysOnEnabled(int user) {
-        return boolSetting(Settings.Secure.DOZE_ALWAYS_ON, user)
+        return boolSettingDefaultOff(Settings.Secure.DOZE_ALWAYS_ON, user)
                 && alwaysOnAvailable();
     }
 
@@ -92,8 +92,15 @@ public class AmbientDisplayConfiguration {
         return !TextUtils.isEmpty(ambientDisplayComponent());
     }
 
-    private boolean boolSetting(String name, int user) {
-        return Settings.Secure.getIntForUser(mContext.getContentResolver(), name, 1, user) != 0;
+    private boolean boolSettingDefaultOn(String name, int user) {
+        return boolSetting(name, user, 1);
     }
 
+    private boolean boolSettingDefaultOff(String name, int user) {
+        return boolSetting(name, user, 0);
+    }
+
+    private boolean boolSetting(String name, int user, int def) {
+        return Settings.Secure.getIntForUser(mContext.getContentResolver(), name, def, user) != 0;
+    }
 }
