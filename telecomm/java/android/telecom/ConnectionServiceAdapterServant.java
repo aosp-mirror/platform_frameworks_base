@@ -68,6 +68,10 @@ final class ConnectionServiceAdapterServant {
     private static final int MSG_SET_CONNECTION_PROPERTIES = 27;
     private static final int MSG_SET_PULLING = 28;
     private static final int MSG_SET_AUDIO_ROUTE = 29;
+    private static final int MSG_ON_RTT_INITIATION_SUCCESS = 30;
+    private static final int MSG_ON_RTT_INITIATION_FAILURE = 31;
+    private static final int MSG_ON_RTT_REMOTELY_TERMINATED = 32;
+    private static final int MSG_ON_RTT_UPGRADE_REQUEST = 33;
 
     private final IConnectionServiceAdapter mDelegate;
 
@@ -300,6 +304,20 @@ final class ConnectionServiceAdapterServant {
                     }
                     break;
                 }
+                case MSG_ON_RTT_INITIATION_SUCCESS:
+                    mDelegate.onRttInitiationSuccess((String) msg.obj, null /*Session.Info*/);
+                    break;
+                case MSG_ON_RTT_INITIATION_FAILURE:
+                    mDelegate.onRttInitiationFailure((String) msg.obj, msg.arg1,
+                            null /*Session.Info*/);
+                    break;
+                case MSG_ON_RTT_REMOTELY_TERMINATED:
+                    mDelegate.onRttSessionRemotelyTerminated((String) msg.obj,
+                            null /*Session.Info*/);
+                    break;
+                case MSG_ON_RTT_UPGRADE_REQUEST:
+                    mDelegate.onRemoteRttRequest((String) msg.obj, null /*Session.Info*/);
+                    break;
             }
         }
     };
@@ -536,6 +554,32 @@ final class ConnectionServiceAdapterServant {
             args.arg2 = event;
             args.arg3 = extras;
             mHandler.obtainMessage(MSG_ON_CONNECTION_EVENT, args).sendToTarget();
+        }
+
+        @Override
+        public void onRttInitiationSuccess(String connectionId, Session.Info sessionInfo)
+                throws RemoteException {
+            mHandler.obtainMessage(MSG_ON_RTT_INITIATION_SUCCESS, connectionId).sendToTarget();
+        }
+
+        @Override
+        public void onRttInitiationFailure(String connectionId, int reason,
+                Session.Info sessionInfo)
+                throws RemoteException {
+            mHandler.obtainMessage(MSG_ON_RTT_INITIATION_FAILURE, reason, 0, connectionId)
+                    .sendToTarget();
+        }
+
+        @Override
+        public void onRttSessionRemotelyTerminated(String connectionId, Session.Info sessionInfo)
+                throws RemoteException {
+            mHandler.obtainMessage(MSG_ON_RTT_REMOTELY_TERMINATED, connectionId).sendToTarget();
+        }
+
+        @Override
+        public void onRemoteRttRequest(String connectionId, Session.Info sessionInfo)
+                throws RemoteException {
+            mHandler.obtainMessage(MSG_ON_RTT_UPGRADE_REQUEST, connectionId).sendToTarget();
         }
     };
 
