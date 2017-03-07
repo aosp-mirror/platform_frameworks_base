@@ -562,10 +562,11 @@ void FrameBuilder::deferRenderNodeOp(const RenderNodeOp& op) {
  * for paint's style on the bounds being computed.
  */
 BakedOpState* FrameBuilder::deferStrokeableOp(const RecordedOp& op, batchid_t batchId,
-        BakedOpState::StrokeBehavior strokeBehavior) {
+        BakedOpState::StrokeBehavior strokeBehavior, bool expandForPathTexture) {
     // Note: here we account for stroke when baking the op
     BakedOpState* bakedState = BakedOpState::tryStrokeableOpConstruct(
-            mAllocator, *mCanvasState.writableSnapshot(), op, strokeBehavior);
+            mAllocator, *mCanvasState.writableSnapshot(), op,
+            strokeBehavior, expandForPathTexture);
     if (!bakedState) return nullptr; // quick rejected
 
     if (op.opId == RecordedOpId::RectOp && op.paint->getStyle() != SkPaint::kStroke_Style) {
@@ -590,7 +591,10 @@ static batchid_t tessBatchId(const RecordedOp& op) {
 }
 
 void FrameBuilder::deferArcOp(const ArcOp& op) {
-    deferStrokeableOp(op, tessBatchId(op));
+    // Pass true below since arcs have a tendency to draw outside their expected bounds within
+    // their path textures. Passing true makes it more likely that we'll scissor, instead of
+    // corrupting the frame by drawing outside of clip bounds.
+    deferStrokeableOp(op, tessBatchId(op), BakedOpState::StrokeBehavior::StyleDefined, true);
 }
 
 static bool hasMergeableClip(const BakedOpState& state) {
@@ -748,7 +752,7 @@ static batchid_t textBatchId(const SkPaint& paint) {
 void FrameBuilder::deferTextOp(const TextOp& op) {
     BakedOpState* bakedState = BakedOpState::tryStrokeableOpConstruct(
             mAllocator, *mCanvasState.writableSnapshot(), op,
-            BakedOpState::StrokeBehavior::StyleDefined);
+            BakedOpState::StrokeBehavior::StyleDefined, false);
     if (!bakedState) return; // quick rejected
 
     batchid_t batchId = textBatchId(*(op.paint));
