@@ -243,12 +243,12 @@ public class Patterns {
     public static final String GOOD_IRI_CHAR =
         "a-zA-Z0-9\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF";
 
-    public static final Pattern IP_ADDRESS
-        = Pattern.compile(
+    private static final String IP_ADDRESS_STRING =
             "((25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[1-9][0-9]|[1-9])\\.(25[0-5]|2[0-4]"
             + "[0-9]|[0-1][0-9]{2}|[1-9][0-9]|[1-9]|0)\\.(25[0-5]|2[0-4][0-9]|[0-1]"
             + "[0-9]{2}|[1-9][0-9]|[1-9]|0)\\.(25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}"
-            + "|[1-9][0-9]|[0-9]))");
+            + "|[1-9][0-9]|[0-9]))";
+    public static final Pattern IP_ADDRESS = Pattern.compile(IP_ADDRESS_STRING);
 
     /**
      * Valid UCS characters defined in RFC 3987. Excludes space characters.
@@ -298,8 +298,8 @@ public class Patterns {
 
     private static final String HOST_NAME = "(" + IRI_LABEL + "\\.)+" + TLD;
 
-    public static final Pattern DOMAIN_NAME
-        = Pattern.compile("(" + HOST_NAME + "|" + IP_ADDRESS + ")");
+    private static final String DOMAIN_NAME_STR = "(" + HOST_NAME + "|" + IP_ADDRESS_STRING + ")";
+    public static final Pattern DOMAIN_NAME = Pattern.compile(DOMAIN_NAME_STR);
 
     private static final String PROTOCOL = "(?i:http|https|rtsp)://";
 
@@ -323,7 +323,7 @@ public class Patterns {
     public static final Pattern WEB_URL = Pattern.compile("("
             + "("
             + "(?:" + PROTOCOL + "(?:" + USER_INFO + ")?" + ")?"
-            + "(?:" + DOMAIN_NAME + ")"
+            + "(?:" + DOMAIN_NAME_STR + ")"
             + "(?:" + PORT_NUMBER + ")?"
             + ")"
             + "(" + PATH_AND_QUERY + ")?"
@@ -346,14 +346,14 @@ public class Patterns {
      * Regular expression that matches domain names using either {@link #STRICT_HOST_NAME} or
      * {@link #IP_ADDRESS}
      */
-    private static final Pattern STRICT_DOMAIN_NAME
-            = Pattern.compile("(?:" + STRICT_HOST_NAME + "|" + IP_ADDRESS + ")");
+    private static final String STRICT_DOMAIN_NAME = "(?:" + STRICT_HOST_NAME + "|"
+            + IP_ADDRESS_STRING + ")";
 
     /**
      * Regular expression that matches domain names without a TLD
      */
     private static final String RELAXED_DOMAIN_NAME =
-            "(?:" + "(?:" + IRI_LABEL + "(?:\\.(?=\\S))" +"?)+" + "|" + IP_ADDRESS + ")";
+            "(?:" + "(?:" + IRI_LABEL + "(?:\\.(?=\\S))" +"?)+" + "|" + IP_ADDRESS_STRING + ")";
 
     /**
      * Regular expression to match strings that do not start with a supported protocol. The TLDs
