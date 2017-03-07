@@ -7213,7 +7213,7 @@
         <!-- The key of another Preference that this Preference will depend on.  If the other
              Preference is not set or is off, this Preference will be disabled. -->
         <attr name="dependency" format="string" />
-        <!-- Whether the Preference stores its value to the shared preferences. -->
+        <!-- Whether the Preference stores its value to the storage. -->
         <attr name="persistent" />
         <!-- The default value for the preference, which will be set either if persistence
              is off or persistence is on and the preference is not found in the persistent
@@ -7222,6 +7222,9 @@
         <!-- Whether the view of this Preference should be disabled when
              this Preference is disabled. -->
         <attr name="shouldDisableView" format="boolean" />
+        <!-- Whether the preference has enabled to have its view recycled when used in the list
+             view. This is true by default. -->
+        <attr name="recycleEnabled" format="boolean" />
     </declare-styleable>
 
     <!-- Base attributes available to CheckBoxPreference. -->
