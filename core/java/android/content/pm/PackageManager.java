@@ -1047,6 +1047,16 @@ public abstract class PackageManager {
     public static final int INSTALL_FAILED_PERMISSION_MODEL_DOWNGRADE = -26;
 
     /**
+     * Installation return code: this is passed to the
+     * {@link IPackageInstallObserver} if the new package attempts to downgrade the
+     * target sandbox version of the app.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int INSTALL_FAILED_SANDBOX_VERSION_DOWNGRADE = -27;
+
+    /**
      * Installation parse return code: this is passed to the
      * {@link IPackageInstallObserver} if the parser was given a path that is
      * not a file, or does not end with the expected '.apk' extension.

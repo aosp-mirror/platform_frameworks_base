@@ -16804,6 +16804,16 @@ public class PackageManagerService extends IPackageManager.Stub {
                                         + " target SDK " + oldTargetSdk + " does.");
                         return;
                     }
+                    // Prevent apps from downgrading their targetSandbox.
+                    final int oldTargetSandbox = oldPackage.applicationInfo.targetSandboxVersion;
+                    final int newTargetSandbox = pkg.applicationInfo.targetSandboxVersion;
+                    if (oldTargetSandbox == 2 && newTargetSandbox != 2) {
+                        res.setError(PackageManager.INSTALL_FAILED_SANDBOX_VERSION_DOWNGRADE,
+                                "Package " + pkg.packageName + " new target sandbox "
+                                + newTargetSandbox + " is incompatible with the previous value of"
+                                + oldTargetSandbox + ".");
+                        return;
+                    }
 
                     // Prevent installing of child packages
                     if (oldPackage.parentPackage != null) {
