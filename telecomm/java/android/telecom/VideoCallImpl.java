@@ -44,6 +44,7 @@ public class VideoCallImpl extends VideoCall {
     private int mVideoQuality = VideoProfile.QUALITY_UNKNOWN;
     private int mVideoState = VideoProfile.STATE_AUDIO_ONLY;
     private final String mCallingPackageName;
+    private final int mTargetSdkVersion;
 
     private IBinder.DeathRecipient mDeathRecipient = new IBinder.DeathRecipient() {
         @Override
@@ -198,13 +199,15 @@ public class VideoCallImpl extends VideoCall {
 
     private Handler mHandler;
 
-    VideoCallImpl(IVideoProvider videoProvider, String callingPackageName) throws RemoteException {
+    VideoCallImpl(IVideoProvider videoProvider, String callingPackageName, int targetSdkVersion)
+            throws RemoteException {
         mVideoProvider = videoProvider;
         mVideoProvider.asBinder().linkToDeath(mDeathRecipient, 0);
 
         mBinder = new VideoCallListenerBinder();
         mVideoProvider.addVideoCallback(mBinder);
         mCallingPackageName = callingPackageName;
+        mTargetSdkVersion = targetSdkVersion;
     }
 
     public void destroy() {
@@ -243,7 +246,7 @@ public class VideoCallImpl extends VideoCall {
     public void setCamera(String cameraId) {
         try {
             Log.w(this, "setCamera: cameraId=%s, calling=%s", cameraId, mCallingPackageName);
-            mVideoProvider.setCamera(cameraId, mCallingPackageName);
+            mVideoProvider.setCamera(cameraId, mCallingPackageName, mTargetSdkVersion);
         } catch (RemoteException e) {
         }
     }

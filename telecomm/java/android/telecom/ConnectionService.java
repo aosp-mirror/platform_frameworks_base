@@ -214,6 +214,7 @@ public abstract class ConnectionService extends Service {
 
         @Override
         public void createConnectionFailed(
+                PhoneAccountHandle connectionManagerPhoneAccount,
                 String callId,
                 ConnectionRequest request,
                 boolean isIncoming,
@@ -224,6 +225,7 @@ public abstract class ConnectionService extends Service {
                 args.arg1 = callId;
                 args.arg2 = request;
                 args.arg3 = Log.createSubsession();
+                args.arg4 = connectionManagerPhoneAccount;
                 args.argi1 = isIncoming ? 1 : 0;
                 mHandler.obtainMessage(MSG_CREATE_CONNECTION_FAILED, args).sendToTarget();
             } finally {
@@ -581,6 +583,8 @@ public abstract class ConnectionService extends Service {
                         final String id = (String) args.arg1;
                         final ConnectionRequest request = (ConnectionRequest) args.arg2;
                         final boolean isIncoming = args.argi1 == 1;
+                        final PhoneAccountHandle connectionMgrPhoneAccount =
+                                (PhoneAccountHandle) args.arg4;
                         if (!mAreAccountsInitialized) {
                             Log.d(this, "Enqueueing pre-init request %s", id);
                             mPreInitializationConnectionRequests.add(
@@ -589,12 +593,14 @@ public abstract class ConnectionService extends Service {
                                             null /*lock*/) {
                                         @Override
                                         public void loggedRun() {
-                                            createConnectionFailed(id, request, isIncoming);
+                                            createConnectionFailed(connectionMgrPhoneAccount, id,
+                                                    request, isIncoming);
                                         }
                                     }.prepare());
                         } else {
                             Log.i(this, "createConnectionFailed %s", id);
-                            createConnectionFailed(id, request, isIncoming);
+                            createConnectionFailed(connectionMgrPhoneAccount, id, request,
+                                    isIncoming);
                         }
                     } finally {
                         args.recycle();
@@ -1225,14 +1231,15 @@ public abstract class ConnectionService extends Service {
         }
     }
 
-    private void createConnectionFailed(final String callId, final ConnectionRequest request,
-            boolean isIncoming) {
+    private void createConnectionFailed(final PhoneAccountHandle callManagerAccount,
+                                        final String callId, final ConnectionRequest request,
+                                        boolean isIncoming) {
 
         Log.i(this, "createConnectionFailed %s", callId);
         if (isIncoming) {
-            onCreateIncomingConnectionFailed(request);
+            onCreateIncomingConnectionFailed(callManagerAccount, request);
         } else {
-            onCreateOutgoingConnectionFailed(request);
+            onCreateOutgoingConnectionFailed(callManagerAccount, request);
         }
     }
 
@@ -1682,9 +1689,12 @@ public abstract class ConnectionService extends Service {
      * <p>
      * See {@link TelecomManager#isIncomingCallPermitted(PhoneAccountHandle)} for more information.
      *
+     * @param connectionManagerPhoneAccount See description at
+     *         {@link #onCreateOutgoingConnection(PhoneAccountHandle, ConnectionRequest)}.
      * @param request The incoming connection request.
      */
-    public void onCreateIncomingConnectionFailed(ConnectionRequest request) {
+    public void onCreateIncomingConnectionFailed(PhoneAccountHandle connectionManagerPhoneAccount,
+                                                 ConnectionRequest request) {
     }
 
     /**
@@ -1698,9 +1708,12 @@ public abstract class ConnectionService extends Service {
      * <p>
      * See {@link TelecomManager#isOutgoingCallPermitted(PhoneAccountHandle)} for more information.
      *
+     * @param connectionManagerPhoneAccount See description at
+     *         {@link #onCreateOutgoingConnection(PhoneAccountHandle, ConnectionRequest)}.
      * @param request The outgoing connection request.
      */
-    public void onCreateOutgoingConnectionFailed(ConnectionRequest request) {
+    public void onCreateOutgoingConnectionFailed(PhoneAccountHandle connectionManagerPhoneAccount,
+                                                 ConnectionRequest request) {
     }
 
     /**
