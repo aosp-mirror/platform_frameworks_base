@@ -70,11 +70,11 @@ oneway interface IInCallAdapter {
 
     void removeExtras(String callId, in List<String> keys);
 
-    void sendRttRequest();
+    void sendRttRequest(String callId);
 
-    void respondToRttRequest(int id, boolean accept);
+    void respondToRttRequest(String callId, int id, boolean accept);
 
-    void stopRtt();
+    void stopRtt(String callId);
 
-    void setRttMode(int mode);
+    void setRttMode(String callId, int mode);
 }

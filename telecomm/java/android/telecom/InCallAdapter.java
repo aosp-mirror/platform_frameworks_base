@@ -379,9 +379,9 @@ public final class InCallAdapter {
     /**
      * Sends an RTT upgrade request to the remote end of the connection.
      */
-    public void sendRttRequest() {
+    public void sendRttRequest(String callId) {
         try {
-            mAdapter.sendRttRequest();
+            mAdapter.sendRttRequest(callId);
         } catch (RemoteException ignored) {
         }
     }
@@ -392,9 +392,9 @@ public final class InCallAdapter {
      * @param id the ID of the request as specified by Telecom
      * @param accept Whether the request should be accepted.
      */
-    public void respondToRttRequest(int id, boolean accept) {
+    public void respondToRttRequest(String callId, int id, boolean accept) {
         try {
-            mAdapter.respondToRttRequest(id, accept);
+            mAdapter.respondToRttRequest(callId, id, accept);
         } catch (RemoteException ignored) {
         }
     }
@@ -402,9 +402,9 @@ public final class InCallAdapter {
     /**
      * Instructs Telecom to shut down the RTT communication channel.
      */
-    public void stopRtt() {
+    public void stopRtt(String callId) {
         try {
-            mAdapter.stopRtt();
+            mAdapter.stopRtt(callId);
         } catch (RemoteException ignored) {
         }
     }
@@ -413,9 +413,9 @@ public final class InCallAdapter {
      * Sets the RTT audio mode.
      * @param mode the desired RTT audio mode
      */
-    public void setRttMode(int mode) {
+    public void setRttMode(String callId, int mode) {
         try {
-            mAdapter.setRttMode(mode);
+            mAdapter.setRttMode(callId, mode);
         } catch (RemoteException ignored) {
         }
     }
