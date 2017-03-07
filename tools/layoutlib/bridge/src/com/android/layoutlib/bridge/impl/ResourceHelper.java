@@ -415,9 +415,9 @@ public final class ResourceHelper {
                 BridgeXmlBlockParser blockParser = new BridgeXmlBlockParser(
                         parser, context, isFramework);
                 try {
-                    FontConfig config = FontResourcesParser.parse(blockParser, context
-                            .getResources());
-                    typeface = Typeface.createFromResources(config, context.getAssets(),
+                    FontResourcesParser.FamilyResourceEntry entry =
+                            FontResourcesParser.parse(blockParser, context.getResources());
+                    typeface = Typeface.createFromResources(entry, context.getAssets(),
                             fontName);
                 } catch (XmlPullParserException | IOException e) {
                     Bridge.getLog().error(null, "Failed to parse file " + fontName,

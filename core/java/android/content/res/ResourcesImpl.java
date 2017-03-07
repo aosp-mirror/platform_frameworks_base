@@ -769,8 +769,13 @@ public class ResourcesImpl {
             if (file.endsWith("xml")) {
                 final XmlResourceParser rp = loadXmlResourceParser(
                         file, id, value.assetCookie, "font");
-                final FontConfig config = FontResourcesParser.parse(rp, wrapper);
-                return Typeface.createFromResources(config, mAssets, file);
+                final FontResourcesParser.FamilyResourceEntry familyEntry =
+                        FontResourcesParser.parse(rp, wrapper);
+                if (familyEntry == null) {
+                    Log.e(TAG, "Failed to find font-family tag");
+                    return null;
+                }
+                return Typeface.createFromResources(familyEntry, mAssets, file);
             }
             return Typeface.createFromResources(mAssets, file, value.assetCookie);
         } catch (XmlPullParserException e) {
@@ -796,20 +801,23 @@ public class ResourcesImpl {
 
         Trace.traceBegin(Trace.TRACE_TAG_RESOURCES, file);
         try {
+            // TODO: Stop re-ussing font-family xml tag structure and use ResourceArray instead.
             final XmlResourceParser rp = loadXmlResourceParser(
                     file, id, value.assetCookie, "font");
-            final FontConfig config = FontResourcesParser.parse(rp, wrapper);
-            final List<FontConfig.Family> families = config.getFamilies();
-            if (families == null || families.isEmpty()) {
+            final FontResourcesParser.FamilyResourceEntry familyEntry =
+                    FontResourcesParser.parse(rp, wrapper);
+            if (familyEntry == null) {
+                Log.e(TAG, "failed to find font-family tag");
                 return;
             }
-            for (int j = 0; j < families.size(); j++) {
-                final FontConfig.Family family = families.get(j);
-                final List<FontConfig.Font> fonts = family.getFonts();
-                for (int i = 0; i < fonts.size(); i++) {
-                    int resourceId = fonts.get(i).getResourceId();
-                    wrapper.getFont(resourceId);
-                }
+            if (familyEntry instanceof FontResourcesParser.ProviderResourceEntry) {
+                throw new IllegalArgumentException("Provider based fonts can not be used.");
+            }
+            final FontResourcesParser.FontFamilyFilesResourceEntry filesEntry =
+                    (FontResourcesParser.FontFamilyFilesResourceEntry) familyEntry;
+            for (FontResourcesParser.FontFileResourceEntry fileEntry : filesEntry.getEntries()) {
+                int resourceId = fileEntry.getResourceId();
+                wrapper.getFont(resourceId);
             }
         } catch (XmlPullParserException e) {
             Log.e(TAG, "Failed to parse xml resource " + file, e);

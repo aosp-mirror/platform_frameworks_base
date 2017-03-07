@@ -25,7 +25,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import java.util.List;
 
 /**
  * A family of typefaces with different styles.
@@ -48,14 +47,8 @@ public class FontFamily {
         mBuilderPtr = nInitBuilder(null, 0);
     }
 
-    public FontFamily(String lang, String variant) {
-        int varEnum = 0;
-        if ("compact".equals(variant)) {
-            varEnum = 1;
-        } else if ("elegant".equals(variant)) {
-            varEnum = 2;
-        }
-        mBuilderPtr = nInitBuilder(lang, varEnum);
+    public FontFamily(String lang, int variant) {
+        mBuilderPtr = nInitBuilder(lang, variant);
     }
 
     public void freeze() {
@@ -103,12 +96,15 @@ public class FontFamily {
         }
     }
 
-    public boolean addFontWeightStyle(ByteBuffer font, int ttcIndex, List<FontConfig.Axis> axes,
+    public boolean addFontWeightStyle(ByteBuffer font, int ttcIndex, FontConfig.Axis[] axes,
             int weight, boolean style) {
         if (mBuilderPtr == 0) {
             throw new IllegalStateException("Unable to call addFontWeightStyle after freezing.");
         }
-        return nAddFontWeightStyle(mBuilderPtr, font, ttcIndex, axes, weight, style);
+        for (FontConfig.Axis axis : axes) {
+            nAddAxisValue(mBuilderPtr, axis.getTag(), axis.getStyleValue());
+        }
+        return nAddFontWeightStyle(mBuilderPtr, font, ttcIndex, weight, style);
     }
 
     /**
@@ -143,8 +139,11 @@ public class FontFamily {
     private static native void nUnrefFamily(long nativePtr);
     private static native boolean nAddFont(long builderPtr, ByteBuffer font, int ttcIndex);
     private static native boolean nAddFontWeightStyle(long builderPtr, ByteBuffer font,
-            int ttcIndex, List<FontConfig.Axis> listOfAxis,
-            int weight, boolean isItalic);
+            int ttcIndex, int weight, boolean isItalic);
     private static native boolean nAddFontFromAssetManager(long builderPtr, AssetManager mgr,
             String path, int cookie, boolean isAsset, int weight, boolean isItalic);
+
+    // The added axis values are only valid for the next nAddFont* method call.
+    @CriticalNative
+    private static native void nAddAxisValue(long builderPtr, int tag, float value);
 }

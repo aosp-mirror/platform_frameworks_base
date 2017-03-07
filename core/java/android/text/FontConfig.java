@@ -16,42 +16,57 @@
 
 package android.text;
 
+import static java.lang.annotation.RetentionPolicy.SOURCE;
+
+import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.lang.annotation.Retention;
+import java.util.Arrays;
+
 
 /**
  * Font configuration descriptions for System fonts.
  */
 public final class FontConfig implements Parcelable {
-    private final List<Family> mFamilies = new ArrayList<>();
-    private final List<Alias> mAliases = new ArrayList<>();
+    private final @NonNull Family[] mFamilies;
+    private final @NonNull Alias[] mAliases;
 
-    public FontConfig() {
+    public FontConfig(@NonNull Family[] families, @NonNull Alias[] aliases) {
+        mFamilies = families;
+        mAliases = aliases;
     }
 
-    public FontConfig(FontConfig config) {
-        for (int i = 0; i < config.mFamilies.size(); i++) {
-            mFamilies.add(new Family(config.mFamilies.get(i)));
+    /**
+     * For duplicating file descriptors.
+     *
+     * Note that this copy constructor can not be usable for deep copy.
+     * @hide
+     */
+    public FontConfig(@NonNull FontConfig config) {
+        mFamilies = new Family[config.mFamilies.length];
+        for (int i = 0; i < config.mFamilies.length; ++i) {
+            mFamilies[i] = new Family(config.mFamilies[i]);
         }
-        mAliases.addAll(config.mAliases);
+        mAliases = Arrays.copyOf(config.mAliases, config.mAliases.length);
     }
 
     /**
      * Returns the ordered list of families included in the system fonts.
      */
-    public List<Family> getFamilies() {
+    public @NonNull Family[] getFamilies() {
         return mFamilies;
     }
 
     /**
      * Returns the list of aliases defined for the font families in the system fonts.
      */
-    public List<Alias> getAliases() {
+    public @NonNull Alias[] getAliases() {
         return mAliases;
     }
 
@@ -59,33 +74,14 @@ public final class FontConfig implements Parcelable {
      * @hide
      */
     public FontConfig(Parcel in) {
-        readFromParcel(in);
+        mFamilies = in.readTypedArray(Family.CREATOR);
+        mAliases = in.readTypedArray(Alias.CREATOR);
     }
 
     @Override
     public void writeToParcel(Parcel out, int flag) {
-        out.writeInt(mFamilies.size());
-        for (int i = 0; i < mFamilies.size(); i++) {
-            mFamilies.get(i).writeToParcel(out, flag);
-        }
-        out.writeInt(mAliases.size());
-        for (int i = 0; i < mAliases.size(); i++) {
-            mAliases.get(i).writeToParcel(out, flag);
-        }
-    }
-
-    /**
-     * @hide
-     */
-    public void readFromParcel(Parcel in) {
-        int size = in.readInt();
-        for (int i = 0; i < size; i++) {
-            mFamilies.add(new Family(in));
-        }
-        size = in.readInt();
-        for (int i = 0; i < size; i++) {
-            mAliases.add(new Alias(in));
-        }
+        out.writeTypedArray(mFamilies, flag);
+        out.writeTypedArray(mAliases, flag);
     }
 
     @Override
@@ -164,36 +160,37 @@ public final class FontConfig implements Parcelable {
      * Class that holds information about a Font.
      */
     public static final class Font implements Parcelable {
-        private String mFontName;
+        private final @NonNull String mFontName;
         private final int mTtcIndex;
-        private final List<Axis> mAxes;
+        private final @NonNull Axis[] mAxes;
         private final int mWeight;
         private final boolean mIsItalic;
-        private ParcelFileDescriptor mFd;
-        private final int mResourceId;
+        private @Nullable ParcelFileDescriptor mFd;
 
         /**
          * @hide
          */
-        public Font(String fontName, int ttcIndex, List<Axis> axes, int weight, boolean isItalic,
-                int resourceId) {
+        public Font(@NonNull String fontName, int ttcIndex, @NonNull Axis[] axes, int weight,
+                boolean isItalic) {
             mFontName = fontName;
             mTtcIndex = ttcIndex;
             mAxes = axes;
             mWeight = weight;
             mIsItalic = isItalic;
             mFd = null;
-            mResourceId = resourceId;
         }
 
-        public Font(String fontName, int ttcIndex, List<Axis> axes, int weight, boolean isItalic) {
-            this(fontName, ttcIndex, axes, weight, isItalic, 0);
-        }
-
+        /**
+         * This is for duplicating FileDescriptors.
+         *
+         * Note that this copy ctor doesn't deep copy the members.
+         *
+         * @hide
+         */
         public Font(Font origin) {
             mFontName = origin.mFontName;
             mTtcIndex = origin.mTtcIndex;
-            mAxes = new ArrayList<>(origin.mAxes);
+            mAxes = origin.mAxes;
             mWeight = origin.mWeight;
             mIsItalic = origin.mIsItalic;
             if (origin.mFd != null) {
@@ -203,21 +200,13 @@ public final class FontConfig implements Parcelable {
                     e.printStackTrace();
                 }
             }
-            mResourceId = origin.mResourceId;
         }
 
         /**
          * Returns the name associated by the system to this font.
          */
-        public String getFontName() {
+        public @NonNull String getFontName() {
             return mFontName;
-        }
-
-        /**
-         * @hide
-         */
-        public void setFontName(String fontName) {
-            mFontName = fontName;
         }
 
         /**
@@ -230,7 +219,7 @@ public final class FontConfig implements Parcelable {
         /**
          * Returns the list of axes associated to this font.
          */
-        public List<Axis> getAxes() {
+        public @NonNull Axis[] getAxes() {
             return mAxes;
         }
 
@@ -251,22 +240,15 @@ public final class FontConfig implements Parcelable {
         /**
          * Returns a file descriptor to access the specified font. This should be closed after use.
          */
-        public ParcelFileDescriptor getFd() {
+        public @Nullable ParcelFileDescriptor getFd() {
             return mFd;
         }
 
         /**
          * @hide
          */
-        public void setFd(ParcelFileDescriptor fd) {
+        public void setFd(@NonNull ParcelFileDescriptor fd) {
             mFd = fd;
-        }
-
-        /**
-         * @hide
-         */
-        public int getResourceId() {
-            return mResourceId;
         }
 
         /**
@@ -275,11 +257,7 @@ public final class FontConfig implements Parcelable {
         public Font(Parcel in) {
             mFontName = in.readString();
             mTtcIndex = in.readInt();
-            final int numAxes = in.readInt();
-            mAxes = new ArrayList<>();
-            for (int i = 0; i < numAxes; i++) {
-                mAxes.add(new Axis(in));
-            }
+            mAxes = in.createTypedArray(Axis.CREATOR);
             mWeight = in.readInt();
             mIsItalic = in.readInt() == 1;
             if (in.readInt() == 1) { /* has FD */
@@ -287,24 +265,19 @@ public final class FontConfig implements Parcelable {
             } else {
                 mFd = null;
             }
-            mResourceId = in.readInt();
         }
 
         @Override
         public void writeToParcel(Parcel out, int flag) {
             out.writeString(mFontName);
             out.writeInt(mTtcIndex);
-            out.writeInt(mAxes.size());
-            for (int i = 0; i < mAxes.size(); i++) {
-                mAxes.get(i).writeToParcel(out, flag);
-            }
+            out.writeTypedArray(mAxes, flag);
             out.writeInt(mWeight);
             out.writeInt(mIsItalic ? 1 : 0);
             out.writeInt(mFd == null ? 0 : 1);
             if (mFd != null) {
                 mFd.writeToParcel(out, flag);
             }
-            out.writeInt(mResourceId);
         }
 
         @Override
@@ -329,27 +302,27 @@ public final class FontConfig implements Parcelable {
      * Class that holds information about a Font alias.
      */
     public static final class Alias implements Parcelable {
-        private final String mName;
-        private final String mToName;
+        private final @NonNull String mName;
+        private final @NonNull String mToName;
         private final int mWeight;
 
-        public Alias(String name, String toName, int weight) {
-            this.mName = name;
-            this.mToName = toName;
-            this.mWeight = weight;
+        public Alias(@NonNull String name, @NonNull String toName, int weight) {
+            mName = name;
+            mToName = toName;
+            mWeight = weight;
         }
 
         /**
          * Returns the new name for the alias.
          */
-        public String getName() {
+        public @NonNull String getName() {
             return mName;
         }
 
         /**
          * Returns the existing name to which this alias points to.
          */
-        public String getToName() {
+        public @NonNull String getToName() {
             return mToName;
         }
 
@@ -398,97 +371,92 @@ public final class FontConfig implements Parcelable {
      * Class that holds information about a Font family.
      */
     public static final class Family implements Parcelable {
-        private final String mName;
-        private final List<Font> mFonts;
-        private final String mLanguage;
-        private final String mVariant;
-        private final String mProviderAuthority;
-        private final String mProviderPackage;
-        private final String mQuery;
+        private final @NonNull String mName;
+        private final @NonNull Font[] mFonts;
+        private final @NonNull String mLanguage;
 
-        public Family(String name, List<Font> fonts, String language, String variant) {
+        /** @hide */
+        @Retention(SOURCE)
+        @IntDef({VARIANT_DEFAULT, VARIANT_COMPACT, VARIANT_ELEGANT})
+        public @interface Variant {}
+
+        /**
+         * Value for font variant.
+         *
+         * Indicates the font has no variant attribute.
+         */
+        public static final int VARIANT_DEFAULT = 0;
+
+        /**
+         * Value for font variant.
+         *
+         * Indicates the font is for compact variant.
+         * @see android.graphics.Paint#setElegantTextHeight
+         */
+        public static final int VARIANT_COMPACT = 1;
+
+        /**
+         * Value for font variant.
+         *
+         * Indiates the font is for elegant variant.
+         * @see android.graphics.Paint#setElegantTextHeight
+         */
+        public static final int VARIANT_ELEGANT = 2;
+
+        // Must be same with Minikin's variant values.
+        // See frameworks/minikin/include/minikin/FontFamily.h
+        private final @Variant int mVariant;
+
+        public Family(@NonNull String name, @NonNull Font[] fonts, @NonNull String language,
+                @Variant int variant) {
             mName = name;
             mFonts = fonts;
             mLanguage = language;
             mVariant = variant;
-            mProviderAuthority = null;
-            mProviderPackage = null;
-            mQuery = null;
         }
 
         /**
+         * For duplicating file descriptor underlying Font object.
+         *
+         * This copy constructor is not for deep copying.
          * @hide
          */
-        public Family(String providerAuthority, String providerPackage, String query) {
-            mName = null;
-            mFonts = null;
-            mLanguage = null;
-            mVariant = null;
-            mProviderAuthority = providerAuthority;
-            mProviderPackage = providerPackage;
-            mQuery = query;
-        }
-
         public Family(Family origin) {
             mName = origin.mName;
             mLanguage = origin.mLanguage;
             mVariant = origin.mVariant;
-            mFonts = new ArrayList<>();
-            for (int i = 0; i < origin.mFonts.size(); i++) {
-                mFonts.add(new Font(origin.mFonts.get(i)));
+            mFonts = new Font[origin.mFonts.length];
+            for (int i = 0; i < origin.mFonts.length; ++i) {
+                mFonts[i] = new Font(origin.mFonts[i]);
             }
-            mProviderAuthority = origin.mProviderAuthority;
-            mProviderPackage = origin.mProviderPackage;
-            mQuery = origin.mQuery;
         }
 
         /**
          * Returns the name given by the system to this font family.
          */
-        public String getName() {
+        public @Nullable String getName() {
             return mName;
         }
 
         /**
          * Returns the list of fonts included in this family.
          */
-        public List<Font> getFonts() {
+        public @Nullable Font[] getFonts() {
             return mFonts;
         }
 
         /**
          * Returns the language for this family. May be null.
          */
-        public String getLanguage() {
+        public @Nullable String getLanguage() {
             return mLanguage;
         }
 
         /**
          * Returns the font variant for this family, e.g. "elegant" or "compact". May be null.
          */
-        public String getVariant() {
+        public @Variant int getVariant() {
             return mVariant;
-        }
-
-        /**
-         * @hide
-         */
-        public String getProviderAuthority() {
-            return mProviderAuthority;
-        }
-
-        /**
-         * @hide
-         */
-        public String getProviderPackage() {
-            return mProviderPackage;
-        }
-
-        /**
-         * @hide
-         */
-        public String getQuery() {
-            return mQuery;
         }
 
         /**
@@ -496,51 +464,17 @@ public final class FontConfig implements Parcelable {
          */
         public Family(Parcel in) {
             mName = in.readString();
-            final int size = in.readInt();
-            mFonts = new ArrayList<>();
-            for (int i = 0; i < size; i++) {
-                mFonts.add(new Font(in));
-            }
+            mFonts = in.readTypedArray(Font.CREATOR);
             mLanguage = in.readString();
-            mVariant = in.readString();
-            if (in.readInt() == 1) {
-                mProviderAuthority = in.readString();
-            } else {
-                mProviderAuthority = null;
-            }
-            if (in.readInt() == 1) {
-                mProviderPackage = in.readString();
-            } else {
-                mProviderPackage = null;
-            }
-            if (in.readInt() == 1) {
-                mQuery = in.readString();
-            } else {
-                mQuery = null;
-            }
+            mVariant = in.readInt();
         }
 
         @Override
         public void writeToParcel(Parcel out, int flag) {
             out.writeString(mName);
-            out.writeInt(mFonts.size());
-            for (int i = 0; i < mFonts.size(); i++) {
-                mFonts.get(i).writeToParcel(out, flag);
-            }
+            out.writeTypedArray(mFonts, flag);
             out.writeString(mLanguage);
-            out.writeString(mVariant);
-            out.writeInt(mProviderAuthority == null ? 0 : 1);
-            if (mProviderAuthority != null) {
-                out.writeString(mProviderAuthority);
-            }
-            out.writeInt(mProviderPackage == null ? 0 : 1);
-            if (mProviderPackage != null) {
-                out.writeString(mProviderPackage);
-            }
-            out.writeInt(mQuery == null ? 0 : 1);
-            if (mQuery != null) {
-                out.writeString(mQuery);
-            }
+            out.writeInt(mVariant);
         }
 
         @Override

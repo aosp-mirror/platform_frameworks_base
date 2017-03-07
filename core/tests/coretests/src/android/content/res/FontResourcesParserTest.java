@@ -20,6 +20,11 @@ import static junit.framework.Assert.assertNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import static android.content.res.FontResourcesParser.FamilyResourceEntry;
+import static android.content.res.FontResourcesParser.ProviderResourceEntry;
+import static android.content.res.FontResourcesParser.FontFileResourceEntry;
+import static android.content.res.FontResourcesParser.FontFamilyFilesResourceEntry;
+
 import android.app.Instrumentation;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
@@ -56,44 +61,40 @@ public class FontResourcesParserTest {
     public void testParse() throws XmlPullParserException, IOException {
         XmlResourceParser parser = mResources.getXml(R.font.samplexmlfont);
 
-        FontConfig result = FontResourcesParser.parse(parser, mResources);
+        FamilyResourceEntry result = FontResourcesParser.parse(parser, mResources);
 
         assertNotNull(result);
-        List<FontConfig.Family> families = result.getFamilies();
-        assertEquals(1, families.size());
-        List<FontConfig.Font> fonts = families.get(0).getFonts();
-        assertEquals(4, fonts.size());
-        FontConfig.Font font1 = fonts.get(0);
+        FontFamilyFilesResourceEntry filesEntry = (FontFamilyFilesResourceEntry) result;
+        FontFileResourceEntry[] fileEntries = filesEntry.getEntries();
+        assertEquals(4, fileEntries.length);
+        FontFileResourceEntry font1 = fileEntries[0];
         assertEquals(400, font1.getWeight());
         assertEquals(false, font1.isItalic());
-        assertEquals("res/font/samplefont.ttf", font1.getFontName());
-        FontConfig.Font font2 = fonts.get(1);
+        assertEquals("res/font/samplefont.ttf", font1.getFileName());
+        FontFileResourceEntry font2 = fileEntries[1];
         assertEquals(400, font2.getWeight());
         assertEquals(true, font2.isItalic());
-        assertEquals("res/font/samplefont2.ttf", font2.getFontName());
-        FontConfig.Font font3 = fonts.get(2);
+        assertEquals("res/font/samplefont2.ttf", font2.getFileName());
+        FontFileResourceEntry font3 = fileEntries[2];
         assertEquals(800, font3.getWeight());
         assertEquals(false, font3.isItalic());
-        assertEquals("res/font/samplefont3.ttf", font3.getFontName());
-        FontConfig.Font font4 = fonts.get(3);
+        assertEquals("res/font/samplefont3.ttf", font3.getFileName());
+        FontFileResourceEntry font4 = fileEntries[3];
         assertEquals(800, font4.getWeight());
         assertEquals(true, font4.isItalic());
-        assertEquals("res/font/samplefont4.ttf", font4.getFontName());
+        assertEquals("res/font/samplefont4.ttf", font4.getFileName());
     }
 
     @Test
     public void testParseDownloadableFont() throws IOException, XmlPullParserException {
         XmlResourceParser parser = mResources.getXml(R.font.samplexmldownloadedfont);
 
-        FontConfig result = FontResourcesParser.parse(parser, mResources);
+        FamilyResourceEntry result = FontResourcesParser.parse(parser, mResources);
 
         assertNotNull(result);
-        List<FontConfig.Family> families = result.getFamilies();
-        assertEquals(1, families.size());
-        FontConfig.Family family = families.get(0);
-        assertEquals("com.example.test.fontprovider.authority", family.getProviderAuthority());
-        assertEquals("com.example.test.fontprovider.package", family.getProviderPackage());
-        assertEquals("MyRequestedFont", family.getQuery());
-        assertNull(family.getFonts());
+        ProviderResourceEntry providerEntry = (ProviderResourceEntry) result;
+        assertEquals("com.example.test.fontprovider.authority", providerEntry.getAuthority());
+        assertEquals("com.example.test.fontprovider.package", providerEntry.getPackage());
+        assertEquals("MyRequestedFont", providerEntry.getQuery());
     }
 }

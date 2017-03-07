@@ -16,7 +16,8 @@
 package android.content.res;
 
 import com.android.internal.R;
-import android.text.FontConfig;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.util.AttributeSet;
 import android.util.Xml;
 
@@ -35,7 +36,81 @@ public class FontResourcesParser {
     private static final int NORMAL_WEIGHT = 400;
     private static final int ITALIC = 1;
 
-    public static FontConfig parse(XmlPullParser parser, Resources resources)
+    // A class represents single entry of font-family in xml file.
+    public interface FamilyResourceEntry {}
+
+    // A class represents font provider based font-family element in xml file.
+    public static final class ProviderResourceEntry implements FamilyResourceEntry {
+        private final @NonNull String mProviderAuthority;
+        private final @NonNull String mProviderPackage;
+        private final @NonNull String mQuery;
+
+        public ProviderResourceEntry(@NonNull String authority, @NonNull String pkg,
+                @NonNull String query) {
+            mProviderAuthority = authority;
+            mProviderPackage = pkg;
+            mQuery = query;
+        }
+
+        public @NonNull String getAuthority() {
+            return mProviderAuthority;
+        }
+
+        public @NonNull String getPackage() {
+            return mProviderPackage;
+        }
+
+        public @NonNull String getQuery() {
+            return mQuery;
+        }
+    }
+
+    // A class represents font element in xml file which points a file in resource.
+    public static final class FontFileResourceEntry {
+        private final @NonNull String mFileName;
+        private int mWeight;
+        private boolean mItalic;
+        private int mResourceId;
+
+        public FontFileResourceEntry(@NonNull String fileName, int weight, boolean italic,
+                int resourceId) {
+            mFileName = fileName;
+            mWeight = weight;
+            mItalic = italic;
+            mResourceId = resourceId;
+        }
+
+        public @NonNull String getFileName() {
+            return mFileName;
+        }
+
+        public int getWeight() {
+            return mWeight;
+        }
+
+        public boolean isItalic() {
+            return mItalic;
+        }
+
+        public int getResourceId() {
+            return mResourceId;
+        }
+    }
+
+    // A class represents file based font-family element in xml file.
+    public static final class FontFamilyFilesResourceEntry implements FamilyResourceEntry {
+        private final @NonNull FontFileResourceEntry[] mEntries;
+
+        public FontFamilyFilesResourceEntry(@NonNull FontFileResourceEntry[] entries) {
+            mEntries = entries;
+        }
+
+        public @NonNull FontFileResourceEntry[] getEntries() {
+            return mEntries;
+        }
+    }
+
+    public static @Nullable FamilyResourceEntry parse(XmlPullParser parser, Resources resources)
             throws XmlPullParserException, IOException {
         int type;
         while ((type=parser.next()) != XmlPullParser.START_TAG
@@ -49,21 +124,21 @@ public class FontResourcesParser {
         return readFamilies(parser, resources);
     }
 
-    private static FontConfig readFamilies(XmlPullParser parser, Resources resources)
-            throws XmlPullParserException, IOException {
-        FontConfig config = new FontConfig();
+    private static @Nullable FamilyResourceEntry readFamilies(XmlPullParser parser,
+            Resources resources) throws XmlPullParserException, IOException {
         parser.require(XmlPullParser.START_TAG, null, "font-family");
         String tag = parser.getName();
+        FamilyResourceEntry result = null;
         if (tag.equals("font-family")) {
-            config.getFamilies().add(readFamily(parser, resources));
+            return readFamily(parser, resources);
         } else {
             skip(parser);
+            return null;
         }
-        return config;
     }
 
-    private static FontConfig.Family readFamily(XmlPullParser parser, Resources resources)
-            throws XmlPullParserException, IOException {
+    private static @Nullable FamilyResourceEntry readFamily(XmlPullParser parser,
+            Resources resources) throws XmlPullParserException, IOException {
         AttributeSet attrs = Xml.asAttributeSet(parser);
         TypedArray array = resources.obtainAttributes(attrs, R.styleable.FontFamily);
         String authority = array.getString(R.styleable.FontFamily_fontProviderAuthority);
@@ -74,9 +149,9 @@ public class FontResourcesParser {
             while (parser.next() != XmlPullParser.END_TAG) {
                 skip(parser);
             }
-            return new FontConfig.Family(authority, providerPackage, query);
+            return new ProviderResourceEntry(authority, providerPackage, query);
         }
-        List<FontConfig.Font> fonts = new ArrayList<>();
+        List<FontFileResourceEntry> fonts = new ArrayList<>();
         while (parser.next() != XmlPullParser.END_TAG) {
             if (parser.getEventType() != XmlPullParser.START_TAG) continue;
             String tag = parser.getName();
@@ -86,10 +161,14 @@ public class FontResourcesParser {
                 skip(parser);
             }
         }
-        return new FontConfig.Family(null, fonts, null, null);
+        if (fonts.isEmpty()) {
+            return null;
+        }
+        return new FontFamilyFilesResourceEntry(fonts.toArray(
+                new FontFileResourceEntry[fonts.size()]));
     }
 
-    private static FontConfig.Font readFont(XmlPullParser parser, Resources resources)
+    private static FontFileResourceEntry readFont(XmlPullParser parser, Resources resources)
             throws XmlPullParserException, IOException {
         AttributeSet attrs = Xml.asAttributeSet(parser);
         TypedArray array = resources.obtainAttributes(attrs, R.styleable.FontFamilyFont);
@@ -101,7 +180,7 @@ public class FontResourcesParser {
         while (parser.next() != XmlPullParser.END_TAG) {
             skip(parser);
         }
-        return new FontConfig.Font(filename, 0, null, weight, isItalic, resourceId);
+        return new FontFileResourceEntry(filename, weight, isItalic, resourceId);
     }
 
     private static void skip(XmlPullParser parser) throws XmlPullParserException, IOException {

@@ -71,11 +71,8 @@ public class FontManagerService extends IFontManager.Stub {
                 return null;
             }
 
-            final int size = config.getFamilies().size();
-            for (int i = 0; i < size; ++i) {
-                FontConfig.Family family = config.getFamilies().get(i);
-                for (int j = 0; j < family.getFonts().size(); ++j) {
-                    FontConfig.Font font = family.getFonts().get(j);
+            for (FontConfig.Family family : config.getFamilies()) {
+                for (FontConfig.Font font : family.getFonts()) {
                     File fontFile = new File(font.getFontName());
                     try {
                         font.setFd(ParcelFileDescriptor.open(

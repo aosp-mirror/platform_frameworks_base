@@ -16,6 +16,11 @@
 
 package android.graphics;
 
+import static android.content.res.FontResourcesParser.ProviderResourceEntry;
+import static android.content.res.FontResourcesParser.FontFileResourceEntry;
+import static android.content.res.FontResourcesParser.FontFamilyFilesResourceEntry;
+import static android.content.res.FontResourcesParser.FamilyResourceEntry;
+
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -161,46 +166,35 @@ public class Typeface {
      * Used by Resources to load a font resource of type xml.
      */
     @Nullable
-    public static Typeface createFromResources(FontConfig config, AssetManager mgr, String path) {
+    public static Typeface createFromResources(
+            FamilyResourceEntry entry, AssetManager mgr, String path) {
         if (sFallbackFonts != null) {
             Typeface typeface = findFromCache(mgr, path);
             if (typeface != null) return typeface;
 
-            List<FontConfig.Family> families = config.getFamilies();
-            if (families == null || families.isEmpty()) {
-                throw new RuntimeException(
-                        "Font resource " + path + " contained no font families.");
-            }
-            if (families.size() > 1) {
-                throw new RuntimeException(
-                        "Font resource " + path + " contained more than one family.");
-            }
-            FontConfig.Family family = families.get(0);
-            if (family.getProviderAuthority() != null && family.getQuery() != null) {
+            if (entry instanceof ProviderResourceEntry) {
+                final ProviderResourceEntry providerEntry = (ProviderResourceEntry) entry;
                 // Downloadable font
-                typeface = findFromCache(
-                        family.getProviderAuthority(), family.getQuery());
+                typeface = findFromCache(providerEntry.getAuthority(), providerEntry.getQuery());
                 if (typeface != null) {
                     return typeface;
                 }
                 // Downloaded font and it wasn't cached, request it again and return a
                 // default font instead (nothing we can do now).
-                create(new FontRequest(family.getProviderAuthority(), family.getProviderPackage(),
-                        family.getQuery()), NO_OP_REQUEST_CALLBACK);
+                create(new FontRequest(providerEntry.getAuthority(), providerEntry.getPackage(),
+                        providerEntry.getQuery()), NO_OP_REQUEST_CALLBACK);
                 return DEFAULT;
             }
 
+            // family is FontFamilyFilesResourceEntry
+            final FontFamilyFilesResourceEntry filesEntry =
+                    (FontFamilyFilesResourceEntry) entry;
+
             FontFamily fontFamily = new FontFamily();
-            List<FontConfig.Font> fonts = family.getFonts();
-            if (fonts == null || fonts.isEmpty()) {
-                throw new RuntimeException("Font resource " + path + " contained no fonts.");
-            }
-            for (int i = 0; i < fonts.size(); i++) {
-                FontConfig.Font font = fonts.get(i);
-                // TODO: Use style and weight info
-                if (!fontFamily.addFontFromAssetManager(mgr, font.getFontName(),
-                        0 /* resourceCookie */, false /* isAsset */, font.getWeight(),
-                        font.isItalic())) {
+            for (final FontFileResourceEntry fontFile : filesEntry.getEntries()) {
+                if (!fontFamily.addFontFromAssetManager(mgr, fontFile.getFileName(),
+                        0 /* resourceCookie */, false /* isAsset */, fontFile.getWeight(),
+                      fontFile.isItalic())) {
                     return null;
                 }
             }
@@ -677,8 +671,8 @@ public class Typeface {
             List<FontFamily> familyList = new ArrayList<FontFamily>();
             // Note that the default typeface is always present in the fallback list;
             // this is an enhancement from pre-Minikin behavior.
-            for (int i = 0; i < fontConfig.getFamilies().size(); i++) {
-                FontConfig.Family f = fontConfig.getFamilies().get(i);
+            for (int i = 0; i < fontConfig.getFamilies().length; i++) {
+                FontConfig.Family f = fontConfig.getFamilies()[i];
                 if (i == 0 || f.getName() == null) {
                     familyList.add(makeFamilyFromParsed(f, bufferForPath));
                 }
@@ -687,9 +681,9 @@ public class Typeface {
             setDefault(Typeface.createFromFamilies(sFallbackFonts));
 
             Map<String, Typeface> systemFonts = new HashMap<String, Typeface>();
-            for (int i = 0; i < fontConfig.getFamilies().size(); i++) {
+            for (int i = 0; i < fontConfig.getFamilies().length; i++) {
                 Typeface typeface;
-                FontConfig.Family f = fontConfig.getFamilies().get(i);
+                FontConfig.Family f = fontConfig.getFamilies()[i];
                 if (f.getName() != null) {
                     if (i == 0) {
                         // The first entry is the default typeface; no sense in
