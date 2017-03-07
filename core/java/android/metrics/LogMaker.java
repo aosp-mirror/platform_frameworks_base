@@ -46,8 +46,9 @@ public class LogMaker {
 
     private SparseArray<Object> entries = new SparseArray();
 
-    public LogMaker(int mainCategory) {
-        setCategory(mainCategory);
+    /** @param category for the new LogMaker. */
+    public LogMaker(int category) {
+        setCategory(category);
     }
 
     /* Deserialize from the eventlog */
@@ -55,71 +56,133 @@ public class LogMaker {
       deserialize(items);
     }
 
+    /** @param category to replace the existing setting. */
     public LogMaker setCategory(int category) {
         entries.put(MetricsEvent.RESERVED_FOR_LOGBUILDER_CATEGORY, category);
         return this;
     }
 
+    /** Set the category to unknown. */
     public LogMaker clearCategory() {
         entries.remove(MetricsEvent.RESERVED_FOR_LOGBUILDER_CATEGORY);
         return this;
     }
 
+    /** @param type to replace the existing setting. */
     public LogMaker setType(int type) {
         entries.put(MetricsEvent.RESERVED_FOR_LOGBUILDER_TYPE, type);
         return this;
     }
 
+    /** Set the type to unknown. */
     public LogMaker clearType() {
         entries.remove(MetricsEvent.RESERVED_FOR_LOGBUILDER_TYPE);
         return this;
     }
 
+    /** @param subtype to replace the existing setting. */
     public LogMaker setSubtype(int subtype) {
         entries.put(MetricsEvent.RESERVED_FOR_LOGBUILDER_SUBTYPE, subtype);
         return this;
     }
 
+    /** Set the subtype to 0. */
     public LogMaker clearSubtype() {
         entries.remove(MetricsEvent.RESERVED_FOR_LOGBUILDER_SUBTYPE);
         return this;
     }
 
+    /**
+     * This will be set by the system when the log is persisted.
+     * Client-supplied values will be ignored.
+     *
+     * @param timestamp to replace the existing settings.
+     * @hide
+     */
     public LogMaker setTimestamp(long timestamp) {
         entries.put(MetricsEvent.RESERVED_FOR_LOGBUILDER_TIMESTAMP, timestamp);
         return this;
     }
 
+    /** Remove the timestamp property.
+     * @hide
+     */
     public LogMaker clearTimestamp() {
         entries.remove(MetricsEvent.RESERVED_FOR_LOGBUILDER_TIMESTAMP);
         return this;
     }
 
+    /** @param packageName to replace the existing setting. */
     public LogMaker setPackageName(String packageName) {
         entries.put(MetricsEvent.RESERVED_FOR_LOGBUILDER_PACKAGENAME, packageName);
         return this;
     }
 
+    /** Remove the package name property. */
     public LogMaker clearPackageName() {
         entries.remove(MetricsEvent.RESERVED_FOR_LOGBUILDER_PACKAGENAME);
         return this;
     }
 
+    /**
+     * This will be set by the system when the log is persisted.
+     * Client-supplied values will be ignored.
+     *
+     * @param pid to replace the existing setting.
+     * @hide
+     */
+    public LogMaker setProcessId(int pid) {
+        entries.put(MetricsEvent.RESERVED_FOR_LOGBUILDER_PID, pid);
+        return this;
+    }
+
+    /** Remove the process ID property.
+     * @hide
+     */
+    public LogMaker clearProcessId() {
+        entries.remove(MetricsEvent.RESERVED_FOR_LOGBUILDER_PID);
+        return this;
+    }
+
+    /**
+     * The name of the counter or histogram.
+     * Only useful for counter or histogram category objects.
+     * @param name to replace the existing setting.
+     * @hide
+     */
     public LogMaker setCounterName(String name) {
         entries.put(MetricsEvent.RESERVED_FOR_LOGBUILDER_NAME, name);
         return this;
     }
 
+    /**
+     * The bucket label, expressed as an integer.
+     * Only useful for histogram category objects.
+     * @param bucket to replace the existing setting.
+     * @hide
+     */
     public LogMaker setCounterBucket(int bucket) {
         entries.put(MetricsEvent.RESERVED_FOR_LOGBUILDER_BUCKET, bucket);
         return this;
     }
 
+    /**
+     * The bucket label, expressed as a long integer.
+     * Only useful for histogram category objects.
+     * @param bucket to replace the existing setting.
+     * @hide
+     */
     public LogMaker setCounterBucket(long bucket) {
         entries.put(MetricsEvent.RESERVED_FOR_LOGBUILDER_BUCKET, bucket);
         return this;
     }
 
+    /**
+     * The value to increment the counter or bucket by.
+     * Only useful for counter and histogram category objects.
+     * @param value to replace the existing setting.
+     * @hide
+     */
     public LogMaker setCounterValue(int value) {
         entries.put(MetricsEvent.RESERVED_FOR_LOGBUILDER_VALUE, value);
         return this;
@@ -171,6 +234,7 @@ public class LogMaker {
         return entries.get(tag);
     }
 
+    /** @return the category of the log, or unknown. */
     public int getCategory() {
         Object obj = entries.get(MetricsEvent.RESERVED_FOR_LOGBUILDER_CATEGORY);
         if (obj instanceof Integer) {
@@ -180,6 +244,7 @@ public class LogMaker {
         }
     }
 
+    /** @return the type of the log, or unknwon. */
     public int getType() {
         Object obj = entries.get(MetricsEvent.RESERVED_FOR_LOGBUILDER_TYPE);
         if (obj instanceof Integer) {
@@ -189,6 +254,7 @@ public class LogMaker {
         }
     }
 
+    /** @return the subtype of the log, or 0. */
     public int getSubtype() {
         Object obj = entries.get(MetricsEvent.RESERVED_FOR_LOGBUILDER_SUBTYPE);
         if (obj instanceof Integer) {
@@ -198,6 +264,7 @@ public class LogMaker {
         }
     }
 
+    /** @return the timestamp of the log.or 0 */
     public long getTimestamp() {
         Object obj = entries.get(MetricsEvent.RESERVED_FOR_LOGBUILDER_TIMESTAMP);
         if (obj instanceof Long) {
@@ -207,6 +274,7 @@ public class LogMaker {
         }
     }
 
+    /** @return the package name of the log, or null. */
     public String getPackageName() {
         Object obj = entries.get(MetricsEvent.RESERVED_FOR_LOGBUILDER_PACKAGENAME);
         if (obj instanceof String) {
@@ -216,6 +284,17 @@ public class LogMaker {
         }
     }
 
+    /** @return the process ID of the log, or -1. */
+    public int getProcessId() {
+        Object obj = entries.get(MetricsEvent.RESERVED_FOR_LOGBUILDER_PID);
+        if (obj instanceof Integer) {
+            return (Integer) obj;
+        } else {
+            return -1;
+        }
+    }
+
+    /** @return the name of the counter, or null. */
     public String getCounterName() {
         Object obj = entries.get(MetricsEvent.RESERVED_FOR_LOGBUILDER_NAME);
         if (obj instanceof String) {
@@ -225,6 +304,7 @@ public class LogMaker {
         }
     }
 
+    /** @return the bucket label of the histogram\, or 0. */
     public long getCounterBucket() {
         Object obj = entries.get(MetricsEvent.RESERVED_FOR_LOGBUILDER_BUCKET);
         if (obj instanceof Number) {
@@ -234,11 +314,13 @@ public class LogMaker {
         }
     }
 
+    /** @return true if the bucket label was specified as a long integer. */
     public boolean isLongCounterBucket() {
         Object obj = entries.get(MetricsEvent.RESERVED_FOR_LOGBUILDER_BUCKET);
         return obj instanceof Long;
     }
 
+    /** @return the increment value of the counter, or 0. */
     public int getCounterValue() {
         Object obj = entries.get(MetricsEvent.RESERVED_FOR_LOGBUILDER_VALUE);
         if (obj instanceof Integer) {
@@ -249,7 +331,7 @@ public class LogMaker {
     }
 
     /**
-     * Assemble logs into structure suitable for EventLog.
+     * @return a representation of the log suitable for EventLog.
      */
     public Object[] serialize() {
         Object[] out = new Object[entries.size() * 2];

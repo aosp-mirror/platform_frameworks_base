@@ -77,7 +77,8 @@ public class MetricsReader {
                     objects[0] = data;
                 }
                 mEventQueue.add(new LogMaker(objects)
-                        .setTimestamp(eventTimestampMs));
+                        .setTimestamp(eventTimestampMs)
+                        .setProcessId(event.getProcessId()));
                 mLastEventMs = eventTimestampMs;
             }
         }
