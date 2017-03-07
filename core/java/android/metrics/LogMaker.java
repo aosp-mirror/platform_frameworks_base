@@ -60,8 +60,18 @@ public class LogMaker {
         return this;
     }
 
+    public LogMaker clearCategory() {
+        entries.remove(MetricsEvent.RESERVED_FOR_LOGBUILDER_CATEGORY);
+        return this;
+    }
+
     public LogMaker setType(int type) {
         entries.put(MetricsEvent.RESERVED_FOR_LOGBUILDER_TYPE, type);
+        return this;
+    }
+
+    public LogMaker clearType() {
+        entries.remove(MetricsEvent.RESERVED_FOR_LOGBUILDER_TYPE);
         return this;
     }
 
@@ -70,13 +80,28 @@ public class LogMaker {
         return this;
     }
 
+    public LogMaker clearSubtype() {
+        entries.remove(MetricsEvent.RESERVED_FOR_LOGBUILDER_SUBTYPE);
+        return this;
+    }
+
     public LogMaker setTimestamp(long timestamp) {
         entries.put(MetricsEvent.RESERVED_FOR_LOGBUILDER_TIMESTAMP, timestamp);
         return this;
     }
 
+    public LogMaker clearTimestamp() {
+        entries.remove(MetricsEvent.RESERVED_FOR_LOGBUILDER_TIMESTAMP);
+        return this;
+    }
+
     public LogMaker setPackageName(String packageName) {
         entries.put(MetricsEvent.RESERVED_FOR_LOGBUILDER_PACKAGENAME, packageName);
+        return this;
+    }
+
+    public LogMaker clearPackageName() {
+        entries.remove(MetricsEvent.RESERVED_FOR_LOGBUILDER_PACKAGENAME);
         return this;
     }
 

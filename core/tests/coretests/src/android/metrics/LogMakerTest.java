@@ -122,6 +122,55 @@ public class LogMakerTest extends TestCase {
         assertEquals(null, builder.getTaggedData(1));
     }
 
+    public void testClearFieldLeavesOtherFieldsIntact() {
+        LogMaker builder = new LogMaker(0);
+        builder.setPackageName("package.name");
+        builder.setSubtype(10);
+        builder.clearPackageName();
+        assertEquals(null, builder.getPackageName());
+        assertEquals(10, builder.getSubtype());
+    }
+
+    public void testSetAndClearCategory() {
+        LogMaker builder = new LogMaker(0);
+        builder.setCategory(MetricsEvent.MAIN_SETTINGS);
+        assertEquals(MetricsEvent.MAIN_SETTINGS, builder.getCategory());
+        builder.clearCategory();
+        assertEquals(MetricsEvent.VIEW_UNKNOWN, builder.getCategory());
+    }
+
+    public void testSetAndClearType() {
+        LogMaker builder = new LogMaker(0);
+        builder.setType(MetricsEvent.TYPE_OPEN);
+        assertEquals(MetricsEvent.TYPE_OPEN, builder.getType());
+        builder.clearType();
+        assertEquals(MetricsEvent.TYPE_UNKNOWN, builder.getType());
+    }
+
+    public void testSetAndClearSubtype() {
+        LogMaker builder = new LogMaker(0);
+        builder.setSubtype(1);
+        assertEquals(1, builder.getSubtype());
+        builder.clearSubtype();
+        assertEquals(0, builder.getSubtype());
+    }
+
+    public void testSetAndClearTimestamp() {
+        LogMaker builder = new LogMaker(0);
+        builder.setTimestamp(1);
+        assertEquals(1, builder.getTimestamp());
+        builder.clearTimestamp();
+        assertEquals(0, builder.getTimestamp());
+    }
+
+    public void testSetAndClearPackageName() {
+        LogMaker builder = new LogMaker(0);
+        builder.setPackageName("package.name");
+        assertEquals("package.name", builder.getPackageName());
+        builder.clearPackageName();
+        assertEquals(null, builder.getPackageName());
+    }
+
     public void testGiantLogOmitted() {
         LogMaker badBuilder = new LogMaker(0);
         StringBuilder b = new StringBuilder();
