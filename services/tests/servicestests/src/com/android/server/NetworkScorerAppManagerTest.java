@@ -23,6 +23,7 @@ import static junit.framework.Assert.assertTrue;
 
 import static org.junit.Assert.assertFalse;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -206,15 +207,30 @@ public class NetworkScorerAppManagerTest {
     }
 
     @Test
-    public void testSetActiveScorer_nullPackage() throws Exception {
+    public void testSetActiveScorer_nullPackage_validDefault() throws Exception {
+        String packageName = "package";
+        String defaultPackage = "defaultPackage";
+        setNetworkRecoPackageSetting(packageName);
+        setDefaultNetworkRecommendationPackage(defaultPackage);
+        final ComponentName recoComponent = new ComponentName(defaultPackage, "class1");
+        mockScoreNetworksGranted(recoComponent.getPackageName());
+        mockRecommendationServiceAvailable(recoComponent, 924 /* packageUid */, null);
+
+        assertTrue(mNetworkScorerAppManager.setActiveScorer(null));
+        verify(mSettingsFacade).putString(mMockContext,
+                Settings.Global.NETWORK_RECOMMENDATIONS_PACKAGE, defaultPackage);
+    }
+
+    @Test
+    public void testSetActiveScorer_nullPackage_invalidDefault() throws Exception {
         String packageName = "package";
         String defaultPackage = "defaultPackage";
         setNetworkRecoPackageSetting(packageName);
         setDefaultNetworkRecommendationPackage(defaultPackage);
 
-        assertTrue(mNetworkScorerAppManager.setActiveScorer(null));
-        verify(mSettingsFacade).putString(mMockContext,
-                Settings.Global.NETWORK_RECOMMENDATIONS_PACKAGE, defaultPackage);
+        assertFalse(mNetworkScorerAppManager.setActiveScorer(null));
+        verify(mSettingsFacade, never()).putString(any(),
+                eq(Settings.Global.NETWORK_RECOMMENDATIONS_PACKAGE), any());
     }
 
     @Test
@@ -242,29 +258,82 @@ public class NetworkScorerAppManagerTest {
         verify(mSettingsFacade, never()).putString(any(), any(), any());
     }
 
-
     @Test
-    public void testRevertToDefaultIfNoActive_notActive() throws Exception {
-        String defaultPackage = "defaultPackage";
-        setDefaultNetworkRecommendationPackage(defaultPackage);
+    public void testUpdateState_recommendationsForcedOff() throws Exception {
+        setRecommendationsEnabledSetting(NetworkScoreManager.RECOMMENDATIONS_ENABLED_FORCED_OFF);
 
-        mNetworkScorerAppManager.revertToDefaultIfNoActive();
+        mNetworkScorerAppManager.updateState();
 
-        verify(mSettingsFacade).putString(mMockContext,
-                Settings.Global.NETWORK_RECOMMENDATIONS_PACKAGE, defaultPackage);
+        verify(mSettingsFacade, never()).getString(any(),
+                eq(Settings.Global.NETWORK_RECOMMENDATIONS_PACKAGE));
+        verify(mSettingsFacade, never()).putInt(any(),
+                eq(Settings.Global.NETWORK_RECOMMENDATIONS_ENABLED), anyInt());
     }
 
     @Test
-    public void testRevertToDefaultIfNoActive_active() throws Exception {
+    public void testUpdateState_currentPackageValid() throws Exception {
         String packageName = "package";
         setNetworkRecoPackageSetting(packageName);
         final ComponentName recoComponent = new ComponentName(packageName, "class1");
         mockScoreNetworksGranted(recoComponent.getPackageName());
         mockRecommendationServiceAvailable(recoComponent, 924 /* packageUid */, null);
 
-        mNetworkScorerAppManager.revertToDefaultIfNoActive();
+        mNetworkScorerAppManager.updateState();
 
-        verify(mSettingsFacade, never()).putString(any(), any(), any());
+        verify(mSettingsFacade, never()).putString(any(),
+                eq(Settings.Global.NETWORK_RECOMMENDATIONS_PACKAGE), any());
+        verify(mSettingsFacade).putInt(mMockContext,
+                Settings.Global.NETWORK_RECOMMENDATIONS_ENABLED,
+                NetworkScoreManager.RECOMMENDATIONS_ENABLED_ON);
+    }
+
+    @Test
+    public void testUpdateState_currentPackageNotValid_validDefault() throws Exception {
+        String defaultPackage = "defaultPackage";
+        setDefaultNetworkRecommendationPackage(defaultPackage);
+        final ComponentName recoComponent = new ComponentName(defaultPackage, "class1");
+        mockScoreNetworksGranted(recoComponent.getPackageName());
+        mockRecommendationServiceAvailable(recoComponent, 924 /* packageUid */, null);
+
+        mNetworkScorerAppManager.updateState();
+
+        verify(mSettingsFacade).putString(mMockContext,
+                Settings.Global.NETWORK_RECOMMENDATIONS_PACKAGE, defaultPackage);
+        verify(mSettingsFacade).putInt(mMockContext,
+                Settings.Global.NETWORK_RECOMMENDATIONS_ENABLED,
+                NetworkScoreManager.RECOMMENDATIONS_ENABLED_ON);
+    }
+
+    @Test
+    public void testUpdateState_currentPackageNotValid_invalidDefault() throws Exception {
+        String defaultPackage = "defaultPackage";
+        setDefaultNetworkRecommendationPackage(defaultPackage);
+        setNetworkRecoPackageSetting("currentPackage");
+
+        mNetworkScorerAppManager.updateState();
+
+        verify(mSettingsFacade).putString(mMockContext,
+                Settings.Global.NETWORK_RECOMMENDATIONS_PACKAGE, defaultPackage);
+        verify(mSettingsFacade).putInt(mMockContext,
+                Settings.Global.NETWORK_RECOMMENDATIONS_ENABLED,
+                NetworkScoreManager.RECOMMENDATIONS_ENABLED_OFF);
+    }
+
+    @Test
+    public void testUpdateState_currentPackageNotValid_sameAsDefault() throws Exception {
+        String defaultPackage = "defaultPackage";
+        setDefaultNetworkRecommendationPackage(defaultPackage);
+        setNetworkRecoPackageSetting(defaultPackage);
+
+        mNetworkScorerAppManager.updateState();
+
+        verify(mSettingsFacade, never()).putString(any(),
+                eq(Settings.Global.NETWORK_RECOMMENDATIONS_PACKAGE), any());
+    }
+
+    private void setRecommendationsEnabledSetting(int value) {
+        when(mSettingsFacade.getInt(eq(mMockContext),
+                eq(Settings.Global.NETWORK_RECOMMENDATIONS_ENABLED), anyInt())).thenReturn(value);
     }
 
     private void setNetworkRecoPackageSetting(String packageName) {

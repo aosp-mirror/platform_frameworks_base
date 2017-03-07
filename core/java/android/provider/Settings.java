@@ -8234,7 +8234,14 @@ public final class Settings {
          * Value to specify if network recommendations from
          * {@link com.android.server.NetworkScoreService} are enabled.
          *
-         * Type: int (0 for false, 1 for true)
+         * Type: int
+         * Valid values:
+         *   -1 = Forced off
+         *    0 = Disabled
+         *    1 = Enabled
+         *
+         * Most readers of this setting should simply check if value == 1 to determined the
+         * enabled state.
          * @hide
          */
         @SystemApi

@@ -277,8 +277,8 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
 
     private void refreshBinding() {
         if (DBG) Log.d(TAG, "refreshBinding()");
-        // Apply the default package name if the Setting isn't set.
-        mNetworkScorerAppManager.revertToDefaultIfNoActive();
+        // Make sure the scorer is up-to-date
+        mNetworkScorerAppManager.updateState();
         registerPackageMonitorIfNeeded();
         bindToScoringServiceIfNeeded();
     }
@@ -291,6 +291,10 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
         final Uri timeoutUri = Global.getUriFor(Global.NETWORK_RECOMMENDATION_REQUEST_TIMEOUT_MS);
         mContentObserver.observe(timeoutUri,
                 ServiceHandler.MSG_RECOMMENDATION_REQUEST_TIMEOUT_CHANGED);
+
+        final Uri settingUri = Global.getUriFor(Global.NETWORK_RECOMMENDATIONS_ENABLED);
+        mContentObserver.observe(settingUri,
+                ServiceHandler.MSG_RECOMMENDATION_ENABLED_SETTING_CHANGED);
     }
 
     /**
@@ -1171,6 +1175,7 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
         public static final int MSG_RECOMMENDATION_REQUEST_TIMEOUT = 1;
         public static final int MSG_RECOMMENDATIONS_PACKAGE_CHANGED = 2;
         public static final int MSG_RECOMMENDATION_REQUEST_TIMEOUT_CHANGED = 3;
+        public static final int MSG_RECOMMENDATION_ENABLED_SETTING_CHANGED = 4;
 
         public ServiceHandler(Looper looper) {
             super(looper);
@@ -1192,6 +1197,7 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
                     break;
 
                 case MSG_RECOMMENDATIONS_PACKAGE_CHANGED:
+                case MSG_RECOMMENDATION_ENABLED_SETTING_CHANGED:
                     refreshBinding();
                     break;
 
