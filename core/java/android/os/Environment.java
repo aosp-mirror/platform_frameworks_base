@@ -301,11 +301,6 @@ public class Environment {
     }
 
     /** {@hide} */
-    public static File getDataProfilesDeForeignDexDirectory(int userId) {
-        return buildPath(getDataProfilesDeDirectory(userId), "foreign-dex");
-    }
-
-    /** {@hide} */
     public static File getDataAppDirectory(String volumeUuid) {
         return new File(getDataDirectory(volumeUuid), "app");
     }
