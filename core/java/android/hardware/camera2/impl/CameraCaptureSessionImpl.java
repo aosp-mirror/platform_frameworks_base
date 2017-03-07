@@ -19,6 +19,7 @@ import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CaptureRequest;
+import android.hardware.camera2.ICameraDeviceUser;
 import android.hardware.camera2.dispatch.ArgumentReplacingDispatcher;
 import android.hardware.camera2.dispatch.BroadcastDispatcher;
 import android.hardware.camera2.dispatch.DuckTypingDispatcher;
@@ -742,7 +743,7 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession
                     try {
                         // begin transition to unconfigured
                         mDeviceImpl.configureStreamsChecked(/*inputConfig*/null, /*outputs*/null,
-                                /*isConstrainedHighSpeed*/false);
+                                /*operatingMode*/ ICameraDeviceUser.NORMAL_MODE);
                     } catch (CameraAccessException e) {
                         // OK: do not throw checked exceptions.
                         Log.e(TAG, mIdString + "Exception while unconfiguring outputs: ", e);
