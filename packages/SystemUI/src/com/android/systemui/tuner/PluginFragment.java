@@ -19,6 +19,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
@@ -26,15 +27,18 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.support.v14.preference.PreferenceFragment;
 import android.support.v14.preference.SwitchPreference;
-import android.support.v7.preference.PreferenceCategory;
 import android.support.v7.preference.PreferenceScreen;
 import android.support.v7.preference.PreferenceViewHolder;
+import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.view.View;
 
 import com.android.systemui.R;
+import com.android.systemui.plugins.PluginInstanceManager;
 import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.plugins.PluginPrefs;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -51,7 +55,6 @@ public class PluginFragment extends PreferenceFragment {
         IntentFilter filter = new IntentFilter(Intent.ACTION_PACKAGE_ADDED);
         filter.addAction(Intent.ACTION_PACKAGE_CHANGED);
         filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
-        filter.addAction(PluginManager.PLUGIN_CHANGED);
         filter.addDataScheme("package");
         getContext().registerReceiver(mReceiver, filter);
         filter = new IntentFilter(Intent.ACTION_USER_UNLOCKED);
@@ -74,22 +77,57 @@ public class PluginFragment extends PreferenceFragment {
         screen.setOrderingAsAdded(false);
         Context prefContext = getPreferenceManager().getContext();
         mPluginPrefs = new PluginPrefs(getContext());
-        Set<String> pluginActions = mPluginPrefs.getPluginList();
-        for (String action : pluginActions) {
-            String name = action.replace("com.android.systemui.action.PLUGIN_", "");
-            PreferenceCategory category = new PreferenceCategory(prefContext);
-            category.setTitle(name);
+        PackageManager pm = getContext().getPackageManager();
 
-            List<ResolveInfo> result = getContext().getPackageManager().queryIntentServices(
+        Set<String> pluginActions = mPluginPrefs.getPluginList();
+        ArrayMap<String, ArraySet<String>> plugins = new ArrayMap<>();
+        for (String action : pluginActions) {
+            String name = toName(action);
+            List<ResolveInfo> result = pm.queryIntentServices(
                     new Intent(action), PackageManager.MATCH_DISABLED_COMPONENTS);
-            if (result.size() > 0) {
-                screen.addPreference(category);
-            }
             for (ResolveInfo info : result) {
-                category.addPreference(new PluginPreference(prefContext, info));
+                String packageName = info.serviceInfo.packageName;
+                if (!plugins.containsKey(packageName)) {
+                    plugins.put(packageName, new ArraySet<>());
+                }
+                plugins.get(packageName).add(name);
             }
         }
+
+        List<PackageInfo> apps = pm.getPackagesHoldingPermissions(new String[]{
+                PluginInstanceManager.PLUGIN_PERMISSION},
+                PackageManager.MATCH_DISABLED_COMPONENTS | PackageManager.GET_SERVICES);
+        apps.forEach(app -> {
+            if (!plugins.containsKey(app.packageName)) return;
+            SwitchPreference pref = new PluginPreference(prefContext, app);
+            pref.setSummary("Plugins: " + toString(plugins.get(app.packageName)));
+            screen.addPreference(pref);
+        });
         setPreferenceScreen(screen);
+    }
+
+    private String toString(ArraySet<String> plugins) {
+        StringBuilder b = new StringBuilder();
+        for (String string : plugins) {
+            if (b.length() != 0) {
+                b.append(", ");
+            }
+            b.append(string);
+        }
+        return b.toString();
+    }
+
+    private String toName(String action) {
+        String str = action.replace("com.android.systemui.action.PLUGIN_", "");
+        StringBuilder b = new StringBuilder();
+        for (String s : str.split("_")) {
+            if (b.length() != 0) {
+                b.append(' ');
+            }
+            b.append(s.substring(0, 1));
+            b.append(s.substring(1).toLowerCase());
+        }
+        return b.toString();
     }
 
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
@@ -100,31 +138,44 @@ public class PluginFragment extends PreferenceFragment {
     };
 
     private static class PluginPreference extends SwitchPreference {
-        private final ComponentName mComponent;
         private final boolean mHasSettings;
+        private final PackageInfo mInfo;
+        private final PackageManager mPm;
 
-        public PluginPreference(Context prefContext, ResolveInfo info) {
+        public PluginPreference(Context prefContext, PackageInfo info) {
             super(prefContext);
-            mComponent = new ComponentName(info.serviceInfo.packageName, info.serviceInfo.name);
-            PackageManager pm = prefContext.getPackageManager();
-            mHasSettings = pm.resolveActivity(new Intent(ACTION_PLUGIN_SETTINGS)
-                    .setPackage(mComponent.getPackageName()), 0) != null;
-            setTitle(info.serviceInfo.loadLabel(pm));
-            setChecked(pm.getComponentEnabledSetting(mComponent)
-                    != PackageManager.COMPONENT_ENABLED_STATE_DISABLED);
+            mPm = prefContext.getPackageManager();
+            mHasSettings = mPm.resolveActivity(new Intent(ACTION_PLUGIN_SETTINGS)
+                    .setPackage(info.packageName), 0) != null;
+            mInfo = info;
+            setTitle(info.applicationInfo.loadLabel(mPm));
+            setChecked(isPluginEnabled());
             setWidgetLayoutResource(R.layout.tuner_widget_settings_switch);
+        }
+
+        private boolean isPluginEnabled() {
+            for (int i = 0; i < mInfo.services.length; i++) {
+                ComponentName componentName = new ComponentName(mInfo.packageName,
+                        mInfo.services[i].name);
+                if (mPm.getComponentEnabledSetting(componentName)
+                        == PackageManager.COMPONENT_ENABLED_STATE_DISABLED) {
+                    return false;
+                }
+            }
+            return true;
         }
 
         @Override
         protected boolean persistBoolean(boolean value) {
-            PackageManager pm = getContext().getPackageManager();
             final int desiredState = value ? PackageManager.COMPONENT_ENABLED_STATE_ENABLED
                     : PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
-            if (pm.getComponentEnabledSetting(mComponent) == desiredState) return true;
-            pm.setComponentEnabledSetting(mComponent,
-                    desiredState,
-                    PackageManager.DONT_KILL_APP);
-            final String pkg = mComponent.getPackageName();
+            for (int i = 0; i < mInfo.services.length; i++) {
+                ComponentName componentName = new ComponentName(mInfo.packageName,
+                        mInfo.services[i].name);
+                mPm.setComponentEnabledSetting(componentName, desiredState,
+                        PackageManager.DONT_KILL_APP);
+            }
+            final String pkg = mInfo.packageName;
             final Intent intent = new Intent(PluginManager.PLUGIN_CHANGED,
                     pkg != null ? Uri.fromParts("package", pkg, null) : null);
             getContext().sendBroadcast(intent);
@@ -141,7 +192,7 @@ public class PluginFragment extends PreferenceFragment {
             holder.findViewById(R.id.settings).setOnClickListener(v -> {
                 ResolveInfo result = v.getContext().getPackageManager().resolveActivity(
                         new Intent(ACTION_PLUGIN_SETTINGS).setPackage(
-                                mComponent.getPackageName()), 0);
+                                mInfo.packageName), 0);
                 if (result != null) {
                     v.getContext().startActivity(new Intent().setComponent(
                             new ComponentName(result.activityInfo.packageName,
@@ -150,7 +201,7 @@ public class PluginFragment extends PreferenceFragment {
             });
             holder.itemView.setOnLongClickListener(v -> {
                 Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-                intent.setData(Uri.fromParts("package", mComponent.getPackageName(), null));
+                intent.setData(Uri.fromParts("package", mInfo.packageName, null));
                 getContext().startActivity(intent);
                 return true;
             });
