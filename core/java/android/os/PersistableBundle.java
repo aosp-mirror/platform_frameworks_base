@@ -76,9 +76,12 @@ public final class PersistableBundle extends BaseBundle implements Cloneable, Pa
 
     /**
      * Constructs a PersistableBundle containing a copy of the mappings from the given
-     * PersistableBundle.
+     * PersistableBundle.  Does only a shallow copy of the original PersistableBundle -- see
+     * {@link #deepCopy()} if that is not what you want.
      *
      * @param b a PersistableBundle to be copied.
+     *
+     * @see #deepCopy()
      */
     public PersistableBundle(PersistableBundle b) {
         super(b);
@@ -87,7 +90,7 @@ public final class PersistableBundle extends BaseBundle implements Cloneable, Pa
 
 
     /**
-     * Constructs a PersistableBundle from a Bundle.
+     * Constructs a PersistableBundle from a Bundle.  Does only a shallow copy of the Bundle.
      *
      * @param b a Bundle to be copied.
      *
@@ -167,7 +170,7 @@ public final class PersistableBundle extends BaseBundle implements Cloneable, Pa
      * primitive arrays.  Other types of objects (such as Parcelable or Serializable)
      * are referenced as-is and not copied in any way.
      */
-    public PersistableBundle deepcopy() {
+    public PersistableBundle deepCopy() {
         PersistableBundle b = new PersistableBundle(false);
         b.copyInternal(this, true);
         return b;

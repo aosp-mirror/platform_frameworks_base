@@ -341,7 +341,7 @@ public class BaseBundle {
                     final int N = fromMap.size();
                     mMap = new ArrayMap<>(N);
                     for (int i = 0; i < N; i++) {
-                        mMap.append(fromMap.keyAt(i), deepcopyValue(fromMap.valueAt(i)));
+                        mMap.append(fromMap.keyAt(i), deepCopyValue(fromMap.valueAt(i)));
                     }
                 }
             } else {
@@ -352,14 +352,14 @@ public class BaseBundle {
         }
     }
 
-    Object deepcopyValue(Object value) {
+    Object deepCopyValue(Object value) {
         if (value == null) {
             return null;
         }
         if (value instanceof Bundle) {
-            return ((Bundle)value).deepcopy();
+            return ((Bundle)value).deepCopy();
         } else if (value instanceof PersistableBundle) {
-            return ((PersistableBundle)value).deepcopy();
+            return ((PersistableBundle)value).deepCopy();
         } else if (value instanceof ArrayList) {
             return deepcopyArrayList((ArrayList) value);
         } else if (value.getClass().isArray()) {
@@ -388,7 +388,7 @@ public class BaseBundle {
         final int N = from.size();
         ArrayList out = new ArrayList(N);
         for (int i=0; i<N; i++) {
-            out.add(deepcopyValue(from.get(i)));
+            out.add(deepCopyValue(from.get(i)));
         }
         return out;
     }
