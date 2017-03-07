@@ -504,6 +504,25 @@ public final class OverlayManagerService extends SystemService {
         }
 
         @Override
+        public boolean setEnabledExclusive(@Nullable final String packageName, final boolean enable,
+                int userId) throws RemoteException {
+            enforceChangeOverlayPackagesPermission("setEnabled");
+            userId = handleIncomingUser(userId, "setEnabled");
+            if (packageName == null) {
+                return false;
+            }
+
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    return mImpl.setEnabledExclusive(packageName, enable, userId);
+                }
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        @Override
         public boolean setPriority(@Nullable final String packageName,
                 @Nullable final String parentPackageName, int userId) throws RemoteException {
             enforceChangeOverlayPackagesPermission("setPriority");
