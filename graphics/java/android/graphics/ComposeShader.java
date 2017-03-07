@@ -16,44 +16,107 @@
 
 package android.graphics;
 
+
+import android.annotation.NonNull;
+
 /** A subclass of shader that returns the composition of two other shaders, combined by
     an {@link android.graphics.Xfermode} subclass.
 */
 public class ComposeShader extends Shader {
 
+    Shader mShaderA;
+    private long mNativeInstanceShaderA;
+    Shader mShaderB;
+    private long mNativeInstanceShaderB;
     private int mPorterDuffMode;
-    final Shader mShaderA;
-    final Shader mShaderB;
 
-    /** Create a new compose shader, given shaders A, B, and a combining mode.
-        When the mode is applied, it will be given the result from shader A as its
-        "dst", and the result from shader B as its "src".
-        @param shaderA  The colors from this shader are seen as the "dst" by the mode
-        @param shaderB  The colors from this shader are seen as the "src" by the mode
-        @param mode     The mode that combines the colors from the two shaders. If mode
-                        is null, then SRC_OVER is assumed.
+    /**
+     * Create a new compose shader, given shaders A, B, and a combining mode.
+     * When the mode is applied, it will be given the result from shader A as its
+     * "dst", and the result from shader B as its "src".
+     *
+     * @param shaderA  The colors from this shader are seen as the "dst" by the mode
+     * @param shaderB  The colors from this shader are seen as the "src" by the mode
+     * @param mode     The mode that combines the colors from the two shaders. If mode
+     *                 is null, then SRC_OVER is assumed.
     */
-    public ComposeShader(Shader shaderA, Shader shaderB, Xfermode mode) {
+    public ComposeShader(@NonNull Shader shaderA, @NonNull Shader shaderB, @NonNull Xfermode mode) {
         this(shaderA, shaderB, mode.porterDuffMode);
     }
 
-    /** Create a new compose shader, given shaders A, B, and a combining PorterDuff mode.
-        When the mode is applied, it will be given the result from shader A as its
-        "dst", and the result from shader B as its "src".
-        @param shaderA  The colors from this shader are seen as the "dst" by the mode
-        @param shaderB  The colors from this shader are seen as the "src" by the mode
-        @param mode     The PorterDuff mode that combines the colors from the two shaders.
+    /**
+     * Create a new compose shader, given shaders A, B, and a combining PorterDuff mode.
+     * When the mode is applied, it will be given the result from shader A as its
+     * "dst", and the result from shader B as its "src".
+     *
+     * @param shaderA  The colors from this shader are seen as the "dst" by the mode
+     * @param shaderB  The colors from this shader are seen as the "src" by the mode
+     * @param mode     The PorterDuff mode that combines the colors from the two shaders.
     */
-    public ComposeShader(Shader shaderA, Shader shaderB, PorterDuff.Mode mode) {
+    public ComposeShader(@NonNull Shader shaderA, @NonNull Shader shaderB,
+            @NonNull PorterDuff.Mode mode) {
         this(shaderA, shaderB, mode.nativeInt);
     }
 
     private ComposeShader(Shader shaderA, Shader shaderB, int nativeMode) {
+        setInternal(shaderA, shaderB, nativeMode);
+    }
+
+    /**
+     * Reinitialize the ComposeShader's component Shaders and blend mode.
+     *
+     * @param shaderA  The colors from this shader are seen as the "dst" by the mode
+     * @param shaderB  The colors from this shader are seen as the "src" by the mode
+     * @param mode     The PorterDuff mode that combines the colors from the two shaders.
+     */
+    public void set(@NonNull Shader shaderA, @NonNull Shader shaderB, @NonNull Xfermode mode) {
+        setInternal(shaderA, shaderB, mode.porterDuffMode);
+    }
+
+    /**
+     * Reinitialize the ComposeShader's component Shaders and blend mode.
+     *
+     * @param shaderA  The colors from this shader are seen as the "dst" by the mode
+     * @param shaderB  The colors from this shader are seen as the "src" by the mode
+     * @param mode     The PorterDuff mode that combines the colors from the two shaders.
+     */
+    public void set(@NonNull Shader shaderA, @NonNull Shader shaderB,
+            @NonNull PorterDuff.Mode mode) {
+        setInternal(shaderA, shaderB, mode.nativeInt);
+    }
+
+    private void setInternal(Shader shaderA, Shader shaderB, int nativeMode) {
+        if (shaderA == null || shaderB == null) {
+            throw new IllegalArgumentException("Shader parameters must not be null");
+        }
+
+        if (shaderA == mShaderA && shaderB == mShaderB && mPorterDuffMode == nativeMode) {
+            // no work to do...
+            return;
+        }
+
+        discardNativeInstance();
         mShaderA = shaderA;
         mShaderB = shaderB;
         mPorterDuffMode = nativeMode;
-        init(nativeCreate(shaderA.getNativeInstance(), shaderB.getNativeInstance(),
-                nativeMode));
+    }
+
+    @Override
+    long createNativeInstance(long nativeMatrix) {
+        mNativeInstanceShaderA = mShaderA.getNativeInstance();
+        mNativeInstanceShaderB = mShaderB.getNativeInstance();
+        return nativeCreate(nativeMatrix,
+                mShaderA.getNativeInstance(), mShaderB.getNativeInstance(), mPorterDuffMode);
+    }
+
+    @Override
+    void verifyNativeInstance() {
+        if (mShaderA.getNativeInstance() != mNativeInstanceShaderA
+                || mShaderB.getNativeInstance() != mNativeInstanceShaderB) {
+            // Child shader native instance has been updated,
+            // so our cached native instance is no longer valid - discard it
+            discardNativeInstance();
+        }
     }
 
     /**
@@ -67,6 +130,6 @@ public class ComposeShader extends Shader {
         return copy;
     }
 
-    private static native long nativeCreate(long native_shaderA, long native_shaderB,
-            int porterDuffMode);
+    private static native long nativeCreate(long nativeMatrix,
+            long nativeShaderA, long nativeShaderB, int porterDuffMode);
 }
