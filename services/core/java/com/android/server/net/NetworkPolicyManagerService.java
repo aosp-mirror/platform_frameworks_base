@@ -96,6 +96,7 @@ import android.Manifest;
 import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
+import android.app.ActivityManagerInternal;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
@@ -250,6 +251,13 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private static final int VERSION_ADDED_NETWORK_ID = 9;
     private static final int VERSION_SWITCH_UID = 10;
     private static final int VERSION_LATEST = VERSION_SWITCH_UID;
+
+    /**
+     * Max items written to {@link #ProcStateSeqHistory}.
+     */
+    @VisibleForTesting
+    public static final int MAX_PROC_STATE_SEQ_HISTORY =
+            ActivityManager.isLowRamDeviceStatic() ? 50 : 200;
 
     @VisibleForTesting
     public static final int TYPE_WARNING = 0x1;
@@ -412,6 +420,15 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     private final IPackageManager mIPm;
 
+    private ActivityManagerInternal mActivityManagerInternal;
+
+    /**
+     * This is used for debugging purposes. Whenever the IUidObserver.onUidStateChanged is called,
+     * the uid and procStateSeq will be written to this and will be printed as part of dump.
+     */
+    @VisibleForTesting
+    public ProcStateSeqHistory mObservedHistory
+            = new ProcStateSeqHistory(MAX_PROC_STATE_SEQ_HISTORY);
 
     // TODO: keep whitelist of system-critical services that should never have
     // rules enforced, such as system, phone, and radio UIDs.
@@ -628,6 +645,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 }
             }
 
+            mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
             try {
                 mActivityManager.registerUidObserver(mUidObserver,
                         ActivityManager.UID_OBSERVER_PROCSTATE|ActivityManager.UID_OBSERVER_GONE,
@@ -724,7 +742,13 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             Trace.traceBegin(Trace.TRACE_TAG_NETWORK, "onUidStateChanged");
             try {
                 synchronized (mUidRulesFirstLock) {
+                    // We received a uid state change callback, add it to the history so that it
+                    // will be useful for debugging.
+                    mObservedHistory.addProcStateSeqUL(uid, procStateSeq);
+                    // Now update the network policy rules as per the updated uid state.
                     updateUidStateUL(uid, procState);
+                    // Updating the network rules is done, so notify AMS about this.
+                    mActivityManagerInternal.notifyNetworkPolicyRulesUpdated(uid, procStateSeq);
                 }
             } finally {
                 Trace.traceEnd(Trace.TRACE_TAG_NETWORK);
@@ -2429,6 +2453,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     fout.println();
                 }
                 fout.decreaseIndent();
+
+                fout.println("Observed uid state changes:");
+                fout.increaseIndent();
+                mObservedHistory.dumpUL(fout);
+                fout.decreaseIndent();
             }
         }
     }
@@ -3607,6 +3636,76 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     }
                 }
             }
+        }
+    }
+
+    /**
+     * This class is used for storing and dumping the last {@link #MAX_PROC_STATE_SEQ_HISTORY}
+     * (uid, procStateSeq) pairs.
+     */
+    @VisibleForTesting
+    public static final class ProcStateSeqHistory {
+        private static final int INVALID_UID = -1;
+
+        /**
+         * Denotes maximum number of items this history can hold.
+         */
+        private final int mMaxCapacity;
+        /**
+         * Used for storing the uid information.
+         */
+        private final int[] mUids;
+        /**
+         * Used for storing the sequence numbers associated with {@link #mUids}.
+         */
+        private final long[] mProcStateSeqs;
+        /**
+         * Points to the next available slot for writing (uid, procStateSeq) pair.
+         */
+        private int mHistoryNext;
+
+        public ProcStateSeqHistory(int maxCapacity) {
+            mMaxCapacity = maxCapacity;
+            mUids = new int[mMaxCapacity];
+            Arrays.fill(mUids, INVALID_UID);
+            mProcStateSeqs = new long[mMaxCapacity];
+        }
+
+        @GuardedBy("mUidRulesFirstLock")
+        public void addProcStateSeqUL(int uid, long procStateSeq) {
+            mUids[mHistoryNext] = uid;
+            mProcStateSeqs[mHistoryNext] = procStateSeq;
+            mHistoryNext = increaseNext(mHistoryNext, 1);
+        }
+
+        @GuardedBy("mUidRulesFirstLock")
+        public void dumpUL(IndentingPrintWriter fout) {
+            if (mUids[0] == INVALID_UID) {
+                fout.println("NONE");
+                return;
+            }
+            int index = mHistoryNext;
+            do {
+                index = increaseNext(index, -1);
+                if (mUids[index] == INVALID_UID) {
+                    break;
+                }
+                fout.println(getString(mUids[index], mProcStateSeqs[index]));
+            } while (index != mHistoryNext);
+        }
+
+        public static String getString(int uid, long procStateSeq) {
+            return "UID=" + uid + " procStateSeq=" + procStateSeq;
+        }
+
+        private int increaseNext(int next, int increment) {
+            next += increment;
+            if (next >= mMaxCapacity) {
+                next = 0;
+            } else if (next < 0) {
+                next = mMaxCapacity - 1;
+            }
+            return next;
         }
     }
 }

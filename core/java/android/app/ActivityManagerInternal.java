@@ -234,4 +234,11 @@ public abstract class ActivityManagerInternal {
      * @see android.view.WindowManager.LayoutParams#TYPE_APPLICATION_OVERLAY
      */
     public abstract void setHasOverlayUi(int pid, boolean hasOverlayUi);
+
+    /**
+     * Called after the network policy rules are updated by
+     * {@link com.android.server.net.NetworkPolicyManagerService} for a specific {@param uid} and
+     * {@param procStateSeq}.
+     */
+    public abstract void notifyNetworkPolicyRulesUpdated(int uid, long procStateSeq);
 }

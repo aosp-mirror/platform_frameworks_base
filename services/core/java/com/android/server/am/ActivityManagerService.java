@@ -78,6 +78,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_IMMERSIVE;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_LOCKTASK;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_LRU;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_MU;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_NETWORK;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_OOM_ADJ;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PERMISSIONS_REVIEW;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_POWER;
@@ -107,6 +108,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_LOCKSCREE
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_LOCKTASK;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_LRU;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_MU;
+import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_NETWORK;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_OOM_ADJ;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_POWER;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_PROCESSES;
@@ -421,6 +423,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     private static final String TAG_LOCKTASK = TAG + POSTFIX_LOCKTASK;
     private static final String TAG_LRU = TAG + POSTFIX_LRU;
     private static final String TAG_MU = TAG + POSTFIX_MU;
+    private static final String TAG_NETWORK = TAG + POSTFIX_NETWORK;
     private static final String TAG_OOM_ADJ = TAG + POSTFIX_OOM_ADJ;
     private static final String TAG_POWER = TAG + POSTFIX_POWER;
     private static final String TAG_PROCESS_OBSERVERS = TAG + POSTFIX_PROCESS_OBSERVERS;
@@ -22901,7 +22904,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-    private final class LocalService extends ActivityManagerInternal {
+    @VisibleForTesting
+    final class LocalService extends ActivityManagerInternal {
         @Override
         public void grantUriPermissionFromIntent(int callingUid, String targetPkg, Intent intent,
                 int targetUserId) {
@@ -23149,6 +23153,30 @@ public class ActivityManagerService extends IActivityManager.Stub
                 pr.hasOverlayUi = hasOverlayUi;
                 //Slog.i(TAG, "Setting hasOverlayUi=" + pr.hasOverlayUi + " for pid=" + pid);
                 updateOomAdjLocked(pr);
+            }
+        }
+
+        /**
+         * Called after the network policy rules are updated by
+         * {@link com.android.server.net.NetworkPolicyManagerService} for a specific {@param uid} and
+         * {@param procStateSeq}.
+         */
+        @Override
+        public void notifyNetworkPolicyRulesUpdated(int uid, long procStateSeq) {
+            if (DEBUG_NETWORK) {
+                Slog.d(TAG_NETWORK, "Got update from NPMS for uid: "
+                        + uid + " seq: " + procStateSeq);
+            }
+            synchronized (ActivityManagerService.this) {
+                final UidRecord record = mActiveUids.get(uid);
+                if (record == null) {
+                    if (DEBUG_NETWORK) {
+                        Slog.d(TAG_NETWORK, "No active uidRecord for uid: " + uid
+                                + " procStateSeq: " + procStateSeq);
+                    }
+                    return;
+                }
+                record.lastNetworkUpdatedProcStateSeq = procStateSeq;
             }
         }
     }
