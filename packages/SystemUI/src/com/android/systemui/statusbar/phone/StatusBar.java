@@ -487,6 +487,8 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     private ScreenPinningRequest mScreenPinningRequest;
 
+    MetricsLogger mMetricsLogger = new MetricsLogger();
+
     // ensure quick settings is disabled until the current user makes it through the setup wizard
     private boolean mUserSetup = false;
     private DeviceProvisionedListener mUserSetupObserver = new DeviceProvisionedListener() {
@@ -1360,7 +1362,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mDismissView.setOnButtonClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                MetricsLogger.action(mContext, MetricsEvent.ACTION_DISMISS_ALL_NOTES);
+                mMetricsLogger.action(MetricsEvent.ACTION_DISMISS_ALL_NOTES);
                 clearAllNotifications();
             }
         });
@@ -1539,7 +1541,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             } else {
                 EventBus.getDefault().send(new UndockingTaskEvent());
                 if (metricsUndockAction != -1) {
-                    MetricsLogger.action(mContext, metricsUndockAction);
+                    mMetricsLogger.action(metricsUndockAction);
                 }
             }
         }
@@ -1597,7 +1599,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                             notification.getKey());
                     notification.getNotification().fullScreenIntent.send();
                     shadeEntry.notifyFullScreenIntentLaunched();
-                    MetricsLogger.count(mContext, "note_fullscreen", 1);
+                    mMetricsLogger.count("note_fullscreen", 1);
                 } catch (PendingIntent.CanceledException e) {
                 }
             }
@@ -2801,16 +2803,16 @@ public class StatusBar extends SystemUI implements DemoMode,
         if (!mUserSetup) return;
 
         if (KeyEvent.KEYCODE_SYSTEM_NAVIGATION_UP == key) {
-            MetricsLogger.action(mContext, MetricsEvent.ACTION_SYSTEM_NAVIGATION_KEY_UP);
+            mMetricsLogger.action(MetricsEvent.ACTION_SYSTEM_NAVIGATION_KEY_UP);
             mNotificationPanel.collapse(false /* delayed */, 1.0f /* speedUpFactor */);
         } else if (KeyEvent.KEYCODE_SYSTEM_NAVIGATION_DOWN == key) {
-            MetricsLogger.action(mContext, MetricsEvent.ACTION_SYSTEM_NAVIGATION_KEY_DOWN);
+            mMetricsLogger.action(MetricsEvent.ACTION_SYSTEM_NAVIGATION_KEY_DOWN);
             if (mNotificationPanel.isFullyCollapsed()) {
                 mNotificationPanel.expand(true /* animate */);
-                MetricsLogger.count(mContext, NotificationPanelView.COUNTER_PANEL_OPEN, 1);
+                mMetricsLogger.count(NotificationPanelView.COUNTER_PANEL_OPEN, 1);
             } else if (!mNotificationPanel.isInSettings() && !mNotificationPanel.isExpanding()){
                 mNotificationPanel.flingSettings(0 /* velocity */, true /* expand */);
-                MetricsLogger.count(mContext, NotificationPanelView.COUNTER_PANEL_OPEN_QS, 1);
+                mMetricsLogger.count(NotificationPanelView.COUNTER_PANEL_OPEN_QS, 1);
             }
         }
 
@@ -3689,7 +3691,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 if (pinnedHeadsUp && isPanelFullyCollapsed())  {
                     notificationLoad = 1;
                 } else {
-                    MetricsLogger.histogram(mContext, "note_load", notificationLoad);
+                    mMetricsLogger.histogram("note_load", notificationLoad);
                 }
                 mBarService.onPanelRevealed(clearNotificationEffects, notificationLoad);
             } else {
@@ -3772,7 +3774,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             if (mStatusBarStateLog == null) {
                 mStatusBarStateLog = new LogMaker(MetricsEvent.VIEW_UNKNOWN);
             }
-            MetricsLogger.action(mStatusBarStateLog
+            mMetricsLogger.write(mStatusBarStateLog
                     .setCategory(isBouncerShowing ? MetricsEvent.BOUNCER : MetricsEvent.LOCKSCREEN)
                     .setType(isShowing ? MetricsEvent.TYPE_OPEN : MetricsEvent.TYPE_CLOSE)
                     .setSubtype(isSecure ? 1 : 0));
@@ -5776,7 +5778,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             NotificationInfo info = (NotificationInfo) item.gutsContent;
             final NotificationInfo.OnSettingsClickListener onSettingsClick = (View v,
                     int appUid) -> {
-                MetricsLogger.action(mContext, MetricsEvent.ACTION_NOTE_INFO);
+                mMetricsLogger.action(MetricsEvent.ACTION_NOTE_INFO);
                 guts.resetFalsingCheck();
                 startAppNotificationSettingsActivity(pkg, appUid, channel.getId());
             };
@@ -5848,7 +5850,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                     return false;
                 }
 
-                MetricsLogger.action(mContext, MetricsEvent.ACTION_NOTE_CONTROLS);
+                mMetricsLogger.action(MetricsEvent.ACTION_NOTE_CONTROLS);
 
                 // ensure that it's laid but not visible until actually laid out
                 guts.setVisibility(View.INVISIBLE);
