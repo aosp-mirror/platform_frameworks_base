@@ -107,9 +107,9 @@ public class SnoozeHelperTest {
                 UserHandle.USER_SYSTEM, r2.sbn.getPackageName(), r2.getKey()));
 
         mSnoozeHelper.cancel(UserHandle.USER_SYSTEM, r.sbn.getPackageName(), "one", 1);
-        // 3 = one for each snooze, above + one for cancel itself.
-        verify(mAm, times(3)).cancel(any(PendingIntent.class));
-        assertFalse(mSnoozeHelper.isSnoozed(
+        // 2 = one for each snooze, above, zero for the cancel.
+        verify(mAm, times(2)).cancel(any(PendingIntent.class));
+        assertTrue(mSnoozeHelper.isSnoozed(
                 UserHandle.USER_SYSTEM, r.sbn.getPackageName(), r.getKey()));
         assertTrue(mSnoozeHelper.isSnoozed(
                 UserHandle.USER_SYSTEM, r2.sbn.getPackageName(), r2.getKey()));
@@ -131,11 +131,11 @@ public class SnoozeHelperTest {
                 UserHandle.USER_ALL, r3.sbn.getPackageName(), r3.getKey()));
 
         mSnoozeHelper.cancel(UserHandle.USER_SYSTEM, false);
-        // 5 = once for each snooze above (3) + once for each notification canceled (2).
-        verify(mAm, times(5)).cancel(any(PendingIntent.class));
-        assertFalse(mSnoozeHelper.isSnoozed(
+        // 3 = once for each snooze above (3), only.
+        verify(mAm, times(3)).cancel(any(PendingIntent.class));
+        assertTrue(mSnoozeHelper.isSnoozed(
                 UserHandle.USER_SYSTEM, r.sbn.getPackageName(), r.getKey()));
-        assertFalse(mSnoozeHelper.isSnoozed(
+        assertTrue(mSnoozeHelper.isSnoozed(
                 UserHandle.USER_SYSTEM, r2.sbn.getPackageName(), r2.getKey()));
         assertTrue(mSnoozeHelper.isSnoozed(
                 UserHandle.USER_ALL, r3.sbn.getPackageName(), r3.getKey()));
@@ -157,14 +157,44 @@ public class SnoozeHelperTest {
                 UserHandle.USER_SYSTEM, r3.sbn.getPackageName(), r3.getKey()));
 
         mSnoozeHelper.cancel(UserHandle.USER_SYSTEM, "pkg2");
-        // 4 = once for each snooze above (3) + once for each notification canceled (1).
-        verify(mAm, times(4)).cancel(any(PendingIntent.class));
+        // 3 = once for each snooze above (3), only.
+        verify(mAm, times(3)).cancel(any(PendingIntent.class));
         assertTrue(mSnoozeHelper.isSnoozed(
                 UserHandle.USER_SYSTEM, r.sbn.getPackageName(), r.getKey()));
         assertTrue(mSnoozeHelper.isSnoozed(
                 UserHandle.USER_SYSTEM, r2.sbn.getPackageName(), r2.getKey()));
-        assertFalse(mSnoozeHelper.isSnoozed(
+        assertTrue(mSnoozeHelper.isSnoozed(
                 UserHandle.USER_SYSTEM, r3.sbn.getPackageName(), r3.getKey()));
+    }
+
+    @Test
+    public void testCancelDoesNotUnsnooze() throws Exception {
+        NotificationRecord r = getNotificationRecord("pkg", 1, "one", UserHandle.SYSTEM);
+        mSnoozeHelper.snooze(r, 1000);
+        assertTrue(mSnoozeHelper.isSnoozed(
+                UserHandle.USER_SYSTEM, r.sbn.getPackageName(), r.getKey()));
+
+        mSnoozeHelper.cancel(UserHandle.USER_SYSTEM, r.sbn.getPackageName(), "one", 1);
+
+        assertTrue(mSnoozeHelper.isSnoozed(
+                UserHandle.USER_SYSTEM, r.sbn.getPackageName(), r.getKey()));
+    }
+
+    @Test
+    public void testCancelDoesNotRepost() throws Exception {
+        NotificationRecord r = getNotificationRecord("pkg", 1, "one", UserHandle.SYSTEM);
+        NotificationRecord r2 = getNotificationRecord("pkg", 2, "two", UserHandle.SYSTEM);
+        mSnoozeHelper.snooze(r, 1000);
+        mSnoozeHelper.snooze(r2 , 1000);
+        assertTrue(mSnoozeHelper.isSnoozed(
+                UserHandle.USER_SYSTEM, r.sbn.getPackageName(), r.getKey()));
+        assertTrue(mSnoozeHelper.isSnoozed(
+                UserHandle.USER_SYSTEM, r2.sbn.getPackageName(), r2.getKey()));
+
+        mSnoozeHelper.cancel(UserHandle.USER_SYSTEM, r.sbn.getPackageName(), "one", 1);
+
+        mSnoozeHelper.repost(r.getKey(), UserHandle.USER_SYSTEM);
+        verify(mCallback, never()).repost(UserHandle.USER_SYSTEM, r);
     }
 
     @Test
