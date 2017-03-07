@@ -1208,7 +1208,8 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
 
             protected void handleNewUpstreamNetworkState(NetworkState ns) {
                 mIPv6TetheringCoordinator.updateUpstreamNetworkState(ns);
-                mOffloadController.setUpstreamLinkProperties(ns.linkProperties);
+                mOffloadController.setUpstreamLinkProperties(
+                        (ns != null) ? ns.linkProperties : null);
             }
         }
 
