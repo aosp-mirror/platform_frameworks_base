@@ -249,6 +249,7 @@ LOCAL_SHARED_LIBRARIES := \
     libbinder \
     libui \
     libgui \
+    libsensor \
     libinput \
     libcamera_client \
     libcamera_metadata \

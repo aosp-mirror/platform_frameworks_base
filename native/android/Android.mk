@@ -32,6 +32,7 @@ LOCAL_SHARED_LIBRARIES := \
     libbinder \
     libui \
     libgui \
+    libsensor \
     libandroid_runtime \
     libnetd_client \
 
