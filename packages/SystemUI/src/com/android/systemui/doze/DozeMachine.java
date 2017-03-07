@@ -17,11 +17,12 @@
 package com.android.systemui.doze;
 
 import android.annotation.MainThread;
+import android.os.UserHandle;
 import android.util.Log;
 import android.view.Display;
 
+import com.android.internal.hardware.AmbientDisplayConfiguration;
 import com.android.internal.util.Preconditions;
-import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.util.Assert;
 
 import java.io.PrintWriter;
@@ -95,16 +96,17 @@ public class DozeMachine {
 
     private final Service mDozeService;
     private final DozeFactory.WakeLock mWakeLock;
-    private final DozeParameters mParams;
+    private final AmbientDisplayConfiguration mConfig;
     private Part[] mParts;
 
     private final ArrayList<State> mQueuedRequests = new ArrayList<>();
     private State mState = State.UNINITIALIZED;
     private boolean mWakeLockHeldForCurrentState = false;
 
-    public DozeMachine(Service service, DozeParameters params, DozeFactory.WakeLock wakeLock) {
+    public DozeMachine(Service service, AmbientDisplayConfiguration config,
+            DozeFactory.WakeLock wakeLock) {
         mDozeService = service;
-        mParams = params;
+        mConfig = config;
         mWakeLock = wakeLock;
     }
 
@@ -267,7 +269,7 @@ public class DozeMachine {
         switch (state) {
             case INITIALIZED:
             case DOZE_PULSE_DONE:
-                transitionTo(mParams.getAlwaysOn()
+                transitionTo(mConfig.alwaysOnEnabled(UserHandle.USER_CURRENT)
                         ? DozeMachine.State.DOZE_AOD : DozeMachine.State.DOZE);
                 break;
             default:
