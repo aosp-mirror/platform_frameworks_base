@@ -162,8 +162,7 @@ public class QSFragment extends Fragment implements QS {
 
     public void setHeaderClickable(boolean clickable) {
         if (DEBUG) Log.d(TAG, "setHeaderClickable " + clickable);
-        mHeader.setClickable(clickable);
-        mFooter.setClickable(clickable);
+        mFooter.getExpandView().setClickable(clickable);
     }
 
     public void setExpanded(boolean expanded) {

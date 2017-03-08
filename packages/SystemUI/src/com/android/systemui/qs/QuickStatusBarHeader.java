@@ -125,9 +125,7 @@ public class QuickStatusBarHeader extends RelativeLayout {
     }
 
     public void updateEverything() {
-        post(() -> {
-            setClickable(false);
-        });
+        post(() -> setClickable(false));
     }
 
     public void setQSPanel(final QSPanel qsPanel) {
