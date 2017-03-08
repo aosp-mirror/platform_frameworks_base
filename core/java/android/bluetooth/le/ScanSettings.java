@@ -122,6 +122,24 @@ public final class ScanSettings implements Parcelable {
     @SystemApi
     public static final int SCAN_RESULT_TYPE_ABBREVIATED = 1;
 
+    /**
+     * Use the Bluetooth LE 1Mbit PHY for scanning.
+     */
+    public static final int PHY_LE_1M = 1;
+
+    /**
+     * Use Bluetooth LE Coded PHY for scanning.
+     */
+    public static final int PHY_LE_CODED = 3;
+
+    /**
+     * Use all supported PHYs for scanning.
+     * This will check the controller capabilities, and start
+     * the scan on 1Mbit and LE Coded PHYs if supported, or on
+     * the 1Mbit PHY only.
+     */
+    public static final int PHY_LE_ALL_SUPPORTED = 255;
+
     // Bluetooth LE scan mode.
     private int mScanMode;
 
@@ -137,6 +155,11 @@ public final class ScanSettings implements Parcelable {
     private int mMatchMode;
 
     private int mNumOfMatchesPerFilter;
+
+    // Include only legacy advertising results
+    private boolean mLegacy;
+
+    private int mPhy;
 
     public int getScanMode() {
         return mScanMode;
@@ -165,6 +188,22 @@ public final class ScanSettings implements Parcelable {
     }
 
     /**
+     * Returns whether only legacy advertisements will be returned.
+     * Legacy advertisements include advertisements as specified
+     * by the Bluetooth core specification 4.2 and below.
+     */
+    public boolean getLegacy() {
+        return mLegacy;
+    }
+
+    /**
+     * Returns the physical layer used during a scan.
+     */
+    public int getPhy() {
+        return mPhy;
+    }
+
+    /**
      * Returns report delay timestamp based on the device clock.
      */
     public long getReportDelayMillis() {
@@ -172,13 +211,16 @@ public final class ScanSettings implements Parcelable {
     }
 
     private ScanSettings(int scanMode, int callbackType, int scanResultType,
-            long reportDelayMillis, int matchMode, int numOfMatchesPerFilter) {
+                         long reportDelayMillis, int matchMode,
+                         int numOfMatchesPerFilter, boolean legacy, int phy) {
         mScanMode = scanMode;
         mCallbackType = callbackType;
         mScanResultType = scanResultType;
         mReportDelayMillis = reportDelayMillis;
         mNumOfMatchesPerFilter = numOfMatchesPerFilter;
         mMatchMode = matchMode;
+        mLegacy = legacy;
+        mPhy = phy;
     }
 
     private ScanSettings(Parcel in) {
@@ -188,6 +230,8 @@ public final class ScanSettings implements Parcelable {
         mReportDelayMillis = in.readLong();
         mMatchMode = in.readInt();
         mNumOfMatchesPerFilter = in.readInt();
+        mLegacy = in.readInt() != 0 ? true : false;
+        mPhy = in.readInt();
     }
 
     @Override
@@ -198,6 +242,8 @@ public final class ScanSettings implements Parcelable {
         dest.writeLong(mReportDelayMillis);
         dest.writeInt(mMatchMode);
         dest.writeInt(mNumOfMatchesPerFilter);
+        dest.writeInt(mLegacy ? 1 : 0);
+        dest.writeInt(mPhy);
     }
 
     @Override
@@ -228,6 +274,9 @@ public final class ScanSettings implements Parcelable {
         private long mReportDelayMillis = 0;
         private int mMatchMode = MATCH_MODE_AGGRESSIVE;
         private int mNumOfMatchesPerFilter  = MATCH_NUM_MAX_ADVERTISEMENT;
+        private boolean mLegacy = true;
+        private int mPhy = PHY_LE_ALL_SUPPORTED;
+
         /**
          * Set scan mode for Bluetooth LE scan.
          *
@@ -341,11 +390,44 @@ public final class ScanSettings implements Parcelable {
         }
 
         /**
+         * Set whether only legacy advertisments should be returned in scan results.
+         * Legacy advertisements include advertisements as specified by the
+         * Bluetooth core specification 4.2 and below. This is true by default
+         * for compatibility with older apps.
+         *
+         * @param legacy true if only legacy advertisements will be returned
+         */
+        public Builder setLegacy(boolean legacy) {
+            mLegacy = legacy;
+            return this;
+        }
+
+        /**
+         * Set the Physical Layer to use during this scan.
+         * This is used only if {@link ScanSettings.Builder#setLegacy}
+         * is set to false.
+         * {@link android.bluetooth.BluetoothAdapter#isLeCodedPhySupported}
+         * may be used to check whether LE Coded phy is supported by calling
+         * {@link android.bluetooth.BluetoothAdapter#isLeCodedPhySupported}.
+         * Selecting an unsupported phy will result in failure to start scan.
+         *
+         * @param phy Can be one of
+         *   {@link ScanSettings#PHY_LE_1M},
+         *   {@link ScanSettings#PHY_LE_CODED} or
+         *   {@link ScanSettings#PHY_LE_ALL_SUPPORTED}
+         */
+        public Builder setPhy(int phy) {
+            mPhy = phy;
+            return this;
+        }
+
+        /**
          * Build {@link ScanSettings}.
          */
         public ScanSettings build() {
             return new ScanSettings(mScanMode, mCallbackType, mScanResultType,
-                    mReportDelayMillis, mMatchMode, mNumOfMatchesPerFilter);
+                                    mReportDelayMillis, mMatchMode,
+                                    mNumOfMatchesPerFilter, mLegacy, mPhy);
         }
     }
 }
