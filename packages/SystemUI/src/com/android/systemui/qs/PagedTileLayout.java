@@ -263,7 +263,6 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
         public TilePage(Context context, AttributeSet attrs) {
             super(context, attrs);
             updateResources();
-            setContentDescription(getContext().getString(R.string.accessibility_desc_quick_settings));
         }
 
         @Override
