@@ -1175,7 +1175,7 @@ static jboolean android_location_GnssLocationProvider_init(JNIEnv* env, jobject 
     }
 
     sp<IGnssNiCallback> gnssNiCbIface = new GnssNiCallback();
-    if (gnssNiCbIface != nullptr) {
+    if (gnssNiIface != nullptr) {
         gnssNiIface->setCallback(gnssNiCbIface);
     } else {
         ALOGE("Unable to initialize GNSS NI interface\n");
