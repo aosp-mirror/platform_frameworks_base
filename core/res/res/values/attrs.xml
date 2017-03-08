@@ -8338,7 +8338,9 @@
         <!-- Component name of an activity that allows the user to set up this service. -->
         <attr name="setupActivity" format="string" />
         <!-- Component name of an activity that allows the user to modify the settings for this
-             service. -->
+             service.
+             {@deprecated This value is deprecated and not used by the framework starting from API
+                         level 26. Use setupActivity instead.} -->
         <attr name="settingsActivity" />
         <!-- Attribute whether the TV input service can record programs. This value can be changed
              at runtime by calling
