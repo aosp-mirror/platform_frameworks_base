@@ -974,6 +974,7 @@ public class WifiAwareManagerTest {
         final PeerHandle peerHandle = new PeerHandle(123412);
         final int role = WifiAwareManager.WIFI_AWARE_DATA_PATH_ROLE_RESPONDER;
         final byte[] pmk = "Some arbitrary byte array".getBytes();
+        final String passphrase = "A really bad password";
         final ConfigRequest configRequest = new ConfigRequest.Builder().build();
         final PublishConfig publishConfig = new PublishConfig.Builder().build();
 
@@ -1038,6 +1039,23 @@ public class WifiAwareManagerTest {
         collector.checkThat("pmk", pmkB64 ,
                 equalTo(jsonObject.getString(WifiAwareManager.NETWORK_SPECIFIER_KEY_PMK)));
 
+        // (5) request an encrypted (Passphrase) network specifier from the session
+        networkSpecifier = publishSession.getValue().createNetworkSpecifierPassphrase(peerHandle,
+                passphrase);
+
+        // validate format
+        jsonObject = new JSONObject(networkSpecifier);
+        collector.checkThat("role", role,
+                equalTo(jsonObject.getInt(WifiAwareManager.NETWORK_SPECIFIER_KEY_ROLE)));
+        collector.checkThat("client_id", clientId,
+                equalTo(jsonObject.getInt(WifiAwareManager.NETWORK_SPECIFIER_KEY_CLIENT_ID)));
+        collector.checkThat("session_id", sessionId,
+                equalTo(jsonObject.getInt(WifiAwareManager.NETWORK_SPECIFIER_KEY_SESSION_ID)));
+        collector.checkThat("peer_id", peerHandle.peerId,
+                equalTo(jsonObject.getInt(WifiAwareManager.NETWORK_SPECIFIER_KEY_PEER_ID)));
+        collector.checkThat("passphrase", passphrase,
+                equalTo(jsonObject.getString(WifiAwareManager.NETWORK_SPECIFIER_KEY_PASSPHRASE)));
+
         verifyNoMoreInteractions(mockCallback, mockSessionCallback, mockAwareService,
                 mockPublishSession, mockRttListener);
     }
@@ -1053,6 +1071,7 @@ public class WifiAwareManagerTest {
         final byte[] someMac = HexEncoding.decode("000102030405".toCharArray(), false);
         final int role = WifiAwareManager.WIFI_AWARE_DATA_PATH_ROLE_INITIATOR;
         final byte[] pmk = "Some arbitrary pmk data".getBytes();
+        final String passphrase = "A really bad password";
 
         String pmkB64 = Base64.encodeToString(pmk, Base64.DEFAULT);
 
@@ -1100,6 +1119,21 @@ public class WifiAwareManagerTest {
                 false)));
         collector.checkThat("pmk", pmkB64,
                 equalTo(jsonObject.getString(WifiAwareManager.NETWORK_SPECIFIER_KEY_PMK)));
+
+        // (4) request an encrypted (Passphrase) direct network specifier
+        networkSpecifier = session.createNetworkSpecifierPassphrase(role, someMac, passphrase);
+
+        // validate format
+        jsonObject = new JSONObject(networkSpecifier);
+        collector.checkThat("role", role,
+                equalTo(jsonObject.getInt(WifiAwareManager.NETWORK_SPECIFIER_KEY_ROLE)));
+        collector.checkThat("client_id", clientId,
+                equalTo(jsonObject.getInt(WifiAwareManager.NETWORK_SPECIFIER_KEY_CLIENT_ID)));
+        collector.checkThat("peer_mac", someMac, equalTo(HexEncoding.decode(
+                jsonObject.getString(WifiAwareManager.NETWORK_SPECIFIER_KEY_PEER_MAC).toCharArray(),
+                false)));
+        collector.checkThat("passphrase", passphrase,
+                equalTo(jsonObject.getString(WifiAwareManager.NETWORK_SPECIFIER_KEY_PASSPHRASE)));
 
         verifyNoMoreInteractions(mockCallback, mockSessionCallback, mockAwareService,
                 mockPublishSession, mockRttListener);
