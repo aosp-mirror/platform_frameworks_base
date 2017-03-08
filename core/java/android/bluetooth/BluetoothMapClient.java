@@ -50,7 +50,10 @@ public final class BluetoothMapClient implements BluetoothProfile {
     public static final String ACTION_MESSAGE_DELIVERED_SUCCESSFULLY =
             "android.bluetooth.mapmce.profile.action.MESSAGE_DELIVERED_SUCCESSFULLY";
 
-    /* Extras used in ACTION_MESSAGE_RECEIVED intent */
+    /* Extras used in ACTION_MESSAGE_RECEIVED intent.
+     * NOTE: HANDLE is only valid for a single session with the device. */
+    public static final String EXTRA_MESSAGE_HANDLE =
+            "android.bluetooth.mapmce.profile.extra.MESSAGE_HANDLE";
     public static final String EXTRA_SENDER_CONTACT_URI =
             "android.bluetooth.mapmce.profile.extra.SENDER_CONTACT_URI";
     public static final String EXTRA_SENDER_CONTACT_NAME =
