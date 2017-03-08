@@ -25,6 +25,7 @@ import android.os.StrictMode;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.ExponentiallyBucketedHistogram;
 
 import java.util.LinkedList;
 
@@ -47,10 +48,13 @@ import java.util.LinkedList;
  */
 public class QueuedWork {
     private static final String LOG_TAG = QueuedWork.class.getSimpleName();
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
 
     /** Delay for delayed runnables, as big as possible but low enough to be barely perceivable */
     private static final long DELAY = 100;
+
+    /** If a {@link #waitToFinish()} takes more than {@value #MAX_WAIT_TIME_MILLIS} ms, warn */
+    private static final long MAX_WAIT_TIME_MILLIS = 512;
 
     /** Lock for this class */
     private static final Object sLock = new Object();
@@ -79,6 +83,13 @@ public class QueuedWork {
     /** If new work can be delayed or not */
     @GuardedBy("sLock")
     private static boolean sCanDelay = true;
+
+    /** Time (and number of instances) waited for work to get processed */
+    @GuardedBy("sLock")
+    private final static ExponentiallyBucketedHistogram
+            mWaitTimes = new ExponentiallyBucketedHistogram(
+            16);
+    private static int mNumWaits = 0;
 
     /**
      * Lazily create a handler on a separate thread.
@@ -136,12 +147,8 @@ public class QueuedWork {
      * after Service command handling, etc. (so async work is never lost)
      */
     public static void waitToFinish() {
-        long startTime = 0;
+        long startTime = System.currentTimeMillis();
         boolean hadMessages = false;
-
-        if (DEBUG) {
-            startTime = System.currentTimeMillis();
-        }
 
         Handler handler = getHandler();
 
@@ -185,11 +192,16 @@ public class QueuedWork {
             sCanDelay = true;
         }
 
-        if (DEBUG) {
+        synchronized (sLock) {
             long waitTime = System.currentTimeMillis() - startTime;
 
             if (waitTime > 0 || hadMessages) {
-                Log.d(LOG_TAG, "waited " + waitTime + " ms");
+                mWaitTimes.add(Long.valueOf(waitTime).intValue());
+                mNumWaits++;
+
+                if (DEBUG || mNumWaits % 1024 == 0 || waitTime > MAX_WAIT_TIME_MILLIS) {
+                    mWaitTimes.log(LOG_TAG, "waited: ");
+                }
             }
         }
     }
