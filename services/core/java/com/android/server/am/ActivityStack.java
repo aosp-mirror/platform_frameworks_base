@@ -4351,9 +4351,13 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             Slog.i(TAG, "moveTaskToBack: bad taskId=" + taskId);
             return false;
         }
-
         Slog.i(TAG, "moveTaskToBack: " + tr);
-        mStackSupervisor.removeLockedTaskLocked(tr);
+
+        // If the task is locked, then show the lock task toast
+        if (mStackSupervisor.isLockedTask(tr)) {
+            mStackSupervisor.showLockTaskToast();
+            return false;
+        }
 
         // If we have a watcher, preflight the move before committing to it.  First check
         // for *other* available tasks, but if none are available, then try again allowing the
@@ -4416,12 +4420,24 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 prevIsHome = true;
             }
         }
-        mTaskHistory.remove(tr);
-        mTaskHistory.add(0, tr);
-        updateTaskMovement(tr, false);
 
-        // There is an assumption that moving a task to the back moves it behind the home activity.
-        // We make sure here that some activity in the stack will launch home.
+        boolean requiresMove = mTaskHistory.indexOf(tr) != 0;
+        if (requiresMove) {
+            mTaskHistory.remove(tr);
+            mTaskHistory.add(0, tr);
+            updateTaskMovement(tr, false);
+
+            mWindowManager.prepareAppTransition(TRANSIT_TASK_TO_BACK, false);
+            mWindowContainerController.positionChildAtBottom(tr.getWindowContainerController());
+        }
+
+        if (mStackId == PINNED_STACK_ID) {
+            mStackSupervisor.removeStackLocked(PINNED_STACK_ID);
+            return true;
+        }
+
+        // Otherwise, there is an assumption that moving a task to the back moves it behind the
+        // home activity. We make sure here that some activity in the stack will launch home.
         int numTasks = mTaskHistory.size();
         for (int taskNdx = numTasks - 1; taskNdx >= 1; --taskNdx) {
             final TaskRecord task = mTaskHistory.get(taskNdx);
@@ -4433,9 +4449,6 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 task.setTaskToReturnTo(HOME_ACTIVITY_TYPE);
             }
         }
-
-        mWindowManager.prepareAppTransition(TRANSIT_TASK_TO_BACK, false);
-        mWindowContainerController.positionChildAtBottom(tr.getWindowContainerController());
 
         final TaskRecord task = mResumedActivity != null ? mResumedActivity.task : null;
         if (prevIsHome || (task == tr && canGoHome) || (numTasks <= 1 && isOnHomeDisplay())) {
