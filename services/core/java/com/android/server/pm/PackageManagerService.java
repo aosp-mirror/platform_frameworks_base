@@ -18625,8 +18625,11 @@ public class PackageManagerService extends IPackageManager.Stub {
     @Override
     public void getPackageSizeInfo(final String packageName, int userHandle,
             final IPackageStatsObserver observer) {
-        throw new UnsupportedOperationException(
-                "Shame on you for calling a hidden API. Shame!");
+        Slog.w(TAG, "Shame on you for calling a hidden API. Shame!");
+        try {
+            observer.onGetStatsCompleted(null, false);
+        } catch (Throwable ignored) {
+        }
     }
 
     private boolean getPackageSizeInfoLI(String packageName, int userId, PackageStats stats) {
