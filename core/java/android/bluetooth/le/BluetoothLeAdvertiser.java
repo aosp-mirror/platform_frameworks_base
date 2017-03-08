@@ -62,6 +62,9 @@ public final class BluetoothLeAdvertiser {
     private BluetoothAdapter mBluetoothAdapter;
     private final Map<AdvertiseCallback, AdvertiseCallbackWrapper>
             mLeAdvertisers = new HashMap<AdvertiseCallback, AdvertiseCallbackWrapper>();
+    private final Map<AdvertisingSetCallback, IAdvertisingSetCallback>
+            advertisingSetCallbackWrappers = new HashMap<>();
+    private final Map<Integer, AdvertisingSet> advertisingSets = new HashMap<>();
 
     /**
      * Use BluetoothAdapter.getLeAdvertiser() instead.
@@ -156,6 +159,93 @@ public final class BluetoothLeAdvertiser {
     }
 
     /**
+    * Creates a new advertising set. If operation succeed, device will start advertising. This
+    * method returns immediately, the operation status is delivered through
+    * {@code callback.onNewAdvertisingSet()}.
+    * <p>
+    * @param parameters advertising set parameters.
+    * @param advertiseData Advertisement data to be broadcasted.
+    * @param scanResponse Scan response associated with the advertisement data.
+    * @param periodicData Periodic advertising data.
+    * @param callback Callback for advertising set.
+    */
+    public void startAdvertisingSet(AdvertisingSetParameters parameters,
+                                    AdvertiseData advertiseData, AdvertiseData scanResponse,
+                                    PeriodicAdvertisingParameters periodicParameters,
+                                    AdvertiseData periodicData, AdvertisingSetCallback callback) {
+        startAdvertisingSet(parameters, advertiseData, scanResponse, periodicParameters,
+                            periodicData, callback, new Handler(Looper.getMainLooper()));
+    }
+
+    /**
+    * Creates a new advertising set. If operation succeed, device will start advertising. This
+    * method returns immediately, the operation status is delivered through
+    * {@code callback.onNewAdvertisingSet()}.
+    * <p>
+    * @param parameters advertising set parameters.
+    * @param advertiseData Advertisement data to be broadcasted.
+    * @param scanResponse Scan response associated with the advertisement data.
+    * @param periodicData Periodic advertising data.
+    * @param callback Callback for advertising set.
+    * @param handler thread upon which the callbacks will be invoked.
+    */
+    public void startAdvertisingSet(AdvertisingSetParameters parameters,
+                                    AdvertiseData advertiseData, AdvertiseData scanResponse,
+                                    PeriodicAdvertisingParameters periodicParameters,
+                                    AdvertiseData periodicData, AdvertisingSetCallback callback,
+                                    Handler handler) {
+        BluetoothLeUtils.checkAdapterStateOn(mBluetoothAdapter);
+
+        if (callback == null) {
+          throw new IllegalArgumentException("callback cannot be null");
+        }
+
+        IBluetoothGatt gatt;
+        try {
+          gatt = mBluetoothManager.getBluetoothGatt();
+        } catch (RemoteException e) {
+          Log.e(TAG, "Failed to get Bluetooth gatt - ", e);
+          throw new IllegalStateException("Failed to get Bluetooth");
+        }
+
+        IAdvertisingSetCallback wrapped = wrap(callback, handler);
+        advertisingSetCallbackWrappers.put(callback, wrapped);
+
+        try {
+            gatt.startAdvertisingSet(parameters, advertiseData, scanResponse, periodicParameters,
+                                     periodicData, wrapped);
+        } catch (RemoteException e) {
+          Log.e(TAG, "Failed to start advertising set - ", e);
+          throw new IllegalStateException("Failed to start advertising set");
+        }
+    }
+
+    /**
+     * Used to dispose of a {@link AdvertisingSet} object, obtained with {@link
+     * BluetoothLeAdvertiser#startAdvertisingSet}.
+     */
+    public void stopAdvertisingSet(AdvertisingSetCallback callback) {
+        if (callback == null) {
+          throw new IllegalArgumentException("callback cannot be null");
+        }
+
+        IAdvertisingSetCallback wrapped = advertisingSetCallbackWrappers.remove(callback);
+        if (wrapped == null) {
+            throw new IllegalArgumentException(
+                "callback does not represent valid registered callback.");
+        }
+
+        IBluetoothGatt gatt;
+        try {
+            gatt = mBluetoothManager.getBluetoothGatt();
+            gatt.stopAdvertisingSet(wrapped);
+       } catch (RemoteException e) {
+            Log.e(TAG, "Failed to stop advertising - ", e);
+            throw new IllegalStateException("Failed to stop advertising");
+        }
+    }
+
+    /**
      * Cleans up advertisers. Should be called when bluetooth is down.
      *
      * @hide
@@ -217,6 +307,110 @@ public final class BluetoothLeAdvertiser {
 
     private int byteLength(byte[] array) {
         return array == null ? 0 : array.length;
+    }
+
+    IAdvertisingSetCallback wrap(AdvertisingSetCallback callback, Handler handler) {
+        return new IAdvertisingSetCallback.Stub() {
+            public void onAdvertisingSetStarted(int advertiserId, int status) {
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (status != AdvertisingSetCallback.ADVERTISE_SUCCESS) {
+                            callback.onAdvertisingSetStarted(null, status);
+                            advertisingSetCallbackWrappers.remove(callback);
+                            return;
+                        }
+
+                        AdvertisingSet advertisingSet =
+                            new AdvertisingSet(advertiserId, mBluetoothManager);
+                        advertisingSets.put(advertiserId, advertisingSet);
+                        callback.onAdvertisingSetStarted(advertisingSet, status);
+                    }
+                });
+            }
+
+            public void onAdvertisingSetStopped(int advertiserId) {
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        AdvertisingSet advertisingSet = advertisingSets.get(advertiserId);
+                        callback.onAdvertisingSetStopped(advertisingSet);
+                        advertisingSets.remove(advertiserId);
+                        advertisingSetCallbackWrappers.remove(callback);
+                    }
+                });
+            }
+
+            public void onAdvertisingEnabled(int advertiserId, boolean enabled, int status) {
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        AdvertisingSet advertisingSet = advertisingSets.get(advertiserId);
+                        callback.onAdvertisingEnabled(advertisingSet, enabled, status);
+                    }
+                });
+            }
+
+            public void onAdvertisingDataSet(int advertiserId, int status) {
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        AdvertisingSet advertisingSet = advertisingSets.get(advertiserId);
+                        callback.onAdvertisingDataSet(advertisingSet, status);
+                    }
+                });
+            }
+
+            public void onScanResponseDataSet(int advertiserId, int status) {
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        AdvertisingSet advertisingSet = advertisingSets.get(advertiserId);
+                        callback.onScanResponseDataSet(advertisingSet, status);
+                    }
+                });
+            }
+
+            public void onAdvertisingParametersUpdated(int advertiserId, int status) {
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        AdvertisingSet advertisingSet = advertisingSets.get(advertiserId);
+                        callback.onAdvertisingParametersUpdated(advertisingSet, status);
+                    }
+                });
+            }
+
+            public void onPeriodicAdvertisingParametersUpdated(int advertiserId, int status) {
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        AdvertisingSet advertisingSet = advertisingSets.get(advertiserId);
+                        callback.onPeriodicAdvertisingParametersUpdated(advertisingSet, status);
+                    }
+                });
+            }
+
+            public void onPeriodicAdvertisingDataSet(int advertiserId, int status) {
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        AdvertisingSet advertisingSet = advertisingSets.get(advertiserId);
+                        callback.onPeriodicAdvertisingDataSet(advertisingSet, status);
+                    }
+                });
+            }
+
+            public void onPeriodicAdvertisingEnable(int advertiserId, boolean enable, int status) {
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        AdvertisingSet advertisingSet = advertisingSets.get(advertiserId);
+                        callback.onPeriodicAdvertisingEnable(advertisingSet, enable, status);
+                    }
+                });
+            }
+        };
     }
 
     /**
