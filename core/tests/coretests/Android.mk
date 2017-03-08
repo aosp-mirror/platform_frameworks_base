@@ -29,7 +29,6 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
     frameworks-core-util-lib \
     mockwebserver \
     guava \
-    littlemock \
     android-support-test \
     mockito-target-minus-junit4 \
     espresso-core \
