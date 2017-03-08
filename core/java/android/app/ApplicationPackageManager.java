@@ -65,7 +65,6 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -2130,15 +2129,10 @@ public class ApplicationPackageManager extends PackageManager {
     @Override
     public void getPackageSizeInfoAsUser(String packageName, int userHandle,
             IPackageStatsObserver observer) {
-        if (mContext.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.O) {
-            throw new UnsupportedOperationException(
-                    "Shame on you for calling a hidden API. Shame!");
-        } else if (observer != null) {
-            Log.d(TAG, "Shame on you for calling a hidden API. Shame!");
-            try {
-                observer.onGetStatsCompleted(null, false);
-            } catch (RemoteException ignored) {
-            }
+        try {
+            mPM.getPackageSizeInfo(packageName, userHandle, observer);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
