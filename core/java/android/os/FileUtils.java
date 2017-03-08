@@ -777,10 +777,15 @@ public class FileUtils {
      * "29.5GB" in UI.
      */
     public static long roundStorageSize(long size) {
-        long res = 1;
-        while (res < size) {
-            res <<= 1;
+        long val = 1;
+        long pow = 1;
+        while ((val * pow) < size) {
+            val <<= 1;
+            if (val > 512) {
+                val = 1;
+                pow *= 1000;
+            }
         }
-        return res;
+        return val * pow;
     }
 }

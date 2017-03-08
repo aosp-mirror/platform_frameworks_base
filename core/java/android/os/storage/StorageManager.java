@@ -1006,7 +1006,8 @@ public class StorageManager {
         for (String path : INTERNAL_STORAGE_SIZE_PATHS) {
             final long numberBlocks = readLong(path);
             if (numberBlocks > 0) {
-                return new Pair<>(path, Long.valueOf(numberBlocks * INTERNAL_STORAGE_SECTOR_SIZE));
+                return new Pair<>(path,
+                        FileUtils.roundStorageSize(numberBlocks * INTERNAL_STORAGE_SECTOR_SIZE));
             }
         }
         return null;
