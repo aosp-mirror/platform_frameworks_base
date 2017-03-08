@@ -417,11 +417,7 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
     // For wide gamut images, we will leave the color space on the SkBitmap.  Otherwise,
     // use the default.
     SkImageInfo bitmapInfo = decodeInfo;
-    sk_sp<SkColorSpace> srgb =
-            SkColorSpace::MakeRGB(SkColorSpace::kSRGB_RenderTargetGamma,
-                                  SkColorSpace::kSRGB_Gamut,
-                                  SkColorSpace::kNonLinearBlending_ColorSpaceFlag);
-    if (decodeInfo.colorSpace() == srgb.get()) {
+    if (decodeInfo.colorSpace() && decodeInfo.colorSpace()->isSRGB()) {
         bitmapInfo = bitmapInfo.makeColorSpace(GraphicsJNI::colorSpaceForType(decodeColorType));
     }
 

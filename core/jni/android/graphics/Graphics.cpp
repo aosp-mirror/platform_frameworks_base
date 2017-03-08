@@ -461,12 +461,7 @@ sk_sp<SkColorSpace> GraphicsJNI::colorSpaceForType(SkColorType type) {
 }
 
 bool GraphicsJNI::isColorSpaceSRGB(SkColorSpace* colorSpace) {
-    return colorSpace == nullptr
-            || colorSpace == SkColorSpace::MakeSRGB().get()
-            || colorSpace == SkColorSpace::MakeRGB(
-                  SkColorSpace::kSRGB_RenderTargetGamma,
-                  SkColorSpace::kSRGB_Gamut,
-                  SkColorSpace::kNonLinearBlending_ColorSpaceFlag).get();
+    return colorSpace == nullptr || colorSpace->isSRGB();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
