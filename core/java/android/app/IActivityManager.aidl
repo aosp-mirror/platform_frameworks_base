@@ -605,6 +605,7 @@ interface IActivityManager {
     ActivityManager.TaskSnapshot getTaskSnapshot(int taskId);
 
     void scheduleApplicationInfoChanged(in List<String> packageNames, int userId);
+    void setPersistentVrThread(int tid);
 
     // WARNING: when these transactions are updated, check if they are any callers on the native
     // side. If so, make sure they are using the correct transaction ids and arguments.
