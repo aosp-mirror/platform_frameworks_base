@@ -3706,6 +3706,20 @@ public class BatteryStatsImpl extends BatteryStats {
 
     public void noteScreenStateLocked(int state) {
         state = mPretendScreenOff ? Display.STATE_OFF : state;
+
+        // Battery stats relies on there being 4 states. To accommodate this, new states beyond the
+        // original 4 are mapped to one of the originals.
+        if (state > MAX_TRACKED_SCREEN_STATE) {
+            switch (state) {
+                case Display.STATE_VR:
+                    state = Display.STATE_ON;
+                    break;
+                default:
+                    Slog.wtf(TAG, "Unknown screen state (not mapped): " + state);
+                    break;
+            }
+        }
+
         if (mScreenState != state) {
             recordDailyStatsIfNeededLocked(true);
             final int oldState = mScreenState;
@@ -3715,9 +3729,9 @@ public class BatteryStatsImpl extends BatteryStats {
 
             if (state != Display.STATE_UNKNOWN) {
                 int stepState = state-1;
-                if (stepState < 4) {
-                    mModStepMode |= (mCurStepMode&STEP_LEVEL_MODE_SCREEN_STATE) ^ stepState;
-                    mCurStepMode = (mCurStepMode&~STEP_LEVEL_MODE_SCREEN_STATE) | stepState;
+                if ((stepState & STEP_LEVEL_MODE_SCREEN_STATE) == stepState) {
+                    mModStepMode |= (mCurStepMode & STEP_LEVEL_MODE_SCREEN_STATE) ^ stepState;
+                    mCurStepMode = (mCurStepMode & ~STEP_LEVEL_MODE_SCREEN_STATE) | stepState;
                 } else {
                     Slog.wtf(TAG, "Unexpected screen state: " + state);
                 }

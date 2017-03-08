@@ -302,7 +302,6 @@ public final class Display {
      *
      * @see #getState
      * @see android.os.PowerManager#isInteractive
-     * @hide
      */
     public static final int STATE_VR = 5;
 

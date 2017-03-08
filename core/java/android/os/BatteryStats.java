@@ -2410,6 +2410,10 @@ public abstract class BatteryStats implements Parcelable {
     // Step duration mode: the screen is on, off, dozed, etc; value is Display.STATE_* - 1.
     public static final int STEP_LEVEL_MODE_SCREEN_STATE = 0x03;
 
+    // The largest value for screen state that is tracked in battery states. Any values above
+    // this should be mapped back to one of the tracked values before being tracked here.
+    public static final int MAX_TRACKED_SCREEN_STATE = Display.STATE_DOZE_SUSPEND;
+
     // Step duration mode: power save is on.
     public static final int STEP_LEVEL_MODE_POWER_SAVE = 0x04;
 
