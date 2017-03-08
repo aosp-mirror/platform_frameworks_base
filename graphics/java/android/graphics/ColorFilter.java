@@ -28,21 +28,51 @@ package android.graphics;
  */
 public class ColorFilter {
     /**
-     * Holds the pointer to the native SkColorFilter instance.
-     *
-     * @hide
+     * @deprecated Use subclass constructors directly instead.
      */
-    public long native_instance;
+    @Deprecated
+    public ColorFilter() {}
+
+    /**
+     * Holds the pointer to the native SkColorFilter instance.
+     */
+    private long mNativeInstance;
+
+    long createNativeInstance() {
+        return 0;
+    }
+
+    void discardNativeInstance() {
+        if (mNativeInstance != 0) {
+            nSafeUnref(mNativeInstance);
+            mNativeInstance = 0;
+        }
+    }
 
     @Override
     protected void finalize() throws Throwable {
         try {
-            super.finalize();
+            if (mNativeInstance != 0) {
+                nSafeUnref(mNativeInstance);
+            }
+            mNativeInstance = -1;
         } finally {
-            destroyFilter(native_instance);
-            native_instance = 0;
+            super.finalize();
         }
     }
 
-    static native void destroyFilter(long native_instance);
+    /** @hide */
+    public long getNativeInstance() {
+        if (mNativeInstance == -1) {
+            throw new IllegalStateException("attempting to use a finalized ColorFilter");
+        }
+
+        if (mNativeInstance == 0) {
+            mNativeInstance = createNativeInstance();
+        }
+        return mNativeInstance;
+
+    }
+
+    static native void nSafeUnref(long native_instance);
 }

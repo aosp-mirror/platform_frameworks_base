@@ -138,7 +138,7 @@ public class ColorFiltersMutateActivity extends Activity {
             mSaturation = saturation;
             final ColorMatrixColorFilter filter =
                     (ColorMatrixColorFilter) mColorMatrixPaint.getColorFilter();
-            final ColorMatrix m = filter.getColorMatrix();
+            final ColorMatrix m = new ColorMatrix();
             m.setSaturation(saturation);
             filter.setColorMatrix(m);
             invalidate();
