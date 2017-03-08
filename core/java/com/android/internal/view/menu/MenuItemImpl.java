@@ -255,7 +255,7 @@ public final class MenuItemImpl implements MenuItem {
             return this;
         }
 
-        mShortcutAlphabeticChar = alphaChar;
+        mShortcutAlphabeticChar = Character.toLowerCase(alphaChar);
         mShortcutAlphabeticModifiers = KeyEvent.normalizeMetaState(alphaModifiers);
 
         mMenu.onItemsChanged(false);
@@ -307,7 +307,7 @@ public final class MenuItemImpl implements MenuItem {
             int alphaModifiers) {
         mShortcutNumericChar = numericChar;
         mShortcutNumericModifiers = KeyEvent.normalizeMetaState(numericModifiers);
-        mShortcutAlphabeticChar = alphaChar;
+        mShortcutAlphabeticChar = Character.toLowerCase(alphaChar);
         mShortcutAlphabeticModifiers = KeyEvent.normalizeMetaState(alphaModifiers);
 
         mMenu.onItemsChanged(false);

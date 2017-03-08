@@ -145,12 +145,12 @@ public class ActionMenuItem implements MenuItem {
     }
 
     public MenuItem setAlphabeticShortcut(char alphaChar) {
-        mShortcutAlphabeticChar = alphaChar;
+        mShortcutAlphabeticChar = Character.toLowerCase(alphaChar);
         return this;
     }
 
     public MenuItem setAlphabeticShortcut(char alphachar, int alphaModifiers) {
-        mShortcutAlphabeticChar = alphachar;
+        mShortcutAlphabeticChar = Character.toLowerCase(alphachar);
         mShortcutAlphabeticModifiers = KeyEvent.normalizeMetaState(alphaModifiers);
         return this;
     }
@@ -210,7 +210,7 @@ public class ActionMenuItem implements MenuItem {
 
     public MenuItem setShortcut(char numericChar, char alphaChar) {
         mShortcutNumericChar = numericChar;
-        mShortcutAlphabeticChar = alphaChar;
+        mShortcutAlphabeticChar = Character.toLowerCase(alphaChar);
         return this;
     }
 
@@ -218,7 +218,7 @@ public class ActionMenuItem implements MenuItem {
             int alphaModifiers) {
         mShortcutNumericChar = numericChar;
         mShortcutNumericModifiers = KeyEvent.normalizeMetaState(numericModifiers);
-        mShortcutAlphabeticChar = alphaChar;
+        mShortcutAlphabeticChar = Character.toLowerCase(alphaChar);
         mShortcutAlphabeticModifiers = KeyEvent.normalizeMetaState(alphaModifiers);
         return this;
     }
