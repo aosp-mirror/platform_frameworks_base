@@ -3141,8 +3141,8 @@ public abstract class BatteryStats implements Parcelable {
                 for (Map.Entry<String, ? extends Timer> ent : kernelWakelocks.entrySet()) {
                     sb.setLength(0);
                     printWakeLockCheckin(sb, ent.getValue(), rawRealtime, null, which, "");
-                    dumpLine(pw, 0 /* uid */, category, KERNEL_WAKELOCK_DATA, ent.getKey(),
-                            sb.toString());
+                    dumpLine(pw, 0 /* uid */, category, KERNEL_WAKELOCK_DATA,
+                            "\"" + ent.getKey() + "\"", sb.toString());
                 }
             }
             final Map<String, ? extends Timer> wakeupReasons = getWakeupReasonStats();
@@ -3343,7 +3343,8 @@ public abstract class BatteryStats implements Parcelable {
                 final long totalTime = (timer.getTotalTimeLocked(rawRealtime, which) + 500) / 1000;
                 final int count = timer.getCountLocked(which);
                 if (totalTime != 0) {
-                    dumpLine(pw, uid, category, SYNC_DATA, syncs.keyAt(isy), totalTime, count);
+                    dumpLine(pw, uid, category, SYNC_DATA, "\"" + syncs.keyAt(isy) + "\"",
+                            totalTime, count);
                 }
             }
 
@@ -3354,7 +3355,8 @@ public abstract class BatteryStats implements Parcelable {
                 final long totalTime = (timer.getTotalTimeLocked(rawRealtime, which) + 500) / 1000;
                 final int count = timer.getCountLocked(which);
                 if (totalTime != 0) {
-                    dumpLine(pw, uid, category, JOB_DATA, jobs.keyAt(ij), totalTime, count);
+                    dumpLine(pw, uid, category, JOB_DATA, "\"" + jobs.keyAt(ij) + "\"",
+                            totalTime, count);
                 }
             }
 
@@ -3426,8 +3428,8 @@ public abstract class BatteryStats implements Parcelable {
 
                 if (userMillis != 0 || systemMillis != 0 || foregroundMillis != 0
                         || starts != 0 || numAnrs != 0 || numCrashes != 0) {
-                    dumpLine(pw, uid, category, PROCESS_DATA, processStats.keyAt(ipr), userMillis,
-                            systemMillis, foregroundMillis, starts, numAnrs, numCrashes);
+                    dumpLine(pw, uid, category, PROCESS_DATA, "\"" + processStats.keyAt(ipr) + "\"",
+                            userMillis, systemMillis, foregroundMillis, starts, numAnrs, numCrashes);
                 }
             }
 
