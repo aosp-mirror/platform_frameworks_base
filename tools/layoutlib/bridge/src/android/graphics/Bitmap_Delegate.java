@@ -650,6 +650,20 @@ public final class Bitmap_Delegate {
         return null;
     }
 
+    @LayoutlibDelegate
+    /*package*/ static boolean nativeIsSRGB(long nativeBitmap) {
+        Bridge.getLog().error(LayoutLog.TAG_UNSUPPORTED,
+                "Color spaces are not supported", null /*data*/);
+        return false;
+    }
+
+    @LayoutlibDelegate
+    /*package*/ static boolean nativeGetColorSpace(long nativePtr, float[] xyz, float[] params) {
+        Bridge.getLog().error(LayoutLog.TAG_UNSUPPORTED,
+                "Color spaces are not supported", null /*data*/);
+        return false;
+    }
+
     // ---- Private delegate/helper methods ----
 
     private Bitmap_Delegate(BufferedImage image, Config config) {
