@@ -141,7 +141,6 @@ import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.animation.AnimationUtils;
 import android.view.autofill.AutoFillManager;
-import android.view.autofill.AutoFillType;
 import android.view.autofill.AutoFillValue;
 import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.CompletionInfo;
@@ -10018,9 +10017,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     @Override
-    @Nullable
-    public AutoFillType getAutoFillType() {
-        return isTextEditable() ? AutoFillType.forText() : null;
+    public @AutofillType int getAutofillType() {
+        return isTextEditable() ? AUTOFILL_TYPE_TEXT : AUTOFILL_TYPE_NONE;
     }
 
     @Override

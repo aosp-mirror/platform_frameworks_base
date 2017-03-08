@@ -26,6 +26,8 @@ import android.view.View;
  * Defines the type of a object that can be used to auto-fill a {@link View} so the
  * {@link android.service.autofill.AutoFillService} can use the proper {@link AutoFillValue} to
  * fill it.
+ *
+ * TODO(b/35956626): remove once clients use getAutoFilltype
  */
 public final class AutoFillType implements Parcelable {
 
@@ -95,8 +97,6 @@ public final class AutoFillType implements Parcelable {
      * <p>{@link AutoFillValue} instances for auto-filling a {@link View} can be obtained through
      * {@link AutoFillValue#forDate(long)}, and the values passed to
      * auto-fill a {@link View} can be fetched through {@link AutoFillValue#getDateValue()}.
-     *
-     * <p>This type has no sub-types.
      */
     public boolean isDate() {
         return mType == TYPE_DATE;

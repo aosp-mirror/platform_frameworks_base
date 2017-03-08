@@ -16,4 +16,7 @@
 
 package android.view.autofill;
 
+/*
+ * TODO(b/35956626): remove once clients use getAutoFilltype()
+ */
 parcelable AutoFillType;

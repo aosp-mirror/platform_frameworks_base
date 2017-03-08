@@ -34,7 +34,6 @@ import android.view.View;
 import android.view.ViewStructure;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.autofill.AutoFillManager;
-import android.view.autofill.AutoFillType;
 import android.view.autofill.AutoFillValue;
 
 import com.android.internal.R;
@@ -775,8 +774,8 @@ public class DatePicker extends FrameLayout {
     }
 
     @Override
-    public AutoFillType getAutoFillType() {
-        return isEnabled() ? AutoFillType.forDate() : null;
+    public @AutofillType int getAutofillType() {
+        return isEnabled() ? AUTOFILL_TYPE_DATE : AUTOFILL_TYPE_NONE;
     }
 
     @Override

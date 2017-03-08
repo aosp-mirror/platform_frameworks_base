@@ -26,7 +26,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewStructure;
 import android.view.autofill.AutoFillManager;
-import android.view.autofill.AutoFillType;
 import android.view.autofill.AutoFillValue;
 
 import com.android.internal.R;
@@ -435,8 +434,8 @@ public class RadioGroup extends LinearLayout {
     }
 
     @Override
-    public AutoFillType getAutoFillType() {
-        return isEnabled() ? AutoFillType.forList() : null;
+    public @AutofillType int getAutofillType() {
+        return isEnabled() ? AUTOFILL_TYPE_LIST : AUTOFILL_TYPE_NONE;
     }
 
     @Override

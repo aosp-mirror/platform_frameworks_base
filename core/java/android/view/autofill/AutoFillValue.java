@@ -45,38 +45,36 @@ public final class AutoFillValue implements Parcelable {
     }
 
     /**
-     * Gets the value to auto-fill a text field.
+     * Gets the value to autofill a text field.
      *
-     * <p>See {@link AutoFillType#isText()} for more info.
+     * <p>See {@link View#AUTOFILL_TYPE_TEXT} for more info.
      */
     public CharSequence getTextValue() {
         return mText;
     }
 
     /**
-     * Gets the value to auto-fill a toggable field.
+     * Gets the value to autofill a toggable field.
      *
-     * <p>See {@link AutoFillType#isToggle()} for more info.
+     * <p>See {@link View#AUTOFILL_TYPE_TOGGLE} for more info.
      */
     public boolean getToggleValue() {
         return mToggle;
     }
 
     /**
-     * Gets the value to auto-fill a selection list field.
+     * Gets the value to autofill a selection list field.
      *
-     * <p>See {@link AutoFillType#isList()} for more info.
+     * <p>See {@link View#AUTOFILL_TYPE_LIST} for more info.
      */
     public int getListValue() {
         return mListIndex;
     }
 
     /**
-     * Gets the value representing the the number of milliseconds since the standard base time known
-     * as "the epoch", namely January 1, 1970, 00:00:00 GMT (see {@link java.util.Date#getTime()}
-     * of a date field.
+     * Gets the value to autofill a date field.
      *
-     * <p>See {@link AutoFillType#isDate()} for more info.
+     * <p>See {@link View#AUTOFILL_TYPE_DATE} for more info.
      */
     public long getDateValue() {
         return mDate;
@@ -174,9 +172,9 @@ public final class AutoFillValue implements Parcelable {
 
     // TODO(b/33197203): add unit tests for each supported type (new / get should return same value)
     /**
-     * Creates a new {@link AutoFillValue} to auto-fill a {@link View} representing a text field.
+     * Creates a new {@link AutoFillValue} to autofill a {@link View} representing a text field.
      *
-     * <p>See {@link AutoFillType#isText()} for more info.
+     * <p>See {@link View#AUTOFILL_TYPE_TEXT} for more info.
      */
     // TODO(b/33197203): use cache
     @Nullable
@@ -185,29 +183,29 @@ public final class AutoFillValue implements Parcelable {
     }
 
     /**
-     * Creates a new {@link AutoFillValue} to auto-fill a {@link View} representing a toggable
+     * Creates a new {@link AutoFillValue} to autofill a {@link View} representing a toggable
      * field.
      *
-     * <p>See {@link AutoFillType#isToggle()} for more info.
+     * <p>See {@link View#AUTOFILL_TYPE_TOGGLE} for more info.
      */
     public static AutoFillValue forToggle(boolean value) {
         return new AutoFillValue(null, 0, value, 0);
     }
 
     /**
-     * Creates a new {@link AutoFillValue} to auto-fill a {@link View} representing a selection
+     * Creates a new {@link AutoFillValue} to autofill a {@link View} representing a selection
      * list.
      *
-     * <p>See {@link AutoFillType#isList()} for more info.
+     * <p>See {@link View#AUTOFILL_TYPE_LIST} for more info.
      */
     public static AutoFillValue forList(int value) {
         return new AutoFillValue(null, value, false, 0);
     }
 
     /**
-     * Creates a new {@link AutoFillValue} to auto-fill a {@link View} representing a date.
+     * Creates a new {@link AutoFillValue} to autofill a {@link View} representing a date.
      *
-     * <p>See {@link AutoFillType#isDate()} for more info.
+     * <p>See {@link View#AUTOFILL_TYPE_DATE} for more info.
      */
     public static AutoFillValue forDate(long date) {
         return new AutoFillValue(null, 0, false, date);
