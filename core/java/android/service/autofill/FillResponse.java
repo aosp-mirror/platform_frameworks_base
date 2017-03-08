@@ -169,35 +169,15 @@ public final class FillResponse implements Parcelable {
     private FillResponse(@NonNull Builder builder) {
         mDatasets = builder.mDatasets;
 
-        if (false) {
-            // TODO(b/33197203, 35727295): this is how mSaveInfo will be set once we don't support
-            // FillResponse.addSavableIds()
-            mSaveInfo = builder.mSaveInfo;
-            if (mSaveInfo != null) {
-                mSaveInfo.addSavableIds(mDatasets);
-                if (mSaveInfo.getSavableIds() == null) {
-                    throw new IllegalArgumentException(
-                            "need to provide at least one savable id on SaveInfo");
-                }
+        // TODO(b/33197203, 35727295): this is how mSaveInfo will be set once we don't support
+        // FillResponse.addSavableIds()
+        mSaveInfo = builder.mSaveInfo;
+        if (mSaveInfo != null) {
+            mSaveInfo.addSavableIds(mDatasets);
+            if (mSaveInfo.getSavableIds() == null) {
+                throw new IllegalArgumentException(
+                        "need to provide at least one savable id on SaveInfo");
             }
-        } else {
-            // Temporary workaround to support FillResponse.addSavableIds()
-            SaveInfo saveInfo = builder.mSaveInfoBuilder != null ? builder.mSaveInfoBuilder.build()
-                    : builder.mSaveInfo;
-
-            // Handle the the case where service didn't call addSavableIds() because it would
-            // contain just the ids from the datasets.
-            if (saveInfo == null && mDatasets != null) {
-                saveInfo = new SaveInfo.Builder(SaveInfo.SAVE_DATA_TYPE_GENERIC).build();
-            }
-            if (saveInfo != null) {
-                saveInfo.addSavableIds(mDatasets);
-                if (saveInfo.getSavableIds() == null) {
-                    throw new IllegalArgumentException(
-                            "need to provide at least one savable id on SaveInfo");
-                }
-            }
-            mSaveInfo = saveInfo;
         }
 
         mExtras = builder.mExtras;
@@ -236,9 +216,6 @@ public final class FillResponse implements Parcelable {
      */
     public static final class Builder {
         private ArrayList<Dataset> mDatasets;
-        // TODO(b/33197203, 35727295): temporary builder use by deprecated addSavableIds() method,
-        // should be removed once that method is gone
-        private SaveInfo.Builder mSaveInfoBuilder;
         private SaveInfo mSaveInfo;
         private Bundle mExtras;
         private RemoteViews mPresentation;
@@ -316,21 +293,6 @@ public final class FillResponse implements Parcelable {
             return this;
         }
 
-        /** @hide */
-        // TODO(b/33197203, 35727295): remove when not used by clients
-        public @NonNull Builder addSavableFields(@Nullable AutoFillId... ids) {
-            throwIfDestroyed();
-            if (mSaveInfo != null) {
-                throw new IllegalStateException("setSaveInfo() already called");
-            }
-            if (mSaveInfoBuilder == null) {
-                mSaveInfoBuilder = new SaveInfo.Builder(SaveInfo.SAVE_DATA_TYPE_GENERIC);
-            }
-            mSaveInfoBuilder.addSavableIds(ids);
-
-            return this;
-        }
-
         /**
          * Sets the {@link SaveInfo} associated with this response.
          *
@@ -340,9 +302,6 @@ public final class FillResponse implements Parcelable {
          */
         public @NonNull Builder setSaveInfo(@NonNull SaveInfo saveInfo) {
             throwIfDestroyed();
-            if (mSaveInfoBuilder != null) {
-                throw new IllegalStateException("addSavableFields() already called");
-            }
             mSaveInfo = saveInfo;
             return this;
         }
@@ -374,8 +333,7 @@ public final class FillResponse implements Parcelable {
         public FillResponse build() {
             throwIfDestroyed();
 
-            if (mAuthentication == null && mDatasets == null && mSaveInfoBuilder == null
-                    && mSaveInfo == null) {
+            if (mAuthentication == null && mDatasets == null && mSaveInfo == null) {
                 throw new IllegalArgumentException("need to provide at least one DataSet or a "
                         + "SaveInfo or an authentication with a presentation");
             }
