@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 The Android Open Source Project
+ * Copyright (C) 2017 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of the License at
@@ -12,7 +12,7 @@
  * permissions and limitations under the License.
  */
 
-package com.android.systemui.utils;
+package android.testing;
 
 import android.content.BroadcastReceiver;
 import android.content.ComponentCallbacks;
@@ -32,36 +32,59 @@ import android.provider.Settings;
 import android.util.ArrayMap;
 import android.view.LayoutInflater;
 
-import com.android.systemui.SysUiServiceProvider;
-import com.android.systemui.SysuiTestCase;
-import com.android.systemui.utils.leaks.Tracker;
+import org.junit.rules.TestRule;
+import org.junit.rules.TestWatcher;
+import org.junit.runner.Description;
+import org.junit.runners.model.Statement;
 
-public class TestableContext extends ContextWrapper implements SysUiServiceProvider {
+/**
+ * A ContextWrapper with utilities specifically designed to make Testing easier.
+ *
+ * <ul>
+ * <li>System services can be mocked out with {@link #addMockSystemService}</li>
+ * <li>Service binding can be mocked out with {@link #addMockService}</li>
+ * <li>Settings support {@link TestableSettings}</li>
+ * <li>Has support for {@link LeakCheck} for services and receivers</li>
+ * </ul>
+ *
+ * <p>TestableContext should be defined as a rule on your test so it can clean up after itself.
+ * Like the following:</p>
+ * <pre class="prettyprint">
+ * {@literal
+ * @Rule
+ * private final TestableContext mContext = new TestableContext(InstrumentationRegister.getContext());
+ * }
+ * </pre>
+ */
+public class TestableContext extends ContextWrapper implements TestRule {
 
-    private final FakeContentResolver mFakeContentResolver;
-    private final FakeSettingsProvider mSettingsProvider;
+    private final TestableContentResolver mTestableContentResolver;
+    private final TestableSettings mSettingsProvider;
 
     private ArrayMap<String, Object> mMockSystemServices;
     private ArrayMap<ComponentName, IBinder> mMockServices;
     private ArrayMap<ServiceConnection, ComponentName> mActiveServices;
-    private ArrayMap<Class<?>, Object> mComponents;
 
     private PackageManager mMockPackageManager;
-    private Tracker mReceiver;
-    private Tracker mService;
-    private Tracker mComponent;
+    private LeakCheck.Tracker mReceiver;
+    private LeakCheck.Tracker mService;
+    private LeakCheck.Tracker mComponent;
 
-    public TestableContext(Context base, SysuiTestCase test) {
+    public TestableContext(Context base) {
+        this(base, null);
+    }
+
+    public TestableContext(Context base, LeakCheck check) {
         super(base);
-        mFakeContentResolver = new FakeContentResolver(base);
+        mTestableContentResolver = new TestableContentResolver(base);
         ContentProviderClient settings = base.getContentResolver()
                 .acquireContentProviderClient(Settings.AUTHORITY);
-        mSettingsProvider = FakeSettingsProvider.getFakeSettingsProvider(settings,
-                mFakeContentResolver);
-        mFakeContentResolver.addProvider(Settings.AUTHORITY, mSettingsProvider);
-        mReceiver = test.getTracker("receiver");
-        mService = test.getTracker("service");
-        mComponent = test.getTracker("component");
+        mSettingsProvider = TestableSettings.getFakeSettingsProvider(settings,
+                mTestableContentResolver);
+        mTestableContentResolver.addProvider(Settings.AUTHORITY, mSettingsProvider.getProvider());
+        mReceiver = check != null ? check.getTracker("receiver") : null;
+        mService = check != null ? check.getTracker("service") : null;
+        mComponent = check != null ? check.getTracker("component") : null;
     }
 
     public void setMockPackageManager(PackageManager mock) {
@@ -86,17 +109,13 @@ public class TestableContext extends ContextWrapper implements SysUiServiceProvi
     }
 
     public void addMockSystemService(String name, Object service) {
-        mMockSystemServices = lazyInit(mMockSystemServices);
+        if (mMockSystemServices == null) mMockSystemServices = new ArrayMap<>();
         mMockSystemServices.put(name, service);
     }
 
     public void addMockService(ComponentName component, IBinder service) {
-        mMockServices = lazyInit(mMockServices);
+        if (mMockServices == null) mMockServices = new ArrayMap<>();
         mMockServices.put(component, service);
-    }
-
-    private <T, V> ArrayMap<T, V> lazyInit(ArrayMap<T, V> services) {
-        return services != null ? services : new ArrayMap<T, V>();
     }
 
     @Override
@@ -110,13 +129,13 @@ public class TestableContext extends ContextWrapper implements SysUiServiceProvi
         return super.getSystemService(name);
     }
 
-    public FakeSettingsProvider getSettingsProvider() {
+    public TestableSettings getSettingsProvider() {
         return mSettingsProvider;
     }
 
     @Override
-    public FakeContentResolver getContentResolver() {
-        return mFakeContentResolver;
+    public TestableContentResolver getContentResolver() {
+        return mTestableContentResolver;
     }
 
     @Override
@@ -177,7 +196,7 @@ public class TestableContext extends ContextWrapper implements SysUiServiceProvi
 
     private boolean checkMocks(ComponentName component, ServiceConnection conn) {
         if (mMockServices != null && component != null && mMockServices.containsKey(component)) {
-            mActiveServices = lazyInit(mActiveServices);
+            if (mActiveServices == null) mActiveServices = new ArrayMap<>();
             mActiveServices.put(conn, component);
             conn.onServiceConnected(component, mMockServices.get(component));
             return true;
@@ -212,13 +231,18 @@ public class TestableContext extends ContextWrapper implements SysUiServiceProvi
         super.unregisterComponentCallbacks(callback);
     }
 
-    @SuppressWarnings("unchecked")
-    public <T> T getComponent(Class<T> interfaceType) {
-        return (T) (mComponents != null ? mComponents.get(interfaceType) : null);
-    }
+    @Override
+    public Statement apply(Statement base, Description description) {
+        return new TestWatcher() {
+            @Override
+            protected void succeeded(Description description) {
+                mSettingsProvider.clearOverrides();
+            }
 
-    public <T, C extends T> void putComponent(Class<T> interfaceType, C component) {
-        mComponents = lazyInit(mComponents);
-        mComponents.put(interfaceType, component);
+            @Override
+            protected void failed(Throwable e, Description description) {
+                mSettingsProvider.clearOverrides();
+            }
+        }.apply(base, description);
     }
 }

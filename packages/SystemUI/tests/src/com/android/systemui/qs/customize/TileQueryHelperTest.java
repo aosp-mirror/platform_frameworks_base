@@ -21,13 +21,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.android.systemui.Dependency;
-import com.android.systemui.SysUIRunner;
+import android.testing.AndroidTestingRunner;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTile.State;
 import com.android.systemui.qs.QSTileHost;
-import com.android.systemui.utils.TestableLooper;
-import com.android.systemui.utils.TestableLooper.RunWithLooper;
+import android.testing.TestableLooper;
+import android.testing.TestableLooper.RunWithLooper;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -37,7 +37,7 @@ import android.os.Message;
 import android.test.suitebuilder.annotation.SmallTest;
 
 @SmallTest
-@RunWith(SysUIRunner.class)
+@RunWith(AndroidTestingRunner.class)
 @RunWithLooper
 public class TileQueryHelperTest extends SysuiTestCase {
     private TestableLooper mBGLooper;
@@ -46,7 +46,7 @@ public class TileQueryHelperTest extends SysuiTestCase {
     @Before
     public void setup() {
         mBGLooper = TestableLooper.get(this);
-        injectTestDependency(Dependency.BG_LOOPER, mBGLooper.getLooper());
+        mDependency.injectTestDependency(Dependency.BG_LOOPER, mBGLooper.getLooper());
     }
 
     @Test

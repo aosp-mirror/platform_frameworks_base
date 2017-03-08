@@ -12,7 +12,7 @@
  * permissions and limitations under the License.
  */
 
-package com.android.systemui;
+package android.testing;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

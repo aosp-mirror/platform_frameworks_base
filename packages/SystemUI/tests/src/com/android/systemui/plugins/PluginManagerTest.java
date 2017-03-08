@@ -34,7 +34,7 @@ import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.annotations.ProvidesInterface;
 import com.android.systemui.plugins.PluginInstanceManager.PluginInfo;
-import com.android.systemui.plugins.PluginManager.PluginInstanceManagerFactory;
+import com.android.systemui.plugins.PluginManagerImpl.PluginInstanceManagerFactory;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -50,7 +50,7 @@ public class PluginManagerTest extends SysuiTestCase {
 
     private PluginInstanceManagerFactory mMockFactory;
     private PluginInstanceManager mMockPluginInstance;
-    private PluginManager mPluginManager;
+    private PluginManagerImpl mPluginManager;
     private PluginListener mMockListener;
 
     private UncaughtExceptionHandler mRealExceptionHandler;
@@ -66,7 +66,8 @@ public class PluginManagerTest extends SysuiTestCase {
         when(mMockFactory.createPluginInstanceManager(Mockito.any(), Mockito.any(), Mockito.any(),
                 Mockito.anyBoolean(), Mockito.any(), Mockito.any(), Mockito.any()))
                 .thenReturn(mMockPluginInstance);
-        mPluginManager = new PluginManager(getContext(), mMockFactory, true, mMockExceptionHandler);
+        mPluginManager = new PluginManagerImpl(getContext(), mMockFactory, true,
+                mMockExceptionHandler);
         resetExceptionHandler();
         mMockListener = mock(PluginListener.class);
     }
@@ -98,7 +99,7 @@ public class PluginManagerTest extends SysuiTestCase {
 
     @Test
     public void testNonDebuggable() {
-        mPluginManager = new PluginManager(getContext(), mMockFactory, false,
+        mPluginManager = new PluginManagerImpl(getContext(), mMockFactory, false,
                 mMockExceptionHandler);
         resetExceptionHandler();
 
@@ -148,7 +149,7 @@ public class PluginManagerTest extends SysuiTestCase {
 
         ComponentName testComponent = new ComponentName(getContext().getPackageName(),
                 PluginManagerTest.class.getName());
-        Intent intent = new Intent(PluginManager.DISABLE_PLUGIN);
+        Intent intent = new Intent(PluginManagerImpl.DISABLE_PLUGIN);
         intent.setData(Uri.parse("package://" + testComponent.flattenToString()));
         mPluginManager.onReceive(mContext, intent);
         verify(nm).cancel(eq(testComponent.getClassName()), eq(SystemMessage.NOTE_PLUGIN));

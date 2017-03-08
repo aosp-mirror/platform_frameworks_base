@@ -14,12 +14,14 @@
 
 package com.android.systemui.utils.leaks;
 
+import android.testing.LeakCheck;
+
 import com.android.systemui.statusbar.policy.FlashlightController;
 import com.android.systemui.statusbar.policy.FlashlightController.FlashlightListener;
 
 public class FakeFlashlightController extends BaseLeakChecker<FlashlightListener>
         implements FlashlightController {
-    public FakeFlashlightController(LeakCheckedTest test) {
+    public FakeFlashlightController(LeakCheck test) {
         super(test, "flashlight");
     }
 

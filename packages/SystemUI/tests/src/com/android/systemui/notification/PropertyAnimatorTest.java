@@ -14,22 +14,25 @@
 
 package com.android.systemui.notification;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
-import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
-
-import com.android.systemui.Interpolators;
-import com.android.systemui.R;
-
+import android.testing.AndroidTestingRunner;
+import android.testing.UiThreadTest;
 import android.util.FloatProperty;
 import android.util.Property;
 import android.view.View;
 import android.view.animation.Interpolator;
 
-import com.android.systemui.SysUIRunner;
+import com.android.systemui.Interpolators;
+import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.UiThreadTest;
 import com.android.systemui.statusbar.notification.PropertyAnimator;
 import com.android.systemui.statusbar.stack.AnimationFilter;
 import com.android.systemui.statusbar.stack.AnimationProperties;
@@ -39,18 +42,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 @SmallTest
-@RunWith(SysUIRunner.class)
+@RunWith(AndroidTestingRunner.class)
 @UiThreadTest
 public class PropertyAnimatorTest extends SysuiTestCase {
 

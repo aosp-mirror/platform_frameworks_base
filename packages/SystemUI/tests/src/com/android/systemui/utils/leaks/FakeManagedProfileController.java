@@ -14,12 +14,14 @@
 
 package com.android.systemui.utils.leaks;
 
+import android.testing.LeakCheck;
+
 import com.android.systemui.statusbar.phone.ManagedProfileController;
 import com.android.systemui.statusbar.phone.ManagedProfileController.Callback;
 
 public class FakeManagedProfileController extends BaseLeakChecker<Callback> implements
         ManagedProfileController {
-    public FakeManagedProfileController(LeakCheckedTest test) {
+    public FakeManagedProfileController(LeakCheck test) {
         super(test, "profile");
     }
 

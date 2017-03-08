@@ -42,8 +42,8 @@ public class ExtensionControllerTest extends SysuiTestCase {
 
     @Before
     public void setup() {
-        mPluginManager = injectMockDependency(PluginManager.class);
-        mTunerService = injectMockDependency(TunerService.class);
+        mPluginManager = mDependency.injectMockDependency(PluginManager.class);
+        mTunerService = mDependency.injectMockDependency(TunerService.class);
         mExtensionController = Dependency.get(ExtensionController.class);
     }
 

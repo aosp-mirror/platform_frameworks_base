@@ -39,21 +39,21 @@ public class DependencyTest extends SysuiTestCase {
     @Test
     public void testClassDependency() {
         FlashlightController f = mock(FlashlightController.class);
-        injectTestDependency(FlashlightController.class, f);
+        mDependency.injectTestDependency(FlashlightController.class, f);
         Assert.assertEquals(f, Dependency.get(FlashlightController.class));
     }
 
     @Test
     public void testStringDependency() {
         Looper l = Looper.getMainLooper();
-        injectTestDependency(Dependency.BG_LOOPER, l);
+        mDependency.injectTestDependency(Dependency.BG_LOOPER, l);
         assertEquals(l, Dependency.get(Dependency.BG_LOOPER));
     }
 
     @Test
     public void testDump() {
         Dumpable d = mock(Dumpable.class);
-        injectTestDependency(DUMPABLE, d);
+        mDependency.injectTestDependency(DUMPABLE, d);
         Dependency.get(DUMPABLE);
         mDependency.dump(null, mock(PrintWriter.class), null);
         verify(d).dump(eq(null), any(), eq(null));
@@ -62,7 +62,7 @@ public class DependencyTest extends SysuiTestCase {
     @Test
     public void testConfigurationChanged() {
         ConfigurationChangedReceiver d = mock(ConfigurationChangedReceiver.class);
-        injectTestDependency(CONFIGURATION_CHANGED_RECEIVER, d);
+        mDependency.injectTestDependency(CONFIGURATION_CHANGED_RECEIVER, d);
         Dependency.get(CONFIGURATION_CHANGED_RECEIVER);
         mDependency.onConfigurationChanged(null);
         verify(d).onConfigurationChanged(eq(null));

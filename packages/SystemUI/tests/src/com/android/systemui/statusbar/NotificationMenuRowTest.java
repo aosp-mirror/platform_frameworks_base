@@ -14,17 +14,17 @@
 
 package com.android.systemui.statusbar;
 
-import com.android.systemui.SysUIRunner;
-import com.android.systemui.utils.TestableLooper;
-import com.android.systemui.utils.TestableLooper.RunWithLooper;
-import com.android.systemui.utils.ViewUtils;
+import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper;
+import android.testing.TestableLooper.RunWithLooper;
+import android.testing.ViewUtils;
 import com.android.systemui.utils.leaks.LeakCheckedTest;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-@RunWith(SysUIRunner.class)
+@RunWith(AndroidTestingRunner.class)
 @RunWithLooper(setAsMainLooper = true)
 public class NotificationMenuRowTest extends LeakCheckedTest {
 

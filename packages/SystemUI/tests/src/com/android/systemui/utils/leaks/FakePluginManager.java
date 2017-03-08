@@ -15,17 +15,17 @@
 package com.android.systemui.utils.leaks;
 
 import android.content.Context;
+import android.testing.LeakCheck;
 
 import com.android.systemui.plugins.Plugin;
 import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.plugins.PluginManager;
 
-public class FakePluginManager extends PluginManager {
+public class FakePluginManager implements PluginManager {
 
     private final BaseLeakChecker<PluginListener> mLeakChecker;
 
-    public FakePluginManager(Context context, LeakCheckedTest test) {
-        super(context);
+    public FakePluginManager(LeakCheck test) {
         mLeakChecker = new BaseLeakChecker<>(test, "Plugin");
     }
 
@@ -36,8 +36,35 @@ public class FakePluginManager extends PluginManager {
     }
 
     @Override
+    public <T extends Plugin> void addPluginListener(PluginListener<T> listener, Class<?> cls) {
+        mLeakChecker.addCallback(listener);
+    }
+
+    @Override
+    public <T extends Plugin> void addPluginListener(PluginListener<T> listener, Class<?> cls,
+            boolean allowMultiple) {
+        mLeakChecker.addCallback(listener);
+    }
+
+    @Override
+    public <T extends Plugin> void addPluginListener(String action, PluginListener<T> listener,
+            Class<?> cls) {
+        mLeakChecker.addCallback(listener);
+    }
+
+    @Override
     public void removePluginListener(PluginListener<?> listener) {
         mLeakChecker.removeCallback(listener);
+    }
+
+    @Override
+    public <T> boolean dependsOn(Plugin p, Class<T> cls) {
+        return false;
+    }
+
+    @Override
+    public <T extends Plugin> T getOneShotPlugin(Class<T> cls) {
+        return null;
     }
 
     @Override

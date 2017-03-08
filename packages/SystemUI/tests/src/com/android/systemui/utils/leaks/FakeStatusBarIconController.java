@@ -14,6 +14,8 @@
 
 package com.android.systemui.utils.leaks;
 
+import android.testing.LeakCheck;
+
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarIconController.IconManager;
@@ -21,7 +23,7 @@ import com.android.systemui.statusbar.phone.StatusBarIconController.IconManager;
 public class FakeStatusBarIconController extends BaseLeakChecker<IconManager>
         implements StatusBarIconController {
 
-    public FakeStatusBarIconController(LeakCheckedTest test) {
+    public FakeStatusBarIconController(LeakCheck test) {
         super(test, "StatusBarGroup");
     }
 

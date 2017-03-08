@@ -15,14 +15,12 @@
 package com.android.systemui.utils.leaks;
 
 import android.os.Bundle;
+import android.testing.LeakCheck;
 
 import com.android.settingslib.net.DataUsageController;
 import com.android.systemui.statusbar.policy.DataSaverController;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
-
-import java.io.FileDescriptor;
-import java.io.PrintWriter;
 
 public class FakeNetworkController extends BaseLeakChecker<SignalCallback>
         implements NetworkController {
@@ -30,10 +28,10 @@ public class FakeNetworkController extends BaseLeakChecker<SignalCallback>
     private final FakeDataSaverController mDataSaverController;
     private final BaseLeakChecker<EmergencyListener> mEmergencyChecker;
 
-    public FakeNetworkController(LeakCheckedTest test) {
+    public FakeNetworkController(LeakCheck test) {
         super(test, "network");
         mDataSaverController = new FakeDataSaverController(test);
-        mEmergencyChecker = new BaseLeakChecker<EmergencyListener>(test, "emergency");
+        mEmergencyChecker = new BaseLeakChecker<>(test, "emergency");
     }
 
     @Override

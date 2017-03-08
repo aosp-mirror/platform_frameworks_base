@@ -33,8 +33,8 @@ import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.policy.SecurityController;
-import com.android.systemui.util.LayoutInflaterBuilder;
-import com.android.systemui.utils.TestableImageView;
+import android.testing.LayoutInflaterBuilder;
+import android.testing.TestableImageView;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -57,8 +57,8 @@ public class QSSecurityFooterTest extends SysuiTestCase {
 
     @Before
     public void setUp() {
-        injectTestDependency(SecurityController.class, mSecurityController);
-        injectTestDependency(Dependency.BG_LOOPER, Looper.getMainLooper());
+        mDependency.injectTestDependency(SecurityController.class, mSecurityController);
+        mDependency.injectTestDependency(Dependency.BG_LOOPER, Looper.getMainLooper());
         mContext.addMockSystemService(Context.LAYOUT_INFLATER_SERVICE,
                 new LayoutInflaterBuilder(mContext)
                         .replace("ImageView", TestableImageView.class)

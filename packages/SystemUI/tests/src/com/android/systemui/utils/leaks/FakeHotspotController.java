@@ -14,12 +14,14 @@
 
 package com.android.systemui.utils.leaks;
 
+import android.testing.LeakCheck;
+
 import com.android.systemui.statusbar.policy.HotspotController;
 import com.android.systemui.statusbar.policy.HotspotController.Callback;
 
 public class FakeHotspotController extends BaseLeakChecker<Callback> implements HotspotController {
 
-    public FakeHotspotController(LeakCheckedTest test) {
+    public FakeHotspotController(LeakCheck test) {
         super(test, "hotspot");
     }
 

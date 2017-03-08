@@ -23,24 +23,22 @@ import android.app.StatusBarManager;
 import android.view.View;
 import android.view.ViewPropertyAnimator;
 
-import com.android.systemui.FragmentTestCase;
 import com.android.systemui.R;
-import com.android.systemui.SysUIRunner;
+import android.testing.AndroidTestingRunner;
+
+import com.android.systemui.SysuiBaseFragmentTest;
 import com.android.systemui.statusbar.CommandQueue;
-import com.android.systemui.statusbar.policy.KeyguardMonitor;
-import com.android.systemui.statusbar.policy.NetworkController;
-import com.android.systemui.statusbar.policy.SecurityController;
 import com.android.systemui.tuner.TunerService;
-import com.android.systemui.utils.TestableLooper.RunWithLooper;
+import android.testing.TestableLooper.RunWithLooper;
 
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-@RunWith(SysUIRunner.class)
+@RunWith(AndroidTestingRunner.class)
 @RunWithLooper(setAsMainLooper = true)
-public class CollapsedStatusBarFragmentTest extends FragmentTestCase {
+public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
 
     private NotificationIconAreaController mMockNotificiationAreaController;
     private View mNotificationAreaInner;
@@ -51,9 +49,9 @@ public class CollapsedStatusBarFragmentTest extends FragmentTestCase {
 
     @Before
     public void setup() {
-        mContext.putComponent(CommandQueue.class, mock(CommandQueue.class));
-        mContext.putComponent(StatusBar.class, mock(StatusBar.class));
-        mContext.putComponent(TunerService.class, mock(TunerService.class));
+        mSysuiContext.putComponent(CommandQueue.class, mock(CommandQueue.class));
+        mSysuiContext.putComponent(StatusBar.class, mock(StatusBar.class));
+        mSysuiContext.putComponent(TunerService.class, mock(TunerService.class));
         injectLeakCheckedDependencies(ALL_SUPPORTED_CLASSES);
         mMockNotificiationAreaController = mock(NotificationIconAreaController.class);
         mNotificationAreaInner = mock(View.class);

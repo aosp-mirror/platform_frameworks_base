@@ -22,7 +22,7 @@ import static org.mockito.Mockito.verify;
 import com.android.internal.app.NightDisplayController;
 import com.android.systemui.Prefs;
 import com.android.systemui.Prefs.Key;
-import com.android.systemui.SysUIRunner;
+import android.testing.AndroidTestingRunner;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.qs.QSTileHost;
 
@@ -32,7 +32,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 
-@RunWith(SysUIRunner.class)
+@RunWith(AndroidTestingRunner.class)
 public class AutoTileManagerTest extends SysuiTestCase {
 
     private QSTileHost mQsTileHost;

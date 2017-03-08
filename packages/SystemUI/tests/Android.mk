@@ -49,7 +49,8 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
     mockito-updated-target-minus-junit4 \
     SystemUI-proto \
     SystemUI-tags \
-    legacy-android-test
+    legacy-android-test \
+    testables
 
 LOCAL_JAVA_LIBRARIES := android.test.runner telephony-common android.car
 

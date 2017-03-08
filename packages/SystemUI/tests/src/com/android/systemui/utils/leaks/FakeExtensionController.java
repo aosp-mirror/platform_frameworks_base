@@ -14,7 +14,8 @@
 
 package com.android.systemui.utils.leaks;
 
-import static org.mockito.Mockito.mock;
+import android.testing.LeakCheck;
+import android.testing.LeakCheck.Tracker;
 
 import com.android.systemui.statusbar.policy.ExtensionController;
 
@@ -25,7 +26,7 @@ public class FakeExtensionController implements ExtensionController {
 
     private final Tracker mTracker;
 
-    public FakeExtensionController(LeakCheckedTest test) {
+    public FakeExtensionController(LeakCheck test) {
         mTracker = test.getTracker("extension");
     }
 

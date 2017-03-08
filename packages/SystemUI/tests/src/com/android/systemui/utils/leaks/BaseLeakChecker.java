@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 The Android Open Source Project
+ * Copyright (C) 2017 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of the License at
@@ -14,6 +14,9 @@
 
 package com.android.systemui.utils.leaks;
 
+import android.testing.LeakCheck;
+import android.testing.LeakCheck.Tracker;
+
 import com.android.systemui.Dumpable;
 import com.android.systemui.statusbar.policy.CallbackController;
 
@@ -24,7 +27,7 @@ public class BaseLeakChecker<T> implements CallbackController<T>, Dumpable {
 
     private final Tracker mTracker;
 
-    public BaseLeakChecker(LeakCheckedTest test, String tag) {
+    public BaseLeakChecker(LeakCheck test, String tag) {
         mTracker = test.getTracker(tag);
     }
 

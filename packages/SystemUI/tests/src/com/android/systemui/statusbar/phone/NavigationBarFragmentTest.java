@@ -19,24 +19,25 @@ import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.os.Looper;
+import android.testing.AndroidTestingRunner;
 import android.view.Display;
 import android.view.WindowManager;
 
 import com.android.systemui.Dependency;
-import com.android.systemui.FragmentTestCase;
-import com.android.systemui.SysUIRunner;
+
+import com.android.systemui.SysuiBaseFragmentTest;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.CommandQueue;
-import com.android.systemui.utils.TestableLooper.RunWithLooper;
+import android.testing.TestableLooper.RunWithLooper;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-@RunWith(SysUIRunner.class)
+@RunWith(AndroidTestingRunner.class)
 @RunWithLooper(setAsMainLooper = true)
-public class NavigationBarFragmentTest extends FragmentTestCase {
+public class NavigationBarFragmentTest extends SysuiBaseFragmentTest {
 
     public NavigationBarFragmentTest() {
         super(NavigationBarFragment.class);
@@ -44,11 +45,11 @@ public class NavigationBarFragmentTest extends FragmentTestCase {
 
     @Before
     public void setup() {
-        injectTestDependency(Dependency.BG_LOOPER, Looper.getMainLooper());
-        mContext.putComponent(CommandQueue.class, mock(CommandQueue.class));
-        mContext.putComponent(StatusBar.class, mock(StatusBar.class));
-        mContext.putComponent(Recents.class, mock(Recents.class));
-        mContext.putComponent(Divider.class, mock(Divider.class));
+        mDependency.injectTestDependency(Dependency.BG_LOOPER, Looper.getMainLooper());
+        mSysuiContext.putComponent(CommandQueue.class, mock(CommandQueue.class));
+        mSysuiContext.putComponent(StatusBar.class, mock(StatusBar.class));
+        mSysuiContext.putComponent(Recents.class, mock(Recents.class));
+        mSysuiContext.putComponent(Divider.class, mock(Divider.class));
         injectLeakCheckedDependencies(ALL_SUPPORTED_CLASSES);
         WindowManager windowManager = mock(WindowManager.class);
         Display defaultDisplay = mContext.getSystemService(WindowManager.class).getDefaultDisplay();

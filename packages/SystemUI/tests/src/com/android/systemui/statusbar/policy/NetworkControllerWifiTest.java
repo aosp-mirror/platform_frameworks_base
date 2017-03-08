@@ -18,7 +18,7 @@ import android.test.suitebuilder.annotation.SmallTest;
 
 import com.android.settingslib.Utils;
 import com.android.systemui.statusbar.policy.NetworkController.IconState;
-import com.android.systemui.utils.FakeSettingsProvider.SettingOverrider;
+import android.testing.TestableSettings.SettingOverrider;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -92,9 +92,9 @@ public class NetworkControllerWifiTest extends NetworkControllerBaseTest {
                         attr);
 
         // Must set the Settings value before instantiating the NetworkControllerImpl due to bugs in
-        // FakeSettingsProvider.
+        // TestableSettings.
         SettingOverrider settingsOverrider =
-                mContext.getSettingsProvider().acquireOverridesBuilder(this)
+                mContext.getSettingsProvider().acquireOverridesBuilder()
                         .addSetting("global", Settings.Global.NETWORK_SCORING_UI_ENABLED, "1")
                         .build();
         super.setUp(); // re-instantiate NetworkControllImpl now that setting has been updated

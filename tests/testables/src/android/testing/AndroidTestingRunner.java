@@ -12,14 +12,14 @@
  * permissions and limitations under the License.
  */
 
-package com.android.systemui;
+package android.testing;
 
 import android.support.test.internal.runner.junit4.statement.RunAfters;
 import android.support.test.internal.runner.junit4.statement.RunBefores;
 import android.support.test.internal.runner.junit4.statement.UiThreadStatement;
 
-import com.android.systemui.utils.TestableLooper.LooperStatement;
-import com.android.systemui.utils.TestableLooper.RunWithLooper;
+import android.testing.TestableLooper.LooperStatement;
+import android.testing.TestableLooper.RunWithLooper;
 
 import org.junit.After;
 import org.junit.Before;
@@ -32,12 +32,15 @@ import org.junit.runners.model.Statement;
 
 import java.util.List;
 
-public class SysUIRunner extends BlockJUnit4ClassRunner {
+/**
+ * A runner with support for extra annotations provided by the Testables library.
+ */
+public class AndroidTestingRunner extends BlockJUnit4ClassRunner {
 
     private final long mTimeout;
     private final Class<?> mKlass;
 
-    public SysUIRunner(Class<?> klass) throws InitializationError {
+    public AndroidTestingRunner(Class<?> klass) throws InitializationError {
         super(klass);
         mKlass = klass;
         // Can't seem to get reference to timeout parameter from here, so set default to 10 mins.

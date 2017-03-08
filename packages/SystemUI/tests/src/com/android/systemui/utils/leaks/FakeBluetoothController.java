@@ -14,6 +14,8 @@
 
 package com.android.systemui.utils.leaks;
 
+import android.testing.LeakCheck;
+
 import com.android.settingslib.bluetooth.CachedBluetoothDevice;
 import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.BluetoothController.Callback;
@@ -23,7 +25,7 @@ import java.util.Collection;
 public class FakeBluetoothController extends BaseLeakChecker<Callback> implements
         BluetoothController {
 
-    public FakeBluetoothController(LeakCheckedTest test) {
+    public FakeBluetoothController(LeakCheck test) {
         super(test, "bluetooth");
     }
 
