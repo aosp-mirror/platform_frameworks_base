@@ -42,10 +42,10 @@ final class EntityConfidence<T> {
         float score1 = mEntityConfidence.get(e1);
         float score2 = mEntityConfidence.get(e2);
         if (score1 > score2) {
-            return 1;
+            return -1;
         }
         if (score1 < score2) {
-            return -1;
+            return 1;
         }
         return 0;
     };
