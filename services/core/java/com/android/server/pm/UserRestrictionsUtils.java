@@ -414,13 +414,6 @@ public class UserRestrictionsUtils {
         final long id = Binder.clearCallingIdentity();
         try {
             switch (key) {
-                case UserManager.DISALLOW_CONFIG_WIFI:
-                    if (newValue) {
-                        android.provider.Settings.Secure.putIntForUser(cr,
-                                android.provider.Settings.Global
-                                        .WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON, 0, userId);
-                    }
-                    break;
                 case UserManager.DISALLOW_DATA_ROAMING:
                     if (newValue) {
                         // DISALLOW_DATA_ROAMING user restriction is set.
