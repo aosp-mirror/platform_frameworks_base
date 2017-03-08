@@ -24,7 +24,8 @@ package android.net.wifi.aware;
  * your identity - e.g. by starting a discovery session. This actual MAC address of the
  * interface may also be useful if the application uses alternative (non-Aware) discovery but needs
  * to set up a Aware connection. The provided Aware discovery interface MAC address can then be used
- * in {@link WifiAwareSession#createNetworkSpecifier(int, byte[], byte[])}.
+ * in {@link WifiAwareSession#createNetworkSpecifierOpen(int, byte[])} or
+ * {@link WifiAwareSession#createNetworkSpecifierPassphrase(int, byte[], String)}.
  */
 public class IdentityChangedListener {
     /**
