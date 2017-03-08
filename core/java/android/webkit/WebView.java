@@ -2784,6 +2784,10 @@ public class WebView extends AbsoluteLayout
      * package that was used to load it. Otherwise, the package that would be used if the WebView
      * was loaded right now will be returned; this does not cause WebView to be loaded, so this
      * information may become outdated at any time.
+     * The WebView package changes either when the current WebView package is updated, disabled, or
+     * uninstalled. It can also be changed through a Developer Setting.
+     * If the WebView package changes, any app process that has loaded WebView will be killed. The
+     * next time the app starts and loads WebView it will use the new WebView package instead.
      * @return the current WebView package, or null if there is none.
      */
     public static PackageInfo getCurrentWebViewPackage() {
