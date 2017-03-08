@@ -147,6 +147,7 @@ public final class Bitmap implements Parcelable {
         mWidth = width;
         mHeight = height;
         mRequestPremultiplied = requestPremultiplied;
+        mColorSpace = null;
     }
 
     /**
@@ -254,6 +255,7 @@ public final class Bitmap implements Parcelable {
         nativeReconfigure(mNativePtr, width, height, config.nativeInt, mRequestPremultiplied);
         mWidth = width;
         mHeight = height;
+        mColorSpace = null;
     }
 
     /**
