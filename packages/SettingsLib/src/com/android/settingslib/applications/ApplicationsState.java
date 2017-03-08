@@ -19,6 +19,8 @@ package com.android.settingslib.applications;
 import android.app.ActivityManager;
 import android.app.AppGlobals;
 import android.app.Application;
+import android.app.usage.StorageStats;
+import android.app.usage.StorageStatsManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -92,6 +94,7 @@ public class ApplicationsState {
     final PackageManager mPm;
     final IPackageManager mIpm;
     final UserManager mUm;
+    final StorageStatsManager mStats;
     final int mAdminRetrieveFlags;
     final int mRetrieveFlags;
     PackageIntentReceiver mPackageIntentReceiver;
@@ -111,6 +114,7 @@ public class ApplicationsState {
     final ArrayList<AppEntry> mAppEntries = new ArrayList<AppEntry>();
     List<ApplicationInfo> mApplications = new ArrayList<ApplicationInfo>();
     long mCurId = 1;
+    String mCurComputingSizeUuid;
     String mCurComputingSizePkg;
     int mCurComputingSizeUserId;
     boolean mSessionsChanged;
@@ -126,7 +130,8 @@ public class ApplicationsState {
         mContext = app;
         mPm = mContext.getPackageManager();
         mIpm = AppGlobals.getPackageManager();
-        mUm = (UserManager) app.getSystemService(Context.USER_SERVICE);
+        mUm = mContext.getSystemService(UserManager.class);
+        mStats = mContext.getSystemService(StorageStatsManager.class);
         for (int userId : mUm.getProfileIdsWithDisabled(UserHandle.myUserId())) {
             mEntriesMap.put(userId, new HashMap<String, AppEntry>());
         }
@@ -328,7 +333,18 @@ public class ApplicationsState {
         synchronized (mEntriesMap) {
             AppEntry entry = mEntriesMap.get(userId).get(packageName);
             if (entry != null) {
-                mPm.getPackageSizeInfoAsUser(packageName, userId, mBackgroundHandler.mStatsObserver);
+                mBackgroundHandler.post(() -> {
+                    final StorageStats stats = mStats.queryStatsForPackage(entry.info.volumeUuid,
+                            packageName, UserHandle.of(userId));
+                    final PackageStats legacyStats = new PackageStats(packageName, userId);
+                    legacyStats.codeSize = stats.getCodeBytes();
+                    legacyStats.dataSize = stats.getDataBytes();
+                    legacyStats.cacheSize = stats.getCacheBytes();
+                    try {
+                        mBackgroundHandler.mStatsObserver.onGetStatsCompleted(legacyStats, true);
+                    } catch (RemoteException ignored) {
+                    }
+                });
             }
             if (DEBUG_LOCKING) Log.v(TAG, "...requestSize releasing lock");
         }
@@ -958,10 +974,24 @@ public class ApplicationsState {
                                         mMainHandler.sendMessage(m);
                                     }
                                     entry.sizeLoadStart = now;
+                                    mCurComputingSizeUuid = entry.info.volumeUuid;
                                     mCurComputingSizePkg = entry.info.packageName;
                                     mCurComputingSizeUserId = UserHandle.getUserId(entry.info.uid);
-                                    mPm.getPackageSizeInfoAsUser(mCurComputingSizePkg,
-                                            mCurComputingSizeUserId, mStatsObserver);
+
+                                    mBackgroundHandler.post(() -> {
+                                        final StorageStats stats = mStats.queryStatsForPackage(
+                                                mCurComputingSizeUuid, mCurComputingSizePkg,
+                                                UserHandle.of(mCurComputingSizeUserId));
+                                        final PackageStats legacyStats = new PackageStats(
+                                                mCurComputingSizePkg, mCurComputingSizeUserId);
+                                        legacyStats.codeSize = stats.getCodeBytes();
+                                        legacyStats.dataSize = stats.getDataBytes();
+                                        legacyStats.cacheSize = stats.getCacheBytes();
+                                        try {
+                                            mStatsObserver.onGetStatsCompleted(legacyStats, true);
+                                        } catch (RemoteException ignored) {
+                                        }
+                                    });
                                 }
                                 if (DEBUG_LOCKING) Log.v(TAG, "MSG_LOAD_SIZES releasing: now computing");
                                 return;

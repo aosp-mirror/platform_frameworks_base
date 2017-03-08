@@ -34,6 +34,7 @@ import android.annotation.XmlRes;
 import android.app.PackageDeleteObserver;
 import android.app.PackageInstallObserver;
 import android.app.admin.DevicePolicyManager;
+import android.app.usage.StorageStatsManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -5466,8 +5467,10 @@ public abstract class PackageManager {
      * the status of the operation. observer may be null to indicate that
      * no callback is desired.
      *
+     * @deprecated use {@link StorageStatsManager} instead.
      * @hide
      */
+    @Deprecated
     public abstract void getPackageSizeInfoAsUser(String packageName, @UserIdInt int userId,
             IPackageStatsObserver observer);
 
@@ -5475,8 +5478,10 @@ public abstract class PackageManager {
      * Like {@link #getPackageSizeInfoAsUser(String, int, IPackageStatsObserver)}, but
      * returns the size for the calling user.
      *
+     * @deprecated use {@link StorageStatsManager} instead.
      * @hide
      */
+    @Deprecated
     public void getPackageSizeInfo(String packageName, IPackageStatsObserver observer) {
         getPackageSizeInfoAsUser(packageName, UserHandle.myUserId(), observer);
     }

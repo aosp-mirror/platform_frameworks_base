@@ -16,6 +16,7 @@
 
 package android.content.pm;
 
+import android.app.usage.StorageStatsManager;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.UserHandle;
@@ -24,9 +25,13 @@ import android.text.TextUtils;
 import java.util.Objects;
 
 /**
- * implementation of PackageStats associated with a
- * application package.
+ * implementation of PackageStats associated with a application package.
+ *
+ * @deprecated this class is an orphan that could never be obtained from a valid
+ *             public API. If you need package storage statistics use the new
+ *             {@link StorageStatsManager} APIs.
  */
+@Deprecated
 public class PackageStats implements Parcelable {
     /** Name of the package to which this stats applies. */
     public String packageName;
