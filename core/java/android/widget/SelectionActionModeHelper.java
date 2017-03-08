@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.annotation.UiThread;
 import android.annotation.WorkerThread;
 import android.os.AsyncTask;
+import android.os.LocaleList;
 import android.text.Selection;
 import android.text.Spannable;
 import android.text.TextUtils;
@@ -60,7 +61,7 @@ final class SelectionActionModeHelper {
         mEditor = Preconditions.checkNotNull(editor);
         final TextView textView = mEditor.getTextView();
         mTextClassificationHelper = new TextClassificationHelper(
-                textView.getTextClassifier(), textView.getText(), 0, 1);
+                textView.getTextClassifier(), textView.getText(), 0, 1, textView.getTextLocales());
     }
 
     public void startActionModeAsync() {
@@ -170,7 +171,8 @@ final class SelectionActionModeHelper {
     private void resetTextClassificationHelper() {
         final TextView textView = mEditor.getTextView();
         mTextClassificationHelper.reset(textView.getTextClassifier(), textView.getText(),
-                textView.getSelectionStart(), textView.getSelectionEnd());
+                textView.getSelectionStart(), textView.getSelectionEnd(),
+                textView.getTextLocales());
     }
 
     /**
@@ -297,6 +299,7 @@ final class SelectionActionModeHelper {
         private int mSelectionStart;
         /** End index relative to mText. */
         private int mSelectionEnd;
+        private LocaleList mLocales;
 
         /** Trimmed text starting from mTrimStart in mText. */
         private CharSequence mTrimmedText;
@@ -308,18 +311,19 @@ final class SelectionActionModeHelper {
         private int mRelativeEnd;
 
         TextClassificationHelper(TextClassifier textClassifier,
-                CharSequence text, int selectionStart, int selectionEnd) {
-            reset(textClassifier, text, selectionStart, selectionEnd);
+                CharSequence text, int selectionStart, int selectionEnd, LocaleList locales) {
+            reset(textClassifier, text, selectionStart, selectionEnd, locales);
         }
 
         @UiThread
         public void reset(TextClassifier textClassifier,
-                CharSequence text, int selectionStart, int selectionEnd) {
+                CharSequence text, int selectionStart, int selectionEnd, LocaleList locales) {
             mTextClassifier = Preconditions.checkNotNull(textClassifier);
             mText = Preconditions.checkNotNull(text).toString();
             Preconditions.checkArgument(selectionEnd > selectionStart);
             mSelectionStart = selectionStart;
             mSelectionEnd = selectionEnd;
+            mLocales = locales;
         }
 
         @WorkerThread
@@ -329,14 +333,14 @@ final class SelectionActionModeHelper {
                     mSelectionStart,
                     mSelectionEnd,
                     mTextClassifier.getTextClassificationResult(
-                            mTrimmedText, mRelativeStart, mRelativeEnd));
+                            mTrimmedText, mRelativeStart, mRelativeEnd, mLocales));
         }
 
         @WorkerThread
         public SelectionResult suggestSelection() {
             trimText();
             final TextSelection sel = mTextClassifier.suggestSelection(
-                    mTrimmedText, mRelativeStart, mRelativeEnd);
+                    mTrimmedText, mRelativeStart, mRelativeEnd, mLocales);
             mSelectionStart = Math.max(0, sel.getSelectionStartIndex() + mTrimStart);
             mSelectionEnd = Math.min(mText.length(), sel.getSelectionEndIndex() + mTrimStart);
             return classifyText();

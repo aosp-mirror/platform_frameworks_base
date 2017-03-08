@@ -369,6 +369,16 @@ package android.view {
 
 }
 
+package android.view.textclassifier {
+
+  public abstract interface TextClassifier {
+    method public abstract android.view.textclassifier.LinksInfo getLinks(java.lang.CharSequence, int);
+    method public abstract android.view.textclassifier.TextClassificationResult getTextClassificationResult(java.lang.CharSequence, int, int);
+    method public abstract android.view.textclassifier.TextSelection suggestSelection(java.lang.CharSequence, int, int);
+  }
+
+}
+
 package android.webkit {
 
   public class WebViewClient {
