@@ -44,18 +44,21 @@ public class BatteryStatsDurationTimerTest extends TestCase {
         assertFalse(timer.isRunningLocked());
         assertEquals(0, timer.getCurrentDurationMsLocked(300));
         assertEquals(0, timer.getMaxDurationMsLocked(301));
+        assertEquals(0, timer.getTotalDurationMsLocked(301));
 
-        // Start timer: current and max advance
+        // Start timer: current, total, and max advance
         timer.startRunningLocked(700);
         assertTrue(timer.isRunningLocked());
         assertEquals(800, timer.getCurrentDurationMsLocked(1500));
         assertEquals(801, timer.getMaxDurationMsLocked(1501));
+        assertEquals(802, timer.getTotalDurationMsLocked(1502));
 
-        // Stop timer: current resets to 0, max remains
+        // Stop timer: current resets to 0; total and max remain
         timer.stopRunningLocked(3100);
         assertFalse(timer.isRunningLocked());
         assertEquals(0, timer.getCurrentDurationMsLocked(6300));
         assertEquals(2400, timer.getMaxDurationMsLocked(6301));
+        assertEquals(2400, timer.getTotalDurationMsLocked(6302));
 
         // Start time again, but check with a short time, and make sure max doesn't
         // increment.
@@ -63,31 +66,36 @@ public class BatteryStatsDurationTimerTest extends TestCase {
         assertTrue(timer.isRunningLocked());
         assertEquals(100, timer.getCurrentDurationMsLocked(12800));
         assertEquals(2400, timer.getMaxDurationMsLocked(12801));
+        assertEquals(2502, timer.getTotalDurationMsLocked(12802));
 
         // And stop it again, but with a short time, and make sure it doesn't increment.
         timer.stopRunningLocked(12900);
         assertFalse(timer.isRunningLocked());
         assertEquals(0, timer.getCurrentDurationMsLocked(13000));
         assertEquals(2400, timer.getMaxDurationMsLocked(13001));
+        assertEquals(2600, timer.getTotalDurationMsLocked(13002));
 
         // Now start and check that the time doesn't increase if the two times are the same.
         timer.startRunningLocked(27000);
         assertTrue(timer.isRunningLocked());
         assertEquals(0, timer.getCurrentDurationMsLocked(27000));
         assertEquals(2400, timer.getMaxDurationMsLocked(27000));
+        assertEquals(2600, timer.getTotalDurationMsLocked(27000));
 
         // Stop the TimeBase. The values should be frozen.
         timeBase.setRunning(false, /* uptimeUs */ 10, /* realtimeUs */ 55000*1000);
         assertTrue(timer.isRunningLocked());
         assertEquals(28000, timer.getCurrentDurationMsLocked(110100));
         assertEquals(28000, timer.getMaxDurationMsLocked(110101));
+        assertEquals(30600, timer.getTotalDurationMsLocked(110102));
 
         // Start the TimeBase. The values should be the old value plus the delta
-        // between when the timer restarted and the current time
+        // between when the timer restarted and the current time.
         timeBase.setRunning(true, /* uptimeUs */ 10, /* realtimeUs */ 220100*1000);
         assertTrue(timer.isRunningLocked());
         assertEquals(28200, timer.getCurrentDurationMsLocked(220300));
         assertEquals(28201, timer.getMaxDurationMsLocked(220301));
+        assertEquals(30802, timer.getTotalDurationMsLocked(220302));
     }
 
     @SmallTest
@@ -114,6 +122,7 @@ public class BatteryStatsDurationTimerTest extends TestCase {
         // Check that it did start running
         assertEquals(400, timer.getMaxDurationMsLocked(700));
         assertEquals(401, timer.getCurrentDurationMsLocked(701));
+        assertEquals(402, timer.getTotalDurationMsLocked(702));
 
         // Write summary
         final Parcel summaryParcel = Parcel.obtain();
@@ -128,8 +137,9 @@ public class BatteryStatsDurationTimerTest extends TestCase {
         // The new one shouldn't be running, and therefore 0 for current time
         assertFalse(summary.isRunningLocked());
         assertEquals(0, summary.getCurrentDurationMsLocked(6300));
-        // The new one should have the max duration that we had when we wrote it
+        // The new one should have the max and total durations that we had when we wrote it
         assertEquals(1200, summary.getMaxDurationMsLocked(6301));
+        assertEquals(1200, summary.getTotalDurationMsLocked(6302));
 
         // Write full
         final Parcel fullParcel = Parcel.obtain();
@@ -142,7 +152,9 @@ public class BatteryStatsDurationTimerTest extends TestCase {
         // The new one shouldn't be running, and therefore 0 for current time
         assertFalse(full.isRunningLocked());
         assertEquals(0, full.getCurrentDurationMsLocked(6300));
-        // The new one should have the max duration that we had when we wrote it
+        // The new one should have the max and total durations that we had when we wrote it
         assertEquals(1200, full.getMaxDurationMsLocked(6301));
+        assertEquals(1200, full.getTotalDurationMsLocked(6302));
+
     }
 }
