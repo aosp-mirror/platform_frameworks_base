@@ -46,7 +46,7 @@ public final class BluetoothGattServer implements BluetoothProfile {
 
     private BluetoothAdapter mAdapter;
     private IBluetoothGatt mService;
-    private BluetoothGattServerCallback mCallback;
+    private BluetoothGattServerCallbackExt mCallback;
 
     private Object mServerIfLock = new Object();
     private int mServerIf;
@@ -59,8 +59,8 @@ public final class BluetoothGattServer implements BluetoothProfile {
     /**
      * Bluetooth GATT interface callbacks
      */
-    private final IBluetoothGattServerCallback mBluetoothGattServerCallback =
-        new IBluetoothGattServerCallback.Stub() {
+    private final IBluetoothGattServerCallbackExt mBluetoothGattServerCallback =
+        new IBluetoothGattServerCallbackExt.Stub() {
             /**
              * Application interface registered - app is ready to go
              * @hide
@@ -292,6 +292,42 @@ public final class BluetoothGattServer implements BluetoothProfile {
                     Log.w(TAG, "Unhandled exception: " + ex);
                 }
             }
+
+            /**
+             * The PHY for a connection was updated
+             * @hide
+             */
+            public void onPhyUpdate(String address, int txPhy, int rxPhy, int status) {
+                if (DBG) Log.d(TAG, "onPhyUpdate() - " + "device=" + address + ", txPHy=" + txPhy
+                    + ", rxPHy=" + rxPhy);
+
+                BluetoothDevice device = mAdapter.getRemoteDevice(address);
+                if (device == null) return;
+
+                try {
+                    mCallback.onPhyUpdate(device, txPhy, rxPhy, status);
+                } catch (Exception ex) {
+                    Log.w(TAG, "Unhandled exception: " + ex);
+                }
+            }
+
+            /**
+             * The PHY for a connection was read
+             * @hide
+             */
+            public void onPhyRead(String address, int txPhy, int rxPhy, int status) {
+                if (DBG) Log.d(TAG, "onPhyUpdate() - " + "device=" + address + ", txPHy=" + txPhy
+                    + ", rxPHy=" + rxPhy);
+
+                BluetoothDevice device = mAdapter.getRemoteDevice(address);
+                if (device == null) return;
+
+                try {
+                    mCallback.onPhyRead(device, txPhy, rxPhy, status);
+                } catch (Exception ex) {
+                    Log.w(TAG, "Unhandled exception: " + ex);
+                }
+            }
         };
 
     /**
@@ -360,7 +396,7 @@ public final class BluetoothGattServer implements BluetoothProfile {
      * @return true, the callback will be called to notify success or failure,
      *         false on immediate error
      */
-    /*package*/ boolean registerCallback(BluetoothGattServerCallback callback) {
+    /*package*/ boolean registerCallback(BluetoothGattServerCallbackExt callback) {
         if (DBG) Log.d(TAG, "registerCallback()");
         if (mService == null) {
             Log.e(TAG, "GATT service not available");
@@ -436,7 +472,7 @@ public final class BluetoothGattServer implements BluetoothProfile {
      *
      * <p>The connection may not be established right away, but will be
      * completed when the remote device is available. A
-     * {@link BluetoothGattServerCallback#onConnectionStateChange} callback will be
+     * {@link BluetoothGattServerCallbackExt#onConnectionStateChange} callback will be
      * invoked when the connection state changes as a result of this function.
      *
      * <p>The autoConnect paramter determines whether to actively connect to
@@ -488,16 +524,58 @@ public final class BluetoothGattServer implements BluetoothProfile {
     }
 
     /**
+     * Set the preferred connection PHY for this app. Please note that this is just a
+     * recommendation, wether the PHY change will happen depends on other applications peferences,
+     * local and remote controller capabilities. Controller can override these settings.
+     * <p>
+     * {@link BluetoothGattServerCallbackExt#onPhyUpdate} will be triggered as a result of this call, even
+     * if no PHY change happens. It is also triggered when remote device updates the PHY.
+     *
+     * @param device The remote device to send this response to
+     * @param txPhy preferred transmitter PHY. Bitwise OR of any of
+     *             {@link BluetoothDevice#PHY_LE_1M}, {@link BluetoothDevice#PHY_LE_2M}, and
+     *             {@link BluetoothDevice#PHY_LE_CODED}.
+     * @param rxPhy preferred receiver PHY. Bitwise OR of any of
+     *             {@link BluetoothDevice#PHY_LE_1M}, {@link BluetoothDevice#PHY_LE_2M}, and
+     *             {@link BluetoothDevice#PHY_LE_CODED}.
+     * @param phyOptions preferred coding to use when transmitting on the LE Coded PHY. Can be one
+     *             of {@link BluetoothDevice#PHY_OPTION_NO_PREFERRED},
+     *             {@link BluetoothDevice#PHY_OPTION_S2} or {@link BluetoothDevice#PHY_OPTION_S8}
+     */
+    public void setPreferredPhy(BluetoothDevice device, int txPhy, int rxPhy, int phyOptions) {
+        try {
+            mService.serverSetPreferredPhy(mServerIf, device.getAddress(), txPhy, rxPhy,
+                                           phyOptions);
+        } catch (RemoteException e) {
+            Log.e(TAG,"",e);
+        }
+    }
+
+    /**
+     * Read the current transmitter PHY and receiver PHY of the connection. The values are returned
+     * in {@link BluetoothGattServerCallbackExt#onPhyRead}
+     *
+     * @param device The remote device to send this response to
+     */
+    public void readPhy(BluetoothDevice device) {
+        try {
+            mService.serverReadPhy(mServerIf, device.getAddress());
+        } catch (RemoteException e) {
+            Log.e(TAG,"",e);
+        }
+    }
+
+    /**
      * Send a response to a read or write request to a remote device.
      *
      * <p>This function must be invoked in when a remote read/write request
      * is received by one of these callback methods:
      *
      * <ul>
-     *      <li>{@link BluetoothGattServerCallback#onCharacteristicReadRequest}
-     *      <li>{@link BluetoothGattServerCallback#onCharacteristicWriteRequest}
-     *      <li>{@link BluetoothGattServerCallback#onDescriptorReadRequest}
-     *      <li>{@link BluetoothGattServerCallback#onDescriptorWriteRequest}
+     *      <li>{@link BluetoothGattServerCallbackExt#onCharacteristicReadRequest}
+     *      <li>{@link BluetoothGattServerCallbackExt#onCharacteristicWriteRequest}
+     *      <li>{@link BluetoothGattServerCallbackExt#onDescriptorReadRequest}
+     *      <li>{@link BluetoothGattServerCallbackExt#onDescriptorWriteRequest}
      * </ul>
      *
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
