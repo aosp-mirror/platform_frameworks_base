@@ -20,6 +20,7 @@ import android.companion.AssociationRequest;
 import android.companion.ICompanionDeviceDiscoveryServiceCallback;
 import android.companion.IFindDeviceCallback;
 
+
 /** @hide */
 interface ICompanionDeviceDiscoveryService {
     void startDiscovery(

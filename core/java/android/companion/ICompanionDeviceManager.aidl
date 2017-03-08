@@ -29,6 +29,9 @@ interface ICompanionDeviceManager {
         in IFindDeviceCallback callback,
         in String callingPackage);
 
+    List<String> getAssociations(String callingPackage);
+    void disassociate(String deviceMacAddress, String callingPackage);
+
     //TODO add these
 //    boolean haveNotificationAccess(String packageName);
 //    oneway void requestNotificationAccess(String packageName);

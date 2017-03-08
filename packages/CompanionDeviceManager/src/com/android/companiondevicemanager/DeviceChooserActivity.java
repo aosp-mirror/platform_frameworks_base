@@ -92,7 +92,7 @@ public class DeviceChooserActivity extends Activity {
         try {
             final PackageManager packageManager = getPackageManager();
             return packageManager.getApplicationLabel(
-                    packageManager.getApplicationInfo(getService().mCallingPackage, 0));
+                    packageManager.getApplicationInfo(getCallingPackage(), 0));
         } catch (PackageManager.NameNotFoundException e) {
             throw new RuntimeException(e);
         }
@@ -128,7 +128,7 @@ public class DeviceChooserActivity extends Activity {
     }
 
     protected void onPairTapped(BluetoothDevice selectedDevice) {
-        getService().onDeviceSelected();
+        getService().onDeviceSelected(getCallingPackage(), selectedDevice.getAddress());
         setResult(RESULT_OK,
                 new Intent().putExtra(CompanionDeviceManager.EXTRA_DEVICE, selectedDevice));
         finish();

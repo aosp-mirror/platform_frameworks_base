@@ -18,5 +18,5 @@ package android.companion;
 
 /** @hide */
 interface ICompanionDeviceDiscoveryServiceCallback {
-    void onDeviceSelected(String packageName, int userId);
+    oneway void onDeviceSelected(String packageName, int userId, String deviceAddress);
 }

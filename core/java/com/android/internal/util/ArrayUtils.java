@@ -31,6 +31,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Function;
 
 /**
  * ArrayUtils contains some methods that you can call to find out
@@ -474,12 +475,25 @@ public class ArrayUtils {
         }
     }
 
+    public static int size(@Nullable Collection<?> cur) {
+        return cur != null ? cur.size() : 0;
+    }
+
+    public static @NonNull <I, O> List<O> map(@Nullable List<I> cur,
+            Function<? super I, ? extends O> f) {
+        if (cur == null || cur.isEmpty()) return Collections.emptyList();
+        final ArrayList<O> result = new ArrayList<>();
+        for (int i = 0; i < cur.size(); i++) {
+            result.add(f.apply(cur.get(i)));
+        }
+        return result;
+    }
+
     /**
      * Returns the given list, or an immutable empty list if the provided list is null
      *
      * @see Collections#emptyList
      */
-
     public static @NonNull <T> List<T> emptyIfNull(@Nullable List<T> cur) {
         return cur == null ? Collections.emptyList() : cur;
     }

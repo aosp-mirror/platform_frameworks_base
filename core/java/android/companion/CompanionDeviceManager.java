@@ -26,6 +26,8 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
 
+import java.util.List;
+
 /**
  * System level service for managing companion devices
  *
@@ -102,6 +104,11 @@ public final class CompanionDeviceManager {
      * special capabilities have a negative effect on the device's battery and user's data
      * usage, therefore you should requested them when absolutely necessary.</p>
      *
+     * <p>You can call {@link #getAssociations} to get the list of currently associated
+     * devices, and {@link #disassociate} to remove an association. Consider doing so when the
+     * association is no longer relevant to avoid unnecessary battery and/or data drain resulting
+     * from special privileges that the association provides</p>
+     *
      * @param request specific details about this request
      * @param callback will be called once there's at least one device found for user to choose from
      * @param handler A handler to control which thread the callback will be delivered on, or null,
@@ -119,6 +126,8 @@ public final class CompanionDeviceManager {
         try {
             mService.associate(
                     request,
+                    //TODO implicit pointer to outer class -> =null onDestroy
+                    //TODO onStop if isFinishing -> stopScan
                     new IFindDeviceCallback.Stub() {
                         @Override
                         public void onSuccess(PendingIntent launcher) {
@@ -133,6 +142,38 @@ public final class CompanionDeviceManager {
                         }
                     },
                     mContext.getPackageName());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @return a list of MAC addresses of devices that have been previously associated with the
+     * current app. You can use these with {@link #disassociate}
+     */
+    @NonNull
+    public List<String> getAssociations() {
+        try {
+            return mService.getAssociations(mContext.getPackageName());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Remove the association between this app and the device with the given mac address.
+     *
+     * <p>Any privileges provided via being associated with a given device will be revoked</p>
+     *
+     * <p>Consider doing so when the
+     * association is no longer relevant to avoid unnecessary battery and/or data drain resulting
+     * from special privileges that the association provides</p>
+     *
+     * @param deviceMacAddress the MAC address of device to disassociate from this app
+     */
+    public void disassociate(@NonNull String deviceMacAddress) {
+        try {
+            mService.disassociate(deviceMacAddress, mContext.getPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
