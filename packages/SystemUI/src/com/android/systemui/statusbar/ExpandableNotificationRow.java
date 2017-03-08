@@ -1268,7 +1268,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         if (mChildrenContainer != null) {
             mChildrenContainer.setVisibility(!mShowingPublic && mIsSummaryWithChildren ? VISIBLE
                     : INVISIBLE);
-            mChildrenContainer.setHeaderVisible(!mShowingPublic && mIsSummaryWithChildren);
         }
         // The limits might have changed if the view suddenly became a group or vice versa
         updateLimits();

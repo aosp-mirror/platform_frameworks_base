@@ -89,7 +89,6 @@ public class NotificationChildrenContainer extends ViewGroup {
     private ViewState mHeaderViewState;
     private int mClipBottomAmount;
     private boolean mIsLowPriority;
-    private boolean mHeaderVisible = true;
     private OnClickListener mHeaderClickListener;
     private boolean mShowingNormalHeader;
 
@@ -324,6 +323,7 @@ public class NotificationChildrenContainer extends ViewGroup {
             }
             mNotificationHeaderWrapperLowPriority.notifyContentUpdated(mContainingNotification);
         } else {
+            removeView(mNotificationHeaderLowPriority);
             mNotificationHeaderLowPriority = null;
             mNotificationHeaderWrapperLowPriority = null;
         }
@@ -794,11 +794,6 @@ public class NotificationChildrenContainer extends ViewGroup {
         return mNotificationHeaderLowPriority;
     }
 
-    public void setHeaderVisible(boolean visible) {
-        mHeaderVisible = visible;
-        updateHeaderVisibility(false /* animate */);
-    }
-
     private void updateHeaderVisibility(boolean animate) {
         NotificationHeaderView visibleHeader = mNotificationHeader;
         NotificationHeaderView hiddenHeader = mNotificationHeaderLowPriority;
@@ -809,7 +804,7 @@ public class NotificationChildrenContainer extends ViewGroup {
             normalHeaderVisible = false;
         }
         if (animate) {
-            if (mHeaderVisible && visibleHeader != null && hiddenHeader != null
+            if (visibleHeader != null && hiddenHeader != null
                     && mShowingNormalHeader != normalHeaderVisible) {
                 hiddenHeader.setVisibility(VISIBLE);
                 visibleHeader.setVisibility(VISIBLE);
@@ -825,7 +820,7 @@ public class NotificationChildrenContainer extends ViewGroup {
         if (!animate) {
             if (visibleHeader != null) {
                 getWrapperForView(visibleHeader).setVisible(true);
-                visibleHeader.setVisibility(mHeaderVisible ? VISIBLE : INVISIBLE);
+                visibleHeader.setVisibility(VISIBLE);
             }
             if (hiddenHeader != null) {
                 getWrapperForView(hiddenHeader).setVisible(false);
@@ -855,7 +850,7 @@ public class NotificationChildrenContainer extends ViewGroup {
 
 
     private void updateHeaderTransformation() {
-        if (mUserLocked && mHeaderVisible && showingAsLowPriority()) {
+        if (mUserLocked && showingAsLowPriority()) {
             float fraction = getGroupExpandFraction();
             mNotificationHeaderWrapper.transformFrom(mNotificationHeaderWrapperLowPriority,
                     fraction);

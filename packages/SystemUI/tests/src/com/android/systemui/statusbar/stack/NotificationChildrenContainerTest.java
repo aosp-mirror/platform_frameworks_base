@@ -14,16 +14,18 @@
  * limitations under the License
  */
 
-package com.android.systemui.statusbar;
-
-import static org.mockito.Mockito.mock;
+package com.android.systemui.statusbar.stack;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.annotation.UiThreadTest;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
+import android.view.NotificationHeaderView;
 import android.view.View;
+
+import com.android.systemui.statusbar.ExpandableNotificationRow;
+import com.android.systemui.statusbar.NotificationTestHelper;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -32,10 +34,11 @@ import org.junit.runner.RunWith;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class ExpandableNotificationRowTest {
+public class NotificationChildrenContainerTest {
 
     private Context mContext;
     private ExpandableNotificationRow mGroup;
+    private int mId;
     private NotificationTestHelper mNotificationTestHelper;
 
     @Before
@@ -47,20 +50,14 @@ public class ExpandableNotificationRowTest {
     }
 
     @Test
-    public void testGroupSummaryNotShowingIconWhenPublic() {
-        mGroup.setSensitive(true, true);
-        mGroup.setHideSensitive(true, false, 0, 0);
-        Assert.assertTrue(mGroup.isSummaryWithChildren());
-        Assert.assertFalse(mGroup.isShowingIcon());
+    public void testLowPriorityHeaderCleared() {
+        mGroup.setIsLowPriority(true);
+        NotificationChildrenContainer childrenContainer = mGroup.getChildrenContainer();
+        NotificationHeaderView lowPriorityHeaderView = childrenContainer.getLowPriorityHeaderView();
+        Assert.assertTrue(lowPriorityHeaderView.getVisibility() == View.VISIBLE);
+        Assert.assertTrue(lowPriorityHeaderView.getParent() == childrenContainer);
+        mGroup.setIsLowPriority(false);
+        Assert.assertTrue(lowPriorityHeaderView.getParent() == null);
+        Assert.assertTrue(childrenContainer.getLowPriorityHeaderView() == null);
     }
-
-    @Test
-    public void testNotificationHeaderVisibleWhenAnimating() {
-        mGroup.setSensitive(true, true);
-        mGroup.setHideSensitive(true, false, 0, 0);
-        mGroup.setHideSensitive(false, true, 0, 0);
-        Assert.assertTrue(mGroup.getChildrenContainer().getVisibleHeader().getVisibility()
-                == View.VISIBLE);
-    }
-
 }
