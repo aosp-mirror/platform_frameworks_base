@@ -25,6 +25,7 @@ import android.content.pm.PackageManager;
 import android.database.ContentObserver;
 import android.hardware.input.InputManager;
 import android.media.AudioManager;
+import android.os.PowerSaveState;
 import android.os.BatteryStats;
 import android.os.Handler;
 import android.os.IVibratorService;
@@ -50,6 +51,7 @@ import android.media.AudioAttributes;
 
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.IBatteryStats;
+import com.android.server.power.BatterySaverPolicy.ServiceType;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -233,10 +235,15 @@ public class VibratorService extends IVibratorService.Stub
         mPowerManagerInternal = LocalServices.getService(PowerManagerInternal.class);
         mPowerManagerInternal.registerLowPowerModeObserver(
                 new PowerManagerInternal.LowPowerModeListener() {
-            @Override
-            public void onLowPowerModeChanged(boolean enabled) {
-                updateInputDeviceVibrators();
-            }
+                    @Override
+                    public int getServiceType() {
+                        return ServiceType.VIBRATION;
+                    }
+
+                    @Override
+                    public void onLowPowerModeChanged(PowerSaveState result) {
+                        updateInputDeviceVibrators();
+                    }
         });
 
         mContext.getContentResolver().registerContentObserver(
@@ -553,7 +560,8 @@ public class VibratorService extends IVibratorService.Stub
                 } catch (SettingNotFoundException snfe) {
                 }
 
-                mLowPowerMode = mPowerManagerInternal.getLowPowerModeEnabled();
+                mLowPowerMode = mPowerManagerInternal
+                        .getLowPowerState(ServiceType.VIBRATION).batterySaverEnabled;
 
                 if (mVibrateInputDevicesSetting) {
                     if (!mInputDeviceListenerRegistered) {

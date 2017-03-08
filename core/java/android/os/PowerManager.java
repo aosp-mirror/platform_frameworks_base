@@ -971,6 +971,24 @@ public final class PowerManager {
     }
 
     /**
+     * Get data about the battery saver mode for a specific service
+     * @param serviceType unique key for the service, one of
+     *             {@link com.android.server.power.BatterySaverPolicy.ServiceType}
+     * @return Battery saver state data.
+     *
+     * @hide
+     * @see com.android.server.power.BatterySaverPolicy
+     * @see PowerSaveState
+     */
+    public PowerSaveState getPowerSaveState(int serviceType) {
+        try {
+            return mService.getPowerSaveState(serviceType);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Returns true if the device is currently in idle mode.  This happens when a device
      * has been sitting unused and unmoving for a sufficiently long period of time, so that
      * it decides to go into a lower power-use state.  This may involve things like turning

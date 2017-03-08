@@ -17,9 +17,13 @@
 package com.android.server.wm;
 
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doAnswer;
+
+import android.os.PowerSaveState;
 import org.mockito.invocation.InvocationOnMock;
 
 import android.annotation.Nullable;
@@ -67,6 +71,10 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
             if (LocalServices.getService(PowerManagerInternal.class) == null) {
                 LocalServices.addService(PowerManagerInternal.class,
                         mock(PowerManagerInternal.class));
+                final PowerManagerInternal pm =
+                        LocalServices.getService(PowerManagerInternal.class);
+                PowerSaveState state = new PowerSaveState.Builder().build();
+                doReturn(state).when(pm).getLowPowerState(anyInt());
             }
             if (LocalServices.getService(ActivityManagerInternal.class) == null) {
                 LocalServices.addService(ActivityManagerInternal.class,

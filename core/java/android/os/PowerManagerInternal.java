@@ -131,12 +131,13 @@ public abstract class PowerManagerInternal {
     public abstract void setDozeOverrideFromDreamManager(
             int screenState, int screenBrightness);
 
-    public abstract boolean getLowPowerModeEnabled();
+    public abstract PowerSaveState getLowPowerState(int serviceType);
 
     public abstract void registerLowPowerModeObserver(LowPowerModeListener listener);
 
     public interface LowPowerModeListener {
-        public void onLowPowerModeChanged(boolean enabled);
+        int getServiceType();
+        void onLowPowerModeChanged(PowerSaveState state);
     }
 
     public abstract boolean setDeviceIdleMode(boolean enabled);

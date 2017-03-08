@@ -16,8 +16,6 @@
 
 package com.android.server.soundtrigger;
 
-import static android.hardware.soundtrigger.SoundTrigger.STATUS_ERROR;
-
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -42,6 +40,7 @@ import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.Slog;
 import com.android.internal.logging.MetricsLogger;
+import com.android.server.power.BatterySaverPolicy.ServiceType;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -841,7 +840,8 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             if (!PowerManager.ACTION_POWER_SAVE_MODE_CHANGED.equals(intent.getAction())) {
                 return;
             }
-            boolean active = mPowerManager.isPowerSaveMode();
+            boolean active = mPowerManager.getPowerSaveState(ServiceType.SOUND)
+                    .batterySaverEnabled;
             if (DBG) Slog.d(TAG, "onPowerSaveModeChanged: " + active);
             synchronized (mLock) {
                 onPowerSaveModeChangedLocked(active);
@@ -874,7 +874,8 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             mContext.registerReceiver(mPowerSaveModeListener,
                     new IntentFilter(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED));
         }
-        mIsPowerSaveMode = mPowerManager.isPowerSaveMode();
+        mIsPowerSaveMode = mPowerManager.getPowerSaveState(ServiceType.SOUND)
+                .batterySaverEnabled;
     }
 
     // Sends an error callback to all models with a valid registered callback.

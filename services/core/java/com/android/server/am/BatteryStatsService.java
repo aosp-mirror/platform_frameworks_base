@@ -24,6 +24,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.net.wifi.IWifiManager;
 import android.net.wifi.WifiActivityEnergyInfo;
+import android.os.PowerSaveState;
 import android.os.BatteryStats;
 import android.os.Binder;
 import android.os.Handler;
@@ -60,6 +61,7 @@ import com.android.internal.os.BatteryStatsImpl;
 import com.android.internal.os.PowerProfile;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
+import com.android.server.power.BatterySaverPolicy.ServiceType;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -232,7 +234,9 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     public void initPowerManagement() {
         final PowerManagerInternal powerMgr = LocalServices.getService(PowerManagerInternal.class);
         powerMgr.registerLowPowerModeObserver(this);
-        mStats.notePowerSaveMode(powerMgr.getLowPowerModeEnabled());
+        mStats.notePowerSaveMode(
+                powerMgr.getLowPowerState(ServiceType.BATTERY_STATS)
+                        .batterySaverEnabled);
         (new WakeupReasonThread()).start();
     }
 
@@ -258,9 +262,14 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     }
 
     @Override
-    public void onLowPowerModeChanged(boolean enabled) {
+    public int getServiceType() {
+        return ServiceType.BATTERY_STATS;
+    }
+
+    @Override
+    public void onLowPowerModeChanged(PowerSaveState result) {
         synchronized (mStats) {
-            mStats.notePowerSaveMode(enabled);
+            mStats.notePowerSaveMode(result.batterySaverEnabled);
         }
     }
 

@@ -129,6 +129,7 @@ import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManagerInternal;
 import android.hardware.input.InputManager;
 import android.net.Uri;
+import android.os.PowerSaveState;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -219,6 +220,7 @@ import com.android.server.LocalServices;
 import com.android.server.UiThread;
 import com.android.server.Watchdog;
 import com.android.server.input.InputManagerService;
+import com.android.server.power.BatterySaverPolicy.ServiceType;
 import com.android.server.power.ShutdownThread;
 
 import java.io.BufferedWriter;
@@ -1009,15 +1011,26 @@ public class WindowManagerService extends IWindowManager.Stub
         mPowerManagerInternal = LocalServices.getService(PowerManagerInternal.class);
 
         if (mPowerManagerInternal != null) {
-            mPowerManagerInternal.registerLowPowerModeObserver((enabled) -> {
-                synchronized (mWindowMap) {
-                    if (mAnimationsDisabled != enabled && !mAllowAnimationsInLowPowerMode) {
-                        mAnimationsDisabled = enabled;
-                        dispatchNewAnimatorScaleLocked(null);
+            mPowerManagerInternal.registerLowPowerModeObserver(
+                    new PowerManagerInternal.LowPowerModeListener() {
+                @Override
+                public int getServiceType() {
+                    return ServiceType.ANIMATION;
+                }
+
+                @Override
+                public void onLowPowerModeChanged(PowerSaveState result) {
+                    synchronized (mWindowMap) {
+                        final boolean enabled = result.batterySaverEnabled;
+                        if (mAnimationsDisabled != enabled && !mAllowAnimationsInLowPowerMode) {
+                            mAnimationsDisabled = enabled;
+                            dispatchNewAnimatorScaleLocked(null);
+                        }
                     }
                 }
             });
-            mAnimationsDisabled = mPowerManagerInternal.getLowPowerModeEnabled();
+            mAnimationsDisabled = mPowerManagerInternal
+                    .getLowPowerState(ServiceType.ANIMATION).batterySaverEnabled;
         }
         mScreenFrozenLock = mPowerManager.newWakeLock(
                 PowerManager.PARTIAL_WAKE_LOCK, "SCREEN_FROZEN");

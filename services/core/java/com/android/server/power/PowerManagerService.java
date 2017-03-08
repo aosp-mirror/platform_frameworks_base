@@ -35,6 +35,7 @@ import android.hardware.power.V1_0.PowerHint;
 import android.net.Uri;
 import android.os.BatteryManager;
 import android.os.BatteryManagerInternal;
+import android.os.PowerSaveState;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -80,7 +81,7 @@ import com.android.server.Watchdog;
 import com.android.server.am.BatteryStatsService;
 import com.android.server.lights.Light;
 import com.android.server.lights.LightsManager;
-
+import com.android.server.power.BatterySaverPolicy.ServiceType;
 import libcore.util.Objects;
 
 import java.io.FileDescriptor;
@@ -192,6 +193,7 @@ public final class PowerManagerService extends SystemService
     private final Context mContext;
     private final ServiceThread mHandlerThread;
     private final PowerManagerHandler mHandler;
+    private final BatterySaverPolicy mBatterySaverPolicy;
 
     private LightsManager mLightsManager;
     private BatteryManagerInternal mBatteryManagerInternal;
@@ -605,6 +607,7 @@ public final class PowerManagerService extends SystemService
         mHandlerThread.start();
         mHandler = new PowerManagerHandler(mHandlerThread.getLooper());
         mConstants = new Constants(mHandler);
+        mBatterySaverPolicy = new BatterySaverPolicy(mHandler);
 
         synchronized (mLock) {
             mWakeLockSuspendBlocker = createSuspendBlockerLocked("PowerManagerService.WakeLocks");
@@ -704,6 +707,7 @@ public final class PowerManagerService extends SystemService
 
         final ContentResolver resolver = mContext.getContentResolver();
         mConstants.start(resolver);
+        mBatterySaverPolicy.start(resolver);
 
         // Register for settings changes.
         resolver.registerContentObserver(Settings.Secure.getUriFor(
@@ -939,8 +943,12 @@ public final class PowerManagerService extends SystemService
                         listeners = new ArrayList<PowerManagerInternal.LowPowerModeListener>(
                                 mLowPowerModeListeners);
                     }
-                    for (int i=0; i<listeners.size(); i++) {
-                        listeners.get(i).onLowPowerModeChanged(lowPowerModeEnabled);
+                    for (int i = 0; i < listeners.size(); i++) {
+                        final PowerManagerInternal.LowPowerModeListener listener = listeners.get(i);
+                        final PowerSaveState result =
+                                mBatterySaverPolicy.getBatterySaverPolicy(
+                                        listener.getServiceType(), lowPowerModeEnabled);
+                        listener.onLowPowerModeChanged(result);
                     }
                     intent = new Intent(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED);
                     intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
@@ -3245,6 +3253,8 @@ public final class PowerManagerService extends SystemService
             pw.println();
             pw.println("Display Power: " + mDisplayPowerCallbacks);
 
+            mBatterySaverPolicy.dump(pw);
+
             wcd = mWirelessChargerDetector;
         }
 
@@ -4201,6 +4211,19 @@ public final class PowerManagerService extends SystemService
             }
         }
 
+        // Binder call
+        public PowerSaveState getPowerSaveState(@ServiceType int serviceType) {
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    return mBatterySaverPolicy.getBatterySaverPolicy(
+                            serviceType, isLowPowerModeInternal());
+                }
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
         @Override // Binder call
         public boolean setPowerSaveMode(boolean mode) {
             mContext.enforceCallingOrSelfPermission(
@@ -4519,9 +4542,9 @@ public final class PowerManagerService extends SystemService
         }
 
         @Override
-        public boolean getLowPowerModeEnabled() {
+        public PowerSaveState getLowPowerState(@ServiceType int serviceType) {
             synchronized (mLock) {
-                return mLowPowerModeEnabled;
+                return mBatterySaverPolicy.getBatterySaverPolicy(serviceType, mLowPowerModeEnabled);
             }
         }
 

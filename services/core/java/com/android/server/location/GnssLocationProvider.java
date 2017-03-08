@@ -16,13 +16,6 @@
 
 package com.android.server.location;
 
-import com.android.internal.app.IAppOpsService;
-import com.android.internal.app.IBatteryStats;
-import com.android.internal.location.GpsNetInitiatedHandler;
-import com.android.internal.location.GpsNetInitiatedHandler.GpsNiNotification;
-import com.android.internal.location.ProviderProperties;
-import com.android.internal.location.ProviderRequest;
-
 import android.app.AlarmManager;
 import android.app.AppOpsManager;
 import android.app.PendingIntent;
@@ -55,6 +48,7 @@ import android.net.NetworkInfo;
 import android.net.NetworkRequest;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.PowerSaveState;
 import android.os.BatteryStats;
 import android.os.Binder;
 import android.os.Bundle;
@@ -81,6 +75,17 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.util.NtpTrustedTime;
 
+import com.android.internal.app.IAppOpsService;
+import com.android.internal.app.IBatteryStats;
+import com.android.internal.location.GpsNetInitiatedHandler;
+import com.android.internal.location.GpsNetInitiatedHandler.GpsNiNotification;
+import com.android.internal.location.ProviderProperties;
+import com.android.internal.location.ProviderRequest;
+import com.android.server.power.BatterySaverPolicy;
+import com.android.server.power.BatterySaverPolicy.ServiceType;
+
+import libcore.io.IoUtils;
+
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
@@ -96,7 +101,6 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Map;
 import java.util.HashMap;
-import libcore.io.IoUtils;
 
 /**
  * A GNSS implementation of LocationProvider used by LocationManager.
@@ -242,14 +246,6 @@ public class GnssLocationProvider implements LocationProviderInterface {
     // Valid TCP/UDP port range is (0, 65535].
     private static final int TCP_MIN_PORT = 0;
     private static final int TCP_MAX_PORT = 0xffff;
-
-    // Value of batterySaverGpsMode such that GPS isn't affected by battery saver mode.
-    private static final int BATTERY_SAVER_MODE_NO_CHANGE = 0;
-    // Value of batterySaverGpsMode such that GPS is disabled when battery saver mode
-    // is enabled and the screen is off.
-    private static final int BATTERY_SAVER_MODE_DISABLED_WHEN_SCREEN_OFF = 1;
-    // Secure setting for GPS behavior when battery saver mode is on.
-    private static final String BATTERY_SAVER_GPS_MODE = "batterySaverGpsMode";
 
     /** simpler wrapper for ProviderRequest + Worksource */
     private static class GpsRequest {
@@ -548,11 +544,12 @@ public class GnssLocationProvider implements LocationProviderInterface {
     private void updateLowPowerMode() {
         // Disable GPS if we are in device idle mode.
         boolean disableGps = mPowerManager.isDeviceIdleMode();
-        switch (Settings.Secure.getInt(mContext.getContentResolver(), BATTERY_SAVER_GPS_MODE,
-                BATTERY_SAVER_MODE_DISABLED_WHEN_SCREEN_OFF)) {
-            case BATTERY_SAVER_MODE_DISABLED_WHEN_SCREEN_OFF:
+        final PowerSaveState result =
+                mPowerManager.getPowerSaveState(ServiceType.GPS);
+        switch (result.gpsMode) {
+            case BatterySaverPolicy.GPS_MODE_DISABLED_WHEN_SCREEN_OFF:
                 // If we are in battery saver mode and the screen is off, disable GPS.
-                disableGps |= mPowerManager.isPowerSaveMode() && !mPowerManager.isInteractive();
+                disableGps |= result.batterySaverEnabled && !mPowerManager.isInteractive();
                 break;
         }
         if (disableGps != mDisableGps) {
