@@ -135,8 +135,8 @@ public final class SensorDirectChannel implements AutoCloseable {
     }
 
     /**
-     * This function encode handle information in {@link android.os.Memory} into a long array to be
-     * passed down to native methods.
+     * This function encode handle information in {@link android.os.MemoryFile} into a long array to
+     * be passed down to native methods.
      *
      * @hide */
     static long[] encodeData(MemoryFile ashmem) {

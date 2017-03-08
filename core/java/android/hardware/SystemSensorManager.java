@@ -34,6 +34,7 @@ import dalvik.system.CloseGuard;
 
 import com.android.internal.annotations.GuardedBy;
 
+import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -50,6 +51,7 @@ import java.util.Map;
 public class SystemSensorManager extends SensorManager {
     //TODO: disable extra logging before release
     private static boolean DEBUG_DYNAMIC_SENSOR = true;
+    private static int MIN_DIRECT_CHANNEL_BUFFER_SIZE = 104;
 
     private static native void nativeClassInit();
     private static native long nativeCreate(String opPackageName);
@@ -59,7 +61,7 @@ public class SystemSensorManager extends SensorManager {
     private static native boolean nativeIsDataInjectionEnabled(long nativeInstance);
 
     private static native int nativeCreateDirectChannel(
-            long nativeInstance, long size, int channelType, long [] channelData);
+            long nativeInstance, long size, int channelType, int fd, HardwareBuffer buffer);
     private static native void nativeDestroyDirectChannel(
             long nativeInstance, int channelHandle);
     private static native int nativeConfigDirectChannel(
@@ -525,24 +527,54 @@ public class SystemSensorManager extends SensorManager {
     }
 
     /** @hide */
-    protected SensorDirectChannel createDirectChannelImpl(long size,
-            MemoryFile ashmemFile, HardwareBuffer grallocMemObject) {
+    protected SensorDirectChannel createDirectChannelImpl(
+            MemoryFile memoryFile, HardwareBuffer hardwareBuffer) {
         SensorDirectChannel ch = null;
-
-        if (size <= 0) throw new IllegalArgumentException("size has to be greater than 0");
-
-        if (ashmemFile != null) {
-            if (size != ashmemFile.length()) {
-                throw new IllegalArgumentException("size has to match MemoryFile.length()");
+        long size;
+        if (memoryFile != null) {
+            int fd;
+            try {
+                fd = memoryFile.getFileDescriptor().getInt$();
+            } catch (IOException e) {
+                throw new IllegalArgumentException("MemoryFile object is not valid");
             }
+
+            if (memoryFile.length() < MIN_DIRECT_CHANNEL_BUFFER_SIZE) {
+                throw new IllegalArgumentException(
+                        "Size of MemoryFile has to be greater than "
+                        + MIN_DIRECT_CHANNEL_BUFFER_SIZE);
+            }
+
+            size = memoryFile.length();
             int id = nativeCreateDirectChannel(
-                    mNativeInstance, size, SensorDirectChannel.TYPE_ASHMEM,
-                    SensorDirectChannel.encodeData(ashmemFile));
+                    mNativeInstance, size, SensorDirectChannel.TYPE_ASHMEM, fd, null);
             if (id > 0) {
                 ch = new SensorDirectChannel(this, id, SensorDirectChannel.TYPE_ASHMEM, size);
             }
-        } else if (grallocMemObject != null) {
-            Log.wtf(TAG, "Implement GRALLOC or remove GRALLOC support entirely");
+        } else if (hardwareBuffer != null) {
+            if (hardwareBuffer.getFormat() != HardwareBuffer.BLOB) {
+                throw new IllegalArgumentException("Format of HardwareBuffer must be BLOB");
+            }
+            if (hardwareBuffer.getHeight() != 1) {
+                throw new IllegalArgumentException("Height of HardwareBuffer must be 1");
+            }
+            if (hardwareBuffer.getWidth() < MIN_DIRECT_CHANNEL_BUFFER_SIZE) {
+                throw new IllegalArgumentException(
+                        "Width if HaradwareBuffer must be greater than "
+                        + MIN_DIRECT_CHANNEL_BUFFER_SIZE);
+            }
+            if ((hardwareBuffer.getUsage() & HardwareBuffer.USAGE0_SENSOR_DIRECT_DATA) == 0) {
+                throw new IllegalArgumentException(
+                        "HardwareBuffer must set usage flag USAGE0_SENSOR_DIRECT_DATA");
+            }
+            size = hardwareBuffer.getWidth();
+            int id = nativeCreateDirectChannel(
+                    mNativeInstance, size, SensorDirectChannel.TYPE_HARDWARE_BUFFER,
+                    -1, hardwareBuffer);
+            if (id > 0) {
+                ch = new SensorDirectChannel(
+                        this, id, SensorDirectChannel.TYPE_HARDWARE_BUFFER, size);
+            }
         } else {
             throw new IllegalArgumentException("Invalid parameter");
         }

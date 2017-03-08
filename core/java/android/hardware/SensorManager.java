@@ -895,7 +895,7 @@ public abstract class SensorManager {
      * @see #configureDirectChannel(SensorDirectChannel, Sensor, int)
      */
     public SensorDirectChannel createDirectChannel(MemoryFile mem) {
-        return createDirectChannelImpl(mem.length(), mem, null);
+        return createDirectChannelImpl(mem, null);
     }
 
     /**
@@ -913,12 +913,12 @@ public abstract class SensorManager {
      * @see #configureDirectChannel(SensorDirectChannel, Sensor, int)
      */
     public SensorDirectChannel createDirectChannel(HardwareBuffer mem) {
-        return null;
+        return createDirectChannelImpl(null, mem);
     }
 
     /** @hide */
-    protected abstract SensorDirectChannel createDirectChannelImpl(long size,
-            MemoryFile ashmemFile, HardwareBuffer hardwareBuffer);
+    protected abstract SensorDirectChannel createDirectChannelImpl(
+            MemoryFile memoryFile, HardwareBuffer hardwareBuffer);
 
     /** @hide */
     void destroyDirectChannel(SensorDirectChannel channel) {

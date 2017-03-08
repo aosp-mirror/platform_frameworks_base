@@ -23,6 +23,7 @@
 #include <ScopedUtfChars.h>
 #include <ScopedLocalRef.h>
 #include <android_runtime/AndroidRuntime.h>
+#include <android_runtime/android_hardware_HardwareBuffer.h>
 #include <sensor/Sensor.h>
 #include <sensor/SensorEventQueue.h>
 #include <sensor/SensorManager.h>
@@ -245,39 +246,28 @@ static jboolean nativeIsDataInjectionEnabled(JNIEnv *_env, jclass _this, jlong s
 }
 
 static jint nativeCreateDirectChannel(JNIEnv *_env, jclass _this, jlong sensorManager,
-        jlong size, jint channelType, jlongArray channelData) {
-    jint ret = -1;
-    jsize len = _env->GetArrayLength(channelData);
-    if (len > 2) {
-        jlong *data = _env->GetLongArrayElements(channelData, NULL);
-        if (data != nullptr) {
-            // construct native handle from jlong*
-            jlong numFd = data[0];
-            jlong numInt = data[1];
-            if ((numFd + numInt + 2) == len) {
-                native_handle_t *nativeHandle = native_handle_create(numFd, numInt);
-                if (nativeHandle != nullptr) {
-                    const jlong *readPointer = data + 2;
-                    int *writePointer = nativeHandle->data;
-                    size_t n = static_cast<size_t>(numFd + numInt);
-                    while (n--) {
-                        // native type of data is int, jlong is just to ensure Java does not
-                        // truncate data on 64-bit system. The cast here is safe.
-                        *writePointer++ = static_cast<int>(*readPointer++);
-                    }
+        jlong size, jint channelType, jint fd, jobject hardwareBufferObj) {
+    const native_handle_t *nativeHandle = nullptr;
+    NATIVE_HANDLE_DECLARE_STORAGE(ashmemHandle, 1, 0);
 
-                    SensorManager* mgr = reinterpret_cast<SensorManager*>(sensorManager);
-                    ret = mgr->createDirectChannel(size, channelType, nativeHandle);
-
-                    // do not native_handle_close() here as handle is owned by java
-                    native_handle_delete(nativeHandle);
-                }
-            }
-            // unidirectional parameter passing, thus JNI_ABORT
-            _env->ReleaseLongArrayElements(channelData, data, JNI_ABORT);
+    if (channelType == SENSOR_DIRECT_MEM_TYPE_ASHMEM) {
+        native_handle_t *handle = native_handle_init(ashmemHandle, 1, 0);
+        handle->data[0] = fd;
+        nativeHandle = handle;
+    } else if (channelType == SENSOR_DIRECT_MEM_TYPE_GRALLOC) {
+        AHardwareBuffer *hardwareBuffer =
+                android_hardware_HardwareBuffer_getNativeHardwareBuffer(_env, hardwareBufferObj);
+        if (hardwareBuffer != nullptr) {
+            nativeHandle = AHardwareBuffer_getNativeHandle(hardwareBuffer);
         }
     }
-    return ret;
+
+    if (nativeHandle == nullptr) {
+        return BAD_VALUE;
+    }
+
+    SensorManager* mgr = reinterpret_cast<SensorManager*>(sensorManager);
+    return mgr->createDirectChannel(size, channelType, nativeHandle);
 }
 
 static void nativeDestroyDirectChannel(JNIEnv *_env, jclass _this, jlong sensorManager,
@@ -499,7 +489,7 @@ static const JNINativeMethod gSystemSensorManagerMethods[] = {
             (void*)nativeIsDataInjectionEnabled },
 
     {"nativeCreateDirectChannel",
-            "(JJI[J)I",
+            "(JJIILandroid/hardware/HardwareBuffer;)I",
             (void*)nativeCreateDirectChannel },
 
     {"nativeDestroyDirectChannel",
