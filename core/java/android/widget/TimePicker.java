@@ -111,6 +111,11 @@ public class TimePicker extends FrameLayout {
     public TimePicker(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
 
+        // DatePicker is important by default, unless app developer overrode attribute.
+        if (getImportantForAutofill() == IMPORTANT_FOR_AUTOFILL_AUTO) {
+            setImportantForAutofill(IMPORTANT_FOR_AUTOFILL_YES);
+        }
+
         final TypedArray a = context.obtainStyledAttributes(
                 attrs, R.styleable.TimePicker, defStyleAttr, defStyleRes);
         final boolean isDialogMode = a.getBoolean(R.styleable.TimePicker_dialogMode, false);

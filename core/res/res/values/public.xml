@@ -2804,6 +2804,7 @@
         <public name="requiredNotFeature" />
         <public name="autoFillHint" />
         <public name="fontProviderPackage" />
+        <public name="importantForAutofill" />
     </public-group>
 
     <public-group type="style" first-id="0x010302e0">

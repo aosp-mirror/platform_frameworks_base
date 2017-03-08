@@ -85,6 +85,11 @@ public class RadioGroup extends LinearLayout {
     public RadioGroup(Context context, AttributeSet attrs) {
         super(context, attrs);
 
+        // RadioGroup is important by default, unless app developer overrode attribute.
+        if (getImportantForAutofill() == IMPORTANT_FOR_AUTOFILL_AUTO) {
+            setImportantForAutofill(IMPORTANT_FOR_AUTOFILL_YES);
+        }
+
         // retrieve selected radio button as requested by the user in the
         // XML layout file
         TypedArray attributes = context.obtainStyledAttributes(

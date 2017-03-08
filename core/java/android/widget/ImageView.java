@@ -156,6 +156,11 @@ public class ImageView extends View {
 
         initImageView();
 
+        // ImageView is not important by default, unless app developer overrode attribute.
+        if (getImportantForAutofill() == IMPORTANT_FOR_AUTOFILL_AUTO) {
+            setImportantForAutofill(IMPORTANT_FOR_AUTOFILL_NO);
+        }
+
         final TypedArray a = context.obtainStyledAttributes(
                 attrs, R.styleable.ImageView, defStyleAttr, defStyleRes);
 

@@ -1174,6 +1174,30 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public static final int AUTOFILL_TYPE_DATE = 4;
 
+    /** @hide */
+    @IntDef({
+            IMPORTANT_FOR_AUTOFILL_AUTO,
+            IMPORTANT_FOR_AUTOFILL_YES,
+            IMPORTANT_FOR_AUTOFILL_NO
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface AutofillImportance {}
+
+    /**
+     * Automatically determine whether a view is important for auto-fill.
+     */
+    public static final int IMPORTANT_FOR_AUTOFILL_AUTO = 0x0;
+
+    /**
+     * The view is important for important for auto-fill.
+     */
+    public static final int IMPORTANT_FOR_AUTOFILL_YES = 0x1;
+
+    /**
+     * The view is not important for auto-fill.
+     */
+    public static final int IMPORTANT_FOR_AUTOFILL_NO = 0x2;
+
     /**
      * This view is enabled. Interpretation varies by subclass.
      * Use with ENABLED_MASK when calling setFlags.
@@ -2745,7 +2769,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *                1                  PFLAG3_FINGER_DOWN
      *               1                   PFLAG3_FOCUSED_BY_DEFAULT
      *             11                    PFLAG3_AUTO_FILL_MODE_MASK
-     *           xx                      * NO LONGER NEEDED, SHOULD BE REUSED *
+     *           11                      PFLAG3_IMPORTANT_FOR_AUTOFILL
      *          1                        PFLAG3_OVERLAPPING_RENDERING_FORCED_VALUE
      *         1                         PFLAG3_HAS_OVERLAPPING_RENDERING_FORCED
      *        1                          PFLAG3_TEMPORARY_DETACH
@@ -2981,6 +3005,20 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     private static final int PFLAG3_AUTO_FILL_MODE_MASK = (AUTO_FILL_MODE_INHERIT
             | AUTO_FILL_MODE_AUTO | AUTO_FILL_MODE_MANUAL) << PFLAG3_AUTO_FILL_MODE_SHIFT;
+
+    /**
+     * Shift for the bits in {@link #mPrivateFlags3} related to the
+     * "importantForAutofill" attribute.
+     */
+    static final int PFLAG3_IMPORTANT_FOR_AUTOFILL_SHIFT = 21;
+
+    /**
+     * Mask for obtaining the bits which specify how to determine
+     * whether a view is important for autofill.
+     */
+    static final int PFLAG3_IMPORTANT_FOR_AUTOFILL_MASK = (IMPORTANT_FOR_AUTOFILL_AUTO
+            | IMPORTANT_FOR_AUTOFILL_YES | IMPORTANT_FOR_AUTOFILL_NO)
+            << PFLAG3_IMPORTANT_FOR_AUTOFILL_SHIFT;
 
     /**
      * Whether this view has rendered elements that overlap (see {@link
@@ -5007,6 +5045,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 case R.styleable.View_autoFillHint:
                     if (a.peekValue(attr) != null) {
                         setAutoFillHint(a.getInt(attr, AUTO_FILL_HINT_NONE));
+                    }
+                    break;
+                case R.styleable.View_importantForAutofill:
+                    if (a.peekValue(attr) != null) {
+                        setImportantForAutofill(a.getInt(attr, IMPORTANT_FOR_AUTOFILL_AUTO));
                     }
                     break;
             }
@@ -7441,6 +7484,118 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @Nullable
     public AutoFillValue getAutoFillValue() {
         return null;
+    }
+
+    /**
+     * Gets the mode for determining whether this View is important for autofill.
+     *
+     * <p>See {@link #setImportantForAutofill(int)} for more info about this mode.
+     *
+     * @return {@link #IMPORTANT_FOR_AUTOFILL_AUTO} by default, or value passed to
+     * {@link #setImportantForAutofill(int)}.
+     *
+     * @attr ref android.R.styleable#View_importantForAutofill
+     */
+    @ViewDebug.ExportedProperty(mapping = {
+            @ViewDebug.IntToString(from = IMPORTANT_FOR_AUTOFILL_AUTO, to = "auto"),
+            @ViewDebug.IntToString(from = IMPORTANT_FOR_AUTOFILL_YES, to = "yes"),
+            @ViewDebug.IntToString(from = IMPORTANT_FOR_AUTOFILL_NO, to = "no")})
+    public @AutofillImportance int getImportantForAutofill() {
+        return (mPrivateFlags3
+                & PFLAG3_IMPORTANT_FOR_AUTOFILL_MASK) >> PFLAG3_IMPORTANT_FOR_AUTOFILL_SHIFT;
+    }
+
+    /**
+     * Sets the mode for determining whether this View is important for autofill.
+     *
+     * <p>See {@link #setImportantForAutofill(int)} for more info about this mode.
+     *
+     * @param mode {@link #IMPORTANT_FOR_AUTOFILL_AUTO}, {@link #IMPORTANT_FOR_AUTOFILL_YES},
+     * or {@link #IMPORTANT_FOR_AUTOFILL_NO}.
+     *
+     * @attr ref android.R.styleable#View_importantForAutofill
+     */
+    public void setImportantForAutofill(@AutofillImportance int mode) {
+        mPrivateFlags3 &= ~PFLAG3_IMPORTANT_FOR_AUTOFILL_MASK;
+        mPrivateFlags3 |= (mode << PFLAG3_IMPORTANT_FOR_AUTOFILL_SHIFT)
+                & PFLAG3_IMPORTANT_FOR_AUTOFILL_MASK;
+    }
+
+    /**
+     * Hints the Android System whether the {@link android.app.assist.AssistStructure.ViewNode}
+     * associated with this View should be included in a {@link ViewStructure} used for
+     * autofill purposes.
+     *
+     * <p>Generally speaking, a view is important for autofill if:
+     * <ol>
+     * <li>The view can-be autofilled by an {@link android.service.autofill.AutoFillService}.
+     * <li>The view contents can help an {@link android.service.autofill.AutoFillService} to
+     * autofill other views.
+     * <ol>
+     *
+     * <p>For example, view containers should typically return {@code false} for performance reasons
+     * (since the important info is provided by their children), but if the container is actually
+     * whose children are part of a compound view, it should return {@code true} (and then override
+     * {@link #dispatchProvideAutoFillStructure(ViewStructure, int)} to simply call
+     * {@link #onProvideAutoFillStructure(ViewStructure, int)} so its children are not included in
+     * the structure). On the other hand, views representing labels or editable fields should
+     * typically return {@code true}, but in some cases they could return {@code false} (for
+     * example, if they're part of a "Captcha" mechanism).
+     *
+     * <p>By default, this method returns {@code true} if {@link #getImportantForAutofill()} returns
+     * {@link #IMPORTANT_FOR_AUTOFILL_YES}, {@code false } if it returns
+     * {@link #IMPORTANT_FOR_AUTOFILL_NO}, and use some heuristics to define the importance when it
+     * returns {@link #IMPORTANT_FOR_AUTOFILL_AUTO}. Hence, it should rarely be overridden - Views
+     * should use {@link #setImportantForAutofill(int)} instead.
+     *
+     * <p><strong>Note:</strong> returning {@code false} does not guarantee the view will be
+     * excluded from the structure; for example, if the user explicitly requested auto-fill, the
+     * View might be always included.
+     *
+     * <p>This decision applies just for the view, not its children - if the view children are not
+     * important for autofill, the view should override
+     * {@link #dispatchProvideAutoFillStructure(ViewStructure, int)} to simply call
+     * {@link #onProvideAutoFillStructure(ViewStructure, int)} (instead of calling
+     * {@link #dispatchProvideAutoFillStructure(ViewStructure, int)} for each child).
+     *
+     * @return whether the view is considered important for autofill.
+     *
+     * @see #IMPORTANT_FOR_AUTOFILL_AUTO
+     * @see #IMPORTANT_FOR_AUTOFILL_YES
+     * @see #IMPORTANT_FOR_AUTOFILL_NO
+     */
+    public final boolean isImportantForAutofill() {
+        final int flag = getImportantForAutofill();
+
+        // First, check if view explicity set it to YES or NO
+        if ((flag & IMPORTANT_FOR_AUTOFILL_YES) != 0) {
+            return true;
+        }
+        if ((flag & IMPORTANT_FOR_AUTOFILL_NO) != 0) {
+            return false;
+        }
+
+        // Then use some heuristics to handle AUTO.
+
+        // Always include views that have a explicity resource id.
+        final int id = mID;
+        if (id != NO_ID && !isViewIdGenerated(id)) {
+            final Resources res = getResources();
+            String entry = null;
+            String pkg = null;
+            try {
+                entry = res.getResourceEntryName(id);
+                pkg = res.getResourcePackageName(id);
+            } catch (Resources.NotFoundException e) {
+                // ignore
+            }
+            if (entry != null && pkg != null && pkg.equals(mContext.getPackageName())) {
+                return true;
+            }
+        }
+
+        // Otherwise, assume it's not important...
+        return false;
     }
 
     @Nullable

@@ -2339,6 +2339,17 @@
             <flag name="creditCardExpirationDay" value="0x1000" />
         </attr>
 
+        <!-- Hints the Android System whether the view node associated with this View should be
+             included in a view structure used for autofill purposes. -->
+        <attr name="importantForAutofill">
+            <!-- Let the Android System use its heuristics to determine if the view is important for autofill. -->
+            <flag name="auto" value="0" />
+            <!-- Hint the Android System that this view is important for autofill. -->
+            <flag name="yes" value="0x1" />
+            <!-- Hint the Android System that this view is *not* important for autofill. -->
+            <flag name="no" value="0x2" />
+        </attr>
+
         <!-- Boolean that controls whether a view can take focus while in touch mode.
              If this is true for a view, that view can gain focus when clicked on, and can keep
              focus if another view is clicked on that doesn't have this attribute set to true. -->
