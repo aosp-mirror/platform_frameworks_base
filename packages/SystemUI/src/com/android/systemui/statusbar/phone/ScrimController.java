@@ -203,10 +203,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
         scheduleUpdate();
     }
 
-    public void animateNextChange() {
-        mAnimateChange = true;
-    }
-
     public void setDozing(boolean dozing) {
         if (mDozing != dozing) {
             mDozing = dozing;

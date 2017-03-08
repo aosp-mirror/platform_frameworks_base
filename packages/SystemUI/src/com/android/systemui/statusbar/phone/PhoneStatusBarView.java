@@ -188,9 +188,6 @@ public class PhoneStatusBarView extends PanelBar {
     public void panelScrimMinFractionChanged(float minFraction) {
         if (mMinFraction != minFraction) {
             mMinFraction = minFraction;
-            if (minFraction != 0.0f) {
-                mScrimController.animateNextChange();
-            }
             updateScrimFraction();
         }
     }
@@ -203,7 +200,11 @@ public class PhoneStatusBarView extends PanelBar {
     }
 
     private void updateScrimFraction() {
-        float scrimFraction = Math.max(mPanelFraction, mMinFraction);
+        float scrimFraction = mPanelFraction;
+        if (mMinFraction < 1.0f) {
+            scrimFraction = Math.max((mPanelFraction - mMinFraction) / (1.0f - mMinFraction),
+                    0);
+        }
         mScrimController.setPanelExpansion(scrimFraction);
     }
 
