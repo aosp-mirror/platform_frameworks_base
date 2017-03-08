@@ -460,6 +460,15 @@ sk_sp<SkColorSpace> GraphicsJNI::colorSpaceForType(SkColorType type) {
     }
 }
 
+bool GraphicsJNI::isColorSpaceSRGB(SkColorSpace* colorSpace) {
+    return colorSpace == nullptr
+            || colorSpace == SkColorSpace::MakeSRGB().get()
+            || colorSpace == SkColorSpace::MakeRGB(
+                  SkColorSpace::kSRGB_RenderTargetGamma,
+                  SkColorSpace::kSRGB_Gamut,
+                  SkColorSpace::kNonLinearBlending_ColorSpaceFlag).get();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 bool HeapAllocator::allocPixelRef(SkBitmap* bitmap, SkColorTable* ctable) {
     mStorage = android::Bitmap::allocateHeapBitmap(bitmap, ctable);
