@@ -36,15 +36,18 @@ import java.util.ArrayList;
  */
 public class PipSnapAlgorithm {
 
+    // The below SNAP_MODE_* constants correspond to the config resource value
+    // config_pictureInPictureSnapMode and should not be changed independently.
     // Allows snapping to the four corners
     private static final int SNAP_MODE_CORNERS_ONLY = 0;
     // Allows snapping to the four corners and the mid-points on the long edge in each orientation
     private static final int SNAP_MODE_CORNERS_AND_SIDES = 1;
     // Allows snapping to anywhere along the edge of the screen
     private static final int SNAP_MODE_EDGE = 2;
-    // Allows snapping to four corners on a fling towards a corner or slow move near a corner
-    // snaps anywhere along the edge of screen otherwise
-    private static final int SNAP_MODE_CORNERS_AND_EDGES = 3;
+    // Allows snapping anywhere along the edge of the screen and magnets towards corners
+    private static final int SNAP_MODE_EDGE_MAGNET_CORNERS = 3;
+    // Allows snapping on the long edge in each orientation and magnets towards corners
+    private static final int SNAP_MODE_LONG_EDGE_MAGNET_CORNERS = 4;
 
     // The friction multiplier to control how slippery the PIP is when flung
     private static final float SCROLL_FRICTION_MULTIPLIER = 8f;
@@ -55,7 +58,7 @@ public class PipSnapAlgorithm {
     private final Context mContext;
 
     private final ArrayList<Integer> mSnapGravities = new ArrayList<>();
-    private final int mDefaultSnapMode = SNAP_MODE_CORNERS_AND_EDGES;
+    private final int mDefaultSnapMode = SNAP_MODE_EDGE_MAGNET_CORNERS;
     private int mSnapMode = mDefaultSnapMode;
 
     private final float mDefaultSizePercent;
@@ -85,7 +88,9 @@ public class PipSnapAlgorithm {
      * Updates the snap algorithm when the configuration changes.
      */
     public void onConfigurationChanged() {
-        mOrientation = mContext.getResources().getConfiguration().orientation;
+        Resources res = mContext.getResources();
+        mOrientation = res.getConfiguration().orientation;
+        mSnapMode = res.getInteger(com.android.internal.R.integer.config_pictureInPictureSnapMode);
         calculateSnapTargets();
     }
 
@@ -127,7 +132,8 @@ public class PipSnapAlgorithm {
                 movementBounds.right + stackBounds.width(),
                 movementBounds.bottom + stackBounds.height());
         final Rect newBounds = new Rect(stackBounds);
-        if (mSnapMode == SNAP_MODE_CORNERS_AND_EDGES) {
+        if (mSnapMode == SNAP_MODE_LONG_EDGE_MAGNET_CORNERS
+                || mSnapMode == SNAP_MODE_EDGE_MAGNET_CORNERS) {
             final Rect tmpBounds = new Rect();
             final Point[] snapTargets = new Point[mSnapGravities.size()];
             for (int i = 0; i < mSnapGravities.size(); i++) {
@@ -137,11 +143,11 @@ public class PipSnapAlgorithm {
             }
             Point snapTarget = findClosestPoint(stackBounds.left, stackBounds.top, snapTargets);
             float distance = distanceToPoint(snapTarget, stackBounds.left, stackBounds.top);
-            final float thresh = stackBounds.width() * CORNER_MAGNET_THRESHOLD;
+            final float thresh = Math.max(stackBounds.width(), stackBounds.height())
+                    * CORNER_MAGNET_THRESHOLD;
             if (distance < thresh) {
                 newBounds.offsetTo(snapTarget.x, snapTarget.y);
             } else {
-                // Otherwise we snap to the edge
                 snapRectToClosestEdge(stackBounds, movementBounds, newBounds);
             }
         } else if (mSnapMode == SNAP_MODE_EDGE) {
@@ -324,11 +330,20 @@ public class PipSnapAlgorithm {
         final int fromTop = Math.abs(stackBounds.top - movementBounds.top);
         final int fromRight = Math.abs(movementBounds.right - stackBounds.left);
         final int fromBottom = Math.abs(movementBounds.bottom - stackBounds.top);
-        if (fromLeft <= fromTop && fromLeft <= fromRight && fromLeft <= fromBottom) {
+        int shortest;
+        if (mSnapMode == SNAP_MODE_LONG_EDGE_MAGNET_CORNERS) {
+            // Only check longest edges
+            shortest = (mOrientation == Configuration.ORIENTATION_LANDSCAPE)
+                    ? Math.min(fromTop, fromBottom)
+                    : Math.min(fromLeft, fromRight);
+        } else {
+            shortest = Math.min(Math.min(fromLeft, fromRight), Math.min(fromTop, fromBottom));
+        }
+        if (shortest == fromLeft) {
             boundsOut.offsetTo(movementBounds.left, boundedTop);
-        } else if (fromTop <= fromLeft && fromTop <= fromRight && fromTop <= fromBottom) {
+        } else if (shortest == fromTop) {
             boundsOut.offsetTo(boundedLeft, movementBounds.top);
-        } else if (fromRight < fromLeft && fromRight < fromTop && fromRight < fromBottom) {
+        } else if (shortest == fromRight) {
             boundsOut.offsetTo(movementBounds.right, boundedTop);
         } else {
             boundsOut.offsetTo(boundedLeft, movementBounds.bottom);
@@ -358,7 +373,8 @@ public class PipSnapAlgorithm {
                 }
                 // Fall through
             case SNAP_MODE_CORNERS_ONLY:
-            case SNAP_MODE_CORNERS_AND_EDGES:
+            case SNAP_MODE_EDGE_MAGNET_CORNERS:
+            case SNAP_MODE_LONG_EDGE_MAGNET_CORNERS:
                 mSnapGravities.add(Gravity.TOP | Gravity.LEFT);
                 mSnapGravities.add(Gravity.TOP | Gravity.RIGHT);
                 mSnapGravities.add(Gravity.BOTTOM | Gravity.LEFT);
