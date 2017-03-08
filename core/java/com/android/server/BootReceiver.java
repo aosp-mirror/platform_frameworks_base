@@ -35,6 +35,8 @@ import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.Xml;
 
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.XmlUtils;
 
@@ -46,6 +48,8 @@ import java.io.FileNotFoundException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -82,6 +86,12 @@ public class BootReceiver extends BroadcastReceiver {
     private static final String LAST_HEADER_FILE = "last-header.txt";
     private static final File lastHeaderFile = new File(
             Environment.getDataSystemDirectory(), LAST_HEADER_FILE);
+
+    // example: fs_stat,/dev/block/platform/soc/by-name/userdata,0x5
+    private static final String FS_STAT_PATTERN = "fs_stat,[^,]*/([^/,]+),(0x[0-9a-fA-F]+)";
+    // ro.boottime.init.mount_all. + postfix for mount_all duration
+    private static final String[] MOUNT_DURATION_PROPS_POSTFIX =
+            new String[] { "early", "default", "late" };
 
     @Override
     public void onReceive(final Context context, Intent intent) {
@@ -200,10 +210,11 @@ public class BootReceiver extends BroadcastReceiver {
             addFileToDropBox(db, timestamps, headers, "/cache/recovery/last_kmsg",
                     -LOG_SIZE, "SYSTEM_RECOVERY_KMSG");
             addAuditErrorsToDropBox(db, timestamps, headers, -LOG_SIZE, "SYSTEM_AUDIT");
-            addFsckErrorsToDropBox(db, timestamps, headers, -LOG_SIZE, "SYSTEM_FSCK");
         } else {
             if (db != null) db.addText("SYSTEM_RESTART", headers);
         }
+        addFsckErrorsToDropBoxAndLogFsStat(db, timestamps, headers, -LOG_SIZE, "SYSTEM_FSCK");
+        logFsMountTime();
 
         // Scan existing tombstones (in case any new ones appeared)
         File[] tombstoneFiles = TOMBSTONE_DIR.listFiles();
@@ -297,11 +308,14 @@ public class BootReceiver extends BroadcastReceiver {
         db.addText(tag, headers + sb.toString());
     }
 
-    private static void addFsckErrorsToDropBox(DropBoxManager db,
+    private static void addFsckErrorsToDropBoxAndLogFsStat(DropBoxManager db,
             HashMap<String, Long> timestamps, String headers, int maxSize, String tag)
             throws IOException {
-        boolean upload_needed = false;
-        if (db == null || !db.isTagEnabled(tag)) return;  // Logging disabled
+        boolean uploadEnabled = true;
+        if (db == null || !db.isTagEnabled(tag)) {
+            uploadEnabled = false;
+        }
+        boolean uploadNeeded = false;
         Slog.i(TAG, "Checking for fsck errors");
 
         File file = new File("/dev/fscklogs/log");
@@ -310,19 +324,49 @@ public class BootReceiver extends BroadcastReceiver {
 
         String log = FileUtils.readTextFile(file, maxSize, "[[TRUNCATED]]\n");
         StringBuilder sb = new StringBuilder();
-        for (String line : log.split("\n")) {
+        Pattern pattern = Pattern.compile(FS_STAT_PATTERN);
+        for (String line : log.split("\n")) { // should check all lines
             if (line.contains("FILE SYSTEM WAS MODIFIED")) {
-                upload_needed = true;
-                break;
+                uploadNeeded = true;
+            } else if (line.contains("fs_stat")){
+                Matcher matcher = pattern.matcher(line);
+                if (matcher.find()) {
+                    handleFsckFsStat(matcher);
+                } else {
+                    Slog.w(TAG, "cannot parse fs_stat:" + line);
+                }
             }
         }
 
-        if (upload_needed) {
+        if (uploadEnabled && uploadNeeded ) {
             addFileToDropBox(db, timestamps, headers, "/dev/fscklogs/log", maxSize, tag);
         }
 
         // Remove the file so we don't re-upload if the runtime restarts.
         file.delete();
+    }
+
+    private static void logFsMountTime() {
+        for (String propPostfix : MOUNT_DURATION_PROPS_POSTFIX) {
+            int duration = SystemProperties.getInt("ro.boottime.init.mount_all." + propPostfix, 0);
+            if (duration != 0) {
+                MetricsLogger.histogram(null, "boot_mount_all_duration_" + propPostfix, duration);
+            }
+        }
+    }
+
+    private static void handleFsckFsStat(Matcher match) {
+        String partition = match.group(1);
+        int stat;
+        try {
+            stat = Integer.decode(match.group(2));
+        } catch (NumberFormatException e) {
+            Slog.w(TAG, "cannot parse fs_stat: partition:" + partition + " stat:" + match.group(2));
+            return;
+        }
+
+        MetricsLogger.histogram(null, "boot_fs_stat_" + partition, stat);
+        Slog.i(TAG, "fs_stat, partition:" + partition + " stat:" + match.group(2));
     }
 
     private static HashMap<String, Long> readTimestamps() {
