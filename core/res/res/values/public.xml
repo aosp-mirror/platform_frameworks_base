@@ -2760,8 +2760,9 @@
        =============================================================== -->
     <eat-comment />
 
-    <public-group type="attr" first-id="0x01010531">
-        <public name="fontStyle" />
+    <public type="attr" name="visibleToInstantApps" id="0x01010531" />
+
+    <public-group type="attr" first-id="0x01010532">
         <public name="font" />
         <public name="fontWeight" />
         <public name="tooltipText" />
@@ -2775,7 +2776,7 @@
         <public name="layout_marginVertical" />
         <public name="paddingHorizontal" />
         <public name="paddingVertical" />
-        <public name="visibleToInstantApps" />
+        <public name="fontStyle" />
         <public name="keyboardNavigationCluster" />
         <public name="targetProcess" />
         <public name="nextClusterForward" />
