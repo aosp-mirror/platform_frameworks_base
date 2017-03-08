@@ -9,6 +9,8 @@ option java_outer_classname = "IpConnectivityLogClass";
 // NetworkId represents the id given by the system to a physical network on the
 // Android device. It is used to relates events to each other for devices with
 // multiple networks (WiFi, 4G, ...).
+// Deprecated since version 3, replaced by top-level network_id field in
+// IpConnectivityEvent.
 message NetworkId {
   // Every network gets assigned a network_id on creation based on order of
   // creation. Thus network_id N is assigned to the network created directly
@@ -91,7 +93,8 @@ message IpReachabilityEvent {
 // This message is associated to android.net.metrics.NetworkEvent.
 message NetworkEvent {
   // The id of the network on which this event happened.
-  optional NetworkId network_id = 1;
+  // Deprecated since version 3.
+  optional NetworkId network_id = 1 [deprecated = true];
 
   // The type of network event, represented by NETWORK_* constants defined in
   // android.net.metrics.NetworkEvent.
@@ -107,7 +110,8 @@ message NetworkEvent {
 // This message is associated to android.net.metrics.ValidationProbeEvent.
 message ValidationProbeEvent {
   // The id of the network for which the probe was sent.
-  optional NetworkId network_id = 1;
+  // Deprecated since version 3.
+  optional NetworkId network_id = 1 [deprecated = true];
 
   // The time it took for that probe to complete or time out.
   optional int32 latency_ms = 2;
@@ -167,17 +171,27 @@ message DNSLatencies {
 
 // Represents latency and errno statistics of the connect() system call.
 // Since version 2.
+// Next tag: 7
 message ConnectStatistics {
   // The number of connect() operations recorded.
   optional int32 connect_count = 1;
 
+  // The number of connect() operations done in blocking mode.
+  // Since version 3.
+  optional int32 connect_blocking_count = 5;
+
   // The number of connect() operations with IPv6 socket address.
   optional int32 ipv6_addr_count = 2;
 
-  // The time it took for each successful connect() operation to complete.
-  // The number of repeated values can be less than connect_count in case of
-  // event rate-limiting.
+  // The time it took for successful blocking connect() operations to complete
+  // The number of repeated values can be less than connect_blocking_count in
+  // case of event rate-limiting.
   repeated int32 latencies_ms = 3;
+
+  // The time it took for successful connect() operation to complete in
+  // non-blocking mode. The number of repeated values can be less than
+  // connect_count - connect_blocking_count in case of event rate-limiting.
+  repeated int32 non_blocking_latencies_ms = 6;
 
   // Counts of all error values returned by failed connect() operations.
   // The Pair key field is the errno code. The Pair value field is the count
@@ -212,9 +226,14 @@ message DHCPEvent {
 
 // Represents the generation of an Android Packet Filter program.
 // Since version 1.
+// Next tag: 8
 message ApfProgramEvent {
-  // Lifetime of the program in seconds.
+  // Maximum lifetime of the program in seconds.
   optional int64 lifetime = 1;
+
+  // Effective lifetime of the program in seconds from the time the
+  // program was installed to the time it was replaced or removed.
+  optional int64 effective_lifetime = 7;
 
   // Number of RAs filtered by the APF program.
   optional int32 filtered_ras = 2;
@@ -236,6 +255,7 @@ message ApfProgramEvent {
 // Represents Router Advertisement listening statistics for an interface with
 // Android Packet Filter enabled.
 // Since version 1.
+// Next tag: 12
 message ApfStatistics {
   // The time interval in milliseconds these stastistics cover.
   optional int64 duration_ms = 1;
@@ -261,6 +281,14 @@ message ApfStatistics {
 
   // The maximum APF program size in byte advertised by hardware.
   optional int32 max_program_size = 9;
+
+  // The total number of successful APF program updates triggered by any state
+  // change in ApfFilter. Since version 3.
+  optional int32 program_updates_all = 10;
+
+  // The total number of APF program updates triggered when disabling the
+  // multicast filter. Since version 3.
+  optional int32 program_updates_allowing_multicast = 11;
 }
 
 // Represents the reception of a Router Advertisement packet for an interface
@@ -308,7 +336,7 @@ message IpProvisioningEvent {
 }
 
 // Represents one of the IP connectivity event defined in this file.
-// Next tag: 16
+// Next tag: 19
 message IpConnectivityEvent {
   // Time in ms when the event was recorded.
   optional int64 time_ms = 1;
@@ -318,7 +346,27 @@ message IpConnectivityEvent {
   // Since version 2.
   optional LinkLayer link_layer = 15;
 
-  // Event type.
+  // Represents the id given by the system to a physical network on the device.
+  // Every network gets assigned a unique id on creation from a monotonic
+  // counter. The value 0 is never assigned to a network and means no network.
+  // It is used to correlate different types of events to each other for devices
+  // with multiple networks (WiFi, 4G, ...).
+  // Since version 3.
+  optional int32 network_id = 16;
+
+  // The interface name (wlan, rmnet, lo, ...) on which the event happened.
+  // Present if the link_layer field was not inferred from the if_name on
+  // the device, so that post-processing of the serialized proto can backfill
+  // link_layer. Since version 3.
+  optional string if_name = 17;
+
+  // The transport types of the network on which the event happened, expressed
+  // as a bit field of TRANSPORT_* constants as defined in NetworkCapabilities.
+  // Present if the link_layer field was not inferred from the transport types,
+  // so that post-processing of the serialized proto can backfill link_layer
+  // Since version 3.
+  optional int64 transports = 18;
+
   oneof event {
 
     // An event about the system default network.
@@ -371,9 +419,10 @@ message IpConnectivityLog {
   optional int32 dropped_events = 2;
 
   // The version number of the metrics events being collected.
-  //  nyc-dev: not populated, implicitly 0.
+  //  nyc:     not populated, implicitly 0.
   //  nyc-dr1: not populated, implicitly 1 (sailfish and marlin only).
   //  nyc-mr1: not populated, implicitly 1.
   //  nyc-mr2: 2.
+  //  oc:      3.
   optional int32 version = 3;
 };
