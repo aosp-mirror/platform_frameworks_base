@@ -10088,8 +10088,18 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     /**
-     * Moves an activity, and all of the other activities within the same task, to the bottom
-     * of the history stack.  The activity's order within the task is unchanged.
+     * Attempts to move a task backwards in z-order (the order of activities within the task is
+     * unchanged).
+     *
+     * There are several possible results of this call:
+     * - if the task is locked, then we will show the lock toast
+     * - if there is a task behind the provided task, then that task is made visible and resumed as
+     *   this task is moved to the back
+     * - otherwise, if there are no other tasks in the stack:
+     *     - if this task is in the pinned stack, then we remove the stack completely, which will
+     *       have the effect of moving the task to the top or bottom of the fullscreen stack
+     *       (depending on whether it is visible)
+     *     - otherwise, we simply return home and hide this task
      *
      * @param token A reference to the activity we wish to move
      * @param nonRoot If false then this only works if the activity is the root
@@ -10105,10 +10115,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 int taskId = ActivityRecord.getTaskForActivityLocked(token, !nonRoot);
                 final TaskRecord task = mStackSupervisor.anyTaskForIdLocked(taskId);
                 if (task != null) {
-                    if (mStackSupervisor.isLockedTask(task)) {
-                        mStackSupervisor.showLockTaskToast();
-                        return false;
-                    }
                     return ActivityRecord.getStackLocked(token).moveTaskToBackLocked(taskId);
                 }
             } finally {
@@ -10367,7 +10373,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         synchronized (this) {
             if (!mSupportsPictureInPicture) {
                 throw new IllegalStateException("moveTopActivityToPinnedStack:"
-                        + "Device doesn't support picture-in-pciture mode");
+                        + "Device doesn't support picture-in-picture mode");
             }
 
             long ident = Binder.clearCallingIdentity();
