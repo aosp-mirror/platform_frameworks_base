@@ -182,11 +182,8 @@ final class RemoteFillService implements DeathRecipient {
         if (mDestroyed || mCompleted) {
             return;
         }
-        if (pendingRequest.isFinal()) {
-            mCompleted = true;
-        }
         if (!isBound()) {
-            if (mPendingRequest != null) {
+            if (mPendingRequest != null && mPendingRequest != pendingRequest) {
                 mPendingRequest.cancel();
             }
             mPendingRequest = pendingRequest;
@@ -196,6 +193,9 @@ final class RemoteFillService implements DeathRecipient {
                 Slog.d(LOG_TAG, "[user: " + mUserId + "] handlePendingRequest()");
             }
             pendingRequest.run();
+            if (pendingRequest.isFinal()) {
+                mCompleted = true;
+            }
         }
     }
 

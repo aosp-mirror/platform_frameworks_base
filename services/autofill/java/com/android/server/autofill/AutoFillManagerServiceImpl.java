@@ -730,6 +730,14 @@ final class AutoFillManagerServiceImpl {
 
         // AutoFillUiCallback
         @Override
+        public void cancelSave() {
+            mHandlerCaller.getHandler().post(() -> {
+                removeSelf();
+            });
+        }
+
+        // AutoFillUiCallback
+        @Override
         public void onEvent(AutoFillId id, int event) {
             mHandlerCaller.getHandler().post(() -> {
                 notifyChangeToClient(id, event);

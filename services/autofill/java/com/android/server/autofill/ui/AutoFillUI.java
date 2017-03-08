@@ -65,6 +65,7 @@ public final class AutoFillUI {
         void authenticate(@NonNull IntentSender intent);
         void fill(@NonNull Dataset dataset);
         void save();
+        void cancelSave();
         void onEvent(AutoFillId id, int event);
     }
 
@@ -219,6 +220,9 @@ public final class AutoFillUI {
                             Slog.e(TAG, "Error starting negative action listener: "
                                     + listener, e);
                         }
+                    }
+                    if (mCallback != null) {
+                        mCallback.cancelSave();
                     }
                 }
             }, mSaveTimeoutMs);
