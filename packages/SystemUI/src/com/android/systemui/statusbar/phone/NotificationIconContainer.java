@@ -95,7 +95,7 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
     private int mActualLayoutWidth = NO_VALUE;
     private float mActualPaddingEnd = NO_VALUE;
     private float mActualPaddingStart = NO_VALUE;
-    private boolean mCentered;
+    private boolean mDark;
     private boolean mChangingViewPositions;
     private int mAddAnimationStartIndex = -1;
     private int mCannedAnimationStartIndex = -1;
@@ -182,6 +182,9 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
             } else {
                 mAddAnimationStartIndex = Math.min(mAddAnimationStartIndex, childIndex);
             }
+        }
+        if (mDark && child instanceof StatusBarIconView) {
+            ((StatusBarIconView) child).setDark(mDark, false, 0);
         }
     }
 
@@ -312,7 +315,8 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
                 numDots++;
             }
         }
-        if (mCentered && translationX < getLayoutEnd()) {
+        boolean center = mDark;
+        if (center && translationX < getLayoutEnd()) {
             float delta = (getLayoutEnd() - translationX) / 2;
             for (int i = 0; i < childCount; i++) {
                 View view = getChildAt(i);
@@ -390,9 +394,15 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
         mChangingViewPositions = changingViewPositions;
     }
 
-    public void setAmbient(boolean ambient) {
-        mCentered = ambient;
+    public void setDark(boolean dark, boolean fade, long delay) {
+        mDark = dark;
         mDisallowNextAnimation = true;
+        for (int i = 0; i < getChildCount(); i++) {
+            View view = getChildAt(i);
+            if (view instanceof StatusBarIconView) {
+                ((StatusBarIconView) view).setDark(dark, fade, delay);
+            }
+        }
     }
 
     public IconState getIconState(StatusBarIconView icon) {

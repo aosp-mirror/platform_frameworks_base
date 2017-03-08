@@ -27,6 +27,7 @@ import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -46,6 +47,7 @@ import android.view.animation.Interpolator;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.notification.NotificationIconDozeHelper;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 
 import java.text.NumberFormat;
@@ -99,7 +101,6 @@ public class StatusBarIconView extends AnimatedImageView {
     private int mDensity;
     private float mIconScale = 1.0f;
     private final Paint mDotPaint = new Paint();
-    private boolean mDotVisible;
     private float mDotRadius;
     private int mStaticDotRadius;
     private int mVisibleState = STATE_ICON;
@@ -110,6 +111,8 @@ public class StatusBarIconView extends AnimatedImageView {
     private OnVisibilityChangedListener mOnVisibilityChangedListener;
     private int mDrawableColor;
     private int mIconColor;
+    private int mDecorColor;
+    private float mDarkAmount;
     private ValueAnimator mColorAnimator;
     private int mCurrentSetColor = NO_COLOR;
     private int mAnimationStartColor = NO_COLOR;
@@ -119,6 +122,7 @@ public class StatusBarIconView extends AnimatedImageView {
                 animation.getAnimatedFraction());
         setColorInternal(newColor);
     };
+    private final NotificationIconDozeHelper mDozer;
 
     public StatusBarIconView(Context context, String slot, Notification notification) {
         this(context, slot, notification, false);
@@ -127,6 +131,7 @@ public class StatusBarIconView extends AnimatedImageView {
     public StatusBarIconView(Context context, String slot, Notification notification,
             boolean blocked) {
         super(context);
+        mDozer = new NotificationIconDozeHelper(context);
         mBlocked = blocked;
         mSlot = slot;
         mNumberPain = new Paint();
@@ -190,6 +195,7 @@ public class StatusBarIconView extends AnimatedImageView {
 
     public StatusBarIconView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        mDozer = new NotificationIconDozeHelper(context);
         mBlocked = false;
         mAlwaysScaleIcon = true;
         updateIconScale();
@@ -466,7 +472,19 @@ public class StatusBarIconView extends AnimatedImageView {
      * to the drawable.
      */
     public void setDecorColor(int iconTint) {
-        mDotPaint.setColor(iconTint);
+        mDecorColor = iconTint;
+        updateDecorColor();
+    }
+
+    private void updateDecorColor() {
+        int color = NotificationUtils.interpolateColors(mDecorColor, Color.WHITE, mDarkAmount);
+        if (mDotPaint.getColor() != color) {
+            mDotPaint.setColor(color);
+
+            if (mDotAppearAmount != 0) {
+                invalidate();
+            }
+        }
     }
 
     /**
@@ -477,6 +495,7 @@ public class StatusBarIconView extends AnimatedImageView {
         mDrawableColor = color;
         setColorInternal(color);
         mIconColor = color;
+        mDozer.setColor(color);
     }
 
     private void setColorInternal(int color) {
@@ -647,6 +666,14 @@ public class StatusBarIconView extends AnimatedImageView {
 
     public void setOnVisibilityChangedListener(OnVisibilityChangedListener listener) {
         mOnVisibilityChangedListener = listener;
+    }
+
+    public void setDark(boolean dark, boolean fade, long delay) {
+        mDozer.setImageDark(this, dark, fade, delay, mIconColor != NO_COLOR);
+        mDozer.setIntensityDark(f -> {
+            mDarkAmount = f;
+            updateDecorColor();
+        }, dark, fade, delay);
     }
 
     public interface OnVisibilityChangedListener {
