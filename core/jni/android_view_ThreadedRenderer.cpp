@@ -178,9 +178,13 @@ public:
             }
         }
         // TODO: This is hacky
+        info.windowInsetLeft = -stagingProperties().getLeft();
+        info.windowInsetTop = -stagingProperties().getTop();
         info.updateWindowPositions = true;
         RenderNode::prepareTree(info);
         info.updateWindowPositions = false;
+        info.windowInsetLeft = 0;
+        info.windowInsetTop = 0;
         info.errorHandler = nullptr;
     }
 
