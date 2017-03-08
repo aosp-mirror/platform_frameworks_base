@@ -2831,6 +2831,9 @@ final class Settings {
         if (pkg.parentPackageName != null) {
             serializer.attribute(null, "parentPackageName", pkg.parentPackageName);
         }
+        if (pkg.updateAvailable) {
+            serializer.attribute(null, "updateAvailable", "true");
+        }
 
         writeChildPackagesLPw(serializer, pkg.childPackageNames);
 
@@ -3698,6 +3701,7 @@ final class Settings {
         String isOrphaned = null;
         String volumeUuid = null;
         String categoryHintString = null;
+        String updateAvailable = null;
         int categoryHint = ApplicationInfo.CATEGORY_UNDEFINED;
         String uidError = null;
         int pkgFlags = 0;
@@ -3726,6 +3730,7 @@ final class Settings {
             primaryCpuAbiString = parser.getAttributeValue(null, "primaryCpuAbi");
             secondaryCpuAbiString = parser.getAttributeValue(null, "secondaryCpuAbi");
             cpuAbiOverrideString = parser.getAttributeValue(null, "cpuAbiOverride");
+            updateAvailable = parser.getAttributeValue(null, "updateAvailable");
 
             if (primaryCpuAbiString == null && legacyCpuAbiString != null) {
                 primaryCpuAbiString = legacyCpuAbiString;
@@ -3905,6 +3910,7 @@ final class Settings {
             packageSetting.legacyNativeLibraryPathString = legacyNativeLibraryPathStr;
             packageSetting.primaryCpuAbiString = primaryCpuAbiString;
             packageSetting.secondaryCpuAbiString = secondaryCpuAbiString;
+            packageSetting.updateAvailable = "true".equals(updateAvailable);
             // Handle legacy string here for single-user mode
             final String enabledStr = parser.getAttributeValue(null, ATTR_ENABLED);
             if (enabledStr != null) {

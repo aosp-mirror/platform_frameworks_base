@@ -141,6 +141,8 @@ abstract class PackageSettingBase extends SettingBase {
     String volumeUuid;
     /** The category of this app, as hinted by the installer */
     int categoryHint = ApplicationInfo.CATEGORY_UNDEFINED;
+    /** Whether or not an update is available. Ostensibly only for instant apps. */
+    boolean updateAvailable;
 
     IntentFilterVerificationInfo verificationInfo;
 
@@ -219,6 +221,14 @@ abstract class PackageSettingBase extends SettingBase {
         timeStamp = newStamp;
     }
 
+    public void setUpdateAvailable(boolean updateAvailable) {
+        this.updateAvailable = updateAvailable;
+    }
+
+    public boolean isUpdateAvailable() {
+        return updateAvailable;
+    }
+
     /**
      * Makes a shallow copy of the given package settings.
      *
@@ -268,6 +278,7 @@ abstract class PackageSettingBase extends SettingBase {
         usesStaticLibrariesVersions = orig.usesStaticLibrariesVersions != null
                 ? Arrays.copyOf(orig.usesStaticLibrariesVersions,
                        orig.usesStaticLibrariesVersions.length) : null;
+        updateAvailable = orig.updateAvailable;
     }
 
     private PackageUserState modifyUserState(int userId) {
