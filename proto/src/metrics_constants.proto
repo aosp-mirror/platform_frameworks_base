@@ -3525,6 +3525,21 @@ message MetricsEvent {
     // OPEN: Settings > About device > Model > Hardware info dialog
     DIALOG_SETTINGS_HARDWARE_INFO = 862;
 
+    // ACTION: Checks whether a contact's phone still exists
+    // Value 0: It doesn't exist anymore
+    // Value 1: It still exists
+    // Value 2: A SecurityException was thrown
+    // CATEGORY: SETTINGS
+    // OS: N
+    ACTION_PHONE_EXISTS = 863;
+
+    // ACTION: Retrieves a contact from CP2
+    // Value 0: Contact retrieved without issues
+    // Value 1: An IllegalArgumentException was thrown
+    // CATEGORY: SETTINGS
+    // OS: N
+    ACTION_GET_CONTACT = 864;
+
     // ---- End O Constants, all O constants go above this line ----
 
     // Add new aosp constants above this line.
