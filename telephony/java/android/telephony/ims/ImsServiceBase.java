@@ -19,6 +19,7 @@ package android.telephony.ims;
 import android.annotation.SystemApi;
 import android.app.Service;
 import android.content.Intent;
+import android.os.Binder;
 import android.os.IBinder;
 
 /**
@@ -30,8 +31,15 @@ import android.os.IBinder;
 @SystemApi
 public class ImsServiceBase extends Service {
 
+    /**
+     * Binder connection that does nothing but keep the connection between this Service and the
+     * framework active. If this service crashes, the framework will be notified.
+     */
+    private IBinder mConnection = new Binder();
+
     @Override
     public IBinder onBind(Intent intent) {
-        return null;
+        return mConnection;
     }
+
 }
