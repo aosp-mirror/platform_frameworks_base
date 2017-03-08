@@ -1385,6 +1385,78 @@ public final class BluetoothAdapter {
     }
 
     /**
+     * Return true if LE 2M PHY feature is supported.
+     *
+     * @return true if chipset supports LE 2M PHY feature
+     */
+    public boolean isLe2MPhySupported() {
+        if (!getLeAccess()) return false;
+        try {
+            mServiceLock.readLock().lock();
+            if (mService != null) return mService.isLe2MPhySupported();
+        } catch (RemoteException e) {
+            Log.e(TAG, "failed to get isExtendedAdvertisingSupported, error: ", e);
+        } finally {
+            mServiceLock.readLock().unlock();
+        }
+        return false;
+    }
+
+    /**
+     * Return true if LE Coded PHY feature is supported.
+     *
+     * @return true if chipset supports LE Coded PHY feature
+     */
+    public boolean isLeCodedPhySupported() {
+        if (!getLeAccess()) return false;
+        try {
+            mServiceLock.readLock().lock();
+            if (mService != null) return mService.isLeCodedPhySupported();
+        } catch (RemoteException e) {
+            Log.e(TAG, "failed to get isLeCodedPhySupported, error: ", e);
+        } finally {
+            mServiceLock.readLock().unlock();
+        }
+        return false;
+    }
+
+    /**
+     * Return true if LE Periodic Advertising feature is supported.
+     *
+     * @return true if chipset supports LE Periodic Advertising feature
+     */
+    public boolean isLeExtendedAdvertisingSupported() {
+        if (!getLeAccess()) return false;
+        try {
+            mServiceLock.readLock().lock();
+            if (mService != null) return mService.isLeExtendedAdvertisingSupported();
+        } catch (RemoteException e) {
+            Log.e(TAG, "failed to get isLeExtendedAdvertisingSupported, error: ", e);
+        } finally {
+            mServiceLock.readLock().unlock();
+        }
+        return false;
+    }
+
+    /**
+     * Return true if LE Periodic Advertising feature is supported.
+     *
+     * @return true if chipset supports LE Periodic Advertising feature
+     */
+    public boolean isLePeriodicAdvertisingSupported() {
+        if (!getLeAccess()) return false;
+        try {
+            mServiceLock.readLock().lock();
+            if (mService != null) return mService.isLePeriodicAdvertisingSupported();
+        } catch (RemoteException e) {
+            Log.e(TAG, "failed to get isLePeriodicAdvertisingSupported, error: ", e);
+        } finally {
+            mServiceLock.readLock().unlock();
+        }
+        return false;
+    }
+
+    /**
      * Return true if hardware has entries available for matching beacons
      *
      * @return true if there are hw entries available for matching beacons
