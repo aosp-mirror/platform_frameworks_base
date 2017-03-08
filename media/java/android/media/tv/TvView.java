@@ -776,8 +776,8 @@ public class TvView extends ViewGroup {
         mSurface = null;
         mSurfaceView = new SurfaceView(getContext(), mAttrs, mDefStyleAttr) {
             @Override
-            protected void updateSurface() {
-                super.updateSurface();
+            protected void updateWindow() {
+                super.updateWindow();
                 relayoutSessionOverlayView();
             }};
         // The surface view's content should be treated as secure all the time.

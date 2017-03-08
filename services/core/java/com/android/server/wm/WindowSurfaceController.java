@@ -135,20 +135,6 @@ class WindowSurfaceController {
         }
     }
 
-    void reparentChildrenInTransaction(WindowSurfaceController other) {
-        if (SHOW_TRANSACTIONS) Slog.i(TAG, "REPARENT from: " + this + " to: " + other);
-        if ((mSurfaceControl != null) && (other.mSurfaceControl != null)) {
-            mSurfaceControl.reparentChildren(other.getHandle());
-        }
-    }
-
-    void detachChildren() {
-        if (SHOW_TRANSACTIONS) Slog.i(TAG, "SEVER CHILDREN");
-        if (mSurfaceControl != null) {
-            mSurfaceControl.detachChildren();
-        }
-    }
-
     void hideInTransaction(String reason) {
         if (SHOW_TRANSACTIONS) logSurface("HIDE ( " + reason + " )", null);
         mHiddenForOtherReasons = true;
