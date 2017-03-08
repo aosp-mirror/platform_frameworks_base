@@ -104,6 +104,10 @@ interface IBluetooth
     boolean isOffloadedFilteringSupported();
     boolean isOffloadedScanBatchingSupported();
     boolean isActivityAndEnergyReportingSupported();
+    boolean isLe2MPhySupported();
+    boolean isLeCodedPhySupported();
+    boolean isLeExtendedAdvertisingSupported();
+    boolean isLePeriodicAdvertisingSupported();
     BluetoothActivityEnergyInfo reportActivityInfo();
 
     /**
