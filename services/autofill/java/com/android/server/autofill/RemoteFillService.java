@@ -135,13 +135,13 @@ final class RemoteFillService implements DeathRecipient {
 
     public void onFillRequest(@NonNull AssistStructure structure, @Nullable Bundle extras) {
         cancelScheduledUnbind();
-        PendingFillRequest request = new PendingFillRequest(structure, extras, this);
+        final PendingFillRequest request = new PendingFillRequest(structure, extras, this);
         mHandler.obtainMessageO(MyHandler.MSG_ON_PENDING_REQUEST, request).sendToTarget();
     }
 
     public void onSaveRequest(@NonNull AssistStructure structure, @Nullable Bundle extras) {
         cancelScheduledUnbind();
-        PendingSaveRequest request = new PendingSaveRequest(structure, extras, this);
+        final PendingSaveRequest request = new PendingSaveRequest(structure, extras, this);
         mHandler.obtainMessageO(MyHandler.MSG_ON_PENDING_REQUEST, request).sendToTarget();
     }
 
