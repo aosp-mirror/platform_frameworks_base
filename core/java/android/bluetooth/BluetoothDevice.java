@@ -1412,6 +1412,27 @@ public final class BluetoothDevice implements Parcelable {
     }
 
     /**
+     * Create an L2cap {@link BluetoothSocket} ready to start an insecure
+     * outgoing connection to this remote device on given channel.
+     * <p>The remote device will be not authenticated and communication on this
+     * socket will not be encrypted.
+     * <p>Use {@link BluetoothSocket#connect} to initiate the outgoing
+     * connection.
+     * <p>Valid L2CAP PSM channels are in range 1 to 2^16.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
+     *
+     * @param channel L2cap PSM/channel to connect to
+     * @return a RFCOMM BluetoothServerSocket ready for an outgoing connection
+     * @throws IOException on error, for example Bluetooth not available, or
+     *                     insufficient permissions
+     * @hide
+     */
+    public BluetoothSocket createInsecureL2capSocket(int channel) throws IOException {
+        return new BluetoothSocket(BluetoothSocket.TYPE_L2CAP, -1, false, false, this, channel,
+                null);
+    }
+
+    /**
      * Create an RFCOMM {@link BluetoothSocket} ready to start a secure
      * outgoing connection to this remote device using SDP lookup of uuid.
      * <p>This is designed to be used with {@link
