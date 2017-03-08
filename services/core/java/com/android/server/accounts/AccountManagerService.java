@@ -503,10 +503,10 @@ public class AccountManagerService
                     UserHandle.getUserId(callingUid));
         } catch (NameNotFoundException e) {
             Log.d(TAG, "Package not found " + e.getMessage());
-            return new HashMap<>();
+            return new LinkedHashMap<>();
         }
 
-        Map<Account, Integer> result = new HashMap<>();
+        Map<Account, Integer> result = new LinkedHashMap<>();
         for (String accountType : accountTypes) {
             synchronized (accounts.cacheLock) {
                 final Account[] accountsOfType = accounts.accountCache.get(accountType);
@@ -1040,7 +1040,7 @@ public class AccountManagerService
     private static HashMap<String, Integer> getAuthenticatorTypeAndUIDForUser(
             IAccountAuthenticatorCache authCache,
             int userId) {
-        HashMap<String, Integer> knownAuth = new HashMap<>();
+        HashMap<String, Integer> knownAuth = new LinkedHashMap<>();
         for (RegisteredServicesCache.ServiceInfo<AuthenticatorDescription> service : authCache
                 .getAllServices(userId)) {
             knownAuth.put(service.type.type, service.uid);
@@ -3927,7 +3927,7 @@ public class AccountManagerService
         List<String> visibleAccountTypes = getTypesVisibleToCaller(callingUid, userId,
                 opPackageName);
         if (visibleAccountTypes.isEmpty()) {
-            return new Account[0];
+            return EMPTY_ACCOUNT_ARRAY;
         }
         long identityToken = clearCallingIdentity();
         try {
@@ -4047,7 +4047,7 @@ public class AccountManagerService
                 opPackageName);
         if (visibleAccountTypes.isEmpty()
                 || (type != null && !visibleAccountTypes.contains(type))) {
-            return new Account[]{};
+            return EMPTY_ACCOUNT_ARRAY;
         } else if (visibleAccountTypes.contains(type)) {
             // Prune the list down to just the requested type.
             visibleAccountTypes = new ArrayList<>();
@@ -4194,11 +4194,11 @@ public class AccountManagerService
             packageUid = mPackageManager.getPackageUidAsUser(packageName, userId);
         } catch (NameNotFoundException re) {
             Slog.e(TAG, "Couldn't determine the packageUid for " + packageName + re);
-            return new Account[0];
+            return EMPTY_ACCOUNT_ARRAY;
         }
         if (!UserHandle.isSameApp(callingUid, Process.SYSTEM_UID)
                 && !isAccountManagedByCaller(type, callingUid, userId)) {
-            return new Account[0];
+            return EMPTY_ACCOUNT_ARRAY;
         }
 
         return getAccountsAsUser(type, userId,
@@ -4229,7 +4229,7 @@ public class AccountManagerService
         if (!visibleAccountTypes.contains(type)) {
             Bundle result = new Bundle();
             // Need to return just the accounts that are from matching signatures.
-            result.putParcelableArray(AccountManager.KEY_ACCOUNTS, new Account[0]);
+            result.putParcelableArray(AccountManager.KEY_ACCOUNTS, EMPTY_ACCOUNT_ARRAY);
             try {
                 response.onResult(result);
             } catch (RemoteException e) {
@@ -5368,10 +5368,11 @@ public class AccountManagerService
         return newAccountsForType[oldLength];
     }
 
+    @NonNull
     private Account[] filterAccounts(UserAccounts accounts, Account[] unfiltered, int callingUid,
             String callingPackage, boolean includeManagedNotVisible) {
         // filter based on visibility.
-        Map<Account, Integer> firstPass = new HashMap<>();
+        Map<Account, Integer> firstPass = new LinkedHashMap<>();
         for (Account account : unfiltered) {
             int visibility = resolveAccountVisibility(account, callingPackage, accounts);
             if ((visibility == AccountManager.VISIBILITY_VISIBLE
@@ -5390,8 +5391,10 @@ public class AccountManagerService
         return filtered;
     }
 
+    @NonNull
     private Map<Account, Integer> filterSharedAccounts(UserAccounts userAccounts,
-            Map<Account, Integer> unfiltered, int callingUid, String callingPackage) {
+            @NonNull Map<Account, Integer> unfiltered, int callingUid,
+            String callingPackage) {
         // first part is to filter shared accounts.
         // unfiltered type check is not necessary.
         if (getUserManager() == null || userAccounts == null || userAccounts.userId < 0
@@ -5441,7 +5444,7 @@ public class AccountManagerService
             } catch (NameNotFoundException e) {
                 Log.d(TAG, "Package not found " + e.getMessage());
             }
-            Map<Account, Integer> filtered = new HashMap<>();
+            Map<Account, Integer> filtered = new LinkedHashMap<>();
             for (Map.Entry<Account, Integer> entry : unfiltered.entrySet()) {
                 Account account = entry.getKey();
                 if (account.type.equals(requiredAccountType)) {
@@ -5469,6 +5472,7 @@ public class AccountManagerService
      * packageName can be null. If not null, it should be used to filter out restricted accounts
      * that the package is not allowed to access.
      */
+    @NonNull
     protected Account[] getAccountsFromCacheLocked(UserAccounts userAccounts, String accountType,
             int callingUid, String callingPackage, boolean includeManagedNotVisible) {
         if (callingPackage == null) {
