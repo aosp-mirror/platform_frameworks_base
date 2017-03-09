@@ -601,11 +601,6 @@ public final class Parcel {
         nativeWriteString(mNativePtr, val);
     }
 
-    /** @hide */
-    public final void writeBoolean(boolean val) {
-        writeInt(val ? 1 : 0);
-    }
-
     /**
      * Write a CharSequence value into the parcel at the current dataPosition(),
      * growing dataCapacity() if needed.
@@ -1969,11 +1964,6 @@ public final class Parcel {
         return nativeReadString(mNativePtr);
     }
 
-    /** @hide */
-    public final boolean readBoolean() {
-        return readInt() != 0;
-    }
-
     /**
      * Read a CharSequence value from the parcel at the current dataPosition().
      * @hide
@@ -2500,11 +2490,11 @@ public final class Parcel {
      * @see #writeParcelableList(List, int)
      * @hide
      */
-    public final <T extends Parcelable> List<T> readParcelableList(List<T> list, ClassLoader cl) {
+    public final <T extends Parcelable> void readParcelableList(List<T> list, ClassLoader cl) {
         final int N = readInt();
         if (N == -1) {
             list.clear();
-            return list;
+            return;
         }
 
         final int M = list.size();
@@ -2518,7 +2508,6 @@ public final class Parcel {
         for (; i<M; i++) {
             list.remove(N);
         }
-        return list;
     }
 
     /**

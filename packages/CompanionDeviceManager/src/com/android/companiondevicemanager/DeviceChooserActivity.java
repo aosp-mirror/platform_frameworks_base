@@ -16,9 +16,10 @@
 
 package com.android.companiondevicemanager;
 
-import static android.companion.BluetoothDeviceFilterUtils.getDeviceMacAddress;
+import static android.companion.BluetoothDeviceFilterUtils.getDeviceDisplayName;
 
 import android.app.Activity;
+import android.bluetooth.BluetoothDevice;
 import android.companion.CompanionDeviceManager;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -32,8 +33,6 @@ import android.view.View;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-
-import com.android.companiondevicemanager.DeviceDiscoveryService.DeviceFilterPair;
 
 public class DeviceChooserActivity extends Activity {
 
@@ -56,11 +55,11 @@ public class DeviceChooserActivity extends Activity {
 
         if (getService().mRequest.isSingleDevice()) {
             setContentView(R.layout.device_confirmation);
-            final DeviceFilterPair selectedDevice = getService().mDevicesFound.get(0);
+            final BluetoothDevice selectedDevice = getService().mDevicesFound.get(0);
             setTitle(Html.fromHtml(getString(
                     R.string.confirmation_title,
                     getCallingAppName(),
-                    selectedDevice.getDisplayName()), 0));
+                    getDeviceDisplayName(selectedDevice)), 0));
             getService().mSelectedDevice = selectedDevice;
         } else {
             setContentView(R.layout.device_chooser);
@@ -128,11 +127,10 @@ public class DeviceChooserActivity extends Activity {
         return DeviceDiscoveryService.sInstance;
     }
 
-   protected void onPairTapped(DeviceFilterPair selectedDevice) {
-        getService().onDeviceSelected(
-                getCallingPackage(), getDeviceMacAddress(selectedDevice.device));
+    protected void onPairTapped(BluetoothDevice selectedDevice) {
+        getService().onDeviceSelected(getCallingPackage(), selectedDevice.getAddress());
         setResult(RESULT_OK,
-                new Intent().putExtra(CompanionDeviceManager.EXTRA_DEVICE, selectedDevice.device));
+                new Intent().putExtra(CompanionDeviceManager.EXTRA_DEVICE, selectedDevice));
         finish();
     }
 }
