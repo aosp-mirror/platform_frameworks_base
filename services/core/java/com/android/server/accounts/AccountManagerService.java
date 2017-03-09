@@ -4003,12 +4003,12 @@ public class AccountManagerService
     public Account[] getAccountsAsUser(String type, int userId, String opPackageName) {
         int callingUid = Binder.getCallingUid();
         mAppOpsManager.checkPackage(callingUid, opPackageName);
-        return getAccountsAsUser(type, userId, opPackageName /* callingPackage */, -1,
+        return getAccountsAsUserForPackage(type, userId, opPackageName /* callingPackage */, -1,
                 opPackageName, false /* includeUserManagedNotVisible */);
     }
 
     @NonNull
-    private Account[] getAccountsAsUser(
+    private Account[] getAccountsAsUserForPackage(
             String type,
             int userId,
             String callingPackage,
@@ -4061,7 +4061,7 @@ public class AccountManagerService
             return getAccountsInternal(
                     accounts,
                     callingUid,
-                    callingPackage,
+                    opPackageName,
                     visibleAccountTypes,
                     includeUserManagedNotVisible);
         } finally {
@@ -4178,7 +4178,7 @@ public class AccountManagerService
             throw new SecurityException("getAccountsForPackage() called from unauthorized uid "
                     + callingUid + " with uid=" + uid);
         }
-        return getAccountsAsUser(null, UserHandle.getCallingUserId(), packageName, uid,
+        return getAccountsAsUserForPackage(null, UserHandle.getCallingUserId(), packageName, uid,
                 opPackageName, true /* includeUserManagedNotVisible */);
     }
 
@@ -4197,11 +4197,10 @@ public class AccountManagerService
             return EMPTY_ACCOUNT_ARRAY;
         }
         if (!UserHandle.isSameApp(callingUid, Process.SYSTEM_UID)
-                && !isAccountManagedByCaller(type, callingUid, userId)) {
-            return EMPTY_ACCOUNT_ARRAY;
+                && (type != null && !isAccountManagedByCaller(type, callingUid, userId))) {
+                return EMPTY_ACCOUNT_ARRAY;
         }
-
-        return getAccountsAsUser(type, userId,
+        return getAccountsAsUserForPackage(type, userId,
                 packageName, packageUid, opPackageName, true /* includeUserManagedNotVisible */);
     }
 
@@ -5371,10 +5370,13 @@ public class AccountManagerService
     @NonNull
     private Account[] filterAccounts(UserAccounts accounts, Account[] unfiltered, int callingUid,
             String callingPackage, boolean includeManagedNotVisible) {
-        // filter based on visibility.
+        String visibilityFilterPackage = callingPackage;
+        if (visibilityFilterPackage == null) {
+            visibilityFilterPackage = getPackageNameForUid(callingUid);
+        }
         Map<Account, Integer> firstPass = new LinkedHashMap<>();
         for (Account account : unfiltered) {
-            int visibility = resolveAccountVisibility(account, callingPackage, accounts);
+            int visibility = resolveAccountVisibility(account, visibilityFilterPackage, accounts);
             if ((visibility == AccountManager.VISIBILITY_VISIBLE
                     || visibility == AccountManager.VISIBILITY_USER_MANAGED_VISIBLE)
                     || (includeManagedNotVisible
@@ -5394,7 +5396,7 @@ public class AccountManagerService
     @NonNull
     private Map<Account, Integer> filterSharedAccounts(UserAccounts userAccounts,
             @NonNull Map<Account, Integer> unfiltered, int callingUid,
-            String callingPackage) {
+            @Nullable String callingPackage) {
         // first part is to filter shared accounts.
         // unfiltered type check is not necessary.
         if (getUserManager() == null || userAccounts == null || userAccounts.userId < 0
@@ -5474,7 +5476,7 @@ public class AccountManagerService
      */
     @NonNull
     protected Account[] getAccountsFromCacheLocked(UserAccounts userAccounts, String accountType,
-            int callingUid, String callingPackage, boolean includeManagedNotVisible) {
+            int callingUid, @Nullable String callingPackage, boolean includeManagedNotVisible) {
         if (callingPackage == null) {
             callingPackage = getPackageNameForUid(callingUid);
         }
