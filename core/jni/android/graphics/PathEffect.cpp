@@ -20,7 +20,7 @@ public:
                                      jlong outerHandle, jlong innerHandle) {
         SkPathEffect* outer = reinterpret_cast<SkPathEffect*>(outerHandle);
         SkPathEffect* inner = reinterpret_cast<SkPathEffect*>(innerHandle);
-        SkPathEffect* effect = SkComposePathEffect::Make(sk_ref_sp(outer),
+        SkPathEffect* effect = SkPathEffect::MakeCompose(sk_ref_sp(outer),
                 sk_ref_sp(inner)).release();
         return reinterpret_cast<jlong>(effect);
     }
@@ -29,7 +29,7 @@ public:
                                  jlong firstHandle, jlong secondHandle) {
         SkPathEffect* first = reinterpret_cast<SkPathEffect*>(firstHandle);
         SkPathEffect* second = reinterpret_cast<SkPathEffect*>(secondHandle);
-        SkPathEffect* effect = SkSumPathEffect::Make(sk_ref_sp(first),
+        SkPathEffect* effect = SkPathEffect::MakeSum(sk_ref_sp(first),
                 sk_ref_sp(second)).release();
         return reinterpret_cast<jlong>(effect);
     }
