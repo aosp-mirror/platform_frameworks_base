@@ -31,8 +31,6 @@
 #include <binder/Parcel.h>
 
 #include <ui/GraphicBuffer.h>
-#include <gui/IGraphicBufferAlloc.h>
-#include <gui/ISurfaceComposer.h>
 #include <private/gui/ComposerService.h>
 
 #include <hardware/gralloc1.h>
@@ -73,15 +71,6 @@ public:
 static jlong android_hardware_HardwareBuffer_create(JNIEnv* env, jobject clazz,
         jint width, jint height, jint format, jint layers, jlong usage) {
 
-    sp<ISurfaceComposer> composer(ComposerService::getComposerService());
-    sp<IGraphicBufferAlloc> alloc(composer->createGraphicBufferAlloc());
-    if (alloc == NULL) {
-        if (kDebugGraphicBuffer) {
-            ALOGW("createGraphicBufferAlloc() failed in HardwareBuffer.create()");
-        }
-        return NULL;
-    }
-
     // TODO: update createGraphicBuffer to take two 64-bit values.
     int pixelFormat = android_hardware_HardwareBuffer_convertToPixelFormat(format);
     if (pixelFormat == 0) {
@@ -92,14 +81,14 @@ static jlong android_hardware_HardwareBuffer_create(JNIEnv* env, jobject clazz,
     }
     uint64_t producerUsage = 0;
     uint64_t consumerUsage = 0;
-    android_hardware_HardwareBuffer_convertToGrallocUsageBits(&producerUsage, &consumerUsage, usage,
-            0);
-    status_t error;
-    sp<GraphicBuffer> buffer(alloc->createGraphicBuffer(width, height, pixelFormat,
-            layers, producerUsage, consumerUsage,
-            std::string("HardwareBuffer pid [") + std::to_string(getpid()) +"]",
-            &error));
-    if (buffer == NULL) {
+    android_hardware_HardwareBuffer_convertToGrallocUsageBits(
+            &producerUsage, &consumerUsage, usage, 0);
+
+    sp<GraphicBuffer> buffer = new GraphicBuffer(width, height, pixelFormat, layers,
+            producerUsage, consumerUsage,
+            std::string("HardwareBuffer pid [") + std::to_string(getpid()) +"]");
+    status_t error = buffer->initCheck();
+    if (error < 0) {
         if (kDebugGraphicBuffer) {
             ALOGW("createGraphicBuffer() failed in HardwareBuffer.create()");
         }

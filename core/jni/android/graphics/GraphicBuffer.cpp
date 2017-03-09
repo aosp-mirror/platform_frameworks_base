@@ -30,8 +30,6 @@
 #include <ui/GraphicBuffer.h>
 #include <ui/PixelFormat.h>
 
-#include <gui/IGraphicBufferAlloc.h>
-#include <gui/ISurfaceComposer.h>
 #include <hwui/Bitmap.h>
 
 #include <SkCanvas.h>
@@ -111,21 +109,14 @@ static jlong android_graphics_GraphicBuffer_wrap(JNIEnv* env, jobject clazz,
 static jlong android_graphics_GraphicBuffer_create(JNIEnv* env, jobject clazz,
         jint width, jint height, jint format, jint usage) {
 
-    sp<ISurfaceComposer> composer(ComposerService::getComposerService());
-    sp<IGraphicBufferAlloc> alloc(composer->createGraphicBufferAlloc());
-    if (alloc == NULL) {
-        if (kDebugGraphicBuffer) {
-            ALOGW("createGraphicBufferAlloc() failed in GraphicBuffer.create()");
-        }
-        return NULL;
-    }
+    sp<GraphicBuffer> buffer = new GraphicBuffer(
+            uint32_t(width), uint32_t(height), PixelFormat(format), uint32_t(usage),
+            std::string("android_graphics_GraphicBuffer_create pid [") +
+                    std::to_string(getpid()) +"]");
 
-    status_t error;
-    sp<GraphicBuffer> buffer(alloc->createGraphicBuffer(width, height, format, 1, usage, &error));
-    if (buffer == NULL) {
-        if (kDebugGraphicBuffer) {
-            ALOGW("createGraphicBuffer() failed in GraphicBuffer.create()");
-        }
+    status_t error = buffer->initCheck();
+    if (error < 0) {
+        ALOGW_IF(kDebugGraphicBuffer, "createGraphicBuffer() failed in GraphicBuffer.create()");
         return NULL;
     }
 

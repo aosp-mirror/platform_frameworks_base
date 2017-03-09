@@ -17,10 +17,6 @@
 #include "TestSceneBase.h"
 #include "utils/Color.h"
 
-#include <gui/IGraphicBufferAlloc.h>
-#include <gui/ISurfaceComposer.h>
-#include <private/gui/ComposerService.h>
-#include <binder/IServiceManager.h>
 #include <ui/PixelFormat.h>
 #include <SkGradientShader.h>
 #include <SkImagePriv.h>
@@ -39,14 +35,11 @@ public:
     void createContent(int width, int height, Canvas& canvas) override {
         canvas.drawColor(Color::Red_500, SkBlendMode::kSrcOver);
 
-        status_t error;
-        sp<ISurfaceComposer> composer(ComposerService::getComposerService());
-        sp<IGraphicBufferAlloc> alloc(composer->createGraphicBufferAlloc());
         uint32_t usage = GraphicBuffer::USAGE_HW_TEXTURE
                 | GraphicBuffer::USAGE_SW_READ_NEVER
                 | GRALLOC_USAGE_SW_WRITE_RARELY;
-        sp<GraphicBuffer> buffer = alloc->createGraphicBuffer(400, 200, PIXEL_FORMAT_RGBA_8888, 1,
-                usage, &error);
+
+        sp<GraphicBuffer> buffer = new GraphicBuffer(400, 200, PIXEL_FORMAT_RGBA_8888, usage);
 
         unsigned char* pixels = nullptr;
         buffer->lock(GraphicBuffer::USAGE_SW_WRITE_RARELY, ((void**)&pixels));
