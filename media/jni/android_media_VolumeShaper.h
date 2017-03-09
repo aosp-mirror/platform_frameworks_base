@@ -29,9 +29,9 @@ struct VolumeShaperHelper {
         jmethodID coConstructId;
         jfieldID  coTypeId;
         jfieldID  coIdId;
-        jfieldID  coInterpolatorTypeId;
         jfieldID  coOptionFlagsId;
         jfieldID  coDurationMsId;
+        jfieldID  coInterpolatorTypeId;
         jfieldID  coTimesId;
         jfieldID  coVolumesId;
 
@@ -56,12 +56,12 @@ struct VolumeShaperHelper {
             if (coClazz == nullptr) {
                 return;
             }
-            coConstructId = env->GetMethodID(coClazz, "<init>", "(IIIID[F[F)V");
+            coConstructId = env->GetMethodID(coClazz, "<init>", "(IIIDI[F[F)V");
             coTypeId = env->GetFieldID(coClazz, "mType", "I");
             coIdId = env->GetFieldID(coClazz, "mId", "I");
-            coInterpolatorTypeId = env->GetFieldID(coClazz, "mInterpolatorType", "I");
             coOptionFlagsId = env->GetFieldID(coClazz, "mOptionFlags", "I");
             coDurationMsId = env->GetFieldID(coClazz, "mDurationMs", "D");
+            coInterpolatorTypeId = env->GetFieldID(coClazz, "mInterpolatorType", "I");
             coTimesId = env->GetFieldID(coClazz, "mTimes", "[F");
             coVolumesId = env->GetFieldID(coClazz, "mVolumes", "[F");
             env->DeleteLocalRef(lclazz);
@@ -108,14 +108,14 @@ struct VolumeShaperHelper {
         configuration->setId(
             (int)env->GetIntField(jshaper, fields.coIdId));
         if (configuration->getType() == VolumeShaper::Configuration::TYPE_SCALE) {
-            configuration->setInterpolatorType(
-                (VolumeShaper::Configuration::InterpolatorType)
-                env->GetIntField(jshaper, fields.coInterpolatorTypeId));
             configuration->setOptionFlags(
                 (VolumeShaper::Configuration::OptionFlag)
                 env->GetIntField(jshaper, fields.coOptionFlagsId));
             configuration->setDurationMs(
                     (double)env->GetDoubleField(jshaper, fields.coDurationMsId));
+            configuration->setInterpolatorType(
+                (VolumeShaper::Configuration::InterpolatorType)
+                env->GetIntField(jshaper, fields.coInterpolatorTypeId));
 
             // convert point arrays
             jobject xobj = env->GetObjectField(jshaper, fields.coTimesId);
@@ -165,9 +165,9 @@ struct VolumeShaperHelper {
         jvalue args[7];
         args[0].i = (jint)configuration->getType();
         args[1].i = (jint)configuration->getId();
-        args[2].i = (jint)configuration->getInterpolatorType();
-        args[3].i = (jint)configuration->getOptionFlags();
-        args[4].d = (jdouble)configuration->getDurationMs();
+        args[2].i = (jint)configuration->getOptionFlags();
+        args[3].d = (jdouble)configuration->getDurationMs();
+        args[4].i = (jint)configuration->getInterpolatorType();
         args[5].l = xarray;
         args[6].l = yarray;
         jobject jshaper = env->NewObjectA(fields.coClazz, fields.coConstructId, args);
