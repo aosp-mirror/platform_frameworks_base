@@ -43,9 +43,7 @@ public abstract class HwBinder implements IHwBinder {
             int code, HwParcel request, HwParcel reply, int flags)
         throws RemoteException;
 
-    public native final void registerService(
-            ArrayList<String> interfaceChain,
-            String serviceName)
+    public native final void registerService(String serviceName)
         throws RemoteException;
 
     public static native final IHwBinder getService(
