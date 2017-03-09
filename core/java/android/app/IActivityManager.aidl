@@ -475,7 +475,7 @@ interface IActivityManager {
     void reportSizeConfigurations(in IBinder token, in int[] horizontalSizeConfiguration,
             in int[] verticalSizeConfigurations, in int[] smallestWidthConfigurations);
     boolean moveTaskToDockedStack(int taskId, int createMode, boolean toTop, boolean animate,
-            in Rect initialBounds, boolean moveHomeStackFront);
+            in Rect initialBounds);
     void suppressResizeConfigChanges(boolean suppress);
     void moveTasksToFullscreenStack(int fromStackId, boolean onTop);
     boolean moveTopActivityToPinnedStack(int stackId, in Rect bounds);

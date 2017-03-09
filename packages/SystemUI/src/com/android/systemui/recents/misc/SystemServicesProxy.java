@@ -519,7 +519,7 @@ public class SystemServicesProxy {
 
         try {
             return mIam.moveTaskToDockedStack(taskId, createMode, true /* onTop */,
-                    false /* animate */, initialBounds, true /* moveHomeStackFront */ );
+                    false /* animate */, initialBounds);
         } catch (RemoteException e) {
             e.printStackTrace();
         }

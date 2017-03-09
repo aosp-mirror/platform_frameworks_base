@@ -1582,6 +1582,16 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                     : STACK_INVISIBLE;
         }
 
+        // Set home stack to invisible when it is below but not immediately below the docked stack
+        // A case would be if recents stack exists but has no tasks and is below the docked stack
+        // and home stack is below recents
+        if (mStackId == HOME_STACK_ID) {
+            int dockedStackIndex = mStacks.indexOf(mStackSupervisor.getStack(DOCKED_STACK_ID));
+            if (dockedStackIndex > stackIndex && stackIndex != dockedStackIndex - 1) {
+                return STACK_INVISIBLE;
+            }
+        }
+
         // Find the first stack behind front stack that actually got something visible.
         int stackBehindTopIndex = mStacks.indexOf(topStack) - 1;
         while (stackBehindTopIndex >= 0 &&
