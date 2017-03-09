@@ -1012,9 +1012,8 @@ public class AssistStructure implements Parcelable {
             mAutofillValue = value;
             // TODO(b/33197203, b/33802548): decide whether to set text as well (so it would work
             // with "legacy" views) or just the autofill value
-            final CharSequence text = value.getTextValue();
-            if (text != null) {
-                mText.mText = text;
+            if (value.isText()) {
+                mText.mText = value.getTextValue();
             }
         }
 

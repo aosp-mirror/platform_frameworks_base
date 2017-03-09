@@ -16,12 +16,21 @@
 
 package android.view.autofill;
 
+import static android.view.View.AUTOFILL_TYPE_DATE;
+import static android.view.View.AUTOFILL_TYPE_LIST;
+import static android.view.View.AUTOFILL_TYPE_TEXT;
+import static android.view.View.AUTOFILL_TYPE_TOGGLE;
 import static android.view.autofill.Helper.DEBUG;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.view.View;
+
+import com.android.internal.util.Preconditions;
+
+import java.util.Objects;
 
 /**
  * Abstracts how a {@link View} can be autofilled by an
@@ -31,52 +40,96 @@ import android.view.View;
  * {@link View#getAutofillType()}.
  */
 public final class AutofillValue implements Parcelable {
-    private final String mText;
-    private final int mListIndex;
-    private final boolean mToggle;
-    private final long mDate;
+    private final @View.AutofillType int mType;
+    private final @NonNull Object mValue;
 
-    private AutofillValue(CharSequence text, int listIndex, boolean toggle, long date) {
-        mText = (text == null) ? null : text.toString();
-        mListIndex = listIndex;
-        mToggle = toggle;
-        mDate = date;
+    private AutofillValue(@View.AutofillType int type, @NonNull Object value) {
+        mType = type;
+        mValue = value;
     }
 
     /**
      * Gets the value to autofill a text field.
      *
-     * <p>See {@link View#AUTOFILL_TYPE_TEXT} for more info.
+     * <p>See {@link View#AUTOFILL_TYPE_TEXT} for more info.</p>
+     *
+     * @throws IllegalStateException if the value is not a text value
      */
-    public CharSequence getTextValue() {
-        return mText;
+    @NonNull public CharSequence getTextValue() {
+        Preconditions.checkState(isText(), "value must be a text value, not type=" + mType);
+        return (CharSequence) mValue;
+    }
+
+    /**
+     * Checks is this is a text value.
+     *
+     * <p>See {@link View#AUTOFILL_TYPE_TEXT} for more info.</p>
+     */
+    public boolean isText() {
+        return mType == AUTOFILL_TYPE_TEXT;
     }
 
     /**
      * Gets the value to autofill a toggable field.
      *
-     * <p>See {@link View#AUTOFILL_TYPE_TOGGLE} for more info.
+     * <p>See {@link View#AUTOFILL_TYPE_TOGGLE} for more info.</p>
+     *
+     * @throws IllegalStateException if the value is not a toggle value
      */
     public boolean getToggleValue() {
-        return mToggle;
+        Preconditions.checkState(isToggle(), "value must be a toggle value, not type=" + mType);
+        return (Boolean) mValue;
+    }
+
+    /**
+     * Checks is this is a toggle value.
+     *
+     * <p>See {@link View#AUTOFILL_TYPE_TOGGLE} for more info.</p>
+     */
+    public boolean isToggle() {
+        return mType == AUTOFILL_TYPE_TOGGLE;
     }
 
     /**
      * Gets the value to autofill a selection list field.
      *
-     * <p>See {@link View#AUTOFILL_TYPE_LIST} for more info.
+     * <p>See {@link View#AUTOFILL_TYPE_LIST} for more info.</p>
+     *
+     * @throws IllegalStateException if the value is not a list value
      */
     public int getListValue() {
-        return mListIndex;
+        Preconditions.checkState(isList(), "value must be a list value, not type=" + mType);
+        return (Integer) mValue;
+    }
+
+    /**
+     * Checks is this is a list value.
+     *
+     * <p>See {@link View#AUTOFILL_TYPE_LIST} for more info.</p>
+     */
+    public boolean isList() {
+        return mType == AUTOFILL_TYPE_LIST;
     }
 
     /**
      * Gets the value to autofill a date field.
      *
-     * <p>See {@link View#AUTOFILL_TYPE_DATE} for more info.
+     * <p>See {@link View#AUTOFILL_TYPE_DATE} for more info.</p>
+     *
+     * @throws IllegalStateException if the value is not a date value
      */
     public long getDateValue() {
-        return mDate;
+        Preconditions.checkState(isDate(), "value must be a date value, not type=" + mType);
+        return (Long) mValue;
+    }
+
+    /**
+     * Checks is this is a date value.
+     *
+     * <p>See {@link View#AUTOFILL_TYPE_DATE} for more info.</p>
+     */
+    public boolean isDate() {
+        return mType == AUTOFILL_TYPE_DATE;
     }
 
     /////////////////////////////////////
@@ -85,13 +138,7 @@ public final class AutofillValue implements Parcelable {
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((mText == null) ? 0 : mText.hashCode());
-        result = prime * result + mListIndex;
-        result = prime * result + (mToggle ? 1231 : 1237);
-        result = prime * result + (int) (mDate ^ (mDate >>> 32));
-        return result;
+        return mType + mValue.hashCode();
     }
 
     @Override
@@ -100,32 +147,31 @@ public final class AutofillValue implements Parcelable {
         if (obj == null) return false;
         if (getClass() != obj.getClass()) return false;
         final AutofillValue other = (AutofillValue) obj;
-        if (mText == null) {
-            if (other.mText != null) return false;
+
+        if (mType != other.mType) return false;
+
+        if (isText()) {
+            return mValue.toString().equals(other.mValue.toString());
         } else {
-            if (!mText.equals(other.mText)) return false;
+            return Objects.equals(mValue, other.mValue);
         }
-        if (mListIndex != other.mListIndex) return false;
-        if (mToggle != other.mToggle) return false;
-        if (mDate != other.mDate) return false;
-        return true;
     }
 
     /** @hide */
     public String coerceToString() {
         // TODO(b/33197203): How can we filter on toggles or list values?
-        return mText;
+        return mValue.toString();
     }
 
     @Override
     public String toString() {
         if (!DEBUG) return super.toString();
 
-        if (mText != null) {
-            return mText.length() + "_chars";
+        if (isText()) {
+            return ((CharSequence) mValue).length() + "_chars";
         }
 
-        return "[l=" + mListIndex + ", t=" + mToggle + ", d=" + mDate + "]";
+        return "[type=" + mType + ", value=" + mValue + "]";
     }
 
     /////////////////////////////////////
@@ -139,17 +185,44 @@ public final class AutofillValue implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
-        parcel.writeString(mText);
-        parcel.writeInt(mListIndex);
-        parcel.writeInt(mToggle ? 1 : 0);
-        parcel.writeLong(mDate);
+        parcel.writeInt(mType);
+
+        switch (mType) {
+            case AUTOFILL_TYPE_TEXT:
+                parcel.writeCharSequence((CharSequence) mValue);
+                break;
+            case AUTOFILL_TYPE_TOGGLE:
+                parcel.writeInt((Boolean) mValue ? 1 : 0);
+                break;
+            case AUTOFILL_TYPE_LIST:
+                parcel.writeInt((Integer) mValue);
+                break;
+            case AUTOFILL_TYPE_DATE:
+                parcel.writeLong((Long) mValue);
+                break;
+        }
     }
 
-    private AutofillValue(Parcel parcel) {
-        mText = parcel.readString();
-        mListIndex = parcel.readInt();
-        mToggle = parcel.readInt() == 1;
-        mDate = parcel.readLong();
+    private AutofillValue(@NonNull Parcel parcel) {
+        mType = parcel.readInt();
+
+        switch (mType) {
+            case AUTOFILL_TYPE_TEXT:
+                mValue = parcel.readCharSequence();
+                break;
+            case AUTOFILL_TYPE_TOGGLE:
+                int rawValue = parcel.readInt();
+                mValue = rawValue != 0;
+                break;
+            case AUTOFILL_TYPE_LIST:
+                mValue = parcel.readInt();
+                break;
+            case AUTOFILL_TYPE_DATE:
+                mValue = parcel.readLong();
+                break;
+            default:
+                throw new IllegalArgumentException("type=" + mType + " not valid");
+        }
     }
 
     public static final Parcelable.Creator<AutofillValue> CREATOR =
@@ -175,9 +248,8 @@ public final class AutofillValue implements Parcelable {
      * <p>See {@link View#AUTOFILL_TYPE_TEXT} for more info.
      */
     // TODO(b/33197203): use cache
-    @Nullable
     public static AutofillValue forText(@Nullable CharSequence value) {
-        return value == null ? null : new AutofillValue(value, 0, false, 0);
+        return value == null ? null : new AutofillValue(AUTOFILL_TYPE_TEXT, value);
     }
 
     /**
@@ -187,7 +259,7 @@ public final class AutofillValue implements Parcelable {
      * <p>See {@link View#AUTOFILL_TYPE_TOGGLE} for more info.
      */
     public static AutofillValue forToggle(boolean value) {
-        return new AutofillValue(null, 0, value, 0);
+        return new AutofillValue(AUTOFILL_TYPE_TOGGLE, value);
     }
 
     /**
@@ -197,7 +269,7 @@ public final class AutofillValue implements Parcelable {
      * <p>See {@link View#AUTOFILL_TYPE_LIST} for more info.
      */
     public static AutofillValue forList(int value) {
-        return new AutofillValue(null, value, false, 0);
+        return new AutofillValue(AUTOFILL_TYPE_LIST, value);
     }
 
     /**
@@ -206,6 +278,6 @@ public final class AutofillValue implements Parcelable {
      * <p>See {@link View#AUTOFILL_TYPE_DATE} for more info.
      */
     public static AutofillValue forDate(long value) {
-        return new AutofillValue(null, 0, false, value);
+        return new AutofillValue(AUTOFILL_TYPE_DATE, value);
     }
 }
