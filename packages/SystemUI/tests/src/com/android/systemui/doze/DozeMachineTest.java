@@ -37,11 +37,12 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.support.test.annotation.UiThreadTest;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.view.Display;
 
+import com.android.systemui.SysUIRunner;
+import com.android.systemui.UiThreadTest;
 import com.android.systemui.statusbar.phone.DozeParameters;
 
 import org.junit.Before;
@@ -49,7 +50,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @SmallTest
-@RunWith(AndroidJUnit4.class)
+@RunWith(SysUIRunner.class)
+@UiThreadTest
 public class DozeMachineTest {
 
     DozeMachine mMachine;
@@ -72,7 +74,6 @@ public class DozeMachineTest {
     }
 
     @Test
-    @UiThreadTest
     public void testInitialize_initializesParts() {
         mMachine.requestState(INITIALIZED);
 
@@ -80,7 +81,6 @@ public class DozeMachineTest {
     }
 
     @Test
-    @UiThreadTest
     public void testInitialize_goesToDoze() {
         when(mParamsMock.getAlwaysOn()).thenReturn(false);
 
@@ -91,7 +91,6 @@ public class DozeMachineTest {
     }
 
     @Test
-    @UiThreadTest
     public void testInitialize_goesToAod() {
         when(mParamsMock.getAlwaysOn()).thenReturn(true);
 
@@ -102,7 +101,6 @@ public class DozeMachineTest {
     }
 
     @Test
-    @UiThreadTest
     public void testPulseDone_goesToDoze() {
         when(mParamsMock.getAlwaysOn()).thenReturn(false);
         mMachine.requestState(INITIALIZED);
@@ -116,7 +114,6 @@ public class DozeMachineTest {
     }
 
     @Test
-    @UiThreadTest
     public void testPulseDone_goesToAoD() {
         when(mParamsMock.getAlwaysOn()).thenReturn(true);
         mMachine.requestState(INITIALIZED);
@@ -130,7 +127,6 @@ public class DozeMachineTest {
     }
 
     @Test
-    @UiThreadTest
     public void testFinished_staysFinished() {
         mMachine.requestState(INITIALIZED);
         mMachine.requestState(FINISH);
@@ -143,7 +139,6 @@ public class DozeMachineTest {
     }
 
     @Test
-    @UiThreadTest
     public void testFinish_finishesService() {
         mMachine.requestState(INITIALIZED);
 
@@ -153,7 +148,6 @@ public class DozeMachineTest {
     }
 
     @Test
-    @UiThreadTest
     public void testWakeLock_heldInTransition() {
         doAnswer((inv) -> {
             assertTrue(mWakeLockFake.isHeld());
@@ -164,7 +158,6 @@ public class DozeMachineTest {
     }
 
     @Test
-    @UiThreadTest
     public void testWakeLock_heldInPulseStates() {
         mMachine.requestState(INITIALIZED);
 
@@ -176,7 +169,6 @@ public class DozeMachineTest {
     }
 
     @Test
-    @UiThreadTest
     public void testWakeLock_notHeldInDozeStates() {
         mMachine.requestState(INITIALIZED);
 
@@ -188,7 +180,6 @@ public class DozeMachineTest {
     }
 
     @Test
-    @UiThreadTest
     public void testWakeLock_releasedAfterPulse() {
         mMachine.requestState(INITIALIZED);
 
@@ -201,7 +192,6 @@ public class DozeMachineTest {
     }
 
     @Test
-    @UiThreadTest
     public void testPulseDuringPulse_doesntCrash() {
         mMachine.requestState(INITIALIZED);
 
@@ -213,7 +203,6 @@ public class DozeMachineTest {
     }
 
     @Test
-    @UiThreadTest
     public void testSuppressingPulse_doesntCrash() {
         mMachine.requestState(INITIALIZED);
 
@@ -223,7 +212,6 @@ public class DozeMachineTest {
     }
 
     @Test
-    @UiThreadTest
     public void testScreen_offInDoze() {
         mMachine.requestState(INITIALIZED);
 
@@ -233,7 +221,6 @@ public class DozeMachineTest {
     }
 
     @Test
-    @UiThreadTest
     public void testScreen_onInAod() {
         mMachine.requestState(INITIALIZED);
 
@@ -243,7 +230,6 @@ public class DozeMachineTest {
     }
 
     @Test
-    @UiThreadTest
     public void testScreen_onInPulse() {
         mMachine.requestState(INITIALIZED);
 
@@ -254,7 +240,6 @@ public class DozeMachineTest {
     }
 
     @Test
-    @UiThreadTest
     public void testScreen_offInRequestPulseWithoutAoD() {
         mMachine.requestState(INITIALIZED);
 
@@ -265,7 +250,6 @@ public class DozeMachineTest {
     }
 
     @Test
-    @UiThreadTest
     public void testScreen_onInRequestPulseWithoutAoD() {
         mMachine.requestState(INITIALIZED);
 
@@ -276,7 +260,6 @@ public class DozeMachineTest {
     }
 
     @Test
-    @UiThreadTest
     public void testTransitions_canRequestTransitions() {
         mMachine.requestState(INITIALIZED);
         mMachine.requestState(DOZE);
@@ -291,7 +274,6 @@ public class DozeMachineTest {
     }
 
     @Test
-    @UiThreadTest
     public void testWakeUp_wakesUp() {
         mMachine.wakeUp();
 

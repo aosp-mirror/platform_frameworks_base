@@ -46,7 +46,7 @@ public class SysUIRunner extends BlockJUnit4ClassRunner {
 
     @Override
     protected Statement methodInvoker(FrameworkMethod method, Object test) {
-        return UiThreadStatement.shouldRunOnUiThread(method) ? new UiThreadStatement(
+        return shouldRunOnUiThread(method) ? new UiThreadStatement(
                 methodInvokerInt(method, test), true) : methodInvokerInt(method, test);
     }
 
@@ -83,5 +83,13 @@ public class SysUIRunner extends BlockJUnit4ClassRunner {
 
     private long getTimeout(Test annotation) {
         return annotation == null ? 0L : annotation.timeout();
+    }
+
+    public boolean shouldRunOnUiThread(FrameworkMethod method) {
+        if (mKlass.getAnnotation(UiThreadTest.class) != null) {
+            return true;
+        } else {
+            return UiThreadStatement.shouldRunOnUiThread(method);
+        }
     }
 }

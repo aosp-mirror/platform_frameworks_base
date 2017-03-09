@@ -16,7 +16,6 @@ package com.android.systemui.notification;
 
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
-import android.support.test.annotation.UiThreadTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
 
@@ -28,7 +27,9 @@ import android.util.Property;
 import android.view.View;
 import android.view.animation.Interpolator;
 
+import com.android.systemui.SysUIRunner;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.UiThreadTest;
 import com.android.systemui.statusbar.notification.PropertyAnimator;
 import com.android.systemui.statusbar.stack.AnimationFilter;
 import com.android.systemui.statusbar.stack.AnimationProperties;
@@ -49,7 +50,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @SmallTest
-@RunWith(AndroidJUnit4.class)
+@RunWith(SysUIRunner.class)
+@UiThreadTest
 public class PropertyAnimatorTest extends SysuiTestCase {
 
     private View mView;
@@ -106,13 +108,11 @@ public class PropertyAnimatorTest extends SysuiTestCase {
 
 
     @Before
-    @UiThreadTest
     public void setUp() {
         mView = new View(getContext());
     }
 
     @Test
-    @UiThreadTest
     public void testAnimationStarted() {
         mAnimationFilter.reset();
         mAnimationFilter.animate(mProperty.getProperty());
@@ -121,7 +121,6 @@ public class PropertyAnimatorTest extends SysuiTestCase {
     }
 
     @Test
-    @UiThreadTest
     public void testNoAnimationStarted() {
         mAnimationFilter.reset();
         PropertyAnimator.startAnimation(mView, mProperty, 200, mAnimationProperties);
@@ -129,7 +128,6 @@ public class PropertyAnimatorTest extends SysuiTestCase {
     }
 
     @Test
-    @UiThreadTest
     public void testEndValueUpdated() {
         mAnimationFilter.reset();
         mAnimationFilter.animate(mProperty.getProperty());
@@ -139,7 +137,6 @@ public class PropertyAnimatorTest extends SysuiTestCase {
     }
 
     @Test
-    @UiThreadTest
     public void testStartTagUpdated() {
         mEffectiveProperty.set(mView, 100f);
         mAnimationFilter.reset();
@@ -150,7 +147,6 @@ public class PropertyAnimatorTest extends SysuiTestCase {
     }
 
     @Test
-    @UiThreadTest
     public void testValueIsSetUnAnimated() {
         mAnimationFilter.reset();
         PropertyAnimator.startAnimation(mView, mProperty, 200f, mAnimationProperties);
@@ -158,7 +154,6 @@ public class PropertyAnimatorTest extends SysuiTestCase {
     }
 
     @Test
-    @UiThreadTest
     public void testAnimationToRightValueUpdated() {
         mAnimationFilter.reset();
         mAnimationFilter.animate(mProperty.getProperty());
@@ -171,7 +166,6 @@ public class PropertyAnimatorTest extends SysuiTestCase {
     }
 
     @Test
-    @UiThreadTest
     public void testAnimationToRightValueUpdateAnimated() {
         mAnimationFilter.reset();
         mAnimationFilter.animate(mProperty.getProperty());
@@ -185,7 +179,6 @@ public class PropertyAnimatorTest extends SysuiTestCase {
     }
 
     @Test
-    @UiThreadTest
     public void testStartTagShiftedWhenChanging() {
         mEffectiveProperty.set(mView, 100f);
         mAnimationFilter.reset();
@@ -198,7 +191,6 @@ public class PropertyAnimatorTest extends SysuiTestCase {
     }
 
     @Test
-    @UiThreadTest
     public void testUsingDuration() {
         mAnimationFilter.reset();
         mAnimationFilter.animate(mProperty.getProperty());
@@ -210,7 +202,6 @@ public class PropertyAnimatorTest extends SysuiTestCase {
     }
 
     @Test
-    @UiThreadTest
     public void testUsingDelay() {
         mAnimationFilter.reset();
         mAnimationFilter.animate(mProperty.getProperty());
@@ -222,7 +213,6 @@ public class PropertyAnimatorTest extends SysuiTestCase {
     }
 
     @Test
-    @UiThreadTest
     public void testUsingInterpolator() {
         mAnimationFilter.reset();
         mAnimationFilter.animate(mProperty.getProperty());
@@ -234,7 +224,6 @@ public class PropertyAnimatorTest extends SysuiTestCase {
     }
 
     @Test
-    @UiThreadTest
     public void testUsingListener() {
         mAnimationFilter.reset();
         mAnimationFilter.animate(mProperty.getProperty());
