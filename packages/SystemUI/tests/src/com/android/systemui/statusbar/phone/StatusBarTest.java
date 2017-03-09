@@ -23,7 +23,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.metrics.LogMaker;
-import android.support.test.filters.FlakyTest;
 import android.support.test.filters.SmallTest;
 import android.support.test.metricshelper.MetricsAsserts;
 import android.support.test.runner.AndroidJUnit4;
@@ -40,7 +39,6 @@ import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -65,7 +63,8 @@ public class StatusBarTest extends SysuiTestCase {
         mStackScroller = mock(NotificationStackScrollLayout.class);
         mMetricsLogger = new FakeMetricsLogger();
         mStatusBar = new TestableStatusBar(mStatusBarKeyguardViewManager, mUnlockMethodCache,
-                mKeyguardIndicationController, mStackScroller, mMetricsLogger);
+                mKeyguardIndicationController, mStackScroller);
+        mStatusBar.setMetricsLogger(mMetricsLogger);
 
         doAnswer(invocation -> {
             OnDismissAction onDismissAction = (OnDismissAction) invocation.getArguments()[0];
@@ -106,8 +105,6 @@ public class StatusBarTest extends SysuiTestCase {
         mStatusBar.executeRunnableDismissingKeyguard(null, null, false, false, false);
     }
 
-    @Ignore("flaky test")
-    @FlakyTest
     @Test
     public void lockscreenStateMetrics_notShowing() {
         // uninteresting state, except that fingerprint must be non-zero
@@ -126,8 +123,6 @@ public class StatusBarTest extends SysuiTestCase {
                         .setSubtype(0));
     }
 
-    @Ignore("flaky test")
-    @FlakyTest
     @Test
     public void lockscreenStateMetrics_notShowing_secure() {
         // uninteresting state, except that fingerprint must be non-zero
@@ -147,8 +142,6 @@ public class StatusBarTest extends SysuiTestCase {
                         .setSubtype(1));
     }
 
-    @Ignore("flaky test")
-    @FlakyTest
     @Test
     public void lockscreenStateMetrics_isShowing() {
         // uninteresting state, except that fingerprint must be non-zero
@@ -168,8 +161,6 @@ public class StatusBarTest extends SysuiTestCase {
                         .setSubtype(0));
     }
 
-    @Ignore("flaky test")
-    @FlakyTest
     @Test
     public void lockscreenStateMetrics_isShowing_secure() {
         // uninteresting state, except that fingerprint must be non-zero
@@ -189,8 +180,6 @@ public class StatusBarTest extends SysuiTestCase {
                         .setSubtype(1));
     }
 
-    @Ignore("flaky test")
-    @FlakyTest
     @Test
     public void lockscreenStateMetrics_isShowingBouncer() {
         // uninteresting state, except that fingerprint must be non-zero
@@ -210,8 +199,6 @@ public class StatusBarTest extends SysuiTestCase {
                         .setSubtype(1));
     }
 
-    @Ignore("flaky test")
-    @FlakyTest
     @Test
     public void onActivatedMetrics() {
         ActivatableNotificationView view =  mock(ActivatableNotificationView.class);
@@ -226,12 +213,11 @@ public class StatusBarTest extends SysuiTestCase {
     static class TestableStatusBar extends StatusBar {
         public TestableStatusBar(StatusBarKeyguardViewManager man,
                 UnlockMethodCache unlock, KeyguardIndicationController key,
-                NotificationStackScrollLayout stack, MetricsLogger logger) {
+                NotificationStackScrollLayout stack) {
             mStatusBarKeyguardViewManager = man;
             mUnlockMethodCache = unlock;
             mKeyguardIndicationController = key;
             mStackScroller = stack;
-            mMetricsLogger = logger;
         }
 
         @Override

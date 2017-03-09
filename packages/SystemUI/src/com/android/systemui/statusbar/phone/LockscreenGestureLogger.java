@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.phone;
 import android.metrics.LogMaker;
 import android.util.ArrayMap;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.EventLogConstants;
@@ -32,6 +33,7 @@ public class LockscreenGestureLogger {
     private ArrayMap<Integer, Integer> mLegacyMap;
     private LogMaker mLogMaker = new LogMaker(MetricsEvent.VIEW_UNKNOWN)
             .setType(MetricsEvent.TYPE_ACTION);
+    private MetricsLogger mMetricsLogger = new MetricsLogger();
 
     public LockscreenGestureLogger() {
         mLegacyMap = new ArrayMap<>(EventLogConstants.METRICS_GESTURE_TYPE_MAP.length);
@@ -41,7 +43,7 @@ public class LockscreenGestureLogger {
     }
 
     public void write(int gesture, int length, int velocity) {
-        MetricsLogger.action(mLogMaker.setCategory(gesture)
+        mMetricsLogger.write(mLogMaker.setCategory(gesture)
                 .setType(MetricsEvent.TYPE_ACTION)
                 .addTaggedData(MetricsEvent.FIELD_GESTURE_LENGTH, length)
                 .addTaggedData(MetricsEvent.FIELD_GESTURE_VELOCITY, velocity));
@@ -55,5 +57,10 @@ public class LockscreenGestureLogger {
             return MetricsEvent.VIEW_UNKNOWN;
         }
         return value;
+    }
+
+    @VisibleForTesting
+    void setMetricsLogger(MetricsLogger metricsLogger) {
+        mMetricsLogger = metricsLogger;
     }
 }
