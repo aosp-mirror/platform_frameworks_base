@@ -994,7 +994,9 @@ public abstract class TvInputService extends Service {
          *
          * <p>The current position for time shifting is the same as the current position of
          * playback. It should be equal to or greater than the start position reported by
-         * {@link #onTimeShiftGetStartPosition()}.
+         * {@link #onTimeShiftGetStartPosition()}. When playback is completed, the current position
+         * should stay where the playback ends, in other words, the returned value of this mehtod
+         * should be equal to the start position plus the duration of the program.
          *
          * @see #onTimeShiftPlay(Uri)
          * @see #onTimeShiftResume()
