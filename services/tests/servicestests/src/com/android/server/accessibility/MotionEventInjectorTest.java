@@ -28,7 +28,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.argThat;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
@@ -36,6 +35,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 
 import android.accessibilityservice.GestureDescription.GestureStep;
 import android.accessibilityservice.GestureDescription.TouchPoint;
@@ -65,7 +65,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.ArgumentMatcher;
+import org.mockito.compat.ArgumentMatcher;
 
 /**
  * Tests for MotionEventInjector
@@ -738,7 +738,7 @@ public class MotionEventInjectorTest {
         return next;
     }
 
-    static class MotionEventMatcher extends ArgumentMatcher<MotionEvent> {
+    static class MotionEventMatcher extends TypeSafeMatcher<MotionEvent> {
         long mDownTime;
         long mEventTime;
         long mActionMasked;
@@ -764,8 +764,7 @@ public class MotionEventInjectorTest {
         }
 
         @Override
-        public boolean matches(Object o) {
-            MotionEvent event = (MotionEvent) o;
+        public boolean matchesSafely(MotionEvent event) {
             if ((event.getDownTime() == mDownTime) && (event.getEventTime() == mEventTime)
                     && (event.getActionMasked() == mActionMasked) && ((int) event.getX() == mX)
                     && ((int) event.getY() == mY)) {
@@ -781,6 +780,11 @@ public class MotionEventInjectorTest {
             Log.e(LOG_TAG, "event.getX() = " + event.getX() + ", expected " + mX);
             Log.e(LOG_TAG, "event.getY() = " + event.getY() + ", expected " + mY);
             return false;
+        }
+
+        @Override
+        public void describeTo(Description description) {
+            description.appendText("Motion event matcher");
         }
     }
 
