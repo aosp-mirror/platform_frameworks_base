@@ -15,6 +15,8 @@
  */
 package com.android.server.vr;
 
+import static android.view.Display.INVALID_DISPLAY;
+
 import android.Manifest;
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
@@ -392,6 +394,11 @@ public class VrManagerService extends SystemService implements EnabledComponentC
         }
 
         @Override
+        public int getCompatibilityDisplayId() {
+            return VrManagerService.this.getCompatibilityDisplayId();
+        }
+
+        @Override
         protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
             if (getContext().checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
                     != PackageManager.PERMISSION_GRANTED) {
@@ -492,6 +499,11 @@ public class VrManagerService extends SystemService implements EnabledComponentC
         @Override
         public void setPersistentVrModeEnabled(boolean enabled) {
             VrManagerService.this.setPersistentVrModeEnabled(enabled);
+        }
+
+        @Override
+        public int getCompatibilityDisplayId() {
+            return VrManagerService.this.getCompatibilityDisplayId();
         }
 
         @Override
@@ -1052,6 +1064,14 @@ public class VrManagerService extends SystemService implements EnabledComponentC
                 setVrMode(false, null, 0, null);
             }
         }
+    }
+
+    private int getCompatibilityDisplayId() {
+        if (mCompatibilityDisplay != null) {
+            return mCompatibilityDisplay.getVirtualDisplayId();
+        }
+        Slog.w(TAG, "CompatibilityDisplay is null!");
+        return INVALID_DISPLAY;
     }
 
     private void setPersistentModeAndNotifyListenersLocked(boolean enabled) {
