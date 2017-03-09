@@ -1562,9 +1562,14 @@ class ActivityStarter {
             // activity. Well that should not be too hard...
             // Note: we must persist the {@link TaskRecord} first as intentActivity could be
             // removed from calling performClearTaskLocked (For example, if it is being brought out
-            // of history or if it is finished immediately), thus disassociating the task.
-            mReuseTask = intentActivity.task;
-            mReuseTask.performClearTaskLocked();
+            // of history or if it is finished immediately), thus disassociating the task. Also note
+            // that mReuseTask is reset as a result of {@link TaskRecord#performClearTaskLocked}
+            // launching another activity.
+            // TODO(b/36119896):  We shouldn't trigger activity launches in this path since we are
+            // already launching one.
+            final TaskRecord task = intentActivity.task;
+            task.performClearTaskLocked();
+            mReuseTask = task;
             mReuseTask.setIntent(mStartActivity);
 
             // When we clear the task - focus will be adjusted, which will bring another task
