@@ -2042,8 +2042,8 @@ public abstract class BatteryStats implements Parcelable {
 
     public static final String[] HISTORY_EVENT_NAMES = new String[] {
             "null", "proc", "fg", "top", "sync", "wake_lock_in", "job", "user", "userfg", "conn",
-            "active", "pkginst", "pkgunin", "alarm", "stats", "inactive", "active", "tmpwhitelist",
-            "screenwake", "wakeupap", "longwake", "est_capacity"
+            "active", "pkginst", "pkgunin", "alarm", "stats", "pkginactive", "pkgactive",
+            "tmpwhitelist", "screenwake", "wakeupap", "longwake", "est_capacity"
     };
 
     public static final String[] HISTORY_EVENT_CHECKIN_NAMES = new String[] {
