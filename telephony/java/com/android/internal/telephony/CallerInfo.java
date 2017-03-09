@@ -30,9 +30,9 @@ import android.provider.ContactsContract.Data;
 import android.provider.ContactsContract.PhoneLookup;
 import android.provider.ContactsContract.RawContacts;
 import android.telephony.PhoneNumberUtils;
+import android.telephony.Rlog;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
-import android.telephony.Rlog;
 import android.util.Log;
 
 import com.android.i18n.phonenumbers.geocoding.PhoneNumberOfflineGeocoder;
@@ -595,7 +595,8 @@ public class CallerInfo {
             pn = util.parse(number, countryIso);
             if (VDBG) Rlog.v(TAG, "- parsed number: " + pn);
         } catch (NumberParseException e) {
-            Rlog.w(TAG, "getGeoDescription: NumberParseException for incoming number '" + number + "'");
+            Rlog.w(TAG, "getGeoDescription: NumberParseException for incoming number '"
+                    + Rlog.pii(TAG, number) + "'");
         }
 
         if (pn != null) {
