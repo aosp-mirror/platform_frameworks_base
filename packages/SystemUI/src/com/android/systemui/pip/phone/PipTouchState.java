@@ -170,6 +170,13 @@ public class PipTouchState {
     }
 
     /**
+     * @return the down touch position.
+     */
+    public PointF getDownTouchPosition() {
+        return mDownTouch;
+    }
+
+    /**
      * @return the movement delta between the last handled touch event and the down touch
      *         position.
      */

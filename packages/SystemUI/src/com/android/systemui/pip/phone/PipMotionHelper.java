@@ -56,7 +56,8 @@ public class PipMotionHelper {
 
     private static final int DEFAULT_MOVE_STACK_DURATION = 225;
     private static final int SNAP_STACK_DURATION = 225;
-    private static final int DISMISS_STACK_DURATION = 375;
+    private static final int DRAG_TO_TARGET_DISMISS_STACK_DURATION = 375;
+    private static final int DRAG_TO_DISMISS_STACK_DURATION = 175;
     private static final int SHRINK_STACK_FROM_MENU_DURATION = 250;
     private static final int EXPAND_STACK_TO_MENU_DURATION = 250;
     private static final int EXPAND_STACK_TO_FULLSCREEN_DURATION = 300;
@@ -65,6 +66,8 @@ public class PipMotionHelper {
 
     // The fraction of the stack width that the user has to drag offscreen to minimize the PiP
     private static final float MINIMIZE_OFFSCREEN_FRACTION = 0.2f;
+    // The fraction of the stack height that the user has to drag offscreen to minimize the PiP
+    private static final float DISMISS_OFFSCREEN_FRACTION = 0.35f;
 
     private Context mContext;
     private IActivityManager mActivityManager;
@@ -194,6 +197,19 @@ public class PipMotionHelper {
     }
 
     /**
+     * @return whether the PiP at the current bounds should be dismissed.
+     */
+    boolean shouldDismissPip() {
+        Point displaySize = new Point();
+        mContext.getDisplay().getRealSize(displaySize);
+        if (mBounds.bottom > displaySize.y) {
+            float offscreenFraction = (float) (mBounds.bottom - displaySize.y) / mBounds.height();
+            return offscreenFraction >= DISMISS_OFFSCREEN_FRACTION;
+        }
+        return false;
+    }
+
+    /**
      * Flings the minimized PiP to the closest minimized snap target.
      */
     Rect flingToMinimizedState(float velocityY, Rect movementBounds) {
@@ -298,15 +314,37 @@ public class PipMotionHelper {
     }
 
     /**
+     * Animates the dismissal of the PiP off the edge of the screen.
+     */
+    Rect animateDragToEdgeDismiss(Rect pipBounds) {
+        cancelAnimations();
+        Point displaySize = new Point();
+        mContext.getDisplay().getRealSize(displaySize);
+        Rect toBounds = new Rect(pipBounds);
+        toBounds.offset(0, displaySize.y - pipBounds.top);
+        mBoundsAnimator = createAnimationToBounds(mBounds, toBounds, DRAG_TO_DISMISS_STACK_DURATION,
+                FAST_OUT_LINEAR_IN, mUpdateBoundsListener);
+        mBoundsAnimator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                dismissPip();
+            }
+        });
+        mBoundsAnimator.start();
+        return toBounds;
+    }
+
+    /**
      * Animates the dismissal of the PiP over the dismiss target bounds.
      */
-    Rect animateDismissFromDrag(Rect dismissBounds) {
+    Rect animateDragToTargetDismiss(Rect dismissBounds) {
         cancelAnimations();
         Rect toBounds = new Rect(dismissBounds.centerX(),
                 dismissBounds.centerY(),
                 dismissBounds.centerX() + 1,
                 dismissBounds.centerY() + 1);
-        mBoundsAnimator = createAnimationToBounds(mBounds, toBounds, DISMISS_STACK_DURATION,
+        mBoundsAnimator = createAnimationToBounds(mBounds, toBounds,
+                DRAG_TO_TARGET_DISMISS_STACK_DURATION,
                 FAST_OUT_LINEAR_IN, mUpdateBoundsListener);
         mBoundsAnimator.addListener(new AnimatorListenerAdapter() {
             @Override
