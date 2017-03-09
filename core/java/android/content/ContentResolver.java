@@ -2835,6 +2835,11 @@ public abstract class ContentResolver {
         }
     }
 
+    /** {@hide} */
+    public int getTargetSdkVersion() {
+        return mTargetSdkVersion;
+    }
+
     /**
      * Returns sampling percentage for a given duration.
      *
