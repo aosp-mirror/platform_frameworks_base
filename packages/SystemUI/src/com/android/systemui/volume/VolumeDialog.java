@@ -426,34 +426,37 @@ public class VolumeDialog implements TunerService.Tunable {
         });
         row.icon = (ImageButton) row.view.findViewById(R.id.volume_row_icon);
         row.icon.setImageResource(iconRes);
-        row.icon.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Events.writeEvent(mContext, Events.EVENT_ICON_CLICK, row.stream, row.iconState);
-                mController.setActiveStream(row.stream);
-                if (row.stream == AudioManager.STREAM_RING) {
-                    final boolean hasVibrator = mController.hasVibrator();
-                    if (mState.ringerModeInternal == AudioManager.RINGER_MODE_NORMAL) {
-                        if (hasVibrator) {
-                            mController.setRingerMode(AudioManager.RINGER_MODE_VIBRATE, false);
+        if (row.stream != AudioSystem.STREAM_ACCESSIBILITY) {
+            row.icon.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Events.writeEvent(mContext, Events.EVENT_ICON_CLICK, row.stream, row.iconState);
+                    mController.setActiveStream(row.stream);
+                    if (row.stream == AudioManager.STREAM_RING) {
+                        final boolean hasVibrator = mController.hasVibrator();
+                        if (mState.ringerModeInternal == AudioManager.RINGER_MODE_NORMAL) {
+                            if (hasVibrator) {
+                                mController.setRingerMode(AudioManager.RINGER_MODE_VIBRATE, false);
+                            } else {
+                                final boolean wasZero = row.ss.level == 0;
+                                mController.setStreamVolume(stream,
+                                        wasZero ? row.lastAudibleLevel : 0);
+                            }
                         } else {
-                            final boolean wasZero = row.ss.level == 0;
-                            mController.setStreamVolume(stream, wasZero ? row.lastAudibleLevel : 0);
+                            mController.setRingerMode(AudioManager.RINGER_MODE_NORMAL, false);
+                            if (row.ss.level == 0) {
+                                mController.setStreamVolume(stream, 1);
+                            }
                         }
                     } else {
-                        mController.setRingerMode(AudioManager.RINGER_MODE_NORMAL, false);
-                        if (row.ss.level == 0) {
-                            mController.setStreamVolume(stream, 1);
-                        }
+                        final boolean vmute = row.ss.level == row.ss.levelMin;
+                        mController.setStreamVolume(stream,
+                                vmute ? row.lastAudibleLevel : row.ss.levelMin);
                     }
-                } else {
-                    final boolean vmute = row.ss.level == row.ss.levelMin;
-                    mController.setStreamVolume(stream,
-                            vmute ? row.lastAudibleLevel : row.ss.levelMin);
+                    row.userAttempt = 0;  // reset the grace period, slider updates immediately
                 }
-                row.userAttempt = 0;  // reset the grace period, slider should update immediately
-            }
-        });
+            });
+        }
     }
 
     public void destroy() {
@@ -722,6 +725,7 @@ public class VolumeDialog implements TunerService.Tunable {
         if (ss.level == row.requestedLevel) {
             row.requestedLevel = -1;
         }
+        final boolean isA11yStream = row.stream == AudioManager.STREAM_ACCESSIBILITY;
         final boolean isRingStream = row.stream == AudioManager.STREAM_RING;
         final boolean isSystemStream = row.stream == AudioManager.STREAM_SYSTEM;
         final boolean isAlarmStream = row.stream == AudioManager.STREAM_ALARM;
@@ -781,14 +785,20 @@ public class VolumeDialog implements TunerService.Tunable {
                 } else {
                     if (mController.hasVibrator()) {
                         row.icon.setContentDescription(mContext.getString(
-                                R.string.volume_stream_content_description_vibrate,
+                                mShowA11yStream
+                                        ? R.string.volume_stream_content_description_vibrate_a11y
+                                        : R.string.volume_stream_content_description_vibrate,
                                 getStreamLabelH(ss)));
                     } else {
                         row.icon.setContentDescription(mContext.getString(
-                                R.string.volume_stream_content_description_mute,
+                                mShowA11yStream
+                                        ? R.string.volume_stream_content_description_mute_a11y
+                                        : R.string.volume_stream_content_description_mute,
                                 getStreamLabelH(ss)));
                     }
                 }
+            } else if (isA11yStream) {
+                row.icon.setContentDescription(getStreamLabelH(ss));
             } else {
                 if (ss.muted || mAutomute && ss.level == 0) {
                    row.icon.setContentDescription(mContext.getString(
@@ -796,7 +806,9 @@ public class VolumeDialog implements TunerService.Tunable {
                            getStreamLabelH(ss)));
                 } else {
                     row.icon.setContentDescription(mContext.getString(
-                            R.string.volume_stream_content_description_mute,
+                            mShowA11yStream
+                                    ? R.string.volume_stream_content_description_mute_a11y
+                                    : R.string.volume_stream_content_description_mute,
                             getStreamLabelH(ss)));
                 }
             }
