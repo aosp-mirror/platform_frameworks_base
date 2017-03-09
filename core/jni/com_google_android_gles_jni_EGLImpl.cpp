@@ -22,9 +22,9 @@
 #include <utils/misc.h>
 
 
-#include <EGL/egl_display.h>
 #include <EGL/egl.h>
 #include <GLES/gl.h>
+#include <private/EGL/display.h>
 
 #include <gui/Surface.h>
 #include <gui/GLConsumer.h>
@@ -180,8 +180,7 @@ static jboolean jni_eglQuerySurface(JNIEnv *_env, jobject _this, jobject display
 
 static jint jni_getInitCount(JNIEnv *_env, jobject _clazz, jobject display) {
     EGLDisplay dpy = getDisplay(_env, display);
-    egl_display_t* eglDisplay = get_display_nowake(dpy);
-    return eglDisplay ? eglDisplay->getRefsCount() : 0;
+    return android::egl_get_init_count(dpy);
 }
 
 static jboolean jni_eglReleaseThread(JNIEnv *_env, jobject _this) {
