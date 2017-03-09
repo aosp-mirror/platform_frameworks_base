@@ -274,15 +274,25 @@ final class AutoFillManagerServiceImpl {
         }
     }
 
+    void setHasCallback(IBinder activityToken, boolean hasIt) {
+        if (!hasService()) {
+            return;
+        }
+        final Session session = mSessions.get(activityToken);
+        if (session != null) {
+            session.setHasCallback(hasIt);
+        }
+    }
+
     void startSessionLocked(IBinder activityToken, IBinder windowToken, IBinder appCallbackToken,
-            AutoFillId autoFillId,  Rect bounds, AutoFillValue value) {
+            AutoFillId autoFillId,  Rect bounds, AutoFillValue value, boolean hasCallback) {
         if (!hasService()) {
             return;
         }
 
         final String historyItem = "s=" + mInfo.getServiceInfo().packageName
                 + " u=" + mUserId + " a=" + activityToken
-                + " i=" + autoFillId + " b=" + bounds;
+                + " i=" + autoFillId + " b=" + bounds + " hc=" + hasCallback;
         mRequestsHistory.log(historyItem);
 
         // TODO(b/33197203): Handle partitioning
@@ -293,7 +303,7 @@ final class AutoFillManagerServiceImpl {
         }
 
         final Session newSession = createSessionByTokenLocked(activityToken,
-                windowToken, appCallbackToken);
+                windowToken, appCallbackToken, hasCallback);
         newSession.updateLocked(autoFillId, bounds, value, FLAG_START_SESSION);
     }
 
@@ -312,9 +322,9 @@ final class AutoFillManagerServiceImpl {
     }
 
     private Session createSessionByTokenLocked(IBinder activityToken, IBinder windowToken,
-            IBinder appCallbackToken) {
+            IBinder appCallbackToken, boolean hasCallback) {
         final Session newSession = new Session(mContext, activityToken,
-                windowToken, appCallbackToken);
+                windowToken, appCallbackToken, hasCallback);
         mSessions.put(activityToken, newSession);
 
         /*
@@ -599,12 +609,18 @@ final class AutoFillManagerServiceImpl {
         @GuardedBy("mLock")
         private AssistStructure mStructure;
 
+        /**
+         * Whether the client has an {@link android.view.autofill.AutoFillManager.AutofillCallback}.
+         */
+        private boolean mHasCallback;
+
         private Session(Context context, IBinder activityToken, IBinder windowToken,
-                IBinder client) {
+                IBinder client, boolean hasCallback) {
             mRemoteFillService = new RemoteFillService(context,
                     mInfo.getServiceInfo().getComponentName(), mUserId, this);
             mActivityToken = activityToken;
             mWindowToken = windowToken;
+            mHasCallback = hasCallback;
 
             mClient = IAutoFillManagerClient.Stub.asInterface(client);
             try {
@@ -712,6 +728,14 @@ final class AutoFillManagerServiceImpl {
                     .sendToTarget();
         }
 
+        // AutoFillUiCallback
+        @Override
+        public void onEvent(AutoFillId id, int event) {
+            mHandlerCaller.getHandler().post(() -> {
+                notifyChangeToClient(id, event);
+            });
+        }
+
         public void setAuthenticationResultLocked(Bundle data) {
             if (mCurrentResponse == null || data == null) {
                 removeSelf();
@@ -729,6 +753,10 @@ final class AutoFillManagerServiceImpl {
                     processResponseLocked(mCurrentResponse);
                 }
             }
+        }
+
+        public void setHasCallback(boolean hasIt) {
+            mHasCallback = hasIt;
         }
 
         /**
@@ -814,6 +842,7 @@ final class AutoFillManagerServiceImpl {
                 node.updateAutoFillValue(value);
             }
 
+            // Sanitize structure before it's sent to service.
             mStructure.sanitizeForParceling(false);
 
             if (VERBOSE) {
@@ -871,7 +900,7 @@ final class AutoFillManagerServiceImpl {
             if ((flags & FLAG_FOCUS_GAINED) != 0) {
                 // Remove the UI if the ViewState has changed.
                 if (mCurrentViewState != viewState) {
-                    mUi.hideFillUi();
+                    mUi.hideFillUi(mCurrentViewState != null ? mCurrentViewState.mId : null);
                     mCurrentViewState = viewState;
                 }
 
@@ -888,7 +917,7 @@ final class AutoFillManagerServiceImpl {
 
             if ((flags & FLAG_FOCUS_LOST) != 0) {
                 if (mCurrentViewState == viewState) {
-                    mUi.hideFillUi();
+                    mUi.hideFillUi(viewState.mId);
                     mCurrentViewState = null;
                 }
                 return;
@@ -910,6 +939,15 @@ final class AutoFillManagerServiceImpl {
             }
 
             getUiForShowing().showFillUi(filledId, response, bounds, filterText);
+        }
+
+        private void notifyChangeToClient(AutoFillId id, int event) {
+            if (!mHasCallback) return;
+            try {
+                mClient.onAutofillEvent(mWindowToken, id, event);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Error notifying client on change: id=" + id + ", event=" + event, e);
+            }
         }
 
         private void processResponseLocked(FillResponse response) {
@@ -993,7 +1031,7 @@ final class AutoFillManagerServiceImpl {
                     pw.println("null");
                 }
             }
-
+            pw.print(prefix); pw.print("mHasCallback: "); pw.println(mHasCallback);
             mRemoteFillService.dump(prefix, pw);
         }
 

@@ -305,14 +305,23 @@ public final class AutoFillManagerService extends SystemService {
         }
 
         @Override
+        public void setHasCallback(IBinder activityToken, int userId, boolean hasIt) {
+            synchronized (mLock) {
+                final AutoFillManagerServiceImpl service = getServiceForUserLocked(userId);
+                service.setHasCallback(activityToken, hasIt);
+            }
+        }
+
+        @Override
         public void startSession(IBinder activityToken, IBinder windowToken, IBinder appCallback,
-                AutoFillId autoFillId, Rect bounds, AutoFillValue value, int userId) {
+                AutoFillId autoFillId, Rect bounds, AutoFillValue value, int userId,
+                boolean hasCallback) {
             // TODO(b/33197203): make sure it's called by resumed / focused activity
 
             synchronized (mLock) {
                 final AutoFillManagerServiceImpl service = getServiceForUserLocked(userId);
                 service.startSessionLocked(activityToken, windowToken, appCallback,
-                        autoFillId, bounds, value);
+                        autoFillId, bounds, value, hasCallback);
             }
         }
 

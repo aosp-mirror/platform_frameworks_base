@@ -20,6 +20,7 @@ import java.util.List;
 
 import android.content.Intent;
 import android.content.IntentSender;
+import android.os.IBinder;
 import android.view.autofill.AutoFillId;
 import android.view.autofill.AutoFillValue;
 
@@ -43,4 +44,9 @@ oneway interface IAutoFillManagerClient {
       * Authenticates a fill response or a data set.
       */
     void authenticate(in IntentSender intent, in Intent fillInIntent);
+
+    /**
+     * Notifies the client when the auto-fill UI changed.
+     */
+    void onAutofillEvent(in IBinder windowToken, in AutoFillId id, int event);
 }
