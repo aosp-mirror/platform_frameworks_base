@@ -789,6 +789,8 @@ public class NetworkMonitor extends StateMachine {
             if (userAgent != null) {
                urlConnection.setRequestProperty("User-Agent", userAgent);
             }
+            // cannot read request header after connection
+            String requestHeader = urlConnection.getRequestProperties().toString();
 
             // Time how long it takes to get a response to our request
             long requestTimestamp = SystemClock.elapsedRealtime();
@@ -802,6 +804,7 @@ public class NetworkMonitor extends StateMachine {
             validationLog(ValidationProbeEvent.getProbeName(probeType) + " " + url +
                     " time=" + (responseTimestamp - requestTimestamp) + "ms" +
                     " ret=" + httpResponseCode +
+                    " request=" + requestHeader +
                     " headers=" + urlConnection.getHeaderFields());
             // NOTE: We may want to consider an "HTTP/1.0 204" response to be a captive
             // portal.  The only example of this seen so far was a captive portal.  For
