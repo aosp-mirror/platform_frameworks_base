@@ -205,6 +205,10 @@ static jbyteArray nativeGetBlob(JNIEnv* env, jclass clazz, jlong windowPtr,
     if (type == CursorWindow::FIELD_TYPE_BLOB || type == CursorWindow::FIELD_TYPE_STRING) {
         size_t size;
         const void* value = window->getFieldSlotValueBlob(fieldSlot, &size);
+        if (!value) {
+            throw_sqlite3_exception(env, "Native could not read blob slot");
+            return NULL;
+        }
         jbyteArray byteArray = env->NewByteArray(size);
         if (!byteArray) {
             env->ExceptionClear();
@@ -240,6 +244,10 @@ static jstring nativeGetString(JNIEnv* env, jclass clazz, jlong windowPtr,
     if (type == CursorWindow::FIELD_TYPE_STRING) {
         size_t sizeIncludingNull;
         const char* value = window->getFieldSlotValueString(fieldSlot, &sizeIncludingNull);
+        if (!value) {
+            throw_sqlite3_exception(env, "Native could not read string slot");
+            return NULL;
+        }
         if (sizeIncludingNull <= 1) {
             return gEmptyString;
         }
