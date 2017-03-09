@@ -49,12 +49,6 @@ using Return = android::hardware::Return<T>;
 
 namespace android {
 
-static jclass gArrayListClass;
-static struct {
-    jmethodID size;
-    jmethodID get;
-} gArrayListMethods;
-
 static jclass gErrorClass;
 
 static struct fields_t {
@@ -239,7 +233,6 @@ static void JHwBinder_native_transact(
 static void JHwBinder_native_registerService(
         JNIEnv *env,
         jobject thiz,
-        jobject interfaceChainArrayList,
         jstring serviceNameObj) {
     if (serviceNameObj == NULL) {
         jniThrowException(env, "java/lang/NullPointerException", NULL);
@@ -250,24 +243,6 @@ static void JHwBinder_native_registerService(
     if (serviceName == NULL) {
         return;  // XXX exception already pending?
     }
-
-    jint numInterfaces = env->CallIntMethod(interfaceChainArrayList,
-                                            gArrayListMethods.size);
-    hidl_string *strings = new hidl_string[numInterfaces];
-
-    for (jint i = 0; i < numInterfaces; i++) {
-        jstring strObj = static_cast<jstring>(
-            env->CallObjectMethod(interfaceChainArrayList,
-                                  gArrayListMethods.get,
-                                  i)
-        );
-        const char * str = env->GetStringUTFChars(strObj, nullptr);
-        strings[i] = hidl_string(str);
-        env->ReleaseStringUTFChars(strObj, str);
-    }
-
-    hidl_vec<hidl_string> interfaceChain;
-    interfaceChain.setToExternal(strings, numInterfaces, true /* shouldOwn */);
 
     sp<hardware::IBinder> binder = JHwBinder::GetNativeContext(env, thiz);
 
@@ -282,7 +257,7 @@ static void JHwBinder_native_registerService(
         return;
     }
 
-    Return<bool> ret = manager->add(interfaceChain, serviceName, base);
+    Return<bool> ret = manager->add(serviceName, base);
 
     env->ReleaseStringUTFChars(serviceNameObj, serviceName);
     serviceName = NULL;
@@ -385,7 +360,7 @@ static JNINativeMethod gMethods[] = {
         "(IL" PACKAGE_PATH "/HwParcel;L" PACKAGE_PATH "/HwParcel;I)V",
         (void *)JHwBinder_native_transact },
 
-    { "registerService", "(Ljava/util/ArrayList;Ljava/lang/String;)V",
+    { "registerService", "(Ljava/lang/String;)V",
         (void *)JHwBinder_native_registerService },
 
     { "getService", "(Ljava/lang/String;Ljava/lang/String;)L" PACKAGE_PATH "/IHwBinder;",
@@ -395,11 +370,6 @@ static JNINativeMethod gMethods[] = {
 namespace android {
 
 int register_android_os_HwBinder(JNIEnv *env) {
-    jclass arrayListClass = FindClassOrDie(env, "java/util/ArrayList");
-    gArrayListClass = MakeGlobalRefOrDie(env, arrayListClass);
-    gArrayListMethods.size = GetMethodIDOrDie(env, arrayListClass, "size", "()I");
-    gArrayListMethods.get = GetMethodIDOrDie(env, arrayListClass, "get", "(I)Ljava/lang/Object;");
-
     jclass errorClass = FindClassOrDie(env, "java/lang/Error");
     gErrorClass = MakeGlobalRefOrDie(env, errorClass);
 
