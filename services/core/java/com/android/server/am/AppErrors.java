@@ -364,6 +364,14 @@ class AppErrors {
             task = data.task;
             msg.obj = data;
             mService.mUiHandler.sendMessage(msg);
+
+            // Send broadcast intent to alert Substratum
+            Intent intent = new Intent("projekt.substratum.APP_CRASHED");
+            intent.putExtra("projekt.substratum.EXTRA_PACKAGE_NAME", r.info.packageName);
+            intent.putExtra("projekt.substratum.EXTRA_CRASH_REPEATING", data.repeating);
+            intent.putExtra("projekt.substratum.EXTRA_EXCEPTION_CLASS_NAME",
+                            crashInfo.exceptionClassName);
+            mContext.sendBroadcast(intent);
         }
 
         int res = result.get();
