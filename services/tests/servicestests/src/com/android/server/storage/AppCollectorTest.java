@@ -28,6 +28,9 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.VolumeInfo;
 import android.test.AndroidTestCase;
+import android.util.ArrayMap;
+import android.util.Log;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -40,12 +43,14 @@ import org.mockito.stubbing.Answer;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
@@ -57,24 +62,29 @@ public class AppCollectorTest extends AndroidTestCase {
     @Mock private PackageManager mPm;
     @Mock private UserManager mUm;
     @Mock private StorageStatsManager mSsm;
-    private List<ApplicationInfo> mApps;
     private List<UserInfo> mUsers;
+    private Map<Integer, List<ApplicationInfo>> mUserApps;
 
     @Before
     public void setUp() throws Exception {
         super.setUp();
         MockitoAnnotations.initMocks(this);
-        mApps = new ArrayList<>();
         when(mContext.getPackageManager()).thenReturn(mPm);
         when(mContext.getSystemService(Context.USER_SERVICE)).thenReturn(mUm);
         when(mContext.getSystemService(Context.STORAGE_STATS_SERVICE)).thenReturn(mSsm);
 
         // Set up the app list.
-        when(mPm.getInstalledApplications(anyInt())).thenReturn(mApps);
+        doAnswer((InvocationOnMock invocation) -> {
+            Integer userId = (Integer) invocation.getArguments()[1];
+            return mUserApps.get(userId);
+        }).when(mPm).getInstalledApplicationsAsUser(anyInt(), anyInt());
 
         // Set up the user list with a single user (0).
         mUsers = new ArrayList<>();
         mUsers.add(new UserInfo(0, "", 0));
+
+        mUserApps = new ArrayMap<>();
+        mUserApps.put(0, new ArrayList<>());
         when(mUm.getUsers()).thenReturn(mUsers);
     }
 
@@ -89,7 +99,7 @@ public class AppCollectorTest extends AndroidTestCase {
 
     @Test
     public void testAppOnExternalVolume() throws Exception {
-        addApplication("com.test.app", "differentuuid");
+        addApplication("com.test.app", "differentuuid", 0);
         VolumeInfo volume = new VolumeInfo("testuuid", 0, null, null);
         volume.fsUuid = "testuuid";
         AppCollector collector = new AppCollector(mContext, volume);
@@ -99,7 +109,7 @@ public class AppCollectorTest extends AndroidTestCase {
 
     @Test
     public void testOneValidApp() throws Exception {
-        addApplication("com.test.app", "testuuid");
+        addApplication("com.test.app", "testuuid", 0);
         VolumeInfo volume = new VolumeInfo("testuuid", 0, null, null);
         volume.fsUuid = "testuuid";
         AppCollector collector = new AppCollector(mContext, volume);
@@ -112,11 +122,9 @@ public class AppCollectorTest extends AndroidTestCase {
 
     @Test
     public void testMultipleUsersOneApp() throws Exception {
-        addApplication("com.test.app", "testuuid");
-        ApplicationInfo otherUsersApp = new ApplicationInfo();
-        otherUsersApp.packageName = "com.test.app";
-        otherUsersApp.volumeUuid = "testuuid";
-        otherUsersApp.uid = 1;
+        addApplication("com.test.app", "testuuid", 0);
+        mUserApps.put(1, new ArrayList<>());
+        addApplication("com.test.app", "testuuid", 1);
         mUsers.add(new UserInfo(1, "", 0));
 
         VolumeInfo volume = new VolumeInfo("testuuid", 0, null, null);
@@ -138,11 +146,28 @@ public class AppCollectorTest extends AndroidTestCase {
         AppCollector collector = new AppCollector(mContext, null);
     }
 
-    private void addApplication(String packageName, String uuid) {
+    @Test
+    public void testAppNotFoundDoesntCauseCrash() throws Exception {
+        VolumeInfo volume = new VolumeInfo("testuuid", 0, null, null);
+        addApplication("com.test.app", "uuid", 0);
+        mUsers.add(new UserInfo(1, "", 0));
+        mUserApps.put(1, new ArrayList<>());
+        AppCollector collector = new AppCollector(mContext, volume);
+        when(mSsm.queryStatsForPackage(anyString(), anyString(), any(UserHandle.class))).thenThrow(
+                new IllegalStateException());
+
+        assertThat(collector.getPackageStats(TIMEOUT)).isEmpty();
+    }
+
+    private void addApplication(String packageName, String uuid, int userId) {
         ApplicationInfo info = new ApplicationInfo();
         info.packageName = packageName;
         info.volumeUuid = uuid;
-        mApps.add(info);
+        List<ApplicationInfo> userApps = mUserApps.get(userId);
+        if (userApps == null) {
+            userApps = new ArrayList<>();
+            mUserApps.put(userId, userApps);
+        }
+        userApps.add(info);
     }
-
 }

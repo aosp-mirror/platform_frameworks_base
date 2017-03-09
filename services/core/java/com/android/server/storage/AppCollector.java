@@ -116,33 +116,33 @@ public class AppCollector {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case MSG_START_LOADING_SIZES: {
-                    final List<ApplicationInfo> apps = mPm.getInstalledApplications(
-                            PackageManager.GET_UNINSTALLED_PACKAGES
-                                    | PackageManager.GET_DISABLED_COMPONENTS);
-
-                    final List<ApplicationInfo> volumeApps = new ArrayList<>();
-                    for (ApplicationInfo app : apps) {
-                        if (Objects.equals(app.volumeUuid, mVolume.getFsUuid())) {
-                            volumeApps.add(app);
-                        }
-                    }
-
-                    List<UserInfo> users = mUm.getUsers();
-                    final int count = users.size() * volumeApps.size();
-                    if (count == 0) {
-                        mStats.complete(new ArrayList<>());
-                    }
-
                     List<PackageStats> stats = new ArrayList<>();
-                    for (UserInfo user : users) {
-                        for (ApplicationInfo app : volumeApps) {
-                            PackageStats packageStats = new PackageStats(app.packageName, user.id);
-                            StorageStats storageStats = mStorageStatsManager.queryStatsForPackage(
-                                    app.volumeUuid, app.packageName, user.getUserHandle());
-                            packageStats.cacheSize = storageStats.getCacheBytes();
-                            packageStats.codeSize = storageStats.getCodeBytes();
-                            packageStats.dataSize = storageStats.getDataBytes();
-                            stats.add(packageStats);
+                    List<UserInfo> users = mUm.getUsers();
+                    for (int userCount = 0, userSize = users.size();
+                            userCount < userSize; userCount++) {
+                        UserInfo user = users.get(userCount);
+                        final List<ApplicationInfo> apps = mPm.getInstalledApplicationsAsUser(
+                                PackageManager.MATCH_DISABLED_COMPONENTS, user.id);
+
+                        for (int appCount = 0, size = apps.size(); appCount < size; appCount++) {
+                            ApplicationInfo app = apps.get(appCount);
+                            if (!Objects.equals(app.volumeUuid, mVolume.getFsUuid())) {
+                                continue;
+                            }
+
+                            try {
+                                StorageStats storageStats =
+                                        mStorageStatsManager.queryStatsForPackage(app.volumeUuid,
+                                                app.packageName, user.getUserHandle());
+                                PackageStats packageStats = new PackageStats(app.packageName,
+                                        user.id);
+                                packageStats.cacheSize = storageStats.getCacheBytes();
+                                packageStats.codeSize = storageStats.getCodeBytes();
+                                packageStats.dataSize = storageStats.getDataBytes();
+                                stats.add(packageStats);
+                            } catch (IllegalStateException e) {
+                                Log.e(TAG, "An exception occurred while fetching app size", e);
+                            }
                         }
                     }
 
