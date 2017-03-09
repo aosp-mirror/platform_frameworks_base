@@ -472,7 +472,7 @@ public class PipTouchHandler {
                 // If the menu is still visible, and we aren't minimized, then just poke the menu
                 // so that it will timeout after the user stops touching it
                 if (mMenuController.isMenuVisible()) {
-                    mMenuController.showMenu();
+                    mMenuController.showMenu(mMotionHelper.getBounds(), mMovementBounds);
                 }
 
                 final float velocity = PointF.length(vel.x, vel.y);
@@ -486,7 +486,7 @@ public class PipTouchHandler {
                 mMotionHelper.animateToClosestSnapTarget(mMovementBounds);
                 setMinimizedStateInternal(false);
             } else if (!mIsMenuVisible) {
-                mMenuController.showMenu();
+                mMenuController.showMenu(mMotionHelper.getBounds(), mMovementBounds);
             } else {
                 mMotionHelper.expandPip();
             }
