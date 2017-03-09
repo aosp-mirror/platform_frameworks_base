@@ -155,24 +155,6 @@ static void SetSigChldHandler() {
   }
 }
 
-// Resets nice priority for zygote process. Zygote priority can be set
-// to high value during boot phase to speed it up. We want to ensure
-// zygote is running at normal priority before childs are forked from it.
-//
-// This ends up being called repeatedly before each fork(), but there's
-// no real harm in that.
-static void ResetNicePriority(JNIEnv* env) {
-  errno = 0;
-  int prio = getpriority(PRIO_PROCESS, 0);
-  if (prio == -1 && errno != 0) {
-    ALOGW("getpriority failed: %s\n", strerror(errno));
-  }
-  if (prio != 0 && setpriority(PRIO_PROCESS, 0, 0) != 0) {
-    ALOGE("setpriority(%d, 0, 0) failed: %s", PRIO_PROCESS, strerror(errno));
-    RuntimeAbort(env, __LINE__, "setpriority failed");
-  }
-}
-
 // Sets the SIGCHLD handler back to default behavior in zygote children.
 static void UnsetSigChldHandler() {
   struct sigaction sa;
@@ -526,8 +508,6 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
     RuntimeAbort(env, __LINE__, "Unable to restat file descriptor table.");
   }
 
-  ResetNicePriority(env);
-
   pid_t pid = fork();
 
   if (pid == 0) {
@@ -806,10 +786,6 @@ static void com_android_internal_os_Zygote_nativeUnmountStorageOnInit(JNIEnv* en
     UnmountTree("/storage");
 }
 
-static void com_android_internal_os_Zygote_nativeResetNicePriority(JNIEnv* env, jclass) {
-    ResetNicePriority(env);
-}
-
 static const JNINativeMethod gMethods[] = {
     { "nativeForkAndSpecialize",
       "(II[II[[IILjava/lang/String;Ljava/lang/String;[I[ILjava/lang/String;Ljava/lang/String;)I",
@@ -819,9 +795,7 @@ static const JNINativeMethod gMethods[] = {
     { "nativeAllowFileAcrossFork", "(Ljava/lang/String;)V",
       (void *) com_android_internal_os_Zygote_nativeAllowFileAcrossFork },
     { "nativeUnmountStorageOnInit", "()V",
-      (void *) com_android_internal_os_Zygote_nativeUnmountStorageOnInit },
-    { "nativeResetNicePriority", "()V",
-      (void *) com_android_internal_os_Zygote_nativeResetNicePriority }
+      (void *) com_android_internal_os_Zygote_nativeUnmountStorageOnInit }
 };
 
 int register_com_android_internal_os_Zygote(JNIEnv* env) {
