@@ -17,27 +17,16 @@
 
 package android.companion;
 
-import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.os.Parcelable;
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 
 /**
  * A filter for companion devices of type {@code D}
  *
  * @param <D> Type of devices, filtered by this filter,
- *           e.g. {@link android.bluetooth.BluetoothDevice}, {@link android.net.wifi.ScanResult}
+ *           e.g. {@link android.bluetooth.BluetoothDevice}, {@link android.net.wifi.WifiInfo}
  */
 public interface DeviceFilter<D extends Parcelable> extends Parcelable {
-
-    /** @hide */
-    int MEDIUM_TYPE_BLUETOOTH = 0;
-    /** @hide */
-    int MEDIUM_TYPE_BLUETOOTH_LE = 1;
-    /** @hide */
-    int MEDIUM_TYPE_WIFI = 2;
 
     /**
      * @return whether the given device matches this filter
@@ -45,12 +34,6 @@ public interface DeviceFilter<D extends Parcelable> extends Parcelable {
      * @hide
      */
     boolean matches(D device);
-
-    /** @hide */
-    String getDeviceDisplayName(D device);
-
-    /**  @hide */
-    @MediumType int getMediumType();
 
     /**
      * A nullsafe {@link #matches(Parcelable)}, returning true if the filter is null
@@ -60,9 +43,4 @@ public interface DeviceFilter<D extends Parcelable> extends Parcelable {
     static <D extends Parcelable> boolean matches(@Nullable DeviceFilter<D> filter, D device) {
         return filter == null || filter.matches(device);
     }
-
-    /** @hide */
-    @IntDef({MEDIUM_TYPE_BLUETOOTH, MEDIUM_TYPE_BLUETOOTH_LE, MEDIUM_TYPE_WIFI})
-    @Retention(RetentionPolicy.SOURCE)
-    @interface MediumType {}
 }

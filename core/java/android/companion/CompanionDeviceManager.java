@@ -117,7 +117,7 @@ public final class CompanionDeviceManager {
      * @see AssociationRequest
      */
     public void associate(
-            @NonNull AssociationRequest request,
+            @NonNull AssociationRequest<?> request,
             @NonNull Callback callback,
             @Nullable Handler handler) {
         final Handler finalHandler = handler != null

@@ -16,7 +16,6 @@
 
 package android.companion;
 
-import static android.companion.BluetoothDeviceFilterUtils.getDeviceDisplayNameInternal;
 import static android.companion.BluetoothDeviceFilterUtils.matchesAddress;
 import static android.companion.BluetoothDeviceFilterUtils.matchesName;
 import static android.companion.BluetoothDeviceFilterUtils.matchesServiceUuids;
@@ -40,6 +39,8 @@ import java.util.regex.Pattern;
  * A filter for Bluetooth(non-LE) devices
  */
 public final class BluetoothDeviceFilter implements DeviceFilter<BluetoothDevice> {
+
+    private static BluetoothDeviceFilter NO_OP;
 
     private final Pattern mNamePattern;
     private final String mAddress;
@@ -66,7 +67,22 @@ public final class BluetoothDeviceFilter implements DeviceFilter<BluetoothDevice
     }
 
     private static List<ParcelUuid> readUuids(Parcel in) {
-        return in.readParcelableList(new ArrayList<>(), ParcelUuid.class.getClassLoader());
+        final ArrayList<ParcelUuid> list = new ArrayList<>();
+        in.readParcelableList(list, ParcelUuid.class.getClassLoader());
+        return list;
+    }
+
+    /** @hide */
+    @NonNull
+    public static BluetoothDeviceFilter nullsafe(@Nullable BluetoothDeviceFilter nullable) {
+        return nullable != null ? nullable : noOp();
+    }
+
+    /** @hide */
+    @NonNull
+    public static BluetoothDeviceFilter noOp() {
+        if (NO_OP == null) NO_OP = new Builder().build();
+        return NO_OP;
     }
 
     /** @hide */
@@ -75,18 +91,6 @@ public final class BluetoothDeviceFilter implements DeviceFilter<BluetoothDevice
         return matchesAddress(mAddress, device)
                 && matchesServiceUuids(mServiceUuids, mServiceUuidMasks, device)
                 && matchesName(getNamePattern(), device);
-    }
-
-    /** @hide */
-    @Override
-    public String getDeviceDisplayName(BluetoothDevice device) {
-        return getDeviceDisplayNameInternal(device);
-    }
-
-    /** @hide */
-    @Override
-    public int getMediumType() {
-        return DeviceFilter.MEDIUM_TYPE_BLUETOOTH;
     }
 
     /** @hide */

@@ -23,8 +23,6 @@ import android.os.Parcel;
 import android.os.ParcelUuid;
 import android.os.Parcelable;
 
-import com.android.internal.util.BitUtils;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -347,7 +345,15 @@ public final class ScanFilter implements Parcelable {
 
     // Check if the uuid pattern matches the particular service uuid.
     private static boolean matchesServiceUuid(UUID uuid, UUID mask, UUID data) {
-        return BitUtils.maskedEquals(data, uuid, mask);
+        if (mask == null) {
+            return uuid.equals(data);
+        }
+        if ((uuid.getLeastSignificantBits() & mask.getLeastSignificantBits()) !=
+                (data.getLeastSignificantBits() & mask.getLeastSignificantBits())) {
+            return false;
+        }
+        return ((uuid.getMostSignificantBits() & mask.getMostSignificantBits()) ==
+                (data.getMostSignificantBits() & mask.getMostSignificantBits()));
     }
 
     // Check whether the data pattern matches the parsed data.
