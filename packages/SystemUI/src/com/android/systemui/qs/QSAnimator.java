@@ -175,7 +175,8 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
             View view = mQs.getView();
             if (count < mNumQuickTiles && mAllowFancy) {
                 // Quick tiles.
-                com.android.systemui.plugins.qs.QSTileView quickTileView = mQuickQsPanel.getTileView(tile);
+                QSTileView quickTileView = mQuickQsPanel.getTileView(tile);
+                if (quickTileView == null) continue;
 
                 lastX = loc1[0];
                 getRelativePosition(loc1, quickTileView.getIcon().getIconView(), view);
