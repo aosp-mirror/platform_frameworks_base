@@ -553,23 +553,23 @@ final class SettingsState {
     }
 
     private void doWriteState() {
+        boolean wroteState = false;
+        final int version;
+        final ArrayMap<String, Setting> settings;
+
+        synchronized (mLock) {
+            version = mVersion;
+            settings = new ArrayMap<>(mSettings);
+            mDirty = false;
+            mWriteScheduled = false;
+        }
+
         synchronized (mWriteLock) {
             if (DEBUG_PERSISTENCE) {
                 Slog.i(LOG_TAG, "[PERSIST START]");
             }
 
             AtomicFile destination = new AtomicFile(mStatePersistFile);
-
-            final int version;
-            final ArrayMap<String, Setting> settings;
-
-            synchronized (mLock) {
-                version = mVersion;
-                settings = new ArrayMap<>(mSettings);
-                mDirty = false;
-                mWriteScheduled = false;
-            }
-
             FileOutputStream out = null;
             try {
                 out = destination.startWrite();
@@ -600,9 +600,7 @@ final class SettingsState {
                 serializer.endDocument();
                 destination.finishWrite(out);
 
-                synchronized (mLock) {
-                    addHistoricalOperationLocked(HISTORICAL_OPERATION_PERSIST, null);
-                }
+                wroteState = true;
 
                 if (DEBUG_PERSISTENCE) {
                     Slog.i(LOG_TAG, "[PERSIST END]");
@@ -612,6 +610,12 @@ final class SettingsState {
                 destination.failWrite(out);
             } finally {
                 IoUtils.closeQuietly(out);
+            }
+        }
+
+        if (wroteState) {
+            synchronized (mLock) {
+                addHistoricalOperationLocked(HISTORICAL_OPERATION_PERSIST, null);
             }
         }
     }
