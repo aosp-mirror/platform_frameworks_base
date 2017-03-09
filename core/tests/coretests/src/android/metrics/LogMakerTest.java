@@ -171,6 +171,14 @@ public class LogMakerTest extends TestCase {
         assertEquals(null, builder.getPackageName());
     }
 
+    public void testSetAndClearPid() {
+        LogMaker builder = new LogMaker(0);
+        builder.setProcessId(1);
+        assertEquals(1, builder.getProcessId());
+        builder.clearProcessId();
+        assertEquals(-1, builder.getProcessId());
+    }
+
     public void testGiantLogOmitted() {
         LogMaker badBuilder = new LogMaker(0);
         StringBuilder b = new StringBuilder();

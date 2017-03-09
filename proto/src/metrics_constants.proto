@@ -3175,7 +3175,7 @@ message MetricsEvent {
     DIALOG_SUPPORT_SYSTEM_INFORMATION = 756;
 
     // These values should never appear in log outputs - they are reserved for
-    // internal Tron use.
+    // internal platform metrics use.
     RESERVED_FOR_LOGBUILDER_CATEGORY = 757;
     RESERVED_FOR_LOGBUILDER_TYPE = 758;
     RESERVED_FOR_LOGBUILDER_SUBTYPE = 759;
@@ -3282,7 +3282,7 @@ message MetricsEvent {
     DEFAULT_AUTOFILL_PICKER = 792;
 
     // These values should never appear in log outputs - they are reserved for
-    // internal Tron use.
+    // internal platform metrics use.
     NOTIFICATION_SINCE_CREATE_MILLIS = 793;
     NOTIFICATION_SINCE_VISIBLE_MILLIS = 794;
     NOTIFICATION_SINCE_UPDATE_MILLIS = 795;
@@ -3297,7 +3297,7 @@ message MetricsEvent {
     QS_NFC = 800;
 
     // These values should never appear in log outputs - they are reserved for
-    // internal Tron use.
+    // internal platform metrics use.
     RESERVED_FOR_LOGBUILDER_BUCKET = 801;
     RESERVED_FOR_LOGBUILDER_VALUE = 802;
     RESERVED_FOR_LOGBUILDER_COUNTER = 803;
@@ -3539,6 +3539,10 @@ message MetricsEvent {
     // CATEGORY: SETTINGS
     // OS: N
     ACTION_GET_CONTACT = 864;
+
+    // This values should never appear in log outputs - it is reserved for
+    // internal platform metrics use.
+    RESERVED_FOR_LOGBUILDER_PID = 865;
 
     // ---- End O Constants, all O constants go above this line ----
 
