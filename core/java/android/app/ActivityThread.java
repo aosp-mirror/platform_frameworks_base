@@ -204,6 +204,22 @@ public final class ActivityThread {
     // Whether to invoke an activity callback after delivering new configuration.
     private static final boolean REPORT_TO_ACTIVITY = true;
 
+    /**
+     * Denotes an invalid sequence number corresponding to a process state change.
+     */
+    public static final long INVALID_PROC_STATE_SEQ = -1;
+
+    private final Object mNetworkPolicyLock = new Object();
+
+    /**
+     * Denotes the sequence number of the process state change for which the main thread needs
+     * to block until the network rules are updated for it.
+     *
+     * Value of {@link #INVALID_PROC_STATE_SEQ} indicates there is no need for blocking.
+     */
+    @GuardedBy("mNetworkPolicyLock")
+    private long mNetworkBlockSeq = INVALID_PROC_STATE_SEQ;
+
     private ContextImpl mSystemContext;
 
     static volatile IPackageManager sPackageManager;
@@ -1321,6 +1337,18 @@ public final class ActivityThread {
                                 + (fromIpc ? " (from ipc": ""));
                     }
                 }
+            }
+        }
+
+        /**
+         * Updates {@link #mNetworkBlockSeq}. This is used by ActivityManagerService to inform
+         * the main thread that it needs to wait for the network rules to get updated before
+         * launching an activity.
+         */
+        @Override
+        public void setNetworkBlockSeq(long procStateSeq) {
+            synchronized (mNetworkPolicyLock) {
+                mNetworkBlockSeq = procStateSeq;
             }
         }
 
@@ -2698,6 +2726,7 @@ public final class ActivityThread {
                     activity.mIntent = customIntent;
                 }
                 r.lastNonConfigurationInstances = null;
+                checkAndBlockForNetworkAccess();
                 activity.mStartedActivity = false;
                 int theme = r.activityInfo.getThemeResource();
                 if (theme != 0) {
@@ -2762,6 +2791,22 @@ public final class ActivityThread {
         }
 
         return activity;
+    }
+
+    /**
+     * Checks if {@link #mNetworkBlockSeq} is {@link #INVALID_PROC_STATE_SEQ} and if so, returns
+     * immediately. Otherwise, makes a blocking call to ActivityManagerService to wait for the
+     * network rules to get updated.
+     */
+    private void checkAndBlockForNetworkAccess() {
+        synchronized (mNetworkPolicyLock) {
+            if (mNetworkBlockSeq != INVALID_PROC_STATE_SEQ) {
+                try {
+                    ActivityManager.getService().waitForNetworkStateUpdate(mNetworkBlockSeq);
+                    mNetworkBlockSeq = INVALID_PROC_STATE_SEQ;
+                } catch (RemoteException ignored) {}
+            }
+        }
     }
 
     private ContextImpl createBaseContextForActivity(ActivityClientRecord r) {
