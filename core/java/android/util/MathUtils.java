@@ -24,7 +24,6 @@ import java.util.Random;
  * @hide Pending API council approval
  */
 public final class MathUtils {
-    private static final Random sRandom = new Random();
     private static final float DEG_TO_RAD = 3.1415926f / 180.0f;
     private static final float RAD_TO_DEG = 180.0f / 3.1415926f;
 
@@ -183,28 +182,6 @@ public final class MathUtils {
 
     public static float map(float minStart, float minStop, float maxStart, float maxStop, float value) {
         return maxStart + (maxStart - maxStop) * ((value - minStart) / (minStop - minStart));
-    }
-
-    public static int random(int howbig) {
-        return (int) (sRandom.nextFloat() * howbig);
-    }
-
-    public static int random(int howsmall, int howbig) {
-        if (howsmall >= howbig) return howsmall;
-        return (int) (sRandom.nextFloat() * (howbig - howsmall) + howsmall);
-    }
-
-    public static float random(float howbig) {
-        return sRandom.nextFloat() * howbig;
-    }
-
-    public static float random(float howsmall, float howbig) {
-        if (howsmall >= howbig) return howsmall;
-        return sRandom.nextFloat() * (howbig - howsmall) + howsmall;
-    }
-
-    public static void randomSeed(long seed) {
-        sRandom.setSeed(seed);
     }
 
     /**
