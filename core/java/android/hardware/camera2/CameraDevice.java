@@ -731,7 +731,7 @@ public abstract class CameraDevice implements AutoCloseable {
     @SystemApi
     @TestApi
     public static final int SESSION_OPERATION_MODE_NORMAL =
-            ICameraDeviceUser.NORMAL_MODE;
+            0; // ICameraDeviceUser.NORMAL_MODE;
 
     /**
      * Constrained high-speed operation mode.
@@ -742,7 +742,7 @@ public abstract class CameraDevice implements AutoCloseable {
     @SystemApi
     @TestApi
     public static final int SESSION_OPERATION_MODE_CONSTRAINED_HIGH_SPEED =
-            ICameraDeviceUser.CONSTRAINED_HIGH_SPEED_MODE;
+            1; // ICameraDeviceUser.CONSTRAINED_HIGH_SPEED_MODE;
 
     /**
      * First vendor-specific operating mode
@@ -753,7 +753,7 @@ public abstract class CameraDevice implements AutoCloseable {
     @SystemApi
     @TestApi
     public static final int SESSION_OPERATION_MODE_VENDOR_START =
-            ICameraDeviceUser.VENDOR_MODE_START;
+            0x8000; // ICameraDeviceUser.VENDOR_MODE_START;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
