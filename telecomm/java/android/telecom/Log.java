@@ -19,6 +19,7 @@ package android.telecom;
 import android.content.Context;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.telecom.Logging.EventManager;
 import android.telecom.Logging.Session;
 import android.telecom.Logging.SessionManager;
@@ -55,6 +56,7 @@ public class Log {
     public static boolean ERROR = isLoggable(android.util.Log.ERROR);
 
     private static final boolean FORCE_LOGGING = false; /* STOP SHIP if true */
+    private static final boolean USER_BUILD = Build.TYPE.equals("user");
 
     // Used to synchronize singleton logging lazy initialization
     private static final Object sSingletonSync = new Object();
@@ -404,7 +406,8 @@ public class Log {
 
     /**
      * Redact personally identifiable information for production users.
-     * If we are running in verbose mode, return the original string, otherwise
+     * If we are running in verbose mode, return the original string,
+     * and return "****" if we are running on the user build, otherwise
      * return a SHA-1 hash of the input string.
      */
     public static String pii(Object pii) {
@@ -415,6 +418,11 @@ public class Log {
     }
 
     private static String secureHash(byte[] input) {
+        // Refrain from logging user personal information in user build.
+        if (USER_BUILD) {
+            return "****";
+        }
+
         if (sMessageDigest != null) {
             sMessageDigest.reset();
             sMessageDigest.update(input);
