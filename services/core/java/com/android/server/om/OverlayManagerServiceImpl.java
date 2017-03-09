@@ -301,6 +301,38 @@ final class OverlayManagerServiceImpl {
         }
     }
 
+    boolean setEnabledExclusive(@NonNull final String packageName, final boolean enable,
+            final int userId) {
+        if (DEBUG) {
+            Slog.d(TAG, String.format("setEnabled packageName=%s enable=%s userId=%d",
+                        packageName, enable, userId));
+        }
+
+        final PackageInfo overlayPackage = mPackageManager.getPackageInfo(packageName, userId);
+        if (overlayPackage == null) {
+            return false;
+        }
+
+        try {
+            final OverlayInfo oi = mSettings.getOverlayInfo(packageName, userId);
+            List<OverlayInfo> allOverlays = getOverlayInfosForTarget(oi.targetPackageName, userId);
+
+            // Disable all other overlays.
+            allOverlays.remove(oi);
+            for (int i = 0; i < allOverlays.size(); i++) {
+                mSettings.setEnabled(allOverlays.get(i).packageName, userId, false);
+            }
+
+            final PackageInfo targetPackage =
+                    mPackageManager.getPackageInfo(oi.targetPackageName, userId);
+            mSettings.setEnabled(packageName, userId, enable);
+            updateState(targetPackage, overlayPackage, userId);
+            return true;
+        } catch (OverlayManagerSettings.BadKeyException e) {
+            return false;
+        }
+    }
+
     boolean setPriority(@NonNull final String packageName,
             @NonNull final String newParentPackageName, final int userId) {
         return mSettings.setPriority(packageName, newParentPackageName, userId);

@@ -89,6 +89,11 @@ interface IOverlayManager {
     boolean setEnabled(in String packageName, in boolean enable, in int userId);
 
     /**
+     * Version of setEnabled that will also disable any other overlays for the target package.
+     */
+    boolean setEnabledExclusive(in String packageName, in boolean enable, in int userId);
+
+    /**
      * Change the priority of the given overlay to be just higher than the
      * overlay with package name newParentPackageName. Both overlay packages
      * must have the same target and user.
