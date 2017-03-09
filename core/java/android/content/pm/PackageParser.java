@@ -211,6 +211,14 @@ public class PackageParser {
         CHILD_PACKAGE_TAGS.add(TAG_EAT_COMMENT);
     }
 
+    private static final boolean LOG_UNSAFE_BROADCASTS = false;
+
+    // Set of broadcast actions that are safe for manifest receivers
+    private static final Set<String> SAFE_BROADCASTS = new ArraySet<>();
+    static {
+        SAFE_BROADCASTS.add(Intent.ACTION_BOOT_COMPLETED);
+    }
+
     /** @hide */
     public static class NewPermissionInfo {
         public final String name;
@@ -4239,6 +4247,18 @@ public class PackageParser {
                 intent.setVisibleToEphemeral(visibleToEphemeral || isWebBrowsableIntent(intent));
                 if (intent.isVisibleToInstantApp()) {
                     a.info.flags |= ActivityInfo.FLAG_VISIBLE_TO_EPHEMERAL;
+                }
+                if (LOG_UNSAFE_BROADCASTS && receiver
+                        && (owner.applicationInfo.targetSdkVersion >= Build.VERSION_CODES.O)) {
+                    for (int i = 0; i < intent.countActions(); i++) {
+                        final String action = intent.getAction(i);
+                        if (action == null || !action.startsWith("android.")) continue;
+                        if (!SAFE_BROADCASTS.contains(action)) {
+                            Slog.w(TAG, "Broadcast " + action + " may never be delivered to "
+                                    + owner.packageName + " as requested at: "
+                                    + parser.getPositionDescription());
+                        }
+                    }
                 }
             } else if (!receiver && parser.getName().equals("preferred")) {
                 ActivityIntentInfo intent = new ActivityIntentInfo(a);

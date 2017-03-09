@@ -16,8 +16,11 @@
 
 package android.appwidget;
 
+import android.annotation.BroadcastBehavior;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SdkConstant;
+import android.annotation.SdkConstant.SdkConstantType;
 import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
@@ -81,12 +84,14 @@ public class AppWidgetManager {
      *
      * @see #ACTION_APPWIDGET_CONFIGURE
      */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_APPWIDGET_PICK = "android.appwidget.action.APPWIDGET_PICK";
 
     /**
      * Similar to ACTION_APPWIDGET_PICK, but used from keyguard
      * @hide
      */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String
             ACTION_KEYGUARD_APPWIDGET_PICK = "android.appwidget.action.KEYGUARD_APPWIDGET_PICK";
 
@@ -133,6 +138,7 @@ public class AppWidgetManager {
      * @see #ACTION_APPWIDGET_CONFIGURE
      *
      */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_APPWIDGET_BIND = "android.appwidget.action.APPWIDGET_BIND";
 
     /**
@@ -157,6 +163,7 @@ public class AppWidgetManager {
      * and not display this AppWidget, and you will receive a {@link #ACTION_APPWIDGET_DELETED}
      * broadcast.
      */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_APPWIDGET_CONFIGURE = "android.appwidget.action.APPWIDGET_CONFIGURE";
 
     /**
@@ -290,6 +297,8 @@ public class AppWidgetManager {
      *
      * @see AppWidgetProvider#onUpdate AppWidgetProvider.onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds)
      */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @BroadcastBehavior(explicitOnly = true)
     public static final String ACTION_APPWIDGET_UPDATE = "android.appwidget.action.APPWIDGET_UPDATE";
 
     /**
@@ -302,6 +311,8 @@ public class AppWidgetManager {
      *      AppWidgetProvider.onAppWidgetOptionsChanged(Context context,
      *      AppWidgetManager appWidgetManager, int appWidgetId, Bundle newExtras)
      */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @BroadcastBehavior(explicitOnly = true)
     public static final String ACTION_APPWIDGET_OPTIONS_CHANGED = "android.appwidget.action.APPWIDGET_UPDATE_OPTIONS";
 
     /**
@@ -312,6 +323,8 @@ public class AppWidgetManager {
      *
      * @see AppWidgetProvider#onDeleted AppWidgetProvider.onDeleted(Context context, int[] appWidgetIds)
      */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @BroadcastBehavior(explicitOnly = true)
     public static final String ACTION_APPWIDGET_DELETED = "android.appwidget.action.APPWIDGET_DELETED";
 
     /**
@@ -322,6 +335,8 @@ public class AppWidgetManager {
      *
      * @see AppWidgetProvider#onEnabled AppWidgetProvider.onDisabled(Context context)
      */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @BroadcastBehavior(explicitOnly = true)
     public static final String ACTION_APPWIDGET_DISABLED = "android.appwidget.action.APPWIDGET_DISABLED";
 
     /**
@@ -334,6 +349,8 @@ public class AppWidgetManager {
      *
      * @see AppWidgetProvider#onEnabled AppWidgetProvider.onEnabled(Context context)
      */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @BroadcastBehavior(explicitOnly = true)
     public static final String ACTION_APPWIDGET_ENABLED = "android.appwidget.action.APPWIDGET_ENABLED";
 
     /**
@@ -365,6 +382,8 @@ public class AppWidgetManager {
      *
      * @see #ACTION_APPWIDGET_HOST_RESTORED
      */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @BroadcastBehavior(explicitOnly = true)
     public static final String ACTION_APPWIDGET_RESTORED
             = "android.appwidget.action.APPWIDGET_RESTORED";
 
@@ -402,6 +421,8 @@ public class AppWidgetManager {
      *
      * @see #ACTION_APPWIDGET_RESTORED
      */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @BroadcastBehavior(explicitOnly = true)
     public static final String ACTION_APPWIDGET_HOST_RESTORED
             = "android.appwidget.action.APPWIDGET_HOST_RESTORED";
 
