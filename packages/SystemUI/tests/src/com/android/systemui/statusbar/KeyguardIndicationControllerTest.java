@@ -16,19 +16,26 @@
 
 package com.android.systemui.statusbar;
 
+import static android.support.test.internal.runner.junit4.statement.UiThreadStatement.runOnUiThread;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import android.app.Instrumentation;
 import android.app.admin.DevicePolicyManager;
 import android.app.trust.TrustManager;
 import android.content.Context;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.Looper;
+import android.support.test.InstrumentationRegistry;
+import android.support.test.filters.SmallTest;
+import android.support.test.internal.runner.junit4.statement.UiThreadStatement;
 import android.support.test.runner.AndroidJUnit4;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -36,6 +43,7 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.phone.KeyguardIndicationTextView;
+import com.android.systemui.util.wakelock.WakeLockFake;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -54,9 +62,13 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     private KeyguardIndicationTextView mDisclosure = mock(KeyguardIndicationTextView.class);
 
     private KeyguardIndicationController mController;
+    private WakeLockFake mWakeLock;
+    private Instrumentation mInstrumentation;
 
     @Before
     public void setUp() throws Exception {
+        mInstrumentation = InstrumentationRegistry.getInstrumentation();
+
         mContext.addMockSystemService(Context.DEVICE_POLICY_SERVICE, mDevicePolicyManager);
         mContext.addMockSystemService(Context.TRUST_SERVICE, mock(TrustManager.class));
         mContext.addMockSystemService(Context.FINGERPRINT_SERVICE, mock(FingerprintManager.class));
@@ -65,13 +77,15 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
 
         when(mIndicationArea.findViewById(R.id.keyguard_indication_enterprise_disclosure))
                 .thenReturn(mDisclosure);
+
+        mWakeLock = new WakeLockFake();
     }
 
     private void createController() {
         if (Looper.myLooper() == null) {
             Looper.prepare();
         }
-        mController = new KeyguardIndicationController(mContext, mIndicationArea, null);
+        mController = new KeyguardIndicationController(mContext, mIndicationArea, null, mWakeLock);
     }
 
     @Test
@@ -138,5 +152,46 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
 
         verify(mDisclosure).setVisibility(View.GONE);
         verifyNoMoreInteractions(mDisclosure);
+    }
+
+    @Test
+    public void transientIndication_holdsWakeLock_whenDozing() {
+        createController();
+
+        mController.setDozing(true);
+        mController.showTransientIndication("Test");
+
+        assertTrue(mWakeLock.isHeld());
+    }
+
+    @Test
+    public void transientIndication_releasesWakeLock_afterHiding() {
+        createController();
+
+        mController.setDozing(true);
+        mController.showTransientIndication("Test");
+        mController.hideTransientIndication();
+
+        assertFalse(mWakeLock.isHeld());
+    }
+
+    @Test
+    public void transientIndication_releasesWakeLock_afterHidingDelayed() throws Throwable {
+        mInstrumentation.runOnMainSync(() -> {
+            createController();
+
+            mController.setDozing(true);
+            mController.showTransientIndication("Test");
+            mController.hideTransientIndicationDelayed(0);
+        });
+        mInstrumentation.waitForIdleSync();
+
+        boolean[] held = new boolean[2];
+        mInstrumentation.runOnMainSync(() -> {
+            held[0] = mWakeLock.isHeld();
+            held[1] = true;
+        });
+        assertFalse("wake lock still held", held[0]);
+        assertTrue("held was not written yet", held[1]);
     }
 }

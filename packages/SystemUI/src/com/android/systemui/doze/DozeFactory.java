@@ -22,12 +22,12 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.hardware.SensorManager;
 import android.os.Handler;
-import android.os.PowerManager;
 
 import com.android.internal.hardware.AmbientDisplayConfiguration;
 import com.android.systemui.SystemUIApplication;
 import com.android.systemui.plugins.doze.DozeProvider;
 import com.android.systemui.statusbar.phone.DozeParameters;
+import com.android.systemui.util.wakelock.WakeLock;
 
 public class DozeFactory {
 
@@ -41,19 +41,17 @@ public class DozeFactory {
     public DozeMachine assembleMachine(DozeService dozeService) {
         Context context = dozeService;
         SensorManager sensorManager = context.getSystemService(SensorManager.class);
-        PowerManager powerManager = context.getSystemService(PowerManager.class);
         AlarmManager alarmManager = context.getSystemService(AlarmManager.class);
 
         DozeHost host = getHost(dozeService);
         AmbientDisplayConfiguration config = new AmbientDisplayConfiguration(context);
         DozeParameters params = new DozeParameters(context);
         Handler handler = new Handler();
-        DozeFactory.WakeLock wakeLock = new DozeFactory.WakeLock(powerManager.newWakeLock(
-                PowerManager.PARTIAL_WAKE_LOCK, "Doze"));
+        WakeLock wakeLock = WakeLock.createPartial(context, "Doze");
 
         DozeMachine machine = new DozeMachine(
                 DozeScreenStatePreventingAdapter.wrapIfNeeded(dozeService, params),
-                params,
+                config,
                 wakeLock);
         machine.setParts(new DozeMachine.Part[]{
                 createDozeTriggers(context, sensorManager, host, config, params, handler, wakeLock,
@@ -156,29 +154,5 @@ public class DozeFactory {
         Application appCandidate = service.getApplication();
         final SystemUIApplication app = (SystemUIApplication) appCandidate;
         return app.getComponent(DozeHost.class);
-    }
-
-    /** A wrapper around {@link PowerManager.WakeLock} for testability. */
-    public static class WakeLock implements DozeProvider.WakeLock {
-        private final PowerManager.WakeLock mInner;
-
-        public WakeLock(PowerManager.WakeLock inner) {
-            mInner = inner;
-        }
-
-        /** @see PowerManager.WakeLock#acquire() */
-        public void acquire() {
-            mInner.acquire();
-        }
-
-        /** @see PowerManager.WakeLock#release() */
-        public void release() {
-            mInner.release();
-        }
-
-        /** @see PowerManager.WakeLock#wrap(Runnable) */
-        public Runnable wrap(Runnable runnable) {
-            return mInner.wrap(runnable);
-        }
     }
 }

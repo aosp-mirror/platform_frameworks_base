@@ -21,6 +21,8 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.SystemClock;
 
+import com.android.systemui.util.wakelock.WakeLock;
+
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
@@ -33,14 +35,14 @@ public class DozeUi implements DozeMachine.Part {
     private final AlarmManager mAlarmManager;
     private final DozeHost mHost;
     private final Handler mHandler;
-    private final DozeFactory.WakeLock mWakeLock;
+    private final WakeLock mWakeLock;
     private final DozeMachine mMachine;
     private final AlarmManager.OnAlarmListener mTimeTick;
 
     private boolean mTimeTickScheduled = false;
 
     public DozeUi(Context context, AlarmManager alarmManager, DozeMachine machine,
-            DozeFactory.WakeLock wakeLock, DozeHost host, Handler handler) {
+            WakeLock wakeLock, DozeHost host, Handler handler) {
         mContext = context;
         mAlarmManager = alarmManager;
         mMachine = machine;

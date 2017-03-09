@@ -36,6 +36,7 @@ import com.android.internal.hardware.AmbientDisplayConfiguration;
 import com.android.internal.util.Preconditions;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.util.Assert;
+import com.android.systemui.util.wakelock.WakeLock;
 
 import java.io.PrintWriter;
 
@@ -57,7 +58,7 @@ public class DozeTriggers implements DozeMachine.Part {
     private final DozeParameters mDozeParameters;
     private final SensorManager mSensorManager;
     private final Handler mHandler;
-    private final DozeFactory.WakeLock mWakeLock;
+    private final WakeLock mWakeLock;
     private final boolean mAllowPulseTriggers;
     private final UiModeManager mUiModeManager;
     private final TriggerReceiver mBroadcastReceiver = new TriggerReceiver();
@@ -69,7 +70,7 @@ public class DozeTriggers implements DozeMachine.Part {
     public DozeTriggers(Context context, DozeMachine machine, DozeHost dozeHost,
             AmbientDisplayConfiguration config,
             DozeParameters dozeParameters, SensorManager sensorManager, Handler handler,
-            DozeFactory.WakeLock wakeLock, boolean allowPulseTriggers) {
+            WakeLock wakeLock, boolean allowPulseTriggers) {
         mContext = context;
         mMachine = machine;
         mDozeHost = dozeHost;
