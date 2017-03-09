@@ -481,7 +481,7 @@ public class WifiTracker {
                         }
                     }
                     if (!apFound) {
-                        accessPoint.setRssi(AccessPoint.UNREACHABLE_RSSI);
+                        accessPoint.setUnreachable();
                     }
                     accessPoints.add(accessPoint);
                     apMap.put(accessPoint.getSsidStr(), accessPoint);

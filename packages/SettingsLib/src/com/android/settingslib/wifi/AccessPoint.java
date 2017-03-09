@@ -47,6 +47,7 @@ import android.text.TextUtils;
 import android.text.style.TtsSpan;
 import android.util.Log;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.settingslib.R;
 
 import java.util.ArrayList;
@@ -114,7 +115,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
 
     public static final int SIGNAL_LEVELS = 4;
 
-    static final int UNREACHABLE_RSSI = Integer.MAX_VALUE;
+    static final int UNREACHABLE_RSSI = Integer.MIN_VALUE;
 
     private final Context mContext;
 
@@ -170,8 +171,8 @@ public class AccessPoint implements Comparable<AccessPoint> {
             }
         }
         update(mConfig, mInfo, mNetworkInfo);
-        mRssi = getRssi();
-        mSeen = getSeen();
+        updateRssi();
+        updateSeen();
         mId = sLastId.incrementAndGet();
     }
 
@@ -377,19 +378,46 @@ public class AccessPoint implements Comparable<AccessPoint> {
     }
 
     public int getRssi() {
+        return mRssi;
+    }
+
+    /**
+     * Updates {@link #mRssi}.
+     *
+     * <p>If the given connection is active, the existing value of {@link #mRssi} will be returned.
+     * If the given AccessPoint is not active, a value will be calculated from previous scan
+     * results, returning the best RSSI for all matching AccessPoints. If the access point is not
+     * connected and there are no scan results, the rssi will be set to {@link #UNREACHABLE_RSSI}.
+     *
+     * <p>Old scan results will be evicted from the cache when this method is invoked.
+     */
+    private void updateRssi() {
         evictOldScanResults();
-        int rssi = Integer.MIN_VALUE;
+
+        if (this.isActive()) {
+            return;
+        }
+
+        int rssi = UNREACHABLE_RSSI;
         for (ScanResult result : mScanResultCache.values()) {
             if (result.level > rssi) {
                 rssi = result.level;
             }
         }
 
-        return rssi;
+        mRssi = rssi;
     }
 
-    public long getSeen() {
+    /**
+     * Updates {@link #mSeen} based on the scan result cache.
+     *
+     * <p>Old scan results will be evicted from the cache when this method is invoked.
+     */
+    private void updateSeen() {
         evictOldScanResults();
+
+        // TODO(sghuman): Set to now if connected
+
         long seen = 0;
         for (ScanResult result : mScanResultCache.values()) {
             if (result.timestamp > seen) {
@@ -397,7 +425,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
             }
         }
 
-        return seen;
+        mSeen = seen;
     }
 
     public NetworkInfo getNetworkInfo() {
@@ -822,13 +850,12 @@ public class AccessPoint implements Comparable<AccessPoint> {
 
     boolean update(ScanResult result) {
         if (matches(result)) {
+            int oldLevel = getLevel();
+
             /* Add or update the scan result for the BSSID */
             mScanResultCache.put(result.BSSID, result);
-
-            int oldLevel = getLevel();
-            int oldRssi = getRssi();
-            mSeen = getSeen();
-            mRssi = (getRssi() + oldRssi)/2;
+            updateSeen();
+            updateRssi();
             int newLevel = getLevel();
 
             if (newLevel > 0 && newLevel != oldLevel && mAccessPointListener != null) {
@@ -877,8 +904,14 @@ public class AccessPoint implements Comparable<AccessPoint> {
         }
     }
 
+    @VisibleForTesting
     void setRssi(int rssi) {
         mRssi = rssi;
+    }
+
+    /** Sets the rssi to {@link #UNREACHABLE_RSSI}. */
+    void setUnreachable() {
+        setRssi(AccessPoint.UNREACHABLE_RSSI);
     }
 
     int getRankingScore() {

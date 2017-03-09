@@ -89,21 +89,10 @@ public class AccessPointTest {
 
     @Test
     public void testThatCopyAccessPoint_scanCacheShouldMatch() {
-        Bundle bundle = new Bundle();
-        ArrayList<ScanResult> scanResults = new ArrayList<>();
-        for (int i = 0; i < 5; i++) {
-            ScanResult scanResult = new ScanResult();
-            scanResult.level = i;
-            scanResult.BSSID = "bssid-" + i;
-            scanResult.timestamp = SystemClock.elapsedRealtime() * 1000;
-            scanResults.add(scanResult);
-        }
-
-        bundle.putParcelableArrayList("key_scanresultcache", scanResults);
-        AccessPoint original = new AccessPoint(mContext, bundle);
+        AccessPoint original = createAccessPointWithScanResultCache();
         assertThat(original.getRssi()).isEqualTo(4);
         AccessPoint copy = new AccessPoint(mContext, createWifiConfiguration());
-        assertThat(copy.getRssi()).isEqualTo(Integer.MIN_VALUE);
+        assertThat(copy.getRssi()).isEqualTo(AccessPoint.UNREACHABLE_RSSI);
         copy.copyFrom(original);
         assertThat(original.getRssi()).isEqualTo(copy.getRssi());
     }
@@ -188,6 +177,37 @@ public class AccessPointTest {
         assertThat(points.indexOf(saved)).isLessThan(points.indexOf(firstName));
         assertThat(points.indexOf(highLevelAndReachable)).isLessThan(points.indexOf(firstName));
         assertThat(points.indexOf(firstName)).isLessThan(points.indexOf(lastname));
+    }
+
+    @Test
+    public void testRssiIsSetFromScanResults() {
+        AccessPoint ap = createAccessPointWithScanResultCache();
+        int originalRssi = ap.getRssi();
+        assertThat(originalRssi).isNotEqualTo(AccessPoint.UNREACHABLE_RSSI);
+    }
+
+    @Test
+    public void testGetRssiShouldReturnSetRssiValue() {
+        AccessPoint ap = createAccessPointWithScanResultCache();
+        int originalRssi = ap.getRssi();
+        int newRssi = originalRssi - 10;
+        ap.setRssi(newRssi);
+        assertThat(ap.getRssi()).isEqualTo(newRssi);
+    }
+
+    private AccessPoint createAccessPointWithScanResultCache() {
+        Bundle bundle = new Bundle();
+        ArrayList<ScanResult> scanResults = new ArrayList<>();
+        for (int i = 0; i < 5; i++) {
+            ScanResult scanResult = new ScanResult();
+            scanResult.level = i;
+            scanResult.BSSID = "bssid-" + i;
+            scanResult.timestamp = SystemClock.elapsedRealtime() * 1000;
+            scanResults.add(scanResult);
+        }
+
+        bundle.putParcelableArrayList("key_scanresultcache", scanResults);
+        return new AccessPoint(mContext, bundle);
     }
 
     private WifiConfiguration createWifiConfiguration() {
