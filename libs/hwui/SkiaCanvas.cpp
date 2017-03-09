@@ -512,15 +512,7 @@ void SkiaCanvas::drawArc(float left, float top, float right, float bottom,
 
 void SkiaCanvas::drawPath(const SkPath& path, const SkPaint& paint) {
     if (CC_UNLIKELY(paint.nothingToDraw())) return;
-    SkRect rect;
-    SkRRect roundRect;
-    if (path.isOval(&rect)) {
-        mCanvas->drawOval(rect, paint);
-    } else if (path.isRRect(&roundRect)) {
-        mCanvas->drawRRect(roundRect, paint);
-    } else {
-        mCanvas->drawPath(path, paint);
-    }
+    mCanvas->drawPath(path, paint);
 }
 
 void SkiaCanvas::drawVertices(SkCanvas::VertexMode vertexMode, int vertexCount,
