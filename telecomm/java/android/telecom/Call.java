@@ -125,8 +125,9 @@ public final class Call {
     public static final String AVAILABLE_PHONE_ACCOUNTS = "selectPhoneAccountAccounts";
 
     /**
-     * Extra key used to indicate the time (in millis) when the last outgoing emergency call was
-     * made.  This is used to identify potential emergency callbacks.
+     * Extra key used to indicate the time (in milliseconds since midnight, January 1, 1970 UTC)
+     * when the last outgoing emergency call was made.  This is used to identify potential emergency
+     * callbacks.
      */
     public static final String EXTRA_LAST_EMERGENCY_CALLBACK_TIME_MILLIS =
             "android.telecom.extra.LAST_EMERGENCY_CALLBACK_TIME_MILLIS";
