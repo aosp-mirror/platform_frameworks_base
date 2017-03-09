@@ -35,7 +35,6 @@ import android.hardware.power.V1_0.PowerHint;
 import android.net.Uri;
 import android.os.BatteryManager;
 import android.os.BatteryManagerInternal;
-import android.os.PowerSaveState;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -44,6 +43,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.PowerManagerInternal;
+import android.os.PowerSaveState;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -69,6 +69,7 @@ import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 import android.view.Display;
 import android.view.WindowManagerPolicy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.os.BackgroundThread;
@@ -626,6 +627,21 @@ public final class PowerManagerService extends SystemService
             nativeSetInteractive(true);
             nativeSetFeature(POWER_FEATURE_DOUBLE_TAP_TO_WAKE, 0);
         }
+    }
+
+    @VisibleForTesting
+    PowerManagerService(Context context, BatterySaverPolicy batterySaverPolicy) {
+        super(context);
+
+        mBatterySaverPolicy = batterySaverPolicy;
+        mContext = context;
+        mHandlerThread = new ServiceThread(TAG,
+                Process.THREAD_PRIORITY_DISPLAY, false /*allowIo*/);
+        mHandlerThread.start();
+        mHandler = new PowerManagerHandler(mHandlerThread.getLooper());
+        mConstants = new Constants(mHandler);
+        mDisplaySuspendBlocker = null;
+        mWakeLockSuspendBlocker = null;
     }
 
     @Override
@@ -2260,8 +2276,9 @@ public final class PowerManagerService extends SystemService
             mDisplayPowerRequest.brightnessSetByUser = brightnessSetByUser;
             mDisplayPowerRequest.useAutoBrightness = autoBrightness;
             mDisplayPowerRequest.useProximitySensor = shouldUseProximitySensorLocked();
-            mDisplayPowerRequest.lowPowerMode = mLowPowerModeEnabled;
             mDisplayPowerRequest.boostScreenBrightness = shouldBoostScreenBrightness();
+
+            updatePowerRequestFromBatterySaverPolicy(mDisplayPowerRequest);
 
             if (mDisplayPowerRequest.policy == DisplayPowerRequest.POLICY_DOZE) {
                 mDisplayPowerRequest.dozeScreenState = mDozeScreenStateOverrideFromDreamManager;
@@ -2677,6 +2694,14 @@ public final class PowerManagerService extends SystemService
         } catch (InterruptedException e) {
             Slog.wtf(TAG, e);
         }
+    }
+
+    @VisibleForTesting
+    void updatePowerRequestFromBatterySaverPolicy(DisplayPowerRequest displayPowerRequest) {
+        PowerSaveState state = mBatterySaverPolicy.
+                getBatterySaverPolicy(ServiceType.SCREEN_BRIGHTNESS, mLowPowerModeEnabled);
+        displayPowerRequest.lowPowerMode = state.batterySaverEnabled;
+        displayPowerRequest.screenLowPowerBrightnessFactor = state.brightnessFactor;
     }
 
     void setStayOnSettingInternal(int val) {

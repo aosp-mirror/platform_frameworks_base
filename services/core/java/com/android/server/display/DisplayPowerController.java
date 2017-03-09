@@ -705,11 +705,14 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             mAppliedDimming = false;
         }
 
-        // If low power mode is enabled, cut the brightness level by half
+        // If low power mode is enabled, scale brightness by screenLowPowerBrightnessFactor
         // as long as it is above the minimum threshold.
         if (mPowerRequest.lowPowerMode) {
             if (brightness > mScreenBrightnessRangeMinimum) {
-                brightness = Math.max(brightness / 2, mScreenBrightnessRangeMinimum);
+                final float brightnessFactor =
+                        Math.min(mPowerRequest.screenLowPowerBrightnessFactor, 1);
+                final int lowPowerBrightness = (int) (brightness * brightnessFactor);
+                brightness = Math.max(lowPowerBrightness, mScreenBrightnessRangeMinimum);
             }
             if (!mAppliedLowPower) {
                 slowChange = false;
