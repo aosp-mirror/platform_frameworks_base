@@ -234,6 +234,8 @@ public class WebViewClient {
     public static final int ERROR_FILE_NOT_FOUND = -14;
     /** Too many requests during this load */
     public static final int ERROR_TOO_MANY_REQUESTS = -15;
+    /** Resource load was cancelled by Safe Browsing */
+    public static final int ERROR_UNSAFE_RESOURCE = -16;
 
     /**
      * Report an error to the host application. These errors are unrecoverable
