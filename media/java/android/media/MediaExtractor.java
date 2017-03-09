@@ -25,6 +25,7 @@ import android.content.res.AssetFileDescriptor;
 import android.media.MediaCodec;
 import android.media.MediaFormat;
 import android.media.MediaHTTPService;
+import android.media.MediaMetricsSet;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -651,41 +652,24 @@ final public class MediaExtractor {
     public native boolean hasCacheReachedEndOfStream();
 
     /**
-     *  Returns Analytics/Metrics data about the current media container.
+     *  Return Metrics data about the current media container.
      *
-     * @return the set of keys and values available for the media being
-     * handled by this instance of MediaExtractor
+     * @return a MediaMetricsSet containing the set of attributes and values
+     * available for the media container being handled by this instance
+     * of MediaExtractor.
+     * The attributes are descibed in {@link MediaMetricsSet.MediaExtractor}.
      *
-     *  <table style="width: 0%">
-     *   <thead>
-     *    <tr>
-     *     <th>Key</th>
-     *     <th>Type</th>
-     *     <th>Description</th>
-     *    </tr>
-     *   </thead>
-     *   <tbody>
-     *    <tr>
-     *     <td>{@code "fmt"}</td>
-     *     <td>String</td>
-     *     <td>The container format (which determines the handler)</td>
-     *    </tr><tr>
-     *     <td>{@code "mime"}</td>
-     *     <td>String</td>
-     *     <td>Mime type of the container.</td>
-     *    </tr><tr>
-     *     <td>{@code "ntrk"}</td>
-     *     <td>Integer</td>
-     *     <td>Number of tracks in the container</td>
-     *    </tr>
-     *   </tbody>
-     *  </table>
-     *
-     *  Additional fields specific to individual codecs will also appear in
+     *  Additional vendor-specific fields may also be present in
      *  the return value.
      */
-    public native Bundle getMetrics();
 
+    public MediaMetricsSet getMetrics() {
+        Bundle bundle = native_getMetrics();
+	MediaMetricsSet mSet = new MediaMetricsSet(bundle);
+	return mSet;
+    }
+
+    private native Bundle native_getMetrics();
 
     private static native final void native_init();
     private native final void native_setup();

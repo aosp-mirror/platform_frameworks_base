@@ -19,6 +19,7 @@
 
 #include "jni.h"
 
+#include <media/MediaAnalyticsItem.h>
 #include <media/hardware/CryptoAPI.h>
 #include <media/stagefright/foundation/ABase.h>
 #include <media/stagefright/foundation/AHandler.h>
@@ -116,7 +117,7 @@ struct JMediaCodec : public AHandler {
 
     status_t getName(JNIEnv *env, jstring *name) const;
 
-    status_t getMetrics(JNIEnv *env, Parcel *reply) const;
+    status_t getMetrics(JNIEnv *env, MediaAnalyticsItem * &reply) const;
 
     status_t setParameters(const sp<AMessage> &params);
 

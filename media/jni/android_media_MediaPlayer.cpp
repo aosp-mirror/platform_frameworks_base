@@ -708,7 +708,7 @@ android_media_MediaPlayer_getVideoHeight(JNIEnv *env, jobject thiz)
 }
 
 static jobject
-android_media_MediaPlayer_getMetrics(JNIEnv *env, jobject thiz)
+android_media_MediaPlayer_native_getMetrics(JNIEnv *env, jobject thiz)
 {
     sp<MediaPlayer> mp = getMediaPlayer(env, thiz);
     if (mp == NULL ) {
@@ -1393,7 +1393,7 @@ static const JNINativeMethod gMethods[] = {
     {"_stop",               "()V",                              (void *)android_media_MediaPlayer_stop},
     {"getVideoWidth",       "()I",                              (void *)android_media_MediaPlayer_getVideoWidth},
     {"getVideoHeight",      "()I",                              (void *)android_media_MediaPlayer_getVideoHeight},
-    {"getMetrics",          "()Landroid/os/Bundle;",            (void *)android_media_MediaPlayer_getMetrics},
+    {"native_getMetrics",          "()Landroid/os/Bundle;",            (void *)android_media_MediaPlayer_native_getMetrics},
     {"setPlaybackParams", "(Landroid/media/PlaybackParams;)V", (void *)android_media_MediaPlayer_setPlaybackParams},
     {"getPlaybackParams", "()Landroid/media/PlaybackParams;", (void *)android_media_MediaPlayer_getPlaybackParams},
     {"setSyncParams",     "(Landroid/media/SyncParams;)V",  (void *)android_media_MediaPlayer_setSyncParams},

@@ -628,9 +628,9 @@ void android_media_MediaRecorder_setInputSurface(
 }
 
 static jobject
-android_media_MediaRecorder_getMetrics(JNIEnv *env, jobject thiz)
+android_media_MediaRecorder_native_getMetrics(JNIEnv *env, jobject thiz)
 {
-    ALOGV("android_media_MediaRecorder_getMetrics");
+    ALOGV("android_media_MediaRecorder_native_getMetrics");
 
     sp<MediaRecorder> mr = getMediaRecorder(env, thiz);
     if (mr == NULL) {
@@ -688,7 +688,7 @@ static const JNINativeMethod gMethods[] = {
     {"native_finalize",      "()V",                             (void *)android_media_MediaRecorder_native_finalize},
     {"native_setInputSurface", "(Landroid/view/Surface;)V", (void *)android_media_MediaRecorder_setInputSurface },
 
-    {"getMetrics",          "()Landroid/os/Bundle;",            (void *)android_media_MediaRecorder_getMetrics},
+    {"native_getMetrics",          "()Landroid/os/Bundle;",            (void *)android_media_MediaRecorder_native_getMetrics},
 };
 
 // This function only registers the native methods, and is called from
