@@ -98,9 +98,14 @@ status_t CursorWindow::createFromParcel(Parcel* parcel, CursorWindow** outCursor
             if (dupAshmemFd < 0) {
                 result = -errno;
             } else {
+                // the size of the ashmem descriptor can be modified between ashmem_get_size_region
+                // call and mmap, so we'll check again immediately after memory is mapped
                 void* data = ::mmap(NULL, size, PROT_READ, MAP_SHARED, dupAshmemFd, 0);
                 if (data == MAP_FAILED) {
                     result = -errno;
+                } else if (ashmem_get_size_region(dupAshmemFd) != size) {
+                    ::munmap(data, size);
+                    result = BAD_VALUE;
                 } else {
                     CursorWindow* window = new CursorWindow(name, dupAshmemFd,
                             data, size, true /*readOnly*/);

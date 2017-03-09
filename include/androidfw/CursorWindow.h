@@ -128,12 +128,13 @@ public:
     inline const char* getFieldSlotValueString(FieldSlot* fieldSlot,
             size_t* outSizeIncludingNull) {
         *outSizeIncludingNull = fieldSlot->data.buffer.size;
-        return static_cast<char*>(offsetToPtr(fieldSlot->data.buffer.offset));
+        return static_cast<char*>(offsetToPtr(
+                fieldSlot->data.buffer.offset, fieldSlot->data.buffer.size));
     }
 
     inline const void* getFieldSlotValueBlob(FieldSlot* fieldSlot, size_t* outSize) {
         *outSize = fieldSlot->data.buffer.size;
-        return offsetToPtr(fieldSlot->data.buffer.offset);
+        return offsetToPtr(fieldSlot->data.buffer.offset, fieldSlot->data.buffer.size);
     }
 
 private:
@@ -166,7 +167,16 @@ private:
     bool mReadOnly;
     Header* mHeader;
 
-    inline void* offsetToPtr(uint32_t offset) {
+    inline void* offsetToPtr(uint32_t offset, uint32_t bufferSize = 0) {
+        if (offset >= mSize) {
+            ALOGE("Offset %zu out of bounds, max value %zu", offset, mSize);
+            return NULL;
+        }
+        if (offset + bufferSize > mSize) {
+            ALOGE("End offset %zu out of bounds, max value %zu",
+                    offset + bufferSize, mSize);
+            return NULL;
+        }
         return static_cast<uint8_t*>(mData) + offset;
     }
 
