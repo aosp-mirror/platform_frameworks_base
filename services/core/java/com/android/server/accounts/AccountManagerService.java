@@ -289,7 +289,7 @@ public class AccountManagerService
                      * and then rebuild the cache. All under the cache lock. But that change is too
                      * large at this point.
                      */
-                    final String removedPackageName = intent.getData().toString();
+                    final String removedPackageName = intent.getData().getSchemeSpecificPart();
                     Runnable purgingRunnable = new Runnable() {
                         @Override
                         public void run() {
