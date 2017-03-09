@@ -59,6 +59,7 @@ import static android.provider.Settings.Global.WAIT_FOR_DEBUGGER;
 import static android.provider.Settings.System.FONT_SCALE;
 import static android.service.voice.VoiceInteractionSession.SHOW_SOURCE_APPLICATION;
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.Display.INVALID_DISPLAY;
 import static com.android.internal.util.XmlUtils.readBooleanAttribute;
 import static com.android.internal.util.XmlUtils.readIntAttribute;
 import static com.android.internal.util.XmlUtils.readLongAttribute;
@@ -688,6 +689,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
     };
+
+    // VR Compatibility Display Id.
+    int mVrCompatibilityDisplayId = INVALID_DISPLAY;
 
     // Whether we should use SCHED_FIFO for UI and RenderThreads.
     private boolean mUseFifoUiScheduling = false;
@@ -23524,6 +23528,22 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                     record.lock.notifyAll();
                 }
+            }
+        }
+
+        /**
+         * Called after virtual display Id is updated by
+         * {@link com.android.server.vr.CompatibilityDisplay} with a specific
+         * {@param vrCompatibilityDisplayId}.
+         */
+        @Override
+        public void setVrCompatibilityDisplayId(int vrCompatibilityDisplayId) {
+            if (DEBUG_STACK) {
+                Slog.d(TAG, "setVrCompatibilityDisplayId called for: " +
+                        vrCompatibilityDisplayId);
+            }
+            synchronized (ActivityManagerService.this) {
+                mVrCompatibilityDisplayId = vrCompatibilityDisplayId;
             }
         }
     }

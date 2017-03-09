@@ -125,8 +125,10 @@ import android.view.Display;
 
 import com.android.internal.app.HeavyWeightSwitcherActivity;
 import com.android.internal.app.IVoiceInteractor;
+import com.android.server.LocalServices;
 import com.android.server.am.ActivityStackSupervisor.PendingActivityLaunch;
 import com.android.server.pm.InstantAppResolver;
+import com.android.server.vr.VrManagerInternal;
 import com.android.server.wm.WindowManagerService;
 
 import java.util.ArrayList;
@@ -192,6 +194,8 @@ class ActivityStarter {
     private IVoiceInteractionSession mVoiceSession;
     private IVoiceInteractor mVoiceInteractor;
 
+    private boolean mUsingVrCompatibilityDisplay;
+
     private void reset() {
         mStartActivity = null;
         mIntent = null;
@@ -229,12 +233,15 @@ class ActivityStarter {
 
         mVoiceSession = null;
         mVoiceInteractor = null;
+
+        mUsingVrCompatibilityDisplay = false;
     }
 
     ActivityStarter(ActivityManagerService service, ActivityStackSupervisor supervisor) {
         mService = service;
         mSupervisor = supervisor;
         mInterceptor = new ActivityStartInterceptor(mService, mSupervisor);
+        mUsingVrCompatibilityDisplay = false;
     }
 
     final int startActivityLocked(IApplicationThread caller, Intent intent, Intent ephemeralIntent,
@@ -1208,10 +1215,7 @@ class ActivityStarter {
         mVoiceSession = voiceSession;
         mVoiceInteractor = voiceInteractor;
 
-        mSourceDisplayId = sourceRecord != null ? sourceRecord.getDisplayId() : INVALID_DISPLAY;
-        if (mSourceDisplayId == INVALID_DISPLAY) {
-            mSourceDisplayId = DEFAULT_DISPLAY;
-        }
+        mSourceDisplayId = getSourceDisplayId(mSourceRecord, mStartActivity);
 
         mLaunchBounds = getOverrideBounds(r, options, inTask);
 
@@ -1463,6 +1467,36 @@ class ActivityStarter {
             }
         }
         return intentActivity;
+    }
+
+    /**
+     * Returns the ID of the display to use for a new activity. If the source activity has
+     * a explicit display ID set, use that to launch the activity. If not and the device is in VR
+     * mode, then return the Vr mode's virtual display ID.
+     */
+    private int getSourceDisplayId(ActivityRecord sourceRecord, ActivityRecord startingActivity) {
+        int displayId = sourceRecord != null ? sourceRecord.getDisplayId() : INVALID_DISPLAY;
+        // If the activity has a displayId set explicitly, launch it on the same displayId.
+        if (displayId != INVALID_DISPLAY) {
+            return displayId;
+        }
+
+        // Check if the Activity is a VR activity. If so, the activity should be launched in
+        // main display.
+        if (startingActivity != null && startingActivity.requestedVrComponent != null) {
+            return DEFAULT_DISPLAY;
+        }
+
+        // Get the virtual display id from ActivityManagerService.
+        displayId = mService.mVrCompatibilityDisplayId;
+        if (displayId != INVALID_DISPLAY) {
+            if (DEBUG_STACK) {
+                Slog.d(TAG, "getSourceDisplayId :" + displayId);
+            }
+            mUsingVrCompatibilityDisplay = true;
+            return displayId;
+        }
+        return DEFAULT_DISPLAY;
     }
 
     /**
@@ -2073,8 +2107,18 @@ class ActivityStarter {
             return mSupervisor.getValidLaunchStackOnDisplay(launchDisplayId, r);
         }
 
-        if ((launchFlags & FLAG_ACTIVITY_LAUNCH_ADJACENT) == 0
-                || mSourceDisplayId != DEFAULT_DISPLAY) {
+        // If we are using Vr compatibility display, find the virtual display stack.
+        if (mUsingVrCompatibilityDisplay) {
+            ActivityStack as = mSupervisor.getValidLaunchStackOnDisplay(mSourceDisplayId, r);
+            if (DEBUG_STACK) {
+                Slog.v(TAG, "Launch stack for app: " + r.toString() +
+                    ", on virtual display stack:" + as.toString());
+            }
+            return as;
+        }
+
+        if (((launchFlags & FLAG_ACTIVITY_LAUNCH_ADJACENT) == 0)
+                 || mSourceDisplayId != DEFAULT_DISPLAY) {
             return null;
         }
         // Otherwise handle adjacent launch.
