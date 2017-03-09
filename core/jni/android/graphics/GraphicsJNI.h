@@ -111,6 +111,7 @@ public:
     static sk_sp<SkColorSpace> defaultColorSpace();
     static sk_sp<SkColorSpace> linearColorSpace();
     static sk_sp<SkColorSpace> colorSpaceForType(SkColorType type);
+    static bool isColorSpaceSRGB(SkColorSpace* colorSpace);
 };
 
 class HeapAllocator : public SkBRDAllocator {

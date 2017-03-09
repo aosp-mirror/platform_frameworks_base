@@ -8,6 +8,8 @@
 #include "SkImageInfo.h"
 #include "SkColor.h"
 #include "SkColorPriv.h"
+#include "SkColorSpace.h"
+#include "SkColorSpaceXform.h"
 #include "SkHalf.h"
 #include "SkMatrix44.h"
 #include "SkPM4f.h"
@@ -29,6 +31,7 @@
 #include "core_jni_helpers.h"
 
 #include <jni.h>
+#include <string.h>
 #include <memory>
 #include <string>
 
@@ -448,11 +451,32 @@ bool GraphicsJNI::SetPixels(JNIEnv* env, jintArray srcColors, int srcOffset, int
 
     // reset to to actual choice from caller
     dst = dstBitmap.getAddr(x, y);
-    // now copy/convert each scanline
-    for (int y = 0; y < height; y++) {
-        proc(dst, src, width, x, y);
-        src += srcStride;
-        dst = (char*)dst + dstBitmap.rowBytes();
+
+    SkColorSpace* colorSpace = dstBitmap.colorSpace();
+    if (GraphicsJNI::isColorSpaceSRGB(colorSpace)) {
+        // now copy/convert each scanline
+        for (int y = 0; y < height; y++) {
+            proc(dst, src, width, x, y);
+            src += srcStride;
+            dst = (char*)dst + dstBitmap.rowBytes();
+        }
+    } else {
+        auto sRGB = SkColorSpace::MakeSRGB();
+        auto xform = SkColorSpaceXform::New(sRGB.get(), colorSpace);
+
+        std::unique_ptr<SkColor[]> row(new SkColor[width]);
+
+        // now copy/convert each scanline
+        for (int y = 0; y < height; y++) {
+            memcpy(row.get(), src, sizeof(SkColor) * width);
+            xform->apply(SkColorSpaceXform::kBGRA_8888_ColorFormat, row.get(),
+                    SkColorSpaceXform::kBGRA_8888_ColorFormat, row.get(), width,
+                    SkAlphaType::kUnpremul_SkAlphaType);
+
+            proc(dst, row.get(), width, x, y);
+            src += srcStride;
+            dst = (char*)dst + dstBitmap.rowBytes();
+        }
     }
 
     dstBitmap.notifyPixelsChanged();
@@ -1179,12 +1203,7 @@ static jboolean Bitmap_isSRGB(JNIEnv* env, jobject, jlong bitmapHandle) {
     if (!bitmapHolder.valid()) return JNI_TRUE;
 
     SkColorSpace* colorSpace = bitmapHolder->info().colorSpace();
-    return colorSpace == nullptr ||
-           colorSpace == SkColorSpace::MakeSRGB().get() ||
-           colorSpace == SkColorSpace::MakeRGB(
-                  SkColorSpace::kSRGB_RenderTargetGamma,
-                  SkColorSpace::kSRGB_Gamut,
-                  SkColorSpace::kNonLinearBlending_ColorSpaceFlag).get();
+    return GraphicsJNI::isColorSpaceSRGB(colorSpace);
 }
 
 static jboolean Bitmap_getColorSpace(JNIEnv* env, jobject, jlong bitmapHandle,
@@ -1246,6 +1265,16 @@ static jint Bitmap_getPixel(JNIEnv* env, jobject, jlong bitmapHandle,
 
     SkColor dst[1];
     proc(dst, src, 1, bitmap.getColorTable());
+
+    SkColorSpace* colorSpace = bitmap.colorSpace();
+    if (!GraphicsJNI::isColorSpaceSRGB(colorSpace)) {
+        auto sRGB = SkColorSpace::MakeSRGB();
+        auto xform = SkColorSpaceXform::New(colorSpace, sRGB.get());
+        xform->apply(SkColorSpaceXform::kBGRA_8888_ColorFormat, &dst[0],
+                SkColorSpaceXform::kBGRA_8888_ColorFormat, &dst[0], 1,
+                SkAlphaType::kUnpremul_SkAlphaType);
+    }
+
     return static_cast<jint>(dst[0]);
 }
 
@@ -1268,11 +1297,30 @@ static void Bitmap_getPixels(JNIEnv* env, jobject, jlong bitmapHandle,
     SkColorTable* ctable = bitmap.getColorTable();
     jint* dst = env->GetIntArrayElements(pixelArray, NULL);
     SkColor* d = (SkColor*)dst + offset;
-    while (--height >= 0) {
-        proc(d, src, width, ctable);
-        d += stride;
-        src = (void*)((const char*)src + bitmap.rowBytes());
+
+    SkColorSpace* colorSpace = bitmap.colorSpace();
+    if (GraphicsJNI::isColorSpaceSRGB(colorSpace)) {
+        while (--height >= 0) {
+            proc(d, src, width, ctable);
+            d += stride;
+            src = (void*)((const char*)src + bitmap.rowBytes());
+        }
+    } else {
+        auto sRGB = SkColorSpace::MakeSRGB();
+        auto xform = SkColorSpaceXform::New(colorSpace, sRGB.get());
+
+        while (--height >= 0) {
+            proc(d, src, width, ctable);
+
+            xform->apply(SkColorSpaceXform::kBGRA_8888_ColorFormat, d,
+                    SkColorSpaceXform::kBGRA_8888_ColorFormat, d, width,
+                    SkAlphaType::kUnpremul_SkAlphaType);
+
+            d += stride;
+            src = (void*)((const char*)src + bitmap.rowBytes());
+        }
     }
+
     env->ReleaseIntArrayElements(pixelArray, dst, 0);
 }
 
@@ -1291,6 +1339,15 @@ static void Bitmap_setPixel(JNIEnv* env, jobject, jlong bitmapHandle,
     FromColorProc proc = ChooseFromColorProc(bitmap);
     if (NULL == proc) {
         return;
+    }
+
+    SkColorSpace* colorSpace = bitmap.colorSpace();
+    if (!GraphicsJNI::isColorSpaceSRGB(colorSpace)) {
+        auto sRGB = SkColorSpace::MakeSRGB();
+        auto xform = SkColorSpaceXform::New(sRGB.get(), colorSpace);
+        xform->apply(SkColorSpaceXform::kBGRA_8888_ColorFormat, &color,
+                SkColorSpaceXform::kBGRA_8888_ColorFormat, &color, 1,
+                SkAlphaType::kUnpremul_SkAlphaType);
     }
 
     proc(bitmap.getAddr(x, y), &color, 1, x, y);

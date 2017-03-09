@@ -522,7 +522,7 @@ public final class Bitmap implements Parcelable {
      * <p>The content of the bitmap is copied into the buffer as-is. This means
      * that if this bitmap stores its pixels pre-multiplied
      * (see {@link #isPremultiplied()}, the values in the buffer will also be
-     * pre-multiplied.</p>
+     * pre-multiplied. The pixels remain in the color space of the bitmap.</p>
      * <p>After this method returns, the current position of the buffer is
      * updated: the position is incremented by the number of elements written
      * in the buffer.</p>
@@ -562,7 +562,8 @@ public final class Bitmap implements Parcelable {
      * <p>Copy the pixels from the buffer, beginning at the current position,
      * overwriting the bitmap's pixels. The data in the buffer is not changed
      * in any way (unlike setPixels(), which converts from unpremultipled 32bit
-     * to whatever the bitmap's native format is.</p>
+     * to whatever the bitmap's native format is. The pixels in the source
+     * buffer are assumed to be in the bitmap's color space.</p>
      * <p>After this method returns, the current position of the buffer is
      * updated: the position is incremented by the number of elements read from
      * the buffer. If you need to read the bitmap from the buffer again you must
@@ -1495,7 +1496,8 @@ public final class Bitmap implements Parcelable {
     /**
      * Returns the {@link Color} at the specified location. Throws an exception
      * if x or y are out of bounds (negative or >= to the width or height
-     * respectively). The returned color is a non-premultiplied ARGB value.
+     * respectively). The returned color is a non-premultiplied ARGB value in
+     * the {@link ColorSpace.Named#SRGB sRGB} color space.
      *
      * @param x    The x coordinate (0...width-1) of the pixel to return
      * @param y    The y coordinate (0...height-1) of the pixel to return
@@ -1517,7 +1519,8 @@ public final class Bitmap implements Parcelable {
      * a packed int representing a {@link Color}. The stride parameter allows
      * the caller to allow for gaps in the returned pixels array between
      * rows. For normal packed results, just pass width for the stride value.
-     * The returned colors are non-premultiplied ARGB values.
+     * The returned colors are non-premultiplied ARGB values in the
+     * {@link ColorSpace.Named#SRGB sRGB} color space.
      *
      * @param pixels   The array to receive the bitmap's colors
      * @param offset   The first index to write into pixels[]
@@ -1610,7 +1613,8 @@ public final class Bitmap implements Parcelable {
     /**
      * <p>Write the specified {@link Color} into the bitmap (assuming it is
      * mutable) at the x,y coordinate. The color must be a
-     * non-premultiplied ARGB value.</p>
+     * non-premultiplied ARGB value in the {@link ColorSpace.Named#SRGB sRGB}
+     * color space.</p>
      *
      * @param x     The x coordinate of the pixel to replace (0...width-1)
      * @param y     The y coordinate of the pixel to replace (0...height-1)
@@ -1632,7 +1636,7 @@ public final class Bitmap implements Parcelable {
     /**
      * <p>Replace pixels in the bitmap with the colors in the array. Each element
      * in the array is a packed int representing a non-premultiplied ARGB
-     * {@link Color}.</p>
+     * {@link Color} in the {@link ColorSpace.Named#SRGB sRGB} color space.</p>
      *
      * @param pixels   The colors to write to the bitmap
      * @param offset   The index of the first color to read from pixels[]
