@@ -471,7 +471,8 @@ public class WifiTracker {
                     accessPoint.update(connectionConfig, mLastInfo, mLastNetworkInfo);
                 }
                 if (mIncludeSaved) {
-                    // If saved network not present in scan result then set its Rssi to MAX_VALUE
+                    // If saved network not present in scan result then set its Rssi to
+                    // UNREACHABLE_RSSI
                     boolean apFound = false;
                     for (ScanResult result : results) {
                         if (result.SSID.equals(accessPoint.getSsidStr())) {
@@ -480,7 +481,7 @@ public class WifiTracker {
                         }
                     }
                     if (!apFound) {
-                        accessPoint.setRssi(Integer.MAX_VALUE);
+                        accessPoint.setRssi(AccessPoint.UNREACHABLE_RSSI);
                     }
                     accessPoints.add(accessPoint);
                     apMap.put(accessPoint.getSsidStr(), accessPoint);

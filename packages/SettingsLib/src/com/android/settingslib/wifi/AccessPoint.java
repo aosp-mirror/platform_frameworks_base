@@ -848,7 +848,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
         return false;
     }
 
-    boolean update(WifiConfiguration config, WifiInfo info, NetworkInfo networkInfo) {
+    public boolean update(WifiConfiguration config, WifiInfo info, NetworkInfo networkInfo) {
         boolean reorder = false;
         if (info != null && isInfoForThisAccessPoint(config, info)) {
             reorder = (mInfo == null);
