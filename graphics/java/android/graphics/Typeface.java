@@ -52,6 +52,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -114,6 +115,9 @@ public class Typeface {
     public static final int BOLD_ITALIC = 3;
 
     private int mStyle = 0;
+
+    private int[] mSupportedAxes;
+    private static final int[] EMPTY_AXES = {};
 
     private static void setDefault(Typeface t) {
         sDefaultTypeface = t;
@@ -478,10 +482,8 @@ public class Typeface {
 
     /** @hide */
     public static Typeface createFromTypefaceWithVariation(Typeface family,
-            String fontVariationSettings) {
+            List<FontConfig.Axis> axes) {
         final long ni = family == null ? 0 : family.native_instance;
-        ArrayList<FontConfig.Axis> axes =
-                FontListParser.parseFontVariationSettings(fontVariationSettings);
         return new Typeface(nativeCreateFromTypefaceWithVariation(ni, axes));
     }
 
@@ -774,6 +776,21 @@ public class Typeface {
         return result;
     }
 
+    /** @hide */
+    public boolean isSupportedAxes(int axis) {
+        if (mSupportedAxes == null) {
+            synchronized (this) {
+                if (mSupportedAxes == null) {
+                    mSupportedAxes = nativeGetSupportedAxes(native_instance);
+                    if (mSupportedAxes == null) {
+                        mSupportedAxes = EMPTY_AXES;
+                    }
+                }
+            }
+        }
+        return Arrays.binarySearch(mSupportedAxes, axis) > 0;
+    }
+
     private static native long nativeCreateFromTypeface(long native_instance, int style);
     private static native long nativeCreateFromTypefaceWithVariation(
             long native_instance, List<FontConfig.Axis> axes);
@@ -782,4 +799,5 @@ public class Typeface {
     private static native int  nativeGetStyle(long native_instance);
     private static native long nativeCreateFromArray(long[] familyArray);
     private static native void nativeSetDefault(long native_instance);
+    private static native int[] nativeGetSupportedAxes(long native_instance);
 }

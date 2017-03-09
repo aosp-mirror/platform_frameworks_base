@@ -91,6 +91,24 @@ static void Typeface_setDefault(JNIEnv *env, jobject, jlong faceHandle) {
     Typeface::setDefault(face);
 }
 
+static jobject Typeface_getSupportedAxes(JNIEnv *env, jobject, jlong faceHandle) {
+    Typeface* face = reinterpret_cast<Typeface*>(faceHandle);
+    const std::unordered_set<minikin::AxisTag>& tagSet = face->fFontCollection->getSupportedTags();
+    const size_t length = tagSet.size();
+    if (length == 0) {
+        return nullptr;
+    }
+    std::vector<jint> tagVec(length);
+    int index = 0;
+    for (const auto& tag : tagSet) {
+        tagVec[index++] = tag;
+    }
+    std::sort(tagVec.begin(), tagVec.end());
+    const jintArray result = env->NewIntArray(length);
+    env->SetIntArrayRegion(result, 0, length, tagVec.data());
+    return result;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 static const JNINativeMethod gTypefaceMethods[] = {
@@ -103,6 +121,7 @@ static const JNINativeMethod gTypefaceMethods[] = {
     { "nativeCreateFromArray",    "([J)J",
                                            (void*)Typeface_createFromArray },
     { "nativeSetDefault",         "(J)V",   (void*)Typeface_setDefault },
+    { "nativeGetSupportedAxes",   "(J)[I",  (void*)Typeface_getSupportedAxes },
 };
 
 int register_android_graphics_Typeface(JNIEnv* env)

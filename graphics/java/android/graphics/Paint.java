@@ -19,7 +19,9 @@ package android.graphics;
 import android.annotation.ColorInt;
 import android.annotation.NonNull;
 import android.annotation.Size;
+import android.graphics.FontListParser;
 import android.os.LocaleList;
+import android.text.FontConfig;
 import android.text.GraphicsOperations;
 import android.text.SpannableString;
 import android.text.SpannedString;
@@ -30,6 +32,9 @@ import com.android.internal.annotations.GuardedBy;
 import dalvik.annotation.optimization.CriticalNative;
 import dalvik.annotation.optimization.FastNative;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
 
@@ -1522,21 +1527,46 @@ public class Paint {
     /**
      * Set font variation settings.
      *
+     * This function does nothing if none of the settings is applicable to underlying font files.
+     *
      * @param settings font variation settings, e.g. "'wdth' 300, 'wght' 1.8"
      *
      * @see #getFontVariationSettings()
      *
      * @param settings the font variation settings. You can pass null or empty string as no
      *                 variation settings.
+     * @return true if the given settings is effective to at least one font file underlying this
+     *         typeface. This function also returns true for empty settings string. Otherwise
+     *         returns false
      */
-    public void setFontVariationSettings(String settings) {
+    public boolean setFontVariationSettings(String settings) {
         settings = TextUtils.nullIfEmpty(settings);
         if (settings == mFontVariationSettings
                 || (settings != null && settings.equals(mFontVariationSettings))) {
-            return;
+            return true;
+        }
+
+        if (settings == null || settings.length() == 0) {
+            mFontVariationSettings = null;
+            setTypeface(Typeface.createFromTypefaceWithVariation(mTypeface,
+                      Collections.emptyList()));
+            return true;
+        }
+
+        final ArrayList<FontConfig.Axis> axes = FontListParser.parseFontVariationSettings(settings);
+        final ArrayList<FontConfig.Axis> filteredAxes = new ArrayList<FontConfig.Axis>();
+        for (int i = 0; i < axes.size(); ++i) {
+            final FontConfig.Axis axis = axes.get(i);
+            if (mTypeface.isSupportedAxes(axis.getTag())) {
+                filteredAxes.add(axis);
+            }
+        }
+        if (filteredAxes.isEmpty()) {
+            return false;
         }
         mFontVariationSettings = settings;
-        setTypeface(Typeface.createFromTypefaceWithVariation(mTypeface, settings));
+        setTypeface(Typeface.createFromTypefaceWithVariation(mTypeface, filteredAxes));
+        return true;
     }
 
     /**
