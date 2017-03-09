@@ -474,6 +474,11 @@ public class TextUtils {
         return !isEmpty(a) ? a : Preconditions.checkStringNotEmpty(b);
     }
 
+    /** {@hide} */
+    public static int length(@Nullable String s) {
+        return isEmpty(s) ? 0 : s.length();
+    }
+
     /**
      * Returns the length that the specified CharSequence would have if
      * spaces and ASCII control characters were trimmed from the start and end,
