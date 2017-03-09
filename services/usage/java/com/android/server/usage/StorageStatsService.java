@@ -28,6 +28,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageStats;
 import android.content.pm.UserInfo;
+import android.net.TrafficStats;
 import android.os.Binder;
 import android.os.Environment;
 import android.os.FileUtils;
@@ -43,6 +44,7 @@ import android.os.storage.StorageManager;
 import android.os.storage.VolumeInfo;
 import android.provider.Settings;
 import android.text.format.DateUtils;
+import android.util.ArrayMap;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -56,6 +58,7 @@ import com.android.server.pm.Installer.InstallerException;
 import com.android.server.storage.CacheQuotaStrategy;
 
 import java.io.IOException;
+import java.util.Map;
 
 public class StorageStatsService extends IStorageStatsManager.Stub {
     private static final String TAG = "StorageStatsService";
@@ -83,6 +86,7 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
     private final UserManager mUser;
     private final PackageManager mPackage;
     private final StorageManager mStorage;
+    private final Map<String, Map<Integer, Long>> mCacheQuotas;
 
     private final Installer mInstaller;
     private final H mHandler;
@@ -93,6 +97,7 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
         mUser = Preconditions.checkNotNull(context.getSystemService(UserManager.class));
         mPackage = Preconditions.checkNotNull(context.getPackageManager());
         mStorage = Preconditions.checkNotNull(context.getSystemService(StorageManager.class));
+        mCacheQuotas = new ArrayMap<>();
 
         mInstaller = new Installer(context);
         mInstaller.onStart();
@@ -174,6 +179,21 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
             final VolumeInfo vol = mStorage.findVolumeByUuid(volumeUuid);
             return vol.getPath().getFreeSpace() + cacheBytes;
         }
+    }
+
+    @Override
+    public long getCacheQuotaBytes(String volumeUuid, int uid, String callingPackage) {
+        enforcePermission(Binder.getCallingUid(), callingPackage);
+
+        if (mCacheQuotas.containsKey(volumeUuid)) {
+            // TODO: Change to SparseLongArray.
+            Map<Integer, Long> uidMap = mCacheQuotas.get(volumeUuid);
+            if (uidMap.containsKey(uid)) {
+                return uidMap.get(uid);
+            }
+        }
+
+        return 64 * TrafficStats.MB_IN_BYTES;
     }
 
     @Override
@@ -424,7 +444,7 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
         private CacheQuotaStrategy getInitializedStrategy() {
             UsageStatsManagerInternal usageStatsManager =
                     LocalServices.getService(UsageStatsManagerInternal.class);
-            return new CacheQuotaStrategy(mContext, usageStatsManager, mInstaller);
+            return new CacheQuotaStrategy(mContext, usageStatsManager, mInstaller, mCacheQuotas);
         }
     }
 

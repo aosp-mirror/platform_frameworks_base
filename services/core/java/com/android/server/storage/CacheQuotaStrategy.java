@@ -41,6 +41,7 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.text.format.DateUtils;
+import android.util.ArrayMap;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.Xml;
@@ -64,6 +65,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * CacheQuotaStrategy is a strategy for determining cache quotas using usage stats and foreground
@@ -85,15 +87,18 @@ public class CacheQuotaStrategy implements RemoteCallback.OnResultListener {
     private final Context mContext;
     private final UsageStatsManagerInternal mUsageStats;
     private final Installer mInstaller;
+    private final Map<String, Map<Integer, Long>> mQuotaMap;
     private ServiceConnection mServiceConnection;
     private ICacheQuotaService mRemoteService;
     private AtomicFile mPreviousValuesFile;
 
     public CacheQuotaStrategy(
-            Context context, UsageStatsManagerInternal usageStatsManager, Installer installer) {
+            Context context, UsageStatsManagerInternal usageStatsManager, Installer installer,
+            Map<String, Map<Integer, Long>> quotaMap) {
         mContext = Preconditions.checkNotNull(context);
         mUsageStats = Preconditions.checkNotNull(usageStatsManager);
         mInstaller = Preconditions.checkNotNull(installer);
+        mQuotaMap = Preconditions.checkNotNull(quotaMap);
         mPreviousValuesFile = new AtomicFile(new File(
                 new File(Environment.getDataDirectory(), "system"), "cachequota.xml"));
     }
@@ -221,6 +226,9 @@ public class CacheQuotaStrategy implements RemoteCallback.OnResultListener {
                 mInstaller.setAppQuota(request.getVolumeUuid(),
                         UserHandle.getUserId(uid),
                         UserHandle.getAppId(uid), proposedQuota);
+                insertIntoQuotaMap(request.getVolumeUuid(),
+                        UserHandle.getUserId(uid),
+                        UserHandle.getAppId(uid), proposedQuota);
             } catch (Installer.InstallerException ex) {
                 Slog.w(TAG,
                         "Failed to set cache quota for " + request.getUid(),
@@ -229,6 +237,15 @@ public class CacheQuotaStrategy implements RemoteCallback.OnResultListener {
         }
 
         disconnectService();
+    }
+
+    private void insertIntoQuotaMap(String volumeUuid, int userId, int appId, long quota) {
+        Map<Integer, Long> volumeMap = mQuotaMap.get(volumeUuid);
+        if (volumeMap == null) {
+            volumeMap = new ArrayMap<>();
+            mQuotaMap.put(volumeUuid, volumeMap);
+        }
+        volumeMap.put(UserHandle.getUid(userId, appId), quota);
     }
 
     private void disconnectService() {

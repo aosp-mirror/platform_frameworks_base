@@ -195,4 +195,13 @@ public class StorageStatsManager {
             throw e.rethrowFromSystemServer();
         }
     }
+
+    /** {@hide} */
+    public long getCacheQuotaBytes(String volumeUuid, int uid) {
+        try {
+            return mService.getCacheQuotaBytes(volumeUuid, uid, mContext.getOpPackageName());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
 }
