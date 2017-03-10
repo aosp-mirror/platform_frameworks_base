@@ -1170,7 +1170,12 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
      */
     @Override
     int getOrientation() {
-        if (fillsParent() && (isVisible() || mService.mOpeningApps.contains(this))) {
+        // The {@link AppWindowToken} should only specify an orientation when it is not closing or
+        // going to the bottom. Allowing closing {@link AppWindowToken} to participate can lead to
+        // an Activity in another task being started in the wrong orientation during the transition.
+        if (fillsParent()
+                && !(sendingToBottom || mService.mClosingApps.contains(this))
+                && (isVisible() || mService.mOpeningApps.contains(this))) {
             return mOrientation;
         }
 
