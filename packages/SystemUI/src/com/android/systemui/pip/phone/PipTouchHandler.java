@@ -52,7 +52,8 @@ public class PipTouchHandler {
     private static final int SHOW_DISMISS_AFFORDANCE_DELAY = 200;
 
     // Allow dragging the PIP to a location to close it
-    private static final boolean ENABLE_DRAG_TO_DISMISS = false;
+    private static final boolean ENABLE_DISMISS_DRAG_TO_TARGET = false;
+    private static final boolean ENABLE_DISMISS_DRAG_TO_EDGE = false;
 
     private final Context mContext;
     private final IActivityManager mActivityManager;
@@ -78,7 +79,7 @@ public class PipTouchHandler {
     private Runnable mShowDismissAffordance = new Runnable() {
         @Override
         public void run() {
-            if (ENABLE_DRAG_TO_DISMISS) {
+            if (ENABLE_DISMISS_DRAG_TO_TARGET) {
                 mDismissViewController.showDismissTarget(mMotionHelper.getBounds());
             }
         }
@@ -378,7 +379,7 @@ public class PipTouchHandler {
                 mMenuController.pokeMenu();
             }
 
-            if (ENABLE_DRAG_TO_DISMISS) {
+            if (ENABLE_DISMISS_DRAG_TO_TARGET) {
                 mDismissViewController.createDismissTarget();
                 mHandler.postDelayed(mShowDismissAffordance, SHOW_DISMISS_AFFORDANCE_DELAY);
             }
@@ -394,7 +395,7 @@ public class PipTouchHandler {
                 mSavedSnapFraction = -1f;
             }
 
-            if (touchState.startedDragging() && ENABLE_DRAG_TO_DISMISS) {
+            if (touchState.startedDragging() && ENABLE_DISMISS_DRAG_TO_TARGET) {
                 mHandler.removeCallbacks(mShowDismissAffordance);
                 mDismissViewController.showDismissTarget(mMotionHelper.getBounds());
             }
@@ -408,11 +409,16 @@ public class PipTouchHandler {
                 if (!touchState.allowDraggingOffscreen()) {
                     left = Math.max(mMovementBounds.left, Math.min(mMovementBounds.right, left));
                 }
-                top = Math.max(mMovementBounds.top, Math.min(mMovementBounds.bottom, top));
+                if (ENABLE_DISMISS_DRAG_TO_EDGE) {
+                    // Allow pip to move past bottom bounds
+                    top = Math.max(mMovementBounds.top, top);
+                } else {
+                    top = Math.max(mMovementBounds.top, Math.min(mMovementBounds.bottom, top));
+                }
                 mTmpBounds.offsetTo((int) left, (int) top);
                 mMotionHelper.movePip(mTmpBounds);
 
-                if (ENABLE_DRAG_TO_DISMISS) {
+                if (ENABLE_DISMISS_DRAG_TO_TARGET) {
                     mDismissViewController.updateDismissTarget(mTmpBounds);
                 }
                 return true;
@@ -427,7 +433,7 @@ public class PipTouchHandler {
             }
 
             try {
-                if (ENABLE_DRAG_TO_DISMISS) {
+                if (ENABLE_DISMISS_DRAG_TO_TARGET) {
                     mHandler.removeCallbacks(mShowDismissAffordance);
                     PointF vel = mTouchState.getVelocity();
                     final float velocity = PointF.length(vel.x, vel.y);
@@ -435,7 +441,7 @@ public class PipTouchHandler {
                             && velocity < mFlingAnimationUtils.getMinVelocityPxPerSecond()) {
                         if (mDismissViewController.shouldDismiss(mMotionHelper.getBounds())) {
                             Rect dismissBounds = mDismissViewController.getDismissBounds();
-                            mMotionHelper.animateDismissFromDrag(dismissBounds);
+                            mMotionHelper.animateDragToTargetDismiss(dismissBounds);
                             MetricsLogger.action(mContext,
                                     MetricsEvent.ACTION_PICTURE_IN_PICTURE_DISMISSED,
                                     METRIC_VALUE_DISMISSED_BY_DRAG);
@@ -448,9 +454,17 @@ public class PipTouchHandler {
             }
 
             if (touchState.isDragging()) {
-                PointF vel = mTouchState.getVelocity();
-                if (!mIsMinimized && (mMotionHelper.shouldMinimizePip()
-                        || isHorizontalFlingTowardsCurrentEdge(vel))) {
+                final boolean onLeft = mMotionHelper.getBounds().left < mMovementBounds.centerX();
+                boolean isFlingToBot = isFlingTowardsEdge(touchState, 4 /* bottom */);
+                if (ENABLE_DISMISS_DRAG_TO_EDGE
+                        && (mMotionHelper.shouldDismissPip() || isFlingToBot)) {
+                    mMotionHelper.animateDragToEdgeDismiss(mMotionHelper.getBounds());
+                    MetricsLogger.action(mContext,
+                            MetricsEvent.ACTION_PICTURE_IN_PICTURE_DISMISSED,
+                            METRIC_VALUE_DISMISSED_BY_DRAG);
+                    return true;
+                } else if (!mIsMinimized && (mMotionHelper.shouldMinimizePip()
+                        || isFlingTowardsEdge(touchState, onLeft ? 2 : 3))) {
                     // Pip should be minimized
                     setMinimizedStateInternal(true);
                     if (mMenuController.isMenuVisible()) {
@@ -475,6 +489,7 @@ public class PipTouchHandler {
                     mMenuController.showMenu(mMotionHelper.getBounds(), mMovementBounds);
                 }
 
+                final PointF vel = mTouchState.getVelocity();
                 final float velocity = PointF.length(vel.x, vel.y);
                 if (velocity > mFlingAnimationUtils.getMinVelocityPxPerSecond()) {
                     mMotionHelper.flingToSnapTarget(velocity, vel.x, vel.y, mMovementBounds);
@@ -495,29 +510,39 @@ public class PipTouchHandler {
     };
 
     /**
-     * @return whether the gesture ending in the {@param vel} is fast enough to be a fling towards
-     *         the same edge the PIP is on. Used to identify a minimize gesture.
+     * @return whether the gesture ending in {@param vel} is fast enough to be a fling and towards
+     *         the provided {@param edge} where:
+     *
+     *         1 = top
+     *         2 = left
+     *         3 = right
+     *         4 = bottom
      */
-    private boolean isHorizontalFlingTowardsCurrentEdge(PointF vel) {
-        final boolean isHorizontal = Math.abs(vel.x) > Math.abs(vel.y);
-        final boolean isFling = PointF.length(vel.x, vel.y) > mFlingAnimationUtils
-                .getMinVelocityPxPerSecond();
-        final boolean towardsCurrentEdge = isOverEdge(true /* left */) && vel.x < 0
-                || isOverEdge(false /* right */) && vel.x > 0;
-        return towardsCurrentEdge && isHorizontal && isFling;
-    }
-
-    /**
-     * @return whether the given bounds are on the left or right edge (depending on
-     *         {@param checkLeft})
-     */
-    private boolean isOverEdge(boolean checkLeft) {
+    private boolean isFlingTowardsEdge(PipTouchState touchState, int edge) {
+        final PointF vel = touchState.getVelocity();
+        final PointF downPos = touchState.getDownTouchPosition();
         final Rect bounds = mMotionHelper.getBounds();
-        if (checkLeft) {
-            return bounds.left <= mMovementBounds.left;
-        } else {
-            return bounds.right >= mMovementBounds.right + bounds.width();
+        final boolean isHorizontal = Math.abs(vel.x) > Math.abs(vel.y);
+        final boolean isFling =
+                PointF.length(vel.x, vel.y) > mFlingAnimationUtils.getMinVelocityPxPerSecond();
+        if (!isFling) {
+            return false;
         }
+        switch (edge) {
+            case 1: // top
+                return !isHorizontal && vel.y < 0
+                        && downPos.y <= mMovementBounds.top + bounds.height();
+            case 2: // left
+                return isHorizontal && vel.x < 0
+                        && downPos.x <= mMovementBounds.left + bounds.width();
+            case 3: // right
+                return isHorizontal && vel.x > 0
+                        && downPos.x >= mMovementBounds.right;
+            case 4: // bottom
+                return !isHorizontal && vel.y > 0
+                        && downPos.y >= mMovementBounds.bottom;
+        }
+        return false;
     }
 
     /**
@@ -542,7 +567,7 @@ public class PipTouchHandler {
         pw.println(innerPrefix + "mIsImeShowing=" + mIsImeShowing);
         pw.println(innerPrefix + "mImeHeight=" + mImeHeight);
         pw.println(innerPrefix + "mSavedSnapFraction=" + mSavedSnapFraction);
-        pw.println(innerPrefix + "mEnableDragToDismiss=" + ENABLE_DRAG_TO_DISMISS);
+        pw.println(innerPrefix + "mEnableDragToDismiss=" + ENABLE_DISMISS_DRAG_TO_TARGET);
         mSnapAlgorithm.dump(pw, innerPrefix);
         mTouchState.dump(pw, innerPrefix);
         mMotionHelper.dump(pw, innerPrefix);
