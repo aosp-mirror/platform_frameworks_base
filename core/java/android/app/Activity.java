@@ -16,9 +16,9 @@
 
 package android.app;
 
-import android.view.autofill.AutoFillId;
-import android.view.autofill.AutoFillManager;
-import android.view.autofill.AutoFillValue;
+import android.view.autofill.AutofillId;
+import android.view.autofill.AutofillManager;
+import android.view.autofill.AutofillValue;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.app.ToolbarActionBar;
@@ -690,7 +690,7 @@ public class Activity extends ContextThemeWrapper
         Window.Callback, KeyEvent.Callback,
         OnCreateContextMenuListener, ComponentCallbacks2,
         Window.OnWindowDismissedCallback, WindowControllerCallback,
-        AutoFillManager.AutoFillClient {
+        AutofillManager.AutofillClient {
     private static final String TAG = "Activity";
     private static final boolean DEBUG_LIFECYCLE = false;
 
@@ -1783,7 +1783,7 @@ public class Activity extends ContextThemeWrapper
         mTranslucentCallback = null;
         mCalled = true;
         if (isFinishing() && mAutoFillResetNeeded) {
-            getSystemService(AutoFillManager.class).reset();
+            getSystemService(AutofillManager.class).reset();
         }
     }
 
@@ -7042,7 +7042,7 @@ public class Activity extends ContextThemeWrapper
             }
         } else if (who.startsWith(AUTO_FILL_AUTH_WHO_PREFIX)) {
             Intent resultData = (resultCode == Activity.RESULT_OK) ? data : null;
-            getSystemService(AutoFillManager.class).onAuthenticationResult(resultData);
+            getSystemService(AutofillManager.class).onAuthenticationResult(resultData);
         } else {
             Fragment frag = mFragments.findFragmentByWho(who);
             if (frag != null) {
@@ -7185,22 +7185,22 @@ public class Activity extends ContextThemeWrapper
 
     /** @hide */
     @Override
-    public void autoFill(List<AutoFillId> ids, List<AutoFillValue> values) {
+    public void autofill(List<AutofillId> ids, List<AutofillValue> values) {
         final View root = getWindow().getDecorView();
         final int itemCount = ids.size();
         for (int i = 0; i < itemCount; i++) {
-            final AutoFillId id = ids.get(i);
-            final AutoFillValue value = values.get(i);
+            final AutofillId id = ids.get(i);
+            final AutofillValue value = values.get(i);
             final int viewId = id.getViewId();
             final View view = root.findViewByAccessibilityIdTraversal(viewId);
             if (view == null) {
-                Log.w(TAG, "autoFill(): no View with id " + viewId);
+                Log.w(TAG, "autofill(): no View with id " + viewId);
                 continue;
             }
             if (id.isVirtual()) {
-                view.autoFillVirtual(id.getVirtualChildId(), value);
+                view.autofillVirtual(id.getVirtualChildId(), value);
             } else {
-                view.autoFill(value);
+                view.autofill(value);
             }
         }
     }

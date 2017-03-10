@@ -22,8 +22,8 @@ import android.os.Bundle;
 import android.os.RemoteException;
 
 /**
- * Handles auto-fill requests from the {@link AutoFillService} into the {@link Activity} being
- * auto-filled.
+ * Handles autofill requests from the {@link AutofillService} into the {@link Activity} being
+ * autofilled.
  */
 public final class FillCallback {
     private final IFillCallback mCallback;
@@ -36,11 +36,11 @@ public final class FillCallback {
 
     /**
      * Notifies the Android System that an
-     * {@link AutoFillService#onFillRequest(android.app.assist.AssistStructure, Bundle,
+     * {@link AutofillService#onFillRequest(android.app.assist.AssistStructure, Bundle,
      * android.os.CancellationSignal, FillCallback)} was successfully fulfilled by the service.
      *
-     * @param response auto-fill information for that activity, or {@code null} when the activity
-     * cannot be auto-filled (for example, if it only contains read-only fields). See
+     * @param response autofill information for that activity, or {@code null} when the activity
+     * cannot be autofilled (for example, if it only contains read-only fields). See
      * {@link FillResponse} for examples.
      */
     public void onSuccess(@Nullable FillResponse response) {
@@ -55,7 +55,7 @@ public final class FillCallback {
 
     /**
      * Notifies the Android System that an
-     * {@link AutoFillService#onFillRequest(android.app.assist.AssistStructure,
+     * {@link AutofillService#onFillRequest(android.app.assist.AssistStructure,
      * Bundle, android.os.CancellationSignal, FillCallback)}
      * could not be fulfilled by the service.
      *

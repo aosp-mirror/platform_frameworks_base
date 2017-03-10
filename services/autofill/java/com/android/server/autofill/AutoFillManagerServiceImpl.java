@@ -16,13 +16,13 @@
 
 package com.android.server.autofill;
 
-import static android.service.autofill.AutoFillService.EXTRA_ACTIVITY_TOKEN;
+import static android.service.autofill.AutofillService.EXTRA_ACTIVITY_TOKEN;
 import static android.service.voice.VoiceInteractionSession.KEY_RECEIVER_EXTRAS;
 import static android.service.voice.VoiceInteractionSession.KEY_STRUCTURE;
-import static android.view.autofill.AutoFillManager.FLAG_FOCUS_GAINED;
-import static android.view.autofill.AutoFillManager.FLAG_FOCUS_LOST;
-import static android.view.autofill.AutoFillManager.FLAG_START_SESSION;
-import static android.view.autofill.AutoFillManager.FLAG_VALUE_CHANGED;
+import static android.view.autofill.AutofillManager.FLAG_FOCUS_GAINED;
+import static android.view.autofill.AutofillManager.FLAG_FOCUS_LOST;
+import static android.view.autofill.AutofillManager.FLAG_START_SESSION;
+import static android.view.autofill.AutofillManager.FLAG_VALUE_CHANGED;
 
 import static com.android.server.autofill.Helper.DEBUG;
 import static com.android.server.autofill.Helper.VERBOSE;
@@ -51,8 +51,8 @@ import android.os.Parcelable;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.provider.Settings;
-import android.service.autofill.AutoFillService;
-import android.service.autofill.AutoFillServiceInfo;
+import android.service.autofill.AutofillService;
+import android.service.autofill.AutofillServiceInfo;
 import android.service.autofill.Dataset;
 import android.service.autofill.FillResponse;
 import android.service.autofill.IAutoFillService;
@@ -62,10 +62,9 @@ import android.util.ArrayMap;
 import android.util.LocalLog;
 import android.util.PrintWriterPrinter;
 import android.util.Slog;
-import android.view.autofill.AutoFillId;
-import android.view.autofill.AutoFillManager;
-import android.view.autofill.AutoFillValue;
-
+import android.view.autofill.AutofillId;
+import android.view.autofill.AutofillManager;
+import android.view.autofill.AutofillValue;
 import android.view.autofill.IAutoFillManagerClient;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.HandlerCaller;
@@ -94,7 +93,7 @@ final class AutoFillManagerServiceImpl {
     private final AutoFillUI mUi;
 
     private RemoteCallbackList<IAutoFillManagerClient> mClients;
-    private AutoFillServiceInfo mInfo;
+    private AutofillServiceInfo mInfo;
 
     private final LocalLog mRequestsHistory;
 
@@ -114,7 +113,7 @@ final class AutoFillManagerServiceImpl {
     /**
      * Cache of pending {@link Session}s, keyed by {@code activityToken}.
      *
-     * <p>They're kept until the {@link AutoFillService} finished handling a request, an error
+     * <p>They're kept until the {@link AutofillService} finished handling a request, an error
      * occurs, or the session times out.
      */
     // TODO(b/33197203): need to make sure service is bound while callback is pending and/or
@@ -205,21 +204,21 @@ final class AutoFillManagerServiceImpl {
         ComponentName serviceComponent = null;
         ServiceInfo serviceInfo = null;
         final String componentName = Settings.Secure.getStringForUser(
-                mContext.getContentResolver(), Settings.Secure.AUTO_FILL_SERVICE, mUserId);
+                mContext.getContentResolver(), Settings.Secure.AUTOFILL_SERVICE, mUserId);
         if (!TextUtils.isEmpty(componentName)) {
             try {
                 serviceComponent = ComponentName.unflattenFromString(componentName);
                 serviceInfo = AppGlobals.getPackageManager().getServiceInfo(serviceComponent,
                         0, mUserId);
             } catch (RuntimeException | RemoteException e) {
-                Slog.e(TAG, "Bad auto-fill service name " + componentName + ": " + e);
+                Slog.e(TAG, "Bad autofill service name " + componentName + ": " + e);
                 return;
             }
         }
         try {
             final boolean hadService = hasService();
             if (serviceInfo != null) {
-                mInfo = new AutoFillServiceInfo(mContext.getPackageManager(),
+                mInfo = new AutofillServiceInfo(mContext.getPackageManager(),
                         serviceComponent, mUserId);
             } else {
                 mInfo = null;
@@ -236,7 +235,7 @@ final class AutoFillManagerServiceImpl {
                 sendStateToClients();
             }
         } catch (PackageManager.NameNotFoundException e) {
-            Slog.e(TAG, "Bad auto-fill service name " + componentName + ": " + e);
+            Slog.e(TAG, "Bad autofill service name " + componentName + ": " + e);
         }
     }
 
@@ -285,14 +284,15 @@ final class AutoFillManagerServiceImpl {
     }
 
     void startSessionLocked(IBinder activityToken, IBinder windowToken, IBinder appCallbackToken,
-            AutoFillId autoFillId,  Rect bounds, AutoFillValue value, boolean hasCallback) {
+            AutofillId autofillId,  Rect bounds, AutofillValue value, boolean hasCallback) {
         if (!hasService()) {
             return;
         }
 
         final String historyItem = "s=" + mInfo.getServiceInfo().packageName
                 + " u=" + mUserId + " a=" + activityToken
-                + " i=" + autoFillId + " b=" + bounds + " hc=" + hasCallback;
+
+                + " i=" + autofillId + " b=" + bounds + " hc=" + hasCallback;
         mRequestsHistory.log(historyItem);
 
         // TODO(b/33197203): Handle partitioning
@@ -304,7 +304,7 @@ final class AutoFillManagerServiceImpl {
 
         final Session newSession = createSessionByTokenLocked(activityToken,
                 windowToken, appCallbackToken, hasCallback);
-        newSession.updateLocked(autoFillId, bounds, value, FLAG_START_SESSION);
+        newSession.updateLocked(autofillId, bounds, value, FLAG_START_SESSION);
     }
 
     void finishSessionLocked(IBinder activityToken) {
@@ -340,9 +340,9 @@ final class AutoFillManagerServiceImpl {
             receiverExtras.putBinder(EXTRA_ACTIVITY_TOKEN, activityToken);
             final long identity = Binder.clearCallingIdentity();
             try {
-                if (!ActivityManager.getService().requestAutoFillData(mAssistReceiver,
+                if (!ActivityManager.getService().requestAutofillData(mAssistReceiver,
                         receiverExtras, activityToken)) {
-                    Slog.w(TAG, "failed to request auto-fill data for " + activityToken);
+                    Slog.w(TAG, "failed to request autofill data for " + activityToken);
                 }
             } finally {
                 Binder.restoreCallingIdentity(identity);
@@ -353,8 +353,8 @@ final class AutoFillManagerServiceImpl {
         return newSession;
     }
 
-    void updateSessionLocked(IBinder activityToken, AutoFillId autoFillId, Rect bounds,
-            AutoFillValue value, int flags) {
+    void updateSessionLocked(IBinder activityToken, AutofillId autofillId, Rect bounds,
+            AutofillValue value, int flags) {
         // TODO(b/33197203): add MetricsLogger call
         final Session session = mSessions.get(activityToken);
         if (session == null) {
@@ -364,7 +364,7 @@ final class AutoFillManagerServiceImpl {
             return;
         }
 
-        session.updateLocked(autoFillId, bounds, value, flags);
+        session.updateLocked(autofillId, bounds, value, flags);
     }
 
     private void handleSessionSave(IBinder activityToken) {
@@ -463,7 +463,7 @@ final class AutoFillManagerServiceImpl {
     }
 
     /**
-     * State for a given view with a AutoFillId.
+     * State for a given view with a AutofillId.
      *
      * <p>This class holds state about a view and calls its listener when the fill UI is ready to
      * be displayed for the view.
@@ -474,10 +474,10 @@ final class AutoFillManagerServiceImpl {
              * Called when the fill UI is ready to be shown for this view.
              */
             void onFillReady(ViewState viewState, FillResponse fillResponse, Rect bounds,
-                    AutoFillId focusedId, @Nullable AutoFillValue value);
+                    AutofillId focusedId, @Nullable AutofillValue value);
         }
 
-        final AutoFillId mId;
+        final AutofillId mId;
         private final Listener mListener;
         // TODO(b/33197203): would not need a reference to response and session if it was an inner
         // class of Session...
@@ -486,12 +486,12 @@ final class AutoFillManagerServiceImpl {
         FillResponse mResponse;
         Intent mAuthIntent;
 
-        private AutoFillValue mAutoFillValue;
+        private AutofillValue mAutofillValue;
         private Rect mBounds;
 
         private boolean mValueUpdated;
 
-        ViewState(Session session, AutoFillId id, Listener listener) {
+        ViewState(Session session, AutofillId id, Listener listener) {
             mSession = session;
             mId = id;
             mListener = listener;
@@ -520,9 +520,9 @@ final class AutoFillManagerServiceImpl {
         // TODO(b/33197203): need to refactor / rename / document this method to make it clear that
         // it can change  the value and update the UI; similarly, should replace code that
         // directly sets mAutoFilLValue to use encapsulation.
-        void update(@Nullable AutoFillValue autoFillValue, @Nullable Rect bounds) {
-            if (autoFillValue != null) {
-                mAutoFillValue = autoFillValue;
+        void update(@Nullable AutofillValue autofillValue, @Nullable Rect bounds) {
+            if (autofillValue != null) {
+                mAutofillValue = autofillValue;
             }
             if (bounds != null) {
                 mBounds = bounds;
@@ -533,25 +533,25 @@ final class AutoFillManagerServiceImpl {
 
         /**
          * Calls {@link
-         * Listener#onFillReady(ViewState, FillResponse, Rect, AutoFillId, AutoFillValue)} if the
+         * Listener#onFillReady(ViewState, FillResponse, Rect, AutofillId, AutofillValue)} if the
          * fill UI is ready to be displayed (i.e. when response and bounds are set).
          */
         void maybeCallOnFillReady() {
             if (mResponse != null && (mResponse.getAuthentication() != null
                     || mResponse.getDatasets() != null) && mBounds != null) {
-                mListener.onFillReady(this, mResponse, mBounds, mId, mAutoFillValue);
+                mListener.onFillReady(this, mResponse, mBounds, mId, mAutofillValue);
             }
         }
 
         @Override
         public String toString() {
-            return "ViewState: [id=" + mId + ", value=" + mAutoFillValue + ", bounds=" + mBounds
+            return "ViewState: [id=" + mId + ", value=" + mAutofillValue + ", bounds=" + mBounds
                     + ", updated = " + mValueUpdated + "]";
         }
 
         void dump(String prefix, PrintWriter pw) {
             pw.print(prefix); pw.print("id:" ); pw.println(mId);
-            pw.print(prefix); pw.print("value:" ); pw.println(mAutoFillValue);
+            pw.print(prefix); pw.print("value:" ); pw.println(mAutofillValue);
             pw.print(prefix); pw.print("updated:" ); pw.println(mValueUpdated);
             pw.print(prefix); pw.print("bounds:" ); pw.println(mBounds);
             pw.print(prefix); pw.print("authIntent:" ); pw.println(mAuthIntent);
@@ -564,7 +564,7 @@ final class AutoFillManagerServiceImpl {
      * <p>This class manages the multiple {@link ViewState}s for each view it has, and keeps track
      * of the current {@link ViewState} to display the appropriate UI.
      *
-     * <p>Although the auto-fill requests and callbacks are stateless from the service's point of
+     * <p>Although the autofill requests and callbacks are stateless from the service's point of
      * view, we need to keep state in the framework side for cases such as authentication. For
      * example, when service return a {@link FillResponse} that contains all the fields needed
      * to fill the activity but it requires authentication first, that response need to be held
@@ -580,7 +580,7 @@ final class AutoFillManagerServiceImpl {
         private final IBinder mWindowToken;
 
         @GuardedBy("mLock")
-        private final Map<AutoFillId, ViewState> mViewStates = new ArrayMap<>();
+        private final Map<AutofillId, ViewState> mViewStates = new ArrayMap<>();
 
         @GuardedBy("mLock")
         @Nullable
@@ -604,7 +604,7 @@ final class AutoFillManagerServiceImpl {
 
         /**
          * Assist structure sent by the app; it will be updated (sanitized, change values for save)
-         * before sent to {@link AutoFillService}.
+         * before sent to {@link AutofillService}.
          */
         @GuardedBy("mLock")
         private AssistStructure mStructure;
@@ -692,11 +692,11 @@ final class AutoFillManagerServiceImpl {
             try {
                 final String autoFillService = Settings.Secure.getStringForUser(
                         mContext.getContentResolver(),
-                        Settings.Secure.AUTO_FILL_SERVICE, mUserId);
+                        Settings.Secure.AUTOFILL_SERVICE, mUserId);
                 if (mInfo.getServiceInfo().getComponentName().equals(
                         ComponentName.unflattenFromString(autoFillService))) {
                     Settings.Secure.putStringForUser(mContext.getContentResolver(),
-                            Settings.Secure.AUTO_FILL_SERVICE, null, mUserId);
+                            Settings.Secure.AUTOFILL_SERVICE, null, mUserId);
                 }
             } finally {
                 Binder.restoreCallingIdentity(identity);
@@ -738,7 +738,7 @@ final class AutoFillManagerServiceImpl {
 
         // AutoFillUiCallback
         @Override
-        public void onEvent(AutoFillId id, int event) {
+        public void onEvent(AutofillId id, int event) {
             mHandlerCaller.getHandler().post(() -> {
                 notifyChangeToClient(id, event);
             });
@@ -749,7 +749,7 @@ final class AutoFillManagerServiceImpl {
                 removeSelf();
             } else {
                 Parcelable result = data.getParcelable(
-                        AutoFillManager.EXTRA_AUTHENTICATION_RESULT);
+                        AutofillManager.EXTRA_AUTHENTICATION_RESULT);
                 if (result instanceof FillResponse) {
                     mCurrentResponse = (FillResponse) result;
                     processResponseLocked(mCurrentResponse);
@@ -777,7 +777,7 @@ final class AutoFillManagerServiceImpl {
             }
             if (mCurrentResponse == null) {
                 // Happens when the activity / session was finished before the service replied, or
-                // when the service cannot auto-fill it (and returned a null response).
+                // when the service cannot autofill it (and returned a null response).
                 if (DEBUG) {
                     Slog.d(TAG, "showSaveLocked(): no mCurrentResponse");
                 }
@@ -795,16 +795,16 @@ final class AutoFillManagerServiceImpl {
 
             final int size = saveInfo.getSavableIds().size();
             for (int i = 0; i < size; i++) {
-                final AutoFillId id = saveInfo.getSavableIds().valueAt(i);
+                final AutofillId id = saveInfo.getSavableIds().valueAt(i);
                 final ViewState state = mViewStates.get(id);
                 if (state != null && state.mValueUpdated) {
-                    final AutoFillValue filledValue = findValue(mAutoFilledDataset, id);
-                    if (state.mAutoFillValue == null || state.mAutoFillValue.equals(filledValue)) {
+                    final AutofillValue filledValue = findValue(mAutoFilledDataset, id);
+                    if (state.mAutofillValue == null || state.mAutofillValue.equals(filledValue)) {
                         continue;
                     }
                     if (DEBUG) {
                         Slog.d(TAG, "finishSessionLocked(): found a change on " + id + ": "
-                                + state.mAutoFillValue);
+                                + state.mAutofillValue);
                     }
                     getUiForShowing().showSaveUi(
                             mInfo.getServiceInfo().loadLabel(mContext.getPackageManager()),
@@ -829,15 +829,15 @@ final class AutoFillManagerServiceImpl {
 
             final Bundle extras = this.mCurrentResponse.getExtras();
 
-            for (Entry<AutoFillId, ViewState> entry : mViewStates.entrySet()) {
-                final AutoFillValue value = entry.getValue().mAutoFillValue;
+            for (Entry<AutofillId, ViewState> entry : mViewStates.entrySet()) {
+                final AutofillValue value = entry.getValue().mAutofillValue;
                 if (value == null) {
                     if (VERBOSE) {
                         Slog.v(TAG, "callSaveLocked(): skipping " + entry.getKey());
                     }
                     continue;
                 }
-                final AutoFillId id = entry.getKey();
+                final AutofillId id = entry.getKey();
                 final ViewNode node = findViewNodeByIdLocked(id);
                 if (node == null) {
                     Slog.w(TAG, "callSaveLocked(): did not find node with id " + id);
@@ -847,7 +847,7 @@ final class AutoFillManagerServiceImpl {
                     Slog.v(TAG, "callSaveLocked(): updating " + id + " to " + value);
                 }
 
-                node.updateAutoFillValue(value);
+                node.updateAutofillValue(value);
             }
 
             // Sanitize structure before it's sent to service.
@@ -861,10 +861,10 @@ final class AutoFillManagerServiceImpl {
             mRemoteFillService.onSaveRequest(mStructure, extras);
         }
 
-        void updateLocked(AutoFillId id, Rect bounds, AutoFillValue value, int flags) {
+        void updateLocked(AutofillId id, Rect bounds, AutofillValue value, int flags) {
             if (mAutoFilledDataset != null && (flags & FLAG_VALUE_CHANGED) == 0) {
                 // TODO(b/33197203): ignoring because we don't support partitions yet
-                Slog.d(TAG, "updateLocked(): ignoring " + flags + " after app was auto-filled");
+                Slog.d(TAG, "updateLocked(): ignoring " + flags + " after app was autofilled");
                 return;
             }
 
@@ -875,28 +875,28 @@ final class AutoFillManagerServiceImpl {
             }
 
             if ((flags & FLAG_START_SESSION) != 0) {
-                // View is triggering auto-fill.
+                // View is triggering autofill.
                 mCurrentViewState = viewState;
                 viewState.update(value, bounds);
                 return;
             }
 
             if ((flags & FLAG_VALUE_CHANGED) != 0) {
-                if (value != null && !value.equals(viewState.mAutoFillValue)) {
+                if (value != null && !value.equals(viewState.mAutofillValue)) {
                     viewState.mValueUpdated = true;
 
-                    // Must check if this update was caused by auto-filling the view, in which
+                    // Must check if this update was caused by autofilling the view, in which
                     // case we just update the value, but not the UI.
                     if (mAutoFilledDataset != null) {
-                        final AutoFillValue filledValue = findValue(mAutoFilledDataset, id);
+                        final AutofillValue filledValue = findValue(mAutoFilledDataset, id);
                         if (value.equals(filledValue)) {
-                            viewState.mAutoFillValue = value;
+                            viewState.mAutofillValue = value;
                             return;
                         }
                     }
 
                     // Change value
-                    viewState.mAutoFillValue = value;
+                    viewState.mAutofillValue = value;
 
                     // Update the chooser UI
                     getUiForShowing().filterFillUi(value.coerceToString());
@@ -936,10 +936,10 @@ final class AutoFillManagerServiceImpl {
 
         @Override
         public void onFillReady(ViewState viewState, FillResponse response, Rect bounds,
-                AutoFillId filledId, @Nullable AutoFillValue value) {
+                AutofillId filledId, @Nullable AutofillValue value) {
             String filterText = "";
             if (value != null) {
-                // TODO(b/33197203): Handle other AutoFillValue types
+                // TODO(b/33197203): Handle other AutofillValue types
                 final CharSequence text = value.getTextValue();
                 if (text != null) {
                     filterText = text.toString();
@@ -949,7 +949,7 @@ final class AutoFillManagerServiceImpl {
             getUiForShowing().showFillUi(filledId, response, bounds, filterText);
         }
 
-        private void notifyChangeToClient(AutoFillId id, int event) {
+        private void notifyChangeToClient(AutofillId id, int event) {
             if (!mHasCallback) return;
             try {
                 mClient.onAutofillEvent(mWindowToken, id, event);
@@ -1006,7 +1006,7 @@ final class AutoFillManagerServiceImpl {
 
         private Intent createAuthFillInIntent(AssistStructure structure) {
             Intent fillInIntent = new Intent();
-            fillInIntent.putExtra(AutoFillManager.EXTRA_ASSIST_STRUCTURE, structure);
+            fillInIntent.putExtra(AutofillManager.EXTRA_ASSIST_STRUCTURE, structure);
             return fillInIntent;
         }
 
@@ -1025,7 +1025,7 @@ final class AutoFillManagerServiceImpl {
             pw.print(prefix); pw.print("mCurrentViewStates: "); pw.println(mCurrentViewState);
             pw.print(prefix); pw.print("mViewStates: "); pw.println(mViewStates.size());
             final String prefix2 = prefix + "  ";
-            for (Map.Entry<AutoFillId, ViewState> entry : mViewStates.entrySet()) {
+            for (Map.Entry<AutofillId, ViewState> entry : mViewStates.entrySet()) {
                 pw.print(prefix); pw.print("State for id "); pw.println(entry.getKey());
                 entry.getValue().dump(prefix2, pw);
             }
@@ -1049,9 +1049,9 @@ final class AutoFillManagerServiceImpl {
                     if (DEBUG) {
                         Slog.d(TAG, "autoFillApp(): the buck is on the app: " + dataset);
                     }
-                    mClient.autoFill(dataset.getFieldIds(), dataset.getFieldValues());
+                    mClient.autofill(dataset.getFieldIds(), dataset.getFieldValues());
                 } catch (RemoteException e) {
-                    Slog.w(TAG, "Error auto-filling activity: " + e);
+                    Slog.w(TAG, "Error autofilling activity: " + e);
                 }
             }
         }
@@ -1063,12 +1063,12 @@ final class AutoFillManagerServiceImpl {
             }
         }
 
-        private ViewNode findViewNodeByIdLocked(AutoFillId id) {
+        private ViewNode findViewNodeByIdLocked(AutofillId id) {
             final int size = mStructure.getWindowNodeCount();
             for (int i = 0; i < size; i++) {
                 final WindowNode window = mStructure.getWindowNodeAt(i);
                 final ViewNode root = window.getRootViewNode();
-                if (id.equals(root.getAutoFillId())) {
+                if (id.equals(root.getAutofillId())) {
                     return root;
                 }
                 final ViewNode child = findViewNodeByIdLocked(root, id);
@@ -1079,16 +1079,16 @@ final class AutoFillManagerServiceImpl {
             return null;
         }
 
-        private ViewNode findViewNodeByIdLocked(ViewNode parent, AutoFillId id) {
+        private ViewNode findViewNodeByIdLocked(ViewNode parent, AutofillId id) {
             final int childrenSize = parent.getChildCount();
             if (childrenSize > 0) {
                 for (int i = 0; i < childrenSize; i++) {
                     final ViewNode child = parent.getChildAt(i);
-                    if (id.equals(child.getAutoFillId())) {
+                    if (id.equals(child.getAutofillId())) {
                         return child;
                     }
                     final ViewNode grandChild = findViewNodeByIdLocked(child, id);
-                    if (grandChild != null && id.equals(grandChild.getAutoFillId())) {
+                    if (grandChild != null && id.equals(grandChild.getAutofillId())) {
                         return grandChild;
                     }
                 }

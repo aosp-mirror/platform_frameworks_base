@@ -16,7 +16,6 @@
 
 package android.widget;
 
-
 import android.annotation.IdRes;
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -25,8 +24,8 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewStructure;
-import android.view.autofill.AutoFillManager;
-import android.view.autofill.AutoFillValue;
+import android.view.autofill.AutofillManager;
+import android.view.autofill.AutofillValue;
 
 import com.android.internal.R;
 
@@ -67,7 +66,7 @@ public class RadioGroup extends LinearLayout {
     private PassThroughHierarchyChangeListener mPassThroughListener;
 
     // Indicates whether the child was set from resources or dynamically, so it can be used
-    // to sanitize auto-fill requests.
+    // to sanitize autofill requests.
     private int mInitialCheckedId = View.NO_ID;
 
     /**
@@ -187,7 +186,7 @@ public class RadioGroup extends LinearLayout {
         if (mOnCheckedChangeListener != null) {
             mOnCheckedChangeListener.onCheckedChanged(this, mCheckedId);
         }
-        final AutoFillManager afm = mContext.getSystemService(AutoFillManager.class);
+        final AutofillManager afm = mContext.getSystemService(AutofillManager.class);
         if (afm != null) {
             afm.valueChanged(this);
         }
@@ -417,16 +416,16 @@ public class RadioGroup extends LinearLayout {
         }
     }
 
-    // TODO(b/33197203): add unit/CTS tests for auto-fill methods (and make sure they handle enable)
+    // TODO(b/33197203): add unit/CTS tests for autofill methods (and make sure they handle enable)
 
     @Override
-    public void onProvideAutoFillStructure(ViewStructure structure, int flags) {
-        super.onProvideAutoFillStructure(structure, flags);
+    public void onProvideAutofillStructure(ViewStructure structure, int flags) {
+        super.onProvideAutofillStructure(structure, flags);
         structure.setSanitized(mCheckedId == mInitialCheckedId);
     }
 
     @Override
-    public void autoFill(AutoFillValue value) {
+    public void autofill(AutofillValue value) {
         if (!isEnabled()) return;
 
         final int index = value.getListValue();
@@ -444,14 +443,14 @@ public class RadioGroup extends LinearLayout {
     }
 
     @Override
-    public AutoFillValue getAutoFillValue() {
+    public AutofillValue getAutofillValue() {
         if (!isEnabled()) return null;
 
         final int count = getChildCount();
         for (int i = 0; i < count; i++) {
             final View child = getChildAt(i);
             if (child.getId() == mCheckedId) {
-                return AutoFillValue.forList(i);
+                return AutofillValue.forList(i);
             }
         }
         return null;

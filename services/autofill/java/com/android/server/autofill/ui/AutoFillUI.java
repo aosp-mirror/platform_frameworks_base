@@ -15,8 +15,8 @@
  */
 package com.android.server.autofill.ui;
 
-import static android.view.autofill.AutoFillManager.AutofillCallback.EVENT_INPUT_HIDDEN;
-import static android.view.autofill.AutoFillManager.AutofillCallback.EVENT_INPUT_SHOWN;
+import static android.view.autofill.AutofillManager.AutofillCallback.EVENT_INPUT_HIDDEN;
+import static android.view.autofill.AutofillManager.AutofillCallback.EVENT_INPUT_SHOWN;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -31,7 +31,7 @@ import android.service.autofill.SaveInfo;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.Slog;
-import android.view.autofill.AutoFillId;
+import android.view.autofill.AutofillId;
 import android.widget.Toast;
 
 import com.android.server.UiThread;
@@ -39,7 +39,7 @@ import com.android.server.UiThread;
 import java.io.PrintWriter;
 
 /**
- * Handles all auto-fill related UI tasks. The UI has two components:
+ * Handles all autofill related UI tasks. The UI has two components:
  * fill UI that shows a popup style window anchored at the focused
  * input field for choosing a dataset to fill or trigger the response
  * authentication flow; save UI that shows a toast style window for
@@ -66,7 +66,7 @@ public final class AutoFillUI {
         void fill(@NonNull Dataset dataset);
         void save();
         void cancelSave();
-        void onEvent(AutoFillId id, int event);
+        void onEvent(AutofillId id, int event);
     }
 
     public AutoFillUI(@NonNull Context context) {
@@ -102,7 +102,7 @@ public final class AutoFillUI {
     /**
      * Hides the fill UI.
      */
-    public void hideFillUi(AutoFillId id) {
+    public void hideFillUi(AutofillId id) {
         mHandler.post(() -> {
             hideFillUiUiThread();
             if (mCallback != null) {
@@ -153,7 +153,7 @@ public final class AutoFillUI {
      * @param anchorBounds bounds of the focused view
      * @param filterText text of the view to be filled
      */
-    public void showFillUi(@NonNull AutoFillId focusedId, @NonNull FillResponse response,
+    public void showFillUi(@NonNull AutofillId focusedId, @NonNull FillResponse response,
             @NonNull Rect anchorBounds, @Nullable String filterText) {
         mHandler.post(() -> {
             if (!hasCallback()) {
@@ -190,7 +190,7 @@ public final class AutoFillUI {
     }
 
     /**
-     * Shows the UI asking the user to save for auto-fill.
+     * Shows the UI asking the user to save for autofill.
      */
     public void showSaveUi(@NonNull CharSequence providerLabel, @NonNull SaveInfo info) {
         mHandler.post(() -> {

@@ -23,19 +23,18 @@ import android.content.IntentSender;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.view.autofill.AutoFillId;
-import android.view.autofill.AutoFillManager;
+import android.view.autofill.AutofillManager;
 import android.widget.RemoteViews;
 
 import java.util.ArrayList;
 
 /**
  * Response for a {@link
- * AutoFillService#onFillRequest(android.app.assist.AssistStructure,
+ * AutofillService#onFillRequest(android.app.assist.AssistStructure,
  * Bundle, android.os.CancellationSignal, FillCallback)}.
  *
  * <p>The response typically contains one or more {@link Dataset}s, each representing a set of
- * fields that can be auto-filled together, and the Android system displays a dataset picker UI
+ * fields that can be autofilled together, and the Android system displays a dataset picker UI
  * affordance that the user must use before the {@link android.app.Activity} is filled with
  * the dataset.
  *
@@ -125,7 +124,7 @@ import java.util.ArrayList;
  * </pre>
  *
  * <p>Then after the user picks the second dataset and taps the street field to
- * trigger another auto-fill request, the second response could be:
+ * trigger another autofill request, the second response could be:
  *
  * <pre class="prettyprint">
  *  new FillResponse.Builder()
@@ -141,7 +140,7 @@ import java.util.ArrayList;
  * </pre>
  *
  * <p>The service could require user authentication at the {@link FillResponse} or the
- * {@link Dataset} level, prior to auto-filling an activity - see
+ * {@link Dataset} level, prior to autofilling an activity - see
  * {@link FillResponse.Builder#setAuthentication(IntentSender, RemoteViews)} and
  * {@link Dataset.Builder#setAuthentication(IntentSender)}.
  *
@@ -169,8 +168,6 @@ public final class FillResponse implements Parcelable {
     private FillResponse(@NonNull Builder builder) {
         mDatasets = builder.mDatasets;
 
-        // TODO(b/33197203, 35727295): this is how mSaveInfo will be set once we don't support
-        // FillResponse.addSavableIds()
         mSaveInfo = builder.mSaveInfo;
         if (mSaveInfo != null) {
             mSaveInfo.addSavableIds(mDatasets);
@@ -223,7 +220,7 @@ public final class FillResponse implements Parcelable {
         private boolean mDestroyed;
 
         /**
-         * Requires a fill response authentication before auto-filling the activity with
+         * Requires a fill response authentication before autofilling the activity with
          * any data set in this response.
          *
          * <p>This is typically useful when a user interaction is required to unlock their
@@ -236,12 +233,12 @@ public final class FillResponse implements Parcelable {
          * intent you also need to specify the presentation view to be shown in the fill UI
          * for the user to trigger your authentication flow.</p>
          *
-         * <p>When a user triggers auto-fill, the system launches the provided intent
-         * whose extras will have the {@link AutoFillManager#EXTRA_ASSIST_STRUCTURE screen
+         * <p>When a user triggers autofill, the system launches the provided intent
+         * whose extras will have the {@link AutofillManager#EXTRA_ASSIST_STRUCTURE screen
          * content}. Once you complete your authentication flow you should set the activity
          * result to {@link android.app.Activity#RESULT_OK} and provide the fully populated
          * {@link FillResponse response} by setting it to the {@link
-         * AutoFillManager#EXTRA_AUTHENTICATION_RESULT} extra.
+         * AutofillManager#EXTRA_AUTHENTICATION_RESULT} extra.
          * For example, if you provided an empty {@link FillResponse resppnse} because the
          * user's data was locked and marked that the response needs an authentication then
          * in the response returned if authentication succeeds you need to provide all
@@ -309,9 +306,9 @@ public final class FillResponse implements Parcelable {
         /**
          * Sets a {@link Bundle} that will be passed to subsequent APIs that
          * manipulate this response. For example, they are passed to subsequent
-         * calls to {@link AutoFillService#onFillRequest(
+         * calls to {@link AutofillService#onFillRequest(
          * android.app.assist.AssistStructure, Bundle, android.os.CancellationSignal,
-         * FillCallback)} and {@link AutoFillService#onSaveRequest(
+         * FillCallback)} and {@link AutofillService#onSaveRequest(
          * android.app.assist.AssistStructure, Bundle, SaveCallback)}.
          *
          * @param extras The response extras.

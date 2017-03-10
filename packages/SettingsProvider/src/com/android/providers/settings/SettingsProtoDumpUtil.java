@@ -976,8 +976,8 @@ class SettingsProtoDumpUtil {
                 Settings.Secure.VOICE_INTERACTION_SERVICE,
                 SecureSettingsProto.VOICE_INTERACTION_SERVICE);
         dumpSetting(s, p,
-                Settings.Secure.AUTO_FILL_SERVICE,
-                SecureSettingsProto.AUTO_FILL_SERVICE);
+                Settings.Secure.AUTOFILL_SERVICE,
+                SecureSettingsProto.AUTOFILL_SERVICE);
         dumpSetting(s, p,
                 Settings.Secure.BLUETOOTH_HCI_LOG,
                 SecureSettingsProto.BLUETOOTH_HCI_LOG);

@@ -27,7 +27,7 @@ import android.util.SparseArray;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewStructure;
-import android.view.autofill.AutoFillValue;
+import android.view.autofill.AutofillValue;
 
 import com.android.internal.R;
 
@@ -492,8 +492,8 @@ public abstract class AbsSpinner extends AdapterView<SpinnerAdapter> {
     // TODO(b/33197203): add unit/CTS tests for auto-fill methods (and make sure they handle enable)
 
     @Override
-    public void onProvideAutoFillStructure(ViewStructure structure, int flags) {
-        super.onProvideAutoFillStructure(structure, flags);
+    public void onProvideAutofillStructure(ViewStructure structure, int flags) {
+        super.onProvideAutofillStructure(structure, flags);
 
         if (getAdapter() == null) return;
 
@@ -506,12 +506,12 @@ public abstract class AbsSpinner extends AdapterView<SpinnerAdapter> {
             for (int i = 0; i < count; i++) {
                 options[i] = getAdapter().getItem(i).toString();
             }
-            structure.setAutoFillOptions(options);
+            structure.setAutofillOptions(options);
         }
     }
 
     @Override
-    public void autoFill(AutoFillValue value) {
+    public void autofill(AutofillValue value) {
         if (!isEnabled()) return;
 
         final int position = value.getListValue();
@@ -524,7 +524,7 @@ public abstract class AbsSpinner extends AdapterView<SpinnerAdapter> {
     }
 
     @Override
-    public AutoFillValue getAutoFillValue() {
-        return isEnabled() ? AutoFillValue.forList(getSelectedItemPosition()) : null;
+    public AutofillValue getAutofillValue() {
+        return isEnabled() ? AutofillValue.forList(getSelectedItemPosition()) : null;
     }
 }

@@ -2797,12 +2797,12 @@
         <public name="numericModifiers" />
         <public name="fontProviderAuthority" />
         <public name="fontProviderQuery" />
-        <public name="autoFillMode" />
+        <public name="autofillMode" />
         <public name="primaryContentAlpha" />
         <public name="secondaryContentAlpha" />
         <public name="requiredFeature" />
         <public name="requiredNotFeature" />
-        <public name="autoFillHint" />
+        <public name="autofillHint" />
         <public name="fontProviderPackage" />
         <public name="importantForAutofill" />
     </public-group>

@@ -2440,8 +2440,14 @@
     <permission android:name="android.permission.BIND_VOICE_INTERACTION"
         android:protectionLevel="signature" />
 
-    <!-- Must be required by a {@link android.service.autofill.AutoFillService},
+    <!-- Must be required by a {@link android.service.autofill.AutofillService},
          to ensure that only the system can bind to it.
+         <p>Protection level: signature
+    -->
+    <permission android:name="android.permission.BIND_AUTOFILL"
+        android:protectionLevel="signature" />
+
+    <!--  TODO(b/35956626): temporary until clients change to BIND_AUTOFILL
          <p>Protection level: signature
     -->
     <permission android:name="android.permission.BIND_AUTO_FILL"

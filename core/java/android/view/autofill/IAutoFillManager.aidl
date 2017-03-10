@@ -19,8 +19,8 @@ package android.view.autofill;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.view.autofill.AutoFillId;
-import android.view.autofill.AutoFillValue;
+import android.view.autofill.AutofillId;
+import android.view.autofill.AutofillValue;
 import android.view.autofill.IAutoFillManagerClient;
 
 /**
@@ -31,10 +31,10 @@ import android.view.autofill.IAutoFillManagerClient;
 interface IAutoFillManager {
     boolean addClient(in IAutoFillManagerClient client, int userId);
     oneway void startSession(in IBinder activityToken, IBinder windowToken, in IBinder appCallback,
-            in AutoFillId autoFillId, in Rect bounds, in AutoFillValue value, int userId,
+            in AutofillId autoFillId, in Rect bounds, in AutofillValue value, int userId,
             boolean hasCallback);
-    oneway void updateSession(in IBinder activityToken, in AutoFillId id, in Rect bounds,
-            in AutoFillValue value, int flags, int userId);
+    oneway void updateSession(in IBinder activityToken, in AutofillId id, in Rect bounds,
+            in AutofillValue value, int flags, int userId);
     oneway void finishSession(in IBinder activityToken, int userId);
     oneway void setAuthenticationResult(in Bundle data,
             in IBinder activityToken, int userId);

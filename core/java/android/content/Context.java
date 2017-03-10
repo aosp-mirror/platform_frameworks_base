@@ -3401,12 +3401,12 @@ public abstract class Context {
     public static final String VOICE_INTERACTION_MANAGER_SERVICE = "voiceinteraction";
 
     /**
-     * Official published name of the (internal) auto-fill service.
+     * Official published name of the (internal) autofill service.
      *
      * @hide
      * @see #getSystemService
      */
-    public static final String AUTO_FILL_MANAGER_SERVICE = "autofill";
+    public static final String AUTOFILL_MANAGER_SERVICE = "autofill";
 
     /**
      * Use with {@link #getSystemService} to access the

@@ -21,8 +21,8 @@ import android.os.Bundle;
 import android.os.RemoteException;
 
 /**
- * Handles save requests from the {@link AutoFillService} into the {@link Activity} being
- * auto-filled.
+ * Handles save requests from the {@link AutofillService} into the {@link Activity} being
+ * autofilled.
  */
 public final class SaveCallback {
     private final ISaveCallback mCallback;
@@ -35,7 +35,7 @@ public final class SaveCallback {
 
     /**
      * Notifies the Android System that an
-     * {@link AutoFillService#onSaveRequest (android.app.assist.AssistStructure, Bundle,
+     * {@link AutofillService#onSaveRequest (android.app.assist.AssistStructure, Bundle,
      * SaveCallback)} was successfully fulfilled by the service.
      *
      * @throws RuntimeException if an error occurred while calling the Android System.
@@ -52,7 +52,7 @@ public final class SaveCallback {
 
     /**
      * Notifies the Android System that an
-     * {@link AutoFillService#onSaveRequest(android.app.assist.AssistStructure, Bundle,
+     * {@link AutofillService#onSaveRequest(android.app.assist.AssistStructure, Bundle,
      * SaveCallback)} could not be fulfilled by the service.
      *
      * @param message error message to be displayed to the user.

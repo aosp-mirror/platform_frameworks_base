@@ -41,7 +41,6 @@ import android.view.MotionEvent;
 import android.view.PointerIcon;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewStructure;
 import android.view.ViewTreeObserver;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -912,27 +911,6 @@ public class Spinner extends AbsSpinner implements OnClickListener {
             return PointerIcon.getSystemIcon(getContext(), PointerIcon.TYPE_HAND);
         }
         return super.onResolvePointerIcon(event, pointerIndex);
-    }
-
-    // TODO(b/33197203): add unit/CTS tests for auto-fill methods (and make sure they handle enable)
-
-    @Override
-    public void onProvideAutoFillStructure(ViewStructure structure, int flags) {
-        super.onProvideAutoFillStructure(structure, flags);
-
-        if (getAdapter() == null) return;
-
-        // TODO(b/33197203): implement sanitization so initial value is only sanitized when coming
-        // from resources.
-
-        final int count = getAdapter().getCount();
-        if (count > 0) {
-            final String[] options = new String[count];
-            for (int i = 0; i < count; i++) {
-                options[i] = getAdapter().getItem(i).toString();
-            }
-            structure.setAutoFillOptions(options);
-        }
     }
 
     static class SavedState extends AbsSpinner.SavedState {

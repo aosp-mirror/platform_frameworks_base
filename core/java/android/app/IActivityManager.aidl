@@ -588,7 +588,7 @@ interface IActivityManager {
     boolean updateDisplayOverrideConfiguration(in Configuration values, int displayId);
     void unregisterTaskStackListener(ITaskStackListener listener);
     void moveStackToDisplay(int stackId, int displayId);
-    boolean requestAutoFillData(in IResultReceiver receiver, in Bundle receiverExtras,
+    boolean requestAutofillData(in IResultReceiver receiver, in Bundle receiverExtras,
                                 in IBinder activityToken);
     void dismissKeyguard(in IBinder token, in IKeyguardDismissCallback callback);
     int restartUserInBackground(int userId);

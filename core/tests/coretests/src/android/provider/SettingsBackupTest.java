@@ -385,7 +385,7 @@ public class SettingsBackupTest {
                  Settings.Secure.ASSIST_DISCLOSURE_ENABLED,
                  Settings.Secure.ASSIST_SCREENSHOT_ENABLED,
                  Settings.Secure.ASSIST_STRUCTURE_ENABLED,
-                 Settings.Secure.AUTO_FILL_SERVICE,
+                 Settings.Secure.AUTOFILL_SERVICE,
                  Settings.Secure.AUTOMATIC_STORAGE_MANAGER_BYTES_CLEARED,
                  Settings.Secure.AUTOMATIC_STORAGE_MANAGER_ENABLED,
                  Settings.Secure.AUTOMATIC_STORAGE_MANAGER_LAST_RUN,
