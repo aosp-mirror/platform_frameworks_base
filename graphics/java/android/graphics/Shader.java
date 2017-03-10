@@ -16,6 +16,9 @@
 
 package android.graphics;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+
 /**
  * Shader is the based class for objects that return horizontal spans of colors
  * during drawing. A subclass of Shader is installed in a Paint calling
@@ -24,18 +27,16 @@ package android.graphics;
  */
 public class Shader {
     /**
-     * This is set by subclasses, but don't make it public.
+     * @deprecated Use subclass constructors directly instead.
      */
-    private long native_instance;
+    @Deprecated
+    public Shader() {}
 
     /**
-     * Initialization step that should be called by subclasses in their
-     * constructors. Calling again may result in memory leaks.
-     * @hide
+     * Current native shader instance. Created and updated lazily when {@link #getNativeInstance()}
+     * is called - otherwise may be out of date with java setters/properties.
      */
-    protected void init(long ni) {
-        native_instance = ni;
-    }
+    private long mNativeInstance;
 
     private Matrix mLocalMatrix;
 
@@ -63,13 +64,13 @@ public class Shader {
 
     /**
      * Return true if the shader has a non-identity local matrix.
-     * @param localM If not null, it is set to the shader's local matrix.
+     * @param localM Set to the local matrix of the shader, if the shader's matrix is non-null.
      * @return true if the shader has a non-identity local matrix
      */
-    public boolean getLocalMatrix(Matrix localM) {
+    public boolean getLocalMatrix(@NonNull Matrix localM) {
         if (mLocalMatrix != null) {
             localM.set(mLocalMatrix);
-            return !mLocalMatrix.isIdentity();
+            return true;
         }
         return false;
     }
@@ -80,18 +81,46 @@ public class Shader {
      *
      * @param localM The shader's new local matrix, or null to specify identity
      */
-    public void setLocalMatrix(Matrix localM) {
-        mLocalMatrix = localM;
-        native_instance = nativeSetLocalMatrix(native_instance,
-                localM == null ? 0 : localM.native_instance);
+    public void setLocalMatrix(@Nullable Matrix localM) {
+        if (localM == null || localM.isIdentity()) {
+            if (mLocalMatrix != null) {
+                mLocalMatrix = null;
+                discardNativeInstance();
+            }
+        } else {
+            if (mLocalMatrix == null) {
+                mLocalMatrix = new Matrix(localM);
+                discardNativeInstance();
+            } else if (!mLocalMatrix.equals(localM)) {
+                mLocalMatrix.set(localM);
+                discardNativeInstance();
+            }
+        }
     }
 
+    long createNativeInstance(long nativeMatrix) {
+        return 0;
+    }
+
+    void discardNativeInstance() {
+        nativeSafeUnref(mNativeInstance);
+        mNativeInstance = 0;
+    }
+
+    /**
+     * Callback for subclasses to call {@link #discardNativeInstance()} if the most recently
+     * constructed native instance is no longer valid.
+     */
+    void verifyNativeInstance() {
+    }
+
+    @Override
     protected void finalize() throws Throwable {
         try {
-            super.finalize();
+            nativeSafeUnref(mNativeInstance);
+            mNativeInstance = -1;
         } finally {
-            nativeDestructor(native_instance);
-            native_instance = 0;  // Other finalizers can still call us.
+            super.finalize();
         }
     }
 
@@ -108,22 +137,26 @@ public class Shader {
      * @hide
      */
     protected void copyLocalMatrix(Shader dest) {
-        if (mLocalMatrix != null) {
-            final Matrix lm = new Matrix();
-            getLocalMatrix(lm);
-            dest.setLocalMatrix(lm);
-        } else {
-            dest.setLocalMatrix(null);
-        }
+        dest.mLocalMatrix.set(mLocalMatrix);
     }
 
     /**
      * @hide
      */
     public long getNativeInstance() {
-        return native_instance;
+        if (mNativeInstance == -1) {
+            throw new IllegalStateException("attempting to use a finalized Shader");
+        }
+
+        // verify mNativeInstance is valid
+        verifyNativeInstance();
+
+        if (mNativeInstance == 0) {
+            mNativeInstance = createNativeInstance(mLocalMatrix == null
+                    ? 0 : mLocalMatrix.native_instance);
+        }
+        return mNativeInstance;
     }
 
-    private static native void nativeDestructor(long native_shader);
-    private static native long nativeSetLocalMatrix(long native_shader, long matrix_instance);
+    private static native void nativeSafeUnref(long nativeInstance);
 }
