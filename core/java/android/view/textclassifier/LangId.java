@@ -37,8 +37,8 @@ final class LangId {
     /**
      * Detects the language for given text.
      */
-    public String findLanguage(String text) {
-        return nativeFindLanguage(mModelPtr, text);
+    public ClassificationResult[] findLanguages(String text) {
+        return nativeFindLanguages(mModelPtr, text);
     }
 
     /**
@@ -50,8 +50,20 @@ final class LangId {
 
     private static native long nativeNew(int fd);
 
-    private static native String nativeFindLanguage(long context, String text);
+    private static native ClassificationResult[] nativeFindLanguages(
+            long context, String text);
 
     private static native void nativeClose(long context);
-}
 
+    /** Classification result for findLanguage method. */
+    static final class ClassificationResult {
+        final String mLanguage;
+        /** float range: 0 - 1 */
+        final float mScore;
+
+        ClassificationResult(String language, float score) {
+            mLanguage = language;
+            mScore = score;
+        }
+    }
+}

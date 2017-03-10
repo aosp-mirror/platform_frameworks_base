@@ -85,12 +85,17 @@ public final class TextClassificationManager {
         Preconditions.checkArgument(text != null);
         try {
             if (text.length() > 0) {
-                final String language = getLanguageDetector().findLanguage(text.toString());
-                final Locale locale = new Locale.Builder().setLanguageTag(language).build();
-                return Collections.unmodifiableList(Arrays.asList(
-                        new TextLanguage.Builder(0, text.length())
-                                .setLanguage(locale, 1.0f /* confidence */)
-                                .build()));
+                final LangId.ClassificationResult[] results =
+                        getLanguageDetector().findLanguages(text.toString());
+                final TextLanguage.Builder tlBuilder = new TextLanguage.Builder(0, text.length());
+                final int size = results.length;
+                for (int i = 0; i < size; i++) {
+                    tlBuilder.setLanguage(
+                            new Locale.Builder().setLanguageTag(results[i].mLanguage).build(),
+                            results[i].mScore);
+                }
+
+                return Collections.unmodifiableList(Arrays.asList(tlBuilder.build()));
             }
         } catch (Throwable t) {
             // Avoid throwing from this method. Log the error.

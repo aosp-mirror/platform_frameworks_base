@@ -55,9 +55,11 @@ final class SmartSelection {
      *
      * The begin and end params are character indices in the context string.
      *
-     * Returns the type of the selection, e.g. "email", "address", "phone".
+     * Returns an array of ClassificationResult objects with the probability
+     * scores for different collections.
      */
-    public String classifyText(String context, int selectionBegin, int selectionEnd) {
+    public ClassificationResult[] classifyText(
+            String context, int selectionBegin, int selectionEnd) {
         return nativeClassifyText(mCtx, context, selectionBegin, selectionEnd);
     }
 
@@ -73,9 +75,21 @@ final class SmartSelection {
     private static native int[] nativeSuggest(
             long context, String text, int selectionBegin, int selectionEnd);
 
-    private static native String nativeClassifyText(
+    private static native ClassificationResult[] nativeClassifyText(
             long context, String text, int selectionBegin, int selectionEnd);
 
     private static native void nativeClose(long context);
+
+    /** Classification result for classifyText method. */
+    static final class ClassificationResult {
+        final String mCollection;
+        /** float range: 0 - 1 */
+        final float mScore;
+
+        ClassificationResult(String collection, float score) {
+            mCollection = collection;
+            mScore = score;
+        }
+    }
 }
 
