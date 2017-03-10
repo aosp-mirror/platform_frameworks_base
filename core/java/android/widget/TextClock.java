@@ -132,7 +132,7 @@ public class TextClock extends TextView {
 
     private CharSequence mDescFormat;
 
-    private boolean mRegistered;
+    private boolean mAttached;
 
     private Calendar mTime;
     private String mTimeZone;
@@ -252,7 +252,7 @@ public class TextClock extends TextView {
         }
 
         createTime(mTimeZone);
-        // Wait until registering for events to handle the ticker
+        // Wait until onAttachedToWindow() to handle the ticker
         chooseFormat(false);
     }
 
@@ -503,9 +503,12 @@ public class TextClock extends TextView {
         boolean hadSeconds = mHasSeconds;
         mHasSeconds = DateFormat.hasSeconds(mFormat);
 
-        if (handleTicker && mRegistered && hadSeconds != mHasSeconds) {
-            if (hadSeconds) getHandler().removeCallbacks(mTicker);
-            else mTicker.run();
+        if (handleTicker && mAttached && hadSeconds != mHasSeconds) {
+            if (hadSeconds) {
+                getHandler().removeCallbacks(mTicker);
+            } else if (getVisibility() == VISIBLE) {
+                mTicker.run();
+            }
         }
     }
 
@@ -517,27 +520,50 @@ public class TextClock extends TextView {
     }
 
     @Override
-    public void onVisibilityAggregated(boolean isVisible) {
-        if (!mRegistered && isVisible) {
-            mRegistered = true;
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+
+        if (!mAttached) {
+            mAttached = true;
 
             registerReceiver();
             registerObserver();
 
             createTime(mTimeZone);
 
-            if (mHasSeconds) {
-                mTicker.run();
-            } else {
-                onTimeChanged();
+            if (getVisibility() == VISIBLE) {
+                if (mHasSeconds) {
+                    mTicker.run();
+                } else {
+                    onTimeChanged();
+                }
             }
-        } else if (mRegistered && !isVisible) {
+        }
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+
+        if (mAttached) {
             unregisterReceiver();
             unregisterObserver();
 
             getHandler().removeCallbacks(mTicker);
 
-            mRegistered = false;
+            mAttached = false;
+        }
+    }
+
+    @Override
+    public void onVisibilityAggregated(boolean isVisible) {
+        if (mAttached) {
+            if (isVisible && mHasSeconds) {
+                mTicker.run();
+            } else {
+                getHandler().removeCallbacks(mTicker);
+            }
+            onTimeChanged();
         }
     }
 
@@ -560,7 +586,7 @@ public class TextClock extends TextView {
     }
 
     private void registerObserver() {
-        if (mRegistered) {
+        if (mAttached) {
             if (mFormatChangeObserver == null) {
                 mFormatChangeObserver = new FormatChangeObserver(getHandler());
             }
@@ -587,9 +613,11 @@ public class TextClock extends TextView {
     }
 
     private void onTimeChanged() {
-        mTime.setTimeInMillis(System.currentTimeMillis());
-        setText(DateFormat.format(mFormat, mTime));
-        setContentDescription(DateFormat.format(mDescFormat, mTime));
+        if (getVisibility() == VISIBLE) {
+            mTime.setTimeInMillis(System.currentTimeMillis());
+            setText(DateFormat.format(mFormat, mTime));
+            setContentDescription(DateFormat.format(mDescFormat, mTime));
+        }
     }
 
     /** @hide */
