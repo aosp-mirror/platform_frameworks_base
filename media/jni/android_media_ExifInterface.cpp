@@ -390,8 +390,7 @@ static jobject ExifInterface_getRawAttributesFromFileDescriptor(
     // Rewind the file descriptor.
     fseek(file, 0L, SEEK_SET);
 
-    std::unique_ptr<SkFILEStream> fileStream(new SkFILEStream(file,
-                SkFILEStream::kCallerPasses_Ownership));
+    std::unique_ptr<SkFILEStream> fileStream(new SkFILEStream(file));
     return getRawAttributes(env, fileStream.get(), false);
 }
 
