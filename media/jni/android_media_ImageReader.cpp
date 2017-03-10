@@ -722,6 +722,9 @@ static jobjectArray Image_createSurfacePlanes(JNIEnv* env, jobject thiz,
 
     LockedImage lockedImg = LockedImage();
     Image_getLockedImage(env, thiz, &lockedImg);
+    if (env->ExceptionCheck()) {
+        return NULL;
+    }
     // Create all SurfacePlanes
     for (int i = 0; i < numPlanes; i++) {
         Image_getLockedImageInfo(env, &lockedImg, i, halReaderFormat,
