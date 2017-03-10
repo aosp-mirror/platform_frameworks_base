@@ -24,7 +24,17 @@ package android.os;
  * @hide
  */
 public class PowerSaveState implements Parcelable {
+    /**
+     * Whether we should enable battery saver for this service.
+     *
+     * @see com.android.server.power.BatterySaverPolicy.ServiceType
+     */
     public final boolean batterySaverEnabled;
+    /**
+     * Whether the battery saver is enabled globally, which means the data we get from
+     * {@link PowerManager#isPowerSaveMode()}
+     */
+    public final boolean globalBatterySaverEnabled;
     public final int gpsMode;
     public final float brightnessFactor;
 
@@ -32,10 +42,12 @@ public class PowerSaveState implements Parcelable {
         batterySaverEnabled = builder.mBatterySaverEnabled;
         gpsMode = builder.mGpsMode;
         brightnessFactor = builder.mBrightnessFactor;
+        globalBatterySaverEnabled = builder.mGlobalBatterySaverEnabled;
     }
 
     public PowerSaveState(Parcel in) {
         batterySaverEnabled = in.readByte() != 0;
+        globalBatterySaverEnabled = in.readByte() != 0;
         gpsMode = in.readInt();
         brightnessFactor = in.readFloat();
     }
@@ -48,12 +60,14 @@ public class PowerSaveState implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeByte((byte) (batterySaverEnabled ? 1 : 0));
+        dest.writeByte((byte) (globalBatterySaverEnabled ? 1 : 0));
         dest.writeInt(gpsMode);
         dest.writeFloat(brightnessFactor);
     }
 
     public static final class Builder {
         private boolean mBatterySaverEnabled = false;
+        private boolean mGlobalBatterySaverEnabled = false;
         private int mGpsMode = 0;
         private float mBrightnessFactor = 0.5f;
 
@@ -61,6 +75,11 @@ public class PowerSaveState implements Parcelable {
 
         public Builder setBatterySaverEnabled(boolean enabled) {
             mBatterySaverEnabled = enabled;
+            return this;
+        }
+
+        public Builder setGlobalBatterySaverEnabled(boolean enabled) {
+            mGlobalBatterySaverEnabled = enabled;
             return this;
         }
 

@@ -37,6 +37,7 @@ import static com.android.server.net.NetworkPolicyManagerService.ProcStateSeqHis
 import static com.android.server.net.NetworkPolicyManagerService.TYPE_LIMIT;
 import static com.android.server.net.NetworkPolicyManagerService.TYPE_LIMIT_SNOOZED;
 import static com.android.server.net.NetworkPolicyManagerService.TYPE_WARNING;
+import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -51,10 +52,15 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isA;
 import static org.mockito.Matchers.isNull;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -89,6 +95,7 @@ import android.net.NetworkTemplate;
 import android.os.Binder;
 import android.os.INetworkManagementService;
 import android.os.PowerManagerInternal;
+import android.os.PowerSaveState;
 import android.os.UserHandle;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.MediumTest;
@@ -198,6 +205,7 @@ public class NetworkPolicyManagerServiceTest {
 
     private IUidObserver mUidObserver;
     private INetworkManagementEventObserver mNetworkObserver;
+    private PowerManagerInternal mPowerManagerInternal;
 
     private NetworkPolicyListenerAnswer mPolicyListener;
     private NetworkPolicyManagerService mService;
@@ -227,12 +235,16 @@ public class NetworkPolicyManagerServiceTest {
 
     @BeforeClass
     public static void registerLocalServices() {
-        addLocalServiceMock(PowerManagerInternal.class);
         addLocalServiceMock(DeviceIdleController.LocalService.class);
         final UsageStatsManagerInternal usageStats =
                 addLocalServiceMock(UsageStatsManagerInternal.class);
         when(usageStats.getIdleUidsForUser(anyInt())).thenReturn(new int[]{});
         mActivityManagerInternal = addLocalServiceMock(ActivityManagerInternal.class);
+
+        final PowerSaveState state = new PowerSaveState.Builder()
+                .setBatterySaverEnabled(false).build();
+        final PowerManagerInternal pmInternal = addLocalServiceMock(PowerManagerInternal.class);
+        when(pmInternal.getLowPowerState(anyInt())).thenReturn(state);
     }
 
     @Before
@@ -399,6 +411,85 @@ public class NetworkPolicyManagerServiceTest {
     public void testRemoveRestrictBackgroundWhitelist_restrictBackgroundOff() throws Exception {
         assertRestrictBackgroundOff(); // Sanity check.
         removeRestrictBackgroundWhitelist(false);
+    }
+
+    @Test
+    public void testLowPowerModeObserver_ListenersRegistered()
+            throws Exception {
+        PowerManagerInternal pmInternal = LocalServices.getService(PowerManagerInternal.class);
+
+        verify(pmInternal, atLeast(2)).registerLowPowerModeObserver(any());
+    }
+
+    @Test
+    public void updateRestrictBackgroundByLowPowerMode_RestrictOnBeforeBsm_RestrictOnAfterBsm()
+            throws Exception {
+        setRestrictBackground(true);
+        PowerSaveState stateOn = new PowerSaveState.Builder()
+                .setGlobalBatterySaverEnabled(true)
+                .setBatterySaverEnabled(false)
+                .build();
+        mService.updateRestrictBackgroundByLowPowerModeUL(stateOn);
+
+        // RestrictBackground should be on even though battery saver want to turn it off
+        assertThat(mService.getRestrictBackground()).isTrue();
+
+        PowerSaveState stateOff = new PowerSaveState.Builder()
+                .setGlobalBatterySaverEnabled(false)
+                .setBatterySaverEnabled(false)
+                .build();
+        mService.updateRestrictBackgroundByLowPowerModeUL(stateOff);
+
+        // RestrictBackground should be on, following its previous state
+        assertThat(mService.getRestrictBackground()).isTrue();
+    }
+
+    @Test
+    public void updateRestrictBackgroundByLowPowerMode_RestrictOffBeforeBsm_RestrictOffAfterBsm()
+            throws Exception {
+        setRestrictBackground(false);
+        PowerSaveState stateOn = new PowerSaveState.Builder()
+                .setGlobalBatterySaverEnabled(true)
+                .setBatterySaverEnabled(true)
+                .build();
+
+        doReturn(true).when(mNetworkManager).setDataSaverModeEnabled(true);
+        mService.updateRestrictBackgroundByLowPowerModeUL(stateOn);
+
+        // RestrictBackground should be turned on because of battery saver
+        assertThat(mService.getRestrictBackground()).isTrue();
+
+        PowerSaveState stateOff = new PowerSaveState.Builder()
+                .setGlobalBatterySaverEnabled(false)
+                .setBatterySaverEnabled(false)
+                .build();
+        mService.updateRestrictBackgroundByLowPowerModeUL(stateOff);
+
+        // RestrictBackground should be off, following its previous state
+        assertThat(mService.getRestrictBackground()).isFalse();
+    }
+
+    @Test
+    public void updateRestrictBackgroundByLowPowerMode_StatusChangedInBsm_DoNotRestore()
+            throws Exception {
+        setRestrictBackground(true);
+        PowerSaveState stateOn = new PowerSaveState.Builder()
+                .setGlobalBatterySaverEnabled(true)
+                .setBatterySaverEnabled(true)
+                .build();
+        mService.updateRestrictBackgroundByLowPowerModeUL(stateOn);
+
+        // RestrictBackground should still be on
+        assertThat(mService.getRestrictBackground()).isTrue();
+
+        // User turns off RestrictBackground manually
+        setRestrictBackground(false);
+        PowerSaveState stateOff = new PowerSaveState.Builder().setBatterySaverEnabled(
+                false).build();
+        mService.updateRestrictBackgroundByLowPowerModeUL(stateOff);
+
+        // RestrictBackground should be off because user changes it manually
+        assertThat(mService.getRestrictBackground()).isFalse();
     }
 
     private void removeRestrictBackgroundWhitelist(boolean expectIntent) throws Exception {
@@ -1231,7 +1322,7 @@ public class NetworkPolicyManagerServiceTest {
 
     private void setRestrictBackground(boolean flag) throws Exception {
         // Must set expectation, otherwise NMPS will reset value to previous one.
-        when(mNetworkManager.setDataSaverModeEnabled(flag)).thenReturn(true);
+        doReturn(true).when(mNetworkManager).setDataSaverModeEnabled(flag);
         mService.setRestrictBackground(flag);
         // Sanity check.
         assertEquals("restrictBackground not set", flag, mService.getRestrictBackground());
