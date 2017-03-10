@@ -279,6 +279,17 @@ public class DexManager {
      * @return true if all secondary dex files were processed successfully (compiled or skipped
      *         because they don't need to be compiled)..
      */
+    public boolean dexoptSecondaryDex(String packageName, int compilerReason, boolean force) {
+        return dexoptSecondaryDex(packageName,
+                PackageManagerServiceCompilerMapping.getCompilerFilterForReason(compilerReason),
+                force);
+    }
+
+    /**
+     * Perform dexopt on the package {@code packageName} secondary dex files.
+     * @return true if all secondary dex files were processed successfully (compiled or skipped
+     *         because they don't need to be compiled)..
+     */
     public boolean dexoptSecondaryDex(String packageName, String compilerFilter, boolean force) {
         // Select the dex optimizer based on the force parameter.
         // Forced compilation is done through ForcedUpdatePackageDexOptimizer which will adjust
