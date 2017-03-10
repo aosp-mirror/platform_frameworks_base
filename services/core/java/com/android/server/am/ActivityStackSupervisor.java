@@ -21,8 +21,6 @@ import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
 import static android.app.ActivityManager.LOCK_TASK_MODE_LOCKED;
 import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
 import static android.app.ActivityManager.LOCK_TASK_MODE_PINNED;
-import static android.app.ActivityManager.RESIZE_MODE_FORCED;
-import static android.app.ActivityManager.RESIZE_MODE_SYSTEM;
 import static android.app.ActivityManager.START_TASK_TO_FRONT;
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.FIRST_DYNAMIC_STACK_ID;
@@ -97,6 +95,7 @@ import static com.android.server.wm.AppTransition.TRANSIT_DOCK_TASK_FROM_RECENTS
 import static java.lang.Integer.MAX_VALUE;
 
 import android.Manifest;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.app.Activity;
@@ -105,7 +104,6 @@ import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityManager.StackId;
 import android.app.ActivityManager.StackInfo;
 import android.app.ActivityOptions;
-import android.app.AppGlobals;
 import android.app.AppOpsManager;
 import android.app.IActivityContainerCallback;
 import android.app.ProfilerInfo;
@@ -179,10 +177,11 @@ import com.android.server.wm.WindowManagerService;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 
 public class ActivityStackSupervisor extends ConfigurationContainer implements DisplayListener {
@@ -248,14 +247,30 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     // Force the focus to change to the stack we are moving a task to..
     static final boolean FORCE_FOCUS = true;
 
-    // Restore task from the saved recents if it can't be found in any live stack.
-    static final boolean RESTORE_FROM_RECENTS = true;
-
     // Don't execute any calls to resume.
     static final boolean DEFER_RESUME = true;
 
     // Used to indicate that a task is removed it should also be removed from recents.
     static final boolean REMOVE_FROM_RECENTS = true;
+
+    /**
+     * The modes which affect which tasks are returned when calling
+     * {@link ActivityStackSupervisor#anyTaskForIdLocked(int)}.
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({
+            MATCH_TASK_IN_STACKS_ONLY,
+            MATCH_TASK_IN_STACKS_OR_RECENT_TASKS,
+            MATCH_TASK_IN_STACKS_OR_RECENT_TASKS_AND_RESTORE
+    })
+    public @interface AnyTaskForIdMatchTaskMode {}
+    // Match only tasks in the current stacks
+    static final int MATCH_TASK_IN_STACKS_ONLY = 0;
+    // Match either tasks in the current stacks, or in the recent tasks if not found in the stacks
+    static final int MATCH_TASK_IN_STACKS_OR_RECENT_TASKS = 1;
+    // Match either tasks in the current stacks, or in the recent tasks, restoring it to the
+    // provided stack id
+    static final int MATCH_TASK_IN_STACKS_OR_RECENT_TASKS_AND_RESTORE = 2;
 
     // Activity actions an app cannot start if it uses a permission which is not granted.
     private static final ArrayMap<String, String> ACTION_TO_RUNTIME_PERMISSION =
@@ -713,18 +728,26 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     }
 
     TaskRecord anyTaskForIdLocked(int id) {
-        return anyTaskForIdLocked(id, RESTORE_FROM_RECENTS, INVALID_STACK_ID);
+        return anyTaskForIdLocked(id, MATCH_TASK_IN_STACKS_OR_RECENT_TASKS_AND_RESTORE,
+                INVALID_STACK_ID);
     }
 
     /**
      * Returns a {@link TaskRecord} for the input id if available. Null otherwise.
      * @param id Id of the task we would like returned.
-     * @param restoreFromRecents If the id was not in the active list, but was found in recents,
-     *                           restore the task from recents to the active list.
+     * @param matchMode The mode to match the given task id in.
      * @param stackId The stack to restore the task to (default launch stack will be used if
-     *                stackId is {@link android.app.ActivityManager.StackId#INVALID_STACK_ID}).
+     *                stackId is {@link android.app.ActivityManager.StackId#INVALID_STACK_ID}). Only
+     *                valid if the matchMode is
+     *                {@link #MATCH_TASK_IN_STACKS_OR_RECENT_TASKS_AND_RESTORE}.
      */
-    TaskRecord anyTaskForIdLocked(int id, boolean restoreFromRecents, int stackId) {
+    TaskRecord anyTaskForIdLocked(int id, @AnyTaskForIdMatchTaskMode int matchMode, int stackId) {
+        // If there is a stack id set, ensure that we are attempting to actually restore a task
+        if (matchMode != MATCH_TASK_IN_STACKS_OR_RECENT_TASKS_AND_RESTORE &&
+                stackId != INVALID_STACK_ID) {
+            throw new IllegalArgumentException("Should not specify stackId for non-restore lookup");
+        }
+
         int numDisplays = mActivityDisplays.size();
         for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
             ArrayList<ActivityStack> stacks = mActivityDisplays.valueAt(displayNdx).mStacks;
@@ -737,18 +760,23 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             }
         }
 
-        // Don't give up! Look in recents.
-        if (DEBUG_RECENTS) Slog.v(TAG_RECENTS, "Looking for task id=" + id + " in recents");
-        TaskRecord task = mRecentTasks.taskForIdLocked(id);
-        if (task == null) {
-            if (DEBUG_RECENTS) Slog.d(TAG_RECENTS, "\tDidn't find task id=" + id + " in recents");
+        // If we are matching stack tasks only, return now
+        if (matchMode == MATCH_TASK_IN_STACKS_ONLY) {
             return null;
         }
 
-        if (!restoreFromRecents) {
+        // Otherwise, check the recent tasks and return if we find it there and we are not restoring
+        // the task from recents
+        if (DEBUG_RECENTS) Slog.v(TAG_RECENTS, "Looking for task id=" + id + " in recents");
+        TaskRecord task = mRecentTasks.taskForIdLocked(id);
+        if (matchMode == MATCH_TASK_IN_STACKS_OR_RECENT_TASKS) {
+            if (DEBUG_RECENTS && task == null) {
+                Slog.d(TAG_RECENTS, "\tDidn't find task id=" + id + " in recents");
+            }
             return task;
         }
 
+        // Implicitly, this case is MATCH_TASK_IN_STACKS_OR_RECENT_TASKS_AND_RESTORE
         if (!restoreRecentTaskLocked(task, stackId)) {
             if (DEBUG_RECENTS) Slog.w(TAG_RECENTS,
                     "Couldn't restore task id=" + id + " found in recents");
@@ -844,7 +872,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         // was 10, user 0 could only have taskIds 0 to 9, user 1: 10 to 19, user 2: 20 to 29, so on.
         int candidateTaskId = nextTaskIdForUser(currentTaskId, userId);
         while (mRecentTasks.taskIdTakenForUserLocked(candidateTaskId, userId)
-                || anyTaskForIdLocked(candidateTaskId, !RESTORE_FROM_RECENTS,
+                || anyTaskForIdLocked(candidateTaskId, MATCH_TASK_IN_STACKS_OR_RECENT_TASKS,
                         INVALID_STACK_ID) != null) {
             candidateTaskId = nextTaskIdForUser(candidateTaskId, userId);
             if (candidateTaskId == currentTaskId) {
@@ -2249,7 +2277,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         for (int i = mResizingTasksDuringAnimation.size() - 1; i >= 0; i--) {
             final int taskId = mResizingTasksDuringAnimation.valueAt(i);
             final TaskRecord task =
-                    anyTaskForIdLocked(taskId, !RESTORE_FROM_RECENTS, INVALID_STACK_ID);
+                    anyTaskForIdLocked(taskId, MATCH_TASK_IN_STACKS_ONLY, INVALID_STACK_ID);
             if (task != null) {
                 task.setTaskDockedResizing(false);
             }
@@ -2493,7 +2521,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
      * @return Returns true if the given task was found and removed.
      */
     boolean removeTaskByIdLocked(int taskId, boolean killProcess, boolean removeFromRecents) {
-        final TaskRecord tr = anyTaskForIdLocked(taskId, !RESTORE_FROM_RECENTS, INVALID_STACK_ID);
+        final TaskRecord tr = anyTaskForIdLocked(taskId, MATCH_TASK_IN_STACKS_OR_RECENT_TASKS,
+                INVALID_STACK_ID);
         if (tr != null) {
             tr.removeTaskActivitiesLocked();
             cleanUpRemovedTaskLocked(tr, killProcess, removeFromRecents);
@@ -4784,7 +4813,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             mWindowManager.prepareAppTransition(TRANSIT_DOCK_TASK_FROM_RECENTS, false);
         }
 
-        task = anyTaskForIdLocked(taskId, RESTORE_FROM_RECENTS, launchStackId);
+        task = anyTaskForIdLocked(taskId, MATCH_TASK_IN_STACKS_OR_RECENT_TASKS_AND_RESTORE,
+                launchStackId);
         if (task == null) {
             continueUpdateBounds(HOME_STACK_ID);
             mWindowManager.executeAppTransition();

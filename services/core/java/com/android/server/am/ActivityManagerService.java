@@ -127,10 +127,11 @@ import static com.android.server.am.ActivityStackSupervisor.ActivityContainer.FO
 import static com.android.server.am.ActivityStackSupervisor.CREATE_IF_NEEDED;
 import static com.android.server.am.ActivityStackSupervisor.DEFER_RESUME;
 import static com.android.server.am.ActivityStackSupervisor.FORCE_FOCUS;
+import static com.android.server.am.ActivityStackSupervisor.MATCH_TASK_IN_STACKS_ONLY;
+import static com.android.server.am.ActivityStackSupervisor.MATCH_TASK_IN_STACKS_OR_RECENT_TASKS;
 import static com.android.server.am.ActivityStackSupervisor.ON_TOP;
 import static com.android.server.am.ActivityStackSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.am.ActivityStackSupervisor.REMOVE_FROM_RECENTS;
-import static com.android.server.am.ActivityStackSupervisor.RESTORE_FROM_RECENTS;
 import static com.android.server.am.TaskRecord.INVALID_TASK_ID;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_DONT_LOCK;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_LAUNCHABLE_PRIV;
@@ -9650,7 +9651,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             enforceCallingPermission(android.Manifest.permission.READ_FRAME_BUFFER,
                     "getTaskThumbnail()");
             final TaskRecord tr = mStackSupervisor.anyTaskForIdLocked(
-                    id, !RESTORE_FROM_RECENTS, INVALID_STACK_ID);
+                    id, MATCH_TASK_IN_STACKS_OR_RECENT_TASKS, INVALID_STACK_ID);
             if (tr != null) {
                 return tr.getTaskThumbnailLocked();
             }
@@ -9663,8 +9664,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         synchronized (this) {
             enforceCallingPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS,
                     "getTaskDescription()");
-            final TaskRecord tr = mStackSupervisor.anyTaskForIdLocked(
-                    id, !RESTORE_FROM_RECENTS, INVALID_STACK_ID);
+            final TaskRecord tr = mStackSupervisor.anyTaskForIdLocked(id,
+                    MATCH_TASK_IN_STACKS_OR_RECENT_TASKS, INVALID_STACK_ID);
             if (tr != null) {
                 return tr.lastTaskDescription;
             }
@@ -9776,7 +9777,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     public void setTaskResizeable(int taskId, int resizeableMode) {
         synchronized (this) {
             final TaskRecord task = mStackSupervisor.anyTaskForIdLocked(
-                    taskId, !RESTORE_FROM_RECENTS, INVALID_STACK_ID);
+                    taskId, MATCH_TASK_IN_STACKS_OR_RECENT_TASKS, INVALID_STACK_ID);
             if (task == null) {
                 Slog.w(TAG, "setTaskResizeable: taskId=" + taskId + " not found");
                 return;
@@ -9838,8 +9839,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         Rect rect = new Rect();
         try {
             synchronized (this) {
-                final TaskRecord task = mStackSupervisor.anyTaskForIdLocked(
-                        taskId, !RESTORE_FROM_RECENTS, INVALID_STACK_ID);
+                final TaskRecord task = mStackSupervisor.anyTaskForIdLocked(taskId,
+                        MATCH_TASK_IN_STACKS_OR_RECENT_TASKS, INVALID_STACK_ID);
                 if (task == null) {
                     Slog.w(TAG, "getTaskBounds: taskId=" + taskId + " not found");
                     return rect;
@@ -9870,8 +9871,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         final long ident = Binder.clearCallingIdentity();
         try {
             synchronized (this) {
-                final TaskRecord task = mStackSupervisor.anyTaskForIdLocked(
-                        taskId, !RESTORE_FROM_RECENTS, INVALID_STACK_ID);
+                final TaskRecord task = mStackSupervisor.anyTaskForIdLocked(taskId,
+                        MATCH_TASK_IN_STACKS_ONLY, INVALID_STACK_ID);
                 if (task == null) {
                     Slog.w(TAG, "cancelTaskWindowTransition: taskId=" + taskId + " not found");
                     return;
@@ -9889,8 +9890,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         final long ident = Binder.clearCallingIdentity();
         try {
             synchronized (this) {
-                final TaskRecord task = mStackSupervisor.anyTaskForIdLocked(
-                        taskId, !RESTORE_FROM_RECENTS, INVALID_STACK_ID);
+                final TaskRecord task = mStackSupervisor.anyTaskForIdLocked(taskId,
+                        MATCH_TASK_IN_STACKS_ONLY, INVALID_STACK_ID);
                 if (task == null) {
                     Slog.w(TAG, "cancelTaskThumbnailTransition: taskId=" + taskId + " not found");
                     return;
@@ -9909,8 +9910,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         try {
             final TaskRecord task;
             synchronized (this) {
-                task = mStackSupervisor.anyTaskForIdLocked(
-                        taskId, !RESTORE_FROM_RECENTS, INVALID_STACK_ID);
+                task = mStackSupervisor.anyTaskForIdLocked(taskId,
+                        MATCH_TASK_IN_STACKS_OR_RECENT_TASKS, INVALID_STACK_ID);
                 if (task == null) {
                     Slog.w(TAG, "getTaskSnapshot: taskId=" + taskId + " not found");
                     return null;
