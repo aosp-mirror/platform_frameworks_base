@@ -1938,6 +1938,9 @@ public class ExifInterface {
      * not exist or thumbnail image is uncompressed.
      */
     public boolean isThumbnailCompressed() {
+        if (!mHasThumbnail) {
+            return false;
+        }
         if (mThumbnailCompression == DATA_JPEG || mThumbnailCompression == DATA_JPEG_COMPRESSED) {
             return true;
         }
@@ -2974,7 +2977,6 @@ public class ExifInterface {
             }
         } else {
             // Thumbnail data may not contain Compression tag value
-            mThumbnailCompression = DATA_JPEG;
             handleThumbnailFromJfif(in, thumbnailData);
         }
     }
@@ -3009,6 +3011,8 @@ public class ExifInterface {
                 mHasThumbnail = true;
                 mThumbnailOffset = thumbnailOffset;
                 mThumbnailLength = thumbnailLength;
+                mThumbnailCompression = DATA_JPEG;
+
                 if (mFilename == null && mAssetInputStream == null
                         && mSeekableFileDescriptor == null) {
                     // Save the thumbnail in memory if the input doesn't support reading again.
