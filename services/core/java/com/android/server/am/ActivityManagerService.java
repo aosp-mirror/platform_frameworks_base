@@ -7808,9 +7808,14 @@ public class ActivityManagerService extends IActivityManager.Stub
                 r.pictureInPictureArgs.copyOnlySet(args);
                 if (r.getStack().getStackId() == PINNED_STACK_ID) {
                     // If the activity is already in picture-in-picture, update the pinned stack now
+                    // if it is not already expanding to fullscreen. Otherwise, the arguments will
+                    // be used the next time the activity enters PiP
                     final PinnedActivityStack stack = r.getStack();
-                    stack.setPictureInPictureAspectRatio(r.pictureInPictureArgs.getAspectRatio());
-                    stack.setPictureInPictureActions(r.pictureInPictureArgs.getActions());
+                    if (!stack.isBoundsAnimatingToFullscreen()) {
+                        stack.setPictureInPictureAspectRatio(
+                                r.pictureInPictureArgs.getAspectRatio());
+                        stack.setPictureInPictureActions(r.pictureInPictureArgs.getActions());
+                    }
                 }
                 logPictureInPictureArgs(args);
             }
