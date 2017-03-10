@@ -41,12 +41,28 @@ public class TestFontsProvider extends ContentProvider {
 
     private ParcelFileDescriptor mPfd;
     private boolean mReturnAllFields = true;
+    private int mResultCode = FontsContract.Columns.RESULT_CODE_OK;
+    private MatrixCursor mCustomCursor = null;
+
+    /**
+     * Used by tests to modify the result code that should be returned.
+     */
+    void setResultCode(int resultCode) {
+        mResultCode = resultCode;
+    }
 
     /**
      * Used by tests to switch whether all fields should be returned or not.
      */
     void setReturnAllFields(boolean returnAllFields) {
         mReturnAllFields = returnAllFields;
+    }
+
+    /**
+     * Used by tests to control what values are returned.
+     */
+    void setCustomCursor(MatrixCursor cursor) {
+        mCustomCursor = cursor;
     }
 
     @Override
@@ -58,12 +74,15 @@ public class TestFontsProvider extends ContentProvider {
     @Override
     public Cursor query(@NonNull Uri uri, @Nullable String[] projection, @Nullable String selection,
             @Nullable String[] selectionArgs, @Nullable String sortOrder) {
+        if (mCustomCursor != null) {
+            return mCustomCursor;
+        }
         MatrixCursor cursor;
         if (mReturnAllFields) {
             cursor = new MatrixCursor(new String[] { FontsContract.Columns._ID,
                     FontsContract.Columns.TTC_INDEX, FontsContract.Columns.VARIATION_SETTINGS,
-                    FontsContract.Columns.STYLE });
-            cursor.addRow(new Object[] { 1, TTC_INDEX, VARIATION_SETTINGS, STYLE });
+                    FontsContract.Columns.STYLE, FontsContract.Columns.RESULT_CODE });
+            cursor.addRow(new Object[] { 1, TTC_INDEX, VARIATION_SETTINGS, STYLE, mResultCode });
         } else {
             cursor = new MatrixCursor(new String[] { FontsContract.Columns._ID });
             cursor.addRow(new Object[] { 1 });

@@ -32,7 +32,6 @@ import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.LruCache;
 import android.util.SparseArray;
-import android.graphics.FontListParser;
 
 import com.android.internal.annotations.GuardedBy;
 
@@ -287,13 +286,11 @@ public class Typeface {
             callback.onTypefaceRetrieved(cachedTypeface);
             return;
         }
-        if (resultCode == FontsContract.RESULT_CODE_PROVIDER_NOT_FOUND) {
-            callback.onTypefaceRequestFailed(
-                    FontRequestCallback.FAIL_REASON_PROVIDER_NOT_FOUND);
+        if (resultCode != FontsContract.Columns.RESULT_CODE_OK) {
+            callback.onTypefaceRequestFailed(resultCode);
             return;
         }
-        if (resultCode == FontsContract.RESULT_CODE_FONT_NOT_FOUND
-                || resultData == null) {
+        if (resultData == null) {
             callback.onTypefaceRequestFailed(
                     FontRequestCallback.FAIL_REASON_FONT_NOT_FOUND);
             return;
@@ -356,21 +353,37 @@ public class Typeface {
          * Constant returned by {@link #onTypefaceRequestFailed(int)} signaling that the given
          * provider was not found on the device.
          */
-        int FAIL_REASON_PROVIDER_NOT_FOUND = 0;
+        int FAIL_REASON_PROVIDER_NOT_FOUND = FontsContract.RESULT_CODE_PROVIDER_NOT_FOUND;
+        /**
+         * Constant returned by {@link #onTypefaceRequestFailed(int)} signaling that the given
+         * provider must be authenticated and the given certificates do not match its signature.
+         */
+        int FAIL_REASON_WRONG_CERTIFICATES = FontsContract.RESULT_CODE_WRONG_CERTIFICATES;
         /**
          * Constant returned by {@link #onTypefaceRequestFailed(int)} signaling that the font
          * returned by the provider was not loaded properly.
          */
-        int FAIL_REASON_FONT_LOAD_ERROR = 1;
+        int FAIL_REASON_FONT_LOAD_ERROR = -3;
         /**
-         * Constant returned by {@link #onTypefaceRequestFailed(int)} signaling that the given
+         * Constant returned by {@link #onTypefaceRequestFailed(int)} signaling that the font
          * provider did not return any results for the given query.
          */
-        int FAIL_REASON_FONT_NOT_FOUND = 2;
+        int FAIL_REASON_FONT_NOT_FOUND = FontsContract.Columns.RESULT_CODE_FONT_NOT_FOUND;
+        /**
+         * Constant returned by {@link #onTypefaceRequestFailed(int)} signaling that the font
+         * provider found the queried font, but it is currently unavailable.
+         */
+        int FAIL_REASON_FONT_UNAVAILABLE = FontsContract.Columns.RESULT_CODE_FONT_UNAVAILABLE;
+        /**
+         * Constant returned by {@link #onTypefaceRequestFailed(int)} signaling that the given
+         * query was not supported by the provider.
+         */
+        int FAIL_REASON_MALFORMED_QUERY = FontsContract.Columns.RESULT_CODE_MALFORMED_QUERY;
 
         /** @hide */
-        @IntDef({FAIL_REASON_PROVIDER_NOT_FOUND, FAIL_REASON_FONT_LOAD_ERROR,
-                FAIL_REASON_FONT_NOT_FOUND})
+        @IntDef({ FAIL_REASON_PROVIDER_NOT_FOUND, FAIL_REASON_FONT_LOAD_ERROR,
+                FAIL_REASON_FONT_NOT_FOUND, FAIL_REASON_FONT_UNAVAILABLE,
+                FAIL_REASON_MALFORMED_QUERY })
         @Retention(RetentionPolicy.SOURCE)
         @interface FontRequestFailReason {}
 
@@ -386,8 +399,10 @@ public class Typeface {
          * Called when a Typeface request done via {@link Typeface#create(FontRequest,
          * FontRequestCallback)} fails.
          * @param reason One of {@link #FAIL_REASON_PROVIDER_NOT_FOUND},
-         *               {@link #FAIL_REASON_FONT_NOT_FOUND} or
-         *               {@link #FAIL_REASON_FONT_LOAD_ERROR}.
+         *               {@link #FAIL_REASON_FONT_NOT_FOUND},
+         *               {@link #FAIL_REASON_FONT_LOAD_ERROR},
+         *               {@link #FAIL_REASON_FONT_UNAVAILABLE} or
+         *               {@link #FAIL_REASON_MALFORMED_QUERY}.
          */
         void onTypefaceRequestFailed(@FontRequestFailReason int reason);
     }
