@@ -2234,8 +2234,11 @@ public class AudioManager {
      *      Use {@link #AUDIOFOCUS_GAIN} for a focus request of unknown duration such
      *      as the playback of a song or a video.
      *  @return {@link #AUDIOFOCUS_REQUEST_FAILED} or {@link #AUDIOFOCUS_REQUEST_GRANTED}
+     *  @deprecated use {@link #requestAudioFocus(AudioFocusRequest)}
      */
     public int requestAudioFocus(OnAudioFocusChangeListener l, int streamType, int durationHint) {
+        PlayerBase.deprecateStreamTypeForPlayback(streamType,
+                "AudioManager", "requestAudioFocus()");
         int status = AUDIOFOCUS_REQUEST_FAILED;
 
         try {
@@ -2502,6 +2505,7 @@ public class AudioManager {
      *  Abandon audio focus. Causes the previous focus owner, if any, to receive focus.
      *  @param l the listener with which focus was requested.
      *  @return {@link #AUDIOFOCUS_REQUEST_FAILED} or {@link #AUDIOFOCUS_REQUEST_GRANTED}
+     *  @deprecated use {@link #abandonAudioFocusRequest(AudioFocusRequest)}
      */
     public int abandonAudioFocus(OnAudioFocusChangeListener l) {
         return abandonAudioFocus(l, null /*AudioAttributes, legacy behavior*/);

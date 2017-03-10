@@ -303,12 +303,12 @@ public final class AudioFocusRequest {
          * by this {@code Builder}'s configuration methods.
          * @return the {@code AudioFocusRequest} instance qualified by all the properties set
          *   on this {@code Builder}.
-         * @throws IllegalArgumentException thrown when focus request is set to accept delayed
-         *    focus, or to pause on duck, but no focus change listener was set.
+         * @throws IllegalStateException thrown when attempting to build a focus request that is set
+         *    to accept delayed focus, or to pause on duck, but no focus change listener was set.
          */
         public AudioFocusRequest build() {
             if ((mDelayedFocus || mPausesOnDuck) && (mFocusListener == null)) {
-                throw new IllegalArgumentException(
+                throw new IllegalStateException(
                         "Can't use delayed focus or pause on duck without a listener");
             }
             final int flags = 0
