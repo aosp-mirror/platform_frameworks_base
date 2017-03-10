@@ -20,10 +20,12 @@ import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_ACT
 import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_CONTROLLER_MESSENGER;
 import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_MOVEMENT_BOUNDS;
 import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_STACK_BOUNDS;
+import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_SHOW_MENU;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -35,6 +37,8 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.PointF;
 import android.graphics.Rect;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.os.Bundle;
 import android.os.Handler;
@@ -71,13 +75,19 @@ public class PipMenuActivity extends Activity {
     public static final int MESSAGE_POKE_MENU = 2;
     public static final int MESSAGE_HIDE_MENU = 3;
     public static final int MESSAGE_UPDATE_ACTIONS = 4;
+    public static final int MESSAGE_UPDATE_DISMISS_FRACTION = 5;
 
     private static final long INITIAL_DISMISS_DELAY = 2000;
     private static final long POST_INTERACTION_DISMISS_DELAY = 1500;
     private static final long MENU_FADE_DURATION = 125;
 
+    private static final float MENU_BACKGROUND_ALPHA = 0.3f;
+    private static final float DISMISS_BACKGROUND_ALPHA = 0.8f;
+
     private boolean mMenuVisible;
     private final List<RemoteAction> mActions = new ArrayList<>();
+    private View mViewRoot;
+    private Drawable mBackgroundDrawable;
     private View mMenuContainer;
     private LinearLayout mActionsGroup;
     private View mDismissButton;
@@ -85,6 +95,14 @@ public class PipMenuActivity extends Activity {
     private int mBetweenActionPaddingLand;
 
     private ObjectAnimator mMenuContainerAnimator;
+    private ValueAnimator.AnimatorUpdateListener mMenuBgUpdateListener =
+            new ValueAnimator.AnimatorUpdateListener() {
+                @Override
+                public void onAnimationUpdate(ValueAnimator animation) {
+                    final float alpha = (float) animation.getAnimatedValue();
+                    mBackgroundDrawable.setAlpha((int) (MENU_BACKGROUND_ALPHA*alpha*255));
+                }
+            };
 
     private PointF mDownPosition = new PointF();
     private PointF mDownDelta = new PointF();
@@ -109,6 +127,10 @@ public class PipMenuActivity extends Activity {
                     Pair<Rect, ParceledListSlice> data = (Pair<Rect, ParceledListSlice>) msg.obj;
                     setActions(data.first, data.second.getList());
                     break;
+                case MESSAGE_UPDATE_DISMISS_FRACTION:
+                    float fraction = (float) msg.obj;
+                    updateDismissFraction(fraction);
+                    break;
             }
         }
     });
@@ -130,7 +152,12 @@ public class PipMenuActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.pip_menu_activity);
 
-        mMenuContainer = findViewById(R.id.menu);
+        mBackgroundDrawable = new ColorDrawable(Color.BLACK);
+        mBackgroundDrawable.setAlpha(0);
+        mViewRoot = findViewById(R.id.background);
+        mViewRoot.setBackground(mBackgroundDrawable);
+        mMenuContainer = findViewById(R.id.menu_container);
+        mMenuContainer.setAlpha(0);
         mMenuContainer.setOnClickListener((v) -> {
             expandPip();
         });
@@ -222,10 +249,10 @@ public class PipMenuActivity extends Activity {
 
     private void showMenu(Rect stackBounds, Rect movementBounds) {
         if (!mMenuVisible) {
+            updateActionViews(stackBounds);
             if (mMenuContainerAnimator != null) {
                 mMenuContainerAnimator.cancel();
             }
-
             notifyMenuVisibility(true);
             updateExpandButtonFromBounds(stackBounds, movementBounds);
             mMenuContainerAnimator = ObjectAnimator.ofFloat(mMenuContainer, View.ALPHA,
@@ -238,6 +265,7 @@ public class PipMenuActivity extends Activity {
                     repostDelayedFinish(INITIAL_DISMISS_DELAY);
                 }
             });
+            mMenuContainerAnimator.addUpdateListener(mMenuBgUpdateListener);
             mMenuContainerAnimator.start();
         } else {
             repostDelayedFinish(POST_INTERACTION_DISMISS_DELAY);
@@ -269,20 +297,24 @@ public class PipMenuActivity extends Activity {
                     }
                 }
             });
+            mMenuContainerAnimator.addUpdateListener(mMenuBgUpdateListener);
             mMenuContainerAnimator.start();
         }
     }
 
     private void updateFromIntent(Intent intent) {
-        Rect stackBounds = Rect.unflattenFromString(intent.getStringExtra(EXTRA_STACK_BOUNDS));
-        Rect movementBounds = Rect.unflattenFromString(intent.getStringExtra(
-                EXTRA_MOVEMENT_BOUNDS));
         mToControllerMessenger = intent.getParcelableExtra(EXTRA_CONTROLLER_MESSENGER);
         ParceledListSlice actions = intent.getParcelableExtra(EXTRA_ACTIONS);
         if (actions != null) {
-            setActions(stackBounds, actions.getList());
+            mActions.clear();
+            mActions.addAll(actions.getList());
         }
-        showMenu(stackBounds, movementBounds);
+        if (intent.getBooleanExtra(EXTRA_SHOW_MENU, false)) {
+            Rect stackBounds = Rect.unflattenFromString(intent.getStringExtra(EXTRA_STACK_BOUNDS));
+            Rect movementBounds = Rect.unflattenFromString(intent.getStringExtra(
+                    EXTRA_MOVEMENT_BOUNDS));
+            showMenu(stackBounds, movementBounds);
+        }
     }
 
     private void updateExpandButtonFromBounds(Rect stackBounds, Rect movementBounds) {
@@ -363,6 +395,19 @@ public class PipMenuActivity extends Activity {
                     R.dimen.pip_expand_container_edge_margin);
             expandContainer.requestLayout();
         }
+    }
+
+    private void updateDismissFraction(float fraction) {
+        int alpha;
+        if (mMenuVisible) {
+            mMenuContainer.setAlpha(1-fraction);
+            final float interpolatedAlpha =
+                    MENU_BACKGROUND_ALPHA * (1.0f - fraction) + DISMISS_BACKGROUND_ALPHA * fraction;
+            alpha = (int) (interpolatedAlpha*255);
+        } else {
+            alpha = (int) (fraction*DISMISS_BACKGROUND_ALPHA*255);
+        }
+        mBackgroundDrawable.setAlpha(alpha);
     }
 
     private void notifyRegisterInputConsumer() {

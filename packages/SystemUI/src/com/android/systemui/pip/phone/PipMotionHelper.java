@@ -65,9 +65,9 @@ public class PipMotionHelper {
     private static final int IME_SHIFT_DURATION = 300;
 
     // The fraction of the stack width that the user has to drag offscreen to minimize the PiP
-    private static final float MINIMIZE_OFFSCREEN_FRACTION = 0.2f;
-    // The fraction of the stack height that the user has to drag offscreen to minimize the PiP
-    private static final float DISMISS_OFFSCREEN_FRACTION = 0.35f;
+    private static final float MINIMIZE_OFFSCREEN_FRACTION = 0.3f;
+    // The fraction of the stack height that the user has to drag offscreen to dismiss the PiP
+    private static final float DISMISS_OFFSCREEN_FRACTION = 0.15f;
 
     private Context mContext;
     private IActivityManager mActivityManager;
@@ -234,12 +234,16 @@ public class PipMotionHelper {
     /**
      * Animates the PiP to the minimized state, slightly offscreen.
      */
-    Rect animateToClosestMinimizedState(Rect movementBounds) {
+    Rect animateToClosestMinimizedState(Rect movementBounds,
+            AnimatorUpdateListener updateListener) {
         cancelAnimations();
         Rect toBounds = getClosestMinimizedBounds(mBounds, movementBounds);
         if (!mBounds.equals(toBounds)) {
             mBoundsAnimator = createAnimationToBounds(mBounds, toBounds,
                     MINIMIZE_STACK_MAX_DURATION, LINEAR_OUT_SLOW_IN, mUpdateBoundsListener);
+            if (updateListener != null) {
+                mBoundsAnimator.addUpdateListener(updateListener);
+            }
             mBoundsAnimator.start();
         }
         return toBounds;
@@ -248,7 +252,8 @@ public class PipMotionHelper {
     /**
      * Flings the PiP to the closest snap target.
      */
-    Rect flingToSnapTarget(float velocity, float velocityX, float velocityY, Rect movementBounds) {
+    Rect flingToSnapTarget(float velocity, float velocityX, float velocityY, Rect movementBounds,
+            AnimatorUpdateListener listener) {
         cancelAnimations();
         Rect toBounds = mSnapAlgorithm.findClosestSnapBounds(movementBounds, mBounds,
                 velocityX, velocityY);
@@ -258,6 +263,9 @@ public class PipMotionHelper {
             mFlingAnimationUtils.apply(mBoundsAnimator, 0,
                     distanceBetweenRectOffsets(mBounds, toBounds),
                     velocity);
+            if (listener != null) {
+                mBoundsAnimator.addUpdateListener(listener);
+            }
             mBoundsAnimator.start();
         }
         return toBounds;
@@ -266,12 +274,15 @@ public class PipMotionHelper {
     /**
      * Animates the PiP to the closest snap target.
      */
-    Rect animateToClosestSnapTarget(Rect movementBounds) {
+    Rect animateToClosestSnapTarget(Rect movementBounds, AnimatorUpdateListener listener) {
         cancelAnimations();
         Rect toBounds = mSnapAlgorithm.findClosestSnapBounds(movementBounds, mBounds);
         if (!mBounds.equals(toBounds)) {
             mBoundsAnimator = createAnimationToBounds(mBounds, toBounds, SNAP_STACK_DURATION,
                     FAST_OUT_SLOW_IN, mUpdateBoundsListener);
+            if (listener != null) {
+                mBoundsAnimator.addUpdateListener(listener);
+            }
             mBoundsAnimator.start();
         }
         return toBounds;
@@ -316,7 +327,7 @@ public class PipMotionHelper {
     /**
      * Animates the dismissal of the PiP off the edge of the screen.
      */
-    Rect animateDragToEdgeDismiss(Rect pipBounds) {
+    Rect animateDragToEdgeDismiss(Rect pipBounds, AnimatorUpdateListener listener) {
         cancelAnimations();
         Point displaySize = new Point();
         mContext.getDisplay().getRealSize(displaySize);
@@ -330,6 +341,9 @@ public class PipMotionHelper {
                 dismissPip();
             }
         });
+        if (listener != null) {
+            mBoundsAnimator.addUpdateListener(listener);
+        }
         mBoundsAnimator.start();
         return toBounds;
     }

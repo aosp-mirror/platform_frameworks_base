@@ -321,7 +321,7 @@ public class PipSnapAlgorithm {
                 stackBounds.top));
         boundsOut.set(stackBounds);
         if (mIsMinimized) {
-            boundsOut.offsetTo(boundedLeft, boundsOut.top);
+            boundsOut.offsetTo(boundedLeft, boundedTop);
             return;
         }
 
