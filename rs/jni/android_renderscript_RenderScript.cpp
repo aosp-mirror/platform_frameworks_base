@@ -34,6 +34,8 @@
 #include "android_runtime/android_view_Surface.h"
 #include "android_runtime/android_util_AssetManager.h"
 #include "android/graphics/GraphicsJNI.h"
+#include "android/native_window.h"
+#include "android/native_window_jni.h"
 
 #include <rsEnv.h>
 #include <rsApiStubs.h>
@@ -1281,13 +1283,12 @@ nAllocationSetSurface(JNIEnv *_env, jobject _this, jlong con, jlong alloc, jobje
               (RsAllocation)alloc, (Surface *)sur);
     }
 
-    sp<Surface> s;
+    ANativeWindow *anw = nullptr;
     if (sur != 0) {
-        s = android_view_Surface_getSurface(_env, sur);
+        anw = ANativeWindow_fromSurface(_env, sur);
     }
 
-    rsAllocationSetSurface((RsContext)con, (RsAllocation)alloc,
-                           static_cast<ANativeWindow *>(s.get()));
+    rsAllocationSetSurface((RsContext)con, (RsAllocation)alloc, anw);
 }
 
 static void
