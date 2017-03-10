@@ -65,8 +65,10 @@ import java.util.List;
  * <li>Create a Aware network specifier to be used with
  * {@link ConnectivityManager#requestNetwork(NetworkRequest, ConnectivityManager.NetworkCallback)}
  * to set-up a Aware connection with a peer. Refer to
- * {@link DiscoverySession#createNetworkSpecifier(PeerHandle, byte[])} and
- * {@link WifiAwareSession#createNetworkSpecifier(int, byte[], byte[])}.
+ * {@link DiscoverySession#createNetworkSpecifierOpen(PeerHandle)},
+ * {@link DiscoverySession#createNetworkSpecifierPassphrase(PeerHandle, String)},
+ * {@link WifiAwareSession#createNetworkSpecifierOpen(int, byte[])}, and
+ * {@link WifiAwareSession#createNetworkSpecifierPassphrase(int, byte[], String)}.
  * </ul>
  * <p>
  *     Aware may not be usable when Wi-Fi is disabled (and other conditions). To validate that
@@ -115,8 +117,10 @@ import java.util.List;
  *        <li>{@link NetworkRequest.Builder#addTransportType(int)} of
  *        {@link android.net.NetworkCapabilities#TRANSPORT_WIFI_AWARE}.
  *        <li>{@link NetworkRequest.Builder#setNetworkSpecifier(String)} using
- *        {@link WifiAwareSession#createNetworkSpecifier(int, byte[], byte[])} or
- *        {@link DiscoverySession#createNetworkSpecifier(PeerHandle, byte[])}.
+ *        {@link WifiAwareSession#createNetworkSpecifierOpen(int, byte[])},
+ *        {@link WifiAwareSession#createNetworkSpecifierPassphrase(int, byte[], String)},
+ *        {@link DiscoverySession#createNetworkSpecifierOpen(PeerHandle)}, or
+ *        {@link DiscoverySession#createNetworkSpecifierPassphrase(PeerHandle, String)}.
  *    </ul>
  */
 public class WifiAwareManager {
@@ -206,8 +210,10 @@ public class WifiAwareManager {
      * Connection creation role is that of INITIATOR. Used to create a network specifier string
      * when requesting a Aware network.
      *
-     * @see DiscoverySession#createNetworkSpecifier(PeerHandle, byte[])
-     * @see WifiAwareSession#createNetworkSpecifier(int, byte[], byte[])
+     * @see DiscoverySession#createNetworkSpecifierOpen(PeerHandle)
+     * @see DiscoverySession#createNetworkSpecifierPassphrase(PeerHandle, String)
+     * @see WifiAwareSession#createNetworkSpecifierOpen(int, byte[])
+     * @see WifiAwareSession#createNetworkSpecifierPassphrase(int, byte[], String)
      */
     public static final int WIFI_AWARE_DATA_PATH_ROLE_INITIATOR = 0;
 
@@ -215,8 +221,10 @@ public class WifiAwareManager {
      * Connection creation role is that of RESPONDER. Used to create a network specifier string
      * when requesting a Aware network.
      *
-     * @see DiscoverySession#createNetworkSpecifier(PeerHandle, byte[])
-     * @see WifiAwareSession#createNetworkSpecifier(int, byte[], byte[])
+     * @see DiscoverySession#createNetworkSpecifierOpen(PeerHandle)
+     * @see DiscoverySession#createNetworkSpecifierPassphrase(PeerHandle, String)
+     * @see WifiAwareSession#createNetworkSpecifierOpen(int, byte[])
+     * @see WifiAwareSession#createNetworkSpecifierPassphrase(int, byte[], String)
      */
     public static final int WIFI_AWARE_DATA_PATH_ROLE_RESPONDER = 1;
 
