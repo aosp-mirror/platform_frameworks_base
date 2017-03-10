@@ -101,7 +101,7 @@ public class ShellUiAutomatorBridge extends UiAutomatorBridge {
                 IWindowManager.Stub.asInterface(ServiceManager.getService(Context.WINDOW_SERVICE));
         int ret = -1;
         try {
-            ret = wm.getRotation();
+            ret = wm.getDefaultDisplayRotation();
         } catch (RemoteException e) {
             Log.e(LOG_TAG, "Error getting screen rotation", e);
             throw new RuntimeException(e);

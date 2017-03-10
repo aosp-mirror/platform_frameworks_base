@@ -112,7 +112,7 @@ public class AppWindowTokenTests extends WindowTestsBase {
         appWindowToken.setOrientation(SCREEN_ORIENTATION_LANDSCAPE);
         sWm.updateOrientationFromAppTokens(sDisplayContent.getOverrideConfiguration(), null,
                 sDisplayContent.getDisplayId());
-        assertEquals(SCREEN_ORIENTATION_LANDSCAPE, sWm.mLastOrientation);
+        assertEquals(SCREEN_ORIENTATION_LANDSCAPE, sDisplayContent.getLastOrientation());
         appWindow.resizeReported = false;
 
         // Update the orientation to perform 180 degree rotation and check that resize was reported.
@@ -120,7 +120,7 @@ public class AppWindowTokenTests extends WindowTestsBase {
         sWm.updateOrientationFromAppTokens(sDisplayContent.getOverrideConfiguration(), null,
                 sDisplayContent.getDisplayId());
         sWm.mRoot.performSurfacePlacement(false /* recoveringMemory */);
-        assertEquals(SCREEN_ORIENTATION_REVERSE_LANDSCAPE, sWm.mLastOrientation);
+        assertEquals(SCREEN_ORIENTATION_REVERSE_LANDSCAPE, sDisplayContent.getLastOrientation());
         assertTrue(appWindow.resizeReported);
         appWindow.removeImmediately();
     }

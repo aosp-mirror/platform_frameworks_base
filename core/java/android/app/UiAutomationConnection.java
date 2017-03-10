@@ -367,7 +367,7 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
             if (mWindowManager.isRotationFrozen()) {
                 // Calling out with a lock held is fine since if the system
                 // process is gone the client calling in will be killed.
-                mInitialFrozenRotation = mWindowManager.getRotation();
+                mInitialFrozenRotation = mWindowManager.getDefaultDisplayRotation();
             }
         } catch (RemoteException re) {
             /* ignore */
