@@ -90,6 +90,7 @@ import android.os.Vibrator;
 import android.provider.Settings;
 import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.StatusBarNotification;
+import android.support.annotation.VisibleForTesting;
 import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
@@ -750,6 +751,12 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     private NavigationBarFragment mNavigationBar;
     private View mNavigationBarView;
+
+    @VisibleForTesting
+    void setMetricsLogger(MetricsLogger metricsLogger) {
+        mMetricsLogger = metricsLogger;
+        mLockscreenGestureLogger.setMetricsLogger(metricsLogger);
+    }
 
     @Override
     public void start() {
