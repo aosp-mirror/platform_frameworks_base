@@ -275,6 +275,10 @@ public class DrmManagerClient implements AutoCloseable {
      * the {@link DrmManagerClient} object is no longer needed in your
      * application. After this method is called, {@link DrmManagerClient} is no
      * longer usable since it has lost all of its required resource.
+     *
+     * This method was added in API 24. In API versions 16 through 23, release()
+     * should be called instead. There is no need to do anything for API
+     * versions prior to 16.
      */
     @Override
     public void close() {
