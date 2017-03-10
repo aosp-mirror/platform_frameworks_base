@@ -1578,8 +1578,14 @@ public class SettingsProvider extends ContentProvider {
     }
 
     private List<String> getSettingsNamesLocked(int settingsType, int userId) {
-        ApplicationInfo ai = getCallingApplicationInfoOrThrow(userId);
-        if (ai.isInstantApp()) {
+        boolean instantApp;
+        if (UserHandle.getAppId(Binder.getCallingUid()) < Process.FIRST_APPLICATION_UID) {
+            instantApp = false;
+        } else {
+            ApplicationInfo ai = getCallingApplicationInfoOrThrow();
+            instantApp = ai.isInstantApp();
+        }
+        if (instantApp) {
             return new ArrayList<String>(getInstantAppAccessibleSettings(settingsType));
         } else {
             return mSettingsRegistry.getSettingsNamesLocked(settingsType, userId);
@@ -1590,7 +1596,7 @@ public class SettingsProvider extends ContentProvider {
         if (UserHandle.getAppId(Binder.getCallingUid()) < Process.FIRST_APPLICATION_UID) {
             return;
         }
-        ApplicationInfo ai = getCallingApplicationInfoOrThrow(userId);
+        ApplicationInfo ai = getCallingApplicationInfoOrThrow();
         if (!ai.isInstantApp()) {
             return;
         }
@@ -1600,10 +1606,16 @@ public class SettingsProvider extends ContentProvider {
         }
     }
 
-    private ApplicationInfo getCallingApplicationInfoOrThrow(int userId) {
+    private ApplicationInfo getCallingApplicationInfoOrThrow() {
+        // We always use the callingUid for this lookup. This means that if hypothetically an
+        // app was installed in user A with cross user and in user B as an Instant App
+        // the app in A would be able to see all the settings in user B. However since cross
+        // user is a system permission and the app must be uninstalled in B and then installed as
+        // an Instant App that situation is not realistic or supported.
         ApplicationInfo ai = null;
         try {
-            ai = mPackageManager.getApplicationInfo(getCallingPackage(), 0 , userId);
+            ai = mPackageManager.getApplicationInfo(getCallingPackage(), 0
+                    , UserHandle.getCallingUserId());
         } catch (RemoteException ignored) {
         }
         if (ai == null) {
