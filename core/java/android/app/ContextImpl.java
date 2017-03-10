@@ -156,13 +156,13 @@ class ContextImpl extends Context {
     @GuardedBy("ContextImpl.class")
     private ArrayMap<String, File> mSharedPrefsPaths;
 
-    final ActivityThread mMainThread;
-    final LoadedApk mPackageInfo;
-    private ClassLoader mClassLoader;
+    final @NonNull ActivityThread mMainThread;
+    final @NonNull LoadedApk mPackageInfo;
+    private @Nullable ClassLoader mClassLoader;
 
-    private final IBinder mActivityToken;
+    private final @Nullable IBinder mActivityToken;
 
-    private final UserHandle mUser;
+    private final @Nullable UserHandle mUser;
 
     private final ApplicationContentResolver mContentResolver;
 
@@ -180,6 +180,9 @@ class ContextImpl extends Context {
     private Resources.Theme mTheme = null;
     private PackageManager mPackageManager;
     private Context mReceiverRestrictedContext = null;
+
+    // The name of the split this Context is representing. May be null.
+    private @Nullable String mSplitName = null;
 
     private final Object mSync = new Object();
 
@@ -1914,17 +1917,25 @@ class ContextImpl extends Context {
         }
     }
 
-    private static Resources createResources(IBinder activityToken, LoadedApk pi, int displayId,
-            Configuration overrideConfig, CompatibilityInfo compatInfo) {
+    private static Resources createResources(IBinder activityToken, LoadedApk pi, String splitName,
+            int displayId, Configuration overrideConfig, CompatibilityInfo compatInfo) {
+        final String[] splitResDirs;
+        final ClassLoader classLoader;
+        try {
+            splitResDirs = pi.getSplitPaths(splitName);
+            classLoader = pi.getSplitClassLoader(splitName);
+        } catch (NameNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         return ResourcesManager.getInstance().getResources(activityToken,
                 pi.getResDir(),
-                pi.getSplitResDirs(),
+                splitResDirs,
                 pi.getOverlayDirs(),
                 pi.getApplicationInfo().sharedLibraryFiles,
                 displayId,
                 overrideConfig,
                 compatInfo,
-                pi.getClassLoader());
+                classLoader);
     }
 
     @Override
@@ -1933,14 +1944,13 @@ class ContextImpl extends Context {
         LoadedApk pi = mMainThread.getPackageInfo(application, mResources.getCompatibilityInfo(),
                 flags | CONTEXT_REGISTER_PACKAGE);
         if (pi != null) {
-            ContextImpl c = new ContextImpl(this, mMainThread, pi, mActivityToken,
-                    new UserHandle(UserHandle.getUserId(application.uid)), flags,
-                    null);
+            ContextImpl c = new ContextImpl(this, mMainThread, pi, null, mActivityToken,
+                    new UserHandle(UserHandle.getUserId(application.uid)), flags, null);
 
             final int displayId = mDisplay != null
                     ? mDisplay.getDisplayId() : Display.DEFAULT_DISPLAY;
 
-            c.setResources(createResources(mActivityToken, pi, displayId, null,
+            c.setResources(createResources(mActivityToken, pi, null, displayId, null,
                     getDisplayAdjustments(displayId).getCompatibilityInfo()));
             if (c.mResources != null) {
                 return c;
@@ -1964,20 +1974,20 @@ class ContextImpl extends Context {
         if (packageName.equals("system") || packageName.equals("android")) {
             // The system resources are loaded in every application, so we can safely copy
             // the context without reloading Resources.
-            return new ContextImpl(this, mMainThread, mPackageInfo, mActivityToken, user, flags,
-                    null);
+            return new ContextImpl(this, mMainThread, mPackageInfo, null, mActivityToken, user,
+                    flags, null);
         }
 
         LoadedApk pi = mMainThread.getPackageInfo(packageName, mResources.getCompatibilityInfo(),
                 flags | CONTEXT_REGISTER_PACKAGE, user.getIdentifier());
         if (pi != null) {
-            ContextImpl c = new ContextImpl(this, mMainThread, pi, mActivityToken, user, flags,
-                    null);
+            ContextImpl c = new ContextImpl(this, mMainThread, pi, null, mActivityToken, user,
+                    flags, null);
 
             final int displayId = mDisplay != null
                     ? mDisplay.getDisplayId() : Display.DEFAULT_DISPLAY;
 
-            c.setResources(createResources(mActivityToken, pi, displayId, null,
+            c.setResources(createResources(mActivityToken, pi, null, displayId, null,
                     getDisplayAdjustments(displayId).getCompatibilityInfo()));
             if (c.mResources != null) {
                 return c;
@@ -1999,7 +2009,7 @@ class ContextImpl extends Context {
         final ClassLoader classLoader = mPackageInfo.getSplitClassLoader(splitName);
         final String[] paths = mPackageInfo.getSplitPaths(splitName);
 
-        final ContextImpl context = new ContextImpl(this, mMainThread, mPackageInfo,
+        final ContextImpl context = new ContextImpl(this, mMainThread, mPackageInfo, splitName,
                 mActivityToken, mUser, mFlags, classLoader);
 
         final int displayId = mDisplay != null
@@ -2024,11 +2034,11 @@ class ContextImpl extends Context {
             throw new IllegalArgumentException("overrideConfiguration must not be null");
         }
 
-        ContextImpl context = new ContextImpl(this, mMainThread, mPackageInfo, mActivityToken,
-                mUser, mFlags, mClassLoader);
+        ContextImpl context = new ContextImpl(this, mMainThread, mPackageInfo, mSplitName,
+                mActivityToken, mUser, mFlags, mClassLoader);
 
         final int displayId = mDisplay != null ? mDisplay.getDisplayId() : Display.DEFAULT_DISPLAY;
-        context.setResources(createResources(mActivityToken, mPackageInfo, displayId,
+        context.setResources(createResources(mActivityToken, mPackageInfo, mSplitName, displayId,
                 overrideConfiguration, getDisplayAdjustments(displayId).getCompatibilityInfo()));
         return context;
     }
@@ -2039,12 +2049,12 @@ class ContextImpl extends Context {
             throw new IllegalArgumentException("display must not be null");
         }
 
-        ContextImpl context = new ContextImpl(this, mMainThread, mPackageInfo, mActivityToken,
-                mUser, mFlags, mClassLoader);
+        ContextImpl context = new ContextImpl(this, mMainThread, mPackageInfo, mSplitName,
+                mActivityToken, mUser, mFlags, mClassLoader);
 
         final int displayId = display.getDisplayId();
-        context.setResources(createResources(mActivityToken, mPackageInfo, displayId, null,
-                getDisplayAdjustments(displayId).getCompatibilityInfo()));
+        context.setResources(createResources(mActivityToken, mPackageInfo, mSplitName, displayId,
+                null, getDisplayAdjustments(displayId).getCompatibilityInfo()));
         context.mDisplay = display;
         return context;
     }
@@ -2053,16 +2063,16 @@ class ContextImpl extends Context {
     public Context createDeviceProtectedStorageContext() {
         final int flags = (mFlags & ~Context.CONTEXT_CREDENTIAL_PROTECTED_STORAGE)
                 | Context.CONTEXT_DEVICE_PROTECTED_STORAGE;
-        return new ContextImpl(this, mMainThread, mPackageInfo, mActivityToken, mUser, flags,
-                mClassLoader);
+        return new ContextImpl(this, mMainThread, mPackageInfo, mSplitName, mActivityToken, mUser,
+                flags, mClassLoader);
     }
 
     @Override
     public Context createCredentialProtectedStorageContext() {
         final int flags = (mFlags & ~Context.CONTEXT_DEVICE_PROTECTED_STORAGE)
                 | Context.CONTEXT_CREDENTIAL_PROTECTED_STORAGE;
-        return new ContextImpl(this, mMainThread, mPackageInfo, mActivityToken, mUser, flags,
-                mClassLoader);
+        return new ContextImpl(this, mMainThread, mPackageInfo, mSplitName, mActivityToken, mUser,
+                flags, mClassLoader);
     }
 
     @Override
@@ -2149,7 +2159,7 @@ class ContextImpl extends Context {
 
     static ContextImpl createSystemContext(ActivityThread mainThread) {
         LoadedApk packageInfo = new LoadedApk(mainThread);
-        ContextImpl context = new ContextImpl(null, mainThread, packageInfo, null, null, 0,
+        ContextImpl context = new ContextImpl(null, mainThread, packageInfo, null, null, null, 0,
                 null);
         context.setResources(packageInfo.getResources());
         context.mResources.updateConfiguration(context.mResourcesManager.getConfiguration(),
@@ -2159,7 +2169,7 @@ class ContextImpl extends Context {
 
     static ContextImpl createAppContext(ActivityThread mainThread, LoadedApk packageInfo) {
         if (packageInfo == null) throw new IllegalArgumentException("packageInfo");
-        ContextImpl context = new ContextImpl(null, mainThread, packageInfo, null, null, 0,
+        ContextImpl context = new ContextImpl(null, mainThread, packageInfo, null, null, null, 0,
                 null);
         context.setResources(packageInfo.getResources());
         return context;
@@ -2186,8 +2196,8 @@ class ContextImpl extends Context {
             }
         }
 
-        ContextImpl context = new ContextImpl(null, mainThread, packageInfo, activityToken, null,
-                0, classLoader);
+        ContextImpl context = new ContextImpl(null, mainThread, packageInfo, activityInfo.splitName,
+                activityToken, null, 0, classLoader);
 
         // Clamp display ID to DEFAULT_DISPLAY if it is INVALID_DISPLAY.
         displayId = (displayId != Display.INVALID_DISPLAY) ? displayId : Display.DEFAULT_DISPLAY;
@@ -2214,9 +2224,10 @@ class ContextImpl extends Context {
         return context;
     }
 
-    private ContextImpl(ContextImpl container, ActivityThread mainThread,
-            LoadedApk packageInfo, IBinder activityToken, UserHandle user, int flags,
-            ClassLoader classLoader) {
+    private ContextImpl(@Nullable ContextImpl container, @NonNull ActivityThread mainThread,
+            @NonNull LoadedApk packageInfo, @Nullable String splitName,
+            @Nullable IBinder activityToken, @Nullable UserHandle user, int flags,
+            @Nullable ClassLoader classLoader) {
         mOuterContext = this;
 
         // If creator didn't specify which storage to use, use the default
@@ -2241,6 +2252,7 @@ class ContextImpl extends Context {
         mUser = user;
 
         mPackageInfo = packageInfo;
+        mSplitName = splitName;
         mClassLoader = classLoader;
         mResourcesManager = ResourcesManager.getInstance();
 

@@ -31,7 +31,7 @@ import android.os.Parcelable;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Printer;
-import android.util.SparseIntArray;
+import android.util.SparseArray;
 
 import com.android.internal.util.ArrayUtils;
 
@@ -656,13 +656,15 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      *
      * The keys and values are all indices into the {@link #splitNames}, {@link #splitSourceDirs},
      * and {@link #splitPublicSourceDirs} arrays.
-     * Each key represents a split and its value is its parent split.
+     * Each key represents a split and its value is an array of splits. The first element of this
+     * array is the parent split, and the rest are configuration splits. These configuration splits
+     * have no dependencies themselves.
      * Cycles do not exist because they are illegal and screened for during installation.
      *
      * May be null if no splits are installed, or if no dependencies exist between them.
      * @hide
      */
-    public SparseIntArray splitDependencies;
+    public SparseArray<int[]> splitDependencies;
 
     /**
      * Full paths to the locations of extra resource packages (runtime overlays)
@@ -1182,7 +1184,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         dest.writeStringArray(splitNames);
         dest.writeStringArray(splitSourceDirs);
         dest.writeStringArray(splitPublicSourceDirs);
-        dest.writeSparseIntArray(splitDependencies);
+        dest.writeSparseArray((SparseArray) splitDependencies);
         dest.writeString(nativeLibraryDir);
         dest.writeString(secondaryNativeLibraryDir);
         dest.writeString(nativeLibraryRootDir);
@@ -1244,7 +1246,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         splitNames = source.readStringArray();
         splitSourceDirs = source.readStringArray();
         splitPublicSourceDirs = source.readStringArray();
-        splitDependencies = source.readSparseIntArray();
+        splitDependencies = source.readSparseArray(null);
         nativeLibraryDir = source.readString();
         secondaryNativeLibraryDir = source.readString();
         nativeLibraryRootDir = source.readString();
