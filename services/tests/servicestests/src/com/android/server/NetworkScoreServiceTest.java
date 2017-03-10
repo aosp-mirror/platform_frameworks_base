@@ -314,8 +314,8 @@ public class NetworkScoreServiceTest {
         final Bundle bundle = new Bundle();
         bundle.putParcelable(EXTRA_RECOMMENDATION_RESULT, providerResult);
         doAnswer(invocation -> {
-            bundle.putInt(EXTRA_SEQUENCE, invocation.getArgumentAt(2, int.class));
-            invocation.getArgumentAt(1, IRemoteCallback.class).sendResult(bundle);
+            bundle.putInt(EXTRA_SEQUENCE, invocation.getArgument(2));
+            invocation.<IRemoteCallback>getArgument(1).sendResult(bundle);
             return null;
         }).when(mRecommendationProvider)
                 .requestRecommendation(eq(mRecommendationRequest), isA(IRemoteCallback.class),
@@ -379,7 +379,7 @@ public class NetworkScoreServiceTest {
         injectProvider();
         final Bundle bundle = new Bundle();
         doAnswer(invocation -> {
-            invocation.getArgumentAt(1, IRemoteCallback.class).sendResult(bundle);
+            invocation.<IRemoteCallback>getArgument(1).sendResult(bundle);
             return null;
         }).when(mRecommendationProvider)
                 .requestRecommendation(eq(mRecommendationRequest), isA(IRemoteCallback.class),
@@ -956,7 +956,7 @@ public class NetworkScoreServiceTest {
                 IBinder mockBinder = mock(IBinder.class);
                 when(mockBinder.queryLocalInterface(anyString()))
                         .thenReturn(mRecommendationProvider);
-                invocation.getArgumentAt(1, ServiceConnection.class)
+                invocation.<ServiceConnection>getArgument(1)
                         .onServiceConnected(NEW_SCORER.getRecommendationServiceComponent(),
                                 mockBinder);
                 return true;

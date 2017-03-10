@@ -44,10 +44,9 @@ import android.test.suitebuilder.annotation.SmallTest;
 import android.view.inputmethod.InputMethodInfo;
 import com.android.settingslib.BaseTest;
 
-import org.hamcrest.Description;
-import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.compat.ArgumentMatcher;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -249,7 +248,7 @@ public class AppRestrictionsHelperTest extends BaseTest {
         }
 
         @Override
-        public boolean matches(Object argument) {
+        public boolean matchesObject(Object argument) {
             if (argument instanceof Intent) {
                 return ((Intent) argument).filterEquals(mIntent);
             }
@@ -257,8 +256,8 @@ public class AppRestrictionsHelperTest extends BaseTest {
         }
 
         @Override
-        public void describeTo(Description description) {
-            description.appendText("Expected: " + mIntent);
+        public String toString() {
+            return "Expected: " + mIntent;
         }
     }
 

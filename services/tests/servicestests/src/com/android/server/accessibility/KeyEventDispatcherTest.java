@@ -22,13 +22,13 @@ import static junit.framework.TestCase.assertTrue;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.argThat;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
+import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -46,12 +46,13 @@ import android.support.test.runner.AndroidJUnit4;
 import android.view.KeyEvent;
 import android.view.WindowManagerPolicy;
 import com.android.server.accessibility.KeyEventDispatcher.KeyEventFilter;
+import org.hamcrest.Description;
+import org.hamcrest.TypeSafeMatcher;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.ArgumentMatcher;
 
 /**
  * Tests for KeyEventDispatcher
@@ -558,7 +559,7 @@ public class KeyEventDispatcherTest {
                 .matches(mInputEventsHander.timedMessages.get(1).obj));
     }
 
-    private class KeyEventMatcher extends ArgumentMatcher<KeyEvent> {
+    private class KeyEventMatcher extends TypeSafeMatcher<KeyEvent> {
         private KeyEvent mEventToMatch;
 
         KeyEventMatcher(KeyEvent eventToMatch) {
@@ -566,13 +567,14 @@ public class KeyEventDispatcherTest {
         }
 
         @Override
-        public boolean matches(Object event) {
-            if (!(event instanceof KeyEvent)) {
-                return false;
-            }
-            KeyEvent keyEvent = (KeyEvent) event;
+        public boolean matchesSafely(KeyEvent keyEvent) {
             return (mEventToMatch.getAction() == keyEvent.getAction())
                     && (mEventToMatch.getKeyCode() == keyEvent.getKeyCode());
+        }
+
+        @Override
+        public void describeTo(Description description) {
+            description.appendText("Key event matcher");
         }
     }
 

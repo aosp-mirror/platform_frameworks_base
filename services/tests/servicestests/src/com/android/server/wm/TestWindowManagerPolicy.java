@@ -82,7 +82,7 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
                 final ActivityManagerInternal am =
                         LocalServices.getService(ActivityManagerInternal.class);
                 doAnswer((InvocationOnMock invocationOnMock) -> {
-                    final Runnable runnable = invocationOnMock.getArgumentAt(0, Runnable.class);
+                    final Runnable runnable = invocationOnMock.<Runnable>getArgument(0);
                     if (runnable != null) {
                         runnable.run();
                     }

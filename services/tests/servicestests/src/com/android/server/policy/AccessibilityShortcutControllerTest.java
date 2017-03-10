@@ -45,8 +45,8 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.internal.util.reflection.Whitebox;
 
+import java.lang.reflect.Field;
 import java.util.Collections;
 
 import static android.provider.Settings.Secure.ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN;
@@ -124,7 +124,15 @@ public class AccessibilityShortcutControllerTest {
         when(mToast.getWindowParams()).thenReturn(mLayoutParams);
 
         Window window = mock(Window.class);
-        Whitebox.setInternalState(window, "mWindowAttributes", new WindowManager.LayoutParams());
+        // Initialize the mWindowAttributes field which was not properly initialized during mock
+        // creation.
+        try {
+            Field field = Window.class.getDeclaredField("mWindowAttributes");
+            field.setAccessible(true);
+            field.set(window, new WindowManager.LayoutParams());
+        } catch (Exception e) {
+            throw new RuntimeException("Unable to set mWindowAttributes", e);
+        }
         when(mAlertDialog.getWindow()).thenReturn(window);
     }
 

@@ -50,10 +50,10 @@ import com.android.internal.R;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.mockito.compat.ArgumentMatcher;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -77,7 +77,7 @@ public class NetworkScorerAppManagerTest {
         when(mMockContext.getPackageManager()).thenReturn(mMockPm);
         when(mMockPm.queryIntentServices(Mockito.argThat(new ArgumentMatcher<Intent>() {
             @Override
-            public boolean matches(Object object) {
+            public boolean matchesObject(Object object) {
                 Intent intent = (Intent) object;
                 return NetworkScoreManager.ACTION_RECOMMEND_NETWORKS.equals(intent.getAction());
             }
@@ -395,7 +395,7 @@ public class NetworkScorerAppManagerTest {
         when(mMockPm.resolveService(
                 Mockito.argThat(new ArgumentMatcher<Intent>() {
                     @Override
-                    public boolean matches(Object object) {
+                    public boolean matchesObject(Object object) {
                         Intent intent = (Intent) object;
                         return NetworkScoreManager.ACTION_RECOMMEND_NETWORKS
                                 .equals(intent.getAction())
@@ -416,7 +416,7 @@ public class NetworkScorerAppManagerTest {
         when(mMockPm.resolveActivity(
                 Mockito.argThat(new ArgumentMatcher<Intent>() {
                     @Override
-                    public boolean matches(Object object) {
+                    public boolean matchesObject(Object object) {
                         Intent intent = (Intent) object;
                         return NetworkScoreManager.ACTION_CUSTOM_ENABLE.equals(intent.getAction())
                                 && useOpenWifiComp.getPackageName().equals(intent.getPackage());

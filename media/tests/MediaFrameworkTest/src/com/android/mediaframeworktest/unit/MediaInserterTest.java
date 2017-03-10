@@ -37,9 +37,9 @@ import android.test.InstrumentationTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
 
 import org.hamcrest.Description;
-import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.compat.ArgumentMatcher;
 
 public class MediaInserterTest extends InstrumentationTestCase {
 
@@ -67,7 +67,7 @@ public class MediaInserterTest extends InstrumentationTestCase {
         }
 
         @Override
-        public boolean matches(Object argument) {
+        public boolean matchesObject(Object argument) {
             if (!(argument instanceof Uri)) {
                 return false;
             }
@@ -79,13 +79,9 @@ public class MediaInserterTest extends InstrumentationTestCase {
         }
 
         @Override
-        public void describeTo(Description description) {
-            description
-                    .appendText("expected a TableUri '")
-                    .appendText(mUri.toString())
-                    .appendText("'");
+        public String toString() {
+            return "expected a TableUri '" + mUri.toString() + "'";
         }
-
     }
 
     private static Uri eqUri(Uri in) {

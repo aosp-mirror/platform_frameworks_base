@@ -45,8 +45,8 @@ import static android.hardware.camera2.CameraDevice.TEMPLATE_PREVIEW;
 
 import com.android.mediaframeworktest.MediaFrameworkIntegrationTestRunner;
 
-import org.mockito.ArgumentMatcher;
 import org.mockito.ArgumentCaptor;
+import org.mockito.compat.ArgumentMatcher;
 import static org.mockito.Mockito.*;
 
 public class CameraDeviceBinderTest extends AndroidTestCase {
@@ -168,7 +168,7 @@ public class CameraDeviceBinderTest extends AndroidTestCase {
 
     class IsMetadataNotEmpty extends ArgumentMatcher<CameraMetadataNative> {
         @Override
-        public boolean matches(Object obj) {
+        public boolean matchesObject(Object obj) {
             return !((CameraMetadataNative) obj).isEmpty();
         }
     }

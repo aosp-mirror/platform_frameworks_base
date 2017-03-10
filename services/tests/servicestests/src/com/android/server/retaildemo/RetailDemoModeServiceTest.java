@@ -66,16 +66,15 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.server.SystemService;
 import com.android.server.retaildemo.RetailDemoModeService.Injector;
 
-import org.hamcrest.Description;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.mockito.ArgumentCaptor;
-import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.compat.ArgumentMatcher;
 
 import java.io.File;
 import java.util.concurrent.CountDownLatch;
@@ -283,7 +282,7 @@ public class RetailDemoModeServiceTest {
         }
 
         @Override
-        public boolean matches(Object argument) {
+        public boolean matchesObject(Object argument) {
             if (argument instanceof Intent) {
                 return ((Intent) argument).filterEquals(mIntent);
             }
@@ -291,8 +290,8 @@ public class RetailDemoModeServiceTest {
         }
 
         @Override
-        public void describeTo(Description description) {
-            description.appendText("Expected: " + mIntent);
+        public String toString() {
+            return "Expected: " + mIntent;
         }
     }
 
