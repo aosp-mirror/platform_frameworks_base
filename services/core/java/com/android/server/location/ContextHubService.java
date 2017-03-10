@@ -93,6 +93,8 @@ public class ContextHubService extends IContextHubService.Stub {
     public int registerCallback(IContextHubCallback callback) throws RemoteException {
         checkPermissions();
         mCallbacksList.register(callback);
+        Log.d(TAG, "Added callback, total callbacks " +
+              mCallbacksList.getRegisteredCallbackCount());
         return 0;
     }
 
@@ -101,6 +103,7 @@ public class ContextHubService extends IContextHubService.Stub {
         checkPermissions();
         int[] returnArray = new int[mContextHubInfo.length];
 
+        Log.d(TAG, "System supports " + returnArray.length + " hubs");
         for (int i = 0; i < returnArray.length; ++i) {
             returnArray[i] = i;
             Log.d(TAG, String.format("Hub %s is mapped to %d",
@@ -114,6 +117,7 @@ public class ContextHubService extends IContextHubService.Stub {
     public ContextHubInfo getContextHubInfo(int contextHubHandle) throws RemoteException {
         checkPermissions();
         if (!(contextHubHandle >= 0 && contextHubHandle < mContextHubInfo.length)) {
+            Log.e(TAG, "Invalid context hub handle " + contextHubHandle);
             return null; // null means fail
         }
 
@@ -129,6 +133,7 @@ public class ContextHubService extends IContextHubService.Stub {
             return -1;
         }
         if (app == null) {
+            Log.e(TAG, "Invalid null app");
             return -1;
         }
 
@@ -158,6 +163,7 @@ public class ContextHubService extends IContextHubService.Stub {
         checkPermissions();
         NanoAppInstanceInfo info = mNanoAppHash.get(nanoAppInstanceHandle);
         if (info == null) {
+            Log.e(TAG, "Cannot find app with handle " + nanoAppInstanceHandle);
             return -1; //means failed
         }
 
@@ -171,6 +177,7 @@ public class ContextHubService extends IContextHubService.Stub {
         byte msg[] = new byte[0];
 
         if (nativeSendMessage(msgHeader, msg) != 0) {
+            Log.e(TAG, "native send message fails");
             return -1;
         }
 
@@ -187,6 +194,7 @@ public class ContextHubService extends IContextHubService.Stub {
         if (mNanoAppHash.containsKey(nanoAppInstanceHandle)) {
             return mNanoAppHash.get(nanoAppInstanceHandle);
         } else {
+            Log.e(TAG, "Could not find nanoApp with handle " + nanoAppInstanceHandle);
             return null;
         }
     }
@@ -209,6 +217,7 @@ public class ContextHubService extends IContextHubService.Stub {
             retArray[i] = foundInstances.get(i).intValue();
         }
 
+        Log.w(TAG, "Found " + retArray.length + " apps on hub handle " + hubHandle);
         return retArray;
     }
 
@@ -265,22 +274,26 @@ public class ContextHubService extends IContextHubService.Stub {
         if (header == null || data == null || header.length < MSG_HEADER_SIZE) {
             return  -1;
         }
+
         int callbacksCount = mCallbacksList.beginBroadcast();
+        int msgType = header[HEADER_FIELD_MSG_TYPE];
+        int msgVersion = header[HEADER_FIELD_MSG_VERSION];
+        int hubHandle = header[HEADER_FIELD_HUB_HANDLE];
+        int appInstance = header[HEADER_FIELD_APP_INSTANCE];
+
+        Log.d(TAG, "Sending message " + msgType + " version " + msgVersion + " from hubHandle " +
+              hubHandle + ", appInstance " + appInstance + ", callBackCount " + callbacksCount);
+
         if (callbacksCount < 1) {
             Log.v(TAG, "No message callbacks registered.");
             return 0;
         }
 
-        ContextHubMessage msg = new ContextHubMessage(header[HEADER_FIELD_MSG_TYPE],
-                                                      header[HEADER_FIELD_MSG_VERSION],
-                                                      data);
+        ContextHubMessage msg = new ContextHubMessage(msgType, msgVersion, data);
         for (int i = 0; i < callbacksCount; ++i) {
             IContextHubCallback callback = mCallbacksList.getBroadcastItem(i);
             try {
-                callback.onMessageReceipt(
-                        header[HEADER_FIELD_HUB_HANDLE],
-                        header[HEADER_FIELD_APP_INSTANCE],
-                        msg);
+                callback.onMessageReceipt(hubHandle, appInstance, msg);
             } catch (RemoteException e) {
                 Log.i(TAG, "Exception (" + e + ") calling remote callback (" + callback + ").");
                 continue;
