@@ -32,10 +32,10 @@ import android.provider.Settings;
 import android.test.InstrumentationTestCase;
 import com.android.internal.R;
 import java.util.List;
-import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.mockito.compat.ArgumentMatcher;
 
 public class NetworkScorerAppManagerTest extends InstrumentationTestCase {
     @Mock private Context mMockContext;
@@ -218,7 +218,7 @@ public class NetworkScorerAppManagerTest extends InstrumentationTestCase {
         when(mMockPm.resolveService(
                 Mockito.argThat(new ArgumentMatcher<Intent>() {
                     @Override
-                    public boolean matches(Object object) {
+                    public boolean matchesObject(Object object) {
                         Intent intent = (Intent) object;
                         return NetworkScoreManager.ACTION_RECOMMEND_NETWORKS
                                 .equals(intent.getAction())

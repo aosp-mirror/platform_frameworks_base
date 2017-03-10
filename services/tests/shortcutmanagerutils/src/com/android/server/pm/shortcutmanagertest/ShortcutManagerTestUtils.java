@@ -59,6 +59,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+import org.mockito.hamcrest.MockitoHamcrest;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -665,7 +666,7 @@ public class ShortcutManagerTestUtils {
                 d.appendText(description);
             }
         };
-        return Mockito.argThat(m);
+        return MockitoHamcrest.argThat(m);
     }
 
     public static List<ShortcutInfo> checkShortcutIds(String... ids) {
