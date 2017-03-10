@@ -56,18 +56,18 @@ public class RadialGradient_Delegate extends Gradient_Delegate {
     // ---- native methods ----
 
     @LayoutlibDelegate
-    /*package*/ static long nativeCreate1(float x, float y, float radius,
+    /*package*/ static long nativeCreate1(long matrix, float x, float y, float radius,
             int colors[], float positions[], int tileMode) {
-        RadialGradient_Delegate newDelegate = new RadialGradient_Delegate(x, y, radius,
+        RadialGradient_Delegate newDelegate = new RadialGradient_Delegate(matrix, x, y, radius,
                 colors, positions, Shader_Delegate.getTileMode(tileMode));
         return sManager.addNewDelegate(newDelegate);
     }
 
     @LayoutlibDelegate
-    /*package*/ static long nativeCreate2(float x, float y, float radius,
+    /*package*/ static long nativeCreate2(long matrix, float x, float y, float radius,
             int color0, int color1, int tileMode) {
-        return nativeCreate1(x, y, radius, new int[] { color0, color1 }, null /*positions*/,
-                tileMode);
+        return nativeCreate1(matrix, x, y, radius, new int[] { color0, color1 },
+                null /*positions*/, tileMode);
     }
 
     // ---- Private delegate/helper methods ----
@@ -75,6 +75,7 @@ public class RadialGradient_Delegate extends Gradient_Delegate {
     /**
      * Create a shader that draws a radial gradient given the center and radius.
      *
+     * @param nativeMatrix reference to the shader's native transformation matrix
      * @param x The x-coordinate of the center of the radius
      * @param y The y-coordinate of the center of the radius
      * @param radius Must be positive. The radius of the circle for this
@@ -86,9 +87,9 @@ public class RadialGradient_Delegate extends Gradient_Delegate {
      *            distributed evenly between the center and edge of the circle.
      * @param tile The Shader tiling mode
      */
-    private RadialGradient_Delegate(float x, float y, float radius, int colors[], float positions[],
-            TileMode tile) {
-        super(colors, positions);
+    private RadialGradient_Delegate(long nativeMatrix, float x, float y, float radius,
+            int colors[], float positions[], TileMode tile) {
+        super(nativeMatrix, colors, positions);
         mJavaPaint = new RadialGradientPaint(x, y, radius, mColors, mPositions, tile);
     }
 
