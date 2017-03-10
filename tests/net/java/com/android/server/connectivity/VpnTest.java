@@ -27,6 +27,7 @@ import android.annotation.UserIdInt;
 import android.app.AppOpsManager;
 import android.app.NotificationManager;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
@@ -41,6 +42,8 @@ import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+
+import com.android.internal.net.VpnConfig;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -101,8 +104,10 @@ public class VpnTest extends AndroidTestCase {
     @Override
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
+
         when(mContext.getPackageManager()).thenReturn(mPackageManager);
         setMockedPackages(mPackages);
+
         when(mContext.getPackageName()).thenReturn(Vpn.class.getPackage().getName());
         when(mContext.getSystemService(eq(Context.USER_SERVICE))).thenReturn(mUserManager);
         when(mContext.getSystemService(eq(Context.APP_OPS_SERVICE))).thenReturn(mAppOps);
@@ -255,6 +260,58 @@ public class VpnTest extends AndroidTestCase {
             new UidRange(profile.start, profile.start + PKG_UIDS[3] - 1),
             new UidRange(profile.start + PKG_UIDS[3] + 1, profile.stop)
         }));
+    }
+
+    @SmallTest
+    public void testLockdownRuleRepeatability() throws Exception {
+        final Vpn vpn = createVpn(primaryUser.id);
+
+        // Given legacy lockdown is already enabled,
+        vpn.setLockdown(true);
+        verify(mNetService, times(1)).setAllowOnlyVpnForUids(
+                eq(true), aryEq(new UidRange[] {UidRange.createForUser(primaryUser.id)}));
+
+        // Enabling legacy lockdown twice should do nothing.
+        vpn.setLockdown(true);
+        verify(mNetService, times(1)).setAllowOnlyVpnForUids(anyBoolean(), any(UidRange[].class));
+
+        // And disabling should remove the rules exactly once.
+        vpn.setLockdown(false);
+        verify(mNetService, times(1)).setAllowOnlyVpnForUids(
+                eq(false), aryEq(new UidRange[] {UidRange.createForUser(primaryUser.id)}));
+
+        // Removing the lockdown again should have no effect.
+        vpn.setLockdown(false);
+        verify(mNetService, times(2)).setAllowOnlyVpnForUids(anyBoolean(), any(UidRange[].class));
+    }
+
+    @SmallTest
+    public void testLockdownRuleReversibility() throws Exception {
+        final Vpn vpn = createVpn(primaryUser.id);
+
+        final UidRange[] entireUser = {
+            UidRange.createForUser(primaryUser.id)
+        };
+        final UidRange[] exceptPkg0 = {
+            new UidRange(entireUser[0].start, entireUser[0].start + PKG_UIDS[0] - 1),
+            new UidRange(entireUser[0].start + PKG_UIDS[0] + 1, entireUser[0].stop)
+        };
+
+        final InOrder order = inOrder(mNetService);
+
+        // Given lockdown is enabled with no package (legacy VPN),
+        vpn.setLockdown(true);
+        order.verify(mNetService).setAllowOnlyVpnForUids(eq(true), aryEq(entireUser));
+
+        // When a new VPN package is set the rules should change to cover that package.
+        vpn.prepare(null, PKGS[0]);
+        order.verify(mNetService).setAllowOnlyVpnForUids(eq(false), aryEq(entireUser));
+        order.verify(mNetService).setAllowOnlyVpnForUids(eq(true), aryEq(exceptPkg0));
+
+        // When that VPN package is unset, everything should be undone again in reverse.
+        vpn.prepare(null, VpnConfig.LEGACY_VPN);
+        order.verify(mNetService).setAllowOnlyVpnForUids(eq(false), aryEq(exceptPkg0));
+        order.verify(mNetService).setAllowOnlyVpnForUids(eq(true), aryEq(entireUser));
     }
 
     @SmallTest

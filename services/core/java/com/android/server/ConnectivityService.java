@@ -3702,17 +3702,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
             existing.shutdown();
         }
 
-        try {
-            if (tracker != null) {
-                mNetd.setFirewallEnabled(true);
-                mNetd.setFirewallInterfaceRule("lo", true);
-                mLockdownTracker = tracker;
-                mLockdownTracker.init();
-            } else {
-                mNetd.setFirewallEnabled(false);
-            }
-        } catch (RemoteException e) {
-            // ignored; NMS lives inside system_server
+        if (tracker != null) {
+            mLockdownTracker = tracker;
+            mLockdownTracker.init();
         }
     }
 

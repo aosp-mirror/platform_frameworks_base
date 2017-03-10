@@ -264,6 +264,30 @@ public class Vpn {
     }
 
     /**
+     * Chooses whether to force all connections to go though VPN.
+     *
+     * Used to enable/disable legacy VPN lockdown.
+     *
+     * This uses the same ip rule mechanism as {@link #setAlwaysOnPackage(String, boolean)};
+     * previous settings from calling that function will be replaced and saved with the
+     * always-on state.
+     *
+     * @param lockdown whether to prevent all traffic outside of a VPN.
+     */
+    public synchronized void setLockdown(boolean lockdown) {
+        enforceControlPermissionOrInternalCaller();
+
+        setVpnForcedLocked(lockdown);
+        mLockdown = lockdown;
+
+        // Update app lockdown setting if it changed. Legacy VPN lockdown status is controlled by
+        // LockdownVpnTracker.isEnabled() which keeps track of its own state.
+        if (mAlwaysOn) {
+            saveAlwaysOnPackage();
+        }
+    }
+
+    /**
      * Configures an always-on VPN connection through a specific application.
      * This connection is automatically granted and persisted after a reboot.
      *
@@ -376,7 +400,7 @@ public class Vpn {
             mSystemServices.settingsSecurePutStringForUser(Settings.Secure.ALWAYS_ON_VPN_APP,
                     getAlwaysOnPackage(), mUserHandle);
             mSystemServices.settingsSecurePutIntForUser(Settings.Secure.ALWAYS_ON_VPN_LOCKDOWN,
-                    (mLockdown ? 1 : 0), mUserHandle);
+                    (mAlwaysOn && mLockdown ? 1 : 0), mUserHandle);
         } finally {
             Binder.restoreCallingIdentity(token);
         }
@@ -557,6 +581,7 @@ public class Vpn {
             mConfig = null;
 
             updateState(DetailedState.IDLE, "prepare");
+            setVpnForcedLocked(mLockdown);
         } finally {
             Binder.restoreCallingIdentity(token);
         }
@@ -1003,9 +1028,7 @@ public class Vpn {
                         Log.wtf(TAG, "Failed to add restricted user to owner", e);
                     }
                 }
-                if (mAlwaysOn) {
-                    setVpnForcedLocked(mLockdown);
-                }
+                setVpnForcedLocked(mLockdown);
             }
         }
     }
@@ -1022,9 +1045,7 @@ public class Vpn {
                         Log.wtf(TAG, "Failed to remove restricted user to owner", e);
                     }
                 }
-                if (mAlwaysOn) {
-                    setVpnForcedLocked(mLockdown);
-                }
+                setVpnForcedLocked(mLockdown);
             }
         }
     }
@@ -1034,7 +1055,7 @@ public class Vpn {
      */
     public synchronized void onUserStopped() {
         // Switch off networking lockdown (if it was enabled)
-        setVpnForcedLocked(false);
+        setLockdown(false);
         mAlwaysOn = false;
 
         unregisterPackageChangeReceiverLocked();
@@ -1061,20 +1082,31 @@ public class Vpn {
      */
     @GuardedBy("this")
     private void setVpnForcedLocked(boolean enforce) {
+        final List<String> exemptedPackages =
+                isNullOrLegacyVpn(mPackage) ? null : Collections.singletonList(mPackage);
+        setVpnForcedWithExemptionsLocked(enforce, exemptedPackages);
+    }
+
+    /**
+     * @see #setVpnForcedLocked
+     */
+    @GuardedBy("this")
+    private void setVpnForcedWithExemptionsLocked(boolean enforce,
+            @Nullable List<String> exemptedPackages) {
         final Set<UidRange> removedRanges = new ArraySet<>(mBlockedUsers);
+
+        Set<UidRange> addedRanges = Collections.emptySet();
         if (enforce) {
-            final Set<UidRange> addedRanges = createUserAndRestrictedProfilesRanges(mUserHandle,
+            addedRanges = createUserAndRestrictedProfilesRanges(mUserHandle,
                     /* allowedApplications */ null,
-                    /* disallowedApplications */ Collections.singletonList(mPackage));
+                    /* disallowedApplications */ exemptedPackages);
 
             removedRanges.removeAll(addedRanges);
             addedRanges.removeAll(mBlockedUsers);
-
-            setAllowOnlyVpnForUids(false, removedRanges);
-            setAllowOnlyVpnForUids(true, addedRanges);
-        } else {
-            setAllowOnlyVpnForUids(false, removedRanges);
         }
+
+        setAllowOnlyVpnForUids(false, removedRanges);
+        setAllowOnlyVpnForUids(true, addedRanges);
     }
 
     /**
