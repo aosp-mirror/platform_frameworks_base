@@ -112,8 +112,10 @@ public class CarrierActionUtils {
         logd("onShowCaptivePortalNotification");
         final NotificationManager notificationMgr = context.getSystemService(
                 NotificationManager.class);
-        Intent portalIntent = new Intent(context, CaptivePortalLaunchActivity.class);
+        Intent portalIntent = new Intent(context, CaptivePortalLoginActivity.class);
         portalIntent.putExtras(intent);
+        portalIntent.setFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT
+                | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, portalIntent,
                 PendingIntent.FLAG_UPDATE_CURRENT);
         Notification notification = getNotification(context, R.string.portal_notification_id,
