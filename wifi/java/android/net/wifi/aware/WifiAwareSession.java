@@ -18,6 +18,7 @@ package android.net.wifi.aware;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.Looper;
@@ -193,15 +194,15 @@ public class WifiAwareSession {
      *     when using Aware discovery use the alternative network specifier method -
      *     {@link DiscoverySession#createNetworkSpecifierOpen(PeerHandle)}.
      * <p>
-     * To set up an encrypted link use the {@link #createNetworkSpecifierPmk(int, byte[], byte[])}
-     * or {@link #createNetworkSpecifierPassphrase(int, byte[], String)} APIs.
+     * To set up an encrypted link use the
+     * {@link #createNetworkSpecifierPassphrase(int, byte[], String)} API.
      *
      * @param role  The role of this device:
      *              {@link WifiAwareManager#WIFI_AWARE_DATA_PATH_ROLE_INITIATOR} or
      *              {@link WifiAwareManager#WIFI_AWARE_DATA_PATH_ROLE_RESPONDER}
      * @param peer  The MAC address of the peer's Aware discovery interface. On a RESPONDER this
      *              value is used to gate the acceptance of a connection request from only that
-     *              peer. A RESPONDER may specify a null - indicating that it will accept
+     *              peer. A RESPONDER may specify a {@code null} - indicating that it will accept
      *              connection requests from any device.
      *
      * @return A string to be used to construct
@@ -209,8 +210,6 @@ public class WifiAwareSession {
      * {@link android.net.ConnectivityManager#requestNetwork(android.net.NetworkRequest,
      * android.net.ConnectivityManager.NetworkCallback)}
      * [or other varieties of that API].
-     *
-     * @hide
      */
     public String createNetworkSpecifierOpen(@WifiAwareManager.DataPathRole int role,
             @Nullable byte[] peer) {
@@ -242,12 +241,10 @@ public class WifiAwareSession {
      *              {@link WifiAwareManager#WIFI_AWARE_DATA_PATH_ROLE_RESPONDER}
      * @param peer  The MAC address of the peer's Aware discovery interface. On a RESPONDER this
      *              value is used to gate the acceptance of a connection request from only that
-     *              peer. A RESPONDER may specify a null - indicating that it will accept
+     *              peer. A RESPONDER may specify a {@code null} - indicating that it will accept
      *              connection requests from any device.
      * @param passphrase The passphrase to be used to encrypt the link. The PMK is generated from
-     *                   the passphrase. Use the
-     *                   {@link #createNetworkSpecifierPmk(int, byte[], byte[])} to specify the
-     *                   PMK directly or {@link #createNetworkSpecifierOpen(int, byte[])} to
+     *                   the passphrase. Use {@link #createNetworkSpecifierOpen(int, byte[])} to
      *                   specify an open (unencrypted) link.
      *
      * @return A string to be used to construct
@@ -255,8 +252,6 @@ public class WifiAwareSession {
      * {@link android.net.ConnectivityManager#requestNetwork(android.net.NetworkRequest,
      * android.net.ConnectivityManager.NetworkCallback)}
      * [or other varieties of that API].
-     *
-     * @hide
      */
     public String createNetworkSpecifierPassphrase(@WifiAwareManager.DataPathRole int role,
             @Nullable byte[] peer, @NonNull String passphrase) {
@@ -307,6 +302,7 @@ public class WifiAwareSession {
      *
      * @hide
      */
+    @SystemApi
     public String createNetworkSpecifierPmk(@WifiAwareManager.DataPathRole int role,
             @Nullable byte[] peer, @NonNull byte[] pmk) {
         WifiAwareManager mgr = mMgr.get();
@@ -322,29 +318,5 @@ public class WifiAwareSession {
             throw new IllegalArgumentException("PMK must not be null or empty");
         }
         return mgr.createNetworkSpecifier(mClientId, role, peer, pmk, null);
-    }
-
-    /**
-     * Place-holder for {@code #createNetworkSpecifierOpen(int, byte[])}. Present to enable
-     * development of replacements CL without causing an API change. Will be removed when new
-     * APIs are exposed.
-     *
-     * @param role  The role of this device:
-     *              {@link WifiAwareManager#WIFI_AWARE_DATA_PATH_ROLE_INITIATOR} or
-     *              {@link WifiAwareManager#WIFI_AWARE_DATA_PATH_ROLE_RESPONDER}
-     * @param peer  The MAC address of the peer's Aware discovery interface. On a RESPONDER this
-     *              value is used to gate the acceptance of a connection request from only that
-     *              peer. A RESPONDER may specify a null - indicating that it will accept
-     *              connection requests from any device.
-     * @param token Deprecated and ignored.
-     * @return A string to be used to construct
-     * {@link android.net.NetworkRequest.Builder#setNetworkSpecifier(String)} to pass to
-     * {@link android.net.ConnectivityManager#requestNetwork(android.net.NetworkRequest,
-     * android.net.ConnectivityManager.NetworkCallback)}
-     * [or other varieties of that API].
-     */
-    public String createNetworkSpecifier(@WifiAwareManager.DataPathRole int role,
-            @Nullable byte[] peer, @Nullable byte[] token) {
-        return createNetworkSpecifierOpen(role, peer);
     }
 }
