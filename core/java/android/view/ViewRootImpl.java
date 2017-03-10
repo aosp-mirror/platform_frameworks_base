@@ -2632,6 +2632,14 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
+    private void onDrawFinished() {
+        try {
+            mWindowSession.finishDrawing(mWindow);
+        } catch (RemoteException e) {
+            // Have fun!
+        }
+    }
+
     private void performDraw() {
         if (mAttachInfo.mDisplayState == Display.STATE_OFF && !mReportNextDraw) {
             return;
@@ -2682,7 +2690,7 @@ public final class ViewRootImpl implements ViewParent,
             }
 
             if (mSurfaceHolder != null && mSurface.isValid()) {
-                SurfaceCallbackHelper sch = new SurfaceCallbackHelper(mWindowSession, mWindow);
+                SurfaceCallbackHelper sch = new SurfaceCallbackHelper(this::onDrawFinished);
                 SurfaceHolder.Callback callbacks[] = mSurfaceHolder.getCallbacks();
 
                 sch.dispatchSurfaceRedrawNeededAsync(mSurfaceHolder, callbacks);

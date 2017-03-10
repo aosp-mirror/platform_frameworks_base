@@ -452,10 +452,6 @@ static void android_view_RenderNode_requestPositionUpdates(JNIEnv* env, jobject,
             const RenderProperties& props = node.properties();
             uirenderer::Rect bounds(props.getWidth(), props.getHeight());
             transform.mapRect(bounds);
-            bounds.left -= info.windowInsetLeft;
-            bounds.right -= info.windowInsetLeft;
-            bounds.top -= info.windowInsetTop;
-            bounds.bottom -= info.windowInsetTop;
 
             if (CC_LIKELY(transform.isPureTranslate())) {
                 // snap/round the computed bounds, so they match the rounding behavior
@@ -627,9 +623,9 @@ static const JNINativeMethod gMethods[] = {
 int register_android_view_RenderNode(JNIEnv* env) {
     jclass clazz = FindClassOrDie(env, "android/view/SurfaceView");
     gSurfaceViewPositionUpdateMethod = GetMethodIDOrDie(env, clazz,
-            "updateWindowPosition_renderWorker", "(JIIII)V");
+            "updateSurfacePosition_renderWorker", "(JIIII)V");
     gSurfaceViewPositionLostMethod = GetMethodIDOrDie(env, clazz,
-            "windowPositionLost_uiRtSync", "(J)V");
+            "surfacePositionLost_uiRtSync", "(J)V");
     return RegisterMethodsOrDie(env, kClassPathName, gMethods, NELEM(gMethods));
 }
 
