@@ -18,6 +18,7 @@ package com.android.internal.content;
 
 import android.annotation.CallSuper;
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
@@ -157,32 +158,15 @@ public abstract class FileSystemProvider extends DocumentsProvider {
         if (!before.renameTo(after)) {
             throw new IllegalStateException("Failed to rename to " + after);
         }
-        removeFromMediaStore(visibleFileBefore);
 
         final String afterDocId = getDocIdForFile(after);
-        scanFile(getFileForDocId(afterDocId, true));
+        moveInMediaStore(visibleFileBefore, getFileForDocId(afterDocId, true));
 
         if (!TextUtils.equals(docId, afterDocId)) {
             return afterDocId;
         } else {
             return null;
         }
-    }
-
-    @Override
-    public void deleteDocument(String docId) throws FileNotFoundException {
-        final File file = getFileForDocId(docId);
-        final File visibleFile = getFileForDocId(docId, true);
-
-        final boolean isDirectory = file.isDirectory();
-        if (isDirectory) {
-            FileUtils.deleteContents(file);
-        }
-        if (!file.delete()) {
-            throw new IllegalStateException("Failed to delete " + file);
-        }
-
-        removeFromMediaStore(visibleFile);
     }
 
     @Override
@@ -200,22 +184,56 @@ public abstract class FileSystemProvider extends DocumentsProvider {
             throw new IllegalStateException("Failed to move to " + after);
         }
 
-        // Notify media store to update its content
-        removeFromMediaStore(visibleFileBefore);
         final String docId = getDocIdForFile(after);
-        scanFile(getFileForDocId(docId, true));
+        moveInMediaStore(visibleFileBefore, getFileForDocId(docId, true));
 
         return docId;
     }
 
-    private void removeFromMediaStore(File visibleFile) throws FileNotFoundException {
+    private void moveInMediaStore(File oldVisibleFile, File newVisibleFile) {
+        if (newVisibleFile != null) {
+            final ContentResolver resolver = getContext().getContentResolver();
+            final Uri externalUri = MediaStore.Files.getContentUri("external");
+
+            ContentValues values = new ContentValues();
+            values.put(MediaStore.Files.FileColumns.DATA, newVisibleFile.getAbsolutePath());
+
+            // Logic borrowed from MtpDatabase.
+            // note - we are relying on a special case in MediaProvider.update() to update
+            // the paths for all children in the case where this is a directory.
+            final String path = oldVisibleFile.getAbsolutePath();
+            resolver.update(externalUri,
+                    values,
+                    "_data LIKE ? AND lower(_data)=lower(?)",
+                    new String[] { path, path });
+        }
+    }
+
+    @Override
+    public void deleteDocument(String docId) throws FileNotFoundException {
+        final File file = getFileForDocId(docId);
+        final File visibleFile = getFileForDocId(docId, true);
+
+        final boolean isDirectory = file.isDirectory();
+        if (isDirectory) {
+            FileUtils.deleteContents(file);
+        }
+        if (!file.delete()) {
+            throw new IllegalStateException("Failed to delete " + file);
+        }
+
+        removeFromMediaStore(visibleFile, isDirectory);
+    }
+
+    private void removeFromMediaStore(File visibleFile, boolean isFolder)
+            throws FileNotFoundException {
         if (visibleFile != null) {
             final ContentResolver resolver = getContext().getContentResolver();
             final Uri externalUri = MediaStore.Files.getContentUri("external");
 
             // Remove media store entries for any files inside this directory, using
             // path prefix match. Logic borrowed from MtpDatabase.
-            if (visibleFile.isDirectory()) {
+            if (isFolder) {
                 final String path = visibleFile.getAbsolutePath() + "/";
                 resolver.delete(externalUri,
                         "_data LIKE ?1 AND lower(substr(_data,1,?2))=lower(?3)",
