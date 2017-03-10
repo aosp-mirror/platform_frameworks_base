@@ -25,7 +25,7 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.Dependency;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 
-import static com.android.systemui.BatteryMeterView.SHOW_PERCENT_SETTING;
+import static android.provider.Settings.System.SHOW_BATTERY_PERCENT;
 
 public class BatteryPreference extends DropDownPreference implements TunerService.Tunable {
 
@@ -49,7 +49,7 @@ public class BatteryPreference extends DropDownPreference implements TunerServic
     public void onAttached() {
         super.onAttached();
         mHasPercentage = Settings.System.getInt(getContext().getContentResolver(),
-                SHOW_PERCENT_SETTING, 0) != 0;
+                SHOW_BATTERY_PERCENT, 0) != 0;
         Dependency.get(TunerService.class).addTunable(this, StatusBarIconController.ICON_BLACKLIST);
     }
 
@@ -84,7 +84,7 @@ public class BatteryPreference extends DropDownPreference implements TunerServic
     protected boolean persistString(String value) {
         final boolean v = PERCENT.equals(value);
         MetricsLogger.action(getContext(), MetricsEvent.TUNER_BATTERY_PERCENTAGE, v);
-        Settings.System.putInt(getContext().getContentResolver(), SHOW_PERCENT_SETTING, v ? 1 : 0);
+        Settings.System.putInt(getContext().getContentResolver(), SHOW_BATTERY_PERCENT, v ? 1 : 0);
         if (DISABLED.equals(value)) {
             mBlacklist.add(mBattery);
         } else {
