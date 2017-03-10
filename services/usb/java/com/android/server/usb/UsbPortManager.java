@@ -120,7 +120,7 @@ public class UsbPortManager {
         try {
             boolean ret = IServiceManager.getService()
                     .registerForNotifications("android.hardware.usb@1.0::IUsb",
-                    "", mServiceNotification);
+                            "", mServiceNotification);
             if (!ret) {
                 logAndPrint(Log.ERROR, null,
                         "Failed to register service start notification");
@@ -249,8 +249,8 @@ public class UsbPortManager {
                     // directly instead.
 
                     logAndPrint(Log.ERROR, pw, "Trying to set the USB port mode: "
-                                + "portId=" + portId
-                                + ", newMode=" + UsbPort.modeToString(newMode));
+                            + "portId=" + portId
+                            + ", newMode=" + UsbPort.modeToString(newMode));
                     PortRole newRole = new PortRole();
                     newRole.type = PortRoleType.MODE;
                     newRole.role = newMode;
@@ -272,8 +272,9 @@ public class UsbPortManager {
                             mProxy.switchRole(portId, newRole);
                         } catch (RemoteException e) {
                             logAndPrintException(pw, "Failed to set the USB port power role: "
-                                    + "portId=" + portId
-                                    + ", newPowerRole=" + UsbPort.powerRoleToString(newRole.role),
+                                            + "portId=" + portId
+                                            + ", newPowerRole=" + UsbPort.powerRoleToString
+                                            (newRole.role),
                                     e);
                             return;
                         }
@@ -286,8 +287,9 @@ public class UsbPortManager {
                             mProxy.switchRole(portId, newRole);
                         } catch (RemoteException e) {
                             logAndPrintException(pw, "Failed to set the USB port data role: "
-                                    + "portId=" + portId
-                                    + ", newDataRole=" + UsbPort.dataRoleToString(newRole.role),
+                                            + "portId=" + portId
+                                            + ", newDataRole=" + UsbPort.dataRoleToString(newRole
+                                            .role),
                                     e);
                             return;
                         }
@@ -425,7 +427,9 @@ public class UsbPortManager {
         }
 
         public void notifyPortStatusChange(ArrayList<PortStatus> currentPortStatus, int retval) {
-            if (!portManager.mSystemReady) return;
+            if (!portManager.mSystemReady) {
+                return;
+            }
 
             if (retval != Status.SUCCESS) {
                 logAndPrint(Log.ERROR, pw, "port status enquiry failed");
@@ -490,7 +494,9 @@ public class UsbPortManager {
 
     private void connectToProxy(IndentingPrintWriter pw) {
         synchronized (mLock) {
-            if (mProxy != null) return;
+            if (mProxy != null) {
+                return;
+            }
 
             try {
                 mProxy = IUsb.getService(sServiceName);
@@ -560,18 +566,18 @@ public class UsbPortManager {
 
     // Must only be called by updatePortsLocked.
     private void addOrUpdatePortLocked(String portId, int supportedModes,
-                                       int currentMode, boolean canChangeMode,
-                                       int currentPowerRole, boolean canChangePowerRole,
-                                       int currentDataRole, boolean canChangeDataRole,
-                                       IndentingPrintWriter pw) {
+            int currentMode, boolean canChangeMode,
+            int currentPowerRole, boolean canChangePowerRole,
+            int currentDataRole, boolean canChangeDataRole,
+            IndentingPrintWriter pw) {
         // Only allow mode switch capability for dual role ports.
         // Validate that the current mode matches the supported modes we expect.
         if (supportedModes != UsbPort.MODE_DUAL) {
             canChangeMode = false;
             if (currentMode != 0 && currentMode != supportedModes) {
                 logAndPrint(Log.WARN, pw, "Ignoring inconsistent current mode from USB "
-                            + "port driver: supportedModes=" + UsbPort.modeToString(supportedModes)
-                            + ", currentMode=" + UsbPort.modeToString(currentMode));
+                        + "port driver: supportedModes=" + UsbPort.modeToString(supportedModes)
+                        + ", currentMode=" + UsbPort.modeToString(currentMode));
                 currentMode = 0;
             }
         }
@@ -586,8 +592,8 @@ public class UsbPortManager {
                 // Can change both power and data role independently.
                 // Assume all combinations are possible.
                 supportedRoleCombinations |=
-                    COMBO_SOURCE_HOST | COMBO_SOURCE_DEVICE
-                    | COMBO_SINK_HOST | COMBO_SINK_DEVICE;
+                        COMBO_SOURCE_HOST | COMBO_SOURCE_DEVICE
+                                | COMBO_SINK_HOST | COMBO_SINK_DEVICE;
             } else if (canChangePowerRole) {
                 // Can only change power role.
                 // Assume data role must remain at its current value.
@@ -615,24 +621,24 @@ public class UsbPortManager {
         if (portInfo == null) {
             portInfo = new PortInfo(portId, supportedModes);
             portInfo.setStatus(currentMode, canChangeMode,
-                               currentPowerRole, canChangePowerRole,
-                               currentDataRole, canChangeDataRole,
-                               supportedRoleCombinations);
+                    currentPowerRole, canChangePowerRole,
+                    currentDataRole, canChangeDataRole,
+                    supportedRoleCombinations);
             mPorts.put(portId, portInfo);
         } else {
             // Sanity check that ports aren't changing definition out from under us.
             if (supportedModes != portInfo.mUsbPort.getSupportedModes()) {
                 logAndPrint(Log.WARN, pw, "Ignoring inconsistent list of supported modes from "
-                            + "USB port driver (should be immutable): "
-                            + "previous=" + UsbPort.modeToString(
-                            portInfo.mUsbPort.getSupportedModes())
-                            + ", current=" + UsbPort.modeToString(supportedModes));
+                        + "USB port driver (should be immutable): "
+                        + "previous=" + UsbPort.modeToString(
+                        portInfo.mUsbPort.getSupportedModes())
+                        + ", current=" + UsbPort.modeToString(supportedModes));
             }
 
             if (portInfo.setStatus(currentMode, canChangeMode,
-                                   currentPowerRole, canChangePowerRole,
-                                   currentDataRole, canChangeDataRole,
-                                   supportedRoleCombinations)) {
+                    currentPowerRole, canChangePowerRole,
+                    currentDataRole, canChangeDataRole,
+                    supportedRoleCombinations)) {
                 portInfo.mDisposition = PortInfo.DISPOSITION_CHANGED;
             } else {
                 portInfo.mDisposition = PortInfo.DISPOSITION_READY;
@@ -659,7 +665,7 @@ public class UsbPortManager {
         final Intent intent = new Intent(UsbManager.ACTION_USB_PORT_CHANGED);
         intent.addFlags(
                 Intent.FLAG_RECEIVER_FOREGROUND |
-                Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
+                        Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
         intent.putExtra(UsbManager.EXTRA_PORT, portInfo.mUsbPort);
         intent.putExtra(UsbManager.EXTRA_PORT_STATUS, portInfo.mUsbPortStatus);
 
@@ -735,7 +741,7 @@ public class UsbPortManager {
                     || mUsbPortStatus.getCurrentPowerRole() != currentPowerRole
                     || mUsbPortStatus.getCurrentDataRole() != currentDataRole
                     || mUsbPortStatus.getSupportedRoleCombinations()
-                            != supportedRoleCombinations) {
+                    != supportedRoleCombinations) {
                 mUsbPortStatus = new UsbPortStatus(currentMode, currentPowerRole, currentDataRole,
                         supportedRoleCombinations);
                 return true;
@@ -772,9 +778,9 @@ public class UsbPortManager {
         }
 
         RawPortInfo(String portId, int supportedModes,
-                                 int currentMode, boolean canChangeMode,
-                                 int currentPowerRole, boolean canChangePowerRole,
-                                 int currentDataRole, boolean canChangeDataRole) {
+                int currentMode, boolean canChangeMode,
+                int currentPowerRole, boolean canChangePowerRole,
+                int currentDataRole, boolean canChangeDataRole) {
             this.portId = portId;
             this.supportedModes = supportedModes;
             this.currentMode = currentMode;
@@ -804,25 +810,25 @@ public class UsbPortManager {
 
         public static final Parcelable.Creator<RawPortInfo> CREATOR =
                 new Parcelable.Creator<RawPortInfo>() {
-            @Override
-            public RawPortInfo createFromParcel(Parcel in) {
-                String id = in.readString();
-                int supportedModes = in.readInt();
-                int currentMode = in.readInt();
-                boolean canChangeMode = in.readByte() != 0;
-                int currentPowerRole = in.readInt();
-                boolean canChangePowerRole = in.readByte() != 0;
-                int currentDataRole = in.readInt();
-                boolean canChangeDataRole = in.readByte() != 0;
-                return new RawPortInfo(id, supportedModes, currentMode, canChangeMode,
-                                   currentPowerRole, canChangePowerRole,
-                                   currentDataRole, canChangeDataRole);
-            }
+                    @Override
+                    public RawPortInfo createFromParcel(Parcel in) {
+                        String id = in.readString();
+                        int supportedModes = in.readInt();
+                        int currentMode = in.readInt();
+                        boolean canChangeMode = in.readByte() != 0;
+                        int currentPowerRole = in.readInt();
+                        boolean canChangePowerRole = in.readByte() != 0;
+                        int currentDataRole = in.readInt();
+                        boolean canChangeDataRole = in.readByte() != 0;
+                        return new RawPortInfo(id, supportedModes, currentMode, canChangeMode,
+                                currentPowerRole, canChangePowerRole,
+                                currentDataRole, canChangeDataRole);
+                    }
 
-            @Override
-            public RawPortInfo[] newArray(int size) {
-                return new RawPortInfo[size];
-            }
-        };
+                    @Override
+                    public RawPortInfo[] newArray(int size) {
+                        return new RawPortInfo[size];
+                    }
+                };
     }
 }
