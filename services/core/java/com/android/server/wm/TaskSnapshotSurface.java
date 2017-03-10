@@ -151,21 +151,7 @@ class TaskSnapshotSurface implements StartingSurface {
     }
 
     private void drawSnapshot(GraphicBuffer snapshot) {
-
-        // TODO: Just wrap the buffer here without any copying.
-        final Canvas c = mSurface.lockHardwareCanvas();
-        final Bitmap b = Bitmap.createHardwareBitmap(snapshot);
-        fillEmptyBackground(c, b);
-        c.drawBitmap(b, 0, 0, null);
-        mSurface.unlockCanvasAndPost(c);
-        final boolean reportNextDraw;
-        synchronized (mService.mWindowMap) {
-            mHasDrawn = true;
-            reportNextDraw = mReportNextDraw;
-        }
-        if (reportNextDraw) {
-            reportDrawn();
-        }
+        mSurface.attachAndQueueBuffer(snapshot);
         mSurface.release();
     }
 

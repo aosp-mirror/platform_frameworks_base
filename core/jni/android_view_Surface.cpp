@@ -21,6 +21,7 @@
 #include "jni.h"
 #include "JNIHelp.h"
 #include "android_os_Parcel.h"
+#include "android/graphics/GraphicBuffer.h"
 #include "android/graphics/GraphicsJNI.h"
 
 #include "core_jni_helpers.h"
@@ -496,6 +497,30 @@ static jint nativeForceScopedDisconnect(JNIEnv *env, jclass clazz, jlong nativeO
     return surface->disconnect(-1, IGraphicBufferProducer::DisconnectMode::AllLocal);
 }
 
+static jint nativeAttachAndQueueBuffer(JNIEnv *env, jclass clazz, jlong nativeObject,
+        jobject graphicBuffer) {
+    Surface* surface = reinterpret_cast<Surface*>(nativeObject);
+    sp<GraphicBuffer> bp = graphicBufferForJavaObject(env, graphicBuffer);
+    if (bp == nullptr) {
+        return BAD_VALUE;
+    }
+    int err = ((ANativeWindow*)surface)->perform(surface, NATIVE_WINDOW_API_CONNECT,
+            NATIVE_WINDOW_API_CPU);
+    if (err != OK) {
+        return err;
+    }
+    err = surface->attachBuffer(bp->getNativeBuffer());
+    if (err != OK) {
+        return err;
+    }
+    err = ((ANativeWindow*)surface)->queueBuffer(surface, bp->getNativeBuffer(), -1);
+    if (err != OK) {
+        return err;
+    }
+    err = surface->disconnect(NATIVE_WINDOW_API_CPU);
+    return err;
+}
+
 namespace uirenderer {
 
 using namespace android::uirenderer::renderthread;
@@ -574,6 +599,7 @@ static const JNINativeMethod gSurfaceMethods[] = {
     {"nativeGetNextFrameNumber", "(J)J", (void*)nativeGetNextFrameNumber },
     {"nativeSetScalingMode", "(JI)I", (void*)nativeSetScalingMode },
     {"nativeForceScopedDisconnect", "(J)I", (void*)nativeForceScopedDisconnect},
+    {"nativeAttachAndQueueBuffer", "(JLandroid/graphics/GraphicBuffer;)I", (void*)nativeAttachAndQueueBuffer},
 
     // HWUI context
     {"nHwuiCreate", "(JJ)J", (void*) hwui::create },
