@@ -44,7 +44,6 @@ import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Pair;
 import android.view.View;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -8913,11 +8912,15 @@ public final class ContactsContract {
          * ambiguous then the activity should prompt the user for the recipient to send the message
          * to.
          * <p>
+         * Voice Assistant may provide additional information to messaging app about which account
+         * to use for sending a message by populating {@link #EXTRA_SENDER_ACCOUNT_HASH}.
+         * <p>
          * Output: nothing
          *
          * @see #EXTRA_RECIPIENT_CONTACT_URI
          * @see #EXTRA_RECIPIENT_CONTACT_CHAT_ID
          * @see #EXTRA_RECIPIENT_CONTACT_NAME
+         * @see #EXTRA_SENDER_ACCOUNT_HASH
          * @see #METADATA_ACCOUNT_TYPE
          * @see #METADATA_MIMETYPE
          */
@@ -8973,6 +8976,16 @@ public final class ContactsContract {
          */
         public static final String EXTRA_RECIPIENT_CONTACT_NAME =
                 "android.provider.extra.RECIPIENT_CONTACT_NAME";
+
+        /**
+         * This optional extra specifies the hash of the account that should be used by messaging
+         * app for sending voice message with {@link #ACTION_VOICE_SEND_MESSAGE_TO_CONTACTS}. The
+         * value of this extra is a {@code String} and should be the value of {@link
+         * android.accounts.Account#hashCode()} for some account returned by {@link
+         * android.accounts.AccountManager#getAccounts()}.
+         */
+        public static final String EXTRA_SENDER_ACCOUNT_HASH =
+                "android.provider.extra.SENDER_ACCOUNT_HASH";
 
         /**
          * A string associated with an {@link #ACTION_VOICE_SEND_MESSAGE_TO_CONTACTS} activity
