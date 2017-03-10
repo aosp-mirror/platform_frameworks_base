@@ -160,7 +160,10 @@ public class RecentsViewTouchHandler {
         EventBus.getDefault().send(new DragStartInitializeDropTargetsEvent(event.task,
                 event.taskView, this));
         if (mDeviceId != -1) {
-            InputDevice.getDevice(mDeviceId).setPointerType(PointerIcon.TYPE_GRABBING);
+            InputDevice device = InputDevice.getDevice(mDeviceId);
+            if (device != null) {
+                device.setPointerType(PointerIcon.TYPE_GRABBING);
+            }
         }
     }
 
