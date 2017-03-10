@@ -85,7 +85,7 @@ public class TestDocumentsProvider extends DocumentsProvider {
     }
 
     @Override
-    public Path findDocumentPath(String documentId, @Nullable String parentDocumentId) {
+    public Path findDocumentPath(@Nullable String parentDocumentId, String documentId) {
         lastDocumentId = documentId;
         lastParentDocumentId = parentDocumentId;
 

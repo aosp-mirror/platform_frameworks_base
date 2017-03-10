@@ -435,7 +435,7 @@ public class MtpDocumentsProvider extends DocumentsProvider {
     }
 
     @Override
-    public Path findDocumentPath(String childDocumentId, String parentDocumentId)
+    public Path findDocumentPath(String parentDocumentId, String childDocumentId)
             throws FileNotFoundException {
         final LinkedList<String> ids = new LinkedList<>();
         final Identifier childIdentifier = mDatabase.createIdentifier(childDocumentId);

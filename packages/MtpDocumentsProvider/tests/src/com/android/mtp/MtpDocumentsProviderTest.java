@@ -35,7 +35,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.LinkedList;
-import java.util.Objects;
 import java.util.Queue;
 import java.util.concurrent.TimeoutException;
 
@@ -802,7 +801,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
         setupRoots(0, new MtpRoot[] { new MtpRoot(0, 0, "Storage", 1000, 1000, "") });
         setupHierarchyDocuments("1");
 
-        final Path path = mProvider.findDocumentPath("15", null);
+        final Path path = mProvider.findDocumentPath(null, "15");
         assertEquals("1", path.getRootId());
         assertEquals(4, path.getPath().size());
         assertEquals("1", path.getPath().get(0));
@@ -816,7 +815,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
         setupRoots(0, new MtpRoot[] { new MtpRoot(0, 0, "Storage", 1000, 1000, "") });
         setupHierarchyDocuments("1");
 
-        final Path path = mProvider.findDocumentPath("18", "3");
+        final Path path = mProvider.findDocumentPath("3", "18");
         assertNull(path.getRootId());
         assertEquals(3, path.getPath().size());
         assertEquals("3", path.getPath().get(0));
@@ -831,7 +830,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
                 new MtpRoot(0, 1, "Storage B", 1000, 1000, "") });
         setupHierarchyDocuments("2");
 
-        final Path path = mProvider.findDocumentPath("16", null);
+        final Path path = mProvider.findDocumentPath(null, "16");
         assertEquals("2", path.getRootId());
         assertEquals(4, path.getPath().size());
         assertEquals("2", path.getPath().get(0));
@@ -847,7 +846,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
                 new MtpRoot(0, 1, "Storage B", 1000, 1000, "") });
         setupHierarchyDocuments("2");
 
-        final Path path = mProvider.findDocumentPath("19", "4");
+        final Path path = mProvider.findDocumentPath("4", "19");
         assertNull(path.getRootId());
         assertEquals(3, path.getPath().size());
         assertEquals("4", path.getPath().get(0));

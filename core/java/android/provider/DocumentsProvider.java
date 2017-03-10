@@ -65,6 +65,7 @@ import android.util.Log;
 import libcore.io.IoUtils;
 
 import java.io.FileNotFoundException;
+import java.util.LinkedList;
 import java.util.Objects;
 
 /**
@@ -352,14 +353,14 @@ public abstract class DocumentsProvider extends ContentProvider {
      * Different roots should use different document ID to refer to the same
      * document.
      *
-     * @param childDocumentId the document which path is requested.
      * @param parentDocumentId the document from which the path starts if not null,
      *     or null to indicate a path from the root is requested.
+     * @param childDocumentId the document which path is requested.
      * @return the path of the requested document. If parentDocumentId is null
      *     returned root ID must not be null. If parentDocumentId is not null
      *     returned root ID must be null.
      */
-    public Path findDocumentPath(String childDocumentId, @Nullable String parentDocumentId)
+    public Path findDocumentPath(@Nullable String parentDocumentId, String childDocumentId)
             throws FileNotFoundException {
         throw new UnsupportedOperationException("findDocumentPath not supported.");
     }
@@ -1048,13 +1049,19 @@ public abstract class DocumentsProvider extends ContentProvider {
                     ? DocumentsContract.getTreeDocumentId(documentUri)
                     : null;
 
-            Path path = findDocumentPath(documentId, parentDocumentId);
+            Path path = findDocumentPath(parentDocumentId, documentId);
 
             // Ensure provider doesn't leak information to unprivileged callers.
             if (isTreeUri) {
                 if (!Objects.equals(path.getPath().get(0), parentDocumentId)) {
                     Log.wtf(TAG, "Provider doesn't return path from the tree root. Expected: "
                             + parentDocumentId + " found: " + path.getPath().get(0));
+
+                    LinkedList<String> docs = new LinkedList<>(path.getPath());
+                    while (docs.size() > 1 && !Objects.equals(docs.getFirst(), parentDocumentId)) {
+                        docs.removeFirst();
+                    }
+                    path = new Path(null, docs);
                 }
 
                 if (path.getRootId() != null) {
