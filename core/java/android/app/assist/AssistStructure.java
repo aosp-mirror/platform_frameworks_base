@@ -47,6 +47,7 @@ public class AssistStructure implements Parcelable {
     boolean mHaveData;
 
     ComponentName mActivityComponent;
+    private boolean mIsHomeActivity;
 
     final ArrayList<WindowNode> mWindowNodes = new ArrayList<>();
 
@@ -58,9 +59,53 @@ public class AssistStructure implements Parcelable {
     Rect mTmpRect = new Rect();
 
     boolean mSanitizeOnWrite = false;
+    private long mAcquisitionStartTime;
+    private long mAcquisitionEndTime;
 
     static final int TRANSACTION_XFER = Binder.FIRST_CALL_TRANSACTION+1;
     static final String DESCRIPTOR = "android.app.AssistStructure";
+
+    /** @hide */
+    public void setAcquisitionStartTime(long acquisitionStartTime) {
+        mAcquisitionStartTime = acquisitionStartTime;
+    }
+
+    /** @hide */
+    public void setAcquisitionEndTime(long acquisitionEndTime) {
+        mAcquisitionEndTime = acquisitionEndTime;
+    }
+
+    /**
+     * @hide
+     * Set the home activity flag.
+     */
+    public void setHomeActivity(boolean isHomeActivity) {
+        mIsHomeActivity = isHomeActivity;
+    }
+
+    /**
+     * Returns the time when the activity started generating assist data to build the
+     * AssistStructure. The time is as specified by {@link SystemClock#uptimeMillis()}.
+     *
+     * @see #getAcquisitionEndTime()
+     * @return Returns the acquisition start time of the assist data, in milliseconds.
+     */
+    public long getAcquisitionStartTime() {
+        ensureData();
+        return mAcquisitionStartTime;
+    }
+
+    /**
+     * Returns the time when the activity finished generating assist data to build the
+     * AssistStructure. The time is as specified by {@link SystemClock#uptimeMillis()}.
+     *
+     * @see #getAcquisitionStartTime()
+     * @return Returns the acquisition end time of the assist data, in milliseconds.
+     */
+    public long getAcquisitionEndTime() {
+        ensureData();
+        return mAcquisitionEndTime;
+    }
 
     final static class SendChannel extends Binder {
         volatile AssistStructure mAssistStructure;
@@ -125,6 +170,8 @@ public class AssistStructure implements Parcelable {
             mSanitizeOnWrite = as.mSanitizeOnWrite;
             mWriteStructure = as.waitForReady();
             ComponentName.writeToParcel(as.mActivityComponent, out);
+            out.writeLong(as.mAcquisitionStartTime);
+            out.writeLong(as.mAcquisitionEndTime);
             mNumWindows = as.mWindowNodes.size();
             if (mWriteStructure && mNumWindows > 0) {
                 out.writeInt(mNumWindows);
@@ -277,6 +324,8 @@ public class AssistStructure implements Parcelable {
         void go() {
             fetchData();
             mActivityComponent = ComponentName.readFromParcel(mCurParcel);
+            mAcquisitionStartTime = mCurParcel.readLong();
+            mAcquisitionEndTime = mCurParcel.readLong();
             final int N = mCurParcel.readInt();
             if (N > 0) {
                 if (DEBUG_PARCEL) Log.d(TAG, "Creating PooledStringReader @ "
@@ -569,6 +618,7 @@ public class AssistStructure implements Parcelable {
         static final int FLAGS_ACCESSIBILITY_FOCUSED = 0x00001000;
         static final int FLAGS_ACTIVATED = 0x00002000;
         static final int FLAGS_CONTEXT_CLICKABLE = 0x00004000;
+        static final int FLAGS_OPAQUE = 0x00008000;
 
         // TODO(b/33197203): autofill data is made of many fields and ideally we should verify
         // one-by-one to optimize what's sent over, but there isn't enough flag bits for that, we'd
@@ -1120,6 +1170,11 @@ public class AssistStructure implements Parcelable {
         }
 
         /**
+         * Returns true if this node is opaque.
+         */
+        public boolean isOpaque() { return (mFlags&ViewNode.FLAGS_OPAQUE) != 0; }
+
+        /**
          * Returns true if this node is something the user can perform a long click/press on.
          */
         public boolean isLongClickable() {
@@ -1412,6 +1467,12 @@ public class AssistStructure implements Parcelable {
         }
 
         @Override
+        public void setOpaque(boolean opaque) {
+            mNode.mFlags = (mNode.mFlags & ~ViewNode.FLAGS_OPAQUE)
+                    | (opaque ? ViewNode.FLAGS_OPAQUE : 0);
+        }
+
+        @Override
         public void setClassName(String className) {
             mNode.mClassName = className;
         }
@@ -1651,6 +1712,7 @@ public class AssistStructure implements Parcelable {
 
     /** @hide */
     public AssistStructure(Parcel in) {
+        mIsHomeActivity = in.readInt() == 1;
         mReceiveChannel = in.readStrongBinder();
     }
 
@@ -1775,6 +1837,15 @@ public class AssistStructure implements Parcelable {
     }
 
     /**
+     * Returns whether the activity associated with this AssistStructure was the home activity
+     * at the time the assist data was acquired.
+     * @return Whether the activity was the home activity.
+     */
+    public boolean isHomeActivity() {
+        return mIsHomeActivity;
+    }
+
+    /**
      * Return the number of window contents that have been collected in this assist data.
      */
     public int getWindowNodeCount() {
@@ -1836,6 +1907,7 @@ public class AssistStructure implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel out, int flags) {
+        out.writeInt(mIsHomeActivity ? 1 : 0);
         if (mHaveData) {
             // This object holds its data.  We want to write a send channel that the
             // other side can use to retrieve that data.

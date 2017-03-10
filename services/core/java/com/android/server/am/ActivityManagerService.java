@@ -702,6 +702,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     public class PendingAssistExtras extends Binder implements Runnable {
         public final ActivityRecord activity;
+        public boolean isHome;
         public final Bundle extras;
         public final Intent intent;
         public final String hint;
@@ -723,6 +724,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             receiverExtras = _receiverExtras;
             userHandle = _userHandle;
         }
+
         @Override
         public void run() {
             Slog.w(TAG, "getAssistContextExtras failed: timeout retrieving from " + activity);
@@ -12702,6 +12704,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
             pae = new PendingAssistExtras(activity, extras, intent, hint, receiver, receiverExtras,
                     userHandle);
+            pae.isHome = activity.isHomeActivity();
 
             // Increment the sessionId if necessary
             if (newSessionId) {
@@ -12748,6 +12751,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
+    /** Called from an app when assist data is ready. */
+    @Override
     public void reportAssistContextExtras(IBinder token, Bundle extras, AssistStructure structure,
             AssistContent content, Uri referrer) {
         PendingAssistExtras pae = (PendingAssistExtras)token;
@@ -12757,6 +12762,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             pae.content = content;
             if (referrer != null) {
                 pae.extras.putParcelable(Intent.EXTRA_REFERRER, referrer);
+            }
+            if (structure != null) {
+                structure.setHomeActivity(pae.isHome);
             }
             pae.haveResult = true;
             pae.notifyAll();

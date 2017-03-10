@@ -146,6 +146,11 @@ public abstract class ViewStructure {
     public abstract void setActivated(boolean state);
 
     /**
+     * Set the opaque state of this view, as per {@link View#isOpaque View.isOpaque()}.
+     */
+    public abstract void setOpaque(boolean opaque);
+
+    /**
      * Set the class name of the view, as per
      * {@link View#getAccessibilityClassName View.getAccessibilityClassName()}.
      */
