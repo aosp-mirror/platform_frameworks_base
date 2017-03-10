@@ -18729,26 +18729,13 @@ public class ActivityManagerService extends IActivityManager.Stub
                     break;
                 case android.hardware.Camera.ACTION_NEW_PICTURE:
                 case android.hardware.Camera.ACTION_NEW_VIDEO:
-                    // These broadcasts are no longer allowed by the system, since they can
-                    // cause significant thrashing at a crictical point (using the camera).
-                    // Apps should use JobScehduler to monitor for media provider changes.
-                    Slog.w(TAG, action + " no longer allowed; dropping from "
-                            + UserHandle.formatUid(callingUid));
-                    if (resultTo != null) {
-                        final BroadcastQueue queue = broadcastQueueForIntent(intent);
-                        try {
-                            queue.performReceiveLocked(callerApp, resultTo, intent,
-                                    Activity.RESULT_CANCELED, null, null,
-                                    false, false, userId);
-                        } catch (RemoteException e) {
-                            Slog.w(TAG, "Failure ["
-                                    + queue.mQueueName + "] sending broadcast result of "
-                                    + intent, e);
-
-                        }
-                    }
-                    // Lie; we don't want to crash the app.
-                    return ActivityManager.BROADCAST_SUCCESS;
+                    // In N we just turned these off; in O we are turing them back on partly,
+                    // only for registered receivers.  This will still address the main problem
+                    // (a spam of apps waking up when a picture is taken putting significant
+                    // memory pressure on the system at a bad point), while still allowing apps
+                    // that are already actively running to know about this happening.
+                    intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+                    break;
                 case android.security.KeyChain.ACTION_TRUST_STORE_CHANGED:
                     mHandler.sendEmptyMessage(HANDLE_TRUST_STORAGE_UPDATE_MSG);
                     break;
