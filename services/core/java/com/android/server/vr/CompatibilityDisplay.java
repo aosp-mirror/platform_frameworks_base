@@ -156,7 +156,7 @@ class CompatibilityDisplay {
 
             mVirtualDisplay = mDisplayManager.createVirtualDisplay("VR 2D Display", WIDTH, HEIGHT,
                     DPI, null /* Surface */, 0 /* flags */);
-            if (mSurface != null && mSurface.isValid()) {
+            if (mVirtualDisplay != null && mSurface != null && mSurface.isValid()) {
               // TODO: Need to protect all setSurface calls with a lock.
               mVirtualDisplay.setSurface(mSurface);
             }
