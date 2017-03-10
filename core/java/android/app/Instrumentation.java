@@ -37,6 +37,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
+import android.os.TestLooperManager;
 import android.os.UserHandle;
 import android.util.AndroidRuntimeException;
 import android.util.Log;
@@ -107,6 +108,22 @@ public class Instrumentation {
     private UiAutomation mUiAutomation;
 
     public Instrumentation() {
+    }
+
+    /**
+     * Called for methods that shouldn't be called by standard apps and
+     * should only be used in instrumentation environments. This is not
+     * security feature as these classes will still be accessible through
+     * reflection, but it will serve as noticeable discouragement from
+     * doing such a thing.
+     */
+    private void checkInstrumenting(String method) {
+        // Check if we have an instrumentation context, as init should only get called by
+        // the system in startup processes that are being instrumented.
+        if (mInstrContext == null) {
+            throw new RuntimeException(method +
+                    " cannot be called outside of instrumented processes");
+        }
     }
 
     /**
@@ -2022,6 +2039,15 @@ public class Instrumentation {
             return mUiAutomation;
         }
         return null;
+    }
+
+    /**
+     * Takes control of the execution of messages on the specified looper until
+     * {@link TestLooperManager#release} is called.
+     */
+    public TestLooperManager acquireLooperManager(Looper looper) {
+        checkInstrumenting("acquireLooperManager");
+        return new TestLooperManager(looper);
     }
 
     private final class InstrumentationThread extends Thread {
