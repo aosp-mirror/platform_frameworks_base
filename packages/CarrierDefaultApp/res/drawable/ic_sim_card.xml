@@ -14,13 +14,12 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="@dimen/glif_icon_size"
-    android:height="@dimen/glif_icon_size"
-    android:viewportWidth="48"
-    android:viewportHeight="48">
-    <path
-        android:fillColor="?android:attr/colorPrimary"
-        android:pathData="M39.98,8c0,-2.21 -1.77,-4 -3.98,-4L20,4L8,16v24c0,2.21 1.79,4 4,4h24.02c2.21,0 3.98,-1.79 3.98,-4l-0.02,-32zM18,38h-4v-4h4v4zM34,38h-4v-4h4v4zM18,30h-4v-8h4v8zM26,38h-4v-8h4v8zM26,26h-4v-4h4v4zM34,30h-4v-8h4v8z" />
+        android:width="24dp"
+        android:height="24dp"
+        android:viewportWidth="24.0"
+        android:viewportHeight="24.0">
+<path
+    android:fillColor="#757575"
+    android:pathData="M18,2h-8L4.02,8 4,20c0,1.1 0.9,2 2,2h12c1.1,0 2,-0.9 2,-2L20,4c0,-1.1 -0.9,-2 -2,-2zM13,17h-2v-2h2v2zM13,13h-2L11,8h2v5z"/>
 </vector>

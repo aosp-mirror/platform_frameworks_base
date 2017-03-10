@@ -21,6 +21,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.os.Bundle;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.util.Log;
@@ -146,18 +147,25 @@ public class CarrierActionUtils {
 
     private static Notification getNotification(Context context, int titleId, int textId,
                                          PendingIntent pendingIntent) {
-        Resources resources = context.getResources();
+        final TelephonyManager telephonyMgr = context.getSystemService(TelephonyManager.class);
+        final Resources resources = context.getResources();
+        final Bundle extras = Bundle.forPair(Notification.EXTRA_SUBSTITUTE_APP_NAME,
+                resources.getString(R.string.android_system_label));
         Notification.Builder builder = new Notification.Builder(context)
                 .setContentTitle(resources.getString(titleId))
-                .setContentText(resources.getString(textId))
+                .setContentText(String.format(resources.getString(textId),
+                        telephonyMgr.getNetworkOperatorName()))
                 .setSmallIcon(R.drawable.ic_sim_card)
+                .setColor(context.getColor(
+                        com.android.internal.R.color.system_notification_accent_color))
                 .setOngoing(true)
                 .setPriority(Notification.PRIORITY_HIGH)
                 .setDefaults(Notification.DEFAULT_ALL)
                 .setVisibility(Notification.VISIBILITY_PUBLIC)
                 .setLocalOnly(true)
                 .setWhen(System.currentTimeMillis())
-                .setShowWhen(false);
+                .setShowWhen(false)
+                .setExtras(extras);
 
         if (pendingIntent != null) {
             builder.setContentIntent(pendingIntent);
