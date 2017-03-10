@@ -431,8 +431,8 @@ public final class VolumeShaper implements AutoCloseable {
                 dest.writeDouble(mDurationMs);
                 // this needs to match the native Interpolator parceling
                 dest.writeInt(mInterpolatorType);
-                dest.writeFloat(0.f); // first slope
-                dest.writeFloat(0.f); // last slope
+                dest.writeFloat(0.f); // first slope (specifying for native side)
+                dest.writeFloat(0.f); // last slope (specifying for native side)
                 // mTimes and mVolumes should have the same length.
                 dest.writeInt(mTimes.length);
                 for (int i = 0; i < mTimes.length; ++i) {
@@ -456,8 +456,8 @@ public final class VolumeShaper implements AutoCloseable {
                     final double durationMs = p.readDouble();
                     // this needs to match the native Interpolator parceling
                     final int interpolatorType = p.readInt();
-                    final float firstSlope = p.readFloat(); // ignored
-                    final float lastSlope = p.readFloat();  // ignored
+                    final float firstSlope = p.readFloat(); // ignored on the Java side
+                    final float lastSlope = p.readFloat();  // ignored on the Java side
                     final int length = p.readInt();
                     final float[] times = new float[length];
                     final float[] volumes = new float[length];
@@ -593,6 +593,10 @@ public final class VolumeShaper implements AutoCloseable {
          * {@code times[]} and {@code volumes[]} are two arrays representing points
          * for the volume curve.
          *
+         * Note that {@code times[]} and {@code volumes[]} are explicitly checked against
+         * null here to provide the proper error string - those are legitimate
+         * arguments to this method.
+         *
          * @param times the x coordinates for the points,
          *        must be between 0.f and 1.f and be monotonic.
          * @param volumes the y coordinates for the points,
@@ -644,10 +648,14 @@ public final class VolumeShaper implements AutoCloseable {
         }
 
         private static void checkCurveForErrorsAndThrowException(
-                @Nullable float[] times, @Nullable float[] volumes, boolean log) {
+                @Nullable float[] times, @Nullable float[] volumes, boolean log, boolean ise) {
             final String error = checkCurveForErrors(times, volumes, log);
             if (error != null) {
-                throw new IllegalArgumentException(error);
+                if (ise) {
+                    throw new IllegalStateException(error);
+                } else {
+                    throw new IllegalArgumentException(error);
+                }
             }
         }
 
@@ -840,8 +848,8 @@ public final class VolumeShaper implements AutoCloseable {
              */
 
             public @NonNull Builder setCurve(@NonNull float[] times, @NonNull float[] volumes) {
-                checkCurveForErrorsAndThrowException(
-                        times, volumes, (mOptionFlags & OPTION_FLAG_VOLUME_IN_DBFS) != 0);
+                final boolean log = (mOptionFlags & OPTION_FLAG_VOLUME_IN_DBFS) != 0;
+                checkCurveForErrorsAndThrowException(times, volumes, log, false /* ise */);
                 mTimes = times.clone();
                 mVolumes = volumes.clone();
                 return this;
@@ -853,11 +861,11 @@ public final class VolumeShaper implements AutoCloseable {
              * to the start.
              *
              * @return the same {@code Builder} instance.
-             * @throws IllegalArgumentException if curve has not been set.
+             * @throws IllegalStateException if curve has not been set.
              */
             public @NonNull Builder reflectTimes() {
-                checkCurveForErrorsAndThrowException(
-                        mTimes, mVolumes, (mOptionFlags & OPTION_FLAG_VOLUME_IN_DBFS) != 0);
+                final boolean log = (mOptionFlags & OPTION_FLAG_VOLUME_IN_DBFS) != 0;
+                checkCurveForErrorsAndThrowException(mTimes, mVolumes, log, true /* ise */);
                 int i;
                 for (i = 0; i < mTimes.length / 2; ++i) {
                     float temp = mTimes[i];
@@ -878,11 +886,11 @@ public final class VolumeShaper implements AutoCloseable {
              * becomes the min volume and vice versa.
              *
              * @return the same {@code Builder} instance.
-             * @throws IllegalArgumentException if curve has not been set.
+             * @throws IllegalStateException if curve has not been set.
              */
             public @NonNull Builder invertVolumes() {
-                checkCurveForErrorsAndThrowException(
-                        mTimes, mVolumes, (mOptionFlags & OPTION_FLAG_VOLUME_IN_DBFS) != 0);
+                final boolean log = (mOptionFlags & OPTION_FLAG_VOLUME_IN_DBFS) != 0;
+                checkCurveForErrorsAndThrowException(mTimes, mVolumes, log, true /* ise */);
                 float min = mVolumes[0];
                 float max = mVolumes[0];
                 for (int i = 1; i < mVolumes.length; ++i) {
@@ -908,12 +916,12 @@ public final class VolumeShaper implements AutoCloseable {
              *
              * @param volume the target end volume to use.
              * @return the same {@code Builder} instance.
-             * @throws IllegalArgumentException if {@code volume}
-             *         is not valid or if curve has not been set.
+             * @throws IllegalArgumentException if {@code volume} is not valid.
+             * @throws IllegalStateException if curve has not been set.
              */
             public @NonNull Builder scaleToEndVolume(float volume) {
                 final boolean log = (mOptionFlags & OPTION_FLAG_VOLUME_IN_DBFS) != 0;
-                checkCurveForErrorsAndThrowException(mTimes, mVolumes, log);
+                checkCurveForErrorsAndThrowException(mTimes, mVolumes, log, true /* ise */);
                 checkValidVolumeAndThrowException(volume, log);
                 final float startVolume = mVolumes[0];
                 final float endVolume = mVolumes[mVolumes.length - 1];
@@ -942,12 +950,12 @@ public final class VolumeShaper implements AutoCloseable {
              *
              * @param volume the target start volume to use.
              * @return the same {@code Builder} instance.
-             * @throws IllegalArgumentException if {@code volume}
-             *         is not valid or if curve has not been set.
+             * @throws IllegalArgumentException if {@code volume} is not valid.
+             * @throws IllegalStateException if curve has not been set.
              */
             public @NonNull Builder scaleToStartVolume(float volume) {
                 final boolean log = (mOptionFlags & OPTION_FLAG_VOLUME_IN_DBFS) != 0;
-                checkCurveForErrorsAndThrowException(mTimes, mVolumes, log);
+                checkCurveForErrorsAndThrowException(mTimes, mVolumes, log, true /* ise */);
                 checkValidVolumeAndThrowException(volume, log);
                 final float startVolume = mVolumes[0];
                 final float endVolume = mVolumes[mVolumes.length - 1];
@@ -971,11 +979,11 @@ public final class VolumeShaper implements AutoCloseable {
              * Builds a new {@link VolumeShaper} object.
              *
              * @return a new {@link VolumeShaper} object.
-             * @throws IllegalArgumentException if curve is not properly set.
+             * @throws IllegalStateException if curve is not properly set.
              */
             public @NonNull Configuration build() {
-                checkCurveForErrorsAndThrowException(
-                        mTimes, mVolumes, (mOptionFlags & OPTION_FLAG_VOLUME_IN_DBFS) != 0);
+                final boolean log = (mOptionFlags & OPTION_FLAG_VOLUME_IN_DBFS) != 0;
+                checkCurveForErrorsAndThrowException(mTimes, mVolumes, log, true /* ise */);
                 return new Configuration(mType, mId, mOptionFlags, mDurationMs,
                         mInterpolatorType, mTimes, mVolumes);
             }
