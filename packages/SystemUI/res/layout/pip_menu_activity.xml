@@ -18,38 +18,39 @@
     android:id="@+id/menu"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#00000000">
+    android:background="#4D000000">
     <!-- The above background is only for the dismiss button ripple to show. -->
 
     <ImageView
         android:id="@+id/dismiss"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
+        android:layout_width="@dimen/pip_action_size"
+        android:layout_height="@dimen/pip_action_size"
         android:layout_gravity="top|end"
-        android:padding="10dp"
+        android:padding="@dimen/pip_action_padding"
         android:contentDescription="@string/pip_phone_close"
         android:src="@drawable/ic_close_white"
         android:background="?android:selectableItemBackgroundBorderless" />
 
+    <!-- The margins for this container is calculated in the code depending on whether the
+         actions_container is visible. -->
     <FrameLayout
         android:id="@+id/expand_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
         <ImageView
-            android:layout_width="64dp"
-            android:layout_height="64dp"
+            android:id="@+id/expand_button"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
             android:layout_gravity="center"
             android:contentDescription="@string/pip_phone_expand"
-            android:src="@drawable/pip_expand"
             android:background="?android:selectableItemBackgroundBorderless" />
     </FrameLayout>
 
     <FrameLayout
         android:id="@+id/actions_container"
         android:layout_width="match_parent"
-        android:layout_height="48dp"
+        android:layout_height="@dimen/pip_action_size"
         android:layout_gravity="bottom"
-        android:background="#66000000"
         android:visibility="invisible">
         <LinearLayout
             android:id="@+id/actions_group"

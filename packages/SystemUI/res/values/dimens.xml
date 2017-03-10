@@ -738,6 +738,16 @@
          the configuration of the device, so we can't use -land resources. -->
     <dimen name="pip_between_action_padding_land">8dp</dimen>
 
+    <!-- The height of the PiP actions container in which the actions are vertically centered. -->
+    <dimen name="pip_action_size">48dp</dimen>
+
+    <!-- The padding around a PiP actions. -->
+    <dimen name="pip_action_padding">12dp</dimen>
+
+    <!-- The bottom margin of the expand container when there are actions.
+         Equal to pip_action_size - pip_action_padding. -->
+    <dimen name="pip_expand_container_edge_margin">36dp</dimen>
+
     <dimen name="default_gear_space">18dp</dimen>
     <dimen name="cell_overlay_padding">18dp</dimen>
 

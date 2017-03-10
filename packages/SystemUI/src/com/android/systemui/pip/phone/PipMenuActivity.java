@@ -16,6 +16,11 @@
 
 package com.android.systemui.pip.phone;
 
+import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_ACTIONS;
+import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_CONTROLLER_MESSENGER;
+import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_MOVEMENT_BOUNDS;
+import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_STACK_BOUNDS;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
@@ -26,14 +31,18 @@ import android.app.PendingIntent.CanceledException;
 import android.app.RemoteAction;
 import android.content.Intent;
 import android.content.pm.ParceledListSlice;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.PointF;
+import android.graphics.Rect;
+import android.graphics.drawable.Icon;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
 import android.util.Log;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -71,6 +80,7 @@ public class PipMenuActivity extends Activity {
     private View mMenuContainer;
     private LinearLayout mActionsGroup;
     private View mDismissButton;
+    private ImageView mExpandButton;
     private int mBetweenActionPaddingLand;
 
     private ObjectAnimator mMenuContainerAnimator;
@@ -85,7 +95,8 @@ public class PipMenuActivity extends Activity {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case MESSAGE_SHOW_MENU:
-                    showMenu();
+                    Pair<Rect, Rect> bounds = (Pair<Rect, Rect>) msg.obj;
+                    showMenu(bounds.first, bounds.second);
                     break;
                 case MESSAGE_POKE_MENU:
                     cancelDelayedFinish();
@@ -94,7 +105,8 @@ public class PipMenuActivity extends Activity {
                     hideMenu();
                     break;
                 case MESSAGE_UPDATE_ACTIONS:
-                    setActions(((ParceledListSlice) msg.obj).getList());
+                    Pair<Rect, ParceledListSlice> data = (Pair<Rect, ParceledListSlice>) msg.obj;
+                    setActions(data.first, data.second.getList());
                     break;
             }
         }
@@ -117,15 +129,6 @@ public class PipMenuActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.pip_menu_activity);
 
-        Intent startingIntent = getIntent();
-        mToControllerMessenger = startingIntent.getParcelableExtra(
-                PipMenuActivityController.EXTRA_CONTROLLER_MESSENGER);
-        ParceledListSlice actions = startingIntent.getParcelableExtra(
-                PipMenuActivityController.EXTRA_ACTIONS);
-        if (actions != null) {
-            setActions(actions.getList());
-        }
-
         mMenuContainer = findViewById(R.id.menu);
         mMenuContainer.setOnClickListener((v) -> {
             expandPip();
@@ -137,15 +140,16 @@ public class PipMenuActivity extends Activity {
         mActionsGroup = (LinearLayout) findViewById(R.id.actions_group);
         mBetweenActionPaddingLand = getResources().getDimensionPixelSize(
                 R.dimen.pip_between_action_padding_land);
+        mExpandButton = (ImageView) findViewById(R.id.expand_button);
 
+        updateFromIntent(getIntent());
         notifyActivityCallback(mMessenger);
-        showMenu();
     }
 
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
-        showMenu();
+        updateFromIntent(intent);
     }
 
     @Override
@@ -214,13 +218,14 @@ public class PipMenuActivity extends Activity {
         // Do nothing
     }
 
-    private void showMenu() {
+    private void showMenu(Rect stackBounds, Rect movementBounds) {
         if (!mMenuVisible) {
             if (mMenuContainerAnimator != null) {
                 mMenuContainerAnimator.cancel();
             }
 
             notifyMenuVisibility(true);
+            updateExpandButtonFromBounds(stackBounds, movementBounds);
             mMenuContainerAnimator = ObjectAnimator.ofFloat(mMenuContainer, View.ALPHA,
                     mMenuContainer.getAlpha(), 1f);
             mMenuContainerAnimator.setInterpolator(Interpolators.ALPHA_IN);
@@ -263,13 +268,43 @@ public class PipMenuActivity extends Activity {
         }
     }
 
-    private void setActions(List<RemoteAction> actions) {
-        mActions.clear();
-        mActions.addAll(actions);
-        updateActionViews();
+    private void updateFromIntent(Intent intent) {
+        Rect stackBounds = Rect.unflattenFromString(intent.getStringExtra(EXTRA_STACK_BOUNDS));
+        Rect movementBounds = Rect.unflattenFromString(intent.getStringExtra(
+                EXTRA_MOVEMENT_BOUNDS));
+        mToControllerMessenger = intent.getParcelableExtra(EXTRA_CONTROLLER_MESSENGER);
+        ParceledListSlice actions = intent.getParcelableExtra(EXTRA_ACTIONS);
+        if (actions != null) {
+            setActions(stackBounds, actions.getList());
+        }
+        showMenu(stackBounds, movementBounds);
     }
 
-    private void updateActionViews() {
+    private void updateExpandButtonFromBounds(Rect stackBounds, Rect movementBounds) {
+        if (stackBounds == null) {
+            return;
+        }
+
+        boolean isLandscapePip = stackBounds.width() > stackBounds.height();
+        boolean left = stackBounds.left < movementBounds.centerX();
+        boolean top = stackBounds.top < movementBounds.centerY();
+        boolean expandL = (left && top) || (!left && !top);
+        int iconResId;
+        if (isLandscapePip) {
+            iconResId = expandL ? R.drawable.pip_expand_ll : R.drawable.pip_expand_lr;
+        } else {
+            iconResId = expandL ? R.drawable.pip_expand_pl : R.drawable.pip_expand_pr;
+        }
+        mExpandButton.setImageResource(iconResId);
+    }
+
+    private void setActions(Rect stackBounds, List<RemoteAction> actions) {
+        mActions.clear();
+        mActions.addAll(actions);
+        updateActionViews(stackBounds);
+    }
+
+    private void updateActionViews(Rect stackBounds) {
         ViewGroup expandContainer = (ViewGroup) findViewById(R.id.expand_container);
         ViewGroup actionsContainer = (ViewGroup) findViewById(R.id.actions_container);
         actionsContainer.setOnTouchListener((v, ev) -> {
@@ -277,7 +312,6 @@ public class PipMenuActivity extends Activity {
             return true;
         });
 
-        int actionsContainerHeight = 0;
         if (mActions.isEmpty()) {
             actionsContainer.setVisibility(View.INVISIBLE);
         } else {
@@ -286,9 +320,8 @@ public class PipMenuActivity extends Activity {
                 mActionsGroup.removeAllViews();
 
                 // Recreate the layout
-                final View decorView = getWindow().getDecorView();
-                final boolean isLandscapePip = decorView.getMeasuredWidth()
-                        > decorView.getMeasuredHeight();
+                final boolean isLandscapePip = stackBounds != null &&
+                        (stackBounds.width() > stackBounds.height());
                 final LayoutInflater inflater = LayoutInflater.from(this);
                 for (int i = 0; i < mActions.size(); i++) {
                     final RemoteAction action = mActions.get(i);
@@ -314,13 +347,17 @@ public class PipMenuActivity extends Activity {
                     mActionsGroup.addView(actionView);
                 }
             }
-            actionsContainerHeight = actionsContainer.getLayoutParams().height;
-        }
 
-        // Update the expand container margin to account for the existence of the action container
-        ((FrameLayout.LayoutParams) expandContainer.getLayoutParams()).bottomMargin =
-                actionsContainerHeight;
-        expandContainer.requestLayout();
+            // Update the expand container margin to adjust the center of the expand button to
+            // account for the existence of the action container
+            FrameLayout.LayoutParams expandedLp =
+                    (FrameLayout.LayoutParams) expandContainer.getLayoutParams();
+            expandedLp.topMargin = getResources().getDimensionPixelSize(
+                    R.dimen.pip_action_padding);
+            expandedLp.bottomMargin = getResources().getDimensionPixelSize(
+                    R.dimen.pip_expand_container_edge_margin);
+            expandContainer.requestLayout();
+        }
     }
 
     private void notifyRegisterInputConsumer() {
