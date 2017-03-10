@@ -21,6 +21,7 @@ import static android.view.View.AUTOFILL_TYPE_LIST;
 import static android.view.View.AUTOFILL_TYPE_TEXT;
 import static android.view.View.AUTOFILL_TYPE_TOGGLE;
 import static android.view.autofill.Helper.DEBUG;
+import static android.view.autofill.Helper.VERBOSE;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -132,6 +133,17 @@ public final class AutofillValue implements Parcelable {
         return mType == AUTOFILL_TYPE_DATE;
     }
 
+    /**
+     * Used to define whether a field is empty so it's not sent to service on save.
+     *
+     * <p>Only applies to some types, like text.
+     *
+     * @hide
+     */
+    public boolean isEmpty() {
+        return isText() && ((CharSequence) mValue).length() == 0;
+    }
+
     /////////////////////////////////////
     //  Object "contract" methods. //
     /////////////////////////////////////
@@ -167,11 +179,10 @@ public final class AutofillValue implements Parcelable {
     public String toString() {
         if (!DEBUG) return super.toString();
 
-        if (isText()) {
-            return ((CharSequence) mValue).length() + "_chars";
-        }
+        final String sanitizedValue = isText() && !VERBOSE
+                ? ((CharSequence) mValue).length() + "_chars" : mValue.toString();
 
-        return "[type=" + mType + ", value=" + mValue + "]";
+        return "[type=" + mType + ", value=" + sanitizedValue + "]";
     }
 
     /////////////////////////////////////
