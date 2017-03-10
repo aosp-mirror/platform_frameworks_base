@@ -625,26 +625,52 @@ public class WebViewUpdateServiceImpl {
             return v1 >= v2;
         }
 
-        /**
-         * Returns whether this provider is valid for use as a WebView provider.
-         */
-        public boolean isValidProvider(WebViewProviderInfo configInfo,
-                PackageInfo packageInfo) {
+        private final static int VALIDITY_OK = 0;
+        private final static int VALIDITY_INCORRECT_SDK_VERSION = 1;
+        private final static int VALIDITY_INCORRECT_VERSION_CODE = 2;
+        private final static int VALIDITY_INCORRECT_SIGNATURE = 3;
+        private final static int VALIDITY_NO_LIBRARY_FLAG = 4;
+
+        private static String getInvalidityReason(int invalidityReason) {
+            switch (invalidityReason) {
+                case VALIDITY_INCORRECT_SDK_VERSION:
+                    return "SDK version too low";
+                case VALIDITY_INCORRECT_VERSION_CODE:
+                    return "Version code too low";
+                case VALIDITY_INCORRECT_SIGNATURE:
+                    return "Incorrect signature";
+                case VALIDITY_NO_LIBRARY_FLAG:
+                    return "No WebView-library manifest flag";
+                default:
+                    return "Unexcepted validity-reason";
+            }
+        }
+
+        private int validityResult(WebViewProviderInfo configInfo, PackageInfo packageInfo) {
             // Ensure the provider targets this framework release (or a later one).
             if (!UserPackage.hasCorrectTargetSdkVersion(packageInfo)) {
-                return false;
+                return VALIDITY_INCORRECT_SDK_VERSION;
             }
             if (!versionCodeGE(packageInfo.versionCode, getMinimumVersionCode())
                     && !mSystemInterface.systemIsDebuggable()) {
                 // Webview providers may be downgraded arbitrarily low, prevent that by enforcing
                 // minimum version code. This check is only enforced for user builds.
-                return false;
+                return VALIDITY_INCORRECT_VERSION_CODE;
             }
-            if (providerHasValidSignature(configInfo, packageInfo, mSystemInterface) &&
-                    WebViewFactory.getWebViewLibrary(packageInfo.applicationInfo) != null) {
-                return true;
+            if (!providerHasValidSignature(configInfo, packageInfo, mSystemInterface)) {
+                return VALIDITY_INCORRECT_SIGNATURE;
             }
-            return false;
+            if (WebViewFactory.getWebViewLibrary(packageInfo.applicationInfo) == null) {
+                return VALIDITY_NO_LIBRARY_FLAG;
+            }
+            return VALIDITY_OK;
+        }
+
+        /**
+         * Returns whether this provider is valid for use as a WebView provider.
+         */
+        public boolean isValidProvider(WebViewProviderInfo configInfo, PackageInfo packageInfo) {
+            return VALIDITY_OK == validityResult(configInfo, packageInfo);
         }
 
         /**
@@ -699,6 +725,53 @@ public class WebViewUpdateServiceImpl {
                 pw.println(String.format("  WebView package dirty: %b", mWebViewPackageDirty));
                 pw.println(String.format("  Any WebView package installed: %b",
                         mAnyWebViewInstalled));
+
+                try {
+                    PackageInfo preferredWebViewPackage = findPreferredWebViewPackage();
+                    pw.println(String.format(
+                            "  Preferred WebView package (name, version): (%s, %s)",
+                            preferredWebViewPackage.packageName,
+                            preferredWebViewPackage.versionName));
+                } catch (WebViewPackageMissingException e) {
+                    pw.println(String.format("  Preferred WebView package: none"));
+                }
+
+                dumpAllPackageInformationLocked(pw);
+            }
+        }
+
+        private void dumpAllPackageInformationLocked(PrintWriter pw) {
+            WebViewProviderInfo[] allProviders = mSystemInterface.getWebViewPackages();
+            pw.println("  WebView packages:");
+            for (WebViewProviderInfo provider : allProviders) {
+                List<UserPackage> userPackages =
+                        mSystemInterface.getPackageInfoForProviderAllUsers(mContext, provider);
+                PackageInfo systemUserPackageInfo =
+                        userPackages.get(UserHandle.USER_SYSTEM).getPackageInfo();
+                if (systemUserPackageInfo == null) {
+                    continue;
+                }
+
+                int validity = validityResult(provider, systemUserPackageInfo);
+                String packageDetails = String.format(
+                        "versionName: %s, versionCode: %d, targetSdkVersion: %d",
+                        systemUserPackageInfo.versionName,
+                        systemUserPackageInfo.versionCode,
+                        systemUserPackageInfo.applicationInfo.targetSdkVersion);
+                if (validity == VALIDITY_OK) {
+                    boolean installedForAllUsers = isInstalledAndEnabledForAllUsers(
+                            mSystemInterface.getPackageInfoForProviderAllUsers(mContext, provider));
+                    pw.println(String.format(
+                            "    Valid package %s (%s) is %s installed/enabled for all users",
+                            systemUserPackageInfo.packageName,
+                            packageDetails,
+                            installedForAllUsers ? "" : "NOT"));
+                } else {
+                    pw.println(String.format("    Invalid package %s (%s), reason: %s",
+                            systemUserPackageInfo.packageName,
+                            packageDetails,
+                            getInvalidityReason(validity)));
+                }
             }
         }
 
