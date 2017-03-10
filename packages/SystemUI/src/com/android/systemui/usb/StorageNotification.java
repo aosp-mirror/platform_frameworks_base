@@ -19,6 +19,7 @@ package com.android.systemui.usb;
 import android.annotation.NonNull;
 import android.app.Notification;
 import android.app.Notification.Action;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
@@ -35,6 +36,7 @@ import android.os.storage.StorageEventListener;
 import android.os.storage.StorageManager;
 import android.os.storage.VolumeInfo;
 import android.os.storage.VolumeRecord;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.Log;
@@ -181,6 +183,11 @@ public class StorageNotification extends SystemUI {
     }
 
     private void updateMissingPrivateVolumes() {
+        if (isTv()) {
+            // On TV, TvSettings displays a modal full-screen activity in this case.
+            return;
+        }
+
         final List<VolumeRecord> recs = mStorageManager.getVolumeRecords();
         for (VolumeRecord rec : recs) {
             if (rec.getType() != VolumeInfo.TYPE_PRIVATE) continue;
@@ -210,7 +217,8 @@ public class StorageNotification extends SystemUI {
                                 .setVisibility(Notification.VISIBILITY_PUBLIC)
                                 .setLocalOnly(true)
                                 .setCategory(Notification.CATEGORY_SYSTEM)
-                                .setDeleteIntent(buildSnoozeIntent(fsUuid));
+                                .setDeleteIntent(buildSnoozeIntent(fsUuid))
+                                .extend(new Notification.TvExtender());
                 SystemUI.overrideNotificationAppName(mContext, builder);
 
                 mNotificationManager.notifyAsUser(fsUuid, SystemMessage.NOTE_STORAGE_PRIVATE,
@@ -237,7 +245,8 @@ public class StorageNotification extends SystemUI {
                             .setStyle(new Notification.BigTextStyle().bigText(text))
                             .setVisibility(Notification.VISIBILITY_PUBLIC)
                             .setLocalOnly(true)
-                            .setCategory(Notification.CATEGORY_ERROR);
+                            .setCategory(Notification.CATEGORY_ERROR)
+                            .extend(new Notification.TvExtender());
             SystemUI.overrideNotificationAppName(mContext, builder);
 
             mNotificationManager.notifyAsUser(disk.getId(), SystemMessage.NOTE_STORAGE_DISK,
@@ -378,7 +387,7 @@ public class StorageNotification extends SystemUI {
                     .addAction(new Action(R.drawable.ic_eject_24dp,
                             mContext.getString(R.string.ext_media_unmount_action),
                             buildUnmountPendingIntent(vol)))
-                    .setContentIntent(browseIntent)
+                    .setContentIntent(buildUnmountPendingIntent(vol))
                     .setCategory(Notification.CATEGORY_SYSTEM);
             // Non-adoptable disks can't be snoozed.
             if (disk.isAdoptable()) {
@@ -571,15 +580,21 @@ public class StorageNotification extends SystemUI {
                         .setContentText(text)
                         .setStyle(new Notification.BigTextStyle().bigText(text))
                         .setVisibility(Notification.VISIBILITY_PUBLIC)
-                        .setLocalOnly(true);
+                        .setLocalOnly(true)
+                        .extend(new Notification.TvExtender());
         overrideNotificationAppName(mContext, builder);
         return builder;
     }
 
     private PendingIntent buildInitPendingIntent(DiskInfo disk) {
         final Intent intent = new Intent();
-        intent.setClassName("com.android.settings",
-                "com.android.settings.deviceinfo.StorageWizardInit");
+        if (isTv()) {
+            intent.setPackage("com.android.tv.settings");
+            intent.setAction("com.android.tv.settings.action.NEW_STORAGE");
+        } else {
+            intent.setClassName("com.android.settings",
+                    "com.android.settings.deviceinfo.StorageWizardInit");
+        }
         intent.putExtra(DiskInfo.EXTRA_DISK_ID, disk.getId());
 
         final int requestKey = disk.getId().hashCode();
@@ -589,8 +604,13 @@ public class StorageNotification extends SystemUI {
 
     private PendingIntent buildInitPendingIntent(VolumeInfo vol) {
         final Intent intent = new Intent();
-        intent.setClassName("com.android.settings",
-                "com.android.settings.deviceinfo.StorageWizardInit");
+        if (isTv()) {
+            intent.setPackage("com.android.tv.settings");
+            intent.setAction("com.android.tv.settings.action.NEW_STORAGE");
+        } else {
+            intent.setClassName("com.android.settings",
+                    "com.android.settings.deviceinfo.StorageWizardInit");
+        }
         intent.putExtra(VolumeInfo.EXTRA_VOLUME_ID, vol.getId());
 
         final int requestKey = vol.getId().hashCode();
@@ -600,13 +620,23 @@ public class StorageNotification extends SystemUI {
 
     private PendingIntent buildUnmountPendingIntent(VolumeInfo vol) {
         final Intent intent = new Intent();
-        intent.setClassName("com.android.settings",
-                "com.android.settings.deviceinfo.StorageUnmountReceiver");
-        intent.putExtra(VolumeInfo.EXTRA_VOLUME_ID, vol.getId());
+        if (isTv()) {
+            intent.setPackage("com.android.tv.settings");
+            intent.setAction("com.android.tv.settings.action.UNMOUNT_STORAGE");
+            intent.putExtra(VolumeInfo.EXTRA_VOLUME_ID, vol.getId());
 
-        final int requestKey = vol.getId().hashCode();
-        return PendingIntent.getBroadcastAsUser(mContext, requestKey, intent,
-                PendingIntent.FLAG_CANCEL_CURRENT, UserHandle.CURRENT);
+            final int requestKey = vol.getId().hashCode();
+            return PendingIntent.getActivityAsUser(mContext, requestKey, intent,
+                    PendingIntent.FLAG_CANCEL_CURRENT, null, UserHandle.CURRENT);
+        } else {
+            intent.setClassName("com.android.settings",
+                    "com.android.settings.deviceinfo.StorageUnmountReceiver");
+            intent.putExtra(VolumeInfo.EXTRA_VOLUME_ID, vol.getId());
+
+            final int requestKey = vol.getId().hashCode();
+            return PendingIntent.getBroadcastAsUser(mContext, requestKey, intent,
+                    PendingIntent.FLAG_CANCEL_CURRENT, UserHandle.CURRENT);
+        }
     }
 
     private PendingIntent buildBrowsePendingIntent(VolumeInfo vol) {
@@ -619,17 +649,22 @@ public class StorageNotification extends SystemUI {
 
     private PendingIntent buildVolumeSettingsPendingIntent(VolumeInfo vol) {
         final Intent intent = new Intent();
-        switch (vol.getType()) {
-            case VolumeInfo.TYPE_PRIVATE:
-                intent.setClassName("com.android.settings",
-                        "com.android.settings.Settings$PrivateVolumeSettingsActivity");
-                break;
-            case VolumeInfo.TYPE_PUBLIC:
-                intent.setClassName("com.android.settings",
-                        "com.android.settings.Settings$PublicVolumeSettingsActivity");
-                break;
-            default:
-                return null;
+        if (isTv()) {
+            intent.setPackage("com.android.tv.settings");
+            intent.setAction(Settings.ACTION_INTERNAL_STORAGE_SETTINGS);
+        } else {
+            switch (vol.getType()) {
+                case VolumeInfo.TYPE_PRIVATE:
+                    intent.setClassName("com.android.settings",
+                            "com.android.settings.Settings$PrivateVolumeSettingsActivity");
+                    break;
+                case VolumeInfo.TYPE_PUBLIC:
+                    intent.setClassName("com.android.settings",
+                            "com.android.settings.Settings$PublicVolumeSettingsActivity");
+                    break;
+                default:
+                    return null;
+            }
         }
         intent.putExtra(VolumeInfo.EXTRA_VOLUME_ID, vol.getId());
 
@@ -648,6 +683,7 @@ public class StorageNotification extends SystemUI {
     }
 
     private PendingIntent buildForgetPendingIntent(VolumeRecord rec) {
+        // Not used on TV
         final Intent intent = new Intent();
         intent.setClassName("com.android.settings",
                 "com.android.settings.Settings$PrivateVolumeForgetActivity");
@@ -660,8 +696,13 @@ public class StorageNotification extends SystemUI {
 
     private PendingIntent buildWizardMigratePendingIntent(MoveInfo move) {
         final Intent intent = new Intent();
-        intent.setClassName("com.android.settings",
-                "com.android.settings.deviceinfo.StorageWizardMigrateProgress");
+        if (isTv()) {
+            intent.setPackage("com.android.tv.settings");
+            intent.setAction("com.android.tv.settings.action.MIGRATE_STORAGE");
+        } else {
+            intent.setClassName("com.android.settings",
+                    "com.android.settings.deviceinfo.StorageWizardMigrateProgress");
+        }
         intent.putExtra(PackageManager.EXTRA_MOVE_ID, move.moveId);
 
         final VolumeInfo vol = mStorageManager.findVolumeByQualifiedUuid(move.volumeUuid);
@@ -674,8 +715,13 @@ public class StorageNotification extends SystemUI {
 
     private PendingIntent buildWizardMovePendingIntent(MoveInfo move) {
         final Intent intent = new Intent();
-        intent.setClassName("com.android.settings",
-                "com.android.settings.deviceinfo.StorageWizardMoveProgress");
+        if (isTv()) {
+            intent.setPackage("com.android.tv.settings");
+            intent.setAction("com.android.tv.settings.action.MOVE_APP");
+        } else {
+            intent.setClassName("com.android.settings",
+                    "com.android.settings.deviceinfo.StorageWizardMoveProgress");
+        }
         intent.putExtra(PackageManager.EXTRA_MOVE_ID, move.moveId);
 
         return PendingIntent.getActivityAsUser(mContext, move.moveId, intent,
@@ -684,12 +730,22 @@ public class StorageNotification extends SystemUI {
 
     private PendingIntent buildWizardReadyPendingIntent(DiskInfo disk) {
         final Intent intent = new Intent();
-        intent.setClassName("com.android.settings",
-                "com.android.settings.deviceinfo.StorageWizardReady");
+        if (isTv()) {
+            intent.setPackage("com.android.tv.settings");
+            intent.setAction(Settings.ACTION_INTERNAL_STORAGE_SETTINGS);
+        } else {
+            intent.setClassName("com.android.settings",
+                    "com.android.settings.deviceinfo.StorageWizardReady");
+        }
         intent.putExtra(DiskInfo.EXTRA_DISK_ID, disk.getId());
 
         final int requestKey = disk.getId().hashCode();
         return PendingIntent.getActivityAsUser(mContext, requestKey, intent,
                 PendingIntent.FLAG_CANCEL_CURRENT, null, UserHandle.CURRENT);
+    }
+
+    private boolean isTv() {
+        PackageManager packageManager = mContext.getPackageManager();
+        return packageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK);
     }
 }

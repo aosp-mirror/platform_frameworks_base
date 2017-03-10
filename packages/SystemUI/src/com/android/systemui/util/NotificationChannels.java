@@ -18,6 +18,7 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 
 import android.content.Context;
+import android.content.pm.PackageManager;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
@@ -32,6 +33,7 @@ public class NotificationChannels extends SystemUI {
 
     @VisibleForTesting
     static void createAll(Context context) {
+
         final NotificationManager nm = context.getSystemService(NotificationManager.class);
         nm.createNotificationChannels(Arrays.asList(
                 new NotificationChannel(
@@ -49,12 +51,19 @@ public class NotificationChannels extends SystemUI {
                 new NotificationChannel(
                         STORAGE,
                         R.string.notification_channel_storage,
-                        NotificationManager.IMPORTANCE_LOW)
+                        isTv(context)
+                                ? NotificationManager.IMPORTANCE_DEFAULT
+                                : NotificationManager.IMPORTANCE_LOW)
                 ));
     }
 
     @Override
     public void start() {
         createAll(mContext);
+    }
+
+    private static boolean isTv(Context context) {
+        PackageManager packageManager = context.getPackageManager();
+        return packageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK);
     }
 }
