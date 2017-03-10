@@ -44,8 +44,8 @@ struct R {
       density = 0x7f030002,
 
       // From feature
-      test3 = 0x7f080000,
-      test4 = 0x7f080001,
+      test3 = 0x80020000,
+      test4 = 0x80020001,
     };
   };
 
@@ -57,7 +57,7 @@ struct R {
       ref2 = 0x7f040003,
 
       // From feature
-      number3 = 0x7f090000,
+      number3 = 0x80030000,
     };
   };
 
