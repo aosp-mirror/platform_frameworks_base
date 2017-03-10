@@ -308,7 +308,8 @@ public class UpstreamNetworkMonitor {
     // Fetch (and cache) a ConnectivityManager only if and when we need one.
     private ConnectivityManager cm() {
         if (mCM == null) {
-            mCM = mContext.getSystemService(ConnectivityManager.class);
+            // MUST call the String variant to be able to write unittests.
+            mCM = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
         }
         return mCM;
     }
