@@ -346,9 +346,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
     final private KeyguardDisableHandler mKeyguardDisableHandler;
 
-    static final String ACTION_REVOKE_SYSTEM_ALERT_WINDOW_PERMISSION =
-            "com.android.server.wm.ACTION_REVOKE_SYSTEM_ALERT_WINDOW_PERMISSION";
-
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -361,16 +358,6 @@ public class WindowManagerService extends IWindowManager.Stub
                     if (userId != USER_NULL) {
                         synchronized (mWindowMap) {
                             mScreenCaptureDisabled.remove(userId);
-                        }
-                    }
-                    break;
-                case ACTION_REVOKE_SYSTEM_ALERT_WINDOW_PERMISSION:
-                    final String packageName = intent.getStringExtra(EXTRA_PACKAGE_NAME);
-                    final int uid = intent.getIntExtra(EXTRA_UID, -1);
-                    if (packageName != null && uid != -1) {
-                        synchronized (mWindowMap) {
-                            // Revoke permission.
-                            mAppOps.setMode(OP_SYSTEM_ALERT_WINDOW, uid, packageName, MODE_IGNORED);
                         }
                     }
                     break;
@@ -1070,7 +1057,6 @@ public class WindowManagerService extends IWindowManager.Stub
         filter.addAction(ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED);
         // Listen to user removal broadcasts so that we can remove the user-specific data.
         filter.addAction(Intent.ACTION_USER_REMOVED);
-        filter.addAction(ACTION_REVOKE_SYSTEM_ALERT_WINDOW_PERMISSION);
         mContext.registerReceiver(mBroadcastReceiver, filter);
 
         mSettingsObserver = new SettingsObserver();

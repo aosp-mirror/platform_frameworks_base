@@ -601,8 +601,7 @@ public class Session extends IWindowSession.Stub
                 if (mAlertWindowSurfaces.isEmpty()) {
                     cancelAlertWindowNotification();
                 } else if (mAlertWindowNotification == null){
-                    mAlertWindowNotification = new AlertWindowNotification(
-                            mService, mPackageName, mUid);
+                    mAlertWindowNotification = new AlertWindowNotification(mService, mPackageName);
                 }
             }
         }
