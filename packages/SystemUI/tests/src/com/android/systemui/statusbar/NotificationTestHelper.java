@@ -42,12 +42,6 @@ public class NotificationTestHelper {
     }
 
     public ExpandableNotificationRow createRow() {
-        LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(
-                mContext.LAYOUT_INFLATER_SERVICE);
-        ExpandableNotificationRow row = (ExpandableNotificationRow) inflater.inflate(
-                R.layout.status_bar_notification_row,
-                null, false);
-        row.setGroupManager(mGroupManager);
         Notification publicVersion = new Notification.Builder(mContext).setSmallIcon(
                 R.drawable.ic_person)
                 .setCustomContentView(new RemoteViews(mContext.getPackageName(),
@@ -59,6 +53,16 @@ public class NotificationTestHelper {
                 .setContentText("Text")
                 .setPublicVersion(publicVersion)
                 .build();
+        return createRow(notification);
+    }
+
+    public ExpandableNotificationRow createRow(Notification notification) {
+        LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(
+                mContext.LAYOUT_INFLATER_SERVICE);
+        ExpandableNotificationRow row = (ExpandableNotificationRow) inflater.inflate(
+                R.layout.status_bar_notification_row,
+                null, false);
+        row.setGroupManager(mGroupManager);
         UserHandle mUser = UserHandle.of(ActivityManager.getCurrentUser());
         StatusBarNotification sbn = new StatusBarNotification("com.android.systemui",
                 "com.android.systemui", mId++, null, 1000,
