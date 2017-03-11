@@ -85,17 +85,19 @@ public class AccessibilityNodeInfo implements Parcelable {
     /** @hide */
     public static final int UNDEFINED_SELECTION_INDEX = -1;
 
+    /* Special IDs for node source IDs */
     /** @hide */
     public static final int UNDEFINED_ITEM_ID = Integer.MAX_VALUE;
 
     /** @hide */
-    public static final long ROOT_NODE_ID = makeNodeId(UNDEFINED_ITEM_ID, UNDEFINED_ITEM_ID);
+    public static final int ROOT_ITEM_ID = Integer.MAX_VALUE - 1;
 
     /** @hide */
-    public static final int ACTIVE_WINDOW_ID = UNDEFINED_ITEM_ID;
+    public static final long UNDEFINED_NODE_ID = makeNodeId(UNDEFINED_ITEM_ID, UNDEFINED_ITEM_ID);
 
     /** @hide */
-    public static final int ANY_WINDOW_ID = -2;
+    public static final long ROOT_NODE_ID = makeNodeId(ROOT_ITEM_ID,
+            AccessibilityNodeProvider.HOST_VIEW_ID);
 
     /** @hide */
     public static final int FLAG_PREFETCH_PREDECESSORS = 0x00000001;
@@ -474,6 +476,34 @@ public class AccessibilityNodeInfo implements Parcelable {
             "android.view.accessibility.action.ARGUMENT_PROGRESS_VALUE";
 
     /**
+     * Argument for specifying the x coordinate to which to move a window.
+     * <p>
+     * <strong>Type:</strong> int<br>
+     * <strong>Actions:</strong>
+     * <ul>
+     *     <li>{@link AccessibilityAction#ACTION_MOVE_WINDOW}</li>
+     * </ul>
+     *
+     * @see AccessibilityAction#ACTION_MOVE_WINDOW
+     */
+    public static final String ACTION_ARGUMENT_MOVE_WINDOW_X =
+            "android.view.accessibility.action.ARGUMENT_MOVE_WINDOW_X";
+
+    /**
+     * Argument for specifying the y coordinate to which to move a window.
+     * <p>
+     * <strong>Type:</strong> int<br>
+     * <strong>Actions:</strong>
+     * <ul>
+     *     <li>{@link AccessibilityAction#ACTION_MOVE_WINDOW}</li>
+     * </ul>
+     *
+     * @see AccessibilityAction#ACTION_MOVE_WINDOW
+     */
+    public static final String ACTION_ARGUMENT_MOVE_WINDOW_Y =
+            "android.view.accessibility.action.ARGUMENT_MOVE_WINDOW_Y";
+
+    /**
      * Argument to pass the {@link AccessibilityClickableSpan}.
      * For use with R.id.accessibilityActionClickOnClickableSpan
      * @hide
@@ -654,13 +684,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @hide
      */
     public static long makeNodeId(int accessibilityViewId, int virtualDescendantId) {
-        // We changed the value for undefined node to positive due to wrong
-        // global id composition (two 32-bin ints into one 64-bit long) but
-        // the value used for the host node provider view has id -1 so we
-        // remap it here.
-        if (virtualDescendantId == AccessibilityNodeProvider.HOST_VIEW_ID) {
-            virtualDescendantId = UNDEFINED_ITEM_ID;
-        }
         return (((long) virtualDescendantId) << VIRTUAL_DESCENDANT_ID_SHIFT) | accessibilityViewId;
     }
 
@@ -673,12 +696,12 @@ public class AccessibilityNodeInfo implements Parcelable {
 
     // Data.
     private int mWindowId = UNDEFINED_ITEM_ID;
-    private long mSourceNodeId = ROOT_NODE_ID;
-    private long mParentNodeId = ROOT_NODE_ID;
-    private long mLabelForId = ROOT_NODE_ID;
-    private long mLabeledById = ROOT_NODE_ID;
-    private long mTraversalBefore = ROOT_NODE_ID;
-    private long mTraversalAfter = ROOT_NODE_ID;
+    private long mSourceNodeId = UNDEFINED_NODE_ID;
+    private long mParentNodeId = UNDEFINED_NODE_ID;
+    private long mLabelForId = UNDEFINED_NODE_ID;
+    private long mLabeledById = UNDEFINED_NODE_ID;
+    private long mTraversalBefore = UNDEFINED_NODE_ID;
+    private long mTraversalAfter = UNDEFINED_NODE_ID;
 
     private int mBooleanProperties;
     private final Rect mBoundsInParent = new Rect();
@@ -733,7 +756,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @param source The info source.
      */
     public void setSource(View source) {
-        setSource(source, UNDEFINED_ITEM_ID);
+        setSource(source, AccessibilityNodeProvider.HOST_VIEW_ID);
     }
 
     /**
@@ -950,7 +973,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @throws IllegalStateException If called from an AccessibilityService.
      */
     public void addChild(View child) {
-        addChildInternal(child, UNDEFINED_ITEM_ID, true);
+        addChildInternal(child, AccessibilityNodeProvider.HOST_VIEW_ID, true);
     }
 
     /**
@@ -960,7 +983,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @hide
      */
     public void addChildUnchecked(View child) {
-        addChildInternal(child, UNDEFINED_ITEM_ID, false);
+        addChildInternal(child, AccessibilityNodeProvider.HOST_VIEW_ID, false);
     }
 
     /**
@@ -978,7 +1001,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @throws IllegalStateException If called from an AccessibilityService.
      */
     public boolean removeChild(View child) {
-        return removeChild(child, UNDEFINED_ITEM_ID);
+        return removeChild(child, AccessibilityNodeProvider.HOST_VIEW_ID);
     }
 
     /**
@@ -1205,6 +1228,17 @@ public class AccessibilityNodeInfo implements Parcelable {
     }
 
     /**
+     * Removes all actions.
+     *
+     * @hide
+     */
+    public void removeAllActions() {
+        if (mActions != null) {
+            mActions.clear();
+        }
+    }
+
+    /**
      * Gets the node before which this one is visited during traversal. A screen-reader
      * must visit the content of this node before the content of the one it precedes.
      *
@@ -1233,7 +1267,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @see #getTraversalBefore()
      */
     public void setTraversalBefore(View view) {
-        setTraversalBefore(view, UNDEFINED_ITEM_ID);
+        setTraversalBefore(view, AccessibilityNodeProvider.HOST_VIEW_ID);
     }
 
     /**
@@ -1294,7 +1328,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @see #getTraversalAfter()
      */
     public void setTraversalAfter(View view) {
-        setTraversalAfter(view, UNDEFINED_ITEM_ID);
+        setTraversalAfter(view, AccessibilityNodeProvider.HOST_VIEW_ID);
     }
 
     /**
@@ -1572,7 +1606,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @throws IllegalStateException If called from an AccessibilityService.
      */
     public void setParent(View parent) {
-        setParent(parent, UNDEFINED_ITEM_ID);
+        setParent(parent, AccessibilityNodeProvider.HOST_VIEW_ID);
     }
 
     /**
@@ -2533,7 +2567,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @param labeled The view for which this info serves as a label.
      */
     public void setLabelFor(View labeled) {
-        setLabelFor(labeled, UNDEFINED_ITEM_ID);
+        setLabelFor(labeled, AccessibilityNodeProvider.HOST_VIEW_ID);
     }
 
     /**
@@ -2585,7 +2619,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @param label The view that labels this node's source.
      */
     public void setLabeledBy(View label) {
-        setLabeledBy(label, UNDEFINED_ITEM_ID);
+        setLabeledBy(label, AccessibilityNodeProvider.HOST_VIEW_ID);
     }
 
     /**
@@ -2812,6 +2846,20 @@ public class AccessibilityNodeInfo implements Parcelable {
     @Override
     public int describeContents() {
         return 0;
+    }
+
+    /**
+     * Sets the id of the source node.
+     *
+     * @param sourceId The id.
+     * @param windowId The window id.
+     *
+     * @hide
+     */
+    public void setSourceNodeId(long sourceId, int windowId) {
+        enforceNotSealed();
+        mSourceNodeId = sourceId;
+        mWindowId = windowId;
     }
 
     /**
@@ -3299,12 +3347,12 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     private void clear() {
         mSealed = false;
-        mSourceNodeId = ROOT_NODE_ID;
-        mParentNodeId = ROOT_NODE_ID;
-        mLabelForId = ROOT_NODE_ID;
-        mLabeledById = ROOT_NODE_ID;
-        mTraversalBefore = ROOT_NODE_ID;
-        mTraversalAfter = ROOT_NODE_ID;
+        mSourceNodeId = UNDEFINED_NODE_ID;
+        mParentNodeId = UNDEFINED_NODE_ID;
+        mLabelForId = UNDEFINED_NODE_ID;
+        mLabeledById = UNDEFINED_NODE_ID;
+        mTraversalBefore = UNDEFINED_NODE_ID;
+        mTraversalAfter = UNDEFINED_NODE_ID;
         mWindowId = UNDEFINED_ITEM_ID;
         mConnectionId = UNDEFINED_CONNECTION_ID;
         mMaxTextLength = -1;
@@ -3324,9 +3372,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         mError = null;
         mContentDescription = null;
         mViewIdResourceName = null;
-        if (mActions != null) {
-            mActions.clear();
-        }
+        removeAllActions();
         mTextSelectionStart = UNDEFINED_SELECTION_INDEX;
         mTextSelectionEnd = UNDEFINED_SELECTION_INDEX;
         mInputType = InputType.TYPE_NULL;
@@ -3974,6 +4020,16 @@ public class AccessibilityNodeInfo implements Parcelable {
          */
         public static final AccessibilityAction ACTION_SET_PROGRESS =
                 new AccessibilityAction(R.id.accessibilityActionSetProgress, null);
+
+        /**
+         * Action to move a window to a new location.
+         * <p>
+         * <strong>Arguments:</strong>
+         * {@link AccessibilityNodeInfo#ACTION_ARGUMENT_MOVE_WINDOW_X}
+         * {@link AccessibilityNodeInfo#ACTION_ARGUMENT_MOVE_WINDOW_Y}
+         */
+        public static final AccessibilityAction ACTION_MOVE_WINDOW =
+                new AccessibilityAction(R.id.accessibilityActionMoveWindow, null);
 
         private static final ArraySet<AccessibilityAction> sStandardActions = new ArraySet<>();
         static {

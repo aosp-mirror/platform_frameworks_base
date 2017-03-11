@@ -16,6 +16,7 @@
 
 package com.android.internal.policy;
 
+import android.view.accessibility.AccessibilityNodeInfo;
 import com.android.internal.R;
 import com.android.internal.policy.PhoneWindow.PanelFeatureState;
 import com.android.internal.policy.PhoneWindow.PhoneWindowMenuCallback;
@@ -2248,6 +2249,11 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         if (!mWindow.isDestroyed() && mWindow.getCallback() != null) {
             mWindow.getCallback().onPointerCaptureChanged(hasCapture);
         }
+    }
+
+    @Override
+    public int getAccessibilityViewId() {
+        return AccessibilityNodeInfo.ROOT_ITEM_ID;
     }
 
     @Override

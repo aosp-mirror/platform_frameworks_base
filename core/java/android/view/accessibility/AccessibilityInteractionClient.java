@@ -158,7 +158,7 @@ public final class AccessibilityInteractionClient
      */
     public AccessibilityNodeInfo getRootInActiveWindow(int connectionId) {
         return findAccessibilityNodeInfoByAccessibilityId(connectionId,
-                AccessibilityNodeInfo.ACTIVE_WINDOW_ID, AccessibilityNodeInfo.ROOT_NODE_ID,
+                AccessibilityWindowInfo.ACTIVE_WINDOW_ID, AccessibilityNodeInfo.ROOT_NODE_ID,
                 false, AccessibilityNodeInfo.FLAG_PREFETCH_DESCENDANTS, null);
     }
 

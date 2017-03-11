@@ -44,6 +44,14 @@ public class InputConsumerController {
     }
 
     /**
+     * Listener interface for callers to learn when this class is registered or unregistered with
+     * window manager
+     */
+    public interface RegistrationListener {
+        void onRegistrationChanged(boolean isRegistered);
+    }
+
+    /**
      * Input handler used for the PiP input consumer.
      */
     private final class PipInputEventReceiver extends InputEventReceiver {
@@ -71,6 +79,7 @@ public class InputConsumerController {
 
     private PipInputEventReceiver mInputEventReceiver;
     private TouchListener mListener;
+    private RegistrationListener mRegistrationListener;
 
     public InputConsumerController(IWindowManager windowManager) {
         mWindowManager = windowManager;
@@ -82,6 +91,22 @@ public class InputConsumerController {
      */
     public void setTouchListener(TouchListener listener) {
         mListener = listener;
+    }
+
+    /**
+     * Sets the registration listener.
+     */
+    public void setRegistrationListener(RegistrationListener listener) {
+        mRegistrationListener = listener;
+    }
+
+    /**
+     * Check if the InputConsumer is currently registered with WindowManager
+     *
+     * @return {@code true} if registered, {@code false} if not.
+     */
+    public boolean isRegistered() {
+        return mInputEventReceiver != null;
     }
 
     /**

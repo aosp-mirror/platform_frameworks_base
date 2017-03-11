@@ -1818,6 +1818,9 @@
     <!-- App label of the instant apps notification [CHAR LIMIT=60] -->
     <string name="instant_apps">Instant Apps</string>
 
+    <!-- Title of menu shown over picture-in-picture. Used for accessibility. -->
+    <string name="pip_menu_title">Picture in picture menu</string>
+
     <!-- Message of the instant apps notification indicating they don't need install [CHAR LIMIT=NONE] -->
     <string name="instant_apps_message">Instant apps don\'t require installation.</string>
 

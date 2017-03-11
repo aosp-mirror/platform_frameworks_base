@@ -45,9 +45,12 @@ interface IAccessibilityManager {
     List<AccessibilityServiceInfo> getEnabledAccessibilityServiceList(int feedbackType, int userId);
 
     int addAccessibilityInteractionConnection(IWindow windowToken,
-        in IAccessibilityInteractionConnection connection, int userId);
+            in IAccessibilityInteractionConnection connection, int userId);
 
     void removeAccessibilityInteractionConnection(IWindow windowToken);
+
+    void setPictureInPictureActionReplacingConnection(
+            in IAccessibilityInteractionConnection connection);
 
     void registerUiTestAutomationService(IBinder owner, IAccessibilityServiceClient client,
         in AccessibilityServiceInfo info, int flags);
