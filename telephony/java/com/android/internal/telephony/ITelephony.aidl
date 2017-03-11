@@ -381,7 +381,7 @@ interface ITelephony {
     /**
      * Returns the call state for a slot.
      */
-     int getCallStateForSlot(int slotId);
+     int getCallStateForSlot(int slotIndex);
 
      int getDataActivity();
      int getDataState();
@@ -397,9 +397,9 @@ interface ITelephony {
      * Returns the current active phone type as integer for particular slot.
      * Returns TelephonyManager.PHONE_TYPE_CDMA if RILConstants.CDMA_PHONE
      * and TelephonyManager.PHONE_TYPE_GSM if RILConstants.GSM_PHONE
-     * @param slotId - slot to query.
+     * @param slotIndex - slot to query.
      */
-    int getActivePhoneTypeForSlot(int slotId);
+    int getActivePhoneTypeForSlot(int slotIndex);
 
     /**
      * Returns the CDMA ERI icon index to display
@@ -573,10 +573,10 @@ interface ITelephony {
 
     /**
      * Return true if an ICC card is present for a subId.
-     * @param slotId user preferred slotId.
+     * @param slotIndex user preferred slotIndex.
      * Return true if an ICC card is present
      */
-    boolean hasIccCardUsingSlotId(int slotId);
+    boolean hasIccCardUsingSlotIndex(int slotIndex);
 
     /**
      * Return if the current radio is LTE on CDMA. This
@@ -777,7 +777,7 @@ interface ITelephony {
      *  requested as well as registering the ImsServiceController for callbacks using the
      *  IImsServiceFeatureListener interface.
      */
-    IImsServiceController getImsServiceControllerAndListen(int slotId, int feature,
+    IImsServiceController getImsServiceControllerAndListen(int slotIndex, int feature,
                 IImsServiceFeatureListener callback);
 
     /**
@@ -1085,22 +1085,22 @@ interface ITelephony {
     /**
      * Returns the IMEI for the given slot.
      *
-     * @param slotId - device slot.
+     * @param slotIndex - device slot.
      * @param callingPackage The package making the call.
      * <p>Requires Permission:
      *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
      */
-    String getImeiForSlot(int slotId, String callingPackage);
+    String getImeiForSlot(int slotIndex, String callingPackage);
 
     /**
      * Returns the device software version.
      *
-     * @param slotId - device slot.
+     * @param slotIndex - device slot.
      * @param callingPackage The package making the call.
      * <p>Requires Permission:
      *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
      */
-    String getDeviceSoftwareVersionForSlot(int slotId, String callingPackage);
+    String getDeviceSoftwareVersionForSlot(int slotIndex, String callingPackage);
 
     /**
      * Returns the subscription ID associated with the specified PhoneAccount.
@@ -1226,22 +1226,22 @@ interface ITelephony {
     List<TelephonyHistogram> getTelephonyHistograms();
 
     /**
-     * Set the allowed carrier list for slotId
+     * Set the allowed carrier list for slotIndex
      * Require system privileges. In the future we may add this to carrier APIs.
      *
      * @return The number of carriers set successfully. Should match length of
      * carriers on success.
      */
-    int setAllowedCarriers(int slotId, in List<CarrierIdentifier> carriers);
+    int setAllowedCarriers(int slotIndex, in List<CarrierIdentifier> carriers);
 
     /**
-     * Get the allowed carrier list for slotId.
+     * Get the allowed carrier list for slotIndex.
      * Require system privileges. In the future we may add this to carrier APIs.
      *
      * @return List of {@link android.service.carrier.CarrierIdentifier}; empty list
      * means all carriers are allowed.
      */
-    List<CarrierIdentifier> getAllowedCarriers(int slotId);
+    List<CarrierIdentifier> getAllowedCarriers(int slotIndex);
 
     /**
      * Action set from carrier signalling broadcast receivers to enable/disable metered apns
@@ -1288,11 +1288,11 @@ interface ITelephony {
 
     /**
      * Set SIM card power state. Request is equivalent to inserting or removing the card.
-     * @param slotId SIM slot id
+     * @param slotIndex SIM slot id
      * @param powerUp True if powering up the SIM, otherwise powering down
      * @hide
      * */
-    void setSimPowerStateForSlot(int slotId, boolean powerUp);
+    void setSimPowerStateForSlot(int slotIndex, boolean powerUp);
 
     /**
      * Returns a list of Forbidden PLMNs from the specified SIM App
