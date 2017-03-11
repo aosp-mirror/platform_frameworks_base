@@ -109,7 +109,6 @@ public class DockedStackDividerController implements DimLayerUser {
     private final Rect mTmpRect2 = new Rect();
     private final Rect mTmpRect3 = new Rect();
     private final Rect mLastRect = new Rect();
-    private final Rect mMiddlePositionDockedStackRect = new Rect();
     private boolean mLastVisibility = false;
     private final RemoteCallbackList<IDockedStackListener> mDockedStackListeners
             = new RemoteCallbackList<>();
@@ -186,16 +185,6 @@ public class DockedStackDividerController implements DimLayerUser {
         return (int) (minWidth / mDisplayContent.getDisplayMetrics().density);
     }
 
-    /**
-     * The middlePositionDockedStackRect is half the screen area that sits at the top (portrait) or
-     * left (landscape).
-     *
-     * @return fixed rect for temp stack
-     */
-    Rect getMiddlePositionDockedStackRect() {
-        return mMinimizedDock && isHomeStackResizable() ? mMiddlePositionDockedStackRect : null;
-    }
-
     void getHomeStackBoundsInDockedMode(Rect outBounds) {
         final DisplayInfo di = mDisplayContent.getDisplayInfo();
         mService.mPolicy.getStableInsetsLw(di.rotation, di.logicalWidth, di.logicalHeight,
@@ -264,29 +253,8 @@ public class DockedStackDividerController implements DimLayerUser {
         initSnapAlgorithmForRotations();
     }
 
-    /**
-     * Calculates the constant rects {@link mMiddlePositionDockedStackRect} based on orientation,
-     * stable insets and display size.
-     */
-    private void updateConstantRects() {
-        final DisplayInfo di = mDisplayContent.getDisplayInfo();
-        mService.mPolicy.getStableInsetsLw(di.rotation, di.logicalWidth, di.logicalHeight,
-                mTmpRect);
-        int dividerSize = mDividerWindowWidth - 2 * mDividerInsets;
-        Configuration configuration = mDisplayContent.getConfiguration();
-        boolean isHorizontal = configuration.orientation == Configuration.ORIENTATION_PORTRAIT;
-        int middlePosition = DockedDividerUtils.calculateMiddlePosition(isHorizontal, mTmpRect,
-                di.logicalWidth, di.logicalHeight, dividerSize);
-        if (isHorizontal) {
-            mMiddlePositionDockedStackRect.set(0, 0, di.logicalWidth, middlePosition);
-        } else {
-            mMiddlePositionDockedStackRect.set(0, 0, middlePosition, di.logicalHeight);
-        }
-    }
-
     void onConfigurationChanged() {
         loadDimens();
-        updateConstantRects();
     }
 
     boolean isResizing() {

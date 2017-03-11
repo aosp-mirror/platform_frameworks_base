@@ -746,15 +746,18 @@ public class DividerView extends FrameLayout implements OnTouchListener,
             if (mStableInsets.isEmpty()) {
                 SystemServicesProxy.getInstance(mContext).getStableInsets(mStableInsets);
             }
+            mMinimizedSnapAlgorithm = null;
+            mDockedStackMinimized = minimized;
+            initializeSnapAlgorithm();
             if (!mIsInMinimizeInteraction && minimized) {
                 mIsInMinimizeInteraction = true;
                 mDividerPositionBeforeMinimized = DockedDividerUtils.calculateMiddlePosition(
                         isHorizontalDivision(), mStableInsets, mDisplayWidth, mDisplayHeight,
                         mDividerSize);
+
+                int position = mMinimizedSnapAlgorithm.getMiddleTarget().position;
+                resizeStack(position, position, mMinimizedSnapAlgorithm.getMiddleTarget());
             }
-            mMinimizedSnapAlgorithm = null;
-            mDockedStackMinimized = minimized;
-            initializeSnapAlgorithm();
         }
     }
 
@@ -1140,7 +1143,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
                         && dockSideBottomRight(mDockSide))) {
             return StackId.DOCKED_STACK_ID;
         } else {
-            return StackId.HOME_STACK_ID;
+            return StackId.RECENTS_STACK_ID;
         }
     }
 

@@ -199,17 +199,19 @@ public class StackWindowController
         }
     }
 
-    public void getStackDockedModeBounds(Rect outBounds, Rect outTempBounds,
-            Rect outTempInsetBounds, boolean ignoreVisibility) {
+    /**
+     * @see TaskStack.getStackDockedModeBoundsLocked(Rect, Rect, Rect, boolean)
+     */
+   public void getStackDockedModeBounds(Rect currentTempTaskBounds, Rect outStackBounds,
+           Rect outTempTaskBounds, boolean ignoreVisibility) {
         synchronized (mWindowMap) {
             if (mContainer != null) {
-                mContainer.getStackDockedModeBoundsLocked(outBounds, outTempBounds,
-                        outTempInsetBounds, ignoreVisibility);
+                mContainer.getStackDockedModeBoundsLocked(currentTempTaskBounds, outStackBounds,
+                        outTempTaskBounds, ignoreVisibility);
                 return;
             }
-            outBounds.setEmpty();
-            outTempBounds.setEmpty();
-            outTempInsetBounds.setEmpty();
+            outStackBounds.setEmpty();
+            outTempTaskBounds.setEmpty();
         }
     }
 
@@ -241,9 +243,9 @@ public class StackWindowController
         }
     }
 
-    public void getBoundsForNewConfiguration(Rect outBounds, Rect outTempBounds) {
+    public void getBoundsForNewConfiguration(Rect outBounds) {
         synchronized(mWindowMap) {
-            mContainer.getBoundsForNewConfiguration(outBounds, outTempBounds);
+            mContainer.getBoundsForNewConfiguration(outBounds);
         }
     }
 

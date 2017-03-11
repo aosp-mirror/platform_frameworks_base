@@ -120,6 +120,7 @@ import com.android.server.am.ActivityManagerService.ItemMatcher;
 import com.android.server.am.ActivityStackSupervisor.ActivityContainer;
 import com.android.server.wm.StackWindowController;
 import com.android.server.wm.StackWindowListener;
+import com.android.server.wm.TaskStack;
 import com.android.server.wm.WindowManagerService;
 
 import java.io.FileDescriptor;
@@ -544,10 +545,13 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         mActivityContainer.mActivityDisplay.mDisplay.getSize(out);
     }
 
-    void getStackDockedModeBounds(Rect outBounds, Rect outTempBounds, Rect outTempInsetBounds,
-            boolean ignoreVisibility) {
-        mWindowContainerController.getStackDockedModeBounds(outBounds, outTempBounds,
-                outTempInsetBounds, ignoreVisibility);
+    /**
+     * @see ActivityStack.getStackDockedModeBounds(Rect, Rect, Rect, boolean)
+     */
+    void getStackDockedModeBounds(Rect currentTempTaskBounds, Rect outStackBounds,
+            Rect outTempTaskBounds, boolean ignoreVisibility) {
+        mWindowContainerController.getStackDockedModeBounds(currentTempTaskBounds,
+                outStackBounds, outTempTaskBounds, ignoreVisibility);
     }
 
     void prepareFreezingTaskBounds() {
@@ -562,8 +566,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         outBounds.setEmpty();
     }
 
-    void getBoundsForNewConfiguration(Rect outBounds, Rect outTempBounds) {
-        mWindowContainerController.getBoundsForNewConfiguration(outBounds, outTempBounds);
+    void getBoundsForNewConfiguration(Rect outBounds) {
+        mWindowContainerController.getBoundsForNewConfiguration(outBounds);
     }
 
     void positionChildWindowContainerAtTop(TaskRecord child) {
