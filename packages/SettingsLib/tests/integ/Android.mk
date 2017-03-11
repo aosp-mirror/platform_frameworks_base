@@ -22,6 +22,8 @@ LOCAL_SRC_FILES := $(call all-java-files-under, src)
 
 LOCAL_JAVA_LIBRARIES := android.test.runner telephony-common
 
+LOCAL_JACK_FLAGS := --multi-dex native
+
 LOCAL_PACKAGE_NAME := SettingsLibTests
 
 LOCAL_STATIC_JAVA_LIBRARIES := \
