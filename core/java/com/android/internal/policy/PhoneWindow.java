@@ -3585,7 +3585,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             synchronized (mWindows) {
                 if (!mIsWatching) {
                     try {
-                        WindowManagerHolder.sWindowManager.watchRotation(this);
+                        WindowManagerHolder.sWindowManager.watchRotation(this,
+                                phoneWindow.getContext().getDisplay().getDisplayId());
                         mHandler = new Handler();
                         mIsWatching = true;
                     } catch (RemoteException ex) {

@@ -532,13 +532,17 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     class RotationWatcher {
-        IRotationWatcher watcher;
-        IBinder.DeathRecipient deathRecipient;
-        RotationWatcher(IRotationWatcher w, IBinder.DeathRecipient d) {
-            watcher = w;
-            deathRecipient = d;
+        IRotationWatcher mWatcher;
+        IBinder.DeathRecipient mDeathRecipient;
+        int mDisplayId;
+        RotationWatcher(IRotationWatcher watcher, IBinder.DeathRecipient deathRecipient,
+                int displayId) {
+            mWatcher = watcher;
+            mDeathRecipient = deathRecipient;
+            mDisplayId = displayId;
         }
     }
+
     ArrayList<RotationWatcher> mRotationWatchers = new ArrayList<>();
     int mDeferredRotationPauseCount;
 
@@ -4073,10 +4077,13 @@ public class WindowManagerService extends IWindowManager.Stub
             mH.sendEmptyMessageDelayed(H.SEAMLESS_ROTATION_TIMEOUT, SEAMLESS_ROTATION_TIMEOUT_DURATION);
         }
 
-        for (int i=mRotationWatchers.size()-1; i>=0; i--) {
-            try {
-                mRotationWatchers.get(i).watcher.onRotationChanged(rotation);
-            } catch (RemoteException e) {
+        for (int i = mRotationWatchers.size() - 1; i >= 0; i--) {
+            final RotationWatcher rotationWatcher = mRotationWatchers.get(i);
+            if (rotationWatcher.mDisplayId == displayId) {
+                try {
+                    rotationWatcher.mWatcher.onRotationChanged(rotation);
+                } catch (RemoteException e) {
+                }
             }
         }
 
@@ -4104,16 +4111,16 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
-    public int watchRotation(IRotationWatcher watcher) {
+    public int watchRotation(IRotationWatcher watcher, int displayId) {
         final IBinder watcherBinder = watcher.asBinder();
         IBinder.DeathRecipient dr = new IBinder.DeathRecipient() {
             @Override
             public void binderDied() {
                 synchronized (mWindowMap) {
                     for (int i=0; i<mRotationWatchers.size(); i++) {
-                        if (watcherBinder == mRotationWatchers.get(i).watcher.asBinder()) {
+                        if (watcherBinder == mRotationWatchers.get(i).mWatcher.asBinder()) {
                             RotationWatcher removed = mRotationWatchers.remove(i);
-                            IBinder binder = removed.watcher.asBinder();
+                            IBinder binder = removed.mWatcher.asBinder();
                             if (binder != null) {
                                 binder.unlinkToDeath(this, 0);
                             }
@@ -4127,12 +4134,11 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized (mWindowMap) {
             try {
                 watcher.asBinder().linkToDeath(dr, 0);
-                mRotationWatchers.add(new RotationWatcher(watcher, dr));
+                mRotationWatchers.add(new RotationWatcher(watcher, dr, displayId));
             } catch (RemoteException e) {
                 // Client died, no cleanup needed.
             }
 
-            // TODO(multi-display): Modify rotation watchers to include display id.
             return getDefaultDisplayRotation();
         }
     }
@@ -4143,11 +4149,11 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized (mWindowMap) {
             for (int i=0; i<mRotationWatchers.size(); i++) {
                 RotationWatcher rotationWatcher = mRotationWatchers.get(i);
-                if (watcherBinder == rotationWatcher.watcher.asBinder()) {
+                if (watcherBinder == rotationWatcher.mWatcher.asBinder()) {
                     RotationWatcher removed = mRotationWatchers.remove(i);
-                    IBinder binder = removed.watcher.asBinder();
+                    IBinder binder = removed.mWatcher.asBinder();
                     if (binder != null) {
-                        binder.unlinkToDeath(removed.deathRecipient, 0);
+                        binder.unlinkToDeath(removed.mDeathRecipient, 0);
                     }
                     i--;
                 }

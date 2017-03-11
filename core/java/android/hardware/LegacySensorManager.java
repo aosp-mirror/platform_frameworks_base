@@ -16,6 +16,8 @@
 
 package android.hardware;
 
+import static android.view.Display.DEFAULT_DISPLAY;
+
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.view.IRotationWatcher;
@@ -57,8 +59,7 @@ final class LegacySensorManager {
                                     public void onRotationChanged(int rotation) {
                                         LegacySensorManager.onRotationChanged(rotation);
                                     }
-                                }
-                        );
+                                }, DEFAULT_DISPLAY);
                     } catch (RemoteException e) {
                     }
                 }
