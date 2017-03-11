@@ -22,6 +22,7 @@ LOCAL_SRC_FILES := \
 	$(call all-java-files-under, EnabledTestApp/src)
 
 LOCAL_DX_FLAGS := --core-library
+LOCAL_JACK_FLAGS := --multi-dex native
 LOCAL_AAPT_FLAGS = -0 dat -0 gld -c fa
 LOCAL_STATIC_JAVA_LIBRARIES := \
     core-tests-support \
