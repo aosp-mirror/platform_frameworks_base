@@ -38,4 +38,8 @@ public class TickerView extends TextSwitcher
     public void setTicker(Ticker t) {
         mTicker = t;
     }
+
+    public void setDarkIntensity(float darkIntensity) {
+        if (mTicker != null) mTicker.setDarkIntensity(darkIntensity);
+    }
 }

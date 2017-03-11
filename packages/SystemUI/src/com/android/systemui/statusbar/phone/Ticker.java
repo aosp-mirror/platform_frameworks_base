@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.phone;
 
+import android.animation.ArgbEvaluator;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.ColorStateList;
@@ -54,6 +55,8 @@ public abstract class Ticker {
     private float mIconScale;
     private ColorStateList mIconTint = null;
     private int mTextColor = 0xffffffff;
+    private int mDarkModeFillColor;
+    private int mLightModeFillColor;
 
     private NotificationColorUtil mNotificationColorUtil;
 
@@ -179,6 +182,9 @@ public abstract class Ticker {
                     AnimationUtils.loadAnimation(context, com.android.internal.R.anim.push_up_in));
         mTextSwitcher.setOutAnimation(
                     AnimationUtils.loadAnimation(context, com.android.internal.R.anim.push_up_out));
+
+        mDarkModeFillColor = context.getColor(R.color.dark_mode_icon_color_dual_tone_fill);
+        mLightModeFillColor = context.getColor(R.color.light_mode_icon_color_dual_tone_fill);
 
         // Copy the paint style of one of the TextSwitchers children to use later for measuring
         TextView text = (TextView) mTextSwitcher.getChildAt(0);
@@ -322,7 +328,14 @@ public abstract class Ticker {
         mIconTint = tint;
     }
 
-    public void setTextColor(int color) {
-        mTextColor = color;
+    private int getColorForDarkIntensity(float darkIntensity, int lightColor, int darkColor) {
+        return (int) ArgbEvaluator.getInstance().evaluate(darkIntensity, lightColor, darkColor);
+    }
+
+    public void setDarkIntensity(float darkIntensity) {
+        mTextColor = getColorForDarkIntensity(
+                darkIntensity, mLightModeFillColor, mDarkModeFillColor);
+        mTextSwitcher.setTextColor(mTextColor);
+
     }
 }
