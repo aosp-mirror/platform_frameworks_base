@@ -52,12 +52,12 @@ interface ISub {
     SubscriptionInfo getActiveSubscriptionInfoForIccId(String iccId, String callingPackage);
 
     /**
-     * Get the active SubscriptionInfo associated with the slotIdx
-     * @param slotIdx the slot which the subscription is inserted
+     * Get the active SubscriptionInfo associated with the slotIndex
+     * @param slotIndex the slot which the subscription is inserted
      * @param callingPackage The package maing the call.
      * @return SubscriptionInfo, maybe null if its not active
      */
-    SubscriptionInfo getActiveSubscriptionInfoForSimSlotIndex(int slotIdx, String callingPackage);
+    SubscriptionInfo getActiveSubscriptionInfoForSimSlotIndex(int slotIndex, String callingPackage);
 
     /**
      * Get the SubscriptionInfo(s) of the active subscriptions. The records will be sorted
@@ -96,10 +96,10 @@ interface ISub {
     /**
      * Add a new SubscriptionInfo to subinfo database if needed
      * @param iccId the IccId of the SIM card
-     * @param slotId the slot which the SIM is inserted
+     * @param slotIndex the slot which the SIM is inserted
      * @return the URL of the newly created row or the updated row
      */
-    int addSubInfoRecord(String iccId, int slotId);
+    int addSubInfoRecord(String iccId, int slotIndex);
 
     /**
      * Set SIM icon tint color by simInfo index
@@ -142,9 +142,9 @@ interface ISub {
      */
     int setDataRoaming(int roaming, int subId);
 
-    int getSlotId(int subId);
+    int getSlotIndex(int subId);
 
-    int[] getSubId(int slotId);
+    int[] getSubId(int slotIndex);
 
     int getDefaultSubId();
 
@@ -177,10 +177,10 @@ interface ISub {
     String getSubscriptionProperty(int subId, String propKey, String callingPackage);
 
     /**
-     * Get the SIM state for the slot idx
+     * Get the SIM state for the slot index
      * @return SIM state as the ordinal of IccCardConstants.State
      */
-    int getSimStateForSlotIdx(int slotIdx);
+    int getSimStateForSlotIndex(int slotIndex);
 
     boolean isActiveSubId(int subId);
 }

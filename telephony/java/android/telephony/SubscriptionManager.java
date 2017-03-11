@@ -521,14 +521,14 @@ public class SubscriptionManager {
     }
 
     /**
-     * Get the active SubscriptionInfo associated with the slotIdx
-     * @param slotIdx the slot which the subscription is inserted
+     * Get the active SubscriptionInfo associated with the slotIndex
+     * @param slotIndex the slot which the subscription is inserted
      * @return SubscriptionInfo, maybe null if its not active
      */
-    public SubscriptionInfo getActiveSubscriptionInfoForSimSlotIndex(int slotIdx) {
-        if (VDBG) logd("[getActiveSubscriptionInfoForSimSlotIndex]+ slotIdx=" + slotIdx);
-        if (!isValidSlotId(slotIdx)) {
-            logd("[getActiveSubscriptionInfoForSimSlotIndex]- invalid slotIdx");
+    public SubscriptionInfo getActiveSubscriptionInfoForSimSlotIndex(int slotIndex) {
+        if (VDBG) logd("[getActiveSubscriptionInfoForSimSlotIndex]+ slotIndex=" + slotIndex);
+        if (!isValidSlotIndex(slotIndex)) {
+            logd("[getActiveSubscriptionInfoForSimSlotIndex]- invalid slotIndex");
             return null;
         }
 
@@ -537,7 +537,7 @@ public class SubscriptionManager {
         try {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
             if (iSub != null) {
-                result = iSub.getActiveSubscriptionInfoForSimSlotIndex(slotIdx,
+                result = iSub.getActiveSubscriptionInfoForSimSlotIndex(slotIndex,
                         mContext.getOpPackageName());
             }
         } catch (RemoteException ex) {
@@ -671,24 +671,24 @@ public class SubscriptionManager {
     /**
      * Add a new SubscriptionInfo to SubscriptionInfo database if needed
      * @param iccId the IccId of the SIM card
-     * @param slotId the slot which the SIM is inserted
+     * @param slotIndex the slot which the SIM is inserted
      * @return the URL of the newly created row or the updated row
      * @hide
      */
-    public Uri addSubscriptionInfoRecord(String iccId, int slotId) {
-        if (VDBG) logd("[addSubscriptionInfoRecord]+ iccId:" + iccId + " slotId:" + slotId);
+    public Uri addSubscriptionInfoRecord(String iccId, int slotIndex) {
+        if (VDBG) logd("[addSubscriptionInfoRecord]+ iccId:" + iccId + " slotIndex:" + slotIndex);
         if (iccId == null) {
             logd("[addSubscriptionInfoRecord]- null iccId");
         }
-        if (!isValidSlotId(slotId)) {
-            logd("[addSubscriptionInfoRecord]- invalid slotId");
+        if (!isValidSlotIndex(slotIndex)) {
+            logd("[addSubscriptionInfoRecord]- invalid slotIndex");
         }
 
         try {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
             if (iSub != null) {
                 // FIXME: This returns 1 on success, 0 on error should should we return it?
-                iSub.addSubInfoRecord(iccId, slotId);
+                iSub.addSubInfoRecord(iccId, slotIndex);
             }
         } catch (RemoteException ex) {
             // ignore it
@@ -830,15 +830,15 @@ public class SubscriptionManager {
     }
 
     /**
-     * Get slotId associated with the subscription.
-     * @return slotId as a positive integer or a negative value if an error either
+     * Get slotIndex associated with the subscription.
+     * @return slotIndex as a positive integer or a negative value if an error either
      * SIM_NOT_INSERTED or < 0 if an invalid slot index
      * @hide
      */
-    public static int getSlotId(int subId) {
+    public static int getSlotIndex(int subId) {
         if (!isValidSubscriptionId(subId)) {
             if (DBG) {
-                logd("[getSlotId]- fail");
+                logd("[getSlotIndex]- fail");
             }
         }
 
@@ -847,7 +847,7 @@ public class SubscriptionManager {
         try {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
             if (iSub != null) {
-                result = iSub.getSlotId(subId);
+                result = iSub.getSlotIndex(subId);
             }
         } catch (RemoteException ex) {
             // ignore it
@@ -858,8 +858,8 @@ public class SubscriptionManager {
     }
 
     /** @hide */
-    public static int[] getSubId(int slotId) {
-        if (!isValidSlotId(slotId)) {
+    public static int[] getSubId(int slotIndex) {
+        if (!isValidSlotIndex(slotIndex)) {
             logd("[getSubId]- fail");
             return null;
         }
@@ -869,7 +869,7 @@ public class SubscriptionManager {
         try {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
             if (iSub != null) {
-                subId = iSub.getSubId(slotId);
+                subId = iSub.getSubId(slotIndex);
             }
         } catch (RemoteException ex) {
             // ignore it
@@ -1155,8 +1155,8 @@ public class SubscriptionManager {
     }
 
     /** @hide */
-    public static boolean isValidSlotId(int slotId) {
-        return slotId >= 0 && slotId < TelephonyManager.getDefault().getSimCount();
+    public static boolean isValidSlotIndex(int slotIndex) {
+        return slotIndex >= 0 && slotIndex < TelephonyManager.getDefault().getSimCount();
     }
 
     /** @hide */
@@ -1179,7 +1179,7 @@ public class SubscriptionManager {
         if (VDBG) logd("putPhoneIdAndSubIdExtra: phoneId=" + phoneId + " subId=" + subId);
         intent.putExtra(PhoneConstants.SUBSCRIPTION_KEY, subId);
         intent.putExtra(PhoneConstants.PHONE_KEY, phoneId);
-        //FIXME this is using phoneId and slotId interchangeably
+        //FIXME this is using phoneId and slotIndex interchangeably
         //Eventually, this should be removed as it is not the slot id
         intent.putExtra(PhoneConstants.SLOT_KEY, phoneId);
     }
@@ -1228,9 +1228,9 @@ public class SubscriptionManager {
     }
 
     /**
-     * Returns a constant indicating the state of sim for the slot idx.
+     * Returns a constant indicating the state of sim for the slot index.
      *
-     * @param slotIdx
+     * @param slotIndex
      *
      * {@See TelephonyManager#SIM_STATE_UNKNOWN}
      * {@See TelephonyManager#SIM_STATE_ABSENT}
@@ -1244,13 +1244,13 @@ public class SubscriptionManager {
      *
      * {@hide}
      */
-    public static int getSimStateForSlotIdx(int slotIdx) {
+    public static int getSimStateForSlotIndex(int slotIndex) {
         int simState = TelephonyManager.SIM_STATE_UNKNOWN;
 
         try {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
             if (iSub != null) {
-                simState = iSub.getSimStateForSlotIdx(slotIdx);
+                simState = iSub.getSimStateForSlotIndex(slotIndex);
             }
         } catch (RemoteException ex) {
         }

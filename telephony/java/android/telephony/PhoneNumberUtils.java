@@ -1896,7 +1896,7 @@ public class PhoneNumberUtils
         number = extractNetworkPortionAlt(number);
 
         String emergencyNumbers = "";
-        int slotId = SubscriptionManager.getSlotId(subId);
+        int slotId = SubscriptionManager.getSlotIndex(subId);
 
         // retrieve the list of emergency numbers
         // check read-write ecclist property first
