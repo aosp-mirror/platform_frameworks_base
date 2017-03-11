@@ -61,7 +61,6 @@ public class DexManagerTests {
 
     @Before
     public void setup() {
-
         mUser0 = 0;
         mUser1 = 1;
 
@@ -350,6 +349,15 @@ public class DexManagerTests {
         // Bar should not be around since it was removed for all users.
         PackageUseInfo pui = getPackageUseInfo(mBarUser0);
         assertNull(pui);
+    }
+
+    @Test
+    public void testNotifyFrameworkLoad() {
+        String frameworkDex = "/system/framework/com.android.location.provider.jar";
+        // Load a dex file from framework.
+        notifyDexLoad(mFooUser0, Arrays.asList(frameworkDex), mUser0);
+        // The dex file should not be recognized as a package.
+        assertNull(mDexManager.getPackageUseInfo(frameworkDex));
     }
 
     private void assertSecondaryUse(TestData testData, PackageUseInfo pui,
