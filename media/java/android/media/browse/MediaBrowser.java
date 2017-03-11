@@ -471,6 +471,7 @@ public final class MediaBrowser {
      * @param extras The bundle of service-specific arguments to send to the media browser
      *            service. The contents of this bundle may affect the search result.
      * @param callback The callback to receive the search result.
+     * @throws IllegalStateException if the browser is not connected to the media browser service.
      */
     public void search(@NonNull final String query, final Bundle extras, SearchCallback callback) {
         if (TextUtils.isEmpty(query)) {
@@ -480,14 +481,8 @@ public final class MediaBrowser {
             throw new IllegalArgumentException("callback cannot be null.");
         }
         if (mState != CONNECT_STATE_CONNECTED) {
-            Log.i(TAG, "Not connected, unable to search.");
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    callback.onError(query, extras);
-                }
-            });
-            return;
+            throw new IllegalStateException("search() called while not connected (state="
+                    + getStateLabel(mState) + ")");
         }
         ResultReceiver receiver = new ResultReceiver(mHandler) {
             @Override
