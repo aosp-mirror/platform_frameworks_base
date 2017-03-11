@@ -857,16 +857,25 @@ class AppErrors {
 
         ProcessCpuTracker processCpuTracker = new ProcessCpuTracker(true);
 
-        String[] nativeProcs = NATIVE_STACKS_OF_INTEREST;
-        // don't dump native PIDs for background ANRs
-        File tracesFile = null;
+        // don't dump native PIDs for background ANRs unless it is the process of interest
+        String[] nativeProcs = null;
         if (isSilentANR) {
-            tracesFile = mService.dumpStackTraces(true, firstPids, null, lastPids,
-                null);
+            for (int i = 0; i < NATIVE_STACKS_OF_INTEREST.length; i++) {
+                if (NATIVE_STACKS_OF_INTEREST[i].equals(app.processName)) {
+                    nativeProcs = new String[] { app.processName };
+                    break;
+                }
+            }
         } else {
-            tracesFile = mService.dumpStackTraces(true, firstPids, processCpuTracker, lastPids,
-                nativeProcs);
+            nativeProcs = NATIVE_STACKS_OF_INTEREST;
         }
+
+        // For background ANRs, don't pass the ProcessCpuTracker to
+        // avoid spending 1/2 second collecting stats to rank lastPids.
+        File tracesFile = mService.dumpStackTraces(true, firstPids,
+                                                   (isSilentANR) ? null : processCpuTracker,
+                                                   (isSilentANR) ? null : lastPids,
+                                                   nativeProcs);
 
         String cpuInfo = null;
         if (ActivityManagerService.MONITOR_CPU_USAGE) {
