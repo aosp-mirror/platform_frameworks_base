@@ -36,7 +36,9 @@ import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
 import android.os.RemoteException;
-import android.annotation.IntRange;
+import android.os.SystemProperties;
+import android.system.ErrnoException;
+import android.system.Os;
 import android.util.ExceptionUtils;
 
 import com.android.internal.util.IndentingPrintWriter;
@@ -78,6 +80,10 @@ import java.util.List;
  */
 public class PackageInstaller {
     private static final String TAG = "PackageInstaller";
+
+    /** {@hide} */
+    public static final boolean ENABLE_REVOCABLE_FD =
+            SystemProperties.getBoolean("fw.revocable_fd", false);
 
     /**
      * Activity Action: Show details about a particular install session. This
@@ -753,15 +759,21 @@ public class PackageInstaller {
         public @NonNull OutputStream openWrite(@NonNull String name, long offsetBytes,
                 long lengthBytes) throws IOException {
             try {
-                final ParcelFileDescriptor clientSocket = mSession.openWrite(name,
-                        offsetBytes, lengthBytes);
-                return new FileBridge.FileBridgeOutputStream(clientSocket);
+                if (ENABLE_REVOCABLE_FD) {
+                    return new ParcelFileDescriptor.AutoCloseOutputStream(
+                            mSession.openWrite(name, offsetBytes, lengthBytes));
+                } else {
+                    final ParcelFileDescriptor clientSocket = mSession.openWrite(name,
+                            offsetBytes, lengthBytes);
+                    return new FileBridge.FileBridgeOutputStream(clientSocket);
+                }
             } catch (RuntimeException e) {
                 ExceptionUtils.maybeUnwrapIOException(e);
                 throw e;
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
+
         }
 
         /**
@@ -770,10 +782,22 @@ public class PackageInstaller {
          * {@link #openWrite(String, long, long)}.
          */
         public void fsync(@NonNull OutputStream out) throws IOException {
-            if (out instanceof FileBridge.FileBridgeOutputStream) {
-                ((FileBridge.FileBridgeOutputStream) out).fsync();
+            if (ENABLE_REVOCABLE_FD) {
+                if (out instanceof ParcelFileDescriptor.AutoCloseOutputStream) {
+                    try {
+                        Os.fsync(((ParcelFileDescriptor.AutoCloseOutputStream) out).getFD());
+                    } catch (ErrnoException e) {
+                        throw e.rethrowAsIOException();
+                    }
+                } else {
+                    throw new IllegalArgumentException("Unrecognized stream");
+                }
             } else {
-                throw new IllegalArgumentException("Unrecognized stream");
+                if (out instanceof FileBridge.FileBridgeOutputStream) {
+                    ((FileBridge.FileBridgeOutputStream) out).fsync();
+                } else {
+                    throw new IllegalArgumentException("Unrecognized stream");
+                }
             }
         }
 
