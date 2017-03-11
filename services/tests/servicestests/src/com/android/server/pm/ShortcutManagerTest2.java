@@ -1640,7 +1640,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
 
         // State changed, but not foreground, so no resetting.
         mService.mUidObserver.onUidStateChanged(
-                CALLING_UID_1, ActivityManager.PROCESS_STATE_TOP_SLEEPING);
+                CALLING_UID_1, ActivityManager.PROCESS_STATE_TOP_SLEEPING, 0);
         runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
             MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
         });
@@ -1664,7 +1664,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
 
         // State changed, package1 foreground, reset.
         mService.mUidObserver.onUidStateChanged(
-                CALLING_UID_1, ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE);
+                CALLING_UID_1, ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE, 0);
         runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
             assertEquals(3, mManager.getRemainingCallCount());
         });
@@ -1684,16 +1684,16 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
             MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
         });
         mService.mUidObserver.onUidStateChanged(
-                CALLING_UID_1, ActivityManager.PROCESS_STATE_TOP_SLEEPING);
+                CALLING_UID_1, ActivityManager.PROCESS_STATE_TOP_SLEEPING, 0);
 
         mInjectedCurrentTimeMillis++;
 
         // Different app comes to foreground briefly, and goes back to background.
         // Now, make sure package 2's counter is reset, even in this case.
         mService.mUidObserver.onUidStateChanged(
-                CALLING_UID_2, ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE);
+                CALLING_UID_2, ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE, 0);
         mService.mUidObserver.onUidStateChanged(
-                CALLING_UID_2, ActivityManager.PROCESS_STATE_TOP_SLEEPING);
+                CALLING_UID_2, ActivityManager.PROCESS_STATE_TOP_SLEEPING, 0);
 
         runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
             assertEquals(3, mManager.getRemainingCallCount());
@@ -1724,9 +1724,9 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         });
 
         mService.mUidObserver.onUidStateChanged(
-                CALLING_UID_2, ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE);
+                CALLING_UID_2, ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE, 0);
         mService.mUidObserver.onUidStateChanged(
-                CALLING_UID_2, ActivityManager.PROCESS_STATE_TOP_SLEEPING);
+                CALLING_UID_2, ActivityManager.PROCESS_STATE_TOP_SLEEPING, 0);
 
         runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
             assertEquals(3, mManager.getRemainingCallCount());
@@ -1753,7 +1753,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         // Now, also try calling some APIs and make sure foreground apps don't get throttled.
         mService.mUidObserver.onUidStateChanged(
                 UserHandle.getUid(USER_10, CALLING_UID_1),
-                ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE);
+                ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE, 0);
         runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
             assertEquals(3, mManager.getRemainingCallCount());
             assertFalse(mManager.isRateLimitingActive());

@@ -342,7 +342,7 @@ public class UsageStatsService extends SystemService implements
 
     private final IUidObserver mUidObserver = new IUidObserver.Stub() {
         @Override
-        public void onUidStateChanged(int uid, int procState) {
+        public void onUidStateChanged(int uid, int procState, long procStateSeq) {
             final int newCounter = (procState <= ActivityManager.PROCESS_STATE_TOP) ? 0 : 1;
             synchronized (mUidToKernelCounter) {
                 final int oldCounter = mUidToKernelCounter.get(uid, 0);
@@ -364,7 +364,7 @@ public class UsageStatsService extends SystemService implements
 
         @Override
         public void onUidGone(int uid, boolean disabled) throws RemoteException {
-            onUidStateChanged(uid, ActivityManager.PROCESS_STATE_NONEXISTENT);
+            onUidStateChanged(uid, ActivityManager.PROCESS_STATE_NONEXISTENT, 0);
         }
 
         @Override
