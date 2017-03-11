@@ -5651,11 +5651,13 @@ public class Notification implements Parcelable
             static final String KEY_SENDER = "sender";
             static final String KEY_DATA_MIME_TYPE = "type";
             static final String KEY_DATA_URI= "uri";
+            static final String KEY_EXTRAS_BUNDLE = "extras";
 
             private final CharSequence mText;
             private final long mTimestamp;
             private final CharSequence mSender;
 
+            private Bundle mExtras = new Bundle();
             private String mDataMimeType;
             private Uri mDataUri;
 
@@ -5724,6 +5726,13 @@ public class Notification implements Parcelable
             }
 
             /**
+             * Get the extras Bundle for this message.
+             */
+            public Bundle getExtras() {
+                return mExtras;
+            }
+
+            /**
              * Get the text used to display the contact's name in the messaging experience
              */
             public CharSequence getSender() {
@@ -5760,6 +5769,9 @@ public class Notification implements Parcelable
                 if (mDataUri != null) {
                     bundle.putParcelable(KEY_DATA_URI, mDataUri);
                 }
+                if (mExtras != null) {
+                    bundle.putBundle(KEY_EXTRAS_BUNDLE, mExtras);
+                }
                 return bundle;
             }
 
@@ -5794,9 +5806,11 @@ public class Notification implements Parcelable
                                 bundle.getLong(KEY_TIMESTAMP), bundle.getCharSequence(KEY_SENDER));
                         if (bundle.containsKey(KEY_DATA_MIME_TYPE) &&
                                 bundle.containsKey(KEY_DATA_URI)) {
-
                             message.setData(bundle.getString(KEY_DATA_MIME_TYPE),
                                     (Uri) bundle.getParcelable(KEY_DATA_URI));
+                        }
+                        if (bundle.containsKey(KEY_EXTRAS_BUNDLE)) {
+                            message.getExtras().putAll(bundle.getBundle(KEY_EXTRAS_BUNDLE));
                         }
                         return message;
                     }
