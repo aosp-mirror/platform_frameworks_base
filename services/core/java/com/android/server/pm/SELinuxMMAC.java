@@ -62,8 +62,8 @@ public final class SELinuxMMAC {
 
     /** Path to MAC permissions on system image */
     private static final File[] MAC_PERMISSIONS =
-    { new File(Environment.getRootDirectory(), "/etc/security/plat_mac_permissions.xml"),
-      new File(Environment.getRootDirectory(), "/etc/security/nonplat_mac_permissions.xml") };
+    { new File(Environment.getRootDirectory(), "/etc/selinux/plat_mac_permissions.xml"),
+      new File(Environment.getVendorDirectory(), "/etc/selinux/nonplat_mac_permissions.xml") };
 
     // Append privapp to existing seinfo label
     private static final String PRIVILEGED_APP_STR = ":privapp";
