@@ -545,7 +545,7 @@ public class ShapeDrawable extends Drawable {
             mChangingConfigurations = orig.mChangingConfigurations;
             mPaint = new Paint(orig.mPaint);
             mThemeAttrs = orig.mThemeAttrs;
-            if (mShape != null) {
+            if (orig.mShape != null) {
                 try {
                     mShape = orig.mShape.clone();
                 } catch (CloneNotSupportedException e) {
