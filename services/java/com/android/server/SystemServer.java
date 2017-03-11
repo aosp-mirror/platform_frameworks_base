@@ -1284,6 +1284,12 @@ public final class SystemServer {
             mActivityManagerService.showSafeModeOverlay();
         }
 
+        // Let's check whether we should disable all theme overlays
+        final boolean disableOverlays = wm.detectDisableOverlays();
+        if (disableOverlays) {
+            mActivityManagerService.disableOverlays();
+        }
+
         // Update the configuration for this context by hand, because we're going
         // to start using it before the config change done in wm.systemReady() will
         // propagate to it.

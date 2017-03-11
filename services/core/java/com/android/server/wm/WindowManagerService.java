@@ -534,6 +534,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     boolean mDisplayReady;
     boolean mSafeMode;
+    boolean mDisableOverlays;
     boolean mDisplayEnabled = false;
     boolean mSystemBooted = false;
     boolean mForceDisplayEnabled = false;
@@ -8191,6 +8192,27 @@ public class WindowManagerService extends IWindowManager.Stub
         }
         mPolicy.setSafeMode(mSafeMode);
         return mSafeMode;
+    }
+
+    public boolean detectDisableOverlays() {
+        if (!mInputMonitor.waitForInputDevicesReady(
+                INPUT_DEVICES_READY_FOR_SAFE_MODE_DETECTION_TIMEOUT_MILLIS)) {
+            Slog.w(TAG_WM, "Devices still not ready after waiting "
+                   + INPUT_DEVICES_READY_FOR_SAFE_MODE_DETECTION_TIMEOUT_MILLIS
+                   + " milliseconds before attempting to detect safe mode.");
+        }
+
+        int volumeUpState = mInputManager.getKeyCodeState(-1, InputDevice.SOURCE_ANY,
+                KeyEvent.KEYCODE_VOLUME_UP);
+        mDisableOverlays = volumeUpState > 0;
+
+        if (mDisableOverlays) {
+            Log.i(TAG_WM, "All enabled theme overlays will now be disabled.");
+        } else {
+            Log.i(TAG_WM, "System will boot with enabled overlays intact.");
+        }
+
+        return mDisableOverlays;
     }
 
     public void displayReady() {
