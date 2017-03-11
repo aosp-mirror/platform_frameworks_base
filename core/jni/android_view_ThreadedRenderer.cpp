@@ -27,7 +27,7 @@
 
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
-#include <EGL/egl_cache.h>
+#include <private/EGL/cache.h>
 
 #include <utils/Looper.h>
 #include <utils/RefBase.h>
@@ -887,7 +887,7 @@ static void android_view_ThreadedRenderer_removeFrameMetricsObserver(JNIEnv* env
 static void android_view_ThreadedRenderer_setupShadersDiskCache(JNIEnv* env, jobject clazz,
         jstring diskCachePath) {
     const char* cacheArray = env->GetStringUTFChars(diskCachePath, NULL);
-    egl_cache_t::get()->setCacheFilename(cacheArray);
+    android::egl_set_cache_filename(cacheArray);
     env->ReleaseStringUTFChars(diskCachePath, cacheArray);
 }
 

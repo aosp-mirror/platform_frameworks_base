@@ -197,7 +197,6 @@ LOCAL_C_INCLUDES += \
     $(JNI_H_INCLUDE) \
     $(LOCAL_PATH)/android/graphics \
     $(LOCAL_PATH)/../../libs/hwui \
-    $(LOCAL_PATH)/../../../native/opengl/libs \
     $(LOCAL_PATH)/../../../native/vulkan/include \
     $(call include-path-for, bluedroid) \
     $(call include-path-for, libhardware)/hardware \
