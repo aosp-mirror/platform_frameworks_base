@@ -1513,6 +1513,21 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets, sp<ApkBuil
         err = NO_ERROR;
     }
 
+    if (mipmaps != NULL) {
+        ResourceDirIterator it(mipmaps, String8("mipmap"));
+        while ((err=it.next()) == NO_ERROR) {
+            err = postProcessImage(bundle, assets, &table, it.getFile());
+            if (err != NO_ERROR) {
+                hasErrors = true;
+            }
+        }
+
+        if (err < NO_ERROR) {
+            hasErrors = true;
+        }
+        err = NO_ERROR;
+    }
+
     if (colors != NULL) {
         ResourceDirIterator it(colors, String8("color"));
         while ((err=it.next()) == NO_ERROR) {
