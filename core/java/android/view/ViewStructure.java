@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.annotation.Nullable;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.os.Bundle;
@@ -323,7 +324,7 @@ public abstract class ViewStructure {
      * Sets the a hint that helps the autofill service to select the appropriate data to fill the
      * view.
      */
-    public abstract void setAutofillHint(@View.AutofillHint int hint);
+    public abstract void setAutofillHint(@Nullable String[] hint);
 
     /**
      * Sets the {@link AutofillValue} representing the current value of this node.

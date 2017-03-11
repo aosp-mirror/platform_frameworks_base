@@ -1,5 +1,6 @@
 package android.app.assist;
 
+import android.annotation.Nullable;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.graphics.Matrix;
@@ -590,7 +591,7 @@ public class AssistStructure implements Parcelable {
         // fields (viewId and childId) of the field.
         AutofillId mAutofillId;
         @View.AutofillType int mAutofillType;
-        @View.AutofillHint int mAutofillHint;
+        @Nullable String[] mAutofillHint;
         AutofillValue mAutofillValue;
         String[] mAutofillOptions;
         boolean mSanitized;
@@ -676,7 +677,7 @@ public class AssistStructure implements Parcelable {
                 mSanitized = in.readInt() == 1;
                 mAutofillId = in.readParcelable(null);
                 mAutofillType = in.readInt();
-                mAutofillHint = in.readInt();
+                mAutofillHint = in.readStringArray();
                 mAutofillValue = in.readParcelable(null);
                 mAutofillOptions = in.readStringArray();
             }
@@ -810,7 +811,7 @@ public class AssistStructure implements Parcelable {
                 out.writeInt(mSanitized ? 1 : 0);
                 out.writeParcelable(mAutofillId, 0);
                 out.writeInt(mAutofillType);
-                out.writeInt(mAutofillHint);
+                out.writeStringArray(mAutofillHint);
                 final AutofillValue sanitizedValue = writeSensitive ? mAutofillValue : null;
                 out.writeParcelable(sanitizedValue,  0);
                 out.writeStringArray(mAutofillOptions);
@@ -949,7 +950,7 @@ public class AssistStructure implements Parcelable {
          *
          * @return The hint for this view
          */
-        @View.AutofillHint public int getAutoFillHint() {
+        @Nullable public String[] getAutoFillHint() {
             return mAutofillHint;
         }
 
@@ -1663,7 +1664,7 @@ public class AssistStructure implements Parcelable {
         }
 
         @Override
-        public void setAutofillHint(@View.AutofillHint int hint) {
+        public void setAutofillHint(@Nullable String[] hint) {
             mNode.mAutofillHint = hint;
         }
 
@@ -1812,7 +1813,7 @@ public class AssistStructure implements Parcelable {
                     + ", type=" + node.getAutofillType()
                     + ", options=" + Arrays.toString(node.getAutofillOptions())
                     + ", inputType=" + node.getInputType()
-                    + ", hint=" + Integer.toHexString(node.getAutoFillHint())
+                    + ", hint=" + Arrays.toString(node.getAutoFillHint())
                     + ", value=" + node.getAutofillValue()
                     + ", sanitized=" + node.isSanitized());
         }
