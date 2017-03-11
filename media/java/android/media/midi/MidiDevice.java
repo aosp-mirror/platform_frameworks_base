@@ -30,6 +30,8 @@ import java.io.Closeable;
 import java.io.FileDescriptor;
 import java.io.IOException;
 
+import java.util.HashSet;
+
 /**
  * This class is used for sending and receiving data to and from a MIDI device
  * Instances of this class are created by {@link MidiManager#openDevice}.
@@ -47,7 +49,18 @@ public final class MidiDevice implements Closeable {
     private final IBinder mClientToken;
     private final IBinder mDeviceToken;
     private boolean mIsDeviceClosed;
-    private boolean mIsMirroredToNative;
+
+    // Native API Helpers
+    /**
+     * Keep a static list of MidiDevice objects that are mirrorToNative()'d so they
+     * don't get inadvertantly garbage collected.
+     */
+    private static HashSet<MidiDevice> mMirroredDevices = new HashSet<MidiDevice>();
+
+    /**
+     * If this device is mirrorToNatived(), this is the native device handler.
+     */
+    private long mNativeHandle;
 
     private final CloseGuard mGuard = CloseGuard.get();
 
@@ -218,34 +231,39 @@ public final class MidiDevice implements Closeable {
      * Makes Midi Device available to the Native API
      * @hide
      */
-    public void mirrorToNative() throws IOException {
-        if (mIsDeviceClosed || mIsMirroredToNative) {
-            return;
+    public long mirrorToNative() throws IOException {
+        if (mIsDeviceClosed || mNativeHandle != 0) {
+            return 0;
         }
 
-        int result = mirrorToNative(mDeviceServer.asBinder(), mDeviceInfo.getId());
-        if (result != 0) {
-            throw new IOException("Failed mirroring to native: " + result);
+        mNativeHandle = native_mirrorToNative(mDeviceServer.asBinder(), mDeviceInfo.getId());
+        if (mNativeHandle == 0) {
+            throw new IOException("Failed mirroring to native");
         }
 
-        mIsMirroredToNative = true;
+        synchronized (mMirroredDevices) {
+            mMirroredDevices.add(this);
+        }
+        return mNativeHandle;
     }
 
     /**
      * Makes Midi Device no longer available to the Native API
      * @hide
      */
-    public void removeFromNative() throws IOException {
-        if (!mIsMirroredToNative) {
+    public void removeFromNative() {
+        if (mNativeHandle == 0) {
             return;
         }
 
-        int result = removeFromNative(mDeviceInfo.getId());
-        if (result != 0) {
-            throw new IOException("Failed removing from native: " + result);
+        synchronized (mGuard) {
+            native_removeFromNative(mNativeHandle);
+            mNativeHandle = 0;
         }
 
-        mIsMirroredToNative = false;
+        synchronized (mMirroredDevices) {
+            mMirroredDevices.remove(this);
+        }
     }
 
     @Override
@@ -279,6 +297,6 @@ public final class MidiDevice implements Closeable {
         return ("MidiDevice: " + mDeviceInfo.toString());
     }
 
-    private native int mirrorToNative(IBinder deviceServerBinder, int uid);
-    private native int removeFromNative(int uid);
+    private native long native_mirrorToNative(IBinder deviceServerBinder, int id);
+    private native void native_removeFromNative(long deviceHandle);
 }

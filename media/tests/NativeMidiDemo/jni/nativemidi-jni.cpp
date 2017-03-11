@@ -66,8 +66,8 @@ static short playBuffer[maxPlaySamples];
 
 static std::atomic_ullong sharedCounter;
 
-static AMIDI_Device midiDevice = AMIDI_INVALID_HANDLE;
-static std::atomic<AMIDI_OutputPort> midiOutputPort(AMIDI_INVALID_HANDLE);
+static AMIDI_Device* midiDevice = AMIDI_INVALID_HANDLE;
+static std::atomic<AMIDI_OutputPort*> midiOutputPort(AMIDI_INVALID_HANDLE);
 
 static int setPlaySamples(int newPlaySamples)
 {
@@ -86,7 +86,7 @@ static void bqPlayerCallback(SLAndroidSimpleBufferQueueItf bq, void */*context*/
 {
     sharedCounter++;
 
-    AMIDI_OutputPort outputPort = midiOutputPort.load();
+    AMIDI_OutputPort* outputPort = midiOutputPort.load();
     if (outputPort != AMIDI_INVALID_HANDLE) {
         char midiDumpBuffer[1024];
         ssize_t midiReceived = AMIDI_receive(
@@ -235,20 +235,21 @@ jobjectArray Java_com_example_android_nativemididemo_NativeMidi_getRecentMessage
 }
 
 void Java_com_example_android_nativemididemo_NativeMidi_startReadingMidi(
-        JNIEnv*, jobject, jint deviceId, jint portNumber) {
+        JNIEnv*, jobject, jlong deviceHandle, jint portNumber) {
     char buffer[1024];
 
-    int result = AMIDI_getDeviceById(deviceId, &midiDevice);
-    if (result == 0) {
-        snprintf(buffer, sizeof(buffer), "Obtained device token for uid %d: token %d", deviceId, midiDevice);
-    } else {
-        snprintf(buffer, sizeof(buffer), "Could not obtain device token for uid %d: %d", deviceId, result);
-    }
+    midiDevice = (AMIDI_Device*)deviceHandle;
+//    int result = AMIDI_getDeviceById(deviceId, &midiDevice);
+//    if (result == 0) {
+//        snprintf(buffer, sizeof(buffer), "Obtained device token for uid %d: token %d", deviceId, midiDevice);
+//    } else {
+//        snprintf(buffer, sizeof(buffer), "Could not obtain device token for uid %d: %d", deviceId, result);
+//    }
     nativemididemo::writeMessage(buffer);
-    if (result) return;
+//    if (result) return;
 
     AMIDI_DeviceInfo deviceInfo;
-    result = AMIDI_getDeviceInfo(midiDevice, &deviceInfo);
+    int result = AMIDI_getDeviceInfo(midiDevice, &deviceInfo);
     if (result == 0) {
         snprintf(buffer, sizeof(buffer), "Device info: uid %d, type %d, priv %d, ports %d I / %d O",
                 deviceInfo.uid, deviceInfo.type, deviceInfo.isPrivate,
@@ -259,27 +260,27 @@ void Java_com_example_android_nativemididemo_NativeMidi_startReadingMidi(
     nativemididemo::writeMessage(buffer);
     if (result) return;
 
-    AMIDI_OutputPort outputPort;
+    AMIDI_OutputPort* outputPort;
     result = AMIDI_openOutputPort(midiDevice, portNumber, &outputPort);
     if (result == 0) {
-        snprintf(buffer, sizeof(buffer), "Opened port %d: token %d", portNumber, outputPort);
+        snprintf(buffer, sizeof(buffer), "Opened port %d: token %p", portNumber, outputPort);
         midiOutputPort.store(outputPort);
     } else {
-        snprintf(buffer, sizeof(buffer), "Could not open port %d: %d", deviceId, result);
+        snprintf(buffer, sizeof(buffer), "Could not open port %p: %d", midiDevice, result);
     }
     nativemididemo::writeMessage(buffer);
 }
 
 void Java_com_example_android_nativemididemo_NativeMidi_stopReadingMidi(
         JNIEnv*, jobject) {
-    AMIDI_OutputPort outputPort = midiOutputPort.exchange(AMIDI_INVALID_HANDLE);
+    AMIDI_OutputPort* outputPort = midiOutputPort.exchange(AMIDI_INVALID_HANDLE);
     if (outputPort == AMIDI_INVALID_HANDLE) return;
     int result = AMIDI_closeOutputPort(outputPort);
     char buffer[1024];
     if (result == 0) {
-        snprintf(buffer, sizeof(buffer), "Closed port by token %d", outputPort);
+        snprintf(buffer, sizeof(buffer), "Closed port by token %p", outputPort);
     } else {
-        snprintf(buffer, sizeof(buffer), "Could not close port by token %d: %d", outputPort, result);
+        snprintf(buffer, sizeof(buffer), "Could not close port by token %p: %d", outputPort, result);
     }
     nativemididemo::writeMessage(buffer);
 }
