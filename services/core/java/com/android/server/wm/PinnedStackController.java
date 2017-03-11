@@ -108,6 +108,7 @@ class PinnedStackController {
     private final DisplayMetrics mTmpMetrics = new DisplayMetrics();
     private final Rect mTmpInsets = new Rect();
     private final Rect mTmpRect = new Rect();
+    private final Rect mTmpAnimatingBoundsRect = new Rect();
     private final Point mTmpDisplaySize = new Point();
 
     /**
@@ -359,7 +360,7 @@ class PinnedStackController {
                 if (isValidPictureInPictureAspectRatio(mAspectRatio)) {
                     transformBoundsToAspectRatio(normalBounds, mAspectRatio);
                 }
-                final Rect animatingBounds = mTmpRect;
+                final Rect animatingBounds = mTmpAnimatingBoundsRect;
                 final TaskStack pinnedStack = mDisplayContent.getStackById(PINNED_STACK_ID);
                 if (pinnedStack != null) {
                     pinnedStack.getAnimatingBounds(animatingBounds);
