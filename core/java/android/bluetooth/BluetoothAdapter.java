@@ -1447,9 +1447,9 @@ public final class BluetoothAdapter {
     }
 
     /**
-     * Return true if LE Periodic Advertising feature is supported.
+     * Return true if LE Extended Advertising feature is supported.
      *
-     * @return true if chipset supports LE Periodic Advertising feature
+     * @return true if chipset supports LE Extended Advertising feature
      */
     public boolean isLeExtendedAdvertisingSupported() {
         if (!getLeAccess()) return false;
