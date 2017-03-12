@@ -244,32 +244,20 @@
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="notification_hidden_text" msgid="1135169301897151909">"Содржините се скриени"</string>
     <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"Содржините се скриени поради политиката"</string>
-    <!-- no translation found for notification_channel_virtual_keyboard (6969925135507955575) -->
-    <skip />
-    <!-- no translation found for notification_channel_physical_keyboard (7297661826966861459) -->
-    <skip />
+    <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"Виртуелна тастатура"</string>
+    <string name="notification_channel_physical_keyboard" msgid="7297661826966861459">"Физичка тастатура"</string>
     <string name="notification_channel_security" msgid="7345516133431326347">"Безбедност"</string>
-    <!-- no translation found for notification_channel_car_mode (3553380307619874564) -->
-    <skip />
-    <!-- no translation found for notification_channel_account (7577959168463122027) -->
-    <skip />
-    <!-- no translation found for notification_channel_developer (7579606426860206060) -->
-    <skip />
-    <!-- no translation found for notification_channel_updates (4794517569035110397) -->
-    <skip />
-    <!-- no translation found for notification_channel_network_status (5025648583129035447) -->
-    <skip />
-    <!-- no translation found for notification_channel_network_alerts (2895141221414156525) -->
-    <skip />
-    <!-- no translation found for notification_channel_vpn (8330103431055860618) -->
-    <skip />
-    <!-- no translation found for notification_channel_device_admin (1568154104368069249) -->
-    <skip />
+    <string name="notification_channel_car_mode" msgid="3553380307619874564">"Режим на работа во автомобил"</string>
+    <string name="notification_channel_account" msgid="7577959168463122027">"Статус на сметка"</string>
+    <string name="notification_channel_developer" msgid="7579606426860206060">"Пораки за програмери"</string>
+    <string name="notification_channel_updates" msgid="4794517569035110397">"Ажурирања"</string>
+    <string name="notification_channel_network_status" msgid="5025648583129035447">"Статус на мрежа"</string>
+    <string name="notification_channel_network_alerts" msgid="2895141221414156525">"Известувања на мрежа"</string>
+    <string name="notification_channel_vpn" msgid="8330103431055860618">"VPN-статус"</string>
+    <string name="notification_channel_device_admin" msgid="1568154104368069249">"Управување со уред"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Предупредувања"</string>
-    <!-- no translation found for notification_channel_retail_mode (6088920674914038779) -->
-    <skip />
-    <!-- no translation found for notification_channel_usb (9006850475328924681) -->
-    <skip />
+    <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Демонстрација за малопродажба"</string>
+    <string name="notification_channel_usb" msgid="9006850475328924681">"USB-врска"</string>
     <string name="safeMode" msgid="2788228061547930246">"Безбеден режим"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Систем Android"</string>
     <string name="user_owner_label" msgid="1119010402169916617">"Префрлете на личен профил"</string>
@@ -318,10 +306,8 @@
     <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Овозможува апликацијата да отстранува кратенки до почетниот екран без интервенција на корисникот."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"пренасочи појдовни повици"</string>
     <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"Дозволува апликацијата да го види бројот што се повикува за време на појдовен повик, со опција да го пренасочи повикот кон друг број или да го прекине повикот."</string>
-    <!-- no translation found for permlab_answerPhoneCalls (4077162841226223337) -->
-    <skip />
-    <!-- no translation found for permdesc_answerPhoneCalls (2901889867993572266) -->
-    <skip />
+    <string name="permlab_answerPhoneCalls" msgid="4077162841226223337">"одговара телефонски повици"</string>
+    <string name="permdesc_answerPhoneCalls" msgid="2901889867993572266">"Дозволува апликацијата да одговара на дојдовен телефонски повик."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"прими текстуални пораки (SMS)"</string>
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Овозможува апликацијата да прима и да обработува SMS пораки. Тоа значи дека апликацијата може да следи или да брише пораки испратени до вашиот уред без да ви ги прикаже вам."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"прими текстуални пораки (MMS)"</string>
@@ -1198,9 +1184,12 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Допрете за избирање јазик и распоред"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="alert_windows_notification_channel_name" msgid="7443890103456396837">"<xliff:g id="NAME">%s</xliff:g> пишува врз други апликации"</string>
-    <string name="alert_windows_notification_title" msgid="5399998516035621282">"Апликацијата <xliff:g id="NAME">%s</xliff:g> е одозгора."</string>
-    <string name="alert_windows_notification_message" msgid="2456738662997073459">"Делови од апликацијава може да бидат видливи цело време. Ако функцијава не работи правилно, исклучете ја."</string>
+    <!-- no translation found for alert_windows_notification_channel_name (3116610965549449803) -->
+    <skip />
+    <!-- no translation found for alert_windows_notification_title (4532185840598192445) -->
+    <skip />
+    <!-- no translation found for alert_windows_notification_message (8917232109522912560) -->
+    <skip />
     <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"ИСКЛУЧИ"</string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"Се подготвува <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Се проверува за грешки"</string>
@@ -1208,8 +1197,12 @@
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"За пренесување фотографии и медиуми"</string>
     <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"Оштетена <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unmountable_notification_message" msgid="2343202057122495773">"<xliff:g id="NAME">%s</xliff:g> е оштетена. Допрете за поправање."</string>
+    <!-- no translation found for ext_media_unmountable_notification_message (3941179940297874950) -->
+    <skip />
     <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"Неподдржана <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unsupported_notification_message" msgid="6121601473787888589">"Уредот не ја поддржува оваа <xliff:g id="NAME">%s</xliff:g>. Допрете за поставување во поддржан формат."</string>
+    <!-- no translation found for ext_media_unsupported_notification_message (3725436899820390906) -->
+    <skip />
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g> неочекувано е отстранета"</string>
     <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"Откачете ја <xliff:g id="NAME">%s</xliff:g> пред да ја отстраните за да избегнете губење на податоците"</string>
     <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"Отстранета <xliff:g id="NAME">%s</xliff:g>"</string>
@@ -1671,7 +1664,8 @@
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"Барањето SS е изменето во барање USSD."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"Барањето SS е изменето во ново барање SS."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Работен профил"</string>
-    <string name="expand_button_content_description" msgid="5855955413376384681">"Копче Прошири"</string>
+    <string name="expand_button_content_description_collapsed" msgid="3609784019345534652">"Прошири"</string>
+    <string name="expand_button_content_description_expanded" msgid="8520652707158554895">"Собери"</string>
     <string name="expand_action_accessibility" msgid="5307730695723718254">"вклучи/исклучи проширување"</string>
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Надворешна порта на УСБ за Android"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>

@@ -244,32 +244,20 @@
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="notification_hidden_text" msgid="1135169301897151909">"内容已隐藏"</string>
     <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"内容已隐藏（根据政策规定）"</string>
-    <!-- no translation found for notification_channel_virtual_keyboard (6969925135507955575) -->
-    <skip />
-    <!-- no translation found for notification_channel_physical_keyboard (7297661826966861459) -->
-    <skip />
+    <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"虚拟键盘"</string>
+    <string name="notification_channel_physical_keyboard" msgid="7297661826966861459">"实体键盘"</string>
     <string name="notification_channel_security" msgid="7345516133431326347">"安全性"</string>
-    <!-- no translation found for notification_channel_car_mode (3553380307619874564) -->
-    <skip />
-    <!-- no translation found for notification_channel_account (7577959168463122027) -->
-    <skip />
-    <!-- no translation found for notification_channel_developer (7579606426860206060) -->
-    <skip />
-    <!-- no translation found for notification_channel_updates (4794517569035110397) -->
-    <skip />
-    <!-- no translation found for notification_channel_network_status (5025648583129035447) -->
-    <skip />
-    <!-- no translation found for notification_channel_network_alerts (2895141221414156525) -->
-    <skip />
-    <!-- no translation found for notification_channel_vpn (8330103431055860618) -->
-    <skip />
-    <!-- no translation found for notification_channel_device_admin (1568154104368069249) -->
-    <skip />
+    <string name="notification_channel_car_mode" msgid="3553380307619874564">"车载模式"</string>
+    <string name="notification_channel_account" msgid="7577959168463122027">"帐号状态"</string>
+    <string name="notification_channel_developer" msgid="7579606426860206060">"开发者消息"</string>
+    <string name="notification_channel_updates" msgid="4794517569035110397">"更新"</string>
+    <string name="notification_channel_network_status" msgid="5025648583129035447">"网络状态"</string>
+    <string name="notification_channel_network_alerts" msgid="2895141221414156525">"网络提醒"</string>
+    <string name="notification_channel_vpn" msgid="8330103431055860618">"VPN 状态"</string>
+    <string name="notification_channel_device_admin" msgid="1568154104368069249">"设备管理"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"提醒"</string>
-    <!-- no translation found for notification_channel_retail_mode (6088920674914038779) -->
-    <skip />
-    <!-- no translation found for notification_channel_usb (9006850475328924681) -->
-    <skip />
+    <string name="notification_channel_retail_mode" msgid="6088920674914038779">"零售演示模式"</string>
+    <string name="notification_channel_usb" msgid="9006850475328924681">"USB 连接"</string>
     <string name="safeMode" msgid="2788228061547930246">"安全模式"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android 系统"</string>
     <string name="user_owner_label" msgid="1119010402169916617">"切换到“个人”"</string>
@@ -318,10 +306,8 @@
     <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"允许应用自行删除主屏幕快捷方式。"</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"重新设置外拨电话的路径"</string>
     <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"允许应用在拨出电话时查看拨打的电话号码，并选择改为拨打其他号码或完全中止通话。"</string>
-    <!-- no translation found for permlab_answerPhoneCalls (4077162841226223337) -->
-    <skip />
-    <!-- no translation found for permdesc_answerPhoneCalls (2901889867993572266) -->
-    <skip />
+    <string name="permlab_answerPhoneCalls" msgid="4077162841226223337">"接听来电"</string>
+    <string name="permdesc_answerPhoneCalls" msgid="2901889867993572266">"允许该应用接听来电。"</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"接收讯息（短信）"</string>
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"允许该应用接收和处理短信。这就意味着，该应用可能会监视发送到您设备的短信，或删除发送到您设备的短信而不向您显示。"</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"接收讯息（彩信）"</string>
@@ -1197,9 +1183,12 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"点按即可选择语言和布局"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="alert_windows_notification_channel_name" msgid="7443890103456396837">"<xliff:g id="NAME">%s</xliff:g>会在其他应用的上层显示内容"</string>
-    <string name="alert_windows_notification_title" msgid="5399998516035621282">"<xliff:g id="NAME">%s</xliff:g>应用目前显示在上层。"</string>
-    <string name="alert_windows_notification_message" msgid="2456738662997073459">"此应用的某些部分可能会一直保持可见状态。如果此功能未能正常运行，请将其关闭。"</string>
+    <!-- no translation found for alert_windows_notification_channel_name (3116610965549449803) -->
+    <skip />
+    <!-- no translation found for alert_windows_notification_title (4532185840598192445) -->
+    <skip />
+    <!-- no translation found for alert_windows_notification_message (8917232109522912560) -->
+    <skip />
     <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"关闭"</string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"正在准备<xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"检查是否有错误"</string>
@@ -1207,8 +1196,12 @@
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"可用于传输照片和媒体文件"</string>
     <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"<xliff:g id="NAME">%s</xliff:g>已损坏"</string>
     <string name="ext_media_unmountable_notification_message" msgid="2343202057122495773">"<xliff:g id="NAME">%s</xliff:g>已损坏，点按即可修复。"</string>
+    <!-- no translation found for ext_media_unmountable_notification_message (3941179940297874950) -->
+    <skip />
     <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"<xliff:g id="NAME">%s</xliff:g>不受支持"</string>
     <string name="ext_media_unsupported_notification_message" msgid="6121601473787888589">"该设备不支持此<xliff:g id="NAME">%s</xliff:g>。点按即可使用支持的格式进行设置。"</string>
+    <!-- no translation found for ext_media_unsupported_notification_message (3725436899820390906) -->
+    <skip />
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g>已意外移除"</string>
     <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"请先卸载<xliff:g id="NAME">%s</xliff:g>，再将其移除，以防数据丢失。"</string>
     <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"已移除<xliff:g id="NAME">%s</xliff:g>"</string>
@@ -1668,7 +1661,8 @@
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS 请求已修改为 USSD 请求。"</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS 请求已修改为新的 SS 请求。"</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"工作资料"</string>
-    <string name="expand_button_content_description" msgid="5855955413376384681">"展开按钮"</string>
+    <string name="expand_button_content_description_collapsed" msgid="3609784019345534652">"展开"</string>
+    <string name="expand_button_content_description_expanded" msgid="8520652707158554895">"收起"</string>
     <string name="expand_action_accessibility" msgid="5307730695723718254">"切换展开模式"</string>
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Android USB 外设端口"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>

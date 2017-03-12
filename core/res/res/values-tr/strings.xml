@@ -244,32 +244,20 @@
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="notification_hidden_text" msgid="1135169301897151909">"İçerik gizlendi"</string>
     <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"İçerikler politika nedeniyle gizlendi"</string>
-    <!-- no translation found for notification_channel_virtual_keyboard (6969925135507955575) -->
-    <skip />
-    <!-- no translation found for notification_channel_physical_keyboard (7297661826966861459) -->
-    <skip />
+    <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"Sanal klavye"</string>
+    <string name="notification_channel_physical_keyboard" msgid="7297661826966861459">"Fiziksel klavye"</string>
     <string name="notification_channel_security" msgid="7345516133431326347">"Güvenlik"</string>
-    <!-- no translation found for notification_channel_car_mode (3553380307619874564) -->
-    <skip />
-    <!-- no translation found for notification_channel_account (7577959168463122027) -->
-    <skip />
-    <!-- no translation found for notification_channel_developer (7579606426860206060) -->
-    <skip />
-    <!-- no translation found for notification_channel_updates (4794517569035110397) -->
-    <skip />
-    <!-- no translation found for notification_channel_network_status (5025648583129035447) -->
-    <skip />
-    <!-- no translation found for notification_channel_network_alerts (2895141221414156525) -->
-    <skip />
-    <!-- no translation found for notification_channel_vpn (8330103431055860618) -->
-    <skip />
-    <!-- no translation found for notification_channel_device_admin (1568154104368069249) -->
-    <skip />
+    <string name="notification_channel_car_mode" msgid="3553380307619874564">"Araç modu"</string>
+    <string name="notification_channel_account" msgid="7577959168463122027">"Hesap durumu"</string>
+    <string name="notification_channel_developer" msgid="7579606426860206060">"Geliştirici mesajları"</string>
+    <string name="notification_channel_updates" msgid="4794517569035110397">"Güncellemeler"</string>
+    <string name="notification_channel_network_status" msgid="5025648583129035447">"Ağ durumu"</string>
+    <string name="notification_channel_network_alerts" msgid="2895141221414156525">"Ağ uyarıları"</string>
+    <string name="notification_channel_vpn" msgid="8330103431055860618">"VPN durumu"</string>
+    <string name="notification_channel_device_admin" msgid="1568154104368069249">"Cihaz yönetimi"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Uyarılar"</string>
-    <!-- no translation found for notification_channel_retail_mode (6088920674914038779) -->
-    <skip />
-    <!-- no translation found for notification_channel_usb (9006850475328924681) -->
-    <skip />
+    <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Mağaza demo"</string>
+    <string name="notification_channel_usb" msgid="9006850475328924681">"USB bağlantısı"</string>
     <string name="safeMode" msgid="2788228061547930246">"Güvenli mod"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android Sistemi"</string>
     <string name="user_owner_label" msgid="1119010402169916617">"Kişisel Profile Geç"</string>
@@ -318,10 +306,8 @@
     <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Uygulamaya, kullanıcının müdahalesi olmadan kısayolları Ana Ekrandan kaldırma izni verir."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"giden çağrıları yeniden yönlendirme"</string>
     <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"Uygulamaya, giden bir çağrının numarası çevrilirken çağrıyı farklı bir numaraya yönlendirme ya da tamamen kapatma seçeneğiyle birlikte numarayı görme izni verir."</string>
-    <!-- no translation found for permlab_answerPhoneCalls (4077162841226223337) -->
-    <skip />
-    <!-- no translation found for permdesc_answerPhoneCalls (2901889867993572266) -->
-    <skip />
+    <string name="permlab_answerPhoneCalls" msgid="4077162841226223337">"telefon çağrılarını yanıtla"</string>
+    <string name="permdesc_answerPhoneCalls" msgid="2901889867993572266">"Uygulamanın gelen bir telefon çağrısına yanıt vermesine olanak tanır."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"kısa mesajları al (SMS)"</string>
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Uygulamaya SMS iletilerini alma ve işleme izni verir. Bu izin, uygulamanın cihazınıza gönderilen iletileri takip edip size göstermeden silebileceği anlamına gelir."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"kısa mesajları (MMS) al"</string>
@@ -1197,9 +1183,12 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Dili ve düzeni seçmek için hafifçe dokunun"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="alert_windows_notification_channel_name" msgid="7443890103456396837">"<xliff:g id="NAME">%s</xliff:g> diğer uygulamaların üzerinde görüntüleniyor"</string>
-    <string name="alert_windows_notification_title" msgid="5399998516035621282">"<xliff:g id="NAME">%s</xliff:g> üstte gösteriliyor."</string>
-    <string name="alert_windows_notification_message" msgid="2456738662997073459">"Bu uygulamanın bazı bölümleri her zaman görünür durumda kalabilir. Bu özellik düzgün çalışmıyorsa kapatın."</string>
+    <!-- no translation found for alert_windows_notification_channel_name (3116610965549449803) -->
+    <skip />
+    <!-- no translation found for alert_windows_notification_title (4532185840598192445) -->
+    <skip />
+    <!-- no translation found for alert_windows_notification_message (8917232109522912560) -->
+    <skip />
     <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"KAPAT"</string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"<xliff:g id="NAME">%s</xliff:g> hazırlanıyor"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Hatalar denetleniyor"</string>
@@ -1207,8 +1196,12 @@
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Fotoğraf ve medya aktarmak için"</string>
     <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"Bozuk <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unmountable_notification_message" msgid="2343202057122495773">"<xliff:g id="NAME">%s</xliff:g> bozuk. Düzeltmek için dokunun."</string>
+    <!-- no translation found for ext_media_unmountable_notification_message (3941179940297874950) -->
+    <skip />
     <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"Desteklenmeyen <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unsupported_notification_message" msgid="6121601473787888589">"Bu cihaz, bu <xliff:g id="NAME">%s</xliff:g> ortamını desteklemiyor. Desteklenen bir biçimde kurmak için dokunun."</string>
+    <!-- no translation found for ext_media_unsupported_notification_message (3725436899820390906) -->
+    <skip />
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g> beklenmedik şekilde çıkarıldı"</string>
     <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"Veri kaybı olmaması için <xliff:g id="NAME">%s</xliff:g> birimini çıkarmadan önce bağlantısını kesin"</string>
     <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"<xliff:g id="NAME">%s</xliff:g> çıkarıldı"</string>
@@ -1668,7 +1661,8 @@
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS isteği USSD isteği olarak değiştirildi."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS isteği yeni SS isteği olarak değiştirildi."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"İş profili"</string>
-    <string name="expand_button_content_description" msgid="5855955413376384681">"Genişlet düğmesi"</string>
+    <string name="expand_button_content_description_collapsed" msgid="3609784019345534652">"Genişlet"</string>
+    <string name="expand_button_content_description_expanded" msgid="8520652707158554895">"Daralt"</string>
     <string name="expand_action_accessibility" msgid="5307730695723718254">"genişletmeyi aç/kapat"</string>
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Android USB Çevre Birimi Bağlantı Noktası"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
