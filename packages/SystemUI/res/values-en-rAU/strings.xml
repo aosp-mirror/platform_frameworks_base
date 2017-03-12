@@ -236,6 +236,7 @@
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="650231949881093289">"Data Saver turned off."</string>
     <string name="accessibility_quick_settings_data_saver_changed_on" msgid="4218725402373934151">"Data Saver turned on."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"Display brightness"</string>
+    <string name="accessibility_ambient_display_charging" msgid="9084521679384069087">"Charging"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G-3G data is paused"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G data is paused"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"Mobile data is paused"</string>
@@ -466,6 +467,8 @@
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. Tap to unmute."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. Tap to set to vibrate. Accessibility services may be muted."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Tap to mute. Accessibility services may be muted."</string>
+    <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s. Tap to set to vibrate."</string>
+    <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. Tap to mute."</string>
     <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"%s volume controls shown. Swipe up to dismiss."</string>
     <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"Volume controls hidden"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"System UI Tuner"</string>
@@ -693,8 +696,9 @@
     <string name="notification_channel_general" msgid="4525309436693914482">"General Messages"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"Storage"</string>
     <string name="instant_apps" msgid="6647570248119804907">"Instant Apps"</string>
+    <!-- no translation found for pip_menu_title (3328510504196964712) -->
+    <skip />
     <string name="instant_apps_message" msgid="8116608994995104836">"Instant apps don\'t require installation."</string>
     <string name="app_info" msgid="6856026610594615344">"App info"</string>
-    <!-- no translation found for mobile_data (7094582042819250762) -->
-    <skip />
+    <string name="mobile_data" msgid="7094582042819250762">"Mobile data"</string>
 </resources>

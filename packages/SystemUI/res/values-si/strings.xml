@@ -236,6 +236,7 @@
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="650231949881093289">"දත්ත සුරැකුම ක්‍රියාවිරහිත කරන ලදී."</string>
     <string name="accessibility_quick_settings_data_saver_changed_on" msgid="4218725402373934151">"දත්ත සුරැකුම ක්‍රියාත්මක කරන ලදී."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"සංදර්ශක දීප්තිය"</string>
+    <string name="accessibility_ambient_display_charging" msgid="9084521679384069087">"ආරෝපණය වෙමින්"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G-3G දත්ත විරාම කර ඇත"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G දත්ත විරාම කර ඇත"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"සෙලියුලර් දත්ත විරාම කර ඇත"</string>
@@ -466,6 +467,8 @@
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. නිහඬ කිරීම ඉවත් කිරීමට තට්ටු කරන්න."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. කම්පනය කිරීමට තට්ටු කරන්න. ප්‍රවේශ්‍යතා සේවා නිහඬ කළ හැකිය."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. නිහඬ කිරීමට තට්ටු කරන්න. ප්‍රවේශ්‍යතා සේවා නිහඬ කළ හැකිය."</string>
+    <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s. කම්පනය කිරීමට සකස් කිරීමට තට්ටු කරන්න."</string>
+    <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. නිහඬ කිරීමට තට්ටු කරන්න."</string>
     <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"%s හඬ පරිමා පාලන පෙන්වයි. ඉවත දැමීමට ස්වයිප් කරන්න."</string>
     <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"හඩ පරිමා පාලන සඟවා ඇත"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"පද්ධති UI සුසරකය"</string>
@@ -693,8 +696,9 @@
     <string name="notification_channel_general" msgid="4525309436693914482">"පොදු පණිවිඩ"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"ගබඩාව"</string>
     <string name="instant_apps" msgid="6647570248119804907">"ක්ෂණික යෙදුම්"</string>
+    <!-- no translation found for pip_menu_title (3328510504196964712) -->
+    <skip />
     <string name="instant_apps_message" msgid="8116608994995104836">"ක්ෂණික යෙදුම් ස්ථාපනය කිරීම අවශ්‍ය නොවේ."</string>
     <string name="app_info" msgid="6856026610594615344">"යෙදුම් තොරතුරු"</string>
-    <!-- no translation found for mobile_data (7094582042819250762) -->
-    <skip />
+    <string name="mobile_data" msgid="7094582042819250762">"ජංගම දත්ත"</string>
 </resources>

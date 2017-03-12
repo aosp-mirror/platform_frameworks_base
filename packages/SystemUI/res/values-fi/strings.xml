@@ -236,6 +236,8 @@
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="650231949881093289">"Data Saver poistettiin käytöstä."</string>
     <string name="accessibility_quick_settings_data_saver_changed_on" msgid="4218725402373934151">"Data Saver otettiin käyttöön."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"Näytön kirkkaus"</string>
+    <!-- no translation found for accessibility_ambient_display_charging (9084521679384069087) -->
+    <skip />
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G–3G-tiedonsiirto keskeytettiin"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G-tiedonsiirto keskeytettiin"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"Mobiilitiedonsiirto keskeytettiin"</string>
@@ -466,6 +468,10 @@
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. Poista mykistys koskettamalla."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. Siirry värinätilaan koskettamalla. Myös esteettömyyspalvelut saattavat mykistyä."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Mykistä koskettamalla. Myös esteettömyyspalvelut saattavat mykistyä."</string>
+    <!-- no translation found for volume_stream_content_description_vibrate_a11y (6427727603978431301) -->
+    <skip />
+    <!-- no translation found for volume_stream_content_description_mute_a11y (8995013018414535494) -->
+    <skip />
     <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"Äänenvoimakkuuden säätimiä on näkyvissä (%s). Hylkää pyyhkäisemällä ylös."</string>
     <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"Äänenvoimakkuuden säätimet piilotettiin."</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"System UI Tuner"</string>
@@ -693,8 +699,9 @@
     <string name="notification_channel_general" msgid="4525309436693914482">"Yleiset viestit"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"Tallennustila"</string>
     <string name="instant_apps" msgid="6647570248119804907">"Instant Apps"</string>
+    <!-- no translation found for pip_menu_title (3328510504196964712) -->
+    <skip />
     <string name="instant_apps_message" msgid="8116608994995104836">"Pikasovelluksia ei tarvitse asentaa."</string>
     <string name="app_info" msgid="6856026610594615344">"Sovelluksen tiedot"</string>
-    <!-- no translation found for mobile_data (7094582042819250762) -->
-    <skip />
+    <string name="mobile_data" msgid="7094582042819250762">"Mobiilitiedonsiirto"</string>
 </resources>

@@ -236,6 +236,8 @@
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="650231949881093289">"ปิดโปรแกรมประหยัดอินเทอร์เน็ตแล้ว"</string>
     <string name="accessibility_quick_settings_data_saver_changed_on" msgid="4218725402373934151">"เปิดโปรแกรมประหยัดอินเทอร์เน็ตแล้ว"</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"ความสว่างของหน้าจอ"</string>
+    <!-- no translation found for accessibility_ambient_display_charging (9084521679384069087) -->
+    <skip />
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"หยุดการใช้ข้อมูล 2G-3G ชั่วคราวแล้ว"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"หยุดการใช้ข้อมูล 4G ชั่วคราวแล้ว"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"หยุดการใช้ข้อมูลมือถือชั่วคราวแล้ว"</string>
@@ -466,6 +468,10 @@
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s แตะเพื่อเปิดเสียง"</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s แตะเพื่อตั้งค่าให้สั่น อาจมีการปิดเสียงบริการการเข้าถึง"</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s แตะเพื่อปิดเสียง อาจมีการปิดเสียงบริการการเข้าถึง"</string>
+    <!-- no translation found for volume_stream_content_description_vibrate_a11y (6427727603978431301) -->
+    <skip />
+    <!-- no translation found for volume_stream_content_description_mute_a11y (8995013018414535494) -->
+    <skip />
     <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"%s ตัวควบคุมระดับเสียงแสดงอยู่ เลื่อนขึ้นเพื่อปิด"</string>
     <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"ตัวควบคุมระดับเสียงซ่อนอยู่"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"ตัวรับสัญญาณ UI ระบบ"</string>
@@ -693,8 +699,9 @@
     <string name="notification_channel_general" msgid="4525309436693914482">"ข้อความทั่วไป"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"พื้นที่เก็บข้อมูล"</string>
     <string name="instant_apps" msgid="6647570248119804907">"Instant App"</string>
+    <!-- no translation found for pip_menu_title (3328510504196964712) -->
+    <skip />
     <string name="instant_apps_message" msgid="8116608994995104836">"Instant Apps ไม่ต้องใช้การติดตั้ง"</string>
     <string name="app_info" msgid="6856026610594615344">"ข้อมูลแอป"</string>
-    <!-- no translation found for mobile_data (7094582042819250762) -->
-    <skip />
+    <string name="mobile_data" msgid="7094582042819250762">"ข้อมูลมือถือ"</string>
 </resources>

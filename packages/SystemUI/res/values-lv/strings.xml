@@ -237,6 +237,8 @@
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="650231949881093289">"Datu lietojuma samazinātājs ir izslēgts."</string>
     <string name="accessibility_quick_settings_data_saver_changed_on" msgid="4218725402373934151">"Datu lietojuma samazinātājs ir ieslēgts."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"Ekrāna spilgtums"</string>
+    <!-- no translation found for accessibility_ambient_display_charging (9084521679384069087) -->
+    <skip />
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G–3G datu lietojums ir apturēts"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G datu lietojums ir apturēts"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"Mobilo datu lietojums ir apturēts"</string>
@@ -468,6 +470,10 @@
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. Pieskarieties, lai ieslēgtu skaņu."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. Pieskarieties, lai iestatītu uz vibrozvanu. Var tikt izslēgti pieejamības pakalpojumu signāli."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Pieskarieties, lai izslēgtu skaņu. Var tikt izslēgti pieejamības pakalpojumu signāli."</string>
+    <!-- no translation found for volume_stream_content_description_vibrate_a11y (6427727603978431301) -->
+    <skip />
+    <!-- no translation found for volume_stream_content_description_mute_a11y (8995013018414535494) -->
+    <skip />
     <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"Tiek rādītas %s skaļuma vadīklas. Velciet augšup, lai nerādītu."</string>
     <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"Skaļuma vadīklas paslēptas"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"Sistēmas saskarnes regulators"</string>
@@ -696,8 +702,9 @@
     <string name="notification_channel_general" msgid="4525309436693914482">"Vispārīgi ziņojumi"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"Krātuve"</string>
     <string name="instant_apps" msgid="6647570248119804907">"Tūlītējās lietotnes"</string>
+    <!-- no translation found for pip_menu_title (3328510504196964712) -->
+    <skip />
     <string name="instant_apps_message" msgid="8116608994995104836">"Tūlītējām lietotnēm nav nepieciešama instalēšana."</string>
     <string name="app_info" msgid="6856026610594615344">"Lietotnes informācija"</string>
-    <!-- no translation found for mobile_data (7094582042819250762) -->
-    <skip />
+    <string name="mobile_data" msgid="7094582042819250762">"Mobilie dati"</string>
 </resources>

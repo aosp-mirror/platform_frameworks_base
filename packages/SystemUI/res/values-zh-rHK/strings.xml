@@ -238,6 +238,8 @@
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="650231949881093289">"已關閉數據節省模式。"</string>
     <string name="accessibility_quick_settings_data_saver_changed_on" msgid="4218725402373934151">"已開啟數據節省模式。"</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"顯示光暗度"</string>
+    <!-- no translation found for accessibility_ambient_display_charging (9084521679384069087) -->
+    <skip />
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"已暫停 2G-3G 數據"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"已暫停 4G 數據"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"已暫停流動數據"</string>
@@ -468,6 +470,10 @@
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s。輕按即可取消靜音。"</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s。輕按即可設為震動。無障礙功能服務可能已經設為靜音。"</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s。輕按即可設為靜音。無障礙功能服務可能已經設為靜音。"</string>
+    <!-- no translation found for volume_stream_content_description_vibrate_a11y (6427727603978431301) -->
+    <skip />
+    <!-- no translation found for volume_stream_content_description_mute_a11y (8995013018414535494) -->
+    <skip />
     <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"已顯示 %s 音量控制項。向上快速滑動即可關閉。"</string>
     <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"已隱藏音量控制"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"系統使用者介面調諧器"</string>
@@ -695,8 +701,9 @@
     <string name="notification_channel_general" msgid="4525309436693914482">"一般訊息"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"儲存空間"</string>
     <string name="instant_apps" msgid="6647570248119804907">"即時應用程式"</string>
+    <!-- no translation found for pip_menu_title (3328510504196964712) -->
+    <skip />
     <string name="instant_apps_message" msgid="8116608994995104836">"即時應用程式無需安裝即可使用。"</string>
     <string name="app_info" msgid="6856026610594615344">"應用程式資料"</string>
-    <!-- no translation found for mobile_data (7094582042819250762) -->
-    <skip />
+    <string name="mobile_data" msgid="7094582042819250762">"流動數據"</string>
 </resources>

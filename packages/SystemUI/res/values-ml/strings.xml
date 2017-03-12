@@ -236,6 +236,8 @@
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="650231949881093289">"ഡാറ്റ സേവർ ഓഫാക്കി."</string>
     <string name="accessibility_quick_settings_data_saver_changed_on" msgid="4218725402373934151">"ഡാറ്റ സേവർ ഓണാക്കി."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"ഡിസ്പ്ലേ തെളിച്ചം"</string>
+    <!-- no translation found for accessibility_ambient_display_charging (9084521679384069087) -->
+    <skip />
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G-3G ഡാറ്റ താൽക്കാലികമായി നിർത്തി"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G ഡാറ്റ താൽക്കാലികമായി നിർത്തി"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"സെല്ലുലാർ ഡാറ്റ താൽക്കാലികമായി നിർത്തി"</string>
@@ -466,6 +468,10 @@
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. അൺമ്യൂട്ടുചെയ്യുന്നതിന് ടാപ്പുചെയ്യുക."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. വൈബ്രേറ്റിലേക്ക് സജ്ജമാക്കുന്നതിന് ടാപ്പുചെയ്യുക. ഉപയോഗസഹായി സേവനങ്ങൾ മ്യൂട്ടുചെയ്യപ്പെട്ടേക്കാം."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. മ്യൂട്ടുചെയ്യുന്നതിന് ടാപ്പുചെയ്യുക. ഉപയോഗസഹായി സേവനങ്ങൾ മ്യൂട്ടുചെയ്യപ്പെട്ടേക്കാം."</string>
+    <!-- no translation found for volume_stream_content_description_vibrate_a11y (6427727603978431301) -->
+    <skip />
+    <!-- no translation found for volume_stream_content_description_mute_a11y (8995013018414535494) -->
+    <skip />
     <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"%s വോളിയം നിയന്ത്രണങ്ങൾ കാണിച്ചിരിക്കുന്നു. ഡിസ്മിസ് ചെയ്യുന്നതിന് മുകളിലേക്ക് സ്വൈപ്പുചെയ്യുക."</string>
     <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"വോളിയം നിയന്ത്രണങ്ങൾ മറച്ചിരിക്കുന്നു"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"സിസ്റ്റം UI ട്യൂണർ"</string>
@@ -693,8 +699,9 @@
     <string name="notification_channel_general" msgid="4525309436693914482">"പൊതുവായ സന്ദേശങ്ങൾ"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"സ്റ്റോറേജ്"</string>
     <string name="instant_apps" msgid="6647570248119804907">"ഇൻസ്റ്റന്റ് ആപ്പ്"</string>
+    <!-- no translation found for pip_menu_title (3328510504196964712) -->
+    <skip />
     <string name="instant_apps_message" msgid="8116608994995104836">"ഇൻസ്‌റ്റ‌ന്റ് ആപ്പിന് ഇൻസ്‌റ്റലേഷൻ ആവശ്യമില്ല."</string>
     <string name="app_info" msgid="6856026610594615344">"ആപ്പ് വിവരം"</string>
-    <!-- no translation found for mobile_data (7094582042819250762) -->
-    <skip />
+    <string name="mobile_data" msgid="7094582042819250762">"മൊബൈൽ ഡാറ്റ"</string>
 </resources>
