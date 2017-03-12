@@ -60,6 +60,7 @@ import java.io.IOException;
 public class StorageStatsService extends IStorageStatsManager.Stub {
     private static final String TAG = "StorageStatsService";
 
+    private static final String PROP_DISABLE_QUOTA = "fw.disable_quota";
     private static final String PROP_VERIFY_STORAGE = "fw.verify_storage";
 
     private static final long DELAY_IN_MILLIS = 30 * DateUtils.SECOND_IN_MILLIS;
@@ -239,7 +240,7 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
 
         final PackageStats stats = new PackageStats(TAG);
         try {
-            mInstaller.getAppSize(volumeUuid, packageNames, userId, Installer.FLAG_USE_QUOTA,
+            mInstaller.getAppSize(volumeUuid, packageNames, userId, getDefaultFlags(),
                     appId, ceDataInodes, codePaths, stats);
 
             if (SystemProperties.getBoolean(PROP_VERIFY_STORAGE, false)) {
@@ -272,7 +273,7 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
 
         final PackageStats stats = new PackageStats(TAG);
         try {
-            mInstaller.getUserSize(volumeUuid, userId, Installer.FLAG_USE_QUOTA, appIds, stats);
+            mInstaller.getUserSize(volumeUuid, userId, getDefaultFlags(), appIds, stats);
 
             if (SystemProperties.getBoolean(PROP_VERIFY_STORAGE, false)) {
                 final PackageStats manualStats = new PackageStats(TAG);
@@ -296,7 +297,7 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
 
         final long[] stats;
         try {
-            stats = mInstaller.getExternalSize(volumeUuid, userId, Installer.FLAG_USE_QUOTA);
+            stats = mInstaller.getExternalSize(volumeUuid, userId, getDefaultFlags());
 
             if (SystemProperties.getBoolean(PROP_VERIFY_STORAGE, false)) {
                 final long[] manualStats = mInstaller.getExternalSize(volumeUuid, userId, 0);
@@ -312,6 +313,14 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
         res.videoBytes = stats[2];
         res.imageBytes = stats[3];
         return res;
+    }
+
+    private static int getDefaultFlags() {
+        if (SystemProperties.getBoolean(PROP_DISABLE_QUOTA, false)) {
+            return 0;
+        } else {
+            return Installer.FLAG_USE_QUOTA;
+        }
     }
 
     private static void checkEquals(String msg, long[] a, long[] b) {
