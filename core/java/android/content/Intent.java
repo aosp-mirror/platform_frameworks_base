@@ -40,6 +40,7 @@ import android.os.ResultReceiver;
 import android.os.ShellCommand;
 import android.os.StrictMode;
 import android.os.UserHandle;
+import android.os.storage.StorageManager;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsProvider;
 import android.provider.MediaStore;
@@ -2443,45 +2444,72 @@ public class Intent implements Parcelable, Cloneable {
      */
     public static final String ACTION_REQUEST_SHUTDOWN = "android.intent.action.ACTION_REQUEST_SHUTDOWN";
     /**
-     * Broadcast Action:  A sticky broadcast that indicates low memory
+     * Broadcast Action: A sticky broadcast that indicates low storage space
      * condition on the device
+     * <p class="note">
+     * This is a protected intent that can only be sent by the system.
      *
-     * <p class="note">This is a protected intent that can only be sent
-     * by the system.
+     * @deprecated if your app targets {@link android.os.Build.VERSION_CODES#O}
+     *             or above, this broadcast will no longer be delivered to any
+     *             {@link BroadcastReceiver} defined in your manifest. Instead,
+     *             apps are strongly encouraged to use the improved
+     *             {@link Context#getCacheDir()} behavior so the system can
+     *             automatically free up storage when needed.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @Deprecated
     public static final String ACTION_DEVICE_STORAGE_LOW = "android.intent.action.DEVICE_STORAGE_LOW";
     /**
-     * Broadcast Action:  Indicates low memory condition on the device no longer exists
+     * Broadcast Action: Indicates low storage space condition on the device no
+     * longer exists
+     * <p class="note">
+     * This is a protected intent that can only be sent by the system.
      *
-     * <p class="note">This is a protected intent that can only be sent
-     * by the system.
+     * @deprecated if your app targets {@link android.os.Build.VERSION_CODES#O}
+     *             or above, this broadcast will no longer be delivered to any
+     *             {@link BroadcastReceiver} defined in your manifest. Instead,
+     *             apps are strongly encouraged to use the improved
+     *             {@link Context#getCacheDir()} behavior so the system can
+     *             automatically free up storage when needed.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @Deprecated
     public static final String ACTION_DEVICE_STORAGE_OK = "android.intent.action.DEVICE_STORAGE_OK";
     /**
-     * Broadcast Action:  A sticky broadcast that indicates a memory full
-     * condition on the device. This is intended for activities that want
-     * to be able to fill the data partition completely, leaving only
-     * enough free space to prevent system-wide SQLite failures.
+     * Broadcast Action: A sticky broadcast that indicates a storage space full
+     * condition on the device. This is intended for activities that want to be
+     * able to fill the data partition completely, leaving only enough free
+     * space to prevent system-wide SQLite failures.
+     * <p class="note">
+     * This is a protected intent that can only be sent by the system.
      *
-     * <p class="note">This is a protected intent that can only be sent
-     * by the system.
-     *
-     * {@hide}
+     * @deprecated if your app targets {@link android.os.Build.VERSION_CODES#O}
+     *             or above, this broadcast will no longer be delivered to any
+     *             {@link BroadcastReceiver} defined in your manifest. Instead,
+     *             apps are strongly encouraged to use the improved
+     *             {@link Context#getCacheDir()} behavior so the system can
+     *             automatically free up storage when needed.
+     * @hide
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @Deprecated
     public static final String ACTION_DEVICE_STORAGE_FULL = "android.intent.action.DEVICE_STORAGE_FULL";
     /**
-     * Broadcast Action:  Indicates memory full condition on the device
-     * no longer exists.
+     * Broadcast Action: Indicates storage space full condition on the device no
+     * longer exists.
+     * <p class="note">
+     * This is a protected intent that can only be sent by the system.
      *
-     * <p class="note">This is a protected intent that can only be sent
-     * by the system.
-     *
-     * {@hide}
+     * @deprecated if your app targets {@link android.os.Build.VERSION_CODES#O}
+     *             or above, this broadcast will no longer be delivered to any
+     *             {@link BroadcastReceiver} defined in your manifest. Instead,
+     *             apps are strongly encouraged to use the improved
+     *             {@link Context#getCacheDir()} behavior so the system can
+     *             automatically free up storage when needed.
+     * @hide
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @Deprecated
     public static final String ACTION_DEVICE_STORAGE_NOT_FULL = "android.intent.action.DEVICE_STORAGE_NOT_FULL";
     /**
      * Broadcast Action:  Indicates low memory condition notification acknowledged by user
