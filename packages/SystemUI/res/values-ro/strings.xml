@@ -239,6 +239,8 @@
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="650231949881093289">"Economizorul de date a fost dezactivat."</string>
     <string name="accessibility_quick_settings_data_saver_changed_on" msgid="4218725402373934151">"Economizorul de date a fost activat."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"Luminozitatea ecranului"</string>
+    <!-- no translation found for accessibility_ambient_display_charging (9084521679384069087) -->
+    <skip />
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"Conexiunea de date 2G – 3G este întreruptă"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"Conexiunea de date 4G este întreruptă"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"Conexiunea de date mobile este întreruptă"</string>
@@ -470,6 +472,10 @@
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. Atingeți pentru a activa sunetul."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. Atingeți pentru a seta vibrarea. Sunetul se poate dezactiva pentru serviciile de accesibilitate."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Atingeți pentru a dezactiva sunetul. Sunetul se poate dezactiva pentru serviciile de accesibilitate."</string>
+    <!-- no translation found for volume_stream_content_description_vibrate_a11y (6427727603978431301) -->
+    <skip />
+    <!-- no translation found for volume_stream_content_description_mute_a11y (8995013018414535494) -->
+    <skip />
     <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"Comenzile de volum pentru %s sunt afișate. Glisați pentru a închide."</string>
     <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"Comenzile de volum sunt ascunse"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"System UI Tuner"</string>
@@ -698,8 +704,9 @@
     <string name="notification_channel_general" msgid="4525309436693914482">"Mesaje generale"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"Stocare"</string>
     <string name="instant_apps" msgid="6647570248119804907">"Aplicații instantanee"</string>
+    <!-- no translation found for pip_menu_title (3328510504196964712) -->
+    <skip />
     <string name="instant_apps_message" msgid="8116608994995104836">"Aplicațiile instantanee nu necesită instalare."</string>
     <string name="app_info" msgid="6856026610594615344">"Informații despre aplicație"</string>
-    <!-- no translation found for mobile_data (7094582042819250762) -->
-    <skip />
+    <string name="mobile_data" msgid="7094582042819250762">"Date mobile"</string>
 </resources>

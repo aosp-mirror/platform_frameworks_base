@@ -236,6 +236,8 @@
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="650231949881093289">"Poupança de dados desativada."</string>
     <string name="accessibility_quick_settings_data_saver_changed_on" msgid="4218725402373934151">"Poupança de dados ativada."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"Brilho do visor"</string>
+    <!-- no translation found for accessibility_ambient_display_charging (9084521679384069087) -->
+    <skip />
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"Dados 2G-3G em pausa"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"Dados 4G em pausa"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"Dados de redes móveis em pausa"</string>
@@ -466,6 +468,10 @@
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. Toque para reativar o som."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. Toque para ativar a vibração. Os serviços de acessibilidade podem ser silenciados."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Toque para desativar o som. Os serviços de acessibilidade podem ser silenciados."</string>
+    <!-- no translation found for volume_stream_content_description_vibrate_a11y (6427727603978431301) -->
+    <skip />
+    <!-- no translation found for volume_stream_content_description_mute_a11y (8995013018414535494) -->
+    <skip />
     <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"Controlos de volume %s apresentados. Deslize rapidamente para cima para ignorar."</string>
     <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"Controles de volume ocultados"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"Sintonizador da interface do sistema"</string>
@@ -693,8 +699,9 @@
     <string name="notification_channel_general" msgid="4525309436693914482">"Mensagens gerais"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"Armazenamento"</string>
     <string name="instant_apps" msgid="6647570248119804907">"Aplicações instantâneas"</string>
+    <!-- no translation found for pip_menu_title (3328510504196964712) -->
+    <skip />
     <string name="instant_apps_message" msgid="8116608994995104836">"As Aplicações instantâneas não requerem instalação."</string>
     <string name="app_info" msgid="6856026610594615344">"Informações da aplicação"</string>
-    <!-- no translation found for mobile_data (7094582042819250762) -->
-    <skip />
+    <string name="mobile_data" msgid="7094582042819250762">"Dados móveis"</string>
 </resources>

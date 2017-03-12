@@ -236,6 +236,8 @@
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="650231949881093289">"डेटा सर्व्हर बंद केला."</string>
     <string name="accessibility_quick_settings_data_saver_changed_on" msgid="4218725402373934151">"डेटा सर्व्हर चालू केला."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"प्रदर्शन चमक"</string>
+    <!-- no translation found for accessibility_ambient_display_charging (9084521679384069087) -->
+    <skip />
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G-3G डेटास विराम दिला आहे"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G डेटास विराम दिला आहे"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"सेल्युलर डेटास विराम दिला आहे"</string>
@@ -466,6 +468,10 @@
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. सशब्द करण्यासाठी टॅप करा."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. कंपन सेट करण्यासाठी टॅप करा. प्रवेशयोग्यता सेवा नि:शब्द केल्या जाऊ शकतात."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. नि:शब्द करण्यासाठी टॅप करा. प्रवेशक्षमता सेवा नि:शब्द केल्या जाऊ शकतात."</string>
+    <!-- no translation found for volume_stream_content_description_vibrate_a11y (6427727603978431301) -->
+    <skip />
+    <!-- no translation found for volume_stream_content_description_mute_a11y (8995013018414535494) -->
+    <skip />
     <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"%s आवाज नियंत्रणे दर्शविली. डिसमिस करण्यासाठी वर स्वाइप करा."</string>
     <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"आवाज नियंत्रणे लपविली"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"सिस्टीम UI ट्यूनर"</string>
@@ -693,8 +699,9 @@
     <string name="notification_channel_general" msgid="4525309436693914482">"सर्वसाधारण संदेश"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"संचय"</string>
     <string name="instant_apps" msgid="6647570248119804907">"इन्सटंट अ‍ॅप्स"</string>
+    <!-- no translation found for pip_menu_title (3328510504196964712) -->
+    <skip />
     <string name="instant_apps_message" msgid="8116608994995104836">"इन्सटंट अॅप्सना स्थापनेची आवश्यकता नसते."</string>
     <string name="app_info" msgid="6856026610594615344">"अॅप माहिती"</string>
-    <!-- no translation found for mobile_data (7094582042819250762) -->
-    <skip />
+    <string name="mobile_data" msgid="7094582042819250762">"मोबाइल डेटा"</string>
 </resources>

@@ -236,6 +236,8 @@
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="650231949881093289">"ডেটা সেভার বন্ধ আছে।"</string>
     <string name="accessibility_quick_settings_data_saver_changed_on" msgid="4218725402373934151">"ডেটা সেভার চালু আছে।"</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"প্রদর্শনের উজ্জ্বলতা"</string>
+    <!-- no translation found for accessibility_ambient_display_charging (9084521679384069087) -->
+    <skip />
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G-3G ডেটা বিরতি দেওয়া হয়েছে"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G ডেটা বিরতি দেওয়া হয়েছে"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"সেলুলার ডেটা বিরতি দেওয়া হয়েছে"</string>
@@ -466,6 +468,10 @@
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s। সশব্দ করতে আলতো চাপুন।"</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s। কম্পন এ সেট করতে আলতো চাপুন। অ্যাক্সেসযোগ্যতার পরিষেবাগুলিকে নিঃশব্দ করা হতে পারে।"</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s। নিঃশব্দ করতে আলতো চাপুন। অ্যাক্সেসযোগ্যতার পরিষেবাগুলিকে নিঃশব্দ করা হতে পারে।"</string>
+    <!-- no translation found for volume_stream_content_description_vibrate_a11y (6427727603978431301) -->
+    <skip />
+    <!-- no translation found for volume_stream_content_description_mute_a11y (8995013018414535494) -->
+    <skip />
     <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"%s ভলিউম নিয়ন্ত্রণগুলি দেখানো হয়েছে৷ খারিজ করতে উপরের দিকে সোয়াইপ করুন৷"</string>
     <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"ভলিউম নিয়ন্ত্রণগুলি লুকানো রয়েছে"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"সিস্টেম UI টিউনার"</string>
@@ -693,8 +699,9 @@
     <string name="notification_channel_general" msgid="4525309436693914482">"সাধারণ বার্তাগুলি"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"সঞ্চয়স্থান"</string>
     <string name="instant_apps" msgid="6647570248119804907">"ঝটপট অ্যাপ"</string>
+    <!-- no translation found for pip_menu_title (3328510504196964712) -->
+    <skip />
     <string name="instant_apps_message" msgid="8116608994995104836">"ঝটপট অ্যাপ ইনস্টল করার প্রয়োজন হয় না।"</string>
     <string name="app_info" msgid="6856026610594615344">"অ্যাপ্লিকেশানের তথ্য"</string>
-    <!-- no translation found for mobile_data (7094582042819250762) -->
-    <skip />
+    <string name="mobile_data" msgid="7094582042819250762">"মোবাইল ডেটা"</string>
 </resources>

@@ -238,6 +238,8 @@
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="650231949881093289">"Mode Économiseur de données désactivé."</string>
     <string name="accessibility_quick_settings_data_saver_changed_on" msgid="4218725402373934151">"Mode Économiseur de données activé."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"Luminosité de l\'écran"</string>
+    <!-- no translation found for accessibility_ambient_display_charging (9084521679384069087) -->
+    <skip />
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"Données 2G/3G désactivées"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"Données 4G désactivées"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"Données cellulaires désactivées"</string>
@@ -468,6 +470,10 @@
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. Touchez pour réactiver le son."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. Touchez pour activer les vibrations. Il est possible de couper le son des services d\'accessibilité."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Touchez pour couper le son. Il est possible de couper le son des services d\'accessibilité."</string>
+    <!-- no translation found for volume_stream_content_description_vibrate_a11y (6427727603978431301) -->
+    <skip />
+    <!-- no translation found for volume_stream_content_description_mute_a11y (8995013018414535494) -->
+    <skip />
     <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"Commandes de volume %s affichées. Faire glisser vers le haut pour ignorer."</string>
     <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"Les commandes de volume sont masquées"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"System UI Tuner"</string>
@@ -695,8 +701,9 @@
     <string name="notification_channel_general" msgid="4525309436693914482">"Messages généraux"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"Stockage"</string>
     <string name="instant_apps" msgid="6647570248119804907">"Applications instantanées"</string>
+    <!-- no translation found for pip_menu_title (3328510504196964712) -->
+    <skip />
     <string name="instant_apps_message" msgid="8116608994995104836">"Les applications instantanées ne nécessitent pas d\'installation."</string>
     <string name="app_info" msgid="6856026610594615344">"Détails de l\'application"</string>
-    <!-- no translation found for mobile_data (7094582042819250762) -->
-    <skip />
+    <string name="mobile_data" msgid="7094582042819250762">"Données cellulaires"</string>
 </resources>
