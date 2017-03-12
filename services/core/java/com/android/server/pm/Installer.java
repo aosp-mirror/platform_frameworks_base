@@ -121,6 +121,10 @@ public class Installer extends SystemService {
 
         if (binder != null) {
             mInstalld = IInstalld.Stub.asInterface(binder);
+            try {
+                invalidateMounts();
+            } catch (InstallerException ignored) {
+            }
         } else {
             Slog.w(TAG, "installd not found; trying again");
             BackgroundThread.getHandler().postDelayed(() -> {

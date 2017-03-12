@@ -222,7 +222,7 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
         }
 
         final int userId = UserHandle.getUserId(uid);
-        final int appId = UserHandle.getUserId(uid);
+        final int appId = UserHandle.getAppId(uid);
 
         final String[] packageNames = mPackage.getPackagesForUid(uid);
         final long[] ceDataInodes = new long[packageNames.length];
