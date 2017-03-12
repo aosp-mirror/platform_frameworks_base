@@ -29,11 +29,13 @@ import android.os.UserManager;
 import android.provider.Settings;
 import android.text.format.DateUtils;
 import android.util.ExceptionUtils;
+import android.util.Log;
 import android.util.MathUtils;
 import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.util.ArrayUtils;
+import com.android.server.pm.PackageManagerService;
 
 import java.io.File;
 
@@ -49,6 +51,7 @@ import java.io.File;
 public class RescueParty {
     private static final String TAG = "RescueParty";
 
+    private static final String PROP_ENABLE_RESCUE = "persist.sys.enable_rescue";
     private static final String PROP_DISABLE_RESCUE = "persist.sys.disable_rescue";
     private static final String PROP_RESCUE_LEVEL = "sys.rescue_level";
     private static final String PROP_RESCUE_BOOT_COUNT = "sys.rescue_boot_count";
@@ -66,6 +69,11 @@ public class RescueParty {
     private static SparseArray<Threshold> sApps = new SparseArray<>();
 
     private static boolean isDisabled() {
+        // Check if we're explicitly enabled for testing
+        if (SystemProperties.getBoolean(PROP_ENABLE_RESCUE, true)) {
+            return false;
+        }
+
         // We're disabled on all engineering devices
         if (Build.IS_ENG) {
             Slog.v(TAG, "Disabled because of eng build");
@@ -138,7 +146,8 @@ public class RescueParty {
         SystemProperties.set(PROP_RESCUE_LEVEL, Integer.toString(level));
 
         EventLogTags.writeRescueLevel(level, triggerUid);
-        Slog.w(TAG, "Incremented rescue level to " + levelToString(level));
+        PackageManagerService.logCriticalInfo(Log.WARN, "Incremented rescue level to "
+                + levelToString(level) + " triggered by UID " + triggerUid);
     }
 
     /**
@@ -157,10 +166,13 @@ public class RescueParty {
         try {
             executeRescueLevelInternal(context, level);
             EventLogTags.writeRescueSuccess(level);
-            Slog.d(TAG, "Finished rescue level " + levelToString(level));
+            PackageManagerService.logCriticalInfo(Log.DEBUG,
+                    "Finished rescue level " + levelToString(level));
         } catch (Throwable t) {
-            EventLogTags.writeRescueFailure(level, ExceptionUtils.getCompleteMessage(t));
-            Slog.e(TAG, "Failed rescue level " + levelToString(level), t);
+            final String msg = ExceptionUtils.getCompleteMessage(t);
+            EventLogTags.writeRescueFailure(level, msg);
+            PackageManagerService.logCriticalInfo(Log.ERROR,
+                    "Failed rescue level " + levelToString(level) + ": " + msg);
         }
     }
 
