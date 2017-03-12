@@ -244,32 +244,20 @@
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="notification_hidden_text" msgid="1135169301897151909">"숨겨진 콘텐츠"</string>
     <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"콘텐츠가 정책에 의해 숨겨졌습니다."</string>
-    <!-- no translation found for notification_channel_virtual_keyboard (6969925135507955575) -->
-    <skip />
-    <!-- no translation found for notification_channel_physical_keyboard (7297661826966861459) -->
-    <skip />
+    <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"가상 키보드"</string>
+    <string name="notification_channel_physical_keyboard" msgid="7297661826966861459">"물리적 키보드"</string>
     <string name="notification_channel_security" msgid="7345516133431326347">"보안"</string>
-    <!-- no translation found for notification_channel_car_mode (3553380307619874564) -->
-    <skip />
-    <!-- no translation found for notification_channel_account (7577959168463122027) -->
-    <skip />
-    <!-- no translation found for notification_channel_developer (7579606426860206060) -->
-    <skip />
-    <!-- no translation found for notification_channel_updates (4794517569035110397) -->
-    <skip />
-    <!-- no translation found for notification_channel_network_status (5025648583129035447) -->
-    <skip />
-    <!-- no translation found for notification_channel_network_alerts (2895141221414156525) -->
-    <skip />
-    <!-- no translation found for notification_channel_vpn (8330103431055860618) -->
-    <skip />
-    <!-- no translation found for notification_channel_device_admin (1568154104368069249) -->
-    <skip />
+    <string name="notification_channel_car_mode" msgid="3553380307619874564">"운전모드"</string>
+    <string name="notification_channel_account" msgid="7577959168463122027">"계정 상태"</string>
+    <string name="notification_channel_developer" msgid="7579606426860206060">"개발자 메시지"</string>
+    <string name="notification_channel_updates" msgid="4794517569035110397">"업데이트"</string>
+    <string name="notification_channel_network_status" msgid="5025648583129035447">"네트워크 상태"</string>
+    <string name="notification_channel_network_alerts" msgid="2895141221414156525">"네트워크 알림"</string>
+    <string name="notification_channel_vpn" msgid="8330103431055860618">"VPN 상태"</string>
+    <string name="notification_channel_device_admin" msgid="1568154104368069249">"기기 관리"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"알림"</string>
-    <!-- no translation found for notification_channel_retail_mode (6088920674914038779) -->
-    <skip />
-    <!-- no translation found for notification_channel_usb (9006850475328924681) -->
-    <skip />
+    <string name="notification_channel_retail_mode" msgid="6088920674914038779">"소매 데모"</string>
+    <string name="notification_channel_usb" msgid="9006850475328924681">"USB 연결"</string>
     <string name="safeMode" msgid="2788228061547930246">"안전 모드"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android 시스템"</string>
     <string name="user_owner_label" msgid="1119010402169916617">"개인으로 전환"</string>
@@ -318,10 +306,8 @@
     <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"애플리케이션이 사용자의 작업 없이 홈 화면 바로가기를 삭제할 수 있도록 허용합니다."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"발신전화 경로 전환"</string>
     <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"다른 번호로 다시 걸거나 중단시키는 옵션을 사용하여 발신한 번호를 볼 수 있게 허용합니다."</string>
-    <!-- no translation found for permlab_answerPhoneCalls (4077162841226223337) -->
-    <skip />
-    <!-- no translation found for permdesc_answerPhoneCalls (2901889867993572266) -->
-    <skip />
+    <string name="permlab_answerPhoneCalls" msgid="4077162841226223337">"전화 받기"</string>
+    <string name="permdesc_answerPhoneCalls" msgid="2901889867993572266">"앱에서 수신 전화를 받도록 허용합니다."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"문자 메시지 받기(SMS)"</string>
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"앱이 SMS 메시지를 수신하고 처리할 수 있도록 허용합니다. 앱이 사용자에게 표시하지 않고 기기로 전송된 메시지를 확인 또는 삭제할 수도 있습니다."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"문자 메시지 받기(MMS)"</string>
@@ -333,9 +319,9 @@
     <string name="permlab_sendSms" msgid="7544599214260982981">"SMS 메시지 전송 및 보기"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"앱이 SMS 메시지를 보낼 수 있도록 허용합니다. 이 경우 예상치 못한 통화 요금이 부과될 수 있습니다. 이 경우 악성 앱이 사용자의 확인 없이 메시지를 전송해 요금이 부과될 수 있습니다."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"내 문자 메시지 읽기(SMS 또는 MMS)"</string>
-    <string name="permdesc_readSms" product="tablet" msgid="4741697454888074891">"이 앱은 태블릿에 저장된 모든 SMS(문자 메시지)를 읽을 수 있습니다."</string>
-    <string name="permdesc_readSms" product="tv" msgid="5796670395641116592">"이 앱은 TV에 저장된 모든 SMS(문자 메시지)를 읽을 수 있습니다."</string>
-    <string name="permdesc_readSms" product="default" msgid="6826832415656437652">"이 앱은 휴대전화에 저장된 모든 SMS(문자 메시지)를 읽을 수 있습니다."</string>
+    <string name="permdesc_readSms" product="tablet" msgid="4741697454888074891">"앱이 태블릿에 저장된 모든 내용의 SMS 메시지를 읽을 수 있도록 허용합니다."</string>
+    <string name="permdesc_readSms" product="tv" msgid="5796670395641116592">"앱이 TV에 저장된 모든 내용의 SMS 메시지를 읽을 수 있도록 허용합니다."</string>
+    <string name="permdesc_readSms" product="default" msgid="6826832415656437652">"앱이 휴대전화에 저장된 모든 내용의 SMS 메시지를 읽을 수 있도록 허용합니다."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"문자 메시지 받기(WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"앱이 WAP 메시지를 수신하고 처리할 수 있도록 허용합니다. 이는 앱이 사용자에게 표시하지 않고 기기로 전송된 메시지를 모니터링 또는 삭제할 수도 있다는 것을 의미합니다."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"실행 중인 앱 검색"</string>
@@ -391,9 +377,9 @@
     <string name="permdesc_readCalendar" product="tv" msgid="8837931557573064315">"이 앱은 TV에 저장된 모든 캘린더 일정을 읽고 캘린더 데이터를 공유하거나 저장할 수 있습니다."</string>
     <string name="permdesc_readCalendar" product="default" msgid="4373978642145196715">"이 앱은 휴대전화에 저장된 모든 캘린더 일정을 읽고 캘린더 데이터를 공유하거나 저장할 수 있습니다."</string>
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"소유자에게 알리지 않고 캘린더 일정을 추가 또는 수정하고 참석자에게 이메일 전송"</string>
-    <string name="permdesc_writeCalendar" product="tablet" msgid="1675270619903625982">"이 앱은 태블릿의 캘린더 일정을 추가, 삭제, 변경할 수 있습니다. 이 앱은 발신자가 캘린더 소유자인 메시지를 전송하거나 소유자가 모르는 사이에 일정을 수정할 수 있습니다."</string>
-    <string name="permdesc_writeCalendar" product="tv" msgid="9017809326268135866">"이 앱은 TV의 캘린더 일정을 추가, 삭제, 변경할 수 있습니다. 이 앱은 발신자가 캘린더 소유자인 메시지를 전송하거나 소유자가 모르는 사이에 일정을 수정할 수 있습니다."</string>
-    <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"이 앱은 휴대전화의 캘린더 일정을 추가, 삭제, 변경할 수 있습니다. 이 앱은 발신자가 캘린더 소유자인 메시지를 전송하거나 소유자가 모르는 사이에 일정을 수정할 수 있습니다."</string>
+    <string name="permdesc_writeCalendar" product="tablet" msgid="1675270619903625982">"앱이 일정을 추가, 삭제, 변경할 수 있도록 허용합니다. 앱이 메시지를 전송하거나 사용자에게 별도 표시 없이 일정을 수정할 수도 있습니다."</string>
+    <string name="permdesc_writeCalendar" product="tv" msgid="9017809326268135866">"앱이 일정을 추가, 삭제, 변경할 수 있도록 허용합니다. 앱이 메시지를 전송하거나 사용자에게 별도 표시 없이 일정을 수정할 수도 있습니다."</string>
+    <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"앱이 일정을 추가, 삭제, 변경할 수 있도록 허용합니다. 앱이 메시지를 전송하거나 사용자에게 별도 표시 없이 일정을 수정할 수도 있습니다."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"추가 위치 제공업체 명령에 접근"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"앱이 추가 위치 정보 제공 기능의 명령에 접근하도록 허용합니다. 이 경우 앱이 GPS 또는 기타 위치 소스의 작동을 방해할 수 있습니다."</string>
     <string name="permlab_accessFineLocation" msgid="251034415460950944">"정확한 위치(GPS 및 네트워크 기반)에 액세스"</string>
@@ -1197,9 +1183,12 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"탭하여 언어와 레이아웃을 선택하세요."</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="alert_windows_notification_channel_name" msgid="7443890103456396837">"<xliff:g id="NAME">%s</xliff:g>이(가) 다른 앱 위에 표시됨"</string>
-    <string name="alert_windows_notification_title" msgid="5399998516035621282">"<xliff:g id="NAME">%s</xliff:g> 앱이 상단에 표시됨"</string>
-    <string name="alert_windows_notification_message" msgid="2456738662997073459">"이 앱의 일부는 항상 표시될 수도 있습니다. 기능이 제대로 작동되지 않으면 사용 중지하세요."</string>
+    <!-- no translation found for alert_windows_notification_channel_name (3116610965549449803) -->
+    <skip />
+    <!-- no translation found for alert_windows_notification_title (4532185840598192445) -->
+    <skip />
+    <!-- no translation found for alert_windows_notification_message (8917232109522912560) -->
+    <skip />
     <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"사용 중지"</string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"<xliff:g id="NAME">%s</xliff:g> 준비 중"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"오류 확인 중"</string>
@@ -1207,8 +1196,12 @@
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"사진 및 미디어를 전송하는 데 사용합니다."</string>
     <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"손상된 <xliff:g id="NAME">%s</xliff:g>입니다."</string>
     <string name="ext_media_unmountable_notification_message" msgid="2343202057122495773">"<xliff:g id="NAME">%s</xliff:g>이(가) 손상되었습니다. 해결하려면 탭하세요."</string>
+    <!-- no translation found for ext_media_unmountable_notification_message (3941179940297874950) -->
+    <skip />
     <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"지원되지 않는 <xliff:g id="NAME">%s</xliff:g>입니다."</string>
     <string name="ext_media_unsupported_notification_message" msgid="6121601473787888589">"이 기기는 <xliff:g id="NAME">%s</xliff:g>을(를) 지원하지 않습니다. 지원하는 형식으로 설정하려면 탭하세요."</string>
+    <!-- no translation found for ext_media_unsupported_notification_message (3725436899820390906) -->
+    <skip />
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g>이(가) 예기치 않게 삭제됨"</string>
     <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"데이터 손실을 피하려면 <xliff:g id="NAME">%s</xliff:g>을(를) 마운트 해제한 다음 삭제하세요."</string>
     <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"<xliff:g id="NAME">%s</xliff:g> 삭제됨"</string>
@@ -1668,7 +1661,8 @@
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS 요청이 USSD 요청으로 수정됩니다."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS 요청이 새로운 SS 요청으로 수정됩니다."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"직장 프로필"</string>
-    <string name="expand_button_content_description" msgid="5855955413376384681">"펼치기 버튼"</string>
+    <string name="expand_button_content_description_collapsed" msgid="3609784019345534652">"펼치기"</string>
+    <string name="expand_button_content_description_expanded" msgid="8520652707158554895">"접기"</string>
     <string name="expand_action_accessibility" msgid="5307730695723718254">"확장 전환"</string>
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Android USB 주변기기 포트"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>

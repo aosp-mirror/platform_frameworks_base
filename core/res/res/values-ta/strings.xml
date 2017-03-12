@@ -244,32 +244,20 @@
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="notification_hidden_text" msgid="1135169301897151909">"மறைந்துள்ள உள்ளடக்கம்"</string>
     <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"கொள்கையின்படி உள்ளடக்கம் மறைக்கப்பட்டது"</string>
-    <!-- no translation found for notification_channel_virtual_keyboard (6969925135507955575) -->
-    <skip />
-    <!-- no translation found for notification_channel_physical_keyboard (7297661826966861459) -->
-    <skip />
+    <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"விர்ச்சுவல் விசைப்பலகை"</string>
+    <string name="notification_channel_physical_keyboard" msgid="7297661826966861459">"கைமுறை விசைப்பலகை"</string>
     <string name="notification_channel_security" msgid="7345516133431326347">"பாதுகாப்பு"</string>
-    <!-- no translation found for notification_channel_car_mode (3553380307619874564) -->
-    <skip />
-    <!-- no translation found for notification_channel_account (7577959168463122027) -->
-    <skip />
-    <!-- no translation found for notification_channel_developer (7579606426860206060) -->
-    <skip />
-    <!-- no translation found for notification_channel_updates (4794517569035110397) -->
-    <skip />
-    <!-- no translation found for notification_channel_network_status (5025648583129035447) -->
-    <skip />
-    <!-- no translation found for notification_channel_network_alerts (2895141221414156525) -->
-    <skip />
-    <!-- no translation found for notification_channel_vpn (8330103431055860618) -->
-    <skip />
-    <!-- no translation found for notification_channel_device_admin (1568154104368069249) -->
-    <skip />
+    <string name="notification_channel_car_mode" msgid="3553380307619874564">"கார் பயன்முறை"</string>
+    <string name="notification_channel_account" msgid="7577959168463122027">"கணக்கின் நிலை"</string>
+    <string name="notification_channel_developer" msgid="7579606426860206060">"டெவெலப்பர் செய்திகள்"</string>
+    <string name="notification_channel_updates" msgid="4794517569035110397">"புதுப்பிப்புகள்"</string>
+    <string name="notification_channel_network_status" msgid="5025648583129035447">"நெட்வொர்க்கின் நிலை"</string>
+    <string name="notification_channel_network_alerts" msgid="2895141221414156525">"நெட்வொர்க் விழிப்பூட்டல்கள்"</string>
+    <string name="notification_channel_vpn" msgid="8330103431055860618">"VPN நிலை"</string>
+    <string name="notification_channel_device_admin" msgid="1568154104368069249">"சாதன நிர்வாகம்"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"விழிப்பூட்டல்கள்"</string>
-    <!-- no translation found for notification_channel_retail_mode (6088920674914038779) -->
-    <skip />
-    <!-- no translation found for notification_channel_usb (9006850475328924681) -->
-    <skip />
+    <string name="notification_channel_retail_mode" msgid="6088920674914038779">"விற்பனையாளர் டெமோ"</string>
+    <string name="notification_channel_usb" msgid="9006850475328924681">"USB இணைப்பு"</string>
     <string name="safeMode" msgid="2788228061547930246">"பாதுகாப்பு பயன்முறை"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android அமைப்பு"</string>
     <string name="user_owner_label" msgid="1119010402169916617">"தனிப்பட்ட சுயவிவரத்திற்கு மாறு"</string>
@@ -318,10 +306,8 @@
     <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"பயனரின் அனுமதி இல்லாமல் முகப்புத்திரையின் குறுக்குவழிகளை அகற்ற பயன்பாட்டை அனுமதிக்கிறது."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"வெளிச்செல்லும் அழைப்புகளுக்கு மீண்டும் வழிகாட்டுதல்"</string>
     <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"மற்றொரு எண்ணிற்கு அழைப்பைத் திருப்பிவிடு அல்லது அழைப்பை முழுமையாக ரத்துசெய் என்னும் விருப்பத்துடன், வெளிச்செல்லும் அழைப்பை மேற்கொள்ளும்போது டயல் செய்யப்படுகின்ற எண்ணைப் பார்க்க, பயன்பாட்டை அனுமதிக்கிறது."</string>
-    <!-- no translation found for permlab_answerPhoneCalls (4077162841226223337) -->
-    <skip />
-    <!-- no translation found for permdesc_answerPhoneCalls (2901889867993572266) -->
-    <skip />
+    <string name="permlab_answerPhoneCalls" msgid="4077162841226223337">"ஃபோன் அழைப்புகளுக்குப் பதிலளி"</string>
+    <string name="permdesc_answerPhoneCalls" msgid="2901889867993572266">"உள்வரும் ஃபோன் அழைப்பிற்குப் பதிலளிக்க, பயன்பாட்டை அனுமதிக்கும்."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"உரைச் செய்திகளை (SMS) பெறுதல்"</string>
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"SMS செய்திகளைப் பெற, செயற்படுத்தப் பயன்பாட்டை அனுமதிக்கிறது. இதற்கு அர்த்தம் உங்கள் சாதனத்திற்கு அனுப்பப்படும் செய்திகளை உங்களுக்குக் காட்டாமல் கண்காணிப்பதற்கு அல்லது நீக்குவதற்குப் பயன்பாட்டால் முடியும் என்பதாகும்."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"உரைச் செய்திகளை (MMS) பெறுதல்"</string>
@@ -1198,9 +1184,12 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"மொழியையும் தளவமைப்பையும் தேர்ந்தெடுக்க, தட்டவும்"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="alert_windows_notification_channel_name" msgid="7443890103456396837">"பிற பயன்பாடுகளின் மேல் <xliff:g id="NAME">%s</xliff:g> செயல்படும்"</string>
-    <string name="alert_windows_notification_title" msgid="5399998516035621282">"பிற பயன்பாடுகளின் மேலே <xliff:g id="NAME">%s</xliff:g> பயன்பாடு காட்டப்படுகிறது."</string>
-    <string name="alert_windows_notification_message" msgid="2456738662997073459">"இந்தப் பயன்பாட்டின் பகுதிகள், எல்லா நேரமும் காட்டப்படக்கூடும். இந்த அம்சம் சரியாகச் செயல்படவில்லை எனில், அதை முடக்கவும்."</string>
+    <!-- no translation found for alert_windows_notification_channel_name (3116610965549449803) -->
+    <skip />
+    <!-- no translation found for alert_windows_notification_title (4532185840598192445) -->
+    <skip />
+    <!-- no translation found for alert_windows_notification_message (8917232109522912560) -->
+    <skip />
     <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"முடக்கு"</string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"<xliff:g id="NAME">%s</xliff:g> தயாராகிறது"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"பிழைகள் உள்ளதா எனப் பார்க்கிறது"</string>
@@ -1208,8 +1197,12 @@
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"படங்களையும் மீடியாவையும் மாற்றலாம்"</string>
     <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"<xliff:g id="NAME">%s</xliff:g> சிதைந்துள்ளது"</string>
     <string name="ext_media_unmountable_notification_message" msgid="2343202057122495773">"<xliff:g id="NAME">%s</xliff:g> சிதைந்துள்ளது. சரிசெய்ய, தட்டவும்."</string>
+    <!-- no translation found for ext_media_unmountable_notification_message (3941179940297874950) -->
+    <skip />
     <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"ஆதரிக்கப்படாத <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unsupported_notification_message" msgid="6121601473787888589">"சாதனம் இந்த <xliff:g id="NAME">%s</xliff:g>ஐ ஆதரிக்கவில்லை. ஆதரிக்கப்படும் வடிவமைப்பில் அமைக்க, தட்டவும்."</string>
+    <!-- no translation found for ext_media_unsupported_notification_message (3725436899820390906) -->
+    <skip />
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g> அகற்றப்பட்டது"</string>
     <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"தரவு இழப்பைத் தவிர்க்க, <xliff:g id="NAME">%s</xliff:g>ஐ அகற்றுவதற்கு முன் இணைப்பு நீக்கவும்"</string>
     <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"<xliff:g id="NAME">%s</xliff:g> அகற்றப்பட்டது"</string>
@@ -1669,7 +1662,8 @@
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS கோரிக்கையானது USSD கோரிக்கைக்கு மாற்றப்பட்டது."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS கோரிக்கையானது புதிய SS கோரிக்கைக்கு மாற்றப்பட்டது."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"பணி சுயவிவரம்"</string>
-    <string name="expand_button_content_description" msgid="5855955413376384681">"விரி பொத்தான்"</string>
+    <string name="expand_button_content_description_collapsed" msgid="3609784019345534652">"விரிவாக்கும்"</string>
+    <string name="expand_button_content_description_expanded" msgid="8520652707158554895">"சுருக்கும்"</string>
     <string name="expand_action_accessibility" msgid="5307730695723718254">"விரிவாக்கத்தை நிலைமாற்றும்"</string>
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Android USB பெரிபெரல் போர்ட்"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>

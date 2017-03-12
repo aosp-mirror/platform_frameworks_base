@@ -242,32 +242,20 @@
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="notification_hidden_text" msgid="1135169301897151909">"Maudhui yamefichwa"</string>
     <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"Maudhui yamefichwa kulingana na sera"</string>
-    <!-- no translation found for notification_channel_virtual_keyboard (6969925135507955575) -->
-    <skip />
-    <!-- no translation found for notification_channel_physical_keyboard (7297661826966861459) -->
-    <skip />
+    <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"Kibodi pepe"</string>
+    <string name="notification_channel_physical_keyboard" msgid="7297661826966861459">"Kibodi halisi"</string>
     <string name="notification_channel_security" msgid="7345516133431326347">"Usalama"</string>
-    <!-- no translation found for notification_channel_car_mode (3553380307619874564) -->
-    <skip />
-    <!-- no translation found for notification_channel_account (7577959168463122027) -->
-    <skip />
-    <!-- no translation found for notification_channel_developer (7579606426860206060) -->
-    <skip />
-    <!-- no translation found for notification_channel_updates (4794517569035110397) -->
-    <skip />
-    <!-- no translation found for notification_channel_network_status (5025648583129035447) -->
-    <skip />
-    <!-- no translation found for notification_channel_network_alerts (2895141221414156525) -->
-    <skip />
-    <!-- no translation found for notification_channel_vpn (8330103431055860618) -->
-    <skip />
-    <!-- no translation found for notification_channel_device_admin (1568154104368069249) -->
-    <skip />
+    <string name="notification_channel_car_mode" msgid="3553380307619874564">"Hali ya gari"</string>
+    <string name="notification_channel_account" msgid="7577959168463122027">"Hali ya akaunti"</string>
+    <string name="notification_channel_developer" msgid="7579606426860206060">"Ujumbe wa wasanidi programu"</string>
+    <string name="notification_channel_updates" msgid="4794517569035110397">"Taarifa"</string>
+    <string name="notification_channel_network_status" msgid="5025648583129035447">"Hali ya mtandao"</string>
+    <string name="notification_channel_network_alerts" msgid="2895141221414156525">"Arifa za mtandao"</string>
+    <string name="notification_channel_vpn" msgid="8330103431055860618">"Hali ya VPN"</string>
+    <string name="notification_channel_device_admin" msgid="1568154104368069249">"Udhibiti wa kifaa"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Arifa"</string>
-    <!-- no translation found for notification_channel_retail_mode (6088920674914038779) -->
-    <skip />
-    <!-- no translation found for notification_channel_usb (9006850475328924681) -->
-    <skip />
+    <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Onyesho la duka la rejareja"</string>
+    <string name="notification_channel_usb" msgid="9006850475328924681">"Muunganisho wa USB"</string>
     <string name="safeMode" msgid="2788228061547930246">"Mtindo salama"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Mfumo wa Android"</string>
     <string name="user_owner_label" msgid="1119010402169916617">"Badili uweke wasifu wa Binafsi"</string>
@@ -316,10 +304,8 @@
     <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Huruhusu programu kuondoa njia za mkato za Skrini ya kwanza bila mtumiaji kuingilia."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"panga upya simu zinazotoka"</string>
     <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"Huruhusu programu kuona nambari inayopigwa wakati simu inapigwa ikiwa na chaguo la kuelekeza simu kwenye nambari tofauti au kukata simu kabisa."</string>
-    <!-- no translation found for permlab_answerPhoneCalls (4077162841226223337) -->
-    <skip />
-    <!-- no translation found for permdesc_answerPhoneCalls (2901889867993572266) -->
-    <skip />
+    <string name="permlab_answerPhoneCalls" msgid="4077162841226223337">"kujibu simu"</string>
+    <string name="permdesc_answerPhoneCalls" msgid="2901889867993572266">"Inaruhusu programu kujibu simu inayopigwa."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"pokea ujumbe wa maandishi wa SMS"</string>
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Inaruhusu programu kupokea na kuchakata ujumbe wa SMS. Hii inamaanisha programu hii inaweza kuchunguza na kufuta ujumbe uliotumwa katika kifaa chako bila ya kukuonyesha."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"pokea ujumbe wa maandishi wa MMS"</string>
@@ -1195,9 +1181,12 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Gonga ili uchague lugha na muundo"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="alert_windows_notification_channel_name" msgid="7443890103456396837">"<xliff:g id="NAME">%s</xliff:g> huchomoza kwenye programu zingine"</string>
-    <string name="alert_windows_notification_title" msgid="5399998516035621282">"Programu ya <xliff:g id="NAME">%s</xliff:g> inaonekana juu ya zingine."</string>
-    <string name="alert_windows_notification_message" msgid="2456738662997073459">"Huenda sehemu za programu hii zikaendelea kuonekana kila wakati. Zima kipengele hiki kama hakifanyi kazi vizuri."</string>
+    <!-- no translation found for alert_windows_notification_channel_name (3116610965549449803) -->
+    <skip />
+    <!-- no translation found for alert_windows_notification_title (4532185840598192445) -->
+    <skip />
+    <!-- no translation found for alert_windows_notification_message (8917232109522912560) -->
+    <skip />
     <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"ZIMA"</string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"Inaandaa <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Inakagua hitilafu"</string>
@@ -1205,8 +1194,12 @@
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Kwa ajili ya kuhamisha picha na maudhui"</string>
     <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"<xliff:g id="NAME">%s</xliff:g> iliyoharibika"</string>
     <string name="ext_media_unmountable_notification_message" msgid="2343202057122495773">"<xliff:g id="NAME">%s</xliff:g> ina hitilafu. Gonga ili uirekebishe."</string>
+    <!-- no translation found for ext_media_unmountable_notification_message (3941179940297874950) -->
+    <skip />
     <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"<xliff:g id="NAME">%s</xliff:g> isiyotumika"</string>
     <string name="ext_media_unsupported_notification_message" msgid="6121601473787888589">"Kifaa hiki hakitumii <xliff:g id="NAME">%s</xliff:g>. Gonga ili uweke mipangilio ya muundo unaoweza kutumika."</string>
+    <!-- no translation found for ext_media_unsupported_notification_message (3725436899820390906) -->
+    <skip />
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g> imeondolewa bila kutarajiwa"</string>
     <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"Ondoa <xliff:g id="NAME">%s</xliff:g> kabla ya kuchomoa ili kuepuka kupoteza data"</string>
     <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"<xliff:g id="NAME">%s</xliff:g> imeondolewa"</string>
@@ -1666,7 +1659,8 @@
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"Ombi la SS limerekebishwa na kuwa ombi la USSD."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"Ombi la SS limerekebishwa na kuwa ombi jipya la SS."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Wasifu wa kazini"</string>
-    <string name="expand_button_content_description" msgid="5855955413376384681">"Kitufe cha kupanua"</string>
+    <string name="expand_button_content_description_collapsed" msgid="3609784019345534652">"Panua"</string>
+    <string name="expand_button_content_description_expanded" msgid="8520652707158554895">"Kunja"</string>
     <string name="expand_action_accessibility" msgid="5307730695723718254">"geuza upanuzi"</string>
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Mlango wa USB wa Pembeni wa Android"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>

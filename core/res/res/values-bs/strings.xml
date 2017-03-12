@@ -247,32 +247,20 @@
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="notification_hidden_text" msgid="1135169301897151909">"Sadržaj je sakriven"</string>
     <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"Sadržaj skriven u skladu sa pravilima"</string>
-    <!-- no translation found for notification_channel_virtual_keyboard (6969925135507955575) -->
-    <skip />
-    <!-- no translation found for notification_channel_physical_keyboard (7297661826966861459) -->
-    <skip />
+    <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"Virtuelna tastatura"</string>
+    <string name="notification_channel_physical_keyboard" msgid="7297661826966861459">"Fizička tastatura"</string>
     <string name="notification_channel_security" msgid="7345516133431326347">"Sigurnost"</string>
-    <!-- no translation found for notification_channel_car_mode (3553380307619874564) -->
-    <skip />
-    <!-- no translation found for notification_channel_account (7577959168463122027) -->
-    <skip />
-    <!-- no translation found for notification_channel_developer (7579606426860206060) -->
-    <skip />
-    <!-- no translation found for notification_channel_updates (4794517569035110397) -->
-    <skip />
-    <!-- no translation found for notification_channel_network_status (5025648583129035447) -->
-    <skip />
-    <!-- no translation found for notification_channel_network_alerts (2895141221414156525) -->
-    <skip />
-    <!-- no translation found for notification_channel_vpn (8330103431055860618) -->
-    <skip />
-    <!-- no translation found for notification_channel_device_admin (1568154104368069249) -->
-    <skip />
+    <string name="notification_channel_car_mode" msgid="3553380307619874564">"Način rada u automobilu"</string>
+    <string name="notification_channel_account" msgid="7577959168463122027">"Status računa"</string>
+    <string name="notification_channel_developer" msgid="7579606426860206060">"Poruke programera"</string>
+    <string name="notification_channel_updates" msgid="4794517569035110397">"Ažuriranja"</string>
+    <string name="notification_channel_network_status" msgid="5025648583129035447">"Status mreže"</string>
+    <string name="notification_channel_network_alerts" msgid="2895141221414156525">"Mrežna upozorenja"</string>
+    <string name="notification_channel_vpn" msgid="8330103431055860618">"Status VPN-a"</string>
+    <string name="notification_channel_device_admin" msgid="1568154104368069249">"Administracija uređaja"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Upozorenja"</string>
-    <!-- no translation found for notification_channel_retail_mode (6088920674914038779) -->
-    <skip />
-    <!-- no translation found for notification_channel_usb (9006850475328924681) -->
-    <skip />
+    <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Promotivna demonstracija u maloprodaji"</string>
+    <string name="notification_channel_usb" msgid="9006850475328924681">"USB veza"</string>
     <string name="safeMode" msgid="2788228061547930246">"Siguran način rada"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android sistem"</string>
     <string name="user_owner_label" msgid="1119010402169916617">"Prebacite se na lični"</string>
@@ -321,10 +309,8 @@
     <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Omogućava aplikaciji uklanjanje prečice početnog ekrana bez intervencije korisnika."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"preusmjeravanje odlaznih poziva"</string>
     <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"Dozvoljava aplikaciji da vidi birani broj prilikom odlaznog poziva uz opciju da poziv preusmjeri na drugi broj ili da ga skroz prekine."</string>
-    <!-- no translation found for permlab_answerPhoneCalls (4077162841226223337) -->
-    <skip />
-    <!-- no translation found for permdesc_answerPhoneCalls (2901889867993572266) -->
-    <skip />
+    <string name="permlab_answerPhoneCalls" msgid="4077162841226223337">"odgovor na telefonski poziv"</string>
+    <string name="permdesc_answerPhoneCalls" msgid="2901889867993572266">"Omogućava aplikaciji odgovor na dolazni telefonski poziv."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"primanje tekstualnih poruka (SMS)"</string>
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Omogućava aplikaciji primanje i obradu SMS poruka. Ovo znači da aplikacija može pratiti ili brisati poruke poslane na vaš uređaj, a da vam ih pritom ne prikazuje."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"primanje tekstualnih poruka (MMS)"</string>
@@ -1220,9 +1206,12 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Dodirnite za odabir jezika i rasporeda"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="alert_windows_notification_channel_name" msgid="7443890103456396837">"Aplikacija <xliff:g id="NAME">%s</xliff:g> prekriva ostale aplikacije"</string>
-    <string name="alert_windows_notification_title" msgid="5399998516035621282">"Apl. <xliff:g id="NAME">%s</xliff:g> prikazana je na vrhu."</string>
-    <string name="alert_windows_notification_message" msgid="2456738662997073459">"Dijelovi aplikacije mogu ostati vidljivi sve vrijeme. Ako ta funkcija ne radi ispravno, isključite je."</string>
+    <!-- no translation found for alert_windows_notification_channel_name (3116610965549449803) -->
+    <skip />
+    <!-- no translation found for alert_windows_notification_title (4532185840598192445) -->
+    <skip />
+    <!-- no translation found for alert_windows_notification_message (8917232109522912560) -->
+    <skip />
     <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"ISKLJUČI"</string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"Priprema se <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Provjera grešaka"</string>
@@ -1230,8 +1219,12 @@
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Za prebacivanje slika i medijskih fajlova"</string>
     <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"Uređaj <xliff:g id="NAME">%s</xliff:g> je oštećen"</string>
     <string name="ext_media_unmountable_notification_message" msgid="2343202057122495773">"Uređaj <xliff:g id="NAME">%s</xliff:g> je oštećen. Dodirnite da biste popravili."</string>
+    <!-- no translation found for ext_media_unmountable_notification_message (3941179940297874950) -->
+    <skip />
     <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"Uređaj <xliff:g id="NAME">%s</xliff:g> nije podržan"</string>
     <string name="ext_media_unsupported_notification_message" msgid="6121601473787888589">"Ovaj uređaj ne podržava uređaj <xliff:g id="NAME">%s</xliff:g>. Dodirnite da biste ga postavili u podržanom formatu."</string>
+    <!-- no translation found for ext_media_unsupported_notification_message (3725436899820390906) -->
+    <skip />
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"Neočekivano uklonjen uređaj <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"Isključite uređaj <xliff:g id="NAME">%s</xliff:g> prije uklanjanja da izbjegnete gubitak podataka"</string>
     <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"Uređaj <xliff:g id="NAME">%s</xliff:g> je uklonjen"</string>
@@ -1701,7 +1694,8 @@
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS zahtjev je izmijenjen u USSD zahtjev."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS zahtjev je izmijenjen u novi SS zahtjev."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Profil za posao"</string>
-    <string name="expand_button_content_description" msgid="5855955413376384681">"Dugme za proširivanje"</string>
+    <string name="expand_button_content_description_collapsed" msgid="3609784019345534652">"Proširi"</string>
+    <string name="expand_button_content_description_expanded" msgid="8520652707158554895">"Skupi"</string>
     <string name="expand_action_accessibility" msgid="5307730695723718254">"prebaci na proširenje"</string>
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Android USB ulaz za periferijske uređaje"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>

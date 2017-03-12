@@ -244,32 +244,20 @@
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="notification_hidden_text" msgid="1135169301897151909">"បាន​លាក់​មាតិកា"</string>
     <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"មាតិកាត្រូវបានលាក់ដោយផ្អែកលើគោលការណ៍"</string>
-    <!-- no translation found for notification_channel_virtual_keyboard (6969925135507955575) -->
-    <skip />
-    <!-- no translation found for notification_channel_physical_keyboard (7297661826966861459) -->
-    <skip />
+    <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"ក្ដារ​ចុច​និម្មិត"</string>
+    <string name="notification_channel_physical_keyboard" msgid="7297661826966861459">"ក្ដារចុច​រូបវន្ត"</string>
     <string name="notification_channel_security" msgid="7345516133431326347">"សុវត្ថិភាព"</string>
-    <!-- no translation found for notification_channel_car_mode (3553380307619874564) -->
-    <skip />
-    <!-- no translation found for notification_channel_account (7577959168463122027) -->
-    <skip />
-    <!-- no translation found for notification_channel_developer (7579606426860206060) -->
-    <skip />
-    <!-- no translation found for notification_channel_updates (4794517569035110397) -->
-    <skip />
-    <!-- no translation found for notification_channel_network_status (5025648583129035447) -->
-    <skip />
-    <!-- no translation found for notification_channel_network_alerts (2895141221414156525) -->
-    <skip />
-    <!-- no translation found for notification_channel_vpn (8330103431055860618) -->
-    <skip />
-    <!-- no translation found for notification_channel_device_admin (1568154104368069249) -->
-    <skip />
+    <string name="notification_channel_car_mode" msgid="3553380307619874564">"មុខងារ​រថយន្ត"</string>
+    <string name="notification_channel_account" msgid="7577959168463122027">"ស្ថានភាព​គណនី"</string>
+    <string name="notification_channel_developer" msgid="7579606426860206060">"សារពី​អ្នក​អភិវឌ្ឍន៍"</string>
+    <string name="notification_channel_updates" msgid="4794517569035110397">"បច្ចុប្បន្នភាព"</string>
+    <string name="notification_channel_network_status" msgid="5025648583129035447">"ស្ថានភាព​បណ្តាញ"</string>
+    <string name="notification_channel_network_alerts" msgid="2895141221414156525">"ការ​ជូនដំណឹង​អំពី​បណ្តាញ"</string>
+    <string name="notification_channel_vpn" msgid="8330103431055860618">"ស្ថានភាព VPN"</string>
+    <string name="notification_channel_device_admin" msgid="1568154104368069249">"ការ​គ្រប់គ្រង​ឧបករណ៍"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"ការ​ជូនដំណឹង"</string>
-    <!-- no translation found for notification_channel_retail_mode (6088920674914038779) -->
-    <skip />
-    <!-- no translation found for notification_channel_usb (9006850475328924681) -->
-    <skip />
+    <string name="notification_channel_retail_mode" msgid="6088920674914038779">"របៀបដាក់បង្ហាញក្នុងហាង"</string>
+    <string name="notification_channel_usb" msgid="9006850475328924681">"ការ​តភ្ជាប់ USB"</string>
     <string name="safeMode" msgid="2788228061547930246">"របៀប​​​សុវត្ថិភាព"</string>
     <string name="android_system_label" msgid="6577375335728551336">"ប្រព័ន្ធ​​ Android"</string>
     <string name="user_owner_label" msgid="1119010402169916617">"ប្តូរទៅផ្ទាល់ខ្លួន"</string>
@@ -318,10 +306,8 @@
     <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"ឲ្យ​កម្មវិធី​លុប​ផ្លូវកាត់​អេក្រង់​ដើម​ដោយ​គ្មាន​អំពើ​ពី​អ្នកប្រើ។"</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"នាំ​ផ្លូវ​ការ​ហៅ​ចេញ​ឡើងវិញ"</string>
     <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"ឲ្យ​កម្មវិធី​ឃើញ​លេខ​ដែល​កំពុង​ត្រូវ​បាន​ហៅ​អំឡុង​ពេល​ហៅ​ចេញ​​ដោយ​ប្រើ​​ជម្រើស​ ដើម្បី​បញ្ជូន​​ការ​ហៅ​បន្ត​ទៅ​លេខ​ផ្សេង ឬ​បោះបង់​ការ​ហៅ​រួម​គ្នា។"</string>
-    <!-- no translation found for permlab_answerPhoneCalls (4077162841226223337) -->
-    <skip />
-    <!-- no translation found for permdesc_answerPhoneCalls (2901889867993572266) -->
-    <skip />
+    <string name="permlab_answerPhoneCalls" msgid="4077162841226223337">"ទទួល​ការ​ហៅ​ទូរសព្ទ"</string>
+    <string name="permdesc_answerPhoneCalls" msgid="2901889867993572266">"អនុញ្ញាត​ឲ្យ​កម្មវិធី​នេះ​ទទួល​ការ​ហៅ​ទូរសព្ទ​ចូល។"</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"ទទួល​សារ​អត្ថបទ (សារ SMS​)"</string>
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"ឲ្យ​កម្មវិធី​ទទួល និង​ដំណើរការ​​សារ MMS ។ មាន​ន័យ​ថា កម្មវិធី​អាច​ត្រួតពិនិត្យ​ ឬ​លុប​សារ​ដែល​បាន​ផ្ញើ​ទៅ​ឧបករណ៍​របស់​អ្នក ដោយ​​មិន​បង្ហាញ​អ្នក។"</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"ទទួល​សារ​អត្ថបទ (MMS​)"</string>
@@ -1199,9 +1185,12 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"ប៉ះដើម្បីជ្រើសភាសា និងប្លង់"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="alert_windows_notification_channel_name" msgid="7443890103456396837">"<xliff:g id="NAME">%s</xliff:g> គូរ​ពីលើ​កម្មវិធី​ផ្សេង​ទៀត"</string>
-    <string name="alert_windows_notification_title" msgid="5399998516035621282">"កម្មវិធី <xliff:g id="NAME">%s</xliff:g> បង្ហាញ​នៅ​លើ​គេ។"</string>
-    <string name="alert_windows_notification_message" msgid="2456738662997073459">"ផ្នែកខ្លះ​នៃ​កម្មវិធី​នេះនឹង​នៅតែ​អាច​មើល​ឃើញ​បានគ្រប់​ពេល។ ប្រសិនបើ​មុខងារនេះ​ដំណើរការ​មិន​ប្រក្រតី​ទេ សូម​បិទ​វា។"</string>
+    <!-- no translation found for alert_windows_notification_channel_name (3116610965549449803) -->
+    <skip />
+    <!-- no translation found for alert_windows_notification_title (4532185840598192445) -->
+    <skip />
+    <!-- no translation found for alert_windows_notification_message (8917232109522912560) -->
+    <skip />
     <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"បិទ"</string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"កំពុងរៀបចំ <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"កំពុងពិនិត្យរកកំហុស"</string>
@@ -1209,8 +1198,12 @@
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"សម្រាប់ផ្ទេររូបភាព និងមេឌៀ"</string>
     <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"<xliff:g id="NAME">%s</xliff:g> ខូច"</string>
     <string name="ext_media_unmountable_notification_message" msgid="2343202057122495773">"<xliff:g id="NAME">%s</xliff:g> បានខូចហើយ សូមប៉ះដើម្បីជួសជុល។"</string>
+    <!-- no translation found for ext_media_unmountable_notification_message (3941179940297874950) -->
+    <skip />
     <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"<xliff:g id="NAME">%s</xliff:g> មិនគាំទ្រ"</string>
     <string name="ext_media_unsupported_notification_message" msgid="6121601473787888589">"ឧបករណ៍នេះមិនគាំទ្រ <xliff:g id="NAME">%s</xliff:g> នេះទេ។ ប៉ះដើម្បីកំណត់ទម្រង់ដែលគាំទ្រ។"</string>
+    <!-- no translation found for ext_media_unsupported_notification_message (3725436899820390906) -->
+    <skip />
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"បានដក <xliff:g id="NAME">%s</xliff:g> ចេញដោយមិនបានរំពឹងទុក"</string>
     <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"ផ្តាច់ <xliff:g id="NAME">%s</xliff:g> មុនពេលដកចេញដើម្បីជៀងវាងការបាត់បង់ទិន្នន័យ"</string>
     <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"បានដក <xliff:g id="NAME">%s</xliff:g> ចេញ"</string>
@@ -1670,7 +1663,8 @@
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"សំណើរ SS ត្រូវបានកែសម្រួលទៅតាមសំណើរ USSD។"</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"សំណើរ SS ត្រូវបានកែសម្រួលទៅតាមសំណើរ SS ថ្មី។"</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"ប្រវត្តិរូបការងារ"</string>
-    <string name="expand_button_content_description" msgid="5855955413376384681">"ប៊ូតុងពង្រីក"</string>
+    <string name="expand_button_content_description_collapsed" msgid="3609784019345534652">"ពង្រីក"</string>
+    <string name="expand_button_content_description_expanded" msgid="8520652707158554895">"លាក់"</string>
     <string name="expand_action_accessibility" msgid="5307730695723718254">"បិទ/បើកការពង្រីក"</string>
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"ឧបករណ៍រន្ធ USB Android បន្ថែម"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>

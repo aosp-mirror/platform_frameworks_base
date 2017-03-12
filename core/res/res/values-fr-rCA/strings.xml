@@ -244,32 +244,20 @@
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"&gt;999"</string>
     <string name="notification_hidden_text" msgid="1135169301897151909">"Contenus masqués"</string>
     <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"Contenu masqué conformément aux politiques"</string>
-    <!-- no translation found for notification_channel_virtual_keyboard (6969925135507955575) -->
-    <skip />
-    <!-- no translation found for notification_channel_physical_keyboard (7297661826966861459) -->
-    <skip />
+    <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"Clavier virtuel"</string>
+    <string name="notification_channel_physical_keyboard" msgid="7297661826966861459">"Clavier physique"</string>
     <string name="notification_channel_security" msgid="7345516133431326347">"Sécurité"</string>
-    <!-- no translation found for notification_channel_car_mode (3553380307619874564) -->
-    <skip />
-    <!-- no translation found for notification_channel_account (7577959168463122027) -->
-    <skip />
-    <!-- no translation found for notification_channel_developer (7579606426860206060) -->
-    <skip />
-    <!-- no translation found for notification_channel_updates (4794517569035110397) -->
-    <skip />
-    <!-- no translation found for notification_channel_network_status (5025648583129035447) -->
-    <skip />
-    <!-- no translation found for notification_channel_network_alerts (2895141221414156525) -->
-    <skip />
-    <!-- no translation found for notification_channel_vpn (8330103431055860618) -->
-    <skip />
-    <!-- no translation found for notification_channel_device_admin (1568154104368069249) -->
-    <skip />
+    <string name="notification_channel_car_mode" msgid="3553380307619874564">"Mode Voiture"</string>
+    <string name="notification_channel_account" msgid="7577959168463122027">"État du compte"</string>
+    <string name="notification_channel_developer" msgid="7579606426860206060">"Messages des concepteurs"</string>
+    <string name="notification_channel_updates" msgid="4794517569035110397">"Mises à jour"</string>
+    <string name="notification_channel_network_status" msgid="5025648583129035447">"État du réseau"</string>
+    <string name="notification_channel_network_alerts" msgid="2895141221414156525">"Alertes réseau"</string>
+    <string name="notification_channel_vpn" msgid="8330103431055860618">"État du RPV"</string>
+    <string name="notification_channel_device_admin" msgid="1568154104368069249">"Administration d\'appareils"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Alertes"</string>
-    <!-- no translation found for notification_channel_retail_mode (6088920674914038779) -->
-    <skip />
-    <!-- no translation found for notification_channel_usb (9006850475328924681) -->
-    <skip />
+    <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Démo en magasin"</string>
+    <string name="notification_channel_usb" msgid="9006850475328924681">"Connexion USB"</string>
     <string name="safeMode" msgid="2788228061547930246">"Mode sécurisé"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Système Android"</string>
     <string name="user_owner_label" msgid="1119010402169916617">"Passer au profil personnel"</string>
@@ -318,10 +306,8 @@
     <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Permet à l\'application de supprimer des raccourcis de la page d\'accueil sans intervention de l\'utilisateur."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"transférer les appels sortants"</string>
     <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"Permet à l\'application de lire le numéro composé lors d\'un appel sortant et lui donne la possibilité de rediriger l\'appel vers un autre numéro ou d\'abandonner l\'appel."</string>
-    <!-- no translation found for permlab_answerPhoneCalls (4077162841226223337) -->
-    <skip />
-    <!-- no translation found for permdesc_answerPhoneCalls (2901889867993572266) -->
-    <skip />
+    <string name="permlab_answerPhoneCalls" msgid="4077162841226223337">"répondre aux appels téléphoniques"</string>
+    <string name="permdesc_answerPhoneCalls" msgid="2901889867993572266">"Permet à l\'application de répondre aux appels entrants."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"recevoir des messages texte"</string>
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Permet à l\'application de recevoir et de traiter les messages texte. Cette autorisation lui donne la possibilité de surveiller ou de supprimer les messages envoyés à votre appareil sans vous les montrer."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"recevoir des messages multimédias"</string>
@@ -1197,9 +1183,12 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Touchez pour sélectionner la langue et la configuration du clavier"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="alert_windows_notification_channel_name" msgid="7443890103456396837">"<xliff:g id="NAME">%s</xliff:g> se superpose aux autres applications"</string>
-    <string name="alert_windows_notification_title" msgid="5399998516035621282">"<xliff:g id="NAME">%s</xliff:g> s\'affiche par-dessus les autres"</string>
-    <string name="alert_windows_notification_message" msgid="2456738662997073459">"Certaines parties de cette application restent visibles en tout temps. Si cette option ne fonctionne pas correctement, désactivez-la."</string>
+    <!-- no translation found for alert_windows_notification_channel_name (3116610965549449803) -->
+    <skip />
+    <!-- no translation found for alert_windows_notification_title (4532185840598192445) -->
+    <skip />
+    <!-- no translation found for alert_windows_notification_message (8917232109522912560) -->
+    <skip />
     <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"DÉSACTIVER"</string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"Préparation de « <xliff:g id="NAME">%s</xliff:g> » en cours"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Recherche d\'erreurs en cours..."</string>
@@ -1207,8 +1196,12 @@
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Pour transférer des photos et d\'autres fichiers"</string>
     <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"Corrompue : <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unmountable_notification_message" msgid="2343202057122495773">"<xliff:g id="NAME">%s</xliff:g> est corrompu. Touchez pour corriger le problème."</string>
+    <!-- no translation found for ext_media_unmountable_notification_message (3941179940297874950) -->
+    <skip />
     <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"<xliff:g id="NAME">%s</xliff:g> non compatible"</string>
     <string name="ext_media_unsupported_notification_message" msgid="6121601473787888589">"Cet appareil n\'est pas compatible avec la mémoire de stockage « <xliff:g id="NAME">%s</xliff:g> ». Touchez pour la configurer dans un format compatible."</string>
+    <!-- no translation found for ext_media_unsupported_notification_message (3725436899820390906) -->
+    <skip />
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"Retrait inattendu de la mémoire « <xliff:g id="NAME">%s</xliff:g> »"</string>
     <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"Désinstallez la mémoire « <xliff:g id="NAME">%s</xliff:g> » avant de la retirer pour éviter toute perte de données."</string>
     <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"Mémoire de stockage « <xliff:g id="NAME">%s</xliff:g> » retirée"</string>
@@ -1668,7 +1661,8 @@
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"La demande SS a été modifiée et est maintenant une demande USSD."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"La demande SS a été modifiée et est maintenant une nouvelle demande SS."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Profil professionnel"</string>
-    <string name="expand_button_content_description" msgid="5855955413376384681">"Bouton Développer"</string>
+    <string name="expand_button_content_description_collapsed" msgid="3609784019345534652">"Développer"</string>
+    <string name="expand_button_content_description_expanded" msgid="8520652707158554895">"Réduire"</string>
     <string name="expand_action_accessibility" msgid="5307730695723718254">"activer/désactiver le développement"</string>
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Port USB de l\'appareil Android"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
