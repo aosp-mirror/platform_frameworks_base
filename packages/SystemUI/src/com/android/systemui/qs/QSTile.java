@@ -355,57 +355,72 @@ public abstract class QSTile<TState extends State> {
         public void handleMessage(Message msg) {
             String name = null;
             try {
-                if (msg.what == ADD_CALLBACK) {
-                    name = "handleAddCallback";
-                    handleAddCallback((QSTile.Callback) msg.obj);
-                } else if (msg.what == REMOVE_CALLBACKS) {
-                    name = "handleRemoveCallbacks";
-                    handleRemoveCallbacks();
-                } else if (msg.what == REMOVE_CALLBACK) {
-                    name = "handleRemoveCallback";
-                    handleRemoveCallback((QSTile.Callback) msg.obj);
-                } else if (msg.what == CLICK) {
-                    name = "handleClick";
-                    if (mState.disabledByPolicy) {
-                        Intent intent = RestrictedLockUtils.getShowAdminSupportDetailsIntent(
-                                mContext, mState.enforcedAdmin);
-                        mHost.startActivityDismissingKeyguard(intent);
-                    } else {
-                        mAnnounceNextStateChange = true;
-                        handleClick();
-                    }
-                } else if (msg.what == SECONDARY_CLICK) {
-                    name = "handleSecondaryClick";
-                    handleSecondaryClick();
-                } else if (msg.what == LONG_CLICK) {
-                    name = "handleLongClick";
-                    handleLongClick();
-                } else if (msg.what == REFRESH_STATE) {
-                    name = "handleRefreshState";
-                    handleRefreshState(msg.obj);
-                } else if (msg.what == SHOW_DETAIL) {
-                    name = "handleShowDetail";
-                    handleShowDetail(msg.arg1 != 0);
-                } else if (msg.what == USER_SWITCH) {
-                    name = "handleUserSwitch";
-                    handleUserSwitch(msg.arg1);
-                } else if (msg.what == TOGGLE_STATE_CHANGED) {
-                    name = "handleToggleStateChanged";
-                    handleToggleStateChanged(msg.arg1 != 0);
-                } else if (msg.what == SCAN_STATE_CHANGED) {
-                    name = "handleScanStateChanged";
-                    handleScanStateChanged(msg.arg1 != 0);
-                } else if (msg.what == DESTROY) {
-                    name = "handleDestroy";
-                    handleDestroy();
-                } else if (msg.what == CLEAR_STATE) {
-                    name = "handleClearState";
-                    handleClearState();
-                } else if (msg.what == SET_LISTENING) {
-                    name = "setListening";
-                    setListening(msg.arg1 != 0);
-                } else {
-                    throw new IllegalArgumentException("Unknown msg: " + msg.what);
+                switch (msg.what) {
+                    case ADD_CALLBACK:
+                        name = "handleAddCallback";
+                        handleAddCallback((QSTile.Callback) msg.obj);
+                        break;
+                    case REMOVE_CALLBACKS:
+                        name = "handleRemoveCallbacks";
+                        handleRemoveCallbacks();
+                        break;
+                    case REMOVE_CALLBACK:
+                        name = "handleRemoveCallback";
+                        handleRemoveCallback((QSTile.Callback) msg.obj);
+                        break;
+                    case CLICK:
+                        name = "handleClick";
+                        if (mState.disabledByPolicy) {
+                            Intent intent = RestrictedLockUtils.getShowAdminSupportDetailsIntent(
+                                    mContext, mState.enforcedAdmin);
+                            mHost.startActivityDismissingKeyguard(intent);
+                        } else {
+                            mAnnounceNextStateChange = true;
+                            handleClick();
+                        }
+                        break;
+                    case SECONDARY_CLICK:
+                        name = "handleSecondaryClick";
+                        handleSecondaryClick();
+                        break;
+                    case LONG_CLICK:
+                        name = "handleLongClick";
+                        handleLongClick();
+                        break;
+                    case REFRESH_STATE:
+                        name = "handleRefreshState";
+                        handleRefreshState(msg.obj);
+                        break;
+                    case SHOW_DETAIL:
+                        name = "handleShowDetail";
+                        handleShowDetail(msg.arg1 != 0);
+                        break;
+                    case USER_SWITCH:
+                        name = "handleUserSwitch";
+                        handleUserSwitch(msg.arg1);
+                        break;
+                    case TOGGLE_STATE_CHANGED:
+                        name = "handleToggleStateChanged";
+                        handleToggleStateChanged(msg.arg1 != 0);
+                        break;
+                    case SCAN_STATE_CHANGED:
+                        name = "handleScanStateChanged";
+                        handleScanStateChanged(msg.arg1 != 0);
+                        break;
+                    case DESTROY:
+                        name = "handleDestroy";
+                        handleDestroy();
+                        break;
+                    case CLEAR_STATE:
+                        name = "handleClearState";
+                        handleClearState();
+                        break;
+                    case SET_LISTENING:
+                        name = "setListening";
+                        setListening(msg.arg1 != 0);
+                        break;
+                    default:
+                        throw new IllegalArgumentException("Unknown msg: " + msg.what);
                 }
             } catch (Throwable t) {
                 final String error = "Error in " + name;
@@ -568,11 +583,14 @@ public abstract class QSTile<TState extends State> {
         public String minimalAccessibilityClassName;
         public String expandedAccessibilityClassName;
 
+        public boolean value;
+
         public boolean copyTo(State other) {
             if (other == null) throw new IllegalArgumentException();
             if (!other.getClass().equals(getClass())) throw new IllegalArgumentException();
             final boolean changed = !Objects.equals(other.icon, icon)
                     || !Objects.equals(other.label, label)
+                    || !Objects.equals(other.value, value)
                     || !Objects.equals(other.contentDescription, contentDescription)
                     || !Objects.equals(other.autoMirrorDrawable, autoMirrorDrawable)
                     || !Objects.equals(other.dualLabelContentDescription,
@@ -587,6 +605,7 @@ public abstract class QSTile<TState extends State> {
                     || !Objects.equals(other.enforcedAdmin, enforcedAdmin);
             other.icon = icon;
             other.label = label;
+            other.value = value;
             other.contentDescription = contentDescription;
             other.dualLabelContentDescription = dualLabelContentDescription;
             other.minimalContentDescription = minimalContentDescription;
@@ -613,6 +632,7 @@ public abstract class QSTile<TState extends State> {
             final StringBuilder sb = new StringBuilder(getClass().getSimpleName()).append('[');
             sb.append(",icon=").append(icon);
             sb.append(",label=").append(label);
+            sb.append(",value=").append(value);
             sb.append(",contentDescription=").append(contentDescription);
             sb.append(",dualLabelContentDescription=").append(dualLabelContentDescription);
             sb.append(",minimalContentDescription=").append(minimalContentDescription);
