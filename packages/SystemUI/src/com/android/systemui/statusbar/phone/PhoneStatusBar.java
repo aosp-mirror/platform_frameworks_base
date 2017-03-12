@@ -560,7 +560,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                     Settings.System.STATUS_BAR_SHOW_TICKER),
                     false, this, UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.STATUS_BAR_CLOCK_STYLE),
+                    Settings.System.STATUSBAR_CLOCK_STYLE),
                     false, this, UserHandle.USER_ALL);
             update();
         }

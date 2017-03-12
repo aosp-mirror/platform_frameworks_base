@@ -21,8 +21,7 @@ import android.util.AttributeSet;
 import android.widget.TextSwitcher;
 import com.android.systemui.statusbar.phone.Ticker;
 
-public class TickerView extends TextSwitcher
-{
+public class TickerView extends TextSwitcher {
     Ticker mTicker;
 
     public TickerView(Context context, AttributeSet attrs) {

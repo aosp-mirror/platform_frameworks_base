@@ -18,7 +18,6 @@ package android.widget;
 
 import android.annotation.DrawableRes;
 import android.content.Context;
-import android.content.res.ColorStateList;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.util.AttributeSet;
@@ -56,11 +55,15 @@ public class ImageSwitcher extends ViewSwitcher
         showNext();
     }
 
-    public void setColoredImageDrawable(Drawable drawable, ColorStateList tint)
-    {
+    public void setImageDrawableTint(Drawable drawable, int tint, boolean isGrayscale) {
         ImageView image = (ImageView)this.getNextView();
-        image.setImageDrawable(drawable);
-        image.setImageTintList(tint);
+        if (isGrayscale) {
+            drawable.setTint(tint);
+            image.setImageDrawable(drawable);
+        } else  {
+            image.setImageDrawable(drawable);
+            image.setImageTintList(null);
+        }
         showNext();
     }
 
