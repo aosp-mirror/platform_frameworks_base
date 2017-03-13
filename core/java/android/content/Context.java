@@ -2383,6 +2383,38 @@ public abstract class Context {
                                             IntentFilter filter);
 
     /**
+     * Register to receive intent broadcasts, with the receiver optionally being
+     * exposed to Instant Apps. See
+     * {@link #registerReceiver(BroadcastReceiver, IntentFilter)} for more
+     * information. By default Instant Apps cannot interact with receivers in other
+     * applications, this allows you to expose a receiver that Instant Apps can
+     * interact with.
+     *
+     * <p>See {@link BroadcastReceiver} for more information on Intent broadcasts.
+     *
+     * <p>As of {@link android.os.Build.VERSION_CODES#ICE_CREAM_SANDWICH}, receivers
+     * registered with this method will correctly respect the
+     * {@link Intent#setPackage(String)} specified for an Intent being broadcast.
+     * Prior to that, it would be ignored and delivered to all matching registered
+     * receivers.  Be careful if using this for security.</p>
+     *
+     * @param receiver The BroadcastReceiver to handle the broadcast.
+     * @param filter Selects the Intent broadcasts to be received.
+     * @param visibleToInstantApps If the receiver accepts broadcasts from Instant Apps.
+     *
+     * @return The first sticky intent found that matches <var>filter</var>,
+     *         or null if there are none.
+     *
+     * @see #registerReceiver(BroadcastReceiver, IntentFilter)
+     * @see #sendBroadcast
+     * @see #unregisterReceiver
+     */
+    @Nullable
+    public abstract Intent registerReceiver(@Nullable BroadcastReceiver receiver,
+                                            IntentFilter filter,
+                                            boolean visibleToInstantApps);
+
+    /**
      * Register to receive intent broadcasts, to run in the context of
      * <var>scheduler</var>.  See
      * {@link #registerReceiver(BroadcastReceiver, IntentFilter)} for more
@@ -2417,6 +2449,43 @@ public abstract class Context {
     public abstract Intent registerReceiver(BroadcastReceiver receiver,
             IntentFilter filter, @Nullable String broadcastPermission,
             @Nullable Handler scheduler);
+
+    /**
+     * Register to receive intent broadcasts, with the receiver optionally being
+     * exposed to Instant Apps. See
+     * {@link #registerReceiver(BroadcastReceiver, IntentFilter, boolean)} and
+     * {@link #registerReceiver(BroadcastReceiver, IntentFilter, String, Handler)}
+     * for more information.
+     *
+     * <p>See {@link BroadcastReceiver} for more information on Intent broadcasts.
+     *
+     * <p>As of {@link android.os.Build.VERSION_CODES#ICE_CREAM_SANDWICH}, receivers
+     * registered with this method will correctly respect the
+     * {@link Intent#setPackage(String)} specified for an Intent being broadcast.
+     * Prior to that, it would be ignored and delivered to all matching registered
+     * receivers.  Be careful if using this for security.</p>
+     *
+     * @param receiver The BroadcastReceiver to handle the broadcast.
+     * @param filter Selects the Intent broadcasts to be received.
+     * @param broadcastPermission String naming a permissions that a
+     *      broadcaster must hold in order to send an Intent to you.  If null,
+     *      no permission is required.
+     * @param scheduler Handler identifying the thread that will receive
+     *      the Intent.  If null, the main thread of the process will be used.
+     * @param visibleToInstantApps If the receiver accepts broadcasts from Instant Apps.
+     *
+     * @return The first sticky intent found that matches <var>filter</var>,
+     *         or null if there are none.
+     *
+     * @see #registerReceiver(BroadcastReceiver, IntentFilter, boolean)
+     * @see #registerReceiver(BroadcastReceiver, IntentFilter, String, Handler)
+     * @see #sendBroadcast
+     * @see #unregisterReceiver
+     */
+    @Nullable
+    public abstract Intent registerReceiver(BroadcastReceiver receiver,
+            IntentFilter filter, @Nullable String broadcastPermission,
+            @Nullable Handler scheduler, boolean visibleToInstantApps);
 
     /**
      * @hide

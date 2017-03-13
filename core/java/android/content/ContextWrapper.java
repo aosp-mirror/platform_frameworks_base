@@ -605,10 +605,24 @@ public class ContextWrapper extends Context {
 
     @Override
     public Intent registerReceiver(
+        BroadcastReceiver receiver, IntentFilter filter, boolean visibleToInstantApps) {
+        return mBase.registerReceiver(receiver, filter, visibleToInstantApps);
+    }
+
+    @Override
+    public Intent registerReceiver(
         BroadcastReceiver receiver, IntentFilter filter,
         String broadcastPermission, Handler scheduler) {
         return mBase.registerReceiver(receiver, filter, broadcastPermission,
                 scheduler);
+    }
+
+    @Override
+    public Intent registerReceiver(
+        BroadcastReceiver receiver, IntentFilter filter,
+        String broadcastPermission, Handler scheduler, boolean visibleToInstantApps) {
+        return mBase.registerReceiver(receiver, filter, broadcastPermission,
+                scheduler, visibleToInstantApps);
     }
 
     /** @hide */

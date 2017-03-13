@@ -1607,8 +1607,21 @@ public class BridgeContext extends Context {
     }
 
     @Override
+    public Intent registerReceiver(BroadcastReceiver arg0, IntentFilter arg1, boolean arg2) {
+        // pass
+        return null;
+    }
+
+    @Override
     public Intent registerReceiver(BroadcastReceiver arg0, IntentFilter arg1,
             String arg2, Handler arg3) {
+        // pass
+        return null;
+    }
+
+    @Override
+    public Intent registerReceiver(BroadcastReceiver arg0, IntentFilter arg1,
+            String arg2, Handler arg3, boolean arg4) {
         // pass
         return null;
     }

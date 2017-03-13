@@ -623,6 +623,37 @@ public final class BroadcastQueue {
             skip = true;
         }
 
+        // Ensure that broadcasts are only sent to other Instant Apps if they are marked as
+        // visible to Instant Apps.
+        final boolean visibleToInstantApps =
+                (r.intent.getFlags() & Intent.FLAG_RECEIVER_VISIBLE_TO_INSTANT_APPS) != 0;
+
+        if (!skip && !visibleToInstantApps && filter.instantApp
+                && filter.receiverList.uid != r.callingUid) {
+            Slog.w(TAG, "Instant App Denial: receiving "
+                    + r.intent.toString()
+                    + " to " + filter.receiverList.app
+                    + " (pid=" + filter.receiverList.pid
+                    + ", uid=" + filter.receiverList.uid + ")"
+                    + " due to sender " + r.callerPackage
+                    + " (uid " + r.callingUid + ")"
+                    + " not specifying FLAG_RECEIVER_VISIBLE_TO_INSTANT_APPS");
+            skip = true;
+        }
+
+        if (!skip && !filter.visibleToInstantApp && r.callerInstantApp
+                && filter.receiverList.uid != r.callingUid) {
+            Slog.w(TAG, "Instant App Denial: receiving "
+                    + r.intent.toString()
+                    + " to " + filter.receiverList.app
+                    + " (pid=" + filter.receiverList.pid
+                    + ", uid=" + filter.receiverList.uid + ")"
+                    + " requires receiver be visible to instant apps"
+                    + " due to sender " + r.callerPackage
+                    + " (uid " + r.callingUid + ")");
+            skip = true;
+        }
+
         if (skip) {
             r.delivery[index] = BroadcastRecord.DELIVERY_SKIPPED;
             return;
@@ -1120,6 +1151,30 @@ public final class BroadcastQueue {
                             + android.Manifest.permission.INTERACT_ACROSS_USERS);
                     skip = true;
                 }
+            }
+            final boolean visibleToInstantApps =
+                    (r.intent.getFlags() & Intent.FLAG_RECEIVER_VISIBLE_TO_INSTANT_APPS) != 0;
+            if (!skip && info.activityInfo.applicationInfo.isInstantApp()
+                    && !visibleToInstantApps
+                    && r.callingUid != info.activityInfo.applicationInfo.uid) {
+                Slog.w(TAG, "Instant App Denial: receiving "
+                        + r.intent
+                        + " to " + component.flattenToShortString()
+                        + " due to sender " + r.callerPackage
+                        + " (uid " + r.callingUid + ")"
+                        + " not specifying FLAG_RECEIVER_VISIBLE_TO_INSTANT_APPS");
+                skip = true;
+            }
+            if (!skip && r.callerInstantApp
+                    && (info.activityInfo.flags & ActivityInfo.FLAG_VISIBLE_TO_EPHEMERAL) == 0
+                    && r.callingUid != info.activityInfo.applicationInfo.uid) {
+                Slog.w(TAG, "Instant App Denial: receiving "
+                        + r.intent
+                        + " to " + component.flattenToShortString()
+                        + " requires receiver have visibleToInstantApps set"
+                        + " due to sender " + r.callerPackage
+                        + " (uid " + r.callingUid + ")");
+                skip = true;
             }
             if (!skip) {
                 r.manifestCount++;

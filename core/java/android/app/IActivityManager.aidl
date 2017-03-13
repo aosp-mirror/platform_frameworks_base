@@ -100,7 +100,7 @@ interface IActivityManager {
     boolean finishActivity(in IBinder token, int code, in Intent data, int finishTask);
     Intent registerReceiver(in IApplicationThread caller, in String callerPackage,
             in IIntentReceiver receiver, in IntentFilter filter,
-            in String requiredPermission, int userId);
+            in String requiredPermission, int userId, boolean visibleToInstantApps);
     void unregisterReceiver(in IIntentReceiver receiver);
     int broadcastIntent(in IApplicationThread caller, in Intent intent,
             in String resolvedType, in IIntentReceiver resultTo, int resultCode,
