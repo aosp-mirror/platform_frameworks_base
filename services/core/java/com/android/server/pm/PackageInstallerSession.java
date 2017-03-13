@@ -56,7 +56,9 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
+import android.os.ProxyFileDescriptorCallback;
 import android.os.RemoteException;
+import android.os.RevocableFileDescriptor;
 import android.os.UserHandle;
 import android.os.storage.StorageManager;
 import android.system.ErrnoException;
@@ -148,7 +150,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private String mFinalMessage;
 
     @GuardedBy("mLock")
-    private ArrayList<FileBridge> mBridges = new ArrayList<>();
+    private final ArrayList<RevocableFileDescriptor> mFds = new ArrayList<>();
+    @GuardedBy("mLock")
+    private final ArrayList<FileBridge> mBridges = new ArrayList<>();
 
     @GuardedBy("mLock")
     private IPackageInstallObserver2 mRemoteObserver;
@@ -430,12 +434,20 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         // Quick sanity check of state, and allocate a pipe for ourselves. We
         // then do heavy disk allocation outside the lock, but this open pipe
         // will block any attempted install transitions.
+        final RevocableFileDescriptor fd;
         final FileBridge bridge;
         synchronized (mLock) {
             assertPreparedAndNotSealed("openWrite");
 
-            bridge = new FileBridge();
-            mBridges.add(bridge);
+            if (PackageInstaller.ENABLE_REVOCABLE_FD) {
+                fd = new RevocableFileDescriptor();
+                bridge = null;
+                mFds.add(fd);
+            } else {
+                fd = null;
+                bridge = new FileBridge();
+                mBridges.add(bridge);
+            }
         }
 
         try {
@@ -468,9 +480,14 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 Libcore.os.lseek(targetFd, offsetBytes, OsConstants.SEEK_SET);
             }
 
-            bridge.setTargetFile(targetFd);
-            bridge.start();
-            return new ParcelFileDescriptor(bridge.getClientSocket());
+            if (PackageInstaller.ENABLE_REVOCABLE_FD) {
+                fd.init(mContext, targetFd);
+                return fd.getRevocableFileDescriptor();
+            } else {
+                bridge.setTargetFile(targetFd);
+                bridge.start();
+                return new ParcelFileDescriptor(bridge.getClientSocket());
+            }
 
         } catch (ErrnoException e) {
             throw e.rethrowAsIOException();
@@ -512,6 +529,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             wasSealed = mSealed;
             if (!mSealed) {
                 // Verify that all writers are hands-off
+                for (RevocableFileDescriptor fd : mFds) {
+                    if (!fd.isRevoked()) {
+                        throw new SecurityException("Files still open");
+                    }
+                }
                 for (FileBridge bridge : mBridges) {
                     if (!bridge.isClosed()) {
                         throw new SecurityException("Files still open");
@@ -1170,6 +1192,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             mDestroyed = true;
 
             // Force shut down all bridges
+            for (RevocableFileDescriptor fd : mFds) {
+                fd.revoke();
+            }
             for (FileBridge bridge : mBridges) {
                 bridge.forceClose();
             }
@@ -1211,6 +1236,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         pw.printPair("mPermissionsAccepted", mPermissionsAccepted);
         pw.printPair("mRelinquished", mRelinquished);
         pw.printPair("mDestroyed", mDestroyed);
+        pw.printPair("mFds", mFds.size());
         pw.printPair("mBridges", mBridges.size());
         pw.printPair("mFinalStatus", mFinalStatus);
         pw.printPair("mFinalMessage", mFinalMessage);
