@@ -18,7 +18,6 @@ package android.provider;
 
 import static android.net.TrafficStats.KB_IN_BYTES;
 import static android.system.OsConstants.SEEK_SET;
-
 import static com.android.internal.util.Preconditions.checkArgument;
 import static com.android.internal.util.Preconditions.checkCollectionElementsNotNull;
 import static com.android.internal.util.Preconditions.checkCollectionNotEmpty;
@@ -29,6 +28,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
@@ -38,6 +38,7 @@ import android.graphics.Matrix;
 import android.graphics.Point;
 import android.media.ExifInterface;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.OperationCanceledException;
@@ -45,6 +46,7 @@ import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.ParcelFileDescriptor.OnCloseListener;
 import android.os.Parcelable;
+import android.os.ParcelableException;
 import android.os.RemoteException;
 import android.os.storage.StorageVolume;
 import android.system.ErrnoException;
@@ -147,9 +149,9 @@ public final class DocumentsContract {
     /**
      * Action of intent issued by DocumentsUI when user wishes to open/configure/manage a particular
      * document in the provider application.
-     * 
+     *
      * <p>When issued, the intent will include the URI of the document as the intent data.
-     * 
+     *
      * <p>A provider wishing to provide support for this action should do two things.
      * <li>Add an {@code <intent-filter>} matching this action.
      * <li>When supplying information in {@link DocumentsProvider#queryChildDocuments}, include
@@ -1023,7 +1025,8 @@ public final class DocumentsContract {
      *      android.os.CancellationSignal)
      */
     public static Bitmap getDocumentThumbnail(
-            ContentResolver resolver, Uri documentUri, Point size, CancellationSignal signal) {
+            ContentResolver resolver, Uri documentUri, Point size, CancellationSignal signal)
+            throws FileNotFoundException {
         final ContentProviderClient client = resolver.acquireUnstableContentProviderClient(
                 documentUri.getAuthority());
         try {
@@ -1032,6 +1035,7 @@ public final class DocumentsContract {
             if (!(e instanceof OperationCanceledException)) {
                 Log.w(TAG, "Failed to load thumbnail for " + documentUri + ": " + e);
             }
+            rethrowIfNecessary(resolver, e);
             return null;
         } finally {
             ContentProviderClient.releaseQuietly(client);
@@ -1113,20 +1117,20 @@ public final class DocumentsContract {
     /**
      * Create a new document with given MIME type and display name.
      *
-     * @param parentDocumentUri directory with
-     *            {@link Document#FLAG_DIR_SUPPORTS_CREATE}
+     * @param parentDocumentUri directory with {@link Document#FLAG_DIR_SUPPORTS_CREATE}
      * @param mimeType MIME type of new document
      * @param displayName name of new document
      * @return newly created document, or {@code null} if failed
      */
     public static Uri createDocument(ContentResolver resolver, Uri parentDocumentUri,
-            String mimeType, String displayName) {
+            String mimeType, String displayName) throws FileNotFoundException {
         final ContentProviderClient client = resolver.acquireUnstableContentProviderClient(
                 parentDocumentUri.getAuthority());
         try {
             return createDocument(client, parentDocumentUri, mimeType, displayName);
         } catch (Exception e) {
             Log.w(TAG, "Failed to create document", e);
+            rethrowIfNecessary(resolver, e);
             return null;
         } finally {
             ContentProviderClient.releaseQuietly(client);
@@ -1177,13 +1181,14 @@ public final class DocumentsContract {
      *         failed.
      */
     public static Uri renameDocument(ContentResolver resolver, Uri documentUri,
-            String displayName) {
+            String displayName) throws FileNotFoundException {
         final ContentProviderClient client = resolver.acquireUnstableContentProviderClient(
                 documentUri.getAuthority());
         try {
             return renameDocument(client, documentUri, displayName);
         } catch (Exception e) {
             Log.w(TAG, "Failed to rename document", e);
+            rethrowIfNecessary(resolver, e);
             return null;
         } finally {
             ContentProviderClient.releaseQuietly(client);
@@ -1208,7 +1213,8 @@ public final class DocumentsContract {
      * @param documentUri document with {@link Document#FLAG_SUPPORTS_DELETE}
      * @return if the document was deleted successfully.
      */
-    public static boolean deleteDocument(ContentResolver resolver, Uri documentUri) {
+    public static boolean deleteDocument(ContentResolver resolver, Uri documentUri)
+            throws FileNotFoundException {
         final ContentProviderClient client = resolver.acquireUnstableContentProviderClient(
                 documentUri.getAuthority());
         try {
@@ -1216,6 +1222,7 @@ public final class DocumentsContract {
             return true;
         } catch (Exception e) {
             Log.w(TAG, "Failed to delete document", e);
+            rethrowIfNecessary(resolver, e);
             return false;
         } finally {
             ContentProviderClient.releaseQuietly(client);
@@ -1240,13 +1247,14 @@ public final class DocumentsContract {
      * @return the copied document, or {@code null} if failed.
      */
     public static Uri copyDocument(ContentResolver resolver, Uri sourceDocumentUri,
-            Uri targetParentDocumentUri) {
+            Uri targetParentDocumentUri) throws FileNotFoundException {
         final ContentProviderClient client = resolver.acquireUnstableContentProviderClient(
                 sourceDocumentUri.getAuthority());
         try {
             return copyDocument(client, sourceDocumentUri, targetParentDocumentUri);
         } catch (Exception e) {
             Log.w(TAG, "Failed to copy document", e);
+            rethrowIfNecessary(resolver, e);
             return null;
         } finally {
             ContentProviderClient.releaseQuietly(client);
@@ -1274,7 +1282,7 @@ public final class DocumentsContract {
      * @return the moved document, or {@code null} if failed.
      */
     public static Uri moveDocument(ContentResolver resolver, Uri sourceDocumentUri,
-            Uri sourceParentDocumentUri, Uri targetParentDocumentUri) {
+            Uri sourceParentDocumentUri, Uri targetParentDocumentUri) throws FileNotFoundException {
         final ContentProviderClient client = resolver.acquireUnstableContentProviderClient(
                 sourceDocumentUri.getAuthority());
         try {
@@ -1282,6 +1290,7 @@ public final class DocumentsContract {
                     targetParentDocumentUri);
         } catch (Exception e) {
             Log.w(TAG, "Failed to move document", e);
+            rethrowIfNecessary(resolver, e);
             return null;
         } finally {
             ContentProviderClient.releaseQuietly(client);
@@ -1311,7 +1320,7 @@ public final class DocumentsContract {
      * @return true if the document was removed successfully.
      */
     public static boolean removeDocument(ContentResolver resolver, Uri documentUri,
-            Uri parentDocumentUri) {
+            Uri parentDocumentUri) throws FileNotFoundException {
         final ContentProviderClient client = resolver.acquireUnstableContentProviderClient(
                 documentUri.getAuthority());
         try {
@@ -1319,6 +1328,7 @@ public final class DocumentsContract {
             return true;
         } catch (Exception e) {
             Log.w(TAG, "Failed to remove document", e);
+            rethrowIfNecessary(resolver, e);
             return false;
         } finally {
             ContentProviderClient.releaseQuietly(client);
@@ -1379,7 +1389,8 @@ public final class DocumentsContract {
      * @return the path of the document, or {@code null} if failed.
      * @see DocumentsProvider#findDocumentPath(String, String)
      */
-    public static Path findDocumentPath(ContentResolver resolver, Uri treeUri) {
+    public static Path findDocumentPath(ContentResolver resolver, Uri treeUri)
+            throws FileNotFoundException {
         checkArgument(isTreeUri(treeUri), treeUri + " is not a tree uri.");
 
         final ContentProviderClient client = resolver.acquireUnstableContentProviderClient(
@@ -1388,6 +1399,7 @@ public final class DocumentsContract {
             return findDocumentPath(client, treeUri);
         } catch (Exception e) {
             Log.w(TAG, "Failed to find path", e);
+            rethrowIfNecessary(resolver, e);
             return null;
         } finally {
             ContentProviderClient.releaseQuietly(client);
@@ -1473,13 +1485,14 @@ public final class DocumentsContract {
      * @see Intent#EXTRA_EMAIL
      */
     public static IntentSender createWebLinkIntent(ContentResolver resolver, Uri uri,
-            Bundle options) {
+            Bundle options) throws FileNotFoundException {
         final ContentProviderClient client = resolver.acquireUnstableContentProviderClient(
                 uri.getAuthority());
         try {
             return createWebLinkIntent(client, uri, options);
         } catch (Exception e) {
             Log.w(TAG, "Failed to create a web link intent", e);
+            rethrowIfNecessary(resolver, e);
             return null;
         } finally {
             ContentProviderClient.releaseQuietly(client);
@@ -1542,6 +1555,20 @@ public final class DocumentsContract {
         }
 
         return new AssetFileDescriptor(pfd, 0, AssetFileDescriptor.UNKNOWN_LENGTH, extras);
+    }
+
+    private static void rethrowIfNecessary(ContentResolver resolver, Exception e)
+            throws FileNotFoundException {
+        // We only want to throw applications targetting O and above
+        if (resolver.getTargetSdkVersion() >= Build.VERSION_CODES.O) {
+            if (e instanceof ParcelableException) {
+                ((ParcelableException) e).maybeRethrow(FileNotFoundException.class);
+            } else if (e instanceof RemoteException ) {
+                ((RemoteException) e).rethrowAsRuntimeException();
+            } else if (e instanceof RuntimeException) {
+                throw (RuntimeException) e;
+            }
+        }
     }
 
     /**
