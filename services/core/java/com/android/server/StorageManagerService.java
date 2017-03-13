@@ -3275,8 +3275,13 @@ class StorageManagerService extends IStorageManager.Stub
         if (uid != Binder.getCallingUid()) {
             mContext.enforceCallingPermission(android.Manifest.permission.STORAGE_INTERNAL, TAG);
         }
-        // TODO: wire up to cache quota once merged
-        return 64 * TrafficStats.MB_IN_BYTES;
+        final long token = Binder.clearCallingIdentity();
+        final StorageStatsManager stats = mContext.getSystemService(StorageStatsManager.class);
+        try {
+            return stats.getCacheQuotaBytes(volumeUuid, uid);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 
     @Override
