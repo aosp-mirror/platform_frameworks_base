@@ -286,6 +286,7 @@ LOCAL_SHARED_LIBRARIES := \
     libhwbinder \
     libvintf \
     libnativewindow \
+    libtextclassifier \
 
 LOCAL_SHARED_LIBRARIES += \
     libhwui \
