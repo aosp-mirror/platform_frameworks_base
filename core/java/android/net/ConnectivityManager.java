@@ -2963,7 +2963,6 @@ public class ConnectivityManager {
      * @param handler {@link Handler} to specify the thread upon which the callback will be invoked.
      * @throws IllegalArgumentException if {@code request} specifies any mutable
      *         {@code NetworkCapabilities}.
-     * @hide
      */
     public void requestNetwork(
             NetworkRequest request, NetworkCallback networkCallback, Handler handler) {
@@ -3080,8 +3079,6 @@ public class ConnectivityManager {
      * @param networkCallback The {@link NetworkCallback} to be utilized for this request. Note
      *                        the callback must not be shared - it uniquely specifies this request.
      * @param handler {@link Handler} to specify the thread upon which the callback will be invoked.
-     *
-     * @hide
      */
     public void requestNetwork(NetworkRequest request, int timeoutMs,
             NetworkCallback networkCallback, Handler handler) {
@@ -3221,7 +3218,6 @@ public class ConnectivityManager {
      * @param networkCallback The {@link NetworkCallback} that the system will call as suitable
      *                        networks change state.
      * @param handler {@link Handler} to specify the thread upon which the callback will be invoked.
-     * @hide
      */
     public void registerNetworkCallback(
             NetworkRequest request, NetworkCallback networkCallback, Handler handler) {
@@ -3295,7 +3291,6 @@ public class ConnectivityManager {
      * @param networkCallback The {@link NetworkCallback} that the system will call as the
      *                        system default network changes.
      * @param handler {@link Handler} to specify the thread upon which the callback will be invoked.
-     * @hide
      */
     public void registerDefaultNetworkCallback(NetworkCallback networkCallback, Handler handler) {
         // This works because if the NetworkCapabilities are null,
