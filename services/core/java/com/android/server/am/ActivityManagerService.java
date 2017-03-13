@@ -691,6 +691,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             Process.setThreadPriority(tid, -2);
         }
         state.regionCounter++;
+        if (LockGuard.ENABLED) {
+            LockGuard.guard(LockGuard.INDEX_ACTIVITY);
+        }
     }
 
     static void resetPriorityAfterLockedSection() {
@@ -2657,6 +2660,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     // Note: This method is invoked on the main thread but may need to attach various
     // handlers to other threads.  So take care to be explicit about the looper.
     public ActivityManagerService(Context systemContext) {
+        LockGuard.installLock(this, LockGuard.INDEX_ACTIVITY);
         mContext = systemContext;
         mFactoryTest = FactoryTest.getMode();
         mSystemThread = ActivityThread.currentActivityThread();
