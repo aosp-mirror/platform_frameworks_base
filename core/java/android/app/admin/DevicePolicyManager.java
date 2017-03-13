@@ -535,18 +535,10 @@ public class DevicePolicyManager {
             = "android.app.extra.PROVISIONING_KEEP_ACCOUNT_ON_MIGRATION";
 
     /**
-     * A String extra that, holds the email address of the account which a managed profile is
-     * created for. Used with {@link #ACTION_PROVISION_MANAGED_PROFILE} and
-     * {@link DeviceAdminReceiver#ACTION_PROFILE_PROVISIONING_COMPLETE}.
-     *
-     * <p> This extra is part of the {@link #EXTRA_PROVISIONING_ADMIN_EXTRAS_BUNDLE}.
-     *
-     * <p> If the {@link #ACTION_PROVISION_MANAGED_PROFILE} intent that starts managed provisioning
-     * contains this extra, it is forwarded in the
-     * {@link DeviceAdminReceiver#ACTION_PROFILE_PROVISIONING_COMPLETE} intent to the mobile
-     * device management application that was set as the profile owner during provisioning.
-     * It is usually used to avoid that the user has to enter their email address twice.
+     * @deprecated From {@link android.os.Build.VERSION_CODES#O}, never used while provisioning the
+     * device.
      */
+    @Deprecated
     public static final String EXTRA_PROVISIONING_EMAIL_ADDRESS
         = "android.app.extra.PROVISIONING_EMAIL_ADDRESS";
 
