@@ -6687,16 +6687,15 @@ public class ActivityManagerService extends IActivityManager.Stub
                     : new ProfilerInfo(profileFile, profileFd, samplingInterval, profileAutoStop,
                                        profileStreamingOutput);
 
-            // We deprecated Build.SERIAL and only apps that target pre NMR1
-            // SDK can see it. Since access to the serial is now behind a
-            // permission we push down the value.
+            // We deprecated Build.SERIAL and it is not accessible to
+            // apps that target the v2 security sandbox. Since access to
+            // the serial is now behind a permission we push down the value.
             String buildSerial = Build.UNKNOWN;
-            // TODO: SHTOPSHIP Uncomment the check when clients migrate
-//            if (appInfo.targetSdkVersion <= Build.VERSION_CODES.N_MR1) {
+            if (appInfo.targetSandboxVersion != 2) {
                 buildSerial = IDeviceIdentifiersPolicyService.Stub.asInterface(
                         ServiceManager.getService(Context.DEVICE_IDENTIFIERS_SERVICE))
                         .getSerial();
-//            }
+            }
 
             // Check if this is a secondary process that should be incorporated into some
             // currently active instrumentation.  (Note we do this AFTER all of the profiling
