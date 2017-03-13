@@ -4,9 +4,9 @@
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
      You may obtain a copy of the License at
-  
+
           http://www.apache.org/licenses/LICENSE-2.0
-  
+
      Unless required by applicable law or agreed to in writing, software
      distributed under the License is distributed on an "AS IS" BASIS,
      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,6 +15,9 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label">Shell</string>
+
+    <!-- Title of notification channel for bug report related notifications. [CHAR LIMIT=50] -->
+    <string name="bugreport_notification_channel">Bug reports</string>
 
     <!-- Title of notification indicating a bugreport is being generated. [CHAR LIMIT=50] -->
     <string name="bugreport_in_progress_title">Bug report <xliff:g id="id">#%d</xliff:g> is being generated</string>
