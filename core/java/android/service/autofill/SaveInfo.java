@@ -198,6 +198,26 @@ public final class SaveInfo implements Parcelable {
             return this;
         }
 
+
+        /**
+         * @hide
+         */
+        // TODO(b/33197203): temporary fix to runtime crash
+        public @NonNull Builder addSavableIds(@Nullable AutoFillId... ids) {
+            throwIfDestroyed();
+
+            if (ids == null) {
+                return this;
+            }
+            for (AutoFillId id : ids) {
+                if (mSavableIds == null) {
+                    mSavableIds = new ArraySet<>();
+                }
+                mSavableIds.add(id.getDaRealId());
+            }
+            return this;
+        }
+
         /**
          * Sets an optional description to be shown in the UI when the user is asked to save.
          *
