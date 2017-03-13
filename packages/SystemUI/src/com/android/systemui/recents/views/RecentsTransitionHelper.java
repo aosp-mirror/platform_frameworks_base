@@ -16,6 +16,7 @@
 
 package com.android.systemui.recents.views;
 
+import static android.app.ActivityManager.StackId.ASSISTANT_STACK_ID;
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
@@ -303,7 +304,7 @@ public class RecentsTransitionHelper {
         // TODO: Sometimes targetStackId is not initialized after reboot, so we also have to
         // check for INVALID_STACK_ID
         if (targetStackId == FULLSCREEN_WORKSPACE_STACK_ID || targetStackId == DOCKED_STACK_ID
-                || targetStackId == INVALID_STACK_ID) {
+                || targetStackId == ASSISTANT_STACK_ID || targetStackId == INVALID_STACK_ID) {
             if (taskView == null) {
                 specs.add(composeOffscreenAnimationSpec(task, offscreenTaskRect));
             } else {
