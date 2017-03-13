@@ -427,13 +427,8 @@ public class RankingHelperTest {
     public void testCreateChannel_blocked() throws Exception {
         mHelper.setImportance(pkg, uid, NotificationManager.IMPORTANCE_NONE);
 
-        try {
-            mHelper.createNotificationChannel(pkg, uid,
-                    new NotificationChannel(pkg, "", IMPORTANCE_LOW), true);
-            fail("Channel creation should fail");
-        } catch (IllegalArgumentException e) {
-            // pass
-        }
+        mHelper.createNotificationChannel(pkg, uid,
+                new NotificationChannel(pkg, "bananas", IMPORTANCE_LOW), true);
     }
 
     @Test
