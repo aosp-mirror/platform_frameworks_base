@@ -860,7 +860,7 @@
     <string name="keyguard_unlock">Swipe up to unlock</string>
 
     <!-- Text on keyguard screen and in Quick Settings footer indicating that the device is enterprise-managed by a Device Owner [CHAR LIMIT=60] -->
-    <string name="do_disclosure_generic">This device is managed</string>
+    <string name="do_disclosure_generic">This device is managed by your organization</string>
 
     <!-- Text on keyguard screen and in Quick Settings footer indicating that the device is enterprise-managed by a Device Owner [CHAR LIMIT=40] -->
     <string name="do_disclosure_with_name">This device is managed by <xliff:g id="organization_name" example="Foo, Inc.">%s</xliff:g></string>
