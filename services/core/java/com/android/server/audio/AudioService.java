@@ -1241,6 +1241,13 @@ public class AudioService extends IAudioService.Stub
     /** @see AudioManager#adjustStreamVolume(int, int, int) */
     public void adjustStreamVolume(int streamType, int direction, int flags,
             String callingPackage) {
+        if ( streamType == AudioManager.STREAM_ACCESSIBILITY
+                && (PackageManager.PERMISSION_GRANTED != mContext.checkCallingOrSelfPermission(
+                        android.Manifest.permission.BIND_ACCESSIBILITY_SERVICE))) {
+            Log.w(TAG, "Trying to call adjustStreamVolume() for a11y without"
+                    + "BIND_ACCESSIBILITY_SERVICE / callingPackage=" + callingPackage);
+            return;
+        }
         adjustStreamVolume(streamType, direction, flags, callingPackage, callingPackage,
                 Binder.getCallingUid());
     }
@@ -1552,6 +1559,13 @@ public class AudioService extends IAudioService.Stub
 
     /** @see AudioManager#setStreamVolume(int, int, int) */
     public void setStreamVolume(int streamType, int index, int flags, String callingPackage) {
+        if ( streamType == AudioManager.STREAM_ACCESSIBILITY
+                && (PackageManager.PERMISSION_GRANTED != mContext.checkCallingOrSelfPermission(
+                        android.Manifest.permission.BIND_ACCESSIBILITY_SERVICE))) {
+            Log.w(TAG, "Trying to call setStreamVolume() for a11y without"
+                    + " BIND_ACCESSIBILITY_SERVICE  callingPackage=" + callingPackage);
+            return;
+        }
         setStreamVolume(streamType, index, flags, callingPackage, callingPackage,
                 Binder.getCallingUid());
     }

@@ -180,6 +180,9 @@
     <!-- accessibility -->
     <uses-permission android:name="android.permission.MODIFY_ACCESSIBILITY_DATA" />
 
+    <!-- to control accessibility volume -->
+    <uses-permission android:name="android.permission.BIND_ACCESSIBILITY_SERVICE" />
+
     <application
         android:name=".SystemUIApplication"
         android:persistent="true"
