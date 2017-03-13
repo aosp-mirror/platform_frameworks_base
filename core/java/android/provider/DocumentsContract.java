@@ -1560,7 +1560,7 @@ public final class DocumentsContract {
         if (resolver.getTargetSdkVersion() >= Build.VERSION_CODES.O) {
             if (e instanceof ParcelableException) {
                 ((ParcelableException) e).maybeRethrow(FileNotFoundException.class);
-            } else if (e instanceof RemoteException ) {
+            } else if (e instanceof RemoteException) {
                 ((RemoteException) e).rethrowAsRuntimeException();
             } else if (e instanceof RuntimeException) {
                 throw (RuntimeException) e;
