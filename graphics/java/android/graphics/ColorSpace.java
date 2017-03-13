@@ -490,16 +490,16 @@ public abstract class ColorSpace {
          *     <tr>
          *         <td>Opto-electronic transfer function (OETF)</td>
          *         <td colspan="4">\(\begin{equation}
-         *             C_{sRGB} = \begin{cases} 12.92 \times C_{linear} & C_{linear} \lt 0.0031308 \\
-         *             1.055 \times C_{linear}^{\frac{1}{2.4}} - 0.055 & C_{linear} \ge 0.0031308 \end{cases}
+         *             C_{DisplayP3} = \begin{cases} 12.92 \times C_{linear} & C_{linear} \lt 0.0030186 \\
+         *             1.055 \times C_{linear}^{\frac{1}{2.4}} - 0.055 & C_{linear} \ge 0.0030186 \end{cases}
          *             \end{equation}\)
          *         </td>
          *     </tr>
          *     <tr>
          *         <td>Electro-optical transfer function (EOTF)</td>
          *         <td colspan="4">\(\begin{equation}
-         *             C_{linear} = \begin{cases}\frac{C_{sRGB}}{12.92} & C_{sRGB} \lt 0.04045 \\
-         *             \left( \frac{C_{sRGB} + 0.055}{1.055} \right) ^{2.4} & C_{sRGB} \ge 0.04045 \end{cases}
+         *             C_{linear} = \begin{cases}\frac{C_{DisplayP3}}{12.92} & C_{sRGB} \lt 0.039 \\
+         *             \left( \frac{C_{DisplayP3} + 0.055}{1.055} \right) ^{2.4} & C_{sRGB} \ge 0.039 \end{cases}
          *             \end{equation}\)
          *         </td>
          *     </tr>
@@ -1482,7 +1482,7 @@ public abstract class ColorSpace {
                 "Display P3",
                 new float[] { 0.680f, 0.320f, 0.265f, 0.690f, 0.150f, 0.060f },
                 ILLUMINANT_D65,
-                new Rgb.TransferParameters(1 / 1.055, 0.055 / 1.055, 1 / 12.92, 0.04045, 2.4),
+                new Rgb.TransferParameters(1 / 1.055, 0.055 / 1.055, 1 / 12.92, 0.039, 2.4),
                 Named.DISPLAY_P3.ordinal()
         );
         sNamedColorSpaces[Named.NTSC_1953.ordinal()] = new ColorSpace.Rgb(
