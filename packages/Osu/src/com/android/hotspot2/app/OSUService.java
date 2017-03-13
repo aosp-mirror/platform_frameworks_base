@@ -46,8 +46,9 @@ public class OSUService extends IntentService {
 
     private static final String[] INTENTS = {
             WifiManager.SCAN_RESULTS_AVAILABLE_ACTION,
-            WifiManager.PASSPOINT_WNM_FRAME_RECEIVED_ACTION,
-            WifiManager.PASSPOINT_ICON_RECEIVED_ACTION,
+            // TODO(b/32883320): use updated intent definitions.
+            //WifiManager.PASSPOINT_WNM_FRAME_RECEIVED_ACTION,
+            //WifiManager.PASSPOINT_ICON_RECEIVED_ACTION,
             WifiManager.CONFIGURED_NETWORKS_CHANGED_ACTION,
             WifiManager.WIFI_STATE_CHANGED_ACTION,
             WifiManager.NETWORK_STATE_CHANGED_ACTION,
@@ -120,6 +121,8 @@ public class OSUService extends IntentService {
             case WifiManager.SCAN_RESULTS_AVAILABLE_ACTION:
                 mOsuManager.pushScanResults(wifiManager.getScanResults());
                 break;
+            // TODO(b/32883320): use updated intent definitions.
+            /*
             case WifiManager.PASSPOINT_WNM_FRAME_RECEIVED_ACTION:
                 long bssid = bundle.getLong(WifiManager.EXTRA_PASSPOINT_WNM_BSSID);
                 String url = bundle.getString(WifiManager.EXTRA_PASSPOINT_WNM_URL);
@@ -157,6 +160,7 @@ public class OSUService extends IntentService {
                         bundle.getString(WifiManager.EXTRA_PASSPOINT_ICON_FILE),
                         bundle.getByteArray(WifiManager.EXTRA_PASSPOINT_ICON_DATA));
                 break;
+            */
             case WifiManager.NETWORK_STATE_CHANGED_ACTION:
                 mOsuManager.networkConnectChange(
                         (WifiInfo) intent.getParcelableExtra(WifiManager.EXTRA_WIFI_INFO));
