@@ -3574,6 +3574,33 @@ message MetricsEvent {
     // The name of the activity being launched in an app transition event.
     APP_TRANSITION_ACTIVITY_NAME = 871;
 
+    // ACTION: Settings > App detail > Uninstall
+    ACTION_SETTINGS_UNINSTALL_APP = 872;
+
+    // ACTION: Settings > App detail > Uninstall Device admin app
+    ACTION_SETTINGS_UNINSTALL_DEVICE_ADMIN = 873;
+
+    // ACTION: Settings > App detail > Disable app
+    ACTION_SETTINGS_DISABLE_APP = 874;
+
+    // ACTION: Settings > App detail > Enable app
+    ACTION_SETTINGS_ENABLE_APP = 875;
+
+    // ACTION: Settings > App detail > Clear data
+    ACTION_SETTINGS_CLEAR_APP_DATA = 876;
+
+    // ACTION: Settings > App detail > Clear cache
+    ACTION_SETTINGS_CLEAR_APP_CACHE = 877;
+
+    // ACTION: Clicking on any search result in Settings.
+    ACTION_CLICK_SETTINGS_SEARCH_INLINE_RESULT = 878;
+
+    // FIELD: Settings inline search result name
+    FIELD_SETTINGS_SEARCH_INLINE_RESULT_NAME = 879;
+
+    // FIELD: Settings inline search result value
+    FIELD_SETTINGS_SEARCH_INLINE_RESULT_VALUE = 880;
+
     // ---- End O Constants, all O constants go above this line ----
 
     // Add new aosp constants above this line.
