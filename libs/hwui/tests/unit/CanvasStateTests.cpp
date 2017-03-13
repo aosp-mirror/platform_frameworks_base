@@ -74,7 +74,7 @@ TEST(CanvasState, simpleClipping) {
     state.clipRect(10, 10, 200, 200, SkClipOp::kIntersect);
     ASSERT_EQ(state.getRenderTargetClipBounds(), Rect(10, 10, 100, 100));
 
-    state.clipRect(50, 50, 150, 150, SkClipOp::kReplace);
+    state.clipRect(50, 50, 150, 150, SkClipOp::kReplace_deprecated);
     ASSERT_EQ(state.getRenderTargetClipBounds(), Rect(50, 50, 150, 150));
 }
 

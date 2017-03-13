@@ -506,19 +506,19 @@ RENDERTHREAD_OPENGL_PIPELINE_TEST(FrameBuilder, clippedMerging) {
         sk_sp<Bitmap> bitmap(TestUtils::createBitmap(20, 20));
 
         // left side clipped (to inset left half)
-        canvas.clipRect(10, 0, 50, 100, SkClipOp::kReplace);
+        canvas.clipRect(10, 0, 50, 100, SkClipOp::kReplace_deprecated);
         canvas.drawBitmap(*bitmap, 0, 40, nullptr);
 
         // top side clipped (to inset top half)
-        canvas.clipRect(0, 10, 100, 50, SkClipOp::kReplace);
+        canvas.clipRect(0, 10, 100, 50, SkClipOp::kReplace_deprecated);
         canvas.drawBitmap(*bitmap, 40, 0, nullptr);
 
         // right side clipped (to inset right half)
-        canvas.clipRect(50, 0, 90, 100, SkClipOp::kReplace);
+        canvas.clipRect(50, 0, 90, 100, SkClipOp::kReplace_deprecated);
         canvas.drawBitmap(*bitmap, 80, 40, nullptr);
 
         // bottom not clipped, just abutting (inset bottom half)
-        canvas.clipRect(0, 50, 100, 90, SkClipOp::kReplace);
+        canvas.clipRect(0, 50, 100, 90, SkClipOp::kReplace_deprecated);
         canvas.drawBitmap(*bitmap, 40, 70, nullptr);
     });
 
@@ -2308,7 +2308,7 @@ RENDERTHREAD_OPENGL_PIPELINE_TEST(FrameBuilder, clip_replace) {
     };
     auto node = TestUtils::createNode<RecordingCanvas>(20, 20, 30, 30,
             [](RenderProperties& props, RecordingCanvas& canvas) {
-        canvas.clipRect(0, -20, 10, 30, SkClipOp::kReplace);
+        canvas.clipRect(0, -20, 10, 30, SkClipOp::kReplace_deprecated);
         canvas.drawColor(SK_ColorWHITE, SkBlendMode::kSrcOver);
     });
 

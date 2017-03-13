@@ -93,7 +93,7 @@ public:
 
     SkCanvas* prepareToDraw() {
         //mCanvas->reset(mSize.width(), mSize.height());
-        mCanvas->clipRect(0, 0, mSize.width(), mSize.height(), SkClipOp::kReplace);
+        mCanvas->clipRect(0, 0, mSize.width(), mSize.height(), SkClipOp::kReplace_deprecated);
         return mCanvas->asSkCanvas();
     }
 
