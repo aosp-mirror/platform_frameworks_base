@@ -458,8 +458,8 @@ public class Preference implements Comparable<Preference> {
     }
 
     /**
-     * Return the extras Bundle object associated with this preference,
-     * returning null if there is not currently one.
+     * Return the extras Bundle object associated with this preference, returning {@code null} if
+     * there is not currently one.
      */
     public Bundle peekExtras() {
         return mExtras;
@@ -974,7 +974,7 @@ public class Preference implements Comparable<Preference> {
      * the persistent {@link SharedPreferences} storage by default or into
      * {@link PreferenceDataStore} if assigned.
      *
-     * @param persistent Set true if it should store its value(s) into the {@link SharedPreferences}.
+     * @param persistent set {@code true} if it should store its value(s) into the storage.
      */
     public void setPersistent(boolean persistent) {
         mPersistent = persistent;
@@ -1035,7 +1035,7 @@ public class Preference implements Comparable<Preference> {
      *
      * @param preferenceScreen A {@link PreferenceScreen} whose hierarchy click
      *            listener should be called in the proper order (between other
-     *            processing). May be null.
+     *            processing). May be {@code null}.
      * @hide
      */
     public void performClick(PreferenceScreen preferenceScreen) {
@@ -1102,9 +1102,9 @@ public class Preference implements Comparable<Preference> {
      * {@link SharedPreferences}, this is intended behavior to improve
      * performance.
      *
-     * @return The {@link SharedPreferences} where this Preference reads its value(s), or null if it
-     *         isn't attached to a Preference hierarchy or if {@link PreferenceDataStore} is used
-     *         instead.
+     * @return the {@link SharedPreferences} where this Preference reads its value(s). If
+     *         this preference isn't attached to a Preference hierarchy or if
+     *         a {@link PreferenceDataStore} has been set, this method returns {@code null}.
      * @see #getEditor()
      * @see #setPreferenceDataStore(PreferenceDataStore)
      */
@@ -1129,9 +1129,9 @@ public class Preference implements Comparable<Preference> {
      * not show up in the SharedPreferences, this is intended behavior to
      * improve performance.
      *
-     * @return A {@link SharedPreferences.Editor} where this preference saves its value(s), or null
-     *         if it isn't attached to a Preference hierarchy or if {@link PreferenceDataStore} is
-     *         used instead.
+     * @return a {@link SharedPreferences.Editor} where this preference saves its value(s). If
+     *         this preference isn't attached to a Preference hierarchy or if
+     *         a {@link PreferenceDataStore} has been set, this method returns {@code null}.
      * @see #shouldCommit()
      * @see #getSharedPreferences()
      * @see #setPreferenceDataStore(PreferenceDataStore)
@@ -1149,7 +1149,7 @@ public class Preference implements Comparable<Preference> {
      * {@link #getEditor()}. This may return false in situations where batch
      * committing is being done (by the manager) to improve performance.
      *
-     * <p>If this preference is using {@link PreferenceDataStore} this value should be irrelevant.
+     * <p>If this preference is using {@link PreferenceDataStore} this value is irrelevant.
      *
      * @return Whether the Preference should commit its saved value(s).
      * @see #getEditor()
@@ -1253,10 +1253,10 @@ public class Preference implements Comparable<Preference> {
     }
 
     /**
-     * Assigns a {@link PreferenceGroup} as the parent of this Preference. Set null to remove
-     * the current parent.
+     * Assigns a {@link PreferenceGroup} as the parent of this Preference. Set {@code null} to
+     * remove the current parent.
      *
-     * @param parentGroup Parent preference group of this Preference or null if none.
+     * @param parentGroup Parent preference group of this Preference or {@code null} if none.
      */
     void assignParent(@Nullable PreferenceGroup parentGroup) {
         mParentGroup = parentGroup;
@@ -1425,10 +1425,10 @@ public class Preference implements Comparable<Preference> {
     }
 
     /**
-     * Returns the {@link PreferenceGroup} which is this Preference assigned to or null if this
-     * preference is not assigned to any group or is a root Preference.
+     * Returns the {@link PreferenceGroup} which is this Preference assigned to or {@code null} if
+     * this preference is not assigned to any group or is a root Preference.
      *
-     * @return The parent PreferenceGroup or null if not attached to any.
+     * @return the parent PreferenceGroup or {@code null} if not attached to any
      */
     @Nullable
     public PreferenceGroup getParent() {
@@ -1483,7 +1483,7 @@ public class Preference implements Comparable<Preference> {
      * if {@link #shouldPersist()} is true).
      *
      * <p>In case of using {@link PreferenceDataStore}, the <var>restorePersistedValue</var> is
-     * always false. But the default value (if provided) is set.
+     * always {@code true}. But the default value (if provided) is set.
      *
      * <p>This may not always be called. One example is if it should not persist
      * but there is no default value given.
@@ -1910,9 +1910,9 @@ public class Preference implements Comparable<Preference> {
      * state. This state should only contain information that is not persistent
      * or can be reconstructed later.
      *
-     * @return A Parcelable object containing the current dynamic state of
-     *         this Preference, or null if there is nothing interesting to save.
-     *         The default implementation returns null.
+     * @return A Parcelable object containing the current dynamic state of this Preference, or
+     *         {@code null} if there is nothing interesting to save. The default implementation
+     *         returns {@code null}.
      * @see #onRestoreInstanceState
      * @see #saveHierarchyState
      */
@@ -1958,9 +1958,9 @@ public class Preference implements Comparable<Preference> {
     }
 
     /**
-     * Hook allowing a Preference to re-apply a representation of its internal
-     * state that had previously been generated by {@link #onSaveInstanceState}.
-     * This function will never be called with a null state.
+     * Hook allowing a Preference to re-apply a representation of its internal state that had
+     * previously been generated by {@link #onSaveInstanceState}. This function will never be called
+     * with a {@code null} state.
      *
      * @param state The saved state that had previously been returned by
      *            {@link #onSaveInstanceState}.
