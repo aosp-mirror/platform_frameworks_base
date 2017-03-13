@@ -3852,6 +3852,17 @@ public final class Settings {
         };
 
         /**
+         * Setting to determine whether or not to show the battery percentage in the status bar.
+         *    0 - Don't show percentage
+         *    1 - Show percentage
+         * @hide
+         */
+        public static final String SHOW_BATTERY_PERCENT = "status_bar_show_battery_percent";
+
+        /** @hide */
+        private static final Validator SHOW_BATTERY_PERCENT_VALIDATOR = sBooleanValidator;
+
+        /**
          * IMPORTANT: If you add a new public settings you also have to add it to
          * PUBLIC_SETTINGS below. If the new setting is hidden you have to add
          * it to PRIVATE_SETTINGS below. Also add a validator that can validate
@@ -3913,7 +3924,8 @@ public final class Settings {
             RINGTONE,
             LOCK_TO_APP_ENABLED,
             NOTIFICATION_SOUND,
-            ACCELEROMETER_ROTATION
+            ACCELEROMETER_ROTATION,
+            SHOW_BATTERY_PERCENT
         };
 
         /**
@@ -4013,6 +4025,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(POINTER_SPEED);
             PRIVATE_SETTINGS.add(LOCK_TO_APP_ENABLED);
             PRIVATE_SETTINGS.add(EGG_MODE);
+            PRIVATE_SETTINGS.add(SHOW_BATTERY_PERCENT);
         }
 
         /**
@@ -4090,6 +4103,7 @@ public final class Settings {
             VALIDATORS.put(WIFI_STATIC_NETMASK, WIFI_STATIC_NETMASK_VALIDATOR);
             VALIDATORS.put(WIFI_STATIC_DNS1, WIFI_STATIC_DNS1_VALIDATOR);
             VALIDATORS.put(WIFI_STATIC_DNS2, WIFI_STATIC_DNS2_VALIDATOR);
+            VALIDATORS.put(SHOW_BATTERY_PERCENT, SHOW_BATTERY_PERCENT_VALIDATOR);
         }
 
         /**

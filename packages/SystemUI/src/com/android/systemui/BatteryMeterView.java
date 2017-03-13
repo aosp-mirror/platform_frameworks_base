@@ -15,6 +15,8 @@
  */
 package com.android.systemui;
 
+import static android.provider.Settings.System.SHOW_BATTERY_PERCENT;
+
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -49,8 +51,6 @@ import java.text.NumberFormat;
 
 public class BatteryMeterView extends LinearLayout implements
         BatteryStateChangeCallback, Tunable, DarkReceiver, ConfigurationListener {
-
-    public static final String SHOW_PERCENT_SETTING = "status_bar_show_battery_percent";
 
     private final BatteryMeterDrawableBase mDrawable;
     private final String mSlotBattery;
@@ -129,7 +129,7 @@ public class BatteryMeterView extends LinearLayout implements
         mBatteryController = Dependency.get(BatteryController.class);
         mBatteryController.addCallback(this);
         getContext().getContentResolver().registerContentObserver(
-                Settings.System.getUriFor(SHOW_PERCENT_SETTING), false, mSettingObserver);
+                Settings.System.getUriFor(SHOW_BATTERY_PERCENT), false, mSettingObserver);
         updateShowPercent();
         Dependency.get(TunerService.class).addTunable(this, StatusBarIconController.ICON_BLACKLIST);
         Dependency.get(ConfigurationController.class).addCallback(this);
@@ -175,7 +175,7 @@ public class BatteryMeterView extends LinearLayout implements
     private void updateShowPercent() {
         final boolean showing = mBatteryPercentView != null;
         if (0 != Settings.System.getInt(getContext().getContentResolver(),
-                BatteryMeterView.SHOW_PERCENT_SETTING, 0) || mForceShowPercent) {
+                SHOW_BATTERY_PERCENT, 0) || mForceShowPercent) {
             if (!showing) {
                 mBatteryPercentView = loadPercentView();
                 if (mTextColor != 0) mBatteryPercentView.setTextColor(mTextColor);

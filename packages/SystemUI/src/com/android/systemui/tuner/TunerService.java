@@ -38,7 +38,7 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 
-import static com.android.systemui.BatteryMeterView.SHOW_PERCENT_SETTING;
+import static android.provider.Settings.System.SHOW_BATTERY_PERCENT;
 import com.android.systemui.DemoMode;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
@@ -213,7 +213,7 @@ public class TunerService {
         // A couple special cases.
         Settings.Global.putString(mContentResolver, DemoMode.DEMO_MODE_ALLOWED, null);
         Settings.System.putString(mContentResolver,
-                SHOW_PERCENT_SETTING, null);
+                SHOW_BATTERY_PERCENT, null);
         Intent intent = new Intent(DemoMode.ACTION_DEMO);
         intent.putExtra(DemoMode.EXTRA_COMMAND, DemoMode.COMMAND_EXIT);
         mContext.sendBroadcast(intent);
