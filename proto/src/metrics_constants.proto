@@ -3544,6 +3544,21 @@ message MetricsEvent {
     // internal platform metrics use.
     RESERVED_FOR_LOGBUILDER_PID = 865;
 
+    // ACTION: Settings > Connected devices > Bluetooth -> Available devices
+    ACTION_SETTINGS_BLUETOOTH_PAIR = 866;
+
+    // ACTION: Settings > Connected devices > Bluetooth -> Paired devices
+    ACTION_SETTINGS_BLUETOOTH_CONNECT = 867;
+
+    // ACTION: Settings > Connected devices > Bluetooth -> Connected device
+    ACTION_SETTINGS_BLUETOOTH_DISCONNECT = 868;
+
+    // ACTION: Settings > Connected devices > Bluetooth -> Error dialog
+    ACTION_SETTINGS_BLUETOOTH_CONNECT_ERROR = 869;
+
+    // ACTION: Settings > Connected devices > Bluetooth master switch Toggle
+    ACTION_SETTINGS_MASTER_SWITCH_BLUETOOTH_TOGGLE = 870;
+
     // ---- End O Constants, all O constants go above this line ----
 
     // Add new aosp constants above this line.
