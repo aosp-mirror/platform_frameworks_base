@@ -31,6 +31,7 @@ import android.os.ParcelUuid;
 import android.provider.OneTimeUseBuilder;
 
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,8 +54,8 @@ public final class BluetoothDeviceFilter implements DeviceFilter<BluetoothDevice
             List<ParcelUuid> serviceUuidMasks) {
         mNamePattern = namePattern;
         mAddress = address;
-        mServiceUuids = ArrayUtils.emptyIfNull(serviceUuids);
-        mServiceUuidMasks = ArrayUtils.emptyIfNull(serviceUuidMasks);
+        mServiceUuids = CollectionUtils.emptyIfNull(serviceUuids);
+        mServiceUuidMasks = CollectionUtils.emptyIfNull(serviceUuidMasks);
     }
 
     private BluetoothDeviceFilter(Parcel in) {

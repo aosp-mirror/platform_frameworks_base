@@ -1136,6 +1136,9 @@ public class DeviceIdleController extends SystemService
 
     private final class BinderService extends IDeviceIdleController.Stub {
         @Override public void addPowerSaveWhitelistApp(String name) {
+            if (DEBUG) {
+                Slog.i(TAG, "addPowerSaveWhitelistApp(name = " + name + ")");
+            }
             getContext().enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER,
                     null);
             long ident = Binder.clearCallingIdentity();
@@ -1147,6 +1150,9 @@ public class DeviceIdleController extends SystemService
         }
 
         @Override public void removePowerSaveWhitelistApp(String name) {
+            if (DEBUG) {
+                Slog.i(TAG, "removePowerSaveWhitelistApp(name = " + name + ")");
+            }
             getContext().enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER,
                     null);
             long ident = Binder.clearCallingIdentity();

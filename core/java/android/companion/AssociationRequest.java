@@ -23,6 +23,7 @@ import android.os.Parcelable;
 import android.provider.OneTimeUseBuilder;
 
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,7 +48,7 @@ public final class AssociationRequest implements Parcelable {
     private AssociationRequest(
             boolean singleDevice, @Nullable List<DeviceFilter<?>> deviceFilters) {
         this.mSingleDevice = singleDevice;
-        this.mDeviceFilters = ArrayUtils.emptyIfNull(deviceFilters);
+        this.mDeviceFilters = CollectionUtils.emptyIfNull(deviceFilters);
     }
 
     private AssociationRequest(Parcel in) {

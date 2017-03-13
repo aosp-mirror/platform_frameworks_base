@@ -31,7 +31,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Function;
 
 /**
  * ArrayUtils contains some methods that you can call to find out
@@ -235,35 +234,6 @@ public class ArrayUtils {
             }
         }
         return false;
-    }
-
-    @NonNull
-    public static <T> List<T> filter(@Nullable List<?> list, Class<T> c) {
-        if (isEmpty(list)) return Collections.emptyList();
-        ArrayList<T> result = null;
-        for (int i = 0; i < list.size(); i++) {
-            final Object item = list.get(i);
-            if (c.isInstance(item)) {
-                result = add(result, (T) item);
-            }
-        }
-        return emptyIfNull(result);
-    }
-
-    public static <T> boolean any(@Nullable List<T> items,
-            java.util.function.Predicate<T> predicate) {
-        return find(items, predicate) != null;
-    }
-
-    @Nullable
-    public static <T> T find(@Nullable List<T> items,
-            java.util.function.Predicate<T> predicate) {
-        if (isEmpty(items)) return null;
-        for (int i = 0; i < items.size(); i++) {
-            final T item = items.get(i);
-            if (predicate.test(item)) return item;
-        }
-        return null;
     }
 
     public static long total(@Nullable long[] array) {
@@ -502,29 +472,6 @@ public class ArrayUtils {
         } else {
             return cur;
         }
-    }
-
-    public static int size(@Nullable Collection<?> cur) {
-        return cur != null ? cur.size() : 0;
-    }
-
-    public static @NonNull <I, O> List<O> map(@Nullable List<I> cur,
-            Function<? super I, ? extends O> f) {
-        if (cur == null || cur.isEmpty()) return Collections.emptyList();
-        final ArrayList<O> result = new ArrayList<>();
-        for (int i = 0; i < cur.size(); i++) {
-            result.add(f.apply(cur.get(i)));
-        }
-        return result;
-    }
-
-    /**
-     * Returns the given list, or an immutable empty list if the provided list is null
-     *
-     * @see Collections#emptyList
-     */
-    public static @NonNull <T> List<T> emptyIfNull(@Nullable List<T> cur) {
-        return cur == null ? Collections.emptyList() : cur;
     }
 
     public static <T> boolean contains(@Nullable Collection<T> cur, T val) {

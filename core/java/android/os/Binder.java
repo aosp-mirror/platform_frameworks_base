@@ -26,6 +26,7 @@ import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Modifier;
+import java.util.function.Supplier;
 
 /**
  * Base class for a remotable object, the core part of a lightweight
@@ -244,6 +245,36 @@ public class Binder implements IBinder {
      * @see #clearCallingIdentity
      */
     public static final native void restoreCallingIdentity(long token);
+
+    /**
+     * Convenience method for running the provided action enclosed in
+     * {@link #clearCallingIdentity}/{@link #restoreCallingIdentity}
+     *
+     * @hide
+     */
+    public static final void withCleanCallingIdentity(Runnable action) {
+        long callingIdentity = clearCallingIdentity();
+        try {
+            action.run();
+        } finally {
+            restoreCallingIdentity(callingIdentity);
+        }
+    }
+
+    /**
+     * Convenience method for running the provided action enclosed in
+     * {@link #clearCallingIdentity}/{@link #restoreCallingIdentity} returning the result
+     *
+     * @hide
+     */
+    public static final <T> T withCleanCallingIdentity(Supplier<T> action) {
+        long callingIdentity = clearCallingIdentity();
+        try {
+            return action.get();
+        } finally {
+            restoreCallingIdentity(callingIdentity);
+        }
+    }
 
     /**
      * Sets the native thread-local StrictMode policy mask.
