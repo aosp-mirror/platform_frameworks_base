@@ -284,7 +284,7 @@ public class AlsaDevicesParser {
     //
     // Loging
     //
-    public void Log(String heading) {
+    private void Log(String heading) {
         if (DEBUG) {
             Slog.i(TAG, heading);
             for (AlsaDeviceRecord deviceRecord : mDeviceRecords) {

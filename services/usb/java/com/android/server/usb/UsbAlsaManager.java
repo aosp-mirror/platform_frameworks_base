@@ -189,10 +189,10 @@ public final class UsbAlsaManager {
                         AudioSystem.DEVICE_OUT_USB_DEVICE);
                 if (DEBUG) {
                     Slog.i(TAG, "pre-call device:0x" + Integer.toHexString(device) +
-                            " addr:" + address + " name:" + audioDevice.mDeviceName);
+                            " addr:" + address + " name:" + audioDevice.getDeviceName());
                 }
                 mAudioService.setWiredDeviceConnectionState(
-                        device, state, address, audioDevice.mDeviceName, TAG);
+                        device, state, address, audioDevice.getDeviceName(), TAG);
             }
 
             // Capture Device
@@ -201,7 +201,7 @@ public final class UsbAlsaManager {
                         AudioSystem.DEVICE_IN_USB_ACCESSORY :
                         AudioSystem.DEVICE_IN_USB_DEVICE);
                 mAudioService.setWiredDeviceConnectionState(
-                        device, state, address, audioDevice.mDeviceName, TAG);
+                        device, state, address, audioDevice.getDeviceName(), TAG);
             }
         } catch (RemoteException e) {
             Slog.e(TAG, "RemoteException in setWiredDeviceConnectionState");
@@ -329,8 +329,7 @@ public final class UsbAlsaManager {
         UsbAudioDevice audioDevice =
                 new UsbAudioDevice(card, device, hasPlayback, hasCapture, deviceClass);
         AlsaCardsParser.AlsaCardRecord cardRecord = mCardsParser.getCardRecordFor(card);
-        audioDevice.mDeviceName = cardRecord.mCardName;
-        audioDevice.mDeviceDescription = cardRecord.mCardDescription;
+        audioDevice.setDeviceNameAndDescription(cardRecord.mCardName, cardRecord.mCardDescription);
 
         notifyDeviceState(audioDevice, true /*enabled*/);
 
