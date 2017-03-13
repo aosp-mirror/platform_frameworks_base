@@ -60,7 +60,6 @@ import com.android.systemui.recents.events.component.ShowUserToastEvent;
 import com.android.systemui.recents.events.ui.RecentsDrawnEvent;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.model.RecentsTaskLoader;
-import com.android.systemui.recents.tv.RecentsTvImpl;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.CommandQueue;
 
@@ -86,7 +85,6 @@ public class Recents extends SystemUI
     public final static Set<String> RECENTS_ACTIVITIES = new HashSet<>();
     static {
         RECENTS_ACTIVITIES.add(RecentsImpl.RECENTS_ACTIVITY);
-        RECENTS_ACTIVITIES.add(RecentsTvImpl.RECENTS_TV_ACTIVITY);
     }
 
     // Purely for experimentation
@@ -205,13 +203,7 @@ public class Recents extends SystemUI
         sTaskLoader = new RecentsTaskLoader(mContext);
         sConfiguration = new RecentsConfiguration(mContext);
         mHandler = new Handler();
-        UiModeManager uiModeManager = (UiModeManager) mContext.
-                getSystemService(Context.UI_MODE_SERVICE);
-        if (uiModeManager.getCurrentModeType() == Configuration.UI_MODE_TYPE_TELEVISION) {
-            mImpl = new RecentsTvImpl(mContext);
-        } else {
-            mImpl = new RecentsImpl(mContext);
-        }
+        mImpl = new RecentsImpl(mContext);
 
         // Check if there is a recents override package
         if ("userdebug".equals(Build.TYPE) || "eng".equals(Build.TYPE)) {
