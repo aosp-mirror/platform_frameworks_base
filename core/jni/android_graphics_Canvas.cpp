@@ -178,10 +178,10 @@ static jboolean quickRejectPath(jlong canvasHandle, jlong pathHandle) {
 // from one to the other (though SkClipOp is destined to become a strict subset)
 static_assert(SkRegion::kDifference_Op == static_cast<SkRegion::Op>(SkClipOp::kDifference), "");
 static_assert(SkRegion::kIntersect_Op == static_cast<SkRegion::Op>(SkClipOp::kIntersect), "");
-static_assert(SkRegion::kUnion_Op == static_cast<SkRegion::Op>(SkClipOp::kUnion), "");
-static_assert(SkRegion::kXOR_Op == static_cast<SkRegion::Op>(SkClipOp::kXOR), "");
-static_assert(SkRegion::kReverseDifference_Op == static_cast<SkRegion::Op>(SkClipOp::kReverseDifference), "");
-static_assert(SkRegion::kReplace_Op == static_cast<SkRegion::Op>(SkClipOp::kReplace), "");
+static_assert(SkRegion::kUnion_Op == static_cast<SkRegion::Op>(SkClipOp::kUnion_deprecated), "");
+static_assert(SkRegion::kXOR_Op == static_cast<SkRegion::Op>(SkClipOp::kXOR_deprecated), "");
+static_assert(SkRegion::kReverseDifference_Op == static_cast<SkRegion::Op>(SkClipOp::kReverseDifference_deprecated), "");
+static_assert(SkRegion::kReplace_Op == static_cast<SkRegion::Op>(SkClipOp::kReplace_deprecated), "");
 
 static SkClipOp opHandleToClipOp(jint opHandle) {
     // The opHandle is defined in Canvas.java to be Region::Op
