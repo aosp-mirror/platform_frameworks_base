@@ -25,8 +25,8 @@ import android.hardware.usb.UsbInterface;
 import android.media.AudioSystem;
 import android.media.IAudioService;
 import android.media.midi.MidiDeviceInfo;
-import android.os.FileObserver;
 import android.os.Bundle;
+import android.os.FileObserver;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
@@ -41,10 +41,7 @@ import com.android.server.audio.AudioService;
 import libcore.io.IoUtils;
 
 import java.io.File;
-import java.io.FileDescriptor;
-import java.io.PrintWriter;
 import java.util.HashMap;
-import java.util.ArrayList;
 
 /**
  * UsbAlsaManager manages USB audio and MIDI devices.
@@ -498,6 +495,7 @@ public final class UsbAlsaManager {
     // Devices List
     //
 /*
+    //import java.util.ArrayList;
     public ArrayList<UsbAudioDevice> getConnectedDevices() {
         ArrayList<UsbAudioDevice> devices = new ArrayList<UsbAudioDevice>(mAudioDevices.size());
         for (HashMap.Entry<UsbDevice,UsbAudioDevice> entry : mAudioDevices.entrySet()) {
