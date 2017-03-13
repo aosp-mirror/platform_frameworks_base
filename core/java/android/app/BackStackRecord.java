@@ -370,7 +370,7 @@ final class BackStackRecord extends FragmentTransaction implements
 
     public BackStackRecord(FragmentManagerImpl manager) {
         mManager = manager;
-        mAllowOptimization = getTargetSdk() > Build.VERSION_CODES.N_MR1;
+        mAllowOptimization = mManager.getTargetSdk() > Build.VERSION_CODES.N_MR1;
     }
 
     public int getId() {
@@ -423,7 +423,7 @@ final class BackStackRecord extends FragmentTransaction implements
     }
 
     private void doAddOp(int containerViewId, Fragment fragment, String tag, int opcmd) {
-        if (getTargetSdk() > Build.VERSION_CODES.N_MR1) {
+        if (mManager.getTargetSdk() > Build.VERSION_CODES.N_MR1) {
             final Class fragmentClass = fragment.getClass();
             final int modifiers = fragmentClass.getModifiers();
             if ((fragmentClass.isAnonymousClass() || !Modifier.isPublic(modifiers)
@@ -1021,23 +1021,5 @@ final class BackStackRecord extends FragmentTransaction implements
 
     public boolean isEmpty() {
         return mOps.isEmpty();
-    }
-
-    /**
-     * @return the target SDK of the FragmentManager's application info. If the
-     * FragmentManager has been torn down, then 0 is returned.
-     */
-    private int getTargetSdk() {
-        FragmentHostCallback host = mManager.mHost;
-        if (host != null) {
-            Context context = host.getContext();
-            if (context != null) {
-                ApplicationInfo info = context.getApplicationInfo();
-                if (info != null) {
-                    return info.targetSdkVersion;
-                }
-            }
-        }
-        return 0;
     }
 }
