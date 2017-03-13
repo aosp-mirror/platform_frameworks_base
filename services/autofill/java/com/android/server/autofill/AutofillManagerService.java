@@ -67,13 +67,13 @@ import java.util.List;
  * Entry point service for autofill management.
  *
  * <p>This service provides the {@link IAutoFillManager} implementation and keeps a list of
- * {@link AutoFillManagerServiceImpl} per user; the real work is done by
- * {@link AutoFillManagerServiceImpl} itself.
+ * {@link AutofillManagerServiceImpl} per user; the real work is done by
+ * {@link AutofillManagerServiceImpl} itself.
  */
 // TODO(b/33197203): Handle removing of packages
-public final class AutoFillManagerService extends SystemService {
+public final class AutofillManagerService extends SystemService {
 
-    private static final String TAG = "AutoFillManagerService";
+    private static final String TAG = "AutofillManagerService";
 
     static final String RECEIVER_BUNDLE_EXTRA_SESSIONS = "sessions";
 
@@ -83,7 +83,7 @@ public final class AutoFillManagerService extends SystemService {
     private final Object mLock = new Object();
 
     /**
-     * Cache of {@link AutoFillManagerServiceImpl} per user id.
+     * Cache of {@link AutofillManagerServiceImpl} per user id.
      * <p>
      * It has to be mapped by user id because the same current user could have simultaneous sessions
      * associated to different user profiles (for example, in a multi-window environment or when
@@ -97,7 +97,7 @@ public final class AutoFillManagerService extends SystemService {
      */
     // TODO(b/33197203): Update the above comment
     @GuardedBy("mLock")
-    private SparseArray<AutoFillManagerServiceImpl> mServicesCache = new SparseArray<>();
+    private SparseArray<AutofillManagerServiceImpl> mServicesCache = new SparseArray<>();
 
     // TODO(b/33197203): set a different max (or disable it) on low-memory devices.
     private final LocalLog mRequestsHistory = new LocalLog(20);
@@ -115,7 +115,7 @@ public final class AutoFillManagerService extends SystemService {
         }
     };
 
-    public AutoFillManagerService(Context context) {
+    public AutofillManagerService(Context context) {
         super(context);
         mContext = context;
         mUi = new AutoFillUI(mContext);
@@ -157,10 +157,11 @@ public final class AutoFillManagerService extends SystemService {
      *
      * @return service instance.
      */
-    @NonNull AutoFillManagerServiceImpl getServiceForUserLocked(int userId) {
-        AutoFillManagerServiceImpl service = mServicesCache.get(userId);
+    @NonNull
+    AutofillManagerServiceImpl getServiceForUserLocked(int userId) {
+        AutofillManagerServiceImpl service = mServicesCache.get(userId);
         if (service == null) {
-            service = new AutoFillManagerServiceImpl(mContext, mLock,
+            service = new AutofillManagerServiceImpl(mContext, mLock,
                     mRequestsHistory, userId, mUi);
             mServicesCache.put(userId, service);
         }
@@ -174,7 +175,7 @@ public final class AutoFillManagerService extends SystemService {
         final IBinder activityToken = getTopActivityForUser();
         if (activityToken != null) {
             synchronized (mLock) {
-                final AutoFillManagerServiceImpl service = mServicesCache.get(userId);
+                final AutofillManagerServiceImpl service = mServicesCache.get(userId);
                 if (service == null) {
                     Log.w(TAG, "handleSaveForUser(): no cached service for userId " + userId);
                     return;
@@ -258,7 +259,7 @@ public final class AutoFillManagerService extends SystemService {
      * Removes a cached service for a given user.
      */
     private void removeCachedServiceLocked(int userId) {
-        final AutoFillManagerServiceImpl service = mServicesCache.get(userId);
+        final AutofillManagerServiceImpl service = mServicesCache.get(userId);
         if (service != null) {
             mServicesCache.delete(userId);
             service.destroyLocked();
@@ -269,7 +270,7 @@ public final class AutoFillManagerService extends SystemService {
      * Updates a cached service for a given user.
      */
     private void updateCachedServiceLocked(int userId) {
-        AutoFillManagerServiceImpl service = mServicesCache.get(userId);
+        AutofillManagerServiceImpl service = mServicesCache.get(userId);
         if (service != null) {
             service.updateLocked();
         }
@@ -299,7 +300,7 @@ public final class AutoFillManagerService extends SystemService {
         @Override
         public void setAuthenticationResult(Bundle data, IBinder activityToken, int userId) {
             synchronized (mLock) {
-                final AutoFillManagerServiceImpl service = getServiceForUserLocked(userId);
+                final AutofillManagerServiceImpl service = getServiceForUserLocked(userId);
                 service.setAuthenticationResultLocked(data, activityToken);
             }
         }
@@ -307,7 +308,7 @@ public final class AutoFillManagerService extends SystemService {
         @Override
         public void setHasCallback(IBinder activityToken, int userId, boolean hasIt) {
             synchronized (mLock) {
-                final AutoFillManagerServiceImpl service = getServiceForUserLocked(userId);
+                final AutofillManagerServiceImpl service = getServiceForUserLocked(userId);
                 service.setHasCallback(activityToken, hasIt);
             }
         }
@@ -319,7 +320,7 @@ public final class AutoFillManagerService extends SystemService {
             // TODO(b/33197203): make sure it's called by resumed / focused activity
 
             synchronized (mLock) {
-                final AutoFillManagerServiceImpl service = getServiceForUserLocked(userId);
+                final AutofillManagerServiceImpl service = getServiceForUserLocked(userId);
                 service.startSessionLocked(activityToken, windowToken, appCallback,
                         autofillId, bounds, value, hasCallback);
             }
@@ -329,7 +330,7 @@ public final class AutoFillManagerService extends SystemService {
         public void updateSession(IBinder activityToken, AutofillId id, Rect bounds,
                 AutofillValue value, int flags, int userId) {
             synchronized (mLock) {
-                final AutoFillManagerServiceImpl service = mServicesCache.get(
+                final AutofillManagerServiceImpl service = mServicesCache.get(
                         UserHandle.getCallingUserId());
                 if (service != null) {
                     service.updateSessionLocked(activityToken, id, bounds, value, flags);
@@ -340,10 +341,21 @@ public final class AutoFillManagerService extends SystemService {
         @Override
         public void finishSession(IBinder activityToken, int userId) {
             synchronized (mLock) {
-                final AutoFillManagerServiceImpl service = mServicesCache.get(
+                final AutofillManagerServiceImpl service = mServicesCache.get(
                         UserHandle.getCallingUserId());
                 if (service != null) {
                     service.finishSessionLocked(activityToken);
+                }
+            }
+        }
+
+        @Override
+        public void cancelSession(IBinder activityToken, int userId) {
+            synchronized (mLock) {
+                final AutofillManagerServiceImpl service = mServicesCache.get(
+                        UserHandle.getCallingUserId());
+                if (service != null) {
+                    service.cancelSessionLocked(activityToken);
                 }
             }
         }
@@ -366,7 +378,7 @@ public final class AutoFillManagerService extends SystemService {
                     pw.println(size);
                     for (int i = 0; i < size; i++) {
                         pw.print("\nService at index "); pw.println(i);
-                        final AutoFillManagerServiceImpl impl = mServicesCache.valueAt(i);
+                        final AutofillManagerServiceImpl impl = mServicesCache.valueAt(i);
                         impl.dumpLocked("  ", pw);
                     }
                 }
@@ -379,7 +391,7 @@ public final class AutoFillManagerService extends SystemService {
         @Override
         public void onShellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
                 String[] args, ShellCallback callback, ResultReceiver resultReceiver) {
-            (new AutoFillManagerServiceShellCommand(AutoFillManagerService.this)).exec(
+            (new AutofillManagerServiceShellCommand(AutofillManagerService.this)).exec(
                     this, in, out, err, args, callback, resultReceiver);
         }
     }

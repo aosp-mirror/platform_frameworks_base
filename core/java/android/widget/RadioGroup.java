@@ -188,7 +188,7 @@ public class RadioGroup extends LinearLayout {
         }
         final AutofillManager afm = mContext.getSystemService(AutofillManager.class);
         if (afm != null) {
-            afm.valueChanged(this);
+            afm.notifyValueChanged(this);
         }
     }
 

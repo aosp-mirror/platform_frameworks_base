@@ -18,6 +18,7 @@
     android:id="@+id/autofill_dataset_picker"
     android:layout_width="wrap_content"
     android:layout_height="fill_parent"
-    android:divider="?android:attr/listDivider"
-    android:background="#ffffffff">
+    android:divider="@null"
+    android:background="#ffffffff"
+    android:elevation="@dimen/floating_window_z">
 </ListView>

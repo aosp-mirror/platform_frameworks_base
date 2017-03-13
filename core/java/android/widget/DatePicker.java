@@ -182,7 +182,7 @@ public class DatePicker extends FrameLayout {
         mDelegate.setAutoFillChangeListener((v, y, m, d) -> {
             final AutofillManager afm = context.getSystemService(AutofillManager.class);
             if (afm != null) {
-                afm.valueChanged(this);
+                afm.notifyValueChanged(this);
             }
         });
     }

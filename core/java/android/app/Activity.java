@@ -1783,7 +1783,7 @@ public class Activity extends ContextThemeWrapper
         mTranslucentCallback = null;
         mCalled = true;
         if (isFinishing() && mAutoFillResetNeeded) {
-            getSystemService(AutofillManager.class).reset();
+            getSystemService(AutofillManager.class).commit();
         }
     }
 

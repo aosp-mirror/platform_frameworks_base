@@ -918,7 +918,7 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
         // Always notify AutoFillManager - it will return right away if autofill is disabled.
         final AutofillManager afm = mContext.getSystemService(AutofillManager.class);
         if (afm != null) {
-            afm.valueChanged(this);
+            afm.notifyValueChanged(this);
         }
     }
 

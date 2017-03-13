@@ -195,7 +195,7 @@ public final class SystemServer {
     private static final String WALLPAPER_SERVICE_CLASS =
             "com.android.server.wallpaper.WallpaperManagerService$Lifecycle";
     private static final String AUTO_FILL_MANAGER_SERVICE_CLASS =
-            "com.android.server.autofill.AutoFillManagerService";
+            "com.android.server.autofill.AutofillManagerService";
 
     private static final String PERSISTENT_DATA_BLOCK_PROP = "ro.frp.pst";
 

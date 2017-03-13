@@ -46,6 +46,7 @@ import android.os.Parcelable;
 import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.Pools;
 import android.util.Pools.SynchronizedPool;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
@@ -3327,7 +3328,74 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     @Override
     public void dispatchProvideStructure(ViewStructure structure) {
         super.dispatchProvideStructure(structure);
-        dispatchProvideStructureForAssistOrAutoFill(structure, false);
+        if (isAssistBlocked() || structure.getChildCount() != 0) {
+            return;
+        }
+        final int childrenCount = mChildrenCount;
+        if (childrenCount <= 0) {
+            return;
+        }
+        structure.setChildCount(childrenCount);
+        ArrayList<View> preorderedList = buildOrderedChildList();
+        boolean customOrder = preorderedList == null
+                && isChildrenDrawingOrderEnabled();
+        for (int i = 0; i < childrenCount; i++) {
+            int childIndex;
+            try {
+                childIndex = getAndVerifyPreorderedIndex(childrenCount, i, customOrder);
+            } catch (IndexOutOfBoundsException e) {
+                childIndex = i;
+                if (mContext.getApplicationInfo().targetSdkVersion < Build.VERSION_CODES.M) {
+                    Log.w(TAG, "Bad getChildDrawingOrder while collecting assist @ "
+                            + i + " of " + childrenCount, e);
+                    // At least one app is failing when we call getChildDrawingOrder
+                    // at this point, so deal semi-gracefully with it by falling back
+                    // on the basic order.
+                    customOrder = false;
+                    if (i > 0) {
+                        // If we failed at the first index, there really isn't
+                        // anything to do -- we will just proceed with the simple
+                        // sequence order.
+                        // Otherwise, we failed in the middle, so need to come up
+                        // with an order for the remaining indices and use that.
+                        // Failed at the first one, easy peasy.
+                        int[] permutation = new int[childrenCount];
+                        SparseBooleanArray usedIndices = new SparseBooleanArray();
+                        // Go back and collected the indices we have done so far.
+                        for (int j = 0; j < i; j++) {
+                            permutation[j] = getChildDrawingOrder(childrenCount, j);
+                            usedIndices.put(permutation[j], true);
+                        }
+                        // Fill in the remaining indices with indices that have not
+                        // yet been used.
+                        int nextIndex = 0;
+                        for (int j = i; j < childrenCount; j++) {
+                            while (usedIndices.get(nextIndex, false)) {
+                                nextIndex++;
+                            }
+                            permutation[j] = nextIndex;
+                            nextIndex++;
+                        }
+                        // Build the final view list.
+                        preorderedList = new ArrayList<>(childrenCount);
+                        for (int j = 0; j < childrenCount; j++) {
+                            final int index = permutation[j];
+                            final View child = mChildren[index];
+                            preorderedList.add(child);
+                        }
+                    }
+                } else {
+                    throw e;
+                }
+            }
+            final View child = getAndVerifyPreorderedView(preorderedList, mChildren,
+                    childIndex);
+            final ViewStructure cstructure = structure.newChild(i);
+            child.dispatchProvideStructure(cstructure);
+        }
+        if (preorderedList != null) {
+            preorderedList.clear();
+        }
     }
 
     /**
@@ -3339,125 +3407,48 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     @Override
     public void dispatchProvideAutofillStructure(ViewStructure structure, int flags) {
         super.dispatchProvideAutofillStructure(structure, flags);
-        dispatchProvideStructureForAssistOrAutoFill(structure, true);
+        if (isAutofillBlocked() || structure.getChildCount() != 0) {
+            return;
+        }
+        final ChildListForAutoFill children = getChildrenForAutofill();
+        final int childrenCount = children.size();
+        structure.setChildCount(childrenCount);
+        for (int i = 0; i < childrenCount; i++) {
+            final View child = children.get(i);
+            final ViewStructure cstructure = structure.newChild(i);
+            child.dispatchProvideAutofillStructure(cstructure, flags);
+        }
+        children.recycle();
     }
 
-    /** @hide */
-    private ArrayList<View> getChildrenForAutofill() {
-        final ArrayList<View> list = new ArrayList<>();
-        populateChildrenForAutofill(list);
-        return list;
+    /**
+     * Gets the children for autofill. Children for autofill are the first
+     * level descendants that are important for autofill. The returned
+     * child list object is pooled and the caller must recycle it once done.
+     * @hide */
+    private @NonNull ChildListForAutoFill getChildrenForAutofill() {
+        final ChildListForAutoFill children = ChildListForAutoFill.obtain();
+        populateChildrenForAutofill(children);
+        return children;
     }
 
     /** @hide */
     private void populateChildrenForAutofill(ArrayList<View> list) {
-        final int count = mChildrenCount;
-        for (int i = 0; i < count; i++) {
-            final View child = mChildren[i];
+        final int childrenCount = mChildrenCount;
+        if (childrenCount <= 0) {
+            return;
+        }
+        final ArrayList<View> preorderedList = buildOrderedChildList();
+        final boolean customOrder = preorderedList == null
+                && isChildrenDrawingOrderEnabled();
+        for (int i = 0; i < childrenCount; i++) {
+            final int childIndex = getAndVerifyPreorderedIndex(childrenCount, i, customOrder);
+            final View child = (preorderedList == null)
+                    ? mChildren[childIndex] : preorderedList.get(childIndex);
             if (child.isImportantForAutofill()) {
                 list.add(child);
             } else if (child instanceof ViewGroup) {
                 ((ViewGroup) child).populateChildrenForAutofill(list);
-            }
-        }
-    }
-
-    private void dispatchProvideStructureForAssistOrAutoFill(ViewStructure structure,
-            boolean forAutofill) {
-        boolean blocked = forAutofill ? isAutofillBlocked() : isAssistBlocked();
-        if (blocked || structure.getChildCount() != 0) {
-            return;
-        }
-        final View[] childrenArray;
-        final ArrayList<View> childrenList;
-        final int childrenCount;
-
-        if (forAutofill) {
-            childrenArray = null;
-            // TODO(b/33197203): the current algorithm allocates a new list for each children that
-            // is a view group; ideally, we should use mAttachInfo.mTempArrayList instead, but that
-            // would complicated the algorithm a lot...
-            childrenList = getChildrenForAutofill();
-
-            childrenCount = childrenList.size();
-        } else {
-            childrenArray = mChildren;
-            childrenList = null;
-            childrenCount = getChildCount();
-        }
-
-        if (childrenCount > 0) {
-            structure.setChildCount(childrenCount);
-            ArrayList<View> preorderedList = buildOrderedChildList();
-            boolean customOrder = preorderedList == null
-                    && isChildrenDrawingOrderEnabled();
-            for (int i = 0; i < childrenCount; i++) {
-                int childIndex;
-                try {
-                    childIndex = getAndVerifyPreorderedIndex(childrenCount, i, customOrder);
-                } catch (IndexOutOfBoundsException e) {
-                    childIndex = i;
-                    if (mContext.getApplicationInfo().targetSdkVersion < Build.VERSION_CODES.M) {
-                        Log.w(TAG, "Bad getChildDrawingOrder while collecting assist @ "
-                                + i + " of " + childrenCount, e);
-                        // At least one app is failing when we call getChildDrawingOrder
-                        // at this point, so deal semi-gracefully with it by falling back
-                        // on the basic order.
-                        customOrder = false;
-                        if (i > 0) {
-                            // If we failed at the first index, there really isn't
-                            // anything to do -- we will just proceed with the simple
-                            // sequence order.
-                            // Otherwise, we failed in the middle, so need to come up
-                            // with an order for the remaining indices and use that.
-                            // Failed at the first one, easy peasy.
-                            int[] permutation = new int[childrenCount];
-                            SparseBooleanArray usedIndices = new SparseBooleanArray();
-                            // Go back and collected the indices we have done so far.
-                            for (int j = 0; j < i; j++) {
-                                permutation[j] = getChildDrawingOrder(childrenCount, j);
-                                usedIndices.put(permutation[j], true);
-                            }
-                            // Fill in the remaining indices with indices that have not
-                            // yet been used.
-                            int nextIndex = 0;
-                            for (int j = i; j < childrenCount; j++) {
-                                while (usedIndices.get(nextIndex, false)) {
-                                    nextIndex++;
-                                }
-                                permutation[j] = nextIndex;
-                                nextIndex++;
-                            }
-                            // Build the final view list.
-                            preorderedList = new ArrayList<>(childrenCount);
-                            for (int j = 0; j < childrenCount; j++) {
-                                final int index = permutation[j];
-                                final View child = forAutofill
-                                        ? childrenList.get(index)
-                                        : childrenArray[index];
-                                preorderedList.add(child);
-                            }
-                        }
-                    } else {
-                        throw e;
-                    }
-                }
-
-                final View child = forAutofill
-                        ? getAndVerifyPreorderedView(preorderedList, childrenList, childIndex)
-                        : getAndVerifyPreorderedView(preorderedList, childrenArray, childIndex);
-                final ViewStructure cstructure = structure.newChild(i);
-
-                // Must explicitly check which recursive method to call.
-                if (forAutofill) {
-                    // NOTE: flags are not currently supported, hence 0
-                    child.dispatchProvideAutofillStructure(cstructure, 0);
-                } else {
-                    child.dispatchProvideStructure(cstructure);
-                }
-            }
-            if (preorderedList != null) {
-                preorderedList.clear();
             }
         }
     }
@@ -3473,21 +3464,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             }
         } else {
             child = children[childIndex];
-        }
-        return child;
-    }
-
-    private static View getAndVerifyPreorderedView(ArrayList<View> preorderedList,
-            ArrayList<View> children, int childIndex) {
-        final View child;
-        if (preorderedList != null) {
-            child = preorderedList.get(childIndex);
-            if (child == null) {
-                throw new RuntimeException("Invalid preorderedList contained null child at index "
-                        + childIndex);
-            }
-        } else {
-            child = children.get(childIndex);
         }
         return child;
     }
@@ -8192,6 +8168,29 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     /**
+     * Pooled class that to hold the children for autifill.
+     */
+    static class ChildListForAutoFill extends ArrayList<View> {
+        private static final int MAX_POOL_SIZE = 32;
+
+        private static final Pools.SimplePool<ChildListForAutoFill> sPool =
+                new Pools.SimplePool<>(MAX_POOL_SIZE);
+
+        public static ChildListForAutoFill obtain() {
+            ChildListForAutoFill list = sPool.acquire();
+            if (list == null) {
+                list = new ChildListForAutoFill();
+            }
+            return list;
+        }
+
+        public void recycle() {
+            clear();
+            sPool.release(this);
+        }
+    }
+
+    /**
      * Pooled class that orderes the children of a ViewGroup from start
      * to end based on how they are laid out and the layout direction.
      */
@@ -8226,10 +8225,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
         public View getChildAt(int index) {
             return mChildren.get(index);
-        }
-
-        public int getChildIndex(View child) {
-            return mChildren.indexOf(child);
         }
 
         private void init(ViewGroup parent, boolean sort) {

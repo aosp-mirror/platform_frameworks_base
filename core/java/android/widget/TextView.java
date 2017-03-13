@@ -9136,7 +9136,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (DEBUG_AUTOFILL) {
                 Log.v(LOG_TAG, "sendAfterTextChanged(): notify AFM for text=" + mText);
             }
-            afm.valueChanged(TextView.this);
+            afm.notifyValueChanged(TextView.this);
         }
     }
 
