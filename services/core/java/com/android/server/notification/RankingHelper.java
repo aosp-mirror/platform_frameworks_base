@@ -510,9 +510,6 @@ public class RankingHelper implements RankingConfig {
         if (r == null) {
             throw new IllegalArgumentException("Invalid package");
         }
-        if (IMPORTANCE_NONE == r.importance) {
-            throw new IllegalArgumentException("Package blocked");
-        }
         if (channel.getGroup() != null && !r.groups.containsKey(channel.getGroup())) {
             throw new IllegalArgumentException("NotificationChannelGroup doesn't exist");
         }
