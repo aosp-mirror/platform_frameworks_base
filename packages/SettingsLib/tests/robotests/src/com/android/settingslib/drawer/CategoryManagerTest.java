@@ -120,7 +120,7 @@ public class CategoryManagerTest {
     }
 
     @Test
-    public void normalizePriority_singlePackage_shouldReorderBasedOnPriority() {
+    public void sortCategories_singlePackage_shouldReorderBasedOnPriority() {
         // Create some fake tiles that are not sorted.
         final String testPackage = "com.android.test";
         final DashboardCategory category = new DashboardCategory();
@@ -141,22 +141,18 @@ public class CategoryManagerTest {
         category.tiles.add(tile3);
         mCategoryByKeyMap.put(CategoryKey.CATEGORY_HOMEPAGE, category);
 
-        // Normalize their priorities
-        mCategoryManager.normalizePriority(ShadowApplication.getInstance().getApplicationContext(),
+        // Sort their priorities
+        mCategoryManager.sortCategories(ShadowApplication.getInstance().getApplicationContext(),
                 mCategoryByKeyMap);
 
         // Verify they are now sorted.
-        assertThat(category.tiles.get(0)).isSameAs(tile2);
+        assertThat(category.tiles.get(0)).isSameAs(tile3);
         assertThat(category.tiles.get(1)).isSameAs(tile1);
-        assertThat(category.tiles.get(2)).isSameAs(tile3);
-        // Verify their priority is normalized
-        assertThat(category.tiles.get(0).priority).isEqualTo(0);
-        assertThat(category.tiles.get(1).priority).isEqualTo(1);
-        assertThat(category.tiles.get(2).priority).isEqualTo(2);
+        assertThat(category.tiles.get(2)).isSameAs(tile2);
     }
 
     @Test
-    public void normalizePriority_multiPackage_shouldReorderBasedOnPackageAndPriority() {
+    public void sortCategories_multiPackage_shouldReorderBasedOnPackageAndPriority() {
         // Create some fake tiles that are not sorted.
         final String testPackage1 = "com.android.test1";
         final String testPackage2 = "com.android.test2";
@@ -178,22 +174,18 @@ public class CategoryManagerTest {
         category.tiles.add(tile3);
         mCategoryByKeyMap.put(CategoryKey.CATEGORY_HOMEPAGE, category);
 
-        // Normalize their priorities
-        mCategoryManager.normalizePriority(ShadowApplication.getInstance().getApplicationContext(),
+        // Sort their priorities
+        mCategoryManager.sortCategories(ShadowApplication.getInstance().getApplicationContext(),
                 mCategoryByKeyMap);
 
         // Verify they are now sorted.
-        assertThat(category.tiles.get(0)).isSameAs(tile3);
-        assertThat(category.tiles.get(1)).isSameAs(tile2);
-        assertThat(category.tiles.get(2)).isSameAs(tile1);
-        // Verify their priority is normalized
-        assertThat(category.tiles.get(0).priority).isEqualTo(0);
-        assertThat(category.tiles.get(1).priority).isEqualTo(1);
-        assertThat(category.tiles.get(2).priority).isEqualTo(2);
+        assertThat(category.tiles.get(0)).isSameAs(tile2);
+        assertThat(category.tiles.get(1)).isSameAs(tile1);
+        assertThat(category.tiles.get(2)).isSameAs(tile3);
     }
 
     @Test
-    public void normalizePriority_internalPackageTiles_shouldSkipTileForInternalPackage() {
+    public void sortCategories_internalPackageTiles_shouldSkipTileForInternalPackage() {
         // Create some fake tiles that are not sorted.
         final String testPackage =
                 ShadowApplication.getInstance().getApplicationContext().getPackageName();
@@ -215,18 +207,82 @@ public class CategoryManagerTest {
         category.tiles.add(tile3);
         mCategoryByKeyMap.put(CategoryKey.CATEGORY_HOMEPAGE, category);
 
-        // Normalize their priorities
-        mCategoryManager.normalizePriority(ShadowApplication.getInstance().getApplicationContext(),
+        // Sort their priorities
+        mCategoryManager.sortCategories(ShadowApplication.getInstance().getApplicationContext(),
                 mCategoryByKeyMap);
 
         // Verify the sorting order is not changed
         assertThat(category.tiles.get(0)).isSameAs(tile1);
         assertThat(category.tiles.get(1)).isSameAs(tile2);
         assertThat(category.tiles.get(2)).isSameAs(tile3);
-        // Verify their priorities are not changed.
-        assertThat(category.tiles.get(0).priority).isEqualTo(100);
-        assertThat(category.tiles.get(1).priority).isEqualTo(100);
-        assertThat(category.tiles.get(2).priority).isEqualTo(50);
+    }
+
+    @Test
+    public void sortCategories_internalAndExternalPackageTiles_shouldRetainPriorityOrdering() {
+        // Inject one external tile among internal tiles.
+        final String testPackage =
+            ShadowApplication.getInstance().getApplicationContext().getPackageName();
+        final String testPackage2 = "com.google.test2";
+        final DashboardCategory category = new DashboardCategory();
+        final Tile tile1 = new Tile();
+        tile1.intent = new Intent().setComponent(new ComponentName(testPackage, "class1"));
+        tile1.priority = 2;
+        final Tile tile2 = new Tile();
+        tile2.intent = new Intent().setComponent(new ComponentName(testPackage, "class2"));
+        tile2.priority = 1;
+        final Tile tile3 = new Tile();
+        tile3.intent = new Intent().setComponent(new ComponentName(testPackage2, "class0"));
+        tile3.priority = 0;
+        final Tile tile4 = new Tile();
+        tile4.intent = new Intent().setComponent(new ComponentName(testPackage, "class3"));
+        tile4.priority = -1;
+        category.tiles.add(tile1);
+        category.tiles.add(tile2);
+        category.tiles.add(tile3);
+        category.tiles.add(tile4);
+        mCategoryByKeyMap.put(CategoryKey.CATEGORY_HOMEPAGE, category);
+
+        // Sort their priorities
+        mCategoryManager.sortCategories(ShadowApplication.getInstance().getApplicationContext(),
+            mCategoryByKeyMap);
+
+        // Verify the sorting order is not changed
+        assertThat(category.tiles.get(0)).isSameAs(tile1);
+        assertThat(category.tiles.get(1)).isSameAs(tile2);
+        assertThat(category.tiles.get(2)).isSameAs(tile3);
+        assertThat(category.tiles.get(3)).isSameAs(tile4);
+    }
+
+    @Test
+    public void sortCategories_samePriority_internalPackageTileShouldTakePrecedence() {
+        // Inject one external tile among internal tiles with same priority.
+        final String testPackage =
+            ShadowApplication.getInstance().getApplicationContext().getPackageName();
+        final String testPackage2 = "com.google.test2";
+        final String testPackage3 = "com.abcde.test3";
+        final DashboardCategory category = new DashboardCategory();
+        final Tile tile1 = new Tile();
+        tile1.intent = new Intent().setComponent(new ComponentName(testPackage2, "class1"));
+        tile1.priority = 1;
+        final Tile tile2 = new Tile();
+        tile2.intent = new Intent().setComponent(new ComponentName(testPackage, "class2"));
+        tile2.priority = 1;
+        final Tile tile3 = new Tile();
+        tile3.intent = new Intent().setComponent(new ComponentName(testPackage3, "class3"));
+        tile3.priority = 1;
+        category.tiles.add(tile1);
+        category.tiles.add(tile2);
+        category.tiles.add(tile3);
+        mCategoryByKeyMap.put(CategoryKey.CATEGORY_HOMEPAGE, category);
+
+        // Sort their priorities
+        mCategoryManager.sortCategories(ShadowApplication.getInstance().getApplicationContext(),
+            mCategoryByKeyMap);
+
+        // Verify the sorting order is internal first, follow by package name ordering
+        assertThat(category.tiles.get(0)).isSameAs(tile2);
+        assertThat(category.tiles.get(1)).isSameAs(tile3);
+        assertThat(category.tiles.get(2)).isSameAs(tile1);
     }
 
     @Test
