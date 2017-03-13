@@ -29,6 +29,7 @@ import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.os.Handler;
 import android.os.UserHandle;
+import android.os.Vibrator;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Slog;
@@ -48,6 +49,11 @@ import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG;
  */
 public class AccessibilityShortcutController {
     private static final String TAG = "AccessibilityShortcutController";
+    private static final AudioAttributes VIBRATION_ATTRIBUTES = new AudioAttributes.Builder()
+            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+            .setUsage(AudioAttributes.USAGE_ASSISTANCE_ACCESSIBILITY)
+            .build();
+
 
     private final Context mContext;
     private AlertDialog mAlertDialog;
@@ -100,6 +106,8 @@ public class AccessibilityShortcutController {
         final int userId = ActivityManager.getCurrentUser();
         final int dialogAlreadyShown = Settings.Secure.getIntForUser(
                 cr, Settings.Secure.ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN, 0, userId);
+
+        // Play a notification tone
         final Ringtone tone =
                 RingtoneManager.getRingtone(mContext, Settings.System.DEFAULT_NOTIFICATION_URI);
         if (tone != null) {
@@ -108,6 +116,18 @@ public class AccessibilityShortcutController {
                 .build());
             tone.play();
         }
+
+        // Play a notification vibration
+        Vibrator vibrator = (Vibrator) mContext.getSystemService(Context.VIBRATOR_SERVICE);
+        if ((vibrator != null) && vibrator.hasVibrator()) {
+            // Don't check if haptics are disabled, as we need to alert the user that their
+            // way of interacting with the phone may change if they activate the shortcut
+            long[] vibePattern = PhoneWindowManager.getLongIntArray(mContext.getResources(),
+                    R.array.config_safeModeDisabledVibePattern);
+            vibrator.vibrate(vibePattern, -1, VIBRATION_ATTRIBUTES);
+        }
+
+
         if (dialogAlreadyShown == 0) {
             // The first time, we show a warning rather than toggle the service to give the user a
             // chance to turn off this feature before stuff gets enabled.

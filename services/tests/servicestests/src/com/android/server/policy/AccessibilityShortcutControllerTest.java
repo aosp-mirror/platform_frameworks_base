@@ -21,9 +21,11 @@ import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.os.Handler;
+import android.os.Vibrator;
 import android.provider.Settings;
 import android.support.test.runner.AndroidJUnit4;
 
@@ -54,6 +56,7 @@ import static android.provider.Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SER
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
+import static org.mockito.AdditionalMatchers.aryEq;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyObject;
@@ -67,6 +70,11 @@ import static org.mockito.Mockito.when;
 @RunWith(AndroidJUnit4.class)
 public class AccessibilityShortcutControllerTest {
     private static final String SERVICE_NAME_STRING = "fake.package/fake.service.name";
+    private static final long VIBRATOR_PATTERN_1 = 100L;
+    private static final long VIBRATOR_PATTERN_2 = 150L;
+    private static final int[] VIBRATOR_PATTERN_INT = {(int) VIBRATOR_PATTERN_1,
+            (int) VIBRATOR_PATTERN_2};
+    private static final long[] VIBRATOR_PATTERN_LONG = {VIBRATOR_PATTERN_1, VIBRATOR_PATTERN_2};
 
     private @Mock Context mContext;
     private @Mock FrameworkObjectProvider mFrameworkObjectProvider;
@@ -77,6 +85,8 @@ public class AccessibilityShortcutControllerTest {
     private @Mock AccessibilityServiceInfo mServiceInfo;
     private @Mock Resources mResources;
     private @Mock Toast mToast;
+    private @Mock Vibrator mVibrator;
+    private @Mock ApplicationInfo mApplicationInfo;
 
     private MockContentResolver mContentResolver;
     private WindowManager.LayoutParams mLayoutParams = new WindowManager.LayoutParams();
@@ -85,10 +95,15 @@ public class AccessibilityShortcutControllerTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
+        when(mVibrator.hasVibrator()).thenReturn(true);
+
+        when(mContext.getResources()).thenReturn(mResources);
+        when(mContext.getApplicationInfo()).thenReturn(mApplicationInfo);
+        when(mContext.getSystemService(Context.VIBRATOR_SERVICE)).thenReturn(mVibrator);
+
         mContentResolver = new MockContentResolver(mContext);
         mContentResolver.addProvider(Settings.AUTHORITY, new FakeSettingsProvider());
         when(mContext.getContentResolver()).thenReturn(mContentResolver);
-        when(mContext.getResources()).thenReturn(mResources);
 
         when(mAccessibilityManagerService.getInstalledAccessibilityServiceList(anyInt()))
                 .thenReturn(Collections.singletonList(mServiceInfo));
@@ -104,6 +119,8 @@ public class AccessibilityShortcutControllerTest {
                 .thenReturn(mToast);
 
         when(mResources.getString(anyInt())).thenReturn("Howdy %s");
+        when(mResources.getIntArray(anyInt())).thenReturn(VIBRATOR_PATTERN_INT);
+
         ResolveInfo resolveInfo = mock(ResolveInfo.class);
         when(resolveInfo.loadLabel(anyObject())).thenReturn("Service name");
         when(mServiceInfo.getResolveInfo()).thenReturn(resolveInfo);
@@ -160,6 +177,14 @@ public class AccessibilityShortcutControllerTest {
         configureShortcutEnabled();
         accessibilityShortcutController.onSettingsChanged();
         assertTrue(accessibilityShortcutController.isAccessibilityShortcutAvailable());
+    }
+
+    @Test
+    public void testOnAccessibilityShortcut_vibrates() {
+        configureShortcutEnabled();
+        AccessibilityShortcutController accessibilityShortcutController = getController();
+        accessibilityShortcutController.performAccessibilityShortcut();
+        verify(mVibrator).vibrate(aryEq(VIBRATOR_PATTERN_LONG), eq(-1), anyObject());
     }
 
     @Test
