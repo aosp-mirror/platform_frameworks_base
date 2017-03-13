@@ -1573,9 +1573,9 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
 
             // If the assistant stack is focused and translucent, then the docked stack is always
             // visible
-            if (topStack.isAssistantStack()
-                    && topStack.isStackTranslucent(starting, DOCKED_STACK_ID)) {
-                return STACK_VISIBLE;
+            if (topStack.isAssistantStack()) {
+                return (topStack.isStackTranslucent(starting, DOCKED_STACK_ID)) ? STACK_VISIBLE
+                        : STACK_INVISIBLE;
             }
 
             // Otherwise, the docked stack is always visible, except in the case where the top
@@ -3205,7 +3205,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                     }
                     // Move the home stack to the top if this stack is fullscreen or there is no
                     // other visible stack.
-                    if (mStackSupervisor.moveHomeStackTaskToTop(myReason)) {
+                    if (task.isOverHomeStack() &&
+                            mStackSupervisor.moveHomeStackTaskToTop(myReason)) {
                         // Activity focus was already adjusted. Nothing else to do...
                         return;
                     }
