@@ -52,4 +52,8 @@ class PinnedActivityStack extends ActivityStack<PinnedStackWindowController> {
     void setPictureInPictureActions(List<RemoteAction> actions) {
         getWindowContainerController().setPictureInPictureActions(actions);
     }
+
+    boolean isBoundsAnimatingToFullscreen() {
+        return getWindowContainerController().isBoundsAnimatingToFullscreen();
+    }
 }
