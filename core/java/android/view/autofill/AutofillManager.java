@@ -71,10 +71,17 @@ public final class AutofillManager {
     public static final String EXTRA_AUTHENTICATION_RESULT =
             "android.view.autofill.extra.AUTHENTICATION_RESULT";
 
-    /** @hide */ public static final int FLAG_START_SESSION = 0x1;
-    /** @hide */ public static final int FLAG_VIEW_ENTERED = 0x2;
-    /** @hide */ public static final int FLAG_VIEW_EXITED = 0x4;
-    /** @hide */ public static final int FLAG_VALUE_CHANGED = 0x8;
+    // Public flags start from the lowest bit
+    /**
+     * Indicates autofill was explicitly requested by the user.
+     */
+    public static final int FLAG_MANUAL_REQUEST = 0x1;
+
+    // Private flags start from the highest bit
+    /** @hide */ public static final int FLAG_START_SESSION = 0x80000000;
+    /** @hide */ public static final int FLAG_VIEW_ENTERED =  0x40000000;
+    /** @hide */ public static final int FLAG_VIEW_EXITED =   0x20000000;
+    /** @hide */ public static final int FLAG_VALUE_CHANGED = 0x10000000;
 
     private final Rect mTempRect = new Rect();
 
@@ -121,6 +128,66 @@ public final class AutofillManager {
     }
 
     /**
+     * Checkes whether autofill is enabled for the current user.
+     *
+     * <p>Typically used to determine whether the option to explicitly request autofill should
+     * be offered - see {@link #requestAutofill(View)}.
+     *
+     * @return whether autofill is enabled for the current user.
+     */
+    public boolean isEnabled() {
+        ensureServiceClientAddedIfNeeded();
+        return mEnabled;
+    }
+
+    /**
+     * Explicitly requests a new autofill context.
+     *
+     * <p>Normally, the autofill context is automatically started when autofillable views are
+     * focused, but this method should be used in the cases where it must be explicitly requested,
+     * like a view that provides a contextual menu allowing users to autofill the activity.
+     *
+     * @param view view requesting the new autofill context.
+     */
+    public void requestAutofill(@NonNull View view) {
+        ensureServiceClientAddedIfNeeded();
+
+        if (!mEnabled) {
+            return;
+        }
+
+        final Rect bounds = mTempRect;
+        view.getBoundsOnScreen(bounds);
+        final AutofillId id = getAutofillId(view);
+        final AutofillValue value = view.getAutofillValue();
+
+        startSession(id, view.getWindowToken(), bounds, value, FLAG_MANUAL_REQUEST);
+    }
+
+    /**
+     * Explicitly requests a new autofill context for virtual views.
+     *
+     * <p>Normally, the autofill context is automatically started when autofillable views are
+     * focused, but this method should be used in the cases where it must be explicitly requested,
+     * like a virtual view that provides a contextual menu allowing users to autofill the activity.
+     *
+     * @param view the {@link View} whose descendant is the virtual view.
+     * @param childId id identifying the virtual child inside the view.
+     * @param bounds child boundaries, relative to the top window.
+     */
+    public void requestAutofill(@NonNull View view, int childId, @NonNull Rect bounds) {
+        ensureServiceClientAddedIfNeeded();
+
+        if (!mEnabled) {
+            return;
+        }
+
+        final AutofillId id = getAutofillId(view, childId);
+        startSession(id, view.getWindowToken(), bounds, null, FLAG_MANUAL_REQUEST);
+    }
+
+
+    /**
      * Called when a {@link View} that supports autofill is entered.
      *
      * @param view {@link View} that was entered.
@@ -139,7 +206,7 @@ public final class AutofillManager {
 
         if (!mHasSession) {
             // Starts new session.
-            startSession(id, view.getWindowToken(), bounds, value);
+            startSession(id, view.getWindowToken(), bounds, value, 0);
         } else {
             // Update focus on existing session.
             updateSession(id, bounds, value, FLAG_VIEW_ENTERED);
@@ -181,7 +248,7 @@ public final class AutofillManager {
 
         if (!mHasSession) {
             // Starts new session.
-            startSession(id, view.getWindowToken(), bounds, null);
+            startSession(id, view.getWindowToken(), bounds, null, 0);
         } else {
             // Update focus on existing session.
             updateSession(id, bounds, null, FLAG_VIEW_ENTERED);
@@ -224,16 +291,16 @@ public final class AutofillManager {
     /**
      * Called to indicate the value of an autofillable virtual {@link View} changed.
      *
-     * @param parent parent view whose value changed.
+     * @param view the {@link View} whose descendant is the virtual view.
      * @param childId id identifying the virtual child inside the parent view.
      * @param value new value of the child.
      */
-    public void notifyVirtualValueChanged(View parent, int childId, AutofillValue value) {
+    public void notifyVirtualValueChanged(View view, int childId, AutofillValue value) {
         if (!mEnabled || !mHasSession) {
             return;
         }
 
-        final AutofillId id = getAutofillId(parent, childId);
+        final AutofillId id = getAutofillId(view, childId);
         updateSession(id, null, value, FLAG_VALUE_CHANGED);
     }
 
@@ -305,15 +372,16 @@ public final class AutofillManager {
     }
 
     private void startSession(AutofillId id, IBinder windowToken, Rect bounds,
-            AutofillValue value) {
+            AutofillValue value, int flags) {
         if (DEBUG) {
-            Log.d(TAG, "startSession(): id=" + id + ", bounds=" + bounds + ", value=" + value);
+            Log.d(TAG, "startSession(): id=" + id + ", bounds=" + bounds + ", value=" + value
+                    + ", flags=" + flags);
         }
 
         try {
             mService.startSession(mContext.getActivityToken(), windowToken,
                     mServiceClient.asBinder(), id, bounds, value, mContext.getUserId(),
-                    mCallback != null);
+                    mCallback != null, flags);
             final AutofillClient client = getClient();
             if (client != null) {
                 client.resetableStateAvailable();

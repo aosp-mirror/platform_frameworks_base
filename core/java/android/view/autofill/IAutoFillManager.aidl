@@ -32,7 +32,7 @@ interface IAutoFillManager {
     boolean addClient(in IAutoFillManagerClient client, int userId);
     oneway void startSession(in IBinder activityToken, IBinder windowToken, in IBinder appCallback,
             in AutofillId autoFillId, in Rect bounds, in AutofillValue value, int userId,
-            boolean hasCallback);
+            boolean hasCallback, int flags);
     oneway void updateSession(in IBinder activityToken, in AutofillId id, in Rect bounds,
             in AutofillValue value, int flags, int userId);
     oneway void finishSession(in IBinder activityToken, int userId);

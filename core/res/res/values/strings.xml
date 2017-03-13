@@ -2640,6 +2640,9 @@
     <!-- Item on EditText context menu. This action is used to redo a text edit operation. -->
     <string name="redo">Redo</string>
 
+    <!-- Item on EditText context menu. This action is used to request autofill. -->
+    <string name="autofill">Autofill</string>
+
     <!-- Text selection contextual mode title, displayed in the CAB. [CHAR LIMIT=20] -->
     <string name="textSelectionCABTitle">Text selection</string>
 

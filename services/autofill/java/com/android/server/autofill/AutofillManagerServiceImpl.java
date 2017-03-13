@@ -74,7 +74,6 @@ import com.android.server.autofill.ui.AutoFillUI;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -171,7 +170,7 @@ final class AutofillManagerServiceImpl {
             structure.sanitizeForParceling(true);
 
             // TODO(b/33197203): Need to pipe the bundle
-            session.mRemoteFillService.onFillRequest(structure, null);
+            session.mRemoteFillService.onFillRequest(structure, null, session.mFlags);
         }
     };
 
@@ -286,7 +285,8 @@ final class AutofillManagerServiceImpl {
     }
 
     void startSessionLocked(IBinder activityToken, IBinder windowToken, IBinder appCallbackToken,
-            AutofillId autofillId,  Rect bounds, AutofillValue value, boolean hasCallback) {
+            AutofillId autofillId,  Rect bounds, AutofillValue value, boolean hasCallback,
+            int flags) {
         if (!hasService()) {
             return;
         }
@@ -294,7 +294,7 @@ final class AutofillManagerServiceImpl {
         final String historyItem = "s=" + mInfo.getServiceInfo().packageName
                 + " u=" + mUserId + " a=" + activityToken
 
-                + " i=" + autofillId + " b=" + bounds + " hc=" + hasCallback;
+                + " i=" + autofillId + " b=" + bounds + " hc=" + hasCallback + " f=" + flags;
         mRequestsHistory.log(historyItem);
 
         // TODO(b/33197203): Handle partitioning
@@ -305,7 +305,7 @@ final class AutofillManagerServiceImpl {
         }
 
         final Session newSession = createSessionByTokenLocked(activityToken,
-                windowToken, appCallbackToken, hasCallback);
+                windowToken, appCallbackToken, hasCallback, flags);
         newSession.updateLocked(autofillId, bounds, value, FLAG_START_SESSION);
     }
 
@@ -338,9 +338,9 @@ final class AutofillManagerServiceImpl {
     }
 
     private Session createSessionByTokenLocked(IBinder activityToken, IBinder windowToken,
-            IBinder appCallbackToken, boolean hasCallback) {
+            IBinder appCallbackToken, boolean hasCallback, int flags) {
         final Session newSession = new Session(mContext, activityToken,
-                windowToken, appCallbackToken, hasCallback);
+                windowToken, appCallbackToken, hasCallback, flags);
         mSessions.put(activityToken, newSession);
 
         /*
@@ -630,13 +630,19 @@ final class AutofillManagerServiceImpl {
          */
         private boolean mHasCallback;
 
+        /**
+         * Flags used to start the session.
+         */
+        private int mFlags;
+
         private Session(Context context, IBinder activityToken, IBinder windowToken,
-                IBinder client, boolean hasCallback) {
+                IBinder client, boolean hasCallback, int flags) {
             mRemoteFillService = new RemoteFillService(context,
                     mInfo.getServiceInfo().getComponentName(), mUserId, this);
             mActivityToken = activityToken;
             mWindowToken = windowToken;
             mHasCallback = hasCallback;
+            mFlags = flags;
 
             mClient = IAutoFillManagerClient.Stub.asInterface(client);
             try {
@@ -856,7 +862,8 @@ final class AutofillManagerServiceImpl {
                 } else {
                     if (state.mAutofillValue == null || state.mAutofillValue.isEmpty()) {
                         if (DEBUG) {
-                            Slog.d(TAG, "finishSessionLocked(): empty value for " + id );
+                            Slog.d(TAG, "finishSessionLocked(): empty value for " + id + ": "
+                                    + state.mAutofillValue);
                         }
                         allRequiredAreNotEmpty = false;
                         break;
@@ -1102,6 +1109,7 @@ final class AutofillManagerServiceImpl {
 
         void dumpLocked(String prefix, PrintWriter pw) {
             pw.print(prefix); pw.print("mActivityToken: "); pw.println(mActivityToken);
+            pw.print(prefix); pw.print("mFlags: "); pw.println(mFlags);
             pw.print(prefix); pw.print("mCurrentResponse: "); pw.println(mCurrentResponse);
             pw.print(prefix); pw.print("mAutoFilledDataset: "); pw.println(mAutoFilledDataset);
             pw.print(prefix); pw.print("mCurrentViewStates: "); pw.println(mCurrentViewState);

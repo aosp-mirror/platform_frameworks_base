@@ -157,6 +157,7 @@ public class Editor {
     private static final int MENU_ITEM_ORDER_SELECT_ALL = 9;
     private static final int MENU_ITEM_ORDER_REPLACE = 10;
     private static final int MENU_ITEM_ORDER_PROCESS_TEXT_INTENT_ACTIONS_START = 11;
+    private static final int MENU_ITEM_ORDER_AUTOFILL = 12;
 
     // Each Editor manages its own undo stack.
     private final UndoManager mUndoManager = new UndoManager();
@@ -2644,6 +2645,10 @@ public class Editor {
                 .setAlphabeticShortcut('a')
                 .setEnabled(mTextView.canSelectAllText())
                 .setOnMenuItemClickListener(mOnContextMenuItemClickListener);
+        menu.add(Menu.NONE, TextView.ID_AUTOFILL, MENU_ITEM_ORDER_AUTOFILL,
+                com.android.internal.R.string.autofill)
+                .setEnabled(mTextView.canRequestAutofill())
+                .setOnMenuItemClickListener(mOnContextMenuItemClickListener);
 
         mPreserveSelection = true;
     }
@@ -3825,6 +3830,12 @@ public class Editor {
             if (mTextView.canShare()) {
                 menu.add(Menu.NONE, TextView.ID_SHARE, MENU_ITEM_ORDER_SHARE,
                         com.android.internal.R.string.share)
+                        .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+            }
+
+            if (mTextView.canRequestAutofill()) {
+                menu.add(Menu.NONE, TextView.ID_AUTOFILL, MENU_ITEM_ORDER_AUTOFILL,
+                        com.android.internal.R.string.autofill)
                         .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
             }
 

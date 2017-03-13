@@ -132,9 +132,10 @@ final class RemoteFillService implements DeathRecipient {
         mCallbacks.onServiceDied(this);
     }
 
-    public void onFillRequest(@NonNull AssistStructure structure, @Nullable Bundle extras) {
+    public void onFillRequest(@NonNull AssistStructure structure, @Nullable Bundle extras,
+            int flags) {
         cancelScheduledUnbind();
-        final PendingFillRequest request = new PendingFillRequest(structure, extras, this);
+        final PendingFillRequest request = new PendingFillRequest(structure, extras, this, flags);
         mHandler.obtainMessageO(MyHandler.MSG_ON_PENDING_REQUEST, request).sendToTarget();
     }
 
@@ -418,11 +419,13 @@ final class RemoteFillService implements DeathRecipient {
         private final IFillCallback mCallback;
         private ICancellationSignal mCancellation;
         private boolean mCancelled;
+        private int mFlags;
 
         public PendingFillRequest(AssistStructure structure,
-                Bundle extras, RemoteFillService service) {
+                Bundle extras, RemoteFillService service, int flags) {
             mStructure = structure;
             mExtras = extras;
+            mFlags = flags;
             mWeakService = new WeakReference<>(service);
             mCallback = new IFillCallback.Stub() {
                 @Override
@@ -469,7 +472,7 @@ final class RemoteFillService implements DeathRecipient {
             if (remoteService != null) {
                 try {
                     remoteService.mAutoFillService.onFillRequest(mStructure,
-                            mExtras, mCallback);
+                            mExtras, mCallback, mFlags);
                     synchronized (mLock) {
                         mStructure = null;
                         mExtras = null;

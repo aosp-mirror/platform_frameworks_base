@@ -31,7 +31,7 @@ import com.android.internal.os.IResultReceiver;
 oneway interface IAutoFillService {
     void onInit(in IAutoFillServiceConnection connection);
     void onFillRequest(in AssistStructure structure, in Bundle extras,
-            in IFillCallback callback);
+            in IFillCallback callback, int flags);
     void onSaveRequest(in AssistStructure structure, in Bundle extras,
             in ISaveCallback callback);
 }

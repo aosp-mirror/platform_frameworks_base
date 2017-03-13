@@ -138,4 +138,8 @@
 
   <!-- Accessibility action identifier for {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction#ACTION_MOVE_WINDOW}. -->
   <item type="id" name="accessibilityActionMoveWindow" />
+
+  <!-- Action used to manually trigger an autofill request -->
+  <item type="id" name="autofill" />
+
 </resources>

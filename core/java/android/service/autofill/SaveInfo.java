@@ -119,7 +119,6 @@ public final class SaveInfo implements Parcelable {
      */
     public static final int SAVE_DATA_TYPE_PASSWORD = 1;
 
-
     /**
      * Type used on when the {@link FillResponse} represents a physical address (such as street,
      * city, state, etc).
