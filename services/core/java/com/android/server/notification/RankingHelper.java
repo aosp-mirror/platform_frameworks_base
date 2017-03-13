@@ -69,7 +69,6 @@ public class RankingHelper implements RankingConfig {
 
     private static final String ATT_VERSION = "version";
     private static final String ATT_NAME = "name";
-    private static final String ATT_NAME_RES_ID = "name_res_id";
     private static final String ATT_UID = "uid";
     private static final String ATT_ID = "id";
     private static final String ATT_PRIORITY = "priority";
@@ -195,14 +194,9 @@ public class RankingHelper implements RankingConfig {
                             if (TAG_GROUP.equals(tagName)) {
                                 String id = parser.getAttributeValue(null, ATT_ID);
                                 CharSequence groupName = parser.getAttributeValue(null, ATT_NAME);
-                                int groupNameRes = safeInt(parser, ATT_NAME_RES_ID, 0);
                                 if (!TextUtils.isEmpty(id)) {
-                                    NotificationChannelGroup group = null;
-                                    if (groupName != null) {
-                                        group = new NotificationChannelGroup(id, groupName);
-                                    } else {
-                                        group = new NotificationChannelGroup(id, groupNameRes);
-                                    }
+                                    NotificationChannelGroup group
+                                            = new NotificationChannelGroup(id, groupName);
                                     r.groups.put(id, group);
                                 }
                             }
@@ -210,19 +204,12 @@ public class RankingHelper implements RankingConfig {
                             if (TAG_CHANNEL.equals(tagName)) {
                                 String id = parser.getAttributeValue(null, ATT_ID);
                                 CharSequence channelName = parser.getAttributeValue(null, ATT_NAME);
-                                int channelNameRes = safeInt(parser, ATT_NAME_RES_ID, 0);
                                 int channelImportance =
                                         safeInt(parser, ATT_IMPORTANCE, DEFAULT_IMPORTANCE);
 
-                                if (!TextUtils.isEmpty(id)) {
-                                    NotificationChannel channel;
-                                    if (channelName != null) {
-                                        channel = new NotificationChannel(id, channelName,
-                                                channelImportance);
-                                    } else {
-                                        channel = new NotificationChannel(id, channelNameRes,
-                                                channelImportance);
-                                    }
+                                if (!TextUtils.isEmpty(id) && !TextUtils.isEmpty(channelName)) {
+                                    NotificationChannel channel = new NotificationChannel(id,
+                                            channelName, channelImportance);
                                     channel.populateFromXml(parser);
                                     r.channels.put(id, channel);
                                 }
@@ -302,7 +289,7 @@ public class RankingHelper implements RankingConfig {
             NotificationChannel channel;
             channel = new NotificationChannel(
                     NotificationChannel.DEFAULT_CHANNEL_ID,
-                    R.string.default_notification_channel_label,
+                    mContext.getString(R.string.default_notification_channel_label),
                     r.importance);
             channel.setBypassDnd(r.priority == Notification.PRIORITY_MAX);
             channel.setLockscreenVisibility(r.visibility);
@@ -482,8 +469,7 @@ public class RankingHelper implements RankingConfig {
         Preconditions.checkNotNull(pkg);
         Preconditions.checkNotNull(group);
         Preconditions.checkNotNull(group.getId());
-        Preconditions.checkNotNull(!TextUtils.isEmpty(group.getName())
-                || group.getNameResId() != 0);
+        Preconditions.checkNotNull(!TextUtils.isEmpty(group.getName()));
         Record r = getOrCreateRecord(pkg, uid);
         if (r == null) {
             throw new IllegalArgumentException("Invalid package");
@@ -504,8 +490,7 @@ public class RankingHelper implements RankingConfig {
         Preconditions.checkNotNull(pkg);
         Preconditions.checkNotNull(channel);
         Preconditions.checkNotNull(channel.getId());
-        Preconditions.checkArgument(!TextUtils.isEmpty(channel.getName())
-                || channel.getNameResId() != 0);
+        Preconditions.checkArgument(!TextUtils.isEmpty(channel.getName()));
         Record r = getOrCreateRecord(pkg, uid);
         if (r == null) {
             throw new IllegalArgumentException("Invalid package");
@@ -524,7 +509,7 @@ public class RankingHelper implements RankingConfig {
                 existing.setDeleted(false);
             }
 
-            existing.setNameResId(channel.getNameResId());
+            existing.setName(channel.getName());
 
             MetricsLogger.action(getChannelLog(channel, pkg));
             updateConfig();

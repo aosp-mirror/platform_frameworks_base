@@ -136,12 +136,7 @@ public class NotificationInfo extends LinearLayout implements GutsContent {
         if (channel.getId().equals(NotificationChannel.DEFAULT_CHANNEL_ID)) {
             channelNameText = mContext.getString(R.string.notification_header_default_channel);
         } else {
-            if (info != null && channel.getNameResId() != 0) {
-                channelNameText = pm.getText(pkg, channel.getNameResId(), info);
-            }
-            if (channel.getName() != null) {
-                channelNameText = channel.getName();
-            }
+            channelNameText = channel.getName();
         }
         ((TextView) findViewById(R.id.pkgname)).setText(appName);
         ((TextView) findViewById(R.id.channel_name)).setText(channelNameText);
@@ -154,12 +149,7 @@ public class NotificationInfo extends LinearLayout implements GutsContent {
                         iNotificationManager.getNotificationChannelGroupForPackage(
                                 channel.getGroup(), pkg, appUid);
                 if (notificationChannelGroup != null) {
-                    if (info != null && notificationChannelGroup.getNameResId() != 0) {
-                        groupName = pm.getText(pkg, notificationChannelGroup.getNameResId(), info);
-                    }
-                    if (notificationChannelGroup.getName() != null) {
-                        groupName = notificationChannelGroup.getName();
-                    }
+                    groupName = notificationChannelGroup.getName();
                 }
             } catch (RemoteException e) {
                 Log.e(TAG, e.toString());

@@ -385,7 +385,7 @@ public class NotificationManager
     /**
      * Creates a group container for {@link NotificationChannel} objects.
      *
-     * This is a no-op for groups that already exist.
+     * This can be used to rename an existing group.
      * <p>
      *     Group information is only used for presentation, not for behavior. Groups are optional
      *     for channels, and you can have a mix of channels that belong to groups and channels
@@ -421,21 +421,22 @@ public class NotificationManager
     /**
      * Creates a notification channel that notifications can be posted to.
      *
-     * This is a no-op for channels that already exist.
+     * This can also be used to restore a deleted channel and to rename an existing channel. All
+     * other fields are ignored for channels that already exist.
      *
      * @param channel  the channel to create.  Note that the created channel may differ from this
      *                 value. If the provided channel is malformed, a RemoteException will be
-     *                 thrown. If the channel already exists, it will not be modified.
+     *                 thrown.
      */
     public void createNotificationChannel(@NonNull NotificationChannel channel) {
         createNotificationChannels(Arrays.asList(channel));
     }
 
     /**
-     * Creates multiple notification channels that different notifications can be posted to.
+     * Creates multiple notification channels that different notifications can be posted to. See
+     * {@link #createNotificationChannel(NotificationChannel)}.
      *
-     * @param channels the list of channels to attempt to create.  If any of these channels already
-     *                 exist, they will not be modified.
+     * @param channels the list of channels to attempt to create.
      */
     public void createNotificationChannels(@NonNull List<NotificationChannel> channels) {
         INotificationManager service = getService();

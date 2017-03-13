@@ -48,12 +48,12 @@ public class SystemNotificationChannels {
         List<NotificationChannel> channelsList = new ArrayList<NotificationChannel>();
         channelsList.add(new NotificationChannel(
                 VIRTUAL_KEYBOARD,
-                R.string.notification_channel_virtual_keyboard,
+                context.getString(R.string.notification_channel_virtual_keyboard),
                 NotificationManager.IMPORTANCE_LOW));
 
         final NotificationChannel physicalKeyboardChannel = new NotificationChannel(
                 PHYSICAL_KEYBOARD,
-                R.string.notification_channel_physical_keyboard,
+                context.getString(R.string.notification_channel_physical_keyboard),
                 NotificationManager.IMPORTANCE_DEFAULT);
         physicalKeyboardChannel.setSound(Settings.System.DEFAULT_NOTIFICATION_URI,
                 Notification.AUDIO_ATTRIBUTES_DEFAULT);
@@ -61,32 +61,32 @@ public class SystemNotificationChannels {
 
         channelsList.add(new NotificationChannel(
                 SECURITY,
-                R.string.notification_channel_security,
+                context.getString(R.string.notification_channel_security),
                 NotificationManager.IMPORTANCE_LOW));
 
         channelsList.add(new NotificationChannel(
                 CAR_MODE,
-                R.string.notification_channel_car_mode,
+                context.getString(R.string.notification_channel_car_mode),
                 NotificationManager.IMPORTANCE_LOW));
 
         channelsList.add(new NotificationChannel(
                 DEVELOPER,
-                R.string.notification_channel_developer,
+                context.getString(R.string.notification_channel_developer),
                 NotificationManager.IMPORTANCE_LOW));
 
         channelsList.add(new NotificationChannel(
                 UPDATES,
-                R.string.notification_channel_updates,
+                context.getString(R.string.notification_channel_updates),
                 NotificationManager.IMPORTANCE_LOW));
 
         channelsList.add(new NotificationChannel(
                 NETWORK_STATUS,
-                R.string.notification_channel_network_status,
+                context.getString(R.string.notification_channel_network_status),
                 NotificationManager.IMPORTANCE_LOW));
 
         final NotificationChannel networkAlertsChannel = new NotificationChannel(
                 NETWORK_ALERTS,
-                R.string.notification_channel_network_alerts,
+                context.getString(R.string.notification_channel_network_alerts),
                 NotificationManager.IMPORTANCE_HIGH);
         networkAlertsChannel.setSound(Settings.System.DEFAULT_NOTIFICATION_URI,
                 Notification.AUDIO_ATTRIBUTES_DEFAULT);
@@ -94,17 +94,17 @@ public class SystemNotificationChannels {
 
         channelsList.add(new NotificationChannel(
                 VPN,
-                R.string.notification_channel_vpn,
+                context.getString(R.string.notification_channel_vpn),
                 NotificationManager.IMPORTANCE_LOW));
 
         channelsList.add(new NotificationChannel(
                 DEVICE_ADMIN,
-                R.string.notification_channel_device_admin,
+                context.getString(R.string.notification_channel_device_admin),
                 NotificationManager.IMPORTANCE_LOW));
 
         final NotificationChannel alertsChannel = new NotificationChannel(
                 ALERTS,
-                R.string.notification_channel_alerts,
+                context.getString(R.string.notification_channel_alerts),
                 NotificationManager.IMPORTANCE_DEFAULT);
         alertsChannel.setSound(Settings.System.DEFAULT_NOTIFICATION_URI,
                 Notification.AUDIO_ATTRIBUTES_DEFAULT);
@@ -112,12 +112,12 @@ public class SystemNotificationChannels {
 
         channelsList.add(new NotificationChannel(
                 RETAIL_MODE,
-                R.string.notification_channel_retail_mode,
+                context.getString(R.string.notification_channel_retail_mode),
                 NotificationManager.IMPORTANCE_LOW));
 
         channelsList.add(new NotificationChannel(
                 USB,
-                R.string.notification_channel_usb,
+                context.getString(R.string.notification_channel_usb),
                 NotificationManager.IMPORTANCE_MIN));
 
         nm.createNotificationChannels(channelsList);
@@ -128,7 +128,7 @@ public class SystemNotificationChannels {
         final NotificationManager nm = context.getSystemService(NotificationManager.class);
         nm.createNotificationChannelsForPackage(pkg, Arrays.asList(new NotificationChannel(
                 ACCOUNT,
-                R.string.notification_channel_account,
+                context.getString(R.string.notification_channel_account),
                 NotificationManager.IMPORTANCE_LOW)));
     }
 

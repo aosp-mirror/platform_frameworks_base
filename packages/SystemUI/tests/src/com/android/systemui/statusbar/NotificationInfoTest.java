@@ -161,47 +161,11 @@ public class NotificationInfoTest extends SysuiTestCase {
     }
 
     @Test
-    public void testBindNotification_SetsGroupName_resId() throws Exception {
-        when(mMockPackageManager.getText(eq(TEST_PACKAGE_NAME),
-                eq(R.string.legacy_vpn_name), anyObject())).thenReturn(
-                getContext().getString(R.string.legacy_vpn_name));
-        mNotificationChannel.setGroup("test_group_id");
-        final NotificationChannelGroup notificationChannelGroup =
-                new NotificationChannelGroup("test_group_id", R.string.legacy_vpn_name);
-        when(mMockINotificationManager.getNotificationChannelGroupForPackage(
-                eq("test_group_id"), eq(TEST_PACKAGE_NAME), anyInt()))
-                .thenReturn(notificationChannelGroup);
-        mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
-                mMockStatusBarNotification, mNotificationChannel, null, null, null);
-        final TextView groupNameView = (TextView) mNotificationInfo.findViewById(R.id.group_name);
-        assertEquals(View.VISIBLE, groupNameView.getVisibility());
-        assertEquals(mContext.getString(R.string.legacy_vpn_name), groupNameView.getText());
-        final TextView groupDividerView =
-                (TextView) mNotificationInfo.findViewById(R.id.pkg_group_divider);
-        assertEquals(View.VISIBLE, groupDividerView.getVisibility());
-    }
-
-    @Test
     public void testBindNotification_SetsTextChannelName() throws Exception {
         mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
                 mMockStatusBarNotification, mNotificationChannel, null, null, null);
         final TextView textView = (TextView) mNotificationInfo.findViewById(R.id.channel_name);
         assertEquals(TEST_CHANNEL_NAME, textView.getText());
-    }
-
-    @Test
-    public void testBindNotification_SetsTextChannelName_resId() throws Exception {
-        when(mMockPackageManager.getText(eq(TEST_PACKAGE_NAME),
-                eq(R.string.notification_menu_accessibility), anyObject())).thenReturn(
-                getContext().getString(R.string.notification_menu_accessibility));
-        NotificationChannel notificationChannelResId = new NotificationChannel(
-                TEST_CHANNEL, R.string.notification_menu_accessibility,
-                NotificationManager.IMPORTANCE_LOW);
-        mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
-                mMockStatusBarNotification, notificationChannelResId, null, null, null);
-        final TextView textView = mNotificationInfo.findViewById(R.id.channel_name);
-        assertEquals(getContext().getString(R.string.notification_menu_accessibility),
-                textView.getText());
     }
 
     @Test

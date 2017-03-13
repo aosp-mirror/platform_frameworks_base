@@ -38,19 +38,19 @@ public class NotificationChannels extends SystemUI {
         nm.createNotificationChannels(Arrays.asList(
                 new NotificationChannel(
                         ALERTS,
-                        R.string.notification_channel_alerts,
+                        context.getString(R.string.notification_channel_alerts),
                         NotificationManager.IMPORTANCE_HIGH),
                 new NotificationChannel(
                         SCREENSHOTS,
-                        R.string.notification_channel_screenshot,
+                        context.getString(R.string.notification_channel_screenshot),
                         NotificationManager.IMPORTANCE_LOW),
                 new NotificationChannel(
                         GENERAL,
-                        R.string.notification_channel_general,
+                        context.getString(R.string.notification_channel_general),
                         NotificationManager.IMPORTANCE_MIN),
                 new NotificationChannel(
                         STORAGE,
-                        R.string.notification_channel_storage,
+                        context.getString(R.string.notification_channel_storage),
                         isTv(context)
                                 ? NotificationManager.IMPORTANCE_DEFAULT
                                 : NotificationManager.IMPORTANCE_LOW)
