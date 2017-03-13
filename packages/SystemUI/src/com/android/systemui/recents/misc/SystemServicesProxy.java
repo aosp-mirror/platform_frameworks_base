@@ -67,6 +67,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.util.ArraySet;
+import android.util.LauncherIcons;
 import android.util.Log;
 import android.util.MutableBoolean;
 import android.view.Display;
@@ -142,6 +143,7 @@ public class SystemServicesProxy {
     int mDummyThumbnailHeight;
     Paint mBgProtectionPaint;
     Canvas mBgProtectionCanvas;
+    LauncherIcons mLauncherIcons;
 
     private final Handler mHandler = new H();
 
@@ -299,6 +301,7 @@ public class SystemServicesProxy {
             Collections.addAll(sRecentsBlacklist,
                     res.getStringArray(R.array.recents_blacklist_array));
         }
+        mLauncherIcons = new LauncherIcons(context);
     }
 
     /**
@@ -834,7 +837,7 @@ public class SystemServicesProxy {
             return new ColorDrawable(0xFF666666);
         }
 
-        Drawable icon = info.loadIcon(mPm);
+        Drawable icon = mLauncherIcons.wrapIconDrawableWithShadow(info.loadIcon(mPm));
         return getBadgedIcon(icon, userId);
     }
 
@@ -850,7 +853,7 @@ public class SystemServicesProxy {
             return new ColorDrawable(0xFF666666);
         }
 
-        Drawable icon = appInfo.loadIcon(mPm);
+        Drawable icon = mLauncherIcons.wrapIconDrawableWithShadow(appInfo.loadIcon(mPm));
         return getBadgedIcon(icon, userId);
     }
 
