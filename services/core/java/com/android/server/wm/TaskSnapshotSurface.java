@@ -152,6 +152,14 @@ class TaskSnapshotSurface implements StartingSurface {
 
     private void drawSnapshot(GraphicBuffer snapshot) {
         mSurface.attachAndQueueBuffer(snapshot);
+        final boolean reportNextDraw;
+        synchronized (mService.mWindowMap) {
+            mHasDrawn = true;
+            reportNextDraw = mReportNextDraw;
+        }
+        if (reportNextDraw) {
+            reportDrawn();
+        }
         mSurface.release();
     }
 
