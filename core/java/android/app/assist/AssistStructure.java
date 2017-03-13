@@ -639,6 +639,7 @@ public class AssistStructure implements Parcelable {
         static final int FLAGS_HAS_CHILDREN = 0x00100000;
         static final int FLAGS_HAS_URL = 0x00080000;
         static final int FLAGS_HAS_INPUT_TYPE = 0x00040000;
+        static final int FLAGS_HAS_ENTRY_ID = 0x00020000;
         static final int FLAGS_ALL_CONTROL = 0xfff00000;
 
         int mFlags;
@@ -672,7 +673,10 @@ public class AssistStructure implements Parcelable {
                         mIdPackage = preader.readString();
                     }
                 }
+            } else if ((flags&FLAGS_HAS_ENTRY_ID) != 0) {
+                mIdEntry = preader.readString();
             }
+
             if ((flags&FLAGS_HAS_AUTOFILL_DATA) != 0) {
                 mSanitized = in.readInt() == 1;
                 mAutofillId = in.readParcelable(null);
@@ -745,6 +749,8 @@ public class AssistStructure implements Parcelable {
             int flags = mFlags & ~FLAGS_ALL_CONTROL;
             if (mId != View.NO_ID) {
                 flags |= FLAGS_HAS_ID;
+            } else if (mIdEntry != null ){
+                flags |= FLAGS_HAS_ENTRY_ID;
             }
             if (mAutofillId != null) {
                 flags |= FLAGS_HAS_AUTOFILL_DATA;
@@ -805,7 +811,10 @@ public class AssistStructure implements Parcelable {
                         pwriter.writeString(mIdPackage);
                     }
                 }
+            } else if ((flags&FLAGS_HAS_ENTRY_ID) != 0) {
+                pwriter.writeString(mIdEntry);
             }
+
             if ((flags&FLAGS_HAS_AUTOFILL_DATA) != 0) {
                 writeSensitive = mSanitized || !sanitizeOnWrite;
                 out.writeInt(mSanitized ? 1 : 0);
@@ -887,6 +896,10 @@ public class AssistStructure implements Parcelable {
          * If {@link #getId()} is a resource identifier, this is the entry name of that
          * identifier.  See {@link android.view.ViewStructure#setId ViewStructure.setId}
          * for more information.
+         *
+         * <p>If the node represents a virtual view, it could also represent the entry id set by
+         *  {@link android.view.ViewStructure#setIdEntry ViewStructure.setIdEntry}
+         *
          */
         public String getIdEntry() {
             return mIdEntry;
@@ -1357,6 +1370,11 @@ public class AssistStructure implements Parcelable {
             mNode.mId = id;
             mNode.mIdPackage = packageName;
             mNode.mIdType = typeName;
+            mNode.mIdEntry = entryName;
+        }
+
+        @Override
+        public void setIdEntry(String entryName) {
             mNode.mIdEntry = entryName;
         }
 

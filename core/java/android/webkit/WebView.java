@@ -41,6 +41,7 @@ import android.os.StrictMode;
 import android.os.RemoteException;
 import android.print.PrintDocumentAdapter;
 import android.security.KeyChain;
+import android.text.InputType;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.DragEvent;
@@ -2611,6 +2612,76 @@ public class WebView extends AbsoluteLayout
         mProvider.getViewDelegate().onProvideVirtualStructure(structure);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>The {@link ViewStructure} traditionally represents a {@link View}, while for web pages
+     * it represent HTML nodes. Hence, it's necessary to "map" the HTML properties in a way that is
+     * understood by the {@link android.service.autofill.AutofillService} implementations:
+     *
+     * <ol>
+     *   <li>{@link ViewStructure#setClassName(String)} should be use to describe the type of node:
+     *   <ol>
+     *       <li>If the Android SDK provides a similar View, the full-qualified class name of that
+     *           view should be used.
+     *       <li>Otherwise, the class name should be {@code HTML.iframe}.
+     *   </ol>
+     *   <li>The W3C autofill field ({@code autocomplete} tag attribute) maps to
+     *       {@link ViewStructure#setAutofillHint(String[])}.
+     *   <li>The {@code type} attribute of {@code INPUT} tags maps to
+     *       {@link ViewStructure#setInputType(int)}.
+     *   <li>The {@code name} attribute maps to {@link ViewStructure#setIdEntry(String)}.
+     *   <li>The {@code value} attribute maps to {@link ViewStructure#setText(CharSequence)}.
+     *   <li>The {@code placeholder} attribute maps to {@link ViewStructure#setHint(CharSequence)}.
+     *   <li>{@link ViewStructure#setDataIsSensitive(boolean)} whould only be called with
+     *       {@code true} for form fields whose {@code value} attribute was not pre-loaded.
+     * </ol>
+     *
+     * <p>Example1: an HTML form with 2 fields for username and password.
+     *
+     * <pre class="prettyprint">
+     *    <input type="text" name="username" value="mr.sparkle" autocomplete="username" placeholder="Email or username">
+     *    <input type="password" name="password" autocomplete="current-password" placeholder="Password">
+     * </pre>
+     *
+     * <p>Would map to:
+     *
+     * <pre class="prettyprint">
+     *     ViewStructure username = //structure.newChildForAutofill(...);
+     *     username.setClassName("input");
+     *     username.setInputType("android.widget.EditText");
+     *     username.setAutofillHints("username");
+     *     username.setIdEntry("username");
+     *     username.setHint("Email or username");
+     *     username.setAutofillType(View.AUTOFILL_TYPE_TEXT);
+     *     username.setAutofillValue(AutofillValue.forText("mr.sparkle"));
+     *     username.setText("mr.sparkle");
+     *     username.setDataIsSensitive(true); // Contains real username, which is sensitive
+     *
+     *     ViewStructure password = //structure.newChildForAutofill(...);
+     *     password.setInputType("android.widget.EditText");
+     *     password.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD);
+     *     password.setAutofillHints("current-password");
+     *     password.setIdEntry("password");
+     *     password.setHint("Password");
+     *     password.setAutofillType(View.AUTOFILL_TYPE_TEXT);
+     *     password.setDataIsSensitive(false); // Value is not set
+     * </pre>
+     *
+     * <p>Example2: an IFRAME tag.
+     *
+     * <pre class="prettyprint">
+     *    <iframe src="http://example.com/login"/>
+     * </pre>
+     *
+     * <p>Would map to:
+     *
+     * <pre class="prettyprint">
+     *     ViewStructure iframe = //structure.newChildForAutofill(...);
+     *     iframe.setClassName("HTML.iframe");
+     *     iframe.setUrl("http://example.com/login");
+     * </pre>
+     */
     @Override
     public void onProvideAutofillVirtualStructure(ViewStructure structure, int flags) {
         mProvider.getViewDelegate().onProvideAutofillVirtualStructure(structure, flags);
