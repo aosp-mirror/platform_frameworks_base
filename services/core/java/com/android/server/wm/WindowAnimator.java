@@ -161,7 +161,7 @@ public class WindowAnimator {
                             // We just finished rotation animation which means we did not announce
                             // the rotation and waited for it to end, announce now.
                             accessibilityController.onRotationChangedLocked(
-                                    mService.getDefaultDisplayContentLocked(), mService.mRotation);
+                                    mService.getDefaultDisplayContentLocked());
                         }
                     }
                 }

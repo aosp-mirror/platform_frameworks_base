@@ -16,21 +16,15 @@
 
 package com.android.server.wm;
 
-import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
 import static android.Manifest.permission.MANAGE_APP_TOKENS;
 import static android.Manifest.permission.REGISTER_WINDOW_MANAGER_LISTENERS;
 import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
-import static android.app.AppOpsManager.MODE_IGNORED;
 import static android.app.AppOpsManager.OP_SYSTEM_ALERT_WINDOW;
 import static android.app.StatusBarManager.DISABLE_MASK;
 import static android.app.admin.DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED;
 import static android.content.Intent.ACTION_USER_REMOVED;
-import static android.content.Intent.EXTRA_PACKAGE_NAME;
-import static android.content.Intent.EXTRA_UID;
 import static android.content.Intent.EXTRA_USER_HANDLE;
-import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
-import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.UserHandle.USER_NULL;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.DOCKED_INVALID;
@@ -69,8 +63,6 @@ import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 import static com.android.server.wm.AppTransition.TRANSIT_UNSET;
 import static com.android.server.wm.AppWindowAnimator.PROLONG_ANIMATION_AT_END;
 import static com.android.server.wm.AppWindowAnimator.PROLONG_ANIMATION_AT_START;
-import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_DOCKED_DIVIDER;
-import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_FREEFORM;
 import static com.android.server.wm.KeyguardDisableHandler.KEYGUARD_POLICY_CHANGED;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
@@ -112,7 +104,6 @@ import android.app.ActivityManager.TaskSnapshot;
 import android.app.ActivityManagerInternal;
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
-import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -528,11 +519,6 @@ public class WindowManagerService extends IWindowManager.Stub
     // The root of the device window hierarchy.
     RootWindowContainer mRoot;
 
-    // TODO: Move several of this states to the RootWindowContainer or DisplayContent
-    int mRotation = 0;
-    int mLastOrientation = SCREEN_ORIENTATION_UNSPECIFIED;
-    boolean mAltOrientation = false;
-
     int mDockedStackCreateMode = DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
     Rect mDockedStackCreateBounds;
 
@@ -573,8 +559,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
     boolean mClientFreezingScreen = false;
     int mAppsFreezingScreen = 0;
-    int mLastWindowForcedOrientation = SCREEN_ORIENTATION_UNSPECIFIED;
-    int mLastKeyguardForcedOrientation = SCREEN_ORIENTATION_UNSPECIFIED;
 
     int mLayoutSeq = 0;
 
@@ -1450,7 +1434,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 } else {
                     taskBounds = null;
                 }
-                if (mPolicy.getInsetHintLw(win.mAttrs, taskBounds, mRotation,
+                if (mPolicy.getInsetHintLw(win.mAttrs, taskBounds, displayInfo.rotation,
                         displayInfo.logicalWidth, displayInfo.logicalHeight, outContentInsets,
                         outStableInsets, outOutsets)) {
                     res |= WindowManagerGlobal.ADD_FLAG_ALWAYS_CONSUME_NAV_BAR;
@@ -2505,12 +2489,16 @@ public class WindowManagerService extends IWindowManager.Stub
     boolean updateOrientationFromAppTokensLocked(boolean inTransaction, int displayId) {
         long ident = Binder.clearCallingIdentity();
         try {
-            final int req = mRoot.getDisplayContent(displayId).getOrientation();
-            if (req != mLastOrientation) {
-                mLastOrientation = req;
+            final DisplayContent dc = mRoot.getDisplayContent(displayId);
+            final int req = dc.getOrientation();
+            if (req != dc.getLastOrientation()) {
+                dc.setLastOrientation(req);
                 //send a message to Policy indicating orientation change to take
                 //action like disabling/enabling sensors etc.,
-                mPolicy.setCurrentOrientationLw(req);
+                // TODO(multi-display): Implement policy for secondary displays.
+                if (dc.isDefaultDisplay) {
+                    mPolicy.setCurrentOrientationLw(req);
+                }
                 if (updateRotationUncheckedLocked(inTransaction, displayId)) {
                     // changed
                     return true;
@@ -2527,10 +2515,18 @@ public class WindowManagerService extends IWindowManager.Stub
     // changed the real orientation our applied our screen rotation animation.
     // For example, because a previous screen rotation was in progress.
     boolean rotationNeedsUpdateLocked() {
-        int rotation = mPolicy.rotationForOrientationLw(mLastOrientation, mRotation);
+        // TODO(multi-display): Check for updates on all displays. Need to have per-display policy
+        // to implement WindowManagerPolicy#rotationForOrientationLw() correctly.
+        final DisplayContent defaultDisplayContent = getDefaultDisplayContentLocked();
+        final int lastOrientation = defaultDisplayContent.getLastOrientation();
+        final int oldRotation = defaultDisplayContent.getRotation();
+        final boolean oldAltOrientation = defaultDisplayContent.getAltOrientation();
+
+        final int rotation = mPolicy.rotationForOrientationLw(lastOrientation,
+                oldRotation);
         boolean altOrientation = !mPolicy.rotationHasCompatibleMetricsLw(
-                mLastOrientation, rotation);
-        if (mRotation == rotation && mAltOrientation == altOrientation) {
+                lastOrientation, rotation);
+        if (oldRotation == rotation && oldAltOrientation == altOrientation) {
             return false;
         }
         return true;
@@ -3758,6 +3754,7 @@ public class WindowManagerService extends IWindowManager.Stub
      */
     @Override
     public void freezeRotation(int rotation) {
+        // TODO(multi-display): Track which display is rotated.
         if (!checkCallingPermission(android.Manifest.permission.SET_ORIENTATION,
                 "freezeRotation()")) {
             throw new SecurityException("Requires SET_ORIENTATION permission");
@@ -3767,12 +3764,14 @@ public class WindowManagerService extends IWindowManager.Stub
                     + "rotation constant.");
         }
 
-        if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "freezeRotation: mRotation=" + mRotation);
+        final int defaultDisplayRotation = getDefaultDisplayRotation();
+        if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "freezeRotation: mRotation="
+                + defaultDisplayRotation);
 
         long origId = Binder.clearCallingIdentity();
         try {
             mPolicy.setUserRotationMode(WindowManagerPolicy.USER_ROTATION_LOCKED,
-                    rotation == -1 ? mRotation : rotation);
+                    rotation == -1 ? defaultDisplayRotation : rotation);
         } finally {
             Binder.restoreCallingIdentity(origId);
         }
@@ -3791,7 +3790,8 @@ public class WindowManagerService extends IWindowManager.Stub
             throw new SecurityException("Requires SET_ORIENTATION permission");
         }
 
-        if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "thawRotation: mRotation=" + mRotation);
+        if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "thawRotation: mRotation="
+                + getDefaultDisplayRotation());
 
         long origId = Binder.clearCallingIdentity();
         try {
@@ -3915,8 +3915,10 @@ public class WindowManagerService extends IWindowManager.Stub
 
         final DisplayContent dc = mRoot.getDisplayContent(displayId);
 
-        final int oldRotation = mRotation;
-        int rotation = mPolicy.rotationForOrientationLw(mLastOrientation, mRotation);
+        final int oldRotation = dc.getRotation();
+        final int lastOrientation = dc.getLastOrientation();
+        final boolean oldAltOrientation = dc.getAltOrientation();
+        int rotation = mPolicy.rotationForOrientationLw(lastOrientation, oldRotation);
         final boolean rotateSeamlessly;
 
         if (mPolicy.shouldRotateSeamlessly(oldRotation, rotation)) {
@@ -3956,29 +3958,30 @@ public class WindowManagerService extends IWindowManager.Stub
         //       an orientation that has different metrics than it expected.
         //       eg. Portrait instead of Landscape.
 
-        boolean altOrientation = !mPolicy.rotationHasCompatibleMetricsLw(
-                mLastOrientation, rotation);
+        boolean altOrientation = !mPolicy.rotationHasCompatibleMetricsLw(lastOrientation, rotation);
 
-        if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Selected orientation " + mLastOrientation
+        if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Selected orientation " + lastOrientation
                 + ", got rotation " + rotation + " which has "
                 + (altOrientation ? "incompatible" : "compatible") + " metrics");
 
-        if (mRotation == rotation && mAltOrientation == altOrientation) {
+        if (oldRotation == rotation && oldAltOrientation == altOrientation) {
             // No change.
             return false;
         }
 
         if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Rotation changed to " + rotation
-                + (altOrientation ? " (alt)" : "") + " from " + mRotation
-                + (mAltOrientation ? " (alt)" : "") + ", lastOrientation=" + mLastOrientation);
+                + (altOrientation ? " (alt)" : "") + " from " + oldRotation
+                + (oldAltOrientation ? " (alt)" : "") + ", lastOrientation=" + lastOrientation);
 
-        if (DisplayContent.deltaRotation(rotation, mRotation) != 2) {
+        if (DisplayContent.deltaRotation(rotation, oldRotation) != 2) {
             mWaitingForConfig = true;
         }
 
-        mRotation = rotation;
-        mAltOrientation = altOrientation;
-        mPolicy.setRotationLw(mRotation);
+        dc.setRotation(rotation);
+        dc.setAltOrientation(altOrientation);
+        if (dc.isDefaultDisplay) {
+            mPolicy.setRotationLw(rotation);
+        }
 
         mWindowsFreezingScreen = WINDOWS_FREEZING_SCREENS_ACTIVE;
         mH.removeMessages(H.WINDOW_FREEZE_TIMEOUT);
@@ -4037,7 +4040,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             if (rotateSeamlessly) {
                 dc.forAllWindows(w -> {
-                        w.mWinAnimator.seamlesslyRotateWindow(oldRotation, mRotation);
+                        w.mWinAnimator.seamlesslyRotateWindow(oldRotation, rotation);
                 }, true /* traverseTopToBottom */);
             }
 
@@ -4082,16 +4085,17 @@ public class WindowManagerService extends IWindowManager.Stub
         // windows in final state. Otherwise, we make this call at the rotation end.
         if (screenRotationAnimation == null && mAccessibilityController != null
                 && dc.getDisplayId() == DEFAULT_DISPLAY) {
-            mAccessibilityController.onRotationChangedLocked(getDefaultDisplayContentLocked(),
-                    rotation);
+            mAccessibilityController.onRotationChangedLocked(getDefaultDisplayContentLocked());
         }
 
         return true;
     }
 
     @Override
-    public int getRotation() {
-        return mRotation;
+    public int getDefaultDisplayRotation() {
+        synchronized (mWindowMap) {
+            return getDefaultDisplayContentLocked().getRotation();
+        }
     }
 
     @Override
@@ -4128,7 +4132,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 // Client died, no cleanup needed.
             }
 
-            return mRotation;
+            // TODO(multi-display): Modify rotation watchers to include display id.
+            return getDefaultDisplayRotation();
         }
     }
 
@@ -4170,10 +4175,9 @@ public class WindowManagerService extends IWindowManager.Stub
     @Override
     public int getPreferredOptionsPanelGravity() {
         synchronized (mWindowMap) {
-            final int rotation = getRotation();
-
             // TODO(multidisplay): Assume that such devices physical keys are on the main screen.
             final DisplayContent displayContent = getDefaultDisplayContentLocked();
+            final int rotation = displayContent.getRotation();
             if (displayContent.mInitialDisplayWidth < displayContent.mInitialDisplayHeight) {
                 // On devices with a natural orientation of portrait
                 switch (rotation) {
@@ -4707,9 +4711,14 @@ public class WindowManagerService extends IWindowManager.Stub
     private DisplayInfo updateDisplayAndOrientationLocked(int uiMode, int displayId) {
         final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
 
+        // TODO(multi-display): Implement rotation for secondary displays.
+        final boolean isDefaultDisplay = displayContent.isDefaultDisplay;
+        final int displayRotation = displayContent.getRotation();
+        final boolean altDisplayOrientation = displayContent.getAltOrientation();
+
         // Use the effective "visual" dimensions based on current rotation
-        final boolean rotated = (mRotation == Surface.ROTATION_90
-                || mRotation == Surface.ROTATION_270);
+        final boolean rotated = (displayRotation == Surface.ROTATION_90
+                || displayRotation == Surface.ROTATION_270);
         final int realdw = rotated ?
                 displayContent.mBaseDisplayHeight : displayContent.mBaseDisplayWidth;
         final int realdh = rotated ?
@@ -4717,7 +4726,7 @@ public class WindowManagerService extends IWindowManager.Stub
         int dw = realdw;
         int dh = realdh;
 
-        if (mAltOrientation) {
+        if (altDisplayOrientation) {
             if (realdw > realdh) {
                 // Turn landscape into portrait.
                 int maxw = (int)(realdh/1.3f);
@@ -4734,18 +4743,21 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         // Update application display metrics.
-        final int appWidth = mPolicy.getNonDecorDisplayWidth(dw, dh, mRotation, uiMode, displayId);
-        final int appHeight = mPolicy.getNonDecorDisplayHeight(dw, dh, mRotation, uiMode,
+        final int appWidth = mPolicy.getNonDecorDisplayWidth(dw, dh, displayRotation, uiMode,
+                displayId);
+        final int appHeight = mPolicy.getNonDecorDisplayHeight(dw, dh, displayRotation, uiMode,
                 displayId);
         final DisplayInfo displayInfo = displayContent.getDisplayInfo();
-        displayInfo.rotation = mRotation;
+        displayInfo.rotation = displayRotation;
         displayInfo.logicalWidth = dw;
         displayInfo.logicalHeight = dh;
         displayInfo.logicalDensityDpi = displayContent.mBaseDisplayDensity;
         displayInfo.appWidth = appWidth;
         displayInfo.appHeight = appHeight;
-        displayInfo.getLogicalMetrics(mRealDisplayMetrics,
-                CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO, null);
+        if (isDefaultDisplay) {
+            displayInfo.getLogicalMetrics(mRealDisplayMetrics,
+                    CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO, null);
+        }
         displayInfo.getAppMetrics(mDisplayMetrics);
         if (displayContent.mDisplayScalingDisabled) {
             displayInfo.flags |= Display.FLAG_SCALING_DISABLED;
@@ -4761,8 +4773,10 @@ public class WindowManagerService extends IWindowManager.Stub
             Slog.i(TAG_WM, "Set app display size: " + appWidth + " x " + appHeight);
         }
 
-        mCompatibleScreenScale = CompatibilityInfo.computeCompatibleScaling(mDisplayMetrics,
-                mCompatDisplayMetrics);
+        if (isDefaultDisplay) {
+            mCompatibleScreenScale = CompatibilityInfo.computeCompatibleScaling(mDisplayMetrics,
+                    mCompatDisplayMetrics);
+        }
         return displayInfo;
     }
 
@@ -4775,13 +4789,13 @@ public class WindowManagerService extends IWindowManager.Stub
         config.orientation = (dw <= dh) ? Configuration.ORIENTATION_PORTRAIT :
                 Configuration.ORIENTATION_LANDSCAPE;
         config.screenWidthDp =
-                (int)(mPolicy.getConfigDisplayWidth(dw, dh, mRotation, config.uiMode, displayId) /
-                        mDisplayMetrics.density);
+                (int)(mPolicy.getConfigDisplayWidth(dw, dh, displayInfo.rotation, config.uiMode,
+                        displayId) / mDisplayMetrics.density);
         config.screenHeightDp =
-                (int)(mPolicy.getConfigDisplayHeight(dw, dh, mRotation, config.uiMode, displayId) /
-                        mDisplayMetrics.density);
-        final boolean rotated = (mRotation == Surface.ROTATION_90
-                || mRotation == Surface.ROTATION_270);
+                (int)(mPolicy.getConfigDisplayHeight(dw, dh, displayInfo.rotation, config.uiMode,
+                        displayId) / mDisplayMetrics.density);
+        final boolean rotated = (displayInfo.rotation == Surface.ROTATION_90
+                || displayInfo.rotation == Surface.ROTATION_270);
 
         computeSizeRangesAndScreenLayout(displayInfo, displayId, rotated, config.uiMode, dw, dh,
                 mDisplayMetrics.density, config);
@@ -7002,10 +7016,14 @@ public class WindowManagerService extends IWindowManager.Stub
                     pw.print(" client="); pw.print(mClientFreezingScreen);
                     pw.print(" apps="); pw.print(mAppsFreezingScreen);
                     pw.print(" waitingForConfig="); pw.println(mWaitingForConfig);
-            pw.print("  mRotation="); pw.print(mRotation);
-                    pw.print(" mAltOrientation="); pw.println(mAltOrientation);
-            pw.print("  mLastWindowForcedOrientation="); pw.print(mLastWindowForcedOrientation);
-                    pw.print(" mLastOrientation="); pw.println(mLastOrientation);
+            final DisplayContent defaultDisplayContent = getDefaultDisplayContentLocked();
+            pw.print("  mRotation="); pw.print(defaultDisplayContent.getRotation());
+                    pw.print(" mAltOrientation=");
+                            pw.println(defaultDisplayContent.getAltOrientation());
+            pw.print("  mLastWindowForcedOrientation=");
+                    pw.print(defaultDisplayContent.getLastWindowForcedOrientation());
+                    pw.print(" mLastOrientation=");
+                            pw.println(defaultDisplayContent.getLastOrientation());
             pw.print("  mDeferredRotationPauseCount="); pw.println(mDeferredRotationPauseCount);
             pw.print("  Animation settings: disabled="); pw.print(mAnimationsDisabled);
                     pw.print(" window="); pw.print(mWindowAnimationScaleSetting);

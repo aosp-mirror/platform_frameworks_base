@@ -156,9 +156,9 @@ final class AccessibilityController {
         }
     }
 
-    public void onRotationChangedLocked(DisplayContent displayContent, int rotation) {
+    public void onRotationChangedLocked(DisplayContent displayContent) {
         if (mDisplayMagnifier != null) {
-            mDisplayMagnifier.onRotationChangedLocked(displayContent, rotation);
+            mDisplayMagnifier.onRotationChangedLocked(displayContent);
         }
         if (mWindowsForAccessibilityObserver != null) {
             mWindowsForAccessibilityObserver.scheduleComputeChangedWindowsLocked();
@@ -312,9 +312,10 @@ final class AccessibilityController {
             mWindowManagerService.scheduleAnimationLocked();
         }
 
-        public void onRotationChangedLocked(DisplayContent displayContent, int rotation) {
+        public void onRotationChangedLocked(DisplayContent displayContent) {
             if (DEBUG_ROTATION) {
-                Slog.i(LOG_TAG, "Rotaton: " + Surface.rotationToString(rotation)
+                final int rotation = displayContent.getRotation();
+                Slog.i(LOG_TAG, "Rotation: " + Surface.rotationToString(rotation)
                         + " displayId: " + displayContent.getDisplayId());
             }
             mMagnifedViewport.onRotationChangedLocked();

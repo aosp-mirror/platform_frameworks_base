@@ -802,6 +802,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
         mHoldScreenWindow = null;
         mObscuringWindow = null;
 
+        // TODO(multi-display): Support these features on secondary screens.
         if (mService.mWatermark != null) {
             mService.mWatermark.positionSurface(defaultDw, defaultDh);
         }
@@ -809,11 +810,12 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
             mService.mStrictModeFlash.positionSurface(defaultDw, defaultDh);
         }
         if (mService.mCircularDisplayMask != null) {
-            mService.mCircularDisplayMask.positionSurface(defaultDw, defaultDh, mService.mRotation);
+            mService.mCircularDisplayMask.positionSurface(defaultDw, defaultDh,
+                    mService.getDefaultDisplayRotation());
         }
         if (mService.mEmulatorDisplayOverlay != null) {
             mService.mEmulatorDisplayOverlay.positionSurface(defaultDw, defaultDh,
-                    mService.mRotation);
+                    mService.getDefaultDisplayRotation());
         }
 
         boolean focusDisplayed = false;

@@ -2835,7 +2835,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // Sometimes we save surfaces due to layout invisible directly after rotation occurs.
         // However this means the surface was never laid out in the new orientation.
         // We can only restore to the last rotation we were laid out as visible in.
-        if (mLastVisibleLayoutRotation != mService.mRotation) {
+        if (mLastVisibleLayoutRotation != getDisplayContent().getRotation()) {
             destroySavedSurface();
             return false;
         }
@@ -4359,7 +4359,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             mWinAnimator.mEnterAnimationPending = true;
         }
 
-        mLastVisibleLayoutRotation = mService.mRotation;
+        mLastVisibleLayoutRotation = getDisplayContent().getRotation();
 
         mWinAnimator.mEnteringAnimation = true;
         if ((result & RELAYOUT_RES_FIRST_TIME) != 0) {

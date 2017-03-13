@@ -1806,7 +1806,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mWakeGestureListener = new MyWakeGestureListener(mContext, mHandler);
         mOrientationListener = new MyOrientationListener(mContext, mHandler);
         try {
-            mOrientationListener.setCurrentRotation(windowManager.getRotation());
+            mOrientationListener.setCurrentRotation(windowManager.getDefaultDisplayRotation());
         } catch (RemoteException ex) { }
         mSettingsObserver = new SettingsObserver(mHandler);
         mSettingsObserver.observe();

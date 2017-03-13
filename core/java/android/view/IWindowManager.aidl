@@ -201,10 +201,12 @@ interface IWindowManager
     void updateRotation(boolean alwaysSendConfiguration, boolean forceRelayout);
 
     /**
-     * Retrieve the current screen orientation, constants as per
-     * {@link android.view.Surface}.
+     * Retrieve the current orientation of the primary screen.
+     * @return Constant as per {@link android.view.Surface.Rotation}.
+     *
+     * @see android.view.Display#DEFAULT_DISPLAY
      */
-    int getRotation();
+    int getDefaultDisplayRotation();
 
     /**
      * Watch the rotation of the screen.  Returns the current rotation,

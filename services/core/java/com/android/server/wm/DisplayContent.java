@@ -182,6 +182,42 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     private final Display mDisplay;
     private final DisplayMetrics mDisplayMetrics = new DisplayMetrics();
 
+    /**
+     * Current rotation of the display.
+     * Constants as per {@link android.view.Surface.Rotation}.
+     *
+     * @see WindowManagerService#updateRotationUncheckedLocked(boolean, int)
+     */
+    private int mRotation = 0;
+    /**
+     * Last applied orientation of the display.
+     * Constants as per {@link android.content.pm.ActivityInfo.ScreenOrientation}.
+     *
+     * @see WindowManagerService#updateOrientationFromAppTokensLocked(boolean, int)
+     */
+    private int mLastOrientation = SCREEN_ORIENTATION_UNSPECIFIED;
+    /**
+     * Flag indicating that the application is receiving an orientation that has different metrics
+     * than it expected. E.g. Portrait instead of Landscape.
+     *
+     * @see WindowManagerService#updateRotationUncheckedLocked(boolean, int)
+     */
+    private boolean mAltOrientation = false;
+    /**
+     * Orientation forced by some window. If there is no visible window that specifies orientation
+     * it is set to {@link android.content.pm.ActivityInfo#SCREEN_ORIENTATION_UNSPECIFIED}.
+     *
+     * @see NonAppWindowContainers#getOrientation()
+     */
+    private int mLastWindowForcedOrientation = SCREEN_ORIENTATION_UNSPECIFIED;
+    /**
+     * Last orientation forced by the keyguard. It is applied when keyguard is shown and is not
+     * occluded.
+     *
+     * @see NonAppWindowContainers#getOrientation()
+     */
+    private int mLastKeyguardForcedOrientation = SCREEN_ORIENTATION_UNSPECIFIED;
+
     Rect mBaseDisplayRect = new Rect();
     private Rect mContentRect = new Rect();
 
@@ -764,6 +800,34 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         return mDisplayMetrics;
     }
 
+    int getRotation() {
+        return mRotation;
+    }
+
+    void setRotation(int newRotation) {
+        mRotation = newRotation;
+    }
+
+    int getLastOrientation() {
+        return mLastOrientation;
+    }
+
+    void setLastOrientation(int orientation) {
+        mLastOrientation = orientation;
+    }
+
+    boolean getAltOrientation() {
+        return mAltOrientation;
+    }
+
+    void setAltOrientation(boolean altOrientation) {
+        mAltOrientation = altOrientation;
+    }
+
+    int getLastWindowForcedOrientation() {
+        return mLastWindowForcedOrientation;
+    }
+
     DockedStackDividerController getDockedDividerController() {
         return mDividerControllerLocked;
     }
@@ -884,14 +948,14 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         final WindowManagerPolicy policy = mService.mPolicy;
 
         if (mService.mDisplayFrozen) {
-            if (mService.mLastWindowForcedOrientation != SCREEN_ORIENTATION_UNSPECIFIED) {
+            if (mLastWindowForcedOrientation != SCREEN_ORIENTATION_UNSPECIFIED) {
                 if (DEBUG_ORIENTATION) Slog.v(TAG_WM,
-                        "Display is frozen, return " + mService.mLastWindowForcedOrientation);
+                        "Display is frozen, return " + mLastWindowForcedOrientation);
                 // If the display is frozen, some activities may be in the middle of restarting, and
                 // thus have removed their old window. If the window has the flag to hide the lock
                 // screen, then the lock screen can re-appear and inflict its own orientation on us.
                 // Keep the orientation stable until this all settles down.
-                return mService.mLastWindowForcedOrientation;
+                return mLastWindowForcedOrientation;
             } else if (policy.isKeyguardLocked()) {
                 // Use the last orientation the while the display is frozen with the keyguard
                 // locked. This could be the keyguard forced orientation or from a SHOW_WHEN_LOCKED
@@ -899,8 +963,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 // things aren't stable while the display is frozen, for example the window could be
                 // momentarily unavailable due to activity relaunch.
                 if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Display is frozen while keyguard locked, "
-                        + "return " + mService.mLastOrientation);
-                return mService.mLastOrientation;
+                        + "return " + mLastOrientation);
+                return mLastOrientation;
             }
         } else {
             final int orientation = mAboveAppWindowsContainers.getOrientation();
@@ -2051,7 +2115,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             Slog.v(TAG, "performLayout: needed=" + isLayoutNeeded() + " dw=" + dw + " dh=" + dh);
         }
 
-        mService.mPolicy.beginLayoutLw(isDefaultDisplay, dw, dh, mService.mRotation,
+        mService.mPolicy.beginLayoutLw(isDefaultDisplay, dw, dh, mRotation,
                 getConfiguration().uiMode);
         if (isDefaultDisplay) {
             // Not needed on non-default displays.
@@ -2712,10 +2776,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             }
 
             if (DEBUG_ORIENTATION) Slog.v(TAG_WM,
-                    "No app is requesting an orientation, return " + mService.mLastOrientation);
+                    "No app is requesting an orientation, return " + mLastOrientation);
             // The next app has not been requested to be visible, so we keep the current orientation
             // to prevent freezing/unfreezing the display too early.
-            return mService.mLastOrientation;
+            return mLastOrientation;
         }
     }
 
@@ -2766,15 +2830,15 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 final int req = win.mAttrs.screenOrientation;
                 if (DEBUG_ORIENTATION) Slog.v(TAG_WM, win + " forcing orientation to " + req);
                 if (policy.isKeyguardHostWindow(win.mAttrs)) {
-                    mService.mLastKeyguardForcedOrientation = req;
+                    mLastKeyguardForcedOrientation = req;
                 }
-                return (mService.mLastWindowForcedOrientation = req);
+                return (mLastWindowForcedOrientation = req);
             }
 
-            mService.mLastWindowForcedOrientation = SCREEN_ORIENTATION_UNSPECIFIED;
+            mLastWindowForcedOrientation = SCREEN_ORIENTATION_UNSPECIFIED;
 
             if (policy.isKeyguardShowingAndNotOccluded()) {
-                return mService.mLastKeyguardForcedOrientation;
+                return mLastKeyguardForcedOrientation;
             }
 
             return SCREEN_ORIENTATION_UNSET;

@@ -62,7 +62,7 @@ public class IWindowManagerImpl implements IWindowManager {
     // ---- implementation of IWindowManager that we care about ----
 
     @Override
-    public int getRotation() throws RemoteException {
+    public int getDefaultDisplayRotation() throws RemoteException {
         return mRotation;
     }
 
