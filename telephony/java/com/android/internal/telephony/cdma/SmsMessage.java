@@ -99,6 +99,15 @@ public class SmsMessage extends SmsMessageBase {
     private static final int RETURN_NO_ACK  = 0;
     private static final int RETURN_ACK     = 1;
 
+    /**
+     * Supported priority modes for CDMA SMS messages
+     * (See 3GPP2 C.S0015-B, v2.0, table 4.5.9-1)
+     */
+    private static final int PRIORITY_NORMAL        = 0x0;
+    private static final int PRIORITY_INTERACTIVE   = 0x1;
+    private static final int PRIORITY_URGENT        = 0x2;
+    private static final int PRIORITY_EMERGENCY     = 0x3;
+
     private SmsEnvelope mEnvelope;
     private BearerData mBearerData;
 
@@ -211,6 +220,26 @@ public class SmsMessage extends SmsMessageBase {
      */
     public static SubmitPdu getSubmitPdu(String scAddr, String destAddr, String message,
             boolean statusReportRequested, SmsHeader smsHeader) {
+        return getSubmitPdu(scAddr, destAddr, message, statusReportRequested, smsHeader, -1);
+    }
+
+    /**
+     * Get an SMS-SUBMIT PDU for a destination address and a message
+     *
+     * @param scAddr                Service Centre address.  Null means use default.
+     * @param destAddr              Address of the recipient.
+     * @param message               String representation of the message payload.
+     * @param statusReportRequested Indicates whether a report is requested for this message.
+     * @param smsHeader             Array containing the data for the User Data Header, preceded
+     *                              by the Element Identifiers.
+     * @param priority              Priority level of the message
+     * @return a <code>SubmitPdu</code> containing the encoded SC
+     *         address, if applicable, and the encoded message.
+     *         Returns null on encode error.
+     * @hide
+     */
+    public static SubmitPdu getSubmitPdu(String scAddr, String destAddr, String message,
+            boolean statusReportRequested, SmsHeader smsHeader, int priority) {
 
         /**
          * TODO(cleanup): Do we really want silent failure like this?
@@ -224,7 +253,7 @@ public class SmsMessage extends SmsMessageBase {
         UserData uData = new UserData();
         uData.payloadStr = message;
         uData.userDataHeader = smsHeader;
-        return privateGetSubmitPdu(destAddr, statusReportRequested, uData);
+        return privateGetSubmitPdu(destAddr, statusReportRequested, uData, priority);
     }
 
     /**
@@ -279,6 +308,22 @@ public class SmsMessage extends SmsMessageBase {
     public static SubmitPdu getSubmitPdu(String destAddr, UserData userData,
             boolean statusReportRequested) {
         return privateGetSubmitPdu(destAddr, statusReportRequested, userData);
+    }
+
+    /**
+     * Get an SMS-SUBMIT PDU for a data message to a destination address &amp; port
+     *
+     * @param destAddr the address of the destination for the message
+     * @param userData the data for the message
+     * @param statusReportRequested Indicates whether a report is requested for this message.
+     * @param priority Priority level of the message
+     * @return a <code>SubmitPdu</code> containing the encoded SC
+     *         address, if applicable, and the encoded message.
+     *         Returns null on encode error.
+     */
+    public static SubmitPdu getSubmitPdu(String destAddr, UserData userData,
+            boolean statusReportRequested, int priority) {
+        return privateGetSubmitPdu(destAddr, statusReportRequested, userData, priority);
     }
 
     /**
@@ -764,6 +809,15 @@ public class SmsMessage extends SmsMessageBase {
      */
     private static SubmitPdu privateGetSubmitPdu(String destAddrStr, boolean statusReportRequested,
             UserData userData) {
+        return privateGetSubmitPdu(destAddrStr, statusReportRequested, userData, -1);
+    }
+
+    /**
+     * Creates BearerData and Envelope from parameters for a Submit SMS.
+     * @return byte stream for SubmitPdu.
+     */
+    private static SubmitPdu privateGetSubmitPdu(String destAddrStr, boolean statusReportRequested,
+            UserData userData, int priority) {
 
         /**
          * TODO(cleanup): give this function a more meaningful name.
@@ -792,6 +846,10 @@ public class SmsMessage extends SmsMessageBase {
         bearerData.userAckReq = false;
         bearerData.readAckReq = false;
         bearerData.reportReq = false;
+        if (priority >= PRIORITY_NORMAL && priority <= PRIORITY_EMERGENCY) {
+            bearerData.priorityIndicatorSet = true;
+            bearerData.priority = priority;
+        }
 
         bearerData.userData = userData;
 
