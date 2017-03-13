@@ -308,7 +308,7 @@ class StorageManagerService extends IStorageManager.Stub
      * <em>Never</em> hold the lock while performing downcalls into vold, since
      * unsolicited events can suddenly appear to update data structures.
      */
-    private final Object mLock = new Object();
+    private final Object mLock = LockGuard.installNewLock(LockGuard.INDEX_STORAGE);
 
     /** Set of users that we know are unlocked. */
     @GuardedBy("mLock")

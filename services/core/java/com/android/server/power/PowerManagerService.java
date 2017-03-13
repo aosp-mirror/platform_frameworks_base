@@ -76,6 +76,7 @@ import com.android.internal.hardware.AmbientDisplayConfiguration;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.EventLogTags;
+import com.android.server.LockGuard;
 import com.android.server.RescueParty;
 import com.android.server.ServiceThread;
 import com.android.server.SystemService;
@@ -210,7 +211,7 @@ public final class PowerManagerService extends SystemService
     private DreamManagerInternal mDreamManager;
     private Light mAttentionLight;
 
-    private final Object mLock = new Object();
+    private final Object mLock = LockGuard.installNewLock(LockGuard.INDEX_POWER);
 
     // A bitfield that indicates what parts of the power state have
     // changed and need to be recalculated.

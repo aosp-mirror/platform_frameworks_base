@@ -235,6 +235,7 @@ public class AppOpsService extends IAppOpsService.Stub {
     }
 
     public AppOpsService(File storagePath, Handler handler) {
+        LockGuard.installLock(this, LockGuard.INDEX_APP_OPS);
         mFile = new AtomicFile(storagePath);
         mHandler = handler;
         readState();

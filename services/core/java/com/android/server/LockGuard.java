@@ -53,9 +53,28 @@ import java.io.PrintWriter;
  * <li>A guarded synchronized block takes 50ns when disabled.
  * <li>A guarded synchronized block takes 460ns per lock checked when enabled.
  * </ul>
+ * <p>
+ * This class also supports a second simpler mode of operation where well-known
+ * locks are explicitly registered and checked via indexes.
  */
 public class LockGuard {
     private static final String TAG = "LockGuard";
+
+    public static final boolean ENABLED = false;
+
+    /**
+     * Well-known locks ordered by fixed index. Locks with a specific index
+     * should never be acquired while holding a lock of a lower index.
+     */
+    public static final int INDEX_APP_OPS = 0;
+    public static final int INDEX_POWER = 1;
+    public static final int INDEX_USER = 2;
+    public static final int INDEX_PACKAGES = 3;
+    public static final int INDEX_STORAGE = 4;
+    public static final int INDEX_WINDOW = 5;
+    public static final int INDEX_ACTIVITY = 6;
+
+    private static Object[] sKnownFixed = new Object[INDEX_ACTIVITY + 1];
 
     private static ArrayMap<Object, LockInfo> sKnown = new ArrayMap<>(0, true);
 
@@ -119,11 +138,41 @@ public class LockGuard {
     }
 
     /**
+     * Yell if any lower-level locks are being held by the calling thread that
+     * is about to acquire the given lock.
+     */
+    public static void guard(int index) {
+        for (int i = 0; i < index; i++) {
+            final Object lock = sKnownFixed[i];
+            if (lock != null && Thread.holdsLock(lock)) {
+                Slog.w(TAG, "Calling thread " + Thread.currentThread().getName() + " is holding "
+                        + lockToString(i) + " while trying to acquire "
+                        + lockToString(index), new Throwable());
+            }
+        }
+    }
+
+    /**
      * Report the given lock with a well-known label.
      */
-    public static void installLock(Object lock, String label) {
+    public static Object installLock(Object lock, String label) {
         final LockInfo info = findOrCreateLockInfo(lock);
         info.label = label;
+        return lock;
+    }
+
+    /**
+     * Report the given lock with a well-known index.
+     */
+    public static Object installLock(Object lock, int index) {
+        sKnownFixed[index] = lock;
+        return lock;
+    }
+
+    public static Object installNewLock(int index) {
+        final Object lock = new Object();
+        installLock(lock, index);
+        return lock;
     }
 
     private static String lockToString(Object lock) {
@@ -132,6 +181,19 @@ public class LockGuard {
             return info.label;
         } else {
             return "0x" + Integer.toHexString(System.identityHashCode(lock));
+        }
+    }
+
+    private static String lockToString(int index) {
+        switch (index) {
+            case INDEX_APP_OPS: return "APP_OPS";
+            case INDEX_POWER: return "POWER";
+            case INDEX_USER: return "USER";
+            case INDEX_PACKAGES: return "PACKAGES";
+            case INDEX_STORAGE: return "STORAGE";
+            case INDEX_WINDOW: return "WINDOW";
+            case INDEX_ACTIVITY: return "ACTIVITY";
+            default: return Integer.toString(index);
         }
     }
 

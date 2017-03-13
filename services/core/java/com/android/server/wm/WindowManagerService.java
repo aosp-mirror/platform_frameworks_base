@@ -222,6 +222,7 @@ import com.android.server.DisplayThread;
 import com.android.server.EventLogTags;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
+import com.android.server.LockGuard;
 import com.android.server.UiThread;
 import com.android.server.Watchdog;
 import com.android.server.input.InputManagerService;
@@ -952,6 +953,7 @@ public class WindowManagerService extends IWindowManager.Stub
     private WindowManagerService(Context context, InputManagerService inputManager,
             boolean haveInputMethods, boolean showBootMsgs, boolean onlyCore,
             WindowManagerPolicy policy) {
+        LockGuard.installLock(this, LockGuard.INDEX_WINDOW);
         mRoot = new RootWindowContainer(this);
         mContext = context;
         mHaveInputMethods = haveInputMethods;
