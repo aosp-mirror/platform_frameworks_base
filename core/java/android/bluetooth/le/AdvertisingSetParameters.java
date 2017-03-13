@@ -284,7 +284,7 @@ public final class AdvertisingSetParameters implements Parcelable {
          *
          * @param isAnonymous wether anonymous advertising should be used.
          */
-        public Builder setAnonymouus(boolean isAnonymous) {
+        public Builder setAnonymous(boolean isAnonymous) {
             this.isAnonymous = isAnonymous;
             return this;
         }

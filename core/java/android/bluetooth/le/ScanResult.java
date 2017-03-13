@@ -67,12 +67,12 @@ public final class ScanResult implements Parcelable {
     public static final int SID_NOT_PRESENT = 0xFF;
 
     /**
-     * Mask for checking wether event type represents legacy advertisement.
+     * Mask for checking whether event type represents legacy advertisement.
      */
     private static final int ET_LEGACY_MASK = 0x10;
 
     /**
-     * Mask for checking wether event type represents connectable advertisement.
+     * Mask for checking whether event type represents connectable advertisement.
      */
     private static final int ET_CONNECTABLE_MASK = 0x01;
 
