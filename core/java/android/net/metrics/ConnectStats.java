@@ -43,6 +43,8 @@ public class ConnectStats {
     private final int mMaxLatencyRecords;
     /** Total count of successful connects. */
     private int mConnectCount = 0;
+    /** Total count of successful connects done in blocking mode. */
+    private int mConnectBlockingCount = 0;
     /** Total count of successful connects with IPv6 socket address. */
     private int mIpv6ConnectCount = 0;
 
@@ -54,6 +56,7 @@ public class ConnectStats {
     public ConnectStatistics toProto() {
         ConnectStatistics stats = new ConnectStatistics();
         stats.connectCount = mConnectCount;
+        stats.connectBlockingCount = mConnectBlockingCount;
         stats.ipv6AddrCount = mIpv6ConnectCount;
         stats.latenciesMs = mLatencies.toArray();
         stats.errnosCounters = toPairArrays(mErrnos);
@@ -62,16 +65,21 @@ public class ConnectStats {
 
     public void addEvent(int errno, int latencyMs, String ipAddr) {
         if (isSuccess(errno)) {
-            countConnect(ipAddr);
+            countConnect(errno, ipAddr);
             countLatency(errno, latencyMs);
         } else {
             countError(errno);
         }
     }
 
-    private void countConnect(String ipAddr) {
+    private void countConnect(int errno, String ipAddr) {
         mConnectCount++;
-        if (isIPv6(ipAddr)) mIpv6ConnectCount++;
+        if (!isNonBlocking(errno)) {
+            mConnectBlockingCount++;
+        }
+        if (isIPv6(ipAddr)) {
+            mIpv6ConnectCount++;
+        }
     }
 
     private void countLatency(int errno, int ms) {
@@ -119,5 +127,19 @@ public class ConnectStats {
             pairs[i] = p;
         }
         return pairs;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder("ConnectStats(")
+                .append(String.format("%d success, ", mConnectCount))
+                .append(String.format("%d blocking, ", mConnectBlockingCount))
+                .append(String.format("%d IPv6 dst", mIpv6ConnectCount));
+        for (int i = 0; i < mErrnos.size(); i++) {
+            String errno = OsConstants.errnoName(mErrnos.keyAt(i));
+            int count = mErrnos.valueAt(i);
+            builder.append(String.format(", %s: %d", errno, count));
+        }
+        return builder.append(")").toString();
     }
 }

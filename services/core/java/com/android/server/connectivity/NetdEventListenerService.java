@@ -204,10 +204,15 @@ public class NetdEventListenerService extends INetdEventListener.Stub {
         // TODO: migrate DnsEventBatch to IpConnectivityLogClass.DNSLatencies
     }
 
-    private IpConnectivityEvent flushConnectStats() {
+    private IpConnectivityEvent connectStatsProto() {
+        // TODO: add transport information
         IpConnectivityEvent ev = new IpConnectivityEvent();
         ev.setConnectStatistics(mConnectStats.toProto());
-        // TODO: add transport information
+        return ev;
+    }
+
+    private IpConnectivityEvent flushConnectStats() {
+        IpConnectivityEvent ev = connectStatsProto();
         mConnectStats = makeConnectStats();
         return ev;
     }
@@ -216,11 +221,19 @@ public class NetdEventListenerService extends INetdEventListener.Stub {
         IndentingPrintWriter pw = new IndentingPrintWriter(writer, "  ");
         pw.println(TAG + ":");
         pw.increaseIndent();
+        list(pw);
+        pw.decreaseIndent();
+    }
+
+    public synchronized void list(PrintWriter pw) {
         for (DnsEventBatch batch : mEventBatches.values()) {
             pw.println(batch.toString());
         }
-        // TODO: also dump ConnectStats
-        pw.decreaseIndent();
+        pw.println(mConnectStats.toString());
+    }
+
+    public synchronized void listAsProtos(PrintWriter pw) {
+        pw.println(connectStatsProto().toString());
     }
 
     private ConnectStats makeConnectStats() {

@@ -201,11 +201,17 @@ final public class IpConnectivityMetrics extends SystemService {
             for (IpConnectivityEvent ev : IpConnectivityEventBuilder.toProto(events)) {
                 pw.print(ev.toString());
             }
+            if (mNetdListener != null) {
+                mNetdListener.listAsProtos(pw);
+            }
             return;
         }
 
         for (ConnectivityMetricsEvent ev : events) {
             pw.println(ev.toString());
+        }
+        if (mNetdListener != null) {
+            mNetdListener.list(pw);
         }
     }
 

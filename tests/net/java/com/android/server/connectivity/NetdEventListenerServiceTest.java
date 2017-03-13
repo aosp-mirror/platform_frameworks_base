@@ -219,7 +219,7 @@ public class NetdEventListenerServiceTest extends TestCase {
                 "time_ms: 0",
                 "transports: 0",
                 "connect_statistics <",
-                "  connect_blocking_count: 0",
+                "  connect_blocking_count: 7",
                 "  connect_count: 12",
                 "  errnos_counters <",
                 "    key: 1",
