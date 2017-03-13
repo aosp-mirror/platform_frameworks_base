@@ -98,6 +98,9 @@ public class InputConsumerController {
      */
     public void setRegistrationListener(RegistrationListener listener) {
         mRegistrationListener = listener;
+        if (mRegistrationListener != null) {
+            mRegistrationListener.onRegistrationChanged(mInputEventReceiver != null);
+        }
     }
 
     /**
@@ -122,6 +125,9 @@ public class InputConsumerController {
                 Log.e(TAG, "Failed to create PIP input consumer", e);
             }
             mInputEventReceiver = new PipInputEventReceiver(inputChannel, Looper.myLooper());
+            if (mRegistrationListener != null) {
+                mRegistrationListener.onRegistrationChanged(true /* isRegistered */);
+            }
         }
     }
 
@@ -137,6 +143,9 @@ public class InputConsumerController {
             }
             mInputEventReceiver.dispose();
             mInputEventReceiver = null;
+            if (mRegistrationListener != null) {
+                mRegistrationListener.onRegistrationChanged(false /* isRegistered */);
+            }
         }
     }
 
