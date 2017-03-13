@@ -65,4 +65,49 @@ public class BatteryStatsSensorTest extends TestCase {
 
         assertEquals(1, sensorBgCounter.getCountLocked(BatteryStats.STATS_SINCE_CHARGED));
     }
+
+    @SmallTest
+    public void testNestedSensorReset() throws Exception {
+        final MockClocks clocks = new MockClocks();
+        MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
+        bi.mForceOnBattery = true;
+        clocks.realtime = 100;
+        clocks.uptime = 100;
+        bi.getOnBatteryTimeBase().setRunning(true, 100, 100);
+        bi.noteUidProcessStateLocked(UID, ActivityManager.PROCESS_STATE_RECEIVER);
+
+        clocks.realtime += 100;
+        clocks.uptime += 100;
+
+        bi.noteStartSensorLocked(UID, SENSOR_ID);
+
+        clocks.realtime += 100;
+        clocks.uptime += 100;
+
+        // The sensor is started and the background counter has been created.
+        final BatteryStats.Uid uid = bi.getUidStats().get(UID);
+        assertNotNull(uid);
+
+        BatteryStats.Uid.Sensor sensor = uid.getSensorStats().get(SENSOR_ID);
+        assertNotNull(sensor);
+        assertNotNull(sensor.getSensorTime());
+        assertNotNull(sensor.getSensorBgCount());
+
+        // Reset the stats. Since the sensor is still running, we should still see the sensor
+        // timer. Background counter should be gone though.
+        bi.getUidStatsLocked(UID).reset();
+
+        sensor = uid.getSensorStats().get(SENSOR_ID);
+        assertNotNull(sensor);
+        assertNotNull(sensor.getSensorTime());
+        assertNull(sensor.getSensorBgCount());
+
+        bi.noteStopSensorLocked(UID, SENSOR_ID);
+
+        // Now the sensor timer has stopped so this reset should also take out the sensor.
+        bi.getUidStatsLocked(UID).reset();
+
+        sensor = uid.getSensorStats().get(SENSOR_ID);
+        assertNull(sensor);
+    }
 }
