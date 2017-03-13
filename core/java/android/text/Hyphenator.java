@@ -135,6 +135,10 @@ public class Hyphenator {
     private static Hyphenator loadHyphenator(HyphenationData data) {
         String patternFilename = "hyph-" + data.mLanguageTag.toLowerCase(Locale.US) + ".hyb";
         File patternFile = new File(getSystemHyphenatorLocation(), patternFilename);
+        if (!patternFile.canRead()) {
+            Log.e(TAG, "hyphenation patterns for " + patternFile + " not found or unreadable");
+            return null;
+        }
         try {
             RandomAccessFile f = new RandomAccessFile(patternFile, "r");
             try {
