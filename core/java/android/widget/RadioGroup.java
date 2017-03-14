@@ -421,7 +421,7 @@ public class RadioGroup extends LinearLayout {
     @Override
     public void onProvideAutofillStructure(ViewStructure structure, int flags) {
         super.onProvideAutofillStructure(structure, flags);
-        structure.setSanitized(mCheckedId == mInitialCheckedId);
+        structure.setDataIsSensitive(mCheckedId != mInitialCheckedId);
     }
 
     @Override

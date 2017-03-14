@@ -346,19 +346,27 @@ public abstract class ViewStructure {
     public abstract void setInputType(int inputType);
 
     /**
-     * Marks this node as sanitized so its content are sent on {@link
+     * Sets whether the data on this node is sensitive; if it is, then its content (text, autofill
+     * value, etc..) is striped before calls to {@link
      * android.service.autofill.AutofillService#onFillRequest(android.app.assist.AssistStructure,
      * Bundle, android.os.CancellationSignal, android.service.autofill.FillCallback)}.
      *
-     * <p>Only nodes that does not have PII (Personally Identifiable Information - sensitive data
-     * such as email addresses, credit card numbers, passwords, etc...) should be marked
-     * as sanitized; a good rule of thumb is to mark as sanitized nodes whose value were statically
-     * set from resources.
+     * <p>By default, all nodes are assumed to be sensitive, and only nodes that does not have PII
+     * (Personally Identifiable Information - sensitive data such as email addresses, credit card
+     * numbers, passwords, etc...) should be marked as non-sensitive; a good rule of thumb is to
+     * mark as non-sensitive nodes whose value were statically set from resources.
+     *
+     * <p>Notice that the content of even sensitive nodes are sent to the service (through the
+     * {@link
+     * android.service.autofill.AutofillService#onSaveRequest(android.app.assist.AssistStructure,
+     * Bundle, android.service.autofill.SaveCallback)} call) when the user consented to save the
+     * data, so it is important to set the content of sensitive nodes as well, but mark them as
+     * sensitive.
      *
      * <p>Should only be set when the node is used for autofill purposes - it will be ignored
      * when used for Assist.
      */
-    public abstract void setSanitized(boolean sanitized);
+    public abstract void setDataIsSensitive(boolean sensitive);
 
     /**
      * Call when done populating a {@link ViewStructure} returned by

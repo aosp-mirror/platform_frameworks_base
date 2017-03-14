@@ -578,7 +578,7 @@ public abstract class CompoundButton extends Button implements Checkable {
     public void onProvideAutofillStructure(ViewStructure structure, int flags) {
         super.onProvideAutofillStructure(structure, flags);
 
-        structure.setSanitized(mCheckedFromResource);
+        structure.setDataIsSensitive(!mCheckedFromResource);
     }
 
     @Override

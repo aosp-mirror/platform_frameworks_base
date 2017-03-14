@@ -1683,8 +1683,8 @@ public class AssistStructure implements Parcelable {
         }
 
         @Override
-        public void setSanitized(boolean sanitized) {
-            mNode.mSanitized = sanitized;
+        public void setDataIsSensitive(boolean sensitive) {
+            mNode.mSanitized = !sensitive;
         }
 
         @Override
