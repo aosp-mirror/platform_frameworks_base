@@ -95,6 +95,9 @@ public final class AccessibilityManager {
 
                 public void notifyServicesStateChanged() {
                 }
+
+                public void setRelevantEventTypes(int eventTypes) {
+                }
             };
 
     /**

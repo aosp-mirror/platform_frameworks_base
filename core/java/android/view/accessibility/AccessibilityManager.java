@@ -40,6 +40,8 @@ import android.util.Log;
 import android.view.IWindow;
 import android.view.View;
 
+import com.android.internal.util.IntPair;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -108,6 +110,8 @@ public final class AccessibilityManager {
     final Handler mHandler;
 
     boolean mIsEnabled;
+
+    int mRelevantEventTypes = AccessibilityEvent.TYPES_ALL_MASK;
 
     boolean mIsTouchExplorationEnabled;
 
@@ -202,6 +206,11 @@ public final class AccessibilityManager {
         @Override
         public void notifyServicesStateChanged() {
             mHandler.obtainMessage(MyHandler.MSG_NOTIFY_SERVICES_STATE_CHANGED).sendToTarget();
+        }
+
+        @Override
+        public void setRelevantEventTypes(int eventTypes) {
+            mRelevantEventTypes = eventTypes;
         }
     };
 
@@ -361,6 +370,14 @@ public final class AccessibilityManager {
                     Log.e(LOG_TAG, "AccessibilityEvent sent with accessibility disabled");
                     return;
                 }
+            }
+            if ((event.getEventType() & mRelevantEventTypes) == 0) {
+                if (DEBUG) {
+                    Log.i(LOG_TAG, "Not dispatching irrelevant event: " + event
+                            + " that is not among "
+                            + AccessibilityEvent.eventTypeToString(mRelevantEventTypes));
+                }
+                return;
             }
             userId = mUserId;
         }
@@ -865,8 +882,9 @@ public final class AccessibilityManager {
         }
 
         try {
-            final int stateFlags = service.addClient(mClient, mUserId);
-            setStateLocked(stateFlags);
+            final long userStateAndRelevantEvents = service.addClient(mClient, mUserId);
+            setStateLocked(IntPair.first(userStateAndRelevantEvents));
+            mRelevantEventTypes = IntPair.second(userStateAndRelevantEvents);
             mService = service;
         } catch (RemoteException re) {
             Log.e(LOG_TAG, "AccessibilityManagerService is dead", re);

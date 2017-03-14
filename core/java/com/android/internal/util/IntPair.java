@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 The Android Open Source Project
+ * Copyright (C) 2017 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,25 @@
  * limitations under the License.
  */
 
-package android.view.accessibility;
+package com.android.internal.util;
 
 /**
- * Interface a client of the IAccessibilityManager implements to
- * receive information about changes in the manager state.
+ * Utilities for treating a {@code long} as a pair of {@code int}s
  *
  * @hide
  */
-oneway interface IAccessibilityManagerClient {
+public class IntPair {
+    private IntPair() {}
 
-    void setState(int stateFlags);
+    public static long of(int first, int second) {
+        return (((long)first) << 32) | ((long)second & 0xffffffffL);
+    }
 
-    void notifyServicesStateChanged();
+    public static int first(long intPair) {
+        return (int)(intPair >> 32);
+    }
 
-    void setRelevantEventTypes(int eventTypes);
+    public static int second(long intPair) {
+        return (int)intPair;
+    }
 }

@@ -50,6 +50,7 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.hardware.display.DisplayManager;
+import android.hardware.fingerprint.IFingerprintService;
 import android.hardware.input.InputManager;
 import android.net.Uri;
 import android.os.Binder;
@@ -69,7 +70,6 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.UserManagerInternal;
 import android.provider.Settings;
-import android.hardware.fingerprint.IFingerprintService;
 import android.provider.SettingsStringUtil.ComponentNameSet;
 import android.provider.SettingsStringUtil.SettingStringHelper;
 import android.text.TextUtils;
@@ -100,7 +100,9 @@ import android.view.accessibility.IAccessibilityManagerClient;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.content.PackageMonitor;
+import com.android.internal.os.HandlerCaller;
 import com.android.internal.os.SomeArgs;
+import com.android.internal.util.IntPair;
 import com.android.server.LocalServices;
 import com.android.server.policy.AccessibilityShortcutController;
 import com.android.server.statusbar.StatusBarManagerInternal;
@@ -120,6 +122,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Consumer;
 
 /**
  * This class is instantiated by the system as a system level service and can be
@@ -434,7 +437,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
     }
 
     @Override
-    public int addClient(IAccessibilityManagerClient client, int userId) {
+    public long addClient(IAccessibilityManagerClient client, int userId) {
         synchronized (mLock) {
             // We treat calls from a profile as if made by its parent as profiles
             // share the accessibility state of the parent. The call below
@@ -450,7 +453,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 if (DEBUG) {
                     Slog.i(LOG_TAG, "Added global client for pid:" + Binder.getCallingPid());
                 }
-                return userState.getClientState();
+                return IntPair.of(
+                        userState.getClientState(), userState.mLastSentRelevantEventTypes);
             } else {
                 userState.mUserClients.register(client);
                 // If this client is not for the current user we do not
@@ -460,7 +464,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     Slog.i(LOG_TAG, "Added user client for pid:" + Binder.getCallingPid()
                             + " and userId:" + mCurrentUserId);
                 }
-                return (resolvedUserId == mCurrentUserId) ? userState.getClientState() : 0;
+                return IntPair.of(
+                        (resolvedUserId == mCurrentUserId) ? userState.getClientState() : 0,
+                        userState.mLastSentRelevantEventTypes);
             }
         }
     }
@@ -1323,6 +1329,35 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         scheduleNotifyClientsOfServicesStateChange(userState);
     }
 
+    private void updateRelevantEventsLocked(UserState userState) {
+        int relevantEventTypes = AccessibilityCache.CACHE_CRITICAL_EVENTS_MASK;
+        for (Service service : userState.mBoundServices) {
+            relevantEventTypes |= service.mEventTypes;
+        }
+        int finalRelevantEventTypes = relevantEventTypes;
+
+        if (userState.mLastSentRelevantEventTypes != finalRelevantEventTypes) {
+            userState.mLastSentRelevantEventTypes = finalRelevantEventTypes;
+            mMainHandler.obtainMessage(MainHandler.MSG_SEND_RELEVANT_EVENTS_CHANGED_TO_CLIENTS,
+                    userState.mUserId, finalRelevantEventTypes);
+            mMainHandler.post(() -> {
+                broadcastToClients(userState, (client) -> {
+                    try {
+                        client.setRelevantEventTypes(finalRelevantEventTypes);
+                    } catch (RemoteException re) {
+                        /* ignore */
+                    }
+                });
+            });
+        }
+    }
+
+    private void broadcastToClients(
+            UserState userState, Consumer<IAccessibilityManagerClient> clientAction) {
+        mGlobalClients.broadcast(clientAction);
+        userState.mUserClients.broadcast(clientAction);
+    }
+
     /**
      * Determines if given event can be dispatched to a service based on the package of the
      * event source. Specifically, a service is notified if it is interested in events from the
@@ -1633,6 +1668,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         scheduleUpdateFingerprintGestureHandling(userState);
         scheduleUpdateInputFilter(userState);
         scheduleUpdateClientsIfNeededLocked(userState);
+        updateRelevantEventsLocked(userState);
     }
 
     private void updateAccessibilityFocusBehaviorLocked(UserState userState) {
@@ -2281,6 +2317,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         public static final int MSG_CLEAR_ACCESSIBILITY_FOCUS = 9;
         public static final int MSG_SEND_SERVICES_STATE_CHANGED_TO_CLIENTS = 10;
         public static final int MSG_UPDATE_FINGERPRINT = 11;
+        public static final int MSG_SEND_RELEVANT_EVENTS_CHANGED_TO_CLIENTS = 12;
 
         public MainHandler(Looper looper) {
             super(looper);
@@ -2351,6 +2388,22 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 case MSG_UPDATE_FINGERPRINT: {
                     updateFingerprintGestureHandling((UserState) msg.obj);
                 } break;
+
+                case MSG_SEND_RELEVANT_EVENTS_CHANGED_TO_CLIENTS: {
+                    final int userId = msg.arg1;
+                    final int relevantEventTypes = msg.arg2;
+                    final UserState userState;
+                    synchronized (mLock) {
+                        userState = getUserStateLocked(userId);
+                    }
+                    broadcastToClients(userState, (client) -> {
+                        try {
+                            client.setRelevantEventTypes(relevantEventTypes);
+                        } catch (RemoteException re) {
+                            /* ignore */
+                        }
+                    });
+                } break;
             }
         }
 
@@ -2380,19 +2433,13 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
         private void sendStateToClients(int clientState,
                 RemoteCallbackList<IAccessibilityManagerClient> clients) {
-            try {
-                final int userClientCount = clients.beginBroadcast();
-                for (int i = 0; i < userClientCount; i++) {
-                    IAccessibilityManagerClient client = clients.getBroadcastItem(i);
-                    try {
-                        client.setState(clientState);
-                    } catch (RemoteException re) {
-                        /* ignore */
-                    }
+            clients.broadcast((client) -> {
+                try {
+                    client.setState(clientState);
+                } catch (RemoteException re) {
+                    /* ignore */
                 }
-            } finally {
-                clients.finishBroadcast();
-            }
+            });
         }
 
         private void notifyClientsOfServicesStateChange(
@@ -4709,6 +4756,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
         public final CopyOnWriteArrayList<Service> mBoundServices =
                 new CopyOnWriteArrayList<>();
+
+        public int mLastSentRelevantEventTypes = AccessibilityEvent.TYPES_ALL_MASK;
 
         public final Map<ComponentName, Service> mComponentNameToServiceMap =
                 new HashMap<>();

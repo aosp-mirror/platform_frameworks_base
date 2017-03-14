@@ -18,6 +18,8 @@ package android.os;
 
 import android.util.ArrayMap;
 
+import java.util.function.Consumer;
+
 /**
  * Takes care of the grunt work of maintaining a list of remote interfaces,
  * typically for the use of performing callbacks from a
@@ -304,6 +306,23 @@ public class RemoteCallbackList<E extends IInterface> {
             }
 
             mBroadcastCount = -1;
+        }
+    }
+
+    /**
+     * Performs {@code action} on each callback, calling
+     * {@link #beginBroadcast()}/{@link #finishBroadcast()} before/after looping
+     *
+     * @hide
+     */
+    public void broadcast(Consumer<E> action) {
+        int itemCount = beginBroadcast();
+        try {
+            for (int i = 0; i < itemCount; i++) {
+                action.accept(getBroadcastItem(i));
+            }
+        } finally {
+            finishBroadcast();
         }
     }
 
