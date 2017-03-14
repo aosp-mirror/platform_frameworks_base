@@ -29,7 +29,6 @@ import android.os.BatteryManager;
 import android.os.BatteryStats;
 import android.os.Handler;
 import android.os.Message;
-import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
@@ -95,12 +94,20 @@ public class KeyguardIndicationController {
     private final DevicePolicyManager mDevicePolicyManager;
     private boolean mDozing;
 
+    /**
+     * Creates a new KeyguardIndicationController and registers callbacks.
+     */
     public KeyguardIndicationController(Context context, ViewGroup indicationArea,
             LockIcon lockIcon) {
         this(context, indicationArea, lockIcon,
                 WakeLock.createPartial(context, "Doze:KeyguardIndication"));
+
+        registerCallbacks(KeyguardUpdateMonitor.getInstance(context));
     }
 
+    /**
+     * Creates a new KeyguardIndicationController for testing. Does *not* register callbacks.
+     */
     @VisibleForTesting
     KeyguardIndicationController(Context context, ViewGroup indicationArea, LockIcon lockIcon,
                 WakeLock wakeLock) {
@@ -124,12 +131,15 @@ public class KeyguardIndicationController {
         mDevicePolicyManager = (DevicePolicyManager) context.getSystemService(
                 Context.DEVICE_POLICY_SERVICE);
 
-        KeyguardUpdateMonitor.getInstance(context).registerCallback(getKeyguardCallback());
-        context.registerReceiverAsUser(mTickReceiver, UserHandle.SYSTEM,
+        updateDisclosure();
+    }
+
+    private void registerCallbacks(KeyguardUpdateMonitor monitor) {
+        monitor.registerCallback(getKeyguardCallback());
+
+        mContext.registerReceiverAsUser(mTickReceiver, UserHandle.SYSTEM,
                 new IntentFilter(Intent.ACTION_TIME_TICK), null,
                 Dependency.get(Dependency.TIME_TICK_HANDLER));
-
-        updateDisclosure();
     }
 
     /**
@@ -331,7 +341,7 @@ public class KeyguardIndicationController {
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
     }
 
-    BroadcastReceiver mTickReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver mTickReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             mHandler.post(() -> {
