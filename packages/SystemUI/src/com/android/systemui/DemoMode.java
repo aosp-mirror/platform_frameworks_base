@@ -37,4 +37,5 @@ public interface DemoMode {
     public static final String COMMAND_STATUS = "status";
     public static final String COMMAND_NOTIFICATIONS = "notifications";
     public static final String COMMAND_VOLUME = "volume";
+    public static final String COMMAND_OPERATOR = "operator";
 }

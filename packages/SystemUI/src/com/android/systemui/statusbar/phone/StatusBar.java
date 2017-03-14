@@ -4128,6 +4128,9 @@ public class StatusBar extends SystemUI implements DemoMode,
                 }
             }
         }
+        if (modeChange || command.equals(COMMAND_OPERATOR)) {
+            dispatchDemoCommandToView(command, args, R.id.operator_name);
+        }
     }
 
     private void dispatchDemoCommandToView(String command, Bundle args, int id) {
