@@ -132,7 +132,7 @@ public class CategoryManager {
                 mCategoryByKeyMap.put(category.key, category);
             }
             backwardCompatCleanupForCategory(mTileByComponentCache, mCategoryByKeyMap);
-            normalizePriority(context, mCategoryByKeyMap);
+            sortCategories(context, mCategoryByKeyMap);
             filterDuplicateTiles(mCategoryByKeyMap);
         }
     }
@@ -188,17 +188,17 @@ public class CategoryManager {
     }
 
     /**
-     * Normalize priority values on tiles across injected from all apps to make sure they don't set
-     * the same priority value. However internal tiles' priority remains unchanged.
+     * Sort the tiles injected from all apps such that if they have the same priority value,
+     * they wil lbe sorted by package name.
      * <p/>
-     * A list of tiles are considered normalized when their priority value increases in a linear
+     * A list of tiles are considered sorted when their priority value decreases in a linear
      * scan.
      */
     @VisibleForTesting
-    synchronized void normalizePriority(Context context,
+    synchronized void sortCategories(Context context,
             Map<String, DashboardCategory> categoryByKeyMap) {
         for (Entry<String, DashboardCategory> categoryEntry : categoryByKeyMap.entrySet()) {
-            normalizePriorityForExternalTiles(context, categoryEntry.getValue());
+            sortCategoriesForExternalTiles(context, categoryEntry.getValue());
         }
     }
 
@@ -228,39 +228,34 @@ public class CategoryManager {
     }
 
     /**
-     * Normalize priority value for tiles within a single {@code DashboardCategory}.
+     * Sort priority value for tiles within a single {@code DashboardCategory}.
      *
-     * @see #normalizePriority(Context, Map)
+     * @see #sortCategories(Context, Map)
      */
-    private synchronized void normalizePriorityForExternalTiles(Context context,
+    private synchronized void sortCategoriesForExternalTiles(Context context,
             DashboardCategory dashboardCategory) {
         final String skipPackageName = context.getPackageName();
 
-        // Sort tiles based on [package, priority within package]
+        // Sort tiles based on [priority, package within priority]
         Collections.sort(dashboardCategory.tiles, (tile1, tile2) -> {
             final String package1 = tile1.intent.getComponent().getPackageName();
             final String package2 = tile2.intent.getComponent().getPackageName();
             final int packageCompare = CASE_INSENSITIVE_ORDER.compare(package1, package2);
-            // First sort by package name
+            // First sort by priority
+            final int priorityCompare = tile2.priority - tile1.priority;
+            if (priorityCompare != 0) {
+                return priorityCompare;
+            }
+            // Then sort by package name, skip package take precedence
             if (packageCompare != 0) {
-                return packageCompare;
-            } else if (TextUtils.equals(package1, skipPackageName)) {
-                return 0;
+                if (TextUtils.equals(package1, skipPackageName)) {
+                    return -1;
+                }
+                if (TextUtils.equals(package2, skipPackageName)) {
+                    return 1;
+                }
             }
-            // Then sort by priority
-            return tile1.priority - tile2.priority;
+            return packageCompare;
         });
-        // Update priority for all items so no package define the same priority value.
-        final int count = dashboardCategory.tiles.size();
-        for (int i = 0; i < count; i++) {
-            final String packageName =
-                    dashboardCategory.tiles.get(i).intent.getComponent().getPackageName();
-            if (TextUtils.equals(packageName, skipPackageName)) {
-                // We skip this tile because it's a intent pointing to our own app. We trust the
-                // priority is set correctly, so don't normalize.
-                continue;
-            }
-            dashboardCategory.tiles.get(i).priority = i;
-        }
     }
 }
