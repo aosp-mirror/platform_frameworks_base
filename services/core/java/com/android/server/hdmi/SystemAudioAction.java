@@ -133,7 +133,7 @@ abstract class SystemAudioAction extends HdmiCecFeatureAction {
     }
 
     protected void setSystemAudioMode(boolean mode) {
-        tv().setSystemAudioMode(mode, true);
+        tv().setSystemAudioMode(mode);
     }
 
     @Override

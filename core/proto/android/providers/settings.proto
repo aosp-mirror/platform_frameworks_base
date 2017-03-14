@@ -97,7 +97,7 @@ message GlobalSettingsProto {
     SettingProto download_max_bytes_over_mobile = 52;
     SettingProto download_recommended_max_bytes_over_mobile = 53;
     SettingProto hdmi_control_enabled = 54;
-    SettingProto hdmi_system_audio_enabled = 55;
+    SettingProto hdmi_system_audio_control_enabled = 55;
     SettingProto hdmi_control_auto_wakeup_enabled = 56;
     SettingProto hdmi_control_auto_device_off_enabled = 57;
     SettingProto mhl_input_switching_enabled = 58;
