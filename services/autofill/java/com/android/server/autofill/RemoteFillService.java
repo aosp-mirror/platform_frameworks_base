@@ -240,7 +240,7 @@ final class RemoteFillService implements DeathRecipient {
         }
         mBinding = false;
         if (isBound()) {
-            // TODO(b/33197203, b/35395043): synchronize access instead
+            // TODO(b/33197203): synchronize access instead?
             // Need to double check if it's null, since it could be set on onServiceDisconnected()
             if (mAutoFillService != null) {
                 try {
@@ -322,7 +322,7 @@ final class RemoteFillService implements DeathRecipient {
             }
 
             try {
-                // TODO(b/33197203, b/35395043): synchronize access instead
+                // TODO(b/33197203): synchronize access instead?
                 // Need to double check if it's null, since it could be set on
                 // onServiceDisconnected()
                 if (mAutoFillService != null) {
