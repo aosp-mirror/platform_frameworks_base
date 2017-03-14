@@ -6132,6 +6132,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
 
         sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_CLICKED);
+
+        notifyEnterOrExitForAutoFillIfNeeded(true);
+
         return result;
     }
 
@@ -6791,14 +6794,18 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             mAttachInfo.mKeyDispatchState.reset(this);
         }
 
+        notifyEnterOrExitForAutoFillIfNeeded(gainFocus);
+    }
+
+    private void notifyEnterOrExitForAutoFillIfNeeded(boolean enter) {
         if (isAutofillable() && isAttachedToWindow()
                 && getResolvedAutofillMode() == AUTOFILL_MODE_AUTO) {
             AutofillManager afm = getAutofillManager();
             if (afm != null) {
-                if (gainFocus) {
-                    afm.startAutofillRequest(this);
-                } else {
-                    afm.stopAutofillRequest(this);
+                if (enter && hasWindowFocus() && isFocused()) {
+                    afm.notifyViewEntered(this);
+                } else if (!hasWindowFocus() || !isFocused()) {
+                    afm.notifyViewExited(this);
                 }
             }
         }
@@ -7368,13 +7375,17 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * <li>Also implement {@link #autofillVirtual(int, AutofillValue)} to autofill the virtual
      * children.
      * <li>Call
-     * {@link android.view.autofill.AutofillManager#startAutofillRequestOnVirtualView} and
-     * {@link android.view.autofill.AutofillManager#stopAutofillRequestOnVirtualView(View, int)}
+     * {@link android.view.autofill.AutofillManager#notifyVirtualViewEntered} and
+     * {@link android.view.autofill.AutofillManager#notifyVirtualViewExited(View, int)}
      * when the focus inside the view changed.
-     * <li>Call {@link android.view.autofill.AutofillManager#virtualValueChanged(View, int,
+     * <li>Call {@link android.view.autofill.AutofillManager#notifyVirtualValueChanged(View, int,
      * AutofillValue)} when the value of a child changed.
-     * <li>Call {@link android.view.autofill.AutofillManager#reset()} when the autofill context
-     * of the view structure changed.
+     * <li>Call {@link AutofillManager#commit()} when the autofill context
+     * of the view structure changed and you want the current autofill interaction if such
+     * to be commited.
+     * <li>Call {@link AutofillManager#cancel()} ()} when the autofill context
+     * of the view structure changed and you want the current autofill interaction if such
+     * to be cancelled.
      * </ol>
      *
      * @param structure Fill in with structured view data.
@@ -11085,6 +11096,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @CallSuper
     public void dispatchStartTemporaryDetach() {
         mPrivateFlags3 |= PFLAG3_TEMPORARY_DETACH;
+        notifyEnterOrExitForAutoFillIfNeeded(false);
         onStartTemporaryDetach();
     }
 
@@ -11110,6 +11122,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (hasWindowFocus() && hasFocus()) {
             InputMethodManager.getInstance().focusIn(this);
         }
+        notifyEnterOrExitForAutoFillIfNeeded(true);
     }
 
     /**
@@ -11512,6 +11525,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         } else if (imm != null && (mPrivateFlags & PFLAG_FOCUSED) != 0) {
             imm.focusIn(this);
         }
+
+        notifyEnterOrExitForAutoFillIfNeeded(hasWindowFocus);
+
         refreshDrawableState();
     }
 
@@ -16879,12 +16895,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
         needGlobalAttributesUpdate(false);
 
-        if (isAutofillable() && isFocused() && getResolvedAutofillMode() == AUTOFILL_MODE_AUTO) {
-            AutofillManager afm = getAutofillManager();
-            if (afm != null) {
-                afm.startAutofillRequest(this);
-            }
-        }
+        notifyEnterOrExitForAutoFillIfNeeded(true);
     }
 
     void dispatchDetachedFromWindow() {
@@ -16932,12 +16943,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             mOverlay.getOverlayView().dispatchDetachedFromWindow();
         }
 
-        if (isAutofillable() && isFocused() && getResolvedAutofillMode() == AUTOFILL_MODE_AUTO) {
-            AutofillManager afm = getAutofillManager();
-            if (afm != null) {
-                afm.stopAutofillRequest(this);
-            }
-        }
+        notifyEnterOrExitForAutoFillIfNeeded(false);
     }
 
     /**

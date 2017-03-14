@@ -144,7 +144,7 @@ public class TimePicker extends FrameLayout {
         mDelegate.setAutoFillChangeListener((v, h, m) -> {
             final AutofillManager afm = context.getSystemService(AutofillManager.class);
             if (afm != null) {
-                afm.valueChanged(this);
+                afm.notifyValueChanged(this);
             }
         });
     }

@@ -182,7 +182,7 @@ final class RemoteFillService implements DeathRecipient {
             return;
         }
         if (!isBound()) {
-            if (mPendingRequest != null && mPendingRequest != pendingRequest) {
+            if (mPendingRequest != null) {
                 mPendingRequest.cancel();
             }
             mPendingRequest = pendingRequest;
@@ -337,9 +337,10 @@ final class RemoteFillService implements DeathRecipient {
                 Slog.w(LOG_TAG, "Exception calling onConnected(): " + e);
             }
 
-
             if (mPendingRequest != null) {
-                handlePendingRequest(mPendingRequest);
+                PendingRequest pendingRequest = mPendingRequest;
+                mPendingRequest = null;
+                handlePendingRequest(pendingRequest);
             }
 
             mServiceDied = false;

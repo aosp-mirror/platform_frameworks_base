@@ -36,6 +36,7 @@ interface IAutoFillManager {
     oneway void updateSession(in IBinder activityToken, in AutofillId id, in Rect bounds,
             in AutofillValue value, int flags, int userId);
     oneway void finishSession(in IBinder activityToken, int userId);
+    oneway void cancelSession(in IBinder activityToken, int userId);
     oneway void setAuthenticationResult(in Bundle data,
             in IBinder activityToken, int userId);
     oneway void setHasCallback(in IBinder activityToken, int userId, boolean hasIt);

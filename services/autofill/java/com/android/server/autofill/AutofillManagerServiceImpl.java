@@ -19,8 +19,8 @@ package com.android.server.autofill;
 import static android.service.autofill.AutofillService.EXTRA_ACTIVITY_TOKEN;
 import static android.service.voice.VoiceInteractionSession.KEY_RECEIVER_EXTRAS;
 import static android.service.voice.VoiceInteractionSession.KEY_STRUCTURE;
-import static android.view.autofill.AutofillManager.FLAG_FOCUS_GAINED;
-import static android.view.autofill.AutofillManager.FLAG_FOCUS_LOST;
+import static android.view.autofill.AutofillManager.FLAG_VIEW_ENTERED;
+import static android.view.autofill.AutofillManager.FLAG_VIEW_EXITED;
 import static android.view.autofill.AutofillManager.FLAG_START_SESSION;
 import static android.view.autofill.AutofillManager.FLAG_VALUE_CHANGED;
 
@@ -77,13 +77,13 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 /**
- * Bridge between the {@code system_server}'s {@link AutoFillManagerService} and the
+ * Bridge between the {@code system_server}'s {@link AutofillManagerService} and the
  * app's {@link IAutoFillService} implementation.
  *
  */
-final class AutoFillManagerServiceImpl {
+final class AutofillManagerServiceImpl {
 
-    private static final String TAG = "AutoFillManagerServiceImpl";
+    private static final String TAG = "AutofillManagerServiceImpl";
 
     private static final int MSG_SERVICE_SAVE = 1;
 
@@ -173,7 +173,7 @@ final class AutoFillManagerServiceImpl {
         }
     };
 
-    AutoFillManagerServiceImpl(Context context, Object lock, LocalLog requestsHistory,
+    AutofillManagerServiceImpl(Context context, Object lock, LocalLog requestsHistory,
             int userId, AutoFillUI ui) {
         mContext = context;
         mLock = lock;
@@ -240,7 +240,7 @@ final class AutoFillManagerServiceImpl {
     }
 
     /**
-     * Used by {@link AutoFillManagerServiceShellCommand} to request save for the current top app.
+     * Used by {@link AutofillManagerServiceShellCommand} to request save for the current top app.
      */
     void requestSaveForUserLocked(IBinder activityToken) {
         if (!hasService()) {
@@ -319,6 +319,20 @@ final class AutoFillManagerServiceImpl {
         }
 
         session.showSaveLocked();
+    }
+
+    void cancelSessionLocked(IBinder activityToken) {
+        if (!hasService()) {
+            return;
+        }
+
+        final Session session = mSessions.get(activityToken);
+        if (session == null) {
+            Slog.w(TAG, "cancelSessionLocked(): no session for " + activityToken);
+            return;
+        }
+
+        session.destroyLocked();
     }
 
     private Session createSessionByTokenLocked(IBinder activityToken, IBinder windowToken,
@@ -457,7 +471,7 @@ final class AutoFillManagerServiceImpl {
 
     @Override
     public String toString() {
-        return "AutoFillManagerServiceImpl: [userId=" + mUserId
+        return "AutofillManagerServiceImpl: [userId=" + mUserId
                 + ", component=" + (mInfo != null
                 ? mInfo.getServiceInfo().getComponentName() : null) + "]";
     }
@@ -905,7 +919,7 @@ final class AutoFillManagerServiceImpl {
                 return;
             }
 
-            if ((flags & FLAG_FOCUS_GAINED) != 0) {
+            if ((flags & FLAG_VIEW_ENTERED) != 0) {
                 // Remove the UI if the ViewState has changed.
                 if (mCurrentViewState != viewState) {
                     mUi.hideFillUi(mCurrentViewState != null ? mCurrentViewState.mId : null);
@@ -923,7 +937,7 @@ final class AutoFillManagerServiceImpl {
                 return;
             }
 
-            if ((flags & FLAG_FOCUS_LOST) != 0) {
+            if ((flags & FLAG_VIEW_EXITED) != 0) {
                 if (mCurrentViewState == viewState) {
                     mUi.hideFillUi(viewState.mId);
                     mCurrentViewState = null;
@@ -1001,7 +1015,7 @@ final class AutoFillManagerServiceImpl {
         }
 
         CharSequence getServiceName() {
-            return AutoFillManagerServiceImpl.this.getServiceName();
+            return AutofillManagerServiceImpl.this.getServiceName();
         }
 
         private Intent createAuthFillInIntent(AssistStructure structure) {

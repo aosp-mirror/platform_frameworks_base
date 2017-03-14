@@ -173,7 +173,7 @@ public abstract class CompoundButton extends Button implements Checkable {
             }
             final AutofillManager afm = mContext.getSystemService(AutofillManager.class);
             if (afm != null) {
-                afm.valueChanged(this);
+                afm.notifyValueChanged(this);
             }
 
             mBroadcasting = false;

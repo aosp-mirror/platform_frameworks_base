@@ -16,7 +16,7 @@
 
 package com.android.server.autofill;
 
-import static com.android.server.autofill.AutoFillManagerService.RECEIVER_BUNDLE_EXTRA_SESSIONS;
+import static com.android.server.autofill.AutofillManagerService.RECEIVER_BUNDLE_EXTRA_SESSIONS;
 
 import android.app.ActivityManager;
 import android.os.Bundle;
@@ -30,11 +30,11 @@ import java.util.ArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-public final class AutoFillManagerServiceShellCommand extends ShellCommand {
+public final class AutofillManagerServiceShellCommand extends ShellCommand {
 
-    private final AutoFillManagerService mService;
+    private final AutofillManagerService mService;
 
-    public AutoFillManagerServiceShellCommand(AutoFillManagerService service) {
+    public AutofillManagerServiceShellCommand(AutofillManagerService service) {
         mService = service;
     }
 
