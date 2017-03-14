@@ -5384,9 +5384,10 @@ public class ActivityManagerService extends IActivityManager.Stub
             ProcessCpuTracker processCpuTracker, SparseArray<Boolean> lastPids, String[] nativeProcs) {
         // Use a FileObserver to detect when traces finish writing.
         // The order of traces is considered important to maintain for legibility.
+        final boolean[] closed = new boolean[1];
         FileObserver observer = new FileObserver(tracesPath, FileObserver.CLOSE_WRITE) {
             @Override
-            public synchronized void onEvent(int event, String path) { notify(); }
+            public synchronized void onEvent(int event, String path) { closed[0] = true; notify(); }
         };
 
         try {
@@ -5403,6 +5404,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                             final long sime = SystemClock.elapsedRealtime();
                             Process.sendSignal(firstPids.get(i), Process.SIGNAL_QUIT);
                             observer.wait(1000);  // Wait for write-close, give up after 1 sec
+                            if (!closed[0]) Slog.w(TAG, "Didn't see close of " + tracesPath);
                             if (DEBUG_ANR) Slog.d(TAG, "Done with pid " + firstPids.get(i)
                                     + " in " + (SystemClock.elapsedRealtime()-sime) + "ms");
                         }
