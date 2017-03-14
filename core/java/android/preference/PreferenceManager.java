@@ -93,8 +93,8 @@ public class PreferenceManager {
     private SharedPreferences mSharedPreferences;
 
     /**
-     * Data store to be used by the Preferences or null if {@link android.content.SharedPreferences}
-     * should be used.
+     * Data store to be used by the Preferences or {@code null} if
+     * {@link android.content.SharedPreferences} should be used.
      */
     @Nullable
     private PreferenceDataStore mPreferenceDataStore;
@@ -484,11 +484,16 @@ public class PreferenceManager {
     /**
      * Gets a {@link SharedPreferences} instance that preferences managed by this will use.
      *
-     * @return A {@link SharedPreferences} instance pointing to the file that contains the values of
-     * preferences that are managed by this or null if {@link PreferenceDataStore} is used instead.
+     * @return a {@link SharedPreferences} instance pointing to the file that contains the values of
+     *         preferences that are managed by this PreferenceManager. If a
+     *         {@link PreferenceDataStore} has been set, this method returns {@code null}.
      */
     public SharedPreferences getSharedPreferences() {
-        if (mSharedPreferences == null && getPreferenceDataStore() == null) {
+        if (mPreferenceDataStore != null) {
+            return null;
+        }
+
+        if (mSharedPreferences == null) {
             final Context storageContext;
             switch (mStorage) {
                 case STORAGE_DEVICE_PROTECTED:
@@ -564,8 +569,8 @@ public class PreferenceManager {
     /**
      * Finds a {@link Preference} based on its key.
      *
-     * @param key The key of the preference to retrieve.
-     * @return The {@link Preference} with the key, or null.
+     * @param key the key of the preference to retrieve
+     * @return the {@link Preference} with the key, or {@code null}
      * @see PreferenceGroup#findPreference(CharSequence)
      */
     @Nullable
@@ -659,11 +664,11 @@ public class PreferenceManager {
 
     /**
      * Returns an editor to use when modifying the shared preferences.
-     * <p>
-     * Do NOT commit unless {@link #shouldCommit()} returns true.
      *
-     * @return An editor to use to write to shared preferences or null if
-     * {@link PreferenceDataStore} is used instead.
+     * <p>Do NOT commit unless {@link #shouldCommit()} returns true.
+     *
+     * @return an editor to use to write to shared preferences. If a {@link PreferenceDataStore}
+     *         has been set, this method returns {@code null}.
      * @see #shouldCommit()
      */
     SharedPreferences.Editor getEditor() {
@@ -686,6 +691,8 @@ public class PreferenceManager {
      * Whether it is the client's responsibility to commit on the
      * {@link #getEditor()}. This will return false in cases where the writes
      * should be batched, for example when inflating preferences from XML.
+     *
+     * <p>If preferences are using {@link PreferenceDataStore} this value is irrelevant.
      *
      * @return Whether the client should commit.
      */
@@ -711,8 +718,8 @@ public class PreferenceManager {
      * Returns the activity that shows the preferences. This is useful for doing
      * managed queries, but in most cases the use of {@link #getContext()} is
      * preferred.
-     * <p>
-     * This will return null if this class was instantiated with a Context
+     *
+     * <p>This will return {@code null} if this class was instantiated with a Context
      * instead of Activity. For example, when setting the default values.
      *
      * @return The activity that shows the preferences.
