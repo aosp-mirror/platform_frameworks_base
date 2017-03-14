@@ -1,9 +1,10 @@
 
 package com.android.server.wm;
 
+import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.app.ActivityManagerInternal.APP_TRANSITION_SAVED_SURFACE;
-import static android.app.ActivityManagerInternal.APP_TRANSITION_STARTING_WINDOW;
-import static android.app.ActivityManagerInternal.APP_TRANSITION_TIMEOUT;
+import static android.app.ActivityManagerInternal.APP_TRANSITION_SNAPSHOT;
+import static android.app.ActivityManagerInternal.APP_TRANSITION_SPLASH_SCREEN;
 import static android.app.ActivityManagerInternal.APP_TRANSITION_WINDOWS_DRAWN;
 import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_CONFIG;
 import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT;
@@ -45,6 +46,7 @@ import android.os.Debug;
 import android.os.Trace;
 import android.util.ArraySet;
 import android.util.Slog;
+import android.util.SparseIntArray;
 import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.Surface;
@@ -93,6 +95,7 @@ class WindowSurfacePlacer {
     private final LayerAndToken mTmpLayerAndToken = new LayerAndToken();
 
     private final ArrayList<SurfaceControl> mPendingDestroyingSurfaces = new ArrayList<>();
+    private final SparseIntArray mTempTransitionReasons = new SparseIntArray();
 
     public WindowSurfacePlacer(WindowManagerService service) {
         mService = service;
@@ -495,7 +498,7 @@ class WindowSurfacePlacer {
             mService.mAnimator.getScreenRotationAnimationLocked(
                     Display.DEFAULT_DISPLAY);
 
-        int reason = APP_TRANSITION_TIMEOUT;
+        final SparseIntArray reasons = mTempTransitionReasons;
         if (!mService.mAppTransition.isTimeout()) {
             // Imagine the case where we are changing orientation due to an app transition, but a previous
             // orientation change is still in progress. We won't process the orientation change
@@ -526,11 +529,15 @@ class WindowSurfacePlacer {
                 if (!allDrawn && !wtoken.startingDisplayed && !wtoken.startingMoved) {
                     return false;
                 }
+                final TaskStack stack = wtoken.getStack();
+                final int stackId = stack != null ? stack.mStackId : INVALID_STACK_ID;
                 if (allDrawn) {
-                    reason = drawnBeforeRestoring ? APP_TRANSITION_WINDOWS_DRAWN
-                            : APP_TRANSITION_SAVED_SURFACE;
+                    reasons.put(stackId, drawnBeforeRestoring ? APP_TRANSITION_WINDOWS_DRAWN
+                            : APP_TRANSITION_SAVED_SURFACE);
                 } else {
-                    reason = APP_TRANSITION_STARTING_WINDOW;
+                    reasons.put(stackId, wtoken.startingData instanceof SplashScreenStartingData
+                            ? APP_TRANSITION_SPLASH_SCREEN
+                            : APP_TRANSITION_SNAPSHOT);
                 }
             }
 
@@ -552,12 +559,13 @@ class WindowSurfacePlacer {
             boolean wallpaperReady = !mWallpaperControllerLocked.isWallpaperVisible() ||
                     mWallpaperControllerLocked.wallpaperTransitionReady();
             if (wallpaperReady) {
-                mService.mH.obtainMessage(NOTIFY_APP_TRANSITION_STARTING, reason, 0).sendToTarget();
+                mService.mH.obtainMessage(NOTIFY_APP_TRANSITION_STARTING, reasons.clone())
+                        .sendToTarget();
                 return true;
             }
             return false;
         }
-        mService.mH.obtainMessage(NOTIFY_APP_TRANSITION_STARTING, reason, 0).sendToTarget();
+        mService.mH.obtainMessage(NOTIFY_APP_TRANSITION_STARTING, reasons.clone()).sendToTarget();
         return true;
     }
 

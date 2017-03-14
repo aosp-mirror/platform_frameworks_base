@@ -25,6 +25,7 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.service.voice.IVoiceInteractionSession;
+import android.util.SparseIntArray;
 
 import com.android.internal.app.IVoiceInteractor;
 
@@ -47,9 +48,9 @@ public abstract class ActivityManagerInternal {
 
     /**
      * Type for {@link #notifyAppTransitionStarting}: The transition was started because we drew
-     * the starting window.
+     * the splash screen.
      */
-    public static final int APP_TRANSITION_STARTING_WINDOW = 1;
+    public static final int APP_TRANSITION_SPLASH_SCREEN = 1;
 
     /**
      * Type for {@link #notifyAppTransitionStarting}: The transition was started because we all
@@ -62,6 +63,12 @@ public abstract class ActivityManagerInternal {
      * timeout.
      */
     public static final int APP_TRANSITION_TIMEOUT = 3;
+
+    /**
+     * Type for {@link #notifyAppTransitionStarting}: The transition was started because of a
+     * we drew a task snapshot.
+     */
+    public static final int APP_TRANSITION_SNAPSHOT = 4;
 
     /**
      * Grant Uri permissions from one app to another. This method only extends
@@ -122,19 +129,13 @@ public abstract class ActivityManagerInternal {
             IVoiceInteractor mInteractor);
 
     /**
-     * Callback for window manager to let activity manager know that the starting window has been
-     * drawn
-     */
-    public abstract void notifyStartingWindowDrawn();
-
-    /**
      * Callback for window manager to let activity manager know that we are finally starting the
      * app transition;
      *
-     * @param reason The reason why the app transition started. Must be one of the APP_TRANSITION_*
-     *               values.
+     * @param reasons A map from stack id to a reason integer why the transition was started,, which
+     *                must be one of the APP_TRANSITION_* values.
      */
-    public abstract void notifyAppTransitionStarting(int reason);
+    public abstract void notifyAppTransitionStarting(SparseIntArray reasons);
 
     /**
      * Callback for window manager to let activity manager know that the app transition was

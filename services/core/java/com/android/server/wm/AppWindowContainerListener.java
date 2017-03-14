@@ -24,6 +24,12 @@ public interface AppWindowContainerListener extends WindowContainerListener {
     void onWindowsVisible();
     /** Called when the windows associated app window container are no longer visible. */
     void onWindowsGone();
+
+    /**
+     * Called when the starting window for this container is drawn.
+     */
+    void onStartingWindowDrawn();
+
     /**
      * Called when the key dispatching to a window associated with the app window container
      * timed-out.

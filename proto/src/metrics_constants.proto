@@ -44,6 +44,18 @@ message MetricsEvent {
 
     // The view or control was updated.
     TYPE_UPDATE = 6;
+
+    // Type for APP_TRANSITION event: The transition started a new activity for which it's process
+    // wasn't running.
+    TYPE_TRANSITION_COLD_LAUNCH = 7;
+
+    // Type for APP_TRANSITION event: The transition started a new activity for which it's process
+    // was already running.
+    TYPE_TRANSITION_WARM_LAUNCH = 8;
+
+    // Type for APP_TRANSITION event: The transition brought an already existing activity to the
+    // front.
+    TYPE_TRANSITION_HOT_LAUNCH = 9;
   }
 
   // Known visual elements: views or controls.
@@ -3558,6 +3570,9 @@ message MetricsEvent {
 
     // ACTION: Settings > Connected devices > Bluetooth master switch Toggle
     ACTION_SETTINGS_MASTER_SWITCH_BLUETOOTH_TOGGLE = 870;
+
+    // The name of the activity being launched in an app transition event.
+    APP_TRANSITION_ACTIVITY_NAME = 871;
 
     // ---- End O Constants, all O constants go above this line ----
 

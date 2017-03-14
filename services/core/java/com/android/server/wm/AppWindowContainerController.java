@@ -59,6 +59,15 @@ public class AppWindowContainerController
     private final IApplicationToken mToken;
     private final Handler mHandler;
 
+    private final Runnable mOnStartingWindowDrawn = () -> {
+        if (mListener == null) {
+            return;
+        }
+        if (DEBUG_VISIBILITY) Slog.v(TAG_WM, "Reporting drawn in "
+                + AppWindowContainerController.this.mToken);
+        mListener.onStartingWindowDrawn();
+    };
+
     private final Runnable mOnWindowsDrawn = () -> {
         if (mListener == null) {
             return;
@@ -655,6 +664,9 @@ public class AppWindowContainerController
         }
     }
 
+    void reportStartingWindowDrawn() {
+        mHandler.post(mOnStartingWindowDrawn);
+    }
 
     void reportWindowsDrawn() {
         mHandler.post(mOnWindowsDrawn);
