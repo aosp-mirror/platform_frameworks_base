@@ -16,8 +16,6 @@
 
 package com.android.systemui.statusbar;
 
-import static android.support.test.internal.runner.junit4.statement.UiThreadStatement.runOnUiThread;
-
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -34,19 +32,17 @@ import android.hardware.fingerprint.FingerprintManager;
 import android.os.Looper;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
-import android.support.test.internal.runner.junit4.statement.UiThreadStatement;
 import android.support.test.runner.AndroidJUnit4;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.phone.KeyguardIndicationTextView;
 import com.android.systemui.util.wakelock.WakeLockFake;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -125,7 +121,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         when(mDevicePolicyManager.isDeviceManaged()).thenReturn(false);
         createController();
 
-        final KeyguardUpdateMonitor monitor = KeyguardUpdateMonitor.getInstance(mContext);
+        final KeyguardUpdateMonitorCallback monitor = mController.getKeyguardCallback();
         reset(mDisclosure);
 
         when(mDevicePolicyManager.isDeviceManaged()).thenReturn(true);
@@ -176,7 +172,6 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         assertFalse(mWakeLock.isHeld());
     }
 
-    @Ignore("Flaky")
     @Test
     public void transientIndication_releasesWakeLock_afterHidingDelayed() throws Throwable {
         mInstrumentation.runOnMainSync(() -> {
@@ -188,12 +183,10 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         });
         mInstrumentation.waitForIdleSync();
 
-        boolean[] held = new boolean[2];
+        Boolean[] held = new Boolean[1];
         mInstrumentation.runOnMainSync(() -> {
             held[0] = mWakeLock.isHeld();
-            held[1] = true;
         });
-        assertFalse("wake lock still held", held[0]);
-        assertTrue("held was not written yet", held[1]);
+        assertFalse("WakeLock expected: RELEASED, was: HELD", held[0]);
     }
 }
