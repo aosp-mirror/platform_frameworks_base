@@ -46,6 +46,7 @@ import com.android.systemui.statusbar.phone.KeyguardIndicationTextView;
 import com.android.systemui.util.wakelock.WakeLockFake;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -175,6 +176,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         assertFalse(mWakeLock.isHeld());
     }
 
+    @Ignore("Flaky")
     @Test
     public void transientIndication_releasesWakeLock_afterHidingDelayed() throws Throwable {
         mInstrumentation.runOnMainSync(() -> {
