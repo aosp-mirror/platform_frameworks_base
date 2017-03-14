@@ -207,9 +207,35 @@ final class DefaultPermissionGrantPolicy {
     }
 
     public void grantDefaultPermissions(int userId) {
-        grantPermissionsToSysComponentsAndPrivApps(userId);
-        grantDefaultSystemHandlerPermissions(userId);
-        grantDefaultPermissionExceptions(userId);
+        if (mService.hasSystemFeature(PackageManager.FEATURE_EMBEDDED, 0)) {
+            grantAllRuntimePermissions(userId);
+        } else {
+            grantPermissionsToSysComponentsAndPrivApps(userId);
+            grantDefaultSystemHandlerPermissions(userId);
+            grantDefaultPermissionExceptions(userId);
+        }
+    }
+
+    private void grantRuntimePermissionsForPackageLocked(int userId, PackageParser.Package pkg) {
+        Set<String> permissions = new ArraySet<>();
+        for (String permission :  pkg.requestedPermissions) {
+            BasePermission bp = mService.mSettings.mPermissions.get(permission);
+            if (bp != null && bp.isRuntime()) {
+                permissions.add(permission);
+            }
+        }
+        if (!permissions.isEmpty()) {
+            grantRuntimePermissionsLPw(pkg, permissions, true, userId);
+        }
+    }
+
+    private void grantAllRuntimePermissions(int userId) {
+        Log.i(TAG, "Granting all runtime permissions for user " + userId);
+        synchronized (mService.mPackages) {
+            for (PackageParser.Package pkg : mService.mPackages.values()) {
+                grantRuntimePermissionsForPackageLocked(userId, pkg);
+            }
+        }
     }
 
     public void scheduleReadDefaultPermissionExceptions() {
@@ -226,18 +252,7 @@ final class DefaultPermissionGrantPolicy {
                         || pkg.requestedPermissions.isEmpty()) {
                     continue;
                 }
-                Set<String> permissions = new ArraySet<>();
-                final int permissionCount = pkg.requestedPermissions.size();
-                for (int i = 0; i < permissionCount; i++) {
-                    String permission = pkg.requestedPermissions.get(i);
-                    BasePermission bp = mService.mSettings.mPermissions.get(permission);
-                    if (bp != null && bp.isRuntime()) {
-                        permissions.add(permission);
-                    }
-                }
-                if (!permissions.isEmpty()) {
-                    grantRuntimePermissionsLPw(pkg, permissions, true, userId);
-                }
+                grantRuntimePermissionsForPackageLocked(userId, pkg);
             }
         }
     }
