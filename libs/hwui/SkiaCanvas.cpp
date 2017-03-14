@@ -73,9 +73,39 @@ void SkiaCanvas::reset(SkCanvas* skiaCanvas) {
 // Canvas state operations: Replace Bitmap
 // ----------------------------------------------------------------------------
 
+class ClipCopier : public SkCanvas::ClipVisitor {
+public:
+    explicit ClipCopier(SkCanvas* dstCanvas) : m_dstCanvas(dstCanvas) {}
+
+    virtual void clipRect(const SkRect& rect, SkClipOp op, bool antialias) {
+        m_dstCanvas->clipRect(rect, op, antialias);
+    }
+    virtual void clipRRect(const SkRRect& rrect, SkClipOp op, bool antialias) {
+        m_dstCanvas->clipRRect(rrect, op, antialias);
+    }
+    virtual void clipPath(const SkPath& path, SkClipOp op, bool antialias) {
+        m_dstCanvas->clipPath(path, op, antialias);
+    }
+
+private:
+    SkCanvas* m_dstCanvas;
+};
+
 void SkiaCanvas::setBitmap(const SkBitmap& bitmap) {
-    mCanvasOwned.reset(new SkCanvas(bitmap));
-    mCanvas = mCanvasOwned.get();
+    SkCanvas* newCanvas = new SkCanvas(bitmap);
+
+    if (!bitmap.isNull()) {
+        // Copy the canvas matrix & clip state.
+        newCanvas->setMatrix(mCanvas->getTotalMatrix());
+
+        ClipCopier copier(newCanvas);
+        mCanvas->replayClips(&copier);
+    }
+
+    // deletes the previously owned canvas (if any)
+    mCanvasOwned = std::unique_ptr<SkCanvas>(newCanvas);
+    mCanvas = newCanvas;
+
     // clean up the old save stack
     mSaveStack.reset(nullptr);
 }
