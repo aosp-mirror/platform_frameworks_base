@@ -66,6 +66,7 @@ import static com.android.server.am.ActivityRecord.APPLICATION_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityRecord.ASSISTANT_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityRecord.HOME_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityStackSupervisor.FindTaskResult;
+import static com.android.server.am.ActivityStackSupervisor.ON_TOP;
 import static com.android.server.am.ActivityStackSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.wm.AppTransition.TRANSIT_ACTIVITY_CLOSE;
 import static com.android.server.wm.AppTransition.TRANSIT_ACTIVITY_OPEN;
@@ -505,7 +506,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         }
         onParentChanged();
 
-        activityDisplay.attachStack(this, onTop);
+        activityDisplay.attachStack(this, findStackInsertIndex(onTop));
         if (mStackId == DOCKED_STACK_ID) {
             // If we created a docked stack we want to resize it so it resizes all other stacks
             // in the system.
@@ -799,16 +800,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         }
 
         mStacks.remove(this);
-        int addIndex = mStacks.size();
-        if (addIndex > 0) {
-            final ActivityStack topStack = mStacks.get(addIndex - 1);
-            if (StackId.isAlwaysOnTop(topStack.mStackId) && topStack != this) {
-                // If the top stack is always on top, we move this stack just below it.
-                addIndex--;
-            }
-        }
-
-        mStacks.add(addIndex, this);
+        mStacks.add(findStackInsertIndex(ON_TOP), this);
         mStackSupervisor.setFocusStackUnchecked(reason, this);
         if (task != null) {
             insertTaskAtTop(task, null);
@@ -838,6 +830,25 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             mTaskHistory.add(0, task);
             updateTaskMovement(task, false);
             mWindowContainerController.positionChildAtBottom(task.getWindowContainerController());
+        }
+    }
+
+    /**
+     * @return the index to insert a new stack into, taking the always-on-top stacks into account.
+     */
+    private int findStackInsertIndex(boolean onTop) {
+        if (onTop) {
+            int addIndex = mStacks.size();
+            if (addIndex > 0) {
+                final ActivityStack topStack = mStacks.get(addIndex - 1);
+                if (StackId.isAlwaysOnTop(topStack.mStackId) && topStack != this) {
+                    // If the top stack is always on top, we move this stack just below it.
+                    addIndex--;
+                }
+            }
+            return addIndex;
+        } else {
+            return 0;
         }
     }
 
