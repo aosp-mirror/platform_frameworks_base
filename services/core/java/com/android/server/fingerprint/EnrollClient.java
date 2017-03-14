@@ -80,7 +80,7 @@ public abstract class EnrollClient extends ClientMonitor {
     public int start() {
         IBiometricsFingerprint daemon = getFingerprintDaemon();
         if (daemon == null) {
-            Slog.w(TAG, "enroll: no fingeprintd!");
+            Slog.w(TAG, "enroll: no fingerprint HAL!");
             return ERROR_ESRCH;
         }
         final int timeout = (int) (ENROLLMENT_TIMEOUT_MS / MS_PER_SEC);
@@ -102,7 +102,7 @@ public abstract class EnrollClient extends ClientMonitor {
     public int stop(boolean initiatedByClient) {
         IBiometricsFingerprint daemon = getFingerprintDaemon();
         if (daemon == null) {
-            Slog.w(TAG, "stopEnrollment: no fingeprintd!");
+            Slog.w(TAG, "stopEnrollment: no fingerprint HAL!");
             return ERROR_ESRCH;
         }
         try {
