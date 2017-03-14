@@ -506,8 +506,6 @@ public final class Settings {
      * Input: Nothing.
      * <p>
      * Output: Nothing.
-     *
-     * @hide
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_NIGHT_DISPLAY_SETTINGS =
