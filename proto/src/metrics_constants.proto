@@ -1180,7 +1180,7 @@ message MetricsEvent {
     // OS: 6.0
     BRIGHTNESS_DIALOG = 220;
 
-    // OPEN: Settings > Apps > Configure Apps > Draw over other apps
+    // OPEN: Settings > Apps > Configure Apps > Display over other apps
     // CATEGORY: SETTINGS
     // OS: 6.0
     SYSTEM_ALERT_WINDOW_APPS = 221;
@@ -3227,7 +3227,7 @@ message MetricsEvent {
     // ACTION: Allow "Draw over other apps" for an app
     APP_SPECIAL_PERMISSION_APPDRAW_ALLOW = 770;
 
-    // ACTION: Deny "Draw over other apps" for an app
+    // ACTION: Deny "Display over other apps" for an app
     APP_SPECIAL_PERMISSION_APPDRAW_DENY = 771;
 
     // ACTION: Allow "VR helper services" for an app
