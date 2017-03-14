@@ -143,6 +143,7 @@ import libcore.io.DropBox;
 import libcore.io.EventLogger;
 import libcore.io.IoUtils;
 import libcore.net.event.NetworkEventDispatcher;
+import dalvik.system.BaseDexClassLoader;
 import dalvik.system.CloseGuard;
 import dalvik.system.VMDebug;
 import dalvik.system.VMRuntime;
@@ -5344,6 +5345,16 @@ public final class ActivityThread {
             } else {
                 Log.e(TAG, "Unable to setupGraphicsSupport due to missing code-cache directory");
             }
+        }
+
+        // If we use profiles, setup the dex reporter to notify package manager
+        // of any relevant dex loads. The idle maintenance job will use the information
+        // reported to optimize the loaded dex files.
+        // Note that we only need one global reporter per app.
+        // Make sure we do this before calling onCreate so that we can capture the
+        // complete application startup.
+        if (SystemProperties.getBoolean("dalvik.vm.usejitprofiles", false)) {
+            BaseDexClassLoader.setReporter(DexLoadReporter.INSTANCE);
         }
 
         // Install the Network Security Config Provider. This must happen before the application
