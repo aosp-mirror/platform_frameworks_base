@@ -8537,13 +8537,21 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         // Third...  does the caller itself have permission to access
         // this uri?
-        if (UserHandle.getAppId(callingUid) != Process.SYSTEM_UID) {
-            if (!checkHoldingPermissionsLocked(pm, pi, grantUri, callingUid, modeFlags)) {
-                // Require they hold a strong enough Uri permission
-                if (!checkUriPermissionLocked(grantUri, callingUid, modeFlags)) {
-                    throw new SecurityException("Uid " + callingUid
-                            + " does not have permission to uri " + grantUri);
-                }
+        final int callingAppId = UserHandle.getAppId(callingUid);
+        if ((callingAppId == Process.SYSTEM_UID) || (callingAppId == Process.ROOT_UID)) {
+            if ("com.android.settings.files".equals(grantUri.uri.getAuthority())) {
+                // Exempted authority for cropping user photos in Settings app
+            } else {
+                Slog.w(TAG, "For security reasons, the system cannot issue a Uri permission"
+                        + " grant to " + grantUri + "; use startActivityAsCaller() instead");
+                return -1;
+            }
+        }
+        if (!checkHoldingPermissionsLocked(pm, pi, grantUri, callingUid, modeFlags)) {
+            // Require they hold a strong enough Uri permission
+            if (!checkUriPermissionLocked(grantUri, callingUid, modeFlags)) {
+                throw new SecurityException("Uid " + callingUid
+                        + " does not have permission to uri " + grantUri);
             }
         }
         return targetUid;
