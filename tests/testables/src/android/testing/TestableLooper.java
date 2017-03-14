@@ -15,20 +15,21 @@
 package android.testing;
 
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.os.MessageQueue;
+import android.os.TestLooperManager;
+import android.support.test.InstrumentationRegistry;
 import android.util.ArrayMap;
 
-import org.junit.runners.model.Statement;
+import org.junit.runners.model.FrameworkMethod;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.Map;
 
 /**
@@ -38,65 +39,35 @@ import java.util.Map;
  */
 public class TestableLooper {
 
-    private final Method mNext;
-    private final Method mRecycleUnchecked;
-
     private Looper mLooper;
     private MessageQueue mQueue;
     private boolean mMain;
     private Object mOriginalMain;
     private MessageHandler mMessageHandler;
 
-    private int mParsedCount;
     private Handler mHandler;
     private Message mEmptyMessage;
+    private TestLooperManager mQueueWrapper;
 
-    public TestableLooper() throws Exception {
-        this(true);
+    public TestableLooper(Looper l) throws Exception {
+        this(InstrumentationRegistry.getInstrumentation().acquireLooperManager(l), l);
     }
 
-    public TestableLooper(boolean setMyLooper) throws Exception {
-        setupQueue(setMyLooper);
-        mNext = mQueue.getClass().getDeclaredMethod("next");
-        mNext.setAccessible(true);
-        mRecycleUnchecked = Message.class.getDeclaredMethod("recycleUnchecked");
-        mRecycleUnchecked.setAccessible(true);
+    private TestableLooper(TestLooperManager wrapper, Looper l) throws Exception {
+        mQueueWrapper = wrapper;
+        setupQueue(l);
+    }
+
+    private TestableLooper(Looper looper, boolean b) throws Exception {
+        setupQueue(looper);
     }
 
     public Looper getLooper() {
         return mLooper;
     }
 
-    private void clearLooper() throws NoSuchFieldException, IllegalAccessException {
-        Field field = Looper.class.getDeclaredField("sThreadLocal");
-        field.setAccessible(true);
-        ThreadLocal<Looper> sThreadLocal = (ThreadLocal<Looper>) field.get(null);
-        sThreadLocal.set(null);
-    }
-
-    private boolean setForCurrentThread() throws NoSuchFieldException, IllegalAccessException {
-        if (Looper.myLooper() != mLooper) {
-            Field field = Looper.class.getDeclaredField("sThreadLocal");
-            field.setAccessible(true);
-            ThreadLocal<Looper> sThreadLocal = (ThreadLocal<Looper>) field.get(null);
-            sThreadLocal.set(mLooper);
-            return true;
-        }
-        return false;
-    }
-
-    private void setupQueue(boolean setMyLooper) throws Exception {
-        if (setMyLooper) {
-            clearLooper();
-            Looper.prepare();
-            mLooper = Looper.myLooper();
-        } else {
-            Constructor<Looper> constructor = Looper.class.getDeclaredConstructor(
-                    boolean.class);
-            constructor.setAccessible(true);
-            mLooper = constructor.newInstance(true);
-        }
-
+    private void setupQueue(Looper l) throws Exception {
+        mLooper = l;
         mQueue = mLooper.getQueue();
         mHandler = new Handler(mLooper);
     }
@@ -121,9 +92,7 @@ public class TestableLooper {
      * tests.
      */
     public void destroy() throws NoSuchFieldException, IllegalAccessException {
-        if (Looper.myLooper() == mLooper) {
-            clearLooper();
-        }
+        mQueueWrapper.release();
         if (mMain && mOriginalMain != null) {
             Field field = mLooper.getClass().getDeclaredField("sMainLooper");
             field.setAccessible(true);
@@ -164,26 +133,26 @@ public class TestableLooper {
 
     private boolean parseMessageInt() {
         try {
-            Message result = (Message) mNext.invoke(mQueue);
+            Message result = mQueueWrapper.next();
             if (result != null) {
                 // This is a break message.
                 if (result == mEmptyMessage) {
-                    mRecycleUnchecked.invoke(result);
+                    mQueueWrapper.recycle(result);
                     return false;
                 }
 
                 if (mMessageHandler != null) {
                     if (mMessageHandler.onMessageHandled(result)) {
                         result.getTarget().dispatchMessage(result);
-                        mRecycleUnchecked.invoke(result);
+                        mQueueWrapper.recycle(result);
                     } else {
-                        mRecycleUnchecked.invoke(result);
+                        mQueueWrapper.recycle(result);
                         // Message handler indicated it doesn't want us to continue.
                         return false;
                     }
                 } else {
                     result.getTarget().dispatchMessage(result);
-                    mRecycleUnchecked.invoke(result);
+                    mQueueWrapper.recycle(result);
                 }
             } else {
                 // No messages, don't continue parsing
@@ -199,10 +168,14 @@ public class TestableLooper {
      * Runs an executable with myLooper set and processes all messages added.
      */
     public void runWithLooper(RunnableWithException runnable) throws Exception {
-        boolean set = setForCurrentThread();
-        runnable.run();
+        new Handler(getLooper()).post(() -> {
+            try {
+                runnable.run();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
         processAllMessages();
-        if (set) clearLooper();
     }
 
     public interface RunnableWithException {
@@ -221,33 +194,131 @@ public class TestableLooper {
         return sLoopers.get(test);
     }
 
-    public static class LooperStatement extends Statement {
-        private final boolean mSetAsMain;
-        private final Statement mBase;
-        private final TestableLooper mLooper;
+    public static class LooperFrameworkMethod extends FrameworkMethod {
+        private HandlerThread mHandlerThread;
 
-        public LooperStatement(Statement base, boolean setAsMain, Object test) {
-            mBase = base;
+        private final TestableLooper mTestableLooper;
+        private final Looper mLooper;
+        private final Handler mHandler;
+
+        public LooperFrameworkMethod(FrameworkMethod base, boolean setAsMain, Object test) {
+            super(base.getMethod());
             try {
-                mLooper = new TestableLooper(false);
-                sLoopers.put(test, mLooper);
-                mSetAsMain = setAsMain;
+                mLooper = setAsMain ? Looper.getMainLooper() : createLooper();
+                mTestableLooper = new TestableLooper(mLooper, false);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
+            sLoopers.put(test, mTestableLooper);
+            mHandler = new Handler(mLooper);
+        }
+
+        public LooperFrameworkMethod(TestableLooper other, FrameworkMethod base) {
+            super(base.getMethod());
+            mLooper = other.mLooper;
+            mTestableLooper = other;
+            mHandler = new Handler(mLooper);
+        }
+
+        public static FrameworkMethod get(FrameworkMethod base, boolean setAsMain, Object test) {
+            if (sLoopers.containsKey(test)) {
+                return new LooperFrameworkMethod(sLoopers.get(test), base);
+            }
+            return new LooperFrameworkMethod(base, setAsMain, test);
         }
 
         @Override
-        public void evaluate() throws Throwable {
-            mLooper.setForCurrentThread();
-            if (mSetAsMain) {
-                mLooper.setAsMainLooper();
+        public Object invokeExplosively(Object target, Object... params) throws Throwable {
+            if (Looper.myLooper() == mLooper) {
+                // Already on the right thread from another statement, just execute then.
+                return super.invokeExplosively(target, params);
+            }
+            boolean set = mTestableLooper.mQueueWrapper == null;
+            if (set) {
+                mTestableLooper.mQueueWrapper = InstrumentationRegistry.getInstrumentation()
+                        .acquireLooperManager(mLooper);
+            }
+            try {
+                Object[] ret = new Object[1];
+                // Run the execution on the looper thread.
+                Runnable execute = () -> {
+                    try {
+                        ret[0] = super.invokeExplosively(target, params);
+                    } catch (Throwable throwable) {
+                        throw new LooperException(throwable);
+                    }
+                };
+                mHandler.post(execute);
+                // Try to wait for the message to be queued.
+                for (int i = 0; i < 10; i++) {
+                    if (!mTestableLooper.mQueueWrapper.hasMessages(mHandler, null, execute)) {
+                        Thread.sleep(1);
+                    }
+                }
+                if (!mTestableLooper.mQueueWrapper.hasMessages(mHandler, null, execute)) {
+                    throw new RuntimeException("Message didn't queue...");
+                }
+                Message m = mTestableLooper.mQueueWrapper.next();
+                // Parse all other messages until we get to ours.
+                while (m.getTarget() != mHandler) {
+                    try {
+                        mTestableLooper.mQueueWrapper.execute(m);
+                    } catch (LooperException e) {
+                        throw e.getSource();
+                    } finally {
+                        mTestableLooper.mQueueWrapper.recycle(m);
+                    }
+                    m = mTestableLooper.mQueueWrapper.next();
+                }
+                // Dispatch our message.
+                try {
+                    mTestableLooper.mQueueWrapper.execute(m);
+                } catch (LooperException e) {
+                    throw e.getSource();
+                } catch (RuntimeException re) {
+                    // If the TestLooperManager has to post, it will wrap what it throws in a
+                    // RuntimeException, make sure we grab the actual source.
+                    if (re.getCause() instanceof LooperException) {
+                        throw ((LooperException) re.getCause()).getSource();
+                    } else {
+                        throw re.getCause();
+                    }
+                } finally {
+                    mTestableLooper.mQueueWrapper.recycle(m);
+                }
+                return ret[0];
+            } finally {
+                if (set) {
+                    mTestableLooper.mQueueWrapper.release();
+                    mTestableLooper.mQueueWrapper = null;
+                }
+            }
+        }
+
+        private Looper createLooper() {
+            // TODO: Find way to share these.
+            mHandlerThread = new HandlerThread(TestableLooper.class.getSimpleName());
+            mHandlerThread.start();
+            return mHandlerThread.getLooper();
+        }
+
+        @Override
+        protected void finalize() throws Throwable {
+            super.finalize();
+            if (mHandlerThread != null) {
+                mHandlerThread.quit();
+            }
+        }
+
+        private static class LooperException extends RuntimeException {
+            private final Throwable mSource;
+
+            public LooperException(Throwable t) {
+                mSource = t;
             }
 
-            try {
-                mBase.evaluate();
-            } finally {
-                mLooper.destroy();
+            public Throwable getSource() {
+                return mSource;
             }
         }
     }
