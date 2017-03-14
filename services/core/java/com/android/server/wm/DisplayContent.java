@@ -73,18 +73,24 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STACK;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TOKEN_MOVEMENT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WALLPAPER;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WALLPAPER_LIGHT;
+import static com.android.server.wm.WindowManagerDebugConfig.SHOW_LIGHT_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_STACK_CRAWLS;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
+import static com.android.server.wm.WindowManagerService.CUSTOM_SCREEN_ROTATION;
 import static com.android.server.wm.WindowManagerService.H.SEND_NEW_CONFIGURATION;
 import static com.android.server.wm.WindowManagerService.H.UPDATE_DOCKED_STACK_DIVIDER;
 import static com.android.server.wm.WindowManagerService.H.WINDOW_HIDE_TIMEOUT;
 import static com.android.server.wm.WindowManagerService.LAYOUT_REPEAT_THRESHOLD;
+import static com.android.server.wm.WindowManagerService.MAX_ANIMATION_DURATION;
+import static com.android.server.wm.WindowManagerService.SEAMLESS_ROTATION_TIMEOUT_DURATION;
 import static com.android.server.wm.WindowManagerService.TYPE_LAYER_MULTIPLIER;
 import static com.android.server.wm.WindowManagerService.TYPE_LAYER_OFFSET;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_WILL_PLACE_SURFACES;
+import static com.android.server.wm.WindowManagerService.WINDOWS_FREEZING_SCREENS_ACTIVE;
 import static com.android.server.wm.WindowManagerService.WINDOWS_FREEZING_SCREENS_TIMEOUT;
+import static com.android.server.wm.WindowManagerService.WINDOW_FREEZE_TIMEOUT_DURATION;
 import static com.android.server.wm.WindowManagerService.dipToPixel;
 import static com.android.server.wm.WindowManagerService.logSurface;
 import static com.android.server.wm.WindowState.RESIZE_HANDLE_WIDTH_IN_DP;
@@ -94,6 +100,7 @@ import static com.android.server.wm.WindowSurfacePlacer.SET_WALLPAPER_MAY_CHANGE
 
 import android.annotation.NonNull;
 import android.app.ActivityManager.StackId;
+import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.GraphicBuffer;
@@ -113,6 +120,7 @@ import android.util.MutableBoolean;
 import android.util.Slog;
 import android.view.Display;
 import android.view.DisplayInfo;
+import android.view.InputDevice;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.WindowManagerPolicy;
@@ -181,12 +189,27 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     private final DisplayInfo mDisplayInfo = new DisplayInfo();
     private final Display mDisplay;
     private final DisplayMetrics mDisplayMetrics = new DisplayMetrics();
+    /**
+     * For default display it contains real metrics, empty for others.
+     * @see WindowManagerService#createWatermarkInTransaction()
+     */
+    final DisplayMetrics mRealDisplayMetrics = new DisplayMetrics();
+    /** @see #computeCompatSmallestWidth(boolean, int, int, int, int) */
+    private final DisplayMetrics mTmpDisplayMetrics = new DisplayMetrics();
+    /**
+     * Compat metrics computed based on {@link #mDisplayMetrics}.
+     * @see #updateDisplayAndOrientation(int)
+     */
+    private final DisplayMetrics mCompatDisplayMetrics = new DisplayMetrics();
+
+    /** The desired scaling factor for compatible apps. */
+    float mCompatibleScreenScale;
 
     /**
      * Current rotation of the display.
      * Constants as per {@link android.view.Surface.Rotation}.
      *
-     * @see WindowManagerService#updateRotationUncheckedLocked(boolean, int)
+     * @see #updateRotationUnchecked(boolean)
      */
     private int mRotation = 0;
     /**
@@ -200,7 +223,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * Flag indicating that the application is receiving an orientation that has different metrics
      * than it expected. E.g. Portrait instead of Landscape.
      *
-     * @see WindowManagerService#updateRotationUncheckedLocked(boolean, int)
+     * @see #updateRotationUnchecked(boolean)
      */
     private boolean mAltOrientation = false;
     /**
@@ -218,7 +241,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      */
     private int mLastKeyguardForcedOrientation = SCREEN_ORIENTATION_UNSPECIFIED;
 
-    Rect mBaseDisplayRect = new Rect();
+    private Rect mBaseDisplayRect = new Rect();
     private Rect mContentRect = new Rect();
 
     // Accessed directly by all users.
@@ -826,6 +849,514 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
     int getLastWindowForcedOrientation() {
         return mLastWindowForcedOrientation;
+    }
+
+    /**
+     * Update rotation of the display.
+     *
+     * Returns true if the rotation has been changed.  In this case YOU MUST CALL
+     * {@link WindowManagerService#sendNewConfiguration(int)} TO UNFREEZE THE SCREEN.
+     */
+    boolean updateRotationUnchecked(boolean inTransaction) {
+        if (mService.mDeferredRotationPauseCount > 0) {
+            // Rotation updates have been paused temporarily.  Defer the update until
+            // updates have been resumed.
+            if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Deferring rotation, rotation is paused.");
+            return false;
+        }
+
+        ScreenRotationAnimation screenRotationAnimation =
+                mService.mAnimator.getScreenRotationAnimationLocked(mDisplayId);
+        if (screenRotationAnimation != null && screenRotationAnimation.isAnimating()) {
+            // Rotation updates cannot be performed while the previous rotation change
+            // animation is still in progress.  Skip this update.  We will try updating
+            // again after the animation is finished and the display is unfrozen.
+            if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Deferring rotation, animation in progress.");
+            return false;
+        }
+        if (mService.mDisplayFrozen) {
+            // Even if the screen rotation animation has finished (e.g. isAnimating
+            // returns false), there is still some time where we haven't yet unfrozen
+            // the display. We also need to abort rotation here.
+            if (DEBUG_ORIENTATION) Slog.v(TAG_WM,
+                    "Deferring rotation, still finishing previous rotation");
+            return false;
+        }
+
+        if (!mService.mDisplayEnabled) {
+            // No point choosing a rotation if the display is not enabled.
+            if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Deferring rotation, display is not enabled.");
+            return false;
+        }
+
+        final int oldRotation = mRotation;
+        final int lastOrientation = mLastOrientation;
+        final boolean oldAltOrientation = mAltOrientation;
+        int rotation = mService.mPolicy.rotationForOrientationLw(lastOrientation, oldRotation);
+        final boolean rotateSeamlessly;
+
+        if (mService.mPolicy.shouldRotateSeamlessly(oldRotation, rotation)) {
+            final WindowState seamlessRotated = getWindow((w) -> w.mSeamlesslyRotated);
+            if (seamlessRotated != null) {
+                // We can't rotate (seamlessly or not) while waiting for the last seamless rotation
+                // to complete (that is, waiting for windows to redraw). It's tempting to check
+                // w.mSeamlessRotationCount but that could be incorrect in the case of
+                // window-removal.
+                return false;
+            }
+
+            final WindowState cantSeamlesslyRotate = getWindow((w) ->
+                    w.isChildWindow() && w.isVisibleNow()
+                            && !w.mWinAnimator.mSurfaceController.getTransformToDisplayInverse());
+            if (cantSeamlesslyRotate != null) {
+                // In what can only be called an unfortunate workaround we require seamlessly
+                // rotated child windows to have the TRANSFORM_TO_DISPLAY_INVERSE flag. Due to
+                // limitations in the client API, there is no way for the client to set this flag in
+                // a race free fashion. If we seamlessly rotate a window which does not have this
+                // flag, but then gains it, we will get an incorrect visual result
+                // (rotated viewfinder). This means if we want to support seamlessly rotating
+                // windows which could gain this flag, we can't rotate windows without it. This
+                // limits seamless rotation in N to camera framework users, windows without
+                // children, and native code. This is unfortunate but having the camera work is our
+                // primary goal.
+                rotateSeamlessly = false;
+            } else {
+                rotateSeamlessly = true;
+            }
+        } else {
+            rotateSeamlessly = false;
+        }
+
+        // TODO: Implement forced rotation changes.
+        //       Set mAltOrientation to indicate that the application is receiving
+        //       an orientation that has different metrics than it expected.
+        //       eg. Portrait instead of Landscape.
+
+        final boolean altOrientation = !mService.mPolicy.rotationHasCompatibleMetricsLw(
+                lastOrientation, rotation);
+
+        if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Selected orientation " + lastOrientation
+                + ", got rotation " + rotation + " which has "
+                + (altOrientation ? "incompatible" : "compatible") + " metrics");
+
+        if (oldRotation == rotation && oldAltOrientation == altOrientation) {
+            // No change.
+            return false;
+        }
+
+        if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Rotation changed to " + rotation
+                + (altOrientation ? " (alt)" : "") + " from " + oldRotation
+                + (oldAltOrientation ? " (alt)" : "") + ", lastOrientation=" + lastOrientation);
+
+        if (DisplayContent.deltaRotation(rotation, oldRotation) != 2) {
+            mService.mWaitingForConfig = true;
+        }
+
+        mRotation = rotation;
+        mAltOrientation = altOrientation;
+        if (isDefaultDisplay) {
+            mService.mPolicy.setRotationLw(rotation);
+        }
+
+        mService.mWindowsFreezingScreen = WINDOWS_FREEZING_SCREENS_ACTIVE;
+        mService.mH.removeMessages(WindowManagerService.H.WINDOW_FREEZE_TIMEOUT);
+        mService.mH.sendEmptyMessageDelayed(WindowManagerService.H.WINDOW_FREEZE_TIMEOUT,
+                WINDOW_FREEZE_TIMEOUT_DURATION);
+
+        setLayoutNeeded();
+        final int[] anim = new int[2];
+        if (isDimming()) {
+            anim[0] = anim[1] = 0;
+        } else {
+            mService.mPolicy.selectRotationAnimationLw(anim);
+        }
+
+        if (!rotateSeamlessly) {
+            mService.startFreezingDisplayLocked(inTransaction, anim[0], anim[1]);
+            // startFreezingDisplayLocked can reset the ScreenRotationAnimation.
+            screenRotationAnimation = mService.mAnimator.getScreenRotationAnimationLocked(
+                    mDisplayId);
+        } else {
+            // The screen rotation animation uses a screenshot to freeze the screen
+            // while windows resize underneath.
+            // When we are rotating seamlessly, we allow the elements to transition
+            // to their rotated state independently and without a freeze required.
+            screenRotationAnimation = null;
+
+            // We have to reset this in case a window was removed before it
+            // finished seamless rotation.
+            mService.mSeamlessRotationCount = 0;
+        }
+
+        // We need to update our screen size information to match the new rotation. If the rotation
+        // has actually changed then this method will return true and, according to the comment at
+        // the top of the method, the caller is obligated to call computeNewConfigurationLocked().
+        // By updating the Display info here it will be available to
+        // #computeScreenConfiguration() later.
+        updateDisplayAndOrientation(getConfiguration().uiMode);
+
+        if (!inTransaction) {
+            if (SHOW_TRANSACTIONS) {
+                Slog.i(TAG_WM, ">>> OPEN TRANSACTION setRotationUnchecked");
+            }
+            mService.openSurfaceTransaction();
+        }
+        try {
+            // NOTE: We disable the rotation in the emulator because
+            //       it doesn't support hardware OpenGL emulation yet.
+            if (CUSTOM_SCREEN_ROTATION && screenRotationAnimation != null
+                    && screenRotationAnimation.hasScreenshot()) {
+                if (screenRotationAnimation.setRotationInTransaction(
+                        rotation, mService.mFxSession,
+                        MAX_ANIMATION_DURATION, mService.getTransitionAnimationScaleLocked(),
+                        mDisplayInfo.logicalWidth, mDisplayInfo.logicalHeight)) {
+                    mService.scheduleAnimationLocked();
+                }
+            }
+
+            if (rotateSeamlessly) {
+                forAllWindows(w -> {
+                    w.mWinAnimator.seamlesslyRotateWindow(oldRotation, rotation);
+                }, true /* traverseTopToBottom */);
+            }
+
+            mService.mDisplayManagerInternal.performTraversalInTransactionFromWindowManager();
+        } finally {
+            if (!inTransaction) {
+                mService.closeSurfaceTransaction();
+                if (SHOW_LIGHT_TRANSACTIONS) {
+                    Slog.i(TAG_WM, "<<< CLOSE TRANSACTION setRotationUnchecked");
+                }
+            }
+        }
+
+        forAllWindows(w -> {
+            // Discard surface after orientation change, these can't be reused.
+            if (w.mAppToken != null) {
+                w.mAppToken.destroySavedSurfaces();
+            }
+            if (w.mHasSurface && !rotateSeamlessly) {
+                if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Set mOrientationChanging of " + w);
+                w.mOrientationChanging = true;
+                mService.mRoot.mOrientationChangeComplete = false;
+                w.mLastFreezeDuration = 0;
+            }
+            w.mReportOrientationChanged = true;
+        }, true /* traverseTopToBottom */);
+
+        if (rotateSeamlessly) {
+            mService.mH.removeMessages(WindowManagerService.H.SEAMLESS_ROTATION_TIMEOUT);
+            mService.mH.sendEmptyMessageDelayed(WindowManagerService.H.SEAMLESS_ROTATION_TIMEOUT,
+                    SEAMLESS_ROTATION_TIMEOUT_DURATION);
+        }
+
+        for (int i = mService.mRotationWatchers.size() - 1; i >= 0; i--) {
+            final WindowManagerService.RotationWatcher rotationWatcher
+                    = mService.mRotationWatchers.get(i);
+            if (rotationWatcher.mDisplayId == mDisplayId) {
+                try {
+                    rotationWatcher.mWatcher.onRotationChanged(rotation);
+                } catch (RemoteException e) {
+                    // Ignore
+                }
+            }
+        }
+
+        // TODO (multi-display): Magnification is supported only for the default display.
+        // Announce rotation only if we will not animate as we already have the
+        // windows in final state. Otherwise, we make this call at the rotation end.
+        if (screenRotationAnimation == null && mService.mAccessibilityController != null
+                && isDefaultDisplay) {
+            mService.mAccessibilityController.onRotationChangedLocked(this);
+        }
+
+        return true;
+    }
+
+    /**
+     * Update {@link #mDisplayInfo} and other internal variables when display is rotated or config
+     * changed.
+     * Do not call if {@link WindowManagerService#mDisplayReady} == false.
+     */
+    private DisplayInfo updateDisplayAndOrientation(int uiMode) {
+        // Use the effective "visual" dimensions based on current rotation
+        final boolean rotated = (mRotation == ROTATION_90 || mRotation == ROTATION_270);
+        final int realdw = rotated ? mBaseDisplayHeight : mBaseDisplayWidth;
+        final int realdh = rotated ? mBaseDisplayWidth : mBaseDisplayHeight;
+        int dw = realdw;
+        int dh = realdh;
+
+        if (mAltOrientation) {
+            if (realdw > realdh) {
+                // Turn landscape into portrait.
+                int maxw = (int)(realdh/1.3f);
+                if (maxw < realdw) {
+                    dw = maxw;
+                }
+            } else {
+                // Turn portrait into landscape.
+                int maxh = (int)(realdw/1.3f);
+                if (maxh < realdh) {
+                    dh = maxh;
+                }
+            }
+        }
+
+        // Update application display metrics.
+        final int appWidth = mService.mPolicy.getNonDecorDisplayWidth(dw, dh, mRotation, uiMode,
+                mDisplayId);
+        final int appHeight = mService.mPolicy.getNonDecorDisplayHeight(dw, dh, mRotation, uiMode,
+                mDisplayId);
+        mDisplayInfo.rotation = mRotation;
+        mDisplayInfo.logicalWidth = dw;
+        mDisplayInfo.logicalHeight = dh;
+        mDisplayInfo.logicalDensityDpi = mBaseDisplayDensity;
+        mDisplayInfo.appWidth = appWidth;
+        mDisplayInfo.appHeight = appHeight;
+        if (isDefaultDisplay) {
+            mDisplayInfo.getLogicalMetrics(mRealDisplayMetrics,
+                    CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO, null);
+        }
+        mDisplayInfo.getAppMetrics(mDisplayMetrics);
+        if (mDisplayScalingDisabled) {
+            mDisplayInfo.flags |= Display.FLAG_SCALING_DISABLED;
+        } else {
+            mDisplayInfo.flags &= ~Display.FLAG_SCALING_DISABLED;
+        }
+
+        mService.mDisplayManagerInternal.setDisplayInfoOverrideFromWindowManager(mDisplayId,
+                mDisplayInfo);
+
+        mBaseDisplayRect.set(0, 0, dw, dh);
+
+        if (isDefaultDisplay) {
+            mCompatibleScreenScale = CompatibilityInfo.computeCompatibleScaling(mDisplayMetrics,
+                    mCompatDisplayMetrics);
+        }
+        return mDisplayInfo;
+    }
+
+    /**
+     * Compute display configuration based on display properties and policy settings.
+     * Do not call if mDisplayReady == false.
+     */
+    void computeScreenConfiguration(Configuration config) {
+        final DisplayInfo displayInfo = updateDisplayAndOrientation(config.uiMode);
+
+        final int dw = displayInfo.logicalWidth;
+        final int dh = displayInfo.logicalHeight;
+        config.orientation = (dw <= dh) ? Configuration.ORIENTATION_PORTRAIT :
+                Configuration.ORIENTATION_LANDSCAPE;
+        config.screenWidthDp =
+                (int)(mService.mPolicy.getConfigDisplayWidth(dw, dh, displayInfo.rotation,
+                        config.uiMode, mDisplayId) / mDisplayMetrics.density);
+        config.screenHeightDp =
+                (int)(mService.mPolicy.getConfigDisplayHeight(dw, dh, displayInfo.rotation,
+                        config.uiMode, mDisplayId) / mDisplayMetrics.density);
+        final boolean rotated = (displayInfo.rotation == Surface.ROTATION_90
+                || displayInfo.rotation == Surface.ROTATION_270);
+
+        computeSizeRangesAndScreenLayout(displayInfo, mDisplayId, rotated, config.uiMode, dw, dh,
+                mDisplayMetrics.density, config);
+
+        config.screenLayout = (config.screenLayout & ~Configuration.SCREENLAYOUT_ROUND_MASK)
+                | ((displayInfo.flags & Display.FLAG_ROUND) != 0
+                ? Configuration.SCREENLAYOUT_ROUND_YES
+                : Configuration.SCREENLAYOUT_ROUND_NO);
+
+        config.compatScreenWidthDp = (int)(config.screenWidthDp / mCompatibleScreenScale);
+        config.compatScreenHeightDp = (int)(config.screenHeightDp / mCompatibleScreenScale);
+        config.compatSmallestScreenWidthDp = computeCompatSmallestWidth(rotated, config.uiMode, dw,
+                dh, mDisplayId);
+        config.densityDpi = displayInfo.logicalDensityDpi;
+
+        config.colorMode =
+                (displayInfo.isHdr()
+                        ? Configuration.COLOR_MODE_HDR_YES
+                        : Configuration.COLOR_MODE_HDR_NO)
+                        | (displayInfo.isWideColorGamut()
+                        ? Configuration.COLOR_MODE_WIDE_COLOR_GAMUT_YES
+                        : Configuration.COLOR_MODE_WIDE_COLOR_GAMUT_NO);
+
+        // Update the configuration based on available input devices, lid switch,
+        // and platform configuration.
+        config.touchscreen = Configuration.TOUCHSCREEN_NOTOUCH;
+        config.keyboard = Configuration.KEYBOARD_NOKEYS;
+        config.navigation = Configuration.NAVIGATION_NONAV;
+
+        int keyboardPresence = 0;
+        int navigationPresence = 0;
+        final InputDevice[] devices = mService.mInputManager.getInputDevices();
+        final int len = devices != null ? devices.length : 0;
+        for (int i = 0; i < len; i++) {
+            InputDevice device = devices[i];
+            if (!device.isVirtual()) {
+                final int sources = device.getSources();
+                final int presenceFlag = device.isExternal() ?
+                        WindowManagerPolicy.PRESENCE_EXTERNAL :
+                        WindowManagerPolicy.PRESENCE_INTERNAL;
+
+                // TODO(multi-display): Configure on per-display basis.
+                if (mService.mIsTouchDevice) {
+                    if ((sources & InputDevice.SOURCE_TOUCHSCREEN) ==
+                            InputDevice.SOURCE_TOUCHSCREEN) {
+                        config.touchscreen = Configuration.TOUCHSCREEN_FINGER;
+                    }
+                } else {
+                    config.touchscreen = Configuration.TOUCHSCREEN_NOTOUCH;
+                }
+
+                if ((sources & InputDevice.SOURCE_TRACKBALL) == InputDevice.SOURCE_TRACKBALL) {
+                    config.navigation = Configuration.NAVIGATION_TRACKBALL;
+                    navigationPresence |= presenceFlag;
+                } else if ((sources & InputDevice.SOURCE_DPAD) == InputDevice.SOURCE_DPAD
+                        && config.navigation == Configuration.NAVIGATION_NONAV) {
+                    config.navigation = Configuration.NAVIGATION_DPAD;
+                    navigationPresence |= presenceFlag;
+                }
+
+                if (device.getKeyboardType() == InputDevice.KEYBOARD_TYPE_ALPHABETIC) {
+                    config.keyboard = Configuration.KEYBOARD_QWERTY;
+                    keyboardPresence |= presenceFlag;
+                }
+            }
+        }
+
+        if (config.navigation == Configuration.NAVIGATION_NONAV && mService.mHasPermanentDpad) {
+            config.navigation = Configuration.NAVIGATION_DPAD;
+            navigationPresence |= WindowManagerPolicy.PRESENCE_INTERNAL;
+        }
+
+        // Determine whether a hard keyboard is available and enabled.
+        // TODO(multi-display): Should the hardware keyboard be tied to a display or to a device?
+        boolean hardKeyboardAvailable = config.keyboard != Configuration.KEYBOARD_NOKEYS;
+        if (hardKeyboardAvailable != mService.mHardKeyboardAvailable) {
+            mService.mHardKeyboardAvailable = hardKeyboardAvailable;
+            mService.mH.removeMessages(WindowManagerService.H.REPORT_HARD_KEYBOARD_STATUS_CHANGE);
+            mService.mH.sendEmptyMessage(WindowManagerService.H.REPORT_HARD_KEYBOARD_STATUS_CHANGE);
+        }
+
+        // Let the policy update hidden states.
+        config.keyboardHidden = Configuration.KEYBOARDHIDDEN_NO;
+        config.hardKeyboardHidden = Configuration.HARDKEYBOARDHIDDEN_NO;
+        config.navigationHidden = Configuration.NAVIGATIONHIDDEN_NO;
+        mService.mPolicy.adjustConfigurationLw(config, keyboardPresence, navigationPresence);
+    }
+
+    private int computeCompatSmallestWidth(boolean rotated, int uiMode, int dw, int dh,
+            int displayId) {
+        mTmpDisplayMetrics.setTo(mDisplayMetrics);
+        final DisplayMetrics tmpDm = mTmpDisplayMetrics;
+        final int unrotDw, unrotDh;
+        if (rotated) {
+            unrotDw = dh;
+            unrotDh = dw;
+        } else {
+            unrotDw = dw;
+            unrotDh = dh;
+        }
+        int sw = reduceCompatConfigWidthSize(0, Surface.ROTATION_0, uiMode, tmpDm, unrotDw, unrotDh,
+                displayId);
+        sw = reduceCompatConfigWidthSize(sw, Surface.ROTATION_90, uiMode, tmpDm, unrotDh, unrotDw,
+                displayId);
+        sw = reduceCompatConfigWidthSize(sw, Surface.ROTATION_180, uiMode, tmpDm, unrotDw, unrotDh,
+                displayId);
+        sw = reduceCompatConfigWidthSize(sw, Surface.ROTATION_270, uiMode, tmpDm, unrotDh, unrotDw,
+                displayId);
+        return sw;
+    }
+
+    private int reduceCompatConfigWidthSize(int curSize, int rotation, int uiMode,
+            DisplayMetrics dm, int dw, int dh, int displayId) {
+        dm.noncompatWidthPixels = mService.mPolicy.getNonDecorDisplayWidth(dw, dh, rotation, uiMode,
+                displayId);
+        dm.noncompatHeightPixels = mService.mPolicy.getNonDecorDisplayHeight(dw, dh, rotation,
+                uiMode, displayId);
+        float scale = CompatibilityInfo.computeCompatibleScaling(dm, null);
+        int size = (int)(((dm.noncompatWidthPixels / scale) / dm.density) + .5f);
+        if (curSize == 0 || size < curSize) {
+            curSize = size;
+        }
+        return curSize;
+    }
+
+    private void computeSizeRangesAndScreenLayout(DisplayInfo displayInfo, int displayId,
+            boolean rotated, int uiMode, int dw, int dh, float density, Configuration outConfig) {
+
+        // We need to determine the smallest width that will occur under normal
+        // operation.  To this, start with the base screen size and compute the
+        // width under the different possible rotations.  We need to un-rotate
+        // the current screen dimensions before doing this.
+        int unrotDw, unrotDh;
+        if (rotated) {
+            unrotDw = dh;
+            unrotDh = dw;
+        } else {
+            unrotDw = dw;
+            unrotDh = dh;
+        }
+        displayInfo.smallestNominalAppWidth = 1<<30;
+        displayInfo.smallestNominalAppHeight = 1<<30;
+        displayInfo.largestNominalAppWidth = 0;
+        displayInfo.largestNominalAppHeight = 0;
+        adjustDisplaySizeRanges(displayInfo, displayId, Surface.ROTATION_0, uiMode, unrotDw,
+                unrotDh);
+        adjustDisplaySizeRanges(displayInfo, displayId, Surface.ROTATION_90, uiMode, unrotDh,
+                unrotDw);
+        adjustDisplaySizeRanges(displayInfo, displayId, Surface.ROTATION_180, uiMode, unrotDw,
+                unrotDh);
+        adjustDisplaySizeRanges(displayInfo, displayId, Surface.ROTATION_270, uiMode, unrotDh,
+                unrotDw);
+        int sl = Configuration.resetScreenLayout(outConfig.screenLayout);
+        sl = reduceConfigLayout(sl, Surface.ROTATION_0, density, unrotDw, unrotDh, uiMode,
+                displayId);
+        sl = reduceConfigLayout(sl, Surface.ROTATION_90, density, unrotDh, unrotDw, uiMode,
+                displayId);
+        sl = reduceConfigLayout(sl, Surface.ROTATION_180, density, unrotDw, unrotDh, uiMode,
+                displayId);
+        sl = reduceConfigLayout(sl, Surface.ROTATION_270, density, unrotDh, unrotDw, uiMode,
+                displayId);
+        outConfig.smallestScreenWidthDp = (int)(displayInfo.smallestNominalAppWidth / density);
+        outConfig.screenLayout = sl;
+    }
+
+    private int reduceConfigLayout(int curLayout, int rotation, float density, int dw, int dh,
+            int uiMode, int displayId) {
+        // Get the app screen size at this rotation.
+        int w = mService.mPolicy.getNonDecorDisplayWidth(dw, dh, rotation, uiMode, displayId);
+        int h = mService.mPolicy.getNonDecorDisplayHeight(dw, dh, rotation, uiMode, displayId);
+
+        // Compute the screen layout size class for this rotation.
+        int longSize = w;
+        int shortSize = h;
+        if (longSize < shortSize) {
+            int tmp = longSize;
+            longSize = shortSize;
+            shortSize = tmp;
+        }
+        longSize = (int)(longSize/density);
+        shortSize = (int)(shortSize/density);
+        return Configuration.reduceScreenLayout(curLayout, longSize, shortSize);
+    }
+
+    private void adjustDisplaySizeRanges(DisplayInfo displayInfo, int displayId, int rotation,
+            int uiMode, int dw, int dh) {
+        final int width = mService.mPolicy.getConfigDisplayWidth(dw, dh, rotation, uiMode,
+                displayId);
+        if (width < displayInfo.smallestNominalAppWidth) {
+            displayInfo.smallestNominalAppWidth = width;
+        }
+        if (width > displayInfo.largestNominalAppWidth) {
+            displayInfo.largestNominalAppWidth = width;
+        }
+        final int height = mService.mPolicy.getConfigDisplayHeight(dw, dh, rotation, uiMode,
+                displayId);
+        if (height < displayInfo.smallestNominalAppHeight) {
+            displayInfo.smallestNominalAppHeight = height;
+        }
+        if (height > displayInfo.largestNominalAppHeight) {
+            displayInfo.largestNominalAppHeight = height;
+        }
     }
 
     DockedStackDividerController getDockedDividerController() {

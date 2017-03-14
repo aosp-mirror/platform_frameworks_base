@@ -1273,8 +1273,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     void prelayout() {
         if (mEnforceSizeCompat) {
-            mGlobalScale = mService.mCompatibleScreenScale;
-            mInvGlobalScale = 1/mGlobalScale;
+            mGlobalScale = getDisplayContent().mCompatibleScreenScale;
+            mInvGlobalScale = 1 / mGlobalScale;
         } else {
             mGlobalScale = mInvGlobalScale = 1;
         }
