@@ -78,14 +78,12 @@ public final class AutofillServiceInfo {
             // TODO(b/35956626): inline newSettingsActivity once clients migrate
             final String newSettingsActivity =
                     metaDataArray.getString(R.styleable.AutofillService_settingsActivity);
-            System.out.println(">>> NEW CRAP MAN: " + newSettingsActivity); // TODO(felipeal): tmp
             if (newSettingsActivity != null) {
                 mSettingsActivity = newSettingsActivity;
             } else {
                 mSettingsActivity =
                         metaDataArray.getString(R.styleable.AutoFillService_settingsActivity);
             }
-            System.out.println(">>> FINAL CRAP MAN: " + mSettingsActivity); // TODO(felipeal): tmp
             metaDataArray.recycle();
         } else {
             mSettingsActivity = null;

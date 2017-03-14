@@ -373,8 +373,7 @@ public final class StorageVolume implements Parcelable {
     }
 
     /** {@hide} */
-    // TODO(b/26742218): find out where toString() is called internally and replace these calls by
-    // dump().
+    // TODO: find out where toString() is called internally and replace these calls by dump().
     public String dump() {
         final CharArrayWriter writer = new CharArrayWriter();
         dump(new IndentingPrintWriter(writer, "    ", 80));
