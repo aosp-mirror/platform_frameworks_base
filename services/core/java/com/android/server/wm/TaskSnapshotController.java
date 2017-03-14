@@ -17,11 +17,16 @@
 package com.android.server.wm;
 
 import static android.app.ActivityManager.ENABLE_TASK_SNAPSHOTS;
+import static android.graphics.GraphicBuffer.USAGE_HW_TEXTURE;
+import static android.graphics.GraphicBuffer.USAGE_SW_READ_NEVER;
+import static android.graphics.GraphicBuffer.USAGE_SW_WRITE_RARELY;
+import static android.graphics.PixelFormat.RGBA_8888;
 
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManager.StackId;
 import android.app.ActivityManager.TaskSnapshot;
+import android.graphics.Canvas;
 import android.graphics.GraphicBuffer;
 import android.os.Environment;
 import android.util.ArraySet;
@@ -47,6 +52,26 @@ import java.io.PrintWriter;
  * To access this class, acquire the global window manager lock.
  */
 class TaskSnapshotController {
+
+    /**
+     * Return value for {@link #getSnapshotMode}: We are allowed to take a real screenshot to be
+     * used as the snapshot.
+     */
+    @VisibleForTesting
+    static final int SNAPSHOT_MODE_REAL = 0;
+
+    /**
+     * Return value for {@link #getSnapshotMode}: We are not allowed to take a real screenshot but
+     * we should try to use the app theme to create a dummy representation of the app.
+     */
+    @VisibleForTesting
+    static final int SNAPSHOT_MODE_APP_THEME = 1;
+
+    /**
+     * Return value for {@link #getSnapshotMode}: We aren't allowed to take any snapshot.
+     */
+    @VisibleForTesting
+    static final int SNAPSHOT_MODE_NONE = 2;
 
     private final WindowManagerService mService;
 
@@ -88,10 +113,21 @@ class TaskSnapshotController {
         getClosingTasks(closingApps, mTmpTasks);
         for (int i = mTmpTasks.size() - 1; i >= 0; i--) {
             final Task task = mTmpTasks.valueAt(i);
-            if (!canSnapshotTask(task)) {
-                continue;
+            final int mode = getSnapshotMode(task);
+            final TaskSnapshot snapshot;
+            switch (mode) {
+                case SNAPSHOT_MODE_NONE:
+                    continue;
+                case SNAPSHOT_MODE_APP_THEME:
+                    snapshot = drawAppThemeSnapshot(task);
+                    break;
+                case SNAPSHOT_MODE_REAL:
+                    snapshot = snapshotTask(task);
+                    break;
+                default:
+                    snapshot = null;
+                    break;
             }
-            final TaskSnapshot snapshot = snapshotTask(task);
             if (snapshot != null) {
                 mCache.putSnapshot(task, snapshot);
                 mPersister.persistSnapshot(task.mTaskId, task.mUserId, snapshot);
@@ -153,12 +189,42 @@ class TaskSnapshotController {
     }
 
     @VisibleForTesting
-    boolean canSnapshotTask(Task task) {
-        // TODO: Figure out what happens when snapshots are disabled. Can we draw a splash screen
-        // instead?
+    int getSnapshotMode(Task task) {
         final AppWindowToken topChild = task.getTopChild();
-        return !StackId.isHomeOrRecentsStack(task.mStack.mStackId)
-                && topChild != null && !topChild.shouldDisablePreviewScreenshots();
+        if (StackId.isHomeOrRecentsStack(task.mStack.mStackId)) {
+            return SNAPSHOT_MODE_NONE;
+        } else if (topChild != null && topChild.shouldDisablePreviewScreenshots()) {
+            return SNAPSHOT_MODE_APP_THEME;
+        } else {
+            return SNAPSHOT_MODE_REAL;
+        }
+    }
+
+    /**
+     * If we are not allowed to take a real screenshot, this attempts to represent the app as best
+     * as possible by using the theme's window background.
+     */
+    private TaskSnapshot drawAppThemeSnapshot(Task task) {
+        final AppWindowToken topChild = task.getTopChild();
+        if (topChild == null) {
+            return null;
+        }
+        final WindowState mainWindow = topChild.findMainWindow();
+        if (mainWindow == null) {
+            return null;
+        }
+        final int color = task.getTaskDescription().getBackgroundColor();
+        final GraphicBuffer buffer = GraphicBuffer.create(mainWindow.getFrameLw().width(),
+                mainWindow.getFrameLw().height(),
+                RGBA_8888, USAGE_HW_TEXTURE | USAGE_SW_WRITE_RARELY | USAGE_SW_READ_NEVER);
+        if (buffer == null) {
+            return null;
+        }
+        final Canvas c = buffer.lockCanvas();
+        c.drawColor(color);
+        buffer.unlockCanvasAndPost(c);
+        return new TaskSnapshot(buffer, topChild.getConfiguration().orientation,
+                mainWindow.mStableInsets, false /* reduced */, 1.0f /* scale */);
     }
 
     /**
