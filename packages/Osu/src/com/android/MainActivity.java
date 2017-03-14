@@ -246,6 +246,8 @@ public class MainActivity extends Activity {
                 case WifiManager.SCAN_RESULTS_AVAILABLE_ACTION:
                     mOsuManager.pushScanResults(wifiManager.getScanResults());
                     break;
+                // TODO(b/32883320): use updated intent.
+                /*
                 case WifiManager.PASSPOINT_WNM_FRAME_RECEIVED_ACTION:
                     long bssid = bundle.getLong(WifiManager.EXTRA_PASSPOINT_WNM_BSSID);
                     String url = bundle.getString(WifiManager.EXTRA_PASSPOINT_WNM_URL);
@@ -282,6 +284,7 @@ public class MainActivity extends Activity {
                             bundle.getString(WifiManager.EXTRA_PASSPOINT_ICON_FILE),
                             bundle.getByteArray(WifiManager.EXTRA_PASSPOINT_ICON_DATA));
                     break;
+                */
                 case WifiManager.CONFIGURED_NETWORKS_CHANGED_ACTION:
                     mOsuManager.networkConfigChange((WifiConfiguration)
                             intent.getParcelableExtra(WifiManager.EXTRA_WIFI_CONFIGURATION));
