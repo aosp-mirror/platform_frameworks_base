@@ -436,6 +436,18 @@ public abstract class Connection extends Conferenceable {
             "android.telecom.extra.ANSWERING_DROPS_FG_CALL";
 
     /**
+     * String connection extra key set on a {@link Connection} in {@link Connection#STATE_RINGING}
+     * state to indicate the name of the third-party app which is responsible for the current
+     * foreground call.
+     * <p>
+     * Used when {@link #EXTRA_ANSWERING_DROPS_FG_CALL} is true to ensure that the default Phone app
+     * is able to inform the user that answering the new incoming call will cause a call owned by
+     * another app to be dropped when the incoming call is answered.
+     */
+    public static final String EXTRA_ANSWERING_DROPS_FG_CALL_APP_NAME =
+            "android.telecom.extra.ANSWERING_DROPS_FG_CALL_APP_NAME";
+
+    /**
      * Boolean connection extra key on a {@link Connection} which indicates that adding an
      * additional call is disallowed.
      * @hide
