@@ -157,12 +157,6 @@ public final class AutofillValue implements Parcelable {
         }
     }
 
-    /** @hide */
-    public String coerceToString() {
-        // TODO(b/33197203): How can we filter on toggles or list values?
-        return mValue.toString();
-    }
-
     @Override
     public String toString() {
         if (!DEBUG) return super.toString();

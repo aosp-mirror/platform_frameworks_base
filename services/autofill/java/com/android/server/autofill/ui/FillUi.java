@@ -113,8 +113,13 @@ final class FillUi {
                         Slog.e(TAG, "Error inflating remote views", e);
                         continue;
                     }
-                    items.add(new ViewItem(dataset, value.coerceToString()
-                            .toLowerCase(), view));
+
+                    String valueText = null;
+                    if (value.isText()) {
+                        valueText = value.getTextValue().toString().toLowerCase();
+                    }
+
+                    items.add(new ViewItem(dataset, valueText, view));
                 }
             }
 
@@ -134,7 +139,13 @@ final class FillUi {
                 mCallback.onDatasetPicked(vi.getDataset());
             });
 
-            filter(filterText);
+            if (filterText == null) {
+                mFilterText = null;
+            } else {
+                mFilterText = filterText.toLowerCase();
+            }
+
+            applyNewFilterText();
             mWindow = new AnchoredWindow(windowToken, mListView);
         }
     }
@@ -147,16 +158,8 @@ final class FillUi {
         }
     }
 
-    public void filter(@Nullable String filterText) {
-        throwIfDestroyed();
-        if (mAdapter == null) {
-            return;
-        }
-        if (Objects.equal(mFilterText, filterText)) {
-            return;
-        }
-        mFilterText = filterText;
-        mAdapter.getFilter().filter(filterText, (count) -> {
+    private void applyNewFilterText() {
+        mAdapter.getFilter().filter(mFilterText, (count) -> {
             if (mDestroyed) {
                 return;
             }
@@ -174,6 +177,26 @@ final class FillUi {
                 }
             }
         });
+    }
+
+    public void setFilterText(@Nullable String filterText) {
+        throwIfDestroyed();
+        if (mAdapter == null) {
+            return;
+        }
+
+        if (filterText == null) {
+            filterText = null;
+        } else {
+            filterText = filterText.toLowerCase();
+        }
+
+        if (Objects.equal(mFilterText, filterText)) {
+            return;
+        }
+        mFilterText = filterText;
+
+        applyNewFilterText();
     }
 
     public void destroy() {
@@ -235,7 +258,7 @@ final class FillUi {
 
         ViewItem(Dataset dataset, String value, View view) {
             mDataset = dataset;
-            mValue = value.toLowerCase();
+            mValue = value;
             mView = view;
         }
 

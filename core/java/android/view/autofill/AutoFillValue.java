@@ -89,11 +89,6 @@ public final class AutoFillValue implements Parcelable {
         return mRealValue.equals(other.mRealValue);
     }
 
-    /** @hide */
-    public String coerceToString() {
-        return mRealValue.coerceToString();
-    }
-
     @Override
     public String toString() {
         if (!DEBUG) return super.toString();
