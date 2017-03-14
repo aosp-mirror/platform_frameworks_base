@@ -239,30 +239,38 @@ namespace PaintGlue {
         return result;
     }
 
-    static jint doTextRunCursor(JNIEnv *env, Paint* paint, const jchar *text, jint start,
-            jint count, jint flags, jint offset, jint opt) {
+    static jint doTextRunCursor(JNIEnv *env, Paint* paint, Typeface* typeface, const jchar *text,
+            jint start, jint count, jint dir, jint offset, jint opt) {
         minikin::GraphemeBreak::MoveOpt moveOpt = minikin::GraphemeBreak::MoveOpt(opt);
-        size_t result = minikin::GraphemeBreak::getTextRunCursor(text, start, count, offset,
-                moveOpt);
+        int bidiFlags = dir == 1 ? minikin::kBidi_Force_RTL : minikin::kBidi_Force_LTR;
+        std::unique_ptr<float[]> advancesArray(new float[count]);
+        MinikinUtils::measureText(paint, bidiFlags, typeface, text, start, count, start + count,
+                advancesArray.get());
+        size_t result = minikin::GraphemeBreak::getTextRunCursor(advancesArray.get(), text,
+                start, count, offset, moveOpt);
         return static_cast<jint>(result);
     }
 
-    static jint getTextRunCursor___C(JNIEnv* env, jobject clazz, jlong paintHandle, jcharArray text,
-            jint contextStart, jint contextCount, jint dir, jint offset, jint cursorOpt) {
+    static jint getTextRunCursor___C(JNIEnv* env, jobject clazz, jlong paintHandle,
+            jlong typefaceHandle, jcharArray text, jint contextStart, jint contextCount, jint dir,
+            jint offset, jint cursorOpt) {
         Paint* paint = reinterpret_cast<Paint*>(paintHandle);
+        Typeface* typeface = reinterpret_cast<Typeface*>(typefaceHandle);
         jchar* textArray = env->GetCharArrayElements(text, nullptr);
-        jint result = doTextRunCursor(env, paint, textArray, contextStart, contextCount, dir,
-                offset, cursorOpt);
+        jint result = doTextRunCursor(env, paint, typeface, textArray,
+                contextStart, contextCount, dir, offset, cursorOpt);
         env->ReleaseCharArrayElements(text, textArray, JNI_ABORT);
         return result;
     }
 
-    static jint getTextRunCursor__String(JNIEnv* env, jobject clazz, jlong paintHandle, jstring text,
-            jint contextStart, jint contextEnd, jint dir, jint offset, jint cursorOpt) {
+    static jint getTextRunCursor__String(JNIEnv* env, jobject clazz, jlong paintHandle,
+            jlong typefaceHandle, jstring text, jint contextStart, jint contextEnd, jint dir,
+            jint offset, jint cursorOpt) {
         Paint* paint = reinterpret_cast<Paint*>(paintHandle);
+        Typeface* typeface = reinterpret_cast<Typeface*>(typefaceHandle);
         const jchar* textArray = env->GetStringChars(text, nullptr);
-        jint result = doTextRunCursor(env, paint, textArray, contextStart,
-                contextEnd - contextStart, dir, offset, cursorOpt);
+        jint result = doTextRunCursor(env, paint, typeface, textArray,
+                contextStart, contextEnd - contextStart, dir, offset, cursorOpt);
         env->ReleaseStringChars(text, textArray);
         return result;
     }
@@ -983,8 +991,8 @@ static const JNINativeMethod methods[] = {
     {"nGetTextAdvances","(JJLjava/lang/String;IIIII[FI)F",
             (void*) PaintGlue::getTextAdvances__StringIIIII_FI},
 
-    {"nGetTextRunCursor", "(J[CIIIII)I", (void*) PaintGlue::getTextRunCursor___C},
-    {"nGetTextRunCursor", "(JLjava/lang/String;IIIII)I",
+    {"nGetTextRunCursor", "(JJ[CIIIII)I", (void*) PaintGlue::getTextRunCursor___C},
+    {"nGetTextRunCursor", "(JJLjava/lang/String;IIIII)I",
             (void*) PaintGlue::getTextRunCursor__String},
     {"nGetTextPath", "(JJI[CIIFFJ)V", (void*) PaintGlue::getTextPath___C},
     {"nGetTextPath", "(JJILjava/lang/String;IIFFJ)V", (void*) PaintGlue::getTextPath__String},

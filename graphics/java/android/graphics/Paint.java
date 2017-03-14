@@ -2294,7 +2294,7 @@ public class Paint {
             throw new IndexOutOfBoundsException();
         }
 
-        return nGetTextRunCursor(mNativePaint, text,
+        return nGetTextRunCursor(mNativePaint, mNativeTypeface, text,
                 contextStart, contextLength, dir, offset, cursorOpt);
     }
 
@@ -2380,7 +2380,7 @@ public class Paint {
             throw new IndexOutOfBoundsException();
         }
 
-        return nGetTextRunCursor(mNativePaint, text,
+        return nGetTextRunCursor(mNativePaint, mNativeTypeface, text,
                 contextStart, contextEnd, dir, offset, cursorOpt);
     }
 
@@ -2686,9 +2686,9 @@ public class Paint {
     private static native float nGetTextAdvances(long paintPtr, long typefacePtr,
             String text, int start, int end, int contextStart, int contextEnd,
             int bidiFlags, float[] advances, int advancesIndex);
-    private native int nGetTextRunCursor(long paintPtr, char[] text,
+    private native int nGetTextRunCursor(long paintPtr, long typefacePtr, char[] text,
             int contextStart, int contextLength, int dir, int offset, int cursorOpt);
-    private native int nGetTextRunCursor(long paintPtr, String text,
+    private native int nGetTextRunCursor(long paintPtr, long typefacePtr, String text,
             int contextStart, int contextEnd, int dir, int offset, int cursorOpt);
     private static native void nGetTextPath(long paintPtr, long typefacePtr,
             int bidiFlags, char[] text, int index, int count, float x, float y, long path);
