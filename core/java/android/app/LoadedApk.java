@@ -608,6 +608,11 @@ public final class LoadedApk {
 
         VMRuntime.registerAppInfo(profileFile.getPath(),
                 codePaths.toArray(new String[codePaths.size()]));
+
+        // Register the app data directory with the reporter. It will
+        // help deciding whether or not a dex file is the primary apk or a
+        // secondary dex.
+        DexLoadReporter.getInstance().registerAppDataDir(mPackageName, mDataDir);
     }
 
     /**
