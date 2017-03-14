@@ -6027,7 +6027,8 @@ public class BatteryStatsImpl extends BatteryStats {
          * Clear all stats for this uid.  Returns true if the uid is completely
          * inactive so can be dropped.
          */
-        boolean reset() {
+        @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+        public boolean reset() {
             boolean active = false;
 
             if (mWifiRunningTimer != null) {
@@ -6968,7 +6969,10 @@ public class BatteryStatsImpl extends BatteryStats {
 
             boolean reset() {
                 if (mBgCounter != null) {
-                    mBgCounter.reset(true);
+                    mBgCounter.reset(true /*detachIfReset*/);
+                    // If we detach, we must null the mBgCounter reference so that it
+                    // can be recreated and attached.
+                    mBgCounter = null;
                 }
                 if (mTimer.reset(true)) {
                     mTimer = null;
