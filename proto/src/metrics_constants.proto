@@ -3601,6 +3601,9 @@ message MetricsEvent {
     // FIELD: Settings inline search result value
     FIELD_SETTINGS_SEARCH_INLINE_RESULT_VALUE = 880;
 
+    // ACTION: Settings > Search > Click saved queries
+    ACTION_CLICK_SETTINGS_SEARCH_SAVED_QUERY = 881;
+
     // ---- End O Constants, all O constants go above this line ----
 
     // Add new aosp constants above this line.
