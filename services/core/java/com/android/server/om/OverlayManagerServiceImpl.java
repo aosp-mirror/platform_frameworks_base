@@ -325,13 +325,11 @@ final class OverlayManagerServiceImpl {
             // Disable all other overlays.
             allOverlays.remove(oi);
             for (int i = 0; i < allOverlays.size(); i++) {
-                mSettings.setEnabled(allOverlays.get(i).packageName, userId, false);
+                // TODO: Optimize this to only send updates after all changes.
+                setEnabled(allOverlays.get(i).packageName, false, userId);
             }
 
-            final PackageInfo targetPackage =
-                    mPackageManager.getPackageInfo(oi.targetPackageName, userId);
-            mSettings.setEnabled(packageName, userId, enable);
-            updateState(targetPackage, overlayPackage, userId);
+            setEnabled(packageName, enable, userId);
             return true;
         } catch (OverlayManagerSettings.BadKeyException e) {
             return false;
