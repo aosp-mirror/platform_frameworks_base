@@ -253,6 +253,7 @@ public final class Policy implements Parcelable {
          * Validate RoamingParnter data.
          *
          * @return true on success
+         * @hide
          */
         public boolean validate() {
             if (TextUtils.isEmpty(mFqdn)) {
@@ -393,6 +394,7 @@ public final class Policy implements Parcelable {
      * Validate Policy data.
      *
      * @return true on success
+     * @hide
      */
     public boolean validate() {
         if (mPolicyUpdate == null) {

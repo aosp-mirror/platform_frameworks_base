@@ -333,6 +333,7 @@ public final class PasspointConfiguration implements Parcelable {
      * Validate the configuration data.
      *
      * @return true on success or false on failure
+     * @hide
      */
     public boolean validate() {
         if (mHomeSp == null || !mHomeSp.validate()) {
