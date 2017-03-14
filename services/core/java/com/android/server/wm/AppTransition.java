@@ -692,7 +692,7 @@ public class AppTransition implements Dump {
     private void getDefaultNextAppTransitionStartRect(Rect rect) {
         if (mDefaultNextAppTransitionAnimationSpec == null ||
                 mDefaultNextAppTransitionAnimationSpec.rect == null) {
-            Slog.wtf(TAG, "Starting rect for app requested, but none available", new Throwable());
+            Slog.e(TAG, "Starting rect for app requested, but none available", new Throwable());
             rect.setEmpty();
         } else {
             rect.set(mDefaultNextAppTransitionAnimationSpec.rect);
@@ -705,7 +705,7 @@ public class AppTransition implements Dump {
             spec = mDefaultNextAppTransitionAnimationSpec;
         }
         if (spec == null || spec.rect == null) {
-            Slog.wtf(TAG, "Starting rect for task: " + taskId + " requested, but not available",
+            Slog.e(TAG, "Starting rect for task: " + taskId + " requested, but not available",
                     new Throwable());
             rect.setEmpty();
         } else {
