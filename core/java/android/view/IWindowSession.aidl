@@ -98,31 +98,6 @@ interface IWindowSession {
             out Rect outOutsets, out Rect outBackdropFrame, out Configuration outConfig,
             out Surface outSurface);
 
-    /**
-     *  Position a window relative to it's parent (attached) window without triggering
-     *  a full relayout. This action may be deferred until a given frame number
-     *  for the parent window appears. This allows for synchronizing movement of a child
-     *  to repainting the contents of the parent.
-     *
-     *  "width" and "height" correspond to the width and height members of
-     *  WindowManager.LayoutParams in the {@link #relayout relayout()} case.
-     *  This may differ from the surface buffer size in the
-     *  case of {@link LayoutParams#FLAG_SCALED} and {@link #relayout relayout()}
-     *  must be used with requestedWidth/height if this must be changed.
-     *
-     *  @param window The window being modified. Must be attached to a parent window
-     *  or this call will fail.
-     *  @param left The new left position
-     *  @param top The new top position
-     *  @param right The new right position
-     *  @param bottom The new bottom position
-     *  @param deferTransactionUntilFrame Frame number from our parent (attached) to
-     *  defer this action until.
-     *  @param outFrame Rect in which is placed the new position/size on screen.
-     */
-    void repositionChild(IWindow childWindow, int left, int top, int right, int bottom,
-            long deferTransactionUntilFrame, out Rect outFrame);
-
     /*
      * Notify the window manager that an application is relaunching and
      * windows should be prepared for replacement.
@@ -132,12 +107,6 @@ interface IWindowSession {
      * (for example when main windows are being reused via preservation).
      */
     void prepareToReplaceWindows(IBinder appToken, boolean childrenOnly);
-
-    /**
-     * If a call to relayout() asked to have the surface destroy deferred,
-     * it must call this once it is okay to destroy that surface.
-     */
-    void performDeferredDestroy(IWindow window);
 
     /**
      * Called by a client to report that it ran out of graphics memory.

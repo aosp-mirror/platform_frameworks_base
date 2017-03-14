@@ -1817,64 +1817,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    void repositionChild(Session session, IWindow client,
-            int left, int top, int right, int bottom,
-            long frameNumber, Rect outFrame) {
-        Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "repositionChild");
-        long origId = Binder.clearCallingIdentity();
-
-        try {
-            synchronized(mWindowMap) {
-                WindowState win = windowForClientLocked(session, client, false);
-                if (win == null) {
-                    return;
-                }
-                if (!win.isChildWindow()) {
-                    throw new IllegalArgumentException(
-                            "repositionChild called but window is not"
-                            + "attached to a parent win=" + win);
-                }
-
-                win.mAttrs.x = left;
-                win.mAttrs.y = top;
-                win.mAttrs.width = right - left;
-                win.mAttrs.height = bottom - top;
-                win.setWindowScale(win.mRequestedWidth, win.mRequestedHeight);
-
-                if (win.mHasSurface) {
-                    if (SHOW_TRANSACTIONS) {
-                        Slog.i(TAG_WM, ">>> OPEN TRANSACTION repositionChild");
-                    }
-
-                    openSurfaceTransaction();
-
-                    try {
-
-                        win.applyGravityAndUpdateFrame(win.mContainingFrame, win.mDisplayFrame);
-                        win.mWinAnimator.computeShownFrameLocked();
-
-                        win.mWinAnimator.setSurfaceBoundariesLocked(false);
-
-                        if (frameNumber > 0) {
-                            win.mWinAnimator.deferTransactionUntilParentFrame(frameNumber);
-                        }
-
-                    } finally {
-                        closeSurfaceTransaction();
-                        if (SHOW_TRANSACTIONS) {
-                            Slog.i(TAG_WM, "<<< CLOSE TRANSACTION repositionChild");
-                        }
-                    }
-                }
-
-                outFrame = win.mCompatFrame;
-            }
-        } finally {
-            Binder.restoreCallingIdentity(origId);
-            Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
-        }
-    }
-
     public int relayoutWindow(Session session, IWindow client, int seq,
             WindowManager.LayoutParams attrs, int requestedWidth,
             int requestedHeight, int viewVisibility, int flags,
@@ -2217,23 +2159,6 @@ public class WindowManagerService extends IWindowManager.Stub
             outSurface.release();
         }
         return result;
-    }
-
-    public void performDeferredDestroyWindow(Session session, IWindow client) {
-        long origId = Binder.clearCallingIdentity();
-
-        try {
-            synchronized (mWindowMap) {
-                WindowState win = windowForClientLocked(session, client, false);
-                if (win == null || win.mWillReplaceWindow) {
-                    return;
-                }
-
-                win.mWinAnimator.destroyDeferredSurfaceLocked();
-            }
-        } finally {
-            Binder.restoreCallingIdentity(origId);
-        }
     }
 
     public boolean outOfMemoryWindow(Session session, IWindow client) {
