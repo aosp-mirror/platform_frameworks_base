@@ -142,7 +142,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
 
         try {
             WindowManagerGlobal.getWindowManagerService()
-                    .watchRotation(mRotationWatcher);
+                    .watchRotation(mRotationWatcher, getContext().getDisplay().getDisplayId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

@@ -399,7 +399,7 @@ public class IWindowManagerImpl implements IWindowManager {
     }
 
     @Override
-    public int watchRotation(IRotationWatcher arg0) throws RemoteException {
+    public int watchRotation(IRotationWatcher arg0, int arg1) throws RemoteException {
         // TODO Auto-generated method stub
         return 0;
     }
