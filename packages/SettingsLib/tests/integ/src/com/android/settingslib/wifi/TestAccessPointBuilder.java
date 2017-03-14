@@ -39,6 +39,8 @@ public class TestAccessPointBuilder {
     private int networkId = WifiConfiguration.INVALID_NETWORK_ID;
     private String ssid = "TestSsid";
     private NetworkInfo mNetworkInfo = null;
+    private String mFqdn = null;
+    private String mProviderFriendlyName = null;
 
     Context mContext;
 
@@ -55,6 +57,12 @@ public class TestAccessPointBuilder {
         bundle.putString(AccessPoint.KEY_SSID, ssid);
         bundle.putParcelable(AccessPoint.KEY_CONFIG, wifiConig);
         bundle.putParcelable(AccessPoint.KEY_NETWORKINFO, mNetworkInfo);
+        if (mFqdn != null) {
+            bundle.putString(AccessPoint.KEY_FQDN, mFqdn);
+        }
+        if (mProviderFriendlyName != null) {
+            bundle.putString(AccessPoint.KEY_PROVIDER_FRIENDLY_NAME, mProviderFriendlyName);
+        }
         AccessPoint ap = new AccessPoint(mContext, bundle);
         ap.setRssi(mRssi);
         return ap;
@@ -126,6 +134,16 @@ public class TestAccessPointBuilder {
 
     public TestAccessPointBuilder setSsid(String newSsid) {
         ssid = newSsid;
+        return this;
+    }
+
+    public TestAccessPointBuilder setFqdn(String fqdn) {
+        mFqdn = fqdn;
+        return this;
+    }
+
+    public TestAccessPointBuilder setProviderFriendlyName(String friendlyName) {
+        mProviderFriendlyName = friendlyName;
         return this;
     }
 }
