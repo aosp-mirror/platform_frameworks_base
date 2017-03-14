@@ -5578,7 +5578,7 @@ public final class ActivityThread {
         // Make sure we do this before calling onCreate so that we can capture the
         // complete application startup.
         if (SystemProperties.getBoolean("dalvik.vm.usejitprofiles", false)) {
-            BaseDexClassLoader.setReporter(DexLoadReporter.INSTANCE);
+            BaseDexClassLoader.setReporter(DexLoadReporter.getInstance());
         }
 
         // Install the Network Security Config Provider. This must happen before the application
