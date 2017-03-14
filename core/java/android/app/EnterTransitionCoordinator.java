@@ -132,7 +132,9 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
         super.viewsReady(sharedElements);
         mIsReadyForTransition = true;
         hideViews(mSharedElements);
-        if (getViewsTransition() != null && mTransitioningViews != null) {
+        Transition viewsTransition = getViewsTransition();
+        if (viewsTransition != null && mTransitioningViews != null) {
+            removeExcludedViews(viewsTransition, mTransitioningViews);
             stripOffscreenViews();
             hideViews(mTransitioningViews);
         }
