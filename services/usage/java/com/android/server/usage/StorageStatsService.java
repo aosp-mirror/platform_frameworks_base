@@ -208,7 +208,8 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
 
         final ApplicationInfo appInfo;
         try {
-            appInfo = mPackage.getApplicationInfoAsUser(packageName, 0, userId);
+            appInfo = mPackage.getApplicationInfoAsUser(packageName,
+                    PackageManager.MATCH_UNINSTALLED_PACKAGES, userId);
         } catch (NameNotFoundException e) {
             throw new IllegalStateException(e);
         }
@@ -251,8 +252,8 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
 
         for (int i = 0; i < packageNames.length; i++) {
             try {
-                codePaths[i] = mPackage.getApplicationInfoAsUser(packageNames[i], 0,
-                        userId).getCodePath();
+                codePaths[i] = mPackage.getApplicationInfoAsUser(packageNames[i],
+                        PackageManager.MATCH_UNINSTALLED_PACKAGES, userId).getCodePath();
             } catch (NameNotFoundException e) {
                 throw new IllegalStateException(e);
             }
@@ -284,7 +285,8 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
         }
 
         int[] appIds = null;
-        for (ApplicationInfo app : mPackage.getInstalledApplicationsAsUser(0, userId)) {
+        for (ApplicationInfo app : mPackage.getInstalledApplicationsAsUser(
+                PackageManager.MATCH_UNINSTALLED_PACKAGES, userId)) {
             final int appId = UserHandle.getAppId(app.uid);
             if (!ArrayUtils.contains(appIds, appId)) {
                 appIds = ArrayUtils.appendInt(appIds, appId);
