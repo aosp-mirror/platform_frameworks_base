@@ -4363,7 +4363,7 @@ public class AccountManagerService
          * security policy.
          *
          * In particular we want to make sure that the Authenticator doesn't try to trick users
-         * into launching aribtrary intents on the device via by tricking to click authenticator
+         * into launching arbitrary intents on the device via by tricking to click authenticator
          * supplied entries in the system Settings app.
          */
         protected void checkKeyIntent(
@@ -4375,12 +4375,9 @@ public class AccountManagerService
                 ResolveInfo resolveInfo = pm.resolveActivityAsUser(intent, 0, mAccounts.userId);
                 ActivityInfo targetActivityInfo = resolveInfo.activityInfo;
                 int targetUid = targetActivityInfo.applicationInfo.uid;
-                if (!GrantCredentialsPermissionActivity.class.getName().equals(
-                        targetActivityInfo.getClass().getName())
-                        && !CantAddAccountActivity.class
-                                .equals(targetActivityInfo.getClass().getName())
-                        && PackageManager.SIGNATURE_MATCH != pm.checkSignatures(authUid,
-                                targetUid)) {
+                if (!isExportedSystemActivity(targetActivityInfo)
+                        && (PackageManager.SIGNATURE_MATCH != pm.checkSignatures(authUid,
+                                targetUid))) {
                     String pkgName = targetActivityInfo.packageName;
                     String activityName = targetActivityInfo.name;
                     String tmpl = "KEY_INTENT resolved to an Activity (%s) in a package (%s) that "
@@ -4391,6 +4388,13 @@ public class AccountManagerService
             } finally {
                 Binder.restoreCallingIdentity(bid);
             }
+        }
+
+        private boolean isExportedSystemActivity(ActivityInfo activityInfo) {
+            String className = activityInfo.name;
+            return "android".equals(activityInfo.packageName) &&
+                    (GrantCredentialsPermissionActivity.class.getName().equals(className)
+                    || CantAddAccountActivity.class.getName().equals(className));
         }
 
         private void close() {
