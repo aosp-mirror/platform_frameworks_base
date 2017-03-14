@@ -9900,7 +9900,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         final boolean isPassword = hasPasswordTransformationMethod()
                 || isPasswordInputType(getInputType());
         if (forAutofill) {
-            structure.setSanitized(mTextFromResource);
+            structure.setDataIsSensitive(!mTextFromResource);
         }
 
         if (!isPassword || forAutofill) {
