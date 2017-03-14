@@ -5752,11 +5752,11 @@
     <declare-styleable name="InsetDrawable">
         <attr name="visible" />
         <attr name="drawable" />
-        <attr name="inset"  format="dimension"/>
-        <attr name="insetLeft" format="dimension" />
-        <attr name="insetRight" format="dimension" />
-        <attr name="insetTop" format="dimension" />
-        <attr name="insetBottom" format="dimension" />
+        <attr name="inset"  format="fraction|dimension"/>
+        <attr name="insetLeft" format="fraction|dimension" />
+        <attr name="insetRight" format="fraction|dimension" />
+        <attr name="insetTop" format="fraction|dimension" />
+        <attr name="insetBottom" format="fraction|dimension" />
     </declare-styleable>
 
     <!-- Drawable used to draw bitmaps. -->
