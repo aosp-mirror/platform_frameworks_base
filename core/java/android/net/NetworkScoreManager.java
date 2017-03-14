@@ -419,6 +419,7 @@ public class NetworkScoreManager {
      *         to connect to
      * @throws SecurityException if the caller does not hold the
      *         {@link android.Manifest.permission#REQUEST_NETWORK_SCORES} permission.
+     * @hide
      */
     public RecommendationResult requestRecommendation(RecommendationRequest request)
             throws SecurityException {
