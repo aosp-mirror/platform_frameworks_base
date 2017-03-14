@@ -432,7 +432,7 @@ public class DexManager {
         // Ignore framework code.
         // TODO(calin): is there a better way to detect it?
         if (dexPath.startsWith("/system/framework/")) {
-            new DexSearchResult("framework", DEX_SEARCH_NOT_FOUND);
+            return new DexSearchResult("framework", DEX_SEARCH_NOT_FOUND);
         }
 
         // First, check if the package which loads the dex file actually owns it.
