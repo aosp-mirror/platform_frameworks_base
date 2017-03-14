@@ -45,16 +45,16 @@ message MetricsEvent {
     // The view or control was updated.
     TYPE_UPDATE = 6;
 
-    // Type for APP_TRANSITION event: The transition started a new activity for which it's process
-    // wasn't running.
+    // Type for APP_TRANSITION event: The transition started a new
+    // activity for which it's process wasn't running.
     TYPE_TRANSITION_COLD_LAUNCH = 7;
 
-    // Type for APP_TRANSITION event: The transition started a new activity for which it's process
-    // was already running.
+    // Type for APP_TRANSITION event: The transition started a new
+    // activity for which it's process was already running.
     TYPE_TRANSITION_WARM_LAUNCH = 8;
 
-    // Type for APP_TRANSITION event: The transition brought an already existing activity to the
-    // front.
+    // Type for APP_TRANSITION event: The transition brought an
+    // already existing activity to the front.
     TYPE_TRANSITION_HOT_LAUNCH = 9;
 
     // The action was successful
@@ -62,6 +62,80 @@ message MetricsEvent {
 
     // The action failed
     TYPE_FAILURE = 11;
+  }
+
+  // Types of alerts, as bit field values
+  enum Alert {
+    // Vibrate the device.
+    ALERT_BUZZ = 1;
+
+    // Make sound through the speaker.
+    ALERT_BEEP = 2;
+
+    // Flash a notificaiton light.
+    ALERT_BLINK = 4;
+  }
+
+  // Reasons that a notification might be dismissed.
+  enum DismissReason {
+    // from android.service.notification.NotificationListenerService
+
+    // Notification was canceled by the status bar reporting a notification click
+    REASON_CLICK = 1;
+
+    // Notification was canceled by the status bar reporting a user dismissal.
+    REASON_CANCEL = 2;
+
+    // Notification was canceled by the status bar reporting a user dismiss all.
+    REASON_CANCEL_ALL = 3;
+
+    // Notification was canceled by the status bar reporting an inflation error.
+    REASON_ERROR = 4;
+
+    // Notification was canceled by the package manager modifying the package.
+    REASON_PACKAGE_CHANGED = 5;
+
+    // Notification was canceled by the owning user context being stopped.
+    REASON_USER_STOPPED = 6;
+
+    // Notification was canceled by the user banning the package.
+    REASON_PACKAGE_BANNED = 7;
+
+    // Notification was canceled by the app canceling this specific notification.
+    REASON_APP_CANCEL = 8;
+
+    //Notification was canceled by the app cancelling all its notifications.
+    REASON_APP_CANCEL_ALL = 9;
+
+    // Notification was canceled by a listener reporting a user dismissal.
+    REASON_LISTENER_CANCEL = 10;
+
+    //Notification was canceled by a listener reporting a user dismiss all.
+    REASON_LISTENER_CANCEL_ALL = 11;
+
+    // Notification was canceled because it was a member of a canceled group.
+    REASON_GROUP_SUMMARY_CANCELED = 12;
+
+    // Notification was canceled because it was an invisible member of a group.
+    REASON_GROUP_OPTIMIZATION = 13;
+
+    // Notification was canceled by the device administrator suspending the package.
+    REASON_PACKAGE_SUSPENDED = 14;
+
+    // Notification was canceled by the owning managed profile being turned off.
+    REASON_PROFILE_TURNED_OFF = 15;
+
+    // Autobundled summary notification was canceled because its group was unbundled.
+    REASON_UNAUTOBUNDLED = 16;
+
+    // Notification was canceled by the user banning the channel.
+    REASON_CHANNEL_BANNED = 17;
+
+    // Notification was snoozed.
+    REASON_SNOOZED = 18;
+
+    // Notification was canceled due to timeout.
+    REASON_TIMEOUT = 19;
   }
 
   // Known visual elements: views or controls.
