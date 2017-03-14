@@ -396,6 +396,22 @@ public class RenderTests extends RenderTestBase {
     }
 
     @Test
+    public void testAdaptiveIcon() throws ClassNotFoundException {
+        // Create the layout pull parser.
+        LayoutPullParser parser = createLayoutPullParser("adaptive_icon.xml");
+        // Create LayoutLibCallback.
+        LayoutLibTestCallback layoutLibCallback =
+                new LayoutLibTestCallback(getLogger(), mDefaultClassLoader);
+        layoutLibCallback.initResources();
+
+        SessionParams params = getSessionParams(parser, ConfigGenerator.NEXUS_5,
+                layoutLibCallback, "Theme.Material.NoActionBar.Fullscreen", false,
+                RenderingMode.V_SCROLL, 22);
+
+        renderAndVerify(params, "adaptive_icon.png");
+    }
+
+    @Test
     public void testColorTypedValue() throws Exception {
         // Setup
         // Create the layout pull parser for our resources (empty.xml can not be part of the test
