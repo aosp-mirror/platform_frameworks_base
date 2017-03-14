@@ -145,10 +145,12 @@ final class Notifier {
         mHandler = new NotifierHandler(looper);
         mScreenOnIntent = new Intent(Intent.ACTION_SCREEN_ON);
         mScreenOnIntent.addFlags(
-                Intent.FLAG_RECEIVER_REGISTERED_ONLY | Intent.FLAG_RECEIVER_FOREGROUND);
+                Intent.FLAG_RECEIVER_REGISTERED_ONLY | Intent.FLAG_RECEIVER_FOREGROUND
+                | Intent.FLAG_RECEIVER_VISIBLE_TO_INSTANT_APPS);
         mScreenOffIntent = new Intent(Intent.ACTION_SCREEN_OFF);
         mScreenOffIntent.addFlags(
-                Intent.FLAG_RECEIVER_REGISTERED_ONLY | Intent.FLAG_RECEIVER_FOREGROUND);
+                Intent.FLAG_RECEIVER_REGISTERED_ONLY | Intent.FLAG_RECEIVER_FOREGROUND
+                | Intent.FLAG_RECEIVER_VISIBLE_TO_INSTANT_APPS);
         mScreenBrightnessBoostIntent =
                 new Intent(PowerManager.ACTION_SCREEN_BRIGHTNESS_BOOST_CHANGED);
         mScreenBrightnessBoostIntent.addFlags(

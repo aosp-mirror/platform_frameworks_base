@@ -954,10 +954,12 @@ class AlarmManagerService extends SystemService {
         mTimeTickSender = PendingIntent.getBroadcastAsUser(getContext(), 0,
                 new Intent(Intent.ACTION_TIME_TICK).addFlags(
                         Intent.FLAG_RECEIVER_REGISTERED_ONLY
-                        | Intent.FLAG_RECEIVER_FOREGROUND), 0,
+                        | Intent.FLAG_RECEIVER_FOREGROUND
+                        | Intent.FLAG_RECEIVER_VISIBLE_TO_INSTANT_APPS), 0,
                         UserHandle.ALL);
         Intent intent = new Intent(Intent.ACTION_DATE_CHANGED);
-        intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
+        intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING
+                | Intent.FLAG_RECEIVER_VISIBLE_TO_INSTANT_APPS);
         mDateChangeSender = PendingIntent.getBroadcastAsUser(getContext(), 0, intent,
                 Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT, UserHandle.ALL);
         
@@ -1034,7 +1036,8 @@ class AlarmManagerService extends SystemService {
 
         if (timeZoneWasChanged) {
             Intent intent = new Intent(Intent.ACTION_TIMEZONE_CHANGED);
-            intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
+            intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING
+                    | Intent.FLAG_RECEIVER_VISIBLE_TO_INSTANT_APPS);
             intent.putExtra("time-zone", zone.getID());
             getContext().sendBroadcastAsUser(intent, UserHandle.ALL);
         }
@@ -2518,7 +2521,8 @@ class AlarmManagerService extends SystemService {
                         Intent intent = new Intent(Intent.ACTION_TIME_CHANGED);
                         intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING
                                 | Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT
-                                | Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
+                                | Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND
+                                | Intent.FLAG_RECEIVER_VISIBLE_TO_INSTANT_APPS);
                         getContext().sendBroadcastAsUser(intent, UserHandle.ALL);
 
                         // The world has changed on us, so we need to re-evaluate alarms

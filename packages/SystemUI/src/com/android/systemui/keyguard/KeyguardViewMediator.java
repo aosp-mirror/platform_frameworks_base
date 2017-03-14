@@ -278,7 +278,8 @@ public class KeyguardViewMediator extends SystemUI {
      */
     private static final Intent USER_PRESENT_INTENT = new Intent(Intent.ACTION_USER_PRESENT)
             .addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING
-                    | Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+                    | Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT
+                    | Intent.FLAG_RECEIVER_VISIBLE_TO_INSTANT_APPS);
 
     /**
      * {@link #setKeyguardEnabled} waits on this condition when it reenables
