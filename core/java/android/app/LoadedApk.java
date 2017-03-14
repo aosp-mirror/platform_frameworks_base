@@ -55,7 +55,6 @@ import android.view.DisplayAdjustments;
 
 import com.android.internal.util.ArrayUtils;
 
-import dalvik.system.BaseDexClassLoader;
 import dalvik.system.VMRuntime;
 
 import java.io.File;
@@ -751,40 +750,6 @@ public final class LoadedApk {
 
         VMRuntime.registerAppInfo(profileFile.getPath(),
                 codePaths.toArray(new String[codePaths.size()]));
-
-        // Setup the reporter to notify package manager of any relevant dex loads.
-        // At this point the primary apk is loaded and will not be reported.
-        // Anything loaded from now on will be tracked as a potential secondary
-        // or foreign dex file. The goal is to enable:
-        //    1) monitoring and compilation of secondary dex file
-        //    2) track whether or not a dex file is used by other apps (used to
-        //       determined the compilation filter of apks).
-        if (BaseDexClassLoader.getReporter() != DexLoadReporter.INSTANCE) {
-            // Set the dex load reporter if not already set.
-            // Note that during the app's life cycle different LoadedApks may be
-            // created and loaded (e.g. if two different apps share the same runtime).
-            BaseDexClassLoader.setReporter(DexLoadReporter.INSTANCE);
-        }
-    }
-
-    private static class DexLoadReporter implements BaseDexClassLoader.Reporter {
-        private static final DexLoadReporter INSTANCE = new DexLoadReporter();
-
-        private DexLoadReporter() {}
-
-        @Override
-        public void report(List<String> dexPaths) {
-            if (dexPaths.isEmpty()) {
-                return;
-            }
-            String packageName = ActivityThread.currentPackageName();
-            try {
-                ActivityThread.getPackageManager().notifyDexLoad(
-                        packageName, dexPaths, VMRuntime.getRuntime().vmInstructionSet());
-            } catch (RemoteException re) {
-                Slog.e(TAG, "Failed to notify PM about dex load for package " + packageName, re);
-            }
-        }
     }
 
     /**
