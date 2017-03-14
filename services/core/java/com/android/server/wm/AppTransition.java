@@ -44,6 +44,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_APP_TRANSITIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
+import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_BEFORE_ANIM;
 import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_NONE;
 import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_AFTER_ANIM;
 
@@ -1652,10 +1653,14 @@ public class AppTransition implements Dump {
     }
 
     int getAppStackClipMode() {
+        // When dismiss keyguard animation occurs, clip before the animation to prevent docked
+        // app from showing beyond the divider
+        if (mNextAppTransition == TRANSIT_KEYGUARD_GOING_AWAY
+                || mNextAppTransition == TRANSIT_KEYGUARD_GOING_AWAY_ON_WALLPAPER) {
+            return STACK_CLIP_BEFORE_ANIM;
+        }
         return mNextAppTransition == TRANSIT_ACTIVITY_RELAUNCH
                 || mNextAppTransition == TRANSIT_DOCK_TASK_FROM_RECENTS
-                || mNextAppTransition == TRANSIT_KEYGUARD_GOING_AWAY
-                || mNextAppTransition == TRANSIT_KEYGUARD_GOING_AWAY_ON_WALLPAPER
                 || mNextAppTransitionType == NEXT_TRANSIT_TYPE_CLIP_REVEAL
                 ? STACK_CLIP_NONE
                 : STACK_CLIP_AFTER_ANIM;
