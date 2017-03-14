@@ -610,7 +610,7 @@ final class AutoFillManagerServiceImpl {
         private AssistStructure mStructure;
 
         /**
-         * Whether the client has an {@link android.view.autofill.AutoFillManager.AutofillCallback}.
+         * Whether the client has an {@link android.view.autofill.AutofillManager.AutofillCallback}.
          */
         private boolean mHasCallback;
 
