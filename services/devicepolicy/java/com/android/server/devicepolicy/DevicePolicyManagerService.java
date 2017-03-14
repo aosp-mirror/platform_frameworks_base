@@ -3141,6 +3141,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             throw new IllegalArgumentException("Only apps in internal storage can be active admin: "
                     + adminReceiver);
         }
+        if (info.getActivityInfo().applicationInfo.isInstantApp()) {
+            throw new IllegalArgumentException("Instant apps cannot be device admins: "
+                    + adminReceiver);
+        }
         synchronized (this) {
             long ident = mInjector.binderClearCallingIdentity();
             try {
