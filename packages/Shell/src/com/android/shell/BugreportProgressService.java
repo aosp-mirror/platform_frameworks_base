@@ -57,6 +57,7 @@ import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Notification;
 import android.app.Notification.Action;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -64,6 +65,7 @@ import android.content.ClipData;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -196,6 +198,8 @@ public class BugreportProgressService extends Service {
      */
     private static final String SCREENSHOT_DIR = "bugreports";
 
+    private static final String NOTIFICATION_CHANNEL_ID = "bugreports";
+
     /** Managed dumpstate processes (keyed by id) */
     private final SparseArray<DumpstateListener> mProcesses = new SparseArray<>();
 
@@ -240,6 +244,12 @@ public class BugreportProgressService extends Service {
         final Configuration conf = mContext.getResources().getConfiguration();
         mIsWatch = (conf.uiMode & Configuration.UI_MODE_TYPE_MASK) ==
                 Configuration.UI_MODE_TYPE_WATCH;
+        NotificationManager nm = NotificationManager.from(mContext);
+        nm.createNotificationChannel(
+                new NotificationChannel(NOTIFICATION_CHANNEL_ID,
+                        mContext.getString(R.string.bugreport_notification_channel),
+                        isTv(this) ? NotificationManager.IMPORTANCE_DEFAULT
+                                : NotificationManager.IMPORTANCE_LOW));
     }
 
     @Override
@@ -1008,13 +1018,16 @@ public class BugreportProgressService extends Service {
             sNotificationBundle.putString(Notification.EXTRA_SUBSTITUTE_APP_NAME,
                     context.getString(com.android.internal.R.string.android_system_label));
         }
-        return new Notification.Builder(context)
+        return new Notification.Builder(context, NOTIFICATION_CHANNEL_ID)
                 .addExtras(sNotificationBundle)
                 .setCategory(Notification.CATEGORY_SYSTEM)
-                .setSmallIcon(com.android.internal.R.drawable.stat_sys_adb)
+                .setSmallIcon(
+                        isTv(context) ? R.drawable.ic_bug_report_black_24dp
+                                : com.android.internal.R.drawable.stat_sys_adb)
                 .setLocalOnly(true)
                 .setColor(context.getColor(
-                        com.android.internal.R.color.system_notification_accent_color));
+                        com.android.internal.R.color.system_notification_accent_color))
+                .extend(new Notification.TvExtender());
     }
 
     /**
@@ -1331,6 +1344,10 @@ public class BugreportProgressService extends Service {
             bitmap.recycle();
         }
         return false;
+    }
+
+    private static boolean isTv(Context context) {
+        return context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_LEANBACK);
     }
 
     /**
