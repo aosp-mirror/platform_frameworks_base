@@ -1031,6 +1031,7 @@ public class StaticLayout extends Layout {
                                    float avail, TextUtils.TruncateAt where,
                                    int line, float textWidth, TextPaint paint,
                                    boolean forceEllipsis) {
+        avail -= getTotalInsets(line);
         if (textWidth <= avail && !forceEllipsis) {
             // Everything fits!
             mLines[mColumns * line + ELLIPSIS_START] = 0;
@@ -1132,6 +1133,17 @@ public class StaticLayout extends Layout {
         mEllipsized = true;
         mLines[mColumns * line + ELLIPSIS_START] = ellipsisStart;
         mLines[mColumns * line + ELLIPSIS_COUNT] = ellipsisCount;
+    }
+
+    private float getTotalInsets(int line) {
+        int totalIndent = 0;
+        if (mLeftIndents != null) {
+            totalIndent = mLeftIndents[Math.min(line, mLeftIndents.length - 1)];
+        }
+        if (mRightIndents != null) {
+            totalIndent += mRightIndents[Math.min(line, mRightIndents.length - 1)];
+        }
+        return totalIndent;
     }
 
     // Override the base class so we can directly access our members,
