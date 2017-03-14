@@ -17,10 +17,12 @@
 package android.media;
 
 import android.annotation.NonNull;
+import android.media.MediaCasException.UnsupportedCasException;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
+import android.os.ServiceSpecificException;
 import android.util.Log;
 
 import java.nio.ByteBuffer;
@@ -54,13 +56,13 @@ public final class MediaDescrambler {
     /**
      * Class for parceling descrambling parameters over IDescrambler binder.
      */
+    // This class currently is not used by Java binder. descramble() goes through
+    // jni to use shared memory. However, the parcelable is still required for AIDL.
     static class DescrambleInfo implements Parcelable {
         private DescrambleInfo() {
-            // TODO: implement
         }
 
         private DescrambleInfo(Parcel in) {
-            // TODO: disable
         }
 
         @Override
@@ -70,7 +72,6 @@ public final class MediaDescrambler {
 
         @Override
         public void writeToParcel(Parcel dest, int flags) {
-            // TODO: implement
         }
 
         public static final Parcelable.Creator<DescrambleInfo> CREATOR
@@ -112,13 +113,6 @@ public final class MediaDescrambler {
         return mIDescrambler.asBinder();
     }
 
-    /*
-     * TODO: handle ServiceSpecificException from the mIDescrambler
-     * All Drm-specific failures will be thrown by mIDescrambler as
-     * ServiceSpecificException exception with Drm error code.
-     * These need to be re-thrown as crypto exceptions.
-     */
-
     /**
      * Query if the scrambling scheme requires the use of a secure decoder
      * to decode data of the given mime type.
@@ -150,14 +144,16 @@ public final class MediaDescrambler {
      * @param sessionId the MediaCas sessionId to associate with this
      * MediaDescrambler instance.
      *
-     * @throws IllegalStateException if the descrambler instance is not valid,
-     * or IllegalArgumentException if the sessionId is not valid.
+     * @throws IllegalStateException if the descrambler instance is not valid.
+     * @throws MediaCasStateException for CAS-specific state exceptions.
      */
     public final void setMediaCasSession(@NonNull byte[] sessionId) {
         validateInternalStates();
 
         try {
             mIDescrambler.setMediaCasSession(sessionId);
+        } catch (ServiceSpecificException e) {
+            MediaCasStateException.throwExceptions(e);
         } catch (RemoteException e) {
             cleanupAndRethrowIllegalState();
         }
@@ -179,9 +175,7 @@ public final class MediaDescrambler {
      * values indicating errors.
      *
      * @throws IllegalStateException if the descrambler instance is not valid.
-     */
-    /*
-     * TODO: throw DRM-specific exception if decrambling is failing.
+     * @throws MediaCasStateException for CAS-specific state exceptions.
      */
     public final int descramble(
             @NonNull ByteBuffer srcBuf, int srcPos, ByteBuffer dstBuf, int dstPos,
@@ -208,12 +202,17 @@ public final class MediaDescrambler {
                     "Invalid CryptoInfo: key array is invalid!");
         }
 
-        return native_descramble(
-                cryptoInfo.key[0],
-                cryptoInfo.numSubSamples,
-                cryptoInfo.numBytesOfClearData,
-                cryptoInfo.numBytesOfEncryptedData,
-                srcBuf, srcPos, dstBuf, dstPos);
+        try {
+            return native_descramble(
+                    cryptoInfo.key[0],
+                    cryptoInfo.numSubSamples,
+                    cryptoInfo.numBytesOfClearData,
+                    cryptoInfo.numBytesOfEncryptedData,
+                    srcBuf, srcPos, dstBuf, dstPos);
+        } catch (ServiceSpecificException e) {
+            MediaCasStateException.throwExceptions(e);
+        }
+        return -1;
     }
 
     public final void release() {

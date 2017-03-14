@@ -1878,9 +1878,7 @@ final public class MediaCodec {
      * @param flags   Specify {@link #CONFIGURE_FLAG_ENCODE} to configure the
      *                component as an encoder.
      * @param descrambler Specify a descrambler object to facilitate secure
-     *                descrambling of the media data. descrambler must not be
-     *                null if this method is used. For non-secure codecs, use
-     *                {@link #configure} and with null crypto parameter.
+     *                descrambling of the media data, or null for non-secure codecs.
      * @throws IllegalArgumentException if the surface has been released (or is invalid),
      * or the format is unacceptable (e.g. missing a mandatory key),
      * or the flags are not set properly
@@ -1891,8 +1889,9 @@ final public class MediaCodec {
      */
     public void configure(
             @Nullable MediaFormat format, @Nullable Surface surface,
-            @ConfigureFlag int flags, @NonNull MediaDescrambler descrambler) {
-        configure(format, surface, null, descrambler.getBinder(), flags);
+            @ConfigureFlag int flags, @Nullable MediaDescrambler descrambler) {
+        configure(format, surface, null,
+                descrambler != null ? descrambler.getBinder() : null, flags);
     }
 
     private void configure(

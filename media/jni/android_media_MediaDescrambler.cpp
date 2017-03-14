@@ -129,7 +129,7 @@ void JDescrambler::ensureBufferCapacity(size_t neededSize) {
     mMem = mDealer->allocate(neededSize);
 }
 
-ssize_t JDescrambler::descramble(
+Status JDescrambler::descramble(
         jbyte key,
         size_t numSubSamples,
         ssize_t totalLength,
@@ -137,7 +137,8 @@ ssize_t JDescrambler::descramble(
         const void *srcPtr,
         jint srcOffset,
         void *dstPtr,
-        jint dstOffset) {
+        jint dstOffset,
+        ssize_t *result) {
     // TODO: IDescrambler::descramble() is re-entrant, however because we
     // only have 1 shared mem buffer, we can only do 1 descramble at a time.
     // Concurrency might be improved by allowing on-demand allocation of up
@@ -159,16 +160,16 @@ ssize_t JDescrambler::descramble(
     info.dstPtr = NULL;
     info.dstOffset = 0;
 
-    int32_t result;
-    binder::Status status = mDescrambler->descramble(info, &result);
+    int32_t descrambleResult;
+    Status status = mDescrambler->descramble(info, &descrambleResult);
 
-    if (!status.isOk() || result > totalLength) {
-        return -1;
+    if (status.isOk()) {
+        *result = (descrambleResult <= totalLength) ? descrambleResult : -1;
+        if (*result > 0) {
+            memcpy((void*)((uint8_t*)dstPtr + dstOffset), mMem->pointer(), *result);
+        }
     }
-    if (result > 0) {
-        memcpy((void*)((uint8_t*)dstPtr + dstOffset), mMem->pointer(), result);
-    }
-    return result;
+    return status;
 }
 
 }  // namespace android
@@ -251,9 +252,43 @@ static ssize_t getSubSampleInfo(JNIEnv *env, jint numSubSamples,
         numBytesOfClearData = NULL;
     }
 
+    if (totalSize < 0) {
+        delete[] subSamples;
+        return -1;
+    }
+
     *outSubSamples = subSamples;
 
     return totalSize;
+}
+
+static jthrowable createServiceSpecificException(
+        JNIEnv *env, int serviceSpecificError, const char *msg) {
+    if (env->ExceptionCheck()) {
+        ALOGW("Discarding pending exception");
+        env->ExceptionDescribe();
+        env->ExceptionClear();
+    }
+
+    ScopedLocalRef<jclass> clazz(
+            env, env->FindClass("android/os/ServiceSpecificException"));
+    CHECK(clazz.get() != NULL);
+
+    const jmethodID ctor = env->GetMethodID(clazz.get(), "<init>", "(ILjava/lang/String;)V");
+    CHECK(ctor != NULL);
+
+    ScopedLocalRef<jstring> msgObj(
+            env, env->NewStringUTF(msg != NULL ?
+                    msg : String8::format("Error %#x", serviceSpecificError)));
+
+    return (jthrowable)env->NewObject(
+            clazz.get(), ctor, serviceSpecificError, msgObj.get());
+}
+
+static void throwServiceSpecificException(
+        JNIEnv *env, int serviceSpecificError, const char *msg) {
+    jthrowable exception = createServiceSpecificException(env, serviceSpecificError, msg);
+    env->Throw(exception);
 }
 
 static jint android_media_MediaDescrambler_native_descramble(
@@ -290,11 +325,11 @@ static jint android_media_MediaDescrambler_native_descramble(
                     env, dstBuf, dstOffset, totalLength, &dstPtr, &dstArray);
         }
     }
-
+    Status status;
     if (err == OK) {
-        result = descrambler->descramble(
+        status = descrambler->descramble(
                 key, numSubSamples, totalLength, subSamples,
-                srcPtr, srcOffset, dstPtr, dstOffset);
+                srcPtr, srcOffset, dstPtr, dstOffset, &result);
     }
 
     delete[] subSamples;
@@ -303,6 +338,51 @@ static jint android_media_MediaDescrambler_native_descramble(
     }
     if (dstArray != NULL) {
         env->ReleaseByteArrayElements(dstArray, (jbyte *)dstPtr, 0);
+    }
+
+    if (!status.isOk()) {
+        switch (status.exceptionCode()) {
+            case Status::EX_SECURITY:
+                jniThrowException(env, "java/lang/SecurityException",
+                        status.exceptionMessage());
+                break;
+            case Status::EX_BAD_PARCELABLE:
+                jniThrowException(env, "java/lang/BadParcelableException",
+                        status.exceptionMessage());
+                break;
+            case Status::EX_ILLEGAL_ARGUMENT:
+                jniThrowException(env, "java/lang/IllegalArgumentException",
+                        status.exceptionMessage());
+                break;
+            case Status::EX_NULL_POINTER:
+                jniThrowException(env, "java/lang/NullPointerException",
+                        status.exceptionMessage());
+                break;
+            case Status::EX_ILLEGAL_STATE:
+                jniThrowException(env, "java/lang/IllegalStateException",
+                        status.exceptionMessage());
+                break;
+            case Status::EX_NETWORK_MAIN_THREAD:
+                jniThrowException(env, "java/lang/NetworkOnMainThreadException",
+                        status.exceptionMessage());
+                break;
+            case Status::EX_UNSUPPORTED_OPERATION:
+                jniThrowException(env, "java/lang/UnsupportedOperationException",
+                        status.exceptionMessage());
+                break;
+            case Status::EX_SERVICE_SPECIFIC:
+                throwServiceSpecificException(env, status.serviceSpecificErrorCode(),
+                        status.exceptionMessage());
+                break;
+            default:
+            {
+                String8 msg;
+                msg.appendFormat("Unknown exception code: %d, msg: %s",
+                        status.exceptionCode(), status.exceptionMessage().string());
+                jniThrowException(env, "java/lang/RuntimeException", msg.string());
+                break;
+            }
+        }
     }
     return result;
 }
