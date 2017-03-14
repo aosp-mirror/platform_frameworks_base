@@ -3809,7 +3809,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     private boolean isActivePasswordSufficientForUserLocked(
             DevicePolicyData policy, int userHandle, boolean parent) {
-        enforceUserUnlocked(userHandle, parent);
+        final long id = Binder.clearCallingIdentity();
+        try {
+            enforceUserUnlocked(userHandle, parent);
+        } finally {
+            Binder.restoreCallingIdentity(id);
+        }
 
         final int requiredPasswordQuality = getPasswordQuality(null, userHandle, parent);
         if (policy.mActivePasswordQuality < requiredPasswordQuality) {
