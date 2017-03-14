@@ -20,6 +20,7 @@ package com.android.server.print;
 import static com.android.internal.util.Preconditions.checkNotNull;
 
 import android.Manifest;
+import android.annotation.CheckResult;
 import android.annotation.Nullable;
 import android.companion.AssociationRequest;
 import android.companion.CompanionDeviceManager;
@@ -36,8 +37,11 @@ import android.content.pm.PackageManager;
 import android.net.NetworkPolicyManager;
 import android.os.Binder;
 import android.os.Environment;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.IDeviceIdleController;
+import android.os.IInterface;
+import android.os.Parcel;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
@@ -68,11 +72,13 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
 
 //TODO move to own package!
-//TODO un/linkToDeath & onBinderDied - unbind
 //TODO onStop schedule unbind in 5 seconds
-//TODO Prune association on app uninstall
+//TODO make sure APIs are only callable from currently focused app
+//TODO schedule stopScan on activity destroy(except if configuration change)
+//TODO on associate called again after configuration change -> replace old callback with new
+//TODO avoid leaking calling activity in IFindDeviceCallback (see PrintManager#print for example)
 /** @hide */
-public class CompanionDeviceManagerService extends SystemService {
+public class CompanionDeviceManagerService extends SystemService implements Binder.DeathRecipient {
 
     private static final ComponentName SERVICE_TO_BIND_TO = ComponentName.createRelative(
             CompanionDeviceManager.COMPANION_DEVICE_DISCOVERY_PACKAGE_NAME,
@@ -90,6 +96,8 @@ public class CompanionDeviceManagerService extends SystemService {
     private final CompanionDeviceManagerImpl mImpl;
     private final ConcurrentMap<Integer, AtomicFile> mUidToStorage = new ConcurrentHashMap<>();
     private IDeviceIdleController mIdleController;
+    private IFindDeviceCallback mFindDeviceCallback;
+    private ServiceConnection mServiceConnection;
 
     public CompanionDeviceManagerService(Context context) {
         super(context);
@@ -125,7 +133,51 @@ public class CompanionDeviceManagerService extends SystemService {
         publishBinderService(Context.COMPANION_DEVICE_SERVICE, mImpl);
     }
 
+    @Override
+    public void binderDied() {
+        Handler.getMain().post(this::handleBinderDied);
+    }
+
+    private void handleBinderDied() {
+        mServiceConnection = unbind(mServiceConnection);
+        mFindDeviceCallback = unlinkToDeath(mFindDeviceCallback, this, 0);
+    }
+
+    /**
+     * Usage: {@code a = unlinkToDeath(a, deathRecipient, flags); }
+     */
+    @Nullable
+    @CheckResult
+    private static <T extends IInterface> T unlinkToDeath(T iinterface,
+            IBinder.DeathRecipient deathRecipient, int flags) {
+        if (iinterface != null) {
+            iinterface.asBinder().unlinkToDeath(deathRecipient, flags);
+        }
+        return null;
+    }
+
+    @Nullable
+    @CheckResult
+    private ServiceConnection unbind(@Nullable ServiceConnection conn) {
+        if (conn != null) {
+            getContext().unbindService(conn);
+        }
+        return null;
+    }
+
     class CompanionDeviceManagerImpl extends ICompanionDeviceManager.Stub {
+
+        @Override
+        public boolean onTransact(int code, Parcel data, Parcel reply, int flags)
+                throws RemoteException {
+            try {
+                return super.onTransact(code, data, reply, flags);
+            } catch (Throwable e) {
+                Slog.e(LOG_TAG, "Error during IPC", e);
+                throw ExceptionUtils.propagate(e, RemoteException.class);
+            }
+        }
+
         @Override
         public void associate(
                 AssociationRequest request,
@@ -135,14 +187,14 @@ public class CompanionDeviceManagerService extends SystemService {
                 Slog.i(LOG_TAG, "associate(request = " + request + ", callback = " + callback
                         + ", callingPackage = " + callingPackage + ")");
             }
-            checkNotNull(request);
-            checkNotNull(callback);
+            checkNotNull(request, "Request cannot be null");
+            checkNotNull(callback, "Callback cannot be null");
             final long callingIdentity = Binder.clearCallingIdentity();
             try {
                 //TODO bindServiceAsUser
                 getContext().bindService(
                         new Intent().setComponent(SERVICE_TO_BIND_TO),
-                        getServiceConnection(request, callback, callingPackage),
+                        createServiceConnection(request, callback, callingPackage),
                         Context.BIND_AUTO_CREATE);
             } finally {
                 Binder.restoreCallingIdentity(callingIdentity);
@@ -168,17 +220,25 @@ public class CompanionDeviceManagerService extends SystemService {
         return UserHandle.getUserId(Binder.getCallingUid());
     }
 
-    private ServiceConnection getServiceConnection(
+    private ServiceConnection createServiceConnection(
             final AssociationRequest request,
             final IFindDeviceCallback findDeviceCallback,
             final String callingPackage) {
-        return new ServiceConnection() {
+        mServiceConnection = new ServiceConnection() {
             @Override
             public void onServiceConnected(ComponentName name, IBinder service) {
                 if (DEBUG) {
                     Slog.i(LOG_TAG,
                             "onServiceConnected(name = " + name + ", service = "
                                     + service + ")");
+                }
+                mFindDeviceCallback = findDeviceCallback;
+                try {
+                    mFindDeviceCallback.asBinder().linkToDeath(
+                            CompanionDeviceManagerService.this, 0);
+                } catch (RemoteException e) {
+                    handleBinderDied();
+                    return;
                 }
                 try {
                     ICompanionDeviceDiscoveryService.Stub
@@ -198,6 +258,7 @@ public class CompanionDeviceManagerService extends SystemService {
                 if (DEBUG) Slog.i(LOG_TAG, "onServiceDisconnected(name = " + name + ")");
             }
         };
+        return mServiceConnection;
     }
 
     private ICompanionDeviceDiscoveryServiceCallback.Stub getServiceCallback() {

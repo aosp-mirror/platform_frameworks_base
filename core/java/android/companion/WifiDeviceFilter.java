@@ -29,6 +29,7 @@ import android.net.wifi.ScanResult;
 import android.os.Parcel;
 import android.provider.OneTimeUseBuilder;
 
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 /**
@@ -72,6 +73,19 @@ public final class WifiDeviceFilter implements DeviceFilter<ScanResult> {
     @Override
     public int getMediumType() {
         return MEDIUM_TYPE_WIFI;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        WifiDeviceFilter that = (WifiDeviceFilter) o;
+        return Objects.equals(mNamePattern, that.mNamePattern);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mNamePattern);
     }
 
     @Override

@@ -35,6 +35,7 @@ import com.android.internal.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 /**
@@ -120,6 +121,22 @@ public final class BluetoothDeviceFilter implements DeviceFilter<BluetoothDevice
         dest.writeString(mAddress);
         dest.writeParcelableList(mServiceUuids, flags);
         dest.writeParcelableList(mServiceUuidMasks, flags);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        BluetoothDeviceFilter that = (BluetoothDeviceFilter) o;
+        return Objects.equals(mNamePattern, that.mNamePattern) &&
+                Objects.equals(mAddress, that.mAddress) &&
+                Objects.equals(mServiceUuids, that.mServiceUuids) &&
+                Objects.equals(mServiceUuidMasks, that.mServiceUuidMasks);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mNamePattern, mAddress, mServiceUuids, mServiceUuidMasks);
     }
 
     @Override

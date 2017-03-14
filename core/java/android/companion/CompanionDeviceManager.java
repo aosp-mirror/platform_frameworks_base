@@ -17,6 +17,8 @@
 package android.companion;
 
 
+import static com.android.internal.util.Preconditions.checkNotNull;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.PendingIntent;
@@ -24,7 +26,6 @@ import android.content.Context;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -43,7 +44,7 @@ import java.util.List;
  */
 public final class CompanionDeviceManager {
 
-    private static final boolean DEBUG = false; //TODO
+    private static final boolean DEBUG = false;
     private static final String LOG_TAG = "CompanionDeviceManager";
 
     /**
@@ -129,10 +130,9 @@ public final class CompanionDeviceManager {
         if (!checkFeaturePresent()) {
             return;
         }
-
-        final Handler finalHandler = handler != null
-                ? handler
-                : new Handler(Looper.getMainLooper());
+        checkNotNull(request, "Request cannot be null");
+        checkNotNull(callback, "Callback cannot be null");
+        final Handler finalHandler = Handler.mainIfNull(handler);
         try {
             mService.associate(
                     request,
