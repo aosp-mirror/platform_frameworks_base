@@ -23,6 +23,7 @@
 #include <stdint.h>
 
 #include <utils/Errors.h>
+#include <utils/LinearTransform.h>
 
 #include "common_clock.h"
 
