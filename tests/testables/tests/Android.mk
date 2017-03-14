@@ -27,7 +27,7 @@ LOCAL_RESOURCE_DIR := $(LOCAL_PATH)/res
 
 LOCAL_STATIC_JAVA_LIBRARIES := \
     android-support-test \
-    mockito-updated-target-minus-junit4 \
+    mockito-target-minus-junit4 \
     legacy-android-test \
 	testables
 
