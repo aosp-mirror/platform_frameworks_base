@@ -8293,7 +8293,6 @@ public final class Settings {
          * enabled state.
          * @hide
          */
-        @SystemApi
         public static final String NETWORK_RECOMMENDATIONS_ENABLED =
                 "network_recommendations_enabled";
 
