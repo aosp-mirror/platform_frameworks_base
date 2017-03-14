@@ -60,6 +60,7 @@ import android.service.autofill.SaveInfo;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.LocalLog;
+import android.util.Log;
 import android.util.PrintWriterPrinter;
 import android.util.Slog;
 import android.view.autofill.AutofillId;
@@ -954,9 +955,10 @@ final class AutofillManagerServiceImpl {
             String filterText = "";
             if (value != null) {
                 // TODO(b/33197203): Handle other AutofillValue types
-                final CharSequence text = value.getTextValue();
-                if (text != null) {
-                    filterText = text.toString();
+                if (value.isText()) {
+                    filterText = value.getTextValue().toString();
+                } else {
+                    Log.w(TAG, value + " could not be autofilled into " + this);
                 }
             }
 

@@ -28,6 +28,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.SoundEffectConstants;
 import android.view.ViewDebug;
@@ -55,6 +56,7 @@ import com.android.internal.R;
  * </p>
  */
 public abstract class CompoundButton extends Button implements Checkable {
+    private static final String LOG_TAG = CompoundButton.class.getSimpleName();
 
     private boolean mChecked;
     private boolean mBroadcasting;
@@ -585,7 +587,11 @@ public abstract class CompoundButton extends Button implements Checkable {
     public void autofill(AutofillValue value) {
         if (!isEnabled()) return;
 
-        setChecked(value.getToggleValue());
+        if (value.isToggle()) {
+            setChecked(value.getToggleValue());
+        } else {
+            Log.w(LOG_TAG, value + " could not be autofilled into " + this);
+        }
     }
 
     @Override

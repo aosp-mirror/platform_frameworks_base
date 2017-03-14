@@ -23,6 +23,7 @@ import android.graphics.Rect;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,6 +39,8 @@ import com.android.internal.R;
  * @attr ref android.R.styleable#AbsSpinner_entries
  */
 public abstract class AbsSpinner extends AdapterView<SpinnerAdapter> {
+    private static final String LOG_TAG = AbsSpinner.class.getSimpleName();
+
     SpinnerAdapter mAdapter;
 
     int mHeightMeasureSpec;
@@ -514,8 +517,11 @@ public abstract class AbsSpinner extends AdapterView<SpinnerAdapter> {
     public void autofill(AutofillValue value) {
         if (!isEnabled()) return;
 
-        final int position = value.getListValue();
-        setSelection(position);
+        if (value.isList()) {
+            setSelection(value.getListValue());
+        } else {
+            Log.w(LOG_TAG, value + " could not be autofilled into " + this);
+        }
     }
 
     @Override
