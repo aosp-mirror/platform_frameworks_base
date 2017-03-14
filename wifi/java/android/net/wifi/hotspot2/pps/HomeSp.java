@@ -245,6 +245,7 @@ public final class HomeSp implements Parcelable {
      * Validate HomeSp data.
      *
      * @return true on success or false on failure
+     * @hide
      */
     public boolean validate() {
         if (TextUtils.isEmpty(mFqdn)) {
