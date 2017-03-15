@@ -146,49 +146,48 @@ public class LocationTile extends QSTile<QSTile.State> {
 
     @Override
     protected void handleUpdateState(QSTile.State state, Object arg) {
-        final boolean locationEnabled =  mController.isLocationEnabled();
+        if (mAnimationList.isEmpty() && mShowingDetail && arg == null) {
+            return;
+        }
+        int currentMode = mController.getLocationCurrentState();
         boolean mIsEasy = isLocationEasyToggleEnabled();
-        if (mIsEasy) {
-            state.value = locationEnabled;
-            checkIfRestrictionEnforcedByAdminOnly(state, UserManager.DISALLOW_SHARE_LOCATION);
-            if (locationEnabled) {
-                state.icon = mEnable;
-                state.label = mContext.getString(R.string.quick_settings_location_label);
-                state.contentDescription = mContext.getString(
-                        R.string.accessibility_quick_settings_location_on);
-            } else {
-                state.icon = mDisable;
-                state.label = mContext.getString(R.string.quick_settings_location_label);
-                state.contentDescription = mContext.getString(
-                        R.string.accessibility_quick_settings_location_off);
-                if (mAnimationList.isEmpty() && mShowingDetail && arg == null) {
-                    return;
+        switch (currentMode) {
+            case Settings.Secure.LOCATION_MODE_BATTERY_SAVING:
+                if (mIsEasy) {
+                    state.value = true;
+                    checkIfRestrictionEnforcedByAdminOnly(state, UserManager.DISALLOW_SHARE_LOCATION);
                 }
-            }
-        } else {
-            int currentMode = mController.getLocationCurrentState();
-            switch (currentMode) {
-                case Settings.Secure.LOCATION_MODE_BATTERY_SAVING:
-                    state.contentDescription = mContext.getString(R.string.accessibility_quick_settings_location_battery_saving);
-                    state.label = mContext.getString(R.string.quick_settings_location_battery_saving_label);
-                    state.icon = ResourceIcon.get(R.drawable.ic_qs_location_battery_saving);
-                    break;
-                case Settings.Secure.LOCATION_MODE_SENSORS_ONLY:
-                    state.contentDescription = mContext.getString(R.string.accessibility_quick_settings_location_gps_only);
-                    state.label = mContext.getString(R.string.quick_settings_location_gps_only_label);
-                    state.icon = mEnable;
-                    break;
-                case Settings.Secure.LOCATION_MODE_HIGH_ACCURACY:
-                    state.contentDescription = mContext.getString(R.string.accessibility_quick_settings_location_high_accuracy);
-                    state.label = mContext.getString(R.string.quick_settings_location_high_accuracy_label);
-                    state.icon = mEnable;
-                    break;
-                default:
-                    state.contentDescription = mContext.getString(R.string.accessibility_quick_settings_location_off);
-                    state.label = mContext.getString(R.string.quick_settings_location_off_custom_label);
-                    state.icon = mDisable;
-                    break;
-            }
+                state.contentDescription = mContext.getString(R.string.accessibility_quick_settings_location_battery_saving);
+                state.label = mContext.getString(R.string.quick_settings_location_battery_saving_label);
+                state.icon = ResourceIcon.get(R.drawable.ic_qs_location_battery_saving);
+                break;
+            case Settings.Secure.LOCATION_MODE_SENSORS_ONLY:
+                if (mIsEasy) {
+                    state.value = true;
+                    checkIfRestrictionEnforcedByAdminOnly(state, UserManager.DISALLOW_SHARE_LOCATION);
+                }
+                state.contentDescription = mContext.getString(R.string.accessibility_quick_settings_location_gps_only);
+                state.label = mContext.getString(R.string.quick_settings_location_gps_only_label);
+                state.icon = mEnable;
+                break;
+            case Settings.Secure.LOCATION_MODE_HIGH_ACCURACY:
+                if (mIsEasy) {
+                    state.value = true;
+                    checkIfRestrictionEnforcedByAdminOnly(state, UserManager.DISALLOW_SHARE_LOCATION);
+                }
+                state.contentDescription = mContext.getString(R.string.accessibility_quick_settings_location_high_accuracy);
+                state.label = mContext.getString(R.string.quick_settings_location_high_accuracy_label);
+                state.icon = mEnable;
+                break;
+            default:
+                state.contentDescription = mContext.getString(R.string.accessibility_quick_settings_location_off);
+                state.label = mContext.getString(R.string.quick_settings_location_off_custom_label);
+                state.icon = mDisable;
+                if (mIsEasy) {
+                    state.value = false;
+                    checkIfRestrictionEnforcedByAdminOnly(state, UserManager.DISALLOW_SHARE_LOCATION);
+                }
+                break;
         }
     }
 
