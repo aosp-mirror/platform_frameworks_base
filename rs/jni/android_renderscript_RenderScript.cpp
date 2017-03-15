@@ -48,9 +48,6 @@ static constexpr bool kLogApi = false;
 
 using namespace android;
 
-template <typename... T>
-void UNUSED(T... t) {}
-
 #define PER_ARRAY_TYPE(flag, fnc, readonly, ...) {                                      \
     jint len = 0;                                                                       \
     void *ptr = nullptr;                                                                \

@@ -256,7 +256,8 @@ class GLEnv {
     std::map<int, ShaderProgram*> attached_shaders_;
     std::map<int, VertexFrame*> attached_vframes_;
 
-    DISALLOW_COPY_AND_ASSIGN(GLEnv);
+    GLEnv(const GLEnv&) = delete;
+    GLEnv& operator=(const GLEnv&) = delete;
 };
 
 } // namespace filterfw
