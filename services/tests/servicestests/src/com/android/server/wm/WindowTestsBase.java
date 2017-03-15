@@ -70,7 +70,10 @@ class WindowTestsBase {
     static WindowManagerService sWm = null;
     static TestWindowManagerPolicy sPolicy = null;
     private final static Session sMockSession = mock(Session.class);
-    private static int sNextDisplayId = Display.DEFAULT_DISPLAY + 1;
+    // The default display is removed in {@link #setUp} and then we iterate over all displays to
+    // make sure we don't collide with any existing display. If we run into no other display, the
+    // added display should be treated as default.
+    private static int sNextDisplayId = Display.DEFAULT_DISPLAY;
     static int sNextStackId = FIRST_DYNAMIC_STACK_ID;
     private static int sNextTaskId = 0;
 
