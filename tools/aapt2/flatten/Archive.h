@@ -26,6 +26,7 @@
 #include "google/protobuf/io/zero_copy_stream_impl_lite.h"
 
 #include "Diagnostics.h"
+#include "io/Io.h"
 #include "util/BigBuffer.h"
 #include "util/Files.h"
 
@@ -42,19 +43,31 @@ struct ArchiveEntry {
   size_t uncompressed_size;
 };
 
-class IArchiveWriter : public google::protobuf::io::CopyingOutputStream {
+class IArchiveWriter : public ::google::protobuf::io::CopyingOutputStream {
  public:
   virtual ~IArchiveWriter() = default;
 
+  virtual bool WriteFile(const android::StringPiece& path, uint32_t flags, io::InputStream* in) = 0;
+
+  // Starts a new entry and allows caller to write bytes to it sequentially.
+  // Only use StartEntry if code you do not control needs to write to a CopyingOutputStream.
+  // Prefer WriteFile instead of manually calling StartEntry/FinishEntry.
   virtual bool StartEntry(const android::StringPiece& path, uint32_t flags) = 0;
-  virtual bool WriteEntry(const BigBuffer& buffer) = 0;
-  virtual bool WriteEntry(const void* data, size_t len) = 0;
+
+  // Called to finish writing an entry previously started by StartEntry.
+  // Prefer WriteFile instead of manually calling StartEntry/FinishEntry.
   virtual bool FinishEntry() = 0;
 
-  // CopyingOutputStream implementations.
-  bool Write(const void* buffer, int size) override {
-    return WriteEntry(buffer, size);
-  }
+  // CopyingOutputStream implementation that allows sequential writes to this archive. Only
+  // valid between calls to StartEntry and FinishEntry.
+  virtual bool Write(const void* buffer, int size) = 0;
+
+  // Returns true if there was an error writing to the archive.
+  // The resulting error message can be retrieved from GetError().
+  virtual bool HadError() const = 0;
+
+  // Returns the error message if HadError() returns true.
+  virtual std::string GetError() const = 0;
 };
 
 std::unique_ptr<IArchiveWriter> CreateDirectoryArchiveWriter(IDiagnostics* diag,

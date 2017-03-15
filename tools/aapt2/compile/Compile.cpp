@@ -37,6 +37,7 @@
 #include "compile/XmlIdCollector.h"
 #include "flatten/Archive.h"
 #include "flatten/XmlFlattener.h"
+#include "io/BigBufferOutputStream.h"
 #include "proto/ProtoSerialize.h"
 #include "util/Files.h"
 #include "util/Maybe.h"
@@ -46,7 +47,6 @@
 
 using android::StringPiece;
 using google::protobuf::io::CopyingOutputStreamAdaptor;
-using google::protobuf::io::ZeroCopyOutputStream;
 
 namespace aapt {
 
@@ -142,10 +142,10 @@ static bool LoadInputFilesFromDir(
     IAaptContext* context, const CompileOptions& options,
     std::vector<ResourcePathData>* out_path_data) {
   const std::string& root_dir = options.res_dir.value();
-  std::unique_ptr<DIR, decltype(closedir)*> d(opendir(root_dir.data()),
-                                              closedir);
+  std::unique_ptr<DIR, decltype(closedir)*> d(opendir(root_dir.data()), closedir);
   if (!d) {
-    context->GetDiagnostics()->Error(DiagMessage() << strerror(errno));
+    context->GetDiagnostics()->Error(DiagMessage()
+                                     << android::base::SystemErrorCodeToString(errno));
     return false;
   }
 
@@ -161,10 +161,10 @@ static bool LoadInputFilesFromDir(
       continue;
     }
 
-    std::unique_ptr<DIR, decltype(closedir)*> subdir(
-        opendir(prefix_path.data()), closedir);
+    std::unique_ptr<DIR, decltype(closedir)*> subdir(opendir(prefix_path.data()), closedir);
     if (!subdir) {
-      context->GetDiagnostics()->Error(DiagMessage() << strerror(errno));
+      context->GetDiagnostics()->Error(DiagMessage()
+                                       << android::base::SystemErrorCodeToString(errno));
       return false;
     }
 
@@ -177,8 +177,7 @@ static bool LoadInputFilesFromDir(
       file::AppendPath(&full_path, leaf_entry->d_name);
 
       std::string err_str;
-      Maybe<ResourcePathData> path_data =
-          ExtractResourcePathData(full_path, &err_str);
+      Maybe<ResourcePathData> path_data = ExtractResourcePathData(full_path, &err_str);
       if (!path_data) {
         context->GetDiagnostics()->Error(DiagMessage() << err_str);
         return false;
@@ -199,7 +198,7 @@ static bool CompileTable(IAaptContext* context, const CompileOptions& options,
     std::ifstream fin(path_data.source.path, std::ifstream::binary);
     if (!fin) {
       context->GetDiagnostics()->Error(DiagMessage(path_data.source)
-                                       << strerror(errno));
+                                       << android::base::SystemErrorCodeToString(errno));
       return false;
     }
 
@@ -249,8 +248,7 @@ static bool CompileTable(IAaptContext* context, const CompileOptions& options,
 
   // Create the file/zip entry.
   if (!writer->StartEntry(output_path, 0)) {
-    context->GetDiagnostics()->Error(DiagMessage(output_path)
-                                     << "failed to open");
+    context->GetDiagnostics()->Error(DiagMessage(output_path) << "failed to open");
     return false;
   }
 
@@ -258,21 +256,18 @@ static bool CompileTable(IAaptContext* context, const CompileOptions& options,
   // writer->FinishEntry().
   {
     // Wrap our IArchiveWriter with an adaptor that implements the
-    // ZeroCopyOutputStream
-    // interface.
+    // ZeroCopyOutputStream interface.
     CopyingOutputStreamAdaptor copying_adaptor(writer);
 
     std::unique_ptr<pb::ResourceTable> pb_table = SerializeTableToPb(&table);
     if (!pb_table->SerializeToZeroCopyStream(&copying_adaptor)) {
-      context->GetDiagnostics()->Error(DiagMessage(output_path)
-                                       << "failed to write");
+      context->GetDiagnostics()->Error(DiagMessage(output_path) << "failed to write");
       return false;
     }
   }
 
   if (!writer->FinishEntry()) {
-    context->GetDiagnostics()->Error(DiagMessage(output_path)
-                                     << "failed to finish entry");
+    context->GetDiagnostics()->Error(DiagMessage(output_path) << "failed to finish entry");
     return false;
   }
   return true;
@@ -293,16 +288,14 @@ static bool WriteHeaderAndBufferToWriter(const StringPiece& output_path,
   // writer->FinishEntry().
   {
     // Wrap our IArchiveWriter with an adaptor that implements the
-    // ZeroCopyOutputStream
-    // interface.
+    // ZeroCopyOutputStream interface.
     CopyingOutputStreamAdaptor copying_adaptor(writer);
     CompiledFileOutputStream output_stream(&copying_adaptor);
 
     // Number of CompiledFiles.
     output_stream.WriteLittleEndian32(1);
 
-    std::unique_ptr<pb::CompiledFile> compiled_file =
-        SerializeCompiledFileToPb(file);
+    std::unique_ptr<pb::CompiledFile> compiled_file = SerializeCompiledFileToPb(file);
     output_stream.WriteCompiledFile(compiled_file.get());
     output_stream.WriteData(&buffer);
 
@@ -371,14 +364,12 @@ static bool FlattenXmlToOutStream(IAaptContext* context,
     return false;
   }
 
-  std::unique_ptr<pb::CompiledFile> pb_compiled_file =
-      SerializeCompiledFileToPb(xmlres->file);
+  std::unique_ptr<pb::CompiledFile> pb_compiled_file = SerializeCompiledFileToPb(xmlres->file);
   out->WriteCompiledFile(pb_compiled_file.get());
   out->WriteData(&buffer);
 
   if (out->HadError()) {
-    context->GetDiagnostics()->Error(DiagMessage(output_path)
-                                     << "failed to write data");
+    context->GetDiagnostics()->Error(DiagMessage(output_path) << "failed to write data");
     return false;
   }
   return true;
@@ -388,8 +379,7 @@ static bool CompileXml(IAaptContext* context, const CompileOptions& options,
                        const ResourcePathData& path_data,
                        IArchiveWriter* writer, const std::string& output_path) {
   if (context->IsVerbose()) {
-    context->GetDiagnostics()->Note(DiagMessage(path_data.source)
-                                    << "compiling XML");
+    context->GetDiagnostics()->Note(DiagMessage(path_data.source) << "compiling XML");
   }
 
   std::unique_ptr<xml::XmlResource> xmlres;
@@ -397,7 +387,7 @@ static bool CompileXml(IAaptContext* context, const CompileOptions& options,
     std::ifstream fin(path_data.source.path, std::ifstream::binary);
     if (!fin) {
       context->GetDiagnostics()->Error(DiagMessage(path_data.source)
-                                       << strerror(errno));
+                                       << android::base::SystemErrorCodeToString(errno));
       return false;
     }
 
@@ -470,31 +460,6 @@ static bool CompileXml(IAaptContext* context, const CompileOptions& options,
   return true;
 }
 
-class BigBufferOutputStream : public io::OutputStream {
- public:
-  explicit BigBufferOutputStream(BigBuffer* buffer) : buffer_(buffer) {}
-
-  bool Next(void** data, int* len) override {
-    size_t count;
-    *data = buffer_->NextBlock(&count);
-    *len = static_cast<int>(count);
-    return true;
-  }
-
-  void BackUp(int count) override { buffer_->BackUp(count); }
-
-  google::protobuf::int64 ByteCount() const override {
-    return buffer_->size();
-  }
-
-  bool HadError() const override { return false; }
-
- private:
-  BigBuffer* buffer_;
-
-  DISALLOW_COPY_AND_ASSIGN(BigBufferOutputStream);
-};
-
 static bool CompilePng(IAaptContext* context, const CompileOptions& options,
                        const ResourcePathData& path_data,
                        IArchiveWriter* writer, const std::string& output_path) {
@@ -520,7 +485,7 @@ static bool CompilePng(IAaptContext* context, const CompileOptions& options,
     }
 
     BigBuffer crunched_png_buffer(4096);
-    BigBufferOutputStream crunched_png_buffer_out(&crunched_png_buffer);
+    io::BigBufferOutputStream crunched_png_buffer_out(&crunched_png_buffer);
 
     // Ensure that we only keep the chunks we care about if we end up
     // using the original PNG instead of the crunched one.
@@ -533,8 +498,7 @@ static bool CompilePng(IAaptContext* context, const CompileOptions& options,
     std::unique_ptr<NinePatch> nine_patch;
     if (path_data.extension == "9.png") {
       std::string err;
-      nine_patch = NinePatch::Create(image->rows.get(), image->width,
-                                     image->height, &err);
+      nine_patch = NinePatch::Create(image->rows.get(), image->width, image->height, &err);
       if (!nine_patch) {
         context->GetDiagnostics()->Error(DiagMessage() << err);
         return false;
@@ -547,8 +511,7 @@ static bool CompilePng(IAaptContext* context, const CompileOptions& options,
       // width - 2.
       image->width -= 2;
       image->height -= 2;
-      memmove(image->rows.get(), image->rows.get() + 1,
-              image->height * sizeof(uint8_t**));
+      memmove(image->rows.get(), image->rows.get() + 1, image->height * sizeof(uint8_t**));
       for (int32_t h = 0; h < image->height; h++) {
         memmove(image->rows[h], image->rows[h] + 4, image->width * 4);
       }
@@ -560,8 +523,7 @@ static bool CompilePng(IAaptContext* context, const CompileOptions& options,
     }
 
     // Write the crunched PNG.
-    if (!WritePng(context, image.get(), nine_patch.get(),
-                  &crunched_png_buffer_out, {})) {
+    if (!WritePng(context, image.get(), nine_patch.get(), &crunched_png_buffer_out, {})) {
       return false;
     }
 
@@ -574,24 +536,21 @@ static bool CompilePng(IAaptContext* context, const CompileOptions& options,
       // The re-encoded PNG is larger than the original, and there is
       // no mandatory transformation. Use the original.
       if (context->IsVerbose()) {
-        context->GetDiagnostics()->Note(
-            DiagMessage(path_data.source)
-            << "original PNG is smaller than crunched PNG"
-            << ", using original");
+        context->GetDiagnostics()->Note(DiagMessage(path_data.source)
+                                        << "original PNG is smaller than crunched PNG"
+                                        << ", using original");
       }
 
-      PngChunkFilter png_chunk_filter_again(content);
+      png_chunk_filter.Rewind();
       BigBuffer filtered_png_buffer(4096);
-      BigBufferOutputStream filtered_png_buffer_out(&filtered_png_buffer);
-      io::Copy(&filtered_png_buffer_out, &png_chunk_filter_again);
+      io::BigBufferOutputStream filtered_png_buffer_out(&filtered_png_buffer);
+      io::Copy(&filtered_png_buffer_out, &png_chunk_filter);
       buffer.AppendBuffer(std::move(filtered_png_buffer));
     }
 
     if (context->IsVerbose()) {
-      // For debugging only, use the legacy PNG cruncher and compare the
-      // resulting file sizes.
-      // This will help catch exotic cases where the new code may generate
-      // larger PNGs.
+      // For debugging only, use the legacy PNG cruncher and compare the resulting file sizes.
+      // This will help catch exotic cases where the new code may generate larger PNGs.
       std::stringstream legacy_stream(content);
       BigBuffer legacy_buffer(4096);
       Png png(context->GetDiagnostics());

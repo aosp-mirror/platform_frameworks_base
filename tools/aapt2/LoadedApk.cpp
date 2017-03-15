@@ -20,6 +20,7 @@
 #include "ValueVisitor.h"
 #include "flatten/Archive.h"
 #include "flatten/TableFlattener.h"
+#include "io/BigBufferInputStream.h"
 
 namespace aapt {
 
@@ -27,8 +28,7 @@ std::unique_ptr<LoadedApk> LoadedApk::LoadApkFromPath(IAaptContext* context,
                                                       const android::StringPiece& path) {
   Source source(path);
   std::string error;
-  std::unique_ptr<io::ZipFileCollection> apk =
-      io::ZipFileCollection::Create(path, &error);
+  std::unique_ptr<io::ZipFileCollection> apk = io::ZipFileCollection::Create(path, &error);
   if (!apk) {
     context->GetDiagnostics()->Error(DiagMessage(source) << error);
     return {};
@@ -36,21 +36,18 @@ std::unique_ptr<LoadedApk> LoadedApk::LoadApkFromPath(IAaptContext* context,
 
   io::IFile* file = apk->FindFile("resources.arsc");
   if (!file) {
-    context->GetDiagnostics()->Error(DiagMessage(source)
-                                     << "no resources.arsc found");
+    context->GetDiagnostics()->Error(DiagMessage(source) << "no resources.arsc found");
     return {};
   }
 
   std::unique_ptr<io::IData> data = file->OpenAsData();
   if (!data) {
-    context->GetDiagnostics()->Error(DiagMessage(source)
-                                     << "could not open resources.arsc");
+    context->GetDiagnostics()->Error(DiagMessage(source) << "could not open resources.arsc");
     return {};
   }
 
   std::unique_ptr<ResourceTable> table = util::make_unique<ResourceTable>();
-  BinaryResourceParser parser(context, table.get(), source, data->data(),
-                              data->size());
+  BinaryResourceParser parser(context, table.get(), source, data->data(), data->size());
   if (!parser.Parse()) {
     return {};
   }
@@ -92,9 +89,9 @@ bool LoadedApk::WriteToArchive(IAaptContext* context, const TableFlattenerOption
       continue;
     }
 
-    // The resource table needs to be reserialized since it might have changed.
+    // The resource table needs to be re-serialized since it might have changed.
     if (path == "resources.arsc") {
-      BigBuffer buffer = BigBuffer(1024);
+      BigBuffer buffer(4096);
       // TODO(adamlesinski): How to determine if there were sparse entries (and if to encode
       // with sparse entries) b/35389232.
       TableFlattener flattener(options, &buffer);
@@ -102,8 +99,8 @@ bool LoadedApk::WriteToArchive(IAaptContext* context, const TableFlattenerOption
         return false;
       }
 
-      if (!writer->StartEntry(path, ArchiveEntry::kAlign) || !writer->WriteEntry(buffer) ||
-          !writer->FinishEntry()) {
+      io::BigBufferInputStream input_stream(&buffer);
+      if (!writer->WriteFile(path, ArchiveEntry::kAlign, &input_stream)) {
         context->GetDiagnostics()->Error(DiagMessage()
                                          << "Error when writing file '" << path << "' in APK.");
         return false;
@@ -113,14 +110,12 @@ bool LoadedApk::WriteToArchive(IAaptContext* context, const TableFlattenerOption
 
     std::unique_ptr<io::IData> data = file->OpenAsData();
     uint32_t compression_flags = file->WasCompressed() ? ArchiveEntry::kCompress : 0u;
-    if (!writer->StartEntry(path, compression_flags) ||
-        !writer->WriteEntry(data->data(), data->size()) || !writer->FinishEntry()) {
+    if (!writer->WriteFile(path, compression_flags, data.get())) {
       context->GetDiagnostics()->Error(DiagMessage()
                                        << "Error when writing file '" << path << "' in APK.");
       return false;
     }
   }
-
   return true;
 }
 

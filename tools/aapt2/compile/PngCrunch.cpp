@@ -29,12 +29,7 @@
 
 namespace aapt {
 
-// Size in bytes of the PNG signature.
-constexpr size_t kPngSignatureSize = 8u;
-
-/**
- * Custom deleter that destroys libpng read and info structs.
- */
+// Custom deleter that destroys libpng read and info structs.
 class PngReadStructDeleter {
  public:
   PngReadStructDeleter(png_structp read_ptr, png_infop info_ptr)
@@ -51,9 +46,7 @@ class PngReadStructDeleter {
   DISALLOW_COPY_AND_ASSIGN(PngReadStructDeleter);
 };
 
-/**
- * Custom deleter that destroys libpng write and info structs.
- */
+// Custom deleter that destroys libpng write and info structs.
 class PngWriteStructDeleter {
  public:
   PngWriteStructDeleter(png_structp write_ptr, png_infop info_ptr)
@@ -82,12 +75,11 @@ static void LogError(png_structp png_ptr, png_const_charp error_msg) {
   diag->Error(DiagMessage() << error_msg);
 }
 
-static void ReadDataFromStream(png_structp png_ptr, png_bytep buffer,
-                               png_size_t len) {
+static void ReadDataFromStream(png_structp png_ptr, png_bytep buffer, png_size_t len) {
   io::InputStream* in = (io::InputStream*)png_get_io_ptr(png_ptr);
 
   const void* in_buffer;
-  int in_len;
+  size_t in_len;
   if (!in->Next(&in_buffer, &in_len)) {
     if (in->HadError()) {
       std::string err = in->GetError();
@@ -96,19 +88,18 @@ static void ReadDataFromStream(png_structp png_ptr, png_bytep buffer,
     return;
   }
 
-  const size_t bytes_read = std::min(static_cast<size_t>(in_len), len);
+  const size_t bytes_read = std::min(in_len, len);
   memcpy(buffer, in_buffer, bytes_read);
-  if (bytes_read != static_cast<size_t>(in_len)) {
-    in->BackUp(in_len - static_cast<int>(bytes_read));
+  if (bytes_read != in_len) {
+    in->BackUp(in_len - bytes_read);
   }
 }
 
-static void WriteDataToStream(png_structp png_ptr, png_bytep buffer,
-                              png_size_t len) {
+static void WriteDataToStream(png_structp png_ptr, png_bytep buffer, png_size_t len) {
   io::OutputStream* out = (io::OutputStream*)png_get_io_ptr(png_ptr);
 
   void* out_buffer;
-  int out_len;
+  size_t out_len;
   while (len > 0) {
     if (!out->Next(&out_buffer, &out_len)) {
       if (out->HadError()) {
@@ -118,7 +109,7 @@ static void WriteDataToStream(png_structp png_ptr, png_bytep buffer,
       return;
     }
 
-    const size_t bytes_written = std::min(static_cast<size_t>(out_len), len);
+    const size_t bytes_written = std::min(out_len, len);
     memcpy(out_buffer, buffer, bytes_written);
 
     // Advance the input buffer.
@@ -126,7 +117,7 @@ static void WriteDataToStream(png_structp png_ptr, png_bytep buffer,
     len -= bytes_written;
 
     // Advance the output buffer.
-    out_len -= static_cast<int>(bytes_written);
+    out_len -= bytes_written;
   }
 
   // If the entire output buffer wasn't used, backup.
@@ -139,41 +130,35 @@ std::unique_ptr<Image> ReadPng(IAaptContext* context, io::InputStream* in) {
   // Read the first 8 bytes of the file looking for the PNG signature.
   // Bail early if it does not match.
   const png_byte* signature;
-  int buffer_size;
+  size_t buffer_size;
   if (!in->Next((const void**)&signature, &buffer_size)) {
-    context->GetDiagnostics()->Error(
-        DiagMessage() << android::base::SystemErrorCodeToString(errno));
+    context->GetDiagnostics()->Error(DiagMessage()
+                                     << android::base::SystemErrorCodeToString(errno));
     return {};
   }
 
-  if (static_cast<size_t>(buffer_size) < kPngSignatureSize ||
-      png_sig_cmp(signature, 0, kPngSignatureSize) != 0) {
-    context->GetDiagnostics()->Error(
-        DiagMessage() << "file signature does not match PNG signature");
+  if (buffer_size < kPngSignatureSize || png_sig_cmp(signature, 0, kPngSignatureSize) != 0) {
+    context->GetDiagnostics()->Error(DiagMessage()
+                                     << "file signature does not match PNG signature");
     return {};
   }
 
   // Start at the beginning of the first chunk.
-  in->BackUp(buffer_size - static_cast<int>(kPngSignatureSize));
+  in->BackUp(buffer_size - kPngSignatureSize);
 
-  // Create and initialize the png_struct with the default error and warning
-  // handlers.
-  // The header version is also passed in to ensure that this was built against
-  // the same
+  // Create and initialize the png_struct with the default error and warning handlers.
+  // The header version is also passed in to ensure that this was built against the same
   // version of libpng.
-  png_structp read_ptr =
-      png_create_read_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
+  png_structp read_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
   if (read_ptr == nullptr) {
-    context->GetDiagnostics()->Error(
-        DiagMessage() << "failed to create libpng read png_struct");
+    context->GetDiagnostics()->Error(DiagMessage() << "failed to create libpng read png_struct");
     return {};
   }
 
   // Create and initialize the memory for image header and data.
   png_infop info_ptr = png_create_info_struct(read_ptr);
   if (info_ptr == nullptr) {
-    context->GetDiagnostics()->Error(
-        DiagMessage() << "failed to create libpng read png_info");
+    context->GetDiagnostics()->Error(DiagMessage() << "failed to create libpng read png_info");
     png_destroy_read_struct(&read_ptr, nullptr, nullptr);
     return {};
   }
@@ -189,8 +174,7 @@ std::unique_ptr<Image> ReadPng(IAaptContext* context, io::InputStream* in) {
   }
 
   // Handle warnings ourselves via IDiagnostics.
-  png_set_error_fn(read_ptr, (png_voidp)context->GetDiagnostics(), LogError,
-                   LogWarning);
+  png_set_error_fn(read_ptr, (png_voidp)context->GetDiagnostics(), LogError, LogWarning);
 
   // Set up the read functions which read from our custom data sources.
   png_set_read_fn(read_ptr, (png_voidp)in, ReadDataFromStream);
@@ -203,8 +187,7 @@ std::unique_ptr<Image> ReadPng(IAaptContext* context, io::InputStream* in) {
 
   // Extract image meta-data from the various chunk headers.
   uint32_t width, height;
-  int bit_depth, color_type, interlace_method, compression_method,
-      filter_method;
+  int bit_depth, color_type, interlace_method, compression_method, filter_method;
   png_get_IHDR(read_ptr, info_ptr, &width, &height, &bit_depth, &color_type,
                &interlace_method, &compression_method, &filter_method);
 
@@ -247,11 +230,9 @@ std::unique_ptr<Image> ReadPng(IAaptContext* context, io::InputStream* in) {
   // 9-patch uses int32_t to index images, so we cap the image dimensions to
   // something
   // that can always be represented by 9-patch.
-  if (width > std::numeric_limits<int32_t>::max() ||
-      height > std::numeric_limits<int32_t>::max()) {
-    context->GetDiagnostics()->Error(DiagMessage()
-                                     << "PNG image dimensions are too large: "
-                                     << width << "x" << height);
+  if (width > std::numeric_limits<int32_t>::max() || height > std::numeric_limits<int32_t>::max()) {
+    context->GetDiagnostics()->Error(
+        DiagMessage() << "PNG image dimensions are too large: " << width << "x" << height);
     return {};
   }
 
@@ -263,8 +244,7 @@ std::unique_ptr<Image> ReadPng(IAaptContext* context, io::InputStream* in) {
   CHECK(row_bytes == 4 * width);  // RGBA
 
   // Allocate one large block to hold the image.
-  output_image->data =
-      std::unique_ptr<uint8_t[]>(new uint8_t[height * row_bytes]);
+  output_image->data = std::unique_ptr<uint8_t[]>(new uint8_t[height * row_bytes]);
 
   // Create an array of rows that index into the data block.
   output_image->rows = std::unique_ptr<uint8_t* []>(new uint8_t*[height]);
@@ -281,19 +261,13 @@ std::unique_ptr<Image> ReadPng(IAaptContext* context, io::InputStream* in) {
   return output_image;
 }
 
-/**
- * Experimentally chosen constant to be added to the overhead of using color
- * type
- * PNG_COLOR_TYPE_PALETTE to account for the uncompressability of the palette
- * chunk.
- * Without this, many small PNGs encoded with palettes are larger after
- * compression than
- * the same PNGs encoded as RGBA.
- */
+// Experimentally chosen constant to be added to the overhead of using color type
+// PNG_COLOR_TYPE_PALETTE to account for the uncompressability of the palette chunk.
+// Without this, many small PNGs encoded with palettes are larger after compression than
+// the same PNGs encoded as RGBA.
 constexpr static const size_t kPaletteOverheadConstant = 1024u * 10u;
 
-// Pick a color type by which to encode the image, based on which color type
-// will take
+// Pick a color type by which to encode the image, based on which color type will take
 // the least amount of disk space.
 //
 // 9-patch images traditionally have not been encoded with palettes.
@@ -372,20 +346,17 @@ static int PickColorType(int32_t width, int32_t height, bool grayscale,
   return PNG_COLOR_TYPE_RGBA;
 }
 
-// Assigns indices to the color and alpha palettes, encodes them, and then
-// invokes
+// Assigns indices to the color and alpha palettes, encodes them, and then invokes
 // png_set_PLTE/png_set_tRNS.
 // This must be done before writing image data.
-// Image data must be transformed to use the indices assigned within the
-// palette.
+// Image data must be transformed to use the indices assigned within the palette.
 static void WritePalette(png_structp write_ptr, png_infop write_info_ptr,
                          std::unordered_map<uint32_t, int>* color_palette,
                          std::unordered_set<uint32_t>* alpha_palette) {
   CHECK(color_palette->size() <= 256);
   CHECK(alpha_palette->size() <= 256);
 
-  // Populate the PNG palette struct and assign indices to the color
-  // palette.
+  // Populate the PNG palette struct and assign indices to the color palette.
 
   // Colors in the alpha palette should have smaller indices.
   // This will ensure that we can truncate the alpha palette if it is
@@ -403,13 +374,11 @@ static void WritePalette(png_structp write_ptr, png_infop write_info_ptr,
   }
 
   // Create the PNG color palette struct.
-  auto color_palette_bytes =
-      std::unique_ptr<png_color[]>(new png_color[color_palette->size()]);
+  auto color_palette_bytes = std::unique_ptr<png_color[]>(new png_color[color_palette->size()]);
 
   std::unique_ptr<png_byte[]> alpha_palette_bytes;
   if (!alpha_palette->empty()) {
-    alpha_palette_bytes =
-        std::unique_ptr<png_byte[]>(new png_byte[alpha_palette->size()]);
+    alpha_palette_bytes = std::unique_ptr<png_byte[]>(new png_byte[alpha_palette->size()]);
   }
 
   for (const auto& entry : *color_palette) {
@@ -433,23 +402,20 @@ static void WritePalette(png_structp write_ptr, png_infop write_info_ptr,
   // The bytes get copied here, so it is safe to release color_palette_bytes at
   // the end of function
   // scope.
-  png_set_PLTE(write_ptr, write_info_ptr, color_palette_bytes.get(),
-               color_palette->size());
+  png_set_PLTE(write_ptr, write_info_ptr, color_palette_bytes.get(), color_palette->size());
 
   if (alpha_palette_bytes) {
-    png_set_tRNS(write_ptr, write_info_ptr, alpha_palette_bytes.get(),
-                 alpha_palette->size(), nullptr);
+    png_set_tRNS(write_ptr, write_info_ptr, alpha_palette_bytes.get(), alpha_palette->size(),
+                 nullptr);
   }
 }
 
 // Write the 9-patch custom PNG chunks to write_info_ptr. This must be done
-// before
-// writing image data.
+// before writing image data.
 static void WriteNinePatch(png_structp write_ptr, png_infop write_info_ptr,
                            const NinePatch* nine_patch) {
   // The order of the chunks is important.
-  // 9-patch code in older platforms expects the 9-patch chunk to
-  // be last.
+  // 9-patch code in older platforms expects the 9-patch chunk to be last.
 
   png_unknown_chunk unknown_chunks[3];
   memset(unknown_chunks, 0, sizeof(unknown_chunks));
@@ -475,8 +441,7 @@ static void WriteNinePatch(png_structp write_ptr, png_infop write_info_ptr,
     index++;
   }
 
-  std::unique_ptr<uint8_t[]> serialized_nine_patch =
-      nine_patch->SerializeBase(&chunk_len);
+  std::unique_ptr<uint8_t[]> serialized_nine_patch = nine_patch->SerializeBase(&chunk_len);
   strcpy((char*)unknown_chunks[index].name, "npTc");
   unknown_chunks[index].size = chunk_len;
   unknown_chunks[index].data = (png_bytep)serialized_nine_patch.get();
@@ -497,22 +462,18 @@ bool WritePng(IAaptContext* context, const Image* image,
               const PngOptions& options) {
   // Create and initialize the write png_struct with the default error and
   // warning handlers.
-  // The header version is also passed in to ensure that this was built against
-  // the same
+  // The header version is also passed in to ensure that this was built against the same
   // version of libpng.
-  png_structp write_ptr =
-      png_create_write_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
+  png_structp write_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
   if (write_ptr == nullptr) {
-    context->GetDiagnostics()->Error(
-        DiagMessage() << "failed to create libpng write png_struct");
+    context->GetDiagnostics()->Error(DiagMessage() << "failed to create libpng write png_struct");
     return false;
   }
 
   // Allocate memory to store image header data.
   png_infop write_info_ptr = png_create_info_struct(write_ptr);
   if (write_info_ptr == nullptr) {
-    context->GetDiagnostics()->Error(
-        DiagMessage() << "failed to create libpng write png_info");
+    context->GetDiagnostics()->Error(DiagMessage() << "failed to create libpng write png_info");
     png_destroy_write_struct(&write_ptr, nullptr);
     return false;
   }
@@ -527,8 +488,7 @@ bool WritePng(IAaptContext* context, const Image* image,
   }
 
   // Handle warnings with our IDiagnostics.
-  png_set_error_fn(write_ptr, (png_voidp)context->GetDiagnostics(), LogError,
-                   LogWarning);
+  png_set_error_fn(write_ptr, (png_voidp)context->GetDiagnostics(), LogError, LogWarning);
 
   // Set up the write functions which write to our custom data sources.
   png_set_write_fn(write_ptr, (png_voidp)out, WriteDataToStream, nullptr);
@@ -599,8 +559,7 @@ bool WritePng(IAaptContext* context, const Image* image,
     context->GetDiagnostics()->Note(msg);
   }
 
-  const bool convertible_to_grayscale =
-      max_gray_deviation <= options.grayscale_tolerance;
+  const bool convertible_to_grayscale = max_gray_deviation <= options.grayscale_tolerance;
 
   const int new_color_type = PickColorType(
       image->width, image->height, grayscale, convertible_to_grayscale,
@@ -715,15 +674,12 @@ bool WritePng(IAaptContext* context, const Image* image,
       }
       png_write_row(write_ptr, out_row.get());
     }
-  } else if (new_color_type == PNG_COLOR_TYPE_RGB ||
-             new_color_type == PNG_COLOR_TYPE_RGBA) {
+  } else if (new_color_type == PNG_COLOR_TYPE_RGB || new_color_type == PNG_COLOR_TYPE_RGBA) {
     const size_t bpp = new_color_type == PNG_COLOR_TYPE_RGB ? 3 : 4;
     if (needs_to_zero_rgb_channels_of_transparent_pixels) {
       // The source RGBA data can't be used as-is, because we need to zero out
-      // the RGB
-      // values of transparent pixels.
-      auto out_row =
-          std::unique_ptr<png_byte[]>(new png_byte[image->width * bpp]);
+      // the RGB values of transparent pixels.
+      auto out_row = std::unique_ptr<png_byte[]>(new png_byte[image->width * bpp]);
 
       for (int32_t y = 0; y < image->height; y++) {
         png_const_bytep in_row = image->rows[y];
@@ -747,8 +703,7 @@ bool WritePng(IAaptContext* context, const Image* image,
       }
     } else {
       // The source image can be used as-is, just tell libpng whether or not to
-      // ignore
-      // the alpha channel.
+      // ignore the alpha channel.
       if (new_color_type == PNG_COLOR_TYPE_RGB) {
         // Delete the extraneous alpha values that we appended to our buffer
         // when reading the original values.

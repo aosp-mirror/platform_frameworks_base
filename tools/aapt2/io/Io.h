@@ -19,42 +19,76 @@
 
 #include <string>
 
-#include "google/protobuf/io/zero_copy_stream_impl_lite.h"
-
 namespace aapt {
 namespace io {
 
-/**
- * InputStream interface that inherits from protobuf's ZeroCopyInputStream,
- * but adds error handling methods to better report issues.
- *
- * The code style here matches the protobuf style.
- */
-class InputStream : public ::google::protobuf::io::ZeroCopyInputStream {
+// InputStream interface that mimics protobuf's ZeroCopyInputStream,
+// with added error handling methods to better report issues.
+class InputStream {
  public:
+  virtual ~InputStream() = default;
+
+  // Returns a chunk of data for reading. data and size must not be nullptr.
+  // Returns true so long as there is more data to read, returns false if an error occurred
+  // or no data remains. If an error occurred, check HadError().
+  // The stream owns the buffer returned from this method and the buffer is invalidated
+  // anytime another mutable method is called.
+  virtual bool Next(const void** data, size_t* size) = 0;
+
+  // Backup count bytes, where count is smaller or equal to the size of the last buffer returned
+  // from Next().
+  // Useful when the last block returned from Next() wasn't fully read.
+  virtual void BackUp(size_t count) = 0;
+
+  // Returns true if this InputStream can rewind. If so, Rewind() can be called.
+  virtual bool CanRewind() const { return false; };
+
+  // Rewinds the stream to the beginning so it can be read again.
+  // Returns true if the rewind succeeded.
+  // This does nothing if CanRewind() returns false.
+  virtual bool Rewind() { return false; }
+
+  // Returns the number of bytes that have been read from the stream.
+  virtual size_t ByteCount() const = 0;
+
+  // Returns an error message if HadError() returned true.
   virtual std::string GetError() const { return {}; }
 
+  // Returns true if an error occurred. Errors are permanent.
   virtual bool HadError() const = 0;
 };
 
-/**
- * OutputStream interface that inherits from protobuf's ZeroCopyOutputStream,
- * but adds error handling methods to better report issues.
- *
- * The code style here matches the protobuf style.
- */
-class OutputStream : public ::google::protobuf::io::ZeroCopyOutputStream {
+// OutputStream interface that mimics protobuf's ZeroCopyOutputStream,
+// with added error handling methods to better report issues.
+class OutputStream {
  public:
+  virtual ~OutputStream() = default;
+
+  // Returns a buffer to which data can be written to. The data written to this buffer will
+  // eventually be written to the stream. Call BackUp() if the data written doesn't occupy the
+  // entire buffer.
+  // Return false if there was an error.
+  // The stream owns the buffer returned from this method and the buffer is invalidated
+  // anytime another mutable method is called.
+  virtual bool Next(void** data, size_t* size) = 0;
+
+  // Backup count bytes, where count is smaller or equal to the size of the last buffer returned
+  // from Next().
+  // Useful for when the last block returned from Next() wasn't fully written to.
+  virtual void BackUp(size_t count) = 0;
+
+  // Returns the number of bytes that have been written to the stream.
+  virtual size_t ByteCount() const = 0;
+
+  // Returns an error message if HadError() returned true.
   virtual std::string GetError() const { return {}; }
 
+  // Returns true if an error occurred. Errors are permanent.
   virtual bool HadError() const = 0;
 };
 
-/**
- * Copies the data from in to out. Returns true if there was no error.
- * If there was an error, check the individual streams' HadError/GetError
- * methods.
- */
+// Copies the data from in to out. Returns false if there was an error.
+// If there was an error, check the individual streams' HadError/GetError methods.
 bool Copy(OutputStream* out, InputStream* in);
 
 }  // namespace io
