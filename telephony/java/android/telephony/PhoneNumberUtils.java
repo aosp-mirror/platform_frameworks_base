@@ -1619,7 +1619,7 @@ public class PhoneNumberUtils
     //
     // Australia: Short codes are six or eight digits in length, starting with the prefix "19"
     //            followed by an additional four or six digits and two.
-    // Czech Republic: Codes are seven digits in length for MO and five (not billed) or
+    // Czechia: Codes are seven digits in length for MO and five (not billed) or
     //            eight (billed) for MT direction
     //
     // see http://en.wikipedia.org/wiki/Short_code#Regional_differences for reference
