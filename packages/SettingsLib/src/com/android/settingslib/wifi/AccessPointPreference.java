@@ -43,10 +43,6 @@ public class AccessPointPreference extends Preference {
     private static final int[] STATE_SECURED = {
             R.attr.state_encrypted
     };
-    private static final int[] STATE_SAVED = {
-            R.attr.state_encrypted,
-            R.attr.state_saved
-    };
 
     private static final int[] wifi_friction_attributes = { R.attr.wifi_friction };
 
@@ -152,10 +148,8 @@ public class AccessPointPreference extends Preference {
         }
         view.itemView.setContentDescription(mContentDescription);
 
-        if (!mForSavedNetworks) {
-            ImageView frictionImageView = (ImageView) view.findViewById(R.id.friction_icon);
-            bindFrictionImage(frictionImageView);
-        }
+        ImageView frictionImageView = (ImageView) view.findViewById(R.id.friction_icon);
+        bindFrictionImage(frictionImageView);
     }
 
     protected void updateIcon(int level, Context context) {
@@ -184,11 +178,7 @@ public class AccessPointPreference extends Preference {
             return;
         }
         if (mAccessPoint.getSecurity() != AccessPoint.SECURITY_NONE) {
-            if (mAccessPoint.isSaved()) {
-                mFrictionSld.setState(STATE_SAVED);
-            } else {
-                mFrictionSld.setState(STATE_SECURED);
-            }
+            mFrictionSld.setState(STATE_SECURED);
         }
         Drawable drawable = mFrictionSld.getCurrent();
         frictionImageView.setImageDrawable(drawable);
