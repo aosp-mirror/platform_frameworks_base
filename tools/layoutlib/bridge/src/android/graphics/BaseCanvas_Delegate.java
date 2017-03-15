@@ -24,6 +24,7 @@ import com.android.layoutlib.bridge.impl.PorterDuffUtility;
 import com.android.ninepatch.NinePatchChunk;
 import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
+import android.annotation.Nullable;
 import android.text.TextUtils;
 
 import java.awt.*;
@@ -31,6 +32,8 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Arc2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
+import java.awt.image.DataBuffer;
 
 public class BaseCanvas_Delegate {
     // ---- delegate manager ----
@@ -646,9 +649,15 @@ public class BaseCanvas_Delegate {
         forceSrcMode[0] = false;
 
         // if the bitmap config is alpha_8, then we erase all color value from it
-        // before drawing it.
+        // before drawing it or apply the texture from the shader if present.
         if (bitmap.getConfig() == Bitmap.Config.ALPHA_8) {
-            fixAlpha8Bitmap(image);
+            Shader_Delegate shader = paint.getShader();
+            java.awt.Paint javaPaint = null;
+            if (shader instanceof BitmapShader_Delegate) {
+                javaPaint = shader.getJavaPaint();
+            }
+
+            fixAlpha8Bitmap(image, javaPaint);
         } else if (!bitmap.hasAlpha()) {
             // hasAlpha is merely a rendering hint. There can in fact be alpha values
             // in the bitmap but it should be ignored at drawing time.
@@ -672,16 +681,37 @@ public class BaseCanvas_Delegate {
         return image;
     }
 
-    private static void fixAlpha8Bitmap(final BufferedImage image) {
+    /**
+     * This method will apply the correct color to the passed "only alpha" image. Colors on the
+     * passed image will be destroyed.
+     * If the passed javaPaint is null, the color will be set to 0. If a paint is passed, it will
+     * be used to obtain the color that will be applied.
+     * <p/>
+     * This will destroy the passed image color channel.
+     */
+    private static void fixAlpha8Bitmap(final BufferedImage image,
+            @Nullable java.awt.Paint javaPaint) {
         int w = image.getWidth();
         int h = image.getHeight();
+
+        DataBuffer texture = null;
+        if (javaPaint != null) {
+            PaintContext context = javaPaint.createContext(ColorModel.getRGBdefault(), null, null,
+                    new AffineTransform(), null);
+            texture = context.getRaster(0, 0, w, h).getDataBuffer();
+        }
+
         int[] argb = new int[w * h];
         image.getRGB(0, 0, image.getWidth(), image.getHeight(), argb, 0, image.getWidth());
 
         final int length = argb.length;
-        for (int i = 0 ; i < length; i++) {
+        for (int i = 0; i < length; i++) {
             argb[i] &= 0xFF000000;
+            if (texture != null) {
+                argb[i] |= texture.getElem(i) & 0x00FFFFFF;
+            }
         }
+
         image.setRGB(0, 0, w, h, argb, 0, w);
     }
 
