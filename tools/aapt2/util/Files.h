@@ -132,6 +132,11 @@ class FileFilter {
   std::vector<std::string> pattern_tokens_;
 };
 
+// Returns a list of files relative to the directory identified by `path`.
+// An optional FileFilter filters out any files that don't pass.
+Maybe<std::vector<std::string>> FindFiles(const android::StringPiece& path, IDiagnostics* diag,
+                                          const FileFilter* filter = nullptr);
+
 }  // namespace file
 }  // namespace aapt
 

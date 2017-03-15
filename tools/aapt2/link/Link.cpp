@@ -77,6 +77,7 @@ struct LinkOptions {
   std::string manifest_path;
   std::vector<std::string> include_paths;
   std::vector<std::string> overlay_files;
+  std::vector<std::string> assets_dirs;
   bool output_to_directory = false;
   bool auto_add_overlay = false;
 
@@ -1412,6 +1413,46 @@ class LinkCommand {
     return doc;
   }
 
+  bool CopyAssetsDirsToApk(IArchiveWriter* writer) {
+    std::map<std::string, std::unique_ptr<io::RegularFile>> merged_assets;
+    for (const std::string& assets_dir : options_.assets_dirs) {
+      Maybe<std::vector<std::string>> files =
+          file::FindFiles(assets_dir, context_->GetDiagnostics(), nullptr);
+      if (!files) {
+        return false;
+      }
+
+      for (const std::string& file : files.value()) {
+        std::string full_key = "assets/" + file;
+        std::string full_path = assets_dir;
+        file::AppendPath(&full_path, file);
+
+        auto iter = merged_assets.find(full_key);
+        if (iter == merged_assets.end()) {
+          merged_assets.emplace(std::move(full_key),
+                                util::make_unique<io::RegularFile>(Source(std::move(full_path))));
+        } else if (context_->IsVerbose()) {
+          context_->GetDiagnostics()->Warn(DiagMessage(iter->second->GetSource())
+                                           << "asset file overrides '" << full_path << "'");
+        }
+      }
+    }
+
+    for (auto& entry : merged_assets) {
+      uint32_t compression_flags = ArchiveEntry::kCompress;
+      std::string extension = file::GetExtension(entry.first).to_string();
+      if (options_.extensions_to_not_compress.count(extension) > 0) {
+        compression_flags = 0u;
+      }
+
+      if (!CopyFileToArchive(entry.second.get(), entry.first, compression_flags, writer,
+                             context_)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   /**
    * Writes the AndroidManifest, ResourceTable, and all XML files referenced by
    * the ResourceTable to the IArchiveWriter.
@@ -1724,11 +1765,9 @@ class LinkCommand {
     }
 
     // Start writing the base APK.
-    std::unique_ptr<IArchiveWriter> archive_writer =
-        MakeArchiveWriter(options_.output_path);
+    std::unique_ptr<IArchiveWriter> archive_writer = MakeArchiveWriter(options_.output_path);
     if (!archive_writer) {
-      context_->GetDiagnostics()->Error(DiagMessage()
-                                        << "failed to create archive");
+      context_->GetDiagnostics()->Error(DiagMessage() << "failed to create archive");
       return 1;
     }
 
@@ -1743,16 +1782,15 @@ class LinkCommand {
       XmlReferenceLinker manifest_linker;
       if (manifest_linker.Consume(context_, manifest_xml.get())) {
         if (options_.generate_proguard_rules_path &&
-            !proguard::CollectProguardRulesForManifest(
-                Source(options_.manifest_path), manifest_xml.get(),
-                &proguard_keep_set)) {
+            !proguard::CollectProguardRulesForManifest(Source(options_.manifest_path),
+                                                       manifest_xml.get(), &proguard_keep_set)) {
           error = true;
         }
 
         if (options_.generate_main_dex_proguard_rules_path &&
-            !proguard::CollectProguardRulesForManifest(
-                Source(options_.manifest_path), manifest_xml.get(),
-                &proguard_main_dex_keep_set, true)) {
+            !proguard::CollectProguardRulesForManifest(Source(options_.manifest_path),
+                                                       manifest_xml.get(),
+                                                       &proguard_main_dex_keep_set, true)) {
           error = true;
         }
 
@@ -1776,13 +1814,15 @@ class LinkCommand {
     }
 
     if (error) {
-      context_->GetDiagnostics()->Error(DiagMessage()
-                                        << "failed processing manifest");
+      context_->GetDiagnostics()->Error(DiagMessage() << "failed processing manifest");
       return 1;
     }
 
-    if (!WriteApk(archive_writer.get(), &proguard_keep_set, manifest_xml.get(),
-                  &final_table_)) {
+    if (!WriteApk(archive_writer.get(), &proguard_keep_set, manifest_xml.get(), &final_table_)) {
+      return 1;
+    }
+
+    if (!CopyAssetsDirsToApk(archive_writer.get())) {
       return 1;
     }
 
@@ -1863,12 +1903,6 @@ class LinkCommand {
                            proguard_main_dex_keep_set)) {
       return 1;
     }
-
-    if (context_->IsVerbose()) {
-      DebugPrintTableOptions debug_print_table_options;
-      debug_print_table_options.show_sources = true;
-      Debug::PrintTable(&final_table_, debug_print_table_options);
-    }
     return 0;
   }
 
@@ -1916,6 +1950,9 @@ int Link(const std::vector<StringPiece>& args) {
           .RequiredFlag("--manifest", "Path to the Android manifest to build",
                         &options.manifest_path)
           .OptionalFlagList("-I", "Adds an Android APK to link against", &options.include_paths)
+          .OptionalFlagList("-A",
+                            "An assets directory to include in the APK. These are unprocessed.",
+                            &options.assets_dirs)
           .OptionalFlagList("-R",
                             "Compilation unit to link, using `overlay` semantics.\n"
                             "The last conflicting resource given takes precedence.",

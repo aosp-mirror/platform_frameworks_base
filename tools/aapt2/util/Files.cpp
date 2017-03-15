@@ -264,5 +264,57 @@ bool FileFilter::operator()(const std::string& filename, FileType type) const {
   return true;
 }
 
+Maybe<std::vector<std::string>> FindFiles(const android::StringPiece& path, IDiagnostics* diag,
+                                          const FileFilter* filter) {
+  const std::string root_dir = path.to_string();
+  std::unique_ptr<DIR, decltype(closedir)*> d(opendir(root_dir.data()), closedir);
+  if (!d) {
+    diag->Error(DiagMessage() << android::base::SystemErrorCodeToString(errno));
+    return {};
+  }
+
+  std::vector<std::string> files;
+  std::vector<std::string> subdirs;
+  while (struct dirent* entry = readdir(d.get())) {
+    if (util::StartsWith(entry->d_name, ".")) {
+      continue;
+    }
+
+    std::string file_name = entry->d_name;
+    std::string full_path = root_dir;
+    AppendPath(&full_path, file_name);
+    const FileType file_type = GetFileType(full_path);
+
+    if (filter != nullptr) {
+      if (!(*filter)(file_name, file_type)) {
+        continue;
+      }
+    }
+
+    if (file_type == file::FileType::kDirectory) {
+      subdirs.push_back(std::move(file_name));
+    } else {
+      files.push_back(std::move(file_name));
+    }
+  }
+
+  // Now process subdirs.
+  for (const std::string& subdir : subdirs) {
+    std::string full_subdir = root_dir;
+    AppendPath(&full_subdir, subdir);
+    Maybe<std::vector<std::string>> subfiles = FindFiles(full_subdir, diag, filter);
+    if (!subfiles) {
+      return {};
+    }
+
+    for (const std::string& subfile : subfiles.value()) {
+      std::string new_file = subdir;
+      AppendPath(&new_file, subfile);
+      files.push_back(new_file);
+    }
+  }
+  return files;
+}
+
 }  // namespace file
 }  // namespace aapt
