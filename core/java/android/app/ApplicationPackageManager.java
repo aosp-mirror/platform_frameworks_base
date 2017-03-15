@@ -1814,6 +1814,15 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
+    public void setUpdateAvailable(String packageName, boolean updateAvailable) {
+        try {
+            mPM.setUpdateAvailable(packageName, updateAvailable);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @Override
     public String getInstallerPackageName(String packageName) {
         try {
             return mPM.getInstallerPackageName(packageName);

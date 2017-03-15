@@ -12190,6 +12190,11 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (!isInstantApp && userState.instantApp) {
                 return null;
             }
+            // throw out instant app filters if updates are available; will trigger
+            // instant app resolution
+            if (userState.instantApp && ps.isUpdateAvailable()) {
+                return null;
+            }
             final ResolveInfo res = new ResolveInfo();
             res.activityInfo = ai;
             if ((mFlags&PackageManager.GET_RESOLVED_FILTER) != 0) {
@@ -16885,6 +16890,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             final PackageSetting ps = mSettings.mPackages.get(pkgName);
             if (ps != null) {
                 res.newUsers = ps.queryInstalledUsers(sUserManager.getUserIds(), true);
+                ps.setUpdateAvailable(false /*updateAvailable*/);
             }
 
             final int childCount = (pkg.childPackages != null) ? pkg.childPackages.size() : 0;
@@ -19671,6 +19677,17 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
             callingPackage = Integer.toString(Binder.getCallingUid());
         }
         setEnabledSetting(appPackageName, null, newState, flags, userId, callingPackage);
+    }
+
+    @Override
+    public void setUpdateAvailable(String packageName, boolean updateAvailable) {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.INSTALL_PACKAGES, null);
+        synchronized (mPackages) {
+            final PackageSetting pkgSetting = mSettings.mPackages.get(packageName);
+            if (pkgSetting != null) {
+                pkgSetting.setUpdateAvailable(updateAvailable);
+            }
+        }
     }
 
     @Override

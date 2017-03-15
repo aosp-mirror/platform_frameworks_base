@@ -643,6 +643,12 @@ public class MockPackageManager extends PackageManager {
         throw new UnsupportedOperationException();
     }
 
+    /** @hide */
+    @Override
+    public void setUpdateAvailable(String packageName, boolean updateAvailable) {
+        throw new UnsupportedOperationException();
+    }
+
     @Override
     public String getInstallerPackageName(String packageName) {
         throw new UnsupportedOperationException();

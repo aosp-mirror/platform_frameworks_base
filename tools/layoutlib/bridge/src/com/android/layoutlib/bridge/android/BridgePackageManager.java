@@ -657,6 +657,10 @@ public class BridgePackageManager extends PackageManager {
     }
 
     @Override
+    public void setUpdateAvailable(String packageName, boolean updateAvailable) {
+    }
+
+    @Override
     public void deletePackage(String packageName, IPackageDeleteObserver observer, int flags) {
     }
 

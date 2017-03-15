@@ -608,6 +608,12 @@ interface IPackageManager {
 
     boolean setRequiredForSystemUser(String packageName, boolean systemUserApp);
 
+    /**
+     * Sets whether or not an update is available. Ostensibly for instant apps
+     * to force exteranl resolution.
+     */
+    void setUpdateAvailable(String packageName, boolean updateAvaialble);
+
     String getServicesSystemSharedLibraryPackageName();
     String getSharedSystemSharedLibraryPackageName();
 

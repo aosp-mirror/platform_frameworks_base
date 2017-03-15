@@ -5286,6 +5286,11 @@ public abstract class PackageManager {
     public abstract void setInstallerPackageName(String targetPackage,
             String installerPackageName);
 
+    /** @hide */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.INSTALL_PACKAGES)
+    public abstract void setUpdateAvailable(String packageName, boolean updateAvaialble);
+
     /**
      * Attempts to delete a package. Since this may take a little while, the
      * result will be posted back to the given observer. A deletion will fail if
