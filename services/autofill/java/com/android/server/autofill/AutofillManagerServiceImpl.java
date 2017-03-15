@@ -69,6 +69,8 @@ import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillValue;
 import android.view.autofill.IAutoFillManagerClient;
+import android.view.autofill.AutofillManager.AutofillCallback;
+
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
@@ -674,8 +676,16 @@ final class AutofillManagerServiceImpl {
         public void onFillRequestSuccess(@Nullable FillResponse response,
                 @NonNull String servicePackageName) {
             if (response == null) {
+                // Nothing to be done, but need to notify client.
+                notifyUnavailableToClient();
                 removeSelf();
                 return;
+            }
+
+            if ((response.getDatasets() == null || response.getDatasets().isEmpty())
+                            && response.getAuthentication() == null) {
+                // Response is "empty" from an UI point of view, need to notify client.
+                notifyUnavailableToClient();
             }
             synchronized (mLock) {
                 processResponseLocked(response);
@@ -1091,6 +1101,15 @@ final class AutofillManagerServiceImpl {
             }
         }
 
+        private void notifyUnavailableToClient() {
+            if (mCurrentViewState == null) {
+                // TODO(b/33197203): temporary sanity check; should never happen
+                Slog.w(TAG, "notifyUnavailable(): mCurrentViewState is null");
+                return;
+            }
+            notifyChangeToClient(mCurrentViewState.mId, AutofillCallback.EVENT_INPUT_UNAVAILABLE);
+        }
+
         private void processResponseLocked(FillResponse response) {
             if (DEBUG) {
                 Slog.d(TAG, "processResponseLocked(auth=" + response.getAuthentication()
@@ -1099,7 +1118,7 @@ final class AutofillManagerServiceImpl {
 
             if (mCurrentViewState == null) {
                 // TODO(b/33197203): temporary sanity check; should never happen
-                Slog.w(TAG, "processResponseLocked(): mCurrentResponse is null");
+                Slog.w(TAG, "processResponseLocked(): mCurrentViewState is null");
                 return;
             }
 
