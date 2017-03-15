@@ -4654,14 +4654,10 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             mDisplayId = display.getDisplayId();
         }
 
-        void attachStack(ActivityStack stack, boolean onTop) {
+        void attachStack(ActivityStack stack, int position) {
             if (DEBUG_STACK) Slog.v(TAG_STACK, "attachStack: attaching " + stack
-                    + " to displayId=" + mDisplayId + " onTop=" + onTop);
-            if (onTop) {
-                mStacks.add(stack);
-            } else {
-                mStacks.add(0, stack);
-            }
+                    + " to displayId=" + mDisplayId + " position=" + position);
+            mStacks.add(position, stack);
         }
 
         void detachStack(ActivityStack stack) {
