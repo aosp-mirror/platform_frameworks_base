@@ -74,6 +74,7 @@ import com.android.server.autofill.ui.AutoFillUI;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -803,35 +804,100 @@ final class AutofillManagerServiceImpl {
                 Slog.d(TAG, "showSaveLocked(): saveInfo=" + saveInfo);
             }
 
-            if (saveInfo == null || saveInfo.getSavableIds() == null
-                    || saveInfo.getSavableIds().isEmpty()) {
+            /*
+             * The Save dialog is only shown if all conditions below are met:
+             *
+             * - saveInfo is not null
+             * - autofillValue of all required ids is not null
+             * - autofillValue of at least one id (required or optional) has changed.
+             */
+
+            if (saveInfo == null) {
                 return;
             }
 
-            final int size = saveInfo.getSavableIds().size();
-            for (int i = 0; i < size; i++) {
-                final AutofillId id = saveInfo.getSavableIds().valueAt(i);
+            final AutofillId[] requiredIds = saveInfo.getRequiredIds();
+            if (requiredIds == null || requiredIds.length == 0) {
+                Slog.w(TAG, "showSaveLocked(): no required ids on saveInfo");
+                return;
+            }
+
+            boolean allRequiredAreNotEmpty = true;
+            boolean atLeastOneChanged = false;
+            for (int i = 0; i < requiredIds.length; i++) {
+                final AutofillId id = requiredIds[i];
                 final ViewState state = mViewStates.get(id);
-                if (state != null && state.mValueUpdated) {
+                if (state == null || state.mAutofillValue == null
+                         || state.mAutofillValue.isEmpty()) {
+                    final ViewNode node = findViewNodeByIdLocked(id);
+                    if (node == null) {
+                        Slog.w(TAG, "Service passed invalid id on SavableInfo: " + id);
+                        allRequiredAreNotEmpty = false;
+                        break;
+                    }
+                    final AutofillValue initialValue = node.getAutofillValue();
+                    if (initialValue == null || initialValue.isEmpty()) {
+                        if (DEBUG) {
+                            Slog.d(TAG, "finishSessionLocked(): empty initial value for " + id );
+                        }
+                        allRequiredAreNotEmpty = false;
+                        break;
+                    }
+                }
+                if (state.mValueUpdated) {
                     final AutofillValue filledValue = findValue(mAutoFilledDataset, id);
-                    if (state.mAutofillValue == null || state.mAutofillValue.equals(filledValue)) {
-                        continue;
+                    if (!state.mAutofillValue.equals(filledValue)) {
+                        if (DEBUG) {
+                            Slog.d(TAG, "finishSessionLocked(): found a change on " + id + ": "
+                                    + filledValue + " => " + state.mAutofillValue);
+                        }
+                        atLeastOneChanged = true;
                     }
-                    if (DEBUG) {
-                        Slog.d(TAG, "finishSessionLocked(): found a change on " + id + ": "
-                                + state.mAutofillValue);
+                } else {
+                    if (state.mAutofillValue == null || state.mAutofillValue.isEmpty()) {
+                        if (DEBUG) {
+                            Slog.d(TAG, "finishSessionLocked(): empty value for " + id );
+                        }
+                        allRequiredAreNotEmpty = false;
+                        break;
+
                     }
+                }
+            }
+
+            if (allRequiredAreNotEmpty) {
+                if (!atLeastOneChanged && saveInfo.getOptionalIds() != null) {
+                    for (int i = 0; i < saveInfo.getOptionalIds().length; i++) {
+                        final AutofillId id = saveInfo.getOptionalIds()[i];
+                        final ViewState state = mViewStates.get(id);
+                        if (state != null && state.mAutofillValue != null && state.mValueUpdated) {
+                            final AutofillValue filledValue = findValue(mAutoFilledDataset, id);
+                            if (!state.mAutofillValue.equals(filledValue)) {
+                                if (DEBUG) {
+                                    Slog.d(TAG, "finishSessionLocked(): found a change on optional "
+                                            + id + ": " + filledValue + " => "
+                                            + state.mAutofillValue);
+                                }
+                                atLeastOneChanged = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+                if (atLeastOneChanged) {
                     getUiForShowing().showSaveUi(
                             mInfo.getServiceInfo().loadLabel(mContext.getPackageManager()),
                             saveInfo);
                     return;
                 }
             }
-
             // Nothing changed...
             if (DEBUG) {
-                Slog.d(TAG, "showSaveLocked(): with no changes, comes no responsibilities");
+                Slog.d(TAG, "showSaveLocked(): with no changes, comes no responsibilities."
+                        + "allRequiredAreNotNull=" + allRequiredAreNotEmpty
+                        + ", atLeastOneChanged=" + atLeastOneChanged);
             }
+            removeSelf();
         }
 
         /**

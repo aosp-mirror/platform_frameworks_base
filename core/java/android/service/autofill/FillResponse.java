@@ -44,8 +44,8 @@ import java.util.ArrayList;
  * <pre class="prettyprint">
  *  new FillResponse.Builder()
  *      .add(new Dataset.Builder(createPresentation())
- *          .setTextFieldValue(id1, "homer")
- *          .setTextFieldValue(id2, "D'OH!")
+ *          .setValue(id1, AutofillValue.forText("homer"))
+ *          .setValue(id2, AutofillValue.forText("D'OH!"))
  *          .build())
  *      .build();
  * </pre>
@@ -55,48 +55,19 @@ import java.util.ArrayList;
  * <pre class="prettyprint">
  *  new FillResponse.Builder()
  *      .add(new Dataset.Builder(createFirstPresentation())
- *          .setTextFieldValue(id1, "homer")
- *          .setTextFieldValue(id2, "D'OH!")
+ *          .setValue(id1, AutofillValue.forText("homer"))
+ *          .setValue(id2, AutofillValue.forText("D'OH!"))
  *          .build())
  *      .add(new Dataset.Builder(createSecondPresentation())
- *          .setTextFieldValue(id1, "elbarto")
- *          .setTextFieldValue(id2, "cowabonga")
+ *          .setValue(id1, AutofillValue.forText("elbarto")
+ *          .setValue(id2, AutofillValue.forText("cowabonga")
  *          .build())
  *      .build();
  * </pre>
  *
- * <p>If the user does not have any data associated with this {@link android.app.Activity} but
- * the service wants to offer the user the option to save the data that was entered, then the
- * service could populate the response with a {@link SaveInfo} instead of {@link Dataset}s:
- *
- * <pre class="prettyprint">
- *  new FillResponse.Builder()
- *      .setSaveInfo(new SaveInfo.Builder(SaveInfo.SAVE_INFO_TYPE_CREDENTIALS)
- *                   .addSavableFields(id1, id2))
- *      .build();
- * </pre>
- *
- * <p>Similarly, there might be cases where the user data on the service is enough to populate some
- * fields but not all, and the service would still be interested on saving the other fields. In this
- * scenario, the service could populate the response with both {@link Dataset}s and
- * {@link SaveInfo}:
- *
- * <pre class="prettyprint">
- *   new FillResponse.Builder()
- *       .add(new Dataset.Builder(createPresentation())
- *          .setTextFieldValue(id1, "Homer")                  // first name
- *          .setTextFieldValue(id2, "Simpson")                // last name
- *          .setTextFieldValue(id3, "742 Evergreen Terrace")  // street
- *          .setTextFieldValue(id4, "Springfield")            // city
- *          .build())
- *       .setSaveInfo(new SaveInfo.Builder(SaveInfo.SAVE_INFO_TYPE_ADDRESS)
- *                   .addSavableFields(id5, id6)) // state and zipcode
- *       .build();
- *
- * </pre>
- *
- * <p>Notice that the ids that are part of a dataset (ids 1 to 4, in this example) are automatically
- * added to the {@code savableIds} list.
+ * If the service is interested on saving the user-edited data back, it must set a {@link SaveInfo}
+ * in the {@link FillResponse}. Typically, the {@link SaveInfo} contains the same ids as the
+ * {@link Dataset}, but other combinations are possible - see {@link SaveInfo} for more details
  *
  * <p>If the service has multiple {@link Dataset}s for different sections of the activity,
  * for example, a user section for which there are two datasets followed by an address
@@ -113,12 +84,12 @@ import java.util.ArrayList;
  * <pre class="prettyprint">
  *  new FillResponse.Builder()
  *      .add(new Dataset.Builder(createFirstPresentation())
- *          .setTextFieldValue(id1, "Homer")
- *          .setTextFieldValue(id2, "Simpson")
+ *          .setValue(id1, AutofillValue.forText("Homer"))
+ *          .setValue(id2, AutofillValue.forText("Simpson"))
  *          .build())
  *      .add(new Dataset.Builder(createSecondPresentation())
- *          .setTextFieldValue(id1, "Bart")
- *          .setTextFieldValue(id2, "Simpson")
+ *          .setValue(id1, AutofillValue.forText("Bart"))
+ *          .setValue(id2, AutofillValue.forText("Simpson"))
  *          .build())
  *      .build();
  * </pre>
@@ -129,12 +100,12 @@ import java.util.ArrayList;
  * <pre class="prettyprint">
  *  new FillResponse.Builder()
  *      .add(new Dataset.Builder(createThirdPresentation())
- *          .setTextFieldValue(id3, "742 Evergreen Terrace")
- *          .setTextFieldValue(id4, "Springfield")
+ *          .setValue(id3, AutofillValue.forText("742 Evergreen Terrace"))
+ *          .setValue(id4, AutofillValue.forText("Springfield"))
  *          .build())
  *      .add(new Dataset.Builder(createFourthPresentation())
- *          .setTextFieldValue(id3, "Springfield Power Plant")
- *          .setTextFieldValue(id4, "Springfield")
+ *          .setValue(id3, AutofillValue.forText("Springfield Power Plant"))
+ *          .setValue(id4, AutofillValue.forText("Springfield"))
  *          .build())
  *      .build();
  * </pre>
@@ -167,16 +138,7 @@ public final class FillResponse implements Parcelable {
 
     private FillResponse(@NonNull Builder builder) {
         mDatasets = builder.mDatasets;
-
         mSaveInfo = builder.mSaveInfo;
-        if (mSaveInfo != null) {
-            mSaveInfo.addSavableIds(mDatasets);
-            if (mSaveInfo.getSavableIds() == null) {
-                throw new IllegalArgumentException(
-                        "need to provide at least one savable id on SaveInfo");
-            }
-        }
-
         mExtras = builder.mExtras;
         mPresentation = builder.mPresentation;
         mAuthentication = builder.mAuthentication;
