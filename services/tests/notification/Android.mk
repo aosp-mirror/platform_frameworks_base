@@ -30,6 +30,7 @@ LOCAL_JAVA_LIBRARIES := android.test.runner
 LOCAL_JACK_FLAGS := --multi-dex native
 
 LOCAL_PACKAGE_NAME := FrameworksNotificationTests
+LOCAL_COMPATIBILITY_SUITE := device-tests
 
 LOCAL_CERTIFICATE := platform
 
