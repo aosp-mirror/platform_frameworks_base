@@ -3608,6 +3608,70 @@ message MetricsEvent {
     // CATEGORY: SETTINGS
     SETTINGS_LOCK_SCREEN_PREFERENCES = 882;
 
+    // ACTION: An app requested the app-op permission ACCESS_NOTIFICATIONS
+    // PACKAGE: The package name of the app requesting the permission
+    ACTION_APPOP_REQUEST_ACCESS_NOTIFICATIONS = 883;
+
+    // ACTION: An app was granted the app-op permission ACCESS_NOTIFICATIONS
+    // PACKAGE: The package name of the app that was granted the permission
+    ACTION_APPOP_GRANT_ACCESS_NOTIFICATIONS = 884;
+
+    // ACTION: An app requested the app-op permission ACCESS_NOTIFICATIONS and the request was denied
+    // PACKAGE: The package name of the app requesting the permission
+    ACTION_APPOP_DENIED_ACCESS_NOTIFICATIONS = 885;
+
+    // ACTION: The app-op permission ACCESS_NOTIFICATIONS was revoked for an app
+    // PACKAGE: The package name of the app the permission was revoked for
+    ACTION_APPOP_REVOKE_ACCESS_NOTIFICATIONS = 886;
+
+    // ACTION: An app requested the app-op permission SYSTEM_ALERT_WINDOW
+    // PACKAGE: The package name of the app requesting the permission
+    ACTION_APPOP_REQUEST_SYSTEM_ALERT_WINDOW = 887;
+
+    // ACTION: An app was granted the app-op permission SYSTEM_ALERT_WINDOW
+    // PACKAGE: The package name of the app that was granted the permission
+    ACTION_APPOP_GRANT_SYSTEM_ALERT_WINDOW = 888;
+
+    // ACTION: An app requested the app-op permission SYSTEM_ALERT_WINDOW and the request was denied
+    // PACKAGE: The package name of the app requesting the permission
+    ACTION_APPOP_DENIED_SYSTEM_ALERT_WINDOW = 889;
+
+    // ACTION: The app-op permission SYSTEM_ALERT_WINDOW was revoked for an app
+    // PACKAGE: The package name of the app the permission was revoked for
+    ACTION_APPOP_REVOKE_SYSTEM_ALERT_WINDOW = 890;
+
+    // ACTION: An app requested the app-op permission REQUEST_WRITE_SETTINGS
+    // PACKAGE: The package name of the app requesting the permission
+    ACTION_APPOP_REQUEST_WRITE_SETTINGS = 891;
+
+    // ACTION: An app was granted the app-op permission REQUEST_WRITE_SETTINGS
+    // PACKAGE: The package name of the app that was granted the permission
+    ACTION_APPOP_GRANT_WRITE_SETTINGS = 892;
+
+    // ACTION: An app requested the app-op permission REQUEST_WRITE_SETTINGS and the request was denied
+    // PACKAGE: The package name of the app requesting the permission
+    ACTION_APPOP_DENIED_WRITE_SETTINGS = 893;
+
+    // ACTION: The app-op permission REQUEST_WRITE_SETTINGS was revoked for an app
+    // PACKAGE: The package name of the app the permission was revoked for
+    ACTION_APPOP_REVOKE_WRITE_SETTINGS = 894;
+
+    // ACTION: An app requested the app-op permission REQUEST_INSTALL_PACKAGES
+    // PACKAGE: The package name of the app requesting the permission
+    ACTION_APPOP_REQUEST_REQUEST_INSTALL_PACKAGES = 895;
+
+    // ACTION: An app was granted the app-op permission REQUEST_INSTALL_PACKAGES
+    // PACKAGE: The package name of the app that was granted the permission
+    ACTION_APPOP_GRANT_REQUEST_INSTALL_PACKAGES = 896;
+
+    // ACTION: An app requested the app-op permission REQUEST_INSTALL_PACKAGES and the request was denied
+    // PACKAGE: The package name of the app requesting the permission
+    ACTION_APPOP_DENIED_REQUEST_INSTALL_PACKAGES = 897;
+
+    // ACTION: The app-op permission REQUEST_INSTALL_PACKAGES was revoked for an app
+    // PACKAGE: The package name of the app the permission was revoked for
+    ACTION_APPOP_REVOKE_REQUEST_INSTALL_PACKAGES = 898;
+
     // ---- End O Constants, all O constants go above this line ----
 
     // Add new aosp constants above this line.
