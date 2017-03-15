@@ -88,7 +88,6 @@
                 android:scaleType="fitCenter"
                 android:src="@drawable/ic_qs_network_logging"
                 android:tint="?android:attr/textColorPrimaryInverse"
-                android:alpha="@dimen/qs_footer_dialog_network_logging_icon_alpha"
                 android:adjustViewBounds="true"/>
             <LinearLayout
                 android:layout_width="match_parent"
