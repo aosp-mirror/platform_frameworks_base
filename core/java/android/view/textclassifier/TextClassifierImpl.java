@@ -121,8 +121,8 @@ final class TextClassifierImpl implements TextClassifier {
                         .classifyText(text.toString(), startIndex, endIndex);
                 if (results.length > 0) {
                     // TODO: Added this log for debug only. Remove before release.
-                    Log.d(LOG_TAG,
-                            String.format("Classification type: %s", results[0].mCollection));
+                    Log.d(LOG_TAG, String.format(
+                            "Classification type: %s", getHighestScoringType(results)));
                     return createClassificationResult(results, classified);
                 }
             }
@@ -188,7 +188,7 @@ final class TextClassifierImpl implements TextClassifier {
             builder.setEntityType(classifications[i].mCollection, classifications[i].mScore);
         }
 
-        final String type = classifications[0].mCollection;
+        final String type = getHighestScoringType(classifications);
         final Intent intent = IntentFactory.create(mContext, type, text.toString());
         final PackageManager pm;
         final ResolveInfo resolveInfo;
@@ -224,6 +224,23 @@ final class TextClassifierImpl implements TextClassifier {
             }
         }
         return builder.build();
+    }
+
+    private static String getHighestScoringType(SmartSelection.ClassificationResult[] types) {
+        if (types.length < 1) {
+            return "";
+        }
+
+        String type = types[0].mCollection;
+        float highestScore = types[0].mScore;
+        final int size = types.length;
+        for (int i = 1; i < size; i++) {
+            if (types[i].mScore > highestScore) {
+                type = types[i].mCollection;
+                highestScore = types[i].mScore;
+            }
+        }
+        return type;
     }
 
     /**
@@ -265,7 +282,7 @@ final class TextClassifierImpl implements TextClassifier {
                     final SmartSelection.ClassificationResult[] results =
                             smartSelection.classifyText(text, selectionStart, selectionEnd);
                     if (results.length > 0) {
-                        final String type = results[0].mCollection;
+                        final String type = getHighestScoringType(results);
                         if (matches(type, linkMask)) {
                             final Intent intent = IntentFactory.create(
                                     context, type, text.substring(selectionStart, selectionEnd));
