@@ -1953,11 +1953,6 @@ final class ActivityRecord implements AppWindowContainerListener {
     }
 
     void setRequestedOrientation(int requestedOrientation) {
-        if (task != null && (!task.mFullscreen || !task.getStack().mFullscreen)) {
-            // Fixed screen orientation isn't supported when activities aren't in full screen mode.
-            return;
-        }
-
         final int displayId = getDisplayId();
         final Configuration displayConfig =
                 mStackSupervisor.getDisplayOverrideConfiguration(displayId);
