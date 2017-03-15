@@ -159,6 +159,8 @@ import com.android.server.notification.ManagedServices.UserProfiles;
 
 import libcore.io.IoUtils;
 
+import com.google.android.collect.Lists;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.xmlpull.v1.XmlPullParser;
@@ -1658,8 +1660,7 @@ public class NotificationManagerService extends SystemService {
         public NotificationChannel getNotificationChannelForPackage(String pkg, int uid,
                 String channelId, boolean includeDeleted) {
             checkCallerIsSystem();
-            return mRankingHelper.getNotificationChannel
-                    (pkg, uid, channelId, includeDeleted);
+            return mRankingHelper.getNotificationChannel(pkg, uid, channelId, includeDeleted);
         }
 
         @Override
@@ -1671,6 +1672,27 @@ public class NotificationManagerService extends SystemService {
             cancelAllNotificationsInt(MY_UID, MY_PID, pkg, channelId, 0, 0, true,
                     UserHandle.getUserId(Binder.getCallingUid()), REASON_CHANNEL_BANNED, null);
             mRankingHelper.deleteNotificationChannel(pkg, Binder.getCallingUid(), channelId);
+            savePolicyFile();
+        }
+
+        @Override
+        public ParceledListSlice<NotificationChannelGroup> getNotificationChannelGroups(
+                String pkg) {
+            checkCallerIsSystemOrSameApp(pkg);
+            return new ParceledListSlice<>(new ArrayList(
+                    mRankingHelper.getNotificationChannelGroups(pkg, Binder.getCallingUid())));
+        }
+
+        @Override
+        public void deleteNotificationChannelGroup(String pkg, String channelGroupId) {
+            checkCallerIsSystemOrSameApp(pkg);
+
+            List<String> deletedChannelIds = mRankingHelper.deleteNotificationChannelGroup(
+                    pkg, Binder.getCallingUid(), channelGroupId);
+            for (int i = 0; i < deletedChannelIds.size(); i++) {
+                cancelAllNotificationsInt(MY_UID, MY_PID, pkg, deletedChannelIds.get(i), 0, 0, true,
+                        UserHandle.getUserId(Binder.getCallingUid()), REASON_CHANNEL_BANNED, null);
+            }
             savePolicyFile();
         }
 

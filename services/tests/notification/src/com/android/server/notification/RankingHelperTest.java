@@ -854,6 +854,43 @@ public class RankingHelperTest {
     }
 
     @Test
+    public void testDeleteGroup() throws Exception {
+        NotificationChannelGroup notDeleted = new NotificationChannelGroup("not", "deleted");
+        NotificationChannelGroup deleted = new NotificationChannelGroup("totally", "deleted");
+        NotificationChannel nonGroupedNonDeletedChannel =
+                new NotificationChannel("no group", "so not deleted", IMPORTANCE_HIGH);
+        NotificationChannel groupedButNotDeleted =
+                new NotificationChannel("not deleted", "belongs to notDeleted", IMPORTANCE_DEFAULT);
+        groupedButNotDeleted.setGroup("not");
+        NotificationChannel groupedAndDeleted =
+                new NotificationChannel("deleted", "belongs to deleted", IMPORTANCE_DEFAULT);
+        groupedAndDeleted.setGroup("totally");
+
+        mHelper.createNotificationChannelGroup(pkg, uid, notDeleted, true);
+        mHelper.createNotificationChannelGroup(pkg, uid, deleted, true);
+        mHelper.createNotificationChannel(pkg, uid, nonGroupedNonDeletedChannel, true);
+        mHelper.createNotificationChannel(pkg, uid, groupedAndDeleted, true);
+        mHelper.createNotificationChannel(pkg, uid, groupedButNotDeleted, true);
+
+        mHelper.deleteNotificationChannelGroup(pkg, uid, deleted.getId());
+
+        assertNull(mHelper.getNotificationChannelGroup(deleted.getId(), pkg, uid));
+        assertNotNull(mHelper.getNotificationChannelGroup(notDeleted.getId(), pkg, uid));
+
+        assertNull(mHelper.getNotificationChannel(pkg, uid, groupedAndDeleted.getId(), false));
+        compareChannels(groupedAndDeleted,
+                mHelper.getNotificationChannel(pkg, uid, groupedAndDeleted.getId(), true));
+
+        compareChannels(groupedButNotDeleted,
+                mHelper.getNotificationChannel(pkg, uid, groupedButNotDeleted.getId(), false));
+        compareChannels(nonGroupedNonDeletedChannel, mHelper.getNotificationChannel(
+                pkg, uid, nonGroupedNonDeletedChannel.getId(), false));
+
+        // notDeleted
+        assertEquals(1, mHelper.getNotificationChannelGroups(pkg, uid).size());
+    }
+
+    @Test
     public void testOnPackageChanged_packageRemoval() throws Exception {
         // Deleted
         NotificationChannel channel1 =
@@ -889,7 +926,7 @@ public class RankingHelperTest {
 
         mHelper.onPackagesChanged(true, UserHandle.USER_SYSTEM, new String[]{pkg}, new int[]{uid});
 
-        assertEquals(0, mHelper.getNotificationChannelGroups(pkg, uid, true).getList().size());
+        assertEquals(0, mHelper.getNotificationChannelGroups(pkg, uid).size());
     }
 
     @Test
