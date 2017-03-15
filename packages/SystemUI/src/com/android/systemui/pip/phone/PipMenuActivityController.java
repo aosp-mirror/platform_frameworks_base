@@ -42,7 +42,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Manages the PiP menu activity.
+ * Manages the PiP menu activity which can show menu options or a scrim.
  *
  * The current media session provides actions whenever there are no valid actions provided by the
  * current PiP activity. Otherwise, those actions always take precedence.
@@ -55,6 +55,7 @@ public class PipMenuActivityController {
     public static final String EXTRA_ACTIONS = "actions";
     public static final String EXTRA_STACK_BOUNDS = "stack_bounds";
     public static final String EXTRA_MOVEMENT_BOUNDS = "movement_bounds";
+    public static final String EXTRA_SHOW_MENU = "show_menu";
 
     public static final int MESSAGE_MENU_VISIBILITY_CHANGED = 100;
     public static final int MESSAGE_EXPAND_PIP = 101;
@@ -101,6 +102,7 @@ public class PipMenuActivityController {
     private ParceledListSlice mMediaActions;
     private boolean mMenuVisible;
 
+    private boolean mStartActivityRequested;
     private Messenger mToActivityMessenger;
     private Messenger mMessenger = new Messenger(new Handler() {
         @Override
@@ -135,6 +137,7 @@ public class PipMenuActivityController {
                 }
                 case MESSAGE_UPDATE_ACTIVITY_CALLBACK: {
                     mToActivityMessenger = msg.replyTo;
+                    mStartActivityRequested = false;
                     // Mark the menu as invisible once the activity finishes as well
                     if (mToActivityMessenger == null) {
                         onMenuVisibilityChanged(false, true /* resize */);
@@ -179,6 +182,25 @@ public class PipMenuActivityController {
     }
 
     /**
+     * Updates the appearance of the menu and scrim on top of the PiP while dismissing.
+     */
+    public void setDismissFraction(float fraction) {
+        if (mToActivityMessenger != null) {
+            Message m = Message.obtain();
+            m.what = PipMenuActivity.MESSAGE_UPDATE_DISMISS_FRACTION;
+            m.obj = fraction;
+            try {
+                mToActivityMessenger.send(m);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Could not notify menu to show", e);
+            }
+        } else if (!mStartActivityRequested) {
+            startMenuActivity(null /* stackBounds */, null /* movementBounds */,
+                    false /* showMenu */);
+        }
+    }
+
+    /**
      * Shows the menu activity.
      */
     public void showMenu(Rect stackBounds, Rect movementBounds) {
@@ -191,28 +213,8 @@ public class PipMenuActivityController {
             } catch (RemoteException e) {
                 Log.e(TAG, "Could not notify menu to show", e);
             }
-        } else {
-            // Start the menu activity on the top task of the pinned stack
-            try {
-                StackInfo pinnedStackInfo = mActivityManager.getStackInfo(PINNED_STACK_ID);
-                if (pinnedStackInfo != null && pinnedStackInfo.taskIds != null &&
-                        pinnedStackInfo.taskIds.length > 0) {
-                    Intent intent = new Intent(mContext, PipMenuActivity.class);
-                    intent.putExtra(EXTRA_CONTROLLER_MESSENGER, mMessenger);
-                    intent.putExtra(EXTRA_ACTIONS, resolveMenuActions());
-                    intent.putExtra(EXTRA_STACK_BOUNDS, stackBounds.flattenToString());
-                    intent.putExtra(EXTRA_MOVEMENT_BOUNDS, movementBounds.flattenToString());
-                    ActivityOptions options = ActivityOptions.makeCustomAnimation(mContext, 0, 0);
-                    options.setLaunchTaskId(
-                            pinnedStackInfo.taskIds[pinnedStackInfo.taskIds.length - 1]);
-                    options.setTaskOverlay(true, true /* canResume */);
-                    mContext.startActivityAsUser(intent, options.toBundle(), UserHandle.CURRENT);
-                } else {
-                    Log.e(TAG, "No PIP tasks found");
-                }
-            } catch (RemoteException e) {
-                Log.e(TAG, "Error showing PIP menu activity", e);
-            }
+        } else if (!mStartActivityRequested) {
+            startMenuActivity(stackBounds, movementBounds, true /* showMenu */);
         }
     }
 
@@ -269,6 +271,39 @@ public class PipMenuActivityController {
             return mAppActions;
         }
         return mMediaActions;
+    }
+
+    /**
+     * Starts the menu activity on the top task of the pinned stack.
+     */
+    private void startMenuActivity(Rect stackBounds, Rect movementBounds, boolean showMenu) {
+        try {
+            StackInfo pinnedStackInfo = mActivityManager.getStackInfo(PINNED_STACK_ID);
+            if (pinnedStackInfo != null && pinnedStackInfo.taskIds != null &&
+                    pinnedStackInfo.taskIds.length > 0) {
+                Intent intent = new Intent(mContext, PipMenuActivity.class);
+                intent.putExtra(EXTRA_CONTROLLER_MESSENGER, mMessenger);
+                intent.putExtra(EXTRA_ACTIONS, resolveMenuActions());
+                if (stackBounds != null) {
+                    intent.putExtra(EXTRA_STACK_BOUNDS, stackBounds.flattenToString());
+                }
+                if (movementBounds != null) {
+                    intent.putExtra(EXTRA_MOVEMENT_BOUNDS, movementBounds.flattenToString());
+                }
+                intent.putExtra(EXTRA_SHOW_MENU, showMenu);
+                ActivityOptions options = ActivityOptions.makeCustomAnimation(mContext, 0, 0);
+                options.setLaunchTaskId(
+                        pinnedStackInfo.taskIds[pinnedStackInfo.taskIds.length - 1]);
+                options.setTaskOverlay(true, true /* canResume */);
+                mContext.startActivityAsUser(intent, options.toBundle(), UserHandle.CURRENT);
+                mStartActivityRequested = true;
+            } else {
+                Log.e(TAG, "No PIP tasks found");
+            }
+        } catch (RemoteException e) {
+            mStartActivityRequested = false;
+            Log.e(TAG, "Error showing PIP menu activity", e);
+        }
     }
 
     /**

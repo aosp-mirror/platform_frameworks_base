@@ -16,6 +16,8 @@
 
 package com.android.systemui.pip.phone;
 
+import android.animation.ValueAnimator;
+import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.app.IActivityManager;
 import android.content.Context;
 import android.graphics.Point;
@@ -55,7 +57,7 @@ public class PipTouchHandler {
 
     // Allow dragging the PIP to a location to close it
     private static final boolean ENABLE_DISMISS_DRAG_TO_TARGET = false;
-    private static final boolean ENABLE_DISMISS_DRAG_TO_EDGE = false;
+    private static final boolean ENABLE_DISMISS_DRAG_TO_EDGE = true;
 
     private final Context mContext;
     private final IActivityManager mActivityManager;
@@ -87,6 +89,13 @@ public class PipTouchHandler {
             }
         }
     };
+    private ValueAnimator.AnimatorUpdateListener mUpdateScrimListener =
+            new AnimatorUpdateListener() {
+                @Override
+                public void onAnimationUpdate(ValueAnimator animation) {
+                    updateDismissFraction();
+                }
+            };
 
     // Behaviour states
     private boolean mIsMenuVisible;
@@ -124,7 +133,7 @@ public class PipTouchHandler {
         @Override
         public void onPipMinimize() {
             setMinimizedStateInternal(true);
-            mMotionHelper.animateToClosestMinimizedState(mMovementBounds);
+            mMotionHelper.animateToClosestMinimizedState(mMovementBounds, null /* updateListener */);
         }
 
         @Override
@@ -331,6 +340,22 @@ public class PipTouchHandler {
     }
 
     /**
+     * Updates the appearance of the menu and scrim on top of the PiP while dismissing.
+     */
+    void updateDismissFraction() {
+        if (mMenuController != null) {
+            Rect bounds = mMotionHelper.getBounds();
+            final float target = mMovementBounds.bottom + bounds.height();
+            float fraction = 0f;
+            if (bounds.bottom > target) {
+                final float distance = bounds.bottom - target;
+                fraction = Math.min(distance / bounds.height(), 1f);
+            }
+            mMenuController.setDismissFraction(fraction);
+        }
+    }
+
+    /**
      * Sets the controller to update the system of changes from user interaction.
      */
     void setPinnedStackController(IPinnedStackController controller) {
@@ -465,6 +490,9 @@ public class PipTouchHandler {
                 if (ENABLE_DISMISS_DRAG_TO_TARGET) {
                     mDismissViewController.updateDismissTarget(mTmpBounds);
                 }
+                if (ENABLE_DISMISS_DRAG_TO_EDGE) {
+                    updateDismissFraction();
+                }
                 return true;
             }
             return false;
@@ -502,7 +530,8 @@ public class PipTouchHandler {
                 boolean isFlingToBot = isFlingTowardsEdge(touchState, 4 /* bottom */);
                 if (ENABLE_DISMISS_DRAG_TO_EDGE
                         && (mMotionHelper.shouldDismissPip() || isFlingToBot)) {
-                    mMotionHelper.animateDragToEdgeDismiss(mMotionHelper.getBounds());
+                    mMotionHelper.animateDragToEdgeDismiss(mMotionHelper.getBounds(),
+                            mUpdateScrimListener);
                     MetricsLogger.action(mContext,
                             MetricsEvent.ACTION_PICTURE_IN_PICTURE_DISMISSED,
                             METRIC_VALUE_DISMISSED_BY_DRAG);
@@ -517,7 +546,8 @@ public class PipTouchHandler {
                         // minimize offset adjusted
                         mMenuController.hideMenu();
                     } else {
-                        mMotionHelper.animateToClosestMinimizedState(mMovementBounds);
+                        mMotionHelper.animateToClosestMinimizedState(mMovementBounds,
+                                mUpdateScrimListener);
                     }
                     return true;
                 }
@@ -536,13 +566,14 @@ public class PipTouchHandler {
                 final PointF vel = mTouchState.getVelocity();
                 final float velocity = PointF.length(vel.x, vel.y);
                 if (velocity > mFlingAnimationUtils.getMinVelocityPxPerSecond()) {
-                    mMotionHelper.flingToSnapTarget(velocity, vel.x, vel.y, mMovementBounds);
+                    mMotionHelper.flingToSnapTarget(velocity, vel.x, vel.y, mMovementBounds,
+                            mUpdateScrimListener);
                 } else {
-                    mMotionHelper.animateToClosestSnapTarget(mMovementBounds);
+                    mMotionHelper.animateToClosestSnapTarget(mMovementBounds, mUpdateScrimListener);
                 }
             } else if (mIsMinimized) {
                 // This was a tap, so no longer minimized
-                mMotionHelper.animateToClosestSnapTarget(mMovementBounds);
+                mMotionHelper.animateToClosestSnapTarget(mMovementBounds, null /* listener */);
                 setMinimizedStateInternal(false);
             } else if (!mIsMenuVisible) {
                 mMenuController.showMenu(mMotionHelper.getBounds(), mMovementBounds);
