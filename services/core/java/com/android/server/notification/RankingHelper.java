@@ -766,6 +766,23 @@ public class RankingHelper implements RankingConfig {
         return new ParceledListSlice<>(channels);
     }
 
+    public int getDeletedChannelCount(String pkg, int uid) {
+        Preconditions.checkNotNull(pkg);
+        int deletedCount = 0;
+        Record r = getRecord(pkg, uid);
+        if (r == null) {
+            return deletedCount;
+        }
+        int N = r.channels.size();
+        for (int i = 0; i < N; i++) {
+            final NotificationChannel nc = r.channels.valueAt(i);
+            if (nc.isDeleted()) {
+                deletedCount++;
+            }
+        }
+        return deletedCount;
+    }
+
     /**
      * Sets importance.
      */

@@ -723,6 +723,25 @@ public class RankingHelperTest {
     }
 
     @Test
+    public void testGetDeletedChannelCount() throws Exception {
+        NotificationChannel channel =
+                new NotificationChannel("id2", "name2", IMPORTANCE_LOW);
+        NotificationChannel channel2 =
+                new NotificationChannel("id4", "a", NotificationManager.IMPORTANCE_HIGH);
+        NotificationChannel channel3 =
+                new NotificationChannel("id4", "a", NotificationManager.IMPORTANCE_HIGH);
+        mHelper.createNotificationChannel(pkg, uid, channel, true);
+        mHelper.createNotificationChannel(pkg, uid, channel2, true);
+        mHelper.createNotificationChannel(pkg, uid, channel3, true);
+
+        mHelper.deleteNotificationChannel(pkg, uid, channel.getId());
+        mHelper.deleteNotificationChannel(pkg, uid, channel3.getId());
+
+        assertEquals(2, mHelper.getDeletedChannelCount(pkg, uid));
+        assertEquals(0, mHelper.getDeletedChannelCount(pkg2, uid2));
+    }
+
+    @Test
     public void testUpdateDeletedChannels() throws Exception {
         NotificationChannel channel =
                 new NotificationChannel("id2", "name2", IMPORTANCE_LOW);

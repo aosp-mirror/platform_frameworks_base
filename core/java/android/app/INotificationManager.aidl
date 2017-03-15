@@ -66,6 +66,7 @@ interface INotificationManager
     ParceledListSlice getNotificationChannels(String pkg);
     ParceledListSlice getNotificationChannelsForPackage(String pkg, int uid, boolean includeDeleted);
     int getNumNotificationChannelsForPackage(String pkg, int uid, boolean includeDeleted);
+    int getDeletedChannelCount(String pkg, int uid);
 
     // TODO: Remove this when callers have been migrated to the equivalent
     // INotificationListener method.

@@ -1698,6 +1698,12 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
+        public int getDeletedChannelCount(String pkg, int uid) {
+            enforceSystemOrSystemUI("getDeletedChannelCount");
+            return mRankingHelper.getDeletedChannelCount(pkg, uid);
+        }
+
+        @Override
         public ParceledListSlice<NotificationChannelGroup> getNotificationChannelGroupsForPackage(
                 String pkg, int uid, boolean includeDeleted) {
             checkCallerIsSystem();
