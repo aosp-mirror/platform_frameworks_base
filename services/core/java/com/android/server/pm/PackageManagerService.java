@@ -9266,9 +9266,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                         ps.pkg.applicationInfo.primaryCpuAbi = adjustedAbi;
                         Slog.i(TAG, "Adjusting ABI for " + ps.name + " to " + adjustedAbi
                                 + " (requirer="
-                                + (requirer == null ? "null" : requirer.pkg.packageName)
+                                + (requirer != null ? requirer.pkg : "null")
                                 + ", scannedPackage="
-                                + (scannedPackage != null ? scannedPackage.packageName : "null")
+                                + (scannedPackage != null ? scannedPackage : "null")
                                 + ")");
                         try {
                             mInstaller.rmdex(ps.codePathString,
