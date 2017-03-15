@@ -46,6 +46,10 @@ public abstract class PanelBar extends FrameLayout {
         mState = state;
     }
 
+    public int getState() {
+        return mState;
+    }
+
     public PanelBar(Context context, AttributeSet attrs) {
         super(context, attrs);
     }

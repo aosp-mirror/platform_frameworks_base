@@ -45,6 +45,7 @@ import com.android.systemui.statusbar.policy.NetworkController;
 public class CollapsedStatusBarFragment extends Fragment implements CommandQueue.Callbacks {
 
     public static final String TAG = "CollapsedStatusBarFragment";
+    private static final String EXTRA_PANEL_STATE = "panel_state";
     private PhoneStatusBarView mStatusBar;
     private KeyguardMonitor mKeyguardMonitor;
     private NetworkController mNetworkController;
@@ -73,11 +74,20 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         mStatusBar = (PhoneStatusBarView) view;
-        mDarkIconManager = new DarkIconManager((LinearLayout) view.findViewById(R.id.statusIcons));
+        if (savedInstanceState != null && savedInstanceState.containsKey(EXTRA_PANEL_STATE)) {
+            mStatusBar.go(savedInstanceState.getInt(EXTRA_PANEL_STATE));
+        }
+        mDarkIconManager = new DarkIconManager(view.findViewById(R.id.statusIcons));
         Dependency.get(StatusBarIconController.class).addIconGroup(mDarkIconManager);
-        mSystemIconArea = (LinearLayout) mStatusBar.findViewById(R.id.system_icon_area);
+        mSystemIconArea = mStatusBar.findViewById(R.id.system_icon_area);
         mSignalClusterView = reinflateSignalCluster(mStatusBar);
         Dependency.get(DarkIconDispatcher.class).addDarkReceiver(mSignalClusterView);
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt(EXTRA_PANEL_STATE, mStatusBar.getState());
     }
 
     @Override
@@ -101,8 +111,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
 
     public void initNotificationIconArea(NotificationIconAreaController
             notificationIconAreaController) {
-        ViewGroup notificationIconArea = (ViewGroup) mStatusBar
-                .findViewById(R.id.notification_icon_area);
+        ViewGroup notificationIconArea = mStatusBar.findViewById(R.id.notification_icon_area);
         mNotificationIconAreaInner =
                 notificationIconAreaController.getNotificationInnerAreaView();
         if (mNotificationIconAreaInner.getParent() != null) {
