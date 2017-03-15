@@ -3237,6 +3237,10 @@ public class ShortcutService extends IShortcutService.Stub {
     boolean injectIsMainActivity(@NonNull ComponentName activity, int userId) {
         final long start = injectElapsedRealtime();
         try {
+            if (activity == null) {
+                wtf("null activity detected");
+                return false;
+            }
             if (DUMMY_MAIN_ACTIVITY.equals(activity.getClassName())) {
                 return true;
             }

@@ -720,7 +720,11 @@ class ShortcutPackage extends ShortcutPackageItem {
 
                 // Disable dynamic shortcuts whose target activity is gone.
                 if (si.isDynamic()) {
-                    if (!s.injectIsMainActivity(si.getActivity(), getPackageUserId())) {
+                    if (si.getActivity() == null) {
+                        // Note if it's dynamic, it must have a target activity, but b/36228253.
+                        s.wtf("null activity detected.");
+                        // TODO Maybe remove it?
+                    } else if (!s.injectIsMainActivity(si.getActivity(), getPackageUserId())) {
                         Slog.w(TAG, String.format(
                                 "%s is no longer main activity. Disabling shorcut %s.",
                                 getPackageName(), si.getId()));
@@ -931,6 +935,10 @@ class ShortcutPackage extends ShortcutPackageItem {
             }
 
             final ComponentName activity = si.getActivity();
+            if (activity == null) {
+                mShortcutUser.mService.wtf("null activity detected.");
+                continue;
+            }
 
             ArrayList<ShortcutInfo> list = activitiesToShortcuts.get(activity);
             if (list == null) {
