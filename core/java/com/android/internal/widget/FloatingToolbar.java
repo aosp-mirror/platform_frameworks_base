@@ -1163,21 +1163,21 @@ public final class FloatingToolbar {
                         isLastItem && menuItemButtonWidth <= availableWidth - extraPadding;
                 if (canFitWithOverflow || canFitNoOverflow) {
                     if (isNewGroup) {
-                        final View border = createBorder(mContext);
-                        final int borderWidth = border.getLayoutParams().width;
+                        final View divider = createDivider(mContext);
+                        final int dividerWidth = divider.getLayoutParams().width;
 
                         // Add extra padding to the end of the previous button.
                         // Half of the extra padding (less borderWidth) goes to the previous button.
                         View previousButton = mMainPanel.getChildAt(mMainPanel.getChildCount() - 1);
                         final int prevPaddingEnd = previousButton.getPaddingEnd()
-                                + extraPadding / 2 - borderWidth;
+                                + extraPadding / 2 - dividerWidth;
                         previousButton.setPaddingRelative(
                                 previousButton.getPaddingStart(),
                                 previousButton.getPaddingTop(),
                                 prevPaddingEnd,
                                 previousButton.getPaddingBottom());
                         final ViewGroup.LayoutParams prevParams = previousButton.getLayoutParams();
-                        prevParams.width += extraPadding / 2 - borderWidth;
+                        prevParams.width += extraPadding / 2 - dividerWidth;
                         previousButton.setLayoutParams(prevParams);
 
                         // Add extra padding to the start of this button.
@@ -1190,8 +1190,8 @@ public final class FloatingToolbar {
                                 menuItemButton.getPaddingEnd(),
                                 menuItemButton.getPaddingBottom());
 
-                        // Include a border.
-                        mMainPanel.addView(border);
+                        // Include a divider.
+                        mMainPanel.addView(divider);
                     }
 
                     setButtonTagAndClickListener(menuItemButton, menuItem);
@@ -1670,21 +1670,28 @@ public final class FloatingToolbar {
         return popupWindow;
     }
 
-    private static View createBorder(Context context) {
+    private static View createDivider(Context context) {
         // TODO: Inflate this instead.
-        View border = new View(context);
+        View divider = new View(context);
+
         int _1dp = (int) TypedValue.applyDimension(
                 TypedValue.COMPLEX_UNIT_DIP, 1, context.getResources().getDisplayMetrics());
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                 _1dp, ViewGroup.LayoutParams.MATCH_PARENT);
         params.setMarginsRelative(0, _1dp * 10, 0, _1dp * 10);
-        border.setLayoutParams(params);
-        border.setBackgroundColor(Color.parseColor("#9E9E9E"));
-        border.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
-        border.setEnabled(false);
-        border.setFocusable(false);
-        border.setContentDescription(null);
-        return border;
+        divider.setLayoutParams(params);
+
+        TypedArray a = context.obtainStyledAttributes(
+                new TypedValue().data, new int[] { R.attr.floatingToolbarDividerColor });
+        divider.setBackgroundColor(a.getColor(0, 0));
+        a.recycle();
+
+        divider.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
+        divider.setEnabled(false);
+        divider.setFocusable(false);
+        divider.setContentDescription(null);
+
+        return divider;
     }
 
     /**

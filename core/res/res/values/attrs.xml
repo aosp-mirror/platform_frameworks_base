@@ -576,6 +576,7 @@
        <attr name="floatingToolbarItemBackgroundDrawable" format="reference" />
        <attr name="floatingToolbarOpenDrawable" format="reference" />
        <attr name="floatingToolbarPopupBackgroundDrawable" format="reference" />
+       <attr name="floatingToolbarDividerColor" format="reference" />
 
         <!-- ============ -->
         <!-- Alert Dialog styles -->
