@@ -631,6 +631,13 @@ public class IpManager extends StateMachine {
 
         pw.println();
         pw.println(mTag + " connectivity packet log:");
+        pw.println();
+        pw.println("Debug with python and scapy via:");
+        pw.println("shell$ python");
+        pw.println(">>> from scapy import all as scapy");
+        pw.println(">>> scapy.Ether(\"<paste_hex_string>\".decode(\"hex\")).show2()");
+        pw.println();
+
         pw.increaseIndent();
         mConnectivityPacketLog.readOnlyLocalLog().dump(fd, pw, args);
         pw.decreaseIndent();
