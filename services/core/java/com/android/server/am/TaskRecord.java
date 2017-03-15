@@ -2013,10 +2013,6 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
         final Configuration parentConfig = getParent().getConfiguration();
         final float density = parentConfig.densityDpi * DisplayMetrics.DENSITY_DEFAULT_SCALE;
 
-        // TODO: Orientation?
-        config.orientation = (config.screenWidthDp <= config.screenHeightDp)
-                ? Configuration.ORIENTATION_PORTRAIT
-                : Configuration.ORIENTATION_LANDSCAPE;
         if (mStack != null) {
             final StackWindowController stackController = mStack.getWindowContainerController();
             stackController.adjustConfigurationForBounds(bounds, insetBounds,
@@ -2029,6 +2025,10 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
             config.screenWidthDp = config.screenHeightDp = config.smallestScreenWidthDp;
             Slog.wtf(TAG, "Expected stack when caclulating override config");
         }
+
+        config.orientation = (config.screenWidthDp <= config.screenHeightDp)
+                ? Configuration.ORIENTATION_PORTRAIT
+                : Configuration.ORIENTATION_LANDSCAPE;
 
         // For calculating screen layout, we need to use the non-decor inset screen area for the
         // calculation for compatibility reasons, i.e. screen area without system bars that could
