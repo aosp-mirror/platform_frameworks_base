@@ -28,13 +28,13 @@ import android.util.Slog;
 import java.util.NoSuchElementException;
 
 /**
- * Abstract base class for keeping track and dispatching events from fingerprintd to the
+ * Abstract base class for keeping track and dispatching events from fingerprint HAL to the
  * the current client.  Subclasses are responsible for coordinating the interaction with
- * fingerprintd for the specific action (e.g. authenticate, enroll, enumerate, etc.).
+ * fingerprint HAL for the specific action (e.g. authenticate, enroll, enumerate, etc.).
  */
 public abstract class ClientMonitor implements IBinder.DeathRecipient {
     protected static final String TAG = FingerprintService.TAG; // TODO: get specific name
-    protected static final int ERROR_ESRCH = 3; // Likely fingerprintd is dead. See errno.h.
+    protected static final int ERROR_ESRCH = 3; // Likely fingerprint HAL is dead. See errno.h.
     protected static final boolean DEBUG = FingerprintService.DEBUG;
     private IBinder mToken;
     private IFingerprintServiceReceiver mReceiver;
@@ -77,13 +77,13 @@ public abstract class ClientMonitor implements IBinder.DeathRecipient {
     }
 
     /**
-     * Contacts fingerprintd to start the client.
+     * Contacts fingerprint HAL to start the client.
      * @return 0 on succes, errno from driver on failure
      */
     public abstract int start();
 
     /**
-     * Contacts fingerprintd to stop the client.
+     * Contacts fingerprint HAL to stop the client.
      * @param initiatedByClient whether the operation is at the request of a client
      */
     public abstract int stop(boolean initiatedByClient);
@@ -108,7 +108,7 @@ public abstract class ClientMonitor implements IBinder.DeathRecipient {
     public abstract boolean onEnumerationResult(int fingerId, int groupId, int remaining);
 
     /**
-     * Called when we get notification from fingerprintd that an image has been acquired.
+     * Called when we get notification from fingerprint HAL that an image has been acquired.
      * Common to authenticate and enroll.
      * @param acquiredInfo info about the current image acquisition
      * @return true if client should be removed
@@ -131,7 +131,7 @@ public abstract class ClientMonitor implements IBinder.DeathRecipient {
     }
 
     /**
-     * Called when we get notification from fingerprintd that an error has occurred with the
+     * Called when we get notification from fingerprint HAL that an error has occurred with the
      * current operation. Common to authenticate, enroll, enumerate and remove.
      * @param error
      * @return true if client should be removed

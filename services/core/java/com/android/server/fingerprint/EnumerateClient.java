@@ -58,7 +58,7 @@ public abstract class EnumerateClient extends ClientMonitor {
     public int stop(boolean initiatedByClient) {
         IBiometricsFingerprint daemon = getFingerprintDaemon();
         if (daemon == null) {
-            Slog.w(TAG, "stopAuthentication: no fingeprintd!");
+            Slog.w(TAG, "stopAuthentication: no fingerprint HAL!");
             return ERROR_ESRCH;
         }
         try {
