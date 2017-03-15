@@ -116,20 +116,23 @@ public class FontListParser {
 
     private static FontConfig readFamilies(XmlPullParser parser)
             throws XmlPullParserException, IOException {
-        FontConfig config = new FontConfig();
+        List<FontConfig.Family> families = new ArrayList<>();
+        List<FontConfig.Alias> aliases = new ArrayList<>();
+
         parser.require(XmlPullParser.START_TAG, null, "familyset");
         while (parser.next() != XmlPullParser.END_TAG) {
             if (parser.getEventType() != XmlPullParser.START_TAG) continue;
             String tag = parser.getName();
             if (tag.equals("family")) {
-                config.getFamilies().add(readFamily(parser));
+                families.add(readFamily(parser));
             } else if (tag.equals("alias")) {
-                config.getAliases().add(readAlias(parser));
+                aliases.add(readAlias(parser));
             } else {
                 skip(parser);
             }
         }
-        return config;
+        return new FontConfig(families.toArray(new FontConfig.Family[families.size()]),
+                aliases.toArray(new FontConfig.Alias[aliases.size()]));
     }
 
     private static FontConfig.Family readFamily(XmlPullParser parser)
@@ -147,7 +150,16 @@ public class FontListParser {
                 skip(parser);
             }
         }
-        return new FontConfig.Family(name, fonts, lang, variant);
+        int intVariant = FontConfig.Family.VARIANT_DEFAULT;
+        if (variant != null) {
+            if (variant.equals("compact")) {
+                intVariant = FontConfig.Family.VARIANT_COMPACT;
+            } else if (variant.equals("elegant")) {
+                intVariant = FontConfig.Family.VARIANT_ELEGANT;
+            }
+        }
+        return new FontConfig.Family(name, fonts.toArray(new FontConfig.Font[fonts.size()]), lang,
+                intVariant);
     }
 
     /** Matches leading and trailing XML whitespace. */
@@ -177,7 +189,8 @@ public class FontListParser {
         }
         String fullFilename = "/system/fonts/" +
                 FILENAME_WHITESPACE_PATTERN.matcher(filename).replaceAll("");
-        return new FontConfig.Font(fullFilename, index, axes, weight, isItalic);
+        return new FontConfig.Font(fullFilename, index,
+                axes.toArray(new FontConfig.Axis[axes.size()]), weight, isItalic);
     }
 
     /** The 'tag' attribute value is read as four character values between U+0020 and U+007E

@@ -44,6 +44,7 @@ struct NativeFamilyBuilder {
     uint32_t langId;
     int variant;
     std::vector<minikin::Font> fonts;
+    std::vector<minikin::FontVariation> axes;
 };
 
 static jlong FontFamily_initBuilder(JNIEnv* env, jobject clazz, jstring lang, jint variant) {
@@ -155,32 +156,16 @@ static jboolean FontFamily_addFont(JNIEnv* env, jobject clazz, jlong builderPtr,
 }
 
 static jboolean FontFamily_addFontWeightStyle(JNIEnv* env, jobject clazz, jlong builderPtr,
-        jobject font, jint ttcIndex, jobject listOfAxis, jint weight, jboolean isItalic) {
+        jobject font, jint ttcIndex, jint weight, jboolean isItalic) {
     NPE_CHECK_RETURN_ZERO(env, font);
 
+    NativeFamilyBuilder* builder = reinterpret_cast<NativeFamilyBuilder*>(builderPtr);
+
     // Declare axis native type.
-    std::unique_ptr<SkFontMgr::FontParameters::Axis[]> skiaAxes;
-    int skiaAxesLength = 0;
-    if (listOfAxis) {
-        ListHelper list(env, listOfAxis);
-        jint listSize = list.size();
-
-        skiaAxes.reset(new SkFontMgr::FontParameters::Axis[listSize]);
-        skiaAxesLength = listSize;
-        for (jint i = 0; i < listSize; ++i) {
-            jobject axisObject = list.get(i);
-            if (!axisObject) {
-                skiaAxes[i].fTag = 0;
-                skiaAxes[i].fStyleValue = 0;
-                continue;
-            }
-            AxisHelper axis(env, axisObject);
-
-            jint tag = axis.getTag();
-            jfloat stylevalue = axis.getStyleValue();
-            skiaAxes[i].fTag = tag;
-            skiaAxes[i].fStyleValue = SkFloatToScalar(stylevalue);
-        }
+    std::vector<SkFontMgr::FontParameters::Axis> skiaAxes;
+    skiaAxes.reserve(builder->axes.size());
+    for (const minikin::FontVariation& minikinAxis : builder->axes) {
+        skiaAxes.push_back({minikinAxis.axisTag, minikinAxis.value});
     }
 
     const void* fontPtr = env->GetDirectBufferAddress(font);
@@ -200,7 +185,7 @@ static jboolean FontFamily_addFontWeightStyle(JNIEnv* env, jobject clazz, jlong 
 
     SkFontMgr::FontParameters params;
     params.setCollectionIndex(ttcIndex);
-    params.setAxes(skiaAxes.get(), skiaAxesLength);
+    params.setAxes(skiaAxes.data(), skiaAxes.size());
 
     sk_sp<SkFontMgr> fm(SkFontMgr::RefDefault());
     sk_sp<SkTypeface> face(fm->createFromStream(fontData.release(), params));
@@ -211,7 +196,6 @@ static jboolean FontFamily_addFontWeightStyle(JNIEnv* env, jobject clazz, jlong 
     std::shared_ptr<minikin::MinikinFont> minikinFont =
             std::make_shared<MinikinFontSkia>(std::move(face), fontPtr, fontSize, ttcIndex,
                     std::vector<minikin::FontVariation>());
-    NativeFamilyBuilder* builder = reinterpret_cast<NativeFamilyBuilder*>(builderPtr);
     builder->fonts.push_back(minikin::Font(std::move(minikinFont),
             minikin::FontStyle(weight / 100, isItalic)));
     return true;
@@ -270,6 +254,11 @@ static jboolean FontFamily_addFontFromAssetManager(JNIEnv* env, jobject, jlong b
     return true;
 }
 
+static void FontFamily_addAxisValue(jlong builderPtr, jint tag, jfloat value) {
+    NativeFamilyBuilder* builder = reinterpret_cast<NativeFamilyBuilder*>(builderPtr);
+    builder->axes.push_back({static_cast<minikin::AxisTag>(tag), value});
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 static const JNINativeMethod gFontFamilyMethods[] = {
@@ -278,10 +267,11 @@ static const JNINativeMethod gFontFamilyMethods[] = {
     { "nAbort",                "(J)V", (void*)FontFamily_abort },
     { "nUnrefFamily",          "(J)V", (void*)FontFamily_unref },
     { "nAddFont",              "(JLjava/nio/ByteBuffer;I)Z", (void*)FontFamily_addFont },
-    { "nAddFontWeightStyle",   "(JLjava/nio/ByteBuffer;ILjava/util/List;IZ)Z",
+    { "nAddFontWeightStyle",   "(JLjava/nio/ByteBuffer;IIZ)Z",
             (void*)FontFamily_addFontWeightStyle },
     { "nAddFontFromAssetManager",    "(JLandroid/content/res/AssetManager;Ljava/lang/String;IZIZ)Z",
             (void*)FontFamily_addFontFromAssetManager },
+    { "nAddAxisValue",         "(JIF)V", (void*)FontFamily_addAxisValue },
 };
 
 int register_android_graphics_FontFamily(JNIEnv* env)
