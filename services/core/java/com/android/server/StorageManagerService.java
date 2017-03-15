@@ -2721,7 +2721,7 @@ class StorageManagerService extends IStorageManager.Stub
      */
     @Override
     public int getPasswordType() {
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.STORAGE_INTERNAL,
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.CRYPT_KEEPER,
             "no permission to access the crypt keeper");
 
         waitForReady();
@@ -2747,7 +2747,7 @@ class StorageManagerService extends IStorageManager.Stub
      */
     @Override
     public void setField(String field, String contents) throws RemoteException {
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.STORAGE_INTERNAL,
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.CRYPT_KEEPER,
             "no permission to access the crypt keeper");
 
         waitForReady();
@@ -2767,7 +2767,7 @@ class StorageManagerService extends IStorageManager.Stub
      */
     @Override
     public String getField(String field) throws RemoteException {
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.STORAGE_INTERNAL,
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.CRYPT_KEEPER,
             "no permission to access the crypt keeper");
 
         waitForReady();
@@ -2793,7 +2793,7 @@ class StorageManagerService extends IStorageManager.Stub
      */
     @Override
     public boolean isConvertibleToFBE() throws RemoteException {
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.STORAGE_INTERNAL,
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.CRYPT_KEEPER,
             "no permission to access the crypt keeper");
 
         waitForReady();
@@ -2809,7 +2809,7 @@ class StorageManagerService extends IStorageManager.Stub
 
     @Override
     public String getPassword() throws RemoteException {
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.STORAGE_INTERNAL,
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.CRYPT_KEEPER,
                 "only keyguard can retrieve password");
 
         if (!isReady()) {
@@ -2834,7 +2834,7 @@ class StorageManagerService extends IStorageManager.Stub
 
     @Override
     public void clearPassword() throws RemoteException {
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.STORAGE_INTERNAL,
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.CRYPT_KEEPER,
                 "only keyguard can clear password");
 
         if (!isReady()) {
