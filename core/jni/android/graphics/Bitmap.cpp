@@ -453,7 +453,8 @@ bool GraphicsJNI::SetPixels(JNIEnv* env, jintArray srcColors, int srcOffset, int
     dst = dstBitmap.getAddr(x, y);
 
     SkColorSpace* colorSpace = dstBitmap.colorSpace();
-    if (GraphicsJNI::isColorSpaceSRGB(colorSpace)) {
+    if (dstBitmap.colorType() == kRGBA_F16_SkColorType ||
+            GraphicsJNI::isColorSpaceSRGB(colorSpace)) {
         // now copy/convert each scanline
         for (int y = 0; y < height; y++) {
             proc(dst, src, width, x, y);
@@ -1267,7 +1268,8 @@ static jint Bitmap_getPixel(JNIEnv* env, jobject, jlong bitmapHandle,
     proc(dst, src, 1, bitmap.getColorTable());
 
     SkColorSpace* colorSpace = bitmap.colorSpace();
-    if (!GraphicsJNI::isColorSpaceSRGB(colorSpace)) {
+    if (bitmap.colorType() != kRGBA_F16_SkColorType &&
+            !GraphicsJNI::isColorSpaceSRGB(colorSpace)) {
         auto sRGB = SkColorSpace::MakeSRGB();
         auto xform = SkColorSpaceXform::New(colorSpace, sRGB.get());
         xform->apply(SkColorSpaceXform::kBGRA_8888_ColorFormat, &dst[0],
@@ -1299,7 +1301,8 @@ static void Bitmap_getPixels(JNIEnv* env, jobject, jlong bitmapHandle,
     SkColor* d = (SkColor*)dst + offset;
 
     SkColorSpace* colorSpace = bitmap.colorSpace();
-    if (GraphicsJNI::isColorSpaceSRGB(colorSpace)) {
+    if (bitmap.colorType() == kRGBA_F16_SkColorType ||
+            GraphicsJNI::isColorSpaceSRGB(colorSpace)) {
         while (--height >= 0) {
             proc(d, src, width, ctable);
             d += stride;
@@ -1342,7 +1345,8 @@ static void Bitmap_setPixel(JNIEnv* env, jobject, jlong bitmapHandle,
     }
 
     SkColorSpace* colorSpace = bitmap.colorSpace();
-    if (!GraphicsJNI::isColorSpaceSRGB(colorSpace)) {
+    if (bitmap.colorType() != kRGBA_F16_SkColorType &&
+            !GraphicsJNI::isColorSpaceSRGB(colorSpace)) {
         auto sRGB = SkColorSpace::MakeSRGB();
         auto xform = SkColorSpaceXform::New(sRGB.get(), colorSpace);
         xform->apply(SkColorSpaceXform::kBGRA_8888_ColorFormat, &color,
