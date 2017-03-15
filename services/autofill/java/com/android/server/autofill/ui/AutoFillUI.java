@@ -123,7 +123,7 @@ public final class AutoFillUI {
             }
             hideSaveUiUiThread();
             if (mFillUi != null) {
-                mFillUi.filter(filterText);
+                mFillUi.setFilterText(filterText);
             }
         });
     }

@@ -980,7 +980,11 @@ final class AutofillManagerServiceImpl {
                     viewState.mAutofillValue = value;
 
                     // Update the chooser UI
-                    getUiForShowing().filterFillUi(value.coerceToString());
+                    if (value.isText()) {
+                        getUiForShowing().filterFillUi(value.getTextValue().toString());
+                    } else {
+                        getUiForShowing().filterFillUi(null);
+                    }
                 }
 
                 return;
@@ -1018,14 +1022,9 @@ final class AutofillManagerServiceImpl {
         @Override
         public void onFillReady(ViewState viewState, FillResponse response, Rect bounds,
                 AutofillId filledId, @Nullable AutofillValue value) {
-            String filterText = "";
-            if (value != null) {
-                // TODO(b/33197203): Handle other AutofillValue types
-                if (value.isText()) {
-                    filterText = value.getTextValue().toString();
-                } else {
-                    Log.w(TAG, value + " could not be autofilled into " + this);
-                }
+            String filterText = null;
+            if (value != null && value.isText()) {
+                filterText = value.getTextValue().toString();
             }
 
             getUiForShowing().showFillUi(filledId, response, bounds, filterText);
