@@ -399,7 +399,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     private static final boolean HIDE_EPHEMERAL_APIS = false;
 
     private static final boolean ENABLE_FREE_CACHE_V2 =
-            SystemProperties.getBoolean("fw.free_cache_v2", false);
+            SystemProperties.getBoolean("fw.free_cache_v2", true);
 
     private static final int RADIO_UID = Process.PHONE_UID;
     private static final int LOG_UID = Process.LOG_UID;
