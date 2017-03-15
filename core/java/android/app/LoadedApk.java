@@ -597,8 +597,7 @@ public final class LoadedApk {
         // Avoid the binder call when the package is the current application package.
         // The activity manager will perform ensure that dexopt is performed before
         // spinning up the process.
-        if (!Objects.equals(mPackageName, ActivityThread.currentPackageName())) {
-            VMRuntime.getRuntime().vmInstructionSet();
+        if (!Objects.equals(mPackageName, ActivityThread.currentPackageName()) && mIncludeCode) {
             try {
                 ActivityThread.getPackageManager().notifyPackageUse(mPackageName,
                         PackageManager.NOTIFY_PACKAGE_USE_CROSS_PACKAGE);
