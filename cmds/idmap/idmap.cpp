@@ -49,8 +49,8 @@ OPTIONS \n\
       --path: create idmap for target package 'target' (path to apk) and overlay package \n\
               'overlay' (path to apk); write results to 'idmap' (path). \n\
 \n\
-      --scan: non-recursively search directory 'dir-to-scan' (path) for overlay packages with \n\
-              target package 'target-package-name-to-look-for' (package name) present at\n\
+      --scan: non-recursively search directory 'dir-to-scan' (path) for static overlay packages \n\
+              with target package 'target-package-name-to-look-for' (package name) present at\n\
               'path-to-target-apk' (path to apk). For each overlay package found, create an\n\
               idmap file in 'dir-to-hold-idmaps' (path). \n\
 \n\
