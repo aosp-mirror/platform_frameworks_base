@@ -73,6 +73,8 @@ public final class AccountManagerServiceTestFixtures {
             new Account(ACCOUNT_NAME_INTERVENE, ACCOUNT_TYPE_1);
     public static final Account ACCOUNT_ERROR =
             new Account(ACCOUNT_NAME_ERROR, ACCOUNT_TYPE_1);
+    public static final Account ACCOUNT_SUCCESS_TYPE_2 =
+            new Account(ACCOUNT_NAME_SUCCESS, ACCOUNT_TYPE_2);
 
     public static final String SESSION_DATA_NAME_1 = "session.data.name.1";
     public static final String SESSION_DATA_VALUE_1 = "session.data.value.1";

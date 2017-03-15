@@ -117,6 +117,9 @@ interface IAccountManager {
     /* Type may be null returns Map <Account, Integer>*/
     Map getAccountsAndVisibilityForPackage(in String packageName, in String accountType);
 
+    void registerAccountListener(in String[] accountTypes, String opPackageName);
+    void unregisterAccountListener(in String[] accountTypes, String opPackageName);
+
     /* Check if the package in a user can access an account */
     boolean hasAccountAccess(in Account account, String packageName, in UserHandle userHandle);
     /* Crate an intent to request account access for package and a given user id */
