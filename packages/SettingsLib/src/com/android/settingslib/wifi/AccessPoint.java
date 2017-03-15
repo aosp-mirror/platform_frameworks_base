@@ -113,9 +113,14 @@ public class AccessPoint implements Comparable<AccessPoint> {
     private static final int PSK_WPA2 = 2;
     private static final int PSK_WPA_WPA2 = 3;
 
-    public static final int SIGNAL_LEVELS = 4;
+    /**
+     * The number of distinct wifi levels.
+     *
+     * <p>Must keep in sync with {@link R.array.wifi_signal} and {@link WifiManager#RSSI_LEVELS}.
+     */
+    public static final int SIGNAL_LEVELS = 5;
 
-    static final int UNREACHABLE_RSSI = Integer.MIN_VALUE;
+    public static final int UNREACHABLE_RSSI = Integer.MIN_VALUE;
 
     private final Context mContext;
 
@@ -370,10 +375,13 @@ public class AccessPoint implements Comparable<AccessPoint> {
         return mInfo;
     }
 
+    /**
+     * Returns the number of levels to show for a Wifi icon, from 0 to {@link #SIGNAL_LEVELS}-1.
+     *
+     * <p>Use {@#isReachable()} to determine if an AccessPoint is in range, as this method will
+     * always return at least 0.
+     */
     public int getLevel() {
-        if (!isReachable()) {
-            return -1;
-        }
         return WifiManager.calculateSignalLevel(mRssi, SIGNAL_LEVELS);
     }
 
@@ -923,7 +931,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
     }
 
     /** Return true if the current RSSI is reachable, and false otherwise. */
-    boolean isReachable() {
+    public boolean isReachable() {
         return mRssi != UNREACHABLE_RSSI;
     }
 
