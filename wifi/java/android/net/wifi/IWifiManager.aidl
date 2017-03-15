@@ -16,7 +16,11 @@
 
 package android.net.wifi;
 
+
+import android.content.pm.ParceledListSlice;
+
 import android.net.wifi.hotspot2.PasspointConfiguration;
+
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.ScanSettings;
@@ -51,9 +55,9 @@ interface IWifiManager
      */
     oneway void requestActivityInfo(in ResultReceiver result);
 
-    List<WifiConfiguration> getConfiguredNetworks();
+    ParceledListSlice getConfiguredNetworks();
 
-    List<WifiConfiguration> getPrivilegedConfiguredNetworks();
+    ParceledListSlice getPrivilegedConfiguredNetworks();
 
     WifiConfiguration getMatchingWifiConfig(in ScanResult scanResult);
 

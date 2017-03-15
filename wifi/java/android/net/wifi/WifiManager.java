@@ -21,6 +21,7 @@ import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
+import android.content.pm.ParceledListSlice;
 import android.net.ConnectivityManager;
 import android.net.DhcpInfo;
 import android.net.Network;
@@ -46,6 +47,7 @@ import com.android.server.net.NetworkPinner;
 import java.net.InetAddress;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.Collections;
 
 /**
  * This class provides the primary API for managing all aspects of Wi-Fi
@@ -811,7 +813,12 @@ public class WifiManager {
      */
     public List<WifiConfiguration> getConfiguredNetworks() {
         try {
-            return mService.getConfiguredNetworks();
+            ParceledListSlice<WifiConfiguration> parceledList =
+                mService.getConfiguredNetworks();
+            if (parceledList == null) {
+                return Collections.emptyList();
+            }
+            return parceledList.getList();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -821,7 +828,12 @@ public class WifiManager {
     @SystemApi
     public List<WifiConfiguration> getPrivilegedConfiguredNetworks() {
         try {
-            return mService.getPrivilegedConfiguredNetworks();
+            ParceledListSlice<WifiConfiguration> parceledList =
+                mService.getPrivilegedConfiguredNetworks();
+            if (parceledList == null) {
+                return Collections.emptyList();
+            }
+            return parceledList.getList();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
