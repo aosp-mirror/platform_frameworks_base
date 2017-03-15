@@ -79,7 +79,7 @@
     <!-- Cyprus: 4-6 digits (not confirmed), known premium codes listed, plus EU -->
     <shortcode country="cy" pattern="\\d{4,6}" premium="7510" free="116\\d{3}" />
 
-    <!-- Czech Republic: 7-8 digits, starting with 9, plus EU:
+    <!-- Czechia: 7-8 digits, starting with 9, plus EU:
          http://www.o2.cz/osobni/en/services-by-alphabet/91670-premium_sms.html -->
     <shortcode country="cz" premium="9\\d{6,7}" free="116\\d{3}" />
 
