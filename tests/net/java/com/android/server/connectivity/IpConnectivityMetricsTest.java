@@ -85,7 +85,7 @@ public class IpConnectivityMetricsTest extends TestCase {
             new Thread() {
                 public void run() {
                     for (int j = 0; j < nEvents; j++) {
-                        assertTrue(logger.log(i * 100 + j, FAKE_EV));
+                        assertTrue(logger.log(1 + i * 100 + j, FAKE_EV));
                     }
                 }
             }.start();
@@ -96,7 +96,7 @@ public class IpConnectivityMetricsTest extends TestCase {
         Iterator<ConnectivityMetricsEvent> iter = got.iterator();
         for (int i = 0; i < nCallers; i++) {
             for (int j = 0; j < nEvents; j++) {
-                int expectedTimestamp = i * 100 + j;
+                int expectedTimestamp = 1 + i * 100 + j;
                 assertEventsEqual(expectedEvent(expectedTimestamp), iter.next());
             }
         }

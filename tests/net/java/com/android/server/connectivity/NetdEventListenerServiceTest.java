@@ -23,6 +23,7 @@ import android.net.metrics.ConnectStats;
 import android.net.metrics.DnsEvent;
 import android.net.metrics.INetdEventListener;
 import android.net.metrics.IpConnectivityLog;
+import android.os.Parcelable;
 import android.os.RemoteException;
 import android.system.OsConstants;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -165,8 +166,8 @@ public class NetdEventListenerServiceTest extends TestCase {
         // call onLost() asynchronously to logDnsAsync's onDnsEvent() calls.
         mCallbackCaptor.getValue().onLost(new Network(105));
 
-        // do not verify unpredictable batch
-        verify(mLog, timeout(500).times(1)).log(any());
+        // do not verify batch with unpredictable length
+        verify(mLog, timeout(500).times(1)).log(any(Parcelable.class));
     }
 
     @SmallTest
@@ -279,11 +280,7 @@ public class NetdEventListenerServiceTest extends TestCase {
     }
 
     void logDnsAsync(int netId, int[] latencies) {
-        new Thread() {
-            public void run() {
-                log(netId, latencies);
-            }
-        }.start();
+        new Thread(() -> log(netId, latencies)).start();
     }
 
     void verifyLoggedDnsEvents(DnsEvent... expected) {
