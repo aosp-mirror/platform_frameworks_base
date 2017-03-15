@@ -50,6 +50,7 @@ import android.database.sqlite.SQLiteDebug;
 import android.database.sqlite.SQLiteDebug.DbStats;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Typeface;
 import android.hardware.display.DisplayManagerGlobal;
 import android.net.ConnectivityManager;
 import android.net.IConnectivityManager;
@@ -5665,6 +5666,7 @@ public final class ActivityThread {
         }
 
         // Preload fonts resources
+        Typeface.setApplicationContext(appContext);
         try {
             final ApplicationInfo info =
                     getPackageManager().getApplicationInfo(
