@@ -2679,6 +2679,9 @@ public final class TvContract {
         /**
          * The ID of the TV channel that provides this TV program.
          *
+         * <p>This value cannot be changed once it's set. Trying to modify it will make the update
+         * fail.
+         *
          * <p>This is a part of the channel URI and matches to {@link BaseColumns#_ID}.
          *
          * <p>This is a required field.
