@@ -791,12 +791,12 @@ public final class Bitmap implements Parcelable {
 
         int neww = width;
         int newh = height;
-        Canvas canvas = new Canvas();
         Bitmap bitmap;
         Paint paint;
 
         Rect srcR = new Rect(x, y, x + width, y + height);
         RectF dstR = new RectF(0, 0, width, height);
+        RectF deviceR = new RectF();
 
         Config newConfig = Config.ARGB_8888;
         final Config config = source.getConfig();
@@ -827,7 +827,6 @@ public final class Bitmap implements Parcelable {
         } else {
             final boolean transformed = !m.rectStaysRect();
 
-            RectF deviceR = new RectF();
             m.mapRect(deviceR, dstR);
 
             neww = Math.round(deviceR.width());
@@ -840,9 +839,6 @@ public final class Bitmap implements Parcelable {
                 }
             }
             bitmap = createBitmap(neww, newh, transformedConfig, transformed || source.hasAlpha());
-
-            canvas.translate(-deviceR.left, -deviceR.top);
-            canvas.concat(m);
 
             paint = new Paint();
             paint.setFilterBitmap(filter);
@@ -857,7 +853,9 @@ public final class Bitmap implements Parcelable {
         bitmap.setHasAlpha(source.hasAlpha());
         bitmap.setPremultiplied(source.mRequestPremultiplied);
 
-        canvas.setBitmap(bitmap);
+        Canvas canvas = new Canvas(bitmap);
+        canvas.translate(-deviceR.left, -deviceR.top);
+        canvas.concat(m);
         canvas.drawBitmap(source, srcR, dstR, paint);
         canvas.setBitmap(null);
         if (isHardware) {
