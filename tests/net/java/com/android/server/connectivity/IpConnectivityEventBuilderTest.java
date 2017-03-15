@@ -26,6 +26,11 @@ import static com.android.server.connectivity.MetricsTestUtil.anIntArray;
 import static com.android.server.connectivity.MetricsTestUtil.b;
 import static com.android.server.connectivity.MetricsTestUtil.describeIpEvent;
 import static com.android.server.connectivity.metrics.nano.IpConnectivityLogClass.IpConnectivityLog;
+import static com.android.server.connectivity.metrics.nano.IpConnectivityLogClass.BLUETOOTH;
+import static com.android.server.connectivity.metrics.nano.IpConnectivityLogClass.CELLULAR;
+import static com.android.server.connectivity.metrics.nano.IpConnectivityLogClass.ETHERNET;
+import static com.android.server.connectivity.metrics.nano.IpConnectivityLogClass.MULTIPLE;
+import static com.android.server.connectivity.metrics.nano.IpConnectivityLogClass.WIFI;
 
 import android.net.ConnectivityMetricsEvent;
 import android.net.metrics.ApfProgramEvent;
@@ -45,6 +50,136 @@ import junit.framework.TestCase;
 
 // TODO: instead of comparing textpb to textpb, parse textpb and compare proto to proto.
 public class IpConnectivityEventBuilderTest extends TestCase {
+
+    @SmallTest
+    public void testLinkLayerInferrence() {
+        ConnectivityMetricsEvent ev = describeIpEvent(
+                aType(IpReachabilityEvent.class),
+                aString("wlan0"),
+                anInt(IpReachabilityEvent.NUD_FAILED));
+
+        String want = joinLines(
+                "dropped_events: 0",
+                "events <",
+                "  if_name: \"\"",
+                "  link_layer: 0",
+                "  network_id: 0",
+                "  time_ms: 1",
+                "  transports: 0",
+                "  ip_reachability_event <",
+                "    event_type: 512",
+                "    if_name: \"wlan0\"",
+                "  >",
+                ">",
+                "version: 2");
+        verifySerialization(want, ev);
+
+        ev.netId = 123;
+        ev.transports = 3; // transports have priority for inferrence of link layer
+        ev.ifname = "wlan0";
+        want = joinLines(
+                "dropped_events: 0",
+                "events <",
+                "  if_name: \"\"",
+                String.format("  link_layer: %d", MULTIPLE),
+                "  network_id: 123",
+                "  time_ms: 1",
+                "  transports: 3",
+                "  ip_reachability_event <",
+                "    event_type: 512",
+                "    if_name: \"wlan0\"",
+                "  >",
+                ">",
+                "version: 2");
+        verifySerialization(want, ev);
+
+        ev.transports = 1;
+        ev.ifname = null;
+        want = joinLines(
+                "dropped_events: 0",
+                "events <",
+                "  if_name: \"\"",
+                String.format("  link_layer: %d", CELLULAR),
+                "  network_id: 123",
+                "  time_ms: 1",
+                "  transports: 1",
+                "  ip_reachability_event <",
+                "    event_type: 512",
+                "    if_name: \"wlan0\"",
+                "  >",
+                ">",
+                "version: 2");
+        verifySerialization(want, ev);
+
+        ev.transports = 0;
+        ev.ifname = "not_inferred";
+        want = joinLines(
+                "dropped_events: 0",
+                "events <",
+                "  if_name: \"not_inferred\"",
+                "  link_layer: 0",
+                "  network_id: 123",
+                "  time_ms: 1",
+                "  transports: 0",
+                "  ip_reachability_event <",
+                "    event_type: 512",
+                "    if_name: \"wlan0\"",
+                "  >",
+                ">",
+                "version: 2");
+        verifySerialization(want, ev);
+
+        ev.ifname = "bt-pan";
+        want = joinLines(
+                "dropped_events: 0",
+                "events <",
+                "  if_name: \"\"",
+                String.format("  link_layer: %d", BLUETOOTH),
+                "  network_id: 123",
+                "  time_ms: 1",
+                "  transports: 0",
+                "  ip_reachability_event <",
+                "    event_type: 512",
+                "    if_name: \"wlan0\"",
+                "  >",
+                ">",
+                "version: 2");
+        verifySerialization(want, ev);
+
+        ev.ifname = "rmnet_ipa0";
+        want = joinLines(
+                "dropped_events: 0",
+                "events <",
+                "  if_name: \"\"",
+                String.format("  link_layer: %d", CELLULAR),
+                "  network_id: 123",
+                "  time_ms: 1",
+                "  transports: 0",
+                "  ip_reachability_event <",
+                "    event_type: 512",
+                "    if_name: \"wlan0\"",
+                "  >",
+                ">",
+                "version: 2");
+        verifySerialization(want, ev);
+
+        ev.ifname = "wlan0";
+        want = joinLines(
+                "dropped_events: 0",
+                "events <",
+                "  if_name: \"\"",
+                String.format("  link_layer: %d", WIFI),
+                "  network_id: 123",
+                "  time_ms: 1",
+                "  transports: 0",
+                "  ip_reachability_event <",
+                "    event_type: 512",
+                "    if_name: \"wlan0\"",
+                "  >",
+                ">",
+                "version: 2");
+        verifySerialization(want, ev);
+    }
 
     @SmallTest
     public void testDefaultNetworkEventSerialization() {
