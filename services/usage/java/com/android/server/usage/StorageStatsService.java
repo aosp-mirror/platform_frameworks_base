@@ -105,7 +105,7 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
         invalidateMounts();
 
         mHandler = new H(IoThread.get().getLooper());
-        mHandler.sendEmptyMessageDelayed(H.MSG_LOAD_CACHED_QUOTAS_FROM_FILE, DELAY_IN_MILLIS);
+        mHandler.sendEmptyMessage(H.MSG_LOAD_CACHED_QUOTAS_FROM_FILE);
 
         mStorage.registerListener(new StorageEventListener() {
             @Override
@@ -137,7 +137,8 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
                         android.Manifest.permission.PACKAGE_USAGE_STATS, TAG);
                 return;
             default:
-                throw new SecurityException("Blocked by mode " + mode);
+                throw new SecurityException("Package " + callingPackage + " from UID " + callingUid
+                        + " blocked by mode " + mode);
         }
     }
 
@@ -169,16 +170,21 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
         enforcePermission(Binder.getCallingUid(), callingPackage);
 
         long cacheBytes = 0;
-        for (UserInfo user : mUser.getUsers()) {
-            final StorageStats stats = queryStatsForUser(volumeUuid, user.id, null);
-            cacheBytes += stats.cacheBytes;
+        final long token = Binder.clearCallingIdentity();
+        try {
+            for (UserInfo user : mUser.getUsers()) {
+                final StorageStats stats = queryStatsForUser(volumeUuid, user.id, null);
+                cacheBytes += stats.cacheBytes;
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
 
         if (volumeUuid == StorageManager.UUID_PRIVATE_INTERNAL) {
-            return Environment.getDataDirectory().getFreeSpace() + cacheBytes;
+            return Environment.getDataDirectory().getUsableSpace() + cacheBytes;
         } else {
             final VolumeInfo vol = mStorage.findVolumeByUuid(volumeUuid);
-            return vol.getPath().getFreeSpace() + cacheBytes;
+            return vol.getPath().getUsableSpace() + cacheBytes;
         }
     }
 

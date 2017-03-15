@@ -81,9 +81,9 @@ public class StorageStatsManager {
     /**
      * Return the free space on the requested storage volume.
      * <p>
-     * The free space is equivalent to {@link File#getFreeSpace()} plus the size
-     * of any cached data that can be automatically deleted by the system as
-     * additional space is needed.
+     * The free space is equivalent to {@link File#getUsableSpace()} plus the
+     * size of any cached data that can be automatically deleted by the system
+     * as additional space is needed.
      * <p>
      * This method may take several seconds to calculate the requested values,
      * so it should only be called from a worker thread.
