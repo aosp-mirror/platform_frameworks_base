@@ -1106,8 +1106,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
                         JobStatus runNow = (JobStatus) message.obj;
                         // runNow can be null, which is a controller's way of indicating that its
                         // state is such that all ready jobs should be run immediately.
-                        if (runNow != null && !mPendingJobs.contains(runNow)
-                                && mJobs.containsJob(runNow)) {
+                        if (runNow != null && isReadyToBeExecutedLocked(runNow)) {
                             mJobPackageTracker.notePending(runNow);
                             mPendingJobs.add(runNow);
                         }
@@ -1310,12 +1309,27 @@ public final class JobSchedulerService extends com.android.server.SystemService
          *      - The component is enabled and runnable.
          */
         private boolean isReadyToBeExecutedLocked(JobStatus job) {
+            final boolean jobExists = mJobs.containsJob(job);
             final boolean jobReady = job.isReady();
             final boolean jobPending = mPendingJobs.contains(job);
             final boolean jobActive = isCurrentlyActiveLocked(job);
 
             final int userId = job.getUserId();
             final boolean userStarted = ArrayUtils.contains(mStartedUsers, userId);
+
+            if (DEBUG) {
+                Slog.v(TAG, "isReadyToBeExecutedLocked: " + job.toShortString()
+                        + " exists=" + jobExists
+                        + " ready=" + jobReady + " pending=" + jobPending
+                        + " active=" + jobActive + " userStarted=" + userStarted);
+            }
+
+            // Short circuit: don't do the expensive PM check unless we really think
+            // we might need to run this job now.
+            if (!jobExists || !userStarted || !jobReady || jobPending || jobActive) {
+                return false;
+            }
+
             final boolean componentPresent;
             try {
                 componentPresent = (AppGlobals.getPackageManager().getServiceInfo(
@@ -1327,11 +1341,11 @@ public final class JobSchedulerService extends com.android.server.SystemService
 
             if (DEBUG) {
                 Slog.v(TAG, "isReadyToBeExecutedLocked: " + job.toShortString()
-                        + " ready=" + jobReady + " pending=" + jobPending
-                        + " active=" + jobActive + " userStarted=" + userStarted
                         + " componentPresent=" + componentPresent);
             }
-            return userStarted && componentPresent && jobReady && !jobPending && !jobActive;
+
+            // Everything else checked out so far, so this is the final yes/no check
+            return componentPresent;
         }
 
         /**
