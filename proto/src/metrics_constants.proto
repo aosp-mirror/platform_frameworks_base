@@ -3604,6 +3604,10 @@ message MetricsEvent {
     // ACTION: Settings > Search > Click saved queries
     ACTION_CLICK_SETTINGS_SEARCH_SAVED_QUERY = 881;
 
+    // OPEN: Settings > Security & screen lock -> Lock screen preferences
+    // CATEGORY: SETTINGS
+    SETTINGS_LOCK_SCREEN_PREFERENCES = 882;
+
     // ---- End O Constants, all O constants go above this line ----
 
     // Add new aosp constants above this line.
