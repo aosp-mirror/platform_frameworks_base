@@ -151,7 +151,8 @@ final public class IpConnectivityEventBuilder {
     }
 
     private static void setDnsEvent(IpConnectivityEvent out, DnsEvent in) {
-        IpConnectivityLogClass.DNSLookupBatch dnsLookupBatch = new IpConnectivityLogClass.DNSLookupBatch();
+        IpConnectivityLogClass.DNSLookupBatch dnsLookupBatch =
+                new IpConnectivityLogClass.DNSLookupBatch();
         dnsLookupBatch.networkId = netIdOf(in.netId);
         dnsLookupBatch.eventTypes = bytesToInts(in.eventTypes);
         dnsLookupBatch.returnCodes = bytesToInts(in.returnCodes);
@@ -160,7 +161,8 @@ final public class IpConnectivityEventBuilder {
     }
 
     private static void setIpManagerEvent(IpConnectivityEvent out, IpManagerEvent in) {
-        IpConnectivityLogClass.IpProvisioningEvent ipProvisioningEvent = new IpConnectivityLogClass.IpProvisioningEvent();
+        IpConnectivityLogClass.IpProvisioningEvent ipProvisioningEvent =
+                new IpConnectivityLogClass.IpProvisioningEvent();
         ipProvisioningEvent.ifName = in.ifName;
         ipProvisioningEvent.eventType = in.eventType;
         ipProvisioningEvent.latencyMs = (int) in.durationMs;
@@ -168,14 +170,16 @@ final public class IpConnectivityEventBuilder {
     }
 
     private static void setIpReachabilityEvent(IpConnectivityEvent out, IpReachabilityEvent in) {
-        IpConnectivityLogClass.IpReachabilityEvent ipReachabilityEvent = new IpConnectivityLogClass.IpReachabilityEvent();
+        IpConnectivityLogClass.IpReachabilityEvent ipReachabilityEvent =
+                new IpConnectivityLogClass.IpReachabilityEvent();
         ipReachabilityEvent.ifName = in.ifName;
         ipReachabilityEvent.eventType = in.eventType;
         out.setIpReachabilityEvent(ipReachabilityEvent);
     }
 
     private static void setDefaultNetworkEvent(IpConnectivityEvent out, DefaultNetworkEvent in) {
-        IpConnectivityLogClass.DefaultNetworkEvent defaultNetworkEvent = new IpConnectivityLogClass.DefaultNetworkEvent();
+        IpConnectivityLogClass.DefaultNetworkEvent defaultNetworkEvent =
+                new IpConnectivityLogClass.DefaultNetworkEvent();
         defaultNetworkEvent.networkId = netIdOf(in.netId);
         defaultNetworkEvent.previousNetworkId = netIdOf(in.prevNetId);
         defaultNetworkEvent.transportTypes = in.transportTypes;
@@ -184,7 +188,8 @@ final public class IpConnectivityEventBuilder {
     }
 
     private static void setNetworkEvent(IpConnectivityEvent out, NetworkEvent in) {
-        IpConnectivityLogClass.NetworkEvent networkEvent = new IpConnectivityLogClass.NetworkEvent();
+        IpConnectivityLogClass.NetworkEvent networkEvent =
+                new IpConnectivityLogClass.NetworkEvent();
         networkEvent.networkId = netIdOf(in.netId);
         networkEvent.eventType = in.eventType;
         networkEvent.latencyMs = (int) in.durationMs;
@@ -192,7 +197,8 @@ final public class IpConnectivityEventBuilder {
     }
 
     private static void setValidationProbeEvent(IpConnectivityEvent out, ValidationProbeEvent in) {
-        IpConnectivityLogClass.ValidationProbeEvent validationProbeEvent = new IpConnectivityLogClass.ValidationProbeEvent();
+        IpConnectivityLogClass.ValidationProbeEvent validationProbeEvent =
+                new IpConnectivityLogClass.ValidationProbeEvent();
         validationProbeEvent.networkId = netIdOf(in.netId);
         validationProbeEvent.latencyMs = (int) in.durationMs;
         validationProbeEvent.probeType = in.probeType;
@@ -201,8 +207,10 @@ final public class IpConnectivityEventBuilder {
     }
 
     private static void setApfProgramEvent(IpConnectivityEvent out, ApfProgramEvent in) {
-        IpConnectivityLogClass.ApfProgramEvent apfProgramEvent = new IpConnectivityLogClass.ApfProgramEvent();
+        IpConnectivityLogClass.ApfProgramEvent apfProgramEvent =
+                new IpConnectivityLogClass.ApfProgramEvent();
         apfProgramEvent.lifetime = in.lifetime;
+        apfProgramEvent.effectiveLifetime = in.actualLifetime;
         apfProgramEvent.filteredRas = in.filteredRas;
         apfProgramEvent.currentRas = in.currentRas;
         apfProgramEvent.programLength = in.programLength;
@@ -216,7 +224,8 @@ final public class IpConnectivityEventBuilder {
     }
 
     private static void setApfStats(IpConnectivityEvent out, ApfStats in) {
-        IpConnectivityLogClass.ApfStatistics apfStatistics = new IpConnectivityLogClass.ApfStatistics();
+        IpConnectivityLogClass.ApfStatistics apfStatistics =
+                new IpConnectivityLogClass.ApfStatistics();
         apfStatistics.durationMs = in.durationMs;
         apfStatistics.receivedRas = in.receivedRas;
         apfStatistics.matchingRas = in.matchingRas;
@@ -224,6 +233,8 @@ final public class IpConnectivityEventBuilder {
         apfStatistics.zeroLifetimeRas = in.zeroLifetimeRas;
         apfStatistics.parseErrors = in.parseErrors;
         apfStatistics.programUpdates = in.programUpdates;
+        apfStatistics.programUpdatesAll = in.programUpdatesAll;
+        apfStatistics.programUpdatesAllowingMulticast = in.programUpdatesAllowingMulticast;
         apfStatistics.maxProgramSize = in.maxProgramSize;
         out.setApfStatistics(apfStatistics);
     }

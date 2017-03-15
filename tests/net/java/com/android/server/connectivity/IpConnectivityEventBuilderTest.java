@@ -304,6 +304,7 @@ public class IpConnectivityEventBuilderTest extends TestCase {
         ConnectivityMetricsEvent ev = describeIpEvent(
                 aType(ApfProgramEvent.class),
                 aLong(200),
+                aLong(18),
                 anInt(7),
                 anInt(9),
                 anInt(2048),
@@ -320,7 +321,7 @@ public class IpConnectivityEventBuilderTest extends TestCase {
                 "  apf_program_event <",
                 "    current_ras: 9",
                 "    drop_multicast: true",
-                "    effective_lifetime: 0",
+                "    effective_lifetime: 18",
                 "    filtered_ras: 7",
                 "    has_ipv4_addr: true",
                 "    lifetime: 200",
@@ -343,6 +344,8 @@ public class IpConnectivityEventBuilderTest extends TestCase {
                 anInt(1),
                 anInt(2),
                 anInt(4),
+                anInt(7),
+                anInt(3),
                 anInt(2048));
 
         String want = joinLines(
@@ -360,8 +363,8 @@ public class IpConnectivityEventBuilderTest extends TestCase {
                 "    max_program_size: 2048",
                 "    parse_errors: 2",
                 "    program_updates: 4",
-                "    program_updates_all: 0",
-                "    program_updates_allowing_multicast: 0",
+                "    program_updates_all: 7",
+                "    program_updates_allowing_multicast: 3",
                 "    received_ras: 10",
                 "    zero_lifetime_ras: 1",
                 "  >",
