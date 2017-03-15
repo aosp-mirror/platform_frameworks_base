@@ -35,6 +35,12 @@ public class SystemProperties {
     private static final String TAG = "SystemProperties";
     private static final boolean TRACK_KEY_ACCESS = false;
 
+    /**
+     * Android O removed the property name length limit, but com.amazon.kindle 7.8.1.5
+     * uses reflection to read this whenever text is selected (http://b/36095274).
+     */
+    public static final int PROP_NAME_MAX = Integer.MAX_VALUE;
+
     public static final int PROP_VALUE_MAX = 91;
 
     private static final ArrayList<Runnable> sChangeCallbacks = new ArrayList<Runnable>();
