@@ -74,7 +74,10 @@ public class IpConnectivityLog {
         }
 
         try {
-            int left = mService.logEvent(new ConnectivityMetricsEvent(timestamp, 0, 0, data));
+            ConnectivityMetricsEvent ev = new ConnectivityMetricsEvent();
+            ev.timestamp = timestamp;
+            ev.data = data;
+            int left = mService.logEvent(ev);
             return left >= 0;
         } catch (RemoteException e) {
             Log.e(TAG, "Error logging event", e);

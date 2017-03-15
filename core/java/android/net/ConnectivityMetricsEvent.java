@@ -23,35 +23,24 @@ import android.os.Parcelable;
 public final class ConnectivityMetricsEvent implements Parcelable {
 
     /**  The time when this event was collected, as returned by System.currentTimeMillis(). */
-    final public long timestamp;
-
-    /** The subsystem that generated the event. One of the COMPONENT_TAG_xxx constants. */
-    final public int componentTag;
-
-    /** The subsystem-specific event ID. */
-    final public int eventTag;
+    public long timestamp;
 
     /** Opaque event-specific data. */
-    final public Parcelable data;
+    public Parcelable data;
 
-    public ConnectivityMetricsEvent(long timestamp, int componentTag,
-                                    int eventTag, Parcelable data) {
-        this.timestamp = timestamp;
-        this.componentTag = componentTag;
-        this.eventTag = eventTag;
-        this.data = data;
+    public ConnectivityMetricsEvent() {
+    }
+
+    public ConnectivityMetricsEvent(Parcel in) {
+        timestamp = in.readLong();
+        data = in.readParcelable(null);
     }
 
     /** Implement the Parcelable interface */
     public static final Parcelable.Creator<ConnectivityMetricsEvent> CREATOR
             = new Parcelable.Creator<ConnectivityMetricsEvent> (){
         public ConnectivityMetricsEvent createFromParcel(Parcel source) {
-            final long timestamp = source.readLong();
-            final int componentTag = source.readInt();
-            final int eventTag = source.readInt();
-            final Parcelable data = source.readParcelable(null);
-            return new ConnectivityMetricsEvent(timestamp, componentTag,
-                    eventTag, data);
+            return new ConnectivityMetricsEvent(source);
         }
 
         public ConnectivityMetricsEvent[] newArray(int size) {
@@ -59,7 +48,6 @@ public final class ConnectivityMetricsEvent implements Parcelable {
         }
     };
 
-    /** Implement the Parcelable interface */
     @Override
     public int describeContents() {
         return 0;
@@ -68,13 +56,11 @@ public final class ConnectivityMetricsEvent implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeLong(timestamp);
-        dest.writeInt(componentTag);
-        dest.writeInt(eventTag);
         dest.writeParcelable(data, 0);
     }
 
+    @Override
     public String toString() {
-        return String.format("ConnectivityMetricsEvent(%tT.%tL, %d, %d): %s",
-                timestamp, timestamp, componentTag, eventTag, data);
+        return String.format("ConnectivityMetricsEvent(%tT.%tL): %s", timestamp, timestamp, data);
     }
 }
