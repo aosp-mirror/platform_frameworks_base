@@ -5482,6 +5482,20 @@ public final class Settings {
         public static final String ACCESSIBILITY_ENABLED = "accessibility_enabled";
 
         /**
+         * Setting specifying if the accessibility shortcut is enabled.
+         * @hide
+         */
+        public static final String ACCESSIBILITY_SHORTCUT_ENABLED =
+                "accessibility_shortcut_enabled";
+
+        /**
+         * Setting specifying if the accessibility shortcut is enabled.
+         * @hide
+         */
+        public static final String ACCESSIBILITY_SHORTCUT_ON_LOCK_SCREEN =
+                "accessibility_shortcut_on_lock_screen";
+
+        /**
          * Setting specifying if the accessibility shortcut dialog has been shown to this user.
          * @hide
          */
@@ -5489,7 +5503,7 @@ public final class Settings {
                 "accessibility_shortcut_dialog_shown";
 
         /**
-         * Setting specifying the the accessibility service to be toggled via the accessibility
+         * Setting specifying the accessibility service to be toggled via the accessibility
          * shortcut. Must be its flattened {@link ComponentName}.
          * @hide
          */
@@ -6984,6 +6998,8 @@ public final class Settings {
             ACCESSIBILITY_ENABLED,
             ACCESSIBILITY_SHORTCUT_TARGET_SERVICE,
             ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN,
+            ACCESSIBILITY_SHORTCUT_ENABLED,
+            ACCESSIBILITY_SHORTCUT_ON_LOCK_SCREEN,
             ACCESSIBILITY_SPEAK_PASSWORD,
             ACCESSIBILITY_HIGH_TEXT_CONTRAST_ENABLED,
             ACCESSIBILITY_CAPTIONING_PRESET,

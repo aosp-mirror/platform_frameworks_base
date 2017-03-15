@@ -1547,7 +1547,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private void interceptAccessibilityShortcutChord() {
-        if (mAccessibilityShortcutController.isAccessibilityShortcutAvailable()
+        if (mAccessibilityShortcutController.isAccessibilityShortcutAvailable(isKeyguardLocked())
                 && mScreenshotChordVolumeDownKeyTriggered && mA11yShortcutChordVolumeUpKeyTriggered
                 && !mScreenshotChordPowerKeyTriggered) {
             final long now = SystemClock.uptimeMillis();
@@ -1771,7 +1771,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mHasFeatureWatch = mContext.getPackageManager().hasSystemFeature(FEATURE_WATCH);
         mHasFeatureLeanback = mContext.getPackageManager().hasSystemFeature(FEATURE_LEANBACK);
         mAccessibilityShortcutController =
-                new AccessibilityShortcutController(mContext, new Handler());
+                new AccessibilityShortcutController(mContext, new Handler(), mCurrentUserId);
         // Init display burn-in protection
         boolean burnInProtectionEnabled = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_enableBurnInProtection);
@@ -3243,7 +3243,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         // If an accessibility shortcut might be partially complete, hold off dispatching until we
         // know if it is complete or not
-        if (mAccessibilityShortcutController.isAccessibilityShortcutAvailable()
+        if (mAccessibilityShortcutController.isAccessibilityShortcutAvailable(false)
                 && (flags & KeyEvent.FLAG_FALLBACK) == 0) {
             if (mScreenshotChordVolumeDownKeyTriggered ^ mA11yShortcutChordVolumeUpKeyTriggered) {
                 final long now = SystemClock.uptimeMillis();
@@ -5823,9 +5823,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             mScreenshotChordVolumeDownKeyConsumed = false;
                             cancelPendingPowerKeyAction();
                             interceptScreenshotChord();
-                            if (!isKeyguardLocked()) {
-                                interceptAccessibilityShortcutChord();
-                            }
+                            interceptAccessibilityShortcutChord();
                         }
                     } else {
                         mScreenshotChordVolumeDownKeyTriggered = false;
@@ -5841,9 +5839,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             mA11yShortcutChordVolumeUpKeyConsumed = false;
                             cancelPendingPowerKeyAction();
                             cancelPendingScreenshotChordAction();
-                            if (!isKeyguardLocked()) {
-                                interceptAccessibilityShortcutChord();
-                            }
+                            interceptAccessibilityShortcutChord();
                         }
                     } else {
                         mA11yShortcutChordVolumeUpKeyTriggered = false;
@@ -7944,6 +7940,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mCurrentUserId = newUserId;
         if (mKeyguardDelegate != null) {
             mKeyguardDelegate.setCurrentUser(newUserId);
+        }
+        if (mAccessibilityShortcutController != null) {
+            mAccessibilityShortcutController.setCurrentUser(newUserId);
         }
         StatusBarManagerInternal statusBar = getStatusBarManagerInternal();
         if (statusBar != null) {

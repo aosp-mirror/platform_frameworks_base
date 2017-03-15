@@ -27,6 +27,7 @@ import android.database.ContentObserver;
 import android.media.AudioAttributes;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.UserHandle;
 import android.os.Vibrator;
@@ -58,6 +59,9 @@ public class AccessibilityShortcutController {
     private final Context mContext;
     private AlertDialog mAlertDialog;
     private boolean mIsShortcutEnabled;
+    private boolean mEnabledOnLockScreen;
+    private int mUserId;
+
     // Visible for testing
     public FrameworkObjectProvider mFrameworkObjectProvider = new FrameworkObjectProvider();
 
@@ -72,29 +76,55 @@ public class AccessibilityShortcutController {
         return context.getString(R.string.config_defaultAccessibilityService);
     }
 
-    public AccessibilityShortcutController(Context context, Handler handler) {
+    public AccessibilityShortcutController(Context context, Handler handler, int initialUserId) {
         mContext = context;
 
-        // Keep track of state of shortcut
+        // Keep track of state of shortcut settings
+        final ContentObserver co = new ContentObserver(handler) {
+            @Override
+            public void onChange(boolean selfChange, Uri uri, int userId) {
+                if (userId == mUserId) {
+                    onSettingsChanged();
+                }
+            }
+        };
         mContext.getContentResolver().registerContentObserver(
                 Settings.Secure.getUriFor(Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE),
-                false,
-                new ContentObserver(handler) {
-                    @Override
-                    public void onChange(boolean selfChange) {
-                        onSettingsChanged();
-                    }
-                },
-                UserHandle.USER_ALL);
-        updateShortcutEnabled();
+                false, co, UserHandle.USER_ALL);
+        mContext.getContentResolver().registerContentObserver(
+                Settings.Secure.getUriFor(Settings.Secure.ACCESSIBILITY_SHORTCUT_ENABLED),
+                false, co, UserHandle.USER_ALL);
+        mContext.getContentResolver().registerContentObserver(
+                Settings.Secure.getUriFor(Settings.Secure.ACCESSIBILITY_SHORTCUT_ON_LOCK_SCREEN),
+                false, co, UserHandle.USER_ALL);
+        setCurrentUser(mUserId);
     }
 
-    public boolean isAccessibilityShortcutAvailable() {
-        return mIsShortcutEnabled;
+    public void setCurrentUser(int currentUserId) {
+        mUserId = currentUserId;
+        onSettingsChanged();
+    }
+
+    /**
+     * Check if the shortcut is available.
+     *
+     * @param onLockScreen Whether or not the phone is currently locked.
+     *
+     * @return {@code true} if the shortcut is available
+     */
+    public boolean isAccessibilityShortcutAvailable(boolean phoneLocked) {
+        return mIsShortcutEnabled && (!phoneLocked || mEnabledOnLockScreen);
     }
 
     public void onSettingsChanged() {
-        updateShortcutEnabled();
+        final boolean haveValidService =
+                !TextUtils.isEmpty(getTargetServiceComponentNameString(mContext, mUserId));
+        final ContentResolver cr = mContext.getContentResolver();
+        final boolean enabled = Settings.Secure.getIntForUser(
+                cr, Settings.Secure.ACCESSIBILITY_SHORTCUT_ENABLED, 1, mUserId) == 1;
+        mEnabledOnLockScreen = Settings.Secure.getIntForUser(
+                cr, Settings.Secure.ACCESSIBILITY_SHORTCUT_ON_LOCK_SCREEN, 0, mUserId) == 1;
+        mIsShortcutEnabled = enabled && haveValidService;
     }
 
     /**
@@ -169,11 +199,6 @@ public class AccessibilityShortcutController {
             mFrameworkObjectProvider.getAccessibilityManagerInstance(mContext)
                     .performAccessibilityShortcut();
         }
-    }
-
-    private void updateShortcutEnabled() {
-        mIsShortcutEnabled = !TextUtils.isEmpty(getTargetServiceComponentNameString(
-                mContext, UserHandle.myUserId()));
     }
 
     private AlertDialog createShortcutWarningDialog(int userId) {
