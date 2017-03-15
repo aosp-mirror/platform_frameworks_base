@@ -418,8 +418,10 @@ public final class NetworkCapabilities implements Parcelable {
      */
     public static final int TRANSPORT_WIFI_AWARE = 5;
 
-    private static final int MIN_TRANSPORT = TRANSPORT_CELLULAR;
-    private static final int MAX_TRANSPORT = TRANSPORT_WIFI_AWARE;
+    /** @hide */
+    public static final int MIN_TRANSPORT = TRANSPORT_CELLULAR;
+    /** @hide */
+    public static final int MAX_TRANSPORT = TRANSPORT_WIFI_AWARE;
 
     private static final String[] TRANSPORT_NAMES = {
         "CELLULAR",
