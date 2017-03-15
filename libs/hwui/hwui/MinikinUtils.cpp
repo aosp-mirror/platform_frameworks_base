@@ -58,8 +58,9 @@ minikin::Layout MinikinUtils::doLayout(const Paint* paint, int bidiFlags,
         size_t bufSize) {
     minikin::MinikinPaint minikinPaint;
     minikin::FontStyle minikinStyle = prepareMinikinPaint(&minikinPaint, paint, typeface);
-    minikin::Layout layout(Typeface::resolveDefault(typeface)->fFontCollection);
-    layout.doLayout(buf, start, count, bufSize, bidiFlags, minikinStyle, minikinPaint);
+    minikin::Layout layout;
+    layout.doLayout(buf, start, count, bufSize, bidiFlags, minikinStyle, minikinPaint,
+            Typeface::resolveDefault(typeface)->fFontCollection);
     return layout;
 }
 
