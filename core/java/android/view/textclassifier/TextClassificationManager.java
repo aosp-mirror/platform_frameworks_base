@@ -63,7 +63,7 @@ public final class TextClassificationManager {
             if (mDefault == null) {
                 try {
                     mSmartSelectionFd = ParcelFileDescriptor.open(
-                            new File("/etc/assistant/smart-selection.model"),
+                            new File("/etc/textclassifier/textclassifier.smartselection.en.model"),
                             ParcelFileDescriptor.MODE_READ_ONLY);
                     mDefault = new TextClassifierImpl(mContext, mSmartSelectionFd);
                 } catch (FileNotFoundException e) {
@@ -109,7 +109,7 @@ public final class TextClassificationManager {
         synchronized (mLangIdLock) {
             if (mLangId == null) {
                 mLangIdFd = ParcelFileDescriptor.open(
-                        new File("/etc/assistant/lang-id.model"),
+                        new File("/etc/textclassifier/textclassifier.langid.model"),
                         ParcelFileDescriptor.MODE_READ_ONLY);
                 mLangId = new LangId(mLangIdFd.getFd());
             }
