@@ -245,9 +245,12 @@ public class LauncherAppsService extends SystemService {
 
                     // STOPSHIP Remove the whitelist.
                     if ("com.google.android.talk".equals(callingPackage)
-                            || "com.google.android.quicksearchbox".equals(callingPackage)) {
+                            || "com.google.android.quicksearchbox".equals(callingPackage)
+                            || "com.google.android.googlequicksearchbox".equals(callingPackage)
+                            ) {
                         return false;
                     }
+                    // STOPSHIP Change it to 'e'.
                     Slog.wtfStack(TAG, message + " by " + callingPackage + " for another profile "
                             + targetUserId + " from " + callingUserId);
 
