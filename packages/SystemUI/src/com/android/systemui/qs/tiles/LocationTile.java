@@ -189,7 +189,7 @@ public class LocationTile extends QSTile<QSTile.State> {
                 }
                 state.contentDescription = mContext.getString(R.string.accessibility_quick_settings_location_high_accuracy);
                 state.label = mContext.getString(R.string.quick_settings_location_high_accuracy_label);
-                state.icon = mEnable;
+                state.icon = ResourceIcon.get(R.drawable.ic_qs_location_high_accuracy);
                 break;
             default:
                 state.contentDescription = mContext.getString(R.string.accessibility_quick_settings_location_off);
