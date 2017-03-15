@@ -279,8 +279,6 @@
     <dimen name="qs_footer_dialog_icon_size">24sp</dimen>
     <!-- Left and right margin of the icons -->
     <dimen name="qs_footer_dialog_icon_margin">8sp</dimen>
-    <!-- Alpha value of network logging icon -->
-    <dimen name="qs_footer_dialog_network_logging_icon_alpha">0.3</dimen>
 
     <!-- Zen mode panel: condition item button padding -->
     <dimen name="zen_mode_condition_detail_button_padding">8dp</dimen>
