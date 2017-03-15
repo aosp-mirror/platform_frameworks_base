@@ -2425,6 +2425,7 @@
   <java-symbol type="drawable" name="ft_avd_toarrow" />
   <java-symbol type="drawable" name="ft_avd_toarrow_animation" />
   <java-symbol type="drawable" name="ft_avd_tooverflow_animation" />
+  <java-symbol type="attr" name="floatingToolbarDividerColor" />
 
   <java-symbol type="string" name="date_picker_prev_month_button" />
   <java-symbol type="string" name="date_picker_next_month_button" />
