@@ -14,13 +14,15 @@
 
 package com.android.systemui.utils.leaks;
 
+import android.testing.LeakCheck;
+
 import com.android.systemui.statusbar.policy.NextAlarmController;
 import com.android.systemui.statusbar.policy.NextAlarmController.NextAlarmChangeCallback;
 
 public class FakeNextAlarmController extends BaseLeakChecker<NextAlarmChangeCallback>
         implements NextAlarmController {
 
-    public FakeNextAlarmController(LeakCheckedTest test) {
+    public FakeNextAlarmController(LeakCheck test) {
         super(test, "alarm");
     }
 }

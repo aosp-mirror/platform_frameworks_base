@@ -30,6 +30,7 @@ import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.PluginDependencyProvider;
 import com.android.systemui.plugins.PluginManager;
+import com.android.systemui.plugins.PluginManagerImpl;
 import com.android.systemui.statusbar.phone.ConfigurationControllerImpl;
 import com.android.systemui.statusbar.phone.DarkIconDispatcherImpl;
 import com.android.systemui.statusbar.phone.ManagedProfileController;
@@ -73,6 +74,7 @@ import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.statusbar.policy.ZenModeControllerImpl;
 import com.android.systemui.tuner.TunerService;
+import com.android.systemui.tuner.TunerServiceImpl;
 import com.android.systemui.util.leak.GarbageMonitor;
 import com.android.systemui.util.leak.LeakDetector;
 import com.android.systemui.util.leak.LeakReporter;
@@ -200,7 +202,7 @@ public class Dependency extends SystemUI {
                 new DeviceProvisionedControllerImpl(mContext));
 
         mProviders.put(PluginManager.class, () ->
-                new PluginManager(mContext));
+                new PluginManagerImpl(mContext));
 
         mProviders.put(AssistManager.class, () ->
                 new AssistManager(getDependency(DeviceProvisionedController.class), mContext));
@@ -223,7 +225,7 @@ public class Dependency extends SystemUI {
                 getDependency(LeakReporter.class)));
 
         mProviders.put(TunerService.class, () ->
-                new TunerService(mContext));
+                new TunerServiceImpl(mContext));
 
         mProviders.put(StatusBarWindowManager.class, () ->
                 new StatusBarWindowManager(mContext));

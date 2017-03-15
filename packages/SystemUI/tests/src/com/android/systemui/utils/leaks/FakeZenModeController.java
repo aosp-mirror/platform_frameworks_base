@@ -18,12 +18,13 @@ import android.content.ComponentName;
 import android.net.Uri;
 import android.service.notification.ZenModeConfig;
 import android.service.notification.ZenModeConfig.ZenRule;
+import android.testing.LeakCheck;
 
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.statusbar.policy.ZenModeController.Callback;
 
 public class FakeZenModeController extends BaseLeakChecker<Callback> implements ZenModeController {
-    public FakeZenModeController(LeakCheckedTest test) {
+    public FakeZenModeController(LeakCheck test) {
         super(test, "zen");
     }
 

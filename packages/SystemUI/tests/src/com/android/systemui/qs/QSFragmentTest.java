@@ -21,14 +21,16 @@ import android.os.Looper;
 
 import com.android.keyguard.CarrierText;
 import com.android.systemui.Dependency;
-import com.android.systemui.FragmentTestCase;
 import com.android.systemui.R;
-import com.android.systemui.SysUIRunner;
+
+import android.testing.AndroidTestingRunner;
+
+import com.android.systemui.SysuiBaseFragmentTest;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
-import com.android.systemui.util.LayoutInflaterBuilder;
-import com.android.systemui.utils.TestableLooper;
-import com.android.systemui.utils.TestableLooper.RunWithLooper;
+import android.testing.LayoutInflaterBuilder;
+import android.testing.TestableLooper;
+import android.testing.TestableLooper.RunWithLooper;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -38,9 +40,9 @@ import android.content.Context;
 import android.view.View;
 import android.widget.FrameLayout;
 
-@RunWith(SysUIRunner.class)
+@RunWith(AndroidTestingRunner.class)
 @RunWithLooper(setAsMainLooper = true)
-public class QSFragmentTest extends FragmentTestCase {
+public class QSFragmentTest extends SysuiBaseFragmentTest {
 
     public QSFragmentTest() {
         super(QSFragment.class);
@@ -56,8 +58,9 @@ public class QSFragmentTest extends FragmentTestCase {
                         .replace(CarrierText.class, View.class)
                         .build());
 
-        injectTestDependency(Dependency.BG_LOOPER, TestableLooper.get(this).getLooper());
-        injectMockDependency(UserSwitcherController.class);
+        mDependency.injectTestDependency(Dependency.BG_LOOPER,
+                TestableLooper.get(this).getLooper());
+        mDependency.injectMockDependency(UserSwitcherController.class);
         injectLeakCheckedDependencies(ALL_SUPPORTED_CLASSES);
     }
 

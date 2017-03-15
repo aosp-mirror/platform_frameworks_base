@@ -62,10 +62,10 @@ public class PluginInstanceManager<T extends Plugin> {
     final PluginHandler mPluginHandler;
     private final boolean isDebuggable;
     private final PackageManager mPm;
-    private final PluginManager mManager;
+    private final PluginManagerImpl mManager;
 
     PluginInstanceManager(Context context, String action, PluginListener<T> listener,
-            boolean allowMultiple, Looper looper, VersionInfo version, PluginManager manager) {
+            boolean allowMultiple, Looper looper, VersionInfo version, PluginManagerImpl manager) {
         this(context, context.getPackageManager(), action, listener, allowMultiple, looper, version,
                 manager, Build.IS_DEBUGGABLE);
     }
@@ -73,7 +73,7 @@ public class PluginInstanceManager<T extends Plugin> {
     @VisibleForTesting
     PluginInstanceManager(Context context, PackageManager pm, String action,
             PluginListener<T> listener, boolean allowMultiple, Looper looper, VersionInfo version,
-            PluginManager manager, boolean debuggable) {
+            PluginManagerImpl manager, boolean debuggable) {
         mMainHandler = new MainHandler(Looper.getMainLooper());
         mPluginHandler = new PluginHandler(looper);
         mManager = manager;
@@ -346,7 +346,7 @@ public class PluginInstanceManager<T extends Plugin> {
                                 .setContentText("Check to see if an OTA is available.\n"
                                         + e.getMessage());
                     }
-                    Intent i = new Intent(PluginManager.DISABLE_PLUGIN).setData(
+                    Intent i = new Intent(PluginManagerImpl.DISABLE_PLUGIN).setData(
                             Uri.parse("package://" + component.flattenToString()));
                     PendingIntent pi = PendingIntent.getBroadcast(mContext, 0, i, 0);
                     nb.addAction(new Action.Builder(null, "Disable plugin", pi).build());

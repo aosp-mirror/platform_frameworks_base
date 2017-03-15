@@ -14,13 +14,15 @@
 
 package com.android.systemui.utils.leaks;
 
+import android.testing.LeakCheck;
+
 import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.CastController.Callback;
 
 import java.util.Set;
 
 public class FakeCastController extends BaseLeakChecker<Callback> implements CastController {
-    public FakeCastController(LeakCheckedTest test) {
+    public FakeCastController(LeakCheck test) {
         super(test, "cast");
     }
 

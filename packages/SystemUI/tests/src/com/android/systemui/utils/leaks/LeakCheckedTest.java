@@ -15,8 +15,8 @@
 package com.android.systemui.utils.leaks;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doAnswer;
 
+import android.testing.LeakCheck;
 import android.util.ArrayMap;
 
 import com.android.systemui.SysuiTestCase;
@@ -25,7 +25,6 @@ import com.android.systemui.statusbar.phone.ManagedProfileController;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BluetoothController;
-import com.android.systemui.statusbar.policy.CallbackController;
 import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.FlashlightController;
 import com.android.systemui.statusbar.policy.HotspotController;
@@ -41,12 +40,7 @@ import com.android.systemui.tuner.TunerService;
 
 import org.junit.Assert;
 import org.junit.Rule;
-import org.junit.rules.TestWatcher;
-import org.junit.runner.Description;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -56,10 +50,7 @@ import java.util.Map;
 public abstract class LeakCheckedTest extends SysuiTestCase {
     private static final String TAG = "LeakCheckedTest";
 
-    private final Map<String, Tracker> mTrackers = new HashMap<>();
-    private final Map<Class, Object> mLeakCheckers = new ArrayMap<>();
-
-    public static final Class<?>[] ALL_SUPPORTED_CLASSES = new Class[] {
+    public static final Class<?>[] ALL_SUPPORTED_CLASSES = new Class[]{
             BluetoothController.class,
             LocationController.class,
             RotationLockController.class,
@@ -80,71 +71,11 @@ public abstract class LeakCheckedTest extends SysuiTestCase {
     };
 
     @Rule
-    public TestWatcher successWatcher = new TestWatcher() {
-        @Override
-        protected void succeeded(Description description) {
-            verify();
-        }
-    };
-
-    public <T> T getLeakChecker(Class<T> cls) {
-        Object obj = mLeakCheckers.get(cls);
-        if (obj == null) {
-            // Lazy create checkers so we only have the ones we need.
-            if (cls == BluetoothController.class) {
-                obj = new FakeBluetoothController(this);
-            } else if (cls == LocationController.class) {
-                obj = new FakeLocationController(this);
-            } else if (cls == RotationLockController.class) {
-                obj = new FakeRotationLockController(this);
-            } else if (cls == ZenModeController.class) {
-                obj = new FakeZenModeController(this);
-            } else if (cls == CastController.class) {
-                obj = new FakeCastController(this);
-            } else if (cls == HotspotController.class) {
-                obj = new FakeHotspotController(this);
-            } else if (cls == FlashlightController.class) {
-                obj = new FakeFlashlightController(this);
-            } else if (cls == UserInfoController.class) {
-                obj = new FakeUserInfoController(this);
-            } else if (cls == KeyguardMonitor.class) {
-                obj = new FakeKeyguardMonitor(this);
-            } else if (cls == BatteryController.class) {
-                obj = new FakeBatteryController(this);
-            } else if (cls == SecurityController.class) {
-                obj = new FakeSecurityController(this);
-            } else if (cls == ManagedProfileController.class) {
-                obj = new FakeManagedProfileController(this);
-            } else if (cls == NextAlarmController.class) {
-                obj = new FakeNextAlarmController(this);
-            } else if (cls == NetworkController.class) {
-                obj = new FakeNetworkController(this);
-            } else if (cls == PluginManager.class) {
-                obj = new FakePluginManager(mContext, this);
-            } else if (cls == TunerService.class) {
-                obj = new FakeTunerService(mContext, this);
-            } else if (cls == StatusBarIconController.class) {
-                obj = new FakeStatusBarIconController(this);
-            } else {
-                Assert.fail(cls.getName() + " is not supported by LeakCheckedTest yet");
-            }
-            mLeakCheckers.put(cls, obj);
-        }
-        return (T) obj;
-    }
+    public SysuiLeakCheck mLeakCheck = new SysuiLeakCheck();
 
     @Override
-    public Tracker getTracker(String tag) {
-        Tracker t = mTrackers.get(tag);
-        if (t == null) {
-            t = new Tracker();
-            mTrackers.put(tag, t);
-        }
-        return t;
-    }
-
-    public void verify() {
-        mTrackers.values().forEach(Tracker::verify);
+    public LeakCheck getLeakCheck() {
+        return mLeakCheck;
     }
 
     public void injectLeakCheckedDependencies(Class<?>... cls) {
@@ -154,26 +85,61 @@ public abstract class LeakCheckedTest extends SysuiTestCase {
     }
 
     public <T> void injectLeakCheckedDependency(Class<T> c) {
-        injectTestDependency(c, getLeakChecker(c));
+        mDependency.injectTestDependency(c, mLeakCheck.getLeakChecker(c));
     }
 
-    public <T extends CallbackController> T addListening(T mock, Class<T> cls, String tag) {
-        doAnswer(new Answer<Void>() {
-            @Override
-            public Void answer(InvocationOnMock invocation) throws Throwable {
-                getTracker(tag).getLeakInfo(invocation.getArguments()[0])
-                        .addAllocation(new Throwable());
-                return null;
+    public static class SysuiLeakCheck extends LeakCheck {
+
+        private final Map<Class, Object> mLeakCheckers = new ArrayMap<>();
+
+        public SysuiLeakCheck() {
+            super();
+        }
+
+        public <T> T getLeakChecker(Class<T> cls) {
+            Object obj = mLeakCheckers.get(cls);
+            if (obj == null) {
+                // Lazy create checkers so we only have the ones we need.
+                if (cls == BluetoothController.class) {
+                    obj = new FakeBluetoothController(this);
+                } else if (cls == LocationController.class) {
+                    obj = new FakeLocationController(this);
+                } else if (cls == RotationLockController.class) {
+                    obj = new FakeRotationLockController(this);
+                } else if (cls == ZenModeController.class) {
+                    obj = new FakeZenModeController(this);
+                } else if (cls == CastController.class) {
+                    obj = new FakeCastController(this);
+                } else if (cls == HotspotController.class) {
+                    obj = new FakeHotspotController(this);
+                } else if (cls == FlashlightController.class) {
+                    obj = new FakeFlashlightController(this);
+                } else if (cls == UserInfoController.class) {
+                    obj = new FakeUserInfoController(this);
+                } else if (cls == KeyguardMonitor.class) {
+                    obj = new FakeKeyguardMonitor(this);
+                } else if (cls == BatteryController.class) {
+                    obj = new FakeBatteryController(this);
+                } else if (cls == SecurityController.class) {
+                    obj = new FakeSecurityController(this);
+                } else if (cls == ManagedProfileController.class) {
+                    obj = new FakeManagedProfileController(this);
+                } else if (cls == NextAlarmController.class) {
+                    obj = new FakeNextAlarmController(this);
+                } else if (cls == NetworkController.class) {
+                    obj = new FakeNetworkController(this);
+                } else if (cls == PluginManager.class) {
+                    obj = new FakePluginManager(this);
+                } else if (cls == TunerService.class) {
+                    obj = new FakeTunerService(this);
+                } else if (cls == StatusBarIconController.class) {
+                    obj = new FakeStatusBarIconController(this);
+                } else {
+                    Assert.fail(cls.getName() + " is not supported by LeakCheckedTest yet");
+                }
+                mLeakCheckers.put(cls, obj);
             }
-        }).when(mock).addCallback(any());
-        doAnswer(new Answer<Void>() {
-            @Override
-            public Void answer(InvocationOnMock invocation) throws Throwable {
-                getTracker(tag).getLeakInfo(invocation.getArguments()[0]).clearAllocations();
-                return null;
-            }
-        }).when(mock).removeCallback(any());
-        mLeakCheckers.put(cls, mock);
-        return mock;
+            return (T) obj;
+        }
     }
 }

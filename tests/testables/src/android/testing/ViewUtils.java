@@ -12,19 +12,14 @@
  * permissions and limitations under the License.
  */
 
-package com.android.systemui.utils;
+package android.testing;
 
 import android.content.pm.ApplicationInfo;
 import android.graphics.PixelFormat;
-import android.os.Handler;
-import android.os.Looper;
-import android.util.Log;
+import android.support.test.InstrumentationRegistry;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
-import android.support.test.InstrumentationRegistry;
-
-import com.android.systemui.SysuiTestCase;
 
 public class ViewUtils {
 

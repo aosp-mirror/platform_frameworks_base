@@ -15,6 +15,7 @@
 package com.android.systemui.utils.leaks;
 
 import android.os.Bundle;
+import android.testing.LeakCheck;
 
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback;
@@ -24,7 +25,7 @@ import java.io.PrintWriter;
 
 public class FakeBatteryController extends BaseLeakChecker<BatteryStateChangeCallback>
         implements BatteryController {
-    public FakeBatteryController(LeakCheckedTest test) {
+    public FakeBatteryController(LeakCheck test) {
         super(test, "battery");
     }
 

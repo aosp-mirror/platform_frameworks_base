@@ -14,12 +14,14 @@
 
 package com.android.systemui.utils.leaks;
 
+import android.testing.LeakCheck;
+
 import com.android.systemui.statusbar.policy.SecurityController;
 import com.android.systemui.statusbar.policy.SecurityController.SecurityControllerCallback;
 
 public class FakeSecurityController extends BaseLeakChecker<SecurityControllerCallback>
         implements SecurityController {
-    public FakeSecurityController(LeakCheckedTest test) {
+    public FakeSecurityController(LeakCheck test) {
         super(test, "security");
     }
 

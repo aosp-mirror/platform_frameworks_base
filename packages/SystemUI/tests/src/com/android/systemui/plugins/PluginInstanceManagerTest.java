@@ -72,7 +72,7 @@ public class PluginInstanceManagerTest extends SysuiTestCase {
     private PackageManager mMockPm;
     private PluginListener mMockListener;
     private PluginInstanceManager mPluginInstanceManager;
-    private PluginManager mMockManager;
+    private PluginManagerImpl mMockManager;
     private VersionInfo mMockVersionInfo;
 
     @Before
@@ -82,7 +82,7 @@ public class PluginInstanceManagerTest extends SysuiTestCase {
         mContextWrapper = new MyContextWrapper(getContext());
         mMockPm = mock(PackageManager.class);
         mMockListener = mock(PluginListener.class);
-        mMockManager = mock(PluginManager.class);
+        mMockManager = mock(PluginManagerImpl.class);
         when(mMockManager.getClassLoader(any(), any()))
                 .thenReturn(getClass().getClassLoader());
         mMockVersionInfo = mock(VersionInfo.class);

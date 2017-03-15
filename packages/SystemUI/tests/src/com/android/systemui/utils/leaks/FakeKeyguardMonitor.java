@@ -14,13 +14,15 @@
 
 package com.android.systemui.utils.leaks;
 
+import android.testing.LeakCheck;
+
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
 
 public class FakeKeyguardMonitor implements KeyguardMonitor {
 
     private final BaseLeakChecker<Callback> mCallbackController;
 
-    public FakeKeyguardMonitor(LeakCheckedTest test) {
+    public FakeKeyguardMonitor(LeakCheck test) {
         mCallbackController = new BaseLeakChecker<Callback>(test, "keyguard");
     }
 

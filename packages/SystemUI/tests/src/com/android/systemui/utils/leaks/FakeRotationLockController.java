@@ -14,12 +14,14 @@
 
 package com.android.systemui.utils.leaks;
 
+import android.testing.LeakCheck;
+
 import com.android.systemui.statusbar.policy.RotationLockController;
 import com.android.systemui.statusbar.policy.RotationLockController.RotationLockControllerCallback;
 
 public class FakeRotationLockController extends BaseLeakChecker<RotationLockControllerCallback>
         implements RotationLockController {
-    public FakeRotationLockController(LeakCheckedTest test) {
+    public FakeRotationLockController(LeakCheck test) {
         super(test, "rotation");
     }
 

@@ -14,12 +14,14 @@
 
 package com.android.systemui.utils.leaks;
 
+import android.testing.LeakCheck;
+
 import com.android.systemui.statusbar.policy.DataSaverController;
 import com.android.systemui.statusbar.policy.DataSaverController.Listener;
 
 public class FakeDataSaverController extends BaseLeakChecker<Listener> implements DataSaverController {
 
-    public FakeDataSaverController(LeakCheckedTest test) {
+    public FakeDataSaverController(LeakCheck test) {
         super(test, "datasaver");
     }
 

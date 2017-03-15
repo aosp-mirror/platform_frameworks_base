@@ -15,49 +15,38 @@
  */
 package com.android.systemui;
 
-import static org.mockito.Mockito.mock;
-
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.MessageQueue;
 import android.support.test.InstrumentationRegistry;
-import android.util.ArrayMap;
+import android.testing.LeakCheck;
 
-import com.android.systemui.Dependency.DependencyKey;
-import com.android.systemui.utils.TestableContext;
-import com.android.systemui.utils.leaks.Tracker;
-
-import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 
 /**
  * Base class that does System UI specific setup.
  */
 public abstract class SysuiTestCase {
 
-    private Throwable mException;
     private Handler mHandler;
-    protected TestableContext mContext;
-    protected TestDependency mDependency;
+    @Rule
+    public SysuiTestableContext mContext = new SysuiTestableContext(
+            InstrumentationRegistry.getContext(), getLeakCheck());
+    public TestableDependency mDependency = new TestableDependency(mContext);
 
     @Before
     public void SysuiSetup() throws Exception {
-        mException = null;
         System.setProperty("dexmaker.share_classloader", "true");
-        mContext = new TestableContext(InstrumentationRegistry.getTargetContext(), this);
         SystemUIFactory.createFromConfig(mContext);
-        mDependency = new TestDependency();
-        mDependency.mContext = mContext;
-        mDependency.start();
     }
 
-    @After
-    public void cleanup() throws Exception {
-        mContext.getSettingsProvider().clearOverrides(this);
+    protected LeakCheck getLeakCheck() {
+        return null;
     }
 
-    protected Context getContext() {
+    public Context getContext() {
         return mContext;
     }
 
@@ -84,45 +73,8 @@ public abstract class SysuiTestCase {
         }
     }
 
-    // Used for leak tracking, returns null to indicate no leak tracking by default.
-    public Tracker getTracker(String tag) {
-        return null;
-    }
-
-    public <T> T injectMockDependency(Class<T> cls) {
-        final T mock = mock(cls);
-        mDependency.injectTestDependency(cls, mock);
-        return mock;
-    }
-
-    public <T> void injectTestDependency(Class<T> cls, T obj) {
-        mDependency.injectTestDependency(cls, obj);
-    }
-
-    public <T> void injectTestDependency(DependencyKey<T> key, T obj) {
-        mDependency.injectTestDependency(key, obj);
-    }
-
     public static final class EmptyRunnable implements Runnable {
         public void run() {
-        }
-    }
-
-    public static class TestDependency extends Dependency {
-        private final ArrayMap<Object, Object> mObjs = new ArrayMap<>();
-
-        private <T> void injectTestDependency(DependencyKey<T> key, T obj) {
-            mObjs.put(key, obj);
-        }
-
-        private <T> void injectTestDependency(Class<T> key, T obj) {
-            mObjs.put(key, obj);
-        }
-
-        @Override
-        protected <T> T createDependency(Object key) {
-            if (mObjs.containsKey(key)) return (T) mObjs.get(key);
-            return super.createDependency(key);
         }
     }
 

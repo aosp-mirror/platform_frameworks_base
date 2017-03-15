@@ -12,7 +12,7 @@
  * permissions and limitations under the License.
  */
 
-package com.android.systemui.utils;
+package android.testing;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
@@ -27,20 +27,17 @@ import static org.mockito.Mockito.when;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-
-import com.android.systemui.SysUIRunner;
-import com.android.systemui.SysuiTestCase;
-import com.android.systemui.utils.TestableLooper.MessageHandler;
-import com.android.systemui.utils.TestableLooper.RunWithLooper;
+import android.testing.TestableLooper.MessageHandler;
+import android.testing.TestableLooper.RunWithLooper;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-@RunWith(SysUIRunner.class)
+@RunWith(AndroidTestingRunner.class)
 @RunWithLooper
-public class TestableLooperTest extends SysuiTestCase {
+public class TestableLooperTest {
 
     private TestableLooper mTestableLooper;
 

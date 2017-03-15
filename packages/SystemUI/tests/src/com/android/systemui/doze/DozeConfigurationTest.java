@@ -47,7 +47,7 @@ public class DozeConfigurationTest extends SysuiTestCase {
             return;
         }
 
-        mContext.getSettingsProvider().acquireOverridesBuilder(this)
+        mContext.getSettingsProvider().acquireOverridesBuilder()
                 .addSetting("secure", Settings.Secure.DOZE_ALWAYS_ON, null)
                 .build();
 

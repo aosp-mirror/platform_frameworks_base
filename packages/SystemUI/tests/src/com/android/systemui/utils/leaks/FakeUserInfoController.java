@@ -14,12 +14,14 @@
 
 package com.android.systemui.utils.leaks;
 
+import android.testing.LeakCheck;
+
 import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.statusbar.policy.UserInfoController.OnUserInfoChangedListener;
 
 public class FakeUserInfoController extends BaseLeakChecker<OnUserInfoChangedListener>
         implements UserInfoController {
-    public FakeUserInfoController(LeakCheckedTest test) {
+    public FakeUserInfoController(LeakCheck test) {
         super(test, "user_info");
     }
 

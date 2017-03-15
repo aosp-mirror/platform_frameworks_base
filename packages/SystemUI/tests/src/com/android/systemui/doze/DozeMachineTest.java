@@ -39,19 +39,20 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.support.test.filters.SmallTest;
+import android.testing.AndroidTestingRunner;
 import android.view.Display;
 
-import com.android.systemui.SysUIRunner;
-import com.android.systemui.UiThreadTest;
 import com.android.internal.hardware.AmbientDisplayConfiguration;
 import com.android.systemui.util.wakelock.WakeLockFake;
+
+import android.testing.UiThreadTest;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @SmallTest
-@RunWith(SysUIRunner.class)
+@RunWith(AndroidTestingRunner.class)
 @UiThreadTest
 public class DozeMachineTest {
 

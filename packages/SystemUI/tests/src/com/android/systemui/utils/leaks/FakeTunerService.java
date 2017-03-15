@@ -15,6 +15,7 @@
 package com.android.systemui.utils.leaks;
 
 import android.content.Context;
+import android.testing.LeakCheck;
 
 import com.android.systemui.tuner.TunerService;
 
@@ -22,10 +23,8 @@ public class FakeTunerService extends TunerService {
 
     private final BaseLeakChecker<Tunable> mBaseLeakChecker;
 
-    public FakeTunerService(Context context, LeakCheckedTest test) {
-        super(context);
+    public FakeTunerService(LeakCheck test) {
         mBaseLeakChecker = new BaseLeakChecker<>(test, "tunable");
-        destroy();
     }
 
     @Override
@@ -39,5 +38,40 @@ public class FakeTunerService extends TunerService {
     @Override
     public void removeTunable(Tunable tunable) {
         mBaseLeakChecker.removeCallback(tunable);
+    }
+
+    @Override
+    public void clearAll() {
+
+    }
+
+    @Override
+    public void destroy() {
+
+    }
+
+    @Override
+    public String getValue(String setting) {
+        return null;
+    }
+
+    @Override
+    public int getValue(String setting, int def) {
+        return def;
+    }
+
+    @Override
+    public String getValue(String setting, String def) {
+        return def;
+    }
+
+    @Override
+    public void setValue(String setting, String value) {
+
+    }
+
+    @Override
+    public void setValue(String setting, int value) {
+
     }
 }

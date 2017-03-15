@@ -14,12 +14,14 @@
 
 package com.android.systemui.utils.leaks;
 
+import android.testing.LeakCheck;
+
 import com.android.systemui.statusbar.policy.LocationController;
 import com.android.systemui.statusbar.policy.LocationController.LocationSettingsChangeCallback;
 
 public class FakeLocationController extends BaseLeakChecker<LocationSettingsChangeCallback>
         implements LocationController {
-    public FakeLocationController(LeakCheckedTest test) {
+    public FakeLocationController(LeakCheck test) {
         super(test, "location");
     }
 

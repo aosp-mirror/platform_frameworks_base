@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 The Android Open Source Project
+ * Copyright (C) 2017 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of the License at
@@ -12,7 +12,9 @@
  * permissions and limitations under the License.
  */
 
-package com.android.systemui;
+package android.testing;
+
+import static org.junit.Assert.assertNotNull;
 
 import android.annotation.Nullable;
 import android.app.Fragment;
@@ -21,20 +23,17 @@ import android.app.FragmentHostCallback;
 import android.app.FragmentManagerNonConfig;
 import android.graphics.PixelFormat;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.Parcelable;
+import android.support.test.InstrumentationRegistry;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.widget.FrameLayout;
 
-import com.android.systemui.utils.TestableLooper;
-import com.android.systemui.utils.ViewUtils;
-import com.android.systemui.utils.leaks.LeakCheckedTest;
-
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 import java.io.FileDescriptor;
@@ -46,7 +45,7 @@ import java.io.PrintWriter;
  * the host for subclasses, so they can push it into desired states and do any unit testing
  * required.
  */
-public abstract class FragmentTestCase extends LeakCheckedTest {
+public abstract class BaseFragmentTest {
 
     private static final int VIEW_ID = 42;
     private final Class<? extends Fragment> mCls;
@@ -55,7 +54,10 @@ public abstract class FragmentTestCase extends LeakCheckedTest {
     protected FragmentController mFragments;
     protected Fragment mFragment;
 
-    public FragmentTestCase(Class<? extends Fragment> cls) {
+    @Rule
+    public final TestableContext mContext = getContext();
+
+    public BaseFragmentTest(Class<? extends Fragment> cls) {
         mCls = cls;
     }
 
@@ -64,6 +66,8 @@ public abstract class FragmentTestCase extends LeakCheckedTest {
         mView = new FrameLayout(mContext);
         mView.setId(VIEW_ID);
 
+        assertNotNull("BaseFragmentTest must be tagged with @RunWithLooper",
+                TestableLooper.get(this));
         TestableLooper.get(this).runWithLooper(() -> {
             mHandler = new Handler();
 
@@ -76,8 +80,8 @@ public abstract class FragmentTestCase extends LeakCheckedTest {
         });
     }
 
-    private String hex(Looper looper) {
-        return Integer.toHexString(System.identityHashCode(looper));
+    protected TestableContext getContext() {
+        return new TestableContext(InstrumentationRegistry.getContext());
     }
 
     @After
@@ -174,14 +178,14 @@ public abstract class FragmentTestCase extends LeakCheckedTest {
         return mView.findViewById(id);
     }
 
-    private class HostCallbacks extends FragmentHostCallback<FragmentTestCase> {
+    private class HostCallbacks extends FragmentHostCallback<BaseFragmentTest> {
         public HostCallbacks() {
-            super(mContext, FragmentTestCase.this.mHandler, 0);
+            super(mContext, BaseFragmentTest.this.mHandler, 0);
         }
 
         @Override
-        public FragmentTestCase onGetHost() {
-            return FragmentTestCase.this;
+        public BaseFragmentTest onGetHost() {
+            return BaseFragmentTest.this;
         }
 
         @Override
@@ -220,7 +224,7 @@ public abstract class FragmentTestCase extends LeakCheckedTest {
         @Nullable
         @Override
         public View onFindViewById(int id) {
-            return FragmentTestCase.this.findViewById(id);
+            return BaseFragmentTest.this.findViewById(id);
         }
 
         @Override

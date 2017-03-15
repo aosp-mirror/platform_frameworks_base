@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 The Android Open Source Project
+ * Copyright (C) 2017 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of the License at
@@ -12,7 +12,7 @@
  * permissions and limitations under the License.
  */
 
-package com.android.systemui.utils;
+package android.testing;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -25,41 +25,37 @@ import android.os.HandlerThread;
 import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.provider.Settings.Secure;
+import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
+import android.testing.TestableSettings.AcquireTimeoutException;
+import android.testing.TestableSettings.SettingOverrider;
 import android.util.Log;
-
-import com.android.systemui.SysuiTestCase;
-import com.android.systemui.utils.FakeSettingsProvider.AcquireTimeoutException;
-import com.android.systemui.utils.FakeSettingsProvider.SettingOverrider;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4.class)
-public class FakeSettingsProviderTest extends SysuiTestCase {
+public class TestableSettingsTest {
 
     public static final String NONEXISTENT_SETTING = "nonexistent_setting";
-    private static final String TAG = "FakeSettingsProviderTest";
+    private static final String TAG = "TestableSettingsTest";
     private SettingOverrider mOverrider;
     private ContentResolver mContentResolver;
+    @Rule
+    public final TestableContext mContext =
+            new TestableContext(InstrumentationRegistry.getContext());
 
     @Before
     public void setup() throws AcquireTimeoutException {
-        mOverrider = mContext.getSettingsProvider().acquireOverridesBuilder(this)
+        mOverrider = mContext.getSettingsProvider().acquireOverridesBuilder()
                 .addSetting("secure", NONEXISTENT_SETTING)
                 .addSetting("global", NONEXISTENT_SETTING, "initial value")
                 .addSetting("global", Global.DEVICE_PROVISIONED)
                 .build();
         mContentResolver = mContext.getContentResolver();
-    }
-
-    @After
-    public void teardown() {
-        if (mOverrider != null) {
-            mOverrider.release();
-        }
     }
 
     @Test
@@ -109,8 +105,9 @@ public class FakeSettingsProviderTest extends SysuiTestCase {
 
     @Test
     public void testAutoRelease() throws Exception {
-        super.cleanup();
-        mContext.getSettingsProvider().acquireOverridesBuilder(this)
+        mOverrider.release();
+        mOverrider = null;
+        mContext.getSettingsProvider().acquireOverridesBuilder()
                 .addSetting("global", Global.DEVICE_PROVISIONED)
                 .build();
     }
@@ -122,7 +119,7 @@ public class FakeSettingsProviderTest extends SysuiTestCase {
         String secure = "secure";
         String key = "something shared";
         String[] result = new String[1];
-        overriders[0] = mContext.getSettingsProvider().acquireOverridesBuilder(this)
+        overriders[0] = mContext.getSettingsProvider().acquireOverridesBuilder()
                 .addSetting(secure, key, "Some craziness")
                 .build();
         synchronized (lock) {
@@ -137,7 +134,7 @@ public class FakeSettingsProviderTest extends SysuiTestCase {
                             lock.notify();
                         }
                         overriders[1] = mContext.getSettingsProvider()
-                                .acquireOverridesBuilder(FakeSettingsProviderTest.this)
+                                .acquireOverridesBuilder()
                                 .addSetting(secure, key, "default value")
                                 .build();
                         // Ensure that the default is the one we set, and not left over from
