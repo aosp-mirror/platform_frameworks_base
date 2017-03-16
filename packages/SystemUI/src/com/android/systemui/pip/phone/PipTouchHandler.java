@@ -504,8 +504,8 @@ public class PipTouchHandler {
                 return false;
             }
 
-            try {
-                if (ENABLE_DISMISS_DRAG_TO_TARGET) {
+            if (ENABLE_DISMISS_DRAG_TO_TARGET) {
+                try {
                     mHandler.removeCallbacks(mShowDismissAffordance);
                     PointF vel = mTouchState.getVelocity();
                     final float velocity = PointF.length(vel.x, vel.y);
@@ -520,9 +520,9 @@ public class PipTouchHandler {
                             return true;
                         }
                     }
+                } finally {
+                    mDismissViewController.destroyDismissTarget();
                 }
-            } finally {
-                mDismissViewController.destroyDismissTarget();
             }
 
             if (touchState.isDragging()) {
