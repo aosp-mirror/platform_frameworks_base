@@ -296,6 +296,7 @@ import android.provider.Settings;
 import android.service.voice.IVoiceInteractionSession;
 import android.service.voice.VoiceInteractionManagerInternal;
 import android.service.voice.VoiceInteractionSession;
+import android.service.vr.IPersistentVrStateCallbacks;
 import android.telecom.TelecomManager;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
@@ -368,7 +369,6 @@ import com.android.server.firewall.IntentFirewall;
 import com.android.server.pm.Installer;
 import com.android.server.pm.Installer.InstallerException;
 import com.android.server.statusbar.StatusBarManagerInternal;
-import com.android.server.vr.PersistentVrStateListener;
 import com.android.server.vr.VrManagerInternal;
 import com.android.server.wm.WindowManagerService;
 
@@ -601,8 +601,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     private int mVrState = NON_VR_MODE;
     private int mTopAppVrThreadTid = 0;
     private int mPersistentVrThreadTid = 0;
-    final PersistentVrStateListener mPersistentVrModeListener =
-            new PersistentVrStateListener() {
+    final IPersistentVrStateCallbacks mPersistentVrModeListener =
+            new IPersistentVrStateCallbacks.Stub() {
         @Override
         public void onPersistentVrStateChanged(boolean enabled) {
             synchronized(ActivityManagerService.this) {
