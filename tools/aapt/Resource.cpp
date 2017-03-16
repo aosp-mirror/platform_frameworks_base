@@ -1403,7 +1403,8 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets, sp<ApkBuil
             String8 src = it.getFile()->getPrintableSource();
             err = compileXmlFile(bundle, assets, String16(it.getBaseName()),
                     it.getFile(), &table, xmlFlags);
-            if (err == NO_ERROR) {
+            // Only verify IDs if there was no error and the file is non-empty.
+            if (err == NO_ERROR && it.getFile()->hasData()) {
                 ResXMLTree block;
                 block.setTo(it.getFile()->getData(), it.getFile()->getSize(), true);
                 checkForIds(src, block);
@@ -1550,7 +1551,7 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets, sp<ApkBuil
             String8 src = it.getFile()->getPrintableSource();
             err = compileXmlFile(bundle, assets, String16(it.getBaseName()),
                     it.getFile(), &table, xmlFlags);
-            if (err == NO_ERROR) {
+            if (err == NO_ERROR && it.getFile()->hasData()) {
                 ResXMLTree block;
                 block.setTo(it.getFile()->getData(), it.getFile()->getSize(), true);
                 checkForIds(src, block);
@@ -1598,7 +1599,7 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets, sp<ApkBuil
         err = compileXmlFile(bundle, assets, workItem.resourceName, workItem.xmlRoot,
                              workItem.file, &table, xmlCompilationFlags);
 
-        if (err == NO_ERROR) {
+        if (err == NO_ERROR && workItem.file->hasData()) {
             assets->addResource(workItem.resPath.getPathLeaf(),
                                 workItem.resPath,
                                 workItem.file,
