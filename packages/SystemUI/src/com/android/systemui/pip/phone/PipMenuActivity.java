@@ -249,6 +249,7 @@ public class PipMenuActivity extends Activity {
 
     private void showMenu(Rect stackBounds, Rect movementBounds) {
         if (!mMenuVisible) {
+            setVisible(true);
             updateActionViews(stackBounds);
             if (mMenuContainerAnimator != null) {
                 mMenuContainerAnimator.cancel();
@@ -295,9 +296,7 @@ public class PipMenuActivity extends Activity {
                     if (animationFinishedRunnable != null) {
                         animationFinishedRunnable.run();
                     }
-                    if (getSystemService(AccessibilityManager.class).isEnabled()) {
-                        finish();
-                    }
+                    setVisible(false);
                 }
             });
             mMenuContainerAnimator.addUpdateListener(mMenuBgUpdateListener);
@@ -401,6 +400,7 @@ public class PipMenuActivity extends Activity {
     }
 
     private void updateDismissFraction(float fraction) {
+        setVisible(true);
         int alpha;
         if (mMenuVisible) {
             mMenuContainer.setAlpha(1-fraction);
