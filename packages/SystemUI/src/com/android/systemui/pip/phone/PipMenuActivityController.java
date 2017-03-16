@@ -63,6 +63,7 @@ public class PipMenuActivityController {
     public static final int MESSAGE_DISMISS_PIP = 103;
     public static final int MESSAGE_UPDATE_ACTIVITY_CALLBACK = 104;
     public static final int MESSAGE_REGISTER_INPUT_CONSUMER = 105;
+    public static final int MESSAGE_UNREGISTER_INPUT_CONSUMER = 106;
 
     /**
      * A listener interface to receive notification on changes in PIP.
@@ -133,6 +134,10 @@ public class PipMenuActivityController {
                 }
                 case MESSAGE_REGISTER_INPUT_CONSUMER: {
                     mInputConsumerController.registerInputConsumer();
+                    break;
+                }
+                case MESSAGE_UNREGISTER_INPUT_CONSUMER: {
+                    mInputConsumerController.unregisterInputConsumer();
                     break;
                 }
                 case MESSAGE_UPDATE_ACTIVITY_CALLBACK: {

@@ -268,7 +268,10 @@ public class PipMenuActivity extends Activity {
             mMenuContainerAnimator.addUpdateListener(mMenuBgUpdateListener);
             mMenuContainerAnimator.start();
         } else {
+            // If we are already visible, then just start the delayed dismiss and unregister any
+            // existing input consumers from the previous drag
             repostDelayedFinish(POST_INTERACTION_DISMISS_DELAY);
+            notifyUnregisterInputConsumer();
         }
     }
 
@@ -414,6 +417,12 @@ public class PipMenuActivity extends Activity {
         Message m = Message.obtain();
         m.what = PipMenuActivityController.MESSAGE_REGISTER_INPUT_CONSUMER;
         sendMessage(m, "Could not notify controller to register input consumer");
+    }
+
+    private void notifyUnregisterInputConsumer() {
+        Message m = Message.obtain();
+        m.what = PipMenuActivityController.MESSAGE_UNREGISTER_INPUT_CONSUMER;
+        sendMessage(m, "Could not notify controller to unregister input consumer");
     }
 
     private void notifyMenuVisibility(boolean visible) {
