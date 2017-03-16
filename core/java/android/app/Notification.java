@@ -1769,7 +1769,9 @@ public class Notification implements Parcelable
         if (this.actions != null) {
             that.actions = new Action[this.actions.length];
             for(int i=0; i<this.actions.length; i++) {
-                that.actions[i] = this.actions[i].clone();
+                if ( this.actions[i] != null) {
+                    that.actions[i] = this.actions[i].clone();
+                }
             }
         }
 
@@ -3116,7 +3118,9 @@ public class Notification implements Parcelable
          * @param action The action to add.
          */
         public Builder addAction(Action action) {
-            mActions.add(action);
+            if (action != null) {
+                mActions.add(action);
+            }
             return this;
         }
 
@@ -3130,7 +3134,9 @@ public class Notification implements Parcelable
         public Builder setActions(Action... actions) {
             mActions.clear();
             for (int i = 0; i < actions.length; i++) {
-                mActions.add(actions[i]);
+                if (actions[i] != null) {
+                    mActions.add(actions[i]);
+                }
             }
             return this;
         }
