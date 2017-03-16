@@ -251,7 +251,8 @@ class ActivityMetricsLogger {
      *                       ActivityManagerInternal.APP_TRANSITION_* reasons.
      */
     void notifyTransitionStarting(SparseIntArray stackIdReasons) {
-        if (!isAnyTransitionActive() || mLoggedTransitionStarting) {
+        // TODO (b/36339388): Figure out why stackIdReasons can be null
+        if (stackIdReasons == null || !isAnyTransitionActive() || mLoggedTransitionStarting) {
             return;
         }
         mCurrentTransitionDelayMs = calculateCurrentDelay();
