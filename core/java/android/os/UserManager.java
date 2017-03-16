@@ -22,6 +22,7 @@ import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.annotation.UserIdInt;
 import android.annotation.WorkerThread;
 import android.app.Activity;
@@ -761,6 +762,16 @@ public class UserManager {
     public static final int PIN_VERIFICATION_FAILED_NOT_SET = -2;
     /** @hide */
     public static final int PIN_VERIFICATION_SUCCESS = -1;
+
+    /**
+     * Sent when user restrictions have changed.
+     *
+     * @hide
+     */
+    @SystemApi
+    @TestApi // To allow seeing it from CTS.
+    public static final String ACTION_USER_RESTRICTIONS_CHANGED =
+            "android.os.action.USER_RESTRICTIONS_CHANGED";
 
     /**
      * Error result indicating that this user is not allowed to add other users on this device.

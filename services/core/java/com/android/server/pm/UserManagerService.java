@@ -1493,6 +1493,10 @@ public class UserManagerService extends IUserManager.Stub {
                     listeners[i].onUserRestrictionsChanged(userId,
                             newRestrictionsFinal, prevRestrictionsFinal);
                 }
+
+                final Intent broadcast = new Intent(UserManager.ACTION_USER_RESTRICTIONS_CHANGED)
+                        .setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+                mContext.sendBroadcastAsUser(broadcast, UserHandle.of(userId));
             }
         });
     }
