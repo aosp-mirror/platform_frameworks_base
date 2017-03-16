@@ -19,20 +19,32 @@ package android.net;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-/** {@hide} */
+/**
+ * Represents a core networking event defined in package android.net.metrics.
+ * Logged by IpConnectivityLog and managed by ConnectivityMetrics service.
+ * {@hide}
+ * */
 public final class ConnectivityMetricsEvent implements Parcelable {
 
-    /**  The time when this event was collected, as returned by System.currentTimeMillis(). */
+    /** Time when this event was collected, as returned by System.currentTimeMillis(). */
     public long timestamp;
-
+    /** Transports of the network associated with the event, as defined in NetworkCapabilities. */
+    public long transports;
+    /** Network id of the network associated with the event, or 0 if unspecified. */
+    public int netId;
+    /** Name of the network interface associated with the event, or null if unspecified. */
+    public String ifname;
     /** Opaque event-specific data. */
     public Parcelable data;
 
     public ConnectivityMetricsEvent() {
     }
 
-    public ConnectivityMetricsEvent(Parcel in) {
+    private ConnectivityMetricsEvent(Parcel in) {
         timestamp = in.readLong();
+        transports = in.readLong();
+        netId = in.readInt();
+        ifname = in.readString();
         data = in.readParcelable(null);
     }
 
@@ -56,11 +68,15 @@ public final class ConnectivityMetricsEvent implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeLong(timestamp);
+        dest.writeLong(transports);
+        dest.writeInt(netId);
+        dest.writeString(ifname);
         dest.writeParcelable(data, 0);
     }
 
     @Override
     public String toString() {
+        // TODO: add transports, netId, ifname
         return String.format("ConnectivityMetricsEvent(%tT.%tL): %s", timestamp, timestamp, data);
     }
 }
