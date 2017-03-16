@@ -203,6 +203,9 @@ public:
     size_t numLocalResources() const;
     bool hasResources() const;
 
+    bool versionForCompat(const Bundle* bundle, const String16& resourceName,
+                          const sp<AaptFile>& file, const sp<XMLNode>& root);
+
     status_t modifyForCompat(const Bundle* bundle);
     status_t modifyForCompat(const Bundle* bundle,
                              const String16& resourceName,
@@ -431,6 +434,10 @@ public:
             mEntries.add(config, entry);
         }
         
+        void removeEntry(const ResTable_config& config) {
+            mEntries.removeItem(config);
+        }
+
         const DefaultKeyedVector<ConfigDescription, sp<Entry> >& getEntries() const { return mEntries; }
     private:
         const String16 mName;
