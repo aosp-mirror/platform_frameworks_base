@@ -431,31 +431,28 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
 
     // Force all the animations to end when the duration scale is 0.
     private void forceToEnd() {
-        if (mEndCanBeCalled) {
-            end();
+        // TODO: Below is commented out to temp work around b/36241584, uncomment this when it's
+        // fixed.
+//        if (mEndCanBeCalled) {
+//            end();
+//            return;
+//        }
+
+        // Note: we don't want to combine this case with the end() method below because in
+        // the case of developer calling end(), we still need to make sure end() is explicitly
+        // called on the child animators to maintain the old behavior.
+        if (mReversing) {
+            handleAnimationEvents(mLastEventId, 0, getTotalDuration());
         } else {
-            // Note: we don't want to combine this case with the end() method below because in
-            // the case of developer calling end(), we still need to make sure end() is explicitly
-            // called on the child animators to maintain the old behavior.
-            if (mReversing) {
-                mLastEventId = mLastEventId == -1 ? mEvents.size() : mLastEventId;
-                for (int j = mLastEventId - 1; j >= 0; j--) {
-                    AnimationEvent event = mEvents.get(j);
-                    if (event.mEvent == AnimationEvent.ANIMATION_END) {
-                        event.mNode.mAnimation.reverse();
-                    }
-                }
-            } else {
-                for (int j = mLastEventId + 1; j < mEvents.size(); j++) {
-                    AnimationEvent event = mEvents.get(j);
-                    if (event.mEvent == AnimationEvent.ANIMATION_START) {
-                        event.mNode.mAnimation.start();
-                    }
-                }
+            long zeroScalePlayTime = getTotalDuration();
+            if (zeroScalePlayTime == DURATION_INFINITE) {
+                // Use a large number for the play time.
+                zeroScalePlayTime = Integer.MAX_VALUE;
             }
-            mPlayingSet.clear();
-            endAnimation();
+            handleAnimationEvents(mLastEventId, mEvents.size() - 1, zeroScalePlayTime);
         }
+        mPlayingSet.clear();
+        endAnimation();
     }
 
     /**
@@ -730,7 +727,7 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
         if (isEmptySet) {
             // In the case of empty AnimatorSet, or 0 duration scale, we will trigger the
             // onAnimationEnd() right away.
-            forceToEnd();
+            end();
         }
     }
 
@@ -1130,8 +1127,10 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
      */
     private void pulseFrame(Node node, long animPlayTime) {
         if (!node.mEnded) {
+            float durationScale = ValueAnimator.getDurationScale();
+            durationScale = durationScale == 0  ? 1 : durationScale;
             node.mEnded = node.mAnimation.pulseAnimationFrame(
-                    (long) (animPlayTime * ValueAnimator.getDurationScale()));
+                    (long) (animPlayTime * durationScale));
         }
     }
 
