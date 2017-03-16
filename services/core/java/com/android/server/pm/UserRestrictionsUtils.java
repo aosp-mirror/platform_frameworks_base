@@ -207,6 +207,7 @@ public class UserRestrictionsUtils {
     }
 
     public static void readRestrictions(XmlPullParser parser, Bundle restrictions) {
+        restrictions.clear();
         for (String key : USER_RESTRICTIONS) {
             final String value = parser.getAttributeValue(null, key);
             if (value != null) {
