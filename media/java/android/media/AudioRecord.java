@@ -677,7 +677,7 @@ public class AudioRecord implements AudioRouting
              ((audioSource > MediaRecorder.getAudioSourceMax()) &&
               (audioSource != MediaRecorder.AudioSource.RADIO_TUNER) &&
               (audioSource != MediaRecorder.AudioSource.HOTWORD)) )  {
-            throw new IllegalArgumentException("Invalid audio source.");
+            throw new IllegalArgumentException("Invalid audio source " + audioSource);
         }
         mRecordSource = audioSource;
 
@@ -703,8 +703,8 @@ public class AudioRecord implements AudioRouting
             mAudioFormat = audioFormat;
             break;
         default:
-            throw new IllegalArgumentException("Unsupported sample encoding."
-                    + " Should be ENCODING_PCM_8BIT, ENCODING_PCM_16BIT, or ENCODING_PCM_FLOAT.");
+            throw new IllegalArgumentException("Unsupported sample encoding " + audioFormat
+                    + ". Should be ENCODING_PCM_8BIT, ENCODING_PCM_16BIT, or ENCODING_PCM_FLOAT.");
         }
     }
 
@@ -722,7 +722,8 @@ public class AudioRecord implements AudioRouting
         int frameSizeInBytes = mChannelCount
             * (AudioFormat.getBytesPerSample(mAudioFormat));
         if ((audioBufferSize % frameSizeInBytes != 0) || (audioBufferSize < 1)) {
-            throw new IllegalArgumentException("Invalid audio buffer size.");
+            throw new IllegalArgumentException("Invalid audio buffer size " + audioBufferSize
+                    + " (frame size " + frameSizeInBytes + ")");
         }
 
         mNativeBufferSizeInBytes = audioBufferSize;
