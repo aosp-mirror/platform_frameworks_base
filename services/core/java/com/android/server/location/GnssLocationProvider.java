@@ -77,10 +77,12 @@ import android.util.NtpTrustedTime;
 
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.IBatteryStats;
+import com.android.internal.location.gnssmetrics.GnssMetrics;
 import com.android.internal.location.GpsNetInitiatedHandler;
 import com.android.internal.location.GpsNetInitiatedHandler.GpsNiNotification;
 import com.android.internal.location.ProviderProperties;
 import com.android.internal.location.ProviderRequest;
+
 import com.android.server.power.BatterySaverPolicy;
 import com.android.server.power.BatterySaverPolicy.ServiceType;
 
@@ -411,6 +413,9 @@ public class GnssLocationProvider implements LocationProviderInterface {
     // greater than 600m/s, and higher than the speed of sound to avoid impacting most use cases.
     private static final float ITAR_SPEED_LIMIT_METERS_PER_SECOND = 400.0F;
     private boolean mItarSpeedLimitExceeded = false;
+
+    // GNSS Metrics
+    private GnssMetrics mGnssMetrics;
 
     private final IGnssStatusProvider mGnssStatusProvider = new IGnssStatusProvider.Stub() {
         @Override
@@ -768,6 +773,7 @@ public class GnssLocationProvider implements LocationProviderInterface {
                 return isEnabled();
             }
         };
+        mGnssMetrics = new GnssMetrics();
     }
 
     /**
@@ -1477,6 +1483,7 @@ public class GnssLocationProvider implements LocationProviderInterface {
         if (mItarSpeedLimitExceeded) {
             Log.i(TAG, "Hal reported a speed in excess of ITAR limit." +
                     "  GPS/GNSS Navigation output blocked.");
+            mGnssMetrics.logReceivedLocationStatus(false);
             return;  // No output of location allowed
         }
 
@@ -1496,11 +1503,23 @@ public class GnssLocationProvider implements LocationProviderInterface {
             }
         }
 
+        mGnssMetrics.logReceivedLocationStatus(hasLatLong);
+        if (hasLatLong) {
+            if (location.hasAccuracy()) {
+                mGnssMetrics.logPositionAccuracyMeters(location.getAccuracy());
+            }
+            if (mTimeToFirstFix > 0) {
+                int timeBetweenFixes = (int) (System.currentTimeMillis() - mLastFixTime);
+                mGnssMetrics.logMissedReports(mFixInterval, timeBetweenFixes);
+            }
+        }
+
         mLastFixTime = System.currentTimeMillis();
         // report time to first fix
         if (mTimeToFirstFix == 0 && hasLatLong) {
             mTimeToFirstFix = (int)(mLastFixTime - mFixRequestTime);
             if (DEBUG) Log.d(TAG, "TTFF: " + mTimeToFirstFix);
+            mGnssMetrics.logTimeToFirstFixMilliSecs(mTimeToFirstFix);
 
             // notify status listeners
             mListenerHelper.onFirstFix(mTimeToFirstFix);
@@ -1778,6 +1797,25 @@ public class GnssLocationProvider implements LocationProviderInterface {
             @Override
             public boolean stop() {
                 return native_stop_batch();
+            }
+        };
+    }
+
+    public interface GnssMetricsProvider {
+        /**
+         * Returns GNSS metrics as proto string
+         */
+        String getGnssMetricsAsProtoString();
+    }
+
+    /**
+     * @hide
+     */
+    public GnssMetricsProvider getGnssMetricsProvider() {
+        return new GnssMetricsProvider() {
+            @Override
+            public String getGnssMetricsAsProtoString() {
+                return mGnssMetrics.dumpGnssMetricsAsProtoString();
             }
         };
     }
@@ -2411,6 +2449,8 @@ public class GnssLocationProvider implements LocationProviderInterface {
         }
     }
 
+
+
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         StringBuilder s = new StringBuilder();
@@ -2427,10 +2467,9 @@ public class GnssLocationProvider implements LocationProviderInterface {
         if (hasCapability(GPS_CAPABILITY_MEASUREMENTS)) s.append("MEASUREMENTS ");
         if (hasCapability(GPS_CAPABILITY_NAV_MESSAGES)) s.append("NAV_MESSAGES ");
         s.append(")\n");
-
-        s.append("  internal state: ").append(native_get_internal_state());
+        s.append(mGnssMetrics.dumpGnssMetricsAsText());
+        s.append("  native internal state: ").append(native_get_internal_state());
         s.append("\n");
-
         pw.append(s);
     }
 
