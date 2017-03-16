@@ -16,6 +16,7 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
     legacy-android-test \
 
 LOCAL_PACKAGE_NAME := ShellTests
+LOCAL_COMPATIBILITY_SUITE := device-tests
 LOCAL_INSTRUMENTATION_FOR := Shell
 
 LOCAL_CERTIFICATE := platform

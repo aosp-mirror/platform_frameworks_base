@@ -8,5 +8,6 @@ LOCAL_STATIC_JAVA_LIBRARIES := junit legacy-android-test
 LOCAL_PACKAGE_NAME := MtpDocumentsProviderTests
 LOCAL_INSTRUMENTATION_FOR := MtpDocumentsProvider
 LOCAL_CERTIFICATE := media
+LOCAL_COMPATIBILITY_SUITE := device-tests
 
 include $(BUILD_PACKAGE)
