@@ -94,10 +94,10 @@ public final class RemotePrintDocument {
                     // but the content has changed.
                     if (mNextCommand == null) {
                         if (mUpdateSpec.pages != null && (mDocumentInfo.changed
-                                || mDocumentInfo.writtenPages == null
+                                || mDocumentInfo.pagesWrittenToFile == null
                                 || (mDocumentInfo.info.getPageCount()
                                         != PrintDocumentInfo.PAGE_COUNT_UNKNOWN
-                                && !PageRangeUtils.contains(mDocumentInfo.writtenPages,
+                                && !PageRangeUtils.contains(mDocumentInfo.pagesWrittenToFile,
                                         mUpdateSpec.pages, mDocumentInfo.info.getPageCount())))) {
                             mNextCommand = new WriteCommand(mContext, mLooper,
                                     mPrintDocumentAdapter, mDocumentInfo,
@@ -106,9 +106,10 @@ public final class RemotePrintDocument {
                         } else {
                             if (mUpdateSpec.pages != null) {
                                 // If we have the requested pages, update which ones to be printed.
-                                mDocumentInfo.printedPages = PageRangeUtils.computePrintedPages(
-                                        mUpdateSpec.pages, mDocumentInfo.writtenPages,
-                                        mDocumentInfo.info.getPageCount());
+                                mDocumentInfo.pagesInFileToPrint =
+                                        PageRangeUtils.computeWhichPagesInFileToPrint(
+                                                mUpdateSpec.pages, mDocumentInfo.pagesWrittenToFile,
+                                                mDocumentInfo.info.getPageCount());
                             }
                             // Notify we are done.
                             mState = STATE_UPDATED;
@@ -514,8 +515,20 @@ public final class RemotePrintDocument {
         public PrintAttributes attributes;
         public Bundle metadata;
         public PrintDocumentInfo info;
-        public PageRange[] printedPages;
-        public PageRange[] writtenPages;
+
+        /**
+         * Which pages out of the ones written to the file to print. This is not indexed by the
+         * document pages, but by the page number in the file.
+         * <p>E.g. if a document has 10 pages, we want pages 4-5 and 7, but only page 3-9 are in the
+         * file. This would contain 1-2 and 4.</p>
+         *
+         * @see PageRangeUtils#computeWhichPagesInFileToPrint
+         */
+        public PageRange[] pagesInFileToPrint;
+
+        /** Pages of the whole document that are currently written to file */
+        public PageRange[] pagesWrittenToFile;
+
         public MutexFileProvider fileProvider;
         public boolean changed;
         public boolean updated;
@@ -783,8 +796,8 @@ public final class RemotePrintDocument {
             if (changed || !equalsIgnoreSize(mDocument.info, info)) {
                 // If the content changed we throw away all pages as
                 // we will request them again with the new content.
-                mDocument.writtenPages = null;
-                mDocument.printedPages = null;
+                mDocument.pagesWrittenToFile = null;
+                mDocument.pagesInFileToPrint = null;
                 mDocument.changed = true;
             }
 
@@ -1098,17 +1111,17 @@ public final class RemotePrintDocument {
             }
 
             PageRange[] writtenPages = PageRangeUtils.normalize(pages);
-            PageRange[] printedPages = PageRangeUtils.computePrintedPages(
+            PageRange[] printedPages = PageRangeUtils.computeWhichPagesInFileToPrint(
                     mPages, writtenPages, mPageCount);
 
             // Handle if we got invalid pages
             if (printedPages != null) {
-                mDocument.writtenPages = writtenPages;
-                mDocument.printedPages = printedPages;
+                mDocument.pagesWrittenToFile = writtenPages;
+                mDocument.pagesInFileToPrint = printedPages;
                 completed();
             } else {
-                mDocument.writtenPages = null;
-                mDocument.printedPages = null;
+                mDocument.pagesWrittenToFile = null;
+                mDocument.pagesInFileToPrint = null;
                 failed(mContext.getString(R.string.print_error_default_message));
             }
 
