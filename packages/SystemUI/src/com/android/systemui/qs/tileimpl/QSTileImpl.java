@@ -369,7 +369,6 @@ public abstract class QSTileImpl<TState extends State> implements QSTile {
                         Dependency.get(ActivityStarter.class).postStartActivityDismissingKeyguard(
                                 intent, 0);
                     } else {
-                        mAnnounceNextStateChange = true;
                         handleClick();
                     }
                 } else if (msg.what == SECONDARY_CLICK) {
