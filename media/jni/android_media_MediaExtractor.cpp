@@ -811,9 +811,9 @@ static void android_media_MediaExtractor_native_finalize(
 }
 
 static jobject
-android_media_MediaExtractor_getMetrics(JNIEnv * env, jobject thiz)
+android_media_MediaExtractor_native_getMetrics(JNIEnv * env, jobject thiz)
 {
-    ALOGV("android_media_MediaExtractor_getMetrics");
+    ALOGV("android_media_MediaExtractor_native_getMetrics");
 
     sp<JMediaExtractor> extractor = getMediaExtractor(env, thiz);
     if (extractor == NULL ) {
@@ -905,8 +905,8 @@ static const JNINativeMethod gMethods[] = {
     { "hasCacheReachedEndOfStream", "()Z",
       (void *)android_media_MediaExtractor_hasCacheReachedEOS },
 
-    {"getMetrics",          "()Landroid/os/Bundle;",
-      (void *)android_media_MediaExtractor_getMetrics},
+    {"native_getMetrics",          "()Landroid/os/Bundle;",
+      (void *)android_media_MediaExtractor_native_getMetrics},
 };
 
 int register_android_media_MediaExtractor(JNIEnv *env) {

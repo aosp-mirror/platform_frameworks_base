@@ -624,7 +624,7 @@ status_t JMediaCodec::getName(JNIEnv *env, jstring *nameStr) const {
     return OK;
 }
 
-status_t JMediaCodec::getMetrics(JNIEnv *, Parcel *reply) const {
+status_t JMediaCodec::getMetrics(JNIEnv *, MediaAnalyticsItem * &reply) const {
 
     status_t status = mCodec->getMetrics(reply);
     return status;
@@ -1666,9 +1666,9 @@ static jobject android_media_MediaCodec_getName(
 }
 
 static jobject
-android_media_MediaCodec_getMetrics(JNIEnv *env, jobject thiz)
+android_media_MediaCodec_native_getMetrics(JNIEnv *env, jobject thiz)
 {
-    ALOGV("android_media_MediaCodec_getMetrics");
+    ALOGV("android_media_MediaCodec_native_getMetrics");
 
     sp<JMediaCodec> codec = getMediaCodec(env, thiz);
     if (codec == NULL ) {
@@ -1677,16 +1677,14 @@ android_media_MediaCodec_getMetrics(JNIEnv *env, jobject thiz)
     }
 
     // get what we have for the metrics from the codec
-    Parcel reply;
-    status_t err = codec->getMetrics(env, &reply);
+    MediaAnalyticsItem *item = NULL;
+
+    status_t err = codec->getMetrics(env, item);
     if (err != OK) {
         ALOGE("getMetrics failed");
         return (jobject) NULL;
     }
 
-    // build and return the Bundle
-    MediaAnalyticsItem *item = new MediaAnalyticsItem;
-    item->readFromParcel(reply);
     jobject mybundle = MediaMetricsJNI::writeMetricsToBundle(env, item, NULL);
 
     // housekeeping
@@ -2004,8 +2002,8 @@ static const JNINativeMethod gMethods[] = {
     { "getName", "()Ljava/lang/String;",
       (void *)android_media_MediaCodec_getName },
 
-    { "getMetrics", "()Landroid/os/Bundle;",
-      (void *)android_media_MediaCodec_getMetrics},
+    { "native_getMetrics", "()Landroid/os/Bundle;",
+      (void *)android_media_MediaCodec_native_getMetrics},
 
     { "setParameters", "([Ljava/lang/String;[Ljava/lang/Object;)V",
       (void *)android_media_MediaCodec_setParameters },

@@ -23,6 +23,7 @@ import android.graphics.ImageFormat;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
 import android.media.MediaCodecInfo.CodecCapabilities;
+import android.media.MediaMetricsSet;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -3186,59 +3187,22 @@ final public class MediaCodec {
     public native final String getName();
 
     /**
-     *  Returns Analytics/Metrics data about the current content being
+     *  Return Metrics data about the current codec instance.
      *
-     * @return a Bundle containing the set of attributes and values available
-     * for the media being handled by this instance of MediaCodec
+     * @return a MediaMetricsSet containing the set of attributes and values
+     * available for the media being handled by this instance of MediaCodec
+     * The attributes are descibed in {@link MediaMetricsSet.MediaCodec}.
      *
-     *  <table style="width: 0%">
-     *   <thead>
-     *    <tr>
-     *     <th>Key</th>
-     *     <th>Type</th>
-     *     <th>Description</th>
-     *    </tr>
-     *   </thead>
-     *   <tbody>
-     *    <tr>
-     *     <td>{@code "codec"}</td>
-     *     <td>String</td>
-     *     <td>Identifies the particular codec in use</td>
-     *    </tr><tr>
-     *     <td>{@code "mime"}</td>
-     *     <td>String</td>
-     *     <td>Mime type of the media being encoded/decoded</td>
-     *    </tr><tr>
-     *     <td>{@code "mode"}</td>
-     *     <td>String</td>
-     *     <td>"Audio" or "Video"</td>
-     *    </tr><tr>
-     *     <td>{@code "secure"}</td>
-     *     <td>Integer</td>
-     *     <td>Indicates whether the code is operating on secure content and
-     *         may also use capabilities in android.media.MediaCrypto</td>
-     *    </tr><tr>
-     *     <td>{@code "height"}</td>
-     *     <td>Integer</td>
-     *     <td>Height (pixels); valid only when mode=video</td>
-     *    </tr><tr>
-     *     <td>{@code "width"}</td>
-     *     <td>Integer</td>
-     *     <td>Width (pixels); valid only when mode=video</td>
-     *    </tr><tr>
-     *     <td>{@code "rotation"}</td>
-     *     <td>Integer</td>
-     *     <td>rotation (degrees) to orient the video onto the target surface;
-     *         valid only when mode=video. Note there may be additional
-     *         rotations applied when the surface is mapped to the screen.</td>
-     *    </tr>
-     *   </tbody>
-     *  </table>
-     *
-     *  Additional fields specific to individual codecs will also appear in
+     *  Additional vendor-specific fields may also be present in
      *  the return value.
      */
-    public native Bundle getMetrics();
+    public MediaMetricsSet getMetrics() {
+        Bundle bundle = native_getMetrics();
+	MediaMetricsSet mSet = new MediaMetricsSet(bundle);
+	return mSet;
+    }
+
+    private native Bundle native_getMetrics();
 
     /**
      * Change a video encoder's target bitrate on the fly. The value is an

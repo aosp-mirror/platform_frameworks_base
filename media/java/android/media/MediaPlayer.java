@@ -49,6 +49,7 @@ import android.media.AudioManager;
 import android.media.BufferingParams;
 import android.media.MediaDrm;
 import android.media.MediaFormat;
+import android.media.MediaMetricsSet;
 import android.media.MediaTimeProvider;
 import android.media.PlaybackParams;
 import android.media.SubtitleController;
@@ -1494,70 +1495,22 @@ public class MediaPlayer extends PlayerBase
     public native int getVideoHeight();
 
     /**
-     *  Returns Analytics/Metrics data about the current video in this player.
+     * Return Metrics data about the current player.
      *
-     * @return the a map of attributes and values available for this video
-     * player or null if no metrics are available.
+     * @return a MediaMetricsSet containing the set of attributes and values
+     * available for the media being handled by this instance of MediaPlayer
+     * The attributes are descibed in {@link MediaMetricsSet.MediaPlayer}.
      *
-     *  <table style="width: 0%">
-     *   <thead>
-     *    <tr>
-     *     <th>Key</th>
-     *     <th>Type</th>
-     *     <th>Description</th>
-     *    </tr>
-     *   </thead>
-     *   <tbody>
-     *    <tr>
-     *     <td>{@code "video/codec"}</td>
-     *     <td>String</td>
-     *     <td>Identifies the video codec in use</td>
-     *    </tr><tr>
-     *     <td>{@code "video/mime"}</td>
-     *     <td>String</td>
-     *     <td>Mime type of the video being encoded/decoded</td>
-     *    </tr><tr>
-     *     <td>{@code "audio/codec"}</td>
-     *     <td>String</td>
-     *     <td>Identifies the audio codec in use</td>
-     *    </tr><tr>
-     *     <td>{@code "audio/mime"}</td>
-     *     <td>String</td>
-     *     <td>Mime type of the audio being encoded/decoded</td>
-     *    </tr><tr>
-     *     <td>{@code "ht"}</td>
-     *     <td>Integer</td>
-     *     <td>Height (pixels); valid only when mode=video</td>
-     *    </tr><tr>
-     *     <td>{@code "wid"}</td>
-     *     <td>Integer</td>
-     *     <td>Width (pixels); valid only when mode=video</td>
-     *    </tr><tr>
-     *     <td>{@code "frame"}</td>
-     *     <td>Integer</td>
-     *     <td>Number of decoded video frames sent to the display</td>
-     *    </tr><tr>
-     *     <td>{@code "dropped"}</td>
-     *     <td>Integer</td>
-     *     <td>Number of decoded video frames that were not sent to display.
-     *         These frames were dropped by the player.</td>
-     *    </tr><tr>
-     *     <td>{@code "durationMs"}</td>
-     *     <td>Integer</td>
-     *     <td>The length of the media being played (in ms), e.g. "This video lasts for 30000 milliseconds". </td>
-     *    </tr><tr>
-     *     <td>{@code "playingMs"}</td>
-     *     <td>Integer</td>
-     *     <td>The time the media has been played (in ms). If you watch a
-     *         30 second twice through, this will report 60000 ms.</td>
-     *    </tr>
-     *   </tbody>
-     *  </table>
-     *
-     *  Additional fields specific to individual codecs will also appear in
+     *  Additional vendor-specific fields may also be present in
      *  the return value.
      */
-    public native Bundle getMetrics();
+    public MediaMetricsSet getMetrics() {
+        Bundle bundle = native_getMetrics();
+	MediaMetricsSet mSet = new MediaMetricsSet(bundle);
+	return mSet;
+    }
+
+    private native Bundle native_getMetrics();
 
     /**
      * Checks whether the MediaPlayer is playing.
