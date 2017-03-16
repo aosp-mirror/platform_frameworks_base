@@ -1810,8 +1810,8 @@ public class UserManagerService extends IUserManager.Stub {
                             if (type == XmlPullParser.START_TAG) {
                                 if (parser.getName().equals(TAG_RESTRICTIONS)) {
                                     synchronized (mGuestRestrictions) {
-                                        mGuestRestrictions.putAll(
-                                                UserRestrictionsUtils.readRestrictions(parser));
+                                        UserRestrictionsUtils
+                                                .readRestrictions(parser, mGuestRestrictions);
                                     }
                                 }
                                 break;
