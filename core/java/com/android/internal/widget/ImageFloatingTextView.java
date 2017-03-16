@@ -115,6 +115,7 @@ public class ImageFloatingTextView extends TextView {
         // Lets calculate how many lines the given measurement allows us.
         int availableHeight = height - mPaddingTop - mPaddingBottom;
         int maxLines = availableHeight / getLineHeight();
+        maxLines = Math.max(1, maxLines);
         if (getMaxLines() > 0) {
             maxLines = Math.min(getMaxLines(), maxLines);
         }

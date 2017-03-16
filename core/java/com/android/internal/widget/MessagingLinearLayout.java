@@ -16,8 +16,6 @@
 
 package com.android.internal.widget;
 
-import com.android.internal.R;
-
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -27,6 +25,8 @@ import android.view.RemotableViewMethod;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RemoteViews;
+
+import com.android.internal.R;
 
 /**
  * A custom-built layout for the Notification.MessagingStyle.
@@ -119,23 +119,30 @@ public class MessagingLinearLayout extends ViewGroup {
                 }
                 final View child = getChildAt(i);
                 LayoutParams lp = (LayoutParams) getChildAt(i).getLayoutParams();
-
+                ImageFloatingTextView textChild = null;
                 if (child instanceof ImageFloatingTextView) {
                     // Pretend we need the image padding for all views, we don't know which
                     // one will end up needing to do this (might end up not using all the space,
                     // but calculating this exactly would be more expensive).
-                    ((ImageFloatingTextView) child).setNumIndentLines(
-                            mIndentLines == 2 ? 3 : mIndentLines);
+                    textChild = (ImageFloatingTextView) child;
+                    textChild.setNumIndentLines(mIndentLines == 2 ? 3 : mIndentLines);
                 }
 
-                measureChildWithMargins(child, widthMeasureSpec, 0, heightMeasureSpec, 0);
+                int spacing = first ? 0 : mSpacing;
+                measureChildWithMargins(child, widthMeasureSpec, 0, heightMeasureSpec, totalHeight
+                        - mPaddingTop - mPaddingBottom + spacing);
 
                 final int childHeight = child.getMeasuredHeight();
                 int newHeight = Math.max(totalHeight, totalHeight + childHeight + lp.topMargin +
-                        lp.bottomMargin + (first ? 0 : mSpacing));
+                        lp.bottomMargin + spacing);
                 first = false;
+                boolean measuredTooSmall = false;
+                if (textChild != null) {
+                    measuredTooSmall = childHeight < textChild.getLayout().getHeight()
+                            + textChild.getPaddingTop() + textChild.getPaddingBottom();
+                }
 
-                if (newHeight <= targetHeight) {
+                if (newHeight <= targetHeight && !measuredTooSmall) {
                     totalHeight = newHeight;
                     lp.hide = false;
                 } else {
@@ -168,7 +175,15 @@ public class MessagingLinearLayout extends ViewGroup {
                 }
                 boolean changed = textChild.setNumIndentLines(Math.max(0, imageLines));
                 if (changed || !recalculateVisibility) {
-                    measureChildWithMargins(child, widthMeasureSpec, 0, heightMeasureSpec, 0);
+                    final int childWidthMeasureSpec = getChildMeasureSpec(widthMeasureSpec,
+                            mPaddingLeft + mPaddingRight + lp.leftMargin + lp.rightMargin,
+                            lp.width);
+                    // we want to measure it at most as high as it is currently, otherwise we'll
+                    // drop later lines
+                    final int childHeightMeasureSpec = getChildMeasureSpec(heightMeasureSpec,
+                            targetHeight - child.getMeasuredHeight(), lp.height);
+
+                    child.measure(childWidthMeasureSpec, childHeightMeasureSpec);;
                 }
                 imageLines -= textChild.getLineCount();
             }
