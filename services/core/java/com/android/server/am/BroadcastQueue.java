@@ -1152,17 +1152,14 @@ public final class BroadcastQueue {
                     skip = true;
                 }
             }
-            final boolean visibleToInstantApps =
-                    (r.intent.getFlags() & Intent.FLAG_RECEIVER_VISIBLE_TO_INSTANT_APPS) != 0;
             if (!skip && info.activityInfo.applicationInfo.isInstantApp()
-                    && !visibleToInstantApps
                     && r.callingUid != info.activityInfo.applicationInfo.uid) {
                 Slog.w(TAG, "Instant App Denial: receiving "
                         + r.intent
                         + " to " + component.flattenToShortString()
                         + " due to sender " + r.callerPackage
                         + " (uid " + r.callingUid + ")"
-                        + " not specifying FLAG_RECEIVER_VISIBLE_TO_INSTANT_APPS");
+                        + " Instant Apps do not support manifest receivers");
                 skip = true;
             }
             if (!skip && r.callerInstantApp
