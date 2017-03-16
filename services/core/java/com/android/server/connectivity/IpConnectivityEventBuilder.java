@@ -152,14 +152,12 @@ final public class IpConnectivityEventBuilder {
 
     private static void setDhcpErrorEvent(IpConnectivityEvent out, DhcpErrorEvent in) {
         IpConnectivityLogClass.DHCPEvent dhcpEvent = new IpConnectivityLogClass.DHCPEvent();
-        dhcpEvent.ifName = in.ifName;
         dhcpEvent.setErrorCode(in.errorCode);
         out.setDhcpEvent(dhcpEvent);
     }
 
     private static void setDhcpClientEvent(IpConnectivityEvent out, DhcpClientEvent in) {
         IpConnectivityLogClass.DHCPEvent dhcpEvent = new IpConnectivityLogClass.DHCPEvent();
-        dhcpEvent.ifName = in.ifName;
         dhcpEvent.setStateTransition(in.msg);
         dhcpEvent.durationMs = in.durationMs;
         out.setDhcpEvent(dhcpEvent);
@@ -178,7 +176,6 @@ final public class IpConnectivityEventBuilder {
     private static void setIpManagerEvent(IpConnectivityEvent out, IpManagerEvent in) {
         IpConnectivityLogClass.IpProvisioningEvent ipProvisioningEvent =
                 new IpConnectivityLogClass.IpProvisioningEvent();
-        ipProvisioningEvent.ifName = in.ifName;
         ipProvisioningEvent.eventType = in.eventType;
         ipProvisioningEvent.latencyMs = (int) in.durationMs;
         out.setIpProvisioningEvent(ipProvisioningEvent);
@@ -187,7 +184,6 @@ final public class IpConnectivityEventBuilder {
     private static void setIpReachabilityEvent(IpConnectivityEvent out, IpReachabilityEvent in) {
         IpConnectivityLogClass.IpReachabilityEvent ipReachabilityEvent =
                 new IpConnectivityLogClass.IpReachabilityEvent();
-        ipReachabilityEvent.ifName = in.ifName;
         ipReachabilityEvent.eventType = in.eventType;
         out.setIpReachabilityEvent(ipReachabilityEvent);
     }

@@ -1023,10 +1023,10 @@ public class DhcpClient extends StateMachine {
     }
 
     private void logError(int errorCode) {
-        mMetricsLog.log(new DhcpErrorEvent(mIfaceName, errorCode));
+        mMetricsLog.log(mIfaceName, new DhcpErrorEvent(errorCode));
     }
 
     private void logState(String name, int durationMs) {
-        mMetricsLog.log(new DhcpClientEvent(mIfaceName, name, durationMs));
+        mMetricsLog.log(mIfaceName, new DhcpClientEvent(name, durationMs));
     }
 }

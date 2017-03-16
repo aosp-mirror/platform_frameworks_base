@@ -48,7 +48,7 @@ import org.mockito.MockitoAnnotations;
 
 public class IpConnectivityMetricsTest extends TestCase {
     static final IpReachabilityEvent FAKE_EV =
-            new IpReachabilityEvent("wlan0", IpReachabilityEvent.NUD_FAILED);
+            new IpReachabilityEvent(IpReachabilityEvent.NUD_FAILED);
 
     @Mock Context mCtx;
     @Mock IIpConnectivityMetrics mMockService;
@@ -154,47 +154,51 @@ public class IpConnectivityMetricsTest extends TestCase {
         apfStats.programUpdatesAllowingMulticast = 3;
         apfStats.maxProgramSize = 2048;
         Parcelable[] events = {
-            new IpReachabilityEvent("wlan0", IpReachabilityEvent.NUD_FAILED),
-            new DhcpClientEvent("wlan0", "SomeState", 192),
+            new IpReachabilityEvent(IpReachabilityEvent.NUD_FAILED),
+            new DhcpClientEvent("SomeState", 192),
             new DefaultNetworkEvent(102, new int[]{1,2,3}, 101, true, false),
-            new IpManagerEvent("wlan0", IpManagerEvent.PROVISIONING_OK, 5678),
+            new IpManagerEvent(IpManagerEvent.PROVISIONING_OK, 5678),
             new ValidationProbeEvent(120, 40730, ValidationProbeEvent.PROBE_HTTP, 204),
             apfStats,
             new RaEvent(2000, 400, 300, -1, 1000, -1)
         };
 
         for (int i = 0; i < events.length; i++) {
-            logger.log(100 * (i + 1), events[i]);
+            ConnectivityMetricsEvent ev = new ConnectivityMetricsEvent();
+            ev.timestamp = 100 * (i + 1);
+            ev.ifname = "wlan0";
+            ev.data = events[i];
+            logger.log(ev);
         }
 
         String want = joinLines(
                 "dropped_events: 0",
                 "events <",
                 "  if_name: \"\"",
-                "  link_layer: 0",
+                "  link_layer: 4",
                 "  network_id: 0",
                 "  time_ms: 100",
                 "  transports: 0",
                 "  ip_reachability_event <",
                 "    event_type: 512",
-                "    if_name: \"wlan0\"",
+                "    if_name: \"\"",
                 "  >",
                 ">",
                 "events <",
                 "  if_name: \"\"",
-                "  link_layer: 0",
+                "  link_layer: 4",
                 "  network_id: 0",
                 "  time_ms: 200",
                 "  transports: 0",
                 "  dhcp_event <",
                 "    duration_ms: 192",
-                "    if_name: \"wlan0\"",
+                "    if_name: \"\"",
                 "    state_transition: \"SomeState\"",
                 "  >",
                 ">",
                 "events <",
                 "  if_name: \"\"",
-                "  link_layer: 0",
+                "  link_layer: 4",
                 "  network_id: 0",
                 "  time_ms: 300",
                 "  transports: 0",
@@ -213,19 +217,19 @@ public class IpConnectivityMetricsTest extends TestCase {
                 ">",
                 "events <",
                 "  if_name: \"\"",
-                "  link_layer: 0",
+                "  link_layer: 4",
                 "  network_id: 0",
                 "  time_ms: 400",
                 "  transports: 0",
                 "  ip_provisioning_event <",
                 "    event_type: 1",
-                "    if_name: \"wlan0\"",
+                "    if_name: \"\"",
                 "    latency_ms: 5678",
                 "  >",
                 ">",
                 "events <",
                 "  if_name: \"\"",
-                "  link_layer: 0",
+                "  link_layer: 4",
                 "  network_id: 0",
                 "  time_ms: 500",
                 "  transports: 0",
@@ -240,7 +244,7 @@ public class IpConnectivityMetricsTest extends TestCase {
                 ">",
                 "events <",
                 "  if_name: \"\"",
-                "  link_layer: 0",
+                "  link_layer: 4",
                 "  network_id: 0",
                 "  time_ms: 600",
                 "  transports: 0",
@@ -259,7 +263,7 @@ public class IpConnectivityMetricsTest extends TestCase {
                 ">",
                 "events <",
                 "  if_name: \"\"",
-                "  link_layer: 0",
+                "  link_layer: 4",
                 "  network_id: 0",
                 "  time_ms: 700",
                 "  transports: 0",

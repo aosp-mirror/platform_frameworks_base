@@ -47,25 +47,21 @@ public final class IpManagerEvent implements Parcelable {
     @Retention(RetentionPolicy.SOURCE)
     public @interface EventType {}
 
-    public final String ifName;
     public final @EventType int eventType;
     public final long durationMs;
 
-    public IpManagerEvent(String ifName, @EventType int eventType, long duration) {
-        this.ifName = ifName;
+    public IpManagerEvent(@EventType int eventType, long duration) {
         this.eventType = eventType;
         this.durationMs = duration;
     }
 
     private IpManagerEvent(Parcel in) {
-        this.ifName = in.readString();
         this.eventType = in.readInt();
         this.durationMs = in.readLong();
     }
 
     @Override
     public void writeToParcel(Parcel out, int flags) {
-        out.writeString(ifName);
         out.writeInt(eventType);
         out.writeLong(durationMs);
     }
@@ -88,8 +84,8 @@ public final class IpManagerEvent implements Parcelable {
 
     @Override
     public String toString() {
-        return String.format("IpManagerEvent(%s, %s, %dms)",
-                ifName, Decoder.constants.get(eventType), durationMs);
+        return String.format("IpManagerEvent(%s, %dms)",
+                Decoder.constants.get(eventType), durationMs);
     }
 
     final static class Decoder {

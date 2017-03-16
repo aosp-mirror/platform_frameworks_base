@@ -55,7 +55,6 @@ public class IpConnectivityEventBuilderTest extends TestCase {
     public void testLinkLayerInferrence() {
         ConnectivityMetricsEvent ev = describeIpEvent(
                 aType(IpReachabilityEvent.class),
-                aString("wlan0"),
                 anInt(IpReachabilityEvent.NUD_FAILED));
 
         String want = joinLines(
@@ -68,7 +67,7 @@ public class IpConnectivityEventBuilderTest extends TestCase {
                 "  transports: 0",
                 "  ip_reachability_event <",
                 "    event_type: 512",
-                "    if_name: \"wlan0\"",
+                "    if_name: \"\"",
                 "  >",
                 ">",
                 "version: 2");
@@ -87,7 +86,7 @@ public class IpConnectivityEventBuilderTest extends TestCase {
                 "  transports: 3",
                 "  ip_reachability_event <",
                 "    event_type: 512",
-                "    if_name: \"wlan0\"",
+                "    if_name: \"\"",
                 "  >",
                 ">",
                 "version: 2");
@@ -105,7 +104,7 @@ public class IpConnectivityEventBuilderTest extends TestCase {
                 "  transports: 1",
                 "  ip_reachability_event <",
                 "    event_type: 512",
-                "    if_name: \"wlan0\"",
+                "    if_name: \"\"",
                 "  >",
                 ">",
                 "version: 2");
@@ -123,7 +122,7 @@ public class IpConnectivityEventBuilderTest extends TestCase {
                 "  transports: 0",
                 "  ip_reachability_event <",
                 "    event_type: 512",
-                "    if_name: \"wlan0\"",
+                "    if_name: \"\"",
                 "  >",
                 ">",
                 "version: 2");
@@ -140,7 +139,7 @@ public class IpConnectivityEventBuilderTest extends TestCase {
                 "  transports: 0",
                 "  ip_reachability_event <",
                 "    event_type: 512",
-                "    if_name: \"wlan0\"",
+                "    if_name: \"\"",
                 "  >",
                 ">",
                 "version: 2");
@@ -157,7 +156,7 @@ public class IpConnectivityEventBuilderTest extends TestCase {
                 "  transports: 0",
                 "  ip_reachability_event <",
                 "    event_type: 512",
-                "    if_name: \"wlan0\"",
+                "    if_name: \"\"",
                 "  >",
                 ">",
                 "version: 2");
@@ -174,7 +173,7 @@ public class IpConnectivityEventBuilderTest extends TestCase {
                 "  transports: 0",
                 "  ip_reachability_event <",
                 "    event_type: 512",
-                "    if_name: \"wlan0\"",
+                "    if_name: \"\"",
                 "  >",
                 ">",
                 "version: 2");
@@ -221,7 +220,6 @@ public class IpConnectivityEventBuilderTest extends TestCase {
     public void testDhcpClientEventSerialization() {
         ConnectivityMetricsEvent ev = describeIpEvent(
                 aType(DhcpClientEvent.class),
-                aString("wlan0"),
                 aString("SomeState"),
                 anInt(192));
 
@@ -235,7 +233,7 @@ public class IpConnectivityEventBuilderTest extends TestCase {
                 "  transports: 0",
                 "  dhcp_event <",
                 "    duration_ms: 192",
-                "    if_name: \"wlan0\"",
+                "    if_name: \"\"",
                 "    state_transition: \"SomeState\"",
                 "  >",
                 ">",
@@ -248,7 +246,6 @@ public class IpConnectivityEventBuilderTest extends TestCase {
     public void testDhcpErrorEventSerialization() {
         ConnectivityMetricsEvent ev = describeIpEvent(
                 aType(DhcpErrorEvent.class),
-                aString("wlan0"),
                 anInt(DhcpErrorEvent.L4_NOT_UDP));
 
         String want = joinLines(
@@ -261,7 +258,7 @@ public class IpConnectivityEventBuilderTest extends TestCase {
                 "  transports: 0",
                 "  dhcp_event <",
                 "    duration_ms: 0",
-                "    if_name: \"wlan0\"",
+                "    if_name: \"\"",
                 "    error_code: 50397184",
                 "  >",
                 ">",
@@ -326,7 +323,6 @@ public class IpConnectivityEventBuilderTest extends TestCase {
     public void testIpManagerEventSerialization() {
         ConnectivityMetricsEvent ev = describeIpEvent(
                 aType(IpManagerEvent.class),
-                aString("wlan0"),
                 anInt(IpManagerEvent.PROVISIONING_OK),
                 aLong(5678));
 
@@ -340,7 +336,7 @@ public class IpConnectivityEventBuilderTest extends TestCase {
                 "  transports: 0",
                 "  ip_provisioning_event <",
                 "    event_type: 1",
-                "    if_name: \"wlan0\"",
+                "    if_name: \"\"",
                 "    latency_ms: 5678",
                 "  >",
                 ">",
@@ -353,7 +349,6 @@ public class IpConnectivityEventBuilderTest extends TestCase {
     public void testIpReachabilityEventSerialization() {
         ConnectivityMetricsEvent ev = describeIpEvent(
                 aType(IpReachabilityEvent.class),
-                aString("wlan0"),
                 anInt(IpReachabilityEvent.NUD_FAILED));
 
         String want = joinLines(
@@ -366,7 +361,7 @@ public class IpConnectivityEventBuilderTest extends TestCase {
                 "  transports: 0",
                 "  ip_reachability_event <",
                 "    event_type: 512",
-                "    if_name: \"wlan0\"",
+                "    if_name: \"\"",
                 "  >",
                 ">",
                 "version: 2");

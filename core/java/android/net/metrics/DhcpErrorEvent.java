@@ -54,7 +54,6 @@ public final class DhcpErrorEvent implements Parcelable {
     public static final int RECEIVE_ERROR              = makeErrorCode(MISC_ERROR, 2);
     public static final int PARSING_ERROR              = makeErrorCode(MISC_ERROR, 3);
 
-    public final String ifName;
     // error code byte format (MSB to LSB):
     // byte 0: error type
     // byte 1: error subtype
@@ -62,19 +61,16 @@ public final class DhcpErrorEvent implements Parcelable {
     // byte 3: optional code
     public final int errorCode;
 
-    public DhcpErrorEvent(String ifName, int errorCode) {
-        this.ifName = ifName;
+    public DhcpErrorEvent(int errorCode) {
         this.errorCode = errorCode;
     }
 
     private DhcpErrorEvent(Parcel in) {
-        this.ifName = in.readString();
         this.errorCode = in.readInt();
     }
 
     @Override
     public void writeToParcel(Parcel out, int flags) {
-        out.writeString(ifName);
         out.writeInt(errorCode);
     }
 
@@ -104,7 +100,7 @@ public final class DhcpErrorEvent implements Parcelable {
 
     @Override
     public String toString() {
-        return String.format("DhcpErrorEvent(%s, %s)", ifName, Decoder.constants.get(errorCode));
+        return String.format("DhcpErrorEvent(%s)", Decoder.constants.get(errorCode));
     }
 
     final static class Decoder {

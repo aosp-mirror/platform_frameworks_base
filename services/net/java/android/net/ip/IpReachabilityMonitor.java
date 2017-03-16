@@ -426,7 +426,7 @@ public class IpReachabilityMonitor {
 
     private void logEvent(int probeType, int errorCode) {
         int eventType = probeType | (errorCode & 0xff);
-        mMetricsLog.log(new IpReachabilityEvent(mInterfaceName, eventType));
+        mMetricsLog.log(mInterfaceName, new IpReachabilityEvent(eventType));
     }
 
     private void logNudFailed(ProvisioningChange delta) {
@@ -434,7 +434,7 @@ public class IpReachabilityMonitor {
         boolean isFromProbe = (duration < getProbeWakeLockDuration());
         boolean isProvisioningLost = (delta == ProvisioningChange.LOST_PROVISIONING);
         int eventType = IpReachabilityEvent.nudFailureEventType(isFromProbe, isProvisioningLost);
-        mMetricsLog.log(new IpReachabilityEvent(mInterfaceName, eventType));
+        mMetricsLog.log(mInterfaceName, new IpReachabilityEvent(eventType));
     }
 
     // TODO: simplify the number of objects by making this extend Thread.
