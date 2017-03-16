@@ -219,23 +219,23 @@ public final class UsbAlsaManager {
         AlsaDevice testDevice = new AlsaDevice(type, card, device);
 
         // This value was empirically determined.
-        final int kWaitTime = 2500; // ms
+        final int kWaitTimeMs = 2500;
 
         synchronized(mAlsaDevices) {
-            long timeout = SystemClock.elapsedRealtime() + kWaitTime;
+            long timeoutMs = SystemClock.elapsedRealtime() + kWaitTimeMs;
             do {
                 if (mAlsaDevices.values().contains(testDevice)) {
                     return testDevice;
                 }
-                long waitTime = timeout - SystemClock.elapsedRealtime();
-                if (waitTime > 0) {
+                long waitTimeMs = timeoutMs - SystemClock.elapsedRealtime();
+                if (waitTimeMs > 0) {
                     try {
-                        mAlsaDevices.wait(waitTime);
+                        mAlsaDevices.wait(waitTimeMs);
                     } catch (InterruptedException e) {
                         Slog.d(TAG, "usb: InterruptedException while waiting for ALSA file.");
                     }
                 }
-            } while (timeout > SystemClock.elapsedRealtime());
+            } while (timeoutMs > SystemClock.elapsedRealtime());
         }
 
         Slog.e(TAG, "waitForAlsaDevice failed for " + testDevice);
