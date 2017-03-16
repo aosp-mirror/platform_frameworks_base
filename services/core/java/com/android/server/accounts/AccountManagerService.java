@@ -35,7 +35,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityThread;
-import android.app.AppGlobals;
 import android.app.AppOpsManager;
 import android.app.INotificationManager;
 import android.app.Notification;
@@ -64,7 +63,6 @@ import android.content.pm.Signature;
 import android.content.pm.UserInfo;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteStatement;
-import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Environment;
@@ -80,7 +78,6 @@ import android.os.StrictMode;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.os.storage.StorageManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
@@ -113,7 +110,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -157,6 +153,11 @@ public class AccountManagerService
         @Override
         public void onUnlockUser(int userHandle) {
             mService.onUnlockUser(userHandle);
+        }
+
+        @Override
+        public void onCleanupUser(int userHandle) {
+            mService.onCleanupUser(userHandle);
         }
     }
 
@@ -302,18 +303,6 @@ public class AccountManagerService
                 }
             }
         }, intentFilter);
-
-        IntentFilter userFilter = new IntentFilter();
-        userFilter.addAction(Intent.ACTION_USER_REMOVED);
-        mContext.registerReceiverAsUser(new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                String action = intent.getAction();
-                if (Intent.ACTION_USER_REMOVED.equals(action)) {
-                    onUserRemoved(intent);
-                }
-            }
-        }, UserHandle.ALL, userFilter, null, null);
 
         injector.addLocalService(new AccountManagerInternalImpl());
 
@@ -1133,33 +1122,17 @@ public class AccountManagerService
         }
     }
 
-    private void onUserRemoved(Intent intent) {
-        int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
-        if (userId < 1) return;
-
+    private void onCleanupUser(int userId) {
+        Log.i(TAG, "onCleanupUser " + userId);
         UserAccounts accounts;
-        boolean userUnlocked;
         synchronized (mUsers) {
             accounts = mUsers.get(userId);
             mUsers.remove(userId);
-            userUnlocked = mLocalUnlockedUsers.get(userId);
             mLocalUnlockedUsers.delete(userId);
         }
         if (accounts != null) {
             synchronized (accounts.cacheLock) {
                 accounts.accountsDb.close();
-            }
-        }
-        Log.i(TAG, "Removing database files for user " + userId);
-        File dbFile = new File(mInjector.getDeDatabaseName(userId));
-
-        AccountsDb.deleteDbFileWarnIfFailed(dbFile);
-        // Remove CE file if user is unlocked, or FBE is not enabled
-        boolean fbeEnabled = StorageManager.isFileEncryptedNativeOrEmulated();
-        if (!fbeEnabled || userUnlocked) {
-            File ceDb = new File(mInjector.getCeDatabaseName(userId));
-            if (ceDb.exists()) {
-                AccountsDb.deleteDbFileWarnIfFailed(ceDb);
             }
         }
     }
