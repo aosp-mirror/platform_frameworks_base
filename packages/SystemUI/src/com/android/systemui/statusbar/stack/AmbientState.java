@@ -59,6 +59,7 @@ public class AmbientState {
     private boolean mPanelTracking;
     private boolean mExpansionChanging;
     private boolean mPanelFullWidth;
+    private boolean mPulsing;
 
     public AmbientState(Context context) {
         reload(context);
@@ -283,6 +284,14 @@ public class AmbientState {
 
     public void setPanelTracking(boolean panelTracking) {
         mPanelTracking = panelTracking;
+    }
+
+    public boolean isPulsing() {
+        return mPulsing;
+    }
+
+    public void setPulsing(boolean pulsing) {
+        mPulsing = pulsing;
     }
 
     public boolean isPanelTracking() {

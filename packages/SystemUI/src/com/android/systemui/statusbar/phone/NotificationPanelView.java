@@ -2472,4 +2472,8 @@ public class NotificationPanelView extends PanelView implements
     public void setNoVisibleNotifications(boolean noNotifications) {
         mNoVisibleNotifications = noNotifications;
     }
+
+    public void setPulsing(boolean pulsing) {
+        mKeyguardStatusView.setPulsing(pulsing);
+    }
 }

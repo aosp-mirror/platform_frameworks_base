@@ -20,6 +20,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:tag="ambient"
+    android:paddingStart="@dimen/notification_extra_margin_ambient"
+    android:paddingEnd="@dimen/notification_extra_margin_ambient"
     >
     <include layout="@layout/notification_template_header" />
 
@@ -52,7 +54,7 @@
                 android:ellipsize="marquee"
                 android:fadingEdge="horizontal"
                 android:textSize="20sp"
-                android:textColor="#e6fafafa"
+                android:textColor="#ffffffff"
             />
             <TextView android:id="@+id/text"
                 android:layout_width="match_parent"
@@ -63,7 +65,7 @@
                 android:gravity="top"
                 android:visibility="gone"
                 android:textSize="16sp"
-                android:textColor="#ccfafafa"
+                android:textColor="#eeffffff"
                 android:layout_marginTop="4dp"
             />
         </LinearLayout>
