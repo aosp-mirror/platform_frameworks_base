@@ -362,6 +362,8 @@ public class AppOpsManager {
     public static final String OPSTR_ANSWER_PHONE_CALLS
             = "android:answer_phone_calls";
 
+    // Warning: If an permission is added here it also has to be added to
+    // com.android.packageinstaller.permission.utils.EventLogger
     private static final int[] RUNTIME_AND_APPOP_PERMISSIONS_OPS = {
             // RUNTIME PERMISSIONS
             // Contacts
