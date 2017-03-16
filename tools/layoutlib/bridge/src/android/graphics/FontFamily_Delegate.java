@@ -16,7 +16,6 @@
 
 package android.graphics;
 
-import android.text.FontConfig;
 import com.android.ide.common.rendering.api.AssetRepository;
 import com.android.ide.common.rendering.api.LayoutLog;
 import com.android.layoutlib.bridge.Bridge;
@@ -293,10 +292,14 @@ public class FontFamily_Delegate {
 
     @LayoutlibDelegate
     /*package*/ static boolean nAddFontWeightStyle(long builderPtr, ByteBuffer font,
-            int ttcIndex, List<FontConfig.Axis> listOfAxis,
-            int weight, boolean isItalic) {
+            int ttcIndex, int weight, boolean isItalic) {
         assert false : "The only client of this method has been overriden.";
         return false;
+    }
+
+    @LayoutlibDelegate
+    /*package*/ static void nAddAxisValue(long builderPtr, int tag, float value) {
+        assert false : "The only client of this method has been overriden.";
     }
 
     static boolean addFont(long builderPtr, final String path, final int weight,
