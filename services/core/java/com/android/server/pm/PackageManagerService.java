@@ -260,7 +260,6 @@ import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
 import com.android.server.AttributeCache;
-import com.android.server.BackgroundDexOptJobService;
 import com.android.server.DeviceIdleController;
 import com.android.server.EventLogTags;
 import com.android.server.FgThread;
@@ -272,6 +271,7 @@ import com.android.server.SystemConfig;
 import com.android.server.SystemServerInitThreadPool;
 import com.android.server.Watchdog;
 import com.android.server.net.NetworkPolicyManagerInternal;
+import com.android.server.pm.BackgroundDexOptService;
 import com.android.server.pm.Installer.InstallerException;
 import com.android.server.pm.PermissionsState.PermissionState;
 import com.android.server.pm.Settings.DatabaseVersion;
@@ -16850,11 +16850,11 @@ public class PackageManagerService extends IPackageManager.Stub {
                     mDexManager.isUsedByOtherApps(pkg.packageName));
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
 
-            // Notify BackgroundDexOptJobService that the package has been changed.
+            // Notify BackgroundDexOptService that the package has been changed.
             // If this is an update of a package which used to fail to compile,
             // BDOS will remove it from its blacklist.
             // TODO: Layering violation
-            BackgroundDexOptJobService.notifyPackageChanged(pkg.packageName);
+            BackgroundDexOptService.notifyPackageChanged(pkg.packageName);
         }
 
         if (!args.doRename(res.returnCode, pkg, oldCodePath)) {
