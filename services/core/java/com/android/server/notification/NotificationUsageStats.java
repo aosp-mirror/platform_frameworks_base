@@ -40,6 +40,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.PrintWriter;
+import java.lang.Math;
 import java.util.ArrayDeque;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -718,8 +719,8 @@ public class NotificationUsageStats {
         }
 
         void increment(int imp) {
-            imp = imp < 0 ? 0 : imp > NUM_IMPORTANCES ? NUM_IMPORTANCES : imp;
-            mCount[imp] ++;
+            imp = Math.max(0, Math.min(imp, mCount.length - 1));
+            mCount[imp]++;
         }
 
         void maybeCount(ImportanceHistogram prev) {
