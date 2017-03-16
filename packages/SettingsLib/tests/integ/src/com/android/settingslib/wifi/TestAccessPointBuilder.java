@@ -73,9 +73,15 @@ public class TestAccessPointBuilder {
         return this;
     }
 
+    public TestAccessPointBuilder setRssi(int rssi) {
+        mRssi = rssi;
+        return this;
+    }
+
     /**
-    * Set the signal level.
-    * Side effect: if this AccessPoint was previously unreachable,
+    * Set the rssi based upon the desired signal level.
+     *
+    * <p>Side effect: if this AccessPoint was previously unreachable,
     * setting the level will also make it reachable.
     */
     public TestAccessPointBuilder setLevel(int level) {

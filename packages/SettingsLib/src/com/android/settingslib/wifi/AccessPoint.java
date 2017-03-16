@@ -394,8 +394,9 @@ public class AccessPoint implements Comparable<AccessPoint> {
      *
      * <p>If the given connection is active, the existing value of {@link #mRssi} will be returned.
      * If the given AccessPoint is not active, a value will be calculated from previous scan
-     * results, returning the best RSSI for all matching AccessPoints. If the access point is not
-     * connected and there are no scan results, the rssi will be set to {@link #UNREACHABLE_RSSI}.
+     * results, returning the best RSSI for all matching AccessPoints averaged with the previous
+     * value. If the access point is not connected and there are no scan results, the rssi will be
+     * set to {@link #UNREACHABLE_RSSI}.
      *
      * <p>Old scan results will be evicted from the cache when this method is invoked.
      */
@@ -413,7 +414,11 @@ public class AccessPoint implements Comparable<AccessPoint> {
             }
         }
 
-        mRssi = rssi;
+        if (rssi != UNREACHABLE_RSSI && mRssi != UNREACHABLE_RSSI) {
+            mRssi = (mRssi + rssi) / 2; // half-life previous value
+        } else {
+            mRssi = rssi;
+        }
     }
 
     /**
