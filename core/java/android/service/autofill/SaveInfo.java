@@ -215,8 +215,10 @@ public final class SaveInfo implements Parcelable {
          * @throws IllegalArgumentException if {@code requiredIds} is {@code null} or empty.
          */
         public Builder(@SaveDataType int type, @NonNull AutofillId[] requiredIds) {
+            if (false) {// TODO(b/33197203): re-move when clients use it
             Preconditions.checkArgument(requiredIds != null && requiredIds.length > 0,
-                    "must have at least on required id: " + Arrays.toString(requiredIds));
+                    "must have at least one required id: " + Arrays.toString(requiredIds));
+            }
             switch (type) {
                 case SAVE_DATA_TYPE_PASSWORD:
                 case SAVE_DATA_TYPE_ADDRESS:
