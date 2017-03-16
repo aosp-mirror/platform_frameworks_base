@@ -2355,6 +2355,13 @@ public abstract class PackageManager {
             = "android.hardware.vr.high_performance";
 
     /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:
+     * The device implements headtracking suitable for a VR device.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_VR_HEADTRACKING = "android.hardware.vr.headtracking";
+
+    /**
      * Action to external storage service to clean out removed apps.
      * @hide
      */
