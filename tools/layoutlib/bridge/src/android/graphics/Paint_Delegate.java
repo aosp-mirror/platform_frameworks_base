@@ -964,8 +964,9 @@ public class Paint_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static int nGetTextRunCursor(Paint paint, long native_object, char[] text,
-            int contextStart, int contextLength, int flags, int offset, int cursorOpt) {
+    /*package*/ static int nGetTextRunCursor(Paint paint, long native_object, long typefacePtr,
+            char[] text, int contextStart, int contextLength, int flags, int offset,
+            int cursorOpt) {
         // FIXME
         Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
                 "Paint.getTextRunCursor is not supported.", null, null /*data*/);
@@ -973,8 +974,8 @@ public class Paint_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static int nGetTextRunCursor(Paint paint, long native_object, String text,
-            int contextStart, int contextEnd, int flags, int offset, int cursorOpt) {
+    /*package*/ static int nGetTextRunCursor(Paint paint, long native_object, long typefacePtr,
+            String text, int contextStart, int contextEnd, int flags, int offset, int cursorOpt) {
         // FIXME
         Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
                 "Paint.getTextRunCursor is not supported.", null, null /*data*/);
