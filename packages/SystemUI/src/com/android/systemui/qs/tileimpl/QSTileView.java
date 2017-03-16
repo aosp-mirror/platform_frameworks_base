@@ -36,11 +36,12 @@ import libcore.util.Objects;
 /** View that represents a standard quick settings tile. **/
 public class QSTileView extends QSTileBaseView {
 
-    private final View mDivider;
+    private View mDivider;
     protected TextView mLabel;
     private ImageView mPadLock;
     private int mState;
     private ViewGroup mLabelContainer;
+    private View mExpandIndicator;
 
     public QSTileView(Context context, QSIconView icon) {
         this(context, icon, false);
@@ -54,8 +55,6 @@ public class QSTileView extends QSTileBaseView {
 
         setClickable(true);
         setId(View.generateViewId());
-        mDivider = LayoutInflater.from(context).inflate(R.layout.divider, this, false);
-        addView(mDivider);
         createLabel();
         setOrientation(VERTICAL);
         setGravity(Gravity.CENTER);
@@ -81,8 +80,10 @@ public class QSTileView extends QSTileBaseView {
                 .inflate(R.layout.qs_tile_label, this, false);
         mLabelContainer.setClipChildren(false);
         mLabelContainer.setClipToPadding(false);
-        mLabel = (TextView) mLabelContainer.findViewById(R.id.tile_label);
-        mPadLock = (ImageView) mLabelContainer.findViewById(R.id.restricted_padlock);
+        mLabel = mLabelContainer.findViewById(R.id.tile_label);
+        mPadLock = mLabelContainer.findViewById(R.id.restricted_padlock);
+        mDivider = mLabelContainer.findViewById(R.id.underline);
+        mExpandIndicator = mLabelContainer.findViewById(R.id.expand_indicator);
 
         addView(mLabelContainer);
     }
@@ -101,6 +102,7 @@ public class QSTileView extends QSTileBaseView {
             mLabel.setText(state.label);
         }
         mDivider.setVisibility(state.dualTarget ? View.VISIBLE : View.INVISIBLE);
+        mExpandIndicator.setVisibility(state.dualTarget ? View.VISIBLE : View.GONE);
         if (state.dualTarget != mLabelContainer.isClickable()) {
             mLabelContainer.setClickable(state.dualTarget);
             mLabelContainer.setLongClickable(state.dualTarget);
