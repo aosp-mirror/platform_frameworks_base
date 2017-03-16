@@ -186,7 +186,8 @@ public class CacheQuotaStrategy implements RemoteCallback.OnResultListener {
                 try {
                     // We need the app info to determine the uid and the uuid of the volume
                     // where the app is installed.
-                    ApplicationInfo appInfo = packageManager.getApplicationInfo(packageName, 0);
+                    ApplicationInfo appInfo = packageManager.getApplicationInfoAsUser(
+                            packageName, 0, info.id);
                     requests.add(
                             new CacheQuotaHint.Builder()
                                     .setVolumeUuid(appInfo.volumeUuid)
