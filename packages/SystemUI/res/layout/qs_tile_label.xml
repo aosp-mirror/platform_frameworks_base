@@ -14,24 +14,38 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-<LinearLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_width="match_parent"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="48dp"
+    android:paddingTop="8dp">
+    <LinearLayout
+        android:id="@+id/label_group"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_horizontal"
-        android:paddingTop="8dp"
-        android:paddingBottom="8dp">
-     <TextView android:id="@+id/tile_label"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/tile_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="?android:attr/textColorPrimary"
-            android:gravity="center_horizontal"
-            android:minLines="2"
+            android:clickable="false"
+            android:maxLines="2"
             android:padding="0dp"
             android:textAppearance="@style/TextAppearance.QS.TileLabel"
-            android:clickable="false" />
-     <ImageView android:id="@+id/restricted_padlock"
+            android:textColor="?android:attr/textColorPrimary"/>
+
+        <ImageView
+            android:id="@+id/expand_indicator"
+            android:layout_marginStart="4dp"
+            android:layout_width="12dp"
+            android:layout_height="match_parent"
+            android:src="@drawable/qs_dual_tile_caret"
+            android:tint="?android:attr/textColorPrimary" />
+
+        <ImageView android:id="@+id/restricted_padlock"
             android:layout_width="@dimen/qs_tile_text_size"
             android:layout_height="match_parent"
             android:paddingBottom="@dimen/qs_tile_text_size"
@@ -39,4 +53,17 @@
             android:layout_marginLeft="@dimen/restricted_padlock_pading"
             android:scaleType="centerInside"
             android:visibility="gone" />
-</LinearLayout>
+    </LinearLayout>
+
+    <View
+        android:id="@+id/underline"
+        android:layout_width="30dp"
+        android:layout_height="1dp"
+        android:layout_marginTop="2dp"
+        android:layout_alignStart="@id/label_group"
+        android:layout_alignEnd="@id/label_group"
+        android:layout_below="@id/label_group"
+        android:alpha="?android:attr/disabledAlpha"
+        android:background="?android:attr/colorForeground"/>
+
+</RelativeLayout>
