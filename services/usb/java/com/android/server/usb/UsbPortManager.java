@@ -92,9 +92,6 @@ public class UsbPortManager {
     // Cookie sent for usb hal death notification.
     private static final int USB_HAL_DEATH_COOKIE = 1000;
 
-    // Usb hal service name.
-    private static String sServiceName = "usb_hal";
-
     // Used as the key while sending the bundle to Main thread.
     private static final String PORT_INFO = "port_info";
 
@@ -499,16 +496,15 @@ public class UsbPortManager {
             }
 
             try {
-                mProxy = IUsb.getService(sServiceName);
+                mProxy = IUsb.getService();
                 mProxy.linkToDeath(new DeathRecipient(pw), USB_HAL_DEATH_COOKIE);
                 mProxy.setCallback(mHALCallback);
                 mProxy.queryPortStatus();
             } catch (NoSuchElementException e) {
-                logAndPrintException(pw, sServiceName + " not found."
+                logAndPrintException(pw, "connectToProxy: usb hal service not found."
                         + " Did the service fail to start?", e);
             } catch (RemoteException e) {
-                logAndPrintException(pw, sServiceName
-                        + " connectToProxy: Service not responding", e);
+                logAndPrintException(pw, "connectToProxy: usb hal service not responding", e);
             }
         }
     }
