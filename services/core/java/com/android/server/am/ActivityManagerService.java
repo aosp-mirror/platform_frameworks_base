@@ -21482,6 +21482,15 @@ public class ActivityManagerService extends IActivityManager.Stub
         return success;
     }
 
+    private boolean isEphemeralLocked(int uid) {
+        String packages[] = mContext.getPackageManager().getPackagesForUid(uid);
+        if (packages == null || packages.length != 1) { // Ephemeral apps cannot share uid
+            return false;
+        }
+        return getPackageManagerInternalLocked().isPackageEphemeral(UserHandle.getUserId(uid),
+                packages[0]);
+    }
+
     private final void enqueueUidChangeLocked(UidRecord uidRec, int uid, int change) {
         final UidRecord.ChangeItem pendingChange;
         if (uidRec == null || uidRec.pendingChange == null) {
@@ -21522,7 +21531,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         pendingChange.change = change;
         pendingChange.processState = uidRec != null
                 ? uidRec.setProcState : ActivityManager.PROCESS_STATE_NONEXISTENT;
-        pendingChange.ephemeral = uidRec.ephemeral;
+        pendingChange.ephemeral = uidRec != null ? uidRec.ephemeral : isEphemeralLocked(uid);
         pendingChange.procStateSeq = uidRec != null ? uidRec.curProcStateSeq : 0;
 
         // Directly update the power manager, since we sit on top of it and it is critical
