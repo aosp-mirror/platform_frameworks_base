@@ -15,8 +15,6 @@
  */
 package com.android.server.notification;
 
-import static android.app.NotificationManager.IMPORTANCE_NONE;
-
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
@@ -654,8 +652,6 @@ public class RankingHelper implements RankingConfig {
 
     @Override
     public void deleteNotificationChannel(String pkg, int uid, String channelId) {
-        Preconditions.checkNotNull(pkg);
-        Preconditions.checkNotNull(channelId);
         Record r = getRecord(pkg, uid);
         if (r == null) {
             return;
@@ -667,6 +663,7 @@ public class RankingHelper implements RankingConfig {
         LogMaker lm = getChannelLog(channel, pkg);
         lm.setType(MetricsProto.MetricsEvent.TYPE_CLOSE);
         MetricsLogger.action(lm);
+        updateConfig();
     }
 
     @Override
@@ -679,6 +676,7 @@ public class RankingHelper implements RankingConfig {
             return;
         }
         r.channels.remove(channelId);
+        updateConfig();
     }
 
     @Override
@@ -695,6 +693,7 @@ public class RankingHelper implements RankingConfig {
                 r.channels.remove(key);
             }
         }
+        updateConfig();
     }
 
     public NotificationChannelGroup getNotificationChannelGroup(String groupId, String pkg,
@@ -719,12 +718,15 @@ public class RankingHelper implements RankingConfig {
             final NotificationChannel nc = r.channels.valueAt(i);
             if (includeDeleted || !nc.isDeleted()) {
                 if (nc.getGroup() != null) {
-                    NotificationChannelGroup ncg = groups.get(nc.getGroup());
-                    if (ncg == null ) {
-                        ncg = r.groups.get(nc.getGroup()).clone();
-                        groups.put(nc.getGroup(), ncg);
+                    if (r.groups.get(nc.getGroup()) != null) {
+                        NotificationChannelGroup ncg = groups.get(nc.getGroup());
+                        if (ncg == null) {
+                            ncg = r.groups.get(nc.getGroup()).clone();
+                            groups.put(nc.getGroup(), ncg);
+
+                        }
+                        ncg.addChannel(nc);
                     }
-                    ncg.addChannel(nc);
                 } else {
                     nonGrouped.addChannel(nc);
                 }
@@ -736,8 +738,29 @@ public class RankingHelper implements RankingConfig {
         return new ParceledListSlice<>(new ArrayList<>(groups.values()));
     }
 
+    public List<String> deleteNotificationChannelGroup(String pkg, int uid,
+            String groupId) {
+        List<String> deletedChannelIds = new ArrayList<>();
+        Record r = getRecord(pkg, uid);
+        if (r == null || TextUtils.isEmpty(groupId)) {
+            return deletedChannelIds;
+        }
+
+        r.groups.remove(groupId);
+
+        int N = r.channels.size();
+        for (int i = 0; i < N; i++) {
+            final NotificationChannel nc = r.channels.valueAt(i);
+            if (groupId.equals(nc.getGroup())) {
+                nc.setDeleted(true);
+                deletedChannelIds.add(nc.getId());
+            }
+        }
+        updateConfig();
+        return deletedChannelIds;
+    }
+
     @Override
-    @VisibleForTesting
     public Collection<NotificationChannelGroup> getNotificationChannelGroups(String pkg,
             int uid) {
         Record r = getRecord(pkg, uid);

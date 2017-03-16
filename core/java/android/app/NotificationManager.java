@@ -498,6 +498,30 @@ public class NotificationManager
     }
 
     /**
+     * Returns all notification channel groups belonging to the calling app.
+     */
+    public List<NotificationChannelGroup> getNotificationChannelGroups() {
+        INotificationManager service = getService();
+        try {
+            return service.getNotificationChannelGroups(mContext.getPackageName()).getList();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Deletes the given notification channel group.
+     */
+    public void deleteNotificationChannelGroup(String groupId) {
+        INotificationManager service = getService();
+        try {
+            service.deleteNotificationChannelGroup(mContext.getPackageName(), groupId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * @hide
      */
     @TestApi
