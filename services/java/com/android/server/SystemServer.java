@@ -86,6 +86,7 @@ import com.android.server.notification.NotificationManagerService;
 import com.android.server.om.OverlayManagerService;
 import com.android.server.os.DeviceIdentifiersPolicyService;
 import com.android.server.os.SchedulingPolicyService;
+import com.android.server.pm.BackgroundDexOptService;
 import com.android.server.pm.Installer;
 import com.android.server.pm.LauncherAppsService;
 import com.android.server.pm.OtaDexoptService;
@@ -1428,11 +1429,11 @@ public final class SystemServer {
                     traceEnd();
                 }
 
-                traceBeginAndSlog("StartBackgroundDexOptJobService");
+                traceBeginAndSlog("StartBackgroundDexOptService");
                 try {
-                    BackgroundDexOptJobService.schedule(context);
+                    BackgroundDexOptService.schedule(context);
                 } catch (Throwable e) {
-                    reportWtf("starting StartBackgroundDexOptJobService", e);
+                    reportWtf("starting StartBackgroundDexOptService", e);
                 }
                 traceEnd();
 
