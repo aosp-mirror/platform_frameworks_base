@@ -281,7 +281,9 @@ public class WifiConfiguration implements Parcelable {
     public int apChannel = 0;
 
     /**
-     * Pre-shared key for use with WPA-PSK.
+     * Pre-shared key for use with WPA-PSK. Either an ASCII string enclosed in
+     * double quotation marks (e.g., {@code "abcdefghij"} for PSK passphrase or
+     * a string of 64 hex digits for raw PSK.
      * <p/>
      * When the value of this key is read, the actual key is
      * not returned, just a "*" if the key has a value, or the null
