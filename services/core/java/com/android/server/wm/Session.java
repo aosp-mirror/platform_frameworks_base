@@ -208,13 +208,6 @@ public class Session extends IWindowSession.Stub
     }
 
     @Override
-    public void repositionChild(IWindow window, int left, int top, int right, int bottom,
-            long deferTransactionUntilFrame, Rect outFrame) {
-        mService.repositionChild(this, window, left, top, right, bottom,
-                deferTransactionUntilFrame, outFrame);
-    }
-
-    @Override
     public void prepareToReplaceWindows(IBinder appToken, boolean childrenOnly) {
         mService.setWillReplaceWindows(appToken, childrenOnly);
     }
@@ -233,10 +226,6 @@ public class Session extends IWindowSession.Stub
         if (false) Slog.d(TAG_WM, "<<<<<< EXITING relayout to "
                 + Binder.getCallingPid());
         return res;
-    }
-
-    public void performDeferredDestroy(IWindow window) {
-        mService.performDeferredDestroyWindow(this, window);
     }
 
     public boolean outOfMemory(IWindow window) {

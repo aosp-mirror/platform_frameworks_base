@@ -96,18 +96,6 @@ public final class BridgeWindowSession implements IWindowSession {
     }
 
     @Override
-    public void repositionChild(IWindow window, int left, int top, int right, int bottom,
-            long deferTransactionUntilFrame, Rect outFrame) {
-        // pass for now.
-        return;
-    }
-
-    @Override
-    public void performDeferredDestroy(IWindow window) {
-        // pass for now.
-    }
-
-    @Override
     public boolean outOfMemory(IWindow window) throws RemoteException {
         return false;
     }
