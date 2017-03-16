@@ -218,6 +218,8 @@ public class AdaptiveIconDrawable extends Drawable implements Drawable.Callback 
     }
 
     /**
+     * Only call this method after bound is set on this drawable.
+     *
      * @return the mask path object used to clip the drawable
      */
     public Path getIconMask() {
