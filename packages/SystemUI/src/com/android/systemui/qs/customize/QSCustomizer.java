@@ -41,10 +41,10 @@ import com.android.internal.logging.nano.MetricsProto;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.plugins.qs.QS;
-import com.android.systemui.qs.QSDetailClipper;
 import com.android.systemui.plugins.qs.QSTile;
-import com.android.systemui.statusbar.phone.NotificationsQuickSettingsContainer;
+import com.android.systemui.qs.QSDetailClipper;
 import com.android.systemui.qs.QSTileHost;
+import com.android.systemui.statusbar.phone.NotificationsQuickSettingsContainer;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
 import com.android.systemui.statusbar.policy.KeyguardMonitor.Callback;
 
@@ -74,6 +74,7 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
     private boolean mFinishedFetchingTiles = false;
     private int mX;
     private int mY;
+    private boolean mOpening;
 
     public QSCustomizer(Context context, AttributeSet attrs) {
         super(new ContextThemeWrapper(context, R.style.edit_theme), attrs);
@@ -140,6 +141,7 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
             mY = y;
             MetricsLogger.visible(getContext(), MetricsProto.MetricsEvent.QS_EDIT);
             isShown = true;
+            mOpening = true;
             setTileSpecs();
             setVisibility(View.VISIBLE);
             mClipper.animateCircularClip(x, y, true, mExpandAnimationListener);
@@ -226,7 +228,7 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
     }
 
     private final Callback mKeyguardCallback = () -> {
-        if (Dependency.get(KeyguardMonitor.class).isShowing()) {
+        if (Dependency.get(KeyguardMonitor.class).isShowing() && !mOpening) {
             hide(0, 0);
         }
     };
@@ -237,11 +239,13 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
             if (isShown) {
                 setCustomizing(true);
             }
+            mOpening = false;
             mNotifQsContainer.setCustomizerAnimating(false);
         }
 
         @Override
         public void onAnimationCancel(Animator animation) {
+            mOpening = false;
             mNotifQsContainer.setCustomizerAnimating(false);
         }
     };
