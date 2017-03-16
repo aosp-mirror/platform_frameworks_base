@@ -1374,6 +1374,22 @@ public class CarrierConfigManager {
     public static final String KEY_DATA_LIMIT_THRESHOLD_BYTES_LONG =
             "data_limit_threshold_bytes_long";
 
+    /**
+     * Offset to be reduced from rsrp threshold while calculating signal strength level.
+     * @hide
+     */
+    public static final String KEY_LTE_EARFCNS_RSRP_BOOST_INT = "lte_earfcns_rsrp_boost_int";
+
+    /**
+     * List of EARFCN (E-UTRA Absolute Radio Frequency Channel Number,
+     * Reference: 3GPP TS 36.104 5.4.3) inclusive ranges on which lte_rsrp_boost_int
+     * will be applied. Format of the String array is expected to be {"erafcn1_start-earfcn1_end",
+     * "earfcn2_start-earfcn2_end" ... }
+     * @hide
+     */
+    public static final String KEY_BOOSTED_LTE_EARFCNS_STRING_ARRAY =
+            "boosted_lte_earfcns_string_array";
+
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
 
@@ -1607,6 +1623,8 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_EDITABLE_TETHER_APN_BOOL, false);
         sDefaults.putStringArray(KEY_CALL_FORWARDING_BLOCKS_WHILE_ROAMING_STRING_ARRAY,
                 null);
+        sDefaults.putInt(KEY_LTE_EARFCNS_RSRP_BOOST_INT, 0);
+        sDefaults.putStringArray(KEY_BOOSTED_LTE_EARFCNS_STRING_ARRAY, null);
     }
 
     /**
