@@ -79,19 +79,16 @@ public class TestAccessPointBuilder {
     * setting the level will also make it reachable.
     */
     public TestAccessPointBuilder setLevel(int level) {
-        int outputRange = AccessPoint.SIGNAL_LEVELS - 1;
-
-        if (level > outputRange) {
-            level = outputRange;
-        } else if (level < 0) {
-            level = 0;
+        // Reversal of WifiManager.calculateSignalLevels
+        if (level == 0) {
+            mRssi = MIN_RSSI;
+        } else if (level >= AccessPoint.SIGNAL_LEVELS) {
+            mRssi = MAX_RSSI;
+        } else {
+            float inputRange = MAX_RSSI - MIN_RSSI;
+            float outputRange = AccessPoint.SIGNAL_LEVELS - 1;
+            mRssi = (int) (level * inputRange / outputRange + MIN_RSSI);
         }
-
-        int inputRange = MAX_RSSI - MIN_RSSI;
-
-        // calculate the rssi required to get the level we want.
-        // this is a rearrangement of the formula from WifiManager.calculateSignalLevel()
-        mRssi = (int)((float)(level * inputRange) / (float)outputRange) + MIN_RSSI;
         return this;
     }
 
