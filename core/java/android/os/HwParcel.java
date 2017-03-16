@@ -219,6 +219,7 @@ public class HwParcel {
     public native final void writeStatus(int status);
     public native final void verifySuccess();
     public native final void releaseTemporaryStorage();
+    public native final void release();
 
     public native final void send();
 
