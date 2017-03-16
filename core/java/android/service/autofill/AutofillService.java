@@ -30,6 +30,7 @@ import android.os.IBinder;
 import android.os.ICancellationSignal;
 import android.os.Looper;
 import android.util.Log;
+import android.view.autofill.AutofillManager;
 
 import com.android.internal.os.SomeArgs;
 
@@ -90,6 +91,8 @@ public abstract class AutofillService extends Service {
     private static final int MSG_ON_FILL_REQUEST = 3;
     private static final int MSG_ON_SAVE_REQUEST = 4;
 
+    private static final int UNUSED_ARG = -1;
+
     private final IAutoFillService mInterface = new IAutoFillService.Stub() {
         @Override
         public void onInit(IAutoFillServiceConnection connection) {
@@ -102,14 +105,14 @@ public abstract class AutofillService extends Service {
 
         @Override
         public void onFillRequest(AssistStructure structure, Bundle extras,
-                IFillCallback callback) {
+                IFillCallback callback, int flags) {
             ICancellationSignal transport = CancellationSignal.createTransport();
             try {
                 callback.onCancellable(transport);
             } catch (RemoteException e) {
                 e.rethrowFromSystemServer();
             }
-            mHandlerCaller.obtainMessageOOOO(MSG_ON_FILL_REQUEST, structure,
+            mHandlerCaller.obtainMessageIIOOOO(MSG_ON_FILL_REQUEST, flags, UNUSED_ARG, structure,
                     CancellationSignal.fromTransport(transport), extras, callback)
                     .sendToTarget();
         }
@@ -135,8 +138,9 @@ public abstract class AutofillService extends Service {
                 final Bundle extras = (Bundle) args.arg3;
                 final IFillCallback callback = (IFillCallback) args.arg4;
                 final FillCallback fillCallback = new FillCallback(callback);
+                final int flags = msg.arg1;
                 args.recycle();
-                onFillRequest(structure, extras, cancellation, fillCallback);
+                onFillRequest(structure, extras, flags, cancellation, fillCallback);
                 break;
             } case MSG_ON_SAVE_REQUEST: {
                 final SomeArgs args = (SomeArgs) msg.obj;
@@ -188,7 +192,6 @@ public abstract class AutofillService extends Service {
      * <p>You should generally do initialization here rather than in {@link #onCreate}.
      */
     public void onConnected() {
-        //TODO(b/33197203): is not called anymore, fix it!
     }
 
     /**
@@ -206,11 +209,25 @@ public abstract class AutofillService extends Service {
      *     as well as when filling different sections of the UI as the system will try to
      *     aggressively unbind from the service to conserve resources. See {@link
      *     FillResponse} Javadoc for examples of multiple-sections requests.
+     * @param flags either {@code 0} or {@link AutofillManager#FLAG_MANUAL_REQUEST}.
      * @param cancellationSignal signal for observing cancellation requests. The system will use
      *     this to notify you that the fill result is no longer needed and you should stop
      *     handling this fill request in order to save resources.
      * @param callback object used to notify the result of the request.
      */
+    public void onFillRequest(@NonNull AssistStructure structure, @Nullable Bundle data, int flags,
+            @NonNull CancellationSignal cancellationSignal, @NonNull FillCallback callback) {
+        //TODO(b/33197203): make non-abstract once older method is removed
+        onFillRequest(structure, data, cancellationSignal, callback);
+    }
+
+    /**
+     * @hide
+     * @deprecated - use {@link #onFillRequest(AssistStructure, Bundle, int,
+     * CancellationSignal, FillCallback)} instead
+     */
+    //TODO(b/33197203): remove once clients are not using anymore
+    @Deprecated
     public abstract void onFillRequest(@NonNull AssistStructure structure, @Nullable Bundle data,
             @NonNull CancellationSignal cancellationSignal, @NonNull FillCallback callback);
 
@@ -238,7 +255,6 @@ public abstract class AutofillService extends Service {
      * <p> At this point this service may no longer be an active {@link AutofillService}.
      */
     public void onDisconnected() {
-        //TODO(b/33197203): is not called anymore, fix it!
     }
 
     /**

@@ -2815,6 +2815,7 @@
     <public-group type="id" first-id="0x01020041">
         <public name="textAssist" />
         <public name="accessibilityActionMoveWindow" />
+        <public name="autofill" />
     </public-group>
 
 

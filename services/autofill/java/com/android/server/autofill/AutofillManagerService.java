@@ -316,13 +316,13 @@ public final class AutofillManagerService extends SystemService {
         @Override
         public void startSession(IBinder activityToken, IBinder windowToken, IBinder appCallback,
                 AutofillId autofillId, Rect bounds, AutofillValue value, int userId,
-                boolean hasCallback) {
+                boolean hasCallback, int flags) {
             // TODO(b/33197203): make sure it's called by resumed / focused activity
 
             synchronized (mLock) {
                 final AutofillManagerServiceImpl service = getServiceForUserLocked(userId);
                 service.startSessionLocked(activityToken, windowToken, appCallback,
-                        autofillId, bounds, value, hasCallback);
+                        autofillId, bounds, value, hasCallback, flags);
             }
         }
 

@@ -31,7 +31,7 @@ import java.util.ArrayList;
 /**
  * Response for a {@link
  * AutofillService#onFillRequest(android.app.assist.AssistStructure,
- * Bundle, android.os.CancellationSignal, FillCallback)}.
+ * Bundle, int, android.os.CancellationSignal, FillCallback)}.
  *
  * <p>The response typically contains one or more {@link Dataset}s, each representing a set of
  * fields that can be autofilled together, and the Android system displays a dataset picker UI
@@ -269,8 +269,8 @@ public final class FillResponse implements Parcelable {
          * Sets a {@link Bundle} that will be passed to subsequent APIs that
          * manipulate this response. For example, they are passed to subsequent
          * calls to {@link AutofillService#onFillRequest(
-         * android.app.assist.AssistStructure, Bundle, android.os.CancellationSignal,
-         * FillCallback)} and {@link AutofillService#onSaveRequest(
+         * android.app.assist.AssistStructure, Bundle, int,
+         * android.os.CancellationSignal, FillCallback)} and {@link AutofillService#onSaveRequest(
          * android.app.assist.AssistStructure, Bundle, SaveCallback)}.
          *
          * @param extras The response extras.
