@@ -422,11 +422,11 @@
     <!-- Setting Checkbox title whether to enable WiFi Verbose Logging. [CHAR LIMIT=40] -->
     <string name="wifi_verbose_logging">Enable Wi\u2011Fi Verbose Logging</string>
     <!-- Setting Checkbox title whether to enable WiFi Aggressive Handover. [CHAR LIMIT=40] -->
-    <string name="wifi_aggressive_handover">Aggressive Wi\u2011Fi to Cellular handover</string>
+    <string name="wifi_aggressive_handover">Aggressive Wi\u2011Fi to mobile handover</string>
     <!-- Setting Checkbox title whether to enable WiFi Scanning in the presence of traffic. [CHAR LIMIT=80] -->
     <string name="wifi_allow_scan_with_traffic">Always allow Wi\u2011Fi Roam Scans</string>
-    <!-- Setting Checkbox title whether to always keep cellular data active. [CHAR LIMIT=80] -->
-    <string name="mobile_data_always_on">Cellular data always active</string>
+    <!-- Setting Checkbox title whether to always keep mobile data active. [CHAR LIMIT=80] -->
+    <string name="mobile_data_always_on">Mobile data always active</string>
     <!-- Setting Checkbox title for disabling Bluetooth absolute volume -->
     <string name="bluetooth_disable_absolute_volume">Disable absolute volume</string>
 
@@ -463,7 +463,7 @@
     <!-- Setting Checkbox summary whether to enable Wifi verbose Logging [CHAR LIMIT=80] -->
     <string name="wifi_verbose_logging_summary">Increase Wi\u2011Fi logging level, show per SSID RSSI in Wi\u2011Fi Picker</string>
     <!-- Setting Checkbox summary whether to enable Wifi aggressive handover [CHAR LIMIT=130] -->
-    <string name="wifi_aggressive_handover_summary">When enabled, Wi\u2011Fi will be more aggressive in handing over the data connection to Cellular, when Wi\u2011Fi signal is low</string>
+    <string name="wifi_aggressive_handover_summary">When enabled, Wi\u2011Fi will be more aggressive in handing over the data connection to mobile, when Wi\u2011Fi signal is low</string>
     <!-- Setting Checkbox summary whether to always allow WiFi Roam Scans [CHAR LIMIT=130] -->
     <string name="wifi_allow_scan_with_traffic_summary">Allow/Disallow Wi\u2011Fi Roam Scans based on the amount of data traffic present at the interface</string>
     <!-- UI debug setting: limit size of Android logger buffers -->
