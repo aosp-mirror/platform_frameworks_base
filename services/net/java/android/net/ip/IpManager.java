@@ -23,6 +23,7 @@ import android.content.Context;
 import android.net.apf.ApfCapabilities;
 import android.net.apf.ApfFilter;
 import android.net.DhcpResults;
+import android.net.INetd;
 import android.net.InterfaceConfiguration;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
@@ -34,10 +35,12 @@ import android.net.dhcp.DhcpClient;
 import android.net.metrics.IpConnectivityLog;
 import android.net.metrics.IpManagerEvent;
 import android.net.util.MultinetworkPolicyTracker;
+import android.net.util.NetdService;
 import android.os.INetworkManagementService;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.ServiceSpecificException;
 import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.LocalLog;
@@ -1027,14 +1030,16 @@ public class IpManager extends StateMachine {
 
     private boolean startIPv6() {
         // Set privacy extensions.
+        final String PREFER_TEMPADDRS = "2";
         try {
-            mNwService.setInterfaceIpv6PrivacyExtensions(mInterfaceName, true);
+            NetdService.run((INetd netd) -> {
+                netd.setProcSysNet(
+                        INetd.IPV6, INetd.CONF, mInterfaceName, "use_tempaddr",
+                        PREFER_TEMPADDRS);
+            });
             mNwService.enableIpv6(mInterfaceName);
-        } catch (RemoteException re) {
-            logError("Unable to change interface settings: %s", re);
-            return false;
-        } catch (IllegalStateException ie) {
-            logError("Unable to change interface settings: %s", ie);
+        } catch (IllegalStateException|RemoteException|ServiceSpecificException e) {
+            logError("Unable to change interface settings: %s", e);
             return false;
         }
 
