@@ -2038,12 +2038,15 @@ public class PackageManagerService extends IPackageManager.Stub {
         final boolean supportsRuntimePermissions = pkg.applicationInfo.targetSdkVersion
                 >= Build.VERSION_CODES.M;
 
+        final boolean instantApp = isInstantApp(pkg.packageName, userId);
+
         for (String permission : pkg.requestedPermissions) {
             final BasePermission bp;
             synchronized (mPackages) {
                 bp = mSettings.mPermissions.get(permission);
             }
             if (bp != null && (bp.isRuntime() || bp.isDevelopment())
+                    && (!instantApp || bp.isInstant())
                     && (grantedPermissions == null
                            || ArrayUtils.contains(grantedPermissions, permission))) {
                 final int flags = permissionsState.getPermissionFlags(permission, userId);
