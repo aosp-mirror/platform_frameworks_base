@@ -150,6 +150,7 @@ import android.os.UserHandle;
 import android.os.WorkSource;
 import android.provider.Settings;
 import android.util.ArraySet;
+import android.util.MergedConfiguration;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
@@ -1813,7 +1814,7 @@ public class WindowManagerService extends IWindowManager.Stub
             int requestedHeight, int viewVisibility, int flags,
             Rect outFrame, Rect outOverscanInsets, Rect outContentInsets,
             Rect outVisibleInsets, Rect outStableInsets, Rect outOutsets, Rect outBackdropFrame,
-            Configuration outConfig, Surface outSurface) {
+            MergedConfiguration mergedConfiguration, Surface outSurface) {
         int result = 0;
         boolean configChanged;
         boolean hasStatusBarPermission =
@@ -1925,7 +1926,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (viewVisibility == View.VISIBLE &&
                     (win.mAppToken == null || win.mAttrs.type == TYPE_APPLICATION_STARTING
                             || !win.mAppToken.clientHidden)) {
-                result = win.relayoutVisibleWindow(outConfig, result, attrChanges,
+                result = win.relayoutVisibleWindow(mergedConfiguration, result, attrChanges,
                         oldVisibility);
                 try {
                     result = createSurfaceControl(outSurface, result, win, winAnimator);

@@ -335,6 +335,8 @@ public final class ActivityThread {
         Configuration overrideConfig;
         // Used for consolidating configs before sending on to Activity.
         private Configuration tmpConfig = new Configuration();
+        // Callback used for updating activity override config.
+        ViewRootImpl.ActivityConfigCallback configCallback;
         ActivityClientRecord nextIdle;
 
         ProfilerInfo profilerInfo;
@@ -370,6 +372,14 @@ public final class ActivityThread {
             stopped = false;
             hideForNow = false;
             nextIdle = null;
+            configCallback = (Configuration overrideConfig, int newDisplayId) -> {
+                if (activity == null) {
+                    throw new IllegalStateException(
+                            "Received config update for non-existing activity");
+                }
+                activity.mMainThread.handleActivityConfigurationChanged(
+                        new ActivityConfigChangeData(token, overrideConfig), newDisplayId);
+            };
         }
 
         public boolean isPreHoneycomb() {
@@ -3679,6 +3689,12 @@ public final class ActivityThread {
                 if (r.activity.mVisibleFromClient) {
                     r.activity.makeVisible();
                 }
+                final ViewRootImpl viewRoot = r.activity.mDecor.getViewRootImpl();
+                if (viewRoot != null) {
+                    // TODO: Figure out the best place to set the callback.
+                    // This looks like a place where decor view is already initialized.
+                    viewRoot.setActivityConfigCallback(r.configCallback);
+                }
             }
 
             if (!r.onlyLocalRequest) {
@@ -5027,7 +5043,7 @@ public final class ActivityThread {
      * @param displayId Id of the display where activity was moved to, -1 if there was no move and
      *                  value didn't change.
      */
-    private void handleActivityConfigurationChanged(ActivityConfigChangeData data, int displayId) {
+    void handleActivityConfigurationChanged(ActivityConfigChangeData data, int displayId) {
         ActivityClientRecord r = mActivities.get(data.activityToken);
         // Check input params.
         if (r == null || r.activity == null) {
@@ -5044,6 +5060,7 @@ public final class ActivityThread {
 
         // Perform updates.
         r.overrideConfig = data.overrideConfig;
+        final ViewRootImpl viewRoot = r.activity.mDecor.getViewRootImpl();
         if (movedToDifferentDisplay) {
             if (DEBUG_CONFIGURATION) Slog.v(TAG, "Handle activity moved to display, activity:"
                     + r.activityInfo.name + ", displayId=" + displayId
@@ -5051,13 +5068,15 @@ public final class ActivityThread {
 
             performConfigurationChangedForActivity(r, mCompatConfiguration, displayId,
                     true /* movedToDifferentDisplay */);
-            final ViewRootImpl viewRoot = r.activity.mDecor.getViewRootImpl();
             viewRoot.onMovedToDisplay(displayId);
         } else {
             if (DEBUG_CONFIGURATION) Slog.v(TAG, "Handle activity config changed: "
                     + r.activityInfo.name + ", config=" + data.overrideConfig);
             performConfigurationChangedForActivity(r, mCompatConfiguration);
         }
+        // Notify the ViewRootImpl instance about configuration changes. It may have initiated this
+        // update to make sure that resources are updated before updating itself.
+        viewRoot.updateConfiguration();
         mSomeActivitiesChanged = true;
     }
 
@@ -6282,35 +6301,26 @@ public final class ActivityThread {
         // add dropbox logging to libcore
         DropBox.setReporter(new DropBoxReporter());
 
-        ViewRootImpl.addConfigCallback(new ComponentCallbacks2() {
-            @Override
-            public void onConfigurationChanged(Configuration newConfig) {
-                synchronized (mResourcesManager) {
-                    // We need to apply this change to the resources
-                    // immediately, because upon returning the view
-                    // hierarchy will be informed about it.
-                    if (mResourcesManager.applyConfigurationToResourcesLocked(newConfig, null)) {
-                        updateLocaleListFromAppContext(mInitialApplication.getApplicationContext(),
-                                mResourcesManager.getConfiguration().getLocales());
+        ViewRootImpl.ConfigChangedCallback configChangedCallback
+                = (Configuration globalConfig) -> {
+            synchronized (mResourcesManager) {
+                // We need to apply this change to the resources immediately, because upon returning
+                // the view hierarchy will be informed about it.
+                if (mResourcesManager.applyConfigurationToResourcesLocked(globalConfig,
+                        null /* compat */)) {
+                    updateLocaleListFromAppContext(mInitialApplication.getApplicationContext(),
+                            mResourcesManager.getConfiguration().getLocales());
 
-                        // This actually changed the resources!  Tell
-                        // everyone about it.
-                        if (mPendingConfiguration == null ||
-                                mPendingConfiguration.isOtherSeqNewer(newConfig)) {
-                            mPendingConfiguration = newConfig;
-
-                            sendMessage(H.CONFIGURATION_CHANGED, newConfig);
-                        }
+                    // This actually changed the resources! Tell everyone about it.
+                    if (mPendingConfiguration == null
+                            || mPendingConfiguration.isOtherSeqNewer(globalConfig)) {
+                        mPendingConfiguration = globalConfig;
+                        sendMessage(H.CONFIGURATION_CHANGED, globalConfig);
                     }
                 }
             }
-            @Override
-            public void onLowMemory() {
-            }
-            @Override
-            public void onTrimMemory(int level) {
-            }
-        });
+        };
+        ViewRootImpl.addConfigCallback(configChangedCallback);
     }
 
     public static ActivityThread systemMain() {
