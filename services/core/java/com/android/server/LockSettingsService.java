@@ -1488,7 +1488,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             return VerifyCredentialResponse.OK;
         }
 
-        if (TextUtils.isEmpty(credential)) {
+        if (storedHash == null || TextUtils.isEmpty(credential)) {
             return VerifyCredentialResponse.ERROR;
         }
 
