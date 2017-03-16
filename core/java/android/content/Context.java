@@ -2865,6 +2865,7 @@ public abstract class Context {
             STORAGE_SERVICE,
             STORAGE_STATS_SERVICE,
             WALLPAPER_SERVICE,
+            TIME_ZONE_RULES_MANAGER_SERVICE,
             VIBRATOR_SERVICE,
             //@hide: STATUS_BAR_SERVICE,
             CONNECTIVITY_SERVICE,
@@ -3955,6 +3956,15 @@ public abstract class Context {
      */
     @SystemApi
     public static final String VR_SERVICE = "vrmanager";
+
+    /**
+     * Use with {@link #getSystemService} to retrieve an
+     * {@link android.app.timezone.ITimeZoneRulesManager}.
+     * @hide
+     *
+     * @see #getSystemService
+     */
+    public static final String TIME_ZONE_RULES_MANAGER_SERVICE = "timezone";
 
     /**
      * Determine whether the given permission is allowed for a particular
