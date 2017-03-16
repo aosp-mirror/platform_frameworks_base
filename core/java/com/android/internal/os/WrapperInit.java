@@ -139,6 +139,21 @@ public class WrapperInit {
             Slog.d(RuntimeInit.TAG, "RuntimeInit: Starting application from wrapper");
         }
 
-        RuntimeInit.applicationInit(targetSdkVersion, argv, null);
+        // Check whether the first argument is a "-cp" in argv, and assume the next argument is the
+        // classpath. If found, create a PathClassLoader and use it for applicationInit.
+        ClassLoader classLoader = null;
+        if (argv != null && argv.length > 2 && argv[0].equals("-cp")) {
+            classLoader = ZygoteInit.createPathClassLoader(argv[1], targetSdkVersion);
+
+            // Install this classloader as the context classloader, too.
+            Thread.currentThread().setContextClassLoader(classLoader);
+
+            // Remove the classpath from the arguments.
+            String removedArgs[] = new String[argv.length - 2];
+            System.arraycopy(argv, 2, removedArgs, 0, argv.length - 2);
+            argv = removedArgs;
+        }
+
+        RuntimeInit.applicationInit(targetSdkVersion, argv, classLoader);
     }
 }
