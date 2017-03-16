@@ -28,7 +28,10 @@ abstract public class MetricsTestUtil {
     }
 
     static ConnectivityMetricsEvent ev(Parcelable p) {
-        return new ConnectivityMetricsEvent(1L, 0, 0, p);
+        ConnectivityMetricsEvent ev = new ConnectivityMetricsEvent();
+        ev.timestamp = 1L;
+        ev.data = p;
+        return ev;
     }
 
     static ConnectivityMetricsEvent describeIpEvent(Consumer<Parcel>... fs) {

@@ -315,14 +315,15 @@ public class IpConnectivityMetricsTest extends TestCase {
     }
 
     static ConnectivityMetricsEvent expectedEvent(int timestamp) {
-        return new ConnectivityMetricsEvent((long)timestamp, 0, 0, FAKE_EV);
+        ConnectivityMetricsEvent ev = new ConnectivityMetricsEvent();
+        ev.timestamp = timestamp;
+        ev.data = FAKE_EV;
+        return ev;
     }
 
     /** Outer equality for ConnectivityMetricsEvent to avoid overriding equals() and hashCode(). */
     static void assertEventsEqual(ConnectivityMetricsEvent expected, ConnectivityMetricsEvent got) {
         assertEquals(expected.timestamp, got.timestamp);
-        assertEquals(expected.componentTag, got.componentTag);
-        assertEquals(expected.eventTag, got.eventTag);
         assertEquals(expected.data, got.data);
     }
 
