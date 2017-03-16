@@ -138,12 +138,8 @@ public class FontsContract {
     private HandlerThread mThread;
 
     /** @hide */
-    public FontsContract() {
-        // TODO: investigate if the system context is the best option here. ApplicationContext or
-        // the one passed by developer?
-        // TODO: Looks like ActivityThread.currentActivityThread() can return null. Check when it
-        // returns null and check if we need to handle null case.
-        mContext = ActivityThread.currentActivityThread().getSystemContext();
+    public FontsContract(Context context) {
+        mContext = context.getApplicationContext();
         mPackageManager = mContext.getPackageManager();
     }
 

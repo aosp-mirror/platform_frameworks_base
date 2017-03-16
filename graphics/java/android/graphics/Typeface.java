@@ -24,6 +24,7 @@ import static android.content.res.FontResourcesParser.FamilyResourceEntry;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.Context;
 import android.content.res.AssetManager;
 import android.graphics.fonts.FontRequest;
 import android.graphics.fonts.FontResult;
@@ -88,7 +89,7 @@ public class Typeface {
     @GuardedBy("sLock")
     private static FontsContract sFontsContract;
     @GuardedBy("sLock")
-    private static Handler mHandler;
+    private static Handler sHandler;
 
     /**
      * Cache for Typeface objects dynamically loaded from assets. Currently max size is 16.
@@ -226,6 +227,20 @@ public class Typeface {
     }
 
     /**
+     * Set the application context so we can generate font requests from the provider. This should
+     * be called from ActivityThread when the application binds, as we preload fonts.
+     * @hide
+     */
+    public static void setApplicationContext(Context context) {
+        synchronized (sLock) {
+            if (sFontsContract == null) {
+                sFontsContract = new FontsContract(context);
+                sHandler = new Handler();
+            }
+        }
+    }
+
+    /**
      * Create a typeface object given a font request. The font will be asynchronously fetched,
      * therefore the result is delivered to the given callback. See {@link FontRequest}.
      * Only one of the methods in callback will be invoked, depending on whether the request
@@ -241,18 +256,17 @@ public class Typeface {
         Typeface cachedTypeface = findFromCache(
                 request.getProviderAuthority(), request.getQuery());
         if (cachedTypeface != null) {
-            mHandler.post(() -> callback.onTypefaceRetrieved(cachedTypeface));
+            sHandler.post(() -> callback.onTypefaceRetrieved(cachedTypeface));
             return;
         }
         synchronized (sLock) {
             if (sFontsContract == null) {
-                sFontsContract = new FontsContract();
-                mHandler = new Handler();
+                throw new RuntimeException("Context not initialized, can't query provider");
             }
             final ResultReceiver receiver = new ResultReceiver(null) {
                 @Override
                 public void onReceiveResult(int resultCode, Bundle resultData) {
-                    mHandler.post(() -> receiveResult(request, callback, resultCode, resultData));
+                    sHandler.post(() -> receiveResult(request, callback, resultCode, resultData));
                 }
             };
             sFontsContract.getFont(request, receiver);
