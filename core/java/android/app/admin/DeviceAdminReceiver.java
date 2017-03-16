@@ -17,6 +17,7 @@
 package android.app.admin;
 
 import android.accounts.AccountManager;
+import android.annotation.BroadcastBehavior;
 import android.annotation.IntDef;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
@@ -81,6 +82,7 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * that other applications can not abuse it.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @BroadcastBehavior(explicitOnly = true)
     public static final String ACTION_DEVICE_ADMIN_ENABLED
             = "android.app.action.DEVICE_ADMIN_ENABLED";
 
@@ -94,6 +96,7 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * to the user before they disable your admin.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @BroadcastBehavior(explicitOnly = true)
     public static final String ACTION_DEVICE_ADMIN_DISABLE_REQUESTED
             = "android.app.action.DEVICE_ADMIN_DISABLE_REQUESTED";
 
@@ -115,6 +118,7 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * its intent filter.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @BroadcastBehavior(explicitOnly = true)
     public static final String ACTION_DEVICE_ADMIN_DISABLED
             = "android.app.action.DEVICE_ADMIN_DISABLED";
 
@@ -131,6 +135,7 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * this broadcast.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @BroadcastBehavior(explicitOnly = true)
     public static final String ACTION_PASSWORD_CHANGED
             = "android.app.action.ACTION_PASSWORD_CHANGED";
 
@@ -147,6 +152,7 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * this broadcast.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @BroadcastBehavior(explicitOnly = true)
     public static final String ACTION_PASSWORD_FAILED
             = "android.app.action.ACTION_PASSWORD_FAILED";
 
@@ -160,6 +166,7 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * this broadcast.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @BroadcastBehavior(explicitOnly = true)
     public static final String ACTION_PASSWORD_SUCCEEDED
             = "android.app.action.ACTION_PASSWORD_SUCCEEDED";
 
@@ -173,6 +180,7 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * this broadcast.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @BroadcastBehavior(explicitOnly = true)
     public static final String ACTION_PASSWORD_EXPIRING
             = "android.app.action.ACTION_PASSWORD_EXPIRING";
 
@@ -187,6 +195,7 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * @see DevicePolicyManager#isLockTaskPermitted(String)
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @BroadcastBehavior(explicitOnly = true)
     public static final String ACTION_LOCK_TASK_ENTERING
             = "android.app.action.LOCK_TASK_ENTERING";
 
@@ -200,6 +209,7 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * @see DevicePolicyManager#isLockTaskPermitted(String)
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @BroadcastBehavior(explicitOnly = true)
     public static final String ACTION_LOCK_TASK_EXITING
             = "android.app.action.LOCK_TASK_EXITING";
 
@@ -232,6 +242,7 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * <p>Output: Nothing</p>
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @BroadcastBehavior(explicitOnly = true)
     public static final String ACTION_PROFILE_PROVISIONING_COMPLETE =
             "android.app.action.PROFILE_PROVISIONING_COMPLETE";
 
@@ -244,6 +255,7 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * @hide
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @BroadcastBehavior(explicitOnly = true)
     public static final String ACTION_BUGREPORT_SHARING_DECLINED =
             "android.app.action.BUGREPORT_SHARING_DECLINED";
 
@@ -256,6 +268,7 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * @hide
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @BroadcastBehavior(explicitOnly = true)
     public static final String ACTION_BUGREPORT_FAILED = "android.app.action.BUGREPORT_FAILED";
 
     /**
@@ -266,6 +279,7 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * @hide
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @BroadcastBehavior(explicitOnly = true)
     public static final String ACTION_BUGREPORT_SHARE =
             "android.app.action.BUGREPORT_SHARE";
 
@@ -274,6 +288,7 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * @hide
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @BroadcastBehavior(explicitOnly = true)
     public static final String ACTION_SECURITY_LOGS_AVAILABLE
             = "android.app.action.SECURITY_LOGS_AVAILABLE";
 
@@ -283,6 +298,7 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * @hide
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @BroadcastBehavior(explicitOnly = true)
     public static final String ACTION_NETWORK_LOGS_AVAILABLE
             = "android.app.action.NETWORK_LOGS_AVAILABLE";
 
@@ -314,7 +330,8 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * @hide
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String ACTION_USER_ADDED  = "android.app.action.USER_ADDED";
+    @BroadcastBehavior(explicitOnly = true)
+    public static final String ACTION_USER_ADDED = "android.app.action.USER_ADDED";
 
     /**
      * Broadcast action: notify the device owner that a user or profile has been removed.
@@ -323,6 +340,7 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * @hide
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @BroadcastBehavior(explicitOnly = true)
     public static final String ACTION_USER_REMOVED = "android.app.action.USER_REMOVED";
 
     /**
@@ -401,6 +419,7 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * @hide
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @BroadcastBehavior(explicitOnly = true)
     public static final String ACTION_NOTIFY_PENDING_SYSTEM_UPDATE =
             "android.app.action.NOTIFY_PENDING_SYSTEM_UPDATE";
 

@@ -21,8 +21,11 @@ import static android.Manifest.permission.GET_ACCOUNTS;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
+import android.annotation.SdkConstant;
 import android.annotation.Size;
 import android.annotation.SystemApi;
+import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.BroadcastBehavior;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -335,6 +338,8 @@ public class AccountManager {
      *
      * @deprecated use #addOnAccountsUpdatedListener to get account updates in runtime.
      */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @BroadcastBehavior(includeBackground = true)
     public static final String LOGIN_ACCOUNTS_CHANGED_ACTION =
         "android.accounts.LOGIN_ACCOUNTS_CHANGED";
 

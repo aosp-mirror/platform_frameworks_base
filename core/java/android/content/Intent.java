@@ -17,6 +17,7 @@
 package android.content;
 
 import android.annotation.AnyRes;
+import android.annotation.BroadcastBehavior;
 import android.annotation.IntDef;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
@@ -1992,6 +1993,7 @@ public class Intent implements Parcelable, Cloneable {
      * This is a protected intent that can only be sent by the system.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @BroadcastBehavior(includeBackground = true)
     public static final String ACTION_BOOT_COMPLETED = "android.intent.action.BOOT_COMPLETED";
 
     /**
