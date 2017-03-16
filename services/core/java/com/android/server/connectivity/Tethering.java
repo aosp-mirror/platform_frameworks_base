@@ -1584,14 +1584,14 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
 
         pw.println("Tethering:");
         pw.increaseIndent();
-        final TetheringConfiguration cfg = mConfig;
-        pw.print("preferredUpstreamIfaceTypes:");
-        synchronized (mPublicSync) {
-            for (Integer netType : cfg.preferredUpstreamIfaceTypes) {
-                pw.print(" " + ConnectivityManager.getNetworkTypeName(netType));
-            }
-            pw.println();
 
+        pw.println("Configuration:");
+        pw.increaseIndent();
+        final TetheringConfiguration cfg = mConfig;
+        cfg.dump(pw);
+        pw.decreaseIndent();
+
+        synchronized (mPublicSync) {
             pw.println("Tether state:");
             pw.increaseIndent();
             for (int i = 0; i < mTetherStates.size(); i++) {
