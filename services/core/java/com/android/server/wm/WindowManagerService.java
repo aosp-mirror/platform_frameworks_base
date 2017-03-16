@@ -7158,6 +7158,17 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
+        public void setForceShowMagnifiableBounds(boolean show) {
+            synchronized (mWindowMap) {
+                if (mAccessibilityController != null) {
+                    mAccessibilityController.setForceShowMagnifiableBoundsLocked(show);
+                } else {
+                    throw new IllegalStateException("Magnification callbacks not set!");
+                }
+            }
+        }
+
+        @Override
         public void getMagnificationRegion(@NonNull Region magnificationRegion) {
             synchronized (mWindowMap) {
                 if (mAccessibilityController != null) {
