@@ -29,7 +29,7 @@ void VkLayer::updateTexture() {
     SkImageInfo info = SkImageInfo::MakeS32(mWidth, mHeight, kPremul_SkAlphaType);
     surface = SkSurface::MakeRenderTarget(mRenderState.getGrContext(), SkBudgeted::kNo, info);
     surface->getCanvas()->clear(SK_ColorBLUE);
-    mImage = surface->makeImageSnapshot(SkBudgeted::kNo);
+    mImage = surface->makeImageSnapshot();
 }
 
 void VkLayer::onVkContextDestroyed() {
