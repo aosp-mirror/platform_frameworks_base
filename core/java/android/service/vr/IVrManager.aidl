@@ -17,6 +17,7 @@
 package android.service.vr;
 
 import android.service.vr.IVrStateCallbacks;
+import android.service.vr.IPersistentVrStateCallbacks;
 
 /** @hide */
 interface IVrManager {
@@ -34,6 +35,20 @@ interface IVrManager {
      * @param cb the callback to remove.
      */
     void unregisterListener(in IVrStateCallbacks cb);
+
+    /**
+     * Add a callback to be notified when persistent VR mode state changes.
+     *
+     * @param cb the callback instance to add.
+     */
+    void registerPersistentVrStateListener(in IPersistentVrStateCallbacks cb);
+
+    /**
+     * Remove the callack from the current set of registered callbacks.
+     *
+     * @param cb the callback to remove.
+     */
+    void unregisterPersistentVrStateListener(in IPersistentVrStateCallbacks cb);
 
     /**
      * Return current VR mode state.
