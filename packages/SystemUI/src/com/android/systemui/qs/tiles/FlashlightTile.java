@@ -87,7 +87,6 @@ public class FlashlightTile extends QSTileImpl<BooleanState> implements
         if (ActivityManager.isUserAMonkey()) {
             return;
         }
-        MetricsLogger.action(mContext, getMetricsCategory(), !mState.value);
         boolean newState = !mState.value;
         refreshState(newState);
         mFlashlightController.setFlashlight(newState);

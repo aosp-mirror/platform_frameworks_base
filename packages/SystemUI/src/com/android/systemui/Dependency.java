@@ -24,6 +24,7 @@ import android.util.ArrayMap;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.NightDisplayController;
+import com.android.internal.logging.MetricsLogger;
 import com.android.internal.util.Preconditions;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.systemui.assist.AssistManager;
@@ -256,6 +257,8 @@ public class Dependency extends SystemUI {
 
         mProviders.put(VolumeDialogController.class, () ->
                 new VolumeDialogControllerImpl(mContext));
+
+        mProviders.put(MetricsLogger.class, () -> new MetricsLogger());
 
         // Put all dependencies above here so the factory can override them if it wants.
         SystemUIFactory.getInstance().injectDependencies(mProviders, mContext);

@@ -54,7 +54,6 @@ public class NightDisplayTile extends QSTileImpl<BooleanState>
     @Override
     protected void handleClick() {
         final boolean activated = !mState.value;
-        MetricsLogger.action(mContext, getMetricsCategory(), activated);
         mController.setActivated(activated);
     }
 

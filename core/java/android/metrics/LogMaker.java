@@ -16,6 +16,7 @@
 package android.metrics;
 
 import android.annotation.SystemApi;
+import android.content.ComponentName;
 import android.util.Log;
 import android.util.SparseArray;
 
@@ -115,6 +116,16 @@ public class LogMaker {
     /** @param packageName to replace the existing setting. */
     public LogMaker setPackageName(String packageName) {
         entries.put(MetricsEvent.RESERVED_FOR_LOGBUILDER_PACKAGENAME, packageName);
+        return this;
+    }
+
+    /**
+     * @param component to replace the existing setting.
+     * @hide
+     */
+    public LogMaker setComponentName(ComponentName component) {
+        entries.put(MetricsEvent.RESERVED_FOR_LOGBUILDER_PACKAGENAME, component.getPackageName());
+        entries.put(MetricsEvent.FIELD_CLASS_NAME, component.getClassName());
         return this;
     }
 

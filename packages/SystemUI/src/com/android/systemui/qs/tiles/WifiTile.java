@@ -114,7 +114,6 @@ public class WifiTile extends QSTileImpl<SignalState> {
     protected void handleClick() {
         // Secondary clicks are header clicks, just toggle.
         mState.copyTo(mStateBeforeClick);
-        MetricsLogger.action(mContext, getMetricsCategory(), !mState.value);
         mController.setWifiEnabled(!mState.value);
     }
 

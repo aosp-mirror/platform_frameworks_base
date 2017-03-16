@@ -22,6 +22,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.graphics.drawable.Drawable;
+import android.metrics.LogMaker;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.IBinder;
@@ -153,6 +154,11 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
 
     public ComponentName getComponent() {
         return mComponent;
+    }
+
+    @Override
+    protected LogMaker populate(LogMaker logMaker) {
+        return super.populate(logMaker).setComponentName(mComponent);
     }
 
     public Tile getQsTile() {

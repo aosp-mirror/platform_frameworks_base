@@ -3656,7 +3656,7 @@ message MetricsEvent {
     ACTION_SETTINGS_MASTER_SWITCH_BLUETOOTH_TOGGLE = 870;
 
     // The name of the activity being launched in an app transition event.
-    APP_TRANSITION_ACTIVITY_NAME = 871;
+    FIELD_CLASS_NAME = 871;
 
     // ACTION: Settings > App detail > Uninstall
     ACTION_SETTINGS_UNINSTALL_APP = 872;
@@ -3873,6 +3873,24 @@ message MetricsEvent {
 
     // OPEN: Settings -> System -> Reset options
     RESET_DASHBOARD = 924;
+
+    // ACTION: QS -> Tile clicked
+    ACTION_QS_CLICK = 925;
+
+    // ACTION: QS -> Secondary click
+    ACTION_QS_SECONDARY_CLICK = 926;
+
+    // FIELD: Position info in QS clicks
+    FIELD_QS_POSITION = 927;
+
+    // FIELD: The value of a QS tile when clicked (if applicable)
+    FIELD_QS_VALUE = 928;
+
+    // ACTION: QS -> Detail panel -> more settings
+    ACTION_QS_MORE_SETTINGS = 929;
+
+    // ACTION: QS -> Click date
+    ACTION_QS_DATE = 930;
 
     // ---- End O Constants, all O constants go above this line ----
 

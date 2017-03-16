@@ -32,6 +32,8 @@ public interface QSHost {
     TileServices getTileServices();
     void removeTile(String tileSpec);
 
+    int indexOf(String tileSpec);
+
     interface Callback {
         void onTilesChanged();
     }

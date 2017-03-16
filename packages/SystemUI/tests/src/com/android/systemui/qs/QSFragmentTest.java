@@ -19,6 +19,7 @@ import static org.mockito.Mockito.mock;
 
 import android.os.Looper;
 
+import com.android.internal.logging.MetricsLogger;
 import com.android.keyguard.CarrierText;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
@@ -44,12 +45,15 @@ import android.widget.FrameLayout;
 @RunWithLooper(setAsMainLooper = true)
 public class QSFragmentTest extends SysuiBaseFragmentTest {
 
+    private MetricsLogger mMockMetricsLogger;
+
     public QSFragmentTest() {
         super(QSFragment.class);
     }
 
     @Before
     public void addLeakCheckDependencies() {
+        mMockMetricsLogger = mDependency.injectMockDependency(MetricsLogger.class);
         mContext.addMockSystemService(Context.LAYOUT_INFLATER_SERVICE,
                 new LayoutInflaterBuilder(mContext)
                         .replace("com.android.systemui.statusbar.policy.SplitClockView",

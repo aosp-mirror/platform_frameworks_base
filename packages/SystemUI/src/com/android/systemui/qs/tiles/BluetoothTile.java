@@ -83,7 +83,6 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
     protected void handleClick() {
         // Secondary clicks are header clicks, just toggle.
         final boolean isEnabled = (Boolean)mState.value;
-        MetricsLogger.action(mContext, getMetricsCategory(), !isEnabled);
         mController.setBluetoothEnabled(!isEnabled);
     }
 

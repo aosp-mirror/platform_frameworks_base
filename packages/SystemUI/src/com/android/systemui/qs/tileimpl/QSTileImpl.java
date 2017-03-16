@@ -14,12 +14,19 @@
 
 package com.android.systemui.qs.tileimpl;
 
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.ACTION_QS_CLICK;
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.ACTION_QS_LONG_PRESS;
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.ACTION_QS_SECONDARY_CLICK;
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_QS_POSITION;
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_QS_VALUE;
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.TYPE_ACTION;
 import static com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
 
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import android.metrics.LogMaker;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -29,7 +36,6 @@ import android.util.Log;
 import android.util.SparseArray;
 
 import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.settingslib.RestrictedLockUtils;
 import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
@@ -58,6 +64,7 @@ public abstract class QSTileImpl<TState extends State> implements QSTile {
     protected final H mHandler = new H(Dependency.get(Dependency.BG_LOOPER));
     protected final Handler mUiHandler = new Handler(Looper.getMainLooper());
     private final ArraySet<Object> mListeners = new ArraySet<>();
+    private final MetricsLogger mMetricsLogger = Dependency.get(MetricsLogger.class);
 
     private final ArrayList<Callback> mCallbacks = new ArrayList<>();
     protected TState mState = newTileState();
@@ -76,7 +83,7 @@ public abstract class QSTileImpl<TState extends State> implements QSTile {
     /**
      * Declare the category of this tile.
      *
-     * Categories are defined in {@link com.android.internal.logging.MetricsProto.MetricsEvent}
+     * Categories are defined in {@link com.android.internal.logging.nano.MetricsProto.MetricsEvent}
      * by editing frameworks/base/proto/src/metrics_constants.proto.
      */
     abstract public int getMetricsCategory();
@@ -152,15 +159,26 @@ public abstract class QSTileImpl<TState extends State> implements QSTile {
     }
 
     public void click() {
+        mMetricsLogger.write(populate(new LogMaker(ACTION_QS_CLICK).setType(TYPE_ACTION)));
         mHandler.sendEmptyMessage(H.CLICK);
     }
 
     public void secondaryClick() {
+        mMetricsLogger.write(populate(new LogMaker(ACTION_QS_SECONDARY_CLICK).setType(TYPE_ACTION)));
         mHandler.sendEmptyMessage(H.SECONDARY_CLICK);
     }
 
     public void longClick() {
+        mMetricsLogger.write(populate(new LogMaker(ACTION_QS_LONG_PRESS).setType(TYPE_ACTION)));
         mHandler.sendEmptyMessage(H.LONG_CLICK);
+    }
+
+    protected LogMaker populate(LogMaker logMaker) {
+        if (mState instanceof BooleanState) {
+            logMaker.addTaggedData(FIELD_QS_VALUE, ((BooleanState) mState).value ? 1 : 0);
+        }
+        return logMaker.setSubtype(getMetricsCategory())
+                .addTaggedData(FIELD_QS_POSITION, mHost.indexOf(mTileSpec));
     }
 
     public void showDetail(boolean show) {
@@ -224,7 +242,6 @@ public abstract class QSTileImpl<TState extends State> implements QSTile {
     }
 
     protected void handleLongClick() {
-        MetricsLogger.action(mContext, MetricsEvent.ACTION_QS_LONG_PRESS, getTileSpec());
         Dependency.get(ActivityStarter.class).postStartActivityDismissingKeyguard(
                 getLongClickIntent(), 0);
     }

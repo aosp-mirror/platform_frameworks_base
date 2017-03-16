@@ -484,7 +484,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     private ScreenPinningRequest mScreenPinningRequest;
 
-    MetricsLogger mMetricsLogger = new MetricsLogger();
+    private final MetricsLogger mMetricsLogger = Dependency.get(MetricsLogger.class);
 
     // ensure quick settings is disabled until the current user makes it through the setup wizard
     private boolean mUserSetup = false;
@@ -747,12 +747,6 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     private NavigationBarFragment mNavigationBar;
     private View mNavigationBarView;
-
-    @VisibleForTesting
-    void setMetricsLogger(MetricsLogger metricsLogger) {
-        mMetricsLogger = metricsLogger;
-        mLockscreenGestureLogger.setMetricsLogger(metricsLogger);
-    }
 
     @Override
     public void start() {
