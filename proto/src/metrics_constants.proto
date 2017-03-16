@@ -3672,6 +3672,36 @@ message MetricsEvent {
     // PACKAGE: The package name of the app the permission was revoked for
     ACTION_APPOP_REVOKE_REQUEST_INSTALL_PACKAGES = 898;
 
+    // ACTION: Phase 1 of instant application resolution occurred
+    // OS: O
+    ACTION_INSTANT_APP_RESOLUTION_PHASE_ONE = 899;
+
+    // ACTION: Phase 2 of instant application resolution occurred
+    // OS: O
+    ACTION_INSTANT_APP_RESOLUTION_PHASE_TWO = 900;
+
+    // FIELD: The amount of time for an ephemeral resolution phase; in milliseconds
+    // OS: O
+    FIELD_INSTANT_APP_RESOLUTION_DELAY_MS = 901;
+
+    // FIELD: The status of an ephemeral resolution phase
+    // Value 0: success
+    // Value 1: no full hash match
+    // OS: O
+    FIELD_INSTANT_APP_RESOLUTION_STATUS = 902;
+
+    // FIELD - A token to identify all events that are part of the same instant application launch
+    // OS: O
+    FIELD_INSTANT_APP_LAUNCH_TOKEN = 903;
+
+    // FIELD - The name of the package responsible for launching the activity
+    // OS: O
+    APP_TRANSITION_CALLING_PACKAGE_NAME = 904;
+
+    // FIELD - Whether or not the launched activity is part of an instant application
+    // OS: O
+    APP_TRANSITION_IS_EPHEMERAL = 905;
+
     // ---- End O Constants, all O constants go above this line ----
 
     // Add new aosp constants above this line.
