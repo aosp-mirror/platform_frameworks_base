@@ -120,7 +120,8 @@ public class WifiManager {
      *
      * Included extras:
      * {@link #EXTRA_BSSID_LONG}
-     * {@link #EXTRA_ICON_INFO}
+     * {@link #EXTRA_FILENAME}
+     * {@link #EXTRA_ICON}
      *
      * Receiver Required Permission: android.Manifest.permission.ACCESS_WIFI_STATE
      *
@@ -136,12 +137,18 @@ public class WifiManager {
      */
     public static final String EXTRA_BSSID_LONG = "android.net.wifi.extra.BSSID_LONG";
     /**
-     * Icon information.
+     * Icon data.
      *
      * Retrieve with {@link android.content.Intent#getParcelableExtra(String)} and cast into
-     * {@link IconInfo}.
+     * {@link android.graphics.drawable.Icon}.
      */
-    public static final String EXTRA_ICON_INFO = "android.net.wifi.extra.ICON_INFO";
+    public static final String EXTRA_ICON = "android.net.wifi.extra.ICON";
+    /**
+     * Name of a file.
+     *
+     * Retrieve with {@link android.content.Intent#getStringExtra(String)}.
+     */
+    public static final String EXTRA_FILENAME = "android.net.wifi.extra.FILENAME";
 
     /**
      * Broadcast intent action indicating a Passpoint OSU Providers List element has been received.
@@ -984,9 +991,9 @@ public class WifiManager {
 
     /**
      * Query for a Hotspot 2.0 release 2 OSU icon file. An {@link #ACTION_PASSPOINT_ICON} intent
-     * will be broadcasted once the request is completed.  The return value of
-     * {@link IconInfo#getData} from the intent extra will indicate the result of the request.
-     * A value of {@code null} will indicate a failure.
+     * will be broadcasted once the request is completed.  The presence of the intent extra
+     * {@link #EXTRA_ICON} will indicate the result of the request.
+     * A missing intent extra {@link #EXTRA_ICON} will indicate a failure.
      *
      * @param bssid The BSSID of the AP
      * @param fileName Name of the icon file (remote file) to query from the AP
