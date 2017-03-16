@@ -189,9 +189,9 @@ void GradientCache::mixBytes(const FloatColor& start, const FloatColor& end,
         float amount, uint8_t*& dst) const {
     float oppAmount = 1.0f - amount;
     float a = start.a * oppAmount + end.a * amount;
-    *dst++ = uint8_t(a * OECF_sRGB((start.r * oppAmount + end.r * amount)) * 255.0f);
-    *dst++ = uint8_t(a * OECF_sRGB((start.g * oppAmount + end.g * amount)) * 255.0f);
-    *dst++ = uint8_t(a * OECF_sRGB((start.b * oppAmount + end.b * amount)) * 255.0f);
+    *dst++ = uint8_t(a * OECF(start.r * oppAmount + end.r * amount) * 255.0f);
+    *dst++ = uint8_t(a * OECF(start.g * oppAmount + end.g * amount) * 255.0f);
+    *dst++ = uint8_t(a * OECF(start.b * oppAmount + end.b * amount) * 255.0f);
     *dst++ = uint8_t(a * 255.0f);
 }
 
@@ -201,17 +201,14 @@ void GradientCache::mixFloats(const FloatColor& start, const FloatColor& end,
     float a = start.a * oppAmount + end.a * amount;
     float* d = (float*) dst;
 #ifdef ANDROID_ENABLE_LINEAR_BLENDING
+    // We want to stay linear
     *d++ = a * (start.r * oppAmount + end.r * amount);
     *d++ = a * (start.g * oppAmount + end.g * amount);
     *d++ = a * (start.b * oppAmount + end.b * amount);
 #else
-    // What we're doing to the alpha channel here is technically incorrect
-    // but reproduces Android's old behavior when the alpha was pre-multiplied
-    // with gamma-encoded colors
-    a = EOCF_sRGB(a);
-    *d++ = a * OECF_sRGB(start.r * oppAmount + end.r * amount);
-    *d++ = a * OECF_sRGB(start.g * oppAmount + end.g * amount);
-    *d++ = a * OECF_sRGB(start.b * oppAmount + end.b * amount);
+    *d++ = a * OECF(start.r * oppAmount + end.r * amount);
+    *d++ = a * OECF(start.g * oppAmount + end.g * amount);
+    *d++ = a * OECF(start.b * oppAmount + end.b * amount);
 #endif
     *d++ = a;
     dst += 4 * sizeof(float);
@@ -232,10 +229,10 @@ void GradientCache::generateTexture(uint32_t* colors, float* positions,
     ChannelMixer mix = gMixers[mUseFloatTexture];
 
     FloatColor start;
-    start.setUnPreMultipliedSRGB(colors[0]);
+    start.setUnPreMultiplied(colors[0]);
 
     FloatColor end;
-    end.setUnPreMultipliedSRGB(colors[1]);
+    end.setUnPreMultiplied(colors[1]);
 
     int currentPos = 1;
     float startPos = positions[0];
@@ -250,7 +247,7 @@ void GradientCache::generateTexture(uint32_t* colors, float* positions,
 
             currentPos++;
 
-            end.setUnPreMultipliedSRGB(colors[currentPos]);
+            end.setUnPreMultiplied(colors[currentPos]);
             distance = positions[currentPos] - startPos;
         }
 
