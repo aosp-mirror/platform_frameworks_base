@@ -2084,6 +2084,22 @@
     <permission android:name="android.permission.UPDATE_CONFIG"
         android:protectionLevel="signature|privileged" />
 
+    <!-- Allows a time zone rule updater application to request
+         the system installs / uninstalls timezone rules.
+         <p>An application requesting this permission is responsible for
+         verifying the source and integrity of the update before passing
+         it off to the installer components.
+         @hide -->
+    <permission android:name="android.permission.UPDATE_TIME_ZONE_RULES"
+        android:protectionLevel="signature|privileged" />
+
+    <!-- Must be required by a time zone rule updater application,
+         to ensure that only the system can trigger it.
+         @hide -->
+    <permission android:name="android.permission.TRIGGER_TIME_ZONE_RULES_CHECK"
+        android:protectionLevel="signature" />
+    <uses-permission android:name="android.permission.TRIGGER_TIME_ZONE_RULES_CHECK"/>
+
     <!-- Allows the system to reset throttling in shortcut manager.
          @hide -->
     <permission android:name="android.permission.RESET_SHORTCUT_MANAGER_THROTTLING"
