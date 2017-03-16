@@ -404,6 +404,11 @@ static void JHwParcel_native_verifySuccess(JNIEnv *env, jobject thiz) {
     signalExceptionForError(env, err);
 }
 
+static void JHwParcel_native_release(
+        JNIEnv *env, jobject thiz) {
+    JHwParcel::GetNativeContext(env, thiz)->setParcel(NULL, false /* assumeOwnership */);
+}
+
 static void JHwParcel_native_releaseTemporaryStorage(
         JNIEnv *env, jobject thiz) {
     JHwParcel::GetNativeContext(env, thiz)->getStorage()->release(env);
@@ -955,6 +960,10 @@ static JNINativeMethod gMethods[] = {
 
     { "writeBuffer", "(L" PACKAGE_PATH "/HwBlob;)V",
         (void *)JHwParcel_native_writeBuffer },
+
+    { "release", "()V",
+        (void *)JHwParcel_native_release },
+
 };
 
 namespace android {
