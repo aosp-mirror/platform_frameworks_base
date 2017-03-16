@@ -146,6 +146,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     private final LockPatternUtils mLockPatternUtils;
     private final NotificationManager mNotificationManager;
     private final UserManager mUserManager;
+    private final DevicePolicyManager mDevicePolicyManager;
     private final IActivityManager mActivityManager;
 
     private final KeyStore mKeyStore;
@@ -333,6 +334,10 @@ public class LockSettingsService extends ILockSettings.Stub {
             return (UserManager) mContext.getSystemService(Context.USER_SERVICE);
         }
 
+        public DevicePolicyManager getDevicePolicyManager() {
+            return (DevicePolicyManager) mContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
+        }
+
         public KeyStore getKeyStore() {
             return KeyStore.getInstance();
         }
@@ -380,6 +385,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         mStorage = injector.getStorage();
         mNotificationManager = injector.getNotificationManager();
         mUserManager = injector.getUserManager();
+        mDevicePolicyManager = injector.getDevicePolicyManager();
         mStrongAuthTracker = injector.getStrongAuthTracker();
         mStrongAuthTracker.register(mStrongAuth);
 
@@ -2015,14 +2021,17 @@ public class LockSettingsService extends ILockSettings.Stub {
             }
         }
         long handle = getSyntheticPasswordHandleLocked(userId);
-        AuthenticationToken auth = mSpManager.unwrapPasswordBasedSyntheticPassword(
-                getGateKeeperService(), handle, savedCredential, userId).authToken;
+        AuthenticationResult authResult = mSpManager.unwrapPasswordBasedSyntheticPassword(
+                getGateKeeperService(), handle, savedCredential, userId);
+        VerifyCredentialResponse response = authResult.gkResponse;
+        AuthenticationToken auth = authResult.authToken;
         if (auth != null) {
             // We are performing a trusted credential change i.e. a correct existing credential
             // is provided
             setLockCredentialWithAuthTokenLocked(credential, credentialType, auth, userId);
             mSpManager.destroyPasswordBasedSyntheticPassword(handle, userId);
-        } else {
+        } else if (response != null
+                && response.getResponseCode() == VerifyCredentialResponse.RESPONSE_ERROR){
             // We are performing an untrusted credential change i.e. by DevicePolicyManager.
             // So provision a new SP and SID. This would invalidate existing escrow tokens.
             // Still support this for now but this flow will be removed in the next release.
@@ -2031,6 +2040,10 @@ public class LockSettingsService extends ILockSettings.Stub {
             initializeSyntheticPasswordLocked(null, credential, credentialType, userId);
             synchronizeUnifiedWorkChallengeForProfiles(userId, null);
             mSpManager.destroyPasswordBasedSyntheticPassword(handle, userId);
+        } else /* response == null || responseCode == VerifyCredentialResponse.RESPONSE_RETRY */ {
+            Slog.w(TAG, "spBasedSetLockCredentialInternalLocked: " +
+                    (response != null ? "rate limit exceeded" : "failed"));
+            return;
         }
         notifyActivePasswordMetricsAvailable(credential, userId);
 
@@ -2042,7 +2055,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         if (DEBUG) Slog.d(TAG, "addEscrowToken: user=" + userId);
         synchronized (mSpManager) {
             enableSyntheticPasswordLocked();
-            // Migrate to synthetic password based credentials if ther user has no password,
+            // Migrate to synthetic password based credentials if the user has no password,
             // the token can then be activated immediately.
             AuthenticationToken auth = null;
             if (!isUserSecure(userId)) {
@@ -2201,22 +2214,20 @@ public class LockSettingsService extends ILockSettings.Stub {
                 Slog.i(TAG, "Managed profile can have escrow token");
                 return;
             }
-            DevicePolicyManager dpm = (DevicePolicyManager)
-                    mContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
             // Devices with Device Owner should have escrow enabled on all users.
-            if (dpm.getDeviceOwnerComponentOnAnyUser() != null) {
+            if (mDevicePolicyManager.getDeviceOwnerComponentOnAnyUser() != null) {
                 Slog.i(TAG, "Corp-owned device can have escrow token");
                 return;
             }
             // We could also have a profile owner on the given (non-managed) user for unicorn cases
-            if (dpm.getProfileOwnerAsUser(userId) != null) {
+            if (mDevicePolicyManager.getProfileOwnerAsUser(userId) != null) {
                 Slog.i(TAG, "User with profile owner can have escrow token");
                 return;
             }
             // If the device is yet to be provisioned (still in SUW), there is still
             // a chance that Device Owner will be set on the device later, so postpone
             // disabling escrow token for now.
-            if (!dpm.isDeviceProvisioned()) {
+            if (!mDevicePolicyManager.isDeviceProvisioned()) {
                 Slog.i(TAG, "Postpone disabling escrow tokens until device is provisioned");
                 return;
             }
