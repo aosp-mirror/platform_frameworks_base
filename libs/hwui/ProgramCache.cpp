@@ -190,7 +190,7 @@ const char* gFS_Transfer_Functions = R"__SHADER__(
 // Dithering must be done in the quantization space
 // When we are writing to an sRGB framebuffer, we must do the following:
 //     EOTF(OETF(color) + dither)
-// The dithering pattern is generated with a triangle noise generator in the range [-0.0,1.0]
+// The dithering pattern is generated with a triangle noise generator in the range [-1.0,1.0]
 // TODO: Handle linear fp16 render targets
 const char* gFS_Gradient_Functions = R"__SHADER__(
         float triangleNoise(const highp vec2 n) {
@@ -203,7 +203,7 @@ const char* gFS_Gradient_Functions = R"__SHADER__(
 const char* gFS_Gradient_Preamble[2] = {
         // Linear framebuffer
         "\nvec4 dither(const vec4 color) {\n"
-        "    return vec4(color.rgb + (triangleNoise(gl_FragCoord.xy * screenSize.xy) / 255.0), color.a);\n"
+        "    return color + (triangleNoise(gl_FragCoord.xy * screenSize.xy) / 255.0);\n"
         "}\n"
         "\nvec4 gammaMix(const vec4 a, const vec4 b, float v) {\n"
         "    vec4 c = mix(a, b, v);\n"
