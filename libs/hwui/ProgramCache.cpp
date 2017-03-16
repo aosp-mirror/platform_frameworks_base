@@ -202,23 +202,26 @@ const char* gFS_Gradient_Functions = R"__SHADER__(
 )__SHADER__";
 const char* gFS_Gradient_Preamble[2] = {
         // Linear framebuffer
-        "\nvec4 dither(const vec4 color) {\n"
-        "    return color + (triangleNoise(gl_FragCoord.xy * screenSize.xy) / 255.0);\n"
-        "}\n"
-        "\nvec4 gammaMix(const vec4 a, const vec4 b, float v) {\n"
-        "    vec4 c = mix(a, b, v);\n"
-        "    c.a = EOTF_sRGB(c.a);\n" // This is technically incorrect but preserves compatibility
-        "    return vec4(OETF_sRGB(c.rgb) * c.a, c.a);\n"
-        "}\n",
+        R"__SHADER__(
+        vec4 dither(const vec4 color) {
+            return color + (triangleNoise(gl_FragCoord.xy * screenSize.xy) / 255.0);
+        }
+        vec4 gradientMix(const vec4 a, const vec4 b, float v) {
+            vec4 c = mix(a, b, v);
+            return vec4(c.rgb * c.a, c.a);
+        }
+        )__SHADER__",
         // sRGB framebuffer
-        "\nvec4 dither(const vec4 color) {\n"
-        "    vec3 dithered = sqrt(color.rgb) + (triangleNoise(gl_FragCoord.xy * screenSize.xy) / 255.0);\n"
-        "    return vec4(dithered * dithered, color.a);\n"
-        "}\n"
-        "\nvec4 gammaMix(const vec4 a, const vec4 b, float v) {\n"
-        "    vec4 c = mix(a, b, v);\n"
-        "    return vec4(c.rgb * c.a, c.a);\n"
-        "}\n"
+        R"__SHADER__(
+        vec4 dither(const vec4 color) {
+            vec3 dithered = sqrt(color.rgb) + (triangleNoise(gl_FragCoord.xy * screenSize.xy) / 255.0);
+            return vec4(dithered * dithered, color.a);
+        }
+        vec4 gradientMixMix(const vec4 a, const vec4 b, float v) {
+            vec4 c = mix(a, b, v);
+            return vec4(c.rgb * c.a, c.a);
+        }
+        )__SHADER__",
 };
 
 // Uses luminance coefficients from Rec.709 to choose the appropriate gamma
@@ -272,19 +275,19 @@ const char* gFS_Main_FetchGradient[6] = {
         // Linear
         "    vec4 gradientColor = texture2D(gradientSampler, linear);\n",
 
-        "    vec4 gradientColor = gammaMix(startColor, endColor, clamp(linear, 0.0, 1.0));\n",
+        "    vec4 gradientColor = gradientMix(startColor, endColor, clamp(linear, 0.0, 1.0));\n",
 
         // Circular
         "    vec4 gradientColor = texture2D(gradientSampler, vec2(length(circular), 0.5));\n",
 
-        "    vec4 gradientColor = gammaMix(startColor, endColor, clamp(length(circular), 0.0, 1.0));\n",
+        "    vec4 gradientColor = gradientMix(startColor, endColor, clamp(length(circular), 0.0, 1.0));\n",
 
         // Sweep
         "    highp float index = atan(sweep.y, sweep.x) * 0.15915494309; // inv(2 * PI)\n"
         "    vec4 gradientColor = texture2D(gradientSampler, vec2(index - floor(index), 0.5));\n",
 
         "    highp float index = atan(sweep.y, sweep.x) * 0.15915494309; // inv(2 * PI)\n"
-        "    vec4 gradientColor = gammaMix(startColor, endColor, clamp(index - floor(index), 0.0, 1.0));\n"
+        "    vec4 gradientColor = gradientMix(startColor, endColor, clamp(index - floor(index), 0.0, 1.0));\n"
 };
 const char* gFS_Main_FetchBitmap =
         "    vec4 bitmapColor = OETF(texture2D(bitmapSampler, outBitmapTexCoords));\n";
