@@ -147,6 +147,8 @@ class PackageManagerShellCommand extends ShellCommand {
                     return runSetHomeActivity();
                 case "get-privapp-permissions":
                     return runGetPrivappPermissions();
+                case "has-feature":
+                    return runHasFeature();
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -1268,6 +1270,28 @@ class PackageManagerShellCommand extends ShellCommand {
         return 0;
     }
 
+    private int runHasFeature() {
+        final PrintWriter err = getErrPrintWriter();
+        final String featureName = getNextArg();
+        if (featureName == null) {
+            err.println("Error: expected FEATURE name");
+            return 1;
+        }
+        final String versionString = getNextArg();
+        try {
+            final int version = (versionString == null) ? 0 : Integer.parseInt(versionString);
+            final boolean hasFeature = mInterface.hasSystemFeature(featureName, version);
+            getOutPrintWriter().println(hasFeature);
+            return hasFeature ? 0 : 1;
+        } catch (NumberFormatException e) {
+            err.println("Error: illegal version number " + versionString);
+            return 1;
+        } catch (RemoteException e) {
+            err.println(e.toString());
+            return 1;
+        }
+    }
+
     private static String checkAbiArgument(String abi) {
         if (TextUtils.isEmpty(abi)) {
             throw new IllegalArgumentException("Missing ABI argument");
@@ -1649,6 +1673,9 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("    Unsuspends the specified package (as user).");
         pw.println("  set-home-activity [--user USER_ID] TARGET-COMPONENT");
         pw.println("    set the default home activity (aka launcher).");
+        pw.println("  has-feature FEATURE_NAME [version]");
+        pw.println("   prints true and returns exit status 0 when system has a FEATURE_NAME,");
+        pw.println("   otherwise prints false and returns exit status 1");
         pw.println();
         Intent.printIntentArgsHelp(pw , "");
     }
