@@ -17,7 +17,10 @@
 #include <jni.h>
 #include <JNIHelp.h>
 
+#include <hidl/HidlTransportSupport.h>
+
 #include <sensorservice/SensorService.h>
+#include <sensorservicehidl/SensorManager.h>
 
 #include <cutils/properties.h>
 #include <utils/Log.h>
@@ -32,6 +35,21 @@ static void android_server_SystemServer_startSensorService(JNIEnv* /* env */, jo
     if (strcmp(propBuf, "1") == 0) {
         SensorService::instantiate();
     }
+
+}
+
+static void android_server_SystemServer_startHidlServices(JNIEnv* /* env */, jobject /* clazz */) {
+    using ::android::frameworks::sensorservice::V1_0::ISensorManager;
+    using ::android::frameworks::sensorservice::V1_0::implementation::SensorManager;
+    using ::android::hardware::configureRpcThreadpool;
+
+    configureRpcThreadpool(1, false /* callerWillJoin */);
+    sp<ISensorManager> sensorService = new SensorManager();
+    status_t err = sensorService->registerAsService();
+    if (err != OK) {
+        ALOGE("Cannot register ::android::frameworks::sensorservice::V1_0::"
+              "implementation::SensorManager: %d", err);
+    }
 }
 
 /*
@@ -40,6 +58,7 @@ static void android_server_SystemServer_startSensorService(JNIEnv* /* env */, jo
 static const JNINativeMethod gMethods[] = {
     /* name, signature, funcPtr */
     { "startSensorService", "()V", (void*) android_server_SystemServer_startSensorService },
+    { "startHidlServices", "()V", (void*) android_server_SystemServer_startHidlServices },
 };
 
 int register_android_server_SystemServer(JNIEnv* env)
