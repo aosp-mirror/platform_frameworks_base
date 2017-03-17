@@ -214,6 +214,7 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
         if (getAvailableSpace() > 0) {
             dexoptCommandCountExecuted++;
 
+            Log.d(TAG, "Next command: " + next);
             return next;
         } else {
             if (DEBUG_DEXOPT) {
