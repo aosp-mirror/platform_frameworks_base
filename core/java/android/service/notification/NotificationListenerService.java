@@ -149,13 +149,13 @@ public abstract class NotificationListenerService extends Service {
     // Notification cancellation reasons
 
     /** Notification was canceled by the status bar reporting a notification click. */
-    public static final int REASON_DELEGATE_CLICK = 1;
+    public static final int REASON_CLICK = 1;
     /** Notification was canceled by the status bar reporting a user dismissal. */
-    public static final int REASON_DELEGATE_CANCEL = 2;
+    public static final int REASON_CANCEL = 2;
     /** Notification was canceled by the status bar reporting a user dismiss all. */
-    public static final int REASON_DELEGATE_CANCEL_ALL = 3;
+    public static final int REASON_CANCEL_ALL = 3;
     /** Notification was canceled by the status bar reporting an inflation error. */
-    public static final int REASON_DELEGATE_ERROR = 4;
+    public static final int REASON_ERROR = 4;
     /** Notification was canceled by the package manager modifying the package. */
     public static final int REASON_PACKAGE_CHANGED = 5;
     /** Notification was canceled by the owning user context being stopped. */

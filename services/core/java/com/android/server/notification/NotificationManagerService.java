@@ -22,10 +22,10 @@ import static android.content.pm.PackageManager.FEATURE_TELEVISION;
 import static android.service.notification.NotificationListenerService.REASON_APP_CANCEL;
 import static android.service.notification.NotificationListenerService.REASON_APP_CANCEL_ALL;
 import static android.service.notification.NotificationListenerService.REASON_CHANNEL_BANNED;
-import static android.service.notification.NotificationListenerService.REASON_DELEGATE_CANCEL;
-import static android.service.notification.NotificationListenerService.REASON_DELEGATE_CANCEL_ALL;
-import static android.service.notification.NotificationListenerService.REASON_DELEGATE_CLICK;
-import static android.service.notification.NotificationListenerService.REASON_DELEGATE_ERROR;
+import static android.service.notification.NotificationListenerService.REASON_CANCEL;
+import static android.service.notification.NotificationListenerService.REASON_CANCEL_ALL;
+import static android.service.notification.NotificationListenerService.REASON_CLICK;
+import static android.service.notification.NotificationListenerService.REASON_ERROR;
 import static android.service.notification.NotificationListenerService.REASON_GROUP_SUMMARY_CANCELED;
 import static android.service.notification.NotificationListenerService.REASON_LISTENER_CANCEL;
 import static android.service.notification.NotificationListenerService.REASON_LISTENER_CANCEL_ALL;
@@ -88,7 +88,6 @@ import android.database.ContentObserver;
 import android.media.AudioManager;
 import android.media.AudioManagerInternal;
 import android.media.IRingtonePlayer;
-import android.metrics.LogMaker;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
@@ -159,8 +158,6 @@ import com.android.server.notification.ManagedServices.UserProfiles;
 
 import libcore.io.IoUtils;
 
-import com.google.android.collect.Lists;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.xmlpull.v1.XmlPullParser;
@@ -181,7 +178,6 @@ import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -545,7 +541,7 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void onClearAll(int callingUid, int callingPid, int userId) {
             synchronized (mNotificationLock) {
-                cancelAllLocked(callingUid, callingPid, userId, REASON_DELEGATE_CANCEL_ALL, null,
+                cancelAllLocked(callingUid, callingPid, userId, REASON_CANCEL_ALL, null,
                         /*includeCurrentProfiles*/ true);
             }
         }
@@ -569,7 +565,7 @@ public class NotificationManagerService extends SystemService {
                 cancelNotification(callingUid, callingPid, sbn.getPackageName(), sbn.getTag(),
                         sbn.getId(), Notification.FLAG_AUTO_CANCEL,
                         Notification.FLAG_FOREGROUND_SERVICE, false, r.getUserId(),
-                        REASON_DELEGATE_CLICK, null);
+                        REASON_CLICK, null);
             }
         }
 
@@ -598,7 +594,7 @@ public class NotificationManagerService extends SystemService {
                 String pkg, String tag, int id, int userId) {
             cancelNotification(callingUid, callingPid, pkg, tag, id, 0,
                     Notification.FLAG_ONGOING_EVENT | Notification.FLAG_FOREGROUND_SERVICE,
-                    true, userId, REASON_DELEGATE_CANCEL, null);
+                    true, userId, REASON_CANCEL, null);
         }
 
         @Override
@@ -633,7 +629,7 @@ public class NotificationManagerService extends SystemService {
             Slog.d(TAG, "onNotification error pkg=" + pkg + " tag=" + tag + " id=" + id
                     + "; will crashApplication(uid=" + uid + ", pid=" + initialPid + ")");
             cancelNotification(callingUid, callingPid, pkg, tag, id, 0, 0, false, userId,
-                    REASON_DELEGATE_ERROR, null);
+                    REASON_ERROR, null);
             long ident = Binder.clearCallingIdentity();
             try {
                 ActivityManager.getService().crashApplication(uid, initialPid, pkg, -1,
@@ -3377,7 +3373,7 @@ public class NotificationManagerService extends SystemService {
                         Slog.e(TAG, "Not posting notification without small icon: " + notification);
                         if (old != null && !old.isCanceled) {
                             mListeners.notifyRemovedLocked(n,
-                                    NotificationListenerService.REASON_DELEGATE_ERROR);
+                                    NotificationListenerService.REASON_ERROR);
                             mHandler.post(new Runnable() {
                                 @Override
                                 public void run() {
@@ -4024,8 +4020,8 @@ public class NotificationManagerService extends SystemService {
         // Record usage stats
         // TODO: add unbundling stats?
         switch (reason) {
-            case REASON_DELEGATE_CANCEL:
-            case REASON_DELEGATE_CANCEL_ALL:
+            case REASON_CANCEL:
+            case REASON_CANCEL_ALL:
             case REASON_LISTENER_CANCEL:
             case REASON_LISTENER_CANCEL_ALL:
                 mUsageStats.registerDismissedByUser(r);
@@ -4085,7 +4081,7 @@ public class NotificationManagerService extends SystemService {
 
                         // Ideally we'd do this in the caller of this method. However, that would
                         // require the caller to also find the notification.
-                        if (reason == REASON_DELEGATE_CLICK) {
+                        if (reason == REASON_CLICK) {
                             mUsageStats.registerClickedByUser(r);
                         }
 
