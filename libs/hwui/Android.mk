@@ -267,6 +267,7 @@ include $(BUILD_SHARED_LIBRARY)
 include $(CLEAR_VARS)
 
 LOCAL_MODULE := hwui_unit_tests
+LOCAL_COMPATIBILITY_SUITE := device-tests
 LOCAL_MODULE_TAGS := tests
 LOCAL_STATIC_LIBRARIES := libgmock libhwui_static_debug
 LOCAL_SHARED_LIBRARIES := libmemunreachable
@@ -331,6 +332,7 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE_PATH := $(TARGET_OUT_DATA)/local/tmp
 LOCAL_MODULE:= hwuimacro
+LOCAL_COMPATIBILITY_SUITE := device-tests
 LOCAL_MODULE_TAGS := tests
 LOCAL_MULTILIB := both
 LOCAL_CFLAGS := $(hwui_cflags)
@@ -354,6 +356,7 @@ include $(BUILD_NATIVE_BENCHMARK)
 include $(CLEAR_VARS)
 
 LOCAL_MODULE:= hwuimicro
+LOCAL_COMPATIBILITY_SUITE := device-tests
 LOCAL_MODULE_TAGS := tests
 LOCAL_CFLAGS := \
         $(hwui_cflags) \
