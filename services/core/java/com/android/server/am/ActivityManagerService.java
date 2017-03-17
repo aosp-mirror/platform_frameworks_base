@@ -384,6 +384,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 import java.lang.ref.WeakReference;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -592,6 +593,10 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     @VisibleForTesting
     static final int NETWORK_STATE_UNBLOCK = 2;
+
+    // Max character limit for a notification title. If the notification title is larger than this
+    // the notification will not be legible to the user.
+    private static final int MAX_BUGREPORT_TITLE_SIZE = 50;
 
     /** All system services */
     SystemServiceManager mSystemServiceManager;
@@ -12622,6 +12627,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      * No new code should be calling it.
      */
     @Deprecated
+    @Override
     public void requestBugReport(int bugreportType) {
         String extraOptions = null;
         switch (bugreportType) {
@@ -12649,6 +12655,46 @@ public class ActivityManagerService extends IActivityManager.Stub
             SystemProperties.set("dumpstate.options", extraOptions);
         }
         SystemProperties.set("ctl.start", "bugreport");
+    }
+
+    /**
+     * @deprecated This method is only used by a few internal components and it will soon be
+     * replaced by a proper bug report API (which will be restricted to a few, pre-defined apps).
+     * No new code should be calling it.
+     */
+    @Deprecated
+    @Override
+    public void requestTelephonyBugReport(String shareTitle, String shareDescription) {
+
+        if (!TextUtils.isEmpty(shareTitle)) {
+            if (shareTitle.length() > MAX_BUGREPORT_TITLE_SIZE) {
+                String errorStr = "shareTitle should be less than " +
+                        MAX_BUGREPORT_TITLE_SIZE + " characters";
+                throw new IllegalArgumentException(errorStr);
+            } else {
+                if (!TextUtils.isEmpty(shareDescription)) {
+                    int length;
+                    try {
+                        length = shareDescription.getBytes("UTF-8").length;
+                    } catch (UnsupportedEncodingException e) {
+                        String errorStr = "shareDescription: UnsupportedEncodingException";
+                        throw new IllegalArgumentException(errorStr);
+                    }
+                    if (length > SystemProperties.PROP_VALUE_MAX) {
+                        String errorStr = "shareTitle should be less than " +
+                                SystemProperties.PROP_VALUE_MAX + " bytes";
+                        throw new IllegalArgumentException(errorStr);
+                    } else {
+                        SystemProperties.set("dumpstate.options.description", shareDescription);
+                    }
+                }
+                SystemProperties.set("dumpstate.options.title", shareTitle);
+            }
+        }
+
+        Slog.d(TAG, "Bugreport notification title " + shareTitle
+                + " description " + shareDescription);
+        requestBugReport(ActivityManager.BUGREPORT_OPTION_TELEPHONY);
     }
 
     public static long getInputDispatchingTimeoutLocked(ActivityRecord r) {

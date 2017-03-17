@@ -329,6 +329,18 @@ interface IActivityManager {
     // No new code should be calling it.
     void requestBugReport(int bugreportType);
 
+    /**
+     *  Takes a telephony bug report and notifies the user with the title and description
+     *  that are passed to this API as parameters
+     *
+     *  @param shareTitle should be a valid legible string less than 50 chars long
+     *  @param shareDescription should be less than 91 bytes when encoded into UTF-8 format
+     *
+     *  @throws IllegalArgumentException if shareTitle or shareDescription is too big or if the
+     *          paremeters cannot be encoding to an UTF-8 charset.
+     */
+    void requestTelephonyBugReport(in String shareTitle, in String shareDescription);
+
     long inputDispatchingTimedOut(int pid, boolean aboveSystem, in String reason);
     void clearPendingBackup();
     Intent getIntentForIntentSender(in IIntentSender sender);

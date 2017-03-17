@@ -31,7 +31,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -99,7 +98,6 @@ import android.view.IWindowManager;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.View.OnFocusChangeListener;
-import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -802,6 +800,17 @@ public class BugreportProgressService extends Service {
         if (screenshot != null) {
             info.addScreenshot(screenshot);
         }
+
+        final String shareTitle = intent.getStringExtra(EXTRA_TITLE);
+        if (!TextUtils.isEmpty(shareTitle)) {
+            info.title = shareTitle;
+            final String shareDescription = intent.getStringExtra(EXTRA_DESCRIPTION);
+            if (!TextUtils.isEmpty(shareDescription)) {
+                info.shareDescription= shareDescription;
+            }
+            Log.d(TAG, "Bugreport title is " + info.title + ","
+                    + " shareDescription is " + info.shareDescription);
+        }
         info.finished = true;
 
         // Stop running on foreground, otherwise share notification cannot be dismissed.
@@ -977,10 +986,20 @@ public class BugreportProgressService extends Service {
         shareIntent.putExtra(EXTRA_ID, info.id);
         shareIntent.putExtra(EXTRA_INFO, info);
 
-        final String title = mContext.getString(R.string.bugreport_finished_title, info.id);
-        final String content = takingScreenshot ?
+        String content;
+        content = takingScreenshot ?
                 mContext.getString(R.string.bugreport_finished_pending_screenshot_text)
                 : mContext.getString(R.string.bugreport_finished_text);
+        final String title;
+        if (TextUtils.isEmpty(info.title)) {
+            title = mContext.getString(R.string.bugreport_finished_title, info.id);
+        } else {
+            title = info.title;
+            if (!TextUtils.isEmpty(info.shareDescription)) {
+                if(!takingScreenshot) content = info.shareDescription;
+            }
+        }
+
         final Notification.Builder builder = newBaseNotification(mContext)
                 .setContentTitle(title)
                 .setTicker(title)
@@ -1241,6 +1260,7 @@ public class BugreportProgressService extends Service {
         addExtra(buffer, intent, EXTRA_BUGREPORT);
         addExtra(buffer, intent, EXTRA_SCREENSHOT);
         addExtra(buffer, intent, EXTRA_INFO);
+        addExtra(buffer, intent, EXTRA_TITLE);
 
         if (intent.hasExtra(EXTRA_ORIGINAL_INTENT)) {
             buffer.append(SHORT_EXTRA_ORIGINAL_INTENT).append(": ");
@@ -1647,6 +1667,11 @@ public class BugreportProgressService extends Service {
         int screenshotCounter;
 
         /**
+         * Descriptive text that will be shown to the user in the notification message.
+         */
+        String shareDescription;
+
+        /**
          * Constructor for tracked bugreports - typically called upon receiving BUGREPORT_STARTED.
          */
         BugreportInfo(Context context, int id, int pid, String name, int max) {
@@ -1747,6 +1772,7 @@ public class BugreportProgressService extends Service {
                 .append("\n\tlast_update: ").append(getFormattedLastUpdate())
                 .append("\n\taddingDetailsToZip: ").append(addingDetailsToZip)
                 .append(" addedDetailsToZip: ").append(addedDetailsToZip)
+                .append("\n\tshareDescription: ").append(shareDescription)
                 .toString();
         }
 
@@ -1773,6 +1799,7 @@ public class BugreportProgressService extends Service {
 
             finished = in.readInt() == 1;
             screenshotCounter = in.readInt();
+            shareDescription = in.readString();
         }
 
         @Override
@@ -1797,6 +1824,7 @@ public class BugreportProgressService extends Service {
 
             dest.writeInt(finished ? 1 : 0);
             dest.writeInt(screenshotCounter);
+            dest.writeString(shareDescription);
         }
 
         @Override
