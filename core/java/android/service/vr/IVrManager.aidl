@@ -50,5 +50,13 @@ interface IVrManager {
      * @param enabled true if the device should be placed in persistent VR mode.
      */
     void setPersistentVrModeEnabled(in boolean enabled);
+
+    /**
+     * Return current virtual display id.
+     *
+     * @return {@link android.view.Display.INVALID_DISPLAY} if there is no virtual display
+     * currently, else return the display id of the virtual display
+     */
+    int getCompatibilityDisplayId();
 }
 

@@ -1,6 +1,8 @@
 
 package com.android.server.vr;
 
+import static android.view.Display.INVALID_DISPLAY;
+
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -86,10 +88,8 @@ class CompatibilityDisplay {
                 startVirtualDisplay();
             }
         } else {
-            // TODO: Remove conditional when launching apps 2D doesn't force VrMode to stop.
-            if (!DEBUG) {
-                stopVirtualDisplay();
-            }
+            // Stop virtual display to test exit condition
+            stopVirtualDisplay();
         }
     }
 
@@ -136,6 +136,19 @@ class CompatibilityDisplay {
                 Log.e(TAG, "Could not register VR State listener.", e);
             }
         }
+    }
+
+    public int getVirtualDisplayId() {
+        synchronized(vdLock) {
+            if (mVirtualDisplay != null) {
+                int virtualDisplayId = mVirtualDisplay.getDisplay().getDisplayId();
+                if (DEBUG) {
+                    Log.e(TAG, "VD id: " + virtualDisplayId);
+                }
+                return virtualDisplayId;
+            }
+        }
+        return INVALID_DISPLAY;
     }
 
     private void startVirtualDisplay() {

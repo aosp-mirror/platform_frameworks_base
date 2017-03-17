@@ -90,6 +90,15 @@ public abstract class VrManagerInternal {
     public abstract void setPersistentVrModeEnabled(boolean enabled);
 
     /**
+     * Return {@link android.view.Display.INVALID_DISPLAY} if there exists no virtual display
+     * currently or the display id of the current virtual display.
+     *
+     * @return {@link android.view.Display.INVALID_DISPLAY} if there is no virtual display
+     * currently, else return the display id of the virtual display
+     */
+    public abstract int getCompatibilityDisplayId();
+
+    /**
      * Adds listener that reports state changes to persistent VR mode.
      */
     public abstract void addPersistentVrModeStateListener(PersistentVrStateListener listener);
