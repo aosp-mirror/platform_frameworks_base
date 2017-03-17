@@ -375,14 +375,15 @@ public class Resources {
     /**
      * @hide
      */
-    public void preloadFonts(@FontRes int id) {
-        final TypedValue value = obtainTempTypedValue();
+    public void preloadFonts(@ArrayRes int id) {
+        final TypedArray array = obtainTypedArray(id);
         try {
-            final ResourcesImpl impl = mResourcesImpl;
-            impl.getValue(id, value, true);
-            impl.preloadFonts(this, value, id);
+            final int size = array.length();
+            for (int i = 0; i < size; i++) {
+                array.getFont(i);
+            }
         } finally {
-            releaseTempTypedValue(value);
+            array.recycle();
         }
     }
 

@@ -787,46 +787,6 @@ public class ResourcesImpl {
     }
 
     /**
-     * @hide
-     */
-    public void preloadFonts(Resources wrapper, TypedValue value, int id) {
-        if (value.string == null) {
-            throw new NotFoundException("Resource \"" + getResourceName(id) + "\" ("
-                    + Integer.toHexString(id) + ") is not a Font: " + value);
-        }
-
-        final String file = value.string.toString();
-
-        Trace.traceBegin(Trace.TRACE_TAG_RESOURCES, file);
-        try {
-            // TODO: Stop re-ussing font-family xml tag structure and use ResourceArray instead.
-            final XmlResourceParser rp = loadXmlResourceParser(
-                    file, id, value.assetCookie, "font");
-            final FontResourcesParser.FamilyResourceEntry familyEntry =
-                    FontResourcesParser.parse(rp, wrapper);
-            if (familyEntry == null) {
-                Log.e(TAG, "failed to find font-family tag");
-                return;
-            }
-            if (familyEntry instanceof FontResourcesParser.ProviderResourceEntry) {
-                throw new IllegalArgumentException("Provider based fonts can not be used.");
-            }
-            final FontResourcesParser.FontFamilyFilesResourceEntry filesEntry =
-                    (FontResourcesParser.FontFamilyFilesResourceEntry) familyEntry;
-            for (FontResourcesParser.FontFileResourceEntry fileEntry : filesEntry.getEntries()) {
-                int resourceId = fileEntry.getResourceId();
-                wrapper.getFont(resourceId);
-            }
-        } catch (XmlPullParserException e) {
-            Log.e(TAG, "Failed to parse xml resource " + file, e);
-        } catch (IOException e) {
-            Log.e(TAG, "Failed to read xml resource " + file, e);
-        } finally {
-            Trace.traceEnd(Trace.TRACE_TAG_RESOURCES);
-        }
-    }
-
-    /**
      * Given the value and id, we can get the XML filename as in value.data, based on that, we
      * first try to load CSL from the cache. If not found, try to get from the constant state.
      * Last, parse the XML and generate the CSL.
