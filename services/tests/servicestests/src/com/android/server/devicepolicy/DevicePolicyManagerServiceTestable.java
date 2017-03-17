@@ -17,13 +17,18 @@ package com.android.server.devicepolicy;
 
 import android.app.IActivityManager;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.backup.IBackupManager;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.database.ContentObserver;
 import android.media.IAudioService;
 import android.net.IIpConnectivityMetrics;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Looper;
 import android.os.PowerManagerInternal;
 import android.os.UserHandle;
@@ -299,6 +304,12 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
         @Override
         boolean userManagerIsSplitSystemUser() {
             return context.userManagerForMock.isSplitSystemUser();
+        }
+
+        @Override
+        PendingIntent pendingIntentGetActivityAsUser(Context context, int requestCode,
+                Intent intent, int flags, Bundle options, UserHandle user) {
+            return null;
         }
 
         @Override
