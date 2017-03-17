@@ -130,7 +130,6 @@ public final class BluetoothLeAdvertiser {
             AdvertisingSetParameters.Builder parameters = new AdvertisingSetParameters.Builder();
             parameters.setLegacyMode(true);
             parameters.setConnectable(isConnectable);
-            parameters.setTimeout(settings.getTimeout());
             if (settings.getMode() == AdvertiseSettings.ADVERTISE_MODE_LOW_POWER) {
                 parameters.setInterval(1600); // 1s
             } else if (settings.getMode() == AdvertiseSettings.ADVERTISE_MODE_BALANCED) {
@@ -152,7 +151,7 @@ public final class BluetoothLeAdvertiser {
             AdvertisingSetCallback wrapped = wrapOldCallback(callback, settings);
             mLegacyAdvertisers.put(callback, wrapped);
             startAdvertisingSet(parameters.build(), advertiseData, scanResponse, null, null,
-                                wrapped);
+                                settings.getTimeout(), wrapped);
         }
     }
 
@@ -216,8 +215,8 @@ public final class BluetoothLeAdvertiser {
                                     AdvertiseData advertiseData, AdvertiseData scanResponse,
                                     PeriodicAdvertisingParameters periodicParameters,
                                     AdvertiseData periodicData, AdvertisingSetCallback callback) {
-        startAdvertisingSet(parameters, advertiseData, scanResponse, periodicParameters,
-                            periodicData, callback, new Handler(Looper.getMainLooper()));
+            startAdvertisingSet(parameters, advertiseData, scanResponse, periodicParameters,
+                            periodicData, 0, callback, new Handler(Looper.getMainLooper()));
     }
 
     /**
@@ -237,6 +236,49 @@ public final class BluetoothLeAdvertiser {
                                     PeriodicAdvertisingParameters periodicParameters,
                                     AdvertiseData periodicData, AdvertisingSetCallback callback,
                                     Handler handler) {
+        startAdvertisingSet(parameters, advertiseData, scanResponse, periodicParameters,
+                            periodicData, 0, callback, handler);
+    }
+
+    /**
+    * Creates a new advertising set. If operation succeed, device will start advertising. This
+    * method returns immediately, the operation status is delivered through
+    * {@code callback.onAdvertisingSetStarted()}.
+    * <p>
+    * @param parameters advertising set parameters.
+    * @param advertiseData Advertisement data to be broadcasted.
+    * @param scanResponse Scan response associated with the advertisement data.
+    * @param periodicData Periodic advertising data.
+    * @param timeoutMillis Advertising time limit. May not exceed 180000
+    * @param callback Callback for advertising set.
+    */
+    public void startAdvertisingSet(AdvertisingSetParameters parameters,
+                                    AdvertiseData advertiseData, AdvertiseData scanResponse,
+                                    PeriodicAdvertisingParameters periodicParameters,
+                                    AdvertiseData periodicData, int timeoutMillis,
+                                    AdvertisingSetCallback callback) {
+        startAdvertisingSet(parameters, advertiseData, scanResponse, periodicParameters,
+                            periodicData, timeoutMillis, callback, new Handler(Looper.getMainLooper()));
+    }
+
+    /**
+    * Creates a new advertising set. If operation succeed, device will start advertising. This
+    * method returns immediately, the operation status is delivered through
+    * {@code callback.onAdvertisingSetStarted()}.
+    * <p>
+    * @param parameters advertising set parameters.
+    * @param advertiseData Advertisement data to be broadcasted.
+    * @param scanResponse Scan response associated with the advertisement data.
+    * @param periodicData Periodic advertising data.
+    * @param timeoutMillis Advertising time limit. May not exceed 180000
+    * @param callback Callback for advertising set.
+    * @param handler thread upon which the callbacks will be invoked.
+    */
+    public void startAdvertisingSet(AdvertisingSetParameters parameters,
+                                    AdvertiseData advertiseData, AdvertiseData scanResponse,
+                                    PeriodicAdvertisingParameters periodicParameters,
+                                    AdvertiseData periodicData, int timeoutMillis,
+                                    AdvertisingSetCallback callback, Handler handler) {
         BluetoothLeUtils.checkAdapterStateOn(mBluetoothAdapter);
 
         if (callback == null) {
@@ -259,7 +301,7 @@ public final class BluetoothLeAdvertiser {
 
         try {
             gatt.startAdvertisingSet(parameters, advertiseData, scanResponse, periodicParameters,
-                                     periodicData, wrapped);
+                                     periodicData, timeoutMillis, wrapped);
         } catch (RemoteException e) {
           Log.e(TAG, "Failed to start advertising set - ", e);
           throw new IllegalStateException("Failed to start advertising set");
