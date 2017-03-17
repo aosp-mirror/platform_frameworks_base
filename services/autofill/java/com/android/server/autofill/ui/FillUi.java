@@ -39,6 +39,7 @@ import android.widget.ListView;
 import com.android.internal.R;
 import libcore.util.Objects;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 
 final class FillUi {
@@ -64,6 +65,7 @@ final class FillUi {
     private final @Nullable ArrayAdapter<ViewItem> mAdapter;
 
     private @Nullable String mFilterText;
+    private final String mAccessibilityTitle;
 
     private int mContentWidth;
     private int mContentHeight;
@@ -76,6 +78,8 @@ final class FillUi {
             @NonNull Callback callback) {
         mAnchorBounds.set(anchorBounds);
         mCallback = callback;
+
+        mAccessibilityTitle = context.getString(R.string.autofill_picker_accessibility_title);
 
         if (response.getAuthentication() != null) {
             mListView = null;
@@ -321,6 +325,7 @@ final class FillUi {
 
         public void show(int desiredWidth, int desiredHeight, Rect anchorBounds) {
             final WindowManager.LayoutParams params = new WindowManager.LayoutParams();
+
             params.setTitle("FillUi");
             params.token = mActivityToken;
             params.type = WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
@@ -329,6 +334,7 @@ final class FillUi {
                     | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
                     | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
                     | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
+            params.accessibilityTitle = mAccessibilityTitle;
 
             mWm.getDefaultDisplay().getRealSize(mTempPoint);
             final int screenWidth = mTempPoint.x;
@@ -378,5 +384,17 @@ final class FillUi {
                 mWm.updateViewLayout(mContentView, params);
             }
         }
+    }
+
+    public void dump(PrintWriter pw, String prefix) {
+        pw.print(prefix); pw.print("mAnchorBounds: "); pw.println(mAnchorBounds);
+        pw.print(prefix); pw.print("mCallback: "); pw.println(mCallback != null);
+        pw.print(prefix); pw.print("mListView: "); pw.println(mListView);
+        pw.print(prefix); pw.print("mAdapter: "); pw.println(mAdapter != null);
+        pw.print(prefix); pw.print("mFilterText: "); pw.println(mFilterText);
+        pw.print(prefix); pw.print("mAccessibilityTitle: "); pw.println(mAccessibilityTitle);
+        pw.print(prefix); pw.print("mContentWidth: "); pw.println(mContentWidth);
+        pw.print(prefix); pw.print("mContentHeight: "); pw.println(mContentHeight);
+        pw.print(prefix); pw.print("mDestroyed: "); pw.println(mDestroyed);
     }
 }

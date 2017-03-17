@@ -285,11 +285,17 @@ public final class AutoFillUI {
     }
 
     public void dump(PrintWriter pw) {
-        pw.println("AufoFill UI");
+        pw.println("Autofill UI");
         final String prefix = "  ";
-        pw.print(prefix); pw.print("showsFillUi: "); pw.println(mFillUi != null);
+        final String prefix2 = "    ";
         pw.print(prefix); pw.print("showsSaveUi: "); pw.println(mSaveUi != null);
         pw.print(prefix); pw.print("save timeout: "); pw.println(mSaveTimeoutMs);
+        if (mFillUi != null) {
+            pw.print(prefix); pw.println("showsFillUi: true");
+            mFillUi.dump(pw, prefix2);
+        } else {
+            pw.print(prefix); pw.println("showsFillUi: false");
+        }
     }
 
     @android.annotation.UiThread
