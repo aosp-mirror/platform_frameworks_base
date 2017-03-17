@@ -521,36 +521,21 @@ def compute_expected_emoji():
     # add zwj sequences not in the current emoji-zwj-sequences.txt
     adjusted_emoji_zwj_sequences = dict(_emoji_zwj_sequences)
     adjusted_emoji_zwj_sequences.update(_emoji_zwj_sequences)
-    # single parent families
+    # Wrestlers with modifiers
     additional_emoji_zwj = (
-        (0x1F468, 0x200D, 0x1F466),
-        (0x1F468, 0x200D, 0x1F467),
-        (0x1F468, 0x200D, 0x1F466, 0x200D, 0x1F466),
-        (0x1F468, 0x200D, 0x1F467, 0x200D, 0x1F466),
-        (0x1F468, 0x200D, 0x1F467, 0x200D, 0x1F467),
-        (0x1F469, 0x200D, 0x1F466),
-        (0x1F469, 0x200D, 0x1F467),
-        (0x1F469, 0x200D, 0x1F466, 0x200D, 0x1F466),
-        (0x1F469, 0x200D, 0x1F467, 0x200D, 0x1F466),
-        (0x1F469, 0x200D, 0x1F467, 0x200D, 0x1F467),
-    )
-    # sequences formed from man and woman and optional fitzpatrick modifier
-    modified_extensions = (
-        0x2696,
-        0x2708,
-        0x1F3A8,
-        0x1F680,
-        0x1F692,
+        (0x1F93C, 0x1F3FB, 0x200D, 0x2640),
+        (0x1F93C, 0x1F3FB, 0x200D, 0x2642),
+        (0x1F93C, 0x1F3FC, 0x200D, 0x2640),
+        (0x1F93C, 0x1F3FC, 0x200D, 0x2642),
+        (0x1F93C, 0x1F3FD, 0x200D, 0x2640),
+        (0x1F93C, 0x1F3FD, 0x200D, 0x2642),
+        (0x1F93C, 0x1F3FE, 0x200D, 0x2640),
+        (0x1F93C, 0x1F3FE, 0x200D, 0x2642),
+        (0x1F93C, 0x1F3FF, 0x200D, 0x2640),
+        (0x1F93C, 0x1F3FF, 0x200D, 0x2642),
     )
     for seq in additional_emoji_zwj:
         adjusted_emoji_zwj_sequences[seq] = 'Emoji_ZWJ_Sequence'
-    for ext in modified_extensions:
-        for base in (0x1F468, 0x1F469):
-            seq = (base, 0x200D, ext)
-            adjusted_emoji_zwj_sequences[seq] = 'Emoji_ZWJ_Sequence'
-            for modifier in range(0x1F3FB, 0x1F400):
-                seq = (base, modifier, 0x200D, ext)
-                adjusted_emoji_zwj_sequences[seq] = 'Emoji_ZWJ_Sequence'
 
     for sequence in _emoji_sequences.keys():
         sequence = tuple(ch for ch in sequence if ch != EMOJI_VS)
