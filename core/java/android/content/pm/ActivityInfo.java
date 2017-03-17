@@ -159,6 +159,12 @@ public class ActivityInfo extends ComponentInfo
     public String targetActivity;
 
     /**
+     * Token used to string together multiple events within a single launch action.
+     * @hide
+     */
+    public String launchToken;
+
+    /**
      * Activity can not be resized and always occupies the fullscreen area with all windows fully
      * visible.
      * @hide

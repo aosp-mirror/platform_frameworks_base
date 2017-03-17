@@ -11,10 +11,13 @@ import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.app.ActivityManagerInternal.APP_TRANSITION_TIMEOUT;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.APP_TRANSITION;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.APP_TRANSITION_ACTIVITY_NAME;
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.APP_TRANSITION_CALLING_PACKAGE_NAME;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.APP_TRANSITION_DELAY_MS;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.APP_TRANSITION_DEVICE_UPTIME_SECONDS;
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.APP_TRANSITION_IS_EPHEMERAL;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.APP_TRANSITION_STARTING_WINDOW_DELAY_MS;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.APP_TRANSITION_WINDOWS_DRAWN_DELAY_MS;
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_INSTANT_APP_LAUNCH_TOKEN;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.TYPE_TRANSITION_COLD_LAUNCH;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.TYPE_TRANSITION_HOT_LAUNCH;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.TYPE_TRANSITION_WARM_LAUNCH;
@@ -309,8 +312,18 @@ class ActivityMetricsLogger {
             }
             final LogMaker builder = new LogMaker(APP_TRANSITION);
             builder.setPackageName(info.launchedActivity.packageName);
-            builder.addTaggedData(APP_TRANSITION_ACTIVITY_NAME, info.launchedActivity.info.name);
             builder.setType(type);
+            builder.addTaggedData(APP_TRANSITION_ACTIVITY_NAME, info.launchedActivity.info.name);
+            if (info.launchedActivity.launchedFromPackage != null) {
+                builder.addTaggedData(APP_TRANSITION_CALLING_PACKAGE_NAME,
+                        info.launchedActivity.launchedFromPackage);
+            }
+            if (info.launchedActivity.info.launchToken != null) {
+                builder.addTaggedData(FIELD_INSTANT_APP_LAUNCH_TOKEN,
+                        info.launchedActivity.info.launchToken);
+            }
+            builder.addTaggedData(APP_TRANSITION_IS_EPHEMERAL,
+                    info.launchedActivity.info.applicationInfo.isInstantApp() ? 1 : 0);
             builder.addTaggedData(APP_TRANSITION_DEVICE_UPTIME_SECONDS,
                     mCurrentTransitionDeviceUptime);
             builder.addTaggedData(APP_TRANSITION_DELAY_MS, mCurrentTransitionDelayMs);

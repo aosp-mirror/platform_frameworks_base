@@ -6314,6 +6314,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                     Slog.v(TAG, "Adding ephemeral installer to the ResolveInfo list");
                 }
                 final ResolveInfo ephemeralInstaller = new ResolveInfo(mInstantAppInstallerInfo);
+                ephemeralInstaller.activityInfo = new ActivityInfo(mInstantAppInstallerActivity);
+                ephemeralInstaller.activityInfo.launchToken = auxiliaryResponse.token;
                 ephemeralInstaller.auxiliaryInfo = auxiliaryResponse;
                 // make sure this resolver is the default
                 ephemeralInstaller.isDefault = true;

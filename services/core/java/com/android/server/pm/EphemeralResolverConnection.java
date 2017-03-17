@@ -84,7 +84,7 @@ final class EphemeralResolverConnection {
     }
 
     public final void getInstantAppIntentFilterList(int hashPrefix[], String hostName,
-            PhaseTwoCallback callback, Handler callbackHandler, final int sequence) {
+            PhaseTwoCallback callback, Handler callbackHandler, final long startTime) {
         final IRemoteCallback remoteCallback = new IRemoteCallback.Stub() {
             @Override
             public void sendResult(Bundle data) throws RemoteException {
@@ -94,14 +94,15 @@ final class EphemeralResolverConnection {
                 callbackHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        callback.onPhaseTwoResolved(resolveList, sequence);
+                        callback.onPhaseTwoResolved(resolveList, startTime);
                     }
                 });
             }
         };
         try {
-            getRemoteInstanceLazy()
-                    .getInstantAppIntentFilterList(hashPrefix, sequence, hostName, remoteCallback);
+            // TODO deprecate sequence; it's never used
+            getRemoteInstanceLazy().getInstantAppIntentFilterList(
+                    hashPrefix, 0 /*sequence*/, hostName, remoteCallback);
         } catch (RemoteException re) {
         } catch (TimeoutException te) {
         }
@@ -174,7 +175,7 @@ final class EphemeralResolverConnection {
      */
     public abstract static class PhaseTwoCallback {
         abstract void onPhaseTwoResolved(
-                List<InstantAppResolveInfo> instantAppResolveInfoList, int sequence);
+                List<InstantAppResolveInfo> instantAppResolveInfoList, long startTime);
     }
 
     private final class MyServiceConnection implements ServiceConnection {
