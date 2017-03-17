@@ -130,7 +130,7 @@ final class OverlayManagerServiceImpl {
         // installed and should be removed
         final int storedOverlayInfosSize = storedOverlayInfos.size();
         for (int i = 0; i < storedOverlayInfosSize; i++) {
-            final OverlayInfo oi = storedOverlayInfos.get(i);
+            final OverlayInfo oi = storedOverlayInfos.valueAt(i);
             mSettings.remove(oi.packageName, oi.userId);
             removeIdmapIfPossible(oi);
             packagesToUpdateAssets.add(oi.targetPackageName);
