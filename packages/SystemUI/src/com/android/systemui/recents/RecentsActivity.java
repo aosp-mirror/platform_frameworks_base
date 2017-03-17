@@ -375,6 +375,8 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
 
         // Notify of the next draw
         mRecentsView.getViewTreeObserver().addOnPreDrawListener(mRecentsDrawnEventListener);
+
+        Recents.getTaskLoader().getHighResThumbnailLoader().setVisible(true);
     }
 
     @Override
@@ -529,6 +531,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         mReceivedNewIntent = false;
         EventBus.getDefault().send(new RecentsVisibilityChangedEvent(this, false));
         MetricsLogger.hidden(this, MetricsEvent.OVERVIEW_ACTIVITY);
+        Recents.getTaskLoader().getHighResThumbnailLoader().setVisible(false);
 
         if (!isChangingConfigurations()) {
             // Workaround for b/22542869, if the RecentsActivity is started again, but without going

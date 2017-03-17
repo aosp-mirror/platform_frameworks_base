@@ -637,7 +637,7 @@ public class SystemServicesProxy {
     }
 
     /** Returns the top task thumbnail for the given task id */
-    public ThumbnailData getTaskThumbnail(int taskId) {
+    public ThumbnailData getTaskThumbnail(int taskId, boolean reduced) {
         if (mAm == null) return null;
 
         // If we are mocking, then just return a dummy thumbnail
@@ -649,7 +649,7 @@ public class SystemServicesProxy {
             return thumbnailData;
         }
 
-        ThumbnailData thumbnailData = getThumbnail(taskId);
+        ThumbnailData thumbnailData = getThumbnail(taskId, reduced);
         if (thumbnailData.thumbnail != null && !ActivityManager.ENABLE_TASK_SNAPSHOTS) {
             thumbnailData.thumbnail.setHasAlpha(false);
             // We use a dumb heuristic for now, if the thumbnail is purely transparent in the top
@@ -669,7 +669,7 @@ public class SystemServicesProxy {
     /**
      * Returns a task thumbnail from the activity manager
      */
-    public @NonNull ThumbnailData getThumbnail(int taskId) {
+    public @NonNull ThumbnailData getThumbnail(int taskId, boolean reducedResolution) {
         if (mAm == null) {
             return new ThumbnailData();
         }

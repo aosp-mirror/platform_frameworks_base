@@ -66,7 +66,7 @@ public class TaskViewThumbnail extends View {
     protected Rect mThumbnailRect = new Rect();
     @ViewDebug.ExportedProperty(category="recents")
     protected float mThumbnailScale;
-    private float mFullscreenThumbnailScale;
+    private float mFullscreenThumbnailScale = 1f;
     /** The height, in pixels, of the task view's title bar. */
     private int mTitleBarHeight;
     private boolean mSizeToFit = false;
@@ -116,12 +116,6 @@ public class TaskViewThumbnail extends View {
         mCornerRadius = res.getDimensionPixelSize(R.dimen.recents_task_view_rounded_corners_radius);
         mBgFillPaint.setColor(Color.WHITE);
         mLockedPaint.setColor(Color.WHITE);
-        if (ActivityManager.ENABLE_TASK_SNAPSHOTS) {
-            mFullscreenThumbnailScale = 1f;
-        } else {
-            mFullscreenThumbnailScale = res.getFraction(
-                    com.android.internal.R.fraction.thumbnail_fullscreen_scale, 1, 1);
-        }
         mTitleBarHeight = res.getDimensionPixelSize(R.dimen.recents_grid_task_view_header_height);
     }
 
@@ -190,6 +184,7 @@ public class TaskViewThumbnail extends View {
         if (thumbnailData != null && thumbnailData.thumbnail != null) {
             Bitmap bm = thumbnailData.thumbnail;
             bm.prepareToDraw();
+            mFullscreenThumbnailScale = thumbnailData.scale;
             mBitmapShader = new BitmapShader(bm, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
             mDrawPaint.setShader(mBitmapShader);
             mThumbnailRect.set(0, 0,
@@ -297,7 +292,8 @@ public class TaskViewThumbnail extends View {
                         (float) mTaskViewRect.width() / mThumbnailRect.width(),
                         (float) mTaskViewRect.height() / mThumbnailRect.height());
             }
-            mMatrix.setTranslate(-mThumbnailData.insets.left, -mThumbnailData.insets.top);
+            mMatrix.setTranslate(-mThumbnailData.insets.left * mFullscreenThumbnailScale,
+                    -mThumbnailData.insets.top * mFullscreenThumbnailScale);
             mMatrix.postScale(mThumbnailScale, mThumbnailScale);
             mBitmapShader.setLocalMatrix(mMatrix);
         }

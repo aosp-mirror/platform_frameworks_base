@@ -83,8 +83,8 @@ import com.android.systemui.recents.events.ui.TaskViewDismissedEvent;
 import com.android.systemui.recents.events.ui.UpdateFreeformTaskViewVisibilityEvent;
 import com.android.systemui.recents.events.ui.UserInteractionEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragDropTargetChangedEvent;
-import com.android.systemui.recents.events.ui.dragndrop.DragEndEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragEndCancelledEvent;
+import com.android.systemui.recents.events.ui.dragndrop.DragEndEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragStartEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragStartInitializeDropTargetsEvent;
 import com.android.systemui.recents.events.ui.focus.DismissFocusedTaskViewEvent;
@@ -96,10 +96,10 @@ import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.misc.Utilities;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
-
 import com.android.systemui.recents.views.grid.GridTaskView;
 import com.android.systemui.recents.views.grid.TaskGridLayoutAlgorithm;
 import com.android.systemui.recents.views.grid.TaskViewFocusFrame;
+
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -217,6 +217,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     // grid layout.
     private TaskViewFocusFrame mTaskViewFocusFrame;
 
+    private Task mPrefetchingTask;
+    private final float mFastFlingVelocity;
+
     // A convenience update listener to request updating clipping of tasks
     private ValueAnimator.AnimatorUpdateListener mRequestUpdateClippingListener =
             new ValueAnimator.AnimatorUpdateListener() {
@@ -273,6 +276,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         mTaskCornerRadiusPx = Recents.getConfiguration().isGridEnabled ?
                 res.getDimensionPixelSize(R.dimen.recents_grid_task_view_rounded_corners_radius) :
                 res.getDimensionPixelSize(R.dimen.recents_task_view_rounded_corners_radius);
+        mFastFlingVelocity = res.getDimensionPixelSize(R.dimen.recents_fast_fling_velocity);
         mDividerSize = ssp.getDockedDividerSize(context);
         mDisplayOrientation = Utilities.getAppConfiguration(mContext).orientation;
         mDisplayRect = ssp.getDisplayRect();
@@ -662,6 +666,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 }
             }
         }
+
+        updatePrefetchingTask(tasks, visibleTaskRange[0], visibleTaskRange[1]);
 
         // Update the focus if the previous focused task was returned to the view pool
         if (lastFocusedTaskIndex != -1) {
@@ -1200,6 +1206,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         if (mStackScroller.computeScroll()) {
             // Notify accessibility
             sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_SCROLLED);
+            Recents.getTaskLoader().getHighResThumbnailLoader().setFlingingFast(
+                    mStackScroller.getScrollVelocity() > mFastFlingVelocity);
         }
         if (mDeferredTaskViewLayoutAnimation != null) {
             relayoutTaskViews(mDeferredTaskViewLayoutAnimation);
@@ -1657,13 +1665,41 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             tv.setNoUserInteractionState();
         }
 
-        // Load the task data
-        Recents.getTaskLoader().loadTaskData(task);
+        if (task == mPrefetchingTask) {
+            task.notifyTaskDataLoaded(task.thumbnail, task.icon);
+        } else {
+            // Load the task data
+            Recents.getTaskLoader().loadTaskData(task);
+        }
+        Recents.getTaskLoader().getHighResThumbnailLoader().onTaskVisible(task);
     }
 
     private void unbindTaskView(TaskView tv, Task task) {
-        // Report that this task's data is no longer being used
-        Recents.getTaskLoader().unloadTaskData(task);
+        if (task != mPrefetchingTask) {
+            // Report that this task's data is no longer being used
+            Recents.getTaskLoader().unloadTaskData(task);
+        }
+        Recents.getTaskLoader().getHighResThumbnailLoader().onTaskInvisible(task);
+    }
+
+    private void updatePrefetchingTask(ArrayList<Task> tasks, int frontIndex, int backIndex) {
+        Task t = null;
+        boolean somethingVisible = frontIndex != -1 && backIndex != -1;
+        if (somethingVisible && frontIndex < tasks.size() - 1) {
+            t = tasks.get(frontIndex + 1);
+        }
+        if (mPrefetchingTask != t) {
+            if (mPrefetchingTask != null) {
+                int index = tasks.indexOf(mPrefetchingTask);
+                if (index < backIndex || index > frontIndex) {
+                    Recents.getTaskLoader().unloadTaskData(mPrefetchingTask);
+                }
+            }
+            mPrefetchingTask = t;
+            if (t != null) {
+                Recents.getTaskLoader().loadTaskData(t);
+            }
+        }
     }
 
     /**** TaskViewCallbacks Implementation ****/

@@ -33,6 +33,7 @@ import android.hardware.display.DisplayManager;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.os.UserHandle;
@@ -59,6 +60,7 @@ import com.android.systemui.recents.events.component.ScreenPinningRequestEvent;
 import com.android.systemui.recents.events.component.ShowUserToastEvent;
 import com.android.systemui.recents.events.ui.RecentsDrawnEvent;
 import com.android.systemui.recents.misc.SystemServicesProxy;
+import com.android.systemui.recents.model.HighResThumbnailLoader;
 import com.android.systemui.recents.model.RecentsTaskLoader;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.CommandQueue;
@@ -183,6 +185,7 @@ public class Recents extends SystemUI
     public static RecentsTaskLoader getTaskLoader() {
         return sTaskLoader;
     }
+
 
     public static SystemServicesProxy getSystemServices() {
         return sSystemServicesProxy;

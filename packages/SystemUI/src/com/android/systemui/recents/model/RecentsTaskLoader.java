@@ -27,6 +27,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.Looper;
 import android.util.Log;
 import android.util.LruCache;
 
@@ -37,6 +38,7 @@ import com.android.systemui.recents.RecentsDebugFlags;
 import com.android.systemui.recents.events.activity.PackagesChangedEvent;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.misc.Utilities;
+import com.android.systemui.recents.model.Task.TaskKey;
 
 import java.io.PrintWriter;
 import java.util.Map;
@@ -156,7 +158,6 @@ class BackgroundTaskLoader implements Runnable {
                     }
                 }
             } else {
-                RecentsConfiguration config = Recents.getConfiguration();
                 SystemServicesProxy ssp = Recents.getSystemServices();
                 // If we've stopped the loader, then fall through to the above logic to wait on
                 // the load thread
@@ -190,7 +191,8 @@ class BackgroundTaskLoader implements Runnable {
                         }
 
                         if (DEBUG) Log.d(TAG, "Loading thumbnail: " + t.key);
-                        ThumbnailData cachedThumbnailData = ssp.getTaskThumbnail(t.key.id);
+                        ThumbnailData cachedThumbnailData = ssp.getTaskThumbnail(t.key.id,
+                                true /* reducedResolution */);
 
                         if (cachedThumbnailData.thumbnail == null) {
                             cachedThumbnailData.thumbnail = mDefaultThumbnail;
@@ -242,6 +244,7 @@ public class RecentsTaskLoader {
     private final TaskKeyLruCache<String> mContentDescriptionCache;
     private final TaskResourceLoadQueue mLoadQueue;
     private final BackgroundTaskLoader mLoader;
+    private final HighResThumbnailLoader mHighResThumbnailLoader;
 
     private final int mMaxThumbnailCacheSize;
     private final int mMaxIconCacheSize;
@@ -293,6 +296,8 @@ public class RecentsTaskLoader {
                 mClearActivityInfoOnEviction);
         mActivityInfoCache = new LruCache(numRecentTasks);
         mLoader = new BackgroundTaskLoader(mLoadQueue, mIconCache, mDefaultThumbnail, mDefaultIcon);
+        mHighResThumbnailLoader = new HighResThumbnailLoader(Recents.getSystemServices(),
+                Looper.getMainLooper());
     }
 
     /** Returns the size of the app icon cache. */
@@ -303,6 +308,10 @@ public class RecentsTaskLoader {
     /** Returns the size of the thumbnail cache. */
     public int getThumbnailCacheSize() {
         return mMaxThumbnailCacheSize;
+    }
+
+    public HighResThumbnailLoader getHighResThumbnailLoader() {
+        return mHighResThumbnailLoader;
     }
 
     /** Creates a new plan for loading the recent tasks. */
@@ -346,7 +355,7 @@ public class RecentsTaskLoader {
     /** Releases the task resource data back into the pool. */
     public void unloadTaskData(Task t) {
         mLoadQueue.removeTask(t);
-        t.notifyTaskDataUnloaded(null, mDefaultIcon);
+        t.notifyTaskDataUnloaded(mDefaultIcon);
     }
 
     /** Completely removes the resource data from the pool. */
@@ -356,7 +365,7 @@ public class RecentsTaskLoader {
         mActivityLabelCache.remove(t.key);
         mContentDescriptionCache.remove(t.key);
         if (notifyTaskDataUnloaded) {
-            t.notifyTaskDataUnloaded(null, mDefaultIcon);
+            t.notifyTaskDataUnloaded(mDefaultIcon);
         }
     }
 
@@ -491,16 +500,16 @@ public class RecentsTaskLoader {
     /**
      * Returns the cached thumbnail if the task key is not expired, updating the cache if it is.
      */
-    Bitmap getAndUpdateThumbnail(Task.TaskKey taskKey, boolean loadIfNotCached) {
+    ThumbnailData getAndUpdateThumbnail(Task.TaskKey taskKey, boolean loadIfNotCached) {
         SystemServicesProxy ssp = Recents.getSystemServices();
 
         if (loadIfNotCached) {
             RecentsConfiguration config = Recents.getConfiguration();
             if (config.svelteLevel < RecentsConfiguration.SVELTE_DISABLE_LOADING) {
                 // Load the thumbnail from the system
-                ThumbnailData thumbnailData = ssp.getTaskThumbnail(taskKey.id);
+                ThumbnailData thumbnailData = ssp.getTaskThumbnail(taskKey.id, true /* reducedResolution */);
                 if (thumbnailData.thumbnail != null) {
-                    return thumbnailData.thumbnail;
+                    return thumbnailData;
                 }
             }
         }

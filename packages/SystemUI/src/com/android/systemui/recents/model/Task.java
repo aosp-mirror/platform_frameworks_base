@@ -17,6 +17,7 @@
 package com.android.systemui.recents.model;
 
 import android.app.ActivityManager;
+import android.app.ActivityManager.TaskThumbnail;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -141,7 +142,7 @@ public class Task {
      * which can then fall back to the application icon.
      */
     public Drawable icon;
-    public Bitmap thumbnail;
+    public ThumbnailData thumbnail;
     @ViewDebug.ExportedProperty(category="recents")
     public String title;
     @ViewDebug.ExportedProperty(category="recents")
@@ -199,11 +200,11 @@ public class Task {
     }
 
     public Task(TaskKey key, int affiliationTaskId, int affiliationColor, Drawable icon,
-                Bitmap thumbnail, String title, String titleDescription, String dismissDescription,
-                String appInfoDescription, int colorPrimary, int colorBackground,
-                boolean isLaunchTarget, boolean isStackTask, boolean isSystemApp,
-                boolean isDockable, Rect bounds, ActivityManager.TaskDescription taskDescription,
-                int resizeMode, ComponentName topActivity, boolean isLocked) {
+            ThumbnailData thumbnail, String title, String titleDescription,
+            String dismissDescription, String appInfoDescription, int colorPrimary,
+            int colorBackground, boolean isLaunchTarget, boolean isStackTask, boolean isSystemApp,
+            boolean isDockable, Rect bounds, ActivityManager.TaskDescription taskDescription,
+            int resizeMode, ComponentName topActivity, boolean isLocked) {
         boolean isInAffiliationGroup = (affiliationTaskId != key.id);
         boolean hasAffiliationGroupColor = isInAffiliationGroup && (affiliationColor != 0);
         this.key = key;
@@ -301,7 +302,7 @@ public class Task {
     /** Notifies the callback listeners that this task has been loaded */
     public void notifyTaskDataLoaded(ThumbnailData thumbnailData, Drawable applicationIcon) {
         this.icon = applicationIcon;
-        this.thumbnail = thumbnailData != null ? thumbnailData.thumbnail : null;
+        this.thumbnail = thumbnailData;
         int callbackCount = mCallbacks.size();
         for (int i = 0; i < callbackCount; i++) {
             mCallbacks.get(i).onTaskDataLoaded(this, thumbnailData);
@@ -309,9 +310,9 @@ public class Task {
     }
 
     /** Notifies the callback listeners that this task has been unloaded */
-    public void notifyTaskDataUnloaded(Bitmap defaultThumbnail, Drawable defaultApplicationIcon) {
+    public void notifyTaskDataUnloaded(Drawable defaultApplicationIcon) {
         icon = defaultApplicationIcon;
-        thumbnail = defaultThumbnail;
+        thumbnail = null;
         for (int i = mCallbacks.size() - 1; i >= 0; i--) {
             mCallbacks.get(i).onTaskDataUnloaded();
         }

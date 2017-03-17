@@ -29,12 +29,16 @@ public class ThumbnailData {
     public Bitmap thumbnail;
     public int orientation;
     public final Rect insets = new Rect();
+    public boolean reducedResolution;
+    public float scale;
 
     public static ThumbnailData createFromTaskSnapshot(TaskSnapshot snapshot) {
         ThumbnailData out = new ThumbnailData();
         out.thumbnail = Bitmap.createHardwareBitmap(snapshot.getSnapshot());
         out.insets.set(snapshot.getContentInsets());
         out.orientation = snapshot.getOrientation();
+        out.reducedResolution = snapshot.isReducedResolution();
+        out.scale = snapshot.getScale();
         return out;
     }
 }
