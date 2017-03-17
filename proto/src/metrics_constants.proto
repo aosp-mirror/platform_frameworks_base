@@ -3339,11 +3339,11 @@ message MetricsEvent {
     // CATEGORY: SETTINGS
     SETTINGS_MANAGE_PICTURE_IN_PICTURE = 812;
 
-    // ACTION: Allow "Enable picture-in-picture on hide" for an app
-    APP_PICTURE_IN_PICTURE_ON_HIDE_ALLOW = 813;
+    // ACTION: Allow "Enable picture-in-picture" for an app
+    APP_PICTURE_IN_PICTURE_ALLOW = 813;
 
-    // ACTION: Deny "Enable picture-in-picture on hide" for an app
-    APP_PICTURE_IN_PICTURE_ON_HIDE_DENY = 814;
+    // ACTION: Deny "Enable picture-in-picture" for an app
+    APP_PICTURE_IN_PICTURE_DENY = 814;
 
     // OPEN: Settings > Language & input > Text-to-speech output -> Speech rate & pitch
     // CATEGORY: SETTINGS
