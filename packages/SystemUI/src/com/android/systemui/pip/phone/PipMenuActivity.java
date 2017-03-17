@@ -19,8 +19,8 @@ package com.android.systemui.pip.phone;
 import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_ACTIONS;
 import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_CONTROLLER_MESSENGER;
 import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_MOVEMENT_BOUNDS;
-import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_STACK_BOUNDS;
 import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_SHOW_MENU;
+import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_STACK_BOUNDS;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -33,13 +33,11 @@ import android.app.PendingIntent.CanceledException;
 import android.app.RemoteAction;
 import android.content.Intent;
 import android.content.pm.ParceledListSlice;
-import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.Icon;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -83,6 +81,8 @@ public class PipMenuActivity extends Activity {
 
     private static final float MENU_BACKGROUND_ALPHA = 0.3f;
     private static final float DISMISS_BACKGROUND_ALPHA = 0.8f;
+
+    private static final float DISABLED_ACTION_ALPHA = 0.54f;
 
     private boolean mMenuVisible;
     private final List<RemoteAction> mActions = new ArrayList<>();
@@ -371,13 +371,18 @@ public class PipMenuActivity extends Activity {
                         actionView.setImageDrawable(d);
                     }, mHandler);
                     actionView.setContentDescription(action.getContentDescription());
-                    actionView.setOnClickListener(v -> {
-                        try {
-                            action.getActionIntent().send();
-                        } catch (CanceledException e) {
-                            Log.w(TAG, "Failed to send action", e);
-                        }
-                    });
+                    if (action.isEnabled()) {
+                        actionView.setOnClickListener(v -> {
+                            try {
+                                action.getActionIntent().send();
+                            } catch (CanceledException e) {
+                                Log.w(TAG, "Failed to send action", e);
+                            }
+                        });
+                    } else {
+                        actionView.setAlpha(DISABLED_ACTION_ALPHA);
+                        actionView.setEnabled(false);
+                    }
                     if (isLandscapePip && i > 0) {
                         LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams)
                                 actionView.getLayoutParams();

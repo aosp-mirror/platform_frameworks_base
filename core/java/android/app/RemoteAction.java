@@ -41,12 +41,14 @@ public final class RemoteAction implements Parcelable {
     private final CharSequence mTitle;
     private final CharSequence mContentDescription;
     private final PendingIntent mActionIntent;
+    private boolean mEnabled;
 
     RemoteAction(Parcel in) {
         mIcon = Icon.CREATOR.createFromParcel(in);
         mTitle = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
         mContentDescription = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
         mActionIntent = PendingIntent.CREATOR.createFromParcel(in);
+        mEnabled = in.readBoolean();
     }
 
     public RemoteAction(@NonNull Icon icon, @NonNull CharSequence title,
@@ -59,6 +61,21 @@ public final class RemoteAction implements Parcelable {
         mTitle = title;
         mContentDescription = contentDescription;
         mActionIntent = intent;
+        mEnabled = true;
+    }
+
+    /**
+     * Sets whether this action is enabled.
+     */
+    public void setEnabled(boolean enabled) {
+        mEnabled = enabled;
+    }
+
+    /**
+     * Return whether this action is enabled.
+     */
+    public boolean isEnabled() {
+        return mEnabled;
     }
 
     /**
@@ -91,7 +108,9 @@ public final class RemoteAction implements Parcelable {
 
     @Override
     public RemoteAction clone() {
-        return new RemoteAction(mIcon, mTitle, mContentDescription, mActionIntent);
+        RemoteAction action = new RemoteAction(mIcon, mTitle, mContentDescription, mActionIntent);
+        action.setEnabled(mEnabled);
+        return action;
     }
 
     @Override
@@ -105,11 +124,13 @@ public final class RemoteAction implements Parcelable {
         TextUtils.writeToParcel(mTitle, out, flags);
         TextUtils.writeToParcel(mContentDescription, out, flags);
         mActionIntent.writeToParcel(out, flags);
+        out.writeBoolean(mEnabled);
     }
 
     public void dump(String prefix, PrintWriter pw) {
         pw.print(prefix);
         pw.print("title=" + mTitle);
+        pw.print(" enabled=" + mEnabled);
         pw.print(" contentDescription=" + mContentDescription);
         pw.print(" icon=" + mIcon);
         pw.print(" action=" + mActionIntent.getIntent());
