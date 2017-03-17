@@ -141,10 +141,9 @@ final class RemoteFillService implements DeathRecipient {
         mHandler.obtainMessageO(MyHandler.MSG_ON_PENDING_REQUEST, request).sendToTarget();
     }
 
-    public void onSaveRequest(@NonNull AssistStructure structure, @Nullable Bundle extras,
-            @Nullable Runnable finalizer) {
+    public void onSaveRequest(@NonNull AssistStructure structure, @Nullable Bundle extras) {
         cancelScheduledUnbind();
-        final PendingSaveRequest request = new PendingSaveRequest(structure, extras, this, finalizer);
+        final PendingSaveRequest request = new PendingSaveRequest(structure, extras, this);
         mHandler.obtainMessageO(MyHandler.MSG_ON_PENDING_REQUEST, request).sendToTarget();
     }
 
@@ -509,14 +508,12 @@ final class RemoteFillService implements DeathRecipient {
         private final AssistStructure mStructure;
         private final Bundle mExtras;
         private final ISaveCallback mCallback;
-        private final Runnable mFinalizer;
 
         public PendingSaveRequest(@NonNull AssistStructure structure, @Nullable Bundle extras,
-                @NonNull RemoteFillService service, @Nullable Runnable finalizer) {
+                @NonNull RemoteFillService service) {
             mStructure = structure;
             mExtras = extras;
             mWeakService = new WeakReference<>(service);
-            mFinalizer = finalizer;
             mCallback = new ISaveCallback.Stub() {
                 @Override
                 public void onSuccess() {
@@ -547,9 +544,6 @@ final class RemoteFillService implements DeathRecipient {
                 } catch (RemoteException e) {
                     Slog.e(LOG_TAG, "Error calling on save request", e);
                 }
-            }
-            if (mFinalizer != null) {
-              mFinalizer.run();
             }
         }
 
