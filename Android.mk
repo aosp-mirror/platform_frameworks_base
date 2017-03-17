@@ -1472,10 +1472,6 @@ LOCAL_PROTOC_FLAGS := \
 LOCAL_SRC_FILES := \
     $(call all-proto-files-under, core/proto) \
     $(call all-proto-files-under, libs/incident/proto)
-LOCAL_C_INCLUDES := \
-    $(call generated-sources-dir-for,STATIC_LIBRARIES,libplatformprotos,)/proto
-LOCAL_EXPORT_C_INCLUDES := \
-    $(call generated-sources-dir-for,STATIC_LIBRARIES,libplatformprotos,)/proto
 include $(BUILD_STATIC_LIBRARY)
 
 # ====  c++ proto host library  ==============================
@@ -1490,10 +1486,6 @@ LOCAL_PROTOC_FLAGS := \
 LOCAL_SRC_FILES := \
     $(call all-proto-files-under, core/proto) \
     $(call all-proto-files-under, libs/incident/proto)
-LOCAL_C_INCLUDES := \
-    $(call generated-sources-dir-for,STATIC_LIBRARIES,libplatformprotos,)/proto
-LOCAL_EXPORT_C_INCLUDES := \
-    $(call generated-sources-dir-for,STATIC_LIBRARIES,libplatformprotos,)/proto
 include $(BUILD_HOST_SHARED_LIBRARY)
 
 
