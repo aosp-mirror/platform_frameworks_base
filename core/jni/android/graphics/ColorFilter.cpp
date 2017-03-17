@@ -30,7 +30,7 @@ using namespace uirenderer;
 
 class SkColorFilterGlue {
 public:
-    static void finalizer(JNIEnv* env, jobject clazz, jlong skFilterHandle) {
+    static void SafeUnref(JNIEnv* env, jobject clazz, jlong skFilterHandle) {
         SkColorFilter* filter = reinterpret_cast<SkColorFilter *>(skFilterHandle);
         SkSafeUnref(filter);
     }
@@ -57,19 +57,19 @@ public:
 };
 
 static const JNINativeMethod colorfilter_methods[] = {
-    {"destroyFilter", "(J)V", (void*) SkColorFilterGlue::finalizer}
+    {"nSafeUnref", "(J)V", (void*) SkColorFilterGlue::SafeUnref}
 };
 
 static const JNINativeMethod porterduff_methods[] = {
-    { "native_CreatePorterDuffFilter", "(II)J", (void*) SkColorFilterGlue::CreatePorterDuffFilter   },
+    { "native_CreatePorterDuffFilter", "(II)J", (void*) SkColorFilterGlue::CreatePorterDuffFilter },
 };
 
 static const JNINativeMethod lighting_methods[] = {
-    { "native_CreateLightingFilter", "(II)J", (void*) SkColorFilterGlue::CreateLightingFilter   },
+    { "native_CreateLightingFilter", "(II)J", (void*) SkColorFilterGlue::CreateLightingFilter },
 };
 
 static const JNINativeMethod colormatrix_methods[] = {
-    { "nativeColorMatrixFilter", "([F)J", (void*) SkColorFilterGlue::CreateColorMatrixFilter   },
+    { "nativeColorMatrixFilter", "([F)J", (void*) SkColorFilterGlue::CreateColorMatrixFilter },
 };
 
 int register_android_graphics_ColorFilter(JNIEnv* env) {

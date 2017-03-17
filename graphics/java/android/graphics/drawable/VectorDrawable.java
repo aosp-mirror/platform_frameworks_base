@@ -333,7 +333,7 @@ public class VectorDrawable extends Drawable {
         // Color filters always override tint filters.
         final ColorFilter colorFilter = (mColorFilter == null ? mTintFilter : mColorFilter);
         final long colorFilterNativeInstance = colorFilter == null ? 0 :
-                colorFilter.native_instance;
+                colorFilter.getNativeInstance();
         boolean canReuseCache = mVectorState.canReuseCache();
         int pixelCount = nDraw(mVectorState.getNativeRenderer(), canvas.getNativeCanvasWrapper(),
                 colorFilterNativeInstance, mTmpBounds, needMirroring(),

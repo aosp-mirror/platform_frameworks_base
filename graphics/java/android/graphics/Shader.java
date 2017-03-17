@@ -106,8 +106,10 @@ public class Shader {
     }
 
     void discardNativeInstance() {
-        nativeSafeUnref(mNativeInstance);
-        mNativeInstance = 0;
+        if (mNativeInstance != 0) {
+            nativeSafeUnref(mNativeInstance);
+            mNativeInstance = 0;
+        }
     }
 
     /**
@@ -120,7 +122,9 @@ public class Shader {
     @Override
     protected void finalize() throws Throwable {
         try {
-            nativeSafeUnref(mNativeInstance);
+            if (mNativeInstance != 0) {
+                nativeSafeUnref(mNativeInstance);
+            }
             mNativeInstance = -1;
         } finally {
             super.finalize();
