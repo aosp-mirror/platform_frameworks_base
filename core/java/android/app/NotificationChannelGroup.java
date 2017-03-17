@@ -40,6 +40,12 @@ import java.util.List;
  */
 public final class NotificationChannelGroup implements Parcelable {
 
+    /**
+     * The maximum length for text fields in a NotificationChannelGroup. Fields will be truncated at
+     * this limit.
+     */
+    private static final int MAX_TEXT_LENGTH = 1000;
+
     private static final String TAG_GROUP = "channelGroup";
     private static final String ATT_NAME = "name";
     private static final String ATT_ID = "id";
@@ -51,14 +57,16 @@ public final class NotificationChannelGroup implements Parcelable {
     /**
      * Creates a notification channel group.
      *
-     * @param id The id of the group. Must be unique per package.
+     * @param id The id of the group. Must be unique per package.  the value may be truncated if
+     *           it is too long.
      * @param name The user visible name of the group. You can rename this group when the system
      *             locale changes by listening for the {@link Intent#ACTION_LOCALE_CHANGED}
-     *             broadcast.
+     *             broadcast. <p>The recommended maximum length is 40 characters; the value may be
+     *             truncated if it is too long.
      */
     public NotificationChannelGroup(String id, CharSequence name) {
-        this.mId = id;
-        this.mName = name;
+        this.mId = getTrimmedString(id);
+        this.mName = name != null ? getTrimmedString(name.toString()) : null;
     }
 
     protected NotificationChannelGroup(Parcel in) {
@@ -69,6 +77,13 @@ public final class NotificationChannelGroup implements Parcelable {
         }
         mName = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
         in.readParcelableList(mChannels, NotificationChannel.class.getClassLoader());
+    }
+
+    private String getTrimmedString(String input) {
+        if (input != null && input.length() > MAX_TEXT_LENGTH) {
+            return input.substring(0, MAX_TEXT_LENGTH);
+        }
+        return input;
     }
 
     @Override

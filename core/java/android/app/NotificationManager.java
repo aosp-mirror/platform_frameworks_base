@@ -421,8 +421,12 @@ public class NotificationManager
     /**
      * Creates a notification channel that notifications can be posted to.
      *
-     * This can also be used to restore a deleted channel and to rename an existing channel. All
-     * other fields are ignored for channels that already exist.
+     * This can also be used to restore a deleted channel and to update an existing channel's
+     * name and description. The name and description should only be changed if the locale changes
+     * or in response to the user renaming this channel. For example, if a user has a channel
+     * named 'John Doe' that represents messages from a 'John Doe', and 'John Doe' changes his name
+     * to 'John Smith,' the channel can be renamed to match.
+     * All other fields are ignored for channels that already exist.
      *
      * @param channel  the channel to create.  Note that the created channel may differ from this
      *                 value. If the provided channel is malformed, a RemoteException will be

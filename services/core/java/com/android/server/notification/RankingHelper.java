@@ -201,7 +201,7 @@ public class RankingHelper implements RankingConfig {
                             // Channels
                             if (TAG_CHANNEL.equals(tagName)) {
                                 String id = parser.getAttributeValue(null, ATT_ID);
-                                CharSequence channelName = parser.getAttributeValue(null, ATT_NAME);
+                                String channelName = parser.getAttributeValue(null, ATT_NAME);
                                 int channelImportance =
                                         safeInt(parser, ATT_IMPORTANCE, DEFAULT_IMPORTANCE);
                                 if (!TextUtils.isEmpty(id) && !TextUtils.isEmpty(channelName)) {
@@ -546,7 +546,8 @@ public class RankingHelper implements RankingConfig {
                 existing.setDeleted(false);
             }
 
-            existing.setName(channel.getName());
+            existing.setName(channel.getName().toString());
+            existing.setDescription(channel.getDescription());
 
             MetricsLogger.action(getChannelLog(channel, pkg));
             updateConfig();
