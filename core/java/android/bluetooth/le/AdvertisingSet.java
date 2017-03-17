@@ -63,9 +63,9 @@ public final class AdvertisingSet {
      * Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}
      *
      */
-    public void enableAdvertising(boolean enable) {
+    public void enableAdvertising(boolean enable, int timeout) {
         try {
-            gatt.enableAdverisingSet(this.advertiserId, enable);
+            gatt.enableAdverisingSet(this.advertiserId, enable, timeout);
         } catch (RemoteException e) {
             Log.e(TAG, "remote exception - ", e);
         }
