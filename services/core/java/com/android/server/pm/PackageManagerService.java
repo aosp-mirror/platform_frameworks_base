@@ -3351,7 +3351,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         //   * The system/shell/root can see metadata for any app
         //   * An installed app can see metadata for 1) other installed apps
         //     and 2) ephemeral apps that have explicitly interacted with it
-        //   * Ephemeral apps can only see their own metadata
+        //   * Ephemeral apps can only see their own data and exposed installed apps
         //   * Holding a signature permission allows seeing instant apps
         final int callingAppId = UserHandle.getAppId(Binder.getCallingUid());
         if (callingAppId != Process.SYSTEM_UID
@@ -3361,8 +3361,10 @@ public class PackageManagerService extends IPackageManager.Stub {
                         Binder.getCallingUid()) != PackageManager.PERMISSION_GRANTED) {
             final String instantAppPackageName = getInstantAppPackageName(Binder.getCallingUid());
             if (instantAppPackageName != null) {
-                // ephemeral apps can only get information on themselves
-                if (!instantAppPackageName.equals(p.packageName)) {
+                // ephemeral apps can only get information on themselves or
+                // installed apps that are exposed.
+                if (!instantAppPackageName.equals(p.packageName)
+                        && (ps.getInstantApp(userId) || !p.visibleToInstantApps)) {
                     return null;
                 }
             } else {
