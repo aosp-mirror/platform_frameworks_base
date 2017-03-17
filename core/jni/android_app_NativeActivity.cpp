@@ -128,8 +128,13 @@ struct NativeCode : public ANativeActivity {
         if (callbacks.onDestroy != NULL) {
             callbacks.onDestroy(this);
         }
-        if (env != NULL && clazz != NULL) {
+        if (env != NULL) {
+          if (clazz != NULL) {
             env->DeleteGlobalRef(clazz);
+          }
+          if (javaAssetManager != NULL) {
+            env->DeleteGlobalRef(javaAssetManager);
+          }
         }
         if (messageQueue != NULL && mainWorkRead >= 0) {
             messageQueue->getLooper()->removeFd(mainWorkRead);
@@ -170,6 +175,10 @@ struct NativeCode : public ANativeActivity {
     int mainWorkRead;
     int mainWorkWrite;
     sp<MessageQueue> messageQueue;
+
+    // Need to hold on to a reference here in case the upper layers destroy our
+    // AssetManager.
+    jobject javaAssetManager;
 };
 
 void android_NativeActivity_finish(ANativeActivity* activity) {
@@ -345,6 +354,7 @@ loadNativeCode_native(JNIEnv* env, jobject clazz, jstring path, jstring funcName
 
     code->sdkVersion = sdkVersion;
 
+    code->javaAssetManager = env->NewGlobalRef(jAssetMgr);
     code->assetManager = assetManagerForJavaObject(env, jAssetMgr);
 
     if (obbDir != NULL) {
