@@ -28,6 +28,7 @@ import android.os.Parcel;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -327,6 +328,50 @@ public final class PasspointConfiguration implements Parcelable {
                 mUpdateIdentifier, mCredentialPriority, mSubscriptionCreationTimeInMs,
                 mSubscriptionExpirationTimeInMs, mUsageLimitUsageTimePeriodInMinutes,
                 mUsageLimitStartTimeInMs, mUsageLimitDataLimit, mUsageLimitTimeLimitInMinutes);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("UpdateIdentifier: ").append(mUpdateIdentifier).append("\n");
+        builder.append("CredentialPriority: ").append(mCredentialPriority).append("\n");
+        builder.append("SubscriptionCreationTime: ").append(
+                mSubscriptionCreationTimeInMs != Long.MIN_VALUE
+                ? new Date(mSubscriptionCreationTimeInMs) : "Not specified").append("\n");
+        builder.append("SubscriptionExpirationTime: ").append(
+                mSubscriptionExpirationTimeInMs != Long.MIN_VALUE
+                ? new Date(mSubscriptionExpirationTimeInMs) : "Not specified").append("\n");
+        builder.append("UsageLimitStartTime: ").append(mUsageLimitStartTimeInMs != Long.MIN_VALUE
+                ? new Date(mUsageLimitStartTimeInMs) : "Not specified").append("\n");
+        builder.append("UsageTimePeriod: ").append(mUsageLimitUsageTimePeriodInMinutes)
+                .append("\n");
+        builder.append("UsageLimitDataLimit: ").append(mUsageLimitDataLimit).append("\n");
+        builder.append("UsageLimitTimeLimit: ").append(mUsageLimitTimeLimitInMinutes).append("\n");
+        if (mHomeSp != null) {
+            builder.append("HomeSP Begin ---\n");
+            builder.append(mHomeSp);
+            builder.append("HomeSP End ---\n");
+        }
+        if (mCredential != null) {
+            builder.append("Credential Begin ---\n");
+            builder.append(mCredential);
+            builder.append("Credential End ---\n");
+        }
+        if (mPolicy != null) {
+            builder.append("Policy Begin ---\n");
+            builder.append(mPolicy);
+            builder.append("Policy End ---\n");
+        }
+        if (mSubscriptionUpdate != null) {
+            builder.append("SubscriptionUpdate Begin ---\n");
+            builder.append(mSubscriptionUpdate);
+            builder.append("SubscriptionUpdate End ---\n");
+        }
+        if (mTrustRootCertList != null) {
+            builder.append("TrustRootCertServers: ").append(mTrustRootCertList.keySet())
+                    .append("\n");
+        }
+        return builder.toString();
     }
 
     /**

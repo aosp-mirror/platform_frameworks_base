@@ -247,6 +247,18 @@ public final class UpdateParameter implements Parcelable {
                 mTrustRootCertSha256Fingerprint);
     }
 
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("UpdateInterval: ").append(mUpdateIntervalInMinutes).append("\n");
+        builder.append("UpdateMethod: ").append(mUpdateMethod).append("\n");
+        builder.append("Restriction: ").append(mRestriction).append("\n");
+        builder.append("ServerURI: ").append(mServerUri).append("\n");
+        builder.append("Username: ").append(mUsername).append("\n");
+        builder.append("TrustRootCertURL: ").append(mTrustRootCertUrl).append("\n");
+        return builder.toString();
+    }
+
     /**
      * Validate UpdateParameter data.
      *
