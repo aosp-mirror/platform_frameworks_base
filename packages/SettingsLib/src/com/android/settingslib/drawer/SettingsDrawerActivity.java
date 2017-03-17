@@ -30,7 +30,6 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.util.ArraySet;
 import android.util.Log;
-import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -40,10 +39,8 @@ import android.widget.FrameLayout;
 import android.widget.Toolbar;
 
 import com.android.settingslib.R;
-import com.android.settingslib.applications.InterestingConfigChanges;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 public class SettingsDrawerActivity extends Activity {
@@ -62,15 +59,6 @@ public class SettingsDrawerActivity extends Activity {
     private final List<CategoryListener> mCategoryListeners = new ArrayList<>();
 
     private FrameLayout mContentHeaderContainer;
-
-    // Remove below after new IA
-    @Deprecated
-    private static List<DashboardCategory> sDashboardCategories;
-    @Deprecated
-    private static HashMap<Pair<String, String>, Tile> sTileCache;
-    @Deprecated
-    private static InterestingConfigChanges sConfigTracker;
-    // Remove above after new IA
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -173,17 +161,6 @@ public class SettingsDrawerActivity extends Activity {
 
     public void showMenuIcon() {
         getActionBar().setDisplayHomeAsUpEnabled(true);
-    }
-
-    public List<DashboardCategory> getDashboardCategories() {
-        if (sDashboardCategories == null) {
-            sTileCache = new HashMap<>();
-            sConfigTracker = new InterestingConfigChanges();
-            // Apply initial current config.
-            sConfigTracker.applyNewConfig(getResources());
-            sDashboardCategories = TileUtils.getCategories(this, sTileCache);
-        }
-        return sDashboardCategories;
     }
 
     protected void onCategoriesChanged() {

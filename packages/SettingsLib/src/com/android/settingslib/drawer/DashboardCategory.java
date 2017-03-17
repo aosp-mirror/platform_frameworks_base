@@ -48,7 +48,7 @@ public class DashboardCategory implements Parcelable {
     /**
      * List of the category's children
      */
-    public List<Tile> tiles = new ArrayList<Tile>();
+    public List<Tile> tiles = new ArrayList<>();
 
 
     public DashboardCategory() {
