@@ -368,7 +368,7 @@ class WindowStateAnimator {
         // we just started or just stopped animating by comparing mWasAnimating with isAnimationSet().
         mWasAnimating = mAnimating;
         final DisplayContent displayContent = mWin.getDisplayContent();
-        if (displayContent != null && mService.okToAnimate()) {
+        if (mWin.mToken.okToAnimate()) {
             // We will run animations as long as the display isn't frozen.
 
             if (mWin.isDrawnLw() && mAnimation != null) {
@@ -1788,7 +1788,7 @@ class WindowStateAnimator {
         // artifacts when we unfreeze the display if some different animation
         // is running.
         Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "WSA#applyAnimationLocked");
-        if (mService.okToAnimate()) {
+        if (mWin.mToken.okToAnimate()) {
             int anim = mPolicy.selectAnimationLw(mWin, transit);
             int attr = -1;
             Animation a = null;
