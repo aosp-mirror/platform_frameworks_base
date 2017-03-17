@@ -195,6 +195,26 @@ public class AccessPointTest {
         assertThat(ap.getRssi()).isEqualTo(newRssi);
     }
 
+    @Test
+    public void testUpdateWithScanResultShouldAverageRssi() {
+        String ssid = "ssid";
+        int originalRssi = -65;
+        int newRssi = -80;
+        int expectedRssi = (originalRssi + newRssi) / 2;
+        AccessPoint ap =
+                new TestAccessPointBuilder(mContext).setSsid(ssid).setRssi(originalRssi).build();
+
+        ScanResult scanResult = new ScanResult();
+        scanResult.SSID = ssid;
+        scanResult.level = newRssi;
+        scanResult.BSSID = "bssid";
+        scanResult.timestamp = SystemClock.elapsedRealtime() * 1000;
+        scanResult.capabilities = "";
+        assertThat(ap.update(scanResult)).isTrue();
+
+        assertThat(ap.getRssi()).isEqualTo(expectedRssi);
+    }
+
     private AccessPoint createAccessPointWithScanResultCache() {
         Bundle bundle = new Bundle();
         ArrayList<ScanResult> scanResults = new ArrayList<>();
@@ -203,6 +223,7 @@ public class AccessPointTest {
             scanResult.level = i;
             scanResult.BSSID = "bssid-" + i;
             scanResult.timestamp = SystemClock.elapsedRealtime() * 1000;
+            scanResult.capabilities = "";
             scanResults.add(scanResult);
         }
 
