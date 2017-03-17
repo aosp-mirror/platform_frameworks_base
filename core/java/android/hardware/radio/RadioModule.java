@@ -16,6 +16,8 @@
 
 package android.hardware.radio;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.content.Context;
 import android.content.Intent;
@@ -23,6 +25,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import java.lang.ref.WeakReference;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -75,6 +78,8 @@ public class RadioModule extends RadioTuner {
     public native int cancel();
 
     public native int getProgramInformation(RadioManager.ProgramInfo[] info);
+
+    public native @NonNull List<RadioManager.ProgramInfo> getProgramList(@Nullable String filter);
 
     public native boolean isAntennaConnected();
 
