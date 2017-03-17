@@ -290,7 +290,7 @@ class DimLayerController {
             state.dimLayer.setLayer(dimLayer);
         }
         if (state.dimLayer.isAnimating()) {
-            if (!mDisplayContent.mService.okToAnimate()) {
+            if (!mDisplayContent.okToAnimate()) {
                 // Jump to the end of the animation.
                 state.dimLayer.show();
             } else {
