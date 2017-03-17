@@ -316,14 +316,13 @@ APK size, we recommend that you just list the specific modules your app needs.
   implementations, as well as any calls to this method, should be removed.
   </li>
 
-  <li>{@link android.support.v4.media.session.MediaSessionCompat#obtain
+  <li>{@code
   MediaSessionCompat.obtain()} has been deprecated and replaced with the more
   appropriately-named method
   <a href="/reference/android/support/v4/media/session/MediaSessionCompat.html#fromMediaSession"><code>fromMediaSession()</code></a>.
   </li>
 
-  <li>{@link
-  android.support.v4.media.session.MediaSessionCompat.QueueItem#obtain
+  <li>{@code
   MediaSessionCompat.QueueItem.obtain()} has been deprecated and replaced with
   the more appropriately-named method
   <a href="/reference/android/support/v4/media/session/MediaSessionCompat.QueueItem.html#fromQueueItem"><code>fromQueueItem()</code></a>.
