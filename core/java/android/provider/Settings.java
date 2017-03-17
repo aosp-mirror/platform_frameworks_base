@@ -6630,6 +6630,8 @@ public final class Settings {
          * This value is only used for managed profiles.
          * @hide
          */
+        @TestApi
+        @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
         public static final String SYNC_PARENT_SOUNDS = "sync_parent_sounds";
 
         /** @hide */
