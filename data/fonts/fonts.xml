@@ -217,8 +217,42 @@
         <font weight="700" style="normal">NotoSansSinhala-Bold.ttf</font>
     </family>
     <family lang="und-Khmr" variant="elegant">
-        <font weight="400" style="normal">NotoSansKhmer-Regular.ttf</font>
-        <font weight="700" style="normal">NotoSansKhmer-Bold.ttf</font>
+        <font weight="100" style="normal">NotoSansKhmer-VF.ttf
+            <axis tag="wdth" stylevalue="100.0" />
+            <axis tag="wght" stylevalue="26.0" />
+        </font>
+        <font weight="200" style="normal">NotoSansKhmer-VF.ttf
+            <axis tag="wdth" stylevalue="100.0" />
+            <axis tag="wght" stylevalue="39.0" />
+        </font>
+        <font weight="300" style="normal">NotoSansKhmer-VF.ttf
+            <axis tag="wdth" stylevalue="100.0" />
+            <axis tag="wght" stylevalue="58.0" />
+        </font>
+        <font weight="400" style="normal">NotoSansKhmer-VF.ttf
+            <axis tag="wdth" stylevalue="100.0" />
+            <axis tag="wght" stylevalue="90.0" />
+        </font>
+        <font weight="500" style="normal">NotoSansKhmer-VF.ttf
+            <axis tag="wdth" stylevalue="100.0" />
+            <axis tag="wght" stylevalue="108.0" />
+        </font>
+        <font weight="600" style="normal">NotoSansKhmer-VF.ttf
+            <axis tag="wdth" stylevalue="100.0" />
+            <axis tag="wght" stylevalue="128.0" />
+        </font>
+        <font weight="700" style="normal">NotoSansKhmer-VF.ttf
+            <axis tag="wdth" stylevalue="100.0" />
+            <axis tag="wght" stylevalue="151.0" />
+        </font>
+        <font weight="800" style="normal">NotoSansKhmer-VF.ttf
+            <axis tag="wdth" stylevalue="100.0" />
+            <axis tag="wght" stylevalue="169.0" />
+        </font>
+        <font weight="900" style="normal">NotoSansKhmer-VF.ttf
+            <axis tag="wdth" stylevalue="100.0" />
+            <axis tag="wght" stylevalue="190.0" />
+        </font>
     </family>
     <family lang="und-Khmr" variant="compact">
         <font weight="400" style="normal">NotoSansKhmerUI-Regular.ttf</font>

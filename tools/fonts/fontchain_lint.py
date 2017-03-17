@@ -234,7 +234,7 @@ def parse_fonts_xml(fonts_xml_path):
         for child in family:
             assert child.tag == 'font', (
                 'Unknown tag <%s>' % child.tag)
-            font_file = child.text
+            font_file = child.text.rstrip()
             weight = int(child.get('weight'))
             assert weight % 100 == 0, (
                 'Font weight "%d" is not a multiple of 100.' % weight)
