@@ -59,10 +59,6 @@ class FileDescriptorWhitelist {
  private:
   FileDescriptorWhitelist();
 
-  static bool StartsWith(const std::string& str, const std::string& prefix);
-
-  static bool EndsWith(const std::string& str, const std::string& suffix);
-
   static FileDescriptorWhitelist* instance_;
 
   std::vector<std::string> whitelist_;
@@ -98,8 +94,6 @@ class FileDescriptorInfo {
 
   FileDescriptorInfo(struct stat stat, const std::string& file_path, int fd, int open_flags,
                      int fd_flags, int fs_flags, off_t offset);
-
-  static bool Readlink(const int fd, std::string* result);
 
   // Returns the locally-bound name of the socket |fd|. Returns true
   // iff. all of the following hold :
