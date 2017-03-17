@@ -1483,6 +1483,25 @@ public final class BluetoothAdapter {
     }
 
     /**
+     * Return the maximum LE advertising data length,
+     * if LE Extended Advertising feature is supported.
+     *
+     * @return the maximum LE advertising data length.
+     */
+    public int getLeMaximumAdvertisingDataLength() {
+        if (!getLeAccess()) return 0;
+        try {
+            mServiceLock.readLock().lock();
+            if (mService != null) return mService.getLeMaximumAdvertisingDataLength();
+        } catch (RemoteException e) {
+            Log.e(TAG, "failed to get getLeMaximumAdvertisingDataLength, error: ", e);
+        } finally {
+            mServiceLock.readLock().unlock();
+        }
+        return 0;
+    }
+
+    /**
      * Return true if hardware has entries available for matching beacons
      *
      * @return true if there are hw entries available for matching beacons
