@@ -39,8 +39,6 @@ import com.android.internal.util.Preconditions;
 import java.util.List;
 
 /**
- * <p><strong>TODO Update the overview to how to use the O new features.</strong></p>
- *
  * The ShortcutManager manages an app's <em>shortcuts</em>. Shortcuts provide users
  * with quick access to activities other than an app's main activity in the currently-active
  * launcher.  For example,
