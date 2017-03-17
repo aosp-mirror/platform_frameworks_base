@@ -153,7 +153,8 @@ public class SystemServicesProxy {
     public abstract static class TaskStackListener {
         public void onTaskStackChanged() { }
         public void onTaskSnapshotChanged(int taskId, TaskSnapshot snapshot) { }
-        public void onActivityPinned() { }
+        public void onActivityPinned(String packageName) { }
+        public void onActivityUnpinned() { }
         public void onPinnedActivityRestartAttempt() { }
         public void onPinnedStackAnimationStarted() { }
         public void onPinnedStackAnimationEnded() { }
@@ -194,17 +195,22 @@ public class SystemServicesProxy {
         }
 
         @Override
-        public void onActivityPinned() throws RemoteException {
+        public void onActivityPinned(String packageName) throws RemoteException {
             mHandler.removeMessages(H.ON_ACTIVITY_PINNED);
-            mHandler.sendEmptyMessage(H.ON_ACTIVITY_PINNED);
+            mHandler.obtainMessage(H.ON_ACTIVITY_PINNED, packageName).sendToTarget();
+        }
+
+        @Override
+        public void onActivityUnpinned() throws RemoteException {
+            mHandler.removeMessages(H.ON_ACTIVITY_UNPINNED);
+            mHandler.sendEmptyMessage(H.ON_ACTIVITY_UNPINNED);
         }
 
         @Override
         public void onPinnedActivityRestartAttempt()
                 throws RemoteException{
             mHandler.removeMessages(H.ON_PINNED_ACTIVITY_RESTART_ATTEMPT);
-            mHandler.obtainMessage(H.ON_PINNED_ACTIVITY_RESTART_ATTEMPT)
-                    .sendToTarget();
+            mHandler.sendEmptyMessage(H.ON_PINNED_ACTIVITY_RESTART_ATTEMPT);
         }
 
         @Override
@@ -1231,6 +1237,7 @@ public class SystemServicesProxy {
         private static final int ON_ACTIVITY_DISMISSING_DOCKED_STACK = 7;
         private static final int ON_TASK_PROFILE_LOCKED = 8;
         private static final int ON_PINNED_STACK_ANIMATION_STARTED = 9;
+        private static final int ON_ACTIVITY_UNPINNED = 10;
 
         @Override
         public void handleMessage(Message msg) {
@@ -1250,7 +1257,13 @@ public class SystemServicesProxy {
                 }
                 case ON_ACTIVITY_PINNED: {
                     for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
-                        mTaskStackListeners.get(i).onActivityPinned();
+                        mTaskStackListeners.get(i).onActivityPinned((String) msg.obj);
+                    }
+                    break;
+                }
+                case ON_ACTIVITY_UNPINNED: {
+                    for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
+                        mTaskStackListeners.get(i).onActivityUnpinned();
                     }
                     break;
                 }

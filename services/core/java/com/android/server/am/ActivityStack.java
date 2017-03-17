@@ -4983,6 +4983,11 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         }
 
         task.setStack(null);
+
+        // Notify if a task from the pinned stack is being removed (or moved depending on the mode)
+        if (mStackId == PINNED_STACK_ID) {
+            mService.mTaskChangeNotificationController.notifyActivityUnpinned();
+        }
     }
 
     TaskRecord createTaskRecord(int taskId, ActivityInfo info, Intent intent,

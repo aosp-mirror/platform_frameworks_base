@@ -31,7 +31,11 @@ public abstract class TaskStackListener extends ITaskStackListener.Stub {
     }
 
     @Override
-    public void onActivityPinned() throws RemoteException {
+    public void onActivityPinned(String packageName) throws RemoteException {
+    }
+
+    @Override
+    public void onActivityUnpinned() throws RemoteException {
     }
 
     @Override
