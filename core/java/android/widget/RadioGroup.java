@@ -426,23 +426,24 @@ public class RadioGroup extends LinearLayout {
     }
 
     @Override
-    public void autofill(AutofillValue value) {
-        if (!isEnabled()) return;
+    public boolean autofill(AutofillValue value) {
+        if (!isEnabled()) return false;
 
         int index;
         if (value.isList()) {
             index = value.getListValue();
         } else {
             Log.w(LOG_TAG, value + " could not be autofilled into " + this);
-            return;
+            return false;
         }
 
         final View child = getChildAt(index);
         if (child == null) {
             Log.w(VIEW_LOG_TAG, "RadioGroup.autoFill(): no child with index " + index);
-            return;
+            return false;
         }
         check(child.getId());
+        return true;
     }
 
     @Override

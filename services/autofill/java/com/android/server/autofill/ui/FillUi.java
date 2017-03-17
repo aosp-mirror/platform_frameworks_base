@@ -50,6 +50,7 @@ final class FillUi {
         void onResponsePicked(@NonNull FillResponse response);
         void onDatasetPicked(@NonNull Dataset dataset);
         void onCanceled();
+        void onDestroy();
     }
 
     private final Rect mAnchorBounds = new Rect();
@@ -201,6 +202,7 @@ final class FillUi {
 
     public void destroy() {
         throwIfDestroyed();
+        mCallback.onDestroy();
         mWindow.hide();
         mDestroyed = true;
     }

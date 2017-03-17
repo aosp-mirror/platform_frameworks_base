@@ -28,6 +28,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.database.ContentObserver;
 import android.graphics.Rect;
@@ -53,6 +54,7 @@ import android.view.autofill.IAutoFillManagerClient;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.IResultReceiver;
+import com.android.internal.util.Preconditions;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
@@ -316,13 +318,27 @@ public final class AutofillManagerService extends SystemService {
         @Override
         public void startSession(IBinder activityToken, IBinder windowToken, IBinder appCallback,
                 AutofillId autofillId, Rect bounds, AutofillValue value, int userId,
-                boolean hasCallback, int flags) {
+                boolean hasCallback, int flags, String packageName) {
             // TODO(b/33197203): make sure it's called by resumed / focused activity
+
+            activityToken = Preconditions.checkNotNull(activityToken, "activityToken");
+            appCallback = Preconditions.checkNotNull(appCallback, "appCallback");
+            autofillId = Preconditions.checkNotNull(autofillId, "autoFillId");
+            bounds = Preconditions.checkNotNull(bounds, "bounds");
+            packageName = Preconditions.checkNotNull(packageName, "packageName");
+
+            Preconditions.checkArgument(userId == UserHandle.getUserId(getCallingUid()), "userId");
+
+            try {
+                mContext.getPackageManager().getPackageInfoAsUser(packageName, 0, userId);
+            } catch (PackageManager.NameNotFoundException e) {
+                throw new IllegalArgumentException(packageName + " is not a valid package", e);
+            }
 
             synchronized (mLock) {
                 final AutofillManagerServiceImpl service = getServiceForUserLocked(userId);
                 service.startSessionLocked(activityToken, windowToken, appCallback,
-                        autofillId, bounds, value, hasCallback, flags);
+                        autofillId, bounds, value, hasCallback, flags, packageName);
             }
         }
 

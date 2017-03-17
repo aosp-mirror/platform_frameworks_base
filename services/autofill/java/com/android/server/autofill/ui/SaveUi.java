@@ -40,6 +40,7 @@ final class SaveUi {
     public interface OnSaveListener {
         void onSave();
         void onCancel(IntentSender listener);
+        void onDestroy();
     }
 
     private final Handler mHandler = UiThread.getHandler();
@@ -122,6 +123,7 @@ final class SaveUi {
 
     void destroy() {
         throwIfDestroyed();
+        mListener.onDestroy();
         mHandler.removeCallbacksAndMessages(mListener);
         mDialog.dismiss();
         mDestroyed = true;
