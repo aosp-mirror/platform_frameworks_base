@@ -1083,18 +1083,7 @@ public class Intent implements Parcelable, Cloneable {
      * @hide
      */
     public static final String ACTION_CALL_PRIVILEGED = "android.intent.action.CALL_PRIVILEGED";
-    /**
-     * Activity action: Activate the current SIM card.  If SIM cards do not require activation,
-     * sending this intent is a no-op.
-     * <p>Input: No data should be specified.  get*Extra may have an optional
-     * {@link #EXTRA_SIM_ACTIVATION_RESPONSE} field containing a PendingIntent through which to
-     * send the activation result.
-     * <p>Output: nothing.
-     * @hide
-     */
-    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
-    public static final String ACTION_SIM_ACTIVATION_REQUEST =
-            "android.intent.action.SIM_ACTIVATION_REQUEST";
+
     /**
      * Activity Action: Main entry point for carrier setup apps.
      * <p>Carrier apps that provide an implementation for this action may be invoked to configure
