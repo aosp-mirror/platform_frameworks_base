@@ -5070,7 +5070,9 @@ public final class ActivityThread {
 
             performConfigurationChangedForActivity(r, mCompatConfiguration, displayId,
                     true /* movedToDifferentDisplay */);
-            viewRoot.onMovedToDisplay(displayId);
+            if (viewRoot != null) {
+                viewRoot.onMovedToDisplay(displayId);
+            }
         } else {
             if (DEBUG_CONFIGURATION) Slog.v(TAG, "Handle activity config changed: "
                     + r.activityInfo.name + ", config=" + data.overrideConfig);
@@ -5078,7 +5080,9 @@ public final class ActivityThread {
         }
         // Notify the ViewRootImpl instance about configuration changes. It may have initiated this
         // update to make sure that resources are updated before updating itself.
-        viewRoot.updateConfiguration();
+        if (viewRoot != null) {
+            viewRoot.updateConfiguration();
+        }
         mSomeActivitiesChanged = true;
     }
 
