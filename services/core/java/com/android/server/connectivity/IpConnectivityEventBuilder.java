@@ -210,7 +210,6 @@ final public class IpConnectivityEventBuilder {
     private static void setValidationProbeEvent(IpConnectivityEvent out, ValidationProbeEvent in) {
         IpConnectivityLogClass.ValidationProbeEvent validationProbeEvent =
                 new IpConnectivityLogClass.ValidationProbeEvent();
-        validationProbeEvent.networkId = netIdOf(in.netId);
         validationProbeEvent.latencyMs = (int) in.durationMs;
         validationProbeEvent.probeType = in.probeType;
         validationProbeEvent.probeResult = in.returnCode;

@@ -402,7 +402,6 @@ public class IpConnectivityEventBuilderTest extends TestCase {
     public void testValidationProbeEventSerialization() {
         ConnectivityMetricsEvent ev = describeIpEvent(
                 aType(ValidationProbeEvent.class),
-                anInt(120),
                 aLong(40730),
                 anInt(ValidationProbeEvent.PROBE_HTTP),
                 anInt(204));
@@ -417,9 +416,6 @@ public class IpConnectivityEventBuilderTest extends TestCase {
                 "  transports: 0",
                 "  validation_probe_event <",
                 "    latency_ms: 40730",
-                "    network_id <",
-                "      network_id: 120",
-                "    >",
                 "    probe_result: 204",
                 "    probe_type: 1",
                 "  >",

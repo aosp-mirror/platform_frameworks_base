@@ -78,7 +78,10 @@ public final class ConnectivityMetricsEvent implements Parcelable {
     public String toString() {
         StringBuilder buffer = new StringBuilder("ConnectivityMetricsEvent(");
         buffer.append(String.format("%tT.%tL", timestamp, timestamp));
-        // TODO: add transports, netId
+        // TODO: add transports
+        if (netId != 0) {
+            buffer.append(", ").append(netId);
+        }
         if (ifname != null) {
             buffer.append(", ").append(ifname);
         }

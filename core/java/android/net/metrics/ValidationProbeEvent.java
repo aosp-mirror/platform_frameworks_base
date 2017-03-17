@@ -48,26 +48,19 @@ public final class ValidationProbeEvent implements Parcelable {
     @Retention(RetentionPolicy.SOURCE)
     public @interface ReturnCode {}
 
-    public final int netId;
-    public final long durationMs;
+    public long durationMs;
     // probeType byte format (MSB to LSB):
     // byte 0: unused
     // byte 1: unused
     // byte 2: 0 = UNKNOWN, 1 = FIRST_VALIDATION, 2 = REVALIDATION
     // byte 3: PROBE_* constant
-    public final int probeType;
-    public final @ReturnCode int returnCode;
+    public int probeType;
+    public @ReturnCode int returnCode;
 
-    public ValidationProbeEvent(
-            int netId, long durationMs, int probeType, @ReturnCode int returnCode) {
-        this.netId = netId;
-        this.durationMs = durationMs;
-        this.probeType = probeType;
-        this.returnCode = returnCode;
+    public ValidationProbeEvent() {
     }
 
     private ValidationProbeEvent(Parcel in) {
-        netId = in.readInt();
         durationMs = in.readLong();
         probeType = in.readInt();
         returnCode = in.readInt();
@@ -75,7 +68,6 @@ public final class ValidationProbeEvent implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel out, int flags) {
-        out.writeInt(netId);
         out.writeLong(durationMs);
         out.writeInt(probeType);
         out.writeInt(returnCode);
@@ -111,7 +103,7 @@ public final class ValidationProbeEvent implements Parcelable {
 
     @Override
     public String toString() {
-        return String.format("ValidationProbeEvent(%d, %s:%d %s, %dms)", netId,
+        return String.format("ValidationProbeEvent(%s:%d %s, %dms)",
                 getProbeName(probeType), returnCode, getValidationStage(probeType), durationMs);
     }
 

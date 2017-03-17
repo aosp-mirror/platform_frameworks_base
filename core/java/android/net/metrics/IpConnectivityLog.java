@@ -111,6 +111,21 @@ public class IpConnectivityLog {
 
     /**
      * Log an IpConnectivity event.
+     * @param netid the id of the network associated with the event.
+     * @param transports the current transports of the network associated with the event, as defined
+     * in NetworkCapabilities.
+     * @param data is a Parcelable instance representing the event.
+     * @return true if the event was successfully logged.
+     */
+    public boolean log(int netid, long transports, Parcelable data) {
+        ConnectivityMetricsEvent ev = makeEv(data);
+        ev.netId = netid;
+        ev.transports = transports;
+        return log(ev);
+    }
+
+    /**
+     * Log an IpConnectivity event.
      * @param data is a Parcelable instance representing the event.
      * @return true if the event was successfully logged.
      */

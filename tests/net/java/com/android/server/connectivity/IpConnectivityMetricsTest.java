@@ -153,12 +153,18 @@ public class IpConnectivityMetricsTest extends TestCase {
         apfStats.programUpdatesAll = 7;
         apfStats.programUpdatesAllowingMulticast = 3;
         apfStats.maxProgramSize = 2048;
+
+        ValidationProbeEvent validationEv = new ValidationProbeEvent();
+        validationEv.durationMs = 40730;
+        validationEv.probeType = ValidationProbeEvent.PROBE_HTTP;
+        validationEv.returnCode = 204;
+
         Parcelable[] events = {
             new IpReachabilityEvent(IpReachabilityEvent.NUD_FAILED),
             new DhcpClientEvent("SomeState", 192),
             new DefaultNetworkEvent(102, new int[]{1,2,3}, 101, true, false),
             new IpManagerEvent(IpManagerEvent.PROVISIONING_OK, 5678),
-            new ValidationProbeEvent(120, 40730, ValidationProbeEvent.PROBE_HTTP, 204),
+            validationEv,
             apfStats,
             new RaEvent(2000, 400, 300, -1, 1000, -1)
         };
@@ -235,9 +241,6 @@ public class IpConnectivityMetricsTest extends TestCase {
                 "  transports: 0",
                 "  validation_probe_event <",
                 "    latency_ms: 40730",
-                "    network_id <",
-                "      network_id: 120",
-                "    >",
                 "    probe_result: 204",
                 "    probe_type: 1",
                 "  >",
