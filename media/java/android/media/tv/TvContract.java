@@ -1807,6 +1807,9 @@ public final class TvContract {
          * {@link #TYPE_S_DMB}, and
          * {@link #TYPE_T_DMB}.
          *
+         * <p>This value cannot be changed once it's set. Trying to modify it will make the update
+         * fail.
+         *
          * <p>This is a required field.
          *
          * <p>Type: TEXT
