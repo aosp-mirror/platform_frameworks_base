@@ -108,6 +108,7 @@ interface IBluetooth
     boolean isLeCodedPhySupported();
     boolean isLeExtendedAdvertisingSupported();
     boolean isLePeriodicAdvertisingSupported();
+    int getLeMaximumAdvertisingDataLength();
     BluetoothActivityEnergyInfo reportActivityInfo();
 
     /**
