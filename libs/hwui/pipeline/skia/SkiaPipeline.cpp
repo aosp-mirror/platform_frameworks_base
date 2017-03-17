@@ -19,13 +19,14 @@
 #include "utils/TraceUtils.h"
 #include <SkImageEncoder.h>
 #include <SkImagePriv.h>
-#include <SkOSFile.h>
 #include <SkOverdrawCanvas.h>
 #include <SkOverdrawColorFilter.h>
 #include <SkPicture.h>
 #include <SkPictureRecorder.h>
 #include <SkPixelSerializer.h>
 #include <SkStream.h>
+
+#include <unistd.h>
 
 using namespace android::uirenderer::renderthread;
 
@@ -190,7 +191,7 @@ void SkiaPipeline::renderFrame(const LayerUpdateQueue& layers, const SkRect& cli
     char prop[PROPERTY_VALUE_MAX];
     if (skpCaptureEnabled()) {
         property_get("debug.hwui.capture_frame_as_skp", prop, "0");
-        recordingPicture = prop[0] != '0' && !sk_exists(prop);
+        recordingPicture = prop[0] != '0' && access(prop, F_OK) != 0;
         if (recordingPicture) {
             recorder.reset(new SkPictureRecorder());
             canvas = recorder->beginRecording(surface->width(), surface->height(),
