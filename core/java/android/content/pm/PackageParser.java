@@ -4211,6 +4211,7 @@ public class PackageParser {
                 sa.getBoolean(R.styleable.AndroidManifestActivity_visibleToInstantApps, false);
         if (visibleToEphemeral) {
             a.info.flags |= ActivityInfo.FLAG_VISIBLE_TO_EPHEMERAL;
+            owner.visibleToInstantApps = true;
         }
 
         sa.recycle();
@@ -4716,6 +4717,7 @@ public class PackageParser {
                 sa.getBoolean(R.styleable.AndroidManifestProvider_visibleToInstantApps, false);
         if (visibleToEphemeral) {
             p.info.flags |= ProviderInfo.FLAG_VISIBLE_TO_EPHEMERAL;
+            owner.visibleToInstantApps = true;
         }
 
         sa.recycle();
@@ -5032,6 +5034,7 @@ public class PackageParser {
                 sa.getBoolean(R.styleable.AndroidManifestService_visibleToInstantApps, false);
         if (visibleToEphemeral) {
             s.info.flags |= ServiceInfo.FLAG_VISIBLE_TO_EPHEMERAL;
+            owner.visibleToInstantApps = true;
         }
 
         sa.recycle();
@@ -5634,6 +5637,11 @@ public class PackageParser {
         public boolean use32bitAbi;
 
         public byte[] restrictUpdateHash;
+
+        /**
+         * Set if the app or any of its components are visible to Instant Apps.
+         */
+        public boolean visibleToInstantApps;
 
         public Package(String packageName) {
             this.packageName = packageName;
