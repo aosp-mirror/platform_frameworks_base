@@ -18,11 +18,11 @@ package com.android.server.wm;
 
 import com.android.internal.os.IResultReceiver;
 
-import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
+import android.util.MergedConfiguration;
 import android.view.DragEvent;
 import android.view.IWindow;
 
@@ -36,7 +36,7 @@ public class TestIWindow extends IWindow.Stub {
 
     @Override
     public void resized(Rect frame, Rect overscanInsets, Rect contentInsets, Rect visibleInsets,
-            Rect stableInsets, Rect outsets, boolean reportDraw, Configuration newConfig,
+            Rect stableInsets, Rect outsets, boolean reportDraw, MergedConfiguration mergedConfig,
             Rect backDropFrame, boolean forceLayout, boolean alwaysConsumeNavBar, int displayId)
             throws RemoteException {
 

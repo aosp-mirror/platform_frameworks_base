@@ -114,6 +114,7 @@ import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.WorkSource;
+import android.util.MergedConfiguration;
 import android.util.DisplayMetrics;
 import android.util.Slog;
 import android.util.TimeUtils;
@@ -2265,7 +2266,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
     }
 
-    void prepareWindowToDisplayDuringRelayout(Configuration outConfig) {
+    void prepareWindowToDisplayDuringRelayout(MergedConfiguration mergedConfiguration) {
         if ((mAttrs.softInputMode & SOFT_INPUT_MASK_ADJUST)
                 == SOFT_INPUT_ADJUST_RESIZE) {
             mLayoutNeeded = true;
@@ -2278,10 +2279,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             mTurnOnScreen = true;
         }
         if (isConfigChanged()) {
-            outConfig.setTo(getConfiguration());
-            if (DEBUG_CONFIGURATION) Slog.i(TAG, "Window " + this + " visible with new config: "
-                    + outConfig);
-            mLastReportedConfiguration.setTo(outConfig);
+            final Configuration globalConfig = mService.mRoot.getConfiguration();
+            final Configuration overrideConfig = getMergedOverrideConfiguration();
+            mergedConfiguration.setConfiguration(globalConfig, overrideConfig);
+            if (DEBUG_CONFIGURATION) Slog.i(TAG, "Window " + this
+                    + " visible with new global config: " + globalConfig
+                    + " merged override config: " + overrideConfig);
+            mLastReportedConfiguration.setTo(getConfiguration());
         }
     }
 
@@ -3027,12 +3031,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         try {
             if (DEBUG_RESIZE || DEBUG_ORIENTATION) Slog.v(TAG, "Reporting new frame to " + this
                     + ": " + mCompatFrame);
-            final Configuration newConfig;
+            final MergedConfiguration mergedConfiguration;
             if (isConfigChanged()) {
-                newConfig = new Configuration(getConfiguration());
-                mLastReportedConfiguration.setTo(newConfig);
+                mergedConfiguration = new MergedConfiguration(mService.mRoot.getConfiguration(),
+                        getMergedOverrideConfiguration());
+                mLastReportedConfiguration.setTo(mergedConfiguration.getMergedConfiguration());
             } else {
-                newConfig = null;
+                mergedConfiguration = null;
             }
             if (DEBUG_ORIENTATION && mWinAnimator.mDrawState == DRAW_PENDING)
                 Slog.i(TAG, "Resizing " + this + " WITH DRAW PENDING");
@@ -3054,7 +3059,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     public void run() {
                         try {
                             dispatchResized(frame, overscanInsets, contentInsets, visibleInsets,
-                                    stableInsets, outsets, reportDraw, newConfig,
+                                    stableInsets, outsets, reportDraw, mergedConfiguration,
                                     reportOrientation, displayId);
                         } catch (RemoteException e) {
                             // Not a remote call, RemoteException won't be raised.
@@ -3063,7 +3068,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 });
             } else {
                 dispatchResized(frame, overscanInsets, contentInsets, visibleInsets, stableInsets,
-                        outsets, reportDraw, newConfig, reportOrientation, displayId);
+                        outsets, reportDraw, mergedConfiguration, reportOrientation, displayId);
             }
 
             //TODO (multidisplay): Accessibility supported only for the default display.
@@ -3120,14 +3125,14 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     private void dispatchResized(Rect frame, Rect overscanInsets, Rect contentInsets,
             Rect visibleInsets, Rect stableInsets, Rect outsets, boolean reportDraw,
-            Configuration newConfig, boolean reportOrientation, int displayId)
+            MergedConfiguration mergedConfiguration, boolean reportOrientation, int displayId)
             throws RemoteException {
         final boolean forceRelayout = isDragResizeChanged() || mResizedWhileNotDragResizing
                 || reportOrientation;
 
         mClient.resized(frame, overscanInsets, contentInsets, visibleInsets, stableInsets, outsets,
-                reportDraw, newConfig, getBackdropFrame(frame),
-                forceRelayout, mPolicy.isNavBarForcedShownLw(this), displayId);
+                reportDraw, mergedConfiguration, getBackdropFrame(frame), forceRelayout,
+                mPolicy.isNavBarForcedShownLw(this), displayId);
         mDragResizingChangeReported = true;
     }
 
@@ -4341,8 +4346,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return !mLastSurfaceInsets.equals(mAttrs.surfaceInsets);
     }
 
-    int relayoutVisibleWindow(Configuration outConfig, int result,
-            int attrChanges, int oldVisibility) {
+    int relayoutVisibleWindow(MergedConfiguration mergedConfiguration, int result, int attrChanges,
+            int oldVisibility) {
         result |= !isVisibleLw() ? RELAYOUT_RES_FIRST_TIME : 0;
         if (mAnimatingExit) {
             Slog.d(TAG, "relayoutVisibleWindow: " + this + " mAnimatingExit=true, mRemoveOnExit="
@@ -4363,7 +4368,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         mWinAnimator.mEnteringAnimation = true;
         if ((result & RELAYOUT_RES_FIRST_TIME) != 0) {
-            prepareWindowToDisplayDuringRelayout(outConfig);
+            prepareWindowToDisplayDuringRelayout(mergedConfiguration);
         }
         if ((attrChanges & FORMAT_CHANGED) != 0) {
             // If the format can't be changed in place, preserve the old surface until the app draws

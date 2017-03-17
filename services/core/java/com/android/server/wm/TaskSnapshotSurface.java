@@ -27,7 +27,6 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.app.ActivityManager.TaskDescription;
-import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -38,6 +37,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
+import android.util.MergedConfiguration;
 import android.util.Slog;
 import android.view.IWindowSession;
 import android.view.Surface;
@@ -78,7 +78,7 @@ class TaskSnapshotSurface implements StartingSurface {
         final Surface surface = new Surface();
         final Rect tmpRect = new Rect();
         final Rect tmpFrame = new Rect();
-        final Configuration tmpConfiguration = new Configuration();
+        final MergedConfiguration tmpMergedConfiguration = new MergedConfiguration();
         int fillBackgroundColor = Color.WHITE;
         synchronized (service.mWindowMap) {
             layoutParams.type = TYPE_APPLICATION_STARTING;
@@ -122,7 +122,7 @@ class TaskSnapshotSurface implements StartingSurface {
         window.setOuter(snapshotSurface);
         try {
             session.relayout(window, window.mSeq, layoutParams, -1, -1, View.VISIBLE, 0, tmpFrame,
-                    tmpRect, tmpRect, tmpRect, tmpRect, tmpRect, tmpRect, tmpConfiguration,
+                    tmpRect, tmpRect, tmpRect, tmpRect, tmpRect, tmpRect, tmpMergedConfiguration,
                     surface);
         } catch (RemoteException e) {
             // Local call.
@@ -221,9 +221,9 @@ class TaskSnapshotSurface implements StartingSurface {
 
         @Override
         public void resized(Rect frame, Rect overscanInsets, Rect contentInsets, Rect visibleInsets,
-                Rect stableInsets, Rect outsets, boolean reportDraw, Configuration newConfig,
-                Rect backDropFrame, boolean forceLayout, boolean alwaysConsumeNavBar,
-                int displayId) {
+                Rect stableInsets, Rect outsets, boolean reportDraw,
+                MergedConfiguration mergedConfiguration, Rect backDropFrame, boolean forceLayout,
+                boolean alwaysConsumeNavBar, int displayId) {
             if (reportDraw) {
                 sHandler.obtainMessage(MSG_REPORT_DRAW, mOuter).sendToTarget();
             }

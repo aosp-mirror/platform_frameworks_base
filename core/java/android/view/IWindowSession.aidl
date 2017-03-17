@@ -11,17 +11,17 @@
 ** Unless required by applicable law or agreed to in writing, software 
 ** distributed under the License is distributed on an "AS IS" BASIS, 
 ** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
-** See the License for the specific language governing permissions and 
+** See the License for the specific language governing permissions and
 ** limitations under the License.
 */
 
 package android.view;
 
 import android.content.ClipData;
-import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Bundle;
+import android.util.MergedConfiguration;
 import android.view.InputChannel;
 import android.view.IWindow;
 import android.view.IWindowId;
@@ -83,9 +83,9 @@ interface IWindowSession {
      * treat as real display. Example of such area is a chin in some models of wearable devices.
      * @param outBackdropFrame Rect which is used draw the resizing background during a resize
      * operation.
-     * @param outConfiguration New configuration of window, if it is now
-     * becoming visible and the global configuration has changed since it
-     * was last displayed.
+     * @param outMergedConfiguration New config container that holds global, override and merged
+     * config for window, if it is now becoming visible and the merged configuration has changed
+     * since it was last displayed.
      * @param outSurface Object in which is placed the new display surface.
      *
      * @return int Result flags: {@link WindowManagerGlobal#RELAYOUT_SHOW_FOCUS},
@@ -95,8 +95,8 @@ interface IWindowSession {
             int requestedWidth, int requestedHeight, int viewVisibility,
             int flags, out Rect outFrame, out Rect outOverscanInsets,
             out Rect outContentInsets, out Rect outVisibleInsets, out Rect outStableInsets,
-            out Rect outOutsets, out Rect outBackdropFrame, out Configuration outConfig,
-            out Surface outSurface);
+            out Rect outOutsets, out Rect outBackdropFrame,
+            out MergedConfiguration outMergedConfiguration, out Surface outSurface);
 
     /*
      * Notify the window manager that an application is relaunching and

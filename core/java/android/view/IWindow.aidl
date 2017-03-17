@@ -17,7 +17,6 @@
 
 package android.view;
 
-import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
@@ -26,6 +25,7 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 
 import com.android.internal.os.IResultReceiver;
+import android.util.MergedConfiguration;
 
 /**
  * API back to a client window that the Window Manager uses to inform it of
@@ -49,8 +49,8 @@ oneway interface IWindow {
 
     void resized(in Rect frame, in Rect overscanInsets, in Rect contentInsets,
             in Rect visibleInsets, in Rect stableInsets, in Rect outsets, boolean reportDraw,
-            in Configuration newConfig, in Rect backDropFrame, boolean forceLayout,
-            boolean alwaysConsumeNavBar, int displayId);
+            in MergedConfiguration newMergedConfiguration, in Rect backDropFrame,
+            boolean forceLayout, boolean alwaysConsumeNavBar, int displayId);
     void moved(int newX, int newY);
     void dispatchAppVisibility(boolean visible);
     void dispatchGetNewSurface();
