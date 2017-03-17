@@ -47,7 +47,7 @@ LOCAL_STATIC_ANDROID_LIBRARIES := \
 LOCAL_STATIC_JAVA_LIBRARIES := \
     metrics-helper-lib \
     android-support-test \
-    mockito-updated-target-minus-junit4 \
+    mockito-target-minus-junit4 \
     SystemUI-proto \
     SystemUI-tags \
     legacy-android-test \
