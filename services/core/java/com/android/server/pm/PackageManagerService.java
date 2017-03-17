@@ -8458,6 +8458,11 @@ public class PackageManagerService extends IPackageManager.Stub {
         return mDexManager.dexoptSecondaryDex(packageName, compilerFilter, force);
     }
 
+    public boolean performDexOptSecondary(String packageName, int compileReason,
+            boolean force) {
+        return mDexManager.dexoptSecondaryDex(packageName, compileReason, force);
+    }
+
     /**
      * Reconcile the information we have about the secondary dex files belonging to
      * {@code packagName} and the actual dex files. For all dex files that were
