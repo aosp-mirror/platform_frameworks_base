@@ -157,7 +157,6 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         super.setUp();
 
         mContext = getContext();
-
         when(mContext.packageManager.hasSystemFeature(eq(PackageManager.FEATURE_DEVICE_ADMIN)))
                 .thenReturn(true);
 
@@ -172,6 +171,12 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         setUpPackageManagerForAdmin(adminNoPerm, DpmMockContext.CALLER_UID);
 
         setUpUserManager();
+    }
+
+    @Override
+    protected void tearDown() throws Exception {
+        flushTasks();
+        super.tearDown();
     }
 
     private void initializeDpms() {
@@ -1246,7 +1251,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         mContext.applicationInfo = new ApplicationInfo();
         mContext.callerPermissions.add(permission.MANAGE_USERS);
         mContext.packageName = "com.android.frameworks.servicestests";
-        mContext.userContexts.put(user, mContext);
+        mContext.addPackageContext(user, mContext);
         when(mContext.resources.getColor(anyInt(), anyObject())).thenReturn(Color.WHITE);
 
         StringParceledListSlice oneCert = asSlice(new String[] {"1"});
@@ -3966,121 +3971,168 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     public void testGetOwnerInstalledCaCertsForDeviceOwner() throws Exception {
+        mContext.packageName = mRealTestContext.getPackageName();
         setDeviceOwner();
 
-        mContext.packageName = admin1.getPackageName();
-        mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
-        verifyCanGetOwnerInstalledCaCerts(admin1);
+        final DpmMockContext caller = new DpmMockContext(mRealTestContext, "test-caller");
+        caller.packageName = admin1.getPackageName();
+        caller.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
+
+        verifyCanGetOwnerInstalledCaCerts(admin1, caller);
     }
 
     public void testGetOwnerInstalledCaCertsForProfileOwner() throws Exception {
+        mContext.packageName = mRealTestContext.getPackageName();
         setAsProfileOwner(admin1);
 
-        mContext.packageName = admin1.getPackageName();
-        verifyCanGetOwnerInstalledCaCerts(admin1);
-        verifyCantGetOwnerInstalledCaCertsProfileOwnerRemoval(admin1);
+        final DpmMockContext caller = new DpmMockContext(mRealTestContext, "test-caller");
+        caller.packageName = admin1.getPackageName();
+        caller.binder.callingUid = DpmMockContext.CALLER_UID;
+
+        verifyCanGetOwnerInstalledCaCerts(admin1, caller);
+        verifyCantGetOwnerInstalledCaCertsProfileOwnerRemoval(admin1, caller);
     }
 
     public void testGetOwnerInstalledCaCertsForDelegate() throws Exception {
+        mContext.packageName = mRealTestContext.getPackageName();
         setAsProfileOwner(admin1);
 
         final String delegate = "com.example.delegate";
         final int delegateUid = setupPackageInPackageManager(delegate, 20988);
         dpm.setCertInstallerPackage(admin1, delegate);
 
-        mContext.packageName = delegate;
-        mContext.binder.callingUid = delegateUid;
-        verifyCanGetOwnerInstalledCaCerts(null);
-        verifyCantGetOwnerInstalledCaCertsProfileOwnerRemoval(null);
+        final DpmMockContext caller = new DpmMockContext(mRealTestContext, "test-caller");
+        caller.packageName = delegate;
+        caller.binder.callingUid = delegateUid;
+
+        verifyCanGetOwnerInstalledCaCerts(null, caller);
+        verifyCantGetOwnerInstalledCaCertsProfileOwnerRemoval(null, caller);
     }
 
-    private void verifyCanGetOwnerInstalledCaCerts(ComponentName caller) throws Exception {
-        final UserHandle user = UserHandle.getUserHandleForUid(mContext.binder.callingUid);
-        final int ownerUid = user.equals(UserHandle.SYSTEM) ?
-                DpmMockContext.CALLER_SYSTEM_USER_UID : DpmMockContext.CALLER_UID;
-
-        mContext.applicationInfo = new ApplicationInfo();
-        mContext.userContexts.put(user, mContext);
-        when(mContext.resources.getColor(anyInt(), anyObject())).thenReturn(Color.WHITE);
-
-        // Install a CA cert.
+    private void verifyCanGetOwnerInstalledCaCerts(
+            final ComponentName caller, final DpmMockContext callerContext) throws Exception {
         final String alias = "cert";
         final byte[] caCert = TEST_CA.getBytes();
-        when(mContext.keyChainConnection.getService().installCaCertificate(caCert))
-                .thenReturn(alias);
-        assertTrue(dpm.installCaCert(caller, caCert));
-        when(mContext.keyChainConnection.getService().getUserCaAliases())
-                .thenReturn(asSlice(new String[] {alias}));
-        mContext.injectBroadcast(new Intent(KeyChain.ACTION_TRUST_STORE_CHANGED));
+
+        // device admin (used for posting the tls notification)
+        final DpmMockContext admin1Context;
+        if (admin1.getPackageName().equals(callerContext.getPackageName())) {
+            admin1Context = callerContext;
+        } else {
+            admin1Context = new DpmMockContext(mRealTestContext, "test-admin");
+            admin1Context.packageName = admin1.getPackageName();
+            admin1Context.applicationInfo = new ApplicationInfo();
+        }
+        when(admin1Context.resources.getColor(anyInt(), anyObject())).thenReturn(Color.WHITE);
+
+        // caller: device admin or delegated certificate installer
+        callerContext.applicationInfo = new ApplicationInfo();
+        final UserHandle callerUser = callerContext.binder.getCallingUserHandle();
+
+        // system_server
+        final DpmMockContext serviceContext = mContext;
+        serviceContext.binder.callingUid = DpmMockContext.SYSTEM_UID;
+        serviceContext.addPackageContext(callerUser, admin1Context);
+        serviceContext.addPackageContext(callerUser, callerContext);
+
+        // Install a CA cert.
+        runAsCaller(callerContext, dpms, (dpm) -> {
+            when(mContext.keyChainConnection.getService().installCaCertificate(caCert))
+                        .thenReturn(alias);
+            assertTrue(dpm.installCaCert(caller, caCert));
+            when(mContext.keyChainConnection.getService().getUserCaAliases())
+                    .thenReturn(asSlice(new String[] {alias}));
+
+        });
+
+        serviceContext.injectBroadcast(new Intent(KeyChain.ACTION_TRUST_STORE_CHANGED)
+                .putExtra(Intent.EXTRA_USER_HANDLE, callerUser.getIdentifier()));
         flushTasks();
 
+        final List<String> ownerInstalledCaCerts = new ArrayList<>();
+
         // Device Owner / Profile Owner can find out which CA certs were installed by itself.
-        final String packageName = mContext.packageName;
-        mContext.packageName = admin1.getPackageName();
-        final long callerIdentity = mContext.binder.clearCallingIdentity();
-        mContext.binder.callingUid = ownerUid;
-        List<String> ownerInstalledCaCerts = dpm.getOwnerInstalledCaCerts(user);
-        assertNotNull(ownerInstalledCaCerts);
-        assertEquals(1, ownerInstalledCaCerts.size());
-        assertTrue(ownerInstalledCaCerts.contains(alias));
+        runAsCaller(admin1Context, dpms, (dpm) -> {
+            final List<String> installedCaCerts = dpm.getOwnerInstalledCaCerts(callerUser);
+            assertEquals(Arrays.asList(alias), installedCaCerts);
+            ownerInstalledCaCerts.addAll(installedCaCerts);
+        });
 
         // Restarting the DPMS should not lose information.
         initializeDpms();
-        assertEquals(ownerInstalledCaCerts, dpm.getOwnerInstalledCaCerts(user));
+        runAsCaller(admin1Context, dpms, (dpm) -> {
+            assertEquals(ownerInstalledCaCerts, dpm.getOwnerInstalledCaCerts(callerUser));
+        });
 
         // System can find out which CA certs were installed by the Device Owner / Profile Owner.
-        mContext.packageName = "com.android.frameworks.servicestests";
-        mContext.binder.clearCallingIdentity();
-        assertEquals(ownerInstalledCaCerts, dpm.getOwnerInstalledCaCerts(user));
+        runAsCaller(serviceContext, dpms, (dpm) -> {
+            assertEquals(ownerInstalledCaCerts, dpm.getOwnerInstalledCaCerts(callerUser));
 
-        // Remove the CA cert.
-        mContext.packageName = packageName;
-        mContext.binder.restoreCallingIdentity(callerIdentity);
-        reset(mContext.keyChainConnection.getService());
-        mContext.injectBroadcast(new Intent(KeyChain.ACTION_TRUST_STORE_CHANGED));
+            // Remove the CA cert.
+            reset(mContext.keyChainConnection.getService());
+        });
+
+        serviceContext.injectBroadcast(new Intent(KeyChain.ACTION_TRUST_STORE_CHANGED)
+                .putExtra(Intent.EXTRA_USER_HANDLE, callerUser.getIdentifier()));
         flushTasks();
 
         // Verify that the CA cert is no longer reported as installed by the Device Owner / Profile
         // Owner.
-        mContext.packageName = admin1.getPackageName();
-        mContext.binder.callingUid = ownerUid;
-        ownerInstalledCaCerts = dpm.getOwnerInstalledCaCerts(user);
-        assertNotNull(ownerInstalledCaCerts);
-        assertTrue(ownerInstalledCaCerts.isEmpty());
-
-        mContext.packageName = packageName;
-        mContext.binder.restoreCallingIdentity(callerIdentity);
+        runAsCaller(admin1Context, dpms, (dpm) -> {
+            MoreAsserts.assertEmpty(dpm.getOwnerInstalledCaCerts(callerUser));
+        });
     }
 
-    private void verifyCantGetOwnerInstalledCaCertsProfileOwnerRemoval(ComponentName caller)
-            throws Exception {
-        final UserHandle user = UserHandle.of(DpmMockContext.CALLER_USER_HANDLE);
-
-        mContext.applicationInfo = new ApplicationInfo();
-        mContext.userContexts.put(user, mContext);
-        when(mContext.resources.getColor(anyInt(), anyObject())).thenReturn(Color.WHITE);
-
-        // Install a CA cert.
+    private void verifyCantGetOwnerInstalledCaCertsProfileOwnerRemoval(
+            final ComponentName callerName, final DpmMockContext callerContext) throws Exception {
         final String alias = "cert";
         final byte[] caCert = TEST_CA.getBytes();
-        when(mContext.keyChainConnection.getService().installCaCertificate(caCert))
-                .thenReturn(alias);
-        assertTrue(dpm.installCaCert(caller, caCert));
-        when(mContext.keyChainConnection.getService().getUserCaAliases())
+
+        // device admin (used for posting the tls notification)
+        final DpmMockContext admin1Context;
+        if (admin1.getPackageName().equals(callerContext.getPackageName())) {
+            admin1Context = callerContext;
+        } else {
+            admin1Context = new DpmMockContext(mRealTestContext, "test-admin");
+            admin1Context.packageName = admin1.getPackageName();
+            admin1Context.applicationInfo = new ApplicationInfo();
+        }
+        when(admin1Context.resources.getColor(anyInt(), anyObject())).thenReturn(Color.WHITE);
+
+        // caller: device admin or delegated certificate installer
+        callerContext.applicationInfo = new ApplicationInfo();
+        final UserHandle callerUser = callerContext.binder.getCallingUserHandle();
+
+        // system_server
+        final DpmMockContext serviceContext = mContext;
+        serviceContext.binder.callingUid = DpmMockContext.SYSTEM_UID;
+        serviceContext.addPackageContext(callerUser, admin1Context);
+        serviceContext.addPackageContext(callerUser, callerContext);
+
+        // Install a CA cert as caller
+        runAsCaller(callerContext, dpms, (dpm) -> {
+            when(mContext.keyChainConnection.getService().installCaCertificate(caCert))
+                    .thenReturn(alias);
+            assertTrue(dpm.installCaCert(callerName, caCert));
+        });
+
+        // Fake the CA cert as having been installed
+        when(serviceContext.keyChainConnection.getService().getUserCaAliases())
                 .thenReturn(asSlice(new String[] {alias}));
-        mContext.injectBroadcast(new Intent(KeyChain.ACTION_TRUST_STORE_CHANGED));
+        serviceContext.injectBroadcast(new Intent(KeyChain.ACTION_TRUST_STORE_CHANGED)
+                .putExtra(Intent.EXTRA_USER_HANDLE, callerUser.getIdentifier()));
         flushTasks();
 
-        // Removing the Profile Owner should clear the information which CA certs were installed
-        // by it.
-        mContext.packageName = admin1.getPackageName();
-        mContext.binder.callingUid = DpmMockContext.CALLER_UID;
-        dpm.clearProfileOwner(admin1);
-        mContext.packageName = "com.android.frameworks.servicestests";
-        mContext.binder.clearCallingIdentity();
-        final List<String> ownerInstalledCaCerts = dpm.getOwnerInstalledCaCerts(user);
-        assertNotNull(ownerInstalledCaCerts);
-        assertTrue(ownerInstalledCaCerts.isEmpty());
+        // Removing the Profile Owner should clear the information on which CA certs were installed
+        runAsCaller(admin1Context, dpms, (dpm) -> {
+            dpm.clearProfileOwner(admin1);
+        });
+
+        runAsCaller(serviceContext, dpms, (dpm) -> {
+            final List<String> ownerInstalledCaCerts = dpm.getOwnerInstalledCaCerts(callerUser);
+            assertNotNull(ownerInstalledCaCerts);
+            assertTrue(ownerInstalledCaCerts.isEmpty());
+        });
     }
 
     private void setUserSetupCompleteForUser(boolean isUserSetupComplete, int userhandle) {
@@ -4147,29 +4199,11 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     private void flushTasks() throws Exception {
-        Boolean tasksFlushed[] = new Boolean[] {false};
-        final Runnable tasksFlushedNotifier = () -> {
-            synchronized (tasksFlushed) {
-                tasksFlushed[0] = true;
-                tasksFlushed.notify();
-            }
-        };
+        dpms.mHandler.runWithScissors(() -> {}, 0 /*now*/);
+        dpms.mBackgroundHandler.runWithScissors(() -> {}, 0 /*now*/);
 
-        // Flush main thread handler.
-        dpms.mHandler.post(tasksFlushedNotifier);
-        synchronized (tasksFlushed) {
-            if (!tasksFlushed[0]) {
-                tasksFlushed.wait();
-            }
-        }
-
-        // Flush background thread handler.
-        tasksFlushed[0] = false;
-        dpms.mBackgroundHandler.post(tasksFlushedNotifier);
-        synchronized (tasksFlushed) {
-            if (!tasksFlushed[0]) {
-                tasksFlushed.wait();
-            }
-        }
+        // We can't let exceptions happen on the background thread. Throw them here if they happen
+        // so they still cause the test to fail despite being suppressed.
+        mContext.rethrowBackgroundBroadcastExceptions();
     }
 }

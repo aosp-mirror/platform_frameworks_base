@@ -48,6 +48,7 @@ import android.telephony.TelephonyManager;
 import android.test.mock.MockContentResolver;
 import android.test.mock.MockContext;
 import android.util.ArrayMap;
+import android.util.Pair;
 import android.view.IWindowManager;
 
 import com.android.internal.widget.LockPatternUtils;
@@ -61,6 +62,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
@@ -111,6 +113,7 @@ public class DpmMockContext extends MockContext {
     public static class MockBinder {
         public int callingUid = CALLER_UID;
         public int callingPid = CALLER_PID;
+        public final Map<Integer, List<String>> callingPermissions = new ArrayMap<>();
 
         public long clearCallingIdentity() {
             final long token = (((long) callingUid) << 32) | (callingPid);
@@ -303,14 +306,19 @@ public class DpmMockContext extends MockContext {
     /** Note this is a partial mock, not a real mock. */
     public final PackageManager packageManager;
 
+    /** TODO: Migrate everything to use {@link #permissions} to avoid confusion. */
+    @Deprecated
     public final List<String> callerPermissions = new ArrayList<>();
+
+    /** Less confusing alias for {@link #callerPermissions}. */
+    public final List<String> permissions = callerPermissions;
 
     private final ArrayList<UserInfo> mUserInfos = new ArrayList<>();
 
     public final BuildMock buildMock = new BuildMock();
 
     /** Optional mapping of other user contexts for {@link #createPackageContextAsUser} to return */
-    public final Map<UserHandle, Context> userContexts = new ArrayMap<>();
+    public final Map<Pair<UserHandle, String>, Context> userPackageContexts = new ArrayMap<>();
 
     public String packageName = null;
 
@@ -323,6 +331,9 @@ public class DpmMockContext extends MockContext {
         public final BroadcastReceiver receiver;
         public final IntentFilter filter;
         public final Handler scheduler;
+
+        // Exceptions thrown in a background thread kill the whole test. Save them instead.
+        public final AtomicReference<Exception> backgroundException = new AtomicReference<>();
 
         public BroadcastReceiverRegistration(BroadcastReceiver receiver, IntentFilter filter,
                 Handler scheduler) {
@@ -337,19 +348,29 @@ public class DpmMockContext extends MockContext {
                     0 /* type */, false /* ordered */, false /* sticky */, null /* token */, userId,
                     0 /* flags */);
             if (filter.match(null, intent, false, "DpmMockContext") > 0) {
-                if (scheduler != null) {
-                    scheduler.post(() -> {
-                        receiver.setPendingResult(result);
-                        receiver.onReceive(DpmMockContext.this, intent);
-                    });
-                } else {
+                final Runnable send = () -> {
                     receiver.setPendingResult(result);
                     receiver.onReceive(DpmMockContext.this, intent);
+                };
+                if (scheduler != null) {
+                    scheduler.post(() -> {
+                        try {
+                            send.run();
+                        } catch (Exception e) {
+                            backgroundException.compareAndSet(null, e);
+                        }
+                    });
+                } else {
+                    send.run();
                 }
             }
         }
     }
     private List<BroadcastReceiverRegistration> mBroadcastReceivers = new ArrayList<>();
+
+    public DpmMockContext(Context realTestContext, String name) {
+        this(realTestContext, new File(realTestContext.getCacheDir(), name));
+    }
 
     public DpmMockContext(Context context, File dataDir) {
         realTestContext = context;
@@ -511,11 +532,27 @@ public class DpmMockContext extends MockContext {
                 .thenReturn(isRunning);
     }
 
-    public void injectBroadcast(Intent intent) {
+    public void injectBroadcast(final Intent intent) {
         final int userId = UserHandle.getUserId(binder.getCallingUid());
         for (final BroadcastReceiverRegistration receiver : mBroadcastReceivers) {
             receiver.sendBroadcastIfApplicable(userId, intent);
         }
+    }
+
+    public void rethrowBackgroundBroadcastExceptions() throws Exception {
+        for (final BroadcastReceiverRegistration receiver : mBroadcastReceivers) {
+            final Exception e = receiver.backgroundException.getAndSet(null);
+            if (e != null) {
+                throw e;
+            }
+        }
+    }
+
+    public void addPackageContext(UserHandle user, Context context) {
+        if (context.getPackageName() == null) {
+            throw new NullPointerException("getPackageName() == null");
+        }
+        userPackageContexts.put(new Pair<>(user, context.getPackageName()), context);
     }
 
     @Override
@@ -576,7 +613,16 @@ public class DpmMockContext extends MockContext {
         if (binder.getCallingUid() == SYSTEM_UID) {
             return; // Assume system has all permissions.
         }
-        if (!callerPermissions.contains(permission)) {
+
+        List<String> permissions = binder.callingPermissions.get(binder.getCallingUid());
+        if (permissions == null) {
+            // TODO: delete the following line. to do this without breaking any tests, first it's
+            //       necessary to remove all tests that set it directly.
+            permissions = callerPermissions;
+//            throw new UnsupportedOperationException(
+//                    "Caller UID " + binder.getCallingUid() + " doesn't exist");
+        }
+        if (!permissions.contains(permission)) {
             throw new SecurityException("Caller doesn't have " + permission + " : " + message);
         }
     }
@@ -751,14 +797,11 @@ public class DpmMockContext extends MockContext {
     @Override
     public Context createPackageContextAsUser(String packageName, int flags, UserHandle user)
             throws PackageManager.NameNotFoundException {
-        if (!userContexts.containsKey(user)) {
-            return super.createPackageContextAsUser(packageName, flags, user);
+        final Pair<UserHandle, String> key = new Pair<>(user, packageName);
+        if (userPackageContexts.containsKey(key)) {
+            return userPackageContexts.get(key);
         }
-        if (!getPackageName().equals(packageName)) {
-            throw new UnsupportedOperationException(
-                    "Creating a context as another package is not implemented");
-        }
-        return userContexts.get(user);
+        throw new UnsupportedOperationException("No package " + packageName + " for user " + user);
     }
 
     @Override

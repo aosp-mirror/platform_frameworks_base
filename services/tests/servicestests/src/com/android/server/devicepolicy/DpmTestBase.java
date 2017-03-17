@@ -16,6 +16,7 @@
 
 package com.android.server.devicepolicy;
 
+import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -68,6 +69,34 @@ public abstract class DpmTestBase extends AndroidTestCase {
     @Override
     public DpmMockContext getContext() {
         return mMockContext;
+    }
+
+    protected interface DpmRunnable {
+        public void run(DevicePolicyManager dpm) throws Exception;
+    }
+
+    /**
+     * Simulate an RPC from {@param caller} to the service context ({@link #mContext}).
+     *
+     * The caller sees its own context. The server also sees its own separate context, with the
+     * appropriate calling UID and calling permissions fields already set up.
+     */
+    protected void runAsCaller(DpmMockContext caller, DevicePolicyManagerServiceTestable dpms,
+            DpmRunnable action) {
+        final DpmMockContext serviceContext = mMockContext;
+
+        final long origId = serviceContext.binder.clearCallingIdentity();
+        try {
+            serviceContext.binder.callingUid = caller.binder.callingUid;
+            serviceContext.binder.callingPid = caller.binder.callingPid;
+            serviceContext.binder.callingPermissions.put(caller.binder.callingUid,
+                    caller.permissions);
+            action.run(new DevicePolicyManagerTestable(caller, dpms));
+        } catch (Exception e) {
+            throw new AssertionError(e);
+        } finally {
+            serviceContext.binder.restoreCallingIdentity(origId);
+        }
     }
 
     protected void markPackageAsInstalled(String packageName, ApplicationInfo ai, int userId)
