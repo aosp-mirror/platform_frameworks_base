@@ -17,26 +17,40 @@ package android.metrics;
 
 import android.annotation.SystemApi;
 import android.util.EventLog;
-import android.util.EventLog.Event;
-import android.util.Log;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Queue;
 
 /**
  * Read platform logs.
+ *
  * @hide
  */
 @SystemApi
 public class MetricsReader {
-    private Queue<LogMaker> mEventQueue = new LinkedList<>();
-    private long mLastEventMs;
-    private long mCheckpointMs;
-    private int[] LOGTAGS = { MetricsLogger.LOGTAG };
+    private Queue<LogMaker> mPendingQueue = new LinkedList<>();
+    private Queue<LogMaker> mSeenQueue = new LinkedList<>();
+    private int[] LOGTAGS = {MetricsLogger.LOGTAG};
+
+    private LogReader mReader = new LogReader();
+    private int mCheckpointTag = -1;
+
+    /**
+     * Set the reader to isolate unit tests from the framework
+     *
+     * @hide
+     */
+    @VisibleForTesting
+    public void setLogReader(LogReader reader) {
+        mReader = reader;
+    }
 
     /**
      * Read the available logs into a new session.
@@ -59,62 +73,139 @@ public class MetricsReader {
     public void read(long horizonMs) {
         ArrayList<Event> nativeEvents = new ArrayList<>();
         try {
-            EventLog.readEventsOnWrapping(LOGTAGS, horizonMs, nativeEvents);
+            mReader.readEvents(LOGTAGS, horizonMs, nativeEvents);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        mEventQueue.clear();
-        for (EventLog.Event event : nativeEvents) {
+        mPendingQueue.clear();
+        mSeenQueue.clear();
+        for (Event event : nativeEvents) {
             final long eventTimestampMs = event.getTimeNanos() / 1000000;
-            if (eventTimestampMs > mCheckpointMs) {
-                Object data = event.getData();
-                Object[] objects;
-                if (data instanceof Object[]) {
-                    objects = (Object[]) data;
-                } else {
-                    // wrap scalar objects
-                    objects = new Object[1];
-                    objects[0] = data;
+            Object data = event.getData();
+            Object[] objects;
+            if (data instanceof Object[]) {
+                objects = (Object[]) data;
+            } else {
+                // wrap scalar objects
+                objects = new Object[1];
+                objects[0] = data;
+            }
+            final LogMaker log = new LogMaker(objects)
+                    .setTimestamp(eventTimestampMs)
+                    .setProcessId(event.getProcessId());
+            if (log.getCategory() == MetricsEvent.METRICS_CHECKPOINT) {
+                if (log.getSubtype() == mCheckpointTag) {
+                    mPendingQueue.clear();
                 }
-                mEventQueue.add(new LogMaker(objects)
-                        .setTimestamp(eventTimestampMs)
-                        .setProcessId(event.getProcessId()));
-                mLastEventMs = eventTimestampMs;
+            } else {
+                mPendingQueue.offer(log);
             }
         }
     }
 
-    /** Cause this session to only contain events that occur after this call. */
+    /**
+     * Empties the session and causes the next {@link #read(long)} to
+     * yeild a session containing only events that occur after this call.
+     */
     public void checkpoint() {
-        // read the log to find the most recent event.
-        read(0L);
+        // write a checkpoint into the log stream
+        mCheckpointTag = (int) (System.currentTimeMillis() % 0x7fffffff);
+        mReader.writeCheckpoint(mCheckpointTag);
         // any queued event is now too old, so drop them.
-        mEventQueue.clear();
-        mCheckpointMs = mLastEventMs;
+        mPendingQueue.clear();
+        mSeenQueue.clear();
     }
 
     /**
-     * Rewind the session to the beginning of time and read all available logs.
-     *
-     * A prior call to {@link #checkpoint()} will cause the reader to ignore
-     * any event with a timestamp before the time of that call.
-     *
-     * The underlying log buffer is live: between calls to {@link #reset()}, older
-     * events may be lost from the beginning of the session, and new events may
-     * appear at the end.
+     * Rewind the session to the beginning of time and replay all available logs.
      */
     public void reset() {
-        read(0l);
+        // flush the rest of hte pending events
+        mSeenQueue.addAll(mPendingQueue);
+        mPendingQueue.clear();
+        mCheckpointTag = -1;
+
+        // swap queues
+        Queue<LogMaker> tmp = mPendingQueue;
+        mPendingQueue = mSeenQueue;
+        mSeenQueue = tmp;
     }
 
     /* Does the current log session have another entry? */
     public boolean hasNext() {
-        return !mEventQueue.isEmpty();
+        return !mPendingQueue.isEmpty();
     }
 
     /* Return the next entry in the current log session. */
     public LogMaker next() {
-        return mEventQueue.poll();
+        final LogMaker next = mPendingQueue.poll();
+        if (next != null) {
+            mSeenQueue.offer(next);
+        }
+        return next;
     }
 
+    /**
+     * Wrapper for the Event object, to facilitate testing.
+     *
+     * @hide
+     */
+    @VisibleForTesting
+    public static class Event {
+        long mTimeNanos;
+        int mPid;
+        Object mData;
+
+        public Event(long timeNanos, int pid, Object data) {
+            mTimeNanos = timeNanos;
+            mPid = pid;
+            mData = data;
+        }
+
+        Event(EventLog.Event nativeEvent) {
+            mTimeNanos = nativeEvent.getTimeNanos();
+            mPid = nativeEvent.getProcessId();
+            mData = nativeEvent.getData();
+        }
+
+        public long getTimeNanos() {
+            return mTimeNanos;
+        }
+
+        public int getProcessId() {
+            return mPid;
+        }
+
+        public Object getData() {
+            return mData;
+        }
+
+        public void setData(Object data) {
+            mData = data;
+        }
+    }
+
+    /**
+     * Wrapper for the Event reader, to facilitate testing.
+     *
+     * @hide
+     */
+    @VisibleForTesting
+    public static class LogReader {
+        public void readEvents(int[] tags, long horizonMs, Collection<Event> events)
+                throws IOException {
+            // Testing in Android: the Static Final Class Strikes Back!
+            ArrayList<EventLog.Event> nativeEvents = new ArrayList<>();
+            EventLog.readEventsOnWrapping(tags, horizonMs, nativeEvents);
+            for (EventLog.Event nativeEvent : nativeEvents) {
+                Event event = new Event(nativeEvent);
+                events.add(event);
+            }
+        }
+
+        public void writeCheckpoint(int tag) {
+            MetricsLogger logger = new MetricsLogger();
+            logger.action(MetricsEvent.METRICS_CHECKPOINT, tag);
+        }
+    }
 }

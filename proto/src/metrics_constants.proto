@@ -3777,6 +3777,9 @@ message MetricsEvent {
     // Package: Package of app that was autofilled
     AUTOFILL_SESSION_FINISHED = 919;
 
+    // meta-event: a reader has checkpointed the log here.
+    METRICS_CHECKPOINT = 920;
+
     // ---- End O Constants, all O constants go above this line ----
 
     // Add new aosp constants above this line.
