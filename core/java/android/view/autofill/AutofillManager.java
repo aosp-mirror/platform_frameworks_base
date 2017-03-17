@@ -196,6 +196,9 @@ public final class AutofillManager {
         ensureServiceClientAddedIfNeeded();
 
         if (!mEnabled) {
+            if (mCallback != null) {
+                mCallback.onAutofillEvent(view, AutofillCallback.EVENT_INPUT_UNAVAILABLE);
+            }
             return;
         }
 
@@ -241,6 +244,10 @@ public final class AutofillManager {
         ensureServiceClientAddedIfNeeded();
 
         if (!mEnabled) {
+            if (mCallback != null) {
+                mCallback.onAutofillEventVirtual(view, childId,
+                        AutofillCallback.EVENT_INPUT_UNAVAILABLE);
+            }
             return;
         }
 
@@ -537,6 +544,15 @@ public final class AutofillManager {
          * {@link #EVENT_INPUT_SHOWN} event, it could be shown again now.
          */
         public static final int EVENT_INPUT_HIDDEN = 2;
+
+        /**
+         * The auto-fill input UI affordance associated with the view won't be shown because
+         * autofill is not available.
+         *
+         * <p>If the view provides its own auto-complete UI affordance but was not displaying it
+         * to avoid flickering, it could shown it upon receiving this event.
+         */
+        public static final int EVENT_INPUT_UNAVAILABLE = 3;
 
         /**
          * Called after a change in the autofill state associated with a view.
