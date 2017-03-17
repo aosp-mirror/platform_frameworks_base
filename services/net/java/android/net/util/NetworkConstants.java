@@ -97,6 +97,7 @@ public final class NetworkConstants {
     public static final int IPV6_SRC_ADDR_OFFSET = 8;
     public static final int IPV6_DST_ADDR_OFFSET = 24;
     public static final int IPV6_ADDR_LEN = 16;
+    public static final int RFC7421_PREFIX_LENGTH = 64;
 
     /**
      * ICMPv6 constants.
