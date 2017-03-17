@@ -2638,7 +2638,7 @@ public final class StrictMode {
             dest.writeString(broadcastIntentAction);
             dest.writeStringArray(tags);
             int total = dest.dataPosition()-start;
-            if (total > 10*1024) {
+            if (Binder.CHECK_PARCEL_SIZE && total > 10*1024) {
                 Slog.d(TAG, "VIO: policy=" + policy + " dur=" + durationMillis
                         + " numLoop=" + violationNumThisLoop
                         + " anim=" + numAnimationsRunning

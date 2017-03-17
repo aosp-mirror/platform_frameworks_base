@@ -22,6 +22,7 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.os.Binder;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemProperties;
@@ -430,7 +431,7 @@ public class ApplicationErrorReport implements Parcelable {
             dest.writeInt(throwLineNumber);
             dest.writeString(stackTrace);
             int total = dest.dataPosition()-start;
-            if (total > 20*1024) {
+            if (Binder.CHECK_PARCEL_SIZE && total > 20*1024) {
                 Slog.d("Error", "ERR: exClass=" + exceptionClassName);
                 Slog.d("Error", "ERR: exMsg=" + exceptionMessage);
                 Slog.d("Error", "ERR: file=" + throwFileName);

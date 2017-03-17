@@ -66,7 +66,8 @@ public class Binder implements IBinder {
      * of classes can potentially create leaks.
      */
     private static final boolean FIND_POTENTIAL_LEAKS = false;
-    private static final boolean CHECK_PARCEL_SIZE = false;
+    /** @hide */
+    public static final boolean CHECK_PARCEL_SIZE = false;
     static final String TAG = "Binder";
 
     /** @hide */
