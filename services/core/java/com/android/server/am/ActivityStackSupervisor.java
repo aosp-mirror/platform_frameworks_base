@@ -16,6 +16,7 @@
 
 package com.android.server.am;
 
+import static android.Manifest.permission.MANAGE_ACTIVITY_STACKS;
 import static android.Manifest.permission.START_ANY_ACTIVITY;
 import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
 import static android.app.ActivityManager.LOCK_TASK_MODE_LOCKED;
@@ -1612,8 +1613,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             return true;
         }
 
-        // Check if the caller can launch anything.
-        final int startAnyPerm = mService.checkPermission(START_ANY_ACTIVITY, callingPid,
+        // Check if the caller can manage activity stacks.
+        final int startAnyPerm = mService.checkPermission(MANAGE_ACTIVITY_STACKS, callingPid,
                 callingUid);
         if (startAnyPerm == PERMISSION_GRANTED) {
             if (DEBUG_TASKS) Slog.d(TAG, "Launch on display check:"
