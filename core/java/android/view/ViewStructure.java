@@ -275,13 +275,12 @@ public abstract class ViewStructure {
      *            {@link #addChildCount(int)} and {@link #setChildCount(int)}.
      * @param virtualId an opaque ID to the Android System (although it could be meaningful to the
      *            {@link View} creating the {@link ViewStructure}), but it's the same id used on
-     *            {@link View#autofillVirtual(int, AutofillValue)}.
+     *            {@link View#autofill(int, AutofillValue)}.
      * @param flags currently {@code 0}.
      *
      * @return Returns an fresh {@link ViewStructure} ready to be filled in.
      */
-    // TODO(b/33197203, b/33802548): add CTS/unit test
-    public abstract ViewStructure newChildForAutofill(int index, int virtualId, int flags);
+    public abstract ViewStructure newChild(int index, int virtualId, int flags);
 
     /**
      * Like {@link #newChild}, but allows the caller to asynchronously populate the returned
@@ -294,7 +293,7 @@ public abstract class ViewStructure {
     public abstract ViewStructure asyncNewChild(int index);
 
     /**
-     * Like {@link #newChildForAutofill(int, int, int)}, but allows the caller to asynchronously
+     * Like {@link #newChild(int, int, int)}, but allows the caller to asynchronously
      * populate the returned child.
      *
      * <p>It can transfer the returned {@link ViewStructure} to another thread for it to build its
@@ -307,13 +306,12 @@ public abstract class ViewStructure {
      *            {@link #addChildCount(int)} and {@link #setChildCount(int)}.
      * @param virtualId an opaque ID to the Android System (although it could be meaningful to the
      *            {@link View} creating the {@link ViewStructure}), but it's the same id used on
-     *            {@link View#autofillVirtual(int, AutofillValue)}.
+     *            {@link View#autofill(int, AutofillValue)}.
      * @param flags currently {@code 0}.
      *
      * @return Returns an fresh {@link ViewStructure} ready to be filled in.
      */
-    // TODO(b/33197203, b/33802548): add CTS/unit test
-    public abstract ViewStructure asyncNewChildForAutofill(int index, int virtualId, int flags);
+    public abstract ViewStructure asyncNewChild(int index, int virtualId, int flags);
 
     /**
      * Sets the {@link View#getAutofillType()} that can be used to autofill this node.

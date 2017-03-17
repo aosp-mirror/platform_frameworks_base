@@ -239,14 +239,12 @@ public final class AutofillManager {
      * @param childId id identifying the virtual child inside the view.
      * @param bounds child boundaries, relative to the top window.
      */
-    public void notifyVirtualViewEntered(@NonNull View view, int childId,
-            @NonNull Rect bounds) {
+    public void notifyViewEntered(@NonNull View view, int childId, @NonNull Rect bounds) {
         ensureServiceClientAddedIfNeeded();
 
         if (!mEnabled) {
             if (mCallback != null) {
-                mCallback.onAutofillEventVirtual(view, childId,
-                        AutofillCallback.EVENT_INPUT_UNAVAILABLE);
+                mCallback.onAutofillEvent(view, childId, AutofillCallback.EVENT_INPUT_UNAVAILABLE);
             }
             return;
         }
@@ -268,7 +266,7 @@ public final class AutofillManager {
      * @param view the {@link View} whose descendant is the virtual view.
      * @param childId id identifying the virtual child inside the view.
      */
-    public void notifyVirtualViewExited(@NonNull View view, int childId) {
+    public void notifyViewExited(@NonNull View view, int childId) {
         ensureServiceClientAddedIfNeeded();
 
         if (mEnabled && mHasSession) {
@@ -302,7 +300,7 @@ public final class AutofillManager {
      * @param childId id identifying the virtual child inside the parent view.
      * @param value new value of the child.
      */
-    public void notifyVirtualValueChanged(View view, int childId, AutofillValue value) {
+    public void notifyValueChanged(View view, int childId, AutofillValue value) {
         if (!mEnabled || !mHasSession) {
             return;
         }
@@ -510,7 +508,7 @@ public final class AutofillManager {
             return;
         }
         if (id.isVirtual()) {
-            mCallback.onAutofillEventVirtual(view, id.getVirtualChildId(), event);
+            mCallback.onAutofillEvent(view, id.getVirtualChildId(), event);
         } else {
             mCallback.onAutofillEvent(view, event);
         }
@@ -561,7 +559,8 @@ public final class AutofillManager {
          *
          * @param event currently either {@link #EVENT_INPUT_SHOWN} or {@link #EVENT_INPUT_HIDDEN}.
          */
-        public void onAutofillEvent(@NonNull View view, @AutofillEventType int event) {}
+        public void onAutofillEvent(@NonNull View view, @AutofillEventType int event) {
+        }
 
         /**
          * Called after a change in the autofill state associated with a virtual view.
@@ -571,8 +570,8 @@ public final class AutofillManager {
          *
          * @param event currently either {@link #EVENT_INPUT_SHOWN} or {@link #EVENT_INPUT_HIDDEN}.
          */
-        public void onAutofillEventVirtual(@NonNull View view, int childId,
-                @AutofillEventType int event) {}
+        public void onAutofillEvent(@NonNull View view, int childId, @AutofillEventType int event) {
+        }
     }
 
     private static final class AutofillManagerClient extends IAutoFillManagerClient.Stub {
