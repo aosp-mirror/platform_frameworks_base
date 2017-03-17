@@ -68,11 +68,12 @@ final class EphemeralResolverConnection {
         mIntent = new Intent(Intent.ACTION_RESOLVE_EPHEMERAL_PACKAGE).setComponent(componentName);
     }
 
-    public final List<InstantAppResolveInfo> getInstantAppResolveInfoList(int hashPrefix[]) {
+    public final List<InstantAppResolveInfo> getInstantAppResolveInfoList(int hashPrefix[],
+            String token) {
         throwIfCalledOnMainThread();
         try {
             return mGetEphemeralResolveInfoCaller.getEphemeralResolveInfoList(
-                    getRemoteInstanceLazy(), hashPrefix);
+                    getRemoteInstanceLazy(), hashPrefix, token);
         } catch (RemoteException re) {
         } catch (TimeoutException te) {
         } finally {
@@ -83,8 +84,9 @@ final class EphemeralResolverConnection {
         return null;
     }
 
-    public final void getInstantAppIntentFilterList(int hashPrefix[], String hostName,
-            PhaseTwoCallback callback, Handler callbackHandler, final long startTime) {
+    public final void getInstantAppIntentFilterList(int hashPrefix[], String token,
+            String hostName, PhaseTwoCallback callback, Handler callbackHandler,
+            final long startTime) {
         final IRemoteCallback remoteCallback = new IRemoteCallback.Stub() {
             @Override
             public void sendResult(Bundle data) throws RemoteException {
@@ -100,9 +102,8 @@ final class EphemeralResolverConnection {
             }
         };
         try {
-            // TODO deprecate sequence; it's never used
-            getRemoteInstanceLazy().getInstantAppIntentFilterList(
-                    hashPrefix, 0 /*sequence*/, hostName, remoteCallback);
+            getRemoteInstanceLazy()
+                    .getInstantAppIntentFilterList(hashPrefix, token, hostName, remoteCallback);
         } catch (RemoteException re) {
         } catch (TimeoutException te) {
         }
@@ -215,10 +216,10 @@ final class EphemeralResolverConnection {
         }
 
         public List<InstantAppResolveInfo> getEphemeralResolveInfoList(
-                IInstantAppResolver target, int hashPrefix[])
+                IInstantAppResolver target, int hashPrefix[], String token)
                         throws RemoteException, TimeoutException {
             final int sequence = onBeforeRemoteCall();
-            target.getInstantAppResolveInfoList(hashPrefix, sequence, mCallback);
+            target.getInstantAppResolveInfoList(hashPrefix, token, sequence, mCallback);
             return getResultTimed(sequence);
         }
     }

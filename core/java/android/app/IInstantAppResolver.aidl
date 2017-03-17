@@ -21,8 +21,8 @@ import android.os.IRemoteCallback;
 /** @hide */
 oneway interface IInstantAppResolver {
     void getInstantAppResolveInfoList(in int[] digestPrefix,
-            int sequence, IRemoteCallback callback);
+            String token, int sequence, IRemoteCallback callback);
 
     void getInstantAppIntentFilterList(in int[] digestPrefix,
-            int sequence, String hostName, IRemoteCallback callback);
+            String token, String hostName, IRemoteCallback callback);
 }
