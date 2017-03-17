@@ -318,6 +318,66 @@ public class ImsReasonInfo implements Parcelable {
      */
     public static final int CODE_IKEV2_AUTH_FAILURE = 1408;
 
+    /** The call cannot be established because RADIO is OFF */
+    public static final int CODE_RADIO_OFF = 1500;
+
+    /** The call cannot be established because of no valid SIM */
+    public static final int CODE_NO_VALID_SIM = 1501;
+
+    /** The failure is due internal error at modem */
+    public static final int CODE_RADIO_INTERNAL_ERROR = 1502;
+
+    /** The failure is due to UE timer expired while waiting for a response from network */
+    public static final int CODE_NETWORK_RESP_TIMEOUT = 1503;
+
+    /** The failure is due to explicit reject from network */
+    public static final int CODE_NETWORK_REJECT = 1504;
+
+    /** The failure is due to radio access failure. ex. RACH failure */
+    public static final int CODE_RADIO_ACCESS_FAILURE = 1505;
+
+    /** Call/IMS registration failed/dropped because of a RLF */
+    public static final int CODE_RADIO_LINK_FAILURE = 1506;
+
+    /** Call/IMS registration failed/dropped because of radio link lost */
+    public static final int CODE_RADIO_LINK_LOST = 1507;
+
+    /** The call Call/IMS registration failed because of a radio uplink issue */
+    public static final int CODE_RADIO_UPLINK_FAILURE = 1508;
+
+    /** Call failed because of a RRC connection setup failure */
+    public static final int CODE_RADIO_SETUP_FAILURE = 1509;
+
+    /** Call failed/dropped because of RRC connection release from NW */
+    public static final int CODE_RADIO_RELEASE_NORMAL = 1510;
+
+    /** Call failed/dropped because of RRC abnormally released by modem/network */
+    public static final int CODE_RADIO_RELEASE_ABNORMAL = 1511;
+
+    /** Call failed because of access class barring */
+    public static final int CODE_ACCESS_CLASS_BLOCKED = 1512;
+
+    /** Call/IMS registration is failed/dropped because of a network detach */
+    public static final int CODE_NETWORK_DETACH = 1513;
+
+    /* OEM specific error codes. To be used by OEMs when they don't want to
+   reveal error code which would be replaced by ERROR_UNSPECIFIED */
+    public static final int CODE_OEM_CAUSE_1 = 0xf001;
+    public static final int CODE_OEM_CAUSE_2 = 0xf002;
+    public static final int CODE_OEM_CAUSE_3 = 0xf003;
+    public static final int CODE_OEM_CAUSE_4 = 0xf004;
+    public static final int CODE_OEM_CAUSE_5 = 0xf005;
+    public static final int CODE_OEM_CAUSE_6 = 0xf006;
+    public static final int CODE_OEM_CAUSE_7 = 0xf007;
+    public static final int CODE_OEM_CAUSE_8 = 0xf008;
+    public static final int CODE_OEM_CAUSE_9 = 0xf009;
+    public static final int CODE_OEM_CAUSE_10 = 0xf00a;
+    public static final int CODE_OEM_CAUSE_11 = 0xf00b;
+    public static final int CODE_OEM_CAUSE_12 = 0xf00c;
+    public static final int CODE_OEM_CAUSE_13 = 0xf00d;
+    public static final int CODE_OEM_CAUSE_14 = 0xf00e;
+    public static final int CODE_OEM_CAUSE_15 = 0xf00f;
+
     /**
      * Network string error messages.
      * mExtraMessage may have these values.
