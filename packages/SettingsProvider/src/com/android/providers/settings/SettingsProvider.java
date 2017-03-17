@@ -248,6 +248,9 @@ public class SettingsProvider extends ContentProvider {
     @GuardedBy("mLock")
     private HandlerThread mHandlerThread;
 
+    @GuardedBy("mLock")
+    private Handler mHandler;
+
     // We have to call in the user manager with no lock held,
     private volatile UserManager mUserManager;
 
@@ -300,10 +303,13 @@ public class SettingsProvider extends ContentProvider {
             mHandlerThread = new HandlerThread(LOG_TAG,
                     Process.THREAD_PRIORITY_BACKGROUND);
             mHandlerThread.start();
+            mHandler = new Handler(mHandlerThread.getLooper());
             mSettingsRegistry = new SettingsRegistry();
         }
-        registerBroadcastReceivers();
-        startWatchingUserRestrictionChanges();
+        mHandler.post(() -> {
+            registerBroadcastReceivers();
+            startWatchingUserRestrictionChanges();
+        });
         ServiceManager.addService("settings", new SettingsService(this));
         return true;
     }

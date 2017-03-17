@@ -105,16 +105,16 @@ final class ActivityManagerConstants extends ContentObserver {
     }
 
     private void updateConstants() {
+        final String setting = Settings.Global.getString(mResolver,
+                Settings.Global.ACTIVITY_MANAGER_CONSTANTS);
         synchronized (mService) {
             try {
-                mParser.setString(Settings.Global.getString(mResolver,
-                        Settings.Global.ACTIVITY_MANAGER_CONSTANTS));
+                mParser.setString(setting);
             } catch (IllegalArgumentException e) {
                 // Failed to parse the settings string, log this and move on
                 // with defaults.
                 Slog.e("ActivityManagerConstants", "Bad activity manager config settings", e);
             }
-
             ENFORCE_BG_CHECK = mParser.getBoolean(KEY_ENFORCE_BG_CHECK, DEFAULT_ENFORCE_BG_CHECK);
             MAX_CACHED_PROCESSES = mParser.getInt(KEY_MAX_CACHED_PROCESSES,
                     DEFAULT_MAX_CACHED_PROCESSES);
