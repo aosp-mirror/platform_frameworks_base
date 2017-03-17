@@ -235,9 +235,8 @@ final class AutofillManagerServiceImpl {
                 if (!hasService()) {
                     final int sessionCount = mSessions.size();
                     for (int i = sessionCount - 1; i >= 0; i--) {
-                        Session session = mSessions.valueAt(i);
-                        session.destroyLocked();
-                        mSessions.removeAt(i);
+                        final Session session = mSessions.valueAt(i);
+                        session.removeSelfLocked();
                     }
                 }
                 sendStateToClients();
@@ -328,7 +327,13 @@ final class AutofillManagerServiceImpl {
             return;
         }
 
-        session.showSaveLocked();
+        final boolean finished = session.showSaveLocked();
+        if (DEBUG) {
+            Log.d(TAG, "finishSessionLocked(): session finished on save? " + finished);
+        }
+        if (finished) {
+            session.removeSelf();
+        }
     }
 
     void cancelSessionLocked(IBinder activityToken) {
@@ -341,8 +346,7 @@ final class AutofillManagerServiceImpl {
             Slog.w(TAG, "cancelSessionLocked(): no session for " + activityToken);
             return;
         }
-
-        session.destroyLocked();
+        session.removeSelfLocked();
     }
 
     private Session createSessionByTokenLocked(@NonNull IBinder activityToken,
@@ -754,9 +758,7 @@ final class AutofillManagerServiceImpl {
             synchronized (mLock) {
                 fillInIntent = createAuthFillInIntent(mStructure);
             }
-            mHandlerCaller.getHandler().post(() -> {
-                startAuthentication(intent, fillInIntent);
-            });
+            mHandlerCaller.getHandler().post(() -> startAuthentication(intent, fillInIntent));
         }
 
         // FillServiceCallbacks
@@ -776,8 +778,7 @@ final class AutofillManagerServiceImpl {
                 Binder.restoreCallingIdentity(identity);
             }
             synchronized (mLock) {
-                destroyLocked();
-                mSessions.remove(this);
+                removeSelfLocked();
             }
         }
 
@@ -790,9 +791,7 @@ final class AutofillManagerServiceImpl {
         // AutoFillUiCallback
         @Override
         public void fill(Dataset dataset) {
-            mHandlerCaller.getHandler().post(() -> {
-                autoFill(dataset);
-            });
+            mHandlerCaller.getHandler().post(() -> autoFill(dataset));
         }
 
         // AutoFillUiCallback
@@ -805,17 +804,13 @@ final class AutofillManagerServiceImpl {
         // AutoFillUiCallback
         @Override
         public void cancelSave() {
-            mHandlerCaller.getHandler().post(() -> {
-                removeSelf();
-            });
+            mHandlerCaller.getHandler().post(() -> removeSelf());
         }
 
         // AutoFillUiCallback
         @Override
         public void onEvent(AutofillId id, int event) {
-            mHandlerCaller.getHandler().post(() -> {
-                notifyChangeToClient(id, event);
-            });
+            mHandlerCaller.getHandler().post(() -> notifyChangeToClient(id, event));
         }
 
         public void setAuthenticationResultLocked(Bundle data) {
@@ -845,12 +840,14 @@ final class AutofillManagerServiceImpl {
         }
 
         /**
-         * Show the save UI, when session can be saved.
+         * Shows the save UI, when session can be saved.
+         *
+         * @return {@code true} if session is done, or {@code false} if it's pending user action.
          */
-        public void showSaveLocked() {
+        public boolean showSaveLocked() {
             if (mStructure == null) {
                 Slog.wtf(TAG, "showSaveLocked(): no mStructure");
-                return;
+                return true;
             }
             if (mCurrentResponse == null) {
                 // Happens when the activity / session was finished before the service replied, or
@@ -858,7 +855,7 @@ final class AutofillManagerServiceImpl {
                 if (DEBUG) {
                     Slog.d(TAG, "showSaveLocked(): no mCurrentResponse");
                 }
-                return;
+                return true;
             }
             final SaveInfo saveInfo = mCurrentResponse.getSaveInfo();
             if (DEBUG) {
@@ -874,13 +871,13 @@ final class AutofillManagerServiceImpl {
              */
 
             if (saveInfo == null) {
-                return;
+                return true;
             }
 
             final AutofillId[] requiredIds = saveInfo.getRequiredIds();
             if (requiredIds == null || requiredIds.length == 0) {
                 Slog.w(TAG, "showSaveLocked(): no required ids on saveInfo");
-                return;
+                return true;
             }
 
             boolean allRequiredAreNotEmpty = true;
@@ -950,7 +947,7 @@ final class AutofillManagerServiceImpl {
                     getUiForShowing().showSaveUi(
                             mInfo.getServiceInfo().loadLabel(mContext.getPackageManager()),
                             saveInfo, mPackageName);
-                    return;
+                    return false;
                 }
             }
             // Nothing changed...
@@ -959,7 +956,7 @@ final class AutofillManagerServiceImpl {
                         + "allRequiredAreNotNull=" + allRequiredAreNotEmpty
                         + ", atLeastOneChanged=" + atLeastOneChanged);
             }
-            removeSelf();
+            return true;
         }
 
         /**
@@ -1001,7 +998,7 @@ final class AutofillManagerServiceImpl {
                 mStructure.dump();
             }
 
-            mRemoteFillService.onSaveRequest(mStructure, extras);
+            mRemoteFillService.onSaveRequest(mStructure, extras, () -> removeSelf());
         }
 
         void updateLocked(AutofillId id, Rect bounds, AutofillValue value, int flags) {
@@ -1255,15 +1252,18 @@ final class AutofillManagerServiceImpl {
                     mPackageName);
         }
 
-        private void removeSelf() {
-            if (VERBOSE) {
-                Slog.v(TAG, "removeSelf()");
-            }
-
+        void removeSelf() {
             synchronized (mLock) {
-                destroyLocked();
-                mSessions.remove(mActivityToken);
+                removeSelfLocked();
             }
+        }
+
+        private void removeSelfLocked() {
+            if (VERBOSE) {
+                Slog.v(TAG, "removeSelfLocked()");
+            }
+            destroyLocked();
+            mSessions.remove(mActivityToken);
         }
     }
 }

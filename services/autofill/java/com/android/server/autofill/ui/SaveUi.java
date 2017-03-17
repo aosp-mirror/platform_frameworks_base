@@ -16,6 +16,8 @@
 
 package com.android.server.autofill.ui;
 
+import static com.android.server.autofill.ui.Helper.DEBUG;
+
 import android.annotation.NonNull;
 import android.app.Dialog;
 import android.content.Context;
@@ -23,6 +25,7 @@ import android.content.IntentSender;
 import android.os.Handler;
 import android.service.autofill.SaveInfo;
 import android.text.format.DateUtils;
+import android.util.Slog;
 import android.view.Gravity;
 import android.view.Window;
 import android.view.WindowManager;
@@ -37,23 +40,66 @@ import com.android.server.UiThread;
  * Autofill Save Prompt
  */
 final class SaveUi {
+
+    private static final String TAG = "SaveUi";
+
     public interface OnSaveListener {
         void onSave();
         void onCancel(IntentSender listener);
         void onDestroy();
     }
 
+    private class OneTimeListener implements OnSaveListener {
+
+        private final OnSaveListener mRealListener;
+        private boolean mDone;
+
+        OneTimeListener(OnSaveListener realListener) {
+            mRealListener = realListener;
+        }
+
+        @Override
+        public void onSave() {
+            if (DEBUG) Slog.d(TAG, "onSave(): " + mDone);
+            if (mDone) {
+                return;
+            }
+            mDone = true;
+            mRealListener.onSave();
+        }
+
+        @Override
+        public void onCancel(IntentSender listener) {
+            if (DEBUG) Slog.d(TAG, "onCancel(): " + mDone);
+            if (mDone) {
+                return;
+            }
+            mDone = true;
+            mRealListener.onCancel(listener);
+        }
+
+        @Override
+        public void onDestroy() {
+            if (DEBUG) Slog.d(TAG, "onDestroy(): " + mDone);
+            if (mDone) {
+                return;
+            }
+            mDone = true;
+            mRealListener.onDestroy();
+        }
+    }
+
     private final Handler mHandler = UiThread.getHandler();
 
     private final @NonNull Dialog mDialog;
 
-    private final @NonNull OnSaveListener mListener;
+    private final @NonNull OneTimeListener mListener;
 
     private boolean mDestroyed;
 
     SaveUi(@NonNull Context context, @NonNull CharSequence providerLabel, @NonNull SaveInfo info,
             @NonNull OnSaveListener listener, int lifeTimeMs) {
-        mListener = listener;
+        mListener = new OneTimeListener(listener);
 
         final LayoutInflater inflater = LayoutInflater.from(context);
         final View view = inflater.inflate(R.layout.autofill_save, null);
@@ -118,7 +164,12 @@ final class SaveUi {
 
         mDialog.show();
 
-        mHandler.postDelayed(() -> mListener.onCancel(null), lifeTimeMs);
+        mHandler.postDelayed(() -> {
+            if (!mListener.mDone) {
+                mListener.onCancel(null);
+                Slog.d(TAG, "Save snackbar timed out after " + lifeTimeMs + "ms");
+            }
+        }, lifeTimeMs);
     }
 
     void destroy() {

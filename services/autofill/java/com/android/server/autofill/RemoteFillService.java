@@ -16,6 +16,8 @@
 
 package com.android.server.autofill;
 
+import static com.android.server.autofill.Helper.DEBUG;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.assist.AssistStructure;
@@ -38,8 +40,10 @@ import android.service.autofill.IFillCallback;
 import android.service.autofill.ISaveCallback;
 import android.text.format.DateUtils;
 import android.util.Slog;
+
 import com.android.internal.os.HandlerCaller;
 import com.android.server.FgThread;
+import com.android.server.autofill.AutofillManagerServiceImpl.Session;
 
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
@@ -54,8 +58,6 @@ import java.lang.ref.WeakReference;
  */
 final class RemoteFillService implements DeathRecipient {
     private static final String LOG_TAG = "RemoteFillService";
-
-    private static final boolean DEBUG = Helper.DEBUG;
 
     // How long after the last interaction with the service we would unbind
     private static final long TIMEOUT_IDLE_BIND_MILLIS = 5 * DateUtils.SECOND_IN_MILLIS;
@@ -139,9 +141,10 @@ final class RemoteFillService implements DeathRecipient {
         mHandler.obtainMessageO(MyHandler.MSG_ON_PENDING_REQUEST, request).sendToTarget();
     }
 
-    public void onSaveRequest(@NonNull AssistStructure structure, @Nullable Bundle extras) {
+    public void onSaveRequest(@NonNull AssistStructure structure, @Nullable Bundle extras,
+            @Nullable Runnable finalizer) {
         cancelScheduledUnbind();
-        final PendingSaveRequest request = new PendingSaveRequest(structure, extras, this);
+        final PendingSaveRequest request = new PendingSaveRequest(structure, extras, this, finalizer);
         mHandler.obtainMessageO(MyHandler.MSG_ON_PENDING_REQUEST, request).sendToTarget();
     }
 
@@ -414,8 +417,8 @@ final class RemoteFillService implements DeathRecipient {
     private static final class PendingFillRequest extends PendingRequest {
         private final Object mLock = new Object();
         private final WeakReference<RemoteFillService> mWeakService;
-        private AssistStructure mStructure;
-        private Bundle mExtras;
+        private final AssistStructure mStructure;
+        private final Bundle mExtras;
         private final IFillCallback mCallback;
         private ICancellationSignal mCancellation;
         private boolean mCancelled;
@@ -473,10 +476,6 @@ final class RemoteFillService implements DeathRecipient {
                 try {
                     remoteService.mAutoFillService.onFillRequest(mStructure,
                             mExtras, mCallback, mFlags);
-                    synchronized (mLock) {
-                        mStructure = null;
-                        mExtras = null;
-                    }
                 } catch (RemoteException e) {
                     Slog.e(LOG_TAG, "Error calling on fill request", e);
                     cancel();
@@ -506,17 +505,18 @@ final class RemoteFillService implements DeathRecipient {
     }
 
     private static final class PendingSaveRequest extends PendingRequest {
-        private final Object mLock = new Object();
         private final WeakReference<RemoteFillService> mWeakService;
-        private AssistStructure mStructure;
-        private Bundle mExtras;
+        private final AssistStructure mStructure;
+        private final Bundle mExtras;
         private final ISaveCallback mCallback;
+        private final Runnable mFinalizer;
 
-        public PendingSaveRequest(@NonNull AssistStructure structure,
-                @Nullable Bundle extras, @NonNull RemoteFillService service) {
+        public PendingSaveRequest(@NonNull AssistStructure structure, @Nullable Bundle extras,
+                @NonNull RemoteFillService service, @Nullable Runnable finalizer) {
             mStructure = structure;
             mExtras = extras;
             mWeakService = new WeakReference<>(service);
+            mFinalizer = finalizer;
             mCallback = new ISaveCallback.Stub() {
                 @Override
                 public void onSuccess() {
@@ -540,18 +540,16 @@ final class RemoteFillService implements DeathRecipient {
 
         @Override
         public void run() {
-            RemoteFillService service = mWeakService.get();
+            final RemoteFillService service = mWeakService.get();
             if (service != null) {
                 try {
-                    service.mAutoFillService.onSaveRequest(mStructure,
-                            mExtras, mCallback);
-                    synchronized (mLock) {
-                        mStructure = null;
-                        mExtras = null;
-                    }
+                    service.mAutoFillService.onSaveRequest(mStructure, mExtras, mCallback);
                 } catch (RemoteException e) {
                     Slog.e(LOG_TAG, "Error calling on save request", e);
                 }
+            }
+            if (mFinalizer != null) {
+              mFinalizer.run();
             }
         }
 
