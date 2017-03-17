@@ -400,12 +400,12 @@ public final class BluetoothLeAdvertiser {
 
     IAdvertisingSetCallback wrap(AdvertisingSetCallback callback, Handler handler) {
         return new IAdvertisingSetCallback.Stub() {
-            public void onAdvertisingSetStarted(int advertiserId, int status) {
+            public void onAdvertisingSetStarted(int advertiserId, int txPower, int status) {
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
                         if (status != AdvertisingSetCallback.ADVERTISE_SUCCESS) {
-                            callback.onAdvertisingSetStarted(null, status);
+                            callback.onAdvertisingSetStarted(null, 0, status);
                             mCallbackWrappers.remove(callback);
                             return;
                         }
@@ -413,7 +413,7 @@ public final class BluetoothLeAdvertiser {
                         AdvertisingSet advertisingSet =
                             new AdvertisingSet(advertiserId, mBluetoothManager);
                         mAdvertisingSets.put(advertiserId, advertisingSet);
-                        callback.onAdvertisingSetStarted(advertisingSet, status);
+                        callback.onAdvertisingSetStarted(advertisingSet, txPower, status);
                     }
                 });
             }
@@ -460,12 +460,12 @@ public final class BluetoothLeAdvertiser {
                 });
             }
 
-            public void onAdvertisingParametersUpdated(int advertiserId, int status) {
+            public void onAdvertisingParametersUpdated(int advertiserId, int txPower, int status) {
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
                         AdvertisingSet advertisingSet = mAdvertisingSets.get(advertiserId);
-                        callback.onAdvertisingParametersUpdated(advertisingSet, status);
+                        callback.onAdvertisingParametersUpdated(advertisingSet, txPower, status);
                     }
                 });
             }

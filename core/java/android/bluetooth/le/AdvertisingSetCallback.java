@@ -62,9 +62,10 @@ public abstract class AdvertisingSetCallback {
      * null, and status will be set to proper error code.
      *
      * @param advertisingSet The advertising set that was started or null if error.
+     * @param txPower tx power that will be used for this set.
      * @param status Status of the operation.
      */
-    public void onAdvertisingSetStarted(AdvertisingSet advertisingSet, int status) {}
+    public void onAdvertisingSetStarted(AdvertisingSet advertisingSet, int txPower, int status) {}
 
     /**
      * Callback triggered in response to {@link BluetoothLeAdvertiser#stopAdvertisingSet}
@@ -106,10 +107,11 @@ public abstract class AdvertisingSetCallback {
      * indicating result of the operation.
      *
      * @param advertisingSet The advertising set.
+     * @param txPower tx power that will be used for this set.
      * @param status Status of the operation.
      */
     public void onAdvertisingParametersUpdated(AdvertisingSet advertisingSet,
-                                               int status) {}
+                                               int txPower, int status) {}
 
     /**
      * Callback triggered in response to {@link AdvertisingSet#setPeriodicAdvertisingParameters}
@@ -133,7 +135,7 @@ public abstract class AdvertisingSetCallback {
                                              int status) {}
 
     /**
-     * Callback triggered in response to {@link AdvertisingSet#periodicAdvertisingEnable}
+     * Callback triggered in response to {@link AdvertisingSet#setPeriodicAdvertisingEnable}
      * indicating result of the operation.
      *
      * @param advertisingSet The advertising set.
