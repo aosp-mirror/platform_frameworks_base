@@ -118,13 +118,11 @@ public final class AdvertisingSetParameters implements Parcelable {
     private final boolean connectable;
     private final int interval;
     private final int txPowerLevel;
-    private final int timeoutMillis;
 
     private AdvertisingSetParameters(boolean connectable, boolean isLegacy,
                                      boolean isAnonymous, boolean includeTxPower,
                                      int primaryPhy, int secondaryPhy,
-                                     int interval, int txPowerLevel,
-                                     int timeoutMillis) {
+                                     int interval, int txPowerLevel) {
         this.connectable = connectable;
         this.isLegacy = isLegacy;
         this.isAnonymous = isAnonymous;
@@ -133,7 +131,6 @@ public final class AdvertisingSetParameters implements Parcelable {
         this.secondaryPhy = secondaryPhy;
         this.interval = interval;
         this.txPowerLevel = txPowerLevel;
-        this.timeoutMillis = timeoutMillis;
     }
 
     private AdvertisingSetParameters(Parcel in) {
@@ -145,7 +142,6 @@ public final class AdvertisingSetParameters implements Parcelable {
         secondaryPhy = in.readInt();
         interval = in.readInt();
         txPowerLevel = in.readInt();
-        timeoutMillis = in.readInt();
     }
 
     /**
@@ -188,11 +184,6 @@ public final class AdvertisingSetParameters implements Parcelable {
      */
     public int getTxPowerLevel() { return txPowerLevel; }
 
-    /**
-     * Returns the advertising time limit in milliseconds.
-     */
-    public int getTimeout() { return timeoutMillis; }
-
     @Override
     public String toString() {
         return "AdvertisingSetParameters [connectable=" + connectable
@@ -202,8 +193,7 @@ public final class AdvertisingSetParameters implements Parcelable {
              + ", primaryPhy=" + primaryPhy
              + ", secondaryPhy=" + secondaryPhy
              + ", interval=" + interval
-             + ", txPowerLevel=" + txPowerLevel
-             + ", timeoutMillis=" + timeoutMillis + "]";
+             + ", txPowerLevel=" + txPowerLevel + "]";
     }
 
     @Override
@@ -221,7 +211,6 @@ public final class AdvertisingSetParameters implements Parcelable {
         dest.writeInt(secondaryPhy);
         dest.writeInt(interval);
         dest.writeInt(txPowerLevel);
-        dest.writeInt(timeoutMillis);
     }
 
     public static final Parcelable.Creator<AdvertisingSetParameters> CREATOR =
@@ -250,7 +239,6 @@ public final class AdvertisingSetParameters implements Parcelable {
         private int secondaryPhy = PHY_LE_1M;
         private int interval = INTERVAL_LOW;
         private int txPowerLevel = TX_POWER_MEDIUM;
-        private int timeoutMillis = 0;
 
         /**
          * Set whether the advertisement type should be connectable or
@@ -380,30 +368,12 @@ public final class AdvertisingSetParameters implements Parcelable {
         }
 
         /**
-         * Limit advertising to a given amount of time.
-         * @param timeoutMillis Advertising time limit. May not exceed 180000
-         * milliseconds. A value of 0 will disable the time limit.
-         * @throws IllegalArgumentException If the provided timeout is over 180000
-         * ms.
-         */
-        public Builder setTimeout(int timeoutMillis) {
-            if (timeoutMillis < 0 || timeoutMillis > LIMITED_ADVERTISING_MAX_MILLIS) {
-                throw new IllegalArgumentException("timeoutMillis invalid (must be 0-" +
-                                                   LIMITED_ADVERTISING_MAX_MILLIS +
-                                                   " milliseconds)");
-            }
-            this.timeoutMillis = timeoutMillis;
-            return this;
-        }
-
-        /**
          * Build the {@link AdvertisingSetParameters} object.
          */
         public AdvertisingSetParameters build() {
             return new AdvertisingSetParameters(connectable, isLegacy, isAnonymous,
                                                 includeTxPower, primaryPhy,
-                                                secondaryPhy, interval, txPowerLevel,
-                                                timeoutMillis);
+                                                secondaryPhy, interval, txPowerLevel);
         }
     }
 }
