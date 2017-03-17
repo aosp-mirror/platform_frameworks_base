@@ -751,70 +751,67 @@ class LinkCommand {
     return true;
   }
 
-  Maybe<AppInfo> ExtractAppInfoFromManifest(xml::XmlResource* xml_res,
-                                            IDiagnostics* diag) {
+  Maybe<AppInfo> ExtractAppInfoFromManifest(xml::XmlResource* xml_res, IDiagnostics* diag) {
     // Make sure the first element is <manifest> with package attribute.
-    if (xml::Element* manifest_el = xml::FindRootElement(xml_res->root.get())) {
-      AppInfo app_info;
-
-      if (!manifest_el->namespace_uri.empty() ||
-          manifest_el->name != "manifest") {
-        diag->Error(DiagMessage(xml_res->file.source)
-                    << "root tag must be <manifest>");
-        return {};
-      }
-
-      xml::Attribute* package_attr = manifest_el->FindAttribute({}, "package");
-      if (!package_attr) {
-        diag->Error(DiagMessage(xml_res->file.source)
-                    << "<manifest> must have a 'package' attribute");
-        return {};
-      }
-
-      app_info.package = package_attr->value;
-
-      if (xml::Attribute* version_code_attr =
-              manifest_el->FindAttribute(xml::kSchemaAndroid, "versionCode")) {
-        Maybe<uint32_t> maybe_code =
-            ResourceUtils::ParseInt(version_code_attr->value);
-        if (!maybe_code) {
-          diag->Error(DiagMessage(xml_res->file.source.WithLine(
-                          manifest_el->line_number))
-                      << "invalid android:versionCode '"
-                      << version_code_attr->value << "'");
-          return {};
-        }
-        app_info.version_code = maybe_code.value();
-      }
-
-      if (xml::Attribute* revision_code_attr =
-              manifest_el->FindAttribute(xml::kSchemaAndroid, "revisionCode")) {
-        Maybe<uint32_t> maybe_code =
-            ResourceUtils::ParseInt(revision_code_attr->value);
-        if (!maybe_code) {
-          diag->Error(DiagMessage(xml_res->file.source.WithLine(
-                          manifest_el->line_number))
-                      << "invalid android:revisionCode '"
-                      << revision_code_attr->value << "'");
-          return {};
-        }
-        app_info.revision_code = maybe_code.value();
-      }
-
-      if (xml::Element* uses_sdk_el = manifest_el->FindChild({}, "uses-sdk")) {
-        if (xml::Attribute* min_sdk = uses_sdk_el->FindAttribute(
-                xml::kSchemaAndroid, "minSdkVersion")) {
-          app_info.min_sdk_version = min_sdk->value;
-        }
-      }
-      return app_info;
+    xml::Element* manifest_el = xml::FindRootElement(xml_res->root.get());
+    if (manifest_el == nullptr) {
+      return {};
     }
-    return {};
+
+    AppInfo app_info;
+
+    if (!manifest_el->namespace_uri.empty() || manifest_el->name != "manifest") {
+      diag->Error(DiagMessage(xml_res->file.source) << "root tag must be <manifest>");
+      return {};
+    }
+
+    xml::Attribute* package_attr = manifest_el->FindAttribute({}, "package");
+    if (!package_attr) {
+      diag->Error(DiagMessage(xml_res->file.source)
+                  << "<manifest> must have a 'package' attribute");
+      return {};
+    }
+    app_info.package = package_attr->value;
+
+    if (xml::Attribute* version_code_attr =
+            manifest_el->FindAttribute(xml::kSchemaAndroid, "versionCode")) {
+      Maybe<uint32_t> maybe_code = ResourceUtils::ParseInt(version_code_attr->value);
+      if (!maybe_code) {
+        diag->Error(DiagMessage(xml_res->file.source.WithLine(manifest_el->line_number))
+                    << "invalid android:versionCode '" << version_code_attr->value << "'");
+        return {};
+      }
+      app_info.version_code = maybe_code.value();
+    }
+
+    if (xml::Attribute* revision_code_attr =
+            manifest_el->FindAttribute(xml::kSchemaAndroid, "revisionCode")) {
+      Maybe<uint32_t> maybe_code = ResourceUtils::ParseInt(revision_code_attr->value);
+      if (!maybe_code) {
+        diag->Error(DiagMessage(xml_res->file.source.WithLine(manifest_el->line_number))
+                    << "invalid android:revisionCode '" << revision_code_attr->value << "'");
+        return {};
+      }
+      app_info.revision_code = maybe_code.value();
+    }
+
+    if (xml::Attribute* split_name_attr = manifest_el->FindAttribute({}, "split")) {
+      if (!split_name_attr->value.empty()) {
+        app_info.split_name = split_name_attr->value;
+      }
+    }
+
+    if (xml::Element* uses_sdk_el = manifest_el->FindChild({}, "uses-sdk")) {
+      if (xml::Attribute* min_sdk =
+              uses_sdk_el->FindAttribute(xml::kSchemaAndroid, "minSdkVersion")) {
+        app_info.min_sdk_version = min_sdk->value;
+      }
+    }
+    return app_info;
   }
 
   /**
-   * Precondition: ResourceTable doesn't have any IDs assigned yet, nor is it
-   * linked.
+   * Precondition: ResourceTable doesn't have any IDs assigned yet, nor is it linked.
    * Postcondition: ResourceTable has only one package left. All others are
    * stripped, or there is an error and false is returned.
    */
@@ -1367,45 +1364,44 @@ class LinkCommand {
     return true;
   }
 
-  std::unique_ptr<xml::XmlResource> GenerateSplitManifest(
-      const AppInfo& app_info, const SplitConstraints& constraints) {
-    std::unique_ptr<xml::XmlResource> doc =
-        util::make_unique<xml::XmlResource>();
+  std::unique_ptr<xml::XmlResource> GenerateSplitManifest(const AppInfo& app_info,
+                                                          const SplitConstraints& constraints) {
+    std::unique_ptr<xml::XmlResource> doc = util::make_unique<xml::XmlResource>();
 
-    std::unique_ptr<xml::Namespace> namespace_android =
-        util::make_unique<xml::Namespace>();
+    std::unique_ptr<xml::Namespace> namespace_android = util::make_unique<xml::Namespace>();
     namespace_android->namespace_uri = xml::kSchemaAndroid;
     namespace_android->namespace_prefix = "android";
 
-    std::unique_ptr<xml::Element> manifest_el =
-        util::make_unique<xml::Element>();
+    std::unique_ptr<xml::Element> manifest_el = util::make_unique<xml::Element>();
     manifest_el->name = "manifest";
-    manifest_el->attributes.push_back(
-        xml::Attribute{"", "package", app_info.package});
+    manifest_el->attributes.push_back(xml::Attribute{"", "package", app_info.package});
 
     if (app_info.version_code) {
-      manifest_el->attributes.push_back(
-          xml::Attribute{xml::kSchemaAndroid, "versionCode",
-                         std::to_string(app_info.version_code.value())});
+      manifest_el->attributes.push_back(xml::Attribute{
+          xml::kSchemaAndroid, "versionCode", std::to_string(app_info.version_code.value())});
     }
 
     if (app_info.revision_code) {
-      manifest_el->attributes.push_back(
-          xml::Attribute{xml::kSchemaAndroid, "revisionCode",
-                         std::to_string(app_info.revision_code.value())});
+      manifest_el->attributes.push_back(xml::Attribute{
+          xml::kSchemaAndroid, "revisionCode", std::to_string(app_info.revision_code.value())});
     }
 
     std::stringstream split_name;
+    if (app_info.split_name) {
+      split_name << app_info.split_name.value() << ".";
+    }
     split_name << "config." << util::Joiner(constraints.configs, "_");
 
-    manifest_el->attributes.push_back(
-        xml::Attribute{"", "split", split_name.str()});
+    manifest_el->attributes.push_back(xml::Attribute{"", "split", split_name.str()});
 
-    std::unique_ptr<xml::Element> application_el =
-        util::make_unique<xml::Element>();
+    if (app_info.split_name) {
+      manifest_el->attributes.push_back(
+          xml::Attribute{"", "configForSplit", app_info.split_name.value()});
+    }
+
+    std::unique_ptr<xml::Element> application_el = util::make_unique<xml::Element>();
     application_el->name = "application";
-    application_el->attributes.push_back(
-        xml::Attribute{xml::kSchemaAndroid, "hasCode", "false"});
+    application_el->attributes.push_back(xml::Attribute{xml::kSchemaAndroid, "hasCode", "false"});
 
     manifest_el->AppendChild(std::move(application_el));
     namespace_android->AppendChild(std::move(manifest_el));

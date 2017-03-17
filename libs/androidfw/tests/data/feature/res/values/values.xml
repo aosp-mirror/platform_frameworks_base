@@ -15,13 +15,12 @@
 -->
 
 <resources>
-    <!-- Features are offset, so 7f020000 will become 7f080000 at runtime. -->
-    <public type="string" name="test3" id="0x7f020000" />
+    <public type="string" name="test3" id="0x80020000" />
     <string name="test3">test3</string>
 
-    <public type="string" name="test4" id="0x7f020001" />
+    <public type="string" name="test4" id="0x80020001" />
     <string name="test4">test4</string>
 
-    <public type="integer" name="number3" id="0x7f030000" />
+    <public type="integer" name="number3" id="0x80030000" />
     <integer name="number3">200</integer>
 </resources>

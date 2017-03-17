@@ -76,7 +76,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
-import android.util.SparseIntArray;
+import android.util.SparseArray;
 import android.util.TypedValue;
 import android.util.apk.ApkSignatureSchemeV2Verifier;
 import android.util.jar.StrictJarFile;
@@ -109,7 +109,6 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.BitSet;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -368,8 +367,12 @@ public class PackageParser {
         /** Names of any split APKs, ordered by parsed splitName */
         public final String[] splitNames;
 
+        /** Names of any split APKs that are features. Ordered by splitName */
+        public final boolean[] isFeatureSplits;
+
         /** Dependencies of any split APKs, ordered by parsed splitName */
         public final String[] usesSplitNames;
+        public final String[] configForSplit;
 
         /**
          * Path where this package was found on disk. For monolithic packages
@@ -396,14 +399,16 @@ public class PackageParser {
         public final boolean isolatedSplits;
 
         public PackageLite(String codePath, ApkLite baseApk, String[] splitNames,
-                String[] usesSplitNames, String[] splitCodePaths,
-                int[] splitRevisionCodes) {
+                boolean[] isFeatureSplits, String[] usesSplitNames, String[] configForSplit,
+                String[] splitCodePaths, int[] splitRevisionCodes) {
             this.packageName = baseApk.packageName;
             this.versionCode = baseApk.versionCode;
             this.installLocation = baseApk.installLocation;
             this.verifiers = baseApk.verifiers;
             this.splitNames = splitNames;
+            this.isFeatureSplits = isFeatureSplits;
             this.usesSplitNames = usesSplitNames;
+            this.configForSplit = configForSplit;
             this.codePath = codePath;
             this.baseCodePath = baseApk.codePath;
             this.splitCodePaths = splitCodePaths;
@@ -434,6 +439,8 @@ public class PackageParser {
         public final String codePath;
         public final String packageName;
         public final String splitName;
+        public boolean isFeatureSplit;
+        public final String configForSplit;
         public final String usesSplitName;
         public final int versionCode;
         public final int revisionCode;
@@ -448,14 +455,17 @@ public class PackageParser {
         public final boolean extractNativeLibs;
         public final boolean isolatedSplits;
 
-        public ApkLite(String codePath, String packageName, String splitName, String usesSplitName,
-                int versionCode, int revisionCode, int installLocation, List<VerifierInfo> verifiers,
-                Signature[] signatures, Certificate[][] certificates, boolean coreApp,
-                boolean debuggable, boolean multiArch, boolean use32bitAbi,
-                boolean extractNativeLibs, boolean isolatedSplits) {
+        public ApkLite(String codePath, String packageName, String splitName, boolean isFeatureSplit,
+                String configForSplit, String usesSplitName, int versionCode, int revisionCode,
+                int installLocation, List<VerifierInfo> verifiers, Signature[] signatures,
+                Certificate[][] certificates, boolean coreApp, boolean debuggable,
+                boolean multiArch, boolean use32bitAbi, boolean extractNativeLibs,
+                boolean isolatedSplits) {
             this.codePath = codePath;
             this.packageName = packageName;
             this.splitName = splitName;
+            this.isFeatureSplit = isFeatureSplit;
+            this.configForSplit = configForSplit;
             this.usesSplitName = usesSplitName;
             this.versionCode = versionCode;
             this.revisionCode = revisionCode;
@@ -811,10 +821,10 @@ public class PackageParser {
         final ApkLite baseApk = parseApkLite(packageFile, flags);
         final String packagePath = packageFile.getAbsolutePath();
         Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
-        return new PackageLite(packagePath, baseApk, null, null, null, null);
+        return new PackageLite(packagePath, baseApk, null, null, null, null, null, null);
     }
 
-    private static PackageLite parseClusterPackageLite(File packageDir, int flags)
+    static PackageLite parseClusterPackageLite(File packageDir, int flags)
             throws PackageParserException {
         final File[] files = packageDir.listFiles();
         if (ArrayUtils.isEmpty(files)) {
@@ -869,12 +879,16 @@ public class PackageParser {
         final int size = apks.size();
 
         String[] splitNames = null;
+        boolean[] isFeatureSplits = null;
         String[] usesSplitNames = null;
+        String[] configForSplits = null;
         String[] splitCodePaths = null;
         int[] splitRevisionCodes = null;
         if (size > 0) {
             splitNames = new String[size];
+            isFeatureSplits = new boolean[size];
             usesSplitNames = new String[size];
+            configForSplits = new String[size];
             splitCodePaths = new String[size];
             splitRevisionCodes = new int[size];
 
@@ -884,14 +898,16 @@ public class PackageParser {
             for (int i = 0; i < size; i++) {
                 final ApkLite apk = apks.get(splitNames[i]);
                 usesSplitNames[i] = apk.usesSplitName;
+                isFeatureSplits[i] = apk.isFeatureSplit;
+                configForSplits[i] = apk.configForSplit;
                 splitCodePaths[i] = apk.codePath;
                 splitRevisionCodes[i] = apk.revisionCode;
             }
         }
 
         final String codePath = packageDir.getAbsolutePath();
-        return new PackageLite(codePath, baseApk, splitNames, usesSplitNames, splitCodePaths,
-                splitRevisionCodes);
+        return new PackageLite(codePath, baseApk, splitNames, isFeatureSplits, usesSplitNames,
+                configForSplits, splitCodePaths, splitRevisionCodes);
     }
 
     /**
@@ -1069,42 +1085,6 @@ public class PackageParser {
         }
     }
 
-    private static SparseIntArray buildSplitDependencyTree(PackageLite pkg)
-            throws PackageParserException {
-        SparseIntArray splitDependencies = new SparseIntArray();
-        for (int splitIdx = 0; splitIdx < pkg.splitNames.length; splitIdx++) {
-            final String splitDependency = pkg.usesSplitNames[splitIdx];
-            if (splitDependency != null) {
-                final int depIdx = Arrays.binarySearch(pkg.splitNames, splitDependency);
-                if (depIdx < 0) {
-                    throw new PackageParserException(
-                            PackageManager.INSTALL_PARSE_FAILED_BAD_MANIFEST,
-                            "Split '" + pkg.splitNames[splitIdx] + "' requires split '"
-                                    + splitDependency + "', which is missing.");
-                }
-                splitDependencies.put(splitIdx, depIdx);
-            }
-        }
-
-        // Verify that there are no cycles.
-        final BitSet bitset = new BitSet();
-        for (int i = 0; i < splitDependencies.size(); i++) {
-            int splitIdx = splitDependencies.keyAt(i);
-
-            bitset.clear();
-            while (splitIdx != -1) {
-                if (bitset.get(splitIdx)) {
-                    throw new PackageParserException(
-                            PackageManager.INSTALL_PARSE_FAILED_BAD_MANIFEST,
-                            "Cycle detected in split dependencies.");
-                }
-                bitset.set(splitIdx);
-                splitIdx = splitDependencies.get(splitIdx, -1);
-            }
-        }
-        return splitDependencies.size() != 0 ? splitDependencies : null;
-    }
-
     /**
      * Parse all APKs contained in the given directory, treating them as a
      * single package. This also performs sanity checking, such as requiring
@@ -1122,11 +1102,15 @@ public class PackageParser {
         }
 
         // Build the split dependency tree.
-        SparseIntArray splitDependencies = null;
+        SparseArray<int[]> splitDependencies = null;
         final SplitAssetLoader assetLoader;
         if (lite.isolatedSplits && !ArrayUtils.isEmpty(lite.splitNames)) {
-            splitDependencies = buildSplitDependencyTree(lite);
-            assetLoader = new SplitAssetDependencyLoader(lite, splitDependencies, flags);
+            try {
+                splitDependencies = SplitAssetDependencyLoader.createDependenciesFromPackage(lite);
+                assetLoader = new SplitAssetDependencyLoader(lite, splitDependencies, flags);
+            } catch (SplitAssetDependencyLoader.IllegalDependencyException e) {
+                throw new PackageParserException(INSTALL_PARSE_FAILED_BAD_MANIFEST, e.getMessage());
+            }
         } else {
             assetLoader = new DefaultSplitAssetLoader(lite, flags);
         }
@@ -1762,6 +1746,8 @@ public class PackageParser {
         boolean use32bitAbi = false;
         boolean extractNativeLibs = true;
         boolean isolatedSplits = false;
+        boolean isFeatureSplit = false;
+        String configForSplit = null;
         String usesSplitName = null;
 
         for (int i = 0; i < attrs.getAttributeCount(); i++) {
@@ -1777,6 +1763,10 @@ public class PackageParser {
                 coreApp = attrs.getAttributeBooleanValue(i, false);
             } else if (attr.equals("isolatedSplits")) {
                 isolatedSplits = attrs.getAttributeBooleanValue(i, false);
+            } else if (attr.equals("configForSplit")) {
+                configForSplit = attrs.getAttributeValue(i);
+            } else if (attr.equals("isFeatureSplit")) {
+                isFeatureSplit = attrs.getAttributeBooleanValue(i, false);
             }
         }
 
@@ -1831,10 +1821,10 @@ public class PackageParser {
             }
         }
 
-        return new ApkLite(codePath, packageSplit.first, packageSplit.second, usesSplitName,
-                versionCode, revisionCode, installLocation, verifiers, signatures,
-                certificates, coreApp, debuggable, multiArch, use32bitAbi, extractNativeLibs,
-                isolatedSplits);
+        return new ApkLite(codePath, packageSplit.first, packageSplit.second, isFeatureSplit,
+                configForSplit, usesSplitName, versionCode, revisionCode, installLocation,
+                verifiers, signatures, certificates, coreApp, debuggable, multiArch, use32bitAbi,
+                extractNativeLibs, isolatedSplits);
     }
 
     /**

@@ -82,13 +82,15 @@ public class InstrumentationInfo extends PackageItemInfo implements Parcelable {
      *
      * The keys and values are all indices into the {@link #splitNames}, {@link #splitSourceDirs},
      * and {@link #splitPublicSourceDirs} arrays.
-     * Each key represents a split and its value is its parent split.
+     * Each key represents a split and its value is an array of splits. The first element of this
+     * array is the parent split, and the rest are configuration splits. These configuration splits
+     * have no dependencies themselves.
      * Cycles do not exist because they are illegal and screened for during installation.
      *
      * May be null if no splits are installed, or if no dependencies exist between them.
      * @hide
      */
-    public SparseIntArray splitDependencies;
+    public SparseArray<int[]> splitDependencies;
 
     /**
      * Full path to a directory assigned to the package for its persistent data.
@@ -155,7 +157,7 @@ public class InstrumentationInfo extends PackageItemInfo implements Parcelable {
         dest.writeStringArray(splitNames);
         dest.writeStringArray(splitSourceDirs);
         dest.writeStringArray(splitPublicSourceDirs);
-        dest.writeSparseIntArray(splitDependencies);
+        dest.writeSparseArray((SparseArray) splitDependencies);
         dest.writeString(dataDir);
         dest.writeString(deviceProtectedDataDir);
         dest.writeString(credentialProtectedDataDir);
@@ -185,7 +187,7 @@ public class InstrumentationInfo extends PackageItemInfo implements Parcelable {
         splitNames = source.readStringArray();
         splitSourceDirs = source.readStringArray();
         splitPublicSourceDirs = source.readStringArray();
-        splitDependencies = source.readSparseIntArray();
+        splitDependencies = source.readSparseArray(null);
         dataDir = source.readString();
         deviceProtectedDataDir = source.readString();
         credentialProtectedDataDir = source.readString();

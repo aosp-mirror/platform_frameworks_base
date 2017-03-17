@@ -19,4 +19,10 @@ set -e
 
 PATH_TO_FRAMEWORK_RES=${ANDROID_BUILD_TOP}/prebuilts/sdk/current/android.jar
 
-aapt package -M AndroidManifest.xml -S res -I $PATH_TO_FRAMEWORK_RES --feature-of ../basic/basic.apk -F feature.apk -f
+aapt2 compile --dir res -o compiled.flata
+aapt2 link -o feature.apk \
+    --manifest AndroidManifest.xml \
+    -I $PATH_TO_FRAMEWORK_RES \
+    -I ../basic/basic.apk \
+    --package-id 0x80 \
+    compiled.flata

@@ -27,7 +27,8 @@ import android.content.ServiceConnection;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
-import android.content.pm.split.SplitDependencyLoaderHelper;
+import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.split.SplitDependencyLoader;
 import android.content.res.AssetManager;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Resources;
@@ -49,7 +50,6 @@ import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.util.SparseIntArray;
 import android.view.Display;
 import android.view.DisplayAdjustments;
 
@@ -304,7 +304,7 @@ public final class LoadedApk {
                 final String[] splitPaths;
                 try {
                     splitPaths = getSplitPaths(null);
-                } catch (PackageManager.NameNotFoundException e) {
+                } catch (NameNotFoundException e) {
                     // This should NEVER fail.
                     throw new AssertionError("null split not found");
                 }
@@ -336,7 +336,7 @@ public final class LoadedApk {
         mSplitResDirs = aInfo.uid == myUid ? aInfo.splitSourceDirs : aInfo.splitPublicSourceDirs;
 
         if (aInfo.requestsIsolatedSplitLoading() && !ArrayUtils.isEmpty(mSplitNames)) {
-            mSplitLoader = new SplitDependencyLoader(aInfo.splitDependencies);
+            mSplitLoader = new SplitDependencyLoaderImpl(aInfo.splitDependencies);
         }
     }
 
@@ -465,110 +465,88 @@ public final class LoadedApk {
         }
     }
 
-    private class SplitDependencyLoader
-            extends SplitDependencyLoaderHelper<PackageManager.NameNotFoundException> {
-        private String[] mCachedBaseResourcePath;
+    /*
+     * All indices received by the super class should be shifted by 1 when accessing mSplitNames,
+     * etc. The super class assumes the base APK is index 0, while the PackageManager APIs don't
+     * include the base APK in the list of splits.
+     */
+    private class SplitDependencyLoaderImpl extends SplitDependencyLoader<NameNotFoundException> {
         private final String[][] mCachedResourcePaths;
-        private final ClassLoader[] mCachedSplitClassLoaders;
+        private final ClassLoader[] mCachedClassLoaders;
 
-        SplitDependencyLoader(SparseIntArray dependencies) {
+        SplitDependencyLoaderImpl(@NonNull SparseArray<int[]> dependencies) {
             super(dependencies);
-            mCachedResourcePaths = new String[mSplitNames.length][];
-            mCachedSplitClassLoaders = new ClassLoader[mSplitNames.length];
+            mCachedResourcePaths = new String[mSplitNames.length + 1][];
+            mCachedClassLoaders = new ClassLoader[mSplitNames.length + 1];
         }
 
         @Override
         protected boolean isSplitCached(int splitIdx) {
-            if (splitIdx != -1) {
-                return mCachedSplitClassLoaders[splitIdx] != null;
-            }
-            return mClassLoader != null && mCachedBaseResourcePath != null;
-        }
-
-        private void addAllConfigSplits(String splitName, ArrayList<String> outAssetPaths) {
-            for (int i = 0; i < mSplitNames.length; i++) {
-                if (isConfigurationSplitOf(mSplitNames[i], splitName)) {
-                    outAssetPaths.add(mSplitResDirs[i]);
-                }
-            }
+            return mCachedClassLoaders[splitIdx] != null;
         }
 
         @Override
-        protected void constructSplit(int splitIdx, int parentSplitIdx) throws
-                PackageManager.NameNotFoundException {
+        protected void constructSplit(int splitIdx, @NonNull int[] configSplitIndices,
+                int parentSplitIdx) throws NameNotFoundException {
             final ArrayList<String> splitPaths = new ArrayList<>();
-            if (splitIdx == -1) {
+            if (splitIdx == 0) {
                 createOrUpdateClassLoaderLocked(null);
-                addAllConfigSplits(null, splitPaths);
-                mCachedBaseResourcePath = splitPaths.toArray(new String[splitPaths.size()]);
+                mCachedClassLoaders[0] = mClassLoader;
+
+                // Never add the base resources here, they always get added no matter what.
+                for (int configSplitIdx : configSplitIndices) {
+                    splitPaths.add(mSplitResDirs[configSplitIdx - 1]);
+                }
+                mCachedResourcePaths[0] = splitPaths.toArray(new String[splitPaths.size()]);
                 return;
             }
 
-            final ClassLoader parent;
-            if (parentSplitIdx == -1) {
-                // The parent is the base APK, so use its ClassLoader as parent
-                // and its configuration splits as part of our own too.
-                parent = mClassLoader;
-                Collections.addAll(splitPaths, mCachedBaseResourcePath);
-            } else {
-                parent = mCachedSplitClassLoaders[parentSplitIdx];
-                Collections.addAll(splitPaths, mCachedResourcePaths[parentSplitIdx]);
+            // Since we handled the special base case above, parentSplitIdx is always valid.
+            final ClassLoader parent = mCachedClassLoaders[parentSplitIdx];
+            mCachedClassLoaders[splitIdx] = ApplicationLoaders.getDefault().getClassLoader(
+                    mSplitAppDirs[splitIdx - 1], getTargetSdkVersion(), false, null, null, parent);
+
+            Collections.addAll(splitPaths, mCachedResourcePaths[parentSplitIdx]);
+            splitPaths.add(mSplitResDirs[splitIdx - 1]);
+            for (int configSplitIdx : configSplitIndices) {
+                splitPaths.add(mSplitResDirs[configSplitIdx - 1]);
             }
-
-            mCachedSplitClassLoaders[splitIdx] = ApplicationLoaders.getDefault().getClassLoader(
-                    mSplitAppDirs[splitIdx], getTargetSdkVersion(), false, null, null, parent);
-
-            splitPaths.add(mSplitResDirs[splitIdx]);
-            addAllConfigSplits(mSplitNames[splitIdx], splitPaths);
             mCachedResourcePaths[splitIdx] = splitPaths.toArray(new String[splitPaths.size()]);
         }
 
-        private int ensureSplitLoaded(String splitName)
-                throws PackageManager.NameNotFoundException {
-            final int idx;
-            if (splitName == null) {
-                idx = -1;
-            } else {
+        private int ensureSplitLoaded(String splitName) throws NameNotFoundException {
+            int idx = 0;
+            if (splitName != null) {
                 idx = Arrays.binarySearch(mSplitNames, splitName);
                 if (idx < 0) {
                     throw new PackageManager.NameNotFoundException(
                             "Split name '" + splitName + "' is not installed");
                 }
+                idx += 1;
             }
-
             loadDependenciesForSplit(idx);
             return idx;
         }
 
-        ClassLoader getClassLoaderForSplit(String splitName)
-                throws PackageManager.NameNotFoundException {
-            final int idx = ensureSplitLoaded(splitName);
-            if (idx < 0) {
-                return mClassLoader;
-            }
-            return mCachedSplitClassLoaders[idx];
+        ClassLoader getClassLoaderForSplit(String splitName) throws NameNotFoundException {
+            return mCachedClassLoaders[ensureSplitLoaded(splitName)];
         }
 
-        String[] getSplitPathsForSplit(String splitName)
-                throws PackageManager.NameNotFoundException {
-            final int idx = ensureSplitLoaded(splitName);
-            if (idx < 0) {
-                return mCachedBaseResourcePath;
-            }
-            return mCachedResourcePaths[idx];
+        String[] getSplitPathsForSplit(String splitName) throws NameNotFoundException {
+            return mCachedResourcePaths[ensureSplitLoaded(splitName)];
         }
     }
 
-    private SplitDependencyLoader mSplitLoader;
+    private SplitDependencyLoaderImpl mSplitLoader;
 
-    ClassLoader getSplitClassLoader(String splitName) throws PackageManager.NameNotFoundException {
+    ClassLoader getSplitClassLoader(String splitName) throws NameNotFoundException {
         if (mSplitLoader == null) {
             return mClassLoader;
         }
         return mSplitLoader.getClassLoaderForSplit(splitName);
     }
 
-    String[] getSplitPaths(String splitName) throws PackageManager.NameNotFoundException {
+    String[] getSplitPaths(String splitName) throws NameNotFoundException {
         if (mSplitLoader == null) {
             return mSplitResDirs;
         }
@@ -925,7 +903,7 @@ public final class LoadedApk {
             final String[] splitPaths;
             try {
                 splitPaths = getSplitPaths(null);
-            } catch (PackageManager.NameNotFoundException e) {
+            } catch (NameNotFoundException e) {
                 // This should never fail.
                 throw new AssertionError("null split not found");
             }

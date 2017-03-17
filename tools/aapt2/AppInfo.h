@@ -23,30 +23,22 @@
 
 namespace aapt {
 
-/**
- * Holds basic information about the app being built. Most of this information
- * will come from the app's AndroidManifest.
- */
+// Information relevant to building an app, parsed from the app's AndroidManifest.xml.
 struct AppInfo {
-  /**
-   * App's package name.
-   */
+  // The app's package name.
   std::string package;
 
-  /**
-   * The App's minimum SDK version.
-   */
+  // The app's minimum SDK version, if it is defined.
   Maybe<std::string> min_sdk_version;
 
-  /**
-   * The Version code of the app.
-   */
+  // The app's version code, if it is defined.
   Maybe<uint32_t> version_code;
 
-  /**
-   * The revision code of the app.
-   */
+  // The app's revision code, if it is defined.
   Maybe<uint32_t> revision_code;
+
+  // The app's split name, if it is a split.
+  Maybe<std::string> split_name;
 };
 
 }  // namespace aapt

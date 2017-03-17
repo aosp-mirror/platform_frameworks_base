@@ -4765,7 +4765,6 @@ nope:
                     && (targetTypeLen = attrPrivate.size())
             );
         }
-        break;
     }
     return 0;
 }

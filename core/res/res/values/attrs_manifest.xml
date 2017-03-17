@@ -1014,6 +1014,15 @@
          <p>The default value of this attribute is <code>false</code>. -->
     <attr name="isolatedSplits" format="boolean" />
 
+    <!-- If set to <code>true</code>, indicates to the platform that this APK is
+         a 'feature' split and that it implicitly depends on the base APK. This distinguishes
+         this split APK from a 'configuration' split, which provides resource overrides
+         for a particular 'feature' split. Only useful when the base APK specifies
+         <code>android:isolatedSplits="true"</code>.
+
+         <p>The default value of this attribute is <code>false</code>. -->
+    <attr name="isFeatureSplit" format="boolean" />
+
     <!-- Extra options for an activity's UI. Applies to either the {@code <activity>} or
          {@code <application>} tag. If specified on the {@code <application>}
          tag these will be considered defaults for all activities in the
@@ -1286,6 +1295,7 @@
         <attr name="sharedUserLabel" />
         <attr name="installLocation" />
         <attr name="isolatedSplits" />
+        <attr name="isFeatureSplit" />
         <attr name="targetSandboxVersion" />
     </declare-styleable>
 
