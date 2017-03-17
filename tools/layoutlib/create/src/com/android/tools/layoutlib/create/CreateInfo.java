@@ -163,7 +163,6 @@ public final class CreateInfo implements ICreateInfo {
         "android.content.res.TypedArray#obtain",
         "android.graphics.BitmapFactory#finishDecode",
         "android.graphics.BitmapFactory#setDensityFromOptions",
-        "android.graphics.drawable.AdaptiveIconDrawable#draw",
         "android.graphics.drawable.AnimatedVectorDrawable$VectorDrawableAnimatorRT#useLastSeenTarget",
         "android.graphics.drawable.AnimatedVectorDrawable$VectorDrawableAnimatorRT#onDraw",
         "android.graphics.drawable.GradientDrawable#buildRing",
@@ -333,8 +332,6 @@ public final class CreateInfo implements ICreateInfo {
      * needed when access from the delegate classes is needed.
      */
     private final static String[] PROMOTED_FIELDS = new String[] {
-        "android.graphics.drawable.AdaptiveIconDrawable#mMaskBitmap",
-        "android.graphics.drawable.AdaptiveIconDrawable#mPaint",
         "android.graphics.drawable.VectorDrawable#mVectorState",
         "android.view.Choreographer#mLastFrameTimeNanos",
         "android.graphics.FontFamily#mBuilderPtr"
