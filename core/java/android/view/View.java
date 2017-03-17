@@ -7379,7 +7379,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * <p>When implementing this method, subclasses must follow the rules below:
      *
      * <ol>
-     * <li>Also implement {@link #autofill(int, AutofillValue)} to autofill the virtual
+     * <li>Also implement {@link #autofill(SparseArray)} to autofill the virtual
      * children.
      * <li>Call
      * {@link android.view.autofill.AutofillManager#notifyViewEntered} and
@@ -7448,24 +7448,23 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Automatically fills the content of a virtual view with the {@code value}
+     * Automatically fills the content of a virtual views.
      *
      * <p>See {@link #autofill(AutofillValue)} and
      * {@link #onProvideAutofillVirtualStructure(ViewStructure, int)} for more info.
      *
-     * @param value value to be autofilled.
-     * @param virtualId id identifying the virtual child inside the custom view.
+     * @param values map of values to be autofilled, keyed by virtual child id.
      *
      * @return {@code true} if the view was successfully autofilled, {@code false} otherwise
      */
-    public boolean autofill(@SuppressWarnings("unused") int virtualId,
-            @SuppressWarnings("unused") AutofillValue value) {
+    public boolean autofill(
+            @NonNull @SuppressWarnings("unused") SparseArray<AutofillValue>values) {
         return false;
     }
 
     /**
      * Describes the autofill type that should be used on calls to
-     * {@link #autofill(AutofillValue)} and {@link #autofill(int, AutofillValue)}.
+     * {@link #autofill(AutofillValue)} and {@link #autofill(SparseArray)}.
      *
      * <p>By default returns {@link #AUTOFILL_TYPE_NONE}, but views should override it (and
      * {@link #autofill(AutofillValue)} to support the Autofill Framework.
