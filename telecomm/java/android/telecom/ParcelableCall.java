@@ -59,6 +59,7 @@ public final class ParcelableCall implements Parcelable {
     private final List<String> mConferenceableCallIds;
     private final Bundle mIntentExtras;
     private final Bundle mExtras;
+    private final long mCreationTimeMillis;
 
     public ParcelableCall(
             String id,
@@ -85,7 +86,8 @@ public final class ParcelableCall implements Parcelable {
             int videoState,
             List<String> conferenceableCallIds,
             Bundle intentExtras,
-            Bundle extras) {
+            Bundle extras,
+            long creationTimeMillis) {
         mId = id;
         mState = state;
         mDisconnectCause = disconnectCause;
@@ -111,6 +113,7 @@ public final class ParcelableCall implements Parcelable {
         mConferenceableCallIds = Collections.unmodifiableList(conferenceableCallIds);
         mIntentExtras = intentExtras;
         mExtras = extras;
+        mCreationTimeMillis = creationTimeMillis;
     }
 
     /** The unique ID of the call. */
@@ -289,6 +292,13 @@ public final class ParcelableCall implements Parcelable {
         return mIsVideoCallProviderChanged;
     }
 
+    /**
+     * @return The time the call was created, in milliseconds since the epoch.
+     */
+    public long getCreationTimeMillis() {
+        return mCreationTimeMillis;
+    }
+
     /** Responsible for creating ParcelableCall objects for deserialized Parcels. */
     public static final Parcelable.Creator<ParcelableCall> CREATOR =
             new Parcelable.Creator<ParcelableCall> () {
@@ -324,6 +334,7 @@ public final class ParcelableCall implements Parcelable {
             int supportedAudioRoutes = source.readInt();
             boolean isRttCallChanged = source.readByte() == 1;
             ParcelableRttCall rttCall = source.readParcelable(classLoader);
+            long creationTimeMillis = source.readLong();
             return new ParcelableCall(
                     id,
                     state,
@@ -349,7 +360,8 @@ public final class ParcelableCall implements Parcelable {
                     videoState,
                     conferenceableCallIds,
                     intentExtras,
-                    extras);
+                    extras,
+                    creationTimeMillis);
         }
 
         @Override
@@ -393,6 +405,7 @@ public final class ParcelableCall implements Parcelable {
         destination.writeInt(mSupportedAudioRoutes);
         destination.writeByte((byte) (mIsRttCallChanged ? 1 : 0));
         destination.writeParcelable(mRttCall, 0);
+        destination.writeLong(mCreationTimeMillis);
     }
 
     @Override
