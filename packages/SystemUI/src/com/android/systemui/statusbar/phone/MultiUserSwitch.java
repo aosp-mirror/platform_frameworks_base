@@ -74,7 +74,7 @@ public class MultiUserSwitch extends FrameLayout implements View.OnClickListener
         if (mUserListener == null) {
             return false;
         }
-        return mUserListener.getUserCount() > 1;
+        return mUserListener.getUserCount() != 0;
     }
 
     public void setUserSwitcherController(UserSwitcherController userSwitcherController) {
