@@ -241,6 +241,20 @@ public final class HomeSp implements Parcelable {
                 mMatchAnyOis, mOtherHomePartners, mRoamingConsortiumOis);
     }
 
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("FQDN: ").append(mFqdn).append("\n");
+        builder.append("FriendlyName: ").append(mFriendlyName).append("\n");
+        builder.append("IconURL: ").append(mIconUrl).append("\n");
+        builder.append("HomeNetworkIDs: ").append(mHomeNetworkIds).append("\n");
+        builder.append("MatchAllOIs: ").append(mMatchAllOis).append("\n");
+        builder.append("MatchAnyOIs: ").append(mMatchAnyOis).append("\n");
+        builder.append("OtherHomePartners: ").append(mOtherHomePartners).append("\n");
+        builder.append("RoamingConsortiumOIs: ").append(mRoamingConsortiumOis).append("\n");
+        return builder.toString();
+    }
+
     /**
      * Validate HomeSp data.
      *

@@ -30,6 +30,7 @@ import java.security.PrivateKey;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -282,6 +283,18 @@ public final class Credential implements Parcelable {
                     mAbleToShare, mEapType, mNonEapInnerMethod);
         }
 
+        @Override
+        public String toString() {
+            StringBuilder builder = new StringBuilder();
+            builder.append("Username: ").append(mUsername).append("\n");
+            builder.append("MachineManaged: ").append(mMachineManaged).append("\n");
+            builder.append("SoftTokenApp: ").append(mSoftTokenApp).append("\n");
+            builder.append("AbleToShare: ").append(mAbleToShare).append("\n");
+            builder.append("EAPType: ").append(mEapType).append("\n");
+            builder.append("AuthMethod: ").append(mNonEapInnerMethod).append("\n");
+            return builder.toString();
+        }
+
         /**
          * Validate the configuration data.
          *
@@ -440,6 +453,11 @@ public final class Credential implements Parcelable {
             return Objects.hash(mCertType, mCertSha256Fingerprint);
         }
 
+        @Override
+        public String toString() {
+            return "CertificateType: " + mCertType + "\n";
+        }
+
         /**
          * Validate the configuration data.
          *
@@ -559,6 +577,14 @@ public final class Credential implements Parcelable {
         @Override
         public int hashCode() {
             return Objects.hash(mImsi, mEapType);
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder builder = new StringBuilder();
+            builder.append("IMSI: ").append(mImsi).append("\n");
+            builder.append("EAPType: ").append(mEapType).append("\n");
+            return builder.toString();
         }
 
         @Override
@@ -765,6 +791,33 @@ public final class Credential implements Parcelable {
         return Objects.hash(mRealm, mCreationTimeInMs, mExpirationTimeInMs,
                 mCheckAaaServerCertStatus, mUserCredential, mCertCredential, mSimCredential,
                 mCaCertificate, mClientCertificateChain, mClientPrivateKey);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("Realm: ").append(mRealm).append("\n");
+        builder.append("CreationTime: ").append(mCreationTimeInMs != Long.MIN_VALUE
+                ? new Date(mCreationTimeInMs) : "Not specified").append("\n");
+        builder.append("ExpirationTime: ").append(mExpirationTimeInMs != Long.MIN_VALUE
+                ? new Date(mExpirationTimeInMs) : "Not specified").append("\n");
+        builder.append("CheckAAAServerStatus: ").append(mCheckAaaServerCertStatus).append("\n");
+        if (mUserCredential != null) {
+            builder.append("UserCredential Begin ---\n");
+            builder.append(mUserCredential);
+            builder.append("UserCredential End ---\n");
+        }
+        if (mCertCredential != null) {
+            builder.append("CertificateCredential Begin ---\n");
+            builder.append(mCertCredential);
+            builder.append("CertificateCredential End ---\n");
+        }
+        if (mSimCredential != null) {
+            builder.append("SIMCredential Begin ---\n");
+            builder.append(mSimCredential);
+            builder.append("SIMCredential End ---\n");
+        }
+        return builder.toString();
     }
 
     /**
