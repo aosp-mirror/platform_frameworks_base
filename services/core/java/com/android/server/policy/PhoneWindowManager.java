@@ -1301,17 +1301,25 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     launchHomeFromHotKey();
                     break;
                 case SHORT_PRESS_POWER_GO_HOME:
-                    launchHomeFromHotKey(true /* awakenFromDreams */, false /*respectKeyguard*/);
+                    shortPressPowerGoHome();
                     break;
                 case SHORT_PRESS_POWER_CLOSE_IME_OR_GO_HOME:
                     if (mWindowManagerFuncs.isInputMethodWindowVisible()) {
                         mWindowManagerFuncs.hideCurrentInputMethod();
                     } else {
-                        launchHomeFromHotKey(true /* awakenFromDreams */,
-                            false /*respectKeyguard*/);
+                        shortPressPowerGoHome();
                     }
                     break;
             }
+        }
+    }
+
+    private void shortPressPowerGoHome() {
+        launchHomeFromHotKey(true /* awakenFromDreams */, false /*respectKeyguard*/);
+        if (isKeyguardShowingAndNotOccluded()) {
+            // Notify keyguard so it can do any special handling for the power button since the
+            // device will not power off and only launch home.
+            mKeyguardDelegate.onShortPowerPressedGoHome();
         }
     }
 

@@ -202,6 +202,12 @@ public class KeyguardService extends Service {
             checkPermission();
             mKeyguardViewMediator.onActivityDrawn();
         }
+
+        @Override
+        public void onShortPowerPressedGoHome() {
+            checkPermission();
+            mKeyguardViewMediator.onShortPowerPressedGoHome();
+        }
     };
 }
 
