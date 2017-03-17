@@ -307,7 +307,7 @@ public class WifiConfiguration implements Parcelable {
     /**
      * Priority determines the preference given to a network by {@code wpa_supplicant}
      * when choosing an access point with which to associate.
-     * @deprecated Priority is no longer used.
+     * @deprecated This field does not exist anymore.
      */
     @Deprecated
     public int priority;
