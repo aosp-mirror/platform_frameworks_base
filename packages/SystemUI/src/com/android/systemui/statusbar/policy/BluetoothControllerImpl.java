@@ -29,6 +29,7 @@ import android.util.Log;
 import com.android.settingslib.bluetooth.BluetoothCallback;
 import com.android.settingslib.bluetooth.CachedBluetoothDevice;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
+import com.android.systemui.Dependency;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -52,7 +53,7 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
     private int mState;
 
     public BluetoothControllerImpl(Context context, Looper bgLooper) {
-        mLocalBluetoothManager = LocalBluetoothManager.getInstance(context, null);
+        mLocalBluetoothManager = Dependency.get(LocalBluetoothManager.class);
         if (mLocalBluetoothManager != null) {
             mLocalBluetoothManager.getEventManager().setReceiverHandler(new Handler(bgLooper));
             mLocalBluetoothManager.getEventManager().registerCallback(this);
@@ -174,24 +175,30 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
     private void updateConnected() {
         // Make sure our connection state is up to date.
         int state = mLocalBluetoothManager.getBluetoothAdapter().getConnectionState();
-        if (state != mConnectionState) {
-            mConnectionState = state;
-            mHandler.sendEmptyMessage(H.MSG_STATE_CHANGED);
+        if (mLastDevice != null && !mLastDevice.isConnected()) {
+            // Clear out last device if no longer connected.
+            mLastDevice = null;
         }
-        if (mLastDevice != null && mLastDevice.isConnected()) {
-            // Our current device is still valid.
-            return;
-        }
-        mLastDevice = null;
+        // If any of the devices are in a higher state than the adapter, move the adapter into
+        // that state.
         for (CachedBluetoothDevice device : getDevices()) {
-            if (device.isConnected()) {
+            int maxDeviceState = device.getMaxConnectionState();
+            if (maxDeviceState > state) {
+                state = maxDeviceState;
+            }
+            if (mLastDevice == null && device.isConnected()) {
+                // Set as last connected device only if we don't have one.
                 mLastDevice = device;
             }
         }
-        if (mLastDevice == null && mConnectionState == BluetoothAdapter.STATE_CONNECTED) {
+
+        if (mLastDevice == null && state == BluetoothAdapter.STATE_CONNECTED) {
             // If somehow we think we are connected, but have no connected devices, we aren't
             // connected.
-            mConnectionState = BluetoothAdapter.STATE_DISCONNECTED;
+            state = BluetoothAdapter.STATE_DISCONNECTED;
+        }
+        if (state != mConnectionState) {
+            mConnectionState = state;
             mHandler.sendEmptyMessage(H.MSG_STATE_CHANGED);
         }
     }
@@ -238,7 +245,6 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
     public void onConnectionStateChanged(CachedBluetoothDevice cachedDevice, int state) {
         mLastDevice = cachedDevice;
         updateConnected();
-        mConnectionState = state;
         mHandler.sendEmptyMessage(H.MSG_STATE_CHANGED);
     }
 
