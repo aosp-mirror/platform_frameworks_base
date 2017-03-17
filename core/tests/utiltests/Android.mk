@@ -25,4 +25,6 @@ LOCAL_PACKAGE_NAME := FrameworksUtilTests
 
 LOCAL_CERTIFICATE := platform
 
+LOCAL_COMPATIBILITY_SUITE := device-tests
+
 include $(BUILD_PACKAGE)
