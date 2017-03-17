@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.graphics.Bitmap.CompressFormat.*;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
@@ -47,9 +48,12 @@ class TaskSnapshotPersister {
 
     private static final String TAG = TAG_WITH_CLASS_NAME ? "TaskSnapshotPersister" : TAG_WM;
     private static final String SNAPSHOTS_DIRNAME = "snapshots";
+    private static final String REDUCED_POSTFIX = "_reduced";
+    static final float REDUCED_SCALE = 0.5f;
     private static final long DELAY_MS = 100;
+    private static final int QUALITY = 95;
     private static final String PROTO_EXTENSION = ".proto";
-    private static final String BITMAP_EXTENSION = ".png";
+    private static final String BITMAP_EXTENSION = ".jpg";
 
     @GuardedBy("mLock")
     private final ArrayDeque<WriteQueueItem> mWriteQueue = new ArrayDeque<>();
@@ -152,6 +156,10 @@ class TaskSnapshotPersister {
         return new File(getDirectory(userId), taskId + BITMAP_EXTENSION);
     }
 
+    File getReducedResolutionBitmapFile(int taskId, int userId) {
+        return new File(getDirectory(userId), taskId + REDUCED_POSTFIX + BITMAP_EXTENSION);
+    }
+
     private boolean createDirectory(int userId) {
         final File dir = getDirectory(userId);
         return dir.exists() || dir.mkdirs();
@@ -160,8 +168,10 @@ class TaskSnapshotPersister {
     private void deleteSnapshot(int taskId, int userId) {
         final File protoFile = getProtoFile(taskId, userId);
         final File bitmapFile = getBitmapFile(taskId, userId);
+        final File bitmapReducedFile = getReducedResolutionBitmapFile(taskId, userId);
         protoFile.delete();
         bitmapFile.delete();
+        bitmapReducedFile.delete();
     }
 
     interface DirectoryResolver {
@@ -254,13 +264,20 @@ class TaskSnapshotPersister {
 
         boolean writeBuffer() {
             final File file = getBitmapFile(mTaskId, mUserId);
+            final File reducedFile = getReducedResolutionBitmapFile(mTaskId, mUserId);
             final Bitmap bitmap = Bitmap.createHardwareBitmap(mSnapshot.getSnapshot());
+            final Bitmap reduced = Bitmap.createScaledBitmap(bitmap,
+                    (int) (bitmap.getWidth() * REDUCED_SCALE),
+                    (int) (bitmap.getHeight() * REDUCED_SCALE), true /* filter */);
             try {
                 FileOutputStream fos = new FileOutputStream(file);
-                bitmap.compress(CompressFormat.PNG, 0 /* quality */, fos);
+                bitmap.compress(JPEG, QUALITY, fos);
                 fos.close();
+                FileOutputStream reducedFos = new FileOutputStream(reducedFile);
+                reduced.compress(JPEG, QUALITY, reducedFos);
+                reducedFos.close();
             } catch (IOException e) {
-                Slog.e(TAG, "Unable to open " + file + " for persisting. " + e);
+                Slog.e(TAG, "Unable to open " + file + " or " + reducedFile +" for persisting.", e);
                 return false;
             }
             return true;
@@ -325,8 +342,12 @@ class TaskSnapshotPersister {
             if (end == -1) {
                 return -1;
             }
+            String name = fileName.substring(0, end);
+            if (name.endsWith(REDUCED_POSTFIX)) {
+                name = name.substring(0, name.length() - REDUCED_POSTFIX.length());
+            }
             try {
-                return Integer.parseInt(fileName.substring(0, end));
+                return Integer.parseInt(name);
             } catch (NumberFormatException e) {
                 return -1;
             }

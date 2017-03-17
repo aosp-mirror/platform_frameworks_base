@@ -106,6 +106,7 @@ class TaskSnapshotPersisterTestBase extends WindowTestsBase {
         Canvas c = buffer.lockCanvas();
         c.drawColor(Color.RED);
         buffer.unlockCanvasAndPost(c);
-        return new TaskSnapshot(buffer, ORIENTATION_PORTRAIT, TEST_INSETS);
+        return new TaskSnapshot(buffer, ORIENTATION_PORTRAIT, TEST_INSETS,
+                false /* reducedResolution */, 1f /* scale */);
     }
 }
