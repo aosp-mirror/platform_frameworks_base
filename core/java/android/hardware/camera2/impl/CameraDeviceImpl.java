@@ -100,6 +100,8 @@ public class CameraDeviceImpl extends CameraDevice
     private final CameraCharacteristics mCharacteristics;
     private final int mTotalPartialCount;
 
+    private static final long NANO_PER_SECOND = 1000000000; //ns
+
     /**
      * A list tracking request and its expected last regular frame number and last reprocess frame
      * number. Updated when calling ICameraDeviceUser methods.
@@ -1239,6 +1241,14 @@ public class CameraDeviceImpl extends CameraDevice
         private final List<CaptureRequest> mRequestList;
         private final Handler mHandler;
         private final int mSessionId;
+        /**
+         * <p>Determine if the callback holder is for a constrained high speed request list that
+         * expects batched capture results. Capture results will be batched if the request list
+         * is interleaved with preview and video requests. Capture results won't be batched if the
+         * request list only contains preview requests, or if the request doesn't belong to a
+         * constrained high speed list.
+         */
+        private final boolean mHasBatchedOutputs;
 
         CaptureCallbackHolder(CaptureCallback callback, List<CaptureRequest> requestList,
                 Handler handler, boolean repeating, int sessionId) {
@@ -1251,6 +1261,25 @@ public class CameraDeviceImpl extends CameraDevice
             mRequestList = new ArrayList<CaptureRequest>(requestList);
             mCallback = callback;
             mSessionId = sessionId;
+
+            // Check whether this callback holder is for batched outputs.
+            // The logic here should match createHighSpeedRequestList.
+            boolean hasBatchedOutputs = true;
+            for (int i = 0; i < requestList.size(); i++) {
+                CaptureRequest request = requestList.get(i);
+                if (!request.isPartOfCRequestList()) {
+                    hasBatchedOutputs = false;
+                    break;
+                }
+                if (i == 0) {
+                    Collection<Surface> targets = request.getTargets();
+                    if (targets.size() != 2) {
+                        hasBatchedOutputs = false;
+                        break;
+                    }
+                }
+            }
+            mHasBatchedOutputs = hasBatchedOutputs;
         }
 
         public boolean isRepeating() {
@@ -1287,6 +1316,14 @@ public class CameraDeviceImpl extends CameraDevice
 
         public int getSessionId() {
             return mSessionId;
+        }
+
+        public int getRequestCount() {
+            return mRequestList.size();
+        }
+
+        public boolean hasBatchedOutputs() {
+            return mHasBatchedOutputs;
         }
     }
 
@@ -1777,10 +1814,27 @@ public class CameraDeviceImpl extends CameraDevice
                         @Override
                         public void run() {
                             if (!CameraDeviceImpl.this.isClosed()) {
-                                holder.getCallback().onCaptureStarted(
-                                    CameraDeviceImpl.this,
-                                    holder.getRequest(resultExtras.getSubsequenceId()),
-                                    timestamp, frameNumber);
+                                final int subsequenceId = resultExtras.getSubsequenceId();
+                                final CaptureRequest request = holder.getRequest(subsequenceId);
+
+                                if (holder.hasBatchedOutputs()) {
+                                    // Send derived onCaptureStarted for requests within the batch
+                                    final Range<Integer> fpsRange =
+                                        request.get(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE);
+                                    for (int i = 0; i < holder.getRequestCount(); i++) {
+                                        holder.getCallback().onCaptureStarted(
+                                            CameraDeviceImpl.this,
+                                            holder.getRequest(i),
+                                            timestamp - (subsequenceId - i) *
+                                            NANO_PER_SECOND/fpsRange.getUpper(),
+                                            frameNumber - (subsequenceId - i));
+                                    }
+                                } else {
+                                    holder.getCallback().onCaptureStarted(
+                                        CameraDeviceImpl.this,
+                                        holder.getRequest(resultExtras.getSubsequenceId()),
+                                        timestamp, frameNumber);
+                                }
                             }
                         }
                     });
@@ -1845,46 +1899,91 @@ public class CameraDeviceImpl extends CameraDevice
                 Runnable resultDispatch = null;
 
                 CaptureResult finalResult;
+                // Make a copy of the native metadata before it gets moved to a CaptureResult
+                // object.
+                final CameraMetadataNative resultCopy;
+                if (holder.hasBatchedOutputs()) {
+                    resultCopy = new CameraMetadataNative(result);
+                } else {
+                    resultCopy = null;
+                }
 
                 // Either send a partial result or the final capture completed result
                 if (isPartialResult) {
                     final CaptureResult resultAsCapture =
                             new CaptureResult(result, request, resultExtras);
-
                     // Partial result
                     resultDispatch = new Runnable() {
                         @Override
                         public void run() {
-                            if (!CameraDeviceImpl.this.isClosed()){
-                                holder.getCallback().onCaptureProgressed(
-                                    CameraDeviceImpl.this,
-                                    request,
-                                    resultAsCapture);
+                            if (!CameraDeviceImpl.this.isClosed()) {
+                                if (holder.hasBatchedOutputs()) {
+                                    // Send derived onCaptureProgressed for requests within
+                                    // the batch.
+                                    for (int i = 0; i < holder.getRequestCount(); i++) {
+                                        CameraMetadataNative resultLocal =
+                                                new CameraMetadataNative(resultCopy);
+                                        CaptureResult resultInBatch = new CaptureResult(
+                                                resultLocal, holder.getRequest(i), resultExtras);
+
+                                        holder.getCallback().onCaptureProgressed(
+                                            CameraDeviceImpl.this,
+                                            holder.getRequest(i),
+                                            resultInBatch);
+                                    }
+                                } else {
+                                    holder.getCallback().onCaptureProgressed(
+                                        CameraDeviceImpl.this,
+                                        request,
+                                        resultAsCapture);
+                                }
                             }
                         }
                     };
-
                     finalResult = resultAsCapture;
                 } else {
                     List<CaptureResult> partialResults =
                             mFrameNumberTracker.popPartialResults(frameNumber);
 
+                    final long sensorTimestamp =
+                            result.get(CaptureResult.SENSOR_TIMESTAMP);
+                    final Range<Integer> fpsRange =
+                            request.get(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE);
+                    final int subsequenceId = resultExtras.getSubsequenceId();
                     final TotalCaptureResult resultAsCapture = new TotalCaptureResult(result,
                             request, resultExtras, partialResults, holder.getSessionId());
-
                     // Final capture result
                     resultDispatch = new Runnable() {
                         @Override
                         public void run() {
                             if (!CameraDeviceImpl.this.isClosed()){
-                                holder.getCallback().onCaptureCompleted(
-                                    CameraDeviceImpl.this,
-                                    request,
-                                    resultAsCapture);
+                                if (holder.hasBatchedOutputs()) {
+                                    // Send derived onCaptureCompleted for requests within
+                                    // the batch.
+                                    for (int i = 0; i < holder.getRequestCount(); i++) {
+                                        resultCopy.set(CaptureResult.SENSOR_TIMESTAMP,
+                                                sensorTimestamp - (subsequenceId - i) *
+                                                NANO_PER_SECOND/fpsRange.getUpper());
+                                        CameraMetadataNative resultLocal =
+                                                new CameraMetadataNative(resultCopy);
+                                        TotalCaptureResult resultInBatch = new TotalCaptureResult(
+                                            resultLocal, holder.getRequest(i), resultExtras,
+                                            partialResults, holder.getSessionId());
+
+                                        holder.getCallback().onCaptureCompleted(
+                                            CameraDeviceImpl.this,
+                                            holder.getRequest(i),
+                                            resultInBatch);
+                                    }
+                                } else {
+                                    holder.getCallback().onCaptureCompleted(
+                                        CameraDeviceImpl.this,
+                                        request,
+                                        resultAsCapture);
+                                }
                             }
                         }
                     };
-
                     finalResult = resultAsCapture;
                 }
 
