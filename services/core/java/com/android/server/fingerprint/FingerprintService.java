@@ -97,7 +97,6 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
     static final String TAG = "FingerprintService";
     static final boolean DEBUG = true;
     private static final String FP_DATA_DIR = "fpdata";
-    private static final String FINGERPRINT_HIDL = "fingerprint_hal";
     private static final int MSG_USER_SWITCHING = 10;
     private static final String ACTION_LOCKOUT_RESET =
             "com.android.server.fingerprint.ACTION_LOCKOUT_RESET";
@@ -219,7 +218,7 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
     public synchronized IBiometricsFingerprint getFingerprintDaemon() {
         if (mDaemon == null) {
             try {
-                mDaemon = IBiometricsFingerprint.getService(FINGERPRINT_HIDL);
+                mDaemon = IBiometricsFingerprint.getService();
             } catch (java.util.NoSuchElementException e) {
                 // Service doesn't exist or cannot be opened. Logged below.
             } catch (RemoteException e) {
