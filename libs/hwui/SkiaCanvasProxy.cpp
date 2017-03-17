@@ -31,6 +31,7 @@
 #include <SkRSXform.h>
 #include <SkSurface.h>
 #include <SkTextBlobRunIterator.h>
+#include <SkVertices.h>
 
 namespace android {
 namespace uirenderer {
@@ -180,20 +181,20 @@ void SkiaCanvasProxy::onDrawImageLattice(const SkImage* image, const Lattice& la
     }
 }
 
-void SkiaCanvasProxy::onDrawVertices(VertexMode mode, int vertexCount, const SkPoint vertices[],
-        const SkPoint texs[], const SkColor colors[], SkBlendMode, const uint16_t indices[],
-        int indexCount, const SkPaint& paint) {
+void SkiaCanvasProxy::onDrawVerticesObject(const SkVertices* vertices, SkBlendMode bmode,
+        const SkPaint& paint) {
     // TODO: should we pass through blendmode
     if (mFilterHwuiCalls) {
         return;
     }
     // convert the SkPoints into floats
     static_assert(sizeof(SkPoint) == sizeof(float)*2, "SkPoint is no longer two floats");
-    const int floatCount = vertexCount << 1;
-    const float* vArray = &vertices[0].fX;
-    const float* tArray = (texs) ? &texs[0].fX : NULL;
-    const int* cArray = (colors) ? (int*)colors : NULL;
-    mCanvas->drawVertices(mode, floatCount, vArray, tArray, cArray, indices, indexCount, paint);
+    const int floatCount = vertices->vertexCount() << 1;
+    const float* vArray = (const float*)vertices->positions();
+    const float* tArray = (const float*)vertices->texCoords();
+    const int* cArray = (const int*)vertices->colors();
+    mCanvas->drawVertices(vertices->mode(), floatCount, vArray, tArray, cArray,
+            vertices->indices(), vertices->indexCount(), paint);
 }
 
 sk_sp<SkSurface> SkiaCanvasProxy::onNewSurface(const SkImageInfo&, const SkSurfaceProps&) {

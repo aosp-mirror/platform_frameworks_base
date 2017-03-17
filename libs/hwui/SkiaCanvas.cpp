@@ -522,8 +522,10 @@ void SkiaCanvas::drawVertices(SkCanvas::VertexMode vertexMode, int vertexCount,
     SkDEBUGFAIL("SkScalar must be a float for these conversions to be valid");
 #endif
     const int ptCount = vertexCount >> 1;
-    mCanvas->drawVertices(vertexMode, ptCount, (SkPoint*)verts, (SkPoint*)texs,
-                          (SkColor*)colors, indices, indexCount, paint);
+    mCanvas->drawVertices(SkVertices::MakeCopy(vertexMode, ptCount, (SkPoint*)verts,
+                                               (SkPoint*)texs, (SkColor*)colors,
+                                               indexCount, indices),
+                          SkBlendMode::kModulate, paint);
 }
 
 // ----------------------------------------------------------------------------
@@ -560,23 +562,17 @@ void SkiaCanvas::drawBitmapMesh(Bitmap& hwuiBitmap, int meshWidth, int meshHeigh
     hwuiBitmap.getSkBitmap(&bitmap);
     const int ptCount = (meshWidth + 1) * (meshHeight + 1);
     const int indexCount = meshWidth * meshHeight * 6;
-
-    /*  Our temp storage holds 2 or 3 arrays.
-        texture points [ptCount * sizeof(SkPoint)]
-        optionally vertex points [ptCount * sizeof(SkPoint)] if we need a
-            copy to convert from float to fixed
-        indices [ptCount * sizeof(uint16_t)]
-    */
-    ssize_t storageSize = ptCount * sizeof(SkPoint); // texs[]
-    storageSize += indexCount * sizeof(uint16_t);  // indices[]
-
-
-#ifndef SK_SCALAR_IS_FLOAT
-    SkDEBUGFAIL("SkScalar must be a float for these conversions to be valid");
-#endif
-    std::unique_ptr<char[]> storage(new char[storageSize]);
-    SkPoint* texs = (SkPoint*)storage.get();
-    uint16_t* indices = (uint16_t*)(texs + ptCount);
+    uint32_t flags = SkVertices::kHasTexCoords_BuilderFlag;
+    if (colors) {
+        flags |= SkVertices::kHasColors_BuilderFlag;
+    }
+    SkVertices::Builder builder(SkCanvas::kTriangles_VertexMode, ptCount, indexCount, flags);
+    memcpy(builder.positions(), vertices, ptCount * sizeof(SkPoint));
+    if (colors) {
+        memcpy(builder.colors(), colors, ptCount * sizeof(SkColor));
+    }
+    SkPoint* texs = builder.texCoords();
+    uint16_t* indices = builder.indices();
 
     // cons up texture coordinates and indices
     {
@@ -625,7 +621,6 @@ void SkiaCanvas::drawBitmapMesh(Bitmap& hwuiBitmap, int meshWidth, int meshHeigh
             index += 1;
         }
         SkASSERT(indexPtr - indices == indexCount);
-        SkASSERT((char*)indexPtr - (char*)storage.get() == storageSize);
     }
 
     // double-check that we have legal indices
@@ -646,9 +641,7 @@ void SkiaCanvas::drawBitmapMesh(Bitmap& hwuiBitmap, int meshWidth, int meshHeigh
     sk_sp<SkImage> image = SkMakeImageFromRasterBitmap(bitmap, kNever_SkCopyPixelsMode);
     tmpPaint.setShader(image->makeShader(SkShader::kClamp_TileMode, SkShader::kClamp_TileMode));
 
-    mCanvas->drawVertices(SkCanvas::kTriangles_VertexMode, ptCount, (SkPoint*)vertices,
-                         texs, (const SkColor*)colors, indices,
-                         indexCount, tmpPaint);
+    mCanvas->drawVertices(builder.detach(), SkBlendMode::kModulate, tmpPaint);
 }
 
 void SkiaCanvas::drawNinePatch(Bitmap& hwuiBitmap, const Res_png_9patch& chunk,
