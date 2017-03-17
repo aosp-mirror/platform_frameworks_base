@@ -35,19 +35,13 @@ public class CustomizeTileView extends QSTileView {
     protected void createLabel() {
         super.createLabel();
         mLabelMinLines = mLabel.getMinLines();
-        View view = LayoutInflater.from(mContext).inflate(R.layout.qs_tile_label, null);
-        mAppLabel = (TextView) view.findViewById(R.id.tile_label);
+        mAppLabel = findViewById(R.id.app_label);
         mAppLabel.setAlpha(.6f);
-        mAppLabel.setSingleLine(true);
-        addView(view);
     }
 
     public void setShowAppLabel(boolean showAppLabel) {
         mAppLabel.setVisibility(showAppLabel ? View.VISIBLE : View.GONE);
         mLabel.setSingleLine(showAppLabel);
-        if (!showAppLabel) {
-            mLabel.setMinLines(mLabelMinLines);
-        }
     }
 
     public void setAppLabel(CharSequence label) {

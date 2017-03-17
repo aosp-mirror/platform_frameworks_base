@@ -165,6 +165,7 @@ public class TileQueryHelper {
         }
         TileInfo info = new TileInfo();
         info.state = state;
+        info.state.dualTarget = false; // No dual targets in edit.
         info.state.expandedAccessibilityClassName =
                 Button.class.getName();
         info.spec = spec;
