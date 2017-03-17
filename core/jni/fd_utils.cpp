@@ -26,7 +26,9 @@
 #include <sys/un.h>
 #include <unistd.h>
 
+#include <android-base/file.h>
 #include <android-base/logging.h>
+#include <android-base/stringprintf.h>
 #include <android-base/strings.h>
 
 // Static whitelist of open paths that the zygote is allowed to keep open.
@@ -65,9 +67,10 @@ bool FileDescriptorWhitelist::IsAllowed(const std::string& path) const {
       return true;
   }
 
-  static const std::string kFrameworksPrefix = "/system/framework/";
-  static const std::string kJarSuffix = ".jar";
-  if (StartsWith(path, kFrameworksPrefix) && EndsWith(path, kJarSuffix)) {
+  static const char* kFrameworksPrefix = "/system/framework/";
+  static const char* kJarSuffix = ".jar";
+  if (android::base::StartsWith(path, kFrameworksPrefix)
+      && android::base::EndsWith(path, kJarSuffix)) {
     return true;
   }
 
@@ -79,28 +82,31 @@ bool FileDescriptorWhitelist::IsAllowed(const std::string& path) const {
   // /data/resource-cache/system@vendor@overlay@framework-res.apk@idmap
   // /data/resource-cache/system@vendor@overlay-subdir@pg@framework-res.apk@idmap
   // See AssetManager.cpp for more details on overlay-subdir.
-  static const std::string kOverlayDir = "/system/vendor/overlay/";
-  static const std::string kVendorOverlayDir = "/vendor/overlay";
-  static const std::string kOverlaySubdir = "/system/vendor/overlay-subdir/";
-  static const std::string kApkSuffix = ".apk";
+  static const char* kOverlayDir = "/system/vendor/overlay/";
+  static const char* kVendorOverlayDir = "/vendor/overlay";
+  static const char* kOverlaySubdir = "/system/vendor/overlay-subdir/";
+  static const char* kApkSuffix = ".apk";
 
-  if ((StartsWith(path, kOverlayDir) || StartsWith(path, kOverlaySubdir)
-       || StartsWith(path, kVendorOverlayDir))
-      && EndsWith(path, kApkSuffix)
+  if ((android::base::StartsWith(path, kOverlayDir)
+       || android::base::StartsWith(path, kOverlaySubdir)
+       || android::base::StartsWith(path, kVendorOverlayDir))
+      && android::base::EndsWith(path, kApkSuffix)
       && path.find("/../") == std::string::npos) {
     return true;
   }
 
-  static const std::string kOverlayIdmapPrefix = "/data/resource-cache/";
-  static const std::string kOverlayIdmapSuffix = ".apk@idmap";
-  if (StartsWith(path, kOverlayIdmapPrefix) && EndsWith(path, kOverlayIdmapSuffix)
+  static const char* kOverlayIdmapPrefix = "/data/resource-cache/";
+  static const char* kOverlayIdmapSuffix = ".apk@idmap";
+  if (android::base::StartsWith(path, kOverlayIdmapPrefix)
+      && android::base::EndsWith(path, kOverlayIdmapSuffix)
       && path.find("/../") == std::string::npos) {
     return true;
   }
 
   // All regular files that are placed under this path are whitelisted automatically.
-  static const std::string kZygoteWhitelistPath = "/vendor/zygote_whitelist/";
-  if (StartsWith(path, kZygoteWhitelistPath) && path.find("/../") == std::string::npos) {
+  static const char* kZygoteWhitelistPath = "/vendor/zygote_whitelist/";
+  if (android::base::StartsWith(path, kZygoteWhitelistPath)
+      && path.find("/../") == std::string::npos) {
     return true;
   }
 
@@ -109,24 +115,6 @@ bool FileDescriptorWhitelist::IsAllowed(const std::string& path) const {
 
 FileDescriptorWhitelist::FileDescriptorWhitelist()
     : whitelist_() {
-}
-
-// TODO: Call android::base::StartsWith instead of copying the code here.
-// static
-bool FileDescriptorWhitelist::StartsWith(const std::string& str,
-                                         const std::string& prefix) {
-  return str.compare(0, prefix.size(), prefix) == 0;
-}
-
-// TODO: Call android::base::EndsWith instead of copying the code here.
-// static
-bool FileDescriptorWhitelist::EndsWith(const std::string& str,
-                                       const std::string& suffix) {
-  if (suffix.size() > str.size()) {
-    return false;
-  }
-
-  return str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0;
 }
 
 FileDescriptorWhitelist* FileDescriptorWhitelist::instance_ = nullptr;
@@ -174,7 +162,8 @@ FileDescriptorInfo* FileDescriptorInfo::CreateFromFd(int fd) {
   }
 
   std::string file_path;
-  if (!Readlink(fd, &file_path)) {
+  const std::string fd_path = android::base::StringPrintf("/proc/self/fd/%d", fd);
+  if (!android::base::Readlink(fd_path, &file_path)) {
     return NULL;
   }
 
@@ -297,30 +286,6 @@ FileDescriptorInfo::FileDescriptorInfo(struct stat stat, const std::string& file
   fs_flags(fs_flags),
   offset(offset),
   is_sock(false) {
-}
-
-// TODO: Call android::base::Readlink instead of copying the code here.
-// static
-bool FileDescriptorInfo::Readlink(const int fd, std::string* result) {
-  char path[64];
-  snprintf(path, sizeof(path), "/proc/self/fd/%d", fd);
-
-  // Code copied from android::base::Readlink starts here :
-
-  // Annoyingly, the readlink system call returns EINVAL for a zero-sized buffer,
-  // and truncates to whatever size you do supply, so it can't be used to query.
-  // We could call lstat first, but that would introduce a race condition that
-  // we couldn't detect.
-  // ext2 and ext4 both have PAGE_SIZE limitations, so we assume that here.
-  char buf[4096];
-  ssize_t len = readlink(path, buf, sizeof(buf));
-  if (len == -1) {
-    PLOG(ERROR) << "Readlink on " << fd << " failed.";
-    return false;
-  }
-
-  result->assign(buf, len);
-  return true;
 }
 
 // static
