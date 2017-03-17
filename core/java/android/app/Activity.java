@@ -7205,7 +7205,7 @@ public class Activity extends ContextThemeWrapper
             }
             final boolean wasApplied;
             if (id.isVirtual()) {
-                wasApplied = view.autofillVirtual(id.getVirtualChildId(), value);
+                wasApplied = view.autofill(id.getVirtualChildId(), value);
             } else {
                 wasApplied = view.autofill(value);
             }

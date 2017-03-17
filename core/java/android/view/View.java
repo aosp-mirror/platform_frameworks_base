@@ -2749,13 +2749,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *                 x                 * NO LONGER NEEDED, SHOULD BE REUSED *
      *                1                  PFLAG3_FINGER_DOWN
      *               1                   PFLAG3_FOCUSED_BY_DEFAULT
-<<<<<<< HEAD
      *             11                    PFLAG3_AUTO_FILL_MODE_MASK
      *           11                      PFLAG3_IMPORTANT_FOR_AUTOFILL
-=======
-     *             11                    PFLAG3_AUTOFILL_MODE_MASK
-     *           xx                      * NO LONGER NEEDED, SHOULD BE REUSED *
->>>>>>> Replaced auto-fill by autofill to keep it consistent with API style.
      *          1                        PFLAG3_OVERLAPPING_RENDERING_FORCED_VALUE
      *         1                         PFLAG3_HAS_OVERLAPPING_RENDERING_FORCED
      *        1                          PFLAG3_TEMPORARY_DETACH
@@ -7384,13 +7379,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * <p>When implementing this method, subclasses must follow the rules below:
      *
      * <ol>
-     * <li>Also implement {@link #autofillVirtual(int, AutofillValue)} to autofill the virtual
+     * <li>Also implement {@link #autofill(int, AutofillValue)} to autofill the virtual
      * children.
      * <li>Call
-     * {@link android.view.autofill.AutofillManager#notifyVirtualViewEntered} and
-     * {@link android.view.autofill.AutofillManager#notifyVirtualViewExited(View, int)}
+     * {@link android.view.autofill.AutofillManager#notifyViewEntered} and
+     * {@link android.view.autofill.AutofillManager#notifyViewExited(View, int)}
      * when the focus inside the view changed.
-     * <li>Call {@link android.view.autofill.AutofillManager#notifyVirtualValueChanged(View, int,
+     * <li>Call {@link android.view.autofill.AutofillManager#notifyValueChanged(View, int,
      * AutofillValue)} when the value of a child changed.
      * <li>Call {@link AutofillManager#commit()} when the autofill context
      * of the view structure changed and you want the current autofill interaction if such
@@ -7463,14 +7458,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @return {@code true} if the view was successfully autofilled, {@code false} otherwise
      */
-    public boolean autofillVirtual(@SuppressWarnings("unused") int virtualId,
+    public boolean autofill(@SuppressWarnings("unused") int virtualId,
             @SuppressWarnings("unused") AutofillValue value) {
         return false;
     }
 
     /**
      * Describes the autofill type that should be used on calls to
-     * {@link #autofill(AutofillValue)} and {@link #autofillVirtual(int, AutofillValue)}.
+     * {@link #autofill(AutofillValue)} and {@link #autofill(int, AutofillValue)}.
      *
      * <p>By default returns {@link #AUTOFILL_TYPE_NONE}, but views should override it (and
      * {@link #autofill(AutofillValue)} to support the Autofill Framework.
