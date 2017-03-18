@@ -16,10 +16,19 @@
 
 package com.android.internal.telephony.gsm;
 
+import static android.telephony.SmsCbEtwsInfo.ETWS_WARNING_TYPE_EARTHQUAKE;
+import static android.telephony.SmsCbEtwsInfo.ETWS_WARNING_TYPE_EARTHQUAKE_AND_TSUNAMI;
+import static android.telephony.SmsCbEtwsInfo.ETWS_WARNING_TYPE_OTHER_EMERGENCY;
+import static android.telephony.SmsCbEtwsInfo.ETWS_WARNING_TYPE_TEST_MESSAGE;
+import static android.telephony.SmsCbEtwsInfo.ETWS_WARNING_TYPE_TSUNAMI;
+
+import android.content.Context;
+import android.content.res.Resources;
 import android.telephony.SmsCbLocation;
 import android.telephony.SmsCbMessage;
 import android.util.Pair;
 
+import com.android.internal.R;
 import com.android.internal.telephony.GsmAlphabet;
 import com.android.internal.telephony.SmsConstants;
 
@@ -55,23 +64,49 @@ public class GsmSmsCbMessage {
     private GsmSmsCbMessage() { }
 
     /**
+     * Get built-in ETWS primary messages by category. ETWS primary message does not contain text,
+     * so we have to show the pre-built messages to the user.
+     *
+     * @param context Device context
+     * @param category ETWS message category defined in SmsCbConstants
+     * @return ETWS text message in string. Return an empty string if no match.
+     */
+    private static String getEtwsPrimaryMessage(Context context, int category) {
+        final Resources r = context.getResources();
+        switch (category) {
+            case ETWS_WARNING_TYPE_EARTHQUAKE:
+                return r.getString(R.string.etws_primary_default_message_earthquake);
+            case ETWS_WARNING_TYPE_TSUNAMI:
+                return r.getString(R.string.etws_primary_default_message_tsunami);
+            case ETWS_WARNING_TYPE_EARTHQUAKE_AND_TSUNAMI:
+                return r.getString(R.string.etws_primary_default_message_earthquake_and_tsunami);
+            case ETWS_WARNING_TYPE_TEST_MESSAGE:
+                return r.getString(R.string.etws_primary_default_message_test);
+            case ETWS_WARNING_TYPE_OTHER_EMERGENCY:
+                return r.getString(R.string.etws_primary_default_message_others);
+            default:
+                return "";
+        }
+    }
+
+    /**
      * Create a new SmsCbMessage object from a header object plus one or more received PDUs.
      *
      * @param pdus PDU bytes
      */
-    public static SmsCbMessage createSmsCbMessage(SmsCbHeader header, SmsCbLocation location,
-            byte[][] pdus) throws IllegalArgumentException {
+    public static SmsCbMessage createSmsCbMessage(Context context, SmsCbHeader header,
+                                                  SmsCbLocation location, byte[][] pdus)
+            throws IllegalArgumentException {
         if (header.isEtwsPrimaryNotification()) {
             // ETSI TS 23.041 ETWS Primary Notification message
             // ETWS primary message only contains 4 fields including serial number,
             // message identifier, warning type, and warning security information.
-            // There is no field for the content/text. We hardcode "ETWS" in the
-            // text body so the user won't see an empty dialog without any text.
-            return new SmsCbMessage(SmsCbMessage.MESSAGE_FORMAT_3GPP,
-                    header.getGeographicalScope(), header.getSerialNumber(),
-                    location, header.getServiceCategory(),
-                    null, "ETWS", SmsCbMessage.MESSAGE_PRIORITY_EMERGENCY,
-                    header.getEtwsInfo(), header.getCmasInfo());
+            // There is no field for the content/text so we get the text from the resources.
+            return new SmsCbMessage(SmsCbMessage.MESSAGE_FORMAT_3GPP, header.getGeographicalScope(),
+                    header.getSerialNumber(), location, header.getServiceCategory(), null,
+                    getEtwsPrimaryMessage(context, header.getEtwsInfo().getWarningType()),
+                    SmsCbMessage.MESSAGE_PRIORITY_EMERGENCY, header.getEtwsInfo(),
+                    header.getCmasInfo());
         } else {
             String language = null;
             StringBuilder sb = new StringBuilder();
@@ -88,19 +123,6 @@ public class GsmSmsCbMessage {
                     header.getServiceCategory(), language, sb.toString(), priority,
                     header.getEtwsInfo(), header.getCmasInfo());
         }
-    }
-
-    /**
-     * Create a new SmsCbMessage object from one or more received PDUs. This is used by some
-     * CellBroadcastReceiver test cases, because SmsCbHeader is now package local.
-     *
-     * @param location the location (geographical scope) for the message
-     * @param pdus PDU bytes
-     */
-    public static SmsCbMessage createSmsCbMessage(SmsCbLocation location, byte[][] pdus)
-            throws IllegalArgumentException {
-        SmsCbHeader header = new SmsCbHeader(pdus[0]);
-        return createSmsCbMessage(header, location, pdus);
     }
 
     /**
