@@ -138,7 +138,7 @@ public class ConnectivityController extends StateController implements
      * We know the network has just come up. We want to run any jobs that are ready.
      */
     @Override
-    public synchronized void onNetworkActive() {
+    public void onNetworkActive() {
         synchronized (mLock) {
             for (int i = 0; i < mTrackedJobs.size(); i++) {
                 final JobStatus js = mTrackedJobs.get(i);

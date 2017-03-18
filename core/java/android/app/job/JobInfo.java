@@ -189,6 +189,11 @@ public class JobInfo implements Parcelable {
      */
     public static final int CONSTRAINT_FLAG_DEVICE_IDLE = 1 << 2;
 
+    /**
+     * @hide
+     */
+    public static final int CONSTRAINT_FLAG_STORAGE_NOT_LOW = 1 << 3;
+
     private final int jobId;
     private final PersistableBundle extras;
     private final Bundle transientExtras;
@@ -270,6 +275,13 @@ public class JobInfo implements Parcelable {
      */
     public boolean isRequireDeviceIdle() {
         return (constraintFlags & CONSTRAINT_FLAG_DEVICE_IDLE) != 0;
+    }
+
+    /**
+     * Whether this job needs the device's storage to not be low.
+     */
+    public boolean isRequireStorageNotLow() {
+        return (constraintFlags & CONSTRAINT_FLAG_STORAGE_NOT_LOW) != 0;
     }
 
     /**
@@ -710,15 +722,33 @@ public class JobInfo implements Parcelable {
         }
 
         /**
+         * Specify that to run this job, the device's available storage must not be low.
+         * This defaults to false.  If true, the job will only run when the device is not
+         * in a low storage state, which is generally the point where the user is given a
+         * "low storage" warning.
+         * @param storageNotLow Whether or not the device's available storage must not be low.
+         */
+        public Builder setRequiresStorageNotLow(boolean storageNotLow) {
+            mConstraintFlags = (mConstraintFlags&~CONSTRAINT_FLAG_STORAGE_NOT_LOW)
+                    | (storageNotLow ? CONSTRAINT_FLAG_STORAGE_NOT_LOW : 0);
+            return this;
+        }
+
+        /**
          * Add a new content: URI that will be monitored with a
          * {@link android.database.ContentObserver}, and will cause the job to execute if changed.
          * If you have any trigger content URIs associated with a job, it will not execute until
          * there has been a change report for one or more of them.
+         *
          * <p>Note that trigger URIs can not be used in combination with
          * {@link #setPeriodic(long)} or {@link #setPersisted(boolean)}.  To continually monitor
          * for content changes, you need to schedule a new JobInfo observing the same URIs
-         * before you finish execution of the JobService handling the most recent changes.</p>
-         * <p>Because because setting this property is not compatible with periodic or
+         * before you finish execution of the JobService handling the most recent changes.
+         * Following this pattern will ensure you do not lost any content changes: while your
+         * job is running, the system will continue monitoring for content changes, and propagate
+         * any it sees over to the next job you schedule.</p>
+         *
+         * <p>Because setting this property is not compatible with periodic or
          * persisted jobs, doing so will throw an {@link java.lang.IllegalArgumentException} when
          * {@link android.app.job.JobInfo.Builder#build()} is called.</p>
          *

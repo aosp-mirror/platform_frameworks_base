@@ -250,7 +250,7 @@ public abstract class JobService extends Service {
     public abstract boolean onStopJob(JobParameters params);
 
     /**
-     * Callback to inform the JobManager you've finished executing. This can be called from any
+     * Call this to inform the JobManager you've finished executing. This can be called from any
      * thread, as it will ultimately be run on your application's main thread. When the system
      * receives this message it will release the wakelock being held.
      * <p>

@@ -49,6 +49,7 @@ public final class JobStatus {
     static final int CONSTRAINT_CHARGING = JobInfo.CONSTRAINT_FLAG_CHARGING;
     static final int CONSTRAINT_IDLE = JobInfo.CONSTRAINT_FLAG_DEVICE_IDLE;
     static final int CONSTRAINT_BATTERY_NOT_LOW = JobInfo.CONSTRAINT_FLAG_BATTERY_NOT_LOW;
+    static final int CONSTRAINT_STORAGE_NOT_LOW = JobInfo.CONSTRAINT_FLAG_STORAGE_NOT_LOW;
     static final int CONSTRAINT_TIMING_DELAY = 1<<31;
     static final int CONSTRAINT_DEADLINE = 1<<30;
     static final int CONSTRAINT_UNMETERED = 1<<29;
@@ -334,6 +335,10 @@ public final class JobStatus {
         return (requiredConstraints&(CONSTRAINT_CHARGING|CONSTRAINT_BATTERY_NOT_LOW)) != 0;
     }
 
+    public boolean hasStorageNotLowConstraint() {
+        return (requiredConstraints&CONSTRAINT_STORAGE_NOT_LOW) != 0;
+    }
+
     public boolean hasTimingDelayConstraint() {
         return (requiredConstraints&CONSTRAINT_TIMING_DELAY) != 0;
     }
@@ -384,6 +389,10 @@ public final class JobStatus {
 
     boolean setBatteryNotLowConstraintSatisfied(boolean state) {
         return setConstraintSatisfied(CONSTRAINT_BATTERY_NOT_LOW, state);
+    }
+
+    boolean setStorageNotLowConstraintSatisfied(boolean state) {
+        return setConstraintSatisfied(CONSTRAINT_STORAGE_NOT_LOW, state);
     }
 
     boolean setTimingDelayConstraintSatisfied(boolean state) {
@@ -460,13 +469,14 @@ public final class JobStatus {
     }
 
     static final int CONSTRAINTS_OF_INTEREST =
-            CONSTRAINT_CHARGING | CONSTRAINT_BATTERY_NOT_LOW | CONSTRAINT_TIMING_DELAY |
+            CONSTRAINT_CHARGING | CONSTRAINT_BATTERY_NOT_LOW | CONSTRAINT_STORAGE_NOT_LOW |
+            CONSTRAINT_TIMING_DELAY |
             CONSTRAINT_CONNECTIVITY | CONSTRAINT_UNMETERED | CONSTRAINT_NOT_ROAMING |
             CONSTRAINT_IDLE | CONSTRAINT_CONTENT_TRIGGER;
 
     // Soft override covers all non-"functional" constraints
     static final int SOFT_OVERRIDE_CONSTRAINTS =
-            CONSTRAINT_CHARGING | CONSTRAINT_BATTERY_NOT_LOW
+            CONSTRAINT_CHARGING | CONSTRAINT_BATTERY_NOT_LOW | CONSTRAINT_STORAGE_NOT_LOW
                     | CONSTRAINT_TIMING_DELAY | CONSTRAINT_IDLE;
 
     /**
@@ -561,6 +571,9 @@ public final class JobStatus {
         }
         if ((constraints& CONSTRAINT_BATTERY_NOT_LOW) != 0) {
             pw.print(" BATTERY_NOT_LOW");
+        }
+        if ((constraints& CONSTRAINT_STORAGE_NOT_LOW) != 0) {
+            pw.print(" STORAGE_NOT_LOW");
         }
         if ((constraints&CONSTRAINT_TIMING_DELAY) != 0) {
             pw.print(" TIMING_DELAY");
