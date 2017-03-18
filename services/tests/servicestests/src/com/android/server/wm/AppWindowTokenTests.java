@@ -132,9 +132,10 @@ public class AppWindowTokenTests extends WindowTestsBase {
         sWm.mDisplayEnabled = true;
 
         // Create an app window with token on a display.
-        final TaskStack stack = createTaskStackOnDisplay(sDisplayContent);
+        final DisplayContent defaultDisplayContent = sWm.getDefaultDisplayContentLocked();
+        final TaskStack stack = createTaskStackOnDisplay(defaultDisplayContent);
         final Task task = createTaskInStack(stack, 0 /* userId */);
-        final TestAppWindowToken appWindowToken = new TestAppWindowToken(sDisplayContent);
+        final TestAppWindowToken appWindowToken = new TestAppWindowToken(defaultDisplayContent);
         task.addChild(appWindowToken, 0);
         final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(
                 TYPE_BASE_APPLICATION);
