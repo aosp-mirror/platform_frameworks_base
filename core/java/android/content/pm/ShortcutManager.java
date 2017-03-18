@@ -49,20 +49,20 @@ import java.util.List;
  * <h3>Static Shortcuts and Dynamic Shortcuts</h3>
  *
  * <p>
- * There are two ways to publish shortcuts: static shortcuts and dynamic shortcuts.
+ * There are several different types of shortcuts:
  *
  * <ul>
- * <li>Static shortcuts are declared in a resource
- * XML file, which is referenced in the publisher app's <code>AndroidManifest.xml</code> file.
- * Static shortcuts are published when an app is installed,
- * and the details of these shortcuts change when an app is upgraded with an updated XML
- * file.
- * Static shortcuts are immutable, and their
- * definitions, such as icons and labels, cannot be changed dynamically without upgrading the
- * publisher app.
+ * <li><p>Static shortcuts are declared in a resource XML file, which is referenced in the publisher
+ * app's <code>AndroidManifest.xml</code> file. These shortcuts are visually associated with an
+ * app's launcher icon.
+ * <p>Static shortcuts are published when an app is installed, and the details of these shortcuts
+ * change when an app is upgraded with an updated XML file. Static shortcuts are immutable, and
+ * their definitions, such as icons and labels, cannot be changed dynamically without upgrading the
+ * publisher app.</li>
  *
- * <li>Dynamic shortcuts are published at runtime using this class's APIs.
- * Apps can publish, update, and remove dynamic shortcuts at runtime.
+ * <li>Dynamic shortcuts are published at runtime using this class's APIs. These shortcuts are
+ * visually associated with an app's launcher icon. Apps can publish, update, and remove dynamic
+ * shortcuts at runtime.
  * </ul>
  *
  * <p>Only main activities&mdash;activities that handle the {@code MAIN} action and the
@@ -70,10 +70,8 @@ import java.util.List;
  * If an app has multiple main activities, these activities have different sets
  * of shortcuts.
  *
- * <p>Static shortcuts and dynamic shortcuts are shown in the currently active launcher when
- * the user long-presses on an app's launcher icon.
- *
- * <p class="note"><strong>Note: </strong>The actual gesture may be different
+ * <p>Static shortcuts and dynamic shortcuts are shown in a supported launcher when the user
+ * long-presses on an app's launcher icon. Note that the actual gesture may be different
  * depending on the launcher app.
  *
  * <p>Each launcher icon can have at most {@link #getMaxShortcutCountPerActivity()} number of
@@ -82,18 +80,19 @@ import java.util.List;
  *
  * <h3>Pinning Shortcuts</h3>
  *
- * <p>
- * Launcher apps allow users to <em>pin</em> shortcuts so they're easier to access.  Both static
- * and dynamic shortcuts can be pinned.
- * Pinned shortcuts <b>cannot</b> be removed by publisher
- * apps; they're removed only when the user removes them,
- * when the publisher app is uninstalled, or when the
- * user performs the <strong>clear data</strong> action on the publisher app from the device's Settings
- * app.
+ * <p>Apps running in the foreground can also <em>pin</em> shortcuts at runtime, subject to user
+ * permission, using this class's APIs. Each pinned shortcut is a copy of a static shortcut or a
+ * dynamic shortcut. Although users can pin a shortcut multiple times, the system calls the pinning
+ * API only once to complete the pinning process. Unlike static and dynamic shortcuts, pinned
+ * shortcuts appear as separate icons, visually distinct from the app's launcher icon, in the
+ * launcher. There is no limit to the number of pinned shortcuts that an app can create.
  *
- * <p>However, the publisher app can <em>disable</em> pinned shortcuts so they cannot be
- * started.  See the following sections for details.
+ * <p>Pinned shortcuts <strong>cannot</strong> be removed by publisher apps. They're removed only
+ * when the user removes them, when the publisher app is uninstalled, or when the user performs the
+ * clear data action on the publisher app from the device's <b>Settings</b> app.
  *
+ * <p>However, the publisher app can <em>disable</em> pinned shortcuts so they cannot be started.
+ * See the following sections for details.
  *
  * <h3>Updating and Disabling Shortcuts</h3>
  *
@@ -124,7 +123,7 @@ import java.util.List;
  *
  *     <li>The app can use {@link #updateShortcuts(List)} to update <em>any</em> of the existing
  *     8 shortcuts, when, for example, the chat peers' icons have changed.
- * </ul>
+ * </ol>
  * The {@link #addDynamicShortcuts(List)} and {@link #setDynamicShortcuts(List)} methods
  * can also be used
  * to update existing shortcuts with the same IDs, but they <b>cannot</b> be used
@@ -133,22 +132,20 @@ import java.util.List;
  *
  *
  * <h4>Disabling Static Shortcuts</h4>
- * When an app is upgraded and the new version
+ * <p>When an app is upgraded and the new version
  * no longer uses a static shortcut that appeared in the previous version, this deprecated
- * shortcut will no longer be published as a static shortcut.
+ * shortcut isn't published as a static shortcut.
  *
  * <p>If the deprecated shortcut is pinned, then the pinned shortcut will remain on the launcher,
- * but it will be disabled automatically.
- * Note that, in this case, the pinned shortcut is no longer a static shortcut, but it's
- * still <b>immutable</b>. Therefore, it cannot be updated using this class's APIs.
- *
+ * but it's disabled automatically. When a pinned shortcut is disabled, this class's APIs cannot
+ * update it.
  *
  * <h4>Disabling Dynamic Shortcuts</h4>
  * Sometimes pinned shortcuts become obsolete and may not be usable.  For example, a pinned shortcut
  * to a group chat becomes unusable when the associated group chat is deleted.  In cases like this,
  * apps should use {@link #disableShortcuts(List)}, which removes the specified dynamic
  * shortcuts and also makes any specified pinned shortcuts un-launchable.
- * The {@link #disableShortcuts(List, CharSequence)} method can also be used to disabled shortcuts
+ * The {@link #disableShortcuts(List, CharSequence)} method can also be used to disable shortcuts
  * and show users a custom error message when they attempt to launch the disabled shortcuts.
  *
  *
@@ -276,6 +273,104 @@ import java.util.List;
  *shortcutManager.setDynamicShortcuts(Arrays.asList(shortcut));
  * </pre>
  *
+ * <h3>Publishing Pinned Shortcuts</h3>
+ *
+ * <p>Apps can pin an existing shortcut (either static or dynamic) or an entirely new shortcut to a
+ * supported launcher programatically using {@link #requestPinShortcut(ShortcutInfo, IntentSender)}.
+ * You pass two arguments into this method:
+ *
+ * <ul>
+ *   <li>A {@link ShortcutInfo} object &ndash; If the shortcut already exists, this object should
+ *   contain only the shortcut's ID. Otherwise, the new {@link ShortcutInfo} object must contain an
+ *   ID, an intent, and a short label for the new shortcut.
+ *   <li><p>A {@link android.app.PendingIntent} object &ndash; This intent represents the callback
+ *   that your app receives if the shortcut is successfully pinned to the device's launcher.
+ *   <p><b>Note:</b> If the user doesn't allow the shortcut to be pinned to the launcher, the
+ *   pinning process fails, and the {@link Intent} object that is passed into this
+ *   {@link android.app.PendingIntent} object isn't executed.
+ * </ul>
+ *
+ * The following code snippet shows how to pin a single shortcut that already exists and is enabled:
+ *
+ * <pre>
+ *ShortcutManager mShortcutManager =
+ *        context.getSystemService(ShortcutManager.class);
+ *
+ *if (mShortcutManager.isRequestPinShortcutSupported()) {
+ *
+ *    // This example defines a new shortcut; that is, this shortcut hasn't
+ *    // been published before.
+ *    ShortcutInfo pinShortcutInfo = new ShortcutInfo.Builder()
+ *            .setIcon(myIcon)
+ *            .setShortLabel("My awesome shortcut")
+ *            .setIntent(myIntent)
+ *            .build();
+ *
+ *    PendingIntent resultPendingIntent = null;
+ *
+ *    // Create the following Intent and PendingIntent objects only if your app
+ *    // needs to be notified that the user allowed the shortcut to be pinned.
+ *    // Use a boolean value, such as "appNeedsNotifying", to define this behavior.
+ *    if (appNeedsNotifying) {
+ *        // We assume here that the app has implemented a method called
+ *        // createShortcutResultIntent() that returns a broadcast intent.
+ *        Intent pinnedShortcutCallbackIntent =
+ *                createShortcutResultIntent(pinShortcutInfo);
+ *
+ *        // Configure the intent so that your app's broadcast receiver gets
+ *        // the callback successfully.
+ *        PendingIntent successCallback = PendingIntent.createBroadcast(context, 0,
+ *                pinnedShortcutCallbackIntent);
+ *
+ *        resultPendingIntent = successCallback.getIntentSender();
+ *    }
+ *
+ *    mShortcutManager.requestPinShortcut(pinShortcutInfo, resultPendingIntent);
+ *}
+ * </pre>
+ *
+ * <p class="note"><strong>Note:</strong> As you add logic in your app to make requests to pin
+ * shortcuts, keep in mind that not all launchers support pinning of shortcuts. To determine whether
+ * your app can complete this process on a particular device, check the return value of
+ * {@link #isRequestPinShortcutSupported()}. Based on this return value, you might decide to hide
+ * the option in your app that allows users to pin a shortcut.
+ *
+ * <h4>Custom Activity for Pinning Shortcuts</h4>
+ *
+ * <p>You can also create a specialized activity that helps users create shortcuts, complete with
+ * custom options and a confirmation button. In your app's manifest file, add
+ * {@link Intent#ACTION_CREATE_SHORTCUT} to the activity's <code>&lt;intent-filter&gt;</code>
+ * element, as shown in the following snippet:
+ *
+ * <pre>
+ *&lt;manifest&gt;
+ *    ...
+ *    &lt;application&gt;
+ *        &lt;activity android:name="com.example.MyCustomPromptToPinShortcut" ... &gt;
+ *            &lt;intent-filter
+ *                    action android:name="android.intent.action.ACTION_CREATE_SHORTCUT"&gt;
+ *            ...
+ *            &lt;/intent-filter&gt;
+ *        &lt;/activity&gt;
+ *        ...
+ *    &lt;/application&gt;
+ *&lt;/manifest&gt;
+ * </pre>
+ *
+ * <p>When you use this specialized activity in your app, the following sequence of steps takes
+ * place:</p>
+ *
+ * <ol>
+ *   <li>The user attempts to create a shortcut, triggering the system to start the specialized
+ *   activity.</li>
+ *   <li>The user sets options for the shortcut.</li>
+ *   <li>The user selects the confirmation button, allowing your app to create the shortcut using
+ *   the {@link #createShortcutResultIntent(ShortcutInfo)} method. This method returns an
+ *   {@link Intent}, which your app relays back to the previously-executing activity using
+ *   {@link Activity#setResult(int)}.</li>
+ *   <li>Your app calls {@link Activity#finish()} on the activity used for creating the customized
+ *   shortcut.</li>
+ * </ol>
  *
  * <h3>Shortcut Intents</h3>
  * <p>
@@ -823,7 +918,7 @@ public class ShortcutManager {
     }
 
     /**
-     * Return {@code TRUE} if the default launcher supports
+     * Return {@code TRUE} if the app is running on a device whose default launcher supports
      * {@link #requestPinShortcut(ShortcutInfo, IntentSender)}.
      */
     public boolean isRequestPinShortcutSupported() {
@@ -837,29 +932,30 @@ public class ShortcutManager {
 
     /**
      * Request to create a pinned shortcut.  The default launcher will receive this request and
-     * ask the user for approval.  If the user approves it, the shortcut will be created and
-     * {@code resultIntent} will be sent.  Otherwise, no responses will be sent to the caller.
+     * ask the user for approval.  If the user approves it, the shortcut will be created, and
+     * {@code resultIntent} will be sent. If a request is denied by the user, however, no response
+     * will be sent to the caller.
      *
-     * <p>When a request is denied by the user, the caller app will not get any response.
+     * <p>Only apps with a foreground activity or a foreground service can call this method.
+     * Otherwise, it'll throw {@link IllegalStateException}.
      *
-     * <p>Only apps with a foreground activity or a foreground service can call it.  Otherwise
-     * it'll throw {@link IllegalStateException}.
+     * <p>It's up to the launcher to decide how to handle previous pending requests when the same
+     * package calls this API multiple times in a row. One possible strategy is to ignore any
+     * previous requests.
      *
-     * <p>It's up to the launcher how to handle previous pending requests when the same package
-     * calls this API multiple times in a row.  It may ignore the previous requests,
-     * for example.
+     * @param shortcut Shortcut to pin.  If an app wants to pin an existing (either static
+     *     or dynamic) shortcut, then it only needs to have an ID. Although other fields don't have
+     *     to be set, the target shortcut must be enabled.
      *
-     * @param shortcut New shortcut to pin.  If an app wants to pin an existing (either dynamic
-     *     or manifest) shortcut, then it only needs to have an ID, and other fields don't have to
-     *     be set, in which case, the target shortcut must be enabled.
-     *     If it's a new shortcut, all the mandatory fields, such as a short label, must be
+     *     <p>If it's a new shortcut, all the mandatory fields, such as a short label, must be
      *     set.
      * @param resultIntent If not null, this intent will be sent when the shortcut is pinned.
-     *    Use {@link android.app.PendingIntent#getIntentSender()} to create a {@link IntentSender}.
+     *    Use {@link android.app.PendingIntent#getIntentSender()} to create an {@link IntentSender}.
      *
      * @return {@code TRUE} if the launcher supports this feature.  Note the API will return without
      *    waiting for the user to respond, so getting {@code TRUE} from this API does *not* mean
-     *    the shortcut is pinned.  {@code FALSE} if the launcher doesn't support this feature.
+     *    the shortcut was pinned successfully.  {@code FALSE} if the launcher doesn't support this
+     *    feature.
      *
      * @see #isRequestPinShortcutSupported()
      * @see IntentSender
@@ -867,7 +963,7 @@ public class ShortcutManager {
      *
      * @throws IllegalArgumentException if a shortcut with the same ID exists and is disabled.
      * @throws IllegalStateException The caller doesn't have a foreground activity or a foreground
-     * service or when the user is locked.
+     * service, or the device is locked.
      */
     public boolean requestPinShortcut(@NonNull ShortcutInfo shortcut,
             @Nullable IntentSender resultIntent) {
@@ -880,16 +976,17 @@ public class ShortcutManager {
     }
 
     /**
-     * Returns an Intent which can be used by the default launcher to pin {@param shortcut}.
-     * This should be used by an Activity to set result in response to
-     * {@link Intent#ACTION_CREATE_SHORTCUT}.
+     * Returns an Intent which can be used by the default launcher to pin a shortcut containing the
+     * given {@link ShortcutInfo}. This method should be used by an Activity to set a result in
+     * response to {@link Intent#ACTION_CREATE_SHORTCUT}.
      *
      * @param shortcut New shortcut to pin.  If an app wants to pin an existing (either dynamic
      *     or manifest) shortcut, then it only needs to have an ID, and other fields don't have to
      *     be set, in which case, the target shortcut must be enabled.
      *     If it's a new shortcut, all the mandatory fields, such as a short label, must be
      *     set.
-     * @return The intent that should be set as the result for the calling activity or null.
+     * @return The intent that should be set as the result for the calling activity, or
+     *     <code>null</code> if the current launcher doesn't support shortcuts.
      *
      * @see Intent#ACTION_CREATE_SHORTCUT
      *
