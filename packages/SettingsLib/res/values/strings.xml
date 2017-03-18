@@ -775,7 +775,7 @@
     <string name="daltonizer_type_overridden">Overridden by <xliff:g id="title" example="Simulate color space">%1$s</xliff:g></string>
 
     <!-- [CHAR_LIMIT=40] Label for estimated remaining duration of battery charging/discharging -->
-    <string name="power_remaining_duration_only">Approx. <xliff:g id="time">%1$s</xliff:g> left</string>
+    <string name="power_remaining_duration_only">about <xliff:g id="time">%1$s</xliff:g> left</string>
 
     <!-- [CHAR_LIMIT=40] Short label for estimated remaining duration of battery charging/discharging -->
     <string name="power_remaining_duration_only_short"><xliff:g id="time">%1$s</xliff:g> left</string>
@@ -793,25 +793,25 @@
             <xliff:g id="state">%2$s</xliff:g></string>
     <!-- [CHAR_LIMIT=40] Label for battery level chart when charging with duration -->
     <string name="power_charging_duration"><xliff:g id="level">%1$s</xliff:g> -
-            <xliff:g id="time">%2$s</xliff:g> until full</string>
+            <xliff:g id="time">%2$s</xliff:g> until fully charged</string>
     <!-- [CHAR_LIMIT=40] Short label for battery level chart when charging with duration -->
     <string name="power_charging_duration_short"><xliff:g id="level">%1$s</xliff:g> -
         <xliff:g id="time">%2$s</xliff:g></string>
     <!-- [CHAR_LIMIT=40] Label for battery level chart when charging with duration -->
     <string name="power_charging_duration_ac"><xliff:g id="level">%1$s</xliff:g> -
-            <xliff:g id="time">%2$s</xliff:g> until full on AC</string>
+            <xliff:g id="time">%2$s</xliff:g> until fully charged on AC</string>
     <!-- [CHAR_LIMIT=40] Short label for battery level chart when charging with duration -->
     <string name="power_charging_duration_ac_short"><xliff:g id="level">%1$s</xliff:g> -
         <xliff:g id="time">%2$s</xliff:g></string>
     <!-- [CHAR_LIMIT=40] Label for battery level chart when charging with duration -->
     <string name="power_charging_duration_usb"><xliff:g id="level">%1$s</xliff:g> -
-            <xliff:g id="time">%2$s</xliff:g> until full over USB</string>
+            <xliff:g id="time">%2$s</xliff:g> until fully charged over USB</string>
     <!-- [CHAR_LIMIT=40] Short label for battery level chart when charging with duration -->
     <string name="power_charging_duration_usb_short"><xliff:g id="level">%1$s</xliff:g> -
         <xliff:g id="time">%2$s</xliff:g></string>
     <!-- [CHAR_LIMIT=40] Label for battery level chart when charging with duration -->
     <string name="power_charging_duration_wireless"><xliff:g id="level">%1$s</xliff:g> -
-            <xliff:g id="time">%2$s</xliff:g> until full from wireless</string>
+            <xliff:g id="time">%2$s</xliff:g> until fully charged from wireless</string>
     <!-- [CHAR_LIMIT=40] Label for battery level chart when charging with duration -->
     <string name="power_charging_duration_wireless_short"><xliff:g id="level">%1$s</xliff:g> -
         <xliff:g id="time">%2$s</xliff:g></string>
