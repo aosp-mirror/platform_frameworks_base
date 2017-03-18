@@ -422,6 +422,8 @@ def parse_ucd(ucd_path):
         path.join(ucd_path, 'emoji-sequences.txt'))
     _emoji_zwj_sequences = parse_unicode_datafile(
         path.join(ucd_path, 'emoji-zwj-sequences.txt'))
+    _emoji_zwj_sequences.update(parse_unicode_datafile(
+        path.join(ucd_path, 'additions', 'emoji-zwj-sequences.txt')))
 
 
 def flag_sequence(territory_code):
@@ -521,21 +523,6 @@ def compute_expected_emoji():
     # add zwj sequences not in the current emoji-zwj-sequences.txt
     adjusted_emoji_zwj_sequences = dict(_emoji_zwj_sequences)
     adjusted_emoji_zwj_sequences.update(_emoji_zwj_sequences)
-    # Wrestlers with modifiers
-    additional_emoji_zwj = (
-        (0x1F93C, 0x1F3FB, 0x200D, 0x2640),
-        (0x1F93C, 0x1F3FB, 0x200D, 0x2642),
-        (0x1F93C, 0x1F3FC, 0x200D, 0x2640),
-        (0x1F93C, 0x1F3FC, 0x200D, 0x2642),
-        (0x1F93C, 0x1F3FD, 0x200D, 0x2640),
-        (0x1F93C, 0x1F3FD, 0x200D, 0x2642),
-        (0x1F93C, 0x1F3FE, 0x200D, 0x2640),
-        (0x1F93C, 0x1F3FE, 0x200D, 0x2642),
-        (0x1F93C, 0x1F3FF, 0x200D, 0x2640),
-        (0x1F93C, 0x1F3FF, 0x200D, 0x2642),
-    )
-    for seq in additional_emoji_zwj:
-        adjusted_emoji_zwj_sequences[seq] = 'Emoji_ZWJ_Sequence'
 
     for sequence in _emoji_sequences.keys():
         sequence = tuple(ch for ch in sequence if ch != EMOJI_VS)
