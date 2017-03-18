@@ -4,9 +4,9 @@
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
      You may obtain a copy of the License at
-  
+
           http://www.apache.org/licenses/LICENSE-2.0
-  
+
      Unless required by applicable law or agreed to in writing, software
      distributed under the License is distributed on an "AS IS" BASIS,
      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,6 +17,8 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"Абалонка"</string>
+    <!-- no translation found for bugreport_notification_channel (2574150205913861141) -->
+    <skip />
     <string name="bugreport_in_progress_title" msgid="4311705936714972757">"Справаздача <xliff:g id="ID">#%d</xliff:g> пра памылку генерыруецца"</string>
     <string name="bugreport_finished_title" msgid="4429132808670114081">"Справаздача <xliff:g id="ID">#%d</xliff:g> пра памылку зафіксавана"</string>
     <string name="bugreport_updating_title" msgid="4423539949559634214">"Дадаванне падрабязнасцей да справаздачы пра памылкі"</string>
