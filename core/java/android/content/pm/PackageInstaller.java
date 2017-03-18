@@ -1153,6 +1153,16 @@ public class PackageInstaller {
         }
 
         /** {@hide} */
+        @SystemApi
+        public void setAllocateAggressive(boolean allocateAggressive) {
+            if (allocateAggressive) {
+                installFlags |= PackageManager.INSTALL_ALLOCATE_AGGRESSIVE;
+            } else {
+                installFlags &= ~PackageManager.INSTALL_ALLOCATE_AGGRESSIVE;
+            }
+        }
+
+        /** {@hide} */
         public void dump(IndentingPrintWriter pw) {
             pw.printPair("mode", mode);
             pw.printHexPair("installFlags", installFlags);

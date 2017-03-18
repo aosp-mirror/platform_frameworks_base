@@ -51,6 +51,7 @@ import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.storage.StorageManager;
 import android.os.storage.VolumeInfo;
 import android.util.AndroidException;
 import android.util.Log;
@@ -610,6 +611,9 @@ public abstract class PackageManager {
             INSTALL_FORCE_PERMISSION_PROMPT,
             INSTALL_INSTANT_APP,
             INSTALL_DONT_KILL_APP,
+            INSTALL_FORCE_SDK,
+            INSTALL_FULL_APP,
+            INSTALL_ALLOCATE_AGGRESSIVE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface InstallFlags {}
@@ -717,15 +721,6 @@ public abstract class PackageManager {
     public static final int INSTALL_INSTANT_APP = 0x00000800;
 
     /**
-     * Flag parameter for {@link #installPackage} to indicate that this package is
-     * to be installed as a heavy weight app. This is fundamentally the opposite of
-     * {@link #INSTALL_INSTANT_APP}.
-     *
-     * @hide
-     */
-    public static final int INSTALL_FULL_APP = 0x00004000;
-
-    /**
      * Flag parameter for {@link #installPackage} to indicate that this package contains
      * a feature split to an existing application and the existing application should not
      * be killed during the installation process.
@@ -741,6 +736,24 @@ public abstract class PackageManager {
      * @hide
      */
     public static final int INSTALL_FORCE_SDK = 0x00002000;
+
+    /**
+     * Flag parameter for {@link #installPackage} to indicate that this package is
+     * to be installed as a heavy weight app. This is fundamentally the opposite of
+     * {@link #INSTALL_INSTANT_APP}.
+     *
+     * @hide
+     */
+    public static final int INSTALL_FULL_APP = 0x00004000;
+
+    /**
+     * Flag parameter for {@link #installPackage} to indicate that this package
+     * is critical to system health or security, meaning the system should use
+     * {@link StorageManager#FLAG_ALLOCATE_AGGRESSIVE} internally.
+     *
+     * @hide
+     */
+    public static final int INSTALL_ALLOCATE_AGGRESSIVE = 0x00008000;
 
     /**
      * Flag parameter for

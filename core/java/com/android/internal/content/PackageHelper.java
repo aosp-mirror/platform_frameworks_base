@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageInstaller.SessionParams;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageParser.PackageLite;
 import android.os.Environment;
@@ -354,10 +355,12 @@ public class PackageHelper {
         abstract public ApplicationInfo getExistingAppInfo(Context context, String packageName);
         abstract public File getDataDirectory();
 
-        public boolean fitsOnInternalStorage(Context context, long sizeBytes) {
+        public boolean fitsOnInternalStorage(Context context, SessionParams params)
+                throws IOException {
             StorageManager storage = getStorageManager(context);
             File target = getDataDirectory();
-            return (sizeBytes <= storage.getStorageBytesUntilLow(target));
+            return (params.sizeBytes <= storage.getAllocatableBytes(target,
+                    translateAllocateFlags(params.installFlags)));
         }
     }
 
@@ -401,6 +404,18 @@ public class PackageHelper {
         return sDefaultTestableInterface;
     }
 
+    @VisibleForTesting
+    @Deprecated
+    public static String resolveInstallVolume(Context context, String packageName,
+            int installLocation, long sizeBytes, TestableInterface testInterface)
+            throws IOException {
+        final SessionParams params = new SessionParams(SessionParams.MODE_INVALID);
+        params.appPackageName = packageName;
+        params.installLocation = installLocation;
+        params.sizeBytes = sizeBytes;
+        return resolveInstallVolume(context, params, testInterface);
+    }
+
     /**
      * Given a requested {@link PackageInfo#installLocation} and calculated
      * install size, pick the actual volume to install the app. Only considers
@@ -410,25 +425,25 @@ public class PackageHelper {
      * @return the {@link VolumeInfo#fsUuid} to install onto, or {@code null}
      *         for internal storage.
      */
-    public static String resolveInstallVolume(Context context, String packageName,
-            int installLocation, long sizeBytes) throws IOException {
+    public static String resolveInstallVolume(Context context, SessionParams params)
+            throws IOException {
         TestableInterface testableInterface = getDefaultTestableInterface();
-        return resolveInstallVolume(context, packageName,
-                installLocation, sizeBytes, testableInterface);
+        return resolveInstallVolume(context, params.appPackageName, params.installLocation,
+                params.sizeBytes, testableInterface);
     }
 
     @VisibleForTesting
-    public static String resolveInstallVolume(Context context, String packageName,
-            int installLocation, long sizeBytes, TestableInterface testInterface)
-            throws IOException {
+    public static String resolveInstallVolume(Context context, SessionParams params,
+            TestableInterface testInterface) throws IOException {
         final boolean forceAllowOnExternal = testInterface.getForceAllowOnExternalSetting(context);
         final boolean allow3rdPartyOnInternal =
                 testInterface.getAllow3rdPartyOnInternalConfig(context);
         // TODO: handle existing apps installed in ASEC; currently assumes
         // they'll end up back on internal storage
-        ApplicationInfo existingInfo = testInterface.getExistingAppInfo(context, packageName);
+        ApplicationInfo existingInfo = testInterface.getExistingAppInfo(context,
+                params.appPackageName);
 
-        final boolean fitsOnInternal = testInterface.fitsOnInternalStorage(context, sizeBytes);
+        final boolean fitsOnInternal = testInterface.fitsOnInternalStorage(context, params);
         final StorageManager storageManager =
                 testInterface.getStorageManager(context);
 
@@ -438,7 +453,8 @@ public class PackageHelper {
                 return StorageManager.UUID_PRIVATE_INTERNAL;
             } else {
                 throw new IOException("Not enough space on existing volume "
-                        + existingInfo.volumeUuid + " for system app " + packageName + " upgrade");
+                        + existingInfo.volumeUuid + " for system app " + params.appPackageName
+                        + " upgrade");
             }
         }
 
@@ -450,8 +466,9 @@ public class PackageHelper {
             boolean isInternalStorage = ID_PRIVATE_INTERNAL.equals(vol.id);
             if (vol.type == VolumeInfo.TYPE_PRIVATE && vol.isMountedWritable()
                     && (!isInternalStorage || allow3rdPartyOnInternal)) {
-                final long availBytes = storageManager.getStorageBytesUntilLow(new File(vol.path));
-                if (availBytes >= sizeBytes) {
+                final long availBytes = storageManager.getAllocatableBytes(new File(vol.path),
+                        translateAllocateFlags(params.installFlags));
+                if (availBytes >= params.sizeBytes) {
                     allCandidates.add(vol.fsUuid);
                 }
                 if (availBytes >= bestCandidateAvailBytes) {
@@ -463,11 +480,11 @@ public class PackageHelper {
 
         // If app expresses strong desire for internal storage, honor it
         if (!forceAllowOnExternal
-                && installLocation == PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY) {
+                && params.installLocation == PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY) {
             if (existingInfo != null && !Objects.equals(existingInfo.volumeUuid,
                     StorageManager.UUID_PRIVATE_INTERNAL)) {
-                throw new IOException("Cannot automatically move " + packageName + " from "
-                        + existingInfo.volumeUuid + " to internal storage");
+                throw new IOException("Cannot automatically move " + params.appPackageName
+                        + " from " + existingInfo.volumeUuid + " to internal storage");
             }
 
             if (!allow3rdPartyOnInternal) {
@@ -490,7 +507,7 @@ public class PackageHelper {
                 return existingInfo.volumeUuid;
             } else {
                 throw new IOException("Not enough space on existing volume "
-                        + existingInfo.volumeUuid + " for " + packageName + " upgrade");
+                        + existingInfo.volumeUuid + " for " + params.appPackageName + " upgrade");
             }
         }
 
@@ -504,29 +521,45 @@ public class PackageHelper {
         }
     }
 
-    public static boolean fitsOnInternal(Context context, long sizeBytes) {
+    public static boolean fitsOnInternal(Context context, SessionParams params) throws IOException {
         final StorageManager storage = context.getSystemService(StorageManager.class);
         final File target = Environment.getDataDirectory();
-        return (sizeBytes <= storage.getStorageBytesUntilLow(target));
+        return (params.sizeBytes <= storage.getAllocatableBytes(target,
+                translateAllocateFlags(params.installFlags)));
     }
 
-    public static boolean fitsOnExternal(Context context, long sizeBytes) {
+    public static boolean fitsOnExternal(Context context, SessionParams params) {
         final StorageManager storage = context.getSystemService(StorageManager.class);
         final StorageVolume primary = storage.getPrimaryVolume();
-        return (sizeBytes > 0) && !primary.isEmulated()
+        return (params.sizeBytes > 0) && !primary.isEmulated()
                 && Environment.MEDIA_MOUNTED.equals(primary.getState())
-                && sizeBytes <= storage.getStorageBytesUntilLow(primary.getPathFile());
+                && params.sizeBytes <= storage.getStorageBytesUntilLow(primary.getPathFile());
+    }
+
+    @Deprecated
+    public static int resolveInstallLocation(Context context, String packageName,
+            int installLocation, long sizeBytes, int installFlags) {
+        final SessionParams params = new SessionParams(SessionParams.MODE_INVALID);
+        params.appPackageName = packageName;
+        params.installLocation = installLocation;
+        params.sizeBytes = sizeBytes;
+        params.installFlags = installFlags;
+        try {
+            return resolveInstallLocation(context, params);
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     /**
      * Given a requested {@link PackageInfo#installLocation} and calculated
      * install size, pick the actual location to install the app.
      */
-    public static int resolveInstallLocation(Context context, String packageName,
-            int installLocation, long sizeBytes, int installFlags) {
+    public static int resolveInstallLocation(Context context, SessionParams params)
+            throws IOException {
         ApplicationInfo existingInfo = null;
         try {
-            existingInfo = context.getPackageManager().getApplicationInfo(packageName,
+            existingInfo = context.getPackageManager().getApplicationInfo(params.appPackageName,
                     PackageManager.MATCH_ANY_USER);
         } catch (NameNotFoundException ignored) {
         }
@@ -534,23 +567,23 @@ public class PackageHelper {
         final int prefer;
         final boolean checkBoth;
         boolean ephemeral = false;
-        if ((installFlags & PackageManager.INSTALL_INSTANT_APP) != 0) {
+        if ((params.installFlags & PackageManager.INSTALL_INSTANT_APP) != 0) {
             prefer = RECOMMEND_INSTALL_INTERNAL;
             ephemeral = true;
             checkBoth = false;
-        } else if ((installFlags & PackageManager.INSTALL_INTERNAL) != 0) {
+        } else if ((params.installFlags & PackageManager.INSTALL_INTERNAL) != 0) {
             prefer = RECOMMEND_INSTALL_INTERNAL;
             checkBoth = false;
-        } else if ((installFlags & PackageManager.INSTALL_EXTERNAL) != 0) {
+        } else if ((params.installFlags & PackageManager.INSTALL_EXTERNAL) != 0) {
             prefer = RECOMMEND_INSTALL_EXTERNAL;
             checkBoth = false;
-        } else if (installLocation == PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY) {
+        } else if (params.installLocation == PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY) {
             prefer = RECOMMEND_INSTALL_INTERNAL;
             checkBoth = false;
-        } else if (installLocation == PackageInfo.INSTALL_LOCATION_PREFER_EXTERNAL) {
+        } else if (params.installLocation == PackageInfo.INSTALL_LOCATION_PREFER_EXTERNAL) {
             prefer = RECOMMEND_INSTALL_EXTERNAL;
             checkBoth = true;
-        } else if (installLocation == PackageInfo.INSTALL_LOCATION_AUTO) {
+        } else if (params.installLocation == PackageInfo.INSTALL_LOCATION_AUTO) {
             // When app is already installed, prefer same medium
             if (existingInfo != null) {
                 // TODO: distinguish if this is external ASEC
@@ -570,12 +603,12 @@ public class PackageHelper {
 
         boolean fitsOnInternal = false;
         if (checkBoth || prefer == RECOMMEND_INSTALL_INTERNAL) {
-            fitsOnInternal = fitsOnInternal(context, sizeBytes);
+            fitsOnInternal = fitsOnInternal(context, params);
         }
 
         boolean fitsOnExternal = false;
         if (checkBoth || prefer == RECOMMEND_INSTALL_EXTERNAL) {
-            fitsOnExternal = fitsOnExternal(context, sizeBytes);
+            fitsOnExternal = fitsOnExternal(context, params);
         }
 
         if (prefer == RECOMMEND_INSTALL_INTERNAL) {
@@ -640,5 +673,13 @@ public class PackageHelper {
                     "Expected " + str + " to end with " + before);
         }
         return str.substring(0, str.length() - before.length()) + after;
+    }
+
+    public static int translateAllocateFlags(int installFlags) {
+        if ((installFlags & PackageManager.INSTALL_ALLOCATE_AGGRESSIVE) != 0) {
+            return StorageManager.FLAG_ALLOCATE_AGGRESSIVE;
+        } else {
+            return 0;
+        }
     }
 }

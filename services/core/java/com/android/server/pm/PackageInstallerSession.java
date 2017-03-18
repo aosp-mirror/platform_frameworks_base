@@ -472,8 +472,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             // If caller specified a total length, allocate it for them. Free up
             // cache space to grow, if needed.
             if (stageDir != null && lengthBytes > 0) {
-                mContext.getSystemService(StorageManager.class).allocateBytes(targetFd,
-                        lengthBytes, 0);
+                mContext.getSystemService(StorageManager.class).allocateBytes(targetFd, lengthBytes,
+                        PackageHelper.translateAllocateFlags(params.installFlags));
             }
 
             if (offsetBytes > 0) {
