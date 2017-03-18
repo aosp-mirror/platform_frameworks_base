@@ -16,6 +16,12 @@
 
 package com.android.server.pm;
 
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.ACTION_INSTANT_APP_RESOLUTION_PHASE_ONE;
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.ACTION_INSTANT_APP_RESOLUTION_PHASE_TWO;
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_INSTANT_APP_LAUNCH_TOKEN;
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_INSTANT_APP_RESOLUTION_DELAY_MS;
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_INSTANT_APP_RESOLUTION_STATUS;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
@@ -32,12 +38,16 @@ import android.content.pm.AuxiliaryResolveInfo;
 import android.content.pm.InstantAppIntentFilter;
 import android.content.pm.InstantAppResolveInfo;
 import android.content.pm.InstantAppResolveInfo.InstantAppDigest;
+import android.metrics.LogMaker;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.util.Log;
+import android.util.Pair;
 import android.util.Slog;
 
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.nano.MetricsProto;
 import com.android.server.pm.EphemeralResolverConnection.PhaseTwoCallback;
 
 import java.util.ArrayList;
@@ -47,28 +57,48 @@ import java.util.UUID;
 
 /** @hide */
 public abstract class InstantAppResolver {
+    private static int RESOLUTION_SUCCESS = 0;
+    private static int RESOLUTION_FAILURE = 1;
+
+    private static MetricsLogger sMetricsLogger;
+    private static MetricsLogger getLogger() {
+        if (sMetricsLogger == null) {
+            sMetricsLogger = new MetricsLogger();
+        }
+        return sMetricsLogger;
+    }
+
     public static AuxiliaryResolveInfo doInstantAppResolutionPhaseOne(Context context,
             EphemeralResolverConnection connection, InstantAppRequest requestObj) {
+        final long startTime = System.currentTimeMillis();
+        final String token = UUID.randomUUID().toString();
         final Intent intent = requestObj.origIntent;
         final InstantAppDigest digest =
                 new InstantAppDigest(intent.getData().getHost(), 5 /*maxDigests*/);
         final int[] shaPrefix = digest.getDigestPrefix();
         final List<InstantAppResolveInfo> instantAppResolveInfoList =
-                connection.getInstantAppResolveInfoList(shaPrefix);
+                connection.getInstantAppResolveInfoList(shaPrefix); // pass token
+
+        final AuxiliaryResolveInfo resolveInfo;
         if (instantAppResolveInfoList == null || instantAppResolveInfoList.size() == 0) {
             // No hash prefix match; there are no instant apps for this domain.
-            return null;
+            resolveInfo = null;
+        } else {
+            resolveInfo = InstantAppResolver.filterInstantAppIntent(instantAppResolveInfoList,
+                    intent, requestObj.resolvedType, requestObj.userId,
+                    intent.getPackage(), digest, token);
         }
 
-        final String token = UUID.randomUUID().toString();
-        return InstantAppResolver.filterInstantAppIntent(instantAppResolveInfoList,
-                intent, requestObj.resolvedType, requestObj.userId,
-                intent.getPackage(), digest, token);
+        logMetrics(ACTION_INSTANT_APP_RESOLUTION_PHASE_ONE, startTime, token,
+                resolveInfo != null ? RESOLUTION_SUCCESS : RESOLUTION_FAILURE);
+
+        return resolveInfo;
     }
 
     public static void doInstantAppResolutionPhaseTwo(Context context,
             EphemeralResolverConnection connection, InstantAppRequest requestObj,
             ActivityInfo instantAppInstaller, Handler callbackHandler) {
+        final long startTime = System.currentTimeMillis();
         final Intent intent = requestObj.origIntent;
         final String hostName = intent.getData().getHost();
         final InstantAppDigest digest = new InstantAppDigest(hostName, 5 /*maxDigests*/);
@@ -77,16 +107,16 @@ public abstract class InstantAppResolver {
         final PhaseTwoCallback callback = new PhaseTwoCallback() {
             @Override
             void onPhaseTwoResolved(List<InstantAppResolveInfo> instantAppResolveInfoList,
-                    int sequence) {
+                    long startTime) {
                 final String packageName;
                 final String splitName;
                 final int versionCode;
+                final String token = requestObj.responseObj.token;
                 if (instantAppResolveInfoList != null && instantAppResolveInfoList.size() > 0) {
                     final AuxiliaryResolveInfo instantAppIntentInfo =
                             InstantAppResolver.filterInstantAppIntent(
                                     instantAppResolveInfoList, intent, null /*resolvedType*/,
-                                    0 /*userId*/, intent.getPackage(), digest,
-                                    requestObj.responseObj.token);
+                                    0 /*userId*/, intent.getPackage(), digest, token);
                     if (instantAppIntentInfo != null
                             && instantAppIntentInfo.resolveInfo != null) {
                         packageName = instantAppIntentInfo.resolveInfo.getPackageName();
@@ -110,15 +140,19 @@ public abstract class InstantAppResolver {
                         packageName,
                         splitName,
                         versionCode,
-                        requestObj.responseObj.token,
+                        token,
                         false /*needsPhaseTwo*/);
                 installerIntent.setComponent(new ComponentName(
                         instantAppInstaller.packageName, instantAppInstaller.name));
+
+                logMetrics(ACTION_INSTANT_APP_RESOLUTION_PHASE_TWO, startTime, token,
+                        packageName != null ? RESOLUTION_SUCCESS : RESOLUTION_FAILURE);
+
                 context.startActivity(installerIntent);
             }
         };
         connection.getInstantAppIntentFilterList(
-                shaPrefix, hostName, callback, callbackHandler, 0 /*sequence*/);
+                shaPrefix, hostName, callback, callbackHandler, startTime);
     }
 
     /**
@@ -241,5 +275,15 @@ public abstract class InstantAppResolver {
         }
         // Hash or filter mis-match; no instant apps for this domain.
         return null;
+    }
+
+    private static void logMetrics(int action, long startTime, String token, int status) {
+        final LogMaker logMaker = new LogMaker(action)
+                .setType(MetricsProto.MetricsEvent.TYPE_ACTION)
+                .addTaggedData(FIELD_INSTANT_APP_RESOLUTION_DELAY_MS,
+                        new Long(System.currentTimeMillis() - startTime))
+                .addTaggedData(FIELD_INSTANT_APP_LAUNCH_TOKEN, token)
+                .addTaggedData(FIELD_INSTANT_APP_RESOLUTION_STATUS, new Integer(status));
+        getLogger().write(logMaker);
     }
 }
