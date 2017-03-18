@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.graphics.Matrix;
 import android.graphics.Rect;
@@ -269,20 +270,6 @@ public abstract class ViewStructure {
     public abstract ViewStructure newChild(int index);
 
     /**
-     * Create a new child {@link ViewStructure} in this view for autofill purposes.
-     *
-     * @param index the index (in the list of children) to put the new child at (see
-     *            {@link #addChildCount(int)} and {@link #setChildCount(int)}.
-     * @param virtualId an opaque ID to the Android System (although it could be meaningful to the
-     *            {@link View} creating the {@link ViewStructure}), but it's the same id used on
-     *            {@link View#autofill(android.util.SparseArray)}.
-     * @param flags currently {@code 0}.
-     *
-     * @return Returns an fresh {@link ViewStructure} ready to be filled in.
-     */
-    public abstract ViewStructure newChild(int index, int virtualId, int flags);
-
-    /**
      * Like {@link #newChild}, but allows the caller to asynchronously populate the returned
      * child.  It can transfer the returned {@link ViewStructure} to another thread for it
      * to build its content (and children etc).  Once done, some thread must call
@@ -293,25 +280,13 @@ public abstract class ViewStructure {
     public abstract ViewStructure asyncNewChild(int index);
 
     /**
-     * Like {@link #newChild(int, int, int)}, but allows the caller to asynchronously
-     * populate the returned child.
+     * Sets the {@link AutofillId} for this virtual node.
      *
-     * <p>It can transfer the returned {@link ViewStructure} to another thread for it to build its
-     * content (and children etc).
-     *
-     * <p>Once done, some thread must call {@link #asyncCommit()} to tell the containing
-     * {@link ViewStructure} that the async population is done.
-     *
-     * @param index the index (in the list of children) to put the new child at (see
-     *            {@link #addChildCount(int)} and {@link #setChildCount(int)}.
-     * @param virtualId an opaque ID to the Android System (although it could be meaningful to the
-     *            {@link View} creating the {@link ViewStructure}), but it's the same id used on
+     * @param parent parent node.
+     * @param virtualId an opaque ID to the Android System; it's the same id used on
      *            {@link View#autofill(android.util.SparseArray)}.
-     * @param flags currently {@code 0}.
-     *
-     * @return Returns an fresh {@link ViewStructure} ready to be filled in.
      */
-    public abstract ViewStructure asyncNewChild(int index, int virtualId, int flags);
+    public abstract void setAutofillId(@NonNull ViewStructure parent, int virtualId);
 
     /**
      * Sets the {@link View#getAutofillType()} that can be used to autofill this node.

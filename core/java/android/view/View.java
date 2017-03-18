@@ -7275,9 +7275,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * fills in all data that can be inferred from the view itself.
      * @param flags optional flags (currently {@code 0}).
      */
-    @CallSuper
     public void onProvideAutofillStructure(ViewStructure structure, int flags) {
         onProvideStructureForAssistOrAutofill(structure, true);
+    }
+
+    private void setAutofillId(ViewStructure structure) {
+        // The autofill id needs to be unique, but its value doesn't matter,
+        // so it's better to reuse the accessibility id to save space.
+        structure.setAutofillId(getAccessibilityViewId());
     }
 
     private void onProvideStructureForAssistOrAutofill(ViewStructure structure,
@@ -7299,13 +7304,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
 
         if (forAutofill) {
+            setAutofillId(structure);
             final @AutofillType int autofillType = getAutofillType();
             // Don't need to fill autofill info if view does not support it.
             // For example, only TextViews that are editable support autofill
             if (autofillType != AUTOFILL_TYPE_NONE) {
-                // The autofill id needs to be unique, but its value doesn't matter, so it's better
-                // to reuse the accessibility id to save space.
-                structure.setAutofillId(getAccessibilityViewId());
                 structure.setAutofillType(autofillType);
                 structure.setAutofillHint(getAutofillHint());
                 structure.setAutofillValue(getAutofillValue());
@@ -7404,6 +7407,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     private void onProvideVirtualStructureForAssistOrAutofill(ViewStructure structure,
             boolean forAutofill) {
+        if (forAutofill) {
+            setAutofillId(structure);
+        }
         // NOTE: currently flags are only used for AutoFill; if they're used for Assist as well,
         // this method should take a boolean with the type of request.
         AccessibilityNodeProvider provider = getAccessibilityNodeProvider();
@@ -7671,6 +7677,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 AccessibilityNodeInfo cinfo = provider.createAccessibilityNodeInfo(
                         AccessibilityNodeInfo.getVirtualDescendantId(info.getChildId(i)));
                 ViewStructure child = structure.newChild(i);
+                // TODO(b/33197203): add CTS test to autofill virtual children based on
+                // Accessibility API.
+                child.setAutofillId(structure, i);
                 populateVirtualStructure(child, provider, cinfo, forAutofill);
                 cinfo.recycle();
             }
@@ -7707,9 +7716,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         boolean blocked = forAutofill ? isAutofillBlocked() : isAssistBlocked();
         if (!blocked) {
             if (forAutofill) {
-                // The autofill id needs to be unique, but its value doesn't matter,
-                // so it's better to reuse the accessibility id to save space.
-                structure.setAutofillId(getAccessibilityViewId());
+                setAutofillId(structure);
                 // NOTE: flags are not currently supported, hence 0
                 onProvideAutofillStructure(structure, 0);
                 onProvideAutofillVirtualStructure(structure, 0);
