@@ -48,7 +48,7 @@ public class LocationTile extends QSTile<QSTile.State> {
     private final Callback mCallback = new Callback();
 
     private String[] mEntries;
-    private Integer[] mValues = {Settings.Secure.LOCATION_MODE_BATTERY_SAVING,
+    private final Integer[] mValues = {Settings.Secure.LOCATION_MODE_BATTERY_SAVING,
             Settings.Secure.LOCATION_MODE_SENSORS_ONLY,
             Settings.Secure.LOCATION_MODE_HIGH_ACCURACY
     };
@@ -104,9 +104,21 @@ public class LocationTile extends QSTile<QSTile.State> {
     protected void handleClick() {
         boolean mIsEasy = isLocationEasyToggleEnabled();
         if(mIsEasy) {
-            final boolean wasEnabled = (Boolean) mState.value;
-            MetricsLogger.action(mContext, getMetricsCategory(), !wasEnabled);
-            mController.setLocationEnabled(!wasEnabled);
+            MetricsLogger.action(mContext, getMetricsCategory());
+            int currentMode = mController.getLocationCurrentState();
+            if (currentMode == mValues[0]) {
+                //from battery saving to off
+                mController.setLocationEnabled(false);
+            } else if (currentMode == mValues[1]) {
+                //from sensor only to high precision
+                mController.setLocationMode(mValues[2]);
+            } else if (currentMode == mValues[2]) {
+                //from high precision to battery saving
+                mController.setLocationMode(mValues[0]);
+            } else {
+                //from off to sensor only
+                mController.setLocationMode(mValues[1]);
+            }
         } else {
             mShowingDetail = true;
             mAnimationList.clear();
