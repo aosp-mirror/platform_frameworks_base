@@ -966,6 +966,8 @@
     <string name="selectTextMode" msgid="1018691815143165326">"텍스트 선택"</string>
     <string name="undo" msgid="7905788502491742328">"실행취소"</string>
     <string name="redo" msgid="7759464876566803888">"다시 실행"</string>
+    <!-- no translation found for autofill (3035779615680565188) -->
+    <skip />
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"텍스트 선택"</string>
     <string name="addToDictionary" msgid="4352161534510057874">"사전에 추가"</string>
     <string name="deleteText" msgid="6979668428458199034">"삭제"</string>
@@ -1183,12 +1185,9 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"탭하여 언어와 레이아웃을 선택하세요."</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <!-- no translation found for alert_windows_notification_channel_name (3116610965549449803) -->
-    <skip />
-    <!-- no translation found for alert_windows_notification_title (4532185840598192445) -->
-    <skip />
-    <!-- no translation found for alert_windows_notification_message (8917232109522912560) -->
-    <skip />
+    <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g>이(가) 다른 앱 위에 표시됨"</string>
+    <string name="alert_windows_notification_title" msgid="4532185840598192445">"<xliff:g id="NAME">%s</xliff:g>이(가) 다른 앱 위에 표시됨"</string>
+    <string name="alert_windows_notification_message" msgid="8917232109522912560">"<xliff:g id="NAME">%s</xliff:g>에서 이 기능이 사용되는 것을 원하지 않는 경우 탭하여 설정을 열고 기능을 사용 중지하세요."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"사용 중지"</string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"<xliff:g id="NAME">%s</xliff:g> 준비 중"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"오류 확인 중"</string>
@@ -1196,12 +1195,10 @@
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"사진 및 미디어를 전송하는 데 사용합니다."</string>
     <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"손상된 <xliff:g id="NAME">%s</xliff:g>입니다."</string>
     <string name="ext_media_unmountable_notification_message" msgid="2343202057122495773">"<xliff:g id="NAME">%s</xliff:g>이(가) 손상되었습니다. 해결하려면 탭하세요."</string>
-    <!-- no translation found for ext_media_unmountable_notification_message (3941179940297874950) -->
-    <skip />
+    <string name="ext_media_unmountable_notification_message" product="tv" msgid="3941179940297874950">"<xliff:g id="NAME">%s</xliff:g>이(가) 손상되었습니다. 선택하여 문제를 해결하세요."</string>
     <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"지원되지 않는 <xliff:g id="NAME">%s</xliff:g>입니다."</string>
     <string name="ext_media_unsupported_notification_message" msgid="6121601473787888589">"이 기기는 <xliff:g id="NAME">%s</xliff:g>을(를) 지원하지 않습니다. 지원하는 형식으로 설정하려면 탭하세요."</string>
-    <!-- no translation found for ext_media_unsupported_notification_message (3725436899820390906) -->
-    <skip />
+    <string name="ext_media_unsupported_notification_message" product="tv" msgid="3725436899820390906">"이 기기는 이 <xliff:g id="NAME">%s</xliff:g>을(를) 지원하지 않습니다. 선택하여 지원되는 형식으로 설정하세요."</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g>이(가) 예기치 않게 삭제됨"</string>
     <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"데이터 손실을 피하려면 <xliff:g id="NAME">%s</xliff:g>을(를) 마운트 해제한 다음 삭제하세요."</string>
     <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"<xliff:g id="NAME">%s</xliff:g> 삭제됨"</string>
@@ -1732,6 +1729,8 @@
     <string name="time_picker_prompt_label" msgid="7588093983899966783">"시간 입력"</string>
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"시간 입력을 위해 텍스트 입력 모드로 전환합니다."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"시간 입력을 위해 시계 모드로 전환합니다."</string>
+    <!-- no translation found for autofill_picker_accessibility_title (8469043291648711535) -->
+    <skip />
     <string name="autofill_save_title" msgid="7081244500504163245">"<xliff:g id="LABEL">%1$s</xliff:g>에 저장하시겠습니까?"</string>
     <string name="autofill_save_title_with_type" msgid="4977385733042555659">"<xliff:g id="TYPE">%1$s</xliff:g>을(를) <xliff:g id="LABEL">%2$s</xliff:g>에 저장하시겠습니까?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"저장"</string>

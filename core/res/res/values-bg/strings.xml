@@ -966,6 +966,8 @@
     <string name="selectTextMode" msgid="1018691815143165326">"Избор на текст"</string>
     <string name="undo" msgid="7905788502491742328">"Отмяна"</string>
     <string name="redo" msgid="7759464876566803888">"Възстановяване"</string>
+    <!-- no translation found for autofill (3035779615680565188) -->
+    <skip />
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Избиране на текст"</string>
     <string name="addToDictionary" msgid="4352161534510057874">"Добавяне в речника"</string>
     <string name="deleteText" msgid="6979668428458199034">"Изтриване"</string>
@@ -1183,12 +1185,9 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Докоснете, за да изберете език и подредба"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <!-- no translation found for alert_windows_notification_channel_name (3116610965549449803) -->
-    <skip />
-    <!-- no translation found for alert_windows_notification_title (4532185840598192445) -->
-    <skip />
-    <!-- no translation found for alert_windows_notification_message (8917232109522912560) -->
-    <skip />
+    <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> се показва върху други приложения"</string>
+    <string name="alert_windows_notification_title" msgid="4532185840598192445">"<xliff:g id="NAME">%s</xliff:g> се показва в/у други прилож."</string>
+    <string name="alert_windows_notification_message" msgid="8917232109522912560">"Ако не искате <xliff:g id="NAME">%s</xliff:g> да използва тази функция, докоснете, за да отворите настройките, и я изключете."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"ИЗКЛЮЧВАНЕ"</string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"<xliff:g id="NAME">%s</xliff:g>: Подготвя се"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Проверява се за грешки"</string>
@@ -1196,12 +1195,10 @@
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"За прехвърляне на снимки и мултимедия"</string>
     <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"<xliff:g id="NAME">%s</xliff:g>: Има повреда"</string>
     <string name="ext_media_unmountable_notification_message" msgid="2343202057122495773">"Носителят (<xliff:g id="NAME">%s</xliff:g>) е повреден. Докоснете, за да отстраните проблема."</string>
-    <!-- no translation found for ext_media_unmountable_notification_message (3941179940297874950) -->
-    <skip />
+    <string name="ext_media_unmountable_notification_message" product="tv" msgid="3941179940297874950">"Носителят (<xliff:g id="NAME">%s</xliff:g>) е повреден. Изберете, за да отстраните проблема."</string>
     <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"<xliff:g id="NAME">%s</xliff:g>: Не се поддържа"</string>
     <string name="ext_media_unsupported_notification_message" msgid="6121601473787888589">"Устройството не поддържа този носител (<xliff:g id="NAME">%s</xliff:g>). Докоснете, за да настроите в поддържан формат."</string>
-    <!-- no translation found for ext_media_unsupported_notification_message (3725436899820390906) -->
-    <skip />
+    <string name="ext_media_unsupported_notification_message" product="tv" msgid="3725436899820390906">"Устройството не поддържа този носител (<xliff:g id="NAME">%s</xliff:g>). Изберете, за да настроите в поддържан формат."</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g>: Неочаквано премахване"</string>
     <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"Спрете хранилището (<xliff:g id="NAME">%s</xliff:g>), преди да го извадите, за да не загубите данни"</string>
     <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"Премахнахте <xliff:g id="NAME">%s</xliff:g>"</string>
@@ -1732,6 +1729,8 @@
     <string name="time_picker_prompt_label" msgid="7588093983899966783">"Въведете часа"</string>
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"Превключете към режима за въвеждане на текст, за да въведете часа."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"Превключете към режима за часовник, за да въведете часа."</string>
+    <!-- no translation found for autofill_picker_accessibility_title (8469043291648711535) -->
+    <skip />
     <string name="autofill_save_title" msgid="7081244500504163245">"Да се запази ли в/ъв „<xliff:g id="LABEL">%1$s</xliff:g>“?"</string>
     <string name="autofill_save_title_with_type" msgid="4977385733042555659">"<xliff:g id="TYPE">%1$s</xliff:g> да се запази ли в/ъв „<xliff:g id="LABEL">%2$s</xliff:g>“?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"Запазване"</string>

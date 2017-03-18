@@ -986,6 +986,8 @@
     <string name="selectTextMode" msgid="1018691815143165326">"Изабери текст"</string>
     <string name="undo" msgid="7905788502491742328">"Опозови"</string>
     <string name="redo" msgid="7759464876566803888">"Понови"</string>
+    <!-- no translation found for autofill (3035779615680565188) -->
+    <skip />
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Избор текста"</string>
     <string name="addToDictionary" msgid="4352161534510057874">"Додај у речник"</string>
     <string name="deleteText" msgid="6979668428458199034">"Избриши"</string>
@@ -1203,12 +1205,9 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Додирните да бисте изабрали језик и распоред"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <!-- no translation found for alert_windows_notification_channel_name (3116610965549449803) -->
-    <skip />
-    <!-- no translation found for alert_windows_notification_title (4532185840598192445) -->
-    <skip />
-    <!-- no translation found for alert_windows_notification_message (8917232109522912560) -->
-    <skip />
+    <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"Апликација <xliff:g id="NAME">%s</xliff:g> се приказује преко других апликација"</string>
+    <string name="alert_windows_notification_title" msgid="4532185840598192445">"Аплик. <xliff:g id="NAME">%s</xliff:g> се приказује преко других аплик."</string>
+    <string name="alert_windows_notification_message" msgid="8917232109522912560">"Ако не желите ову функцију за <xliff:g id="NAME">%s</xliff:g>, додирните да бисте отворили подешавања и искључили је."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"ИСКЉУЧИ"</string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"<xliff:g id="NAME">%s</xliff:g> се припрема"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Проверава се да ли постоје грешке"</string>
@@ -1216,12 +1215,10 @@
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"За пренос слика и медија"</string>
     <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"Уређај <xliff:g id="NAME">%s</xliff:g> је оштећен"</string>
     <string name="ext_media_unmountable_notification_message" msgid="2343202057122495773">"Уређај <xliff:g id="NAME">%s</xliff:g> је оштећен. Додирните да бисте га поправили."</string>
-    <!-- no translation found for ext_media_unmountable_notification_message (3941179940297874950) -->
-    <skip />
+    <string name="ext_media_unmountable_notification_message" product="tv" msgid="3941179940297874950">"Медиј <xliff:g id="NAME">%s</xliff:g> је оштећен. Изаберите да га поправите."</string>
     <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"Уређај <xliff:g id="NAME">%s</xliff:g> није подржан"</string>
     <string name="ext_media_unsupported_notification_message" msgid="6121601473787888589">"Овај уређај не подржава овај уређај <xliff:g id="NAME">%s</xliff:g>. Додирните да бисте подесили подржани формат."</string>
-    <!-- no translation found for ext_media_unsupported_notification_message (3725436899820390906) -->
-    <skip />
+    <string name="ext_media_unsupported_notification_message" product="tv" msgid="3725436899820390906">"Овај уређај не подржава овај медиј (<xliff:g id="NAME">%s</xliff:g>). Изаберите да га подесите у подржаном формату."</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"Уређај <xliff:g id="NAME">%s</xliff:g> је неочекивано уклоњен"</string>
     <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"Искључите уређај <xliff:g id="NAME">%s</xliff:g> пре уклањања да не бисте изгубили податке"</string>
     <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"Уређај <xliff:g id="NAME">%s</xliff:g> је уклоњен"</string>
@@ -1763,6 +1760,8 @@
     <string name="time_picker_prompt_label" msgid="7588093983899966783">"Унесите време"</string>
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"Пређите у режим уноса текста ради уноса времена."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"Пређите у режим сата ради уноса времена."</string>
+    <!-- no translation found for autofill_picker_accessibility_title (8469043291648711535) -->
+    <skip />
     <string name="autofill_save_title" msgid="7081244500504163245">"Желите ли да сачувате у: <xliff:g id="LABEL">%1$s</xliff:g>?"</string>
     <string name="autofill_save_title_with_type" msgid="4977385733042555659">"Желите ли да сачувате ставку <xliff:g id="TYPE">%1$s</xliff:g> у: <xliff:g id="LABEL">%2$s</xliff:g>?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"Сачувај"</string>

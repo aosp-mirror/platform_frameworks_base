@@ -276,7 +276,7 @@
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"dostęp do kalendarza"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"wysyłanie i wyświetlanie SMS-ów"</string>
-    <string name="permgrouplab_storage" msgid="1971118770546336966">"Pamięć"</string>
+    <string name="permgrouplab_storage" msgid="1971118770546336966">"Pamięć wewnętrzna"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"dostęp do zdjęć, multimediów i plików na Twoim urządzeniu"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"nagrywanie dźwięku"</string>
@@ -1006,6 +1006,8 @@
     <string name="selectTextMode" msgid="1018691815143165326">"Zaznacz tekst"</string>
     <string name="undo" msgid="7905788502491742328">"Cofnij"</string>
     <string name="redo" msgid="7759464876566803888">"Ponów"</string>
+    <!-- no translation found for autofill (3035779615680565188) -->
+    <skip />
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Zaznaczanie tekstu"</string>
     <string name="addToDictionary" msgid="4352161534510057874">"Dodaj do słownika"</string>
     <string name="deleteText" msgid="6979668428458199034">"Usuń"</string>
@@ -1223,12 +1225,9 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Kliknij, by wybrać język i układ"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" AĄBCĆDEĘFGHIJKLŁMNŃOÓPQRSŚTUVWXYZŹŻ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <!-- no translation found for alert_windows_notification_channel_name (3116610965549449803) -->
-    <skip />
-    <!-- no translation found for alert_windows_notification_title (4532185840598192445) -->
-    <skip />
-    <!-- no translation found for alert_windows_notification_message (8917232109522912560) -->
-    <skip />
+    <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"Wyświetlanie aplikacji <xliff:g id="NAME">%s</xliff:g> nad innymi"</string>
+    <string name="alert_windows_notification_title" msgid="4532185840598192445">"Aplikacja <xliff:g id="NAME">%s</xliff:g> jest wyświetlana nad innymi."</string>
+    <string name="alert_windows_notification_message" msgid="8917232109522912560">"Jeśli nie chcesz, by aplikacja <xliff:g id="NAME">%s</xliff:g> korzystała z tej funkcji, otwórz ustawienia i ją wyłącz."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"WYŁĄCZ"</string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"Przygotowuję: <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Sprawdzanie w poszukiwaniu błędów"</string>
@@ -1236,12 +1235,10 @@
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Do przenoszenia zdjęć i multimediów"</string>
     <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"Nośnik <xliff:g id="NAME">%s</xliff:g> uszkodzony"</string>
     <string name="ext_media_unmountable_notification_message" msgid="2343202057122495773">"<xliff:g id="NAME">%s</xliff:g>: uszkodzenie. Kliknij, by naprawić."</string>
-    <!-- no translation found for ext_media_unmountable_notification_message (3941179940297874950) -->
-    <skip />
+    <string name="ext_media_unmountable_notification_message" product="tv" msgid="3941179940297874950">"Nośnik <xliff:g id="NAME">%s</xliff:g> jest uszkodzony. Wybierz, by rozwiązać problem."</string>
     <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"Nośnik <xliff:g id="NAME">%s</xliff:g> nieobsługiwany"</string>
     <string name="ext_media_unsupported_notification_message" msgid="6121601473787888589">"To urządzenie nie obsługuje <xliff:g id="NAME">%s</xliff:g>. Kliknij, by użyć obsługiwanego formatu."</string>
-    <!-- no translation found for ext_media_unsupported_notification_message (3725436899820390906) -->
-    <skip />
+    <string name="ext_media_unsupported_notification_message" product="tv" msgid="3725436899820390906">"To urządzenie nie obsługuje nośnika <xliff:g id="NAME">%s</xliff:g>. Wybierz, by skonfigurować obsługiwany format."</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g>: nieoczekiwane wyjęcie"</string>
     <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"Odłącz nośnik <xliff:g id="NAME">%s</xliff:g> przed jego wyjęciem, by uniknąć utraty danych"</string>
     <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"Wyjęto: <xliff:g id="NAME">%s</xliff:g>"</string>
@@ -1794,6 +1791,8 @@
     <string name="time_picker_prompt_label" msgid="7588093983899966783">"Podaj czas"</string>
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"Aby wprowadzić czas, włącz tryb wprowadzania tekstu."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"Aby wprowadzić czas, włącz tryb zegara."</string>
+    <!-- no translation found for autofill_picker_accessibility_title (8469043291648711535) -->
+    <skip />
     <string name="autofill_save_title" msgid="7081244500504163245">"Zapisać w: <xliff:g id="LABEL">%1$s</xliff:g>?"</string>
     <string name="autofill_save_title_with_type" msgid="4977385733042555659">"Zapisać element <xliff:g id="TYPE">%1$s</xliff:g> w: <xliff:g id="LABEL">%2$s</xliff:g>?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"Zapisz"</string>

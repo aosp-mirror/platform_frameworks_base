@@ -966,6 +966,8 @@
     <string name="selectTextMode" msgid="1018691815143165326">"เลือกข้อความ"</string>
     <string name="undo" msgid="7905788502491742328">"เลิกทำ"</string>
     <string name="redo" msgid="7759464876566803888">"ทำซ้ำ"</string>
+    <!-- no translation found for autofill (3035779615680565188) -->
+    <skip />
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"การเลือกข้อความ"</string>
     <string name="addToDictionary" msgid="4352161534510057874">"เพิ่มในพจนานุกรม"</string>
     <string name="deleteText" msgid="6979668428458199034">"ลบ"</string>
@@ -1183,12 +1185,9 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"แตะเพื่อเลือกภาษาและรูปแบบ"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" กขฃคฅฆงจฉชซฌญฎฏฐฑฒณดตถทธนบปผฝพฟภมยรลวศษสหฬอฮ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" กขฃคฅฆงจฉชซฌญฎฏฐฑฒณดตถทธนบปผฝพฟภมยรลวศษสหฬอฮ"</string>
-    <!-- no translation found for alert_windows_notification_channel_name (3116610965549449803) -->
-    <skip />
-    <!-- no translation found for alert_windows_notification_title (4532185840598192445) -->
-    <skip />
-    <!-- no translation found for alert_windows_notification_message (8917232109522912560) -->
-    <skip />
+    <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> แสดงทับแอปอื่นๆ"</string>
+    <string name="alert_windows_notification_title" msgid="4532185840598192445">"<xliff:g id="NAME">%s</xliff:g> กำลังแสดงทับแอปอื่นๆ"</string>
+    <string name="alert_windows_notification_message" msgid="8917232109522912560">"หากคุณไม่ต้องการให้ <xliff:g id="NAME">%s</xliff:g> ใช้คุณลักษณะนี้ ให้แตะเพื่อเปิดการตั้งค่าแล้วปิดคุณลักษณะ"</string>
     <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"ปิด"</string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"กำลังเตรียม <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"กำลังตรวจหาข้อผิดพลาด"</string>
@@ -1196,12 +1195,10 @@
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"สำหรับการโอนรูปภาพและสื่อ"</string>
     <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"<xliff:g id="NAME">%s</xliff:g> เสียหาย"</string>
     <string name="ext_media_unmountable_notification_message" msgid="2343202057122495773">"<xliff:g id="NAME">%s</xliff:g> เสียหาย แตะเพื่อแก้ไข"</string>
-    <!-- no translation found for ext_media_unmountable_notification_message (3941179940297874950) -->
-    <skip />
+    <string name="ext_media_unmountable_notification_message" product="tv" msgid="3941179940297874950">"<xliff:g id="NAME">%s</xliff:g> เสียหาย เลือกเพื่อแก้ไข"</string>
     <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"ไม่สนับสนุน <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unsupported_notification_message" msgid="6121601473787888589">"อุปกรณ์นี้ไม่สนับสนุน <xliff:g id="NAME">%s</xliff:g> นี้ แตะเพื่อตั้งค่าในรูปแบบที่สนับสนุน"</string>
-    <!-- no translation found for ext_media_unsupported_notification_message (3725436899820390906) -->
-    <skip />
+    <string name="ext_media_unsupported_notification_message" product="tv" msgid="3725436899820390906">"อุปกรณ์นี้ไม่รองรับ <xliff:g id="NAME">%s</xliff:g> นี้ เลือกเพื่อตั้งค่าในรูปแบบที่รองรับ"</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g> ถูกนำออกไปโดยไม่คาดคิด"</string>
     <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"ยกเลิกการต่อเชื่อม <xliff:g id="NAME">%s</xliff:g> ก่อนนำออกเพื่อหลีกเลี่ยงข้อมูลสูญหาย"</string>
     <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"นำ <xliff:g id="NAME">%s</xliff:g> ออกแล้ว"</string>
@@ -1732,6 +1729,8 @@
     <string name="time_picker_prompt_label" msgid="7588093983899966783">"พิมพ์เวลา"</string>
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"สลับไปโหมดป้อนข้อความเพื่อป้อนเวลา"</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"สลับไปโหมดนาฬิกาเพื่อป้อนเวลา"</string>
+    <!-- no translation found for autofill_picker_accessibility_title (8469043291648711535) -->
+    <skip />
     <string name="autofill_save_title" msgid="7081244500504163245">"บันทึกไปยัง <xliff:g id="LABEL">%1$s</xliff:g> ใช่ไหม"</string>
     <string name="autofill_save_title_with_type" msgid="4977385733042555659">"บันทึก <xliff:g id="TYPE">%1$s</xliff:g> ไปยัง <xliff:g id="LABEL">%2$s</xliff:g> ใช่ไหม"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"บันทึก"</string>

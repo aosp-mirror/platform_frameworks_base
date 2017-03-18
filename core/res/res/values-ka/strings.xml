@@ -966,6 +966,8 @@
     <string name="selectTextMode" msgid="1018691815143165326">"ტექსტის მონიშვნა"</string>
     <string name="undo" msgid="7905788502491742328">"დაბრუნება"</string>
     <string name="redo" msgid="7759464876566803888">"გამეორება"</string>
+    <!-- no translation found for autofill (3035779615680565188) -->
+    <skip />
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"ტექსტის მონიშვნა"</string>
     <string name="addToDictionary" msgid="4352161534510057874">"ლექსიკონში დამატება"</string>
     <string name="deleteText" msgid="6979668428458199034">"წაშლა"</string>
@@ -1183,12 +1185,9 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"შეეხეთ ენისა და განლაგების ასარჩევად"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <!-- no translation found for alert_windows_notification_channel_name (3116610965549449803) -->
-    <skip />
-    <!-- no translation found for alert_windows_notification_title (4532185840598192445) -->
-    <skip />
-    <!-- no translation found for alert_windows_notification_message (8917232109522912560) -->
-    <skip />
+    <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> ნაჩვენებია სხვა აპების ინტერფეისის გადაფარვით"</string>
+    <string name="alert_windows_notification_title" msgid="4532185840598192445">"<xliff:g id="NAME">%s</xliff:g> ნაჩვენებია სხვა აპების ინტერფეისის გადაფარვით."</string>
+    <string name="alert_windows_notification_message" msgid="8917232109522912560">"თუ არ გსურთ <xliff:g id="NAME">%s</xliff:g>-ის მიერ ამ ფუნქციის გამოყენება, შეეხეთ პარამეტრების გასახსნელად და გამორთეთ."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"გამორთვა"</string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"<xliff:g id="NAME">%s</xliff:g>-ის მომზადება"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"შეცდომების შემოწმება"</string>
@@ -1196,12 +1195,10 @@
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"ფოტოებისა და მედიის გადასატანად"</string>
     <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"დაზიანებული <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unmountable_notification_message" msgid="2343202057122495773">"<xliff:g id="NAME">%s</xliff:g> დაზიანებულია. შეეხეთ გასასწორებლად."</string>
-    <!-- no translation found for ext_media_unmountable_notification_message (3941179940297874950) -->
-    <skip />
+    <string name="ext_media_unmountable_notification_message" product="tv" msgid="3941179940297874950">"<xliff:g id="NAME">%s</xliff:g> დაზიანებულია. შეეხეთ გასასწორებლად."</string>
     <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"მხარდაუჭერელი <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unsupported_notification_message" msgid="6121601473787888589">"ეს <xliff:g id="NAME">%s</xliff:g> მხარდაუჭერელია არ მოწყობილობაზე. შეეხეთ მხარდაჭერილ ფორმატში დასაყენებლად."</string>
-    <!-- no translation found for ext_media_unsupported_notification_message (3725436899820390906) -->
-    <skip />
+    <string name="ext_media_unsupported_notification_message" product="tv" msgid="3725436899820390906">"ეს <xliff:g id="NAME">%s</xliff:g> მხარდაუჭერელია ამ მოწყობილობაზე. შეეხეთ მხარდაჭერილ ფორმატში დასაყენებლად."</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"მოულოდნელად მოხდა <xliff:g id="NAME">%s</xliff:g>-ის ამოღება"</string>
     <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"მონაცემთა დაკარგვის თავიდან ასაცილებლად, ფიზიკურად ამოღებამდე, სისტემურად მოხსენით <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"<xliff:g id="NAME">%s</xliff:g> ამოღებულია"</string>
@@ -1732,6 +1729,8 @@
     <string name="time_picker_prompt_label" msgid="7588093983899966783">"აკრიფეთ დრო"</string>
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"დროის შეყვანისთვის ტექსტის შეყვანის რეჟიმზე გადართვა."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"დროის შეყვანისთვის საათის რეჟიმზე გადართვა."</string>
+    <!-- no translation found for autofill_picker_accessibility_title (8469043291648711535) -->
+    <skip />
     <string name="autofill_save_title" msgid="7081244500504163245">"გსურთ „<xliff:g id="LABEL">%1$s</xliff:g>“-ში შენახვა?"</string>
     <string name="autofill_save_title_with_type" msgid="4977385733042555659">"გსურთ, შეინახოთ <xliff:g id="TYPE">%1$s</xliff:g> „<xliff:g id="LABEL">%2$s</xliff:g>“-ში?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"შენახვა"</string>

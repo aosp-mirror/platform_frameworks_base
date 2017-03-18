@@ -569,7 +569,7 @@
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"పరికరం గ్లోబల్ ప్రాక్సీని సెట్ చేయండి"</string>
     <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"విధానాన్ని ప్రారంభించినప్పుడు ఉపయోగించడానికి పరికర గ్లోబల్ ప్రాక్సీని సెట్ చేస్తుంది. పరికర యజమాని మాత్రమే గ్లోబల్ ప్రాక్సీని సెట్ చేయగలరు."</string>
     <string name="policylab_expirePassword" msgid="5610055012328825874">"స్క్రీన్ లాక్ పాస్‌వర్డ్ గడువు ముగింపుని సెట్ చేయండి"</string>
-    <string name="policydesc_expirePassword" msgid="5367525762204416046">"స్క్రీన్ లాక్ పాస్‌వర్డ్, PIN లేదా నమూనాని తప్పనిసరిగా ఎంత తరచుగా మార్చాలనే దాన్ని మారుస్తుంది."</string>
+    <string name="policydesc_expirePassword" msgid="5367525762204416046">"స్క్రీన్ లాక్ పాస్‌వర్డ్, పిన్ లేదా నమూనాని తప్పనిసరిగా ఎంత తరచుగా మార్చాలనే దాన్ని మారుస్తుంది."</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"నిల్వ గుప్తీకరణను సెట్ చేయండి"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"నిల్వ చేయబడిన అనువర్తన డేటా గుప్తీకరించబడి ఉండటం అవసరం."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"కెమెరాలను నిలిపివేయండి"</string>
@@ -966,6 +966,8 @@
     <string name="selectTextMode" msgid="1018691815143165326">"వచనాన్ని ఎంచుకోండి"</string>
     <string name="undo" msgid="7905788502491742328">"చర్య రద్దు చేయి"</string>
     <string name="redo" msgid="7759464876566803888">"చర్యను పునరావృతం చేయి"</string>
+    <!-- no translation found for autofill (3035779615680565188) -->
+    <skip />
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"వచన ఎంపిక"</string>
     <string name="addToDictionary" msgid="4352161534510057874">"నిఘంటువుకు జోడించు"</string>
     <string name="deleteText" msgid="6979668428458199034">"తొలగించు"</string>
@@ -1184,12 +1186,9 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"భాష మరియు లేఅవుట్‌ను ఎంచుకోవడానికి నొక్కండి"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <!-- no translation found for alert_windows_notification_channel_name (3116610965549449803) -->
-    <skip />
-    <!-- no translation found for alert_windows_notification_title (4532185840598192445) -->
-    <skip />
-    <!-- no translation found for alert_windows_notification_message (8917232109522912560) -->
-    <skip />
+    <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> ఇతర అనువర్తనాలలో చూపబడుతోంది"</string>
+    <string name="alert_windows_notification_title" msgid="4532185840598192445">"<xliff:g id="NAME">%s</xliff:g> ఇతర అనువర్తనాలలో చూపబడుతోంది."</string>
+    <string name="alert_windows_notification_message" msgid="8917232109522912560">"<xliff:g id="NAME">%s</xliff:g> ఈ లక్షణాన్ని ఉపయోగించకూడదు అని మీరు అనుకుంటే, సెట్టింగ్‌లను తెరవడానికి నొక్కి, దీన్ని ఆఫ్ చేయండి."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"ఆఫ్ చేయి"</string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"<xliff:g id="NAME">%s</xliff:g>ని సిద్ధం చేస్తోంది"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"లోపాల కోసం తనిఖీ చేస్తోంది"</string>
@@ -1197,12 +1196,10 @@
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"ఫోటోలు మరియు మీడియాను బదిలీ చేయడానికి"</string>
     <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"<xliff:g id="NAME">%s</xliff:g> పాడైంది"</string>
     <string name="ext_media_unmountable_notification_message" msgid="2343202057122495773">"<xliff:g id="NAME">%s</xliff:g> పాడైంది. సరిచేయడానికి నొక్కండి."</string>
-    <!-- no translation found for ext_media_unmountable_notification_message (3941179940297874950) -->
-    <skip />
+    <string name="ext_media_unmountable_notification_message" product="tv" msgid="3941179940297874950">"<xliff:g id="NAME">%s</xliff:g> పాడైంది. సరిచేయడానికి ఎంచుకోండి."</string>
     <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"<xliff:g id="NAME">%s</xliff:g>కి మద్దతు లేదు"</string>
     <string name="ext_media_unsupported_notification_message" msgid="6121601473787888589">"ఈ పరికరం ఈ <xliff:g id="NAME">%s</xliff:g>కి మద్దతు ఇవ్వదు. మద్దతు కలిగిన ఆకృతిలో సెటప్ చేయడానికి నొక్కండి."</string>
-    <!-- no translation found for ext_media_unsupported_notification_message (3725436899820390906) -->
-    <skip />
+    <string name="ext_media_unsupported_notification_message" product="tv" msgid="3725436899820390906">"ఈ పరికరం ఈ <xliff:g id="NAME">%s</xliff:g>కి మద్దతు ఇవ్వదు. మద్దతు కలిగిన ఆకృతిలో సెటప్ చేయడానికి ఎంచుకోండి."</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g> ఊహించని విధంగా తీసివేయబడింది"</string>
     <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"డేటా కోల్పోకుండా ఉండటానికి <xliff:g id="NAME">%s</xliff:g>ని తీసివేయడానికి ముందు అన్‌మౌంట్ చేయండి"</string>
     <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"<xliff:g id="NAME">%s</xliff:g> తీసివేయబడింది"</string>
@@ -1733,6 +1730,8 @@
     <string name="time_picker_prompt_label" msgid="7588093983899966783">"సమయంలో టైప్ చేయండి"</string>
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"సమయాన్ని నమోదు చేయడం కోసం వచన నమోదు మోడ్‌కి మారండి."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"సమయాన్ని నమోదు చేయడం కోసం గడియారం మోడ్‌కు మారండి."</string>
+    <!-- no translation found for autofill_picker_accessibility_title (8469043291648711535) -->
+    <skip />
     <string name="autofill_save_title" msgid="7081244500504163245">"<xliff:g id="LABEL">%1$s</xliff:g>కు సేవ్ చేయాలా?"</string>
     <string name="autofill_save_title_with_type" msgid="4977385733042555659">"<xliff:g id="TYPE">%1$s</xliff:g>ని <xliff:g id="LABEL">%2$s</xliff:g>కు సేవ్ చేయాలా?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"సేవ్ చేయి"</string>

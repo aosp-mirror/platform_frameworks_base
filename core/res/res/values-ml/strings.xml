@@ -966,6 +966,8 @@
     <string name="selectTextMode" msgid="1018691815143165326">"ടെക്‌സ്‌റ്റ് തിരഞ്ഞെടുക്കുക"</string>
     <string name="undo" msgid="7905788502491742328">"പഴയപടിയാക്കുക"</string>
     <string name="redo" msgid="7759464876566803888">"വീണ്ടും ചെയ്യുക"</string>
+    <!-- no translation found for autofill (3035779615680565188) -->
+    <skip />
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"ടെക്‌സ്റ്റ് തിരഞ്ഞെടുക്കൽ"</string>
     <string name="addToDictionary" msgid="4352161534510057874">"നിഘണ്ടുവിൽ ചേർക്കുക"</string>
     <string name="deleteText" msgid="6979668428458199034">"ഇല്ലാതാക്കുക"</string>
@@ -1184,12 +1186,9 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"ഭാഷയും ലേഔട്ടും തിരഞ്ഞെടുക്കുന്നതിന് ടാപ്പുചെയ്യുക"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <!-- no translation found for alert_windows_notification_channel_name (3116610965549449803) -->
-    <skip />
-    <!-- no translation found for alert_windows_notification_title (4532185840598192445) -->
-    <skip />
-    <!-- no translation found for alert_windows_notification_message (8917232109522912560) -->
-    <skip />
+    <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> മറ്റ് ആപ്പുകൾക്ക് മുകളിൽ പ്രദർശിപ്പിക്കുന്നു"</string>
+    <string name="alert_windows_notification_title" msgid="4532185840598192445">"<xliff:g id="NAME">%s</xliff:g> മറ്റ് ആപ്പുകൾക്ക് മുകളിൽ പ്രദർശിപ്പിക്കുന്നു."</string>
+    <string name="alert_windows_notification_message" msgid="8917232109522912560">"<xliff:g id="NAME">%s</xliff:g> ഈ ഫീച്ചർ ഉപയോഗിക്കുന്നതിൽ നിങ്ങൾക്ക് താൽപ്പര്യമില്ലെങ്കിൽ, ടാപ്പുചെയ്‌ത് ക്രമീകരണം തുറന്ന് അത് ഓഫാക്കുക."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"ഓഫാക്കുക"</string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"<xliff:g id="NAME">%s</xliff:g> തയ്യാറാകുന്നു"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"പിശകുകളുണ്ടോയെന്നു പരിശോധിക്കുന്നു"</string>
@@ -1197,12 +1196,10 @@
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"ഫോട്ടോകളും മീഡിയയും ട്രാൻസ്‌ഫർ ചെയ്യാൻ"</string>
     <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"കേടായ <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unmountable_notification_message" msgid="2343202057122495773">"<xliff:g id="NAME">%s</xliff:g> കേടായിരിക്കുന്നു. പരിഹരിക്കാൻ ടാപ്പുചെയ്യുക."</string>
-    <!-- no translation found for ext_media_unmountable_notification_message (3941179940297874950) -->
-    <skip />
+    <string name="ext_media_unmountable_notification_message" product="tv" msgid="3941179940297874950">"<xliff:g id="NAME">%s</xliff:g> കേടായി. പരിഹരിക്കാൻ തിരഞ്ഞെടുക്കുക."</string>
     <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"പിന്തുണയില്ലാത്ത <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unsupported_notification_message" msgid="6121601473787888589">"ഈ ഉപകരണം <xliff:g id="NAME">%s</xliff:g> പിന്തുണയ്ക്കുന്നതല്ല. പിന്തുണയുള്ള ഫോർമാറ്റിൽ സജ്ജമാക്കുന്നതിന് ടാപ്പുചെയ്യുക."</string>
-    <!-- no translation found for ext_media_unsupported_notification_message (3725436899820390906) -->
-    <skip />
+    <string name="ext_media_unsupported_notification_message" product="tv" msgid="3725436899820390906">"<xliff:g id="NAME">%s</xliff:g> ഈ ഉപകരണത്തിന് അനുയോജ്യമല്ല. അനുയോജ്യമായ ഒരു ഫോർമാറ്റിൽ സജ്ജമാക്കുന്നതിന് തിരഞ്ഞെടുക്കുക."</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g> അപ്രതീക്ഷിതമായി നീക്കംചെയ്‌തു"</string>
     <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"വിവരങ്ങൾ നഷ്‌ടപ്പെടുന്നത് ഒഴിവാക്കാൻ നീക്കംചെയ്യുന്നതിനുമുമ്പ് <xliff:g id="NAME">%s</xliff:g> അൺ‌മൗണ്ടുചെയ്യുക"</string>
     <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"<xliff:g id="NAME">%s</xliff:g> നീക്കംചെയ്‌തു"</string>
@@ -1733,6 +1730,8 @@
     <string name="time_picker_prompt_label" msgid="7588093983899966783">"സമയത്തിൽ ടൈപ്പുചെയ്യുക"</string>
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"സമയം നൽകുന്നതിന് ടെക്സ്റ്റ് ഇൻപുട്ട് ‌മോ‌ഡിലേക്ക് ‌മാറുക."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"‌സമയം നൽകുന്നതിന് ക്ലോക്ക് മോഡിലേക്ക് ‌മാറുക."</string>
+    <!-- no translation found for autofill_picker_accessibility_title (8469043291648711535) -->
+    <skip />
     <string name="autofill_save_title" msgid="7081244500504163245">"<xliff:g id="LABEL">%1$s</xliff:g> എന്നതിലേക്ക് സംരക്ഷിക്കണോ?"</string>
     <string name="autofill_save_title_with_type" msgid="4977385733042555659">"<xliff:g id="TYPE">%1$s</xliff:g> <xliff:g id="LABEL">%2$s</xliff:g> എന്നതിലേക്ക് സംരക്ഷിക്കണോ?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"സംരക്ഷിക്കുക"</string>

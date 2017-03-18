@@ -222,7 +222,7 @@
     <string name="global_action_emergency" msgid="7112311161137421166">"Тез жардам"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Ката тууралуу билдирүү"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Ката тууралуу билдирүү түзүү"</string>
-    <string name="bugreport_message" msgid="398447048750350456">"Бул сиздин түзмөгүңүздүн учурдагы абалын эмейл билдирүүсү катары жөнөтүш максатында маалымат чогултат. Ката тууралуу билдирүү түзүлүп башталып, жөнөтүлгөнгө чейин бир аз убакыт керек болот; сураныч, бир аз күтө туруңуз."</string>
+    <string name="bugreport_message" msgid="398447048750350456">"Ушуну менен түзмөгүңүздүн учурдагы абалы тууралуу маалымат топтолуп, электрондук почта аркылуу жөнөтүлөт. Отчет даяр болгуча бир аз күтө туруңуз."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Интерактивдүү кабар"</string>
     <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Ката жөнүндө кабардын абалын жана көйгөй тууралуу кошумча маалыматты көрсөтүү үчүн ушул функцияны колдонууну сунуштайбыз. Ката жөнүндө кабар жөнөтүлүп жатканда көп убакыт талап кылынбашы үчүн негизги бөлүмдөр гана көрүнөт."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"Толук кабар берүү"</string>
@@ -357,13 +357,13 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="6839285697565389467">"Колдонмого жайылтуу аяктагандан кийинки жабышчаак жайылтууларды жөнөтүү мүмкүнчүлүгүн берет. Ашыкча колдонулганда, сыналгы өтө жай же туруксуз иштеп, эстутумда өтө көп орунду ээлеши мүмкүн."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="2825803764232445091">"Колдонмого берүү токтогондон кийин улантыла берүүчү жабышкак берүүлөрдү жөнөтүү уруксатын берет. Муну ашыкча колдонуу, эстутумду өтө көп пайдаланууга алып келип, телефондун жай же туруксуз иштөөсүнүнө себепкер болушу мүмкүн."</string>
     <string name="permlab_readContacts" msgid="8348481131899886131">"байланыштарыңызды окуу"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"Колдонмого планшетиңизде сакталган байланыштарыңыздын берилиштерин, көп терилген, көп эмейл алмашкан же башка жолдор менен көп баарлашкан байланыштар тууралуу берилиштерди окуганга уруксат берет. Бул уруксат колдонмолорго сиздин байланыштарыңыздын берилиштерин сактоого жол берет жана зыяндуу колдонмолор сизге билгизбей аларды бөлүшө алат."</string>
+    <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"Колдонмо планшетиңиздеги байланыштар, ошондой эле белгилүү бир адамдар менен канчалык көп чалышып, кат жазышып жана башка жолдор менен байланышып жаткандыгыңыз тууралуу маалыматты көрүп, сактай алат. Мындай уруксатты алган колдонмолор байланыштар тууралуу маалыматты сактай алышат, ал эми зыянкеч программалар байланыштар тууралуу маалыматты алдын ала эскертүүсүз бөлүшүүсү мүмкүн."</string>
     <string name="permdesc_readContacts" product="tv" msgid="1839238344654834087">"Колдонмого сыналгыңызда сакталган байланыштарыңыз тууралуу дайындарды, ошондой эле белгилүү бир адамдарга кандай убакыт аралыгында чалып, электрондук билдирүү жөнөтүп же башка жолдор менен байланышканыңызды окуу мүмкүнчүлүгүн берет. Мындай уруксат менен колдонмолор байланыштар дайындарын сактап, зыянкеч колдонмолор сизге билгизбестен байланыштар дайындарын бөлүшө алышат."</string>
-    <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"Колдонмого телефонуңузда сакталган байланыштарыңыздын берилиштерин, көп терилген, көп эмейл алмашкан же башка жолдор менен көп баарлашкан байланыштар тууралуу берилиштерди окуганга уруксат берет. Бул уруксат колдонмолорго сиздин байланыштарыңыздын берилиштерин сактоого жол берет жана зыяндуу колдонмолор сизге билгизбей аларды бөлүшө алат."</string>
+    <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"Колдонмо түзмөктөгү байланыштар, ошондой эле белгилүү бир адамдар менен канчалык көп чалышып, кат жазышып жана башка жолдор менен байланышып жаткандыгыңыз тууралуу маалыматты көрүп, сактай алат. Зыянкеч программалар байланыштар тууралуу маалыматты алдын ала эскертүүсүз бөлүшүүсү мүмкүн."</string>
     <string name="permlab_writeContacts" msgid="5107492086416793544">"байланыштарыңызды өзгөртүү"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"Колдонмого планшетиңизде сакталган байланыштарыңыздын берилиштерин, анын ичиде, көп терилген, көп эмейл алмашкан же башка жолдор менен көп баарлашкан байланыштар тууралуу берилиштерди өзгөртүүгө уруксат берет. Бул уруксат, колдонмолорго сиздин байланыштарыңыздын берилиштерин өчүрүү уруксатын берет."</string>
+    <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"Колдонмо планшетиңиздеги байланыштар, ошондой эле белгилүү бир адамдар менен канчалык көп чалышып, кат жазышып жана башка жолдор менен байланышып жаткандыгыңыз тууралуу маалыматты өзгөртө алат. Мындай уруксатты алган колдонмолор байланыштар тууралуу маалыматты жок кыла алышат."</string>
     <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"Колдонмого сыналгыңызда сакталган байланыштарыңыз тууралуу дайындарды, ошондой эле белгилүү байланыштарга кандай убакыт аралыгында чалып, электрондук билдирүү жөнөтүп же башка жолдор менен байланышканыңызды өзгөртүү мүмкүнчүлүгүн берет. Мындай уруксат менен колдонмолор байланыш дайындарын жок кыла алат."</string>
-    <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"Колдонмого телефонуңузда сакталган байланыштарыңыздын берилиштерин, анын ичинде, көп терилген, көп эмейл алмашкан же башка жолдор менен көп баарлашкан байланыштар тууралуу берилиштерди өзгөртүүгө уруксат берет. Бул уруксат, колдонмолорго сиздин байланыштарыңыздын берилиштерин өчүрүү уруксатын берет."</string>
+    <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"Колдонмо телефонуңуздагы байланыштар, ошондой эле белгилүү бир адамдар менен канчалык көп чалышып, кат жазышып жана башка жолдор менен байланышып жаткандыгыңыз тууралуу маалыматты өзгөртө алат. Мындай уруксатты алган колдонмолор байланыштар тууралуу маалыматты жок кыла алышат."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"чалуулар тизмегин окуу"</string>
     <string name="permdesc_readCallLog" msgid="3204122446463552146">"Бул колдонмо чалууларыңыздын таржымалын окуй алат."</string>
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"чалуулар тизмегин жаздыруу"</string>
@@ -966,6 +966,8 @@
     <string name="selectTextMode" msgid="1018691815143165326">"Текст тандоо"</string>
     <string name="undo" msgid="7905788502491742328">"Артка кайтаруу"</string>
     <string name="redo" msgid="7759464876566803888">"Кайталоо"</string>
+    <!-- no translation found for autofill (3035779615680565188) -->
+    <skip />
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Текст тандоо"</string>
     <string name="addToDictionary" msgid="4352161534510057874">"Сөздүккө кошуу"</string>
     <string name="deleteText" msgid="6979668428458199034">"Жок кылуу"</string>
@@ -1184,12 +1186,9 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Тил жана калып тандоо үчүн таптап коюңуз"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <!-- no translation found for alert_windows_notification_channel_name (3116610965549449803) -->
-    <skip />
-    <!-- no translation found for alert_windows_notification_title (4532185840598192445) -->
-    <skip />
-    <!-- no translation found for alert_windows_notification_message (8917232109522912560) -->
-    <skip />
+    <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> колдонмосун башка терезелердин үстүнөн көрсөтүү"</string>
+    <string name="alert_windows_notification_title" msgid="4532185840598192445">"<xliff:g id="NAME">%s</xliff:g> колдонмосу башка терезелердин үстүнөн көрсөтүлүүдө."</string>
+    <string name="alert_windows_notification_message" msgid="8917232109522912560">"Эгер <xliff:g id="NAME">%s</xliff:g> колдонмосу бул функцияны пайдаланбасын десеңиз, жөндөөлөрдү ачып туруп, аны өчүрүп коюңуз."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"ӨЧҮРҮҮ"</string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"<xliff:g id="NAME">%s</xliff:g> даярдалууда"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Каталар текшерилүүдө"</string>
@@ -1197,12 +1196,10 @@
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Сүрөттөрдү жана медиа өткөрүү үчүн"</string>
     <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"<xliff:g id="NAME">%s</xliff:g> бузулган"</string>
     <string name="ext_media_unmountable_notification_message" msgid="2343202057122495773">"<xliff:g id="NAME">%s</xliff:g> - бузук. Оңдоо үчүн таптап коюңуз."</string>
-    <!-- no translation found for ext_media_unmountable_notification_message (3941179940297874950) -->
-    <skip />
+    <string name="ext_media_unmountable_notification_message" product="tv" msgid="3941179940297874950">"<xliff:g id="NAME">%s</xliff:g> – бузук. Оңдоо үчүн тандаңыз."</string>
     <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"<xliff:g id="NAME">%s</xliff:g> колдоого алынбайт"</string>
     <string name="ext_media_unsupported_notification_message" msgid="6121601473787888589">"Бул түзмөктө <xliff:g id="NAME">%s</xliff:g> колдоого алынбайт. Колдоого алынуучу форматта орнотуу үчүн таптап коюңуз."</string>
-    <!-- no translation found for ext_media_unsupported_notification_message (3725436899820390906) -->
-    <skip />
+    <string name="ext_media_unsupported_notification_message" product="tv" msgid="3725436899820390906">"Бул түзмөктө <xliff:g id="NAME">%s</xliff:g> колдоого алынбайт. Колдоого алынуучу форматта орнотуу үчүн тандаңыз."</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g> күтүүсүздөн алынып салынды"</string>
     <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"Дайындарды жоготуунун алдын алуу үчүн чыгаруудан мурун <xliff:g id="NAME">%s</xliff:g> түзмөгүн бошотуңуз"</string>
     <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"<xliff:g id="NAME">%s</xliff:g> алынды"</string>
@@ -1443,7 +1440,7 @@
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"PIN-коддор туура келбеди"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Өтө көп үлгү киргизүү аракети болду"</string>
     <string name="kg_login_instructions" msgid="1100551261265506448">"Бөгөттөн чыгарыш үчүн, Google эсебиңиз менен кириңиз."</string>
-    <string name="kg_login_username_hint" msgid="5718534272070920364">"Колдонуучунун аты (эмейл)"</string>
+    <string name="kg_login_username_hint" msgid="5718534272070920364">"Колдонуучунун аты (эл.почта)"</string>
     <string name="kg_login_password_hint" msgid="9057289103827298549">"Сырсөз"</string>
     <string name="kg_login_submit_button" msgid="5355904582674054702">"Кирүү"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"Колдонуучу атыңыз же сырсөзүңүз туура эмес."</string>
@@ -1458,9 +1455,9 @@
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"Сиз планшетиңизди <xliff:g id="NUMBER">%d</xliff:g> жолу ийгиликсиз бөгөттөн чыгаруу аракетин кылдыңыз. Планшет баштапкы абалына кайтарылат."</string>
     <string name="kg_failed_attempts_now_wiping" product="tv" msgid="4987878286750741463">"Сыналгыңыздын кулпусун ачууда <xliff:g id="NUMBER">%d</xliff:g>_0 жолу туура эмес аракет кылдыңыз. Сыналгыңыз баштапкы абалга келтирилет."</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Сиз телефонуңузду <xliff:g id="NUMBER">%d</xliff:g> жолу ийгиликсиз бөгөттөн чыгаруу аракетин кылдыңыз. Телефон баштапкы абалына кайтарылат."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Сиз бөгөттөн чыгаруу үлгүсүн <xliff:g id="NUMBER_0">%1$d</xliff:g> жолу туура эмес көрсөттүңүз. Дагы <xliff:g id="NUMBER_1">%2$d</xliff:g> ийгиликсиз аракеттен кийин, планшетиңизди эмейл эсебиңиз аркылуу бөгөттөн чыгаруу талап кылынат.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> секундадан кийин кайра аракеттениңиз."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Графикалык ачкычты <xliff:g id="NUMBER_0">%1$d</xliff:g> жолу туура эмес көрсөттүңүз. <xliff:g id="NUMBER_1">%2$d</xliff:g> жолу туура эмес көрсөтүлгөндөн кийин, планшетиңиздин кулпусун ачуу үчүн Google каттоо эсебиңизге кирүүгө туура келет.\n\n<xliff:g id="NUMBER_2">%3$d</xliff:g> секундадан кийин кайталап көрсөңүз болот."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4224651132862313471">"Кулпуну ачуу үлгүсүн <xliff:g id="NUMBER_0">%1$d</xliff:g> жолу туура эмес тарттыңыз. Дагы <xliff:g id="NUMBER_1">%2$d</xliff:g> жолу туура эмес тартсаңыз, сыналгыңыздын кулпусун электрондук каттоо эсебиңизге кирип ачууга туура келет.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> секундадан кийин дагы аракет кылып көрүңүз."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Сиз бөгөттөн чыгаруу үлгүсүн <xliff:g id="NUMBER_0">%1$d</xliff:g> жолу туура эмес көрсөттүңүз. Дагы <xliff:g id="NUMBER_1">%2$d</xliff:g> ийгиликсиз аракеттен кийин, телефонуңузду эмейл эсебиңиз аркылуу бөгөттөн чыгаруу талап кылынат.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> секундадан кийин кайра аракеттениңиз."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Графикалык ачкычты <xliff:g id="NUMBER_0">%1$d</xliff:g> жолу туура эмес көрсөттүңүз. <xliff:g id="NUMBER_1">%2$d</xliff:g> жолу туура эмес көрсөтүлгөндөн кийин, телефондун кулпусун ачуу үчүн Google каттоо эсебиңизге кирүүгө туура келет.\n\n<xliff:g id="NUMBER_2">%3$d</xliff:g> секундадан кийин кайталап көрсөңүз болот."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Алып салуу"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"Сунушталган деңгээлден да катуулатып уккуңуз келеби?\n\nМузыканы узакка чейин катуу уксаңыз, угууңуз начарлап кетиши мүмкүн."</string>
@@ -1733,6 +1730,8 @@
     <string name="time_picker_prompt_label" msgid="7588093983899966783">"Убакытты жазыңыз"</string>
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"Убакытты текст киргизүү режиминде киргизиңиз."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"Убакытты дубал саатынын режиминде киргизиңиз."</string>
+    <!-- no translation found for autofill_picker_accessibility_title (8469043291648711535) -->
+    <skip />
     <string name="autofill_save_title" msgid="7081244500504163245">"<xliff:g id="LABEL">%1$s</xliff:g> кызматында сакталсынбы?"</string>
     <string name="autofill_save_title_with_type" msgid="4977385733042555659">"<xliff:g id="TYPE">%1$s</xliff:g> <xliff:g id="LABEL">%2$s</xliff:g> кызматында сакталсынбы?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"Сактоо"</string>

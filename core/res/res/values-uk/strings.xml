@@ -1006,6 +1006,8 @@
     <string name="selectTextMode" msgid="1018691815143165326">"Вибрати текст"</string>
     <string name="undo" msgid="7905788502491742328">"Відмінити"</string>
     <string name="redo" msgid="7759464876566803888">"Повторити"</string>
+    <!-- no translation found for autofill (3035779615680565188) -->
+    <skip />
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Вибір тексту"</string>
     <string name="addToDictionary" msgid="4352161534510057874">"Додати в словник"</string>
     <string name="deleteText" msgid="6979668428458199034">"Видалити"</string>
@@ -1223,12 +1225,9 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Торкніться, щоб вибрати мову та розкладку"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" АБВГҐДЕЄЖЗИІЇЙКЛМНОПРСТУФХЦЧШЩЬЮЯ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789АБВГҐДЕЄЖЗИІЇЙКЛМНОПРСТУФХЦЧШЩЬЮЯ"</string>
-    <!-- no translation found for alert_windows_notification_channel_name (3116610965549449803) -->
-    <skip />
-    <!-- no translation found for alert_windows_notification_title (4532185840598192445) -->
-    <skip />
-    <!-- no translation found for alert_windows_notification_message (8917232109522912560) -->
-    <skip />
+    <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"Додаток <xliff:g id="NAME">%s</xliff:g> відображається поверх інших додатків"</string>
+    <string name="alert_windows_notification_title" msgid="4532185840598192445">"<xliff:g id="NAME">%s</xliff:g> поверх інших додатків."</string>
+    <string name="alert_windows_notification_message" msgid="8917232109522912560">"Щоб у додатку <xliff:g id="NAME">%s</xliff:g> не працювала ця функція, вимкніть її в налаштуваннях."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"ВИМКНУТИ"</string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"Підготовка пристрою пам’яті <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Виявлення помилок"</string>
@@ -1236,12 +1235,10 @@
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Для перенесення фотографій і медіафайлів"</string>
     <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"<xliff:g id="NAME">%s</xliff:g> не підключається"</string>
     <string name="ext_media_unmountable_notification_message" msgid="2343202057122495773">"Носій (<xliff:g id="NAME">%s</xliff:g>) пошкоджено. Торкніться, щоб виправити."</string>
-    <!-- no translation found for ext_media_unmountable_notification_message (3941179940297874950) -->
-    <skip />
+    <string name="ext_media_unmountable_notification_message" product="tv" msgid="3941179940297874950">"Пристрій <xliff:g id="NAME">%s</xliff:g> пошкоджено. Виберіть, щоб виправити."</string>
     <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"<xliff:g id="NAME">%s</xliff:g> не підтримується"</string>
     <string name="ext_media_unsupported_notification_message" msgid="6121601473787888589">"<xliff:g id="NAME">%s</xliff:g> не підтримується цим пристроєм. Торкніться, щоб налаштувати підтримуваний формат."</string>
-    <!-- no translation found for ext_media_unsupported_notification_message (3725436899820390906) -->
-    <skip />
+    <string name="ext_media_unsupported_notification_message" product="tv" msgid="3725436899820390906">"<xliff:g id="NAME">%s</xliff:g> не підтримується на цьому пристрої. Виберіть, щоб налаштувати в підтримуваному форматі."</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g> несподівано вийнято"</string>
     <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"Перш ніж виймати пристрій пам’яті <xliff:g id="NAME">%s</xliff:g>, відключіть його, щоб не втратити дані"</string>
     <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"Ви вийняли пристрій пам’яті <xliff:g id="NAME">%s</xliff:g>"</string>
@@ -1794,6 +1791,8 @@
     <string name="time_picker_prompt_label" msgid="7588093983899966783">"Введіть час"</string>
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"Перейти в текстовий режим, щоб ввести час."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"Перейти в режим годинника, щоб ввести час."</string>
+    <!-- no translation found for autofill_picker_accessibility_title (8469043291648711535) -->
+    <skip />
     <string name="autofill_save_title" msgid="7081244500504163245">"Зберегти в службі <xliff:g id="LABEL">%1$s</xliff:g>?"</string>
     <string name="autofill_save_title_with_type" msgid="4977385733042555659">"Зберегти дані (<xliff:g id="TYPE">%1$s</xliff:g>) у службі <xliff:g id="LABEL">%2$s</xliff:g>?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"Зберегти"</string>

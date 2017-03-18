@@ -1006,6 +1006,8 @@
     <string name="selectTextMode" msgid="1018691815143165326">"בחר טקסט"</string>
     <string name="undo" msgid="7905788502491742328">"בטל"</string>
     <string name="redo" msgid="7759464876566803888">"בצע מחדש"</string>
+    <!-- no translation found for autofill (3035779615680565188) -->
+    <skip />
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"בחירת טקסט"</string>
     <string name="addToDictionary" msgid="4352161534510057874">"הוסף למילון"</string>
     <string name="deleteText" msgid="6979668428458199034">"מחק"</string>
@@ -1223,12 +1225,9 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"הקש כדי לבחור שפה ופריסה"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <!-- no translation found for alert_windows_notification_channel_name (3116610965549449803) -->
-    <skip />
-    <!-- no translation found for alert_windows_notification_title (4532185840598192445) -->
-    <skip />
-    <!-- no translation found for alert_windows_notification_message (8917232109522912560) -->
-    <skip />
+    <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"תצוגה של <xliff:g id="NAME">%s</xliff:g> מעל אפליקציות אחרות"</string>
+    <string name="alert_windows_notification_title" msgid="4532185840598192445">"<xliff:g id="NAME">%s</xliff:g> מוצגת מעל אפליקציות אחרות."</string>
+    <string name="alert_windows_notification_message" msgid="8917232109522912560">"אם אינך רוצה ש-<xliff:g id="NAME">%s</xliff:g> תשתמש בתכונה הזו, הקש כדי לפתוח את ההגדרות ולכבות אותה."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"כבה"</string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"הכנת <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"בודק אם יש שגיאות"</string>
@@ -1236,12 +1235,10 @@
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"להעברת תמונות ומדיה"</string>
     <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"<xliff:g id="NAME">%s</xliff:g> פגום"</string>
     <string name="ext_media_unmountable_notification_message" msgid="2343202057122495773">"<xliff:g id="NAME">%s</xliff:g> פגום. הקש כדי לתקן."</string>
-    <!-- no translation found for ext_media_unmountable_notification_message (3941179940297874950) -->
-    <skip />
+    <string name="ext_media_unmountable_notification_message" product="tv" msgid="3941179940297874950">"<xliff:g id="NAME">%s</xliff:g> פגום. בחר כדי לטפל בבעיה."</string>
     <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"<xliff:g id="NAME">%s</xliff:g> לא נתמך"</string>
     <string name="ext_media_unsupported_notification_message" msgid="6121601473787888589">"מכשיר זה אינו תומך ב-<xliff:g id="NAME">%s</xliff:g> זה. הקש כדי להגדיר בפורמט נתמך."</string>
-    <!-- no translation found for ext_media_unsupported_notification_message (3725436899820390906) -->
-    <skip />
+    <string name="ext_media_unsupported_notification_message" product="tv" msgid="3725436899820390906">"<xliff:g id="NAME">%s</xliff:g> לא נתמך במכשיר הזה. בחר כדי להגדיר בפורמט שנתמך."</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g> הוסר באופן בלתי צפוי"</string>
     <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"בטל טעינה של <xliff:g id="NAME">%s</xliff:g> לפני הסרתו כדי למנוע אובדן נתונים"</string>
     <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"<xliff:g id="NAME">%s</xliff:g> הוסר"</string>
@@ -1794,6 +1791,8 @@
     <string name="time_picker_prompt_label" msgid="7588093983899966783">"הקלד את השעה"</string>
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"העבר למצב קלט טקסט לצורך הזנת השעה"</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"העבר למצב שעון לצורך הזנת השעה"</string>
+    <!-- no translation found for autofill_picker_accessibility_title (8469043291648711535) -->
+    <skip />
     <string name="autofill_save_title" msgid="7081244500504163245">"לשמור ב-<xliff:g id="LABEL">%1$s</xliff:g>?"</string>
     <string name="autofill_save_title_with_type" msgid="4977385733042555659">"לשמור <xliff:g id="TYPE">%1$s</xliff:g> ב-<xliff:g id="LABEL">%2$s</xliff:g>?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"שמור"</string>
