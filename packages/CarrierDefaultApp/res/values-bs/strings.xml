@@ -2,19 +2,20 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="5247871339820894594">"CarrierDefaultApp"</string>
-    <!-- no translation found for android_system_label (4571709328900953606) -->
+    <!-- no translation found for android_system_label (2797790869522345065) -->
     <skip />
-    <!-- no translation found for portal_notification_id (5155057562457079297) -->
+    <string name="portal_notification_id" msgid="5155057562457079297">"Mobilni internet je potrošen"</string>
+    <!-- no translation found for no_data_notification_id (668400731803969521) -->
     <skip />
-    <!-- no translation found for no_data_notification_id (7900410098774295500) -->
+    <!-- no translation found for portal_notification_detail (2295729385924660881) -->
     <skip />
-    <!-- no translation found for portal_notification_detail (2903915627830838406) -->
+    <string name="no_data_notification_detail" msgid="3112125343857014825">"Obratite se pružaocu usluga %s"</string>
+    <!-- no translation found for action_bar_label (4290345990334377177) -->
     <skip />
-    <!-- no translation found for no_data_notification_detail (3112125343857014825) -->
+    <!-- no translation found for ssl_error_warning (3127935140338254180) -->
     <skip />
-    <string name="progress_dialogue_network_connection" msgid="4964125154591905581">"Povezivanje na zaštitni portal..."</string>
-    <string name="alert_dialogue_network_timeout" msgid="4515760047815901797">"Isteklo je vrijeme za odziv mreže. Želite li ponoviti?"</string>
-    <string name="alert_dialogue_network_timeout_title" msgid="3117252205484891837">"Mreža nije dostupna"</string>
-    <string name="quit" msgid="4392968039488794590">"Odustani"</string>
-    <string name="wait" msgid="7902715035629500128">"Sačekaj"</string>
+    <!-- no translation found for ssl_error_example (6188711843183058764) -->
+    <skip />
+    <!-- no translation found for ssl_error_continue (1138548463994095584) -->
+    <skip />
 </resources>
