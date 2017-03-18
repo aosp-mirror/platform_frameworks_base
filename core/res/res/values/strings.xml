@@ -4441,4 +4441,19 @@
 
     <!-- Label used by Telephony code, assigned as the display name for conference calls [CHAR LIMIT=60] -->
     <string name="conference_call">Conference Call</string>
+
+    <!-- Primary ETWS (Earthquake and Tsunami Warning System) default message for earthquake -->
+    <string name="etws_primary_default_message_earthquake">Stay calm and seek shelter nearby.</string>
+
+    <!-- Primary ETWS (Earthquake and Tsunami Warning System) default message for Tsunami -->
+    <string name="etws_primary_default_message_tsunami">Evacuate immediately from coastal regions and riverside areas to a safer place such as high ground.</string>
+
+    <!-- Primary ETWS (Earthquake and Tsunami Warning System) default message for earthquake and Tsunami -->
+    <string name="etws_primary_default_message_earthquake_and_tsunami">Stay calm and seek shelter nearby.</string>
+
+    <!-- Primary ETWS (Earthquake and Tsunami Warning System) default message for test -->
+    <string name="etws_primary_default_message_test">Emergency messages test</string>
+
+    <!-- Primary ETWS (Earthquake and Tsunami Warning System) default message for others -->
+    <string name="etws_primary_default_message_others"></string>
 </resources>
