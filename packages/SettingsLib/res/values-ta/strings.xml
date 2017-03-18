@@ -167,9 +167,11 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"நெட்வொர்க்கிங்"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"வயர்லெஸ் காட்சிக்கான சான்றிதழ்"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"வைஃபை அதிவிவர நுழைவை இயக்கு"</string>
-    <string name="wifi_aggressive_handover" msgid="9194078645887480917">"ஒத்துழைக்காத வைஃபையிலிருந்து செல்லுலாருக்கு மாறு"</string>
+    <!-- no translation found for wifi_aggressive_handover (5309131983693661320) -->
+    <skip />
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"எப்போதும் வைஃபை ரோமிங் ஸ்கேன்களை அனுமதி"</string>
-    <string name="mobile_data_always_on" msgid="7745605759775320362">"செல்லுலார் தரவு எப்போதும் இயக்கத்தில்"</string>
+    <!-- no translation found for mobile_data_always_on (8774857027458200434) -->
+    <skip />
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"அப்சல்யூட் ஒலியளவு அம்சத்தை முடக்கு"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"புளூடூத் ஆடியோ கோடெக்"</string>
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="4558347981670553665">"புளூடூத் ஆடியோ கோடெக்கைத் தேர்ந்தெடுக்கவும்"</string>
@@ -184,7 +186,8 @@
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"ஸ்ட்ரீமிங்: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"வயர்லெஸ் காட்சி சான்றுக்கான விருப்பங்களைக் காட்டு"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Wifi நுழைவு அளவை அதிகரித்து, வைஃபை தேர்வியில் ஒவ்வொன்றிற்கும் SSID RSSI ஐ காட்டுக"</string>
-    <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"இயக்கப்பட்டதும், வைஃபை சிக்னல் குறையும் போது, வைஃபை முழுமையாக ஒத்துழைக்காமல் இருப்பதால் செல்லுலாரின் தரவு இணைப்புக்கு மாறும்"</string>
+    <!-- no translation found for wifi_aggressive_handover_summary (7266329646559808827) -->
+    <skip />
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"இடைமுகத்தில் உள்ள ட்ராஃபிக் தரவின் அளவைப் பொறுத்து வைஃபை ரோமிங் ஸ்கேன்களை அனுமதி/அனுமதிக்காதே"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"லாகர் பஃபர் அளவுகள்"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"லாக் பஃபர் ஒன்றிற்கு லாகர் அளவுகளைத் தேர்வுசெய்க"</string>
@@ -313,18 +316,23 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"வண்ணத்திருத்தம்"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"இது சோதனை முறையிலான அம்சம், இது செயல்திறனைப் பாதிக்கலாம்."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"<xliff:g id="TITLE">%1$s</xliff:g> மூலம் மேலெழுதப்பட்டது"</string>
-    <string name="power_remaining_duration_only" msgid="4400068916452346544">"தோராயமாக <xliff:g id="TIME">%1$s</xliff:g> உள்ளது"</string>
+    <!-- no translation found for power_remaining_duration_only (802533652866862201) -->
+    <skip />
     <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">%1$s</xliff:g> மீதமுள்ளது"</string>
     <string name="power_discharging_duration" msgid="1605929174734600590">"தோராயம்: <xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> உள்ளது"</string>
     <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> மீதமுள்ளது"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_charging_duration" msgid="2853265177761520490">"முழு சார்ஜிற்கு: <xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <!-- no translation found for power_charging_duration (4676999980973411875) -->
+    <skip />
     <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="power_charging_duration_ac" msgid="3969186192576594254">"முழு AC சார்ஜிற்கு: <xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <!-- no translation found for power_charging_duration_ac (7341243578143555689) -->
+    <skip />
     <string name="power_charging_duration_ac_short" msgid="7895864687218765582">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="power_charging_duration_usb" msgid="182405645340976546">"முழு USB சார்ஜிற்கு: <xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <!-- no translation found for power_charging_duration_usb (3720632890882121805) -->
+    <skip />
     <string name="power_charging_duration_usb_short" msgid="941854728040426399">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="power_charging_duration_wireless" msgid="1829295708243159464">"முழு வயர்லெஸ் சார்ஜிற்கு: <xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <!-- no translation found for power_charging_duration_wireless (5768338238751562058) -->
+    <skip />
     <string name="power_charging_duration_wireless_short" msgid="1642664799869599476">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"அறியப்படாத"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"சார்ஜ் ஏற்றப்படுகிறது"</string>

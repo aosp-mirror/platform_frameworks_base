@@ -167,9 +167,11 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"নেটওয়ার্কিং"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"ওয়্যারলেস ডিসপ্লে সার্টিফিকেশন"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"ওয়াই-ফাই ভারবোস লগিং সক্ষম করুন"</string>
-    <string name="wifi_aggressive_handover" msgid="9194078645887480917">"ওয়াই-ফাই থেকে সেলুলারে তৎপর পরিবর্তন"</string>
+    <!-- no translation found for wifi_aggressive_handover (5309131983693661320) -->
+    <skip />
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"সর্বদা Wifi রোম স্ক্যানকে অনুমতি দিন"</string>
-    <string name="mobile_data_always_on" msgid="7745605759775320362">"সেলুলার ডেটা সর্বদাই সক্রিয় থাকে"</string>
+    <!-- no translation found for mobile_data_always_on (8774857027458200434) -->
+    <skip />
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"চূড়ান্ত ভলিউম অক্ষম করুন"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"ব্লুটুথ অডিও কোডেক"</string>
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="4558347981670553665">"ব্লুটুথ অডিও কোডেক বেছে নিন"</string>
@@ -184,7 +186,8 @@
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"স্ট্রিমিং: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"ওয়্যারলেস প্রদর্শন সার্টিফিকেশন জন্য বিকল্পগুলি দেখান"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"ওয়াই-ফাই লগিং স্তর বাড়ান, ওয়াই-ফাই চয়নকারীতে SSID RSSI অনুযায়ী দেখান"</string>
-    <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"সক্ষম করা থাকলে, নিম্নমানের ওয়াই-ফাই সিগন্যালের ক্ষেত্রে, সেলুলার-এ ডেটা সংযোগ প্রদান করতে ওয়াই-ফাই আরো বেশি শক্তিশালীভাবে কাজ করবে"</string>
+    <!-- no translation found for wifi_aggressive_handover_summary (7266329646559808827) -->
+    <skip />
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"ইন্টারফেসে উপস্থিত ডেটা ট্রাফিকের পরিমাণের উপরে ভিত্তি করে ওয়াই-ফাই রোম স্ক্যানকে অনুমোদিত/অননুমোদিত করুন"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"লগার বাফারের আকারগুলি"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"লগ বাফার প্রতি অপেক্ষাকৃত বড় আকারগুলির নির্বাচন করুন"</string>
@@ -313,18 +316,23 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"রঙ সংশোধন"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"এই বৈশিষ্ট্যটি পরীক্ষামূলক এবং এটি কার্য-সম্পাদনা প্রভাবিত করতে পারে।"</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"<xliff:g id="TITLE">%1$s</xliff:g> এর দ্বারা ওভাররাইড করা হয়েছে"</string>
-    <string name="power_remaining_duration_only" msgid="4400068916452346544">"প্রায় <xliff:g id="TIME">%1$s</xliff:g> বাকী আছে"</string>
+    <!-- no translation found for power_remaining_duration_only (802533652866862201) -->
+    <skip />
     <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">%1$s</xliff:g> বাকী আছে"</string>
     <string name="power_discharging_duration" msgid="1605929174734600590">"<xliff:g id="LEVEL">%1$s</xliff:g> - আনুমানিক <xliff:g id="TIME">%2$s</xliff:g> বাকি আছে"</string>
     <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> বাকী আছে"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_charging_duration" msgid="2853265177761520490">"<xliff:g id="LEVEL">%1$s</xliff:g> - সম্পূর্ণ হতে <xliff:g id="TIME">%2$s</xliff:g> বাকি"</string>
+    <!-- no translation found for power_charging_duration (4676999980973411875) -->
+    <skip />
     <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="power_charging_duration_ac" msgid="3969186192576594254">"<xliff:g id="LEVEL">%1$s</xliff:g> - ACতে সম্পূর্ণ হতে <xliff:g id="TIME">%2$s</xliff:g> বাকি"</string>
+    <!-- no translation found for power_charging_duration_ac (7341243578143555689) -->
+    <skip />
     <string name="power_charging_duration_ac_short" msgid="7895864687218765582">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="power_charging_duration_usb" msgid="182405645340976546">"<xliff:g id="LEVEL">%1$s</xliff:g> - USB এর মাধ্যমে সম্পূর্ণ হতে <xliff:g id="TIME">%2$s</xliff:g> বাকি"</string>
+    <!-- no translation found for power_charging_duration_usb (3720632890882121805) -->
+    <skip />
     <string name="power_charging_duration_usb_short" msgid="941854728040426399">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="power_charging_duration_wireless" msgid="1829295708243159464">"<xliff:g id="LEVEL">%1$s</xliff:g> -  বেতার যোগে সম্পূর্ণ হতে <xliff:g id="TIME">%2$s</xliff:g> বাকি"</string>
+    <!-- no translation found for power_charging_duration_wireless (5768338238751562058) -->
+    <skip />
     <string name="power_charging_duration_wireless_short" msgid="1642664799869599476">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"অজানা"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"চার্জ হচ্ছে"</string>

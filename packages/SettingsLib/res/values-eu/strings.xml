@@ -167,9 +167,11 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Sareak"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Hari gabeko bistaratze-egiaztatzea"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Gaitu Wi-Fi sareetan saioa hasteko modu xehatua"</string>
-    <string name="wifi_aggressive_handover" msgid="9194078645887480917">"Behartu Wi-Fi konexiotik datuenera aldatzera"</string>
+    <!-- no translation found for wifi_aggressive_handover (5309131983693661320) -->
+    <skip />
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Onartu beti ibiltaritzan Wi-Fi sareak bilatzea"</string>
-    <string name="mobile_data_always_on" msgid="7745605759775320362">"Mugikorreko datuak beti aktibo"</string>
+    <!-- no translation found for mobile_data_always_on (8774857027458200434) -->
+    <skip />
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Desgaitu bolumen absolutua"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Bluetooth bidezko audioaren kodeka"</string>
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="4558347981670553665">"Hautatu Bluetooth audioaren kodeka"</string>
@@ -184,7 +186,8 @@
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Igortzean: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Erakutsi hari gabeko bistaratze-egiaztapenaren aukerak"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Erakutsi datu gehiago Wi-Fi sareetan saioa hasterakoan. Erakutsi sarearen identifikatzailea eta seinalearen indarra Wi‑Fi sareen hautagailuan."</string>
-    <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"Aukera hori gaituz gero, gailua errazago aldatuko da datu mugikorren konexiora Wi-Fi seinalea ahultzen dela nabaritutakoan"</string>
+    <!-- no translation found for wifi_aggressive_handover_summary (7266329646559808827) -->
+    <skip />
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"Onartu edo debekatu ibiltaritzan Wi-Fi sareak bilatzea, interfazeko datu-trafikoaren arabera"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Erregistroen buffer-tamainak"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Hautatu erregistroen buffer-tamainak"</string>
@@ -313,18 +316,23 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"Kolore-zuzenketa"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Eginbidea esperimentala da eta eragina izan dezake funtzionamenduan."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"<xliff:g id="TITLE">%1$s</xliff:g> hobespena gainjarri zaio"</string>
-    <string name="power_remaining_duration_only" msgid="4400068916452346544">"<xliff:g id="TIME">%1$s</xliff:g> inguru guztiz kargatu arte"</string>
+    <!-- no translation found for power_remaining_duration_only (802533652866862201) -->
+    <skip />
     <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">%1$s</xliff:g> guztiz kargatu arte"</string>
     <string name="power_discharging_duration" msgid="1605929174734600590">"<xliff:g id="LEVEL">%1$s</xliff:g> inguru. <xliff:g id="TIME">%2$s</xliff:g> geratzen d(ir)a"</string>
     <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> guztiz kargatu arte"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_charging_duration" msgid="2853265177761520490">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> guztiz kargatu arte"</string>
+    <!-- no translation found for power_charging_duration (4676999980973411875) -->
+    <skip />
     <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="power_charging_duration_ac" msgid="3969186192576594254">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> korrontearen bidez guztiz kargatu arte"</string>
+    <!-- no translation found for power_charging_duration_ac (7341243578143555689) -->
+    <skip />
     <string name="power_charging_duration_ac_short" msgid="7895864687218765582">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="power_charging_duration_usb" msgid="182405645340976546">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> USB bidez guztiz kargatu arte"</string>
+    <!-- no translation found for power_charging_duration_usb (3720632890882121805) -->
+    <skip />
     <string name="power_charging_duration_usb_short" msgid="941854728040426399">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="power_charging_duration_wireless" msgid="1829295708243159464">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> haririk gabe guztiz kargatu arte"</string>
+    <!-- no translation found for power_charging_duration_wireless (5768338238751562058) -->
+    <skip />
     <string name="power_charging_duration_wireless_short" msgid="1642664799869599476">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"Ezezaguna"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"Kargatzea"</string>

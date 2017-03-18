@@ -167,9 +167,11 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"નેટવર્કિંગ"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"બિનતારી પ્રદર્શન પ્રમાણન"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Wi-Fi વર્બોઝ લૉગિંગ સક્ષમ કરો"</string>
-    <string name="wifi_aggressive_handover" msgid="9194078645887480917">"સેલ્યુલર હેન્ડઓવર પર એગ્રેસિવ Wi‑Fi"</string>
+    <!-- no translation found for wifi_aggressive_handover (5309131983693661320) -->
+    <skip />
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"હંમેશા Wi‑Fi રોમ સ્કૅન્સને મંજૂરી આપો"</string>
-    <string name="mobile_data_always_on" msgid="7745605759775320362">"સેલ્યુલર ડેટા હંમેશા સક્રિય"</string>
+    <!-- no translation found for mobile_data_always_on (8774857027458200434) -->
+    <skip />
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"ચોક્કસ વૉલ્યૂમને અક્ષમ કરો"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Bluetooth ઑડિઓ કોડેક"</string>
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="4558347981670553665">"Bluetooth ઑડિઓ LDAC કોડેક પસંદ કરો"</string>
@@ -184,7 +186,8 @@
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"સ્ટ્રીમિંગ: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"વાયરલેસ ડિસ્પ્લે પ્રમાણપત્ર માટેના વિકલ્પો બતાવો"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Wi‑Fi લોગિંગ સ્તર વધારો, Wi‑Fi પીકરમાં SSID RSSI દીઠ બતાવો"</string>
-    <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"જ્યારે સક્ષમ હોય, ત્યારે Wi‑Fi સિગ્નલ ઓછા હોવા પર, સેલ્યુલર પર ડેટા કનેક્શન મોકલવામાં વધુ આક્રમક હશે"</string>
+    <!-- no translation found for wifi_aggressive_handover_summary (7266329646559808827) -->
+    <skip />
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"ઇન્ટરફેસ પર હાજર ડેટા ટ્રાફિકના પ્રમાણનાં આધારે Wi‑Fi રોમ સ્કૅન્સને મંજૂરી આપો/નામંજૂર કરો"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"લોગર બફર કદ"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"લૉગ દીઠ લૉગર કદ બફર પસંદ કરો"</string>
@@ -313,18 +316,23 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"રંગ સુધારણા"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"આ સુવિધા પ્રાયોગિક છે અને કામગીરી પર અસર કરી શકે છે."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"<xliff:g id="TITLE">%1$s</xliff:g> દ્વારા ઓવરરાઇડ થયું"</string>
-    <string name="power_remaining_duration_only" msgid="4400068916452346544">"અંદાજે. <xliff:g id="TIME">%1$s</xliff:g> બાકી"</string>
+    <!-- no translation found for power_remaining_duration_only (802533652866862201) -->
+    <skip />
     <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">%1$s</xliff:g> બાકી"</string>
     <string name="power_discharging_duration" msgid="1605929174734600590">"<xliff:g id="LEVEL">%1$s</xliff:g> - આશરે <xliff:g id="TIME">%2$s</xliff:g> બાકી"</string>
     <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> બાકી"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_charging_duration" msgid="2853265177761520490">"સંપૂર્ણ થવામાં <xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <!-- no translation found for power_charging_duration (4676999980973411875) -->
+    <skip />
     <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="power_charging_duration_ac" msgid="3969186192576594254">"<xliff:g id="LEVEL">%1$s</xliff:g>, AC પર પૂર્ણ ચાર્જ થયાંને <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <!-- no translation found for power_charging_duration_ac (7341243578143555689) -->
+    <skip />
     <string name="power_charging_duration_ac_short" msgid="7895864687218765582">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="power_charging_duration_usb" msgid="182405645340976546">"<xliff:g id="LEVEL">%1$s</xliff:g>, USB પર પૂર્ણ ચાર્જ થયાંને <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <!-- no translation found for power_charging_duration_usb (3720632890882121805) -->
+    <skip />
     <string name="power_charging_duration_usb_short" msgid="941854728040426399">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="power_charging_duration_wireless" msgid="1829295708243159464">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> વાયરલેસ દ્વારા પૂર્ણ થાય ત્યાં સુધી"</string>
+    <!-- no translation found for power_charging_duration_wireless (5768338238751562058) -->
+    <skip />
     <string name="power_charging_duration_wireless_short" msgid="1642664799869599476">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"અજાણ્યું"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"ચાર્જ થઈ રહ્યું છે"</string>
