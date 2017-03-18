@@ -966,6 +966,8 @@
     <string name="selectTextMode" msgid="1018691815143165326">"Selecciona el text"</string>
     <string name="undo" msgid="7905788502491742328">"Desfés"</string>
     <string name="redo" msgid="7759464876566803888">"Refés"</string>
+    <!-- no translation found for autofill (3035779615680565188) -->
+    <skip />
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Selecció de text"</string>
     <string name="addToDictionary" msgid="4352161534510057874">"Afegeix al diccionari"</string>
     <string name="deleteText" msgid="6979668428458199034">"Suprimeix"</string>
@@ -1183,12 +1185,9 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Toca per seleccionar l\'idioma i el disseny"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <!-- no translation found for alert_windows_notification_channel_name (3116610965549449803) -->
-    <skip />
-    <!-- no translation found for alert_windows_notification_title (4532185840598192445) -->
-    <skip />
-    <!-- no translation found for alert_windows_notification_message (8917232109522912560) -->
-    <skip />
+    <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"S\'està superposant <xliff:g id="NAME">%s</xliff:g> a altres aplicacions"</string>
+    <string name="alert_windows_notification_title" msgid="4532185840598192445">"S\'està superposant <xliff:g id="NAME">%s</xliff:g> a altres aplicacions"</string>
+    <string name="alert_windows_notification_message" msgid="8917232109522912560">"Si no vols que <xliff:g id="NAME">%s</xliff:g> utilitzi aquesta funció, toca per obrir la configuració i desactiva-la."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"DESACTIVA"</string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"S\'està preparant <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"S\'està comprovant si hi ha errors"</string>
@@ -1196,12 +1195,10 @@
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Per transferir fotos i fitxers multimèdia"</string>
     <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"S\'ha malmès <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unmountable_notification_message" msgid="2343202057122495773">"La unitat <xliff:g id="NAME">%s</xliff:g> està malmesa. Toca per solucionar-ho."</string>
-    <!-- no translation found for ext_media_unmountable_notification_message (3941179940297874950) -->
-    <skip />
+    <string name="ext_media_unmountable_notification_message" product="tv" msgid="3941179940297874950">"La unitat següent està malmesa: <xliff:g id="NAME">%s</xliff:g>. Selecciona-la per solucionar-ho."</string>
     <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"<xliff:g id="NAME">%s</xliff:g> no és compatible"</string>
     <string name="ext_media_unsupported_notification_message" msgid="6121601473787888589">"El dispositiu no admet la unitat <xliff:g id="NAME">%s</xliff:g>. Toca per configurar-la amb un format compatible."</string>
-    <!-- no translation found for ext_media_unsupported_notification_message (3725436899820390906) -->
-    <skip />
+    <string name="ext_media_unsupported_notification_message" product="tv" msgid="3725436899820390906">"Aquest dispositiu no admet la unitat següent: <xliff:g id="NAME">%s</xliff:g>. Selecciona-la per configurar-la en un format compatible."</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"S\'ha extret <xliff:g id="NAME">%s</xliff:g> de manera inesperada"</string>
     <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"Desactiva <xliff:g id="NAME">%s</xliff:g> abans d\'extraure\'l per evitar perdre dades"</string>
     <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"S\'ha extret <xliff:g id="NAME">%s</xliff:g>"</string>
@@ -1732,6 +1729,8 @@
     <string name="time_picker_prompt_label" msgid="7588093983899966783">"Escriu l\'hora"</string>
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"Canvia al mode d\'introducció de text per introduir l\'hora."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"Canvia al mode de rellotge per introduir l\'hora."</string>
+    <!-- no translation found for autofill_picker_accessibility_title (8469043291648711535) -->
+    <skip />
     <string name="autofill_save_title" msgid="7081244500504163245">"Vols desar-ho a <xliff:g id="LABEL">%1$s</xliff:g>?"</string>
     <string name="autofill_save_title_with_type" msgid="4977385733042555659">"Vols desar la informació del camp <xliff:g id="TYPE">%1$s</xliff:g> a <xliff:g id="LABEL">%2$s</xliff:g>?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"Desa"</string>

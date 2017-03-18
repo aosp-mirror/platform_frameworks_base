@@ -490,7 +490,7 @@
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Ikona za otisak prsta"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"čitanje postavki za sinhroniziranje"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Omogućava aplikaciji čitanje postavki sinhroniziranja za račun. Naprimjer, ovim se može utvrditi da li je aplikacija People sinhronizirana sa računom."</string>
-    <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"uključivanje i isključivanje sinhroniziranja"</string>
+    <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"aktiviranje/deaktiviranje sinhroniziranja"</string>
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Omogućava aplikaciji izmjenu postavki sinhroniziranja za račun. Naprimjer, ovim se može omogućiti sinhroniziranje aplikacije People sa računom."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"čitanje statistike sinhroniziranja"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Omogućava aplikaciji čitanje statistike sinhroniziranja za račun, uključujući historiju događaja sinhroniziranja i količinu sinhroniziranih podataka."</string>
@@ -986,6 +986,8 @@
     <string name="selectTextMode" msgid="1018691815143165326">"Odaberi tekst"</string>
     <string name="undo" msgid="7905788502491742328">"Vrati"</string>
     <string name="redo" msgid="7759464876566803888">"Ponovo uradi"</string>
+    <!-- no translation found for autofill (3035779615680565188) -->
+    <skip />
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Odabir teksta"</string>
     <string name="addToDictionary" msgid="4352161534510057874">"Dodaj u rječnik"</string>
     <string name="deleteText" msgid="6979668428458199034">"Izbriši"</string>
@@ -1206,12 +1208,9 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Dodirnite za odabir jezika i rasporeda"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <!-- no translation found for alert_windows_notification_channel_name (3116610965549449803) -->
-    <skip />
-    <!-- no translation found for alert_windows_notification_title (4532185840598192445) -->
-    <skip />
-    <!-- no translation found for alert_windows_notification_message (8917232109522912560) -->
-    <skip />
+    <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"Aplikacija <xliff:g id="NAME">%s</xliff:g> prekriva ostale aplikacije"</string>
+    <string name="alert_windows_notification_title" msgid="4532185840598192445">"Aplikacija <xliff:g id="NAME">%s</xliff:g> prekriva ostale aplikacije."</string>
+    <string name="alert_windows_notification_message" msgid="8917232109522912560">"Ako ne želite da <xliff:g id="NAME">%s</xliff:g> koristi ovu funkciju, dodirnite da otvorite postavke i isključite je."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"ISKLJUČI"</string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"Priprema se <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Provjera grešaka"</string>
@@ -1219,12 +1218,10 @@
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Za prebacivanje slika i medijskih fajlova"</string>
     <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"Uređaj <xliff:g id="NAME">%s</xliff:g> je oštećen"</string>
     <string name="ext_media_unmountable_notification_message" msgid="2343202057122495773">"Uređaj <xliff:g id="NAME">%s</xliff:g> je oštećen. Dodirnite da biste popravili."</string>
-    <!-- no translation found for ext_media_unmountable_notification_message (3941179940297874950) -->
-    <skip />
+    <string name="ext_media_unmountable_notification_message" product="tv" msgid="3941179940297874950">"Uređaj <xliff:g id="NAME">%s</xliff:g> je oštećen. Odaberite za popravak."</string>
     <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"Uređaj <xliff:g id="NAME">%s</xliff:g> nije podržan"</string>
     <string name="ext_media_unsupported_notification_message" msgid="6121601473787888589">"Ovaj uređaj ne podržava uređaj <xliff:g id="NAME">%s</xliff:g>. Dodirnite da biste ga postavili u podržanom formatu."</string>
-    <!-- no translation found for ext_media_unsupported_notification_message (3725436899820390906) -->
-    <skip />
+    <string name="ext_media_unsupported_notification_message" product="tv" msgid="3725436899820390906">"Ovaj uređaj ne podržava uređaj <xliff:g id="NAME">%s</xliff:g>. Dodirnite da ga postavite u podržanom formatu."</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"Neočekivano uklonjen uređaj <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"Isključite uređaj <xliff:g id="NAME">%s</xliff:g> prije uklanjanja da izbjegnete gubitak podataka"</string>
     <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"Uređaj <xliff:g id="NAME">%s</xliff:g> je uklonjen"</string>
@@ -1696,7 +1693,7 @@
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Profil za posao"</string>
     <string name="expand_button_content_description_collapsed" msgid="3609784019345534652">"Proširi"</string>
     <string name="expand_button_content_description_expanded" msgid="8520652707158554895">"Skupi"</string>
-    <string name="expand_action_accessibility" msgid="5307730695723718254">"prebaci na proširenje"</string>
+    <string name="expand_action_accessibility" msgid="5307730695723718254">"aktiviraj/deaktiviraj proširenje"</string>
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Android USB ulaz za periferijske uređaje"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"USB ulaz za periferijske uređaje"</string>
@@ -1766,6 +1763,8 @@
     <string name="time_picker_prompt_label" msgid="7588093983899966783">"Upišite vrijeme"</string>
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"Prebacite u način unosa teksta za unos vremena."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"Prebacite u način rada kao sat za unos vremena."</string>
+    <!-- no translation found for autofill_picker_accessibility_title (8469043291648711535) -->
+    <skip />
     <string name="autofill_save_title" msgid="7081244500504163245">"Želite li sačuvati u: <xliff:g id="LABEL">%1$s</xliff:g>?"</string>
     <string name="autofill_save_title_with_type" msgid="4977385733042555659">"Želite li sačuvati stavku <xliff:g id="TYPE">%1$s</xliff:g> u: <xliff:g id="LABEL">%2$s</xliff:g>?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"Sačuvaj"</string>

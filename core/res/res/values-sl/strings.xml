@@ -1006,6 +1006,8 @@
     <string name="selectTextMode" msgid="1018691815143165326">"Izbira besedila"</string>
     <string name="undo" msgid="7905788502491742328">"Razveljavi"</string>
     <string name="redo" msgid="7759464876566803888">"Uveljavi"</string>
+    <!-- no translation found for autofill (3035779615680565188) -->
+    <skip />
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Izbrano besedilo"</string>
     <string name="addToDictionary" msgid="4352161534510057874">"Dodaj v slovar"</string>
     <string name="deleteText" msgid="6979668428458199034">"Izbriši"</string>
@@ -1223,12 +1225,9 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Dotaknite se, če želite izbrati jezik in postavitev."</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <!-- no translation found for alert_windows_notification_channel_name (3116610965549449803) -->
-    <skip />
-    <!-- no translation found for alert_windows_notification_title (4532185840598192445) -->
-    <skip />
-    <!-- no translation found for alert_windows_notification_message (8917232109522912560) -->
-    <skip />
+    <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> prekriva druge aplikacije"</string>
+    <string name="alert_windows_notification_title" msgid="4532185840598192445">"<xliff:g id="NAME">%s</xliff:g> prekriva druge aplikacije."</string>
+    <string name="alert_windows_notification_message" msgid="8917232109522912560">"Če ne želite, da aplikacija <xliff:g id="NAME">%s</xliff:g> uporablja to funkcijo, se dotaknite, da odprete nastavitve, in funkcijo izklopite."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"IZKLOP"</string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"Pripravljanje shrambe <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Iskanje napak"</string>
@@ -1236,12 +1235,10 @@
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Za prenos fotografij in predstavnosti"</string>
     <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"Naprava za sh. <xliff:g id="NAME">%s</xliff:g> je poškodovana"</string>
     <string name="ext_media_unmountable_notification_message" msgid="2343202057122495773">"Nosilec <xliff:g id="NAME">%s</xliff:g> je poškodovan. Dotaknite se, če želite odpraviti napako."</string>
-    <!-- no translation found for ext_media_unmountable_notification_message (3941179940297874950) -->
-    <skip />
+    <string name="ext_media_unmountable_notification_message" product="tv" msgid="3941179940297874950">"Nosilec <xliff:g id="NAME">%s</xliff:g> je pokvarjen. Izberite, če ga želite popraviti."</string>
     <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"Nepodprta naprava za shran. <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unsupported_notification_message" msgid="6121601473787888589">"Ta naprava ne podpira tega nosilca <xliff:g id="NAME">%s</xliff:g>. Dotaknite se, če želite nastaviti v podprti obliki."</string>
-    <!-- no translation found for ext_media_unsupported_notification_message (3725436899820390906) -->
-    <skip />
+    <string name="ext_media_unsupported_notification_message" product="tv" msgid="3725436899820390906">"Naprava ne podpira nosilca <xliff:g id="NAME">%s</xliff:g>. Izberite, če ga želite nastaviti v podprti obliki."</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"Shramba <xliff:g id="NAME">%s</xliff:g> nepričak. odstranjena"</string>
     <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"Izpnite shrambo <xliff:g id="NAME">%s</xliff:g>, preden jo odstranite, da se izognete izgubi podatkov."</string>
     <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"Shramba <xliff:g id="NAME">%s</xliff:g> je bila odstranjena"</string>
@@ -1794,6 +1791,8 @@
     <string name="time_picker_prompt_label" msgid="7588093983899966783">"Vnesite uro"</string>
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"Preklopite na način za vnašanje besedila, da vnesete čas."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"Preklopite na način ure, da vnesete čas."</string>
+    <!-- no translation found for autofill_picker_accessibility_title (8469043291648711535) -->
+    <skip />
     <string name="autofill_save_title" msgid="7081244500504163245">"Shrani v <xliff:g id="LABEL">%1$s</xliff:g>?"</string>
     <string name="autofill_save_title_with_type" msgid="4977385733042555659">"Shrani <xliff:g id="TYPE">%1$s</xliff:g> v <xliff:g id="LABEL">%2$s</xliff:g>?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"Shrani"</string>

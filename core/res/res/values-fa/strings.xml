@@ -966,6 +966,8 @@
     <string name="selectTextMode" msgid="1018691815143165326">"انتخاب متن"</string>
     <string name="undo" msgid="7905788502491742328">"لغو"</string>
     <string name="redo" msgid="7759464876566803888">"انجام مجدد"</string>
+    <!-- no translation found for autofill (3035779615680565188) -->
+    <skip />
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"انتخاب متن"</string>
     <string name="addToDictionary" msgid="4352161534510057874">"افزودن به واژه‌نامه"</string>
     <string name="deleteText" msgid="6979668428458199034">"حذف"</string>
@@ -1183,12 +1185,9 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"برای انتخاب زبان و چیدمان ضربه بزنید"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <!-- no translation found for alert_windows_notification_channel_name (3116610965549449803) -->
-    <skip />
-    <!-- no translation found for alert_windows_notification_title (4532185840598192445) -->
-    <skip />
-    <!-- no translation found for alert_windows_notification_message (8917232109522912560) -->
-    <skip />
+    <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> روی برنامه‌های دیگر نشان داده می‌شود"</string>
+    <string name="alert_windows_notification_title" msgid="4532185840598192445">"<xliff:g id="NAME">%s</xliff:g> روی برنامه‌های دیگر نشان داده می‌شود."</string>
+    <string name="alert_windows_notification_message" msgid="8917232109522912560">"اگر نمی‌خواهید <xliff:g id="NAME">%s</xliff:g> از این قابلیت استفاده کند، با ضربه زدن، تنظیمات را باز کنید و قابلیت را خاموش کنید."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"خاموش کردن"</string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"در حال آماده‌سازی <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"در حال بررسی برای خطاها"</string>
@@ -1196,12 +1195,10 @@
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"برای انتقال عکس‌ها و رسانه"</string>
     <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"<xliff:g id="NAME">%s</xliff:g> خراب است"</string>
     <string name="ext_media_unmountable_notification_message" msgid="2343202057122495773">"<xliff:g id="NAME">%s</xliff:g> خراب است. برای برطرف کردن مشکل ضربه بزنید."</string>
-    <!-- no translation found for ext_media_unmountable_notification_message (3941179940297874950) -->
-    <skip />
+    <string name="ext_media_unmountable_notification_message" product="tv" msgid="3941179940297874950">"<xliff:g id="NAME">%s</xliff:g> خراب است. رفع خطا را انتخاب کنید."</string>
     <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"<xliff:g id="NAME">%s</xliff:g> پشتیبانی نشده"</string>
     <string name="ext_media_unsupported_notification_message" msgid="6121601473787888589">"این دستگاه از این <xliff:g id="NAME">%s</xliff:g> پشتیبانی نمی‌کند. برای نصب آن در قالب پشتیبانی‌شده ضربه بزنید."</string>
-    <!-- no translation found for ext_media_unsupported_notification_message (3725436899820390906) -->
-    <skip />
+    <string name="ext_media_unsupported_notification_message" product="tv" msgid="3725436899820390906">"این دستگاه از این <xliff:g id="NAME">%s</xliff:g> پشتیبانی نمی‌کند. برای تنظیم در یک قالب پشتیبانی‌شده، آن را انتخاب کنید."</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g> به‌طور غیرمنتظره جدا شد"</string>
     <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"قبل از جدا کردن، برای جلوگیری از از دست رفتن اطلاعات، ارتباط <xliff:g id="NAME">%s</xliff:g> را قطع کنید."</string>
     <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"<xliff:g id="NAME">%s</xliff:g> جدا شده است"</string>
@@ -1732,6 +1729,8 @@
     <string name="time_picker_prompt_label" msgid="7588093983899966783">"زمان را تایپ کنید"</string>
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"برای وارد کردن زمان، به حالت وارد کردن نوشتار تغییر وضعیت دهید."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"برای وارد کردن زمان، به حالت ساعت تغییر وضعیت دهید."</string>
+    <!-- no translation found for autofill_picker_accessibility_title (8469043291648711535) -->
+    <skip />
     <string name="autofill_save_title" msgid="7081244500504163245">"در <xliff:g id="LABEL">%1$s</xliff:g> ذخیره شود؟"</string>
     <string name="autofill_save_title_with_type" msgid="4977385733042555659">"<xliff:g id="TYPE">%1$s</xliff:g> در <xliff:g id="LABEL">%2$s</xliff:g> ذخیره شود؟"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"ذخیره"</string>

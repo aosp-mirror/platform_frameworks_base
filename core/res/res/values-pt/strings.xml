@@ -966,6 +966,8 @@
     <string name="selectTextMode" msgid="1018691815143165326">"Selecionar texto"</string>
     <string name="undo" msgid="7905788502491742328">"Desfazer"</string>
     <string name="redo" msgid="7759464876566803888">"Refazer"</string>
+    <!-- no translation found for autofill (3035779615680565188) -->
+    <skip />
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Seleção de texto"</string>
     <string name="addToDictionary" msgid="4352161534510057874">"Adicionar ao dicionário"</string>
     <string name="deleteText" msgid="6979668428458199034">"Excluir"</string>
@@ -1183,12 +1185,9 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Toque para selecionar o idioma e o layout"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <!-- no translation found for alert_windows_notification_channel_name (3116610965549449803) -->
-    <skip />
-    <!-- no translation found for alert_windows_notification_title (4532185840598192445) -->
-    <skip />
-    <!-- no translation found for alert_windows_notification_message (8917232109522912560) -->
-    <skip />
+    <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> exibido sobre outros apps"</string>
+    <string name="alert_windows_notification_title" msgid="4532185840598192445">"<xliff:g id="NAME">%s</xliff:g> exibido sobre outros apps."</string>
+    <string name="alert_windows_notification_message" msgid="8917232109522912560">"Se você não deseja que o <xliff:g id="NAME">%s</xliff:g> use este recurso, toque para abrir as configurações e desativá-lo."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"DESATIVAR"</string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"Preparando <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Procurando erros"</string>
@@ -1196,12 +1195,10 @@
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Para transferir fotos e mídia"</string>
     <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"<xliff:g id="NAME">%s</xliff:g> corrompido"</string>
     <string name="ext_media_unmountable_notification_message" msgid="2343202057122495773">"<xliff:g id="NAME">%s</xliff:g> está corrompido. Toque para corrigir."</string>
-    <!-- no translation found for ext_media_unmountable_notification_message (3941179940297874950) -->
-    <skip />
+    <string name="ext_media_unmountable_notification_message" product="tv" msgid="3941179940297874950">"O <xliff:g id="NAME">%s</xliff:g> está corrompido. Selecione para corrigir."</string>
     <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"<xliff:g id="NAME">%s</xliff:g> não compatível"</string>
     <string name="ext_media_unsupported_notification_message" msgid="6121601473787888589">"Este dispositivo não é compatível com esse <xliff:g id="NAME">%s</xliff:g>. Toque para configurar em um formato compatível."</string>
-    <!-- no translation found for ext_media_unsupported_notification_message (3725436899820390906) -->
-    <skip />
+    <string name="ext_media_unsupported_notification_message" product="tv" msgid="3725436899820390906">"Este dispositivo não é compatível com este <xliff:g id="NAME">%s</xliff:g>. Selecione para configurar um formato compatível."</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g> foi removido inesperadamente"</string>
     <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"Desconecte <xliff:g id="NAME">%s</xliff:g> antes da remoção para evitar a perda de dados"</string>
     <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"Mídia <xliff:g id="NAME">%s</xliff:g> removida."</string>
@@ -1732,6 +1729,8 @@
     <string name="time_picker_prompt_label" msgid="7588093983899966783">"Digite o horário"</string>
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"Alterne para o modo de entrada de texto para informar o horário."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"Alterne para o modo de relógio para informar o horário."</string>
+    <!-- no translation found for autofill_picker_accessibility_title (8469043291648711535) -->
+    <skip />
     <string name="autofill_save_title" msgid="7081244500504163245">"Salvar em <xliff:g id="LABEL">%1$s</xliff:g>?"</string>
     <string name="autofill_save_title_with_type" msgid="4977385733042555659">"Salvar <xliff:g id="TYPE">%1$s</xliff:g> em <xliff:g id="LABEL">%2$s</xliff:g>?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"Salvar"</string>
