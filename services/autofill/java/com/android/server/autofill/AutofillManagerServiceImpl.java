@@ -998,7 +998,7 @@ final class AutofillManagerServiceImpl {
                 mStructure.dump();
             }
 
-            mRemoteFillService.onSaveRequest(mStructure, extras, () -> removeSelf());
+            mRemoteFillService.onSaveRequest(mStructure, extras);
         }
 
         void updateLocked(AutofillId id, Rect bounds, AutofillValue value, int flags) {
