@@ -92,6 +92,7 @@ import android.net.wifi.p2p.WifiP2pManager;
 import android.nfc.NfcManager;
 import android.os.BatteryManager;
 import android.os.BatteryStats;
+import android.os.Build;
 import android.os.DropBoxManager;
 import android.os.HardwarePropertiesManager;
 import android.os.IBatteryPropertiesRegistrar;
@@ -674,7 +675,12 @@ final class SystemServiceRegistry {
                 new CachedServiceFetcher<FingerprintManager>() {
             @Override
             public FingerprintManager createService(ContextImpl ctx) throws ServiceNotFoundException {
-                IBinder binder = ServiceManager.getServiceOrThrow(Context.FINGERPRINT_SERVICE);
+                final IBinder binder;
+                if (ctx.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.O) {
+                    binder = ServiceManager.getServiceOrThrow(Context.FINGERPRINT_SERVICE);
+                } else {
+                    binder = ServiceManager.getService(Context.FINGERPRINT_SERVICE);
+                }
                 IFingerprintService service = IFingerprintService.Stub.asInterface(binder);
                 return new FingerprintManager(ctx.getOuterContext(), service);
             }});
