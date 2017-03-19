@@ -65,7 +65,7 @@
             android:layout_height="40dp"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
-            android:elevation="100dp"
+            android:elevation="108dp"
             android:stateListAnimator="@null"/>
 
     </RelativeLayout>
@@ -90,7 +90,7 @@
             android:layout_height="40dp"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
-            android:elevation="36dp"
+            android:elevation="108dp"
             android:stateListAnimator="@null"/>
 
     </RelativeLayout>
