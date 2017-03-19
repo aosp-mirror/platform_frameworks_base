@@ -58,9 +58,9 @@ public class PackageHelperTests extends AndroidTestCase {
     private static final long sAdoptedSize = 10000;
     private static final long sPublicSize = 1000000;
 
-    private static final StorageManager sStorageManager = createStorageManagerMock();
+    private static StorageManager sStorageManager;
 
-    private static StorageManager createStorageManagerMock() {
+    private static StorageManager createStorageManagerMock() throws Exception {
         VolumeInfo internalVol = new VolumeInfo("private",
                 VolumeInfo.TYPE_PRIVATE, null /*DiskInfo*/, null /*partGuid*/);
         internalVol.path = sInternalVolPath;
@@ -93,6 +93,12 @@ public class PackageHelperTests extends AndroidTestCase {
         Mockito.when(storageManager.getStorageBytesUntilLow(internalFile)).thenReturn(sInternalSize);
         Mockito.when(storageManager.getStorageBytesUntilLow(adoptedFile)).thenReturn(sAdoptedSize);
         Mockito.when(storageManager.getStorageBytesUntilLow(publicFile)).thenReturn(sPublicSize);
+        Mockito.when(storageManager.getAllocatableBytes(Mockito.eq(internalFile), Mockito.anyInt()))
+                .thenReturn(sInternalSize);
+        Mockito.when(storageManager.getAllocatableBytes(Mockito.eq(adoptedFile), Mockito.anyInt()))
+                .thenReturn(sAdoptedSize);
+        Mockito.when(storageManager.getAllocatableBytes(Mockito.eq(publicFile), Mockito.anyInt()))
+                .thenReturn(sPublicSize);
         return storageManager;
     }
 
@@ -156,18 +162,10 @@ public class PackageHelperTests extends AndroidTestCase {
         }
     }
 
-    void failStr(String errMsg) {
-        Log.w(TAG, "errMsg=" + errMsg);
-        fail(errMsg);
-    }
-
-    void failStr(Exception e) {
-        failStr(e.getMessage());
-    }
-
     @Override
     protected void setUp() throws Exception {
         super.setUp();
+        sStorageManager = createStorageManagerMock();
         if (localLOGV) Log.i(TAG, "Cleaning out old test containers");
         cleanupContainers();
     }
@@ -175,28 +173,25 @@ public class PackageHelperTests extends AndroidTestCase {
     @Override
     protected void tearDown() throws Exception {
         super.tearDown();
+        sStorageManager = null;
         if (localLOGV) Log.i(TAG, "Cleaning out old test containers");
         cleanupContainers();
     }
 
-    public void testMountAndPullSdCard() {
-        try {
-            fullId = PREFIX;
-            fullId2 = PackageHelper.createSdDir(1024 * MB_IN_BYTES, fullId, "none",
-                    android.os.Process.myUid(), true);
+    public void testMountAndPullSdCard() throws Exception {
+        fullId = PREFIX;
+        fullId2 = PackageHelper.createSdDir(1024 * MB_IN_BYTES, fullId, "none",
+                android.os.Process.myUid(), true);
 
-            Log.d(TAG,PackageHelper.getSdDir(fullId));
-            PackageHelper.unMountSdDir(fullId);
+        Log.d(TAG, "getSdDir=" + PackageHelper.getSdDir(fullId));
+        PackageHelper.unMountSdDir(fullId);
 
-            Runnable r1 = getMountRunnable();
-            Runnable r2 = getDestroyRunnable();
-            Thread thread = new Thread(r1);
-            Thread thread2 = new Thread(r2);
-            thread2.start();
-            thread.start();
-        } catch (Exception e) {
-            failStr(e);
-        }
+        Runnable r1 = getMountRunnable();
+        Runnable r2 = getDestroyRunnable();
+        Thread thread = new Thread(r1);
+        Thread thread2 = new Thread(r2);
+        thread2.start();
+        thread.start();
     }
 
     public Runnable getMountRunnable() {

@@ -637,12 +637,12 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
         // If caller requested explicit location, sanity check it, otherwise
         // resolve the best internal or adopted location.
         if ((params.installFlags & PackageManager.INSTALL_INTERNAL) != 0) {
-            if (!PackageHelper.fitsOnInternal(mContext, params.sizeBytes)) {
+            if (!PackageHelper.fitsOnInternal(mContext, params)) {
                 throw new IOException("No suitable internal storage available");
             }
 
         } else if ((params.installFlags & PackageManager.INSTALL_EXTERNAL) != 0) {
-            if (!PackageHelper.fitsOnExternal(mContext, params.sizeBytes)) {
+            if (!PackageHelper.fitsOnExternal(mContext, params)) {
                 throw new IOException("No suitable external storage available");
             }
 
@@ -660,8 +660,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
             // requested install flags, delta size, and manifest settings.
             final long ident = Binder.clearCallingIdentity();
             try {
-                params.volumeUuid = PackageHelper.resolveInstallVolume(mContext,
-                        params.appPackageName, params.installLocation, params.sizeBytes);
+                params.volumeUuid = PackageHelper.resolveInstallVolume(mContext, params);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
