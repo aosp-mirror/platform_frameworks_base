@@ -91,9 +91,11 @@ public class BatteryMeterDrawable extends Drawable implements
     private boolean mPowerSaveEnabled;
 
     private int mDarkModeBackgroundColor;
+    private int mDarkModeBatteryMeterFrameColor;
     private int mDarkModeFillColor;
 
     private int mLightModeBackgroundColor;
+    private int mLightModeBatteryMeterFrameColor;
     private int mLightModeFillColor;
 
     private final SettingObserver mSettingObserver = new SettingObserver();
@@ -193,6 +195,11 @@ public class BatteryMeterDrawable extends Drawable implements
         mLightModeBackgroundColor =
                 context.getColor(R.color.light_mode_icon_color_dual_tone_background);
         mLightModeFillColor = context.getColor(R.color.light_mode_icon_color_dual_tone_fill);
+
+        mDarkModeBatteryMeterFrameColor =
+                context.getColor(R.color.batterymeter_frame_color_darkintensity);
+        mLightModeBatteryMeterFrameColor =
+                context.getColor(R.color.batterymeter_frame_color);
 
         mIntrinsicWidth = context.getResources().getDimensionPixelSize(R.dimen.battery_width);
         mIntrinsicHeight = context.getResources().getDimensionPixelSize(R.dimen.battery_height);
@@ -419,7 +426,7 @@ public class BatteryMeterDrawable extends Drawable implements
 
     private int getBackgroundColor(float darkIntensity) {
         return getColorForDarkIntensity(
-                darkIntensity, mLightModeBackgroundColor, mDarkModeBackgroundColor);
+                darkIntensity, mLightModeBatteryMeterFrameColor, mDarkModeBatteryMeterFrameColor);
     }
 
     private int getFillColor(float darkIntensity) {
