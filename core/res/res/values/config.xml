@@ -1041,7 +1041,7 @@
 
     <!-- Control the behavior when the user long presses the home button.
             0 - Nothing
-            1 - Recent apps view in SystemUI
+            1 - Launch all apps intent
             2 - Launch assist intent
          This needs to match the constants in
          policy/src/com/android/internal/policy/impl/PhoneWindowManager.java
