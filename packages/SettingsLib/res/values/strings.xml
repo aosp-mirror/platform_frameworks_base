@@ -432,6 +432,11 @@
     <!-- Setting Checkbox title for disabling Bluetooth absolute volume -->
     <string name="bluetooth_disable_absolute_volume">Disable absolute volume</string>
 
+    <!-- UI debug setting: Select Bluetooth AVRCP Version -->
+    <string name="bluetooth_select_avrcp_version_string">Bluetooth AVRCP Version</string>
+    <!-- UI debug setting: Select Bluetooth AVRCP Version -->
+    <string name="bluetooth_select_avrcp_version_dialog_title">Select Bluetooth AVRCP Version</string>
+
     <!-- UI debug setting: Select Bluetooth Audio Codec -->
     <string name="bluetooth_select_a2dp_codec_type">Bluetooth Audio Codec</string>
     <!-- UI debug setting: Select Bluetooth Audio Codec -->
