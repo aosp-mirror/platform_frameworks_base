@@ -1340,18 +1340,33 @@
     <!-- Notification Inline Controls: Header for apps that are not yet using notification channels. -->
     <string name="notification_header_default_channel">Notifications</string>
 
-    <!-- The divider symbol between different parts of the notification header including spaces. not translatable [CHAR LIMIT=3] -->
-    <string name="notification_header_divider_symbol_with_spaces" translatable="false">" • "</string>
-
     <!-- Notification Inline Controls: Shown when a channel's notifications are currently blocked -->
     <string name="notification_channel_disabled">You won\'t get these notifications anymore.</string>
 
+    <!-- Notification: Control panel: Label that shows how many channels are included in this bundle
+        of notifications.  Replaces the channel name and only appears when there is more than one channel. -->
+    <string name="notification_num_channels"> <xliff:g id="number">%d</xliff:g> notification categories</string>
+
     <!-- Notification: Control panel: Label that shows how many channels this application has
-        defined, describing the current notification channel as "1 out of n". -->
+        defined, describing the current notification channel as "1 out of n categories from this app". -->
     <plurals name="notification_num_channels_desc">
         <item quantity="one">1 out of <xliff:g id="number">%d</xliff:g> category from this app</item>
         <item quantity="other">1 out of <xliff:g id="number">%d</xliff:g> categories from this app</item>
     </plurals>
+
+    <!-- Notification: Control panel: For bundles of notifications, this label that lists the
+        channels used by the contained notifications.  The first two channels are listed by name,
+        followed by "and N others"
+        Example: "Friend requests, Friend confirmations"
+        Example: "Friend requests, Friend confirmations, and 1 other"
+        Example: "Friend requests, Friend confirmations, and 2 others"
+    -->
+    <string name="notification_channels_list_desc_2"><xliff:g id="channel_name_1">%1$s</xliff:g>, <xliff:g id="channel_name_2">%2$s</xliff:g></string>
+    <plurals name="notification_channels_list_desc_2_and_others">
+        <item quantity="one"><xliff:g id="channel_name_1">%1$s</xliff:g>, <xliff:g id="channel_name_2">%2$s</xliff:g>, and <xliff:g id="number">%3$d</xliff:g> other</item>
+        <item quantity="other"><xliff:g id="channel_name_1">%1$s</xliff:g>, <xliff:g id="channel_name_2">%2$s</xliff:g>, and <xliff:g id="number">%3$d</xliff:g> others</item>
+    </plurals>
+
     <!-- Notification: Control panel: Label for button that launches notification settings. Used
         when this app has defined more than a single channel for notifications. -->
     <string name="notification_all_categories">All Categories</string>

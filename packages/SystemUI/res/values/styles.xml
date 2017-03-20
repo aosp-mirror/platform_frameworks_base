@@ -349,38 +349,42 @@
         <item name="dropdownPreferenceStyle">@style/Preference.DropDown.Material</item>
     </style>
 
-    <style name="TextAppearance.NotificationGuts">
-        <item name="android:textSize">14sp</item>
-        <item name="android:fontFamily">roboto-regular</item>
+    <style name="TextAppearance.NotificationInfo">
+        <item name="android:fontFamily">sans-serif</item>
         <item name="android:textColor">@android:color/black</item>
     </style>
 
-    <style name="TextAppearance.NotificationGuts.Header">
+    <style name="TextAppearance.NotificationInfo.Primary">
         <item name="android:textColor">?android:attr/textColorPrimary</item>
-        <item name="android:textSize">20sp</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:alpha">0.87</item>
     </style>
 
-    <style name="TextAppearance.NotificationGuts.Secondary">
+    <style name="TextAppearance.NotificationInfo.Secondary">
         <item name="android:textColor">?android:attr/textColorPrimary</item>
-        <item name="android:textSize">12sp</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:alpha">0.54</item>
     </style>
 
-    <style name="TextAppearance.NotificationGuts.SecondaryWarning">
+    <style name="TextAppearance.NotificationInfo.Secondary.Warning">
         <item name="android:textColor">?android:attr/colorError</item>
-        <item name="android:textSize">12sp</item>
     </style>
 
-    <style name="TextAppearance.NotificationGuts.Button">
+    <style name="TextAppearance.NotificationInfo.Button">
+        <item name="android:fontFamily">sans-serif-medium</item>
         <item name="android:textSize">14sp</item>
         <item name="android:textAllCaps">true</item>
-        <item name="android:fontFamily">sans-serif-medium</item>
-        <item name="android:gravity">center</item>
         <item name="android:textColor">?android:attr/colorAccent</item>
+        <item name="android:background">@drawable/btn_borderless_rect</item>
+        <item name="android:gravity">center</item>
+        <item name="android:focusable">true</item>
+        <item name="android:paddingStart">8dp</item>
+        <item name="android:paddingEnd">8dp</item>
     </style>
 
     <style name="TextAppearance.SnoozeSnackBar">
         <item name="android:textSize">14sp</item>
-        <item name="android:fontFamily">roboto-regular</item>
+        <item name="android:fontFamily">sans-serif</item>
         <item name="android:textColor">@android:color/white</item>
     </style>
 

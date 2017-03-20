@@ -35,7 +35,6 @@ import android.os.Handler;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.service.notification.NotificationListenerService;
-import android.service.notification.StatusBarNotification;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
@@ -59,6 +58,8 @@ import com.android.systemui.plugins.statusbar.NotificationMenuRowProvider.GutsIn
 import com.android.systemui.statusbar.NotificationGuts.OnSettingsClickListener;
 import com.android.systemui.statusbar.stack.StackStateAnimator;
 
+import java.lang.IllegalArgumentException;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -68,9 +69,11 @@ public class NotificationInfo extends LinearLayout implements GutsContent {
     private static final String TAG = "InfoGuts";
 
     private INotificationManager mINotificationManager;
+    private String mPkg;
+    private int mAppUid;
+    private List<NotificationChannel> mNotificationChannels;
+    private NotificationChannel mSingleNotificationChannel;
     private int mStartingUserImportance;
-    private StatusBarNotification mStatusBarNotification;
-    private NotificationChannel mNotificationChannel;
 
     private TextView mNumChannelsView;
     private View mChannelDisabledView;
@@ -83,36 +86,42 @@ public class NotificationInfo extends LinearLayout implements GutsContent {
     }
 
     public interface OnSettingsClickListener {
-        void onClick(View v, int appUid);
+        void onClick(View v, NotificationChannel channel, int appUid);
     }
 
     public void bindNotification(final PackageManager pm,
             final INotificationManager iNotificationManager,
-            final StatusBarNotification sbn, final NotificationChannel channel,
+            final String pkg,
+            final List<NotificationChannel> notificationChannels,
             OnSettingsClickListener onSettingsClick,
-            OnClickListener onDoneClick, final Set<String> nonBlockablePkgs) {
+            OnClickListener onDoneClick, final Set<String> nonBlockablePkgs)
+            throws RemoteException {
         mINotificationManager = iNotificationManager;
-        mNotificationChannel = channel;
-        mStatusBarNotification = sbn;
-        mStartingUserImportance = channel.getImportance();
+        mPkg = pkg;
+        mNotificationChannels = notificationChannels;
+        if (mNotificationChannels.isEmpty()) {
+            throw new IllegalArgumentException("bindNotification requires at least one channel");
+        } else if (mNotificationChannels.size() == 1) {
+            mSingleNotificationChannel = mNotificationChannels.get(0);
+            mStartingUserImportance = mSingleNotificationChannel.getImportance();
+        } else {
+            mSingleNotificationChannel = null;
+        }
 
-        final String pkg = sbn.getPackageName();
-        int appUid = -1;
-        String appName = pkg;
+        String appName = mPkg;
         Drawable pkgicon = null;
         CharSequence channelNameText = "";
         ApplicationInfo info = null;
         try {
-            info = pm.getApplicationInfo(pkg,
+            info = pm.getApplicationInfo(mPkg,
                     PackageManager.MATCH_UNINSTALLED_PACKAGES
                             | PackageManager.MATCH_DISABLED_COMPONENTS
                             | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
                             | PackageManager.MATCH_DIRECT_BOOT_AWARE);
             if (info != null) {
-                appUid = info.uid;
+                mAppUid = info.uid;
                 appName = String.valueOf(pm.getApplicationLabel(info));
                 pkgicon = pm.getApplicationIcon(info);
-
             }
         } catch (PackageManager.NameNotFoundException e) {
             // app is gone, just show package name and generic icon
@@ -121,38 +130,54 @@ public class NotificationInfo extends LinearLayout implements GutsContent {
         ((ImageView) findViewById(R.id.pkgicon)).setImageDrawable(pkgicon);
 
         int numChannels = 1;
-        try {
-            numChannels = iNotificationManager.getNumNotificationChannelsForPackage(
-                    pkg, appUid, false /* includeDeleted */);
-        } catch (RemoteException e) {
-            Log.e(TAG, e.toString());
-        }
+        numChannels = iNotificationManager.getNumNotificationChannelsForPackage(
+                pkg, mAppUid, false /* includeDeleted */);
 
+        String channelsDescText;
         mNumChannelsView = (TextView) (findViewById(R.id.num_channels_desc));
-        mNumChannelsView.setText(String.format(mContext.getResources().getQuantityString(
-                R.plurals.notification_num_channels_desc, numChannels), numChannels));
+        switch (mNotificationChannels.size()) {
+            case 1:
+                channelsDescText = String.format(mContext.getResources().getQuantityString(
+                        R.plurals.notification_num_channels_desc, numChannels), numChannels);
+                break;
+            case 2:
+                channelsDescText = mContext.getString(R.string.notification_channels_list_desc_2,
+                        mNotificationChannels.get(0).getName(),
+                        mNotificationChannels.get(1).getName());
+                break;
+            default:
+                final int numOthers = mNotificationChannels.size() - 2;
+                channelsDescText = String.format(
+                        mContext.getResources().getQuantityString(
+                                R.plurals.notification_channels_list_desc_2_and_others, numOthers),
+                        mNotificationChannels.get(0).getName(),
+                        mNotificationChannels.get(1).getName(),
+                        numOthers);
+        }
+        mNumChannelsView.setText(channelsDescText);
 
-        // If this is the placeholder channel, don't use our channel-specific text.
-        if (channel.getId().equals(NotificationChannel.DEFAULT_CHANNEL_ID)) {
+        if (mSingleNotificationChannel == null) {
+            // Multiple channels don't use a channel name for the title.
+            channelNameText = mContext.getString(R.string.notification_num_channels,
+                    mNotificationChannels.size());
+        } else if (mSingleNotificationChannel.getId()
+                .equals(NotificationChannel.DEFAULT_CHANNEL_ID)) {
+            // If this is the placeholder channel, don't use our channel-specific text.
             channelNameText = mContext.getString(R.string.notification_header_default_channel);
         } else {
-            channelNameText = channel.getName();
+            channelNameText = mSingleNotificationChannel.getName();
         }
         ((TextView) findViewById(R.id.pkgname)).setText(appName);
         ((TextView) findViewById(R.id.channel_name)).setText(channelNameText);
 
         // Set group information if this channel has an associated group.
         CharSequence groupName = null;
-        if (channel.getGroup() != null) {
-            try {
-                final NotificationChannelGroup notificationChannelGroup =
-                        iNotificationManager.getNotificationChannelGroupForPackage(
-                                channel.getGroup(), pkg, appUid);
-                if (notificationChannelGroup != null) {
-                    groupName = notificationChannelGroup.getName();
-                }
-            } catch (RemoteException e) {
-                Log.e(TAG, e.toString());
+        if (mSingleNotificationChannel != null && mSingleNotificationChannel.getGroup() != null) {
+            final NotificationChannelGroup notificationChannelGroup =
+                    iNotificationManager.getNotificationChannelGroupForPackage(
+                            mSingleNotificationChannel.getGroup(), pkg, mAppUid);
+            if (notificationChannelGroup != null) {
+                groupName = notificationChannelGroup.getName();
             }
         }
         TextView groupNameView = ((TextView) findViewById(R.id.group_name));
@@ -181,15 +206,15 @@ public class NotificationInfo extends LinearLayout implements GutsContent {
 
         // Top-level importance group
         mChannelDisabledView = findViewById(R.id.channel_disabled);
-        updateImportanceDisplay();
+        updateSecondaryText();
 
         // Settings button.
         final TextView settingsButton = (TextView) findViewById(R.id.more_settings);
-        if (appUid >= 0 && onSettingsClick != null) {
-            final int appUidF = appUid;
+        if (mAppUid >= 0 && onSettingsClick != null) {
+            final int appUidF = mAppUid;
             settingsButton.setOnClickListener(
                     (View view) -> {
-                        onSettingsClick.onClick(view, appUidF);
+                        onSettingsClick.onClick(view, mSingleNotificationChannel, appUidF);
                     });
             if (numChannels > 1) {
                 settingsButton.setText(R.string.notification_all_categories);
@@ -208,21 +233,24 @@ public class NotificationInfo extends LinearLayout implements GutsContent {
     }
 
     public boolean hasImportanceChanged() {
-        return mStartingUserImportance != getSelectedImportance();
+        return mSingleNotificationChannel != null &&
+                mStartingUserImportance != getSelectedImportance();
     }
 
     private void saveImportance() {
+        if (mSingleNotificationChannel == null) {
+            return;
+        }
         int selectedImportance = getSelectedImportance();
         if (selectedImportance == mStartingUserImportance) {
             return;
         }
         MetricsLogger.action(mContext, MetricsEvent.ACTION_SAVE_IMPORTANCE,
                 selectedImportance - mStartingUserImportance);
-        mNotificationChannel.setImportance(selectedImportance);
+        mSingleNotificationChannel.setImportance(selectedImportance);
         try {
             mINotificationManager.updateNotificationChannelForPackage(
-                    mStatusBarNotification.getPackageName(), mStatusBarNotification.getUid(),
-                    mNotificationChannel);
+                    mPkg, mAppUid, mSingleNotificationChannel);
         } catch (RemoteException e) {
             // :(
         }
@@ -241,26 +269,32 @@ public class NotificationInfo extends LinearLayout implements GutsContent {
         mChannelEnabledSwitch = (Switch) findViewById(R.id.channel_enabled_switch);
         mChannelEnabledSwitch.setChecked(
                 mStartingUserImportance != NotificationManager.IMPORTANCE_NONE);
-        mChannelEnabledSwitch.setVisibility(nonBlockable ? View.INVISIBLE : View.VISIBLE);
+        final boolean visible = !nonBlockable && mSingleNotificationChannel != null;
+        mChannelEnabledSwitch.setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
 
         // Callback when checked.
         mChannelEnabledSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (mGutsInteractionListener != null) {
                 mGutsInteractionListener.onInteraction(NotificationInfo.this);
             }
-            updateImportanceDisplay();
+            updateSecondaryText();
         });
     }
 
-    private void updateImportanceDisplay() {
-        final boolean disabled = getSelectedImportance() == NotificationManager.IMPORTANCE_NONE;
-        mChannelDisabledView.setVisibility(disabled ? View.VISIBLE : View.GONE);
-        if (disabled) {
-            // To be replaced by disabled text.
+    private void updateSecondaryText() {
+        final boolean defaultChannel = mSingleNotificationChannel != null &&
+                mSingleNotificationChannel.getId().equals(NotificationChannel.DEFAULT_CHANNEL_ID);
+        final boolean disabled = mSingleNotificationChannel != null &&
+                getSelectedImportance() == NotificationManager.IMPORTANCE_NONE;
+        if (defaultChannel) {
+            // Don't show any secondary text if this is from the default channel.
+            mChannelDisabledView.setVisibility(View.GONE);
             mNumChannelsView.setVisibility(View.GONE);
-        } else if (mNotificationChannel.getId().equals(NotificationChannel.DEFAULT_CHANNEL_ID)) {
-            mNumChannelsView.setVisibility(View.INVISIBLE);
+        } else if (disabled) {
+            mChannelDisabledView.setVisibility(View.VISIBLE);
+            mNumChannelsView.setVisibility(View.GONE);
         } else {
+            mChannelDisabledView.setVisibility(View.GONE);
             mNumChannelsView.setVisibility(View.VISIBLE);
         }
     }
