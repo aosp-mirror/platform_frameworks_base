@@ -649,7 +649,11 @@ public class ApplicationsState {
             }
 
             if (comparator != null) {
-                Collections.sort(filteredApps, comparator);
+                synchronized (mEntriesMap) {
+                    // Locking to ensure that the background handler does not mutate
+                    // the size of AppEntries used for ordering while sorting.
+                    Collections.sort(filteredApps, comparator);
+                }
             }
 
             synchronized (mRebuildSync) {
