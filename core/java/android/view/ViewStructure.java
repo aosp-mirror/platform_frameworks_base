@@ -275,7 +275,7 @@ public abstract class ViewStructure {
      *            {@link #addChildCount(int)} and {@link #setChildCount(int)}.
      * @param virtualId an opaque ID to the Android System (although it could be meaningful to the
      *            {@link View} creating the {@link ViewStructure}), but it's the same id used on
-     *            {@link View#autofill(int, AutofillValue)}.
+     *            {@link View#autofill(android.util.SparseArray)}.
      * @param flags currently {@code 0}.
      *
      * @return Returns an fresh {@link ViewStructure} ready to be filled in.
@@ -306,7 +306,7 @@ public abstract class ViewStructure {
      *            {@link #addChildCount(int)} and {@link #setChildCount(int)}.
      * @param virtualId an opaque ID to the Android System (although it could be meaningful to the
      *            {@link View} creating the {@link ViewStructure}), but it's the same id used on
-     *            {@link View#autofill(int, AutofillValue)}.
+     *            {@link View#autofill(android.util.SparseArray)}.
      * @param flags currently {@code 0}.
      *
      * @return Returns an fresh {@link ViewStructure} ready to be filled in.

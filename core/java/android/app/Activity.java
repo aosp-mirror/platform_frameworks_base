@@ -7193,6 +7193,7 @@ public class Activity extends ContextThemeWrapper
         final View root = getWindow().getDecorView();
         final int itemCount = ids.size();
         int numApplied = 0;
+        ArrayMap<View, SparseArray<AutofillValue>> virtualValues = null;
 
         for (int i = 0; i < itemCount; i++) {
             final AutofillId id = ids.get(i);
@@ -7203,19 +7204,37 @@ public class Activity extends ContextThemeWrapper
                 Log.w(TAG, "autofill(): no View with id " + viewId);
                 continue;
             }
-            final boolean wasApplied;
             if (id.isVirtual()) {
-                wasApplied = view.autofill(id.getVirtualChildId(), value);
+                final int parentId = id.getViewId();
+                if (virtualValues == null) {
+                    // Most likely there will be just one view with virtual children.
+                    virtualValues = new ArrayMap<>(1);
+                }
+                SparseArray<AutofillValue> valuesByParent = virtualValues.get(view);
+                if (valuesByParent == null) {
+                    // We don't know the size yet, but usually it will be just a few fields...
+                    valuesByParent = new SparseArray<>(5);
+                    virtualValues.put(view, valuesByParent);
+                }
+                valuesByParent.put(id.getVirtualChildId(), value);
             } else {
-                wasApplied = view.autofill(value);
-            }
-
-            if (wasApplied) {
-                numApplied++;
+                if (view.autofill(value)) {
+                    numApplied++;
+                }
             }
         }
 
-        LogMaker log = new LogMaker(MetricsProto.MetricsEvent.AUTOFILL_DATASET_APPLIED);
+        if (virtualValues != null) {
+            for (int i = 0; i < virtualValues.size(); i++) {
+                final View parent = virtualValues.keyAt(i);
+                final SparseArray<AutofillValue> childrenValues = virtualValues.valueAt(i);
+                if (parent.autofill(childrenValues)) {
+                    numApplied += childrenValues.size();
+                }
+            }
+        }
+
+        final LogMaker log = new LogMaker(MetricsProto.MetricsEvent.AUTOFILL_DATASET_APPLIED);
         log.addTaggedData(MetricsProto.MetricsEvent.FIELD_AUTOFILL_NUM_VALUES, itemCount);
         log.addTaggedData(MetricsProto.MetricsEvent.FIELD_AUTOFILL_NUM_VIEWS_FILLED, numApplied);
         mMetricsLogger.write(log);
