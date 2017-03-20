@@ -146,7 +146,6 @@ public class LockSettingsService extends ILockSettings.Stub {
     private final LockPatternUtils mLockPatternUtils;
     private final NotificationManager mNotificationManager;
     private final UserManager mUserManager;
-    private final DevicePolicyManager mDevicePolicyManager;
     private final IActivityManager mActivityManager;
 
     private final KeyStore mKeyStore;
@@ -385,7 +384,6 @@ public class LockSettingsService extends ILockSettings.Stub {
         mStorage = injector.getStorage();
         mNotificationManager = injector.getNotificationManager();
         mUserManager = injector.getUserManager();
-        mDevicePolicyManager = injector.getDevicePolicyManager();
         mStrongAuthTracker = injector.getStrongAuthTracker();
         mStrongAuthTracker.register(mStrongAuth);
 
@@ -2214,20 +2212,21 @@ public class LockSettingsService extends ILockSettings.Stub {
                 Slog.i(TAG, "Managed profile can have escrow token");
                 return;
             }
+            DevicePolicyManager dpm = mInjector.getDevicePolicyManager();
             // Devices with Device Owner should have escrow enabled on all users.
-            if (mDevicePolicyManager.getDeviceOwnerComponentOnAnyUser() != null) {
+            if (dpm.getDeviceOwnerComponentOnAnyUser() != null) {
                 Slog.i(TAG, "Corp-owned device can have escrow token");
                 return;
             }
             // We could also have a profile owner on the given (non-managed) user for unicorn cases
-            if (mDevicePolicyManager.getProfileOwnerAsUser(userId) != null) {
+            if (dpm.getProfileOwnerAsUser(userId) != null) {
                 Slog.i(TAG, "User with profile owner can have escrow token");
                 return;
             }
             // If the device is yet to be provisioned (still in SUW), there is still
             // a chance that Device Owner will be set on the device later, so postpone
             // disabling escrow token for now.
-            if (!mDevicePolicyManager.isDeviceProvisioned()) {
+            if (!dpm.isDeviceProvisioned()) {
                 Slog.i(TAG, "Postpone disabling escrow tokens until device is provisioned");
                 return;
             }
