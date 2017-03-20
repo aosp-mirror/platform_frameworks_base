@@ -5123,6 +5123,8 @@ public class Intent implements Parcelable, Cloneable {
     private Intent mSelector;
     private ClipData mClipData;
     private int mContentUserHint = UserHandle.USER_CURRENT;
+    /** Token to track instant app launches. Local only; do not copy cross-process. */
+    private String mLaunchToken;
 
     // ---------------------------------------------------------------------
 
@@ -5143,6 +5145,7 @@ public class Intent implements Parcelable, Cloneable {
         this.mComponent = o.mComponent;
         this.mFlags = o.mFlags;
         this.mContentUserHint = o.mContentUserHint;
+        this.mLaunchToken = o.mLaunchToken;
         if (o.mCategories != null) {
             this.mCategories = new ArraySet<String>(o.mCategories);
         }
@@ -6377,6 +6380,16 @@ public class Intent implements Parcelable, Cloneable {
     /** @hide */
     public int getContentUserHint() {
         return mContentUserHint;
+    }
+
+    /** @hide */
+    public String getLaunchToken() {
+        return mLaunchToken;
+    }
+
+    /** @hide */
+    public void setLaunchToken(String launchToken) {
+        mLaunchToken = launchToken;
     }
 
     /**

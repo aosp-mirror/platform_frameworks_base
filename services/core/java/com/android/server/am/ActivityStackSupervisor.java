@@ -1226,6 +1226,10 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                     mService.setProfileApp(aInfo.applicationInfo, aInfo.processName, profilerInfo);
                 }
             }
+            final String intentLaunchToken = intent.getLaunchToken();
+            if (aInfo.launchToken == null && intentLaunchToken != null) {
+                aInfo.launchToken = intentLaunchToken;
+            }
         }
         return aInfo;
     }
