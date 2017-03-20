@@ -636,17 +636,6 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
             // we are coming from in WM before we reparent because it became empty.
             mWindowContainerController.reparent(toStack.getWindowContainerController(), position);
 
-            // Reset the resumed activity on the previous stack
-            if (wasResumed) {
-                sourceStack.mResumedActivity = null;
-            }
-
-            // Reset the paused activity on the previous stack
-            if (wasPaused) {
-                sourceStack.mPausingActivity = null;
-                sourceStack.removeTimeoutsForActivityLocked(r);
-            }
-
             // Move the task
             sourceStack.removeTask(this, reason, REMOVE_TASK_MODE_MOVING);
             toStack.addTask(this, position, reason);
@@ -1187,14 +1176,13 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
      * be in the current task or unparented to any task.
      */
     void addActivityAtIndex(int index, ActivityRecord r) {
-        if (r.task != null && r.task != this) {
+        TaskRecord task = r.getTask();
+        if (task != null && task != this) {
             throw new IllegalArgumentException("Can not add r=" + " to task=" + this
-                    + " current parent=" + r.task);
+                    + " current parent=" + task);
         }
-        // TODO(b/36505427): Maybe make task private to ActivityRecord so we can also do
-        // onParentChanged() within the setter?
-        r.task = this;
-        r.onParentChanged();
+
+        r.setTask(this);
 
         // Remove r first, and if it wasn't already in the list and it's fullscreen, count it.
         if (!mActivities.remove(r) && r.fullscreen) {
@@ -1249,15 +1237,21 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
     }
 
     /**
-     * @return true if this was the last activity in the task
+     * Removes the specified activity from this task.
+     * @param r The {@link ActivityRecord} to remove.
+     * @return true if this was the last activity in the task.
      */
     boolean removeActivity(ActivityRecord r) {
-        if (r.task != this) {
+        return removeActivity(r, false /*reparenting*/);
+    }
+
+    boolean removeActivity(ActivityRecord r, boolean reparenting) {
+        if (r.getTask() != this) {
             throw new IllegalArgumentException(
                     "Activity=" + r + " does not belong to task=" + this);
         }
 
-        r.task = null;
+        r.setTask(null /*task*/, reparenting);
 
         if (mActivities.remove(r) && r.fullscreen) {
             // Was previously in list.
@@ -1412,7 +1406,7 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
     TaskThumbnail getTaskThumbnailLocked() {
         if (mStack != null) {
             final ActivityRecord resumedActivity = mStack.mResumedActivity;
-            if (resumedActivity != null && resumedActivity.task == this) {
+            if (resumedActivity != null && resumedActivity.getTask() == this) {
                 final Bitmap thumbnail = resumedActivity.screenshotActivityLocked();
                 setLastThumbnailLocked(thumbnail);
             }
@@ -1928,7 +1922,7 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
         task.updateOverrideConfiguration(bounds);
 
         for (int activityNdx = activities.size() - 1; activityNdx >=0; --activityNdx) {
-            activities.get(activityNdx).task = task;
+            activities.get(activityNdx).setTask(task);
         }
 
         if (DEBUG_RECENTS) Slog.d(TAG_RECENTS, "Restored task=" + task);

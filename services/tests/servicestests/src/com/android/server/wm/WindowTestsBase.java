@@ -19,21 +19,16 @@ package com.android.server.wm;
 import static android.view.View.VISIBLE;
 
 import android.app.ActivityManager.TaskDescription;
-import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManagerGlobal;
-import android.os.Binder;
 import android.view.Display;
 import android.view.DisplayInfo;
-import android.view.IApplicationToken;
 import org.junit.Assert;
 import org.junit.After;
 import org.junit.Before;
 import org.mockito.MockitoAnnotations;
 
-import android.app.ActivityManager.TaskSnapshot;
 import android.content.Context;
-import android.os.IBinder;
 import android.support.test.InstrumentationRegistry;
 import android.view.IWindow;
 import android.view.WindowManager;
@@ -41,10 +36,6 @@ import android.view.WindowManager;
 import static android.app.ActivityManager.StackId.FIRST_DYNAMIC_STACK_ID;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.app.AppOpsManager.OP_NONE;
-import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
-import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
-import static android.content.res.Configuration.EMPTY;
-import static android.content.res.Configuration.ORIENTATION_UNDEFINED;
 import static android.view.DisplayAdjustments.DEFAULT_DISPLAY_ADJUSTMENTS;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
@@ -58,7 +49,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
-import static com.android.server.wm.WindowContainer.POSITION_TOP;
 import static org.mockito.Mockito.mock;
 
 import com.android.server.AttributeCache;
@@ -78,8 +68,7 @@ class WindowTestsBase {
     // make sure we don't collide with any existing display. If we run into no other display, the
     // added display should be treated as default. This cannot be the default display
     private static int sNextDisplayId = Display.DEFAULT_DISPLAY + 1;
-    static int sNextStackId = FIRST_DYNAMIC_STACK_ID;
-    private static int sNextTaskId = 0;
+    private static int sNextStackId = FIRST_DYNAMIC_STACK_ID;
 
     private static boolean sOneTimeSetupDone = false;
     static DisplayContent sDisplayContent;
@@ -184,14 +173,14 @@ class WindowTestsBase {
 
     private static WindowToken createWindowToken(DisplayContent dc, int stackId, int type) {
         if (type < FIRST_APPLICATION_WINDOW || type > LAST_APPLICATION_WINDOW) {
-            return new TestWindowToken(type, dc);
+            return new WindowTestUtils.TestWindowToken(type, dc);
         }
 
         final TaskStack stack = stackId == INVALID_STACK_ID
                 ? createTaskStackOnDisplay(dc)
                 : createStackControllerOnStackOnDisplay(stackId, dc).mContainer;
         final Task task = createTaskInStack(stack, 0 /* userId */);
-        final TestAppWindowToken token = new TestAppWindowToken(dc);
+        final WindowTestUtils.TestAppWindowToken token = new WindowTestUtils.TestAppWindowToken(dc);
         task.addChild(token, 0);
         return token;
     }
@@ -209,7 +198,7 @@ class WindowTestsBase {
     }
 
     WindowState createAppWindow(Task task, int type, String name) {
-        final AppWindowToken token = new TestAppWindowToken(sDisplayContent);
+        final AppWindowToken token = new WindowTestUtils.TestAppWindowToken(sDisplayContent);
         task.addChild(token, 0);
         return createWindow(null, type, token, name);
     }
@@ -260,10 +249,7 @@ class WindowTestsBase {
 
     /** Creates a {@link Task} and adds it to the specified {@link TaskStack}. */
     static Task createTaskInStack(TaskStack stack, int userId) {
-        final Task newTask = new Task(sNextTaskId++, stack, userId, sWm, null, EMPTY, 0, false,
-                false, new TaskDescription(), null);
-        stack.addTask(newTask, POSITION_TOP);
-        return newTask;
+        return WindowTestUtils.createTaskInStack(sWm, stack, userId);
     }
 
     /** Creates a {@link DisplayContent} and adds it to the system. */
@@ -274,227 +260,10 @@ class WindowTestsBase {
         return new DisplayContent(display, sWm, sLayersController, new WallpaperController(sWm));
     }
 
-    /* Used so we can gain access to some protected members of the {@link WindowToken} class */
-    static class TestWindowToken extends WindowToken {
-        int adj = 0;
-
-        TestWindowToken(int type, DisplayContent dc) {
-            this(type, dc, false /* persistOnEmpty */);
-        }
-
-        TestWindowToken(int type, DisplayContent dc, boolean persistOnEmpty) {
-            super(sWm, mock(IBinder.class), type, persistOnEmpty, dc,
-                    false /* ownerCanManageAppTokens */);
-        }
-
-        int getWindowsCount() {
-            return mChildren.size();
-        }
-
-        boolean hasWindow(WindowState w) {
-            return mChildren.contains(w);
-        }
-
-        @Override
-        int getAnimLayerAdjustment() {
-            return adj;
-        }
+    /** Creates a {@link com.android.server.wm.WindowTestUtils.TestWindowState} */
+    WindowTestUtils.TestWindowState createWindowState(WindowManager.LayoutParams attrs,
+            WindowToken token) {
+        return new WindowTestUtils.TestWindowState(sWm, sMockSession, sIWindow, attrs, token);
     }
 
-    /** Used so we can gain access to some protected members of the {@link AppWindowToken} class. */
-    static class TestAppWindowToken extends AppWindowToken {
-
-        TestAppWindowToken(DisplayContent dc) {
-            super(sWm, null, false, dc, true /* fillsParent */, null /* overrideConfig */,
-                    null /* bounds */);
-        }
-
-        TestAppWindowToken(WindowManagerService service, IApplicationToken token,
-                boolean voiceInteraction, DisplayContent dc, long inputDispatchingTimeoutNanos,
-                boolean fullscreen, boolean showForAllUsers, int targetSdk, int orientation,
-                int rotationAnimationHint, int configChanges, boolean launchTaskBehind,
-                boolean alwaysFocusable, AppWindowContainerController controller,
-                Configuration overrideConfig, Rect bounds) {
-            super(service, token, voiceInteraction, dc, inputDispatchingTimeoutNanos, fullscreen,
-                    showForAllUsers, targetSdk, orientation, rotationAnimationHint, configChanges,
-                    launchTaskBehind, alwaysFocusable, controller, overrideConfig, bounds);
-        }
-
-        int getWindowsCount() {
-            return mChildren.size();
-        }
-
-        boolean hasWindow(WindowState w) {
-            return mChildren.contains(w);
-        }
-
-        WindowState getFirstChild() {
-            return mChildren.getFirst();
-        }
-
-        WindowState getLastChild() {
-            return mChildren.getLast();
-        }
-
-        int positionInParent() {
-            return getParent().mChildren.indexOf(this);
-        }
-    }
-
-    /* Used so we can gain access to some protected members of the {@link Task} class */
-    class TestTask extends Task {
-
-        boolean mShouldDeferRemoval = false;
-        boolean mOnDisplayChangedCalled = false;
-        private boolean mUseLocalIsAnimating = false;
-        private boolean mIsAnimating = false;
-
-        TestTask(int taskId, TaskStack stack, int userId, WindowManagerService service, Rect bounds,
-                Configuration overrideConfig, int resizeMode, boolean supportsPictureInPicture,
-                boolean homeTask, TaskWindowContainerController controller) {
-            super(taskId, stack, userId, service, bounds, overrideConfig, resizeMode,
-                    supportsPictureInPicture, homeTask, new TaskDescription(), controller);
-        }
-
-        boolean shouldDeferRemoval() {
-            return mShouldDeferRemoval;
-        }
-
-        int positionInParent() {
-            return getParent().mChildren.indexOf(this);
-        }
-
-        @Override
-        void onDisplayChanged(DisplayContent dc) {
-            super.onDisplayChanged(dc);
-            mOnDisplayChangedCalled = true;
-        }
-
-        @Override
-        boolean isAnimating() {
-            return mUseLocalIsAnimating ? mIsAnimating : super.isAnimating();
-        }
-
-        void setLocalIsAnimating(boolean isAnimating) {
-            mUseLocalIsAnimating = true;
-            mIsAnimating = isAnimating;
-        }
-    }
-
-    /**
-     * Used so we can gain access to some protected members of {@link TaskWindowContainerController}
-     * class.
-     */
-    class TestTaskWindowContainerController extends TaskWindowContainerController {
-
-        TestTaskWindowContainerController() {
-            this(createStackControllerOnDisplay(sDisplayContent));
-        }
-
-        TestTaskWindowContainerController(StackWindowController stackController) {
-            super(sNextTaskId++, new TaskWindowContainerListener() {
-                        @Override
-                        public void onSnapshotChanged(TaskSnapshot snapshot) {
-
-                        }
-
-                        @Override
-                        public void requestResize(Rect bounds, int resizeMode) {
-
-                        }
-                    }, stackController, 0 /* userId */, null /* bounds */,
-                    EMPTY /* overrideConfig*/, RESIZE_MODE_UNRESIZEABLE,
-                    false /* supportsPictureInPicture */, false /* homeTask*/, true /* toTop*/,
-                    true /* showForAllUsers */, new TaskDescription(), sWm);
-        }
-
-        @Override
-        TestTask createTask(int taskId, TaskStack stack, int userId, Rect bounds,
-                Configuration overrideConfig, int resizeMode, boolean supportsPictureInPicture,
-                boolean homeTask, TaskDescription taskDescription) {
-            return new TestTask(taskId, stack, userId, mService, bounds, overrideConfig, resizeMode,
-                    supportsPictureInPicture, homeTask, this);
-        }
-    }
-
-    class TestAppWindowContainerController extends AppWindowContainerController {
-
-        final IApplicationToken mToken;
-
-        TestAppWindowContainerController(TestTaskWindowContainerController taskController) {
-            this(taskController, new TestIApplicationToken());
-        }
-
-        TestAppWindowContainerController(TestTaskWindowContainerController taskController,
-                IApplicationToken token) {
-            super(taskController, token, null /* listener */, 0 /* index */,
-                    SCREEN_ORIENTATION_UNSPECIFIED, true /* fullscreen */,
-                    true /* showForAllUsers */, 0 /* configChanges */, false /* voiceInteraction */,
-                    false /* launchTaskBehind */, false /* alwaysFocusable */,
-                    0 /* targetSdkVersion */, 0 /* rotationAnimationHint */,
-                    0 /* inputDispatchingTimeoutNanos */, sWm, null /* overrideConfig */,
-                    null /* bounds */);
-            mToken = token;
-        }
-
-        @Override
-        AppWindowToken createAppWindow(WindowManagerService service, IApplicationToken token,
-                boolean voiceInteraction, DisplayContent dc, long inputDispatchingTimeoutNanos,
-                boolean fullscreen, boolean showForAllUsers, int targetSdk, int orientation,
-                int rotationAnimationHint, int configChanges, boolean launchTaskBehind,
-                boolean alwaysFocusable, AppWindowContainerController controller,
-                Configuration overrideConfig, Rect bounds) {
-            return new TestAppWindowToken(service, token, voiceInteraction, dc,
-                    inputDispatchingTimeoutNanos, fullscreen, showForAllUsers, targetSdk,
-                    orientation,
-                    rotationAnimationHint, configChanges, launchTaskBehind, alwaysFocusable,
-                    controller, overrideConfig, bounds);
-        }
-
-        AppWindowToken getAppWindowToken() {
-            return (AppWindowToken) sDisplayContent.getWindowToken(mToken.asBinder());
-        }
-    }
-
-    class TestIApplicationToken implements IApplicationToken {
-
-        private final Binder mBinder = new Binder();
-        @Override
-        public IBinder asBinder() {
-            return mBinder;
-        }
-    }
-
-    /** Used to track resize reports. */
-    class TestWindowState extends WindowState {
-        boolean resizeReported;
-
-        TestWindowState(WindowManager.LayoutParams attrs, WindowToken token) {
-            super(sWm, sMockSession, sIWindow, token, null, OP_NONE, 0, attrs, 0, 0,
-                    false /* ownerCanAddInternalSystemWindow */);
-        }
-
-        @Override
-        void reportResized() {
-            super.reportResized();
-            resizeReported = true;
-        }
-
-        @Override
-        public boolean isGoneForLayoutLw() {
-            return false;
-        }
-
-        @Override
-        void updateResizingWindowIfNeeded() {
-            // Used in AppWindowTokenTests#testLandscapeSeascapeRotationRelayout to deceive
-            // the system that it can actually update the window.
-            boolean hadSurface = mHasSurface;
-            mHasSurface = true;
-
-            super.updateResizingWindowIfNeeded();
-
-            mHasSurface = hadSurface;
-        }
-    }
 }

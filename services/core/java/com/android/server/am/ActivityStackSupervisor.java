@@ -164,6 +164,7 @@ import android.view.Display;
 import android.view.InputEvent;
 import android.view.Surface;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.ReferrerIntent;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
@@ -173,6 +174,7 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.LocalServices;
 import com.android.server.am.ActivityStack.ActivityState;
+import com.android.server.wm.StackWindowController;
 import com.android.server.wm.WindowManagerService;
 
 import java.io.FileDescriptor;
@@ -549,9 +551,9 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         }
     }
 
-    public ActivityStackSupervisor(ActivityManagerService service) {
+    public ActivityStackSupervisor(ActivityManagerService service, Looper looper) {
         mService = service;
-        mHandler = new ActivityStackSupervisorHandler(mService.mHandler.getLooper());
+        mHandler = new ActivityStackSupervisorHandler(looper);
         mActivityMetricsLogger = new ActivityMetricsLogger(this, mService.mContext);
         mKeyguardController = new KeyguardController(service, this);
     }
@@ -718,7 +720,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         }
 
         if (prev != null) {
-            prev.task.setTaskToReturnTo(APPLICATION_ACTIVITY_TYPE);
+            prev.getTask().setTaskToReturnTo(APPLICATION_ACTIVITY_TYPE);
         }
 
         mHomeStack.moveHomeStackTaskToTop();
@@ -1310,7 +1312,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         mService.updateLruProcessLocked(app, true, null);
         mService.updateOomAdjLocked();
 
-        final TaskRecord task = r.task;
+        final TaskRecord task = r.getTask();
         if (task.mLockTaskAuth == LOCK_TASK_AUTH_LAUNCHABLE ||
                 task.mLockTaskAuth == LOCK_TASK_AUTH_LAUNCHABLE_PRIV) {
             setLockTaskModeLocked(task, LOCK_TASK_MODE_LOCKED, "mLockTaskAuth==LAUNCHABLE", false);
@@ -2614,7 +2616,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 }
 
                 for (int k = 0; k < proc.activities.size(); k++) {
-                    TaskRecord otherTask = proc.activities.get(k).task;
+                    TaskRecord otherTask = proc.activities.get(k).getTask();
                     if (tr.taskId != otherTask.taskId && otherTask.inRecents) {
                         // Don't kill process(es) that has an activity in a different task that is
                         // also in recents.
@@ -2829,7 +2831,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         final PinnedActivityStack stack = getStack(PINNED_STACK_ID, CREATE_IF_NEEDED, ON_TOP);
 
         try {
-            final TaskRecord task = r.task;
+            final TaskRecord task = r.getTask();
 
             if (r == task.getStack().getVisibleBehindActivity()) {
                 // An activity can't be pinned and visible behind at the same time. Go ahead and
@@ -2902,7 +2904,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             return false;
         }
 
-        final TaskRecord task = r.task;
+        final TaskRecord task = r.getTask();
         final ActivityStack stack = r.getStack();
         if (stack == null) {
             Slog.w(TAG, "moveActivityStackToFront: invalid task or stack: r="
@@ -3195,7 +3197,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
     // Called when WindowManager has finished animating the launchingBehind activity to the back.
     private void handleLaunchTaskBehindCompleteLocked(ActivityRecord r) {
-        final TaskRecord task = r.task;
+        final TaskRecord task = r.getTask();
         final ActivityStack stack = task.getStack();
 
         r.mLaunchTaskBehind = false;
@@ -3208,7 +3210,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         // task has been shown briefly
         final ActivityRecord top = stack.topActivity();
         if (top != null) {
-            top.task.touchActiveTime();
+            top.getTask().touchActiveTime();
         }
     }
 
@@ -3307,17 +3309,19 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 if (DEBUG_RELEASE) Slog.d(TAG_RELEASE, "Not releasing in-use activity: " + r);
                 continue;
             }
-            if (r.task != null) {
-                if (DEBUG_RELEASE) Slog.d(TAG_RELEASE, "Collecting release task " + r.task
+
+            final TaskRecord task = r.getTask();
+            if (task != null) {
+                if (DEBUG_RELEASE) Slog.d(TAG_RELEASE, "Collecting release task " + task
                         + " from " + r);
                 if (firstTask == null) {
-                    firstTask = r.task;
-                } else if (firstTask != r.task) {
+                    firstTask = task;
+                } else if (firstTask != task) {
                     if (tasks == null) {
                         tasks = new ArraySet<>();
                         tasks.add(firstTask);
                     }
-                    tasks.add(r.task);
+                    tasks.add(task);
                 }
             }
         }
@@ -3656,8 +3660,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 pw.println(header2);
                 header2 = null;
             }
-            if (lastTask != r.task) {
-                lastTask = r.task;
+            if (lastTask != r.getTask()) {
+                lastTask = r.getTask();
                 pw.print(prefix);
                 pw.print(full ? "* " : "  ");
                 pw.println(lastTask);
@@ -4072,7 +4076,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             }
         }
         final ActivityRecord r = topRunningActivityLocked();
-        final TaskRecord task = r != null ? r.task : null;
+        final TaskRecord task = r != null ? r.getTask() : null;
         if (mLockTaskModeTasks.isEmpty() && task != null
                 && task.mLockTaskAuth == LOCK_TASK_AUTH_LAUNCHABLE) {
             // This task must have just been authorized.
@@ -4365,16 +4369,21 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             synchronized (mService) {
                 mStackId = stackId;
                 mActivityDisplay = activityDisplay;
-                switch (mStackId) {
-                    case PINNED_STACK_ID:
-                        new PinnedActivityStack(this, mRecentTasks, onTop);
-                        break;
-                    default:
-                        new ActivityStack(this, mRecentTasks, onTop);
-                        break;
-                }
                 mIdString = "ActivtyContainer{" + mStackId + "}";
+
+                createStack(stackId, onTop);
                 if (DEBUG_STACK) Slog.d(TAG_STACK, "Creating " + this);
+            }
+        }
+
+        protected void createStack(int stackId, boolean onTop) {
+            switch (stackId) {
+                case PINNED_STACK_ID:
+                    new PinnedActivityStack(this, mRecentTasks, onTop);
+                    break;
+                default:
+                    new ActivityStack(this, mRecentTasks, onTop);
+                    break;
             }
         }
 
@@ -4901,7 +4910,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
             mService.mActivityStarter.postStartActivityProcessing(task.getTopActivity(),
                     ActivityManager.START_TASK_TO_FRONT,
-                    sourceRecord != null ? sourceRecord.task.getStackId() : INVALID_STACK_ID,
+                    sourceRecord != null ? sourceRecord.getTask().getStackId() : INVALID_STACK_ID,
                     sourceRecord, task.getStack());
             return ActivityManager.START_TASK_TO_FRONT;
         }

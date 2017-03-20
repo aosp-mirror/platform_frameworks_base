@@ -188,10 +188,10 @@ class ActivityStartInterceptor {
         }
 
         ActivityRecord homeActivityRecord = mSupervisor.getHomeActivity();
-        if (homeActivityRecord != null && homeActivityRecord.task != null) {
+        if (homeActivityRecord != null && homeActivityRecord.getTask() != null) {
             // Showing credential confirmation activity in home task to avoid stopping multi-windowed
             // mode after showing the full-screen credential confirmation activity.
-            mActivityOptions.setLaunchTaskId(homeActivityRecord.task.taskId);
+            mActivityOptions.setLaunchTaskId(homeActivityRecord.getTask().taskId);
         }
 
         final UserInfo parent = mUserManager.getProfileParent(mUserId);

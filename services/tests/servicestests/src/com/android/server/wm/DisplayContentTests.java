@@ -175,7 +175,7 @@ public class DisplayContentTests extends WindowTestsBase {
         assertEquals(dc, stack.getDisplayContent());
 
         final Task task = createTaskInStack(stack, 0 /* userId */);
-        final TestAppWindowToken token = new TestAppWindowToken(dc);
+        final WindowTestUtils.TestAppWindowToken token = new WindowTestUtils.TestAppWindowToken(dc);
         task.addChild(token, 0);
         assertEquals(dc, task.getDisplayContent());
         assertEquals(dc, token.getDisplayContent());

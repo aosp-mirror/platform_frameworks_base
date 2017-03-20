@@ -16,14 +16,9 @@
 
 package com.android.server.wm;
 
-import static android.view.DisplayAdjustments.DEFAULT_DISPLAY_ADJUSTMENTS;
-
-import android.hardware.display.DisplayManagerGlobal;
 import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
-import android.view.Display;
-import android.view.DisplayInfo;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -45,10 +40,10 @@ public class TaskWindowContainerControllerTests extends WindowTestsBase {
 
     @Test
     public void testRemoveContainer() throws Exception {
-        final TestTaskWindowContainerController taskController =
-                new TestTaskWindowContainerController();
-        final TestAppWindowContainerController appController =
-                new TestAppWindowContainerController(taskController);
+        final WindowTestUtils.TestTaskWindowContainerController taskController =
+                new WindowTestUtils.TestTaskWindowContainerController();
+        final WindowTestUtils.TestAppWindowContainerController appController =
+                new WindowTestUtils.TestAppWindowContainerController(taskController);
 
         taskController.removeContainer();
         // Assert that the container was removed.
@@ -58,12 +53,12 @@ public class TaskWindowContainerControllerTests extends WindowTestsBase {
 
     @Test
     public void testRemoveContainer_deferRemoval() throws Exception {
-        final TestTaskWindowContainerController taskController =
-                new TestTaskWindowContainerController();
-        final TestAppWindowContainerController appController =
-                new TestAppWindowContainerController(taskController);
+        final WindowTestUtils.TestTaskWindowContainerController taskController =
+                new WindowTestUtils.TestTaskWindowContainerController();
+        final WindowTestUtils.TestAppWindowContainerController appController =
+                new WindowTestUtils.TestAppWindowContainerController(taskController);
 
-        final TestTask task = (TestTask) taskController.mContainer;
+        final WindowTestUtils.TestTask task = (WindowTestUtils.TestTask) taskController.mContainer;
         final AppWindowToken app = appController.mContainer;
         task.mShouldDeferRemoval = true;
 
@@ -85,12 +80,12 @@ public class TaskWindowContainerControllerTests extends WindowTestsBase {
     public void testReparent() throws Exception {
         final StackWindowController stackController1 =
                 createStackControllerOnDisplay(sDisplayContent);
-        final TestTaskWindowContainerController taskController =
-                new TestTaskWindowContainerController(stackController1);
+        final WindowTestUtils.TestTaskWindowContainerController taskController =
+                new WindowTestUtils.TestTaskWindowContainerController(stackController1);
         final StackWindowController stackController2 =
                 createStackControllerOnDisplay(sDisplayContent);
-        final TestTaskWindowContainerController taskController2 =
-                new TestTaskWindowContainerController(stackController2);
+        final WindowTestUtils.TestTaskWindowContainerController taskController2 =
+                new WindowTestUtils.TestTaskWindowContainerController(stackController2);
 
         boolean gotException = false;
         try {
@@ -114,8 +109,8 @@ public class TaskWindowContainerControllerTests extends WindowTestsBase {
 
         taskController.reparent(stackController2, 0);
         assertEquals(stackController2.mContainer, taskController.mContainer.getParent());
-        assertEquals(0, ((TestTask) taskController.mContainer).positionInParent());
-        assertEquals(1, ((TestTask) taskController2.mContainer).positionInParent());
+        assertEquals(0, ((WindowTestUtils.TestTask) taskController.mContainer).positionInParent());
+        assertEquals(1, ((WindowTestUtils.TestTask) taskController2.mContainer).positionInParent());
     }
 
     @Test
@@ -124,9 +119,9 @@ public class TaskWindowContainerControllerTests extends WindowTestsBase {
         final StackWindowController stack1Controller =
                 createStackControllerOnDisplay(sDisplayContent);
         final TaskStack stack1 = stack1Controller.mContainer;
-        final TestTaskWindowContainerController taskController =
-                new TestTaskWindowContainerController(stack1Controller);
-        final TestTask task1 = (TestTask) taskController.mContainer;
+        final WindowTestUtils.TestTaskWindowContainerController taskController =
+                new WindowTestUtils.TestTaskWindowContainerController(stack1Controller);
+        final WindowTestUtils.TestTask task1 = (WindowTestUtils.TestTask) taskController.mContainer;
         task1.mOnDisplayChangedCalled = false;
         assertEquals(sDisplayContent, stack1.getDisplayContent());
 
@@ -134,9 +129,10 @@ public class TaskWindowContainerControllerTests extends WindowTestsBase {
         final DisplayContent dc = createNewDisplay();
         final StackWindowController stack2Controller = createStackControllerOnDisplay(dc);
         final TaskStack stack2 = stack2Controller.mContainer;
-        final TestTaskWindowContainerController taskController2 =
-                new TestTaskWindowContainerController(stack2Controller);
-        final TestTask task2 = (TestTask) taskController2.mContainer;
+        final WindowTestUtils.TestTaskWindowContainerController taskController2 =
+                new WindowTestUtils.TestTaskWindowContainerController(stack2Controller);
+        final WindowTestUtils.TestTask task2 =
+                (WindowTestUtils.TestTask) taskController2.mContainer;
 
         // Reparent and check state
         taskController.reparent(stack2Controller, 0);
