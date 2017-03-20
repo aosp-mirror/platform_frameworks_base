@@ -6431,32 +6431,42 @@ status_t ResTable::parsePackage(const ResTable_package* const pkg,
             }
 
             if (newEntryCount > 0) {
+                bool addToType = true;
                 uint8_t typeIndex = typeSpec->id - 1;
                 ssize_t idmapIndex = idmapEntries.indexOfKey(typeSpec->id);
                 if (idmapIndex >= 0) {
                     typeIndex = idmapEntries[idmapIndex].targetTypeId() - 1;
+                } else if (header->resourceIDMap != NULL) {
+                    // This is an overlay, but the types in this overlay are not
+                    // overlaying anything according to the idmap. We can skip these
+                    // as they will otherwise conflict with the other resources in the package
+                    // without a mapping.
+                    addToType = false;
                 }
 
-                TypeList& typeList = group->types.editItemAt(typeIndex);
-                if (!typeList.isEmpty()) {
-                    const Type* existingType = typeList[0];
-                    if (existingType->entryCount != newEntryCount && idmapIndex < 0) {
-                        ALOGW("ResTable_typeSpec entry count inconsistent: given %d, previously %d",
-                                (int) newEntryCount, (int) existingType->entryCount);
-                        // We should normally abort here, but some legacy apps declare
-                        // resources in the 'android' package (old bug in AAPT).
+                if (addToType) {
+                    TypeList& typeList = group->types.editItemAt(typeIndex);
+                    if (!typeList.isEmpty()) {
+                        const Type* existingType = typeList[0];
+                        if (existingType->entryCount != newEntryCount && idmapIndex < 0) {
+                            ALOGW("ResTable_typeSpec entry count inconsistent: "
+                                  "given %d, previously %d",
+                                  (int) newEntryCount, (int) existingType->entryCount);
+                            // We should normally abort here, but some legacy apps declare
+                            // resources in the 'android' package (old bug in AAPT).
+                        }
                     }
-                }
 
-                Type* t = new Type(header, package, newEntryCount);
-                t->typeSpec = typeSpec;
-                t->typeSpecFlags = (const uint32_t*)(
-                        ((const uint8_t*)typeSpec) + dtohs(typeSpec->header.headerSize));
-                if (idmapIndex >= 0) {
-                    t->idmapEntries = idmapEntries[idmapIndex];
+                    Type* t = new Type(header, package, newEntryCount);
+                    t->typeSpec = typeSpec;
+                    t->typeSpecFlags = (const uint32_t*)(
+                            ((const uint8_t*)typeSpec) + dtohs(typeSpec->header.headerSize));
+                    if (idmapIndex >= 0) {
+                        t->idmapEntries = idmapEntries[idmapIndex];
+                    }
+                    typeList.add(t);
+                    group->largestTypeId = max(group->largestTypeId, typeSpec->id);
                 }
-                typeList.add(t);
-                group->largestTypeId = max(group->largestTypeId, typeSpec->id);
             } else {
                 ALOGV("Skipping empty ResTable_typeSpec for type %d", typeSpec->id);
             }
@@ -6499,31 +6509,40 @@ status_t ResTable::parsePackage(const ResTable_package* const pkg,
             }
 
             if (newEntryCount > 0) {
+                bool addToType = true;
                 uint8_t typeIndex = type->id - 1;
                 ssize_t idmapIndex = idmapEntries.indexOfKey(type->id);
                 if (idmapIndex >= 0) {
                     typeIndex = idmapEntries[idmapIndex].targetTypeId() - 1;
+                } else if (header->resourceIDMap != NULL) {
+                    // This is an overlay, but the types in this overlay are not
+                    // overlaying anything according to the idmap. We can skip these
+                    // as they will otherwise conflict with the other resources in the package
+                    // without a mapping.
+                    addToType = false;
                 }
 
-                TypeList& typeList = group->types.editItemAt(typeIndex);
-                if (typeList.isEmpty()) {
-                    ALOGE("No TypeSpec for type %d", type->id);
-                    return (mError=BAD_TYPE);
-                }
+                if (addToType) {
+                    TypeList& typeList = group->types.editItemAt(typeIndex);
+                    if (typeList.isEmpty()) {
+                        ALOGE("No TypeSpec for type %d", type->id);
+                        return (mError=BAD_TYPE);
+                    }
 
-                Type* t = typeList.editItemAt(typeList.size() - 1);
-                if (t->package != package) {
-                    ALOGE("No TypeSpec for type %d", type->id);
-                    return (mError=BAD_TYPE);
-                }
+                    Type* t = typeList.editItemAt(typeList.size() - 1);
+                    if (t->package != package) {
+                        ALOGE("No TypeSpec for type %d", type->id);
+                        return (mError=BAD_TYPE);
+                    }
 
-                t->configs.add(type);
+                    t->configs.add(type);
 
-                if (kDebugTableGetEntry) {
-                    ResTable_config thisConfig;
-                    thisConfig.copyFromDtoH(type->config);
-                    ALOGI("Adding config to type %d: %s\n", type->id,
-                            thisConfig.toString().string());
+                    if (kDebugTableGetEntry) {
+                        ResTable_config thisConfig;
+                        thisConfig.copyFromDtoH(type->config);
+                        ALOGI("Adding config to type %d: %s\n", type->id,
+                                thisConfig.toString().string());
+                    }
                 }
             } else {
                 ALOGV("Skipping empty ResTable_type for type %d", type->id);

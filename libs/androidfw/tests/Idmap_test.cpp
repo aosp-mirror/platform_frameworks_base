@@ -30,25 +30,23 @@ class IdmapTest : public ::testing::Test {
  protected:
   void SetUp() override {
     std::string contents;
-    ASSERT_TRUE(ReadFileFromZipToString(GetTestDataPath() + "/basic/basic.apk",
-                                        "resources.arsc", &contents));
-    ASSERT_EQ(NO_ERROR,
-              target_table_.add(contents.data(), contents.size(), 0, true));
+    ASSERT_TRUE(ReadFileFromZipToString(GetTestDataPath() + "/basic/basic.apk", "resources.arsc",
+                                        &contents));
+    ASSERT_EQ(NO_ERROR, target_table_.add(contents.data(), contents.size(), 0, true));
 
-    ASSERT_TRUE(
-        ReadFileFromZipToString(GetTestDataPath() + "/overlay/overlay.apk",
-                                "resources.arsc", &overlay_data_));
+    ASSERT_TRUE(ReadFileFromZipToString(GetTestDataPath() + "/overlay/overlay.apk",
+                                        "resources.arsc", &overlay_data_));
     ResTable overlay_table;
-    ASSERT_EQ(NO_ERROR,
-              overlay_table.add(overlay_data_.data(), overlay_data_.size()));
+    ASSERT_EQ(NO_ERROR, overlay_table.add(overlay_data_.data(), overlay_data_.size()));
 
     char target_name[256] = "com.android.basic";
-    ASSERT_EQ(NO_ERROR,
-              target_table_.createIdmap(overlay_table, 0, 0, target_name,
-                                        target_name, &data_, &data_size_));
+    ASSERT_EQ(NO_ERROR, target_table_.createIdmap(overlay_table, 0, 0, target_name, target_name,
+                                                  &data_, &data_size_));
   }
 
-  void TearDown() override { ::free(data_); }
+  void TearDown() override {
+    ::free(data_);
+  }
 
   ResTable target_table_;
   std::string overlay_data_;
@@ -56,13 +54,12 @@ class IdmapTest : public ::testing::Test {
   size_t data_size_ = 0;
 };
 
-TEST_F(IdmapTest, canLoadIdmap) {
+TEST_F(IdmapTest, CanLoadIdmap) {
   ASSERT_EQ(NO_ERROR,
-            target_table_.add(overlay_data_.data(), overlay_data_.size(), data_,
-                              data_size_));
+            target_table_.add(overlay_data_.data(), overlay_data_.size(), data_, data_size_));
 }
 
-TEST_F(IdmapTest, overlayOverridesResourceValue) {
+TEST_F(IdmapTest, OverlayOverridesResourceValue) {
   Res_value val;
   ssize_t block = target_table_.getResource(R::string::test2, &val, false);
   ASSERT_GE(block, 0);
@@ -71,45 +68,60 @@ TEST_F(IdmapTest, overlayOverridesResourceValue) {
   ASSERT_TRUE(pool != NULL);
   ASSERT_LT(val.data, pool->size());
 
-  size_t strLen;
-  const char16_t* targetStr16 = pool->stringAt(val.data, &strLen);
-  ASSERT_TRUE(targetStr16 != NULL);
-  ASSERT_EQ(String16("test2"), String16(targetStr16, strLen));
+  size_t str_len;
+  const char16_t* target_str16 = pool->stringAt(val.data, &str_len);
+  ASSERT_TRUE(target_str16 != NULL);
+  ASSERT_EQ(String16("test2"), String16(target_str16, str_len));
 
   ASSERT_EQ(NO_ERROR,
-            target_table_.add(overlay_data_.data(), overlay_data_.size(), data_,
-                              data_size_));
+            target_table_.add(overlay_data_.data(), overlay_data_.size(), data_, data_size_));
 
-  ssize_t newBlock = target_table_.getResource(R::string::test2, &val, false);
-  ASSERT_GE(newBlock, 0);
-  ASSERT_NE(block, newBlock);
+  ssize_t new_block = target_table_.getResource(R::string::test2, &val, false);
+  ASSERT_GE(new_block, 0);
+  ASSERT_NE(block, new_block);
   ASSERT_EQ(Res_value::TYPE_STRING, val.dataType);
-  pool = target_table_.getTableStringBlock(newBlock);
+  pool = target_table_.getTableStringBlock(new_block);
   ASSERT_TRUE(pool != NULL);
   ASSERT_LT(val.data, pool->size());
 
-  targetStr16 = pool->stringAt(val.data, &strLen);
-  ASSERT_TRUE(targetStr16 != NULL);
-  ASSERT_EQ(String16("test2-overlay"), String16(targetStr16, strLen));
+  target_str16 = pool->stringAt(val.data, &str_len);
+  ASSERT_TRUE(target_str16 != NULL);
+  ASSERT_EQ(String16("test2-overlay"), String16(target_str16, str_len));
 }
 
-TEST_F(IdmapTest, overlaidResourceHasSameName) {
+TEST_F(IdmapTest, OverlaidResourceHasSameName) {
   ASSERT_EQ(NO_ERROR,
-            target_table_.add(overlay_data_.data(), overlay_data_.size(), data_,
-                              data_size_));
+            target_table_.add(overlay_data_.data(), overlay_data_.size(), data_, data_size_));
 
-  ResTable::resource_name resName;
-  ASSERT_TRUE(
-      target_table_.getResourceName(R::array::integerArray1, false, &resName));
+  ResTable::resource_name res_name;
+  ASSERT_TRUE(target_table_.getResourceName(R::array::integerArray1, false, &res_name));
 
-  ASSERT_TRUE(resName.package != NULL);
-  ASSERT_TRUE(resName.type != NULL);
-  ASSERT_TRUE(resName.name != NULL);
+  ASSERT_TRUE(res_name.package != NULL);
+  ASSERT_TRUE(res_name.type != NULL);
+  ASSERT_TRUE(res_name.name != NULL);
 
-  EXPECT_EQ(String16("com.android.basic"),
-            String16(resName.package, resName.packageLen));
-  EXPECT_EQ(String16("array"), String16(resName.type, resName.typeLen));
-  EXPECT_EQ(String16("integerArray1"), String16(resName.name, resName.nameLen));
+  EXPECT_EQ(String16("com.android.basic"), String16(res_name.package, res_name.packageLen));
+  EXPECT_EQ(String16("array"), String16(res_name.type, res_name.typeLen));
+  EXPECT_EQ(String16("integerArray1"), String16(res_name.name, res_name.nameLen));
+}
+
+constexpr const uint32_t kNonOverlaidResourceId = 0x7fff0000u;
+
+TEST_F(IdmapTest, OverlayDoesNotIncludeNonOverlaidResources) {
+  // First check that the resource we're trying to not include when overlaid is present when
+  // the overlay is loaded as a standalone APK.
+  ResTable table;
+  ASSERT_EQ(NO_ERROR, table.add(overlay_data_.data(), overlay_data_.size(), 0, true));
+
+  Res_value val;
+  ssize_t block = table.getResource(kNonOverlaidResourceId, &val, false /*mayBeBag*/);
+  ASSERT_GE(block, 0);
+
+  // Now add the overlay and verify that the unoverlaid resource is gone.
+  ASSERT_EQ(NO_ERROR,
+            target_table_.add(overlay_data_.data(), overlay_data_.size(), data_, data_size_));
+  block = target_table_.getResource(kNonOverlaidResourceId, &val, false /*mayBeBag*/);
+  ASSERT_LT(block, 0);
 }
 
 }  // namespace
