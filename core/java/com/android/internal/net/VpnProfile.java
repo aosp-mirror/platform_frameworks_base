@@ -19,7 +19,6 @@ package com.android.internal.net;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
-import android.util.Log;
 
 import java.net.InetAddress;
 import java.nio.charset.StandardCharsets;
@@ -171,34 +170,51 @@ public class VpnProfile implements Cloneable, Parcelable {
     }
 
     /**
-     * Test if profile is valid for lockdown, which requires IPv4 address for
+     * Tests if profile is valid for lockdown, which requires IPv4 address for
      * both server and DNS. Server hostnames would require using DNS before
      * connection.
      */
     public boolean isValidLockdownProfile() {
-        // b/7064069: lockdown firewall blocks ports that would be used for PPTP
-        if (type == TYPE_PPTP) {
-            return false;
-        }
+        return isTypeValidForLockdown()
+                && isServerAddressNumeric()
+                && hasDns()
+                && areDnsAddressesNumeric();
+    }
 
+    /** Returns {@code true} if the VPN type is valid for lockdown. */
+    public boolean isTypeValidForLockdown() {
+        // b/7064069: lockdown firewall blocks ports used for PPTP
+        return type != TYPE_PPTP;
+    }
+
+    /** Returns {@code true} if the server address is numeric, e.g. 8.8.8.8 */
+    public boolean isServerAddressNumeric() {
         try {
             InetAddress.parseNumericAddress(server);
-
-            for (String dnsServer : dnsServers.split(" +")) {
-                InetAddress.parseNumericAddress(this.dnsServers);
-            }
-            if (TextUtils.isEmpty(dnsServers)) {
-                Log.w(TAG, "DNS required");
-                return false;
-            }
-
-            // Everything checked out above
-            return true;
-
         } catch (IllegalArgumentException e) {
-            Log.w(TAG, "Invalid address", e);
             return false;
         }
+        return true;
+    }
+
+    /** Returns {@code true} if one or more DNS servers are specified. */
+    public boolean hasDns() {
+        return !TextUtils.isEmpty(dnsServers);
+    }
+
+    /**
+     * Returns {@code true} if all DNS servers have numeric addresses,
+     * e.g. 8.8.8.8
+     */
+    public boolean areDnsAddressesNumeric() {
+        try {
+            for (String dnsServer : dnsServers.split(" +")) {
+                InetAddress.parseNumericAddress(dnsServer);
+            }
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+        return true;
     }
 
     public static final Creator<VpnProfile> CREATOR = new Creator<VpnProfile>() {
