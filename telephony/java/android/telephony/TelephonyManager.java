@@ -5054,25 +5054,20 @@ public class TelephonyManager {
        public void onReceiveUssdResponseFailed(String request, int failureCode) {};
     }
 
-    /* <p>Requires permission:
-     * @link android.Manifest.permission#CALL_PHONE}
+    /**
+     * Sends an Unstructured Supplementary Service Data (USSD) request to the cellular network and
+     * informs the caller of the response via {@code callback}.
+     * <p>Carriers define USSD codes which can be sent by the user to request information such as
+     * the user's current data balance or minutes balance.
+     * <p>Requires permission:
+     * {@link android.Manifest.permission#CALL_PHONE}
      * @param ussdRequest the USSD command to be executed.
-     * @param wrappedCallback receives a callback result.
+     * @param callback called by the framework to inform the caller of the result of executing the
+     *                 USSD request (see {@link OnReceiveUssdResponseCallback}).
+     * @param handler the {@link Handler} to run the request on.
      */
     @RequiresPermission(android.Manifest.permission.CALL_PHONE)
     public void sendUssdRequest(String ussdRequest,
-                                final OnReceiveUssdResponseCallback callback, Handler handler) {
-        sendUssdRequest(ussdRequest, getSubId(), callback, handler);
-    }
-
-   /* <p>Requires permission:
-    * @link android.Manifest.permission#CALL_PHONE}
-    * @param subId The subscription to use.
-    * @param ussdRequest the USSD command to be executed.
-    * @param wrappedCallback receives a callback result.
-    */
-    @RequiresPermission(android.Manifest.permission.CALL_PHONE)
-    public void sendUssdRequest(String ussdRequest, int subId,
                                 final OnReceiveUssdResponseCallback callback, Handler handler) {
         checkNotNull(callback, "OnReceiveUssdResponseCallback cannot be null.");
 
@@ -5095,7 +5090,7 @@ public class TelephonyManager {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                telephony.handleUssdRequest(subId, ussdRequest, wrappedCallback);
+                telephony.handleUssdRequest(mSubId, ussdRequest, wrappedCallback);
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelephony#sendUSSDCode", e);
