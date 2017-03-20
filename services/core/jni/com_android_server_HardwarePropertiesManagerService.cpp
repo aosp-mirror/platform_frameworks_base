@@ -31,7 +31,6 @@
 namespace android {
 
 using hardware::hidl_vec;
-using hardware::Status;
 using hardware::thermal::V1_0::CoolingDevice;
 using hardware::thermal::V1_0::CpuUsage;
 using hardware::thermal::V1_0::IThermal;
