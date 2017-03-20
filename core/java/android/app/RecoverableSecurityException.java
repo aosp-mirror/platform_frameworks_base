@@ -16,8 +16,9 @@
 
 package android.app;
 
+import android.content.ContentProvider;
+import android.content.ContentResolver;
 import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.drawable.Icon;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -31,7 +32,15 @@ import com.android.internal.util.Preconditions;
  * <p>
  * This exception is only appropriate where there is a concrete action the user
  * can take to recover and make forward progress, such as confirming or entering
- * authentication credentials.
+ * authentication credentials, or granting access.
+ * <p>
+ * If the receiving app is actively involved with the user, it should present
+ * the contained recovery details to help the user make forward progress. The
+ * {@link #showAsDialog(Activity)} and
+ * {@link #showAsNotification(Context, String)} methods are provided as a
+ * convenience, but receiving apps are encouraged to use
+ * {@link #getUserMessage()} and {@link #getUserAction()} to integrate in a more
+ * natural way if relevant.
  * <p class="note">
  * Note: legacy code that receives this exception may treat it as a general
  * {@link SecurityException}, and thus there is no guarantee that the messages
@@ -66,7 +75,10 @@ public final class RecoverableSecurityException extends SecurityException implem
      *            {@link Activity#setResult(int)} before finishing to
      *            communicate the final status of the recovery. For example,
      *            apps that observe {@link Activity#RESULT_OK} may choose to
-     *            immediately retry their operation.
+     *            immediately retry their operation. If this exception was
+     *            thrown from a {@link ContentProvider}, you should also send
+     *            any relevant {@link ContentResolver#notifyChange} events to
+     *            trigger reloading of data.
      */
     public RecoverableSecurityException(Throwable cause, CharSequence userMessage,
             RemoteAction userAction) {
@@ -101,6 +113,20 @@ public final class RecoverableSecurityException extends SecurityException implem
         return mUserAction;
     }
 
+    /** @removed */
+    @Deprecated
+    public void showAsNotification(Context context) {
+        final NotificationManager nm = context.getSystemService(NotificationManager.class);
+
+        // Create a channel per-sender, since we don't want one poorly behaved
+        // remote app to cause all of our notifications to be blocked
+        final String channelId = TAG + "_" + mUserAction.getActionIntent().getCreatorUid();
+        nm.createNotificationChannel(new NotificationChannel(channelId, TAG,
+                NotificationManager.IMPORTANCE_DEFAULT));
+
+        showAsNotification(context, channelId);
+    }
+
     /**
      * Convenience method that will show a very simple notification populated
      * with the details from this exception.
@@ -114,23 +140,20 @@ public final class RecoverableSecurityException extends SecurityException implem
      * <p>
      * This method will only display the most recent exception from any single
      * remote UID; notifications from older exceptions will always be replaced.
+     *
+     * @param channelId the {@link NotificationChannel} to use, which must have
+     *            been already created using
+     *            {@link NotificationManager#createNotificationChannel}.
      */
-    public void showAsNotification(Context context) {
+    public void showAsNotification(Context context, String channelId) {
         final NotificationManager nm = context.getSystemService(NotificationManager.class);
-
-        // Create a channel per-sender, since we don't want one poorly behaved
-        // remote app to cause all of our notifications to be blocked
-        final String tag = TAG + "_" + mUserAction.getActionIntent().getCreatorUid();
-        nm.createNotificationChannel(new NotificationChannel(tag, TAG,
-                NotificationManager.IMPORTANCE_DEFAULT));
-
-        final Notification.Builder builder = new Notification.Builder(context, tag)
+        final Notification.Builder builder = new Notification.Builder(context, channelId)
                 .setSmallIcon(com.android.internal.R.drawable.ic_print_error)
                 .setContentTitle(mUserAction.getTitle())
                 .setContentText(mUserMessage)
                 .setContentIntent(mUserAction.getActionIntent())
                 .setCategory(Notification.CATEGORY_ERROR);
-        nm.notify(tag, 0, builder.build());
+        nm.notify(TAG, mUserAction.getActionIntent().getCreatorUid(), builder.build());
     }
 
     /**
@@ -164,7 +187,13 @@ public final class RecoverableSecurityException extends SecurityException implem
         ft.commitAllowingStateLoss();
     }
 
-    /** {@hide} */
+    /**
+     * Implementation detail for
+     * {@link RecoverableSecurityException#showAsDialog(Activity)}; needs to
+     * remain static to be recreated across orientation changes.
+     *
+     * @hide
+     */
     public static class LocalDialog extends DialogFragment {
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
