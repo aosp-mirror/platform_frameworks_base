@@ -619,7 +619,6 @@ public final class SystemServer {
             startSensorService();
             traceLog.traceEnd();
         }, START_SENSOR_SERVICE);
-
     }
 
     /**
@@ -647,14 +646,6 @@ public final class SystemServer {
         traceBeginAndSlog("StartWebViewUpdateService");
         mWebViewUpdateService = mSystemServiceManager.startService(WebViewUpdateService.class);
         traceEnd();
-
-        // Start receiving calls from HIDL services. Start in in a separate thread
-        // because it need to connect to SensorManager.
-        SystemServerInitThreadPool.get().submit(() -> {
-            traceBeginAndSlog(START_HIDL_SERVICES);
-            startHidlServices();
-            traceEnd();
-        }, START_HIDL_SERVICES);
     }
 
     /**
@@ -812,6 +803,15 @@ public final class SystemServer {
             ServiceManager.addService(Context.WINDOW_SERVICE, wm);
             ServiceManager.addService(Context.INPUT_SERVICE, inputManager);
             traceEnd();
+
+            // Start receiving calls from HIDL services. Start in in a separate thread
+            // because it need to connect to SensorManager. This have to start
+            // after START_SENSOR_SERVICE is done.
+            SystemServerInitThreadPool.get().submit(() -> {
+                traceBeginAndSlog(START_HIDL_SERVICES);
+                startHidlServices();
+                traceEnd();
+            }, START_HIDL_SERVICES);
 
             if (!disableVrManager) {
                 traceBeginAndSlog("StartVrManagerService");
