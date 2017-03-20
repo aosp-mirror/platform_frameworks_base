@@ -35,9 +35,7 @@ import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
 import android.companion.AssociationRequest;
 import android.companion.BluetoothDeviceFilter;
-import android.companion.BluetoothDeviceFilterUtils;
 import android.companion.BluetoothLEDeviceFilter;
-import android.companion.CompanionDeviceManager;
 import android.companion.DeviceFilter;
 import android.companion.ICompanionDeviceDiscoveryService;
 import android.companion.ICompanionDeviceDiscoveryServiceCallback;
@@ -60,7 +58,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
-import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.Preconditions;
 
 import java.util.ArrayList;
@@ -185,10 +183,10 @@ public class DeviceDiscoveryService extends Service {
         mRequest = request;
 
         mFilters = request.getDeviceFilters();
-        mWifiFilters = ArrayUtils.filter(mFilters, WifiDeviceFilter.class);
-        mBluetoothFilters = ArrayUtils.filter(mFilters, BluetoothDeviceFilter.class);
-        mBLEFilters = ArrayUtils.filter(mFilters, BluetoothLEDeviceFilter.class);
-        mBLEScanFilters = ArrayUtils.map(mBLEFilters, BluetoothLEDeviceFilter::getScanFilter);
+        mWifiFilters = CollectionUtils.filter(mFilters, WifiDeviceFilter.class);
+        mBluetoothFilters = CollectionUtils.filter(mFilters, BluetoothDeviceFilter.class);
+        mBLEFilters = CollectionUtils.filter(mFilters, BluetoothLEDeviceFilter.class);
+        mBLEScanFilters = CollectionUtils.map(mBLEFilters, BluetoothLEDeviceFilter::getScanFilter);
 
         reset();
 
@@ -357,7 +355,7 @@ public class DeviceDiscoveryService extends Service {
         public static <T extends Parcelable> DeviceFilterPair<T> findMatch(
                 T dev, @Nullable List<? extends DeviceFilter<T>> filters) {
             if (isEmpty(filters)) return new DeviceFilterPair<>(dev, null);
-            final DeviceFilter<T> matchingFilter = ArrayUtils.find(filters, (f) -> f.matches(dev));
+            final DeviceFilter<T> matchingFilter = CollectionUtils.find(filters, (f) -> f.matches(dev));
             return matchingFilter != null ? new DeviceFilterPair<>(dev, matchingFilter) : null;
         }
 

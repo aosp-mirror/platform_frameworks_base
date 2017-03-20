@@ -46,7 +46,10 @@ import android.util.ExceptionUtils;
 import android.util.Slog;
 import android.util.Xml;
 
+import com.android.internal.content.PackageMonitor;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.CollectionUtils;
+import com.android.server.FgThread;
 import com.android.server.SystemService;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -86,10 +89,35 @@ public class CompanionDeviceManagerService extends SystemService {
 
     private final CompanionDeviceManagerImpl mImpl;
     private final ConcurrentMap<Integer, AtomicFile> mUidToStorage = new ConcurrentHashMap<>();
+    private IDeviceIdleController mIdleController;
 
     public CompanionDeviceManagerService(Context context) {
         super(context);
         mImpl = new CompanionDeviceManagerImpl();
+        mIdleController = IDeviceIdleController.Stub.asInterface(
+                ServiceManager.getService(Context.DEVICE_IDLE_CONTROLLER));
+        registerPackageMonitor();
+    }
+
+    private void registerPackageMonitor() {
+        new PackageMonitor() {
+            @Override
+            public void onPackageRemoved(String packageName, int uid) {
+                updateAssociations(
+                        as -> CollectionUtils.filter(as,
+                                a -> !Objects.equals(a.companionAppPackage, packageName)),
+                        getChangingUserId());
+            }
+
+            @Override
+            public void onPackageModified(String packageName) {
+                int userId = getChangingUserId();
+                if (!ArrayUtils.isEmpty(readAllAssociations(userId, packageName))) {
+                    updateSpecialAccessPermissionForAssociatedPackage(packageName, userId);
+                }
+            }
+
+        }.register(getContext(), FgThread.get().getLooper(), UserHandle.ALL, true);
     }
 
     @Override
@@ -124,9 +152,9 @@ public class CompanionDeviceManagerService extends SystemService {
 
         @Override
         public List<String> getAssociations(String callingPackage) {
-            return ArrayUtils.map(
+            return CollectionUtils.map(
                     readAllAssociations(getUserId(), callingPackage),
-                    (a) -> a.deviceAddress);
+                    a -> a.deviceAddress);
         }
 
         @Override
@@ -178,43 +206,55 @@ public class CompanionDeviceManagerService extends SystemService {
             @Override
             public void onDeviceSelected(String packageName, int userId, String deviceAddress) {
                 //TODO unbind
-                grantSpecialAccessPermissionsIfNeeded(packageName, userId);
+                updateSpecialAccessPermissionForAssociatedPackage(packageName, userId);
                 recordAssociation(packageName, deviceAddress);
             }
         };
     }
 
-    private void grantSpecialAccessPermissionsIfNeeded(String packageName, int userId) {
-        final long identity = Binder.clearCallingIdentity();
-        final PackageInfo packageInfo;
-        try {
+    private void updateSpecialAccessPermissionForAssociatedPackage(String packageName, int userId) {
+        PackageInfo packageInfo = getPackageInfo(packageName, userId);
+        if (packageInfo == null) {
+            return;
+        }
+
+        Binder.withCleanCallingIdentity(() -> {
             try {
-                packageInfo = getContext().getPackageManager().getPackageInfoAsUser(
-                        packageName, PackageManager.GET_PERMISSIONS, userId);
-            } catch (PackageManager.NameNotFoundException e) {
-                Slog.e(LOG_TAG, "Error granting special access permissions to package:"
-                        + packageName, e);
-                return;
-            }
-            if (ArrayUtils.contains(packageInfo.requestedPermissions,
-                    Manifest.permission.RUN_IN_BACKGROUND)) {
-                IDeviceIdleController idleController = IDeviceIdleController.Stub.asInterface(
-                        ServiceManager.getService(Context.DEVICE_IDLE_CONTROLLER));
-                try {
-                    idleController.addPowerSaveWhitelistApp(packageName);
-                } catch (RemoteException e) {
-                    /* ignore - local call */
+                if (ArrayUtils.contains(packageInfo.requestedPermissions,
+                        Manifest.permission.RUN_IN_BACKGROUND)) {
+                    mIdleController.addPowerSaveWhitelistApp(packageInfo.packageName);
+                } else {
+                    mIdleController.removePowerSaveWhitelistApp(packageInfo.packageName);
                 }
+            } catch (RemoteException e) {
+                /* ignore - local call */
             }
+
+            NetworkPolicyManager networkPolicyManager = NetworkPolicyManager.from(getContext());
             if (ArrayUtils.contains(packageInfo.requestedPermissions,
                     Manifest.permission.USE_DATA_IN_BACKGROUND)) {
-                NetworkPolicyManager.from(getContext()).addUidPolicy(
+                networkPolicyManager.addUidPolicy(
+                        packageInfo.applicationInfo.uid,
+                        NetworkPolicyManager.POLICY_ALLOW_METERED_BACKGROUND);
+            } else {
+                networkPolicyManager.removeUidPolicy(
                         packageInfo.applicationInfo.uid,
                         NetworkPolicyManager.POLICY_ALLOW_METERED_BACKGROUND);
             }
-        } finally {
-            Binder.restoreCallingIdentity(identity);
-        }
+        });
+    }
+
+    @Nullable
+    private PackageInfo getPackageInfo(String packageName, int userId) {
+        return Binder.withCleanCallingIdentity(() -> {
+            try {
+                return getContext().getPackageManager().getPackageInfoAsUser(
+                        packageName, PackageManager.GET_PERMISSIONS, userId);
+            } catch (PackageManager.NameNotFoundException e) {
+                Slog.e(LOG_TAG, "Failed to get PackageInfo for package " + packageName, e);
+                return null;
+            }
+        });
     }
 
     private void recordAssociation(String priviledgedPackage, String deviceAddress) {
@@ -222,13 +262,16 @@ public class CompanionDeviceManagerService extends SystemService {
                 new Association(getUserId(), deviceAddress, priviledgedPackage)));
     }
 
-    private void updateAssociations(
-            Function<ArrayList<Association>, ArrayList<Association>> update) {
-        final int userId = getUserId();
+    private void updateAssociations(Function<ArrayList<Association>, List<Association>> update) {
+        updateAssociations(update, getUserId());
+    }
+
+    private void updateAssociations(Function<ArrayList<Association>, List<Association>> update,
+            int userId) {
         final AtomicFile file = getStorageFileForUser(userId);
         synchronized (file) {
             final ArrayList<Association> old = readAllAssociations(userId);
-            final ArrayList<Association> associations = update.apply(old);
+            final List<Association> associations = update.apply(old);
             if (Objects.equals(old, associations)) return;
 
             file.write((out) -> {
@@ -239,7 +282,7 @@ public class CompanionDeviceManagerService extends SystemService {
                     xml.startDocument(null, true);
                     xml.startTag(null, XML_TAG_ASSOCIATIONS);
 
-                    for (int i = 0; i < ArrayUtils.size(associations); i++) {
+                    for (int i = 0; i < CollectionUtils.size(associations); i++) {
                         Association association = associations.get(i);
                         xml.startTag(null, XML_TAG_ASSOCIATION)
                             .attribute(null, XML_ATTR_PACKAGE, association.companionAppPackage)
