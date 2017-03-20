@@ -36,6 +36,8 @@ import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillValue;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.RemoteViews;
+
 import com.android.internal.R;
 import libcore.util.Objects;
 
@@ -110,15 +112,15 @@ final class FillUi {
                 final Dataset dataset = response.getDatasets().get(i);
                 final int index = dataset.getFieldIds().indexOf(focusedViewId);
                 if (index >= 0) {
-                    final AutofillValue value = dataset.getFieldValues().get(index);
+                    final RemoteViews presentation = dataset.getFieldPresentation(index);
                     final View view;
                     try {
-                        view = dataset.getPresentation().apply(context, null);
+                        view = presentation.apply(context, null);
                     } catch (RuntimeException e) {
                         Slog.e(TAG, "Error inflating remote views", e);
                         continue;
                     }
-
+                    final AutofillValue value = dataset.getFieldValues().get(index);
                     String valueText = null;
                     if (value.isText()) {
                         valueText = value.getTextValue().toString().toLowerCase();

@@ -49,12 +49,14 @@ public final class Dataset implements Parcelable {
 
     private final ArrayList<AutofillId> mFieldIds;
     private final ArrayList<AutofillValue> mFieldValues;
+    private final ArrayList<RemoteViews> mFieldPresentations;
     private final RemoteViews mPresentation;
     private final IntentSender mAuthentication;
 
     private Dataset(Builder builder) {
         mFieldIds = builder.mFieldIds;
         mFieldValues = builder.mFieldValues;
+        mFieldPresentations = builder.mFieldPresentations;
         mPresentation = builder.mPresentation;
         mAuthentication = builder.mAuthentication;
     }
@@ -67,6 +69,12 @@ public final class Dataset implements Parcelable {
     /** @hide */
     public @Nullable ArrayList<AutofillValue> getFieldValues() {
         return mFieldValues;
+    }
+
+    /** @hide */
+    public RemoteViews getFieldPresentation(int index) {
+        final RemoteViews customPresentation = mFieldPresentations.get(index);
+        return customPresentation != null ? customPresentation : mPresentation;
     }
 
     /** @hide */
@@ -91,6 +99,8 @@ public final class Dataset implements Parcelable {
         return new StringBuilder("Dataset [")
                 .append(", fieldIds=").append(mFieldIds)
                 .append(", fieldValues=").append(mFieldValues)
+                .append(", fieldPresentations=")
+                .append(mFieldPresentations == null ? 0 : mFieldPresentations.size())
                 .append(", hasPresentation=").append(mPresentation != null)
                 .append(", hasAuthentication=").append(mAuthentication != null)
                 .append(']').toString();
@@ -103,6 +113,7 @@ public final class Dataset implements Parcelable {
     public static final class Builder {
         private ArrayList<AutofillId> mFieldIds;
         private ArrayList<AutofillValue> mFieldValues;
+        private ArrayList<RemoteViews> mFieldPresentations;
         private RemoteViews mPresentation;
         private IntentSender mAuthentication;
         private boolean mDestroyed;
@@ -115,6 +126,15 @@ public final class Dataset implements Parcelable {
         public Builder(@NonNull RemoteViews presentation) {
             Preconditions.checkNotNull(presentation, "presentation must be non-null");
             mPresentation = presentation;
+        }
+
+        /**
+         * Creates a new builder for a dataset where each field will be visualized independently.
+         *
+         * <p>When using this constructor, fields must be set through
+         * {@link #setValue(AutofillId, AutofillValue, RemoteViews)}.
+         */
+        public Builder() {
         }
 
         /**
@@ -175,24 +195,54 @@ public final class Dataset implements Parcelable {
          *         android.app.assist.AssistStructure.ViewNode#getAutofillId()}.
          * @param value value to be auto filled.
          * @return This builder.
+         * @throws IllegalStateException if the builder was constructed without a presentation
+         * ({@link RemoteViews}).
          */
         public @NonNull Builder setValue(@NonNull AutofillId id, @NonNull AutofillValue value) {
             throwIfDestroyed();
+            if (mPresentation == null) {
+                throw new IllegalStateException("Dataset presentation not set on constructor");
+            }
+            setValueAndPresentation(id, value, null);
+            return this;
+        }
+
+        /**
+         * Sets the value of a field, usin a custom presentation to visualize it.
+         *
+         * @param id id returned by {@link
+         *         android.app.assist.AssistStructure.ViewNode#getAutofillId()}.
+         * @param value value to be auto filled.
+         * @param presentation The presentation used to visualize this field.
+         * @return This builder.
+         */
+        public @NonNull Builder setValue(@NonNull AutofillId id, @NonNull AutofillValue value,
+                @NonNull RemoteViews presentation) {
+            throwIfDestroyed();
+            Preconditions.checkNotNull(presentation, "presentation cannot be null");
+            setValueAndPresentation(id, value, presentation);
+            return this;
+        }
+
+        private void setValueAndPresentation(AutofillId id, AutofillValue value,
+                RemoteViews presentation) {
             Preconditions.checkNotNull(id, "id cannot be null");
             Preconditions.checkNotNull(value, "value cannot be null");
             if (mFieldIds != null) {
                 final int existingIdx = mFieldIds.indexOf(id);
                 if (existingIdx >= 0) {
                     mFieldValues.set(existingIdx, value);
-                    return this;
+                    mFieldPresentations.set(existingIdx, presentation);
+                    return;
                 }
             } else {
                 mFieldIds = new ArrayList<>();
                 mFieldValues = new ArrayList<>();
+                mFieldPresentations = new ArrayList<>();
             }
             mFieldIds.add(id);
             mFieldValues.add(value);
-            return this;
+            mFieldPresentations.add(presentation);
         }
 
         /**
@@ -234,6 +284,7 @@ public final class Dataset implements Parcelable {
         parcel.writeParcelable(mPresentation, flags);
         parcel.writeTypedArrayList(mFieldIds, flags);
         parcel.writeTypedArrayList(mFieldValues, flags);
+        parcel.writeParcelableList(mFieldPresentations, flags);
         parcel.writeParcelable(mAuthentication, flags);
     }
 
@@ -243,15 +294,22 @@ public final class Dataset implements Parcelable {
             // Always go through the builder to ensure the data ingested by
             // the system obeys the contract of the builder to avoid attacks
             // using specially crafted parcels.
-            final Builder builder = new Builder(parcel.readParcelable(null));
+            final RemoteViews presentation = parcel.readParcelable(null);
+            final Builder builder = (presentation == null)
+                    ? new Builder()
+                    : new Builder(presentation);
             final ArrayList<AutofillId> ids = parcel.readTypedArrayList(null);
             final ArrayList<AutofillValue> values = parcel.readTypedArrayList(null);
+            final ArrayList<RemoteViews> presentations = new ArrayList<>();
+            parcel.readParcelableList(presentations, null);
             final int idCount = (ids != null) ? ids.size() : 0;
             final int valueCount = (values != null) ? values.size() : 0;
             for (int i = 0; i < idCount; i++) {
                 final AutofillId id = ids.get(i);
                 final AutofillValue value = (valueCount > i) ? values.get(i) : null;
-                builder.setValue(id, value);
+                final RemoteViews fieldPresentation = presentations.isEmpty() ? null
+                        : presentations.get(i);
+                builder.setValueAndPresentation(id, value, fieldPresentation);
             }
             builder.setAuthentication(parcel.readParcelable(null));
             return builder.build();
