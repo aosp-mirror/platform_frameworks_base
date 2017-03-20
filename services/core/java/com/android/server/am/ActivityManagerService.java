@@ -368,6 +368,7 @@ import com.android.server.firewall.IntentFirewall;
 import com.android.server.pm.Installer;
 import com.android.server.pm.Installer.InstallerException;
 import com.android.server.statusbar.StatusBarManagerInternal;
+import com.android.server.vr.PersistentVrStateListener;
 import com.android.server.vr.VrManagerInternal;
 import com.android.server.wm.WindowManagerService;
 
@@ -593,7 +594,70 @@ public class ActivityManagerService extends IActivityManager.Stub
     // default action automatically.  Important for devices without direct input
     // devices.
     private boolean mShowDialogs = true;
-    private boolean mInVrMode = false;
+    // VR state flags.
+    static final int NON_VR_MODE = 0;
+    static final int VR_MODE = 1;
+    static final int PERSISTENT_VR_MODE = 2;
+    private int mVrState = NON_VR_MODE;
+    private int mTopAppVrThreadTid = 0;
+    private int mPersistentVrThreadTid = 0;
+    final PersistentVrStateListener mPersistentVrModeListener =
+            new PersistentVrStateListener() {
+        @Override
+        public void onPersistentVrStateChanged(boolean enabled) {
+            synchronized(ActivityManagerService.this) {
+                // There are 4 possible cases here:
+                //
+                // Cases for enabled == true
+                // Invariant: mVrState != PERSISTENT_VR_MODE;
+                //    This is guaranteed as only this function sets mVrState to PERSISTENT_VR_MODE
+                // Invariant: mPersistentVrThreadTid == 0
+                //   This is guaranteed by VrManagerService, which only emits callbacks when the
+                //   mode changes, and in setPersistentVrThread, which only sets
+                //   mPersistentVrThreadTid when mVrState = PERSISTENT_VR_MODE
+                // Case 1: mTopAppVrThreadTid > 0 (someone called setVrThread successfully and is
+                // the top-app)
+                //     We reset the app which currently has SCHED_FIFO (mPersistentVrThreadTid) to
+                //     SCHED_OTHER
+                // Case 2: mTopAppVrThreadTid == 0
+                //     Do nothing
+                //
+                // Cases for enabled == false
+                // Invariant: mVrState == PERSISTENT_VR_MODE;
+                //     This is guaranteed by VrManagerService, which only emits callbacks when the
+                //     mode changes, and the only other assignment of mVrState outside of this
+                //     function checks if mVrState != PERSISTENT_VR_MODE
+                // Invariant: mTopAppVrThreadTid == 0
+                //     This is guaranteed in that mTopAppVrThreadTid is only set to a tid when
+                //     mVrState is VR_MODE, and is explicitly set to 0 when setPersistentVrThread is
+                //     called
+                //   mPersistentVrThreadTid > 0 (someone called setPersistentVrThread successfully)
+                //     3. Reset mPersistentVrThreadTidto SCHED_OTHER
+                //   mPersistentVrThreadTid == 0
+                //     4. Do nothing
+                if (enabled) {
+                    mVrState = PERSISTENT_VR_MODE;
+                } else {
+                    // Leaving persistent mode implies leaving VR mode.
+                    mVrState = NON_VR_MODE;
+                }
+
+                if (mVrState == PERSISTENT_VR_MODE) {
+                    if (mTopAppVrThreadTid > 0) {
+                        // Ensure that when entering persistent VR mode the last top-app loses
+                        // SCHED_FIFO.
+                        Process.setThreadScheduler(mTopAppVrThreadTid, Process.SCHED_OTHER, 0);
+                        mTopAppVrThreadTid = 0;
+                    }
+                } else if (mPersistentVrThreadTid > 0) {
+                    // Ensure that when leaving persistent VR mode we reschedule the high priority
+                    // persistent thread.
+                    Process.setThreadScheduler(mPersistentVrThreadTid, Process.SCHED_OTHER, 0);
+                    mPersistentVrThreadTid = 0;
+                }
+            }
+        }
+    };
 
     // Whether we should use SCHED_FIFO for UI and RenderThreads.
     private boolean mUseFifoUiScheduling = false;
@@ -2325,28 +2389,36 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
                 final ActivityRecord r = (ActivityRecord) msg.obj;
                 boolean vrMode;
+                boolean inVrMode;
                 ComponentName requestedPackage;
                 ComponentName callingPackage;
                 int userId;
                 synchronized (ActivityManagerService.this) {
                     vrMode = r.requestedVrComponent != null;
+                    inVrMode = mVrState != NON_VR_MODE;
                     requestedPackage = r.requestedVrComponent;
                     userId = r.userId;
                     callingPackage = r.info.getComponentName();
-                    if (mInVrMode != vrMode) {
-                        mInVrMode = vrMode;
-                        mShowDialogs = shouldShowDialogs(getGlobalConfiguration(), mInVrMode);
+                    if (vrMode != inVrMode) {
+                        // Don't change state if we're in persistent VR mode, but do update thread
+                        // priorities if necessary.
+                        if (mVrState != PERSISTENT_VR_MODE) {
+                            mVrState = vrMode ? VR_MODE : NON_VR_MODE;
+                        }
+                        mShowDialogs = shouldShowDialogs(getGlobalConfiguration(), vrMode);
                         if (r.app != null) {
                             ProcessRecord proc = r.app;
                             if (proc.vrThreadTid > 0) {
                                 if (proc.curSchedGroup == ProcessList.SCHED_GROUP_TOP_APP) {
                                     try {
-                                        if (mInVrMode == true) {
+                                        if (mVrState == VR_MODE) {
                                             Process.setThreadScheduler(proc.vrThreadTid,
                                                 Process.SCHED_FIFO | Process.SCHED_RESET_ON_FORK, 1);
+                                            mTopAppVrThreadTid = proc.vrThreadTid;
                                         } else {
                                             Process.setThreadScheduler(proc.vrThreadTid,
                                                 Process.SCHED_OTHER, 0);
+                                            mTopAppVrThreadTid = 0;
                                         }
                                     } catch (IllegalArgumentException e) {
                                         Slog.w(TAG, "Failed to set scheduling policy, thread does"
@@ -13010,51 +13082,98 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
+    @Override
     public void setVrThread(int tid) {
         if (!mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_VR_MODE)) {
             throw new UnsupportedOperationException("VR mode not supported on this device!");
         }
 
         synchronized (this) {
+            if (tid > 0 && mVrState == PERSISTENT_VR_MODE) {
+                Slog.e(TAG, "VR thread cannot be set in persistent VR mode!");
+                return;
+            }
             ProcessRecord proc;
             synchronized (mPidsSelfLocked) {
                 final int pid = Binder.getCallingPid();
                 proc = mPidsSelfLocked.get(pid);
-
-                if (proc != null && mInVrMode && tid >= 0) {
-                    // ensure the tid belongs to the process
-                    if (!Process.isThreadInProcess(pid, tid)) {
-                        throw new IllegalArgumentException("VR thread does not belong to process");
-                    }
-
-                    // reset existing VR thread to CFS if this thread still exists and belongs to
-                    // the calling process
-                    if (proc.vrThreadTid != 0
-                            && Process.isThreadInProcess(pid, proc.vrThreadTid)) {
-                        try {
-                            Process.setThreadScheduler(proc.vrThreadTid, Process.SCHED_OTHER, 0);
-                        } catch (IllegalArgumentException e) {
-                            // Ignore this.  Only occurs in race condition where previous VR thread
-                            // was destroyed during this method call.
-                        }
-                    }
-
-                    proc.vrThreadTid = tid;
-
-                    // promote to FIFO now if the tid is non-zero
-                    try {
-                        if (proc.curSchedGroup == ProcessList.SCHED_GROUP_TOP_APP &&
-                            proc.vrThreadTid > 0) {
-                            Process.setThreadScheduler(proc.vrThreadTid,
-                                Process.SCHED_FIFO | Process.SCHED_RESET_ON_FORK, 1);
-                        }
-                    } catch (IllegalArgumentException e) {
-                        Slog.e(TAG, "Failed to set scheduling policy, thread does"
-                               + " not exist:\n" + e);
-                    }
+                if (proc != null && mVrState == VR_MODE && tid >= 0) {
+                    proc.vrThreadTid = updateVrThreadLocked(proc, proc.vrThreadTid, pid, tid);
+                    mTopAppVrThreadTid = proc.vrThreadTid;
                 }
             }
         }
+    }
+
+    @Override
+    public void setPersistentVrThread(int tid) {
+        if (checkCallingPermission(permission.RESTRICTED_VR_ACCESS) != PERMISSION_GRANTED) {
+            String msg = "Permission Denial: setPersistentVrThread() from pid="
+                    + Binder.getCallingPid()
+                    + ", uid=" + Binder.getCallingUid()
+                    + " requires " + permission.RESTRICTED_VR_ACCESS;
+            Slog.w(TAG, msg);
+            throw new SecurityException(msg);
+        }
+        if (!mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_VR_MODE)) {
+            throw new UnsupportedOperationException("VR mode not supported on this device!");
+        }
+
+        synchronized (this) {
+            // Disable any existing VR thread.
+            if (mTopAppVrThreadTid > 0) {
+                Process.setThreadScheduler(mTopAppVrThreadTid, Process.SCHED_OTHER, 0);
+                mTopAppVrThreadTid = 0;
+            }
+
+            if (tid > 0 && mVrState != PERSISTENT_VR_MODE) {
+                Slog.e(TAG, "Persistent VR thread may only be set in persistent VR mode!");
+                return;
+            }
+            ProcessRecord proc;
+            synchronized (mPidsSelfLocked) {
+                final int pid = Binder.getCallingPid();
+                mPersistentVrThreadTid =
+                        updateVrThreadLocked(null, mPersistentVrThreadTid, pid, tid);
+            }
+        }
+    }
+
+    /**
+     * Used by setVrThread and setPersistentVrThread to update a thread's priority. When proc is
+     * non-null it must be in SCHED_GROUP_TOP_APP.  When it is null, the tid is unconditionally
+     * rescheduled.
+     */
+    private int updateVrThreadLocked(ProcessRecord proc, int lastTid, int pid, int tid) {
+        // ensure the tid belongs to the process
+        if (!Process.isThreadInProcess(pid, tid)) {
+            throw new IllegalArgumentException("VR thread does not belong to process");
+        }
+
+        // reset existing VR thread to CFS if this thread still exists and belongs to
+        // the calling process
+        if (lastTid != 0 && Process.isThreadInProcess(pid, lastTid)) {
+            try {
+                Process.setThreadScheduler(lastTid, Process.SCHED_OTHER, 0);
+            } catch (IllegalArgumentException e) {
+                // Ignore this.  Only occurs in race condition where previous VR thread
+                // was destroyed during this method call.
+            }
+        }
+
+        // promote to FIFO now if the tid is non-zero
+        try {
+            if ((proc == null || proc.curSchedGroup == ProcessList.SCHED_GROUP_TOP_APP)
+                    && tid > 0) {
+                Process.setThreadScheduler(tid,
+                    Process.SCHED_FIFO | Process.SCHED_RESET_ON_FORK, 1);
+            }
+            return tid;
+        } catch (IllegalArgumentException e) {
+            Slog.e(TAG, "Failed to set scheduling policy, thread does"
+                   + " not exist:\n" + e);
+        }
+        return lastTid;
     }
 
     @Override
@@ -13643,7 +13762,10 @@ public class ActivityManagerService extends IActivityManager.Stub
             mLocalDeviceIdleController
                     = LocalServices.getService(DeviceIdleController.LocalService.class);
             mAssistUtils = new AssistUtils(mContext);
-
+            VrManagerInternal vrManagerInternal = LocalServices.getService(VrManagerInternal.class);
+            if (vrManagerInternal != null) {
+                vrManagerInternal.addPersistentVrModeStateListener(mPersistentVrModeListener);
+            }
             // Make sure we have the current profile info, since it is needed for security checks.
             mUserController.onSystemReady();
             mRecentTasks.onSystemReadyLocked();
@@ -19740,7 +19862,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 mUserController.getCurrentUserIdLocked());
 
         // TODO: If our config changes, should we auto dismiss any currently showing dialogs?
-        mShowDialogs = shouldShowDialogs(mTempConfig, mInVrMode);
+        mShowDialogs = shouldShowDialogs(mTempConfig, mVrState != NON_VR_MODE);
 
         AttributeCache ac = AttributeCache.instance();
         if (ac != null) {
@@ -21281,10 +21403,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                         // do nothing if we already switched to RT
                         if (oldSchedGroup != ProcessList.SCHED_GROUP_TOP_APP) {
                             // Switch VR thread for app to SCHED_FIFO
-                            if (mInVrMode && app.vrThreadTid != 0) {
+                            if (mVrState == VR_MODE && app.vrThreadTid != 0) {
                                 try {
                                     Process.setThreadScheduler(app.vrThreadTid,
                                         Process.SCHED_FIFO | Process.SCHED_RESET_ON_FORK, 1);
+                                    mTopAppVrThreadTid = app.vrThreadTid;
                                 } catch (IllegalArgumentException e) {
                                     // thread died, ignore
                                 }
@@ -21332,6 +21455,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         // Safe to do even if we're not in VR mode
                         if (app.vrThreadTid != 0) {
                             Process.setThreadScheduler(app.vrThreadTid, Process.SCHED_OTHER, 0);
+                            mTopAppVrThreadTid = 0;
                         }
                         if (mUseFifoUiScheduling) {
                             // Reset UI pipeline to SCHED_OTHER
