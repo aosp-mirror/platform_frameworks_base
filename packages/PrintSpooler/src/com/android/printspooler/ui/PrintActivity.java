@@ -85,8 +85,8 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
-
 import android.widget.Toast;
+
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.printspooler.R;
@@ -120,6 +120,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 public class PrintActivity extends Activity implements RemotePrintDocument.UpdateResultCallbacks,
         PrintErrorFragment.OnActionListener, PageAdapter.ContentCallbacks,
@@ -543,8 +544,8 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         // pages in the printed document.
         PrintDocumentInfo info = document.info;
         if (info != null) {
-            final int pageCount = PageRangeUtils.getNormalizedPageCount(document.writtenPages,
-                    getAdjustedPageCount(info));
+            final int pageCount = PageRangeUtils.getNormalizedPageCount(
+                    document.pagesWrittenToFile, getAdjustedPageCount(info));
             PrintDocumentInfo adjustedInfo = new PrintDocumentInfo.Builder(info.getName())
                     .setContentType(info.getContentType())
                     .setPageCount(pageCount)
@@ -558,7 +559,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
             }
 
             mPrintJob.setDocumentInfo(adjustedInfo);
-            mPrintJob.setPages(document.printedPages);
+            mPrintJob.setPages(document.pagesInFileToPrint);
         }
 
         switch (mState) {
@@ -627,7 +628,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         // Update the preview controller.
         mPrintPreviewController.onContentUpdated(contentUpdated,
                 getAdjustedPageCount(documentInfo.info),
-                mPrintedDocument.getDocumentInfo().writtenPages,
+                mPrintedDocument.getDocumentInfo().pagesWrittenToFile,
                 mSelectedPages, mPrintJob.getAttributes().getMediaSize(),
                 mPrintJob.getAttributes().getMinMargins());
     }
@@ -2105,14 +2106,15 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         // If saving to PDF, apply the attibutes as we are acting as a print service.
         PrintAttributes attributes = mDestinationSpinnerAdapter.getPdfPrinter() == mCurrentPrinter
                 ?  mPrintJob.getAttributes() : null;
-        new DocumentTransformer(this, mPrintJob, mFileProvider, attributes, new Runnable() {
-            @Override
-            public void run() {
+        new DocumentTransformer(this, mPrintJob, mFileProvider, attributes, error -> {
+            if (error == null) {
                 if (writeToUri != null) {
                     mPrintedDocument.writeContent(getContentResolver(), writeToUri);
                 }
                 setState(STATE_PRINT_COMPLETED);
                 doFinish();
+            } else {
+                onPrintDocumentError(error);
             }
         }).transform();
     }
@@ -3096,11 +3098,11 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
 
         private final PrintAttributes mAttributesToApply;
 
-        private final Runnable mCallback;
+        private final Consumer<String> mCallback;
 
         public DocumentTransformer(Context context, PrintJobInfo printJob,
                 MutexFileProvider fileProvider, PrintAttributes attributes,
-                Runnable callback) {
+                Consumer<String> callback) {
             mContext = context;
             mPrintJob = printJob;
             mFileProvider = fileProvider;
@@ -3112,7 +3114,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         public void transform() {
             // If we have only the pages we want, done.
             if (mPagesToShred.length <= 0 && mAttributesToApply == null) {
-                mCallback.run();
+                mCallback.accept(null);
                 return;
             }
 
@@ -3126,22 +3128,26 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             final IPdfEditor editor = IPdfEditor.Stub.asInterface(service);
-            new AsyncTask<Void, Void, Void>() {
+            new AsyncTask<Void, Void, String>() {
                 @Override
-                protected Void doInBackground(Void... params) {
+                protected String doInBackground(Void... params) {
                     // It's OK to access the data members as they are
                     // final and this code is the last one to touch
                     // them as shredding is the very last step, so the
                     // UI is not interactive at this point.
-                    doTransform(editor);
-                    updatePrintJob();
-                    return null;
+                    try {
+                        doTransform(editor);
+                        updatePrintJob();
+                        return null;
+                    } catch (IOException | RemoteException | IllegalStateException e) {
+                        return e.toString();
+                    }
                 }
 
                 @Override
-                protected void onPostExecute(Void aVoid) {
+                protected void onPostExecute(String error) {
                     mContext.unbindService(DocumentTransformer.this);
-                    mCallback.run();
+                    mCallback.accept(error);
                 }
             }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         }
@@ -3151,7 +3157,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
             /* do nothing */
         }
 
-        private void doTransform(IPdfEditor editor) {
+        private void doTransform(IPdfEditor editor) throws IOException, RemoteException {
             File tempFile = null;
             ParcelFileDescriptor src = null;
             ParcelFileDescriptor dst = null;
@@ -3190,8 +3196,6 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
                 in = new FileInputStream(tempFile);
                 out = new FileOutputStream(jobFile);
                 Streams.copy(in, out);
-            } catch (IOException|RemoteException e) {
-                Log.e(LOG_TAG, "Error dropping pages", e);
             } finally {
                 IoUtils.closeQuietly(src);
                 IoUtils.closeQuietly(dst);
