@@ -141,6 +141,11 @@ public class MediaRouter {
             mDefaultAudioVideo.mNameResId = com.android.internal.R.string.default_audio_route_name;
             mDefaultAudioVideo.mSupportedTypes = ROUTE_TYPE_LIVE_AUDIO | ROUTE_TYPE_LIVE_VIDEO;
             mDefaultAudioVideo.updatePresentationDisplay();
+            if (((AudioManager) appContext.getSystemService(Context.AUDIO_SERVICE))
+                    .isVolumeFixed()) {
+                mDefaultAudioVideo.mVolumeHandling = RouteInfo.PLAYBACK_VOLUME_FIXED;
+            }
+
             addRouteStatic(mDefaultAudioVideo);
 
             // This will select the active wifi display route if there is one.
