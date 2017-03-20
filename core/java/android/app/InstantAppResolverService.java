@@ -29,6 +29,8 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 
+import com.android.internal.os.SomeArgs;
+
 import java.util.List;
 
 /**
@@ -37,10 +39,10 @@ import java.util.List;
  */
 @SystemApi
 public abstract class InstantAppResolverService extends Service {
+    /** @hide */
     public static final String EXTRA_RESOLVE_INFO = "android.app.extra.RESOLVE_INFO";
+    /** @hide */
     public static final String EXTRA_SEQUENCE = "android.app.extra.SEQUENCE";
-    static final String EXTRA_PREFIX = "android.app.PREFIX";
-    static final String EXTRA_HOSTNAME = "android.app.HOSTNAME";
     Handler mHandler;
 
     /**
@@ -49,7 +51,7 @@ public abstract class InstantAppResolverService extends Service {
      * @param digestPrefix The hash prefix of the instant app's domain.
      */
     public void onGetInstantAppResolveInfo(
-            int digestPrefix[], InstantAppResolutionCallback callback) {
+            int digestPrefix[], String token, InstantAppResolutionCallback callback) {
         throw new IllegalStateException("Must define");
     }
 
@@ -59,7 +61,7 @@ public abstract class InstantAppResolverService extends Service {
      * @param digestPrefix The hash prefix of the instant app's domain.
      */
     public void onGetInstantAppIntentFilter(
-            int digestPrefix[], InstantAppResolutionCallback callback) {
+            int digestPrefix[], String token, InstantAppResolutionCallback callback) {
         throw new IllegalStateException("Must define");
     }
 
@@ -81,25 +83,26 @@ public abstract class InstantAppResolverService extends Service {
         return new IInstantAppResolver.Stub() {
             @Override
             public void getInstantAppResolveInfoList(
-                    int digestPrefix[], int sequence, IRemoteCallback callback) {
-                final Message msg = mHandler.obtainMessage(
-                        ServiceHandler.MSG_GET_INSTANT_APP_RESOLVE_INFO, sequence, 0, callback);
-                final Bundle data = new Bundle();
-                data.putIntArray(EXTRA_PREFIX, digestPrefix);
-                msg.setData(data);
-                msg.sendToTarget();
+                    int digestPrefix[], String token, int sequence, IRemoteCallback callback) {
+                final SomeArgs args = SomeArgs.obtain();
+                args.arg1 = callback;
+                args.arg2 = digestPrefix;
+                args.arg3 = token;
+                mHandler.obtainMessage(
+                                ServiceHandler.MSG_GET_INSTANT_APP_RESOLVE_INFO, sequence, 0, args)
+                        .sendToTarget();
             }
 
             @Override
             public void getInstantAppIntentFilterList(
-                    int digestPrefix[], int sequence, String hostName, IRemoteCallback callback) {
-                final Message msg = mHandler.obtainMessage(
-                        ServiceHandler.MSG_GET_INSTANT_APP_INTENT_FILTER, sequence, 0, callback);
-                final Bundle data = new Bundle();
-                data.putString(EXTRA_HOSTNAME, hostName);
-                data.putIntArray(EXTRA_PREFIX, digestPrefix);
-                msg.setData(data);
-                msg.sendToTarget();
+                    int digestPrefix[], String token, String hostName, IRemoteCallback callback) {
+                final SomeArgs args = SomeArgs.obtain();
+                args.arg1 = callback;
+                args.arg2 = digestPrefix;
+                args.arg3 = token;
+                args.arg4 = hostName;
+                mHandler.obtainMessage(
+                        ServiceHandler.MSG_GET_INSTANT_APP_INTENT_FILTER, callback).sendToTarget();
             }
         };
     }
@@ -117,8 +120,8 @@ public abstract class InstantAppResolverService extends Service {
 
         public void onInstantAppResolveInfo(List<InstantAppResolveInfo> resolveInfo) {
             final Bundle data = new Bundle();
-            data.putInt(EXTRA_SEQUENCE, mSequence);
             data.putParcelableList(EXTRA_RESOLVE_INFO, resolveInfo);
+            data.putInt(EXTRA_SEQUENCE, mSequence);
             try {
                 mCallback.sendResult(data);
             } catch (RemoteException e) {
@@ -127,13 +130,14 @@ public abstract class InstantAppResolverService extends Service {
     }
 
     @Deprecated
-    void _onGetInstantAppResolveInfo(int[] digestPrefix, InstantAppResolutionCallback callback) {
-        onGetInstantAppResolveInfo(digestPrefix, callback);
+    void _onGetInstantAppResolveInfo(int[] digestPrefix, String token,
+            InstantAppResolutionCallback callback) {
+        onGetInstantAppResolveInfo(digestPrefix, token, callback);
     }
     @Deprecated
-    void _onGetInstantAppIntentFilter(int digestPrefix[], String hostName,
+    void _onGetInstantAppIntentFilter(int digestPrefix[], String token, String hostName,
             InstantAppResolutionCallback callback) {
-        onGetInstantAppIntentFilter(digestPrefix, callback);
+        onGetInstantAppIntentFilter(digestPrefix, token, callback);
     }
 
     private final class ServiceHandler extends Handler {
@@ -150,21 +154,25 @@ public abstract class InstantAppResolverService extends Service {
             final int action = message.what;
             switch (action) {
                 case MSG_GET_INSTANT_APP_RESOLVE_INFO: {
-                    final IRemoteCallback callback = (IRemoteCallback) message.obj;
+                    final SomeArgs args = (SomeArgs) message.obj;
+                    final IRemoteCallback callback = (IRemoteCallback) args.arg1;
+                    final int[] digestPrefix = (int[]) args.arg2;
+                    final String token = (String) args.arg3;
                     final int sequence = message.arg1;
-                    final int[] digestPrefix = message.getData().getIntArray(EXTRA_PREFIX);
                     _onGetInstantAppResolveInfo(
-                            digestPrefix, new InstantAppResolutionCallback(sequence, callback));
+                            digestPrefix, token,
+                            new InstantAppResolutionCallback(sequence, callback));
                 } break;
 
                 case MSG_GET_INSTANT_APP_INTENT_FILTER: {
-                    final IRemoteCallback callback = (IRemoteCallback) message.obj;
-                    final int sequence = message.arg1;
-                    final int[] digestPrefix = message.getData().getIntArray(EXTRA_PREFIX);
-                    final String hostName = message.getData().getString(EXTRA_HOSTNAME);
+                    final SomeArgs args = (SomeArgs) message.obj;
+                    final IRemoteCallback callback = (IRemoteCallback) args.arg1;
+                    final int[] digestPrefix = (int[]) args.arg2;
+                    final String token = (String) args.arg3;
+                    final String hostName = (String) args.arg4;
                     _onGetInstantAppIntentFilter(
-                            digestPrefix, hostName,
-                            new InstantAppResolutionCallback(sequence, callback));
+                            digestPrefix, token, hostName,
+                            new InstantAppResolutionCallback(-1 /*sequence*/, callback));
                 } break;
 
                 default: {

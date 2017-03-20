@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.EphemeralResolveInfo;
 import android.content.pm.InstantAppResolveInfo;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -30,8 +31,10 @@ import android.os.IRemoteCallback;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
+import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -42,6 +45,9 @@ import java.util.List;
 @Deprecated
 @SystemApi
 public abstract class EphemeralResolverService extends InstantAppResolverService {
+    private static final boolean DEBUG_EPHEMERAL = Build.IS_DEBUGGABLE;
+    private static final String TAG = "PackageManager";
+
     /**
      * Called to retrieve resolve info for ephemeral applications.
      *
@@ -79,7 +85,12 @@ public abstract class EphemeralResolverService extends InstantAppResolverService
     }
 
     @Override
-    void _onGetInstantAppResolveInfo(int[] digestPrefix, InstantAppResolutionCallback callback) {
+    void _onGetInstantAppResolveInfo(int[] digestPrefix, String token,
+            InstantAppResolutionCallback callback) {
+        if (DEBUG_EPHEMERAL) {
+            Log.d(TAG, "Legacy resolver; getInstantAppResolveInfo;"
+                    + " prefix: " + Arrays.toString(digestPrefix));
+        }
         final List<EphemeralResolveInfo> response = onGetEphemeralResolveInfo(digestPrefix);
         final int responseSize = response == null ? 0 : response.size();
         final List<InstantAppResolveInfo> resultList = new ArrayList<>(responseSize);
@@ -90,8 +101,12 @@ public abstract class EphemeralResolverService extends InstantAppResolverService
     }
 
     @Override
-    void _onGetInstantAppIntentFilter(int[] digestPrefix, String hostName,
-            InstantAppResolutionCallback callback) {
+    void _onGetInstantAppIntentFilter(int[] digestPrefix, String token,
+            String hostName, InstantAppResolutionCallback callback) {
+        if (DEBUG_EPHEMERAL) {
+            Log.d(TAG, "Legacy resolver; getInstantAppIntentFilter;"
+                    + " prefix: " + Arrays.toString(digestPrefix));
+        }
         final EphemeralResolveInfo response = onGetEphemeralIntentFilter(hostName);
         final List<InstantAppResolveInfo> resultList = new ArrayList<>(1);
         resultList.add(response.getInstantAppResolveInfo());
