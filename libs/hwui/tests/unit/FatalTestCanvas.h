@@ -80,9 +80,7 @@ public:
     void onDrawPoints(PointMode, size_t count, const SkPoint pts[], const SkPaint&) {
         ADD_FAILURE() << "onDrawPoints not expected in this test";
     }
-    void onDrawVertices(VertexMode, int vertexCount, const SkPoint vertices[], const SkPoint texs[],
-            const SkColor colors[], SkBlendMode, const uint16_t indices[], int indexCount,
-            const SkPaint&) {
+    void onDrawVerticesObject(const SkVertices*, SkBlendMode, const SkPaint&) {
         ADD_FAILURE() << "onDrawVertices not expected in this test";
     }
     void onDrawAtlas(const SkImage*, const SkRSXform[], const SkRect[], const SkColor[], int count,

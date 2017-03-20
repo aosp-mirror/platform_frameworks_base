@@ -75,10 +75,7 @@ protected:
             const SkPaint*);
     virtual void onDrawImageLattice(const SkImage*, const Lattice& lattice, const SkRect& dst,
             const SkPaint*);
-    virtual void onDrawVertices(VertexMode, int vertexCount, const SkPoint vertices[],
-                                const SkPoint texs[], const SkColor colors[], SkBlendMode,
-                                const uint16_t indices[], int indexCount,
-                                const SkPaint&) override;
+    virtual void onDrawVerticesObject(const SkVertices*, SkBlendMode, const SkPaint&) override;
 
     virtual void onDrawDRRect(const SkRRect&, const SkRRect&, const SkPaint&) override;
 
