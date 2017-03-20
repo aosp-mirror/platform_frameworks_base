@@ -2397,7 +2397,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         ApplicationInfo appInfo;
         try {
-            appInfo = mContext.getPackageManager().getApplicationInfo(attrs.packageName,
+            appInfo = mContext.getPackageManager().getApplicationInfoAsUser(
+                            attrs.packageName,
+                            0 /* flags */,
                             UserHandle.getUserId(callingUid));
         } catch (PackageManager.NameNotFoundException e) {
             appInfo = null;
