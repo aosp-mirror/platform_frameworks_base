@@ -3205,7 +3205,7 @@ public class TelephonyManager {
     public void listen(PhoneStateListener listener, int events) {
         if (mContext == null) return;
         try {
-            Boolean notifyNow = (getITelephony() != null);
+            boolean notifyNow = (getITelephony() != null);
             // If the listener has not explicitly set the subId (for example, created with the
             // default constructor), replace the subId so it will listen to the account the
             // telephony manager is created with.
