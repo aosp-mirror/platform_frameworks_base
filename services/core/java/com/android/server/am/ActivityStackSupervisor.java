@@ -399,6 +399,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     /** Mapping from (ActivityStack/TaskStack).mStackId to their current state */
     SparseArray<ActivityContainer> mActivityContainers = new SparseArray<>();
 
+    // TODO: There should be an ActivityDisplayController coordinating am/wm interaction.
     /** Mapping from displayId to display current state */
     private final SparseArray<ActivityDisplay> mActivityDisplays = new SparseArray<>();
 
@@ -3719,10 +3720,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 }
                 mActivityDisplays.put(displayId, activityDisplay);
                 calculateDefaultMinimalSizeOfResizeableTasks(activityDisplay);
+                mWindowManager.onDisplayAdded(displayId);
             }
-        }
-        if (newDisplay) {
-            mWindowManager.onDisplayAdded(displayId);
         }
     }
 
@@ -3762,9 +3761,9 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                     }
                 }
                 mActivityDisplays.remove(displayId);
+                mWindowManager.onDisplayRemoved(displayId);
             }
         }
-        mWindowManager.onDisplayRemoved(displayId);
     }
 
     private void handleDisplayChanged(int displayId) {
@@ -3773,8 +3772,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             if (activityDisplay != null) {
                 // TODO: Update the bounds.
             }
+            mWindowManager.onDisplayChanged(displayId);
         }
-        mWindowManager.onDisplayChanged(displayId);
     }
 
     private StackInfo getStackInfoLocked(ActivityStack stack) {
@@ -4734,7 +4733,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
             init(mVirtualDisplay.getDisplay());
 
-            mWindowManager.handleDisplayAdded(mDisplayId);
+            mWindowManager.onDisplayAdded(mDisplayId);
         }
 
         void setSurface(Surface surface) {

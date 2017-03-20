@@ -4634,10 +4634,6 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int SHOW_STRICT_MODE_VIOLATION = 25;
         public static final int DO_ANIMATION_CALLBACK = 26;
 
-        public static final int DO_DISPLAY_ADDED = 27;
-        public static final int DO_DISPLAY_REMOVED = 28;
-        public static final int DO_DISPLAY_CHANGED = 29;
-
         public static final int CLIENT_FREEZE_TIMEOUT = 30;
         public static final int TAP_OUTSIDE_TASK = 31;
         public static final int NOTIFY_ACTIVITY_DRAWN = 32;
@@ -4980,22 +4976,6 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                     break;
                 }
-
-                case DO_DISPLAY_ADDED:
-                    handleDisplayAdded(msg.arg1);
-                    break;
-
-                case DO_DISPLAY_REMOVED:
-                    synchronized (mWindowMap) {
-                        handleDisplayRemovedLocked(msg.arg1);
-                    }
-                    break;
-
-                case DO_DISPLAY_CHANGED:
-                    synchronized (mWindowMap) {
-                        handleDisplayChangedLocked(msg.arg1);
-                    }
-                    break;
 
                 case TAP_OUTSIDE_TASK: {
                     handleTapOutsideTask((DisplayContent)msg.obj, msg.arg1, msg.arg2);
@@ -6710,10 +6690,6 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     public void onDisplayAdded(int displayId) {
-        mH.sendMessage(mH.obtainMessage(H.DO_DISPLAY_ADDED, displayId, 0));
-    }
-
-    public void handleDisplayAdded(int displayId) {
         synchronized (mWindowMap) {
             final Display display = mDisplayManager.getDisplay(displayId);
             if (display != null) {
@@ -6725,28 +6701,24 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     public void onDisplayRemoved(int displayId) {
-        mH.sendMessage(mH.obtainMessage(H.DO_DISPLAY_REMOVED, displayId, 0));
-    }
-
-    private void handleDisplayRemovedLocked(int displayId) {
-        final DisplayContent displayContent = mRoot.getDisplayContentOrCreate(displayId);
-        if (displayContent != null) {
-            displayContent.removeIfPossible();
+        synchronized (mWindowMap) {
+            final DisplayContent displayContent = mRoot.getDisplayContentOrCreate(displayId);
+            if (displayContent != null) {
+                displayContent.removeIfPossible();
+            }
+            mAnimator.removeDisplayLocked(displayId);
+            mWindowPlacerLocked.requestTraversal();
         }
-        mAnimator.removeDisplayLocked(displayId);
-        mWindowPlacerLocked.requestTraversal();
     }
 
     public void onDisplayChanged(int displayId) {
-        mH.sendMessage(mH.obtainMessage(H.DO_DISPLAY_CHANGED, displayId, 0));
-    }
-
-    private void handleDisplayChangedLocked(int displayId) {
-        final DisplayContent displayContent = mRoot.getDisplayContentOrCreate(displayId);
-        if (displayContent != null) {
-            displayContent.updateDisplayInfo();
+        synchronized (mWindowMap) {
+            final DisplayContent displayContent = mRoot.getDisplayContentOrCreate(displayId);
+            if (displayContent != null) {
+                displayContent.updateDisplayInfo();
+            }
+            mWindowPlacerLocked.requestTraversal();
         }
-        mWindowPlacerLocked.requestTraversal();
     }
 
     @Override
