@@ -94,9 +94,6 @@ public final class SubscribeConfig implements Parcelable {
     public final int mSubscribeType;
 
     /** @hide */
-    public final int mSubscribeCount;
-
-    /** @hide */
     public final int mTtlSec;
 
     /** @hide */
@@ -107,13 +104,12 @@ public final class SubscribeConfig implements Parcelable {
 
     /** @hide */
     public SubscribeConfig(byte[] serviceName, byte[] serviceSpecificInfo, byte[] matchFilter,
-            int subscribeType, int publichCount, int ttlSec, int matchStyle,
+            int subscribeType, int ttlSec, int matchStyle,
             boolean enableTerminateNotification) {
         mServiceName = serviceName;
         mServiceSpecificInfo = serviceSpecificInfo;
         mMatchFilter = matchFilter;
         mSubscribeType = subscribeType;
-        mSubscribeCount = publichCount;
         mTtlSec = ttlSec;
         mMatchStyle = matchStyle;
         mEnableTerminateNotification = enableTerminateNotification;
@@ -125,7 +121,7 @@ public final class SubscribeConfig implements Parcelable {
                 (mServiceSpecificInfo == null) ? "null" : HexEncoding.encode(mServiceSpecificInfo))
                 + ", mMatchFilter=" + (new TlvBufferUtils.TlvIterable(0, 1,
                 mMatchFilter)).toString() + ", mSubscribeType=" + mSubscribeType
-                + ", mSubscribeCount=" + mSubscribeCount + ", mTtlSec=" + mTtlSec + ", mMatchType="
+                + ", mTtlSec=" + mTtlSec + ", mMatchType="
                 + mMatchStyle + ", mEnableTerminateNotification=" + mEnableTerminateNotification
                 + "]";
     }
@@ -141,7 +137,6 @@ public final class SubscribeConfig implements Parcelable {
         dest.writeByteArray(mServiceSpecificInfo);
         dest.writeByteArray(mMatchFilter);
         dest.writeInt(mSubscribeType);
-        dest.writeInt(mSubscribeCount);
         dest.writeInt(mTtlSec);
         dest.writeInt(mMatchStyle);
         dest.writeInt(mEnableTerminateNotification ? 1 : 0);
@@ -159,12 +154,11 @@ public final class SubscribeConfig implements Parcelable {
             byte[] ssi = in.createByteArray();
             byte[] matchFilter = in.createByteArray();
             int subscribeType = in.readInt();
-            int subscribeCount = in.readInt();
             int ttlSec = in.readInt();
             int matchStyle = in.readInt();
             boolean enableTerminateNotification = in.readInt() != 0;
 
-            return new SubscribeConfig(serviceName, ssi, matchFilter, subscribeType, subscribeCount,
+            return new SubscribeConfig(serviceName, ssi, matchFilter, subscribeType,
                     ttlSec, matchStyle, enableTerminateNotification);
         }
     };
@@ -183,7 +177,7 @@ public final class SubscribeConfig implements Parcelable {
 
         return Arrays.equals(mServiceName, lhs.mServiceName) && Arrays.equals(mServiceSpecificInfo,
                 lhs.mServiceSpecificInfo) && Arrays.equals(mMatchFilter, lhs.mMatchFilter)
-                && mSubscribeType == lhs.mSubscribeType && mSubscribeCount == lhs.mSubscribeCount
+                && mSubscribeType == lhs.mSubscribeType
                 && mTtlSec == lhs.mTtlSec && mMatchStyle == lhs.mMatchStyle
                 && mEnableTerminateNotification == lhs.mEnableTerminateNotification;
     }
@@ -196,7 +190,6 @@ public final class SubscribeConfig implements Parcelable {
         result = 31 * result + Arrays.hashCode(mServiceSpecificInfo);
         result = 31 * result + Arrays.hashCode(mMatchFilter);
         result = 31 * result + mSubscribeType;
-        result = 31 * result + mSubscribeCount;
         result = 31 * result + mTtlSec;
         result = 31 * result + mMatchStyle;
         result = 31 * result + (mEnableTerminateNotification ? 1 : 0);
@@ -220,9 +213,6 @@ public final class SubscribeConfig implements Parcelable {
         }
         if (mSubscribeType < SUBSCRIBE_TYPE_PASSIVE || mSubscribeType > SUBSCRIBE_TYPE_ACTIVE) {
             throw new IllegalArgumentException("Invalid subscribeType - " + mSubscribeType);
-        }
-        if (mSubscribeCount < 0) {
-            throw new IllegalArgumentException("Invalid subscribeCount - must be non-negative");
         }
         if (mTtlSec < 0) {
             throw new IllegalArgumentException("Invalid ttlSec - must be non-negative");
@@ -261,7 +251,6 @@ public final class SubscribeConfig implements Parcelable {
         private byte[] mServiceSpecificInfo;
         private byte[] mMatchFilter;
         private int mSubscribeType = SUBSCRIBE_TYPE_PASSIVE;
-        private int mSubscribeCount = 0;
         private int mTtlSec = 0;
         private int mMatchStyle = MATCH_STYLE_ALL;
         private boolean mEnableTerminateNotification = true;
@@ -350,29 +339,6 @@ public final class SubscribeConfig implements Parcelable {
         }
 
         /**
-         * Sets the number of times an active (
-         * {@link SubscribeConfig.Builder#setSubscribeType(int)}) subscribe session
-         * will broadcast. When the count is reached an event will be
-         * generated for {@link DiscoverySessionCallback#onSessionTerminated()}.
-         * <p>
-         *     Optional. 0 by default - indicating the session doesn't terminate on its own.
-         *     Session will be terminated when {@link DiscoverySession#destroy()} is
-         *     called.
-         *
-         * @param subscribeCount Number of subscribe packets to broadcast.
-         *
-         * @return The builder to facilitate chaining
-         *         {@code builder.setXXX(..).setXXX(..)}.
-         */
-        public Builder setSubscribeCount(int subscribeCount) {
-            if (subscribeCount < 0) {
-                throw new IllegalArgumentException("Invalid subscribeCount - must be non-negative");
-            }
-            mSubscribeCount = subscribeCount;
-            return this;
-        }
-
-        /**
          * Sets the time interval (in seconds) an active (
          * {@link SubscribeConfig.Builder#setSubscribeType(int)}) subscribe session
          * will be alive - i.e. broadcasting a packet. When the TTL is reached
@@ -440,7 +406,7 @@ public final class SubscribeConfig implements Parcelable {
          */
         public SubscribeConfig build() {
             return new SubscribeConfig(mServiceName, mServiceSpecificInfo, mMatchFilter,
-                    mSubscribeType, mSubscribeCount, mTtlSec, mMatchStyle,
+                    mSubscribeType, mTtlSec, mMatchStyle,
                     mEnableTerminateNotification);
         }
     }
