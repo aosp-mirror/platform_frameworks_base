@@ -4,6 +4,10 @@ package android.app {
     method public deprecated void setLatestEventInfo(android.content.Context, java.lang.CharSequence, java.lang.CharSequence, android.app.PendingIntent);
   }
 
+  public final class RecoverableSecurityException extends java.lang.SecurityException implements android.os.Parcelable {
+    method public deprecated void showAsNotification(android.content.Context);
+  }
+
 }
 
 package android.app.admin {
