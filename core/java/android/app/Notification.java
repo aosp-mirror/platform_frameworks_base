@@ -1099,7 +1099,7 @@ public class Notification implements Parcelable
      * represent this notification.
      */
     public static final int BADGE_ICON_LARGE = 2;
-    private int mBadgeIcon = BADGE_ICON_LARGE;
+    private int mBadgeIcon = BADGE_ICON_NONE;
 
     /**
      * Structure to encapsulate a named action that can be shown as part of this notification.
