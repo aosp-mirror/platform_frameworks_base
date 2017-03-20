@@ -126,7 +126,7 @@ public class NotificationPlayer implements OnCompletionListener, OnErrorListener
                         Thread.sleep(mNotificationRampTimeMs);
                         player.start();
                     } catch (InterruptedException e) {
-                        Log.e(mTag, "Exception while sleeping to sync notification playback "
+                        Log.e(mTag, "Exception while sleeping to sync notification playback"
                                 + " with ducking", e);
                     }
                     if (mPlayer != null) {
