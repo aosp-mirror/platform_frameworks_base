@@ -3808,23 +3808,28 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @param fontVariationSettings font variation settings. You can pass null or empty string as
      *                              no variation settings.
      *
+     * @return true if the given settings is effective to at least one font file underlying this
+     *         TextView. This function also returns true for empty settings string. Otherwise
+     *         returns false.
+     *
      * @see #getFontVariationSettings()
      * @see Paint#getFontVariationSettings() Paint.getFontVariationSettings()
      */
-    public void setFontVariationSettings(@Nullable String fontVariationSettings) {
+    public boolean setFontVariationSettings(@Nullable String fontVariationSettings) {
         final String existingSettings = mTextPaint.getFontVariationSettings();
         if (fontVariationSettings == existingSettings
                 || (fontVariationSettings != null
                         && fontVariationSettings.equals(existingSettings))) {
-            return;
+            return true;
         }
-        mTextPaint.setFontVariationSettings(fontVariationSettings);
+        boolean effective = mTextPaint.setFontVariationSettings(fontVariationSettings);
 
-        if (mLayout != null) {
+        if (effective && mLayout != null) {
             nullLayouts();
             requestLayout();
             invalidate();
         }
+        return effective;
     }
 
     /**
