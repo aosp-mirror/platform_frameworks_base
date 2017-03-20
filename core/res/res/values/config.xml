@@ -2691,6 +2691,10 @@
     <!-- List of packages to enable in carrier demo mode (comma separated). -->
     <string name="config_carrierDemoModePackages" translatable="false"></string>
 
+    <!-- Number of days preloaded file cache should be preserved on a device before it can be
+         deleted -->
+    <integer name="config_keepPreloadsMinDays">7</integer>
+
     <!-- Flag indicating whether round icons should be parsed from the application manifest. -->
     <bool name="config_useRoundIcon">false</bool>
 
