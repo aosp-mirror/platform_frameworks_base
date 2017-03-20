@@ -2524,10 +2524,16 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     // adjust stats accounting based on foreground status
     private void updateNetworkStats(int uid, boolean uidForeground) {
+        if (Trace.isTagEnabled(Trace.TRACE_TAG_NETWORK)) {
+            Trace.traceBegin(Trace.TRACE_TAG_NETWORK,
+                    "updateNetworkStats: " + uid + "/" + (uidForeground ? "F" : "B"));
+        }
         try {
             mNetworkStats.setUidForeground(uid, uidForeground);
         } catch (RemoteException e) {
             // ignored; service lives in system_server
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_NETWORK);
         }
     }
 
@@ -2655,12 +2661,19 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     void updateRuleForAppIdleUL(int uid) {
         if (!isUidValidForBlacklistRules(uid)) return;
 
-        int appId = UserHandle.getAppId(uid);
-        if (!mPowerSaveTempWhitelistAppIds.get(appId) && isUidIdle(uid)
-                && !isUidForegroundOnRestrictPowerUL(uid)) {
-            setUidFirewallRule(FIREWALL_CHAIN_STANDBY, uid, FIREWALL_RULE_DENY);
-        } else {
-            setUidFirewallRule(FIREWALL_CHAIN_STANDBY, uid, FIREWALL_RULE_DEFAULT);
+        if (Trace.isTagEnabled(Trace.TRACE_TAG_NETWORK)) {
+            Trace.traceBegin(Trace.TRACE_TAG_NETWORK, "updateRuleForAppIdleUL: " + uid );
+        }
+        try {
+            int appId = UserHandle.getAppId(uid);
+            if (!mPowerSaveTempWhitelistAppIds.get(appId) && isUidIdle(uid)
+                    && !isUidForegroundOnRestrictPowerUL(uid)) {
+                setUidFirewallRule(FIREWALL_CHAIN_STANDBY, uid, FIREWALL_RULE_DENY);
+            } else {
+                setUidFirewallRule(FIREWALL_CHAIN_STANDBY, uid, FIREWALL_RULE_DEFAULT);
+            }
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_NETWORK);
         }
     }
 
@@ -2696,7 +2709,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      * {@link #mRestrictPower}, or {@link #mDeviceIdleMode} value.
      */
     private void updateRulesForGlobalChangeAL(boolean restrictedNetworksChanged) {
-        Trace.traceBegin(Trace.TRACE_TAG_NETWORK, "updateRulesForGlobalChangeAL");
+        if (Trace.isTagEnabled(Trace.TRACE_TAG_NETWORK)) {
+            Trace.traceBegin(Trace.TRACE_TAG_NETWORK,
+                    "updateRulesForGlobalChangeAL: " + (restrictedNetworksChanged ? "R" : "-"));
+        }
         try {
             updateRulesForAppIdleUL();
             updateRulesForRestrictPowerUL();
@@ -2749,14 +2765,27 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             Trace.traceBegin(Trace.TRACE_TAG_NETWORK, "updateRulesForRestrictPowerUL-" + type);
         }
         try {
-            final PackageManager pm = mContext.getPackageManager();
-
             // update rules for all installed applications
-            final List<UserInfo> users = mUserManager.getUsers();
-            final List<ApplicationInfo> apps = pm.getInstalledApplications(
-                    PackageManager.MATCH_ANY_USER | PackageManager.MATCH_DISABLED_COMPONENTS
-                            | PackageManager.MATCH_DIRECT_BOOT_AWARE
-                            | PackageManager.MATCH_DIRECT_BOOT_UNAWARE);
+
+            final PackageManager pm = mContext.getPackageManager();
+            final List<UserInfo> users;
+            final List<ApplicationInfo> apps;
+
+            Trace.traceBegin(Trace.TRACE_TAG_NETWORK, "list-users");
+            try {
+                users = mUserManager.getUsers();
+            } finally {
+                Trace.traceEnd(Trace.TRACE_TAG_NETWORK);
+            }
+            Trace.traceBegin(Trace.TRACE_TAG_NETWORK, "list-uids");
+            try {
+                apps = pm.getInstalledApplications(
+                        PackageManager.MATCH_ANY_USER | PackageManager.MATCH_DISABLED_COMPONENTS
+                                | PackageManager.MATCH_DIRECT_BOOT_AWARE
+                                | PackageManager.MATCH_DIRECT_BOOT_UNAWARE);
+            } finally {
+                Trace.traceEnd(Trace.TRACE_TAG_NETWORK);
+            }
 
             final int usersSize = users.size();
             final int appsSize = apps.size();
@@ -2778,9 +2807,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 }
             }
         } finally {
-            if (Trace.isTagEnabled(Trace.TRACE_TAG_NETWORK)) {
-                Trace.traceEnd(Trace.TRACE_TAG_NETWORK);
-            }
+            Trace.traceEnd(Trace.TRACE_TAG_NETWORK);
         }
     }
 
@@ -2931,6 +2958,18 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      *
      */
     private void updateRulesForDataUsageRestrictionsUL(int uid) {
+        if (Trace.isTagEnabled(Trace.TRACE_TAG_NETWORK)) {
+            Trace.traceBegin(Trace.TRACE_TAG_NETWORK,
+                    "updateRulesForDataUsageRestrictionsUL: " + uid);
+        }
+        try {
+            updateRulesForDataUsageRestrictionsULInner(uid);
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_NETWORK);
+        }
+    }
+
+    private void updateRulesForDataUsageRestrictionsULInner(int uid) {
         if (!isUidValidForWhitelistRules(uid)) {
             if (LOGD) Slog.d(TAG, "no need to update restrict data rules for uid " + uid);
             return;
@@ -3073,6 +3112,19 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      * @return the new computed rules for the uid
      */
     private int updateRulesForPowerRestrictionsUL(int uid, int oldUidRules, boolean paroled) {
+        if (Trace.isTagEnabled(Trace.TRACE_TAG_NETWORK)) {
+            Trace.traceBegin(Trace.TRACE_TAG_NETWORK,
+                    "updateRulesForPowerRestrictionsUL: " + uid + "/" + oldUidRules + "/"
+                    + (paroled ? "P" : "-"));
+        }
+        try {
+            return updateRulesForPowerRestrictionsULInner(uid, oldUidRules, paroled);
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_NETWORK);
+        }
+    }
+
+    private int updateRulesForPowerRestrictionsULInner(int uid, int oldUidRules, boolean paroled) {
         if (!isUidValidForBlacklistRules(uid)) {
             if (LOGD) Slog.d(TAG, "no need to update restrict power rules for uid " + uid);
             return RULE_NONE;
@@ -3432,20 +3484,28 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      * Add or remove a uid to the firewall blacklist for all network ifaces.
      */
     private void setUidFirewallRule(int chain, int uid, int rule) {
-        if (chain == FIREWALL_CHAIN_DOZABLE) {
-            mUidFirewallDozableRules.put(uid, rule);
-        } else if (chain == FIREWALL_CHAIN_STANDBY) {
-            mUidFirewallStandbyRules.put(uid, rule);
-        } else if (chain == FIREWALL_CHAIN_POWERSAVE) {
-            mUidFirewallPowerSaveRules.put(uid, rule);
+        if (Trace.isTagEnabled(Trace.TRACE_TAG_NETWORK)) {
+            Trace.traceBegin(Trace.TRACE_TAG_NETWORK,
+                    "setUidFirewallRule: " + chain + "/" + uid + "/" + rule);
         }
-
         try {
-            mNetworkManager.setFirewallUidRule(chain, uid, rule);
-        } catch (IllegalStateException e) {
-            Log.wtf(TAG, "problem setting firewall uid rules", e);
-        } catch (RemoteException e) {
-            // ignored; service lives in system_server
+            if (chain == FIREWALL_CHAIN_DOZABLE) {
+                mUidFirewallDozableRules.put(uid, rule);
+            } else if (chain == FIREWALL_CHAIN_STANDBY) {
+                mUidFirewallStandbyRules.put(uid, rule);
+            } else if (chain == FIREWALL_CHAIN_POWERSAVE) {
+                mUidFirewallPowerSaveRules.put(uid, rule);
+            }
+
+            try {
+                mNetworkManager.setFirewallUidRule(chain, uid, rule);
+            } catch (IllegalStateException e) {
+                Log.wtf(TAG, "problem setting firewall uid rules", e);
+            } catch (RemoteException e) {
+                // ignored; service lives in system_server
+            }
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_NETWORK);
         }
     }
 
