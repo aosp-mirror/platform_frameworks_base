@@ -2885,9 +2885,10 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         return true;
     }
 
-    ActivityRecord findTaskLocked(ActivityRecord r) {
+    ActivityRecord findTaskLocked(ActivityRecord r, int displayId) {
         mTmpFindTaskResult.r = null;
         mTmpFindTaskResult.matchedByRootAffinity = false;
+        ActivityRecord affinityMatch = null;
         if (DEBUG_TASKS) Slog.d(TAG_TASKS, "Looking for task of " + r);
         for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
             final ArrayList<ActivityStack> stacks = mActivityDisplays.valueAt(displayNdx).mStacks;
@@ -2903,17 +2904,22 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                     continue;
                 }
                 stack.findTaskLocked(r, mTmpFindTaskResult);
-                // It is possible to have task in multiple stacks with the same root affinity.
-                // If the match we found was based on root affinity we keep on looking to see if
-                // there is a better match in another stack. We eventually return the match based
-                // on root affinity if we don't find a better match.
-                if (mTmpFindTaskResult.r != null && !mTmpFindTaskResult.matchedByRootAffinity) {
-                    return mTmpFindTaskResult.r;
+                // It is possible to have tasks in multiple stacks with the same root affinity, so
+                // we should keep looking after finding an affinity match to see if there is a
+                // better match in another stack. Also, task affinity isn't a good enough reason
+                // to target a display which isn't the source of the intent, so skip any affinity
+                // matches not on the specified display.
+                if (mTmpFindTaskResult.r != null) {
+                    if (!mTmpFindTaskResult.matchedByRootAffinity) {
+                        return mTmpFindTaskResult.r;
+                    } else if (mTmpFindTaskResult.r.getDisplayId() == displayId) {
+                        affinityMatch = mTmpFindTaskResult.r;
+                    }
                 }
             }
         }
-        if (DEBUG_TASKS && mTmpFindTaskResult.r == null) Slog.d(TAG_TASKS, "No task found");
-        return mTmpFindTaskResult.r;
+        if (DEBUG_TASKS && affinityMatch == null) Slog.d(TAG_TASKS, "No task found");
+        return affinityMatch;
     }
 
     ActivityRecord findActivityLocked(Intent intent, ActivityInfo info,

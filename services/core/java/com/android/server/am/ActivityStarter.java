@@ -54,6 +54,7 @@ import static android.content.pm.ActivityInfo.DOCUMENT_LAUNCH_ALWAYS;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_INSTANCE;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TASK;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TOP;
+import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_CONFIGURATION;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_FOCUS;
@@ -169,6 +170,7 @@ class ActivityStarter {
     private boolean mDoResume;
     private int mStartFlags;
     private ActivityRecord mSourceRecord;
+    private int mSourceDisplayId;
 
     private TaskRecord mInTask;
     private boolean mAddingToTask;
@@ -208,6 +210,7 @@ class ActivityStarter {
         mDoResume = false;
         mStartFlags = 0;
         mSourceRecord = null;
+        mSourceDisplayId = INVALID_DISPLAY;
 
         mInTask = null;
         mAddingToTask = false;
@@ -451,8 +454,8 @@ class ActivityStarter {
                     Slog.i(TAG, "START u" + userId + " {" + intent.toShortString(true, true,
                             true, false) + "} from uid " + callingUid + " on display "
                             + (container == null ? (mSupervisor.mFocusedStack == null ?
-                            Display.DEFAULT_DISPLAY : mSupervisor.mFocusedStack.mDisplayId) :
-                            (container.mActivityDisplay == null ? Display.DEFAULT_DISPLAY :
+                            DEFAULT_DISPLAY : mSupervisor.mFocusedStack.mDisplayId) :
+                            (container.mActivityDisplay == null ? DEFAULT_DISPLAY :
                                     container.mActivityDisplay.mDisplayId)));
                 }
             }
@@ -1193,6 +1196,11 @@ class ActivityStarter {
         mVoiceSession = voiceSession;
         mVoiceInteractor = voiceInteractor;
 
+        mSourceDisplayId = sourceRecord != null ? sourceRecord.getDisplayId() : INVALID_DISPLAY;
+        if (mSourceDisplayId == INVALID_DISPLAY) {
+            mSourceDisplayId = DEFAULT_DISPLAY;
+        }
+
         mLaunchBounds = getOverrideBounds(r, options, inTask);
 
         mLaunchSingleTop = r.launchMode == LAUNCH_SINGLE_TOP;
@@ -1439,7 +1447,7 @@ class ActivityStarter {
                         !mLaunchSingleTask);
             } else {
                 // Otherwise find the best task to put the activity in.
-                intentActivity = mSupervisor.findTaskLocked(mStartActivity);
+                intentActivity = mSupervisor.findTaskLocked(mStartActivity, mSourceDisplayId);
             }
         }
         return intentActivity;
@@ -1925,33 +1933,31 @@ class ActivityStarter {
             return container.mStack;
         }
 
-        // The fullscreen stack can contain any task regardless of if the task is resizeable
-        // or not. So, we let the task go in the fullscreen task if it is the focus stack.
-        // Same also applies to dynamic stacks, as they behave similar to fullscreen stack.
-        // If the freeform or docked stack has focus, and the activity to be launched is resizeable,
-        // we can also put it in the focused stack.
         if (canLaunchIntoFocusedStack(r, newTask)) {
             if (DEBUG_FOCUS || DEBUG_STACK) Slog.d(TAG_FOCUS,
                     "computeStackFocus: Have a focused stack=" + mSupervisor.mFocusedStack);
             return mSupervisor.mFocusedStack;
         }
 
-        // We first try to put the task in the first dynamic stack on home display.
-        final ArrayList<ActivityStack> homeDisplayStacks = mSupervisor.mHomeStack.mStacks;
-        for (int stackNdx = homeDisplayStacks.size() - 1; stackNdx >= 0; --stackNdx) {
-            stack = homeDisplayStacks.get(stackNdx);
-            if (isDynamicStack(stack.mStackId)) {
-                if (DEBUG_FOCUS || DEBUG_STACK) Slog.d(TAG_FOCUS,
-                        "computeStackFocus: Setting focused stack=" + stack);
-                return stack;
+        if (mSourceDisplayId == DEFAULT_DISPLAY) {
+            // We first try to put the task in the first dynamic stack on home display.
+            final ArrayList<ActivityStack> homeDisplayStacks = mSupervisor.mHomeStack.mStacks;
+            for (int stackNdx = homeDisplayStacks.size() - 1; stackNdx >= 0; --stackNdx) {
+                stack = homeDisplayStacks.get(stackNdx);
+                if (isDynamicStack(stack.mStackId)) {
+                    if (DEBUG_FOCUS || DEBUG_STACK) Slog.d(TAG_FOCUS,
+                            "computeStackFocus: Setting focused stack=" + stack);
+                    return stack;
+                }
             }
+            // If there is no suitable dynamic stack then we figure out which static stack to use.
+            final int stackId = task != null ? task.getLaunchStackId() :
+                    bounds != null ? FREEFORM_WORKSPACE_STACK_ID :
+                            FULLSCREEN_WORKSPACE_STACK_ID;
+            stack = mSupervisor.getStack(stackId, CREATE_IF_NEEDED, ON_TOP);
+        } else {
+            stack = mSupervisor.getValidLaunchStackOnDisplay(mSourceDisplayId, r);
         }
-
-        // If there is no suitable dynamic stack then we figure out which static stack to use.
-        final int stackId = task != null ? task.getLaunchStackId() :
-                bounds != null ? FREEFORM_WORKSPACE_STACK_ID :
-                        FULLSCREEN_WORKSPACE_STACK_ID;
-        stack = mSupervisor.getStack(stackId, CREATE_IF_NEEDED, ON_TOP);
         if (DEBUG_FOCUS || DEBUG_STACK) Slog.d(TAG_FOCUS, "computeStackFocus: New stack r="
                 + r + " stackId=" + stack.mStackId);
         return stack;
@@ -1959,35 +1965,35 @@ class ActivityStarter {
 
     /** Check if provided activity record can launch in currently focused stack. */
     private boolean canLaunchIntoFocusedStack(ActivityRecord r, boolean newTask) {
-        // The fullscreen stack can contain any task regardless of if the task is resizeable
-        // or not. So, we let the task go in the fullscreen task if it is the focus stack.
-        // Same also applies to dynamic stacks, as they behave similar to fullscreen stack.
-        // If the freeform or docked stack has focus, and the activity to be launched is resizeable,
-        // we can also put it in the focused stack.
         final ActivityStack focusedStack = mSupervisor.mFocusedStack;
         final int focusedStackId = mSupervisor.mFocusedStack.mStackId;
         final boolean canUseFocusedStack;
         switch (focusedStackId) {
             case FULLSCREEN_WORKSPACE_STACK_ID:
+                // The fullscreen stack can contain any task regardless of if the task is resizeable
+                // or not. So, we let the task go in the fullscreen task if it is the focus stack.
                 canUseFocusedStack = true;
                 break;
             case ASSISTANT_STACK_ID:
                 canUseFocusedStack = r.isAssistantActivity();
                 break;
             case DOCKED_STACK_ID:
+                // Any activty which supports split screen can go in the docked stack.
                 canUseFocusedStack = r.supportsSplitScreen();
                 break;
             case FREEFORM_WORKSPACE_STACK_ID:
+                // Any activty which supports freeform can go in the freeform stack.
                 canUseFocusedStack = r.supportsFreeform();
                 break;
             default:
-                canUseFocusedStack = isDynamicStack(focusedStackId)
-                        && mSupervisor.isCallerAllowedToLaunchOnDisplay(r.launchedFromPid,
-                        r.launchedFromUid, focusedStack.mDisplayId);
+                // Dynamic stacks behave similarly to the fullscreen stack and can contain any task.
+                canUseFocusedStack = isDynamicStack(focusedStackId);
         }
 
         return canUseFocusedStack
-                && (!newTask || focusedStack.mActivityContainer.isEligibleForNewTasks());
+                && (!newTask || focusedStack.mActivityContainer.isEligibleForNewTasks())
+                // We strongly prefer to launch activities on the same display as their source.
+                && (mSourceDisplayId == focusedStack.mDisplayId);
     }
 
     private ActivityStack getLaunchStack(ActivityRecord r, int launchFlags, TaskRecord task,
@@ -2034,7 +2040,8 @@ class ActivityStarter {
             return mSupervisor.getValidLaunchStackOnDisplay(launchDisplayId, r);
         }
 
-        if ((launchFlags & FLAG_ACTIVITY_LAUNCH_ADJACENT) == 0) {
+        if ((launchFlags & FLAG_ACTIVITY_LAUNCH_ADJACENT) == 0
+                || mSourceDisplayId != DEFAULT_DISPLAY) {
             return null;
         }
         // Otherwise handle adjacent launch.
