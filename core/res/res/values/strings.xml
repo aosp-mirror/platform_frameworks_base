@@ -392,12 +392,12 @@
         This indicates that a work profile has been deleted. [CHAR LIMIT=NONE]-->
     <string name="work_profile_deleted_description_dpm_wipe">Your work profile is no longer available on this device.</string>
 
-    <!-- Content title for a notification. This indicates that network logging was activated by
-        a device owner. [CHAR LIMIT=NONE]-->
-    <string name="network_logging_notification_title">Network traffic is being monitored</string>
-    <!-- Content text for a notification. Tapping opens a dialog with more information on network
-        logging. [CHAR LIMIT=NONE]-->
-    <string name="network_logging_notification_text">Tap to learn more</string>
+    <!-- Content title for a notification. This notification indicates that the device is managed 
+         and network logging was activated by a device owner. [CHAR LIMIT=NONE]-->
+    <string name="network_logging_notification_title">Device is managed</string>
+    <!-- Content text for a notification. Tapping opens a dialog with more information on device management and network
+         logging. [CHAR LIMIT=NONE]-->
+    <string name="network_logging_notification_text">Your organization manages this device and may monitor network traffic. Tap for details.</string>
 
     <!-- Factory reset warning dialog strings--> <skip />
     <!-- Shows up in the dialog's title to warn about an impeding factory reset. [CHAR LIMIT=NONE] -->

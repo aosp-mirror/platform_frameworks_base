@@ -10800,12 +10800,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 UserHandle.CURRENT);
         Notification notification =
                 new Notification.Builder(mContext, SystemNotificationChannels.DEVICE_ADMIN)
-                .setSmallIcon(R.drawable.ic_qs_network_logging)
+                .setSmallIcon(R.drawable.ic_info_outline)
                 .setContentTitle(mContext.getString(R.string.network_logging_notification_title))
                 .setContentText(mContext.getString(R.string.network_logging_notification_text))
                 .setTicker(mContext.getString(R.string.network_logging_notification_title))
                 .setShowWhen(true)
                 .setContentIntent(pendingIntent)
+                .setStyle(new Notification.BigTextStyle()
+                        .bigText(mContext.getString(R.string.network_logging_notification_text)))
                 .build();
         mInjector.getNotificationManager().notify(NETWORK_LOGGING_NOTIFICATION_ID, notification);
         saveSettingsLocked(mOwners.getDeviceOwnerUserId());
