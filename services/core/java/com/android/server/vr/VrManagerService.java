@@ -40,6 +40,7 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.notification.NotificationListenerService;
+import android.service.vr.IPersistentVrStateCallbacks;
 import android.service.vr.IVrListener;
 import android.service.vr.IVrManager;
 import android.service.vr.IVrStateCallbacks;
@@ -123,10 +124,10 @@ public class VrManagerService extends SystemService implements EnabledComponentC
     private int mCurrentVrModeUser;
     private boolean mWasDefaultGranted;
     private boolean mGuard;
-    private final RemoteCallbackList<IVrStateCallbacks> mRemoteCallbacks =
+    private final RemoteCallbackList<IVrStateCallbacks> mVrStateRemoteCallbacks =
             new RemoteCallbackList<>();
-    private final ArrayList<PersistentVrStateListener> mPersistentVrStateListeners =
-            new ArrayList<>();
+    private final RemoteCallbackList<IPersistentVrStateCallbacks>
+            mPersistentVrStateRemoteCallbacks = new RemoteCallbackList<>();
     private int mPreviousCoarseLocationMode = INVALID_APPOPS_MODE;
     private int mPreviousManageOverlayMode = INVALID_APPOPS_MODE;
     private VrState mPendingState;
@@ -202,16 +203,16 @@ public class VrManagerService extends SystemService implements EnabledComponentC
             switch(msg.what) {
                 case MSG_VR_STATE_CHANGE : {
                     boolean state = (msg.arg1 == 1);
-                    int i = mRemoteCallbacks.beginBroadcast();
+                    int i = mVrStateRemoteCallbacks.beginBroadcast();
                     while (i > 0) {
                         i--;
                         try {
-                            mRemoteCallbacks.getBroadcastItem(i).onVrStateChanged(state);
+                            mVrStateRemoteCallbacks.getBroadcastItem(i).onVrStateChanged(state);
                         } catch (RemoteException e) {
                             // Noop
                         }
                     }
-                    mRemoteCallbacks.finishBroadcast();
+                    mVrStateRemoteCallbacks.finishBroadcast();
                 } break;
                 case MSG_PENDING_VR_STATE_CHANGE : {
                     synchronized(mLock) {
@@ -222,10 +223,17 @@ public class VrManagerService extends SystemService implements EnabledComponentC
                 } break;
                 case MSG_PERSISTENT_VR_MODE_STATE_CHANGE : {
                     boolean state = (msg.arg1 == 1);
-                    for (int i = 0; i < mPersistentVrStateListeners.size(); i++) {
-                        mPersistentVrStateListeners.get(i).onPersistentVrStateChanged(
-                                state);
+                    int i = mPersistentVrStateRemoteCallbacks.beginBroadcast();
+                    while (i > 0) {
+                        i--;
+                        try {
+                            mPersistentVrStateRemoteCallbacks.getBroadcastItem(i)
+                                    .onPersistentVrStateChanged(state);
+                        } catch (RemoteException e) {
+                            // Noop
+                        }
                     }
+                    mPersistentVrStateRemoteCallbacks.finishBroadcast();
                 } break;
                 default :
                     throw new IllegalStateException("Unknown message type: " + msg.what);
@@ -383,6 +391,26 @@ public class VrManagerService extends SystemService implements EnabledComponentC
         }
 
         @Override
+        public void registerPersistentVrStateListener(IPersistentVrStateCallbacks cb) {
+            enforceCallerPermission(Manifest.permission.ACCESS_VR_MANAGER);
+            if (cb == null) {
+                throw new IllegalArgumentException("Callback binder object is null.");
+            }
+
+            VrManagerService.this.addPersistentStateCallback(cb);
+        }
+
+        @Override
+        public void unregisterPersistentVrStateListener(IPersistentVrStateCallbacks cb) {
+            enforceCallerPermission(Manifest.permission.ACCESS_VR_MANAGER);
+            if (cb == null) {
+                throw new IllegalArgumentException("Callback binder object is null.");
+            }
+
+            VrManagerService.this.removePersistentStateCallback(cb);
+        }
+
+        @Override
         public boolean getVrModeState() {
             return VrManagerService.this.getVrMode();
         }
@@ -414,13 +442,21 @@ public class VrManagerService extends SystemService implements EnabledComponentC
             String tab = "  ";
             dumpStateTransitions(pw);
             pw.println("\n\nRemote Callbacks:");
-            int i=mRemoteCallbacks.beginBroadcast(); // create the broadcast item array
+            int i=mVrStateRemoteCallbacks.beginBroadcast(); // create the broadcast item array
             while(i-->0) {
                 pw.print(tab);
-                pw.print(mRemoteCallbacks.getBroadcastItem(i));
+                pw.print(mVrStateRemoteCallbacks.getBroadcastItem(i));
                 if (i>0) pw.println(",");
             }
-            mRemoteCallbacks.finishBroadcast();
+            mVrStateRemoteCallbacks.finishBroadcast();
+            pw.println("\n\nPersistent Vr State Remote Callbacks:");
+            i=mPersistentVrStateRemoteCallbacks.beginBroadcast();
+            while(i-->0) {
+                pw.print(tab);
+                pw.print(mPersistentVrStateRemoteCallbacks.getBroadcastItem(i));
+                if (i>0) pw.println(",");
+            }
+            mPersistentVrStateRemoteCallbacks.finishBroadcast();
             pw.println("\n");
             pw.println("Installed VrListenerService components:");
             int userId = mCurrentVrModeUser;
@@ -441,16 +477,6 @@ public class VrManagerService extends SystemService implements EnabledComponentC
                 for (ComponentName n : enabled) {
                     pw.print(tab);
                     pw.println(n.flattenToString());
-                }
-            }
-            pw.println("Attached persistent mode listeners:");
-            if (mPersistentVrStateListeners == null ||
-                    mPersistentVrStateListeners.size() == 0) {
-                pw.println("None");
-            } else {
-                for (PersistentVrStateListener l : mPersistentVrStateListeners) {
-                    pw.print(tab);
-                    pw.println("listener: " + l);
                 }
             }
             pw.println("\n");
@@ -507,8 +533,8 @@ public class VrManagerService extends SystemService implements EnabledComponentC
         }
 
         @Override
-        public void addPersistentVrModeStateListener(PersistentVrStateListener listener) {
-            VrManagerService.this.addPersistentVrModeStateListener(listener);
+        public void addPersistentVrModeStateListener(IPersistentVrStateCallbacks listener) {
+            VrManagerService.this.addPersistentStateCallback(listener);
         }
     }
 
@@ -1084,12 +1110,6 @@ public class VrManagerService extends SystemService implements EnabledComponentC
                 (mPersistentVrModeEnabled) ? 1 : 0, 0));
     }
 
-    private void addPersistentVrModeStateListener(PersistentVrStateListener listener) {
-        synchronized (mLock) {
-            mPersistentVrStateListeners.add(listener);
-        }
-    }
-
     private int hasVrPackage(@NonNull ComponentName targetPackageName, int userId) {
         synchronized (mLock) {
             return mComponentObserver.isValid(targetPackageName, userId);
@@ -1111,11 +1131,19 @@ public class VrManagerService extends SystemService implements EnabledComponentC
      */
 
     private void addStateCallback(IVrStateCallbacks cb) {
-        mRemoteCallbacks.register(cb);
+        mVrStateRemoteCallbacks.register(cb);
     }
 
     private void removeStateCallback(IVrStateCallbacks cb) {
-        mRemoteCallbacks.unregister(cb);
+        mVrStateRemoteCallbacks.unregister(cb);
+    }
+
+    private void addPersistentStateCallback(IPersistentVrStateCallbacks cb) {
+        mPersistentVrStateRemoteCallbacks.register(cb);
+    }
+
+    private void removePersistentStateCallback(IPersistentVrStateCallbacks cb) {
+        mPersistentVrStateRemoteCallbacks.unregister(cb);
     }
 
     private boolean getVrMode() {
