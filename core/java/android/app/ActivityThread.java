@@ -5062,7 +5062,9 @@ public final class ActivityThread {
 
         // Perform updates.
         r.overrideConfig = data.overrideConfig;
-        final ViewRootImpl viewRoot = r.activity.mDecor.getViewRootImpl();
+        final ViewRootImpl viewRoot = r.activity.mDecor != null
+            ? r.activity.mDecor.getViewRootImpl() : null;
+
         if (movedToDifferentDisplay) {
             if (DEBUG_CONFIGURATION) Slog.v(TAG, "Handle activity moved to display, activity:"
                     + r.activityInfo.name + ", displayId=" + displayId
