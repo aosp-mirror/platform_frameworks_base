@@ -91,6 +91,8 @@ public class NotificationPlayer implements OnCompletionListener, OnErrorListener
                     player.setAudioAttributes(mCmd.attributes);
                     player.setDataSource(mCmd.context, mCmd.uri);
                     player.setLooping(mCmd.looping);
+                    player.setOnCompletionListener(NotificationPlayer.this);
+                    player.setOnErrorListener(NotificationPlayer.this);
                     player.prepare();
                     if ((mCmd.uri != null) && (mCmd.uri.getEncodedPath() != null)
                             && (mCmd.uri.getEncodedPath().length() > 0)) {
@@ -118,12 +120,15 @@ public class NotificationPlayer implements OnCompletionListener, OnErrorListener
                     //  can lead to AudioFocus being released too early, before the second sound is
                     //  done playing. This class should be modified to use a single thread, on which
                     //  command are issued, and on which it receives the completion callbacks.
-                    player.setOnCompletionListener(NotificationPlayer.this);
-                    player.setOnErrorListener(NotificationPlayer.this);
                     if (DEBUG)  { Log.d(mTag, "notification will be delayed by "
                             + mNotificationRampTimeMs + "ms"); }
-                    player.setStartDelayMs(mNotificationRampTimeMs);
-                    player.start();
+                    try {
+                        Thread.sleep(mNotificationRampTimeMs);
+                        player.start();
+                    } catch (InterruptedException e) {
+                        Log.e(mTag, "Exception while sleeping to sync notification playback "
+                                + " with ducking", e);
+                    }
                     if (mPlayer != null) {
                         mPlayer.release();
                     }
