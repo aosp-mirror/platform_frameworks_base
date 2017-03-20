@@ -204,7 +204,6 @@ public class RankingHelper implements RankingConfig {
                                 CharSequence channelName = parser.getAttributeValue(null, ATT_NAME);
                                 int channelImportance =
                                         safeInt(parser, ATT_IMPORTANCE, DEFAULT_IMPORTANCE);
-
                                 if (!TextUtils.isEmpty(id) && !TextUtils.isEmpty(channelName)) {
                                     NotificationChannel channel = new NotificationChannel(id,
                                             channelName, channelImportance);
@@ -342,7 +341,9 @@ public class RankingHelper implements RankingConfig {
                 }
 
                 for (NotificationChannel channel : r.channels.values()) {
-                    channel.writeXml(out);
+                    if (!forBackup || (forBackup && !channel.isDeleted())) {
+                        channel.writeXml(out);
+                    }
                 }
 
                 out.endTag(null, TAG_PACKAGE);

@@ -173,6 +173,7 @@ public class RankingHelperTest {
         try {
             when(mPm.getApplicationInfoAsUser(eq(pkg), anyInt(), anyInt())).thenReturn(legacy);
             when(mPm.getApplicationInfoAsUser(eq(pkg2), anyInt(), anyInt())).thenReturn(upgrade);
+            when(mPm.getPackageUidAsUser(eq(pkg), anyInt())).thenReturn(uid);
         } catch (PackageManager.NameNotFoundException e) {
         }
     }
@@ -182,14 +183,15 @@ public class RankingHelperTest {
                 IMPORTANCE_LOW);
     }
 
-    private ByteArrayOutputStream writeXmlAndPurge(String pkg, int uid, String... channelIds)
+    private ByteArrayOutputStream writeXmlAndPurge(String pkg, int uid, boolean forBackup,
+            String... channelIds)
             throws Exception {
         XmlSerializer serializer = new FastXmlSerializer();
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         serializer.setOutput(new BufferedOutputStream(baos), "utf-8");
         serializer.startDocument(null, true);
         serializer.startTag(null, "ranking");
-        mHelper.writeXml(serializer, false);
+        mHelper.writeXml(serializer, forBackup);
         serializer.endTag(null, "ranking");
         serializer.endDocument();
         serializer.flush();
@@ -295,8 +297,8 @@ public class RankingHelperTest {
         mHelper.setShowBadge(pkg, uid, true);
         mHelper.setShowBadge(pkg2, uid2, false);
 
-        ByteArrayOutputStream baos = writeXmlAndPurge(pkg, uid, channel1.getId(), channel2.getId(),
-                NotificationChannel.DEFAULT_CHANNEL_ID);
+        ByteArrayOutputStream baos = writeXmlAndPurge(pkg, uid, false, channel1.getId(),
+                channel2.getId(), NotificationChannel.DEFAULT_CHANNEL_ID);
         mHelper.onPackagesChanged(true, UserHandle.myUserId(), new String[]{pkg}, new int[]{uid});
 
         XmlPullParser parser = Xml.newPullParser();
@@ -337,13 +339,52 @@ public class RankingHelperTest {
     }
 
     @Test
+    public void testChannelXml_backup() throws Exception {
+        NotificationChannelGroup ncg = new NotificationChannelGroup("1", "bye");
+        NotificationChannelGroup ncg2 = new NotificationChannelGroup("2", "hello");
+        NotificationChannel channel1 =
+                new NotificationChannel("id1", "name1", NotificationManager.IMPORTANCE_HIGH);
+        NotificationChannel channel2 =
+                new NotificationChannel("id2", "name2", IMPORTANCE_LOW);
+        NotificationChannel channel3 =
+                new NotificationChannel("id3", "name3", IMPORTANCE_LOW);
+        channel3.setGroup(ncg.getId());
+
+        mHelper.createNotificationChannelGroup(pkg, uid, ncg, true);
+        mHelper.createNotificationChannelGroup(pkg, uid, ncg2, true);
+        mHelper.createNotificationChannel(pkg, uid, channel1, true);
+        mHelper.createNotificationChannel(pkg, uid, channel2, false);
+        mHelper.createNotificationChannel(pkg, uid, channel3, true);
+
+        mHelper.deleteNotificationChannel(pkg, uid, channel1.getId());
+        mHelper.deleteNotificationChannelGroup(pkg, uid, ncg.getId());
+        assertEquals(channel2, mHelper.getNotificationChannel(pkg, uid, channel2.getId(), false));
+
+        ByteArrayOutputStream baos = writeXmlAndPurge(pkg, uid, true, channel1.getId(),
+                channel2.getId(), channel3.getId(), NotificationChannel.DEFAULT_CHANNEL_ID);
+        mHelper.onPackagesChanged(true, UserHandle.myUserId(), new String[]{pkg}, new int[]{uid});
+
+        XmlPullParser parser = Xml.newPullParser();
+        parser.setInput(new BufferedInputStream(new ByteArrayInputStream(baos.toByteArray())),
+                null);
+        parser.nextTag();
+        mHelper.readXml(parser, true);
+
+        assertNull(mHelper.getNotificationChannel(pkg, uid, channel1.getId(), false));
+        assertNull(mHelper.getNotificationChannel(pkg, uid, channel3.getId(), false));
+        assertNull(mHelper.getNotificationChannelGroup(ncg.getId(), pkg, uid));
+        //assertEquals(ncg2, mHelper.getNotificationChannelGroup(ncg2.getId(), pkg, uid));
+        assertEquals(channel2, mHelper.getNotificationChannel(pkg, uid, channel2.getId(), false));
+    }
+
+    @Test
     public void testChannelXml_defaultChannelLegacyApp_noUserSettings() throws Exception {
         NotificationChannel channel1 =
                 new NotificationChannel("id1", "name1", NotificationManager.IMPORTANCE_DEFAULT);
 
         mHelper.createNotificationChannel(pkg, uid, channel1, true);
 
-        ByteArrayOutputStream baos = writeXmlAndPurge(pkg, uid, channel1.getId(),
+        ByteArrayOutputStream baos = writeXmlAndPurge(pkg, uid,false, channel1.getId(),
                 NotificationChannel.DEFAULT_CHANNEL_ID);
 
         XmlPullParser parser = Xml.newPullParser();
@@ -371,7 +412,7 @@ public class RankingHelperTest {
         defaultChannel.setImportance(IMPORTANCE_LOW);
         mHelper.updateNotificationChannel(pkg, uid, defaultChannel);
 
-        ByteArrayOutputStream baos = writeXmlAndPurge(pkg, uid, channel1.getId(),
+        ByteArrayOutputStream baos = writeXmlAndPurge(pkg, uid, false, channel1.getId(),
                 NotificationChannel.DEFAULT_CHANNEL_ID);
 
         XmlPullParser parser = Xml.newPullParser();
