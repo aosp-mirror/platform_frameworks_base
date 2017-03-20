@@ -37,6 +37,7 @@ import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MA
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_NOT_APK;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_NO_CERTIFICATES;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_UNEXPECTED_EXCEPTION;
+import static android.os.Build.VERSION_CODES.O;
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_ROTATE;
 
@@ -146,6 +147,8 @@ public class PackageParser {
     public static final int APK_SIGNING_UNKNOWN = 0;
     public static final int APK_SIGNING_V1 = 1;
     public static final int APK_SIGNING_V2 = 2;
+
+    private static final float DEFAULT_PRE_O_MAX_ASPECT_RATIO = 1.86f;
 
     // TODO: switch outError users to PackageParserException
     // TODO: refactor "codePath" to "apkPath"
@@ -3465,6 +3468,8 @@ public class PackageParser {
             ai.privateFlags |= PRIVATE_FLAG_RESIZEABLE_ACTIVITIES_VIA_SDK_VERSION;
         }
 
+        ai.maxAspectRatio = sa.getFloat(R.styleable.AndroidManifestApplication_maxAspectRatio, 0);
+
         ai.networkSecurityConfigRes = sa.getResourceId(
                 com.android.internal.R.styleable.AndroidManifestApplication_networkSecurityConfig,
                 0);
@@ -4161,6 +4166,8 @@ public class PackageParser {
                 a.info.flags |= FLAG_ALWAYS_FOCUSABLE;
             }
 
+            setActivityMaxAspectRatio(a.info, sa, owner);
+
             a.info.lockTaskLaunchMode =
                     sa.getInt(R.styleable.AndroidManifestActivity_lockTaskMode, 0);
 
@@ -4376,6 +4383,27 @@ public class PackageParser {
         }
     }
 
+    private void setActivityMaxAspectRatio(ActivityInfo aInfo, TypedArray sa, Package owner) {
+        if (aInfo.resizeMode == RESIZE_MODE_RESIZEABLE
+                || aInfo.resizeMode == RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION) {
+            // Resizeable activities can be put in any aspect ratio.
+            aInfo.maxAspectRatio = 0;
+            return;
+        }
+
+        // Default to (1.86) 16.7:9 aspect ratio for pre-O apps and unset for O and greater.
+        // NOTE: 16.7:9 was the max aspect ratio Android devices can support pre-O per the CDD.
+        float defaultMaxAspectRatio = owner.applicationInfo.targetSdkVersion < O
+                ? DEFAULT_PRE_O_MAX_ASPECT_RATIO : 0;
+        if (owner.applicationInfo.maxAspectRatio != 0 ) {
+            // Use the application max aspect ration as default if set.
+            defaultMaxAspectRatio = owner.applicationInfo.maxAspectRatio;
+        }
+
+        aInfo.maxAspectRatio = Math.max(1.0f, sa.getFloat(
+                R.styleable.AndroidManifestActivity_maxAspectRatio, defaultMaxAspectRatio));
+    }
+
     /**
      * @param configChanges The bit mask of configChanges fetched from AndroidManifest.xml.
      * @param restartOnConfigChanges The bit mask restartOnConfigChanges fetched from
@@ -4512,6 +4540,7 @@ public class PackageParser {
         info.maxRecents = target.info.maxRecents;
         info.windowLayout = target.info.windowLayout;
         info.resizeMode = target.info.resizeMode;
+        info.maxAspectRatio = target.info.maxAspectRatio;
         info.encryptionAware = info.directBootAware = target.info.directBootAware;
 
         Activity a = new Activity(mParseActivityAliasArgs, info);

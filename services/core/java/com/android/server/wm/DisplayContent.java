@@ -3044,6 +3044,12 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         mTaskStackContainers.removeExistingAppTokensIfPossible();
     }
 
+    @Override
+    void onDescendantOverrideConfigurationChanged() {
+        setLayoutNeeded();
+        mService.requestTraversal();
+    }
+
     static final class TaskForResizePointSearchResult {
         boolean searchDone;
         Task taskForResize;

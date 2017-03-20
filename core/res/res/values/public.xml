@@ -2812,6 +2812,7 @@
         <public name="fontProviderCerts" />
         <public name="iconTint" />
         <public name="iconTintMode" />
+        <public name="maxAspectRatio"/>
     </public-group>
 
     <public-group type="style" first-id="0x010302e0">
