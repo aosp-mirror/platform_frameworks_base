@@ -7085,6 +7085,8 @@ public final class Settings {
 
             INSTANT_APP_SETTINGS.add(DEFAULT_INPUT_METHOD);
             INSTANT_APP_SETTINGS.add(ENABLED_INPUT_METHODS);
+
+            INSTANT_APP_SETTINGS.add(ANDROID_ID);
         }
 
         /**
