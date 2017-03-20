@@ -172,7 +172,6 @@ public class PipMenuActivity extends Activity {
 
         updateFromIntent(getIntent());
         setTitle(R.string.pip_menu_title);
-        notifyActivityCallback(mMessenger);
     }
 
     @Override
@@ -304,6 +303,7 @@ public class PipMenuActivity extends Activity {
 
     private void updateFromIntent(Intent intent) {
         mToControllerMessenger = intent.getParcelableExtra(EXTRA_CONTROLLER_MESSENGER);
+        notifyActivityCallback(mMessenger);
         ParceledListSlice actions = intent.getParcelableExtra(EXTRA_ACTIONS);
         if (actions != null) {
             mActions.clear();
