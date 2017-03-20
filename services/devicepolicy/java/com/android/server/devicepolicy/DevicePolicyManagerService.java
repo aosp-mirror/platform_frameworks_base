@@ -8192,7 +8192,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             // Ensure the caller is a DO/PO or a package access delegate.
             enforceCanManageScope(who, callerPackage, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER,
                     DELEGATION_PACKAGE_ACCESS);
-            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
 
             long id = mInjector.binderClearCallingIdentity();
             try {
