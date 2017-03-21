@@ -25,6 +25,7 @@ import android.util.ArrayMap;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.NightDisplayController;
 import com.android.internal.util.Preconditions;
+import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.plugins.ActivityStarter;
@@ -247,6 +248,9 @@ public class Dependency extends SystemUI {
 
         mProviders.put(PluginDependencyProvider.class, () ->
                 new PluginDependencyProvider(get(PluginManager.class)));
+
+        mProviders.put(LocalBluetoothManager.class, () ->
+                LocalBluetoothManager.getInstance(mContext, null));
 
         // Put all dependencies above here so the factory can override them if it wants.
         SystemUIFactory.getInstance().injectDependencies(mProviders, mContext);
