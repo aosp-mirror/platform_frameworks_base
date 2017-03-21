@@ -26,6 +26,7 @@ import android.app.ActivityManager.TaskSnapshot;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
+import android.os.Debug;
 import android.os.SystemClock;
 import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.MediumTest;
@@ -50,7 +51,6 @@ import java.io.File;
 @RunWith(AndroidJUnit4.class)
 public class TaskSnapshotPersisterLoaderTest extends TaskSnapshotPersisterTestBase {
 
-    private static final String TEST_USER_NAME = "TaskSnapshotPersisterTest User";
     private static final Rect TEST_INSETS = new Rect(10, 20, 30, 40);
 
     @Test
@@ -58,9 +58,10 @@ public class TaskSnapshotPersisterLoaderTest extends TaskSnapshotPersisterTestBa
         mPersister.persistSnapshot(1 , sTestUserId, createSnapshot());
         mPersister.waitForQueueEmpty();
         final File[] files = new File[] { new File(sFilesDir.getPath() + "/snapshots/1.proto"),
-                new File(sFilesDir.getPath() + "/snapshots/1.png") };
+                new File(sFilesDir.getPath() + "/snapshots/1.jpg"),
+                new File(sFilesDir.getPath() + "/snapshots/1_reduced.jpg")};
         assertTrueForFiles(files, File::exists, " must exist");
-        final TaskSnapshot snapshot = mLoader.loadTask(1, sTestUserId);
+        final TaskSnapshot snapshot = mLoader.loadTask(1, sTestUserId, false /* reduced */);
         assertNotNull(snapshot);
         assertEquals(TEST_INSETS, snapshot.getContentInsets());
         assertNotNull(snapshot.getSnapshot());
@@ -79,7 +80,8 @@ public class TaskSnapshotPersisterLoaderTest extends TaskSnapshotPersisterTestBa
         mPersister.onTaskRemovedFromRecents(1, sTestUserId);
         mPersister.waitForQueueEmpty();
         assertFalse(new File(sFilesDir.getPath() + "/snapshots/1.proto").exists());
-        assertFalse(new File(sFilesDir.getPath() + "/snapshots/1.png").exists());
+        assertFalse(new File(sFilesDir.getPath() + "/snapshots/1.jpg").exists());
+        assertFalse(new File(sFilesDir.getPath() + "/snapshots/1_reduced.jpg").exists());
     }
 
     /**
@@ -105,9 +107,10 @@ public class TaskSnapshotPersisterLoaderTest extends TaskSnapshotPersisterTestBa
         assertEquals(-1, removeObsoleteFilesQueueItem.getTaskId("blablablulp"));
         assertEquals(-1, removeObsoleteFilesQueueItem.getTaskId("nothing.err"));
         assertEquals(-1, removeObsoleteFilesQueueItem.getTaskId("/invalid/"));
-        assertEquals(12, removeObsoleteFilesQueueItem.getTaskId("12.png"));
+        assertEquals(12, removeObsoleteFilesQueueItem.getTaskId("12.jpg"));
         assertEquals(12, removeObsoleteFilesQueueItem.getTaskId("12.proto"));
-        assertEquals(1, removeObsoleteFilesQueueItem.getTaskId("1.png"));
+        assertEquals(1, removeObsoleteFilesQueueItem.getTaskId("1.jpg"));
+        assertEquals(1, removeObsoleteFilesQueueItem.getTaskId("1_reduced.jpg"));
     }
 
     @Test
@@ -120,10 +123,12 @@ public class TaskSnapshotPersisterLoaderTest extends TaskSnapshotPersisterTestBa
         mPersister.waitForQueueEmpty();
         final File[] existsFiles = new File[] {
                 new File(sFilesDir.getPath() + "/snapshots/1.proto"),
-                new File(sFilesDir.getPath() + "/snapshots/1.png") };
+                new File(sFilesDir.getPath() + "/snapshots/1.jpg"),
+                new File(sFilesDir.getPath() + "/snapshots/1_reduced.jpg") };
         final File[] nonExistsFiles = new File[] {
                 new File(sFilesDir.getPath() + "/snapshots/2.proto"),
-                new File(sFilesDir.getPath() + "/snapshots/2.png") };
+                new File(sFilesDir.getPath() + "/snapshots/2.jpg"),
+                new File(sFilesDir.getPath() + "/snapshots/2_reduced.jpg")};
         assertTrueForFiles(existsFiles, File::exists, " must exist");
         assertTrueForFiles(nonExistsFiles, file -> !file.exists(), " must not exist");
     }
@@ -138,9 +143,11 @@ public class TaskSnapshotPersisterLoaderTest extends TaskSnapshotPersisterTestBa
         mPersister.waitForQueueEmpty();
         final File[] existsFiles = new File[] {
                 new File(sFilesDir.getPath() + "/snapshots/1.proto"),
-                new File(sFilesDir.getPath() + "/snapshots/1.png"),
+                new File(sFilesDir.getPath() + "/snapshots/1.jpg"),
+                new File(sFilesDir.getPath() + "/snapshots/1_reduced.jpg"),
                 new File(sFilesDir.getPath() + "/snapshots/2.proto"),
-                new File(sFilesDir.getPath() + "/snapshots/2.png") };
+                new File(sFilesDir.getPath() + "/snapshots/2.jpg"),
+                new File(sFilesDir.getPath() + "/snapshots/2_reduced.jpg")};
         assertTrueForFiles(existsFiles, File::exists, " must exist");
     }
 }

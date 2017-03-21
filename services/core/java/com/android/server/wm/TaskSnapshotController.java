@@ -106,8 +106,9 @@ class TaskSnapshotController {
      * Retrieves a snapshot. If {@param restoreFromDisk} equals {@code true}, DO HOLD THE WINDOW
      * MANAGER LOCK WHEN CALLING THIS METHOD!
      */
-    @Nullable TaskSnapshot getSnapshot(int taskId, int userId, boolean restoreFromDisk) {
-        return mCache.getSnapshot(taskId, userId, restoreFromDisk);
+    @Nullable TaskSnapshot getSnapshot(int taskId, int userId, boolean restoreFromDisk,
+            boolean reducedResolution) {
+        return mCache.getSnapshot(taskId, userId, restoreFromDisk, reducedResolution);
     }
 
     /**
@@ -130,7 +131,7 @@ class TaskSnapshotController {
             return null;
         }
         return new TaskSnapshot(buffer, top.getConfiguration().orientation,
-                top.findMainWindow().mStableInsets);
+                top.findMainWindow().mStableInsets, false /* reduced */, 1f /* scale */);
     }
 
     /**

@@ -188,7 +188,8 @@ public class RecentsTaskLoadPlan {
             Drawable icon = isStackTask
                     ? loader.getAndUpdateActivityIcon(taskKey, t.taskDescription, res, false)
                     : null;
-            Bitmap thumbnail = loader.getAndUpdateThumbnail(taskKey, false /* loadIfNotCached */);
+            ThumbnailData thumbnail = loader.getAndUpdateThumbnail(taskKey,
+                    false /* loadIfNotCached */);
             int activityColor = loader.getActivityPrimaryColor(t.taskDescription);
             int backgroundColor = loader.getActivityBackgroundColor(t.taskDescription);
             boolean isSystemApp = (info != null) &&

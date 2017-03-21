@@ -600,9 +600,12 @@ interface IActivityManager {
     void cancelTaskThumbnailTransition(int taskId);
 
     /**
+     * @param taskId the id of the task to retrieve the snapshots for
+     * @param reducedResolution if set, if the snapshot needs to be loaded from disk, this will load
+     *                          a reduced resolution of it, which is much faster
      * @return a graphic buffer representing a screenshot of a task
      */
-    ActivityManager.TaskSnapshot getTaskSnapshot(int taskId);
+    ActivityManager.TaskSnapshot getTaskSnapshot(int taskId, boolean reducedResolution);
 
     void scheduleApplicationInfoChanged(in List<String> packageNames, int userId);
     void setPersistentVrThread(int tid);

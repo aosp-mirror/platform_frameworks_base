@@ -10028,7 +10028,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
-    public TaskSnapshot getTaskSnapshot(int taskId) {
+    public TaskSnapshot getTaskSnapshot(int taskId, boolean reducedResolution) {
         enforceCallingPermission(READ_FRAME_BUFFER, "getTaskSnapshot()");
         final long ident = Binder.clearCallingIdentity();
         try {
@@ -10042,7 +10042,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             }
             // Don't call this while holding the lock as this operation might hit the disk.
-            return task.getSnapshot();
+            return task.getSnapshot(reducedResolution);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }

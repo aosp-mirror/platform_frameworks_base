@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static com.android.server.wm.TaskSnapshotPersister.*;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
@@ -59,11 +60,14 @@ class TaskSnapshotLoader {
      *
      * @param taskId The id of the task to load.
      * @param userId The id of the user the task belonged to.
+     * @param reducedResolution Whether to load a reduced resolution version of the snapshot.
      * @return The loaded {@link TaskSnapshot} or {@code null} if it couldn't be loaded.
      */
-    TaskSnapshot loadTask(int taskId, int userId) {
+    TaskSnapshot loadTask(int taskId, int userId, boolean reducedResolution) {
         final File protoFile = mPersister.getProtoFile(taskId, userId);
-        final File bitmapFile = mPersister.getBitmapFile(taskId, userId);
+        final File bitmapFile = reducedResolution
+                ? mPersister.getReducedResolutionBitmapFile(taskId, userId)
+                : mPersister.getBitmapFile(taskId, userId);
         if (!protoFile.exists() || !bitmapFile.exists()) {
             return null;
         }
@@ -84,7 +88,8 @@ class TaskSnapshotLoader {
                 return null;
             }
             return new TaskSnapshot(buffer, proto.orientation,
-                    new Rect(proto.insetLeft, proto.insetTop, proto.insetRight, proto.insetBottom));
+                    new Rect(proto.insetLeft, proto.insetTop, proto.insetRight, proto.insetBottom),
+                    reducedResolution, reducedResolution ? REDUCED_SCALE : 1f);
         } catch (IOException e) {
             Slog.w(TAG, "Unable to load task snapshot data for taskId=" + taskId);
             return null;
