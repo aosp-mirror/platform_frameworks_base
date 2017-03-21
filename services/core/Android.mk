@@ -22,7 +22,8 @@ LOCAL_JAVA_LIBRARIES := \
     services.net \
     android.hardware.light@2.0-java \
     android.hardware.power@1.0-java \
-    android.hardware.tv.cec@1.0-java
+    android.hardware.tv.cec@1.0-java \
+    android.hidl.manager@1.0-java
 
 LOCAL_STATIC_JAVA_LIBRARIES := \
     tzdata_shared2 \

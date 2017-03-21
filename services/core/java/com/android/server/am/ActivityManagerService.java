@@ -5468,11 +5468,12 @@ public class ActivityManagerService extends IActivityManager.Stub
      *    appended to any existing file content.
      * @param firstPids of dalvik VM processes to dump stack traces for first
      * @param lastPids of dalvik VM processes to dump stack traces for last
-     * @param nativeProcs optional list of native process names to dump stack crawls
+     * @param nativePids optional list of native pids to dump stack crawls
      * @return file containing stack traces, or null if no dump file is configured
      */
     public static File dumpStackTraces(boolean clearTraces, ArrayList<Integer> firstPids,
-            ProcessCpuTracker processCpuTracker, SparseArray<Boolean> lastPids, String[] nativeProcs) {
+            ProcessCpuTracker processCpuTracker, SparseArray<Boolean> lastPids,
+            ArrayList<Integer> nativePids) {
         String tracesPath = SystemProperties.get("dalvik.vm.stack-trace-file", null);
         if (tracesPath == null || tracesPath.length() == 0) {
             return null;
@@ -5488,7 +5489,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             return null;
         }
 
-        dumpStackTraces(tracesPath, firstPids, processCpuTracker, lastPids, nativeProcs);
+        dumpStackTraces(tracesPath, firstPids, processCpuTracker, lastPids, nativePids);
         return tracesFile;
     }
 
@@ -5530,7 +5531,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     private static void dumpStackTraces(String tracesPath, ArrayList<Integer> firstPids,
-            ProcessCpuTracker processCpuTracker, SparseArray<Boolean> lastPids, String[] nativeProcs) {
+            ProcessCpuTracker processCpuTracker, SparseArray<Boolean> lastPids,
+            ArrayList<Integer> nativePids) {
         // Use a FileObserver to detect when traces finish writing.
         // The order of traces is considered important to maintain for legibility.
         DumpStackFileObserver observer = new DumpStackFileObserver(tracesPath);
@@ -5551,18 +5553,15 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
 
             // Next collect the stacks of the native pids
-            if (nativeProcs != null) {
-                int[] pids = Process.getPidsForCommands(nativeProcs);
-                if (pids != null) {
-                    for (int pid : pids) {
-                        if (DEBUG_ANR) Slog.d(TAG, "Collecting stacks for native pid " + pid);
-                        final long sime = SystemClock.elapsedRealtime();
+            if (nativePids != null) {
+                for (int pid : nativePids) {
+                    if (DEBUG_ANR) Slog.d(TAG, "Collecting stacks for native pid " + pid);
+                    final long sime = SystemClock.elapsedRealtime();
 
-                        Debug.dumpNativeBacktraceToFileTimeout(
-                                pid, tracesPath, DumpStackFileObserver.TRACE_DUMP_TIMEOUT_SECONDS);
-                        if (DEBUG_ANR) Slog.d(TAG, "Done with native pid " + pid
-                                + " in " + (SystemClock.elapsedRealtime()-sime) + "ms");
-                    }
+                    Debug.dumpNativeBacktraceToFileTimeout(
+                            pid, tracesPath, DumpStackFileObserver.TRACE_DUMP_TIMEOUT_SECONDS);
+                    if (DEBUG_ANR) Slog.d(TAG, "Done with native pid " + pid
+                            + " in " + (SystemClock.elapsedRealtime()-sime) + "ms");
                 }
             }
 
