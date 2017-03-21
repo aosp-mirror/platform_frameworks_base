@@ -2670,11 +2670,11 @@ public final class PowerManagerService extends SystemService
             public void run() {
                 synchronized (this) {
                     if (haltMode == HALT_MODE_REBOOT_SAFE_MODE) {
-                        ShutdownThread.rebootSafeMode(mContext, confirm);
+                        ShutdownThread.rebootSafeMode(getUiContext(), confirm);
                     } else if (haltMode == HALT_MODE_REBOOT) {
-                        ShutdownThread.reboot(mContext, reason, confirm);
+                        ShutdownThread.reboot(getUiContext(), reason, confirm);
                     } else {
-                        ShutdownThread.shutdown(mContext, reason, confirm);
+                        ShutdownThread.shutdown(getUiContext(), reason, confirm);
                     }
                 }
             }

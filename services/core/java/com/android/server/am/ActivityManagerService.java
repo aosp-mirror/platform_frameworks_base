@@ -1343,7 +1343,13 @@ public class ActivityManagerService extends IActivityManager.Stub
     @GuardedBy("this") boolean mLaunchWarningShown = false;
     @GuardedBy("this") boolean mCheckedForSetup = false;
 
-    Context mContext;
+    final Context mContext;
+
+    /**
+     * This Context is themable and meant for UI display (AlertDialogs, etc.). The theme can
+     * change at runtime. Use mContext for non-UI purposes.
+     */
+    final Context mUiContext;
 
     /**
      * The time at which we will allow normal application switches again,
@@ -1844,7 +1850,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             } break;
             case SHOW_FACTORY_ERROR_UI_MSG: {
                 Dialog d = new FactoryErrorDialog(
-                    mContext, msg.getData().getCharSequence("msg"));
+                        mUiContext, msg.getData().getCharSequence("msg"));
                 d.show();
                 ensureBootCompleted();
             } break;
@@ -1855,7 +1861,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         if (!app.waitedForDebugger) {
                             Dialog d = new AppWaitingForDebuggerDialog(
                                     ActivityManagerService.this,
-                                    mContext, app);
+                                    mUiContext, app);
                             app.waitDialog = d;
                             app.waitedForDebugger = true;
                             d.show();
@@ -1870,24 +1876,24 @@ public class ActivityManagerService extends IActivityManager.Stub
             } break;
             case SHOW_UID_ERROR_UI_MSG: {
                 if (mShowDialogs) {
-                    AlertDialog d = new BaseErrorDialog(mContext);
+                    AlertDialog d = new BaseErrorDialog(mUiContext);
                     d.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ERROR);
                     d.setCancelable(false);
-                    d.setTitle(mContext.getText(R.string.android_system_label));
-                    d.setMessage(mContext.getText(R.string.system_error_wipe_data));
-                    d.setButton(DialogInterface.BUTTON_POSITIVE, mContext.getText(R.string.ok),
+                    d.setTitle(mUiContext.getText(R.string.android_system_label));
+                    d.setMessage(mUiContext.getText(R.string.system_error_wipe_data));
+                    d.setButton(DialogInterface.BUTTON_POSITIVE, mUiContext.getText(R.string.ok),
                             obtainMessage(DISMISS_DIALOG_UI_MSG, d));
                     d.show();
                 }
             } break;
             case SHOW_FINGERPRINT_ERROR_UI_MSG: {
                 if (mShowDialogs) {
-                    AlertDialog d = new BaseErrorDialog(mContext);
+                    AlertDialog d = new BaseErrorDialog(mUiContext);
                     d.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ERROR);
                     d.setCancelable(false);
-                    d.setTitle(mContext.getText(R.string.android_system_label));
-                    d.setMessage(mContext.getText(R.string.system_error_manufacturer));
-                    d.setButton(DialogInterface.BUTTON_POSITIVE, mContext.getText(R.string.ok),
+                    d.setTitle(mUiContext.getText(R.string.android_system_label));
+                    d.setMessage(mUiContext.getText(R.string.system_error_manufacturer));
+                    d.setButton(DialogInterface.BUTTON_POSITIVE, mUiContext.getText(R.string.ok),
                             obtainMessage(DISMISS_DIALOG_UI_MSG, d));
                     d.show();
                 }
@@ -1911,7 +1917,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                             if (mode == ActivityManager.COMPAT_MODE_DISABLED
                                     || mode == ActivityManager.COMPAT_MODE_ENABLED) {
                                 mCompatModeDialog = new CompatModeDialog(
-                                        ActivityManagerService.this, mContext,
+                                        ActivityManagerService.this, mUiContext,
                                         ar.info.applicationInfo);
                                 mCompatModeDialog.show();
                             }
@@ -1931,7 +1937,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                             ar.packageName)) {
                         // TODO(multi-display): Show dialog on appropriate display.
                         mUnsupportedDisplaySizeDialog = new UnsupportedDisplaySizeDialog(
-                                ActivityManagerService.this, mContext, ar.info.applicationInfo);
+                                ActivityManagerService.this, mUiContext, ar.info.applicationInfo);
                         mUnsupportedDisplaySizeDialog.show();
                     }
                 }
@@ -2744,6 +2750,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     public ActivityManagerService(Injector injector) {
         mInjector = injector;
         mContext = mInjector.getContext();
+        mUiContext = null;
         GL_ES_VERSION = 0;
         mActivityStarter = null;
         mAppErrors = null;
@@ -2775,8 +2782,10 @@ public class ActivityManagerService extends IActivityManager.Stub
         LockGuard.installLock(this, LockGuard.INDEX_ACTIVITY);
         mInjector = new Injector();
         mContext = systemContext;
+
         mFactoryTest = FactoryTest.getMode();
         mSystemThread = ActivityThread.currentActivityThread();
+        mUiContext = mSystemThread.getSystemUiContext();
 
         Slog.i(TAG, "Memory class: " + ActivityManager.staticGetMemoryClass());
 
@@ -2819,7 +2828,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         mServices = new ActiveServices(this);
         mProviderMap = new ProviderMap(this);
-        mAppErrors = new AppErrors(mContext, this);
+        mAppErrors = new AppErrors(mUiContext, this);
 
         // TODO: Move creation of battery stats service outside of activity manager service.
         File dataDir = Environment.getDataDirectory();
@@ -23824,7 +23833,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         final boolean updateFrameworkRes = packagesToUpdate.contains("android");
         for (int i = mLruProcesses.size() - 1; i >= 0; i--) {
             final ProcessRecord app = mLruProcesses.get(i);
-            if (app.thread == null || app.pid == Process.myPid()) {
+            if (app.thread == null) {
                 continue;
             }
 

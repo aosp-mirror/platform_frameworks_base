@@ -2194,6 +2194,18 @@ class ContextImpl extends Context {
         return context;
     }
 
+    /**
+     * System Context to be used for UI. This Context has resources that can be themed.
+     */
+    static ContextImpl createSystemUiContext(ActivityThread mainThread) {
+        LoadedApk packageInfo = new LoadedApk(mainThread);
+        ContextImpl context = new ContextImpl(null, mainThread, packageInfo, null, null, null, 0,
+                null);
+        context.setResources(createResources(null, packageInfo, null, Display.DEFAULT_DISPLAY, null,
+                packageInfo.getCompatibilityInfo()));
+        return context;
+    }
+
     static ContextImpl createAppContext(ActivityThread mainThread, LoadedApk packageInfo) {
         if (packageInfo == null) throw new IllegalArgumentException("packageInfo");
         ContextImpl context = new ContextImpl(null, mainThread, packageInfo, null, null, null, 0,

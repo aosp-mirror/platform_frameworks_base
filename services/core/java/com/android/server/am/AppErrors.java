@@ -98,6 +98,7 @@ class AppErrors {
 
 
     AppErrors(Context context, ActivityManagerService service) {
+        context.assertRuntimeOverlayThemable();
         mService = service;
         mContext = context;
     }

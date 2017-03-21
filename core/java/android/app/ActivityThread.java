@@ -221,6 +221,7 @@ public final class ActivityThread {
     private long mNetworkBlockSeq = INVALID_PROC_STATE_SEQ;
 
     private ContextImpl mSystemContext;
+    private ContextImpl mSystemUiContext;
 
     static volatile IPackageManager sPackageManager;
 
@@ -2178,9 +2179,19 @@ public final class ActivityThread {
         }
     }
 
+    public ContextImpl getSystemUiContext() {
+        synchronized (this) {
+            if (mSystemUiContext == null) {
+                mSystemUiContext = ContextImpl.createSystemUiContext(this);
+            }
+            return mSystemUiContext;
+        }
+    }
+
     public void installSystemApplicationInfo(ApplicationInfo info, ClassLoader classLoader) {
         synchronized (this) {
             getSystemContext().installSystemApplicationInfo(info, classLoader);
+            getSystemUiContext().installSystemApplicationInfo(info, classLoader);
 
             // give ourselves a default profiler
             mProfiler = new Profiler();
@@ -5003,6 +5014,11 @@ public final class ActivityThread {
             if ((systemTheme.getChangingConfigurations() & configDiff) != 0) {
                 systemTheme.rebase();
             }
+
+            final Theme systemUiTheme = getSystemUiContext().getTheme();
+            if ((systemUiTheme.getChangingConfigurations() & configDiff) != 0) {
+                systemUiTheme.rebase();
+            }
         }
 
         ArrayList<ComponentCallbacks2> callbacks = collectComponentCallbacks(false, config);
@@ -5058,9 +5074,10 @@ public final class ActivityThread {
 
         // Trigger a regular Configuration change event, only with a different assetsSeq number
         // so that we actually call through to all components.
+        // TODO(adamlesinski): Change this to make use of ActivityManager's upcoming ability to
+        // store configurations per-process.
         Configuration newConfig = new Configuration();
-        newConfig.unset();
-        newConfig.assetsSeq = mConfiguration.assetsSeq + 1;
+        newConfig.assetsSeq = (mConfiguration != null ? mConfiguration.assetsSeq : 0) + 1;
         handleConfigurationChanged(newConfig, null);
 
         // Schedule all activities to reload
