@@ -7198,6 +7198,9 @@
         <!-- Whether the preference has enabled to have its view recycled when used in the list
              view. This is true by default. -->
         <attr name="recycleEnabled" format="boolean" />
+        <!-- Whether to use single line for the preference title text. By default, preference title
+             will be constrained to one line, so the default value of this attribute is true. -->
+        <attr name="singleLineTitle" format="boolean" />
     </declare-styleable>
 
     <!-- Base attributes available to CheckBoxPreference. -->

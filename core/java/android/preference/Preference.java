@@ -82,6 +82,7 @@ import java.util.Set;
  * @attr ref android.R.styleable#Preference_defaultValue
  * @attr ref android.R.styleable#Preference_shouldDisableView
  * @attr ref android.R.styleable#Preference_recycleEnabled
+ * @attr ref android.R.styleable#Preference_singleLineTitle
  */
 public class Preference implements Comparable<Preference> {
     /**
@@ -133,6 +134,7 @@ public class Preference implements Comparable<Preference> {
     private boolean mDependencyMet = true;
     private boolean mParentDependencyMet = true;
     private boolean mRecycleEnabled = true;
+    private boolean mSingleLineTitle = true;
 
     /**
      * @see #setShouldDisableView(boolean)
@@ -295,6 +297,10 @@ public class Preference implements Comparable<Preference> {
 
                 case com.android.internal.R.styleable.Preference_recycleEnabled:
                     mRecycleEnabled = a.getBoolean(attr, mRecycleEnabled);
+                    break;
+
+                case com.android.internal.R.styleable.Preference_singleLineTitle:
+                    mSingleLineTitle = a.getBoolean(attr, mSingleLineTitle);
                     break;
             }
         }
@@ -597,6 +603,7 @@ public class Preference implements Comparable<Preference> {
             if (!TextUtils.isEmpty(title)) {
                 titleView.setText(title);
                 titleView.setVisibility(View.VISIBLE);
+                titleView.setSingleLine(mSingleLineTitle);
             } else {
                 titleView.setVisibility(View.GONE);
             }
@@ -900,6 +907,27 @@ public class Preference implements Comparable<Preference> {
      */
     public boolean isRecycleEnabled() {
         return mRecycleEnabled;
+    }
+
+    /**
+     * Sets whether to constrain the title of this Preference to a single line instead of
+     * letting it wrap onto multiple lines.
+     *
+     * @param singleLineTitle set {@code true} if the title should be constrained to one line
+     */
+    public void setSingleLineTitle(boolean singleLineTitle) {
+        mSingleLineTitle = singleLineTitle;
+        notifyChanged();
+    }
+
+    /**
+     * Gets whether the title of this preference is constrained to a single line.
+     *
+     * @see #setSingleLineTitle(boolean)
+     * @return {@code true} if the title of this preference is constrained to a single line
+     */
+    public boolean isSingleLineTitle() {
+        return mSingleLineTitle;
     }
 
     /**
