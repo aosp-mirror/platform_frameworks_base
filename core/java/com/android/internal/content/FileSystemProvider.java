@@ -129,21 +129,35 @@ public abstract class FileSystemProvider extends DocumentsProvider {
         }
 
         final File file = FileUtils.buildUniqueFile(parent, mimeType, displayName);
+        final String childId;
         if (Document.MIME_TYPE_DIR.equals(mimeType)) {
             if (!file.mkdir()) {
                 throw new IllegalStateException("Failed to mkdir " + file);
             }
+            childId = getDocIdForFile(file);
+            addFolderToMediaStore(getFileForDocId(childId, true));
         } else {
             try {
                 if (!file.createNewFile()) {
                     throw new IllegalStateException("Failed to touch " + file);
                 }
+                childId = getDocIdForFile(file);
             } catch (IOException e) {
                 throw new IllegalStateException("Failed to touch " + file + ": " + e);
             }
         }
 
-        return getDocIdForFile(file);
+        return childId;
+    }
+
+    private void addFolderToMediaStore(File visibleFolder) {
+        assert(visibleFolder.isDirectory());
+
+        final ContentResolver resolver = getContext().getContentResolver();
+        final Uri uri = MediaStore.Files.getDirectoryUri("external");
+        ContentValues values = new ContentValues();
+        values.put(MediaStore.Files.FileColumns.DATA, visibleFolder.getAbsolutePath());
+        resolver.insert(uri, values);
     }
 
     @Override
@@ -193,7 +207,9 @@ public abstract class FileSystemProvider extends DocumentsProvider {
     private void moveInMediaStore(File oldVisibleFile, File newVisibleFile) {
         if (newVisibleFile != null) {
             final ContentResolver resolver = getContext().getContentResolver();
-            final Uri externalUri = MediaStore.Files.getContentUri("external");
+            final Uri externalUri = newVisibleFile.isDirectory()
+                    ? MediaStore.Files.getDirectoryUri("external")
+                    : MediaStore.Files.getContentUri("external");
 
             ContentValues values = new ContentValues();
             values.put(MediaStore.Files.FileColumns.DATA, newVisibleFile.getAbsolutePath());
