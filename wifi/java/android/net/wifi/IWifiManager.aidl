@@ -81,8 +81,6 @@ interface IWifiManager
 
     boolean disableNetwork(int netId);
 
-    boolean pingSupplicant();
-
     void startScan(in ScanSettings requested, in WorkSource ws);
 
     List<ScanResult> getScanResults(String callingPackage);
