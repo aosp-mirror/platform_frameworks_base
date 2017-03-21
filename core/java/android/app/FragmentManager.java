@@ -23,9 +23,11 @@ import android.animation.AnimatorSet;
 import android.animation.PropertyValuesHolder;
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources.NotFoundException;
 import android.content.res.TypedArray;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.Looper;
@@ -673,6 +675,10 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
 
     // Postponed transactions.
     ArrayList<StartEnterTransitionListener> mPostponedTransactions;
+
+    // Prior to O, we allowed executing transactions during fragment manager state changes.
+    // This is dangerous, but we want to keep from breaking old applications.
+    boolean mAllowOldReentrantBehavior;
 
     Runnable mExecCommit = new Runnable() {
         @Override
@@ -2815,67 +2821,90 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
         mHost = host;
         mContainer = container;
         mParent = parent;
+        mAllowOldReentrantBehavior = getTargetSdk() <= Build.VERSION_CODES.N_MR1;
     }
-    
+
+    /**
+     * @return the target SDK of the FragmentManager's application info. If the
+     * FragmentManager has been torn down, then 0 is returned.
+     */
+    int getTargetSdk() {
+        if (mHost != null) {
+            Context context = mHost.getContext();
+            if (context != null) {
+                ApplicationInfo info = context.getApplicationInfo();
+                if (info != null) {
+                    return info.targetSdkVersion;
+                }
+            }
+        }
+        return 0;
+    }
+
     public void noteStateNotSaved() {
         mStateSaved = false;
     }
     
     public void dispatchCreate() {
         mStateSaved = false;
-        mExecutingActions = true;
-        moveToState(Fragment.CREATED, false);
-        mExecutingActions = false;
+        dispatchMoveToState(Fragment.CREATED);
     }
     
     public void dispatchActivityCreated() {
         mStateSaved = false;
-        mExecutingActions = true;
-        moveToState(Fragment.ACTIVITY_CREATED, false);
-        mExecutingActions = false;
+        dispatchMoveToState(Fragment.ACTIVITY_CREATED);
     }
     
     public void dispatchStart() {
         mStateSaved = false;
-        mExecutingActions = true;
-        moveToState(Fragment.STARTED, false);
-        mExecutingActions = false;
+        dispatchMoveToState(Fragment.STARTED);
     }
     
     public void dispatchResume() {
         mStateSaved = false;
-        mExecutingActions = true;
-        moveToState(Fragment.RESUMED, false);
-        mExecutingActions = false;
+        dispatchMoveToState(Fragment.RESUMED);
     }
     
     public void dispatchPause() {
-        mExecutingActions = true;
-        moveToState(Fragment.STARTED, false);
-        mExecutingActions = false;
+        dispatchMoveToState(Fragment.STARTED);
     }
     
     public void dispatchStop() {
-        mExecutingActions = true;
-        moveToState(Fragment.STOPPED, false);
-        mExecutingActions = false;
+        dispatchMoveToState(Fragment.STOPPED);
     }
     
     public void dispatchDestroyView() {
-        mExecutingActions = true;
-        moveToState(Fragment.CREATED, false);
-        mExecutingActions = false;
+        dispatchMoveToState(Fragment.CREATED);
     }
 
     public void dispatchDestroy() {
         mDestroyed = true;
         execPendingActions();
-        mExecutingActions = true;
-        moveToState(Fragment.INITIALIZING, false);
-        mExecutingActions = false;
+        dispatchMoveToState(Fragment.INITIALIZING);
         mHost = null;
         mContainer = null;
         mParent = null;
+    }
+
+    /**
+     * This method is called by dispatch* methods to change the FragmentManager's state.
+     * It calls moveToState directly if the target SDK is older than O. Otherwise, it sets and
+     * clears mExecutingActions to ensure that there is no reentrancy while the
+     * FragmentManager is changing state.
+     *
+     * @param state The new state of the FragmentManager.
+     */
+    private void dispatchMoveToState(int state) {
+        if (mAllowOldReentrantBehavior) {
+            moveToState(state, false);
+        } else {
+            try {
+                mExecutingActions = true;
+                moveToState(state, false);
+            } finally {
+                mExecutingActions = false;
+            }
+        }
     }
 
     public void dispatchMultiWindowModeChanged(boolean isInMultiWindowMode) {
