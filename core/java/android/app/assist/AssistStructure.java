@@ -1,5 +1,6 @@
 package android.app.assist;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Activity;
 import android.content.ComponentName;
@@ -1601,48 +1602,27 @@ public class AssistStructure implements Parcelable {
             return mNode.mChildren != null ? mNode.mChildren.length : 0;
         }
 
-        private void setAutofillId(ViewNode child, boolean forAutoFill, int virtualId) {
-            if (forAutoFill) {
-                child.mAutofillId = new AutofillId(mNode.mAutofillId, virtualId);
-            }
+        @Override
+        public void setAutofillId(@NonNull ViewStructure parent, int virtualId) {
+            mNode.mAutofillId = new AutofillId(parent.getAutofillId(), virtualId);
         }
 
-        private ViewStructure newChild(int index, boolean forAutoFill, int virtualId, int flags) {
+        @Override
+        public ViewStructure newChild(int index) {
             ViewNode node = new ViewNode();
-            setAutofillId(node, forAutoFill, virtualId);
             mNode.mChildren[index] = node;
             return new ViewNodeBuilder(mAssist, node, false);
         }
 
-        private ViewStructure asyncNewChild(int index, boolean forAutoFill, int virtualId) {
+        @Override
+        public ViewStructure asyncNewChild(int index) {
             synchronized (mAssist) {
                 ViewNode node = new ViewNode();
-                setAutofillId(node, forAutoFill, virtualId);
                 mNode.mChildren[index] = node;
                 ViewNodeBuilder builder = new ViewNodeBuilder(mAssist, node, true);
                 mAssist.mPendingAsyncChildren.add(builder);
                 return builder;
             }
-        }
-
-        @Override
-        public ViewStructure newChild(int index) {
-            return newChild(index, false, 0, 0);
-        }
-
-        @Override
-        public ViewStructure newChild(int index, int virtualId, int flags) {
-            return newChild(index, true, virtualId, flags);
-        }
-
-        @Override
-        public ViewStructure asyncNewChild(int index) {
-            return asyncNewChild(index, false, 0);
-        }
-
-        @Override
-        public ViewStructure asyncNewChild(int index, int virtualId, int flags) {
-            return asyncNewChild(index, true, virtualId);
         }
 
         @Override
