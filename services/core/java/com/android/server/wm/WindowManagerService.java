@@ -7306,4 +7306,49 @@ public class WindowManagerService extends IWindowManager.Stub
         mAppFreezeListeners.remove(listener);
     }
 
+    /**
+     * WARNING: This interrupts surface updates, be careful! Don't
+     * execute within the transaction for longer than you would
+     * execute on an animation thread.
+     * WARNING: This holds the WindowManager lock, so if exec will acquire
+     * the ActivityManager lock, you should hold it BEFORE calling this
+     * otherwise there is a risk of deadlock if another thread holding the AM
+     * lock waits on the WM lock.
+     * WARNING: This method contains locks known to the State of California
+     * to cause Deadlocks and other conditions.
+     *
+     *
+     * Begins a surface transaction with which the AM can batch operations.
+     * All Surface updates performed by the WindowManager following this
+     * will not appear on screen until after the call to
+     * closeSurfaceTransaction.
+     *
+     * ActivityManager can use this to ensure multiple 'commands' will all
+     * be reflected in a single frame. For example when reparenting a window
+     * which was previously hidden due to it's parent properties, we may
+     * need to ensure it is hidden in the same frame that the properties
+     * from the new parent are inherited, otherwise it could be revealed
+     * mistakenly.
+     *
+     *
+     * TODO(b/36393204): We can investigate totally replacing #deferSurfaceLayout
+     * with something like this but it seems that some existing cases of
+     * deferSurfaceLayout may be a little too broad, in particular the total
+     * enclosure of startActivityUnchecked which could run for quite some time.
+     */
+    public void inSurfaceTransaction(Runnable exec) {
+        // We hold the WindowManger lock to ensure relayoutWindow
+        // does not return while a Surface transaction is opening.
+        // The client depends on us to have resized the surface
+        // by that point (b/36462635)
+
+        synchronized (mWindowMap) {
+            SurfaceControl.openTransaction();
+            try {
+                exec.run();
+            } finally {
+                SurfaceControl.closeTransaction();
+            }
+        }
+    }
 }
