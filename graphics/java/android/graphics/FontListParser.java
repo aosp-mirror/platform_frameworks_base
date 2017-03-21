@@ -98,15 +98,17 @@ public class FontListParser {
             } catch (NumberFormatException e) {
                 continue;  // ignoreing invalid number format
             }
-            int tag = makeTag(tagString.charAt(0), tagString.charAt(1), tagString.charAt(2),
-                    tagString.charAt(3));
+            int tag = makeTag(tagString);
             axisList.add(new FontConfig.Axis(tag, styleValue));
         }
         return axisList;
     }
 
-    @VisibleForTesting
-    public static int makeTag(char c1, char c2, char c3, char c4) {
+    public static int makeTag(String tagString) {
+        char c1 = tagString.charAt(0);
+        char c2 = tagString.charAt(1);
+        char c3 = tagString.charAt(2);
+        char c4 = tagString.charAt(3);
         return (c1 << 24) | (c2 << 16) | (c3 << 8) | c4;
     }
 
@@ -198,6 +200,13 @@ public class FontListParser {
      */
     private static final Pattern TAG_PATTERN = Pattern.compile("[\\x20-\\x7E]{4}");
 
+    public static boolean isValidTag(String tagString) {
+        if (tagString == null || tagString.length() != 4) {
+            return false;
+        }
+        return TAG_PATTERN.matcher(tagString).matches();
+    }
+
     /** The 'styleValue' attribute has an optional leading '-', followed by '<digits>',
      *  '<digits>.<digits>', or '.<digits>' where '<digits>' is one or more of [0-9].
      */
@@ -208,8 +217,8 @@ public class FontListParser {
             throws XmlPullParserException, IOException {
         int tag = 0;
         String tagStr = parser.getAttributeValue(null, "tag");
-        if (tagStr != null && TAG_PATTERN.matcher(tagStr).matches()) {
-            tag = makeTag(tagStr.charAt(0), tagStr.charAt(1), tagStr.charAt(2), tagStr.charAt(3));
+        if (isValidTag(tagStr)) {
+            tag = makeTag(tagStr);
         } else {
             throw new XmlPullParserException("Invalid tag attribute value.", parser, null);
         }

@@ -81,7 +81,8 @@ public class FontFamily {
         }
     }
 
-    public boolean addFont(String path, int ttcIndex) {
+    public boolean addFont(String path, int ttcIndex, FontConfig.Axis[] axes, int weight,
+            int italic) {
         if (mBuilderPtr == 0) {
             throw new IllegalStateException("Unable to call addFont after freezing.");
         }
@@ -89,22 +90,29 @@ public class FontFamily {
             FileChannel fileChannel = file.getChannel();
             long fontSize = fileChannel.size();
             ByteBuffer fontBuffer = fileChannel.map(FileChannel.MapMode.READ_ONLY, 0, fontSize);
-            return nAddFont(mBuilderPtr, fontBuffer, ttcIndex);
+            if (axes != null) {
+                for (FontConfig.Axis axis : axes) {
+                    nAddAxisValue(mBuilderPtr, axis.getTag(), axis.getStyleValue());
+                }
+            }
+            return nAddFont(mBuilderPtr, fontBuffer, ttcIndex, weight, italic);
         } catch (IOException e) {
             Log.e(TAG, "Error mapping font file " + path);
             return false;
         }
     }
 
-    public boolean addFontWeightStyle(ByteBuffer font, int ttcIndex, FontConfig.Axis[] axes,
-            int weight, boolean style) {
+    public boolean addFontFromBuffer(ByteBuffer font, int ttcIndex, FontConfig.Axis[] axes,
+            int weight, int italic) {
         if (mBuilderPtr == 0) {
             throw new IllegalStateException("Unable to call addFontWeightStyle after freezing.");
         }
-        for (FontConfig.Axis axis : axes) {
-            nAddAxisValue(mBuilderPtr, axis.getTag(), axis.getStyleValue());
+        if (axes != null) {
+            for (FontConfig.Axis axis : axes) {
+                nAddAxisValue(mBuilderPtr, axis.getTag(), axis.getStyleValue());
+            }
         }
-        return nAddFontWeightStyle(mBuilderPtr, font, ttcIndex, weight, style);
+        return nAddFontWeightStyle(mBuilderPtr, font, ttcIndex, weight, italic);
     }
 
     /**
@@ -120,11 +128,18 @@ public class FontFamily {
      * @return
      */
     public boolean addFontFromAssetManager(AssetManager mgr, String path, int cookie,
-            boolean isAsset, int weight, boolean isItalic) {
+            boolean isAsset, int ttcIndex, int weight, int isItalic,
+            FontConfig.Axis[] axes) {
         if (mBuilderPtr == 0) {
             throw new IllegalStateException("Unable to call addFontFromAsset after freezing.");
         }
-        return nAddFontFromAssetManager(mBuilderPtr, mgr, path, cookie, isAsset, weight, isItalic);
+        if (axes != null) {
+            for (FontConfig.Axis axis : axes) {
+                nAddAxisValue(mBuilderPtr, axis.getTag(), axis.getStyleValue());
+            }
+        }
+        return nAddFontFromAssetManager(mBuilderPtr, mgr, path, cookie, isAsset, ttcIndex, weight,
+                isItalic);
     }
 
     private static native long nInitBuilder(String lang, int variant);
@@ -137,11 +152,14 @@ public class FontFamily {
 
     @CriticalNative
     private static native void nUnrefFamily(long nativePtr);
-    private static native boolean nAddFont(long builderPtr, ByteBuffer font, int ttcIndex);
+    // By passing -1 to weigth argument, the weight value is resolved by OS/2 table in the font.
+    // By passing -1 to italic argument, the italic value is resolved by OS/2 table in the font.
+    private static native boolean nAddFont(long builderPtr, ByteBuffer font, int ttcIndex,
+            int weight, int isItalic);
     private static native boolean nAddFontWeightStyle(long builderPtr, ByteBuffer font,
-            int ttcIndex, int weight, boolean isItalic);
+            int ttcIndex, int weight, int isItalic);
     private static native boolean nAddFontFromAssetManager(long builderPtr, AssetManager mgr,
-            String path, int cookie, boolean isAsset, int weight, boolean isItalic);
+            String path, int cookie, boolean isAsset, int ttcIndex, int weight, int isItalic);
 
     // The added axis values are only valid for the next nAddFont* method call.
     @CriticalNative

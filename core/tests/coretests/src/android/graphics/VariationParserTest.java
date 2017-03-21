@@ -28,7 +28,7 @@ public class VariationParserTest extends TestCase {
 
     @SmallTest
     public void testParseFontVariationSetting() {
-        int tag = FontListParser.makeTag('w', 'd', 't', 'h');
+        int tag = FontListParser.makeTag("wdth");
         List<FontConfig.Axis> axes = FontListParser.parseFontVariationSettings("'wdth' 1");
         assertEquals(tag, axes.get(0).getTag());
         assertEquals(1.0f, axes.get(0).getStyleValue());
@@ -45,7 +45,7 @@ public class VariationParserTest extends TestCase {
         assertEquals(tag, axes.get(0).getTag());
         assertEquals(0.5f, axes.get(0).getStyleValue());
 
-        tag = FontListParser.makeTag('A', 'X', ' ', ' ');
+        tag = FontListParser.makeTag("AX  ");
         axes = FontListParser.parseFontVariationSettings("'AX  ' 1");
         assertEquals(tag, axes.get(0).getTag());
         assertEquals(1.0f, axes.get(0).getStyleValue());
@@ -93,8 +93,8 @@ public class VariationParserTest extends TestCase {
     public void testParseFontVariationStyleSettings() {
         List<FontConfig.Axis> axes =
                 FontListParser.parseFontVariationSettings("'wdth' 10,'AX  '\r1");
-        int tag1 = FontListParser.makeTag('w', 'd', 't', 'h');
-        int tag2 = FontListParser.makeTag('A', 'X', ' ', ' ');
+        int tag1 = FontListParser.makeTag("wdth");
+        int tag2 = FontListParser.makeTag("AX  ");
         assertEquals(tag1, axes.get(0).getTag());
         assertEquals(10.0f, axes.get(0).getStyleValue());
         assertEquals(tag2, axes.get(1).getTag());
@@ -102,7 +102,7 @@ public class VariationParserTest extends TestCase {
 
         // Test only spacers are allowed before tag
         axes = FontListParser.parseFontVariationSettings("     'wdth' 10,ab'wdth' 1");
-        tag1 = FontListParser.makeTag('w', 'd', 't', 'h');
+        tag1 = FontListParser.makeTag("wdth");
         assertEquals(tag1, axes.get(0).getTag());
         assertEquals(10.0f, axes.get(0).getStyleValue());
         assertEquals(1, axes.size());
@@ -119,8 +119,8 @@ public class VariationParserTest extends TestCase {
 
     @SmallTest
     public void testMakeTag() {
-      assertEquals(0x77647468, FontListParser.makeTag('w', 'd', 't', 'h'));
-      assertEquals(0x41582020, FontListParser.makeTag('A', 'X', ' ', ' '));
-      assertEquals(0x20202020, FontListParser.makeTag(' ', ' ', ' ', ' '));
+      assertEquals(0x77647468, FontListParser.makeTag("wdth"));
+      assertEquals(0x41582020, FontListParser.makeTag("AX  "));
+      assertEquals(0x20202020, FontListParser.makeTag("    "));
     }
 }
