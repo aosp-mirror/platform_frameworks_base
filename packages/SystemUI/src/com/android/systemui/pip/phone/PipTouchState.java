@@ -17,6 +17,7 @@
 package com.android.systemui.pip.phone;
 
 import android.graphics.PointF;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.ViewConfiguration;
@@ -28,6 +29,7 @@ import java.io.PrintWriter;
  */
 public class PipTouchState {
     private static final String TAG = "PipTouchHandler";
+    private static final boolean DEBUG = true;
 
     private ViewConfiguration mViewConfig;
 
@@ -72,6 +74,9 @@ public class PipTouchState {
                 initOrResetVelocityTracker();
 
                 mActivePointerId = ev.getPointerId(0);
+                if (DEBUG) {
+                    Log.e(TAG, "Setting active pointer id on DOWN: " + mActivePointerId);
+                }
                 mLastTouch.set(ev.getX(), ev.getY());
                 mDownTouch.set(mLastTouch);
                 mAllowDraggingOffscreen = true;
@@ -87,6 +92,11 @@ public class PipTouchState {
                 // Update the velocity tracker
                 mVelocityTracker.addMovement(ev);
                 int pointerIndex = ev.findPointerIndex(mActivePointerId);
+                if (pointerIndex == -1) {
+                    Log.e(TAG, "Invalid active pointer id on MOVE: " + mActivePointerId);
+                    break;
+                }
+
                 float x = ev.getX(pointerIndex);
                 float y = ev.getY(pointerIndex);
                 mLastDelta.set(x - mLastTouch.x, y - mLastTouch.y);
@@ -119,6 +129,10 @@ public class PipTouchState {
                     // Select a new active pointer id and reset the movement state
                     final int newPointerIndex = (pointerIndex == 0) ? 1 : 0;
                     mActivePointerId = ev.getPointerId(newPointerIndex);
+                    if (DEBUG) {
+                        Log.e(TAG, "Relinquish active pointer id on POINTER_UP: " +
+                                mActivePointerId);
+                    }
                     mLastTouch.set(ev.getX(newPointerIndex), ev.getY(newPointerIndex));
                 }
                 break;
@@ -136,6 +150,11 @@ public class PipTouchState {
                 mVelocity.set(mVelocityTracker.getXVelocity(), mVelocityTracker.getYVelocity());
 
                 int pointerIndex = ev.findPointerIndex(mActivePointerId);
+                if (pointerIndex == -1) {
+                    Log.e(TAG, "Invalid active pointer id on UP: " + mActivePointerId);
+                    break;
+                }
+
                 mLastTouch.set(ev.getX(pointerIndex), ev.getY(pointerIndex));
 
                 // Fall through to clean up
@@ -251,6 +270,7 @@ public class PipTouchState {
         final String innerPrefix = prefix + "  ";
         pw.println(prefix + TAG);
         pw.println(innerPrefix + "mAllowTouches=" + mAllowTouches);
+        pw.println(innerPrefix + "mActivePointerId=" + mActivePointerId);
         pw.println(innerPrefix + "mDownTouch=" + mDownTouch);
         pw.println(innerPrefix + "mDownDelta=" + mDownDelta);
         pw.println(innerPrefix + "mLastTouch=" + mLastTouch);
