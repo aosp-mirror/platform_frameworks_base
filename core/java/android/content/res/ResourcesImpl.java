@@ -74,8 +74,6 @@ public class ResourcesImpl {
     private static final boolean TRACE_FOR_PRELOAD = false;
     private static final boolean TRACE_FOR_MISS_PRELOAD = false;
 
-    private static final int LAYOUT_DIR_CONFIG = ActivityInfo.activityInfoConfigJavaToNative(
-            ActivityInfo.CONFIG_LAYOUT_DIRECTION);
 
     private static final int ID_OTHER = 0x01000004;
 
@@ -636,8 +634,8 @@ public class ResourcesImpl {
                 }
             } else {
                 if (verifyPreloadConfig(
-                        changingConfigs, LAYOUT_DIR_CONFIG, value.resourceId, "drawable")) {
-                    if ((changingConfigs & LAYOUT_DIR_CONFIG) == 0) {
+                        changingConfigs, ActivityInfo.CONFIG_LAYOUT_DIRECTION, value.resourceId, "drawable")) {
+                    if ((changingConfigs & ActivityInfo.CONFIG_LAYOUT_DIRECTION) == 0) {
                         // If this resource does not vary based on layout direction,
                         // we can put it in all of the preload maps.
                         sPreloadedDrawables[0].put(key, cs);
