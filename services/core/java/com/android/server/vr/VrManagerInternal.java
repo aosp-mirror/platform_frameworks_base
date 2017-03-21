@@ -17,7 +17,6 @@ package com.android.server.vr;
 
 import android.annotation.NonNull;
 import android.content.ComponentName;
-import android.service.vr.IPersistentVrStateCallbacks;
 
 /**
  * Service for accessing the VR mode manager.
@@ -102,5 +101,5 @@ public abstract class VrManagerInternal {
     /**
      * Adds listener that reports state changes to persistent VR mode.
      */
-    public abstract void addPersistentVrModeStateListener(IPersistentVrStateCallbacks listener);
+    public abstract void addPersistentVrModeStateListener(PersistentVrStateListener listener);
 }
