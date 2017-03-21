@@ -23,6 +23,7 @@ import static android.view.autofill.AutofillManager.FLAG_VIEW_ENTERED;
 import static android.view.autofill.AutofillManager.FLAG_VIEW_EXITED;
 import static android.view.autofill.AutofillManager.FLAG_START_SESSION;
 import static android.view.autofill.AutofillManager.FLAG_VALUE_CHANGED;
+import static android.view.autofill.AutofillManager.FLAG_MANUAL_REQUEST;
 
 import static com.android.server.autofill.Helper.DEBUG;
 import static com.android.server.autofill.Helper.VERBOSE;
@@ -1125,6 +1126,13 @@ final class AutofillManagerServiceImpl {
                 // Handle authentication.
                 final Intent fillInIntent = createAuthFillInIntent(mStructure);
                 mCurrentViewState.setResponse(mCurrentResponse, fillInIntent);
+                return;
+            }
+
+            if ((mFlags & FLAG_MANUAL_REQUEST) != 0 && response.getDatasets() != null
+                    && response.getDatasets().size() == 1) {
+                Slog.d(TAG, "autofilling manual request directly");
+                autoFill(response.getDatasets().get(0));
                 return;
             }
 
