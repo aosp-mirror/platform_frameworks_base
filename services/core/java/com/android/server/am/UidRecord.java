@@ -40,6 +40,11 @@ public final class UidRecord {
      * when {@link #curProcState} changes from background to foreground or vice versa.
      */
     long curProcStateSeq;
+    /**
+     * Last seq number for which NetworkPolicyManagerService notified ActivityManagerService that
+     * network policies rules were updated.
+     */
+    long lastNetworkUpdatedProcStateSeq;
 
     static final int CHANGE_PROCSTATE = 0;
     static final int CHANGE_GONE = 1;
@@ -92,6 +97,8 @@ public final class UidRecord {
         sb.append(numProcs);
         sb.append(" curProcStateSeq:");
         sb.append(curProcStateSeq);
+        sb.append(" lastNetworkUpdatedProcStateSeq:");
+        sb.append(lastNetworkUpdatedProcStateSeq);
         sb.append("}");
         return sb.toString();
     }

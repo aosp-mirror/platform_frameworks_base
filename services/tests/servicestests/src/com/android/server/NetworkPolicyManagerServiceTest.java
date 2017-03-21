@@ -32,6 +32,8 @@ import static android.text.format.DateUtils.DAY_IN_MILLIS;
 import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 import static android.text.format.Time.TIMEZONE_UTC;
 
+import static com.android.server.net.NetworkPolicyManagerService.MAX_PROC_STATE_SEQ_HISTORY;
+import static com.android.server.net.NetworkPolicyManagerService.ProcStateSeqHistory;
 import static com.android.server.net.NetworkPolicyManagerService.TYPE_LIMIT;
 import static com.android.server.net.NetworkPolicyManagerService.TYPE_LIMIT_SNOOZED;
 import static com.android.server.net.NetworkPolicyManagerService.TYPE_WARNING;
@@ -58,6 +60,7 @@ import static org.mockito.Mockito.when;
 
 import android.Manifest;
 import android.app.ActivityManager;
+import android.app.ActivityManagerInternal;
 import android.app.IActivityManager;
 import android.app.INotificationManager;
 import android.app.IUidObserver;
@@ -95,6 +98,7 @@ import android.text.format.Time;
 import android.util.Log;
 import android.util.TrustedTime;
 
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.test.BroadcastInterceptingContext;
 import com.android.internal.util.test.BroadcastInterceptingContext.FutureIntent;
 import com.android.server.net.NetworkPolicyManagerInternal;
@@ -120,10 +124,12 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -160,6 +166,8 @@ public class NetworkPolicyManagerServiceTest {
     private static final String TEST_IFACE = "test0";
     private static final String TEST_SSID = "AndroidAP";
 
+    private static final String LINE_SEPARATOR = System.getProperty("line.separator");
+
     private static NetworkTemplate sTemplateWifi = NetworkTemplate.buildTemplateWifi(TEST_SSID);
 
     /**
@@ -185,6 +193,8 @@ public class NetworkPolicyManagerServiceTest {
     private @Mock INotificationManager mNotifManager;
     private @Mock PackageManager mPackageManager;
     private @Mock IPackageManager mIpm;
+
+    private static ActivityManagerInternal mActivityManagerInternal;
 
     private IUidObserver mUidObserver;
     private INetworkManagementEventObserver mNetworkObserver;
@@ -222,6 +232,7 @@ public class NetworkPolicyManagerServiceTest {
         final UsageStatsManagerInternal usageStats =
                 addLocalServiceMock(UsageStatsManagerInternal.class);
         when(usageStats.getIdleUidsForUser(anyInt())).thenReturn(new int[]{});
+        mActivityManagerInternal = addLocalServiceMock(ActivityManagerInternal.class);
     }
 
     @Before
@@ -958,6 +969,75 @@ public class NetworkPolicyManagerServiceTest {
             verifyPolicyDataEnable(TYPE_WIFI, true);
             verifyRemoveInterfaceQuota(TEST_IFACE);
             verifySetInterfaceQuota(TEST_IFACE, Long.MAX_VALUE);
+        }
+    }
+
+    @Test
+    public void testOnUidStateChanged_notifyAMS() throws Exception {
+        final long procStateSeq = 222;
+        mUidObserver.onUidStateChanged(UID_A, ActivityManager.PROCESS_STATE_SERVICE,
+                procStateSeq);
+        verify(mActivityManagerInternal).notifyNetworkPolicyRulesUpdated(UID_A, procStateSeq);
+
+        final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        final IndentingPrintWriter writer = new IndentingPrintWriter(
+                new PrintWriter(outputStream), " ");
+        mService.mObservedHistory.dumpUL(writer);
+        writer.flush();
+        assertEquals(ProcStateSeqHistory.getString(UID_A, procStateSeq),
+                outputStream.toString().trim());
+    }
+
+    @Test
+    public void testProcStateHistory() {
+        // Verify dump works correctly with no elements added.
+        verifyProcStateHistoryDump(0);
+
+        // Add items upto half of the max capacity and verify that dump works correctly.
+        verifyProcStateHistoryDump(MAX_PROC_STATE_SEQ_HISTORY / 2);
+
+        // Add items upto the max capacity and verify that dump works correctly.
+        verifyProcStateHistoryDump(MAX_PROC_STATE_SEQ_HISTORY);
+
+        // Add more items than max capacity and verify that dump works correctly.
+        verifyProcStateHistoryDump(MAX_PROC_STATE_SEQ_HISTORY + MAX_PROC_STATE_SEQ_HISTORY / 2);
+
+    }
+
+    private void verifyProcStateHistoryDump(int count) {
+        final ProcStateSeqHistory history = new ProcStateSeqHistory(MAX_PROC_STATE_SEQ_HISTORY);
+        final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        final IndentingPrintWriter writer = new IndentingPrintWriter(
+                new PrintWriter(outputStream), " ");
+
+        if (count == 0) {
+            // Verify with no uid info written to history.
+            history.dumpUL(writer);
+            writer.flush();
+            assertEquals("When no uid info is there, dump should contain NONE",
+                    "NONE", outputStream.toString().trim());
+            return;
+        }
+
+        int uid = 111;
+        long procStateSeq = 222;
+        // Add count items and verify dump works correctly.
+        for (int i = 0; i < count; ++i) {
+            uid++;
+            procStateSeq++;
+            history.addProcStateSeqUL(uid, procStateSeq);
+        }
+        history.dumpUL(writer);
+        writer.flush();
+        final String[] uidsDump = outputStream.toString().split(LINE_SEPARATOR);
+        // Dump will have at most MAX_PROC_STATE_SEQ_HISTORY items.
+        final int expectedCount = (count < MAX_PROC_STATE_SEQ_HISTORY)
+                ? count : MAX_PROC_STATE_SEQ_HISTORY;
+        assertEquals(expectedCount, uidsDump.length);
+        for (int i = 0; i < expectedCount; ++i) {
+            assertEquals(ProcStateSeqHistory.getString(uid, procStateSeq), uidsDump[i]);
+            uid--;
+            procStateSeq--;
         }
     }
 
