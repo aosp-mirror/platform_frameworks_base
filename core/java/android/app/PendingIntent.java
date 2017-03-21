@@ -596,6 +596,42 @@ public final class PendingIntent implements Parcelable {
      */
     public static PendingIntent getService(Context context, int requestCode,
             @NonNull Intent intent, @Flags int flags) {
+        return buildServicePendingIntent(context, requestCode, intent, flags,
+                ActivityManager.INTENT_SENDER_SERVICE);
+    }
+
+    /**
+     * Retrieve a PendingIntent that will start a foreground service, like calling
+     * {@link Context#startService Context.startForegroundService()}.  The start
+     * arguments given to the service will come from the extras of the Intent.
+     *
+     * <p class="note">For security reasons, the {@link android.content.Intent}
+     * you supply here should almost always be an <em>explicit intent</em>,
+     * that is specify an explicit component to be delivered to through
+     * {@link Intent#setClass(android.content.Context, Class) Intent.setClass}</p>
+     *
+     * @param context The Context in which this PendingIntent should start
+     * the service.
+     * @param requestCode Private request code for the sender
+     * @param intent An Intent describing the service to be started.
+     * @param flags May be {@link #FLAG_ONE_SHOT}, {@link #FLAG_NO_CREATE},
+     * {@link #FLAG_CANCEL_CURRENT}, {@link #FLAG_UPDATE_CURRENT},
+     * {@link #FLAG_IMMUTABLE} or any of the flags as supported by
+     * {@link Intent#fillIn Intent.fillIn()} to control which unspecified parts
+     * of the intent that can be supplied when the actual send happens.
+     *
+     * @return Returns an existing or new PendingIntent matching the given
+     * parameters.  May return null only if {@link #FLAG_NO_CREATE} has been
+     * supplied.
+     */
+    public static PendingIntent getForegroundService(Context context, int requestCode,
+            @NonNull Intent intent, @Flags int flags) {
+        return buildServicePendingIntent(context, requestCode, intent, flags,
+                ActivityManager.INTENT_SENDER_FOREGROUND_SERVICE);
+    }
+
+    private static PendingIntent buildServicePendingIntent(Context context, int requestCode,
+            Intent intent, int flags, int serviceKind) {
         String packageName = context.getPackageName();
         String resolvedType = intent != null ? intent.resolveTypeIfNeeded(
                 context.getContentResolver()) : null;
@@ -603,7 +639,7 @@ public final class PendingIntent implements Parcelable {
             intent.prepareToLeaveProcess(context);
             IIntentSender target =
                 ActivityManager.getService().getIntentSender(
-                    ActivityManager.INTENT_SENDER_SERVICE, packageName,
+                    serviceKind, packageName,
                     null, null, requestCode, new Intent[] { intent },
                     resolvedType != null ? new String[] { resolvedType } : null,
                     flags, null, UserHandle.myUserId());

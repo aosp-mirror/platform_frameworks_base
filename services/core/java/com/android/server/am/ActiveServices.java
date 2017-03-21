@@ -17,7 +17,6 @@
 package com.android.server.am;
 
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
-import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
 import static com.android.server.am.ActivityManagerDebugConfig.*;
 
 import java.io.FileDescriptor;
@@ -95,6 +94,10 @@ public final class ActiveServices {
 
     // How long we wait for a service to finish executing.
     static final int SERVICE_BACKGROUND_TIMEOUT = SERVICE_TIMEOUT * 10;
+
+    // How long the startForegroundService() grace period is to get around to
+    // calling startForeground() before we ANR + stop it.
+    static final int SERVICE_START_FOREGROUND_TIMEOUT = 5*1000;
 
     // How long a service needs to be running until restarting its process
     // is no longer considered to be a relaunch of the service.
@@ -307,8 +310,8 @@ public final class ActiveServices {
     }
 
     ComponentName startServiceLocked(IApplicationThread caller, Intent service, String resolvedType,
-            int id, Notification notification,
-            int callingPid, int callingUid, String callingPackage, final int userId)
+            int id, Notification notification, int callingPid, int callingUid,
+            boolean fgRequired, String callingPackage, final int userId)
             throws TransactionTooLargeException {
         if (DEBUG_DELAYED_STARTS) Slog.v(TAG_SERVICE, "startService: " + service
                 + " type=" + resolvedType + " args=" + service.getExtras());
@@ -345,8 +348,9 @@ public final class ActiveServices {
             return null;
         }
 
-        // Non-null notification means this is a start directly into the foreground
-        if (!r.startRequested && notification == null) {
+        // If this isn't a direct-to-foreground start, check our ability to kick off an
+        // arbitrary service
+        if (!r.startRequested && !fgRequired) {
             final long token = Binder.clearCallingIdentity();
             try {
                 // Before going further -- if this app is not allowed to start services in the
@@ -392,12 +396,13 @@ public final class ActiveServices {
         r.lastActivity = SystemClock.uptimeMillis();
         r.startRequested = true;
         r.delayedStop = false;
+        r.fgRequired = fgRequired;
         r.pendingStarts.add(new ServiceRecord.StartItem(r, false, r.makeNextStartId(),
                 service, neededGrants));
 
         final ServiceMap smap = getServiceMapLocked(r.userId);
         boolean addToStarting = false;
-        if (!callerFg && r.app == null
+        if (!callerFg && !fgRequired && r.app == null
                 && mAm.mUserController.hasStartedUserState(r.userId)) {
             ProcessRecord proc = mAm.getProcessRecordLocked(r.processName, r.appInfo.uid, false);
             if (proc == null || proc.curProcState > ActivityManager.PROCESS_STATE_RECEIVER) {
@@ -449,9 +454,9 @@ public final class ActiveServices {
                 Slog.v(TAG_SERVICE, sb.toString());
             }
         } else if (DEBUG_DELAYED_STARTS) {
-            if (callerFg) {
+            if (callerFg || fgRequired) {
                 Slog.v(TAG_SERVICE, "Not potential delay (callerFg=" + callerFg + " uid="
-                        + callingUid + " pid=" + callingPid + "): " + r);
+                        + callingUid + " pid=" + callingPid + " fgRequired=" + fgRequired + "): " + r);
             } else if (r.app != null) {
                 Slog.v(TAG_SERVICE, "Not potential delay (cur app=" + r.app + "): " + r);
             } else {
@@ -461,6 +466,7 @@ public final class ActiveServices {
         }
 
         ComponentName cmp = startServiceInnerLocked(smap, service, r, callerFg, addToStarting);
+        // STOPSHIP deprecated; remove when NotificationManager.startServiceInForeground is retired
         if (notification != null) {
             setServiceForegroundInnerLocked(r, id, notification, 0);
         }
@@ -540,7 +546,7 @@ public final class ActiveServices {
             if (first) {
                 smap.rescheduleDelayedStartsLocked();
             }
-        } else if (callerFg) {
+        } else if (callerFg || r.fgRequired) {
             smap.ensureNotStartingBackgroundLocked(r);
         }
 
@@ -756,8 +762,17 @@ public final class ActiveServices {
                         }
                 }
             }
+            if (r.fgRequired) {
+                if (DEBUG_BACKGROUND_CHECK) {
+                    Slog.i(TAG, "Service called startForeground() as required: " + r);
+                }
+                r.fgRequired = false;
+                r.fgWaiting = false;
+                mAm.mHandler.removeMessages(
+                        ActivityManagerService.SERVICE_FOREGROUND_TIMEOUT_MSG, r);
+            }
             if (r.foregroundId != id) {
-                cancelForegroudNotificationLocked(r);
+                cancelForegroundNotificationLocked(r);
                 r.foregroundId = id;
             }
             notification.flags |= Notification.FLAG_FOREGROUND_SERVICE;
@@ -779,7 +794,7 @@ public final class ActiveServices {
                 }
             }
             if ((flags & Service.STOP_FOREGROUND_REMOVE) != 0) {
-                cancelForegroudNotificationLocked(r);
+                cancelForegroundNotificationLocked(r);
                 r.foregroundId = 0;
                 r.foregroundNoti = null;
             } else if (r.appInfo.targetSdkVersion >= Build.VERSION_CODES.LOLLIPOP) {
@@ -792,7 +807,7 @@ public final class ActiveServices {
         }
     }
 
-    private void cancelForegroudNotificationLocked(ServiceRecord r) {
+    private void cancelForegroundNotificationLocked(ServiceRecord r) {
         if (r.foregroundId != 0) {
             // First check to see if this app has any other active foreground services
             // with the same notification ID.  If so, we shouldn't actually cancel it,
@@ -1631,7 +1646,7 @@ public final class ActiveServices {
             r.makeRestarting(mAm.mProcessStats.getMemFactorLocked(), now);
         }
 
-        cancelForegroudNotificationLocked(r);
+        cancelForegroundNotificationLocked(r);
 
         mAm.mHandler.removeCallbacks(r.restarter);
         mAm.mHandler.postAtTime(r.restarter, r.nextRestartTime);
@@ -1718,7 +1733,9 @@ public final class ActiveServices {
             return null;
         }
 
-        if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, "Bringing up " + r + " " + r.intent);
+        if (DEBUG_SERVICE) {
+            Slog.v(TAG_SERVICE, "Bringing up " + r + " " + r.intent + " fg=" + r.fgRequired);
+        }
 
         // We are now bringing the service up, so no longer in the
         // restarting state.
@@ -1944,8 +1961,10 @@ public final class ActiveServices {
             ServiceRecord.StartItem si = null;
             try {
                 si = r.pendingStarts.remove(0);
-                if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, "Sending arguments to: "
-                        + r + " " + r.intent + " args=" + si.intent);
+                if (DEBUG_SERVICE) {
+                    Slog.v(TAG_SERVICE, "Sending arguments to: "
+                            + r + " " + r.intent + " args=" + si.intent);
+                }
                 if (si.intent == null && N > 1) {
                     // If somehow we got a dummy null intent in the middle,
                     // then skip it.  DO NOT skip a null intent when it is
@@ -1965,6 +1984,19 @@ public final class ActiveServices {
                 if (!oomAdjusted) {
                     oomAdjusted = true;
                     mAm.updateOomAdjLocked(r.app);
+                }
+                if (r.fgRequired && !r.fgWaiting) {
+                    if (!r.isForeground) {
+                        if (DEBUG_BACKGROUND_CHECK) {
+                            Slog.i(TAG, "Launched service must call startForeground() within timeout: " + r);
+                        }
+                        scheduleServiceForegroundTransitionTimeoutLocked(r);
+                    } else {
+                        if (DEBUG_BACKGROUND_CHECK) {
+                            Slog.i(TAG, "Service already foreground; no new timeout: " + r);
+                        }
+                        r.fgRequired = false;
+                    }
                 }
                 int flags = 0;
                 if (si.deliveryCount > 1) {
@@ -2101,7 +2133,7 @@ public final class ActiveServices {
             }
         }
 
-        cancelForegroudNotificationLocked(r);
+        cancelForegroundNotificationLocked(r);
         r.isForeground = false;
         r.foregroundId = 0;
         r.foregroundNoti = null;
@@ -2925,23 +2957,53 @@ public final class ActiveServices {
         }
     }
 
+    void serviceForegroundTimeout(ServiceRecord r) {
+        ProcessRecord app;
+        synchronized (mAm) {
+            if (!r.fgRequired) {
+                return;
+            }
+
+            if (DEBUG_BACKGROUND_CHECK) {
+                Slog.i(TAG, "Service foreground-required timeout for " + r);
+            }
+            app = r.app;
+            r.fgWaiting = false;
+            stopServiceLocked(r);
+        }
+
+        if (app != null) {
+            mAm.mAppErrors.appNotResponding(app, null, null, false,
+                    "Context.startForegroundService() did not then call Service.startForeground()");
+        }
+    }
+
     void scheduleServiceTimeoutLocked(ProcessRecord proc) {
         if (proc.executingServices.size() == 0 || proc.thread == null) {
             return;
         }
-        long now = SystemClock.uptimeMillis();
         Message msg = mAm.mHandler.obtainMessage(
                 ActivityManagerService.SERVICE_TIMEOUT_MSG);
         msg.obj = proc;
-        mAm.mHandler.sendMessageAtTime(msg,
-                proc.execServicesFg ? (now+SERVICE_TIMEOUT) : (now+ SERVICE_BACKGROUND_TIMEOUT));
+        mAm.mHandler.sendMessageDelayed(msg,
+                proc.execServicesFg ? SERVICE_TIMEOUT : SERVICE_BACKGROUND_TIMEOUT);
+    }
+
+    void scheduleServiceForegroundTransitionTimeoutLocked(ServiceRecord r) {
+        if (r.app.executingServices.size() == 0 || r.app.thread == null) {
+            return;
+        }
+        Message msg = mAm.mHandler.obtainMessage(
+                ActivityManagerService.SERVICE_FOREGROUND_TIMEOUT_MSG);
+        msg.obj = r;
+        r.fgWaiting = true;
+        mAm.mHandler.sendMessageDelayed(msg, SERVICE_START_FOREGROUND_TIMEOUT);
     }
 
     final class ServiceDumper {
         private final FileDescriptor fd;
         private final PrintWriter pw;
         private final String[] args;
-        private final int opti;
         private final boolean dumpAll;
         private final String dumpPackage;
         private final ItemMatcher matcher;
@@ -2962,7 +3024,6 @@ public final class ActiveServices {
             this.fd = fd;
             this.pw = pw;
             this.args = args;
-            this.opti = opti;
             this.dumpAll = dumpAll;
             this.dumpPackage = dumpPackage;
             matcher = new ItemMatcher();
