@@ -62,7 +62,18 @@ final class LogicalDisplay {
 
     private final int mDisplayId;
     private final int mLayerStack;
-    private DisplayInfo mOverrideDisplayInfo; // set by the window manager
+    /**
+     * Override information set by the window manager. Will be reported instead of {@link #mInfo}
+     * if not null.
+     * @see #setDisplayInfoOverrideFromWindowManagerLocked(DisplayInfo)
+     * @see #getDisplayInfoLocked()
+     */
+    private DisplayInfo mOverrideDisplayInfo;
+    /**
+     * Current display info. Initialized with {@link #mBaseDisplayInfo}. Set to {@code null} if
+     * needs to be updated.
+     * @see #getDisplayInfoLocked()
+     */
     private DisplayInfo mInfo;
 
     // The display device that this logical display is based on and which
@@ -261,6 +272,9 @@ final class LogicalDisplay {
 
             mPrimaryDisplayDeviceInfo = deviceInfo;
             mInfo = null;
+            // Make sure that WM will be notified of new changes. It will then decide whether to
+            // apply them or not and will set the value again.
+            mOverrideDisplayInfo = null;
         }
     }
 
