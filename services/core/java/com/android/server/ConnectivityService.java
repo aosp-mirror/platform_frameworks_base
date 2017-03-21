@@ -3085,7 +3085,17 @@ public class ConnectivityService extends IConnectivityManager.Stub
         boolean tetherEnabledInSettings = (Settings.Global.getInt(mContext.getContentResolver(),
                 Settings.Global.TETHER_SUPPORTED, defaultVal) != 0)
                 && !mUserManager.hasUserRestriction(UserManager.DISALLOW_CONFIG_TETHERING);
-        return tetherEnabledInSettings && mUserManager.isAdminUser() &&
+
+        // Elevate to system UID to avoid caller requiring MANAGE_USERS permission.
+        boolean adminUser = false;
+        final long token = Binder.clearCallingIdentity();
+        try {
+            adminUser = mUserManager.isAdminUser();
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+
+        return tetherEnabledInSettings && adminUser &&
                mTethering.hasTetherableConfiguration();
     }
 
