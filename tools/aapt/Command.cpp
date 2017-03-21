@@ -2501,14 +2501,21 @@ static status_t addResourcesToBuilder(const sp<AaptDir>& dir, const sp<ApkBuilde
         const size_t numConfigs = gp->getFiles().size();
         for (size_t j = 0; j < numConfigs; j++) {
             status_t err = NO_ERROR;
-            if (ignoreConfig) {
-                err = builder->getBaseSplit()->addEntry(gp->getPath(), gp->getFiles().valueAt(j));
-            } else {
-                err = builder->addEntry(gp->getPath(), gp->getFiles().valueAt(j));
+            const sp<AaptFile>& file = gp->getFiles().valueAt(j);
+            if (!file->hasData()) {
+              // Empty files do not get written.
+              continue;
             }
+
+            if (ignoreConfig) {
+                err = builder->getBaseSplit()->addEntry(gp->getPath(), file);
+            } else {
+                err = builder->addEntry(gp->getPath(), file);
+            }
+
             if (err != NO_ERROR) {
                 fprintf(stderr, "Failed to add %s (%s) to builder.\n",
-                        gp->getPath().string(), gp->getFiles()[j]->getPrintableSource().string());
+                        gp->getPath().string(), file->getPrintableSource().string());
                 return err;
             }
         }

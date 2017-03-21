@@ -78,6 +78,13 @@ status_t compileXmlFile(const Bundle* bundle,
                         ResourceTable* table,
                         int options)
 {
+    if (table->versionForCompat(bundle, resourceName, target, root)) {
+        // The file was versioned, so stop processing here.
+        // The resource entry has already been removed and the new one added.
+        // The `target` file will be empty, but empty files do not get written to the APK.
+        return NO_ERROR;
+    }
+
     if ((options&XML_COMPILE_STRIP_WHITESPACE) != 0) {
         root->removeWhitespace(true, NULL);
     } else  if ((options&XML_COMPILE_COMPACT_WHITESPACE) != 0) {
@@ -4756,6 +4763,77 @@ static bool IsTransitionElement(const String16& name) {
         }
     }
     return false;
+}
+
+bool ResourceTable::versionForCompat(const Bundle* bundle, const String16& resourceName,
+                                         const sp<AaptFile>& target, const sp<XMLNode>& root) {
+    XMLNode* node = root.get();
+    while (node->getType() != XMLNode::TYPE_ELEMENT) {
+        // We're assuming the root element is what we're looking for, which can only be under a
+        // bunch of namespace declarations.
+        if (node->getChildren().size() != 1) {
+          // Not sure what to do, bail.
+          return false;
+        }
+        node = node->getChildren().itemAt(0).get();
+    }
+
+    if (node->getElementNamespace().size() != 0) {
+        // Not something we care about.
+        return false;
+    }
+
+    int versionedSdk = 0;
+    if (node->getElementName() == String16("adaptive-icon")) {
+        versionedSdk = SDK_O;
+    }
+
+    const int minSdkVersion = getMinSdkVersion(bundle);
+    const ConfigDescription config(target->getGroupEntry().toParams());
+    if (versionedSdk <= minSdkVersion || versionedSdk <= config.sdkVersion) {
+        return false;
+    }
+
+    sp<ConfigList> cl = getConfigList(String16(mAssets->getPackage()),
+            String16(target->getResourceType()), resourceName);
+    if (!shouldGenerateVersionedResource(cl, config, versionedSdk)) {
+        return false;
+    }
+
+    // Remove the original entry.
+    cl->removeEntry(config);
+
+    // We need to wholesale version this file.
+    ConfigDescription newConfig(config);
+    newConfig.sdkVersion = versionedSdk;
+    sp<AaptFile> newFile = new AaptFile(target->getSourceFile(),
+            AaptGroupEntry(newConfig), target->getResourceType());
+    String8 resPath = String8::format("res/%s/%s.xml",
+            newFile->getGroupEntry().toDirName(target->getResourceType()).string(),
+            String8(resourceName).string());
+    resPath.convertToResPath();
+
+    // Add a resource table entry.
+    addEntry(SourcePos(),
+            String16(mAssets->getPackage()),
+            String16(target->getResourceType()),
+            resourceName,
+            String16(resPath),
+            NULL,
+            &newConfig);
+
+    // Schedule this to be compiled.
+    CompileResourceWorkItem item;
+    item.resourceName = resourceName;
+    item.resPath = resPath;
+    item.file = newFile;
+    item.xmlRoot = root->clone();
+    item.needsCompiling = false;    // This step occurs after we parse/assign, so we don't need
+                                    // to do it again.
+    mWorkQueue.push(item);
+
+    // Now mark the old entry as deleted.
+    return true;
 }
 
 status_t ResourceTable::modifyForCompat(const Bundle* bundle,
