@@ -466,11 +466,22 @@ public class DexManager {
             }
         }
 
-        // Cache miss. Return not found for the moment.
-        //
-        // TODO(calin): this may be because of a newly installed package, an update
-        // or a new added user. We can either perform a full look up again or register
-        // observers to be notified of package/user updates.
+        if (DEBUG) {
+            // TODO(calin): Consider checking for /data/data symlink.
+            // /data/data/ symlinks /data/user/0/ and there's nothing stopping apps
+            // to load dex files through it.
+            try {
+                String dexPathReal = PackageManagerServiceUtils.realpath(new File(dexPath));
+                if (dexPathReal != dexPath) {
+                    Slog.d(TAG, "Dex loaded with symlink. dexPath=" +
+                            dexPath + " dexPathReal=" + dexPathReal);
+                }
+            } catch (IOException e) {
+                // Ignore
+            }
+        }
+        // Cache miss. The cache is updated during installs and uninstalls,
+        // so if we get here we're pretty sure the dex path does not exist.
         return new DexSearchResult(null, DEX_SEARCH_NOT_FOUND);
     }
 
@@ -519,12 +530,9 @@ public class DexManager {
 
         public int searchDex(String dexPath, int userId) {
             // First check that this package is installed or active for the given user.
-            // If we don't have a data dir it means this user is trying to load something
-            // unavailable for them.
+            // A missing data dir means the package is not installed.
             Set<String> userDataDirs = mAppDataDirs.get(userId);
             if (userDataDirs == null) {
-                Slog.w(TAG, "Trying to load a dex path which does not exist for the current " +
-                        "user. dexPath=" + dexPath + ", userId=" + userId);
                 return DEX_SEARCH_NOT_FOUND;
             }
 
@@ -540,19 +548,6 @@ public class DexManager {
                 }
             }
 
-            // TODO(calin): What if we get a symlink? e.g. data dir may be a symlink,
-            // /data/data/ -> /data/user/0/.
-            if (DEBUG) {
-                try {
-                    String dexPathReal = PackageManagerServiceUtils.realpath(new File(dexPath));
-                    if (dexPathReal != dexPath) {
-                        Slog.d(TAG, "Dex loaded with symlink. dexPath=" +
-                                dexPath + " dexPathReal=" + dexPathReal);
-                    }
-                } catch (IOException e) {
-                    // Ignore
-                }
-            }
             return DEX_SEARCH_NOT_FOUND;
         }
     }
