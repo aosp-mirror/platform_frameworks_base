@@ -16,6 +16,7 @@
 
 package com.android.server.tv;
 
+import android.hardware.tv.input.V1_0.Constants;
 import android.media.tv.TvInputHardwareInfo;
 import android.media.tv.TvStreamConfig;
 import android.os.Handler;
@@ -41,9 +42,10 @@ final class TvInputHal implements Handler.Callback {
     public final static int ERROR_STALE_CONFIG = -2;
     public final static int ERROR_UNKNOWN = -3;
 
-    public static final int EVENT_DEVICE_AVAILABLE = 1;
-    public static final int EVENT_DEVICE_UNAVAILABLE = 2;
-    public static final int EVENT_STREAM_CONFIGURATION_CHANGED = 3;
+    public static final int EVENT_DEVICE_AVAILABLE = Constants.EVENT_DEVICE_AVAILABLE;
+    public static final int EVENT_DEVICE_UNAVAILABLE = Constants.EVENT_DEVICE_UNAVAILABLE;
+    public static final int EVENT_STREAM_CONFIGURATION_CHANGED =
+            Constants.EVENT_STREAM_CONFIGURATIONS_CHANGED;
     public static final int EVENT_FIRST_FRAME_CAPTURED = 4;
 
     public interface Callback {

@@ -20,6 +20,7 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.annotation.IntDef;
 import android.annotation.SystemApi;
+import android.hardware.tv.input.V1_0.Constants;
 import android.media.AudioManager;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -37,16 +38,16 @@ public final class TvInputHardwareInfo implements Parcelable {
     static final String TAG = "TvInputHardwareInfo";
 
     // Match hardware/libhardware/include/hardware/tv_input.h
-    public static final int TV_INPUT_TYPE_OTHER_HARDWARE = 1;
-    public static final int TV_INPUT_TYPE_TUNER          = 2;
-    public static final int TV_INPUT_TYPE_COMPOSITE      = 3;
-    public static final int TV_INPUT_TYPE_SVIDEO         = 4;
-    public static final int TV_INPUT_TYPE_SCART          = 5;
-    public static final int TV_INPUT_TYPE_COMPONENT      = 6;
-    public static final int TV_INPUT_TYPE_VGA            = 7;
-    public static final int TV_INPUT_TYPE_DVI            = 8;
-    public static final int TV_INPUT_TYPE_HDMI           = 9;
-    public static final int TV_INPUT_TYPE_DISPLAY_PORT   = 10;
+    public static final int TV_INPUT_TYPE_OTHER_HARDWARE = Constants.TV_INPUT_TYPE_OTHER;
+    public static final int TV_INPUT_TYPE_TUNER          = Constants.TV_INPUT_TYPE_TUNER;
+    public static final int TV_INPUT_TYPE_COMPOSITE      = Constants.TV_INPUT_TYPE_COMPOSITE;
+    public static final int TV_INPUT_TYPE_SVIDEO         = Constants.TV_INPUT_TYPE_SVIDEO;
+    public static final int TV_INPUT_TYPE_SCART          = Constants.TV_INPUT_TYPE_SCART;
+    public static final int TV_INPUT_TYPE_COMPONENT      = Constants.TV_INPUT_TYPE_COMPONENT;
+    public static final int TV_INPUT_TYPE_VGA            = Constants.TV_INPUT_TYPE_VGA;
+    public static final int TV_INPUT_TYPE_DVI            = Constants.TV_INPUT_TYPE_DVI;
+    public static final int TV_INPUT_TYPE_HDMI           = Constants.TV_INPUT_TYPE_HDMI;
+    public static final int TV_INPUT_TYPE_DISPLAY_PORT   = Constants.TV_INPUT_TYPE_DISPLAY_PORT;
 
     /** @hide */
     @Retention(SOURCE)
@@ -58,17 +59,20 @@ public final class TvInputHardwareInfo implements Parcelable {
     /**
      * The hardware is unsure about the connection status or does not support cable detection.
      */
-    public static final int CABLE_CONNECTION_STATUS_UNKNOWN = 0;
+    public static final int CABLE_CONNECTION_STATUS_UNKNOWN =
+            Constants.CABLE_CONNECTION_STATUS_UNKNOWN;
 
     /**
      * Cable is connected to the hardware.
      */
-    public static final int CABLE_CONNECTION_STATUS_CONNECTED = 1;
+    public static final int CABLE_CONNECTION_STATUS_CONNECTED =
+            Constants.CABLE_CONNECTION_STATUS_CONNECTED;
 
     /**
      * Cable is disconnected to the hardware.
      */
-    public static final int CABLE_CONNECTION_STATUS_DISCONNECTED = 2;
+    public static final int CABLE_CONNECTION_STATUS_DISCONNECTED =
+            Constants.CABLE_CONNECTION_STATUS_DISCONNECTED;
 
     public static final Parcelable.Creator<TvInputHardwareInfo> CREATOR =
             new Parcelable.Creator<TvInputHardwareInfo>() {

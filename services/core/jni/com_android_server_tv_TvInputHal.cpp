@@ -577,7 +577,6 @@ JTvInputHal::TvInputCallback::TvInputCallback(JTvInputHal* hal) {
 }
 
 Return<void> JTvInputHal::TvInputCallback::notify(const TvInputEvent& event) {
-    // TODO(b/32200867): Ensure the event type values are in sync with the framework code.
     mHal->mLooper->sendMessage(new NotifyHandler(mHal, event), static_cast<int>(event.type));
     return Void();
 }
