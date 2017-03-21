@@ -289,6 +289,18 @@ public class NotificationRecordTest {
     }
 
     @Test
+    public void testImportance_locked_unspecified_preUpgrade() throws Exception {
+        defaultChannel.setImportance(NotificationManager.IMPORTANCE_UNSPECIFIED);
+        defaultChannel.lockFields(NotificationChannel.USER_LOCKED_IMPORTANCE);
+        StatusBarNotification sbn = getNotification(true /*preO */, true /* noisy */,
+                true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
+                false /* lights */, false /*defaultLights */);
+
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, defaultChannel);
+        assertEquals(NotificationManager.IMPORTANCE_HIGH, record.getImportance());
+    }
+
+    @Test
     public void testImportance_upgrade() throws Exception {
         StatusBarNotification sbn = getNotification(false /*preO */, true /* noisy */,
                 true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,

@@ -294,8 +294,9 @@ public final class NotificationRecord {
         stats.isNoisy = mSound != null || mVibration != null;
 
         if (mPreChannelsNotification
-                && (getChannel().getUserLockedFields()
-                & NotificationChannel.USER_LOCKED_IMPORTANCE) == 0) {
+                && (importance == IMPORTANCE_UNSPECIFIED
+                || (getChannel().getUserLockedFields()
+                & NotificationChannel.USER_LOCKED_IMPORTANCE) == 0)) {
             if (!stats.isNoisy && requestedImportance > IMPORTANCE_LOW) {
                 requestedImportance = IMPORTANCE_LOW;
             }
@@ -358,6 +359,7 @@ public final class NotificationRecord {
     }
 
     void dump(PrintWriter pw, String prefix, Context baseContext, boolean redact) {
+        prefix = prefix + "  ";
         final Notification notification = sbn.getNotification();
         final Icon icon = notification.getSmallIcon();
         String iconStr = String.valueOf(icon);
@@ -365,21 +367,21 @@ public final class NotificationRecord {
             iconStr += " / " + idDebugString(baseContext, icon.getResPackage(), icon.getResId());
         }
         pw.println(prefix + this);
-        pw.println(prefix + "  uid=" + sbn.getUid() + " userId=" + sbn.getUserId());
-        pw.println(prefix + "  icon=" + iconStr);
-        pw.println(prefix + "  pri=" + notification.priority);
-        pw.println(prefix + "  key=" + sbn.getKey());
-        pw.println(prefix + "  seen=" + mIsSeen);
-        pw.println(prefix + "  groupKey=" + getGroupKey());
-        pw.println(prefix + "  fullscreenIntent=" + notification.fullScreenIntent);
-        pw.println(prefix + "  contentIntent=" + notification.contentIntent);
-        pw.println(prefix + "  deleteIntent=" + notification.deleteIntent);
-        pw.println(prefix + "  tickerText=" + notification.tickerText);
-        pw.println(prefix + "  contentView=" + notification.contentView);
-        pw.println(prefix + String.format("  color=0x%08x", notification.color));
-        pw.println(prefix + "  timeout=" + TimeUtils.formatForLogging(notification.getTimeout()));
+        pw.println(prefix + "uid=" + sbn.getUid() + " userId=" + sbn.getUserId());
+        pw.println(prefix + "icon=" + iconStr);
+        pw.println(prefix + "pri=" + notification.priority);
+        pw.println(prefix + "key=" + sbn.getKey());
+        pw.println(prefix + "seen=" + mIsSeen);
+        pw.println(prefix + "groupKey=" + getGroupKey());
+        pw.println(prefix + "fullscreenIntent=" + notification.fullScreenIntent);
+        pw.println(prefix + "contentIntent=" + notification.contentIntent);
+        pw.println(prefix + "deleteIntent=" + notification.deleteIntent);
+        pw.println(prefix + "tickerText=" + notification.tickerText);
+        pw.println(prefix + "contentView=" + notification.contentView);
+        pw.println(prefix + String.format("color=0x%08x", notification.color));
+        pw.println(prefix + "timeout=" + TimeUtils.formatForLogging(notification.getTimeout()));
         if (notification.actions != null && notification.actions.length > 0) {
-            pw.println(prefix + "  actions={");
+            pw.println(prefix + "actions={");
             final int N = notification.actions.length;
             for (int i = 0; i < N; i++) {
                 final Notification.Action action = notification.actions[i];
@@ -395,7 +397,7 @@ public final class NotificationRecord {
             pw.println(prefix + "  }");
         }
         if (notification.extras != null && notification.extras.size() > 0) {
-            pw.println(prefix + "  extras={");
+            pw.println(prefix + "extras={");
             for (String key : notification.extras.keySet()) {
                 pw.print(prefix + "    " + key + "=");
                 Object val = notification.extras.get(key);
@@ -425,46 +427,46 @@ public final class NotificationRecord {
                     pw.println();
                 }
             }
-            pw.println(prefix + "  }");
+            pw.println(prefix + "}");
         }
-        pw.println(prefix + "  stats=" + stats.toString());
-        pw.println(prefix + "  mContactAffinity=" + mContactAffinity);
-        pw.println(prefix + "  mRecentlyIntrusive=" + mRecentlyIntrusive);
-        pw.println(prefix + "  mPackagePriority=" + mPackagePriority);
-        pw.println(prefix + "  mPackageVisibility=" + mPackageVisibility);
-        pw.println(prefix + "  mUserImportance="
+        pw.println(prefix + "stats=" + stats.toString());
+        pw.println(prefix + "mContactAffinity=" + mContactAffinity);
+        pw.println(prefix + "mRecentlyIntrusive=" + mRecentlyIntrusive);
+        pw.println(prefix + "mPackagePriority=" + mPackagePriority);
+        pw.println(prefix + "mPackageVisibility=" + mPackageVisibility);
+        pw.println(prefix + "mUserImportance="
                 + NotificationListenerService.Ranking.importanceToString(mUserImportance));
-        pw.println(prefix + "  mImportance="
+        pw.println(prefix + "mImportance="
                 + NotificationListenerService.Ranking.importanceToString(mImportance));
-        pw.println(prefix + "  mImportanceExplanation=" + mImportanceExplanation);
-        pw.println(prefix + "  mIntercept=" + mIntercept);
-        pw.println(prefix + "  mGlobalSortKey=" + mGlobalSortKey);
-        pw.println(prefix + "  mRankingTimeMs=" + mRankingTimeMs);
-        pw.println(prefix + "  mCreationTimeMs=" + mCreationTimeMs);
-        pw.println(prefix + "  mVisibleSinceMs=" + mVisibleSinceMs);
-        pw.println(prefix + "  mUpdateTimeMs=" + mUpdateTimeMs);
-        pw.println(prefix + "  mSuppressedVisualEffects= " + mSuppressedVisualEffects);
+        pw.println(prefix + "mImportanceExplanation=" + mImportanceExplanation);
+        pw.println(prefix + "mIntercept=" + mIntercept);
+        pw.println(prefix + "mGlobalSortKey=" + mGlobalSortKey);
+        pw.println(prefix + "mRankingTimeMs=" + mRankingTimeMs);
+        pw.println(prefix + "mCreationTimeMs=" + mCreationTimeMs);
+        pw.println(prefix + "mVisibleSinceMs=" + mVisibleSinceMs);
+        pw.println(prefix + "mUpdateTimeMs=" + mUpdateTimeMs);
+        pw.println(prefix + "mSuppressedVisualEffects= " + mSuppressedVisualEffects);
         if (mPreChannelsNotification) {
-            pw.println(prefix + String.format("  defaults=0x%08x flags=0x%08x",
+            pw.println(prefix + String.format("defaults=0x%08x flags=0x%08x",
                     notification.defaults, notification.flags));
-            pw.println(prefix + "  n.sound=" + notification.sound);
-            pw.println(prefix + "  n.audioStreamType=" + notification.audioStreamType);
-            pw.println(prefix + "  n.audioAttributes=" + notification.audioAttributes);
+            pw.println(prefix + "n.sound=" + notification.sound);
+            pw.println(prefix + "n.audioStreamType=" + notification.audioStreamType);
+            pw.println(prefix + "n.audioAttributes=" + notification.audioAttributes);
             pw.println(prefix + String.format("  led=0x%08x onMs=%d offMs=%d",
                     notification.ledARGB, notification.ledOnMS, notification.ledOffMS));
-            pw.println(prefix + "  vibrate=" + Arrays.toString(notification.vibrate));
+            pw.println(prefix + "vibrate=" + Arrays.toString(notification.vibrate));
         }
-        pw.println(prefix + "  mSound= " + mSound);
-        pw.println(prefix + "  mVibration= " + mVibration);
-        pw.println(prefix + "  mAttributes= " + mAttributes);
-        pw.println(prefix + "  mLight= " + mLight);
-        pw.println(prefix + "  mShowBadge=" + mShowBadge);
-        pw.println(prefix + "  effectiveNotificationChannel=" + getChannel());
+        pw.println(prefix + "mSound= " + mSound);
+        pw.println(prefix + "mVibration= " + mVibration);
+        pw.println(prefix + "mAttributes= " + mAttributes);
+        pw.println(prefix + "mLight= " + mLight);
+        pw.println(prefix + "mShowBadge=" + mShowBadge);
+        pw.println(prefix + "effectiveNotificationChannel=" + getChannel());
         if (getPeopleOverride() != null) {
-            pw.println(prefix + "  overridePeople= " + TextUtils.join(",", getPeopleOverride()));
+            pw.println(prefix + "overridePeople= " + TextUtils.join(",", getPeopleOverride()));
         }
         if (getSnoozeCriteria() != null) {
-            pw.println(prefix + "  snoozeCriteria=" + TextUtils.join(",", getSnoozeCriteria()));
+            pw.println(prefix + "snoozeCriteria=" + TextUtils.join(",", getSnoozeCriteria()));
         }
     }
 

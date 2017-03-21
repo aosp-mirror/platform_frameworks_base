@@ -1305,14 +1305,16 @@ public class NotificationManagerService extends SystemService {
             mRankingHelper.updateNotificationChannel(pkg, uid, channel);
         }
 
-        synchronized (mNotificationList) {
+        synchronized (mNotificationLock) {
             final int N = mNotificationList.size();
             for (int i = N - 1; i >= 0; --i) {
                 NotificationRecord r = mNotificationList.get(i);
-                if (channel.getId() != null && channel.getId().equals(r.getChannel().getId())) {
+                if (r.sbn.getPackageName().equals(pkg)
+                        && r.sbn.getUid() == uid
+                        && channel.getId() != null
+                        && channel.getId().equals(r.getChannel().getId())) {
                     r.updateNotificationChannel(mRankingHelper.getNotificationChannel(
-                            r.sbn.getPackageName(), r.getUser().getIdentifier(),
-                            channel.getId(), false));
+                            pkg, uid, channel.getId(), false));
                 }
             }
         }

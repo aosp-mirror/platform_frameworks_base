@@ -94,10 +94,12 @@ public class ImportanceExtractorTest {
                 new NotificationChannel("a", "a", NotificationManager.IMPORTANCE_UNSPECIFIED);
 
         NotificationRecord r = getNotificationRecord(channel);
+        int notificationImportance = r.getImportance();
 
         extractor.process(r);
 
-        assertEquals(r.getUserImportance(), NotificationManager.IMPORTANCE_UNSPECIFIED);
+        assertEquals(NotificationManager.IMPORTANCE_UNSPECIFIED, r.getUserImportance());
+        assertEquals(notificationImportance, r.getImportance());
     }
 
     @Test
