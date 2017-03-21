@@ -2159,10 +2159,10 @@ public class TextToSpeech {
                     }
 
                     @Override
-                    public void onUtteranceRangeStart(String utteranceId, int start, int end) {
+                    public void onRangeStart(String utteranceId, int start, int end, int frame) {
                         UtteranceProgressListener listener = mUtteranceProgressListener;
                         if (listener != null) {
-                            listener.onUtteranceRangeStart(utteranceId, start, end);
+                            listener.onRangeStart(utteranceId, start, end, frame);
                         }
                     }
                 };

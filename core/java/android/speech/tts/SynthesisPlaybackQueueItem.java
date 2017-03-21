@@ -224,7 +224,7 @@ final class SynthesisPlaybackQueueItem extends PlaybackQueueItem
             return;
         }
         // Inform the client.
-        getDispatcher().dispatchOnUtteranceRangeStart(marker.start, marker.end);
+        getDispatcher().dispatchOnRangeStart(marker.start, marker.end, marker.frames);
         // Listen for the next marker.
         // It's ok if this marker is in the past, in that case onMarkerReached will be called again.
         updateMarker();

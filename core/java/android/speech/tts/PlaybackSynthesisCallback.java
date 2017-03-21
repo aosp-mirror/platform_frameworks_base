@@ -272,6 +272,7 @@ class PlaybackSynthesisCallback extends AbstractSynthesisCallback {
         }
     }
 
+    @Override
     public void rangeStart(int markerInFrames, int start, int end) {
         if (mItem == null) {
             Log.e(TAG, "mItem is null");

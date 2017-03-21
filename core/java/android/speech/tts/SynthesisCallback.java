@@ -148,8 +148,8 @@ public interface SynthesisCallback {
      *
      * <p>Calling this method means that at the given audio frame, the given range of the input is
      * about to be spoken. If this method is called the client will receive a callback on the
-     * listener ({@link UtteranceProgressListener#onUtteranceRangeStart}) at the moment that frame
-     * has been reached by the playback head.
+     * listener ({@link UtteranceProgressListener#onRangeStart}) at the moment that frame has been
+     * reached by the playback head.
      *
      * <p>The markerInFrames is a frame index into the audio for this synthesis request, i.e. into
      * the concatenation of the audio bytes sent to audioAvailable for this synthesis request. The
