@@ -77,6 +77,12 @@ public class BootReceiver extends BroadcastReceiver {
                 mContext.startService(cpuinfo);
             }
 
+            // start the screen state service if activated
+            if (Settings.System.getInt(res, Settings.System.START_SCREEN_STATE_SERVICE, 0) != 0) {
+                Intent screenstate = new Intent(context, com.android.systemui.screenstate.ScreenStateService.class);
+                context.startService(screenstate);
+            }
+
         } catch (Exception e) {
             Log.e(TAG, "Can't start load average service", e);
         }
