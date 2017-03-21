@@ -33,63 +33,8 @@ namespace VectorDrawable {
 
 const int Tree::MAX_CACHED_BITMAP_SIZE = 2048;
 
-void Path::draw(SkCanvas* outCanvas, const SkMatrix& groupStackedMatrix, float scaleX, float scaleY,
-        bool useStagingData) {
-    float matrixScale = getMatrixScale(groupStackedMatrix);
-    if (matrixScale == 0) {
-        // When either x or y is scaled to 0, we don't need to draw anything.
-        return;
-    }
-
-    SkMatrix pathMatrix(groupStackedMatrix);
-    pathMatrix.postScale(scaleX, scaleY);
-
-    //TODO: try apply the path matrix to the canvas instead of creating a new path.
-    SkPath renderPath;
-    renderPath.reset();
-
-    if (useStagingData) {
-        SkPath tmpPath;
-        getStagingPath(&tmpPath);
-        renderPath.addPath(tmpPath, pathMatrix);
-    } else {
-        renderPath.addPath(getUpdatedPath(), pathMatrix);
-    }
-
-    float minScale = fmin(scaleX, scaleY);
-    float strokeScale = minScale * matrixScale;
-    drawPath(outCanvas, renderPath, strokeScale, pathMatrix, useStagingData);
-}
-
 void Path::dump() {
     ALOGD("Path: %s has %zu points", mName.c_str(), mProperties.getData().points.size());
-}
-
-float Path::getMatrixScale(const SkMatrix& groupStackedMatrix) {
-    // Given unit vectors A = (0, 1) and B = (1, 0).
-    // After matrix mapping, we got A' and B'. Let theta = the angel b/t A' and B'.
-    // Therefore, the final scale we want is min(|A'| * sin(theta), |B'| * sin(theta)),
-    // which is (|A'| * |B'| * sin(theta)) / max (|A'|, |B'|);
-    // If  max (|A'|, |B'|) = 0, that means either x or y has a scale of 0.
-    //
-    // For non-skew case, which is most of the cases, matrix scale is computing exactly the
-    // scale on x and y axis, and take the minimal of these two.
-    // For skew case, an unit square will mapped to a parallelogram. And this function will
-    // return the minimal height of the 2 bases.
-    SkVector skVectors[2];
-    skVectors[0].set(0, 1);
-    skVectors[1].set(1, 0);
-    groupStackedMatrix.mapVectors(skVectors, 2);
-    float scaleX = hypotf(skVectors[0].fX, skVectors[0].fY);
-    float scaleY = hypotf(skVectors[1].fX, skVectors[1].fY);
-    float crossProduct = skVectors[0].cross(skVectors[1]);
-    float maxScale = fmax(scaleX, scaleY);
-
-    float matrixScale = 0;
-    if (maxScale > 0) {
-        matrixScale = fabs(crossProduct) / maxScale;
-    }
-    return matrixScale;
 }
 
 // Called from UI thread during the initial setup/theme change.
@@ -104,18 +49,19 @@ Path::Path(const Path& path) : Node(path) {
     mStagingProperties.syncProperties(path.mStagingProperties);
 }
 
-const SkPath& Path::getUpdatedPath() {
-    if (mSkPathDirty) {
-        mSkPath.reset();
-        VectorDrawableUtils::verbsToPath(&mSkPath, mProperties.getData());
-        mSkPathDirty = false;
+const SkPath& Path::getUpdatedPath(bool useStagingData, SkPath* tempStagingPath) {
+    if (useStagingData) {
+        tempStagingPath->reset();
+        VectorDrawableUtils::verbsToPath(tempStagingPath, mStagingProperties.getData());
+        return *tempStagingPath;
+    } else {
+        if (mSkPathDirty) {
+            mSkPath.reset();
+            VectorDrawableUtils::verbsToPath(&mSkPath, mProperties.getData());
+            mSkPathDirty = false;
+        }
+        return mSkPath;
     }
-    return mSkPath;
-}
-
-void Path::getStagingPath(SkPath* outPath) {
-    outPath->reset();
-    VectorDrawableUtils::verbsToPath(outPath, mStagingProperties.getData());
 }
 
 void Path::syncProperties() {
@@ -157,26 +103,35 @@ static void applyTrim(SkPath* outPath, const SkPath& inPath, float trimPathStart
     }
 }
 
-const SkPath& FullPath::getUpdatedPath() {
-    if (!mSkPathDirty && !mProperties.mTrimDirty) {
+const SkPath& FullPath::getUpdatedPath(bool useStagingData, SkPath* tempStagingPath) {
+    if (!useStagingData && !mSkPathDirty && !mProperties.mTrimDirty) {
         return mTrimmedSkPath;
     }
-    Path::getUpdatedPath();
-    if (mProperties.getTrimPathStart() != 0.0f || mProperties.getTrimPathEnd() != 1.0f) {
-        mProperties.mTrimDirty = false;
-        applyTrim(&mTrimmedSkPath, mSkPath, mProperties.getTrimPathStart(),
-                mProperties.getTrimPathEnd(), mProperties.getTrimPathOffset());
-        return mTrimmedSkPath;
+    Path::getUpdatedPath(useStagingData, tempStagingPath);
+    SkPath *outPath;
+    if (useStagingData) {
+        SkPath inPath = *tempStagingPath;
+        applyTrim(tempStagingPath, inPath, mStagingProperties.getTrimPathStart(),
+                mStagingProperties.getTrimPathEnd(), mStagingProperties.getTrimPathOffset());
+        outPath = tempStagingPath;
     } else {
-        return mSkPath;
+        if (mProperties.getTrimPathStart() != 0.0f || mProperties.getTrimPathEnd() != 1.0f) {
+            mProperties.mTrimDirty = false;
+            applyTrim(&mTrimmedSkPath, mSkPath, mProperties.getTrimPathStart(),
+                    mProperties.getTrimPathEnd(), mProperties.getTrimPathOffset());
+            outPath = &mTrimmedSkPath;
+        } else {
+            outPath = &mSkPath;
+        }
     }
-}
-
-void FullPath::getStagingPath(SkPath* outPath) {
-    Path::getStagingPath(outPath);
-    SkPath inPath = *outPath;
-    applyTrim(outPath, inPath, mStagingProperties.getTrimPathStart(),
-            mStagingProperties.getTrimPathEnd(), mStagingProperties.getTrimPathOffset());
+    const FullPathProperties& properties = useStagingData ? mStagingProperties : mProperties;
+    bool setFillPath = properties.getFillGradient() != nullptr
+            || properties.getFillColor() != SK_ColorTRANSPARENT;
+    if (setFillPath) {
+        SkPath::FillType ft = static_cast<SkPath::FillType>(properties.getFillType());
+        outPath->setFillType(ft);
+    }
+    return *outPath;
 }
 
 void FullPath::dump() {
@@ -192,16 +147,17 @@ inline SkColor applyAlpha(SkColor color, float alpha) {
     return SkColorSetA(color, alphaBytes * alpha);
 }
 
-void FullPath::drawPath(SkCanvas* outCanvas, SkPath& renderPath, float strokeScale,
-                        const SkMatrix& matrix, bool useStagingData){
+void FullPath::draw(SkCanvas* outCanvas, bool useStagingData) {
     const FullPathProperties& properties = useStagingData ? mStagingProperties : mProperties;
+    SkPath tempStagingPath;
+    const SkPath& renderPath = getUpdatedPath(useStagingData, &tempStagingPath);
 
     // Draw path's fill, if fill color or gradient is valid
     bool needsFill = false;
     SkPaint paint;
     if (properties.getFillGradient() != nullptr) {
         paint.setColor(applyAlpha(SK_ColorBLACK, properties.getFillAlpha()));
-        paint.setShader(properties.getFillGradient()->makeWithLocalMatrix(matrix));
+        paint.setShader(sk_sp<SkShader>(SkSafeRef(properties.getFillGradient())));
         needsFill = true;
     } else if (properties.getFillColor() != SK_ColorTRANSPARENT) {
         paint.setColor(applyAlpha(properties.getFillColor(), properties.getFillAlpha()));
@@ -211,8 +167,6 @@ void FullPath::drawPath(SkCanvas* outCanvas, SkPath& renderPath, float strokeSca
     if (needsFill) {
         paint.setStyle(SkPaint::Style::kFill_Style);
         paint.setAntiAlias(true);
-        SkPath::FillType ft = static_cast<SkPath::FillType>(properties.getFillType());
-        renderPath.setFillType(ft);
         outCanvas->drawPath(renderPath, paint);
     }
 
@@ -220,7 +174,7 @@ void FullPath::drawPath(SkCanvas* outCanvas, SkPath& renderPath, float strokeSca
     bool needsStroke = false;
     if (properties.getStrokeGradient() != nullptr) {
         paint.setColor(applyAlpha(SK_ColorBLACK, properties.getStrokeAlpha()));
-        paint.setShader(properties.getStrokeGradient()->makeWithLocalMatrix(matrix));
+        paint.setShader(sk_sp<SkShader>(SkSafeRef(properties.getStrokeGradient())));
         needsStroke = true;
     } else if (properties.getStrokeColor() != SK_ColorTRANSPARENT) {
         paint.setColor(applyAlpha(properties.getStrokeColor(), properties.getStrokeAlpha()));
@@ -232,7 +186,7 @@ void FullPath::drawPath(SkCanvas* outCanvas, SkPath& renderPath, float strokeSca
         paint.setStrokeJoin(SkPaint::Join(properties.getStrokeLineJoin()));
         paint.setStrokeCap(SkPaint::Cap(properties.getStrokeLineCap()));
         paint.setStrokeMiter(properties.getStrokeMiterLimit());
-        paint.setStrokeWidth(properties.getStrokeWidth() * strokeScale);
+        paint.setStrokeWidth(properties.getStrokeWidth());
         outCanvas->drawPath(renderPath, paint);
     }
 }
@@ -306,36 +260,28 @@ void FullPath::FullPathProperties::setPropertyValue(int propertyId, float value)
     }
 }
 
-void ClipPath::drawPath(SkCanvas* outCanvas, SkPath& renderPath,
-        float strokeScale, const SkMatrix& matrix, bool useStagingData){
-    outCanvas->clipPath(renderPath);
+void ClipPath::draw(SkCanvas* outCanvas, bool useStagingData) {
+    SkPath tempStagingPath;
+    outCanvas->clipPath(getUpdatedPath(useStagingData, &tempStagingPath));
 }
 
 Group::Group(const Group& group) : Node(group) {
     mStagingProperties.syncProperties(group.mStagingProperties);
 }
 
-void Group::draw(SkCanvas* outCanvas, const SkMatrix& currentMatrix, float scaleX,
-        float scaleY, bool useStagingData) {
-    // TODO: Try apply the matrix to the canvas instead of passing it down the tree
-
-    // Calculate current group's matrix by preConcat the parent's and
-    // and the current one on the top of the stack.
-    // Basically the Mfinal = Mviewport * M0 * M1 * M2;
-    // Mi the local matrix at level i of the group tree.
+void Group::draw(SkCanvas* outCanvas, bool useStagingData) {
+    // Save the current clip and matrix information, which is local to this group.
+    SkAutoCanvasRestore saver(outCanvas, true);
+    // apply the current group's matrix to the canvas
     SkMatrix stackedMatrix;
     const GroupProperties& prop = useStagingData ? mStagingProperties : mProperties;
     getLocalMatrix(&stackedMatrix, prop);
-    stackedMatrix.postConcat(currentMatrix);
-
-    // Save the current clip information, which is local to this group.
-    outCanvas->save();
+    outCanvas->concat(stackedMatrix);
     // Draw the group tree in the same order as the XML file.
     for (auto& child : mChildren) {
-        child->draw(outCanvas, stackedMatrix, scaleX, scaleY, useStagingData);
+        child->draw(outCanvas, useStagingData);
     }
-    // Restore the previous clip information.
-    outCanvas->restore();
+    // Restore the previous clip and matrix information.
 }
 
 void Group::dump() {
@@ -556,7 +502,8 @@ void Tree::updateBitmapCache(Bitmap& bitmap, bool useStagingData) {
             mStagingProperties.getViewportHeight() : mProperties.getViewportHeight();
     float scaleX = outCache.width() / viewportWidth;
     float scaleY = outCache.height() / viewportHeight;
-    mRootNode->draw(&outCanvas, SkMatrix::I(), scaleX, scaleY, useStagingData);
+    outCanvas.scale(scaleX, scaleY);
+    mRootNode->draw(&outCanvas, useStagingData);
 }
 
 bool Tree::allocateBitmapIfNeeded(Cache& cache, int width, int height) {

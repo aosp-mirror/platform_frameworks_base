@@ -109,8 +109,7 @@ public:
         mName = node.mName;
     }
     Node() {}
-    virtual void draw(SkCanvas* outCanvas, const SkMatrix& currentMatrix,
-            float scaleX, float scaleY, bool useStagingData) = 0;
+    virtual void draw(SkCanvas* outCanvas, bool useStagingData) = 0;
     virtual void dump() = 0;
     void setName(const char* name) {
         mName = name;
@@ -169,9 +168,6 @@ public:
     Path() {}
 
     void dump() override;
-    void draw(SkCanvas* outCanvas, const SkMatrix& groupStackedMatrix,
-            float scaleX, float scaleY, bool useStagingData) override;
-    static float getMatrixScale(const SkMatrix& groupStackedMatrix);
     virtual void syncProperties() override;
     virtual void onPropertyChanged(Properties* prop) override {
         if (prop == &mStagingProperties) {
@@ -193,10 +189,7 @@ public:
     PathProperties* mutateProperties() { return &mProperties; }
 
 protected:
-    virtual const SkPath& getUpdatedPath();
-    virtual void getStagingPath(SkPath* outPath);
-    virtual void drawPath(SkCanvas *outCanvas, SkPath& renderPath,
-            float strokeScale, const SkMatrix& matrix, bool useStagingData) = 0;
+    virtual const SkPath& getUpdatedPath(bool useStagingData, SkPath* tempStagingPath);
 
     // Internal data, render thread only.
     bool mSkPathDirty = true;
@@ -364,6 +357,7 @@ public:
     FullPath(const FullPath& path); // for cloning
     FullPath(const char* path, size_t strLength) : Path(path, strLength) {}
     FullPath() : Path() {}
+    void draw(SkCanvas* outCanvas, bool useStagingData) override;
     void dump() override;
     FullPathProperties* mutateStagingProperties() { return &mStagingProperties; }
     const FullPathProperties* stagingProperties() { return &mStagingProperties; }
@@ -387,10 +381,7 @@ public:
     }
 
 protected:
-    const SkPath& getUpdatedPath() override;
-    void getStagingPath(SkPath* outPath) override;
-    void drawPath(SkCanvas* outCanvas, SkPath& renderPath,
-            float strokeScale, const SkMatrix& matrix, bool useStagingData) override;
+    const SkPath& getUpdatedPath(bool useStagingData, SkPath* tempStagingPath) override;
 private:
 
     FullPathProperties mProperties = FullPathProperties(this);
@@ -407,10 +398,7 @@ public:
     ClipPath(const ClipPath& path) : Path(path) {}
     ClipPath(const char* path, size_t strLength) : Path(path, strLength) {}
     ClipPath() : Path() {}
-
-protected:
-    void drawPath(SkCanvas* outCanvas, SkPath& renderPath,
-            float strokeScale, const SkMatrix& matrix, bool useStagingData) override;
+    void draw(SkCanvas* outCanvas, bool useStagingData) override;
 };
 
 class ANDROID_API Group: public Node {
@@ -519,8 +507,7 @@ public:
     GroupProperties* mutateProperties() { return &mProperties; }
 
     // Methods below could be called from either UI thread or Render Thread.
-    virtual void draw(SkCanvas* outCanvas, const SkMatrix& currentMatrix,
-            float scaleX, float scaleY, bool useStagingData) override;
+    virtual void draw(SkCanvas* outCanvas, bool useStagingData) override;
     void getLocalMatrix(SkMatrix* outMatrix, const GroupProperties& properties);
     void dump() override;
     static bool isValidProperty(int propertyId);
