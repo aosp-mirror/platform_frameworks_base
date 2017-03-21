@@ -573,6 +573,29 @@ public class ActivityManagerService extends IActivityManager.Stub
     // Determines whether to take full screen screenshots
     static final boolean TAKE_FULLSCREEN_SCREENSHOTS = true;
 
+    /**
+     * Indicates the maximum time spent waiting for the network rules to get updated.
+     */
+    private static final long WAIT_FOR_NETWORK_TIMEOUT_MS = 2000; // 2 sec
+
+    /**
+     * State indicating that there is no need for any blocking for network.
+     */
+    @VisibleForTesting
+    static final int NETWORK_STATE_NO_CHANGE = 0;
+
+    /**
+     * State indicating that the main thread needs to be informed about the network wait.
+     */
+    @VisibleForTesting
+    static final int NETWORK_STATE_BLOCK = 1;
+
+    /**
+     * State indicating that any threads waiting for network state to get updated can be unblocked.
+     */
+    @VisibleForTesting
+    static final int NETWORK_STATE_UNBLOCK = 2;
+
     /** All system services */
     SystemServiceManager mSystemServiceManager;
     AssistUtils mAssistUtils;
@@ -1531,6 +1554,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     @GuardedBy("this")
     @VisibleForTesting
     long mProcStateSeqCounter = 0;
+
+    private final Injector mInjector;
 
     static final class ProcessChangeItem {
         static final int CHANGE_ACTIVITIES = 1<<0;
@@ -2707,10 +2732,11 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @VisibleForTesting
     public ActivityManagerService(Injector injector) {
+        mInjector = injector;
         GL_ES_VERSION = 0;
         mActivityStarter = null;
         mAppErrors = null;
-        mAppOpsService = injector.getAppOpsService();
+        mAppOpsService = mInjector.getAppOpsService(null, null);
         mBatteryStatsService = null;
         mCompatModePackages = null;
         mConstants = null;
@@ -2728,7 +2754,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mStackSupervisor = null;
         mSystemThread = null;
         mTaskChangeNotificationController = null;
-        mUiHandler = injector.getHandler();
+        mUiHandler = injector.getUiHandler(null);
         mUserController = null;
     }
 
@@ -2736,6 +2762,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     // handlers to other threads.  So take care to be explicit about the looper.
     public ActivityManagerService(Context systemContext) {
         LockGuard.installLock(this, LockGuard.INDEX_ACTIVITY);
+        mInjector = new Injector();
         mContext = systemContext;
         mFactoryTest = FactoryTest.getMode();
         mSystemThread = ActivityThread.currentActivityThread();
@@ -2749,7 +2776,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 android.os.Process.THREAD_PRIORITY_FOREGROUND, false /*allowIo*/);
         mHandlerThread.start();
         mHandler = new MainHandler(mHandlerThread.getLooper());
-        mUiHandler = new UiHandler();
+        mUiHandler = mInjector.getUiHandler(this);
 
         mConstants = new ActivityManagerConstants(this, mHandler);
 
@@ -2796,7 +2823,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         mProcessStats = new ProcessStatsService(this, new File(systemDir, "procstats"));
 
-        mAppOpsService = new AppOpsService(new File(systemDir, "appops.xml"), mHandler);
+        mAppOpsService = mInjector.getAppOpsService(new File(systemDir, "appops.xml"), mHandler);
         mAppOpsService.startWatchingMode(AppOpsManager.OP_RUN_IN_BACKGROUND, null,
                 new IAppOpsCallback.Stub() {
                     @Override public void opChanged(int op, int uid, String packageName) {
@@ -22052,9 +22079,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
 
-        for (int i = mActiveUids.size() - 1; i >= 0; --i) {
-            incrementProcStateSeqIfNeeded(mActiveUids.valueAt(i));
-        }
+        incrementProcStateSeqAndNotifyAppsLocked();
 
         mNumServiceProcs = mNewNumServiceProcs;
 
@@ -22406,39 +22431,103 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     /**
-     * If {@link UidRecord#curProcStateSeq} needs to be updated, then increments the global seq
-     * counter {@link #mProcStateSeqCounter} and uses that value for {@param uidRec}.
+     * Checks if any uid is coming from background to foreground or vice versa and if so, increments
+     * the {@link UidRecord#curProcStateSeq} corresponding to that uid using global seq counter
+     * {@link #mProcStateSeqCounter} and notifies the app if it needs to block.
      */
     @VisibleForTesting
-    void incrementProcStateSeqIfNeeded(UidRecord uidRec) {
-        if (uidRec.curProcState != uidRec.setProcState && shouldIncrementProcStateSeq(uidRec)) {
-            uidRec.curProcStateSeq = ++mProcStateSeqCounter;
+    @GuardedBy("this")
+    void incrementProcStateSeqAndNotifyAppsLocked() {
+        // Used for identifying which uids need to block for network.
+        ArrayList<Integer> blockingUids = null;
+        for (int i = mActiveUids.size() - 1; i >= 0; --i) {
+            final UidRecord uidRec = mActiveUids.valueAt(i);
+            // If the network is not restricted for uid, then nothing to do here.
+            if (!mInjector.isNetworkRestrictedForUid(uidRec.uid)) {
+                continue;
+            }
+            // If process state is not changed, then there's nothing to do.
+            if (uidRec.setProcState == uidRec.curProcState) {
+                continue;
+            }
+            final int blockState = getBlockStateForUid(uidRec);
+            // No need to inform the app when the blockState is NETWORK_STATE_NO_CHANGE as
+            // there's nothing the app needs to do in this scenario.
+            if (blockState == NETWORK_STATE_NO_CHANGE) {
+                continue;
+            }
+            synchronized (uidRec.lock) {
+                uidRec.curProcStateSeq = ++mProcStateSeqCounter;
+                if (blockState == NETWORK_STATE_BLOCK) {
+                    if (blockingUids == null) {
+                        blockingUids = new ArrayList<>();
+                    }
+                    blockingUids.add(uidRec.uid);
+                } else {
+                    if (DEBUG_NETWORK) {
+                        Slog.d(TAG_NETWORK, "uid going to background, notifying all blocking"
+                                + " threads for uid: " + uidRec);
+                    }
+                    if (uidRec.waitingForNetwork) {
+                        uidRec.lock.notifyAll();
+                    }
+                }
+            }
+        }
+
+        // There are no uids that need to block, so nothing more to do.
+        if (blockingUids == null) {
+            return;
+        }
+
+        for (int i = mLruProcesses.size() - 1; i >= 0; --i) {
+            final ProcessRecord app = mLruProcesses.get(i);
+            if (!blockingUids.contains(app.uid)) {
+                continue;
+            }
+            if (!app.killedByAm && app.thread != null) {
+                final UidRecord uidRec = mActiveUids.get(app.uid);
+                try {
+                    if (DEBUG_NETWORK) {
+                        Slog.d(TAG_NETWORK, "Informing app thread that it needs to block: "
+                                + uidRec);
+                    }
+                    app.thread.setNetworkBlockSeq(uidRec.curProcStateSeq);
+                } catch (RemoteException ignored) {
+                }
+            }
         }
     }
 
     /**
-     * Checks if {@link UidRecord#curProcStateSeq} needs to be incremented depending on whether
-     * the uid is coming from background to foreground state or vice versa.
+     * Checks if the uid is coming from background to foreground or vice versa and returns
+     * appropriate block state based on this.
      *
-     * @return Returns true if the uid is coming from background to foreground state or vice versa,
-     *                 false otherwise.
+     * @return blockState based on whether the uid is coming from background to foreground or
+     *         vice versa. If bg->fg or fg->bg, then {@link #NETWORK_STATE_BLOCK} or
+     *         {@link #NETWORK_STATE_UNBLOCK} respectively, otherwise
+     *         {@link #NETWORK_STATE_NO_CHANGE}.
      */
     @VisibleForTesting
-    boolean shouldIncrementProcStateSeq(UidRecord uidRec) {
-        final boolean isAllowedOnRestrictBackground
-                = isProcStateAllowedWhileOnRestrictBackground(uidRec.curProcState);
-        final boolean isAllowedOnDeviceIdleOrPowerSaveMode
-                = isProcStateAllowedWhileIdleOrPowerSaveMode(uidRec.curProcState);
+    int getBlockStateForUid(UidRecord uidRec) {
+        // Denotes whether uid's process state is currently allowed network access.
+        final boolean isAllowed = isProcStateAllowedWhileIdleOrPowerSaveMode(uidRec.curProcState)
+                || isProcStateAllowedWhileOnRestrictBackground(uidRec.curProcState);
+        // Denotes whether uid's process state was previously allowed network access.
+        final boolean wasAllowed = isProcStateAllowedWhileIdleOrPowerSaveMode(uidRec.setProcState)
+                || isProcStateAllowedWhileOnRestrictBackground(uidRec.setProcState);
 
-        final boolean wasAllowedOnRestrictBackground
-                = isProcStateAllowedWhileOnRestrictBackground(uidRec.setProcState);
-        final boolean wasAllowedOnDeviceIdleOrPowerSaveMode
-                = isProcStateAllowedWhileIdleOrPowerSaveMode(uidRec.setProcState);
-
-        // If the uid is coming from background to foreground or vice versa,
-        // then return true. Otherwise false.
-        return (wasAllowedOnDeviceIdleOrPowerSaveMode != isAllowedOnDeviceIdleOrPowerSaveMode)
-                || (wasAllowedOnRestrictBackground != isAllowedOnRestrictBackground);
+        // When the uid is coming to foreground, AMS should inform the app thread that it should
+        // block for the network rules to get updated before launching an activity.
+        if (!wasAllowed && isAllowed) {
+            return NETWORK_STATE_BLOCK;
+        }
+        // When the uid is going to background, AMS should inform the app thread that if an
+        // activity launch is blocked for the network rules to get updated, it should be unblocked.
+        if (wasAllowed && !isAllowed) {
+            return NETWORK_STATE_UNBLOCK;
+        }
+        return NETWORK_STATE_NO_CHANGE;
     }
 
     final void runInBackgroundDisabled(int uid) {
@@ -23290,8 +23379,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         /**
          * Called after the network policy rules are updated by
-         * {@link com.android.server.net.NetworkPolicyManagerService} for a specific {@param uid} and
-         * {@param procStateSeq}.
+         * {@link com.android.server.net.NetworkPolicyManagerService} for a specific {@param uid}
+         * and {@param procStateSeq}.
          */
         @Override
         public void notifyNetworkPolicyRulesUpdated(int uid, long procStateSeq) {
@@ -23299,8 +23388,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                 Slog.d(TAG_NETWORK, "Got update from NPMS for uid: "
                         + uid + " seq: " + procStateSeq);
             }
+            UidRecord record;
             synchronized (ActivityManagerService.this) {
-                final UidRecord record = mActiveUids.get(uid);
+                record = mActiveUids.get(uid);
                 if (record == null) {
                     if (DEBUG_NETWORK) {
                         Slog.d(TAG_NETWORK, "No active uidRecord for uid: " + uid
@@ -23308,7 +23398,98 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                     return;
                 }
+            }
+            synchronized (record.lock) {
+                if (record.lastNetworkUpdatedProcStateSeq >= procStateSeq) {
+                    if (DEBUG_NETWORK) {
+                        Slog.d(TAG_NETWORK, "procStateSeq: " + procStateSeq + " has already"
+                                + " been handled for uid: " + uid);
+                    }
+                    return;
+                }
                 record.lastNetworkUpdatedProcStateSeq = procStateSeq;
+                if (record.curProcStateSeq > procStateSeq) {
+                    if (DEBUG_NETWORK) {
+                        Slog.d(TAG_NETWORK, "No need to handle older seq no., Uid: " + uid
+                                + ", curProcstateSeq: " + record.curProcStateSeq
+                                + ", procStateSeq: " + procStateSeq);
+                    }
+                    return;
+                }
+                if (record.waitingForNetwork) {
+                    if (DEBUG_NETWORK) {
+                        Slog.d(TAG_NETWORK, "Notifying all blocking threads for uid: " + uid
+                                + ", procStateSeq: " + procStateSeq);
+                    }
+                    record.lock.notifyAll();
+                }
+            }
+        }
+    }
+
+    /**
+     * Called by app main thread to wait for the network policy rules to get udpated.
+     *
+     * @param procStateSeq The sequence number indicating the process state change that the main
+     *                     thread is interested in.
+     */
+    @Override
+    public void waitForNetworkStateUpdate(long procStateSeq) {
+        final int callingUid = Binder.getCallingUid();
+        if (DEBUG_NETWORK) {
+            Slog.d(TAG_NETWORK, "Called from " + callingUid + " to wait for seq: " + procStateSeq);
+        }
+        UidRecord record;
+        synchronized (this) {
+            record = mActiveUids.get(callingUid);
+            if (record == null) {
+                return;
+            }
+        }
+        synchronized (record.lock) {
+            if (record.lastDispatchedProcStateSeq < procStateSeq) {
+                if (DEBUG_NETWORK) {
+                    Slog.d(TAG_NETWORK, "Uid state change for seq no. " + procStateSeq + " is not "
+                            + "dispatched to NPMS yet, so don't wait. Uid: " + callingUid
+                            + " lastProcStateSeqDispatchedToObservers: "
+                            + record.lastDispatchedProcStateSeq);
+                }
+                return;
+            }
+            if (record.curProcStateSeq > procStateSeq) {
+                if (DEBUG_NETWORK) {
+                    Slog.d(TAG_NETWORK, "Ignore the wait requests for older seq numbers. Uid: "
+                            + callingUid + ", curProcStateSeq: " + record.curProcStateSeq
+                            + ", procStateSeq: " + procStateSeq);
+                }
+                return;
+            }
+            if (record.lastNetworkUpdatedProcStateSeq >= procStateSeq) {
+                if (DEBUG_NETWORK) {
+                    Slog.d(TAG_NETWORK, "Network rules have been already updated for seq no. "
+                            + procStateSeq + ", so no need to wait. Uid: "
+                            + callingUid + ", lastProcStateSeqWithUpdatedNetworkState: "
+                            + record.lastNetworkUpdatedProcStateSeq);
+                }
+                return;
+            }
+            try {
+                if (DEBUG_NETWORK) {
+                    Slog.d(TAG_NETWORK, "Starting to wait for the network rules update."
+                        + " Uid: " + callingUid + " procStateSeq: " + procStateSeq);
+                }
+                final long startTime = SystemClock.uptimeMillis();
+                record.waitingForNetwork = true;
+                record.lock.wait(WAIT_FOR_NETWORK_TIMEOUT_MS);
+                record.waitingForNetwork = false;
+                final long totalTime = SystemClock.uptimeMillis() - startTime;
+                if (DEBUG_NETWORK ||  totalTime > WAIT_FOR_NETWORK_TIMEOUT_MS / 2) {
+                    Slog.d(TAG_NETWORK, "Total time waited for network rules to get updated: "
+                            + totalTime + ". Uid: " + callingUid + " procStateSeq: "
+                            + procStateSeq);
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
             }
         }
     }
@@ -23595,8 +23776,19 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-    static interface Injector {
-        public AppOpsService getAppOpsService();
-        public Handler getHandler();
+    @VisibleForTesting
+    public static class Injector {
+        public AppOpsService getAppOpsService(File file, Handler handler) {
+            return new AppOpsService(file, handler);
+        }
+
+        public Handler getUiHandler(ActivityManagerService service) {
+            return service.new UiHandler();
+        }
+
+        public boolean isNetworkRestrictedForUid(int uid) {
+            // TODO: add implementation
+            return false;
+        }
     }
 }
