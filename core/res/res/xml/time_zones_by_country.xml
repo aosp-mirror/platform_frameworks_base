@@ -336,6 +336,10 @@
 
     <timezone code="ck">Pacific/Rarotonga</timezone>
 
+    <!-- CHILE, -3:00 -->
+
+    <timezone code="cl">America/Punta_Arenas</timezone>
+
     <!-- CHILE, -4:00 -->
 
     <timezone code="cl">America/Santiago</timezone>
