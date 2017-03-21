@@ -1636,7 +1636,11 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         mDisplayAccessUIDs.clear();
         for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
             final ActivityDisplay activityDisplay = mActivityDisplays.valueAt(displayNdx);
-            mDisplayAccessUIDs.append(activityDisplay.mDisplayId, activityDisplay.getPresentUIDs());
+            // Only bother calculating the whitelist for private displays
+            if (activityDisplay.isPrivate()) {
+                mDisplayAccessUIDs.append(
+                        activityDisplay.mDisplayId, activityDisplay.getPresentUIDs());
+            }
         }
         // Store updated lists in DisplayManager. Callers from outside of AM should get them there.
         mDisplayManagerInternal.setDisplayAccessUIDs(mDisplayAccessUIDs);
