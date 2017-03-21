@@ -172,6 +172,25 @@ public class SecurityLog {
                 return new SecurityEvent[size];
             }
         };
+
+        /**
+         * @hide
+         */
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            SecurityEvent other = (SecurityEvent) o;
+            return mEvent.equals(other.mEvent);
+        }
+
+        /**
+         * @hide
+         */
+        @Override
+        public int hashCode() {
+            return mEvent.hashCode();
+        }
     }
     /**
      * Retrieve all security logs and return immediately.
