@@ -22,12 +22,15 @@ import static android.net.ConnectivityManager.TYPE_MOBILE_HIPRI;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.net.ConnectivityManager;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.StringJoiner;
 
 
 /**
@@ -95,6 +98,44 @@ public class TetheringConfiguration {
 
     public boolean isBluetooth(String iface) {
         return matchesDownstreamRegexs(iface, tetherableBluetoothRegexs);
+    }
+
+    public void dump(PrintWriter pw) {
+        dumpStringArray(pw, "tetherableUsbRegexs", tetherableUsbRegexs);
+        dumpStringArray(pw, "tetherableWifiRegexs", tetherableWifiRegexs);
+        dumpStringArray(pw, "tetherableBluetoothRegexs", tetherableBluetoothRegexs);
+
+        pw.print("isDunRequired: ");
+        pw.println(isDunRequired);
+
+        String[] upstreamTypes = null;
+        if (preferredUpstreamIfaceTypes != null) {
+            upstreamTypes = new String[preferredUpstreamIfaceTypes.size()];
+            int i = 0;
+            for (Integer netType : preferredUpstreamIfaceTypes) {
+                upstreamTypes[i] = ConnectivityManager.getNetworkTypeName(netType);
+                i++;
+            }
+        }
+        dumpStringArray(pw, "preferredUpstreamIfaceTypes", upstreamTypes);
+
+        dumpStringArray(pw, "dhcpRanges", dhcpRanges);
+        dumpStringArray(pw, "defaultIPv4DNS", defaultIPv4DNS);
+    }
+
+    private static void dumpStringArray(PrintWriter pw, String label, String[] values) {
+        pw.print(label);
+        pw.print(": ");
+
+        if (values != null) {
+            final StringJoiner sj = new StringJoiner(", ", "[", "]");
+            for (String value : values) { sj.add(value); }
+            pw.print(sj.toString());
+        } else {
+            pw.print("null");
+        }
+
+        pw.println();
     }
 
     private static boolean checkDunRequired(Context ctx) {
