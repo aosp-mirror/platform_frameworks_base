@@ -140,6 +140,12 @@ public class Process {
     public static final int WEBVIEW_ZYGOTE_UID = 1051;
 
     /**
+     * Defines the UID used for resource tracking for OTA updates.
+     * @hide
+     */
+    public static final int OTA_UPDATE_UID = 1061;
+
+    /**
      * Defines the start of a range of UIDs (and GIDs), going from this
      * number to {@link #LAST_APPLICATION_UID} that are reserved for assigning
      * to applications.
