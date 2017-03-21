@@ -2765,4 +2765,15 @@
   <java-symbol type="drawable" name="lockscreen_selected" />
 
   <java-symbol type="string" name="config_defaultCellBroadcastReceiverPkg" />
+
+  <!-- ETWS primary messages -->
+  <java-symbol type="string" name="etws_primary_default_message_earthquake" />
+
+  <java-symbol type="string" name="etws_primary_default_message_tsunami" />
+
+  <java-symbol type="string" name="etws_primary_default_message_earthquake_and_tsunami" />
+
+  <java-symbol type="string" name="etws_primary_default_message_test" />
+
+  <java-symbol type="string" name="etws_primary_default_message_others" />
 </resources>
