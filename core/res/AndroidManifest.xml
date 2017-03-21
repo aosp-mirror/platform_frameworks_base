@@ -1965,6 +1965,11 @@
     <eat-comment />
 
     <!-- Allows an application to install a shortcut in Launcher.
+         <p>In Android O (API level 26) and higher, the <code>INSTALL_SHORTCUT</code> broadcast no
+         longer has any effect on your app because it's a private, implicit
+         broadcast. Instead, you should create an app shortcut by using the
+         {@link android.content.pm.ShortcutManager#requestPinShortcut requestPinShortcut()}
+         method from the {@link android.content.pm.ShortcutManager} class.
          <p>Protection level: normal
     -->
     <permission android:name="com.android.launcher.permission.INSTALL_SHORTCUT"
