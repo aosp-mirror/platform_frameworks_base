@@ -534,6 +534,14 @@ public final class MediaStore {
         }
 
         /**
+         * Used to trigger special logic for directories.
+         * @hide
+         */
+        public static final Uri getDirectoryUri(String volumeName) {
+            return Uri.parse(CONTENT_AUTHORITY_SLASH + volumeName + "/dir");
+        }
+
+        /**
          * Fields for master table for all media files.
          * Table also contains MediaColumns._ID, DATA, SIZE and DATE_MODIFIED.
          */
