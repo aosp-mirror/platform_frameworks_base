@@ -120,7 +120,7 @@ public class BatteryController extends StateController {
             mStateChangedListener.onControllerStateChanged();
         }
         // Also tell the scheduler that any ready jobs should be flushed.
-        if (stablePower) {
+        if (stablePower || batteryNotLow) {
             mStateChangedListener.onRunJobNow(null);
         }
     }

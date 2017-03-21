@@ -489,7 +489,8 @@ public final class BatteryService extends SystemService {
                         mContext.sendBroadcastAsUser(statusIntent, UserHandle.ALL);
                     }
                 });
-            } else if (mSentLowBatteryBroadcast && mLastBatteryLevel >= mLowBatteryCloseWarningLevel) {
+            } else if (mSentLowBatteryBroadcast &&
+                    mBatteryProps.batteryLevel >= mLowBatteryCloseWarningLevel) {
                 mSentLowBatteryBroadcast = false;
                 final Intent statusIntent = new Intent(Intent.ACTION_BATTERY_OKAY);
                 statusIntent.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);

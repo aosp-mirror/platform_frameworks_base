@@ -83,6 +83,7 @@ import com.android.server.job.controllers.DeviceIdleJobsController;
 import com.android.server.job.controllers.IdleController;
 import com.android.server.job.controllers.JobStatus;
 import com.android.server.job.controllers.StateController;
+import com.android.server.job.controllers.StorageController;
 import com.android.server.job.controllers.TimeController;
 
 import libcore.util.EmptyArray;
@@ -133,6 +134,8 @@ public final class JobSchedulerService extends com.android.server.SystemService
     List<StateController> mControllers;
     /** Need direct access to this for testing. */
     BatteryController mBatteryController;
+    /** Need direct access to this for testing. */
+    StorageController mStorageController;
     /**
      * Queue of pending jobs. The JobServiceContext class will receive jobs from this list
      * when ready to execute them.
@@ -197,6 +200,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
         private static final String KEY_MIN_IDLE_COUNT = "min_idle_count";
         private static final String KEY_MIN_CHARGING_COUNT = "min_charging_count";
         private static final String KEY_MIN_BATTERY_NOT_LOW_COUNT = "min_battery_not_low_count";
+        private static final String KEY_MIN_STORAGE_NOT_LOW_COUNT = "min_storage_not_low_count";
         private static final String KEY_MIN_CONNECTIVITY_COUNT = "min_connectivity_count";
         private static final String KEY_MIN_CONTENT_COUNT = "min_content_count";
         private static final String KEY_MIN_READY_JOBS_COUNT = "min_ready_jobs_count";
@@ -211,6 +215,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
         private static final int DEFAULT_MIN_IDLE_COUNT = 1;
         private static final int DEFAULT_MIN_CHARGING_COUNT = 1;
         private static final int DEFAULT_MIN_BATTERY_NOT_LOW_COUNT = 1;
+        private static final int DEFAULT_MIN_STORAGE_NOT_LOW_COUNT = 1;
         private static final int DEFAULT_MIN_CONNECTIVITY_COUNT = 1;
         private static final int DEFAULT_MIN_CONTENT_COUNT = 1;
         private static final int DEFAULT_MIN_READY_JOBS_COUNT = 1;
@@ -237,6 +242,11 @@ public final class JobSchedulerService extends com.android.server.SystemService
          * schedule things early.
          */
         int MIN_BATTERY_NOT_LOW_COUNT = DEFAULT_MIN_BATTERY_NOT_LOW_COUNT;
+        /**
+         * Minimum # of "storage not low" jobs that must be ready in order to force the JMS to
+         * schedule things early.
+         */
+        int MIN_STORAGE_NOT_LOW_COUNT = DEFAULT_MIN_STORAGE_NOT_LOW_COUNT;
         /**
          * Minimum # of connectivity jobs that must be ready in order to force the JMS to schedule
          * things early.  1 == Run connectivity jobs as soon as ready.
@@ -323,6 +333,8 @@ public final class JobSchedulerService extends com.android.server.SystemService
                         DEFAULT_MIN_CHARGING_COUNT);
                 MIN_BATTERY_NOT_LOW_COUNT = mParser.getInt(KEY_MIN_BATTERY_NOT_LOW_COUNT,
                         DEFAULT_MIN_BATTERY_NOT_LOW_COUNT);
+                MIN_STORAGE_NOT_LOW_COUNT = mParser.getInt(KEY_MIN_STORAGE_NOT_LOW_COUNT,
+                        DEFAULT_MIN_STORAGE_NOT_LOW_COUNT);
                 MIN_CONNECTIVITY_COUNT = mParser.getInt(KEY_MIN_CONNECTIVITY_COUNT,
                         DEFAULT_MIN_CONNECTIVITY_COUNT);
                 MIN_CONTENT_COUNT = mParser.getInt(KEY_MIN_CONTENT_COUNT,
@@ -369,6 +381,9 @@ public final class JobSchedulerService extends com.android.server.SystemService
 
             pw.print("    "); pw.print(KEY_MIN_BATTERY_NOT_LOW_COUNT); pw.print("=");
             pw.print(MIN_BATTERY_NOT_LOW_COUNT); pw.println();
+
+            pw.print("    "); pw.print(KEY_MIN_STORAGE_NOT_LOW_COUNT); pw.print("=");
+            pw.print(MIN_STORAGE_NOT_LOW_COUNT); pw.println();
 
             pw.print("    "); pw.print(KEY_MIN_CONNECTIVITY_COUNT); pw.print("=");
             pw.print(MIN_CONNECTIVITY_COUNT); pw.println();
@@ -802,6 +817,8 @@ public final class JobSchedulerService extends com.android.server.SystemService
         mControllers.add(IdleController.get(this));
         mBatteryController = BatteryController.get(this);
         mControllers.add(mBatteryController);
+        mStorageController = StorageController.get(this);
+        mControllers.add(mStorageController);
         mControllers.add(AppIdleController.get(this));
         mControllers.add(ContentObserverController.get(this));
         mControllers.add(DeviceIdleJobsController.get(this));
@@ -1202,6 +1219,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
         class MaybeReadyJobQueueFunctor implements JobStatusFunctor {
             int chargingCount;
             int batteryNotLowCount;
+            int storageNotLowCount;
             int idleCount;
             int backoffCount;
             int connectivityCount;
@@ -1242,6 +1260,9 @@ public final class JobSchedulerService extends com.android.server.SystemService
                     if (job.hasBatteryNotLowConstraint()) {
                         batteryNotLowCount++;
                     }
+                    if (job.hasStorageNotLowConstraint()) {
+                        storageNotLowCount++;
+                    }
                     if (job.hasContentTriggerConstraint()) {
                         contentCount++;
                     }
@@ -1261,6 +1282,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
                         connectivityCount >= mConstants.MIN_CONNECTIVITY_COUNT ||
                         chargingCount >= mConstants.MIN_CHARGING_COUNT ||
                         batteryNotLowCount >= mConstants.MIN_BATTERY_NOT_LOW_COUNT ||
+                        storageNotLowCount >= mConstants.MIN_STORAGE_NOT_LOW_COUNT ||
                         contentCount >= mConstants.MIN_CONTENT_COUNT ||
                         (runnableJobs != null
                                 && runnableJobs.size() >= mConstants.MIN_READY_JOBS_COUNT)) {
@@ -1285,6 +1307,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
                 backoffCount = 0;
                 connectivityCount = 0;
                 batteryNotLowCount = 0;
+                storageNotLowCount = 0;
                 contentCount = 0;
                 runnableJobs = null;
             }
@@ -1825,6 +1848,19 @@ public final class JobSchedulerService extends com.android.server.SystemService
         synchronized (mLock) {
             return mBatteryController != null
                     ? mBatteryController.getTracker().isBatteryNotLow() : false;
+        }
+    }
+
+    int getStorageSeq() {
+        synchronized (mLock) {
+            return mStorageController != null ? mStorageController.getTracker().getSeq() : -1;
+        }
+    }
+
+    boolean getStorageNotLow() {
+        synchronized (mLock) {
+            return mStorageController != null
+                    ? mStorageController.getTracker().isStorageNotLow() : false;
         }
     }
 

@@ -34,10 +34,12 @@ import android.os.Binder;
 import android.os.Environment;
 import android.os.FileObserver;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Message;
 import android.os.RemoteException;
+import android.os.ResultReceiver;
 import android.os.ServiceManager;
+import android.os.ShellCallback;
+import android.os.ShellCommand;
 import android.os.StatFs;
 import android.os.SystemClock;
 import android.os.SystemProperties;
@@ -52,6 +54,7 @@ import android.util.TimeUtils;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import dalvik.system.VMRuntime;
 
@@ -76,12 +79,19 @@ import dalvik.system.VMRuntime;
 public class DeviceStorageMonitorService extends SystemService {
     static final String TAG = "DeviceStorageMonitorService";
 
+    /**
+     * Extra for {@link android.content.Intent#ACTION_BATTERY_CHANGED}:
+     * Current int sequence number of the update.
+     */
+    public static final String EXTRA_SEQUENCE = "seq";
+
     // TODO: extend to watch and manage caches on all private volumes
 
     static final boolean DEBUG = false;
     static final boolean localLOGV = false;
 
     static final int DEVICE_MEMORY_WHAT = 1;
+    static final int FORCE_MEMORY_WHAT = 2;
     private static final int MONITOR_INTERVAL = 1; //in minutes
     private static final int LOW_MEMORY_NOTIFICATION_ID = 1;
 
@@ -112,6 +122,8 @@ public class DeviceStorageMonitorService extends SystemService {
     private static final File CACHE_PATH = Environment.getDownloadCacheDirectory();
 
     private long mThreadStartTime = -1;
+    boolean mUpdatesStopped;
+    AtomicInteger mSeq = new AtomicInteger(1);
     boolean mClearSucceeded = false;
     boolean mClearingCache;
     private final Intent mStorageLowIntent;
@@ -152,11 +164,17 @@ public class DeviceStorageMonitorService extends SystemService {
         @Override
         public void handleMessage(Message msg) {
             //don't handle an invalid message
-            if (msg.what != DEVICE_MEMORY_WHAT) {
-                Slog.e(TAG, "Will not process invalid message");
-                return;
+            switch (msg.what) {
+                case DEVICE_MEMORY_WHAT:
+                    checkMemory(msg.arg1 == _TRUE);
+                    return;
+                case FORCE_MEMORY_WHAT:
+                    forceMemory(msg.arg1, msg.arg2);
+                    return;
+                default:
+                    Slog.w(TAG, "Will not process invalid message");
+                    return;
             }
-            checkMemory(msg.arg1 == _TRUE);
         }
     };
 
@@ -239,12 +257,36 @@ public class DeviceStorageMonitorService extends SystemService {
         }
     }
 
+    void forceMemory(int opts, int seq) {
+        if ((opts&OPTION_UPDATES_STOPPED) == 0) {
+            if (mUpdatesStopped) {
+                mUpdatesStopped = false;
+                checkMemory(true);
+            }
+        } else {
+            mUpdatesStopped = true;
+            final boolean forceLow = (opts&OPTION_STORAGE_LOW) != 0;
+            if (mLowMemFlag != forceLow || (opts&OPTION_FORCE_UPDATE) != 0) {
+                mLowMemFlag = forceLow;
+                if (forceLow) {
+                    sendNotification(seq);
+                } else {
+                    cancelNotification(seq);
+                }
+            }
+        }
+    }
+
     void checkMemory(boolean checkCache) {
+        if (mUpdatesStopped) {
+            return;
+        }
+
         //if the thread that was started to clear cache is still running do nothing till its
         //finished clearing cache. Ideally this flag could be modified by clearCache
         // and should be accessed via a lock but even if it does this test will fail now and
         //hopefully the next time this flag will be set to the correct value.
-        if(mClearingCache) {
+        if (mClearingCache) {
             if(localLOGV) Slog.i(TAG, "Thread already running just skip");
             //make sure the thread is not hung for too long
             long diffTime = System.currentTimeMillis() - mThreadStartTime;
@@ -284,7 +326,7 @@ public class DeviceStorageMonitorService extends SystemService {
                         // We tried to clear the cache, but that didn't get us
                         // below the low storage limit.  Tell the user.
                         Slog.i(TAG, "Running low on memory. Sending notification");
-                        sendNotification();
+                        sendNotification(0);
                         mLowMemFlag = true;
                     } else {
                         if (localLOGV) Slog.v(TAG, "Running low on memory " +
@@ -295,13 +337,13 @@ public class DeviceStorageMonitorService extends SystemService {
                 mFreeMemAfterLastCacheClear = mFreeMem;
                 if (mLowMemFlag) {
                     Slog.i(TAG, "Memory available. Cancelling notification");
-                    cancelNotification();
+                    cancelNotification(0);
                     mLowMemFlag = false;
                 }
             }
             if (!mLowMemFlag && !mIsBootImageOnDisk && mFreeMem < BOOT_IMAGE_STORAGE_REQUIREMENT) {
                 Slog.i(TAG, "No boot image on disk due to lack of space. Sending notification");
-                sendNotification();
+                sendNotification(0);
                 mLowMemFlag = true;
             }
             if (mFreeMem < mMemFullThreshold) {
@@ -419,7 +461,7 @@ public class DeviceStorageMonitorService extends SystemService {
         }
     };
 
-    private final IBinder mRemoteService = new Binder() {
+    private final Binder mRemoteService = new Binder() {
         @Override
         protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
             if (getContext().checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
@@ -431,44 +473,157 @@ public class DeviceStorageMonitorService extends SystemService {
                 return;
             }
 
-            dumpImpl(pw);
+            dumpImpl(fd, pw, args);
+        }
+
+        @Override
+        public void onShellCommand(FileDescriptor in, FileDescriptor out,
+                FileDescriptor err, String[] args, ShellCallback callback,
+                ResultReceiver resultReceiver) {
+            (new Shell()).exec(this, in, out, err, args, callback, resultReceiver);
         }
     };
 
-    void dumpImpl(PrintWriter pw) {
-        final Context context = getContext();
+    class Shell extends ShellCommand {
+        @Override
+        public int onCommand(String cmd) {
+            return onShellCommand(this, cmd);
+        }
 
-        pw.println("Current DeviceStorageMonitor state:");
+        @Override
+        public void onHelp() {
+            PrintWriter pw = getOutPrintWriter();
+            dumpHelp(pw);
+        }
+    }
 
-        pw.print("  mFreeMem="); pw.print(Formatter.formatFileSize(context, mFreeMem));
-        pw.print(" mTotalMemory=");
-        pw.println(Formatter.formatFileSize(context, mTotalMemory));
+    static final int OPTION_FORCE_UPDATE = 1<<0;
+    static final int OPTION_UPDATES_STOPPED = 1<<1;
+    static final int OPTION_STORAGE_LOW = 1<<2;
 
-        pw.print("  mFreeMemAfterLastCacheClear=");
-        pw.println(Formatter.formatFileSize(context, mFreeMemAfterLastCacheClear));
+    int parseOptions(Shell shell) {
+        String opt;
+        int opts = 0;
+        while ((opt = shell.getNextOption()) != null) {
+            if ("-f".equals(opt)) {
+                opts |= OPTION_FORCE_UPDATE;
+            }
+        }
+        return opts;
+    }
 
-        pw.print("  mLastReportedFreeMem=");
-        pw.print(Formatter.formatFileSize(context, mLastReportedFreeMem));
-        pw.print(" mLastReportedFreeMemTime=");
-        TimeUtils.formatDuration(mLastReportedFreeMemTime, SystemClock.elapsedRealtime(), pw);
-        pw.println();
+    int onShellCommand(Shell shell, String cmd) {
+        if (cmd == null) {
+            return shell.handleDefaultCommands(cmd);
+        }
+        PrintWriter pw = shell.getOutPrintWriter();
+        switch (cmd) {
+            case "force-low": {
+                int opts = parseOptions(shell);
+                getContext().enforceCallingOrSelfPermission(
+                        android.Manifest.permission.DEVICE_POWER, null);
+                int seq = mSeq.incrementAndGet();
+                mHandler.sendMessage(mHandler.obtainMessage(FORCE_MEMORY_WHAT,
+                        opts | OPTION_UPDATES_STOPPED | OPTION_STORAGE_LOW, seq));
+                if ((opts & OPTION_FORCE_UPDATE) != 0) {
+                    pw.println(seq);
+                }
+            } break;
+            case "force-not-low": {
+                int opts = parseOptions(shell);
+                getContext().enforceCallingOrSelfPermission(
+                        android.Manifest.permission.DEVICE_POWER, null);
+                int seq = mSeq.incrementAndGet();
+                mHandler.sendMessage(mHandler.obtainMessage(FORCE_MEMORY_WHAT,
+                        opts | OPTION_UPDATES_STOPPED, seq));
+                if ((opts & OPTION_FORCE_UPDATE) != 0) {
+                    pw.println(seq);
+                }
+            } break;
+            case "reset": {
+                int opts = parseOptions(shell);
+                getContext().enforceCallingOrSelfPermission(
+                        android.Manifest.permission.DEVICE_POWER, null);
+                int seq = mSeq.incrementAndGet();
+                mHandler.sendMessage(mHandler.obtainMessage(FORCE_MEMORY_WHAT,
+                        opts, seq));
+                if ((opts & OPTION_FORCE_UPDATE) != 0) {
+                    pw.println(seq);
+                }
+            } break;
+            default:
+                return shell.handleDefaultCommands(cmd);
+        }
+        return 0;
+    }
 
-        pw.print("  mLowMemFlag="); pw.print(mLowMemFlag);
-        pw.print(" mMemFullFlag="); pw.println(mMemFullFlag);
-        pw.print(" mIsBootImageOnDisk="); pw.print(mIsBootImageOnDisk);
+    static void dumpHelp(PrintWriter pw) {
+        pw.println("Device storage monitor service (devicestoragemonitor) commands:");
+        pw.println("  help");
+        pw.println("    Print this help text.");
+        pw.println("  force-low [-f]");
+        pw.println("    Force storage to be low, freezing storage state.");
+        pw.println("    -f: force a storage change broadcast be sent, prints new sequence.");
+        pw.println("  force-not-low [-f]");
+        pw.println("    Force storage to not be low, freezing storage state.");
+        pw.println("    -f: force a storage change broadcast be sent, prints new sequence.");
+        pw.println("  reset [-f]");
+        pw.println("    Unfreeze storage state, returning to current real values.");
+        pw.println("    -f: force a storage change broadcast be sent, prints new sequence.");
+    }
 
-        pw.print("  mClearSucceeded="); pw.print(mClearSucceeded);
-        pw.print(" mClearingCache="); pw.println(mClearingCache);
+    void dumpImpl(FileDescriptor fd, PrintWriter pw, String[] args) {
+        if (args == null || args.length == 0 || "-a".equals(args[0])) {
+            final Context context = getContext();
 
-        pw.print("  mMemLowThreshold=");
-        pw.print(Formatter.formatFileSize(context, mMemLowThreshold));
-        pw.print(" mMemFullThreshold=");
-        pw.println(Formatter.formatFileSize(context, mMemFullThreshold));
+            pw.println("Current DeviceStorageMonitor state:");
 
-        pw.print("  mMemCacheStartTrimThreshold=");
-        pw.print(Formatter.formatFileSize(context, mMemCacheStartTrimThreshold));
-        pw.print(" mMemCacheTrimToThreshold=");
-        pw.println(Formatter.formatFileSize(context, mMemCacheTrimToThreshold));
+            pw.print("  mFreeMem=");
+            pw.print(Formatter.formatFileSize(context, mFreeMem));
+            pw.print(" mTotalMemory=");
+            pw.println(Formatter.formatFileSize(context, mTotalMemory));
+
+            pw.print("  mFreeMemAfterLastCacheClear=");
+            pw.println(Formatter.formatFileSize(context, mFreeMemAfterLastCacheClear));
+
+            pw.print("  mLastReportedFreeMem=");
+            pw.print(Formatter.formatFileSize(context, mLastReportedFreeMem));
+            pw.print(" mLastReportedFreeMemTime=");
+            TimeUtils.formatDuration(mLastReportedFreeMemTime, SystemClock.elapsedRealtime(), pw);
+            pw.println();
+
+            if (mUpdatesStopped) {
+                pw.print("  mUpdatesStopped=");
+                pw.print(mUpdatesStopped);
+                pw.print(" mSeq=");
+                pw.println(mSeq.get());
+            } else {
+                pw.print("  mClearSucceeded=");
+                pw.print(mClearSucceeded);
+                pw.print(" mClearingCache=");
+                pw.println(mClearingCache);
+            }
+
+            pw.print("  mLowMemFlag=");
+            pw.print(mLowMemFlag);
+            pw.print(" mMemFullFlag=");
+            pw.println(mMemFullFlag);
+
+            pw.print("  mMemLowThreshold=");
+            pw.print(Formatter.formatFileSize(context, mMemLowThreshold));
+            pw.print(" mMemFullThreshold=");
+            pw.println(Formatter.formatFileSize(context, mMemFullThreshold));
+
+            pw.print("  mMemCacheStartTrimThreshold=");
+            pw.print(Formatter.formatFileSize(context, mMemCacheStartTrimThreshold));
+            pw.print(" mMemCacheTrimToThreshold=");
+            pw.println(Formatter.formatFileSize(context, mMemCacheTrimToThreshold));
+
+            pw.print("  mIsBootImageOnDisk="); pw.println(mIsBootImageOnDisk);
+        } else {
+            Shell shell = new Shell();
+            shell.exec(mRemoteService, null, fd, null, args, null, new ResultReceiver(null));
+        }
     }
 
     /**
@@ -476,7 +631,7 @@ public class DeviceStorageMonitorService extends SystemService {
     * an error dialog indicating low disk space and launch the Installer
     * application
     */
-    private void sendNotification() {
+    private void sendNotification(int seq) {
         final Context context = getContext();
         if(localLOGV) Slog.i(TAG, "Sending low memory notification");
         //log the event to event log with the amount of free storage(in bytes) left on the device
@@ -514,13 +669,17 @@ public class DeviceStorageMonitorService extends SystemService {
         notification.flags |= Notification.FLAG_NO_CLEAR;
         notificationMgr.notifyAsUser(null, LOW_MEMORY_NOTIFICATION_ID, notification,
                 UserHandle.ALL);
-        context.sendStickyBroadcastAsUser(mStorageLowIntent, UserHandle.ALL);
+        Intent broadcast = new Intent(mStorageLowIntent);
+        if (seq != 0) {
+            broadcast.putExtra(EXTRA_SEQUENCE, seq);
+        }
+        context.sendStickyBroadcastAsUser(broadcast, UserHandle.ALL);
     }
 
     /**
      * Cancels low storage notification and sends OK intent.
      */
-    private void cancelNotification() {
+    private void cancelNotification(int seq) {
         final Context context = getContext();
         if(localLOGV) Slog.i(TAG, "Canceling low memory notification");
         NotificationManager mNotificationMgr =
@@ -530,7 +689,11 @@ public class DeviceStorageMonitorService extends SystemService {
         mNotificationMgr.cancelAsUser(null, LOW_MEMORY_NOTIFICATION_ID, UserHandle.ALL);
 
         context.removeStickyBroadcastAsUser(mStorageLowIntent, UserHandle.ALL);
-        context.sendBroadcastAsUser(mStorageOkIntent, UserHandle.ALL);
+        Intent broadcast = new Intent(mStorageOkIntent);
+        if (seq != 0) {
+            broadcast.putExtra(EXTRA_SEQUENCE, seq);
+        }
+        context.sendBroadcastAsUser(broadcast, UserHandle.ALL);
     }
 
     /**

@@ -54,6 +54,10 @@ public class JobSchedulerShellCommand extends ShellCommand {
                     return runGetBatteryCharging(pw);
                 case "get-battery-not-low":
                     return runGetBatteryNotLow(pw);
+                case "get-storage-seq":
+                    return runGetStorageSeq(pw);
+                case "get-storage-not-low":
+                    return runGetStorageNotLow(pw);
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -181,6 +185,18 @@ public class JobSchedulerShellCommand extends ShellCommand {
         return 0;
     }
 
+    private int runGetStorageSeq(PrintWriter pw) {
+        int seq = mInternal.getStorageSeq();
+        pw.println(seq);
+        return 0;
+    }
+
+    private int runGetStorageNotLow(PrintWriter pw) {
+        boolean val = mInternal.getStorageNotLow();
+        pw.println(val);
+        return 0;
+    }
+
     @Override
     public void onHelp() {
         final PrintWriter pw = getOutPrintWriter();
@@ -204,6 +220,10 @@ public class JobSchedulerShellCommand extends ShellCommand {
         pw.println("    Return whether the battery is currently considered to be charging.");
         pw.println("  get-battery-not-low");
         pw.println("    Return whether the battery is currently considered to not be low.");
+        pw.println("  get-storage-seq");
+        pw.println("    Return the last storage update sequence number that was received.");
+        pw.println("  get-storage-not-low");
+        pw.println("    Return whether storage is currently considered to not be low.");
         pw.println();
     }
 
