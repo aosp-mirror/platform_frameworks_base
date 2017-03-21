@@ -282,7 +282,6 @@ LOCAL_SRC_FILES += \
 	core/java/android/service/notification/IStatusBarNotificationHolder.aidl \
 	core/java/android/service/notification/IConditionListener.aidl \
 	core/java/android/service/notification/IConditionProvider.aidl \
-	core/java/android/service/vr/IPersistentVrStateCallbacks.aidl \
 	core/java/android/service/vr/IVrListener.aidl \
 	core/java/android/service/vr/IVrManager.aidl \
 	core/java/android/service/vr/IVrStateCallbacks.aidl \
