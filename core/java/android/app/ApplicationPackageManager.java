@@ -2139,11 +2139,12 @@ public class ApplicationPackageManager extends PackageManager {
     @Override
     public void getPackageSizeInfoAsUser(String packageName, int userHandle,
             IPackageStatsObserver observer) {
+        final String msg = "Shame on you for calling the hidden API "
+                + "getPackageSizeInfoAsUser(). Shame!";
         if (mContext.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.O) {
-            throw new UnsupportedOperationException(
-                    "Shame on you for calling a hidden API. Shame!");
+            throw new UnsupportedOperationException(msg);
         } else if (observer != null) {
-            Log.d(TAG, "Shame on you for calling a hidden API. Shame!");
+            Log.d(TAG, msg);
             try {
                 observer.onGetStatsCompleted(null, false);
             } catch (RemoteException ignored) {

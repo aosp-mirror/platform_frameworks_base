@@ -46,6 +46,7 @@ import android.content.res.XmlResourceParser;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
@@ -57,6 +58,8 @@ import android.util.AndroidException;
 import android.util.Log;
 
 import com.android.internal.util.ArrayUtils;
+
+import dalvik.system.VMRuntime;
 
 import java.io.File;
 import java.lang.annotation.Retention;
@@ -4252,8 +4255,14 @@ public abstract class PackageManager {
     @Deprecated
     public List<ResolveInfo> queryBroadcastReceivers(Intent intent,
             @ResolveInfoFlags int flags, @UserIdInt int userId) {
-        Log.w(TAG, "STAHP USING HIDDEN APIS KTHX");
-        return queryBroadcastReceiversAsUser(intent, flags, userId);
+        final String msg = "Shame on you for calling the hidden API "
+                + "queryBroadcastReceivers(). Shame!";
+        if (VMRuntime.getRuntime().getTargetSdkVersion() >= Build.VERSION_CODES.O) {
+            throw new UnsupportedOperationException(msg);
+        } else {
+            Log.d(TAG, msg);
+            return queryBroadcastReceiversAsUser(intent, flags, userId);
+        }
     }
 
     /**
