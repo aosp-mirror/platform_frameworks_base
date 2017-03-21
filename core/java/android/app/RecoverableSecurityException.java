@@ -45,7 +45,8 @@ import com.android.internal.util.Preconditions;
  * Note: legacy code that receives this exception may treat it as a general
  * {@link SecurityException}, and thus there is no guarantee that the messages
  * contained will be shown to the end user.
- * </p>
+ *
+ * @hide
  */
 public final class RecoverableSecurityException extends SecurityException implements Parcelable {
     private static final String TAG = "RecoverableSecurityException";
