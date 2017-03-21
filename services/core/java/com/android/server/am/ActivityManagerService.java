@@ -1726,6 +1726,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final int HANDLE_TRUST_STORAGE_UPDATE_MSG = 63;
     static final int REPORT_LOCKED_BOOT_COMPLETE_MSG = 64;
     static final int NOTIFY_VR_SLEEPING_MSG = 65;
+    static final int SERVICE_FOREGROUND_TIMEOUT_MSG = 66;
     static final int START_USER_SWITCH_FG_MSG = 712;
 
     static final int FIRST_ACTIVITY_STACK_MSG = 100;
@@ -1990,6 +1991,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                     return;
                 }
                 mServices.serviceTimeout((ProcessRecord)msg.obj);
+            } break;
+            case SERVICE_FOREGROUND_TIMEOUT_MSG: {
+                mServices.serviceForegroundTimeout((ServiceRecord)msg.obj);
             } break;
             case UPDATE_TIME_ZONE: {
                 synchronized (ActivityManagerService.this) {
@@ -17898,7 +17902,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public ComponentName startService(IApplicationThread caller, Intent service,
-            String resolvedType, int id, Notification notification,
+            String resolvedType, int id, Notification notification, boolean requireForeground,
             String callingPackage, int userId)
             throws TransactionTooLargeException {
         enforceNotIsolatedCaller("startService");
@@ -17912,28 +17916,28 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         if (DEBUG_SERVICE) Slog.v(TAG_SERVICE,
-                "startService: " + service + " type=" + resolvedType);
+                "*** startService: " + service + " type=" + resolvedType + " fg=" + requireForeground);
         synchronized(this) {
             final int callingPid = Binder.getCallingPid();
             final int callingUid = Binder.getCallingUid();
             final long origId = Binder.clearCallingIdentity();
             ComponentName res = mServices.startServiceLocked(caller, service,
-                    resolvedType, id, notification,
-                    callingPid, callingUid, callingPackage, userId);
+                    resolvedType, id, notification, callingPid, callingUid,
+                    requireForeground, callingPackage, userId);
             Binder.restoreCallingIdentity(origId);
             return res;
         }
     }
 
     ComponentName startServiceInPackage(int uid, Intent service, String resolvedType,
-            String callingPackage, int userId)
+            boolean fgRequired, String callingPackage, int userId)
             throws TransactionTooLargeException {
         synchronized(this) {
             if (DEBUG_SERVICE) Slog.v(TAG_SERVICE,
                     "startServiceInPackage: " + service + " type=" + resolvedType);
             final long origId = Binder.clearCallingIdentity();
             ComponentName res = mServices.startServiceLocked(null, service,
-                    resolvedType, 0, null, -1, uid, callingPackage, userId);
+                    resolvedType, 0, null, -1, uid, fgRequired, callingPackage, userId);
             Binder.restoreCallingIdentity(origId);
             return res;
         }

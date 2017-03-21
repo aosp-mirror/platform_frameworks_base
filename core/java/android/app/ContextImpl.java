@@ -1447,14 +1447,21 @@ class ContextImpl extends Context {
     @Override
     public ComponentName startService(Intent service) {
         warnIfCallingFromSystemProcess();
-        return startServiceCommon(service, -1, null, mUser);
+        return startServiceCommon(service, -1, null, false, mUser);
     }
 
+    @Override
+    public ComponentName startForegroundService(Intent service) {
+        warnIfCallingFromSystemProcess();
+        return startServiceCommon(service, -1, null, true, mUser);
+    }
+
+    // STOPSHIP: remove when NotificationManager.startServiceInForeground() is retired
     @Override
     public ComponentName startServiceInForeground(Intent service,
             int id, Notification notification) {
         warnIfCallingFromSystemProcess();
-        return startServiceCommon(service, id, notification, mUser);
+        return startServiceCommon(service, id, notification, false, mUser);
     }
 
     @Override
@@ -1465,24 +1472,30 @@ class ContextImpl extends Context {
 
     @Override
     public ComponentName startServiceAsUser(Intent service, UserHandle user) {
-        return startServiceCommon(service, -1, null, user);
+        return startServiceCommon(service, -1, null, false, user);
     }
 
     @Override
+    public ComponentName startForegroundServiceAsUser(Intent service, UserHandle user) {
+        return startServiceCommon(service, -1, null, true, user);
+    }
+
+    // STOPSHIP: remove when NotificationManager.startServiceInForeground() is retired
+    @Override
     public ComponentName startServiceInForegroundAsUser(Intent service,
             int id, Notification notification, UserHandle user) {
-        return startServiceCommon(service, id, notification, user);
+        return startServiceCommon(service, id, notification, false, user);
     }
 
     private ComponentName startServiceCommon(Intent service, int id, Notification notification,
-            UserHandle user) {
+            boolean requireForeground, UserHandle user) {
         try {
             validateServiceIntent(service);
             service.prepareToLeaveProcess(this);
             ComponentName cn = ActivityManager.getService().startService(
                 mMainThread.getApplicationThread(), service, service.resolveTypeIfNeeded(
-                            getContentResolver()), id, notification, getOpPackageName(),
-                            user.getIdentifier());
+                            getContentResolver()), id, notification, requireForeground,
+                            getOpPackageName(), user.getIdentifier());
             if (cn != null) {
                 if (cn.getPackageName().equals("!")) {
                     throw new SecurityException(

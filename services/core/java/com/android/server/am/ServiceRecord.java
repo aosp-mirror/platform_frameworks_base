@@ -92,6 +92,8 @@ final class ServiceRecord extends Binder {
     ServiceState restartTracker; // tracking service restart
     boolean whitelistManager; // any bindings to this service have BIND_ALLOW_WHITELIST_MANAGEMENT?
     boolean delayed;        // are we waiting to start this service in the background?
+    boolean fgRequired;     // is the service required to go foreground after starting?
+    boolean fgWaiting;      // is a timeout for going foreground already scheduled?
     boolean isForeground;   // is service currently in foreground mode?
     int foregroundId;       // Notification ID of last foreground req.
     Notification foregroundNoti; // Notification record of foreground state.
