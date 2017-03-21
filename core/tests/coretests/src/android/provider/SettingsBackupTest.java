@@ -141,6 +141,7 @@ public class SettingsBackupTest {
                     Settings.Global.CONTACTS_DATABASE_WAL_ENABLED,
                     Settings.Global.DATA_ACTIVITY_TIMEOUT_MOBILE,
                     Settings.Global.DATA_ACTIVITY_TIMEOUT_WIFI,
+                    Settings.Global.DATABASE_CREATION_BUILDID,
                     Settings.Global.DATABASE_DOWNGRADE_REASON,
                     Settings.Global.DATA_ROAMING,
                     Settings.Global.DATA_STALL_ALARM_AGGRESSIVE_DELAY_IN_MS,

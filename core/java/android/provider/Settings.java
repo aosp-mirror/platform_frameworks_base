@@ -9741,6 +9741,16 @@ public final class Settings {
         public static final String DATABASE_DOWNGRADE_REASON = "database_downgrade_reason";
 
         /**
+         * The build id of when the settings database was first created (or re-created due it
+         * being missing).
+         *
+         * Type: string
+         *
+         * @hide
+         */
+        public static final String DATABASE_CREATION_BUILDID = "database_creation_buildid";
+
+        /**
          * Flag to toggle journal mode WAL on or off for the contacts database. WAL is enabled by
          * default. Set to 0 to disable.
          *
