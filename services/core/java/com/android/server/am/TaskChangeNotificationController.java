@@ -47,6 +47,7 @@ class TaskChangeNotificationController {
     static final int NOTIFY_TASK_PROFILE_LOCKED_LISTENERS_MSG = 14;
     static final int NOTIFY_TASK_SNAPSHOT_CHANGED_LISTENERS_MSG = 15;
     static final int NOTIFY_PINNED_STACK_ANIMATION_STARTED_LISTENERS_MSG = 16;
+    static final int NOTIFY_ACTIVITY_UNPINNED_LISTENERS_MSG = 17;
 
     // Delay in notifying task stack change listeners (in millis)
     static final int NOTIFY_TASK_STACK_CHANGE_LISTENERS_DELAY = 100;
@@ -94,7 +95,11 @@ class TaskChangeNotificationController {
     };
 
     private final TaskStackConsumer mNotifyActivityPinned = (l, m) -> {
-        l.onActivityPinned();
+        l.onActivityPinned((String) m.obj);
+    };
+
+    private final TaskStackConsumer mNotifyActivityUnpinned = (l, m) -> {
+        l.onActivityUnpinned();
     };
 
     private final TaskStackConsumer mNotifyPinnedActivityRestartAttempt = (l, m) -> {
@@ -167,6 +172,9 @@ class TaskChangeNotificationController {
                     break;
                 case NOTIFY_ACTIVITY_PINNED_LISTENERS_MSG:
                     forAllRemoteListeners(mNotifyActivityPinned, msg);
+                    break;
+                case NOTIFY_ACTIVITY_UNPINNED_LISTENERS_MSG:
+                    forAllRemoteListeners(mNotifyActivityUnpinned, msg);
                     break;
                 case NOTIFY_PINNED_ACTIVITY_RESTART_ATTEMPT_LISTENERS_MSG:
                     forAllRemoteListeners(mNotifyPinnedActivityRestartAttempt, msg);
@@ -263,10 +271,19 @@ class TaskChangeNotificationController {
     }
 
     /** Notifies all listeners when an Activity is pinned. */
-    void notifyActivityPinned() {
+    void notifyActivityPinned(String packageName) {
         mHandler.removeMessages(NOTIFY_ACTIVITY_PINNED_LISTENERS_MSG);
-        final Message msg = mHandler.obtainMessage(NOTIFY_ACTIVITY_PINNED_LISTENERS_MSG);
+        final Message msg = mHandler.obtainMessage(NOTIFY_ACTIVITY_PINNED_LISTENERS_MSG,
+                packageName);
         forAllLocalListeners(mNotifyActivityPinned, msg);
+        msg.sendToTarget();
+    }
+
+    /** Notifies all listeners when an Activity is unpinned. */
+    void notifyActivityUnpinned() {
+        mHandler.removeMessages(NOTIFY_ACTIVITY_UNPINNED_LISTENERS_MSG);
+        final Message msg = mHandler.obtainMessage(NOTIFY_ACTIVITY_UNPINNED_LISTENERS_MSG);
+        forAllLocalListeners(mNotifyActivityUnpinned, msg);
         msg.sendToTarget();
     }
 

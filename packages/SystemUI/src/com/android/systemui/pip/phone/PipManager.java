@@ -56,6 +56,7 @@ public class PipManager implements BasePipManager {
     private InputConsumerController mInputConsumerController;
     private PipMenuActivityController mMenuController;
     private PipMediaController mMediaController;
+    private PipNotificationController mNotificationController;
     private PipTouchHandler mTouchHandler;
 
     /**
@@ -63,13 +64,24 @@ public class PipManager implements BasePipManager {
      */
     TaskStackListener mTaskStackListener = new TaskStackListener() {
         @Override
-        public void onActivityPinned() {
+        public void onActivityPinned(String packageName) {
             if (!checkCurrentUserId(false /* debug */)) {
                 return;
             }
+
             mTouchHandler.onActivityPinned();
             mMediaController.onActivityPinned();
             mMenuController.onActivityPinned();
+            mNotificationController.onActivityPinned(packageName);
+        }
+
+        @Override
+        public void onActivityUnpinned() {
+            if (!checkCurrentUserId(false /* debug */)) {
+                return;
+            }
+
+            mNotificationController.onActivityUnpinned();
         }
 
         @Override
@@ -160,6 +172,7 @@ public class PipManager implements BasePipManager {
                 mInputConsumerController);
         mTouchHandler = new PipTouchHandler(context, mActivityManager, mMenuController,
                 mInputConsumerController);
+        mNotificationController = new PipNotificationController(context, mActivityManager);
     }
 
     /**

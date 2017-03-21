@@ -1765,6 +1765,18 @@
     <!-- Label for PIP the drag to close zone [CHAR LIMIT=NONE]-->
     <string name="pip_phone_close">Close</string>
 
+    <!-- Title of menu shown over picture-in-picture. Used for accessibility. -->
+    <string name="pip_menu_title">Picture in picture menu</string>
+
+    <!-- User visible notification channel name for the PiP BTW notification. [CHAR LIMIT=NONE] -->
+    <string name="pip_notification_channel_name">Picture-in-picture</string>
+
+    <!-- PiP BTW notification title. [CHAR LIMIT=50] -->
+    <string name="pip_notification_title"><xliff:g id="name" example="Google Maps">%s</xliff:g> is in picture-in-picture</string>
+
+    <!-- PiP BTW notification description. [CHAR LIMIT=NONE] -->
+    <string name="pip_notification_message">If you don’t want <xliff:g id="name" example="Google Maps">%s</xliff:g> to use this feature, tap to open settings and turn it off.</string>
+
     <!-- Tuner string -->
     <string name="change_theme_reboot" translatable="false">Changing the theme requires a restart.</string>
     <!-- Tuner string -->
@@ -1832,9 +1844,6 @@
 
     <!-- App label of the instant apps notification [CHAR LIMIT=60] -->
     <string name="instant_apps">Instant Apps</string>
-
-    <!-- Title of menu shown over picture-in-picture. Used for accessibility. -->
-    <string name="pip_menu_title">Picture in picture menu</string>
 
     <!-- Message of the instant apps notification indicating they don't need install [CHAR LIMIT=NONE] -->
     <string name="instant_apps_message">Instant apps don\'t require installation.</string>

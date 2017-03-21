@@ -2854,7 +2854,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         resumeFocusedStackTopActivityLocked();
 
         stack.animateResizePinnedStack(bounds, -1 /* animationDuration */);
-        mService.mTaskChangeNotificationController.notifyActivityPinned();
+        mService.mTaskChangeNotificationController.notifyActivityPinned(r.packageName);
     }
 
     /** Move activity with its stack to front and make the stack focused. */
