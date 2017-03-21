@@ -1069,6 +1069,11 @@ public abstract class ActionBar {
     }
 
     /** @hide */
+    public boolean closeOptionsMenu() {
+        return false;
+    }
+
+    /** @hide */
     public boolean invalidateOptionsMenu() {
         return false;
     }

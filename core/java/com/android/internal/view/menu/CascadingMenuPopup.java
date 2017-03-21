@@ -441,9 +441,11 @@ final class CascadingMenuPopup extends MenuPopup implements MenuPresenter, OnKey
 
         popupWindow.show();
 
+        final ListView listView = popupWindow.getListView();
+        listView.setOnKeyListener(this);
+
         // If this is the root menu, show the title if requested.
         if (parentInfo == null && mShowTitle && menu.getHeaderTitle() != null) {
-            final ListView listView = popupWindow.getListView();
             final FrameLayout titleItemView = (FrameLayout) inflater.inflate(
                     R.layout.popup_menu_header_item_layout, listView, false);
             final TextView titleView = (TextView) titleItemView.findViewById(R.id.title);
