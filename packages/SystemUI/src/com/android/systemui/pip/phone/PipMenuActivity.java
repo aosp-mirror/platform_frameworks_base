@@ -295,7 +295,9 @@ public class PipMenuActivity extends Activity {
                     if (animationFinishedRunnable != null) {
                         animationFinishedRunnable.run();
                     }
-                    setVisible(false);
+                    if (!isDestroyed()) {
+                        setVisible(false);
+                    }
                 }
             });
             mMenuContainerAnimator.addUpdateListener(mMenuBgUpdateListener);
