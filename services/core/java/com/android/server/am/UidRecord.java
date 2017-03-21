@@ -34,17 +34,25 @@ public final class UidRecord {
     boolean setWhitelist;
     boolean idle;
     int numProcs;
+
     /**
      * Sequence number associated with the {@link #curProcState}. This is incremented using
      * {@link ActivityManagerService#mProcStateSeqCounter}
      * when {@link #curProcState} changes from background to foreground or vice versa.
      */
     long curProcStateSeq;
+
     /**
      * Last seq number for which NetworkPolicyManagerService notified ActivityManagerService that
      * network policies rules were updated.
      */
     long lastNetworkUpdatedProcStateSeq;
+
+    /**
+     * Last seq number for which AcitivityManagerService dispatched uid state change to
+     * NetworkPolicyManagerService.
+     */
+    long lastDispatchedProcStateSeq;
 
     static final int CHANGE_PROCSTATE = 0;
     static final int CHANGE_GONE = 1;
@@ -70,6 +78,17 @@ public final class UidRecord {
 
     public void reset() {
         curProcState = ActivityManager.PROCESS_STATE_CACHED_EMPTY;
+    }
+
+    /**
+     * If the change being dispatched is neither CHANGE_GONE nor CHANGE_GONE_IDLE (not interested in
+     * these changes), then update the {@link #lastDispatchedProcStateSeq} with
+     * {@link #curProcStateSeq}.
+     */
+    public void updateLastDispatchedProcStateSeq(int changeToDispatch) {
+        if (changeToDispatch != CHANGE_GONE && changeToDispatch != CHANGE_GONE_IDLE) {
+            lastDispatchedProcStateSeq = curProcStateSeq;
+        }
     }
 
     public String toString() {
@@ -99,6 +118,8 @@ public final class UidRecord {
         sb.append(curProcStateSeq);
         sb.append(" lastNetworkUpdatedProcStateSeq:");
         sb.append(lastNetworkUpdatedProcStateSeq);
+        sb.append(" lastDispatchedProcStateSeq:");
+        sb.append(lastDispatchedProcStateSeq);
         sb.append("}");
         return sb.toString();
     }

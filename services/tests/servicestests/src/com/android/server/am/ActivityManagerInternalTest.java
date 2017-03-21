@@ -22,11 +22,11 @@ import android.app.ActivityManagerInternal;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
-import com.android.server.AppOpsService;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 /**
  * Test class for {@link ActivityManagerInternal}.
@@ -46,11 +46,15 @@ import org.junit.runner.RunWith;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class ActivityManagerInternalTest {
+    @Mock private ActivityManagerService.Injector mMockInjector;
+
     private ActivityManagerService mAms;
     private ActivityManagerInternal mAmi;
     @Before
     public void setUp() {
-        mAms = new ActivityManagerService((AppOpsService) null);
+        MockitoAnnotations.initMocks(this);
+
+        mAms = new ActivityManagerService(mMockInjector);
         mAmi = mAms.new LocalService();
     }
 

@@ -1721,7 +1721,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     final ServiceThread mHandlerThread;
     final MainHandler mHandler;
-    final UiHandler mUiHandler;
+    final Handler mUiHandler;
 
     final ActivityManagerConstants mConstants;
 
@@ -2706,11 +2706,11 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @VisibleForTesting
-    public ActivityManagerService(AppOpsService appOpsService) {
+    public ActivityManagerService(Injector injector) {
         GL_ES_VERSION = 0;
         mActivityStarter = null;
         mAppErrors = null;
-        mAppOpsService = appOpsService;
+        mAppOpsService = injector.getAppOpsService();
         mBatteryStatsService = null;
         mCompatModePackages = null;
         mConstants = null;
@@ -2728,7 +2728,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mStackSupervisor = null;
         mSystemThread = null;
         mTaskChangeNotificationController = null;
-        mUiHandler = null;
+        mUiHandler = injector.getHandler();
         mUserController = null;
     }
 
@@ -21633,7 +21633,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 packages[0]);
     }
 
-    private final void enqueueUidChangeLocked(UidRecord uidRec, int uid, int change) {
+    @VisibleForTesting
+    final void enqueueUidChangeLocked(UidRecord uidRec, int uid, int change) {
         final UidRecord.ChangeItem pendingChange;
         if (uidRec == null || uidRec.pendingChange == null) {
             if (mPendingUidChanges.size() == 0) {
@@ -21675,6 +21676,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                 ? uidRec.setProcState : ActivityManager.PROCESS_STATE_NONEXISTENT;
         pendingChange.ephemeral = uidRec != null ? uidRec.ephemeral : isEphemeralLocked(uid);
         pendingChange.procStateSeq = uidRec != null ? uidRec.curProcStateSeq : 0;
+        if (uidRec != null) {
+            uidRec.updateLastDispatchedProcStateSeq(change);
+        }
 
         // Directly update the power manager, since we sit on top of it and it is critical
         // it be kept in sync (so wake locks will be held as soon as appropriate).
@@ -23589,5 +23593,10 @@ public class ActivityManagerService extends IActivityManager.Stub
         } catch (RemoteException e) {
             throw new IllegalStateException("Process disappeared");
         }
+    }
+
+    static interface Injector {
+        public AppOpsService getAppOpsService();
+        public Handler getHandler();
     }
 }
