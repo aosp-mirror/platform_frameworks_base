@@ -48,6 +48,7 @@ public abstract class BaseCanvas {
      */
     protected int mScreenDensity = Bitmap.DENSITY_NONE;
     protected int mDensity = Bitmap.DENSITY_NONE;
+    private boolean mAllowHwBitmapsInSwMode = false;
 
     protected void throwIfCannotDraw(Bitmap bitmap) {
         if (bitmap.isRecycled()) {
@@ -511,8 +512,23 @@ public abstract class BaseCanvas {
                 indices, indexOffset, indexCount, paint.getNativeInstance());
     }
 
+    /**
+     * @hide
+     */
+    public void setHwBitmapsInSwModeEnabled(boolean enabled) {
+        mAllowHwBitmapsInSwMode = enabled;
+    }
+
+    /**
+     * @hide
+     */
+    public boolean isHwBitmapsInSwModeEnabled() {
+        return mAllowHwBitmapsInSwMode;
+    }
+
     private void throwIfHwBitmapInSwMode(Bitmap bitmap) {
-        if (!isHardwareAccelerated() && bitmap.getConfig() == Bitmap.Config.HARDWARE) {
+        if (!mAllowHwBitmapsInSwMode && !isHardwareAccelerated()
+                && bitmap.getConfig() == Bitmap.Config.HARDWARE) {
             throw new IllegalStateException("Software rendering doesn't support hardware bitmaps");
         }
     }

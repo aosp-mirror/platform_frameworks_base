@@ -17892,7 +17892,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             // This case should hopefully never or seldom happen
             canvas = new Canvas(bitmap);
         }
-
+        boolean enabledHwBitmapsInSwMode = canvas.isHwBitmapsInSwModeEnabled();
+        canvas.setHwBitmapsInSwModeEnabled(true);
         if ((backgroundColor & 0xff000000) != 0) {
             bitmap.eraseColor(backgroundColor);
         }
@@ -17920,6 +17921,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         canvas.restoreToCount(restoreCount);
         canvas.setBitmap(null);
+        canvas.setHwBitmapsInSwModeEnabled(enabledHwBitmapsInSwMode);
 
         if (attachInfo != null) {
             // Restore the cached Canvas for our siblings
