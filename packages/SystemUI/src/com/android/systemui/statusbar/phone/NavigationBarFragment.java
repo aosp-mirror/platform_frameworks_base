@@ -31,6 +31,7 @@ import android.app.Fragment;
 import android.app.IActivityManager;
 import android.app.StatusBarManager;
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -107,6 +108,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
     private int mNavigationBarMode;
     private AccessibilityManager mAccessibilityManager;
     private MagnificationContentObserver mMagnificationObserver;
+    private ContentResolver mContentResolver;
 
     private int mDisabledFlags1;
     private StatusBar mStatusBar;
@@ -138,9 +140,10 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
         mAccessibilityManager = getContext().getSystemService(AccessibilityManager.class);
         mAccessibilityManager.addAccessibilityServicesStateChangeListener(
                 this::updateAccessibilityServicesState);
+        mContentResolver = getContext().getContentResolver();
         mMagnificationObserver = new MagnificationContentObserver(
                 getContext().getMainThreadHandler());
-        getContext().getContentResolver().registerContentObserver(Settings.Secure.getUriFor(
+        mContentResolver.registerContentObserver(Settings.Secure.getUriFor(
                 Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_NAVBAR_ENABLED), false,
                 mMagnificationObserver);
 
@@ -163,7 +166,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
         mCommandQueue.removeCallbacks(this);
         mAccessibilityManager.removeAccessibilityServicesStateChangeListener(
                 this::updateAccessibilityServicesState);
-        getContext().getContentResolver().unregisterContentObserver(mMagnificationObserver);
+        mContentResolver.unregisterContentObserver(mMagnificationObserver);
         try {
             WindowManagerGlobal.getWindowManagerService()
                     .removeRotationWatcher(mRotationWatcher);
@@ -563,7 +566,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
     private void updateAccessibilityServicesState() {
         int requestingServices = 0;
         try {
-            if (Settings.Secure.getInt(getContext().getContentResolver(),
+            if (Settings.Secure.getInt(mContentResolver,
                     Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_NAVBAR_ENABLED) == 1) {
                 requestingServices++;
             }
