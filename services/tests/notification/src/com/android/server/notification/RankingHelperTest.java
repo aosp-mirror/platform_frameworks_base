@@ -725,6 +725,11 @@ public class RankingHelperTest {
     }
 
     @Test
+    public void testDeleteNonExistentChannel() throws Exception {
+        mHelper.deleteNotificationChannelGroup(PKG, UID, "does not exist");
+    }
+
+    @Test
     public void testGetDeletedChannel() throws Exception {
         NotificationChannel channel =
                 new NotificationChannel("id2", "name2", IMPORTANCE_LOW);

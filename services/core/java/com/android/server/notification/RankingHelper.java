@@ -683,11 +683,11 @@ public class RankingHelper implements RankingConfig {
         NotificationChannel channel = r.channels.get(channelId);
         if (channel != null) {
             channel.setDeleted(true);
+            LogMaker lm = getChannelLog(channel, pkg);
+            lm.setType(MetricsProto.MetricsEvent.TYPE_CLOSE);
+            MetricsLogger.action(lm);
+            updateConfig();
         }
-        LogMaker lm = getChannelLog(channel, pkg);
-        lm.setType(MetricsProto.MetricsEvent.TYPE_CLOSE);
-        MetricsLogger.action(lm);
-        updateConfig();
     }
 
     @Override
