@@ -64,6 +64,9 @@ public class PinnedStackWindowController extends StackWindowController {
             mContainer.getBounds(originalBounds);
             mContainer.setAnimatingBounds(toBounds);
             UiThread.getHandler().post(() -> {
+                if (mContainer == null) {
+                    return;
+                }
                 mService.mBoundsAnimationController.animateBounds(mContainer, originalBounds,
                         toBounds, animationDuration, moveToFullscreen);
             });
