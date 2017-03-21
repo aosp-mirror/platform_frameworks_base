@@ -114,7 +114,6 @@ import android.net.Uri;
 import android.net.metrics.IpConnectivityLog;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
-import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -184,7 +183,6 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
@@ -193,9 +191,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
 import java.text.DateFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -398,6 +393,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      */
     boolean mIsWatch;
 
+    private final CertificateMonitor mCertificateMonitor;
     private final SecurityLogMonitor mSecurityLogMonitor;
     private NetworkLogger mNetworkLogger;
 
@@ -530,19 +526,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     final Handler mHandler;
     final Handler mBackgroundHandler;
 
-    /** Listens on any device, even when mHasFeature == false. */
-    final BroadcastReceiver mRootCaReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (StorageManager.inCryptKeeperBounce()) {
-                return;
-            }
-            final int userHandle = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, getSendingUserId());
-            new MonitoringCertNotificationTask(DevicePolicyManagerService.this, mInjector)
-                    .execute(userHandle);
-        }
-    };
-
     /** Listens only if mHasFeature == true. */
     final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
@@ -630,25 +613,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 handlePackagesChanged(intent.getData().getSchemeSpecificPart(), userHandle);
             } else if (Intent.ACTION_MANAGED_PROFILE_ADDED.equals(action)) {
                 clearWipeProfileNotification();
-            } else if (KeyChain.ACTION_TRUST_STORE_CHANGED.equals(intent.getAction())) {
-                mBackgroundHandler.post(() ->  {
-                    try (final KeyChainConnection keyChainConnection = mInjector.keyChainBindAsUser(
-                            UserHandle.of(userHandle))) {
-                        final List<String> caCerts =
-                                keyChainConnection.getService().getUserCaAliases().getList();
-                        synchronized (DevicePolicyManagerService.this) {
-                            if (getUserData(userHandle).mOwnerInstalledCaCerts
-                                    .retainAll(caCerts)) {
-                                saveSettingsLocked(userHandle);
-                            }
-                        }
-                    } catch (InterruptedException e) {
-                        Slog.w(LOG_TAG, "error talking to IKeyChainService", e);
-                        Thread.currentThread().interrupt();
-                    } catch (RemoteException e) {
-                        Slog.w(LOG_TAG, "error talking to IKeyChainService", e);
-                    }
-                });
             }
         }
 
@@ -1527,7 +1491,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     @VisibleForTesting
     static class Injector {
 
-        private final Context mContext;
+        public final Context mContext;
 
         Injector(Context context) {
             mContext = context;
@@ -1720,6 +1684,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return "/data/system/";
         }
 
+        PendingIntent pendingIntentGetActivityAsUser(Context context, int requestCode,
+                @NonNull Intent intent, int flags, Bundle options, UserHandle user) {
+            return PendingIntent.getActivityAsUser(
+                    context, requestCode, intent, flags, options, user);
+        }
+
         void registerContentObserver(Uri uri, boolean notifyForDescendents,
                 ContentObserver observer, int userHandle) {
             mContext.getContentResolver().registerContentObserver(uri, notifyForDescendents,
@@ -1810,6 +1780,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         mLocalService = new LocalService();
         mLockPatternUtils = injector.newLockPatternUtils();
 
+        // TODO: why does SecurityLogMonitor need to be created even when mHasFeature == false?
         mSecurityLogMonitor = new SecurityLogMonitor(this);
 
         mHasFeature = mInjector.getPackageManager()
@@ -1818,27 +1789,20 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 .hasSystemFeature(PackageManager.FEATURE_WATCH);
         mBackgroundHandler = BackgroundThread.getHandler();
 
-        // Broadcast filter for changes to the trusted certificate store. These changes get a
-        // separate intent filter so we can listen to them even when device_admin is off.
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(Intent.ACTION_USER_STARTED);
-        filter.addAction(Intent.ACTION_USER_UNLOCKED);
-        filter.addAction(KeyChain.ACTION_TRUST_STORE_CHANGED);
-        filter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
-        mContext.registerReceiverAsUser(mRootCaReceiver, UserHandle.ALL, filter, null, mHandler);
+        // Needed when mHasFeature == false, because it controls the certificate warning text.
+        mCertificateMonitor = new CertificateMonitor(this, mInjector, mBackgroundHandler);
 
         if (!mHasFeature) {
             // Skip the rest of the initialization
             return;
         }
 
-        filter = new IntentFilter();
+        IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_BOOT_COMPLETED);
         filter.addAction(ACTION_EXPIRED_PASSWORD_NOTIFICATION);
         filter.addAction(Intent.ACTION_USER_ADDED);
         filter.addAction(Intent.ACTION_USER_REMOVED);
         filter.addAction(Intent.ACTION_USER_STARTED);
-        filter.addAction(KeyChain.ACTION_TRUST_STORE_CHANGED);
         filter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
         mContext.registerReceiverAsUser(mReceiver, UserHandle.ALL, filter, null, mHandler);
         filter = new IntentFilter();
@@ -3083,33 +3047,43 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     /**
-     * Remove deleted CA certificates from the "approved" list for a particular user, counting
-     * the number still remaining to approve.
+     * Clean up internal state when the set of installed trusted CA certificates changes.
      *
      * @param userHandle user to check for. This must be a real user and not, for example,
      *        {@link UserHandle#ALL}.
      * @param installedCertificates the full set of certificate authorities currently installed for
      *        {@param userHandle}. After calling this function, {@code mAcceptedCaCertificates} will
      *        correspond to some subset of this.
-     *
-     * @return number of certificates yet to be approved by {@param userHandle}.
      */
-    protected synchronized int retainAcceptedCertificates(final UserHandle userHandle,
+    protected void onInstalledCertificatesChanged(final UserHandle userHandle,
             final @NonNull Collection<String> installedCertificates) {
+        if (!mHasFeature) {
+            return;
+        }
         enforceManageUsers();
 
-        if (!mHasFeature) {
-            return installedCertificates.size();
-        } else {
+        synchronized (this) {
             final DevicePolicyData policy = getUserData(userHandle.getIdentifier());
 
-            // Remove deleted certificates. Flush xml if necessary.
-            if (policy.mAcceptedCaCertificates.retainAll(installedCertificates)) {
+            boolean changed = false;
+            changed |= policy.mAcceptedCaCertificates.retainAll(installedCertificates);
+            changed |= policy.mOwnerInstalledCaCerts.retainAll(installedCertificates);
+            if (changed) {
                 saveSettingsLocked(userHandle.getIdentifier());
             }
+        }
+    }
 
-            // Trim approved certificates from the count.
-            return installedCertificates.size() - policy.mAcceptedCaCertificates.size();
+    /**
+     * Internal method used by {@link CertificateMonitor}.
+     */
+    protected Set<String> getAcceptedCaCertificates(final UserHandle userHandle) {
+        if (!mHasFeature) {
+            return Collections.<String> emptySet();
+        }
+        synchronized (this) {
+            final DevicePolicyData policy = getUserData(userHandle.getIdentifier());
+            return policy.mAcceptedCaCertificates;
         }
     }
 
@@ -4690,7 +4664,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
             saveSettingsLocked(userId);
         }
-        new MonitoringCertNotificationTask(this, mInjector).execute(userId);
+        mCertificateMonitor.onCertificateApprovalsChanged(userId);
         return true;
     }
 
@@ -4713,8 +4687,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     getUserData(userInfo.id).mAcceptedCaCertificates.clear();
                     saveSettingsLocked(userInfo.id);
                 }
-
-                new MonitoringCertNotificationTask(this, mInjector).execute(userInfo.id);
+                mCertificateMonitor.onCertificateApprovalsChanged(userId);
             }
         }
     }
@@ -4722,79 +4695,47 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     @Override
     public boolean installCaCert(ComponentName admin, String callerPackage, byte[] certBuffer)
             throws RemoteException {
-        enforceCanManageCaCerts(admin, callerPackage);
-
-        byte[] pemCert;
-        try {
-            X509Certificate cert = parseCert(certBuffer);
-            pemCert = Credentials.convertToPem(cert);
-        } catch (CertificateException ce) {
-            Log.e(LOG_TAG, "Problem converting cert", ce);
-            return false;
-        } catch (IOException ioe) {
-            Log.e(LOG_TAG, "Problem reading cert", ioe);
+        if (!mHasFeature) {
             return false;
         }
+        enforceCanManageCaCerts(admin, callerPackage);
 
-        final UserHandle userHandle = UserHandle.of(mInjector.userHandleGetCallingUserId());
+        final String alias;
+
+        final UserHandle userHandle = mInjector.binderGetCallingUserHandle();
         final long id = mInjector.binderClearCallingIdentity();
-        String alias = null;
         try {
-            try (final KeyChainConnection keyChainConnection = mInjector.keyChainBindAsUser(
-                    userHandle)) {
-                alias = keyChainConnection.getService().installCaCertificate(pemCert);
-            } catch (RemoteException e) {
-                Log.e(LOG_TAG, "installCaCertsToKeyChain(): ", e);
+            alias = mCertificateMonitor.installCaCert(userHandle, certBuffer);
+            if (alias == null) {
+                Log.w(LOG_TAG, "Problem installing cert");
+                return false;
             }
-        } catch (InterruptedException e1) {
-            Log.w(LOG_TAG, "installCaCertsToKeyChain(): ", e1);
-            Thread.currentThread().interrupt();
         } finally {
             mInjector.binderRestoreCallingIdentity(id);
         }
-        if (alias == null) {
-            Log.w(LOG_TAG, "Problem installing cert");
-        } else {
-            synchronized (this) {
-                final int userId = userHandle.getIdentifier();
-                getUserData(userId).mOwnerInstalledCaCerts.add(alias);
-                saveSettingsLocked(userId);
-            }
-            return true;
-        }
-        return false;
-    }
 
-    private static X509Certificate parseCert(byte[] certBuffer) throws CertificateException {
-        CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
-        return (X509Certificate) certFactory.generateCertificate(new ByteArrayInputStream(
-                certBuffer));
+        synchronized (this) {
+            getUserData(userHandle.getIdentifier()).mOwnerInstalledCaCerts.add(alias);
+            saveSettingsLocked(userHandle.getIdentifier());
+        }
+        return true;
     }
 
     @Override
     public void uninstallCaCerts(ComponentName admin, String callerPackage, String[] aliases) {
+        if (!mHasFeature) {
+            return;
+        }
         enforceCanManageCaCerts(admin, callerPackage);
 
         final int userId = mInjector.userHandleGetCallingUserId();
-        final UserHandle userHandle = UserHandle.of(userId);
         final long id = mInjector.binderClearCallingIdentity();
         try {
-            try (final KeyChainConnection keyChainConnection = mInjector.keyChainBindAsUser(
-                    userHandle)) {
-                for (int i = 0 ; i < aliases.length; i++) {
-                    keyChainConnection.getService().deleteCaCertificate(aliases[i]);
-                }
-            } catch (RemoteException e) {
-                Log.e(LOG_TAG, "from CaCertUninstaller: ", e);
-                return;
-            }
-        } catch (InterruptedException ie) {
-            Log.w(LOG_TAG, "CaCertUninstaller: ", ie);
-            Thread.currentThread().interrupt();
-            return;
+            mCertificateMonitor.uninstallCaCerts(UserHandle.of(userId), aliases);
         } finally {
             mInjector.binderRestoreCallingIdentity(id);
         }
+
         synchronized (this) {
             if (getUserData(userId).mOwnerInstalledCaCerts.removeAll(Arrays.asList(aliases))) {
                 saveSettingsLocked(userId);
