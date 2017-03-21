@@ -566,7 +566,7 @@ public class AppWindowContainerController
             return false;
         }
 
-        mContainer.startingData = new SnapshotStartingData(mService, snapshot.getSnapshot());
+        mContainer.startingData = new SnapshotStartingData(mService, snapshot);
         scheduleAddStartingWindow();
         return true;
     }
