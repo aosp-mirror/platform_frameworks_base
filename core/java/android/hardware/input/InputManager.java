@@ -33,6 +33,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.Vibrator;
+import android.os.VibrationEffect;
 import android.os.ServiceManager.ServiceNotFoundException;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
@@ -1154,23 +1155,33 @@ public final class InputManager {
             return true;
         }
 
-        /**
-         * @hide
-         */
         @Override
-        public void vibrate(int uid, String opPkg, long milliseconds, AudioAttributes attributes) {
-            vibrate(new long[] { 0, milliseconds}, -1);
+        public boolean hasAmplitudeControl() {
+            return false;
         }
 
         /**
          * @hide
          */
         @Override
-        public void vibrate(int uid, String opPkg, long[] pattern, int repeat,
-                AudioAttributes attributes) {
-            if (repeat >= pattern.length) {
-                throw new ArrayIndexOutOfBoundsException();
+        public void vibrate(int uid, String opPkg,
+                VibrationEffect effect, AudioAttributes attributes) {
+            long[] pattern;
+            int repeat;
+            if (effect instanceof VibrationEffect.OneShot) {
+                VibrationEffect.OneShot oneShot = (VibrationEffect.OneShot) effect;
+                pattern = new long[] { 0, oneShot.getTiming() };
+                repeat = -1;
+            } else if (effect instanceof VibrationEffect.Waveform) {
+                VibrationEffect.Waveform waveform = (VibrationEffect.Waveform) effect;
+                pattern = waveform.getTimings();
+                repeat = waveform.getRepeatIndex();
+            } else {
+                // TODO: Add support for prebaked effects
+                Log.w(TAG, "Pre-baked effects aren't supported on input devices");
+                return;
             }
+
             try {
                 mIm.vibrate(mDeviceId, pattern, repeat, mToken);
             } catch (RemoteException ex) {

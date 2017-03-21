@@ -177,6 +177,7 @@ import android.os.SystemProperties;
 import android.os.UEventObserver;
 import android.os.UserHandle;
 import android.os.Vibrator;
+import android.os.VibrationEffect;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.service.dreams.DreamManagerInternal;
@@ -7527,17 +7528,35 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (hapticsDisabled && !always) {
             return false;
         }
-        long[] pattern = null;
+
+        VibrationEffect effect = getVibrationEffect(effectId);
+        if (effect == null) {
+            return false;
+        }
+
+        int owningUid;
+        String owningPackage;
+        if (win != null) {
+            owningUid = win.getOwningUid();
+            owningPackage = win.getOwningPackage();
+        } else {
+            owningUid = android.os.Process.myUid();
+            owningPackage = mContext.getOpPackageName();
+        }
+        mVibrator.vibrate(owningUid, owningPackage, effect, VIBRATION_ATTRIBUTES);
+        return true;
+    }
+
+    private VibrationEffect getVibrationEffect(int effectId) {
+        long[] pattern;
         switch (effectId) {
+            case HapticFeedbackConstants.VIRTUAL_KEY:
+                return VibrationEffect.get(VibrationEffect.EFFECT_CLICK);
             case HapticFeedbackConstants.LONG_PRESS:
                 pattern = mLongPressVibePattern;
                 break;
-            case HapticFeedbackConstants.VIRTUAL_KEY:
-                pattern = mVirtualKeyVibePattern;
-                break;
             case HapticFeedbackConstants.KEYBOARD_TAP:
-                pattern = mKeyboardTapVibePattern;
-                break;
+                return VibrationEffect.get(VibrationEffect.EFFECT_CLICK);
             case HapticFeedbackConstants.CLOCK_TICK:
                 pattern = mClockTickVibePattern;
                 break;
@@ -7554,25 +7573,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 pattern = mContextClickVibePattern;
                 break;
             default:
-                return false;
-        }
-        int owningUid;
-        String owningPackage;
-        if (win != null) {
-            owningUid = win.getOwningUid();
-            owningPackage = win.getOwningPackage();
-        } else {
-            owningUid = android.os.Process.myUid();
-            owningPackage = mContext.getOpPackageName();
+                return null;
         }
         if (pattern.length == 1) {
             // One-shot vibration
-            mVibrator.vibrate(owningUid, owningPackage, pattern[0], VIBRATION_ATTRIBUTES);
+            return VibrationEffect.createOneShot(pattern[0], VibrationEffect.DEFAULT_AMPLITUDE);
         } else {
             // Pattern vibration
-            mVibrator.vibrate(owningUid, owningPackage, pattern, -1, VIBRATION_ATTRIBUTES);
+            return VibrationEffect.createWaveform(pattern, -1);
         }
-        return true;
     }
 
     @Override

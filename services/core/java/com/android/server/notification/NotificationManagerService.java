@@ -105,6 +105,7 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.Vibrator;
+import android.os.VibrationEffect;
 import android.provider.Settings;
 import android.service.notification.Adjustment;
 import android.service.notification.Condition;
@@ -3613,9 +3614,12 @@ public class NotificationManagerService extends SystemService {
         // notifying app does not have the VIBRATE permission.
         long identity = Binder.clearCallingIdentity();
         try {
-            mVibrator.vibrate(record.sbn.getUid(), record.sbn.getOpPkg(), vibration,
-                    ((record.getNotification().flags & Notification.FLAG_INSISTENT) != 0)
-                            ? 0: -1, record.getAudioAttributes());
+            final boolean insistent =
+                (record.getNotification().flags & Notification.FLAG_INSISTENT) != 0;
+            final VibrationEffect effect = VibrationEffect.createWaveform(
+                    vibration, insistent ? 0 : -1 /*repeatIndex*/);
+            mVibrator.vibrate(record.sbn.getUid(), record.sbn.getOpPkg(),
+                    effect, record.getAudioAttributes());
             return true;
         } finally{
             Binder.restoreCallingIdentity(identity);
