@@ -27,6 +27,8 @@ import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.net.NetworkInfo.DetailedState;
 import android.net.NetworkInfo.State;
+import android.net.NetworkScoreManager;
+import android.net.NetworkScorerAppData;
 import android.net.ScoredNetwork;
 import android.net.wifi.IWifiManager;
 import android.net.wifi.ScanResult;
@@ -949,7 +951,15 @@ public class AccessPoint implements Comparable<AccessPoint> {
                 return String.format(format, passpointProvider);
             } else if (isEphemeral) {
                 // Special case for connected + ephemeral networks.
-                return context.getString(R.string.connected_via_wfa);
+                final NetworkScoreManager networkScoreManager = context.getSystemService(
+                        NetworkScoreManager.class);
+                NetworkScorerAppData scorer = networkScoreManager.getActiveScorer();
+                if (scorer != null && scorer.getRecommendationServiceLabel() != null) {
+                    String format = context.getString(R.string.connected_via_network_scorer);
+                    return String.format(format, scorer.getRecommendationServiceLabel());
+                } else {
+                    return context.getString(R.string.connected_via_network_scorer_default);
+                }
             }
         }
 
