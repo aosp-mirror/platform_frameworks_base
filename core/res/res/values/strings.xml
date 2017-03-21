@@ -392,7 +392,7 @@
         This indicates that a work profile has been deleted. [CHAR LIMIT=NONE]-->
     <string name="work_profile_deleted_description_dpm_wipe">Your work profile is no longer available on this device.</string>
 
-    <!-- Content title for a notification. This notification indicates that the device is managed 
+    <!-- Content title for a notification. This notification indicates that the device is managed
          and network logging was activated by a device owner. [CHAR LIMIT=NONE]-->
     <string name="network_logging_notification_title">Device is managed</string>
     <!-- Content text for a notification. Tapping opens a dialog with more information on device management and network
@@ -4588,4 +4588,18 @@
     <!-- Label for the type of data being saved for autofill when it represents a credit card [CHAR LIMIT=NONE] -->
     <string name="autofill_save_type_credit_card">credit card</string>
 
+    <!-- Primary ETWS (Earthquake and Tsunami Warning System) default message for earthquake -->
+    <string name="etws_primary_default_message_earthquake">Stay calm and seek shelter nearby.</string>
+
+    <!-- Primary ETWS (Earthquake and Tsunami Warning System) default message for Tsunami -->
+    <string name="etws_primary_default_message_tsunami">Evacuate immediately from coastal regions and riverside areas to a safer place such as high ground.</string>
+
+    <!-- Primary ETWS (Earthquake and Tsunami Warning System) default message for earthquake and Tsunami -->
+    <string name="etws_primary_default_message_earthquake_and_tsunami">Stay calm and seek shelter nearby.</string>
+
+    <!-- Primary ETWS (Earthquake and Tsunami Warning System) default message for test -->
+    <string name="etws_primary_default_message_test">Emergency messages test</string>
+
+    <!-- Primary ETWS (Earthquake and Tsunami Warning System) default message for others -->
+    <string name="etws_primary_default_message_others"></string>
 </resources>
