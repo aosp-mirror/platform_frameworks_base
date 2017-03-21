@@ -5482,37 +5482,61 @@ public class ActivityManagerService extends IActivityManager.Stub
         return tracesFile;
     }
 
+    public static class DumpStackFileObserver extends FileObserver {
+        // Keep in sync with frameworks/native/cmds/dumpstate/utils.cpp
+        private static final int TRACE_DUMP_TIMEOUT_MS = 10000; // 10 seconds
+        static final int TRACE_DUMP_TIMEOUT_SECONDS = TRACE_DUMP_TIMEOUT_MS / 1000;
+
+        private final String mTracesPath;
+        private boolean mClosed;
+
+        public DumpStackFileObserver(String tracesPath) {
+            super(tracesPath, FileObserver.CLOSE_WRITE);
+            mTracesPath = tracesPath;
+        }
+
+        @Override
+        public synchronized void onEvent(int event, String path) {
+            mClosed = true;
+            notify();
+        }
+
+        public void dumpWithTimeout(int pid) {
+            Process.sendSignal(pid, Process.SIGNAL_QUIT);
+            synchronized (this) {
+                try {
+                    wait(TRACE_DUMP_TIMEOUT_MS); // Wait for traces file to be closed.
+                } catch (InterruptedException e) {
+                    Slog.wtf(TAG, e);
+                }
+            }
+            if (!mClosed) {
+                Slog.w(TAG, "Didn't see close of " + mTracesPath + " for pid " + pid +
+                       ". Attempting native stack collection.");
+                Debug.dumpNativeBacktraceToFileTimeout(pid, mTracesPath, TRACE_DUMP_TIMEOUT_SECONDS);
+            }
+            mClosed = false;
+        }
+    }
+
     private static void dumpStackTraces(String tracesPath, ArrayList<Integer> firstPids,
             ProcessCpuTracker processCpuTracker, SparseArray<Boolean> lastPids, String[] nativeProcs) {
         // Use a FileObserver to detect when traces finish writing.
         // The order of traces is considered important to maintain for legibility.
-        final boolean[] closed = new boolean[1];
-        FileObserver observer = new FileObserver(tracesPath, FileObserver.CLOSE_WRITE) {
-            @Override
-            public synchronized void onEvent(int event, String path) { closed[0] = true; notify(); }
-        };
-
+        DumpStackFileObserver observer = new DumpStackFileObserver(tracesPath);
         try {
             observer.startWatching();
 
             // First collect all of the stacks of the most important pids.
             if (firstPids != null) {
-                try {
-                    int num = firstPids.size();
-                    for (int i = 0; i < num; i++) {
-                        synchronized (observer) {
-                            if (DEBUG_ANR) Slog.d(TAG, "Collecting stacks for pid "
-                                    + firstPids.get(i));
-                            final long sime = SystemClock.elapsedRealtime();
-                            Process.sendSignal(firstPids.get(i), Process.SIGNAL_QUIT);
-                            observer.wait(1000);  // Wait for write-close, give up after 1 sec
-                            if (!closed[0]) Slog.w(TAG, "Didn't see close of " + tracesPath);
-                            if (DEBUG_ANR) Slog.d(TAG, "Done with pid " + firstPids.get(i)
-                                    + " in " + (SystemClock.elapsedRealtime()-sime) + "ms");
-                        }
-                    }
-                } catch (InterruptedException e) {
-                    Slog.wtf(TAG, e);
+                int num = firstPids.size();
+                for (int i = 0; i < num; i++) {
+                    if (DEBUG_ANR) Slog.d(TAG, "Collecting stacks for pid "
+                            + firstPids.get(i));
+                    final long sime = SystemClock.elapsedRealtime();
+                    observer.dumpWithTimeout(firstPids.get(i));
+                    if (DEBUG_ANR) Slog.d(TAG, "Done with pid " + firstPids.get(i)
+                            + " in " + (SystemClock.elapsedRealtime()-sime) + "ms");
                 }
             }
 
@@ -5524,7 +5548,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                         if (DEBUG_ANR) Slog.d(TAG, "Collecting stacks for native pid " + pid);
                         final long sime = SystemClock.elapsedRealtime();
 
-                        Debug.dumpNativeBacktraceToFileTimeout(pid, tracesPath, 10);
+                        Debug.dumpNativeBacktraceToFileTimeout(
+                                pid, tracesPath, DumpStackFileObserver.TRACE_DUMP_TIMEOUT_SECONDS);
                         if (DEBUG_ANR) Slog.d(TAG, "Done with native pid " + pid
                                 + " in " + (SystemClock.elapsedRealtime()-sime) + "ms");
                     }
@@ -5551,19 +5576,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                     ProcessCpuTracker.Stats stats = processCpuTracker.getWorkingStats(i);
                     if (lastPids.indexOfKey(stats.pid) >= 0) {
                         numProcs++;
-                        try {
-                            synchronized (observer) {
-                                if (DEBUG_ANR) Slog.d(TAG, "Collecting stacks for extra pid "
-                                        + stats.pid);
-                                final long stime = SystemClock.elapsedRealtime();
-                                Process.sendSignal(stats.pid, Process.SIGNAL_QUIT);
-                                observer.wait(1000);  // Wait for write-close, give up after 1 sec
-                                if (DEBUG_ANR) Slog.d(TAG, "Done with extra pid " + stats.pid
-                                        + " in " + (SystemClock.elapsedRealtime()-stime) + "ms");
-                            }
-                        } catch (InterruptedException e) {
-                            Slog.wtf(TAG, e);
-                        }
+                        if (DEBUG_ANR) Slog.d(TAG, "Collecting stacks for extra pid "
+                                + stats.pid);
+                        final long stime = SystemClock.elapsedRealtime();
+                        observer.dumpWithTimeout(stats.pid);
+                        if (DEBUG_ANR) Slog.d(TAG, "Done with extra pid " + stats.pid
+                                + " in " + (SystemClock.elapsedRealtime()-stime) + "ms");
                     } else if (DEBUG_ANR) {
                         Slog.d(TAG, "Skipping next CPU consuming process, not a java proc: "
                                 + stats.pid);
