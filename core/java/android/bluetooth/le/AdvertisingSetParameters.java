@@ -116,14 +116,16 @@ public final class AdvertisingSetParameters implements Parcelable {
     private final int primaryPhy;
     private final int secondaryPhy;
     private final boolean connectable;
+    private final boolean scannable;
     private final int interval;
     private final int txPowerLevel;
 
-    private AdvertisingSetParameters(boolean connectable, boolean isLegacy,
+    private AdvertisingSetParameters(boolean connectable, boolean scannable, boolean isLegacy,
                                      boolean isAnonymous, boolean includeTxPower,
                                      int primaryPhy, int secondaryPhy,
                                      int interval, int txPowerLevel) {
         this.connectable = connectable;
+        this.scannable = scannable;
         this.isLegacy = isLegacy;
         this.isAnonymous = isAnonymous;
         this.includeTxPower = includeTxPower;
@@ -135,6 +137,7 @@ public final class AdvertisingSetParameters implements Parcelable {
 
     private AdvertisingSetParameters(Parcel in) {
         connectable = in.readInt() != 0 ? true : false;
+        scannable = in.readInt() != 0 ? true : false;
         isLegacy = in.readInt() != 0 ? true : false;
         isAnonymous = in.readInt() != 0 ? true : false;
         includeTxPower = in.readInt() != 0 ? true : false;
@@ -148,6 +151,11 @@ public final class AdvertisingSetParameters implements Parcelable {
      * Returns whether the advertisement will be connectable.
      */
     public boolean isConnectable() { return connectable; }
+
+    /**
+     * Returns whether the advertisement will be scannable.
+     */
+    public boolean isScannable() { return scannable; }
 
     /**
      * Returns whether the legacy advertisement will be used.
@@ -204,6 +212,7 @@ public final class AdvertisingSetParameters implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(connectable ? 1 : 0);
+        dest.writeInt(scannable ? 1 : 0);
         dest.writeInt(isLegacy ? 1 : 0);
         dest.writeInt(isAnonymous ? 1 : 0);
         dest.writeInt(includeTxPower ? 1 : 0);
@@ -232,6 +241,7 @@ public final class AdvertisingSetParameters implements Parcelable {
     public static final class Builder {
 
         private boolean connectable = true;
+        private boolean scannable = true;
         private boolean isLegacy = false;
         private boolean isAnonymous = false;
         private boolean includeTxPower = false;
@@ -250,6 +260,18 @@ public final class AdvertisingSetParameters implements Parcelable {
          */
         public Builder setConnectable(boolean connectable) {
             this.connectable = connectable;
+            return this;
+        }
+
+        /**
+         * Set whether the advertisement type should be scannable
+         * Legacy advertisements can be both connectable and scannable. Other
+         * advertisements can be scannable only if not connectable.
+         * @param scannable Controls whether the advertisment type will be
+         * scannable (true) or non-scannable (false).
+         */
+        public Builder setScannable(boolean scannable) {
+            this.scannable = scannable;
             return this;
         }
 
@@ -371,7 +393,7 @@ public final class AdvertisingSetParameters implements Parcelable {
          * Build the {@link AdvertisingSetParameters} object.
          */
         public AdvertisingSetParameters build() {
-            return new AdvertisingSetParameters(connectable, isLegacy, isAnonymous,
+            return new AdvertisingSetParameters(connectable, scannable, isLegacy, isAnonymous,
                                                 includeTxPower, primaryPhy,
                                                 secondaryPhy, interval, txPowerLevel);
         }
