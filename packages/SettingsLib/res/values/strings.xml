@@ -777,14 +777,14 @@
     <string name="daltonizer_type_overridden">Overridden by <xliff:g id="title" example="Simulate color space">%1$s</xliff:g></string>
 
     <!-- [CHAR_LIMIT=40] Label for estimated remaining duration of battery charging/discharging -->
-    <string name="power_remaining_duration_only">about <xliff:g id="time">%1$s</xliff:g> left</string>
+    <string name="power_remaining_duration_only">Approx. <xliff:g id="time">%1$s</xliff:g> left</string>
 
     <!-- [CHAR_LIMIT=40] Short label for estimated remaining duration of battery charging/discharging -->
     <string name="power_remaining_duration_only_short"><xliff:g id="time">%1$s</xliff:g> left</string>
 
     <!-- [CHAR_LIMIT=40] Label for battery level chart when discharging with duration -->
     <string name="power_discharging_duration"><xliff:g id="level">%1$s</xliff:g>
-        - approx. <xliff:g id="time">%2$s</xliff:g> left</string>
+        - about <xliff:g id="time">%2$s</xliff:g> left</string>
 
     <!-- [CHAR_LIMIT=40] Label for battery level chart when discharging with duration -->
     <string name="power_discharging_duration_short"><xliff:g id="level">%1$s</xliff:g>
