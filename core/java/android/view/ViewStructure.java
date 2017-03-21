@@ -45,7 +45,7 @@ public abstract class ViewStructure {
      * Sets the name of the identifier for this view.
      *
      * <p>Typically used when adding virtual children (through
-     * {@link #asyncNewChild(int, int, int)}) that does not map to Android {@link View}
+     * {@link #asyncNewChild(int)}) that does not map to Android {@link View}
      * - otherwise, it's better to call {@link #setId(int, String, String, String)}.
      *
      * @param entryName The entry name of the view's identifier, or {@code null} if there is none.
