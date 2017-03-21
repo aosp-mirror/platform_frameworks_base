@@ -200,6 +200,7 @@ public abstract class InstantAppResolver {
             // Intent that is launched if the package couldn't be installed for any reason.
             final Intent failureIntent = new Intent(origIntent);
             failureIntent.setFlags(failureIntent.getFlags() | Intent.FLAG_IGNORE_EPHEMERAL);
+            failureIntent.setLaunchToken(token);
             try {
                 final IIntentSender failureIntentTarget = ActivityManager.getService()
                         .getIntentSender(
@@ -216,6 +217,7 @@ public abstract class InstantAppResolver {
 
             // Intent that is launched if the package was installed successfully.
             final Intent successIntent = new Intent(origIntent);
+            successIntent.setLaunchToken(token);
             try {
                 final IIntentSender successIntentTarget = ActivityManager.getService()
                         .getIntentSender(

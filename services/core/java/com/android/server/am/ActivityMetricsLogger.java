@@ -321,6 +321,7 @@ class ActivityMetricsLogger {
             if (info.launchedActivity.info.launchToken != null) {
                 builder.addTaggedData(FIELD_INSTANT_APP_LAUNCH_TOKEN,
                         info.launchedActivity.info.launchToken);
+                info.launchedActivity.info.launchToken = null;
             }
             builder.addTaggedData(APP_TRANSITION_IS_EPHEMERAL,
                     info.launchedActivity.info.applicationInfo.isInstantApp() ? 1 : 0);
