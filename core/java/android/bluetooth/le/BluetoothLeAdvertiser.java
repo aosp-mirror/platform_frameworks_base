@@ -130,6 +130,7 @@ public final class BluetoothLeAdvertiser {
             AdvertisingSetParameters.Builder parameters = new AdvertisingSetParameters.Builder();
             parameters.setLegacyMode(true);
             parameters.setConnectable(isConnectable);
+            parameters.setScannable(true); // legacy advertisements we support are always scannable
             if (settings.getMode() == AdvertiseSettings.ADVERTISE_MODE_LOW_POWER) {
                 parameters.setInterval(1600); // 1s
             } else if (settings.getMode() == AdvertiseSettings.ADVERTISE_MODE_BALANCED) {
