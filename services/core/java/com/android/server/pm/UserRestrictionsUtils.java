@@ -109,6 +109,7 @@ public class UserRestrictionsUtils {
             UserManager.DISALLOW_SET_WALLPAPER,
             UserManager.DISALLOW_OEM_UNLOCK,
             UserManager.DISALLOW_UNMUTE_DEVICE,
+            UserManager.DISALLOW_AUTOFILL,
     });
 
     /**

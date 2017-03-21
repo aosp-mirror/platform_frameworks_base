@@ -1584,6 +1584,7 @@ public final class Pm {
         System.err.println("       pm disable-user [--user USER_ID] PACKAGE_OR_COMPONENT");
         System.err.println("       pm disable-until-used [--user USER_ID] PACKAGE_OR_COMPONENT");
         System.err.println("       pm default-state [--user USER_ID] PACKAGE_OR_COMPONENT");
+        System.err.println("       pm set-user-restriction [--user USER_ID] RESTRICTION VALUE");
         System.err.println("       pm hide [--user USER_ID] PACKAGE_OR_COMPONENT");
         System.err.println("       pm unhide [--user USER_ID] PACKAGE_OR_COMPONENT");
         System.err.println("       pm grant [--user USER_ID] PACKAGE PERMISSION");

@@ -228,8 +228,11 @@ public abstract class AutofillService extends Service {
      */
     //TODO(b/33197203): remove once clients are not using anymore
     @Deprecated
-    public abstract void onFillRequest(@NonNull AssistStructure structure, @Nullable Bundle data,
-            @NonNull CancellationSignal cancellationSignal, @NonNull FillCallback callback);
+    public void onFillRequest(@NonNull AssistStructure structure, @Nullable Bundle data,
+            @NonNull CancellationSignal cancellationSignal, @NonNull FillCallback callback) {
+        // Should never be called because it was abstract before.
+        throw new UnsupportedOperationException("deprecated");
+    }
 
     /**
      * Called when user requests service to save the fields of an {@link Activity}.

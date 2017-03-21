@@ -53,6 +53,7 @@ import android.os.Looper;
 import android.os.Parcelable;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
+import android.os.UserManager;
 import android.provider.Settings;
 import android.service.autofill.AutofillService;
 import android.service.autofill.AutofillServiceInfo;
@@ -105,6 +106,10 @@ final class AutofillManagerServiceImpl {
     private AutofillServiceInfo mInfo;
 
     private final LocalLog mRequestsHistory;
+    /**
+     * Whether service was disabled for user due to {@link UserManager} restrictions.
+     */
+    private boolean mDisabled;
 
     private final HandlerCaller.Callback mHandlerCallback = (msg) -> {
         switch (msg.what) {
@@ -183,13 +188,13 @@ final class AutofillManagerServiceImpl {
     };
 
     AutofillManagerServiceImpl(Context context, Object lock, LocalLog requestsHistory,
-            int userId, AutoFillUI ui) {
+            int userId, AutoFillUI ui, boolean disabled) {
         mContext = context;
         mLock = lock;
         mRequestsHistory = requestsHistory;
         mUserId = userId;
         mUi = ui;
-        updateLocked();
+        updateLocked(disabled);
     }
 
     CharSequence getServiceName() {
@@ -209,7 +214,9 @@ final class AutofillManagerServiceImpl {
         }
     }
 
-    void updateLocked() {
+    void updateLocked(boolean disabled) {
+        final boolean wasEnabled = isEnabled();
+        mDisabled = disabled;
         ComponentName serviceComponent = null;
         ServiceInfo serviceInfo = null;
         final String componentName = Settings.Secure.getStringForUser(
@@ -225,15 +232,14 @@ final class AutofillManagerServiceImpl {
             }
         }
         try {
-            final boolean hadService = hasService();
             if (serviceInfo != null) {
                 mInfo = new AutofillServiceInfo(mContext.getPackageManager(),
                         serviceComponent, mUserId);
             } else {
                 mInfo = null;
             }
-            if (hadService != hasService()) {
-                if (!hasService()) {
+            if (wasEnabled != isEnabled()) {
+                if (!isEnabled()) {
                     final int sessionCount = mSessions.size();
                     for (int i = sessionCount - 1; i >= 0; i--) {
                         final Session session = mSessions.valueAt(i);
@@ -251,7 +257,7 @@ final class AutofillManagerServiceImpl {
      * Used by {@link AutofillManagerServiceShellCommand} to request save for the current top app.
      */
     void requestSaveForUserLocked(IBinder activityToken) {
-        if (!hasService()) {
+        if (!isEnabled()) {
             return;
         }
         final Session session = mSessions.get(activityToken);
@@ -268,11 +274,11 @@ final class AutofillManagerServiceImpl {
             mClients = new RemoteCallbackList<>();
         }
         mClients.register(client);
-        return hasService();
+        return isEnabled();
     }
 
     void setAuthenticationResultLocked(Bundle data, IBinder activityToken) {
-        if (!hasService()) {
+        if (!isEnabled()) {
             return;
         }
         final Session session = mSessions.get(activityToken);
@@ -282,7 +288,7 @@ final class AutofillManagerServiceImpl {
     }
 
     void setHasCallback(IBinder activityToken, boolean hasIt) {
-        if (!hasService()) {
+        if (!isEnabled()) {
             return;
         }
         final Session session = mSessions.get(activityToken);
@@ -295,7 +301,7 @@ final class AutofillManagerServiceImpl {
             @NonNull IBinder appCallbackToken, @NonNull AutofillId autofillId, @NonNull Rect bounds,
             @Nullable AutofillValue value, boolean hasCallback, int flags,
             @NonNull String packageName) {
-        if (!hasService()) {
+        if (!isEnabled()) {
             return;
         }
 
@@ -318,7 +324,7 @@ final class AutofillManagerServiceImpl {
     }
 
     void finishSessionLocked(IBinder activityToken) {
-        if (!hasService()) {
+        if (!isEnabled()) {
             return;
         }
 
@@ -338,7 +344,7 @@ final class AutofillManagerServiceImpl {
     }
 
     void cancelSessionLocked(IBinder activityToken) {
-        if (!hasService()) {
+        if (!isEnabled()) {
             return;
         }
 
@@ -423,8 +429,9 @@ final class AutofillManagerServiceImpl {
 
         pw.print(prefix); pw.print("Component:"); pw.println(mInfo != null
                 ? mInfo.getServiceInfo().getComponentName() : null);
+        pw.print(prefix); pw.print("Disabled:"); pw.println(mDisabled);
 
-        if (VERBOSE) {
+        if (VERBOSE && mInfo != null) {
             // ServiceInfo dump is too noisy and redundant (it can be obtained through other dumps)
             pw.print(prefix); pw.println("ServiceInfo:");
             mInfo.getServiceInfo().dump(new PrintWriterPrinter(pw), prefix + prefix);
@@ -467,9 +474,9 @@ final class AutofillManagerServiceImpl {
         }
         try {
             for (int i = 0; i < userClientCount; i++) {
-                IAutoFillManagerClient client = clients.getBroadcastItem(i);
+                final IAutoFillManagerClient client = clients.getBroadcastItem(i);
                 try {
-                    client.setState(hasService());
+                    client.setState(isEnabled());
                 } catch (RemoteException re) {
                     /* ignore */
                 }
@@ -479,8 +486,8 @@ final class AutofillManagerServiceImpl {
         }
     }
 
-    private boolean hasService() {
-        return mInfo != null;
+    private boolean isEnabled() {
+        return mInfo != null && !mDisabled;
     }
 
     @Override

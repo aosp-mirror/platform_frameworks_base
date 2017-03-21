@@ -706,6 +706,20 @@ public class UserManager {
             = "allow_parent_profile_app_linking";
 
     /**
+     * Specifies if a user is not allowed to use Autofill Services.
+     *
+     * <p>Device owner and profile owner can set this restriction. When it is set by device owner,
+     * only the target user will be affected.
+     *
+     * <p>The default value is <code>false</code>.
+     *
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
+     * @see #getUserRestrictions()
+     */
+    public static final String DISALLOW_AUTOFILL = "no_autofill";
+
+    /**
      * Application restriction key that is used to indicate the pending arrival
      * of real restrictions for the app.
      *

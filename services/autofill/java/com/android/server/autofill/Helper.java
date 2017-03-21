@@ -31,24 +31,21 @@ final class Helper {
 
     static final boolean DEBUG = true; // TODO(b/33197203): set to false when stable
     static final boolean VERBOSE = false;
-    static final String REDACTED = "[REDACTED]";
 
     static void append(StringBuilder builder, Bundle bundle) {
-        if (bundle == null) {
-            builder.append("N/A");
-        } else if (!VERBOSE) {
-            builder.append(REDACTED);
-        } else {
-            final Set<String> keySet = bundle.keySet();
-            builder.append("[Bundle with ").append(keySet.size()).append(" extras:");
-            for (String key : keySet) {
-                final Object value = bundle.get(key);
-                builder.append(' ').append(key).append('=');
-                builder.append((value instanceof Object[])
-                        ? Arrays.toString((Objects[]) value) : value);
-            }
-            builder.append(']');
+        if (bundle == null || !DEBUG) {
+            builder.append("null");
+            return;
         }
+        final Set<String> keySet = bundle.keySet();
+        builder.append("[Bundle with ").append(keySet.size()).append(" extras:");
+        for (String key : keySet) {
+            final Object value = bundle.get(key);
+            builder.append(' ').append(key).append('=');
+            builder.append((value instanceof Object[])
+                    ? Arrays.toString((Objects[]) value) : value);
+        }
+        builder.append(']');
     }
 
     static String bundleToString(Bundle bundle) {
