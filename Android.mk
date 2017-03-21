@@ -569,6 +569,9 @@ LOCAL_STATIC_JAVA_LIBRARIES :=                          \
     android.hardware.health@1.0-java-constants          \
     android.hardware.usb@1.0-java-constants             \
 
+# Loaded with System.loadLibrary by android.view.textclassifier
+LOCAL_REQUIRED_MODULES += libtextclassifier
+
 LOCAL_PROTOC_OPTIMIZE_TYPE := stream
 LOCAL_PROTOC_FLAGS := \
     -Iexternal/protobuf/src
