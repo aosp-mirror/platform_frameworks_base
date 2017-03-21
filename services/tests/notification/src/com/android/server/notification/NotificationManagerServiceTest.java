@@ -59,21 +59,23 @@ import com.android.server.lights.LightsManager;
 
 public class NotificationManagerServiceTest {
     private static final long WAIT_FOR_IDLE_TIMEOUT = 2;
-    private final String pkg = "com.android.server.notification";
+    private static final String TEST_CHANNEL_ID = "NotificationManagerServiceTestChannelId";
     private final int uid = Binder.getCallingUid();
     private NotificationManagerService mNotificationManagerService;
     private INotificationManager mBinderService;
     private IPackageManager mPackageManager = mock(IPackageManager.class);
-    final PackageManager mPackageManagerClient = mock(PackageManager.class);
-    private Context mContext;
+    private final PackageManager mPackageManagerClient = mock(PackageManager.class);
+    private Context mContext = InstrumentationRegistry.getTargetContext();
+    private final String PKG = mContext.getPackageName();
     private HandlerThread mThread;
-    final RankingHelper mRankingHelper = mock(RankingHelper.class);
+    private final RankingHelper mRankingHelper = mock(RankingHelper.class);
+    private NotificationChannel mTestNotificationChannel = new NotificationChannel(
+            TEST_CHANNEL_ID, TEST_CHANNEL_ID, NotificationManager.IMPORTANCE_DEFAULT);
 
     @Before
     @Test
     @UiThreadTest
     public void setUp() throws Exception {
-        mContext = InstrumentationRegistry.getTargetContext();
         mNotificationManagerService = new NotificationManagerService(mContext);
 
         // MockPackageManager - default returns ApplicationInfo with matching calling UID
@@ -93,13 +95,16 @@ public class NotificationManagerServiceTest {
                 mock(NotificationManagerService.NotificationListeners.class);
         when(mockNotificationListeners.checkServiceTokenLocked(any())).thenReturn(
                 mockNotificationListeners.new ManagedServiceInfo(null,
-                        new ComponentName(pkg, "test_class"), uid, true, null, 0));
+                        new ComponentName(PKG, "test_class"), uid, true, null, 0));
 
         mNotificationManagerService.init(mThread.getLooper(), mPackageManager,
                 mPackageManagerClient, mockLightsManager, mockNotificationListeners);
 
         // Tests call directly into the Binder.
         mBinderService = mNotificationManagerService.getBinderService();
+
+        mBinderService.createNotificationChannels(
+                PKG, new ParceledListSlice(Arrays.asList(mTestNotificationChannel)));
     }
 
     public void waitForIdle() throws Exception {
@@ -127,7 +132,7 @@ public class NotificationManagerServiceTest {
     private NotificationRecord generateNotificationRecord(NotificationChannel channel,
             Notification.TvExtender extender) {
         if (channel == null) {
-            channel = new NotificationChannel("id", "name", NotificationManager.IMPORTANCE_DEFAULT);
+            channel = mTestNotificationChannel;
         }
         Notification.Builder nb = new Notification.Builder(mContext, channel.getId())
                 .setContentTitle("foo")
@@ -135,8 +140,7 @@ public class NotificationManagerServiceTest {
         if (extender != null) {
             nb.extend(extender);
         }
-        StatusBarNotification sbn = new StatusBarNotification(mContext.getPackageName(),
-                mContext.getPackageName(), 1, "tag", uid, 0,
+        StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, 1, "tag", uid, 0,
                 nb.build(), new UserHandle(uid), null, 0);
         return new NotificationRecord(mContext, sbn, channel);
     }
@@ -256,38 +260,38 @@ public class NotificationManagerServiceTest {
     @Test
     @UiThreadTest
     public void testEnqueueNotificationWithTag_PopulatesGetActiveNotifications() throws Exception {
-        mBinderService.enqueueNotificationWithTag(mContext.getPackageName(), "opPkg", "tag", 0,
+        mBinderService.enqueueNotificationWithTag(PKG, "opPkg", "tag", 0,
                 generateNotificationRecord(null).getNotification(), new int[1], 0);
         waitForIdle();
         StatusBarNotification[] notifs =
-                mBinderService.getActiveNotifications(mContext.getPackageName());
+                mBinderService.getActiveNotifications(PKG);
         assertEquals(1, notifs.length);
     }
 
     @Test
     @UiThreadTest
     public void testCancelNotificationImmediatelyAfterEnqueue() throws Exception {
-        mBinderService.enqueueNotificationWithTag(mContext.getPackageName(), "opPkg", "tag", 0,
+        mBinderService.enqueueNotificationWithTag(PKG, "opPkg", "tag", 0,
                 generateNotificationRecord(null).getNotification(), new int[1], 0);
-        mBinderService.cancelNotificationWithTag(mContext.getPackageName(), "tag", 0, 0);
+        mBinderService.cancelNotificationWithTag(PKG, "tag", 0, 0);
         waitForIdle();
         StatusBarNotification[] notifs =
-                mBinderService.getActiveNotifications(mContext.getPackageName());
+                mBinderService.getActiveNotifications(PKG);
         assertEquals(0, notifs.length);
     }
 
     @Test
     @UiThreadTest
     public void testCancelNotificationWhilePostedAndEnqueued() throws Exception {
-        mBinderService.enqueueNotificationWithTag(mContext.getPackageName(), "opPkg", "tag", 0,
+        mBinderService.enqueueNotificationWithTag(PKG, "opPkg", "tag", 0,
                 generateNotificationRecord(null).getNotification(), new int[1], 0);
         waitForIdle();
-        mBinderService.enqueueNotificationWithTag(mContext.getPackageName(), "opPkg", "tag", 0,
+        mBinderService.enqueueNotificationWithTag(PKG, "opPkg", "tag", 0,
                 generateNotificationRecord(null).getNotification(), new int[1], 0);
-        mBinderService.cancelNotificationWithTag(mContext.getPackageName(), "tag", 0, 0);
+        mBinderService.cancelNotificationWithTag(PKG, "tag", 0, 0);
         waitForIdle();
         StatusBarNotification[] notifs =
-                mBinderService.getActiveNotifications(mContext.getPackageName());
+                mBinderService.getActiveNotifications(PKG);
         assertEquals(0, notifs.length);
     }
 
@@ -295,7 +299,7 @@ public class NotificationManagerServiceTest {
     @UiThreadTest
     public void testCancelNotificationsFromListenerImmediatelyAfterEnqueue() throws Exception {
         final StatusBarNotification sbn = generateNotificationRecord(null).sbn;
-        mBinderService.enqueueNotificationWithTag(sbn.getPackageName(), "opPkg", "tag",
+        mBinderService.enqueueNotificationWithTag(PKG, "opPkg", "tag",
                 sbn.getId(), sbn.getNotification(), new int[1], sbn.getUserId());
         mBinderService.cancelNotificationsFromListener(null, null);
         waitForIdle();
@@ -308,9 +312,9 @@ public class NotificationManagerServiceTest {
     @UiThreadTest
     public void testCancelAllNotificationsImmediatelyAfterEnqueue() throws Exception {
         final StatusBarNotification sbn = generateNotificationRecord(null).sbn;
-        mBinderService.enqueueNotificationWithTag(sbn.getPackageName(), "opPkg", "tag",
+        mBinderService.enqueueNotificationWithTag(PKG, "opPkg", "tag",
                 sbn.getId(), sbn.getNotification(), new int[1], sbn.getUserId());
-        mBinderService.cancelAllNotifications(sbn.getPackageName(), sbn.getUserId());
+        mBinderService.cancelAllNotifications(PKG, sbn.getUserId());
         waitForIdle();
         StatusBarNotification[] notifs =
                 mBinderService.getActiveNotifications(sbn.getPackageName());
@@ -322,9 +326,9 @@ public class NotificationManagerServiceTest {
     public void testCancelAllNotifications_IgnoreForegroundService() throws Exception {
         final StatusBarNotification sbn = generateNotificationRecord(null).sbn;
         sbn.getNotification().flags |= Notification.FLAG_FOREGROUND_SERVICE;
-        mBinderService.enqueueNotificationWithTag(sbn.getPackageName(), "opPkg", "tag",
+        mBinderService.enqueueNotificationWithTag(PKG, "opPkg", "tag",
                 sbn.getId(), sbn.getNotification(), new int[1], sbn.getUserId());
-        mBinderService.cancelAllNotifications(sbn.getPackageName(), sbn.getUserId());
+        mBinderService.cancelAllNotifications(PKG, sbn.getUserId());
         waitForIdle();
         StatusBarNotification[] notifs =
                 mBinderService.getActiveNotifications(sbn.getPackageName());
@@ -336,7 +340,7 @@ public class NotificationManagerServiceTest {
     public void testCancelAllNotifications_IgnoreOtherPackages() throws Exception {
         final StatusBarNotification sbn = generateNotificationRecord(null).sbn;
         sbn.getNotification().flags |= Notification.FLAG_FOREGROUND_SERVICE;
-        mBinderService.enqueueNotificationWithTag(sbn.getPackageName(), "opPkg", "tag",
+        mBinderService.enqueueNotificationWithTag(PKG, "opPkg", "tag",
                 sbn.getId(), sbn.getNotification(), new int[1], sbn.getUserId());
         mBinderService.cancelAllNotifications("other_pkg_name", sbn.getUserId());
         waitForIdle();
@@ -349,7 +353,7 @@ public class NotificationManagerServiceTest {
     @UiThreadTest
     public void testCancelAllNotifications_NullPkgRemovesAll() throws Exception {
         final StatusBarNotification sbn = generateNotificationRecord(null).sbn;
-        mBinderService.enqueueNotificationWithTag(sbn.getPackageName(), "opPkg", "tag",
+        mBinderService.enqueueNotificationWithTag(PKG, "opPkg", "tag",
                 sbn.getId(), sbn.getNotification(), new int[1], sbn.getUserId());
         mBinderService.cancelAllNotifications(null, sbn.getUserId());
         waitForIdle();
@@ -362,7 +366,7 @@ public class NotificationManagerServiceTest {
     @UiThreadTest
     public void testCancelAllNotifications_NullPkgIgnoresUserAllNotifications() throws Exception {
         final StatusBarNotification sbn = generateNotificationRecord(null).sbn;
-        mBinderService.enqueueNotificationWithTag(sbn.getPackageName(), "opPkg", "tag",
+        mBinderService.enqueueNotificationWithTag(PKG, "opPkg", "tag",
                 sbn.getId(), sbn.getNotification(), new int[1], UserHandle.USER_ALL);
         // Null pkg is how we signal a user switch.
         mBinderService.cancelAllNotifications(null, sbn.getUserId());
@@ -377,14 +381,14 @@ public class NotificationManagerServiceTest {
     public void testTvExtenderChannelOverride_onTv() throws Exception {
         mNotificationManagerService.setIsTelevision(true);
         mNotificationManagerService.setRankingHelper(mRankingHelper);
-        when(mRankingHelper.getNotificationChannelWithFallback(
+        when(mRankingHelper.getNotificationChannel(
                 anyString(), anyInt(), eq("foo"), anyBoolean())).thenReturn(
                         new NotificationChannel("foo", "foo", NotificationManager.IMPORTANCE_HIGH));
 
         Notification.TvExtender tv = new Notification.TvExtender().setChannel("foo");
-        mBinderService.enqueueNotificationWithTag(mContext.getPackageName(), "opPkg", "tag", 0,
+        mBinderService.enqueueNotificationWithTag(PKG, "opPkg", "tag", 0,
                 generateNotificationRecord(null, tv).getNotification(), new int[1], 0);
-        verify(mRankingHelper, times(1)).getNotificationChannelWithFallback(
+        verify(mRankingHelper, times(1)).getNotificationChannel(
                 anyString(), anyInt(), eq("foo"), anyBoolean());
     }
 
@@ -393,14 +397,14 @@ public class NotificationManagerServiceTest {
     public void testTvExtenderChannelOverride_notOnTv() throws Exception {
         mNotificationManagerService.setIsTelevision(false);
         mNotificationManagerService.setRankingHelper(mRankingHelper);
-        when(mRankingHelper.getNotificationChannelWithFallback(
+        when(mRankingHelper.getNotificationChannel(
                 anyString(), anyInt(), anyString(), anyBoolean())).thenReturn(
-                new NotificationChannel("id", "id", NotificationManager.IMPORTANCE_HIGH));
+                mTestNotificationChannel);
 
         Notification.TvExtender tv = new Notification.TvExtender().setChannel("foo");
-        mBinderService.enqueueNotificationWithTag(mContext.getPackageName(), "opPkg", "tag", 0,
+        mBinderService.enqueueNotificationWithTag(PKG, "opPkg", "tag", 0,
                 generateNotificationRecord(null, tv).getNotification(), new int[1], 0);
-        verify(mRankingHelper, times(1)).getNotificationChannelWithFallback(
-                anyString(), anyInt(), eq("id"), anyBoolean());
+        verify(mRankingHelper, times(1)).getNotificationChannel(
+                anyString(), anyInt(), eq(mTestNotificationChannel.getId()), anyBoolean());
     }
 }

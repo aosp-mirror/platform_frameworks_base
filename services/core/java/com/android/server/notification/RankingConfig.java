@@ -39,7 +39,6 @@ public interface RankingConfig {
     void updateNotificationChannel(String pkg, int uid, NotificationChannel channel);
     void updateNotificationChannelFromAssistant(String pkg, int uid, NotificationChannel channel);
     NotificationChannel getNotificationChannel(String pkg, int uid, String channelId, boolean includeDeleted);
-    NotificationChannel getNotificationChannelWithFallback(String pkg, int uid, String channelId, boolean includeDeleted);
     void deleteNotificationChannel(String pkg, int uid, String channelId);
     void permanentlyDeleteNotificationChannel(String pkg, int uid, String channelId);
     void permanentlyDeleteNotificationChannels(String pkg, int uid);
