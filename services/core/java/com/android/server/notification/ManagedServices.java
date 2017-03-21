@@ -31,6 +31,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
@@ -43,6 +44,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.IInterface;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
@@ -82,6 +84,7 @@ abstract public class ManagedServices {
     protected final Object mMutex;
     private final UserProfiles mUserProfiles;
     private final SettingsObserver mSettingsObserver;
+    private final IPackageManager mPm;
     private final Config mConfig;
     private ArraySet<String> mRestored;
 
@@ -114,6 +117,7 @@ abstract public class ManagedServices {
         mContext = context;
         mMutex = mutex;
         mUserProfiles = userProfiles;
+        mPm = IPackageManager.Stub.asInterface(ServiceManager.getService("package"));
         mConfig = getConfig();
         mSettingsObserver = new SettingsObserver(handler);
 
@@ -575,8 +579,21 @@ abstract public class ManagedServices {
         for (int i = 0; i < nUserIds; ++i) {
             final Set<ComponentName> add = toAdd.get(userIds[i]);
             for (ComponentName component : add) {
-                Slog.v(TAG, "enabling " + getCaption() + " for " + userIds[i] + ": " + component);
-                registerService(component, userIds[i]);
+                try {
+                    ServiceInfo info = mPm.getServiceInfo(component,
+                            PackageManager.MATCH_DIRECT_BOOT_AWARE
+                                    | PackageManager.MATCH_DIRECT_BOOT_UNAWARE, userIds[i]);
+                    if (!mConfig.bindPermission.equals(info.permission)) {
+                        Slog.w(TAG, "Skipping " + getCaption() + " service " + component
+                                + ": it does not require the permission " + mConfig.bindPermission);
+                        continue;
+                    }
+                    Slog.v(TAG,
+                            "enabling " + getCaption() + " for " + userIds[i] + ": " + component);
+                    registerService(component, userIds[i]);
+                } catch (RemoteException e) {
+                    e.rethrowFromSystemServer();
+                }
             }
         }
 
