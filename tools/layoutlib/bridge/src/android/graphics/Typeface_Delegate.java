@@ -174,6 +174,12 @@ public final class Typeface_Delegate {
     }
 
     @LayoutlibDelegate
+    /*package*/ static synchronized int[] nativeGetSupportedAxes(long native_instance) {
+        // nativeCreateFromTypefaceWithVariation is not supported so we do not keep the axes
+        return null;
+    }
+
+    @LayoutlibDelegate
     /*package*/ static long nativeCreateWeightAlias(long native_instance, int weight) {
         Typeface_Delegate delegate = sManager.getDelegate(native_instance);
         if (delegate == null) {
