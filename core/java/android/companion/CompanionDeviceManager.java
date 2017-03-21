@@ -22,10 +22,13 @@ import android.annotation.Nullable;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.IntentSender;
+import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
+import android.util.Log;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -39,6 +42,9 @@ import java.util.List;
  * @see AssociationRequest
  */
 public final class CompanionDeviceManager {
+
+    private static final boolean DEBUG = false; //TODO
+    private static final String LOG_TAG = "CompanionDeviceManager";
 
     /**
      * A device, returned in the activity result of the {@link IntentSender} received in
@@ -81,7 +87,7 @@ public final class CompanionDeviceManager {
 
     /** @hide */
     public CompanionDeviceManager(
-            @NonNull ICompanionDeviceManager service, @NonNull Context context) {
+            @Nullable ICompanionDeviceManager service, @NonNull Context context) {
         mService = service;
         mContext = context;
     }
@@ -120,6 +126,10 @@ public final class CompanionDeviceManager {
             @NonNull AssociationRequest request,
             @NonNull Callback callback,
             @Nullable Handler handler) {
+        if (!checkFeaturePresent()) {
+            return;
+        }
+
         final Handler finalHandler = handler != null
                 ? handler
                 : new Handler(Looper.getMainLooper());
@@ -153,6 +163,9 @@ public final class CompanionDeviceManager {
      */
     @NonNull
     public List<String> getAssociations() {
+        if (!checkFeaturePresent()) {
+            return Collections.emptyList();
+        }
         try {
             return mService.getAssociations(mContext.getPackageName());
         } catch (RemoteException e) {
@@ -172,6 +185,9 @@ public final class CompanionDeviceManager {
      * @param deviceMacAddress the MAC address of device to disassociate from this app
      */
     public void disassociate(@NonNull String deviceMacAddress) {
+        if (!checkFeaturePresent()) {
+            return;
+        }
         try {
             mService.disassociate(deviceMacAddress, mContext.getPackageName());
         } catch (RemoteException e) {
@@ -181,14 +197,28 @@ public final class CompanionDeviceManager {
 
     /** @hide */
     public void requestNotificationAccess() {
+        if (!checkFeaturePresent()) {
+            return;
+        }
         //TODO implement
         throw new UnsupportedOperationException("Not yet implemented");
     }
 
     /** @hide */
     public boolean haveNotificationAccess() {
+        if (!checkFeaturePresent()) {
+            return false;
+        }
         //TODO implement
         throw new UnsupportedOperationException("Not yet implemented");
     }
 
+    private boolean checkFeaturePresent() {
+        boolean featurePresent = mService == null;
+        if (!featurePresent && DEBUG) {
+            Log.d(LOG_TAG, "Feature " + PackageManager.FEATURE_COMPANION_DEVICE_SETUP
+                    + " not available");
+        }
+        return featurePresent;
+    }
 }

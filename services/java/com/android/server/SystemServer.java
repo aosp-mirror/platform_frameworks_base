@@ -1392,9 +1392,11 @@ public final class SystemServer {
                 traceEnd();
             }
 
-            traceBeginAndSlog("StartCompanionDeviceManager");
-            mSystemServiceManager.startService(COMPANION_DEVICE_MANAGER_SERVICE_CLASS);
-            traceEnd();
+            if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_COMPANION_DEVICE_SETUP)) {
+                traceBeginAndSlog("StartCompanionDeviceManager");
+                mSystemServiceManager.startService(COMPANION_DEVICE_MANAGER_SERVICE_CLASS);
+                traceEnd();
+            }
 
             traceBeginAndSlog("StartRestrictionManager");
             mSystemServiceManager.startService(RestrictionsManagerService.class);

@@ -2236,6 +2236,15 @@ public abstract class PackageManager {
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:
+     * The device supports {@link android.companion.CompanionDeviceManager#associate associating}
+     * with devices via {@link android.companion.CompanionDeviceManager}.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_COMPANION_DEVICE_SETUP
+            = "android.software.companion_device_setup";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:
      * The device can perform backup and restore operations on installed applications.
      */
     @SdkConstant(SdkConstantType.FEATURE)
