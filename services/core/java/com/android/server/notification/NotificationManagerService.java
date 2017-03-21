@@ -3107,7 +3107,8 @@ public class NotificationManagerService extends SystemService {
                         + " - notification=" + notification);
                 return;
             }
-            throw new IllegalArgumentException("No Channel found for notification=" + notification);
+            throw new IllegalArgumentException("No Channel found for channelId=" + channelId
+                    + ", notification=" + notification);
         }
         final StatusBarNotification n = new StatusBarNotification(
                 pkg, opPkg, id, tag, notificationUid, callingPid, notification,
