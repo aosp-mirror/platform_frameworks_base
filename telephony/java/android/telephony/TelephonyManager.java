@@ -918,15 +918,15 @@ public class TelephonyManager {
      * <p>Requires Permission:
      *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
      *
-     * @param slotId of which deviceID is returned
+     * @param slotIndex of which deviceID is returned
      */
     /** {@hide} */
-    public String getDeviceSoftwareVersion(int slotId) {
+    public String getDeviceSoftwareVersion(int slotIndex) {
         ITelephony telephony = getITelephony();
         if (telephony == null) return null;
 
         try {
-            return telephony.getDeviceSoftwareVersionForSlot(slotId, getOpPackageName());
+            return telephony.getDeviceSoftwareVersionForSlot(slotIndex, getOpPackageName());
         } catch (RemoteException ex) {
             return null;
         } catch (NullPointerException ex) {
@@ -961,15 +961,15 @@ public class TelephonyManager {
      * <p>Requires Permission:
      *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
      *
-     * @param slotId of which deviceID is returned
+     * @param slotIndex of which deviceID is returned
      */
-    public String getDeviceId(int slotId) {
-        // FIXME this assumes phoneId == slotId
+    public String getDeviceId(int slotIndex) {
+        // FIXME this assumes phoneId == slotIndex
         try {
             IPhoneSubInfo info = getSubscriberInfo();
             if (info == null)
                 return null;
-            return info.getDeviceIdForPhone(slotId, mContext.getOpPackageName());
+            return info.getDeviceIdForPhone(slotIndex, mContext.getOpPackageName());
         } catch (RemoteException ex) {
             return null;
         } catch (NullPointerException ex) {
@@ -996,17 +996,17 @@ public class TelephonyManager {
      * <p>Requires Permission:
      *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
      *
-     * @param slotId of which deviceID is returned
+     * @param slotIndex of which deviceID is returned
      *
      * @hide
      */
     @SystemApi
-    public String getImei(int slotId) {
+    public String getImei(int slotIndex) {
         ITelephony telephony = getITelephony();
         if (telephony == null) return null;
 
         try {
-            return telephony.getImeiForSlot(slotId, getOpPackageName());
+            return telephony.getImeiForSlot(slotIndex, getOpPackageName());
         } catch (RemoteException ex) {
             return null;
         } catch (NullPointerException ex) {
@@ -1026,11 +1026,11 @@ public class TelephonyManager {
     /**
      * Returns the NAI. Return null if NAI is not available.
      *
-     *  @param slotId of which Nai is returned
+     *  @param slotIndex of which Nai is returned
      */
     /** {@hide}*/
-    public String getNai(int slotId) {
-        int[] subId = SubscriptionManager.getSubId(slotId);
+    public String getNai(int slotIndex) {
+        int[] subId = SubscriptionManager.getSubId(slotIndex);
         try {
             IPhoneSubInfo info = getSubscriberInfo();
             if (info == null)
@@ -1226,23 +1226,23 @@ public class TelephonyManager {
      *
      * @hide
      */
-    public int getCurrentPhoneTypeForSlot(int slotId) {
+    public int getCurrentPhoneTypeForSlot(int slotIndex) {
         try{
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                return telephony.getActivePhoneTypeForSlot(slotId);
+                return telephony.getActivePhoneTypeForSlot(slotIndex);
             } else {
                 // This can happen when the ITelephony interface is not up yet.
-                return getPhoneTypeFromProperty(slotId);
+                return getPhoneTypeFromProperty(slotIndex);
             }
         } catch (RemoteException ex) {
             // This shouldn't happen in the normal case, as a backup we
             // read from the system property.
-            return getPhoneTypeFromProperty(slotId);
+            return getPhoneTypeFromProperty(slotIndex);
         } catch (NullPointerException ex) {
             // This shouldn't happen in the normal case, as a backup we
             // read from the system property.
-            return getPhoneTypeFromProperty(slotId);
+            return getPhoneTypeFromProperty(slotIndex);
         }
     }
 
@@ -1962,17 +1962,17 @@ public class TelephonyManager {
     /**
      * @return true if a ICC card is present for a subscription
      *
-     * @param slotId for which icc card presence is checked
+     * @param slotIndex for which icc card presence is checked
      */
     /** {@hide} */
-    // FIXME Input argument slotId should be of type int
-    public boolean hasIccCard(int slotId) {
+    // FIXME Input argument slotIndex should be of type int
+    public boolean hasIccCard(int slotIndex) {
 
         try {
             ITelephony telephony = getITelephony();
             if (telephony == null)
                 return false;
-            return telephony.hasIccCardUsingSlotId(slotId);
+            return telephony.hasIccCardUsingSlotIndex(slotIndex);
         } catch (RemoteException ex) {
             // Assume no ICC card if remote exception which shouldn't happen
             return false;
@@ -1997,31 +1997,31 @@ public class TelephonyManager {
      * @see #SIM_STATE_CARD_RESTRICTED
      */
     public int getSimState() {
-        int slotIdx = getDefaultSim();
-        // slotIdx may be invalid due to sim being absent. In that case query all slots to get
+        int slotIndex = getDefaultSim();
+        // slotIndex may be invalid due to sim being absent. In that case query all slots to get
         // sim state
-        if (slotIdx < 0) {
+        if (slotIndex < 0) {
             // query for all slots and return absent if all sim states are absent, otherwise
             // return unknown
             for (int i = 0; i < getPhoneCount(); i++) {
                 int simState = getSimState(i);
                 if (simState != SIM_STATE_ABSENT) {
-                    Rlog.d(TAG, "getSimState: default sim:" + slotIdx + ", sim state for " +
-                            "slotIdx=" + i + " is " + simState + ", return state as unknown");
+                    Rlog.d(TAG, "getSimState: default sim:" + slotIndex + ", sim state for " +
+                            "slotIndex=" + i + " is " + simState + ", return state as unknown");
                     return SIM_STATE_UNKNOWN;
                 }
             }
-            Rlog.d(TAG, "getSimState: default sim:" + slotIdx + ", all SIMs absent, return " +
+            Rlog.d(TAG, "getSimState: default sim:" + slotIndex + ", all SIMs absent, return " +
                     "state as absent");
             return SIM_STATE_ABSENT;
         }
-        return getSimState(slotIdx);
+        return getSimState(slotIndex);
     }
 
     /**
      * Returns a constant indicating the state of the device SIM card in a slot.
      *
-     * @param slotIdx
+     * @param slotIndex
      *
      * @see #SIM_STATE_UNKNOWN
      * @see #SIM_STATE_ABSENT
@@ -2034,8 +2034,8 @@ public class TelephonyManager {
      * @see #SIM_STATE_CARD_IO_ERROR
      * @see #SIM_STATE_CARD_RESTRICTED
      */
-    public int getSimState(int slotIdx) {
-        int simState = SubscriptionManager.getSimStateForSlotIdx(slotIdx);
+    public int getSimState(int slotIndex) {
+        int simState = SubscriptionManager.getSimStateForSlotIndex(slotIndex);
         return simState;
     }
 
@@ -3210,12 +3210,12 @@ public class TelephonyManager {
      *
      * @hide
      */
-    public int getCallStateForSlot(int slotId) {
+    public int getCallStateForSlot(int slotIndex) {
         try {
             ITelephony telephony = getITelephony();
             if (telephony == null)
                 return CALL_STATE_IDLE;
-            return telephony.getCallStateForSlot(slotId);
+            return telephony.getCallStateForSlot(slotIndex);
         } catch (RemoteException ex) {
             // the phone process is restarting.
             return CALL_STATE_IDLE;
@@ -4033,7 +4033,7 @@ public class TelephonyManager {
 
     /** {@hide} */
     public int getDefaultSim() {
-        return SubscriptionManager.getSlotId(SubscriptionManager.getDefaultSubscriptionId());
+        return SubscriptionManager.getSlotIndex(SubscriptionManager.getDefaultSubscriptionId());
     }
 
     /**
@@ -4398,7 +4398,7 @@ public class TelephonyManager {
      * feature or {@link null} if the service is not available. If an ImsServiceController is
      * available, the {@link IImsServiceFeatureListener} callback is registered as a listener for
      * feature updates.
-     * @param slotId The SIM slot that we are requesting the {@link IImsServiceController} for.
+     * @param slotIndex The SIM slot that we are requesting the {@link IImsServiceController} for.
      * @param feature The IMS Feature we are requesting, corresponding to {@link ImsFeature}.
      * @param callback Listener that will send updates to ImsManager when there are updates to
      * ImsServiceController.
@@ -4406,12 +4406,12 @@ public class TelephonyManager {
      * it is unavailable.
      * @hide
      */
-    public IImsServiceController getImsServiceControllerAndListen(int slotId, @Feature int feature,
+    public IImsServiceController getImsServiceControllerAndListen(int slotIndex, @Feature int feature,
             IImsServiceFeatureListener callback) {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                return telephony.getImsServiceControllerAndListen(slotId, feature, callback);
+                return telephony.getImsServiceControllerAndListen(slotIndex, feature, callback);
             }
         } catch (RemoteException e) {
             Rlog.e(TAG, "getImsServiceControllerAndListen, RemoteException: " + e.getMessage());
@@ -5641,7 +5641,7 @@ public class TelephonyManager {
     /**
      * Set SIM card power state. Request is equivalent to inserting or removing the card.
      *
-     * @param slotId SIM slot id
+     * @param slotIndex SIM slot id
      * @param powerUp True if powering up the SIM, otherwise powering down
      *
      * <p>Requires Permission:
@@ -5649,11 +5649,11 @@ public class TelephonyManager {
      *
      * @hide
      **/
-    public void setSimPowerStateForSlot(int slotId, boolean powerUp) {
+    public void setSimPowerStateForSlot(int slotIndex, boolean powerUp) {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                telephony.setSimPowerStateForSlot(slotId, powerUp);
+                telephony.setSimPowerStateForSlot(slotIndex, powerUp);
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelephony#setSimPowerStateForSlot", e);
@@ -6237,7 +6237,7 @@ public class TelephonyManager {
     }
 
     /**
-     * Set the allowed carrier list for slotId
+     * Set the allowed carrier list for slotIndex
      * Require system privileges. In the future we may add this to carrier APIs.
      *
      * <p>Requires Permission:
@@ -6251,11 +6251,11 @@ public class TelephonyManager {
      * @hide
      */
     @SystemApi
-    public int setAllowedCarriers(int slotId, List<CarrierIdentifier> carriers) {
+    public int setAllowedCarriers(int slotIndex, List<CarrierIdentifier> carriers) {
         try {
             ITelephony service = getITelephony();
             if (service != null) {
-                return service.setAllowedCarriers(slotId, carriers);
+                return service.setAllowedCarriers(slotIndex, carriers);
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelephony#setAllowedCarriers", e);
@@ -6266,7 +6266,7 @@ public class TelephonyManager {
     }
 
     /**
-     * Get the allowed carrier list for slotId.
+     * Get the allowed carrier list for slotIndex.
      * Require system privileges. In the future we may add this to carrier APIs.
      *
      * <p>Requires Permission:
@@ -6280,11 +6280,11 @@ public class TelephonyManager {
      * @hide
      */
     @SystemApi
-    public List<CarrierIdentifier> getAllowedCarriers(int slotId) {
+    public List<CarrierIdentifier> getAllowedCarriers(int slotIndex) {
         try {
             ITelephony service = getITelephony();
             if (service != null) {
-                return service.getAllowedCarriers(slotId);
+                return service.getAllowedCarriers(slotIndex);
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelephony#getAllowedCarriers", e);
