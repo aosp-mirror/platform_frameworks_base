@@ -41,6 +41,17 @@ public abstract class ViewStructure {
     public abstract void setId(int id, String packageName, String typeName, String entryName);
 
     /**
+     * Sets the name of the identifier for this view.
+     *
+     * <p>Typically used when adding virtual children (through
+     * {@link #asyncNewChild(int, int, int)}) that does not map to Android {@link View}
+     * - otherwise, it's better to call {@link #setId(int, String, String, String)}.
+     *
+     * @param entryName The entry name of the view's identifier, or {@code null} if there is none.
+     */
+    public abstract void setIdEntry(String entryName);
+
+    /**
      * Set the basic dimensions of this view.
      *
      * @param left The view's left position, in pixels relative to its parent's left edge.
