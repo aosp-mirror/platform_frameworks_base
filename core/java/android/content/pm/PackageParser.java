@@ -184,6 +184,10 @@ public class PackageParser {
     private static final String TAG_RESTRICT_UPDATE = "restrict-update";
     private static final String TAG_USES_SPLIT = "uses-split";
 
+    // STOPSHIP remove the ability to expose components via meta-data
+    // Temporary workaround; allow meta-data to expose components to instant apps
+    private static final String META_DATA_INSTANT_APPS = "instantapps.clients.allowed";
+
     /**
      * Bit mask of all the valid bits that can be set in restartOnConfigChanges.
      * @hide
@@ -4197,7 +4201,8 @@ public class PackageParser {
                     ApplicationInfo.PRIVATE_FLAG_PARTIALLY_DIRECT_BOOT_AWARE;
         }
 
-        final boolean visibleToEphemeral =
+        // can't make this final; we may set it later via meta-data
+        boolean visibleToEphemeral =
                 sa.getBoolean(R.styleable.AndroidManifestActivity_visibleToInstantApps, false);
         if (visibleToEphemeral) {
             a.info.flags |= ActivityInfo.FLAG_VISIBLE_TO_EPHEMERAL;
@@ -4283,6 +4288,22 @@ public class PackageParser {
                 if ((a.metaData = parseMetaData(res, parser, a.metaData,
                         outError)) == null) {
                     return null;
+                }
+                // we don't have an attribute [or it's false], but, we have meta-data
+                if (!visibleToEphemeral && a.metaData.getBoolean(META_DATA_INSTANT_APPS)) {
+                    visibleToEphemeral = true; // set in case there are more intent filters
+                    a.info.flags |= ActivityInfo.FLAG_VISIBLE_TO_EPHEMERAL;
+                    owner.visibleToInstantApps = true;
+                    // cycle through any filters already seen
+                    for (int i = a.intents.size() - 1; i >= 0; --i) {
+                        a.intents.get(i).setVisibleToEphemeral(true /*visibleToEmphemeral*/);
+                    }
+                    if (owner.preferredActivityFilters != null) {
+                        for (int i = owner.preferredActivityFilters.size() - 1; i >= 0; --i) {
+                            owner.preferredActivityFilters.get(i)
+                                    .setVisibleToEphemeral(true /*visibleToEmphemeral*/);
+                        }
+                    }
                 }
             } else if (!receiver && parser.getName().equals("layout")) {
                 parseLayout(res, parser, a);
@@ -4733,7 +4754,7 @@ public class PackageParser {
         p.info.authority = cpname.intern();
 
         if (!parseProviderTags(
-                res, parser, visibleToEphemeral, p, outError)) {
+                res, parser, visibleToEphemeral, owner, p, outError)) {
             return null;
         }
 
@@ -4741,7 +4762,7 @@ public class PackageParser {
     }
 
     private boolean parseProviderTags(Resources res, XmlResourceParser parser,
-            boolean visibleToEphemeral, Provider outInfo, String[] outError)
+            boolean visibleToEphemeral, Package owner, Provider outInfo, String[] outError)
                     throws XmlPullParserException, IOException {
         int outerDepth = parser.getDepth();
         int type;
@@ -4769,6 +4790,16 @@ public class PackageParser {
                 if ((outInfo.metaData=parseMetaData(res, parser,
                         outInfo.metaData, outError)) == null) {
                     return false;
+                }
+                // we don't have an attribute [or it's false], but, we have meta-data
+                if (!visibleToEphemeral && outInfo.metaData.getBoolean(META_DATA_INSTANT_APPS)) {
+                    visibleToEphemeral = true; // set in case there are more intent filters
+                    outInfo.info.flags |= ActivityInfo.FLAG_VISIBLE_TO_EPHEMERAL;
+                    owner.visibleToInstantApps = true;
+                    // cycle through any filters already seen
+                    for (int i = outInfo.intents.size() - 1; i >= 0; --i) {
+                        outInfo.intents.get(i).setVisibleToEphemeral(true /*visibleToEmphemeral*/);
+                    }
                 }
 
             } else if (parser.getName().equals("grant-uri-permission")) {
@@ -5020,7 +5051,7 @@ public class PackageParser {
                     ApplicationInfo.PRIVATE_FLAG_PARTIALLY_DIRECT_BOOT_AWARE;
         }
 
-        final boolean visibleToEphemeral =
+        boolean visibleToEphemeral =
                 sa.getBoolean(R.styleable.AndroidManifestService_visibleToInstantApps, false);
         if (visibleToEphemeral) {
             s.info.flags |= ServiceInfo.FLAG_VISIBLE_TO_EPHEMERAL;
@@ -5064,6 +5095,16 @@ public class PackageParser {
                 if ((s.metaData=parseMetaData(res, parser, s.metaData,
                         outError)) == null) {
                     return null;
+                }
+                // we don't have an attribute [or it's false], but, we have meta-data
+                if (!visibleToEphemeral && s.metaData.getBoolean(META_DATA_INSTANT_APPS)) {
+                    visibleToEphemeral = true; // set in case there are more intent filters
+                    s.info.flags |= ActivityInfo.FLAG_VISIBLE_TO_EPHEMERAL;
+                    owner.visibleToInstantApps = true;
+                    // cycle through any filters already seen
+                    for (int i = s.intents.size() - 1; i >= 0; --i) {
+                        s.intents.get(i).setVisibleToEphemeral(true /*visibleToEmphemeral*/);
+                    }
                 }
             } else {
                 if (!RIGID_PARSER) {
