@@ -7010,6 +7010,30 @@
              the title should be sufficient in describing this item. -->
         <attr name="icon" />
 
+        <!-- Tint to apply to the icon. -->
+        <attr name="iconTint" format="color" />
+
+        <!-- Blending mode used to apply the icon tint. -->
+        <attr name="iconTintMode">
+            <!-- The tint is drawn on top of the icon.
+                 [Sa + (1 - Sa)*Da, Rc = Sc + (1 - Sa)*Dc] -->
+            <enum name="src_over" value="3" />
+            <!-- The tint is masked by the alpha channel of the icon. The icon’s
+                 color channels are thrown out. [Sa * Da, Sc * Da] -->
+            <enum name="src_in" value="5" />
+            <!-- The tint is drawn above the icon, but with the icon’s alpha
+                 channel masking the result. [Da, Sc * Da + (1 - Sa) * Dc] -->
+            <enum name="src_atop" value="9" />
+            <!-- Multiplies the color and alpha channels of the icon with those of
+                 the tint. [Sa * Da, Sc * Dc] -->
+            <enum name="multiply" value="14" />
+            <!-- [Sa + Da - Sa * Da, Sc + Dc - Sc * Dc] -->
+            <enum name="screen" value="15" />
+            <!-- Combines the tint and icon color and alpha channels, clamping the
+                 result to valid color values. Saturate(S + D) -->
+            <enum name="add" value="16" />
+        </attr>
+
         <!-- The alphabetic shortcut key.  This is the shortcut when using a keyboard
              with alphabetic keys. -->
         <attr name="alphabeticShortcut" format="string" />

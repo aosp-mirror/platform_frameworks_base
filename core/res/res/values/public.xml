@@ -2810,6 +2810,8 @@
         <public name="isFeatureSplit" />
         <public name="singleLineTitle" />
         <public name="fontProviderCerts" />
+        <public name="iconTint" />
+        <public name="iconTintMode" />
     </public-group>
 
     <public-group type="style" first-id="0x010302e0">

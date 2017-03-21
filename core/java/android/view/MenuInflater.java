@@ -20,8 +20,11 @@ import android.annotation.MenuRes;
 import android.app.Activity;
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Xml;
@@ -304,6 +307,8 @@ public class MenuInflater {
         private CharSequence itemTitle;
         private CharSequence itemTitleCondensed;
         private int itemIconResId;
+        private ColorStateList itemIconTintList = null;
+        private PorterDuff.Mode itemIconTintMode = null;
         private char itemAlphabeticShortcut;
         private int itemAlphabeticModifiers;
         private char itemNumericShortcut;
@@ -395,6 +400,22 @@ public class MenuInflater {
             itemTitle = a.getText(com.android.internal.R.styleable.MenuItem_title);
             itemTitleCondensed = a.getText(com.android.internal.R.styleable.MenuItem_titleCondensed);
             itemIconResId = a.getResourceId(com.android.internal.R.styleable.MenuItem_icon, 0);
+            if (a.hasValue(com.android.internal.R.styleable.MenuItem_iconTintMode)) {
+                itemIconTintMode = Drawable.parseTintMode(a.getInt(
+                        com.android.internal.R.styleable.MenuItem_iconTintMode, -1),
+                        itemIconTintMode);
+            } else {
+                // Reset to null so that it's not carried over to the next item
+                itemIconTintMode = null;
+            }
+            if (a.hasValue(com.android.internal.R.styleable.MenuItem_iconTint)) {
+                itemIconTintList = a.getColorStateList(
+                        com.android.internal.R.styleable.MenuItem_iconTint);
+            } else {
+                // Reset to null so that it's not carried over to the next item
+                itemIconTintList = null;
+            }
+
             itemAlphabeticShortcut =
                     getShortcut(a.getString(com.android.internal.R.styleable.MenuItem_alphabeticShortcut));
             itemAlphabeticModifiers =
@@ -464,6 +485,14 @@ public class MenuInflater {
 
             if (itemShowAsAction >= 0) {
                 item.setShowAsAction(itemShowAsAction);
+            }
+
+            if (itemIconTintMode != null) {
+                item.setIconTintMode(itemIconTintMode);
+            }
+
+            if (itemIconTintList != null) {
+                item.setIconTintList(itemIconTintList);
             }
 
             if (itemListenerMethodName != null) {
