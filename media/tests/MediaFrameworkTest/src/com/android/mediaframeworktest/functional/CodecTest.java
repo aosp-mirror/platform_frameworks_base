@@ -25,6 +25,9 @@ import com.android.mediaframeworktest.MediaNames;
 import android.content.res.AssetFileDescriptor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.MediaCodecList;
+import android.media.MediaExtractor;
+import android.media.MediaFormat;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
@@ -805,6 +808,29 @@ public class CodecTest {
         mFailedToCompleteWithNoError = true;
         String testResult;
 
+        final MediaCodecList list = new MediaCodecList(MediaCodecList.REGULAR_CODECS);
+        final MediaExtractor extractor = new MediaExtractor();
+        boolean hasSupportedVideo = false;
+
+        try {
+            extractor.setDataSource(filePath);
+
+            for (int index = 0; index < extractor.getTrackCount(); ++index) {
+                MediaFormat format = extractor.getTrackFormat(index);
+                String mime = format.getString(MediaFormat.KEY_MIME);
+                if (!mime.startsWith("video/")) {
+                    continue;
+                }
+
+                if (list.findDecoderForFormat(format) != null) {
+                    hasSupportedVideo = true;
+                    break;
+                }
+            }
+        } finally {
+            extractor.release();
+        }
+
         initializeMessageLooper();
         synchronized (lock) {
             try {
@@ -820,7 +846,12 @@ public class CodecTest {
             mMediaPlayer.setOnInfoListener(mInfoListener);
             Log.v(TAG, "playMediaSamples: sample file name " + filePath);
             mMediaPlayer.setDataSource(filePath);
-            mMediaPlayer.setDisplay(MediaFrameworkTest.mSurfaceView.getHolder());
+            if (hasSupportedVideo) {
+                mMediaPlayer.setDisplay(MediaFrameworkTest.mSurfaceView.getHolder());
+            } else {
+                Log.i(TAG, "Set no display due to no (supported) video track.");
+                mMediaPlayer.setDisplay(null);
+            }
             mMediaPlayer.prepare();
             duration = mMediaPlayer.getDuration();
             // start to play
