@@ -479,6 +479,8 @@ public class SurfaceView extends View {
                             "SurfaceView - " + viewRoot.getTitle().toString(),
                             mSurfaceWidth, mSurfaceHeight, mFormat,
                             mSurfaceFlags);
+                } else if (mSurfaceControl == null) {
+                    return;
                 }
 
                 boolean realSizeChanged = false;
@@ -625,7 +627,7 @@ public class SurfaceView extends View {
                     }
                 }
             } catch (Exception ex) {
-                Log.e(TAG, "Exception from relayout", ex);
+                Log.e(TAG, "Exception configuring surface", ex);
             }
             if (DEBUG) Log.v(
                 TAG, "Layout: x=" + mScreenRect.left + " y=" + mScreenRect.top
@@ -662,7 +664,7 @@ public class SurfaceView extends View {
                                 mScreenRect.right, mScreenRect.bottom));
                         setParentSpaceRectangle(mScreenRect, -1);
                     } catch (Exception ex) {
-                        Log.e(TAG, "Exception from relayout", ex);
+                        Log.e(TAG, "Exception configuring surface", ex);
                     }
                 }
             }
@@ -762,7 +764,7 @@ public class SurfaceView extends View {
                             mScreenRect.right, mScreenRect.bottom));
                     setParentSpaceRectangle(mScreenRect, frameNumber);
                 } catch (Exception ex) {
-                    Log.e(TAG, "Exception from relayout", ex);
+                    Log.e(TAG, "Exception configuring surface", ex);
                 }
             }
             mRTLastReportedPosition.setEmpty();
