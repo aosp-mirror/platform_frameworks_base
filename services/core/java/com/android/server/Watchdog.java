@@ -26,6 +26,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.hidl.manager.V1_0.IServiceManager;
 import android.os.Debug;
 import android.os.Handler;
 import android.os.IPowerManager;
@@ -42,6 +43,9 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
 
 /** This class calls its monitor every minute. Killing this process if they don't return **/
 public class Watchdog extends Thread {
@@ -74,6 +78,14 @@ public class Watchdog extends Thread {
         "media.extractor", // system/bin/mediaextractor
         "com.android.bluetooth",  // Bluetooth service
     };
+
+    public static final List<String> HAL_INTERFACES_OF_INTEREST = Arrays.asList(
+        "android.hardware.audio@2.0::IDevicesFactory",
+        "android.hardware.bluetooth@1.0::IBluetoothHci",
+        "android.hardware.camera.provider@2.4::ICameraProvider",
+        "android.hardware.vr@1.0::IVr",
+        "android.hardware.media.omx@1.0::IOmx"
+    );
 
     static Watchdog sWatchdog;
 
@@ -344,6 +356,43 @@ public class Watchdog extends Thread {
         return builder.toString();
     }
 
+    private ArrayList<Integer> getInterestingHalPids() {
+        try {
+            IServiceManager serviceManager = IServiceManager.getService();
+            ArrayList<IServiceManager.InstanceDebugInfo> dump =
+                    serviceManager.debugDump();
+            HashSet<Integer> pids = new HashSet<>();
+            for (IServiceManager.InstanceDebugInfo info : dump) {
+                if (info.pid == IServiceManager.PidConstant.NO_PID) {
+                    continue;
+                }
+
+                if (!HAL_INTERFACES_OF_INTEREST.contains(info.interfaceName)) {
+                    continue;
+                }
+
+                pids.add(info.pid);
+            }
+            return new ArrayList<Integer>(pids);
+        } catch (RemoteException e) {
+            return new ArrayList<Integer>();
+        }
+    }
+
+    private ArrayList<Integer> getInterestingNativePids() {
+        ArrayList<Integer> pids = getInterestingHalPids();
+
+        int[] nativePids = Process.getPidsForCommands(NATIVE_STACKS_OF_INTEREST);
+        if (nativePids != null) {
+            pids.ensureCapacity(pids.size() + nativePids.length);
+            for (int i : nativePids) {
+                pids.add(i);
+            }
+        }
+
+        return pids;
+    }
+
     @Override
     public void run() {
         boolean waitedHalf = false;
@@ -400,7 +449,7 @@ public class Watchdog extends Thread {
                         ArrayList<Integer> pids = new ArrayList<Integer>();
                         pids.add(Process.myPid());
                         ActivityManagerService.dumpStackTraces(true, pids, null, null,
-                                NATIVE_STACKS_OF_INTEREST);
+                            getInterestingNativePids());
                         waitedHalf = true;
                     }
                     continue;
@@ -417,13 +466,13 @@ public class Watchdog extends Thread {
             // Then kill this process so that the system will restart.
             EventLog.writeEvent(EventLogTags.WATCHDOG, subject);
 
-            ArrayList<Integer> pids = new ArrayList<Integer>();
+            ArrayList<Integer> pids = new ArrayList<>();
             pids.add(Process.myPid());
             if (mPhonePid > 0) pids.add(mPhonePid);
             // Pass !waitedHalf so that just in case we somehow wind up here without having
             // dumped the halfway stacks, we properly re-initialize the trace file.
             final File stack = ActivityManagerService.dumpStackTraces(
-                    !waitedHalf, pids, null, null, NATIVE_STACKS_OF_INTEREST);
+                    !waitedHalf, pids, null, null, getInterestingNativePids());
 
             // Give some extra time to make sure the stack traces get written.
             // The system's been hanging for a minute, another second or two won't hurt much.
