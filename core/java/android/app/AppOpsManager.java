@@ -245,8 +245,8 @@ public class AppOpsManager {
     public static final int OP_READ_PHONE_NUMBER = 65;
     /** @hide Request package installs through package installer */
     public static final int OP_REQUEST_INSTALL_PACKAGES = 66;
-    /** @hide Enter picture-in-picture when hidden. */
-    public static final int OP_ENTER_PICTURE_IN_PICTURE_ON_HIDE = 67;
+    /** @hide Enter picture-in-picture. */
+    public static final int OP_PICTURE_IN_PICTURE = 67;
     /** @hide Instant app start foreground service. */
     public static final int OP_INSTANT_APP_START_FOREGROUND = 68;
     /** @hide Answer incoming phone calls */
@@ -355,6 +355,9 @@ public class AppOpsManager {
             = "android:get_accounts";
     public static final String OPSTR_READ_PHONE_NUMBER
             = "android:read_phone_number";
+    /** Access to picture-in-picture. */
+    public static final String OPSTR_PICTURE_IN_PICTURE
+            = "android:picture_in_picture";
     /** @hide */
     public static final String OPSTR_INSTANT_APP_START_FOREGROUND
             = "android:instant_app_start_foreground";
@@ -486,7 +489,7 @@ public class AppOpsManager {
             OP_AUDIO_ACCESSIBILITY_VOLUME,
             OP_READ_PHONE_NUMBER,
             OP_REQUEST_INSTALL_PACKAGES,
-            OP_ENTER_PICTURE_IN_PICTURE_ON_HIDE,
+            OP_PICTURE_IN_PICTURE,
             OP_INSTANT_APP_START_FOREGROUND,
             OP_ANSWER_PHONE_CALLS
     };
@@ -563,7 +566,7 @@ public class AppOpsManager {
             null, // OP_AUDIO_ACCESSIBILITY_VOLUME
             OPSTR_READ_PHONE_NUMBER,
             null, // OP_REQUEST_INSTALL_PACKAGES
-            null,
+            OPSTR_PICTURE_IN_PICTURE,
             OPSTR_INSTANT_APP_START_FOREGROUND,
             OPSTR_ANSWER_PHONE_CALLS,
     };
@@ -640,7 +643,7 @@ public class AppOpsManager {
             "AUDIO_ACCESSIBILITY_VOLUME",
             "READ_PHONE_NUMBER",
             "REQUEST_INSTALL_PACKAGES",
-            "OP_ENTER_PICTURE_IN_PICTURE_ON_HIDE",
+            "PICTURE_IN_PICTURE",
             "INSTANT_APP_START_FOREGROUND",
             "ANSWER_PHONE_CALLS",
     };
@@ -948,7 +951,7 @@ public class AppOpsManager {
             AppOpsManager.MODE_ALLOWED,  // OP_AUDIO_ACCESSIBILITY_VOLUME
             AppOpsManager.MODE_ALLOWED,
             AppOpsManager.MODE_DEFAULT,  // OP_REQUEST_INSTALL_PACKAGES
-            AppOpsManager.MODE_ALLOWED,  // OP_ENTER_PICTURE_IN_PICTURE_ON_HIDE
+            AppOpsManager.MODE_ALLOWED,  // OP_PICTURE_IN_PICTURE
             AppOpsManager.MODE_DEFAULT,  // OP_INSTANT_APP_START_FOREGROUND
             AppOpsManager.MODE_ALLOWED, // ANSWER_PHONE_CALLS
     };
@@ -1028,7 +1031,7 @@ public class AppOpsManager {
             false, // OP_AUDIO_ACCESSIBILITY_VOLUME
             false,
             false, // OP_REQUEST_INSTALL_PACKAGES
-            false, // OP_ENTER_PICTURE_IN_PICTURE_ON_HIDE
+            false, // OP_PICTURE_IN_PICTURE
             false,
             false, // ANSWER_PHONE_CALLS
     };

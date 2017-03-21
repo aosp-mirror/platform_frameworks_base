@@ -26,7 +26,7 @@ import static android.app.ActivityManager.StackId.HOME_STACK_ID;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.app.AppOpsManager.MODE_ALLOWED;
-import static android.app.AppOpsManager.OP_ENTER_PICTURE_IN_PICTURE_ON_HIDE;
+import static android.app.AppOpsManager.OP_PICTURE_IN_PICTURE;
 import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
 import static android.content.pm.ActivityInfo.CONFIG_ORIENTATION;
 import static android.content.pm.ActivityInfo.CONFIG_SCREEN_LAYOUT;
@@ -1005,6 +1005,11 @@ final class ActivityRecord implements AppWindowContainerListener {
      *         the activity is not currently visible and {@param noThrow} is not set.
      */
     boolean checkEnterPictureInPictureState(String caller, boolean noThrow) {
+        // Check app-ops and see if PiP is supported for this package
+        if (!checkEnterPictureInPictureAppOpsState()) {
+            return false;
+        }
+
         boolean isCurrentAppLocked = mStackSupervisor.getLockTaskModeState() != LOCK_TASK_MODE_NONE;
         boolean isKeyguardLocked = service.isKeyguardLocked();
         boolean hasPinnedStack = mStackSupervisor.getStack(PINNED_STACK_ID) != null;
@@ -1022,15 +1027,13 @@ final class ActivityRecord implements AppWindowContainerListener {
                 // require that there is not an existing PiP activity and that the current system
                 // state supports entering PiP
                 return isNotLockedOrOnKeyguard && !hasPinnedStack
-                        && supportsPictureInPictureWhilePausing
-                        && checkEnterPictureInPictureOnHideAppOpsState();
+                        && supportsPictureInPictureWhilePausing;
             case STOPPING:
                 // When stopping in a valid state, then only allow enter PiP as in the pause state.
                 // Otherwise, fall through to throw an exception if the caller is trying to enter
                 // PiP in an invalid stopping state.
                 if (supportsPictureInPictureWhilePausing) {
-                    return isNotLockedOrOnKeyguard && !hasPinnedStack
-                            && checkEnterPictureInPictureOnHideAppOpsState();
+                    return isNotLockedOrOnKeyguard && !hasPinnedStack;
                 }
             default:
                 if (noThrow) {
@@ -1044,11 +1047,11 @@ final class ActivityRecord implements AppWindowContainerListener {
     }
 
     /**
-     * @return Whether AppOps allows this package to enter picture-in-picture when it is hidden.
+     * @return Whether AppOps allows this package to enter picture-in-picture.
      */
-    private boolean checkEnterPictureInPictureOnHideAppOpsState() {
+    private boolean checkEnterPictureInPictureAppOpsState() {
         try {
-            return service.getAppOpsService().checkOperation(OP_ENTER_PICTURE_IN_PICTURE_ON_HIDE,
+            return service.getAppOpsService().checkOperation(OP_PICTURE_IN_PICTURE,
                     appInfo.uid, packageName) == MODE_ALLOWED;
         } catch (RemoteException e) {
             // Local call
