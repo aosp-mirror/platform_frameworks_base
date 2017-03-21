@@ -20,4 +20,6 @@
         <item>10</item>
         <item>11</item>
     </integer-array>
+    <public type="animator" name="unoverlaid" id="0x7fff0000" />
+    <item type="animator" name="unoverlaid">@null</item>
 </resources>
