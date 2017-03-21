@@ -18646,7 +18646,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     public void getPackageSizeInfo(final String packageName, int userHandle,
             final IPackageStatsObserver observer) {
         throw new UnsupportedOperationException(
-                "Shame on you for calling a hidden API. Shame!");
+                "Shame on you for calling the hidden API getPackageSizeInfo(). Shame!");
     }
 
     private boolean getPackageSizeInfoLI(String packageName, int userId, PackageStats stats) {
