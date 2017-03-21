@@ -157,7 +157,9 @@ public final class BluetoothLeAdvertiser {
 
     AdvertisingSetCallback wrapOldCallback(AdvertiseCallback callback, AdvertiseSettings settings) {
         return new AdvertisingSetCallback() {
-            public void onAdvertisingSetStarted(AdvertisingSet advertisingSet, int status) {
+            @Override
+            public void onAdvertisingSetStarted(AdvertisingSet advertisingSet, int txPower,
+                        int status) {
                 if (status != AdvertisingSetCallback.ADVERTISE_SUCCESS) {
                     postStartFailure(callback, status);
                     return;
@@ -167,7 +169,9 @@ public final class BluetoothLeAdvertiser {
             }
 
             /* Legacy advertiser is disabled on timeout */
-            public void onAdvertisingEnabled(int advertiserId, boolean enabled, int status) {
+            @Override
+            public void onAdvertisingEnabled(AdvertisingSet advertisingSet, boolean enabled,
+                        int status) {
                 if (enabled == true) {
                     Log.e(TAG, "Legacy advertiser should be only disabled on timeout," +
                         " but was enabled!");
@@ -400,6 +404,7 @@ public final class BluetoothLeAdvertiser {
 
     IAdvertisingSetCallback wrap(AdvertisingSetCallback callback, Handler handler) {
         return new IAdvertisingSetCallback.Stub() {
+            @Override
             public void onAdvertisingSetStarted(int advertiserId, int txPower, int status) {
                 handler.post(new Runnable() {
                     @Override
@@ -418,6 +423,7 @@ public final class BluetoothLeAdvertiser {
                 });
             }
 
+            @Override
             public void onAdvertisingSetStopped(int advertiserId) {
                 handler.post(new Runnable() {
                     @Override
@@ -430,6 +436,7 @@ public final class BluetoothLeAdvertiser {
                 });
             }
 
+            @Override
             public void onAdvertisingEnabled(int advertiserId, boolean enabled, int status) {
                 handler.post(new Runnable() {
                     @Override
@@ -440,6 +447,7 @@ public final class BluetoothLeAdvertiser {
                 });
             }
 
+            @Override
             public void onAdvertisingDataSet(int advertiserId, int status) {
                 handler.post(new Runnable() {
                     @Override
@@ -450,6 +458,7 @@ public final class BluetoothLeAdvertiser {
                 });
             }
 
+            @Override
             public void onScanResponseDataSet(int advertiserId, int status) {
                 handler.post(new Runnable() {
                     @Override
@@ -460,6 +469,7 @@ public final class BluetoothLeAdvertiser {
                 });
             }
 
+            @Override
             public void onAdvertisingParametersUpdated(int advertiserId, int txPower, int status) {
                 handler.post(new Runnable() {
                     @Override
@@ -470,6 +480,7 @@ public final class BluetoothLeAdvertiser {
                 });
             }
 
+            @Override
             public void onPeriodicAdvertisingParametersUpdated(int advertiserId, int status) {
                 handler.post(new Runnable() {
                     @Override
@@ -480,6 +491,7 @@ public final class BluetoothLeAdvertiser {
                 });
             }
 
+            @Override
             public void onPeriodicAdvertisingDataSet(int advertiserId, int status) {
                 handler.post(new Runnable() {
                     @Override
@@ -490,6 +502,7 @@ public final class BluetoothLeAdvertiser {
                 });
             }
 
+            @Override
             public void onPeriodicAdvertisingEnable(int advertiserId, boolean enable, int status) {
                 handler.post(new Runnable() {
                     @Override
