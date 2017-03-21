@@ -245,9 +245,12 @@ public final class AssetManager implements AutoCloseable {
      *
      * @param resId the resource id of the string array
      */
-    final CharSequence[] getResourceTextArray(@ArrayRes int resId) {
+    final @Nullable CharSequence[] getResourceTextArray(@ArrayRes int resId) {
         synchronized (this) {
             final int[] rawInfoArray = getArrayStringInfo(resId);
+            if (rawInfoArray == null) {
+                return null;
+            }
             final int rawInfoArrayLen = rawInfoArray.length;
             final int infoArrayLen = rawInfoArrayLen / 2;
             int block;

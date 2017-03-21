@@ -5033,7 +5033,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
                             try {
                                 rawHints = a.getTextArray(attr);
-                            } catch (NullPointerException e) {
+                            } catch (Resources.NotFoundException e) {
                                 rawString = getResources().getString(resId);
                             }
                         } else {
