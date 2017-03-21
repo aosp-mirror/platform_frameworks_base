@@ -92,6 +92,13 @@ public class BootReceiver extends BroadcastReceiver {
     // ro.boottime.init.mount_all. + postfix for mount_all duration
     private static final String[] MOUNT_DURATION_PROPS_POSTFIX =
             new String[] { "early", "default", "late" };
+    // for reboot, fs shutdown time is recorded in last_kmsg.
+    private static final String[] LAST_KMSG_FILES =
+            new String[] { "/sys/fs/pstore/console-ramoops", "/proc/last_kmsg" };
+    // first: fs shutdown time in ms, second: umount status defined in init/reboot.h
+    private static final String LAST_SHUTDOWN_TIME_PATTERN =
+            "powerctl_shutdown_time_ms:([0-9]+):([0-9]+)";
+    private static final int UMOUNT_STATUS_NOT_AVAILABLE = 4; // should match with init/reboot.h
 
     @Override
     public void onReceive(final Context context, Intent intent) {
@@ -213,8 +220,11 @@ public class BootReceiver extends BroadcastReceiver {
         } else {
             if (db != null) db.addText("SYSTEM_RESTART", headers);
         }
-        addFsckErrorsToDropBoxAndLogFsStat(db, timestamps, headers, -LOG_SIZE, "SYSTEM_FSCK");
+        // log always available fs_stat last so that logcat collecting tools can wait until
+        // fs_stat to get all file system metrics.
+        logFsShutdownTime();
         logFsMountTime();
+        addFsckErrorsToDropBoxAndLogFsStat(db, timestamps, headers, -LOG_SIZE, "SYSTEM_FSCK");
 
         // Scan existing tombstones (in case any new ones appeared)
         File[] tombstoneFiles = TOMBSTONE_DIR.listFiles();
@@ -323,7 +333,6 @@ public class BootReceiver extends BroadcastReceiver {
         if (fileTime <= 0) return;  // File does not exist
 
         String log = FileUtils.readTextFile(file, maxSize, "[[TRUNCATED]]\n");
-        StringBuilder sb = new StringBuilder();
         Pattern pattern = Pattern.compile(FS_STAT_PATTERN);
         for (String line : log.split("\n")) { // should check all lines
             if (line.contains("FILE SYSTEM WAS MODIFIED")) {
@@ -352,6 +361,45 @@ public class BootReceiver extends BroadcastReceiver {
             if (duration != 0) {
                 MetricsLogger.histogram(null, "boot_mount_all_duration_" + propPostfix, duration);
             }
+        }
+    }
+
+    private static void logFsShutdownTime() {
+        File f = null;
+        for (String fileName : LAST_KMSG_FILES) {
+            File file = new File(fileName);
+            if (!file.exists()) continue;
+            f = file;
+            break;
+        }
+        if (f == null) { // no last_kmsg
+            return;
+        }
+
+        final int maxReadSize = 16*1024;
+        // last_kmsg can be very big, so only parse the last part
+        String lines;
+        try {
+            lines = FileUtils.readTextFile(f, -maxReadSize, null);
+        } catch (IOException e) {
+            Slog.w(TAG, "cannot read last msg", e);
+            return;
+        }
+        Pattern pattern = Pattern.compile(LAST_SHUTDOWN_TIME_PATTERN, Pattern.MULTILINE);
+        Matcher matcher = pattern.matcher(lines);
+        if (matcher.find()) {
+            MetricsLogger.histogram(null, "boot_fs_shutdown_duration",
+                    Integer.parseInt(matcher.group(1)));
+            MetricsLogger.histogram(null, "boot_fs_shutdown_umount_stat",
+                    Integer.parseInt(matcher.group(2)));
+            Slog.i(TAG, "boot_fs_shutdown," + matcher.group(1) + "," + matcher.group(2));
+        } else { // not found
+            // This can happen when a device has too much kernel log after file system unmount
+            // ,exceeding maxReadSize. And having that much kernel logging can affect overall
+            // performance as well. So it is better to fix the kernel to reduce the amount of log.
+            MetricsLogger.histogram(null, "boot_fs_shutdown_umount_stat",
+                    UMOUNT_STATUS_NOT_AVAILABLE);
+            Slog.w(TAG, "boot_fs_shutdown, string not found");
         }
     }
 
