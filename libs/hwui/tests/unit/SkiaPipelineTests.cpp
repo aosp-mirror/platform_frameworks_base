@@ -206,10 +206,10 @@ public:
         return new T();
     }
     sk_sp<SkSurface> onNewSurface(const SkImageInfo&) override {
-        return sk_sp<SkSurface>();
+        return nullptr;
     }
-    sk_sp<SkImage> onNewImageSnapshot(SkBudgeted) override {
-        return sk_sp<SkImage>();
+    sk_sp<SkImage> onNewImageSnapshot() override {
+        return nullptr;
     }
     T* canvas() { return static_cast<T*>(getCanvas()); }
     void onCopyOnWrite(ContentChangeMode) override {}
