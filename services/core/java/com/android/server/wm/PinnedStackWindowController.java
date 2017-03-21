@@ -82,19 +82,17 @@ public class PinnedStackWindowController extends StackWindowController {
                 return;
             }
 
-            final int displayId = mContainer.getDisplayContent().getDisplayId();
-            final Rect toBounds = mService.getPictureInPictureBounds(displayId, aspectRatio);
-            final Rect targetBounds = new Rect();
-            mContainer.getAnimatingBounds(targetBounds);
-            if (!toBounds.equals(targetBounds)) {
-                animateResizePinnedStack(toBounds, -1 /* duration */);
-            }
-
             final PinnedStackController pinnedStackController =
                     mContainer.getDisplayContent().getPinnedStackController();
-            pinnedStackController.setAspectRatio(
-                    pinnedStackController.isValidPictureInPictureAspectRatio(aspectRatio)
-                            ? aspectRatio : -1f);
+
+            if (Float.compare(aspectRatio, pinnedStackController.getAspectRatio()) != 0) {
+                final int displayId = mContainer.getDisplayContent().getDisplayId();
+                final Rect toBounds = mService.getPictureInPictureBounds(displayId, aspectRatio);
+                animateResizePinnedStack(toBounds, -1 /* duration */);
+                pinnedStackController.setAspectRatio(
+                        pinnedStackController.isValidPictureInPictureAspectRatio(aspectRatio)
+                                ? aspectRatio : -1f);
+            }
         }
     }
 

@@ -299,6 +299,13 @@ class PinnedStackController {
     }
 
     /**
+     * @return the current aspect ratio.
+     */
+    float getAspectRatio() {
+        return mAspectRatio;
+    }
+
+    /**
      * Sets the current set of actions.
      */
     void setActions(List<RemoteAction> actions) {
