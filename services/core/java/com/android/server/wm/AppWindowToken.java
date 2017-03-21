@@ -55,6 +55,7 @@ import android.os.IBinder;
 import android.os.SystemClock;
 import android.util.Slog;
 import android.view.IApplicationToken;
+import android.view.SurfaceControl;
 import android.view.WindowManager;
 import android.view.WindowManagerPolicy.StartingSurface;
 
@@ -364,6 +365,13 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                 // We need to inform the client the enter animation was finished.
                 mEnteringAnimation = true;
                 mService.mActivityManagerAppTransitionNotifier.onAppTransitionFinishedLocked(token);
+            }
+            if (hidden && !delayed) {
+                SurfaceControl.openTransaction();
+                for (int i = mChildren.size() - 1; i >= 0; i--) {
+                    mChildren.get(i).mWinAnimator.hide("immediately hidden");
+                }
+                SurfaceControl.closeTransaction();
             }
 
             if (!mService.mClosingApps.contains(this) && !mService.mOpeningApps.contains(this)) {
@@ -965,19 +973,6 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             win.onUnfreezeBounds();
         }
         mService.mWindowPlacerLocked.performSurfacePlacement();
-    }
-
-    void resetJustMovedInStack() {
-        for (int i = mChildren.size() - 1; i >= 0; i--) {
-            (mChildren.get(i)).resetJustMovedInStack();
-        }
-    }
-
-    void notifyMovedInStack() {
-        for (int winNdx = mChildren.size() - 1; winNdx >= 0; --winNdx) {
-            final WindowState win = mChildren.get(winNdx);
-            win.notifyMovedInStack();
-        }
     }
 
     void setAppLayoutChanges(int changes, String reason) {

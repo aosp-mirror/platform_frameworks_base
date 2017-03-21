@@ -517,11 +517,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     final private Rect mTmpRect = new Rect();
 
     /**
-     * See {@link #notifyMovedInStack}.
-     */
-    private boolean mJustMovedInStack;
-
-    /**
      * Whether the window was resized by us while it was gone for layout.
      */
     boolean mResizedWhileGone = false;
@@ -1995,49 +1990,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (dimLayerUser != null && dc.mDimLayerController.isDimming(dimLayerUser, mWinAnimator)) {
             // Force an animation pass just to update the mDimLayer layer.
             mService.scheduleAnimationLocked();
-        }
-    }
-
-    /**
-     * Notifies this window that the corresponding task has just moved in the stack.
-     * <p>
-     * This is used to fix the following: If we moved in the stack, and if the last clip rect was
-     * empty, meaning that our task was completely offscreen, we need to keep it invisible because
-     * the actual app transition that updates the visibility is delayed by a few transactions.
-     * Instead of messing around with the ordering and timing how transitions and transactions are
-     * executed, we introduce this little hack which prevents this window of getting visible again
-     * with the wrong bounds until the app transitions has started.
-     * <p>
-     * This method notifies the window about that we just moved in the stack so we can apply this
-     * logic in {@link WindowStateAnimator#updateSurfaceWindowCrop}
-     */
-    void notifyMovedInStack() {
-        mJustMovedInStack = true;
-
-        for (int i = mChildren.size() - 1; i >= 0; --i) {
-            final WindowState c = mChildren.get(i);
-            c.notifyMovedInStack();
-        }
-    }
-
-    /**
-     * See {@link #notifyMovedInStack}.
-     *
-     * @return Whether we just got moved in the corresponding stack.
-     */
-    boolean hasJustMovedInStack() {
-        return mJustMovedInStack;
-    }
-
-    /**
-     * Resets that we just moved in the corresponding stack. See {@link #notifyMovedInStack}.
-     */
-    void resetJustMovedInStack() {
-        mJustMovedInStack = false;
-
-        for (int i = mChildren.size() - 1; i >= 0; i--) {
-            final WindowState c = mChildren.get(i);
-            c.resetJustMovedInStack();
         }
     }
 

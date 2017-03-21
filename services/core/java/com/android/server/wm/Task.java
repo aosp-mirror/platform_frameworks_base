@@ -208,10 +208,6 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
     void positionAt(int position, Rect bounds, Configuration overrideConfig) {
         mStack.positionChildAt(position, this, false /* includingParents */);
         resizeLocked(bounds, overrideConfig, false /* force */);
-
-        for (int activityNdx = mChildren.size() - 1; activityNdx >= 0; --activityNdx) {
-            mChildren.get(activityNdx).notifyMovedInStack();
-        }
     }
 
     @Override

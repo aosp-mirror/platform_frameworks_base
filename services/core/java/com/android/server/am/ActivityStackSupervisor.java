@@ -2287,7 +2287,18 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         mResizingTasksDuringAnimation.clear();
     }
 
-    void moveTasksToFullscreenStackLocked(int fromStackId, boolean onTop) {
+    private class MoveTaskToFullscreenArgs {
+        public int fromStackId;
+        public boolean onTop;
+    };
+    // Used only to closure over the arguments to moveTasksToFullscreenStack without
+    // allocation
+    private MoveTaskToFullscreenArgs mMoveToFullscreenArgs = new MoveTaskToFullscreenArgs();
+
+    private void moveTasksToFullscreenStackInnerLocked() {
+        int fromStackId = mMoveToFullscreenArgs.fromStackId;
+        boolean onTop = mMoveToFullscreenArgs.onTop;
+
         final ActivityStack stack = getStack(fromStackId);
         if (stack == null) {
             return;
@@ -2357,6 +2368,13 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             mAllowDockedStackResize = true;
             mWindowManager.continueSurfaceLayout();
         }
+    }
+
+    void moveTasksToFullscreenStackLocked(int fromStackId, boolean onTop) {
+        mMoveToFullscreenArgs.fromStackId = fromStackId;
+        mMoveToFullscreenArgs.onTop = onTop;
+
+        mWindowManager.inSurfaceTransaction(this::moveTasksToFullscreenStackInnerLocked);
     }
 
     void resizeDockedStackLocked(Rect dockedBounds, Rect tempDockedTaskBounds,
@@ -2471,12 +2489,12 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         return activityContainer.mStack;
     }
 
-    /**
-     * Removes the stack associated with the given {@param stackId}.  If the {@param stackId} is the
-     * pinned stack, then its tasks are not explicitly removed when the stack is destroyed, but
-     * instead moved back onto the fullscreen stack.
-     */
-    void removeStackLocked(int stackId) {
+
+    // Used only to closure over the argument to removeStack without allocation.
+    private int mRemoveStackStackId;
+    void removeStackInnerLocked() {
+        int stackId = mRemoveStackStackId;
+
         final ActivityStack stack = getStack(stackId);
         if (stack == null) {
             return;
@@ -2512,6 +2530,16 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                         REMOVE_FROM_RECENTS);
             }
         }
+    }
+
+    /**
+     * Removes the stack associated with the given {@param stackId}.  If the {@param stackId} is the
+     * pinned stack, then its tasks are not explicitly removed when the stack is destroyed, but
+     * instead moved back onto the fullscreen stack.
+     */
+    void removeStackLocked(int stackId) {
+        mRemoveStackStackId = stackId;
+        mWindowManager.inSurfaceTransaction(this::removeStackInnerLocked);
     }
 
     /**
