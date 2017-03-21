@@ -667,7 +667,7 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
     @Override
     public boolean setActiveScorer(String packageName) {
         // Only the system can set the active scorer
-        if (!isCallerSystemProcess(getCallingUid()) || !callerCanRequestScores()) {
+        if (!isCallerSystemProcess(getCallingUid()) && !callerCanRequestScores()) {
             throw new SecurityException(
                     "Caller is neither the system process nor a score requester.");
         }
@@ -736,7 +736,7 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
     @Override
     public List<NetworkScorerAppData> getAllValidScorers() {
         // Only the system can access this data.
-        if (!isCallerSystemProcess(getCallingUid()) || !callerCanRequestScores()) {
+        if (!isCallerSystemProcess(getCallingUid()) && !callerCanRequestScores()) {
             throw new SecurityException(
                     "Caller is neither the system process nor a score requester.");
         }
@@ -747,7 +747,7 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
     @Override
     public void disableScoring() {
         // Only the active scorer or the system should be allowed to disable scoring.
-        if (!isCallerActiveScorer(getCallingUid()) || !callerCanRequestScores()) {
+        if (!isCallerActiveScorer(getCallingUid()) && !callerCanRequestScores()) {
             throw new SecurityException(
                     "Caller is neither the active scorer nor the scorer manager.");
         }
