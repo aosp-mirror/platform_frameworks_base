@@ -16,6 +16,17 @@
 
 package com.android.server.connectivity;
 
+import static android.net.NetworkCapabilities.MAX_TRANSPORT;
+import static android.net.NetworkCapabilities.TRANSPORT_BLUETOOTH;
+import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
+import static android.net.NetworkCapabilities.TRANSPORT_ETHERNET;
+import static android.net.NetworkCapabilities.TRANSPORT_VPN;
+import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
+import static android.net.NetworkCapabilities.TRANSPORT_WIFI_AWARE;
+import static com.android.server.connectivity.metrics.nano.IpConnectivityLogClass.IpConnectivityEvent;
+import static com.android.server.connectivity.metrics.nano.IpConnectivityLogClass.IpConnectivityLog;
+import static com.android.server.connectivity.metrics.nano.IpConnectivityLogClass.NetworkId;
+
 import android.net.ConnectivityMetricsEvent;
 import android.net.metrics.ApfProgramEvent;
 import android.net.metrics.ApfStats;
@@ -29,14 +40,12 @@ import android.net.metrics.NetworkEvent;
 import android.net.metrics.RaEvent;
 import android.net.metrics.ValidationProbeEvent;
 import android.os.Parcelable;
+import android.util.SparseArray;
 import com.android.server.connectivity.metrics.nano.IpConnectivityLogClass;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.android.server.connectivity.metrics.nano.IpConnectivityLogClass.IpConnectivityEvent;
-import static com.android.server.connectivity.metrics.nano.IpConnectivityLogClass.IpConnectivityLog;
-import static com.android.server.connectivity.metrics.nano.IpConnectivityLogClass.NetworkId;
 
 /** {@hide} */
 final public class IpConnectivityEventBuilder {
@@ -73,6 +82,12 @@ final public class IpConnectivityEventBuilder {
             return null;
         }
         out.timeMs = ev.timestamp;
+        out.networkId = ev.netId;
+        out.transports = ev.transports;
+        if (ev.ifname != null) {
+          out.ifName = ev.ifname;
+        }
+        inferLinkLayer(out);
         return out;
     }
 
@@ -137,14 +152,12 @@ final public class IpConnectivityEventBuilder {
 
     private static void setDhcpErrorEvent(IpConnectivityEvent out, DhcpErrorEvent in) {
         IpConnectivityLogClass.DHCPEvent dhcpEvent = new IpConnectivityLogClass.DHCPEvent();
-        dhcpEvent.ifName = in.ifName;
         dhcpEvent.setErrorCode(in.errorCode);
         out.setDhcpEvent(dhcpEvent);
     }
 
     private static void setDhcpClientEvent(IpConnectivityEvent out, DhcpClientEvent in) {
         IpConnectivityLogClass.DHCPEvent dhcpEvent = new IpConnectivityLogClass.DHCPEvent();
-        dhcpEvent.ifName = in.ifName;
         dhcpEvent.setStateTransition(in.msg);
         dhcpEvent.durationMs = in.durationMs;
         out.setDhcpEvent(dhcpEvent);
@@ -163,7 +176,6 @@ final public class IpConnectivityEventBuilder {
     private static void setIpManagerEvent(IpConnectivityEvent out, IpManagerEvent in) {
         IpConnectivityLogClass.IpProvisioningEvent ipProvisioningEvent =
                 new IpConnectivityLogClass.IpProvisioningEvent();
-        ipProvisioningEvent.ifName = in.ifName;
         ipProvisioningEvent.eventType = in.eventType;
         ipProvisioningEvent.latencyMs = (int) in.durationMs;
         out.setIpProvisioningEvent(ipProvisioningEvent);
@@ -172,7 +184,6 @@ final public class IpConnectivityEventBuilder {
     private static void setIpReachabilityEvent(IpConnectivityEvent out, IpReachabilityEvent in) {
         IpConnectivityLogClass.IpReachabilityEvent ipReachabilityEvent =
                 new IpConnectivityLogClass.IpReachabilityEvent();
-        ipReachabilityEvent.ifName = in.ifName;
         ipReachabilityEvent.eventType = in.eventType;
         out.setIpReachabilityEvent(ipReachabilityEvent);
     }
@@ -279,5 +290,71 @@ final public class IpConnectivityEventBuilder {
 
     private static boolean isBitSet(int flags, int bit) {
         return (flags & (1 << bit)) != 0;
+    }
+
+    private static void inferLinkLayer(IpConnectivityEvent ev) {
+        int linkLayer = IpConnectivityLogClass.UNKNOWN;
+        if (ev.transports != 0) {
+            linkLayer = transportsToLinkLayer(ev.transports);
+        } else if (ev.ifName != null) {
+            linkLayer = ifnameToLinkLayer(ev.ifName);
+        }
+        if (linkLayer == IpConnectivityLogClass.UNKNOWN) {
+            return;
+        }
+        ev.linkLayer = linkLayer;
+        ev.ifName = "";
+    }
+
+    private static int transportsToLinkLayer(long transports) {
+        switch (Long.bitCount(transports)) {
+            case 0:
+                return IpConnectivityLogClass.UNKNOWN;
+            case 1:
+                int t = Long.numberOfTrailingZeros(transports);
+                return transportToLinkLayer(t);
+            default:
+                return IpConnectivityLogClass.MULTIPLE;
+        }
+    }
+
+    private static int transportToLinkLayer(int transport) {
+        if (0 <= transport && transport < TRANSPORT_LINKLAYER_MAP.length) {
+            return TRANSPORT_LINKLAYER_MAP[transport];
+        }
+        return IpConnectivityLogClass.UNKNOWN;
+    }
+
+    private static final int[] TRANSPORT_LINKLAYER_MAP = new int[MAX_TRANSPORT + 1];
+    static {
+        TRANSPORT_LINKLAYER_MAP[TRANSPORT_CELLULAR]   = IpConnectivityLogClass.CELLULAR;
+        TRANSPORT_LINKLAYER_MAP[TRANSPORT_WIFI]       = IpConnectivityLogClass.WIFI;
+        TRANSPORT_LINKLAYER_MAP[TRANSPORT_BLUETOOTH]  = IpConnectivityLogClass.BLUETOOTH;
+        TRANSPORT_LINKLAYER_MAP[TRANSPORT_ETHERNET]   = IpConnectivityLogClass.ETHERNET;
+        TRANSPORT_LINKLAYER_MAP[TRANSPORT_VPN]        = IpConnectivityLogClass.UNKNOWN;
+        // TODO: change mapping TRANSPORT_WIFI_AWARE -> WIFI_AWARE
+        TRANSPORT_LINKLAYER_MAP[TRANSPORT_WIFI_AWARE] = IpConnectivityLogClass.UNKNOWN;
+    };
+
+    private static int ifnameToLinkLayer(String ifname) {
+        // Do not try to catch all interface names with regexes, instead only catch patterns that
+        // are cheap to check, and otherwise fallback on postprocessing in aggregation layer.
+        for (int i = 0; i < IFNAME_LINKLAYER_MAP.size(); i++) {
+            String pattern = IFNAME_LINKLAYER_MAP.valueAt(i);
+            if (ifname.startsWith(pattern)) {
+                return IFNAME_LINKLAYER_MAP.keyAt(i);
+            }
+        }
+        return IpConnectivityLogClass.UNKNOWN;
+    }
+
+    private static final SparseArray<String> IFNAME_LINKLAYER_MAP = new SparseArray<String>();
+    static {
+        IFNAME_LINKLAYER_MAP.put(IpConnectivityLogClass.CELLULAR, "rmnet");
+        IFNAME_LINKLAYER_MAP.put(IpConnectivityLogClass.WIFI, "wlan");
+        IFNAME_LINKLAYER_MAP.put(IpConnectivityLogClass.BLUETOOTH, "bt-pan");
+        // TODO: rekey to USB
+        IFNAME_LINKLAYER_MAP.put(IpConnectivityLogClass.ETHERNET, "usb");
+        // TODO: add mappings for nan -> WIFI_AWARE and p2p -> WIFI_P2P
     }
 }

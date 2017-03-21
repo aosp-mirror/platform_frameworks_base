@@ -720,7 +720,7 @@ public class IpManager extends StateMachine {
     private void recordMetric(final int type) {
         if (mStartTimeMillis <= 0) { Log.wtf(mTag, "Start time undefined!"); }
         final long duration = SystemClock.elapsedRealtime() - mStartTimeMillis;
-        mMetricsLog.log(new IpManagerEvent(mInterfaceName, type, duration));
+        mMetricsLog.log(mInterfaceName, new IpManagerEvent(type, duration));
     }
 
     // For now: use WifiStateMachine's historical notion of provisioned.

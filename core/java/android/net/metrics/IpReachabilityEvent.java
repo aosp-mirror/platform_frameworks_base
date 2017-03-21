@@ -41,7 +41,6 @@ public final class IpReachabilityEvent implements Parcelable {
     /** Neighbor unreachable notification from kernel, IP provisioning is also lost. */
     public static final int PROVISIONING_LOST_ORGANIC = 5 << 8;
 
-    public final String ifName;
     // eventType byte format (MSB to LSB):
     // byte 0: unused
     // byte 1: unused
@@ -49,19 +48,16 @@ public final class IpReachabilityEvent implements Parcelable {
     // byte 3: when byte 2 == PROBE, errno code from RTNetlink or IpReachabilityMonitor.
     public final int eventType;
 
-    public IpReachabilityEvent(String ifName, int eventType) {
-        this.ifName = ifName;
+    public IpReachabilityEvent(int eventType) {
         this.eventType = eventType;
     }
 
     private IpReachabilityEvent(Parcel in) {
-        this.ifName = in.readString();
         this.eventType = in.readInt();
     }
 
     @Override
     public void writeToParcel(Parcel out, int flags) {
-        out.writeString(ifName);
         out.writeInt(eventType);
     }
 
@@ -97,7 +93,7 @@ public final class IpReachabilityEvent implements Parcelable {
         int hi = eventType & 0xff00;
         int lo = eventType & 0x00ff;
         String eventName = Decoder.constants.get(hi);
-        return String.format("IpReachabilityEvent(%s, %s:%02x)", ifName, eventName, lo);
+        return String.format("IpReachabilityEvent(%s:%02x)", eventName, lo);
     }
 
     final static class Decoder {

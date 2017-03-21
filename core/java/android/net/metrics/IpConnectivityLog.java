@@ -99,6 +99,18 @@ public class IpConnectivityLog {
 
     /**
      * Log an IpConnectivity event.
+     * @param ifname the network interface associated with the event.
+     * @param data is a Parcelable instance representing the event.
+     * @return true if the event was successfully logged.
+     */
+    public boolean log(String ifname, Parcelable data) {
+        ConnectivityMetricsEvent ev = makeEv(data);
+        ev.ifname = ifname;
+        return log(ev);
+    }
+
+    /**
+     * Log an IpConnectivity event.
      * @param data is a Parcelable instance representing the event.
      * @return true if the event was successfully logged.
      */
