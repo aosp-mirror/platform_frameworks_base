@@ -478,6 +478,17 @@ public final class NetworkCapabilities implements Parcelable {
     }
 
     /**
+     * Gets all the transports set on this {@code NetworkCapability} instance.
+     *
+     * @return a bit field composed of up bits at indexes defined by
+     * {@code NetworkCapabilities.TRANSPORT_*} values for this instance.
+     * @hide
+     */
+    public long getTransports() {
+        return mTransportTypes;
+    }
+
+    /**
      * Tests for the presence of a transport on this instance.
      *
      * @param transportType the {@code NetworkCapabilities.TRANSPORT_*} to be tested for.
