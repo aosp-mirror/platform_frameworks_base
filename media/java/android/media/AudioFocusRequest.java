@@ -18,6 +18,7 @@ package android.media;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.media.AudioManager.OnAudioFocusChangeListener;
 import android.os.Handler;
 import android.os.Looper;
@@ -48,7 +49,6 @@ public final class AudioFocusRequest {
     private final int mFocusGain;
     private final int mFlags;
 
-    //TODO implement use of optional handler
     private AudioFocusRequest(OnAudioFocusChangeListener listener, Handler handler,
             AudioAttributes attr, int focusGain, int flags) {
         mFocusListener = listener;
@@ -77,6 +77,7 @@ public final class AudioFocusRequest {
     }
 
     /**
+     * @hide
      * Returns the focus change listener set for this {@code AudioFocusRequest}.
      * @return null if no {@link AudioManager.OnAudioFocusChangeListener} was set.
      */
@@ -85,6 +86,7 @@ public final class AudioFocusRequest {
     }
 
     /**
+     * @hide
      * Returns the {@link Handler} to be used for the focus change listener.
      * @return the same {@code Handler} set in.
      *   {@link Builder#setOnAudioFocusChangeListener(OnAudioFocusChangeListener, Handler)}, or null
@@ -134,6 +136,18 @@ public final class AudioFocusRequest {
                 == AudioManager.AUDIOFOCUS_FLAG_DELAY_OK;
     }
 
+    /**
+     * @hide
+     * Returns whether audio focus will be locked (i.e. focus cannot change) as a result of this
+     * focus request being successful.
+     * @return whether this request will lock focus.
+     */
+    @SystemApi
+    public boolean locksFocus() {
+        return (mFlags & AudioManager.AUDIOFOCUS_FLAG_LOCK)
+                == AudioManager.AUDIOFOCUS_FLAG_LOCK;
+    }
+
     int getFlags() {
         return mFlags;
     }
@@ -158,9 +172,16 @@ public final class AudioFocusRequest {
      *  ...
      * mMediaPlayer.setAudioAttributes(mPlaybackAttributes);
      *  ...
-     * mAudioManager.requestAudioFocus(mFocusRequest);
-     *  ...
-     * mAudioManager.abandonAudioFocusRequest(mFocusRequest);
+     * boolean mPlaybackAuthorized = true;;
+     * int res = mAudioManager.requestAudioFocus(mFocusRequest);
+     * if (res == AUDIOFOCUS_REQUEST_FAILED) {
+     *     mPlaybackAuthorized = false;
+     *     cancelPlayback();
+     * } else if (res == AUDIOFOCUS_REQUEST_DELAYED) {
+     *     playbackDelayed();
+     * } else { // res == AUDIOFOCUS_REQUEST_GRANTED
+     *     playbackNow();
+     * }
      * </pre>
      *
      */
@@ -171,6 +192,7 @@ public final class AudioFocusRequest {
         private int mFocusGain;
         private boolean mPausesOnDuck = false;
         private boolean mDelayedFocus = false;
+        private boolean mFocusLocked = false;
 
         /**
          * Constructs a new {@code Builder}, and specifies how audio focus
@@ -178,7 +200,8 @@ public final class AudioFocusRequest {
          * {@link AudioManager#AUDIOFOCUS_GAIN}, {@link AudioManager#AUDIOFOCUS_GAIN_TRANSIENT},
          * {@link AudioManager#AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK}, and
          * {@link AudioManager#AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE}.
-         * <p>By default there is no focus change listener, and the <code>AudioAttributes</code>
+         * <p>By default there is no focus change listener, delayed focus is not supported, ducking
+         * is suitable for the application, and the <code>AudioAttributes</code>
          * have a usage of {@link AudioAttributes#USAGE_MEDIA}.
          * @param focusGain the type of audio focus gain that will be requested
          * @throws IllegalArgumentException thrown when an invalid focus gain type is used
@@ -258,11 +281,11 @@ public final class AudioFocusRequest {
          * in {@code AudioTrack}.
          * @param attributes the {@link AudioAttributes} for the focus request.
          * @return this {@code Builder} instance.
-         * @throws IllegalArgumentException thrown when using null for the attributes.
+         * @throws NullPointerException thrown when using null for the attributes.
          */
         public @NonNull Builder setAudioAttributes(@NonNull AudioAttributes attributes) {
             if (attributes == null) {
-                throw new IllegalArgumentException("Illegal null AudioAttributes");
+                throw new NullPointerException("Illegal null AudioAttributes");
             }
             mAttr = attributes;
             return this;
@@ -299,6 +322,22 @@ public final class AudioFocusRequest {
         }
 
         /**
+         * @hide
+         * Marks this focus request as locking audio focus so granting is temporarily disabled.
+         * This feature can only be used by owners of a registered
+         * {@link android.media.audiopolicy.AudioPolicy} in
+         * {@link AudioManager#requestAudioFocus(AudioFocusRequest, android.media.audiopolicy.AudioPolicy)}.
+         * Setting to false is the same as the default behavior.
+         * @param focusLocked true when locking focus
+         * @return this {@code Builder} instance
+         */
+        @SystemApi
+        public @NonNull Builder setLocksFocus(boolean focusLocked) {
+            mFocusLocked = focusLocked;
+            return this;
+        }
+
+        /**
          * Builds a new {@code AudioFocusRequest} instance combining all the information gathered
          * by this {@code Builder}'s configuration methods.
          * @return the {@code AudioFocusRequest} instance qualified by all the properties set
@@ -313,7 +352,8 @@ public final class AudioFocusRequest {
             }
             final int flags = 0
                     | (mDelayedFocus ? AudioManager.AUDIOFOCUS_FLAG_DELAY_OK : 0)
-                    | (mPausesOnDuck ? AudioManager.AUDIOFOCUS_FLAG_PAUSES_ON_DUCKABLE_LOSS : 0);
+                    | (mPausesOnDuck ? AudioManager.AUDIOFOCUS_FLAG_PAUSES_ON_DUCKABLE_LOSS : 0)
+                    | (mFocusLocked  ? AudioManager.AUDIOFOCUS_FLAG_LOCK : 0);
             return new AudioFocusRequest(mFocusListener, mListenerHandler,
                     mAttr, mFocusGain, flags);
         }
