@@ -19,6 +19,7 @@ import static com.android.internal.util.Preconditions.checkArgument;
 
 import android.annotation.Nullable;
 import android.content.ContentResolver;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.MathUtils;
@@ -33,22 +34,24 @@ import com.android.internal.util.ArrayUtils;
  *
  * @hide
  */
-public final class PageViewCursor extends CrossProcessCursorWrapper {
+public final class PageViewCursor extends CursorWrapper implements CrossProcessCursor {
 
     /**
-     * An extra added to results that are auto-paged using the wrapper.
+     * An in internal extra added to results that are auto-paged using the wrapper.
      */
     public static final String EXTRA_AUTO_PAGED = "android.content.extra.AUTO_PAGED";
 
     private static final String TAG = "PageViewCursor";
-    private static final boolean DEBUG = false;
-    private static final boolean VERBOSE = false;
+    private static final boolean DEBUG = Build.IS_DEBUGGABLE;
+    private static final boolean VERBOSE = Build.IS_DEBUGGABLE && Log.isLoggable(TAG, Log.VERBOSE);
 
     private final int mOffset;  // aka first index
     private final int mCount;
     private final Bundle mExtras;
 
+    private @Nullable CursorWindow mWindow;
     private int mPos = -1;
+    private int mWindowFillCount = 0;
 
     /**
      * @see PageViewCursor#wrap(Cursor, Bundle)
@@ -195,6 +198,33 @@ public final class PageViewCursor extends CrossProcessCursorWrapper {
         return mCount;
     }
 
+    @Override
+    public boolean getWantsAllOnMoveCalls() {
+        return false;  // we want bulk cursor adapter to lift data into a CursorWindow.
+    }
+
+    @Override
+    public CursorWindow getWindow() {
+        assert(mPos == -1 || mPos == 0);
+        if (mWindow == null) {
+           mWindow = new CursorWindow("PageViewCursorWindow");
+           fillWindow(0, mWindow);
+        }
+
+        return mWindow;
+    }
+
+    @Override
+    public void fillWindow(int position, CursorWindow window) {
+        assert(window == mWindow);
+
+        if (mWindowFillCount++ > 0) {
+            Log.w(TAG, "Re-filling window on paged cursor! Reduce ContentResolver.QUERY_ARG_LIMIT");
+        }
+
+        DatabaseUtils.cursorFillWindow(this, position, window);
+    }
+
     /**
      * Wraps the cursor such that it will honor paging args (if present), AND if the cursor
      * does not report paging size.
@@ -209,12 +239,19 @@ public final class PageViewCursor extends CrossProcessCursorWrapper {
                 || queryArgs.containsKey(ContentResolver.QUERY_ARG_LIMIT));
 
         if (!hasPagingArgs) {
-            if (VERBOSE) Log.d(TAG, "No-wrap: No paging args in request.");
+            if (VERBOSE) Log.v(TAG, "No-wrap: No paging args in request.");
             return cursor;
         }
 
         if (hasPagedResponseDetails(cursor.getExtras())) {
-            if (VERBOSE) Log.d(TAG, "No-wrap. Cursor has paging details.");
+            if (VERBOSE) Log.v(TAG, "No-wrap. Cursor has paging details.");
+            return cursor;
+        }
+
+        // Cursors that want all calls aren't compatible with our way
+        // of doing business. TODO: Cover this case in CTS.
+        if (cursor.getWantsAllOnMoveCalls()) {
+            Log.w(TAG, "Unable to wrap cursor that wants to hear about move calls.");
             return cursor;
         }
 
