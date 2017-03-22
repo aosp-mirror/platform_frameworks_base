@@ -76,15 +76,21 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
 
     private static final String BLUETOOTH_ADMIN_PERM = android.Manifest.permission.BLUETOOTH_ADMIN;
     private static final String BLUETOOTH_PERM = android.Manifest.permission.BLUETOOTH;
-    private static final String ACTION_SERVICE_STATE_CHANGED="com.android.bluetooth.btservice.action.STATE_CHANGED";
-    private static final String EXTRA_ACTION="action";
+
     private static final String SECURE_SETTINGS_BLUETOOTH_ADDR_VALID="bluetooth_addr_valid";
     private static final String SECURE_SETTINGS_BLUETOOTH_ADDRESS="bluetooth_address";
     private static final String SECURE_SETTINGS_BLUETOOTH_NAME="bluetooth_name";
+
+    private static final int ACTIVE_LOG_MAX_SIZE = 20;
+    private static final int CRASH_LOG_MAX_SIZE = 100;
     private static final String REASON_AIRPLANE_MODE = "airplane mode";
+    private static final String REASON_RESTARTED = "automatic restart";
+    private static final String REASON_START_CRASH = "turn-on crash";
     private static final String REASON_SYSTEM_BOOT = "system boot";
+    private static final String REASON_UNEXPECTED = "unexpected crash";
+    private static final String REASON_USER_SWITCH = "user switch";
+
     private static final int TIMEOUT_BIND_MS = 3000; //Maximum msec to wait for a bind
-    private static final int TIMEOUT_SAVE_MS = 500; //Maximum msec to wait for a save
     //Maximum msec to wait for service restart
     private static final int SERVICE_RESTART_TIME_MS = 200;
     //Maximum msec to wait for restart due to error
@@ -149,6 +155,10 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
     private boolean mQuietEnable = false;
     private boolean mEnable;
 
+    private CharSequence timeToLog(long timestamp) {
+        return android.text.format.DateFormat.format("MM-dd HH:mm:ss", timestamp);
+    }
+
     /**
      * Used for tracking apps that enabled / disabled Bluetooth.
      */
@@ -168,13 +178,15 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
         }
 
         public String toString() {
-            return android.text.format.DateFormat.format("MM-dd HH:mm:ss ", mTimestamp) +
-                    (mEnable ? "  Enabled " : " Disabled ") + " by " + mPackageName;
+            return  timeToLog(mTimestamp) + (mEnable ? "  Enabled " : " Disabled ") + " by "
+                + mPackageName;
         }
 
     }
 
     private LinkedList<ActiveLog> mActiveLogs;
+    private LinkedList<Long> mCrashTimestamps;
+    private int mCrashes;
 
     // configuration from external IBinder call which is used to
     // synchronize with broadcast receiver.
@@ -308,6 +320,8 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                 com.android.internal.R.bool.config_permissionReviewRequired);
 
         mActiveLogs = new LinkedList<ActiveLog>();
+        mCrashTimestamps = new LinkedList<Long>();
+        mCrashes = 0;
         mBluetooth = null;
         mBluetoothBinder = null;
         mBluetoothGatt = null;
@@ -1565,6 +1579,9 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                         mBluetoothLock.writeLock().unlock();
                     }
 
+                    // log the unexpected crash
+                    addCrashLog();
+                    addActiveLog(REASON_UNEXPECTED, false);
                     if (mEnable) {
                         mEnable = false;
                         // Send a Bluetooth Restart message
@@ -1600,6 +1617,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                      it doesnt change when IBluetooth
                      service restarts */
                     mEnable = true;
+                    addActiveLog(REASON_RESTARTED, true);
                     handleEnable(mQuietEnable);
                     break;
                 }
@@ -1654,6 +1672,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
 
                         unbindAllBluetoothProfileServices();
                         // disable
+                        addActiveLog(REASON_USER_SWITCH, false);
                         handleDisable();
                         // Pbap service need receive STATE_TURNING_OFF intent to close
                         bluetoothStateChangeHandler(BluetoothAdapter.STATE_ON,
@@ -1691,6 +1710,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                         mHandler.removeMessages(MESSAGE_BLUETOOTH_STATE_CHANGE);
                         mState = BluetoothAdapter.STATE_OFF;
                         // enable
+                        addActiveLog(REASON_USER_SWITCH, true);
                         handleEnable(mQuietEnable);
                     } else if (mBinding || mBluetooth != null) {
                         Message userMsg = mHandler.obtainMessage(MESSAGE_USER_SWITCHED);
@@ -1945,11 +1965,19 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
 
     private void addActiveLog(String packageName, boolean enable) {
         synchronized (mActiveLogs) {
-            if (mActiveLogs.size() > 10) {
+            if (mActiveLogs.size() > ACTIVE_LOG_MAX_SIZE) {
                 mActiveLogs.remove();
             }
             mActiveLogs.add(new ActiveLog(packageName, enable, System.currentTimeMillis()));
         }
+    }
+
+    private void addCrashLog() {
+      synchronized (mCrashTimestamps) {
+        if (mCrashTimestamps.size() == CRASH_LOG_MAX_SIZE) mCrashTimestamps.removeFirst();
+        mCrashTimestamps.add(System.currentTimeMillis());
+        mCrashes++;
+      }
     }
 
     private void recoverBluetoothServiceFromError(boolean clearBle) {
@@ -1969,6 +1997,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
         SystemClock.sleep(500);
 
         // disable
+        addActiveLog(REASON_START_CRASH, false);
         handleDisable();
 
         waitForOnOff(false, true);
@@ -2068,6 +2097,12 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                 for (ActiveLog log : mActiveLogs) {
                     writer.println("  " + log);
                 }
+            }
+
+            writer.println("Bluetooth crashed " + mCrashes + " time" + (mCrashes == 1 ? "" : "s"));
+            if (mCrashes == CRASH_LOG_MAX_SIZE) writer.println("(last " + CRASH_LOG_MAX_SIZE + ")");
+            for (Long time : mCrashTimestamps) {
+              writer.println("  " + timeToLog(time.longValue()));
             }
 
             String bleAppString = "No BLE Apps registered.";
