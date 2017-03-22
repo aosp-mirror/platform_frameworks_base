@@ -920,7 +920,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
 
     /**
      * Category for apps which are primarily social apps, such as messaging,
-     * communication, or social network apps.
+     * communication, email, or social network apps.
      *
      * @see #category
      */
