@@ -4891,7 +4891,6 @@ public class AccountManagerService
 
     private void installNotification(int notificationId, final Notification notification,
             String packageName, int userId) {
-        SystemNotificationChannels.createAccountChannelForPackage(packageName, mContext);
         final long token = clearCallingIdentity();
         try {
             INotificationManager notificationManager = mInjector.getNotificationManager();
@@ -5678,6 +5677,7 @@ public class AccountManagerService
             synchronized (mUsers) {
                 userAccounts = mUsers.get(userId);
             }
+            SystemNotificationChannels.createAccountChannelForPackage(packageName, mContext);
             doNotification(userAccounts, account, null, intent, packageName, userId);
         }
 
