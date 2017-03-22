@@ -54,6 +54,7 @@ import static android.provider.Settings.Global.DEBUG_APP;
 import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT;
 import static android.provider.Settings.Global.DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES;
 import static android.provider.Settings.Global.DEVELOPMENT_FORCE_RTL;
+import static android.provider.Settings.Global.NETWORK_ACCESS_TIMEOUT_MS;
 import static android.provider.Settings.Global.WAIT_FOR_DEBUGGER;
 import static android.provider.Settings.System.FONT_SCALE;
 import static android.service.voice.VoiceInteractionSession.SHOW_SOURCE_APPLICATION;
@@ -359,6 +360,7 @@ import com.android.server.DeviceIdleController;
 import com.android.server.IntentResolver;
 import com.android.server.LocalServices;
 import com.android.server.LockGuard;
+import com.android.server.NetworkManagementInternal;
 import com.android.server.RescueParty;
 import com.android.server.ServiceThread;
 import com.android.server.SystemConfig;
@@ -574,9 +576,9 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final boolean TAKE_FULLSCREEN_SCREENSHOTS = true;
 
     /**
-     * Indicates the maximum time spent waiting for the network rules to get updated.
+     * Default value for {@link Settings.Global#NETWORK_ACCESS_TIMEOUT_MS}.
      */
-    private static final long WAIT_FOR_NETWORK_TIMEOUT_MS = 2000; // 2 sec
+    private static final long NETWORK_ACCESS_TIMEOUT_DEFAULT_MS = 0; // 0 sec
 
     /**
      * State indicating that there is no need for any blocking for network.
@@ -750,6 +752,12 @@ public class ActivityManagerService extends IActivityManager.Stub
     final UserController mUserController;
 
     final AppErrors mAppErrors;
+
+    /**
+     * Indicates the maximum time spent waiting for the network rules to get updated.
+     */
+    @VisibleForTesting
+    long mWaitForNetworkTimeoutMs;
 
     public boolean canShowErrorDialogs() {
         return mShowDialogs && !mSleeping && !mShuttingDown
@@ -13737,6 +13745,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         final boolean forceRtl = Settings.Global.getInt(resolver, DEVELOPMENT_FORCE_RTL, 0) != 0;
         final boolean forceResizable = Settings.Global.getInt(
                 resolver, DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES, 0) != 0;
+        final long waitForNetworkTimeoutMs = Settings.Global.getLong(resolver,
+                NETWORK_ACCESS_TIMEOUT_MS, NETWORK_ACCESS_TIMEOUT_DEFAULT_MS);
         final boolean supportsLeanbackOnly =
                 mContext.getPackageManager().hasSystemFeature(FEATURE_LEANBACK_ONLY);
 
@@ -13792,6 +13802,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 mFullscreenThumbnailScale = res.getFraction(
                     com.android.internal.R.fraction.thumbnail_fullscreen_scale, 1, 1);
             }
+            mWaitForNetworkTimeoutMs = waitForNetworkTimeoutMs;
         }
     }
 
@@ -22456,6 +22467,9 @@ public class ActivityManagerService extends IActivityManager.Stub
     @VisibleForTesting
     @GuardedBy("this")
     void incrementProcStateSeqAndNotifyAppsLocked() {
+        if (mWaitForNetworkTimeoutMs <= 0) {
+            return;
+        }
         // Used for identifying which uids need to block for network.
         ArrayList<Integer> blockingUids = null;
         for (int i = mActiveUids.size() - 1; i >= 0; --i) {
@@ -23498,10 +23512,14 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
                 final long startTime = SystemClock.uptimeMillis();
                 record.waitingForNetwork = true;
-                record.lock.wait(WAIT_FOR_NETWORK_TIMEOUT_MS);
+                record.lock.wait(mWaitForNetworkTimeoutMs);
                 record.waitingForNetwork = false;
                 final long totalTime = SystemClock.uptimeMillis() - startTime;
-                if (DEBUG_NETWORK ||  totalTime > WAIT_FOR_NETWORK_TIMEOUT_MS / 2) {
+                if (totalTime >= mWaitForNetworkTimeoutMs) {
+                    Slog.wtf(TAG_NETWORK, "Total time waited for network rules to get updated: "
+                            + totalTime + ". Uid: " + callingUid + " procStateSeq: "
+                            + procStateSeq);
+                } else if (DEBUG_NETWORK ||  totalTime >= mWaitForNetworkTimeoutMs / 2) {
                     Slog.d(TAG_NETWORK, "Total time waited for network rules to get updated: "
                             + totalTime + ". Uid: " + callingUid + " procStateSeq: "
                             + procStateSeq);
@@ -23796,6 +23814,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @VisibleForTesting
     public static class Injector {
+        private NetworkManagementInternal mNmi;
+
         public AppOpsService getAppOpsService(File file, Handler handler) {
             return new AppOpsService(file, handler);
         }
@@ -23805,8 +23825,17 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         public boolean isNetworkRestrictedForUid(int uid) {
-            // TODO: add implementation
+            if (ensureHasNetworkManagementInternal()) {
+                return mNmi.isNetworkRestrictedForUid(uid);
+            }
             return false;
+        }
+
+        private boolean ensureHasNetworkManagementInternal() {
+            if (mNmi == null) {
+                mNmi = LocalServices.getService(NetworkManagementInternal.class);
+            }
+            return mNmi != null;
         }
     }
 }

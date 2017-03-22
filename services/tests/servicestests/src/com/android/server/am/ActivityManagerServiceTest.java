@@ -132,6 +132,7 @@ public class ActivityManagerServiceTest {
         mHandler = new TestHandler(mHandlerThread.getLooper());
         mInjector = new TestInjector();
         mAms = new ActivityManagerService(mInjector);
+        mAms.mWaitForNetworkTimeoutMs = 100;
     }
 
     @After
@@ -213,6 +214,17 @@ public class ActivityManagerServiceTest {
         verifySeqCounterAndInteractions(uidRec,
                 PROCESS_STATE_IMPORTANT_BACKGROUND, // prevState
                 PROCESS_STATE_TOP, // curState
+                44, // expectedGlobalCounter
+                44, // exptectedCurProcStateSeq
+                -1, // expectedBlockState, -1 to verify there are no interactions with main thread.
+                false); // expectNotify
+
+        // Verify when waitForNetworkTimeout is 0, then procStateSeq is not incremented.
+        mAms.mWaitForNetworkTimeoutMs = 0;
+        mInjector.setNetworkRestrictedForUid(true);
+        verifySeqCounterAndInteractions(uidRec,
+                PROCESS_STATE_TOP, // prevState
+                PROCESS_STATE_IMPORTANT_BACKGROUND, // curState
                 44, // expectedGlobalCounter
                 44, // exptectedCurProcStateSeq
                 -1, // expectedBlockState, -1 to verify there are no interactions with main thread.
