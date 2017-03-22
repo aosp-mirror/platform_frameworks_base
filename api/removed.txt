@@ -1,7 +1,12 @@
 package android.app {
 
   public class Notification implements android.os.Parcelable {
+    method public deprecated int getBadgeIcon();
     method public deprecated void setLatestEventInfo(android.content.Context, java.lang.CharSequence, java.lang.CharSequence, android.app.PendingIntent);
+  }
+
+  public static class Notification.Builder {
+    method public deprecated android.app.Notification.Builder chooseBadgeIcon(int);
   }
 
   public final class RecoverableSecurityException extends java.lang.SecurityException implements android.os.Parcelable {
