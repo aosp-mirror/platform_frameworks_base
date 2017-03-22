@@ -15293,9 +15293,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                 printedAnything = needSep = true;
             }
         }
-        if (mValidateUids.size() > 0) {
-            if (dumpUids(pw, dumpPackage, mValidateUids, "UID validation:", needSep)) {
-                printedAnything = needSep = true;
+        if (dumpAll) {
+            if (mValidateUids.size() > 0) {
+                if (dumpUids(pw, dumpPackage, mValidateUids, "UID validation:", needSep)) {
+                    printedAnything = needSep = true;
+                }
             }
         }
 
