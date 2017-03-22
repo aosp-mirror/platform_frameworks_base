@@ -7677,9 +7677,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 AccessibilityNodeInfo cinfo = provider.createAccessibilityNodeInfo(
                         AccessibilityNodeInfo.getVirtualDescendantId(info.getChildId(i)));
                 ViewStructure child = structure.newChild(i);
-                // TODO(b/33197203): add CTS test to autofill virtual children based on
-                // Accessibility API.
-                child.setAutofillId(structure, i);
+                if (forAutofill) {
+                    // TODO(b/33197203): add CTS test to autofill virtual children based on
+                    // Accessibility API.
+                    child.setAutofillId(structure, i);
+                }
                 populateVirtualStructure(child, provider, cinfo, forAutofill);
                 cinfo.recycle();
             }
