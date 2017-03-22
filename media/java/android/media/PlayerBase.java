@@ -254,7 +254,7 @@ public abstract class PlayerBase {
             if (mAppOps != null) {
                 mAppOps.stopWatchingMode(mAppOpsCallback);
             }
-        } catch (RemoteException e) {
+        } catch (Exception e) {
             // nothing to do here, the object is supposed to be released anyway
         }
     }
