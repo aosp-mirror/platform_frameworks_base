@@ -4100,8 +4100,9 @@
     </declare-styleable>
 
     <declare-styleable name="ProgressBar">
+        <!-- Defines the minimum value. -->
         <attr name="min" format="integer" />
-        <!-- Defines the maximum value the progress can take. -->
+        <!-- Defines the maximum value. -->
         <attr name="max" format="integer" />
         <!-- Defines the default progress value, between 0 and max. -->
         <attr name="progress" format="integer" />
