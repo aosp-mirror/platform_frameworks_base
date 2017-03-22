@@ -55,4 +55,25 @@ public class BitUtils {
                 && maskedEquals(a.getMostSignificantBits(), b.getMostSignificantBits(),
                     mask.getMostSignificantBits());
     }
+
+    public static int[] unpackBits(long val) {
+        int size = Long.bitCount(val);
+        int[] result = new int[size];
+        int index = 0;
+        int bitPos = 0;
+        while (val > 0) {
+            if ((val & 1) == 1) result[index++] = bitPos;
+            val = val >> 1;
+            bitPos++;
+        }
+        return result;
+    }
+
+    public static long packBits(int[] bits) {
+        long packed = 0;
+        for (int b : bits) {
+            packed |= (1 << b);
+        }
+        return packed;
+    }
 }
