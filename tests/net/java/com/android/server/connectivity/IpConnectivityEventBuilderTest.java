@@ -57,7 +57,7 @@ public class IpConnectivityEventBuilderTest extends TestCase {
                 aType(IpReachabilityEvent.class),
                 anInt(IpReachabilityEvent.NUD_FAILED));
 
-        String want = joinLines(
+        String want = String.join("\n",
                 "dropped_events: 0",
                 "events <",
                 "  if_name: \"\"",
@@ -70,13 +70,13 @@ public class IpConnectivityEventBuilderTest extends TestCase {
                 "    if_name: \"\"",
                 "  >",
                 ">",
-                "version: 2");
+                "version: 2\n");
         verifySerialization(want, ev);
 
         ev.netId = 123;
         ev.transports = 3; // transports have priority for inferrence of link layer
         ev.ifname = "wlan0";
-        want = joinLines(
+        want = String.join("\n",
                 "dropped_events: 0",
                 "events <",
                 "  if_name: \"\"",
@@ -89,12 +89,12 @@ public class IpConnectivityEventBuilderTest extends TestCase {
                 "    if_name: \"\"",
                 "  >",
                 ">",
-                "version: 2");
+                "version: 2\n");
         verifySerialization(want, ev);
 
         ev.transports = 1;
         ev.ifname = null;
-        want = joinLines(
+        want = String.join("\n",
                 "dropped_events: 0",
                 "events <",
                 "  if_name: \"\"",
@@ -107,12 +107,12 @@ public class IpConnectivityEventBuilderTest extends TestCase {
                 "    if_name: \"\"",
                 "  >",
                 ">",
-                "version: 2");
+                "version: 2\n");
         verifySerialization(want, ev);
 
         ev.transports = 0;
         ev.ifname = "not_inferred";
-        want = joinLines(
+        want = String.join("\n",
                 "dropped_events: 0",
                 "events <",
                 "  if_name: \"not_inferred\"",
@@ -125,11 +125,11 @@ public class IpConnectivityEventBuilderTest extends TestCase {
                 "    if_name: \"\"",
                 "  >",
                 ">",
-                "version: 2");
+                "version: 2\n");
         verifySerialization(want, ev);
 
         ev.ifname = "bt-pan";
-        want = joinLines(
+        want = String.join("\n",
                 "dropped_events: 0",
                 "events <",
                 "  if_name: \"\"",
@@ -142,11 +142,11 @@ public class IpConnectivityEventBuilderTest extends TestCase {
                 "    if_name: \"\"",
                 "  >",
                 ">",
-                "version: 2");
+                "version: 2\n");
         verifySerialization(want, ev);
 
         ev.ifname = "rmnet_ipa0";
-        want = joinLines(
+        want = String.join("\n",
                 "dropped_events: 0",
                 "events <",
                 "  if_name: \"\"",
@@ -159,11 +159,11 @@ public class IpConnectivityEventBuilderTest extends TestCase {
                 "    if_name: \"\"",
                 "  >",
                 ">",
-                "version: 2");
+                "version: 2\n");
         verifySerialization(want, ev);
 
         ev.ifname = "wlan0";
-        want = joinLines(
+        want = String.join("\n",
                 "dropped_events: 0",
                 "events <",
                 "  if_name: \"\"",
@@ -176,7 +176,7 @@ public class IpConnectivityEventBuilderTest extends TestCase {
                 "    if_name: \"\"",
                 "  >",
                 ">",
-                "version: 2");
+                "version: 2\n");
         verifySerialization(want, ev);
     }
 
@@ -190,7 +190,7 @@ public class IpConnectivityEventBuilderTest extends TestCase {
                 aBool(true),
                 aBool(false));
 
-        String want = joinLines(
+        String want = String.join("\n",
                 "dropped_events: 0",
                 "events <",
                 "  if_name: \"\"",
@@ -211,7 +211,7 @@ public class IpConnectivityEventBuilderTest extends TestCase {
                 "    transport_types: 3",
                 "  >",
                 ">",
-                "version: 2");
+                "version: 2\n");
 
         verifySerialization(want, ev);
     }
@@ -223,7 +223,7 @@ public class IpConnectivityEventBuilderTest extends TestCase {
                 aString("SomeState"),
                 anInt(192));
 
-        String want = joinLines(
+        String want = String.join("\n",
                 "dropped_events: 0",
                 "events <",
                 "  if_name: \"\"",
@@ -237,7 +237,7 @@ public class IpConnectivityEventBuilderTest extends TestCase {
                 "    state_transition: \"SomeState\"",
                 "  >",
                 ">",
-                "version: 2");
+                "version: 2\n");
 
         verifySerialization(want, ev);
     }
@@ -248,7 +248,7 @@ public class IpConnectivityEventBuilderTest extends TestCase {
                 aType(DhcpErrorEvent.class),
                 anInt(DhcpErrorEvent.L4_NOT_UDP));
 
-        String want = joinLines(
+        String want = String.join("\n",
                 "dropped_events: 0",
                 "events <",
                 "  if_name: \"\"",
@@ -262,59 +262,7 @@ public class IpConnectivityEventBuilderTest extends TestCase {
                 "    error_code: 50397184",
                 "  >",
                 ">",
-                "version: 2");
-
-        verifySerialization(want, ev);
-    }
-
-    @SmallTest
-    public void testDnsEventSerialization() {
-        ConnectivityMetricsEvent ev = describeIpEvent(
-                aType(DnsEvent.class),
-                anInt(101),
-                aByteArray(b(1), b(1), b(2), b(1), b(1), b(1), b(2), b(2)),
-                aByteArray(b(0), b(0), b(22), b(3), b(1), b(0), b(200), b(178)),
-                anIntArray(3456, 267, 1230, 45, 2111, 450, 638, 1300));
-
-        String want = joinLines(
-                "dropped_events: 0",
-                "events <",
-                "  if_name: \"\"",
-                "  link_layer: 0",
-                "  network_id: 0",
-                "  time_ms: 1",
-                "  transports: 0",
-                "  dns_lookup_batch <",
-                "    event_types: 1",
-                "    event_types: 1",
-                "    event_types: 2",
-                "    event_types: 1",
-                "    event_types: 1",
-                "    event_types: 1",
-                "    event_types: 2",
-                "    event_types: 2",
-                "    latencies_ms: 3456",
-                "    latencies_ms: 267",
-                "    latencies_ms: 1230",
-                "    latencies_ms: 45",
-                "    latencies_ms: 2111",
-                "    latencies_ms: 450",
-                "    latencies_ms: 638",
-                "    latencies_ms: 1300",
-                "    network_id <",
-                "      network_id: 101",
-                "    >",
-                "    return_codes: 0",
-                "    return_codes: 0",
-                "    return_codes: 22",
-                "    return_codes: 3",
-                "    return_codes: 1",
-                "    return_codes: 0",
-                "    return_codes: 200",
-                "    return_codes: 178",
-                "  >",
-                ">",
-                "version: 2");
+                "version: 2\n");
 
         verifySerialization(want, ev);
     }
@@ -326,7 +274,7 @@ public class IpConnectivityEventBuilderTest extends TestCase {
                 anInt(IpManagerEvent.PROVISIONING_OK),
                 aLong(5678));
 
-        String want = joinLines(
+        String want = String.join("\n",
                 "dropped_events: 0",
                 "events <",
                 "  if_name: \"\"",
@@ -340,7 +288,7 @@ public class IpConnectivityEventBuilderTest extends TestCase {
                 "    latency_ms: 5678",
                 "  >",
                 ">",
-                "version: 2");
+                "version: 2\n");
 
         verifySerialization(want, ev);
     }
@@ -351,7 +299,7 @@ public class IpConnectivityEventBuilderTest extends TestCase {
                 aType(IpReachabilityEvent.class),
                 anInt(IpReachabilityEvent.NUD_FAILED));
 
-        String want = joinLines(
+        String want = String.join("\n",
                 "dropped_events: 0",
                 "events <",
                 "  if_name: \"\"",
@@ -364,7 +312,7 @@ public class IpConnectivityEventBuilderTest extends TestCase {
                 "    if_name: \"\"",
                 "  >",
                 ">",
-                "version: 2");
+                "version: 2\n");
 
         verifySerialization(want, ev);
     }
@@ -377,7 +325,7 @@ public class IpConnectivityEventBuilderTest extends TestCase {
                 anInt(5),
                 aLong(20410));
 
-        String want = joinLines(
+        String want = String.join("\n",
                 "dropped_events: 0",
                 "events <",
                 "  if_name: \"\"",
@@ -393,7 +341,7 @@ public class IpConnectivityEventBuilderTest extends TestCase {
                 "    >",
                 "  >",
                 ">",
-                "version: 2");
+                "version: 2\n");
 
         verifySerialization(want, ev);
     }
@@ -406,7 +354,7 @@ public class IpConnectivityEventBuilderTest extends TestCase {
                 anInt(ValidationProbeEvent.PROBE_HTTP),
                 anInt(204));
 
-        String want = joinLines(
+        String want = String.join("\n",
                 "dropped_events: 0",
                 "events <",
                 "  if_name: \"\"",
@@ -420,7 +368,7 @@ public class IpConnectivityEventBuilderTest extends TestCase {
                 "    probe_type: 1",
                 "  >",
                 ">",
-                "version: 2");
+                "version: 2\n");
 
         verifySerialization(want, ev);
     }
@@ -436,7 +384,7 @@ public class IpConnectivityEventBuilderTest extends TestCase {
                 anInt(2048),
                 anInt(3));
 
-        String want = joinLines(
+        String want = String.join("\n",
                 "dropped_events: 0",
                 "events <",
                 "  if_name: \"\"",
@@ -454,7 +402,7 @@ public class IpConnectivityEventBuilderTest extends TestCase {
                 "    program_length: 2048",
                 "  >",
                 ">",
-                "version: 2");
+                "version: 2\n");
 
         verifySerialization(want, ev);
     }
@@ -474,7 +422,7 @@ public class IpConnectivityEventBuilderTest extends TestCase {
                 anInt(3),
                 anInt(2048));
 
-        String want = joinLines(
+        String want = String.join("\n",
                 "dropped_events: 0",
                 "events <",
                 "  if_name: \"\"",
@@ -495,7 +443,7 @@ public class IpConnectivityEventBuilderTest extends TestCase {
                 "    zero_lifetime_ras: 1",
                 "  >",
                 ">",
-                "version: 2");
+                "version: 2\n");
 
         verifySerialization(want, ev);
     }
@@ -511,7 +459,7 @@ public class IpConnectivityEventBuilderTest extends TestCase {
                 aLong(1000),
                 aLong(-1));
 
-        String want = joinLines(
+        String want = String.join("\n",
                 "dropped_events: 0",
                 "events <",
                 "  if_name: \"\"",
@@ -528,7 +476,7 @@ public class IpConnectivityEventBuilderTest extends TestCase {
                 "    router_lifetime: 2000",
                 "  >",
                 ">",
-                "version: 2");
+                "version: 2\n");
 
         verifySerialization(want, ev);
     }
@@ -542,14 +490,5 @@ public class IpConnectivityEventBuilderTest extends TestCase {
         } catch (Exception e) {
             fail(e.toString());
         }
-    }
-
-    static String joinLines(String ... elems) {
-        StringBuilder b = new StringBuilder();
-        for (String s : elems) {
-            b.append(s);
-            b.append("\n");
-        }
-        return b.toString();
     }
 }
