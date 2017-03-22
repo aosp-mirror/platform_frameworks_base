@@ -24,7 +24,7 @@ import android.util.Log;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.systemui.volume.VolumeDialogController.State;
+import com.android.systemui.plugins.VolumeDialogController.State;
 
 import java.util.Arrays;
 

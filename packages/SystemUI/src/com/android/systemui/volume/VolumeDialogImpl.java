@@ -16,6 +16,9 @@
 
 package com.android.systemui.volume;
 
+import static android.accessibilityservice.AccessibilityServiceInfo.FEEDBACK_ALL_MASK;
+import static android.accessibilityservice.AccessibilityServiceInfo.FEEDBACK_GENERIC;
+
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.animation.ObjectAnimator;
 import android.annotation.NonNull;
@@ -72,28 +75,27 @@ import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.plugins.VolumeDialogController;
+import com.android.systemui.plugins.VolumeDialogController.State;
+import com.android.systemui.plugins.VolumeDialogController.StreamState;
+import com.android.systemui.plugins.VolumeDialog;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerZenModePanel;
-import com.android.systemui.volume.VolumeDialogController.State;
-import com.android.systemui.volume.VolumeDialogController.StreamState;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
-import static android.accessibilityservice.AccessibilityServiceInfo.FEEDBACK_ALL_MASK;
-import static android.accessibilityservice.AccessibilityServiceInfo.FEEDBACK_GENERIC;
-
 /**
  * Visual presentation of the volume dialog.
  *
- * A client of VolumeDialogController and its state model.
+ * A client of VolumeDialogControllerImpl and its state model.
  *
  * Methods ending in "H" must be called on the (ui) handler.
  */
-public class VolumeDialog implements TunerService.Tunable {
-    private static final String TAG = Util.logTag(VolumeDialog.class);
+public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable {
+    private static final String TAG = Util.logTag(VolumeDialogImpl.class);
 
     public static final String SHOW_FULL_ZEN = "sysui_show_full_zen";
 
@@ -102,7 +104,7 @@ public class VolumeDialog implements TunerService.Tunable {
 
     private final Context mContext;
     private final H mHandler = new H();
-    private final VolumeDialogController mController;
+    private VolumeDialogController mController;
 
     private Window mWindow;
     private CustomDialog mDialog;
@@ -123,7 +125,7 @@ public class VolumeDialog implements TunerService.Tunable {
     private final ColorStateList mActiveSliderTint;
     private final ColorStateList mInactiveSliderTint;
     private VolumeDialogMotion mMotion;
-    private final int mWindowType;
+    private int mWindowType;
     private final ZenModeController mZenModeController;
 
     private boolean mShowing;
@@ -146,30 +148,37 @@ public class VolumeDialog implements TunerService.Tunable {
     private boolean mShowFullZen;
     private TunerZenModePanel mZenPanel;
 
-    public VolumeDialog(Context context, int windowType, VolumeDialogController controller,
-            ZenModeController zenModeController, Callback callback) {
+    public VolumeDialogImpl(Context context) {
         mContext = context;
-        mController = controller;
-        mCallback = callback;
-        mWindowType = windowType;
-        mZenModeController = zenModeController;
-        mKeyguard = (KeyguardManager) context.getSystemService(Context.KEYGUARD_SERVICE);
-        mAudioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+        mZenModeController = Dependency.get(ZenModeController.class);
+        mController = Dependency.get(VolumeDialogController.class);
+        mKeyguard = (KeyguardManager) mContext.getSystemService(Context.KEYGUARD_SERVICE);
+        mAudioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
         mAccessibilityMgr =
                 (AccessibilityManager) mContext.getSystemService(Context.ACCESSIBILITY_SERVICE);
         mActiveSliderTint = ColorStateList.valueOf(Utils.getColorAccent(mContext));
         mInactiveSliderTint = loadColorStateList(R.color.volume_slider_inactive);
+    }
+
+    public void init(int windowType, Callback callback) {
+        mCallback = callback;
+        mWindowType = windowType;
 
         initDialog();
 
         mAccessibility.init();
 
-        controller.addCallback(mControllerCallbackH, mHandler);
-        controller.getState();
+        mController.addCallback(mControllerCallbackH, mHandler);
+        mController.getState();
         Dependency.get(TunerService.class).addTunable(this, SHOW_FULL_ZEN);
 
         final Configuration currentConfig = mContext.getResources().getConfiguration();
         mDensity = currentConfig.densityDpi;
+    }
+
+    @Override
+    public void destroy() {
+        mController.removeCallback(mControllerCallbackH);
     }
 
     private void initDialog() {
@@ -193,7 +202,7 @@ public class VolumeDialog implements TunerService.Tunable {
         final WindowManager.LayoutParams lp = mWindow.getAttributes();
         lp.type = mWindowType;
         lp.format = PixelFormat.TRANSLUCENT;
-        lp.setTitle(VolumeDialog.class.getSimpleName());
+        lp.setTitle(VolumeDialogImpl.class.getSimpleName());
         lp.gravity = Gravity.TOP | Gravity.CENTER_HORIZONTAL;
         lp.y = res.getDimensionPixelSize(R.dimen.volume_offset_top);
         lp.gravity = Gravity.TOP;
@@ -361,7 +370,7 @@ public class VolumeDialog implements TunerService.Tunable {
     }
 
     public void dump(PrintWriter writer) {
-        writer.println(VolumeDialog.class.getSimpleName() + " state:");
+        writer.println(VolumeDialogImpl.class.getSimpleName() + " state:");
         writer.print("  mShowing: "); writer.println(mShowing);
         writer.print("  mExpanded: "); writer.println(mExpanded);
         writer.print("  mExpandButtonAnimationRunning: ");
@@ -457,10 +466,6 @@ public class VolumeDialog implements TunerService.Tunable {
                 }
             });
         }
-    }
-
-    public void destroy() {
-        mController.removeCallback(mControllerCallbackH);
     }
 
     public void show(int reason) {
@@ -1288,10 +1293,5 @@ public class VolumeDialog implements TunerService.Tunable {
         private ObjectAnimator anim;  // slider progress animation for non-touch-related updates
         private int animTargetProgress;
         private int lastAudibleLevel = 1;
-    }
-
-    public interface Callback {
-        void onZenSettingsClicked();
-        void onZenPrioritySettingsClicked();
     }
 }

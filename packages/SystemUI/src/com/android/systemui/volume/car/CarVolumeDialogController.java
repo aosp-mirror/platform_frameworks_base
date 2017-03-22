@@ -25,7 +25,7 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.util.Log;
 
-import com.android.systemui.volume.VolumeDialogController;
+import com.android.systemui.volume.VolumeDialogControllerImpl;
 
 /**
  * A volume dialog controller for the automotive use case.
@@ -33,7 +33,7 @@ import com.android.systemui.volume.VolumeDialogController;
  * {@link android.car.media.CarAudioManager} is the source of truth to get the stream volumes.
  * And volume changes should be sent to the car's audio module instead of the android's audio mixer.
  */
-public class CarVolumeDialogController extends VolumeDialogController {
+public class CarVolumeDialogController extends VolumeDialogControllerImpl {
     private static final String TAG = "CarVolumeDialogController";
 
     private final Car mCar;
@@ -57,8 +57,8 @@ public class CarVolumeDialogController extends VolumeDialogController {
         }
     };
 
-    public CarVolumeDialogController(Context context, ComponentName component) {
-        super(context, component);
+    public CarVolumeDialogController(Context context) {
+        super(context);
         mCar = Car.createCar(context, mConnection);
         mCar.connect();
     }
