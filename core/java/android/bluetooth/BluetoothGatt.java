@@ -31,7 +31,7 @@ import java.util.UUID;
  * <p>This class provides Bluetooth GATT functionality to enable communication
  * with Bluetooth Smart or Smart Ready devices.
  *
- * <p>To connect to a remote peripheral device, create a {@link BluetoothGattCallbackExt}
+ * <p>To connect to a remote peripheral device, create a {@link BluetoothGattCallback}
  * and call {@link BluetoothDevice#connectGatt} to get a instance of this class.
  * GATT capable devices can be discovered using the Bluetooth device discovery or BLE
  * scan process.
@@ -42,7 +42,7 @@ public final class BluetoothGatt implements BluetoothProfile {
     private static final boolean VDBG = false;
 
     private IBluetoothGatt mService;
-    private BluetoothGattCallbackExt mCallback;
+    private BluetoothGattCallback mCallback;
     private int mClientIf;
     private BluetoothDevice mDevice;
     private boolean mAutoConnect;
@@ -133,9 +133,9 @@ public final class BluetoothGatt implements BluetoothProfile {
     /*package*/ static final int AUTHENTICATION_MITM = 2;
 
     /**
-     * Bluetooth GATT callbacks. Overrides the default BluetoothGattCallbackExt implementation.
+     * Bluetooth GATT callbacks. Overrides the default BluetoothGattCallback implementation.
      */
-    private final IBluetoothGattCallbackExt mBluetoothGattCallbackExt =
+    private final IBluetoothGattCallbackExt mBluetoothGattCallback =
         new IBluetoothGattCallbackExt.Stub() {
             /**
              * Application interface registered - app is ready to go
@@ -618,7 +618,7 @@ public final class BluetoothGatt implements BluetoothProfile {
     /**
      * Register an application callback to start using GATT.
      *
-     * <p>This is an asynchronous call. The callback {@link BluetoothGattCallbackExt#onAppRegistered}
+     * <p>This is an asynchronous call. The callback {@link BluetoothGattCallback#onAppRegistered}
      * is used to notify success or failure if the function returns true.
      *
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
@@ -627,7 +627,7 @@ public final class BluetoothGatt implements BluetoothProfile {
      * @return If true, the callback will be called to notify success or failure,
      *         false on immediate error
      */
-    private boolean registerApp(BluetoothGattCallbackExt callback) {
+    private boolean registerApp(BluetoothGattCallback callback) {
         if (DBG) Log.d(TAG, "registerApp()");
         if (mService == null) return false;
 
@@ -636,7 +636,7 @@ public final class BluetoothGatt implements BluetoothProfile {
         if (DBG) Log.d(TAG, "registerApp() - UUID=" + uuid);
 
         try {
-            mService.registerClient(new ParcelUuid(uuid), mBluetoothGattCallbackExt);
+            mService.registerClient(new ParcelUuid(uuid), mBluetoothGattCallback);
         } catch (RemoteException e) {
             Log.e(TAG,"",e);
             return false;
@@ -666,7 +666,7 @@ public final class BluetoothGatt implements BluetoothProfile {
      *
      * <p>The connection may not be established right away, but will be
      * completed when the remote device is available. A
-     * {@link BluetoothGattCallbackExt#onConnectionStateChange} callback will be
+     * {@link BluetoothGattCallback#onConnectionStateChange} callback will be
      * invoked when the connection state changes as a result of this function.
      *
      * <p>The autoConnect parameter determines whether to actively connect to
@@ -684,7 +684,7 @@ public final class BluetoothGatt implements BluetoothProfile {
      *                    device becomes available (true).
      * @return true, if the connection attempt was initiated successfully
      */
-    /*package*/ boolean connect(Boolean autoConnect, BluetoothGattCallbackExt callback) {
+    /*package*/ boolean connect(Boolean autoConnect, BluetoothGattCallback callback) {
         if (DBG) Log.d(TAG, "connect() - device: " + mDevice.getAddress() + ", auto: " + autoConnect);
         synchronized(mStateLock) {
             if (mConnState != CONN_STATE_IDLE) {
@@ -749,7 +749,7 @@ public final class BluetoothGatt implements BluetoothProfile {
      * recommendation, wether the PHY change will happen depends on other applications peferences,
      * local and remote controller capabilities. Controller can override these settings.
      * <p>
-     * {@link BluetoothGattCallbackExt#onPhyUpdate} will be triggered as a result of this call, even
+     * {@link BluetoothGattCallback#onPhyUpdate} will be triggered as a result of this call, even
      * if no PHY change happens. It is also triggered when remote device updates the PHY.
      *
      * @param txPhy preferred transmitter PHY. Bitwise OR of any of
@@ -773,7 +773,7 @@ public final class BluetoothGatt implements BluetoothProfile {
 
     /**
      * Read the current transmitter PHY and receiver PHY of the connection. The values are returned
-     * in {@link BluetoothGattCallbackExt#onPhyRead}
+     * in {@link BluetoothGattCallback#onPhyRead}
      */
     public void readPhy() {
         try {
@@ -797,7 +797,7 @@ public final class BluetoothGatt implements BluetoothProfile {
      * characteristics and descriptors.
      *
      * <p>This is an asynchronous operation. Once service discovery is completed,
-     * the {@link BluetoothGattCallbackExt#onServicesDiscovered} callback is
+     * the {@link BluetoothGattCallback#onServicesDiscovered} callback is
      * triggered. If the discovery was successful, the remote services can be
      * retrieved using the {@link #getServices} function.
      *
@@ -876,7 +876,7 @@ public final class BluetoothGatt implements BluetoothProfile {
      * Reads the requested characteristic from the associated remote device.
      *
      * <p>This is an asynchronous operation. The result of the read operation
-     * is reported by the {@link BluetoothGattCallbackExt#onCharacteristicRead}
+     * is reported by the {@link BluetoothGattCallback#onCharacteristicRead}
      * callback.
      *
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
@@ -918,7 +918,7 @@ public final class BluetoothGatt implements BluetoothProfile {
      * Writes a given characteristic and its values to the associated remote device.
      *
      * <p>Once the write operation has been completed, the
-     * {@link BluetoothGattCallbackExt#onCharacteristicWrite} callback is invoked,
+     * {@link BluetoothGattCallback#onCharacteristicWrite} callback is invoked,
      * reporting the result of the operation.
      *
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
@@ -962,7 +962,7 @@ public final class BluetoothGatt implements BluetoothProfile {
      * Reads the value for a given descriptor from the associated remote device.
      *
      * <p>Once the read operation has been completed, the
-     * {@link BluetoothGattCallbackExt#onDescriptorRead} callback is
+     * {@link BluetoothGattCallback#onDescriptorRead} callback is
      * triggered, signaling the result of the operation.
      *
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
@@ -1003,7 +1003,7 @@ public final class BluetoothGatt implements BluetoothProfile {
     /**
      * Write the value of a given descriptor to the associated remote device.
      *
-     * <p>A {@link BluetoothGattCallbackExt#onDescriptorWrite} callback is
+     * <p>A {@link BluetoothGattCallback#onDescriptorWrite} callback is
      * triggered to report the result of the write operation.
      *
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
@@ -1047,7 +1047,7 @@ public final class BluetoothGatt implements BluetoothProfile {
      * <p>Once a reliable write transaction has been initiated, all calls
      * to {@link #writeCharacteristic} are sent to the remote device for
      * verification and queued up for atomic execution. The application will
-     * receive an {@link BluetoothGattCallbackExt#onCharacteristicWrite} callback
+     * receive an {@link BluetoothGattCallback#onCharacteristicWrite} callback
      * in response to every {@link #writeCharacteristic} call and is responsible
      * for verifying if the value has been transmitted accurately.
      *
@@ -1081,7 +1081,7 @@ public final class BluetoothGatt implements BluetoothProfile {
      * <p>This function will commit all queued up characteristic write
      * operations for a given remote device.
      *
-     * <p>A {@link BluetoothGattCallbackExt#onReliableWriteCompleted} callback is
+     * <p>A {@link BluetoothGattCallback#onReliableWriteCompleted} callback is
      * invoked to indicate whether the transaction has been executed correctly.
      *
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
@@ -1138,7 +1138,7 @@ public final class BluetoothGatt implements BluetoothProfile {
      * Enable or disable notifications/indications for a given characteristic.
      *
      * <p>Once notifications are enabled for a characteristic, a
-     * {@link BluetoothGattCallbackExt#onCharacteristicChanged} callback will be
+     * {@link BluetoothGattCallback#onCharacteristicChanged} callback will be
      * triggered if the remote device indicates that the given characteristic
      * has changed.
      *
@@ -1193,7 +1193,7 @@ public final class BluetoothGatt implements BluetoothProfile {
     /**
      * Read the RSSI for a connected remote device.
      *
-     * <p>The {@link BluetoothGattCallbackExt#onReadRemoteRssi} callback will be
+     * <p>The {@link BluetoothGattCallback#onReadRemoteRssi} callback will be
      * invoked when the RSSI value has been read.
      *
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
@@ -1221,7 +1221,7 @@ public final class BluetoothGatt implements BluetoothProfile {
      * the data sent is truncated to the MTU size. This function may be used
      * to request a larger MTU size to be able to send more data at once.
      *
-     * <p>A {@link BluetoothGattCallbackExt#onMtuChanged} callback will indicate
+     * <p>A {@link BluetoothGattCallback#onMtuChanged} callback will indicate
      * whether this operation was successful.
      *
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
