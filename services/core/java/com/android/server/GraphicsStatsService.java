@@ -32,6 +32,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.Trace;
+import android.os.UserHandle;
 import android.util.Log;
 import android.view.IGraphicsStats;
 import android.view.IGraphicsStatsCallback;
@@ -167,7 +168,10 @@ public class GraphicsStatsService extends IGraphicsStats.Stub {
         long callingIdentity = Binder.clearCallingIdentity();
         try {
             mAppOps.checkPackage(uid, packageName);
-            PackageInfo info = mContext.getPackageManager().getPackageInfo(packageName, 0);
+            PackageInfo info = mContext.getPackageManager().getPackageInfoAsUser(
+                    packageName,
+                    0,
+                    UserHandle.getUserId(uid));
             synchronized (mLock) {
                 pfd = requestBufferForProcessLocked(token, uid, pid, packageName, info.versionCode);
             }
