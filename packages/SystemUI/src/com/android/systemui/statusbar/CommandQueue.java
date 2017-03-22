@@ -78,6 +78,7 @@ public class CommandQueue extends IStatusBar.Stub {
     private static final int MSG_APP_TRANSITION_FINISHED       = 31 << MSG_SHIFT;
     private static final int MSG_DISMISS_KEYBOARD_SHORTCUTS    = 32 << MSG_SHIFT;
     private static final int MSG_HANDLE_SYSNAV_KEY             = 33 << MSG_SHIFT;
+    private static final int MSG_SHOW_GLOBAL_ACTIONS           = 34 << MSG_SHIFT;
 
     public static final int FLAG_EXCLUDE_NONE = 0;
     public static final int FLAG_EXCLUDE_SEARCH_PANEL = 1 << 0;
@@ -134,6 +135,7 @@ public class CommandQueue extends IStatusBar.Stub {
         default void clickTile(ComponentName tile) { }
 
         default void handleSystemNavigationKey(int arg1) { }
+        default void handleShowGlobalActionsMenu() { }
     }
 
     @VisibleForTesting
@@ -414,6 +416,14 @@ public class CommandQueue extends IStatusBar.Stub {
         }
     }
 
+    @Override
+    public void showGlobalActionsMenu() {
+        synchronized (mLock) {
+            mHandler.removeMessages(MSG_SHOW_GLOBAL_ACTIONS);
+            mHandler.obtainMessage(MSG_SHOW_GLOBAL_ACTIONS).sendToTarget();
+        }
+    }
+
     private final class H extends Handler {
         private H(Looper l) {
             super(l);
@@ -588,6 +598,11 @@ public class CommandQueue extends IStatusBar.Stub {
                 case MSG_HANDLE_SYSNAV_KEY:
                     for (int i = 0; i < mCallbacks.size(); i++) {
                         mCallbacks.get(i).handleSystemNavigationKey(msg.arg1);
+                    }
+                    break;
+                case MSG_SHOW_GLOBAL_ACTIONS:
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).handleShowGlobalActionsMenu();
                     }
                     break;
             }

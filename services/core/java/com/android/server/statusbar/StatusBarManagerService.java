@@ -25,6 +25,7 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
@@ -40,6 +41,8 @@ import com.android.internal.statusbar.NotificationVisibility;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.server.LocalServices;
 import com.android.server.notification.NotificationDelegate;
+import com.android.server.power.ShutdownThread;
+import com.android.server.statusbar.StatusBarManagerInternal.GlobalActionsListener;
 import com.android.server.wm.WindowManagerService;
 
 import java.io.FileDescriptor;
@@ -65,6 +68,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
 
     // for disabling the status bar
     private final ArrayList<DisableRecord> mDisableRecords = new ArrayList<DisableRecord>();
+    private GlobalActionsListener mGlobalActionListener;
     private IBinder mSysUiVisToken = new Binder();
     private int mDisabled1 = 0;
     private int mDisabled2 = 0;
@@ -304,6 +308,21 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
                 try {
                     mBar.appTransitionStarting(
                             statusBarAnimationsStartTime, statusBarAnimationsDuration);
+                } catch (RemoteException ex) {}
+            }
+        }
+
+        @Override
+        public void setGlobalActionsListener(GlobalActionsListener listener) {
+            mGlobalActionListener = listener;
+            mGlobalActionListener.onStatusBarConnectedChanged(mBar != null);
+        }
+
+        @Override
+        public void showGlobalActions() {
+            if (mBar != null) {
+                try {
+                    mBar.showGlobalActionsMenu();
                 } catch (RemoteException ex) {}
             }
         }
@@ -656,6 +675,17 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
 
         Slog.i(TAG, "registerStatusBar bar=" + bar);
         mBar = bar;
+        try {
+            mBar.asBinder().linkToDeath(new DeathRecipient() {
+                @Override
+                public void binderDied() {
+                    mBar = null;
+                    notifyBarAttachChanged();
+                }
+            }, 0);
+        } catch (RemoteException e) {
+        }
+        notifyBarAttachChanged();
         synchronized (mIcons) {
             for (String slot : mIcons.keySet()) {
                 iconSlots.add(slot);
@@ -676,6 +706,13 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
             fullscreenStackBounds.set(mFullscreenStackBounds);
             dockedStackBounds.set(mDockedStackBounds);
         }
+    }
+
+    private void notifyBarAttachChanged() {
+        mHandler.post(() -> {
+            if (mGlobalActionListener == null) return;
+            mGlobalActionListener.onStatusBarConnectedChanged(mBar != null);
+        });
     }
 
     /**
@@ -710,6 +747,65 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
         long identity = Binder.clearCallingIdentity();
         try {
             mNotificationDelegate.onPanelHidden();
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    /**
+     * Allows the status bar to shutdown the device.
+     */
+    @Override
+    public void shutdown() {
+        enforceStatusBarService();
+        long identity = Binder.clearCallingIdentity();
+        try {
+            mHandler.post(() ->
+                    ShutdownThread.shutdown(mContext, PowerManager.SHUTDOWN_USER_REQUESTED, false));
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    /**
+     * Allows the status bar to reboot the device.
+     */
+    @Override
+    public void reboot(boolean safeMode) {
+        enforceStatusBarService();
+        long identity = Binder.clearCallingIdentity();
+        try {
+            mHandler.post(() -> {
+                if (safeMode) {
+                    ShutdownThread.rebootSafeMode(mContext, false);
+                } else {
+                    ShutdownThread.reboot(mContext, PowerManager.SHUTDOWN_USER_REQUESTED, false);
+                }
+            });
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    @Override
+    public void onGlobalActionsShown() {
+        enforceStatusBarService();
+        long identity = Binder.clearCallingIdentity();
+        try {
+            if (mGlobalActionListener == null) return;
+            mGlobalActionListener.onGlobalActionsShown();
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    @Override
+    public void onGlobalActionsHidden() {
+        enforceStatusBarService();
+        long identity = Binder.clearCallingIdentity();
+        try {
+            if (mGlobalActionListener == null) return;
+            mGlobalActionListener.onGlobalActionsDismissed();
         } finally {
             Binder.restoreCallingIdentity(identity);
         }

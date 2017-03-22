@@ -31,10 +31,12 @@ import android.util.ArraySet;
 import android.util.Log;
 
 import com.android.systemui.fragments.FragmentService;
+import com.android.systemui.globalactions.GlobalActionsComponent;
 import com.android.systemui.keyboard.KeyboardUI;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.media.RingtonePlayer;
 import com.android.systemui.pip.PipUI;
+import com.android.systemui.plugins.GlobalActions;
 import com.android.systemui.plugins.OverlayPlugin;
 import com.android.systemui.plugins.Plugin;
 import com.android.systemui.plugins.PluginListener;
@@ -84,6 +86,7 @@ public class SystemUIApplication extends Application implements SysUiServiceProv
             VendorServices.class,
             GarbageMonitor.Service.class,
             LatencyTester.class,
+            GlobalActionsComponent.class,
     };
 
     /**

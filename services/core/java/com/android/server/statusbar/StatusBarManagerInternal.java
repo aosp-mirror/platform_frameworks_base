@@ -76,4 +76,26 @@ public interface StatusBarManagerInternal {
     void toggleRecentApps();
 
     void setCurrentUser(int newUserId);
+
+    void setGlobalActionsListener(GlobalActionsListener listener);
+    void showGlobalActions();
+
+    public interface GlobalActionsListener {
+        /**
+         * Called when sysui starts and connects its status bar, or when the status bar binder
+         * dies indicating sysui is no longer alive.
+         */
+        void onStatusBarConnectedChanged(boolean connected);
+
+        /**
+         * Callback from sysui to notify system that global actions has been successfully shown.
+         */
+        void onGlobalActionsShown();
+
+        /**
+         * Callback from sysui to notify system that the user has dismissed global actions and
+         * it no longer needs to be displayed (even if sysui dies).
+         */
+        void onGlobalActionsDismissed();
+    }
 }

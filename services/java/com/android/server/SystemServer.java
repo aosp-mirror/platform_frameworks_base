@@ -56,7 +56,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.BinderInternal;
 import com.android.internal.os.SamplingProfilerIntegration;
-import com.android.internal.policy.EmergencyAffordanceManager;
+import com.android.internal.util.EmergencyAffordanceManager;
 import com.android.internal.util.ConcurrentUtils;
 import com.android.internal.widget.ILockSettings;
 import com.android.server.accessibility.AccessibilityManagerService;
