@@ -1185,13 +1185,13 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         @Override
         public String toString() {
-            String result = Integer.toString(sourceUserId) + " @ " + uri.toString();
+            String result = uri.toString() + " [user " + sourceUserId + "]";
             if (prefix) result += " [prefix]";
             return result;
         }
 
         public String toSafeString() {
-            String result = Integer.toString(sourceUserId) + " @ " + uri.toSafeString();
+            String result = uri.toSafeString() + " [user " + sourceUserId + "]";
             if (prefix) result += " [prefix]";
             return result;
         }
@@ -8671,8 +8671,15 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (!checkHoldingPermissionsLocked(pm, pi, grantUri, callingUid, modeFlags)) {
             // Require they hold a strong enough Uri permission
             if (!checkUriPermissionLocked(grantUri, callingUid, modeFlags)) {
-                throw new SecurityException("Uid " + callingUid
-                        + " does not have permission to uri " + grantUri);
+                if (android.Manifest.permission.MANAGE_DOCUMENTS.equals(pi.readPermission)) {
+                    throw new SecurityException(
+                            "UID " + callingUid + " does not have permission to " + grantUri
+                                    + "; you could obtain access using ACTION_OPEN_DOCUMENT "
+                                    + "or related APIs");
+                } else {
+                    throw new SecurityException(
+                            "UID " + callingUid + " does not have permission to " + grantUri);
+                }
             }
         }
         return targetUid;
@@ -10927,7 +10934,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         } catch (RemoteException ignored) {
         }
         if (cpi == null) {
-            return "Failed to find provider " + authority + " for user " + userId;
+            return "Failed to find provider " + authority + " for user " + userId
+                    + "; expected to find a valid ContentProvider for this authority";
         }
 
         ProcessRecord r = null;
@@ -11007,18 +11015,17 @@ public class ActivityManagerService extends IActivityManager.Stub
             return null;
         }
 
-        String msg;
+        final String suffix;
         if (!cpi.exported) {
-            msg = "Permission Denial: opening provider " + cpi.name
-                    + " from " + (r != null ? r : "(null)") + " (pid=" + callingPid
-                    + ", uid=" + callingUid + ") that is not exported from uid "
-                    + cpi.applicationInfo.uid;
+            suffix = " that is not exported from UID " + cpi.applicationInfo.uid;
+        } else if (android.Manifest.permission.MANAGE_DOCUMENTS.equals(cpi.readPermission)) {
+            suffix = " requires that you obtain access using ACTION_OPEN_DOCUMENT or related APIs";
         } else {
-            msg = "Permission Denial: opening provider " + cpi.name
-                    + " from " + (r != null ? r : "(null)") + " (pid=" + callingPid
-                    + ", uid=" + callingUid + ") requires "
-                    + cpi.readPermission + " or " + cpi.writePermission;
+            suffix = " requires " + cpi.readPermission + " or " + cpi.writePermission;
         }
+        final String msg = "Permission Denial: opening provider " + cpi.name
+                + " from " + (r != null ? r : "(null)") + " (pid=" + callingPid
+                + ", uid=" + callingUid + ")" + suffix;
         Slog.w(TAG, msg);
         return msg;
     }
