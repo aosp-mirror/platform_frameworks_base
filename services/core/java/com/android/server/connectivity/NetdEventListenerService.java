@@ -52,7 +52,6 @@ public class NetdEventListenerService extends INetdEventListener.Stub {
     private static final boolean DBG = false;
     private static final boolean VDBG = false;
 
-    // TODO: read this constant from system property
     private static final int MAX_LOOKUPS_PER_DNS_EVENT = 100;
 
     // Rate limit connect latency logging to 1 measurement per 15 seconds (5760 / day) with maximum

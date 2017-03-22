@@ -1100,7 +1100,7 @@ public class NetworkMonitor extends StateMachine {
     }
 
     private void logValidationProbe(long durationMs, int probeType, int probeResult) {
-        long transports = mNetworkAgentInfo.networkCapabilities.getTransports();
+        int[] transports = mNetworkAgentInfo.networkCapabilities.getTransportTypes();
         boolean isFirstValidation = validationStage().isFirstValidation;
         ValidationProbeEvent ev = new ValidationProbeEvent();
         ev.probeType = ValidationProbeEvent.makeProbeType(probeType, isFirstValidation);
