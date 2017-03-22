@@ -20,6 +20,7 @@ import android.annotation.Nullable;
 import android.app.Activity;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.SystemClock;
 
 /**
  * Activity for which screenshotting is disabled.
@@ -31,5 +32,14 @@ public class DisableScreenshotsActivity extends Activity {
         super.onCreate(savedInstanceState);
         setDisablePreviewScreenshots(true);
         getWindow().getDecorView().setBackgroundColor(Color.RED);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        // This is to simulate slowness over resuming the app, such that we have plenty of time to
+        // see the starting window.
+        SystemClock.sleep(500);
     }
 }
