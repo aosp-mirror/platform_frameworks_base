@@ -142,6 +142,11 @@ public class FontFamily {
                 isItalic);
     }
 
+    // TODO: Remove once internal user stop using private API.
+    private static boolean nAddFont(long builderPtr, ByteBuffer font, int ttcIndex) {
+        return nAddFont(builderPtr, font, ttcIndex, -1, -1);
+    }
+
     private static native long nInitBuilder(String lang, int variant);
 
     @CriticalNative
