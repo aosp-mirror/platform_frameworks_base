@@ -4538,7 +4538,7 @@
     <string name="app_category_video">Movies &amp; Video</string>
     <!-- Category title for apps which primarily work with images or photos, such as camera or gallery apps. [CHAR LIMIT=32] -->
     <string name="app_category_image">Photos &amp; Images</string>
-    <!-- Category title for apps which are primarily social apps, such as messaging, communication, or social network apps. [CHAR LIMIT=32] -->
+    <!-- Category title for apps which are primarily social apps, such as messaging, communication, email, or social network apps. [CHAR LIMIT=32] -->
     <string name="app_category_social">Social &amp; Communication</string>
     <!-- Category title for apps which are primarily news apps, such as newspapers, magazines, or sports apps. [CHAR LIMIT=32] -->
     <string name="app_category_news">News &amp; Magazines</string>

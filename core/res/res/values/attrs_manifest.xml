@@ -1422,7 +1422,7 @@
             <enum name="video" value="2" />
             <!-- Apps which primarily work with images or photos, such as camera or gallery apps. -->
             <enum name="image" value="3" />
-            <!-- Apps which are primarily social apps, such as messaging, communication, or social network apps. -->
+            <!-- Apps which are primarily social apps, such as messaging, communication, email, or social network apps. -->
             <enum name="social" value="4" />
             <!-- Apps which are primarily news apps, such as newspapers, magazines, or sports apps. -->
             <enum name="news" value="5" />
