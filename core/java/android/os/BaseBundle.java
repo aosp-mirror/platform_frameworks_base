@@ -450,6 +450,13 @@ public class BaseBundle {
             } else {
                 throw e;
             }
+        } catch (RuntimeException e) {
+            if (sShouldDefuse && (e.getCause() instanceof ClassNotFoundException)) {
+                Log.w(TAG, "Failed to parse Bundle, but defusing quietly", e);
+                map.erase();
+            } else {
+                throw e;
+            }
         } finally {
             mMap = map;
             if (recycleParcel) {
