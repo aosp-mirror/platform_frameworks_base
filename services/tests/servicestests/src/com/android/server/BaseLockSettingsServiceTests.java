@@ -53,19 +53,21 @@ import org.mockito.stubbing.Answer;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.ArrayList;
 
 
 public class BaseLockSettingsServiceTests extends AndroidTestCase {
     protected static final int PRIMARY_USER_ID = 0;
     protected static final int MANAGED_PROFILE_USER_ID = 12;
+    protected static final int TURNED_OFF_PROFILE_USER_ID = 17;
     protected static final int SECONDARY_USER_ID = 20;
 
     private static final UserInfo PRIMARY_USER_INFO = new UserInfo(PRIMARY_USER_ID, null, null,
             UserInfo.FLAG_INITIALIZED | UserInfo.FLAG_ADMIN | UserInfo.FLAG_PRIMARY);
-    private static final UserInfo MANAGED_PROFILE_INFO = new UserInfo(MANAGED_PROFILE_USER_ID, null,
-            null, UserInfo.FLAG_INITIALIZED | UserInfo.FLAG_MANAGED_PROFILE);
     private static final UserInfo SECONDARY_USER_INFO = new UserInfo(SECONDARY_USER_ID, null, null,
             UserInfo.FLAG_INITIALIZED);
+
+    private ArrayList<UserInfo> mPrimaryUserProfiles = new ArrayList<>();
 
     LockSettingsService mService;
 
@@ -106,13 +108,12 @@ public class BaseLockSettingsServiceTests extends AndroidTestCase {
         mService = new LockSettingsServiceTestable(mContext, mLockPatternUtils,
                 mStorage, mGateKeeperService, mKeyStore, mStorageManager, mActivityManager);
         when(mUserManager.getUserInfo(eq(PRIMARY_USER_ID))).thenReturn(PRIMARY_USER_INFO);
-        when(mUserManager.getProfiles(eq(PRIMARY_USER_ID))).thenReturn(Arrays.asList(
-                new UserInfo[] {PRIMARY_USER_INFO, MANAGED_PROFILE_INFO}));
-        when(mUserManager.getUserInfo(eq(MANAGED_PROFILE_USER_ID))).thenReturn(
-                MANAGED_PROFILE_INFO);
-        when(mUserManager.getProfileParent(eq(MANAGED_PROFILE_USER_ID))).thenReturn(
-                PRIMARY_USER_INFO);
+        mPrimaryUserProfiles.add(PRIMARY_USER_INFO);
+        installChildProfile(MANAGED_PROFILE_USER_ID);
+        installQuietModeChildProfile(TURNED_OFF_PROFILE_USER_ID);
+        when(mUserManager.getProfiles(eq(PRIMARY_USER_ID))).thenReturn(mPrimaryUserProfiles);
         when(mUserManager.getUserInfo(eq(SECONDARY_USER_ID))).thenReturn(SECONDARY_USER_INFO);
+        when(mUserManager.isUserRunning(eq(MANAGED_PROFILE_USER_ID))).thenReturn(true);
 
         when(mActivityManager.unlockUser(anyInt(), any(), any(), any())).thenAnswer(
                 new Answer<Boolean>() {
@@ -130,6 +131,21 @@ public class BaseLockSettingsServiceTests extends AndroidTestCase {
         // Adding a fake Device Owner app which will enable escrow token support in LSS.
         when(mDevicePolicyManager.getDeviceOwnerComponentOnAnyUser()).thenReturn(
                 new ComponentName("com.dummy.package", ".FakeDeviceOwner"));
+    }
+
+    private UserInfo installChildProfile(int profileId) {
+        final UserInfo userInfo = new UserInfo(
+            profileId, null, null, UserInfo.FLAG_INITIALIZED | UserInfo.FLAG_MANAGED_PROFILE);
+        mPrimaryUserProfiles.add(userInfo);
+        when(mUserManager.getUserInfo(eq(profileId))).thenReturn(userInfo);
+        when(mUserManager.getProfileParent(eq(profileId))).thenReturn(PRIMARY_USER_INFO);
+        return userInfo;
+    }
+
+    private UserInfo installQuietModeChildProfile(int profileId) {
+        final UserInfo userInfo = installChildProfile(profileId);
+        userInfo.flags |= UserInfo.FLAG_QUIET_MODE;
+        return userInfo;
     }
 
     @Override
