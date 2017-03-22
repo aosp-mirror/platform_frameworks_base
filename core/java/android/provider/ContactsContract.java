@@ -8983,6 +8983,11 @@ public final class ContactsContract {
          * value of this extra is a {@code String} and should be the value of {@link
          * android.accounts.Account#hashCode()} for some account returned by {@link
          * android.accounts.AccountManager#getAccounts()}.
+         * <p>
+         * If the extra is not specified, the app can decide which account to use.
+         * <p>
+         * If the account specified in the extra cannot be used for any reason (account missing, not
+         * usable by the app, etc), the message should not be sent.
          */
         public static final String EXTRA_SENDER_ACCOUNT_HASH =
                 "android.provider.extra.SENDER_ACCOUNT_HASH";
