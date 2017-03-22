@@ -14,10 +14,13 @@
 
 package com.android.internal.notification;
 
+import android.app.INotificationManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
+import android.content.pm.ParceledListSlice;
+import android.os.RemoteException;
 import android.provider.Settings;
 
 import com.android.internal.R;
@@ -68,6 +71,8 @@ public class SystemNotificationChannels {
                 CAR_MODE,
                 context.getString(R.string.notification_channel_car_mode),
                 NotificationManager.IMPORTANCE_LOW));
+
+        channelsList.add(newAccountChannel(context));
 
         channelsList.add(new NotificationChannel(
                 DEVELOPER,
@@ -121,15 +126,23 @@ public class SystemNotificationChannels {
                 NotificationManager.IMPORTANCE_MIN));
 
         nm.createNotificationChannels(channelsList);
-        createAccountChannelForPackage(context.getPackageName(), context);
     }
 
-    public static void createAccountChannelForPackage(String pkg, Context context) {
-        final NotificationManager nm = context.getSystemService(NotificationManager.class);
-        nm.createNotificationChannelsForPackage(pkg, Arrays.asList(new NotificationChannel(
+    public static void createAccountChannelForPackage(String pkg, int uid, Context context) {
+        final INotificationManager iNotificationManager = NotificationManager.getService();
+        try {
+            iNotificationManager.createNotificationChannelsForPackage(pkg, uid,
+                    new ParceledListSlice(Arrays.asList(newAccountChannel(context))));
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    private static NotificationChannel newAccountChannel(Context context) {
+        return new NotificationChannel(
                 ACCOUNT,
                 context.getString(R.string.notification_channel_account),
-                NotificationManager.IMPORTANCE_LOW)));
+                NotificationManager.IMPORTANCE_LOW);
     }
 
     private SystemNotificationChannels() {}

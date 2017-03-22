@@ -5677,7 +5677,7 @@ public class AccountManagerService
             synchronized (mUsers) {
                 userAccounts = mUsers.get(userId);
             }
-            SystemNotificationChannels.createAccountChannelForPackage(packageName, mContext);
+            SystemNotificationChannels.createAccountChannelForPackage(packageName, uid, mContext);
             doNotification(userAccounts, account, null, intent, packageName, userId);
         }
 
