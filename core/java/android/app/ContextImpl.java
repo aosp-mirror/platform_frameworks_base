@@ -63,6 +63,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.Trace;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.os.storage.IStorageManager;
 import android.system.ErrnoException;
 import android.system.Os;
@@ -365,6 +366,13 @@ class ContextImpl extends Context {
     @Override
     public SharedPreferences getSharedPreferences(File file, int mode) {
         checkMode(mode);
+        if (getApplicationInfo().targetSdkVersion >= android.os.Build.VERSION_CODES.O) {
+            if (isCredentialProtectedStorage()
+                    && !getSystemService(UserManager.class).isUserUnlocked()) {
+                throw new IllegalStateException("SharedPreferences in credential encrypted "
+                        + "storage are not available until after user is unlocked");
+            }
+        }
         SharedPreferencesImpl sp;
         synchronized (ContextImpl.class) {
             final ArrayMap<File, SharedPreferencesImpl> cache = getSharedPreferencesCacheLocked();
