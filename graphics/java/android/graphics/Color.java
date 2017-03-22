@@ -22,6 +22,7 @@ import android.annotation.ColorLong;
 import android.annotation.HalfFloat;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.Size;
 
 import android.util.Half;
@@ -288,7 +289,7 @@ import java.util.function.DoubleUnaryOperator;
  * and <code>(1.0, 0.0, 0.0, 0.5)</code>.</p>
  */
 @AnyThread
-public class Color {
+public final class Color {
     @ColorInt public static final int BLACK       = 0xFF000000;
     @ColorInt public static final int DKGRAY      = 0xFF444444;
     @ColorInt public static final int GRAY        = 0xFF888888;
@@ -415,7 +416,7 @@ public class Color {
      * to this color space's color model, plus one extra component for
      * alpha.
      *
-     * @return An integer between 4 and 5
+     * @return The integer 4 or 5
      */
     @IntRange(from = 4, to = 5)
     public int getComponentCount() {
@@ -560,7 +561,37 @@ public class Color {
     @NonNull
     @Size(min = 4, max = 5)
     public float[] getComponents() {
-        return Arrays.copyOf(mComponents, mColorSpace.getComponentCount() + 1);
+        return Arrays.copyOf(mComponents, mComponents.length);
+    }
+
+    /**
+     * Copies this color's components in the supplied array. The last element of the
+     * array is always the alpha component.
+     *
+     * @param components An array of floats whose size must be at least
+     *                  {@link #getComponentCount()}, can be null
+     * @return The array passed as a parameter if not null, or a new array of length
+     *         {@link #getComponentCount()}
+     *
+     * @see #getComponent(int)
+     *
+     * @throws IllegalArgumentException If the specified array's length is less than
+     * {@link #getComponentCount()}
+     */
+    @NonNull
+    @Size(min = 4)
+    public float[] getComponents(@Nullable @Size(min = 4) float[] components) {
+        if (components == null) {
+            return Arrays.copyOf(mComponents, mComponents.length);
+        }
+
+        if (components.length < mComponents.length) {
+            throw new IllegalArgumentException("The specified array's length must be at "
+                    + "least " + mComponents.length);
+        }
+
+        System.arraycopy(mComponents, 0, components, 0, mComponents.length);
+        return components;
     }
 
     /**
@@ -570,7 +601,7 @@ public class Color {
      *
      * <p>If the requested component index is {@link #getComponentCount()},
      * this method returns the alpha component, always in the range
-     * \([0..1\).</p>
+     * \([0..1]\).</p>
      *
      * @see #getComponents()
      *
