@@ -2295,17 +2295,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         mResizingTasksDuringAnimation.clear();
     }
 
-    private class MoveTaskToFullscreenArgs {
-        public int fromStackId;
-        public boolean onTop;
-    };
-    // Used only to closure over the arguments to moveTasksToFullscreenStack without
-    // allocation
-    private MoveTaskToFullscreenArgs mMoveToFullscreenArgs = new MoveTaskToFullscreenArgs();
-
-    private void moveTasksToFullscreenStackInnerLocked() {
-        int fromStackId = mMoveToFullscreenArgs.fromStackId;
-        boolean onTop = mMoveToFullscreenArgs.onTop;
+    private void moveTasksToFullscreenStackInSurfaceTransaction(int fromStackId,
+            boolean onTop) {
 
         final ActivityStack stack = getStack(fromStackId);
         if (stack == null) {
@@ -2379,10 +2370,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     }
 
     void moveTasksToFullscreenStackLocked(int fromStackId, boolean onTop) {
-        mMoveToFullscreenArgs.fromStackId = fromStackId;
-        mMoveToFullscreenArgs.onTop = onTop;
-
-        mWindowManager.inSurfaceTransaction(this::moveTasksToFullscreenStackInnerLocked);
+        mWindowManager.inSurfaceTransaction(
+                () -> moveTasksToFullscreenStackInSurfaceTransaction(fromStackId, onTop));
     }
 
     void resizeDockedStackLocked(Rect dockedBounds, Rect tempDockedTaskBounds,
@@ -2498,11 +2487,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     }
 
 
-    // Used only to closure over the argument to removeStack without allocation.
-    private int mRemoveStackStackId;
-    void removeStackInnerLocked() {
-        int stackId = mRemoveStackStackId;
-
+    void removeStackInSurfaceTransaction(int stackId) {
         final ActivityStack stack = getStack(stackId);
         if (stack == null) {
             return;
@@ -2546,8 +2531,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
      * instead moved back onto the fullscreen stack.
      */
     void removeStackLocked(int stackId) {
-        mRemoveStackStackId = stackId;
-        mWindowManager.inSurfaceTransaction(this::removeStackInnerLocked);
+        mWindowManager.inSurfaceTransaction(
+                () -> removeStackInSurfaceTransaction(stackId));
     }
 
     /**

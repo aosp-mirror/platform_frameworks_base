@@ -368,6 +368,10 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                 mEnteringAnimation = true;
                 mService.mActivityManagerAppTransitionNotifier.onAppTransitionFinishedLocked(token);
             }
+            // If we are hidden but there is no delay needed we immediately
+            // apply the Surface transaction so that the ActivityManager
+            // can have some guarantee on the Surface state
+            // following setting the visibility.
             if (hidden && !delayed) {
                 SurfaceControl.openTransaction();
                 for (int i = mChildren.size() - 1; i >= 0; i--) {

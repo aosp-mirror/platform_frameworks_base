@@ -7317,7 +7317,6 @@ public class WindowManagerService extends IWindowManager.Stub
      * WARNING: This method contains locks known to the State of California
      * to cause Deadlocks and other conditions.
      *
-     *
      * Begins a surface transaction with which the AM can batch operations.
      * All Surface updates performed by the WindowManager following this
      * will not appear on screen until after the call to
@@ -7329,7 +7328,6 @@ public class WindowManagerService extends IWindowManager.Stub
      * need to ensure it is hidden in the same frame that the properties
      * from the new parent are inherited, otherwise it could be revealed
      * mistakenly.
-     *
      *
      * TODO(b/36393204): We can investigate totally replacing #deferSurfaceLayout
      * with something like this but it seems that some existing cases of
