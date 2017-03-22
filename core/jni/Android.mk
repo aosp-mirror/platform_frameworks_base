@@ -215,6 +215,7 @@ LOCAL_C_INCLUDES += \
     external/pdfium/public \
     external/pdfium \
     external/skia/include/private \
+    external/skia/src/codec \
     external/skia/src/core \
     external/skia/src/effects \
     external/skia/src/image \
