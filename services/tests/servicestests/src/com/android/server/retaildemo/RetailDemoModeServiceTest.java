@@ -33,6 +33,8 @@ import android.app.ActivityManagerInternal;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.RetailDemoModeServiceInternal;
+import android.app.job.JobInfo;
+import android.app.job.JobScheduler;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -97,6 +99,7 @@ public class RetailDemoModeServiceTest {
     private @Mock AudioManager mAudioManager;
     private @Mock WifiManager mWifiManager;
     private @Mock LockPatternUtils mLockPatternUtils;
+    private @Mock JobScheduler mJobScheduler;
     private MockPreloadAppsInstaller mPreloadAppsInstaller;
     private MockContentResolver mContentResolver;
     private MockContactsProvider mContactsProvider;
@@ -110,6 +113,12 @@ public class RetailDemoModeServiceTest {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
+        Context originalContext = InstrumentationRegistry.getContext();
+        when(mContext.getApplicationInfo()).thenReturn(originalContext.getApplicationInfo());
+        when(mContext.getResources()).thenReturn(originalContext.getResources());
+        when(mContext.getSystemServiceName(eq(JobScheduler.class))).thenReturn(
+                Context.JOB_SCHEDULER_SERVICE);
+        when(mContext.getSystemService(Context.JOB_SCHEDULER_SERVICE)).thenReturn(mJobScheduler);
         mContentResolver = new MockContentResolver(mContext);
         mContentResolver.addProvider(Settings.AUTHORITY, new FakeSettingsProvider());
         mContactsProvider = new MockContactsProvider(mContext);
@@ -218,6 +227,8 @@ public class RetailDemoModeServiceTest {
         // verify that the preloaded directory is emptied.
         assertEquals("Preloads directory is not emptied",
                 0, mTestPreloadsDir.list().length);
+        // Verify that the expiration job was scheduled
+        verify(mJobScheduler).schedule(any(JobInfo.class));
     }
 
     @Test

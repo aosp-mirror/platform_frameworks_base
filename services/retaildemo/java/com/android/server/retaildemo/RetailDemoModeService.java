@@ -69,6 +69,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.LocalServices;
+import com.android.server.PreloadsFileCacheExpirationJobService;
 import com.android.server.ServiceThread;
 import com.android.server.SystemService;
 import com.android.server.am.ActivityManagerService;
@@ -259,6 +260,7 @@ public class RetailDemoModeService extends SystemService {
                         if (!deletePreloadsFolderContents()) {
                             Slog.w(TAG, "Failed to delete preloads folder contents");
                         }
+                        PreloadsFileCacheExpirationJobService.schedule(mInjector.getContext());
                     });
 
                     stopDemoMode();
@@ -443,6 +445,11 @@ public class RetailDemoModeService extends SystemService {
                 mInjector.getContentResolver(), Settings.Global.DEVICE_PROVISIONED, 0) != 0;
     }
 
+    /**
+     * Deletes contents of {@link Environment#getDataPreloadsDirectory()},
+     * but leave {@link Environment#getDataPreloadsFileCacheDirectory()}
+     * @return true if contents was sucessfully deleted
+     */
     private boolean deletePreloadsFolderContents() {
         final File dir = mInjector.getDataPreloadsDirectory();
         final File[] files = FileUtils.listFilesOrEmpty(dir);
