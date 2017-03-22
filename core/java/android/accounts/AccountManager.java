@@ -336,7 +336,7 @@ public class AccountManager {
      *
      * @see #addOnAccountsUpdatedListener
      *
-     * @deprecated use #addOnAccountsUpdatedListener to get account updates in runtime.
+     * @deprecated use {@link #addOnAccountsUpdatedListener} to get account updates in runtime.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     @BroadcastBehavior(includeBackground = true)
@@ -888,9 +888,9 @@ public class AccountManager {
      * This method requires the caller to have a signature match with the authenticator that owns
      * the specified account.
      *
-     * @param account The account for which visibility data should be returned.
+     * @param account The account for which visibility data should be returned
      *
-     * @return Map from package names to visibility for given account.
+     * @return Map from package names to visibility for given account
      */
     public Map<String, Integer> getPackagesAndVisibilityForAccount(Account account) {
         try {
@@ -913,11 +913,11 @@ public class AccountManager {
      *
      * <p>
      *
-     * @param packageName Package name.
-     * @param accountType Account type.
+     * @param packageName Package name
+     * @param accountType {@link Account} type
      *
-     * @return Map with visibility for all accounts of given type.
-     * See {@link #getAccountVisibility} for possilbe values.
+     * @return Map with visibility for all accounts of given type
+     * See {@link #getAccountVisibility} for possible values
      */
     public Map<Account, Integer> getAccountsAndVisibilityForPackage(String packageName,
             String accountType) {
@@ -932,7 +932,7 @@ public class AccountManager {
     }
 
     /**
-     * Set visibility value of given account to certain packageName.
+     * Set visibility value of given account to certain package.
      * Package name must match installed application, or be equal to
      * {@link #PACKAGE_NAME_KEY_LEGACY_VISIBLE} or {@link #PACKAGE_NAME_KEY_LEGACY_NOT_VISIBLE}.
      * <p>
@@ -948,11 +948,11 @@ public class AccountManager {
      * This method requires the caller to have a signature match with the authenticator that owns
      * the specified account.
      *
-     * @param account Account to update visibility
-     * @param packageName Package name of the application to modify account visibility.
-     * @param visibility - new visibility value.
+     * @param account {@link Account} to update visibility
+     * @param packageName Package name of the application to modify account visibility
+     * @param visibility New visibility value
      *
-     * @return True if visibility value was succesfully updated.
+     * @return True, if visibility value was successfully updated.
      */
     public boolean setAccountVisibility(Account account, String packageName,
             @AccountVisibility int visibility) {
@@ -978,10 +978,10 @@ public class AccountManager {
      * This method requires the caller to have a signature match with the authenticator that owns
      * the specified account.
      *
-     * @param account Account to get visibility.
+     * @param account {@link Account} to get visibility
      * @param packageName Package name of the application to get account visibility
      *
-     * @return int Visibility for given account and package.
+     * @return int Visibility of given account.
      */
     public @AccountVisibility int getAccountVisibility(Account account, String packageName) {
         if (account == null)
