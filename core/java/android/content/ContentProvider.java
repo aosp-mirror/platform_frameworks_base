@@ -620,12 +620,17 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
             return MODE_IGNORED;
         }
 
-        final String failReason = mExported
-                ? " requires " + missingPerm + ", or grantUriPermission()"
-                : " requires the provider be exported, or grantUriPermission()";
+        final String suffix;
+        if (android.Manifest.permission.MANAGE_DOCUMENTS.equals(mReadPermission)) {
+            suffix = " requires that you obtain access using ACTION_OPEN_DOCUMENT or related APIs";
+        } else if (mExported) {
+            suffix = " requires " + missingPerm + ", or grantUriPermission()";
+        } else {
+            suffix = " requires the provider be exported, or grantUriPermission()";
+        }
         throw new SecurityException("Permission Denial: reading "
                 + ContentProvider.this.getClass().getName() + " uri " + uri + " from pid=" + pid
-                + ", uid=" + uid + failReason);
+                + ", uid=" + uid + suffix);
     }
 
     /** {@hide} */
