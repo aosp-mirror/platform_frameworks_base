@@ -36,6 +36,7 @@ import static android.net.NetworkPolicyManager.RULE_REJECT_ALL;
 import static android.net.NetworkPolicyManager.RULE_REJECT_METERED;
 import static android.net.NetworkPolicyManager.RULE_TEMPORARY_ALLOW_METERED;
 import static android.net.NetworkPolicyManager.uidRulesToString;
+import static com.android.internal.util.Preconditions.checkNotNull;
 
 import android.annotation.Nullable;
 import android.app.BroadcastOptions;
@@ -3450,13 +3451,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         Slog.e(TAG, s);
     }
 
-    private static <T> T checkNotNull(T value, String message) {
-        if (value == null) {
-            throw new NullPointerException(message);
-        }
-        return value;
-    }
-
     /**
      * Prepare for a VPN application.
      * VPN permissions are checked in the {@link Vpn} class. If the caller is not {@code userId},
@@ -4759,8 +4753,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
         msg.setData(bundle);
         try {
             if (VDBG) {
-                log("sending notification " + notifyTypeToName(notificationType) +
-                        " for " + nri.request);
+                String notification = ConnectivityManager.getCallbackName(notificationType);
+                log("sending notification " + notification + " for " + nri.request);
             }
             nri.messenger.send(msg);
         } catch (RemoteException e) {
@@ -5370,7 +5364,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     protected void notifyNetworkCallbacks(NetworkAgentInfo networkAgent, int notifyType, int arg1) {
-        if (VDBG) log("notifyType " + notifyTypeToName(notifyType) + " for " + networkAgent.name());
+        if (VDBG) {
+            String notification = ConnectivityManager.getCallbackName(notifyType);
+            log("notifyType " + notification + " for " + networkAgent.name());
+        }
         for (int i = 0; i < networkAgent.numNetworkRequests(); i++) {
             NetworkRequest nr = networkAgent.requestAt(i);
             NetworkRequestInfo nri = mNetworkRequests.get(nr);
@@ -5387,20 +5384,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     protected void notifyNetworkCallbacks(NetworkAgentInfo networkAgent, int notifyType) {
         notifyNetworkCallbacks(networkAgent, notifyType, 0);
-    }
-
-    private String notifyTypeToName(int notifyType) {
-        switch (notifyType) {
-            case ConnectivityManager.CALLBACK_PRECHECK:    return "PRECHECK";
-            case ConnectivityManager.CALLBACK_AVAILABLE:   return "AVAILABLE";
-            case ConnectivityManager.CALLBACK_LOSING:      return "LOSING";
-            case ConnectivityManager.CALLBACK_LOST:        return "LOST";
-            case ConnectivityManager.CALLBACK_UNAVAIL:     return "UNAVAILABLE";
-            case ConnectivityManager.CALLBACK_CAP_CHANGED: return "CAP_CHANGED";
-            case ConnectivityManager.CALLBACK_IP_CHANGED:  return "IP_CHANGED";
-            case ConnectivityManager.CALLBACK_RELEASED:    return "RELEASED";
-        }
-        return "UNKNOWN";
     }
 
     /**
