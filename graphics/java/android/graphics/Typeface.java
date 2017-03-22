@@ -490,7 +490,6 @@ public class Typeface {
      *
      * <p>Note that only one source can be specified for the single Typeface.</p>
      */
-    /** @hide TODO: Make this API public. */
     public static final class Builder {
         /**
          * Value for weight and italic.

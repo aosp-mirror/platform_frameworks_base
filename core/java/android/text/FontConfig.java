@@ -111,7 +111,6 @@ public final class FontConfig implements Parcelable {
             mStyleValue = styleValue;
         }
 
-        /** @hide */
         public Axis(@NonNull String tagString, float styleValue) {
             if (!FontListParser.isValidTag(tagString)) {
                 throw new IllegalArgumentException("Invalid tag pattern: " + tagString);
