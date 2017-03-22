@@ -120,10 +120,12 @@ final class TextClassifierImpl implements TextClassifier {
                 SmartSelection.ClassificationResult[] results = getSmartSelection()
                         .classifyText(text.toString(), startIndex, endIndex);
                 if (results.length > 0) {
+                    final TextClassificationResult classificationResult =
+                            createClassificationResult(results, classified);
                     // TODO: Added this log for debug only. Remove before release.
                     Log.d(LOG_TAG, String.format(
-                            "Classification type: %s", getHighestScoringType(results)));
-                    return createClassificationResult(results, classified);
+                            "Classification type: %s", classificationResult));
+                    return classificationResult;
                 }
             }
         } catch (Throwable t) {
@@ -147,26 +149,6 @@ final class TextClassifierImpl implements TextClassifier {
         }
         // Getting here means something went wrong, return a NO_OP result.
         return TextClassifier.NO_OP.getLinks(text, linkMask, defaultLocales);
-    }
-
-    // TODO: Remove
-    @Override
-    public TextSelection suggestSelection(
-            CharSequence text, int selectionStartIndex, int selectionEndIndex) {
-        throw new UnsupportedOperationException("Removed");
-    }
-
-    // TODO: Remove
-    @Override
-    public TextClassificationResult getTextClassificationResult(
-            CharSequence text, int startIndex, int endIndex) {
-        throw new UnsupportedOperationException("Removed");
-    }
-
-    // TODO: Remove
-    @Override
-    public LinksInfo getLinks(CharSequence text, int linkMask) {
-        throw new UnsupportedOperationException("Removed");
     }
 
     private SmartSelection getSmartSelection() throws FileNotFoundException {
