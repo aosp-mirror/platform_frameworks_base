@@ -1149,7 +1149,11 @@ status_t generateAndroidManifestForSplit(Bundle* bundle, const sp<AaptAssets>& a
     if (err < NO_ERROR) {
         return err;
     }
+#ifdef AAPT_COMPRESS
     outFile->setCompressionMethod(ZipEntry::kCompressDeflated);
+#else
+    outFile->setCompressionMethod(ZipEntry::kCompressStored);
+#endif
     return NO_ERROR;
 }
 

@@ -68,7 +68,7 @@ aaptCFlags := -DAAPT_VERSION=\"$(BUILD_NUMBER_FROM_FILE)\"
 aaptCFlags += -Wall -Werror
 
 ifeq ($(TARGET_WANTS_AAPT_COMPRESS),true)
-aaptCFlags += -DAAPT_COMPRESS=1
+aaptCFlags += -DAAPT_COMPRESS
 endif
 
 aaptHostLdLibs_linux := -lrt -ldl -lpthread

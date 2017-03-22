@@ -269,7 +269,7 @@ int main(int argc, char* const argv[])
     int tolerance = 0;
 
     /* default to 0 compression, unless the target opted out*/
-#if AAPT_COMPRESS
+#ifdef AAPT_COMPRESS
     bundle.setCompressionMethod(ZipEntry::kCompressDeflated);
 #else
     bundle.setCompressionMethod(ZipEntry::kCompressStored);
