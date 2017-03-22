@@ -411,7 +411,18 @@ public final class PdfRenderer implements AutoCloseable {
             final int contentBottom = (destClip != null) ? destClip.bottom
                     : destination.getHeight();
 
-            final long transformPtr = (transform != null) ? transform.native_instance : 0;
+            // If transform is not set, stretch page to whole clipped area
+            if (transform == null) {
+                int clipWidth = contentRight - contentLeft;
+                int clipHeight = contentBottom - contentTop;
+
+                transform = new Matrix();
+                transform.postScale((float)clipWidth / getWidth(),
+                        (float)clipHeight / getHeight());
+                transform.postTranslate(contentLeft, contentTop);
+            }
+
+            final long transformPtr = transform.native_instance;
 
             synchronized (sPdfiumLock) {
                 nativeRenderPage(mNativeDocument, mNativePage, destination, contentLeft,
@@ -463,7 +474,8 @@ public final class PdfRenderer implements AutoCloseable {
     private static native int nativeGetPageCount(long documentPtr);
     private static native boolean nativeScaleForPrinting(long documentPtr);
     private static native void nativeRenderPage(long documentPtr, long pagePtr, Bitmap dest,
-            int destLeft, int destTop, int destRight, int destBottom, long matrixPtr, int renderMode);
+            int clipLeft, int clipTop, int clipRight, int clipBottom, long transformPtr,
+            int renderMode);
     private static native long nativeOpenPageAndGetSize(long documentPtr, int pageIndex,
             Point outSize);
     private static native void nativeClosePage(long pagePtr);

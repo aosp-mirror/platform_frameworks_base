@@ -210,10 +210,7 @@ LOCAL_C_INCLUDES += \
     $(TOP)/system/media/camera/include \
     $(TOP)/system/netd/include \
     external/giflib \
-    external/pdfium/core/include/fpdfapi \
-    external/pdfium/fpdfsdk/include \
     external/pdfium/public \
-    external/pdfium \
     external/skia/include/private \
     external/skia/src/core \
     external/skia/src/effects \
