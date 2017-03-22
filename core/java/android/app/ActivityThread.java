@@ -792,6 +792,11 @@ public final class ActivityThread {
         public final void scheduleReceiver(Intent intent, ActivityInfo info,
                 CompatibilityInfo compatInfo, int resultCode, String data, Bundle extras,
                 boolean sync, int sendingUser, int processState) {
+            // TODO: Debugging added for bug:36406078 . Remove when done
+            if (Log.isLoggable("36406078", Log.DEBUG)) {
+                Log.d(TAG, "scheduleReceiver");
+            }
+
             updateProcessState(processState, false);
             ReceiverData r = new ReceiverData(intent, resultCode, data, extras,
                     sync, false, mAppThread.asBinder(), sendingUser);
@@ -877,6 +882,11 @@ public final class ActivityThread {
                 boolean isRestrictedBackupMode, boolean persistent, Configuration config,
                 CompatibilityInfo compatInfo, Map services, Bundle coreSettings,
                 String buildSerial) {
+
+            // TODO: Debugging added for bug:36406078 . Remove when done
+            if (Log.isLoggable("36406078", Log.DEBUG)) {
+                Log.d(TAG, "bindApplication: " + processName);
+            }
 
             if (services != null) {
                 // Setup the service cache in the ServiceManager
@@ -3183,6 +3193,10 @@ public final class ActivityThread {
 
         if (receiver.getPendingResult() != null) {
             data.finish();
+        }
+        // TODO: Debugging added for bug:36406078 . Remove when done
+        if (Log.isLoggable("36406078", Log.DEBUG)) {
+            Log.d(TAG, "handleReceiver done");
         }
     }
 
@@ -5716,6 +5730,10 @@ public final class ActivityThread {
             }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        }
+        // TODO: Debugging added for bug:36406078 . Remove when done
+        if (Log.isLoggable("36406078", Log.DEBUG)) {
+            Log.d(TAG, "handleBindApplication done");
         }
     }
 
