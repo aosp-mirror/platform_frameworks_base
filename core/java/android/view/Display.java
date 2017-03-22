@@ -50,7 +50,7 @@ import java.util.Arrays;
  * <li>The real display area specifies the part of the display that contains content
  * including the system decorations.  Even so, the real display area may be smaller than the
  * physical size of the display if the window manager is emulating a smaller display
- * using (adb shell wm size).  Use the following methods to query the
+ * using (adb shell am display-size).  Use the following methods to query the
  * real display area: {@link #getRealSize}, {@link #getRealMetrics}.</li>
  * </ul>
  * </p><p>
@@ -947,7 +947,7 @@ public final class Display {
      * The size is adjusted based on the current rotation of the display.
      * </p><p>
      * The real size may be smaller than the physical size of the screen when the
-     * window manager is emulating a smaller display (using adb shell wm size).
+     * window manager is emulating a smaller display (using adb shell am display-size).
      * </p>
      *
      * @param outSize Set to the real size of the display.
