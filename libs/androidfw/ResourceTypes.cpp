@@ -4320,6 +4320,7 @@ ssize_t ResTable::getBagLocked(uint32_t resID, const bag_entry** outBag,
         if (curOff > (dtohl(entry.type->header.size)-sizeof(ResTable_map))) {
             ALOGW("ResTable_map at %d is beyond type chunk data %d",
                  (int)curOff, dtohl(entry.type->header.size));
+            free(set);
             return BAD_TYPE;
         }
         map = (const ResTable_map*)(((const uint8_t*)entry.type) + curOff);
@@ -4332,6 +4333,7 @@ ssize_t ResTable::getBagLocked(uint32_t resID, const bag_entry** outBag,
             if (grp->dynamicRefTable.lookupResourceId(&newName) != NO_ERROR) {
                 ALOGE("Failed resolving ResTable_map name at %d with ident 0x%08x",
                         (int) curOff, (int) newName);
+                free(set);
                 return UNKNOWN_ERROR;
             }
         }
