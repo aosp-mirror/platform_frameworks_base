@@ -89,7 +89,10 @@ public class UsbDeviceStateController {
     @Override
     protected void finalize() throws Throwable {
         try {
-            mCloseGuard.warnIfOpen();
+            if (mCloseGuard != null) {
+                mCloseGuard.warnIfOpen();
+            }
+
             release();
         } finally {
             super.finalize();

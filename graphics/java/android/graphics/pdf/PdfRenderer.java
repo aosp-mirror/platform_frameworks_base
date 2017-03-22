@@ -230,7 +230,10 @@ public final class PdfRenderer implements AutoCloseable {
     @Override
     protected void finalize() throws Throwable {
         try {
-            mCloseGuard.warnIfOpen();
+            if (mCloseGuard != null) {
+                mCloseGuard.warnIfOpen();
+            }
+
             if (mInput != null) {
                 doClose();
             }
@@ -444,7 +447,10 @@ public final class PdfRenderer implements AutoCloseable {
         @Override
         protected void finalize() throws Throwable {
             try {
-                mCloseGuard.warnIfOpen();
+                if (mCloseGuard != null) {
+                    mCloseGuard.warnIfOpen();
+                }
+
                 if (mNativePage != 0) {
                     doClose();
                 }

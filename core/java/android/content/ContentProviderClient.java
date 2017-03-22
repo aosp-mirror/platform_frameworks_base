@@ -524,7 +524,10 @@ public class ContentProviderClient implements AutoCloseable {
     @Override
     protected void finalize() throws Throwable {
         try {
-            mCloseGuard.warnIfOpen();
+            if (mCloseGuard != null) {
+                mCloseGuard.warnIfOpen();
+            }
+
             close();
         } finally {
             super.finalize();
@@ -579,7 +582,10 @@ public class ContentProviderClient implements AutoCloseable {
         @Override
         protected void finalize() throws Throwable {
             try {
-                mCloseGuard.warnIfOpen();
+                if (mCloseGuard != null) {
+                    mCloseGuard.warnIfOpen();
+                }
+
                 close();
             } finally {
                 super.finalize();
