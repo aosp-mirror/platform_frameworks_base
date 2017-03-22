@@ -24,6 +24,8 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.nullable;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -87,6 +89,17 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+
+/**
+ * Tests for {@link AccountManagerService}.
+ * <p>Run with:<pre>
+ * mmma -j40 frameworks/base/services/tests/servicestests
+ * adb install -r ${OUT}/data/app/FrameworksServicesTests/FrameworksServicesTests.apk
+ * adb shell am instrument -w -e class package com.android.server.accounts \
+ * com.android.frameworks.servicestests\
+ * /android.support.test.runner.AndroidJUnitRunner
+ * </pre>
+ */
 public class AccountManagerServiceTest extends AndroidTestCase {
     private static final String TAG = AccountManagerServiceTest.class.getSimpleName();
     private static final long ONE_DAY_IN_MILLISECOND = 86400000;
@@ -103,6 +116,8 @@ public class AccountManagerServiceTest extends AndroidTestCase {
 
     @Captor private ArgumentCaptor<Intent> mIntentCaptor;
     @Captor private ArgumentCaptor<Bundle> mBundleCaptor;
+    private int mVisibleAccountsChangedBroadcasts;
+    private int mLoginAccountsChangedBroadcasts;
 
     private static final int LATCH_TIMEOUT_MS = 500;
     private static final String PREN_DB = "pren.db";
@@ -1042,7 +1057,7 @@ public class AccountManagerServiceTest extends AndroidTestCase {
         waitForLatch(latch);
         // Verify notification is cancelled
         verify(mMockNotificationManager).cancelNotificationWithTag(
-                anyString(), anyString(), anyInt(), anyInt());
+                anyString(), nullable(String.class), anyInt(), anyInt());
 
         verify(mMockAccountManagerResponse).onResult(mBundleCaptor.capture());
         Bundle result = mBundleCaptor.getValue();
@@ -1889,7 +1904,7 @@ public class AccountManagerServiceTest extends AndroidTestCase {
         waitForLatch(latch);
         // Verify notification is cancelled
         verify(mMockNotificationManager).cancelNotificationWithTag(
-                anyString(), anyString(), anyInt(), anyInt());
+                anyString(), nullable(String.class), anyInt(), anyInt());
 
         verify(mMockAccountManagerResponse).onResult(mBundleCaptor.capture());
         Bundle result = mBundleCaptor.getValue();
@@ -2444,6 +2459,161 @@ public class AccountManagerServiceTest extends AndroidTestCase {
         verify(mMockAccountManagerResponse).onError(
                 eq(AccountManager.ERROR_CODE_INVALID_RESPONSE), anyString());
         verify(mMockAccountManagerResponse, never()).onResult(any(Bundle.class));
+    }
+
+    @SmallTest
+    public void testRegisterAccountListener() throws Exception {
+        unlockSystemUser();
+        mAms.registerAccountListener(
+            new String [] {AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1},
+            "testpackage"); // opPackageName
+
+        mAms.registerAccountListener(
+            null, //accountTypes
+            "testpackage"); // opPackageName
+
+        // Check that two previously registered receivers can be unregistered successfully.
+        mAms.unregisterAccountListener(
+            new String [] {AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1},
+            "testpackage"); // opPackageName
+
+        mAms.unregisterAccountListener(
+             null, //accountTypes
+            "testpackage"); // opPackageName
+    }
+
+    @SmallTest
+    public void testRegisterAccountListenerAndAddAccount() throws Exception {
+        unlockSystemUser();
+        mAms.registerAccountListener(
+            new String [] {AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1},
+            "testpackage"); // opPackageName
+
+        mAms.addAccountExplicitly(AccountManagerServiceTestFixtures.ACCOUNT_SUCCESS, "p11", null);
+        // Notification about new account
+        updateBroadcastCounters(2);
+        assertEquals(mVisibleAccountsChangedBroadcasts, 1);
+        assertEquals(mLoginAccountsChangedBroadcasts, 1);
+    }
+
+    @SmallTest
+    public void testRegisterAccountListenerAndAddAccountOfDifferentType() throws Exception {
+        unlockSystemUser();
+        mAms.registerAccountListener(
+            new String [] {AccountManagerServiceTestFixtures.ACCOUNT_TYPE_2},
+            "testpackage"); // opPackageName
+
+        mAms.addAccountExplicitly(AccountManagerServiceTestFixtures.ACCOUNT_SUCCESS, "p11", null);
+        mAms.addAccountExplicitly(
+            AccountManagerServiceTestFixtures.ACCOUNT_INTERVENE, "p11", null);
+        // Notification about new account
+
+        updateBroadcastCounters(2);
+        assertEquals(mVisibleAccountsChangedBroadcasts, 0); // broadcast was not sent
+        assertEquals(mLoginAccountsChangedBroadcasts, 2);
+    }
+
+    @SmallTest
+    public void testRegisterAccountListenerWithAddingTwoAccounts() throws Exception {
+        unlockSystemUser();
+        mAms.registerAccountListener(
+            new String [] {AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1},
+            "testpackage"); // opPackageName
+        mAms.addAccountExplicitly(AccountManagerServiceTestFixtures.ACCOUNT_SUCCESS, "p11", null);
+        mAms.unregisterAccountListener(
+            new String [] {AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1},
+            "testpackage"); // opPackageName
+        mAms.addAccountExplicitly(
+            AccountManagerServiceTestFixtures.ACCOUNT_INTERVENE, "p11", null);
+
+        updateBroadcastCounters(3);
+        assertEquals(mVisibleAccountsChangedBroadcasts, 1);
+        assertEquals(mLoginAccountsChangedBroadcasts, 2);
+
+        mAms.removeAccountInternal(AccountManagerServiceTestFixtures.ACCOUNT_SUCCESS);
+        mAms.registerAccountListener( null /* accountTypes */, "testpackage");
+        mAms.removeAccountInternal(AccountManagerServiceTestFixtures.ACCOUNT_INTERVENE);
+
+        updateBroadcastCounters(6);
+        assertEquals(mVisibleAccountsChangedBroadcasts, 2);
+        assertEquals(mLoginAccountsChangedBroadcasts, 4);
+    }
+
+    @SmallTest
+    public void testRegisterAccountListenerForThreePackages() throws Exception {
+        unlockSystemUser();
+        mAms.registerAccountListener(
+            new String [] {AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1},
+            "testpackage1"); // opPackageName
+        mAms.registerAccountListener(
+            new String [] {AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1},
+            "testpackage2"); // opPackageName
+        mAms.registerAccountListener(
+            new String [] {AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1},
+            "testpackage3"); // opPackageName
+        mAms.addAccountExplicitly(AccountManagerServiceTestFixtures.ACCOUNT_SUCCESS, "p11", null);
+        updateBroadcastCounters(4);
+        assertEquals(mVisibleAccountsChangedBroadcasts, 3);
+        assertEquals(mLoginAccountsChangedBroadcasts, 1);
+
+        mAms.unregisterAccountListener(
+            new String [] {AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1},
+            "testpackage3"); // opPackageName
+        // Remove account with 2 active listeners.
+        mAms.removeAccountInternal(AccountManagerServiceTestFixtures.ACCOUNT_SUCCESS);
+        updateBroadcastCounters(7);
+        assertEquals(mVisibleAccountsChangedBroadcasts, 5);
+        assertEquals(mLoginAccountsChangedBroadcasts, 2); // 3 add, 2 remove
+
+        // Add account of another type.
+        mAms.addAccountExplicitly(
+            AccountManagerServiceTestFixtures.ACCOUNT_SUCCESS_TYPE_2, "p11", null);
+
+        updateBroadcastCounters(8);
+        assertEquals(mVisibleAccountsChangedBroadcasts, 5);
+        assertEquals(mLoginAccountsChangedBroadcasts, 3);
+    }
+
+    @SmallTest
+    public void testRegisterAccountListenerCredentialsUpdate() throws Exception {
+        unlockSystemUser();
+        mAms.registerAccountListener(
+            new String [] {AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1},
+            "testpackage"); // opPackageName
+        mAms.addAccountExplicitly(AccountManagerServiceTestFixtures.ACCOUNT_SUCCESS, "p11", null);
+        mAms.setPassword(AccountManagerServiceTestFixtures.ACCOUNT_SUCCESS, "pwd");
+        updateBroadcastCounters(4);
+        assertEquals(mVisibleAccountsChangedBroadcasts, 2);
+        assertEquals(mLoginAccountsChangedBroadcasts, 2);
+    }
+
+    @SmallTest
+    public void testUnregisterAccountListenerNotRegistered() throws Exception {
+        unlockSystemUser();
+        try {
+            mAms.unregisterAccountListener(
+                new String [] {AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1},
+                "testpackage"); // opPackageName
+            fail("IllegalArgumentException expected. But no exception was thrown.");
+        } catch (IllegalArgumentException e) {
+            // IllegalArgumentException is expected.
+        }
+    }
+
+    private void updateBroadcastCounters (int expectedBroadcasts){
+        mVisibleAccountsChangedBroadcasts = 0;
+        mLoginAccountsChangedBroadcasts = 0;
+        ArgumentCaptor<Intent> captor = ArgumentCaptor.forClass(Intent.class);
+        verify(mMockContext, times(expectedBroadcasts)).sendBroadcastAsUser(captor.capture(),
+            any(UserHandle.class));
+        for (Intent intent : captor.getAllValues()) {
+            if (AccountManager.ACTION_VISIBLE_ACCOUNTS_CHANGED. equals(intent.getAction())) {
+                mVisibleAccountsChangedBroadcasts++;
+            }
+            if (AccountManager.LOGIN_ACCOUNTS_CHANGED_ACTION. equals(intent.getAction())) {
+                mLoginAccountsChangedBroadcasts++;
+            }
+        }
     }
 
     private void waitForLatch(CountDownLatch latch) {

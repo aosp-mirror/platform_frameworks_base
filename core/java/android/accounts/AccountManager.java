@@ -344,6 +344,17 @@ public class AccountManager {
         "android.accounts.LOGIN_ACCOUNTS_CHANGED";
 
     /**
+     * Action sent as a broadcast Intent to specific package by the AccountsService
+     * when account visibility or account's credentials (saved password, etc) are changed.
+     *
+     * @see #addOnAccountsUpdatedListener
+     *
+     * @hide
+     */
+    public static final String ACTION_VISIBLE_ACCOUNTS_CHANGED =
+        "android.accounts.action.VISIBLE_ACCOUNTS_CHANGED";
+
+    /**
      * Key to set default visibility for applications targeting API level
      * {@link android.os.Build.VERSION_CODES#O} or above and don't have the same signature as
      * authenticator See {@link #getAccountVisibility}. If the value was not set by authenticator
@@ -1057,8 +1068,8 @@ public class AccountManager {
 
     /**
      * Gets the previous name associated with the account or {@code null}, if
-     * none. This is intended so that clients of {@link
-     * #LOGIN_ACCOUNTS_CHANGED_ACTION} broadcasts can determine if an
+     * none. This is intended so that clients of
+     * {@link OnAccountsUpdateListener} can determine if an
      * authenticator has renamed an account.
      *
      * <p>It is safe to call this method from the main thread.
@@ -1555,7 +1566,8 @@ public class AccountManager {
      * <p>In that case, you may need to wait until the user responds, which
      * could take hours or days or forever.  When the user does respond and
      * supply a new password, the account manager will broadcast the
-     * {@link #LOGIN_ACCOUNTS_CHANGED_ACTION} Intent, which applications can
+     * {@link #LOGIN_ACCOUNTS_CHANGED_ACTION} Intent and
+     * notify {@link OnAccountsUpdateListener} which applications can
      * use to try again.
      *
      * <p>If notifyAuthFailure is not set, it is the application's
@@ -1631,7 +1643,8 @@ public class AccountManager {
      * <p>In that case, you may need to wait until the user responds, which
      * could take hours or days or forever.  When the user does respond and
      * supply a new password, the account manager will broadcast the
-     * {@link #LOGIN_ACCOUNTS_CHANGED_ACTION} Intent, which applications can
+     * {@link #LOGIN_ACCOUNTS_CHANGED_ACTION} Intent and
+     * notify {@link OnAccountsUpdateListener} which applications can
      * use to try again.
      *
      * <p>If notifyAuthFailure is not set, it is the application's
@@ -2811,7 +2824,7 @@ public class AccountManager {
             Maps.newHashMap();
 
     /**
-     * BroadcastReceiver that listens for the LOGIN_ACCOUNTS_CHANGED_ACTION intent
+     * BroadcastReceiver that listens for the ACTION_VISIBLE_ACCOUNTS_CHANGED intent
      * so that it can read the updated list of accounts and send them to the listener
      * in mAccountsUpdatedListeners.
      */
@@ -2881,21 +2894,26 @@ public class AccountManager {
             mAccountsUpdatedListeners.put(listener, handler);
             if (accountTypes != null) {
                 mAccountsUpdatedListenersTypes.put(listener,
-                        new HashSet<String>(Arrays.asList(accountTypes)));
+                    new HashSet<String>(Arrays.asList(accountTypes)));
+            } else {
+                mAccountsUpdatedListenersTypes.put(listener, null);
             }
 
             if (wasEmpty) {
                 // Register a broadcast receiver to monitor account changes
                 IntentFilter intentFilter = new IntentFilter();
-                // TODO get rid of the broadcast receiver
-                // create android.os.ResultReceiver
-                // send it to the service via aidl
-                // handle onReceiveResult
-                intentFilter.addAction(LOGIN_ACCOUNTS_CHANGED_ACTION);
+                intentFilter.addAction(ACTION_VISIBLE_ACCOUNTS_CHANGED);
                 // To recover from disk-full.
                 intentFilter.addAction(Intent.ACTION_DEVICE_STORAGE_OK);
-                // Register a broadcast receiver to monitor account changes
                 mContext.registerReceiver(mAccountsChangedBroadcastReceiver, intentFilter);
+            }
+
+            try {
+                // Notify AccountManagedService about new receiver.
+                // The receiver must be unregistered later exactly one time
+                mService.registerAccountListener(accountTypes, mContext.getOpPackageName());
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
             }
         }
         if (updateImmediately) {
@@ -2923,10 +2941,22 @@ public class AccountManager {
                 Log.e(TAG, "Listener was not previously added");
                 return;
             }
+            Set<String> accountTypes = mAccountsUpdatedListenersTypes.get(listener);
+            String[] accountsArray;
+            if (accountTypes != null) {
+                accountsArray = accountTypes.toArray(new String[accountTypes.size()]);
+            } else {
+                accountsArray = null;
+            }
             mAccountsUpdatedListeners.remove(listener);
             mAccountsUpdatedListenersTypes.remove(listener);
             if (mAccountsUpdatedListeners.isEmpty()) {
                 mContext.unregisterReceiver(mAccountsChangedBroadcastReceiver);
+            }
+            try {
+                mService.unregisterAccountListener(accountsArray, mContext.getOpPackageName());
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
             }
         }
     }
