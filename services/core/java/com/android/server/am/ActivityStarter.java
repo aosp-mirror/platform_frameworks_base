@@ -1453,6 +1453,12 @@ class ActivityStarter {
         return intentActivity;
     }
 
+    /**
+     * Figure out which task and activity to bring to front when we have found an existing matching
+     * activity record in history. May also clear the task if needed.
+     * @param intentActivity Existing matching activity.
+     * @return {@link ActivityRecord} brought to front.
+     */
     private ActivityRecord setTargetStackAndMoveToFrontIfNeeded(ActivityRecord intentActivity) {
         mTargetStack = intentActivity.getStack();
         mTargetStack.mLastPausedActivity = null;
@@ -1513,6 +1519,14 @@ class ActivityStarter {
                                     mOptions, mStartActivity.appTimeTracker,
                                     "bringToFrontInsteadOfAdjacentLaunch");
                         }
+                        mMovedToFront = true;
+                    } else if (launchStack.mDisplayId != mTargetStack.mDisplayId) {
+                        // Target and computed stacks are on different displays and we've
+                        // found a matching task - move the existing instance to that display and
+                        // move it to front.
+                        intentActivity.task.reparent(launchStack.mStackId, ON_TOP,
+                                REPARENT_MOVE_STACK_TO_FRONT, ANIMATE, DEFER_RESUME,
+                                "reparentToDisplay");
                         mMovedToFront = true;
                     }
                     mOptions = null;
