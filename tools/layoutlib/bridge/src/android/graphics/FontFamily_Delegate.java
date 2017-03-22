@@ -26,6 +26,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.res.AssetManager;
 import android.content.res.BridgeAssetManager;
+import android.text.FontConfig;
 
 import java.awt.Font;
 import java.awt.FontFormatException;
@@ -43,6 +44,7 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
 
+import static android.graphics.Typeface.Builder.RESOLVE_BY_FONT_TABLE;
 import static android.graphics.Typeface_Delegate.SYSTEM_FONTS;
 
 /**
@@ -247,12 +249,13 @@ public class FontFamily_Delegate {
 
     // ---- delegate methods ----
     @LayoutlibDelegate
-    /*package*/ static boolean addFont(FontFamily thisFontFamily, String path, int ttcIndex) {
+    /*package*/ static boolean addFont(FontFamily thisFontFamily, String path, int ttcIndex,
+            FontConfig.Axis[] axes, int weight, int italic) {
         if (thisFontFamily.mBuilderPtr == 0) {
             throw new IllegalStateException("Unable to call addFont after freezing.");
         }
         final FontFamily_Delegate delegate = getDelegate(thisFontFamily.mBuilderPtr);
-        return delegate != null && delegate.addFont(path, ttcIndex);
+        return delegate != null && delegate.addFont(path, ttcIndex, weight, italic);
     }
 
     // ---- native methods ----
@@ -285,39 +288,41 @@ public class FontFamily_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static boolean nAddFont(long builderPtr, ByteBuffer font, int ttcIndex) {
-        assert false : "The only client of this method has been overriden.";
+    /*package*/ static boolean nAddFont(long builderPtr, ByteBuffer font, int ttcIndex,
+            int weight, int isItalic) {
+        assert false : "The only client of this method has been overridden.";
         return false;
     }
 
     @LayoutlibDelegate
     /*package*/ static boolean nAddFontWeightStyle(long builderPtr, ByteBuffer font,
-            int ttcIndex, int weight, boolean isItalic) {
-        assert false : "The only client of this method has been overriden.";
+            int ttcIndex, int weight, int isItalic) {
+        assert false : "The only client of this method has been overridden.";
         return false;
     }
 
     @LayoutlibDelegate
     /*package*/ static void nAddAxisValue(long builderPtr, int tag, float value) {
-        assert false : "The only client of this method has been overriden.";
+        assert false : "The only client of this method has been overridden.";
     }
 
     static boolean addFont(long builderPtr, final String path, final int weight,
             final boolean isItalic) {
         final FontFamily_Delegate delegate = getDelegate(builderPtr);
+        int italic = isItalic ? 1 : 0;
         if (delegate != null) {
             if (sFontLocation == null) {
-                delegate.mPostInitRunnables.add(() -> delegate.addFont(path, weight, isItalic));
+                delegate.mPostInitRunnables.add(() -> delegate.addFont(path, weight, italic));
                 return true;
             }
-            return delegate.addFont(path, weight, isItalic);
+            return delegate.addFont(path, weight, italic);
         }
         return false;
     }
 
     @LayoutlibDelegate
     /*package*/ static boolean nAddFontFromAssetManager(long builderPtr, AssetManager mgr, String path,
-            int cookie, boolean isAsset, int weight, boolean isItalic) {
+            int cookie, boolean isAsset, int ttcIndex, int weight, int isItalic) {
         FontFamily_Delegate ffd = sManager.getDelegate(builderPtr);
         if (ffd == null) {
             return false;
@@ -358,12 +363,13 @@ public class FontFamily_Delegate {
                 Font font = Font.createFont(Font.TRUETYPE_FONT, fontStream);
                 fontInfo = new FontInfo();
                 fontInfo.mFont = font;
-                if (weight == 0) {
+                if (weight == RESOLVE_BY_FONT_TABLE) {
                     fontInfo.mWeight = font.isBold() ? BOLD_FONT_WEIGHT : DEFAULT_FONT_WEIGHT;
                 } else {
                     fontInfo.mWeight = weight;
                 }
-                fontInfo.mIsItalic = weight == 0 ? font.isItalic() : isItalic;
+                fontInfo.mIsItalic = isItalic == RESOLVE_BY_FONT_TABLE ? font.isItalic() :
+                        isItalic == 1;
                 ffd.addFont(fontInfo);
                 return true;
             } catch (IOException e) {
@@ -412,20 +418,20 @@ public class FontFamily_Delegate {
         mPostInitRunnables = null;
     }
 
-    private boolean addFont(final String path, int ttcIndex) {
+    private boolean addFont(final String path, int ttcIndex, int weight, int italic) {
         // FIXME: support ttc fonts. Hack JRE??
         if (sFontLocation == null) {
-            mPostInitRunnables.add(() -> addFont(path));
+            mPostInitRunnables.add(() -> addFont(path, weight, italic));
             return true;
         }
-        return addFont(path);
+        return addFont(path, weight, italic);
     }
 
      private boolean addFont(@NonNull String path) {
-         return addFont(path, DEFAULT_FONT_WEIGHT, path.endsWith(FONT_SUFFIX_ITALIC));
+         return addFont(path, DEFAULT_FONT_WEIGHT, path.endsWith(FONT_SUFFIX_ITALIC) ? 1 : RESOLVE_BY_FONT_TABLE);
      }
 
-    private boolean addFont(@NonNull String path, int weight, boolean isItalic) {
+    private boolean addFont(@NonNull String path, int weight, int italic) {
         if (path.startsWith(SYSTEM_FONTS) &&
                 !SDK_FONTS.contains(path.substring(SYSTEM_FONTS.length()))) {
             return mValid = false;
@@ -439,7 +445,7 @@ public class FontFamily_Delegate {
         FontInfo fontInfo = new FontInfo();
         fontInfo.mFont = font;
         fontInfo.mWeight = weight;
-        fontInfo.mIsItalic = isItalic;
+        fontInfo.mIsItalic = italic == RESOLVE_BY_FONT_TABLE ? font.isItalic() : italic == 1;
         addFont(fontInfo);
         return true;
     }
