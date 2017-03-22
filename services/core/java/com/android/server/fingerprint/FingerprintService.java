@@ -217,6 +217,7 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
 
     public synchronized IBiometricsFingerprint getFingerprintDaemon() {
         if (mDaemon == null) {
+            Slog.v(TAG, "mDeamon was null, reconnect to fingerprint");
             try {
                 mDaemon = IBiometricsFingerprint.getService();
             } catch (java.util.NoSuchElementException e) {
@@ -291,6 +292,13 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
                 if (DEBUG) Slog.v(TAG, "start pending client " + mPendingClient.getOwnerString());
                 startClient(mPendingClient, false);
                 mPendingClient = null;
+            }
+        } else if (error == FingerprintManager.FINGERPRINT_ERROR_HW_UNAVAILABLE) {
+            // If we get HW_UNAVAILABLE, try to connect again later...
+            Slog.w(TAG, "Got ERROR_HW_UNAVAILABLE; try reconnecting next client.");
+            synchronized (this) {
+                mDaemon = null;
+                mHalDeviceId = 0;
             }
         }
     }
@@ -995,7 +1003,8 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
                     Binder.getCallingUid(), Binder.getCallingPid())) {
                 return false;
             }
-            return mHalDeviceId != 0;
+            IBiometricsFingerprint daemon = getFingerprintDaemon();
+            return daemon != null && mHalDeviceId != 0;
         }
 
         @Override // Binder call
