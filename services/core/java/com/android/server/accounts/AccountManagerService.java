@@ -3697,11 +3697,11 @@ public class AccountManagerService
         if (ArrayUtils.isEmpty(packageNames)) {
             return null;
         }
-        // For app op checks related to permissions all packages in the UID
-        // have the same app op state, so doesn't matter which one we pick.
-        // Update: due to visibility changes we want to use package with oldest target SDK,
-
         String packageName = packageNames[0];
+        if (packageNames.length == 1) {
+            return packageName;
+        }
+        // Due to visibility changes we want to use package with oldest target SDK
         int oldestVersion = Integer.MAX_VALUE;
         for (String name : packageNames) {
             try {
