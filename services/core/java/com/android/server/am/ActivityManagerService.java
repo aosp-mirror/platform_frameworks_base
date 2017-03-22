@@ -128,7 +128,6 @@ import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NA
 import static com.android.server.am.ActivityStackSupervisor.ActivityContainer.FORCE_NEW_TASK_FLAGS;
 import static com.android.server.am.ActivityStackSupervisor.CREATE_IF_NEEDED;
 import static com.android.server.am.ActivityStackSupervisor.DEFER_RESUME;
-import static com.android.server.am.ActivityStackSupervisor.FORCE_FOCUS;
 import static com.android.server.am.ActivityStackSupervisor.MATCH_TASK_IN_STACKS_ONLY;
 import static com.android.server.am.ActivityStackSupervisor.MATCH_TASK_IN_STACKS_OR_RECENT_TASKS;
 import static com.android.server.am.ActivityStackSupervisor.ON_TOP;
@@ -148,8 +147,6 @@ import static com.android.server.wm.AppTransition.TRANSIT_TASK_OPEN;
 import static com.android.server.wm.AppTransition.TRANSIT_TASK_TO_FRONT;
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
-
-import static java.lang.Integer.MAX_VALUE;
 
 import android.Manifest;
 import android.Manifest.permission;
@@ -10848,6 +10845,25 @@ public class ActivityManagerService extends IActivityManager.Stub
                 return;
             }
             mStackSupervisor.showLockTaskEscapeMessageLocked(r.task);
+        }
+    }
+
+    @Override
+    public void setDisablePreviewScreenshots(IBinder token, boolean disable)
+            throws RemoteException {
+        synchronized (this) {
+            final ActivityRecord r = ActivityRecord.isInStackLocked(token);
+            if (r == null) {
+                Slog.w(TAG, "setDisablePreviewScreenshots: Unable to find activity for token="
+                        + token);
+                return;
+            }
+            final long origId = Binder.clearCallingIdentity();
+            try {
+                r.setDisablePreviewScreenshots(disable);
+            } finally {
+                Binder.restoreCallingIdentity(origId);
+            }
         }
     }
 

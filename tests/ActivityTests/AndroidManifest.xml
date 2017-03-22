@@ -79,5 +79,12 @@
             android:singleUser="true" android:exported="true" />
         <receiver android:name="TrackTimeReceiver" />
         <receiver android:name="AlarmSpamReceiver" />
+        <activity android:name="DisableScreenshotsActivity"
+                android:label="DisableScreenshots">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
     </application>
 </manifest>

@@ -152,8 +152,13 @@ class TaskSnapshotController {
         }
     }
 
-    private boolean canSnapshotTask(Task task) {
-        return !StackId.isHomeOrRecentsStack(task.mStack.mStackId);
+    @VisibleForTesting
+    boolean canSnapshotTask(Task task) {
+        // TODO: Figure out what happens when snapshots are disabled. Can we draw a splash screen
+        // instead?
+        final AppWindowToken topChild = task.getTopChild();
+        return !StackId.isHomeOrRecentsStack(task.mStack.mStackId)
+                && topChild != null && !topChild.shouldDisablePreviewScreenshots();
     }
 
     /**

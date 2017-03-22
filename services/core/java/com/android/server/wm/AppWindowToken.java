@@ -167,6 +167,8 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     ArrayDeque<Rect> mFrozenBounds = new ArrayDeque<>();
     ArrayDeque<Configuration> mFrozenMergedConfig = new ArrayDeque<>();
 
+    private boolean mDisbalePreviewScreenshots;
+
     AppWindowToken(WindowManagerService service, IApplicationToken token, boolean voiceInteraction,
             DisplayContent dc, long inputDispatchingTimeoutNanos, boolean fullscreen,
             boolean showForAllUsers, int targetSdk, int orientation, int rotationAnimationHint,
@@ -1426,6 +1428,14 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             }
         }
         return candidate;
+    }
+
+    void setDisablePreviewSnapshots(boolean disable) {
+        mDisbalePreviewScreenshots = disable;
+    }
+
+    boolean shouldDisablePreviewScreenshots() {
+        return mDisbalePreviewScreenshots;
     }
 
     @Override
