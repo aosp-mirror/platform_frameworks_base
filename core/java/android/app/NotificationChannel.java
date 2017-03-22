@@ -20,9 +20,6 @@ import org.json.JSONObject;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlSerializer;
 
-import android.annotation.NonNull;
-import android.annotation.Nullable;
-import android.annotation.StringRes;
 import android.annotation.SystemApi;
 import android.content.Intent;
 import android.media.AudioAttributes;
@@ -46,8 +43,15 @@ public final class NotificationChannel implements Parcelable {
      */
     public static final String DEFAULT_CHANNEL_ID = "miscellaneous";
 
+    /**
+     * The maximum length for text fields in a NotificationChannel. Fields will be truncated at this
+     * limit.
+     */
+    private static final int MAX_TEXT_LENGTH = 1000;
+
     private static final String TAG_CHANNEL = "channel";
     private static final String ATT_NAME = "name";
+    private static final String ATT_DESC = "desc";
     private static final String ATT_ID = "id";
     private static final String ATT_DELETED = "deleted";
     private static final String ATT_PRIORITY = "priority";
@@ -69,56 +73,46 @@ public final class NotificationChannel implements Parcelable {
     /**
      * @hide
      */
-    @SystemApi
     public static final int USER_LOCKED_PRIORITY = 0x00000001;
     /**
      * @hide
      */
-    @SystemApi
     public static final int USER_LOCKED_VISIBILITY = 0x00000002;
     /**
      * @hide
      */
-    @SystemApi
     public static final int USER_LOCKED_IMPORTANCE = 0x00000004;
     /**
      * @hide
      */
-    @SystemApi
     public static final int USER_LOCKED_LIGHTS = 0x00000008;
     /**
      * @hide
      */
-    @SystemApi
     public static final int USER_LOCKED_VIBRATION = 0x00000010;
     /**
      * @hide
      */
-    @SystemApi
     public static final int USER_LOCKED_SOUND = 0x00000020;
 
     /**
      * @hide
      */
-    @SystemApi
     public static final int USER_LOCKED_ALLOWED = 0x00000040;
 
     /**
      * @hide
      */
-    @SystemApi
     public static final int USER_LOCKED_SHOW_BADGE = 0x00000080;
 
     /**
      * @hide
      */
-    @SystemApi
     public static final int USER_LOCKED_AUDIO_ATTRIBUTES = 0x00000100;
 
     /**
      * @hide
      */
-    @SystemApi
     public static final int[] LOCKABLE_FIELDS = new int[] {
             USER_LOCKED_PRIORITY,
             USER_LOCKED_VISIBILITY,
@@ -140,7 +134,8 @@ public final class NotificationChannel implements Parcelable {
     private static final boolean DEFAULT_SHOW_BADGE = true;
 
     private final String mId;
-    private CharSequence mName;
+    private String mName;
+    private String mDesc;
     private int mImportance = DEFAULT_IMPORTANCE;
     private boolean mBypassDnd;
     private int mLockscreenVisibility = DEFAULT_VISIBILITY;
@@ -158,19 +153,19 @@ public final class NotificationChannel implements Parcelable {
     /**
      * Creates a notification channel.
      *
-     * @param id The id of the channel. Must be unique per package.
-     * @param name The user visible name of the channel. Unchangeable once created; use this
-     *             constructor if the channel represents a user-defined category that does not
-     *             need to be translated. You can rename this channel when the system
+     * @param id The id of the channel. Must be unique per package. The value may be truncated if
+     *           it is too long.
+     * @param name The user visible name of the channel. You can rename this channel when the system
      *             locale changes by listening for the {@link Intent#ACTION_LOCALE_CHANGED}
-     *             broadcast.
+     *             broadcast. The recommended maximum length is 40 characters; the value may be
+     *             truncated if it is too long.
      * @param importance The importance of the channel. This controls how interruptive notifications
      *                   posted to this channel are. See e.g.
      *                   {@link NotificationManager#IMPORTANCE_DEFAULT}.
      */
     public NotificationChannel(String id, CharSequence name, int importance) {
-        this.mId = id;
-        this.mName = name;
+        this.mId = getTrimmedString(id);
+        this.mName = name != null ? getTrimmedString(name.toString()) : null;
         this.mImportance = importance;
     }
 
@@ -180,7 +175,16 @@ public final class NotificationChannel implements Parcelable {
         } else {
             mId = null;
         }
-        mName = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
+        if (in.readByte() != 0) {
+            mName = in.readString();
+        } else {
+            mName = null;
+        }
+        if (in.readByte() != 0) {
+            mDesc = in.readString();
+        } else {
+            mDesc = null;
+        }
         mImportance = in.readInt();
         mBypassDnd = in.readByte() != 0;
         mLockscreenVisibility = in.readInt();
@@ -212,7 +216,18 @@ public final class NotificationChannel implements Parcelable {
         } else {
             dest.writeByte((byte) 0);
         }
-        TextUtils.writeToParcel(mName, dest, flags);
+        if (mName != null) {
+            dest.writeByte((byte) 1);
+            dest.writeString(mName);
+        } else {
+            dest.writeByte((byte) 0);
+        }
+        if (mDesc != null) {
+            dest.writeByte((byte) 1);
+            dest.writeString(mDesc);
+        } else {
+            dest.writeByte((byte) 0);
+        }
         dest.writeInt(mImportance);
         dest.writeByte(mBypassDnd ? (byte) 1 : (byte) 0);
         dest.writeInt(mLockscreenVisibility);
@@ -257,46 +272,33 @@ public final class NotificationChannel implements Parcelable {
         mDeleted = deleted;
     }
 
+    // Modifiable by apps post channel creation
+
     /**
-     * Sets the name of this channel.
+     * Sets the user visible name of this channel.
+     *
+     * <p>The recommended maximum length is 40 characters; the value may be truncated if it is too
+     * long.
      */
     public void setName(CharSequence name) {
-        mName = name;
-    }
-
-    // Modifiable by a notification ranker.
-
-    /**
-     * Sets whether or not notifications posted to this channel can interrupt the user in
-     * {@link android.app.NotificationManager.Policy#INTERRUPTION_FILTER_PRIORITY} mode.
-     *
-     * Only modifiable by the system and notification ranker.
-     */
-    public void setBypassDnd(boolean bypassDnd) {
-        this.mBypassDnd = bypassDnd;
+        mName = name != null ? getTrimmedString(name.toString()) : null;
     }
 
     /**
-     * Sets whether notifications posted to this channel appear on the lockscreen or not, and if so,
-     * whether they appear in a redacted form. See e.g. {@link Notification#VISIBILITY_SECRET}.
+     * Sets the user visible description of this channel.
      *
-     * Only modifiable by the system and notification ranker.
+     * <p>The recommended maximum length is 300 characters; the value may be truncated if it is too
+     * long.
      */
-    public void setLockscreenVisibility(int lockscreenVisibility) {
-        this.mLockscreenVisibility = lockscreenVisibility;
+    public void setDescription(String description) {
+        mDesc = getTrimmedString(description);
     }
 
-    /**
-     * Sets the level of interruption of this notification channel.
-     *
-     * Only modifiable by the system and notification ranker.
-     *
-     * @param importance the amount the user should be interrupted by notifications from this
-     *                   channel. See e.g.
-     *                   {@link android.app.NotificationManager#IMPORTANCE_DEFAULT}.
-     */
-    public void setImportance(int importance) {
-        this.mImportance = importance;
+    private String getTrimmedString(String input) {
+        if (input != null && input.length() > MAX_TEXT_LENGTH) {
+            return input.substring(0, MAX_TEXT_LENGTH);
+        }
+        return input;
     }
 
     // Modifiable by apps on channel creation.
@@ -385,6 +387,43 @@ public final class NotificationChannel implements Parcelable {
     }
 
     /**
+     * Sets the level of interruption of this notification channel.
+     *
+     * Only modifiable before the channel is submitted to
+     * {@link NotificationManager#notify(String, int, Notification)}.
+     *
+     * @param importance the amount the user should be interrupted by notifications from this
+     *                   channel. See e.g.
+     *                   {@link android.app.NotificationManager#IMPORTANCE_DEFAULT}.
+     */
+    public void setImportance(int importance) {
+        this.mImportance = importance;
+    }
+
+    // Modifiable by a notification ranker.
+
+    /**
+     * Sets whether or not notifications posted to this channel can interrupt the user in
+     * {@link android.app.NotificationManager.Policy#INTERRUPTION_FILTER_PRIORITY} mode.
+     *
+     * Only modifiable by the system and notification ranker.
+     */
+    public void setBypassDnd(boolean bypassDnd) {
+        this.mBypassDnd = bypassDnd;
+    }
+
+    /**
+     * Sets whether notifications posted to this channel appear on the lockscreen or not, and if so,
+     * whether they appear in a redacted form. See e.g. {@link Notification#VISIBILITY_SECRET}.
+     *
+     * Only modifiable by the system and notification ranker.
+     */
+    public void setLockscreenVisibility(int lockscreenVisibility) {
+        this.mLockscreenVisibility = lockscreenVisibility;
+    }
+
+
+    /**
      * Returns the id of this channel.
      */
     public String getId() {
@@ -394,8 +433,15 @@ public final class NotificationChannel implements Parcelable {
     /**
      * Returns the user visible name of this channel.
      */
-    public @Nullable CharSequence getName() {
+    public CharSequence getName() {
         return mName;
+    }
+
+    /**
+     * Returns the user visible description of this channel.
+     */
+    public String getDescription() {
+        return mDesc;
     }
 
     /**
@@ -507,6 +553,7 @@ public final class NotificationChannel implements Parcelable {
     @SystemApi
     public void populateFromXml(XmlPullParser parser) {
         // Name, id, and importance are set in the constructor.
+        setDescription(parser.getAttributeValue(null, ATT_DESC));
         setBypassDnd(Notification.PRIORITY_DEFAULT
                 != safeInt(parser, ATT_PRIORITY, Notification.PRIORITY_DEFAULT));
         setLockscreenVisibility(safeInt(parser, ATT_VISIBILITY, DEFAULT_VISIBILITY));
@@ -530,6 +577,9 @@ public final class NotificationChannel implements Parcelable {
         out.attribute(null, ATT_ID, getId());
         if (getName() != null) {
             out.attribute(null, ATT_NAME, getName().toString());
+        }
+        if (getDescription() != null) {
+            out.attribute(null, ATT_DESC, getDescription());
         }
         if (getImportance() != DEFAULT_IMPORTANCE) {
             out.attribute(
@@ -588,6 +638,7 @@ public final class NotificationChannel implements Parcelable {
         JSONObject record = new JSONObject();
         record.put(ATT_ID, getId());
         record.put(ATT_NAME, getName());
+        record.put(ATT_DESC, getDescription());
         if (getImportance() != DEFAULT_IMPORTANCE) {
             record.put(ATT_IMPORTANCE,
                     NotificationListenerService.Ranking.importanceToString(getImportance()));
@@ -718,6 +769,10 @@ public final class NotificationChannel implements Parcelable {
         if (getName() != null ? !getName().equals(that.getName()) : that.getName() != null) {
             return false;
         }
+        if (getDescription() != null ? !getDescription().equals(that.getDescription())
+                : that.getDescription() != null) {
+            return false;
+        }
         if (getSound() != null ? !getSound().equals(that.getSound()) : that.getSound() != null) {
             return false;
         }
@@ -734,6 +789,7 @@ public final class NotificationChannel implements Parcelable {
     public int hashCode() {
         int result = getId() != null ? getId().hashCode() : 0;
         result = 31 * result + (getName() != null ? getName().hashCode() : 0);
+        result = 31 * result + (getDescription() != null ? getDescription().hashCode() : 0);
         result = 31 * result + getImportance();
         result = 31 * result + (mBypassDnd ? 1 : 0);
         result = 31 * result + getLockscreenVisibility();
@@ -755,6 +811,7 @@ public final class NotificationChannel implements Parcelable {
         return "NotificationChannel{" +
                 "mId='" + mId + '\'' +
                 ", mName=" + mName +
+                ", mDescription=" + (!TextUtils.isEmpty(mDesc) ? "hasDescription " : "") +
                 ", mImportance=" + mImportance +
                 ", mBypassDnd=" + mBypassDnd +
                 ", mLockscreenVisibility=" + mLockscreenVisibility +
