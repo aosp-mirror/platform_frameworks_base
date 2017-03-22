@@ -1295,7 +1295,7 @@ public class BackupManagerService {
         if (DEBUG) Slog.v(TAG, "Starting with transport " + currentTransport);
 
         mTransportManager = new TransportManager(context, transportWhitelist, currentTransport,
-                mTransportBoundListener);
+                mTransportBoundListener, mHandlerThread.getLooper());
         mTransportManager.registerAllTransports();
 
         // Now that we know about valid backup participants, parse any
