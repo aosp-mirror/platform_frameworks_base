@@ -73,5 +73,17 @@ interface IVrManager {
      * currently, else return the display id of the virtual display
      */
     int getCompatibilityDisplayId();
+
+    /**
+     * Initiate connection for system controller data.
+     *
+     * @param fd Controller data file descriptor.
+     */
+    void connectController(in FileDescriptor fd);
+
+    /**
+     * Sever connection for system controller data.
+     */
+    void disconnectController();
 }
 

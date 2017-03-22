@@ -37,6 +37,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.notification.NotificationListenerService;
@@ -44,6 +45,7 @@ import android.service.vr.IPersistentVrStateCallbacks;
 import android.service.vr.IVrListener;
 import android.service.vr.IVrManager;
 import android.service.vr.IVrStateCallbacks;
+import android.service.vr.IVrWindowManager;
 import android.service.vr.VrListenerService;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -424,6 +426,18 @@ public class VrManagerService extends SystemService implements EnabledComponentC
         @Override
         public int getCompatibilityDisplayId() {
             return VrManagerService.this.getCompatibilityDisplayId();
+        }
+
+        @Override
+        public void connectController(FileDescriptor fd) throws android.os.RemoteException {
+            enforceCallerPermission(Manifest.permission.RESTRICTED_VR_ACCESS);
+            VrManagerService.this.connectController(fd);
+        }
+
+        @Override
+        public void disconnectController() throws android.os.RemoteException {
+            enforceCallerPermission(Manifest.permission.RESTRICTED_VR_ACCESS);
+            VrManagerService.this.disconnectController();
         }
 
         @Override
@@ -1150,5 +1164,21 @@ public class VrManagerService extends SystemService implements EnabledComponentC
         synchronized (mLock) {
             return mVrModeEnabled;
         }
+    }
+
+    private void connectController(FileDescriptor fd) throws android.os.RemoteException {
+        // TODO(b/36506799): move vr_wm code to VrCore and remove this.
+        IVrWindowManager remote =
+                IVrWindowManager.Stub.asInterface(
+                        ServiceManager.getService(IVrWindowManager.SERVICE_NAME));
+        remote.connectController(fd);
+    }
+
+    private void disconnectController() throws android.os.RemoteException {
+        // TODO(b/36506799): move vr_wm code to VrCore and remove this.
+        IVrWindowManager remote =
+                IVrWindowManager.Stub.asInterface(
+                        ServiceManager.getService(IVrWindowManager.SERVICE_NAME));
+        remote.disconnectController();
     }
 }
