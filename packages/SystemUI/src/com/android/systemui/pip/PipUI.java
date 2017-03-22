@@ -23,6 +23,7 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 
 import com.android.systemui.SystemUI;
+import com.android.systemui.recents.misc.SystemServicesProxy;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -35,7 +36,6 @@ public class PipUI extends SystemUI {
     private BasePipManager mPipManager;
 
     private boolean mSupportsPip;
-    private boolean mIsLeanBackOnly;
 
     @Override
     public void start() {
@@ -43,6 +43,12 @@ public class PipUI extends SystemUI {
         mSupportsPip = pm.hasSystemFeature(FEATURE_PICTURE_IN_PICTURE);
         if (!mSupportsPip) {
             return;
+        }
+
+        // Ensure that we are the primary user's SystemUI.
+        final int processUser = SystemServicesProxy.getInstance(mContext).getProcessUser();
+        if (!SystemServicesProxy.getInstance(mContext).isSystemUser(processUser)) {
+            throw new IllegalStateException("Non-primary Pip component not currently supported.");
         }
 
         mPipManager = pm.hasSystemFeature(FEATURE_LEANBACK_ONLY)
