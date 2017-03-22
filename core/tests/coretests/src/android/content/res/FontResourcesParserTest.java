@@ -15,21 +15,20 @@
  */
 package android.content.res;
 
-import static junit.framework.Assert.assertNull;
+import static android.content.res.FontResourcesParser.FamilyResourceEntry;
+import static android.content.res.FontResourcesParser.FontFamilyFilesResourceEntry;
+import static android.content.res.FontResourcesParser.FontFileResourceEntry;
+import static android.content.res.FontResourcesParser.ProviderResourceEntry;
+
+import static junit.framework.Assert.assertTrue;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-
-import static android.content.res.FontResourcesParser.FamilyResourceEntry;
-import static android.content.res.FontResourcesParser.ProviderResourceEntry;
-import static android.content.res.FontResourcesParser.FontFileResourceEntry;
-import static android.content.res.FontResourcesParser.FontFamilyFilesResourceEntry;
 
 import android.app.Instrumentation;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
-import android.text.FontConfig;
 
 import com.android.frameworks.coretests.R;
 
@@ -96,5 +95,51 @@ public class FontResourcesParserTest {
         assertEquals("com.example.test.fontprovider.authority", providerEntry.getAuthority());
         assertEquals("com.example.test.fontprovider.package", providerEntry.getPackage());
         assertEquals("MyRequestedFont", providerEntry.getQuery());
+    }
+
+    @Test
+    public void testParseDownloadableFont_singleCerts() throws IOException, XmlPullParserException {
+        XmlResourceParser parser = mResources.getXml(R.font.samplexmldownloadedfontsinglecerts);
+
+        FamilyResourceEntry result = FontResourcesParser.parse(parser, mResources);
+
+        assertNotNull(result);
+        assertTrue(result instanceof ProviderResourceEntry);
+        ProviderResourceEntry providerResourceEntry = (ProviderResourceEntry) result;
+        assertEquals("com.example.test.fontprovider", providerResourceEntry.getAuthority());
+        assertEquals("MyRequestedFont", providerResourceEntry.getQuery());
+        assertEquals("com.example.test.fontprovider.package", providerResourceEntry.getPackage());
+        List<List<String>> certList = providerResourceEntry.getCerts();
+        assertNotNull(certList);
+        assertEquals(1, certList.size());
+        List<String> certs = certList.get(0);
+        assertEquals(2, certs.size());
+        assertEquals("123456789", certs.get(0));
+        assertEquals("987654321", certs.get(1));
+    }
+
+    @Test
+    public void testParseDownloadableFont_multipleCerts() throws IOException, XmlPullParserException {
+        XmlResourceParser parser = mResources.getXml(R.font.samplexmldownloadedfontmulticerts);
+
+        FamilyResourceEntry result = FontResourcesParser.parse(parser, mResources);
+
+        assertNotNull(result);
+        assertTrue(result instanceof ProviderResourceEntry);
+        ProviderResourceEntry providerResourceEntry = (ProviderResourceEntry) result;
+        assertEquals("com.example.test.fontprovider", providerResourceEntry.getAuthority());
+        assertEquals("MyRequestedFont", providerResourceEntry.getQuery());
+        assertEquals("com.example.test.fontprovider.package", providerResourceEntry.getPackage());
+        List<List<String>> certList = providerResourceEntry.getCerts();
+        assertNotNull(certList);
+        assertEquals(2, certList.size());
+        List<String> certs1 = certList.get(0);
+        assertEquals(2, certs1.size());
+        assertEquals("123456789", certs1.get(0));
+        assertEquals("987654321", certs1.get(1));
+        List<String> certs2 = certList.get(1);
+        assertEquals(2, certs2.size());
+        assertEquals("abcdefg", certs2.get(0));
+        assertEquals("gfedcba", certs2.get(1));
     }
 }

@@ -8569,6 +8569,7 @@
         <attr name="fontProviderAuthority" format="string" />
         <attr name="fontProviderPackage" format="string" />
         <attr name="fontProviderQuery" format="string" />
+        <attr name="fontProviderCerts" format="reference" />
     </declare-styleable>
 
     <!-- @hide -->

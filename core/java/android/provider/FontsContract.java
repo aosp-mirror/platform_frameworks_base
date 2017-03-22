@@ -15,7 +15,6 @@
  */
 package android.provider;
 
-import android.app.ActivityThread;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Context;
@@ -42,9 +41,10 @@ import com.android.internal.annotations.VisibleForTesting;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Utility class to deal with Font ContentProviders.
@@ -207,11 +207,12 @@ public class FontsContract {
             return info;
         }
 
-        Set<byte[]> signatures;
+        List<byte[]> signatures;
         try {
             PackageInfo packageInfo = mPackageManager.getPackageInfo(info.packageName,
                     PackageManager.GET_SIGNATURES);
-            signatures = convertToSet(packageInfo.signatures);
+            signatures = convertToByteArrayList(packageInfo.signatures);
+            Collections.sort(signatures, sByteArrayComparator);
         } catch (PackageManager.NameNotFoundException e) {
             Log.e(TAG, "Can't find content provider " + providerAuthority, e);
             receiver.send(RESULT_CODE_PROVIDER_NOT_FOUND, null);
@@ -219,8 +220,10 @@ public class FontsContract {
         }
         List<List<byte[]>> requestCertificatesList = request.getCertificates();
         for (int i = 0; i < requestCertificatesList.size(); ++i) {
-            final Set<byte[]> requestCertificates = convertToSet(requestCertificatesList.get(i));
-            if (signatures.equals(requestCertificates)) {
+            // Make a copy so we can sort it without modifying the incoming data.
+            List<byte[]> requestSignatures = new ArrayList<>(requestCertificatesList.get(i));
+            Collections.sort(requestSignatures, sByteArrayComparator);
+            if (equalsByteArrayList(signatures, requestSignatures)) {
                 return info;
             }
         }
@@ -229,17 +232,35 @@ public class FontsContract {
         return null;
     }
 
-    private Set<byte[]> convertToSet(Signature[] signatures) {
-        Set<byte[]> shas = new HashSet<>();
+    private static final Comparator<byte[]> sByteArrayComparator = (l, r) -> {
+        if (l.length != r.length) {
+            return l.length - r.length;
+        }
+        for (int i = 0; i < l.length; ++i) {
+            if (l[i] != r[i]) {
+                return l[i] - r[i];
+            }
+        }
+        return 0;
+    };
+
+    private boolean equalsByteArrayList(List<byte[]> signatures, List<byte[]> requestSignatures) {
+        if (signatures.size() != requestSignatures.size()) {
+            return false;
+        }
+        for (int i = 0; i < signatures.size(); ++i) {
+            if (!Arrays.equals(signatures.get(i), requestSignatures.get(i))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private List<byte[]> convertToByteArrayList(Signature[] signatures) {
+        List<byte[]> shas = new ArrayList<>();
         for (int i = 0; i < signatures.length; ++i) {
             shas.add(signatures[i].toByteArray());
         }
-        return shas;
-    }
-
-    private Set<byte[]> convertToSet(List<byte[]> certs) {
-        Set<byte[]> shas = new HashSet<>();
-        shas.addAll(certs);
         return shas;
     }
 
