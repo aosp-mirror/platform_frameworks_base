@@ -102,6 +102,11 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     // Trigger proximity if distance is less than 5 cm.
     private static final float TYPICAL_PROXIMITY_THRESHOLD = 5.0f;
 
+    // State machine constants for tracking initial brightness ramp skipping when enabled.
+    private static final int RAMP_STATE_SKIP_NONE = 0;
+    private static final int RAMP_STATE_SKIP_INITIAL = 1;
+    private static final int RAMP_STATE_SKIP_AUTOBRIGHT = 2;
+
     private static final int REPORTED_TO_POLICY_SCREEN_OFF = 0;
     private static final int REPORTED_TO_POLICY_SCREEN_TURNING_ON = 1;
     private static final int REPORTED_TO_POLICY_SCREEN_ON = 2;
@@ -250,8 +255,14 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     private final int mBrightnessRampRateFast;
     private final int mBrightnessRampRateSlow;
 
-    // Brightness animation ramp flags
+    // Whether or not to skip the initial brightness ramps into STATE_ON.
     private final boolean mSkipScreenOnBrightnessRamp;
+
+    // A record of state for skipping brightness ramps
+    private int mSkipRampState = RAMP_STATE_SKIP_NONE;
+
+    // The first autobrightness value set when entering RAMP_STATE_SKIP_INITIAL.
+    private int mInitialAutoBrightness;
 
     // The controller for the automatic brightness level.
     private AutomaticBrightnessController mAutomaticBrightnessController;
@@ -747,10 +758,31 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
         // Animate the screen brightness when the screen is on or dozing.
         // Skip the animation when the screen is off, suspended, or if configs say otherwise.
+        // N.B. There are two ramps that can occur when the skip ramp config is enabled. The first
+        // is from a dozing or off state value to the previous screen brightness value. The second
+        // occurs when autobrightness is enabled and the screen adjusts from the previous
+        // brightness value to a new one based off of new ambient light sensor readings.
         if (!mPendingScreenOff) {
-            boolean skipScreenRamp = mSkipScreenOnBrightnessRamp && mDozing
-                    && state == Display.STATE_ON;
-            if (state == Display.STATE_ON && !skipScreenRamp || state == Display.STATE_DOZE) {
+            if (mSkipScreenOnBrightnessRamp) {
+
+                if (state == Display.STATE_ON) {
+                    if (mSkipRampState == RAMP_STATE_SKIP_NONE && mDozing) {
+                        mInitialAutoBrightness = brightness;
+                        mSkipRampState = RAMP_STATE_SKIP_INITIAL;
+                    } else if (mSkipRampState == RAMP_STATE_SKIP_INITIAL
+                            && mUseSoftwareAutoBrightnessConfig
+                            && brightness != mInitialAutoBrightness) {
+                        mSkipRampState = RAMP_STATE_SKIP_AUTOBRIGHT;
+                    } else if (mSkipRampState == RAMP_STATE_SKIP_AUTOBRIGHT) {
+                        mSkipRampState = RAMP_STATE_SKIP_NONE;
+                    }
+                } else {
+                    mSkipRampState = RAMP_STATE_SKIP_NONE;
+                }
+            }
+
+            if (state == Display.STATE_ON && mSkipRampState == RAMP_STATE_SKIP_NONE
+                    || state == Display.STATE_DOZE) {
                 animateScreenBrightness(brightness,
                         slowChange ? mBrightnessRampRateSlow : mBrightnessRampRateFast);
             } else {
