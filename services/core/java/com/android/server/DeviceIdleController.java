@@ -2865,8 +2865,9 @@ public class DeviceIdleController extends SystemService
             if (arg != null) {
                 try {
                     addPowerSaveTempWhitelistAppChecked(arg, duration, shell.userId, "shell");
-                } catch (RemoteException re) {
-                    pw.println("Failed: " + re);
+                } catch (Exception e) {
+                    pw.println("Failed: " + e);
+                    return -1;
                 }
             } else {
                 dumpTempWhitelistSchedule(pw, false);
