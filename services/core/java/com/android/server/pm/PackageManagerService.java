@@ -3819,6 +3819,16 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     @Override
+    public void deletePreloadsFileCache() {
+        if (!UserHandle.isSameApp(Binder.getCallingUid(), Process.SYSTEM_UID)) {
+            throw new SecurityException("Only system or settings may call deletePreloadsFileCache");
+        }
+        File dir = Environment.getDataPreloadsFileCacheDirectory();
+        Slog.i(TAG, "Deleting preloaded file cache " + dir);
+        FileUtils.deleteContents(dir);
+    }
+
+    @Override
     public void freeStorageAndNotify(final String volumeUuid, final long freeStorageSize,
             final IPackageDataObserver observer) {
         mContext.enforceCallingOrSelfPermission(
@@ -3871,19 +3881,27 @@ public class PackageManagerService extends IPackageManager.Stub {
     public void freeStorage(String volumeUuid, long bytes, int storageFlags) throws IOException {
         final StorageManager storage = mContext.getSystemService(StorageManager.class);
         final File file = storage.findPathForUuid(volumeUuid);
+        if (file.getUsableSpace() >= bytes) return;
 
         if (ENABLE_FREE_CACHE_V2) {
             final boolean aggressive = (storageFlags
                     & StorageManager.FLAG_ALLOCATE_AGGRESSIVE) != 0;
+            final boolean internalVolume = Objects.equals(StorageManager.UUID_PRIVATE_INTERNAL,
+                    volumeUuid);
 
             // 1. Pre-flight to determine if we have any chance to succeed
             // 2. Consider preloaded data (after 1w honeymoon, unless aggressive)
+            if (internalVolume && (aggressive || SystemProperties
+                    .getBoolean("persist.sys.preloads.file_cache_expired", false))) {
+                deletePreloadsFileCache();
+                if (file.getUsableSpace() >= bytes) return;
+            }
 
             // 3. Consider parsed APK data (aggressive only)
-            if (aggressive) {
+            if (internalVolume && aggressive) {
                 FileUtils.deleteContents(mCacheDir);
+                if (file.getUsableSpace() >= bytes) return;
             }
-            if (file.getUsableSpace() >= bytes) return;
 
             // 4. Consider cached app data (above quotas)
             try {
