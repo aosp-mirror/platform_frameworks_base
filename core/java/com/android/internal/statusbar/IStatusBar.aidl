@@ -106,6 +106,11 @@ oneway interface IStatusBar
      */
     void showTvPictureInPictureMenu();
 
+    /**
+     * Shows the global actions menu.
+     */
+    void showGlobalActionsMenu();
+
     void addQsTile(in ComponentName tile);
     void remQsTile(in ComponentName tile);
     void clickQsTile(in ComponentName tile);

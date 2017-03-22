@@ -37,7 +37,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.telephony.IccCardConstants.State;
 import com.android.internal.widget.LockPatternUtils;
-import com.android.internal.policy.EmergencyAffordanceManager;
+import com.android.internal.util.EmergencyAffordanceManager;
 
 /**
  * This class implements a smart emergency button that updates itself based
