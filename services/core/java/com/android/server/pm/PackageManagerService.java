@@ -6287,7 +6287,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             } else {
                 final PackageParser.Package pkg = mPackages.get(pkgName);
                 if (pkg != null) {
-                    result = applyPostResolutionFilter(filterIfNotSystemUser(
+                    return applyPostResolutionFilter(filterIfNotSystemUser(
                             mActivities.queryIntentForPackage(
                                     intent, resolvedType, flags, pkg.activities, userId),
                             userId), instantAppPkgName);
