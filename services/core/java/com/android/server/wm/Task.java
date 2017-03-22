@@ -22,6 +22,7 @@ import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZABLE_LANDSCAPE_ONLY;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZABLE_PRESERVE_ORIENTATION;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZABLE_PORTRAIT_ONLY;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static com.android.server.EventLogTags.WM_TASK_REMOVED;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STACK;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TASK_MOVEMENT;
@@ -107,6 +108,9 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
         setController(controller);
         setBounds(bounds, overrideConfig);
         mTaskDescription = taskDescription;
+
+        // Tasks have no set orientation value (including SCREEN_ORIENTATION_UNSPECIFIED).
+        setOrientation(SCREEN_ORIENTATION_UNSET);
     }
 
     DisplayContent getDisplayContent() {

@@ -16,12 +16,18 @@
 
 package com.android.server.wm;
 
+import android.content.pm.ActivityInfo;
+import android.view.WindowManager;
+import android.view.WindowManager.LayoutParams;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
+
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -55,6 +61,42 @@ public class TaskStackTests extends WindowTestsBase {
         stack.positionChildAt(WindowContainer.POSITION_TOP, task2, false /* includingParents */);
         assertEquals(stack.mChildren.get(0), task2);
         assertEquals(stack.mChildren.get(1), task1);
+    }
+
+    @Test
+    public void testClosingAppDifferentStackOrientation() throws Exception {
+        final TaskStack stack = createTaskStackOnDisplay(sDisplayContent);
+        final Task task1 = createTaskInStack(stack, 0 /* userId */);
+        TestAppWindowToken appWindowToken1 = new TestAppWindowToken(sDisplayContent);
+        task1.addChild(appWindowToken1, 0);
+        appWindowToken1.setOrientation(SCREEN_ORIENTATION_LANDSCAPE);
+
+        final Task task2 = createTaskInStack(stack, 1 /* userId */);
+        TestAppWindowToken appWindowToken2 = new TestAppWindowToken(sDisplayContent);
+        task2.addChild(appWindowToken2, 0);
+        appWindowToken2.setOrientation(SCREEN_ORIENTATION_PORTRAIT);
+
+        assertEquals(stack.getOrientation(), SCREEN_ORIENTATION_PORTRAIT);
+        sWm.mClosingApps.add(appWindowToken2);
+        assertEquals(stack.getOrientation(), SCREEN_ORIENTATION_LANDSCAPE);
+    }
+
+    @Test
+    public void testMoveTaskToBackDifferentStackOrientation() throws Exception {
+        final TaskStack stack = createTaskStackOnDisplay(sDisplayContent);
+        final Task task1 = createTaskInStack(stack, 0 /* userId */);
+        TestAppWindowToken appWindowToken1 = new TestAppWindowToken(sDisplayContent);
+        task1.addChild(appWindowToken1, 0);
+        appWindowToken1.setOrientation(SCREEN_ORIENTATION_LANDSCAPE);
+
+        final Task task2 = createTaskInStack(stack, 1 /* userId */);
+        TestAppWindowToken appWindowToken2 = new TestAppWindowToken(sDisplayContent);
+        task2.addChild(appWindowToken2, 0);
+        appWindowToken2.setOrientation(SCREEN_ORIENTATION_PORTRAIT);
+
+        assertEquals(stack.getOrientation(), SCREEN_ORIENTATION_PORTRAIT);
+        task2.setSendingToBottom(true);
+        assertEquals(stack.getOrientation(), SCREEN_ORIENTATION_LANDSCAPE);
     }
 
     @Test
