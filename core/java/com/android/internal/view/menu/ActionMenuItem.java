@@ -16,8 +16,11 @@
 
 package com.android.internal.view.menu;
 
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.ColorStateList;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.view.ActionProvider;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -45,6 +48,10 @@ public class ActionMenuItem implements MenuItem {
 
     private Drawable mIconDrawable;
     private int mIconResId = NO_ICON;
+    private ColorStateList mIconTintList = null;
+    private PorterDuff.Mode mIconTintMode = null;
+    private boolean mHasIconTint = false;
+    private boolean mHasIconTintMode = false;
 
     private Context mContext;
 
@@ -178,13 +185,63 @@ public class ActionMenuItem implements MenuItem {
     public MenuItem setIcon(Drawable icon) {
         mIconDrawable = icon;
         mIconResId = NO_ICON;
+
+        applyIconTint();
         return this;
     }
 
     public MenuItem setIcon(int iconRes) {
         mIconResId = iconRes;
         mIconDrawable = mContext.getDrawable(iconRes);
+
+        applyIconTint();
         return this;
+    }
+
+    @Override
+    public MenuItem setIconTintList(@Nullable ColorStateList iconTintList) {
+        mIconTintList = iconTintList;
+        mHasIconTint = true;
+
+        applyIconTint();
+
+        return this;
+    }
+
+    @Nullable
+    @Override
+    public ColorStateList getIconTintList() {
+        return mIconTintList;
+    }
+
+    @Override
+    public MenuItem setIconTintMode(PorterDuff.Mode iconTintMode) {
+        mIconTintMode = iconTintMode;
+        mHasIconTintMode = true;
+
+        applyIconTint();
+
+        return this;
+    }
+
+    @Nullable
+    @Override
+    public PorterDuff.Mode getIconTintMode() {
+        return mIconTintMode;
+    }
+
+    private void applyIconTint() {
+        if (mIconDrawable != null && (mHasIconTint || mHasIconTintMode)) {
+            mIconDrawable = mIconDrawable.mutate();
+
+            if (mHasIconTint) {
+                mIconDrawable.setTintList(mIconTintList);
+            }
+
+            if (mHasIconTintMode) {
+                mIconDrawable.setTintMode(mIconTintMode);
+            }
+        }
     }
 
     public MenuItem setIntent(Intent intent) {
