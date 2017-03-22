@@ -22,7 +22,6 @@ import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.nullable;
 import static org.mockito.Mockito.times;
@@ -32,7 +31,6 @@ import static org.mockito.Mockito.when;
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.accounts.AccountManagerInternal;
-import android.accounts.AuthenticatorDescription;
 import android.accounts.CantAddAccountActivity;
 import android.accounts.IAccountManagerResponse;
 import android.app.AppOpsManager;
@@ -49,11 +47,9 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.RegisteredServicesCacheListener;
 import android.content.pm.ResolveInfo;
 import android.content.pm.Signature;
 import android.content.pm.UserInfo;
-import android.content.pm.RegisteredServicesCache.ServiceInfo;
 import android.database.Cursor;
 import android.database.DatabaseErrorHandler;
 import android.database.sqlite.SQLiteDatabase;
@@ -62,6 +58,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.test.AndroidTestCase;
@@ -78,16 +75,18 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.io.File;
-import java.io.FileDescriptor;
-import java.io.PrintWriter;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 
 /**
@@ -2613,6 +2612,142 @@ public class AccountManagerServiceTest extends AndroidTestCase {
             if (AccountManager.LOGIN_ACCOUNTS_CHANGED_ACTION. equals(intent.getAction())) {
                 mLoginAccountsChangedBroadcasts++;
             }
+        }
+    }
+
+    @SmallTest
+    public void testConcurrencyReadWrite() throws Exception {
+        // Test 2 threads calling getAccounts and 1 thread setAuthToken
+        unlockSystemUser();
+        String[] list = new String[]{AccountManagerServiceTestFixtures.CALLER_PACKAGE};
+        when(mMockPackageManager.getPackagesForUid(anyInt())).thenReturn(list);
+
+        Account a1 = new Account("account1",
+                AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1);
+        mAms.addAccountExplicitly(a1, "p1", null);
+        List<String> errors = Collections.synchronizedList(new ArrayList<>());
+        int readerCount = 2;
+        ExecutorService es = Executors.newFixedThreadPool(readerCount + 1);
+        AtomicLong readTotalTime = new AtomicLong(0);
+        AtomicLong writeTotalTime = new AtomicLong(0);
+        final CyclicBarrier cyclicBarrier = new CyclicBarrier(readerCount + 1);
+
+        final int loopSize = 20;
+        for (int t = 0; t < readerCount; t++) {
+            es.submit(() -> {
+                for (int i = 0; i < loopSize; i++) {
+                    String logPrefix = Thread.currentThread().getName() + " " + i;
+                    waitForCyclicBarrier(cyclicBarrier);
+                    cyclicBarrier.reset();
+                    SystemClock.sleep(1); // Ensure that writer wins
+                    Log.d(TAG, logPrefix + " getAccounts started");
+                    long ti = System.currentTimeMillis();
+                    try {
+                        Account[] accounts = mAms.getAccounts(null, mContext.getOpPackageName());
+                        if (accounts == null || accounts.length != 1
+                                || !AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1.equals(
+                                accounts[0].type)) {
+                            String msg = logPrefix + ": Unexpected accounts: " + Arrays
+                                    .toString(accounts);
+                            Log.e(TAG, "    " + msg);
+                            errors.add(msg);
+                        }
+                        Log.d(TAG, logPrefix + " getAccounts done");
+                    } catch (Exception e) {
+                        String msg = logPrefix + ": getAccounts failed " + e;
+                        Log.e(TAG, msg, e);
+                        errors.add(msg);
+                    }
+                    ti = System.currentTimeMillis() - ti;
+                    readTotalTime.addAndGet(ti);
+                }
+            });
+        }
+
+        es.submit(() -> {
+            for (int i = 0; i < loopSize; i++) {
+                String logPrefix = Thread.currentThread().getName() + " " + i;
+                waitForCyclicBarrier(cyclicBarrier);
+                long ti = System.currentTimeMillis();
+                Log.d(TAG, logPrefix + " setAuthToken started");
+                try {
+                    mAms.setAuthToken(a1, "t1", "v" + i);
+                    Log.d(TAG, logPrefix + " setAuthToken done");
+                } catch (Exception e) {
+                    errors.add(logPrefix + ": setAuthToken failed: " + e);
+                }
+                ti = System.currentTimeMillis() - ti;
+                writeTotalTime.addAndGet(ti);
+            }
+        });
+        es.shutdown();
+        assertTrue("Time-out waiting for jobs to finish",
+                es.awaitTermination(10, TimeUnit.SECONDS));
+        es.shutdownNow();
+        assertTrue("Errors: " + errors, errors.isEmpty());
+        Log.i(TAG, "testConcurrencyReadWrite: readTotalTime=" + readTotalTime + " avg="
+                + (readTotalTime.doubleValue() / readerCount / loopSize));
+        Log.i(TAG, "testConcurrencyReadWrite: writeTotalTime=" + writeTotalTime + " avg="
+                + (writeTotalTime.doubleValue() / loopSize));
+    }
+
+    @SmallTest
+    public void testConcurrencyRead() throws Exception {
+        // Test 2 threads calling getAccounts
+        unlockSystemUser();
+        String[] list = new String[]{AccountManagerServiceTestFixtures.CALLER_PACKAGE};
+        when(mMockPackageManager.getPackagesForUid(anyInt())).thenReturn(list);
+
+        Account a1 = new Account("account1",
+                AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1);
+        mAms.addAccountExplicitly(a1, "p1", null);
+        List<String> errors = Collections.synchronizedList(new ArrayList<>());
+        int readerCount = 2;
+        ExecutorService es = Executors.newFixedThreadPool(readerCount + 1);
+        AtomicLong readTotalTime = new AtomicLong(0);
+
+        final int loopSize = 20;
+        for (int t = 0; t < readerCount; t++) {
+            es.submit(() -> {
+                for (int i = 0; i < loopSize; i++) {
+                    String logPrefix = Thread.currentThread().getName() + " " + i;
+                    Log.d(TAG, logPrefix + " getAccounts started");
+                    long ti = System.currentTimeMillis();
+                    try {
+                        Account[] accounts = mAms.getAccounts(null, mContext.getOpPackageName());
+                        if (accounts == null || accounts.length != 1
+                                || !AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1.equals(
+                                accounts[0].type)) {
+                            String msg = logPrefix + ": Unexpected accounts: " + Arrays
+                                    .toString(accounts);
+                            Log.e(TAG, "    " + msg);
+                            errors.add(msg);
+                        }
+                        Log.d(TAG, logPrefix + " getAccounts done");
+                    } catch (Exception e) {
+                        String msg = logPrefix + ": getAccounts failed " + e;
+                        Log.e(TAG, msg, e);
+                        errors.add(msg);
+                    }
+                    ti = System.currentTimeMillis() - ti;
+                    readTotalTime.addAndGet(ti);
+                }
+            });
+        }
+        es.shutdown();
+        assertTrue("Time-out waiting for jobs to finish",
+                es.awaitTermination(10, TimeUnit.SECONDS));
+        es.shutdownNow();
+        assertTrue("Errors: " + errors, errors.isEmpty());
+        Log.i(TAG, "testConcurrencyRead: readTotalTime=" + readTotalTime + " avg="
+                + (readTotalTime.doubleValue() / readerCount / loopSize));
+    }
+
+    private void waitForCyclicBarrier(CyclicBarrier cyclicBarrier) {
+        try {
+            cyclicBarrier.await(LATCH_TIMEOUT_MS, TimeUnit.MILLISECONDS);
+        } catch (Exception e) {
+            throw new IllegalStateException("Should not throw " + e, e);
         }
     }
 
