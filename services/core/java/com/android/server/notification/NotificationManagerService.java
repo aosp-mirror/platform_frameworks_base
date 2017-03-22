@@ -3099,7 +3099,7 @@ public class NotificationManagerService extends SystemService {
             final ApplicationInfo ai = mPackageManagerClient.getApplicationInfoAsUser(
                     pkg, PackageManager.MATCH_DEBUG_TRIAGED_MISSING,
                     (userId == UserHandle.USER_ALL) ? UserHandle.USER_SYSTEM : userId);
-            Notification.addFieldsFromContext(ai, userId, notification);
+            Notification.addFieldsFromContext(ai, notification);
         } catch (NameNotFoundException e) {
             Slog.e(TAG, "Cannot create a context for sending app", e);
             return;
