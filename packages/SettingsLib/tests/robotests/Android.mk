@@ -25,29 +25,8 @@ LOCAL_MODULE_TAGS := optional
 
 LOCAL_PRIVILEGED_MODULE := true
 
-LOCAL_JAVA_LIBRARIES := \
-    junit \
-    platform-robolectric-prebuilt
-
-LOCAL_STATIC_JAVA_LIBRARIES := \
-    android-support-v4 \
-    android-support-v7-recyclerview \
-    android-support-v7-preference \
-    android-support-v7-appcompat \
-    android-support-v14-preference \
-    platform-system-robolectric \
-    truth-prebuilt
-
-LOCAL_AAPT_FLAGS := --auto-add-overlay \
-
-LOCAL_SRC_FILES := \
-    $(call all-java-files-under, src)
-
-LOCAL_JAR_EXCLUDE_FILES := none
-
 LOCAL_RESOURCE_DIR := \
     $(LOCAL_PATH)/res
-
 
 include frameworks/base/packages/SettingsLib/common.mk
 
