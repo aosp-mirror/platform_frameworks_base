@@ -28,11 +28,11 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.ViewStub;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
-
 import com.android.systemui.BatteryMeterView;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
@@ -136,8 +136,14 @@ public class CarStatusBar extends StatusBar implements
             return;
         }
 
-        mNavigationBarView = (CarNavigationBarView) View.inflate(mContext,
-                R.layout.car_navigation_bar, null);
+        // SystemUI requires that the navigation bar view have a parent. Since the regular
+        // StatusBar inflates navigation_bar_window as this parent view, use the same view for the
+        // CarNavigationBarView.
+        ViewGroup navigationBarWindow = (ViewGroup) View.inflate(mContext,
+                R.layout.navigation_bar_window, null);
+        View.inflate(mContext, R.layout.car_navigation_bar, navigationBarWindow);
+        mNavigationBarView = (CarNavigationBarView) navigationBarWindow.getChildAt(0);
+
         mController = new CarNavigationBarController(mContext, mNavigationBarView,
                 this /* ActivityStarter*/);
         mNavigationBarView.getBarTransitions().setAlwaysOpaque(true);
@@ -153,7 +159,8 @@ public class CarStatusBar extends StatusBar implements
                 PixelFormat.TRANSLUCENT);
         lp.setTitle("CarNavigationBar");
         lp.windowAnimations = 0;
-        mWindowManager.addView(mNavigationBarView, lp);
+
+        mWindowManager.addView(navigationBarWindow, lp);
     }
 
     @Override
