@@ -3557,7 +3557,8 @@ public class Activity extends ContextThemeWrapper
      * closed, this method does nothing.
      */
     public void closeOptionsMenu() {
-        if (mWindow.hasFeature(Window.FEATURE_OPTIONS_PANEL)) {
+        if (mWindow.hasFeature(Window.FEATURE_OPTIONS_PANEL) &&
+                (mActionBar == null || !mActionBar.closeOptionsMenu())) {
             mWindow.closePanel(Window.FEATURE_OPTIONS_PANEL);
         }
     }
