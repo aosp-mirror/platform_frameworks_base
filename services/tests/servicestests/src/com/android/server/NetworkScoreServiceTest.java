@@ -563,6 +563,14 @@ public class NetworkScoreServiceTest {
     }
 
     @Test
+    public void testSetActiveScorer_requestNetworkScoresPermission() {
+        when(mContext.checkCallingOrSelfPermission(permission.REQUEST_NETWORK_SCORES))
+                .thenReturn(PackageManager.PERMISSION_GRANTED);
+
+        mNetworkScoreService.setActiveScorer(null);
+    }
+
+    @Test
     public void testDisableScoring_notActiveScorer_noRequestNetworkScoresPermission() {
         bindToScorer(false /*callerIsScorer*/);
         when(mContext.checkCallingOrSelfPermission(permission.REQUEST_NETWORK_SCORES))
@@ -574,6 +582,36 @@ public class NetworkScoreServiceTest {
         } catch (SecurityException e) {
             // expected
         }
+    }
+
+    @Test
+    public void testDisableScoring_activeScorer_noRequestNetworkScoresPermission() {
+        bindToScorer(true /*callerIsScorer*/);
+        when(mContext.checkCallingOrSelfPermission(permission.REQUEST_NETWORK_SCORES))
+                .thenReturn(PackageManager.PERMISSION_DENIED);
+
+        mNetworkScoreService.disableScoring();
+    }
+
+    @Test
+    public void testGetAllValidScorer_noRequestNetworkScoresPermission() {
+        when(mContext.checkCallingOrSelfPermission(permission.REQUEST_NETWORK_SCORES))
+                .thenReturn(PackageManager.PERMISSION_DENIED);
+
+        try {
+            mNetworkScoreService.getAllValidScorers();
+            fail("SecurityException expected");
+        } catch (SecurityException e) {
+            // expected
+        }
+    }
+
+    @Test
+    public void testGetAllValidScorer_requestNetworkScoresPermission() {
+        when(mContext.checkCallingOrSelfPermission(permission.REQUEST_NETWORK_SCORES))
+                .thenReturn(PackageManager.PERMISSION_GRANTED);
+
+        mNetworkScoreService.getAllValidScorers();
     }
 
     @Test
