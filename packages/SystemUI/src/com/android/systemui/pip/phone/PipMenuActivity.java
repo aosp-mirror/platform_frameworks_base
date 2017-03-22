@@ -18,6 +18,7 @@ package com.android.systemui.pip.phone;
 
 import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_ACTIONS;
 import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_CONTROLLER_MESSENGER;
+import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_DISMISS_FRACTION;
 import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_MOVEMENT_BOUNDS;
 import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_SHOW_MENU;
 import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_STACK_BOUNDS;
@@ -113,24 +114,29 @@ public class PipMenuActivity extends Activity {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case MESSAGE_SHOW_MENU:
-                    Pair<Rect, Rect> bounds = (Pair<Rect, Rect>) msg.obj;
-                    showMenu(bounds.first, bounds.second);
+                case MESSAGE_SHOW_MENU: {
+                    final Bundle data = (Bundle) msg.obj;
+                    showMenu(data.getParcelable(EXTRA_STACK_BOUNDS),
+                            data.getParcelable(EXTRA_MOVEMENT_BOUNDS));
                     break;
+                }
                 case MESSAGE_POKE_MENU:
                     cancelDelayedFinish();
                     break;
                 case MESSAGE_HIDE_MENU:
                     hideMenu();
                     break;
-                case MESSAGE_UPDATE_ACTIONS:
-                    Pair<Rect, ParceledListSlice> data = (Pair<Rect, ParceledListSlice>) msg.obj;
-                    setActions(data.first, data.second.getList());
+                case MESSAGE_UPDATE_ACTIONS: {
+                    final Bundle data = (Bundle) msg.obj;
+                    setActions(data.getParcelable(EXTRA_STACK_BOUNDS),
+                            ((ParceledListSlice) data.getParcelable(EXTRA_ACTIONS)).getList());
                     break;
-                case MESSAGE_UPDATE_DISMISS_FRACTION:
-                    float fraction = (float) msg.obj;
-                    updateDismissFraction(fraction);
+                }
+                case MESSAGE_UPDATE_DISMISS_FRACTION: {
+                    final Bundle data = (Bundle) msg.obj;
+                    updateDismissFraction(data.getFloat(EXTRA_DISMISS_FRACTION));
                     break;
+                }
             }
         }
     });
@@ -313,9 +319,8 @@ public class PipMenuActivity extends Activity {
             mActions.addAll(actions.getList());
         }
         if (intent.getBooleanExtra(EXTRA_SHOW_MENU, false)) {
-            Rect stackBounds = Rect.unflattenFromString(intent.getStringExtra(EXTRA_STACK_BOUNDS));
-            Rect movementBounds = Rect.unflattenFromString(intent.getStringExtra(
-                    EXTRA_MOVEMENT_BOUNDS));
+            Rect stackBounds = intent.getParcelableExtra(EXTRA_STACK_BOUNDS);
+            Rect movementBounds = intent.getParcelableExtra(EXTRA_MOVEMENT_BOUNDS);
             showMenu(stackBounds, movementBounds);
         }
     }
