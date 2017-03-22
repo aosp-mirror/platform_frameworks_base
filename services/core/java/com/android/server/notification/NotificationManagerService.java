@@ -1633,19 +1633,31 @@ public class NotificationManagerService extends SystemService {
             savePolicyFile();
         }
 
-        @Override
-        public void createNotificationChannels(String pkg,
-                ParceledListSlice channelsList) throws RemoteException {
-            checkCallerIsSystemOrSameApp(pkg);
+        private void createNotificationChannelsImpl(String pkg, int uid,
+                ParceledListSlice channelsList) {
             List<NotificationChannel> channels = channelsList.getList();
             final int channelsSize = channels.size();
             for (int i = 0; i < channelsSize; i++) {
                 final NotificationChannel channel = channels.get(i);
                 Preconditions.checkNotNull(channel, "channel in list is null");
-                mRankingHelper.createNotificationChannel(pkg, Binder.getCallingUid(), channel,
+                mRankingHelper.createNotificationChannel(pkg, uid, channel,
                         true /* fromTargetApp */);
             }
             savePolicyFile();
+        }
+
+        @Override
+        public void createNotificationChannels(String pkg,
+                ParceledListSlice channelsList) throws RemoteException {
+            checkCallerIsSystemOrSameApp(pkg);
+            createNotificationChannelsImpl(pkg, Binder.getCallingUid(), channelsList);
+        }
+
+        @Override
+        public void createNotificationChannelsForPackage(String pkg, int uid,
+                ParceledListSlice channelsList) throws RemoteException {
+            checkCallerIsSystem();
+            createNotificationChannelsImpl(pkg, uid, channelsList);
         }
 
         @Override

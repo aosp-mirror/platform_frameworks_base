@@ -57,6 +57,7 @@ interface INotificationManager
 
     void createNotificationChannelGroups(String pkg, in ParceledListSlice channelGroupList);
     void createNotificationChannels(String pkg, in ParceledListSlice channelsList);
+    void createNotificationChannelsForPackage(String pkg, int uid, in ParceledListSlice channelsList);
     ParceledListSlice getNotificationChannelGroupsForPackage(String pkg, int uid, boolean includeDeleted);
     NotificationChannelGroup getNotificationChannelGroupForPackage(String groupId, String pkg, int uid);
     void updateNotificationChannelForPackage(String pkg, int uid, in NotificationChannel channel);
