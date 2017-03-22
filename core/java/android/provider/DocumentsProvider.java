@@ -629,9 +629,14 @@ public abstract class DocumentsProvider extends ContentProvider {
         throw new UnsupportedOperationException("Search not supported");
     }
 
-    /** {@hide} */
+    /**
+     * Ejects the root. Throws {@link IllegalStateException} if ejection failed.
+     *
+     * @param rootId the root to be ejected.
+     * @see Root#FLAG_SUPPORTS_EJECT
+     */
     @SuppressWarnings("unused")
-    public boolean ejectRoot(String rootId) {
+    public void ejectRoot(String rootId) {
         throw new UnsupportedOperationException("Eject not supported");
     }
 
@@ -963,14 +968,12 @@ public abstract class DocumentsProvider extends ContentProvider {
         if (METHOD_EJECT_ROOT.equals(method)) {
             // Given that certain system apps can hold MOUNT_UNMOUNT permission, but only apps
             // signed with platform signature can hold MANAGE_DOCUMENTS, we are going to check for
-            // MANAGE_DOCUMENTS here instead
-            getContext().enforceCallingPermission(
-                    android.Manifest.permission.MANAGE_DOCUMENTS, null);
+            // MANAGE_DOCUMENTS or associated URI permission here instead
             final Uri rootUri = extras.getParcelable(DocumentsContract.EXTRA_URI);
-            final String rootId = DocumentsContract.getRootId(rootUri);
-            final boolean ejected = ejectRoot(rootId);
+            enforceWritePermissionInner(rootUri, getCallingPackage(), null);
 
-            out.putBoolean(DocumentsContract.EXTRA_RESULT, ejected);
+            final String rootId = DocumentsContract.getRootId(rootUri);
+            ejectRoot(rootId);
 
             return out;
         }
