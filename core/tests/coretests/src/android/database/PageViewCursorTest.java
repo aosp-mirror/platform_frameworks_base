@@ -19,15 +19,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import android.annotation.Nullable;
 import android.content.ContentResolver;
 import android.os.Bundle;
 import android.support.test.runner.AndroidJUnit4;
-import android.util.Log;
-import android.util.MathUtils;
-
-import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.ArrayUtils;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -259,9 +253,16 @@ public class PageViewCursorTest {
     }
 
     @Test
-    public void testPagingMarker() {
+    public void testAutoPagedExtra() {
         mCursor = new PageViewCursor(mDelegate, 5, 100);
         assertTrue(mCursor.getExtras().getBoolean(PageViewCursor.EXTRA_AUTO_PAGED));
+    }
+
+    @Test
+    public void testGetWindow() {
+        mCursor = new PageViewCursor(mDelegate, 5, 5);
+        CursorWindow window = mCursor.getWindow();
+        assertEquals(5, window.getNumRows());
     }
 
     @Test
