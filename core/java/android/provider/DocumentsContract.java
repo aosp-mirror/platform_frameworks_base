@@ -1444,14 +1444,15 @@ public final class DocumentsContract {
      * <p>Providers are required to show confirmation UI for all new permissions granted
      * for the linked document.
      *
-     * <p>If list of recipients is known, then it can be passed in options as
-     * {@link Intent#EXTRA_EMAIL} as either a string or list of strings. Note, that
+     * <p>If list of recipients is known, then it should be passed in options as
+     * {@link Intent#EXTRA_EMAIL} as a list of email addresses. Note, that
      * this is just a hint for the provider, which can ignore the list. In either
      * case the provider is required to show a UI for letting the user confirm
      * any new permission grants.
      *
-     * <p>Note, that the entire <code>options</code> bundle is send to the provider.
-     * Make sure that you trust the provider before passing any sensitive information.
+     * <p>Note, that the entire <code>options</code> bundle will be sent to the provider
+     * backing the passed <code>uri</code>. Make sure that you trust the provider
+     * before passing any sensitive information.
      *
      * <p>Since this API may show a UI, it cannot be called from background.
      *
