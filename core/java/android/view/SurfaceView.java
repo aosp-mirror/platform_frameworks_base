@@ -114,6 +114,9 @@ public class SurfaceView extends View {
     SurfaceSession mSurfaceSession;
 
     SurfaceControl mSurfaceControl;
+    // In the case of format changes we switch out the surface in-place
+    // we need to preserve the old one until the new one has drawn.
+    SurfaceControl mDeferredDestroySurfaceControl;
     final Rect mTmpRect = new Rect();
     final Configuration mConfiguration = new Configuration();
 
@@ -475,6 +478,7 @@ public class SurfaceView extends View {
 
                 if (creating) {
                     mSurfaceSession = new SurfaceSession(viewRoot.mSurface);
+                    mDeferredDestroySurfaceControl = mSurfaceControl;
                     mSurfaceControl = new SurfaceControl(mSurfaceSession,
                             "SurfaceView - " + viewRoot.getTitle().toString(),
                             mSurfaceWidth, mSurfaceHeight, mFormat,
@@ -676,6 +680,12 @@ public class SurfaceView extends View {
             Log.i(TAG, System.identityHashCode(this) + " "
                     + "finishedDrawing");
         }
+
+        if (mDeferredDestroySurfaceControl != null) {
+            mDeferredDestroySurfaceControl.destroy();
+            mDeferredDestroySurfaceControl = null;
+        }
+
         mHandler.sendEmptyMessage(DRAW_FINISHED_MSG);
     }
 
