@@ -53,6 +53,7 @@ import com.android.server.input.InputWindowHandle;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
+import java.util.Set;
 import java.util.function.Consumer;
 
 final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
@@ -582,6 +583,13 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
     void dump(PrintWriter pw, String prefix) {
         if (mInputFreezeReason != null) {
             pw.println(prefix + "mInputFreezeReason=" + mInputFreezeReason);
+        }
+        final Set<String> inputConsumerKeys = mInputConsumers.keySet();
+        if (!inputConsumerKeys.isEmpty()) {
+            pw.println(prefix + "InputConsumers:");
+            for (String key : inputConsumerKeys) {
+                pw.println(prefix + "  name=" + key);
+            }
         }
     }
 
