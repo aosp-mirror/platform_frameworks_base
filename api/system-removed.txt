@@ -366,6 +366,10 @@ package android.view {
     method protected void initializeScrollbars(android.content.res.TypedArray);
   }
 
+  public class ViewConfiguration {
+    method public int getScaledScrollFactor();
+  }
+
   public static class WindowManager.LayoutParams extends android.view.ViewGroup.LayoutParams implements android.os.Parcelable {
     field public static final int TYPE_KEYGUARD = 2004; // 0x7d4
   }
