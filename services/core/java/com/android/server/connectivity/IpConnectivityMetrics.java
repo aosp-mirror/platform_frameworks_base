@@ -76,7 +76,8 @@ final public class IpConnectivityMetrics extends SystemService {
 
     @VisibleForTesting
     public final Impl impl = new Impl();
-    private NetdEventListenerService mNetdListener;
+    @VisibleForTesting
+    NetdEventListenerService mNetdListener;
 
     @GuardedBy("mLock")
     private ArrayList<ConnectivityMetricsEvent> mBuffer;

@@ -138,6 +138,7 @@ public class IpConnectivityMetricsTest extends TestCase {
     }
 
     @SmallTest
+    // TODO: add NetdEventListenerService coverage too
     public void testEndToEndLogging() {
         // TODO: instead of comparing textpb to textpb, parse textpb and compare proto to proto.
         IpConnectivityLog logger = new IpConnectivityLog(mService.impl);
@@ -177,7 +178,7 @@ public class IpConnectivityMetricsTest extends TestCase {
             logger.log(ev);
         }
 
-        String want = joinLines(
+        String want = String.join("\n",
                 "dropped_events: 0",
                 "events <",
                 "  if_name: \"\"",
@@ -279,7 +280,7 @@ public class IpConnectivityMetricsTest extends TestCase {
                 "    router_lifetime: 2000",
                 "  >",
                 ">",
-                "version: 2");
+                "version: 2\n");
 
         verifySerialization(want, getdump("flush"));
     }

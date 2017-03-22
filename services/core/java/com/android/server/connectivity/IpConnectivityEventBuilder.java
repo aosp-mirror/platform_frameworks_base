@@ -91,6 +91,21 @@ final public class IpConnectivityEventBuilder {
         return out;
     }
 
+    public static IpConnectivityEvent toProto(DnsEvent in) {
+        final IpConnectivityEvent out = new IpConnectivityEvent();
+        IpConnectivityLogClass.DNSLookupBatch dnsLookupBatch =
+                new IpConnectivityLogClass.DNSLookupBatch();
+        in.resize(in.eventCount);
+        dnsLookupBatch.eventTypes = bytesToInts(in.eventTypes);
+        dnsLookupBatch.returnCodes = bytesToInts(in.returnCodes);
+        dnsLookupBatch.latenciesMs = in.latenciesMs;
+        out.setDnsLookupBatch(dnsLookupBatch);
+        out.networkId = in.netId;
+        out.transports = in.transports;
+        inferLinkLayer(out);
+        return out;
+    }
+
     private static boolean setEvent(IpConnectivityEvent out, Parcelable in) {
         if (in instanceof DhcpErrorEvent) {
             setDhcpErrorEvent(out, (DhcpErrorEvent) in);
@@ -99,11 +114,6 @@ final public class IpConnectivityEventBuilder {
 
         if (in instanceof DhcpClientEvent) {
             setDhcpClientEvent(out, (DhcpClientEvent) in);
-            return true;
-        }
-
-        if (in instanceof DnsEvent) {
-            setDnsEvent(out, (DnsEvent) in);
             return true;
         }
 
@@ -161,16 +171,6 @@ final public class IpConnectivityEventBuilder {
         dhcpEvent.setStateTransition(in.msg);
         dhcpEvent.durationMs = in.durationMs;
         out.setDhcpEvent(dhcpEvent);
-    }
-
-    private static void setDnsEvent(IpConnectivityEvent out, DnsEvent in) {
-        IpConnectivityLogClass.DNSLookupBatch dnsLookupBatch =
-                new IpConnectivityLogClass.DNSLookupBatch();
-        dnsLookupBatch.networkId = netIdOf(in.netId);
-        dnsLookupBatch.eventTypes = bytesToInts(in.eventTypes);
-        dnsLookupBatch.returnCodes = bytesToInts(in.returnCodes);
-        dnsLookupBatch.latenciesMs = in.latenciesMs;
-        out.setDnsLookupBatch(dnsLookupBatch);
     }
 
     private static void setIpManagerEvent(IpConnectivityEvent out, IpManagerEvent in) {
