@@ -898,6 +898,9 @@ public final class Parcel {
         }
     }
 
+    /**
+     * @hide
+     */
     public final void writeSparseIntArray(SparseIntArray val) {
         if (val == null) {
             writeInt(-1);
@@ -2323,6 +2326,7 @@ public final class Parcel {
     /**
      * Read and return a new SparseIntArray object from the parcel at the current
      * dataPosition(). Returns null if the previously written array object was null.
+     * @hide
      */
     public final SparseIntArray readSparseIntArray() {
         int N = readInt();
