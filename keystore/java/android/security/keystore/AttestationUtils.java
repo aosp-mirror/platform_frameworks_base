@@ -81,9 +81,9 @@ public abstract class AttestationUtils {
     /**
      * Performs attestation of the device's identifiers. This method returns a certificate chain
      * whose first element contains the requested device identifiers in an extension. The device's
-     * brand, device and product are always also included in the attestation. If the device supports
-     * attestation in secure hardware, the chain will be rooted at a trustworthy CA key. Otherwise,
-     * the chain will be rooted at an untrusted certificate. See
+     * manufacturer, model, brand, device and product are always also included in the attestation.
+     * If the device supports attestation in secure hardware, the chain will be rooted at a
+     * trustworthy CA key. Otherwise, the chain will be rooted at an untrusted certificate. See
      * <a href="https://developer.android.com/training/articles/security-key-attestation.html">
      * Key Attestation</a> for the format of the certificate extension.
      * <p>
@@ -169,6 +169,10 @@ public abstract class AttestationUtils {
                 Build.DEVICE.getBytes(StandardCharsets.UTF_8));
         attestArgs.addBytes(KeymasterDefs.KM_TAG_ATTESTATION_ID_PRODUCT,
                 Build.PRODUCT.getBytes(StandardCharsets.UTF_8));
+        attestArgs.addBytes(KeymasterDefs.KM_TAG_ATTESTATION_ID_MANUFACTURER,
+                Build.MANUFACTURER.getBytes(StandardCharsets.UTF_8));
+        attestArgs.addBytes(KeymasterDefs.KM_TAG_ATTESTATION_ID_MODEL,
+                Build.MODEL.getBytes(StandardCharsets.UTF_8));
 
         final KeyStore keyStore = KeyStore.getInstance();
         final String keyAlias = "android_internal_device_id_attestation-"
