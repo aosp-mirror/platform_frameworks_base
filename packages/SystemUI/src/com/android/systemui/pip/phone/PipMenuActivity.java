@@ -45,14 +45,12 @@ import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
 import android.util.Log;
-import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.WindowManager.LayoutParams;
-import android.view.accessibility.AccessibilityManager;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -61,6 +59,7 @@ import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -128,8 +127,9 @@ public class PipMenuActivity extends Activity {
                     break;
                 case MESSAGE_UPDATE_ACTIONS: {
                     final Bundle data = (Bundle) msg.obj;
-                    setActions(data.getParcelable(EXTRA_STACK_BOUNDS),
-                            ((ParceledListSlice) data.getParcelable(EXTRA_ACTIONS)).getList());
+                    final ParceledListSlice actions = data.getParcelable(EXTRA_ACTIONS);
+                    setActions(data.getParcelable(EXTRA_STACK_BOUNDS), actions != null
+                            ? actions.getList() : Collections.EMPTY_LIST);
                     break;
                 }
                 case MESSAGE_UPDATE_DISMISS_FRACTION: {
@@ -260,6 +260,7 @@ public class PipMenuActivity extends Activity {
             }
             notifyMenuVisibility(true);
             updateExpandButtonFromBounds(stackBounds, movementBounds);
+            setDecorViewVisibility(true);
             mMenuContainerAnimator = ObjectAnimator.ofFloat(mMenuContainer, View.ALPHA,
                     mMenuContainer.getAlpha(), 1f);
             mMenuContainerAnimator.setInterpolator(Interpolators.ALPHA_IN);
@@ -300,9 +301,7 @@ public class PipMenuActivity extends Activity {
                     if (animationFinishedRunnable != null) {
                         animationFinishedRunnable.run();
                     }
-                    if (getSystemService(AccessibilityManager.class).isEnabled()) {
-                        finish();
-                    }
+                    setDecorViewVisibility(false);
                 }
             });
             mMenuContainerAnimator.addUpdateListener(mMenuBgUpdateListener);
@@ -411,6 +410,7 @@ public class PipMenuActivity extends Activity {
     }
 
     private void updateDismissFraction(float fraction) {
+        setDecorViewVisibility(true);
         int alpha;
         if (mMenuVisible) {
             mMenuContainer.setAlpha(1-fraction);
@@ -496,5 +496,17 @@ public class PipMenuActivity extends Activity {
         View v = getWindow().getDecorView();
         v.removeCallbacks(mFinishRunnable);
         v.postDelayed(mFinishRunnable, delay);
+    }
+
+    /**
+     * Sets the visibility of the root view of the window to disable drawing and touches for the
+     * activity.  This differs from {@link Activity#setVisible(boolean)} in that it does not set
+     * the internal mVisibleFromClient state.
+     */
+    private void setDecorViewVisibility(boolean visible) {
+        final View decorView = getWindow().getDecorView();
+        if (decorView != null) {
+            decorView.setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
+        }
     }
 }
