@@ -32,7 +32,7 @@ public class ImsException extends Exception {
     }
 
     public ImsException(String message, int code) {
-        super(message + ", code = " + code);
+        super(message + "(" + code + ")");
         mCode = code;
     }
 
