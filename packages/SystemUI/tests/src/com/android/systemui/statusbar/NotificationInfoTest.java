@@ -260,12 +260,14 @@ public class NotificationInfoTest extends SysuiTestCase {
     }
 
     @Test
-    public void testBindNotification_NumChannelsTextHiddenWhenDefaultChannel() throws Exception {
+    public void testBindNotification_NumChannelsTextUniqueWhenDefaultChannel() throws Exception {
         mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
                 TEST_PACKAGE_NAME, Arrays.asList(mDefaultNotificationChannel), null, null, null);
         final TextView numChannelsView =
                 (TextView) mNotificationInfo.findViewById(R.id.num_channels_desc);
-        assertTrue(numChannelsView.getVisibility() != View.VISIBLE);
+        assertEquals(View.VISIBLE, numChannelsView.getVisibility());
+        assertEquals(mContext.getString(R.string.notification_default_channel_desc),
+                numChannelsView.getText());
     }
 
     @Test
@@ -390,13 +392,14 @@ public class NotificationInfoTest extends SysuiTestCase {
 
     @Test
     @UiThreadTest
-    public void testBindNotification_ChannelDisabledTextHiddenWhenDefaultChannel()
+    public void testBindNotification_ChannelDisabledTextShowsForDefaultChannel()
             throws Exception {
+        mDefaultNotificationChannel.setImportance(NotificationManager.IMPORTANCE_NONE);
         mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
                 TEST_PACKAGE_NAME, Arrays.asList(mDefaultNotificationChannel), null, null, null);
         final TextView channelDisabledView =
                 (TextView) mNotificationInfo.findViewById(R.id.channel_disabled);
-        assertTrue(channelDisabledView.getVisibility() != View.VISIBLE);
+        assertEquals(View.VISIBLE, channelDisabledView.getVisibility());
     }
 
     @Test
