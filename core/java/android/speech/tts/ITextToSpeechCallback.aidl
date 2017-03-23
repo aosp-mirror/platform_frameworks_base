@@ -96,6 +96,8 @@ oneway interface ITextToSpeechCallback {
      * @param utteranceId Unique id identifying the synthesis request.
      * @param start The start character index of the range in the utterance text.
      * @param end The end character index of the range (exclusive) in the utterance text.
+     * @param frame The start position in frames in the audio of the request where this range is
+     *        spoken.
      */
-    void onUtteranceRangeStart(String utteranceId, int start, int end);
+    void onRangeStart(String utteranceId, int start, int end, int frame);
 }
