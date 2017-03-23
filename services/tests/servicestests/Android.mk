@@ -52,6 +52,7 @@ LOCAL_JNI_SHARED_LIBRARIES := \
 LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/Android.mk
 
 LOCAL_JACK_FLAGS := --multi-dex native
+LOCAL_DX_FLAGS := --multi-dex
 
 LOCAL_STATIC_JAVA_LIBRARIES += ub-uiautomator
 
