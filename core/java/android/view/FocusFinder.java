@@ -18,14 +18,17 @@ package android.view;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.content.pm.PackageManager;
 import android.graphics.Rect;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -58,7 +61,7 @@ public class FocusFinder {
     private final UserSpecifiedFocusComparator mUserSpecifiedClusterComparator =
             new UserSpecifiedFocusComparator((r, v) -> isValidId(v.getNextClusterForwardId())
                     ? v.findUserSetNextKeyboardNavigationCluster(r, View.FOCUS_FORWARD) : null);
-    private final FocusComparator mFocusComparator = new FocusComparator();
+    private final FocusSorter mFocusSorter = new FocusSorter();
 
     private final ArrayList<View> mTempList = new ArrayList<View>();
 
@@ -760,63 +763,99 @@ public class FocusFinder {
         return id != 0 && id != View.NO_ID;
     }
 
-    static FocusComparator getFocusComparator(ViewGroup root, boolean isRtl) {
-        FocusComparator comparator = getInstance().mFocusComparator;
-        comparator.setRoot(root);
-        comparator.setIsLayoutRtl(isRtl);
-        return comparator;
-    }
+    static final class FocusSorter {
+        private ArrayList<Rect> mRectPool = new ArrayList<>();
+        private int mLastPoolRect;
+        private int mRtlMult;
+        private HashMap<View, Rect> mRectByView = null;
 
-    static final class FocusComparator implements Comparator<View> {
-        private final Rect mFirstRect = new Rect();
-        private final Rect mSecondRect = new Rect();
-        private ViewGroup mRoot = null;
-        private boolean mIsLayoutRtl;
-
-        public void setIsLayoutRtl(boolean b) {
-            mIsLayoutRtl = b;
-        }
-
-        public void setRoot(ViewGroup root) {
-            mRoot = root;
-        }
-
-        public int compare(View first, View second) {
+        private Comparator<View> mTopsComparator = (first, second) -> {
             if (first == second) {
                 return 0;
             }
 
-            getRect(first, mFirstRect);
-            getRect(second, mSecondRect);
+            Rect firstRect = mRectByView.get(first);
+            Rect secondRect = mRectByView.get(second);
 
-            if (mFirstRect.top < mSecondRect.top) {
-                return -1;
-            } else if (mFirstRect.top > mSecondRect.top) {
-                return 1;
-            } else if (mFirstRect.left < mSecondRect.left) {
-                return mIsLayoutRtl ? 1 : -1;
-            } else if (mFirstRect.left > mSecondRect.left) {
-                return mIsLayoutRtl ? -1 : 1;
-            } else if (mFirstRect.bottom < mSecondRect.bottom) {
-                return -1;
-            } else if (mFirstRect.bottom > mSecondRect.bottom) {
-                return 1;
-            } else if (mFirstRect.right < mSecondRect.right) {
-                return mIsLayoutRtl ? 1 : -1;
-            } else if (mFirstRect.right > mSecondRect.right) {
-                return mIsLayoutRtl ? -1 : 1;
-            } else {
-                // The view are distinct but completely coincident so we consider
-                // them equal for our purposes.  Since the sort is stable, this
-                // means that the views will retain their layout order relative to one another.
+            int result = firstRect.top - secondRect.top;
+            if (result == 0) {
+                return firstRect.bottom - secondRect.bottom;
+            }
+            return result;
+        };
+
+        private Comparator<View> mSidesComparator = (first, second) -> {
+            if (first == second) {
                 return 0;
             }
-        }
 
-        private void getRect(View view, Rect rect) {
-            view.getDrawingRect(rect);
-            mRoot.offsetDescendantRectToMyCoords(view, rect);
+            Rect firstRect = mRectByView.get(first);
+            Rect secondRect = mRectByView.get(second);
+
+            int result = firstRect.left - secondRect.left;
+            if (result == 0) {
+                return firstRect.right - secondRect.right;
+            }
+            return mRtlMult * result;
+        };
+
+        public void sort(View[] views, int start, int end, ViewGroup root, boolean isRtl) {
+            int count = end - start;
+            if (count < 2) {
+                return;
+            }
+            if (mRectByView == null) {
+                mRectByView = new HashMap<>();
+            }
+            mRtlMult = isRtl ? -1 : 1;
+            for (int i = mRectPool.size(); i < count; ++i) {
+                mRectPool.add(new Rect());
+            }
+            for (int i = start; i < end; ++i) {
+                Rect next = mRectPool.get(mLastPoolRect++);
+                views[i].getDrawingRect(next);
+                root.offsetDescendantRectToMyCoords(views[i], next);
+                mRectByView.put(views[i], next);
+            }
+
+            // Sort top-to-bottom
+            Arrays.sort(views, start, count, mTopsComparator);
+            // Sweep top-to-bottom to identify rows
+            int sweepBottom = mRectByView.get(views[start]).bottom;
+            int rowStart = start;
+            int sweepIdx = start + 1;
+            for (; sweepIdx < end; ++sweepIdx) {
+                Rect currRect = mRectByView.get(views[sweepIdx]);
+                if (currRect.top >= sweepBottom) {
+                    // Next view is on a new row, sort the row we've just finished left-to-right.
+                    if ((sweepIdx - rowStart) > 1) {
+                        Arrays.sort(views, rowStart, sweepIdx, mSidesComparator);
+                    }
+                    sweepBottom = currRect.bottom;
+                    rowStart = sweepIdx;
+                } else {
+                    // Next view vertically overlaps, we need to extend our "row height"
+                    sweepBottom = Math.max(sweepBottom, currRect.bottom);
+                }
+            }
+            // Sort whatever's left (final row) left-to-right
+            if ((sweepIdx - rowStart) > 1) {
+                Arrays.sort(views, rowStart, sweepIdx, mSidesComparator);
+            }
+
+            mLastPoolRect = 0;
+            mRectByView.clear();
         }
+    }
+
+    /**
+     * Public for testing.
+     *
+     * @hide
+     */
+    @TestApi
+    public static void sort(View[] views, int start, int end, ViewGroup root, boolean isRtl) {
+        getInstance().mFocusSorter.sort(views, start, end, root, isRtl);
     }
 
     /**
