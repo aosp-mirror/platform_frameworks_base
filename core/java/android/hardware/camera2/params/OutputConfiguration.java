@@ -373,11 +373,15 @@ public final class OutputConfiguration implements Parcelable {
                     ", the pre-configured size will be used.");
         }
 
-        if (mConfiguredDataspace != SurfaceUtils.getSurfaceDataspace(surface)) {
-            throw new IllegalArgumentException("The dataspace of added surface doesn't match");
-        }
         if (mConfiguredFormat != SurfaceUtils.getSurfaceFormat(surface)) {
             throw new IllegalArgumentException("The format of added surface format doesn't match");
+        }
+
+        // If the surface format is PRIVATE, do not enforce dataSpace because camera device may
+        // override it.
+        if (mConfiguredFormat != ImageFormat.PRIVATE &&
+                mConfiguredDataspace != SurfaceUtils.getSurfaceDataspace(surface)) {
+            throw new IllegalArgumentException("The dataspace of added surface doesn't match");
         }
 
         mSurfaces.add(surface);
