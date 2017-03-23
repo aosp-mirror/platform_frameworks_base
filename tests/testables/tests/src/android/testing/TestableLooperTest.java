@@ -24,16 +24,15 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.testing.TestableLooper.MessageHandler;
 import android.testing.TestableLooper.RunWithLooper;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
 
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
@@ -44,11 +43,6 @@ public class TestableLooperTest {
     @Before
     public void setup() throws Exception {
         mTestableLooper = TestableLooper.get(this);
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        mTestableLooper.destroy();
     }
 
     @Test
@@ -133,39 +127,23 @@ public class TestableLooperTest {
     @Test
     public void testMainLooper() throws Exception {
         assertNotEquals(Looper.myLooper(), Looper.getMainLooper());
-
-        Looper originalMain = Looper.getMainLooper();
-        mTestableLooper.setAsMainLooper();
-        assertEquals(Looper.myLooper(), Looper.getMainLooper());
-        Runnable r = mock(Runnable.class);
-
-        new Handler(Looper.getMainLooper()).post(r);
-        mTestableLooper.processAllMessages();
-
-        verify(r).run();
-        mTestableLooper.destroy();
-
-        assertEquals(originalMain, Looper.getMainLooper());
-    }
-
-    @Test
-    public void testNotMyLooper() throws Exception {
-        TestableLooper looper = new TestableLooper(false);
-
-        assertEquals(Looper.myLooper(), mTestableLooper.getLooper());
-        assertNotEquals(Looper.myLooper(), looper.getLooper());
-
         Runnable r = mock(Runnable.class);
         Runnable r2 = mock(Runnable.class);
-        new Handler().post(r);
-        new Handler(looper.getLooper()).post(r2);
+        TestableLooper testableLooper = new TestableLooper(Looper.getMainLooper());
 
-        looper.processAllMessages();
-        verify(r2).run();
-        verify(r, never()).run();
+        try {
+            testableLooper.setMessageHandler(m -> {
+                if (m.getCallback() == r) return true;
+                return false;
+            });
+            new Handler(Looper.getMainLooper()).post(r);
+            testableLooper.processAllMessages();
 
-        mTestableLooper.processAllMessages();
-        verify(r).run();
+            verify(r).run();
+            verify(r2, never()).run();
+        } finally {
+            testableLooper.destroy();
+        }
     }
 
     @Test
