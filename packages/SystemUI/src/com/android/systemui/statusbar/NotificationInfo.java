@@ -99,11 +99,14 @@ public class NotificationInfo extends LinearLayout implements GutsContent {
         mINotificationManager = iNotificationManager;
         mPkg = pkg;
         mNotificationChannels = notificationChannels;
+        boolean isSingleDefaultChannel = false;
         if (mNotificationChannels.isEmpty()) {
             throw new IllegalArgumentException("bindNotification requires at least one channel");
         } else if (mNotificationChannels.size() == 1) {
             mSingleNotificationChannel = mNotificationChannels.get(0);
             mStartingUserImportance = mSingleNotificationChannel.getImportance();
+            isSingleDefaultChannel = mSingleNotificationChannel.getId()
+                    .equals(NotificationChannel.DEFAULT_CHANNEL_ID);
         } else {
             mSingleNotificationChannel = null;
         }
@@ -135,24 +138,30 @@ public class NotificationInfo extends LinearLayout implements GutsContent {
 
         String channelsDescText;
         mNumChannelsView = (TextView) (findViewById(R.id.num_channels_desc));
-        switch (mNotificationChannels.size()) {
-            case 1:
-                channelsDescText = String.format(mContext.getResources().getQuantityString(
-                        R.plurals.notification_num_channels_desc, numChannels), numChannels);
-                break;
-            case 2:
-                channelsDescText = mContext.getString(R.string.notification_channels_list_desc_2,
-                        mNotificationChannels.get(0).getName(),
-                        mNotificationChannels.get(1).getName());
-                break;
-            default:
-                final int numOthers = mNotificationChannels.size() - 2;
-                channelsDescText = String.format(
-                        mContext.getResources().getQuantityString(
-                                R.plurals.notification_channels_list_desc_2_and_others, numOthers),
-                        mNotificationChannels.get(0).getName(),
-                        mNotificationChannels.get(1).getName(),
-                        numOthers);
+        if (isSingleDefaultChannel) {
+            channelsDescText = mContext.getString(R.string.notification_default_channel_desc);
+        } else {
+            switch (mNotificationChannels.size()) {
+                case 1:
+                    channelsDescText = String.format(mContext.getResources().getQuantityString(
+                            R.plurals.notification_num_channels_desc, numChannels), numChannels);
+                    break;
+                case 2:
+                    channelsDescText = mContext.getString(
+                            R.string.notification_channels_list_desc_2,
+                            mNotificationChannels.get(0).getName(),
+                            mNotificationChannels.get(1).getName());
+                    break;
+                default:
+                    final int numOthers = mNotificationChannels.size() - 2;
+                    channelsDescText = String.format(
+                            mContext.getResources().getQuantityString(
+                                    R.plurals.notification_channels_list_desc_2_and_others,
+                                    numOthers),
+                            mNotificationChannels.get(0).getName(),
+                            mNotificationChannels.get(1).getName(),
+                            numOthers);
+            }
         }
         mNumChannelsView.setText(channelsDescText);
 
@@ -160,9 +169,8 @@ public class NotificationInfo extends LinearLayout implements GutsContent {
             // Multiple channels don't use a channel name for the title.
             channelNameText = mContext.getString(R.string.notification_num_channels,
                     mNotificationChannels.size());
-        } else if (mSingleNotificationChannel.getId()
-                .equals(NotificationChannel.DEFAULT_CHANNEL_ID)) {
-            // If this is the placeholder channel, don't use our channel-specific text.
+        } else if (isSingleDefaultChannel) {
+            // If this is the default channel, don't use our channel-specific text.
             channelNameText = mContext.getString(R.string.notification_header_default_channel);
         } else {
             channelNameText = mSingleNotificationChannel.getName();
@@ -282,15 +290,9 @@ public class NotificationInfo extends LinearLayout implements GutsContent {
     }
 
     private void updateSecondaryText() {
-        final boolean defaultChannel = mSingleNotificationChannel != null &&
-                mSingleNotificationChannel.getId().equals(NotificationChannel.DEFAULT_CHANNEL_ID);
         final boolean disabled = mSingleNotificationChannel != null &&
                 getSelectedImportance() == NotificationManager.IMPORTANCE_NONE;
-        if (defaultChannel) {
-            // Don't show any secondary text if this is from the default channel.
-            mChannelDisabledView.setVisibility(View.GONE);
-            mNumChannelsView.setVisibility(View.GONE);
-        } else if (disabled) {
+        if (disabled) {
             mChannelDisabledView.setVisibility(View.VISIBLE);
             mNumChannelsView.setVisibility(View.GONE);
         } else {
