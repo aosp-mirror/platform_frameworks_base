@@ -157,7 +157,6 @@ public class WifiTile extends QSTileImpl<SignalState> {
         state.activityIn = cb.enabled && cb.activityIn;
         state.activityOut = cb.enabled && cb.activityOut;
         final StringBuffer minimalContentDescription = new StringBuffer();
-        final StringBuffer expandedContentDescription = new StringBuffer();
         final Resources r = mContext.getResources();
         if (!state.value) {
             state.icon = ResourceIcon.get(R.drawable.ic_qs_wifi_disabled);
@@ -175,26 +174,14 @@ public class WifiTile extends QSTileImpl<SignalState> {
         minimalContentDescription.append(
                 mContext.getString(R.string.quick_settings_wifi_label)).append(",");
         if (state.value) {
-            expandedContentDescription.append(
-                    r.getString(R.string.quick_settings_wifi_on_label)).append(",");
             if (wifiConnected) {
                 minimalContentDescription.append(cb.wifiSignalContentDescription).append(",");
                 minimalContentDescription.append(removeDoubleQuotes(cb.enabledDesc));
-                expandedContentDescription.append(cb.wifiSignalContentDescription).append(",");
-                expandedContentDescription.append(removeDoubleQuotes(cb.enabledDesc));
             }
-        } else {
-            expandedContentDescription.append(
-                    r.getString(R.string.quick_settings_wifi_off_label));
         }
-        expandedContentDescription.append(",").append(
-                r.getString(R.string.accessibility_quick_settings_open_settings, getTileLabel()));
-        state.contentDescription = expandedContentDescription;
-        CharSequence wifiName = state.label;
-        if (cb.connected) {
-            wifiName = r.getString(R.string.accessibility_wifi_name, state.label);
-        }
-        state.dualLabelContentDescription = wifiName;
+        state.contentDescription = minimalContentDescription;
+        state.dualLabelContentDescription = r.getString(
+                R.string.accessibility_quick_settings_open_settings, getTileLabel());
         state.expandedAccessibilityClassName = Switch.class.getName();
         state.state = state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
     }

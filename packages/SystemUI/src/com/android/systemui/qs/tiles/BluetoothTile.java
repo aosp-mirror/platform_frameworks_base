@@ -148,13 +148,7 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
             state.state = Tile.STATE_INACTIVE;
         }
 
-        CharSequence bluetoothName = state.label;
-        if (connected) {
-            bluetoothName = state.dualLabelContentDescription = mContext.getString(
-                    R.string.accessibility_bluetooth_name, state.label);
-        }
-        state.dualLabelContentDescription = bluetoothName;
-        state.contentDescription = state.contentDescription + "," + mContext.getString(
+        state.dualLabelContentDescription = mContext.getResources().getString(
                 R.string.accessibility_quick_settings_open_settings, getTileLabel());
         state.expandedAccessibilityClassName = Switch.class.getName();
     }

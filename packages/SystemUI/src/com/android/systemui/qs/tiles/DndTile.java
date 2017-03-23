@@ -198,6 +198,8 @@ public class DndTile extends QSTileImpl<BooleanState> {
         if (valueChanged) {
             fireToggleStateChanged(state.value);
         }
+        state.dualLabelContentDescription = mContext.getResources().getString(
+                R.string.accessibility_quick_settings_open_settings, getTileLabel());
         state.expandedAccessibilityClassName = Switch.class.getName();
     }
 

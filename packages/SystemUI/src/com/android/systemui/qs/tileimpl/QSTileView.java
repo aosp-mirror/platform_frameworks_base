@@ -103,6 +103,8 @@ public class QSTileView extends QSTileBaseView {
         }
         mDivider.setVisibility(state.dualTarget ? View.VISIBLE : View.INVISIBLE);
         mExpandIndicator.setVisibility(state.dualTarget ? View.VISIBLE : View.GONE);
+        mLabelContainer.setContentDescription(state.dualTarget ? state.dualLabelContentDescription
+                : null);
         if (state.dualTarget != mLabelContainer.isClickable()) {
             mLabelContainer.setClickable(state.dualTarget);
             mLabelContainer.setLongClickable(state.dualTarget);

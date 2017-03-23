@@ -14,7 +14,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-<RelativeLayout
+<com.android.systemui.qs.tileimpl.ButtonRelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -82,4 +82,4 @@
         android:alpha="?android:attr/disabledAlpha"
         android:background="?android:attr/colorForeground"/>
 
-</RelativeLayout>
+</com.android.systemui.qs.tileimpl.ButtonRelativeLayout>
