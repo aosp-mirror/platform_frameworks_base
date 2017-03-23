@@ -22,10 +22,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.os.Process;
 import android.os.UserHandle;
 import android.security.IKeyChainService;
 import android.util.Slog;
 
+import com.android.server.DeviceIdleController;
+import com.android.server.LocalServices;
 import com.android.server.SystemService;
 
 /**
@@ -44,6 +47,11 @@ import com.android.server.SystemService;
 public class KeyChainSystemService extends SystemService {
 
     private static final String TAG = "KeyChainSystemService";
+
+    /**
+     * Maximum time limit for the KeyChain app to deal with packages being removed.
+     */
+    private static final int KEYCHAIN_IDLE_WHITELIST_DURATION_MS = 30 * 1000;
 
     public KeyChainSystemService(final Context context) {
         super(context);
@@ -77,10 +85,25 @@ public class KeyChainSystemService extends SystemService {
                 }
                 intent.setComponent(service);
                 intent.setAction(broadcastIntent.getAction());
-                getContext().startServiceAsUser(intent, UserHandle.of(getSendingUserId()));
+                startServiceInBackgroundAsUser(intent, UserHandle.of(getSendingUserId()));
             } catch (RuntimeException e) {
                 Slog.e(TAG, "Unable to forward package removed broadcast to KeyChain", e);
             }
         }
     };
+
+
+    private void startServiceInBackgroundAsUser(final Intent intent, final UserHandle user) {
+        if (intent.getComponent() == null) {
+            return;
+        }
+
+        final String packageName = intent.getComponent().getPackageName();
+        final DeviceIdleController.LocalService idleController =
+                LocalServices.getService(DeviceIdleController.LocalService.class);
+        idleController.addPowerSaveTempWhitelistApp(Process.myUid(), packageName,
+                KEYCHAIN_IDLE_WHITELIST_DURATION_MS, user.getIdentifier(), false, "keychain");
+
+        getContext().startServiceAsUser(intent, user);
+    }
 }
