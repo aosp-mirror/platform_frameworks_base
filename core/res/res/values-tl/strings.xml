@@ -98,7 +98,8 @@
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"Naka-block ang mga serbisyo ng Voice/SMS."</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"Naka-block ang lahat ng serbisyo sa boses/data/SMS."</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Hindi maabot ang network"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="7335915397439759249">"Upang mapahusay ang reception, subukang baguhin ang uring napili sa Mga Setting &gt; Mga cellular network &gt; Gustong uri ng network."</string>
+    <!-- no translation found for NetworkPreferenceSwitchSummary (4164230263214915351) -->
+    <skip />
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Hiniling ng peer ang TTY Mode FULL"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Hiniling ng peer ang TTY Mode HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Hiniling ng peer ang TTY Mode VCO"</string>
@@ -138,7 +139,8 @@
   </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Naka-off"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Mas gusto ang Wi-Fi"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Mas gusto ang cellular"</string>
+    <!-- no translation found for wfc_mode_cellular_preferred_summary (1988279625335345908) -->
+    <skip />
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Wi-Fi lang"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Hindi naipasa"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -182,8 +184,10 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Na-delete ang profile sa trabaho dahil wala itong admin app."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Ang admin app ng profile sa trabaho ay nawawala o sira. Bilang resulta, na-delete na ang iyong profile sa trabaho at nauugnay na data. Makipag-ugnayan sa iyong administrator para sa tulong."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Hindi na available ang iyong profile sa trabaho sa device na ito."</string>
-    <string name="network_logging_notification_title" msgid="1805392571290161924">"Sinusubaybayan ang trapiko sa network"</string>
-    <string name="network_logging_notification_text" msgid="2671761001956320094">"I-tap upang matuto pa"</string>
+    <!-- no translation found for network_logging_notification_title (6399790108123704477) -->
+    <skip />
+    <!-- no translation found for network_logging_notification_text (7930089249949354026) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"Buburahin ang iyong device"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Ang admin app ay may mga kulang na bahagi o sira, at hindi ito magagamit. Buburahin na ngayon ang iyong device. Makipag-ugnayan sa iyong administrator para sa tulong."</string>
     <string name="me" msgid="6545696007631404292">"Ako"</string>
@@ -1099,13 +1103,7 @@
     <string name="network_switch_metered" msgid="4671730921726992671">"Lumipat sa <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="5325661434777870353">"Ginagamit ng device ang <xliff:g id="NEW_NETWORK">%1$s</xliff:g> kapag walang access sa Internet ang <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g>. Maaaring may mga malapat na singilin."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Lumipat sa <xliff:g id="NEW_NETWORK">%2$s</xliff:g> mula sa <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g>"</string>
-  <string-array name="network_switch_type_name">
-    <item msgid="2952042958050315394">"cellular data"</item>
-    <item msgid="75483255295529161">"Wi-Fi"</item>
-    <item msgid="6862614801537202646">"Bluetooth"</item>
-    <item msgid="5447331121797802871">"Ethernet"</item>
-    <item msgid="8257233890381651999">"VPN"</item>
-  </string-array>
+    <!-- no translation found for network_switch_type_name:0 (3979506840912951943) -->
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"isang hindi kilalang uri ng network"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Hindi makakonekta sa Wi-Fi"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" ay mayroong mahinang koneksyon sa Internet."</string>
@@ -1143,10 +1141,10 @@
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"Palaging Payagan"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"Huwag kailanman Payagan"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"Naalis ang SIM card"</string>
-    <string name="sim_removed_message" msgid="5450336489923274918">"Magiging unavailable ang cellular network hanggang mag-restart ka nang may nakalagay na wastong SIM card."</string>
+    <string name="sim_removed_message" msgid="2333164559970958645">"Hindi magiging available ang mobile network hanggang mag-restart ka gamit ang isang may-bisang SIM card"</string>
     <string name="sim_done_button" msgid="827949989369963775">"Tapos na"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"Idinagdag ang SIM card"</string>
-    <string name="sim_added_message" msgid="7797975656153714319">"I-restart ang iyong device upang ma-access ang cellular network."</string>
+    <string name="sim_added_message" msgid="6599945301141050216">"I-restart ang iyong device upang ma-access ang mobile network."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"I-restart"</string>
     <string name="carrier_app_dialog_message" msgid="7066156088266319533">"Upang gumana nang maayos ang bago mong SIM, kakailanganin mong mag-install at magbukas ng app mula sa iyong carrier."</string>
     <string name="carrier_app_dialog_button" msgid="7900235513678617329">"KUNIN ANG APP"</string>
@@ -1361,12 +1359,13 @@
     <string name="data_usage_warning_body" msgid="6660692274311972007">"I-tap tingnan paggamit/setting."</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"Naabot na ang limitasyon sa 2G-3G data"</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"Naabot na ang limitasyon sa 4G data"</string>
-    <string name="data_usage_mobile_limit_title" msgid="557158376602636112">"Naabot na ang limitasyon sa cellular data"</string>
+    <!-- no translation found for data_usage_mobile_limit_title (6561099244084267376) -->
+    <skip />
     <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"Naabot na ang limitasyon sa data ng Wi-Fi"</string>
     <string name="data_usage_limit_body" msgid="291731708279614081">"Naka-pause ang data para sa nalalabing bahagi ng pag-ikot"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"lumampas sa 2G-3G na limitasyon ng data"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"Lumampas sa 4G na limitasyon ng data"</string>
-    <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"Lampas na sa cellular data limit"</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"Lumampas sa limitasyon ng data sa mobile"</string>
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Lumampas sa limitasyon ng data ng Wi-Fi"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"Lampas ng <xliff:g id="SIZE">%s</xliff:g> sa tinukoy na limitasyon."</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"Pinaghihigpitan ang data ng background"</string>
@@ -1738,4 +1737,13 @@
     <string name="autofill_save_type_password" msgid="5288448918465971568">"password"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"address"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"credit card"</string>
+    <!-- no translation found for etws_primary_default_message_earthquake (5541962250262769193) -->
+    <skip />
+    <!-- no translation found for etws_primary_default_message_tsunami (1887685943498368548) -->
+    <skip />
+    <!-- no translation found for etws_primary_default_message_earthquake_and_tsunami (998797956848445862) -->
+    <skip />
+    <!-- no translation found for etws_primary_default_message_test (2709597093560037455) -->
+    <skip />
+    <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
 </resources>

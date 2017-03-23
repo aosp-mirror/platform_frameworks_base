@@ -100,7 +100,8 @@
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"Balso / SMS paslaugos blokuojamos."</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"Blokuojamos visos balso / duomenų / SMS paslaugos."</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Nepavyko pasiekti tinklo"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="7335915397439759249">"Kad pagerintumėte ryšį, pabandykite pakeisti tipą, pasirinktą skiltyje „Nustatymai“ &gt; „Mobiliojo ryšio tinklai“ &gt; „Pageidaujamas tinklo tipas“."</string>
+    <!-- no translation found for NetworkPreferenceSwitchSummary (4164230263214915351) -->
+    <skip />
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Lygiavertis naudotojas pateikė užklausą dėl TTY režimo FULL"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Lygiavertis naudotojas pateikė užklausą dėl TTY režimo HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Lygiavertis naudotojas pateikė užklausą dėl TTY režimo VCO"</string>
@@ -140,7 +141,8 @@
   </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Išjungta"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Pageidautinas „Wi-Fi“ ryšys"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Pageidautinas mobilusis ryšys"</string>
+    <!-- no translation found for wfc_mode_cellular_preferred_summary (1988279625335345908) -->
+    <skip />
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Tik „Wi-Fi“"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: neperadresuota"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -186,8 +188,10 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Darbo profilis ištrintas dėl trūkstamos administratoriaus programos."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Trūksta darbo profilio administratoriaus programos arba ji sugadinta. Todėl darbo profilis ir susiję duomenys buvo ištrinti. Dėl pagalbos susisiekite su administratoriumi."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Darbo profilis nebepasiekiamas šiame įrenginyje."</string>
-    <string name="network_logging_notification_title" msgid="1805392571290161924">"Tinklo srautas stebimas"</string>
-    <string name="network_logging_notification_text" msgid="2671761001956320094">"Palieskite, kad sužinotumėte daugiau"</string>
+    <!-- no translation found for network_logging_notification_title (6399790108123704477) -->
+    <skip />
+    <!-- no translation found for network_logging_notification_text (7930089249949354026) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"Įrenginys bus ištrintas"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Trūksta administratoriaus programos komponentų arba programa sugadinta ir jos negalima naudoti. Dabar įrenginys bus ištrintas. Dėl pagalbos susisiekite su administratoriumi."</string>
     <string name="me" msgid="6545696007631404292">"Aš"</string>
@@ -1139,13 +1143,7 @@
     <string name="network_switch_metered" msgid="4671730921726992671">"Perjungta į tinklą <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="5325661434777870353">"Įrenginys naudoja tinklą <xliff:g id="NEW_NETWORK">%1$s</xliff:g> kai tinkle <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> nėra interneto ryšio. Gali būti taikomi mokesčiai."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Perjungta iš tinklo <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> į tinklą <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
-  <string-array name="network_switch_type_name">
-    <item msgid="2952042958050315394">"mobiliojo ryšio duomenys"</item>
-    <item msgid="75483255295529161">"Wi-Fi"</item>
-    <item msgid="6862614801537202646">"Bluetooth"</item>
-    <item msgid="5447331121797802871">"Eternetas"</item>
-    <item msgid="8257233890381651999">"VPN"</item>
-  </string-array>
+    <!-- no translation found for network_switch_type_name:0 (3979506840912951943) -->
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"nežinomas tinklo tipas"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Nepavyko prisijungti prie „Wi-Fi“"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" turi prastą interneto ryšį."</string>
@@ -1183,10 +1181,10 @@
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"Visada leisti"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"Niekada neleisti"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"SIM kortelė pašalinta"</string>
-    <string name="sim_removed_message" msgid="5450336489923274918">"Negalėsite pasiekti korinio tinklo, kol iš naujo paleisite įrenginį įdėję tinkamą SIM kortelę."</string>
+    <string name="sim_removed_message" msgid="2333164559970958645">"Mobilusis tinklas bus nepasiekiamas, kol nepaleisite iš naujo įdėję tinkamą SIM kortelę."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Atlikta"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"SIM kortelė pridėta"</string>
-    <string name="sim_added_message" msgid="7797975656153714319">"Iš naujo paleiskite įrenginį, kad pasiektumėte korinį tinklą."</string>
+    <string name="sim_added_message" msgid="6599945301141050216">"Jei norite pasiekti mobiliojo ryšio tinklą, reikia iš naujo paleisti įrenginį."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"Paleisti iš naujo"</string>
     <string name="carrier_app_dialog_message" msgid="7066156088266319533">"Kad nauja SIM kortelė veiktų tinkamai, turite įdiegti ir atidaryti iš operatoriaus gautą programą."</string>
     <string name="carrier_app_dialog_button" msgid="7900235513678617329">"GAUTI PROGRAMĄ"</string>
@@ -1403,12 +1401,13 @@
     <string name="data_usage_warning_body" msgid="6660692274311972007">"Pal. ir perž. naud. i. bei nust."</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"Pasiektas 2G–3G duomenų apribojimas"</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"Pasiektas 4G duomenų apribojimas"</string>
-    <string name="data_usage_mobile_limit_title" msgid="557158376602636112">"Pasiektas mobiliųjų duomenų apribojimas"</string>
+    <!-- no translation found for data_usage_mobile_limit_title (6561099244084267376) -->
+    <skip />
     <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"Pasiektas „Wi-Fi“ duomenų apribojimas"</string>
     <string name="data_usage_limit_body" msgid="291731708279614081">"Pristabdyti likusio ciklo duomenys"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"Viršyta 2G–3G duomenų riba"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"Viršyta 4G duomenų riba"</string>
-    <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"Viršytas mobil. duom. limitas"</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"Viršyta mobiliųjų duomenų riba"</string>
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Viršytas „Wi-Fi“ duomenų aprib."</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> viršyta nurodyta riba."</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"Apriboti foniniai duomenys"</string>
@@ -1800,4 +1799,13 @@
     <string name="autofill_save_type_password" msgid="5288448918465971568">"slaptažodį"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"adresą"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"kredito kortelę"</string>
+    <!-- no translation found for etws_primary_default_message_earthquake (5541962250262769193) -->
+    <skip />
+    <!-- no translation found for etws_primary_default_message_tsunami (1887685943498368548) -->
+    <skip />
+    <!-- no translation found for etws_primary_default_message_earthquake_and_tsunami (998797956848445862) -->
+    <skip />
+    <!-- no translation found for etws_primary_default_message_test (2709597093560037455) -->
+    <skip />
+    <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
 </resources>

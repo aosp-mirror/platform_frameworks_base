@@ -98,7 +98,8 @@
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"Sprach-/SMS-Dienste sind gesperrt."</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"Alle Sprach-/Daten-/SMS-Dienste sind gesperrt."</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Netzwerk nicht erreichbar"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="7335915397439759249">"Der Empfang lässt sich möglicherweise verbessern, indem du unter \"Einstellungen\" &gt; \"Mobilfunknetze\" &gt; \"Bevorzugter Netzwerktyp\" einen anderen Typ auswählst."</string>
+    <!-- no translation found for NetworkPreferenceSwitchSummary (4164230263214915351) -->
+    <skip />
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Peer hat TTY-Modus \"Vollständig\" angefordert."</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Peer hat TTY-Modus \"HCO\" angefordert."</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Peer hat TTY-Modus \"VC\" angefordert."</string>
@@ -138,7 +139,8 @@
   </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Aus"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"WLAN bevorzugt"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Mobilfunk bevorzugt"</string>
+    <!-- no translation found for wfc_mode_cellular_preferred_summary (1988279625335345908) -->
+    <skip />
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Nur WLAN"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Nicht weitergeleitet"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -182,8 +184,10 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Arbeitsprofil aufgrund fehlender Admin-App gelöscht"</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Die Admin-App für das Arbeitsprofil fehlt oder ist beschädigt. Daher wurden dein Arbeitsprofil und alle zugehörigen Daten gelöscht. Wende dich für weitere Hilfe an deinen Administrator."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Dein Arbeitsprofil ist auf diesem Gerät nicht mehr verfügbar."</string>
-    <string name="network_logging_notification_title" msgid="1805392571290161924">"Der Netzwerkverkehr wird protokolliert"</string>
-    <string name="network_logging_notification_text" msgid="2671761001956320094">"Für weitere Informationen tippen"</string>
+    <!-- no translation found for network_logging_notification_title (6399790108123704477) -->
+    <skip />
+    <!-- no translation found for network_logging_notification_text (7930089249949354026) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"Die Daten auf deinem Gerät werden gelöscht."</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Die Admin-App kann nicht verwendet werden, da sie beschädigt wurde oder Komponenten fehlen. Die Daten auf deinem Gerät werden nun gelöscht. Wende dich für weitere Hilfe an deinen Administrator."</string>
     <string name="me" msgid="6545696007631404292">"Eigene"</string>
@@ -1099,13 +1103,7 @@
     <string name="network_switch_metered" msgid="4671730921726992671">"Zu <xliff:g id="NETWORK_TYPE">%1$s</xliff:g> gewechselt"</string>
     <string name="network_switch_metered_detail" msgid="5325661434777870353">"Auf dem Gerät wird \"<xliff:g id="NEW_NETWORK">%1$s</xliff:g>\" verwendet, wenn über \"<xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g>\" kein Internet verfügbar ist. Eventuell fallen Gebühren an."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Von \"<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g>\" zu \"<xliff:g id="NEW_NETWORK">%2$s</xliff:g>\" gewechselt"</string>
-  <string-array name="network_switch_type_name">
-    <item msgid="2952042958050315394">"mobile Datennutzung"</item>
-    <item msgid="75483255295529161">"WLAN"</item>
-    <item msgid="6862614801537202646">"Bluetooth"</item>
-    <item msgid="5447331121797802871">"Ethernet"</item>
-    <item msgid="8257233890381651999">"VPN"</item>
-  </string-array>
+    <!-- no translation found for network_switch_type_name:0 (3979506840912951943) -->
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"ein unbekannter Netzwerktyp"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Es konnte keine WLAN-Verbindung hergestellt werden."</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" hat eine schlechte Internetverbindung."</string>
@@ -1143,10 +1141,10 @@
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"Immer zulassen"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"Nie zulassen"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"SIM-Karte entfernt"</string>
-    <string name="sim_removed_message" msgid="5450336489923274918">"Das Mobilfunknetz ist erst wieder verfügbar, wenn du einen Neustart mit einer gültigen SIM-Karte durchführst."</string>
+    <string name="sim_removed_message" msgid="2333164559970958645">"Das Mobilfunknetz ist erst wieder verfügbar, wenn du einen Neustart mit einer gültigen SIM-Karte durchführst."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Fertig"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"SIM-Karte hinzugefügt"</string>
-    <string name="sim_added_message" msgid="7797975656153714319">"Starte zur Nutzung des Mobilfunknetzes dein Gerät neu."</string>
+    <string name="sim_added_message" msgid="6599945301141050216">"Starte zur Nutzung des Mobilfunknetzes dein Gerät neu."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"Neu starten"</string>
     <string name="carrier_app_dialog_message" msgid="7066156088266319533">"Damit deine neue SIM-Karte ordnungsgemäß funktioniert, musst du zuerst eine App deines Mobilfunkanbieters installieren und öffnen."</string>
     <string name="carrier_app_dialog_button" msgid="7900235513678617329">"APP HERUNTERLADEN"</string>
@@ -1361,12 +1359,13 @@
     <string name="data_usage_warning_body" msgid="6660692274311972007">"Für Nutzung und Einstellungen tippen."</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"2G-/3G-Datenlimit erreicht"</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"4G-Datenlimit erreicht"</string>
-    <string name="data_usage_mobile_limit_title" msgid="557158376602636112">"Mobilfunkdatenlimit erreicht"</string>
+    <!-- no translation found for data_usage_mobile_limit_title (6561099244084267376) -->
+    <skip />
     <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"WLAN-Datenlimit erreicht"</string>
     <string name="data_usage_limit_body" msgid="291731708279614081">"Daten für restl. Zeitraum deakt."</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"2G-/3G-Datenlimit überschritten"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"4G-Datenlimit überschritten"</string>
-    <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"Mobilfunkdatenlimit überschritten"</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"Mobildatenlimit überschritten"</string>
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"WLAN-Datenlimit überschritten"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> über dem vorgegebenen Limit"</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"Hintergrunddaten beschränkt"</string>
@@ -1738,4 +1737,13 @@
     <string name="autofill_save_type_password" msgid="5288448918465971568">"Passwort"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"Adresse"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"Kreditkarte"</string>
+    <!-- no translation found for etws_primary_default_message_earthquake (5541962250262769193) -->
+    <skip />
+    <!-- no translation found for etws_primary_default_message_tsunami (1887685943498368548) -->
+    <skip />
+    <!-- no translation found for etws_primary_default_message_earthquake_and_tsunami (998797956848445862) -->
+    <skip />
+    <!-- no translation found for etws_primary_default_message_test (2709597093560037455) -->
+    <skip />
+    <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
 </resources>

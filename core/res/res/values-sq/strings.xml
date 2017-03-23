@@ -98,7 +98,8 @@
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"Shërbimet me zë/SMS-të janë të bllokuara."</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"Të gjitha shërbimet me zë/të të dhënave/SMS-të janë bllokuar."</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Rrjeti i paarritshëm"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="7335915397439759249">"Për të përmirësuar marrjen e sinjalit, provo të ndryshosh llojin e zgjedhur te Cilësimet &gt; Rrjetet celulare &gt; Lloji i preferuar i rrjetit."</string>
+    <!-- no translation found for NetworkPreferenceSwitchSummary (4164230263214915351) -->
+    <skip />
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Homologu yt kërkoi modalitet \"TTY\" të plotë"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Homologu kërkoi modalitet \"TTY\" të llojit \"HCO\""</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Homologu yt kërkoi modalitet \"TTY\" të llojit \"VCO\""</string>
@@ -138,7 +139,8 @@
   </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Çaktivizuar"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Preferohet Wi-Fi"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Preferohet rrjeti celular"</string>
+    <!-- no translation found for wfc_mode_cellular_preferred_summary (1988279625335345908) -->
+    <skip />
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Vetëm Wi-Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Nuk u transferua"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -182,8 +184,10 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Profili i punës u fshi për shkak të mungesës së aplikacionit të administratorit."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Aplikacioni i administratorit të profilit të punës mungon ose është dëmtuar. Si rezultat i kësaj, profili yt i punës dhe të dhënat përkatëse janë fshirë. Kontakto administratorin tënd për ndihmë."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Profili yt i punës nuk është më i disponueshëm në këtë pajisje."</string>
-    <string name="network_logging_notification_title" msgid="1805392571290161924">"Trafiku i rrjetit po monitorohet"</string>
-    <string name="network_logging_notification_text" msgid="2671761001956320094">"Trokit për të mësuar më shumë"</string>
+    <!-- no translation found for network_logging_notification_title (6399790108123704477) -->
+    <skip />
+    <!-- no translation found for network_logging_notification_text (7930089249949354026) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"Pajisja do të spastrohet"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Aplikacionit të administratorit i mungojnë përbërësit ose është dëmtuar dhe nuk mund të përdoret. Pajisja jote tani do të fshihet. Kontakto administratorin tënd për ndihmë."</string>
     <string name="me" msgid="6545696007631404292">"Unë"</string>
@@ -1099,13 +1103,7 @@
     <string name="network_switch_metered" msgid="4671730921726992671">"Kaloi te <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="5325661434777870353">"Pajisja përdor <xliff:g id="NEW_NETWORK">%1$s</xliff:g> kur <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> nuk ka qasje në internet. Mund të zbatohen tarifa."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Kaloi nga <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> te <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
-  <string-array name="network_switch_type_name">
-    <item msgid="2952042958050315394">"të dhënat celulare"</item>
-    <item msgid="75483255295529161">"Wi-Fi"</item>
-    <item msgid="6862614801537202646">"Bluetooth"</item>
-    <item msgid="5447331121797802871">"Eternet"</item>
-    <item msgid="8257233890381651999">"VPN"</item>
-  </string-array>
+    <!-- no translation found for network_switch_type_name:0 (3979506840912951943) -->
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"një lloj rrjeti i panjohur"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Nuk mund të lidhej me Wi-Fi"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" ka një lidhje të dobët interneti."</string>
@@ -1143,10 +1141,10 @@
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"Lejo gjithmonë"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"Mos lejo asnjëherë"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"Karta SIM u hoq"</string>
-    <string name="sim_removed_message" msgid="5450336489923274918">"Rrjeti celular nuk do të mundësohet derisa ta rinisësh pajisjen me një kartë të vlefshme SIM në të."</string>
+    <string name="sim_removed_message" msgid="2333164559970958645">"Rrjeti celular nuk do të mundësohet derisa ta rinisësh pajisjen me një kartë të vlefshme SIM në të."</string>
     <string name="sim_done_button" msgid="827949989369963775">"U krye!"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"Karta SIM u shtua"</string>
-    <string name="sim_added_message" msgid="7797975656153714319">"Rinise pajisjen për të pasur qasje në rrjetin celular."</string>
+    <string name="sim_added_message" msgid="6599945301141050216">"Rinise pajisjen për të pasur qasje në rrjetin celular."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"Rifillo"</string>
     <string name="carrier_app_dialog_message" msgid="7066156088266319533">"Që karta e re SIM të funksionojë siç duhet, duhet të instalosh dhe të hapësh një aplikacion nga operatori yt."</string>
     <string name="carrier_app_dialog_button" msgid="7900235513678617329">"MERR APLIKACIONIN"</string>
@@ -1362,12 +1360,13 @@
     <string name="data_usage_warning_body" msgid="6660692274311972007">"Trokit për të parë përdorimin dhe cilësimet."</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"Kufiri i të dhënave 2G-3G u arrit"</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"Kufiri i të dhënave 4G u arrit"</string>
-    <string name="data_usage_mobile_limit_title" msgid="557158376602636112">"Kufiri i të dhënave celulare u arrit"</string>
+    <!-- no translation found for data_usage_mobile_limit_title (6561099244084267376) -->
+    <skip />
     <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"U arrit kufiri i të dhënave Wi-Fi"</string>
     <string name="data_usage_limit_body" msgid="291731708279614081">"Të dhënat u ndaluan për pjesën e mbetur të ciklit"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"Kufiri i të dhënave 2G-3G u tejkalua"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"Kufiri i të dhënave 4G u tejkalua"</string>
-    <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"Kufiri i të dhënave celulare u tejkalua"</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"Kufiri i të dhënave celulare u tejkalua"</string>
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Kufiri i të dhënave Wi-Fi u tejkalua"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> mbi kufirin e përcaktuar."</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"Të dhënat e sfondit janë të kufizuara"</string>
@@ -1739,4 +1738,13 @@
     <string name="autofill_save_type_password" msgid="5288448918465971568">"fjalëkalimi"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"adresa"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"karta e kreditit"</string>
+    <!-- no translation found for etws_primary_default_message_earthquake (5541962250262769193) -->
+    <skip />
+    <!-- no translation found for etws_primary_default_message_tsunami (1887685943498368548) -->
+    <skip />
+    <!-- no translation found for etws_primary_default_message_earthquake_and_tsunami (998797956848445862) -->
+    <skip />
+    <!-- no translation found for etws_primary_default_message_test (2709597093560037455) -->
+    <skip />
+    <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
 </resources>

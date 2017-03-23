@@ -98,7 +98,8 @@
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"Ahots eta SMS zerbitzuak blokeatuta daude."</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"Ahotsaren, datuen eta SMSen zerbitzuak blokeatuta daude."</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Ezin da konektatu sarera"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="7335915397439759249">"Seinalea hobea izan dadin, aldatu hautatutako mota Ezarpenak &gt; Sare mugikorrak &gt; Sare mota hobetsia atalean."</string>
+    <!-- no translation found for NetworkPreferenceSwitchSummary (4164230263214915351) -->
+    <skip />
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Beste gailuak TTY osagarria FULL moduan erabiltzea eskatu du"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Beste gailuak TTY osagarria HCO moduan erabiltzea eskatu du"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Beste gailuak TTY osagarria VCO moduan erabiltzea eskatu du"</string>
@@ -138,7 +139,8 @@
   </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Desaktibatuta"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi sarea hobesten da"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Sare mugikorra hobesten da"</string>
+    <!-- no translation found for wfc_mode_cellular_preferred_summary (1988279625335345908) -->
+    <skip />
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Wi-Fi sarea soilik"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ez da desbideratu"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -182,8 +184,10 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Laneko profila ezabatu egin da hura administratzeko aplikazioa falta delako."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Laneko profila administratzeko aplikazioa falta da edo hondatuta dago. Ondorioz, laneko profila eta horrekin erlazionatutako datuak ezabatu egin dira. Laguntza lortzeko, jarri administratzailearekin harremanetan."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Work profila ez dago erabilgarri gailu honetan."</string>
-    <string name="network_logging_notification_title" msgid="1805392571290161924">"Sareko trafikoa gainbegiratzen da"</string>
-    <string name="network_logging_notification_text" msgid="2671761001956320094">"Sakatu informazio gehiago lortzeko"</string>
+    <!-- no translation found for network_logging_notification_title (6399790108123704477) -->
+    <skip />
+    <!-- no translation found for network_logging_notification_text (7930089249949354026) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"Gailuko datuak ezabatu egingo dira"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Administrazio-aplikazioaren osagai batzuk falta dira edo aplikazioa hondatuta dago eta ezin da erabili. Gailuko datuak ezabatu egingo dira. Laguntza lortzeko, jarri administratzailearekin harremanetan."</string>
     <string name="me" msgid="6545696007631404292">"Ni"</string>
@@ -1099,13 +1103,7 @@
     <string name="network_switch_metered" msgid="4671730921726992671">"<xliff:g id="NETWORK_TYPE">%1$s</xliff:g> erabiltzen ari zara orain"</string>
     <string name="network_switch_metered_detail" msgid="5325661434777870353">"<xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> Internetera konektatzeko gauza ez denean, <xliff:g id="NEW_NETWORK">%1$s</xliff:g> erabiltzen du gailuak. Agian kostuak ordaindu beharko dituzu."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> erabiltzen ari zinen, baina <xliff:g id="NEW_NETWORK">%2$s</xliff:g> erabiltzen ari zara orain"</string>
-  <string-array name="network_switch_type_name">
-    <item msgid="2952042958050315394">"datu-konexioa"</item>
-    <item msgid="75483255295529161">"Wi-Fi"</item>
-    <item msgid="6862614801537202646">"Bluetooth"</item>
-    <item msgid="5447331121797802871">"Ethernet"</item>
-    <item msgid="8257233890381651999">"VPN"</item>
-  </string-array>
+    <!-- no translation found for network_switch_type_name:0 (3979506840912951943) -->
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"sare mota ezezaguna"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Ezin izan da Wi-Fi sarera konektatu"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" Interneteko konexio txarra du."</string>
@@ -1143,10 +1141,10 @@
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"Onartu beti"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"Ez onartu inoiz"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"SIM txartela kendu da"</string>
-    <string name="sim_removed_message" msgid="5450336489923274918">"Sare mugikorra ez da erabilgarri egongo baliozko SIM txartel bat sartu eta gailua berrabiarazi arte."</string>
+    <string name="sim_removed_message" msgid="2333164559970958645">"Sare mugikorra ez da erabilgarri egongo baliozko SIM txartel bat sartuta berrabiarazten ez duzun arte."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Eginda"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"SIM txartela gehitu da"</string>
-    <string name="sim_added_message" msgid="7797975656153714319">"Sare mugikorra atzitzeko, berrabiarazi gailua."</string>
+    <string name="sim_added_message" msgid="6599945301141050216">"Berrabiarazi gailua sare mugikorra atzitzeko."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"Berrabiarazi"</string>
     <string name="carrier_app_dialog_message" msgid="7066156088266319533">"SIM berriak behar bezala funtziona dezan, operadorearen aplikazio bat instalatu eta ireki behar duzu."</string>
     <string name="carrier_app_dialog_button" msgid="7900235513678617329">"ESKURATU APLIKAZIOA"</string>
@@ -1362,12 +1360,13 @@
     <string name="data_usage_warning_body" msgid="6660692274311972007">"Sakatu erabilera eta ezarpenak ikusteko."</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"2-3 GB-ko mugara iritsi zara"</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"4 GB-ko mugara iritsi zara"</string>
-    <string name="data_usage_mobile_limit_title" msgid="557158376602636112">"Datuen mugara iritsi zara"</string>
+    <!-- no translation found for data_usage_mobile_limit_title (6561099244084267376) -->
+    <skip />
     <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"Wi-Fi datuen mugara iritsi zara"</string>
     <string name="data_usage_limit_body" msgid="291731708279614081">"Datuen erab. etenda zikloa amaitu arte"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"2G-3G datu-muga gainditu da"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"4G datu-muga gainditu da"</string>
-    <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"Datu mugikorren muga gainditu da"</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"Datu mugikorren muga gainditu da"</string>
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Wi-Fi datuen muga gainditu da"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"Zehaztutako muga baino <xliff:g id="SIZE">%s</xliff:g> gehiago."</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"Atzeko planoko datuak murriztuta"</string>
@@ -1739,4 +1738,13 @@
     <string name="autofill_save_type_password" msgid="5288448918465971568">"pasahitza"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"helbidea"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"kreditu-txartela"</string>
+    <!-- no translation found for etws_primary_default_message_earthquake (5541962250262769193) -->
+    <skip />
+    <!-- no translation found for etws_primary_default_message_tsunami (1887685943498368548) -->
+    <skip />
+    <!-- no translation found for etws_primary_default_message_earthquake_and_tsunami (998797956848445862) -->
+    <skip />
+    <!-- no translation found for etws_primary_default_message_test (2709597093560037455) -->
+    <skip />
+    <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
 </resources>

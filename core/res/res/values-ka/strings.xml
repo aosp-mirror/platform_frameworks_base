@@ -98,7 +98,8 @@
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"ყველა ხმოვანი/SMS-ის სერვისი დაბლოკილია."</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"ხმის/მონაცემების/SMS-ის ყველა სერვისი დაბლოკილია."</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"ქსელთან დაკავშირება ვერ ხერხდება"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="7335915397439759249">"მიღების გასაუმჯობესებლად ცადეთ არჩეული ტიპის შეცვლა აქ: პარამეტრები &gt; ფიჭური ქსელები &gt; ქსელის სასურველი ტიპი."</string>
+    <!-- no translation found for NetworkPreferenceSwitchSummary (4164230263214915351) -->
+    <skip />
     <string name="peerTtyModeFull" msgid="6165351790010341421">"მოთხოვნილია კვანძი TTY რეჟიმი FULL"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"მოთხოვნილია კვანძი TTY რეჟიმი HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"მოთხოვნილია კვანძი TTY რეჟიმი VCO"</string>
@@ -138,7 +139,8 @@
   </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"გამორთული"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"სასურველია Wi-Fi"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"სასურველია ფიჭური ინტერნეტი"</string>
+    <!-- no translation found for wfc_mode_cellular_preferred_summary (1988279625335345908) -->
+    <skip />
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"მხოლოდ Wi-Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: არ არის გადამისამართებული"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -182,8 +184,10 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"სამუშაო პროფილი წაშლილია ადმინისტრატორის აპლიკაციის არ ქონის გამო."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"სამუშაო პროფილის ადმინისტრატორის აპლიკაცია გამოტოვებული ან დაზიანებულია. შედეგად, თქვენი სამუშაო პროფილი და მასთან დაკავშირებული მონაცემები წაიშალა. დახმარებისათვის დაუკავშირდით თქვენს ადმინისტრატორს."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"თქვენი სამუშაო პროფილი აღარ არის ხელმისაწვდომი ამ მოწყობილობაზე."</string>
-    <string name="network_logging_notification_title" msgid="1805392571290161924">"ქსელის ტრაფიკი მონიტორინგს გადის"</string>
-    <string name="network_logging_notification_text" msgid="2671761001956320094">"შეეხეთ, რათა შეიტყოთ მეტი"</string>
+    <!-- no translation found for network_logging_notification_title (6399790108123704477) -->
+    <skip />
+    <!-- no translation found for network_logging_notification_text (7930089249949354026) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"თქვენი მოწყობილობა წაიშლება"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"ადმინისტრატორის აპლიკაციას კომპონენტები აკლია ან დაზიანებულია, შესაბამისად, მისი გამოყენება ვერ მოხერხდება. თქვენი მოწყობილობა წაიშლება. დახმარებისათვის დაუკავშირდით თქვენს ადმინისტრატორს."</string>
     <string name="me" msgid="6545696007631404292">"მე"</string>
@@ -1099,13 +1103,7 @@
     <string name="network_switch_metered" msgid="4671730921726992671">"ახლა გამოიყენება <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="5325661434777870353">"თუ <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> ინტერნეტთან კავშირს დაკარგავს, მოწყობილობის მიერ <xliff:g id="NEW_NETWORK">%1$s</xliff:g> იქნება გამოყენებული, რამაც შეიძლება დამატებითი ხარჯები გამოიწვიოს"</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"ახლა გამოიყენება <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> (გამოიყენებოდა <xliff:g id="NEW_NETWORK">%2$s</xliff:g>)"</string>
-  <string-array name="network_switch_type_name">
-    <item msgid="2952042958050315394">"მობილური ინტერნეტი"</item>
-    <item msgid="75483255295529161">"Wi-Fi"</item>
-    <item msgid="6862614801537202646">"Bluetooth"</item>
-    <item msgid="5447331121797802871">"Ethernet"</item>
-    <item msgid="8257233890381651999">"VPN"</item>
-  </string-array>
+    <!-- no translation found for network_switch_type_name:0 (3979506840912951943) -->
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"უცნობი ტიპის ქსელი"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Wi-Fi-თან დაკავშირება ვერ მოხერხდა"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" აქვს ცუდი ინტერნეტ კავშირი."</string>
@@ -1143,10 +1141,10 @@
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"ნებართვის მიცემა - ყოველთვის"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"არასოდეს მისცე უფლება"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"SIM ბარათი ამოღებულია"</string>
-    <string name="sim_removed_message" msgid="5450336489923274918">"ფიჭური კავშირი არ იქნება ხელმისაწვდომი, ვიდრე არ ჩადებთ ქმედით SIM ბარათს და გადატვირთავთ."</string>
+    <string name="sim_removed_message" msgid="2333164559970958645">"მობილური კავშირი არ იქნება ხელმისაწვდომი, ვიდრე არ ჩადებთ ქმედით SIM ბარათს და გადატვირთავთ."</string>
     <string name="sim_done_button" msgid="827949989369963775">"დასრულდა"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"SIM ბარათი დაემატა"</string>
-    <string name="sim_added_message" msgid="7797975656153714319">"გადატვირთეთ თქვენი მოწყობილობა ფიჭურ ქსელზე წვდომისთვის."</string>
+    <string name="sim_added_message" msgid="6599945301141050216">"გადატვირთეთ თქვენი მოწყობილობა მობილურ ქსელზე წვდომისთვის."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"გადატვირთვა"</string>
     <string name="carrier_app_dialog_message" msgid="7066156088266319533">"ახალი SIM ბარათის გამართული მუშაობისთვის აუცილებელია თქვენი ოპერატორის აპის ინსტალაცია და გახსნა."</string>
     <string name="carrier_app_dialog_button" msgid="7900235513678617329">"აპის ჩამოტვირთვა"</string>
@@ -1361,12 +1359,13 @@
     <string name="data_usage_warning_body" msgid="6660692274311972007">"შეეხეთ მოხმარებისა და პარამეტრების სანახავად."</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"2G-3G მონაცემთა ლიმიტი ამოიწურა"</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"4G მონაცემთა ლიმიტი ამოიწურა"</string>
-    <string name="data_usage_mobile_limit_title" msgid="557158376602636112">"ფიჭურ მონაცემთა ლიმიტი ამოიწურა"</string>
+    <!-- no translation found for data_usage_mobile_limit_title (6561099244084267376) -->
+    <skip />
     <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"Wi-Fi მონაცემთა ლიმიტი ამოიწურა"</string>
     <string name="data_usage_limit_body" msgid="291731708279614081">"მონაცემები შეჩერდა ციკლისთვის"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"გადაჭარბებულია 2G-3G მონაცემების ლიმიტი"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"4G ლიმიტი გადაჭარბებულია"</string>
-    <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"ფიჭ. ინტერნეტის ლიმიტი მიღწეულია"</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"მობილური ინტერნეტის ლიმიტი გადაჭარბებულია."</string>
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Wi‑Fi მონაცემთა ლიმიტი გადაჭარბებულია"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"ლიმიტი გადაჭარბებულია <xliff:g id="SIZE">%s</xliff:g>-ით."</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"მონაცემთა ფონური გადაცემა შეზღუდულია"</string>
@@ -1738,4 +1737,13 @@
     <string name="autofill_save_type_password" msgid="5288448918465971568">"პაროლი"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"მისამართი"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"საკრედიტო ბარათი"</string>
+    <!-- no translation found for etws_primary_default_message_earthquake (5541962250262769193) -->
+    <skip />
+    <!-- no translation found for etws_primary_default_message_tsunami (1887685943498368548) -->
+    <skip />
+    <!-- no translation found for etws_primary_default_message_earthquake_and_tsunami (998797956848445862) -->
+    <skip />
+    <!-- no translation found for etws_primary_default_message_test (2709597093560037455) -->
+    <skip />
+    <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
 </resources>

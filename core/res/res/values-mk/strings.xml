@@ -98,7 +98,8 @@
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"Услугите за гласовно бирање/SMS пораки се блокирани."</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"Сите услугите со говор/податоци/SMS пораки се блокирани."</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Не може да се дојде до мрежата"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="7335915397439759249">"За да се подобри приемот, обидете се да го смените избраниот тип во „Поставки“ &gt; „Мобилни мрежи“ &gt; „Претпочитан тип мрежа“."</string>
+    <!-- no translation found for NetworkPreferenceSwitchSummary (4164230263214915351) -->
+    <skip />
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Рамноправен уред го побара режимот на TTY „FULL“"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Рамноправен уред го побара режимот на TTY „HCO“"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Рамноправен уред го побара режимот на TTY „VCO“"</string>
@@ -138,7 +139,8 @@
   </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Исклучено"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Се претпочита Wi-Fi"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Се претпочита мобилна"</string>
+    <!-- no translation found for wfc_mode_cellular_preferred_summary (1988279625335345908) -->
+    <skip />
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Само Wi-Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: не е препратено"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -182,8 +184,10 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Работниот профил е избришан заради отсуството на апликација на администратор."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Апликацијата на администраторот за работниот профил недостасува или е оштетена. Како резултат на тоа, работниот профил и поврзаните податоци ќе се избришат. Контактирајте со администраторот за помош."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Работниот профил веќе не е достапен на уредов."</string>
-    <string name="network_logging_notification_title" msgid="1805392571290161924">"Се следи сообраќајот на мрежата"</string>
-    <string name="network_logging_notification_text" msgid="2671761001956320094">"Допрете за да дознаете повеќе"</string>
+    <!-- no translation found for network_logging_notification_title (6399790108123704477) -->
+    <skip />
+    <!-- no translation found for network_logging_notification_text (7930089249949354026) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"Уредот ќе се избрише"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"На апликацијата на администраторот ѝ недостасуваат компоненти или е оштетена, па не може да се користи. Уредот ќе се избрише сега. Контактирајте со администраторот за помош."</string>
     <string name="me" msgid="6545696007631404292">"Јас"</string>
@@ -1099,13 +1103,7 @@
     <string name="network_switch_metered" msgid="4671730921726992671">"Префрлено на <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="5325661434777870353">"Уредот користи <xliff:g id="NEW_NETWORK">%1$s</xliff:g> кога <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> нема пристап до интернет. Може да се наплатат трошоци."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Префрлено од <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> на <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
-  <string-array name="network_switch_type_name">
-    <item msgid="2952042958050315394">"мобилен интернет"</item>
-    <item msgid="75483255295529161">"Wi-Fi"</item>
-    <item msgid="6862614801537202646">"Bluetooth"</item>
-    <item msgid="5447331121797802871">"Етернет"</item>
-    <item msgid="8257233890381651999">"VPN"</item>
-  </string-array>
+    <!-- no translation found for network_switch_type_name:0 (3979506840912951943) -->
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"непознат тип мрежа"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Не можеше да се поврзе со Wi-Fi"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" има слаба конекција на интернет."</string>
@@ -1143,10 +1141,10 @@
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"Секогаш дозволувај"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"Никогаш не дозволувај"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"СИМ картичката е отстранета"</string>
-    <string name="sim_removed_message" msgid="5450336489923274918">"Мобилната мрежа ќе биде недостапна додека не рестартирате со вметната важечка СИМ-картичка."</string>
+    <string name="sim_removed_message" msgid="2333164559970958645">"Мобилната мрежа ќе биде недостапна додека се рестартира со вметната важечка СИМ картичка."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Готово"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"Додадена е СИМ картичка"</string>
-    <string name="sim_added_message" msgid="7797975656153714319">"Рестартирајте го уредот за да пристапите кон мобилна мрежа."</string>
+    <string name="sim_added_message" msgid="6599945301141050216">"Рестартирај го својот уред за да пристапиш на мобилната мрежа."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"Рестартирај"</string>
     <string name="carrier_app_dialog_message" msgid="7066156088266319533">"За да работи правилно вашата нова СИМ-картичка, треба да ја инсталирате и да ја отворите апликацијата од операторот."</string>
     <string name="carrier_app_dialog_button" msgid="7900235513678617329">"ПРЕЗЕМИ ЈА АПЛИКАЦИЈАТА"</string>
@@ -1364,12 +1362,13 @@
     <string name="data_usage_warning_body" msgid="6660692274311972007">"Допрете за употреба и поставки."</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"Постигна лимит за 2G-3G податоци"</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"Постигнат лимит за 4G податоци"</string>
-    <string name="data_usage_mobile_limit_title" msgid="557158376602636112">"Постигна лимит за мобилни подат."</string>
+    <!-- no translation found for data_usage_mobile_limit_title (6561099244084267376) -->
+    <skip />
     <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"Постигна лимит за Wi-Fi податоци"</string>
     <string name="data_usage_limit_body" msgid="291731708279614081">"Паузирано до крај на циклус"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"Надминат лимит од 2G-3G податоци"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"Надминат лимит од 4G податоци"</string>
-    <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"Лимитот за моб. подат. е надминат"</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"Надминат лимит на подат. од моб."</string>
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Надминат лимит на Wi-Fi податоци"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> над назначената граница."</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"Подат. од заднина се ограничени"</string>
@@ -1741,4 +1740,13 @@
     <string name="autofill_save_type_password" msgid="5288448918465971568">"лозинка"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"адреса"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"кредитна картичка"</string>
+    <!-- no translation found for etws_primary_default_message_earthquake (5541962250262769193) -->
+    <skip />
+    <!-- no translation found for etws_primary_default_message_tsunami (1887685943498368548) -->
+    <skip />
+    <!-- no translation found for etws_primary_default_message_earthquake_and_tsunami (998797956848445862) -->
+    <skip />
+    <!-- no translation found for etws_primary_default_message_test (2709597093560037455) -->
+    <skip />
+    <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
 </resources>

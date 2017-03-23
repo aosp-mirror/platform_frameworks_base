@@ -98,7 +98,8 @@
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"వాయిస్/SMS సేవలు బ్లాక్ చేయబడ్డాయి."</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"అన్ని వాయిస్/డేటా/SMS సేవలు బ్లాక్ చేయబడ్డాయి."</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"నెట్‌వర్క్‌ను చేరుకోలేరు"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="7335915397439759249">"స్వీకరణను మెరుగుపరచడానికి, సెట్టింగ్‌లు &gt; సెల్యులార్ నెట్‌వర్క్‌లు &gt; ప్రాధాన్య నెట్‌వర్క్ రకం ఎంపికలో ఎంచుకున్న రకాన్ని మార్చడానికి ప్రయత్నించండి."</string>
+    <!-- no translation found for NetworkPreferenceSwitchSummary (4164230263214915351) -->
+    <skip />
     <string name="peerTtyModeFull" msgid="6165351790010341421">"అవతలి వారు FULL TTY మోడ్‌ని అభ్యర్థించారు"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"అవతలి వారు HCO TTY మోడ్‌ని అభ్యర్థించారు"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"అవతలి వారు VCO TTY మోడ్‌ని అభ్యర్థించారు"</string>
@@ -138,7 +139,8 @@
   </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"ఆఫ్‌లో ఉంది"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fiకి ప్రాధాన్యత"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"సెల్యులార్‌కి ప్రాధాన్యత"</string>
+    <!-- no translation found for wfc_mode_cellular_preferred_summary (1988279625335345908) -->
+    <skip />
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Wi-Fi మాత్రమే"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ఫార్వార్డ్ చేయబడలేదు"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -182,8 +184,10 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"నిర్వాహక అనువర్తనం లేనందున కార్యాలయ ప్రొఫైల్ తొలగించబడింది."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"కార్యాలయ ప్రొఫైల్ నిర్వాహక అనువర్తనం లేదు లేదా పాడైంది. తత్ఫలితంగా, మీ కార్యాలయ ప్రొఫైల్ మరియు సంబంధిత డేటా తొలగించబడ్డాయి. సహాయం కోసం మీ నిర్వాహకుడిని సంప్రదించండి."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"ఈ పరికరంలో మీ కార్యాలయ ప్రొఫైల్ ఇప్పుడు అందుబాటులో లేదు."</string>
-    <string name="network_logging_notification_title" msgid="1805392571290161924">"నెట్‌వర్క్ ట్రాఫిక్ పర్యవేక్షించబడుతోంది"</string>
-    <string name="network_logging_notification_text" msgid="2671761001956320094">"మరింత తెలుసుకోవడానికి నొక్కండి"</string>
+    <!-- no translation found for network_logging_notification_title (6399790108123704477) -->
+    <skip />
+    <!-- no translation found for network_logging_notification_text (7930089249949354026) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"మీ పరికరంలోని డేటా తొలగించబడుతుంది"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"నిర్వాహక అనువర్తనంలో కొన్ని అంతర్భాగాలు లేవు లేదా అది పాడైపోయి, నిరుపయోగంగా మారింది. మీ పరికరంలోని డేటా ఇప్పుడు తొలగించబడుతుంది. సహాయం కోసం మీ నిర్వాహకుడిని సంప్రదించండి."</string>
     <string name="me" msgid="6545696007631404292">"నేను"</string>
@@ -1099,13 +1103,7 @@
     <string name="network_switch_metered" msgid="4671730921726992671">"<xliff:g id="NETWORK_TYPE">%1$s</xliff:g>కి మార్చబడింది"</string>
     <string name="network_switch_metered_detail" msgid="5325661434777870353">"పరికరం <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g>కి ఇంటర్నెట్ ప్రాప్యత లేనప్పుడు <xliff:g id="NEW_NETWORK">%1$s</xliff:g>ని ఉపయోగిస్తుంది. ఛార్జీలు వర్తించవచ్చు."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> నుండి <xliff:g id="NEW_NETWORK">%2$s</xliff:g>కి మార్చబడింది"</string>
-  <string-array name="network_switch_type_name">
-    <item msgid="2952042958050315394">"సెల్యులార్ డేటా"</item>
-    <item msgid="75483255295529161">"Wi-Fi"</item>
-    <item msgid="6862614801537202646">"బ్లూటూత్"</item>
-    <item msgid="5447331121797802871">"ఈథర్‌నెట్"</item>
-    <item msgid="8257233890381651999">"VPN"</item>
-  </string-array>
+    <!-- no translation found for network_switch_type_name:0 (3979506840912951943) -->
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"తెలియని నెట్‌వర్క్ రకం"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Wi-Fiకి కనెక్ట్ చేయడం సాధ్యపడలేదు"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" బలహీన ఇంటర్నెట్ కనెక్షన్‌ను కలిగి ఉంది."</string>
@@ -1143,10 +1141,10 @@
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"ఎల్లప్పుడూ అనుమతించు"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"ఎప్పటికీ అనుమతించవద్దు"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"సిమ్ కార్డు తీసివేయబడింది"</string>
-    <string name="sim_removed_message" msgid="5450336489923274918">"మీరు చెల్లుబాటు అయ్యే సిమ్ కార్డును చొప్పించి, దాన్ని పునఃప్రారంభించే వరకు సెల్యులార్ నెట్‌వర్క్ అందుబాటులో ఉండదు."</string>
+    <string name="sim_removed_message" msgid="2333164559970958645">"మీరు చెల్లుబాటు అయ్యే సిమ్ కార్డు‌ను చొప్పించి పునఃప్రారంభించే వరకు మొబైల్ నెట్‌వర్క్ అందుబాటులో ఉండదు."</string>
     <string name="sim_done_button" msgid="827949989369963775">"పూర్తయింది"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"సిమ్ కార్డు జోడించబడింది"</string>
-    <string name="sim_added_message" msgid="7797975656153714319">"సెల్యులార్ నెట్‌వర్క్‌ను ప్రాప్యత చేయడానికి మీ పరికరాన్ని పునఃప్రారంభించండి."</string>
+    <string name="sim_added_message" msgid="6599945301141050216">"మొబైల్ నెట్‌వర్క్‌ను ప్రాప్యత చేయడానికి మీ పరికరాన్ని పునఃప్రారంభించండి."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"పునఃప్రారంభించు"</string>
     <string name="carrier_app_dialog_message" msgid="7066156088266319533">"మీ SIM సక్రమంగా పని చేస్తుండటానికి, మీరు మీ క్యారియర్ నుండి ఒక అనువర్తనాన్ని ఇన్‌స్టాల్ చేసుకొని, తెరవాలి."</string>
     <string name="carrier_app_dialog_button" msgid="7900235513678617329">"అనువర్తనాన్ని పొందండి"</string>
@@ -1362,12 +1360,13 @@
     <string name="data_usage_warning_body" msgid="6660692274311972007">"వినియోగం,సెట్టింగ్‌ల కోసం నొక్కండి"</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"2G-3G డేటా పరిమితిని చేరుకుంది"</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"4G డేటా పరిమితిని చేరుకుంది"</string>
-    <string name="data_usage_mobile_limit_title" msgid="557158376602636112">"సెల్యులార్ డేటా పరిమి. చేరుకుంది"</string>
+    <!-- no translation found for data_usage_mobile_limit_title (6561099244084267376) -->
+    <skip />
     <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"Wi-Fi డేటా పరిమితిని చేరుకుంది"</string>
     <string name="data_usage_limit_body" msgid="291731708279614081">"మిగిలిన కార్యా. డేటా పాజ్ చేయబ."</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"2G-3G డేటా పరిమితి మించిపోయింది"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"4G డేటా పరిమితి మించిపోయింది"</string>
-    <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"సెల్యులార్ డేటా పరిమితిని మించిపోయింది"</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"మొబైల్ డేటా పరిమితి మించిపోయింది"</string>
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Wi-Fi డేటా పరిమితి మించిపోయింది"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"పేర్కొన్న పరిమితి కంటే <xliff:g id="SIZE">%s</xliff:g> మించిపోయింది."</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"నేపథ్య డేటా పరిమితం చేయబడింది"</string>
@@ -1739,4 +1738,13 @@
     <string name="autofill_save_type_password" msgid="5288448918465971568">"పాస్‌వర్డ్"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"చిరునామా"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"క్రెడిట్ కార్డ్"</string>
+    <!-- no translation found for etws_primary_default_message_earthquake (5541962250262769193) -->
+    <skip />
+    <!-- no translation found for etws_primary_default_message_tsunami (1887685943498368548) -->
+    <skip />
+    <!-- no translation found for etws_primary_default_message_earthquake_and_tsunami (998797956848445862) -->
+    <skip />
+    <!-- no translation found for etws_primary_default_message_test (2709597093560037455) -->
+    <skip />
+    <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
 </resources>

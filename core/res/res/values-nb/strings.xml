@@ -98,7 +98,8 @@
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"Tjenester for tale og tekstmeldinger er blokkert."</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"Alle tjenester for tale, data og tekstmeldinger er blokkert."</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Får ikke kontakt med nettverket"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="7335915397439759249">"For å forbedre signalet, prøv å endre valgt nettverkstype i Innstillinger &gt; Mobilnettverk &gt; Foretrukket nettverkstype."</string>
+    <!-- no translation found for NetworkPreferenceSwitchSummary (4164230263214915351) -->
+    <skip />
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Motpart ba om TTY-modus FULL"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Motpart ba om TTY-modus HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Motpart ba om TTY-modus VCO"</string>
@@ -138,7 +139,8 @@
   </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Av"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi er foretrukket"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Mobil er foretrukket"</string>
+    <!-- no translation found for wfc_mode_cellular_preferred_summary (1988279625335345908) -->
+    <skip />
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Bare Wi-Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Ikke viderekoblet"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -182,8 +184,10 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Arbeidsprofilen er slettet på grunn av manglende admin-app."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Arbeidsprofilens admin-app mangler eller er ødelagt. Dette har ført til at arbeidsprofilen og alle data knyttet til den er blitt slettet. Kontakt administratoren for å få hjelp."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Arbeidsprofilen din er ikke lenger tilgjengelig på denne enheten."</string>
-    <string name="network_logging_notification_title" msgid="1805392571290161924">"Nettverkstrafikken blir overvåket"</string>
-    <string name="network_logging_notification_text" msgid="2671761001956320094">"Trykk for å finne ut mer"</string>
+    <!-- no translation found for network_logging_notification_title (6399790108123704477) -->
+    <skip />
+    <!-- no translation found for network_logging_notification_text (7930089249949354026) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"Enheten blir slettet"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Admin-appen mangler komponenter eller er ødelagt, og kan ikke brukes. Enheten din blir nå slettet. Kontakt administratoren for å få hjelp."</string>
     <string name="me" msgid="6545696007631404292">"Meg"</string>
@@ -1099,13 +1103,7 @@
     <string name="network_switch_metered" msgid="4671730921726992671">"Byttet til <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="5325661434777870353">"Enheten bruker <xliff:g id="NEW_NETWORK">%1$s</xliff:g> når <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> ikke har Internett-tilgang. Avgifter kan påløpe."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Byttet fra <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> til <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
-  <string-array name="network_switch_type_name">
-    <item msgid="2952042958050315394">"mobildata"</item>
-    <item msgid="75483255295529161">"Wi-Fi"</item>
-    <item msgid="6862614801537202646">"Bluetooth"</item>
-    <item msgid="5447331121797802871">"Ethernet"</item>
-    <item msgid="8257233890381651999">"VPN"</item>
-  </string-array>
+    <!-- no translation found for network_switch_type_name:0 (3979506840912951943) -->
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"en ukjent nettverkstype"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Kan ikke koble til Wi-Fi"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" har en dårlig Internett-tilkobling."</string>
@@ -1143,10 +1141,10 @@
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"Alltid tillat"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"Aldri tillat"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"SIM-kort er fjernet"</string>
-    <string name="sim_removed_message" msgid="5450336489923274918">"Mobilnettverket er utilgjengelig til du starter på nytt med et gyldig SIM-kort."</string>
+    <string name="sim_removed_message" msgid="2333164559970958645">"Det mobile nettverket forblir utilgjengelig inntil du starter på nytt med et gyldig SIM-kort."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Ferdig"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"SIM-kort er lagt til"</string>
-    <string name="sim_added_message" msgid="7797975656153714319">"Start enheten på nytt for å få tilgang til mobilnettverket."</string>
+    <string name="sim_added_message" msgid="6599945301141050216">"Start enheten på nytt for å få tilgang til det mobile nettverket."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"Start på nytt"</string>
     <string name="carrier_app_dialog_message" msgid="7066156088266319533">"For at det nye SIM-kortet ditt skal fungere skikkelig, må du installere og åpne en app fra operatøren din."</string>
     <string name="carrier_app_dialog_button" msgid="7900235513678617329">"SKAFF DEG APPEN"</string>
@@ -1361,12 +1359,13 @@
     <string name="data_usage_warning_body" msgid="6660692274311972007">"Trykk for å se bruken og innstillingene."</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"Datagrensen for 2G-3G er nådd"</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"Datagrensen for 4G er nådd"</string>
-    <string name="data_usage_mobile_limit_title" msgid="557158376602636112">"Grensen for mobildata er nådd"</string>
+    <!-- no translation found for data_usage_mobile_limit_title (6561099244084267376) -->
+    <skip />
     <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"Datagrensen for Wi-Fi er nådd"</string>
     <string name="data_usage_limit_body" msgid="291731708279614081">"Data er på pause resten av sykl."</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"Grense på 2G-3G data overskredet"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"Grensen på 4G data er overskredet"</string>
-    <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"Mobildatagrensen er overskredet"</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"Grensen for mobildatabruk er overskredet"</string>
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Wi-Fi-datagrense overskredet"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> over angitt grense."</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"Bakgrunnsdata er begrenset"</string>
@@ -1738,4 +1737,13 @@
     <string name="autofill_save_type_password" msgid="5288448918465971568">"passord"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"adresse"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"kredittkort"</string>
+    <!-- no translation found for etws_primary_default_message_earthquake (5541962250262769193) -->
+    <skip />
+    <!-- no translation found for etws_primary_default_message_tsunami (1887685943498368548) -->
+    <skip />
+    <!-- no translation found for etws_primary_default_message_earthquake_and_tsunami (998797956848445862) -->
+    <skip />
+    <!-- no translation found for etws_primary_default_message_test (2709597093560037455) -->
+    <skip />
+    <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
 </resources>
