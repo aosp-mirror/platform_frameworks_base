@@ -31,12 +31,15 @@ import android.os.BatteryStats;
 import android.os.Build;
 import android.os.FileUtils;
 import android.os.Handler;
+import android.os.IBatteryPropertiesRegistrar;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Parcel;
 import android.os.ParcelFormatException;
 import android.os.Parcelable;
 import android.os.Process;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.WorkSource;
@@ -3151,12 +3154,23 @@ public class BatteryStatsImpl extends BatteryStats {
         boolean unpluggedScreenOff = unplugged && screenOff;
         if (unpluggedScreenOff != mOnBatteryScreenOffTimeBase.isRunning()) {
             updateKernelWakelocksLocked();
+            updateBatteryPropertiesLocked();
             if (DEBUG_ENERGY_CPU) {
                 Slog.d(TAG, "Updating cpu time because screen is now " +
                         (unpluggedScreenOff ? "off" : "on"));
             }
             updateCpuTimeLocked();
             mOnBatteryScreenOffTimeBase.setRunning(unpluggedScreenOff, uptime, realtime);
+        }
+    }
+
+    private void updateBatteryPropertiesLocked() {
+        try {
+            IBatteryPropertiesRegistrar registrar = IBatteryPropertiesRegistrar.Stub.asInterface(
+                    ServiceManager.getService("batteryproperties"));
+            registrar.scheduleUpdate();
+        } catch (RemoteException e) {
+            // Ignore.
         }
     }
 
