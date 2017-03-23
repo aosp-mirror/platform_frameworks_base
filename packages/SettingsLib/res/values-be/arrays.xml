@@ -58,6 +58,12 @@
     <item msgid="3878793616631049349">"Выкарыстанне праверкі HDCP только для змесціва, абароненага DRM"</item>
     <item msgid="45075631231212732">"Заўсёды выкарыстоўваць праверку HDCP"</item>
   </string-array>
+    <!-- no translation found for bluetooth_avrcp_versions:0 (5347678900838034763) -->
+    <!-- no translation found for bluetooth_avrcp_versions:1 (2089555299377409443) -->
+    <!-- no translation found for bluetooth_avrcp_versions:2 (2895327394279434278) -->
+    <!-- no translation found for bluetooth_avrcp_version_values:0 (2838624067805073303) -->
+    <!-- no translation found for bluetooth_avrcp_version_values:1 (1913619118958233129) -->
+    <!-- no translation found for bluetooth_avrcp_version_values:2 (7142710449249088270) -->
   <string-array name="bluetooth_a2dp_codec_titles">
     <item msgid="7065842274271279580">"Выбар сістэмы (стандартны)"</item>
     <item msgid="7539690996561263909">"SBC"</item>

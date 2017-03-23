@@ -32,7 +32,10 @@
     <string name="wifi_no_internet_no_reconnect" msgid="5724903347310541706">"தானாக இணைக்கப்படாது"</string>
     <string name="wifi_no_internet" msgid="3880396223819116454">"இணைய அணுகல் இல்லை"</string>
     <string name="saved_network" msgid="4352716707126620811">"<xliff:g id="NAME">%1$s</xliff:g> சேமித்தது"</string>
-    <string name="connected_via_wfa" msgid="3805736726317410714">"வைஃபை அசிஸ்டண்ட் மூலம் இணைக்கப்பட்டது"</string>
+    <!-- no translation found for connected_via_network_scorer (5713793306870815341) -->
+    <skip />
+    <!-- no translation found for connected_via_network_scorer_default (8430960324014668989) -->
+    <skip />
     <string name="connected_via_passpoint" msgid="2826205693803088747">"%1$s வழியாக இணைக்கப்பட்டது"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"%1$s வழியாகக் கிடைக்கிறது"</string>
     <string name="wifi_connected_no_internet" msgid="3149853966840874992">"இணைக்கப்பட்டது, இணையம் இல்லை"</string>
@@ -173,6 +176,10 @@
     <!-- no translation found for mobile_data_always_on (8774857027458200434) -->
     <skip />
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"அப்சல்யூட் ஒலியளவு அம்சத்தை முடக்கு"</string>
+    <!-- no translation found for bluetooth_select_avrcp_version_string (3750059931120293633) -->
+    <skip />
+    <!-- no translation found for bluetooth_select_avrcp_version_dialog_title (7277329668298705702) -->
+    <skip />
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"புளூடூத் ஆடியோ கோடெக்"</string>
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="4558347981670553665">"புளூடூத் ஆடியோ கோடெக்கைத் தேர்ந்தெடுக்கவும்"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"புளூடூத் ஆடியோ சாம்பிள் ரேட்"</string>
@@ -316,10 +323,10 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"வண்ணத்திருத்தம்"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"இது சோதனை முறையிலான அம்சம், இது செயல்திறனைப் பாதிக்கலாம்."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"<xliff:g id="TITLE">%1$s</xliff:g> மூலம் மேலெழுதப்பட்டது"</string>
-    <!-- no translation found for power_remaining_duration_only (802533652866862201) -->
-    <skip />
+    <string name="power_remaining_duration_only" msgid="4400068916452346544">"தோராயமாக <xliff:g id="TIME">%1$s</xliff:g> உள்ளது"</string>
     <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">%1$s</xliff:g> மீதமுள்ளது"</string>
-    <string name="power_discharging_duration" msgid="1605929174734600590">"தோராயம்: <xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> உள்ளது"</string>
+    <!-- no translation found for power_discharging_duration (2843747179907396142) -->
+    <skip />
     <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> மீதமுள்ளது"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <!-- no translation found for power_charging_duration (4676999980973411875) -->
