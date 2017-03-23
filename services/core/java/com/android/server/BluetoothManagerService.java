@@ -82,6 +82,8 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
     private static final String SECURE_SETTINGS_BLUETOOTH_ADDR_VALID="bluetooth_addr_valid";
     private static final String SECURE_SETTINGS_BLUETOOTH_ADDRESS="bluetooth_address";
     private static final String SECURE_SETTINGS_BLUETOOTH_NAME="bluetooth_name";
+    private static final String REASON_AIRPLANE_MODE = "airplane mode";
+    private static final String REASON_SYSTEM_BOOT = "system boot";
     private static final int TIMEOUT_BIND_MS = 3000; //Maximum msec to wait for a bind
     private static final int TIMEOUT_SAVE_MS = 500; //Maximum msec to wait for a save
     //Maximum msec to wait for service restart
@@ -195,19 +197,6 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
 
     private final boolean mPermissionReviewRequired;
 
-    private void registerForAirplaneMode(IntentFilter filter) {
-        final ContentResolver resolver = mContext.getContentResolver();
-        final String airplaneModeRadios = Settings.Global.getString(resolver,
-                Settings.Global.AIRPLANE_MODE_RADIOS);
-        final String toggleableRadios = Settings.Global.getString(resolver,
-                Settings.Global.AIRPLANE_MODE_TOGGLEABLE_RADIOS);
-        boolean mIsAirplaneSensitive = airplaneModeRadios == null ? true :
-                airplaneModeRadios.contains(Settings.Global.RADIO_BLUETOOTH);
-        if (mIsAirplaneSensitive) {
-            filter.addAction(Intent.ACTION_AIRPLANE_MODE_CHANGED);
-        }
-    }
-
     private final IBluetoothCallback mBluetoothCallback = new IBluetoothCallback.Stub() {
         @Override
         public void onBluetoothStateChange(int prevState, int newState) throws RemoteException  {
@@ -240,6 +229,62 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
         }
     };
 
+    private final ContentObserver mAirplaneModeObserver = new ContentObserver(null) {
+        @Override
+        public void onChange(boolean unused) {
+            synchronized(this) {
+                if (isBluetoothPersistedStateOn()) {
+                    if (isAirplaneModeOn()) {
+                        persistBluetoothSetting(BLUETOOTH_ON_AIRPLANE);
+                    } else {
+                        persistBluetoothSetting(BLUETOOTH_ON_BLUETOOTH);
+                    }
+                }
+
+                int st = BluetoothAdapter.STATE_OFF;
+                try {
+                    mBluetoothLock.readLock().lock();
+                    if (mBluetooth != null) {
+                        st = mBluetooth.getState();
+                    }
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Unable to call getState", e);
+                    return;
+                } finally {
+                    mBluetoothLock.readLock().unlock();
+                }
+
+                Slog.d(TAG, "Airplane Mode change - current state:  " +
+                          BluetoothAdapter.nameForState(st));
+
+                if (isAirplaneModeOn()) {
+                    // Clear registered LE apps to force shut-off
+                    clearBleApps();
+
+                    // If state is BLE_ON make sure we trigger disableBLE
+                    if (st == BluetoothAdapter.STATE_BLE_ON) {
+                        try {
+                            mBluetoothLock.readLock().lock();
+                            if (mBluetooth != null) {
+                                mBluetooth.onBrEdrDown();
+                                mEnable = false;
+                                mEnableExternal = false;
+                            }
+                        } catch (RemoteException e) {
+                            Slog.e(TAG,"Unable to call onBrEdrDown", e);
+                        } finally {
+                            mBluetoothLock.readLock().unlock();
+                        }
+                    } else if (st == BluetoothAdapter.STATE_ON){
+                        sendDisableMsg(REASON_AIRPLANE_MODE);
+                    }
+                } else if (mEnableExternal) {
+                    sendEnableMsg(mQuietEnableExternal, REASON_AIRPLANE_MODE);
+                }
+            }
+        }
+    };
+
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -249,58 +294,6 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                 if (DBG) Slog.d(TAG, "Bluetooth Adapter name changed to " + newName);
                 if (newName != null) {
                     storeNameAndAddress(newName, null);
-                }
-            } else if (Intent.ACTION_AIRPLANE_MODE_CHANGED.equals(action)) {
-                synchronized(mReceiver) {
-                    if (isBluetoothPersistedStateOn()) {
-                        if (isAirplaneModeOn()) {
-                            persistBluetoothSetting(BLUETOOTH_ON_AIRPLANE);
-                        } else {
-                            persistBluetoothSetting(BLUETOOTH_ON_BLUETOOTH);
-                        }
-                    }
-
-                    int st = BluetoothAdapter.STATE_OFF;
-                    try {
-                        mBluetoothLock.readLock().lock();
-                        if (mBluetooth != null) {
-                            st = mBluetooth.getState();
-                        }
-                    } catch (RemoteException e) {
-                        Slog.e(TAG, "Unable to call getState", e);
-                    } finally {
-                        mBluetoothLock.readLock().unlock();
-                    }
-                    Slog.d(TAG, "Airplane Mode change - current state: " +
-                              BluetoothAdapter.nameForState(st));
-
-                    if (isAirplaneModeOn()) {
-                        // Clear registered LE apps to force shut-off
-                        clearBleApps();
-                        if (st == BluetoothAdapter.STATE_BLE_ON) {
-                            //if state is BLE_ON make sure you trigger disableBLE part
-                            try {
-                                mBluetoothLock.readLock().lock();
-                                if (mBluetooth != null) {
-                                    mBluetooth.onBrEdrDown();
-                                    mEnable = false;
-                                    mEnableExternal = false;
-                                }
-                            } catch (RemoteException e) {
-                                Slog.e(TAG,"Unable to call onBrEdrDown", e);
-                            } finally {
-                                mBluetoothLock.readLock().unlock();
-                            }
-                        } else if (st == BluetoothAdapter.STATE_ON){
-                            // disable without persisting the setting
-                            Slog.d(TAG, "Calling disable");
-                            sendDisableMsg("airplane mode");
-                        }
-                    } else if (mEnableExternal) {
-                        // enable without persisting the setting
-                        Slog.d(TAG, "Calling enable");
-                        sendEnableMsg(mQuietEnableExternal, "airplane mode");
-                    }
                 }
             }
         }
@@ -334,13 +327,21 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
         mCallbacks = new RemoteCallbackList<IBluetoothManagerCallback>();
         mStateChangeCallbacks = new RemoteCallbackList<IBluetoothStateChangeCallback>();
         IntentFilter filter = new IntentFilter(BluetoothAdapter.ACTION_LOCAL_NAME_CHANGED);
-        registerForAirplaneMode(filter);
         filter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
         mContext.registerReceiver(mReceiver, filter);
         loadStoredNameAndAddress();
         if (isBluetoothPersistedStateOn()) {
             if (DBG) Slog.d(TAG, "Startup: Bluetooth persisted state is ON.");
             mEnableExternal = true;
+        }
+
+        String airplaneModeRadios = Settings.Global.getString(mContentResolver,
+            Settings.Global.AIRPLANE_MODE_RADIOS);
+        if (airplaneModeRadios == null ||
+            airplaneModeRadios.contains(Settings.Global.RADIO_BLUETOOTH)) {
+            mContentResolver.registerContentObserver(
+                Settings.Global.getUriFor(Settings.Global.AIRPLANE_MODE_ON),
+                true, mAirplaneModeObserver);
         }
 
         int systemUiUid = -1;
@@ -978,7 +979,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
         }
         if (mEnableExternal && isBluetoothPersistedStateOnBluetooth()) {
             if (DBG) Slog.d(TAG, "Auto-enabling Bluetooth.");
-            sendEnableMsg(mQuietEnableExternal, "system boot");
+            sendEnableMsg(mQuietEnableExternal, REASON_SYSTEM_BOOT);
         } else if (!isNameAndAddressSet()) {
             if (DBG) Slog.d(TAG, "Getting adapter name and address");
             Message getMsg = mHandler.obtainMessage(MESSAGE_GET_NAME_AND_ADDRESS);
