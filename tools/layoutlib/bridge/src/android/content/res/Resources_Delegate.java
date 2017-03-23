@@ -33,6 +33,7 @@ import com.android.layoutlib.bridge.impl.ResourceHelper;
 import com.android.layoutlib.bridge.util.NinePatchInputStream;
 import com.android.ninepatch.NinePatch;
 import com.android.resources.ResourceType;
+import com.android.resources.ResourceUrl;
 import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 import com.android.util.Pair;
 
@@ -58,6 +59,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.Iterator;
+
+import static com.android.SdkConstants.ANDROID_NS_NAME;
 
 @SuppressWarnings("deprecation")
 public class Resources_Delegate {
@@ -137,8 +140,8 @@ public class Resources_Delegate {
 
             if (value == null) {
                 // Unable to resolve the attribute, just leave the unresolved value
-                value = new ResourceValue(resourceInfo.getFirst(), attributeName, attributeName,
-                        platformResFlag_out[0]);
+                value = new ResourceValue(ResourceUrl.create(resourceInfo.getFirst(), attributeName,
+                        platformResFlag_out[0]), attributeName);
             }
             return Pair.of(attributeName, value);
         }
@@ -678,7 +681,7 @@ public class Resources_Delegate {
         String packageName;
         if (resourceInfo != null) {
             if (platformOut[0]) {
-                packageName = SdkConstants.ANDROID_NS_NAME;
+                packageName = ANDROID_NS_NAME;
             } else {
                 packageName = resources.mContext.getPackageName();
                 packageName = packageName == null ? SdkConstants.APP_PREFIX : packageName;
@@ -696,7 +699,7 @@ public class Resources_Delegate {
         Pair<ResourceType, String> resourceInfo = getResourceInfo(resources, resid, platformOut);
         if (resourceInfo != null) {
             if (platformOut[0]) {
-                return SdkConstants.ANDROID_NS_NAME;
+                return ANDROID_NS_NAME;
             }
             String packageName = resources.mContext.getPackageName();
             return packageName == null ? SdkConstants.APP_PREFIX : packageName;

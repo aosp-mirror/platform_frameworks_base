@@ -31,6 +31,7 @@ import com.android.layoutlib.bridge.android.view.WindowManagerImpl;
 import com.android.layoutlib.bridge.impl.ParserFactory;
 import com.android.layoutlib.bridge.impl.Stack;
 import com.android.resources.ResourceType;
+import com.android.resources.ResourceUrl;
 import com.android.util.Pair;
 import com.android.util.PropertiesMap;
 import com.android.util.PropertiesMap.Property;
@@ -86,7 +87,6 @@ import android.util.TypedValue;
 import android.view.BridgeInflater;
 import android.view.Display;
 import android.view.DisplayAdjustments;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -107,6 +107,7 @@ import java.util.List;
 import java.util.Map;
 
 import static android.os._Original_Build.VERSION_CODES.JELLY_BEAN_MR1;
+import static com.android.SdkConstants.ANDROID_NS_NAME;
 import static com.android.layoutlib.bridge.android.RenderParamsFlags.FLAG_KEY_APPLICATION_PACKAGE;
 
 /**
@@ -121,20 +122,23 @@ public class BridgeContext extends Context {
 
     static {
         FRAMEWORK_PATCHED_VALUES.put("animateFirstView", new ResourceValue(
-                ResourceType.BOOL, "animateFirstView", "false", false));
-        FRAMEWORK_PATCHED_VALUES.put("animateLayoutChanges",
-                new ResourceValue(ResourceType.BOOL, "animateLayoutChanges", "false", false));
+                ResourceUrl.create(ANDROID_NS_NAME, ResourceType.BOOL, "animateFirstView"),
+                "false"));
+        FRAMEWORK_PATCHED_VALUES.put("animateLayoutChanges", new ResourceValue(
+                ResourceUrl.create(ANDROID_NS_NAME, ResourceType.BOOL, "animateLayoutChanges"),
+                "false"));
 
 
-        FRAMEWORK_REPLACE_VALUES.put("textEditSuggestionItemLayout",
-                new ResourceValue(ResourceType.LAYOUT, "textEditSuggestionItemLayout",
-                        "text_edit_suggestion_item", true));
-        FRAMEWORK_REPLACE_VALUES.put("textEditSuggestionContainerLayout",
-                new ResourceValue(ResourceType.LAYOUT, "textEditSuggestionContainerLayout",
-                        "text_edit_suggestion_container", true));
-        FRAMEWORK_REPLACE_VALUES.put("textEditSuggestionHighlightStyle",
-                new ResourceValue(ResourceType.STYLE, "textEditSuggestionHighlightStyle",
-                        "TextAppearance.Holo.SuggestionHighlight", true));
+        FRAMEWORK_REPLACE_VALUES.put("textEditSuggestionItemLayout", new ResourceValue(
+                ResourceUrl.create(ANDROID_NS_NAME, ResourceType.LAYOUT,
+                        "textEditSuggestionItemLayout"), "text_edit_suggestion_item"));
+        FRAMEWORK_REPLACE_VALUES.put("textEditSuggestionContainerLayout", new ResourceValue(
+                ResourceUrl.create(ANDROID_NS_NAME, ResourceType.LAYOUT,
+                        "textEditSuggestionContainerLayout"), "text_edit_suggestion_container"));
+        FRAMEWORK_REPLACE_VALUES.put("textEditSuggestionHighlightStyle", new ResourceValue(
+                ResourceUrl.create(ANDROID_NS_NAME, ResourceType.STYLE,
+                        "textEditSuggestionHighlightStyle"),
+                "TextAppearance.Holo.SuggestionHighlight"));
 
     }
 
@@ -963,7 +967,9 @@ public class BridgeContext extends Context {
                     // there is a value in the XML, but we need to resolve it in case it's
                     // referencing another resource or a theme value.
                     ta.bridgeSetValue(index, attrName, frameworkAttr,
-                            mRenderResources.resolveValue(null, attrName, value, isPlatformFile));
+                            mRenderResources.resolveResValue(new ResourceValue(
+                                    ResourceUrl.create(ResourceType.STRING, attrName,
+                                            isPlatformFile), value)));
                 }
             }
         }
