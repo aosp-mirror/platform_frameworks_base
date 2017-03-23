@@ -91,7 +91,7 @@ public class NetworkNotificationManagerTest extends TestCase {
         final int NETWORK_ID_BASE = 100;
         List<NotificationType> types = Arrays.asList(NotificationType.values());
         List<Integer> ids = new ArrayList<>(types.size());
-        for (int i = 0; i < ids.size(); i++) {
+        for (int i = 0; i < types.size(); i++) {
             ids.add(NETWORK_ID_BASE + i);
         }
         Collections.shuffle(ids);
@@ -101,9 +101,10 @@ public class NetworkNotificationManagerTest extends TestCase {
             mManager.showNotification(ids.get(i), types.get(i), mWifiNai, mCellNai, null, false);
         }
 
-        Collections.shuffle(ids);
+        List<Integer> idsToClear = new ArrayList<>(ids);
+        Collections.shuffle(idsToClear);
         for (int i = 0; i < ids.size(); i++) {
-            mManager.clearNotification(ids.get(i));
+            mManager.clearNotification(idsToClear.get(i));
         }
 
         for (int i = 0; i < ids.size(); i++) {
