@@ -184,7 +184,7 @@ public class PackageParser {
     private static final String TAG_RESTRICT_UPDATE = "restrict-update";
     private static final String TAG_USES_SPLIT = "uses-split";
 
-    // STOPSHIP remove the ability to expose components via meta-data
+    // [b/36551762] STOPSHIP remove the ability to expose components via meta-data
     // Temporary workaround; allow meta-data to expose components to instant apps
     private static final String META_DATA_INSTANT_APPS = "instantapps.clients.allowed";
 
