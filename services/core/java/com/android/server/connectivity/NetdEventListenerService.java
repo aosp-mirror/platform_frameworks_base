@@ -34,10 +34,11 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.BitUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.TokenBucket;
-import com.android.server.connectivity.metrics.nano.IpConnectivityLogClass.ConnectStatistics;
 import com.android.server.connectivity.metrics.nano.IpConnectivityLogClass.IpConnectivityEvent;
 import java.io.PrintWriter;
 import java.util.List;
+import java.util.function.Function;
+import java.util.function.IntFunction;
 
 /**
  * Implementation of the INetdEventListener interface.
@@ -58,18 +59,17 @@ public class NetdEventListenerService extends INetdEventListener.Stub {
     private static final int CONNECT_LATENCY_FILL_RATE    = 15 * (int) DateUtils.SECOND_IN_MILLIS;
     private static final int CONNECT_LATENCY_MAXIMUM_RECORDS = 20000;
 
-    // Sparse array of DNS events, grouped by net id.
+    // Sparse arrays of DNS and connect events, grouped by net id.
     @GuardedBy("this")
     private final SparseArray<DnsEvent> mDnsEvents = new SparseArray<>();
+    @GuardedBy("this")
+    private final SparseArray<ConnectStats> mConnectEvents = new SparseArray<>();
 
     private final ConnectivityManager mCm;
 
     @GuardedBy("this")
     private final TokenBucket mConnectTb =
             new TokenBucket(CONNECT_LATENCY_FILL_RATE, CONNECT_LATENCY_BURST_LIMIT);
-    @GuardedBy("this")
-    private ConnectStats mConnectStats = makeConnectStats();
-
     // Callback should only be registered/unregistered when logging is being enabled/disabled in DPM
     // by the device owner. It's DevicePolicyManager's responsibility to ensure that.
     @GuardedBy("this")
@@ -123,7 +123,12 @@ public class NetdEventListenerService extends INetdEventListener.Stub {
             int port, int uid) throws RemoteException {
         maybeVerboseLog("onConnectEvent(%d, %d, %dms)", netId, error, latencyMs);
 
-        mConnectStats.addEvent(error, latencyMs, ipAddr);
+        ConnectStats connectStats = mConnectEvents.get(netId);
+        if (connectStats == null) {
+            connectStats = makeConnectStats(netId);
+            mConnectEvents.put(netId, connectStats);
+        }
+        connectStats.addEvent(error, latencyMs, ipAddr);
 
         if (mNetdEventCallback != null) {
             mNetdEventCallback.onConnectEvent(ipAddr, port, System.currentTimeMillis(), uid);
@@ -131,29 +136,8 @@ public class NetdEventListenerService extends INetdEventListener.Stub {
     }
 
     public synchronized void flushStatistics(List<IpConnectivityEvent> events) {
-        flushConnectStats(events);
-        flushDnsStats(events);
-    }
-
-    private static IpConnectivityEvent connectStatsProto(ConnectStats connectStats) {
-        // TODO: add transport information
-        IpConnectivityEvent ev = new IpConnectivityEvent();
-        ev.setConnectStatistics(connectStats.toProto());
-        return ev;
-    }
-
-    private void flushConnectStats(List<IpConnectivityEvent> events) {
-        events.add(connectStatsProto(mConnectStats));
-        mConnectStats = makeConnectStats();
-    }
-
-    private void flushDnsStats(List<IpConnectivityEvent> events) {
-        // TODO: migrate DnsEventBatch to IpConnectivityLogClass.DNSLatencies
-        for (int i = 0; i < mDnsEvents.size(); i++) {
-            IpConnectivityEvent ev = IpConnectivityEventBuilder.toProto(mDnsEvents.valueAt(i));
-            events.add(ev);
-        }
-        mDnsEvents.clear();
+        flushProtos(events, mConnectEvents, IpConnectivityEventBuilder::toProto);
+        flushProtos(events, mDnsEvents, IpConnectivityEventBuilder::toProto);
     }
 
     public synchronized void dump(PrintWriter writer) {
@@ -165,22 +149,33 @@ public class NetdEventListenerService extends INetdEventListener.Stub {
     }
 
     public synchronized void list(PrintWriter pw) {
-        for (int i = 0; i < mDnsEvents.size(); i++) {
-            pw.println(mDnsEvents.valueAt(i).toString());
-        }
-        pw.println(mConnectStats.toString());
+        listEvents(pw, mConnectEvents, (x) -> x);
+        listEvents(pw, mDnsEvents, (x) -> x);
     }
 
     public synchronized void listAsProtos(PrintWriter pw) {
-        for (int i = 0; i < mDnsEvents.size(); i++) {
-            IpConnectivityEvent ev = IpConnectivityEventBuilder.toProto(mDnsEvents.valueAt(i));
-            pw.println(ev.toString());
-        }
-        pw.println(connectStatsProto(mConnectStats).toString());
+        listEvents(pw, mConnectEvents, IpConnectivityEventBuilder::toProto);
+        listEvents(pw, mDnsEvents, IpConnectivityEventBuilder::toProto);
     }
 
-    private ConnectStats makeConnectStats() {
-        return new ConnectStats(mConnectTb, CONNECT_LATENCY_MAXIMUM_RECORDS);
+    private static <T> void flushProtos(List<IpConnectivityEvent> out, SparseArray<T> in,
+            Function<T, IpConnectivityEvent> mapper) {
+        for (int i = 0; i < in.size(); i++) {
+            out.add(mapper.apply(in.valueAt(i)));
+        }
+        in.clear();
+    }
+
+    public static <T> void listEvents(
+            PrintWriter pw, SparseArray<T> events, Function<T, Object> mapper) {
+        for (int i = 0; i < events.size(); i++) {
+            pw.println(mapper.apply(events.valueAt(i)).toString());
+        }
+    }
+
+    private ConnectStats makeConnectStats(int netId) {
+        long transports = getTransports(netId);
+        return new ConnectStats(netId, transports, mConnectTb, CONNECT_LATENCY_MAXIMUM_RECORDS);
     }
 
     private DnsEvent makeDnsEvent(int netId) {

@@ -16,51 +16,45 @@
 
 package android.net.metrics;
 
+import android.net.NetworkCapabilities;
 import android.system.OsConstants;
 import android.util.IntArray;
 import android.util.SparseIntArray;
+import com.android.internal.util.BitUtils;
 import com.android.internal.util.TokenBucket;
-import com.android.server.connectivity.metrics.nano.IpConnectivityLogClass.ConnectStatistics;
-import com.android.server.connectivity.metrics.nano.IpConnectivityLogClass.Pair;
 
 /**
- * A class that aggregates connect() statistics and helps build
- * IpConnectivityLogClass.ConnectStatistics instances.
- *
+ * A class that aggregates connect() statistics.
  * {@hide}
  */
 public class ConnectStats {
     private final static int EALREADY     = OsConstants.EALREADY;
     private final static int EINPROGRESS  = OsConstants.EINPROGRESS;
 
+    /** Network id of the network associated with the event, or 0 if unspecified. */
+    public final int netId;
+    /** Transports of the network associated with the event, as defined in NetworkCapabilities. */
+    public final long transports;
     /** How many events resulted in a given errno. */
-    private final SparseIntArray mErrnos = new SparseIntArray();
-    /** Latencies of blocking connects. TODO: add non-blocking connects latencies. */
-    private final IntArray mLatencies = new IntArray();
+    public final SparseIntArray errnos = new SparseIntArray();
+    /** Latencies of successful blocking connects. TODO: add non-blocking connects latencies. */
+    public final IntArray latencies = new IntArray();
     /** TokenBucket for rate limiting latency recording. */
-    private final TokenBucket mLatencyTb;
+    public final TokenBucket mLatencyTb;
     /** Maximum number of latency values recorded. */
-    private final int mMaxLatencyRecords;
+    public final int mMaxLatencyRecords;
     /** Total count of successful connects. */
-    private int mConnectCount = 0;
+    public int connectCount = 0;
     /** Total count of successful connects done in blocking mode. */
-    private int mConnectBlockingCount = 0;
+    public int connectBlockingCount = 0;
     /** Total count of successful connects with IPv6 socket address. */
-    private int mIpv6ConnectCount = 0;
+    public int ipv6ConnectCount = 0;
 
-    public ConnectStats(TokenBucket tb, int maxLatencyRecords) {
+    public ConnectStats(int netId, long transports, TokenBucket tb, int maxLatencyRecords) {
+        this.netId = netId;
+        this.transports = transports;
         mLatencyTb = tb;
         mMaxLatencyRecords = maxLatencyRecords;
-    }
-
-    public ConnectStatistics toProto() {
-        ConnectStatistics stats = new ConnectStatistics();
-        stats.connectCount = mConnectCount;
-        stats.connectBlockingCount = mConnectBlockingCount;
-        stats.ipv6AddrCount = mIpv6ConnectCount;
-        stats.latenciesMs = mLatencies.toArray();
-        stats.errnosCounters = toPairArrays(mErrnos);
-        return stats;
     }
 
     public void addEvent(int errno, int latencyMs, String ipAddr) {
@@ -73,12 +67,12 @@ public class ConnectStats {
     }
 
     private void countConnect(int errno, String ipAddr) {
-        mConnectCount++;
+        connectCount++;
         if (!isNonBlocking(errno)) {
-            mConnectBlockingCount++;
+            connectBlockingCount++;
         }
         if (isIPv6(ipAddr)) {
-            mIpv6ConnectCount++;
+            ipv6ConnectCount++;
         }
     }
 
@@ -91,16 +85,16 @@ public class ConnectStats {
             // Rate limited
             return;
         }
-        if (mLatencies.size() >= mMaxLatencyRecords) {
+        if (latencies.size() >= mMaxLatencyRecords) {
             // Hard limit the total number of latency measurements.
             return;
         }
-        mLatencies.add(ms);
+        latencies.add(ms);
     }
 
     private void countError(int errno) {
-        final int newcount = mErrnos.get(errno, 0) + 1;
-        mErrnos.put(errno, newcount);
+        final int newcount = errnos.get(errno, 0) + 1;
+        errnos.put(errno, newcount);
     }
 
     private static boolean isSuccess(int errno) {
@@ -117,27 +111,18 @@ public class ConnectStats {
         return ipAddr.contains(":");
     }
 
-    private static Pair[] toPairArrays(SparseIntArray counts) {
-        final int s = counts.size();
-        Pair[] pairs = new Pair[s];
-        for (int i = 0; i < s; i++) {
-            Pair p = new Pair();
-            p.key = counts.keyAt(i);
-            p.value = counts.valueAt(i);
-            pairs[i] = p;
-        }
-        return pairs;
-    }
-
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder("ConnectStats(")
-                .append(String.format("%d success, ", mConnectCount))
-                .append(String.format("%d blocking, ", mConnectBlockingCount))
-                .append(String.format("%d IPv6 dst", mIpv6ConnectCount));
-        for (int i = 0; i < mErrnos.size(); i++) {
-            String errno = OsConstants.errnoName(mErrnos.keyAt(i));
-            int count = mErrnos.valueAt(i);
+        StringBuilder builder = new StringBuilder("ConnectStats(").append(netId).append(", ");
+        for (int t : BitUtils.unpackBits(transports)) {
+            builder.append(NetworkCapabilities.transportNameOf(t)).append(", ");
+        }
+        builder.append(String.format("%d success, ", connectCount));
+        builder.append(String.format("%d blocking, ", connectBlockingCount));
+        builder.append(String.format("%d IPv6 dst", ipv6ConnectCount));
+        for (int i = 0; i < errnos.size(); i++) {
+            String errno = OsConstants.errnoName(errnos.keyAt(i));
+            int count = errnos.valueAt(i);
             builder.append(String.format(", %s: %d", errno, count));
         }
         return builder.append(")").toString();

@@ -23,9 +23,6 @@ import static android.net.NetworkCapabilities.TRANSPORT_ETHERNET;
 import static android.net.NetworkCapabilities.TRANSPORT_VPN;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI_AWARE;
-import static com.android.server.connectivity.metrics.nano.IpConnectivityLogClass.IpConnectivityEvent;
-import static com.android.server.connectivity.metrics.nano.IpConnectivityLogClass.IpConnectivityLog;
-import static com.android.server.connectivity.metrics.nano.IpConnectivityLogClass.NetworkId;
 
 import android.net.ConnectivityMetricsEvent;
 import android.net.metrics.ApfProgramEvent;
@@ -34,6 +31,7 @@ import android.net.metrics.DefaultNetworkEvent;
 import android.net.metrics.DhcpClientEvent;
 import android.net.metrics.DhcpErrorEvent;
 import android.net.metrics.DnsEvent;
+import android.net.metrics.ConnectStats;
 import android.net.metrics.IpManagerEvent;
 import android.net.metrics.IpReachabilityEvent;
 import android.net.metrics.NetworkEvent;
@@ -41,7 +39,12 @@ import android.net.metrics.RaEvent;
 import android.net.metrics.ValidationProbeEvent;
 import android.os.Parcelable;
 import android.util.SparseArray;
+import android.util.SparseIntArray;
 import com.android.server.connectivity.metrics.nano.IpConnectivityLogClass;
+import com.android.server.connectivity.metrics.nano.IpConnectivityLogClass.IpConnectivityEvent;
+import com.android.server.connectivity.metrics.nano.IpConnectivityLogClass.IpConnectivityLog;
+import com.android.server.connectivity.metrics.nano.IpConnectivityLogClass.NetworkId;
+import com.android.server.connectivity.metrics.nano.IpConnectivityLogClass.Pair;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -77,33 +80,49 @@ final public class IpConnectivityEventBuilder {
     }
 
     public static IpConnectivityEvent toProto(ConnectivityMetricsEvent ev) {
-        final IpConnectivityEvent out = new IpConnectivityEvent();
+        final IpConnectivityEvent out = buildEvent(ev.netId, ev.transports, ev.ifname);
+        out.timeMs = ev.timestamp;
         if (!setEvent(out, ev.data)) {
             return null;
         }
-        out.timeMs = ev.timestamp;
-        out.networkId = ev.netId;
-        out.transports = ev.transports;
-        if (ev.ifname != null) {
-          out.ifName = ev.ifname;
-        }
-        inferLinkLayer(out);
         return out;
     }
 
+    public static IpConnectivityEvent toProto(ConnectStats in) {
+        IpConnectivityLogClass.ConnectStatistics stats =
+                new IpConnectivityLogClass.ConnectStatistics();
+        stats.connectCount = in.connectCount;
+        stats.connectBlockingCount = in.connectBlockingCount;
+        stats.ipv6AddrCount = in.ipv6ConnectCount;
+        stats.latenciesMs = in.latencies.toArray();
+        stats.errnosCounters = toPairArray(in.errnos);
+        final IpConnectivityEvent out = buildEvent(in.netId, in.transports, null);
+        out.setConnectStatistics(stats);
+        return out;
+    }
+
+
     public static IpConnectivityEvent toProto(DnsEvent in) {
-        final IpConnectivityEvent out = new IpConnectivityEvent();
         IpConnectivityLogClass.DNSLookupBatch dnsLookupBatch =
                 new IpConnectivityLogClass.DNSLookupBatch();
         in.resize(in.eventCount);
         dnsLookupBatch.eventTypes = bytesToInts(in.eventTypes);
         dnsLookupBatch.returnCodes = bytesToInts(in.returnCodes);
         dnsLookupBatch.latenciesMs = in.latenciesMs;
+        final IpConnectivityEvent out = buildEvent(in.netId, in.transports, null);
         out.setDnsLookupBatch(dnsLookupBatch);
-        out.networkId = in.netId;
-        out.transports = in.transports;
-        inferLinkLayer(out);
         return out;
+    }
+
+    private static IpConnectivityEvent buildEvent(int netId, long transports, String ifname) {
+        final IpConnectivityEvent ev = new IpConnectivityEvent();
+        ev.networkId = netId;
+        ev.transports = transports;
+        if (ifname != null) {
+            ev.ifName = ifname;
+        }
+        inferLinkLayer(ev);
+        return ev;
     }
 
     private static boolean setEvent(IpConnectivityEvent out, Parcelable in) {
@@ -266,6 +285,18 @@ final public class IpConnectivityEventBuilder {
             out[i] = in[i] & 0xFF;
         }
         return out;
+    }
+
+    private static Pair[] toPairArray(SparseIntArray counts) {
+        final int s = counts.size();
+        Pair[] pairs = new Pair[s];
+        for (int i = 0; i < s; i++) {
+            Pair p = new Pair();
+            p.key = counts.keyAt(i);
+            p.value = counts.valueAt(i);
+            pairs[i] = p;
+        }
+        return pairs;
     }
 
     private static NetworkId netIdOf(int netid) {

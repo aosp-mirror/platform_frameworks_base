@@ -16,12 +16,22 @@
 
 package com.android.server.connectivity;
 
+import static android.net.metrics.INetdEventListener.EVENT_GETADDRINFO;
+import static android.net.metrics.INetdEventListener.EVENT_GETHOSTBYNAME;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import android.content.Context;
+import android.net.ConnectivityManager;
 import android.net.ConnectivityMetricsEvent;
 import android.net.IIpConnectivityMetrics;
+import android.net.Network;
+import android.net.NetworkCapabilities;
 import android.net.metrics.ApfProgramEvent;
 import android.net.metrics.ApfStats;
 import android.net.metrics.DefaultNetworkEvent;
@@ -31,7 +41,9 @@ import android.net.metrics.IpManagerEvent;
 import android.net.metrics.IpReachabilityEvent;
 import android.net.metrics.RaEvent;
 import android.net.metrics.ValidationProbeEvent;
+import android.system.OsConstants;
 import android.os.Parcelable;
+import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Base64;
 import com.android.server.connectivity.metrics.nano.IpConnectivityLogClass;
@@ -41,26 +53,38 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
-import junit.framework.TestCase;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
-public class IpConnectivityMetricsTest extends TestCase {
+@RunWith(AndroidJUnit4.class)
+@SmallTest
+public class IpConnectivityMetricsTest {
     static final IpReachabilityEvent FAKE_EV =
             new IpReachabilityEvent(IpReachabilityEvent.NUD_FAILED);
 
+    private static final String EXAMPLE_IPV4 = "192.0.2.1";
+    private static final String EXAMPLE_IPV6 = "2001:db8:1200::2:1";
+
     @Mock Context mCtx;
     @Mock IIpConnectivityMetrics mMockService;
+    @Mock ConnectivityManager mCm;
 
     IpConnectivityMetrics mService;
+    NetdEventListenerService mNetdListener;
 
+    @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         mService = new IpConnectivityMetrics(mCtx, (ctx) -> 2000);
+        mNetdListener = new NetdEventListenerService(mCm);
+        mService.mNetdListener = mNetdListener;
     }
 
-    @SmallTest
+    @Test
     public void testLoggingEvents() throws Exception {
         IpConnectivityLog logger = new IpConnectivityLog(mMockService);
 
@@ -74,7 +98,7 @@ public class IpConnectivityMetricsTest extends TestCase {
         assertEventsEqual(expectedEvent(3), got.get(2));
     }
 
-    @SmallTest
+    @Test
     public void testLoggingEventsWithMultipleCallers() throws Exception {
         IpConnectivityLog logger = new IpConnectivityLog(mMockService);
 
@@ -91,7 +115,7 @@ public class IpConnectivityMetricsTest extends TestCase {
             }.start();
         }
 
-        List<ConnectivityMetricsEvent> got = verifyEvents(nCallers * nEvents, 100);
+        List<ConnectivityMetricsEvent> got = verifyEvents(nCallers * nEvents, 200);
         Collections.sort(got, EVENT_COMPARATOR);
         Iterator<ConnectivityMetricsEvent> iter = got.iterator();
         for (int i = 0; i < nCallers; i++) {
@@ -102,7 +126,7 @@ public class IpConnectivityMetricsTest extends TestCase {
         }
     }
 
-    @SmallTest
+    @Test
     public void testBufferFlushing() {
         String output1 = getdump("flush");
         assertEquals("", output1);
@@ -115,7 +139,7 @@ public class IpConnectivityMetricsTest extends TestCase {
         assertEquals("", output3);
     }
 
-    @SmallTest
+    @Test
     public void testRateLimiting() {
         final IpConnectivityLog logger = new IpConnectivityLog(mService.impl);
         final ApfProgramEvent ev = new ApfProgramEvent();
@@ -137,11 +161,18 @@ public class IpConnectivityMetricsTest extends TestCase {
         assertEquals("", output2);
     }
 
-    @SmallTest
-    // TODO: add NetdEventListenerService coverage too
-    public void testEndToEndLogging() {
+    @Test
+    public void testEndToEndLogging() throws Exception {
         // TODO: instead of comparing textpb to textpb, parse textpb and compare proto to proto.
         IpConnectivityLog logger = new IpConnectivityLog(mService.impl);
+
+        NetworkCapabilities ncWifi = new NetworkCapabilities();
+        NetworkCapabilities ncCell = new NetworkCapabilities();
+        ncWifi.addTransportType(NetworkCapabilities.TRANSPORT_WIFI);
+        ncCell.addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR);
+
+        when(mCm.getNetworkCapabilities(new Network(100))).thenReturn(ncWifi);
+        when(mCm.getNetworkCapabilities(new Network(101))).thenReturn(ncCell);
 
         ApfStats apfStats = new ApfStats();
         apfStats.durationMs = 45000;
@@ -177,6 +208,21 @@ public class IpConnectivityMetricsTest extends TestCase {
             ev.data = events[i];
             logger.log(ev);
         }
+
+        // netId, errno, latency, destination
+        connectEvent(100, OsConstants.EALREADY, 0, EXAMPLE_IPV4);
+        connectEvent(100, OsConstants.EINPROGRESS, 0, EXAMPLE_IPV6);
+        connectEvent(100, 0, 110, EXAMPLE_IPV4);
+        connectEvent(101, 0, 23, EXAMPLE_IPV4);
+        connectEvent(101, 0, 45, EXAMPLE_IPV6);
+        connectEvent(100, OsConstants.EAGAIN, 0, EXAMPLE_IPV4);
+
+        // netId, type, return code, latency
+        dnsEvent(100, EVENT_GETADDRINFO, 0, 3456);
+        dnsEvent(100, EVENT_GETADDRINFO, 3, 45);
+        dnsEvent(100, EVENT_GETHOSTBYNAME, 0, 638);
+        dnsEvent(101, EVENT_GETADDRINFO, 0, 56);
+        dnsEvent(101, EVENT_GETHOSTBYNAME, 0, 34);
 
         String want = String.join("\n",
                 "dropped_events: 0",
@@ -280,6 +326,70 @@ public class IpConnectivityMetricsTest extends TestCase {
                 "    router_lifetime: 2000",
                 "  >",
                 ">",
+                "events <",
+                "  if_name: \"\"",
+                "  link_layer: 4",
+                "  network_id: 100",
+                "  time_ms: 0",
+                "  transports: 2",
+                "  connect_statistics <",
+                "    connect_blocking_count: 1",
+                "    connect_count: 3",
+                "    errnos_counters <",
+                "      key: 11",
+                "      value: 1",
+                "    >",
+                "    ipv6_addr_count: 1",
+                "    latencies_ms: 110",
+                "  >",
+                ">",
+                "events <",
+                "  if_name: \"\"",
+                "  link_layer: 2",
+                "  network_id: 101",
+                "  time_ms: 0",
+                "  transports: 1",
+                "  connect_statistics <",
+                "    connect_blocking_count: 2",
+                "    connect_count: 2",
+                "    ipv6_addr_count: 1",
+                "    latencies_ms: 23",
+                "    latencies_ms: 45",
+                "  >",
+                ">",
+                "events <",
+                "  if_name: \"\"",
+                "  link_layer: 4",
+                "  network_id: 100",
+                "  time_ms: 0",
+                "  transports: 2",
+                "  dns_lookup_batch <",
+                "    event_types: 1",
+                "    event_types: 1",
+                "    event_types: 2",
+                "    latencies_ms: 3456",
+                "    latencies_ms: 45",
+                "    latencies_ms: 638",
+                "    return_codes: 0",
+                "    return_codes: 3",
+                "    return_codes: 0",
+                "  >",
+                ">",
+                "events <",
+                "  if_name: \"\"",
+                "  link_layer: 2",
+                "  network_id: 101",
+                "  time_ms: 0",
+                "  transports: 1",
+                "  dns_lookup_batch <",
+                "    event_types: 1",
+                "    event_types: 2",
+                "    latencies_ms: 56",
+                "    latencies_ms: 34",
+                "    return_codes: 0",
+                "    return_codes: 0",
+                "  >",
+                ">",
                 "version: 2\n");
 
         verifySerialization(want, getdump("flush"));
@@ -290,6 +400,14 @@ public class IpConnectivityMetricsTest extends TestCase {
         PrintWriter writer = new PrintWriter(buffer);
         mService.impl.dump(null, writer, command);
         return buffer.toString();
+    }
+
+    void connectEvent(int netid, int error, int latencyMs, String ipAddr) throws Exception {
+        mNetdListener.onConnectEvent(netid, error, latencyMs, ipAddr, 80, 1);
+    }
+
+    void dnsEvent(int netId, int type, int result, int latency) throws Exception {
+        mNetdListener.onDnsEvent(netId, type, result, latency, "", null, 0, 0);
     }
 
     List<ConnectivityMetricsEvent> verifyEvents(int n, int timeoutMs) throws Exception {
