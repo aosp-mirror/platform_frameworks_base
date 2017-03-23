@@ -4601,4 +4601,10 @@
 
     <!-- Primary ETWS (Earthquake and Tsunami Warning System) default message for others -->
     <string name="etws_primary_default_message_others"></string>
+
+    <!-- Title of notification when UE fails to register network with MM reject cause code. -->
+    <string name="mmcc_authentication_reject">SIM not allowed</string>
+    <string name="mmcc_imsi_unknown_in_hlr">SIM not provisioned</string>
+    <string name="mmcc_illegal_ms">SIM not allowed</string>
+    <string name="mmcc_illegal_me">Phone not allowed</string>
 </resources>
