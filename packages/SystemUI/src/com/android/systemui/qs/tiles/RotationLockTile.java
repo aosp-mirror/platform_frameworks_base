@@ -136,13 +136,13 @@ public class RotationLockTile extends QSTileImpl<BooleanState> {
      */
     private String getAccessibilityString(boolean locked) {
         if (locked) {
-            return mContext.getString(R.string.accessibility_quick_settings_rotation) + ","
-                    + mContext.getString(R.string.accessibility_quick_settings_rotation_value,
+            return mContext.getString(R.string.accessibility_quick_settings_rotation_value,
                     isCurrentOrientationLockPortrait(mController, mContext)
                             ? mContext.getString(
                                     R.string.quick_settings_rotation_locked_portrait_label)
                             : mContext.getString(
-                                    R.string.quick_settings_rotation_locked_landscape_label));
+                                    R.string.quick_settings_rotation_locked_landscape_label))
+                    + "," + mContext.getString(R.string.accessibility_quick_settings_rotation);
 
         } else {
             return mContext.getString(R.string.accessibility_quick_settings_rotation);
