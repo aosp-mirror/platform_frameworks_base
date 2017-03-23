@@ -491,6 +491,36 @@ Bitmap& Tree::getBitmapUpdateIfDirty() {
     return *mCache.bitmap;
 }
 
+void Tree::updateCache(sk_sp<SkSurface> surface) {
+    if (surface.get()) {
+        mCache.surface = surface;
+    }
+    if (surface.get() || mCache.dirty) {
+        SkSurface* vdSurface = mCache.surface.get();
+        SkCanvas* canvas = vdSurface->getCanvas();
+        float scaleX = vdSurface->width() / mProperties.getViewportWidth();
+        float scaleY = vdSurface->height() / mProperties.getViewportHeight();
+        SkAutoCanvasRestore acr(canvas, true);
+        canvas->clear(SK_ColorTRANSPARENT);
+        canvas->scale(scaleX, scaleY);
+        mRootNode->draw(canvas, false);
+        mCache.dirty = false;
+        canvas->flush();
+    }
+}
+
+void Tree::draw(SkCanvas* canvas) {
+   /*
+    * TODO address the following...
+    *
+    * 1) figure out how to set path's as volatile during animation
+    * 2) if mRoot->getPaint() != null either promote to layer (during
+    *    animation) or cache in SkSurface (for static content)
+    */
+    canvas->drawImageRect(mCache.surface->makeImageSnapshot().get(),
+        mutateProperties()->getBounds(), getPaint());
+}
+
 void Tree::updateBitmapCache(Bitmap& bitmap, bool useStagingData) {
     SkBitmap outCache;
     bitmap.getSkBitmap(&outCache);

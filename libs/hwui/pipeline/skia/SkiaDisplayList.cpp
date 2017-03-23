@@ -19,6 +19,7 @@
 #include "renderthread/CanvasContext.h"
 #include "VectorDrawable.h"
 #include "DumpOpsCanvas.h"
+#include "SkiaPipeline.h"
 
 #include <SkImagePriv.h>
 
@@ -92,6 +93,8 @@ bool SkiaDisplayList::prepareListAndChildren(TreeObserver& observer, TreeInfo& i
         // If any vector drawable in the display list needs update, damage the node.
         if (vectorDrawable->isDirty()) {
             isDirty = true;
+            static_cast<SkiaPipeline*>(info.canvasContext.getRenderPipeline())
+                ->getVectorDrawables()->push_back(vectorDrawable);
         }
         vectorDrawable->setPropertyChangeWillBeConsumed(true);
     }

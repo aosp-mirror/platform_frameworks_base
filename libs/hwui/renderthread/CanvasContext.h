@@ -194,6 +194,8 @@ public:
 
     void waitOnFences();
 
+    IRenderPipeline* getRenderPipeline() { return mRenderPipeline.get(); }
+
 private:
     CanvasContext(RenderThread& thread, bool translucent, RenderNode* rootRenderNode,
             IContextFactory* contextFactory, std::unique_ptr<IRenderPipeline> renderPipeline);

@@ -49,6 +49,8 @@ public:
             const std::vector< sp<RenderNode> >& nodes, bool opaque, const Rect &contentDrawBounds,
             sk_sp<SkSurface> surface);
 
+    std::vector<VectorDrawableRoot*>* getVectorDrawables() { return &mVectorDrawables; }
+
     static void destroyLayer(RenderNode* node);
 
     static void prepareToDraw(const renderthread::RenderThread& thread, Bitmap* bitmap);
@@ -119,8 +121,18 @@ private:
             const std::vector< sp<RenderNode> >& nodes, const Rect &contentDrawBounds,
             sk_sp<SkSurface>);
 
+    /**
+     *  Render mVectorDrawables into offscreen buffers.
+     */
+    void renderVectorDrawableCache();
+
     TaskManager mTaskManager;
     std::vector<sk_sp<SkImage>> mPinnedImages;
+
+    /**
+     *  populated by prepareTree with dirty VDs
+     */
+    std::vector<VectorDrawableRoot*> mVectorDrawables;
     static float mLightRadius;
     static uint8_t mAmbientShadowAlpha;
     static uint8_t mSpotShadowAlpha;

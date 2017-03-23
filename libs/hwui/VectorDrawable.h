@@ -31,6 +31,7 @@
 #include <SkPathMeasure.h>
 #include <SkRect.h>
 #include <SkShader.h>
+#include <SkSurface.h>
 
 #include <cutils/compiler.h>
 #include <stddef.h>
@@ -677,15 +678,37 @@ public:
     // This should only be called from animations on RT
     TreeProperties* mutateProperties() { return &mProperties; }
 
+    // called from RT only
+    const TreeProperties& properties() const { return mProperties; }
+
     // This should always be called from RT.
     void markDirty() { mCache.dirty = true; }
     bool isDirty() const { return mCache.dirty; }
     bool getPropertyChangeWillBeConsumed() const { return mWillBeConsumed; }
     void setPropertyChangeWillBeConsumed(bool willBeConsumed) { mWillBeConsumed = willBeConsumed; }
 
+    // Returns true if VD cache surface is big enough. This should always be called from RT and it
+    // works with Skia pipelines only.
+    bool canReuseSurface() {
+        SkSurface* surface = mCache.surface.get();
+        return surface && surface->width() >= mProperties.getScaledWidth()
+              && surface->height() >= mProperties.getScaledHeight();
+    }
+
+    // Draws VD cache into a canvas. This should always be called from RT and it works with Skia
+    // pipelines only.
+    void draw(SkCanvas* canvas);
+
+    // Draws VD into a GPU backed surface. If canReuseSurface returns false, then "surface" must
+    // contain a new surface. This should always be called from RT and it works with Skia pipelines
+    // only.
+    void updateCache(sk_sp<SkSurface> surface);
+
 private:
     struct Cache {
-        sk_sp<Bitmap> bitmap;
+        sk_sp<Bitmap> bitmap; //used by HWUI pipeline and software
+        //TODO: use surface instead of bitmap when drawing in software canvas
+        sk_sp<SkSurface> surface; //used only by Skia pipelines
         bool dirty = true;
     };
 

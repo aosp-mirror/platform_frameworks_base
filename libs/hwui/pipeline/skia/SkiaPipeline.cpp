@@ -25,6 +25,7 @@
 #include <SkPictureRecorder.h>
 #include <SkPixelSerializer.h>
 #include <SkStream.h>
+#include "VectorDrawable.h"
 
 #include <unistd.h>
 
@@ -40,7 +41,9 @@ uint8_t SkiaPipeline::mSpotShadowAlpha = 0;
 
 Vector3 SkiaPipeline::mLightCenter = {FLT_MIN, FLT_MIN, FLT_MIN};
 
-SkiaPipeline::SkiaPipeline(RenderThread& thread) :  mRenderThread(thread) { }
+SkiaPipeline::SkiaPipeline(RenderThread& thread) :  mRenderThread(thread) {
+    mVectorDrawables.reserve(30);
+}
 
 TaskManager* SkiaPipeline::getTaskManager() {
     return &mTaskManager;
@@ -74,6 +77,7 @@ void SkiaPipeline::renderLayers(const FrameBuilder::LightGeometry& lightGeometry
         const BakedOpRenderer::LightInfo& lightInfo) {
     updateLighting(lightGeometry, lightInfo);
     ATRACE_NAME("draw layers");
+    renderVectorDrawableCache();
     renderLayersImpl(*layerUpdateQueue, opaque);
     layerUpdateQueue->clear();
 }
@@ -176,9 +180,34 @@ public:
     }
 };
 
+void SkiaPipeline::renderVectorDrawableCache() {
+    //render VectorDrawables into offscreen buffers
+    for (auto vd : mVectorDrawables) {
+        sk_sp<SkSurface> surface;
+        if (!vd->canReuseSurface()) {
+#ifndef ANDROID_ENABLE_LINEAR_BLENDING
+            sk_sp<SkColorSpace> colorSpace = nullptr;
+#else
+            sk_sp<SkColorSpace> colorSpace = SkColorSpace::MakeSRGB();
+#endif
+            int scaledWidth = SkScalarCeilToInt(vd->properties().getScaledWidth());
+            int scaledHeight = SkScalarCeilToInt(vd->properties().getScaledHeight());
+            SkImageInfo info = SkImageInfo::MakeN32(scaledWidth, scaledHeight,
+                    kPremul_SkAlphaType, colorSpace);
+            SkASSERT(mRenderThread.getGrContext() != nullptr);
+            surface = SkSurface::MakeRenderTarget(mRenderThread.getGrContext(), SkBudgeted::kYes,
+                    info);
+        }
+        vd->updateCache(surface);
+    }
+    mVectorDrawables.clear();
+}
+
 void SkiaPipeline::renderFrame(const LayerUpdateQueue& layers, const SkRect& clip,
         const std::vector<sp<RenderNode>>& nodes, bool opaque, const Rect &contentDrawBounds,
         sk_sp<SkSurface> surface) {
+
+    renderVectorDrawableCache();
 
     // draw all layers up front
     renderLayersImpl(layers, opaque);
