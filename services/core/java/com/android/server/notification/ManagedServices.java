@@ -583,7 +583,7 @@ abstract public class ManagedServices {
                     ServiceInfo info = mPm.getServiceInfo(component,
                             PackageManager.MATCH_DIRECT_BOOT_AWARE
                                     | PackageManager.MATCH_DIRECT_BOOT_UNAWARE, userIds[i]);
-                    if (!mConfig.bindPermission.equals(info.permission)) {
+                    if (info == null || !mConfig.bindPermission.equals(info.permission)) {
                         Slog.w(TAG, "Skipping " + getCaption() + " service " + component
                                 + ": it does not require the permission " + mConfig.bindPermission);
                         continue;
