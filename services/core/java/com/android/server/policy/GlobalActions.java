@@ -43,7 +43,11 @@ class GlobalActions implements GlobalActionsListener {
         mLegacyGlobalActions = new LegacyGlobalActions(context, windowManagerFuncs,
                 this::onGlobalActionsDismissed);
         mStatusBarInternal = LocalServices.getService(StatusBarManagerInternal.class);
-        mStatusBarInternal.setGlobalActionsListener(this);
+
+        // Some form factors do not have a status bar.
+        if (mStatusBarInternal != null) {
+            mStatusBarInternal.setGlobalActionsListener(this);
+        }
     }
 
     public void showDialog(boolean keyguardShowing, boolean deviceProvisioned) {
