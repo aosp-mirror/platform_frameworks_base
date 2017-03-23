@@ -1664,43 +1664,6 @@ public final class BluetoothDevice implements Parcelable {
      * @param autoConnect Whether to directly connect to the remote device (false)
      *                    or to automatically connect as soon as the remote
      *                    device becomes available (true).
-     * @throws IllegalArgumentException if callback is null
-     */
-    public BluetoothGatt connectGatt(Context context, boolean autoConnect,
-                                     BluetoothGattCallbackExt callback) {
-        return (connectGatt(context, autoConnect,callback, TRANSPORT_AUTO));
-    }
-
-    /**
-     * Connect to GATT Server hosted by this device. Caller acts as GATT client.
-     * The callback is used to deliver results to Caller, such as connection status as well
-     * as any further GATT client operations.
-     * The method returns a BluetoothGatt instance. You can use BluetoothGatt to conduct
-     * GATT client operations.
-     * @param callback GATT callback handler that will receive asynchronous callbacks.
-     * @param autoConnect Whether to directly connect to the remote device (false)
-     *                    or to automatically connect as soon as the remote
-     *                    device becomes available (true).
-     * @param transport preferred transport for GATT connections to remote dual-mode devices
-     *             {@link BluetoothDevice#TRANSPORT_AUTO} or
-     *             {@link BluetoothDevice#TRANSPORT_BREDR} or {@link BluetoothDevice#TRANSPORT_LE}
-     * @throws IllegalArgumentException if callback is null
-     */
-    public BluetoothGatt connectGatt(Context context, boolean autoConnect,
-                                     BluetoothGattCallbackExt callback, int transport) {
-        return (connectGatt(context, autoConnect,callback, TRANSPORT_AUTO, PHY_LE_1M));
-    }
-
-    /**
-     * Connect to GATT Server hosted by this device. Caller acts as GATT client.
-     * The callback is used to deliver results to Caller, such as connection status as well
-     * as any further GATT client operations.
-     * The method returns a BluetoothGatt instance. You can use BluetoothGatt to conduct
-     * GATT client operations.
-     * @param callback GATT callback handler that will receive asynchronous callbacks.
-     * @param autoConnect Whether to directly connect to the remote device (false)
-     *                    or to automatically connect as soon as the remote
-     *                    device becomes available (true).
      * @param transport preferred transport for GATT connections to remote dual-mode devices
      *             {@link BluetoothDevice#TRANSPORT_AUTO} or
      *             {@link BluetoothDevice#TRANSPORT_BREDR} or {@link BluetoothDevice#TRANSPORT_LE}
@@ -1711,7 +1674,7 @@ public final class BluetoothDevice implements Parcelable {
      * @throws IllegalArgumentException if callback is null
      */
     public BluetoothGatt connectGatt(Context context, boolean autoConnect,
-                                     BluetoothGattCallbackExt callback, int transport, int phy) {
+                                     BluetoothGattCallback callback, int transport, int phy) {
         // TODO(Bluetooth) check whether platform support BLE
         //     Do the check here or in GattServer?
         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();

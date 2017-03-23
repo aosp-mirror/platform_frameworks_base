@@ -46,7 +46,7 @@ public final class BluetoothGattServer implements BluetoothProfile {
 
     private BluetoothAdapter mAdapter;
     private IBluetoothGatt mService;
-    private BluetoothGattServerCallbackExt mCallback;
+    private BluetoothGattServerCallback mCallback;
 
     private Object mServerIfLock = new Object();
     private int mServerIf;
@@ -396,7 +396,7 @@ public final class BluetoothGattServer implements BluetoothProfile {
      * @return true, the callback will be called to notify success or failure,
      *         false on immediate error
      */
-    /*package*/ boolean registerCallback(BluetoothGattServerCallbackExt callback) {
+    /*package*/ boolean registerCallback(BluetoothGattServerCallback callback) {
         if (DBG) Log.d(TAG, "registerCallback()");
         if (mService == null) {
             Log.e(TAG, "GATT service not available");
@@ -472,7 +472,7 @@ public final class BluetoothGattServer implements BluetoothProfile {
      *
      * <p>The connection may not be established right away, but will be
      * completed when the remote device is available. A
-     * {@link BluetoothGattServerCallbackExt#onConnectionStateChange} callback will be
+     * {@link BluetoothGattServerCallback#onConnectionStateChange} callback will be
      * invoked when the connection state changes as a result of this function.
      *
      * <p>The autoConnect paramter determines whether to actively connect to
@@ -528,7 +528,7 @@ public final class BluetoothGattServer implements BluetoothProfile {
      * recommendation, wether the PHY change will happen depends on other applications peferences,
      * local and remote controller capabilities. Controller can override these settings.
      * <p>
-     * {@link BluetoothGattServerCallbackExt#onPhyUpdate} will be triggered as a result of this call, even
+     * {@link BluetoothGattServerCallback#onPhyUpdate} will be triggered as a result of this call, even
      * if no PHY change happens. It is also triggered when remote device updates the PHY.
      *
      * @param device The remote device to send this response to
@@ -553,7 +553,7 @@ public final class BluetoothGattServer implements BluetoothProfile {
 
     /**
      * Read the current transmitter PHY and receiver PHY of the connection. The values are returned
-     * in {@link BluetoothGattServerCallbackExt#onPhyRead}
+     * in {@link BluetoothGattServerCallback#onPhyRead}
      *
      * @param device The remote device to send this response to
      */
@@ -572,10 +572,10 @@ public final class BluetoothGattServer implements BluetoothProfile {
      * is received by one of these callback methods:
      *
      * <ul>
-     *      <li>{@link BluetoothGattServerCallbackExt#onCharacteristicReadRequest}
-     *      <li>{@link BluetoothGattServerCallbackExt#onCharacteristicWriteRequest}
-     *      <li>{@link BluetoothGattServerCallbackExt#onDescriptorReadRequest}
-     *      <li>{@link BluetoothGattServerCallbackExt#onDescriptorWriteRequest}
+     *      <li>{@link BluetoothGattServerCallback#onCharacteristicReadRequest}
+     *      <li>{@link BluetoothGattServerCallback#onCharacteristicWriteRequest}
+     *      <li>{@link BluetoothGattServerCallback#onDescriptorReadRequest}
+     *      <li>{@link BluetoothGattServerCallback#onDescriptorWriteRequest}
      * </ul>
      *
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
