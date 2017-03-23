@@ -365,7 +365,6 @@ public final class AutofillManagerService extends SystemService {
             activityToken = Preconditions.checkNotNull(activityToken, "activityToken");
             appCallback = Preconditions.checkNotNull(appCallback, "appCallback");
             autofillId = Preconditions.checkNotNull(autofillId, "autoFillId");
-            bounds = Preconditions.checkNotNull(bounds, "bounds");
             packageName = Preconditions.checkNotNull(packageName, "packageName");
 
             Preconditions.checkArgument(userId == UserHandle.getUserId(getCallingUid()), "userId");

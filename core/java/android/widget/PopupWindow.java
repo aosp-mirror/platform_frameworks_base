@@ -209,7 +209,7 @@ public class PopupWindow {
     private int mGravity = Gravity.NO_GRAVITY;
 
     private static final int[] ABOVE_ANCHOR_STATE_SET = new int[] {
-        com.android.internal.R.attr.state_above_anchor
+            com.android.internal.R.attr.state_above_anchor
     };
 
     private final OnAttachStateChangeListener mOnAnchorDetachedListener =
@@ -589,7 +589,6 @@ public class PopupWindow {
         mIgnoreCheekPress = true;
     }
 
-
     /**
      * <p>Change the animation style resource for this popup.</p>
      *
@@ -860,6 +859,11 @@ public class PopupWindow {
         mAllowScrollingAnchorParent = enabled;
     }
 
+    /** @hide */
+    protected final boolean getAllowScrollingAnchorParent() {
+        return mAllowScrollingAnchorParent;
+    }
+
     /**
      * <p>Indicates whether the popup window supports splitting touches.</p>
      *
@@ -958,6 +962,11 @@ public class PopupWindow {
      */
     public void setLayoutInsetDecor(boolean enabled) {
         mLayoutInsetDecor = enabled;
+    }
+
+    /** @hide */
+    protected final boolean isLayoutInsetDecor() {
+        return mLayoutInsetDecor;
     }
 
     /**
@@ -1122,6 +1131,26 @@ public class PopupWindow {
         return mIsShowing;
     }
 
+    /** @hide */
+    protected final void setShowing(boolean isShowing) {
+        mIsShowing = isShowing;
+    }
+
+    /** @hide */
+    protected final void setDropDown(boolean isDropDown) {
+        mIsDropdown = isDropDown;
+    }
+
+    /** @hide */
+    protected final void setTransitioningToDismiss(boolean transitioningToDismiss) {
+        mIsTransitioningToDismiss = transitioningToDismiss;
+    }
+
+    /** @hide */
+    protected final boolean isTransitioningToDismiss() {
+        return mIsTransitioningToDismiss;
+    }
+
     /**
      * <p>
      * Display the content view in a popup window at the specified location. If the popup window
@@ -1232,7 +1261,7 @@ public class PopupWindow {
      * @see #dismiss()
      */
     public void showAsDropDown(View anchor, int xoff, int yoff, int gravity) {
-        if (isShowing() || mContentView == null) {
+        if (isShowing() || !hasContentView()) {
             return;
         }
 
@@ -1255,7 +1284,8 @@ public class PopupWindow {
         invokePopup(p);
     }
 
-    private void updateAboveAnchor(boolean aboveAnchor) {
+    /** @hide */
+    protected final void updateAboveAnchor(boolean aboveAnchor) {
         if (aboveAnchor != mAboveAnchor) {
             mAboveAnchor = aboveAnchor;
 
@@ -1426,8 +1456,10 @@ public class PopupWindow {
      * @param token the window token used to bind the popup's window
      *
      * @return the layout parameters to pass to the window manager
+     *
+     * @hide
      */
-    private WindowManager.LayoutParams createPopupLayoutParams(IBinder token) {
+    protected final WindowManager.LayoutParams createPopupLayoutParams(IBinder token) {
         final WindowManager.LayoutParams p = new WindowManager.LayoutParams();
 
         // These gravity settings put the view at the top left corner of the
@@ -1510,7 +1542,7 @@ public class PopupWindow {
             curFlags |= WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
         }
         if (mAttachedInDecor) {
-          curFlags |= WindowManager.LayoutParams.FLAG_LAYOUT_ATTACHED_IN_DECOR;
+            curFlags |= WindowManager.LayoutParams.FLAG_LAYOUT_ATTACHED_IN_DECOR;
         }
         return curFlags;
     }
@@ -1543,8 +1575,10 @@ public class PopupWindow {
      * @param allowScroll whether the anchor view's parent may be scrolled
      *                    when the popup window doesn't fit on screen
      * @return true if the popup is translated upwards to fit on screen
+     *
+     * @hide
      */
-    private boolean findDropDownPosition(View anchor, WindowManager.LayoutParams outParams,
+    protected final boolean findDropDownPosition(View anchor, WindowManager.LayoutParams outParams,
             int xOffset, int yOffset, int width, int height, int gravity, boolean allowScroll) {
         final int anchorHeight = anchor.getHeight();
         final int anchorWidth = anchor.getWidth();
@@ -1853,7 +1887,7 @@ public class PopupWindow {
      * @see #showAsDropDown(android.view.View)
      */
     public void dismiss() {
-        if (!isShowing() || mIsTransitioningToDismiss) {
+        if (!isShowing() || isTransitioningToDismiss()) {
             return;
         }
 
@@ -1923,8 +1957,10 @@ public class PopupWindow {
      *
      * @return the window-relative epicenter bounds to be used by enter and
      *         exit transitions
+     *
+     * @hide
      */
-    private Rect getTransitionEpicenter() {
+    protected final Rect getTransitionEpicenter() {
         final View anchor = mAnchor != null ? mAnchor.get() : null;
         final View decor = mDecorView;
         if (anchor == null || decor == null) {
@@ -1981,6 +2017,11 @@ public class PopupWindow {
         mOnDismissListener = onDismissListener;
     }
 
+    /** @hide */
+    protected final OnDismissListener getOnDismissListener() {
+        return mOnDismissListener;
+    }
+
     /**
      * Updates the state of the popup window, if it is currently being displayed,
      * from the currently set state.
@@ -1996,12 +2037,11 @@ public class PopupWindow {
      * </ul>
      */
     public void update() {
-        if (!isShowing() || mContentView == null) {
+        if (!isShowing() || !hasContentView()) {
             return;
         }
 
-        final WindowManager.LayoutParams p =
-                (WindowManager.LayoutParams) mDecorView.getLayoutParams();
+        final WindowManager.LayoutParams p = getDecorViewLayoutParams();
 
         boolean update = false;
 
@@ -2024,9 +2064,14 @@ public class PopupWindow {
         }
 
         if (update) {
-            setLayoutDirectionFromAnchor();
-            mWindowManager.updateViewLayout(mDecorView, p);
+            update(mAnchor.get(), p);
         }
+    }
+
+    /** @hide */
+    protected void update(View anchor, WindowManager.LayoutParams params) {
+        setLayoutDirectionFromAnchor();
+        mWindowManager.updateViewLayout(mDecorView, params);
     }
 
     /**
@@ -2039,8 +2084,7 @@ public class PopupWindow {
      * @param height the new height in pixels, must be >= 0 or -1 to ignore
      */
     public void update(int width, int height) {
-        final WindowManager.LayoutParams p =
-                (WindowManager.LayoutParams) mDecorView.getLayoutParams();
+        final WindowManager.LayoutParams p = getDecorViewLayoutParams();
         update(p.x, p.y, width, height, false);
     }
 
@@ -2086,12 +2130,11 @@ public class PopupWindow {
             setHeight(height);
         }
 
-        if (!isShowing() || mContentView == null) {
+        if (!isShowing() || !hasContentView()) {
             return;
         }
 
-        final WindowManager.LayoutParams p =
-                (WindowManager.LayoutParams) mDecorView.getLayoutParams();
+        final WindowManager.LayoutParams p = getDecorViewLayoutParams();
 
         boolean update = force;
 
@@ -2135,17 +2178,32 @@ public class PopupWindow {
             update = true;
         }
 
-        int newAccessibilityIdOfAnchor =
-                (mAnchor != null) ? mAnchor.get().getAccessibilityViewId() : -1;
+        final View anchor = mAnchor.get();
+        final int newAccessibilityIdOfAnchor = (anchor != null)
+                ? anchor.getAccessibilityViewId() : -1;
         if (newAccessibilityIdOfAnchor != p.accessibilityIdOfAnchor) {
             p.accessibilityIdOfAnchor = newAccessibilityIdOfAnchor;
             update = true;
         }
 
         if (update) {
-            setLayoutDirectionFromAnchor();
-            mWindowManager.updateViewLayout(mDecorView, p);
+            update(anchor, p);
         }
+    }
+
+    /** @hide */
+    protected boolean hasContentView() {
+        return mContentView != null;
+    }
+
+    /** @hide */
+    protected boolean hasDecorView() {
+        return mDecorView != null;
+    }
+
+    /** @hide */
+    protected WindowManager.LayoutParams getDecorViewLayoutParams() {
+        return (WindowManager.LayoutParams) mDecorView.getLayoutParams();
     }
 
     /**
@@ -2185,7 +2243,7 @@ public class PopupWindow {
     private void update(View anchor, boolean updateLocation, int xoff, int yoff,
             int width, int height) {
 
-        if (!isShowing() || mContentView == null) {
+        if (!isShowing() || !hasContentView()) {
             return;
         }
 
@@ -2201,7 +2259,7 @@ public class PopupWindow {
             mAnchorYoff = yoff;
         }
 
-        final LayoutParams p = (LayoutParams) mDecorView.getLayoutParams();
+        final WindowManager.LayoutParams p = getDecorViewLayoutParams();
         final int oldGravity = p.gravity;
         final int oldWidth = p.width;
         final int oldHeight = p.height;
@@ -2243,7 +2301,8 @@ public class PopupWindow {
         public void onDismiss();
     }
 
-    private void detachFromAnchor() {
+    /** @hide */
+    protected final void detachFromAnchor() {
         final View anchor = mAnchor != null ? mAnchor.get() : null;
         if (anchor != null) {
             final ViewTreeObserver vto = anchor.getViewTreeObserver();
@@ -2262,7 +2321,8 @@ public class PopupWindow {
         mIsAnchorRootAttached = false;
     }
 
-    private void attachToAnchor(View anchor, int xoff, int yoff, int gravity) {
+    /** @hide */
+    protected final void attachToAnchor(View anchor, int xoff, int yoff, int gravity) {
         detachFromAnchor();
 
         final ViewTreeObserver vto = anchor.getViewTreeObserver();
@@ -2287,9 +2347,8 @@ public class PopupWindow {
 
     private void alignToAnchor() {
         final View anchor = mAnchor != null ? mAnchor.get() : null;
-        if (anchor != null && anchor.isAttachedToWindow() && mDecorView != null) {
-            final WindowManager.LayoutParams p = (WindowManager.LayoutParams)
-                    mDecorView.getLayoutParams();
+        if (anchor != null && anchor.isAttachedToWindow() && hasDecorView()) {
+            final WindowManager.LayoutParams p = getDecorViewLayoutParams();
 
             updateAboveAnchor(findDropDownPosition(anchor, p, mAnchorXoff, mAnchorYoff,
                     p.width, p.height, mAnchoredGravity, false));

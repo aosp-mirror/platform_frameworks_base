@@ -15,19 +15,14 @@
  */
 package com.android.server.autofill.ui;
 
-import static android.view.autofill.AutofillManager.AutofillCallback.EVENT_INPUT_HIDDEN;
-import static android.view.autofill.AutofillManager.AutofillCallback.EVENT_INPUT_SHOWN;
-
 import static com.android.server.autofill.ui.Helper.DEBUG;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.IntentSender;
-import android.graphics.Rect;
 import android.metrics.LogMaker;
 import android.os.Handler;
-import android.os.IBinder;
 import android.service.autofill.Dataset;
 import android.service.autofill.FillResponse;
 import android.service.autofill.SaveInfo;
@@ -35,6 +30,7 @@ import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.Slog;
 import android.view.autofill.AutofillId;
+import android.view.autofill.IAutofillWindowPresenter;
 import android.widget.Toast;
 
 import com.android.internal.logging.MetricsLogger;
@@ -62,7 +58,6 @@ public final class AutoFillUI {
     private @Nullable SaveUi mSaveUi;
 
     private @Nullable AutoFillUiCallback mCallback;
-    private @Nullable IBinder mWindowToken;
 
     private int mSaveTimeoutMs = (int) (5 * DateUtils.SECOND_IN_MILLIS);
     private final MetricsLogger mMetricsLogger = new MetricsLogger();
@@ -72,20 +67,20 @@ public final class AutoFillUI {
         void fill(@NonNull Dataset dataset);
         void save();
         void cancelSave();
-        void onEvent(AutofillId id, int event);
+        void requestShowFillUi(AutofillId id, int width, int height,
+                IAutofillWindowPresenter presenter);
+        void requestHideFillUi(AutofillId id);
     }
 
     public AutoFillUI(@NonNull Context context) {
         mContext = context;
     }
 
-    public void setCallback(@Nullable AutoFillUiCallback callback,
-            @Nullable IBinder windowToken) {
+    public void setCallback(@Nullable AutoFillUiCallback callback) {
         mHandler.post(() -> {
-            if (mCallback != callback || mWindowToken != windowToken) {
+            if (mCallback != callback) {
                 hideAllUiThread();
                 mCallback = callback;
-                mWindowToken = windowToken;
             }
         });
     }
@@ -109,12 +104,7 @@ public final class AutoFillUI {
      * Hides the fill UI.
      */
     public void hideFillUi(AutofillId id) {
-        mHandler.post(() -> {
-            hideFillUiUiThread();
-            if (mCallback != null) {
-                mCallback.onEvent(id, EVENT_INPUT_HIDDEN);
-            }
-        });
+        mHandler.post(this::hideFillUiUiThread);
     }
 
     /**
@@ -135,36 +125,17 @@ public final class AutoFillUI {
     }
 
     /**
-     * Updates the position of the fill UI.
-     *
-     * @param anchoredBounds The bounds of the anchor view.
-     */
-    public void updateFillUi(@NonNull Rect anchoredBounds) {
-        mHandler.post(() -> {
-            if (!hasCallback()) {
-                return;
-            }
-            hideSaveUiUiThread();
-            if (mFillUi != null) {
-                mFillUi.update(anchoredBounds);
-            }
-        });
-    }
-
-    /**
      * Shows the fill UI, removing the previous fill UI if the has changed.
      *
      * @param focusedId the currently focused field
      * @param response the current fill response
-     * @param anchorBounds bounds of the focused view
      * @param filterText text of the view to be filled
      * @param packageName package name of the activity that is filled
      */
     public void showFillUi(@NonNull AutofillId focusedId, @NonNull FillResponse response,
-            @NonNull Rect anchorBounds, @Nullable String filterText, @NonNull String packageName) {
+            @Nullable String filterText, @NonNull String packageName) {
         if (DEBUG) {
-            Slog.d(TAG, "showFillUi(): id=" + focusedId + ", bounds=" + anchorBounds + " filter="
-                    + filterText);
+            Slog.d(TAG, "showFillUi(): id=" + focusedId + ", filter=" + filterText);
         }
         final LogMaker log = (new LogMaker(MetricsProto.MetricsEvent.AUTOFILL_FILL_UI))
                 .setPackageName(packageName)
@@ -179,7 +150,7 @@ public final class AutoFillUI {
             }
             hideAllUiThread();
             mFillUi = new FillUi(mContext, response, focusedId,
-                    mWindowToken, anchorBounds, filterText, new FillUi.Callback() {
+                    filterText, new FillUi.Callback() {
                 @Override
                 public void onResponsePicked(FillResponse response) {
                     log.setType(MetricsProto.MetricsEvent.TYPE_DETAIL);
@@ -211,8 +182,22 @@ public final class AutoFillUI {
                     }
                     mMetricsLogger.write(log);
                 }
+
+                @Override
+                public void requestShowFillUi(int width, int height,
+                        IAutofillWindowPresenter windowPresenter) {
+                    if (mCallback != null) {
+                        mCallback.requestShowFillUi(focusedId, width, height, windowPresenter);
+                    }
+                }
+
+                @Override
+                public void requestHideFillUi() {
+                    if (mCallback != null) {
+                        mCallback.requestHideFillUi(focusedId);
+                    }
+                }
             });
-            mCallback.onEvent(focusedId, EVENT_INPUT_SHOWN);
         });
     }
 

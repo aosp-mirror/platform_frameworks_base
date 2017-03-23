@@ -326,6 +326,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/view/accessibility/IAccessibilityManagerClient.aidl \
 	core/java/android/view/autofill/IAutoFillManager.aidl \
 	core/java/android/view/autofill/IAutoFillManagerClient.aidl \
+	core/java/android/view/autofill/IAutofillWindowPresenter.aidl \
 	core/java/android/view/IApplicationToken.aidl \
 	core/java/android/view/IAppTransitionAnimationSpecsFuture.aidl \
 	core/java/android/view/IDockedStackListener.aidl \

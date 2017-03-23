@@ -18,14 +18,10 @@ package com.android.server.autofill.ui;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
-import android.graphics.PixelFormat;
-import android.graphics.Point;
 import android.graphics.Rect;
-import android.os.IBinder;
 import android.service.autofill.Dataset;
 import android.service.autofill.FillResponse;
 import android.util.Slog;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -34,11 +30,13 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillValue;
+import android.view.autofill.IAutofillWindowPresenter;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.RemoteViews;
 
 import com.android.internal.R;
+import com.android.server.UiThread;
 import libcore.util.Objects;
 
 import java.io.PrintWriter;
@@ -54,9 +52,13 @@ final class FillUi {
         void onDatasetPicked(@NonNull Dataset dataset);
         void onCanceled();
         void onDestroy();
+        void requestShowFillUi(int width, int height,
+                IAutofillWindowPresenter windowPresenter);
+        void requestHideFillUi();
     }
 
-    private final Rect mAnchorBounds = new Rect();
+    private final @NonNull AutofillWindowPresenter mWindowPresenter =
+            new AutofillWindowPresenter();
 
     private final @NonNull AnchoredWindow mWindow;
 
@@ -75,10 +77,8 @@ final class FillUi {
     private boolean mDestroyed;
 
     FillUi(@NonNull Context context, @NonNull FillResponse response,
-            @NonNull AutofillId focusedViewId, @NonNull IBinder windowToken,
-            @NonNull Rect anchorBounds, @Nullable String filterText,
+            @NonNull AutofillId focusedViewId, @NonNull @Nullable String filterText,
             @NonNull Callback callback) {
-        mAnchorBounds.set(anchorBounds);
         mCallback = callback;
 
         mAccessibilityTitle = context.getString(R.string.autofill_picker_accessibility_title);
@@ -104,8 +104,8 @@ final class FillUi {
             mContentWidth = content.getMeasuredWidth();
             mContentHeight = content.getMeasuredHeight();
 
-            mWindow = new AnchoredWindow(windowToken, content);
-            mWindow.show(mContentWidth, mContentHeight, mAnchorBounds);
+            mWindow = new AnchoredWindow(content);
+            mCallback.requestShowFillUi(mContentWidth, mContentHeight, mWindowPresenter);
         } else {
             final int datasetCount = response.getDatasets().size();
             final ArrayList<ViewItem> items = new ArrayList<>(datasetCount);
@@ -153,15 +153,7 @@ final class FillUi {
             }
 
             applyNewFilterText();
-            mWindow = new AnchoredWindow(windowToken, mListView);
-        }
-    }
-
-    public void update(@NonNull Rect anchorBounds) {
-        throwIfDestroyed();
-        if (!mAnchorBounds.equals(anchorBounds)) {
-            mAnchorBounds.set(anchorBounds);
-            mWindow.show(mContentWidth, mContentHeight, anchorBounds);
+            mWindow = new AnchoredWindow(mListView);
         }
     }
 
@@ -171,10 +163,10 @@ final class FillUi {
                 return;
             }
             if (count <= 0) {
-                mWindow.hide();
+                mCallback.requestHideFillUi();
             } else {
                 if (updateContentSize()) {
-                    mWindow.show(mContentWidth, mContentHeight, mAnchorBounds);
+                    mCallback.requestShowFillUi(mContentWidth, mContentHeight, mWindowPresenter);
                 }
                 if (mAdapter.getCount() > VISIBLE_OPTIONS_MAX_COUNT) {
                     mListView.setVerticalScrollBarEnabled(true);
@@ -209,7 +201,7 @@ final class FillUi {
     public void destroy() {
         throwIfDestroyed();
         mCallback.onDestroy();
-        mWindow.hide();
+        mCallback.requestHideFillUi();
         mDestroyed = true;
     }
 
@@ -285,33 +277,61 @@ final class FillUi {
         }
     }
 
+    private final class AutofillWindowPresenter extends IAutofillWindowPresenter.Stub {
+        @Override
+        public void show(WindowManager.LayoutParams p, Rect transitionEpicenter,
+                boolean fitsSystemWindows, int layoutDirection) {
+            UiThread.getHandler().post(() -> mWindow.show(p));
+        }
+
+        @Override
+        public void hide(Rect transitionEpicenter) {
+            UiThread.getHandler().post(mWindow::hide);
+        }
+    }
+
     final class AnchoredWindow implements View.OnTouchListener {
-        private final Point mTempPoint = new Point();
-
         private final WindowManager mWm;
-
-        private final IBinder mActivityToken;
         private final View mContentView;
+        private boolean mShowing;
 
         /**
          * Constructor.
          *
-         * @param activityToken token to pass to window manager
          * @param contentView content of the window
          */
-        AnchoredWindow(IBinder activityToken, View contentView) {
+        AnchoredWindow(View contentView) {
             mWm = contentView.getContext().getSystemService(WindowManager.class);
-            mActivityToken = activityToken;
             mContentView = contentView;
+        }
+
+        /**
+         * Shows the window.
+         */
+        public void show(WindowManager.LayoutParams params) {
+            try {
+                if (!mShowing) {
+                    params.accessibilityTitle = mAccessibilityTitle;
+                    mWm.addView(mContentView, params);
+                    mContentView.setOnTouchListener(this);
+                    mShowing = true;
+                } else {
+                    mWm.updateViewLayout(mContentView, params);
+                }
+            } catch (WindowManager.BadTokenException e) {
+                Slog.i(TAG, "Filed with with token " + params.token + " gone.");
+                mCallback.onDestroy();
+            }
         }
 
         /**
          * Hides the window.
          */
         void hide() {
-            if (mContentView.isAttachedToWindow()) {
+            if (mShowing) {
                 mContentView.setOnTouchListener(null);
                 mWm.removeView(mContentView);
+                mShowing = false;
             }
         }
 
@@ -324,82 +344,9 @@ final class FillUi {
             }
             return false;
         }
-
-        public void show(int desiredWidth, int desiredHeight, Rect anchorBounds) {
-            try {
-                // TODO: temporary workaround to avoud system_server crashes.
-                unsafelyShow(desiredWidth, desiredHeight, anchorBounds);
-            } catch (RuntimeException e) {
-                Slog.w(TAG, "Error showing Anchored window: w=" + desiredWidth + ", h="
-                        + desiredHeight + ", b=" + anchorBounds, e);
-            }
-        }
-
-        private void unsafelyShow(int desiredWidth, int desiredHeight, Rect anchorBounds) {
-            final WindowManager.LayoutParams params = new WindowManager.LayoutParams();
-
-            params.setTitle("FillUi");
-            params.token = mActivityToken;
-            params.type = WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
-            params.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                    | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
-                    | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
-                    | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
-                    | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
-            params.accessibilityTitle = mAccessibilityTitle;
-
-            mWm.getDefaultDisplay().getRealSize(mTempPoint);
-            final int screenWidth = mTempPoint.x;
-            final int screenHeight = mTempPoint.y;
-
-            // Try to place the window at the start of the anchor view if
-            // there is space to fit the content, otherwise fit as much of
-            // the window as possible moving it to the left using all available
-            // screen width.
-            params.x = Math.min(anchorBounds.left, Math.max(screenWidth - desiredWidth, 0));
-            params.width = Math.min(screenWidth, desiredWidth);
-
-            // Try to fit below using all available space with top-start gravity
-            // and if that fails try to fit above using all available space with
-            // bottom-start gravity.
-            final int verticalSpaceBelow = screenHeight - anchorBounds.bottom;
-            if (desiredHeight <= verticalSpaceBelow) {
-                // Fits below bounds.
-                params.height = desiredHeight;
-                params.gravity = Gravity.TOP | Gravity.START;
-                params.y = anchorBounds.bottom;
-            } else {
-                final int verticalSpaceAbove = anchorBounds.top;
-                if (desiredHeight <= verticalSpaceAbove) {
-                    // Fits above bounds.
-                    params.height = desiredHeight;
-                    params.gravity = Gravity.BOTTOM | Gravity.START;
-                    params.y = anchorBounds.top + desiredHeight;
-                } else {
-                    // Pick above/below based on which has the most space.
-                    if (verticalSpaceBelow >= verticalSpaceAbove) {
-                        params.height = verticalSpaceBelow;
-                        params.gravity = Gravity.TOP | Gravity.START;
-                        params.y = anchorBounds.bottom;
-                    } else {
-                        params.height = verticalSpaceAbove;
-                        params.gravity = Gravity.BOTTOM | Gravity.START;
-                        params.y = anchorBounds.top + desiredHeight;
-                    }
-                }
-            }
-
-            if (!mContentView.isAttachedToWindow()) {
-                mWm.addView(mContentView, params);
-                mContentView.setOnTouchListener(this);
-            } else {
-                mWm.updateViewLayout(mContentView, params);
-            }
-        }
     }
 
     public void dump(PrintWriter pw, String prefix) {
-        pw.print(prefix); pw.print("mAnchorBounds: "); pw.println(mAnchorBounds);
         pw.print(prefix); pw.print("mCallback: "); pw.println(mCallback != null);
         pw.print(prefix); pw.print("mListView: "); pw.println(mListView);
         pw.print(prefix); pw.print("mAdapter: "); pw.println(mAdapter != null);

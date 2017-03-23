@@ -20,9 +20,11 @@ import java.util.List;
 
 import android.content.Intent;
 import android.content.IntentSender;
+import android.graphics.Rect;
 import android.os.IBinder;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillValue;
+import android.view.autofill.IAutofillWindowPresenter;
 
 /**
  * Object running in the application process and responsible for autofilling it.
@@ -38,7 +40,7 @@ oneway interface IAutoFillManagerClient {
     /**
       * Autofills the activity with the contents of a dataset.
       */
-    void autofill(in List<AutofillId> ids, in List<AutofillValue> values);
+    void autofill(in IBinder windowToken, in List<AutofillId> ids, in List<AutofillValue> values);
 
     /**
       * Authenticates a fill response or a data set.
@@ -46,7 +48,18 @@ oneway interface IAutoFillManagerClient {
     void authenticate(in IntentSender intent, in Intent fillInIntent);
 
     /**
-     * Notifies the client when the auto-fill UI changed.
+     * Requests showing the fill UI.
      */
-    void onAutofillEvent(in IBinder windowToken, in AutofillId id, int event);
+    void requestShowFillUi(in IBinder windowToken, in AutofillId id, int width,
+            int height, in Rect anchorBounds, in IAutofillWindowPresenter presenter);
+
+    /**
+     * Requests hiding the fill UI.
+     */
+    void requestHideFillUi(in IBinder windowToken, in AutofillId id);
+
+    /**
+     * Nitifies no fill UI will be shown.
+     */
+    void notifyNoFillUi(in IBinder windowToken, in AutofillId id);
 }
