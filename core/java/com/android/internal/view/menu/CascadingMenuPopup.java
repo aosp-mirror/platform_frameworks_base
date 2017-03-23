@@ -381,6 +381,7 @@ final class CascadingMenuPopup extends MenuPopup implements MenuPresenter, OnKey
 
         if (parentView != null) {
             // This menu is a cascading submenu anchored to a parent view.
+            popupWindow.setAnchorView(parentView);
             popupWindow.setTouchModal(false);
             popupWindow.setEnterTransition(null);
 
@@ -388,42 +389,30 @@ final class CascadingMenuPopup extends MenuPopup implements MenuPresenter, OnKey
             final boolean showOnRight = nextMenuPosition == HORIZ_POSITION_RIGHT;
             mLastPosition = nextMenuPosition;
 
-            // A popup anchored to mAnchorView with (0,0) offset would be shown at this position.
-            final int[] offsetOrigin = new int[2];
-            mAnchorView.getLocationOnScreen(offsetOrigin);
-            offsetOrigin[1] += mAnchorView.getHeight();
-
-            final int[] parentViewScreenLocation = new int[2];
-            parentView.getLocationOnScreen(parentViewScreenLocation);
-
-            // Translate the parent view location into the offset coordinate space.
-            // If used as horizontal/vertical offsets, these values would position the submenu
-            // at the exact same position as the parent item.
-            final int parentOffsetLeft = parentViewScreenLocation[0] - offsetOrigin[0];
-            final int parentOffsetTop = parentViewScreenLocation[1] - offsetOrigin[1];
-
-            // Adjust the horizontal offset to display the submenu to the right or to the left
+            // Compute the horizontal offset to display the submenu to the right or to the left
             // of the parent item.
             // By now, mDropDownGravity is the resolved absolute gravity, so
             // this should work in both LTR and RTL.
             final int x;
             if ((mDropDownGravity & Gravity.RIGHT) == Gravity.RIGHT) {
                 if (showOnRight) {
-                    x = parentOffsetLeft + menuWidth;
+                    x = menuWidth;
                 } else {
-                    x = parentOffsetLeft - parentView.getWidth();
+                    x = -parentView.getWidth();
                 }
             } else {
                 if (showOnRight) {
-                    x = parentOffsetLeft + parentView.getWidth();
+                    x = parentView.getWidth();
                 } else {
-                    x = parentOffsetLeft - menuWidth;
+                    x = -menuWidth;
                 }
             }
             popupWindow.setHorizontalOffset(x);
 
-            // Use the same vertical offset as the parent item.
-            popupWindow.setVerticalOffset(parentOffsetTop);
+            // Align with the top edge of the parent view (or the bottom edge when the submenu is
+            // flipped vertically).
+            popupWindow.setOverlapAnchor(true);
+            popupWindow.setVerticalOffset(0);
         } else {
             if (mHasXOffset) {
                 popupWindow.setHorizontalOffset(mXOffset);

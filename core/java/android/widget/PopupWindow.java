@@ -55,6 +55,7 @@ import android.view.ViewTreeObserver.OnScrollChangedListener;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
+import android.view.WindowManagerGlobal;
 
 import com.android.internal.R;
 
@@ -137,6 +138,7 @@ public class PopupWindow {
 
     private final int[] mTmpDrawingLocation = new int[2];
     private final int[] mTmpScreenLocation = new int[2];
+    private final int[] mTmpAppLocation = new int[2];
     private final Rect mTempRect = new Rect();
 
     private Context mContext;
@@ -241,6 +243,9 @@ public class PopupWindow {
     private boolean mIsAnchorRootAttached;
 
     private final OnScrollChangedListener mOnScrollChangedListener = this::alignToAnchor;
+
+    private final View.OnLayoutChangeListener mOnLayoutChangeListener =
+            (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> alignToAnchor();
 
     private int mAnchorXoff;
     private int mAnchorYoff;
@@ -1238,7 +1243,8 @@ public class PopupWindow {
         mIsShowing = true;
         mIsDropdown = true;
 
-        final WindowManager.LayoutParams p = createPopupLayoutParams(anchor.getWindowToken());
+        final WindowManager.LayoutParams p =
+                createPopupLayoutParams(anchor.getApplicationWindowToken());
         preparePopup(p);
 
         final boolean aboveAnchor = findDropDownPosition(anchor, p, xoff, yoff,
@@ -1547,13 +1553,21 @@ public class PopupWindow {
         }
 
         // Initially, align to the bottom-left corner of the anchor plus offsets.
+        final int[] appScreenLocation = mTmpAppLocation;
+        final View appRootView = getAppRootView(anchor);
+        appRootView.getLocationOnScreen(appScreenLocation);
+
+        final int[] screenLocation = mTmpScreenLocation;
+        anchor.getLocationOnScreen(screenLocation);
+
         final int[] drawingLocation = mTmpDrawingLocation;
-        anchor.getLocationInWindow(drawingLocation);
+        drawingLocation[0] = screenLocation[0] - appScreenLocation[0];
+        drawingLocation[1] = screenLocation[1] - appScreenLocation[1];
         outParams.x = drawingLocation[0] + xOffset;
         outParams.y = drawingLocation[1] + anchorHeight + yOffset;
 
         final Rect displayFrame = new Rect();
-        anchor.getWindowVisibleDisplayFrame(displayFrame);
+        appRootView.getWindowVisibleDisplayFrame(displayFrame);
         if (width == MATCH_PARENT) {
             width = displayFrame.right - displayFrame.left;
         }
@@ -1574,9 +1588,6 @@ public class PopupWindow {
             outParams.x -= width - anchorWidth;
         }
 
-        final int[] screenLocation = mTmpScreenLocation;
-        anchor.getLocationOnScreen(screenLocation);
-
         // First, attempt to fit the popup vertically without resizing.
         final boolean fitsVertical = tryFitVertical(outParams, yOffset, height,
                 anchorHeight, drawingLocation[1], screenLocation[1], displayFrame.top,
@@ -1595,7 +1606,9 @@ public class PopupWindow {
                     scrollY + height + anchorHeight + yOffset);
             if (allowScroll && anchor.requestRectangleOnScreen(r, true)) {
                 // Reset for the new anchor position.
-                anchor.getLocationInWindow(drawingLocation);
+                anchor.getLocationOnScreen(screenLocation);
+                drawingLocation[0] = screenLocation[0] - appScreenLocation[0];
+                drawingLocation[1] = screenLocation[1] - appScreenLocation[1];
                 outParams.x = drawingLocation[0] + xOffset;
                 outParams.y = drawingLocation[1] + anchorHeight + yOffset;
 
@@ -1793,7 +1806,8 @@ public class PopupWindow {
         Rect displayFrame = null;
         final Rect visibleDisplayFrame = new Rect();
 
-        anchor.getWindowVisibleDisplayFrame(visibleDisplayFrame);
+        final View appView = getAppRootView(anchor);
+        appView.getWindowVisibleDisplayFrame(visibleDisplayFrame);
         if (ignoreBottomDecorations) {
             // In the ignore bottom decorations case we want to
             // still respect all other decorations so we use the inset visible
@@ -2240,6 +2254,7 @@ public class PopupWindow {
         final View anchorRoot = mAnchorRoot != null ? mAnchorRoot.get() : null;
         if (anchorRoot != null) {
             anchorRoot.removeOnAttachStateChangeListener(mOnAnchorRootDetachedListener);
+            anchorRoot.removeOnLayoutChangeListener(mOnLayoutChangeListener);
         }
 
         mAnchor = null;
@@ -2258,6 +2273,7 @@ public class PopupWindow {
 
         final View anchorRoot = anchor.getRootView();
         anchorRoot.addOnAttachStateChangeListener(mOnAnchorRootDetachedListener);
+        anchorRoot.addOnLayoutChangeListener(mOnLayoutChangeListener);
 
         mAnchor = new WeakReference<>(anchor);
         mAnchorRoot = new WeakReference<>(anchorRoot);
@@ -2279,6 +2295,15 @@ public class PopupWindow {
                     p.width, p.height, mAnchoredGravity, false));
             update(p.x, p.y, -1, -1, true);
         }
+    }
+
+    private View getAppRootView(View anchor) {
+        final View appWindowView = WindowManagerGlobal.getInstance().getWindowView(
+                anchor.getApplicationWindowToken());
+        if (appWindowView != null) {
+            return appWindowView;
+        }
+        return anchor.getRootView();
     }
 
     private class PopupDecorView extends FrameLayout {
