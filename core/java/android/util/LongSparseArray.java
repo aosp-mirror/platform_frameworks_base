@@ -315,6 +315,7 @@ public class LongSparseArray<E> implements Cloneable {
      * and that multiple keys can map to the same value and this will
      * find only one of them.
      * <p>Note also that this method uses {@code equals} unlike {@code indexOfValue}.
+     * @hide
      */
     public int indexOfValueByValue(E value) {
         if (mGarbage) {
