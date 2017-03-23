@@ -20,6 +20,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.nullable;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
@@ -148,8 +149,8 @@ public class AppRestrictionsHelperTest extends BaseTest {
                 0 /*installFlags*/, PackageManager.INSTALL_REASON_UNKNOWN);
         verify(mIpm, times(1)).setApplicationHiddenSettingAsUser("app2", false, testUserId);
         verify(mockListener).onDisableUiForPackage("app2");
-        verify(mPm, times(1)).deletePackageAsUser(eq("app3"), any(IPackageDeleteObserver.class),
-                anyInt(), eq(mTestUser.getIdentifier()));
+        verify(mPm, times(1)).deletePackageAsUser(eq("app3"),
+                nullable(IPackageDeleteObserver.class), anyInt(), eq(mTestUser.getIdentifier()));
     }
 
     private void addsystemImes(String[] defaultImes, String[] otherImes) throws
