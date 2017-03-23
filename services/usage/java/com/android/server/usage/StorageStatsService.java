@@ -46,6 +46,7 @@ import android.provider.Settings;
 import android.text.format.DateUtils;
 import android.util.ArrayMap;
 import android.util.Slog;
+import android.util.SparseLongArray;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
@@ -58,7 +59,6 @@ import com.android.server.pm.Installer.InstallerException;
 import com.android.server.storage.CacheQuotaStrategy;
 
 import java.io.IOException;
-import java.util.Map;
 
 public class StorageStatsService extends IStorageStatsManager.Stub {
     private static final String TAG = "StorageStatsService";
@@ -67,6 +67,7 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
     private static final String PROP_VERIFY_STORAGE = "fw.verify_storage";
 
     private static final long DELAY_IN_MILLIS = 30 * DateUtils.SECOND_IN_MILLIS;
+    private static final long DEFAULT_QUOTA = 64 * TrafficStats.MB_IN_BYTES;
 
     public static class Lifecycle extends SystemService {
         private StorageStatsService mService;
@@ -87,7 +88,7 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
     private final UserManager mUser;
     private final PackageManager mPackage;
     private final StorageManager mStorage;
-    private final Map<String, Map<Integer, Long>> mCacheQuotas;
+    private final ArrayMap<String, SparseLongArray> mCacheQuotas;
 
     private final Installer mInstaller;
     private final H mHandler;
@@ -193,14 +194,11 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
         enforcePermission(Binder.getCallingUid(), callingPackage);
 
         if (mCacheQuotas.containsKey(volumeUuid)) {
-            // TODO: Change to SparseLongArray.
-            Map<Integer, Long> uidMap = mCacheQuotas.get(volumeUuid);
-            if (uidMap.containsKey(uid)) {
-                return uidMap.get(uid);
-            }
+            final SparseLongArray uidMap = mCacheQuotas.get(volumeUuid);
+            return uidMap.get(uid, DEFAULT_QUOTA);
         }
 
-        return 64 * TrafficStats.MB_IN_BYTES;
+        return DEFAULT_QUOTA;
     }
 
     @Override

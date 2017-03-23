@@ -1680,7 +1680,7 @@ public class StorageManager {
                 "Well this is embarassing; we can't allocate " + bytes + " for " + file);
     }
 
-    private static final String XATTR_CACHE_ATOMIC = "user.cache_atomic";
+    private static final String XATTR_CACHE_GROUP = "user.cache_group";
     private static final String XATTR_CACHE_TOMBSTONE = "user.cache_tombstone";
 
     /** {@hide} */
@@ -1723,7 +1723,7 @@ public class StorageManager {
 
     /**
      * Enable or disable special cache behavior that treats this directory and
-     * its contents as an atomic unit.
+     * its contents as an entire group.
      * <p>
      * When enabled and this directory is considered for automatic deletion by
      * the OS, all contained files will either be deleted together, or not at
@@ -1738,16 +1738,28 @@ public class StorageManager {
      * This behavior can only be set on a directory, and it applies recursively
      * to all contained files and directories.
      */
-    public void setCacheBehaviorAtomic(File path, boolean atomic) throws IOException {
-        setCacheBehavior(path, XATTR_CACHE_ATOMIC, atomic);
+    public void setCacheBehaviorGroup(File path, boolean group) throws IOException {
+        setCacheBehavior(path, XATTR_CACHE_GROUP, group);
     }
 
     /**
      * Read the current value set by
-     * {@link #setCacheBehaviorAtomic(File, boolean)}.
+     * {@link #setCacheBehaviorGroup(File, boolean)}.
      */
+    public boolean isCacheBehaviorGroup(File path) throws IOException {
+        return isCacheBehavior(path, XATTR_CACHE_GROUP);
+    }
+
+    /** @removed */
+    @Deprecated
+    public void setCacheBehaviorAtomic(File path, boolean atomic) throws IOException {
+        setCacheBehaviorGroup(path, atomic);
+    }
+
+    /** @removed */
+    @Deprecated
     public boolean isCacheBehaviorAtomic(File path) throws IOException {
-        return isCacheBehavior(path, XATTR_CACHE_ATOMIC);
+        return isCacheBehaviorGroup(path);
     }
 
     /**
