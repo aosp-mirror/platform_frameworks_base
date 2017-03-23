@@ -322,6 +322,8 @@ public class StaticLayout extends Layout {
 
         /**
          * Enables or disables paragraph justification. The default value is disabled (false).
+         * If the last line is too short for justification, the last line will be displayed with
+         * the alignment set by {@link #setAlignment}.
          *
          * @param justify true for enabling and false for disabling paragraph justification.
          * @return this builder, useful for chaining.
