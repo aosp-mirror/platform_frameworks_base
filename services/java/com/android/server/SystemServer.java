@@ -99,6 +99,7 @@ import com.android.server.power.ShutdownThread;
 import com.android.server.restrictions.RestrictionsManagerService;
 import com.android.server.retaildemo.RetailDemoModeService;
 import com.android.server.security.KeyAttestationApplicationIdProviderService;
+import com.android.server.security.KeyChainSystemService;
 import com.android.server.soundtrigger.SoundTriggerService;
 import com.android.server.statusbar.StatusBarManagerService;
 import com.android.server.storage.DeviceStorageMonitorService;
@@ -725,6 +726,10 @@ public final class SystemServer {
             traceBeginAndSlog("StartKeyAttestationApplicationIdProviderService");
             ServiceManager.addService("sec_key_att_app_id_provider",
                     new KeyAttestationApplicationIdProviderService(context));
+            traceEnd();
+
+            traceBeginAndSlog("StartKeyChainSystemService");
+            mSystemServiceManager.startService(KeyChainSystemService.class);
             traceEnd();
 
             traceBeginAndSlog("StartSchedulingPolicyService");
