@@ -50,7 +50,6 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
-import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.Environment;
@@ -69,20 +68,18 @@ import android.os.storage.IStorageManager;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
-import android.text.TextUtils;
+import android.system.StructStat;
 import android.util.AndroidRuntimeException;
 import android.util.ArrayMap;
-import android.util.IntArray;
 import android.util.Log;
 import android.util.Slog;
-import android.util.SparseBooleanArray;
 import android.view.Display;
 import android.view.DisplayAdjustments;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
 
-import dalvik.system.PathClassLoader;
+import libcore.io.Memory;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -91,8 +88,7 @@ import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.nio.ByteOrder;
 import java.util.Objects;
 
 class ReceiverRestrictedContext extends ContextWrapper {
@@ -145,6 +141,9 @@ class ReceiverRestrictedContext extends ContextWrapper {
 class ContextImpl extends Context {
     private final static String TAG = "ContextImpl";
     private final static boolean DEBUG = false;
+
+    private static final String XATTR_INODE_CACHE = "user.inode_cache";
+    private static final String XATTR_INODE_CODE_CACHE = "user.inode_code_cache";
 
     /**
      * Map from package name, to preference name, to cached preferences.
@@ -538,15 +537,15 @@ class ContextImpl extends Context {
      * Common-path handling of app data dir creation
      */
     private static File ensurePrivateDirExists(File file) {
-        return ensurePrivateDirExists(file, 0771, -1);
+        return ensurePrivateDirExists(file, 0771, -1, null);
     }
 
-    private static File ensurePrivateCacheDirExists(File file) {
+    private static File ensurePrivateCacheDirExists(File file, String xattr) {
         final int gid = UserHandle.getCacheAppGid(Process.myUid());
-        return ensurePrivateDirExists(file, 02771, gid);
+        return ensurePrivateDirExists(file, 02771, gid, xattr);
     }
 
-    private static File ensurePrivateDirExists(File file, int mode, int gid) {
+    private static File ensurePrivateDirExists(File file, int mode, int gid, String xattr) {
         if (!file.exists()) {
             final String path = file.getAbsolutePath();
             try {
@@ -560,6 +559,17 @@ class ContextImpl extends Context {
                     // We must have raced with someone; that's okay
                 } else {
                     Log.w(TAG, "Failed to ensure " + file + ": " + e.getMessage());
+                }
+            }
+
+            if (xattr != null) {
+                try {
+                    final StructStat stat = Os.stat(file.getAbsolutePath());
+                    final byte[] value = new byte[8];
+                    Memory.pokeLong(value, 0, stat.st_ino, ByteOrder.nativeOrder());
+                    Os.setxattr(file.getParentFile().getAbsolutePath(), xattr, value, 0);
+                } catch (ErrnoException e) {
+                    Log.w(TAG, "Failed to update " + xattr + ": " + e.getMessage());
                 }
             }
         }
@@ -623,7 +633,7 @@ class ContextImpl extends Context {
             if (mCacheDir == null) {
                 mCacheDir = new File(getDataDir(), "cache");
             }
-            return ensurePrivateCacheDirExists(mCacheDir);
+            return ensurePrivateCacheDirExists(mCacheDir, XATTR_INODE_CACHE);
         }
     }
 
@@ -633,7 +643,7 @@ class ContextImpl extends Context {
             if (mCodeCacheDir == null) {
                 mCodeCacheDir = new File(getDataDir(), "code_cache");
             }
-            return ensurePrivateCacheDirExists(mCodeCacheDir);
+            return ensurePrivateCacheDirExists(mCodeCacheDir, XATTR_INODE_CODE_CACHE);
         }
     }
 
