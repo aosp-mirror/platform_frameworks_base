@@ -196,7 +196,8 @@ public final class KeyChain {
      *
      * @deprecated Use {@link #ACTION_KEYCHAIN_CHANGED}, {@link #ACTION_TRUST_STORE_CHANGED} or
      * {@link #ACTION_KEY_ACCESS_CHANGED}. Apps that target a version higher than
-     * {@link Build.VERSION_CODES#N_MR1} will not receive this broadcast.
+     * {@link Build.VERSION_CODES#N_MR1} will only receive this broadcast if they register for it
+     * at runtime.
      */
     public static final String ACTION_STORAGE_CHANGED = "android.security.STORAGE_CHANGED";
 
