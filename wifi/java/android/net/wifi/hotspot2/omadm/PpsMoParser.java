@@ -144,6 +144,8 @@ public final class PpsMoParser {
     private static final String NODE_TIME_LIMIT = "TimeLimit";
     private static final String NODE_USAGE_TIME_PERIOD = "UsageTimePeriod";
     private static final String NODE_CREDENTIAL_PRIORITY = "CredentialPriority";
+    private static final String NODE_EXTENSION = "Extension";
+
     /**
      * Fields under HomeSP subtree.
      */
@@ -628,6 +630,10 @@ public final class PpsMoParser {
                     break;
                 case NODE_CREDENTIAL_PRIORITY:
                     config.setCredentialPriority(parseInteger(getPpsNodeValue(child)));
+                    break;
+                case NODE_EXTENSION:
+                    // All vendor specific information will be under this node.
+                    Log.d(TAG, "Ignore Extension node for vendor specific information");
                     break;
                 default:
                     throw new ParsingException("Unknown node: " + child.getName());
