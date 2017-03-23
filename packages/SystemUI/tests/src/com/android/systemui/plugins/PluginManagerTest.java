@@ -29,13 +29,18 @@ import android.net.Uri;
 import android.support.test.annotation.UiThreadTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
+import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper;
+import android.testing.TestableLooper.RunWithLooper;
 
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
+import com.android.systemui.Dependency;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.annotations.ProvidesInterface;
 import com.android.systemui.plugins.PluginInstanceManager.PluginInfo;
 import com.android.systemui.plugins.PluginManagerImpl.PluginInstanceManagerFactory;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -45,7 +50,8 @@ import org.mockito.Mockito;
 import java.lang.Thread.UncaughtExceptionHandler;
 
 @SmallTest
-@RunWith(AndroidJUnit4.class)
+@RunWith(AndroidTestingRunner.class)
+@RunWithLooper
 public class PluginManagerTest extends SysuiTestCase {
 
     private PluginInstanceManagerFactory mMockFactory;
@@ -59,6 +65,8 @@ public class PluginManagerTest extends SysuiTestCase {
 
     @Before
     public void setup() throws Exception {
+        mDependency.injectTestDependency(Dependency.BG_LOOPER,
+                TestableLooper.get(this).getLooper());
         mRealExceptionHandler = Thread.getDefaultUncaughtExceptionHandler();
         mMockExceptionHandler = mock(UncaughtExceptionHandler.class);
         mMockFactory = mock(PluginInstanceManagerFactory.class);
@@ -72,7 +80,7 @@ public class PluginManagerTest extends SysuiTestCase {
         mMockListener = mock(PluginListener.class);
     }
 
-    @UiThreadTest
+    @RunWithLooper(setAsMainLooper = true)
     @Test
     public void testOneShot() {
         Plugin mockPlugin = mock(Plugin.class);
