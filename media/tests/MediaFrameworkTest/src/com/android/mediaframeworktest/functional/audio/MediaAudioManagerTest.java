@@ -161,13 +161,11 @@ public class MediaAudioManagerTest extends ActivityInstrumentationTestCase2<Medi
 
     private void setupAudioFocusListener() {
         mAudioFocusListener = new AudioFocusListener();
-        mAudioManager.registerAudioFocusListener(mAudioFocusListener);
     }
 
     private void cleanupAudioFocusListener() {
         // clean up
         mAudioManager.abandonAudioFocus(mAudioFocusListener);
-        mAudioManager.unregisterAudioFocusListener(mAudioFocusListener);
     }
 
     //----------------------------------
@@ -245,6 +243,5 @@ public class MediaAudioManagerTest extends ActivityInstrumentationTestCase2<Medi
                 mAudioFocusListener.mFocusChangeCounter + " AudioFocus changes",
                 mAudioFocusListener.mFocusChangeCounter == ITERATIONS * 2);
         mAudioManager.abandonAudioFocus(mAudioFocusListener);
-        mAudioManager.unregisterAudioFocusListener(mAudioFocusListener);
     }
  }
