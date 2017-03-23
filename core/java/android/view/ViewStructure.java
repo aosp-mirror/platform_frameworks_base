@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.os.LocaleList;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillValue;
 
@@ -380,4 +381,9 @@ public abstract class ViewStructure {
      * </ol>
      */
     public abstract void setUrl(String url);
+
+    /**
+     * Sets the the list of locales associated with this node.
+     */
+    public abstract void setLocaleList(LocaleList localeList);
 }
