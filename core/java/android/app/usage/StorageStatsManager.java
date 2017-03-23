@@ -16,6 +16,7 @@
 
 package android.app.usage;
 
+import android.annotation.TestApi;
 import android.annotation.WorkerThread;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -48,6 +49,7 @@ public class StorageStatsManager {
     }
 
     /** {@hide} */
+    @TestApi
     public boolean isQuotaSupported(String volumeUuid) {
         try {
             return mService.isQuotaSupported(volumeUuid, mContext.getOpPackageName());

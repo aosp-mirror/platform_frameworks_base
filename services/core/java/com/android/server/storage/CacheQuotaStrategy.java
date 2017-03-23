@@ -44,6 +44,7 @@ import android.text.format.DateUtils;
 import android.util.ArrayMap;
 import android.util.Pair;
 import android.util.Slog;
+import android.util.SparseLongArray;
 import android.util.Xml;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -87,14 +88,14 @@ public class CacheQuotaStrategy implements RemoteCallback.OnResultListener {
     private final Context mContext;
     private final UsageStatsManagerInternal mUsageStats;
     private final Installer mInstaller;
-    private final Map<String, Map<Integer, Long>> mQuotaMap;
+    private final ArrayMap<String, SparseLongArray> mQuotaMap;
     private ServiceConnection mServiceConnection;
     private ICacheQuotaService mRemoteService;
     private AtomicFile mPreviousValuesFile;
 
     public CacheQuotaStrategy(
             Context context, UsageStatsManagerInternal usageStatsManager, Installer installer,
-            Map<String, Map<Integer, Long>> quotaMap) {
+            ArrayMap<String, SparseLongArray> quotaMap) {
         mContext = Preconditions.checkNotNull(context);
         mUsageStats = Preconditions.checkNotNull(usageStatsManager);
         mInstaller = Preconditions.checkNotNull(installer);
@@ -241,9 +242,9 @@ public class CacheQuotaStrategy implements RemoteCallback.OnResultListener {
     }
 
     private void insertIntoQuotaMap(String volumeUuid, int userId, int appId, long quota) {
-        Map<Integer, Long> volumeMap = mQuotaMap.get(volumeUuid);
+        SparseLongArray volumeMap = mQuotaMap.get(volumeUuid);
         if (volumeMap == null) {
-            volumeMap = new ArrayMap<>();
+            volumeMap = new SparseLongArray();
             mQuotaMap.put(volumeUuid, volumeMap);
         }
         volumeMap.put(UserHandle.getUid(userId, appId), quota);
