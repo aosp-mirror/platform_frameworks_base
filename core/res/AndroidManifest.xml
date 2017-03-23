@@ -525,6 +525,7 @@
     <protected-broadcast android:name="com.android.server.wm.ACTION_REVOKE_SYSTEM_ALERT_WINDOW_PERMISSION" />
 
     <protected-broadcast android:name="android.content.pm.action.SESSION_COMMITTED" />
+    <protected-broadcast android:name="android.os.action.USER_RESTRICTIONS_CHANGED" />
 
     <!-- ====================================================================== -->
     <!--                          RUNTIME PERMISSIONS                           -->
