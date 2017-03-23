@@ -358,10 +358,10 @@ public class Typeface {
                         FileChannel.MapMode.READ_ONLY, 0, fontSize);
                 int style = result.getStyle();
                 int weight = (style & BOLD) != 0 ? 700 : 400;
-                // TODO: this method should be
-                // create(fd, ttcIndex, fontVariationSettings, style).
+                final ArrayList<FontConfig.Axis> axes = FontListParser.parseFontVariationSettings(
+                        result.getFontVariationSettings());
                 if (!fontFamily.addFontFromBuffer(fontBuffer, result.getTtcIndex(),
-                                null, weight,
+                                axes.toArray(new FontConfig.Axis[axes.size()]), weight,
                                 (style & ITALIC) == 0 ? Builder.NORMAL : Builder.ITALIC)) {
                     Log.e(TAG, "Error creating font " + request.getQuery());
                     callback.onTypefaceRequestFailed(
