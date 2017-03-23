@@ -18,6 +18,8 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:clipChildren="false"
+    android:clipToPadding="false"
     android:minHeight="48dp"
     android:paddingTop="8dp">
     <LinearLayout
@@ -26,6 +28,8 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
+        android:clipChildren="false"
+        android:clipToPadding="false"
         android:orientation="horizontal">
 
         <TextView
@@ -35,6 +39,8 @@
             android:clickable="false"
             android:maxLines="2"
             android:padding="0dp"
+            android:gravity="center"
+            android:ellipsize="end"
             android:textAppearance="@style/TextAppearance.QS.TileLabel"
             android:textColor="?android:attr/textColorPrimary"/>
 
