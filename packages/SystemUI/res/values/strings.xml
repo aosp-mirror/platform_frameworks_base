@@ -190,7 +190,8 @@
     <!-- Notification text displayed when we fail to save a screenshot. [CHAR LIMIT=100] -->
     <string name="screenshot_failed_to_save_text">Can\'t save screenshot due to limited storage space.</string>
     <!-- Notification text displayed when we fail to take a screenshot. [CHAR LIMIT=100] -->
-    <string name="screenshot_failed_to_capture_text">Taking screenshots is not allowed by the app or your organization.</string>
+    <string name="screenshot_failed_to_capture_text">Taking screenshots isn\'t allowed by the app or
+        your organization</string>
 
     <!-- Title for the USB function chooser in UsbPreferenceActivity. [CHAR LIMIT=30] -->
     <string name="usb_preference_title">USB file transfer options</string>
@@ -1115,7 +1116,9 @@
     <string name="legacy_vpn_name">VPN</string>
 
     <!-- Monitoring dialog text for single app (no profile or device owner) [CHAR LIMIT=400] -->
-    <string name="monitoring_description_app">You\'re connected to <xliff:g id="application">%1$s</xliff:g>, which can monitor your network activity including emails, apps, and websites.</string>
+    <string name="monitoring_description_app">You\'re connected to
+        <xliff:g id="application">%1$s</xliff:g>, which can monitor your network activity,
+        including emails, apps, and websites.</string>
 
     <!-- Monitoring dialog text for single app (inside personal profile) [CHAR LIMIT=400] -->
     <string name="monitoring_description_app_personal">You\'re connected to <xliff:g id="application">%1$s</xliff:g>, which can monitor your personal network activity, including emails, apps, and websites.</string>
@@ -1124,10 +1127,18 @@
     <string name="branded_monitoring_description_app_personal">You\'re connected to <xliff:g id="application">%1$s</xliff:g>, which can monitor your personal network activity, including emails, apps, and websites.</string>
 
     <!-- Monitoring dialog text for single app (inside work profile) [CHAR LIMIT=400] -->
-    <string name="monitoring_description_app_work">Your work profile is managed by <xliff:g id="organization">%1$s</xliff:g>. It is connected to <xliff:g id="application">%2$s</xliff:g>, which can monitor your work network activity, including emails, apps, and websites.\n\nFor more information, contact your admin.</string>
+    <string name="monitoring_description_app_work">Your work profile is managed by
+        <xliff:g id="organization">%1$s</xliff:g>. The profile is connected to
+        <xliff:g id="application">%2$s</xliff:g>, which can monitor your work network activity,
+        including emails, apps, and websites.\n\nFor more information, contact your admin.</string>
 
     <!-- Monitoring dialog text for multiple apps (in personal and work profiles) [CHAR LIMIT=400] -->
-    <string name="monitoring_description_app_personal_work">Your work profile is managed by <xliff:g id="organization">%1$s</xliff:g>. It is connected to <xliff:g id="application_work">%2$s</xliff:g>, which can monitor your work network activity, including emails, apps, and websites.\n\nYou\'re also connected to <xliff:g id="application_personal">%3$s</xliff:g>, which can monitor your personal network activity.</string>
+    <string name="monitoring_description_app_personal_work">Your work profile is managed by
+        <xliff:g id="organization">%1$s</xliff:g>. The profile is connected to
+        <xliff:g id="application_work">%2$s</xliff:g>, which can monitor your work network activity,
+        including emails, apps, and websites.\n\nYou\'re also connected to
+        <xliff:g id="application_personal">%3$s</xliff:g>, which can monitor your personal network
+        activity.</string>
 
     <!-- Indication on the keyguard that appears when the user disables trust agents until the next time they unlock manually. [CHAR LIMIT=NONE] -->
     <string name="keyguard_indication_trust_disabled">Device will stay locked until you manually unlock</string>

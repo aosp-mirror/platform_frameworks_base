@@ -370,7 +370,7 @@
     <string name="ssl_ca_cert_noti_by_unknown">By an unknown third party</string>
     <!-- Content text for a notification. The Title of the notification is "ssl_ca_cert_warning".
          This indicates that an unspecified administrator is doing the monitoring. [CHAR LIMIT=100]-->
-    <string name="ssl_ca_cert_noti_by_administrator">By your work profile administrator</string>
+    <string name="ssl_ca_cert_noti_by_administrator">By your work profile admin</string>
     <!-- Content text for a notification. The Title of the notification is "ssl_ca_cert_warning".
          This indicates who is doing the monitoring. [CHAR LIMIT=100]-->
     <string name="ssl_ca_cert_noti_managed">By <xliff:g id="managing_domain">%s</xliff:g></string>
@@ -381,15 +381,15 @@
     <!-- Content text for a notification. The Title of the notification is "work_profile_deleted",
          i.e. "Work profile deleted". This says that the profile is deleted by the system as a result of
          the current profile owner gone missing. [CHAR LIMIT=100]-->
-    <string name="work_profile_deleted_description">Work profile deleted due to missing admin app.</string>
+    <string name="work_profile_deleted_description">Work profile deleted due to missing admin app</string>
     <!-- Content text for an expanded notification. The Title of the notification is "work_profile_deleted",
          i.e. "Work profile deleted". This further explains that the profile is deleted by the system
          as a result of the current profile admin gone missing. [CHAR LIMIT=NONE]-->
     <string name="work_profile_deleted_details">The work profile admin app is either missing or corrupted.
-         As a result, your work profile and related data have been deleted. Contact your administrator for assistance.</string>
+         As a result, your work profile and related data have been deleted. Contact your admin for assistance.</string>
     <!-- Content text for a notification. The Title of the notification is "work_profile_deleted",
         This indicates that a work profile has been deleted. [CHAR LIMIT=NONE]-->
-    <string name="work_profile_deleted_description_dpm_wipe">Your work profile is no longer available on this device.</string>
+    <string name="work_profile_deleted_description_dpm_wipe">Your work profile is no longer available on this device</string>
 
     <!-- Content title for a notification. This notification indicates that the device is managed
          and network logging was activated by a device owner. [CHAR LIMIT=NONE]-->
@@ -403,8 +403,8 @@
     <string name="factory_reset_warning">Your device will be erased</string>
     <!-- Text message in the factory reset warning dialog. This says that the the device admin app
          is missing or corrupted. As a result the device will be erased. [CHAR LIMIT=NONE]-->
-    <string name="factory_reset_message">The admin app is missing components or corrupted, and can\'t be used.
-         Your device will now be erased. Contact your administrator for assistance.</string>
+    <string name="factory_reset_message">The admin app can\'t be used. Your device will now be
+        erased.\n\nIf you have questions, contact your organization's admin.</string>
 
     <!-- Display name for any time a piece of data refers to the owner of the phone. For example, this could be used in place of the phone's phone number. -->
     <string name="me">Me</string>
@@ -1460,7 +1460,7 @@
     <!-- Description of policy access to limiting the user's password choices -->
     <string name="policydesc_limitPassword">Control the length and the characters allowed in screen lock passwords and PINs.</string>
     <!-- Title of policy access to watch user login attempts -->
-    <string name="policylab_watchLogin">Monitor screen-unlock attempts</string>
+    <string name="policylab_watchLogin">Monitor screen unlock attempts</string>
     <!-- Description of policy access to watch user login attempts -->
     <string name="policydesc_watchLogin" product="tablet">Monitor the number of incorrect passwords
     typed when unlocking the screen, and lock the tablet or erase all the tablet\'s
@@ -2385,7 +2385,7 @@
          It is also used by the home screen's search "widget". It should be short -->
     <string name="search_go">Search</string>
     <!-- Default hint text for the system-wide search UI's text field. [CHAR LIMIT=30] -->
-    <string name="search_hint">Search…</string>
+    <string name="search_hint">Search\u2026</string>
     <!-- SearchView accessibility description for search button [CHAR LIMIT=NONE] -->
     <string name="searchview_description_search">Search</string>
     <!-- SearchView accessibility description for search text field [CHAR LIMIT=NONE] -->
@@ -3135,7 +3135,8 @@
     <!-- Title of notification shown to indicate that bug report is still being collected after sharing was accepted. -->
     <string name="sharing_remote_bugreport_notification_title">Sharing bug report\u2026</string>
     <!-- Message of a notification shown to ask for user consent for sharing a bugreport that was requested remotely by the IT administrator. -->
-    <string name="share_remote_bugreport_notification_message_finished">Your IT admin requested a bug report to help troubleshoot this device. Apps and data may be shared.</string>
+    <string name="share_remote_bugreport_notification_message_finished">Your admin requested a bug
+        report to help troubleshoot this device. Apps and data may be shared.</string>
     <!-- Acceptance label of notification shown to ask for user consent for sharing the remote bugreport. -->
     <string name="share_remote_bugreport_action">SHARE</string>
     <!-- Decline label of notification shown to ask for user consent for sharing the remote bugreport. -->
@@ -3966,7 +3967,7 @@
     <!-- Error message title [CHAR LIMIT=35] -->
     <string name="error_message_title">Error</string>
     <!-- Message informing user that the change was disallowed by an administrator. [CHAR LIMIT=none] -->
-    <string name="error_message_change_not_allowed">This change isn\'t allowed by your administrator</string>
+    <string name="error_message_change_not_allowed">This change isn\'t allowed by your admin</string>
     <!-- Message informing user that the requested activity could not be found [CHAR LIMIT=none] -->
     <string name="app_not_found">No application found to handle this action</string>
     <string name="revoke">Revoke</string>
@@ -4169,7 +4170,7 @@
     <string name="print_service_installed_message">Tap to enable</string>
 
     <!-- PIN entry dialog title for entering the administrator PIN [CHAR LIMIT=none] -->
-    <string name="restr_pin_enter_admin_pin">Enter administrator PIN</string>
+    <string name="restr_pin_enter_admin_pin">Enter admin PIN</string>
     <!-- PIN entry dialog label/hint for PIN [CHAR LIMIT=none] -->
     <string name="restr_pin_enter_pin">Enter PIN</string>
     <!-- PIN entry dialog label/hint for incorrect PIN entry [CHAR LIMIT=none] -->
@@ -4255,9 +4256,11 @@
     <string name="date_picker_day_typeface">sans-serif-medium</string>
 
     <!-- Notify use that they are in Lock-to-app -->
-    <string name="lock_to_app_toast">To unpin this screen, touch &amp; hold Back and Overview buttons.</string>
+    <string name="lock_to_app_toast">To unpin this screen, touch &amp; hold Back and Overview
+        buttons</string>
+
     <!-- Notify user that they are locked in lock-to-app mode -->
-    <string name="lock_to_app_toast_locked">App is pinned: Unpinning isn\'t allowed on this device.</string>
+    <string name="lock_to_app_toast_locked">This app can\'t be unpinned</string>
     <!-- Starting lock-to-app indication. -->
     <string name="lock_to_app_start">Screen pinned</string>
     <!-- Exting lock-to-app indication. -->
@@ -4271,11 +4274,11 @@
     <string name="lock_to_app_unlock_password">Ask for password before unpinning</string>
 
     <!-- Notification shown when device owner silently installs a package [CHAR LIMIT=NONE] -->
-    <string name="package_installed_device_owner">Installed by your administrator</string>
+    <string name="package_installed_device_owner">Installed by your admin</string>
     <!-- Notification shown when device owner silently updates a package [CHAR LIMIT=NONE] -->
-    <string name="package_updated_device_owner">Updated by your administrator</string>
+    <string name="package_updated_device_owner">Updated by your admin</string>
     <!-- Notification shown when device owner silently deletes a package [CHAR LIMIT=NONE] -->
-    <string name="package_deleted_device_owner">Deleted by your administrator</string>
+    <string name="package_deleted_device_owner">Deleted by your admin</string>
 
     <!-- [CHAR_LIMIT=NONE] Battery saver: Feature description -->
     <string name="battery_saver_description">To help improve battery life, battery saver reduces your device’s performance and limits vibration, location services, and most background data. Email, messaging, and other apps that rely on syncing may not update unless you open them.\n\nBattery saver turns off automatically when your device is charging.</string>
@@ -4462,9 +4465,10 @@
     <string name="locale_search_menu">Search</string>
 
     <!-- Title for dialog displayed when work profile is turned off. [CHAR LIMIT=30] -->
-    <string name="work_mode_off_title">Work mode is OFF</string>
+    <string name="work_mode_off_title">Turn on work mode?</string>
     <!-- Message displayed in dialog when work profile is turned off. [CHAR LIMIT=NONE] -->
-    <string name="work_mode_off_message">Allow work profile to function, including apps, background sync, and related features.</string>
+    <string name="work_mode_off_message">This will turn on your work profile, including apps,
+        background sync, and related features</string>
     <!-- Title for button to turn on work profile. [CHAR LIMIT=NONE] -->
     <string name="work_mode_turn_on">Turn on</string>
 

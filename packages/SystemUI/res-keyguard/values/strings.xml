@@ -327,7 +327,7 @@
 
     <!-- An explanation text that the credential needs to be entered because a device admin has
     locked the device. [CHAR LIMIT=80] -->
-    <string name="kg_prompt_reason_device_admin">Device administrator locked device</string>
+    <string name="kg_prompt_reason_device_admin">Device locked by admin</string>
 
     <!-- An explanation text that the credential needs to be entered because the user has clicked
      the force lock button. [CHAR LIMIT=80] -->

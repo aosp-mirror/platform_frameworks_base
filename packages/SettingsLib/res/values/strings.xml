@@ -356,7 +356,7 @@
     </string-array>
 
    <!-- Title for profile selection dialog [CHAR LIMIT=30] -->
-   <string name="choose_profile">Choose Profile</string>
+   <string name="choose_profile">Choose profile</string>
 
     <!-- Header for items under the personal user [CHAR LIMIT=30] -->
     <string name="category_personal">Personal</string>
@@ -850,9 +850,9 @@
     <string name="disabled_by_admin_summary_text">Controlled by admin</string>
 
     <!-- Summary for switch preference to denote it is switched on [CHAR LIMIT=50] -->
-    <string name="enabled_by_admin">Enabled by administrator</string>
+    <string name="enabled_by_admin">Enabled by admin</string>
     <!-- Summary for switch preference to denote it is switched off [CHAR LIMIT=50] -->
-    <string name="disabled_by_admin">Disabled by administrator</string>
+    <string name="disabled_by_admin">Disabled by admin</string>
 
     <!-- Option in navigation drawer that leads to Settings main screen [CHAR LIMIT=30] -->
     <string name="home">Settings Home</string>
