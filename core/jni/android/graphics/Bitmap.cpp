@@ -621,7 +621,7 @@ static void ToColor_SA8(SkColor dst[], const void* src, int width, SkColorTable*
     const uint8_t* s = (const uint8_t*)src;
     do {
         uint8_t c = *s++;
-        *dst++ = SkColorSetARGB(c, c, c, c);
+        *dst++ = SkColorSetARGB(c, 0, 0, 0);
     } while (--width != 0);
 }
 
@@ -727,6 +727,50 @@ static jobject Bitmap_creator(JNIEnv* env, jobject, jintArray jColors,
     return createBitmap(env, nativeBitmap.release(), getPremulBitmapCreateFlags(isMutable));
 }
 
+static bool bitmapCopyTo(SkBitmap* dst, SkColorType dstCT, const SkBitmap& src,
+        SkBitmap::Allocator* alloc) {
+    // Skia does not support copying from kAlpha8 to types that are not alpha only.
+    // We will handle this case here.
+    if (kAlpha_8_SkColorType == src.colorType() && kAlpha_8_SkColorType != dstCT) {
+        SkAutoPixmapUnlock srcUnlocker;
+        if (!src.requestLock(&srcUnlocker)) {
+            return false;
+        }
+        SkPixmap srcPixmap = srcUnlocker.pixmap();
+
+        SkImageInfo dstInfo = src.info().makeColorType(dstCT);
+        if (!dst->setInfo(dstInfo)) {
+            return false;
+        }
+        if (!dst->tryAllocPixels(alloc, nullptr)) {
+            return false;
+        }
+
+        switch (dstCT) {
+            case kRGBA_8888_SkColorType:
+            case kBGRA_8888_SkColorType: {
+                for (int y = 0; y < src.height(); y++) {
+                    const uint8_t* srcRow = srcPixmap.addr8(0, y);
+                    uint32_t* dstRow = dst->getAddr32(0, y);
+                    ToColor_SA8(dstRow, srcRow, src.width(), nullptr);
+                }
+                return true;
+            }
+            case kRGB_565_SkColorType: {
+                for (int y = 0; y < src.height(); y++) {
+                    uint16_t* dstRow = dst->getAddr16(0, y);
+                    memset(dstRow, 0, sizeof(uint16_t) * src.width());
+                }
+                return true;
+            }
+            default:
+                return false;
+        }
+    }
+
+    return src.copyTo(dst, dstCT, alloc);
+}
+
 static jobject Bitmap_copy(JNIEnv* env, jobject, jlong srcHandle,
                            jint dstConfigHandle, jboolean isMutable) {
     SkBitmap src;
@@ -743,7 +787,7 @@ static jobject Bitmap_copy(JNIEnv* env, jobject, jlong srcHandle,
     SkBitmap result;
     HeapAllocator allocator;
 
-    if (!src.copyTo(&result, dstCT, &allocator)) {
+    if (!bitmapCopyTo(&result, dstCT, src, &allocator)) {
         return NULL;
     }
     auto bitmap = allocator.getStorageObjAndReset();
@@ -754,7 +798,7 @@ static Bitmap* Bitmap_copyAshmemImpl(JNIEnv* env, SkBitmap& src, SkColorType& ds
     SkBitmap result;
 
     AshmemPixelAllocator allocator(env);
-    if (!src.copyTo(&result, dstCT, &allocator)) {
+    if (!bitmapCopyTo(&result, dstCT, src, &allocator)) {
         return NULL;
     }
     auto bitmap = allocator.getStorageObjAndReset();
