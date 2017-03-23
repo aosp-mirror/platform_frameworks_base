@@ -199,6 +199,8 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     long cpuTimeAtResume;   // the cpu time of host process at the time of resuming activity
     long pauseTime;         // last time we started pausing the activity
     long launchTickTime;    // base time for launch tick messages
+    // TODO: Refactor mLastReportedConfiguration and mLastReportedOverrideConfiguration to use a
+    // MergedConfiguration object for clarity.
     private Configuration mLastReportedConfiguration; // configuration activity was last running in
     // Overridden configuration by the activity task
     // WARNING: Reference points to {@link TaskRecord#getMergedOverrideConfig}, so its internal
@@ -299,6 +301,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
      */
     private final Configuration mTmpConfig1 = new Configuration();
     private final Configuration mTmpConfig2 = new Configuration();
+    private final Configuration mTmpConfig3 = new Configuration();
     private final Point mTmpPoint = new Point();
     private final Rect mTmpBounds = new Rect();
 
@@ -2167,6 +2170,9 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         // to decide whether to relaunch an activity or just report a configuration change.
         final int changes = getConfigurationChanges(mTmpConfig1);
 
+        // Preserve configuration used to generate this set of configuration changes.
+        mTmpConfig3.setTo(mTmpConfig1);
+
         // Update last reported values.
         final Configuration newGlobalConfig = service.getGlobalConfiguration();
         final Configuration newMergedOverrideConfig = getMergedOverrideConfiguration();
@@ -2210,8 +2216,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
                         + ", newGlobalConfig=" + newGlobalConfig
                         + ", newMergedOverrideConfig=" + newMergedOverrideConfig);
 
-        if (shouldRelaunchLocked(changes, newGlobalConfig, newMergedOverrideConfig)
-                || forceNewConfig) {
+        if (shouldRelaunchLocked(changes, mTmpConfig3) || forceNewConfig) {
             // Aha, the activity isn't handling the change, so DIE DIE DIE.
             configChangeFlags |= changes;
             startFreezingScreenLocked(app, globalChanges);
@@ -2269,10 +2274,14 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     /**
      * When assessing a configuration change, decide if the changes flags and the new configurations
      * should cause the Activity to relaunch.
+     *
+     * @param changes the changes due to the given configuration.
+     * @param changesConfig the configuration that was used to calculate the given changes via a
+     *        call to getConfigurationChanges.
      */
-    private boolean shouldRelaunchLocked(int changes, Configuration newGlobalConfig,
-            Configuration newTaskMergedOverrideConfig) {
+    private boolean shouldRelaunchLocked(int changes, Configuration changesConfig) {
         int configChanged = info.getRealConfigChanged();
+        boolean onlyVrUiModeChanged = onlyVrUiModeChanged(changes, changesConfig);
 
         // Override for apps targeting pre-O sdks
         // If a device is in VR mode, and we're transitioning into VR ui mode, add ignore ui mode
@@ -2280,11 +2289,21 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         // For O and later, apps will be required to add configChanges="uimode" to their manifest.
         if (appInfo.targetSdkVersion < O
                 && requestedVrComponent != null
-                && (isInVrUiMode(newGlobalConfig) || isInVrUiMode(newTaskMergedOverrideConfig))) {
+                && onlyVrUiModeChanged) {
             configChanged |= CONFIG_UI_MODE;
         }
 
         return (changes&(~configChanged)) != 0;
+    }
+
+    /**
+     * Returns true if the configuration change is solely due to the UI mode switching into or out
+     * of UI_MODE_TYPE_VR_HEADSET.
+     */
+    private boolean onlyVrUiModeChanged(int changes, Configuration lastReportedConfig) {
+        final Configuration currentConfig = getConfiguration();
+        return changes == ActivityInfo.CONFIG_UI_MODE && (isInVrUiMode(currentConfig)
+            != isInVrUiMode(lastReportedConfig));
     }
 
     private int getConfigurationChanges(Configuration lastReportedConfig) {
