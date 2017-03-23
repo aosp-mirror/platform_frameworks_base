@@ -368,7 +368,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
         assertEquals(0, cursor.getInt(5));
     }
 
-    public void testQueryDocument_forRoot()
+    public void testQueryDocument_forStorage()
             throws IOException, InterruptedException, TimeoutException {
         setupProvider(MtpDatabaseConstants.FLAG_DATABASE_IN_MEMORY);
         setupRoots(0, new MtpRoot[] {
@@ -390,6 +390,61 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
         assertTrue(cursor.isNull(3));
         assertEquals(DocumentsContract.Document.FLAG_DIR_SUPPORTS_CREATE, cursor.getInt(4));
         assertEquals(3072, cursor.getInt(5));
+    }
+
+    public void testQueryDocument_forDeviceWithSingleStorage()
+            throws IOException, InterruptedException, TimeoutException {
+        setupProvider(MtpDatabaseConstants.FLAG_DATABASE_IN_MEMORY);
+        setupRoots(0, new MtpRoot[] {
+                new MtpRoot(
+                        0 /* deviceId */,
+                        1 /* storageId */,
+                        "Storage A" /* volume description */,
+                        1024 /* free space */,
+                        4096 /* total space */,
+                        "" /* no volume identifier */)
+        });
+        final Cursor cursor = mProvider.queryDocument("1", null);
+        assertEquals(1, cursor.getCount());
+
+        cursor.moveToNext();
+        assertEquals("1", cursor.getString(0));
+        assertEquals(DocumentsContract.Document.MIME_TYPE_DIR, cursor.getString(1));
+        assertEquals("Device Storage A", cursor.getString(2));
+        assertTrue(cursor.isNull(3));
+        assertEquals(DocumentsContract.Document.FLAG_DIR_SUPPORTS_CREATE, cursor.getInt(4));
+        assertTrue(cursor.isNull(5));
+    }
+
+    public void testQueryDocument_forDeviceWithTwoStorages()
+            throws IOException, InterruptedException, TimeoutException {
+        setupProvider(MtpDatabaseConstants.FLAG_DATABASE_IN_MEMORY);
+        setupRoots(0, new MtpRoot[] {
+                new MtpRoot(
+                        0 /* deviceId */,
+                        1 /* storageId */,
+                        "Storage A" /* volume description */,
+                        1024 /* free space */,
+                        4096 /* total space */,
+                        "" /* no volume identifier */),
+                new MtpRoot(
+                        0 /* deviceId */,
+                        2 /* storageId */,
+                        "Storage B" /* volume description */,
+                        1024 /* free space */,
+                        4096 /* total space */,
+                        "" /* no volume identifier */)
+        });
+        final Cursor cursor = mProvider.queryDocument("1", null);
+        assertEquals(1, cursor.getCount());
+
+        cursor.moveToNext();
+        assertEquals("1", cursor.getString(0));
+        assertEquals(DocumentsContract.Document.MIME_TYPE_DIR, cursor.getString(1));
+        assertEquals("Device", cursor.getString(2));
+        assertTrue(cursor.isNull(3));
+        assertEquals(0, cursor.getInt(4));
+        assertTrue(cursor.isNull(5));
     }
 
     public void testQueryChildDocuments() throws Exception {
