@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.os.Binder;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.security.keymaster.KeyAttestationPackageInfo;
@@ -45,14 +46,19 @@ public class KeyAttestationApplicationIdProviderService
 
     public KeyAttestationApplicationId getKeyAttestationApplicationId(int uid)
             throws RemoteException {
-        String[] packageNames = mPackageManager.getPackagesForUid(uid);
-        if (packageNames == null) {
-            throw new RemoteException("No packages for uid");
+        if (Binder.getCallingUid() != android.os.Process.KEYSTORE_UID) {
+            throw new SecurityException("This service can only be used by Keystore");
         }
-        int userId = UserHandle.getUserId(uid);
-        KeyAttestationPackageInfo[] keyAttestationPackageInfos =
-                new KeyAttestationPackageInfo[packageNames.length];
+        KeyAttestationPackageInfo[] keyAttestationPackageInfos = null;
+        final long token = Binder.clearCallingIdentity();
         try {
+            String[] packageNames = mPackageManager.getPackagesForUid(uid);
+            if (packageNames == null) {
+                throw new RemoteException("No packages for uid");
+            }
+            int userId = UserHandle.getUserId(uid);
+            keyAttestationPackageInfos = new KeyAttestationPackageInfo[packageNames.length];
+
             for (int i = 0; i < packageNames.length; ++i) {
                 PackageInfo packageInfo = mPackageManager.getPackageInfoAsUser(packageNames[i],
                         PackageManager.GET_SIGNATURES, userId);
@@ -61,6 +67,8 @@ public class KeyAttestationApplicationIdProviderService
             }
         } catch (NameNotFoundException nnfe) {
             throw new RemoteException(nnfe.getMessage());
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
         return new KeyAttestationApplicationId(keyAttestationPackageInfos);
     }
