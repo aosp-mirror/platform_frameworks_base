@@ -38,7 +38,7 @@ import static android.provider.DocumentsContract.isTreeUri;
 import android.Manifest;
 import android.annotation.CallSuper;
 import android.annotation.Nullable;
-import android.app.RecoverableSecurityException;
+import android.app.AuthenticationRequiredException;
 import android.content.ClipDescription;
 import android.content.ContentProvider;
 import android.content.ContentResolver;
@@ -235,10 +235,6 @@ public abstract class DocumentsProvider extends ContentProvider {
      * {@link Document#COLUMN_DOCUMENT_ID}. You must allocate a new
      * {@link Document#COLUMN_DOCUMENT_ID} to represent the document, which must
      * not change once returned.
-     * <p>
-     * {@link RecoverableSecurityException} can be thrown if more input is required
-     * from the user (such as insufficient permission), but it is not guaranteed that
-     * the client will handle this properly.
      *
      * @param parentDocumentId the parent directory to create the new document
      *            under.
@@ -247,6 +243,10 @@ public abstract class DocumentsProvider extends ContentProvider {
      * @param displayName the display name of the new document. The provider may
      *            alter this name to meet any internal constraints, such as
      *            avoiding conflicting names.
+
+     * @throws AuthenticationRequiredException If authentication is required from the user (such as
+     *             login credentials), but it is not guaranteed that the client will handle this
+     *             properly.
      */
     @SuppressWarnings("unused")
     public String createDocument(String parentDocumentId, String mimeType, String displayName)
@@ -262,15 +262,14 @@ public abstract class DocumentsProvider extends ContentProvider {
      * URI permission grants will be updated to point at the new document. If
      * the original {@link Document#COLUMN_DOCUMENT_ID} is still valid after the
      * rename, return {@code null}.
-     * <p>
-     * {@link RecoverableSecurityException} can be thrown if more input is required
-     * from the user (such as insufficient permission), but it is not guaranteed that
-     * the client will handle this properly.
      *
      * @param documentId the document to rename.
      * @param displayName the updated display name of the document. The provider
      *            may alter this name to meet any internal constraints, such as
      *            avoiding conflicting names.
+     * @throws AuthenticationRequiredException If authentication is required from
+     *            the user (such as login credentials), but it is not guaranteed
+     *            that the client will handle this properly.
      */
     @SuppressWarnings("unused")
     public String renameDocument(String documentId, String displayName)
@@ -286,12 +285,11 @@ public abstract class DocumentsProvider extends ContentProvider {
      * call (such as documents inside a directory) the implementor is
      * responsible for revoking those permissions using
      * {@link #revokeDocumentPermission(String)}.
-     * <p>
-     * {@link RecoverableSecurityException} can be thrown if more input is required
-     * from the user (such as insufficient permission), but it is not guaranteed that
-     * the client will handle this properly.
      *
      * @param documentId the document to delete.
+     * @throws AuthenticationRequiredException If authentication is required from
+     *            the user (such as login credentials), but it is not guaranteed
+     *            that the client will handle this properly.
      */
     @SuppressWarnings("unused")
     public void deleteDocument(String documentId) throws FileNotFoundException {
@@ -305,13 +303,12 @@ public abstract class DocumentsProvider extends ContentProvider {
      * the same document provider. Upon completion returns the document id of
      * the copied document at the target destination. {@code null} must never
      * be returned.
-     * <p>
-     * {@link RecoverableSecurityException} can be thrown if more input is required
-     * from the user (such as insufficient permission), but it is not guaranteed that
-     * the client will handle this properly.
      *
      * @param sourceDocumentId the document to copy.
      * @param targetParentDocumentId the target document to be copied into as a child.
+     * @throws AuthenticationRequiredException If authentication is required from
+     *            the user (such as login credentials), but it is not guaranteed
+     *            that the client will handle this properly.
      */
     @SuppressWarnings("unused")
     public String copyDocument(String sourceDocumentId, String targetParentDocumentId)
@@ -329,15 +326,14 @@ public abstract class DocumentsProvider extends ContentProvider {
      *
      * <p>It's the responsibility of the provider to revoke grants if the document
      * is no longer accessible using <code>sourceDocumentId</code>.
-     * <p>
-     * {@link RecoverableSecurityException} can be thrown if more input is required
-     * from the user (such as insufficient permission), but it is not guaranteed that
-     * the client will handle this properly.
      *
      * @param sourceDocumentId the document to move.
      * @param sourceParentDocumentId the parent of the document to move.
      * @param targetParentDocumentId the target document to be a new parent of the
      *     source document.
+     * @throws AuthenticationRequiredException If authentication is required from
+     *            the user (such as login credentials), but it is not guaranteed
+     *            that the client will handle this properly.
      */
     @SuppressWarnings("unused")
     public String moveDocument(String sourceDocumentId, String sourceParentDocumentId,
@@ -355,11 +351,11 @@ public abstract class DocumentsProvider extends ContentProvider {
      * <p>It's the responsibility of the provider to revoke grants if the document is
      * removed from the last parent, and effectively the document is deleted.
      *
-     * <p>{@link RecoverableSecurityException} can be thrown if more input is required
-     * from the user (such as insufficient permission), but it is not guaranteed that
-     * the client will handle this properly.
      * @param documentId the document to remove.
      * @param parentDocumentId the parent of the document to move.
+     * @throws AuthenticationRequiredException If authentication is required from
+     *            the user (such as login credentials), but it is not guaranteed
+     *            that the client will handle this properly.
      */
     @SuppressWarnings("unused")
     public void removeDocument(String documentId, String parentDocumentId)
@@ -377,9 +373,6 @@ public abstract class DocumentsProvider extends ContentProvider {
      * <p>This API assumes that document ID has enough info to infer the root.
      * Different roots should use different document ID to refer to the same
      * document.
-     * <p>{@link RecoverableSecurityException} can be thrown if more input is required
-     * from the user (such as insufficient permission), but it is not guaranteed that
-     * the client will handle this properly.perly.
      *
      *
      * @param parentDocumentId the document from which the path starts if not null,
@@ -388,6 +381,9 @@ public abstract class DocumentsProvider extends ContentProvider {
      * @return the path of the requested document. If parentDocumentId is null
      *     returned root ID must not be null. If parentDocumentId is not null
      *     returned root ID must be null.
+     * @throws AuthenticationRequiredException If authentication is required from
+     *            the user (such as login credentials), but it is not guaranteed
+     *            that the client will handle this properly.
      */
     public Path findDocumentPath(@Nullable String parentDocumentId, String childDocumentId)
             throws FileNotFoundException {
@@ -397,7 +393,7 @@ public abstract class DocumentsProvider extends ContentProvider {
     /**
      * Creates an intent sender for a web link, if the document is web linkable.
      * <p>
-     * {@link RecoverableSecurityException} can be thrown if user does not have
+     * {@link AuthenticationRequiredException} can be thrown if user does not have
      * sufficient permission for the linked document. Before any new permissions
      * are granted for the linked document, a visible UI must be shown, so the
      * user can explicitly confirm whether the permission grants are expected.
@@ -414,6 +410,9 @@ public abstract class DocumentsProvider extends ContentProvider {
      *
      * @param documentId the document to create a web link intent for.
      * @param options additional information, such as list of recipients. Optional.
+     * @throws AuthenticationRequiredException If authentication is required from
+     *            the user (such as login credentials), but it is not guaranteed
+     *            that the client will handle this properly.
      *
      * @see DocumentsContract.Document#FLAG_WEB_LINKABLE
      * @see android.app.PendingIntent#getIntentSender
@@ -436,9 +435,6 @@ public abstract class DocumentsProvider extends ContentProvider {
      * android.database.ContentObserver, boolean)} with
      * {@link DocumentsContract#buildRootsUri(String)} to notify the system.
      * <p>
-     * {@link RecoverableSecurityException} can be thrown if more input is required
-     * from the user (such as insufficient permission), or returned as part of
-     * Cursor's bundle. It is not guaranteed that the client will handle this properly.
      *
      * @param projection list of {@link Root} columns to put into the cursor. If
      *            {@code null} all supported columns should be included.
@@ -451,10 +447,6 @@ public abstract class DocumentsProvider extends ContentProvider {
      * {@link Root#FLAG_SUPPORTS_RECENTS}. The returned documents should be
      * sorted by {@link Document#COLUMN_LAST_MODIFIED} in descending order, and
      * limited to only return the 64 most recently modified documents.
-     * <p>
-     * {@link RecoverableSecurityException} can be thrown if more input is required
-     * from the user (such as insufficient permission), or returned as part of
-     * Cursor's bundle. It is not guaranteed that the client will handle this properly.
      * <p>
      * Recent documents do not support change notifications.
      *
@@ -472,16 +464,14 @@ public abstract class DocumentsProvider extends ContentProvider {
     /**
      * Return metadata for the single requested document. You should avoid
      * making network requests to keep this request fast.
-     * <p>
-     * {@link RecoverableSecurityException} can be thrown if more input is required
-     * from the user (such as insufficient permission), or returned as part of
-     * Cursor's bundle. It is not guaranteed that the client will handle this properly.
-     *
      *
      * @param documentId the document to return.
      * @param projection list of {@link Document} columns to put into the
      *            cursor. If {@code null} all supported columns should be
      *            included.
+     * @throws AuthenticationRequiredException If authentication is required from
+     *            the user (such as login credentials), but it is not guaranteed
+     *            that the client will handle this properly.
      */
     public abstract Cursor queryDocument(String documentId, String[] projection)
             throws FileNotFoundException;
@@ -509,11 +499,6 @@ public abstract class DocumentsProvider extends ContentProvider {
      * you can call {@link ContentResolver#notifyChange(Uri,
      * android.database.ContentObserver, boolean)} with that Uri to send change
      * notifications.
-     * <p>
-     * {@link RecoverableSecurityException} can be thrown if more input is required
-     * from the user (such as insufficient permission), or returned as part of
-     * Cursor's bundle. It is not guaranteed that the client will handle this properly.
-     *
      *
      * @param parentDocumentId the directory to return children for.
      * @param projection list of {@link Document} columns to put into the
@@ -525,6 +510,9 @@ public abstract class DocumentsProvider extends ContentProvider {
      *            may be unordered. This ordering is a hint that can be used to
      *            prioritize how data is fetched from the network, but UI may
      *            always enforce a specific ordering.
+     * @throws AuthenticationRequiredException If authentication is required from
+     *            the user (such as login credentials), but it is not guaranteed
+     *            that the client will handle this properly.
      * @see DocumentsContract#EXTRA_LOADING
      * @see DocumentsContract#EXTRA_INFO
      * @see DocumentsContract#EXTRA_ERROR
@@ -552,10 +540,6 @@ public abstract class DocumentsProvider extends ContentProvider {
      * you can call {@link ContentResolver#notifyChange(Uri,
      * android.database.ContentObserver, boolean)} with that Uri to send change
      * notifications.
-     * <p>
-     * {@link RecoverableSecurityException} can be thrown if more input is required
-     * from the user (such as insufficient permission), or returned as part of
-     * Cursor's bundle. It is not guaranteed that the client will handle this properly.
      *
      * @param parentDocumentId the directory to return children for.
      * @param projection list of {@link Document} columns to put into the
@@ -567,6 +551,9 @@ public abstract class DocumentsProvider extends ContentProvider {
      *            will be used, which may be unordered. See
      *            {@link ContentResolver#QUERY_ARG_SORT_COLUMNS} for
      *            details.
+     * @throws AuthenticationRequiredException If authentication is required from
+     *            the user (such as login credentials), but it is not guaranteed
+     *            that the client will handle this properly.
      *
      * @see DocumentsContract#EXTRA_LOADING
      * @see DocumentsContract#EXTRA_INFO
@@ -609,16 +596,16 @@ public abstract class DocumentsProvider extends ContentProvider {
      * String, String)}. Then you can call {@link ContentResolver#notifyChange(Uri,
      * android.database.ContentObserver, boolean)} with that Uri to send change
      * notifications.
-     * <p>
-     * {@link RecoverableSecurityException} can be thrown if more input is required
-     * from the user (such as insufficient permission), or returned as part of
-     * Cursor's bundle. It is not guaranteed that the client will handle this properly.
      *
      * @param rootId the root to search under.
      * @param query string to match documents against.
      * @param projection list of {@link Document} columns to put into the
      *            cursor. If {@code null} all supported columns should be
      *            included.
+     * @throws AuthenticationRequiredException If authentication is required from
+     *            the user (such as login credentials), but it is not guaranteed
+     *            that the client will handle this properly.
+     *
      * @see DocumentsContract#EXTRA_LOADING
      * @see DocumentsContract#EXTRA_INFO
      * @see DocumentsContract#EXTRA_ERROR
@@ -641,9 +628,9 @@ public abstract class DocumentsProvider extends ContentProvider {
      * implementation queries {@link #queryDocument(String, String[])}, so
      * providers may choose to override this as an optimization.
      * <p>
-     * {@link RecoverableSecurityException} can be thrown if more input is required
-     * from the user (such as insufficient permission), but it is not guaranteed that
-     * the client will handle this properly.
+     * @throws AuthenticationRequiredException If authentication is required from
+     *            the user (such as login credentials), but it is not guaranteed
+     *            that the client will handle this properly.
      */
     public String getDocumentType(String documentId) throws FileNotFoundException {
         final Cursor cursor = queryDocument(documentId, null);
@@ -669,15 +656,14 @@ public abstract class DocumentsProvider extends ContentProvider {
      * <p>
      * If you block while downloading content, you should periodically check
      * {@link CancellationSignal#isCanceled()} to abort abandoned open requests.
-     * <p>
-     * {@link RecoverableSecurityException} can be thrown if more input is required
-     * from the user (such as insufficient permission), but it is not guaranteed that
-     * the client will handle this properly.
      *
      * @param documentId the document to return.
      * @param mode the mode to open with, such as 'r', 'w', or 'rw'.
      * @param signal used by the caller to signal if the request should be
      *            cancelled. May be null.
+     * @throws AuthenticationRequiredException If authentication is required from
+     *            the user (such as login credentials), but it is not guaranteed
+     *            that the client will handle this properly.
      * @see ParcelFileDescriptor#open(java.io.File, int, android.os.Handler,
      *      OnCloseListener)
      * @see ParcelFileDescriptor#createReliablePipe()
@@ -697,15 +683,14 @@ public abstract class DocumentsProvider extends ContentProvider {
      * If you perform expensive operations to download or generate a thumbnail,
      * you should periodically check {@link CancellationSignal#isCanceled()} to
      * abort abandoned thumbnail requests.
-     * <p>
-     * {@link RecoverableSecurityException} can be thrown if more input is required
-     * from the user (such as insufficient permission), but it is not guaranteed that
-     * the client will handle this properly.
      *
      * @param documentId the document to return.
      * @param sizeHint hint of the optimal thumbnail dimensions.
      * @param signal used by the caller to signal if the request should be
      *            cancelled. May be null.
+     * @throws AuthenticationRequiredException If authentication is required from
+     *            the user (such as login credentials), but it is not guaranteed
+     *            that the client will handle this properly.
      * @see Document#FLAG_SUPPORTS_THUMBNAIL
      */
     @SuppressWarnings("unused")
@@ -723,10 +708,6 @@ public abstract class DocumentsProvider extends ContentProvider {
      * matching the specified MIME type filter.
      * <p>
      * Virtual documents must have at least one streamable format.
-     * <p>
-     * {@link RecoverableSecurityException} can be thrown if more input is required
-     * from the user (such as insufficient permission), but it is not guaranteed that
-     * the client will handle this properly.
      *
      * @param documentId the document to return.
      * @param mimeTypeFilter the MIME type filter for the requested format. May
@@ -735,6 +716,9 @@ public abstract class DocumentsProvider extends ContentProvider {
      *            provider.
      * @param signal used by the caller to signal if the request should be
      *            cancelled. May be null.
+     * @throws AuthenticationRequiredException If authentication is required from
+     *            the user (such as login credentials), but it is not guaranteed
+     *            that the client will handle this properly.
      * @see #getDocumentStreamTypes(String, String)
      */
     @SuppressWarnings("unused")
