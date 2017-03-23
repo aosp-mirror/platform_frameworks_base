@@ -600,6 +600,10 @@ public class ListPopupWindow implements ShowableListMenu {
         mPopup.setWindowLayoutType(mDropDownWindowLayoutType);
 
         if (mPopup.isShowing()) {
+            if (!getAnchorView().isAttachedToWindow()) {
+                //Don't update position if the anchor view is detached from window.
+                return;
+            }
             final int widthSpec;
             if (mDropDownWidth == ViewGroup.LayoutParams.MATCH_PARENT) {
                 // The call to PopupWindow's update method below can accept -1 for any
