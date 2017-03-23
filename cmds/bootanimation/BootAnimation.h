@@ -163,6 +163,7 @@ private:
     bool        mTimeIsAccurate;
     bool        mTimeFormat12Hour;
     bool        mSystemBoot;
+    bool        mShuttingDown;
     String8     mZipFileName;
     SortedVector<String8> mLoadedFiles;
     sp<TimeCheckThread> mTimeCheckThread = nullptr;
