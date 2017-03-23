@@ -3743,7 +3743,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * Enables or disables full justification. The default value is false.
+     * Enables or disables full justification. The default value is false. If the last line is too
+     * short for justification, the last line will be displayed with the alignment set by
+     * {@link android.view.View#setTextAlignment}.
      *
      * @see #getJustify()
      */
