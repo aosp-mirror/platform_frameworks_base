@@ -236,6 +236,15 @@ public final class SystemServer {
                 SystemClock.setCurrentTimeMillis(EARLIEST_SUPPORTED_TIME);
             }
 
+            //
+            // Default the timezone property to GMT if not set.
+            //
+            String timezoneProperty =  SystemProperties.get("persist.sys.timezone");
+            if (timezoneProperty == null || timezoneProperty.isEmpty()) {
+                Slog.w(TAG, "Timezone not set; setting to GMT.");
+                SystemProperties.set("persist.sys.timezone", "GMT");
+            }
+
             // If the system has "persist.sys.language" and friends set, replace them with
             // "persist.sys.locale". Note that the default locale at this point is calculated
             // using the "-Duser.locale" command line flag. That flag is usually populated by
