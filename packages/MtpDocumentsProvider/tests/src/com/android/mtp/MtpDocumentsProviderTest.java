@@ -388,7 +388,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
         assertEquals(DocumentsContract.Document.MIME_TYPE_DIR, cursor.getString(1));
         assertEquals("Storage A", cursor.getString(2));
         assertTrue(cursor.isNull(3));
-        assertEquals(0, cursor.getInt(4));
+        assertEquals(DocumentsContract.Document.FLAG_DIR_SUPPORTS_CREATE, cursor.getInt(4));
         assertEquals(3072, cursor.getInt(5));
     }
 
