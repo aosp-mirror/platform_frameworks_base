@@ -98,7 +98,8 @@
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"તમામ વૉઇસ/SMS સેવાઓ અવરોધિત છે."</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"તમામ વૉઇસ/ડેટા/SMS સેવાઓ અવરોધિત છે."</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"નેટવર્ક પર પહોંચી શકાતું નથી"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="7335915397439759249">"પ્રાપ્તિને બહેતર બનાવવા માટે, સેટિંગ્સ &gt; સેલ્યુલર નેટવર્ક્સ &gt; પસંદગીનો નેટવર્ક પ્રકાર પર પસંદ કરેલ પ્રકારને બદલી જુઓ."</string>
+    <!-- no translation found for NetworkPreferenceSwitchSummary (4164230263214915351) -->
+    <skip />
     <string name="peerTtyModeFull" msgid="6165351790010341421">"પીઅરે TTY મોડ પૂર્ણની વિનંતી કરી"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"પીઅરે TTY મોડ HCO ની વિનંતી કરી"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"પીઅરે TTY મોડ VCO ની વિનંતી કરી"</string>
@@ -138,7 +139,8 @@
   </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"બંધ"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi પસંદ કર્યું"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"સેલ્યુલર પસંદ કર્યું"</string>
+    <!-- no translation found for wfc_mode_cellular_preferred_summary (1988279625335345908) -->
+    <skip />
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"ફક્ત Wi-Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ફોરવર્ડ કર્યો નથી"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -182,8 +184,10 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"ખૂટતી એડમિન એપ્લિકેશનને કારણે કાર્ય પ્રોફાઇલ કાઢી નાખી."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"કાર્ય પ્રોફાઇલ વ્યવસ્થાપક ઍપ્લિકેશન કાં તો ખૂટે છે અથવા દૂષિત છે. પરિણામે, તમારી કાર્ય પ્રોફાઇલ અને સંબંધિત ડેટા કાઢી નાખવામાં આવ્યો છે. સહાયતા માટે તમારા વ્યવસ્થાપકનો સંપર્ક કરો."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"આ ઉપકરણ પર તમારી કાર્ય પ્રોફાઇલ હવે ઉપલબ્ધ નથી."</string>
-    <string name="network_logging_notification_title" msgid="1805392571290161924">"નેટવર્ક ટ્રાફિક મૉનિટર કરવામાં આવી રહ્યું છે"</string>
-    <string name="network_logging_notification_text" msgid="2671761001956320094">"વધુ જાણવા માટે ટૅપ કરો"</string>
+    <!-- no translation found for network_logging_notification_title (6399790108123704477) -->
+    <skip />
+    <!-- no translation found for network_logging_notification_text (7930089249949354026) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"તમારું ઉપકરણ કાઢી નાખવામાં આવશે"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"એડમિન એપ્લિકેશનમાં ઘટકો ખૂટે છે અથવા દૂષિત છે અને વાપરી શકાશે નહીં. તમારું ઉપકરણ હવે કાઢી નાખવામાં આવશે. સહાયતા માટે તમારા વ્યવસ્થાપકનો સંપર્ક કરો."</string>
     <string name="me" msgid="6545696007631404292">"હું"</string>
@@ -1099,13 +1103,7 @@
     <string name="network_switch_metered" msgid="4671730921726992671">"<xliff:g id="NETWORK_TYPE">%1$s</xliff:g> પર સ્વિચ કર્યું"</string>
     <string name="network_switch_metered_detail" msgid="5325661434777870353">"જ્યારે <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> પાસે કોઈ ઇન્ટરનેટ ઍક્સેસ ન હોય ત્યારે ઉપકરણ <xliff:g id="NEW_NETWORK">%1$s</xliff:g> નો ઉપયોગ કરે છે. શુલ્ક લાગુ થઈ શકે છે."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> પરથી <xliff:g id="NEW_NETWORK">%2$s</xliff:g> પર સ્વિચ કર્યું"</string>
-  <string-array name="network_switch_type_name">
-    <item msgid="2952042958050315394">"સેલ્યુલર ડેટા"</item>
-    <item msgid="75483255295529161">"Wi-Fi"</item>
-    <item msgid="6862614801537202646">"Bluetooth"</item>
-    <item msgid="5447331121797802871">"ઇથરનેટ"</item>
-    <item msgid="8257233890381651999">"VPN"</item>
-  </string-array>
+    <!-- no translation found for network_switch_type_name:0 (3979506840912951943) -->
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"અજાણ્યો નેટવર્ક પ્રકાર"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Wi-Fi સાથે કનેક્ટ કરી શકાયું નથી"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" નબળું ઇન્ટરનેટ કનેક્શન ધરાવે છે."</string>
@@ -1143,10 +1141,10 @@
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"હંમેશા મંજૂરી આપો"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"ક્યારેય મંજૂરી આપશો નહીં"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"SIM કાર્ડ દૂર કર્યું"</string>
-    <string name="sim_removed_message" msgid="5450336489923274918">"એક માન્ય SIM કાર્ડ દાખલ કરીને તમે પુનઃપ્રારંભ ન કરો ત્યાં સુધી સેલ્યુલર નેટવર્ક અનુપલબ્ધ રહેશે."</string>
+    <string name="sim_removed_message" msgid="2333164559970958645">"એક માન્ય SIM કાર્ડ દાખલ કરીને તમે પુનઃપ્રારંભ ન કરો ત્યાં સુધી મોબાઇલ નેટવર્ક અનુપલબ્ધ રહેશે."</string>
     <string name="sim_done_button" msgid="827949989369963775">"થઈ ગયું"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"SIM કાર્ડ ઉમેર્યું"</string>
-    <string name="sim_added_message" msgid="7797975656153714319">"સેલ્યુલર નેટવર્કને ઍક્સેસ કરવામાં તમારા ઉપકરણને પુનઃપ્રારંભ કરો."</string>
+    <string name="sim_added_message" msgid="6599945301141050216">"મોબાઇલ નેટવર્કને ઍક્સેસ કરવા માટે તમારા ઉપકરણને પુનઃપ્રારંભ કરો."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"પુનઃપ્રારંભ કરો"</string>
     <string name="carrier_app_dialog_message" msgid="7066156088266319533">"તમારું નવું SIM ઠીકથી કામ કરે તે માટે, તમને તમારા કેરીઅર પરથી ઍપ્લિકેશન ઇન્સ્ટૉલ કરીને ખોલવી પડશે."</string>
     <string name="carrier_app_dialog_button" msgid="7900235513678617329">"ઍપ્લિકેશન મેળવો"</string>
@@ -1362,12 +1360,13 @@
     <string name="data_usage_warning_body" msgid="6660692274311972007">"વપરાશ અને સેટિંગ્સ જોવા ટૅપ કરો."</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"2G-3G ડેટા મર્યાદા પર પહોંચ્યાં"</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"4G ડેટા મર્યાદા સુધી પહોંચ્યાં"</string>
-    <string name="data_usage_mobile_limit_title" msgid="557158376602636112">"સેલ્યુલર ડેટા મર્યાદા સુધી પહોંચ્યાં"</string>
+    <!-- no translation found for data_usage_mobile_limit_title (6561099244084267376) -->
+    <skip />
     <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"Wi-Fi ડેટા સીમા પર પહોંચ્યાં"</string>
     <string name="data_usage_limit_body" msgid="291731708279614081">"બાકીના ચક્ર માટે ડેટા થોભાવ્યો"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"2G-3G ડેટા મર્યાદા ઓળંગાઈ"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"4G ડેટા મર્યાદા ઓળંગાઈ"</string>
-    <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"સેલ્યુલર ડેટા મર્યાદા ઓળંગાઈ"</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"મોબાઇલ ડેટા મર્યાદા ઓળંગાઈ"</string>
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Wi-Fi ડેટા મર્યાદા ઓળંગાઈ"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"ઉલ્લેખિત મર્યાદાથી <xliff:g id="SIZE">%s</xliff:g> વધુ."</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"પૃષ્ઠભૂમિ ડેટા પ્રતિબંધિત"</string>
@@ -1739,4 +1738,13 @@
     <string name="autofill_save_type_password" msgid="5288448918465971568">"પાસવર્ડ"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"સરનામું"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"ક્રેડિટ કાર્ડ"</string>
+    <!-- no translation found for etws_primary_default_message_earthquake (5541962250262769193) -->
+    <skip />
+    <!-- no translation found for etws_primary_default_message_tsunami (1887685943498368548) -->
+    <skip />
+    <!-- no translation found for etws_primary_default_message_earthquake_and_tsunami (998797956848445862) -->
+    <skip />
+    <!-- no translation found for etws_primary_default_message_test (2709597093560037455) -->
+    <skip />
+    <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
 </resources>

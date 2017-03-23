@@ -98,7 +98,8 @@
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"आवाज/SMS सेवाहरू बन्द छन्।"</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"सबै भ्वाइस/डेटा/SMS सेवाहरू ब्लक भएका छन्।"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"नेटवर्कमाथि पहुँच राख्न सकिँदैन"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="7335915397439759249">"सेलुलरको रिसेप्सनलाई सुधार्न सेटिङहरू &gt; सेलुलर नेटवर्कहरू &gt; नेटवर्कको रुचाइएको प्रकारमा गई चयन गरिएको प्रकार परिवर्तन गरी हेर्नुहोस्।"</string>
+    <!-- no translation found for NetworkPreferenceSwitchSummary (4164230263214915351) -->
+    <skip />
     <string name="peerTtyModeFull" msgid="6165351790010341421">"सहकर्मी अनुरोध गरियो। TTY मोड पूर्ण"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"सहकर्मी अनुरोध गरियो। TTY मोड HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"सहकर्मी अनुरोध गरियो। TTY मोड VCO"</string>
@@ -138,7 +139,8 @@
   </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"निष्क्रिय"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi मनपराइयो"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"सेलुलर मनपराइयो"</string>
+    <!-- no translation found for wfc_mode_cellular_preferred_summary (1988279625335345908) -->
+    <skip />
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Wi-Fi मात्र"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: अगाडि पठाइएको छैन"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -182,8 +184,10 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"प्रशासन अनुप्रयोग हराएको कारण कार्य प्रोफाइल मेटियो।"</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"कार्य प्रोफाइल व्यवस्थापक अनुप्रयोग या त हराएको या त बिग्रेको छ। फलस्वरूप, तपाईँको कार्य प्रोफाइल र सम्बन्धित डेटा मेटिएको छ। सहयोगको लागि तपाईँको व्यवस्थापकसँग सम्पर्क गर्नुहोस्।"</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"यस यन्त्रमा तपाईँको कार्य प्रोफाइल अब उपलब्ध छैन।"</string>
-    <string name="network_logging_notification_title" msgid="1805392571290161924">"नेटवर्कको ट्राफिकको अनुगमन गरिँदै छ"</string>
-    <string name="network_logging_notification_text" msgid="2671761001956320094">"थप जान्न ट्याप गर्नुहोस्"</string>
+    <!-- no translation found for network_logging_notification_title (6399790108123704477) -->
+    <skip />
+    <!-- no translation found for network_logging_notification_text (7930089249949354026) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"तपाईंको यन्त्र मेटिनेछ"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"व्यवस्थापक अनुप्रयोगमा कम्पोनेन्टहरू या त हराएको वा भ्रष्ट छन्, र यसैले प्रयोग गर्न सकिँदैन। तपाईंको यन्त्र अब मेटिनेछ। सहयोगको लागि आफ्नो व्यवस्थापकलाई सम्पर्क गर्नुहोस्।"</string>
     <string name="me" msgid="6545696007631404292">"मलाई"</string>
@@ -1105,13 +1109,7 @@
     <string name="network_switch_metered" msgid="4671730921726992671">"<xliff:g id="NETWORK_TYPE">%1$s</xliff:g> मा बदल्नुहोस्"</string>
     <string name="network_switch_metered_detail" msgid="5325661434777870353">"<xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> मा इन्टरनेट माथिको पहुँच नहुँदा यन्त्रले <xliff:g id="NEW_NETWORK">%1$s</xliff:g> को प्रयोग गर्दछ। शुल्कहरू लागू हुन सक्छन्।"</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> बाट <xliff:g id="NEW_NETWORK">%2$s</xliff:g> मा परिवर्तन गरियो"</string>
-  <string-array name="network_switch_type_name">
-    <item msgid="2952042958050315394">"सेलुलर डेटा"</item>
-    <item msgid="75483255295529161">"Wi-Fi"</item>
-    <item msgid="6862614801537202646">"ब्लुटुथ"</item>
-    <item msgid="5447331121797802871">"इथरनेट"</item>
-    <item msgid="8257233890381651999">"VPN"</item>
-  </string-array>
+    <!-- no translation found for network_switch_type_name:0 (3979506840912951943) -->
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"नेटवर्कको कुनै अज्ञात प्रकार"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"वाइ-फाइसँग जडान गर्न सकेन"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" कमजोर इन्टरनेट जडान छ।"</string>
@@ -1149,10 +1147,10 @@
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"सधैँ अनुमति दिनुहोस्"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"कहिल्यै अनुमति नदिनुहोस्"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"SIM कार्ड हटाइयो"</string>
-    <string name="sim_removed_message" msgid="5450336489923274918">"तपाईं मान्य SIM कार्डसँग फेरि सुरु नगरे सम्म सेलुलर सञ्जाल उपलब्ध हुने छ।"</string>
+    <string name="sim_removed_message" msgid="2333164559970958645">"एउटा मान्य SIM कार्ड राखेर पुनःस्टार्ट नगरेसम्म मोबाइल नेटवर्क उपलब्ध हुने छैन।"</string>
     <string name="sim_done_button" msgid="827949989369963775">"भयो"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"SIM कार्ड थप गरियो"</string>
-    <string name="sim_added_message" msgid="7797975656153714319">"सेलुलर सञ्जाल पहुँच गर्न तपाईँको उपकरण पुनः सुरु गर्नुहोस्।"</string>
+    <string name="sim_added_message" msgid="6599945301141050216">"मोबाइल नेटवर्क पहुँच गर्न तपाईँको उपकरण पुनःस्टार्ट गर्नुहोस्।"</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"पुनःस्टार्ट गर्नुहोस्"</string>
     <string name="carrier_app_dialog_message" msgid="7066156088266319533">"तपाईंको नयाँ SIM ले राम्रोसँग काम गर्न, तपाईंले आफ्नो वाहक मार्फत अनुप्रयोग स्थापना र खोल्न आवश्यक हुनेछ।"</string>
     <string name="carrier_app_dialog_button" msgid="7900235513678617329">"अनुप्रयोग प्राप्त गर्नुहोस्"</string>
@@ -1367,12 +1365,13 @@
     <string name="data_usage_warning_body" msgid="6660692274311972007">"प्रयोग र सेटिङहरू हेर्न ट्याप गर्नुहोस्।"</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"2G-3G डेटा सीमा पुग्यो"</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"4G डेटा सीमा पुग्यो"</string>
-    <string name="data_usage_mobile_limit_title" msgid="557158376602636112">"सेलुलर डेटा सीमा पुग्यो"</string>
+    <!-- no translation found for data_usage_mobile_limit_title (6561099244084267376) -->
+    <skip />
     <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"Wi-Fi डेटा सीमा पुग्यो"</string>
     <string name="data_usage_limit_body" msgid="291731708279614081">"तथ्याङ्क बाँकी चक्रको लागि रोकिएको छ"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"2G-3G डेटा सीमा भन्दा पार भएको छ"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"4G डेटा SIMा नाघ्यो"</string>
-    <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"सेलुलर डेटा सीमा नाघ्यो"</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"मोवाइल डेटा SIMा नाघ्यो"</string>
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Wi-Fi डेटा SIMा नाघ्यो"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> उल्लेखित सीमा भन्दा बढी छ।"</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"पृष्ठभूमिका डेटा प्रतिबन्धित गरिएको छ"</string>
@@ -1744,4 +1743,13 @@
     <string name="autofill_save_type_password" msgid="5288448918465971568">"पासवर्ड"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"ठेगाना"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"क्रेडिट कार्ड"</string>
+    <!-- no translation found for etws_primary_default_message_earthquake (5541962250262769193) -->
+    <skip />
+    <!-- no translation found for etws_primary_default_message_tsunami (1887685943498368548) -->
+    <skip />
+    <!-- no translation found for etws_primary_default_message_earthquake_and_tsunami (998797956848445862) -->
+    <skip />
+    <!-- no translation found for etws_primary_default_message_test (2709597093560037455) -->
+    <skip />
+    <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
 </resources>

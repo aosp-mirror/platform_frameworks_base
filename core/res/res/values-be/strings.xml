@@ -100,7 +100,8 @@
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"Службы перадачы голаса і SMS заблакаваныя."</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"Усе службы перадачы дадзеных, галасавыя і SMS-службы заблакаваны."</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Немагчыма падключыцца да сеткі"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="7335915397439759249">"Каб палепшыць якасць прыёму, паспрабуйце змяніць тып, выбраны ў меню \"Налады &gt; Сотавыя сеткі &gt; Прыярытэтны тып сеткі\"."</string>
+    <!-- no translation found for NetworkPreferenceSwitchSummary (4164230263214915351) -->
+    <skip />
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Аднарангавая прылада запытала рэжым TTY FULL"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Аднарангавая прылада запытала рэжым TTY НСО"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Аднарангавая прылада запытала рэжым TTY VCO"</string>
@@ -140,7 +141,8 @@
   </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Выкл."</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Прыярытэт Wi-Fi"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Прыярытэт мабільнай сеткі"</string>
+    <!-- no translation found for wfc_mode_cellular_preferred_summary (1988279625335345908) -->
+    <skip />
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Толькі Wi-Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: не пераадрасоўваецца"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -186,8 +188,10 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Рабочы профіль выдалены з-за адсутнасці праграмы адміністравання."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Праграма для адміністравання рабочага профілю адсутнічае або пашкоджана. У выніку гэтага ваш рабочы профіль і звязаныя з ім даныя былі выдаленыя. Звярніцеся па дапамогу да адміністратара."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Ваш працоўны профіль больш не даступны на гэтай прыладзе."</string>
-    <string name="network_logging_notification_title" msgid="1805392571290161924">"Сеткавы трафік адсочваецца"</string>
-    <string name="network_logging_notification_text" msgid="2671761001956320094">"Дакраніцеся, каб даведацца больш"</string>
+    <!-- no translation found for network_logging_notification_title (6399790108123704477) -->
+    <skip />
+    <!-- no translation found for network_logging_notification_text (7930089249949354026) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"Даныя вашай прылады будуць сцерты"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Праграма для адміністравання не можа быць выкарыстана, таму што ў яе адсутнічаюць кампаненты або яна пашкоджана. Зараз даныя вашай прылады будуць сцерты. Звярніцеся па дапамогу да адміністратара."</string>
     <string name="me" msgid="6545696007631404292">"Я"</string>
@@ -1139,13 +1143,7 @@
     <string name="network_switch_metered" msgid="4671730921726992671">"Выкананы пераход да <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="5325661434777870353">"Прылада выкарыстоўвае <xliff:g id="NEW_NETWORK">%1$s</xliff:g>, калі ў <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> няма доступу да інтэрнэту. Можа спаганяцца дадатковая плата."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Выкананы пераход з <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> да <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
-  <string-array name="network_switch_type_name">
-    <item msgid="2952042958050315394">"сотавая перадача даных"</item>
-    <item msgid="75483255295529161">"Wi-Fi"</item>
-    <item msgid="6862614801537202646">"Bluetooth"</item>
-    <item msgid="5447331121797802871">"Ethernet"</item>
-    <item msgid="8257233890381651999">"VPN"</item>
-  </string-array>
+    <!-- no translation found for network_switch_type_name:0 (3979506840912951943) -->
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"невядомы тып сеткі"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Немагчыма падключыцца да Wi-Fi"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" дрэннае падключэнне да Інтэрнэту."</string>
@@ -1183,10 +1181,10 @@
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"Заўсёды дазваляць"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"Ніколі не дазваляць"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"SIM-карта выдаленая"</string>
-    <string name="sim_removed_message" msgid="5450336489923274918">"Мабільная сетка будзе недаступная да перазагрузкі з сапраўднай SIM-картай."</string>
+    <string name="sim_removed_message" msgid="2333164559970958645">"Мабільная сетка будзе недаступная да перазагрузкі з дзеючай SIM-картай."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Гатова"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"SIM-карта дадазеная"</string>
-    <string name="sim_added_message" msgid="7797975656153714319">"Перазапусціце прыладу, каб атрымаць доступ да мабільнай сеткі."</string>
+    <string name="sim_added_message" msgid="6599945301141050216">"Перазагрузіце прыладу, каб атрымаць доступ да мабільнай сеткі."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"Перазапусціць"</string>
     <string name="carrier_app_dialog_message" msgid="7066156088266319533">"Каб ваша новая SIM-карта працавала належным чынам, вам неабходна ўсталяваць і адкрыць праграму ад вашага аператара."</string>
     <string name="carrier_app_dialog_button" msgid="7900235513678617329">"АТРЫМАЦЬ ПРАГРАМУ"</string>
@@ -1403,12 +1401,13 @@
     <string name="data_usage_warning_body" msgid="6660692274311972007">"Прагляд выкарыстання і налад."</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"Дасягнуты ліміт трафіку 2G-3G"</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"Дасягнуты ліміт трафіку 4G"</string>
-    <string name="data_usage_mobile_limit_title" msgid="557158376602636112">"Дасягн. ліміт маб.перадачы даных"</string>
+    <!-- no translation found for data_usage_mobile_limit_title (6561099244084267376) -->
+    <skip />
     <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"Дасягн. ліміт перад. даных Wi-Fi"</string>
     <string name="data_usage_limit_body" msgid="291731708279614081">"Перад.даных спын. да канца цыкла"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"Перавышаны ліміт 2G-3G"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"Перавышаны ліміт дадзеных 4G"</string>
-    <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"Перавыш.ліміт маб.перадачы даных"</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"Перавышаны ліміт мабільных дадзеных"</string>
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Перав. ліміт па дадзеным Wi-Fi"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"Аб\'ём <xliff:g id="SIZE">%s</xliff:g> перавышае устаноўл. мяжу."</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"Зыходныя дадзеныя абмежаваныя"</string>
@@ -1800,4 +1799,13 @@
     <string name="autofill_save_type_password" msgid="5288448918465971568">"пароль"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"адрас"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"крэдытная картка"</string>
+    <!-- no translation found for etws_primary_default_message_earthquake (5541962250262769193) -->
+    <skip />
+    <!-- no translation found for etws_primary_default_message_tsunami (1887685943498368548) -->
+    <skip />
+    <!-- no translation found for etws_primary_default_message_earthquake_and_tsunami (998797956848445862) -->
+    <skip />
+    <!-- no translation found for etws_primary_default_message_test (2709597093560037455) -->
+    <skip />
+    <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
 </resources>

@@ -98,7 +98,8 @@
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"已封鎖語音/SMS 服務。"</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"已封鎖所有語音/數據傳輸/SMS 服務。"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"無法連接網絡"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="7335915397439759249">"如要改善接收品質，請嘗試前往「設定」&gt;「流動網絡」&gt;「偏好網絡類型」以變更所選類型。"</string>
+    <!-- no translation found for NetworkPreferenceSwitchSummary (4164230263214915351) -->
+    <skip />
     <string name="peerTtyModeFull" msgid="6165351790010341421">"對方曾要求 TTY 模式 (FULL)"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"對方曾要求 TTY 模式 (HCO)"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"對方曾要求 TTY 模式 (VCO)"</string>
@@ -138,7 +139,8 @@
   </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"關閉"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"首選 Wi-Fi"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"首選流動數據"</string>
+    <!-- no translation found for wfc_mode_cellular_preferred_summary (1988279625335345908) -->
+    <skip />
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"只限 Wi-Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>：尚未轉接"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>:<xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -182,8 +184,10 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"由於沒有管理員應用程式，工作設定檔已被刪除。"</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"找不到工作設定檔應用程式，或工作設定檔應用程式已受損。因此，您的工作設定檔現在將被清除。請聯絡您的管理員以取得協助。"</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"無法在此裝置上再使用您的工作設定檔。"</string>
-    <string name="network_logging_notification_title" msgid="1805392571290161924">"網絡流量現正受監控"</string>
-    <string name="network_logging_notification_text" msgid="2671761001956320094">"輕按即可瞭解詳情"</string>
+    <!-- no translation found for network_logging_notification_title (6399790108123704477) -->
+    <skip />
+    <!-- no translation found for network_logging_notification_text (7930089249949354026) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"您的裝置將被清除"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"找不到管理員應用程式的元件，或管理員應用程式已受損並不能使用。您的裝置現在將被清除。請聯絡您的管理員以取得協助。"</string>
     <string name="me" msgid="6545696007631404292">"我本人"</string>
@@ -1099,13 +1103,7 @@
     <string name="network_switch_metered" msgid="4671730921726992671">"已切換至<xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="5325661434777870353">"當<xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g>無法連線至互聯網時，裝置便會切換至<xliff:g id="NEW_NETWORK">%1$s</xliff:g>。可能需要支付額外費用。"</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"已從<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g>切換至<xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
-  <string-array name="network_switch_type_name">
-    <item msgid="2952042958050315394">"流動數據"</item>
-    <item msgid="75483255295529161">"Wi-Fi"</item>
-    <item msgid="6862614801537202646">"藍牙"</item>
-    <item msgid="5447331121797802871">"以太網"</item>
-    <item msgid="8257233890381651999">"VPN"</item>
-  </string-array>
+    <!-- no translation found for network_switch_type_name:0 (3979506840912951943) -->
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"不明網絡類型"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"無法連線至 Wi-Fi"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" 互聯網連線欠佳。"</string>
@@ -1143,10 +1141,10 @@
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"一律允許"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"絕不允許"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"SIM 卡已移除"</string>
-    <string name="sim_removed_message" msgid="5450336489923274918">"您必須先插入有效的 SIM 卡再重新啟動手機，才能使用流動網絡。"</string>
+    <string name="sim_removed_message" msgid="2333164559970958645">"您必須先以插入有效的 SIM 卡來重新啟動手機，才能使用流動網絡。"</string>
     <string name="sim_done_button" msgid="827949989369963775">"完成"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"SIM 卡已新增"</string>
-    <string name="sim_added_message" msgid="7797975656153714319">"重新啟動裝置，才能使用流動網絡。"</string>
+    <string name="sim_added_message" msgid="6599945301141050216">"重新啟動裝置，才能使用流動網絡。"</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"重新啟動"</string>
     <string name="carrier_app_dialog_message" msgid="7066156088266319533">"為確保新的 SIM 卡正常運作，您必須先安裝並開啟流動網絡供應商提供的應用程式。"</string>
     <string name="carrier_app_dialog_button" msgid="7900235513678617329">"下載應用程式"</string>
@@ -1361,12 +1359,13 @@
     <string name="data_usage_warning_body" msgid="6660692274311972007">"輕按即可查看用量和設定。"</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"已達到 2G-3G 數據流量上限"</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"已達到 4G 數據流量上限"</string>
-    <string name="data_usage_mobile_limit_title" msgid="557158376602636112">"已達到流動數據流量上限"</string>
+    <!-- no translation found for data_usage_mobile_limit_title (6561099244084267376) -->
+    <skip />
     <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"已達到 Wi-Fi 數據流量上限"</string>
     <string name="data_usage_limit_body" msgid="291731708279614081">"已暫停使用數據連線，直到工作階段結束為止"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"已達 2G-3G 數據上限"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"已達 4G 數據上限"</string>
-    <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"已超過流動數據流量上限"</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"已達流動數據上限"</string>
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"已達 Wi-Fi 數據上限"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> 超過規定上限。"</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"已限制背景資料"</string>
@@ -1738,4 +1737,13 @@
     <string name="autofill_save_type_password" msgid="5288448918465971568">"密碼"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"地址"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"信用卡"</string>
+    <!-- no translation found for etws_primary_default_message_earthquake (5541962250262769193) -->
+    <skip />
+    <!-- no translation found for etws_primary_default_message_tsunami (1887685943498368548) -->
+    <skip />
+    <!-- no translation found for etws_primary_default_message_earthquake_and_tsunami (998797956848445862) -->
+    <skip />
+    <!-- no translation found for etws_primary_default_message_test (2709597093560037455) -->
+    <skip />
+    <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
 </resources>

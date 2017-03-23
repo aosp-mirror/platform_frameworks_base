@@ -98,7 +98,8 @@
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"குரல்/SMS சேவைகள் தடைசெய்யப்பட்டுள்ளன."</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"எல்லா குரல்/தரவு/SMS சேவைகள் தடைசெய்யப்பட்டுள்ளன."</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"நெட்வொர்க்குடன் இணைக்க முடியவில்லை"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="7335915397439759249">"பெறுதலை மேம்படுத்த, அமைப்புகள் &gt; செல்லுலார் நெட்வொர்க்குகள் &gt; விரும்பும் நெட்வொர்க் வகை என்பதில் தேர்ந்தெடுத்த நெட்வொர்க் வகையை மாற்றவும்."</string>
+    <!-- no translation found for NetworkPreferenceSwitchSummary (4164230263214915351) -->
+    <skip />
     <string name="peerTtyModeFull" msgid="6165351790010341421">"TTY Mode FULLஐ இணைச் செயல்பாடு கோரியது"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"TTY Mode HCOஐ இணைச் செயல்பாடு கோரியது"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"TTY Mode VCOஐ இணைச் செயல்பாடு கோரியது"</string>
@@ -138,7 +139,8 @@
   </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"முடக்கப்பட்டுள்ளது"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"வைஃபைக்கு முன்னுரிமை"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"செல்லுலாருக்கு முன்னுரிமை"</string>
+    <!-- no translation found for wfc_mode_cellular_preferred_summary (1988279625335345908) -->
+    <skip />
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"வைஃபை மட்டும்"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: பகிரப்படவில்லை"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -182,8 +184,10 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"நிர்வாகி பயன்பாடு இல்லாததனால், பணி சுயவிவரம் நீக்கப்பட்டது."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"பணி சுயவிவர நிர்வாகி பயன்பாடு இல்லை அல்லது சேதமடைந்துள்ளது. இதன் விளைவாக, உங்கள் பணி சுயவிவரமும், அதனுடன் தொடர்புடைய தரவும் நீக்கப்பட்டன. உதவிக்கு, உங்கள் நிர்வாகியைத் தொடர்புகொள்ளவும்."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"சாதனத்தில் இனி பணி சுயவிவரம் கிடைக்காது."</string>
-    <string name="network_logging_notification_title" msgid="1805392571290161924">"நெட்வொர்க் ட்ராஃபிக் கண்காணிக்கப்படுகிறது"</string>
-    <string name="network_logging_notification_text" msgid="2671761001956320094">"மேலும் அறிய, தட்டவும்"</string>
+    <!-- no translation found for network_logging_notification_title (6399790108123704477) -->
+    <skip />
+    <!-- no translation found for network_logging_notification_text (7930089249949354026) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"சாதனத் தரவு அழிக்கப்படும்"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"நிர்வாகி பயன்பாடு இல்லை அல்லது சேதமடைந்துள்ளது மற்றும் பயன்படுத்த முடியாது. இப்போது சாதனத் தரவு அழிக்கப்படும். உதவிக்கு, நிர்வாகியைத் தொடர்புகொள்ளவும்."</string>
     <string name="me" msgid="6545696007631404292">"நான்"</string>
@@ -1099,13 +1103,7 @@
     <string name="network_switch_metered" msgid="4671730921726992671">"<xliff:g id="NETWORK_TYPE">%1$s</xliff:g>க்கு மாற்றப்பட்டது"</string>
     <string name="network_switch_metered_detail" msgid="5325661434777870353">"<xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> இல் இணைய அணுகல் இல்லாததால், சாதனமானது <xliff:g id="NEW_NETWORK">%1$s</xliff:g>ஐப் பயன்படுத்துகிறது. கட்டணங்கள் விதிக்கப்படலாம்."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> இலிருந்து <xliff:g id="NEW_NETWORK">%2$s</xliff:g>க்கு மாற்றப்பட்டது"</string>
-  <string-array name="network_switch_type_name">
-    <item msgid="2952042958050315394">"செல்லுலார் தரவு"</item>
-    <item msgid="75483255295529161">"வைஃபை"</item>
-    <item msgid="6862614801537202646">"புளூடூத்"</item>
-    <item msgid="5447331121797802871">"ஈத்தர்நெட்"</item>
-    <item msgid="8257233890381651999">"VPN"</item>
-  </string-array>
+    <!-- no translation found for network_switch_type_name:0 (3979506840912951943) -->
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"தெரியாத நெட்வொர்க் வகை"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"வைஃபை உடன் இணைக்க முடியவில்லை"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" இணைய இணைப்பு மோசமாக உள்ளது."</string>
@@ -1143,10 +1141,10 @@
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"எப்போதும் அனுமதி"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"ஒருபோதும் அனுமதிக்காதே"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"சிம் கார்டு அகற்றப்பட்டது"</string>
-    <string name="sim_removed_message" msgid="5450336489923274918">"சரியான சிம் கார்டைச் செருகி, மறுதொடக்கம் செய்யும் வரை செல்லுலார் நெட்வொர்க் கிடைக்காது."</string>
+    <string name="sim_removed_message" msgid="2333164559970958645">"செருக்கப்பட்ட சரியான சிம் கார்டு உடன் மறுதொடக்கம் செய்யும்வரை மொபைல் நெட்வொர்க் கிடைக்காது."</string>
     <string name="sim_done_button" msgid="827949989369963775">"முடிந்தது"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"சிம் கார்டு சேர்க்கப்பட்டது"</string>
-    <string name="sim_added_message" msgid="7797975656153714319">"செல்லுலார் நெட்வொர்க்கை அணுக உங்கள் சாதனத்தை மறுதொடக்கம் செய்யவும்."</string>
+    <string name="sim_added_message" msgid="6599945301141050216">"மொபைல் நெட்வொர்க்கை அணுக உங்கள் சாதனத்தை மறுதொடக்கம் செய்யவும்."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"மறுதொடக்கம்"</string>
     <string name="carrier_app_dialog_message" msgid="7066156088266319533">"புதிய சிம் சரியாக இயங்குவதற்கு, நீங்கள் பயன்படுத்தும் மொபைல் நிறுவனத்திலிருந்து ஒரு பயன்பாட்டை நிறுவி, திறக்க வேண்டும்."</string>
     <string name="carrier_app_dialog_button" msgid="7900235513678617329">"பயன்பாட்டைப் பெறுக"</string>
@@ -1362,12 +1360,13 @@
     <string name="data_usage_warning_body" msgid="6660692274311972007">"தரவு உபயோகம், அமைப்புகளைப் பார்க்க, தட்டவும்."</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"2G-3G தரவு வரம்பைக் கடந்தது"</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"4G தரவு வரம்பைக் கடந்தது"</string>
-    <string name="data_usage_mobile_limit_title" msgid="557158376602636112">"செல்லுலார் தரவு வரம்பைக் கடந்தது"</string>
+    <!-- no translation found for data_usage_mobile_limit_title (6561099244084267376) -->
+    <skip />
     <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"வைஃபை தரவு வரம்பைக் கடந்தது"</string>
     <string name="data_usage_limit_body" msgid="291731708279614081">"மீதமுள்ள சுழற்சிக்கு தரவு இடைநிறுத்தப்பட்டது"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"2G-3G தரவு வரம்பு கடந்தது"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"4G தரவு வரம்பு கடந்தது"</string>
-    <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"செல்லுலார் தரவு வரம்பை மீறியது"</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"மொபைல் தரவு வரம்பு கடந்தது"</string>
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"வைஃபை தரவு வரம்பு கடந்தது"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"குறிப்பிட்ட வரம்பைவிட <xliff:g id="SIZE">%s</xliff:g> கூடுதல்."</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"பின்புல வரம்பு வரையறுக்கப்பட்டது"</string>
@@ -1739,4 +1738,13 @@
     <string name="autofill_save_type_password" msgid="5288448918465971568">"கடவுச்சொல்"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"முகவரி"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"கிரெடிட் கார்டு"</string>
+    <!-- no translation found for etws_primary_default_message_earthquake (5541962250262769193) -->
+    <skip />
+    <!-- no translation found for etws_primary_default_message_tsunami (1887685943498368548) -->
+    <skip />
+    <!-- no translation found for etws_primary_default_message_earthquake_and_tsunami (998797956848445862) -->
+    <skip />
+    <!-- no translation found for etws_primary_default_message_test (2709597093560037455) -->
+    <skip />
+    <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
 </resources>

@@ -98,7 +98,8 @@
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"Hääl-/SMS-teenused on blokeeritud."</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"Kõik hääl-/andme-/SMS-teenused on blokeeritud."</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Võrguga ei saa ühendust"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="7335915397439759249">"Vastuvõtu parandamiseks muutke menüüs Seaded &gt; Mobiilsidevõrgud &gt; Eelistatud võrgutüüp valitud tüüpi."</string>
+    <!-- no translation found for NetworkPreferenceSwitchSummary (4164230263214915351) -->
+    <skip />
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Partner taotles TTY-režiimi TÄIELIK"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Partner taotles TTY-režiimi HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Partner taotles TTY-režiimi VCO"</string>
@@ -138,7 +139,8 @@
   </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Väljas"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"WiFi eelistusega"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Mobiilside eelistusega"</string>
+    <!-- no translation found for wfc_mode_cellular_preferred_summary (1988279625335345908) -->
+    <skip />
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Ainult WiFi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: pole suunatud"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -182,8 +184,10 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Tööprofiil on kustutatud puuduva administraatori rakenduse tõttu."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Tööprofiili administraatori rakendus puudub või on rikutud. Seetõttu on teie tööprofiil ja seotud andmed kustutatud. Abi saamiseks võtke ühendust administraatoriga."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Teie tööprofiil pole selles seadmes enam saadaval."</string>
-    <string name="network_logging_notification_title" msgid="1805392571290161924">"Võrguliiklust jälgitakse"</string>
-    <string name="network_logging_notification_text" msgid="2671761001956320094">"Puudutage lisateabe saamiseks"</string>
+    <!-- no translation found for network_logging_notification_title (6399790108123704477) -->
+    <skip />
+    <!-- no translation found for network_logging_notification_text (7930089249949354026) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"Seade kustutatakse"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Administraatori rakendusel on puuduvaid osi või on see rikutud ja seda ei saa kasutada. Seade kustutatakse. Abi saamiseks võtke ühendust administraatoriga."</string>
     <string name="me" msgid="6545696007631404292">"Mina"</string>
@@ -1099,13 +1103,7 @@
     <string name="network_switch_metered" msgid="4671730921726992671">"Lülitati võrgule <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="5325661434777870353">"Seade kasutab võrku <xliff:g id="NEW_NETWORK">%1$s</xliff:g>, kui võrgul <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> puudub Interneti-ühendus. Rakenduda võivad tasud."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Lülitati võrgult <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> võrgule <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
-  <string-array name="network_switch_type_name">
-    <item msgid="2952042958050315394">"mobiilne andmeside"</item>
-    <item msgid="75483255295529161">"WiFi"</item>
-    <item msgid="6862614801537202646">"Bluetooth"</item>
-    <item msgid="5447331121797802871">"Ethernet"</item>
-    <item msgid="8257233890381651999">"VPN"</item>
-  </string-array>
+    <!-- no translation found for network_switch_type_name:0 (3979506840912951943) -->
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"tundmatu võrgutüüp"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Ei saanud WiFi-ga ühendust"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" on halb Interneti-ühendus."</string>
@@ -1143,10 +1141,10 @@
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"Luba alati"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"Ära luba"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"SIM-kaart eemaldatud"</string>
-    <string name="sim_removed_message" msgid="5450336489923274918">"Mobiilsidevõrk ei ole saadaval, kuni sisestate kehtiva SIM-kaardi ja taaskäivitate seadme."</string>
+    <string name="sim_removed_message" msgid="2333164559970958645">"Mobiilsidevõrk ei ole saadaval, kuni sisestate kehtiva SIM-kaardi ja taaskäivitate seadme."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Valmis"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"SIM-kaart lisatud"</string>
-    <string name="sim_added_message" msgid="7797975656153714319">"Mobiilsidevõrku pääsemiseks taaskäivitage seade."</string>
+    <string name="sim_added_message" msgid="6599945301141050216">"Mobiilsidevõrku pääsemiseks taaskäivitage seade."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"Taaskäivita"</string>
     <string name="carrier_app_dialog_message" msgid="7066156088266319533">"Uue SIM-kaardi kasutamiseks peate installima ja avama operaatorilt saadud rakenduse."</string>
     <string name="carrier_app_dialog_button" msgid="7900235513678617329">"HANKIGE RAKENDUS"</string>
@@ -1361,12 +1359,13 @@
     <string name="data_usage_warning_body" msgid="6660692274311972007">"Puudutage kasutuse/seadete vaat."</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"2G-, 3G-andmeside limiit on täis"</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"4G-andmeside limiit on täis"</string>
-    <string name="data_usage_mobile_limit_title" msgid="557158376602636112">"Mobiilse andmes. limiit on täis"</string>
+    <!-- no translation found for data_usage_mobile_limit_title (6561099244084267376) -->
+    <skip />
     <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"WiFi-andmeside limiit on täis"</string>
     <string name="data_usage_limit_body" msgid="291731708279614081">"Andmed on ülej. tsükliks peatat."</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"2G-3G andmemahupiirang ületatud"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"4G andmemahupiirang ületatud"</string>
-    <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"Mob. andmeside limiit ületatud"</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"Mobiilne andmemahupiirang ületatud"</string>
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"WiFi-andmete piir on ületatud"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> üle määratud piirmäära."</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"Taustandmed on piiratud"</string>
@@ -1738,4 +1737,13 @@
     <string name="autofill_save_type_password" msgid="5288448918465971568">"parool"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"aadress"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"krediitkaart"</string>
+    <!-- no translation found for etws_primary_default_message_earthquake (5541962250262769193) -->
+    <skip />
+    <!-- no translation found for etws_primary_default_message_tsunami (1887685943498368548) -->
+    <skip />
+    <!-- no translation found for etws_primary_default_message_earthquake_and_tsunami (998797956848445862) -->
+    <skip />
+    <!-- no translation found for etws_primary_default_message_test (2709597093560037455) -->
+    <skip />
+    <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
 </resources>

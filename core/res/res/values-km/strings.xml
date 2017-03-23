@@ -98,7 +98,8 @@
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"បាន​ទប់ស្កាត់​សេវាកម្ម​សំឡេង/សារ SMS ។"</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"សំឡេង/ទិន្នន័យ/សេវាកម្ម SMS ទាំងអស់​ត្រូវ​បាន​ទប់​ស្កាត់។"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"មិន​អាច​ភ្ជាប់​ទៅ​បណ្តាញ​បានទេ​"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="7335915397439759249">"ដើម្បី​ធ្វើ​ឲ្យ​ការ​ទទួល​​រលក​សញ្ញា​​ប្រសើរ​ជាងមុន​ សូម​សាកល្បង​ប្តូរ​ប្រភេទ​ដែល​បាន​ជ្រើសរើស​នៅ​ក្នុង ការកំណត់​ &gt;​ បណ្តាញ​ចល័ត​ &gt;​ ប្រភេទ​បណ្តាញ​ដែល​ពេញចិត្ត​។"</string>
+    <!-- no translation found for NetworkPreferenceSwitchSummary (4164230263214915351) -->
+    <skip />
     <string name="peerTtyModeFull" msgid="6165351790010341421">"ម៉ាស៊ីនកូនបានស្នើ TTY Mode FULL"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"ម៉ាស៊ីនកូនបានស្នើ TTY Mode HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"ម៉ាស៊ីនកូនបានស្នើ TTY Mode VCO"</string>
@@ -138,7 +139,8 @@
   </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"បិទ"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"គួរប្រើ Wi-Fi"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"គួរប្រើប្រព័ន្ធទូរស័ព្ទ"</string>
+    <!-- no translation found for wfc_mode_cellular_preferred_summary (1988279625335345908) -->
+    <skip />
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Wi-Fi តែប៉ុណ្ណោះ"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g> ៖ មិន​បាន​បញ្ជូន​បន្ត"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -182,8 +184,10 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"ប្រវត្តិរូបការងារត្រូវបានលុបដោយសារបាត់បង់កម្មវិធីគ្រប់គ្រង។"</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"ប្រវត្តិរូបការងាររបស់អ្នកអាចបាត់បង់ ឬមានបញ្ហា។ ជាលទ្ធផល ប្រវត្តិរូបការងាររបស់អ្នក និងទិន្នន័យដែលពាក់ព័ន្ធត្រូវបានលុប។ ទំនាក់ទំនងអ្នកគ្រប់គ្រងរបស់អ្នកសម្រាប់ជំនួយ។"</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"ប្រវត្តិរូបការងាររបស់អ្នកមិនមាននៅលើឧបករណ៍នេះទៀតទេ។"</string>
-    <string name="network_logging_notification_title" msgid="1805392571290161924">"កំពុង​តាមដាន​ចរាចរណ៍​បណ្តាញ"</string>
-    <string name="network_logging_notification_text" msgid="2671761001956320094">"ចុច​ដើម្បី​ស្វែងយល់​បន្ថែម"</string>
+    <!-- no translation found for network_logging_notification_title (6399790108123704477) -->
+    <skip />
+    <!-- no translation found for network_logging_notification_text (7930089249949354026) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"ឧបករណ៍របស់អ្នកនឹងត្រូវបានលុប"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"កម្មវិធីគ្រប់គ្រងបាត់បង់សមាសធាតុ ឬមានបញ្ហា ហើយមិនអាចប្រើបានទេ។ ឧបករណ៍របស់អ្នកនឹងត្រូវបានលុបឥឡូវនេះ។ ទំនាក់ទំនងអ្នកគ្រប់គ្រងរបស់អ្នកសម្រាប់ជំនួយ។"</string>
     <string name="me" msgid="6545696007631404292">"ខ្ញុំ"</string>
@@ -1101,13 +1105,7 @@
     <string name="network_switch_metered" msgid="4671730921726992671">"បានប្តូរទៅ <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="5325661434777870353">"ឧបករណ៍ប្រើ <xliff:g id="NEW_NETWORK">%1$s</xliff:g> នៅពេលដែល <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> គ្មានការតភ្ជាប់អ៊ីនធឺណិត។ អាចគិតប្រាក់លើការប្រើប្រាស់ទិន្នន័យ។"</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"បានប្តូរពី <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> ទៅ <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
-  <string-array name="network_switch_type_name">
-    <item msgid="2952042958050315394">"ទិន្នន័យចល័ត"</item>
-    <item msgid="75483255295529161">"Wi-Fi"</item>
-    <item msgid="6862614801537202646">"ប៊្លូធូស"</item>
-    <item msgid="5447331121797802871">"អ៊ីសឺរណិត"</item>
-    <item msgid="8257233890381651999">"VPN"</item>
-  </string-array>
+    <!-- no translation found for network_switch_type_name:0 (3979506840912951943) -->
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"ប្រភេទបណ្តាញមិនស្គាល់"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"មិន​​អាច​តភ្ជាប់​វ៉ាយហ្វាយ"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" មាន​ការ​តភ្ជាប់​អ៊ីនធឺណិត​មិន​ល្អ។"</string>
@@ -1145,10 +1143,10 @@
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"អនុញ្ញាត​ជា​និច្ច"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"កុំ​អនុញ្ញាត"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"បាន​ដក​ស៊ីម​កាត​ចេញ"</string>
-    <string name="sim_removed_message" msgid="5450336489923274918">"បណ្ដាញ​ចល័ត​នឹង​​មិន​អាច​ប្រើ​បាន​ទេ លុះត្រាតែ​អ្នក​ចាប់ផ្ដើម​ឡើង​វិញ​ដោយ​បញ្ចូល​ស៊ីមកាត​ត្រឹមត្រូវ។"</string>
+    <string name="sim_removed_message" msgid="2333164559970958645">"បណ្ដាញ​ចល័ត​នឹង​ប្រើ​លែង​បាន​រហូត​ដល់​អ្នក​ចាប់ផ្ដើម​ជា​មួយ​ស៊ីម​កាត​ដែល​បា​បញ្ចូល​ត្រឹមត្រូវ។​"</string>
     <string name="sim_done_button" msgid="827949989369963775">"រួចរាល់"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"បាន​បន្ថែម​ស៊ីម​កាត"</string>
-    <string name="sim_added_message" msgid="7797975656153714319">"ចាប់ផ្ដើម​ឧបករណ៍​របស់​អ្នក​ឡើងវិញ ដើម្បី​ចូល​ប្រើ​បណ្ដាញ​ចល័ត។"</string>
+    <string name="sim_added_message" msgid="6599945301141050216">"ចាប់ផ្ដើម​ឧបករណ៍​របស់​អ្នក​ឡើង​វិញ ដើម្បី​ចូល​ដំណើរការ​បណ្ដាញ​ចល័ត។"</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"ចាប់ផ្ដើម​ឡើងវិញ"</string>
     <string name="carrier_app_dialog_message" msgid="7066156088266319533">"ដើម្បីឲ្យស៊ីមកាតថ្មីរបស់អ្នកដំណើរការប្រក្រតី អ្នកត្រូវដំឡើង និងបើកកម្មវិធីចេញពីក្រុមហ៊ុនផ្តល់សេវាទូរស័ព្ទរបស់អ្នក។"</string>
     <string name="carrier_app_dialog_button" msgid="7900235513678617329">"ទាញយកកម្មវិធី"</string>
@@ -1363,12 +1361,13 @@
     <string name="data_usage_warning_body" msgid="6660692274311972007">"ប៉ះដើម្បីមើលការប្រើប្រាស់ និងការកំណត់"</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"បាន​ដល់​ដែន​កំណត់​ទិន្នន័យ 2G-3G"</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"បាន​ដល់​ដែន​កំណត់​ទិន្នន័យ 4G"</string>
-    <string name="data_usage_mobile_limit_title" msgid="557158376602636112">"បាន​ដល់​ដែន​កំណត់​ទិន្នន័យ​ចល័ត"</string>
+    <!-- no translation found for data_usage_mobile_limit_title (6561099244084267376) -->
+    <skip />
     <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"បានដល់ដែន​កំណត់ទិន្នន័យវ៉ាយហ្វាយ"</string>
     <string name="data_usage_limit_body" msgid="291731708279614081">"ផ្អាកទិន្នន័យសម្រាប់រយៈពេលនៅសល់"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"លើស​ដែន​កំណត់​ទិន្នន័យ 2G​-3G"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"បាន​លើស​ដែន​កំណត់​ទិន្នន័យ 4G"</string>
-    <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"បាន​លើស​ដែន​កំណត់​ទិន្នន័យ​ចល័ត"</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"បាន​លើស​ដែន​កំណត់​ទិន្នន័យ​ចល័ត"</string>
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"លើស​ដែន​កំណត់​ទិន្នន័យ​វ៉ាយហ្វាយ"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> លើ​ដែន​កំណត់​បាន​បញ្ជាក់។"</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"បាន​ដាក់​កម្រិត​ទិន្នន័យ​ផ្ទៃ​ខាង​ក្រោយ"</string>
@@ -1740,4 +1739,13 @@
     <string name="autofill_save_type_password" msgid="5288448918465971568">"ពាក្យ​សម្ងាត់"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"អាសយដ្ឋាន"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"បណ្ណ​ឥណទាន"</string>
+    <!-- no translation found for etws_primary_default_message_earthquake (5541962250262769193) -->
+    <skip />
+    <!-- no translation found for etws_primary_default_message_tsunami (1887685943498368548) -->
+    <skip />
+    <!-- no translation found for etws_primary_default_message_earthquake_and_tsunami (998797956848445862) -->
+    <skip />
+    <!-- no translation found for etws_primary_default_message_test (2709597093560037455) -->
+    <skip />
+    <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
 </resources>

@@ -98,7 +98,8 @@
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"വോയ്‌സ്/SMS സേവനങ്ങൾ തടഞ്ഞു."</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"എല്ലാ വോയ്‌സ്/ഡാറ്റ/SMS സേവനങ്ങളും തടഞ്ഞു."</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"നെറ്റ്‌വർക്കിലേക്ക് കണക്റ്റുചെയ്യാനാവുന്നില്ല"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="7335915397439759249">"സ്വീകരണം മെച്ചപ്പെടുത്തുന്നതിന് ക്രമീകരണം &gt; സെല്ലുലാർ നെറ്റ്‌വർക്കുകൾ &gt; തിരഞ്ഞെടുത്ത നെറ്റ്‌വർക്ക് തരം എന്നതിൽ തിരഞ്ഞെടുത്തിരിക്കുന്ന തരം മാറ്റിക്കൊണ്ട് ശ്രമിച്ചുനോക്കുക."</string>
+    <!-- no translation found for NetworkPreferenceSwitchSummary (4164230263214915351) -->
+    <skip />
     <string name="peerTtyModeFull" msgid="6165351790010341421">"പിയർ അഭ്യർത്ഥിച്ച TTY മോഡ് \'ഫുൾ\'"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"പിയർ അഭ്യർത്ഥിച്ച TTY മോഡ് HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"പിയർ അഭ്യർത്ഥിച്ച TTY മോഡ് VCO"</string>
@@ -138,7 +139,8 @@
   </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"ഓഫ്"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"വൈഫൈ തിരഞ്ഞെടുത്തിരിക്കുന്നു"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"സെല്ലുലാർ തിരഞ്ഞെടുത്തിരിക്കുന്നു"</string>
+    <!-- no translation found for wfc_mode_cellular_preferred_summary (1988279625335345908) -->
+    <skip />
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"വൈഫൈ മാത്രം"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: കൈമാറിയില്ല"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -182,8 +184,10 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"അഡ്‌മിൻ അപ്ലിക്കേഷൻ നഷ്‌ടപ്പെട്ടതിനാൽ ഔദ്യോഗിക പ്രൊഫൈൽ ഇല്ലാതാക്കി."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"ഔദ്യോഗിക പ്രൊഫൈൽ അഡ്‌മിൻ അപ്ലിക്കേഷൻ നഷ്‌ടപ്പെട്ടതോ കേടായതോ ആണ്. അക്കാരണത്താൽ നിങ്ങളുടെ ഔദ്യോഗിക പ്രൊഫൈലും ബന്ധപ്പെട്ട വിവരവും ഇല്ലാതാക്കിയിരിക്കുന്നു. സഹായത്തിന് അഡ്‌മിനിസ്‌ട്രേറ്ററുമായി ബന്ധപ്പെടുക."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"ഈ ഉപകരണത്തിൽ തുടർന്നങ്ങോട്ട് നിങ്ങളുടെ ഔദ്യോഗിക പ്രൊഫൈൽ ലഭ്യമല്ല."</string>
-    <string name="network_logging_notification_title" msgid="1805392571290161924">"നെറ്റ്‌വർക്ക് ട്രാഫിക്ക് നിരീക്ഷിക്കപ്പെടുന്നു"</string>
-    <string name="network_logging_notification_text" msgid="2671761001956320094">"കൂടുതലറിയുന്നതിന് ടാപ്പുചെയ്യുക"</string>
+    <!-- no translation found for network_logging_notification_title (6399790108123704477) -->
+    <skip />
+    <!-- no translation found for network_logging_notification_text (7930089249949354026) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"നിങ്ങളുടെ ഉപകരണം മായ്‌ക്കും"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"അഡ്‌മിൻ അപ്ലിക്കേഷൻ, ഘടകഭാഗങ്ങൾ നഷ്‌ടപ്പെട്ടതോ കേടായതോ ആണെങ്കിൽ ഉപയോഗിക്കാനാവില്ല. നിങ്ങളുടെ ഉപകരണം ഇപ്പോൾ ഇല്ലാതാക്കും. സഹായത്തിന് നിങ്ങളുടെ അഡ്‌മിനിസ്‌ട്രേറ്ററെ ബന്ധപ്പെടുക."</string>
     <string name="me" msgid="6545696007631404292">"ഞാന്‍"</string>
@@ -1099,13 +1103,7 @@
     <string name="network_switch_metered" msgid="4671730921726992671">"<xliff:g id="NETWORK_TYPE">%1$s</xliff:g> എന്നതിലേക്ക് മാറി"</string>
     <string name="network_switch_metered_detail" msgid="5325661434777870353">"<xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> നെറ്റ്‌വർക്കിന് ഇന്റർനെറ്റ് ആക്സസ്സ് ഇല്ലാത്തപ്പോൾ ഉപകരണം <xliff:g id="NEW_NETWORK">%1$s</xliff:g> ഉപയോഗിക്കുന്നു. നിരക്കുകൾ ബാധകമായേക്കാം."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> നെറ്റ്‌വർക്കിൽ നിന്ന് <xliff:g id="NEW_NETWORK">%2$s</xliff:g> നെറ്റ്‌വർക്കിലേക്ക് മാറി"</string>
-  <string-array name="network_switch_type_name">
-    <item msgid="2952042958050315394">"സെല്ലുലാർ ഡാറ്റ"</item>
-    <item msgid="75483255295529161">"വൈഫൈ"</item>
-    <item msgid="6862614801537202646">"Bluetooth"</item>
-    <item msgid="5447331121797802871">"ഇതര്‍നെറ്റ്"</item>
-    <item msgid="8257233890381651999">"VPN"</item>
-  </string-array>
+    <!-- no translation found for network_switch_type_name:0 (3979506840912951943) -->
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"തിരിച്ചറിയാനാകാത്ത ഒരു നെറ്റ്‌വർക്ക് തരം"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Wi-Fi-ലേക്ക് കണക്‌റ്റുചെയ്യാൻ കഴിഞ്ഞില്ല"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" മോശം ഇന്റർനെറ്റ് കണക്ഷനാണുള്ളത്."</string>
@@ -1143,10 +1141,10 @@
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"എപ്പോഴും അനുവദിക്കൂ"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"ഒരിക്കലുമനുവദിക്കരുത്"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"സിം കാർഡ് നീക്കംചെയ്‌തു"</string>
-    <string name="sim_removed_message" msgid="5450336489923274918">"സാധുതയുള്ള ഒരു സിം കാർഡ് ചേർത്ത് പുനരാരംഭിക്കുന്നതുവരെ സെല്ലുലാർ നെറ്റ്‌വർക്ക് ലഭ്യമാകില്ല."</string>
+    <string name="sim_removed_message" msgid="2333164559970958645">"സാധുതയുള്ള ഒരു സിം കാർഡ് ചേർത്ത് പുനരാരംഭിക്കുന്നതുവരെ നിങ്ങൾക്ക് മൊബൈൽ നെറ്റ്‌വർക്ക് ലഭ്യമാകില്ല."</string>
     <string name="sim_done_button" msgid="827949989369963775">"പൂർത്തിയായി"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"സിം കാർഡ് ചേർത്തു"</string>
-    <string name="sim_added_message" msgid="7797975656153714319">"സെല്ലുലാർ നെറ്റ്‌വർക്ക് ആക്‌സസ്സുചെയ്യാൻ നിങ്ങളുടെ ഉപകരണം പുനരാരംഭിക്കുക."</string>
+    <string name="sim_added_message" msgid="6599945301141050216">"മൊബൈൽ നെറ്റ്‌വർക്ക് ആക്‌സസ്സുചെയ്യാൻ നിങ്ങളുടെ ഉപകരണം പുനരാരംഭിക്കുക."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"പുനരാരംഭിക്കുക"</string>
     <string name="carrier_app_dialog_message" msgid="7066156088266319533">"നിങ്ങളുടെ സിം ശരിയായി പ്രവർത്തിക്കുന്നതിന്, നിങ്ങളുടെ കാരിയറിൽ നിന്നുള്ള ആപ്പ് നിങ്ങൾ ഇൻസ്റ്റാൾ ചെയ്യുകയും തുറക്കുകയും ചെയ്യേണ്ടതുണ്ട്."</string>
     <string name="carrier_app_dialog_button" msgid="7900235513678617329">"ആപ്പ് സ്വന്തമാക്കുക"</string>
@@ -1362,12 +1360,13 @@
     <string name="data_usage_warning_body" msgid="6660692274311972007">"ഉപയോഗവും ക്രമീകരണവും കാണാൻ ടാപ്പുചെയ്യുക."</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"2G-3G ഡാറ്റ പരിധിയിലെത്തി"</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"4G ഡാറ്റ പരിധിയിലെത്തി"</string>
-    <string name="data_usage_mobile_limit_title" msgid="557158376602636112">"സെല്ലുലാർ ഡാറ്റ പരിധിയിലെത്തി"</string>
+    <!-- no translation found for data_usage_mobile_limit_title (6561099244084267376) -->
+    <skip />
     <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"വൈഫൈ ഡാറ്റ പരിധിയിലെത്തി"</string>
     <string name="data_usage_limit_body" msgid="291731708279614081">"ശേഷിക്കുന്ന പ്രവർത്തനങ്ങൾക്കായി ഡാറ്റ താൽക്കാലികമായി നിർത്തി"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"2G-3G ഡാറ്റ പരിധി കവിഞ്ഞു"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"4G ഡാറ്റ പരിധി കവിഞ്ഞു"</string>
-    <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"സെല്ലുലാർ ഡാറ്റ പരിധി കവിഞ്ഞു"</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"മൊബൈൽ ഡാറ്റ പരിധി കവിഞ്ഞു"</string>
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"വൈഫൈ ഡാറ്റ പരിധി കവിഞ്ഞു"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"നിശ്ചിത പരിധിയിലും <xliff:g id="SIZE">%s</xliff:g> കൂടുതലാണ്."</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"പശ്ചാത്തല ഡാറ്റ പരിമിതപ്പെടുത്തി"</string>
@@ -1739,4 +1738,13 @@
     <string name="autofill_save_type_password" msgid="5288448918465971568">"പാസ്‌വേഡ്"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"വിലാസം"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"ക്രെഡിറ്റ് കാർഡ്"</string>
+    <!-- no translation found for etws_primary_default_message_earthquake (5541962250262769193) -->
+    <skip />
+    <!-- no translation found for etws_primary_default_message_tsunami (1887685943498368548) -->
+    <skip />
+    <!-- no translation found for etws_primary_default_message_earthquake_and_tsunami (998797956848445862) -->
+    <skip />
+    <!-- no translation found for etws_primary_default_message_test (2709597093560037455) -->
+    <skip />
+    <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
 </resources>

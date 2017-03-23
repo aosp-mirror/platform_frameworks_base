@@ -98,7 +98,8 @@
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"سرویس‌های صوتی/پیامک مسدود شده‌اند"</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"تمام سرویس‌های صدا/داده/ پیامک مسدود هستند."</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"شبکه دردسترس نیست"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="7335915397439759249">"‏برای بهبود دریافت، نوع شبکه‌ای را که انتخاب کرده‌اید در «تنظیمات &gt; شبکه‌های تلفن همراه &amp; gt؛ نوع شبکه ترجیحی» تغییر دهید."</string>
+    <!-- no translation found for NetworkPreferenceSwitchSummary (4164230263214915351) -->
+    <skip />
     <string name="peerTtyModeFull" msgid="6165351790010341421">"‏دستگاه مرتبط درخواست TTY حالت FULL کرد"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"‏دستگاه مرتبط درخواست TTY حالت HCO کرد"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"‏دستگاه مرتبط درخواست TTY حالت VCO کرد"</string>
@@ -138,7 +139,8 @@
   </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"خاموش"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"‏Wi-Fi ترجیحی"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"شبکه سلولی ترجیحی"</string>
+    <!-- no translation found for wfc_mode_cellular_preferred_summary (1988279625335345908) -->
+    <skip />
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"‏فقط Wi-Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: هدایت نشده"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -182,8 +184,10 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"به دلیل نداشتن برنامه سرپرست، نمایه کار حذف شده است."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"برنامه سرپرست نمایه کار وجود ندارد یا خراب است. در نتیجه، نمایه کاریتان و اطلاعات مرتبط حذف شده است. برای دریافت راهنمایی با سرپرستتان تماس بگیرید."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"نمایه کاری شما دیگر در این دستگاه در دسترس نیست."</string>
-    <string name="network_logging_notification_title" msgid="1805392571290161924">"ترافیک شبکه، تحت نظارت است"</string>
-    <string name="network_logging_notification_text" msgid="2671761001956320094">"برای اطلاعات بیشتر ضربه بزنید"</string>
+    <!-- no translation found for network_logging_notification_title (6399790108123704477) -->
+    <skip />
+    <!-- no translation found for network_logging_notification_text (7930089249949354026) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"دستگاهتان پاک خواهد شد"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"برنامه سرپرست بخش‌هایی را ندارد یا خراب است، و نمی‌تواند استفاده شود. دستگاهتان اکنون پاک می‌شود. برای این که راهنمایی شوید، با سرپرستتان تماس بگیرید."</string>
     <string name="me" msgid="6545696007631404292">"من"</string>
@@ -1099,13 +1103,7 @@
     <string name="network_switch_metered" msgid="4671730921726992671">"به <xliff:g id="NETWORK_TYPE">%1$s</xliff:g> تغییر کرد"</string>
     <string name="network_switch_metered_detail" msgid="5325661434777870353">"وقتی <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> دسترسی به اینترنت نداشته باشد، دستگاه از <xliff:g id="NEW_NETWORK">%1$s</xliff:g> استفاده می‌کند. ممکن است هزینه‌هایی اعمال شود."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"از <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> به <xliff:g id="NEW_NETWORK">%2$s</xliff:g> تغییر کرد"</string>
-  <string-array name="network_switch_type_name">
-    <item msgid="2952042958050315394">"داده شبکه تلفن همراه"</item>
-    <item msgid="75483255295529161">"Wi-Fi"</item>
-    <item msgid="6862614801537202646">"بلوتوث"</item>
-    <item msgid="5447331121797802871">"اترنت"</item>
-    <item msgid="8257233890381651999">"VPN"</item>
-  </string-array>
+    <!-- no translation found for network_switch_type_name:0 (3979506840912951943) -->
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"نوع شبکه نامشخص"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"‏اتصال به Wi-Fi ممکن نیست"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" اتصال اینترنتی ضعیفی دارد."</string>
@@ -1143,10 +1141,10 @@
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"همیشه مجاز است"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"همیشه غیرمجاز"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"سیم کارت برداشته شد"</string>
-    <string name="sim_removed_message" msgid="5450336489923274918">"تا زمانی که با یک سیم‌کارت معتبر دوباره راه‌اندازی نکنید شبکه تلفن همراه غیر قابل‌ دسترس خواهد بود."</string>
+    <string name="sim_removed_message" msgid="2333164559970958645">"تا وقتی که با یک سیم‌کارت معتبر راه‌اندازی مجدد نکنید شبکهٔ تلفن همراه غیر قابل‌ دسترس خواهد بود."</string>
     <string name="sim_done_button" msgid="827949989369963775">"تمام"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"سیم کارت اضافه شد"</string>
-    <string name="sim_added_message" msgid="7797975656153714319">"برای دسترسی به شبکه تلفن همراه، دستگاهتان را مجدداً راه‌اندازی کنید."</string>
+    <string name="sim_added_message" msgid="6599945301141050216">"برای دسترسی به شبکهٔ تلفن همراه، دستگاه خود را مجدداً راه‌اندازی کنید."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"راه‌اندازی مجدد"</string>
     <string name="carrier_app_dialog_message" msgid="7066156088266319533">"برای اینکه سیم‌کارت جدیدتان عملکرد درستی داشته باشد باید برنامه‌ای را از شرکت مخابراتی‌تان نصب و باز کنید."</string>
     <string name="carrier_app_dialog_button" msgid="7900235513678617329">"دریافت برنامه"</string>
@@ -1361,12 +1359,13 @@
     <string name="data_usage_warning_body" msgid="6660692274311972007">"برای مشاهده مصرف و تنظیمات ضربه بزنید."</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"‏به حد مجاز مصرف داده 2G-3G رسید"</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"‏به حد مجاز مصرف داده 4G رسید"</string>
-    <string name="data_usage_mobile_limit_title" msgid="557158376602636112">"به حد مجاز مصرف داده همراه رسید"</string>
+    <!-- no translation found for data_usage_mobile_limit_title (6561099244084267376) -->
+    <skip />
     <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"‏به حد مجاز مصرف داده Wi-Fi رسید"</string>
     <string name="data_usage_limit_body" msgid="291731708279614081">"داده برای مابقی دوره متوقف شد"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"‏اطلاعات 2G-3G بیش از حد مجاز است"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"‏بیش از حد مجاز 4G است"</string>
-    <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"از حد مجاز شبکه سلولی فراتر رفتید"</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"داده‌های تلفن همراه از مقدار مجاز بیشتر است"</string>
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"‏از محدوده مجاز داده‌های Wi-Fi بیشتر شد"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> از حد تعیین شده بیشتر شد."</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"داده پس‌زمینه محدود شد"</string>
@@ -1738,4 +1737,13 @@
     <string name="autofill_save_type_password" msgid="5288448918465971568">"گذرواژه"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"نشانی"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"کارت‌ اعتباری"</string>
+    <!-- no translation found for etws_primary_default_message_earthquake (5541962250262769193) -->
+    <skip />
+    <!-- no translation found for etws_primary_default_message_tsunami (1887685943498368548) -->
+    <skip />
+    <!-- no translation found for etws_primary_default_message_earthquake_and_tsunami (998797956848445862) -->
+    <skip />
+    <!-- no translation found for etws_primary_default_message_test (2709597093560037455) -->
+    <skip />
+    <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
 </resources>

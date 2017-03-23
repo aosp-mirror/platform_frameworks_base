@@ -98,7 +98,8 @@
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"Дауыс/SMS қызметтері бөгелген."</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"Барлық дыбыс/дерекқор/SMS қызметтері бөгелген."</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Желіге қосылу мүмкін емес"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="7335915397439759249">"Қабылдау мүмкіндігін жақсарту үшін \"Параметрлер &gt; Ұялы желілер &gt; Қалаған желі түрін\" таңдап, басқасына өзгертіп көріңіз."</string>
+    <!-- no translation found for NetworkPreferenceSwitchSummary (4164230263214915351) -->
+    <skip />
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Пир TTY режимі ТОЛЫҚ сұрады"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Пир TTY режимінің HCO сұрады"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Пир TTY режимінің VCO сұрады"</string>
@@ -138,7 +139,8 @@
   </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Өшірулі"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Қалаулы Wi-Fi"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Қалаулы ұялы байланыс"</string>
+    <!-- no translation found for wfc_mode_cellular_preferred_summary (1988279625335345908) -->
+    <skip />
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Тек Wi-Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Басқа нөмірге бағытталмады"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -182,8 +184,10 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Басқару қолданбасы болмағандықтан жұмыс профилі жойылды."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Жұмыс профилінің басқару қолданбасы жоқ немесе бүлінген. Нәтижесінде жұмыс профиліңіз және қатысты деректер жойылды. Көмек алу үшін әкімшіге хабарласыңыз."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Жұмыс профиліңіз осы құрылғыда енді қолжетімді емес."</string>
-    <string name="network_logging_notification_title" msgid="1805392571290161924">"Желі трафигі бақылануда"</string>
-    <string name="network_logging_notification_text" msgid="2671761001956320094">"Толығырақ мәліметтер үшін түртіңіз"</string>
+    <!-- no translation found for network_logging_notification_title (6399790108123704477) -->
+    <skip />
+    <!-- no translation found for network_logging_notification_text (7930089249949354026) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"Құрылғыңыздағы деректер өшіріледі"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Басқару қолданбасында құрамдастар жетіспейді немесе ол бүлінген және оны пайдалану мүмкін емес. Құрылғыңыздағы деректер қазір өшіріледі. Көмек алу үшін әкімшіге хабарласыңыз."</string>
     <string name="me" msgid="6545696007631404292">"Мен"</string>
@@ -1099,13 +1103,7 @@
     <string name="network_switch_metered" msgid="4671730921726992671">"<xliff:g id="NETWORK_TYPE">%1$s</xliff:g> желісіне ауысты"</string>
     <string name="network_switch_metered_detail" msgid="5325661434777870353">"Құрылғы <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> желісінде интернетпен байланыс жоғалған жағдайда <xliff:g id="NEW_NETWORK">%1$s</xliff:g> желісін пайдаланады. Деректер ақысы алынуы мүмкін."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> желісінен <xliff:g id="NEW_NETWORK">%2$s</xliff:g> желісіне ауысты"</string>
-  <string-array name="network_switch_type_name">
-    <item msgid="2952042958050315394">"ұялы дерек"</item>
-    <item msgid="75483255295529161">"Wi-Fi"</item>
-    <item msgid="6862614801537202646">"Bluetooth"</item>
-    <item msgid="5447331121797802871">"Ethernet"</item>
-    <item msgid="8257233890381651999">"VPN"</item>
-  </string-array>
+    <!-- no translation found for network_switch_type_name:0 (3979506840912951943) -->
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"желі түрі белгісіз"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Wi-Fi желісіне қосыла алмады"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" Интернет байланысы нашар."</string>
@@ -1143,10 +1141,10 @@
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"Әрқашан рұқсат беру"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"Ешқашан рұқсат бермеу"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"SIM картасы алынды"</string>
-    <string name="sim_removed_message" msgid="5450336489923274918">"Жарамды SIM картасын салып қайта іске қосқанша ұялы желі қол жетімді болмайды."</string>
+    <string name="sim_removed_message" msgid="2333164559970958645">"Жарамды SIM картасын енгізіп, қайт бастағанша, ұялы желі қол жетімсіз болады."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Дайын"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"SIM картасы қосылды"</string>
-    <string name="sim_added_message" msgid="7797975656153714319">"Ұялы желіге қатынасу үшін құрылғыны қайта іске қосыңыз."</string>
+    <string name="sim_added_message" msgid="6599945301141050216">"Ұялы желіге кіру үшін құрылғыны қайта бастаңыз."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"Қайта бастау"</string>
     <string name="carrier_app_dialog_message" msgid="7066156088266319533">"Жаңа SIM картаңыз дұрыс жұмыс істеуі үшін оператордың қолданбасын орнату және ашу керек."</string>
     <string name="carrier_app_dialog_button" msgid="7900235513678617329">"ҚОЛДАНБАНЫ АЛУ"</string>
@@ -1362,12 +1360,13 @@
     <string name="data_usage_warning_body" msgid="6660692274311972007">"Трафик пен параметрлерді көру үшін түртіңіз."</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"2G-3G деректер шегіне жеттіңіз"</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"4G деректер шегіне жеттіңіз"</string>
-    <string name="data_usage_mobile_limit_title" msgid="557158376602636112">"Ұялы деректер шегіне жеттіңіз"</string>
+    <!-- no translation found for data_usage_mobile_limit_title (6561099244084267376) -->
+    <skip />
     <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"Wi-Fi деректер шегіне жеттіңіз"</string>
     <string name="data_usage_limit_body" msgid="291731708279614081">"Циклдің қал. бөл. үшін дер. кід."</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"2Г-3Г дерекқор шектеуінен асып кетті"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"4Ш дерекқор шектеуінен асып кетті"</string>
-    <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"Ұялы деректер шегі асырылды"</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"Ұялы дерекқор шектеуінен асып кетті"</string>
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Wi-Fi дерекқор шектеуінен асып кетті"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"Анықталған уақтыттан <xliff:g id="SIZE">%s</xliff:g> асты."</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"Фондық деректер шектелген"</string>
@@ -1739,4 +1738,13 @@
     <string name="autofill_save_type_password" msgid="5288448918465971568">"құпия сөз"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"мекенжай"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"несие картасы"</string>
+    <!-- no translation found for etws_primary_default_message_earthquake (5541962250262769193) -->
+    <skip />
+    <!-- no translation found for etws_primary_default_message_tsunami (1887685943498368548) -->
+    <skip />
+    <!-- no translation found for etws_primary_default_message_earthquake_and_tsunami (998797956848445862) -->
+    <skip />
+    <!-- no translation found for etws_primary_default_message_test (2709597093560037455) -->
+    <skip />
+    <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
 </resources>
