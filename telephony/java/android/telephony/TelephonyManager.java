@@ -3080,7 +3080,7 @@ public class TelephonyManager {
      *
      * @param inputCode The special dialer code to send which follows the format of *#*#<code>#*#*
      * @return true if sent sucessfully, false otherwise
-     *
+     * @deprecated use {@link #sendDialerSpecialCode(String)} ()} instead.
      */
     public boolean sendDialerCode(String inputCode) {
         try {
@@ -3093,6 +3093,31 @@ public class TelephonyManager {
         } catch (RemoteException | NullPointerException ex) {
             // This could happen before phone restarts due to crashing
             return false;
+        }
+    }
+
+    /**
+     * Send the special dialer code. The IPC caller must be the current default dialer or has
+     * carrier privileges.
+     * @see #hasCarrierPrivileges
+     *
+     * @param inputCode The special dialer code to send
+     *
+     * @throws SecurityException if the caller does not have carrier privileges or is not the
+     *         current default dialer
+     *
+     * @throws IllegalStateException if telephony service is unavailable.
+     */
+    public void sendDialerSpecialCode(String inputCode) {
+        try {
+            final ITelephony telephony = getITelephony();
+            telephony.sendDialerSpecialCode(mContext.getOpPackageName(), inputCode);
+        } catch (RemoteException ex) {
+            // This could happen if binder process crashes.
+            ex.rethrowFromSystemServer();
+        } catch (NullPointerException ex) {
+            // This could happen before phone restarts due to crashing
+            throw new IllegalStateException("Telephony service unavailable");
         }
     }
 
