@@ -52,6 +52,7 @@ import java.util.Arrays;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.android.server.lights.Light;
@@ -259,6 +260,7 @@ public class NotificationManagerServiceTest {
 
     @Test
     @UiThreadTest
+    @Ignore("Flaky")
     public void testEnqueueNotificationWithTag_PopulatesGetActiveNotifications() throws Exception {
         mBinderService.enqueueNotificationWithTag(PKG, "opPkg", "tag", 0,
                 generateNotificationRecord(null).getNotification(), new int[1], 0);
