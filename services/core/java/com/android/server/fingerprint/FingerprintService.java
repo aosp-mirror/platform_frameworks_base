@@ -85,6 +85,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.LinkedList;
 
 /**
  * A service to manage multiple clients that want to access the fingerprint HAL API.
@@ -133,6 +134,20 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
     private ClientMonitor mCurrentClient;
     private ClientMonitor mPendingClient;
     private PerformanceStats mPerformanceStats;
+
+
+    private IBinder mToken = new Binder(); // used for internal FingerprintService enumeration
+    private LinkedList<Integer> mEnumeratingUserIds = new LinkedList<>();
+    private ArrayList<UserFingerprint> mUnknownFingerprints = new ArrayList<>(); // hw finterprints
+
+    private class UserFingerprint {
+        Fingerprint f;
+        int userId;
+        public UserFingerprint(Fingerprint f, int userId) {
+            this.f = f;
+            this.userId = userId;
+        }
+    }
 
     // Normal fingerprint authentications are tracked by mPerformanceMap.
     private HashMap<Integer, PerformanceStats> mPerformanceMap = new HashMap<>();
@@ -257,10 +272,12 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
         // This operation can be expensive, so keep track of the elapsed time. Might need to move to
         // background if it takes too long.
         long t = System.currentTimeMillis();
-
         mAuthenticatorIds.clear();
+        mEnumeratingUserIds.clear();
+        mUnknownFingerprints.clear();
         for (UserInfo user : UserManager.get(mContext).getUsers(true /* excludeDying */)) {
             int userId = getUserOrWorkProfileId(null, user.id);
+            mEnumeratingUserIds.add(userId);
             if (!mAuthenticatorIds.containsKey(userId)) {
                 updateActiveGroup(userId, null);
             }
@@ -270,12 +287,70 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
         if (t > 1000) {
             Slog.w(TAG, "loadAuthenticatorIds() taking too long: " + t + "ms");
         }
+
+        if (!mEnumeratingUserIds.isEmpty()) {
+            enumerateNextUser();
+        }
+    }
+
+    private void enumerateNextUser() {
+        int nextUser = mEnumeratingUserIds.getFirst();
+        updateActiveGroup(nextUser, null);
+        boolean restricted = !hasPermission(MANAGE_FINGERPRINT);
+
+        if (DEBUG) Slog.v(TAG, "Enumerating user id " + nextUser + " of "
+                + mEnumeratingUserIds.size() + " remaining users");
+
+        startEnumerate(mToken, nextUser, null, restricted, true /* internal */);
+    }
+
+    // Remove unknown fingerprints from hardware
+    private void cleanupUnknownFingerprints() {
+        if (!mUnknownFingerprints.isEmpty()) {
+            Slog.w(TAG, "unknown fingerprint size: " + mUnknownFingerprints.size());
+            UserFingerprint uf = mUnknownFingerprints.get(0);
+            mUnknownFingerprints.remove(uf);
+            boolean restricted = !hasPermission(MANAGE_FINGERPRINT);
+            updateActiveGroup(uf.userId, null);
+            startRemove(mToken, uf.f.getFingerId(), uf.f.getGroupId(), uf.userId, null,
+                    restricted, true /* internal */);
+        }
     }
 
     protected void handleEnumerate(long deviceId, int fingerId, int groupId, int remaining) {
-        if (DEBUG) Slog.w(TAG, "Enumerate: fid=" + fingerId + ", gid="
-                + groupId + "rem=" + remaining);
-        // TODO: coordinate names with framework
+        if (DEBUG) Slog.w(TAG, "Enumerate: fid=" + fingerId
+                + ", gid=" + groupId
+                + ", dev=" + deviceId
+                + ", rem=" + remaining);
+
+        ClientMonitor client = mCurrentClient;
+
+        if (client != null) {
+            client.onEnumerationResult(fingerId, groupId, remaining);
+        }
+
+        // All fingerprints in hardware for this user were enumerated
+        if (remaining == 0) {
+            mEnumeratingUserIds.poll();
+
+            if (client instanceof InternalEnumerateClient) {
+                List<Fingerprint> enrolled = ((InternalEnumerateClient) client).getEnumeratedList();
+                Slog.w(TAG, "Added " + enrolled.size() + " enumerated fingerprints for deletion");
+                for (Fingerprint f : enrolled) {
+                    mUnknownFingerprints.add(new UserFingerprint(f, client.getTargetUserId()));
+                }
+            }
+
+            removeClient(client);
+
+            if (!mEnumeratingUserIds.isEmpty()) {
+                enumerateNextUser();
+            } else if (client instanceof InternalEnumerateClient) {
+                if (DEBUG) Slog.v(TAG, "Finished enumerating all users");
+                // This will start a chain of InternalRemovalClients
+                cleanupUnknownFingerprints();
+            }
+        }
     }
 
     protected void handleError(long deviceId, int error, int vendorCode) {
@@ -304,9 +379,17 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
     }
 
     protected void handleRemoved(long deviceId, int fingerId, int groupId, int remaining) {
+        if (DEBUG) Slog.w(TAG, "Removed: fid=" + fingerId
+                + ", gid=" + groupId
+                + ", dev=" + deviceId
+                + ", rem=" + remaining);
+
         ClientMonitor client = mCurrentClient;
         if (client != null && client.onRemoved(fingerId, groupId, remaining)) {
             removeClient(client);
+        }
+        if (client instanceof InternalRemovalClient && !mUnknownFingerprints.isEmpty()) {
+            cleanupUnknownFingerprints();
         }
     }
 
@@ -434,7 +517,15 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
         ClientMonitor currentClient = mCurrentClient;
         if (currentClient != null) {
             if (DEBUG) Slog.v(TAG, "request stop current client " + currentClient.getOwnerString());
-            currentClient.stop(initiatedByClient);
+            if (currentClient instanceof InternalEnumerateClient ||
+                    currentClient instanceof InternalRemovalClient) {
+                // This condition means we're currently running internal diagnostics to
+                // remove extra fingerprints in the hardware and/or the software
+                // TODO: design an escape hatch in case client never finishes
+            }
+            else {
+                currentClient.stop(initiatedByClient);
+            }
             mPendingClient = newClient;
             mHandler.removeCallbacks(mResetClientState);
             mHandler.postDelayed(mResetClientState, CANCEL_TIMEOUT_LIMIT);
@@ -451,47 +542,86 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
     }
 
     void startRemove(IBinder token, int fingerId, int groupId, int userId,
-            IFingerprintServiceReceiver receiver, boolean restricted) {
+            IFingerprintServiceReceiver receiver, boolean restricted, boolean internal) {
         IBiometricsFingerprint daemon = getFingerprintDaemon();
         if (daemon == null) {
             Slog.w(TAG, "startRemove: no fingerprint HAL!");
             return;
         }
-        RemovalClient client = new RemovalClient(getContext(), mHalDeviceId, token,
-                receiver, fingerId, groupId, userId, restricted, token.toString()) {
-            @Override
-            public void notifyUserActivity() {
-                FingerprintService.this.userActivity();
-            }
 
-            @Override
-            public IBiometricsFingerprint getFingerprintDaemon() {
-                return FingerprintService.this.getFingerprintDaemon();
-            }
-        };
-        startClient(client, true);
+        if (internal) {
+            Context context = getContext();
+            InternalRemovalClient client = new InternalRemovalClient(context, mHalDeviceId,
+                    token, receiver, fingerId, groupId, userId, restricted,
+                    context.getOpPackageName()) {
+                @Override
+                public void notifyUserActivity() {
+
+                }
+                @Override
+                public IBiometricsFingerprint getFingerprintDaemon() {
+                    return FingerprintService.this.getFingerprintDaemon();
+                }
+            };
+            startClient(client, true);
+        }
+        else {
+            RemovalClient client = new RemovalClient(getContext(), mHalDeviceId, token,
+                    receiver, fingerId, groupId, userId, restricted, token.toString()) {
+                @Override
+                public void notifyUserActivity() {
+                    FingerprintService.this.userActivity();
+                }
+
+                @Override
+                public IBiometricsFingerprint getFingerprintDaemon() {
+                    return FingerprintService.this.getFingerprintDaemon();
+                }
+            };
+            startClient(client, true);
+        }
     }
 
     void startEnumerate(IBinder token, int userId,
-        IFingerprintServiceReceiver receiver, boolean restricted) {
+        IFingerprintServiceReceiver receiver, boolean restricted, boolean internal) {
         IBiometricsFingerprint daemon = getFingerprintDaemon();
         if (daemon == null) {
             Slog.w(TAG, "startEnumerate: no fingerprint HAL!");
             return;
         }
-        EnumerateClient client = new EnumerateClient(getContext(), mHalDeviceId, token,
-            receiver, userId, userId, restricted, token.toString()) {
-            @Override
-            public void notifyUserActivity() {
-                FingerprintService.this.userActivity();
-            }
+        if (internal) {
+            List<Fingerprint> enrolledList = getEnrolledFingerprints(userId);
+            Context context = getContext();
+            InternalEnumerateClient client = new InternalEnumerateClient(context, mHalDeviceId,
+                    token, receiver, userId, userId, restricted, context.getOpPackageName(),
+                    enrolledList) {
+                @Override
+                public void notifyUserActivity() {
 
-            @Override
-            public IBiometricsFingerprint getFingerprintDaemon() {
-                return FingerprintService.this.getFingerprintDaemon();
-            }
-        };
-        startClient(client, true);
+                }
+
+                @Override
+                public IBiometricsFingerprint getFingerprintDaemon() {
+                    return FingerprintService.this.getFingerprintDaemon();
+                }
+            };
+            startClient(client, true);
+        }
+        else {
+            EnumerateClient client = new EnumerateClient(getContext(), mHalDeviceId, token,
+                    receiver, userId, userId, restricted, token.toString()) {
+                @Override
+                public void notifyUserActivity() {
+                    FingerprintService.this.userActivity();
+                }
+
+                @Override
+                public IBiometricsFingerprint getFingerprintDaemon() {
+                    return FingerprintService.this.getFingerprintDaemon();
+                }
+            };
+            startClient(client, true);
+        }
     }
 
     public List<Fingerprint> getEnrolledFingerprints(int userId) {
@@ -978,12 +1108,14 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    startRemove(token, fingerId, groupId, userId, receiver, restricted);
+                    startRemove(token, fingerId, groupId, userId, receiver,
+                            restricted, false /* internal */);
                 }
             });
 
         }
 
+        @Override // Binder call
         public void enumerate(final IBinder token, final int userId,
             final IFingerprintServiceReceiver receiver) {
             checkPermission(MANAGE_FINGERPRINT); // TODO: Maybe have another permission
@@ -991,7 +1123,7 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    startEnumerate(token, userId, receiver, restricted);
+                    startEnumerate(token, userId, receiver, restricted, false /* internal */);
                 }
             });
 
