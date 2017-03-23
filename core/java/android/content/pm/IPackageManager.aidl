@@ -628,4 +628,6 @@ interface IPackageManager {
     ParceledListSlice getSharedLibraries(int flags, int userId);
 
     boolean canRequestPackageInstalls(String packageName, int userId);
+
+    void deletePreloadsFileCache();
 }
