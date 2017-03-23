@@ -8578,21 +8578,41 @@
     </declare-styleable>
 
     <!-- Attributes that are read when parsing a <font> tag, which is a child of
-         <font-family>. -->
+         <font-family>. This represents an actual font file and its attributes. -->
     <declare-styleable name="FontFamilyFont">
+        <!-- The style of the given font file. This will be used when the font is being loaded into
+         the font stack and will override any style information in the font's header tables. If
+         unspecified, the value in the font's header tables will be used. -->
         <attr name="fontStyle">
             <enum name="normal" value="0" />
             <enum name="italic" value="1" />
         </attr>
+        <!-- The reference to the font file to be used. This should be a file in the res/font folder
+         and should therefore have an R reference value. E.g. @font/myfont -->
         <attr name="font" format="reference" />
+        <!-- The weight of the given font file. This will be used when the font is being loaded into
+         the font stack and will override any weight information in the font's header tables. Must
+         be a positive number, a multiple of 100, and between 100 and 900, inclusive. The most
+         common values are 400 for regular weight and 700 for bold weight. If unspecified, the value
+         in the font's header tables will be used. -->
         <attr name="fontWeight" format="integer" />
     </declare-styleable>
 
     <!-- Attributes that are read when parsing a <fontfamily> tag. -->
     <declare-styleable name="FontFamily">
+        <!-- The authority of the Font Provider to be used for the request. -->
         <attr name="fontProviderAuthority" format="string" />
+        <!-- The package for the Font Provider to be used for the request. This is used to verify
+        the identity of the provider. -->
         <attr name="fontProviderPackage" format="string" />
+        <!-- The query to be sent over to the provider. Refer to your font provider's documentation
+        on the format of this string. -->
         <attr name="fontProviderQuery" format="string" />
+        <!-- The sets of hashes for the certificates the provider should be signed with. This is
+        used to verify the identity of the provider, and is only required if the provider is not
+        part of the system image. This value may point to one list or a list of lists, where each
+        individual list represents one collection of signature hashes. Refer to your font provider's
+        documentation for these values. -->
         <attr name="fontProviderCerts" format="reference" />
     </declare-styleable>
 
