@@ -18,6 +18,8 @@ package com.android.server.autofill.ui;
 import static android.view.autofill.AutofillManager.AutofillCallback.EVENT_INPUT_HIDDEN;
 import static android.view.autofill.AutofillManager.AutofillCallback.EVENT_INPUT_SHOWN;
 
+import static com.android.server.autofill.ui.Helper.DEBUG;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
@@ -160,7 +162,11 @@ public final class AutoFillUI {
      */
     public void showFillUi(@NonNull AutofillId focusedId, @NonNull FillResponse response,
             @NonNull Rect anchorBounds, @Nullable String filterText, @NonNull String packageName) {
-        LogMaker log = (new LogMaker(MetricsProto.MetricsEvent.AUTOFILL_FILL_UI))
+        if (DEBUG) {
+            Slog.d(TAG, "showFillUi(): id=" + focusedId + ", bounds=" + anchorBounds + " filter="
+                    + filterText);
+        }
+        final LogMaker log = (new LogMaker(MetricsProto.MetricsEvent.AUTOFILL_FILL_UI))
                 .setPackageName(packageName)
                 .addTaggedData(MetricsProto.MetricsEvent.FIELD_AUTOFILL_FILTERTEXT_LEN,
                         filterText == null ? 0 : filterText.length())

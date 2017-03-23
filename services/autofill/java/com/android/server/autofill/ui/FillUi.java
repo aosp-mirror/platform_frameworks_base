@@ -326,6 +326,16 @@ final class FillUi {
         }
 
         public void show(int desiredWidth, int desiredHeight, Rect anchorBounds) {
+            try {
+                // TODO: temporary workaround to avoud system_server crashes.
+                unsafelyShow(desiredWidth, desiredHeight, anchorBounds);
+            } catch (RuntimeException e) {
+                Slog.w(TAG, "Error showing Anchored window: w=" + desiredWidth + ", h="
+                        + desiredHeight + ", b=" + anchorBounds, e);
+            }
+        }
+
+        private void unsafelyShow(int desiredWidth, int desiredHeight, Rect anchorBounds) {
             final WindowManager.LayoutParams params = new WindowManager.LayoutParams();
 
             params.setTitle("FillUi");
