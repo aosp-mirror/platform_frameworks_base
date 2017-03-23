@@ -1639,7 +1639,7 @@ public class ListView extends AbsListView {
                     final View focusChild = getAccessibilityFocusedChild(focusHost);
                     if (focusChild != null) {
                         if (!dataChanged || isDirectChildHeaderOrFooter(focusChild)
-                                || focusChild.hasTransientState() || mAdapterHasStableIds) {
+                                || (focusChild.hasTransientState() && mAdapterHasStableIds)) {
                             // The views won't be changing, so try to maintain
                             // focus on the current host and virtual view.
                             accessibilityFocusLayoutRestoreView = focusHost;

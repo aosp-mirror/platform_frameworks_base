@@ -6873,9 +6873,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     mTransientStateViews.put(position, scrap);
                 } else {
                     // Otherwise, we'll have to remove the view and start over.
+                    clearScrapForRebind(scrap);
                     getSkippedScrap().add(scrap);
                 }
             } else {
+                clearScrapForRebind(scrap);
                 if (mViewTypeCount == 1) {
                     mCurrentScrap.add(scrap);
                 } else {
@@ -7098,12 +7100,12 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                         }
                     } else if (params.scrappedFromPosition == position) {
                         final View scrap = scrapViews.remove(i);
-                        clearAccessibilityFromScrap(scrap);
+                        clearScrapForRebind(scrap);
                         return scrap;
                     }
                 }
                 final View scrap = scrapViews.remove(size - 1);
-                clearAccessibilityFromScrap(scrap);
+                clearScrapForRebind(scrap);
                 return scrap;
             } else {
                 return null;
@@ -7117,7 +7119,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             }
         }
 
-        private void clearAccessibilityFromScrap(View view) {
+        private void clearScrapForRebind(View view) {
             view.clearAccessibilityFocus();
             view.setAccessibilityDelegate(null);
         }
