@@ -131,6 +131,13 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
     public static final int PROTECTION_FLAG_EPHEMERAL = 0x1000;
 
     /**
+     * Additional flag for {@link #protectionLevel}, corresponding
+     * to the <code>runtime</code> value of
+     * {@link android.R.attr#protectionLevel}.
+     */
+    public static final int PROTECTION_FLAG_RUNTIME_ONLY = 0x2000;
+
+    /**
      * Mask for {@link #protectionLevel}: the basic protection type.
      */
     public static final int PROTECTION_MASK_BASE = 0xf;
@@ -249,6 +256,9 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
         }
         if ((level&PermissionInfo.PROTECTION_FLAG_EPHEMERAL) != 0) {
             protLevel += "|ephemeral";
+        }
+        if ((level&PermissionInfo.PROTECTION_FLAG_RUNTIME_ONLY) != 0) {
+            protLevel += "|runtime";
         }
         return protLevel;
     }

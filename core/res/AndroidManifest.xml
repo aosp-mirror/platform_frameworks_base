@@ -913,7 +913,7 @@
         android:permissionGroup="android.permission-group.PHONE"
         android:label="@string/permlab_answerPhoneCalls"
         android:description="@string/permdesc_answerPhoneCalls"
-        android:protectionLevel="dangerous" />
+        android:protectionLevel="dangerous|runtime" />
 
 
     <!-- ====================================================================== -->

@@ -3114,6 +3114,7 @@ public class PackageParser {
 
         if ((perm.info.protectionLevel&PermissionInfo.PROTECTION_MASK_FLAGS) != 0) {
             if ( (perm.info.protectionLevel&PermissionInfo.PROTECTION_FLAG_EPHEMERAL) == 0
+                    && (perm.info.protectionLevel&PermissionInfo.PROTECTION_FLAG_RUNTIME_ONLY) == 0
                     && (perm.info.protectionLevel&PermissionInfo.PROTECTION_MASK_BASE) !=
                     PermissionInfo.PROTECTION_SIGNATURE) {
                 outError[0] = "<permission>  protectionLevel specifies a non-ephemeral flag but is "

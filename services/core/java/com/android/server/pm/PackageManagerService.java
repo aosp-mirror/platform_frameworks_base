@@ -2052,6 +2052,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
             if (bp != null && (bp.isRuntime() || bp.isDevelopment())
                     && (!instantApp || bp.isInstant())
+                    && (supportsRuntimePermissions || !bp.isRuntimeOnly())
                     && (grantedPermissions == null
                            || ArrayUtils.contains(grantedPermissions, permission))) {
                 final int flags = permissionsState.getPermissionFlags(permission, userId);
@@ -11384,6 +11385,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         for (int i=0; i<N; i++) {
             final String name = pkg.requestedPermissions.get(i);
             final BasePermission bp = mSettings.mPermissions.get(name);
+            final boolean appSupportsRuntimePermissions = pkg.applicationInfo.targetSdkVersion
+                    >= Build.VERSION_CODES.M;
 
             if (DEBUG_INSTALL) {
                 Log.i(TAG, "Package " + pkg.packageName + " checking " + name + ": " + bp);
@@ -11405,6 +11408,12 @@ public class PackageManagerService extends IPackageManager.Stub {
                 continue;
             }
 
+            if (bp.isRuntimeOnly() && !appSupportsRuntimePermissions) {
+                Log.i(TAG, "Denying runtime-only permission " + bp.name + " for package "
+                        + pkg.packageName);
+                continue;
+            }
+
             final String perm = bp.name;
             boolean allowedSig = false;
             int grant = GRANT_DENIED;
@@ -11420,8 +11429,6 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
 
             final int level = bp.protectionLevel & PermissionInfo.PROTECTION_MASK_BASE;
-            final boolean appSupportsRuntimePermissions = pkg.applicationInfo.targetSdkVersion
-                    >= Build.VERSION_CODES.M;
             switch (level) {
                 case PermissionInfo.PROTECTION_NORMAL: {
                     // For all apps normal permissions are install time ones.

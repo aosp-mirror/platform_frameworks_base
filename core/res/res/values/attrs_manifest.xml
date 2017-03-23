@@ -245,6 +245,10 @@
         <!-- Additional flag from base permission type: this permission can be granted to ephemeral
              apps -->
         <flag name="ephemeral" value="0x1000" />
+        <!-- Additional flag from base permission type: this permission can only be granted to apps
+             that target runtime permissions ({@link android.os.Build.VERSION_CODES#M} and above)
+             -->
+        <flag name="runtime" value="0x2000" />
     </attr>
 
     <!-- Flags indicating more context for a permission group. -->
