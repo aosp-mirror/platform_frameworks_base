@@ -242,50 +242,6 @@ public class UiModeManager {
     }
 
     /**
-     * Sets the vendor theme overlay property, then triggers a reboot.
-     * @hide
-     */
-    public void setTheme(String theme) {
-        if (mService != null) {
-            try {
-                mService.setTheme(theme);
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-        }
-    }
-
-    /**
-     * Gets the vendor theme overlay property.
-     * @hide
-     */
-    public String getTheme() {
-        if (mService != null) {
-            try {
-                return mService.getTheme();
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Gets the valid inputs to {@link #setTheme(String)}.
-     * @hide
-     */
-    public String[] getAvailableThemes() {
-        if (mService != null) {
-            try {
-                return mService.getAvailableThemes();
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-        }
-        return null;
-    }
-
-    /**
      * Returns the currently configured night mode.
      * <p>
      * May be one of:
