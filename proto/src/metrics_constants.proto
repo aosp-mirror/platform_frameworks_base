@@ -3791,6 +3791,12 @@ message MetricsEvent {
     // CATEGORY: SETTINGS
     // OS: O
     ACCESSIBILITY_SCREEN_MAGNIFICATION_SETTINGS = 922;
+
+    // ACTION: Logs pressing the "Clear app" button in the app info settings page for an instant
+    // app.
+    // VALUE: The package name of the app
+    ACTION_SETTINGS_CLEAR_INSTANT_APP = 923;
+
     // ---- End O Constants, all O constants go above this line ----
 
     // Add new aosp constants above this line.
