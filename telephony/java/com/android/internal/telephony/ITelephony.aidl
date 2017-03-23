@@ -530,9 +530,6 @@ interface ITelephony {
             in String number, in int port, in String text, in PendingIntent sentIntent);
 
     // Send the special dialer code. The IPC caller must be the current default dialer.
-    boolean sendDialerCode(String callingPackageName, String inputCode);
-
-    // Send the special dialer code. The IPC caller must be the current default dialer.
     void sendDialerSpecialCode(String callingPackageName, String inputCode);
 
     /**
