@@ -5393,7 +5393,7 @@ public class AccountManagerService
 
     @NonNull
     private Account[] filterAccounts(UserAccounts accounts, Account[] unfiltered, int callingUid,
-            String callingPackage, boolean includeManagedNotVisible) {
+            @Nullable String callingPackage, boolean includeManagedNotVisible) {
         String visibilityFilterPackage = callingPackage;
         if (visibilityFilterPackage == null) {
             visibilityFilterPackage = getPackageNameForUid(callingUid);
@@ -5429,8 +5429,7 @@ public class AccountManagerService
         }
         UserInfo user = getUserManager().getUserInfo(userAccounts.userId);
         if (user != null && user.isRestricted()) {
-            String[] packages =
-                    mPackageManager.getPackagesForUid(callingUid);
+            String[] packages = mPackageManager.getPackagesForUid(callingUid);
             if (packages == null) {
                 packages = new String[] {};
             }
@@ -5501,9 +5500,6 @@ public class AccountManagerService
     @NonNull
     protected Account[] getAccountsFromCacheLocked(UserAccounts userAccounts, String accountType,
             int callingUid, @Nullable String callingPackage, boolean includeManagedNotVisible) {
-        if (callingPackage == null) {
-            callingPackage = getPackageNameForUid(callingUid);
-        }
         if (accountType != null) {
             final Account[] accounts = userAccounts.accountCache.get(accountType);
             if (accounts == null) {
