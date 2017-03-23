@@ -106,11 +106,11 @@ public class SuggestionParser {
 
     public SuggestionParser(
         Context context, SharedPreferences sharedPrefs, int orderXml, String smartDismissControl) {
-        mContext = context;
-        mSuggestionList = (List<SuggestionCategory>) new SuggestionOrderInflater(mContext)
-                .parse(orderXml);
-        mSharedPrefs = sharedPrefs;
-        mSmartDismissControl = smartDismissControl;
+        this(
+                context,
+                sharedPrefs,
+                (List<SuggestionCategory>) new SuggestionOrderInflater(context).parse(orderXml),
+                smartDismissControl);
     }
 
     public SuggestionParser(Context context, SharedPreferences sharedPrefs, int orderXml) {
@@ -118,12 +118,15 @@ public class SuggestionParser {
     }
 
     @VisibleForTesting
-    public SuggestionParser(Context context, SharedPreferences sharedPrefs) {
+    public SuggestionParser(
+            Context context,
+            SharedPreferences sharedPrefs,
+            List<SuggestionCategory> suggestionList,
+            String smartDismissControl) {
         mContext = context;
-        mSuggestionList = new ArrayList<SuggestionCategory>();
+        mSuggestionList = suggestionList;
         mSharedPrefs = sharedPrefs;
-        mSmartDismissControl = DEFAULT_SMART_DISMISS_CONTROL;
-        Log.wtf(TAG, "Only use this constructor for testing");
+        mSmartDismissControl = smartDismissControl;
     }
 
     public List<Tile> getSuggestions() {
@@ -134,7 +137,19 @@ public class SuggestionParser {
         List<Tile> suggestions = new ArrayList<>();
         final int N = mSuggestionList.size();
         for (int i = 0; i < N; i++) {
-            readSuggestions(mSuggestionList.get(i), suggestions, isSmartSuggestionEnabled);
+            final SuggestionCategory category = mSuggestionList.get(i);
+            if (category.exclusive) {
+                // If suggestions from an exclusive category are present, parsing is stopped
+                // and only suggestions from that category are displayed. Note that subsequent
+                // exclusive categories are also ignored.
+                List<Tile> exclusiveSuggestions = new ArrayList<>();
+                readSuggestions(category, exclusiveSuggestions, isSmartSuggestionEnabled);
+                if (!exclusiveSuggestions.isEmpty()) {
+                    return exclusiveSuggestions;
+                }
+            } else {
+                readSuggestions(category, suggestions, isSmartSuggestionEnabled);
+            }
         }
         return suggestions;
     }
@@ -368,6 +383,7 @@ public class SuggestionParser {
         public String category;
         public String pkg;
         public boolean multiple;
+        public boolean exclusive;
     }
 
     private static class SuggestionOrderInflater {
@@ -377,6 +393,7 @@ public class SuggestionParser {
         private static final String ATTR_CATEGORY = "category";
         private static final String ATTR_PACKAGE = "package";
         private static final String ATTR_MULTIPLE = "multiple";
+        private static final String ATTR_EXCLUSIVE = "exclusive";
 
         private final Context mContext;
 
@@ -451,6 +468,9 @@ public class SuggestionParser {
                 category.pkg = attrs.getAttributeValue(null, ATTR_PACKAGE);
                 String multiple = attrs.getAttributeValue(null, ATTR_MULTIPLE);
                 category.multiple = !TextUtils.isEmpty(multiple) && Boolean.parseBoolean(multiple);
+                String exclusive = attrs.getAttributeValue(null, ATTR_EXCLUSIVE);
+                category.exclusive =
+                        !TextUtils.isEmpty(exclusive) && Boolean.parseBoolean(exclusive);
                 return category;
             } else {
                 throw new IllegalArgumentException("Unknown item " + name);
