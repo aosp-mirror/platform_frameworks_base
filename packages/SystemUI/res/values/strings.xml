@@ -1036,11 +1036,47 @@
     <!-- Monitoring dialog subtitle for the section describing network logging [CHAR LIMIT=35]-->
     <string name="monitoring_subtitle_network_logging">Network Logging</string>
 
+    <!-- Monitoring dialog subtitle for the section describing certificate authorities [CHAR LIMIT=35]-->
+    <string name="monitoring_subtitle_ca_certificate">CA certificates</string>
+
     <!-- Monitoring dialog disable vpn button [CHAR LIMIT=30] -->
     <string name="disable_vpn">Disable VPN</string>
 
     <!-- Monitoring dialog disconnect vpn button [CHAR LIMIT=30] -->
     <string name="disconnect_vpn">Disconnect VPN</string>
+
+    <!-- Monitoring dialog label for button opening a page with more information on the admin's abilities [CHAR LIMIT=30] -->
+    <string name="monitoring_button_view_policies">View Policies</string>
+
+    <!-- Monitoring dialog: Description of the device owner by name. [CHAR LIMIT=NONE]-->
+    <string name="monitoring_description_named_management">Your device is managed by <xliff:g id="organization_name" example="Foo, Inc.">%1$s</xliff:g>.\n\nYour admin can monitor and manage settings, corporate access, apps, data associated with your device, and your device's location information.\n\nFor more information, contact your admin." </string>
+
+    <!-- Monitoring dialog: Description of a device owner. [CHAR LIMIT=NONE]-->
+    <string name="monitoring_description_management">Your device is managed by your organization.\n\nYour admin can monitor and manage settings, corporate access, apps, data associated with your device, and your device's location information.\n\nFor more information, contact your admin." </string>
+
+    <!-- Monitoring dialog: Description of a CA Certificate. [CHAR LIMIT=NONE]-->
+    <string name="monitoring_description_management_ca_certificate">Your organization installed a certificate authority on this device. Your secure network traffic may be monitored or modified.</string>
+
+    <!-- Monitoring dialog: Description of a CA Certificate in the work profile. [CHAR LIMIT=NONE]-->
+    <string name="monitoring_description_managed_profile_ca_certificate">Your organization installed a certificate authority in your work profile. Your secure network traffic may be monitored or modified.</string>
+
+    <!-- Monitoring dialog: Description of a CA Certificate. [CHAR LIMIT=NONE]-->
+    <string name="monitoring_description_ca_certificate">A certificate authority is installed on this device. Your secure network traffic may be monitored or modified.</string>
+
+    <!-- Monitoring dialog: Description of Network Logging. [CHAR LIMIT=NONE]-->
+    <string name="monitoring_description_management_network_logging">Your admin has turned on network logging, which monitores traffic on your device.</string>
+
+    <!-- Monitoring dialog: Description of an active VPN. [CHAR LIMIT=NONE]-->
+    <string name="monitoring_description_named_vpn">You're connected to <xliff:g id="vpn_app" example="Foo VPN App">%1$s</xliff:g>, which can monitor your network activity, including emails, apps, and websites.</string>
+
+    <!-- Monitoring dialog: Description of two active VPNs. [CHAR LIMIT=NONE]-->
+    <string name="monitoring_description_two_named_vpns">You're connected to <xliff:g id="vpn_app" example="Foo VPN App">%1$s</xliff:g> and <xliff:g id="vpn_app" example="Bar VPN App">%2$s</xliff:g>, which can monitor your network activity, including emails, apps, and websites.</string>
+
+    <!-- Monitoring dialog: Description of an active VPN in the work profile. [CHAR LIMIT=NONE]-->
+    <string name="monitoring_description_managed_profile_named_vpn">Your work profile is connected to <xliff:g id="vpn_app" example="Foo VPN App">%1$s</xliff:g>, which can monitor your network activity, including emails, apps, and websites.</string>
+
+    <!-- Monitoring dialog: Description of an active VPN in the personal profile (as opposed to the work profile). [CHAR LIMIT=NONE]-->
+    <string name="monitoring_description_personal_profile_named_vpn">Your personal profile is connected to <xliff:g id="vpn_app" example="Foo VPN App">%1$s</xliff:g>, which can monitor your network activity, including emails, apps, and websites.</string>
 
     <!-- Monitoring dialog: Header indicating that the device is managed by a Device Owner app [CHAR LIMIT=80] -->
     <string name="monitoring_description_do_header_generic">Your device is managed by <xliff:g id="device_owner_app" example="Google Mobile Management">%1$s</xliff:g>.</string>
@@ -1068,7 +1104,6 @@
 
     <!-- Monitoring dialog: Network logging text [CHAR LIMIT=400] -->
     <string name="monitoring_description_network_logging">Your admin has turned on network logging, which monitors traffic on your device.\n\nFor more information, contact your admin.</string>
-
 
     <!-- Monitoring dialog VPN text [CHAR LIMIT=400] -->
     <string name="monitoring_description_vpn">You gave an app permission to set up a VPN connection.\n\nThis app can monitor your device and network activity, including emails, apps, and websites.</string>
