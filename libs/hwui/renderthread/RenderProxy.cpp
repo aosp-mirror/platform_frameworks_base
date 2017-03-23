@@ -21,6 +21,7 @@
 #include "Properties.h"
 #include "Readback.h"
 #include "Rect.h"
+#include "pipeline/skia/VectorDrawableAtlas.h"
 #include "renderthread/CanvasContext.h"
 #include "renderthread/EglManager.h"
 #include "renderthread/RenderTask.h"
@@ -716,6 +717,19 @@ void RenderProxy::disableVsync() {
 
 void RenderProxy::post(RenderTask* task) {
     mRenderThread.queue(task);
+}
+
+CREATE_BRIDGE1(repackVectorDrawableAtlas, RenderThread* thread) {
+    args->thread->cacheManager().acquireVectorDrawableAtlas()->repackIfNeeded(
+            args->thread->getGrContext());
+    return nullptr;
+}
+
+void RenderProxy::repackVectorDrawableAtlas() {
+    RenderThread& thread = RenderThread::getInstance();
+    SETUP_TASK(repackVectorDrawableAtlas);
+    args->thread = &thread;
+    thread.queue(task);
 }
 
 void* RenderProxy::postAndWait(MethodInvokeRenderTask* task) {

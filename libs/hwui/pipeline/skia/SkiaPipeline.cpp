@@ -183,26 +183,16 @@ public:
 };
 
 void SkiaPipeline::renderVectorDrawableCache() {
-    //render VectorDrawables into offscreen buffers
-    for (auto vd : mVectorDrawables) {
-        sk_sp<SkSurface> surface;
-        if (!vd->canReuseSurface()) {
-#ifndef ANDROID_ENABLE_LINEAR_BLENDING
-            sk_sp<SkColorSpace> colorSpace = nullptr;
-#else
-            sk_sp<SkColorSpace> colorSpace = SkColorSpace::MakeSRGB();
-#endif
-            int scaledWidth = SkScalarCeilToInt(vd->properties().getScaledWidth());
-            int scaledHeight = SkScalarCeilToInt(vd->properties().getScaledHeight());
-            SkImageInfo info = SkImageInfo::MakeN32(scaledWidth, scaledHeight,
-                    kPremul_SkAlphaType, colorSpace);
-            SkASSERT(mRenderThread.getGrContext() != nullptr);
-            surface = SkSurface::MakeRenderTarget(mRenderThread.getGrContext(), SkBudgeted::kYes,
-                    info);
+    if (!mVectorDrawables.empty()) {
+        sp<VectorDrawableAtlas> atlas = mRenderThread.cacheManager().acquireVectorDrawableAtlas();
+        auto grContext = mRenderThread.getGrContext();
+        atlas->prepareForDraw(grContext);
+        for (auto vd : mVectorDrawables) {
+            vd->updateCache(atlas, grContext);
         }
-        vd->updateCache(surface);
+        grContext->flush();
+        mVectorDrawables.clear();
     }
-    mVectorDrawables.clear();
 }
 
 void SkiaPipeline::renderFrame(const LayerUpdateQueue& layers, const SkRect& clip,

@@ -19,6 +19,7 @@
 
 #include "hwui/Canvas.h"
 #include "hwui/Bitmap.h"
+#include "renderthread/CacheManager.h"
 #include "DisplayList.h"
 
 #include <SkBitmap.h>
@@ -687,35 +688,61 @@ public:
     bool getPropertyChangeWillBeConsumed() const { return mWillBeConsumed; }
     void setPropertyChangeWillBeConsumed(bool willBeConsumed) { mWillBeConsumed = willBeConsumed; }
 
-    // Returns true if VD cache surface is big enough. This should always be called from RT and it
-    // works with Skia pipelines only.
-    bool canReuseSurface() {
-        SkSurface* surface = mCache.surface.get();
-        return surface && surface->width() >= mProperties.getScaledWidth()
-              && surface->height() >= mProperties.getScaledHeight();
-    }
-
-    // Draws VD cache into a canvas. This should always be called from RT and it works with Skia
-    // pipelines only.
+    /**
+     * Draws VD cache into a canvas. This should always be called from RT and it works with Skia
+     * pipelines only.
+     */
     void draw(SkCanvas* canvas);
 
-    // Draws VD into a GPU backed surface. If canReuseSurface returns false, then "surface" must
-    // contain a new surface. This should always be called from RT and it works with Skia pipelines
-    // only.
-    void updateCache(sk_sp<SkSurface> surface);
+    /**
+     * Draws VD into a GPU backed surface.
+     * This should always be called from RT and it works with Skia pipeline only.
+     */
+    void updateCache(sp<skiapipeline::VectorDrawableAtlas>& atlas, GrContext* context);
 
 private:
-    struct Cache {
+    class Cache {
+    public:
         sk_sp<Bitmap> bitmap; //used by HWUI pipeline and software
         //TODO: use surface instead of bitmap when drawing in software canvas
-        sk_sp<SkSurface> surface; //used only by Skia pipelines
         bool dirty = true;
+
+        // the rest of the code in Cache is used by Skia pipelines only
+
+        ~Cache() { clear(); }
+
+        /**
+         * Stores a weak pointer to the atlas and a key.
+         */
+        void setAtlas(sp<skiapipeline::VectorDrawableAtlas> atlas,
+                skiapipeline::AtlasKey newAtlasKey);
+
+        /**
+         * Gets a surface and bounds from the atlas.
+         *
+         * @return nullptr if the altas has been deleted.
+         */
+        sk_sp<SkSurface> getSurface(SkRect* bounds);
+
+        /**
+         * Releases atlas key from the atlas, which makes it available for reuse.
+         */
+        void clear();
+    private:
+        wp<skiapipeline::VectorDrawableAtlas> mAtlas;
+        skiapipeline::AtlasKey mAtlasKey = INVALID_ATLAS_KEY;
     };
 
     SkPaint* updatePaint(SkPaint* outPaint, TreeProperties* prop);
     bool allocateBitmapIfNeeded(Cache& cache, int width, int height);
     bool canReuseBitmap(Bitmap*, int width, int height);
     void updateBitmapCache(Bitmap& outCache, bool useStagingData);
+
+    /**
+     * Draws the root node into "surface" at a given "dst" position.
+     */
+    void draw(SkSurface* surface, const SkRect& dst);
+
     // Cap the bitmap size, such that it won't hurt the performance too much
     // and it won't crash due to a very large scale.
     // The drawable will look blurry above this size.
