@@ -504,12 +504,12 @@ public final class BluetoothLeAdvertiser {
             }
 
             @Override
-            public void onPeriodicAdvertisingEnable(int advertiserId, boolean enable, int status) {
+            public void onPeriodicAdvertisingEnabled(int advertiserId, boolean enable, int status) {
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
                         AdvertisingSet advertisingSet = mAdvertisingSets.get(advertiserId);
-                        callback.onPeriodicAdvertisingEnable(advertisingSet, enable, status);
+                        callback.onPeriodicAdvertisingEnabled(advertisingSet, enable, status);
                     }
                 });
             }
