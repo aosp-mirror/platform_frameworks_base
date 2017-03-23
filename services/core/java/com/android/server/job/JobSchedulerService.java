@@ -1965,12 +1965,22 @@ public final class JobSchedulerService extends com.android.server.SystemService
                     pw.print(mHandler.isReadyToBeExecutedLocked(job));
                     pw.print(" (job=");
                     pw.print(job.isReady());
-                    pw.print(" pending=");
-                    pw.print(mPendingJobs.contains(job));
-                    pw.print(" active=");
-                    pw.print(isCurrentlyActiveLocked(job));
                     pw.print(" user=");
                     pw.print(ArrayUtils.contains(mStartedUsers, job.getUserId()));
+                    pw.print(" !pending=");
+                    pw.print(!mPendingJobs.contains(job));
+                    pw.print(" !active=");
+                    pw.print(!isCurrentlyActiveLocked(job));
+                    pw.print(" comp=");
+                    boolean componentPresent = false;
+                    try {
+                        componentPresent = (AppGlobals.getPackageManager().getServiceInfo(
+                                job.getServiceComponent(),
+                                PackageManager.MATCH_DEBUG_TRIAGED_MISSING,
+                                job.getUserId()) != null);
+                    } catch (RemoteException e) {
+                    }
+                    pw.print(componentPresent);
                     pw.println(")");
                 }
             } else {

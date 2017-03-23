@@ -128,13 +128,13 @@ public final class UidRecord {
         }
         sb.append(" procs:");
         sb.append(numProcs);
-        sb.append(" curProcStateSeq:");
+        sb.append(" seq(");
         sb.append(curProcStateSeq);
-        sb.append(" lastNetworkUpdatedProcStateSeq:");
+        sb.append(",");
         sb.append(lastNetworkUpdatedProcStateSeq);
-        sb.append(" lastDispatchedProcStateSeq:");
+        sb.append(",");
         sb.append(lastDispatchedProcStateSeq);
-        sb.append("}");
+        sb.append(")}");
         return sb.toString();
     }
 }
