@@ -385,6 +385,42 @@ public class AccountsDbTest {
     }
 
     @Test
+    public void testFindAllVisibilityValues() {
+        long accId = 10;
+        long accId2 = 11;
+        String packageName1 = "com.example.one";
+        String packageName2 = "com.example.two";
+        Account account = new Account("name", "example.com");
+        Account account2 = new Account("name2", "example2.com");
+        assertNull(mAccountsDb.findAccountVisibility(account, packageName1));
+
+        mAccountsDb.insertDeAccount(account, accId);
+        assertNull(mAccountsDb.findAccountVisibility(account, packageName1));
+        assertNull(mAccountsDb.findAccountVisibility(accId, packageName1));
+        mAccountsDb.insertDeAccount(account2, accId2);
+
+        mAccountsDb.setAccountVisibility(accId, packageName1, 1);
+        mAccountsDb.setAccountVisibility(accId, packageName2, 2);
+        mAccountsDb.setAccountVisibility(accId2, packageName1, 1);
+
+        Map<Account, Map<String, Integer>> vis = mAccountsDb.findAllVisibilityValues();
+        assertEquals(vis.size(), 2);
+        Map<String, Integer> accnt1Visibility = vis.get(account);
+        assertEquals(accnt1Visibility.size(), 2);
+        assertEquals(accnt1Visibility.get(packageName1), Integer.valueOf(1));
+        assertEquals(accnt1Visibility.get(packageName2), Integer.valueOf(2));
+        Map<String, Integer> accnt2Visibility = vis.get(account2);
+        assertEquals(accnt2Visibility.size(), 1);
+        assertEquals(accnt2Visibility.get(packageName1), Integer.valueOf(1));
+
+        mAccountsDb.setAccountVisibility(accId2, packageName2, 3);
+        vis = mAccountsDb.findAllVisibilityValues();
+        accnt2Visibility = vis.get(account2);
+        assertEquals(accnt2Visibility.size(), 2);
+        assertEquals(accnt2Visibility.get(packageName2), Integer.valueOf(3));
+    }
+
+    @Test
     public void testVisibilityCleanupTrigger() {
         long accId = 10;
         String packageName1 = "com.example.one";

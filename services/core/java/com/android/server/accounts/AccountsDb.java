@@ -909,7 +909,7 @@ class AccountsDb implements AutoCloseable {
     }
 
     Integer findAccountVisibility(Account account, String packageName) {
-        SQLiteDatabase db = mDeDatabase.getWritableDatabase();
+        SQLiteDatabase db = mDeDatabase.getReadableDatabase();
         final Cursor cursor = db.query(TABLE_VISIBILITY, new String[] {VISIBILITY_VALUE},
                 SELECTION_ACCOUNTS_ID_BY_ACCOUNT + " AND " + VISIBILITY_PACKAGE + "=? ",
                 new String[] {account.name, account.type, packageName}, null, null, null);
@@ -924,7 +924,7 @@ class AccountsDb implements AutoCloseable {
     }
 
     Integer findAccountVisibility(long accountId, String packageName) {
-        SQLiteDatabase db = mDeDatabase.getWritableDatabase();
+        SQLiteDatabase db = mDeDatabase.getReadableDatabase();
         final Cursor cursor = db.query(TABLE_VISIBILITY, new String[] {VISIBILITY_VALUE},
                 VISIBILITY_ACCOUNTS_ID + "=? AND " + VISIBILITY_PACKAGE + "=? ",
                 new String[] {String.valueOf(accountId), packageName}, null, null, null);
@@ -965,6 +965,41 @@ class AccountsDb implements AutoCloseable {
         try {
             while (cursor.moveToNext()) {
                 result.put(cursor.getString(0), cursor.getInt(1));
+            }
+        } finally {
+            cursor.close();
+        }
+        return result;
+    }
+
+    /**
+     * Returns a map account -> (package -> visibility)
+     */
+    Map <Account, Map<String, Integer>> findAllVisibilityValues() {
+        SQLiteDatabase db = mDeDatabase.getReadableDatabase();
+        Map<Account, Map<String, Integer>> result = new HashMap<>();
+        Cursor cursor = db.rawQuery(
+                "SELECT " + TABLE_VISIBILITY + "." + VISIBILITY_PACKAGE
+                        + ", " + TABLE_VISIBILITY + "." + VISIBILITY_VALUE
+                        + ", " + TABLE_ACCOUNTS + "." + ACCOUNTS_NAME
+                        + ", " + TABLE_ACCOUNTS + "." + ACCOUNTS_TYPE
+                        + " FROM " + TABLE_VISIBILITY
+                        + " JOIN " + TABLE_ACCOUNTS
+                        + " ON " + TABLE_ACCOUNTS + "." + ACCOUNTS_ID
+                        + " = " + TABLE_VISIBILITY + "." + VISIBILITY_ACCOUNTS_ID, null);
+        try {
+            while (cursor.moveToNext()) {
+                String packageName = cursor.getString(0);
+                Integer visibility = cursor.getInt(1);
+                String accountName = cursor.getString(2);
+                String accountType = cursor.getString(3);
+                Account account = new Account(accountName, accountType);
+                Map <String, Integer> accountVisibility = result.get(account);
+                if (accountVisibility == null) {
+                    accountVisibility = new HashMap<>();
+                    result.put(account, accountVisibility);
+                }
+                accountVisibility.put(packageName, visibility);
             }
         } finally {
             cursor.close();

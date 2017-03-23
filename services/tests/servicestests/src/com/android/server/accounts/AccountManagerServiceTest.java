@@ -94,7 +94,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * <p>Run with:<pre>
  * mmma -j40 frameworks/base/services/tests/servicestests
  * adb install -r ${OUT}/data/app/FrameworksServicesTests/FrameworksServicesTests.apk
- * adb shell am instrument -w -e class package com.android.server.accounts \
+ * adb shell am instrument -w -e package com.android.server.accounts \
  * com.android.frameworks.servicestests\
  * /android.support.test.runner.AndroidJUnitRunner
  * </pre>
