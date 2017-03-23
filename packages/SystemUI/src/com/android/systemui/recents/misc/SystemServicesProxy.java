@@ -32,7 +32,6 @@ import android.app.ActivityOptions;
 import android.app.AppGlobals;
 import android.app.IActivityManager;
 import android.app.KeyguardManager;
-import android.app.UiModeManager;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -42,7 +41,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -298,15 +296,9 @@ public class SystemServicesProxy {
             mDummyIcon.eraseColor(0xFF999999);
         }
 
-        UiModeManager uiModeManager = (UiModeManager) context.
-                getSystemService(Context.UI_MODE_SERVICE);
-        if (uiModeManager.getCurrentModeType() == Configuration.UI_MODE_TYPE_TELEVISION) {
-            Collections.addAll(sRecentsBlacklist,
-                    res.getStringArray(R.array.recents_tv_blacklist_array));
-        } else {
-            Collections.addAll(sRecentsBlacklist,
-                    res.getStringArray(R.array.recents_blacklist_array));
-        }
+        Collections.addAll(sRecentsBlacklist,
+                res.getStringArray(R.array.recents_blacklist_array));
+
         mLauncherIcons = new LauncherIcons(context);
     }
 
