@@ -18,7 +18,10 @@ package com.android.server.autofill;
 
 import static android.Manifest.permission.MANAGE_AUTO_FILL;
 import static android.content.Context.AUTOFILL_MANAGER_SERVICE;
+
+import static com.android.server.autofill.Helper.DEBUG;
 import static com.android.server.autofill.Helper.VERBOSE;
+import static com.android.server.autofill.Helper.bundleToString;
 
 import android.Manifest;
 import android.annotation.NonNull;
@@ -28,8 +31,8 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.UserInfo;
 import android.database.ContentObserver;
 import android.graphics.Rect;
 import android.net.Uri;
@@ -41,16 +44,19 @@ import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
 import android.os.UserHandle;
+import android.os.UserManager;
+import android.os.UserManagerInternal;
 import android.provider.Settings;
 import android.util.LocalLog;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SparseBooleanArray;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillValue;
-
 import android.view.autofill.IAutoFillManager;
 import android.view.autofill.IAutoFillManagerClient;
+
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.IResultReceiver;
@@ -90,20 +96,20 @@ public final class AutofillManagerService extends SystemService {
      * It has to be mapped by user id because the same current user could have simultaneous sessions
      * associated to different user profiles (for example, in a multi-window environment or when
      * device has work profiles).
-     * <p>
-     * Entries on this cache are added on demand and removed when:
-     * <ol>
-     *   <li>An autofill service app is removed.
-     *   <li>The {@link android.provider.Settings.Secure#AUTOFILL_SERVICE} for an user change.
-     * </ol>
      */
-    // TODO(b/33197203): Update the above comment
     @GuardedBy("mLock")
     private SparseArray<AutofillManagerServiceImpl> mServicesCache = new SparseArray<>();
+
+    /**
+     * Users disabled due to {@link UserManager} restrictions.
+     */
+    @GuardedBy("mLock")
+    private final SparseBooleanArray mDisabledUsers = new SparseBooleanArray();
 
     // TODO(b/33197203): set a different max (or disable it) on low-memory devices.
     private final LocalLog mRequestsHistory = new LocalLog(20);
 
+    // TODO(b/33197203): is this still needed?
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -122,10 +128,38 @@ public final class AutofillManagerService extends SystemService {
         mContext = context;
         mUi = new AutoFillUI(mContext);
 
-        IntentFilter filter = new IntentFilter();
+        final IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
-        mContext.registerReceiver(mBroadcastReceiver, filter, null,
-                FgThread.getHandler());
+        mContext.registerReceiver(mBroadcastReceiver, filter, null, FgThread.getHandler());
+
+        // Hookup with UserManager to disable service when necessary.
+        final UserManager um = context.getSystemService(UserManager.class);
+        final UserManagerInternal umi = LocalServices.getService(UserManagerInternal.class);
+        final List<UserInfo> users = um.getUsers();
+        for (int i = 0; i < users.size(); i++) {
+            final int userId = users.get(i).id;
+            final boolean disabled = umi.getUserRestriction(userId, UserManager.DISALLOW_AUTOFILL);
+            if (disabled) {
+                mDisabledUsers.put(userId, disabled);
+            }
+        }
+        umi.addUserRestrictionsListener((userId, newRestrictions, prevRestrictions) -> {
+            final boolean disabledNow =
+                    newRestrictions.getBoolean(UserManager.DISALLOW_AUTOFILL, false);
+            synchronized (mLock) {
+                final boolean disabledBefore = mDisabledUsers.get(userId);
+                if (disabledBefore == disabledNow) {
+                    // Nothing changed, do nothing.
+                    if (DEBUG) {
+                        Slog.d(TAG, "Restriction not changed for user " + userId + ": "
+                                + bundleToString(newRestrictions));
+                        return;
+                    }
+                }
+                mDisabledUsers.put(userId, disabledNow);
+                updateCachedServiceLocked(userId, disabledNow);
+            }
+        });
     }
 
     @Override
@@ -164,7 +198,7 @@ public final class AutofillManagerService extends SystemService {
         AutofillManagerServiceImpl service = mServicesCache.get(userId);
         if (service == null) {
             service = new AutofillManagerServiceImpl(mContext, mLock,
-                    mRequestsHistory, userId, mUi);
+                    mRequestsHistory, userId, mUi, mDisabledUsers.get(userId));
             mServicesCache.put(userId, service);
         }
         return service;
@@ -272,9 +306,16 @@ public final class AutofillManagerService extends SystemService {
      * Updates a cached service for a given user.
      */
     private void updateCachedServiceLocked(int userId) {
+        updateCachedServiceLocked(userId, mDisabledUsers.get(userId));
+    }
+
+    /**
+     * Updates a cached service for a given user.
+     */
+    private void updateCachedServiceLocked(int userId, boolean disabled) {
         AutofillManagerServiceImpl service = mServicesCache.get(userId);
         if (service != null) {
-            service.updateLocked();
+            service.updateLocked(disabled);
         }
     }
 
@@ -386,6 +427,7 @@ public final class AutofillManagerService extends SystemService {
                 return;
             }
             synchronized (mLock) {
+                pw.print("Disabled users: "); pw.println(mDisabledUsers);
                 final int size = mServicesCache.size();
                 pw.print("Cached services: ");
                 if (size == 0) {

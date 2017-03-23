@@ -208,7 +208,7 @@ public final class Dataset implements Parcelable {
         }
 
         /**
-         * Sets the value of a field, usin a custom presentation to visualize it.
+         * Sets the value of a field, using a custom presentation to visualize it.
          *
          * @param id id returned by {@link
          *         android.app.assist.AssistStructure.ViewNode#getAutofillId()}.
@@ -257,8 +257,7 @@ public final class Dataset implements Parcelable {
             throwIfDestroyed();
             mDestroyed = true;
             if (mFieldIds == null) {
-                throw new IllegalArgumentException(
-                        "at least one value must be set");
+                throw new IllegalArgumentException("at least one value must be set");
             }
             return new Dataset(this);
         }
