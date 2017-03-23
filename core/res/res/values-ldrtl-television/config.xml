@@ -22,7 +22,7 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
 
     <!-- The default gravity for the picture-in-picture window.
-         Currently, this maps to Gravity.TOP | Gravity.LEFT -->
-    <integer name="config_defaultPictureInPictureGravity">0x33</integer>
+         Currently, this maps to Gravity.BOTTOM | Gravity.LEFT -->
+    <integer name="config_defaultPictureInPictureGravity">0x53</integer>
 
 </resources>
