@@ -17,8 +17,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"Guaska"</string>
-    <!-- no translation found for bugreport_notification_channel (2574150205913861141) -->
-    <skip />
+    <string name="bugreport_notification_channel" msgid="2574150205913861141">"Raportet e gabimeve"</string>
     <string name="bugreport_in_progress_title" msgid="4311705936714972757">"Raporti i defekteve në kod <xliff:g id="ID">#%d</xliff:g> po krijohet"</string>
     <string name="bugreport_finished_title" msgid="4429132808670114081">"Raporti i defekteve në kod <xliff:g id="ID">#%d</xliff:g> u regjistrua"</string>
     <string name="bugreport_updating_title" msgid="4423539949559634214">"Po shtohen detajet te raporti i defekteve në kod"</string>

@@ -17,8 +17,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"شیل"</string>
-    <!-- no translation found for bugreport_notification_channel (2574150205913861141) -->
-    <skip />
+    <string name="bugreport_notification_channel" msgid="2574150205913861141">"بگ رپورٹس"</string>
     <string name="bugreport_in_progress_title" msgid="4311705936714972757">"بگ رپورٹ <xliff:g id="ID">#%d</xliff:g> تخلیق ہو رہی ہے"</string>
     <string name="bugreport_finished_title" msgid="4429132808670114081">"بگ رپورٹ <xliff:g id="ID">#%d</xliff:g> کیپچر ہو گئی"</string>
     <string name="bugreport_updating_title" msgid="4423539949559634214">"بگ رپورٹ میں تفصیلات شامل کی جا رہی ہیں"</string>
