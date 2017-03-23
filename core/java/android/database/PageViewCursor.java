@@ -18,13 +18,13 @@ package android.database;
 import static com.android.internal.util.Preconditions.checkArgument;
 
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.content.ContentResolver;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.MathUtils;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 
 /**
@@ -34,11 +34,10 @@ import com.android.internal.util.ArrayUtils;
  *
  * @hide
  */
+@TestApi
 public final class PageViewCursor extends CursorWrapper implements CrossProcessCursor {
 
-    /**
-     * An in internal extra added to results that are auto-paged using the wrapper.
-     */
+    /** An extra added to results that are auto-paged using the wrapper. */
     public static final String EXTRA_AUTO_PAGED = "android.content.extra.AUTO_PAGED";
 
     private static final String TAG = "PageViewCursor";
@@ -56,7 +55,6 @@ public final class PageViewCursor extends CursorWrapper implements CrossProcessC
     /**
      * @see PageViewCursor#wrap(Cursor, Bundle)
      */
-    @VisibleForTesting
     public PageViewCursor(Cursor cursor, int offset, int limit) {
         super(cursor);
 
