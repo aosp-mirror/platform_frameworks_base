@@ -179,6 +179,7 @@ import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -3651,6 +3652,10 @@ public class NotificationManagerService extends SystemService {
             mVibrator.vibrate(record.sbn.getUid(), record.sbn.getOpPkg(),
                     effect, record.getAudioAttributes());
             return true;
+        } catch (IllegalArgumentException e) {
+            Slog.e(TAG, "Error creating vibration waveform with pattern: " +
+                    Arrays.toString(vibration));
+            return false;
         } finally{
             Binder.restoreCallingIdentity(identity);
         }
