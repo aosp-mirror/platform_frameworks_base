@@ -93,6 +93,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.ParcelFileDescriptor;
+import android.os.Parcelable;
 import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
@@ -2550,25 +2551,32 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     private void handleTimedOutNetworkRequest(final NetworkRequestInfo nri) {
-        if (mNetworkRequests.get(nri.request) != null && mNetworkForRequestId.get(
-                nri.request.requestId) == null) {
-            handleRemoveNetworkRequest(nri, ConnectivityManager.CALLBACK_UNAVAIL);
+        if (mNetworkRequests.get(nri.request) == null) {
+            return;
         }
+        if (mNetworkForRequestId.get(nri.request.requestId) != null) {
+            return;
+        }
+        if (VDBG || (DBG && nri.request.isRequest())) {
+            log("releasing " + nri.request + " (timeout)");
+        }
+        handleRemoveNetworkRequest(nri);
+        callCallbackForRequest(nri, null, ConnectivityManager.CALLBACK_UNAVAIL, 0);
     }
 
     private void handleReleaseNetworkRequest(NetworkRequest request, int callingUid) {
-        final NetworkRequestInfo nri = getNriForAppRequest(
-                request, callingUid, "release NetworkRequest");
-        if (nri != null) {
-            handleRemoveNetworkRequest(nri, ConnectivityManager.CALLBACK_RELEASED);
+        final NetworkRequestInfo nri =
+                getNriForAppRequest(request, callingUid, "release NetworkRequest");
+        if (nri == null) {
+            return;
         }
+        if (VDBG || (DBG && nri.request.isRequest())) {
+            log("releasing " + nri.request + " (release request)");
+        }
+        handleRemoveNetworkRequest(nri);
     }
 
-    private void handleRemoveNetworkRequest(final NetworkRequestInfo nri, final int whichCallback) {
-        final String logCallbackType = ConnectivityManager.getCallbackName(whichCallback);
-        if (VDBG || (DBG && nri.request.isRequest())) {
-            log("releasing " + nri.request + " (" + logCallbackType + ")");
-        }
+    private void handleRemoveNetworkRequest(final NetworkRequestInfo nri) {
         nri.unlinkDeathRecipient();
         mNetworkRequests.remove(nri.request);
         synchronized (mUidToNetworkRequestCount) {
@@ -2664,7 +2672,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 }
             }
         }
-        callCallbackForRequest(nri, null, whichCallback, 0);
     }
 
     @Override
@@ -4722,16 +4729,17 @@ public class ConnectivityService extends IConnectivityManager.Stub
         releasePendingNetworkRequestWithDelay(pendingIntent);
     }
 
-    private void callCallbackForRequest(NetworkRequestInfo nri,
+    private static void callCallbackForRequest(NetworkRequestInfo nri,
             NetworkAgentInfo networkAgent, int notificationType, int arg1) {
-        if (nri.messenger == null) return;  // Default request has no msgr
+        if (nri.messenger == null) {
+            return;  // Default request has no msgr
+        }
         Bundle bundle = new Bundle();
-        bundle.putParcelable(NetworkRequest.class.getSimpleName(),
-                new NetworkRequest(nri.request));
+        // TODO: check if defensive copies of data is needed.
+        putParcelable(bundle, new NetworkRequest(nri.request));
         Message msg = Message.obtain();
-        if (notificationType != ConnectivityManager.CALLBACK_UNAVAIL &&
-                notificationType != ConnectivityManager.CALLBACK_RELEASED) {
-            bundle.putParcelable(Network.class.getSimpleName(), networkAgent.network);
+        if (notificationType != ConnectivityManager.CALLBACK_UNAVAIL) {
+            putParcelable(bundle, networkAgent.network);
         }
         switch (notificationType) {
             case ConnectivityManager.CALLBACK_LOSING: {
@@ -4739,13 +4747,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 break;
             }
             case ConnectivityManager.CALLBACK_CAP_CHANGED: {
-                bundle.putParcelable(NetworkCapabilities.class.getSimpleName(),
-                        new NetworkCapabilities(networkAgent.networkCapabilities));
+                putParcelable(bundle, new NetworkCapabilities(networkAgent.networkCapabilities));
                 break;
             }
             case ConnectivityManager.CALLBACK_IP_CHANGED: {
-                bundle.putParcelable(LinkProperties.class.getSimpleName(),
-                        new LinkProperties(networkAgent.linkProperties));
+                putParcelable(bundle, new LinkProperties(networkAgent.linkProperties));
                 break;
             }
         }
@@ -4761,6 +4767,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
             // may occur naturally in the race of binder death.
             loge("RemoteException caught trying to send a callback msg for " + nri.request);
         }
+    }
+
+    private static <T extends Parcelable> void putParcelable(Bundle bundle, T t) {
+        bundle.putParcelable(t.getClass().getSimpleName(), t);
     }
 
     private void teardownUnneededNetwork(NetworkAgentInfo nai) {
