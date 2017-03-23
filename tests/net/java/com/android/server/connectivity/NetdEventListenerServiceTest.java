@@ -62,19 +62,21 @@ public class NetdEventListenerServiceTest {
 
     @Before
     public void setUp() {
-        mCm = mock(ConnectivityManager.class);
-        mNetdEventListenerService = new NetdEventListenerService(mCm);
-    }
-
-    @Test
-    public void testDnsLogging() throws Exception {
         NetworkCapabilities ncWifi = new NetworkCapabilities();
         NetworkCapabilities ncCell = new NetworkCapabilities();
         ncWifi.addTransportType(NetworkCapabilities.TRANSPORT_WIFI);
         ncCell.addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR);
 
+        mCm = mock(ConnectivityManager.class);
         when(mCm.getNetworkCapabilities(new Network(100))).thenReturn(ncWifi);
         when(mCm.getNetworkCapabilities(new Network(101))).thenReturn(ncCell);
+
+        mNetdEventListenerService = new NetdEventListenerService(mCm);
+    }
+
+    @Test
+    public void testDnsLogging() throws Exception {
+        asyncDump(100);
 
         dnsEvent(100, EVENT_GETADDRINFO, 0, 3456);
         dnsEvent(100, EVENT_GETADDRINFO, 0, 267);
@@ -94,18 +96,6 @@ public class NetdEventListenerServiceTest {
         String got = flushStatistics();
         String want = String.join("\n",
                 "dropped_events: 0",
-                "events <",
-                "  if_name: \"\"",
-                "  link_layer: 0",
-                "  network_id: 0",
-                "  time_ms: 0",
-                "  transports: 0",
-                "  connect_statistics <",
-                "    connect_blocking_count: 0",
-                "    connect_count: 0",
-                "    ipv6_addr_count: 0",
-                "  >",
-                ">",
                 "events <",
                 "  if_name: \"\"",
                 "  link_layer: 4",
@@ -172,34 +162,36 @@ public class NetdEventListenerServiceTest {
 
     @Test
     public void testConnectLogging() throws Exception {
+        asyncDump(100);
+
         final int OK = 0;
         Thread[] logActions = {
             // ignored
-            connectEventAction(OsConstants.EALREADY, 0, EXAMPLE_IPV4),
-            connectEventAction(OsConstants.EALREADY, 0, EXAMPLE_IPV6),
-            connectEventAction(OsConstants.EINPROGRESS, 0, EXAMPLE_IPV4),
-            connectEventAction(OsConstants.EINPROGRESS, 0, EXAMPLE_IPV6),
-            connectEventAction(OsConstants.EINPROGRESS, 0, EXAMPLE_IPV6),
+            connectEventAction(100, OsConstants.EALREADY, 0, EXAMPLE_IPV4),
+            connectEventAction(100, OsConstants.EALREADY, 0, EXAMPLE_IPV6),
+            connectEventAction(100, OsConstants.EINPROGRESS, 0, EXAMPLE_IPV4),
+            connectEventAction(101, OsConstants.EINPROGRESS, 0, EXAMPLE_IPV6),
+            connectEventAction(101, OsConstants.EINPROGRESS, 0, EXAMPLE_IPV6),
             // valid latencies
-            connectEventAction(OK, 110, EXAMPLE_IPV4),
-            connectEventAction(OK, 23, EXAMPLE_IPV4),
-            connectEventAction(OK, 45, EXAMPLE_IPV4),
-            connectEventAction(OK, 56, EXAMPLE_IPV4),
-            connectEventAction(OK, 523, EXAMPLE_IPV6),
-            connectEventAction(OK, 214, EXAMPLE_IPV6),
-            connectEventAction(OK, 67, EXAMPLE_IPV6),
+            connectEventAction(100, OK, 110, EXAMPLE_IPV4),
+            connectEventAction(100, OK, 23, EXAMPLE_IPV4),
+            connectEventAction(100, OK, 45, EXAMPLE_IPV4),
+            connectEventAction(101, OK, 56, EXAMPLE_IPV4),
+            connectEventAction(101, OK, 523, EXAMPLE_IPV6),
+            connectEventAction(101, OK, 214, EXAMPLE_IPV6),
+            connectEventAction(101, OK, 67, EXAMPLE_IPV6),
             // errors
-            connectEventAction(OsConstants.EPERM, 0, EXAMPLE_IPV4),
-            connectEventAction(OsConstants.EPERM, 0, EXAMPLE_IPV4),
-            connectEventAction(OsConstants.EAGAIN, 0, EXAMPLE_IPV4),
-            connectEventAction(OsConstants.EACCES, 0, EXAMPLE_IPV4),
-            connectEventAction(OsConstants.EACCES, 0, EXAMPLE_IPV4),
-            connectEventAction(OsConstants.EACCES, 0, EXAMPLE_IPV6),
-            connectEventAction(OsConstants.EADDRINUSE, 0, EXAMPLE_IPV4),
-            connectEventAction(OsConstants.ETIMEDOUT, 0, EXAMPLE_IPV4),
-            connectEventAction(OsConstants.ETIMEDOUT, 0, EXAMPLE_IPV6),
-            connectEventAction(OsConstants.ETIMEDOUT, 0, EXAMPLE_IPV6),
-            connectEventAction(OsConstants.ECONNREFUSED, 0, EXAMPLE_IPV4),
+            connectEventAction(100, OsConstants.EPERM, 0, EXAMPLE_IPV4),
+            connectEventAction(101, OsConstants.EPERM, 0, EXAMPLE_IPV4),
+            connectEventAction(100, OsConstants.EAGAIN, 0, EXAMPLE_IPV4),
+            connectEventAction(100, OsConstants.EACCES, 0, EXAMPLE_IPV4),
+            connectEventAction(101, OsConstants.EACCES, 0, EXAMPLE_IPV4),
+            connectEventAction(101, OsConstants.EACCES, 0, EXAMPLE_IPV6),
+            connectEventAction(100, OsConstants.EADDRINUSE, 0, EXAMPLE_IPV4),
+            connectEventAction(101, OsConstants.ETIMEDOUT, 0, EXAMPLE_IPV4),
+            connectEventAction(100, OsConstants.ETIMEDOUT, 0, EXAMPLE_IPV6),
+            connectEventAction(100, OsConstants.ETIMEDOUT, 0, EXAMPLE_IPV6),
+            connectEventAction(101, OsConstants.ECONNREFUSED, 0, EXAMPLE_IPV4),
         };
 
         for (Thread t : logActions) {
@@ -209,59 +201,84 @@ public class NetdEventListenerServiceTest {
             t.join();
         }
 
-        List<IpConnectivityEvent> events = new ArrayList<>();
-        mNetdEventListenerService.flushStatistics(events);
-
-        IpConnectivityEvent got = events.get(0);
+        String got = flushStatistics();
         String want = String.join("\n",
-                "if_name: \"\"",
-                "link_layer: 0",
-                "network_id: 0",
-                "time_ms: 0",
-                "transports: 0",
-                "connect_statistics <",
-                "  connect_blocking_count: 7",
-                "  connect_count: 12",
-                "  errnos_counters <",
-                "    key: 1",
-                "    value: 2",
+                "dropped_events: 0",
+                "events <",
+                "  if_name: \"\"",
+                "  link_layer: 4",
+                "  network_id: 100",
+                "  time_ms: 0",
+                "  transports: 2",
+                "  connect_statistics <",
+                "    connect_blocking_count: 3",
+                "    connect_count: 6",
+                "    errnos_counters <",
+                "      key: 1",
+                "      value: 1",
+                "    >",
+                "    errnos_counters <",
+                "      key: 11",
+                "      value: 1",
+                "    >",
+                "    errnos_counters <",
+                "      key: 13",
+                "      value: 1",
+                "    >",
+                "    errnos_counters <",
+                "      key: 98",
+                "      value: 1",
+                "    >",
+                "    errnos_counters <",
+                "      key: 110",
+                "      value: 2",
+                "    >",
+                "    ipv6_addr_count: 1",
+                "    latencies_ms: 23",
+                "    latencies_ms: 45",
+                "    latencies_ms: 110",
                 "  >",
-                "  errnos_counters <",
-                "    key: 11",
-                "    value: 1",
+                ">",
+                "events <",
+                "  if_name: \"\"",
+                "  link_layer: 2",
+                "  network_id: 101",
+                "  time_ms: 0",
+                "  transports: 1",
+                "  connect_statistics <",
+                "    connect_blocking_count: 4",
+                "    connect_count: 6",
+                "    errnos_counters <",
+                "      key: 1",
+                "      value: 1",
+                "    >",
+                "    errnos_counters <",
+                "      key: 13",
+                "      value: 2",
+                "    >",
+                "    errnos_counters <",
+                "      key: 110",
+                "      value: 1",
+                "    >",
+                "    errnos_counters <",
+                "      key: 111",
+                "      value: 1",
+                "    >",
+                "    ipv6_addr_count: 5",
+                "    latencies_ms: 56",
+                "    latencies_ms: 67",
+                "    latencies_ms: 214",
+                "    latencies_ms: 523",
                 "  >",
-                "  errnos_counters <",
-                "    key: 13",
-                "    value: 3",
-                "  >",
-                "  errnos_counters <",
-                "    key: 98",
-                "    value: 1",
-                "  >",
-                "  errnos_counters <",
-                "    key: 110",
-                "    value: 3",
-                "  >",
-                "  errnos_counters <",
-                "    key: 111",
-                "    value: 1",
-                "  >",
-                "  ipv6_addr_count: 6",
-                "  latencies_ms: 23",
-                "  latencies_ms: 45",
-                "  latencies_ms: 56",
-                "  latencies_ms: 67",
-                "  latencies_ms: 110",
-                "  latencies_ms: 214",
-                "  latencies_ms: 523",
-                ">\n");
-        verifyConnectEvent(want, got);
+                ">",
+                "version: 2\n");
+        assertEquals(want, got);
     }
 
-    Thread connectEventAction(int error, int latencyMs, String ipAddr) {
+    Thread connectEventAction(int netId, int error, int latencyMs, String ipAddr) {
         return new Thread(() -> {
             try {
-                mNetdEventListenerService.onConnectEvent(100, error, latencyMs, ipAddr, 80, 1);
+                mNetdEventListenerService.onConnectEvent(netId, error, latencyMs, ipAddr, 80, 1);
             } catch (Exception e) {
                 fail(e.toString());
             }
@@ -272,25 +289,14 @@ public class NetdEventListenerServiceTest {
         mNetdEventListenerService.onDnsEvent(netId, type, result, latency, "", null, 0, 0);
     }
 
-    Thread dumpAction(long durationMs) throws Exception {
+    void asyncDump(long durationMs) throws Exception {
         final long stop = System.currentTimeMillis() + durationMs;
         final PrintWriter pw = new PrintWriter(new FileOutputStream("/dev/null"));
-        return new Thread(() -> {
+        new Thread(() -> {
             while (System.currentTimeMillis() < stop) {
                 mNetdEventListenerService.dump(pw);
             }
-        });
-    }
-
-    static void verifyConnectEvent(String expected, IpConnectivityEvent got) {
-        try {
-            Arrays.sort(got.getConnectStatistics().latenciesMs);
-            Arrays.sort(got.getConnectStatistics().errnosCounters,
-                    Comparator.comparingInt((p) -> p.key));
-            assertEquals(expected, got.toString());
-        } catch (Exception e) {
-            fail(e.toString());
-        }
+        }).start();
     }
 
     // TODO: instead of comparing textpb to textpb, parse textpb and compare proto to proto.
@@ -303,6 +309,16 @@ public class NetdEventListenerServiceTest {
         PrintWriter writer = new PrintWriter(buffer);
         metricsService.impl.dump(null, writer, new String[]{"flush"});
         byte[] bytes = Base64.decode(buffer.toString(), Base64.DEFAULT);
-        return IpConnectivityLog.parseFrom(bytes).toString();
+        IpConnectivityLog log = IpConnectivityLog.parseFrom(bytes);
+        for (IpConnectivityEvent ev : log.events) {
+            if (ev.getConnectStatistics() == null) {
+                continue;
+            }
+            // Sort repeated fields of connect() events arriving in non-deterministic order.
+            Arrays.sort(ev.getConnectStatistics().latenciesMs);
+            Arrays.sort(ev.getConnectStatistics().errnosCounters,
+                    Comparator.comparingInt((p) -> p.key));
+        }
+        return log.toString();
     }
 }

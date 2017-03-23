@@ -16,7 +16,9 @@
 
 package android.net.metrics;
 
+import android.net.NetworkCapabilities;
 import java.util.Arrays;
+import com.android.internal.util.BitUtils;
 
 /**
  * A DNS event recorded by NetdEventListenerService.
@@ -74,6 +76,10 @@ final public class DnsEvent {
 
     @Override
     public String toString() {
-        return String.format("DnsEvent(%d events)", eventCount);
+        StringBuilder builder = new StringBuilder("DnsEvent(").append(netId).append(", ");
+        for (int t : BitUtils.unpackBits(transports)) {
+            builder.append(NetworkCapabilities.transportNameOf(t)).append(", ");
+        }
+        return builder.append(eventCount).append(" events)").toString();
     }
 }

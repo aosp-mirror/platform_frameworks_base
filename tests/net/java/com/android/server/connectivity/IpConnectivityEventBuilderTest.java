@@ -45,7 +45,9 @@ import android.net.metrics.NetworkEvent;
 import android.net.metrics.RaEvent;
 import android.net.metrics.ValidationProbeEvent;
 import android.test.suitebuilder.annotation.SmallTest;
+import com.android.server.connectivity.metrics.nano.IpConnectivityLogClass.IpConnectivityEvent;
 import java.util.Arrays;
+import java.util.List;
 import junit.framework.TestCase;
 
 // TODO: instead of comparing textpb to textpb, parse textpb and compare proto to proto.
@@ -483,8 +485,9 @@ public class IpConnectivityEventBuilderTest extends TestCase {
 
     static void verifySerialization(String want, ConnectivityMetricsEvent... input) {
         try {
-            byte[] got = IpConnectivityEventBuilder.serialize(0,
-                    IpConnectivityEventBuilder.toProto(Arrays.asList(input)));
+            List<IpConnectivityEvent> proto =
+                    IpConnectivityEventBuilder.toProto(Arrays.asList(input));
+            byte[] got = IpConnectivityEventBuilder.serialize(0, proto);
             IpConnectivityLog log = IpConnectivityLog.parseFrom(got);
             assertEquals(want, log.toString());
         } catch (Exception e) {
