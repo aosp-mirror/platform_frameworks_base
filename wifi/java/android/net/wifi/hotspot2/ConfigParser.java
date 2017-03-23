@@ -111,6 +111,7 @@ public final class ConfigParser {
      *
      * Content-Type: multipart/mixed; boundary={boundary}
      * Content-Transfer-Encoding: base64
+     * [Skip uninterested headers]
      *
      * --{boundary}
      * Content-Type: application/x-passpoint-profile
@@ -326,7 +327,8 @@ public final class ConfigParser {
                     header.encodingType = entry.getValue();
                     break;
                 default:
-                    throw new IOException("Unexpected header: " + entry.getKey());
+                    Log.d(TAG, "Ignore header: " + entry.getKey());
+                    break;
             }
         }
         return header;
@@ -344,21 +346,24 @@ public final class ConfigParser {
      * @throws IOException
      */
     private static Pair<String, String> parseContentType(String contentType) throws IOException {
-        String[] attributes = contentType.toString().split(";");
+        String[] attributes = contentType.split(";");
         String type = null;
         String boundary = null;
 
-        if (attributes.length < 1 || attributes.length > 2) {
+        if (attributes.length < 1) {
             throw new IOException("Invalid Content-Type: " + contentType);
         }
 
+        // The type is always the first attribute.
         type = attributes[0].trim();
-        if (attributes.length == 2) {
-            boundary = attributes[1].trim();
-            if (!boundary.startsWith(BOUNDARY)) {
-                throw new IOException("Invalid Content-Type: " + contentType);
+        // Look for boundary string from the rest of the attributes.
+        for (int i = 1; i < attributes.length; i++) {
+            String attribute = attributes[i].trim();
+            if (!attribute.startsWith(BOUNDARY)) {
+                Log.d(TAG, "Ignore Content-Type attribute: " + attributes[i]);
+                continue;
             }
-            boundary = boundary.substring(BOUNDARY.length());
+            boundary = attribute.substring(BOUNDARY.length());
             // Remove the leading and trailing quote if present.
             if (boundary.length() > 1 && boundary.startsWith("\"") && boundary.endsWith("\"")) {
                 boundary = boundary.substring(1, boundary.length()-1);
