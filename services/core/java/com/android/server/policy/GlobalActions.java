@@ -29,9 +29,10 @@ class GlobalActions implements GlobalActionsListener {
     private static final boolean DEBUG = false;
 
     private final Context mContext;
-    private final LegacyGlobalActions mLegacyGlobalActions;
     private final StatusBarManagerInternal mStatusBarInternal;
     private final Handler mHandler;
+    private final WindowManagerFuncs mWindowManagerFuncs;
+    private LegacyGlobalActions mLegacyGlobalActions;
     private boolean mKeyguardShowing;
     private boolean mDeviceProvisioned;
     private boolean mStatusBarConnected;
@@ -40,14 +41,19 @@ class GlobalActions implements GlobalActionsListener {
     public GlobalActions(Context context, WindowManagerFuncs windowManagerFuncs) {
         mContext = context;
         mHandler = new Handler();
-        mLegacyGlobalActions = new LegacyGlobalActions(context, windowManagerFuncs,
-                this::onGlobalActionsDismissed);
+        mWindowManagerFuncs = windowManagerFuncs;
         mStatusBarInternal = LocalServices.getService(StatusBarManagerInternal.class);
 
         // Some form factors do not have a status bar.
         if (mStatusBarInternal != null) {
             mStatusBarInternal.setGlobalActionsListener(this);
         }
+    }
+
+    private void ensureLegacyCreated() {
+        if (mLegacyGlobalActions != null) return;
+        mLegacyGlobalActions = new LegacyGlobalActions(mContext, mWindowManagerFuncs,
+                this::onGlobalActionsDismissed);
     }
 
     public void showDialog(boolean keyguardShowing, boolean deviceProvisioned) {
@@ -60,6 +66,7 @@ class GlobalActions implements GlobalActionsListener {
             mHandler.postDelayed(mShowTimeout, 5000);
         } else {
             // SysUI isn't alive, show legacy menu.
+            ensureLegacyCreated();
             mLegacyGlobalActions.showDialog(mKeyguardShowing, mDeviceProvisioned);
         }
     }
@@ -83,6 +90,7 @@ class GlobalActions implements GlobalActionsListener {
         mStatusBarConnected = connected;
         if (mShowing && !mStatusBarConnected) {
             // Status bar died but we need to be showing global actions still, show the legacy.
+            ensureLegacyCreated();
             mLegacyGlobalActions.showDialog(mKeyguardShowing, mDeviceProvisioned);
         }
     }
@@ -92,6 +100,7 @@ class GlobalActions implements GlobalActionsListener {
         public void run() {
             if (DEBUG) Slog.d(TAG, "Global actions timeout");
             // We haven't heard from sysui, show the legacy dialog.
+            ensureLegacyCreated();
             mLegacyGlobalActions.showDialog(mKeyguardShowing, mDeviceProvisioned);
         }
     };
