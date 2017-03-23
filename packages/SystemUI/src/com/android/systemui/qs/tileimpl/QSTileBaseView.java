@@ -20,6 +20,7 @@ import android.graphics.drawable.RippleDrawable;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.service.quicksettings.Tile;
 import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.View;
@@ -110,7 +111,6 @@ public class QSTileBaseView extends com.android.systemui.plugins.qs.QSTileView {
 
     public void init(OnClickListener click, OnClickListener secondaryClick,
             OnLongClickListener longClick) {
-        setClickable(true);
         setOnClickListener(click);
         setOnLongClickListener(longClick);
     }
@@ -148,12 +148,19 @@ public class QSTileBaseView extends com.android.systemui.plugins.qs.QSTileView {
     }
 
     protected void handleStateChanged(QSTile.State state) {
+        setClickable(state.state != Tile.STATE_UNAVAILABLE);
         mIcon.setIcon(state);
         setContentDescription(state.contentDescription);
         mAccessibilityClass = state.expandedAccessibilityClassName;
         if (state instanceof QSTile.BooleanState) {
             mTileState = ((QSTile.BooleanState) state).value;
         }
+    }
+
+    @Override
+    public void setClickable(boolean clickable) {
+        super.setClickable(clickable);
+        setBackground(clickable ? mRipple : null);
     }
 
     @Override
