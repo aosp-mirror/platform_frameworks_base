@@ -3116,8 +3116,19 @@ public class NotificationManagerService extends SystemService {
                         + " - notification=" + notification);
                 return;
             }
-            throw new IllegalArgumentException("No Channel found for channelId=" + channelId
-                    + ", notification=" + notification);
+            final String noChannelStr = "No Channel found for "
+                    + "pkg=" + pkg
+                    + ", channelId=" + channelId
+                    + ", opPkg=" + opPkg
+                    + ", callingUid=" + callingUid
+                    + ", userId=" + userId
+                    + ", incomingUserId=" + incomingUserId
+                    + ", notificationUid=" + notificationUid
+                    + ", notification=" + notification;
+            // STOPSHIP TODO: should throw instead of logging.
+            // throw new IllegalArgumentException(noChannelStr);
+            Log.e(TAG, noChannelStr);
+            return;
         }
         final StatusBarNotification n = new StatusBarNotification(
                 pkg, opPkg, id, tag, notificationUid, callingPid, notification,
