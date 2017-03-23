@@ -92,8 +92,8 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
     private final MediaSessionService mService;
 
     private final Object mLock = new Object();
-    private final ArrayList<ISessionControllerCallback> mControllerCallbacks =
-            new ArrayList<ISessionControllerCallback>();
+    private final ArrayList<ISessionControllerCallbackHolder> mControllerCallbackHolders =
+            new ArrayList<>();
 
     private long mFlags;
     private PendingIntent mMediaButtonReceiver;
@@ -444,7 +444,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         pw.println(indent + "active=" + mIsActive);
         pw.println(indent + "flags=" + mFlags);
         pw.println(indent + "rating type=" + mRatingType);
-        pw.println(indent + "controllers: " + mControllerCallbacks.size());
+        pw.println(indent + "controllers: " + mControllerCallbackHolders.size());
         pw.println(indent + "state=" + (mPlaybackState == null ? null : mPlaybackState.toString()));
         pw.println(indent + "audioAttrs=" + mAudioAttrs);
         pw.println(indent + "volumeType=" + mVolumeType + ", controlType=" + mVolumeControlType
@@ -489,20 +489,28 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         return "size=" + fields + ", description=" + description;
     }
 
+    private void logCallbackException(
+            String msg, ISessionControllerCallbackHolder holder, Exception e) {
+        Log.v(TAG, msg + ", this=" + this + ", callback package=" + holder.mPackageName
+                + ", exception=" + e);
+    }
+
     private void pushPlaybackStateUpdate() {
         synchronized (mLock) {
             if (mDestroyed) {
                 return;
             }
-            for (int i = mControllerCallbacks.size() - 1; i >= 0; i--) {
-                ISessionControllerCallback cb = mControllerCallbacks.get(i);
+            for (int i = mControllerCallbackHolders.size() - 1; i >= 0; i--) {
+                ISessionControllerCallbackHolder holder = mControllerCallbackHolders.get(i);
                 try {
-                    cb.onPlaybackStateChanged(mPlaybackState);
+                    holder.mCallback.onPlaybackStateChanged(mPlaybackState);
                 } catch (DeadObjectException e) {
-                    mControllerCallbacks.remove(i);
-                    Log.w(TAG, "Removed dead callback in pushPlaybackStateUpdate.", e);
+                    mControllerCallbackHolders.remove(i);
+                    logCallbackException("Removed dead callback in pushPlaybackStateUpdate",
+                            holder, e);
                 } catch (RemoteException e) {
-                    Log.w(TAG, "unexpected exception in pushPlaybackStateUpdate.", e);
+                    logCallbackException("unexpected exception in pushPlaybackStateUpdate",
+                            holder, e);
                 }
             }
         }
@@ -513,15 +521,15 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
             if (mDestroyed) {
                 return;
             }
-            for (int i = mControllerCallbacks.size() - 1; i >= 0; i--) {
-                ISessionControllerCallback cb = mControllerCallbacks.get(i);
+            for (int i = mControllerCallbackHolders.size() - 1; i >= 0; i--) {
+                ISessionControllerCallbackHolder holder = mControllerCallbackHolders.get(i);
                 try {
-                    cb.onMetadataChanged(mMetadata);
+                    holder.mCallback.onMetadataChanged(mMetadata);
                 } catch (DeadObjectException e) {
-                    Log.w(TAG, "Removing dead callback in pushMetadataUpdate. ", e);
-                    mControllerCallbacks.remove(i);
+                    logCallbackException("Removing dead callback in pushMetadataUpdate", holder, e);
+                    mControllerCallbackHolders.remove(i);
                 } catch (RemoteException e) {
-                    Log.w(TAG, "unexpected exception in pushMetadataUpdate. ", e);
+                    logCallbackException("unexpected exception in pushMetadataUpdate", holder, e);
                 }
             }
         }
@@ -532,15 +540,15 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
             if (mDestroyed) {
                 return;
             }
-            for (int i = mControllerCallbacks.size() - 1; i >= 0; i--) {
-                ISessionControllerCallback cb = mControllerCallbacks.get(i);
+            for (int i = mControllerCallbackHolders.size() - 1; i >= 0; i--) {
+                ISessionControllerCallbackHolder holder = mControllerCallbackHolders.get(i);
                 try {
-                    cb.onQueueChanged(mQueue);
+                    holder.mCallback.onQueueChanged(mQueue);
                 } catch (DeadObjectException e) {
-                    mControllerCallbacks.remove(i);
-                    Log.w(TAG, "Removed dead callback in pushQueueUpdate.", e);
+                    mControllerCallbackHolders.remove(i);
+                    logCallbackException("Removed dead callback in pushQueueUpdate", holder, e);
                 } catch (RemoteException e) {
-                    Log.w(TAG, "unexpected exception in pushQueueUpdate.", e);
+                    logCallbackException("unexpected exception in pushQueueUpdate", holder, e);
                 }
             }
         }
@@ -551,15 +559,17 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
             if (mDestroyed) {
                 return;
             }
-            for (int i = mControllerCallbacks.size() - 1; i >= 0; i--) {
-                ISessionControllerCallback cb = mControllerCallbacks.get(i);
+            for (int i = mControllerCallbackHolders.size() - 1; i >= 0; i--) {
+                ISessionControllerCallbackHolder holder = mControllerCallbackHolders.get(i);
                 try {
-                    cb.onQueueTitleChanged(mQueueTitle);
+                    holder.mCallback.onQueueTitleChanged(mQueueTitle);
                 } catch (DeadObjectException e) {
-                    mControllerCallbacks.remove(i);
-                    Log.w(TAG, "Removed dead callback in pushQueueTitleUpdate.", e);
+                    mControllerCallbackHolders.remove(i);
+                    logCallbackException("Removed dead callback in pushQueueTitleUpdate",
+                            holder, e);
                 } catch (RemoteException e) {
-                    Log.w(TAG, "unexpected exception in pushQueueTitleUpdate.", e);
+                    logCallbackException("unexpected exception in pushQueueTitleUpdate",
+                            holder, e);
                 }
             }
         }
@@ -570,15 +580,15 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
             if (mDestroyed) {
                 return;
             }
-            for (int i = mControllerCallbacks.size() - 1; i >= 0; i--) {
-                ISessionControllerCallback cb = mControllerCallbacks.get(i);
+            for (int i = mControllerCallbackHolders.size() - 1; i >= 0; i--) {
+                ISessionControllerCallbackHolder holder = mControllerCallbackHolders.get(i);
                 try {
-                    cb.onExtrasChanged(mExtras);
+                    holder.mCallback.onExtrasChanged(mExtras);
                 } catch (DeadObjectException e) {
-                    mControllerCallbacks.remove(i);
-                    Log.w(TAG, "Removed dead callback in pushExtrasUpdate.", e);
+                    mControllerCallbackHolders.remove(i);
+                    logCallbackException("Removed dead callback in pushExtrasUpdate", holder, e);
                 } catch (RemoteException e) {
-                    Log.w(TAG, "unexpected exception in pushExtrasUpdate.", e);
+                    logCallbackException("unexpected exception in pushExtrasUpdate", holder, e);
                 }
             }
         }
@@ -590,14 +600,14 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
                 return;
             }
             ParcelableVolumeInfo info = mController.getVolumeAttributes();
-            for (int i = mControllerCallbacks.size() - 1; i >= 0; i--) {
-                ISessionControllerCallback cb = mControllerCallbacks.get(i);
+            for (int i = mControllerCallbackHolders.size() - 1; i >= 0; i--) {
+                ISessionControllerCallbackHolder holder = mControllerCallbackHolders.get(i);
                 try {
-                    cb.onVolumeInfoChanged(info);
+                    holder.mCallback.onVolumeInfoChanged(info);
                 } catch (DeadObjectException e) {
-                    Log.w(TAG, "Removing dead callback in pushVolumeUpdate. ", e);
+                    logCallbackException("Removing dead callback in pushVolumeUpdate", holder, e);
                 } catch (RemoteException e) {
-                    Log.w(TAG, "Unexpected exception in pushVolumeUpdate. ", e);
+                    logCallbackException("Unexpected exception in pushVolumeUpdate", holder, e);
                 }
             }
         }
@@ -608,15 +618,15 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
             if (mDestroyed) {
                 return;
             }
-            for (int i = mControllerCallbacks.size() - 1; i >= 0; i--) {
-                ISessionControllerCallback cb = mControllerCallbacks.get(i);
+            for (int i = mControllerCallbackHolders.size() - 1; i >= 0; i--) {
+                ISessionControllerCallbackHolder holder = mControllerCallbackHolders.get(i);
                 try {
-                    cb.onEvent(event, data);
+                    holder.mCallback.onEvent(event, data);
                 } catch (DeadObjectException e) {
-                    Log.w(TAG, "Removing dead callback in pushEvent.", e);
-                    mControllerCallbacks.remove(i);
+                    logCallbackException("Removing dead callback in pushEvent", holder, e);
+                    mControllerCallbackHolders.remove(i);
                 } catch (RemoteException e) {
-                    Log.w(TAG, "unexpected exception in pushEvent.", e);
+                    logCallbackException("unexpected exception in pushEvent", holder, e);
                 }
             }
         }
@@ -627,15 +637,16 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
             if (mDestroyed) {
                 return;
             }
-            for (int i = mControllerCallbacks.size() - 1; i >= 0; i--) {
-                ISessionControllerCallback cb = mControllerCallbacks.get(i);
+            for (int i = mControllerCallbackHolders.size() - 1; i >= 0; i--) {
+                ISessionControllerCallbackHolder holder = mControllerCallbackHolders.get(i);
                 try {
-                    cb.onRepeatModeChanged(mRepeatMode);
+                    holder.mCallback.onRepeatModeChanged(mRepeatMode);
                 } catch (DeadObjectException e) {
-                    mControllerCallbacks.remove(i);
-                    Log.w(TAG, "Removed dead callback in pushRepeatModeUpdate.", e);
+                    mControllerCallbackHolders.remove(i);
+                    logCallbackException("Removed dead callback in pushRepeatModeUpdate",
+                            holder, e);
                 } catch (RemoteException e) {
-                    Log.w(TAG, "unexpected exception in pushRepeatModeUpdate.", e);
+                    logCallbackException("unexpected exception in pushRepeatModeUpdate", holder, e);
                 }
             }
         }
@@ -646,15 +657,17 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
             if (mDestroyed) {
                 return;
             }
-            for (int i = mControllerCallbacks.size() - 1; i >= 0; i--) {
-                ISessionControllerCallback cb = mControllerCallbacks.get(i);
+            for (int i = mControllerCallbackHolders.size() - 1; i >= 0; i--) {
+                ISessionControllerCallbackHolder holder = mControllerCallbackHolders.get(i);
                 try {
-                    cb.onShuffleModeChanged(mShuffleModeEnabled);
+                    holder.mCallback.onShuffleModeChanged(mShuffleModeEnabled);
                 } catch (DeadObjectException e) {
-                    mControllerCallbacks.remove(i);
-                    Log.w(TAG, "Removed dead callback in pushShuffleModeUpdate.", e);
+                    mControllerCallbackHolders.remove(i);
+                    logCallbackException("Removed dead callback in pushShuffleModeUpdate",
+                            holder, e);
                 } catch (RemoteException e) {
-                    Log.w(TAG, "unexpected exception in pushShuffleModeUpdate.", e);
+                    logCallbackException("unexpected exception in pushShuffleModeUpdate",
+                            holder, e);
                 }
             }
         }
@@ -667,19 +680,19 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
             if (!mDestroyed) {
                 return;
             }
-            for (int i = mControllerCallbacks.size() - 1; i >= 0; i--) {
-                ISessionControllerCallback cb = mControllerCallbacks.get(i);
+            for (int i = mControllerCallbackHolders.size() - 1; i >= 0; i--) {
+                ISessionControllerCallbackHolder holder = mControllerCallbackHolders.get(i);
                 try {
-                    cb.onSessionDestroyed();
+                    holder.mCallback.onSessionDestroyed();
                 } catch (DeadObjectException e) {
-                    Log.w(TAG, "Removing dead callback in pushEvent.", e);
-                    mControllerCallbacks.remove(i);
+                    logCallbackException("Removing dead callback in pushEvent", holder, e);
+                    mControllerCallbackHolders.remove(i);
                 } catch (RemoteException e) {
-                    Log.w(TAG, "unexpected exception in pushEvent.", e);
+                    logCallbackException("unexpected exception in pushEvent", holder, e);
                 }
             }
             // After notifying clear all listeners
-            mControllerCallbacks.clear();
+            mControllerCallbackHolders.clear();
         }
     }
 
@@ -717,10 +730,10 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         return result == null ? state : result;
     }
 
-    private int getControllerCbIndexForCb(ISessionControllerCallback cb) {
+    private int getControllerHolderIndexForCb(ISessionControllerCallback cb) {
         IBinder binder = cb.asBinder();
-        for (int i = mControllerCallbacks.size() - 1; i >= 0; i--) {
-            if (binder.equals(mControllerCallbacks.get(i).asBinder())) {
+        for (int i = mControllerCallbackHolders.size() - 1; i >= 0; i--) {
+            if (binder.equals(mControllerCallbackHolders.get(i).mCallback.asBinder())) {
                 return i;
             }
         }
@@ -738,20 +751,21 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         synchronized (mLock) {
             if (mCallingUid == UID_NOT_SET || mCallingUid != uid) {
                 mCallingUid = uid;
-                mCallingPackage = packageName;
-                if (mCallingPackage != null) {
-                    return;
-                }
-                Context context = mService.getContext();
-                if (context == null) {
-                    return;
-                }
-                String[] packages = context.getPackageManager().getPackagesForUid(uid);
-                if (packages != null && packages.length > 0) {
-                    mCallingPackage = packages[0];
-                }
+                mCallingPackage = packageName != null ? packageName : getPackageName(uid);
             }
         }
+    }
+
+    private String getPackageName(int uid) {
+        Context context = mService.getContext();
+        if (context == null) {
+            return null;
+        }
+        String[] packages = context.getPackageManager().getPackagesForUid(uid);
+        if (packages != null && packages.length > 0) {
+            return packages[0];
+        }
+        return null;
     }
 
     private final Runnable mClearOptimisticVolumeRunnable = new Runnable() {
@@ -1199,8 +1213,9 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
                     }
                     return;
                 }
-                if (getControllerCbIndexForCb(cb) < 0) {
-                    mControllerCallbacks.add(cb);
+                if (getControllerHolderIndexForCb(cb) < 0) {
+                    mControllerCallbackHolders.add(new ISessionControllerCallbackHolder(cb,
+                          Binder.getCallingUid()));
                     if (DEBUG) {
                         Log.d(TAG, "registering controller callback " + cb);
                     }
@@ -1212,9 +1227,9 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         public void unregisterCallbackListener(ISessionControllerCallback cb)
                 throws RemoteException {
             synchronized (mLock) {
-                int index = getControllerCbIndexForCb(cb);
+                int index = getControllerHolderIndexForCb(cb);
                 if (index != -1) {
-                    mControllerCallbacks.remove(index);
+                    mControllerCallbackHolders.remove(index);
                 }
                 if (DEBUG) {
                     Log.d(TAG, "unregistering callback " + cb + ". index=" + index);
@@ -1482,6 +1497,16 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         @Override
         public boolean isTransportControlEnabled() {
             return MediaSessionRecord.this.isTransportControlEnabled();
+        }
+    }
+
+    private class ISessionControllerCallbackHolder {
+        private final ISessionControllerCallback mCallback;
+        private final String mPackageName;
+
+        ISessionControllerCallbackHolder(ISessionControllerCallback callback, int uid) {
+            mCallback = callback;
+            mPackageName = getPackageName(uid);
         }
     }
 

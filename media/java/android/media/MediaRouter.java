@@ -176,7 +176,7 @@ public class MediaRouter {
         }
 
         void updateAudioRoutes(AudioRoutesInfo newRoutes) {
-            Log.v(TAG, "Updating audio routes: " + newRoutes);
+            boolean updated = false;
             if (newRoutes.mainType != mCurAudioRoutesInfo.mainType) {
                 mCurAudioRoutesInfo.mainType = newRoutes.mainType;
                 int name;
@@ -192,6 +192,7 @@ public class MediaRouter {
                 }
                 sStatic.mDefaultAudioVideo.mNameResId = name;
                 dispatchRouteChanged(sStatic.mDefaultAudioVideo);
+                updated = true;
             }
 
             final int mainType = mCurAudioRoutesInfo.mainType;
@@ -216,16 +217,22 @@ public class MediaRouter {
                     removeRouteStatic(sStatic.mBluetoothA2dpRoute);
                     sStatic.mBluetoothA2dpRoute = null;
                 }
+                updated = true;
             }
 
             if (mBluetoothA2dpRoute != null) {
                 final boolean a2dpEnabled = isBluetoothA2dpOn();
                 if (mSelectedRoute == mBluetoothA2dpRoute && !a2dpEnabled) {
                     selectRouteStatic(ROUTE_TYPE_LIVE_AUDIO, mDefaultAudioVideo, false);
+                    updated = true;
                 } else if ((mSelectedRoute == mDefaultAudioVideo || mSelectedRoute == null) &&
                         a2dpEnabled) {
                     selectRouteStatic(ROUTE_TYPE_LIVE_AUDIO, mBluetoothA2dpRoute, false);
+                    updated = true;
                 }
+            }
+            if (updated) {
+                Log.v(TAG, "Audio routes updated: " + newRoutes + ", a2dp=" + isBluetoothA2dpOn());
             }
         }
 
