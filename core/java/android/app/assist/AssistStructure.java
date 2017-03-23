@@ -10,6 +10,7 @@ import android.os.BadParcelableException;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.LocaleList;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PooledStringReader;
@@ -641,6 +642,7 @@ public class AssistStructure implements Parcelable {
         static final int FLAGS_HAS_URL = 0x00080000;
         static final int FLAGS_HAS_INPUT_TYPE = 0x00040000;
         static final int FLAGS_HAS_ENTRY_ID = 0x00020000;
+        static final int FLAGS_HAS_LOCALE_LIST = 0x00010000;
         static final int FLAGS_ALL_CONTROL = 0xfff00000;
 
         int mFlags;
@@ -652,6 +654,7 @@ public class AssistStructure implements Parcelable {
         int mInputType;
         String mUrl;
         Bundle mExtras;
+        LocaleList mLocaleList;
 
         ViewNode[] mChildren;
 
@@ -726,6 +729,9 @@ public class AssistStructure implements Parcelable {
             if ((flags&FLAGS_HAS_URL) != 0) {
                 mUrl = in.readString();
             }
+            if ((flags&FLAGS_HAS_LOCALE_LIST) != 0) {
+                mLocaleList = in.readParcelable(null);
+            }
             if ((flags&FLAGS_HAS_EXTRAS) != 0) {
                 mExtras = in.readBundle();
             }
@@ -786,6 +792,9 @@ public class AssistStructure implements Parcelable {
             }
             if (mUrl != null) {
                 flags |= FLAGS_HAS_URL;
+            }
+            if (mLocaleList != null) {
+                flags |= FLAGS_HAS_LOCALE_LIST;
             }
             if (mExtras != null) {
                 flags |= FLAGS_HAS_EXTRAS;
@@ -858,9 +867,11 @@ public class AssistStructure implements Parcelable {
             if ((flags&FLAGS_HAS_INPUT_TYPE) != 0) {
                 out.writeInt(mInputType);
             }
-
             if ((flags&FLAGS_HAS_URL) != 0) {
                 out.writeString(mUrl);
+            }
+            if ((flags&FLAGS_HAS_LOCALE_LIST) != 0) {
+                out.writeParcelable(mLocaleList, 0);
             }
             if ((flags&FLAGS_HAS_EXTRAS) != 0) {
                 out.writeBundle(mExtras);
@@ -1235,6 +1246,13 @@ public class AssistStructure implements Parcelable {
          */
         public String getUrl() {
             return mUrl;
+        }
+
+        /**
+         * Returns the the list of locales associated with this node.
+         */
+        public LocaleList getLocaleList() {
+            return mLocaleList;
         }
 
         /**
@@ -1688,6 +1706,11 @@ public class AssistStructure implements Parcelable {
         public void setUrl(String url) {
             mNode.mUrl = url;
         }
+
+        @Override
+        public void setLocaleList(LocaleList localeList) {
+            mNode.mLocaleList = localeList;
+        }
     }
 
     /** @hide */
@@ -1789,6 +1812,10 @@ public class AssistStructure implements Parcelable {
         CharSequence url = node.getUrl();
         if (url != null) {
             Log.i(TAG, prefix + "  URL: " + url);
+        }
+        LocaleList localeList = node.getLocaleList();
+        if (localeList != null) {
+            Log.i(TAG, prefix + "  LocaleList: " + localeList);
         }
         String hint = node.getHint();
         if (hint != null) {
