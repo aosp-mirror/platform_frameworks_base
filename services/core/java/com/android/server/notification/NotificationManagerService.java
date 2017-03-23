@@ -1441,11 +1441,6 @@ public class NotificationManagerService extends SystemService {
                 return ;
             }
 
-            if (isCallerInstantApp(pkg)) {
-                throw new SecurityException("Instant app " + pkg
-                        + " is not allowed to create toasts");
-            }
-
             final boolean isSystemToast = isCallerSystem() || ("android".equals(pkg));
             final boolean isPackageSuspended =
                     isPackageSuspendedForUser(pkg, Binder.getCallingUid());
