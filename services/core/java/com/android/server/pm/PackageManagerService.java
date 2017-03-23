@@ -2879,24 +2879,17 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
 
             mInstallerService = new PackageInstallerService(context, this);
-
             final ComponentName ephemeralResolverComponent = getEphemeralResolverLPr();
             if (ephemeralResolverComponent != null) {
                 if (DEBUG_EPHEMERAL) {
-                    Slog.i(TAG, "Ephemeral resolver: " + ephemeralResolverComponent);
+                    Slog.d(TAG, "Set ephemeral resolver: " + ephemeralResolverComponent);
                 }
                 mInstantAppResolverConnection =
                         new EphemeralResolverConnection(mContext, ephemeralResolverComponent);
             } else {
                 mInstantAppResolverConnection = null;
             }
-            mInstantAppInstallerComponent = getEphemeralInstallerLPr();
-            if (mInstantAppInstallerComponent != null) {
-                if (DEBUG_EPHEMERAL) {
-                    Slog.i(TAG, "Ephemeral installer: " + mInstantAppInstallerComponent);
-                }
-                setUpInstantAppInstallerActivityLP(mInstantAppInstallerComponent);
-            }
+            updateInstantAppInstallerLocked();
 
             // Read and update the usage of dex files.
             // Do this at the end of PM init so that all the packages have their
@@ -2934,6 +2927,21 @@ public class PackageManagerService extends IPackageManager.Stub {
         // Expose private service for system components to use.
         LocalServices.addService(PackageManagerInternal.class, new PackageManagerInternalImpl());
         Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+    }
+
+    private void updateInstantAppInstallerLocked() {
+        final ComponentName oldInstantAppInstallerComponent = mInstantAppInstallerComponent;
+        final ComponentName newInstantAppInstallerComponent = getEphemeralInstallerLPr();
+        if (newInstantAppInstallerComponent != null
+                && !newInstantAppInstallerComponent.equals(oldInstantAppInstallerComponent)) {
+            if (DEBUG_EPHEMERAL) {
+                Slog.d(TAG, "Set ephemeral installer: " + newInstantAppInstallerComponent);
+            }
+            setUpInstantAppInstallerActivityLP(newInstantAppInstallerComponent);
+        } else if (DEBUG_EPHEMERAL && newInstantAppInstallerComponent == null) {
+            Slog.d(TAG, "Unset ephemeral installer; none available");
+        }
+        mInstantAppInstallerComponent = newInstantAppInstallerComponent;
     }
 
     private static File preparePackageParserCache(boolean isUpgrade) {
@@ -16928,6 +16936,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             if (res.returnCode == PackageManager.INSTALL_SUCCEEDED) {
                 updateSequenceNumberLP(pkgName, res.newUsers);
+                updateInstantAppInstallerLocked();
             }
         }
     }
@@ -17503,6 +17512,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         mInstantAppRegistry.onPackageUninstalledLPw(pkg, info.removedUsers);
                     }
                     updateSequenceNumberLP(packageName, info.removedUsers);
+                    updateInstantAppInstallerLocked();
                 }
             }
         }
@@ -19848,6 +19858,12 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
             }
             scheduleWritePackageRestrictionsLocked(userId);
             updateSequenceNumberLP(packageName, new int[] { userId });
+            final long callingId = Binder.clearCallingIdentity();
+            try {
+                updateInstantAppInstallerLocked();
+            } finally {
+                Binder.restoreCallingIdentity(callingId);
+            }
             components = mPendingBroadcasts.get(userId, packageName);
             final boolean newPackage = components == null;
             if (newPackage) {
