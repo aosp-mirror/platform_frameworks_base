@@ -3344,6 +3344,19 @@
                 <category android:name="android.intent.category.VOICE" />
             </intent-filter>
         </activity>
+        <activity android:name="com.android.internal.app.AccessibilityButtonChooserActivity"
+                  android:theme="@style/Theme.DeviceDefault.Resolver"
+                  android:finishOnCloseSystemDialogs="true"
+                  android:excludeFromRecents="true"
+                  android:documentLaunchMode="never"
+                  android:relinquishTaskIdentity="true"
+                  android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboard|keyboardHidden"
+                  android:process=":ui">
+            <intent-filter>
+                <action android:name="android.intent.action.CHOOSE_ACCESSIBILITY_BUTTON" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
         <activity android:name="com.android.internal.app.IntentForwarderActivity"
                 android:finishOnCloseSystemDialogs="true"
                 android:theme="@style/Theme.NoDisplay"

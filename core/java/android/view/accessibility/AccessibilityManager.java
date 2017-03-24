@@ -22,6 +22,7 @@ import android.Manifest;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SdkConstant;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -96,6 +97,22 @@ public final class AccessibilityManager {
 
     /** @hide */
     public static final int AUTOCLICK_DELAY_DEFAULT = 600;
+
+    /**
+     * Activity action: Launch UI to manage which accessibility service or feature is assigned
+     * to the navigation bar Accessibility button.
+     * <p>
+     * Input: Nothing.
+     * </p>
+     * <p>
+     * Output: Nothing.
+     * </p>
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstant.SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_CHOOSE_ACCESSIBILITY_BUTTON =
+            "android.intent.action.CHOOSE_ACCESSIBILITY_BUTTON";
 
     static final Object sInstanceSync = new Object();
 

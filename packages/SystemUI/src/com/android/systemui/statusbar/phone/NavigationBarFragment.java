@@ -557,9 +557,9 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
     }
 
     private boolean onAccessibilityLongClick(View v) {
-        // TODO(b/34720082): Target service selection via long click
-        android.widget.Toast.makeText(getContext(), "Service selection coming soon...",
-                android.widget.Toast.LENGTH_LONG).show();
+        Intent intent = new Intent(AccessibilityManager.ACTION_CHOOSE_ACCESSIBILITY_BUTTON);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        v.getContext().startActivity(intent);
         return true;
     }
 

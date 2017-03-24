@@ -5511,6 +5511,16 @@ public final class Settings {
                 "accessibility_shortcut_target_service";
 
         /**
+         * Setting specifying the accessibility service or feature to be toggled via the
+         * accessibility button in the navigation bar. This is either a flattened
+         * {@link ComponentName} or the class name of a system class implementing a supported
+         * accessibility feature.
+         * @hide
+         */
+        public static final String ACCESSIBILITY_BUTTON_TARGET_COMPONENT =
+                "accessibility_button_target_component";
+
+        /**
          * If touch exploration is enabled.
          */
         public static final String TOUCH_EXPLORATION_ENABLED = "touch_exploration_enabled";
@@ -6997,6 +7007,7 @@ public final class Settings {
             TOUCH_EXPLORATION_ENABLED,
             ACCESSIBILITY_ENABLED,
             ACCESSIBILITY_SHORTCUT_TARGET_SERVICE,
+            ACCESSIBILITY_BUTTON_TARGET_COMPONENT,
             ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN,
             ACCESSIBILITY_SHORTCUT_ENABLED,
             ACCESSIBILITY_SHORTCUT_ON_LOCK_SCREEN,
