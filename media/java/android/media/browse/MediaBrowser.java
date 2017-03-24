@@ -87,10 +87,11 @@ public final class MediaBrowser {
      */
     public static final String EXTRA_PAGE_SIZE = "android.media.browse.extra.PAGE_SIZE";
 
-    private static final int CONNECT_STATE_DISCONNECTED = 0;
-    private static final int CONNECT_STATE_CONNECTING = 1;
-    private static final int CONNECT_STATE_CONNECTED = 2;
-    private static final int CONNECT_STATE_SUSPENDED = 3;
+    private static final int CONNECT_STATE_DISCONNECTING = 0;
+    private static final int CONNECT_STATE_DISCONNECTED = 1;
+    private static final int CONNECT_STATE_CONNECTING = 2;
+    private static final int CONNECT_STATE_CONNECTED = 3;
+    private static final int CONNECT_STATE_SUSPENDED = 4;
 
     private final Context mContext;
     private final ComponentName mServiceComponent;
@@ -213,6 +214,7 @@ public final class MediaBrowser {
         // It's ok to call this any state, because allowing this lets apps not have
         // to check isConnected() unnecessarily. They won't appreciate the extra
         // assertions for this. We do everything we can here to go back to a sane state.
+        mState = CONNECT_STATE_DISCONNECTING;
         mHandler.post(new Runnable() {
             @Override
             public void run() {
@@ -535,7 +537,7 @@ public final class MediaBrowser {
 
         // If we are connected, tell the service that we are watching. If we aren't connected,
         // the service will be told when we connect.
-        if (mState == CONNECT_STATE_CONNECTED) {
+        if (isConnected()) {
             try {
                 if (options == null) {
                     mServiceBinder.addSubscriptionDeprecated(parentId, mServiceCallbacks);
@@ -563,7 +565,7 @@ public final class MediaBrowser {
         // Tell the service if necessary.
         try {
             if (callback == null) {
-                if (mState == CONNECT_STATE_CONNECTED) {
+                if (isConnected()) {
                     mServiceBinder.removeSubscriptionDeprecated(parentId, mServiceCallbacks);
                     mServiceBinder.removeSubscription(parentId, null, mServiceCallbacks);
                 }
@@ -572,7 +574,7 @@ public final class MediaBrowser {
                 final List<Bundle> optionsList = sub.getOptionsList();
                 for (int i = callbacks.size() - 1; i >= 0; --i) {
                     if (callbacks.get(i) == callback) {
-                        if (mState == CONNECT_STATE_CONNECTED) {
+                        if (isConnected()) {
                             mServiceBinder.removeSubscription(
                                     parentId, callback.mToken, mServiceCallbacks);
                         }
@@ -597,6 +599,8 @@ public final class MediaBrowser {
      */
     private static String getStateLabel(int state) {
         switch (state) {
+            case CONNECT_STATE_DISCONNECTING:
+                return "CONNECT_STATE_DISCONNECTING";
             case CONNECT_STATE_DISCONNECTED:
                 return "CONNECT_STATE_DISCONNECTED";
             case CONNECT_STATE_CONNECTING:
