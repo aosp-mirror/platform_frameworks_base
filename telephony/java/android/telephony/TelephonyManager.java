@@ -46,6 +46,7 @@ import android.util.Log;
 
 import com.android.ims.internal.IImsServiceController;
 import com.android.ims.internal.IImsServiceFeatureListener;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.telecom.ITelecomService;
 import com.android.internal.telephony.CellNetworkScanResult;
 import com.android.internal.telephony.IPhoneSubInfo;
@@ -885,7 +886,11 @@ public class TelephonyManager {
      *
      * <p>Requires Permission:
      *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     *
+     * @deprecated Use (@link getImei} which returns IMEI for GSM or (@link getMeid} which returns
+     * MEID for CDMA.
      */
+    @Deprecated
     public String getDeviceId() {
         try {
             ITelephony telephony = getITelephony();
@@ -907,7 +912,11 @@ public class TelephonyManager {
      *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
      *
      * @param slotIndex of which deviceID is returned
+     *
+     * @deprecated Use (@link getImei} which returns IMEI for GSM or (@link getMeid} which returns
+     * MEID for CDMA.
      */
+    @Deprecated
     public String getDeviceId(int slotIndex) {
         // FIXME this assumes phoneId == slotIndex
         try {
@@ -923,35 +932,62 @@ public class TelephonyManager {
     }
 
     /**
-     * Returns the IMEI. Return null if IMEI is not available.
+     * Returns the IMEI (International Mobile Equipment Identity). Return null if IMEI is not
+     * available.
      *
      * <p>Requires Permission:
      *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
-     *
-     * @hide
      */
-    @SystemApi
     public String getImei() {
         return getImei(getDefaultSim());
     }
 
     /**
-     * Returns the IMEI. Return null if IMEI is not available.
+     * Returns the IMEI (International Mobile Equipment Identity). Return null if IMEI is not
+     * available.
      *
      * <p>Requires Permission:
      *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
      *
-     * @param slotIndex of which deviceID is returned
-     *
-     * @hide
+     * @param slotIndex of which IMEI is returned
      */
-    @SystemApi
     public String getImei(int slotIndex) {
         ITelephony telephony = getITelephony();
         if (telephony == null) return null;
 
         try {
             return telephony.getImeiForSlot(slotIndex, getOpPackageName());
+        } catch (RemoteException ex) {
+            return null;
+        } catch (NullPointerException ex) {
+            return null;
+        }
+    }
+
+    /**
+     * Returns the MEID (Mobile Equipment Identifier). Return null if MEID is not available.
+     *
+     * <p>Requires Permission:
+     *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     */
+    public String getMeid() {
+        return getMeid(getDefaultSim());
+    }
+
+    /**
+     * Returns the MEID (Mobile Equipment Identifier). Return null if MEID is not available.
+     *
+     * <p>Requires Permission:
+     *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     *
+     * @param slotIndex of which MEID is returned
+     */
+    public String getMeid(int slotIndex) {
+        ITelephony telephony = getITelephony();
+        if (telephony == null) return null;
+
+        try {
+            return telephony.getMeidForSlot(slotIndex, getOpPackageName());
         } catch (RemoteException ex) {
             return null;
         } catch (NullPointerException ex) {
@@ -3886,9 +3922,19 @@ public class TelephonyManager {
         return SubscriptionManager.getPhoneId(SubscriptionManager.getDefaultSubscriptionId());
     }
 
-    /** {@hide} */
+    /**
+     *  @return default SIM's slot index. If SIM is not inserted, return default SIM slot index.
+     *
+     * {@hide}
+     */
+    @VisibleForTesting
     public int getDefaultSim() {
-        return SubscriptionManager.getSlotIndex(SubscriptionManager.getDefaultSubscriptionId());
+        int slotIndex = SubscriptionManager.getSlotIndex(
+                SubscriptionManager.getDefaultSubscriptionId());
+        if (slotIndex == SubscriptionManager.SIM_NOT_INSERTED) {
+            slotIndex = SubscriptionManager.DEFAULT_SIM_SLOT_INDEX;
+        }
+        return slotIndex;
     }
 
     /**
