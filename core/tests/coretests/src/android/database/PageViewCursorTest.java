@@ -13,20 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package android.database;
 
+import static com.android.internal.util.ArrayUtils.contains;
+import static com.android.internal.util.Preconditions.checkArgument;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import android.annotation.Nullable;
 import android.content.ContentResolver;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.test.runner.AndroidJUnit4;
+import android.util.Log;
+import android.util.MathUtils;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.Arrays;
 import java.util.Random;
 
 @RunWith(AndroidJUnit4.class)
@@ -37,32 +45,32 @@ public class PageViewCursorTest {
     private static final String NAME_COLUMN = "name";
     private static final String NUM_COLUMN = "num";
 
-    private static final String[] COLUMNS = new String[]{
-      NAME_COLUMN,
-      NUM_COLUMN
+    private static final String[] COLUMNS = new String[] {
+        NAME_COLUMN,
+        NUM_COLUMN
     };
 
     private static final String[] NAMES = new String[] {
-            "000",
-            "111",
-            "222",
-            "333",
-            "444",
-            "555",
-            "666",
-            "777",
-            "888",
-            "999",
-            "aaa",
-            "bbb",
-            "ccc",
-            "ddd",
-            "eee",
-            "fff",
-            "ggg",
-            "hhh",
-            "iii",
-            "jjj"
+        "000",
+        "111",
+        "222",
+        "333",
+        "444",
+        "555",
+        "666",
+        "777",
+        "888",
+        "999",
+        "aaa",
+        "bbb",
+        "ccc",
+        "ddd",
+        "eee",
+        "fff",
+        "ggg",
+        "hhh",
+        "iii",
+        "jjj"
     };
 
     private MatrixCursor mDelegate;
@@ -79,7 +87,7 @@ public class PageViewCursorTest {
             row.add(NUM_COLUMN, rand.nextInt());
         }
 
-        mCursor = new PageViewCursor(mDelegate, 10, 5);
+        mCursor = new PageViewCursor(mDelegate, createArgs(10, 5));
     }
 
     @Test
@@ -94,7 +102,7 @@ public class PageViewCursorTest {
 
     @Test
     public void testPage_OffsetExceedsCursorCount_EffectivelyEmptyCursor() {
-        mCursor = new PageViewCursor(mDelegate, ITEM_COUNT * 2, 5);
+        mCursor = new PageViewCursor(mDelegate, createArgs(ITEM_COUNT * 2, 5));
         assertEquals(0, mCursor.getCount());
     }
 
@@ -155,13 +163,13 @@ public class PageViewCursorTest {
 
     @Test
     public void testCount_ZeroForEmptyCursor() {
-        mCursor = new PageViewCursor(mDelegate, 0, 0);
+        mCursor = new PageViewCursor(mDelegate, createArgs(0, 0));
         assertEquals(0, mCursor.getCount());
     }
 
     @Test
     public void testIsBeforeFirst_TrueForEmptyCursor() {
-        mCursor = new PageViewCursor(mDelegate, 0, 0);
+        mCursor = new PageViewCursor(mDelegate, createArgs(0, 0));
         assertTrue(mCursor.isBeforeFirst());
     }
 
@@ -175,7 +183,7 @@ public class PageViewCursorTest {
 
     @Test
     public void testIsAfterLast_TrueForEmptyCursor() {
-        mCursor = new PageViewCursor(mDelegate, 0, 0);
+        mCursor = new PageViewCursor(mDelegate, createArgs(0, 0));
         assertTrue(mCursor.isAfterLast());
     }
 
@@ -247,69 +255,129 @@ public class PageViewCursorTest {
     }
 
     @Test
-    public void testOffset_LimitOutOfBounds() {
-        mCursor = new PageViewCursor(mDelegate, 5, 100);
+    public void testLimitOutOfBounds() {
+        mCursor = new PageViewCursor(mDelegate, createArgs(5, 100));
         assertEquals(15, mCursor.getCount());
     }
 
     @Test
-    public void testAutoPagedExtra() {
-        mCursor = new PageViewCursor(mDelegate, 5, 100);
+    public void testOffsetOutOfBounds_EmptyResult() {
+        mCursor = new PageViewCursor(mDelegate, createArgs(100000, 100));
+        assertEquals(0, mCursor.getCount());
+    }
+
+    @Test
+    public void testAddsExtras() {
+        mCursor = new PageViewCursor(mDelegate, createArgs(5, 100));
         assertTrue(mCursor.getExtras().getBoolean(PageViewCursor.EXTRA_AUTO_PAGED));
+        String[] honoredArgs = mCursor.getExtras()
+                .getStringArray(ContentResolver.EXTRA_HONORED_ARGS);
+        assertTrue(contains(honoredArgs, ContentResolver.QUERY_ARG_OFFSET));
+        assertTrue(contains(honoredArgs, ContentResolver.QUERY_ARG_LIMIT));
+    }
+
+    @Test
+    public void testAddsExtras_OnlyOffset() {
+        Bundle args = new Bundle();
+        args.putInt(ContentResolver.QUERY_ARG_OFFSET, 5);
+        mCursor = new PageViewCursor(mDelegate, args);
+        String[] honoredArgs = mCursor.getExtras()
+                .getStringArray(ContentResolver.EXTRA_HONORED_ARGS);
+        assertTrue(contains(honoredArgs, ContentResolver.QUERY_ARG_OFFSET));
+        assertFalse(contains(honoredArgs, ContentResolver.QUERY_ARG_LIMIT));
+    }
+
+    @Test
+    public void testAddsExtras_OnlyLimit() {
+        Bundle args = new Bundle();
+        args.putInt(ContentResolver.QUERY_ARG_LIMIT, 5);
+        mCursor = new PageViewCursor(mDelegate, args);
+        String[] honoredArgs = mCursor.getExtras()
+                .getStringArray(ContentResolver.EXTRA_HONORED_ARGS);
+        assertFalse(contains(honoredArgs, ContentResolver.QUERY_ARG_OFFSET));
+        assertTrue(contains(honoredArgs, ContentResolver.QUERY_ARG_LIMIT));
     }
 
     @Test
     public void testGetWindow() {
-        mCursor = new PageViewCursor(mDelegate, 5, 5);
+        mCursor = new PageViewCursor(mDelegate, createArgs(5, 5));
         CursorWindow window = mCursor.getWindow();
         assertEquals(5, window.getNumRows());
     }
 
     @Test
-    public void testWrap() {
-        Bundle queryArgs = new Bundle();
-        queryArgs.putInt(ContentResolver.QUERY_ARG_OFFSET, 5);
-        queryArgs.putInt(ContentResolver.QUERY_ARG_LIMIT, 5);
-        Cursor wrapped = PageViewCursor.wrap(mDelegate, queryArgs);
+    public void testWraps() {
+        Bundle args = createArgs(5, 5);
+        Cursor wrapped = PageViewCursor.wrap(mDelegate, args);
         assertTrue(wrapped instanceof PageViewCursor);
         assertEquals(5, wrapped.getCount());
     }
 
     @Test
-    public void testWrap_NoOpWithoutPagingArgs() {
+    public void testWraps_NullExtras() {
+        Bundle args = createArgs(5, 5);
+        mDelegate.setExtras(null);
+        Cursor wrapped = PageViewCursor.wrap(mDelegate, args);
+        assertTrue(wrapped instanceof PageViewCursor);
+        assertEquals(5, wrapped.getCount());
+    }
+
+    @Test
+    public void testWraps_WithJustOffset() {
+        Bundle args = new Bundle();
+        args.putInt(ContentResolver.QUERY_ARG_OFFSET, 5);
+        Cursor wrapped = PageViewCursor.wrap(mDelegate, args);
+        assertTrue(wrapped instanceof PageViewCursor);
+        assertEquals(15, wrapped.getCount());
+    }
+
+    @Test
+    public void testWraps_WithJustLimit() {
+        Bundle args = new Bundle();
+        args.putInt(ContentResolver.QUERY_ARG_LIMIT, 5);
+        Cursor wrapped = PageViewCursor.wrap(mDelegate, args);
+        assertTrue(wrapped instanceof PageViewCursor);
+        assertEquals(5, wrapped.getCount());
+    }
+
+    @Test
+    public void testNoWrap_WithoutPagingArgs() {
         Cursor wrapped = PageViewCursor.wrap(mDelegate, Bundle.EMPTY);
         assertTrue(mDelegate == wrapped);
     }
 
     @Test
-    public void testWrap_NoOpCursorsWithExistingPaging_ByTotalSize() {
+    public void testNoWrap_CursorsHasExistingPaging_ByTotalSize() {
         Bundle extras = new Bundle();
         extras.putInt(ContentResolver.EXTRA_TOTAL_SIZE, 5);
         mDelegate.setExtras(extras);
 
-        Bundle queryArgs = new Bundle();
-        queryArgs.putInt(ContentResolver.QUERY_ARG_OFFSET, 5);
-        queryArgs.putInt(ContentResolver.QUERY_ARG_LIMIT, 5);
-        Cursor wrapped = PageViewCursor.wrap(mDelegate, queryArgs);
+        Bundle args = createArgs(5, 5);
+        Cursor wrapped = PageViewCursor.wrap(mDelegate, args);
         assertTrue(mDelegate == wrapped);
     }
 
     @Test
-    public void testWrap_NoOpCursorsWithExistingPaging_ByHonoredArgs() {
+    public void testNoWrap_CursorsHasExistingPaging_ByHonoredArgs() {
         Bundle extras = new Bundle();
         extras.putStringArray(
                 ContentResolver.EXTRA_HONORED_ARGS,
                 new String[] {
-                    ContentResolver.QUERY_ARG_OFFSET,
-                    ContentResolver.QUERY_ARG_LIMIT
+                        ContentResolver.QUERY_ARG_OFFSET,
+                        ContentResolver.QUERY_ARG_LIMIT
                 });
         mDelegate.setExtras(extras);
 
-        Bundle queryArgs = new Bundle();
-        queryArgs.putInt(ContentResolver.QUERY_ARG_OFFSET, 5);
-        queryArgs.putInt(ContentResolver.QUERY_ARG_LIMIT, 5);
-        Cursor wrapped = PageViewCursor.wrap(mDelegate, queryArgs);
+        Bundle args = createArgs(5, 5);
+        Cursor wrapped = PageViewCursor.wrap(mDelegate, args);
         assertTrue(mDelegate == wrapped);
+    }
+
+    private static Bundle createArgs(int offset, int limit) {
+        Bundle args = new Bundle();
+        args.putInt(ContentResolver.QUERY_ARG_OFFSET, offset);
+        args.putInt(ContentResolver.QUERY_ARG_LIMIT, limit);
+        return args;
     }
 
     private void assertStringAt(int row, int column, String expected) {
