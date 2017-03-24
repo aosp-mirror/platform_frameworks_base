@@ -66,11 +66,6 @@ public:
      * OVERLAY_DIR.
      */
     static const char* OVERLAY_THEME_DIR_PROPERTY;
-    /**
-     * If OVERLAY_THEME_DIR_PERSIST_PROPERTY, use it to override
-     * OVERLAY_THEME_DIR_PROPERTY.
-     */
-    static const char* OVERLAY_THEME_DIR_PERSIST_PROPERTY;
     static const char* TARGET_PACKAGE_NAME;
     static const char* TARGET_APK_PATH;
     static const char* IDMAP_DIR;

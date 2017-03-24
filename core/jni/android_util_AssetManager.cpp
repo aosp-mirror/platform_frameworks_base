@@ -178,11 +178,7 @@ static void verifySystemIdmaps()
                 // Directories to scan for overlays: if OVERLAY_THEME_DIR_PROPERTY is defined,
                 // use OVERLAY_DIR/<value of OVERLAY_THEME_DIR_PROPERTY> in addition to OVERLAY_DIR.
                 char subdir[PROP_VALUE_MAX];
-                int len = __system_property_get(AssetManager::OVERLAY_THEME_DIR_PERSIST_PROPERTY,
-                        subdir);
-                if (len == 0) {
-                    len = __system_property_get(AssetManager::OVERLAY_THEME_DIR_PROPERTY, subdir);
-                }
+                int len = __system_property_get(AssetManager::OVERLAY_THEME_DIR_PROPERTY, subdir);
                 if (len > 0) {
                     String8 overlayPath = String8(AssetManager::OVERLAY_DIR) + "/" + subdir;
                     if (stat(overlayPath.string(), &st) == 0) {

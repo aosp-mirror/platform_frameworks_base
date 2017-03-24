@@ -323,52 +323,6 @@ final class UiModeManagerService extends SystemService {
         }
 
         @Override
-        public void setTheme(String theme) {
-            if (getContext().checkCallingOrSelfPermission(
-                    android.Manifest.permission.MODIFY_THEME_OVERLAY)
-                    != PackageManager.PERMISSION_GRANTED) {
-                Slog.e(TAG, "setTheme requires MODIFY_THEME_OVERLAY permission");
-                return;
-            }
-            SystemProperties.set("persist.vendor.overlay.theme", theme);
-            mHandler.post(() -> ShutdownThread.reboot(getContext(),
-                    PowerManager.SHUTDOWN_USER_REQUESTED, false));
-        }
-
-        @Override
-        public String getTheme() {
-            if (getContext().checkCallingOrSelfPermission(
-                    android.Manifest.permission.MODIFY_THEME_OVERLAY)
-                    != PackageManager.PERMISSION_GRANTED) {
-                Slog.e(TAG, "setTheme requires MODIFY_THEME_OVERLAY permission");
-                return null;
-            }
-            return SystemProperties.get("persist.vendor.overlay.theme");
-        }
-
-        @Override
-        public String[] getAvailableThemes() {
-            if (getContext().checkCallingOrSelfPermission(
-                    android.Manifest.permission.MODIFY_THEME_OVERLAY)
-                    != PackageManager.PERMISSION_GRANTED) {
-                Slog.e(TAG, "getAvailableThemes requires MODIFY_THEME_OVERLAY permission");
-                return null;
-            }
-            String def = SystemProperties.get("ro.boot.vendor.overlay.theme");
-            if (TextUtils.isEmpty(def)) {
-                def = null;
-            }
-            String[] fileList = new File("/vendor/overlay").list();
-            if (fileList == null) return new String[0];
-            ArrayList<String> options = new ArrayList(fileList.length + 1);
-            Collections.addAll(options, fileList);
-            if (!options.contains(def)) {
-                options.add(0, def);
-            }
-            return options.toArray(new String[options.size()]);
-        }
-
-        @Override
         public int getNightMode() {
             synchronized (mLock) {
                 return mNightMode;
