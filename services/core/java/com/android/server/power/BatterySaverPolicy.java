@@ -43,7 +43,8 @@ public class BatterySaverPolicy extends ContentObserver {
             ServiceType.NETWORK_FIREWALL,
             ServiceType.SCREEN_BRIGHTNESS,
             ServiceType.SOUND,
-            ServiceType.BATTERY_STATS})
+            ServiceType.BATTERY_STATS,
+            ServiceType.DATA_SAVER})
     public @interface ServiceType {
         int NULL = 0;
         int GPS = 1;
@@ -55,6 +56,7 @@ public class BatterySaverPolicy extends ContentObserver {
         int SCREEN_BRIGHTNESS = 7;
         int SOUND = 8;
         int BATTERY_STATS = 9;
+        int DATA_SAVER = 10;
     }
 
     private static final String TAG = "BatterySaverPolicy";
@@ -73,6 +75,7 @@ public class BatterySaverPolicy extends ContentObserver {
     private static final String KEY_SOUNDTRIGGER_DISABLED = "soundtrigger_disabled";
     private static final String KEY_FIREWALL_DISABLED = "firewall_disabled";
     private static final String KEY_ADJUST_BRIGHTNESS_DISABLED = "adjust_brightness_disabled";
+    private static final String KEY_DATASAVER_DISABLED = "datasaver_disabled";
     private static final String KEY_ADJUST_BRIGHTNESS_FACTOR = "adjust_brightness_factor";
     private static final String KEY_FULLBACKUP_DEFERRED = "fullbackup_deferred";
     private static final String KEY_KEYVALUE_DEFERRED = "keyvaluebackup_deferred";
@@ -137,6 +140,14 @@ public class BatterySaverPolicy extends ContentObserver {
     private boolean mAdjustBrightnessDisabled;
 
     /**
+     * {@code true} if data saver is disabled in battery saver mode.
+     *
+     * @see Settings.Global#BATTERY_SAVER_CONSTANTS
+     * @see #KEY_DATASAVER_DISABLED
+     */
+    private boolean mDataSaverDisabled;
+
+    /**
      * This is the flag to decide the gps mode in battery saver mode.
      *
      * @see Settings.Global#BATTERY_SAVER_CONSTANTS
@@ -191,6 +202,7 @@ public class BatterySaverPolicy extends ContentObserver {
             mFireWallDisabled = mParser.getBoolean(KEY_FIREWALL_DISABLED, false);
             mAdjustBrightnessDisabled = mParser.getBoolean(KEY_ADJUST_BRIGHTNESS_DISABLED, false);
             mAdjustBrightnessFactor = mParser.getFloat(KEY_ADJUST_BRIGHTNESS_FACTOR, 0.5f);
+            mDataSaverDisabled = mParser.getBoolean(KEY_DATASAVER_DISABLED, true);
 
             // Get default value from Settings.Secure
             final int defaultGpsMode = Settings.Secure.getInt(mContentResolver, SECURE_KEY_GPS_MODE,
@@ -210,7 +222,8 @@ public class BatterySaverPolicy extends ContentObserver {
      */
     public PowerSaveState getBatterySaverPolicy(@ServiceType int type, boolean realMode) {
         synchronized (BatterySaverPolicy.this) {
-            final PowerSaveState.Builder builder = new PowerSaveState.Builder();
+            final PowerSaveState.Builder builder = new PowerSaveState.Builder()
+                    .setGlobalBatterySaverEnabled(realMode);
             if (!realMode) {
                 return builder.setBatterySaverEnabled(realMode)
                         .build();
@@ -235,6 +248,9 @@ public class BatterySaverPolicy extends ContentObserver {
                 case ServiceType.SCREEN_BRIGHTNESS:
                     return builder.setBatterySaverEnabled(!mAdjustBrightnessDisabled)
                             .setBrightnessFactor(mAdjustBrightnessFactor)
+                            .build();
+                case ServiceType.DATA_SAVER:
+                    return builder.setBatterySaverEnabled(!mDataSaverDisabled)
                             .build();
                 case ServiceType.SOUND:
                     return builder.setBatterySaverEnabled(mSoundTriggerDisabled)
@@ -262,6 +278,7 @@ public class BatterySaverPolicy extends ContentObserver {
         pw.println("  " + KEY_FULLBACKUP_DEFERRED + "=" + mFullBackupDeferred);
         pw.println("  " + KEY_KEYVALUE_DEFERRED + "=" + mKeyValueBackupDeferred);
         pw.println("  " + KEY_FIREWALL_DISABLED + "=" + mFireWallDisabled);
+        pw.println("  " + KEY_DATASAVER_DISABLED + "=" + mDataSaverDisabled);
         pw.println("  " + KEY_ADJUST_BRIGHTNESS_DISABLED + "=" + mAdjustBrightnessDisabled);
         pw.println("  " + KEY_ADJUST_BRIGHTNESS_FACTOR + "=" + mAdjustBrightnessFactor);
         pw.println("  " + KEY_GPS_MODE + "=" + mGpsMode);

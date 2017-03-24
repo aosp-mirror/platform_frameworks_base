@@ -19,7 +19,9 @@ import android.os.PowerSaveState;
 import android.os.Handler;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
+
 import com.android.server.power.BatterySaverPolicy.ServiceType;
+
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -40,6 +42,7 @@ public class BatterySaverPolicyTest extends AndroidTestCase {
             + "animation_disabled=false,"
             + "soundtrigger_disabled=true,"
             + "firewall_disabled=false,"
+            + "datasaver_disabled=false,"
             + "adjust_brightness_disabled=true,"
             + "adjust_brightness_factor=0.7,"
             + "fullbackup_deferred=true,"
@@ -99,6 +102,18 @@ public class BatterySaverPolicyTest extends AndroidTestCase {
     }
 
     @SmallTest
+    public void testGetBatterySaverPolicy_PolicyDataSaver_DefaultValueCorrect() {
+        mBatterySaverPolicy.updateConstants("");
+        final PowerSaveState batterySaverStateOn =
+                mBatterySaverPolicy.getBatterySaverPolicy(ServiceType.DATA_SAVER, BATTERY_SAVER_ON);
+        assertThat(batterySaverStateOn.batterySaverEnabled).isFalse();
+
+        final PowerSaveState batterySaverStateOff = mBatterySaverPolicy.getBatterySaverPolicy(
+                ServiceType.DATA_SAVER, BATTERY_SAVER_OFF);
+        assertThat(batterySaverStateOff.batterySaverEnabled).isFalse();
+    }
+
+    @SmallTest
     public void testGetBatterySaverPolicy_PolicyScreenBrightness_DefaultValueCorrect() {
         testServiceDefaultValue(ServiceType.SCREEN_BRIGHTNESS);
 
@@ -137,7 +152,8 @@ public class BatterySaverPolicyTest extends AndroidTestCase {
         assertThat(networkState.batterySaverEnabled).isTrue();
 
         final PowerSaveState screenState =
-                mBatterySaverPolicy.getBatterySaverPolicy(ServiceType.SCREEN_BRIGHTNESS, BATTERY_SAVER_ON);
+                mBatterySaverPolicy.getBatterySaverPolicy(ServiceType.SCREEN_BRIGHTNESS,
+                        BATTERY_SAVER_ON);
         assertThat(screenState.batterySaverEnabled).isFalse();
         assertThat(screenState.brightnessFactor).isWithin(PRECISION).of(BRIGHTNESS_FACTOR);
 
@@ -148,6 +164,10 @@ public class BatterySaverPolicyTest extends AndroidTestCase {
         final PowerSaveState keyValueBackupState = mBatterySaverPolicy.getBatterySaverPolicy(
                 ServiceType.KEYVALUE_BACKUP, BATTERY_SAVER_ON);
         assertThat(keyValueBackupState.batterySaverEnabled).isFalse();
+
+        final PowerSaveState dataSaverState = mBatterySaverPolicy.getBatterySaverPolicy(
+                ServiceType.DATA_SAVER, BATTERY_SAVER_ON);
+        assertThat(dataSaverState.batterySaverEnabled).isTrue();
 
         final PowerSaveState gpsState =
                 mBatterySaverPolicy.getBatterySaverPolicy(ServiceType.GPS, BATTERY_SAVER_ON);

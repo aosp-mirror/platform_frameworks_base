@@ -322,6 +322,12 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private INotificationManager mNotifManager;
     private PowerManagerInternal mPowerManagerInternal;
     private IDeviceIdleController mDeviceIdleController;
+    @GuardedBy("mUidRulesFirstLock")
+    private PowerSaveState mRestrictBackgroundPowerState;
+
+    // Store the status of restrict background before turning on battery saver.
+    // Used to restore mRestrictBackground when battery saver is turned off.
+    private boolean mRestrictBackgroundBeforeBsm;
 
     // See main javadoc for instructions on how to use these locks.
     final Object mUidRulesFirstLock = new Object();
@@ -332,6 +338,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     @GuardedBy("mUidRulesFirstLock") volatile boolean mRestrictBackground;
     @GuardedBy("mUidRulesFirstLock") volatile boolean mRestrictPower;
     @GuardedBy("mUidRulesFirstLock") volatile boolean mDeviceIdleMode;
+    // Store whether user flipped restrict background in battery saver mode
+    @GuardedBy("mUidRulesFirstLock") volatile boolean mRestrictBackgroundChangedInBsm;
 
     private final boolean mSuppressDefaultPolicy;
 
@@ -617,8 +625,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                                 @Override
                                 public void onLowPowerModeChanged(PowerSaveState result) {
                                     final boolean enabled = result.batterySaverEnabled;
-                                    if (LOGD) Slog.d(TAG,
-                                            "onLowPowerModeChanged(" + enabled + ")");
+                                    if (LOGD) {
+                                        Slog.d(TAG, "onLowPowerModeChanged(" + enabled + ")");
+                                    }
                                     synchronized (mUidRulesFirstLock) {
                                         if (mRestrictPower != enabled) {
                                             mRestrictPower = enabled;
@@ -626,7 +635,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                                         }
                                     }
                                 }
-                    });
+                            });
                     mRestrictPower = mPowerManagerInternal.getLowPowerState(
                             ServiceType.NETWORK_FIREWALL).batterySaverEnabled;
 
@@ -634,6 +643,32 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
                     // read policy from disk
                     readPolicyAL();
+
+                    // Update the restrictBackground if battery saver is turned on
+                    mRestrictBackgroundBeforeBsm = mRestrictBackground;
+                    mRestrictBackgroundPowerState = mPowerManagerInternal
+                            .getLowPowerState(ServiceType.DATA_SAVER);
+                    final boolean localRestrictBackground =
+                            mRestrictBackgroundPowerState.batterySaverEnabled;
+                    if (localRestrictBackground && localRestrictBackground != mRestrictBackground) {
+                        mRestrictBackground = localRestrictBackground;
+                        mHandler.obtainMessage(MSG_RESTRICT_BACKGROUND_CHANGED,
+                                mRestrictBackground ? 1 : 0, 0).sendToTarget();
+                    }
+                    mPowerManagerInternal.registerLowPowerModeObserver(
+                            new PowerManagerInternal.LowPowerModeListener() {
+                                @Override
+                                public int getServiceType() {
+                                    return ServiceType.DATA_SAVER;
+                                }
+
+                                @Override
+                                public void onLowPowerModeChanged(PowerSaveState result) {
+                                    synchronized (mUidRulesFirstLock) {
+                                        updateRestrictBackgroundByLowPowerModeUL(result);
+                                    }
+                                }
+                            });
 
                     if (addDefaultRestrictBackgroundWhitelistUidsUL()) {
                         writePolicyAL();
@@ -2159,6 +2194,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         } catch (RemoteException e) {
             // ignored; service lives in system_server
         }
+
+        if (mRestrictBackgroundPowerState.globalBatterySaverEnabled) {
+            mRestrictBackgroundChangedInBsm = true;
+        }
         synchronized (mNetworkPoliciesSecondLock) {
             updateNotificationsNL();
             writePolicyAL();
@@ -3643,6 +3682,35 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     @VisibleForTesting
     public void addIdleHandler(IdleHandler handler) {
         mHandler.getLooper().getQueue().addIdleHandler(handler);
+    }
+
+    @VisibleForTesting
+    public void updateRestrictBackgroundByLowPowerModeUL(final PowerSaveState result) {
+        mRestrictBackgroundPowerState = result;
+
+        boolean restrictBackground = result.batterySaverEnabled;
+        boolean shouldInvokeRestrictBackground;
+        // store the temporary mRestrictBackgroundChangedInBsm and update it at last
+        boolean localRestrictBgChangedInBsm = mRestrictBackgroundChangedInBsm;
+
+        if (result.globalBatterySaverEnabled) {
+            // Try to turn on restrictBackground if (1) it is off and (2) batter saver need to
+            // turn it on.
+            shouldInvokeRestrictBackground = !mRestrictBackground && result.batterySaverEnabled;
+            mRestrictBackgroundBeforeBsm = mRestrictBackground;
+            localRestrictBgChangedInBsm = false;
+        } else {
+            // Try to restore the restrictBackground if it doesn't change in bsm
+            shouldInvokeRestrictBackground = !mRestrictBackgroundChangedInBsm;
+            restrictBackground = mRestrictBackgroundBeforeBsm;
+        }
+
+        if (shouldInvokeRestrictBackground) {
+            setRestrictBackground(restrictBackground);
+        }
+
+        // Change it at last so setRestrictBackground() won't affect this variable
+        mRestrictBackgroundChangedInBsm = localRestrictBgChangedInBsm;
     }
 
     private static void collectKeys(SparseIntArray source, SparseBooleanArray target) {
