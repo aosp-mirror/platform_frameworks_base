@@ -49,6 +49,7 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Pair;
 
+import com.android.settingslib.R;
 import com.android.settingslib.SuggestionParser;
 import com.android.settingslib.TestConfig;
 
@@ -291,6 +292,30 @@ public class TileUtilsTest {
                 false /* checkCategory */);
 
         assertThat(outTiles.size()).isEqualTo(1);
+    }
+
+    @Test
+    public void getTilesForIntent_shouldShowRemoteViewIfSpecified() {
+        Intent intent = new Intent();
+        Map<Pair<String, String>, Tile> addedCache = new ArrayMap<>();
+        List<Tile> outTiles = new ArrayList<>();
+        List<ResolveInfo> info = new ArrayList<>();
+        ResolveInfo resolveInfo = newInfo(true, null /* category */);
+        resolveInfo.activityInfo.metaData.putInt("com.android.settings.custom_view",
+                R.layout.user_preference);
+        info.add(resolveInfo);
+
+        when(mPackageManager.queryIntentActivitiesAsUser(eq(intent), anyInt(), anyInt()))
+                .thenReturn(info);
+
+        TileUtils.getTilesForIntent(mContext, UserHandle.CURRENT, intent, addedCache,
+                null /* defaultCategory */, outTiles, false /* usePriority */,
+                false /* checkCategory */);
+
+        assertThat(outTiles.size()).isEqualTo(1);
+        Tile tile = outTiles.get(0);
+        assertThat(tile.remoteViews).isNotNull();
+        assertThat(tile.remoteViews.getLayoutId()).isEqualTo(R.layout.user_preference);
     }
 
     public static ResolveInfo newInfo(boolean systemApp, String category) {

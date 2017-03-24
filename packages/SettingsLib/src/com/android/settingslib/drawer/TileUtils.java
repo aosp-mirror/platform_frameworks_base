@@ -21,7 +21,6 @@ import android.content.IContentProvider;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
@@ -35,6 +34,7 @@ import android.provider.Settings.Global;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
+import android.widget.RemoteViews;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -152,6 +152,14 @@ public class TileUtils {
      */
     public static final String META_DATA_PREFERENCE_SUMMARY_URI =
             "com.android.settings.summary_uri";
+
+    /**
+     * Name of the meta-data item that should be set in the AndroidManifest.xml to specify the
+     * custom view which should be displayed for the preference. The custom view will be inflated
+     * as a remote view.
+     */
+    public static final String META_DATA_PREFERENCE_CUSTOM_VIEW =
+            "com.android.settings.custom_view";
 
     public static final String SETTING_PKG = "com.android.settings";
 
@@ -353,6 +361,7 @@ public class TileUtils {
             String summary = null;
             String keyHint = null;
             Uri uri = null;
+            RemoteViews remoteViews = null;
 
             // Get the activity's meta-data
             try {
@@ -385,6 +394,10 @@ public class TileUtils {
                             keyHint = metaData.getString(META_DATA_PREFERENCE_KEYHINT);
                         }
                     }
+                    if (metaData.containsKey(META_DATA_PREFERENCE_CUSTOM_VIEW)) {
+                        int layoutId = metaData.getInt(META_DATA_PREFERENCE_CUSTOM_VIEW);
+                        remoteViews = new RemoteViews(applicationInfo.packageName, layoutId);
+                    }
                 }
             } catch (PackageManager.NameNotFoundException | Resources.NotFoundException e) {
                 if (DEBUG) Log.d(LOG_TAG, "Couldn't find info", e);
@@ -414,6 +427,7 @@ public class TileUtils {
                     activityInfo.name);
             // Suggest a key for this tile
             tile.key = keyHint;
+            tile.remoteViews = remoteViews;
 
             return true;
         }
