@@ -311,6 +311,7 @@ public class RenderTestBase {
         sFrameworkRepo = null;
         sProjectResources = null;
         sLogger = null;
+        sBridge.dispose();
         sBridge = null;
 
         TestUtils.gc();
