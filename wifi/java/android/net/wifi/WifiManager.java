@@ -1437,15 +1437,15 @@ public class WifiManager {
     }
 
     /**
-     * Creates a configuration token describing the network referenced by {@code netId}
-     * of MIME type application/vnd.wfa.wsc. Can be used to configure WiFi networks via NFC.
+     * Creates a configuration token describing the current network of MIME type
+     * application/vnd.wfa.wsc. Can be used to configure WiFi networks via NFC.
      *
-     * @return hex-string encoded configuration token
+     * @return hex-string encoded configuration token or null if there is no current network
      * @hide
      */
-    public String getWpsNfcConfigurationToken(int netId) {
+    public String getCurrentNetworkWpsNfcConfigurationToken() {
         try {
-            return mService.getWpsNfcConfigurationToken(netId);
+            return mService.getCurrentNetworkWpsNfcConfigurationToken();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
