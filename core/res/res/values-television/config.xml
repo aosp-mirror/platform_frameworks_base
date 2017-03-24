@@ -34,6 +34,6 @@
     <string translatable="false" name="config_defaultPictureInPictureScreenEdgeInsets">56x27</string>
 
     <!-- The default gravity for the picture-in-picture window.
-         Currently, this maps to Gravity.TOP | Gravity.RIGHT -->
-    <integer name="config_defaultPictureInPictureGravity">0x35</integer>
+         Currently, this maps to Gravity.BOTTOM | Gravity.RIGHT -->
+    <integer name="config_defaultPictureInPictureGravity">0x55</integer>
 </resources>
