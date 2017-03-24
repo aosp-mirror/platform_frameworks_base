@@ -1080,7 +1080,7 @@
     <string name="monitoring_subtitle_vpn">VPN</string>
 
     <!-- Monitoring dialog subtitle for the section describing network logging [CHAR LIMIT=35]-->
-    <string name="monitoring_subtitle_network_logging">Network Logging</string>
+    <string name="monitoring_subtitle_network_logging">Network logging</string>
 
     <!-- Monitoring dialog subtitle for the section describing certificate authorities [CHAR LIMIT=35]-->
     <string name="monitoring_subtitle_ca_certificate">CA certificates</string>
@@ -1110,7 +1110,7 @@
     <string name="monitoring_description_ca_certificate">A certificate authority is installed on this device. Your secure network traffic may be monitored or modified.</string>
 
     <!-- Monitoring dialog: Description of Network Logging. [CHAR LIMIT=NONE]-->
-    <string name="monitoring_description_management_network_logging">Your admin has turned on network logging, which monitores traffic on your device.</string>
+    <string name="monitoring_description_management_network_logging">Your admin has turned on network logging, which monitors traffic on your device.</string>
 
     <!-- Monitoring dialog: Description of an active VPN. [CHAR LIMIT=NONE]-->
     <string name="monitoring_description_named_vpn">You're connected to <xliff:g id="vpn_app" example="Foo VPN App">%1$s</xliff:g>, which can monitor your network activity, including emails, apps, and websites.</string>
@@ -1147,6 +1147,12 @@
 
     <!-- Monitoring dialog: Link to open the VPN settings page [CHAR LIMIT=60] -->
     <string name="monitoring_description_vpn_settings">Open VPN Settings</string>
+
+    <!-- Monitoring dialog: Space that separates the CA certs body text and the "Open trusted credentials" link that follows it. [CHAR LIMIT=5] -->
+    <string name="monitoring_description_ca_cert_settings_separator">" "</string>
+
+    <!-- Monitoring dialog: Link to open the settings page containing CA certificates [CHAR LIMIT=NONE] -->
+    <string name="monitoring_description_ca_cert_settings">Open trusted credentials</string>
 
     <!-- Monitoring dialog: Network logging text [CHAR LIMIT=400] -->
     <string name="monitoring_description_network_logging">Your admin has turned on network logging, which monitors traffic on your device.\n\nFor more information, contact your admin.</string>
