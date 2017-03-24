@@ -87,6 +87,7 @@ public final class UidRecord {
 
     public UidRecord(int _uid) {
         uid = _uid;
+        idle = true;
         reset();
     }
 
