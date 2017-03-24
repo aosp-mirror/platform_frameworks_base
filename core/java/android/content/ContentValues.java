@@ -204,6 +204,17 @@ public final class ContentValues implements Parcelable {
     }
 
     /**
+     * Indicates whether this collection is empty.
+     *
+     * @return true iff size == 0
+     * {@hide}
+     * TODO: consider exposing this new method publicly
+     */
+    public boolean isEmpty() {
+        return mValues.isEmpty();
+    }
+
+    /**
      * Remove a single value.
      *
      * @param key the name of the value to remove

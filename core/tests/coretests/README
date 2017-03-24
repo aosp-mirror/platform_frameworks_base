@@ -45,6 +45,10 @@ To run tests in debug mode:
 
     -e debug true
 
+To uninstall the package:
+
+  adb shell pm uninstall -k com.android.frameworks.coretests
+
 For more arguments, see the guide to command=line testing:
 
   https://developer.android.com/studio/test/command-line.html

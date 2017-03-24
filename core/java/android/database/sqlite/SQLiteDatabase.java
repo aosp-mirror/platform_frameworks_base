@@ -1449,7 +1449,7 @@ public final class SQLiteDatabase extends SQLiteClosable {
             sql.append('(');
 
             Object[] bindArgs = null;
-            int size = (initialValues != null && initialValues.size() > 0)
+            int size = (initialValues != null && !initialValues.isEmpty())
                     ? initialValues.size() : 0;
             if (size > 0) {
                 bindArgs = new Object[size];
@@ -1541,7 +1541,7 @@ public final class SQLiteDatabase extends SQLiteClosable {
      */
     public int updateWithOnConflict(String table, ContentValues values,
             String whereClause, String[] whereArgs, int conflictAlgorithm) {
-        if (values == null || values.size() == 0) {
+        if (values == null || values.isEmpty()) {
             throw new IllegalArgumentException("Empty values");
         }
 
