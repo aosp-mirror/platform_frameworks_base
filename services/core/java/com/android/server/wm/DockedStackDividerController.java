@@ -540,12 +540,14 @@ public class DockedStackDividerController implements DimLayerUser {
         checkMinimizeChanged(true /* animate */);
 
         // We were minimized, and now we are still minimized, but somebody is trying to launch an
-        // app in docked stack, better show recent apps so we actually get unminimized! This catches
+        // app in docked stack, better show recent apps so we actually get unminimized! However do
+        // not do this if keyguard is dismissed such as when the device is unlocking. This catches
         // any case that was missed in ActivityStarter.postStartActivityUncheckedProcessing because
         // we couldn't retrace the launch of the app in the docked stack to the launch from
         // homescreen.
         if (wasMinimized && mMinimizedDock && containsAppInDockedStack(openingApps)
-                && appTransition != TRANSIT_NONE) {
+                && appTransition != TRANSIT_NONE &&
+                !AppTransition.isKeyguardGoingAwayTransit(appTransition)) {
             mService.showRecentApps(true /* fromHome */);
         }
     }
@@ -577,6 +579,12 @@ public class DockedStackDividerController implements DimLayerUser {
         }
         final Task homeTask = homeStack.findHomeTask();
         if (homeTask == null || !isWithinDisplay(homeTask)) {
+            return;
+        }
+
+        // Do not minimize when dock is already minimized while keyguard is showing and not
+        // occluded such as unlocking the screen
+        if (mMinimizedDock && mService.mPolicy.isKeyguardShowingAndNotOccluded()) {
             return;
         }
         final TaskStack fullscreenStack =
