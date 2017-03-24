@@ -2037,6 +2037,8 @@ public class SettingsProvider extends ContentProvider {
 
         private final BackupManager mBackupManager;
 
+        private String mSettingsCreationBuildId;
+
         public SettingsRegistry() {
             mHandler = new MyHandler(getContext().getMainLooper());
             mGenerationRegistry = new GenerationRegistry(mLock);
@@ -2502,6 +2504,8 @@ public class SettingsProvider extends ContentProvider {
                     return;
                 }
 
+                mSettingsCreationBuildId = Build.ID;
+
                 final long identity = Binder.clearCallingIdentity();
                 try {
                     List<UserInfo> users = mUserManager.getUsers(true);
@@ -2570,6 +2574,12 @@ public class SettingsProvider extends ContentProvider {
                 ensureSettingsStateLocked(globalKey);
                 SettingsState globalSettings = mSettingsStates.get(globalKey);
                 migrateLegacySettingsLocked(globalSettings, database, TABLE_GLOBAL);
+                // If this was just created
+                if (mSettingsCreationBuildId != null) {
+                    globalSettings.insertSettingLocked(Settings.Global.DATABASE_CREATION_BUILDID,
+                            mSettingsCreationBuildId, null, true,
+                            SettingsState.SYSTEM_PACKAGE_NAME);
+                }
                 globalSettings.persistSyncLocked();
             }
 
