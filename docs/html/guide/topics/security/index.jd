@@ -1,7 +1,0 @@
-page.title=Security
-page.landing=true
-page.landing.intro=Configure the security of your application.
-
-@jd:body
-<div class="landing-docs">
-</div>
