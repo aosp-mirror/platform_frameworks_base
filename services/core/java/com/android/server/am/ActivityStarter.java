@@ -1790,21 +1790,7 @@ class ActivityStarter {
             return START_RETURN_LOCK_TASK_MODE_VIOLATION;
         }
 
-        if (mLaunchBounds != null) {
-            mInTask.updateOverrideConfiguration(mLaunchBounds);
-            int stackId = mInTask.getLaunchStackId();
-            if (stackId != mInTask.getStackId()) {
-                mInTask.reparent(stackId, ON_TOP, REPARENT_KEEP_STACK_AT_FRONT, !ANIMATE,
-                        DEFER_RESUME, "inTaskToFront");
-                stackId = mInTask.getStackId();
-            }
-            if (StackId.resizeStackWithLaunchBounds(stackId)) {
-                mService.resizeStack(stackId, mLaunchBounds, true, !PRESERVE_WINDOWS, ANIMATE, -1);
-            }
-        }
         mTargetStack = mInTask.getStack();
-        mTargetStack.moveTaskToFrontLocked(
-                mInTask, mNoAnimation, mOptions, mStartActivity.appTimeTracker, "inTaskToFront");
 
         // Check whether we should actually launch the new activity in to the task,
         // or just reuse the current activity on top.
@@ -1813,6 +1799,8 @@ class ActivityStarter {
                 && top.userId == mStartActivity.userId) {
             if ((mLaunchFlags & FLAG_ACTIVITY_SINGLE_TOP) != 0
                     || mLaunchSingleTop || mLaunchSingleTask) {
+                mTargetStack.moveTaskToFrontLocked(mInTask, mNoAnimation, mOptions,
+                        mStartActivity.appTimeTracker, "inTaskToFront");
                 ActivityStack.logStartActivity(AM_NEW_INTENT, top, top.task);
                 if ((mStartFlags & START_FLAG_ONLY_IF_NEEDED) != 0) {
                     // We don't need to start a new activity, and the client said not to do
@@ -1826,11 +1814,30 @@ class ActivityStarter {
         }
 
         if (!mAddingToTask) {
+            mTargetStack.moveTaskToFrontLocked(mInTask, mNoAnimation, mOptions,
+                    mStartActivity.appTimeTracker, "inTaskToFront");
             // We don't actually want to have this activity added to the task, so just
             // stop here but still tell the caller that we consumed the intent.
             ActivityOptions.abort(mOptions);
             return START_TASK_TO_FRONT;
         }
+
+        if (mLaunchBounds != null) {
+            mInTask.updateOverrideConfiguration(mLaunchBounds);
+            int stackId = mInTask.getLaunchStackId();
+            if (stackId != mInTask.getStackId()) {
+                mInTask.reparent(stackId, ON_TOP, REPARENT_KEEP_STACK_AT_FRONT, !ANIMATE,
+                        DEFER_RESUME, "inTaskToFront");
+                stackId = mInTask.getStackId();
+                mTargetStack = mInTask.getStack();
+            }
+            if (StackId.resizeStackWithLaunchBounds(stackId)) {
+                mService.resizeStack(stackId, mLaunchBounds, true, !PRESERVE_WINDOWS, ANIMATE, -1);
+            }
+        }
+
+        mTargetStack.moveTaskToFrontLocked(
+                mInTask, mNoAnimation, mOptions, mStartActivity.appTimeTracker, "inTaskToFront");
 
         addOrReparentStartingActivity(mInTask, "setTaskFromInTask");
         if (DEBUG_TASKS) Slog.v(TAG_TASKS, "Starting new activity " + mStartActivity
