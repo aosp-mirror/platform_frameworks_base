@@ -35,6 +35,7 @@ import android.text.method.WordIterator;
 import android.text.style.ClickableSpan;
 import android.text.util.Linkify;
 import android.util.Log;
+import android.util.Patterns;
 import android.view.View;
 
 import com.android.internal.util.Preconditions;
@@ -88,7 +89,9 @@ final class TextClassifierImpl implements TextClassifier {
                 if (start >= 0 && end <= string.length() && start <= end) {
                     final TextSelection.Builder tsBuilder = new TextSelection.Builder(start, end);
                     final SmartSelection.ClassificationResult[] results =
-                            getSmartSelection().classifyText(string, start, end);
+                            getSmartSelection().classifyText(
+                                    string, start, end,
+                                    getHintFlags(string, start, end));
                     final int size = results.length;
                     for (int i = 0; i < size; i++) {
                         tsBuilder.setEntityType(results[i].mCollection, results[i].mScore);
@@ -116,12 +119,14 @@ final class TextClassifierImpl implements TextClassifier {
         validateInput(text, startIndex, endIndex);
         try {
             if (text.length() > 0) {
-                final CharSequence classified = text.subSequence(startIndex, endIndex);
+                final String string = text.toString();
                 SmartSelection.ClassificationResult[] results = getSmartSelection()
-                        .classifyText(text.toString(), startIndex, endIndex);
+                        .classifyText(string, startIndex, endIndex,
+                                getHintFlags(string, startIndex, endIndex));
                 if (results.length > 0) {
                     final TextClassificationResult classificationResult =
-                            createClassificationResult(results, classified);
+                            createClassificationResult(
+                                    results, string.subSequence(startIndex, endIndex));
                     // TODO: Added this log for debug only. Remove before release.
                     Log.d(LOG_TAG, String.format(
                             "Classification type: %s", classificationResult));
@@ -208,6 +213,24 @@ final class TextClassifierImpl implements TextClassifier {
         return builder.build();
     }
 
+    private static int getHintFlags(CharSequence text, int start, int end) {
+        int flag = 0;
+        final CharSequence subText = text.subSequence(start, end);
+        if (Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(subText).matches()) {
+            flag |= SmartSelection.HINT_FLAG_EMAIL;
+        }
+        if (Patterns.AUTOLINK_WEB_URL.matcher(subText).matches()
+                && Linkify.sUrlMatchFilter.acceptMatch(text, start, end)) {
+            flag |= SmartSelection.HINT_FLAG_URL;
+        }
+        // TODO: Added this log for debug only. Remove before release.
+        Log.d(LOG_TAG, String.format("Email hint: %b",
+                (flag & SmartSelection.HINT_FLAG_EMAIL) != 0));
+        Log.d(LOG_TAG, String.format("Url hint: %b",
+                (flag & SmartSelection.HINT_FLAG_URL) != 0));
+        return flag;
+    }
+
     private static String getHighestScoringType(SmartSelection.ClassificationResult[] types) {
         if (types.length < 1) {
             return "";
@@ -262,7 +285,9 @@ final class TextClassifierImpl implements TextClassifier {
                 if (selectionStart >= 0 && selectionEnd <= text.length()
                         && selectionStart <= selectionEnd) {
                     final SmartSelection.ClassificationResult[] results =
-                            smartSelection.classifyText(text, selectionStart, selectionEnd);
+                            smartSelection.classifyText(
+                                    text, selectionStart, selectionEnd,
+                                    getHintFlags(text, selectionStart, selectionEnd));
                     if (results.length > 0) {
                         final String type = getHighestScoringType(results);
                         if (matches(type, linkMask)) {

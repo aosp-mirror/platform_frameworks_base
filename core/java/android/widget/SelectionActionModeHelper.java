@@ -289,7 +289,7 @@ final class SelectionActionModeHelper {
      */
     private static final class TextClassificationHelper {
 
-        private static final int TRIM_DELTA = 50;  // characters
+        private static final int TRIM_DELTA = 120;  // characters
 
         private TextClassifier mTextClassifier;
 
