@@ -20,9 +20,7 @@ import static org.mockito.Mockito.when;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothProfile;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
-import android.testing.TestableLooper.RunWithLooper;
 
 import com.android.settingslib.bluetooth.BluetoothEventManager;
 import com.android.settingslib.bluetooth.CachedBluetoothDevice;
@@ -33,13 +31,10 @@ import com.android.systemui.SysuiTestCase;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@RunWith(AndroidTestingRunner.class)
-@RunWithLooper
 public class BluetoothControllerImplTest extends SysuiTestCase {
 
     private LocalBluetoothManager mMockBluetoothManager;
@@ -52,7 +47,7 @@ public class BluetoothControllerImplTest extends SysuiTestCase {
 
     @Before
     public void setup() throws Exception {
-        mTestableLooper = TestableLooper.get(this);
+        mTestableLooper = new TestableLooper();
         mMockBluetoothManager = mDependency.injectMockDependency(LocalBluetoothManager.class);
         mDevices = new ArrayList<>();
         mMockDeviceManager = mock(CachedBluetoothDeviceManager.class);
