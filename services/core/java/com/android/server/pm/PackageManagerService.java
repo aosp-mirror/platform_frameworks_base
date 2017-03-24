@@ -842,7 +842,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     /** Component used to install ephemeral applications */
     ComponentName mInstantAppInstallerComponent;
-    final ActivityInfo mInstantAppInstallerActivity = new ActivityInfo();
+    ActivityInfo mInstantAppInstallerActivity;
     final ResolveInfo mInstantAppInstallerInfo = new ResolveInfo();
 
     final SparseArray<IntentFilterVerificationState> mIntentFilterVerificationStates
@@ -2931,13 +2931,16 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     private void updateInstantAppInstallerLocked() {
         final ComponentName oldInstantAppInstallerComponent = mInstantAppInstallerComponent;
-        final ComponentName newInstantAppInstallerComponent = getEphemeralInstallerLPr();
+        final ActivityInfo newInstantAppInstaller = getEphemeralInstallerLPr();
+        ComponentName newInstantAppInstallerComponent = newInstantAppInstaller == null
+                ? null : newInstantAppInstaller.getComponentName();
+
         if (newInstantAppInstallerComponent != null
                 && !newInstantAppInstallerComponent.equals(oldInstantAppInstallerComponent)) {
             if (DEBUG_EPHEMERAL) {
                 Slog.d(TAG, "Set ephemeral installer: " + newInstantAppInstallerComponent);
             }
-            setUpInstantAppInstallerActivityLP(newInstantAppInstallerComponent);
+            setUpInstantAppInstallerActivityLP(newInstantAppInstaller);
         } else if (DEBUG_EPHEMERAL && newInstantAppInstallerComponent == null) {
             Slog.d(TAG, "Unset ephemeral installer; none available");
         }
@@ -3160,7 +3163,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         return null;
     }
 
-    private @Nullable ComponentName getEphemeralInstallerLPr() {
+    private @Nullable ActivityInfo getEphemeralInstallerLPr() {
         final Intent intent = new Intent(Intent.ACTION_INSTALL_EPHEMERAL_PACKAGE);
         intent.addCategory(Intent.CATEGORY_DEFAULT);
         intent.setDataAndType(Uri.fromFile(new File("foo.apk")), PACKAGE_MIME_TYPE);
@@ -3186,7 +3189,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         if (matches.size() == 0) {
             return null;
         } else if (matches.size() == 1) {
-            return matches.get(0).getComponentInfo().getComponentName();
+            return (ActivityInfo) matches.get(0).getComponentInfo();
         } else {
             throw new RuntimeException(
                     "There must be at most one ephemeral installer; found " + matches);
@@ -10642,28 +10645,23 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-    private void setUpInstantAppInstallerActivityLP(ComponentName installerComponent) {
-        if (installerComponent == null) {
+    private void setUpInstantAppInstallerActivityLP(ActivityInfo installerActivity) {
+        if (installerActivity == null) {
             if (DEBUG_EPHEMERAL) {
                 Slog.d(TAG, "Clear ephemeral installer activity");
             }
-            mInstantAppInstallerActivity.applicationInfo = null;
+            mInstantAppInstallerActivity = null;
             return;
         }
 
         if (DEBUG_EPHEMERAL) {
-            Slog.d(TAG, "Set ephemeral installer activity: " + installerComponent);
+            Slog.d(TAG, "Set ephemeral installer activity: "
+                    + installerActivity.getComponentName());
         }
-        final PackageParser.Package pkg = mPackages.get(installerComponent.getPackageName());
         // Set up information for ephemeral installer activity
-        mInstantAppInstallerActivity.applicationInfo = pkg.applicationInfo;
-        mInstantAppInstallerActivity.name = installerComponent.getClassName();
-        mInstantAppInstallerActivity.packageName = pkg.applicationInfo.packageName;
-        mInstantAppInstallerActivity.processName = pkg.applicationInfo.packageName;
-        mInstantAppInstallerActivity.launchMode = ActivityInfo.LAUNCH_MULTIPLE;
-        mInstantAppInstallerActivity.flags = ActivityInfo.FLAG_EXCLUDE_FROM_RECENTS
+        mInstantAppInstallerActivity = installerActivity;
+        mInstantAppInstallerActivity.flags |= ActivityInfo.FLAG_EXCLUDE_FROM_RECENTS
                 | ActivityInfo.FLAG_FINISH_ON_CLOSE_SYSTEM_DIALOGS;
-        mInstantAppInstallerActivity.theme = 0;
         mInstantAppInstallerActivity.exported = true;
         mInstantAppInstallerActivity.enabled = true;
         mInstantAppInstallerInfo.activityInfo = mInstantAppInstallerActivity;
