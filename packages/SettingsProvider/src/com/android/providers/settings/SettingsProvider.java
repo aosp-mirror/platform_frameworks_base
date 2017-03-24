@@ -3343,6 +3343,24 @@ public class SettingsProvider extends ContentProvider {
                     currentVersion = 142;
                 }
 
+                if (currentVersion == 142) {
+                    // Version 142: Set a default value for Wi-Fi wakeup feature.
+                    if (userId == UserHandle.USER_SYSTEM) {
+                        final SettingsState globalSettings = getGlobalSettingsLocked();
+                        Setting currentSetting = globalSettings.getSettingLocked(
+                                Settings.Global.WIFI_WAKEUP_ENABLED);
+                        if (currentSetting.isNull()) {
+                            globalSettings.insertSettingLocked(
+                                    Settings.Global.WIFI_WAKEUP_ENABLED,
+                                    getContext().getResources().getBoolean(
+                                            R.bool.def_wifi_wakeup_enabled) ? "1" : "0",
+                                    null, true, SettingsState.SYSTEM_PACKAGE_NAME);
+                        }
+                    }
+
+                    currentVersion = 143;
+                }
+
                 if (currentVersion != newVersion) {
                     Slog.wtf("SettingsProvider", "warning: upgrading settings database to version "
                             + newVersion + " left it at "
