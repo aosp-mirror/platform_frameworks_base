@@ -2743,6 +2743,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     @VisibleForTesting
     public ActivityManagerService(Injector injector) {
         mInjector = injector;
+        mContext = mInjector.getContext();
         GL_ES_VERSION = 0;
         mActivityStarter = null;
         mAppErrors = null;
@@ -23874,6 +23875,10 @@ public class ActivityManagerService extends IActivityManager.Stub
     @VisibleForTesting
     public static class Injector {
         private NetworkManagementInternal mNmi;
+
+        public Context getContext() {
+            return null;
+        }
 
         public AppOpsService getAppOpsService(File file, Handler handler) {
             return new AppOpsService(file, handler);

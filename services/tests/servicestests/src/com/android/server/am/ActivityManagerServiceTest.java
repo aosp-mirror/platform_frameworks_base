@@ -51,7 +51,9 @@ import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.app.IApplicationThread;
 import android.app.IUidObserver;
+import android.content.Context;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -116,7 +118,9 @@ public class ActivityManagerServiceTest {
         UidRecord.CHANGE_ACTIVE
     };
 
+    @Mock private Context mContext;
     @Mock private AppOpsService mAppOpsService;
+    @Mock private PackageManager mPackageManager;
 
     private TestInjector mInjector;
     private ActivityManagerService mAms;
@@ -133,6 +137,8 @@ public class ActivityManagerServiceTest {
         mInjector = new TestInjector();
         mAms = new ActivityManagerService(mInjector);
         mAms.mWaitForNetworkTimeoutMs = 100;
+
+        when(mContext.getPackageManager()).thenReturn(mPackageManager);
     }
 
     @After
@@ -601,10 +607,12 @@ public class ActivityManagerServiceTest {
         uidRecord.pendingChange = changeItem;
         uidRecord.curProcStateSeq = TEST_PROC_STATE_SEQ2;
         verifyLastProcStateSeqUpdated(uidRecord, -1, TEST_PROC_STATE_SEQ2);
+    }
 
+    @Test
+    public void testEnqueueUidChangeLocked_nullUidRecord() {
         // Use "null" uidRecord to make sure there is no crash.
-        // TODO: currently it crashes, uncomment after fixing it.
-        // mAms.enqueueUidChangeLocked(null, TEST_UID, UidRecord.CHANGE_ACTIVE);
+        mAms.enqueueUidChangeLocked(null, TEST_UID, UidRecord.CHANGE_ACTIVE);
     }
 
     private void verifyLastProcStateSeqUpdated(UidRecord uidRecord, int uid, long curProcstateSeq) {
@@ -768,6 +776,11 @@ public class ActivityManagerServiceTest {
 
     private class TestInjector extends Injector {
         private boolean mRestricted = true;
+
+        @Override
+        public Context getContext() {
+            return mContext;
+        }
 
         @Override
         public AppOpsService getAppOpsService(File file, Handler handler) {
