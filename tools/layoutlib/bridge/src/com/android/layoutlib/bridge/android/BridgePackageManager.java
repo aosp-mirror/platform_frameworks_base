@@ -916,4 +916,9 @@ public class BridgePackageManager extends PackageManager {
     public boolean canRequestPackageInstalls() {
         return false;
     }
+
+    @Override
+    public ComponentName getInstantAppResolverSettingsComponent() {
+        return null;
+    }
 }

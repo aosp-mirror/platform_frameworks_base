@@ -1118,4 +1118,12 @@ public class MockPackageManager extends PackageManager {
     public int getInstallReason(String packageName, UserHandle user) {
         throw new UnsupportedOperationException();
     }
+
+    /**
+     * @hide
+     */
+    @Override
+    public ComponentName getInstantAppResolverSettingsComponent() {
+        throw new UnsupportedOperationException();
+    }
 }
