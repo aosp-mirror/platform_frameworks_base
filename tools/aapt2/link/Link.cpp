@@ -38,6 +38,7 @@
 #include "flatten/Archive.h"
 #include "flatten/TableFlattener.h"
 #include "flatten/XmlFlattener.h"
+#include "io/BigBufferInputStream.h"
 #include "io/FileSystem.h"
 #include "io/ZipArchive.h"
 #include "java/JavaClassGenerator.h"
@@ -168,34 +169,57 @@ class LinkContext : public IAaptContext {
   int min_sdk_version_ = 0;
 };
 
+static bool CopyInputStreamToArchive(io::InputStream* in, const std::string& out_path,
+                                     uint32_t compression_flags, IArchiveWriter* writer,
+                                     IAaptContext* context) {
+  if (context->IsVerbose()) {
+    context->GetDiagnostics()->Note(DiagMessage() << "writing " << out_path << " to archive");
+  }
+
+  if (!writer->WriteFile(out_path, compression_flags, in)) {
+    context->GetDiagnostics()->Error(DiagMessage() << "failed to write " << out_path
+                                                   << " to archive: " << writer->GetError());
+    return false;
+  }
+  return true;
+}
+
 static bool CopyFileToArchive(io::IFile* file, const std::string& out_path,
                               uint32_t compression_flags,
                               IArchiveWriter* writer, IAaptContext* context) {
   std::unique_ptr<io::IData> data = file->OpenAsData();
   if (!data) {
-    context->GetDiagnostics()->Error(DiagMessage(file->GetSource())
-                                     << "failed to open file");
+    context->GetDiagnostics()->Error(DiagMessage(file->GetSource()) << "failed to open file");
     return false;
   }
+  return CopyInputStreamToArchive(data.get(), out_path, compression_flags, writer, context);
+}
 
-  const uint8_t* buffer = reinterpret_cast<const uint8_t*>(data->data());
-  const size_t buffer_size = data->size();
-
+static bool CopyProtoToArchive(::google::protobuf::MessageLite* proto_msg,
+                               const std::string& out_path, uint32_t compression_flags,
+                               IArchiveWriter* writer, IAaptContext* context) {
   if (context->IsVerbose()) {
-    context->GetDiagnostics()->Note(DiagMessage() << "writing " << out_path
-                                                  << " to archive");
+    context->GetDiagnostics()->Note(DiagMessage() << "writing " << out_path << " to archive");
   }
 
   if (writer->StartEntry(out_path, compression_flags)) {
-    if (writer->WriteEntry(buffer, buffer_size)) {
-      if (writer->FinishEntry()) {
-        return true;
+    // Make sure CopyingOutputStreamAdaptor is deleted before we call writer->FinishEntry().
+    {
+      // Wrap our IArchiveWriter with an adaptor that implements the ZeroCopyOutputStream interface.
+      ::google::protobuf::io::CopyingOutputStreamAdaptor adaptor(writer);
+      if (!proto_msg->SerializeToZeroCopyStream(&adaptor)) {
+        context->GetDiagnostics()->Error(DiagMessage()
+                                         << "failed to write " << out_path << " to archive");
+        return false;
       }
     }
-  }
 
-  context->GetDiagnostics()->Error(DiagMessage() << "failed to write file "
-                                                 << out_path);
+    if (writer->FinishEntry()) {
+      return true;
+    }
+  }
+  context->GetDiagnostics()->Error(DiagMessage() << "failed to write " << out_path
+                                                 << " to archive: " << writer->GetError());
   return false;
 }
 
@@ -221,16 +245,9 @@ static bool FlattenXml(xml::XmlResource* xml_res, const StringPiece& path,
     context->GetDiagnostics()->Note(msg);
   }
 
-  if (writer->StartEntry(path, ArchiveEntry::kCompress)) {
-    if (writer->WriteEntry(buffer)) {
-      if (writer->FinishEntry()) {
-        return true;
-      }
-    }
-  }
-  context->GetDiagnostics()->Error(DiagMessage() << "failed to write " << path
-                                                 << " to archive");
-  return false;
+  io::BigBufferInputStream input_stream(&buffer);
+  return CopyInputStreamToArchive(&input_stream, path.to_string(), ArchiveEntry::kCompress, writer,
+                                  context);
 }
 
 static std::unique_ptr<ResourceTable> LoadTableFromPb(const Source& source,
@@ -243,8 +260,7 @@ static std::unique_ptr<ResourceTable> LoadTableFromPb(const Source& source,
     return {};
   }
 
-  std::unique_ptr<ResourceTable> table =
-      DeserializeTableFromPb(pb_table, source, diag);
+  std::unique_ptr<ResourceTable> table = DeserializeTableFromPb(pb_table, source, diag);
   if (!table) {
     return {};
   }
@@ -898,49 +914,18 @@ class LinkCommand {
     BigBuffer buffer(1024);
     TableFlattener flattener(options_.table_flattener_options, &buffer);
     if (!flattener.Consume(context_, table)) {
+      context_->GetDiagnostics()->Error(DiagMessage() << "failed to flatten resource table");
       return false;
     }
 
-    if (writer->StartEntry("resources.arsc", ArchiveEntry::kAlign)) {
-      if (writer->WriteEntry(buffer)) {
-        if (writer->FinishEntry()) {
-          return true;
-        }
-      }
-    }
-
-    context_->GetDiagnostics()->Error(
-        DiagMessage() << "failed to write resources.arsc to archive");
-    return false;
+    io::BigBufferInputStream input_stream(&buffer);
+    return CopyInputStreamToArchive(&input_stream, "resources.arsc", ArchiveEntry::kAlign, writer,
+                                    context_);
   }
 
   bool FlattenTableToPb(ResourceTable* table, IArchiveWriter* writer) {
-    // Create the file/zip entry.
-    if (!writer->StartEntry("resources.arsc.flat", 0)) {
-      context_->GetDiagnostics()->Error(DiagMessage() << "failed to open");
-      return false;
-    }
-
-    // Make sure CopyingOutputStreamAdaptor is deleted before we call
-    // writer->FinishEntry().
-    {
-      // Wrap our IArchiveWriter with an adaptor that implements the
-      // ZeroCopyOutputStream interface.
-      CopyingOutputStreamAdaptor adaptor(writer);
-
-      std::unique_ptr<pb::ResourceTable> pb_table = SerializeTableToPb(table);
-      if (!pb_table->SerializeToZeroCopyStream(&adaptor)) {
-        context_->GetDiagnostics()->Error(DiagMessage() << "failed to write");
-        return false;
-      }
-    }
-
-    if (!writer->FinishEntry()) {
-      context_->GetDiagnostics()->Error(DiagMessage()
-                                        << "failed to finish entry");
-      return false;
-    }
-    return true;
+    std::unique_ptr<pb::ResourceTable> pb_table = SerializeTableToPb(table);
+    return CopyProtoToArchive(pb_table.get(), "resources.arsc.flat", 0, writer, context_);
   }
 
   bool WriteJavaFile(ResourceTable* table,
@@ -971,8 +956,7 @@ class LinkCommand {
 
     JavaClassGenerator generator(context_, table, java_options);
     if (!generator.Generate(package_name_to_generate, out_package, &fout)) {
-      context_->GetDiagnostics()->Error(DiagMessage(out_path)
-                                        << generator.getError());
+      context_->GetDiagnostics()->Error(DiagMessage(out_path) << generator.getError());
       return false;
     }
 
@@ -1484,7 +1468,6 @@ class LinkCommand {
 
     if (options_.package_type == PackageType::kStaticLib) {
       if (!FlattenTableToPb(table, writer)) {
-        context_->GetDiagnostics()->Error(DiagMessage() << "failed to write resources.arsc.flat");
         return false;
       }
     } else {

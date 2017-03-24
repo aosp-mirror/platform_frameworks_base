@@ -71,16 +71,16 @@ static bool IsPngChunkWhitelisted(uint32_t type) {
 PngChunkFilter::PngChunkFilter(const StringPiece& data) : data_(data) {
   if (util::StartsWith(data_, kPngSignature)) {
     window_start_ = 0;
-    window_end_ = strlen(kPngSignature);
+    window_end_ = kPngSignatureSize;
   } else {
     error_ = true;
   }
 }
 
-bool PngChunkFilter::ConsumeWindow(const void** buffer, int* len) {
+bool PngChunkFilter::ConsumeWindow(const void** buffer, size_t* len) {
   if (window_start_ != window_end_) {
     // We have bytes to give from our window.
-    const int bytes_read = (int)(window_end_ - window_start_);
+    const size_t bytes_read = window_end_ - window_start_;
     *buffer = data_.data() + window_start_;
     *len = bytes_read;
     window_start_ = window_end_;
@@ -89,7 +89,7 @@ bool PngChunkFilter::ConsumeWindow(const void** buffer, int* len) {
   return false;
 }
 
-bool PngChunkFilter::Next(const void** buffer, int* len) {
+bool PngChunkFilter::Next(const void** buffer, size_t* len) {
   if (error_) {
     return false;
   }
@@ -113,16 +113,14 @@ bool PngChunkFilter::Next(const void** buffer, int* len) {
 
     // Verify the chunk length.
     const uint32_t chunk_len = Peek32LE(data_.data() + window_end_);
-    if (((uint64_t)chunk_len) + ((uint64_t)window_end_) + sizeof(uint32_t) >
-        data_.size()) {
+    if (((uint64_t)chunk_len) + ((uint64_t)window_end_) + sizeof(uint32_t) > data_.size()) {
       // Overflow.
       error_ = true;
       return false;
     }
 
     // Do we strip this chunk?
-    const uint32_t chunk_type =
-        Peek32LE(data_.data() + window_end_ + sizeof(uint32_t));
+    const uint32_t chunk_type = Peek32LE(data_.data() + window_end_ + sizeof(uint32_t));
     if (IsPngChunkWhitelisted(chunk_type)) {
       // Advance the window to include this chunk.
       window_end_ += kMinChunkHeaderSize + chunk_len;
@@ -146,31 +144,19 @@ bool PngChunkFilter::Next(const void** buffer, int* len) {
   return false;
 }
 
-void PngChunkFilter::BackUp(int count) {
+void PngChunkFilter::BackUp(size_t count) {
   if (error_) {
     return;
   }
   window_start_ -= count;
 }
 
-bool PngChunkFilter::Skip(int count) {
+bool PngChunkFilter::Rewind() {
   if (error_) {
     return false;
   }
-
-  const void* buffer;
-  int len;
-  while (count > 0) {
-    if (!Next(&buffer, &len)) {
-      return false;
-    }
-    if (len > count) {
-      BackUp(len - count);
-      count = 0;
-    } else {
-      count -= len;
-    }
-  }
+  window_start_ = 0;
+  window_end_ = kPngSignatureSize;
   return true;
 }
 

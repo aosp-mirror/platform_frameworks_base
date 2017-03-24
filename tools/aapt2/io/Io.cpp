@@ -16,7 +16,6 @@
 
 #include "io/Io.h"
 
-#include <algorithm>
 #include <cstring>
 
 namespace aapt {
@@ -24,15 +23,15 @@ namespace io {
 
 bool Copy(OutputStream* out, InputStream* in) {
   const void* in_buffer;
-  int in_len;
+  size_t in_len;
   while (in->Next(&in_buffer, &in_len)) {
     void* out_buffer;
-    int out_len;
+    size_t out_len;
     if (!out->Next(&out_buffer, &out_len)) {
       return !out->HadError();
     }
 
-    const int bytes_to_copy = std::min(in_len, out_len);
+    const size_t bytes_to_copy = in_len < out_len ? in_len : out_len;
     memcpy(out_buffer, in_buffer, bytes_to_copy);
     out->BackUp(out_len - bytes_to_copy);
     in->BackUp(in_len - bytes_to_copy);

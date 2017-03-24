@@ -31,6 +31,9 @@
 
 namespace aapt {
 
+// Size in bytes of the PNG signature.
+constexpr size_t kPngSignatureSize = 8u;
+
 struct PngOptions {
   int grayscale_tolerance = 0;
 };
@@ -46,9 +49,9 @@ class Png {
                const PngOptions& options);
 
  private:
-  IDiagnostics* mDiag;
-
   DISALLOW_COPY_AND_ASSIGN(Png);
+
+  IDiagnostics* mDiag;
 };
 
 /**
@@ -57,26 +60,26 @@ class Png {
 class PngChunkFilter : public io::InputStream {
  public:
   explicit PngChunkFilter(const android::StringPiece& data);
+  virtual ~PngChunkFilter() = default;
 
-  bool Next(const void** buffer, int* len) override;
-  void BackUp(int count) override;
-  bool Skip(int count) override;
+  bool Next(const void** buffer, size_t* len) override;
+  void BackUp(size_t count) override;
 
-  google::protobuf::int64 ByteCount() const override {
-    return static_cast<google::protobuf::int64>(window_start_);
-  }
+  bool CanRewind() const override { return true; }
+  bool Rewind() override;
+  size_t ByteCount() const override { return window_start_; }
 
   bool HadError() const override { return error_; }
 
  private:
-  bool ConsumeWindow(const void** buffer, int* len);
+  DISALLOW_COPY_AND_ASSIGN(PngChunkFilter);
+
+  bool ConsumeWindow(const void** buffer, size_t* len);
 
   android::StringPiece data_;
   size_t window_start_ = 0;
   size_t window_end_ = 0;
   bool error_ = false;
-
-  DISALLOW_COPY_AND_ASSIGN(PngChunkFilter);
 };
 
 /**

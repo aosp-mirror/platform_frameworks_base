@@ -33,7 +33,6 @@
 namespace aapt {
 
 constexpr bool kDebug = false;
-constexpr size_t kPngSignatureSize = 8u;
 
 struct PngInfo {
   ~PngInfo() {

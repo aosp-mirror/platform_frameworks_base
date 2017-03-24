@@ -87,6 +87,7 @@ cc_library_host_static {
         "flatten/Archive.cpp",
         "flatten/TableFlattener.cpp",
         "flatten/XmlFlattener.cpp",
+        "io/BigBufferStreams.cpp",
         "io/File.cpp",
         "io/FileSystem.cpp",
         "io/Io.cpp",

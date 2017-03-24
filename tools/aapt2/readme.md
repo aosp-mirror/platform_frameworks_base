@@ -1,5 +1,12 @@
 # Android Asset Packaging Tool 2.0 (AAPT2) release notes
 
+## Version 2.11
+### `aapt2 link ...`
+- Adds the ability to specify assets directories with the -A parameter. Assets work just like
+  assets in the original AAPT. It is not recommended to package assets with aapt2, however,
+  since the resulting APK is post-processed by other tools anyways. Assets do not get processed
+  by AAPT2, just copied, so incremental building gets slower if they are included early on.
+
 ## Version 2.10
 ### `aapt2 link ...`
 - Add ability to specify package ID to compile with for regular apps (not shared or static libs).
