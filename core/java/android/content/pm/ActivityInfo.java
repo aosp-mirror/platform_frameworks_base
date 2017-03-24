@@ -223,6 +223,15 @@ public class ActivityInfo extends ComponentInfo
     public int resizeMode = RESIZE_MODE_RESIZEABLE;
 
     /**
+     * Value indicating the maximum aspect ratio the activity supports.
+     * <p>
+     * 0 means unset.
+     * @See {@link android.R.attr#maxAspectRatio}.
+     * @hide
+     */
+    public float maxAspectRatio;
+
+    /**
      * Name of the VrListenerService component to run for this activity.
      * @see android.R.attr#enableVrMode
      * @hide
@@ -922,6 +931,7 @@ public class ActivityInfo extends ComponentInfo
         requestedVrComponent = orig.requestedVrComponent;
         rotationAnimation = orig.rotationAnimation;
         colorMode = orig.colorMode;
+        maxAspectRatio = orig.maxAspectRatio;
     }
 
     /**
@@ -1064,6 +1074,9 @@ public class ActivityInfo extends ComponentInfo
         if (requestedVrComponent != null) {
             pw.println(prefix + "requestedVrComponent=" + requestedVrComponent);
         }
+        if (maxAspectRatio != 0) {
+            pw.println(prefix + "maxAspectRatio=" + maxAspectRatio);
+        }
         super.dumpBack(pw, prefix, flags);
     }
 
@@ -1110,6 +1123,7 @@ public class ActivityInfo extends ComponentInfo
         dest.writeString(requestedVrComponent);
         dest.writeInt(rotationAnimation);
         dest.writeInt(colorMode);
+        dest.writeFloat(maxAspectRatio);
     }
 
     public static final Parcelable.Creator<ActivityInfo> CREATOR
@@ -1146,6 +1160,7 @@ public class ActivityInfo extends ComponentInfo
         requestedVrComponent = source.readString();
         rotationAnimation = source.readInt();
         colorMode = source.readInt();
+        maxAspectRatio = source.readFloat();
     }
 
     /**

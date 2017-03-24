@@ -22,6 +22,8 @@ import android.content.res.Configuration;
  * Contains common logic for classes that have override configurations and are organized in a
  * hierarchy.
  */
+// TODO(b/36505427): Move to wm package and have WindowContainer use this instead of having its own
+// implementation for merging configuration.
 abstract class ConfigurationContainer<E extends ConfigurationContainer> {
 
     /** Contains override configuration settings applied to this configuration container. */

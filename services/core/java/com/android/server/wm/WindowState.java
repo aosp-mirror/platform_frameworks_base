@@ -717,16 +717,16 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mHaveFrame = true;
 
         final Task task = getTask();
-        final boolean fullscreenTask = !isInMultiWindowMode();
+        final boolean inFullscreenContainer = inFullscreenContainer();
         final boolean windowsAreFloating = task != null && task.isFloating();
         final DisplayContent dc = getDisplayContent();
 
         // If the task has temp inset bounds set, we have to make sure all its windows uses
         // the temp inset frame. Otherwise different display frames get applied to the main
         // window and the child window, making them misaligned.
-        if (fullscreenTask) {
+        if (inFullscreenContainer) {
             mInsetFrame.setEmpty();
-        } else {
+        } else if (task != null && isInMultiWindowMode()) {
             task.getTempInsetBounds(mInsetFrame);
         }
 
@@ -740,7 +740,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // The offset from the layout containing frame to the actual containing frame.
         final int layoutXDiff;
         final int layoutYDiff;
-        if (fullscreenTask || layoutInParentFrame()) {
+        if (inFullscreenContainer || layoutInParentFrame()) {
             // We use the parent frame as the containing frame for fullscreen and child windows
             mContainingFrame.set(parentFrame);
             mDisplayFrame.set(displayFrame);
@@ -749,7 +749,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             layoutXDiff = 0;
             layoutYDiff = 0;
         } else {
-            task.getBounds(mContainingFrame);
+            getContainerBounds(mContainingFrame);
             if (mAppToken != null && !mAppToken.mFrozenBounds.isEmpty()) {
 
                 // If the bounds are frozen, we still want to translate the window freely and only
@@ -883,7 +883,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     Math.min(mStableFrame.bottom, mFrame.bottom));
         }
 
-        if (fullscreenTask && !windowsAreFloating) {
+        if (inFullscreenContainer && !windowsAreFloating) {
             // Windows that are not fullscreen can be positioned outside of the display frame,
             // but that is not a reason to provide them with overscan insets.
             mOverscanInsets.set(Math.max(mOverscanFrame.left - layoutContainingFrame.left, 0),
@@ -908,10 +908,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             getDisplayContent().getLogicalDisplayRect(mTmpRect);
             // Override right and/or bottom insets in case if the frame doesn't fit the screen in
             // non-fullscreen mode.
-            boolean overrideRightInset = !windowsAreFloating && !fullscreenTask &&
-                    mFrame.right > mTmpRect.right;
-            boolean overrideBottomInset = !windowsAreFloating && !fullscreenTask &&
-                    mFrame.bottom > mTmpRect.bottom;
+            boolean overrideRightInset = !windowsAreFloating && !inFullscreenContainer
+                    && mFrame.right > mTmpRect.right;
+            boolean overrideBottomInset = !windowsAreFloating && !inFullscreenContainer
+                    && mFrame.bottom > mTmpRect.bottom;
             mContentInsets.set(mContentFrame.left - mFrame.left,
                     mContentFrame.top - mFrame.top,
                     overrideRightInset ? mTmpRect.right - mContentFrame.right
@@ -3122,6 +3122,28 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return task != null && !task.isFullscreen();
     }
 
+    /** Is this window in a container that takes up the entire screen space? */
+    private boolean inFullscreenContainer() {
+        if (mAppToken == null) {
+            return true;
+        }
+        if (mAppToken.hasBounds()) {
+            return false;
+        }
+        return !isInMultiWindowMode();
+    }
+
+    /** Returns the appropriate bounds to use for computing frames. */
+    private void getContainerBounds(Rect outBounds) {
+        if (isInMultiWindowMode()) {
+            getTask().getBounds(outBounds);
+        } else if (mAppToken != null){
+            mAppToken.getBounds(outBounds);
+        } else {
+            outBounds.setEmpty();
+        }
+    }
+
     boolean isDragResizeChanged() {
         return mDragResizing != computeDragResizing();
     }
@@ -3137,7 +3159,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     /**
      * @return Whether we reported a drag resize change to the application or not already.
      */
-    boolean isDragResizingChangeReported() {
+    private boolean isDragResizingChangeReported() {
         return mDragResizingChangeReported;
     }
 
@@ -3154,7 +3176,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * Set whether we got resized but drag resizing flag was false.
      * @see #isResizedWhileNotDragResizing().
      */
-    void setResizedWhileNotDragResizing(boolean resizedWhileNotDragResizing) {
+    private void setResizedWhileNotDragResizing(boolean resizedWhileNotDragResizing) {
         mResizedWhileNotDragResizing = resizedWhileNotDragResizing;
         mResizedWhileNotDragResizingReported = !resizedWhileNotDragResizing;
     }
@@ -3459,17 +3481,17 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         final int pw = containingFrame.width();
         final int ph = containingFrame.height();
         final Task task = getTask();
-        final boolean nonFullscreenTask = isInMultiWindowMode();
+        final boolean inNonFullscreenContainer = !inFullscreenContainer();
         final boolean noLimits = (mAttrs.flags & FLAG_LAYOUT_NO_LIMITS) != 0;
 
         // We need to fit it to the display if either
-        // a) The task is fullscreen, or we don't have a task (we assume fullscreen for the taskless
-        // windows)
+        // a) The window is in a fullscreen container, or we don't have a task (we assume fullscreen
+        // for the taskless windows)
         // b) If it's a secondary app window, we also need to fit it to the display unless
-        // FLAG_LAYOUT_NO_LIMITS is set. This is so we place Popups, dialogs, and similar windows on screen,
-        // but SurfaceViews want to be always at a specific location so we don't fit it to the
-        // display.
-        final boolean fitToDisplay = (task == null || !nonFullscreenTask)
+        // FLAG_LAYOUT_NO_LIMITS is set. This is so we place Popups, dialogs, and similar windows on
+        // screen, but SurfaceViews want to be always at a specific location so we don't fit it to
+        // the display.
+        final boolean fitToDisplay = (task == null || !inNonFullscreenContainer)
                 || ((mAttrs.type != TYPE_BASE_APPLICATION) && !noLimits);
         float x, y;
         int w,h;
@@ -3514,7 +3536,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             y = mAttrs.y;
         }
 
-        if (nonFullscreenTask && !layoutInParentFrame()) {
+        if (inNonFullscreenContainer && !layoutInParentFrame()) {
             // Make sure window fits in containing frame since it is in a non-fullscreen task as
             // required by {@link Gravity#apply} call.
             w = Math.min(w, pw);

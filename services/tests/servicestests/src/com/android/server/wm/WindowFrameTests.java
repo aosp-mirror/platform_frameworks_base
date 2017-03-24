@@ -23,7 +23,6 @@ import org.junit.runner.RunWith;
 import android.app.ActivityManager.TaskDescription;
 import android.content.Context;
 import android.graphics.Rect;
-import android.os.Binder;
 import android.platform.test.annotations.Presubmit;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
@@ -34,7 +33,6 @@ import android.view.IWindow;
 import android.view.WindowManager;
 
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
-import static android.view.WindowManager.LayoutParams.FLAG_SCALED;
 import static android.view.WindowManager.LayoutParams.FILL_PARENT;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -47,9 +45,8 @@ import static org.junit.Assert.assertTrue;
 @SmallTest
 @Presubmit
 @RunWith(AndroidJUnit4.class)
-public class WindowFrameTests {
+public class WindowFrameTests extends WindowTestsBase {
 
-    private static WindowManagerService sWm = null;
     private WindowToken mWindowToken;
     private final IWindow mIWindow = new TestIWindow();
 
@@ -105,8 +102,7 @@ public class WindowFrameTests {
         // Just any non zero value.
         sWm.mSystemDecorLayer = 10000;
 
-        mWindowToken = new WindowToken(sWm, new Binder(), 0, false,
-                sWm.getDefaultDisplayContentLocked(), false /* ownerCanManageAppTokens */);
+        mWindowToken = new TestAppWindowToken(sWm.getDefaultDisplayContentLocked());
         mStubStack = new TaskStack(sWm, 0);
     }
 

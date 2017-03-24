@@ -924,12 +924,12 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
 
     @Override
     protected int getChildCount() {
-        return 0;
+        return mActivities.size();
     }
 
     @Override
     protected ConfigurationContainer getChildAt(int index) {
-        return null;
+        return mActivities.get(index);
     }
 
     @Override
@@ -944,7 +944,7 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
     }
 
     // Close up recents linked list.
-    void closeRecentsChain() {
+    private void closeRecentsChain() {
         if (mPrevAffiliate != null) {
             mPrevAffiliate.setNextAffiliate(mNextAffiliate);
         }
@@ -1188,7 +1188,10 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
             throw new IllegalArgumentException("Can not add r=" + " to task=" + this
                     + " current parent=" + r.task);
         }
+        // TODO(b/36505427): Maybe make task private to ActivityRecord so we can also do
+        // onParentChanged() within the setter?
         r.task = this;
+        r.onParentChanged();
 
         // Remove r first, and if it wasn't already in the list and it's fullscreen, count it.
         if (!mActivities.remove(r) && r.fullscreen) {
@@ -1995,7 +1998,7 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
             if (mStack == null || StackId.persistTaskBounds(mStack.mStackId)) {
                 mLastNonFullscreenBounds = mBounds;
             }
-            calculateOverrideConfig(newConfig, mTmpRect, insetBounds,
+            computeOverrideConfiguration(newConfig, mTmpRect, insetBounds,
                     mTmpRect.right != bounds.right, mTmpRect.bottom != bounds.bottom);
         }
         onOverrideConfigurationChanged(newConfig);
@@ -2008,7 +2011,10 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
     }
 
     /** Clears passed config and fills it with new override values. */
-    private void calculateOverrideConfig(Configuration config, Rect bounds, Rect insetBounds,
+    // TODO(b/36505427): TaskRecord.computeOverrideConfiguration() is a utility method that doesn't
+    // depend on task or stacks, but uses those object to get the display to base the calculation
+    // on. Probably best to centralize calculations like this in ConfigurationContainer.
+    void computeOverrideConfiguration(Configuration config, Rect bounds, Rect insetBounds,
             boolean overrideWidth, boolean overrideHeight) {
         mTmpNonDecorBounds.set(bounds);
         mTmpStableBounds.set(bounds);
@@ -2027,7 +2033,7 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
             config.smallestScreenWidthDp =
                     mService.mStackSupervisor.mDefaultMinSizeOfResizeableTask;
             config.screenWidthDp = config.screenHeightDp = config.smallestScreenWidthDp;
-            Slog.wtf(TAG, "Expected stack when caclulating override config");
+            Slog.wtf(TAG, "Expected stack when calculating override config");
         }
 
         config.orientation = (config.screenWidthDp <= config.screenHeightDp)
@@ -2046,23 +2052,6 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
         final int shortSize = Math.min(compatScreenHeightDp, compatScreenWidthDp);
         config.screenLayout = Configuration.reduceScreenLayout(sl, longSize, shortSize);
 
-    }
-
-    /**
-     * Using the existing configuration {@param config}, creates a new task override config such
-     * that all the fields that are usually set in an override config are set to the ones in
-     * {@param config}.
-     */
-    Configuration extractOverrideConfig(Configuration config) {
-        final Configuration extracted = new Configuration();
-        extracted.screenWidthDp = config.screenWidthDp;
-        extracted.screenHeightDp = config.screenHeightDp;
-        extracted.smallestScreenWidthDp = config.smallestScreenWidthDp;
-        extracted.orientation = config.orientation;
-        // We're only overriding LONG, SIZE and COMPAT parts of screenLayout.
-        extracted.screenLayout = config.screenLayout & (Configuration.SCREENLAYOUT_LONG_MASK
-                | Configuration.SCREENLAYOUT_SIZE_MASK | Configuration.SCREENLAYOUT_COMPAT_NEEDED);
-        return extracted;
     }
 
     Rect updateOverrideConfigurationFromLaunchBounds() {

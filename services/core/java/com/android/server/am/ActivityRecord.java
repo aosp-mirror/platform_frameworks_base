@@ -47,6 +47,7 @@ import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
+import static android.content.res.Configuration.EMPTY;
 import static android.content.res.Configuration.UI_MODE_TYPE_VR_HEADSET;
 import static android.os.Build.VERSION_CODES.HONEYCOMB;
 import static android.os.Build.VERSION_CODES.O;
@@ -83,6 +84,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Debug;
@@ -130,7 +132,7 @@ import java.util.Objects;
 /**
  * An entry in the history stack, representing an activity.
  */
-final class ActivityRecord implements AppWindowContainerListener {
+final class ActivityRecord extends ConfigurationContainer implements AppWindowContainerListener {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "ActivityRecord" : TAG_AM;
     private static final String TAG_CONFIGURATION = TAG + POSTFIX_CONFIGURATION;
     private static final String TAG_SAVED_STATE = TAG + POSTFIX_SAVED_STATE;
@@ -286,11 +288,19 @@ final class ActivityRecord implements AppWindowContainerListener {
     // on the window.
     int mRotationAnimationHint = -1;
 
+    // The bounds of this activity. Mainly used for aspect-ratio compatibility.
+    // TODO(b/36505427): Every level on ConfigurationContainer now has bounds information, which
+    // directly affects the configuration. We should probably move this into that class and have it
+    // handle calculating override configuration from the bounds.
+    private final Rect mBounds = new Rect();
+
     /**
      * Temp configs used in {@link #ensureActivityConfigurationLocked(int, boolean)}
      */
     private final Configuration mTmpConfig1 = new Configuration();
     private final Configuration mTmpConfig2 = new Configuration();
+    private final Point mTmpPoint = new Point();
+    private final Rect mTmpBounds = new Rect();
 
     private static String startingWindowStateToString(int state) {
         switch (state) {
@@ -344,6 +354,13 @@ final class ActivityRecord implements AppWindowContainerListener {
                 pw.println(mLastReportedConfiguration);
         pw.print(prefix); pw.print("mLastReportedOverrideConfiguration=");
                 pw.println(mLastReportedOverrideConfiguration);
+        pw.print(prefix); pw.print("CurrentConfiguration="); pw.println(getConfiguration());
+        if (!getOverrideConfiguration().equals(EMPTY)) {
+            pw.println(prefix + "OverrideConfiguration=" + getOverrideConfiguration());
+        }
+        if (!mBounds.isEmpty()) {
+            pw.println(prefix + "mBounds=" + mBounds);
+        }
         if (resultTo != null || resultWho != null) {
             pw.print(prefix); pw.print("resultTo="); pw.print(resultTo);
                     pw.print(" resultWho="); pw.print(resultWho);
@@ -461,10 +478,15 @@ final class ActivityRecord implements AppWindowContainerListener {
         }
         if (info != null) {
             pw.println(prefix + "resizeMode=" + ActivityInfo.resizeModeToString(info.resizeMode));
-            pw.println(prefix + "supportsPictureInPicture=" + info.supportsPictureInPicture());
+            if (info.supportsPictureInPicture()) {
+                pw.println(prefix + "supportsPictureInPicture=" + info.supportsPictureInPicture());
+                pw.println(prefix + "supportsPictureInPictureWhilePausing: "
+                        + supportsPictureInPictureWhilePausing);
+            }
+            if (info.maxAspectRatio != 0) {
+                pw.println(prefix + "maxAspectRatio=" + info.maxAspectRatio);
+            }
         }
-        pw.println(prefix + "supportsPictureInPictureWhilePausing: "
-                + supportsPictureInPictureWhilePausing);
     }
 
     private boolean crossesHorizontalSizeThreshold(int firstDp, int secondDp) {
@@ -577,6 +599,22 @@ final class ActivityRecord implements AppWindowContainerListener {
 
     boolean isFreeform() {
         return task != null && task.getStackId() == FREEFORM_WORKSPACE_STACK_ID;
+    }
+
+    @Override
+    protected int getChildCount() {
+        // {@link ActivityRecord} is a leaf node and has no children.
+        return 0;
+    }
+
+    @Override
+    protected ConfigurationContainer getChildAt(int index) {
+        return null;
+    }
+
+    @Override
+    protected ConfigurationContainer getParent() {
+        return task;
     }
 
     static class Token extends IApplicationToken.Stub {
@@ -764,15 +802,20 @@ final class ActivityRecord implements AppWindowContainerListener {
 
         inHistory = true;
 
-        task.updateOverrideConfigurationFromLaunchBounds();
         final TaskWindowContainerController taskController = task.getWindowContainerController();
+
+        // TODO(b/36505427): Maybe this call should be moved inside updateOverrideConfiguration()
+        task.updateOverrideConfigurationFromLaunchBounds();
+        // Make sure override configuration is up-to-date before using to create window controller.
+        updateOverrideConfiguration();
 
         mWindowContainerController = new AppWindowContainerController(taskController, appToken,
                 this, Integer.MAX_VALUE /* add on top */, info.screenOrientation, fullscreen,
                 (info.flags & FLAG_SHOW_FOR_ALL_USERS) != 0, info.configChanges,
                 task.voiceSession != null, mLaunchTaskBehind, isAlwaysFocusable(),
                 appInfo.targetSdkVersion, mRotationAnimationHint,
-                ActivityManagerService.getInputDispatchingTimeoutLocked(this) * 1000000L);
+                ActivityManagerService.getInputDispatchingTimeoutLocked(this) * 1000000L,
+                getOverrideConfiguration(), mBounds);
 
         task.addActivityToTop(this);
 
@@ -1994,8 +2037,73 @@ final class ActivityRecord implements AppWindowContainerListener {
     }
 
     /** Call when override config was sent to the Window Manager to update internal records. */
+    // TODO(b/36505427): Why do we set last reported based on sending the config to WM? Seems like
+    // we should only set this when we actually report to the activity which is what the method
+    // setLastReportedMergedOverrideConfiguration() does. Investigate if this is really needed.
     void onOverrideConfigurationSent() {
-        mLastReportedOverrideConfiguration.setTo(task.getMergedOverrideConfiguration());
+        mLastReportedOverrideConfiguration.setTo(getMergedOverrideConfiguration());
+    }
+
+    @Override
+    void onOverrideConfigurationChanged(Configuration overrideConfiguration) {
+        super.onOverrideConfigurationChanged(overrideConfiguration);
+        if (mWindowContainerController != null) {
+            mWindowContainerController.onOverrideConfigurationChanged(
+                    overrideConfiguration, mBounds);
+            // TODO(b/36505427): Can we consolidate the call points of onOverrideConfigurationSent()
+            // to just use this method instead?
+            onOverrideConfigurationSent();
+        }
+    }
+
+    // TODO(b/36505427): Consider moving this method and similar ones to ConfigurationContainer.
+    private boolean updateOverrideConfiguration() {
+        computeBounds(mTmpBounds);
+        if (mTmpBounds.equals(mBounds)) {
+            return false;
+        }
+        mBounds.set(mTmpBounds);
+        // Bounds changed...update configuration to match.
+        mTmpConfig1.unset();
+        task.computeOverrideConfiguration(mTmpConfig1, mBounds, null /* insetBounds */,
+                false /* overrideWidth */, false /* overrideHeight */);
+        onOverrideConfigurationChanged(mTmpConfig1);
+        return true;
+    }
+
+    /** Computes the override configuration for this activity */
+    // TODO(b/36505427): Consider moving this method and similar ones to ConfigurationContainer.
+    private void computeBounds(Rect outBounds) {
+        outBounds.setEmpty();
+        final float maxAspectRatio = info.maxAspectRatio;
+        final ActivityStack stack = getStack();
+        if ((task != null && !task.mFullscreen) || maxAspectRatio == 0 || stack == null) {
+            // We don't set override configuration if that activity task isn't fullscreen. I.e. the
+            // activity is in multi-window mode. Or, there isn't a max aspect ratio specified for
+            // the activity.
+            return;
+        }
+
+        stack.getDisplaySize(mTmpPoint);
+        int maxActivityWidth = mTmpPoint.x;
+        int maxActivityHeight = mTmpPoint.y;
+        if (mTmpPoint.x < mTmpPoint.y) {
+            // Width is the shorter side, so we use that to figure-out what the max. height should
+            // be given the aspect ratio.
+            maxActivityHeight = (int) ((maxActivityWidth * maxAspectRatio) + 0.5f);
+        } else {
+            // Height is the shorter side, so we use that to figure-out what the max. width should
+            // be given the aspect ratio.
+            maxActivityWidth = (int) ((maxActivityHeight * maxAspectRatio) + 0.5f);
+        }
+
+        if (mTmpPoint.x <= maxActivityWidth && mTmpPoint.y <= maxActivityHeight) {
+            // The display matches or is less than the activity aspect ratio, so nothing else to do.
+            return;
+        }
+
+        // Compute configuration based on max supported width and height.
+        outBounds.set(0, 0, maxActivityWidth, maxActivityHeight);
     }
 
     /**
@@ -2028,13 +2136,16 @@ final class ActivityRecord implements AppWindowContainerListener {
         if (displayChanged) {
             mLastReportedDisplayId = newDisplayId;
         }
+        // TODO(b/36505427): Is there a better place to do this?
+        updateOverrideConfiguration();
+
         // Short circuit: if the two full configurations are equal (the common case), then there is
         // nothing to do.  We test the full configuration instead of the global and merged override
         // configurations because there are cases (like moving a task to the pinned stack) where
         // the combine configurations are equal, but would otherwise differ in the override config
         mTmpConfig1.setTo(mLastReportedConfiguration);
         mTmpConfig1.updateFrom(mLastReportedOverrideConfiguration);
-        if (task.getConfiguration().equals(mTmpConfig1) && !forceNewConfig && !displayChanged) {
+        if (getConfiguration().equals(mTmpConfig1) && !forceNewConfig && !displayChanged) {
             if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
                     "Configuration & display unchanged in " + this);
             return true;
@@ -2045,15 +2156,15 @@ final class ActivityRecord implements AppWindowContainerListener {
 
         // Find changes between last reported merged configuration and the current one. This is used
         // to decide whether to relaunch an activity or just report a configuration change.
-        final int changes = getTaskConfigurationChanges(mTmpConfig1);
+        final int changes = getConfigurationChanges(mTmpConfig1);
 
         // Update last reported values.
         final Configuration newGlobalConfig = service.getGlobalConfiguration();
-        final Configuration newTaskMergedOverrideConfig = task.getMergedOverrideConfiguration();
+        final Configuration newMergedOverrideConfig = getMergedOverrideConfiguration();
         mTmpConfig1.setTo(mLastReportedConfiguration);
         mTmpConfig2.setTo(mLastReportedOverrideConfiguration);
         mLastReportedConfiguration.setTo(newGlobalConfig);
-        mLastReportedOverrideConfiguration.setTo(newTaskMergedOverrideConfig);
+        mLastReportedOverrideConfiguration.setTo(newMergedOverrideConfig);
 
         if (changes == 0 && !forceNewConfig) {
             if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
@@ -2061,9 +2172,9 @@ final class ActivityRecord implements AppWindowContainerListener {
             // There are no significant differences, so we won't relaunch but should still deliver
             // the new configuration to the client process.
             if (displayChanged) {
-                scheduleActivityMovedToDisplay(newDisplayId, newTaskMergedOverrideConfig);
+                scheduleActivityMovedToDisplay(newDisplayId, newMergedOverrideConfig);
             } else {
-                scheduleConfigurationChanged(newTaskMergedOverrideConfig);
+                scheduleConfigurationChanged(newMergedOverrideConfig);
             }
             return true;
         }
@@ -2088,9 +2199,9 @@ final class ActivityRecord implements AppWindowContainerListener {
                         + Integer.toHexString(changes) + ", handles=0x"
                         + Integer.toHexString(info.getRealConfigChanged())
                         + ", newGlobalConfig=" + newGlobalConfig
-                        + ", newTaskMergedOverrideConfig=" + newTaskMergedOverrideConfig);
+                        + ", newMergedOverrideConfig=" + newMergedOverrideConfig);
 
-        if (shouldRelaunchLocked(changes, newGlobalConfig, newTaskMergedOverrideConfig)
+        if (shouldRelaunchLocked(changes, newGlobalConfig, newMergedOverrideConfig)
                 || forceNewConfig) {
             // Aha, the activity isn't handling the change, so DIE DIE DIE.
             configChangeFlags |= changes;
@@ -2133,13 +2244,13 @@ final class ActivityRecord implements AppWindowContainerListener {
         }
 
         // Default case: the activity can handle this new configuration, so hand it over.
-        // NOTE: We only forward the task override configuration as the system level configuration
+        // NOTE: We only forward the override configuration as the system level configuration
         // changes is always sent to all processes when they happen so it can just use whatever
         // system level configuration it last got.
         if (displayChanged) {
-            scheduleActivityMovedToDisplay(newDisplayId, newTaskMergedOverrideConfig);
+            scheduleActivityMovedToDisplay(newDisplayId, newMergedOverrideConfig);
         } else {
-            scheduleConfigurationChanged(newTaskMergedOverrideConfig);
+            scheduleConfigurationChanged(newMergedOverrideConfig);
         }
         stopFreezingScreenLocked(false);
 
@@ -2167,31 +2278,31 @@ final class ActivityRecord implements AppWindowContainerListener {
         return (changes&(~configChanged)) != 0;
     }
 
-    private int getTaskConfigurationChanges(Configuration lastReportedConfig) {
+    private int getConfigurationChanges(Configuration lastReportedConfig) {
         // Determine what has changed.  May be nothing, if this is a config that has come back from
         // the app after going idle.  In that case we just want to leave the official config object
         // now in the activity and do nothing else.
-        final Configuration currentConfig = task.getConfiguration();
-        int taskChanges = lastReportedConfig.diff(currentConfig);
+        final Configuration currentConfig = getConfiguration();
+        int changes = lastReportedConfig.diff(currentConfig);
         // We don't want to use size changes if they don't cross boundaries that are important to
         // the app.
-        if ((taskChanges & CONFIG_SCREEN_SIZE) != 0) {
+        if ((changes & CONFIG_SCREEN_SIZE) != 0) {
             final boolean crosses = crossesHorizontalSizeThreshold(lastReportedConfig.screenWidthDp,
                     currentConfig.screenWidthDp)
                     || crossesVerticalSizeThreshold(lastReportedConfig.screenHeightDp,
                     currentConfig.screenHeightDp);
             if (!crosses) {
-                taskChanges &= ~CONFIG_SCREEN_SIZE;
+                changes &= ~CONFIG_SCREEN_SIZE;
             }
         }
-        if ((taskChanges & CONFIG_SMALLEST_SCREEN_SIZE) != 0) {
+        if ((changes & CONFIG_SMALLEST_SCREEN_SIZE) != 0) {
             final int oldSmallest = lastReportedConfig.smallestScreenWidthDp;
             final int newSmallest = currentConfig.smallestScreenWidthDp;
             if (!crossesSmallestSizeThreshold(oldSmallest, newSmallest)) {
-                taskChanges &= ~CONFIG_SMALLEST_SCREEN_SIZE;
+                changes &= ~CONFIG_SMALLEST_SCREEN_SIZE;
             }
         }
-        return taskChanges;
+        return changes;
     }
 
     private static boolean isResizeOnlyChange(int change) {
@@ -2232,7 +2343,7 @@ final class ActivityRecord implements AppWindowContainerListener {
             app.thread.scheduleRelaunchActivity(appToken, pendingResults, pendingNewIntents,
                     configChangeFlags, !andResume,
                     new Configuration(service.getGlobalConfiguration()),
-                    new Configuration(task.getMergedOverrideConfiguration()), preserveWindow);
+                    new Configuration(getMergedOverrideConfiguration()), preserveWindow);
             // Note: don't need to call pauseIfSleepingLocked() here, because the caller will only
             // pass in 'andResume' if this activity is currently resumed, which implies we aren't
             // sleeping.

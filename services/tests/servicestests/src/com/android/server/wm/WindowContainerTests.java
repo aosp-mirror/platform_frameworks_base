@@ -361,6 +361,18 @@ public class WindowContainerTests extends WindowTestsBase {
     }
 
     @Test
+    public void testOverrideConfigurationAncestorNotification() {
+        final TestWindowContainerBuilder builder = new TestWindowContainerBuilder();
+        final TestWindowContainer grandparent = builder.setLayer(0).build();
+
+        final TestWindowContainer parent = grandparent.addChildWindow();
+        final TestWindowContainer child = parent.addChildWindow();
+        child.onOverrideConfigurationChanged(new Configuration());
+
+        assertTrue(grandparent.mOnDescendantOverrideCalled);
+    }
+
+    @Test
     public void testRemoveChild() throws Exception {
         final TestWindowContainerBuilder builder = new TestWindowContainerBuilder();
         final TestWindowContainer root = builder.setLayer(0).build();
@@ -718,6 +730,7 @@ public class WindowContainerTests extends WindowTestsBase {
         private Integer mOrientation;
 
         private boolean mOnParentSetCalled;
+        private boolean mOnDescendantOverrideCalled;
 
         /**
          * Compares 2 window layers and returns -1 if the first is lesser than the second in terms
@@ -773,6 +786,12 @@ public class WindowContainerTests extends WindowTestsBase {
         @Override
         void onParentSet() {
             mOnParentSetCalled = true;
+        }
+
+        @Override
+        void onDescendantOverrideConfigurationChanged() {
+            mOnDescendantOverrideCalled = true;
+            super.onDescendantOverrideConfigurationChanged();
         }
 
         @Override

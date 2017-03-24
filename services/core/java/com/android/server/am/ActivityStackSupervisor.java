@@ -1380,7 +1380,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 new Configuration(mService.getGlobalConfiguration());
             r.setLastReportedGlobalConfiguration(globalConfiguration);
             final Configuration mergedOverrideConfiguration =
-                new Configuration(task.getMergedOverrideConfiguration());
+                new Configuration(r.getMergedOverrideConfiguration());
             r.setLastReportedMergedOverrideConfiguration(mergedOverrideConfiguration);
 
             app.thread.scheduleLaunchActivity(new Intent(r.intent), r.appToken,

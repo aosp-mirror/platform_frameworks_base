@@ -603,6 +603,15 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public int largestWidthLimitDp = 0;
 
     /**
+     * Value indicating the maximum aspect ratio the application supports.
+     * <p>
+     * 0 means unset.
+     * @See {@link android.R.attr#maxAspectRatio}.
+     * @hide
+     */
+    public float maxAspectRatio;
+
+    /**
      * UUID of the storage volume on which this application is being hosted. For
      * apps hosted on the default internal storage at
      * {@link Environment#getDataDirectory()}, the UUID value is {@code null}.

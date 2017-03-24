@@ -30,6 +30,7 @@ import java.util.function.Predicate;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+import static android.content.res.Configuration.EMPTY;
 
 /**
  * Defines common functionality for classes that can hold windows directly or through their
@@ -315,9 +316,22 @@ class WindowContainer<E extends WindowContainer> implements Comparable<WindowCon
     void onOverrideConfigurationChanged(Configuration overrideConfiguration) {
         mOverrideConfiguration.setTo(overrideConfiguration);
         // Update full configuration of this container and all its children.
-        onConfigurationChanged(mParent != null ? mParent.getConfiguration() : Configuration.EMPTY);
+        onConfigurationChanged(mParent != null ? mParent.getConfiguration() : EMPTY);
         // Update merged override config of this container and all its children.
         onMergedOverrideConfigurationChanged();
+
+        if (mParent != null) {
+            mParent.onDescendantOverrideConfigurationChanged();
+        }
+    }
+
+    /**
+     * Notify that a descendant's overrideConfiguration has changed.
+     */
+    void onDescendantOverrideConfigurationChanged() {
+        if (mParent != null) {
+            mParent.onDescendantOverrideConfigurationChanged();
+        }
     }
 
     /**

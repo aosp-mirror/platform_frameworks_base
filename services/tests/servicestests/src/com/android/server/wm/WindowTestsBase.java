@@ -303,17 +303,19 @@ class WindowTestsBase {
     static class TestAppWindowToken extends AppWindowToken {
 
         TestAppWindowToken(DisplayContent dc) {
-            super(sWm, null, false, dc, true /* fillsParent */);
+            super(sWm, null, false, dc, true /* fillsParent */, null /* overrideConfig */,
+                    null /* bounds */);
         }
 
         TestAppWindowToken(WindowManagerService service, IApplicationToken token,
                 boolean voiceInteraction, DisplayContent dc, long inputDispatchingTimeoutNanos,
                 boolean fullscreen, boolean showForAllUsers, int targetSdk, int orientation,
                 int rotationAnimationHint, int configChanges, boolean launchTaskBehind,
-                boolean alwaysFocusable, AppWindowContainerController controller) {
+                boolean alwaysFocusable, AppWindowContainerController controller,
+                Configuration overrideConfig, Rect bounds) {
             super(service, token, voiceInteraction, dc, inputDispatchingTimeoutNanos, fullscreen,
                     showForAllUsers, targetSdk, orientation, rotationAnimationHint, configChanges,
-                    launchTaskBehind, alwaysFocusable, controller);
+                    launchTaskBehind, alwaysFocusable, controller, overrideConfig, bounds);
         }
 
         int getWindowsCount() {
@@ -428,7 +430,8 @@ class WindowTestsBase {
                     true /* showForAllUsers */, 0 /* configChanges */, false /* voiceInteraction */,
                     false /* launchTaskBehind */, false /* alwaysFocusable */,
                     0 /* targetSdkVersion */, 0 /* rotationAnimationHint */,
-                    0 /* inputDispatchingTimeoutNanos */, sWm);
+                    0 /* inputDispatchingTimeoutNanos */, sWm, null /* overrideConfig */,
+                    null /* bounds */);
             mToken = token;
         }
 
@@ -437,12 +440,13 @@ class WindowTestsBase {
                 boolean voiceInteraction, DisplayContent dc, long inputDispatchingTimeoutNanos,
                 boolean fullscreen, boolean showForAllUsers, int targetSdk, int orientation,
                 int rotationAnimationHint, int configChanges, boolean launchTaskBehind,
-                boolean alwaysFocusable, AppWindowContainerController controller) {
+                boolean alwaysFocusable, AppWindowContainerController controller,
+                Configuration overrideConfig, Rect bounds) {
             return new TestAppWindowToken(service, token, voiceInteraction, dc,
                     inputDispatchingTimeoutNanos, fullscreen, showForAllUsers, targetSdk,
                     orientation,
                     rotationAnimationHint, configChanges, launchTaskBehind, alwaysFocusable,
-                    controller);
+                    controller, overrideConfig, bounds);
         }
 
         AppWindowToken getAppWindowToken() {
