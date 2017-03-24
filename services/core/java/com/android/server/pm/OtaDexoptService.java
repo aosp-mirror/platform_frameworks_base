@@ -135,16 +135,7 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
         }
 
         for (PackageParser.Package p : important) {
-            // Make sure that core apps are optimized according to their own "reason".
-            // If the core apps are not preopted in the B OTA, and REASON_AB_OTA is not speed
-            // (by default is speed-profile) they will be interepreted/JITed. This in itself is
-            // not a problem as we will end up doing profile guided compilation. However, some
-            // core apps may be loaded by system server which doesn't JIT and we need to make
-            // sure we don't interpret-only
-            int compilationReason = p.coreApp
-                    ? PackageManagerService.REASON_CORE_APP
-                    : PackageManagerService.REASON_AB_OTA;
-            mDexoptCommands.addAll(generatePackageDexopts(p, compilationReason));
+            mDexoptCommands.addAll(generatePackageDexopts(p, PackageManagerService.REASON_AB_OTA));
         }
         for (PackageParser.Package p : others) {
             // We assume here that there are no core apps left.
