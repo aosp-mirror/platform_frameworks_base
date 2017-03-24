@@ -3780,6 +3780,9 @@ message MetricsEvent {
     // meta-event: a reader has checkpointed the log here.
     METRICS_CHECKPOINT = 920;
 
+    // OPEN: Settings -> Display -> When in VR Mode
+    VR_DISPLAY_PREFERENCE = 921;
+
     // ---- End O Constants, all O constants go above this line ----
 
     // Add new aosp constants above this line.
