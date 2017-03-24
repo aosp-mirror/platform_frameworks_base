@@ -139,7 +139,7 @@ interface IWifiManager
 
     void enableTdlsWithMacAddress(String remoteMacAddress, boolean enable);
 
-    String getWpsNfcConfigurationToken(int netId);
+    String getCurrentNetworkWpsNfcConfigurationToken();
 
     void enableVerboseLogging(int verbose);
 
