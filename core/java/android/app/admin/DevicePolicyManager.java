@@ -7207,7 +7207,7 @@ public class DevicePolicyManager {
      * @return {@code true} if security logging is enabled by device owner, {@code false} otherwise.
      * @throws SecurityException if {@code admin} is not a device owner.
      */
-    public boolean isSecurityLoggingEnabled(@NonNull ComponentName admin) {
+    public boolean isSecurityLoggingEnabled(@Nullable ComponentName admin) {
         throwIfParentInstance("isSecurityLoggingEnabled");
         try {
             return mService.isSecurityLoggingEnabled(admin);
