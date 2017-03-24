@@ -38,6 +38,7 @@ import android.annotation.NonNull;
 import android.content.res.BridgeAssetManager;
 import android.graphics.Bitmap;
 import android.graphics.FontFamily_Delegate;
+import android.graphics.Typeface;
 import android.graphics.Typeface_Delegate;
 import android.icu.util.ULocale;
 import android.os.Looper;
@@ -402,6 +403,7 @@ public final class Bridge extends com.android.ide.common.rendering.api.Bridge {
 
         // dispose of the default typeface.
         Typeface_Delegate.resetDefaults();
+        Typeface.sDynamicTypefaceCache.evictAll();
 
         return true;
     }
