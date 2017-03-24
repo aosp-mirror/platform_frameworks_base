@@ -212,6 +212,23 @@ public abstract class RadioTuner {
     public abstract int getProgramInformation(RadioManager.ProgramInfo[] info);
 
     /**
+     * Initiates a background scan to update internally cached program list.
+     *
+     * It may not be necessary to initiate the scan explicitly - the scan MAY be performed on boot.
+     *
+     * The operation is asynchronous and {@link Callback} backgroundScanComplete or onError will
+     * be called if the return value of this call was {@code true}. As result of this call
+     * programListChanged may be triggered (if the scanned list differs).
+     *
+     * @return {@code true} if the scan was properly scheduled, {@code false} if the scan feature
+     * is unavailable; ie. temporarily due to ongoing foreground playback in single-tuner device
+     * or permanently if the feature is not supported
+     * (see ModuleProperties#isBackgroundScanningSupported()).
+     * @hide FutureFeature
+     */
+    public abstract boolean startBackgroundScan();
+
+    /**
      * Get the list of discovered radio stations.
      *
      * To get the full list, set filter to null or empty string. Otherwise, client application
@@ -219,7 +236,8 @@ public abstract class RadioTuner {
      *
      * @param filter vendor-specific selector for radio stations.
      * @return a list of radio stations.
-     * @throws IllegalStateException if the scan is in progress or has not been started.
+     * @throws IllegalStateException if the scan is in progress or has not been started,
+     *         startBackgroundScan() call may fix it.
      * @throws IllegalArgumentException if the filter argument is not valid.
      * @hide FutureFeature
      */
@@ -317,6 +335,32 @@ public abstract class RadioTuner {
          * with control set to {@code true}.
          */
         public void onControlChanged(boolean control) {}
+
+        /**
+         * onBackgroundScanAvailabilityChange() is called when background scan
+         * feature becomes available or not.
+         *
+         * @param isAvailable true, if the tuner turned temporarily background-
+         *                    capable, false in the other case.
+         * @hide FutureFeature
+         */
+        public void onBackgroundScanAvailabilityChange(boolean isAvailable) {}
+
+        /**
+         * Called when a background scan completes successfully.
+         *
+         * @hide FutureFeature
+         */
+        public void onBackgroundScanComplete() {}
+
+        /**
+         * Called when available program list changed.
+         *
+         * Use getProgramList() to get the actual list.
+         *
+         * @hide FutureFeature
+         */
+        public void onProgramListChanged() {}
     }
 
 }

@@ -196,6 +196,19 @@ public class RadioManager {
             return mIsCaptureSupported;
         }
 
+        /**
+         * {@code true} if the module supports background scanning. At the given time it may not
+         * be available though, see {@link RadioTuner#startBackgroundScan()}.
+         *
+         * @return {@code true} if background scanning is supported (not necessary available
+         * at a given time), {@code false} otherwise.
+         *
+         * @hide FutureFeature
+         */
+        public boolean isBackgroundScanningSupported() {
+            return false;
+        }
+
         /** List of descriptors for all bands supported by this module.
          * @return an array of {@link BandDescriptor}.
          */
