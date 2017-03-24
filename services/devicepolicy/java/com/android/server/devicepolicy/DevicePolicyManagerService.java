@@ -10088,9 +10088,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return false;
         }
 
-        Preconditions.checkNotNull(admin);
         synchronized (this) {
-            getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
+            if (!isCallerWithSystemUid()) {
+                Preconditions.checkNotNull(admin);
+                getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
+            }
             return mInjector.securityLogGetLoggingEnabledProperty();
         }
     }
