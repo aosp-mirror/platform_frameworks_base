@@ -22,6 +22,7 @@ import android.app.FragmentManager;
 import android.app.FragmentManager.FragmentLifecycleCallbacks;
 import android.app.FragmentManagerNonConfig;
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
@@ -33,9 +34,7 @@ import android.view.View;
 
 import com.android.settingslib.applications.InterestingConfigChanges;
 import com.android.systemui.Dependency;
-import com.android.systemui.SystemUIApplication;
 import com.android.systemui.plugins.Plugin;
-import com.android.systemui.plugins.PluginManager;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -48,7 +47,8 @@ public class FragmentHostManager {
     private final Context mContext;
     private final HashMap<String, ArrayList<FragmentListener>> mListeners = new HashMap<>();
     private final View mRootView;
-    private final InterestingConfigChanges mConfigChanges = new InterestingConfigChanges();
+    private final InterestingConfigChanges mConfigChanges = new InterestingConfigChanges(
+            ActivityInfo.CONFIG_FONT_SCALE);
     private final FragmentService mManager;
     private final PluginFragmentManager mPlugins = new PluginFragmentManager();
 
