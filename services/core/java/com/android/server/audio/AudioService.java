@@ -106,6 +106,7 @@ import android.text.TextUtils;
 import android.util.AndroidRuntimeException;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.IntArray;
 import android.util.Log;
 import android.util.MathUtils;
 import android.util.Slog;
@@ -126,6 +127,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -574,6 +576,10 @@ public class AudioService extends IAudioService.Stub
     private AudioManagerInternal.RingerModeDelegate mRingerModeDelegate;
     private VolumePolicy mVolumePolicy = VolumePolicy.DEFAULT;
     private long mLoweredFromNormalToVibrateTime;
+
+    // Array of Uids of valid accessibility services to check if caller is one of them
+    private int[] mAccessibilityServiceUids;
+    private final Object mAccessibilityServiceUidsLock = new Object();
 
     // Intent "extra" data keys.
     public static final String CONNECT_INTENT_KEY_PORT_NAME = "portName";
@@ -1241,11 +1247,9 @@ public class AudioService extends IAudioService.Stub
     /** @see AudioManager#adjustStreamVolume(int, int, int) */
     public void adjustStreamVolume(int streamType, int direction, int flags,
             String callingPackage) {
-        if ( streamType == AudioManager.STREAM_ACCESSIBILITY
-                && (PackageManager.PERMISSION_GRANTED != mContext.checkCallingOrSelfPermission(
-                        android.Manifest.permission.BIND_ACCESSIBILITY_SERVICE))) {
+        if ((streamType == AudioManager.STREAM_ACCESSIBILITY) && !canChangeAccessibilityVolume()) {
             Log.w(TAG, "Trying to call adjustStreamVolume() for a11y without"
-                    + "BIND_ACCESSIBILITY_SERVICE / callingPackage=" + callingPackage);
+                    + "CHANGE_ACCESSIBILITY_VOLUME / callingPackage=" + callingPackage);
             return;
         }
         adjustStreamVolume(streamType, direction, flags, callingPackage, callingPackage,
@@ -1559,15 +1563,31 @@ public class AudioService extends IAudioService.Stub
 
     /** @see AudioManager#setStreamVolume(int, int, int) */
     public void setStreamVolume(int streamType, int index, int flags, String callingPackage) {
-        if ( streamType == AudioManager.STREAM_ACCESSIBILITY
-                && (PackageManager.PERMISSION_GRANTED != mContext.checkCallingOrSelfPermission(
-                        android.Manifest.permission.BIND_ACCESSIBILITY_SERVICE))) {
+        if ((streamType == AudioManager.STREAM_ACCESSIBILITY) && !canChangeAccessibilityVolume()) {
             Log.w(TAG, "Trying to call setStreamVolume() for a11y without"
-                    + " BIND_ACCESSIBILITY_SERVICE  callingPackage=" + callingPackage);
+                    + " CHANGE_ACCESSIBILITY_VOLUME  callingPackage=" + callingPackage);
             return;
         }
         setStreamVolume(streamType, index, flags, callingPackage, callingPackage,
                 Binder.getCallingUid());
+    }
+
+    private boolean canChangeAccessibilityVolume() {
+        synchronized (mAccessibilityServiceUidsLock) {
+            if (PackageManager.PERMISSION_GRANTED == mContext.checkCallingOrSelfPermission(
+                    android.Manifest.permission.CHANGE_ACCESSIBILITY_VOLUME)) {
+                return true;
+            }
+            if (mAccessibilityServiceUids != null) {
+                int callingUid = Binder.getCallingUid();
+                for (int i = 0; i < mAccessibilityServiceUids.length; i++) {
+                    if (mAccessibilityServiceUids[i] == callingUid) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
     }
 
     private void setStreamVolume(int streamType, int index, int flags, String callingPackage,
@@ -6377,6 +6397,29 @@ public class AudioService extends IAudioService.Stub
             synchronized (mSettingsLock) {
                 if (updateRingerModeAffectedStreams()) {
                     setRingerModeInt(getRingerModeInternal(), false);
+                }
+            }
+        }
+
+        @Override
+        public void setAccessibilityServiceUids(IntArray uids) {
+            synchronized (mAccessibilityServiceUidsLock) {
+                if (uids.size() == 0) {
+                    mAccessibilityServiceUids = null;
+                } else {
+                    boolean changed = (mAccessibilityServiceUids == null)
+                            || (mAccessibilityServiceUids.length != uids.size());
+                    if (!changed) {
+                        for (int i = 0; i < mAccessibilityServiceUids.length; i++) {
+                            if (uids.get(i) != mAccessibilityServiceUids[i]) {
+                                changed = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (changed) {
+                        mAccessibilityServiceUids = uids.toArray();
+                    }
                 }
             }
         }

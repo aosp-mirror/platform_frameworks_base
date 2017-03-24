@@ -181,7 +181,7 @@
     <uses-permission android:name="android.permission.MODIFY_ACCESSIBILITY_DATA" />
 
     <!-- to control accessibility volume -->
-    <uses-permission android:name="android.permission.BIND_ACCESSIBILITY_SERVICE" />
+    <uses-permission android:name="android.permission.CHANGE_ACCESSIBILITY_VOLUME" />
 
     <application
         android:name=".SystemUIApplication"
