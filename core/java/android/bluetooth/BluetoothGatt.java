@@ -141,6 +141,7 @@ public final class BluetoothGatt implements BluetoothProfile {
              * Application interface registered - app is ready to go
              * @hide
              */
+            @Override
             public void onClientRegistered(int status, int clientIf) {
                 if (DBG) Log.d(TAG, "onClientRegistered() - status=" + status
                     + " clientIf=" + clientIf);
@@ -210,6 +211,7 @@ public final class BluetoothGatt implements BluetoothProfile {
              * Client connection state changed
              * @hide
              */
+            @Override
             public void onClientConnectionState(int status, int clientIf,
                                                 boolean connected, String address) {
                 if (DBG) Log.d(TAG, "onClientConnectionState() - status=" + status
@@ -245,6 +247,7 @@ public final class BluetoothGatt implements BluetoothProfile {
              * we are done at this point.
              * @hide
              */
+            @Override
             public void onSearchComplete(String address, List<BluetoothGattService> services,
                                          int status) {
                 if (DBG) Log.d(TAG, "onSearchComplete() = Device=" + address + " Status=" + status);
@@ -288,6 +291,7 @@ public final class BluetoothGatt implements BluetoothProfile {
              * Updates the internal value.
              * @hide
              */
+            @Override
             public void onCharacteristicRead(String address, int status, int handle, byte[] value) {
                 if (VDBG) Log.d(TAG, "onCharacteristicRead() - Device=" + address
                             + " handle=" + handle + " Status=" + status);
@@ -336,6 +340,7 @@ public final class BluetoothGatt implements BluetoothProfile {
              * Let the app know how we did...
              * @hide
              */
+            @Override
             public void onCharacteristicWrite(String address, int status, int handle) {
                 if (VDBG) Log.d(TAG, "onCharacteristicWrite() - Device=" + address
                             + " handle=" + handle + " Status=" + status);
@@ -380,6 +385,7 @@ public final class BluetoothGatt implements BluetoothProfile {
              * Updates the internal value.
              * @hide
              */
+            @Override
             public void onNotify(String address, int handle, byte[] value) {
                 if (VDBG) Log.d(TAG, "onNotify() - Device=" + address + " handle=" + handle);
 
@@ -403,6 +409,7 @@ public final class BluetoothGatt implements BluetoothProfile {
              * Descriptor has been read.
              * @hide
              */
+            @Override
             public void onDescriptorRead(String address, int status, int handle, byte[] value) {
                 if (VDBG) Log.d(TAG, "onDescriptorRead() - Device=" + address + " handle=" + handle);
 
@@ -446,6 +453,7 @@ public final class BluetoothGatt implements BluetoothProfile {
              * Descriptor write operation complete.
              * @hide
              */
+            @Override
             public void onDescriptorWrite(String address, int status, int handle) {
                 if (VDBG) Log.d(TAG, "onDescriptorWrite() - Device=" + address + " handle=" + handle);
 
@@ -488,6 +496,7 @@ public final class BluetoothGatt implements BluetoothProfile {
              * Prepared write transaction completed (or aborted)
              * @hide
              */
+            @Override
             public void onExecuteWrite(String address, int status) {
                 if (VDBG) Log.d(TAG, "onExecuteWrite() - Device=" + address
                     + " status=" + status);
@@ -510,6 +519,7 @@ public final class BluetoothGatt implements BluetoothProfile {
              * Remote device RSSI has been read
              * @hide
              */
+            @Override
             public void onReadRemoteRssi(String address, int rssi, int status) {
                 if (VDBG) Log.d(TAG, "onReadRemoteRssi() - Device=" + address +
                             " rssi=" + rssi + " status=" + status);
@@ -527,6 +537,7 @@ public final class BluetoothGatt implements BluetoothProfile {
              * Callback invoked when the MTU for a given connection changes
              * @hide
              */
+            @Override
             public void onConfigureMTU(String address, int mtu, int status) {
                 if (DBG) Log.d(TAG, "onConfigureMTU() - Device=" + address +
                             " mtu=" + mtu + " status=" + status);
@@ -535,6 +546,27 @@ public final class BluetoothGatt implements BluetoothProfile {
                 }
                 try {
                     mCallback.onMtuChanged(BluetoothGatt.this, mtu, status);
+                } catch (Exception ex) {
+                    Log.w(TAG, "Unhandled exception in callback", ex);
+                }
+            }
+
+            /**
+             * Callback invoked when the given connection is updated
+             * @hide
+             */
+            @Override
+            public void onConnectionUpdated(String address, int interval, int latency,
+                                            int timeout, int status) {
+                if (DBG) Log.d(TAG, "onConnectionUpdated() - Device=" + address +
+                            " interval=" + interval + " latency=" + latency +
+                            " timeout=" + timeout + " status=" + status);
+                if (!address.equals(mDevice.getAddress())) {
+                    return;
+                }
+                try {
+                    mCallback.onConnectionUpdated(BluetoothGatt.this, interval, latency,
+                                                  timeout, status);
                 } catch (Exception ex) {
                     Log.w(TAG, "Unhandled exception in callback", ex);
                 }
