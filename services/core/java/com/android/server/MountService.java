@@ -387,7 +387,7 @@ class MountService extends IMountService.Stub
 
     private boolean shouldBenchmark() {
         final long benchInterval = Settings.Global.getLong(mContext.getContentResolver(),
-                Settings.Global.STORAGE_BENCHMARK_INTERVAL, DateUtils.WEEK_IN_MILLIS);
+                Settings.Global.STORAGE_BENCHMARK_INTERVAL, -1);
         if (benchInterval == -1) {
             return false;
         } else if (benchInterval == 0) {
