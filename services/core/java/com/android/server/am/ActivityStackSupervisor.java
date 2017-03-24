@@ -3569,8 +3569,16 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 stackHeader.append("  mFullscreen=" + stack.mFullscreen);
                 stackHeader.append("\n");
                 stackHeader.append("  mBounds=" + stack.mBounds);
-                printed |= stack.dumpActivitiesLocked(fd, pw, dumpAll, dumpClient, dumpPackage,
-                        needSep, stackHeader.toString());
+
+                final boolean printedStackHeader = stack.dumpActivitiesLocked(fd, pw, dumpAll,
+                        dumpClient, dumpPackage, needSep, stackHeader.toString());
+                printed |= printedStackHeader;
+                if (!printedStackHeader) {
+                    // Ensure we always dump the stack header even if there are no activities
+                    pw.println();
+                    pw.println(stackHeader);
+                }
+
                 printed |= dumpHistoryList(fd, pw, stack.mLRUActivities, "    ", "Run", false,
                         !dumpAll, false, dumpPackage, true,
                         "    Running activities (most recent first):", null);
