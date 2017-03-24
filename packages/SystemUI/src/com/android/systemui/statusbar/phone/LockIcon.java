@@ -179,10 +179,6 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
             setRestingAlpha(
                     anyFingerprintIcon ? 1f : KeyguardAffordanceHelper.SWIPE_RESTING_ALPHA_AMOUNT);
             setImageDrawable(icon);
-            String contentDescription = getResources().getString(anyFingerprintIcon
-                    ? R.string.accessibility_unlock_button_fingerprint
-                    : R.string.accessibility_unlock_button);
-            setContentDescription(contentDescription);
             mHasFingerPrintIcon = anyFingerprintIcon;
             if (animation != null && isAnim) {
                 animation.forceAnimationOnUI();
@@ -225,13 +221,13 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
     public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfo(info);
         if (mHasFingerPrintIcon) {
-            // Avoid that the button description is also spoken
-            info.setClassName(LockIcon.class.getName());
             AccessibilityNodeInfo.AccessibilityAction unlock
                     = new AccessibilityNodeInfo.AccessibilityAction(
                     AccessibilityNodeInfo.ACTION_CLICK,
                     getContext().getString(R.string.accessibility_unlock_without_fingerprint));
             info.addAction(unlock);
+            info.setHintText(getContext().getString(
+                    R.string.accessibility_waiting_for_fingerprint));
         }
     }
 
