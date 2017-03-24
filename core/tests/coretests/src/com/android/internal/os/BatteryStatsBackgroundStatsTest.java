@@ -21,6 +21,7 @@ import android.app.ActivityManager;
 import android.os.BatteryStats;
 import android.os.WorkSource;
 import android.support.test.filters.SmallTest;
+import android.util.ArrayMap;
 
 import junit.framework.TestCase;
 
@@ -186,5 +187,66 @@ public class BatteryStatsBackgroundStatsTest extends TestCase {
         assertEquals(1, bgCount);
         assertEquals((305 - 202) * 1000, actualTime);
         assertEquals((305 - 254) * 1000, bgTime);
+    }
+
+    @SmallTest
+    public void testJob() throws Exception {
+        final MockClocks clocks = new MockClocks();
+        MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
+        final String jobName = "job_name";
+        long curr = 0; // realtime in us
+
+        // On battery
+        curr = 1000 * (clocks.realtime = clocks.uptime = 100);
+        bi.updateTimeBasesLocked(true, false, curr, curr); // on battery
+        // App in foreground
+        bi.noteUidProcessStateLocked(UID, ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND);
+
+        // Start timer
+        curr = 1000 * (clocks.realtime = clocks.uptime = 151);
+        bi.noteJobStartLocked(jobName, UID);
+
+        // Stop timer
+        curr = 1000 * (clocks.realtime = clocks.uptime = 161);
+        bi.noteJobFinishLocked(jobName, UID);
+
+        // Start timer
+        curr = 1000 * (clocks.realtime = clocks.uptime = 202);
+        bi.noteJobStartLocked(jobName, UID);
+
+        // Move to background
+        curr = 1000 * (clocks.realtime = clocks.uptime = 254);
+        bi.noteUidProcessStateLocked(UID, ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND);
+
+        // Off battery
+        curr = 1000 * (clocks.realtime = clocks.uptime = 305);
+        bi.updateTimeBasesLocked(false, false, curr, curr); // off battery
+
+        // Stop timer
+        curr = 1000 * (clocks.realtime = clocks.uptime = 409);
+        bi.noteJobFinishLocked(jobName, UID);
+
+        // Test
+        curr = 1000 * (clocks.realtime = clocks.uptime = 657);
+        final ArrayMap<String, ? extends BatteryStats.Timer> jobs =
+                bi.getUidStats().get(UID).getJobStats();
+        assertEquals(1, jobs.size());
+        BatteryStats.Timer timer = jobs.valueAt(0);
+        BatteryStats.Timer bgTimer = timer.getSubTimer();
+        long time = timer.getTotalTimeLocked(curr, STATS_SINCE_CHARGED);
+        int count = timer.getCountLocked(STATS_SINCE_CHARGED);
+        int bgCount = bgTimer.getCountLocked(STATS_SINCE_CHARGED);
+        long bgTime = bgTimer.getTotalTimeLocked(curr, STATS_SINCE_CHARGED);
+        assertEquals((161 - 151 + 305 - 202) * 1000, time);
+        assertEquals(2, count);
+        assertEquals(1, bgCount);
+        assertEquals((305 - 254) * 1000, bgTime);
+
+        // Test that a second job is separate.
+        curr = 1000 * (clocks.realtime = clocks.uptime = 3000);
+        final String jobName2 = "second_job";
+        bi.noteJobStartLocked(jobName2, UID);
+        assertEquals(2, bi.getUidStats().get(UID).getJobStats().size());
+        bi.noteJobFinishLocked(jobName2, UID);
     }
 }
