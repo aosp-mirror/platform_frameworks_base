@@ -325,11 +325,12 @@ static jint convertProgramInfoFromNative(JNIEnv *env,
 
     ALOGV("%s channel %d tuned %d", __FUNCTION__, nProgramInfo->channel, nProgramInfo->tuned);
 
+    int flags = 0;  // TODO(b/32621193): pass from the HAL
     *jProgramInfo = env->NewObject(gRadioProgramInfoClass, gRadioProgramInfoCstor,
                                   nProgramInfo->channel, nProgramInfo->sub_channel,
                                   nProgramInfo->tuned, nProgramInfo->stereo,
                                   nProgramInfo->digital, nProgramInfo->signal_strength,
-                                  jMetadata);
+                                  jMetadata, flags);
 
     env->DeleteLocalRef(jMetadata);
     return (jint)RADIO_STATUS_OK;
@@ -932,7 +933,7 @@ int register_android_hardware_Radio(JNIEnv *env)
     jclass programInfoClass = FindClassOrDie(env, kRadioProgramInfoClassPathName);
     gRadioProgramInfoClass = MakeGlobalRefOrDie(env, programInfoClass);
     gRadioProgramInfoCstor = GetMethodIDOrDie(env, programInfoClass, "<init>",
-            "(IIZZZILandroid/hardware/radio/RadioMetadata;)V");
+            "(IIZZZILandroid/hardware/radio/RadioMetadata;I)V");
 
     jclass metadataClass = FindClassOrDie(env, kRadioMetadataClassPathName);
     gRadioMetadataClass = MakeGlobalRefOrDie(env, metadataClass);
