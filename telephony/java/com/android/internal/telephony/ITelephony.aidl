@@ -1062,6 +1062,16 @@ interface ITelephony {
     String getImeiForSlot(int slotIndex, String callingPackage);
 
     /**
+     * Returns the MEID for the given slot.
+     *
+     * @param slotIndex - device slot.
+     * @param callingPackage The package making the call.
+     * <p>Requires Permission:
+     *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     */
+    String getMeidForSlot(int slotIndex, String callingPackage);
+
+    /**
      * Returns the device software version.
      *
      * @param slotIndex - device slot.
