@@ -1,9 +1,0 @@
-excludeFromSuggestions=true
-@jd:body
-
-<script type="text/javascript">
-  document.location=toRoot+"studio/index.html"
-</script>
-
-<p>You should have already been redirected by your browser. Please go to
-<a href="{@docRoot}studio/index.html">Installing the Android SDK</a>.</p>
