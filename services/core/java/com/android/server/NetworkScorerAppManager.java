@@ -88,9 +88,12 @@ public class NetworkScorerAppManager {
                 final String serviceLabel = getRecommendationServiceLabel(serviceInfo, pm);
                 final ComponentName useOpenWifiNetworksActivity =
                         findUseOpenWifiNetworksActivity(serviceInfo);
+                final String networkAvailableNotificationChannelId =
+                        getNetworkAvailableNotificationChannelId(serviceInfo);
                 appDataList.add(
                         new NetworkScorerAppData(serviceInfo.applicationInfo.uid,
-                                serviceComponentName, serviceLabel, useOpenWifiNetworksActivity));
+                                serviceComponentName, serviceLabel, useOpenWifiNetworksActivity,
+                                networkAvailableNotificationChannelId));
             } else {
                 if (VERBOSE) Log.v(TAG, serviceInfo.packageName
                         + " is NOT a valid scorer/recommender.");
@@ -144,6 +147,20 @@ public class NetworkScorerAppManager {
 
         return null;
     }
+
+    @Nullable
+    private static String getNetworkAvailableNotificationChannelId(ServiceInfo serviceInfo) {
+        if (serviceInfo.metaData == null) {
+            if (DEBUG) {
+                Log.d(TAG, "No metadata found on " + serviceInfo.getComponentName());
+            }
+            return null;
+        }
+
+        return serviceInfo.metaData.getString(
+                NetworkScoreManager.NETWORK_AVAILABLE_NOTIFICATION_CHANNEL_ID_META_DATA);
+    }
+
 
     /**
      * Get the application to use for scoring networks.

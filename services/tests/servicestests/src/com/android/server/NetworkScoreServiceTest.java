@@ -128,9 +128,11 @@ public class NetworkScoreServiceTest {
     private static final ScoredNetwork SCORED_NETWORK_2 =
             new ScoredNetwork(new NetworkKey(new WifiKey(quote(SSID_2), "00:00:00:00:00:00")),
                     null /* rssiCurve*/);
+    private static final String NETWORK_AVAILABLE_NOTIFICATION_CHANNEL_ID =
+            "networkAvailableNotificationChannelId";
     private static final NetworkScorerAppData NEW_SCORER = new NetworkScorerAppData(
             1, RECOMMENDATION_SERVICE_COMP, RECOMMENDATION_SERVICE_LABEL,
-            USE_WIFI_ENABLE_ACTIVITY_COMP);
+            USE_WIFI_ENABLE_ACTIVITY_COMP, NETWORK_AVAILABLE_NOTIFICATION_CHANNEL_ID);
 
     @Mock private NetworkScorerAppManager mNetworkScorerAppManager;
     @Mock private Context mContext;
@@ -965,7 +967,7 @@ public class NetworkScoreServiceTest {
                 .thenReturn(PackageManager.PERMISSION_GRANTED);
         NetworkScorerAppData expectedAppData = new NetworkScorerAppData(Binder.getCallingUid(),
                 RECOMMENDATION_SERVICE_COMP, RECOMMENDATION_SERVICE_LABEL,
-                USE_WIFI_ENABLE_ACTIVITY_COMP);
+                USE_WIFI_ENABLE_ACTIVITY_COMP, NETWORK_AVAILABLE_NOTIFICATION_CHANNEL_ID);
         bindToScorer(expectedAppData);
         assertEquals(expectedAppData, mNetworkScoreService.getActiveScorer());
     }
@@ -1007,7 +1009,7 @@ public class NetworkScoreServiceTest {
         final int callingUid = callerIsScorer ? Binder.getCallingUid() : Binder.getCallingUid() + 1;
         NetworkScorerAppData appData = new NetworkScorerAppData(callingUid,
                 RECOMMENDATION_SERVICE_COMP, RECOMMENDATION_SERVICE_LABEL,
-                USE_WIFI_ENABLE_ACTIVITY_COMP);
+                USE_WIFI_ENABLE_ACTIVITY_COMP, NETWORK_AVAILABLE_NOTIFICATION_CHANNEL_ID);
         bindToScorer(appData);
     }
 
