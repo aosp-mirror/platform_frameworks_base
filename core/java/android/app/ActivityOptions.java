@@ -1068,6 +1068,7 @@ public class ActivityOptions {
      * Sets the task the activity will be launched in.
      * @hide
      */
+    @TestApi
     public void setLaunchTaskId(int taskId) {
         mLaunchTaskId = taskId;
     }
@@ -1085,6 +1086,7 @@ public class ActivityOptions {
      * the task will also not be moved to the front of the stack.
      * @hide
      */
+    @TestApi
     public void setTaskOverlay(boolean taskOverlay, boolean canResume) {
         mTaskOverlay = taskOverlay;
         mTaskOverlayCanResume = canResume;

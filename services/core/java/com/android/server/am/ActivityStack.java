@@ -67,7 +67,9 @@ import static com.android.server.am.ActivityRecord.ASSISTANT_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityRecord.HOME_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityStackSupervisor.FindTaskResult;
 import static com.android.server.am.ActivityStackSupervisor.ON_TOP;
+import static com.android.server.am.ActivityStackSupervisor.PAUSE_IMMEDIATELY;
 import static com.android.server.am.ActivityStackSupervisor.PRESERVE_WINDOWS;
+import static com.android.server.am.ActivityStackSupervisor.REMOVE_FROM_RECENTS;
 import static com.android.server.wm.AppTransition.TRANSIT_ACTIVITY_CLOSE;
 import static com.android.server.wm.AppTransition.TRANSIT_ACTIVITY_OPEN;
 import static com.android.server.wm.AppTransition.TRANSIT_NONE;
@@ -121,7 +123,6 @@ import com.android.server.am.ActivityManagerService.ItemMatcher;
 import com.android.server.am.ActivityStackSupervisor.ActivityContainer;
 import com.android.server.wm.StackWindowController;
 import com.android.server.wm.StackWindowListener;
-import com.android.server.wm.TaskStack;
 import com.android.server.wm.WindowManagerService;
 
 import java.io.FileDescriptor;
@@ -1185,13 +1186,13 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
      * @param resuming The activity we are currently trying to resume or null if this is not being
      *                 called as part of resuming the top activity, so we shouldn't try to instigate
      *                 a resume here if not null.
-     * @param dontWait True if the caller does not want to wait for the pause to complete.  If
-     * set to true, we will immediately complete the pause here before returning.
+     * @param pauseImmediately True if the caller does not want to wait for the activity callback to
+     *                         complete pausing.
      * @return Returns true if an activity now is in the PAUSING state, and we are waiting for
      * it to tell us when it is done.
      */
     final boolean startPausingLocked(boolean userLeaving, boolean uiSleeping,
-            ActivityRecord resuming, boolean dontWait) {
+            ActivityRecord resuming, boolean pauseImmediately) {
         if (mPausingActivity != null) {
             Slog.wtf(TAG, "Going to pause when pause is already pending for " + mPausingActivity
                     + " state=" + mPausingActivity.state);
@@ -1213,7 +1214,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
 
         if (mActivityContainer.mParentActivity == null) {
             // Top level stack, not a child. Look for child stacks.
-            mStackSupervisor.pauseChildStacks(prev, userLeaving, uiSleeping, resuming, dontWait);
+            mStackSupervisor.pauseChildStacks(prev, userLeaving, uiSleeping, resuming,
+                    pauseImmediately);
         }
 
         if (DEBUG_STATES) Slog.v(TAG_STATES, "Moving to PAUSING: " + prev);
@@ -1243,7 +1245,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                         prev.shortComponentName);
                 mService.updateUsageStats(prev, false);
                 prev.app.thread.schedulePauseActivity(prev.appToken, prev.finishing,
-                        userLeaving, prev.configChangeFlags, dontWait);
+                        userLeaving, prev.configChangeFlags, pauseImmediately);
             } catch (Exception e) {
                 // Ignore exception, if process died other code will cleanup.
                 Slog.w(TAG, "Exception thrown during pause", e);
@@ -1274,7 +1276,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                  Slog.v(TAG_PAUSE, "Key dispatch not paused for screen off");
             }
 
-            if (dontWait) {
+            if (pauseImmediately) {
                 // If the caller said they don't want to wait for the pause, then complete
                 // the pause now.
                 completePauseLocked(false, resuming);
@@ -3488,11 +3490,19 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     }
 
     /**
+     * See {@link #finishActivityLocked(ActivityRecord, int, Intent, String, boolean, boolean)}
+     */
+    final boolean finishActivityLocked(ActivityRecord r, int resultCode, Intent resultData,
+            String reason, boolean oomAdj) {
+        return finishActivityLocked(r, resultCode, resultData, reason, oomAdj, !PAUSE_IMMEDIATELY);
+    }
+
+    /**
      * @return Returns true if this activity has been removed from the history
      * list, or false if it is still in the list and will be removed later.
      */
     final boolean finishActivityLocked(ActivityRecord r, int resultCode, Intent resultData,
-            String reason, boolean oomAdj) {
+            String reason, boolean oomAdj, boolean pauseImmediately) {
         if (r.finishing) {
             Slog.w(TAG, "Duplicate finish request for " + r);
             return false;
@@ -3529,9 +3539,10 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             if (mResumedActivity == r) {
                 if (DEBUG_VISIBILITY || DEBUG_TRANSITION) Slog.v(TAG_TRANSITION,
                         "Prepare close transition: finishing " + r);
-            if (endTask) {
-                mService.mTaskChangeNotificationController.notifyTaskRemovalStarted(task.taskId);
-            }
+                if (endTask) {
+                    mService.mTaskChangeNotificationController.notifyTaskRemovalStarted(
+                            task.taskId);
+                }
                 mWindowManager.prepareAppTransition(transit, false);
 
                 // Tell window manager to prepare for this one to be removed.
@@ -3541,7 +3552,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                     if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "Finish needs to pause: " + r);
                     if (DEBUG_USER_LEAVING) Slog.v(TAG_USER_LEAVING,
                             "finish() => pause with userLeaving=false");
-                    startPausingLocked(false, false, null, false);
+                    startPausingLocked(false, false, null, pauseImmediately);
                 }
 
                 if (endTask) {
@@ -3552,15 +3563,30 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 // it is done pausing; else we can just directly finish it here.
                 if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "Finish not pausing: " + r);
                 if (r.visible) {
-                    mWindowManager.prepareAppTransition(transit, false);
-                    r.setVisibility(false);
-                    mWindowManager.executeAppTransition();
-                    if (!mStackSupervisor.mWaitingVisibleActivities.contains(r)) {
-                        mStackSupervisor.mWaitingVisibleActivities.add(r);
+                    prepareActivityHideTransitionAnimation(r, transit);
+                }
+
+                final int finishMode = (r.visible || r.nowVisible) ? FINISH_AFTER_VISIBLE
+                        : FINISH_AFTER_PAUSE;
+                final boolean removedActivity = finishCurrentActivityLocked(r, finishMode, oomAdj)
+                        == null;
+
+                // The following code is an optimization. When the last non-task overlay activity
+                // is removed from the task, we remove the entire task from the stack. However,
+                // since that is done after the scheduled destroy callback from the activity, that
+                // call to change the visibility of the task overlay activities would be out of
+                // sync with the activitiy visibility being set for this finishing activity above.
+                // In this case, we can set the visibility of all the task overlay activities when
+                // we detect the last one is finishing to keep them in sync.
+                if (task.onlyHasTaskOverlayActivities(true /* excludeFinishing */)) {
+                    for (ActivityRecord taskOverlay : task.mActivities) {
+                        if (!taskOverlay.mTaskOverlay) {
+                            continue;
+                        }
+                        prepareActivityHideTransitionAnimation(taskOverlay, transit);
                     }
                 }
-                return finishCurrentActivityLocked(r, (r.visible || r.nowVisible) ?
-                        FINISH_AFTER_VISIBLE : FINISH_AFTER_PAUSE, oomAdj) == null;
+                return removedActivity;
             } else {
                 if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "Finish waiting for pause of: " + r);
             }
@@ -3568,6 +3594,15 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             return false;
         } finally {
             mWindowManager.continueSurfaceLayout();
+        }
+    }
+
+    private void prepareActivityHideTransitionAnimation(ActivityRecord r, int transit) {
+        mWindowManager.prepareAppTransition(transit, false);
+        r.setVisibility(false);
+        mWindowManager.executeAppTransition();
+        if (!mStackSupervisor.mWaitingVisibleActivities.contains(r)) {
+            mStackSupervisor.mWaitingVisibleActivities.add(r);
         }
     }
 
@@ -3864,15 +3899,23 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         r.removeWindowContainer();
         final TaskRecord task = r.task;
         final boolean lastActivity = task != null ? task.removeActivity(r) : false;
+        // If we are removing the last activity in the task, not including task overlay activities,
+        // then fall through into the block below to remove the entire task itself
+        final boolean onlyHasTaskOverlays = task != null
+                ? task.onlyHasTaskOverlayActivities(false /* excludingFinishing */) : false;
 
-        if (lastActivity) {
-            if (DEBUG_STACK) Slog.i(TAG_STACK,
-                    "removeActivityFromHistoryLocked: last activity removed from " + this);
+        if (lastActivity || onlyHasTaskOverlays) {
+            if (DEBUG_STACK) {
+                Slog.i(TAG_STACK,
+                        "removeActivityFromHistoryLocked: last activity removed from " + this
+                                + " onlyHasTaskOverlays=" + onlyHasTaskOverlays);
+            }
+
             if (mStackSupervisor.isFocusedStack(this) && task == topTask() &&
                     task.isOverHomeStack()) {
                 mStackSupervisor.moveHomeStackTaskToTop(reason);
             }
-            removeTask(task, reason);
+            removeTask(task, reason, REMOVE_TASK_MODE_DESTROYING);
         }
         cleanUpActivityServicesLocked(r);
         r.removeUriPermissionsLocked();
@@ -4923,10 +4966,6 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         return starting;
     }
 
-    void removeTask(TaskRecord task, String reason) {
-        removeTask(task, reason, REMOVE_TASK_MODE_DESTROYING);
-    }
-
     /**
      * Removes the input task from this stack.
      * @param task to remove.
@@ -4936,6 +4975,10 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
      */
     void removeTask(TaskRecord task, String reason, int mode) {
         if (mode == REMOVE_TASK_MODE_DESTROYING) {
+            // When destroying a task, tell the supervisor to remove it so that any activity it has
+            // can be cleaned up correctly
+            mStackSupervisor.removeTaskByIdLocked(task.taskId, false /* killProcess */,
+                    !REMOVE_FROM_RECENTS, PAUSE_IMMEDIATELY);
             task.removeWindowContainer();
         }
 
