@@ -498,18 +498,30 @@ public abstract class AbsSpinner extends AdapterView<SpinnerAdapter> {
     public void onProvideAutofillStructure(ViewStructure structure, int flags) {
         super.onProvideAutofillStructure(structure, flags);
 
-        if (getAdapter() == null) return;
+        final SpinnerAdapter adapter = getAdapter();
+
+        if (adapter == null) return;
 
         // TODO(b/33197203): implement sanitization so initial value is only sanitized when coming
         // from resources.
 
-        final int count = getAdapter().getCount();
+        final int count = adapter.getCount();
+        int size = 0;
         if (count > 0) {
             final String[] options = new String[count];
             for (int i = 0; i < count; i++) {
-                options[i] = getAdapter().getItem(i).toString();
+                final Object item = adapter.getItem(i);
+                if (item != null) {
+                    options[size++] = item.toString();
+                }
             }
-            structure.setAutofillOptions(options);
+            if (size == count) {
+                structure.setAutofillOptions(options);
+            } else {
+                final String[] validOptions = new String[size];
+                System.arraycopy(options, 0, validOptions, 0, size);
+                structure.setAutofillOptions(validOptions);
+            }
         }
     }
 
