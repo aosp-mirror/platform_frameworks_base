@@ -152,8 +152,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
     }
 
     WindowState computeFocusedWindow() {
-        final int count = mChildren.size();
-        for (int i = 0; i < count; i++) {
+        for (int i = mChildren.size() - 1; i >= 0; i--) {
             final DisplayContent dc = mChildren.get(i);
             final WindowState win = dc.findFocusedWindow();
             if (win != null) {

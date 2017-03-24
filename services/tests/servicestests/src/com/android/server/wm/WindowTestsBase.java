@@ -16,6 +16,8 @@
 
 package com.android.server.wm;
 
+import static android.view.View.VISIBLE;
+
 import android.app.ActivityManager.TaskDescription;
 import android.content.res.Configuration;
 import android.graphics.Rect;
@@ -226,7 +228,7 @@ class WindowTestsBase {
         attrs.setTitle(name);
 
         final WindowState w = new WindowState(sWm, sMockSession, sIWindow, token, parent, OP_NONE,
-                0, attrs, 0, 0, ownerCanAddInternalSystemWindow);
+                0, attrs, VISIBLE, 0, ownerCanAddInternalSystemWindow);
         // TODO: Probably better to make this call in the WindowState ctor to avoid errors with
         // adding it to the token...
         token.addWindow(w);
