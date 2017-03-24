@@ -51,8 +51,8 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.settingslib.Utils;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
-import com.android.systemui.plugins.statusbar.NotificationMenuRowProvider;
-import com.android.systemui.plugins.statusbar.NotificationMenuRowProvider.GutsContent;
+import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
+import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin.MenuItem;
 import com.android.systemui.statusbar.stack.StackStateAnimator;
 
 import java.util.Set;
@@ -60,8 +60,7 @@ import java.util.Set;
 /**
  * The guts of a notification revealed when performing a long press.
  */
-public class NotificationGuts extends FrameLayout
-        implements NotificationMenuRowProvider.GutsInteractionListener {
+public class NotificationGuts extends FrameLayout {
     private static final String TAG = "NotificationGuts";
     private static final long CLOSE_GUTS_DELAY = 8000;
 
@@ -78,8 +77,33 @@ public class NotificationGuts extends FrameLayout
 
     private GutsContent mGutsContent;
 
+    public interface GutsContent {
+
+        public void setGutsParent(NotificationGuts listener);
+
+        /**
+         * @return the view to be shown in the notification guts.
+         */
+        public View getContentView();
+
+        /**
+         * Called when the guts view have been told to close, typically after an outside
+         * interaction. Returning {@code true} here will prevent the guts view to close.
+         */
+        public boolean handleCloseControls(boolean save);
+
+        /**
+         * @return whether the notification associated with these guts is set to be removed.
+         */
+        public boolean willBeRemoved();
+    }
+
     public interface OnGutsClosedListener {
         public void onGutsClosed(NotificationGuts guts);
+    }
+
+    interface OnSettingsClickListener {
+        void onClick(View v, int appUid);
     }
 
     public NotificationGuts(Context context, AttributeSet attrs) {
@@ -161,10 +185,6 @@ public class NotificationGuts extends FrameLayout
         if (mBackground != null) {
             mBackground.setHotspot(x, y);
         }
-    }
-
-    interface OnSettingsClickListener {
-        void onClick(View v, int appUid);
     }
 
     public void closeControls(int x, int y, boolean save) {
@@ -250,15 +270,5 @@ public class NotificationGuts extends FrameLayout
 
     public boolean isExposed() {
         return mExposed;
-    }
-
-    @Override
-    public void onInteraction(View view) {
-        resetFalsingCheck();
-    }
-
-    @Override
-    public void closeGuts(View view) {
-        closeControls(-1 /* x */, -1 /* y */, true /* notify */);
     }
 }

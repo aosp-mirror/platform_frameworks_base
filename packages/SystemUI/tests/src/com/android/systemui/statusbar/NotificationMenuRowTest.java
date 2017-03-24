@@ -18,6 +18,8 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 import android.testing.ViewUtils;
+import android.testing.ViewUtils;
+import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.utils.leaks.LeakCheckedTest;
 
 import org.junit.Before;
@@ -35,10 +37,11 @@ public class NotificationMenuRowTest extends LeakCheckedTest {
 
     @Test
     public void testAttachDetach() {
-        NotificationMenuRow row = new NotificationMenuRow(mContext);
-        ViewUtils.attachView(row);
+        NotificationMenuRowPlugin row = new NotificationMenuRow(mContext);
+        row.createMenu(null);
+        ViewUtils.attachView(row.getMenuView());
         TestableLooper.get(this).processAllMessages();
-        ViewUtils.detachView(row);
+        ViewUtils.detachView(row.getMenuView());
         TestableLooper.get(this).processAllMessages();
     }
 }
