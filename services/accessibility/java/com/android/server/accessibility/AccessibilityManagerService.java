@@ -1920,7 +1920,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         }
         ComponentName componentNameToEnable =
             ComponentName.unflattenFromString(componentNameToEnableString);
-        if (componentNameToEnable.equals(userState.mServiceToEnableWithShortcut)) {
+        if ((componentNameToEnable != null)
+                && componentNameToEnable.equals(userState.mServiceToEnableWithShortcut)) {
             return false;
         }
         userState.mServiceToEnableWithShortcut = componentNameToEnable;
@@ -1948,7 +1949,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         if (!shortcutServiceIsInstalled) {
             userState.mServiceToEnableWithShortcut = null;
             Settings.Secure.putStringForUser(mContext.getContentResolver(),
-                    Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE, "", userState.mUserId);
+                    Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE, null, userState.mUserId);
+            Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                    Settings.Secure.ACCESSIBILITY_SHORTCUT_ENABLED, 0, userState.mUserId);
         }
     }
 

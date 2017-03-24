@@ -3929,22 +3929,24 @@
 
     <!-- Dialog title for dialog shown when the accessibility shortcut is activated, and we want
      to confirm that the user understands what's going to happen-->
-    <string name="accessibility_shortcut_warning_dialog_title">Accessibility Shortcut is ON</string>
+    <string name="accessibility_shortcut_warning_dialog_title">Use Accessibility Shortcut?</string>
 
     <!-- Message shown in dialog when user is in the process of enabling the accessibility
     service via the volume buttons shortcut for the first time. [CHAR LIMIT=none] -->
     <string name="accessibility_shortcut_toogle_warning">
-        Turn <xliff:g id="service_name" example="TalkBack">%1$s</xliff:g> on or off by holding down
-        both volume buttons for 3 seconds.\n\nYou can change the service in
-        Settings > Accessibility.
+        When the shortcut is on, pressing both volume buttons for 3 seconds will start an
+        accessibility feature.\n\n
+        Current accessibility feature:\n
+        <xliff:g id="service_name" example="TalkBack">%1$s</xliff:g>\n\n
+        You can change the feature in Settings > Accessibility.
     </string>
 
     <!-- Text in button that turns off the accessibility shortcut -->
-    <string name="disable_accessibility_shortcut">Turn Off Shortcut</string>
+    <string name="disable_accessibility_shortcut">Turn off Shortcut</string>
 
     <!-- Text in button that closes the warning dialog about the accessibility shortcut, leaving the
     shortcut enabled.-->
-    <string name="leave_accessibility_shortcut_on">Leave on</string>
+    <string name="leave_accessibility_shortcut_on">Use Shortcut</string>
 
     <!-- Text in toast to alert the user that the accessibility shortcut turned on an accessibility
     service.-->
