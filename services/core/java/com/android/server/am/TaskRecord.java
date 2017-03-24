@@ -617,15 +617,15 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
         boolean kept = true;
         try {
             final ActivityRecord r = topRunningActivityLocked();
-            final boolean wasFocused = supervisor.isFocusedStack(sourceStack)
+            final boolean wasFocused = r != null && supervisor.isFocusedStack(sourceStack)
                     && (topRunningActivityLocked() == r);
-            final boolean wasResumed = sourceStack.mResumedActivity == r;
-            final boolean wasPaused = sourceStack.mPausingActivity == r;
+            final boolean wasResumed = r != null && sourceStack.mResumedActivity == r;
+            final boolean wasPaused = r != null && sourceStack.mPausingActivity == r;
 
             // In some cases the focused stack isn't the front stack. E.g. pinned stack.
             // Whenever we are moving the top activity from the front stack we want to make sure to
             // move the stack to the front.
-            final boolean wasFront = supervisor.isFrontStackOnDisplay(sourceStack)
+            final boolean wasFront = r != null && supervisor.isFrontStackOnDisplay(sourceStack)
                     && (sourceStack.topRunningActivityLocked() == r);
 
             // Adjust the position for the new parent stack as needed.
@@ -667,8 +667,10 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
             // new stack by moving the stack to the front.
             final boolean moveStackToFront = moveStackMode == REPARENT_MOVE_STACK_TO_FRONT
                     || (moveStackMode == REPARENT_KEEP_STACK_AT_FRONT && (wasFocused || wasFront));
-            toStack.moveToFrontAndResumeStateIfNeeded(r, moveStackToFront, wasResumed, wasPaused,
-                    reason);
+            if (r != null) {
+                toStack.moveToFrontAndResumeStateIfNeeded(r, moveStackToFront, wasResumed,
+                        wasPaused, reason);
+            }
             if (!animate) {
                 toStack.mNoAnimActivities.add(topActivity);
             }
