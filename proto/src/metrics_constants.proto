@@ -97,7 +97,9 @@ message MetricsEvent {
     // OS: 6.0
     ACCESSIBILITY_TOGGLE_GLOBAL_GESTURE = 6;
 
-    // OPEN: Settings > Accessibility > Magnification gestures
+    // OPEN: Settings > Accessibility > Magnification gestures (Renamed in O)
+    // OPEN: Settings > Accessibility > Magnification > Magnify with triple-tap
+    // OPEN: Settings > Accessibility > Magnification > Magnify with button
     // CATEGORY: SETTINGS
     // OS: 6.0
     ACCESSIBILITY_TOGGLE_SCREEN_MAGNIFICATION = 7;
@@ -1881,7 +1883,9 @@ message MetricsEvent {
     // OS: N
     SUW_ACCESSIBILITY = 367;
 
-    // OPEN: SUW Welcome Screen -> Vision Settings -> Magnification gesture
+    // OPEN: SUW Welcome Screen -> Vision Settings -> Magnification gestures (Renamed in O)
+    // OPEN: SUW Welcome Screen -> Vision Settings -> Magnification -> Magnify with triple-tap
+    // OPEN: SUW Welcome Screen -> Vision Settings -> Magnification -> Magnify with button
     // ACTION: New magnification gesture configuration is chosen
     //  SUBTYPE: 0 is off, 1 is on
     // CATEGORY: SETTINGS
@@ -3783,6 +3787,10 @@ message MetricsEvent {
     // OPEN: Settings -> Display -> When in VR Mode
     VR_DISPLAY_PREFERENCE = 921;
 
+    // OPEN: Settings > Accessibility > Magnification
+    // CATEGORY: SETTINGS
+    // OS: O
+    ACCESSIBILITY_SCREEN_MAGNIFICATION_SETTINGS = 922;
     // ---- End O Constants, all O constants go above this line ----
 
     // Add new aosp constants above this line.
