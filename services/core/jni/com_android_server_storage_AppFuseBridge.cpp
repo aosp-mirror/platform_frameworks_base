@@ -19,16 +19,19 @@
 
 #include <android_runtime/Log.h>
 #include <android-base/logging.h>
+#include <android-base/unique_fd.h>
 #include <core_jni_helpers.h>
 #include <libappfuse/FuseBridgeLoop.h>
+#include <libappfuse/FuseBuffer.h>
 #include <nativehelper/JNIHelp.h>
 
 namespace android {
 namespace {
 
 constexpr const char* CLASS_NAME = "com/android/server/storage/AppFuseBridge";
-static jclass appFuseClass;
-static jmethodID appFuseOnMount;
+static jclass gAppFuseClass;
+static jmethodID gAppFuseOnMount;
+static jmethodID gAppFuseOnClosed;
 
 class Callback : public fuse::FuseBridgeLoopCallback {
     JNIEnv* mEnv;
@@ -36,8 +39,16 @@ class Callback : public fuse::FuseBridgeLoopCallback {
 
 public:
     Callback(JNIEnv* env, jobject self) : mEnv(env), mSelf(self) {}
-    void OnMount() override {
-        mEnv->CallVoidMethod(mSelf, appFuseOnMount);
+    void OnMount(int mount_id) override {
+        mEnv->CallVoidMethod(mSelf, gAppFuseOnMount, mount_id);
+        if (mEnv->ExceptionCheck()) {
+            LOGE_EX(mEnv, nullptr);
+            mEnv->ExceptionClear();
+        }
+    }
+
+    void OnClosed(int mount_id) override {
+        mEnv->CallVoidMethod(mSelf, gAppFuseOnClosed, mount_id);
         if (mEnv->ExceptionCheck()) {
             LOGE_EX(mEnv, nullptr);
             mEnv->ExceptionClear();
@@ -45,17 +56,93 @@ public:
     }
 };
 
-jboolean com_android_server_storage_AppFuseBridge_start_loop(
-        JNIEnv* env, jobject self, jint devJavaFd, jint proxyJavaFd) {
+class MonitorScope final {
+public:
+    MonitorScope(JNIEnv* env, jobject obj) : mEnv(env), mObj(obj), mLocked(false) {
+        if (mEnv->MonitorEnter(obj) == JNI_OK) {
+            mLocked = true;
+        } else {
+            LOG(ERROR) << "Failed to enter monitor.";
+        }
+    }
+
+    ~MonitorScope() {
+        if (mLocked) {
+            if (mEnv->MonitorExit(mObj) != JNI_OK) {
+                LOG(ERROR) << "Failed to exit monitor.";
+            }
+        }
+    }
+
+    operator bool() {
+        return mLocked;
+    }
+
+private:
+    // Lifetime of |MonitorScope| must be shorter than the reference of mObj.
+    JNIEnv* mEnv;
+    jobject mObj;
+    bool mLocked;
+
+    DISALLOW_COPY_AND_ASSIGN(MonitorScope);
+};
+
+jlong com_android_server_storage_AppFuseBridge_new(JNIEnv* env, jobject self) {
+    return reinterpret_cast<jlong>(new fuse::FuseBridgeLoop());
+}
+
+void com_android_server_storage_AppFuseBridge_delete(JNIEnv* env, jobject self, jlong java_loop) {
+    fuse::FuseBridgeLoop* const loop = reinterpret_cast<fuse::FuseBridgeLoop*>(java_loop);
+    CHECK(loop);
+    delete loop;
+}
+
+void com_android_server_storage_AppFuseBridge_start_loop(
+        JNIEnv* env, jobject self, jlong java_loop) {
+    fuse::FuseBridgeLoop* const loop = reinterpret_cast<fuse::FuseBridgeLoop*>(java_loop);
+    CHECK(loop);
     Callback callback(env, self);
-    return fuse::StartFuseBridgeLoop(devJavaFd, proxyJavaFd, &callback);
+    loop->Start(&callback);
+}
+
+jint com_android_server_storage_AppFuseBridge_add_bridge(
+        JNIEnv* env, jobject self, jlong java_loop, jint mountId, jint javaDevFd) {
+    base::unique_fd devFd(javaDevFd);
+    fuse::FuseBridgeLoop* const loop = reinterpret_cast<fuse::FuseBridgeLoop*>(java_loop);
+    CHECK(loop);
+
+    base::unique_fd proxyFd[2];
+    if (!fuse::SetupMessageSockets(&proxyFd)) {
+        return -1;
+    }
+
+    if (!loop->AddBridge(mountId, std::move(devFd), std::move(proxyFd[0]))) {
+        return -1;
+    }
+
+    return proxyFd[1].release();
 }
 
 const JNINativeMethod methods[] = {
     {
+        "native_new",
+        "()J",
+        reinterpret_cast<void*>(com_android_server_storage_AppFuseBridge_new)
+    },
+    {
+        "native_delete",
+        "(J)V",
+        reinterpret_cast<void*>(com_android_server_storage_AppFuseBridge_delete)
+    },
+    {
         "native_start_loop",
-        "(II)Z",
-        (void *) com_android_server_storage_AppFuseBridge_start_loop
+        "(J)V",
+        reinterpret_cast<void*>(com_android_server_storage_AppFuseBridge_start_loop)
+    },
+    {
+        "native_add_bridge",
+        "(JII)I",
+        reinterpret_cast<void*>(com_android_server_storage_AppFuseBridge_add_bridge)
     }
 };
 
@@ -64,8 +151,9 @@ const JNINativeMethod methods[] = {
 void register_android_server_storage_AppFuse(JNIEnv* env) {
     CHECK(env != nullptr);
 
-    appFuseClass = MakeGlobalRefOrDie(env, FindClassOrDie(env, CLASS_NAME));
-    appFuseOnMount = GetMethodIDOrDie(env, appFuseClass, "onMount", "()V");
+    gAppFuseClass = MakeGlobalRefOrDie(env, FindClassOrDie(env, CLASS_NAME));
+    gAppFuseOnMount = GetMethodIDOrDie(env, gAppFuseClass, "onMount", "(I)V");
+    gAppFuseOnClosed = GetMethodIDOrDie(env, gAppFuseClass, "onClosed", "(I)V");
     RegisterMethodsOrDie(env, CLASS_NAME, methods, NELEM(methods));
 }
 }  // namespace android
