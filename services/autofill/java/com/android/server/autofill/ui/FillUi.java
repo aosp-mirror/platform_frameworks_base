@@ -100,6 +100,7 @@ final class FillUi {
             final int heightMeasureSpec = MeasureSpec.makeMeasureSpec(MeasureSpec.UNSPECIFIED, 0);
             content.measure(widthMeasureSpec, heightMeasureSpec);
             content.setOnClickListener(v -> mCallback.onResponsePicked(response));
+            content.setElevation(context.getResources().getDimension(R.dimen.floating_window_z));
             mContentWidth = content.getMeasuredWidth();
             mContentHeight = content.getMeasuredHeight();
 
@@ -138,8 +139,7 @@ final class FillUi {
             };
 
             final LayoutInflater inflater = LayoutInflater.from(context);
-            mListView = (ListView) inflater.inflate(
-                    com.android.internal.R.layout.autofill_dataset_picker, null);
+            mListView = (ListView) inflater.inflate(R.layout.autofill_dataset_picker, null);
             mListView.setAdapter(mAdapter);
             mListView.setOnItemClickListener((adapter, view, position, id) -> {
                 final ViewItem vi = mAdapter.getItem(position);
