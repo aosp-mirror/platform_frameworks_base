@@ -65,6 +65,7 @@ public final class BluetoothGattServer implements BluetoothProfile {
              * Application interface registered - app is ready to go
              * @hide
              */
+            @Override
             public void onServerRegistered(int status, int serverIf) {
                 if (DBG) Log.d(TAG, "onServerRegistered() - status=" + status
                     + " serverIf=" + serverIf);
@@ -80,18 +81,10 @@ public final class BluetoothGattServer implements BluetoothProfile {
             }
 
             /**
-             * Callback reporting an LE scan result.
-             * @hide
-             */
-            public void onScanResult(String address, int rssi, byte[] advData) {
-                if (VDBG) Log.d(TAG, "onScanResult() - Device=" + address + " RSSI=" +rssi);
-                // no op
-            }
-
-            /**
              * Server connection state changed
              * @hide
              */
+            @Override
             public void onServerConnectionState(int status, int serverIf,
                                                 boolean connected, String address) {
                 if (DBG) Log.d(TAG, "onServerConnectionState() - status=" + status
@@ -109,6 +102,7 @@ public final class BluetoothGattServer implements BluetoothProfile {
              * Service has been added
              * @hide
              */
+            @Override
             public void onServiceAdded(int status, BluetoothGattService service) {
                 if (DBG) Log.d(TAG, "onServiceAdded() - handle=" + service.getInstanceId()
                     + " uuid=" + service.getUuid() + " status=" + status);
@@ -149,6 +143,7 @@ public final class BluetoothGattServer implements BluetoothProfile {
              * Remote client characteristic read request.
              * @hide
              */
+            @Override
             public void onCharacteristicReadRequest(String address, int transId,
                             int offset, boolean isLong, int handle) {
                 if (VDBG) Log.d(TAG, "onCharacteristicReadRequest() - handle=" + handle);
@@ -171,6 +166,7 @@ public final class BluetoothGattServer implements BluetoothProfile {
              * Remote client descriptor read request.
              * @hide
              */
+            @Override
             public void onDescriptorReadRequest(String address, int transId,
                             int offset, boolean isLong, int handle) {
                 if (VDBG) Log.d(TAG, "onCharacteristicReadRequest() - handle=" + handle);
@@ -193,6 +189,7 @@ public final class BluetoothGattServer implements BluetoothProfile {
              * Remote client characteristic write request.
              * @hide
              */
+            @Override
             public void onCharacteristicWriteRequest(String address, int transId,
                             int offset, int length, boolean isPrep, boolean needRsp,
                             int handle, byte[] value) {
@@ -218,6 +215,7 @@ public final class BluetoothGattServer implements BluetoothProfile {
              * Remote client descriptor write request.
              * @hide
              */
+            @Override
             public void onDescriptorWriteRequest(String address, int transId, int offset,
                             int length, boolean isPrep, boolean needRsp, int handle, byte[] value) {
                 if (VDBG) Log.d(TAG, "onDescriptorWriteRequest() - handle=" + handle);
@@ -241,6 +239,7 @@ public final class BluetoothGattServer implements BluetoothProfile {
              * Execute pending writes.
              * @hide
              */
+            @Override
             public void onExecuteWrite(String address, int transId,
                                        boolean execWrite) {
                 if (DBG) Log.d(TAG, "onExecuteWrite() - "
@@ -261,6 +260,7 @@ public final class BluetoothGattServer implements BluetoothProfile {
              * A notification/indication has been sent.
              * @hide
              */
+            @Override
             public void onNotificationSent(String address, int status) {
                 if (VDBG) Log.d(TAG, "onNotificationSent() - "
                     + "device=" + address + ", status=" + status);
@@ -279,6 +279,7 @@ public final class BluetoothGattServer implements BluetoothProfile {
              * The MTU for a connection has changed
              * @hide
              */
+            @Override
             public void onMtuChanged(String address, int mtu) {
                 if (DBG) Log.d(TAG, "onMtuChanged() - "
                     + "device=" + address + ", mtu=" + mtu);
@@ -297,6 +298,7 @@ public final class BluetoothGattServer implements BluetoothProfile {
              * The PHY for a connection was updated
              * @hide
              */
+            @Override
             public void onPhyUpdate(String address, int txPhy, int rxPhy, int status) {
                 if (DBG) Log.d(TAG, "onPhyUpdate() - " + "device=" + address + ", txPHy=" + txPhy
                     + ", rxPHy=" + rxPhy);
@@ -315,6 +317,7 @@ public final class BluetoothGattServer implements BluetoothProfile {
              * The PHY for a connection was read
              * @hide
              */
+            @Override
             public void onPhyRead(String address, int txPhy, int rxPhy, int status) {
                 if (DBG) Log.d(TAG, "onPhyUpdate() - " + "device=" + address + ", txPHy=" + txPhy
                     + ", rxPHy=" + rxPhy);
@@ -328,6 +331,28 @@ public final class BluetoothGattServer implements BluetoothProfile {
                     Log.w(TAG, "Unhandled exception: " + ex);
                 }
             }
+
+            /**
+             * Callback invoked when the given connection is updated
+             * @hide
+             */
+            @Override
+            public void onConnectionUpdated(String address, int interval, int latency,
+                                            int timeout, int status) {
+                if (DBG) Log.d(TAG, "onConnectionUpdated() - Device=" + address +
+                            " interval=" + interval + " latency=" + latency +
+                            " timeout=" + timeout + " status=" + status);
+                BluetoothDevice device = mAdapter.getRemoteDevice(address);
+                if (device == null) return;
+
+                try {
+                    mCallback.onConnectionUpdated(device, interval, latency,
+                                                  timeout, status);
+                } catch (Exception ex) {
+                    Log.w(TAG, "Unhandled exception: " + ex);
+                }
+            }
+
         };
 
     /**
