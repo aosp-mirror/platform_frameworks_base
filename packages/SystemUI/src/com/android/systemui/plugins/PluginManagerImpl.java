@@ -59,7 +59,6 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
 
     private static PluginManager sInstance;
 
-    private final HandlerThread mBackgroundThread;
     private final ArrayMap<PluginListener<?>, PluginInstanceManager> mPluginMap
             = new ArrayMap<>();
     private final Map<String, ClassLoader> mClassLoaders = new ArrayMap<>();
@@ -71,6 +70,7 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
     private ClassLoaderFilter mParentClassLoader;
     private boolean mListening;
     private boolean mHasOneShot;
+    private Looper mLooper;
 
     public PluginManagerImpl(Context context) {
         this(context, new PluginInstanceManagerFactory(),
@@ -82,8 +82,7 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
             UncaughtExceptionHandler defaultHandler) {
         mContext = context;
         mFactory = factory;
-        mBackgroundThread = new HandlerThread("Plugins");
-        mBackgroundThread.start();
+        mLooper = Dependency.get(Dependency.BG_LOOPER);
         isDebuggable = debuggable;
         mPluginPrefs = new PluginPrefs(mContext);
 
@@ -91,7 +90,7 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
                 defaultHandler);
         Thread.setDefaultUncaughtExceptionHandler(uncaughtExceptionHandler);
         if (isDebuggable) {
-            new Handler(mBackgroundThread.getLooper()).post(() -> {
+            new Handler(mLooper).post(() -> {
                 // Plugin dependencies that don't have another good home can go here, but
                 // dependencies that have better places to init can happen elsewhere.
                 Dependency.get(PluginDependencyProvider.class)
@@ -120,7 +119,7 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
             throw new RuntimeException("Must be called from UI thread");
         }
         PluginInstanceManager<T> p = mFactory.createPluginInstanceManager(mContext, action, null,
-                false, mBackgroundThread.getLooper(), cls, this);
+                false, mLooper, cls, this);
         mPluginPrefs.addAction(action);
         PluginInfo<T> info = p.getPlugin();
         if (info != null) {
@@ -154,7 +153,7 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
         }
         mPluginPrefs.addAction(action);
         PluginInstanceManager p = mFactory.createPluginInstanceManager(mContext, action, listener,
-                allowMultiple, mBackgroundThread.getLooper(), cls, this);
+                allowMultiple, mLooper, cls, this);
         p.loadAll();
         mPluginMap.put(listener, p);
         startListening();
