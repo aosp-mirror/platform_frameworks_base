@@ -491,8 +491,6 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
 
         setState(STATE_UPDATE_FAILED);
 
-        updateOptionsUi();
-
         mPrintedDocument.kill(message);
     }
 
@@ -502,7 +500,6 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
                 && canUpdateDocument() && updateDocument(true)) {
             ensurePreviewUiShown();
             setState(STATE_CONFIGURING);
-            updateOptionsUi();
         }
     }
 
@@ -579,7 +576,6 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
                 updatePrintPreviewController(document.changed);
 
                 setState(STATE_CONFIGURING);
-                updateOptionsUi();
             } break;
         }
     }
@@ -600,8 +596,6 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         }
 
         setState(STATE_UPDATE_FAILED);
-
-        updateOptionsUi();
     }
 
     @Override
@@ -734,7 +728,6 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
             updateOptionsUi();
         } else {
             setState(STATE_CREATE_FILE_FAILED);
-            updateOptionsUi();
             // Calling finish here does not invoke lifecycle callbacks but we
             // update the print job in onPause if finishing, hence post a message.
             mDestinationSpinner.post(new Runnable() {
@@ -958,12 +951,14 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
                     Log.i(LOG_TAG, "[state]" + state);
                 }
                 mState = state;
+                updateOptionsUi();
             }
         } else {
             if (DEBUG) {
                 Log.i(LOG_TAG, "[state]" + state);
             }
             mState = state;
+            updateOptionsUi();
         }
     }
 
@@ -1230,6 +1225,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
 
         final boolean willUpdate = mPrintedDocument.update(mPrintJob.getAttributes(),
                 pages, preview);
+        updateOptionsUi();
 
         if (willUpdate && !mPrintedDocument.hasLaidOutPages()) {
             // When the update is done we update the print preview.
@@ -1254,7 +1250,6 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
 
     private void cancelPrint() {
         setState(STATE_PRINT_CANCELED);
-        updateOptionsUi();
         mPrintedDocument.cancel(true);
         doFinish();
     }
@@ -1274,7 +1269,6 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
     private void confirmPrint() {
         setState(STATE_PRINT_CONFIRMED);
 
-        updateOptionsUi();
         addCurrentPrinterToHistory();
         setUserPrinted();
 
@@ -1629,6 +1623,8 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         // Always update the summary.
         updateSummary();
 
+        mDestinationSpinner.setEnabled(!isFinalState(mState));
+
         if (mState == STATE_PRINT_CONFIRMED
                 || mState == STATE_PRINT_COMPLETED
                 || mState == STATE_PRINT_CANCELED
@@ -1636,9 +1632,6 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
                 || mState == STATE_CREATE_FILE_FAILED
                 || mState == STATE_PRINTER_UNAVAILABLE
                 || mState == STATE_UPDATE_SLOW) {
-            if (mState != STATE_PRINTER_UNAVAILABLE) {
-                mDestinationSpinner.setEnabled(false);
-            }
             disableOptionsUi(isFinalState(mState));
             return;
         }
@@ -1927,7 +1920,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
             mPrintButton.setImageResource(R.drawable.ic_menu_savetopdf);
             mPrintButton.setContentDescription(getString(R.string.savetopdf_button));
         }
-        if (!mPrintedDocument.getDocumentInfo().laidout
+        if (!mPrintedDocument.getDocumentInfo().updated
                 ||(mRangeOptionsSpinner.getSelectedItemPosition() == 1
                 && (TextUtils.isEmpty(mPageRangeEditText.getText()) || hasErrors()))
                 || (mRangeOptionsSpinner.getSelectedItemPosition() == 0
@@ -2048,7 +2041,6 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
                 updateDocument(false);
             }
             ensurePreviewUiShown();
-            updateOptionsUi();
         }
     }
 
@@ -2058,7 +2050,6 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
             mPrintedDocument.cancel(false);
             ensureErrorUiShown(getString(R.string.print_error_printer_unavailable),
                     PrintErrorFragment.ACTION_NONE);
-            updateOptionsUi();
         }
     }
 
@@ -3038,7 +3029,6 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
             if (mState == STATE_UPDATE_SLOW) {
                 setState(STATE_UPDATE_SLOW);
                 ensureProgressUiShown();
-                updateOptionsUi();
 
                 return;
             } else if (mPosted) {
@@ -3080,7 +3070,6 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
             mPreviousState = mState;
             setState(STATE_UPDATE_SLOW);
             ensureProgressUiShown();
-            updateOptionsUi();
         }
     }
 
