@@ -214,7 +214,7 @@ public final class CompanionDeviceManager {
     }
 
     private boolean checkFeaturePresent() {
-        boolean featurePresent = mService == null;
+        boolean featurePresent = mService != null;
         if (!featurePresent && DEBUG) {
             Log.d(LOG_TAG, "Feature " + PackageManager.FEATURE_COMPANION_DEVICE_SETUP
                     + " not available");
