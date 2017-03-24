@@ -568,9 +568,10 @@ public final class TvContract {
     }
 
     /**
-     * Common base for the tables of TV programs.
+     * Common columns for the tables of TV programs.
+     * @hide
      */
-    public interface BaseProgramColumns extends BaseTvColumns {
+    interface ProgramColumns {
         /**
          * The title of this TV program.
          *
@@ -836,9 +837,10 @@ public final class TvContract {
     }
 
     /**
-     * Common base for the tables of preview programs.
+     * Common columns for the tables of preview programs.
+     * @hide
      */
-    public interface BasePreviewProgramColumns extends BaseProgramColumns {
+    interface PreviewProgramColumns {
 
         /** @hide */
         @IntDef({
@@ -2227,7 +2229,7 @@ public final class TvContract {
      * <p>By default, the query results will be sorted by
      * {@link Programs#COLUMN_START_TIME_UTC_MILLIS} in ascending order.
      */
-    public static final class Programs implements BaseProgramColumns {
+    public static final class Programs implements BaseTvColumns, ProgramColumns {
 
         /** The content:// style URI for this table. */
         public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/"
@@ -2541,7 +2543,7 @@ public final class TvContract {
      * <p>By default, the query results will be sorted by {@link #COLUMN_START_TIME_UTC_MILLIS} in
      * ascending order.
      */
-    public static final class RecordedPrograms implements BaseProgramColumns {
+    public static final class RecordedPrograms implements BaseTvColumns, ProgramColumns {
 
         /** The content:// style URI for this table. */
         public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/"
@@ -2663,7 +2665,8 @@ public final class TvContract {
     /**
      * Column definitions for the preview TV programs table.
      */
-    public static final class PreviewPrograms implements BasePreviewProgramColumns {
+    public static final class PreviewPrograms implements BaseTvColumns, ProgramColumns,
+        PreviewProgramColumns {
 
         /** The content:// style URI for this table. */
         public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/"
@@ -2709,7 +2712,8 @@ public final class TvContract {
     /**
      * Column definitions for the "watch next" TV programs table.
      */
-    public static final class WatchNextPrograms implements BasePreviewProgramColumns {
+    public static final class WatchNextPrograms implements BaseTvColumns, ProgramColumns,
+        PreviewProgramColumns {
 
         /** The content:// style URI for this table. */
         public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/"
