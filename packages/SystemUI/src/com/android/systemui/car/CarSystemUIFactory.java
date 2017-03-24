@@ -15,11 +15,12 @@
  */
 package com.android.systemui.car;
 
-import android.content.ComponentName;
 import android.content.Context;
+import android.util.ArrayMap;
 
+import com.android.systemui.Dependency.DependencyProvider;
 import com.android.systemui.SystemUIFactory;
-import com.android.systemui.volume.VolumeDialogController;
+import com.android.systemui.plugins.VolumeDialogController;
 import com.android.systemui.volume.car.CarVolumeDialogController;
 
 /**
@@ -27,8 +28,9 @@ import com.android.systemui.volume.car.CarVolumeDialogController;
  */
 public class CarSystemUIFactory extends SystemUIFactory {
     @Override
-    public VolumeDialogController createVolumeDialogController(Context context,
-            ComponentName name) {
-        return new CarVolumeDialogController(context, name);
+    public void injectDependencies(ArrayMap<Object, DependencyProvider> providers,
+            Context context) {
+        super.injectDependencies(providers, context);
+        providers.put(VolumeDialogController.class, () -> new CarVolumeDialogController(context));
     }
 }

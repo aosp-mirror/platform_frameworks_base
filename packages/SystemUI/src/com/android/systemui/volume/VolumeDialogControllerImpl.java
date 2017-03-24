@@ -16,7 +16,6 @@
 
 package com.android.systemui.volume;
 
-import android.annotation.IntegerRes;
 import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -44,10 +43,11 @@ import android.provider.Settings;
 import android.service.notification.Condition;
 import android.util.ArrayMap;
 import android.util.Log;
-import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.systemui.Dumpable;
 import com.android.systemui.R;
+import com.android.systemui.plugins.VolumeDialogController;
 import com.android.systemui.qs.tiles.DndTile;
 
 import java.io.FileDescriptor;
@@ -63,8 +63,8 @@ import java.util.Objects;
  *
  *  Methods ending in "W" must be called on the worker thread.
  */
-public class VolumeDialogController {
-    private static final String TAG = Util.logTag(VolumeDialogController.class);
+public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpable {
+    private static final String TAG = Util.logTag(VolumeDialogControllerImpl.class);
 
     private static final int DYNAMIC_STREAM_START_INDEX = 100;
     private static final int VIBRATE_HINT_DURATION = 50;
@@ -89,7 +89,6 @@ public class VolumeDialogController {
     private final Context mContext;
     private AudioManager mAudio;
     private final NotificationManager mNoMan;
-    private final ComponentName mComponent;
     private final SettingObserver mObserver;
     private final Receiver mReceiver = new Receiver();
     private final MediaSessions mMediaSessions;
@@ -108,11 +107,10 @@ public class VolumeDialogController {
 
     protected final VC mVolumeController = new VC();
 
-    public VolumeDialogController(Context context, ComponentName component) {
+    public VolumeDialogControllerImpl(Context context) {
         mContext = context.getApplicationContext();
         Events.writeEvent(mContext, Events.EVENT_COLLECTION_STARTED);
-        mComponent = component;
-        mWorkerThread = new HandlerThread(VolumeDialogController.class.getSimpleName());
+        mWorkerThread = new HandlerThread(VolumeDialogControllerImpl.class.getSimpleName());
         mWorkerThread.start();
         mWorker = new W(mWorkerThread.getLooper());
         mMediaSessions = createMediaSessions(mContext, mWorkerThread.getLooper(),
@@ -197,7 +195,7 @@ public class VolumeDialogController {
     }
 
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        pw.println(VolumeDialogController.class.getSimpleName() + " state:");
+        pw.println(VolumeDialogControllerImpl.class.getSimpleName() + " state:");
         pw.print("  mDestroyed: "); pw.println(mDestroyed);
         pw.print("  mVolumePolicy: "); pw.println(mVolumePolicy);
         pw.print("  mState: "); pw.println(mState.toString(4));
@@ -530,7 +528,7 @@ public class VolumeDialogController {
     }
 
     private final class VC extends IVolumeController.Stub {
-        private final String TAG = VolumeDialogController.TAG + ".VC";
+        private final String TAG = VolumeDialogControllerImpl.TAG + ".VC";
 
         @Override
         public void displaySafeVolumeWarning(int flags) throws RemoteException {
@@ -956,113 +954,6 @@ public class VolumeDialogController {
             }
             return null;
         }
-    }
-
-    public static final class StreamState {
-        public boolean dynamic;
-        public int level;
-        public int levelMin;
-        public int levelMax;
-        public boolean muted;
-        public boolean muteSupported;
-        public @IntegerRes int name;
-        public String remoteLabel;
-        public boolean routedToBluetooth;
-
-        public StreamState copy() {
-            final StreamState rt = new StreamState();
-            rt.dynamic = dynamic;
-            rt.level = level;
-            rt.levelMin = levelMin;
-            rt.levelMax = levelMax;
-            rt.muted = muted;
-            rt.muteSupported = muteSupported;
-            rt.name = name;
-            rt.remoteLabel = remoteLabel;
-            rt.routedToBluetooth = routedToBluetooth;
-            return rt;
-        }
-    }
-
-    public static final class State {
-        public static int NO_ACTIVE_STREAM = -1;
-
-        public final SparseArray<StreamState> states = new SparseArray<StreamState>();
-
-        public int ringerModeInternal;
-        public int ringerModeExternal;
-        public int zenMode;
-        public ComponentName effectsSuppressor;
-        public String effectsSuppressorName;
-        public int activeStream = NO_ACTIVE_STREAM;
-
-        public State copy() {
-            final State rt = new State();
-            for (int i = 0; i < states.size(); i++) {
-                rt.states.put(states.keyAt(i), states.valueAt(i).copy());
-            }
-            rt.ringerModeExternal = ringerModeExternal;
-            rt.ringerModeInternal = ringerModeInternal;
-            rt.zenMode = zenMode;
-            if (effectsSuppressor != null) rt.effectsSuppressor = effectsSuppressor.clone();
-            rt.effectsSuppressorName = effectsSuppressorName;
-            rt.activeStream = activeStream;
-            return rt;
-        }
-
-        @Override
-        public String toString() {
-            return toString(0);
-        }
-
-        public String toString(int indent) {
-            final StringBuilder sb = new StringBuilder("{");
-            if (indent > 0) sep(sb, indent);
-            for (int i = 0; i < states.size(); i++) {
-                if (i > 0) {
-                    sep(sb, indent);
-                }
-                final int stream = states.keyAt(i);
-                final StreamState ss = states.valueAt(i);
-                sb.append(AudioSystem.streamToString(stream)).append(":").append(ss.level)
-                        .append('[').append(ss.levelMin).append("..").append(ss.levelMax)
-                        .append(']');
-                if (ss.muted) sb.append(" [MUTED]");
-                if (ss.dynamic) sb.append(" [DYNAMIC]");
-            }
-            sep(sb, indent); sb.append("ringerModeExternal:").append(ringerModeExternal);
-            sep(sb, indent); sb.append("ringerModeInternal:").append(ringerModeInternal);
-            sep(sb, indent); sb.append("zenMode:").append(zenMode);
-            sep(sb, indent); sb.append("effectsSuppressor:").append(effectsSuppressor);
-            sep(sb, indent); sb.append("effectsSuppressorName:").append(effectsSuppressorName);
-            sep(sb, indent); sb.append("activeStream:").append(activeStream);
-            if (indent > 0) sep(sb, indent);
-            return sb.append('}').toString();
-        }
-
-        private static void sep(StringBuilder sb, int indent) {
-            if (indent > 0) {
-                sb.append('\n');
-                for (int i = 0; i < indent; i++) {
-                    sb.append(' ');
-                }
-            } else {
-                sb.append(',');
-            }
-        }
-    }
-
-    public interface Callbacks {
-        void onShowRequested(int reason);
-        void onDismissRequested(int reason);
-        void onStateChanged(State state);
-        void onLayoutDirectionChanged(int layoutDirection);
-        void onConfigurationChanged();
-        void onShowVibrateHint();
-        void onShowSilentHint();
-        void onScreenOff();
-        void onShowSafetyWarning(int flags);
-        void onAccessibilityModeChanged(Boolean showA11yStream);
     }
 
     public interface UserActivityListener {

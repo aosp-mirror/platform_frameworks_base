@@ -16,7 +16,6 @@
 
 package com.android.systemui;
 
-import android.content.ComponentName;
 import android.content.Context;
 import android.util.ArrayMap;
 import android.util.Log;
@@ -39,7 +38,7 @@ import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
-import com.android.systemui.volume.VolumeDialogController;
+import com.android.systemui.volume.VolumeDialogControllerImpl;
 
 /**
  * Class factory to provide customizable SystemUI components.
@@ -87,11 +86,6 @@ public class SystemUIFactory {
             ScrimView scrimBehind, ScrimView scrimInFront, View headsUpScrim,
             LockscreenWallpaper lockscreenWallpaper) {
         return new ScrimController(lightBarController, scrimBehind, scrimInFront, headsUpScrim);
-    }
-
-    public VolumeDialogController createVolumeDialogController(Context context,
-            ComponentName name) {
-        return new VolumeDialogController(context, name);
     }
 
     public NotificationIconAreaController createNotificationIconAreaController(Context context,

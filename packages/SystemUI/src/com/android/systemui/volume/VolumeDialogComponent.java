@@ -24,13 +24,19 @@ import android.media.VolumePolicy;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.WindowManager;
+import android.view.WindowManager.LayoutParams;
 
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.Dependency;
 import com.android.systemui.SystemUI;
-import com.android.systemui.SystemUIFactory;
 import com.android.systemui.keyguard.KeyguardViewMediator;
+import com.android.systemui.plugins.PluginDependency;
+import com.android.systemui.plugins.PluginDependencyProvider;
+import com.android.systemui.plugins.PluginManager;
+import com.android.systemui.plugins.VolumeDialog;
+import com.android.systemui.plugins.VolumeDialogController;
 import com.android.systemui.qs.tiles.DndTile;
+import com.android.systemui.statusbar.policy.ExtensionController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.tuner.TunerService;
 
@@ -41,7 +47,7 @@ import java.io.PrintWriter;
  * Implementation of VolumeComponent backed by the new volume dialog.
  */
 public class VolumeDialogComponent implements VolumeComponent, TunerService.Tunable,
-        VolumeDialogController.UserActivityListener{
+        VolumeDialogControllerImpl.UserActivityListener{
 
     public static final String VOLUME_DOWN_SILENT = "sysui_volume_down_silent";
     public static final String VOLUME_UP_SILENT = "sysui_volume_up_silent";
@@ -53,9 +59,8 @@ public class VolumeDialogComponent implements VolumeComponent, TunerService.Tuna
 
     private final SystemUI mSysui;
     private final Context mContext;
-    private final VolumeDialogController mController;
-    private final ZenModeController mZenModeController;
-    private final VolumeDialog mDialog;
+    private final VolumeDialogControllerImpl mController;
+    private VolumeDialog mDialog;
     private VolumePolicy mVolumePolicy = new VolumePolicy(
             DEFAULT_VOLUME_DOWN_TO_ENTER_SILENT,  // volumeDownToEnterSilent
             DEFAULT_VOLUME_UP_TO_EXIT_SILENT,  // volumeUpToExitSilent
@@ -66,14 +71,33 @@ public class VolumeDialogComponent implements VolumeComponent, TunerService.Tuna
     public VolumeDialogComponent(SystemUI sysui, Context context, Handler handler) {
         mSysui = sysui;
         mContext = context;
-        mController = SystemUIFactory.getInstance().createVolumeDialogController(context, null);
+        mController = (VolumeDialogControllerImpl) Dependency.get(VolumeDialogController.class);
         mController.setUserActivityListener(this);
-        mZenModeController = Dependency.get(ZenModeController.class);
-        mDialog = new VolumeDialog(context, WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY,
-                mController, mZenModeController, mVolumeDialogCallback);
+        // Allow plugins to reference the VolumeDialogController.
+        Dependency.get(PluginDependencyProvider.class)
+                .allowPluginDependency(VolumeDialogController.class);
+        Dependency.get(ExtensionController.class).newExtension(VolumeDialog.class)
+                .withPlugin(VolumeDialog.class)
+                .withDefault(this::createDefault)
+                .withCallback(dialog -> {
+                    if (mDialog != null) {
+                        mDialog.destroy();
+                    }
+                    mDialog = dialog;
+                    mDialog.init(LayoutParams.TYPE_VOLUME_OVERLAY, mVolumeDialogCallback);
+                }).build();
         applyConfiguration();
         Dependency.get(TunerService.class).addTunable(this, VOLUME_DOWN_SILENT, VOLUME_UP_SILENT,
                 VOLUME_SILENT_DO_NOT_DISTURB);
+    }
+
+    private VolumeDialog createDefault() {
+        VolumeDialogImpl impl = new VolumeDialogImpl(mContext);
+        impl.setStreamImportant(AudioManager.STREAM_ALARM, true);
+        impl.setStreamImportant(AudioManager.STREAM_SYSTEM, false);
+        impl.setAutomute(true);
+        impl.setSilentMode(false);
+        return impl;
     }
 
     @Override
@@ -118,10 +142,6 @@ public class VolumeDialogComponent implements VolumeComponent, TunerService.Tuna
     }
 
     private void applyConfiguration() {
-        mDialog.setStreamImportant(AudioManager.STREAM_ALARM, true);
-        mDialog.setStreamImportant(AudioManager.STREAM_SYSTEM, false);
-        mDialog.setAutomute(true);
-        mDialog.setSilentMode(false);
         mController.setVolumePolicy(mVolumePolicy);
         mController.showDndTile(true);
     }
@@ -149,8 +169,6 @@ public class VolumeDialogComponent implements VolumeComponent, TunerService.Tuna
 
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        mController.dump(fd, pw, args);
-        mDialog.dump(pw);
     }
 
     private void startSettings(Intent intent) {
@@ -158,7 +176,7 @@ public class VolumeDialogComponent implements VolumeComponent, TunerService.Tuna
                 true /* onlyProvisioned */, true /* dismissShade */);
     }
 
-    private final VolumeDialog.Callback mVolumeDialogCallback = new VolumeDialog.Callback() {
+    private final VolumeDialogImpl.Callback mVolumeDialogCallback = new VolumeDialogImpl.Callback() {
         @Override
         public void onZenSettingsClicked() {
             startSettings(ZenModePanel.ZEN_SETTINGS);
