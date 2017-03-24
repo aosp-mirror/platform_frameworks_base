@@ -531,7 +531,7 @@
             android:excludeFromRecents="true"
             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.SHOW_BRIGHTNESS_DIALOG" />
+                <action android:name="com.android.intent.action.SHOW_BRIGHTNESS_DIALOG" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
@@ -564,8 +564,8 @@
         <receiver
             android:name=".statusbar.KeyboardShortcutsReceiver">
             <intent-filter>
-                <action android:name="android.intent.action.DISMISS_KEYBOARD_SHORTCUTS" />
-                <action android:name="android.intent.action.SHOW_KEYBOARD_SHORTCUTS" />
+                <action android:name="com.android.intent.action.DISMISS_KEYBOARD_SHORTCUTS" />
+                <action android:name="com.android.intent.action.SHOW_KEYBOARD_SHORTCUTS" />
             </intent-filter>
         </receiver>
     </application>
