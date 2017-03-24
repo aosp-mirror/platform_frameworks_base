@@ -2031,6 +2031,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         Typeface tf = fontTypeface;
         if (tf == null && familyName != null) {
             tf = Typeface.create(familyName, styleIndex);
+        } else if (tf != null && tf.getStyle() != styleIndex) {
+            tf = Typeface.create(tf, styleIndex);
         }
         if (tf != null) {
             setTypeface(tf);
