@@ -480,21 +480,18 @@ public class ExternalStorageProvider extends FileSystemProvider {
     }
 
     @Override
-    public boolean ejectRoot(String rootId) {
+    public void ejectRoot(String rootId) {
         final long token = Binder.clearCallingIdentity();
-        boolean ejected = false;
         RootInfo root = mRoots.get(rootId);
         if (root != null) {
             try {
                 mStorageManager.unmount(root.volumeId);
-                ejected = true;
             } catch (RuntimeException e) {
-                Log.w(TAG, "Root '" + root.title + "' could not be ejected");
+                throw new IllegalStateException(e);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
         }
-        return ejected;
     }
 
     @Override

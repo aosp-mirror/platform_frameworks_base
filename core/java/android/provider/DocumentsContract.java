@@ -594,6 +594,15 @@ public final class DocumentsContract {
         public static final int FLAG_SUPPORTS_IS_CHILD = 1 << 4;
 
         /**
+         * Flag indicating that this root can be ejected.
+         *
+         * @see #COLUMN_FLAGS
+         * @see DocumentsContract#ejectRoot(ContentResolver, Uri)
+         * @see DocumentsProvider#ejectRoot(String)
+         */
+        public static final int FLAG_SUPPORTS_EJECT = 1 << 5;
+
+        /**
          * Flag indicating that this root is currently empty. This may be used
          * to hide the root when opening documents, but the root will still be
          * shown when creating documents and {@link #FLAG_SUPPORTS_CREATE} is
@@ -641,9 +650,6 @@ public final class DocumentsContract {
          * @hide
          */
         public static final int FLAG_REMOVABLE_USB = 1 << 20;
-
-        /** {@hide} */
-        public static final int FLAG_SUPPORTS_EJECT = 1 << 21;
     }
 
     /**
@@ -1345,35 +1351,30 @@ public final class DocumentsContract {
         client.call(METHOD_REMOVE_DOCUMENT, null, in);
     }
 
-    /** {@hide} */
-    public static boolean ejectRoot(ContentResolver resolver, Uri rootUri) {
+    /**
+     * Ejects the given root. It throws {@link IllegalStateException} when ejection failed.
+     *
+     * @param rootUri root with {@link Root#FLAG_SUPPORTS_EJECT} to be ejected
+     */
+    public static void ejectRoot(ContentResolver resolver, Uri rootUri) {
         final ContentProviderClient client = resolver.acquireUnstableContentProviderClient(
                 rootUri.getAuthority());
         try {
-            return ejectRoot(client, rootUri);
-        } catch (Exception e) {
-            Log.w(TAG, "Failed to eject root", e);
-            return false;
+            ejectRoot(client, rootUri);
+        } catch (RemoteException e) {
+            e.rethrowAsRuntimeException();
         } finally {
             ContentProviderClient.releaseQuietly(client);
         }
     }
 
     /** {@hide} */
-    public static boolean ejectRoot(ContentProviderClient client, Uri rootUri)
+    public static void ejectRoot(ContentProviderClient client, Uri rootUri)
             throws RemoteException {
         final Bundle in = new Bundle();
         in.putParcelable(DocumentsContract.EXTRA_URI, rootUri);
 
-        final Bundle out = client.call(METHOD_EJECT_ROOT, null, in);
-
-        if (out == null) {
-            throw new RemoteException("Failed to get a reponse from ejectRoot.");
-        }
-        if (!out.containsKey(DocumentsContract.EXTRA_RESULT)) {
-            throw new RemoteException("Response did not include result field..");
-        }
-        return out.getBoolean(DocumentsContract.EXTRA_RESULT);
+        client.call(METHOD_EJECT_ROOT, null, in);
     }
 
     /**
