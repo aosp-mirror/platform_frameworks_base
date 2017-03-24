@@ -24,14 +24,12 @@ import java.util.Formatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Predicate;
 
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.telephony.SignalStrength;
 import android.text.format.DateFormat;
 import android.util.ArrayMap;
-import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.MutableBoolean;
 import android.util.Pair;
@@ -184,7 +182,7 @@ public abstract class BatteryStats implements Parcelable {
      * New in version 19:
      *   - Wakelock data (wl) gets current and max times.
      * New in version 20:
-     *   - Sensor gets a background counter.
+     *   - Sensor, BluetoothScan, WifiScan get background timers and counter.
      */
     static final String CHECKIN_VERSION = "20";
 
@@ -363,7 +361,7 @@ public abstract class BatteryStats implements Parcelable {
 
         /**
          * Returns the max duration if it is being tracked.
-         * Not all Timer subclasses track the max duration and the current duration.
+         * Not all Timer subclasses track the max, total, current durations.
 
          */
         public long getMaxDurationMsLocked(long elapsedRealtimeMs) {
@@ -372,9 +370,24 @@ public abstract class BatteryStats implements Parcelable {
 
         /**
          * Returns the current time the timer has been active, if it is being tracked.
-         * Not all Timer subclasses track the max duration and the current duration.
+         * Not all Timer subclasses track the max, total, current durations.
          */
         public long getCurrentDurationMsLocked(long elapsedRealtimeMs) {
+            return -1;
+        }
+
+        /**
+         * Returns the current time the timer has been active, if it is being tracked.
+         *
+         * Returns the total cumulative duration (i.e. sum of past durations) that this timer has
+         * been on since reset.
+         * This may differ from getTotalTimeLocked(elapsedRealtimeUs, STATS_SINCE_CHARGED)/1000 since,
+         * depending on the Timer, getTotalTimeLocked may represent the total 'blamed' or 'pooled'
+         * time, rather than the actual time. By contrast, getTotalDurationMsLocked always gives
+         * the actual total time.
+         * Not all Timer subclasses track the max, total, current durations.
+         */
+        public long getTotalDurationMsLocked(long elapsedRealtimeMs) {
             return -1;
         }
 
@@ -477,6 +490,9 @@ public abstract class BatteryStats implements Parcelable {
         public abstract long getFullWifiLockTime(long elapsedRealtimeUs, int which);
         public abstract long getWifiScanTime(long elapsedRealtimeUs, int which);
         public abstract int getWifiScanCount(int which);
+        public abstract int getWifiScanBackgroundCount(int which);
+        public abstract long getWifiScanActualTime(long elapsedRealtimeUs);
+        public abstract long getWifiScanBackgroundTime(long elapsedRealtimeUs);
         public abstract long getWifiBatchedScanTime(int csphBin, long elapsedRealtimeUs, int which);
         public abstract int getWifiBatchedScanCount(int csphBin, int which);
         public abstract long getWifiMulticastTime(long elapsedRealtimeUs, int which);
@@ -486,6 +502,7 @@ public abstract class BatteryStats implements Parcelable {
         public abstract Timer getCameraTurnedOnTimer();
         public abstract Timer getForegroundActivityTimer();
         public abstract Timer getBluetoothScanTimer();
+        public abstract Timer getBluetoothScanBackgroundTimer();
 
         // Note: the following times are disjoint.  They can be added together to find the
         // total time a uid has had any processes running at all.
@@ -609,8 +626,8 @@ public abstract class BatteryStats implements Parcelable {
 
             public abstract Timer getSensorTime();
 
-            /** Returns a counter for usage count when in the background. */
-            public abstract Counter getSensorBgCount();
+            /** Returns a Timer for sensor usage when app is in the background. */
+            public abstract Timer getSensorBackgroundTime();
         }
 
         public class Pid {
@@ -2652,7 +2669,7 @@ public abstract class BatteryStats implements Parcelable {
      * @param pw a PrintWriter object to print to.
      * @param sb a StringBuilder object.
      * @param timer a Timer object contining the wakelock times.
-     * @param rawRealtime the current on-battery time in microseconds.
+     * @param rawRealtimeUs the current on-battery time in microseconds.
      * @param which which one of STATS_SINCE_CHARGED, STATS_SINCE_UNPLUGGED, or STATS_CURRENT.
      * @param prefix a String to be prepended to each line of output.
      * @param type the name of the timer.
@@ -3284,19 +3301,41 @@ public abstract class BatteryStats implements Parcelable {
             final long fullWifiLockOnTime = u.getFullWifiLockTime(rawRealtime, which);
             final long wifiScanTime = u.getWifiScanTime(rawRealtime, which);
             final int wifiScanCount = u.getWifiScanCount(which);
+            final int wifiScanCountBg = u.getWifiScanBackgroundCount(which);
+            // Note that 'ActualTime' are unpooled and always since reset (regardless of 'which')
+            final long wifiScanActualTime = u.getWifiScanActualTime(rawRealtime);
+            final long wifiScanActualTimeBg = u.getWifiScanBackgroundTime(rawRealtime);
             final long uidWifiRunningTime = u.getWifiRunningTime(rawRealtime, which);
             if (fullWifiLockOnTime != 0 || wifiScanTime != 0 || wifiScanCount != 0
+                    || wifiScanCountBg != 0 || wifiScanActualTime != 0 || wifiScanActualTimeBg != 0
                     || uidWifiRunningTime != 0) {
                 dumpLine(pw, uid, category, WIFI_DATA, fullWifiLockOnTime, wifiScanTime,
                         uidWifiRunningTime, wifiScanCount,
-                        /* legacy fields follow, keep at 0 */ 0, 0, 0);
+                        /* legacy fields follow, keep at 0 */ 0, 0, 0,
+                        wifiScanCountBg, wifiScanActualTime, wifiScanActualTimeBg);
             }
 
             dumpControllerActivityLine(pw, uid, category, WIFI_CONTROLLER_DATA,
                     u.getWifiControllerActivity(), which);
 
-            dumpTimer(pw, uid, category, BLUETOOTH_MISC_DATA, u.getBluetoothScanTimer(),
-                    rawRealtime, which);
+            final Timer bleTimer = u.getBluetoothScanTimer();
+            if (bleTimer != null) {
+                // Convert from microseconds to milliseconds with rounding
+                final long totalTime = (bleTimer.getTotalTimeLocked(rawRealtime, which) + 500)
+                        / 1000;
+                if (totalTime != 0) {
+                    final int count = bleTimer.getCountLocked(which);
+                    final Timer bleTimerBg = u.getBluetoothScanBackgroundTimer();
+                    final int countBg = bleTimerBg != null ? bleTimerBg.getCountLocked(which) : 0;
+                    final long rawRealtimeMs = (rawRealtime + 500) / 1000;
+                    // 'actualTime' are unpooled and always since reset (regardless of 'which')
+                    final long actualTime = bleTimer.getTotalDurationMsLocked(rawRealtimeMs);
+                    final long actualTimeBg = bleTimerBg != null ?
+                            bleTimerBg.getTotalDurationMsLocked(rawRealtimeMs) : 0;
+                    dumpLine(pw, uid, category, BLUETOOTH_MISC_DATA, totalTime, count,
+                            countBg, actualTime, actualTimeBg);
+                }
+            }
 
             dumpControllerActivityLine(pw, uid, category, BLUETOOTH_CONTROLLER_DATA,
                     u.getBluetoothControllerActivity(), which);
@@ -3375,16 +3414,21 @@ public abstract class BatteryStats implements Parcelable {
                 final Uid.Sensor se = sensors.valueAt(ise);
                 final int sensorNumber = sensors.keyAt(ise);
                 final Timer timer = se.getSensorTime();
-                final Counter bgCounter = se.getSensorBgCount();
                 if (timer != null) {
                     // Convert from microseconds to milliseconds with rounding
                     final long totalTime = (timer.getTotalTimeLocked(rawRealtime, which) + 500)
                             / 1000;
-                    final int count = timer.getCountLocked(which);
-                    final int bgCount = bgCounter != null ? bgCounter.getCountLocked(which) : 0;
                     if (totalTime != 0) {
-                        dumpLine(pw, uid, category, SENSOR_DATA, sensorNumber, totalTime, count,
-                                bgCount);
+                        final int count = timer.getCountLocked(which);
+                        final Timer bgTimer = se.getSensorBackgroundTime();
+                        final int bgCount = bgTimer != null ? bgTimer.getCountLocked(which) : 0;
+                        final long rawRealtimeMs = (rawRealtime + 500) / 1000;
+                        // 'actualTime' are unpooled and always since reset (regardless of 'which')
+                        final long actualTime = timer.getTotalDurationMsLocked(rawRealtimeMs);
+                        final long bgActualTime = bgTimer != null ?
+                                bgTimer.getTotalDurationMsLocked(rawRealtimeMs) : 0;
+                        dumpLine(pw, uid, category, SENSOR_DATA, sensorNumber, totalTime,
+                                count, bgCount, actualTime, bgActualTime);
                     }
                 }
             }
@@ -4294,6 +4338,10 @@ public abstract class BatteryStats implements Parcelable {
             final long fullWifiLockOnTime = u.getFullWifiLockTime(rawRealtime, which);
             final long wifiScanTime = u.getWifiScanTime(rawRealtime, which);
             final int wifiScanCount = u.getWifiScanCount(which);
+            final int wifiScanCountBg = u.getWifiScanBackgroundCount(which);
+            // 'actualTime' are unpooled and always since reset (regardless of 'which')
+            final long wifiScanActualTime = u.getWifiScanActualTime(rawRealtime);
+            final long wifiScanActualTimeBg = u.getWifiScanBackgroundTime(rawRealtime);
             final long uidWifiRunningTime = u.getWifiRunningTime(rawRealtime, which);
 
             final long mobileWakeup = u.getMobileRadioApWakeupCount(which);
@@ -4344,6 +4392,7 @@ public abstract class BatteryStats implements Parcelable {
             }
 
             if (fullWifiLockOnTime != 0 || wifiScanTime != 0 || wifiScanCount != 0
+                    || wifiScanCountBg != 0 || wifiScanActualTime != 0 || wifiScanActualTimeBg != 0
                     || uidWifiRunningTime != 0) {
                 sb.setLength(0);
                 sb.append(prefix); sb.append("    Wifi Running: ");
@@ -4354,11 +4403,26 @@ public abstract class BatteryStats implements Parcelable {
                         formatTimeMs(sb, fullWifiLockOnTime / 1000);
                         sb.append("("); sb.append(formatRatioLocked(fullWifiLockOnTime,
                                 whichBatteryRealtime)); sb.append(")\n");
-                sb.append(prefix); sb.append("    Wifi Scan: ");
+                sb.append(prefix); sb.append("    Wifi Scan (blamed): ");
                         formatTimeMs(sb, wifiScanTime / 1000);
                         sb.append("("); sb.append(formatRatioLocked(wifiScanTime,
                                 whichBatteryRealtime)); sb.append(") ");
                                 sb.append(wifiScanCount);
+                                sb.append("x\n");
+                // actual and background times are unpooled and since reset (regardless of 'which')
+                sb.append(prefix); sb.append("    Wifi Scan (actual): ");
+                        formatTimeMs(sb, wifiScanActualTime / 1000);
+                        sb.append("("); sb.append(formatRatioLocked(wifiScanActualTime,
+                                computeBatteryRealtime(rawRealtime, STATS_SINCE_CHARGED)));
+                                sb.append(") ");
+                                sb.append(wifiScanCount);
+                                sb.append("x\n");
+                sb.append(prefix); sb.append("    Background Wifi Scan: ");
+                        formatTimeMs(sb, wifiScanActualTimeBg / 1000);
+                        sb.append("("); sb.append(formatRatioLocked(wifiScanActualTimeBg,
+                                computeBatteryRealtime(rawRealtime, STATS_SINCE_CHARGED)));
+                                sb.append(") ");
+                                sb.append(wifiScanCountBg);
                                 sb.append("x");
                 pw.println(sb.toString());
             }
@@ -4381,8 +4445,50 @@ public abstract class BatteryStats implements Parcelable {
                 pw.println(" sent");
             }
 
-            uidActivity |= printTimer(pw, sb, u.getBluetoothScanTimer(), rawRealtime, which, prefix,
-                    "Bluetooth Scan");
+            final Timer bleTimer = u.getBluetoothScanTimer();
+            if (bleTimer != null) {
+                // Convert from microseconds to milliseconds with rounding
+                final long totalTimeMs = (bleTimer.getTotalTimeLocked(rawRealtime, which) + 500)
+                        / 1000;
+                if (totalTimeMs != 0) {
+                    final int count = bleTimer.getCountLocked(which);
+                    final Timer bleTimerBg = u.getBluetoothScanBackgroundTimer();
+                    final int countBg = bleTimerBg != null ? bleTimerBg.getCountLocked(which) : 0;
+                    final long rawRealtimeMs = (rawRealtime + 500) / 1000;
+                    // 'actualTime' are unpooled and always since reset (regardless of 'which')
+                    final long actualTimeMs = bleTimer.getTotalDurationMsLocked(rawRealtimeMs);
+                    final long actualTimeMsBg = bleTimerBg != null ?
+                            bleTimerBg.getTotalDurationMsLocked(rawRealtimeMs) : 0;
+
+                    sb.setLength(0);
+                    sb.append(prefix);
+                    sb.append("    ");
+                    sb.append("Bluetooth Scan");
+                    sb.append(": ");
+                    if (actualTimeMs != totalTimeMs) {
+                        formatTimeMs(sb, totalTimeMs);
+                        sb.append("blamed realtime, ");
+                    }
+                    formatTimeMs(sb, actualTimeMs); // since reset, regardless of 'which'
+                    sb.append("realtime (");
+                    sb.append(count);
+                    sb.append(" times)");
+                    if (bleTimer.isRunningLocked()) {
+                            sb.append(" (running)");
+                    }
+                    if (actualTimeMsBg != 0 || countBg > 0) {
+                        sb.append(", ");
+                        formatTimeMs(sb, actualTimeMsBg); // since reset, regardless of 'which'
+                        sb.append("background (");
+                        sb.append(countBg);
+                        sb.append(" times)");
+                    }
+                    pw.println(sb.toString());
+                    uidActivity = true;
+                }
+            }
+
+
 
             if (u.hasUserActivity()) {
                 boolean hasData = false;
@@ -4553,25 +4659,38 @@ public abstract class BatteryStats implements Parcelable {
                 sb.append(": ");
 
                 final Timer timer = se.getSensorTime();
-                final Counter bgCounter = se.getSensorBgCount();
                 if (timer != null) {
                     // Convert from microseconds to milliseconds with rounding
-                    final long totalTime = (timer.getTotalTimeLocked(
-                            rawRealtime, which) + 500) / 1000;
+                    final long totalTime = (timer.getTotalTimeLocked(rawRealtime, which) + 500)
+                            / 1000;
                     final int count = timer.getCountLocked(which);
-                    final int bgCount = bgCounter != null ? bgCounter.getCountLocked(which) : 0;
+                    final Timer bgTimer = se.getSensorBackgroundTime();
+                    final int bgCount = bgTimer != null ? bgTimer.getCountLocked(which) : 0;
+                    final long rawRealtimeMs = (rawRealtime + 500) / 1000;
+                    // 'actualTime' are unpooled and always since reset (regardless of 'which')
+                    final long actualTime = timer.getTotalDurationMsLocked(rawRealtimeMs);
+                    final long bgActualTime = bgTimer != null ?
+                            bgTimer.getTotalDurationMsLocked(rawRealtimeMs) : 0;
+
                     //timer.logState();
                     if (totalTime != 0) {
-                        formatTimeMs(sb, totalTime);
+                        if (actualTime != totalTime) {
+                            formatTimeMs(sb, totalTime);
+                            sb.append("blamed realtime, ");
+                        }
+
+                        formatTimeMs(sb, actualTime); // since reset, regardless of 'which'
                         sb.append("realtime (");
                         sb.append(count);
-                        sb.append(" times");
-                        if (bgCount > 0) {
+                        sb.append(" times)");
+
+                        if (bgActualTime != 0 || bgCount > 0) {
                             sb.append(", ");
+                            formatTimeMs(sb, bgActualTime); // since reset, regardless of 'which'
+                            sb.append("background (");
                             sb.append(bgCount);
-                            sb.append(" bg");
+                            sb.append(" times)");
                         }
-                        sb.append(")");
                     } else {
                         sb.append("(not used)");
                     }

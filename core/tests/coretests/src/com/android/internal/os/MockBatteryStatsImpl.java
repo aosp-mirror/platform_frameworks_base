@@ -26,6 +26,7 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
     MockBatteryStatsImpl(Clocks clocks) {
         super(clocks);
         this.clocks = mClocks;
+        mBluetoothScanTimer = new StopwatchTimer(mClocks, null, -14, null, mOnBatteryTimeBase);
     }
 
     MockBatteryStatsImpl() {
@@ -38,6 +39,10 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
 
     public boolean isOnBattery() {
         return mForceOnBattery ? true : super.isOnBattery();
+    }
+
+    public TimeBase getOnBatteryBackgroundTimeBase(int uid) {
+        return getUidStatsLocked(uid).mOnBatteryBackgroundTimeBase;
     }
 }
 
