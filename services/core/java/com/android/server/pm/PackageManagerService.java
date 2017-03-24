@@ -5788,6 +5788,10 @@ public class PackageManagerService extends IPackageManager.Stub {
                         return false;
                     }
                     if (ps.getInstantApp(userId)) {
+                        if (DEBUG_EPHEMERAL) {
+                            Slog.v(TAG, "DENY instant app installed;"
+                                    + " pkg: " + packageName);
+                        }
                         return false;
                     }
                 }
@@ -6267,7 +6271,6 @@ public class PackageManagerService extends IPackageManager.Stub {
                         intent, resolvedType, flags, userId), userId);
                 addEphemeral = !ephemeralDisabled
                         && isEphemeralAllowed(intent, result, userId, false /*skipPackageCheck*/);
-
                 // Check for cross profile results.
                 boolean hasNonNegativePriorityResult = hasNonNegativePriority(result);
                 xpResolveInfo = queryCrossProfileIntents(
@@ -6323,7 +6326,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 } else {
                     // the caller wants to resolve for a particular package; however, there
                     // were no installed results, so, try to find an ephemeral result
-                    addEphemeral =  !ephemeralDisabled
+                    addEphemeral = !ephemeralDisabled
                             && isEphemeralAllowed(
                                     intent, null /*result*/, userId, true /*skipPackageCheck*/);
                     result = new ArrayList<ResolveInfo>();
@@ -23069,6 +23072,13 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
             synchronized (mPackages) {
                 mInstantAppRegistry.grantInstantAccessLPw(userId, intent,
                         targetAppId, ephemeralAppId);
+            }
+        }
+
+        @Override
+        public boolean isInstantAppInstallerComponent(ComponentName component) {
+            synchronized (mPackages) {
+                return component != null && component.equals(mInstantAppInstallerComponent);
             }
         }
 
