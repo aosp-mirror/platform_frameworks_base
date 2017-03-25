@@ -9758,6 +9758,15 @@ public final class Settings {
         public static final String RETAIL_DEMO_MODE_CONSTANTS = "retail_demo_mode_constants";
 
         /**
+         * Indicates the maximum time that an app is blocked for the network rules to get updated.
+         *
+         * Type: long
+         *
+         * @hide
+         */
+        public static final String NETWORK_ACCESS_TIMEOUT_MS = "network_access_timeout_ms";
+
+        /**
          * The reason for the settings database being downgraded. This is only for
          * troubleshooting purposes and its value should not be interpreted in any way.
          *
