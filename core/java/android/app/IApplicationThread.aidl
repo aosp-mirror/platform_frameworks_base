@@ -146,9 +146,10 @@ oneway interface IApplicationThread {
     void notifyCleartextNetwork(in byte[] firstPacket);
     void startBinderTracking();
     void stopBinderTrackingAndDump(in ParcelFileDescriptor fd);
-    void scheduleMultiWindowModeChanged(IBinder token, boolean isInMultiWindowMode);
-    void schedulePictureInPictureModeChanged(IBinder token,
-            boolean isInPictureInPictureMode);
+    void scheduleMultiWindowModeChanged(IBinder token, boolean isInMultiWindowMode,
+            in Configuration newConfig);
+    void schedulePictureInPictureModeChanged(IBinder token, boolean isInPictureInPictureMode,
+            in Configuration newConfig);
     void scheduleLocalVoiceInteractionStarted(IBinder token,
             IVoiceInteractor voiceInteractor);
     void handleTrustStorageUpdate();

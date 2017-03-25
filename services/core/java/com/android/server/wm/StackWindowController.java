@@ -350,6 +350,13 @@ public class StackWindowController
         }
     }
 
+    /** Calls directly into activity manager so window manager lock shouldn't held. */
+    public void updatePictureInPictureModeForPinnedStackAnimation(Rect targetStackBounds) {
+        if (mListener != null) {
+            mListener.updatePictureInPictureModeForPinnedStackAnimation(targetStackBounds);
+        }
+    }
+
     void requestResize(Rect bounds) {
         mHandler.obtainMessage(H.REQUEST_RESIZE, bounds).sendToTarget();
     }

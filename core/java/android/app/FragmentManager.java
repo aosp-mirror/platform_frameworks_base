@@ -2944,6 +2944,10 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
         }
     }
 
+    /**
+     * @deprecated use {@link #dispatchMultiWindowModeChanged(boolean, Configuration)}
+     */
+    @Deprecated
     public void dispatchMultiWindowModeChanged(boolean isInMultiWindowMode) {
         if (mAdded == null) {
             return;
@@ -2956,6 +2960,23 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
         }
     }
 
+    public void dispatchMultiWindowModeChanged(boolean isInMultiWindowMode,
+            Configuration newConfig) {
+        if (mAdded == null) {
+            return;
+        }
+        for (int i = mAdded.size() - 1; i >= 0; --i) {
+            final Fragment f = mAdded.get(i);
+            if (f != null) {
+                f.performMultiWindowModeChanged(isInMultiWindowMode, newConfig);
+            }
+        }
+    }
+
+    /**
+     * @deprecated use {@link #dispatchPictureInPictureModeChanged(boolean, Configuration)}
+     */
+    @Deprecated
     public void dispatchPictureInPictureModeChanged(boolean isInPictureInPictureMode) {
         if (mAdded == null) {
             return;
@@ -2964,6 +2985,19 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
             final Fragment f = mAdded.get(i);
             if (f != null) {
                 f.performPictureInPictureModeChanged(isInPictureInPictureMode);
+            }
+        }
+    }
+
+    public void dispatchPictureInPictureModeChanged(boolean isInPictureInPictureMode,
+            Configuration newConfig) {
+        if (mAdded == null) {
+            return;
+        }
+        for (int i = mAdded.size() - 1; i >= 0; --i) {
+            final Fragment f = mAdded.get(i);
+            if (f != null) {
+                f.performPictureInPictureModeChanged(isInPictureInPictureMode, newConfig);
             }
         }
     }

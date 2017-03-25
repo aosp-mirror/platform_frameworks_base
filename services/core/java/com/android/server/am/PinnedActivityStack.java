@@ -23,6 +23,7 @@ import com.android.server.am.ActivityStackSupervisor.ActivityContainer;
 import com.android.server.wm.PinnedStackWindowController;
 import com.android.server.wm.StackWindowController;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -56,5 +57,19 @@ class PinnedActivityStack extends ActivityStack<PinnedStackWindowController> {
 
     boolean isBoundsAnimatingToFullscreen() {
         return getWindowContainerController().isBoundsAnimatingToFullscreen();
+    }
+
+    @Override
+    public void updatePictureInPictureModeForPinnedStackAnimation(Rect targetStackBounds) {
+        // It is guaranteed that the activities requiring the update will be in the pinned stack at
+        // this point (either reparented before the animation into PiP, or before reparenting after
+        // the animation out of PiP)
+        synchronized(this) {
+            ArrayList<TaskRecord> tasks = getAllTasks();
+            for (int i = 0; i < tasks.size(); i++ ) {
+                mStackSupervisor.scheduleUpdatePictureInPictureModeIfNeeded(tasks.get(i),
+                        targetStackBounds, true /* immediate */);
+            }
+        }
     }
 }

@@ -371,6 +371,10 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
      * application */
     final ArrayList<ActivityRecord> mPipModeChangedActivities = new ArrayList<>();
 
+    /** The target stack bounds for the picture-in-picture mode changed that we need to report to
+     * the application */
+    Rect mPipModeChangedTargetStackBounds;
+
     /** Used on user changes */
     final ArrayList<UserState> mStartingUsers = new ArrayList<>();
 
@@ -2333,6 +2337,9 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             ActivityStack fullscreenStack = getStack(FULLSCREEN_WORKSPACE_STACK_ID);
             final boolean isFullscreenStackVisible = fullscreenStack != null &&
                     fullscreenStack.getStackVisibilityLocked(null) == STACK_VISIBLE;
+            // If we are moving from the pinned stack, then the animation takes care of updating
+            // the picture-in-picture mode.
+            final boolean schedulePictureInPictureModeChange = (fromStackId != PINNED_STACK_ID);
             final ArrayList<TaskRecord> tasks = stack.getAllTasks();
             final int size = tasks.size();
             if (onTop) {
@@ -2351,6 +2358,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                     // Defer resume until all the tasks have been moved to the fullscreen stack
                     task.reparent(FULLSCREEN_WORKSPACE_STACK_ID, ON_TOP,
                             REPARENT_MOVE_STACK_TO_FRONT, isTopTask /* animate */, DEFER_RESUME,
+                            schedulePictureInPictureModeChange,
                             "moveTasksToFullscreenStack - onTop");
                 }
             } else {
@@ -2360,8 +2368,9 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                             ? Math.max(fullscreenStack.getAllTasks().size() - 1, 0) : 0;
                     // Defer resume until all the tasks have been moved to the fullscreen stack
                     task.reparent(FULLSCREEN_WORKSPACE_STACK_ID, position,
-                            REPARENT_LEAVE_STACK_IN_PLACE, !ANIMATE,
-                            DEFER_RESUME, "moveTasksToFullscreenStack - NOT_onTop");
+                            REPARENT_LEAVE_STACK_IN_PLACE, !ANIMATE, DEFER_RESUME,
+                            schedulePictureInPictureModeChange,
+                            "moveTasksToFullscreenStack - NOT_onTop");
                 }
             }
 
@@ -2855,9 +2864,9 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                     // was launched from home so home should be visible behind it.
                     moveHomeStackToFront(reason);
                 }
-                // Defer resume until below
+                // Defer resume until below, and do not schedule PiP changes until we animate below
                 task.reparent(PINNED_STACK_ID, ON_TOP, REPARENT_MOVE_STACK_TO_FRONT, !ANIMATE,
-                        DEFER_RESUME, reason);
+                        DEFER_RESUME, false /* schedulePictureInPictureModeChange */, reason);
             } else {
                 // There are multiple activities in the task and moving the top activity should
                 // reveal/leave the other activities in their original task.
@@ -2872,9 +2881,9 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                         r.mActivityType);
                 r.reparent(newTask, MAX_VALUE, "moveActivityToStack");
 
-                // Defer resume until below
+                // Defer resume until below, and do not schedule PiP changes until we animate below
                 newTask.reparent(PINNED_STACK_ID, ON_TOP, REPARENT_MOVE_STACK_TO_FRONT, !ANIMATE,
-                        DEFER_RESUME, reason);
+                        DEFER_RESUME, false /* schedulePictureInPictureModeChange */, reason);
             }
 
             // Reset the state that indicates it can enter PiP while pausing after we've moved it
@@ -4108,7 +4117,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         mActivityMetricsLogger.logWindowState();
     }
 
-    void scheduleReportMultiWindowModeChanged(TaskRecord task) {
+    void scheduleUpdateMultiWindowMode(TaskRecord task) {
         for (int i = task.mActivities.size() - 1; i >= 0; i--) {
             final ActivityRecord r = task.mActivities.get(i);
             if (r.app != null && r.app.thread != null) {
@@ -4121,22 +4130,39 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         }
     }
 
-    void scheduleReportPictureInPictureModeChangedIfNeeded(TaskRecord task, ActivityStack prevStack) {
+    void scheduleUpdatePictureInPictureModeIfNeeded(TaskRecord task, ActivityStack prevStack) {
         final ActivityStack stack = task.getStack();
         if (prevStack == null || prevStack == stack
                 || (prevStack.mStackId != PINNED_STACK_ID && stack.mStackId != PINNED_STACK_ID)) {
             return;
         }
 
-        for (int i = task.mActivities.size() - 1; i >= 0; i--) {
-            final ActivityRecord r = task.mActivities.get(i);
-            if (r.app != null && r.app.thread != null) {
-                mPipModeChangedActivities.add(r);
-            }
-        }
+        scheduleUpdatePictureInPictureModeIfNeeded(task, stack.mBounds, false /* immediate */);
+    }
 
-        if (!mHandler.hasMessages(REPORT_PIP_MODE_CHANGED_MSG)) {
-            mHandler.sendEmptyMessage(REPORT_PIP_MODE_CHANGED_MSG);
+    void scheduleUpdatePictureInPictureModeIfNeeded(TaskRecord task, Rect targetStackBounds,
+            boolean immediate) {
+
+        if (immediate) {
+            mHandler.removeMessages(REPORT_PIP_MODE_CHANGED_MSG);
+            for (int i = task.mActivities.size() - 1; i >= 0; i--) {
+                final ActivityRecord r = task.mActivities.get(i);
+                if (r.app != null && r.app.thread != null) {
+                    r.updatePictureInPictureMode(targetStackBounds);
+                }
+            }
+        } else {
+            for (int i = task.mActivities.size() - 1; i >= 0; i--) {
+                final ActivityRecord r = task.mActivities.get(i);
+                if (r.app != null && r.app.thread != null) {
+                    mPipModeChangedActivities.add(r);
+                }
+            }
+            mPipModeChangedTargetStackBounds = targetStackBounds;
+
+            if (!mHandler.hasMessages(REPORT_PIP_MODE_CHANGED_MSG)) {
+                mHandler.sendEmptyMessage(REPORT_PIP_MODE_CHANGED_MSG);
+            }
         }
     }
 
@@ -4164,7 +4190,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                     synchronized (mService) {
                         for (int i = mMultiWindowModeChangedActivities.size() - 1; i >= 0; i--) {
                             final ActivityRecord r = mMultiWindowModeChangedActivities.remove(i);
-                            r.scheduleMultiWindowModeChanged();
+                            r.updateMultiWindowMode();
                         }
                     }
                 } break;
@@ -4172,7 +4198,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                     synchronized (mService) {
                         for (int i = mPipModeChangedActivities.size() - 1; i >= 0; i--) {
                             final ActivityRecord r = mPipModeChangedActivities.remove(i);
-                            r.schedulePictureInPictureModeChanged();
+                            r.updatePictureInPictureMode(mPipModeChangedTargetStackBounds);
                         }
                     }
                 } break;

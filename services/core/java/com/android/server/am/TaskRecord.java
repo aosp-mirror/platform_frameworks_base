@@ -568,7 +568,27 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
     boolean reparent(int preferredStackId, boolean toTop, @ReparentMoveStackMode int moveStackMode,
             boolean animate, boolean deferResume, String reason) {
         return reparent(preferredStackId, toTop ? MAX_VALUE : 0, moveStackMode, animate,
-                deferResume, reason);
+                deferResume, true /* schedulePictureInPictureModeChange */, reason);
+    }
+
+    /**
+     * Convenience method to reparent a task to the top or bottom position of the stack, with
+     * an option to skip scheduling the picture-in-picture mode change.
+     */
+    boolean reparent(int preferredStackId, boolean toTop, @ReparentMoveStackMode int moveStackMode,
+            boolean animate, boolean deferResume, boolean schedulePictureInPictureModeChange,
+            String reason) {
+        return reparent(preferredStackId, toTop ? MAX_VALUE : 0, moveStackMode, animate,
+                deferResume, schedulePictureInPictureModeChange, reason);
+    }
+
+    /**
+     * Convenience method to reparent a task to a specific position of the stack.
+     */
+    boolean reparent(int preferredStackId, int position, @ReparentMoveStackMode int moveStackMode,
+            boolean animate, boolean deferResume, String reason) {
+        return reparent(preferredStackId, position, moveStackMode, animate, deferResume,
+                true /* schedulePictureInPictureModeChange */, reason);
     }
 
     /**
@@ -577,16 +597,20 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
      * @param preferredStackId the stack id of the target stack to move this task
      * @param position the position to place this task in the new stack
      * @param animate whether or not we should wait for the new window created as a part of the
-     *                reparenting to be drawn and animated in
+     *            reparenting to be drawn and animated in
      * @param moveStackMode whether or not to move the stack to the front always, only if it was
-     *                      previously focused & in front, or never
+     *            previously focused & in front, or never
      * @param deferResume whether or not to update the visibility of other tasks and stacks that may
-     *                    have changed as a result of this reparenting
+     *            have changed as a result of this reparenting
+     * @param schedulePictureInPictureModeChange specifies whether or not to schedule the PiP mode
+     *            change. Callers may set this to false if they are explicitly scheduling PiP mode
+     *            changes themselves, like during the PiP animation
      * @param reason the caller of this reparenting
-     * @return
+     * @return whether the task was reparented
      */
     boolean reparent(int preferredStackId, int position, @ReparentMoveStackMode int moveStackMode,
-            boolean animate, boolean deferResume, String reason) {
+            boolean animate, boolean deferResume, boolean schedulePictureInPictureModeChange,
+            String reason) {
         final ActivityStackSupervisor supervisor = mService.mStackSupervisor;
         final WindowManagerService windowManager = mService.mWindowManager;
         final ActivityStack sourceStack = getStack();
@@ -649,11 +673,12 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
 
             // Move the task
             sourceStack.removeTask(this, reason, REMOVE_TASK_MODE_MOVING);
-            toStack.addTask(this, position, reason);
+            toStack.addTask(this, position, false /* schedulePictureInPictureModeChange */, reason);
 
-            // TODO: Ensure that this is actually necessary here
-            // Notify of picture-in-picture mode changes
-            supervisor.scheduleReportPictureInPictureModeChangedIfNeeded(this, sourceStack);
+            if (schedulePictureInPictureModeChange) {
+                // Notify of picture-in-picture mode changes
+                supervisor.scheduleUpdatePictureInPictureModeIfNeeded(this, sourceStack);
+            }
 
             // TODO: Ensure that this is actually necessary here
             // Notify the voice session if required
@@ -1979,6 +2004,25 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
     }
 
     /**
+     * @return a new Configuration for this Task, given the provided {@param bounds} and
+     *         {@param insetBounds}.
+     */
+    Configuration computeNewOverrideConfigurationForBounds(Rect bounds, Rect insetBounds) {
+        // Compute a new override configuration for the given bounds, if fullscreen bounds
+        // (bounds == null), then leave the override config unset
+        final Configuration newOverrideConfig = new Configuration();
+        if (bounds != null) {
+            newOverrideConfig.setTo(getOverrideConfiguration());
+            mTmpRect.set(bounds);
+            adjustForMinimalTaskDimensions(mTmpRect);
+            computeOverrideConfiguration(newOverrideConfig, mTmpRect, insetBounds,
+                    mTmpRect.right != bounds.right, mTmpRect.bottom != bounds.bottom);
+        }
+
+        return newOverrideConfig;
+    }
+
+    /**
      * Update task's override configuration based on the bounds.
      * @param bounds The bounds of the task.
      * @return True if the override configuration was updated.
@@ -2027,7 +2071,7 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
         onOverrideConfigurationChanged(newConfig);
 
         if (mFullscreen != oldFullscreen) {
-            mService.mStackSupervisor.scheduleReportMultiWindowModeChanged(this);
+            mService.mStackSupervisor.scheduleUpdateMultiWindowMode(this);
         }
 
         return !mTmpConfig.equals(newConfig);
