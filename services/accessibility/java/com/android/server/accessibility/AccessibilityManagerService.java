@@ -70,6 +70,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.UserManagerInternal;
 import android.provider.Settings;
+import android.provider.SettingsStringUtil;
 import android.provider.SettingsStringUtil.ComponentNameSet;
 import android.provider.SettingsStringUtil.SettingStringHelper;
 import android.text.TextUtils;
@@ -100,7 +101,6 @@ import android.view.accessibility.IAccessibilityManagerClient;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.content.PackageMonitor;
-import com.android.internal.os.HandlerCaller;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.IntPair;
 import com.android.server.LocalServices;
@@ -1154,17 +1154,55 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
     private void notifyAccessibilityButtonClickedLocked() {
         final UserState state = getCurrentUserStateLocked();
-        if (state.mIsNavBarMagnificationEnabled) {
-            mMainHandler.obtainMessage(
-                    MainHandler.MSG_SEND_ACCESSIBILITY_BUTTON_TO_INPUT_FILTER).sendToTarget();
-        } else {
-            for (int i = state.mBoundServices.size() - 1; i >= 0; i--) {
-                final Service service = state.mBoundServices.get(i);
-                // TODO(b/34720082): Only notify a single user-defined service
-                if (service.mRequestAccessibilityButton) {
-                    service.notifyAccessibilityButtonClickedLocked();
+
+        int potentialTargets = state.mIsNavBarMagnificationEnabled ? 1 : 0;
+        for (int i = state.mBoundServices.size() - 1; i >= 0; i--) {
+            final Service service = state.mBoundServices.get(i);
+            if (service.mRequestAccessibilityButton) {
+                potentialTargets++;
+            }
+        }
+
+        if (potentialTargets == 0) {
+            return;
+        }
+        if (potentialTargets == 1) {
+            if (state.mIsNavBarMagnificationEnabled) {
+                mMainHandler.obtainMessage(
+                        MainHandler.MSG_SEND_ACCESSIBILITY_BUTTON_TO_INPUT_FILTER).sendToTarget();
+                return;
+            } else {
+                for (int i = state.mBoundServices.size() - 1; i >= 0; i--) {
+                    final Service service = state.mBoundServices.get(i);
+                    if (service.mRequestAccessibilityButton) {
+                        service.notifyAccessibilityButtonClickedLocked();
+                        return;
+                    }
                 }
             }
+        } else {
+            if (state.mServiceAssignedToAccessibilityButton == null
+                    && !state.mIsNavBarMagnificationAssignedToAccessibilityButton) {
+                mMainHandler.obtainMessage(
+                        MainHandler.MSG_SHOW_ACCESSIBILITY_BUTTON_CHOOSER).sendToTarget();
+            } else if (state.mIsNavBarMagnificationEnabled
+                    && state.mIsNavBarMagnificationAssignedToAccessibilityButton) {
+                mMainHandler.obtainMessage(
+                        MainHandler.MSG_SEND_ACCESSIBILITY_BUTTON_TO_INPUT_FILTER).sendToTarget();
+                return;
+            } else {
+                for (int i = state.mBoundServices.size() - 1; i >= 0; i--) {
+                    final Service service = state.mBoundServices.get(i);
+                    if (service.mRequestAccessibilityButton && (service.mComponentName.equals(
+                            state.mServiceAssignedToAccessibilityButton))) {
+                        service.notifyAccessibilityButtonClickedLocked();
+                        return;
+                    }
+                }
+            }
+            // The user may have turned off the assigned service or feature
+            mMainHandler.obtainMessage(
+                    MainHandler.MSG_SHOW_ACCESSIBILITY_BUTTON_CHOOSER).sendToTarget();
         }
     }
 
@@ -1534,6 +1572,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         }
     }
 
+    private void showAccessibilityButtonTargetSelection() {
+        Intent intent = new Intent(AccessibilityManager.ACTION_CHOOSE_ACCESSIBILITY_BUTTON);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        mContext.startActivity(intent);
+    }
+
     private void scheduleNotifyClientsOfServicesStateChange(UserState userState) {
         mMainHandler.obtainMessage(MainHandler.MSG_SEND_SERVICES_STATE_CHANGED_TO_CLIENTS,
                 userState.mUserId).sendToTarget();
@@ -1681,6 +1725,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         scheduleUpdateInputFilter(userState);
         scheduleUpdateClientsIfNeededLocked(userState);
         updateRelevantEventsLocked(userState);
+        updateAccessibilityButtonTargets(userState);
     }
 
     private void updateAccessibilityFocusBehaviorLocked(UserState userState) {
@@ -1794,6 +1839,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         somethingChanged |= readMagnificationEnabledSettingsLocked(userState);
         somethingChanged |= readAutoclickEnabledSettingLocked(userState);
         somethingChanged |= readAccessibilityShortcutSettingLocked(userState);
+        somethingChanged |= readAccessibilityButtonSettingsLocked(userState);
         return somethingChanged;
     }
 
@@ -1925,6 +1971,37 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             return false;
         }
         userState.mServiceToEnableWithShortcut = componentNameToEnable;
+        return true;
+    }
+
+    private boolean readAccessibilityButtonSettingsLocked(UserState userState) {
+        String componentId = Settings.Secure.getStringForUser(mContext.getContentResolver(),
+                Settings.Secure.ACCESSIBILITY_BUTTON_TARGET_COMPONENT, userState.mUserId);
+        if (TextUtils.isEmpty(componentId)) {
+            if ((userState.mServiceAssignedToAccessibilityButton == null)
+                    && !userState.mIsNavBarMagnificationAssignedToAccessibilityButton) {
+                return false;
+            }
+            userState.mServiceAssignedToAccessibilityButton = null;
+            userState.mIsNavBarMagnificationAssignedToAccessibilityButton = false;
+            return true;
+        }
+
+        if (componentId.equals(MagnificationController.class.getName())) {
+            if (userState.mIsNavBarMagnificationAssignedToAccessibilityButton) {
+                return false;
+            }
+            userState.mServiceAssignedToAccessibilityButton = null;
+            userState.mIsNavBarMagnificationAssignedToAccessibilityButton = true;
+            return true;
+        }
+
+        ComponentName componentName = ComponentName.unflattenFromString(componentId);
+        if (componentName.equals(userState.mServiceAssignedToAccessibilityButton)) {
+            return false;
+        }
+        userState.mServiceAssignedToAccessibilityButton = componentName;
+        userState.mIsNavBarMagnificationAssignedToAccessibilityButton = false;
         return true;
     }
 
@@ -2138,6 +2215,22 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         }
     }
 
+    private void updateAccessibilityButtonTargets(UserState userState) {
+        final List<Service> services;
+        synchronized (mLock) {
+            services = userState.mBoundServices;
+            int numServices = services.size();
+            for (int i = 0; i < numServices; i++) {
+                final Service service = services.get(i);
+                if (service.mRequestAccessibilityButton) {
+                    boolean available = service.mComponentName.equals(
+                            userState.mServiceAssignedToAccessibilityButton);
+                    service.notifyAccessibilityButtonAvailabilityChangedLocked(available);
+                }
+            }
+        }
+    }
+
     @GuardedBy("mLock")
     private MagnificationSpec getCompatibleMagnificationSpecLocked(int windowId) {
         IBinder windowToken = mGlobalWindowTokens.get(windowId);
@@ -2212,7 +2305,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
      * Disables accessibility service specified by {@param componentName} for the {@param userId}.
      */
     private void disableAccessibilityServiceLocked(ComponentName componentName, int userId) {
-        final SettingStringHelper setting =
+        final SettingsStringUtil.SettingStringHelper setting =
                 new SettingStringHelper(
                         mContext.getContentResolver(),
                         Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
@@ -2342,6 +2435,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         public static final int MSG_UPDATE_FINGERPRINT = 11;
         public static final int MSG_SEND_RELEVANT_EVENTS_CHANGED_TO_CLIENTS = 12;
         public static final int MSG_SEND_ACCESSIBILITY_BUTTON_TO_INPUT_FILTER = 13;
+        public static final int MSG_SHOW_ACCESSIBILITY_BUTTON_CHOOSER = 14;
 
         public MainHandler(Looper looper) {
             super(looper);
@@ -2435,6 +2529,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                             mInputFilter.notifyAccessibilityButtonClicked();
                         }
                     }
+                } break;
+
+                case MSG_SHOW_ACCESSIBILITY_BUTTON_CHOOSER: {
+                    showAccessibilityButtonTargetSelection();
                 }
             }
         }
@@ -4813,6 +4911,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         public int mSoftKeyboardShowMode = 0;
 
         public boolean mIsAccessibilityButtonAvailable;
+        public boolean mIsNavBarMagnificationAssignedToAccessibilityButton;
+        public ComponentName mServiceAssignedToAccessibilityButton;
 
         public boolean mIsTouchExplorationEnabled;
         public boolean mIsTextHighContrastEnabled;
@@ -4888,6 +4988,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             mIsEnhancedWebAccessibilityEnabled = false;
             mIsDisplayMagnificationEnabled = false;
             mIsNavBarMagnificationEnabled = false;
+            mServiceAssignedToAccessibilityButton = null;
+            mIsNavBarMagnificationAssignedToAccessibilityButton = false;
             mIsAutoclickEnabled = false;
             mSoftKeyboardShowMode = 0;
 
@@ -4953,6 +5055,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         private final Uri mAccessibilityShortcutServiceIdUri = Settings.Secure.getUriFor(
                 Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE);
 
+        private final Uri mAccessibilityButtonComponentIdUri = Settings.Secure.getUriFor(
+                Settings.Secure.ACCESSIBILITY_BUTTON_TARGET_COMPONENT);
+
         public AccessibilityContentObserver(Handler handler) {
             super(handler);
         }
@@ -4985,6 +5090,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     mAccessibilitySoftKeyboardModeUri, false, this, UserHandle.USER_ALL);
             contentResolver.registerContentObserver(
                     mAccessibilityShortcutServiceIdUri, false, this, UserHandle.USER_ALL);
+            contentResolver.registerContentObserver(
+                    mAccessibilityButtonComponentIdUri, false, this, UserHandle.USER_ALL);
         }
 
         @Override
@@ -5040,6 +5147,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     }
                 } else if (mAccessibilityShortcutServiceIdUri.equals(uri)) {
                     if (readAccessibilityShortcutSettingLocked(userState)) {
+                        onUserStateChangedLocked(userState);
+                    }
+                } else if (mAccessibilityButtonComponentIdUri.equals(uri)) {
+                    if (readAccessibilityButtonSettingsLocked(userState)) {
                         onUserStateChangedLocked(userState);
                     }
                 }

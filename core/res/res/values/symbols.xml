@@ -2841,6 +2841,15 @@
   <java-symbol type="string" name="leave_accessibility_shortcut_on" />
   <java-symbol type="string" name="config_defaultAccessibilityService" />
 
+  <!-- Accessibility Button -->
+  <java-symbol type="layout" name="accessibility_button_chooser" />
+  <java-symbol type="layout" name="accessibility_button_chooser_item" />
+  <java-symbol type="id" name="accessibility_button_chooser_grid" />
+  <java-symbol type="id" name="accessibility_button_prompt" />
+  <java-symbol type="id" name="accessibility_button_target_icon" />
+  <java-symbol type="id" name="accessibility_button_target_label" />
+  <java-symbol type="string" name="accessibility_magnification_chooser_text" />
+
   <!-- com.android.internal.widget.RecyclerView -->
   <java-symbol type="id" name="item_touch_helper_previous_elevation"/>
   <java-symbol type="dimen" name="item_touch_helper_max_drag_scroll_per_frame"/>
