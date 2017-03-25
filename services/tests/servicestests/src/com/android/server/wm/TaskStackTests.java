@@ -76,9 +76,9 @@ public class TaskStackTests extends WindowTestsBase {
         task2.addChild(appWindowToken2, 0);
         appWindowToken2.setOrientation(SCREEN_ORIENTATION_PORTRAIT);
 
-        assertEquals(stack.getOrientation(), SCREEN_ORIENTATION_PORTRAIT);
+        assertEquals(SCREEN_ORIENTATION_PORTRAIT, stack.getOrientation());
         sWm.mClosingApps.add(appWindowToken2);
-        assertEquals(stack.getOrientation(), SCREEN_ORIENTATION_LANDSCAPE);
+        assertEquals(SCREEN_ORIENTATION_LANDSCAPE, stack.getOrientation());
     }
 
     @Test
@@ -94,9 +94,9 @@ public class TaskStackTests extends WindowTestsBase {
         task2.addChild(appWindowToken2, 0);
         appWindowToken2.setOrientation(SCREEN_ORIENTATION_PORTRAIT);
 
-        assertEquals(stack.getOrientation(), SCREEN_ORIENTATION_PORTRAIT);
+        assertEquals(SCREEN_ORIENTATION_PORTRAIT, stack.getOrientation());
         task2.setSendingToBottom(true);
-        assertEquals(stack.getOrientation(), SCREEN_ORIENTATION_LANDSCAPE);
+        assertEquals(SCREEN_ORIENTATION_LANDSCAPE, stack.getOrientation());
     }
 
     @Test

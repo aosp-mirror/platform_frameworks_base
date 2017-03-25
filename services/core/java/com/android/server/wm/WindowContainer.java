@@ -516,14 +516,22 @@ class WindowContainer<E extends WindowContainer> implements Comparable<WindowCon
         mOrientation = orientation;
     }
 
+    int getOrientation() {
+        return getOrientation(mOrientation);
+    }
+
     /**
      * Returns the specified orientation for this window container or one of its children is there
      * is one set, or {@link android.content.pm.ActivityInfo#SCREEN_ORIENTATION_UNSET} if no
      * specification is set.
      * NOTE: {@link android.content.pm.ActivityInfo#SCREEN_ORIENTATION_UNSPECIFIED} is a
      * specification...
+     *
+     * @param candidate The current orientation candidate that will be returned if we don't find a
+     *                  better match.
+     * @return The orientation as specified by this branch or the window hierarchy.
      */
-    int getOrientation() {
+    int getOrientation(int candidate) {
         if (!fillsParent()) {
             // Ignore containers that don't completely fill their parents.
             return SCREEN_ORIENTATION_UNSET;
@@ -537,12 +545,14 @@ class WindowContainer<E extends WindowContainer> implements Comparable<WindowCon
                 && mOrientation != SCREEN_ORIENTATION_UNSPECIFIED) {
             return mOrientation;
         }
-        int candidate = mOrientation;
 
         for (int i = mChildren.size() - 1; i >= 0; --i) {
             final WindowContainer wc = mChildren.get(i);
 
-            final int orientation = wc.getOrientation();
+            // TODO: Maybe mOrientation should default to SCREEN_ORIENTATION_UNSET vs.
+            // SCREEN_ORIENTATION_UNSPECIFIED?
+            final int orientation = wc.getOrientation(candidate == SCREEN_ORIENTATION_BEHIND
+                    ? SCREEN_ORIENTATION_BEHIND : SCREEN_ORIENTATION_UNSET);
             if (orientation == SCREEN_ORIENTATION_BEHIND) {
                 // container wants us to use the orientation of the container behind it. See if we
                 // can find one. Else return SCREEN_ORIENTATION_BEHIND so the caller can choose to

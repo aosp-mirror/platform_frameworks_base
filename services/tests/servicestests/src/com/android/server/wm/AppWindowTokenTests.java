@@ -26,8 +26,10 @@ import android.support.test.runner.AndroidJUnit4;
 import android.view.Surface;
 import android.view.WindowManager;
 
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
@@ -159,5 +161,23 @@ public class AppWindowTokenTests extends WindowTestsBase {
         // Simulate animator finishing orientation change
         sWm.mRoot.mOrientationChangeComplete = true;
         sWm.mRoot.performSurfacePlacement(false /* recoveringMemory */);
+    }
+
+    @Test
+    public void testGetOrientation() throws Exception {
+        final TestAppWindowToken token = new TestAppWindowToken(sDisplayContent);
+        token.setOrientation(SCREEN_ORIENTATION_LANDSCAPE);
+
+        token.setFillsParent(false);
+        // Can not specify orientation if app doesn't fill parent.
+        assertEquals(SCREEN_ORIENTATION_UNSET, token.getOrientation());
+
+        token.setFillsParent(true);
+        token.hidden = true;
+        token.sendingToBottom = true;
+        // Can not specify orientation if app isn't visible even though it fills parent.
+        assertEquals(SCREEN_ORIENTATION_UNSET, token.getOrientation());
+        // Can specify orientation if the current orientation candidate is orientation behind.
+        assertEquals(SCREEN_ORIENTATION_LANDSCAPE, token.getOrientation(SCREEN_ORIENTATION_BEHIND));
     }
 }
