@@ -40,6 +40,7 @@ import android.os.WorkSource;
 import android.util.Log;
 import android.util.SparseArray;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.AsyncChannel;
 import com.android.internal.util.Protocol;
@@ -861,6 +862,12 @@ public class WifiManager {
     public static final int HOTSPOT_FAILED = 2;
     /** @hide */
     public static final int HOTSPOT_OBSERVER_REGISTERED = 3;
+
+    private final Object mLock = new Object(); // lock guarding access to the following vars
+    @GuardedBy("mLock")
+    private LocalOnlyHotspotCallbackProxy mLOHSCallbackProxy;
+    @GuardedBy("mLock")
+    private LocalOnlyHotspotObserverProxy mLOHSObserverProxy;
 
     /**
      * Create a new WifiManager instance.
@@ -1880,7 +1887,24 @@ public class WifiManager {
      */
     public void startLocalOnlyHotspot(LocalOnlyHotspotCallback callback,
             @Nullable Handler handler) {
-        throw new UnsupportedOperationException("LocalOnlyHotspot is still in development");
+        synchronized (mLock) {
+            Looper looper = (handler == null) ? mContext.getMainLooper() : handler.getLooper();
+            LocalOnlyHotspotCallbackProxy proxy =
+                    new LocalOnlyHotspotCallbackProxy(this, looper, callback);
+            try {
+                WifiConfiguration config = mService.startLocalOnlyHotspot(
+                        proxy.getMessenger(), new Binder());
+                if (config == null) {
+                    // Send message to the proxy to make sure we call back on the correct thread
+                    proxy.notifyFailed(
+                            LocalOnlyHotspotCallback.ERROR_INCOMPATIBLE_MODE);
+                    return;
+                }
+                mLOHSCallbackProxy = proxy;
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
     }
 
     /**
@@ -1897,7 +1921,9 @@ public class WifiManager {
      * @hide
      */
     public void cancelLocalOnlyHotspotRequest() {
-        throw new UnsupportedOperationException("LocalOnlyHotspot is still in development");
+        synchronized (mLock) {
+            stopLocalOnlyHotspot();
+        }
     }
 
     /**
@@ -1911,7 +1937,18 @@ public class WifiManager {
      *  method on their LocalOnlyHotspotReservation.
      */
     private void stopLocalOnlyHotspot() {
-        throw new UnsupportedOperationException("LocalOnlyHotspot is still in development");
+        synchronized (mLock) {
+            if (mLOHSCallbackProxy == null) {
+                // nothing to do, the callback was already cleaned up.
+                return;
+            }
+            mLOHSCallbackProxy = null;
+            try {
+                mService.stopLocalOnlyHotspot();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
     }
 
     /**
