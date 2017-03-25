@@ -20,6 +20,7 @@ import android.app.usage.TimeSparseArray;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.os.Build;
+import android.os.SystemProperties;
 import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.TimeUtils;
@@ -56,6 +57,9 @@ class UsageStatsDatabase {
     private static final boolean DEBUG = UsageStatsService.DEBUG;
     private static final String BAK_SUFFIX = ".bak";
     private static final String CHECKED_IN_SUFFIX = UsageStatsXml.CHECKED_IN_SUFFIX;
+    private static final String RETENTION_LEN_KEY = "ro.usagestats.chooser.retention";
+    private static final int SELECTION_LOG_RETENTION_LEN =
+            SystemProperties.getInt(RETENTION_LEN_KEY, 14);
 
     private final Object mLock = new Object();
     private final File[] mIntervalDirs;
@@ -504,7 +508,7 @@ class UsageStatsDatabase {
                     mCal.getTimeInMillis());
 
             mCal.setTimeInMillis(currentTimeMillis);
-            mCal.addDays(-14);
+            mCal.addDays(-SELECTION_LOG_RETENTION_LEN);
             for (int i = 0; i < mIntervalDirs.length; ++i) {
                 pruneChooserCountsOlderThan(mIntervalDirs[i], mCal.getTimeInMillis());
             }
