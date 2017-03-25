@@ -71,8 +71,7 @@ import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillValue;
 import android.view.autofill.IAutoFillManagerClient;
-import android.view.autofill.AutofillManager.AutofillCallback;
-
+import android.view.autofill.IAutofillWindowPresenter;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
@@ -298,17 +297,17 @@ final class AutofillManagerServiceImpl {
     }
 
     void startSessionLocked(@NonNull IBinder activityToken, @Nullable IBinder windowToken,
-            @NonNull IBinder appCallbackToken, @NonNull AutofillId autofillId, @NonNull Rect bounds,
-            @Nullable AutofillValue value, boolean hasCallback, int flags,
-            @NonNull String packageName) {
+            @NonNull IBinder appCallbackToken, @NonNull AutofillId autofillId,
+            @NonNull Rect virtualBounds, @Nullable AutofillValue value, boolean hasCallback,
+            int flags, @NonNull String packageName) {
         if (!isEnabled()) {
             return;
         }
 
         final String historyItem = "s=" + mInfo.getServiceInfo().packageName
                 + " u=" + mUserId + " a=" + activityToken
-
-                + " i=" + autofillId + " b=" + bounds + " hc=" + hasCallback + " f=" + flags;
+                + " i=" + autofillId + " b=" + virtualBounds + " hc=" + hasCallback
+                + " f=" + flags;
         mRequestsHistory.log(historyItem);
 
         // TODO(b/33197203): Handle partitioning
@@ -320,7 +319,7 @@ final class AutofillManagerServiceImpl {
 
         final Session newSession = createSessionByTokenLocked(activityToken,
                 windowToken, appCallbackToken, hasCallback, flags, packageName);
-        newSession.updateLocked(autofillId, bounds, value, FLAG_START_SESSION);
+        newSession.updateLocked(autofillId, virtualBounds, value, FLAG_START_SESSION);
     }
 
     void finishSessionLocked(IBinder activityToken) {
@@ -388,7 +387,7 @@ final class AutofillManagerServiceImpl {
         return newSession;
     }
 
-    void updateSessionLocked(IBinder activityToken, AutofillId autofillId, Rect bounds,
+    void updateSessionLocked(IBinder activityToken, AutofillId autofillId, Rect virtualBounds,
             AutofillValue value, int flags) {
         final Session session = mSessions.get(activityToken);
         if (session == null) {
@@ -398,7 +397,7 @@ final class AutofillManagerServiceImpl {
             return;
         }
 
-        session.updateLocked(autofillId, bounds, value, flags);
+        session.updateLocked(autofillId, virtualBounds, value, flags);
     }
 
     private void handleSessionSave(IBinder activityToken) {
@@ -508,8 +507,8 @@ final class AutofillManagerServiceImpl {
             /**
              * Called when the fill UI is ready to be shown for this view.
              */
-            void onFillReady(ViewState viewState, FillResponse fillResponse, Rect bounds,
-                    AutofillId focusedId, @Nullable AutofillValue value);
+            void onFillReady(FillResponse fillResponse, AutofillId focusedId,
+                    @Nullable AutofillValue value);
         }
 
         final AutofillId mId;
@@ -522,7 +521,9 @@ final class AutofillManagerServiceImpl {
         Intent mAuthIntent;
 
         private AutofillValue mAutofillValue;
-        private Rect mBounds;
+
+        // Bounds if a virtual view, null otherwise
+        private Rect mVirtualBounds;
 
         private boolean mValueUpdated;
 
@@ -555,12 +556,12 @@ final class AutofillManagerServiceImpl {
         // TODO(b/33197203): need to refactor / rename / document this method to make it clear that
         // it can change  the value and update the UI; similarly, should replace code that
         // directly sets mAutoFilLValue to use encapsulation.
-        void update(@Nullable AutofillValue autofillValue, @Nullable Rect bounds) {
+        void update(@Nullable AutofillValue autofillValue, @Nullable Rect virtualBounds) {
             if (autofillValue != null) {
                 mAutofillValue = autofillValue;
             }
-            if (bounds != null) {
-                mBounds = bounds;
+            if (virtualBounds != null) {
+                mVirtualBounds = virtualBounds;
             }
 
             maybeCallOnFillReady();
@@ -568,19 +569,19 @@ final class AutofillManagerServiceImpl {
 
         /**
          * Calls {@link
-         * Listener#onFillReady(ViewState, FillResponse, Rect, AutofillId, AutofillValue)} if the
+         * Listener#onFillReady(FillResponse, AutofillId, AutofillValue)} if the
          * fill UI is ready to be displayed (i.e. when response and bounds are set).
          */
         void maybeCallOnFillReady() {
             if (mResponse != null && (mResponse.getAuthentication() != null
-                    || mResponse.getDatasets() != null) && mBounds != null) {
-                mListener.onFillReady(this, mResponse, mBounds, mId, mAutofillValue);
+                    || mResponse.getDatasets() != null)) {
+                mListener.onFillReady(mResponse, mId, mAutofillValue);
             }
         }
 
         @Override
         public String toString() {
-            return "ViewState: [id=" + mId + ", value=" + mAutofillValue + ", bounds=" + mBounds
+            return "ViewState: [id=" + mId + ", value=" + mAutofillValue + ", bounds=" + mVirtualBounds
                     + ", updated = " + mValueUpdated + "]";
         }
 
@@ -588,7 +589,7 @@ final class AutofillManagerServiceImpl {
             pw.print(prefix); pw.print("id:" ); pw.println(mId);
             pw.print(prefix); pw.print("value:" ); pw.println(mAutofillValue);
             pw.print(prefix); pw.print("updated:" ); pw.println(mValueUpdated);
-            pw.print(prefix); pw.print("bounds:" ); pw.println(mBounds);
+            pw.print(prefix); pw.print("virtualBounds:" ); pw.println(mVirtualBounds);
             pw.print(prefix); pw.print("authIntent:" ); pw.println(mAuthIntent);
         }
     }
@@ -817,8 +818,24 @@ final class AutofillManagerServiceImpl {
 
         // AutoFillUiCallback
         @Override
-        public void onEvent(AutofillId id, int event) {
-            mHandlerCaller.getHandler().post(() -> notifyChangeToClient(id, event));
+        public void requestShowFillUi(AutofillId id, int width, int height,
+                IAutofillWindowPresenter presenter) {
+            try {
+                mClient.requestShowFillUi(mWindowToken, id, width, height,
+                        mCurrentViewState.mVirtualBounds, presenter);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Error requesting to show fill UI", e);
+            }
+        }
+
+        // AutoFillUiCallback
+        @Override
+        public void requestHideFillUi(AutofillId id) {
+            try {
+                mClient.requestHideFillUi(mWindowToken, id);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Error requesting to hide fill UI", e);
+            }
         }
 
         public void setAuthenticationResultLocked(Bundle data) {
@@ -835,10 +852,11 @@ final class AutofillManagerServiceImpl {
                     processResponseLocked(mCurrentResponse);
                 } else if (result instanceof Dataset) {
                     Dataset dataset = (Dataset) result;
-                    mCurrentResponse.getDatasets().remove(mAutoFilledDataset);
-                    mCurrentResponse.getDatasets().add(dataset);
-                    mAutoFilledDataset = dataset;
-                    processResponseLocked(mCurrentResponse);
+                    final int index = mCurrentResponse.getDatasets().indexOf(mAutoFilledDataset);
+                    if (index >= 0) {
+                        mCurrentResponse.getDatasets().set(index, dataset);
+                        autoFill(dataset);
+                    }
                 }
             }
         }
@@ -1009,7 +1027,7 @@ final class AutofillManagerServiceImpl {
             mRemoteFillService.onSaveRequest(mStructure, extras);
         }
 
-        void updateLocked(AutofillId id, Rect bounds, AutofillValue value, int flags) {
+        void updateLocked(AutofillId id, Rect virtualBounds, AutofillValue value, int flags) {
             if (mAutoFilledDataset != null && (flags & FLAG_VALUE_CHANGED) == 0) {
                 // TODO(b/33197203): ignoring because we don't support partitions yet
                 Slog.d(TAG, "updateLocked(): ignoring " + flags + " after app was autofilled");
@@ -1025,7 +1043,7 @@ final class AutofillManagerServiceImpl {
             if ((flags & FLAG_START_SESSION) != 0) {
                 // View is triggering autofill.
                 mCurrentViewState = viewState;
-                viewState.update(value, bounds);
+                viewState.update(value, virtualBounds);
                 return;
             }
 
@@ -1065,7 +1083,7 @@ final class AutofillManagerServiceImpl {
                 }
 
                 // If the ViewState is ready to be displayed, onReady() will be called.
-                viewState.update(value, bounds);
+                viewState.update(value, virtualBounds);
 
                 // TODO(b/33197203): Remove when there is a response per activity.
                 if (mCurrentResponse != null) {
@@ -1087,23 +1105,14 @@ final class AutofillManagerServiceImpl {
         }
 
         @Override
-        public void onFillReady(ViewState viewState, FillResponse response, Rect bounds,
-                AutofillId filledId, @Nullable AutofillValue value) {
+        public void onFillReady(FillResponse response, AutofillId filledId,
+                @Nullable AutofillValue value) {
             String filterText = null;
             if (value != null && value.isText()) {
                 filterText = value.getTextValue().toString();
             }
 
-            getUiForShowing().showFillUi(filledId, response, bounds, filterText, mPackageName);
-        }
-
-        private void notifyChangeToClient(AutofillId id, int event) {
-            if (!mHasCallback) return;
-            try {
-                mClient.onAutofillEvent(mWindowToken, id, event);
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Error notifying client on change: id=" + id + ", event=" + event, e);
-            }
+            getUiForShowing().showFillUi(filledId, response, filterText, mPackageName);
         }
 
         private void notifyUnavailableToClient() {
@@ -1112,7 +1121,13 @@ final class AutofillManagerServiceImpl {
                 Slog.w(TAG, "notifyUnavailable(): mCurrentViewState is null");
                 return;
             }
-            notifyChangeToClient(mCurrentViewState.mId, AutofillCallback.EVENT_INPUT_UNAVAILABLE);
+            if (!mHasCallback) return;
+            try {
+                mClient.notifyNoFillUi(mWindowToken, mCurrentViewState.mId);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Error notifying client no fill UI: windowToken=" + mWindowToken
+                        + " id=" + mCurrentViewState.mId, e);
+            }
         }
 
         private void processResponseLocked(FillResponse response) {
@@ -1212,7 +1227,7 @@ final class AutofillManagerServiceImpl {
                     if (DEBUG) {
                         Slog.d(TAG, "autoFillApp(): the buck is on the app: " + dataset);
                     }
-                    mClient.autofill(dataset.getFieldIds(), dataset.getFieldValues());
+                    mClient.autofill(mWindowToken, dataset.getFieldIds(), dataset.getFieldValues());
                 } catch (RemoteException e) {
                     Slog.w(TAG, "Error autofilling activity: " + e);
                 }
@@ -1221,7 +1236,7 @@ final class AutofillManagerServiceImpl {
 
         private AutoFillUI getUiForShowing() {
             synchronized (mLock) {
-                mUi.setCallback(this, mWindowToken);
+                mUi.setCallback(this);
                 return mUi;
             }
         }
@@ -1261,8 +1276,7 @@ final class AutofillManagerServiceImpl {
 
         private void destroyLocked() {
             mRemoteFillService.destroy();
-            mUi.setCallback(null, null);
-
+            mUi.setCallback(null);
             mMetricsLogger.action(MetricsProto.MetricsEvent.AUTOFILL_SESSION_FINISHED,
                     mPackageName);
         }

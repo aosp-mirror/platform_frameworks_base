@@ -43,7 +43,6 @@ import android.util.Slog;
 
 import com.android.internal.os.HandlerCaller;
 import com.android.server.FgThread;
-import com.android.server.autofill.AutofillManagerServiceImpl.Session;
 
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
@@ -89,10 +88,13 @@ final class RemoteFillService implements DeathRecipient {
     private PendingRequest mPendingRequest;
 
     public interface FillServiceCallbacks {
-        void onFillRequestSuccess(@Nullable FillResponse response, @NonNull String servicePackageName);
-        void onFillRequestFailure(@Nullable CharSequence message, @NonNull String servicePackageName);
+        void onFillRequestSuccess(@Nullable FillResponse response,
+                @NonNull String servicePackageName);
+        void onFillRequestFailure(@Nullable CharSequence message,
+                @NonNull String servicePackageName);
         void onSaveRequestSuccess(@NonNull String servicePackageName);
-        void onSaveRequestFailure(@Nullable CharSequence message, @NonNull String servicePackageName);
+        void onSaveRequestFailure(@Nullable CharSequence message,
+                @NonNull String servicePackageName);
         void onServiceDied(RemoteFillService service);
         void onDisableSelf();
     }
@@ -243,14 +245,10 @@ final class RemoteFillService implements DeathRecipient {
         }
         mBinding = false;
         if (isBound()) {
-            // TODO(b/33197203): synchronize access instead?
-            // Need to double check if it's null, since it could be set on onServiceDisconnected()
-            if (mAutoFillService != null) {
-                try {
-                    mAutoFillService.onInit(null);
-                } catch (Exception e) {
-                    Slog.w(LOG_TAG, "Exception calling onDisconnected(): " + e);
-                }
+            try {
+                mAutoFillService.onInit(null);
+            } catch (Exception e) {
+                Slog.w(LOG_TAG, "Exception calling onDisconnected(): " + e);
             }
             if (mAutoFillService != null) {
                 mAutoFillService.asBinder().unlinkToDeath(this, 0);
@@ -323,19 +321,13 @@ final class RemoteFillService implements DeathRecipient {
                 handleBinderDied();
                 return;
             }
-
             try {
-                // TODO(b/33197203): synchronize access instead?
-                // Need to double check if it's null, since it could be set on
-                // onServiceDisconnected()
-                if (mAutoFillService != null) {
-                    mAutoFillService.onInit(new IAutoFillServiceConnection.Stub() {
-                        @Override
-                        public void disableSelf() {
-                            mHandler.obtainMessage(MyHandler.MSG_ON_DISABLE_SELF).sendToTarget();
-                        }
-                    });
-                }
+                mAutoFillService.onInit(new IAutoFillServiceConnection.Stub() {
+                    @Override
+                    public void disableSelf() {
+                        mHandler.obtainMessage(MyHandler.MSG_ON_DISABLE_SELF).sendToTarget();
+                    }
+                });
             } catch (RemoteException e) {
                 Slog.w(LOG_TAG, "Exception calling onConnected(): " + e);
             }
