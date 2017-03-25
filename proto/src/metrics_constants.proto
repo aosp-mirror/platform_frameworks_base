@@ -3797,6 +3797,9 @@ message MetricsEvent {
     // VALUE: The package name of the app
     ACTION_SETTINGS_CLEAR_INSTANT_APP = 923;
 
+    // OPEN: Settings -> System -> Reset options
+    RESET_DASHBOARD = 924;
+
     // ---- End O Constants, all O constants go above this line ----
 
     // Add new aosp constants above this line.
