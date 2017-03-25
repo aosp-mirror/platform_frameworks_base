@@ -363,6 +363,7 @@ void BakedOpRenderer::renderFunctor(const FunctorOp& op, const BakedOpState& sta
     state.computedState.transform.copyTo(&info.transform[0]);
 
     mRenderState.invokeFunctor(op.functor, DrawGlInfo::kModeDraw, &info);
+    if (!mRenderTarget.frameBufferId) mHasDrawn = true;
 }
 
 void BakedOpRenderer::dirtyRenderTarget(const Rect& uiDirty) {
