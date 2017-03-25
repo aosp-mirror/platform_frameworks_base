@@ -130,9 +130,11 @@ public class KeyphraseEnrollmentInfo {
                     continue;
                 }
 
-                mKeyphrasePackageMap.put(
-                        getKeyphraseMetadataFromApplicationInfo(pm, ai, parseErrors),
-                        ai.packageName);
+                KeyphraseMetadata metadata =
+                        getKeyphraseMetadataFromApplicationInfo(pm, ai, parseErrors);
+                if (metadata != null) {
+                    mKeyphrasePackageMap.put(metadata, ai.packageName);
+                }
             } catch (PackageManager.NameNotFoundException e) {
                 String error = "error parsing voice enrollment meta-data for "
                         + ri.activityInfo.packageName;
