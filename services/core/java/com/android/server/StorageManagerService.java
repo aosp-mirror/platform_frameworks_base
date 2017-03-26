@@ -714,7 +714,8 @@ class StorageManagerService extends IStorageManager.Stub
                         final Intent intent = new Intent(action,
                                 Uri.fromFile(userVol.getPathFile()));
                         intent.putExtra(StorageVolume.EXTRA_STORAGE_VOLUME, userVol);
-                        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+                        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT
+                                | Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
                         mContext.sendBroadcastAsUser(intent, userVol.getOwner());
                     }
                     break;
