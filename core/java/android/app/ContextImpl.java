@@ -367,6 +367,7 @@ class ContextImpl extends Context {
         // STOPSHIP: fix buggy apps
         if (SystemProperties.getBoolean("fw.ignore_buggy", false)) return false;
         if ("com.google.android.tts".equals(getApplicationInfo().packageName)) return true;
+        if ("com.breel.geswallpapers".equals(getApplicationInfo().packageName)) return true;
         return false;
     }
 
