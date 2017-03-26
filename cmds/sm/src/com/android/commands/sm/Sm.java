@@ -94,6 +94,8 @@ public final class Sm {
             runGetFbeMode();
         } else if ("fstrim".equals(op)) {
             runFstrim();
+        } else if ("set-virtual-disk".equals(op)) {
+            runSetVirtualDisk();
         } else {
             throw new IllegalArgumentException();
         }
@@ -225,6 +227,12 @@ public final class Sm {
         mSm.fstrim(0);
     }
 
+    public void runSetVirtualDisk() throws RemoteException {
+        final boolean virtualDisk = Boolean.parseBoolean(nextArg());
+        mSm.setDebugFlags(virtualDisk ? StorageManager.DEBUG_VIRTUAL_DISK : 0,
+                StorageManager.DEBUG_VIRTUAL_DISK);
+    }
+
     private String nextArg() {
         if (mNextArg >= mArgs.length) {
             return null;
@@ -240,6 +248,7 @@ public final class Sm {
         System.err.println("       sm has-adoptable");
         System.err.println("       sm get-primary-storage-uuid");
         System.err.println("       sm set-force-adoptable [true|false]");
+        System.err.println("       sm set-virtual-disk [true|false]");
         System.err.println("");
         System.err.println("       sm partition DISK [public|private|mixed] [ratio]");
         System.err.println("       sm mount VOLUME");

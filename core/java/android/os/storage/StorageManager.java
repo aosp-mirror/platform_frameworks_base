@@ -113,6 +113,8 @@ public class StorageManager {
     public static final String PROP_EMULATE_FBE = "persist.sys.emulate_fbe";
     /** {@hide} */
     public static final String PROP_SDCARDFS = "persist.sys.sdcardfs";
+    /** {@hide} */
+    public static final String PROP_VIRTUAL_DISK = "persist.sys.virtual_disk";
 
     /** {@hide} */
     public static final String UUID_PRIVATE_INTERNAL = null;
@@ -140,6 +142,8 @@ public class StorageManager {
     public static final int DEBUG_SDCARDFS_FORCE_ON = 1 << 2;
     /** {@hide} */
     public static final int DEBUG_SDCARDFS_FORCE_OFF = 1 << 3;
+    /** {@hide} */
+    public static final int DEBUG_VIRTUAL_DISK = 1 << 4;
 
     // NOTE: keep in sync with installd
     /** {@hide} */

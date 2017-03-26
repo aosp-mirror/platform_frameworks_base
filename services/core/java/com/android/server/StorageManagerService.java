@@ -2078,6 +2078,20 @@ class StorageManagerService extends IStorageManager.Stub
                 Binder.restoreCallingIdentity(token);
             }
         }
+
+        if ((mask & StorageManager.DEBUG_VIRTUAL_DISK) != 0) {
+            final boolean enabled = (flags & StorageManager.DEBUG_VIRTUAL_DISK) != 0;
+
+            final long token = Binder.clearCallingIdentity();
+            try {
+                SystemProperties.set(StorageManager.PROP_VIRTUAL_DISK, Boolean.toString(enabled));
+
+                // Reset storage to kick new setting into place
+                mHandler.obtainMessage(H_RESET).sendToTarget();
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
     }
 
     @Override
