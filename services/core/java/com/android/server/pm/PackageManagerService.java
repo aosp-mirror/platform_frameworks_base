@@ -537,8 +537,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     public static final int REASON_INSTALL = 2;
     public static final int REASON_BACKGROUND_DEXOPT = 3;
     public static final int REASON_AB_OTA = 4;
-    public static final int REASON_SHARED_APK = 5;
-    public static final int REASON_FORCED_DEXOPT = 6;
+    public static final int REASON_FORCED_DEXOPT = 5;
 
     public static final int REASON_LAST = REASON_FORCED_DEXOPT;
 
@@ -2374,59 +2373,6 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             if (systemServerClassPath == null) {
                 Slog.w(TAG, "No SYSTEMSERVERCLASSPATH found!");
-            }
-
-            final List<String> allInstructionSets = InstructionSets.getAllInstructionSets();
-            final String[] dexCodeInstructionSets =
-                    getDexCodeInstructionSets(
-                            allInstructionSets.toArray(new String[allInstructionSets.size()]));
-
-            /**
-             * Ensure all external libraries have had dexopt run on them.
-             */
-            if (mSharedLibraries.size() > 0) {
-                Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dexopt");
-                // NOTE: For now, we're compiling these system "shared libraries"
-                // (and framework jars) into all available architectures. It's possible
-                // to compile them only when we come across an app that uses them (there's
-                // already logic for that in scanPackageLI) but that adds some complexity.
-                for (String dexCodeInstructionSet : dexCodeInstructionSets) {
-                    final int libCount = mSharedLibraries.size();
-                    for (int i = 0; i < libCount; i++) {
-                        SparseArray<SharedLibraryEntry> versionedLib = mSharedLibraries.valueAt(i);
-                        final int versionCount = versionedLib.size();
-                        for (int j = 0; j < versionCount; j++) {
-                            SharedLibraryEntry libEntry = versionedLib.valueAt(j);
-                            final String libPath = libEntry.path != null
-                                    ? libEntry.path : libEntry.apk;
-                            if (libPath == null) {
-                                continue;
-                            }
-                            try {
-                                // Shared libraries do not have profiles so we perform a full
-                                // AOT compilation (if needed).
-                                int dexoptNeeded = DexFile.getDexOptNeeded(
-                                        libPath, dexCodeInstructionSet,
-                                        getCompilerFilterForReason(REASON_SHARED_APK),
-                                        false /* newProfile */);
-                                if (dexoptNeeded != DexFile.NO_DEXOPT_NEEDED) {
-                                    mInstaller.dexopt(libPath, Process.SYSTEM_UID, "*",
-                                            dexCodeInstructionSet, dexoptNeeded, null,
-                                            DEXOPT_PUBLIC,
-                                            getCompilerFilterForReason(REASON_SHARED_APK),
-                                            StorageManager.UUID_PRIVATE_INTERNAL,
-                                            PackageDexOptimizer.SKIP_SHARED_LIBRARY_CHECK);
-                                }
-                            } catch (FileNotFoundException e) {
-                                Slog.w(TAG, "Library not found: " + libPath);
-                            } catch (IOException | InstallerException e) {
-                                Slog.w(TAG, "Cannot dexopt " + libPath + "; is it an APK or JAR? "
-                                        + e.getMessage());
-                            }
-                        }
-                    }
-                }
-                Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
             }
 
             File frameworkDir = new File(Environment.getRootDirectory(), "framework");
