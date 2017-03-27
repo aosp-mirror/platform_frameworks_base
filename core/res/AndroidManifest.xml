@@ -1346,7 +1346,7 @@
     <permission android:name="android.permission.CONNECTIVITY_INTERNAL"
         android:protectionLevel="signature|privileged" />
 
-    <!-- Allows an internal user to use restricted Networks.
+    <!-- @SystemApi Allows an internal user to use restricted Networks.
          @hide -->
     <permission android:name="android.permission.CONNECTIVITY_USE_RESTRICTED_NETWORKS"
         android:protectionLevel="signature|privileged" />
