@@ -17,6 +17,8 @@
 package android.util;
 
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.Preconditions;
+import java.util.Arrays;
 import libcore.util.EmptyArray;
 
 /**
@@ -29,6 +31,11 @@ public class LongArray implements Cloneable {
 
     private long[] mValues;
     private int mSize;
+
+    private  LongArray(long[] array, int size) {
+        mValues = array;
+        mSize = Preconditions.checkArgumentInRange(size, 0, array.length, "size");
+    }
 
     /**
      * Creates an empty LongArray with the default initial capacity.
@@ -50,6 +57,35 @@ public class LongArray implements Cloneable {
     }
 
     /**
+     * Creates an LongArray wrapping the given primitive long array.
+     */
+    public static LongArray wrap(long[] array) {
+        return new LongArray(array, array.length);
+    }
+
+    /**
+     * Creates an LongArray from the given primitive long array, copying it.
+     */
+    public static LongArray fromArray(long[] array, int size) {
+        return wrap(Arrays.copyOf(array, size));
+    }
+
+    /**
+     * Changes the size of this LongArray. If this LongArray is shrinked, the backing array capacity
+     * is unchanged. If the new size is larger than backing array capacity, a new backing array is
+     * created from the current content of this LongArray padded with 0s.
+     */
+    public void resize(int newSize) {
+        Preconditions.checkArgumentNonnegative(newSize);
+        if (newSize <= mValues.length) {
+            Arrays.fill(mValues, newSize, mValues.length, 0);
+        } else {
+            ensureCapacity(newSize - mSize);
+        }
+        mSize = newSize;
+    }
+
+    /**
      * Appends the specified value to the end of this array.
      */
     public void add(long value) {
@@ -57,23 +93,23 @@ public class LongArray implements Cloneable {
     }
 
     /**
-     * Inserts a value at the specified position in this array.
+     * Inserts a value at the specified position in this array. If the specified index is equal to
+     * the length of the array, the value is added at the end.
      *
      * @throws IndexOutOfBoundsException when index &lt; 0 || index &gt; size()
      */
     public void add(int index, long value) {
-        if (index < 0 || index > mSize) {
-            throw new IndexOutOfBoundsException();
-        }
-
         ensureCapacity(1);
+        int rightSegment = mSize - index;
+        mSize++;
+        checkBounds(index);
 
-        if (mSize - index != 0) {
-            System.arraycopy(mValues, index, mValues, index + 1, mSize - index);
+        if (rightSegment != 0) {
+            // Move by 1 all values from the right of 'index'
+            System.arraycopy(mValues, index, mValues, index + 1, rightSegment);
         }
 
         mValues[index] = value;
-        mSize++;
     }
 
     /**
@@ -126,10 +162,16 @@ public class LongArray implements Cloneable {
      * Returns the value at the specified position in this array.
      */
     public long get(int index) {
-        if (index >= mSize) {
-            throw new ArrayIndexOutOfBoundsException(mSize, index);
-        }
+        checkBounds(index);
         return mValues[index];
+    }
+
+    /**
+     * Sets the value at the specified position in this array.
+     */
+    public void set(int index, long value) {
+        checkBounds(index);
+        mValues[index] = value;
     }
 
     /**
@@ -150,9 +192,7 @@ public class LongArray implements Cloneable {
      * Removes the value at the specified index from this array.
      */
     public void remove(int index) {
-        if (index >= mSize) {
-            throw new ArrayIndexOutOfBoundsException(mSize, index);
-        }
+        checkBounds(index);
         System.arraycopy(mValues, index + 1, mValues, index, mSize - index - 1);
         mSize--;
     }
@@ -162,5 +202,18 @@ public class LongArray implements Cloneable {
      */
     public int size() {
         return mSize;
+    }
+
+    /**
+     * Returns a new array with the contents of this LongArray.
+     */
+    public long[] toArray() {
+        return Arrays.copyOf(mValues, mSize);
+    }
+
+    private void checkBounds(int index) {
+        if (index < 0 || mSize <= index) {
+            throw new ArrayIndexOutOfBoundsException(mSize, index);
+        }
     }
 }
