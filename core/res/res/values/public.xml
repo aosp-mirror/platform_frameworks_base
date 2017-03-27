@@ -2813,6 +2813,7 @@
         <public name="iconTint" />
         <public name="iconTintMode" />
         <public name="maxAspectRatio"/>
+        <public name="iconSpaceReserved"/>
     </public-group>
 
     <public-group type="style" first-id="0x010302e0">
