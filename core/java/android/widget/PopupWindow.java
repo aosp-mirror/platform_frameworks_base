@@ -2371,7 +2371,8 @@ public class PopupWindow {
     }
 
     private class PopupDecorView extends FrameLayout {
-        private TransitionListenerAdapter mPendingExitListener;
+        /** Runnable used to clean up listeners after exit transition. */
+        private Runnable mCleanupAfterExit;
 
         public PopupDecorView(Context context) {
             super(context);
@@ -2482,7 +2483,7 @@ public class PopupWindow {
          * <p>
          * <strong>Note:</strong> The transition listener is guaranteed to have
          * its {@code onTransitionEnd} method called even if the transition
-         * never starts; however, it may be called with a {@code null} argument.
+         * never starts.
          */
         public void startExitTransition(@NonNull Transition transition,
                 @Nullable final View anchorRoot, @Nullable final Rect epicenter,
@@ -2498,25 +2499,32 @@ public class PopupWindow {
                 anchorRoot.addOnAttachStateChangeListener(mOnAnchorRootDetachedListener);
             }
 
-            // The exit listener MUST be called for cleanup, even if the
-            // transition never starts or ends. Stash it for later.
-            mPendingExitListener = new TransitionListenerAdapter() {
-                @Override
-                public void onTransitionEnd(Transition t) {
-                    if (anchorRoot != null) {
-                        anchorRoot.removeOnAttachStateChangeListener(mOnAnchorRootDetachedListener);
-                    }
+            // The cleanup runnable MUST be called even if the transition is
+            // canceled before it starts (and thus can't call onTransitionEnd).
+            mCleanupAfterExit = () -> {
+                listener.onTransitionEnd(transition);
 
-                    listener.onTransitionEnd(t);
-
-                    // The listener was called. Our job here is done.
-                    mPendingExitListener = null;
-                    t.removeListener(this);
+                if (anchorRoot != null) {
+                    anchorRoot.removeOnAttachStateChangeListener(mOnAnchorRootDetachedListener);
                 }
+
+                // The listener was called. Our job here is done.
+                mCleanupAfterExit = null;
             };
 
             final Transition exitTransition = transition.clone();
-            exitTransition.addListener(mPendingExitListener);
+            exitTransition.addListener(new TransitionListenerAdapter() {
+                @Override
+                public void onTransitionEnd(Transition t) {
+                    t.removeListener(this);
+
+                    // This null check shouldn't be necessary, but it's easier
+                    // to check here than it is to test every possible case.
+                    if (mCleanupAfterExit != null) {
+                        mCleanupAfterExit.run();
+                    }
+                }
+            });
             exitTransition.setEpicenterCallback(new EpicenterCallback() {
                 @Override
                 public Rect onGetEpicenter(Transition transition) {
@@ -2544,8 +2552,10 @@ public class PopupWindow {
         public void cancelTransitions() {
             TransitionManager.endTransitions(this);
 
-            if (mPendingExitListener != null) {
-                mPendingExitListener.onTransitionEnd(null);
+            // If the cleanup runnable is still around, that means the
+            // transition never started. We should run it now to clean up.
+            if (mCleanupAfterExit != null) {
+                mCleanupAfterExit.run();
             }
         }
 
