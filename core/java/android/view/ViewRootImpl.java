@@ -2704,8 +2704,40 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
-    private void onDrawFinished() {
+    /**
+     * A count of the number of calls to pendingDrawFinished we
+     * require to notify the WM drawing is complete.
+     *
+     * This starts at 1, for the ViewRootImpl surface itself.
+     * Subsurfaces may debt the value with drawPending.
+     */
+    int mDrawsNeededToReport = 1;
+
+    /**
+     * Delay notifying WM of draw finished until
+     * a balanced call to pendingDrawFinished.
+     */
+    void drawPending() {
+        mDrawsNeededToReport++;
+    }
+
+    void pendingDrawFinished() {
+        if (mDrawsNeededToReport == 0) {
+            throw new RuntimeException("Unbalanced drawPending/pendingDrawFinished calls");
+        }
+        mDrawsNeededToReport--;
+        if (mDrawsNeededToReport == 0) {
+            reportDrawFinished();
+        }
+    }
+
+    private void postDrawFinished() {
+        mHandler.sendEmptyMessage(MSG_DRAW_FINISHED);
+    }
+
+    private void reportDrawFinished() {
         try {
+            mDrawsNeededToReport = 1;
             mWindowSession.finishDrawing(mWindow);
         } catch (RemoteException e) {
             // Have fun!
@@ -2762,15 +2794,12 @@ public final class ViewRootImpl implements ViewParent,
             }
 
             if (mSurfaceHolder != null && mSurface.isValid()) {
-                SurfaceCallbackHelper sch = new SurfaceCallbackHelper(this::onDrawFinished);
+                SurfaceCallbackHelper sch = new SurfaceCallbackHelper(this::postDrawFinished);
                 SurfaceHolder.Callback callbacks[] = mSurfaceHolder.getCallbacks();
 
                 sch.dispatchSurfaceRedrawNeededAsync(mSurfaceHolder, callbacks);
             } else {
-                try {
-                    mWindowSession.finishDrawing(mWindow);
-                } catch (RemoteException e) {
-                }
+                pendingDrawFinished();
             }
         }
     }
@@ -3576,6 +3605,7 @@ public final class ViewRootImpl implements ViewParent,
     private final static int MSG_REQUEST_KEYBOARD_SHORTCUTS = 26;
     private final static int MSG_UPDATE_POINTER_ICON = 27;
     private final static int MSG_POINTER_CAPTURE_CHANGED = 28;
+    private final static int MSG_DRAW_FINISHED = 29;
 
     final class ViewRootHandler extends Handler {
         @Override
@@ -3627,6 +3657,8 @@ public final class ViewRootImpl implements ViewParent,
                     return "MSG_UPDATE_POINTER_ICON";
                 case MSG_POINTER_CAPTURE_CHANGED:
                     return "MSG_POINTER_CAPTURE_CHANGED";
+                case MSG_DRAW_FINISHED:
+                    return "MSG_DRAW_FINISHED";
             }
             return super.getMessageName(message);
         }
@@ -3901,6 +3933,9 @@ public final class ViewRootImpl implements ViewParent,
             case MSG_POINTER_CAPTURE_CHANGED: {
                 final boolean hasCapture = msg.arg1 != 0;
                 handlePointerCaptureChanged(hasCapture);
+            } break;
+            case MSG_DRAW_FINISHED: {
+                pendingDrawFinished();
             } break;
             }
         }
