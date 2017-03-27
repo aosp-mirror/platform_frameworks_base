@@ -870,7 +870,7 @@ class AppErrors {
             nativeProcs = NATIVE_STACKS_OF_INTEREST;
         }
 
-        int[] pids = Process.getPidsForCommands(nativeProcs);
+        int[] pids = nativeProcs == null ? null : Process.getPidsForCommands(nativeProcs);
         ArrayList<Integer> nativePids = null;
 
         if (pids != null) {
