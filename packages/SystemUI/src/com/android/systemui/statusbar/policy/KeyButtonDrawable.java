@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.policy;
 import android.annotation.Nullable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
+import android.view.Gravity;
 
 /**
  * Drawable for {@link KeyButtonView}s which contains an asset for both normal mode and light
@@ -40,6 +41,9 @@ public class KeyButtonDrawable extends LayerDrawable {
 
     private KeyButtonDrawable(Drawable[] drawables) {
         super(drawables);
+        for (int i = 0; i < drawables.length; i++) {
+            setLayerGravity(i, Gravity.CENTER);
+        }
         mutate();
         mHasDarkDrawable = drawables.length > 1;
         setDarkIntensity(0f);
