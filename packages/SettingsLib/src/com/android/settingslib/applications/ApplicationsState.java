@@ -1601,6 +1601,21 @@ public class ApplicationsState {
         }
     };
 
+    public static final AppFilter FILTER_MOVIES = new AppFilter() {
+        @Override
+        public void init() {
+        }
+
+        @Override
+        public boolean filterApp(AppEntry entry) {
+            boolean isMovieApp;
+            synchronized(entry) {
+                isMovieApp = entry.info.category == ApplicationInfo.CATEGORY_VIDEO;
+            }
+            return isMovieApp;
+        }
+    };
+
     public static final AppFilter FILTER_OTHER_APPS = new AppFilter() {
         @Override
         public void init() {
@@ -1611,7 +1626,8 @@ public class ApplicationsState {
             boolean isCategorized;
             synchronized(entry) {
                 isCategorized = entry.info.category == ApplicationInfo.CATEGORY_AUDIO ||
-                    entry.info.category == ApplicationInfo.CATEGORY_GAME;
+                    entry.info.category == ApplicationInfo.CATEGORY_GAME ||
+                    entry.info.category == ApplicationInfo.CATEGORY_VIDEO;
             }
             return !isCategorized;
         }

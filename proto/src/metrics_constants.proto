@@ -3906,6 +3906,11 @@ message MetricsEvent {
     // OS: O
     FINGERPRINT_REMOVE_SIDECAR = 934;
 
+    // OPEN: Settings > Storage > Movies & TV
+    // CATEGORY: SETTINGS
+    // OS: O
+    APPLICATIONS_STORAGE_MOVIES = 935;
+
     // ---- End O Constants, all O constants go above this line ----
 
     // Add new aosp constants above this line.
