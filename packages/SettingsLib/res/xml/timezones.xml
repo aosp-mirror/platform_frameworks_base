@@ -21,7 +21,7 @@
     <timezone id="America/St_Johns"></timezone>
     <timezone id="America/Recife"></timezone>
     <timezone id="America/Sao_Paulo"></timezone>
-    <timezone id="America/Buenos_Aires"></timezone>
+    <timezone id="America/Argentina/Buenos_Aires"></timezone>
     <timezone id="America/Godthab"></timezone>
     <timezone id="America/Montevideo"></timezone>
     <timezone id="Atlantic/South_Georgia"></timezone>
@@ -58,11 +58,11 @@
     <timezone id="Asia/Karachi"></timezone>
     <timezone id="Asia/Oral"></timezone>
     <timezone id="Asia/Yekaterinburg"></timezone>
-    <timezone id="Asia/Calcutta"></timezone>
+    <timezone id="Asia/Kolkata"></timezone>
     <timezone id="Asia/Colombo"></timezone>
-    <timezone id="Asia/Katmandu"></timezone>
+    <timezone id="Asia/Kathmandu"></timezone>
     <timezone id="Asia/Almaty"></timezone>
-    <timezone id="Asia/Rangoon"></timezone>
+    <timezone id="Asia/Yangon"></timezone>
     <timezone id="Asia/Krasnoyarsk"></timezone>
     <timezone id="Asia/Bangkok"></timezone>
     <timezone id="Asia/Jakarta"></timezone>
