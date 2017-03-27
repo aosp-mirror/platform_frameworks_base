@@ -483,10 +483,14 @@
   <java-symbol type="string" name="Noon" />
   <java-symbol type="string" name="PinMmi" />
   <java-symbol type="string" name="PwdMmi" />
-  <java-symbol type="string" name="RestrictedOnAllVoice" />
-  <java-symbol type="string" name="RestrictedOnData" />
-  <java-symbol type="string" name="RestrictedOnEmergency" />
-  <java-symbol type="string" name="RestrictedOnNormal" />
+  <java-symbol type="string" name="RestrictedOnAllVoiceTitle" />
+  <java-symbol type="string" name="RestrictedOnDataTitle" />
+  <java-symbol type="string" name="RestrictedOnEmergencyTitle" />
+  <java-symbol type="string" name="RestrictedOnNormalTitle" />
+  <java-symbol type="string" name="RestrictedOnAllVoiceContent" />
+  <java-symbol type="string" name="RestrictedOnDataContent" />
+  <java-symbol type="string" name="RestrictedOnEmergencyContent" />
+  <java-symbol type="string" name="RestrictedOnNormalContent" />
   <java-symbol type="string" name="SetupCallDefault" />
   <java-symbol type="string" name="accept" />
   <java-symbol type="string" name="accessibility_enabled" />
