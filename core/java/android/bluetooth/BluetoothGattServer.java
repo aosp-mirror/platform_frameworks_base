@@ -59,8 +59,8 @@ public final class BluetoothGattServer implements BluetoothProfile {
     /**
      * Bluetooth GATT interface callbacks
      */
-    private final IBluetoothGattServerCallbackExt mBluetoothGattServerCallback =
-        new IBluetoothGattServerCallbackExt.Stub() {
+    private final IBluetoothGattServerCallback mBluetoothGattServerCallback =
+        new IBluetoothGattServerCallback.Stub() {
             /**
              * Application interface registered - app is ready to go
              * @hide
