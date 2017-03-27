@@ -53,7 +53,9 @@ public class FocusFinder {
     final Rect mOtherRect = new Rect();
     final Rect mBestCandidateRect = new Rect();
     private final UserSpecifiedFocusComparator mUserSpecifiedFocusComparator =
-            new UserSpecifiedFocusComparator();
+            new UserSpecifiedFocusComparator((v) -> v.getNextFocusForwardId());
+    private final UserSpecifiedFocusComparator mUserSpecifiedClusterComparator =
+            new UserSpecifiedFocusComparator((v) -> v.getNextClusterForwardId());
     private final FocusComparator mFocusComparator = new FocusComparator();
 
     private final ArrayList<View> mTempList = new ArrayList<View>();
@@ -119,6 +121,12 @@ public class FocusFinder {
             @Nullable View currentCluster,
             @View.FocusDirection int direction) {
         View next = null;
+        if (currentCluster != null) {
+            next = findNextUserSpecifiedKeyboardNavigationCluster(root, currentCluster, direction);
+            if (next != null) {
+                return next;
+            }
+        }
 
         final ArrayList<View> clusters = mTempList;
         try {
@@ -132,6 +140,16 @@ public class FocusFinder {
             clusters.clear();
         }
         return next;
+    }
+
+    private View findNextUserSpecifiedKeyboardNavigationCluster(View root, View currentCluster,
+            int direction) {
+        View userSetNextCluster =
+                currentCluster.findUserSetNextKeyboardNavigationCluster(root, direction);
+        if (userSetNextCluster != null && userSetNextCluster.hasFocusable()) {
+            return userSetNextCluster;
+        }
+        return null;
     }
 
     private View findNextUserSpecifiedFocus(ViewGroup root, View focused, int direction) {
@@ -207,6 +225,13 @@ public class FocusFinder {
             View currentCluster,
             List<View> clusters,
             @View.FocusDirection int direction) {
+        try {
+            // Note: This sort is stable.
+            mUserSpecifiedClusterComparator.setFocusables(clusters);
+            Collections.sort(clusters, mUserSpecifiedClusterComparator);
+        } finally {
+            mUserSpecifiedClusterComparator.recycle();
+        }
         final int count = clusters.size();
 
         switch (direction) {
@@ -771,6 +796,15 @@ public class FocusFinder {
         private final SparseBooleanArray mIsConnectedTo = new SparseBooleanArray();
         private final ArrayMap<View, View> mHeadsOfChains = new ArrayMap<View, View>();
         private final ArrayMap<View, Integer> mOriginalOrdinal = new ArrayMap<>();
+        private final NextIdGetter mNextIdGetter;
+
+        public interface NextIdGetter {
+            int get(View view);
+        }
+
+        UserSpecifiedFocusComparator(NextIdGetter nextIdGetter) {
+            mNextIdGetter = nextIdGetter;
+        }
 
         public void recycle() {
             mFocusables.clear();
@@ -779,14 +813,14 @@ public class FocusFinder {
             mOriginalOrdinal.clear();
         }
 
-        public void setFocusables(ArrayList<View> focusables) {
+        public void setFocusables(List<View> focusables) {
             for (int i = focusables.size() - 1; i >= 0; i--) {
                 final View view = focusables.get(i);
                 final int id = view.getId();
                 if (isValidId(id)) {
                     mFocusables.put(id, view);
                 }
-                final int nextId = view.getNextFocusForwardId();
+                final int nextId = mNextIdGetter.get(view);
                 if (isValidId(nextId)) {
                     mIsConnectedTo.put(nextId, true);
                 }
@@ -794,7 +828,7 @@ public class FocusFinder {
 
             for (int i = focusables.size() - 1; i >= 0; i--) {
                 final View view = focusables.get(i);
-                final int nextId = view.getNextFocusForwardId();
+                final int nextId = mNextIdGetter.get(view);
                 if (isValidId(nextId) && !mIsConnectedTo.get(view.getId())) {
                     setHeadOfChain(view);
                 }
@@ -807,7 +841,7 @@ public class FocusFinder {
 
         private void setHeadOfChain(View head) {
             for (View view = head; view != null;
-                    view = mFocusables.get(view.getNextFocusForwardId())) {
+                    view = mFocusables.get(mNextIdGetter.get(view))) {
                 final View otherHead = mHeadsOfChains.get(view);
                 if (otherHead != null) {
                     if (otherHead == head) {
@@ -835,7 +869,7 @@ public class FocusFinder {
                     return -1; // first is the head, it should be first
                 } else if (second == firstHead) {
                     return 1; // second is the head, it should be first
-                } else if (isValidId(first.getNextFocusForwardId())) {
+                } else if (isValidId(mNextIdGetter.get(first))) {
                     return -1; // first is not the end of the chain
                 } else {
                     return 1; // first is end of chain

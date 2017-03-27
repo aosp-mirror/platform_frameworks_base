@@ -4656,6 +4656,7 @@ public final class ViewRootImpl implements ViewParent,
             if (cluster != null && cluster.isRootNamespace()) {
                 // the default cluster. Try to find a non-clustered view to focus.
                 if (cluster.restoreFocusNotInCluster()) {
+                    playSoundEffect(SoundEffectConstants.getContantForFocusDirection(direction));
                     return true;
                 }
                 // otherwise skip to next actual cluster
@@ -4663,6 +4664,7 @@ public final class ViewRootImpl implements ViewParent,
             }
 
             if (cluster != null && cluster.restoreFocusInCluster(realDirection)) {
+                playSoundEffect(SoundEffectConstants.getContantForFocusDirection(direction));
                 return true;
             }
 
