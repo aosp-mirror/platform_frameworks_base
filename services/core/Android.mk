@@ -39,8 +39,8 @@ endif
 
 LOCAL_JACK_FLAGS := \
  -D jack.transformations.boost-locked-region-priority=true \
- -D jack.transformations.boost-locked-region-priority.classname=com.android.server.am.ActivityManagerService \
- -D jack.transformations.boost-locked-region-priority.request=com.android.server.am.ActivityManagerService\#boostPriorityForLockedSection \
- -D jack.transformations.boost-locked-region-priority.reset=com.android.server.am.ActivityManagerService\#resetPriorityAfterLockedSection
+ -D jack.transformations.boost-locked-region-priority.classname=com.android.server.am.ActivityManagerService,com.android.server.wm.WindowHashMap \
+ -D jack.transformations.boost-locked-region-priority.request=com.android.server.am.ActivityManagerService\#boostPriorityForLockedSection,com.android.server.wm.WindowManagerService\#boostPriorityForLockedSection \
+ -D jack.transformations.boost-locked-region-priority.reset=com.android.server.am.ActivityManagerService\#resetPriorityAfterLockedSection,com.android.server.wm.WindowManagerService\#resetPriorityAfterLockedSection
 
 include $(BUILD_STATIC_JAVA_LIBRARY)
