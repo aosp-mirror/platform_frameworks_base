@@ -227,14 +227,14 @@ public class Trampoline extends IBackupManager.Stub {
     }
 
     @Override
-    public void fullBackup(ParcelFileDescriptor fd, boolean includeApks, boolean includeObbs,
+    public void adbBackup(ParcelFileDescriptor fd, boolean includeApks, boolean includeObbs,
             boolean includeShared, boolean doWidgets, boolean allApps,
-            boolean allIncludesSystem, boolean doCompress, String[] packageNames)
+            boolean allIncludesSystem, boolean doCompress, boolean doKeyValue, String[] packageNames)
                     throws RemoteException {
         BackupManagerService svc = mService;
         if (svc != null) {
-            svc.fullBackup(fd, includeApks, includeObbs, includeShared, doWidgets,
-                    allApps, allIncludesSystem, doCompress, packageNames);
+            svc.adbBackup(fd, includeApks, includeObbs, includeShared, doWidgets,
+                    allApps, allIncludesSystem, doCompress, doKeyValue, packageNames);
         }
     }
 
@@ -247,10 +247,10 @@ public class Trampoline extends IBackupManager.Stub {
     }
 
     @Override
-    public void fullRestore(ParcelFileDescriptor fd) throws RemoteException {
+    public void adbRestore(ParcelFileDescriptor fd) throws RemoteException {
         BackupManagerService svc = mService;
         if (svc != null) {
-            svc.fullRestore(fd);
+            svc.adbRestore(fd);
         }
     }
 
@@ -260,7 +260,7 @@ public class Trampoline extends IBackupManager.Stub {
                     throws RemoteException {
         BackupManagerService svc = mService;
         if (svc != null) {
-            svc.acknowledgeFullBackupOrRestore(token, allow,
+            svc.acknowledgeAdbBackupOrRestore(token, allow,
                     curPassword, encryptionPassword, observer);
         }
     }

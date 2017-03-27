@@ -144,9 +144,10 @@ interface IBackupManager {
     void backupNow();
 
     /**
-     * Write a full backup of the given package to the supplied file descriptor.
+     * Write a backup of the given package to the supplied file descriptor.
      * The fd may be a socket or other non-seekable destination.  If no package names
      * are supplied, then every application on the device will be backed up to the output.
+     * Currently only used by the 'adb backup' command.
      *
      * <p>This method is <i>synchronous</i> -- it does not return until the backup has
      * completed.
@@ -167,12 +168,14 @@ interface IBackupManager {
      *     as including packages pre-installed as part of the system. If {@code false},
      *     then setting {@code allApps} to {@code true} will mean only that all 3rd-party
      *     applications will be included in the dataset.
+     * @param doKeyValue If {@code true}, also packages supporting key-value backup will be backed
+     *     up. If {@code false}, key-value packages will be skipped.
      * @param packageNames The package names of the apps whose data (and optionally .apk files)
      *     are to be backed up.  The <code>allApps</code> parameter supersedes this.
      */
-    void fullBackup(in ParcelFileDescriptor fd, boolean includeApks, boolean includeObbs,
+    void adbBackup(in ParcelFileDescriptor fd, boolean includeApks, boolean includeObbs,
             boolean includeShared, boolean doWidgets, boolean allApps, boolean allIncludesSystem,
-            boolean doCompress, in String[] packageNames);
+            boolean doCompress, boolean doKeyValue, in String[] packageNames);
 
     /**
      * Perform a full-dataset backup of the given applications via the currently active
@@ -184,11 +187,12 @@ interface IBackupManager {
 
     /**
      * Restore device content from the data stream passed through the given socket.  The
-     * data stream must be in the format emitted by fullBackup().
+     * data stream must be in the format emitted by adbBackup().
+     * Currently only used by the 'adb restore' command.
      *
      * <p>Callers must hold the android.permission.BACKUP permission to use this method.
      */
-    void fullRestore(in ParcelFileDescriptor fd);
+    void adbRestore(in ParcelFileDescriptor fd);
 
     /**
      * Confirm that the requested full backup/restore operation can proceed.  The system will
