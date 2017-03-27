@@ -858,6 +858,10 @@ public class WifiManager {
 
     /**
      * Returns a WifiConfiguration matching this ScanResult
+     *
+     * An {@link UnsupportedOperationException} will be thrown if Passpoint is not enabled
+     * on the device.
+     *
      * @param scanResult scanResult that represents the BSSID
      * @return {@link WifiConfiguration} that matches this BSSID or null
      * @hide
@@ -944,6 +948,8 @@ public class WifiManager {
      * FQDN, the new configuration will replace the existing configuration.
      *
      * An {@link IllegalArgumentException} will be thrown on failure.
+     * An {@link UnsupportedOperationException} will be thrown if Passpoint is not enabled
+     * on the device.
      *
      * @param config The Passpoint configuration to be added
      */
@@ -961,6 +967,8 @@ public class WifiManager {
      * Remove the Passpoint configuration identified by its FQDN (Fully Qualified Domain Name).
      *
      * An {@link IllegalArgumentException} will be thrown on failure.
+     * An {@link UnsupportedOperationException} will be thrown if Passpoint is not enabled
+     * on the device.
      *
      * @param fqdn The FQDN of the passpoint configuration to be removed
      */
@@ -979,6 +987,9 @@ public class WifiManager {
      *
      * An empty list will be returned when no configurations are installed.
      *
+     * An {@link UnsupportedOperationException} will be thrown if Passpoint is not enabled
+     * on the device.
+     *
      * @return A list of {@link PasspointConfiguration}
      */
     public List<PasspointConfiguration> getPasspointConfigurations() {
@@ -994,6 +1005,9 @@ public class WifiManager {
      * will be broadcasted once the request is completed.  The presence of the intent extra
      * {@link #EXTRA_ICON} will indicate the result of the request.
      * A missing intent extra {@link #EXTRA_ICON} will indicate a failure.
+     *
+     * An {@link UnsupportedOperationException} will be thrown if Passpoint is not enabled
+     * on the device.
      *
      * @param bssid The BSSID of the AP
      * @param fileName Name of the icon file (remote file) to query from the AP
