@@ -104,6 +104,8 @@ public class PipTouchHandler {
     private int mImeHeight;
     private float mSavedSnapFraction = -1f;
     private boolean mSendingHoverAccessibilityEvents;
+    private boolean mMovementWithinMinimize;
+    private boolean mMovementWithinDismiss;
 
     // Touch state
     private final PipTouchState mTouchState;
@@ -435,12 +437,18 @@ public class PipTouchHandler {
      * Gesture controlling normal movement of the PIP.
      */
     private PipTouchGesture mDefaultMovementGesture = new PipTouchGesture() {
+        // Whether the PiP was on the left side of the screen at the start of the gesture
+        private boolean mStartedOnLeft;
 
         @Override
         public void onDown(PipTouchState touchState) {
             if (!touchState.isUserInteracting()) {
                 return;
             }
+
+            mStartedOnLeft = mMotionHelper.getBounds().left < mMovementBounds.centerX();
+            mMovementWithinMinimize = true;
+            mMovementWithinDismiss = touchState.getDownTouchPosition().y >= mMovementBounds.bottom;
 
             // If the menu is still visible, and we aren't minimized, then just poke the menu
             // so that it will timeout after the user stops touching it
@@ -493,6 +501,18 @@ public class PipTouchHandler {
                 if (ENABLE_DISMISS_DRAG_TO_EDGE) {
                     updateDismissFraction();
                 }
+
+                final PointF curPos = touchState.getLastTouchPosition();
+                if (mMovementWithinMinimize) {
+                    // Track if movement remains near starting edge to identify swipes to minimize
+                    mMovementWithinMinimize = mStartedOnLeft
+                            ? curPos.x <= mMovementBounds.left + mTmpBounds.width()
+                            : curPos.x >= mMovementBounds.right;
+                }
+                if (mMovementWithinDismiss) {
+                    // Track if movement remains near the bottom edge to identify swipe to dismiss
+                    mMovementWithinDismiss = curPos.y >= mMovementBounds.bottom;
+                }
                 return true;
             }
             return false;
@@ -526,8 +546,15 @@ public class PipTouchHandler {
             }
 
             if (touchState.isDragging()) {
+                final PointF vel = touchState.getVelocity();
+                final float velocity = PointF.length(vel.x, vel.y);
+                final boolean isFling = velocity > mFlingAnimationUtils.getMinVelocityPxPerSecond();
+                final boolean isHorizontal = Math.abs(vel.x) > Math.abs(vel.y);
                 final boolean onLeft = mMotionHelper.getBounds().left < mMovementBounds.centerX();
-                boolean isFlingToBot = isFlingTowardsEdge(touchState, 4 /* bottom */);
+                final boolean isFlingToBot = !isHorizontal && mMovementWithinDismiss && vel.y > 0;
+                final boolean isFlingToEdge = isHorizontal && mMovementWithinMinimize
+                        && (onLeft ? vel.x < 0 : vel.x > 0);
+
                 if (ENABLE_DISMISS_DRAG_TO_EDGE
                         && (mMotionHelper.shouldDismissPip() || isFlingToBot)) {
                     mMotionHelper.animateDragToEdgeDismiss(mMotionHelper.getBounds(),
@@ -536,8 +563,7 @@ public class PipTouchHandler {
                             MetricsEvent.ACTION_PICTURE_IN_PICTURE_DISMISSED,
                             METRIC_VALUE_DISMISSED_BY_DRAG);
                     return true;
-                } else if (!mIsMinimized && (mMotionHelper.shouldMinimizePip()
-                        || isFlingTowardsEdge(touchState, onLeft ? 2 : 3))) {
+                } else if (!mIsMinimized && (mMotionHelper.shouldMinimizePip() || isFlingToEdge)) {
                     // Pip should be minimized
                     setMinimizedStateInternal(true);
                     if (mMenuController.isMenuVisible()) {
@@ -563,9 +589,7 @@ public class PipTouchHandler {
                     mMenuController.showMenu(mMotionHelper.getBounds(), mMovementBounds);
                 }
 
-                final PointF vel = mTouchState.getVelocity();
-                final float velocity = PointF.length(vel.x, vel.y);
-                if (velocity > mFlingAnimationUtils.getMinVelocityPxPerSecond()) {
+                if (isFling) {
                     mMotionHelper.flingToSnapTarget(velocity, vel.x, vel.y, mMovementBounds,
                             mUpdateScrimListener);
                 } else {
@@ -583,42 +607,6 @@ public class PipTouchHandler {
             return true;
         }
     };
-
-    /**
-     * @return whether the gesture ending in {@param vel} is fast enough to be a fling and towards
-     *         the provided {@param edge} where:
-     *
-     *         1 = top
-     *         2 = left
-     *         3 = right
-     *         4 = bottom
-     */
-    private boolean isFlingTowardsEdge(PipTouchState touchState, int edge) {
-        final PointF vel = touchState.getVelocity();
-        final PointF downPos = touchState.getDownTouchPosition();
-        final Rect bounds = mMotionHelper.getBounds();
-        final boolean isHorizontal = Math.abs(vel.x) > Math.abs(vel.y);
-        final boolean isFling =
-                PointF.length(vel.x, vel.y) > mFlingAnimationUtils.getMinVelocityPxPerSecond();
-        if (!isFling) {
-            return false;
-        }
-        switch (edge) {
-            case 1: // top
-                return !isHorizontal && vel.y < 0
-                        && downPos.y <= mMovementBounds.top + bounds.height();
-            case 2: // left
-                return isHorizontal && vel.x < 0
-                        && downPos.x <= mMovementBounds.left + bounds.width();
-            case 3: // right
-                return isHorizontal && vel.x > 0
-                        && downPos.x >= mMovementBounds.right;
-            case 4: // bottom
-                return !isHorizontal && vel.y > 0
-                        && downPos.y >= mMovementBounds.bottom;
-        }
-        return false;
-    }
 
     /**
      * Updates the current movement bounds based on whether the menu is currently visible.
