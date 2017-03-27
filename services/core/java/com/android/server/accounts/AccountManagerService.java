@@ -202,16 +202,17 @@ public class AccountManagerService
                 new HashMap<Account, Integer>();
         final Object cacheLock = new Object();
         /** protected by the {@link #cacheLock} */
-        final HashMap<String, Account[]> accountCache =
-                new LinkedHashMap<>();
+        final HashMap<String, Account[]> accountCache = new LinkedHashMap<>();
         /** protected by the {@link #cacheLock} */
         private final Map<Account, Map<String, String>> userDataCache = new HashMap<>();
         /** protected by the {@link #cacheLock} */
         private final Map<Account, Map<String, String>> authTokenCache = new HashMap<>();
         /** protected by the {@link #cacheLock} */
         private final TokenCache accountTokenCaches = new TokenCache();
+        /** protected by the {@link #cacheLock} */
+        private final Map<Account, Map<String, Integer>> visibilityCache = new HashMap<>();
 
-        /** protected by the {@link #mReceiversForType}
+        /** protected by the {@link #mReceiversForType},
          *  type -> (packageName -> number of active receivers)
          *  type == null is used to get notifications about all account types
          */
@@ -524,25 +525,29 @@ public class AccountManagerService
                     String.format("uid %s cannot get secrets for account %s", callingUid, account);
             throw new SecurityException(msg);
         }
-        return getPackagesAndVisibilityForAccount(account, accounts);
+        synchronized (accounts.cacheLock) {
+            return getPackagesAndVisibilityForAccountLocked(account, accounts);
+        }
     }
 
     /**
-     * Returns all package names and visibility values, which were set for given account.
+     * Returns Map with all package names and visibility values for given account.
+     * The method and returned map must be guarded by accounts.cacheLock
      *
      * @param account Account to get visibility values.
      * @param accounts UserAccount that currently hosts the account and application
      *
-     * @return Map from package names to visibility.
+     * @return Map with cache for package names to visibility.
      */
-    private Map<String, Integer> getPackagesAndVisibilityForAccount(Account account,
+    private @NonNull Map<String, Integer> getPackagesAndVisibilityForAccountLocked(Account account,
             UserAccounts accounts) {
-        final StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskReads();
-        try {
-            return accounts.accountsDb.findAllVisibilityValuesForAccount(account);
-        } finally {
-            StrictMode.setThreadPolicy(oldPolicy);
+        Map<String, Integer> accountVisibility = accounts.visibilityCache.get(account);
+        if (accountVisibility == null) {
+            Log.d(TAG, "Visibility was not initialized");
+            accountVisibility = new HashMap<>();
+            accounts.visibilityCache.put(account, accountVisibility);
         }
+        return accountVisibility;
     }
 
     @Override
@@ -572,14 +577,13 @@ public class AccountManagerService
      * @return Visibility value, AccountManager.VISIBILITY_UNDEFINED if no value was stored.
      *
      */
-    private int getAccountVisibility(Account account, String packageName, UserAccounts accounts) {
-        final StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskReads();
-        try {
-            Integer visibility =
-                accounts.accountsDb.findAccountVisibility(account, packageName);
+    private int getAccountVisibilityFromCache(Account account, String packageName,
+            UserAccounts accounts) {
+        synchronized (accounts.cacheLock) {
+            Map<String, Integer> accountVisibility =
+                getPackagesAndVisibilityForAccountLocked(account, accounts);
+            Integer visibility = accountVisibility.get(packageName);
             return visibility != null ? visibility : AccountManager.VISIBILITY_UNDEFINED;
-        } finally {
-            StrictMode.setThreadPolicy(oldPolicy);
         }
     }
 
@@ -595,9 +599,7 @@ public class AccountManagerService
      */
     private Integer resolveAccountVisibility(Account account, @NonNull String packageName,
             UserAccounts accounts) {
-
         Preconditions.checkNotNull(packageName, "packageName cannot be null");
-
         int uid = -1;
         try {
             long identityToken = clearCallingIdentity();
@@ -630,7 +632,7 @@ public class AccountManagerService
         }
 
         // Return stored value if it was set.
-        int visibility = getAccountVisibility(account, packageName, accounts);
+        int visibility = getAccountVisibilityFromCache(account, packageName, accounts);
 
         if (AccountManager.VISIBILITY_UNDEFINED != visibility) {
             return visibility;
@@ -652,13 +654,13 @@ public class AccountManagerService
                 || canReadContacts || isPrivileged) {
             // Use legacy for preO apps with GET_ACCOUNTS permission or pre/postO with signature
             // match.
-            visibility = getAccountVisibility(account,
+            visibility = getAccountVisibilityFromCache(account,
                     AccountManager.PACKAGE_NAME_KEY_LEGACY_VISIBLE, accounts);
             if (AccountManager.VISIBILITY_UNDEFINED == visibility) {
                 visibility = AccountManager.VISIBILITY_USER_MANAGED_VISIBLE;
             }
         } else {
-            visibility = getAccountVisibility(account,
+            visibility = getAccountVisibilityFromCache(account,
                     AccountManager.PACKAGE_NAME_KEY_LEGACY_NOT_VISIBLE, accounts);
             if (AccountManager.VISIBILITY_UNDEFINED == visibility) {
                 visibility = AccountManager.VISIBILITY_USER_MANAGED_NOT_VISIBLE;
@@ -751,19 +753,8 @@ public class AccountManagerService
                 packagesToVisibility = new HashMap<>();
             }
 
-            final long accountId = accounts.accountsDb.findDeAccountId(account);
-            if (accountId < 0) {
+            if (!updateAccountVisibilityLocked(account, packageName, newVisibility, accounts)) {
                 return false;
-            }
-
-            final StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskWrites();
-            try {
-                if (!accounts.accountsDb.setAccountVisibility(accountId, packageName,
-                        newVisibility)) {
-                    return false;
-                }
-            } finally {
-                StrictMode.setThreadPolicy(oldPolicy);
             }
 
             if (notify) {
@@ -776,6 +767,29 @@ public class AccountManagerService
             }
             return true;
         }
+    }
+
+    // Update account visibility in cache and database.
+    private boolean updateAccountVisibilityLocked(Account account, String packageName,
+            int newVisibility, UserAccounts accounts) {
+        final long accountId = accounts.accountsDb.findDeAccountId(account);
+        if (accountId < 0) {
+            return false;
+        }
+
+        final StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskWrites();
+        try {
+            if (!accounts.accountsDb.setAccountVisibility(accountId, packageName,
+                    newVisibility)) {
+                return false;
+            }
+        } finally {
+            StrictMode.setThreadPolicy(oldPolicy);
+        }
+        Map<String, Integer> accountVisibility =
+            getPackagesAndVisibilityForAccountLocked(account, accounts);
+        accountVisibility.put(packageName, newVisibility);
+        return true;
     }
 
     @Override
@@ -1042,9 +1056,12 @@ public class AccountManagerService
                         accounts.userDataCache.remove(account);
                         accounts.authTokenCache.remove(account);
                         accounts.accountTokenCaches.remove(account);
+                        accounts.visibilityCache.remove(account);
 
-                        for (Entry<String, Integer> packageToVisibility : packagesToVisibility.entrySet()) {
-                            if (packageToVisibility.getValue() != AccountManager.VISIBILITY_NOT_VISIBLE) {
+                        for (Entry<String, Integer> packageToVisibility :
+                                packagesToVisibility.entrySet()) {
+                            if (packageToVisibility.getValue()
+                                    != AccountManager.VISIBILITY_NOT_VISIBLE) {
                                 notifyPackage(packageToVisibility.getKey(), accounts);
                             }
                         }
@@ -1067,6 +1084,7 @@ public class AccountManagerService
                     }
                     accounts.accountCache.put(accountType, accountsForType);
                 }
+                accounts.visibilityCache.putAll(accountsDb.findAllVisibilityValues());
             } finally {
                 if (accountDeleted) {
                     sendAccountsChangedBroadcast(accounts.userId);
@@ -1181,18 +1199,30 @@ public class AccountManagerService
     }
 
     private void removeVisibilityValuesForPackage(String packageName) {
+        if (isSpecialPackageKey(packageName)) {
+            return;
+        }
         synchronized (mUsers) {
-          for (int i = 0; i < mUsers.size(); i++) {
-              UserAccounts accounts = mUsers.valueAt(i);
-              try {
-                  int uid = mPackageManager.getPackageUidAsUser(packageName, accounts.userId);
-              } catch (NameNotFoundException e) {
-                  // package does not exist - remove visibility values
-                  accounts.accountsDb.deleteAccountVisibilityForPackage(packageName);
+            int numberOfUsers = mUsers.size();
+            for (int i = 0; i < numberOfUsers; i++) {
+                UserAccounts accounts = mUsers.valueAt(i);
+                try {
+                    mPackageManager.getPackageUidAsUser(packageName, accounts.userId);
+                } catch (NameNotFoundException e) {
+                    // package does not exist - remove visibility values
+                    accounts.accountsDb.deleteAccountVisibilityForPackage(packageName);
+                    synchronized(accounts.cacheLock) {
+                        for (Account account : accounts.visibilityCache.keySet()) {
+                            Map<String, Integer> accountVisibility =
+                                getPackagesAndVisibilityForAccountLocked(account, accounts);
+                            accountVisibility.remove(packageName);
+                        }
+                    }
               }
           }
         }
     }
+
 
     private void onCleanupUser(int userId) {
         Log.i(TAG, "onCleanupUser " + userId);
@@ -1849,6 +1879,7 @@ public class AccountManagerService
              */
             Map<String, String> tmpData = accounts.userDataCache.get(accountToRename);
             Map<String, String> tmpTokens = accounts.authTokenCache.get(accountToRename);
+            Map<String, Integer> tmpVisibility = accounts.visibilityCache.get(accountToRename);
             removeAccountFromCacheLocked(accounts, accountToRename);
             /*
              * Update the cached data associated with the renamed
@@ -1856,6 +1887,7 @@ public class AccountManagerService
              */
             accounts.userDataCache.put(renamedAccount, tmpData);
             accounts.authTokenCache.put(renamedAccount, tmpTokens);
+            accounts.visibilityCache.put(renamedAccount, tmpVisibility);
             accounts.previousNameCache.put(
                     renamedAccount,
                     new AtomicReference<>(accountToRename.name));
@@ -5369,6 +5401,7 @@ public class AccountManagerService
         accounts.userDataCache.remove(account);
         accounts.authTokenCache.remove(account);
         accounts.previousNameCache.remove(account);
+        accounts.visibilityCache.remove(account);
     }
 
     /**
