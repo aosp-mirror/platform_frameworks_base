@@ -550,10 +550,10 @@ public class PipTouchHandler {
                 final float velocity = PointF.length(vel.x, vel.y);
                 final boolean isFling = velocity > mFlingAnimationUtils.getMinVelocityPxPerSecond();
                 final boolean isHorizontal = Math.abs(vel.x) > Math.abs(vel.y);
-                final boolean onLeft = mMotionHelper.getBounds().left < mMovementBounds.centerX();
-                final boolean isFlingToBot = !isHorizontal && mMovementWithinDismiss && vel.y > 0;
-                final boolean isFlingToEdge = isHorizontal && mMovementWithinMinimize
-                        && (onLeft ? vel.x < 0 : vel.x > 0);
+                final boolean isFlingToBot = isFling
+                        && !isHorizontal && mMovementWithinDismiss && vel.y > 0;
+                final boolean isFlingToEdge = isFling && isHorizontal && mMovementWithinMinimize
+                        && (mStartedOnLeft ? vel.x < 0 : vel.x > 0);
 
                 if (ENABLE_DISMISS_DRAG_TO_EDGE
                         && (mMotionHelper.shouldDismissPip() || isFlingToBot)) {
