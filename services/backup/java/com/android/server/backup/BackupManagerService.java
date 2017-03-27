@@ -3526,21 +3526,23 @@ public class BackupManagerService {
                     return;
                 }
                 mCancelAll = cancelAll;
-                // Whoops, the current agent timed out running doBackup().  Tidy up and restage
-                // it for the next time we run a backup pass.
-                // !!! TODO: keep track of failure counts per agent, and blacklist those which
-                // fail repeatedly (i.e. have proved themselves to be buggy).
-                Slog.e(TAG, "Cancel backing up " + mCurrentPackage.packageName);
-                EventLog.writeEvent(EventLogTags.BACKUP_AGENT_FAILURE, mCurrentPackage.packageName);
+                final String logPackageName = (mCurrentPackage != null)
+                        ? mCurrentPackage.packageName
+                        : "no_package_yet";
+                Slog.i(TAG, "Cancel backing up " + logPackageName);
+                EventLog.writeEvent(EventLogTags.BACKUP_AGENT_FAILURE, logPackageName);
+                addBackupTrace("cancel of " + logPackageName + ", cancelAll=" + cancelAll);
                 mMonitor = monitorEvent(mMonitor,
                         BackupManagerMonitor.LOG_EVENT_ID_KEY_VALUE_BACKUP_CANCEL,
                         mCurrentPackage, BackupManagerMonitor.LOG_EVENT_CATEGORY_AGENT,
                         putMonitoringExtra(null, BackupManagerMonitor.EXTRA_LOG_CANCEL_ALL,
                                 mCancelAll));
-                addBackupTrace(
-                        "cancel of " + mCurrentPackage.packageName + ", cancelAll=" + cancelAll);
                 errorCleanup();
                 if (!cancelAll) {
+                    // The current agent either timed out or was cancelled running doBackup().
+                    // Restage it for the next time we run a backup pass.
+                    // !!! TODO: keep track of failure counts per agent, and blacklist those which
+                    // fail repeatedly (i.e. have proved themselves to be buggy).
                     executeNextState(
                             mQueue.isEmpty() ? BackupState.FINAL : BackupState.RUNNING_QUEUE);
                     dataChangedImpl(mCurrentPackage.packageName);
