@@ -50,6 +50,7 @@ hwui_src_files := \
     service/GraphicsStatsService.cpp \
     thread/TaskManager.cpp \
     utils/Blur.cpp \
+    utils/Color.cpp \
     utils/GLUtils.cpp \
     utils/LinearAllocator.cpp \
     utils/StringUtils.cpp \

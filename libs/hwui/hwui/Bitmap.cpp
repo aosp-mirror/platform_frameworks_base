@@ -19,6 +19,7 @@
 #include "renderthread/EglManager.h"
 #include "renderthread/RenderThread.h"
 #include "renderthread/RenderProxy.h"
+#include "utils/Color.h"
 
 #include <sys/mman.h>
 
@@ -223,8 +224,7 @@ sk_sp<Bitmap> Bitmap::allocateHardwareBitmap(uirenderer::renderthread::RenderThr
         return nullptr;
     }
 
-    sk_sp<SkColorSpace> sRGB = SkColorSpace::MakeSRGB();
-    bool needSRGB = skBitmap.info().colorSpace() == sRGB.get();
+    bool needSRGB = uirenderer::transferFunctionCloseToSRGB(skBitmap.info().colorSpace());
     bool hasLinearBlending = caches.extensions().hasLinearBlending();
     GLint format, type, internalFormat;
     uirenderer::Texture::colorTypeToGlFormatAndType(caches, skBitmap.colorType(),
@@ -245,7 +245,8 @@ sk_sp<Bitmap> Bitmap::allocateHardwareBitmap(uirenderer::renderthread::RenderThr
 
     SkBitmap bitmap;
     if (CC_UNLIKELY(uirenderer::Texture::hasUnsupportedColorType(skBitmap.info(),
-            hasLinearBlending, sRGB.get()))) {
+            hasLinearBlending))) {
+        sk_sp<SkColorSpace> sRGB = SkColorSpace::MakeSRGB();
         bitmap = uirenderer::Texture::uploadToN32(skBitmap, hasLinearBlending, std::move(sRGB));
     } else {
         bitmap = skBitmap;

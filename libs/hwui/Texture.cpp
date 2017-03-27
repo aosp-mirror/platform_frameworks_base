@@ -17,9 +17,12 @@
 #include "Caches.h"
 #include "Texture.h"
 #include "utils/GLUtils.h"
+#include "utils/MathUtils.h"
 #include "utils/TraceUtils.h"
 
 #include <utils/Log.h>
+
+#include <math/mat4.h>
 
 #include <SkCanvas.h>
 
@@ -48,12 +51,7 @@ static int bytesPerPixel(GLint glFormat) {
     }
 }
 
-bool Texture::isLinear() const {
-    return mInternalFormat == GL_RGBA16F;
-}
-
 void Texture::setWrapST(GLenum wrapS, GLenum wrapT, bool bindTexture, bool force) {
-
     if (force || wrapS != mWrapS || wrapT != mWrapT) {
         mWrapS = wrapS;
         mWrapT = wrapT;
@@ -94,7 +92,7 @@ void Texture::deleteTexture() {
     }
 }
 
-bool Texture::updateSize(uint32_t width, uint32_t height, GLint internalFormat,
+bool Texture::updateLayout(uint32_t width, uint32_t height, GLint internalFormat,
         GLint format, GLenum target) {
     if (mWidth == width
             && mHeight == height
@@ -122,7 +120,7 @@ void Texture::resetCachedParams() {
 void Texture::upload(GLint internalFormat, uint32_t width, uint32_t height,
         GLenum format, GLenum type, const void* pixels) {
     GL_CHECKPOINT(MODERATE);
-    bool needsAlloc = updateSize(width, height, internalFormat, format, GL_TEXTURE_2D);
+    bool needsAlloc = updateLayout(width, height, internalFormat, format, GL_TEXTURE_2D);
     if (!mId) {
         glGenTextures(1, &mId);
         needsAlloc = true;
@@ -224,7 +222,6 @@ void Texture::colorTypeToGlFormatAndType(const Caches& caches, SkColorType color
         *outType = GL_UNSIGNED_BYTE;
         break;
     case kGray_8_SkColorType:
-        // TODO: Handle sRGB
         *outFormat = GL_LUMINANCE;
         *outInternalFormat = GL_LUMINANCE;
         *outType = GL_UNSIGNED_BYTE;
@@ -252,14 +249,13 @@ SkBitmap Texture::uploadToN32(const SkBitmap& bitmap, bool hasLinearBlending,
     return rgbaBitmap;
 }
 
-bool Texture::hasUnsupportedColorType(const SkImageInfo& info, bool hasLinearBlending,
-        SkColorSpace* sRGB) {
-    bool needSRGB = info.colorSpace() == sRGB;
+bool Texture::hasUnsupportedColorType(const SkImageInfo& info, bool hasLinearBlending) {
     return info.colorType() == kARGB_4444_SkColorType
         || info.colorType() == kIndex_8_SkColorType
-        || (info.colorType() == kRGB_565_SkColorType && hasLinearBlending && needSRGB);
+        || (info.colorType() == kRGB_565_SkColorType
+                && hasLinearBlending
+                && info.colorSpace()->isSRGB());
 }
-
 
 void Texture::upload(Bitmap& bitmap) {
     if (!bitmap.readyToDraw()) {
@@ -284,23 +280,59 @@ void Texture::upload(Bitmap& bitmap) {
         setDefaultParams = true;
     }
 
-    sk_sp<SkColorSpace> sRGB = SkColorSpace::MakeSRGB();
-    bool needSRGB = bitmap.info().colorSpace() == sRGB.get();
+    bool hasLinearBlending = mCaches.extensions().hasLinearBlending();
+    bool needSRGB = transferFunctionCloseToSRGB(bitmap.info().colorSpace());
 
     GLint internalFormat, format, type;
-    colorTypeToGlFormatAndType(mCaches, bitmap.colorType(), needSRGB, &internalFormat, &format, &type);
+    colorTypeToGlFormatAndType(mCaches, bitmap.colorType(),
+            needSRGB && hasLinearBlending, &internalFormat, &format, &type);
+
+    mConnector.reset();
+
+    // RGBA16F is always extended sRGB, alpha masks don't have color profiles
+    if (internalFormat != GL_RGBA16F && internalFormat != GL_ALPHA) {
+        SkColorSpace* colorSpace = bitmap.info().colorSpace();
+        // If the bitmap is sRGB we don't need conversion
+        if (colorSpace != nullptr && !colorSpace->isSRGB()) {
+            SkMatrix44 xyzMatrix(SkMatrix44::kUninitialized_Constructor);
+            if (!colorSpace->toXYZD50(&xyzMatrix)) {
+                ALOGW("Incompatible color space!");
+            } else {
+                SkColorSpaceTransferFn fn;
+                if (!colorSpace->isNumericalTransferFn(&fn)) {
+                    ALOGW("Incompatible color space, no numerical transfer function!");
+                } else {
+                    float data[16];
+                    xyzMatrix.asColMajorf(data);
+
+                    ColorSpace::TransferParameters p =
+                            {fn.fG, fn.fA, fn.fB, fn.fC, fn.fD, fn.fE, fn.fF};
+                    ColorSpace src("Unnamed", mat4f((const float*) &data[0]).upperLeft(), p);
+                    mConnector.reset(new ColorSpaceConnector(src, ColorSpace::sRGB()));
+
+                    // A non-sRGB color space might have a transfer function close enough to sRGB
+                    // that we can save shader instructions by using an sRGB sampler
+                    // This is only possible if we have hardware support for sRGB textures
+                    if (needSRGB && internalFormat == GL_RGBA
+                            && mCaches.extensions().hasSRGB() && !bitmap.isHardware()) {
+                        internalFormat = GL_SRGB8_ALPHA8;
+                    }
+                }
+            }
+        }
+    }
 
     GLenum target = bitmap.isHardware() ? GL_TEXTURE_EXTERNAL_OES : GL_TEXTURE_2D;
-    needsAlloc |= updateSize(bitmap.width(), bitmap.height(), internalFormat, format, target);
+    needsAlloc |= updateLayout(bitmap.width(), bitmap.height(), internalFormat, format, target);
 
     blend = !bitmap.isOpaque();
     mCaches.textureState().bindTexture(mTarget, mId);
 
     // TODO: Handle sRGB gray bitmaps
-    bool hasLinearBlending = mCaches.extensions().hasLinearBlending();
-    if (CC_UNLIKELY(hasUnsupportedColorType(bitmap.info(), hasLinearBlending, sRGB.get()))) {
+    if (CC_UNLIKELY(hasUnsupportedColorType(bitmap.info(), hasLinearBlending))) {
         SkBitmap skBitmap;
         bitmap.getSkBitmap(&skBitmap);
+        sk_sp<SkColorSpace> sRGB = SkColorSpace::MakeSRGB();
         SkBitmap rgbaBitmap = uploadToN32(skBitmap, hasLinearBlending, std::move(sRGB));
         uploadToTexture(needsAlloc, internalFormat, format, type, rgbaBitmap.rowBytesAsPixels(),
                 rgbaBitmap.bytesPerPixel(), rgbaBitmap.width(),
@@ -333,8 +365,27 @@ void Texture::wrap(GLuint id, uint32_t width, uint32_t height,
     mFormat = format;
     mInternalFormat = internalFormat;
     mTarget = target;
+    mConnector.reset();
     // We're wrapping an existing texture, so don't double count this memory
     notifySizeChanged(0);
+}
+
+TransferFunctionType Texture::getTransferFunctionType() const {
+    if (mConnector.get() != nullptr && mInternalFormat != GL_SRGB8_ALPHA8) {
+        const ColorSpace::TransferParameters& p = mConnector->getSource().getTransferParameters();
+        if (MathUtils::isZero(p.e) && MathUtils::isZero(p.f)) {
+            if (MathUtils::areEqual(p.a, 1.0f) && MathUtils::isZero(p.b)
+                    && MathUtils::isZero(p.c) && MathUtils::isZero(p.d)) {
+                if (MathUtils::areEqual(p.g, 1.0f)) {
+                    return TransferFunctionType::None;
+                }
+                return TransferFunctionType::Gamma;
+            }
+            return TransferFunctionType::Limited;
+        }
+        return TransferFunctionType::Full;
+    }
+    return TransferFunctionType::None;
 }
 
 }; // namespace uirenderer
