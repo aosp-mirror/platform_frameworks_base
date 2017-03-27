@@ -82,6 +82,8 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         mSystemIconArea = mStatusBar.findViewById(R.id.system_icon_area);
         mSignalClusterView = reinflateSignalCluster(mStatusBar);
         Dependency.get(DarkIconDispatcher.class).addDarkReceiver(mSignalClusterView);
+        // Default to showing until we know otherwise.
+        showSystemIconArea(false);
     }
 
     @Override
@@ -119,6 +121,8 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
                     .removeView(mNotificationIconAreaInner);
         }
         notificationIconArea.addView(mNotificationIconAreaInner);
+        // Default to showing until we know otherwise.
+        showNotificationIconArea(false);
     }
 
     @Override

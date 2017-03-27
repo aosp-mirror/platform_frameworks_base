@@ -16,6 +16,7 @@ package com.android.systemui.statusbar.phone;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -104,6 +105,6 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
 
         fragment.disable(0, 0, false);
 
-        Mockito.verify(mNotificationAreaInner).setVisibility(eq(View.VISIBLE));
+        Mockito.verify(mNotificationAreaInner, atLeast(1)).setVisibility(eq(View.VISIBLE));
     }
 }

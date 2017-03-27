@@ -987,16 +987,19 @@ public class StatusBar extends SystemUI implements DemoMode,
         Dependency.get(DarkIconDispatcher.class).addDarkReceiver(mNotificationIconAreaController);
         FragmentHostManager.get(mStatusBarWindow)
                 .addTagListener(CollapsedStatusBarFragment.TAG, (tag, fragment) -> {
-                    CollapsedStatusBarFragment statusBarFragment = (CollapsedStatusBarFragment) fragment;
+                    CollapsedStatusBarFragment statusBarFragment =
+                            (CollapsedStatusBarFragment) fragment;
                     statusBarFragment.initNotificationIconArea(mNotificationIconAreaController);
                     mStatusBarView = (PhoneStatusBarView) fragment.getView();
                     mStatusBarView.setBar(this);
                     mStatusBarView.setPanel(mNotificationPanel);
                     mStatusBarView.setScrimController(mScrimController);
                     setAreThereNotifications();
+                    checkBarModes();
                 }).getFragmentManager()
                 .beginTransaction()
-                .replace(R.id.status_bar_container, new CollapsedStatusBarFragment(), CollapsedStatusBarFragment.TAG)
+                .replace(R.id.status_bar_container, new CollapsedStatusBarFragment(),
+                        CollapsedStatusBarFragment.TAG)
                 .commit();
         Dependency.get(StatusBarIconController.class).addIconGroup(
                 new IconManager((ViewGroup) mKeyguardStatusBar.findViewById(R.id.statusIcons)));
