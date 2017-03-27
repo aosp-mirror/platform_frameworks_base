@@ -70,26 +70,6 @@ public interface TextClassifier {
         public LinksInfo getLinks(CharSequence text, int linkMask, LocaleList defaultLocales) {
             return LinksInfo.NO_OP;
         }
-
-        // TODO: Remove
-        @Override
-        public TextSelection suggestSelection(
-                CharSequence text, int selectionStartIndex, int selectionEndIndex) {
-            throw new UnsupportedOperationException("Removed");
-        }
-
-        // TODO: Remove
-        @Override
-        public TextClassificationResult getTextClassificationResult(
-                CharSequence text, int startIndex, int endIndex) {
-            throw new UnsupportedOperationException("Removed");
-        }
-
-        // TODO: Remove
-        @Override
-        public LinksInfo getLinks(CharSequence text, int linkMask) {
-            throw new UnsupportedOperationException("Removed");
-        }
     };
 
     /**
@@ -154,16 +134,4 @@ public interface TextClassifier {
      */
     LinksInfo getLinks(
             @NonNull CharSequence text, int linkMask, @Nullable LocaleList defaultLocales);
-
-    // TODO: Remove
-    /** @removed */
-    TextSelection suggestSelection(
-            CharSequence text, int selectionStartIndex, int selectionEndIndex);
-    // TODO: Remove
-    /** @removed */
-    TextClassificationResult getTextClassificationResult(
-            CharSequence text, int startIndex, int endIndex);
-    // TODO: Remove
-    /** @removed */
-    LinksInfo getLinks(CharSequence text, int linkMask);
 }
