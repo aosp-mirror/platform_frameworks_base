@@ -44,6 +44,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * App entry point to the AutoFill Framework.
@@ -91,6 +92,8 @@ public final class AutofillManager {
      */
     public static final String EXTRA_DATA_EXTRAS = "android.view.autofill.extra.DATA_EXTRAS";
 
+    static final String LAST_AUTOFILLED_DATA_TAG = "android:lastAutoFilledData";
+
     // Public flags start from the lowest bit
     /**
      * Indicates autofill was explicitly requested by the user.
@@ -114,6 +117,9 @@ public final class AutofillManager {
 
     private boolean mHasSession;
     private boolean mEnabled;
+
+    /** If a view changes to this mapping the autofill operation was successful */
+    @Nullable private ParcelableMap mLastAutofilledData;
 
     /** @hide */
     public interface AutofillClient {
@@ -160,7 +166,31 @@ public final class AutofillManager {
     }
 
     /**
-     * Checkes whether autofill is enabled for the current user.
+     * Restore state after activity lifecycle
+     *
+     * @param savedInstanceState The state to be restored
+     *
+     * {@hide}
+     */
+    public void onRestoreInstanceState(Bundle savedInstanceState) {
+        mLastAutofilledData = savedInstanceState.getParcelable(LAST_AUTOFILLED_DATA_TAG);
+    }
+
+    /**
+     * Save state before activity lifecycle
+     *
+     * @param outState Place to store the state
+     *
+     * {@hide}
+     */
+    public void onSaveInstanceState(Bundle outState) {
+        if (mLastAutofilledData != null) {
+            outState.putParcelable(LAST_AUTOFILLED_DATA_TAG, mLastAutofilledData);
+        }
+    }
+
+    /**
+     * Checks whether autofill is enabled for the current user.
      *
      * <p>Typically used to determine whether the option to explicitly request autofill should
      * be offered - see {@link #requestAutofill(View)}.
@@ -311,12 +341,43 @@ public final class AutofillManager {
      * @param view view whose value changed.
      */
     public void notifyValueChanged(View view) {
+        AutofillId id = null;
+        boolean valueWasRead = false;
+        AutofillValue value = null;
+
+        // If the session is gone some fields might still be highlighted, hence we have to remove
+        // the isAutofilled property even if no sessions are active.
+        if (mLastAutofilledData == null) {
+            view.setAutofilled(false);
+        } else {
+            id = getAutofillId(view);
+            if (mLastAutofilledData.containsKey(id)) {
+                value = view.getAutofillValue();
+                valueWasRead = true;
+
+                if (Objects.equals(mLastAutofilledData.get(id), value)) {
+                    view.setAutofilled(true);
+                } else {
+                    view.setAutofilled(false);
+                    mLastAutofilledData.remove(id);
+                }
+            } else {
+                view.setAutofilled(false);
+            }
+        }
+
         if (!mEnabled || !mHasSession) {
             return;
         }
 
-        final AutofillId id = getAutofillId(view);
-        final AutofillValue value = view.getAutofillValue();
+        if (id == null) {
+            id = getAutofillId(view);
+        }
+
+        if (!valueWasRead) {
+            value = view.getAutofillValue();
+        }
+
         updateSession(id, null, value, FLAG_VALUE_CHANGED);
     }
 
@@ -535,6 +596,23 @@ public final class AutofillManager {
         }
     }
 
+    /**
+     * Sets a view as autofilled if the current value is the {code targetValue}.
+     *
+     * @param view The view that is to be autofilled
+     * @param targetValue The value we want to fill into view
+     */
+    private void setAutofilledIfValuesIs(@NonNull View view, @Nullable AutofillValue targetValue) {
+        AutofillValue currentValue = view.getAutofillValue();
+        if (Objects.equals(currentValue, targetValue)) {
+            if (mLastAutofilledData == null) {
+                mLastAutofilledData = new ParcelableMap(1);
+            }
+            mLastAutofilledData.put(getAutofillId(view), targetValue);
+            view.setAutofilled(true);
+        }
+    }
+
     private void handleAutofill(IBinder windowToken, List<AutofillId> ids,
             List<AutofillValue> values) {
         final View root = WindowManagerGlobal.getInstance().getWindowView(windowToken);
@@ -568,7 +646,19 @@ public final class AutofillManager {
                 }
                 valuesByParent.put(id.getVirtualChildId(), value);
             } else {
+                // Mark the view as to be autofilled with 'value'
+                if (mLastAutofilledData == null) {
+                    mLastAutofilledData = new ParcelableMap(itemCount - i);
+                }
+                mLastAutofilledData.put(id, value);
+
                 view.autofill(value);
+
+                // Set as autofilled if the values match now, e.g. when the value was updated
+                // synchronously.
+                // If autofill happens async, the view is set to autofilled in notifyValueChanged.
+                setAutofilledIfValuesIs(view, value);
+
                 numApplied++;
             }
         }

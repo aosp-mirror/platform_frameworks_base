@@ -724,6 +724,7 @@ public class Activity extends ContextThemeWrapper
     public static final int FINISH_TASK_WITH_ACTIVITY = 2;
 
     static final String FRAGMENTS_TAG = "android:fragments";
+    static final String AUTOFILL_RESET_NEEDED_TAG = "android:autofillResetNeeded";
 
     private static final String WINDOW_HIERARCHY_TAG = "android:viewHierarchyState";
     private static final String SAVED_DIALOG_IDS_KEY = "android:savedDialogIds";
@@ -1057,6 +1058,12 @@ public class Activity extends ContextThemeWrapper
      * @see #onSaveInstanceState
      */
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        mAutoFillResetNeeded = savedInstanceState.getBoolean(AUTOFILL_RESET_NEEDED_TAG, false);
+
+        if (mAutoFillResetNeeded) {
+            getSystemService(AutofillManager.class).onRestoreInstanceState(savedInstanceState);
+        }
+
         if (mWindow != null) {
             Bundle windowState = savedInstanceState.getBundle(WINDOW_HIERARCHY_TAG);
             if (windowState != null) {
@@ -1501,6 +1508,10 @@ public class Activity extends ContextThemeWrapper
         Parcelable p = mFragments.saveAllState();
         if (p != null) {
             outState.putParcelable(FRAGMENTS_TAG, p);
+        }
+        if (mAutoFillResetNeeded) {
+            outState.putBoolean(AUTOFILL_RESET_NEEDED_TAG, mAutoFillResetNeeded);
+            getSystemService(AutofillManager.class).onSaveInstanceState(outState);
         }
         getApplication().dispatchActivitySaveInstanceState(this, outState);
     }
