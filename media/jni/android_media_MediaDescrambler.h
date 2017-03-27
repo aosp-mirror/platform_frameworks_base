@@ -19,6 +19,7 @@
 
 #include "jni.h"
 
+#include <binder/Status.h>
 #include <media/cas/DescramblerAPI.h>
 #include <media/stagefright/foundation/ABase.h>
 #include <utils/Mutex.h>
@@ -31,11 +32,12 @@ namespace media {
 class IDescrambler;
 };
 using namespace media;
+using binder::Status;
 
 struct JDescrambler : public RefBase {
     JDescrambler(JNIEnv *env, jobject descramberBinderObj);
 
-    ssize_t descramble(
+    Status descramble(
             jbyte key,
             size_t numSubSamples,
             ssize_t totalLength,
@@ -43,7 +45,8 @@ struct JDescrambler : public RefBase {
             const void *srcPtr,
             jint srcOffset,
             void *dstPtr,
-            jint dstOffset);
+            jint dstOffset,
+            ssize_t *result);
 
 protected:
     virtual ~JDescrambler();

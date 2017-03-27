@@ -18,6 +18,7 @@ package android.media;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.media.MediaCasException.*;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -28,6 +29,7 @@ import android.os.Parcelable;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.ServiceSpecificException;
 import android.util.Log;
 import android.util.Singleton;
 
@@ -83,8 +85,6 @@ import android.util.Singleton;
  * to use with {@link MediaCodec} if the licensing requires a secure decoder. The
  * sessionId of the descrambler can be retrieved by {@link MediaExtractor#getDrmInitData}
  * and used to initialize a MediaDescrambler object for MediaCodec.
- * <p>
- * TODO: determine exception handling schemes.
  * <p>
  * <h3>Listeners</h3>
  * <p>The app may register a listener to receive events from the CA system using
@@ -382,28 +382,22 @@ public final class MediaCas {
         mEventHandler = new EventHandler(looper);
     }
 
-    /*
-     * TODO: handle ServiceSpecificException from the IMediaCas
-     * All Drm-specific failures will be thrown by mICas as
-     * ServiceSpecificException exception with Drm error code.
-     * These need to be re-thrown as crypto exceptions.
-     */
-
     /**
      * Send the private data for the CA system.
      *
      * @param data byte array of the private data.
      *
      * @throws IllegalStateException if the MediaCas instance is not valid.
+     * @throws MediaCasException for CAS-specific errors.
+     * @throws MediaCasStateException for CAS-specific state exceptions.
      */
-    /*
-     * TODO: need to re-throw DRM-specific exceptions
-     */
-    public void setPrivateData(@NonNull byte[] data) {
+    public void setPrivateData(@NonNull byte[] data) throws MediaCasException {
         validateInternalStates();
 
         try {
             mICas.setPrivateData(data);
+        } catch (ServiceSpecificException e) {
+            MediaCasException.throwExceptions(e);
         } catch (RemoteException e) {
             cleanupAndRethrowIllegalState();
         }
@@ -416,14 +410,17 @@ public final class MediaCas {
      *
      * @return session id of the newly opened session.
      *
-     * @throws IllegalStateException if the MediaCas instance is not valid,
-     * or IllegalArgumentException if a session for the program already exists.
+     * @throws IllegalStateException if the MediaCas instance is not valid.
+     * @throws MediaCasException for CAS-specific errors.
+     * @throws MediaCasStateException for CAS-specific state exceptions.
      */
-    public byte[] openSession(int programNumber) {
+    public byte[] openSession(int programNumber) throws MediaCasException {
         validateInternalStates();
 
         try {
             return mICas.openSession(programNumber);
+        } catch (ServiceSpecificException e) {
+            MediaCasException.throwExceptions(e);
         } catch (RemoteException e) {
             cleanupAndRethrowIllegalState();
         }
@@ -438,14 +435,18 @@ public final class MediaCas {
      *
      * @return session id of the newly opened session.
      *
-     * @throws IllegalStateException if the MediaCas instance is not valid,
-     * or IllegalArgumentException if a session for the stream already exists.
+     * @throws IllegalStateException if the MediaCas instance is not valid.
+     * @throws MediaCasException for CAS-specific errors.
+     * @throws MediaCasStateException for CAS-specific state exceptions.
      */
-    public byte[] openSession(int programNumber, int elementaryPID) {
+    public byte[] openSession(int programNumber, int elementaryPID)
+            throws MediaCasException {
         validateInternalStates();
 
         try {
             return mICas.openSessionForStream(programNumber, elementaryPID);
+        } catch (ServiceSpecificException e) {
+            MediaCasException.throwExceptions(e);
         } catch (RemoteException e) {
             cleanupAndRethrowIllegalState();
         }
@@ -457,14 +458,16 @@ public final class MediaCas {
      *
      * @param sessionId the session to be closed.
      *
-     * @throws IllegalStateException if the MediaCas instance is not valid,
-     * or IllegalArgumentException if the session is not valid.
+     * @throws IllegalStateException if the MediaCas instance is not valid.
+     * @throws MediaCasStateException for CAS-specific state exceptions.
      */
     public void closeSession(@NonNull byte[] sessionId) {
         validateInternalStates();
 
         try {
             mICas.closeSession(sessionId);
+        } catch (ServiceSpecificException e) {
+            MediaCasStateException.throwExceptions(e);
         } catch (RemoteException e) {
             cleanupAndRethrowIllegalState();
         }
@@ -476,17 +479,18 @@ public final class MediaCas {
      * @param sessionId the session for which the private data is intended.
      * @param data byte array of the private data.
      *
-     * @throws IllegalStateException if the MediaCas instance is not valid,
-     * or IllegalArgumentException if the session is not valid.
+     * @throws IllegalStateException if the MediaCas instance is not valid.
+     * @throws MediaCasException for CAS-specific errors.
+     * @throws MediaCasStateException for CAS-specific state exceptions.
      */
-    /*
-     * TODO: need to re-throw DRM-specific exceptions
-     */
-    public void setSessionPrivateData(@NonNull byte[] sessionId, @NonNull byte[] data) {
+    public void setSessionPrivateData(@NonNull byte[] sessionId, @NonNull byte[] data)
+            throws MediaCasException {
         validateInternalStates();
 
         try {
             mICas.setSessionPrivateData(sessionId, data);
+        } catch (ServiceSpecificException e) {
+            MediaCasException.throwExceptions(e);
         } catch (RemoteException e) {
             cleanupAndRethrowIllegalState();
         }
@@ -500,19 +504,19 @@ public final class MediaCas {
      * @param offset position within data where the ECM data begins.
      * @param length length of the data (starting from offset).
      *
-     * @throws IllegalStateException if the MediaCas instance is not valid,
-     * or IllegalArgumentException if the session is not valid.
+     * @throws IllegalStateException if the MediaCas instance is not valid.
+     * @throws MediaCasException for CAS-specific errors.
+     * @throws MediaCasStateException for CAS-specific state exceptions.
      */
-    /*
-     * TODO: need to re-throw DRM-specific exceptions
-     */
-    public void processEcm(
-            @NonNull byte[] sessionId, @NonNull byte[] data, int offset, int length) {
+    public void processEcm(@NonNull byte[] sessionId, @NonNull byte[] data,
+            int offset, int length) throws MediaCasException {
         validateInternalStates();
 
         try {
             mCasData.set(data, offset, length);
             mICas.processEcm(sessionId, mCasData);
+        } catch (ServiceSpecificException e) {
+            MediaCasException.throwExceptions(e);
         } catch (RemoteException e) {
             cleanupAndRethrowIllegalState();
         }
@@ -526,13 +530,12 @@ public final class MediaCas {
      * @param sessionId the session for which the ECM is intended.
      * @param data byte array of the ECM data.
      *
-     * @throws IllegalStateException if the MediaCas instance is not valid,
-     * or IllegalArgumentException if the session is not valid.
+     * @throws IllegalStateException if the MediaCas instance is not valid.
+     * @throws MediaCasException for CAS-specific errors.
+     * @throws MediaCasStateException for CAS-specific state exceptions.
      */
-    /*
-     * TODO: need to re-throw DRM-specific exceptions
-     */
-    public void processEcm(@NonNull byte[] sessionId, @NonNull byte[] data) {
+    public void processEcm(@NonNull byte[] sessionId, @NonNull byte[] data)
+            throws MediaCasException {
         processEcm(sessionId, data, 0, data.length);
     }
 
@@ -544,16 +547,18 @@ public final class MediaCas {
      * @param length length of the data (starting from offset).
      *
      * @throws IllegalStateException if the MediaCas instance is not valid.
+     * @throws MediaCasException for CAS-specific errors.
+     * @throws MediaCasStateException for CAS-specific state exceptions.
      */
-    /*
-     * TODO: need to re-throw DRM-specific exceptions
-     */
-    public void processEmm(@NonNull byte[] data, int offset, int length) {
+    public void processEmm(@NonNull byte[] data, int offset, int length)
+            throws MediaCasException {
         validateInternalStates();
 
         try {
             mCasData.set(data, offset, length);
             mICas.processEmm(mCasData);
+        } catch (ServiceSpecificException e) {
+            MediaCasException.throwExceptions(e);
         } catch (RemoteException e) {
             cleanupAndRethrowIllegalState();
         }
@@ -567,11 +572,10 @@ public final class MediaCas {
      * @param data byte array of the EMM data.
      *
      * @throws IllegalStateException if the MediaCas instance is not valid.
+     * @throws MediaCasException for CAS-specific errors.
+     * @throws MediaCasStateException for CAS-specific state exceptions.
      */
-    /*
-     * TODO: need to re-throw DRM-specific exceptions
-     */
-    public void processEmm(@NonNull byte[] data) {
+    public void processEmm(@NonNull byte[] data) throws MediaCasException {
         processEmm(data, 0, data.length);
     }
 
@@ -584,12 +588,17 @@ public final class MediaCas {
      * @param data a byte array containing scheme-specific data for the event.
      *
      * @throws IllegalStateException if the MediaCas instance is not valid.
+     * @throws MediaCasException for CAS-specific errors.
+     * @throws MediaCasStateException for CAS-specific state exceptions.
      */
-    public void sendEvent(int event, int arg, @Nullable byte[] data) {
+    public void sendEvent(int event, int arg, @Nullable byte[] data)
+            throws MediaCasException {
         validateInternalStates();
 
         try {
             mICas.sendEvent(event, arg, data);
+        } catch (ServiceSpecificException e) {
+            MediaCasException.throwExceptions(e);
         } catch (RemoteException e) {
             cleanupAndRethrowIllegalState();
         }
@@ -603,12 +612,16 @@ public final class MediaCas {
      * specific.
      *
      * @throws IllegalStateException if the MediaCas instance is not valid.
+     * @throws MediaCasException for CAS-specific errors.
+     * @throws MediaCasStateException for CAS-specific state exceptions.
      */
-    public void provision(@NonNull String provisionString) {
+    public void provision(@NonNull String provisionString) throws MediaCasException {
         validateInternalStates();
 
         try {
             mICas.provision(provisionString);
+        } catch (ServiceSpecificException e) {
+            MediaCasException.throwExceptions(e);
         } catch (RemoteException e) {
             cleanupAndRethrowIllegalState();
         }
@@ -621,15 +634,17 @@ public final class MediaCas {
      * @param refreshData private data associated with the refreshment.
      *
      * @throws IllegalStateException if the MediaCas instance is not valid.
+     * @throws MediaCasException for CAS-specific errors.
+     * @throws MediaCasStateException for CAS-specific state exceptions.
      */
-    /*
-     * TODO: define enums for refreshType
-     */
-    public void refreshEntitlements(int refreshType, @Nullable byte[] refreshData) {
+    public void refreshEntitlements(int refreshType, @Nullable byte[] refreshData)
+            throws MediaCasException {
         validateInternalStates();
 
         try {
             mICas.refreshEntitlements(refreshType, refreshData);
+        } catch (ServiceSpecificException e) {
+            MediaCasException.throwExceptions(e);
         } catch (RemoteException e) {
             cleanupAndRethrowIllegalState();
         }
