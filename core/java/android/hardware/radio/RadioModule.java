@@ -83,6 +83,10 @@ public class RadioModule extends RadioTuner {
 
     public native @NonNull List<RadioManager.ProgramInfo> getProgramList(@Nullable String filter);
 
+    public native boolean isAnalogForced();
+
+    public native void setAnalogForced(boolean isForced);
+
     public native boolean isAntennaConnected();
 
     public native boolean hasControl();
