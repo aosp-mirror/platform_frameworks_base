@@ -264,10 +264,15 @@ void JankTracker::addFrame(const FrameInfo& frame) {
             // the actual time spent blocked.
             nsecs_t forgiveAmount = std::min(expectedDequeueDuration,
                     frame[FrameInfoIndex::DequeueBufferDuration]);
+            LOG_ALWAYS_FATAL_IF(forgiveAmount >= totalDuration,
+                    "Impossible dequeue duration! dequeue duration reported %" PRId64
+                    ", total duration %" PRId64, forgiveAmount, totalDuration);
             totalDuration -= forgiveAmount;
         }
     }
+    LOG_ALWAYS_FATAL_IF(totalDuration <= 0, "Impossible totalDuration %" PRId64, totalDuration);
     uint32_t framebucket = frameCountIndexForFrameTime(totalDuration);
+    LOG_ALWAYS_FATAL_IF(framebucket < 0, "framebucket < 0 (%u)", framebucket);
     // Keep the fast path as fast as possible.
     if (CC_LIKELY(totalDuration < mFrameInterval)) {
         mData->frameCounts[framebucket]++;
