@@ -1878,6 +1878,15 @@
     <!-- PiP BTW notification description. [CHAR LIMIT=NONE] -->
     <string name="pip_notification_message">If you don’t want <xliff:g id="name" example="Google Maps">%s</xliff:g> to use this feature, tap to open settings and turn it off.</string>
 
+    <!-- PiP section of the tuner. [CHAR LIMIT=NONE] -->
+    <string name="picture_in_picture" translatable="false">Picture-in-Picture</string>
+
+    <!-- PiP minimize title. [CHAR LIMIT=NONE]-->
+    <string name="pip_minimize_title" translatable="false">Minimize</string>
+
+    <!-- PiP minimize description. [CHAR LIMIT=NONE] -->
+    <string name="pip_minimize_description" translatable="false">Drag or fling the PIP to the edges of the screen to minimize it.</string>
+
     <!-- Tuner string -->
     <string name="change_theme_reboot" translatable="false">Changing the theme requires a restart.</string>
     <!-- Tuner string -->
