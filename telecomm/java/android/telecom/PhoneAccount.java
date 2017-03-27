@@ -43,6 +43,15 @@ public final class PhoneAccount implements Parcelable {
 
     /**
      * {@link PhoneAccount} extras key (see {@link PhoneAccount#getExtras()}) which determines the
+     * sort order for {@link PhoneAccount}s from the same
+     * {@link android.telecom.ConnectionService}.
+     * @hide
+     */
+    public static final String EXTRA_SORT_ORDER =
+            "android.telecom.extra.SORT_ORDER";
+
+    /**
+     * {@link PhoneAccount} extras key (see {@link PhoneAccount#getExtras()}) which determines the
      * maximum permitted length of a call subject specified via the
      * {@link TelecomManager#EXTRA_CALL_SUBJECT} extra on an
      * {@link android.content.Intent#ACTION_CALL} intent.  Ultimately a {@link ConnectionService} is
