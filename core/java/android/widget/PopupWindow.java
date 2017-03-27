@@ -2178,9 +2178,14 @@ public class PopupWindow {
             update = true;
         }
 
-        final View anchor = mAnchor.get();
-        final int newAccessibilityIdOfAnchor = (anchor != null)
-                ? anchor.getAccessibilityViewId() : -1;
+        View anchor = null;
+        int newAccessibilityIdOfAnchor = -1;
+
+        if (mAnchor != null && mAnchor.get() != null) {
+            anchor = mAnchor.get();
+            newAccessibilityIdOfAnchor = anchor.getAccessibilityViewId();
+        }
+
         if (newAccessibilityIdOfAnchor != p.accessibilityIdOfAnchor) {
             p.accessibilityIdOfAnchor = newAccessibilityIdOfAnchor;
             update = true;
