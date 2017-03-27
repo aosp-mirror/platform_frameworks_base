@@ -37,8 +37,10 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.policy.PipSnapAlgorithm;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.FlingAnimationUtils;
+import com.android.systemui.tuner.TunerService;
 
 import java.io.PrintWriter;
 
@@ -46,8 +48,10 @@ import java.io.PrintWriter;
  * Manages all the touch handling for PIP on the Phone, including moving, dismissing and expanding
  * the PIP.
  */
-public class PipTouchHandler {
+public class PipTouchHandler implements TunerService.Tunable {
     private static final String TAG = "PipTouchHandler";
+
+    private static final String TUNER_KEY_MINIMIZE = "pip_minimize";
 
     // These values are used for metrics and should never change
     private static final int METRIC_VALUE_DISMISSED_BY_TAP = 0;
@@ -96,6 +100,9 @@ public class PipTouchHandler {
                     updateDismissFraction();
                 }
             };
+
+    // Allow the PIP to be dragged to the edge of the screen to be minimized.
+    private boolean mEnableMinimize = false;
 
     // Behaviour states
     private boolean mIsMenuVisible;
@@ -169,6 +176,9 @@ public class PipTouchHandler {
         mExpandedShortestEdgeSize = context.getResources().getDimensionPixelSize(
                 R.dimen.pip_expanded_shortest_edge_size);
 
+        // Register any tuner settings changes
+        Dependency.get(TunerService.class).addTunable(this, TUNER_KEY_MINIMIZE);
+
         // Register the listener for input consumer touch events
         inputConsumerController.setTouchListener(this::handleTouchEvent);
         inputConsumerController.setRegistrationListener(this::onRegistrationChanged);
@@ -186,6 +196,20 @@ public class PipTouchHandler {
         }
         if (mIsMinimized) {
             setMinimizedStateInternal(false);
+        }
+    }
+
+    @Override
+    public void onTuningChanged(String key, String newValue) {
+        if (newValue == null) {
+            // Reset back to default
+            mEnableMinimize = false;
+            return;
+        }
+        switch (key) {
+            case TUNER_KEY_MINIMIZE:
+                mEnableMinimize = Integer.parseInt(newValue) != 0;
+                break;
         }
     }
 
@@ -368,6 +392,9 @@ public class PipTouchHandler {
      * Sets the minimized state.
      */
     void setMinimizedStateInternal(boolean isMinimized) {
+        if (!mEnableMinimize) {
+            return;
+        }
         setMinimizedState(isMinimized, false /* fromController */);
     }
 
@@ -375,6 +402,9 @@ public class PipTouchHandler {
      * Sets the minimized state.
      */
     void setMinimizedState(boolean isMinimized, boolean fromController) {
+        if (!mEnableMinimize) {
+            return;
+        }
         if (mIsMinimized != isMinimized) {
             MetricsLogger.action(mContext, MetricsEvent.ACTION_PICTURE_IN_PICTURE_MINIMIZED,
                     isMinimized);
@@ -483,7 +513,7 @@ public class PipTouchHandler {
                 final PointF lastDelta = touchState.getLastTouchDelta();
                 float left = mTmpBounds.left + lastDelta.x;
                 float top = mTmpBounds.top + lastDelta.y;
-                if (!touchState.allowDraggingOffscreen()) {
+                if (!touchState.allowDraggingOffscreen() || !mEnableMinimize) {
                     left = Math.max(mMovementBounds.left, Math.min(mMovementBounds.right, left));
                 }
                 if (ENABLE_DISMISS_DRAG_TO_EDGE) {
@@ -563,7 +593,8 @@ public class PipTouchHandler {
                             MetricsEvent.ACTION_PICTURE_IN_PICTURE_DISMISSED,
                             METRIC_VALUE_DISMISSED_BY_DRAG);
                     return true;
-                } else if (!mIsMinimized && (mMotionHelper.shouldMinimizePip() || isFlingToEdge)) {
+                } else if (mEnableMinimize &&
+                        !mIsMinimized && (mMotionHelper.shouldMinimizePip() || isFlingToEdge)) {
                     // Pip should be minimized
                     setMinimizedStateInternal(true);
                     if (mMenuController.isMenuVisible()) {
@@ -631,6 +662,7 @@ public class PipTouchHandler {
         pw.println(innerPrefix + "mImeHeight=" + mImeHeight);
         pw.println(innerPrefix + "mSavedSnapFraction=" + mSavedSnapFraction);
         pw.println(innerPrefix + "mEnableDragToDismiss=" + ENABLE_DISMISS_DRAG_TO_TARGET);
+        pw.println(innerPrefix + "mEnableMinimize=" + mEnableMinimize);
         mSnapAlgorithm.dump(pw, innerPrefix);
         mTouchState.dump(pw, innerPrefix);
         mMotionHelper.dump(pw, innerPrefix);
