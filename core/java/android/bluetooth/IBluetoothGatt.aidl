@@ -29,8 +29,8 @@ import android.bluetooth.le.ResultStorageDescriptor;
 import android.os.ParcelUuid;
 import android.os.WorkSource;
 
-import android.bluetooth.IBluetoothGattCallbackExt;
-import android.bluetooth.IBluetoothGattServerCallbackExt;
+import android.bluetooth.IBluetoothGattCallback;
+import android.bluetooth.IBluetoothGattServerCallback;
 import android.bluetooth.le.IAdvertiserCallback;
 import android.bluetooth.le.IAdvertisingSetCallback;
 import android.bluetooth.le.IPeriodicAdvertisingCallback;
@@ -66,7 +66,7 @@ interface IBluetoothGatt {
     void registerSync(in ScanResult scanResult, in int skip, in int timeout, in IPeriodicAdvertisingCallback callback);
     void unregisterSync(in IPeriodicAdvertisingCallback callback);
 
-    void registerClient(in ParcelUuid appId, in IBluetoothGattCallbackExt callback);
+    void registerClient(in ParcelUuid appId, in IBluetoothGattCallback callback);
 
     void unregisterClient(in int clientIf);
     void clientConnect(in int clientIf, in String address, in boolean isDirect, in int transport, in int phy);
@@ -88,7 +88,7 @@ interface IBluetoothGatt {
     void configureMTU(in int clientIf, in String address, in int mtu);
     void connectionParameterUpdate(in int clientIf, in String address, in int connectionPriority);
 
-    void registerServer(in ParcelUuid appId, in IBluetoothGattServerCallbackExt callback);
+    void registerServer(in ParcelUuid appId, in IBluetoothGattServerCallback callback);
     void unregisterServer(in int serverIf);
     void serverConnect(in int serverIf, in String address, in boolean isDirect, in int transport);
     void serverDisconnect(in int serverIf, in String address);
