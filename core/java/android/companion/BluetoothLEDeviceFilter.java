@@ -36,6 +36,8 @@ import com.android.internal.util.BitUtils;
 import com.android.internal.util.ObjectUtils;
 import com.android.internal.util.Preconditions;
 
+import java.util.Arrays;
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 /**
@@ -160,9 +162,39 @@ public final class BluetoothLEDeviceFilter implements DeviceFilter<ScanResult> {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        BluetoothLEDeviceFilter that = (BluetoothLEDeviceFilter) o;
+        return mRenameBytesFrom == that.mRenameBytesFrom &&
+                mRenameBytesTo == that.mRenameBytesTo &&
+                mRenameBytesReverseOrder == that.mRenameBytesReverseOrder &&
+                Objects.equals(mNamePattern, that.mNamePattern) &&
+                Objects.equals(mScanFilter, that.mScanFilter) &&
+                Arrays.equals(mRawDataFilter, that.mRawDataFilter) &&
+                Arrays.equals(mRawDataFilterMask, that.mRawDataFilterMask) &&
+                Objects.equals(mRenamePrefix, that.mRenamePrefix) &&
+                Objects.equals(mRenameSuffix, that.mRenameSuffix);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mNamePattern, mScanFilter, mRawDataFilter, mRawDataFilterMask,
+                mRenamePrefix, mRenameSuffix, mRenameBytesFrom, mRenameBytesTo,
+                mRenameBytesReverseOrder);
+    }
+
+    @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(patternToString(getNamePattern()));
         dest.writeParcelable(mScanFilter, flags);
+        dest.writeByteArray(mRawDataFilter);
+        dest.writeByteArray(mRawDataFilterMask);
+        dest.writeString(mRenamePrefix);
+        dest.writeString(mRenameSuffix);
+        dest.writeInt(mRenameBytesFrom);
+        dest.writeInt(mRenameBytesTo);
+        dest.writeBoolean(mRenameBytesReverseOrder);
     }
 
     @Override
@@ -174,13 +206,23 @@ public final class BluetoothLEDeviceFilter implements DeviceFilter<ScanResult> {
             = new Creator<BluetoothLEDeviceFilter>() {
         @Override
         public BluetoothLEDeviceFilter createFromParcel(Parcel in) {
-            return new BluetoothLEDeviceFilter.Builder()
+            Builder builder = new Builder()
                     .setNamePattern(patternFromString(in.readString()))
-                    .setScanFilter(in.readParcelable(null))
-                    .setRawDataFilter(in.readBlob(), in.readBlob())
-                    .setRename(in.readString(), in.readString(),
-                            in.readInt(), in.readInt(), in.readBoolean())
-                    .build();
+                    .setScanFilter(in.readParcelable(null));
+            byte[] rawDataFilter = in.createByteArray();
+            byte[] rawDataFilterMask = in.createByteArray();
+            if (rawDataFilter != null) {
+                builder.setRawDataFilter(rawDataFilter, rawDataFilterMask);
+            }
+            String renamePrefix = in.readString();
+            String suffix = in.readString();
+            int bytesFrom = in.readInt();
+            int bytesTo = in.readInt();
+            boolean bytesReverseOrder = in.readBoolean();
+            if (renamePrefix != null) {
+                builder.setRename(renamePrefix, suffix, bytesFrom, bytesTo, bytesReverseOrder);
+            }
+            return builder.build();
         }
 
         @Override
@@ -240,12 +282,14 @@ public final class BluetoothLEDeviceFilter implements DeviceFilter<ScanResult> {
          */
         @NonNull
         public Builder setRawDataFilter(@NonNull byte[] rawDataFilter,
-                @NonNull byte[] rawDataFilterMask) {
+                @Nullable byte[] rawDataFilterMask) {
             checkNotUsed();
-            checkArgument(rawDataFilter.length == rawDataFilterMask.length,
+            Preconditions.checkNotNull(rawDataFilter);
+            checkArgument(rawDataFilterMask == null ||
+                    rawDataFilter.length == rawDataFilterMask.length,
                     "Mask and filter should be the same length");
-            mRawDataFilter = Preconditions.checkNotNull(rawDataFilter);
-            mRawDataFilterMask = Preconditions.checkNotNull(rawDataFilterMask);
+            mRawDataFilter = rawDataFilter;
+            mRawDataFilterMask = rawDataFilterMask;
             return this;
         }
 

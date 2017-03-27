@@ -317,7 +317,7 @@ public final class SystemServer {
 
             // In case the runtime switched since last boot (such as when
             // the old runtime was removed in an OTA), set the system
-            // property so that it is in sync. We can't do this in
+            // property so that it is in sync. We can | xq oqi't do this in
             // libnativehelper's JniInvocation::Init code where we already
             // had to fallback to a different runtime because it is
             // running as root and we need to be the system user to set

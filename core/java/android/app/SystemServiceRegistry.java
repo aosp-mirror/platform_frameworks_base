@@ -93,6 +93,7 @@ import android.nfc.NfcManager;
 import android.os.BatteryManager;
 import android.os.BatteryStats;
 import android.os.Build;
+import android.os.Debug;
 import android.os.DropBoxManager;
 import android.os.HardwarePropertiesManager;
 import android.os.IBatteryPropertiesRegistrar;

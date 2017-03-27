@@ -27,6 +27,7 @@ import com.android.internal.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * A request for the user to select a companion device to associate with.
@@ -66,6 +67,20 @@ public final class AssociationRequest implements Parcelable {
     @NonNull
     public List<DeviceFilter<?>> getDeviceFilters() {
         return mDeviceFilters;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        AssociationRequest that = (AssociationRequest) o;
+        return mSingleDevice == that.mSingleDevice &&
+                Objects.equals(mDeviceFilters, that.mDeviceFilters);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mSingleDevice, mDeviceFilters);
     }
 
     @Override

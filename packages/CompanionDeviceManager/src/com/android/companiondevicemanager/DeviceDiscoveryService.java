@@ -58,6 +58,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.Preconditions;
 
@@ -180,15 +181,20 @@ public class DeviceDiscoveryService extends Service {
     }
 
     private void startDiscovery(AssociationRequest request) {
-        mRequest = request;
+        if (!request.equals(mRequest)) {
+            mRequest = request;
 
-        mFilters = request.getDeviceFilters();
-        mWifiFilters = CollectionUtils.filter(mFilters, WifiDeviceFilter.class);
-        mBluetoothFilters = CollectionUtils.filter(mFilters, BluetoothDeviceFilter.class);
-        mBLEFilters = CollectionUtils.filter(mFilters, BluetoothLEDeviceFilter.class);
-        mBLEScanFilters = CollectionUtils.map(mBLEFilters, BluetoothLEDeviceFilter::getScanFilter);
+            mFilters = request.getDeviceFilters();
+            mWifiFilters = CollectionUtils.filter(mFilters, WifiDeviceFilter.class);
+            mBluetoothFilters = CollectionUtils.filter(mFilters, BluetoothDeviceFilter.class);
+            mBLEFilters = CollectionUtils.filter(mFilters, BluetoothLEDeviceFilter.class);
+            mBLEScanFilters = CollectionUtils.map(mBLEFilters, BluetoothLEDeviceFilter::getScanFilter);
 
-        reset();
+            reset();
+        }
+        if (!ArrayUtils.isEmpty(mDevicesFound)) {
+            onReadyToShowUI();
+        }
 
         if (shouldScan(mBluetoothFilters)) {
             final IntentFilter intentFilter = new IntentFilter();
@@ -228,10 +234,18 @@ public class DeviceDiscoveryService extends Service {
 
     private void stopScan() {
         if (DEBUG) Log.i(LOG_TAG, "stopScan() called");
-        mBluetoothAdapter.cancelDiscovery();
-        mBLEScanner.stopScan(mBLEScanCallback);
-        unregisterReceiver(mBluetoothDeviceFoundBroadcastReceiver);
-        unregisterReceiver(mWifiDeviceFoundBroadcastReceiver);
+
+        if (shouldScan(mBluetoothFilters)) {
+            mBluetoothAdapter.cancelDiscovery();
+            unregisterReceiver(mBluetoothDeviceFoundBroadcastReceiver);
+        }
+        if (shouldScan(mBLEFilters)) {
+            mBLEScanner.stopScan(mBLEScanCallback);
+        }
+        if (shouldScan(mWifiFilters)) {
+            unregisterReceiver(mWifiDeviceFoundBroadcastReceiver);
+        }
+
         stopSelf();
     }
 
