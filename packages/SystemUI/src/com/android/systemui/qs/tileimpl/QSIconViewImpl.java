@@ -116,7 +116,7 @@ public class QSIconViewImpl extends QSIconView {
         if (state.state != mState) {
             int color = getColor(state.state);
             mState = state.state;
-            if (iv.isShown()) {
+            if (iv.isShown() && mTint != 0) {
                 animateGrayScale(mTint, color, iv);
                 mTint = color;
             } else {
