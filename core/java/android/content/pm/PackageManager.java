@@ -431,6 +431,7 @@ public abstract class PackageManager {
      * This will not return information on any unbundled update to system components.
      * @hide
      */
+    @SystemApi
     public static final int MATCH_FACTORY_ONLY = 0x00200000;
 
     /**
