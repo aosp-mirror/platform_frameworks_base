@@ -43,6 +43,8 @@
         android:alpha="0"
         android:background="@color/qs_detail_progress_track"
         android:src="@drawable/indeterminate_anim"
+        android:scaleType="fitXY"
+        android:translationY="16dp"
         />
 
     <com.android.systemui.qs.NonInterceptingScrollView
@@ -57,6 +59,6 @@
             android:layout_height="match_parent"/>
     </com.android.systemui.qs.NonInterceptingScrollView>
 
-    <include layout="@layout/qs_detail_buttons"/>
+    <include layout="@layout/qs_detail_buttons" />
 
 </com.android.systemui.qs.QSDetail>
