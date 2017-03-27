@@ -4400,8 +4400,12 @@ public class PackageParser {
             defaultMaxAspectRatio = owner.applicationInfo.maxAspectRatio;
         }
 
-        aInfo.maxAspectRatio = Math.max(1.0f, sa.getFloat(
-                R.styleable.AndroidManifestActivity_maxAspectRatio, defaultMaxAspectRatio));
+        aInfo.maxAspectRatio = sa.getFloat(
+                R.styleable.AndroidManifestActivity_maxAspectRatio, defaultMaxAspectRatio);
+        if (aInfo.maxAspectRatio < 1.0f && aInfo.maxAspectRatio != 0) {
+            // Ignore any value lesser than 1.0.
+            aInfo.maxAspectRatio = 0;
+        }
     }
 
     /**
