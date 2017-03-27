@@ -24,6 +24,10 @@ public interface DeviceProvisionedController extends CallbackController<DevicePr
     boolean isUserSetup(int currentUser);
     int getCurrentUser();
 
+    default boolean isCurrentUserSetup() {
+        return isUserSetup(getCurrentUser());
+    }
+
     interface DeviceProvisionedListener {
         default void onDeviceProvisionedChanged() { }
         default void onUserSwitched() {
