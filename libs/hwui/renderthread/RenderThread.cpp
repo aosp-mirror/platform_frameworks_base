@@ -98,6 +98,7 @@ void TaskQueue::queue(RenderTask* task) {
 }
 
 void TaskQueue::queueAtFront(RenderTask* task) {
+    LOG_ALWAYS_FATAL_IF(task->mNext || mHead == task, "Task is already in the queue!");
     if (mTail) {
         task->mNext = mHead;
         mHead = task;
