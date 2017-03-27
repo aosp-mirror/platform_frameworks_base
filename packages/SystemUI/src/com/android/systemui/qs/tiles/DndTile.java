@@ -146,7 +146,6 @@ public class DndTile extends QSTileImpl<BooleanState> {
                     Toast.LENGTH_LONG).show();
             return;
         }
-        MetricsLogger.action(mContext, getMetricsCategory(), !mState.value);
         showDetail(true);
         int zen = Prefs.getInt(mContext, Prefs.Key.DND_FAVORITE_ZEN, Global.ZEN_MODE_ALARMS);
         mController.setZen(zen, null, TAG);

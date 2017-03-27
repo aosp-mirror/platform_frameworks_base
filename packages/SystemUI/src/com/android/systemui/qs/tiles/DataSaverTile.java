@@ -87,7 +87,6 @@ public class DataSaverTile extends QSTileImpl<BooleanState> implements
 
     private void toggleDataSaver() {
         mState.value = !mDataSaverController.isDataSaverEnabled();
-        MetricsLogger.action(mContext, getMetricsCategory(), mState.value);
         mDataSaverController.setDataSaverEnabled(mState.value);
         refreshState(mState.value);
     }

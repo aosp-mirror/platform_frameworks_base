@@ -68,7 +68,6 @@ public class WorkModeTile extends QSTileImpl<BooleanState> implements
 
     @Override
     public void handleClick() {
-        MetricsLogger.action(mContext, getMetricsCategory(), !mState.value);
         mProfileController.setWorkModeEnabled(!mState.value);
     }
 

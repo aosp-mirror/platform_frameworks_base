@@ -16,6 +16,8 @@
 
 package com.android.systemui.qs;
 
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.ACTION_QS_DATE;
+
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -358,6 +360,8 @@ public class QSFooter extends LinearLayout implements
                 startSettingsActivity();
             }
         } else if (v == mDateTimeGroup) {
+            Dependency.get(MetricsLogger.class).action(ACTION_QS_DATE,
+                    mNextAlarm != null);
             if (mNextAlarm != null) {
                 PendingIntent showIntent = mNextAlarm.getShowIntent();
                 mActivityStarter.startPendingIntentDismissingKeyguard(showIntent);

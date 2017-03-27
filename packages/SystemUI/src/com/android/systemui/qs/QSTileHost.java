@@ -157,6 +157,10 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory> {
         return mServices;
     }
 
+    public int indexOf(String spec) {
+        return mTileSpecs.indexOf(spec);
+    }
+
     @Override
     public void onTuningChanged(String key, String newValue) {
         if (!TILES_SETTING.equals(key)) {

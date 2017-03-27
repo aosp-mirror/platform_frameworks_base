@@ -84,7 +84,6 @@ public class ColorInversionTile extends QSTileImpl<BooleanState> {
 
     @Override
     protected void handleClick() {
-        MetricsLogger.action(mContext, getMetricsCategory(), !mState.value);
         mSetting.setValue(mState.value ? 0 : 1);
     }
 

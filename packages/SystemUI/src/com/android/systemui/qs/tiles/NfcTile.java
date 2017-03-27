@@ -85,7 +85,6 @@ public class NfcTile extends QSTileImpl<BooleanState> {
     @Override
     protected void handleClick() {
         if (mAdapter == null) return;
-        MetricsLogger.action(mContext, getMetricsCategory(), !mState.value);
         if (!mAdapter.isEnabled()) {
             mAdapter.enable();
         } else {

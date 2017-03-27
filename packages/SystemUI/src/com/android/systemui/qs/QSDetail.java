@@ -14,6 +14,8 @@
 
 package com.android.systemui.qs;
 
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.ACTION_QS_MORE_SETTINGS;
+
 import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
 import android.animation.AnimatorListenerAdapter;
@@ -197,7 +199,7 @@ public class QSDetail extends LinearLayout {
             mDetailContent.removeAllViews();
             mDetailContent.addView(detailView);
             mDetailViews.put(viewCacheIndex, detailView);
-            MetricsLogger.visible(mContext, adapter.getMetricsCategory());
+            Dependency.get(MetricsLogger.class).visible(adapter.getMetricsCategory());
             announceForAccessibility(mContext.getString(
                     R.string.accessibility_quick_settings_detail,
                     adapter.getTitle()));
@@ -206,7 +208,7 @@ public class QSDetail extends LinearLayout {
             setVisibility(View.VISIBLE);
         } else {
             if (mDetailAdapter != null) {
-                MetricsLogger.hidden(mContext, mDetailAdapter.getMetricsCategory());
+                Dependency.get(MetricsLogger.class).hidden(mDetailAdapter.getMetricsCategory());
             }
             mClosingDetail = true;
             mDetailAdapter = null;
@@ -238,8 +240,12 @@ public class QSDetail extends LinearLayout {
     protected void setupDetailFooter(DetailAdapter adapter) {
         final Intent settingsIntent = adapter.getSettingsIntent();
         mDetailSettingsButton.setVisibility(settingsIntent != null ? VISIBLE : GONE);
-        mDetailSettingsButton.setOnClickListener(v -> Dependency.get(ActivityStarter.class)
-                .postStartActivityDismissingKeyguard(settingsIntent, 0));
+        mDetailSettingsButton.setOnClickListener(v -> {
+            Dependency.get(MetricsLogger.class).action(ACTION_QS_MORE_SETTINGS,
+                    mDetailAdapter.getMetricsCategory());
+            Dependency.get(ActivityStarter.class)
+                    .postStartActivityDismissingKeyguard(settingsIntent, 0);
+        });
     }
 
     protected void setupDetailHeader(final DetailAdapter adapter) {

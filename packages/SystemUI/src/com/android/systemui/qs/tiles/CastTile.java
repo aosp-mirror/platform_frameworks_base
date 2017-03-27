@@ -108,13 +108,11 @@ public class CastTile extends QSTileImpl<BooleanState> {
     protected void handleClick() {
         if (mKeyguard.isSecure() && !mKeyguard.canSkipBouncer()) {
             mActivityStarter.postQSRunnableDismissingKeyguard(() -> {
-                MetricsLogger.action(mContext, getMetricsCategory());
                 showDetail(true);
                 mHost.openPanels();
             });
             return;
         }
-        MetricsLogger.action(mContext, getMetricsCategory());
         showDetail(true);
     }
 

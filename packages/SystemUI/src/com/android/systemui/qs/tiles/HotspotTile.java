@@ -106,7 +106,6 @@ public class HotspotTile extends QSTileImpl<AirplaneBooleanState> {
         if (!isEnabled && mAirplaneMode.getValue() != 0) {
             return;
         }
-        MetricsLogger.action(mContext, getMetricsCategory(), !isEnabled);
         mController.setHotspotEnabled(!isEnabled);
     }
 

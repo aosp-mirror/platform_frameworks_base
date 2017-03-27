@@ -62,9 +62,9 @@ public class StatusBarTest extends SysuiTestCase {
         mKeyguardIndicationController = mock(KeyguardIndicationController.class);
         mStackScroller = mock(NotificationStackScrollLayout.class);
         mMetricsLogger = new FakeMetricsLogger();
+        mDependency.injectTestDependency(MetricsLogger.class, mMetricsLogger);
         mStatusBar = new TestableStatusBar(mStatusBarKeyguardViewManager, mUnlockMethodCache,
                 mKeyguardIndicationController, mStackScroller);
-        mStatusBar.setMetricsLogger(mMetricsLogger);
 
         doAnswer(invocation -> {
             OnDismissAction onDismissAction = (OnDismissAction) invocation.getArguments()[0];

@@ -92,7 +92,6 @@ public class IntentTile extends QSTileImpl<State> {
 
     @Override
     protected void handleClick() {
-        MetricsLogger.action(mContext, getMetricsCategory(), mIntentPackage);
         sendIntent("click", mOnClick, mOnClickUri);
     }
 

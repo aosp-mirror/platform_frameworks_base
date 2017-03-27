@@ -59,6 +59,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
     protected final View mBrightnessView;
     private final H mHandler = new H();
     private final View mPageIndicator;
+    private final MetricsLogger mMetricsLogger = Dependency.get(MetricsLogger.class);
 
     private int mPanelPaddingBottom;
     private int mBrightnessPaddingTop;
@@ -259,7 +260,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
         if (!mExpanded && mTileLayout instanceof PagedTileLayout) {
             ((PagedTileLayout) mTileLayout).setCurrentItem(0, false);
         }
-        MetricsLogger.visibility(mContext, MetricsEvent.QS_PANEL, mExpanded);
+        mMetricsLogger.visibility(MetricsEvent.QS_PANEL, mExpanded);
         if (!mExpanded) {
             closeDetail();
         } else {
@@ -475,7 +476,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
         int newVis = visible ? VISIBLE : INVISIBLE;
         setVisibility(newVis);
         if (mGridContentVisible != visible) {
-            MetricsLogger.visibility(mContext, MetricsEvent.QS_PANEL, newVis);
+            mMetricsLogger.visibility(MetricsEvent.QS_PANEL, newVis);
         }
         mGridContentVisible = visible;
     }
@@ -483,7 +484,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
     private void logTiles() {
         for (int i = 0; i < mRecords.size(); i++) {
             TileRecord tileRecord = mRecords.get(i);
-            MetricsLogger.visible(mContext, tileRecord.tile.getMetricsCategory());
+            mMetricsLogger.visible(tileRecord.tile.getMetricsCategory());
         }
     }
 

@@ -22,6 +22,7 @@ import android.util.ArrayMap;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.systemui.Dependency;
 import com.android.systemui.EventLogConstants;
 import com.android.systemui.EventLogTags;
 
@@ -33,7 +34,7 @@ public class LockscreenGestureLogger {
     private ArrayMap<Integer, Integer> mLegacyMap;
     private LogMaker mLogMaker = new LogMaker(MetricsEvent.VIEW_UNKNOWN)
             .setType(MetricsEvent.TYPE_ACTION);
-    private MetricsLogger mMetricsLogger = new MetricsLogger();
+    private final MetricsLogger mMetricsLogger = Dependency.get(MetricsLogger.class);
 
     public LockscreenGestureLogger() {
         mLegacyMap = new ArrayMap<>(EventLogConstants.METRICS_GESTURE_TYPE_MAP.length);
@@ -57,10 +58,5 @@ public class LockscreenGestureLogger {
             return MetricsEvent.VIEW_UNKNOWN;
         }
         return value;
-    }
-
-    @VisibleForTesting
-    void setMetricsLogger(MetricsLogger metricsLogger) {
-        mMetricsLogger = metricsLogger;
     }
 }
