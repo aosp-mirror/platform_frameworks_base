@@ -133,14 +133,7 @@ public abstract class BaseFragmentTest {
     public void testRecreate() {
         mFragments.dispatchResume();
         processAllMessages();
-        mFragments.dispatchPause();
-        Parcelable p = mFragments.saveAllState();
-        mFragments.dispatchDestroy();
-
-        mFragments = FragmentController.createController(new HostCallbacks());
-        mFragments.attachHost(null);
-        mFragments.restoreAllState(p, (FragmentManagerNonConfig) null);
-        mFragments.dispatchResume();
+        recreateFragment();
         processAllMessages();
     }
 
@@ -152,6 +145,18 @@ public abstract class BaseFragmentTest {
         processAllMessages();
         mFragments.dispatchResume();
         processAllMessages();
+    }
+
+    protected void recreateFragment() {
+        mFragments.dispatchPause();
+        Parcelable p = mFragments.saveAllState();
+        mFragments.dispatchDestroy();
+
+        mFragments = FragmentController.createController(new HostCallbacks());
+        mFragments.attachHost(null);
+        mFragments.restoreAllState(p, (FragmentManagerNonConfig) null);
+        mFragments.dispatchResume();
+        mFragment = mFragments.getFragmentManager().findFragmentById(VIEW_ID);
     }
 
     protected void attachFragmentToWindow() {
