@@ -197,7 +197,7 @@ public class CacheQuotaStrategy implements RemoteCallback.OnResultListener {
                                     .setQuota(CacheQuotaHint.QUOTA_NOT_SET)
                                     .build());
                 } catch (PackageManager.NameNotFoundException e) {
-                    Slog.w(TAG, "Unable to find package for quota calculation", e);
+                    // This may happen if an app has a recorded usage, but has been uninstalled.
                     continue;
                 }
             }
