@@ -526,9 +526,13 @@ public class WifiTracker {
                         // the given ScanResult.  This is used for showing that a given AP
                         // (ScanResult) is available via a Passpoint provider (provider friendly
                         // name).
-                        WifiConfiguration config = mWifiManager.getMatchingWifiConfig(result);
-                        if (config != null) {
-                            accessPoint.update(config);
+                        try {
+                            WifiConfiguration config = mWifiManager.getMatchingWifiConfig(result);
+                            if (config != null) {
+                                accessPoint.update(config);
+                            }
+                        } catch (UnsupportedOperationException e) {
+                            // Passpoint not supported on the device.
                         }
                     }
 
