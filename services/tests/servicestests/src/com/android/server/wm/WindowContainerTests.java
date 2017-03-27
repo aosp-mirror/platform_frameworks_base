@@ -422,7 +422,7 @@ public class WindowContainerTests extends WindowTestsBase {
         final TestWindowContainer child1 = root.addChildWindow(builder);
         child1.setFillsParent(true);
 
-        assertTrue(root.getOrientation() == expectedOrientation);
+        assertEquals(expectedOrientation, root.getOrientation());
     }
 
     @Test
@@ -805,8 +805,13 @@ public class WindowContainerTests extends WindowTestsBase {
         }
 
         @Override
+        int getOrientation(int candidate) {
+            return mOrientation != null ? mOrientation : super.getOrientation(candidate);
+        }
+
+        @Override
         int getOrientation() {
-            return mOrientation != null ? mOrientation : super.getOrientation();
+            return getOrientation(super.mOrientation);
         }
 
         @Override
