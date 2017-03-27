@@ -21,6 +21,7 @@ import android.app.Fragment;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.support.annotation.VisibleForTesting;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -39,6 +40,8 @@ import com.android.systemui.statusbar.stack.StackStateAnimator;
 public class QSFragment extends Fragment implements QS {
     private static final String TAG = "QS";
     private static final boolean DEBUG = false;
+    private static final String EXTRA_EXPANDED = "expanded";
+    private static final String EXTRA_LISTENING = "listening";
 
     private final Rect mQsBounds = new Rect();
     private boolean mQsExpanded;
@@ -85,6 +88,35 @@ public class QSFragment extends Fragment implements QS {
 
         mQSCustomizer = view.findViewById(R.id.qs_customize);
         mQSCustomizer.setQs(this);
+        if (savedInstanceState != null) {
+            setExpanded(savedInstanceState.getBoolean(EXTRA_EXPANDED));
+            setListening(savedInstanceState.getBoolean(EXTRA_LISTENING));
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (mListening) {
+            setListening(false);
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean(EXTRA_EXPANDED, mQsExpanded);
+        outState.putBoolean(EXTRA_LISTENING, mListening);
+    }
+
+    @VisibleForTesting
+    boolean isListening() {
+        return mListening;
+    }
+
+    @VisibleForTesting
+    boolean isExpanded() {
+        return mQsExpanded;
     }
 
     @Override

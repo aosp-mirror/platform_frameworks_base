@@ -15,14 +15,18 @@
 package com.android.systemui.qs;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
+import android.app.FragmentController;
+import android.app.FragmentManagerNonConfig;
 import android.os.Looper;
 
 import com.android.keyguard.CarrierText;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 
+import android.os.Parcelable;
 import android.testing.AndroidTestingRunner;
 
 import com.android.systemui.SysuiBaseFragmentTest;
@@ -85,5 +89,24 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
 
         host.destroy();
         processAllMessages();
+    }
+
+    @Test
+    public void testSaveState() {
+        QSFragment qs = (QSFragment) mFragment;
+
+        mFragments.dispatchResume();
+        processAllMessages();
+
+        qs.setListening(true);
+        qs.setExpanded(true);
+        processAllMessages();
+        recreateFragment();
+        processAllMessages();
+
+        // Get the reference to the new fragment.
+        qs = (QSFragment) mFragment;
+        assertTrue(qs.isListening());
+        assertTrue(qs.isExpanded());
     }
 }
