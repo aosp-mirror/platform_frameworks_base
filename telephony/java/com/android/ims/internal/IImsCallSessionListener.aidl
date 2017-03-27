@@ -106,6 +106,8 @@ interface IImsCallSessionListener {
             in int srcAccessTech, in int targetAccessTech, in ImsReasonInfo reasonInfo);
     void callSessionHandoverFailed(in IImsCallSession session,
             in int srcAccessTech, in int targetAccessTech, in ImsReasonInfo reasonInfo);
+    void callSessionMayHandover(in IImsCallSession session,
+            in int srcAccessTech, in int targetAccessTech);
 
     /**
      * Notifies the TTY mode change by remote party.
