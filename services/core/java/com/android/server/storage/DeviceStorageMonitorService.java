@@ -17,6 +17,8 @@
 package com.android.server.storage;
 
 import android.app.NotificationChannel;
+
+import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.server.EventLogTags;
 import com.android.server.SystemService;
@@ -93,7 +95,6 @@ public class DeviceStorageMonitorService extends SystemService {
     static final int DEVICE_MEMORY_WHAT = 1;
     static final int FORCE_MEMORY_WHAT = 2;
     private static final int MONITOR_INTERVAL = 1; //in minutes
-    private static final int LOW_MEMORY_NOTIFICATION_ID = 1;
 
     private static final int DEFAULT_FREE_STORAGE_LOG_INTERVAL_IN_MINUTES = 12*60; //in minutes
     private static final long DEFAULT_DISK_FREE_CHANGE_REPORTING_THRESHOLD = 2 * 1024 * 1024; // 2MB
@@ -669,7 +670,7 @@ public class DeviceStorageMonitorService extends SystemService {
                                 .setChannel(TV_NOTIFICATION_CHANNEL_ID))
                         .build();
         notification.flags |= Notification.FLAG_NO_CLEAR;
-        notificationMgr.notifyAsUser(null, LOW_MEMORY_NOTIFICATION_ID, notification,
+        notificationMgr.notifyAsUser(null, SystemMessage.NOTE_LOW_STORAGE, notification,
                 UserHandle.ALL);
         Intent broadcast = new Intent(mStorageLowIntent);
         if (seq != 0) {
@@ -688,7 +689,7 @@ public class DeviceStorageMonitorService extends SystemService {
                 (NotificationManager)context.getSystemService(
                         Context.NOTIFICATION_SERVICE);
         //cancel notification since memory has been freed
-        mNotificationMgr.cancelAsUser(null, LOW_MEMORY_NOTIFICATION_ID, UserHandle.ALL);
+        mNotificationMgr.cancelAsUser(null, SystemMessage.NOTE_LOW_STORAGE, UserHandle.ALL);
 
         context.removeStickyBroadcastAsUser(mStorageLowIntent, UserHandle.ALL);
         Intent broadcast = new Intent(mStorageOkIntent);

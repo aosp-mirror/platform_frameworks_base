@@ -88,6 +88,7 @@ import libcore.io.IoUtils;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.content.PackageHelper;
+import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.ImageUtils;
@@ -995,7 +996,9 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
             if (PackageManager.DELETE_SUCCEEDED == returnCode && mNotification != null) {
                 NotificationManager notificationManager = (NotificationManager)
                         mContext.getSystemService(Context.NOTIFICATION_SERVICE);
-                notificationManager.notify(basePackageName, 0, mNotification);
+                notificationManager.notify(basePackageName,
+                        SystemMessage.NOTE_PACKAGE_STATE,
+                        mNotification);
             }
             final Intent fillIn = new Intent();
             fillIn.putExtra(PackageInstaller.EXTRA_PACKAGE_NAME, mPackageName);
@@ -1054,7 +1057,9 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
                 if (notification != null) {
                     NotificationManager notificationManager = (NotificationManager)
                             mContext.getSystemService(Context.NOTIFICATION_SERVICE);
-                    notificationManager.notify(basePackageName, 0, notification);
+                    notificationManager.notify(basePackageName,
+                            SystemMessage.NOTE_PACKAGE_STATE,
+                            notification);
                 }
             }
             final Intent fillIn = new Intent();

@@ -89,6 +89,7 @@ import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.PackageMonitor;
+import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.IndentingPrintWriter;
@@ -189,7 +190,8 @@ public class AccountManagerService
     }
 
     private final LinkedHashMap<String, Session> mSessions = new LinkedHashMap<String, Session>();
-    private final AtomicInteger mNotificationIds = new AtomicInteger(1);
+    private final AtomicInteger mNotificationIds =
+            new AtomicInteger(SystemMessage.ACCOUNT_MANAGER_BASE);
 
     static class UserAccounts {
         private final int userId;

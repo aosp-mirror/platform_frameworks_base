@@ -28,6 +28,7 @@ import com.android.internal.inputmethod.InputMethodSubtypeSwitchingController;
 import com.android.internal.inputmethod.InputMethodSubtypeSwitchingController.ImeSubtypeListItem;
 import com.android.internal.inputmethod.InputMethodUtils;
 import com.android.internal.inputmethod.InputMethodUtils.InputMethodSettings;
+import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.HandlerCaller;
 import com.android.internal.os.SomeArgs;
@@ -2192,7 +2193,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                             Slog.d(TAG, "--- show notification: label =  " + summary);
                         }
                         mNotificationManager.notifyAsUser(null,
-                                com.android.internal.R.string.select_input_method,
+                                SystemMessage.NOTE_SELECT_INPUT_METHOD,
                                 mImeSwitcherNotification.build(), UserHandle.ALL);
                         mNotificationShown = true;
                     }
@@ -2204,7 +2205,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         Slog.d(TAG, "--- hide notification");
                     }
                     mNotificationManager.cancelAsUser(null,
-                            com.android.internal.R.string.select_input_method, UserHandle.ALL);
+                            SystemMessage.NOTE_SELECT_INPUT_METHOD, UserHandle.ALL);
                     mNotificationShown = false;
                 }
             }

@@ -81,6 +81,7 @@ import android.util.Log;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.net.LegacyVpnInfo;
 import com.android.internal.net.VpnConfig;
 import com.android.internal.net.VpnInfo;
@@ -1304,7 +1305,8 @@ public class Vpn {
                             .setVisibility(Notification.VISIBILITY_PUBLIC)
                             .setOngoing(true)
                             .setColor(mContext.getColor(R.color.system_notification_accent_color));
-            notificationManager.notifyAsUser(TAG, 0, builder.build(), user);
+            notificationManager.notifyAsUser(TAG, SystemMessage.NOTE_VPN_DISCONNECTED,
+                    builder.build(), user);
         } finally {
             Binder.restoreCallingIdentity(token);
         }

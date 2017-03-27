@@ -339,6 +339,7 @@ import com.android.internal.app.SystemUserHomeActivity;
 import com.android.internal.app.procstats.ProcessStats;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.internal.os.IResultReceiver;
@@ -2121,7 +2122,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     try {
                         int[] outId = new int[1];
                         inm.enqueueNotificationWithTag("android", "android", null,
-                                R.string.heavy_weight_notification,
+                                SystemMessage.NOTE_HEAVY_WEIGHT_NOTIFICATION,
                                 notification, outId, root.userId);
                     } catch (RuntimeException e) {
                         Slog.w(ActivityManagerService.TAG,
@@ -2139,7 +2140,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
                 try {
                     inm.cancelNotificationWithTag("android", null,
-                            R.string.heavy_weight_notification,  msg.arg1);
+                            SystemMessage.NOTE_HEAVY_WEIGHT_NOTIFICATION,  msg.arg1);
                 } catch (RuntimeException e) {
                     Slog.w(ActivityManagerService.TAG,
                             "Error canceling notification for service", e);
@@ -2376,7 +2377,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 try {
                     int[] outId = new int[1];
                     inm.enqueueNotificationWithTag("android", "android", null,
-                            R.string.dump_heap_notification,
+                            SystemMessage.NOTE_DUMP_HEAP_NOTIFICATION,
                             notification, outId, userId);
                 } catch (RuntimeException e) {
                     Slog.w(ActivityManagerService.TAG,

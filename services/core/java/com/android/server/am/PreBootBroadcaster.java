@@ -35,6 +35,7 @@ import android.os.UserHandle;
 import android.util.Slog;
 
 import com.android.internal.R;
+import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.util.ProgressReporter;
 import com.android.server.UiThread;
@@ -159,11 +160,13 @@ public abstract class PreBootBroadcaster extends IIntentReceiver.Stub {
                             .setVisibility(Notification.VISIBILITY_PUBLIC)
                             .setProgress(max, index, false)
                             .build();
-                    notifManager.notifyAsUser(TAG, 0, notif, UserHandle.of(mUserId));
+                    notifManager.notifyAsUser(TAG, SystemMessage.NOTE_SYSTEM_UPGRADING, notif,
+                            UserHandle.of(mUserId));
                     break;
 
                 case MSG_HIDE:
-                    notifManager.cancelAsUser(TAG, 0, UserHandle.of(mUserId));
+                    notifManager.cancelAsUser(TAG, SystemMessage.NOTE_SYSTEM_UPGRADING,
+                            UserHandle.of(mUserId));
                     break;
             }
         }
