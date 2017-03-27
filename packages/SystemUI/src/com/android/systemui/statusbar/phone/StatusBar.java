@@ -2739,6 +2739,10 @@ public class StatusBar extends SystemUI implements DemoMode,
         return mNotificationPanel.hideStatusBarIconsWhenExpanded();
     }
 
+    public KeyguardIndicationController getKeyguardIndicationController() {
+        return mKeyguardIndicationController;
+    }
+
     /**
      * All changes to the status bar and notifications funnel through here and are batched.
      */
