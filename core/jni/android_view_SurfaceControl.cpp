@@ -167,7 +167,7 @@ static jobject nativeScreenshotToBuffer(JNIEnv* env, jclass clazz,
             buffer->getHeight(),
             buffer->getPixelFormat(),
             buffer->getUsage(),
-            (void*)buffer.get());
+            (jlong)buffer.get());
 }
 
 static jobject nativeScreenshotBitmap(JNIEnv* env, jclass clazz,
