@@ -16,8 +16,6 @@
 
 package android.net.ip;
 
-import static android.net.util.NetworkConstants.RFC7421_PREFIX_LENGTH;
-
 import com.android.internal.util.MessageUtils;
 import com.android.internal.util.WakeupMessage;
 
@@ -44,7 +42,6 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceSpecificException;
 import android.os.SystemClock;
-import android.system.OsConstants;
 import android.text.TextUtils;
 import android.util.LocalLog;
 import android.util.Log;
@@ -1031,36 +1028,15 @@ public class IpManager extends StateMachine {
         return true;
     }
 
-    private void enableInterfaceIPv6PrivacyExtensions() {
+    private boolean startIPv6() {
+        // Set privacy extensions.
         final String PREFER_TEMPADDRS = "2";
-        NetdService.run((INetd netd) -> {
-                netd.setProcSysNet(
-                        INetd.IPV6, INetd.CONF, mInterfaceName, "use_tempaddr", PREFER_TEMPADDRS);
-            });
-    }
-
-    private void setInterfaceIPv6RaRtInfoMaxPlen(int plen) {
-        // Setting RIO max plen is best effort. Catch and ignore most exceptions.
         try {
             NetdService.run((INetd netd) -> {
-                    netd.setProcSysNet(
-                            INetd.IPV6, INetd.CONF, mInterfaceName, "accept_ra_rt_info_max_plen",
-                            Integer.toString(plen));
-                });
-        } catch (ServiceSpecificException e) {
-            // Old kernel versions without support for RIOs do not export accept_ra_rt_info_max_plen
-            // in the /proc filesystem. If the kernel supports RIOs we should never see any other
-            // type of error.
-            if (e.errorCode != OsConstants.ENOENT) {
-                logError("unexpected error setting accept_ra_rt_info_max_plen %s", e);
-            }
-        }
-    }
-
-    private boolean startIPv6() {
-        try {
-            enableInterfaceIPv6PrivacyExtensions();
-            setInterfaceIPv6RaRtInfoMaxPlen(RFC7421_PREFIX_LENGTH);
+                netd.setProcSysNet(
+                        INetd.IPV6, INetd.CONF, mInterfaceName, "use_tempaddr",
+                        PREFER_TEMPADDRS);
+            });
             mNwService.enableIpv6(mInterfaceName);
         } catch (IllegalStateException|RemoteException|ServiceSpecificException e) {
             logError("Unable to change interface settings: %s", e);
