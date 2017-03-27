@@ -65,7 +65,7 @@ final class SmartSelection {
      */
     public ClassificationResult[] classifyText(
             String context, int selectionBegin, int selectionEnd, int hintFlags) {
-        return nativeClassifyText(mCtx, context, selectionBegin, selectionEnd);
+        return nativeClassifyText(mCtx, context, selectionBegin, selectionEnd, hintFlags);
     }
 
     /**
@@ -81,7 +81,7 @@ final class SmartSelection {
             long context, String text, int selectionBegin, int selectionEnd);
 
     private static native ClassificationResult[] nativeClassifyText(
-            long context, String text, int selectionBegin, int selectionEnd);
+            long context, String text, int selectionBegin, int selectionEnd, int hintFlags);
 
     private static native void nativeClose(long context);
 
