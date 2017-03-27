@@ -66,12 +66,6 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     /**
-     * The length of time a session will still be considered active after
-     * pausing in ms.
-     */
-    private static final int ACTIVE_BUFFER = 30000;
-
-    /**
      * The amount of time we'll send an assumed volume after the last volume
      * command before reverting to the last reported volume.
      */
@@ -109,7 +103,6 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
     private int mRatingType;
     private int mRepeatMode;
     private boolean mShuffleModeEnabled;
-    private long mLastActiveTime;
     // End TransportPerformer fields
 
     // Volume handling fields
@@ -130,7 +123,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
     private String mCallingPackage;
 
     public MediaSessionRecord(int ownerPid, int ownerUid, int userId, String ownerPackageName,
-            ISessionCallback cb, String tag, MediaSessionService service, Handler handler) {
+            ISessionCallback cb, String tag, MediaSessionService service, Looper handlerLooper) {
         mOwnerPid = ownerPid;
         mOwnerUid = ownerUid;
         mUserId = userId;
@@ -140,7 +133,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         mSession = new SessionStub();
         mSessionCb = new SessionCb(cb);
         mService = service;
-        mHandler = new MessageHandler(handler.getLooper());
+        mHandler = new MessageHandler(handlerLooper);
         mAudioManager = (AudioManager) service.getContext().getSystemService(Context.AUDIO_SERVICE);
         mAudioManagerInternal = LocalServices.getService(AudioManagerInternal.class);
         mAudioAttrs = new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA).build();
@@ -211,6 +204,15 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
     }
 
     /**
+     * Get the UID this session was created for.
+     *
+     * @return The UID for this session.
+     */
+    public int getUid() {
+        return mOwnerUid;
+    }
+
+    /**
      * Get the user id this session was created for.
      *
      * @return The user id for this session.
@@ -244,7 +246,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
     public void adjustVolume(int direction, int flags, String packageName, int uid,
             boolean useSuggested) {
         int previousFlagPlaySound = flags & AudioManager.FLAG_PLAY_SOUND;
-        if (isPlaybackActive(false) || hasFlag(MediaSession.FLAG_EXCLUSIVE_GLOBAL_PRIORITY)) {
+        if (isPlaybackActive() || hasFlag(MediaSession.FLAG_EXCLUSIVE_GLOBAL_PRIORITY)) {
             flags &= ~AudioManager.FLAG_PLAY_SOUND;
         }
         if (mVolumeType == PlaybackInfo.PLAYBACK_TYPE_LOCAL) {
@@ -320,25 +322,13 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
     }
 
     /**
-     * Check if the session is currently performing playback. This will also
-     * return true if the session was recently paused.
+     * Check if the session is currently performing playback.
      *
-     * @param includeRecentlyActive True if playback that was recently paused
-     *            should count, false if it shouldn't.
      * @return True if the session is performing playback, false otherwise.
      */
-    public boolean isPlaybackActive(boolean includeRecentlyActive) {
-        int state = mPlaybackState == null ? 0 : mPlaybackState.getState();
-        if (MediaSession.isActiveState(state)) {
-            return true;
-        }
-        if (includeRecentlyActive && state == mPlaybackState.STATE_PAUSED) {
-            long inactiveTime = SystemClock.uptimeMillis() - mLastActiveTime;
-            if (inactiveTime < ACTIVE_BUFFER) {
-                return true;
-            }
-        }
-        return false;
+    public boolean isPlaybackActive() {
+        int state = mPlaybackState == null ? PlaybackState.STATE_NONE : mPlaybackState.getState();
+        return MediaSession.isActiveState(state);
     }
 
     /**
@@ -456,7 +446,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
 
     @Override
     public String toString() {
-        return mPackageName + "/" + mTag + " (uid=" + mUserId + ")";
+        return mPackageName + "/" + mTag + " (userId=" + mUserId + ")";
     }
 
     private void postAdjustLocalVolume(final int stream, final int direction, final int flags,
@@ -817,6 +807,12 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         @Override
         public void setMediaButtonReceiver(PendingIntent pi) {
             mMediaButtonReceiver = pi;
+            final long token = Binder.clearCallingIdentity();
+            try {
+                mService.onMediaButtonReceiverChanged(MediaSessionRecord.this);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
         }
 
         @Override
@@ -842,15 +838,19 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
 
         @Override
         public void setPlaybackState(PlaybackState state) {
-            int oldState = mPlaybackState == null ? 0 : mPlaybackState.getState();
-            int newState = state == null ? 0 : state.getState();
-            if (MediaSession.isActiveState(oldState) && newState == PlaybackState.STATE_PAUSED) {
-                mLastActiveTime = SystemClock.elapsedRealtime();
-            }
+            int oldState = mPlaybackState == null
+                    ? PlaybackState.STATE_NONE : mPlaybackState.getState();
+            int newState = state == null
+                    ? PlaybackState.STATE_NONE : state.getState();
             synchronized (mLock) {
                 mPlaybackState = state;
             }
-            mService.onSessionPlaystateChange(MediaSessionRecord.this, oldState, newState);
+            final long token = Binder.clearCallingIdentity();
+            try {
+                mService.onSessionPlaystateChanged(MediaSessionRecord.this, oldState, newState);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
             mHandler.post(MessageHandler.MSG_UPDATE_PLAYBACK_STATE);
         }
 
