@@ -105,7 +105,7 @@ import java.util.function.Function;
 public class ActivityManagerServiceTest {
     private static final String TAG = ActivityManagerServiceTest.class.getSimpleName();
 
-    private static final int TEST_UID = 111;
+    private static final int TEST_UID = 11111;
 
     private static final long TEST_PROC_STATE_SEQ1 = 555;
     private static final long TEST_PROC_STATE_SEQ2 = 556;
@@ -121,6 +121,7 @@ public class ActivityManagerServiceTest {
     @Mock private Context mContext;
     @Mock private AppOpsService mAppOpsService;
     @Mock private PackageManager mPackageManager;
+    @Mock private BatteryStatsImpl mBatteryStatsImpl;
 
     private TestInjector mInjector;
     private ActivityManagerService mAms;
@@ -149,20 +150,9 @@ public class ActivityManagerServiceTest {
     @MediumTest
     @Test
     public void incrementProcStateSeqAndNotifyAppsLocked() throws Exception {
-        final UidRecord uidRec = new UidRecord(TEST_UID);
-        uidRec.waitingForNetwork = true;
-        mAms.mActiveUids.put(TEST_UID, uidRec);
 
-        final BatteryStatsImpl batteryStats = Mockito.mock(BatteryStatsImpl.class);
-        final ProcessRecord appRec = new ProcessRecord(batteryStats,
-                new ApplicationInfo(), TAG, TEST_UID);
-        appRec.thread = Mockito.mock(IApplicationThread.class);
-        mAms.mLruProcesses.add(appRec);
-
-        final ProcessRecord appRec2 = new ProcessRecord(batteryStats,
-                new ApplicationInfo(), TAG, TEST_UID + 1);
-        appRec2.thread = Mockito.mock(IApplicationThread.class);
-        mAms.mLruProcesses.add(appRec2);
+        final UidRecord uidRec = addUidRecord(TEST_UID);
+        addUidRecord(TEST_UID + 1);
 
         // Uid state is not moving from background to foreground or vice versa.
         verifySeqCounterAndInteractions(uidRec,
@@ -235,12 +225,51 @@ public class ActivityManagerServiceTest {
                 44, // exptectedCurProcStateSeq
                 -1, // expectedBlockState, -1 to verify there are no interactions with main thread.
                 false); // expectNotify
+
+        // Verify when the uid doesn't have internet permission, then procStateSeq is not
+        // incremented.
+        uidRec.hasInternetPermission = false;
+        mAms.mWaitForNetworkTimeoutMs = 111;
+        mInjector.setNetworkRestrictedForUid(true);
+        verifySeqCounterAndInteractions(uidRec,
+                PROCESS_STATE_CACHED_ACTIVITY, // prevState
+                PROCESS_STATE_FOREGROUND_SERVICE, // curState
+                44, // expectedGlobalCounter
+                44, // exptectedCurProcStateSeq
+                -1, // expectedBlockState, -1 to verify there are no interactions with main thread.
+                false); // expectNotify
+
+        // Verify procStateSeq is not incremented when the uid is not an application, regardless
+        // of the process state.
+        final int notAppUid = 111;
+        final UidRecord uidRec2 = addUidRecord(notAppUid);
+        verifySeqCounterAndInteractions(uidRec2,
+                PROCESS_STATE_CACHED_EMPTY, // prevState
+                PROCESS_STATE_TOP, // curState
+                44, // expectedGlobalCounter
+                0, // exptectedCurProcStateSeq
+                -1, // expectedBlockState, -1 to verify there are no interactions with main thread.
+                false); // expectNotify
+    }
+
+    private UidRecord addUidRecord(int uid) {
+        final UidRecord uidRec = new UidRecord(uid);
+        uidRec.waitingForNetwork = true;
+        uidRec.hasInternetPermission = true;
+        mAms.mActiveUids.put(uid, uidRec);
+
+        final ProcessRecord appRec = new ProcessRecord(mBatteryStatsImpl,
+                new ApplicationInfo(), TAG, uid);
+        appRec.thread = Mockito.mock(IApplicationThread.class);
+        mAms.mLruProcesses.add(appRec);
+
+        return uidRec;
     }
 
     private void verifySeqCounterAndInteractions(UidRecord uidRec, int prevState, int curState,
             int expectedGlobalCounter, int expectedCurProcStateSeq, int expectedBlockState,
             boolean expectNotify) throws Exception {
-        CustomThread thread = new CustomThread(uidRec.lock);
+        CustomThread thread = new CustomThread(uidRec.networkStateLock);
         thread.startAndWait("Unexpected state for " + uidRec);
 
         uidRec.setProcState = prevState;
@@ -720,7 +749,7 @@ public class ActivityManagerServiceTest {
         record.lastNetworkUpdatedProcStateSeq = lastNetworkUpdatedProcStateSeq;
         mAms.mActiveUids.put(Process.myUid(), record);
 
-        CustomThread thread = new CustomThread(record.lock, new Runnable() {
+        CustomThread thread = new CustomThread(record.networkStateLock, new Runnable() {
             @Override
             public void run() {
                 mAms.waitForNetworkStateUpdate(procStateSeqToWait);
@@ -730,8 +759,8 @@ public class ActivityManagerServiceTest {
         if (expectWait) {
             thread.startAndWait(errMsg, true);
             thread.assertTimedWaiting(errMsg);
-            synchronized (record.lock) {
-                record.lock.notifyAll();
+            synchronized (record.networkStateLock) {
+                record.networkStateLock.notifyAll();
             }
             thread.assertTerminated(errMsg);
             assertTrue(thread.mNotified);

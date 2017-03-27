@@ -6552,6 +6552,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (Arrays.binarySearch(mDeviceIdleTempWhitelist, UserHandle.getAppId(proc.uid)) >= 0) {
                 uidRec.setWhitelist = uidRec.curWhitelist = true;
             }
+            uidRec.updateHasInternetPermission();
             mActiveUids.put(proc.uid, uidRec);
             noteUidProcessState(uidRec.uid, uidRec.curProcState);
             enqueueUidChangeLocked(uidRec, -1, UidRecord.CHANGE_ACTIVE);
@@ -18865,9 +18866,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                     switch (action) {
                         case Intent.ACTION_UID_REMOVED:
-                            final Bundle intentExtras = intent.getExtras();
-                            final int uid = intentExtras != null
-                                    ? intentExtras.getInt(Intent.EXTRA_UID) : -1;
+                            final int uid = getUidFromIntent(intent);
                             if (uid >= 0) {
                                 mBatteryStatsService.removeUid(uid);
                                 mAppOpsService.uidRemoved(uid);
@@ -19062,6 +19061,18 @@ public class ActivityManagerService extends IActivityManager.Stub
                 case android.security.KeyChain.ACTION_TRUST_STORE_CHANGED:
                     mHandler.sendEmptyMessage(HANDLE_TRUST_STORAGE_UPDATE_MSG);
                     break;
+            }
+
+            if (Intent.ACTION_PACKAGE_ADDED.equals(action) ||
+                    Intent.ACTION_PACKAGE_REMOVED.equals(action) ||
+                    Intent.ACTION_PACKAGE_REPLACED.equals(action)) {
+                final int uid = getUidFromIntent(intent);
+                if (uid != -1) {
+                    final UidRecord uidRec = mActiveUids.get(uid);
+                    if (uidRec != null) {
+                        uidRec.updateHasInternetPermission();
+                    }
+                }
             }
         }
 
@@ -19327,6 +19338,18 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         return ActivityManager.BROADCAST_SUCCESS;
+    }
+
+    /**
+     * @return uid from the extra field {@link Intent#EXTRA_UID} if present, Otherwise -1
+     */
+    private int getUidFromIntent(Intent intent) {
+        if (intent == null) {
+            return -1;
+        }
+        final Bundle intentExtras = intent.getExtras();
+        return intent.hasExtra(Intent.EXTRA_UID)
+                ? intentExtras.getInt(Intent.EXTRA_UID) : -1;
     }
 
     final void rotateBroadcastStatsIfNeededLocked() {
@@ -22547,6 +22570,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (!mInjector.isNetworkRestrictedForUid(uidRec.uid)) {
                 continue;
             }
+            if (!UserHandle.isApp(uidRec.uid) || !uidRec.hasInternetPermission) {
+                continue;
+            }
             // If process state is not changed, then there's nothing to do.
             if (uidRec.setProcState == uidRec.curProcState) {
                 continue;
@@ -22557,7 +22583,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (blockState == NETWORK_STATE_NO_CHANGE) {
                 continue;
             }
-            synchronized (uidRec.lock) {
+            synchronized (uidRec.networkStateLock) {
                 uidRec.curProcStateSeq = ++mProcStateSeqCounter;
                 if (blockState == NETWORK_STATE_BLOCK) {
                     if (blockingUids == null) {
@@ -22570,7 +22596,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                                 + " threads for uid: " + uidRec);
                     }
                     if (uidRec.waitingForNetwork) {
-                        uidRec.lock.notifyAll();
+                        uidRec.networkStateLock.notifyAll();
                     }
                 }
             }
@@ -23500,7 +23526,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     return;
                 }
             }
-            synchronized (record.lock) {
+            synchronized (record.networkStateLock) {
                 if (record.lastNetworkUpdatedProcStateSeq >= procStateSeq) {
                     if (DEBUG_NETWORK) {
                         Slog.d(TAG_NETWORK, "procStateSeq: " + procStateSeq + " has already"
@@ -23522,7 +23548,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         Slog.d(TAG_NETWORK, "Notifying all blocking threads for uid: " + uid
                                 + ", procStateSeq: " + procStateSeq);
                     }
-                    record.lock.notifyAll();
+                    record.networkStateLock.notifyAll();
                 }
             }
         }
@@ -23547,7 +23573,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 return;
             }
         }
-        synchronized (record.lock) {
+        synchronized (record.networkStateLock) {
             if (record.lastDispatchedProcStateSeq < procStateSeq) {
                 if (DEBUG_NETWORK) {
                     Slog.d(TAG_NETWORK, "Uid state change for seq no. " + procStateSeq + " is not "
@@ -23581,7 +23607,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
                 final long startTime = SystemClock.uptimeMillis();
                 record.waitingForNetwork = true;
-                record.lock.wait(mWaitForNetworkTimeoutMs);
+                record.networkStateLock.wait(mWaitForNetworkTimeoutMs);
                 record.waitingForNetwork = false;
                 final long totalTime = SystemClock.uptimeMillis() - startTime;
                 if (totalTime >= mWaitForNetworkTimeoutMs) {
