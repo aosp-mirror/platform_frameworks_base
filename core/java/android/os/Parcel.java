@@ -2039,14 +2039,20 @@ public final class Parcel {
         }
     }
 
+    /** @deprecated use {@link android.system.Os#open(String, int, int)} */
+    @Deprecated
+    static native FileDescriptor openFileDescriptor(String file, int mode)
+            throws FileNotFoundException;
 
-    /*package*/ static native FileDescriptor openFileDescriptor(String file,
-            int mode) throws FileNotFoundException;
-    /*package*/ static native FileDescriptor dupFileDescriptor(FileDescriptor orig)
-            throws IOException;
-    /*package*/ static native void closeFileDescriptor(FileDescriptor desc)
-            throws IOException;
-    /*package*/ static native void clearFileDescriptor(FileDescriptor desc);
+    /** @deprecated use {@link android.system.Os#dup(FileDescriptor)} */
+    @Deprecated
+    static native FileDescriptor dupFileDescriptor(FileDescriptor orig) throws IOException;
+
+    /** @deprecated use {@link android.system.Os#close(FileDescriptor)} */
+    @Deprecated
+    static native void closeFileDescriptor(FileDescriptor desc) throws IOException;
+
+    static native void clearFileDescriptor(FileDescriptor desc);
 
     /**
      * Read a byte value from the parcel at the current dataPosition().
