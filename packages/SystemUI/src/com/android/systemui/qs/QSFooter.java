@@ -49,6 +49,7 @@ import com.android.systemui.qs.TouchAnimator.Builder;
 import com.android.systemui.statusbar.phone.ExpandableIndicator;
 import com.android.systemui.statusbar.phone.MultiUserSwitch;
 import com.android.systemui.statusbar.phone.SettingsButton;
+import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.NetworkController.EmergencyListener;
 import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
@@ -336,6 +337,11 @@ public class QSFooter extends LinearLayout implements
     @Override
     public void onClick(View v) {
         if (v == mSettingsButton) {
+            if (!Dependency.get(DeviceProvisionedController.class).isCurrentUserSetup()) {
+                // If user isn't setup just unlock the device and dump them back at SUW.
+                mActivityStarter.postQSRunnableDismissingKeyguard(() -> { });
+                return;
+            }
             MetricsLogger.action(mContext,
                     mExpanded ? MetricsProto.MetricsEvent.ACTION_QS_EXPANDED_SETTINGS_LAUNCH
                             : MetricsProto.MetricsEvent.ACTION_QS_COLLAPSED_SETTINGS_LAUNCH);
