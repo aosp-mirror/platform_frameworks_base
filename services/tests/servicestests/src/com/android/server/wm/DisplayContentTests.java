@@ -21,6 +21,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_VOICE_INTERACTION;
+import static com.android.server.wm.WindowContainer.POSITION_TOP;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -231,6 +232,26 @@ public class DisplayContentTests extends WindowTestsBase {
         globalConfig = sWm.mRoot.getConfiguration();
         assertEquals(currentOverrideConfig.densityDpi, globalConfig.densityDpi);
         assertEquals(currentOverrideConfig.fontScale, globalConfig.fontScale, 0.1 /* delta */);
+    }
+
+    @Test
+    public void testFocusedWindowMultipleDisplays() throws Exception {
+        // Create a focusable window and check that focus is calcualted correctly
+        final WindowState window1 =
+                createWindow(null, TYPE_BASE_APPLICATION, sDisplayContent, "window1");
+        assertEquals(window1, sWm.mRoot.computeFocusedWindow());
+
+        // Check that a new display doesn't affect focus
+        final DisplayContent dc = createNewDisplay();
+        assertEquals(window1, sWm.mRoot.computeFocusedWindow());
+
+        // Add a window to the second display, and it should be focused
+        final WindowState window2 = createWindow(null, TYPE_BASE_APPLICATION, dc, "window2");
+        assertEquals(window2, sWm.mRoot.computeFocusedWindow());
+
+        // Move the first window to the to including parents, and make sure focus is updated
+        window1.getParent().positionChildAt(POSITION_TOP, window1, true);
+        assertEquals(window1, sWm.mRoot.computeFocusedWindow());
     }
 
     private void assertForAllWindowsOrder(List<WindowState> expectedWindows) {
