@@ -16,20 +16,12 @@
 
 package android.net.wifi;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.validateMockitoUsage;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
-import android.net.wifi.WifiScanner.BssidInfo;
-import android.net.wifi.WifiScanner.BssidListener;
 import android.os.Handler;
-import android.os.Message;
 import android.os.test.TestLooper;
 import android.test.suitebuilder.annotation.SmallTest;
 
@@ -37,10 +29,9 @@ import com.android.internal.util.test.BidirectionalAsyncChannelServer;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Test;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
 
 /**
  * Unit tests for {@link android.net.wifi.WifiScanner}.
@@ -51,8 +42,6 @@ public class WifiScannerTest {
     private Context mContext;
     @Mock
     private IWifiScanner mService;
-    @Mock
-    private BssidListener mBssidListener;
 
     private WifiScanner mWifiScanner;
     private TestLooper mLooper;
@@ -81,31 +70,4 @@ public class WifiScannerTest {
         validateMockitoUsage();
     }
 
-    private void verifySetHotlistMessage(Handler handler) {
-        ArgumentCaptor<Message> messageCaptor = ArgumentCaptor.forClass(Message.class);
-        verify(handler, atLeastOnce()).handleMessage(messageCaptor.capture());
-        assertEquals("message.what is not CMD_SET_HOTLIST",
-                WifiScanner.CMD_SET_HOTLIST,
-                messageCaptor.getValue().what);
-    }
-
-    /**
-     * Test duplicate listeners for bssid tracking.
-     */
-    @Test
-    public void testStartTrackingBssidsDuplicateListeners() throws Exception {
-        BssidInfo[] bssids = new BssidInfo[] {
-                new BssidInfo()
-        };
-
-        // First start tracking succeeds.
-        mWifiScanner.startTrackingBssids(bssids, -100, mBssidListener);
-        mLooper.dispatchAll();
-        verifySetHotlistMessage(mHandler);
-
-        // Second start tracking should fail.
-        mWifiScanner.startTrackingBssids(bssids, -100, mBssidListener);
-        mLooper.dispatchAll();
-        verify(mBssidListener).onFailure(eq(WifiScanner.REASON_DUPLICATE_REQEUST), anyString());
-    }
 }
