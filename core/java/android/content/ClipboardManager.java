@@ -150,7 +150,7 @@ public class ClipboardManager extends android.text.ClipboardManager {
 
     public void addPrimaryClipChangedListener(OnPrimaryClipChangedListener what) {
         synchronized (mPrimaryClipChangedListeners) {
-            if (mPrimaryClipChangedListeners.size() == 0) {
+            if (mPrimaryClipChangedListeners.isEmpty()) {
                 try {
                     mService.addPrimaryClipChangedListener(
                             mPrimaryClipChangedServiceListener, mContext.getOpPackageName());
@@ -165,7 +165,7 @@ public class ClipboardManager extends android.text.ClipboardManager {
     public void removePrimaryClipChangedListener(OnPrimaryClipChangedListener what) {
         synchronized (mPrimaryClipChangedListeners) {
             mPrimaryClipChangedListeners.remove(what);
-            if (mPrimaryClipChangedListeners.size() == 0) {
+            if (mPrimaryClipChangedListeners.isEmpty()) {
                 try {
                     mService.removePrimaryClipChangedListener(
                             mPrimaryClipChangedServiceListener);

@@ -23,6 +23,7 @@ public class ContentTests {
         TestSuite suite = new TestSuite(ContentTests.class.getName());
 
         suite.addTestSuite(AssetTest.class);
+        suite.addTestSuite(ContentValuesTest.class);
         return suite;
     }
 }
