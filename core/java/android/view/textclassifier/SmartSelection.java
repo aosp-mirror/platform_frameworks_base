@@ -26,6 +26,11 @@ final class SmartSelection {
         System.loadLibrary("textclassifier");
     }
 
+    /** Hints the classifier that this may be a url. */
+    static final int HINT_FLAG_URL = 0x01;
+    /** Hints the classifier that this may be an email. */
+    static final int HINT_FLAG_EMAIL = 0x02;
+
     private final long mCtx;
 
     /**
@@ -59,7 +64,7 @@ final class SmartSelection {
      * scores for different collections.
      */
     public ClassificationResult[] classifyText(
-            String context, int selectionBegin, int selectionEnd) {
+            String context, int selectionBegin, int selectionEnd, int hintFlags) {
         return nativeClassifyText(mCtx, context, selectionBegin, selectionEnd);
     }
 
