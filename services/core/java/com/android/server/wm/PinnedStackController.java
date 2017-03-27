@@ -195,7 +195,8 @@ class PinnedStackController {
      * @return whether the given {@param aspectRatio} is valid.
      */
     public boolean isValidPictureInPictureAspectRatio(float aspectRatio) {
-        return mMinAspectRatio <= aspectRatio && aspectRatio <= mMaxAspectRatio;
+        return Float.compare(mMinAspectRatio, aspectRatio) <= 0 &&
+                Float.compare(aspectRatio, mMaxAspectRatio) <= 0;
     }
 
     /**
