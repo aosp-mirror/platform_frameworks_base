@@ -2064,7 +2064,7 @@ public class PopupWindow {
         }
 
         if (update) {
-            update(mAnchor.get(), p);
+            update(mAnchor != null ? mAnchor.get() : null, p);
         }
     }
 
