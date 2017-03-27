@@ -759,6 +759,12 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         }
     }
 
+    final void removeActivitiesFromLRUListLocked(TaskRecord task) {
+        for (ActivityRecord r : task.mActivities) {
+            mLRUActivities.remove(r);
+        }
+    }
+
     final boolean updateLRUListLocked(ActivityRecord r) {
         final boolean hadit = mLRUActivities.remove(r);
         mLRUActivities.add(r);
@@ -4947,6 +4953,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             }
         }
         mTaskHistory.remove(task);
+        removeActivitiesFromLRUListLocked(task);
         updateTaskMovement(task, true);
 
         if (mode == REMOVE_TASK_MODE_DESTROYING && task.mActivities.isEmpty()) {
@@ -5114,6 +5121,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         // Apps may depend on onResume()/onPause() being called in pairs.
         if (setResume) {
             mResumedActivity = r;
+            updateLRUListLocked(r);
         }
         // If the activity was previously pausing, then ensure we transfer that as well
         if (setPause) {
