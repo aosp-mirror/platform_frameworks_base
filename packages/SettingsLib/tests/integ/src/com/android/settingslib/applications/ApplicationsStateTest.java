@@ -136,4 +136,18 @@ public class ApplicationsStateTest {
         when(mEntry.info.isInstantApp()).thenReturn(true);
         assertThat(ApplicationsState.FILTER_DISABLED.filterApp(mEntry)).isFalse();
     }
+
+    @Test
+    public void testVideoFilterAcceptsCategorizedVideo() {
+        mEntry.info.category = ApplicationInfo.CATEGORY_VIDEO;
+
+        assertThat(ApplicationsState.FILTER_MOVIES.filterApp(mEntry)).isTrue();
+    }
+
+    @Test
+    public void testVideosFilterRejectsNotVideo() {
+        mEntry.info.category = ApplicationInfo.CATEGORY_GAME;
+
+        assertThat(ApplicationsState.FILTER_MOVIES.filterApp(mEntry)).isFalse();
+    }
 }
