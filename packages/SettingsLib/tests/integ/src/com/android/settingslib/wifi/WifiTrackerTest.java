@@ -395,6 +395,26 @@ public class WifiTrackerTest {
     }
 
     @Test
+    public void testGetNumSavedNetworks() throws InterruptedException {
+        WifiConfiguration validConfig = new WifiConfiguration();
+        validConfig.SSID = SSID_1;
+        validConfig.BSSID = BSSID_1;
+
+        WifiConfiguration selfAddedNoAssociation = new WifiConfiguration();
+        selfAddedNoAssociation.selfAdded = true;
+        selfAddedNoAssociation.numAssociation = 0;
+        selfAddedNoAssociation.SSID = SSID_2;
+        selfAddedNoAssociation.BSSID = BSSID_2;
+
+        when(mockWifiManager.getConfiguredNetworks())
+                .thenReturn(Arrays.asList(validConfig, selfAddedNoAssociation));
+
+        WifiTracker tracker = createTrackerWithImmediateBroadcastsAndInjectInitialScanResults();
+
+        assertEquals(1, tracker.getNumSavedNetworks());
+    }
+
+    @Test
     public void startTrackingShouldSetConnectedAccessPointAsActive() throws InterruptedException {
         WifiTracker tracker =  createTrackerWithScanResultsAndAccessPoint1Connected();
 

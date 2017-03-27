@@ -95,7 +95,7 @@ public class WifiTracker {
 
     private WifiTrackerNetworkCallback mNetworkCallback;
 
-    private boolean mSavedNetworksExist;
+    private int mNumSavedNetworks;
     private boolean mRegistered;
 
     /** Updated using main handler. Clone of this collection is returned
@@ -363,11 +363,11 @@ public class WifiTracker {
     }
 
     /**
-     * @return true when there are saved networks on the device, regardless
-     * of whether the WifiTracker is tracking saved networks.
+     * Returns the number of saved networks on the device, regardless of whether the WifiTracker
+     * is tracking saved networks.
      */
-    public boolean doSavedNetworksExist() {
-        return mSavedNetworksExist;
+    public int getNumSavedNetworks() {
+        return mNumSavedNetworks;
     }
 
     public boolean isConnected() {
@@ -461,11 +461,12 @@ public class WifiTracker {
 
         final List<WifiConfiguration> configs = mWifiManager.getConfiguredNetworks();
         if (configs != null) {
-            mSavedNetworksExist = configs.size() != 0;
+            mNumSavedNetworks = 0;
             for (WifiConfiguration config : configs) {
                 if (config.selfAdded && config.numAssociation == 0) {
                     continue;
                 }
+                mNumSavedNetworks++;
                 AccessPoint accessPoint = getCachedOrCreate(config, cachedAccessPoints);
                 if (mLastInfo != null && mLastNetworkInfo != null) {
                     accessPoint.update(connectionConfig, mLastInfo, mLastNetworkInfo);
