@@ -95,6 +95,7 @@ public class SystemUIApplication extends Application implements SysUiServiceProv
      */
     private final Class<?>[] SERVICES_PER_USER = new Class[] {
             Dependency.class,
+            NotificationChannels.class,
             Recents.class
     };
 
