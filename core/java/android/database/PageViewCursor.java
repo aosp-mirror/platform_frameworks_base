@@ -15,6 +15,7 @@
  */
 package android.database;
 
+import static com.android.internal.util.ArrayUtils.contains;
 import static com.android.internal.util.Preconditions.checkArgument;
 
 import android.annotation.Nullable;
@@ -25,7 +26,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.util.MathUtils;
 
-import com.android.internal.util.ArrayUtils;
+import java.util.Arrays;
 
 /**
  * Cursor wrapper that provides visibility into a subset of a wrapped cursor.
@@ -40,11 +41,12 @@ public final class PageViewCursor extends CursorWrapper implements CrossProcessC
     /** An extra added to results that are auto-paged using the wrapper. */
     public static final String EXTRA_AUTO_PAGED = "android.content.extra.AUTO_PAGED";
 
+    private static final String[] EMPTY_ARGS = new String[0];
     private static final String TAG = "PageViewCursor";
     private static final boolean DEBUG = Build.IS_DEBUGGABLE;
     private static final boolean VERBOSE = Build.IS_DEBUGGABLE && Log.isLoggable(TAG, Log.VERBOSE);
 
-    private final int mOffset;  // aka first index
+    private final int mOffset; // aka first index
     private final int mCount;
     private final Bundle mExtras;
 
@@ -55,11 +57,16 @@ public final class PageViewCursor extends CursorWrapper implements CrossProcessC
     /**
      * @see PageViewCursor#wrap(Cursor, Bundle)
      */
-    public PageViewCursor(Cursor cursor, int offset, int limit) {
+    public PageViewCursor(Cursor cursor, Bundle queryArgs) {
         super(cursor);
+
+        int offset = queryArgs.getInt(ContentResolver.QUERY_ARG_OFFSET, 0);
+        int limit = queryArgs.getInt(ContentResolver.QUERY_ARG_LIMIT, Integer.MAX_VALUE);
 
         checkArgument(offset > -1);
         checkArgument(limit > -1);
+
+        int count = mCursor.getCount();
 
         mOffset = offset;
 
@@ -68,26 +75,47 @@ public final class PageViewCursor extends CursorWrapper implements CrossProcessC
         if (extras != null) {
             mExtras.putAll(extras);
         }
-        mExtras.putBoolean(EXTRA_AUTO_PAGED, true);
-
-        // We need a mutable bundle so we can add QUERY_RESULT_SIZE.
-        // Direct equality check is correct here. Bundle.EMPTY is a specific instance
-        // of Bundle that is immutable by way of implementation.
-        // mExtras = (extras == Bundle.EMPTY) ? new Bundle() : extras;
 
         // When we're wrapping another cursor, it should not already be "paged".
-        checkArgument(!mExtras.containsKey(ContentResolver.EXTRA_TOTAL_SIZE));
+        checkArgument(!hasPagedResponseDetails(mExtras));
 
-        int count = mCursor.getCount();
+        mExtras.putBoolean(EXTRA_AUTO_PAGED, true);
         mExtras.putInt(ContentResolver.EXTRA_TOTAL_SIZE, count);
+
+        // Ensure we retain any extra args supplied in cursor extras, and add
+        // offset and/or limit.
+        String[] existingArgs = mExtras.getStringArray(ContentResolver.EXTRA_HONORED_ARGS);
+        existingArgs = existingArgs != null ? existingArgs : EMPTY_ARGS;
+
+        int size = existingArgs.length;
+
+        // copy the array with space for the extra query args we'll be adding.
+        String[] newArgs = Arrays.copyOf(existingArgs, size + 2);
+
+        if (queryArgs.containsKey(ContentResolver.QUERY_ARG_OFFSET)) {
+            newArgs[size++] = ContentResolver.QUERY_ARG_OFFSET;
+        }
+        if (queryArgs.containsKey(ContentResolver.QUERY_ARG_LIMIT)) {
+            newArgs[size++] = ContentResolver.QUERY_ARG_LIMIT;
+        }
+
+        assert(size > existingArgs.length);  // must add at least one arg.
+
+        // At this point there may be a null element at the end of
+        // the array because our pre-sizing didn't match the actualy
+        // number of args we added. So we trim.
+        if (size == newArgs.length - 1) {
+            newArgs = Arrays.copyOf(newArgs, size);
+        }
+        mExtras.putStringArray(ContentResolver.EXTRA_HONORED_ARGS, newArgs);
 
         mCount = MathUtils.constrain(count - offset, 0, limit);
 
         if (DEBUG) Log.d(TAG, "Wrapped cursor"
-            + " offset: " + mOffset
-            + ", limit: " + limit
-            + ", delegate_size: " + count
-            + ", paged_count: " + mCount);
+                + " offset: " + mOffset
+                + ", limit: " + limit
+                + ", delegate_size: " + count
+                + ", paged_count: " + mCount);
     }
 
     @Override
@@ -155,9 +183,9 @@ public final class PageViewCursor extends CursorWrapper implements CrossProcessC
     public boolean moveToPosition(int position) {
         if (position >= mCount) {
             if (VERBOSE) Log.v(TAG, "Invalid Positon: " + position + " >= count: " + mCount
-                    + ". Moving to last record.");
+                        + ". Moving to last record.");
             mPos = mCount;
-            super.moveToPosition(mOffset + mPos);  // move into "after last" state.
+            super.moveToPosition(mOffset + mPos); // move into "after last" state.
             return false;
         }
 
@@ -198,15 +226,15 @@ public final class PageViewCursor extends CursorWrapper implements CrossProcessC
 
     @Override
     public boolean getWantsAllOnMoveCalls() {
-        return false;  // we want bulk cursor adapter to lift data into a CursorWindow.
+        return false; // we want bulk cursor adapter to lift data into a CursorWindow.
     }
 
     @Override
     public CursorWindow getWindow() {
         assert(mPos == -1 || mPos == 0);
         if (mWindow == null) {
-           mWindow = new CursorWindow("PageViewCursorWindow");
-           fillWindow(0, mWindow);
+            mWindow = new CursorWindow("PageViewCursorWindow");
+            fillWindow(0, mWindow);
         }
 
         return mWindow;
@@ -224,17 +252,16 @@ public final class PageViewCursor extends CursorWrapper implements CrossProcessC
     }
 
     /**
-     * Wraps the cursor such that it will honor paging args (if present), AND if the cursor
-     * does not report paging size.
-     *
-     * <p>No-op if cursor already contains paging or is less than specified page size.
+     * Wraps the cursor such that it will honor paging args (if present), AND if the cursor does
+     * not report paging size.
+     * <p>
+     * No-op if cursor already contains paging or is less than specified page size.
      */
     public static Cursor wrap(Cursor cursor, @Nullable Bundle queryArgs) {
 
-        boolean hasPagingArgs =
-                queryArgs != null
+        boolean hasPagingArgs = queryArgs != null
                 && (queryArgs.containsKey(ContentResolver.QUERY_ARG_OFFSET)
-                || queryArgs.containsKey(ContentResolver.QUERY_ARG_LIMIT));
+                        || queryArgs.containsKey(ContentResolver.QUERY_ARG_LIMIT));
 
         if (!hasPagingArgs) {
             if (VERBOSE) Log.v(TAG, "No-wrap: No paging args in request.");
@@ -253,25 +280,26 @@ public final class PageViewCursor extends CursorWrapper implements CrossProcessC
             return cursor;
         }
 
-        return new PageViewCursor(
-                cursor,
-                queryArgs.getInt(ContentResolver.QUERY_ARG_OFFSET, 0),
-                queryArgs.getInt(ContentResolver.QUERY_ARG_LIMIT, Integer.MAX_VALUE));
+        return new PageViewCursor(cursor, queryArgs);
     }
 
     /**
-     * @return true if the extras contains information indicating the associated
-     * cursor is paged.
+     * @return true if the extras contains information indicating the associated cursor is
+     *         paged.
      */
     private static boolean hasPagedResponseDetails(@Nullable Bundle extras) {
-        if (extras != null && extras.containsKey(ContentResolver.EXTRA_TOTAL_SIZE)) {
+        if (extras == null) {
+            return false;
+        }
+
+        if (extras.containsKey(ContentResolver.EXTRA_TOTAL_SIZE)) {
             return true;
         }
 
         String[] honoredArgs = extras.getStringArray(ContentResolver.EXTRA_HONORED_ARGS);
-        if (honoredArgs != null && (
-                ArrayUtils.contains(honoredArgs, ContentResolver.QUERY_ARG_OFFSET)
-                || ArrayUtils.contains(honoredArgs, ContentResolver.QUERY_ARG_LIMIT))) {
+        if (honoredArgs != null
+                && (contains(honoredArgs, ContentResolver.QUERY_ARG_OFFSET)
+                        || contains(honoredArgs, ContentResolver.QUERY_ARG_LIMIT))) {
             return true;
         }
 
