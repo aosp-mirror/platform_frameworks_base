@@ -2923,6 +2923,9 @@
   <!-- Colon separated list of package names that should be granted Notification Listener access -->
   <java-symbol type="string" name="config_defaultListenerAccessPackages" />
 
+  <!-- maximum width of the display -->
+  <java-symbol type="integer" name="config_maxUiWidth" />
+
   <!-- system notification channels -->
   <java-symbol type="string" name="notification_channel_virtual_keyboard" />
   <java-symbol type="string" name="notification_channel_physical_keyboard" />
