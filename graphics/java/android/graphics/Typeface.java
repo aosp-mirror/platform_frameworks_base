@@ -32,6 +32,7 @@ import android.content.res.AssetManager;
 import android.graphics.FontListParser;
 import android.graphics.fonts.FontRequest;
 import android.graphics.fonts.FontResult;
+import android.graphics.fonts.FontVariationAxis;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.ParcelFileDescriptor;
@@ -358,11 +359,15 @@ public class Typeface {
                         FileChannel.MapMode.READ_ONLY, 0, fontSize);
                 int style = result.getStyle();
                 int weight = (style & BOLD) != 0 ? 700 : 400;
-                final ArrayList<FontConfig.Axis> axes = FontListParser.parseFontVariationSettings(
-                        result.getFontVariationSettings());
-                if (!fontFamily.addFontFromBuffer(fontBuffer, result.getTtcIndex(),
-                                axes.toArray(new FontConfig.Axis[axes.size()]), weight,
-                                (style & ITALIC) == 0 ? Builder.NORMAL : Builder.ITALIC)) {
+                FontVariationAxis[] axes = null;
+                try {
+                    axes = FontVariationAxis.fromFontVariationSettings(
+                            result.getFontVariationSettings());
+                } catch (FontVariationAxis.InvalidFormatException e) {
+                    // TODO: Nice to pass FontVariationAxis[] directly instead of string.
+                }
+                if (!fontFamily.addFontFromBuffer(fontBuffer, result.getTtcIndex(), axes, weight,
+                        (style & ITALIC) == 0 ? Builder.NORMAL : Builder.ITALIC)) {
                     Log.e(TAG, "Error creating font " + request.getQuery());
                     callback.onTypefaceRequestFailed(
                             FontRequestCallback.FAIL_REASON_FONT_LOAD_ERROR);
@@ -514,7 +519,7 @@ public class Typeface {
         public static final int ITALIC = 1;
 
         private int mTtcIndex;
-        private FontConfig.Axis[] mAxes;
+        private FontVariationAxis[] mAxes;
 
         private AssetManager mAssetManager;
         private String mPath;
@@ -682,15 +687,16 @@ public class Typeface {
          * Sets a font variation settings.
          *
          * @param variationSettings See {@link android.widget.TextView#setFontVariationSettings}.
+         * @throws FontVariationAxis.InvalidFormatException If given string is not a valid font
+         *                                                  variation settings format.
          */
-        public Builder setFontVariationSettings(@Nullable String variationSettings) {
+        public Builder setFontVariationSettings(@Nullable String variationSettings)
+                throws FontVariationAxis.InvalidFormatException {
             checkNotRecycled();
             if (mAxes != null) {
                 throw new IllegalStateException("Font variation settings are already set.");
             }
-            final List<FontConfig.Axis> axesList = FontListParser.parseFontVariationSettings(
-                    variationSettings);
-            mAxes = axesList.toArray(new FontConfig.Axis[axesList.size()]);
+            mAxes = FontVariationAxis.fromFontVariationSettings(variationSettings);
             return this;
         }
 
@@ -699,7 +705,7 @@ public class Typeface {
          *
          * @param axes An array of font variation axis tag-value pairs.
          */
-        public Builder setFontVariationSettings(@Nullable FontConfig.Axis[] axes) {
+        public Builder setFontVariationSettings(@Nullable FontVariationAxis[] axes) {
             checkNotRecycled();
             if (mAxes != null) {
                 throw new IllegalStateException("Font variation settings are already set.");
@@ -718,7 +724,7 @@ public class Typeface {
          * @return Unique id for a given AssetManager and asset path.
          */
         private static String createAssetUid(final AssetManager mgr, String path, int ttcIndex,
-                @Nullable FontConfig.Axis[] axes) {
+                @Nullable FontVariationAxis[] axes) {
             final SparseArray<String> pkgs = mgr.getAssignedPackageIdentifiers();
             final StringBuilder builder = new StringBuilder();
             final int size = pkgs.size();
@@ -731,8 +737,8 @@ public class Typeface {
             builder.append(Integer.toString(ttcIndex));
             builder.append("-");
             if (axes != null) {
-                for (FontConfig.Axis axis : axes) {
-                    builder.append(Integer.toHexString(axis.getTag()));
+                for (FontVariationAxis axis : axes) {
+                    builder.append(axis.getTag());
                     builder.append("-");
                     builder.append(Float.toString(axis.getStyleValue()));
                 }
@@ -865,7 +871,7 @@ public class Typeface {
 
     /** @hide */
     public static Typeface createFromTypefaceWithVariation(Typeface family,
-            List<FontConfig.Axis> axes) {
+            List<FontVariationAxis> axes) {
         final long ni = family == null ? 0 : family.native_instance;
         return new Typeface(nativeCreateFromTypefaceWithVariation(ni, axes));
     }
@@ -1162,9 +1168,9 @@ public class Typeface {
     }
 
     private static native long nativeCreateFromTypeface(long native_instance, int style);
-    // TODO: clean up: change List<FontConfig.Axis> to FontConfig.Axis[]
+    // TODO: clean up: change List<FontVariationAxis> to FontVariationAxis[]
     private static native long nativeCreateFromTypefaceWithVariation(
-            long native_instance, List<FontConfig.Axis> axes);
+            long native_instance, List<FontVariationAxis> axes);
     private static native long nativeCreateWeightAlias(long native_instance, int weight);
     private static native void nativeUnref(long native_instance);
     private static native int  nativeGetStyle(long native_instance);

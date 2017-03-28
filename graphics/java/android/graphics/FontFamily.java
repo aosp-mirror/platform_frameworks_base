@@ -17,6 +17,7 @@
 package android.graphics;
 
 import android.content.res.AssetManager;
+import android.graphics.fonts.FontVariationAxis;
 import android.text.FontConfig;
 import android.util.Log;
 import dalvik.annotation.optimization.CriticalNative;
@@ -81,7 +82,7 @@ public class FontFamily {
         }
     }
 
-    public boolean addFont(String path, int ttcIndex, FontConfig.Axis[] axes, int weight,
+    public boolean addFont(String path, int ttcIndex, FontVariationAxis[] axes, int weight,
             int italic) {
         if (mBuilderPtr == 0) {
             throw new IllegalStateException("Unable to call addFont after freezing.");
@@ -91,8 +92,8 @@ public class FontFamily {
             long fontSize = fileChannel.size();
             ByteBuffer fontBuffer = fileChannel.map(FileChannel.MapMode.READ_ONLY, 0, fontSize);
             if (axes != null) {
-                for (FontConfig.Axis axis : axes) {
-                    nAddAxisValue(mBuilderPtr, axis.getTag(), axis.getStyleValue());
+                for (FontVariationAxis axis : axes) {
+                    nAddAxisValue(mBuilderPtr, axis.getOpenTypeTagValue(), axis.getStyleValue());
                 }
             }
             return nAddFont(mBuilderPtr, fontBuffer, ttcIndex, weight, italic);
@@ -102,14 +103,14 @@ public class FontFamily {
         }
     }
 
-    public boolean addFontFromBuffer(ByteBuffer font, int ttcIndex, FontConfig.Axis[] axes,
+    public boolean addFontFromBuffer(ByteBuffer font, int ttcIndex, FontVariationAxis[] axes,
             int weight, int italic) {
         if (mBuilderPtr == 0) {
             throw new IllegalStateException("Unable to call addFontWeightStyle after freezing.");
         }
         if (axes != null) {
-            for (FontConfig.Axis axis : axes) {
-                nAddAxisValue(mBuilderPtr, axis.getTag(), axis.getStyleValue());
+            for (FontVariationAxis axis : axes) {
+                nAddAxisValue(mBuilderPtr, axis.getOpenTypeTagValue(), axis.getStyleValue());
             }
         }
         return nAddFontWeightStyle(mBuilderPtr, font, ttcIndex, weight, italic);
@@ -129,13 +130,13 @@ public class FontFamily {
      */
     public boolean addFontFromAssetManager(AssetManager mgr, String path, int cookie,
             boolean isAsset, int ttcIndex, int weight, int isItalic,
-            FontConfig.Axis[] axes) {
+            FontVariationAxis[] axes) {
         if (mBuilderPtr == 0) {
             throw new IllegalStateException("Unable to call addFontFromAsset after freezing.");
         }
         if (axes != null) {
-            for (FontConfig.Axis axis : axes) {
-                nAddAxisValue(mBuilderPtr, axis.getTag(), axis.getStyleValue());
+            for (FontVariationAxis axis : axes) {
+                nAddAxisValue(mBuilderPtr, axis.getOpenTypeTagValue(), axis.getStyleValue());
             }
         }
         return nAddFontFromAssetManager(mBuilderPtr, mgr, path, cookie, isAsset, ttcIndex, weight,
