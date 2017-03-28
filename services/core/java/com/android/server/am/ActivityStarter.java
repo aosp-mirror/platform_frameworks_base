@@ -640,6 +640,18 @@ class ActivityStarter {
         final Intent ephemeralIntent = new Intent(intent);
         // Don't modify the client's object!
         intent = new Intent(intent);
+        if (componentSpecified
+                && intent.getData() != null
+                && Intent.ACTION_VIEW.equals(intent.getAction())
+                && intent.hasCategory(Intent.CATEGORY_BROWSABLE)
+                && mService.getPackageManagerInternalLocked()
+                        .isInstantAppInstallerComponent(intent.getComponent())) {
+            // intercept intents targeted directly to the ephemeral installer the
+            // ephemeral installer should never be started with a raw URL; instead
+            // adjust the intent so it looks like a "normal" instant app launch
+            intent.setComponent(null /*component*/);
+            componentSpecified = false;
+        }
 
         ResolveInfo rInfo = mSupervisor.resolveIntent(intent, resolvedType, userId);
         if (rInfo == null) {
