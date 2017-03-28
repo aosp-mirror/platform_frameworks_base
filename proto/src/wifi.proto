@@ -238,6 +238,9 @@ message WifiLog {
 
   // Histogram of the delta between scan result RSSI and RSSI polls
   repeated RssiPollCount rssi_poll_delta_count = 51;
+
+  // List of events
+  repeated StaEvent sta_event_list = 52;
 }
 
 // Information that gets logged for every WiFi connection.
@@ -459,4 +462,203 @@ message SoftApReturnCodeCount {
 
   // Result of attempt to start SoftAp
   optional SoftApStartResult start_result = 3;
+}
+
+message StaEvent {
+  message ConfigInfo {
+    // The set of key management protocols supported by this configuration.
+    optional uint32 allowed_key_management = 1 [default = 0];
+
+    // The set of security protocols supported by this configuration.
+    optional uint32 allowed_protocols = 2 [default = 0];
+
+    // The set of authentication protocols supported by this configuration.
+    optional uint32 allowed_auth_algorithms = 3 [default = 0];
+
+    // The set of pairwise ciphers for WPA supported by this configuration.
+    optional uint32 allowed_pairwise_ciphers = 4 [default = 0];
+
+    // The set of group ciphers supported by this configuration.
+    optional uint32 allowed_group_ciphers = 5;
+
+    // Is this a 'hidden network'
+    optional bool hidden_ssid = 6;
+
+    // Is this a Hotspot 2.0 / passpoint network
+    optional bool is_passpoint = 7;
+
+    // Is this an 'ephemeral' network (Not in saved network list, recommended externally)
+    optional bool is_ephemeral = 8;
+
+    // Has a successful connection ever been established using this WifiConfiguration
+    optional bool has_ever_connected = 9;
+
+    // RSSI of the scan result candidate associated with this WifiConfiguration
+    optional int32 scan_rssi = 10 [default = -127];
+
+    // Frequency of the scan result candidate associated with this WifiConfiguration
+    optional int32 scan_freq = 11 [default = -1];
+  }
+
+  enum EventType {
+    // Default/Invalid event
+    TYPE_UNKNOWN = 0;
+
+    // Supplicant Association Rejection event. Code contains the 802.11
+    TYPE_ASSOCIATION_REJECTION_EVENT = 1;
+
+    // Supplicant L2 event,
+    TYPE_AUTHENTICATION_FAILURE_EVENT = 2;
+
+    // Supplicant L2 event
+    TYPE_NETWORK_CONNECTION_EVENT = 3;
+
+    // Supplicant L2 event
+    TYPE_NETWORK_DISCONNECTION_EVENT = 4;
+
+    // Supplicant L2 event
+    TYPE_SUPPLICANT_STATE_CHANGE_EVENT = 5;
+
+    // Supplicant L2 event
+    TYPE_CMD_ASSOCIATED_BSSID = 6;
+
+    // IP Manager successfully completed IP Provisioning
+    TYPE_CMD_IP_CONFIGURATION_SUCCESSFUL = 7;
+
+    // IP Manager failed to complete IP Provisioning
+    TYPE_CMD_IP_CONFIGURATION_LOST = 8;
+
+    // IP Manager lost reachability to network neighbors
+    TYPE_CMD_IP_REACHABILITY_LOST = 9;
+
+    // Indicator that Supplicant is targeting a BSSID for roam/connection
+    TYPE_CMD_TARGET_BSSID = 10;
+
+    // Wifi framework is initiating a connection attempt
+    TYPE_CMD_START_CONNECT = 11;
+
+    // Wifi framework is initiating a roaming connection attempt
+    TYPE_CMD_START_ROAM = 12;
+
+    // SystemAPI connect() command, Settings App
+    TYPE_CONNECT_NETWORK = 13;
+
+    // Network Agent has validated the internet connection (Captive Portal Check success, or user
+    // validation)
+    TYPE_NETWORK_AGENT_VALID_NETWORK = 14;
+
+    // Framework initiated disconnect. Sometimes generated to give an extra reason for a disconnect
+    // Should typically be followed by a NETWORK_DISCONNECTION_EVENT with a local_gen = true
+    TYPE_FRAMEWORK_DISCONNECT = 15;
+  }
+
+  enum FrameworkDisconnectReason {
+    // default/none/unknown value
+    DISCONNECT_UNKNOWN = 0;
+
+    // API DISCONNECT
+    DISCONNECT_API = 1;
+
+    // Some framework internal reason (generic)
+    DISCONNECT_GENERIC = 2;
+
+    // Network Agent network validation failed, user signaled network unwanted
+    DISCONNECT_UNWANTED = 3;
+
+    // Roaming timed out
+    DISCONNECT_ROAM_WATCHDOG_TIMER = 4;
+
+    // P2P service requested wifi disconnect
+    DISCONNECT_P2P_DISCONNECT_WIFI_REQUEST = 5;
+
+    // SIM was removed while using a SIM config
+    DISCONNECT_RESET_SIM_NETWORKS = 6;
+  }
+
+  // Authentication Failure reasons as reported through the API.
+  enum AuthFailureReason {
+    // Unknown default
+    AUTH_FAILURE_UNKNOWN = 0;
+
+    // The reason code if there is no error during authentication. It could also imply that there no
+    // authentication in progress,
+    AUTH_FAILURE_NONE = 1;
+
+    // The reason code if there was a timeout authenticating.
+    AUTH_FAILURE_TIMEOUT = 2;
+
+    // The reason code if there was a wrong password while authenticating.
+    AUTH_FAILURE_WRONG_PSWD = 3;
+
+    // The reason code if there was EAP failure while authenticating.
+    AUTH_FAILURE_EAP_FAILURE = 4;
+  }
+
+  // What event was this
+  optional EventType type = 1;
+
+  // 80211 death reason code, relevant to NETWORK_DISCONNECTION_EVENTs
+  optional int32 reason = 2 [default = -1];
+
+  // 80211 Association Status code, relevant to ASSOCIATION_REJECTION_EVENTs
+  optional int32 status = 3 [default = -1];
+
+  // Designates whether a NETWORK_DISCONNECT_EVENT was by the STA or AP
+  optional bool local_gen = 4 [default = false];
+
+  // Network information from the WifiConfiguration of a framework initiated connection attempt
+  optional ConfigInfo config_info = 5;
+
+  // RSSI from the last rssi poll (Only valid for active connections)
+  optional int32 last_rssi = 6 [default = -127];
+
+  // Link speed from the last rssi poll (Only valid for active connections)
+  optional int32 last_link_speed = 7 [default = -1];
+
+  // Frequency from the last rssi poll (Only valid for active connections)
+  optional int32 last_freq = 8 [default = -1];
+
+  // Enum used to define bit positions in the supplicant_state_change_bitmask
+  // See {@code frameworks/base/wifi/java/android/net/wifi/SupplicantState.java} for documentation
+  enum SupplicantState {
+    STATE_DISCONNECTED = 0;
+
+    STATE_INTERFACE_DISABLED = 1;
+
+    STATE_INACTIVE = 2;
+
+    STATE_SCANNING = 3;
+
+    STATE_AUTHENTICATING = 4;
+
+    STATE_ASSOCIATING = 5;
+
+    STATE_ASSOCIATED = 6;
+
+    STATE_FOUR_WAY_HANDSHAKE = 7;
+
+    STATE_GROUP_HANDSHAKE = 8;
+
+    STATE_COMPLETED = 9;
+
+    STATE_DORMANT = 10;
+
+    STATE_UNINITIALIZED = 11;
+
+    STATE_INVALID = 12;
+  }
+
+  // Bit mask of all supplicant state changes that occured since the last event
+  optional uint32 supplicant_state_changes_bitmask = 9 [default = 0];
+
+  // The number of milliseconds that have elapsed since the device booted
+  optional int64 start_time_millis = 10 [default = 0];
+
+  optional FrameworkDisconnectReason framework_disconnect_reason = 11 [default = DISCONNECT_UNKNOWN];
+
+  // Flag which indicates if an association rejection event occured due to a timeout
+  optional bool association_timed_out = 12 [default = false];
+
+  // Authentication failure reason, as reported by WifiManager (calculated from state & deauth code)
+  optional AuthFailureReason auth_failure_reason = 13 [default = AUTH_FAILURE_UNKNOWN];
 }
