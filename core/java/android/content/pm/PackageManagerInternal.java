@@ -172,6 +172,7 @@ public abstract class PackageManagerInternal {
      * @param packageName The package name.
      * @param userId The user for which to check.
      * @return Whether was launched.
+     * @throws IllegalArgumentException if the package is not found
      */
     public abstract boolean wasPackageEverLaunched(String packageName, int userId);
 

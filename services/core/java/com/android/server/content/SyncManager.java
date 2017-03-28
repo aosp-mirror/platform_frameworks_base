@@ -907,7 +907,12 @@ public class SyncManager {
                     Bundle finalExtras = new Bundle(extras);
                     String packageName = syncAdapterInfo.componentName.getPackageName();
                     // If the app did not run and has no account access, done
-                    if (!mPackageManagerInternal.wasPackageEverLaunched(packageName, userId)) {
+                    try {
+                        if (!mPackageManagerInternal.wasPackageEverLaunched(packageName, userId)) {
+                            continue;
+                        }
+                    } catch (IllegalArgumentException e) {
+                        // Package not found, race with an uninstall
                         continue;
                     }
                     mAccountManagerInternal.requestAccountAccess(account.account,
