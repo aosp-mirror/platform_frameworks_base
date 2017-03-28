@@ -221,7 +221,7 @@ public class QSFragment extends Fragment implements QS {
         }
 
         // Set bounds on the QS panel so it doesn't run over the header.
-        mQsBounds.top = (int) (mHeader.getBottom() * (1 - expansion));
+        mQsBounds.top = (int) (mQSPanel.getHeight() * (1 - expansion));
         mQsBounds.right = mQSPanel.getWidth();
         mQsBounds.bottom = mQSPanel.getHeight();
         mQSPanel.setClipBounds(mQsBounds);
