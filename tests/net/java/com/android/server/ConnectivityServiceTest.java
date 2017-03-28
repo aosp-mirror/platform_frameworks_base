@@ -23,7 +23,12 @@ import static android.net.ConnectivityManager.TYPE_WIFI;
 import static android.net.ConnectivityManager.getNetworkTypeName;
 import static android.net.NetworkCapabilities.*;
 
+import static org.mockito.Mockito.anyBoolean;
+import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -33,6 +38,7 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Resources;
 import android.net.ConnectivityManager;
 import android.net.ConnectivityManager.NetworkCallback;
 import android.net.ConnectivityManager.PacketKeepalive;
@@ -76,10 +82,15 @@ import android.util.LogPrinter;
 import com.android.internal.util.WakeupMessage;
 import com.android.internal.util.test.BroadcastInterceptingContext;
 import com.android.internal.util.test.FakeSettingsProvider;
+import com.android.server.connectivity.MockableSystemProperties;
 import com.android.server.connectivity.NetworkAgentInfo;
 import com.android.server.connectivity.NetworkMonitor;
 import com.android.server.connectivity.NetworkMonitor.CaptivePortalProbeResult;
 import com.android.server.net.NetworkPinner;
+
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 
 import java.net.InetAddress;
 import java.util.ArrayList;
@@ -133,8 +144,19 @@ public class ConnectivityServiceTest extends AndroidTestCase {
     private class MockContext extends BroadcastInterceptingContext {
         private final MockContentResolver mContentResolver;
 
+        @Spy private Resources mResources;
+
         MockContext(Context base) {
             super(base);
+
+            mResources = spy(base.getResources());
+            when(mResources.getStringArray(com.android.internal.R.array.networkAttributes)).
+                    thenReturn(new String[] {
+                            "wifi,1,1,1,-1,true",
+                            "mobile,0,0,0,-1,true",
+                            "mobile_mms,2,0,2,60000,true",
+                    });
+
             mContentResolver = new MockContentResolver();
             mContentResolver.addProvider(Settings.AUTHORITY, new FakeSettingsProvider());
         }
@@ -149,6 +171,11 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         @Override
         public ContentResolver getContentResolver() {
             return mContentResolver;
+        }
+
+        @Override
+        public Resources getResources() {
+            return mResources;
         }
     }
 
@@ -620,6 +647,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
     private class WrappedConnectivityService extends ConnectivityService {
         public WrappedMultinetworkPolicyTracker wrappedMultinetworkPolicyTracker;
         private WrappedNetworkMonitor mLastCreatedNetworkMonitor;
+        private MockableSystemProperties mSystemProperties;
 
         public WrappedConnectivityService(Context context, INetworkManagementService netManager,
                 INetworkStatsService statsService, INetworkPolicyManager policyManager,
@@ -629,9 +657,13 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         }
 
         @Override
-        protected int getDefaultTcpRwnd() {
-            // Prevent wrapped ConnectivityService from trying to write to SystemProperties.
-            return 0;
+        protected MockableSystemProperties getSystemProperties() {
+            // Minimal approach to overriding system properties: let most calls fall through to real
+            // device values, and only override ones values that are important to this test.
+            mSystemProperties = spy(new MockableSystemProperties());
+            when(mSystemProperties.getInt("net.tcp.default_init_rwnd", 0)).thenReturn(0);
+            when(mSystemProperties.getBoolean("ro.radio.noril", false)).thenReturn(false);
+            return mSystemProperties;
         }
 
         @Override
@@ -799,6 +831,14 @@ public class ConnectivityServiceTest extends AndroidTestCase {
                     }
                 }, new IntentFilter(CONNECTIVITY_ACTION));
         return cv;
+    }
+
+    public void testNetworkTypes() {
+        // Ensure that our mocks for the networkAttributes config variable work as expected. If they
+        // don't, then tests that depend on CONNECTIVITY_ACTION broadcasts for these network types
+        // will fail. Failing here is much easier to debug.
+        assertTrue(mCm.isNetworkSupported(TYPE_WIFI));
+        assertTrue(mCm.isNetworkSupported(TYPE_MOBILE));
     }
 
     @SmallTest
