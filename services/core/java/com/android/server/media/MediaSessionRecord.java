@@ -772,7 +772,12 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
     private final class SessionStub extends ISession.Stub {
         @Override
         public void destroy() {
-            mService.destroySession(MediaSessionRecord.this);
+            final long token = Binder.clearCallingIdentity();
+            try {
+                mService.destroySession(MediaSessionRecord.this);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
         }
 
         @Override
