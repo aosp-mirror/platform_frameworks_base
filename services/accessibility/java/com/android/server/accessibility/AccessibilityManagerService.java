@@ -584,17 +584,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             result = mEnabledServicesForFeedbackTempList;
             result.clear();
             List<Service> services = userState.mBoundServices;
-            while (feedbackType != 0) {
-                final int feedbackTypeBit = (1 << Integer.numberOfTrailingZeros(feedbackType));
-                feedbackType &= ~feedbackTypeBit;
-                final int serviceCount = services.size();
-                for (int i = 0; i < serviceCount; i++) {
-                    Service service = services.get(i);
-                    // Don't report the UIAutomation (fake service)
-                    if (!sFakeAccessibilityServiceComponentName.equals(service.mComponentName)
-                            && (service.mFeedbackType & feedbackTypeBit) != 0) {
-                        result.add(service.mAccessibilityServiceInfo);
-                    }
+            for (int serviceCount = services.size(), i = 0; i < serviceCount; ++i) {
+                Service service = services.get(i);
+                // Don't report the UIAutomation (fake service)
+                if (!sFakeAccessibilityServiceComponentName.equals(service.mComponentName)
+                        && (service.mFeedbackType & feedbackType) != 0) {
+                    result.add(service.mAccessibilityServiceInfo);
                 }
             }
         }
