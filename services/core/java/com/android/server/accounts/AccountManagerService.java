@@ -201,6 +201,7 @@ public class AccountManagerService
         private final HashMap<Account, Integer> signinRequiredNotificationIds =
                 new HashMap<Account, Integer>();
         final Object cacheLock = new Object();
+        final Object dbLock = new Object();
         /** protected by the {@link #cacheLock} */
         final HashMap<String, Account[]> accountCache = new LinkedHashMap<>();
         /** protected by the {@link #cacheLock} */
@@ -238,8 +239,10 @@ public class AccountManagerService
 
         UserAccounts(Context context, int userId, File preNDbFile, File deDbFile) {
             this.userId = userId;
-            synchronized (cacheLock) {
-                accountsDb = AccountsDb.create(context, userId, preNDbFile, deDbFile);
+            synchronized (dbLock) {
+                synchronized (cacheLock) {
+                    accountsDb = AccountsDb.create(context, userId, preNDbFile, deDbFile);
+                }
             }
         }
     }
@@ -500,12 +503,14 @@ public class AccountManagerService
 
         Map<Account, Integer> result = new LinkedHashMap<>();
         for (String accountType : accountTypes) {
-            synchronized (accounts.cacheLock) {
-                final Account[] accountsOfType = accounts.accountCache.get(accountType);
-                if (accountsOfType != null) {
-                    for (Account account : accountsOfType) {
-                        result.put(account,
-                                resolveAccountVisibility(account, packageName, accounts));
+            synchronized (accounts.dbLock) {
+                synchronized (accounts.cacheLock) {
+                    final Account[] accountsOfType = accounts.accountCache.get(accountType);
+                    if (accountsOfType != null) {
+                        for (Account account : accountsOfType) {
+                            result.put(account,
+                                    resolveAccountVisibility(account, packageName, accounts));
+                        }
                     }
                 }
             }
@@ -525,8 +530,10 @@ public class AccountManagerService
                     String.format("uid %s cannot get secrets for account %s", callingUid, account);
             throw new SecurityException(msg);
         }
-        synchronized (accounts.cacheLock) {
-            return getPackagesAndVisibilityForAccountLocked(account, accounts);
+        synchronized (accounts.dbLock) {
+            synchronized (accounts.cacheLock) {
+                return getPackagesAndVisibilityForAccountLocked(account, accounts);
+            }
         }
     }
 
@@ -579,11 +586,13 @@ public class AccountManagerService
      */
     private int getAccountVisibilityFromCache(Account account, String packageName,
             UserAccounts accounts) {
-        synchronized (accounts.cacheLock) {
-            Map<String, Integer> accountVisibility =
-                getPackagesAndVisibilityForAccountLocked(account, accounts);
-            Integer visibility = accountVisibility.get(packageName);
-            return visibility != null ? visibility : AccountManager.VISIBILITY_UNDEFINED;
+        synchronized (accounts.dbLock) {
+            synchronized (accounts.cacheLock) {
+                Map<String, Integer> accountVisibility =
+                        getPackagesAndVisibilityForAccountLocked(account, accounts);
+                Integer visibility = accountVisibility.get(packageName);
+                return visibility != null ? visibility : AccountManager.VISIBILITY_UNDEFINED;
+            }
         }
     }
 
@@ -729,43 +738,47 @@ public class AccountManagerService
      */
     private boolean setAccountVisibility(Account account, String packageName, int newVisibility,
             boolean notify, UserAccounts accounts) {
-        synchronized (accounts.cacheLock) {
-            Map<String, Integer> packagesToVisibility;
-            if (notify) {
-                if (isSpecialPackageKey(packageName)) {
-                    packagesToVisibility =
-                        getRequestingPackages(account, accounts);
+        synchronized (accounts.dbLock) {
+            synchronized (accounts.cacheLock) {
+                Map<String, Integer> packagesToVisibility;
+                if (notify) {
+                    if (isSpecialPackageKey(packageName)) {
+                        packagesToVisibility =
+                                getRequestingPackages(account, accounts);
+                    } else {
+                        if (!packageExistsForUser(packageName, accounts.userId)) {
+                            return false; // package is not installed.
+                        }
+                        packagesToVisibility = new HashMap<>();
+                        packagesToVisibility.put(packageName,
+                                resolveAccountVisibility(account, packageName, accounts));
+                    }
                 } else {
-                    if (!packageExistsForUser(packageName, accounts.userId)) {
-                        return false; // package is not installed.
+                    // Notifications will not be send.
+                    if (!isSpecialPackageKey(packageName) &&
+                            !packageExistsForUser(packageName, accounts.userId)) {
+                        // package is not installed and not meta value.
+                        return false;
                     }
                     packagesToVisibility = new HashMap<>();
-                    packagesToVisibility.put(packageName,
-                        resolveAccountVisibility(account, packageName, accounts));
                 }
-            } else {
-                // Notifications will not be send.
-                if (!isSpecialPackageKey(packageName) &&
-                        !packageExistsForUser(packageName, accounts.userId)) {
-                    // package is not installed and not meta value.
+
+                if (!updateAccountVisibilityLocked(account, packageName, newVisibility, accounts)) {
                     return false;
                 }
-                packagesToVisibility = new HashMap<>();
-            }
 
-            if (!updateAccountVisibilityLocked(account, packageName, newVisibility, accounts)) {
-                return false;
-            }
-
-            if (notify) {
-                for (Entry<String, Integer> packageToVisibility : packagesToVisibility.entrySet()) {
-                    if (packageToVisibility.getValue() != AccountManager.VISIBILITY_NOT_VISIBLE) {
-                        notifyPackage(packageToVisibility.getKey(), accounts);
+                if (notify) {
+                    for (Entry<String, Integer> packageToVisibility : packagesToVisibility
+                            .entrySet()) {
+                        if (packageToVisibility.getValue()
+                                != AccountManager.VISIBILITY_NOT_VISIBLE) {
+                            notifyPackage(packageToVisibility.getKey(), accounts);
+                        }
                     }
+                    sendAccountsChangedBroadcast(accounts.userId);
                 }
-                sendAccountsChangedBroadcast(accounts.userId);
+                return true;
             }
-            return true;
         }
     }
 
@@ -970,23 +983,24 @@ public class AccountManagerService
                 mAuthenticatorCache, accounts.userId);
         boolean userUnlocked = isLocalUnlockedUser(accounts.userId);
 
-        synchronized (accounts.cacheLock) {
-            boolean accountDeleted = false;
+        synchronized (accounts.dbLock) {
+            synchronized (accounts.cacheLock) {
+                boolean accountDeleted = false;
 
-            // Get a map of stored authenticator types to UID
-            final AccountsDb accountsDb = accounts.accountsDb;
-            Map<String, Integer> metaAuthUid = accountsDb.findMetaAuthUid();
-            // Create a list of authenticator type whose previous uid no longer exists
-            HashSet<String> obsoleteAuthType = Sets.newHashSet();
-            SparseBooleanArray knownUids = null;
-            for (Entry<String, Integer> authToUidEntry : metaAuthUid.entrySet()) {
-                String type = authToUidEntry.getKey();
-                int uid = authToUidEntry.getValue();
-                Integer knownUid = knownAuth.get(type);
-                if (knownUid != null && uid == knownUid) {
-                    // Remove it from the knownAuth list if it's unchanged.
-                    knownAuth.remove(type);
-                } else {
+                // Get a map of stored authenticator types to UID
+                final AccountsDb accountsDb = accounts.accountsDb;
+                Map<String, Integer> metaAuthUid = accountsDb.findMetaAuthUid();
+                // Create a list of authenticator type whose previous uid no longer exists
+                HashSet<String> obsoleteAuthType = Sets.newHashSet();
+                SparseBooleanArray knownUids = null;
+                for (Entry<String, Integer> authToUidEntry : metaAuthUid.entrySet()) {
+                    String type = authToUidEntry.getKey();
+                    int uid = authToUidEntry.getValue();
+                    Integer knownUid = knownAuth.get(type);
+                    if (knownUid != null && uid == knownUid) {
+                        // Remove it from the knownAuth list if it's unchanged.
+                        knownAuth.remove(type);
+                    } else {
                     /*
                      * The authenticator is presently not cached and should only be triggered
                      * when we think an authenticator has been removed (or is being updated).
@@ -1003,91 +1017,95 @@ public class AccountManagerService
                      * uninstalled while the authenticator's package is being updated.
                      *
                      */
-                    if (knownUids == null) {
-                        knownUids = getUidsOfInstalledOrUpdatedPackagesAsUser(accounts.userId);
-                    }
-                    if (!knownUids.get(uid)) {
-                        // The authenticator is not presently available to the cache. And the
-                        // package no longer has a data directory (so we surmise it isn't updating).
-                        // So purge its data from the account databases.
-                        obsoleteAuthType.add(type);
-                        // And delete it from the TABLE_META
-                        accountsDb.deleteMetaByAuthTypeAndUid(type, uid);
+                        if (knownUids == null) {
+                            knownUids = getUidsOfInstalledOrUpdatedPackagesAsUser(accounts.userId);
+                        }
+                        if (!knownUids.get(uid)) {
+                            // The authenticator is not presently available to the cache. And the
+                            // package no longer has a data directory (so we surmise it isn't
+                            // updating). So purge its data from the account databases.
+                            obsoleteAuthType.add(type);
+                            // And delete it from the TABLE_META
+                            accountsDb.deleteMetaByAuthTypeAndUid(type, uid);
+                        }
                     }
                 }
-            }
 
-            // Add the newly registered authenticator to TABLE_META. If old authenticators have
-            // been re-enabled (after being updated for example), then we just overwrite the old
-            // values.
-            for (Entry<String, Integer> entry : knownAuth.entrySet()) {
-                accountsDb.insertOrReplaceMetaAuthTypeAndUid(entry.getKey(), entry.getValue());
-            }
+                // Add the newly registered authenticator to TABLE_META. If old authenticators have
+                // been re-enabled (after being updated for example), then we just overwrite the old
+                // values.
+                for (Entry<String, Integer> entry : knownAuth.entrySet()) {
+                    accountsDb.insertOrReplaceMetaAuthTypeAndUid(entry.getKey(), entry.getValue());
+                }
 
-            final Map<Long, Account> accountsMap = accountsDb.findAllDeAccounts();
-            try {
-                accounts.accountCache.clear();
-                final HashMap<String, ArrayList<String>> accountNamesByType = new LinkedHashMap<>();
-                for (Entry<Long, Account> accountEntry : accountsMap.entrySet()) {
-                    final long accountId = accountEntry.getKey();
-                    final Account account = accountEntry.getValue();
-                    if (obsoleteAuthType.contains(account.type)) {
-                        Slog.w(TAG, "deleting account " + account.name + " because type "
-                                + account.type + "'s registered authenticator no longer exist.");
-                        Map<String, Integer> packagesToVisibility =
-                            getRequestingPackages(account, accounts);
-                        accountsDb.beginTransaction();
-                        try {
-                            accountsDb.deleteDeAccount(accountId);
-                            // Also delete from CE table if user is unlocked; if user is currently
-                            // locked the account will be removed later by syncDeCeAccountsLocked
-                            if (userUnlocked) {
-                                accountsDb.deleteCeAccount(accountId);
+                final Map<Long, Account> accountsMap = accountsDb.findAllDeAccounts();
+                try {
+                    accounts.accountCache.clear();
+                    final HashMap<String, ArrayList<String>> accountNamesByType
+                            = new LinkedHashMap<>();
+                    for (Entry<Long, Account> accountEntry : accountsMap.entrySet()) {
+                        final long accountId = accountEntry.getKey();
+                        final Account account = accountEntry.getValue();
+                        if (obsoleteAuthType.contains(account.type)) {
+                            Slog.w(TAG, "deleting account " + account.name + " because type "
+                                    + account.type
+                                    + "'s registered authenticator no longer exist.");
+                            Map<String, Integer> packagesToVisibility =
+                                    getRequestingPackages(account, accounts);
+                            accountsDb.beginTransaction();
+                            try {
+                                accountsDb.deleteDeAccount(accountId);
+                                // Also delete from CE table if user is unlocked; if user is
+                                // currently locked the account will be removed later by
+                                // syncDeCeAccountsLocked
+                                if (userUnlocked) {
+                                    accountsDb.deleteCeAccount(accountId);
+                                }
+                                accountsDb.setTransactionSuccessful();
+                            } finally {
+                                accountsDb.endTransaction();
                             }
-                            accountsDb.setTransactionSuccessful();
-                        } finally {
-                            accountsDb.endTransaction();
-                        }
-                        accountDeleted = true;
+                            accountDeleted = true;
 
-                        logRecord(AccountsDb.DEBUG_ACTION_AUTHENTICATOR_REMOVE,
-                                AccountsDb.TABLE_ACCOUNTS, accountId, accounts);
+                            logRecord(AccountsDb.DEBUG_ACTION_AUTHENTICATOR_REMOVE,
+                                    AccountsDb.TABLE_ACCOUNTS, accountId, accounts);
 
-                        accounts.userDataCache.remove(account);
-                        accounts.authTokenCache.remove(account);
-                        accounts.accountTokenCaches.remove(account);
-                        accounts.visibilityCache.remove(account);
+                            accounts.userDataCache.remove(account);
+                            accounts.authTokenCache.remove(account);
+                            accounts.accountTokenCaches.remove(account);
+                            accounts.visibilityCache.remove(account);
 
-                        for (Entry<String, Integer> packageToVisibility :
-                                packagesToVisibility.entrySet()) {
-                            if (packageToVisibility.getValue()
-                                    != AccountManager.VISIBILITY_NOT_VISIBLE) {
-                                notifyPackage(packageToVisibility.getKey(), accounts);
+                            for (Entry<String, Integer> packageToVisibility :
+                                    packagesToVisibility.entrySet()) {
+                                if (packageToVisibility.getValue()
+                                        != AccountManager.VISIBILITY_NOT_VISIBLE) {
+                                    notifyPackage(packageToVisibility.getKey(), accounts);
+                                }
                             }
+                        } else {
+                            ArrayList<String> accountNames = accountNamesByType.get(account.type);
+                            if (accountNames == null) {
+                                accountNames = new ArrayList<>();
+                                accountNamesByType.put(account.type, accountNames);
+                            }
+                            accountNames.add(account.name);
                         }
-                    } else {
-                        ArrayList<String> accountNames = accountNamesByType.get(account.type);
-                        if (accountNames == null) {
-                            accountNames = new ArrayList<>();
-                            accountNamesByType.put(account.type, accountNames);
+                    }
+                    for (Map.Entry<String, ArrayList<String>> cur : accountNamesByType.entrySet()) {
+                        final String accountType = cur.getKey();
+                        final ArrayList<String> accountNames = cur.getValue();
+                        final Account[] accountsForType = new Account[accountNames.size()];
+                        for (int i = 0; i < accountsForType.length; i++) {
+                            accountsForType[i] = new Account(accountNames.get(i), accountType,
+                                    UUID.randomUUID().toString());
                         }
-                        accountNames.add(account.name);
+                        accounts.accountCache.put(accountType, accountsForType);
                     }
-                }
-                for (Map.Entry<String, ArrayList<String>> cur : accountNamesByType.entrySet()) {
-                    final String accountType = cur.getKey();
-                    final ArrayList<String> accountNames = cur.getValue();
-                    final Account[] accountsForType = new Account[accountNames.size()];
-                    for (int i = 0; i < accountsForType.length; i++) {
-                        accountsForType[i] = new Account(accountNames.get(i), accountType,
-                                UUID.randomUUID().toString());
+                    accounts.visibilityCache.putAll(accountsDb.findAllVisibilityValues());
+                } finally {
+                    if (accountDeleted) {
+                        sendAccountsChangedBroadcast(accounts.userId);
                     }
-                    accounts.accountCache.put(accountType, accountsForType);
-                }
-                accounts.visibilityCache.putAll(accountsDb.findAllVisibilityValues());
-            } finally {
-                if (accountDeleted) {
-                    sendAccountsChangedBroadcast(accounts.userId);
                 }
             }
         }
@@ -1147,9 +1165,11 @@ public class AccountManagerService
             // open CE database if necessary
             if (!accounts.accountsDb.isCeDatabaseAttached() && mLocalUnlockedUsers.get(userId)) {
                 Log.i(TAG, "User " + userId + " is unlocked - opening CE database");
-                synchronized (accounts.cacheLock) {
-                    File ceDatabaseFile = new File(mInjector.getCeDatabaseName(userId));
-                    accounts.accountsDb.attachCeDatabase(ceDatabaseFile);
+                synchronized (accounts.dbLock) {
+                    synchronized (accounts.cacheLock) {
+                        File ceDatabaseFile = new File(mInjector.getCeDatabaseName(userId));
+                        accounts.accountsDb.attachCeDatabase(ceDatabaseFile);
+                    }
                 }
                 syncDeCeAccountsLocked(accounts);
             }
@@ -1184,16 +1204,18 @@ public class AccountManagerService
     }
 
     private void purgeOldGrants(UserAccounts accounts) {
-        synchronized (accounts.cacheLock) {
-            List<Integer> uids = accounts.accountsDb.findAllUidGrants();
-            for (int uid : uids) {
-                final boolean packageExists = mPackageManager.getPackagesForUid(uid) != null;
-                if (packageExists) {
-                    continue;
+        synchronized (accounts.dbLock) {
+            synchronized (accounts.cacheLock) {
+                List<Integer> uids = accounts.accountsDb.findAllUidGrants();
+                for (int uid : uids) {
+                    final boolean packageExists = mPackageManager.getPackagesForUid(uid) != null;
+                    if (packageExists) {
+                        continue;
+                    }
+                    Log.d(TAG, "deleting grants for UID " + uid
+                            + " because its package is no longer installed");
+                    accounts.accountsDb.deleteGrantsByUid(uid);
                 }
-                Log.d(TAG, "deleting grants for UID " + uid
-                        + " because its package is no longer installed");
-                accounts.accountsDb.deleteGrantsByUid(uid);
             }
         }
     }
@@ -1211,11 +1233,13 @@ public class AccountManagerService
                 } catch (NameNotFoundException e) {
                     // package does not exist - remove visibility values
                     accounts.accountsDb.deleteAccountVisibilityForPackage(packageName);
-                    synchronized(accounts.cacheLock) {
-                        for (Account account : accounts.visibilityCache.keySet()) {
-                            Map<String, Integer> accountVisibility =
-                                getPackagesAndVisibilityForAccountLocked(account, accounts);
-                            accountVisibility.remove(packageName);
+                    synchronized (accounts.dbLock) {
+                        synchronized (accounts.cacheLock) {
+                            for (Account account : accounts.visibilityCache.keySet()) {
+                                Map<String, Integer> accountVisibility =
+                                        getPackagesAndVisibilityForAccountLocked(account, accounts);
+                                accountVisibility.remove(packageName);
+                            }
                         }
                     }
               }
@@ -1233,8 +1257,10 @@ public class AccountManagerService
             mLocalUnlockedUsers.delete(userId);
         }
         if (accounts != null) {
-            synchronized (accounts.cacheLock) {
-                accounts.accountsDb.close();
+            synchronized (accounts.dbLock) {
+                synchronized (accounts.cacheLock) {
+                    accounts.accountsDb.close();
+                }
             }
         }
     }
@@ -1314,8 +1340,11 @@ public class AccountManagerService
             return null;
         }
 
-        synchronized (accounts.cacheLock) {
-            return accounts.accountsDb.findAccountPasswordByNameAndType(account.name, account.type);
+        synchronized (accounts.dbLock) {
+            synchronized (accounts.cacheLock) {
+                return accounts.accountsDb
+                        .findAccountPasswordByNameAndType(account.name, account.type);
+            }
         }
     }
 
@@ -1341,15 +1370,17 @@ public class AccountManagerService
         if  (account == null) {
             return null;
         }
-        synchronized (accounts.cacheLock) {
-            AtomicReference<String> previousNameRef = accounts.previousNameCache.get(account);
-            if (previousNameRef == null) {
-                String previousName = accounts.accountsDb.findDeAccountPreviousName(account);
-                previousNameRef = new AtomicReference<>(previousName);
-                accounts.previousNameCache.put(account, previousNameRef);
-                return previousName;
-            } else {
-                return previousNameRef.get();
+        synchronized (accounts.dbLock) {
+            synchronized (accounts.cacheLock) {
+                AtomicReference<String> previousNameRef = accounts.previousNameCache.get(account);
+                if (previousNameRef == null) {
+                    String previousName = accounts.accountsDb.findDeAccountPreviousName(account);
+                    previousNameRef = new AtomicReference<>(previousName);
+                    accounts.previousNameCache.put(account, previousNameRef);
+                    return previousName;
+                } else {
+                    return previousNameRef.get();
+                }
             }
         }
     }
@@ -1379,11 +1410,13 @@ public class AccountManagerService
         long identityToken = clearCallingIdentity();
         try {
             UserAccounts accounts = getUserAccounts(userId);
-            synchronized (accounts.cacheLock) {
-                if (!accountExistsCacheLocked(accounts, account)) {
-                    return null;
+            synchronized (accounts.dbLock) {
+                synchronized (accounts.cacheLock) {
+                    if (!accountExistsCacheLocked(accounts, account)) {
+                        return null;
+                    }
+                    return readUserDataInternalLocked(accounts, account, key);
                 }
-                return readUserDataInternalLocked(accounts, account, key);
             }
         } finally {
             restoreCallingIdentity(identityToken);
@@ -1542,8 +1575,10 @@ public class AccountManagerService
 
     private boolean updateLastAuthenticatedTime(Account account) {
         final UserAccounts accounts = getUserAccountsForCaller();
-        synchronized (accounts.cacheLock) {
-            return accounts.accountsDb.updateAccountLastAuthenticatedTime(account);
+        synchronized (accounts.dbLock) {
+            synchronized (accounts.cacheLock) {
+                return accounts.accountsDb.updateAccountLastAuthenticatedTime(account);
+            }
         }
     }
 
@@ -1566,13 +1601,15 @@ public class AccountManagerService
                 public void run() throws RemoteException {
                     // Confirm that the owner's account still exists before this step.
                     UserAccounts owner = getUserAccounts(parentUserId);
-                    synchronized (owner.cacheLock) {
-                        for (Account acc : getAccounts(parentUserId,
-                                mContext.getOpPackageName())) {
-                            if (acc.equals(account)) {
-                                mAuthenticator.addAccountFromCredentials(
-                                        this, account, accountCredentials);
-                                break;
+                    synchronized (owner.dbLock) {
+                        synchronized (owner.cacheLock) {
+                            for (Account acc : getAccounts(parentUserId,
+                                    mContext.getOpPackageName())) {
+                                if (acc.equals(account)) {
+                                    mAuthenticator.addAccountFromCredentials(
+                                            this, account, accountCredentials);
+                                    break;
+                                }
                             }
                         }
                     }
@@ -1613,51 +1650,55 @@ public class AccountManagerService
                     + " is locked. callingUid=" + callingUid);
             return false;
         }
-        synchronized (accounts.cacheLock) {
-            accounts.accountsDb.beginTransaction();
-            try {
-                if (accounts.accountsDb.findCeAccountId(account) >= 0) {
-                    Log.w(TAG, "insertAccountIntoDatabase: " + account
-                            + ", skipping since the account already exists");
-                    return false;
-                }
-                long accountId = accounts.accountsDb.insertCeAccount(account, password);
-                if (accountId < 0) {
-                    Log.w(TAG, "insertAccountIntoDatabase: " + account
-                            + ", skipping the DB insert failed");
-                    return false;
-                }
-                // Insert into DE table
-                if (accounts.accountsDb.insertDeAccount(account, accountId) < 0) {
-                    Log.w(TAG, "insertAccountIntoDatabase: " + account
-                            + ", skipping the DB insert failed");
-                    return false;
-                }
-                if (extras != null) {
-                    for (String key : extras.keySet()) {
-                        final String value = extras.getString(key);
-                        if (accounts.accountsDb.insertExtra(accountId, key, value) < 0) {
-                            Log.w(TAG, "insertAccountIntoDatabase: " + account
-                                    + ", skipping since insertExtra failed for key " + key);
-                            return false;
+        synchronized (accounts.dbLock) {
+            synchronized (accounts.cacheLock) {
+                accounts.accountsDb.beginTransaction();
+                try {
+                    if (accounts.accountsDb.findCeAccountId(account) >= 0) {
+                        Log.w(TAG, "insertAccountIntoDatabase: " + account
+                                + ", skipping since the account already exists");
+                        return false;
+                    }
+                    long accountId = accounts.accountsDb.insertCeAccount(account, password);
+                    if (accountId < 0) {
+                        Log.w(TAG, "insertAccountIntoDatabase: " + account
+                                + ", skipping the DB insert failed");
+                        return false;
+                    }
+                    // Insert into DE table
+                    if (accounts.accountsDb.insertDeAccount(account, accountId) < 0) {
+                        Log.w(TAG, "insertAccountIntoDatabase: " + account
+                                + ", skipping the DB insert failed");
+                        return false;
+                    }
+                    if (extras != null) {
+                        for (String key : extras.keySet()) {
+                            final String value = extras.getString(key);
+                            if (accounts.accountsDb.insertExtra(accountId, key, value) < 0) {
+                                Log.w(TAG, "insertAccountIntoDatabase: " + account
+                                        + ", skipping since insertExtra failed for key " + key);
+                                return false;
+                            }
                         }
                     }
-                }
 
-                if (packageToVisibility != null) {
-                    for (Entry<String, Integer> entry : packageToVisibility.entrySet()) {
-                        setAccountVisibility(account, entry.getKey() /* package */,
-                                entry.getValue() /* visibility */, false /* notify */, accounts);
+                    if (packageToVisibility != null) {
+                        for (Entry<String, Integer> entry : packageToVisibility.entrySet()) {
+                            setAccountVisibility(account, entry.getKey() /* package */,
+                                    entry.getValue() /* visibility */, false /* notify */,
+                                    accounts);
+                        }
                     }
+                    accounts.accountsDb.setTransactionSuccessful();
+
+                    logRecord(AccountsDb.DEBUG_ACTION_ACCOUNT_ADD, AccountsDb.TABLE_ACCOUNTS,
+                            accountId,
+                            accounts, callingUid);
+
+                    insertAccountIntoCacheLocked(accounts, account);
+                } finally {
+                    accounts.accountsDb.endTransaction();
                 }
-                accounts.accountsDb.setTransactionSuccessful();
-
-                logRecord(AccountsDb.DEBUG_ACTION_ACCOUNT_ADD, AccountsDb.TABLE_ACCOUNTS, accountId,
-                        accounts, callingUid);
-
-                insertAccountIntoCacheLocked(accounts, account);
-            } finally {
-                accounts.accountsDb.endTransaction();
             }
         }
         if (getUserManager().getUserInfo(accounts.userId).canHaveProfile()) {
@@ -1842,74 +1883,76 @@ public class AccountManagerService
                 }
             }
         }
-        synchronized (accounts.cacheLock) {
-            accounts.accountsDb.beginTransaction();
-            Account renamedAccount = new Account(newName, accountToRename.type);
-            if ((accounts.accountsDb.findCeAccountId(renamedAccount) >= 0)) {
-                Log.e(TAG, "renameAccount failed - account with new name already exists");
-                return null;
-            }
-            try {
-                final long accountId = accounts.accountsDb.findDeAccountId(accountToRename);
-                if (accountId >= 0) {
-                    accounts.accountsDb.renameCeAccount(accountId, newName);
-                    if (accounts.accountsDb.renameDeAccount(
-                            accountId, newName, accountToRename.name)) {
-                        accounts.accountsDb.setTransactionSuccessful();
-                    } else {
-                        Log.e(TAG, "renameAccount failed");
-                        return null;
-                    }
-                } else {
-                    Log.e(TAG, "renameAccount failed - old account does not exist");
+        synchronized (accounts.dbLock) {
+            synchronized (accounts.cacheLock) {
+                accounts.accountsDb.beginTransaction();
+                Account renamedAccount = new Account(newName, accountToRename.type);
+                if ((accounts.accountsDb.findCeAccountId(renamedAccount) >= 0)) {
+                    Log.e(TAG, "renameAccount failed - account with new name already exists");
                     return null;
                 }
-            } finally {
-                accounts.accountsDb.endTransaction();
-            }
+                try {
+                    final long accountId = accounts.accountsDb.findDeAccountId(accountToRename);
+                    if (accountId >= 0) {
+                        accounts.accountsDb.renameCeAccount(accountId, newName);
+                        if (accounts.accountsDb.renameDeAccount(
+                                accountId, newName, accountToRename.name)) {
+                            accounts.accountsDb.setTransactionSuccessful();
+                        } else {
+                            Log.e(TAG, "renameAccount failed");
+                            return null;
+                        }
+                    } else {
+                        Log.e(TAG, "renameAccount failed - old account does not exist");
+                        return null;
+                    }
+                } finally {
+                    accounts.accountsDb.endTransaction();
+                }
             /*
              * Database transaction was successful. Clean up cached
              * data associated with the account in the user profile.
              */
-            renamedAccount = insertAccountIntoCacheLocked(accounts, renamedAccount);
+                renamedAccount = insertAccountIntoCacheLocked(accounts, renamedAccount);
             /*
              * Extract the data and token caches before removing the
              * old account to preserve the user data associated with
              * the account.
              */
-            Map<String, String> tmpData = accounts.userDataCache.get(accountToRename);
-            Map<String, String> tmpTokens = accounts.authTokenCache.get(accountToRename);
-            Map<String, Integer> tmpVisibility = accounts.visibilityCache.get(accountToRename);
-            removeAccountFromCacheLocked(accounts, accountToRename);
+                Map<String, String> tmpData = accounts.userDataCache.get(accountToRename);
+                Map<String, String> tmpTokens = accounts.authTokenCache.get(accountToRename);
+                Map<String, Integer> tmpVisibility = accounts.visibilityCache.get(accountToRename);
+                removeAccountFromCacheLocked(accounts, accountToRename);
             /*
              * Update the cached data associated with the renamed
              * account.
              */
-            accounts.userDataCache.put(renamedAccount, tmpData);
-            accounts.authTokenCache.put(renamedAccount, tmpTokens);
-            accounts.visibilityCache.put(renamedAccount, tmpVisibility);
-            accounts.previousNameCache.put(
-                    renamedAccount,
-                    new AtomicReference<>(accountToRename.name));
-            resultAccount = renamedAccount;
+                accounts.userDataCache.put(renamedAccount, tmpData);
+                accounts.authTokenCache.put(renamedAccount, tmpTokens);
+                accounts.visibilityCache.put(renamedAccount, tmpVisibility);
+                accounts.previousNameCache.put(
+                        renamedAccount,
+                        new AtomicReference<>(accountToRename.name));
+                resultAccount = renamedAccount;
 
-            int parentUserId = accounts.userId;
-            if (canHaveProfile(parentUserId)) {
+                int parentUserId = accounts.userId;
+                if (canHaveProfile(parentUserId)) {
                 /*
                  * Owner or system user account was renamed, rename the account for
                  * those users with which the account was shared.
                  */
-                List<UserInfo> users = getUserManager().getUsers(true);
-                for (UserInfo user : users) {
-                    if (user.isRestricted()
-                            && (user.restrictedProfileParentId == parentUserId)) {
-                        renameSharedAccountAsUser(accountToRename, newName, user.id);
+                    List<UserInfo> users = getUserManager().getUsers(true);
+                    for (UserInfo user : users) {
+                        if (user.isRestricted()
+                                && (user.restrictedProfileParentId == parentUserId)) {
+                            renameSharedAccountAsUser(accountToRename, newName, user.id);
+                        }
                     }
                 }
-            }
 
-            sendNotificationAccountUpdated(resultAccount, accounts);
-            sendAccountsChangedBroadcast(accounts.userId);
+                sendNotificationAccountUpdated(resultAccount, accounts);
+                sendAccountsChangedBroadcast(accounts.userId);
+            }
         }
         return resultAccount;
     }
@@ -2107,42 +2150,47 @@ public class AccountManagerService
             Slog.i(TAG, "Removing account " + account + " while user "+ accounts.userId
                     + " is still locked. CE data will be removed later");
         }
-        synchronized (accounts.cacheLock) {
-            Map<String, Integer> packagesToVisibility = getRequestingPackages(account, accounts);
-            accounts.accountsDb.beginTransaction();
-            // Set to a dummy value, this will only be used if the database
-            // transaction succeeds.
-            long accountId = -1;
-            try {
-                accountId = accounts.accountsDb.findDeAccountId(account);
-                if (accountId >= 0) {
-                    isChanged = accounts.accountsDb.deleteDeAccount(accountId);
-                }
-                // always delete from CE table if CE storage is available
-                // DE account could be removed while CE was locked
-                if (userUnlocked) {
-                    long ceAccountId = accounts.accountsDb.findCeAccountId(account);
-                    if (ceAccountId >= 0) {
-                        accounts.accountsDb.deleteCeAccount(ceAccountId);
+        synchronized (accounts.dbLock) {
+            synchronized (accounts.cacheLock) {
+                Map<String, Integer> packagesToVisibility = getRequestingPackages(account,
+                        accounts);
+                accounts.accountsDb.beginTransaction();
+                // Set to a dummy value, this will only be used if the database
+                // transaction succeeds.
+                long accountId = -1;
+                try {
+                    accountId = accounts.accountsDb.findDeAccountId(account);
+                    if (accountId >= 0) {
+                        isChanged = accounts.accountsDb.deleteDeAccount(accountId);
                     }
-                }
-                accounts.accountsDb.setTransactionSuccessful();
-            } finally {
-                accounts.accountsDb.endTransaction();
-            }
-            if (isChanged) {
-                removeAccountFromCacheLocked(accounts, account);
-                for (Entry<String, Integer> packageToVisibility : packagesToVisibility.entrySet()) {
-                    if (packageToVisibility.getValue() != AccountManager.VISIBILITY_NOT_VISIBLE) {
-                        notifyPackage(packageToVisibility.getKey(), accounts);
+                    // always delete from CE table if CE storage is available
+                    // DE account could be removed while CE was locked
+                    if (userUnlocked) {
+                        long ceAccountId = accounts.accountsDb.findCeAccountId(account);
+                        if (ceAccountId >= 0) {
+                            accounts.accountsDb.deleteCeAccount(ceAccountId);
+                        }
                     }
+                    accounts.accountsDb.setTransactionSuccessful();
+                } finally {
+                    accounts.accountsDb.endTransaction();
                 }
+                if (isChanged) {
+                    removeAccountFromCacheLocked(accounts, account);
+                    for (Entry<String, Integer> packageToVisibility : packagesToVisibility
+                            .entrySet()) {
+                        if (packageToVisibility.getValue()
+                                != AccountManager.VISIBILITY_NOT_VISIBLE) {
+                            notifyPackage(packageToVisibility.getKey(), accounts);
+                        }
+                    }
 
-                // Only broadcast LOGIN_ACCOUNTS_CHANGED if a change occurred.
-                sendAccountsChangedBroadcast(accounts.userId);
-                String action = userUnlocked ? AccountsDb.DEBUG_ACTION_ACCOUNT_REMOVE
-                        : AccountsDb.DEBUG_ACTION_ACCOUNT_REMOVE_DE;
-                logRecord(action, AccountsDb.TABLE_ACCOUNTS, accountId, accounts);
+                    // Only broadcast LOGIN_ACCOUNTS_CHANGED if a change occurred.
+                    sendAccountsChangedBroadcast(accounts.userId);
+                    String action = userUnlocked ? AccountsDb.DEBUG_ACTION_ACCOUNT_REMOVE
+                            : AccountsDb.DEBUG_ACTION_ACCOUNT_REMOVE_DE;
+                    logRecord(action, AccountsDb.TABLE_ACCOUNTS, accountId, accounts);
+                }
             }
         }
         long id = Binder.clearCallingIdentity();
@@ -2192,14 +2240,16 @@ public class AccountManagerService
         long identityToken = clearCallingIdentity();
         try {
             UserAccounts accounts = getUserAccounts(userId);
-            synchronized (accounts.cacheLock) {
-                accounts.accountsDb.beginTransaction();
-                try {
-                    invalidateAuthTokenLocked(accounts, accountType, authToken);
-                    invalidateCustomTokenLocked(accounts, accountType, authToken);
-                    accounts.accountsDb.setTransactionSuccessful();
-                } finally {
-                    accounts.accountsDb.endTransaction();
+            synchronized (accounts.dbLock) {
+                synchronized (accounts.cacheLock) {
+                    accounts.accountsDb.beginTransaction();
+                    try {
+                        invalidateAuthTokenLocked(accounts, accountType, authToken);
+                        invalidateCustomTokenLocked(accounts, accountType, authToken);
+                        accounts.accountsDb.setTransactionSuccessful();
+                    } finally {
+                        accounts.accountsDb.endTransaction();
+                    }
                 }
             }
         } finally {
@@ -2255,9 +2305,11 @@ public class AccountManagerService
         }
         cancelNotification(getSigninRequiredNotificationId(accounts, account),
                 UserHandle.of(accounts.userId));
-        synchronized (accounts.cacheLock) {
-            accounts.accountTokenCaches.put(
-                    account, token, tokenType, callerPkg, callerSigDigest, expiryMillis);
+        synchronized (accounts.dbLock) {
+            synchronized (accounts.cacheLock) {
+                accounts.accountTokenCaches.put(
+                        account, token, tokenType, callerPkg, callerSigDigest, expiryMillis);
+            }
         }
     }
 
@@ -2268,22 +2320,24 @@ public class AccountManagerService
         }
         cancelNotification(getSigninRequiredNotificationId(accounts, account),
                 UserHandle.of(accounts.userId));
-        synchronized (accounts.cacheLock) {
-            accounts.accountsDb.beginTransaction();
-            try {
-                long accountId = accounts.accountsDb.findDeAccountId(account);
-                if (accountId < 0) {
+        synchronized (accounts.dbLock) {
+            synchronized (accounts.cacheLock) {
+                accounts.accountsDb.beginTransaction();
+                try {
+                    long accountId = accounts.accountsDb.findDeAccountId(account);
+                    if (accountId < 0) {
+                        return false;
+                    }
+                    accounts.accountsDb.deleteAuthtokensByAccountIdAndType(accountId, type);
+                    if (accounts.accountsDb.insertAuthToken(accountId, type, authToken) >= 0) {
+                        accounts.accountsDb.setTransactionSuccessful();
+                        writeAuthTokenIntoCacheLocked(accounts, account, type, authToken);
+                        return true;
+                    }
                     return false;
+                } finally {
+                    accounts.accountsDb.endTransaction();
                 }
-                accounts.accountsDb.deleteAuthtokensByAccountIdAndType(accountId, type);
-                if (accounts.accountsDb.insertAuthToken(accountId, type, authToken) >= 0) {
-                    accounts.accountsDb.setTransactionSuccessful();
-                    writeAuthTokenIntoCacheLocked(accounts, account, type, authToken);
-                    return true;
-                }
-                return false;
-            } finally {
-                accounts.accountsDb.endTransaction();
             }
         }
     }
@@ -2381,31 +2435,35 @@ public class AccountManagerService
             return;
         }
         boolean isChanged = false;
-        synchronized (accounts.cacheLock) {
-            accounts.accountsDb.beginTransaction();
-            try {
-                final long accountId = accounts.accountsDb.findDeAccountId(account);
-                if (accountId >= 0) {
-                    accounts.accountsDb.updateCeAccountPassword(accountId, password);
-                    accounts.accountsDb.deleteAuthTokensByAccountId(accountId);
-                    accounts.authTokenCache.remove(account);
-                    accounts.accountTokenCaches.remove(account);
-                    accounts.accountsDb.setTransactionSuccessful();
-                    // If there is an account whose password will be updated and the database
-                    // transactions succeed, then we say that a change has occured. Even if the
-                    // new password is the same as the old and there were no authtokens to delete.
-                    isChanged = true;
-                    String action = (password == null || password.length() == 0) ?
-                            AccountsDb.DEBUG_ACTION_CLEAR_PASSWORD
-                            : AccountsDb.DEBUG_ACTION_SET_PASSWORD;
-                    logRecord(action, AccountsDb.TABLE_ACCOUNTS, accountId, accounts, callingUid);
-                }
-            } finally {
-                accounts.accountsDb.endTransaction();
-                if (isChanged) {
-                    // Send LOGIN_ACCOUNTS_CHANGED only if the something changed.
-                    sendNotificationAccountUpdated(account, accounts);
-                    sendAccountsChangedBroadcast(accounts.userId);
+        synchronized (accounts.dbLock) {
+            synchronized (accounts.cacheLock) {
+                accounts.accountsDb.beginTransaction();
+                try {
+                    final long accountId = accounts.accountsDb.findDeAccountId(account);
+                    if (accountId >= 0) {
+                        accounts.accountsDb.updateCeAccountPassword(accountId, password);
+                        accounts.accountsDb.deleteAuthTokensByAccountId(accountId);
+                        accounts.authTokenCache.remove(account);
+                        accounts.accountTokenCaches.remove(account);
+                        accounts.accountsDb.setTransactionSuccessful();
+                        // If there is an account whose password will be updated and the database
+                        // transactions succeed, then we say that a change has occured. Even if the
+                        // new password is the same as the old and there were no authtokens to
+                        // delete.
+                        isChanged = true;
+                        String action = (password == null || password.length() == 0) ?
+                                AccountsDb.DEBUG_ACTION_CLEAR_PASSWORD
+                                : AccountsDb.DEBUG_ACTION_SET_PASSWORD;
+                        logRecord(action, AccountsDb.TABLE_ACCOUNTS, accountId, accounts,
+                                callingUid);
+                    }
+                } finally {
+                    accounts.accountsDb.endTransaction();
+                    if (isChanged) {
+                        // Send LOGIN_ACCOUNTS_CHANGED only if the something changed.
+                        sendNotificationAccountUpdated(account, accounts);
+                        sendAccountsChangedBroadcast(accounts.userId);
+                    }
                 }
             }
         }
@@ -2459,11 +2517,13 @@ public class AccountManagerService
         long identityToken = clearCallingIdentity();
         try {
             UserAccounts accounts = getUserAccounts(userId);
-            synchronized (accounts.cacheLock) {
-                if (!accountExistsCacheLocked(accounts, account)) {
-                    return;
+            synchronized (accounts.dbLock) {
+                synchronized (accounts.cacheLock) {
+                    if (!accountExistsCacheLocked(accounts, account)) {
+                        return;
+                    }
+                    setUserdataInternalLocked(accounts, account, key, value);
                 }
-                setUserdataInternalLocked(accounts, account, key, value);
             }
         } finally {
             restoreCallingIdentity(identityToken);
@@ -3887,9 +3947,12 @@ public class AccountManagerService
 
         @Override
         public void run() throws RemoteException {
-            synchronized (mAccounts.cacheLock) {
-                mAccountsOfType = getAccountsFromCacheLocked(mAccounts, mAccountType, mCallingUid,
-                        mPackageName, false /* include managed not visible*/);
+            synchronized (mAccounts.dbLock) {
+                synchronized (mAccounts.cacheLock) {
+                    mAccountsOfType = getAccountsFromCacheLocked(mAccounts, mAccountType,
+                            mCallingUid,
+                            mPackageName, false /* include managed not visible*/);
+                }
             }
             // check whether each account matches the requested features
             mAccountsWithFeatures = new ArrayList<>(mAccountsOfType.length);
@@ -4034,15 +4097,17 @@ public class AccountManagerService
         for (int userId : userIds) {
             UserAccounts userAccounts = getUserAccounts(userId);
             if (userAccounts == null) continue;
-            synchronized (userAccounts.cacheLock) {
-                Account[] accounts = getAccountsFromCacheLocked(
-                        userAccounts,
-                        null /* type */,
-                        Binder.getCallingUid(),
-                        null /* packageName */,
-                        false /* include managed not visible*/);
-                for (int a = 0; a < accounts.length; a++) {
-                    runningAccounts.add(new AccountAndUser(accounts[a], userId));
+            synchronized (userAccounts.dbLock) {
+                synchronized (userAccounts.cacheLock) {
+                    Account[] accounts = getAccountsFromCacheLocked(
+                            userAccounts,
+                            null /* type */,
+                            Binder.getCallingUid(),
+                            null /* packageName */,
+                            false /* include managed not visible*/);
+                    for (int a = 0; a < accounts.length; a++) {
+                        runningAccounts.add(new AccountAndUser(accounts[a], userId));
+                    }
                 }
             }
         }
@@ -4129,21 +4194,23 @@ public class AccountManagerService
             String callingPackage,
             List<String> visibleAccountTypes,
             boolean includeUserManagedNotVisible) {
-        synchronized (userAccounts.cacheLock) {
-            ArrayList<Account> visibleAccounts = new ArrayList<>();
-            for (String visibleType : visibleAccountTypes) {
-                Account[] accountsForType = getAccountsFromCacheLocked(
-                        userAccounts, visibleType, callingUid, callingPackage,
-                        includeUserManagedNotVisible);
-                if (accountsForType != null) {
-                    visibleAccounts.addAll(Arrays.asList(accountsForType));
+        synchronized (userAccounts.dbLock) {
+            synchronized (userAccounts.cacheLock) {
+                ArrayList<Account> visibleAccounts = new ArrayList<>();
+                for (String visibleType : visibleAccountTypes) {
+                    Account[] accountsForType = getAccountsFromCacheLocked(
+                            userAccounts, visibleType, callingUid, callingPackage,
+                            includeUserManagedNotVisible);
+                    if (accountsForType != null) {
+                        visibleAccounts.addAll(Arrays.asList(accountsForType));
+                    }
                 }
+                Account[] result = new Account[visibleAccounts.size()];
+                for (int i = 0; i < visibleAccounts.size(); i++) {
+                    result[i] = visibleAccounts.get(i);
+                }
+                return result;
             }
-            Account[] result = new Account[visibleAccounts.size()];
-            for (int i = 0; i < visibleAccounts.size(); i++) {
-                result[i] = visibleAccounts.get(i);
-            }
-            return result;
         }
     }
 
@@ -4294,9 +4361,11 @@ public class AccountManagerService
             UserAccounts userAccounts = getUserAccounts(userId);
             if (features == null || features.length == 0) {
                 Account[] accounts;
-                synchronized (userAccounts.cacheLock) {
-                    accounts = getAccountsFromCacheLocked(
-                            userAccounts, type, callingUid, opPackageName, false);
+                synchronized (userAccounts.dbLock) {
+                    synchronized (userAccounts.cacheLock) {
+                        accounts = getAccountsFromCacheLocked(
+                                userAccounts, type, callingUid, opPackageName, false);
+                    }
                 }
                 Bundle result = new Bundle();
                 result.putParcelableArray(AccountManager.KEY_ACCOUNTS, accounts);
@@ -4853,32 +4922,35 @@ public class AccountManagerService
 
     private void dumpUser(UserAccounts userAccounts, FileDescriptor fd, PrintWriter fout,
             String[] args, boolean isCheckinRequest) {
-        synchronized (userAccounts.cacheLock) {
-            if (isCheckinRequest) {
-                // This is a checkin request. *Only* upload the account types and the count of each.
-                userAccounts.accountsDb.dumpDeAccountsTable(fout);
-            } else {
-                Account[] accounts = getAccountsFromCacheLocked(userAccounts, null /* type */,
-                        Process.SYSTEM_UID, null /* packageName */, false);
-                fout.println("Accounts: " + accounts.length);
-                for (Account account : accounts) {
-                    fout.println("  " + account);
-                }
-
-                // Add debug information.
-                fout.println();
-                userAccounts.accountsDb.dumpDebugTable(fout);
-                fout.println();
-                synchronized (mSessions) {
-                    final long now = SystemClock.elapsedRealtime();
-                    fout.println("Active Sessions: " + mSessions.size());
-                    for (Session session : mSessions.values()) {
-                        fout.println("  " + session.toDebugString(now));
+        synchronized (userAccounts.dbLock) {
+            synchronized (userAccounts.cacheLock) {
+                if (isCheckinRequest) {
+                    // This is a checkin request. *Only* upload the account types and the count of
+                    // each.
+                    userAccounts.accountsDb.dumpDeAccountsTable(fout);
+                } else {
+                    Account[] accounts = getAccountsFromCacheLocked(userAccounts, null /* type */,
+                            Process.SYSTEM_UID, null /* packageName */, false);
+                    fout.println("Accounts: " + accounts.length);
+                    for (Account account : accounts) {
+                        fout.println("  " + account);
                     }
-                }
 
-                fout.println();
-                mAuthenticatorCache.dump(fd, fout, args, userAccounts.userId);
+                    // Add debug information.
+                    fout.println();
+                    userAccounts.accountsDb.dumpDebugTable(fout);
+                    fout.println();
+                    synchronized (mSessions) {
+                        final long now = SystemClock.elapsedRealtime();
+                        fout.println("Active Sessions: " + mSessions.size());
+                        for (Session session : mSessions.values()) {
+                            fout.println("  " + session.toDebugString(now));
+                        }
+                    }
+
+                    fout.println();
+                    mAuthenticatorCache.dump(fd, fout, args, userAccounts.userId);
+                }
             }
         }
     }
@@ -5192,26 +5264,28 @@ public class AccountManagerService
             return true;
         }
         UserAccounts accounts = getUserAccounts(UserHandle.getUserId(callerUid));
-        synchronized (accounts.cacheLock) {
-            long grantsCount;
-            if (authTokenType != null) {
-                grantsCount = accounts.accountsDb.findMatchingGrantsCount(callerUid, authTokenType,
-                        account);
-            } else {
-                grantsCount = accounts.accountsDb.findMatchingGrantsCountAnyToken(callerUid,
-                        account);
-            }
-            final boolean permissionGranted = grantsCount > 0;
+        synchronized (accounts.dbLock) {
+            synchronized (accounts.cacheLock) {
+                long grantsCount;
+                if (authTokenType != null) {
+                    grantsCount = accounts.accountsDb
+                            .findMatchingGrantsCount(callerUid, authTokenType, account);
+                } else {
+                    grantsCount = accounts.accountsDb.findMatchingGrantsCountAnyToken(callerUid,
+                            account);
+                }
+                final boolean permissionGranted = grantsCount > 0;
 
-            if (!permissionGranted && ActivityManager.isRunningInTestHarness()) {
-                // TODO: Skip this check when running automated tests. Replace this
-                // with a more general solution.
-                Log.d(TAG, "no credentials permission for usage of " + account + ", "
-                        + authTokenType + " by uid " + callerUid
-                        + " but ignoring since device is in test harness.");
-                return true;
+                if (!permissionGranted && ActivityManager.isRunningInTestHarness()) {
+                    // TODO: Skip this check when running automated tests. Replace this
+                    // with a more general solution.
+                    Log.d(TAG, "no credentials permission for usage of " + account + ", "
+                            + authTokenType + " by uid " + callerUid
+                            + " but ignoring since device is in test harness.");
+                    return true;
+                }
+                return permissionGranted;
             }
-            return permissionGranted;
         }
     }
 
@@ -5325,15 +5399,18 @@ public class AccountManagerService
             return;
         }
         UserAccounts accounts = getUserAccounts(UserHandle.getUserId(uid));
-        synchronized (accounts.cacheLock) {
-            long accountId = accounts.accountsDb.findDeAccountId(account);
-            if (accountId >= 0) {
-                accounts.accountsDb.insertGrant(accountId, authTokenType, uid);
-            }
-            cancelNotification(getCredentialPermissionNotificationId(account, authTokenType, uid),
-                    UserHandle.of(accounts.userId));
+        synchronized (accounts.dbLock) {
+            synchronized (accounts.cacheLock) {
+                long accountId = accounts.accountsDb.findDeAccountId(account);
+                if (accountId >= 0) {
+                    accounts.accountsDb.insertGrant(accountId, authTokenType, uid);
+                }
+                cancelNotification(
+                        getCredentialPermissionNotificationId(account, authTokenType, uid),
+                        UserHandle.of(accounts.userId));
 
-            cancelAccountAccessRequestNotificationIfNeeded(account, uid, true);
+                cancelAccountAccessRequestNotificationIfNeeded(account, uid, true);
+            }
         }
 
         // Listeners are a final CopyOnWriteArrayList, hence no lock needed.
@@ -5357,21 +5434,24 @@ public class AccountManagerService
             return;
         }
         UserAccounts accounts = getUserAccounts(UserHandle.getUserId(uid));
-        synchronized (accounts.cacheLock) {
-            accounts.accountsDb.beginTransaction();
-            try {
-                long accountId = accounts.accountsDb.findDeAccountId(account);
-                if (accountId >= 0) {
-                    accounts.accountsDb.deleteGrantsByAccountIdAuthTokenTypeAndUid(
-                            accountId, authTokenType, uid);
-                    accounts.accountsDb.setTransactionSuccessful();
+        synchronized (accounts.dbLock) {
+            synchronized (accounts.cacheLock) {
+                accounts.accountsDb.beginTransaction();
+                try {
+                    long accountId = accounts.accountsDb.findDeAccountId(account);
+                    if (accountId >= 0) {
+                        accounts.accountsDb.deleteGrantsByAccountIdAuthTokenTypeAndUid(
+                                accountId, authTokenType, uid);
+                        accounts.accountsDb.setTransactionSuccessful();
+                    }
+                } finally {
+                    accounts.accountsDb.endTransaction();
                 }
-            } finally {
-                accounts.accountsDb.endTransaction();
-            }
 
-            cancelNotification(getCredentialPermissionNotificationId(account, authTokenType, uid),
-                    new UserHandle(accounts.userId));
+                cancelNotification(
+                        getCredentialPermissionNotificationId(account, authTokenType, uid),
+                        UserHandle.of(accounts.userId));
+            }
         }
 
         // Listeners are a final CopyOnWriteArrayList, hence no lock needed.
@@ -5581,9 +5661,11 @@ public class AccountManagerService
             String tokenType,
             String callingPackage,
             byte[] pkgSigDigest) {
-        synchronized (accounts.cacheLock) {
-            return accounts.accountTokenCaches.get(
-                    account, tokenType, callingPackage, pkgSigDigest);
+        synchronized (accounts.dbLock) {
+            synchronized (accounts.cacheLock) {
+                return accounts.accountTokenCaches.get(
+                        account, tokenType, callingPackage, pkgSigDigest);
+            }
         }
     }
 
@@ -5603,14 +5685,16 @@ public class AccountManagerService
 
     protected String readAuthTokenInternal(UserAccounts accounts, Account account,
             String authTokenType) {
-        synchronized (accounts.cacheLock) {
-            Map<String, String> authTokensForAccount = accounts.authTokenCache.get(account);
-            if (authTokensForAccount == null) {
-                // need to populate the cache for this account
-                authTokensForAccount = accounts.accountsDb.findAuthTokensByAccount(account);
-                accounts.authTokenCache.put(account, authTokensForAccount);
+        synchronized (accounts.dbLock) {
+            synchronized (accounts.cacheLock) {
+                Map<String, String> authTokensForAccount = accounts.authTokenCache.get(account);
+                if (authTokensForAccount == null) {
+                    // need to populate the cache for this account
+                    authTokensForAccount = accounts.accountsDb.findAuthTokensByAccount(account);
+                    accounts.authTokenCache.put(account, authTokensForAccount);
+                }
+                return authTokensForAccount.get(authTokenType);
             }
-            return authTokensForAccount.get(authTokenType);
         }
     }
 

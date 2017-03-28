@@ -100,17 +100,19 @@ public final class AccountManagerBackupHelper {
             Account account = null;
             AccountManagerService.UserAccounts accounts = mAccountManagerService
                     .getUserAccounts(userId);
-            synchronized (accounts.cacheLock) {
-                for (Account[] accountsPerType : accounts.accountCache.values()) {
-                    for (Account accountPerType : accountsPerType) {
-                        if (accountDigest.equals(PackageUtils.computeSha256Digest(
-                                accountPerType.name.getBytes()))) {
-                            account = accountPerType;
+            synchronized (accounts.dbLock) {
+                synchronized (accounts.cacheLock) {
+                    for (Account[] accountsPerType : accounts.accountCache.values()) {
+                        for (Account accountPerType : accountsPerType) {
+                            if (accountDigest.equals(PackageUtils.computeSha256Digest(
+                                    accountPerType.name.getBytes()))) {
+                                account = accountPerType;
+                                break;
+                            }
+                        }
+                        if (account != null) {
                             break;
                         }
-                    }
-                    if (account != null) {
-                        break;
                     }
                 }
             }
@@ -141,49 +143,52 @@ public final class AccountManagerBackupHelper {
     public byte[] backupAccountAccessPermissions(int userId) {
         final AccountManagerService.UserAccounts accounts = mAccountManagerService
                 .getUserAccounts(userId);
-        synchronized (accounts.cacheLock) {
-            List<Pair<String, Integer>> allAccountGrants = accounts.accountsDb
-                    .findAllAccountGrants();
-            if (allAccountGrants.isEmpty()) {
-                return null;
-            }
-            try {
-                ByteArrayOutputStream dataStream = new ByteArrayOutputStream();
-                final XmlSerializer serializer = new FastXmlSerializer();
-                serializer.setOutput(dataStream, StandardCharsets.UTF_8.name());
-                serializer.startDocument(null, true);
-                serializer.startTag(null, TAG_PERMISSIONS);
+        synchronized (accounts.dbLock) {
+            synchronized (accounts.cacheLock) {
+                List<Pair<String, Integer>> allAccountGrants = accounts.accountsDb
+                        .findAllAccountGrants();
+                if (allAccountGrants.isEmpty()) {
+                    return null;
+                }
+                try {
+                    ByteArrayOutputStream dataStream = new ByteArrayOutputStream();
+                    final XmlSerializer serializer = new FastXmlSerializer();
+                    serializer.setOutput(dataStream, StandardCharsets.UTF_8.name());
+                    serializer.startDocument(null, true);
+                    serializer.startTag(null, TAG_PERMISSIONS);
 
-                PackageManager packageManager = mAccountManagerService.mContext.getPackageManager();
-                for (Pair<String, Integer> grant : allAccountGrants) {
-                    final String accountName = grant.first;
-                    final int uid = grant.second;
+                    PackageManager packageManager = mAccountManagerService.mContext
+                            .getPackageManager();
+                    for (Pair<String, Integer> grant : allAccountGrants) {
+                        final String accountName = grant.first;
+                        final int uid = grant.second;
 
-                    final String[] packageNames = packageManager.getPackagesForUid(uid);
-                    if (packageNames == null) {
-                        continue;
-                    }
+                        final String[] packageNames = packageManager.getPackagesForUid(uid);
+                        if (packageNames == null) {
+                            continue;
+                        }
 
-                    for (String packageName : packageNames) {
-                        String digest = PackageUtils.computePackageCertSha256Digest(
-                                packageManager, packageName, userId);
-                        if (digest != null) {
-                            serializer.startTag(null, TAG_PERMISSION);
-                            serializer.attribute(null, ATTR_ACCOUNT_SHA_256,
-                                    PackageUtils.computeSha256Digest(accountName.getBytes()));
-                            serializer.attribute(null, ATTR_PACKAGE, packageName);
-                            serializer.attribute(null, ATTR_DIGEST, digest);
-                            serializer.endTag(null, TAG_PERMISSION);
+                        for (String packageName : packageNames) {
+                            String digest = PackageUtils.computePackageCertSha256Digest(
+                                    packageManager, packageName, userId);
+                            if (digest != null) {
+                                serializer.startTag(null, TAG_PERMISSION);
+                                serializer.attribute(null, ATTR_ACCOUNT_SHA_256,
+                                        PackageUtils.computeSha256Digest(accountName.getBytes()));
+                                serializer.attribute(null, ATTR_PACKAGE, packageName);
+                                serializer.attribute(null, ATTR_DIGEST, digest);
+                                serializer.endTag(null, TAG_PERMISSION);
+                            }
                         }
                     }
+                    serializer.endTag(null, TAG_PERMISSIONS);
+                    serializer.endDocument();
+                    serializer.flush();
+                    return dataStream.toByteArray();
+                } catch (IOException e) {
+                    Log.e(TAG, "Error backing up account access grants", e);
+                    return null;
                 }
-                serializer.endTag(null, TAG_PERMISSIONS);
-                serializer.endDocument();
-                serializer.flush();
-                return dataStream.toByteArray();
-            } catch (IOException e) {
-                Log.e(TAG, "Error backing up account access grants", e);
-                return null;
             }
         }
     }
