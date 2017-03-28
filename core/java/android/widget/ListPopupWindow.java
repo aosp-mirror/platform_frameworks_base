@@ -523,9 +523,17 @@ public class ListPopupWindow implements ShowableListMenu {
     /**
      * Sets the height of the popup window in pixels. Can also be {@link #MATCH_PARENT}.
      *
-     * @param height Height of the popup window.
+     * @param height Height of the popup window must be a positive value,
+     *               {@link #MATCH_PARENT}, or {@link #WRAP_CONTENT}.
+     *
+     * @throws IllegalArgumentException if height is set to negative value
      */
     public void setHeight(int height) {
+        if (height < 0 && ViewGroup.LayoutParams.WRAP_CONTENT != height
+                && ViewGroup.LayoutParams.MATCH_PARENT != height) {
+            throw new IllegalArgumentException(
+                   "Invalid height. Must be a positive value, MATCH_PARENT, or WRAP_CONTENT.");
+        }
         mDropDownHeight = height;
     }
 
