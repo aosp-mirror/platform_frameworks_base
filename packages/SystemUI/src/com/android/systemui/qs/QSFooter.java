@@ -162,11 +162,10 @@ public class QSFooter extends LinearLayout implements
         final Builder builder = new Builder()
                 .addFloat(mSettingsContainer, "translationX", -(remaining - defSpace), 0)
                 .addFloat(mSettingsButton, "rotation", -120, 0)
-                .addFloat(mAlarmStatus, "alpha", 0, 1)
-                .addFloat(mAlarmStatus, "translationX", 0, -mDate.getWidth())
-                .addFloat(mAlarmStatusCollapsed, "translationX", 0, -mDate.getWidth());
+                .addFloat(mAlarmStatus, "alpha", 0, 1);
         if (mAlarmShowing) {
-            builder.addFloat(mDate, "alpha", 1, 0);
+            builder.addFloat(mDate, "alpha", 1, 0)
+                    .addFloat(mDateTimeGroup, "translationX", 0, -mDate.getWidth());
         }
         mAnimator = builder.build();
         setExpansion(mExpansionAmount);
