@@ -74,6 +74,7 @@ public class UserRestrictionsUtils {
             UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES,
             UserManager.DISALLOW_CONFIG_BLUETOOTH,
             UserManager.DISALLOW_BLUETOOTH,
+            UserManager.DISALLOW_BLUETOOTH_SHARING,
             UserManager.DISALLOW_USB_FILE_TRANSFER,
             UserManager.DISALLOW_CONFIG_CREDENTIALS,
             UserManager.DISALLOW_REMOVE_USER,
@@ -155,6 +156,7 @@ public class UserRestrictionsUtils {
      */
     private static final Set<String> GLOBAL_RESTRICTIONS = Sets.newArraySet(
             UserManager.DISALLOW_ADJUST_VOLUME,
+            UserManager.DISALLOW_BLUETOOTH_SHARING,
             UserManager.DISALLOW_RUN_IN_BACKGROUND,
             UserManager.DISALLOW_UNMUTE_MICROPHONE,
             UserManager.DISALLOW_UNMUTE_DEVICE
@@ -165,6 +167,17 @@ public class UserRestrictionsUtils {
      */
     private static final Set<String> DEFAULT_ENABLED_FOR_DEVICE_OWNERS = Sets.newArraySet(
             UserManager.DISALLOW_ADD_MANAGED_PROFILE
+    );
+
+    /**
+     * User restrictions that default to {@code true} for managed profile owners.
+     *
+     * NB: {@link UserManager#DISALLOW_INSTALL_UNKNOWN_SOURCES} is also set by default but it is
+     * not set to existing profile owners unless they used to have INSTALL_NON_MARKET_APPS disabled
+     * in settings. So it is handled separately.
+     */
+    private static final Set<String> DEFAULT_ENABLED_FOR_MANAGED_PROFILES = Sets.newArraySet(
+            UserManager.DISALLOW_BLUETOOTH_SHARING
     );
 
     /*
@@ -305,6 +318,13 @@ public class UserRestrictionsUtils {
      */
     public static @NonNull Set<String> getDefaultEnabledForDeviceOwner() {
         return DEFAULT_ENABLED_FOR_DEVICE_OWNERS;
+    }
+
+    /**
+     * Returns the user restrictions that default to {@code true} for managed profile owners.
+     */
+    public static @NonNull Set<String> getDefaultEnabledForManagedProfiles() {
+        return DEFAULT_ENABLED_FOR_MANAGED_PROFILES;
     }
 
     /**
@@ -544,8 +564,8 @@ public class UserRestrictionsUtils {
     public static void moveRestriction(String restrictionKey, SparseArray<Bundle> srcRestrictions,
             SparseArray<Bundle> destRestrictions) {
         for (int i = 0; i < srcRestrictions.size(); i++) {
-            int key = srcRestrictions.keyAt(i);
-            Bundle from = srcRestrictions.valueAt(i);
+            final int key = srcRestrictions.keyAt(i);
+            final Bundle from = srcRestrictions.valueAt(i);
             if (contains(from, restrictionKey)) {
                 from.remove(restrictionKey);
                 Bundle to = destRestrictions.get(key);
@@ -561,5 +581,25 @@ public class UserRestrictionsUtils {
                 }
             }
         }
+    }
+
+    /**
+     * Returns whether restrictions differ between two bundles.
+     * @param oldRestrictions old bundle of restrictions.
+     * @param newRestrictions new bundle of restrictions
+     * @param restrictions restrictions of interest, if empty, all restrictions are checked.
+     */
+    public static boolean restrictionsChanged(Bundle oldRestrictions, Bundle newRestrictions,
+            String... restrictions) {
+        if (restrictions.length == 0) {
+            return areEqual(oldRestrictions, newRestrictions);
+        }
+        for (final String restriction : restrictions) {
+            if (oldRestrictions.getBoolean(restriction, false) !=
+                    newRestrictions.getBoolean(restriction, false)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
