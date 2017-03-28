@@ -16965,6 +16965,15 @@ public class PackageManagerService extends IPackageManager.Stub {
                 return;
             }
 
+            // Shared libraries for the package need to be updated.
+            synchronized (mPackages) {
+                try {
+                    updateSharedLibrariesLPr(pkg, null);
+                } catch (PackageManagerException e) {
+                    Slog.e(TAG, "updateAllSharedLibrariesLPw failed: " + e.getMessage());
+                }
+            }
+
             Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dexopt");
             // Do not run PackageDexOptimizer through the local performDexOpt
             // method because `pkg` may not be in `mPackages` yet.
@@ -17013,6 +17022,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         args.user, installerPackageName, volumeUuid, res, args.installReason);
             }
         }
+
         synchronized (mPackages) {
             final PackageSetting ps = mSettings.mPackages.get(pkgName);
             if (ps != null) {
