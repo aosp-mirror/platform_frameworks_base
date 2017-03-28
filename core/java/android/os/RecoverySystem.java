@@ -483,7 +483,7 @@ public class RecoverySystem {
             }
 
             final String filenameArg = "--update_package=" + filename + "\n";
-            final String localeArg = "--locale=" + Locale.getDefault().toString() + "\n";
+            final String localeArg = "--locale=" + Locale.getDefault().toLanguageTag() + "\n";
             final String securityArg = "--security\n";
 
             String command = filenameArg + localeArg;
@@ -531,7 +531,7 @@ public class RecoverySystem {
         }
 
         final String filenameArg = "--update_package=" + filename + "\n";
-        final String localeArg = "--locale=" + Locale.getDefault().toString() + "\n";
+        final String localeArg = "--locale=" + Locale.getDefault().toLanguageTag() + "\n";
         final String securityArg = "--security\n";
 
         String command = filenameArg + localeArg;
@@ -647,7 +647,7 @@ public class RecoverySystem {
             reasonArg = "--reason=" + sanitizeArg(reason);
         }
 
-        final String localeArg = "--locale=" + Locale.getDefault().toString();
+        final String localeArg = "--locale=" + Locale.getDefault().toLanguageTag() ;
         bootCommand(context, shutdownArg, "--wipe_data", reasonArg, localeArg);
     }
 
@@ -678,7 +678,7 @@ public class RecoverySystem {
             reasonArg = "--reason=" + sanitizeArg(reason);
         }
 
-        final String localeArg = "--locale=" + Locale.getDefault().toString();
+        final String localeArg = "--locale=" + Locale.getDefault().toLanguageTag() ;
         bootCommand(context, "--wipe_cache", reasonArg, localeArg);
     }
 
@@ -703,7 +703,7 @@ public class RecoverySystem {
 
         final String filename = packageFile.getCanonicalPath();
         final String filenameArg = "--wipe_package=" + filename;
-        final String localeArg = "--locale=" + Locale.getDefault().toString();
+        final String localeArg = "--locale=" + Locale.getDefault().toLanguageTag() ;
         bootCommand(context, "--wipe_ab", filenameArg, reasonArg, localeArg);
     }
 
