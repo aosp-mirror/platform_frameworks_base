@@ -202,8 +202,6 @@ public class DeviceDiscoveryService extends Service {
             reset();
         } else if (DEBUG) Log.i(LOG_TAG, "startDiscovery: duplicate request: " + request);
 
-
-
         if (!ArrayUtils.isEmpty(mDevicesFound)) {
             onReadyToShowUI();
         }
@@ -304,6 +302,14 @@ public class DeviceDiscoveryService extends Service {
         } catch (RemoteException e) {
             Log.e(LOG_TAG, "Failed to record association: "
                     + callingPackage + " <-> " + deviceAddress);
+        }
+    }
+
+    void onCancel() {
+        try {
+            mServiceCallback.onDeviceSelectionCancel();
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
         }
     }
 
