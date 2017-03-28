@@ -126,22 +126,7 @@ class VectorDrawable : public SkDrawable {
          return SkRect::MakeLargest();
      }
      virtual void onDraw(SkCanvas* canvas) override {
-         Bitmap& hwuiBitmap = mRoot->getBitmapUpdateIfDirty();
-         SkBitmap bitmap;
-         hwuiBitmap.getSkBitmap(&bitmap);
-         SkPaint* paint = mRoot->getPaint();
-         canvas->drawBitmapRect(bitmap, mRoot->mutateProperties()->getBounds(), paint);
-         /*
-          * TODO we can draw this directly but need to address the following...
-          *
-          * 1) Add drawDirect(SkCanvas*) to VectorDrawableRoot
-          * 2) fix VectorDrawable.cpp's Path::draw to not make a temporary path
-          *    so that we don't break caching
-          * 3) figure out how to set path's as volatile during animation
-          * 4) if mRoot->getPaint() != null either promote to layer (during
-          *    animation) or cache in SkSurface (for static content)
-          *
-          */
+         mRoot->draw(canvas);
      }
 
  private:
