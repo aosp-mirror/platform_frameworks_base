@@ -630,4 +630,6 @@ interface IPackageManager {
     boolean canRequestPackageInstalls(String packageName, int userId);
 
     void deletePreloadsFileCache();
+
+    ComponentName getInstantAppResolverSettingsComponent();
 }
