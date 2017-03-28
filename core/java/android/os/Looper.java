@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.os.LooperProto;
 import android.util.Log;
 import android.util.Printer;
+import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
 /**
@@ -75,6 +76,9 @@ public final class Looper {
 
     private Printer mLogging;
     private long mTraceTag;
+
+    /* If set, the looper will show a warning log if a message dispatch takes longer than time. */
+    private long mSlowDispatchThresholdMs;
 
      /** Initialize the current thread as a looper.
       * This gives you a chance to create handlers that then reference
@@ -148,15 +152,28 @@ public final class Looper {
                         msg.callback + ": " + msg.what);
             }
 
+            final long slowDispatchThresholdMs = me.mSlowDispatchThresholdMs;
+
             final long traceTag = me.mTraceTag;
             if (traceTag != 0 && Trace.isTagEnabled(traceTag)) {
                 Trace.traceBegin(traceTag, msg.target.getTraceName(msg));
             }
+            final long start = (slowDispatchThresholdMs == 0) ? 0 : SystemClock.uptimeMillis();
+            final long end;
             try {
                 msg.target.dispatchMessage(msg);
+                end = (slowDispatchThresholdMs == 0) ? 0 : SystemClock.uptimeMillis();
             } finally {
                 if (traceTag != 0) {
                     Trace.traceEnd(traceTag);
+                }
+            }
+            if (slowDispatchThresholdMs > 0) {
+                final long time = end - start;
+                if (time > slowDispatchThresholdMs) {
+                    Slog.w(TAG, "Dispatch took " + time + "ms on "
+                            + Thread.currentThread().getName() + ", h=" +
+                            msg.target + " cb=" + msg.callback + " msg=" + msg.what);
                 }
             }
 
@@ -224,6 +241,11 @@ public final class Looper {
     /** {@hide} */
     public void setTraceTag(long traceTag) {
         mTraceTag = traceTag;
+    }
+
+    /** {@hide} */
+    public void setSlowDispatchThresholdMs(long slowDispatchThresholdMs) {
+        mSlowDispatchThresholdMs = slowDispatchThresholdMs;
     }
 
     /**
