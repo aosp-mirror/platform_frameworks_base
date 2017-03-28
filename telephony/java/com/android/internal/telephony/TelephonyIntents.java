@@ -261,7 +261,7 @@ public class TelephonyIntents {
      * by the system.
      */
     public static final String ACTION_SHOW_NOTICE_ECM_BLOCK_OTHERS
-            = "android.intent.action.ACTION_SHOW_NOTICE_ECM_BLOCK_OTHERS";
+            = "com.android.internal.intent.action.ACTION_SHOW_NOTICE_ECM_BLOCK_OTHERS";
 
     /**
      * <p>Broadcast Action: Indicates that the action is forbidden by network.
