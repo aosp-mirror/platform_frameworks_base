@@ -41,6 +41,7 @@ import android.util.Log;
 import android.view.IWindow;
 import android.view.View;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.IntPair;
 
 import java.util.ArrayList;
@@ -125,6 +126,8 @@ public final class AccessibilityManager {
     final int mUserId;
 
     final Handler mHandler;
+
+    final Handler.Callback mCallback;
 
     boolean mIsEnabled;
 
@@ -217,12 +220,12 @@ public final class AccessibilityManager {
             // is now off an exception will be thrown. We want to have the exception
             // enforcement to guard against apps that fire unnecessary accessibility
             // events when accessibility is off.
-            mHandler.obtainMessage(MyHandler.MSG_SET_STATE, state, 0).sendToTarget();
+            mHandler.obtainMessage(MyCallback.MSG_SET_STATE, state, 0).sendToTarget();
         }
 
         @Override
         public void notifyServicesStateChanged() {
-            mHandler.obtainMessage(MyHandler.MSG_NOTIFY_SERVICES_STATE_CHANGED).sendToTarget();
+            mHandler.obtainMessage(MyCallback.MSG_NOTIFY_SERVICES_STATE_CHANGED).sendToTarget();
         }
 
         @Override
@@ -271,7 +274,8 @@ public final class AccessibilityManager {
     public AccessibilityManager(Context context, IAccessibilityManager service, int userId) {
         // Constructor can't be chained because we can't create an instance of an inner class
         // before calling another constructor.
-        mHandler = new MyHandler(context.getMainLooper());
+        mCallback = new MyCallback();
+        mHandler = new Handler(context.getMainLooper(), mCallback);
         mUserId = userId;
         synchronized (mLock) {
             tryConnectToServiceLocked(service);
@@ -288,6 +292,7 @@ public final class AccessibilityManager {
      * @hide
      */
     public AccessibilityManager(Handler handler, IAccessibilityManager service, int userId) {
+        mCallback = new MyCallback();
         mHandler = handler;
         mUserId = userId;
         synchronized (mLock) {
@@ -300,6 +305,14 @@ public final class AccessibilityManager {
      */
     public IAccessibilityManagerClient getClient() {
         return mClient;
+    }
+
+    /**
+     * @hide
+     */
+    @VisibleForTesting
+    public Handler.Callback getCallback() {
+        return mCallback;
     }
 
     /**
@@ -711,15 +724,15 @@ public final class AccessibilityManager {
         mIsHighTextContrastEnabled = highTextContrastEnabled;
 
         if (wasEnabled != enabled) {
-            mHandler.sendEmptyMessage(MyHandler.MSG_NOTIFY_ACCESSIBILITY_STATE_CHANGED);
+            mHandler.sendEmptyMessage(MyCallback.MSG_NOTIFY_ACCESSIBILITY_STATE_CHANGED);
         }
 
         if (wasTouchExplorationEnabled != touchExplorationEnabled) {
-            mHandler.sendEmptyMessage(MyHandler.MSG_NOTIFY_EXPLORATION_STATE_CHANGED);
+            mHandler.sendEmptyMessage(MyCallback.MSG_NOTIFY_EXPLORATION_STATE_CHANGED);
         }
 
         if (wasHighTextContrastEnabled != highTextContrastEnabled) {
-            mHandler.sendEmptyMessage(MyHandler.MSG_NOTIFY_HIGH_TEXT_CONTRAST_STATE_CHANGED);
+            mHandler.sendEmptyMessage(MyCallback.MSG_NOTIFY_HIGH_TEXT_CONTRAST_STATE_CHANGED);
         }
     }
 
@@ -960,19 +973,15 @@ public final class AccessibilityManager {
         }
     }
 
-    private final class MyHandler extends Handler {
+    private final class MyCallback implements Handler.Callback {
         public static final int MSG_NOTIFY_ACCESSIBILITY_STATE_CHANGED = 1;
         public static final int MSG_NOTIFY_EXPLORATION_STATE_CHANGED = 2;
         public static final int MSG_NOTIFY_HIGH_TEXT_CONTRAST_STATE_CHANGED = 3;
         public static final int MSG_SET_STATE = 4;
         public static final int MSG_NOTIFY_SERVICES_STATE_CHANGED = 5;
 
-        public MyHandler(Looper looper) {
-            super(looper, null, false);
-        }
-
         @Override
-        public void handleMessage(Message message) {
+        public boolean handleMessage(Message message) {
             switch (message.what) {
                 case MSG_NOTIFY_ACCESSIBILITY_STATE_CHANGED: {
                     handleNotifyAccessibilityStateChanged();
@@ -998,6 +1007,7 @@ public final class AccessibilityManager {
                     }
                 } break;
             }
+            return true;
         }
     }
 }

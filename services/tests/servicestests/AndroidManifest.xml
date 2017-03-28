@@ -52,20 +52,6 @@
     <application>
         <uses-library android:name="android.test.runner" />
 
-        <service android:name="com.android.server.AccessibilityManagerServiceTest$MyFirstMockAccessibilityService"
-            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
-          <intent-filter>
-            <action android:name="android.accessibilityservice.AccessibilityService"/>
-          </intent-filter>
-        </service>
-
-        <service android:name="com.android.server.AccessibilityManagerServiceTest$MySecondMockAccessibilityService"
-            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
-          <intent-filter>
-            <action android:name="android.accessibilityservice.AccessibilityService"/>
-          </intent-filter>
-        </service>
-
         <service android:name="com.android.server.accounts.TestAccountType1AuthenticatorService"
             android:exported="false">
           <intent-filter>
