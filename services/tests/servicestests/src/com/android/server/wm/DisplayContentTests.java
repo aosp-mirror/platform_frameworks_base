@@ -254,6 +254,48 @@ public class DisplayContentTests extends WindowTestsBase {
         assertEquals(window1, sWm.mRoot.computeFocusedWindow());
     }
 
+    /**
+     * This tests setting the maximum ui width on a display.
+     */
+    @Test
+    public void testMaxUiWidth() throws Exception {
+        final int baseWidth = 1440;
+        final int baseHeight = 2560;
+        final int baseDensity = 300;
+
+        sDisplayContent.updateBaseDisplayMetrics(baseWidth, baseHeight, baseDensity);
+
+        final int maxWidth = 300;
+        final int resultingHeight = (maxWidth * baseHeight) / baseWidth;
+        final int resultingDensity = (maxWidth * baseDensity) / baseWidth;
+
+        sDisplayContent.setMaxUiWidth(maxWidth);
+        verifySizes(sDisplayContent, maxWidth, resultingHeight, resultingDensity);
+
+        // Assert setting values again does not change;
+        sDisplayContent.updateBaseDisplayMetrics(baseWidth, baseHeight, baseDensity);
+        verifySizes(sDisplayContent, maxWidth, resultingHeight, resultingDensity);
+
+        final int smallerWidth = 200;
+        final int smallerHeight = 400;
+        final int smallerDensity = 100;
+
+        // Specify smaller dimension, verify that it is honored
+        sDisplayContent.updateBaseDisplayMetrics(smallerWidth, smallerHeight, smallerDensity);
+        verifySizes(sDisplayContent, smallerWidth, smallerHeight, smallerDensity);
+
+        // Verify that setting the max width to a greater value than the base width has no effect
+        sDisplayContent.setMaxUiWidth(maxWidth);
+        verifySizes(sDisplayContent, smallerWidth, smallerHeight, smallerDensity);
+    }
+
+    private static void verifySizes(DisplayContent displayContent, int expectedBaseWidth,
+                             int expectedBaseHeight, int expectedBaseDensity) {
+        assertEquals(displayContent.mBaseDisplayWidth, expectedBaseWidth);
+        assertEquals(displayContent.mBaseDisplayHeight, expectedBaseHeight);
+        assertEquals(displayContent.mBaseDisplayDensity, expectedBaseDensity);
+    }
+
     private void assertForAllWindowsOrder(List<WindowState> expectedWindows) {
         final LinkedList<WindowState> actualWindows = new LinkedList();
 

@@ -385,6 +385,7 @@ public class WindowManagerService extends IWindowManager.Stub
     final boolean mAllowBootMessages;
 
     final boolean mLimitedAlphaCompositing;
+    final int mMaxUiWidth;
 
     final WindowManagerPolicy mPolicy;
 
@@ -949,6 +950,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 com.android.internal.R.integer.config_drawLockTimeoutMillis);
         mAllowAnimationsInLowPowerMode = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_allowAnimationsInLowPowerMode);
+        mMaxUiWidth = context.getResources().getInteger(
+                com.android.internal.R.integer.config_maxUiWidth);
         mInputManager = inputManager; // Must be before createDisplayContentLocked.
         mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
         mDisplaySettings = new DisplaySettings();
@@ -4572,6 +4575,9 @@ public class WindowManagerService extends IWindowManager.Stub
 
         synchronized(mWindowMap) {
             final DisplayContent displayContent = getDefaultDisplayContentLocked();
+            if (mMaxUiWidth > 0) {
+                displayContent.setMaxUiWidth(mMaxUiWidth);
+            }
             readForcedDisplayPropertiesLocked(displayContent);
             mDisplayReady = true;
         }
