@@ -21,7 +21,6 @@ import android.app.PendingIntent;
 import android.app.backup.IBackupManager;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.database.ContentObserver;
@@ -56,17 +55,17 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
     public static class OwnersTestable extends Owners {
         public static final String LEGACY_FILE = "legacy.xml";
         public static final String DEVICE_OWNER_FILE = "device_owner2.xml";
-        public static final String PROFILE_OWNER_FILE_BASE = "profile_owner.xml";
+        public static final String PROFILE_OWNER_FILE = "profile_owner.xml";
 
         private final File mLegacyFile;
         private final File mDeviceOwnerFile;
-        private final File mProfileOwnerBase;
+        private final File mUsersDataDir;
 
         public OwnersTestable(DpmMockContext context) {
             super(context.userManager, context.userManagerInternal, context.packageManagerInternal);
             mLegacyFile = new File(context.dataDir, LEGACY_FILE);
             mDeviceOwnerFile = new File(context.dataDir, DEVICE_OWNER_FILE);
-            mProfileOwnerBase = new File(context.dataDir, PROFILE_OWNER_FILE_BASE);
+            mUsersDataDir = new File(context.dataDir, "users");
         }
 
         @Override
@@ -81,7 +80,8 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
 
         @Override
         File getProfileOwnerFileWithTestOverride(int userId) {
-            return new File(mDeviceOwnerFile.getAbsoluteFile() + "-" + userId);
+            final File userDir = new File(mUsersDataDir, String.valueOf(userId));
+            return new File(userDir, PROFILE_OWNER_FILE);
         }
     }
 

@@ -64,7 +64,7 @@ import java.util.List;
  */
 public class UserManager {
 
-    private static String TAG = "UserManager";
+    private static final String TAG = "UserManager";
     private final IUserManager mService;
     private final Context mContext;
 
@@ -216,6 +216,23 @@ public class UserManager {
      * @see #getUserRestrictions()
      */
     public static final String DISALLOW_BLUETOOTH = "no_bluetooth";
+
+    /**
+     * Specifies if bluetooth sharing is disallowed on the device. Device owner and profile owner
+     * can set this restriction. When it is set by device owner, all users on this device will be
+     * affected.
+     *
+     * <p>Default is <code>true</code> for managed profiles and false for otherwise. When a device
+     * upgrades to {@link android.os.Build.VERSION_CODES#O}, the system sets it for all existing
+     * managed profiles.
+     *
+     * <p>Key for user restrictions.
+     * <p>Type: Boolean
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
+     * @see #getUserRestrictions()
+     */
+    public static final String DISALLOW_BLUETOOTH_SHARING = "no_bluetooth_sharing";
 
     /**
      * Specifies if a user is disallowed from transferring files over
