@@ -23,13 +23,20 @@ public final class NetworkScorerAppData implements Parcelable {
      * wifi networks automatically" feature.
      */
     private final ComponentName mEnableUseOpenWifiActivity;
+    /**
+     * The {@link android.app.NotificationChannel} ID used by {@link #mRecommendationService} to
+     * post open network notifications.
+     */
+    private final String mNetworkAvailableNotificationChannelId;
 
     public NetworkScorerAppData(int packageUid, ComponentName recommendationServiceComp,
-            String recommendationServiceLabel, ComponentName enableUseOpenWifiActivity) {
+            String recommendationServiceLabel, ComponentName enableUseOpenWifiActivity,
+            String networkAvailableNotificationChannelId) {
         this.packageUid = packageUid;
         this.mRecommendationService = recommendationServiceComp;
         this.mRecommendationServiceLabel = recommendationServiceLabel;
         this.mEnableUseOpenWifiActivity = enableUseOpenWifiActivity;
+        this.mNetworkAvailableNotificationChannelId = networkAvailableNotificationChannelId;
     }
 
     protected NetworkScorerAppData(Parcel in) {
@@ -37,6 +44,7 @@ public final class NetworkScorerAppData implements Parcelable {
         mRecommendationService = ComponentName.readFromParcel(in);
         mRecommendationServiceLabel = in.readString();
         mEnableUseOpenWifiActivity = ComponentName.readFromParcel(in);
+        mNetworkAvailableNotificationChannelId = in.readString();
     }
 
     @Override
@@ -45,6 +53,7 @@ public final class NetworkScorerAppData implements Parcelable {
         ComponentName.writeToParcel(mRecommendationService, dest);
         dest.writeString(mRecommendationServiceLabel);
         ComponentName.writeToParcel(mEnableUseOpenWifiActivity, dest);
+        dest.writeString(mNetworkAvailableNotificationChannelId);
     }
 
     @Override
@@ -83,6 +92,11 @@ public final class NetworkScorerAppData implements Parcelable {
         return mRecommendationServiceLabel;
     }
 
+    @Nullable
+    public String getNetworkAvailableNotificationChannelId() {
+        return mNetworkAvailableNotificationChannelId;
+    }
+
     @Override
     public String toString() {
         return "NetworkScorerAppData{" +
@@ -90,6 +104,8 @@ public final class NetworkScorerAppData implements Parcelable {
                 ", mRecommendationService=" + mRecommendationService +
                 ", mRecommendationServiceLabel=" + mRecommendationServiceLabel +
                 ", mEnableUseOpenWifiActivity=" + mEnableUseOpenWifiActivity +
+                ", mNetworkAvailableNotificationChannelId=" +
+                mNetworkAvailableNotificationChannelId +
                 '}';
     }
 
@@ -101,12 +117,14 @@ public final class NetworkScorerAppData implements Parcelable {
         return packageUid == that.packageUid &&
                 Objects.equals(mRecommendationService, that.mRecommendationService) &&
                 Objects.equals(mRecommendationServiceLabel, that.mRecommendationServiceLabel) &&
-                Objects.equals(mEnableUseOpenWifiActivity, that.mEnableUseOpenWifiActivity);
+                Objects.equals(mEnableUseOpenWifiActivity, that.mEnableUseOpenWifiActivity) &&
+                Objects.equals(mNetworkAvailableNotificationChannelId,
+                        that.mNetworkAvailableNotificationChannelId);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(packageUid, mRecommendationService, mRecommendationServiceLabel,
-                mEnableUseOpenWifiActivity);
+                mEnableUseOpenWifiActivity, mNetworkAvailableNotificationChannelId);
     }
 }

@@ -120,6 +120,14 @@ public class NetworkScoreManager {
             "android.net.wifi.use_open_wifi_package";
 
     /**
+     * Meta-data specified on a {@link NetworkRecommendationProvider} that specifies the
+     * {@link android.app.NotificationChannel} ID used to post open network notifications.
+     * @hide
+     */
+    public static final String NETWORK_AVAILABLE_NOTIFICATION_CHANNEL_ID_META_DATA =
+            "android.net.wifi.notification_channel_id_network_available";
+
+    /**
      * Broadcast action: the active scorer has been changed. Scorer apps may listen to this to
      * perform initialization once selected as the active scorer, or clean up unneeded resources
      * if another scorer has been selected. This is an explicit broadcast only sent to the

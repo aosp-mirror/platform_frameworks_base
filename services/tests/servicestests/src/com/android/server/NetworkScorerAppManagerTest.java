@@ -62,6 +62,8 @@ import java.util.List;
 public class NetworkScorerAppManagerTest {
     private static String MOCK_SERVICE_LABEL = "Mock Service";
     private static String MOCK_OVERRIDEN_SERVICE_LABEL = "Mock Service Label Override";
+    private static String MOCK_NETWORK_AVAILABLE_NOTIFICATION_CHANNEL_ID =
+            "Mock Network Available Notification Channel Id";
 
     @Mock private Context mMockContext;
     @Mock private PackageManager mMockPm;
@@ -168,13 +170,30 @@ public class NetworkScorerAppManagerTest {
         mockScoreNetworksGranted(recoComponent.getPackageName());
         mockRecommendationServiceAvailable(recoComponent, 924 /* packageUid */,
                 enableUseOpenWifiComponent.getPackageName());
-        mockEnableUseOpenWifiActivity(enableUseOpenWifiComponent);
 
         final NetworkScorerAppData activeScorer = mNetworkScorerAppManager.getActiveScorer();
         assertNotNull(activeScorer);
         assertEquals(recoComponent, activeScorer.getRecommendationServiceComponent());
         assertEquals(924, activeScorer.packageUid);
         assertEquals(enableUseOpenWifiComponent, activeScorer.getEnableUseOpenWifiActivity());
+        assertNull(activeScorer.getNetworkAvailableNotificationChannelId());
+    }
+
+    @Test
+    public void testGetActiveScorer_providerAvailable_networkAvailableNotificationChannelIdSet() {
+        final ComponentName recoComponent = new ComponentName("package1", "class1");
+        setNetworkRecoPackageSetting(recoComponent.getPackageName());
+        mockScoreNetworksGranted(recoComponent.getPackageName());
+        mockRecommendationServiceAvailable(recoComponent, 924 /* packageUid */,
+                null /* enableUseOpenWifiActivityPackage */, false /* serviceLabelOverride */,
+                true /* setNotificationChannelId */);
+
+        final NetworkScorerAppData activeScorer = mNetworkScorerAppManager.getActiveScorer();
+        assertNotNull(activeScorer);
+        assertEquals(recoComponent, activeScorer.getRecommendationServiceComponent());
+        assertEquals(924, activeScorer.packageUid);
+        assertEquals(MOCK_NETWORK_AVAILABLE_NOTIFICATION_CHANNEL_ID,
+                activeScorer.getNetworkAvailableNotificationChannelId());
     }
 
     @Test
@@ -368,6 +387,13 @@ public class NetworkScorerAppManagerTest {
 
     private void mockRecommendationServiceAvailable(final ComponentName compName, int packageUid,
             String enableUseOpenWifiActivityPackage, boolean serviceLabelOverride) {
+        mockRecommendationServiceAvailable(compName, packageUid, enableUseOpenWifiActivityPackage,
+                serviceLabelOverride, false);
+    }
+
+    private void mockRecommendationServiceAvailable(final ComponentName compName, int packageUid,
+            String enableUseOpenWifiActivityPackage, boolean serviceLabelOverride,
+            boolean setNotificationChannel) {
         final ResolveInfo serviceInfo = new ResolveInfo();
         serviceInfo.serviceInfo = new ServiceInfo();
         serviceInfo.serviceInfo.name = compName.getClassName();
@@ -389,6 +415,14 @@ public class NetworkScorerAppManagerTest {
                     MOCK_OVERRIDEN_SERVICE_LABEL);
         } else {
             serviceInfo.serviceInfo.nonLocalizedLabel = MOCK_SERVICE_LABEL;
+        }
+        if (setNotificationChannel) {
+            if (serviceInfo.serviceInfo.metaData == null) {
+                serviceInfo.serviceInfo.metaData = new Bundle();
+            }
+            serviceInfo.serviceInfo.metaData.putString(
+                    NetworkScoreManager.NETWORK_AVAILABLE_NOTIFICATION_CHANNEL_ID_META_DATA,
+                    MOCK_NETWORK_AVAILABLE_NOTIFICATION_CHANNEL_ID);
         }
 
         final int flags = PackageManager.GET_META_DATA;
