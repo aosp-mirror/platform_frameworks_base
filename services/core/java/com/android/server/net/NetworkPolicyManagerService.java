@@ -3307,7 +3307,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
         // Second step: apply bw changes based on change of state.
         if (newRule != oldRule) {
-            if ((newRule & RULE_TEMPORARY_ALLOW_METERED) != 0) {
+            if (hasRule(newRule, RULE_TEMPORARY_ALLOW_METERED)) {
                 // Temporarily whitelist foreground app, removing from blacklist if necessary
                 // (since bw_penalty_box prevails over bw_happy_box).
 
@@ -3318,7 +3318,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 if (isBlacklisted) {
                     setMeteredNetworkBlacklist(uid, false);
                 }
-            } else if ((oldRule & RULE_TEMPORARY_ALLOW_METERED) != 0) {
+            } else if (hasRule(oldRule, RULE_TEMPORARY_ALLOW_METERED)) {
                 // Remove temporary whitelist from app that is not on foreground anymore.
 
                 // TODO: if statements below are used to avoid unnecessary calls to netd / iptables,
@@ -3331,18 +3331,18 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 if (isBlacklisted) {
                     setMeteredNetworkBlacklist(uid, true);
                 }
-            } else if ((newRule & RULE_REJECT_METERED) != 0
-                    || (oldRule & RULE_REJECT_METERED) != 0) {
+            } else if (hasRule(newRule, RULE_REJECT_METERED)
+                    || hasRule(oldRule, RULE_REJECT_METERED)) {
                 // Flip state because app was explicitly added or removed to blacklist.
                 setMeteredNetworkBlacklist(uid, isBlacklisted);
-                if ((oldRule & RULE_REJECT_METERED) != 0 && isWhitelisted) {
+                if (hasRule(oldRule, RULE_REJECT_METERED) && isWhitelisted) {
                     // Since blacklist prevails over whitelist, we need to handle the special case
                     // where app is whitelisted and blacklisted at the same time (although such
                     // scenario should be blocked by the UI), then blacklist is removed.
                     setMeteredNetworkWhitelist(uid, isWhitelisted);
                 }
-            } else if ((newRule & RULE_ALLOW_METERED) != 0
-                    || (oldRule & RULE_ALLOW_METERED) != 0) {
+            } else if (hasRule(newRule, RULE_ALLOW_METERED)
+                    || hasRule(oldRule, RULE_ALLOW_METERED)) {
                 // Flip state because app was explicitly added or removed to whitelist.
                 setMeteredNetworkWhitelist(uid, isWhitelisted);
             } else {
@@ -3455,9 +3455,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
         // Second step: notify listeners if state changed.
         if (newRule != oldRule) {
-            if (newRule == RULE_NONE || (newRule & RULE_ALLOW_ALL) != 0) {
+            if (newRule == RULE_NONE || hasRule(newRule, RULE_ALLOW_ALL)) {
                 if (LOGV) Log.v(TAG, "Allowing non-metered access for UID " + uid);
-            } else if ((newRule & RULE_REJECT_ALL) != 0) {
+            } else if (hasRule(newRule, RULE_REJECT_ALL)) {
                 if (LOGV) Log.v(TAG, "Rejecting non-metered access for UID " + uid);
             } else {
                 // All scenarios should have been covered above
