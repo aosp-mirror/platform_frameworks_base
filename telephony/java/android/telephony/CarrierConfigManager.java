@@ -689,6 +689,16 @@ public class CarrierConfigManager {
     public static final String KEY_HIDE_PREFERRED_NETWORK_TYPE_BOOL = "hide_preferred_network_type_bool";
 
     /**
+     * String array for package names that need to be enabled for this carrier.
+     * If user has explicitly disabled some packages in the list, won't re-enable.
+     * Other carrier specific apps which are not in this list may be disabled for current carrier,
+     * and only be re-enabled when this config for another carrier includes it.
+     *
+     * @hide
+     */
+    public static final String KEY_ENABLE_APPS_STRING_ARRAY = "enable_apps_string_array";
+
+    /**
      * Determine whether user can switch Wi-Fi preferred or Cellular preferred in calling preference.
      * Some operators support Wi-Fi Calling only, not VoLTE.
      * They don't need "Cellular preferred" option.
@@ -1305,6 +1315,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_HIDE_IMS_APN_BOOL, false);
         sDefaults.putBoolean(KEY_HIDE_PREFERRED_NETWORK_TYPE_BOOL, false);
         sDefaults.putBoolean(KEY_ALLOW_EMERGENCY_VIDEO_CALLS_BOOL, false);
+        sDefaults.putStringArray(KEY_ENABLE_APPS_STRING_ARRAY, null);
         sDefaults.putBoolean(KEY_EDITABLE_WFC_MODE_BOOL, true);
         sDefaults.putStringArray(KEY_WFC_OPERATOR_ERROR_CODES_STRING_ARRAY, null);
         sDefaults.putInt(KEY_WFC_SPN_FORMAT_IDX_INT, 0);
