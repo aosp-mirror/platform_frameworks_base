@@ -778,7 +778,7 @@ public final class BluetoothGatt implements BluetoothProfile {
 
     /**
      * Set the preferred connection PHY for this app. Please note that this is just a
-     * recommendation, wether the PHY change will happen depends on other applications peferences,
+     * recommendation, whether the PHY change will happen depends on other applications peferences,
      * local and remote controller capabilities. Controller can override these settings.
      * <p>
      * {@link BluetoothGattCallback#onPhyUpdate} will be triggered as a result of this call, even
