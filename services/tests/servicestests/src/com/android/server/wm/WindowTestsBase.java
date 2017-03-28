@@ -167,8 +167,9 @@ class WindowTestsBase {
     /**
      * Waits until the main handler for WM has processed all messages.
      */
-    void waitUntilHandlerIdle() {
+    void waitUntilHandlersIdle() {
         sWm.mH.runWithScissors(() -> { }, 0);
+        sWm.mAnimationHandler.runWithScissors(() -> { }, 0);
     }
 
     private static WindowToken createWindowToken(DisplayContent dc, int stackId, int type) {

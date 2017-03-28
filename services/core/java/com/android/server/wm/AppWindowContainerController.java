@@ -554,7 +554,7 @@ public class AppWindowContainerController
         // want to process the message ASAP, before any other queued
         // messages.
         if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM, "Enqueueing ADD_STARTING");
-        mHandler.postAtFrontOfQueue(mAddStartingWindow);
+        mService.mAnimationHandler.postAtFrontOfQueue(mAddStartingWindow);
     }
 
     private boolean createSnapshot() {

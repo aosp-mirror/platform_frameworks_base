@@ -31,6 +31,7 @@ import static android.os.Process.SHELL_UID;
 import static android.os.Process.SYSTEM_UID;
 import static android.os.Process.THREAD_PRIORITY_DISPLAY;
 import static android.os.Process.myPid;
+import static android.os.Process.myTid;
 import static android.os.UserHandle.USER_NULL;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.DOCKED_INVALID;
@@ -147,6 +148,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.PowerManager;
 import android.os.PowerManagerInternal;
 import android.os.PowerSaveState;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.StrictMode;
@@ -169,7 +171,6 @@ import android.util.SparseIntArray;
 import android.util.TimeUtils;
 import android.util.TypedValue;
 import android.view.AppTransitionAnimationSpec;
-import android.view.Choreographer;
 import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.Gravity;
@@ -218,6 +219,7 @@ import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethodClient;
 import com.android.internal.view.IInputMethodManager;
 import com.android.internal.view.WindowManagerPolicyThread;
+import com.android.server.AnimationThread;
 import com.android.server.DisplayThread;
 import com.android.server.EventLogTags;
 import com.android.server.FgThread;
@@ -601,7 +603,12 @@ public class WindowManagerService extends IWindowManager.Stub
 
     final H mH = new H();
 
-    final Choreographer mChoreographer = Choreographer.getInstance();
+    /**
+     * Handler for things to run that have direct impact on an animation, i.e. animation tick,
+     * layout, starting window creation, whereas {@link H} runs things that are still important, but
+     * not as critical.
+     */
+    final Handler mAnimationHandler = new Handler(AnimationThread.getHandler().getLooper());
 
     WindowState mCurrentFocus = null;
     WindowState mLastFocus = null;
@@ -707,8 +714,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
     // For frozen screen animations.
     private int mExitAnimId, mEnterAnimId;
-
-    boolean mAnimationScheduled;
 
     /** Skip repeated AppWindowTokens initialization. Note that AppWindowsToken's version of this
      * is a long initialized to Long.MIN_VALUE so that it doesn't match this value on startup. */
@@ -4645,7 +4650,6 @@ public class WindowManagerService extends IWindowManager.Stub
     final class H extends android.os.Handler {
         public static final int REPORT_FOCUS_CHANGE = 2;
         public static final int REPORT_LOSING_FOCUS = 3;
-        public static final int DO_TRAVERSAL = 4;
         public static final int WINDOW_FREEZE_TIMEOUT = 11;
 
         public static final int APP_TRANSITION_TIMEOUT = 13;
@@ -4775,12 +4779,6 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                 } break;
 
-                case DO_TRAVERSAL: {
-                    synchronized(mWindowMap) {
-                        mWindowPlacerLocked.performSurfacePlacement();
-                    }
-                } break;
-
                 case WINDOW_FREEZE_TIMEOUT: {
                     // TODO(multidisplay): Can non-default displays rotate?
                     synchronized (mWindowMap) {
@@ -4849,7 +4847,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     synchronized (mWindowMap) {
                         // Since we're holding both mWindowMap and mAnimator we don't need to
                         // hold mAnimator.mLayoutToAnim.
-                        if (mAnimator.isAnimating() || mAnimationScheduled) {
+                        if (mAnimator.isAnimating() || mAnimator.isAnimationScheduled()) {
                             // If we are animating, don't do the gc now but
                             // delay a bit so we don't interrupt the animation.
                             sendEmptyMessageDelayed(H.FORCE_GC, 2000);
@@ -5744,10 +5742,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     /** Note that Locked in this case is on mLayoutToAnim */
     void scheduleAnimationLocked() {
-        if (!mAnimationScheduled) {
-            mAnimationScheduled = true;
-            mChoreographer.postFrameCallback(mAnimator.mAnimationFrameCallback);
-        }
+        mAnimator.scheduleAnimation();
     }
 
     // TODO: Move to DisplayContent

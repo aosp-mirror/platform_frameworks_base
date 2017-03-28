@@ -33,6 +33,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.AttributeSet;
+import android.view.Choreographer;
 import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.GestureDetector;
@@ -312,7 +313,8 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         EventBus.getDefault().register(this);
-        mSfChoreographer = new SurfaceFlingerVsyncChoreographer(mHandler, getDisplay());
+        mSfChoreographer = new SurfaceFlingerVsyncChoreographer(mHandler, getDisplay(),
+                Choreographer.getInstance());
     }
 
     @Override
