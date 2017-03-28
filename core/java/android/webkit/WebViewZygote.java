@@ -67,6 +67,13 @@ public class WebViewZygote {
     private static PackageInfo sPackage;
 
     /**
+     * Cache key for the selected WebView package's classloader. This is set from
+     * #onWebViewProviderChanged().
+     */
+    @GuardedBy("sLock")
+    private static String sPackageCacheKey;
+
+    /**
      * Flag for whether multi-process WebView is enabled. If this is false, the zygote
      * will not be started.
      */
@@ -118,9 +125,10 @@ public class WebViewZygote {
         }
     }
 
-    public static void onWebViewProviderChanged(PackageInfo packageInfo) {
+    public static void onWebViewProviderChanged(PackageInfo packageInfo, String cacheKey) {
         synchronized (sLock) {
             sPackage = packageInfo;
+            sPackageCacheKey = cacheKey;
 
             // If multi-process is not enabled, then do not start the zygote service.
             if (!sMultiprocessEnabled) {
@@ -210,7 +218,8 @@ public class WebViewZygote {
                     TextUtils.join(File.pathSeparator, zipPaths);
 
             Log.d(LOGTAG, "Preloading package " + zip + " " + librarySearchPath);
-            sZygote.preloadPackageForAbi(zip, librarySearchPath, Build.SUPPORTED_ABIS[0]);
+            sZygote.preloadPackageForAbi(zip, librarySearchPath, sPackageCacheKey,
+                                         Build.SUPPORTED_ABIS[0]);
         } catch (Exception e) {
             Log.e(LOGTAG, "Error connecting to " + serviceName, e);
             sZygote = null;
