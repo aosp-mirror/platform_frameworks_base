@@ -18277,6 +18277,10 @@ public class ActivityManagerService extends IActivityManager.Stub
             return record.info.isInstantApp();
         }
         // Otherwise check with PackageManager.
+        if (callerPackage == null) {
+            Slog.e(TAG, "isInstantApp with an application's uid, no record, and no package name");
+            throw new IllegalArgumentException("Calling application did not provide package name");
+        }
         mAppOpsService.checkPackage(uid, callerPackage);
         try {
             IPackageManager pm = AppGlobals.getPackageManager();
