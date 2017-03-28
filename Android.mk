@@ -567,8 +567,9 @@ LOCAL_JAVA_LIBRARIES := core-oj core-libart conscrypt okhttp bouncycastle ext
 
 LOCAL_STATIC_JAVA_LIBRARIES :=                          \
     framework-protos                                    \
-    android.hardware.thermal@1.0-java-constants         \
     android.hardware.health@1.0-java-constants          \
+    android.hardware.thermal@1.0-java-constants         \
+    android.hardware.tv.input@1.0-java-constants        \
     android.hardware.usb@1.0-java-constants             \
     android.hardware.vibrator@1.0-java-constants        \
 
