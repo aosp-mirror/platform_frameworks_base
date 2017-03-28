@@ -54,6 +54,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -310,6 +311,16 @@ public abstract class FragmentManager {
      * the given reference.
      */
     public abstract Fragment getFragment(Bundle bundle, String key);
+
+    /**
+     * Get a list of all fragments that are currently added to the FragmentManager.
+     * This may include those that are hidden as well as those that are shown.
+     * This will not include any fragments only in the back stack, or fragments that
+     * are detached or removed.
+     *
+     * @return A list of all fragments that are added to the FragmentManager.
+     */
+    public abstract List<Fragment> getFragments();
 
     /**
      * Save the current instance state of the given Fragment.  This can be
@@ -895,6 +906,16 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
     }
 
     @Override
+    public List<Fragment> getFragments() {
+        if (mAdded == null) {
+            return Collections.EMPTY_LIST;
+        }
+        synchronized (mAdded) {
+            return (List<Fragment>) mAdded.clone();
+        }
+    }
+
+    @Override
     public Fragment.SavedState saveFragmentInstanceState(Fragment fragment) {
         if (fragment.mIndex < 0) {
             throwException(new IllegalStateException("Fragment " + fragment
@@ -1226,7 +1247,7 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
                                 }
                             }
                             f.mContainer = container;
-                            f.mView = f.performCreateView(f.getLayoutInflater(
+                            f.mView = f.performCreateView(f.onGetLayoutInflater(
                                     f.mSavedFragmentState), container, f.mSavedFragmentState);
                             if (f.mView != null) {
                                 f.mView.setSaveFromParentEnabled(false);
@@ -1398,7 +1419,7 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
 
     void ensureInflatedFragmentView(Fragment f) {
         if (f.mFromLayout && !f.mPerformedCreateView) {
-            f.mView = f.performCreateView(f.getLayoutInflater(
+            f.mView = f.performCreateView(f.onGetLayoutInflater(
                     f.mSavedFragmentState), null, f.mSavedFragmentState);
             if (f.mView != null) {
                 f.mView.setSaveFromParentEnabled(false);
@@ -1620,7 +1641,9 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
             if (mAdded.contains(fragment)) {
                 throw new IllegalStateException("Fragment already added: " + fragment);
             }
-            mAdded.add(fragment);
+            synchronized (mAdded) {
+                mAdded.add(fragment);
+            }
             fragment.mAdded = true;
             fragment.mRemoving = false;
             if (fragment.mView == null) {
@@ -1648,7 +1671,9 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
                 }
             }
             if (mAdded != null) {
-                mAdded.remove(fragment);
+                synchronized (mAdded) {
+                    mAdded.remove(fragment);
+                }
             }
             if (fragment.mHasMenu && fragment.mMenuVisible) {
                 mNeedMenuInvalidate = true;
@@ -1698,7 +1723,9 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
                 // We are not already in back stack, so need to remove the fragment.
                 if (mAdded != null) {
                     if (DEBUG) Log.v(TAG, "remove from detach: " + fragment);
-                    mAdded.remove(fragment);
+                    synchronized (mAdded) {
+                        mAdded.remove(fragment);
+                    }
                 }
                 if (fragment.mHasMenu && fragment.mMenuVisible) {
                     mNeedMenuInvalidate = true;
@@ -1720,7 +1747,9 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
                     throw new IllegalStateException("Fragment already added: " + fragment);
                 }
                 if (DEBUG) Log.v(TAG, "add from attach: " + fragment);
-                mAdded.add(fragment);
+                synchronized (mAdded) {
+                    mAdded.add(fragment);
+                }
                 fragment.mAdded = true;
                 if (fragment.mHasMenu && fragment.mMenuVisible) {
                     mNeedMenuInvalidate = true;
@@ -2762,7 +2791,9 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
                 if (mAdded.contains(f)) {
                     throw new IllegalStateException("Already added!");
                 }
-                mAdded.add(f);
+                synchronized (mAdded) {
+                    mAdded.add(f);
+                }
             }
         } else {
             mAdded = null;
