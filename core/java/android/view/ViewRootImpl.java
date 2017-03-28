@@ -1106,10 +1106,11 @@ public final class ViewRootImpl implements ViewParent,
     /**
      * Notify about move to a different display.
      * @param displayId The id of the display where this view root is moved to.
+     * @param config Configuration of the resources on new display after move.
      *
      * @hide
      */
-    public void onMovedToDisplay(int displayId) {
+    public void onMovedToDisplay(int displayId, Configuration config) {
         if (mDisplay.getDisplayId() == displayId) {
             return;
         }
@@ -1120,7 +1121,7 @@ public final class ViewRootImpl implements ViewParent,
             mView.getResources());
         mAttachInfo.mDisplayState = mDisplay.getState();
         // Internal state updated, now notify the view hierarchy.
-        mView.dispatchMovedToDisplay(mDisplay);
+        mView.dispatchMovedToDisplay(mDisplay, config);
     }
 
     void pokeDrawLockIfNeeded() {
@@ -3485,15 +3486,16 @@ public final class ViewRootImpl implements ViewParent,
             mActivityConfigCallback.onConfigurationChanged(overrideConfig, newDisplayId);
         } else {
             // There is no activity callback - update the configuration right away.
-            updateConfiguration();
+            updateConfiguration(newDisplayId);
         }
         mForceNextConfigUpdate = false;
     }
 
     /**
      * Update display and views if last applied merged configuration changed.
+     * @param newDisplayId Id of new display if moved, {@link Display#INVALID_DISPLAY} otherwise.
      */
-    public void updateConfiguration() {
+    public void updateConfiguration(int newDisplayId) {
         if (mView == null) {
             return;
         }
@@ -3503,6 +3505,13 @@ public final class ViewRootImpl implements ViewParent,
         // the one in them which may be newer.
         final Resources localResources = mView.getResources();
         final Configuration config = localResources.getConfiguration();
+
+        // Handle move to display.
+        if (newDisplayId != INVALID_DISPLAY) {
+            onMovedToDisplay(newDisplayId, config);
+        }
+
+        // Handle configuration change.
         if (mForceNextConfigUpdate || mLastConfigurationFromResources.diff(config) != 0) {
             // Update the display with new DisplayAdjustments.
             mDisplay = ResourcesManager.getInstance().getAdjustedDisplay(
@@ -3674,15 +3683,17 @@ public final class ViewRootImpl implements ViewParent,
                     SomeArgs args = (SomeArgs) msg.obj;
 
                     final int displayId = args.argi3;
-                    final boolean displayChanged = mDisplay.getDisplayId() != displayId;
-                    if (displayChanged) {
-                        onMovedToDisplay(displayId);
-                    }
-
                     final MergedConfiguration mergedConfiguration = (MergedConfiguration) args.arg4;
+                    final boolean displayChanged = mDisplay.getDisplayId() != displayId;
+
                     if (mergedConfiguration != null) {
+                        // If configuration changed - notify about that and, maybe, about move to
+                        // display.
                         performConfigurationChange(mergedConfiguration, false /* force */,
                                 displayChanged ? displayId : INVALID_DISPLAY /* same display */);
+                    } else if (displayChanged) {
+                        // Moved to display without config change - report last applied one.
+                        onMovedToDisplay(displayId, mLastConfigurationFromResources);
                     }
 
                     final boolean framesChanged = !mWinFrame.equals(args.arg1)
