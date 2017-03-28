@@ -96,7 +96,6 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.SystemClock;
-import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
@@ -207,6 +206,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
     // How long to delay to removal of a pending intent based request.
     // See Settings.Secure.CONNECTIVITY_RELEASE_PENDING_INTENT_DELAY_MS
     private final int mReleasePendingIntentDelayMs;
+
+    private MockableSystemProperties mSystemProperties;
 
     private Tethering mTethering;
 
@@ -691,6 +692,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
             IpConnectivityLog logger) {
         if (DBG) log("ConnectivityService starting up");
 
+        mSystemProperties = getSystemProperties();
+
         mMetricsLog = logger;
         mDefaultRequest = createInternetRequestForTransport(-1, NetworkRequest.Type.REQUEST);
         NetworkRequestInfo defaultNRI = new NetworkRequestInfo(null, mDefaultRequest, new Binder());
@@ -708,7 +711,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mReleasePendingIntentDelayMs = Settings.Secure.getInt(context.getContentResolver(),
                 Settings.Secure.CONNECTIVITY_RELEASE_PENDING_INTENT_DELAY_MS, 5_000);
 
-        mLingerDelayMs = SystemProperties.getInt(LINGER_DELAY_PROPERTY, DEFAULT_LINGER_DELAY_MS);
+        mLingerDelayMs = mSystemProperties.getInt(LINGER_DELAY_PROPERTY, DEFAULT_LINGER_DELAY_MS);
 
         mContext = checkNotNull(context, "missing Context");
         mNetd = checkNotNull(netManager, "missing INetworkManagementService");
@@ -735,7 +738,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mNetConfigs = new NetworkConfig[ConnectivityManager.MAX_NETWORK_TYPE+1];
 
         // TODO: What is the "correct" way to do determine if this is a wifi only device?
-        boolean wifiOnly = SystemProperties.getBoolean("ro.radio.noril", false);
+        boolean wifiOnly = mSystemProperties.getBoolean("ro.radio.noril", false);
         log("wifiOnly=" + wifiOnly);
         String[] naStrings = context.getResources().getStringArray(
                 com.android.internal.R.array.networkAttributes);
@@ -788,8 +791,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
             }
         }
 
-        mTestMode = SystemProperties.get("cm.test.mode").equals("true")
-                && SystemProperties.get("ro.build.type").equals("eng");
+        mTestMode = mSystemProperties.get("cm.test.mode").equals("true")
+                && mSystemProperties.get("ro.build.type").equals("eng");
 
         mTethering = new Tethering(mContext, mNetd, statsService, mPolicyManager,
                                    IoThread.get().getLooper(), new MockableSystemProperties());
@@ -1814,8 +1817,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     // Overridden for testing purposes to avoid writing to SystemProperties.
     @VisibleForTesting
-    protected int getDefaultTcpRwnd() {
-        return SystemProperties.getInt(DEFAULT_TCP_RWND_KEY, 0);
+    protected MockableSystemProperties getSystemProperties() {
+        return new MockableSystemProperties();
     }
 
     private void updateTcpBufferSizes(NetworkAgentInfo nai) {
@@ -1853,10 +1856,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
 
         Integer rwndValue = Settings.Global.getInt(mContext.getContentResolver(),
-            Settings.Global.TCP_DEFAULT_INIT_RWND, getDefaultTcpRwnd());
+            Settings.Global.TCP_DEFAULT_INIT_RWND,
+                    mSystemProperties.getInt("net.tcp.default_init_rwnd", 0));
         final String sysctlKey = "sys.sysctl.tcp_def_init_rwnd";
         if (rwndValue != 0) {
-            SystemProperties.set(sysctlKey, rwndValue.toString());
+            mSystemProperties.set(sysctlKey, rwndValue.toString());
         }
     }
 
@@ -1880,7 +1884,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     @Override
     public int getRestoreDefaultNetworkDelay(int networkType) {
-        String restoreDefaultNetworkDelayStr = SystemProperties.get(
+        String restoreDefaultNetworkDelayStr = mSystemProperties.get(
                 NETWORK_RESTORE_DELAY_PROP_NAME);
         if(restoreDefaultNetworkDelayStr != null &&
                 restoreDefaultNetworkDelayStr.length() != 0) {
@@ -3081,7 +3085,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     @Override
     public boolean isTetheringSupported() {
         enforceTetherAccessPermission();
-        int defaultVal = (SystemProperties.get("ro.tether.denied").equals("true") ? 0 : 1);
+        int defaultVal = (mSystemProperties.get("ro.tether.denied").equals("true") ? 0 : 1);
         boolean tetherEnabledInSettings = (Settings.Global.getInt(mContext.getContentResolver(),
                 Settings.Global.TETHER_SUPPORTED, defaultVal) != 0)
                 && !mUserManager.hasUserRestriction(UserManager.DISALLOW_CONFIG_TETHERING);
@@ -4580,11 +4584,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
             ++last;
             String key = "net.dns" + last;
             String value = dns.getHostAddress();
-            SystemProperties.set(key, value);
+            mSystemProperties.set(key, value);
         }
         for (int i = last + 1; i <= mNumDnsEntries; ++i) {
             String key = "net.dns" + i;
-            SystemProperties.set(key, "");
+            mSystemProperties.set(key, "");
         }
         mNumDnsEntries = last;
     }
