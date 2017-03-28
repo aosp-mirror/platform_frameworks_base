@@ -18,6 +18,7 @@ package com.android.server;
 
 import android.content.Context;
 import android.graphics.FontListParser;
+import android.net.Uri;
 import android.os.ParcelFileDescriptor;
 import android.text.FontConfig;
 import android.util.Slog;
@@ -34,6 +35,7 @@ import java.io.IOException;
 public class FontManagerService extends IFontManager.Stub {
     private static final String TAG = "FontManagerService";
     private static final String FONTS_CONFIG = "/system/etc/fonts.xml";
+    private static final String SYSTEM_FONT_DIR = "/system/fonts/";
 
     @GuardedBy("mLock")
     private FontConfig mConfig;
@@ -63,28 +65,22 @@ public class FontManagerService extends IFontManager.Stub {
     public FontConfig getSystemFonts() {
         synchronized (mLock) {
             if (mConfig != null) {
-                return new FontConfig(mConfig);
+                return mConfig;
             }
 
-            FontConfig config = loadFromSystem();
-            if (config == null) {
+            mConfig = loadFromSystem();
+            if (mConfig == null) {
                 return null;
             }
 
-            for (FontConfig.Family family : config.getFamilies()) {
+            for (FontConfig.Family family : mConfig.getFamilies()) {
                 for (FontConfig.Font font : family.getFonts()) {
-                    File fontFile = new File(font.getFontName());
-                    try {
-                        font.setFd(ParcelFileDescriptor.open(
-                                fontFile, ParcelFileDescriptor.MODE_READ_ONLY));
-                    } catch (IOException e) {
-                        Slog.e(TAG, "Error opening font file " + font.getFontName(), e);
-                    }
+                    File fontFile = new File(SYSTEM_FONT_DIR, font.getFontName());
+                    font.setUri(Uri.fromFile(fontFile));
                 }
             }
 
-            mConfig = config;
-            return new FontConfig(mConfig);
+            return mConfig;
         }
     }
 

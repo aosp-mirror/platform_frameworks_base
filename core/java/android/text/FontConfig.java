@@ -22,13 +22,11 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.graphics.FontListParser;
+import android.net.Uri;
 import android.os.Parcel;
-import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
 
-import java.io.IOException;
 import java.lang.annotation.Retention;
-import java.util.Arrays;
 
 
 /**
@@ -41,20 +39,6 @@ public final class FontConfig implements Parcelable {
     public FontConfig(@NonNull Family[] families, @NonNull Alias[] aliases) {
         mFamilies = families;
         mAliases = aliases;
-    }
-
-    /**
-     * For duplicating file descriptors.
-     *
-     * Note that this copy constructor can not be usable for deep copy.
-     * @hide
-     */
-    public FontConfig(@NonNull FontConfig config) {
-        mFamilies = new Family[config.mFamilies.length];
-        for (int i = 0; i < config.mFamilies.length; ++i) {
-            mFamilies[i] = new Family(config.mFamilies[i]);
-        }
-        mAliases = Arrays.copyOf(config.mAliases, config.mAliases.length);
     }
 
     /**
@@ -174,7 +158,7 @@ public final class FontConfig implements Parcelable {
         private final @NonNull Axis[] mAxes;
         private final int mWeight;
         private final boolean mIsItalic;
-        private @Nullable ParcelFileDescriptor mFd;
+        private Uri mUri;
 
         /**
          * @hide
@@ -186,29 +170,6 @@ public final class FontConfig implements Parcelable {
             mAxes = axes;
             mWeight = weight;
             mIsItalic = isItalic;
-            mFd = null;
-        }
-
-        /**
-         * This is for duplicating FileDescriptors.
-         *
-         * Note that this copy ctor doesn't deep copy the members.
-         *
-         * @hide
-         */
-        public Font(Font origin) {
-            mFontName = origin.mFontName;
-            mTtcIndex = origin.mTtcIndex;
-            mAxes = origin.mAxes;
-            mWeight = origin.mWeight;
-            mIsItalic = origin.mIsItalic;
-            if (origin.mFd != null) {
-                try {
-                    mFd = origin.mFd.dup();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
         }
 
         /**
@@ -247,17 +208,20 @@ public final class FontConfig implements Parcelable {
         }
 
         /**
-         * Returns a file descriptor to access the specified font. This should be closed after use.
+         * Returns the content uri associated to this font.
+         *
+         * You can reach to the font contents by calling {@link
+         * android.content.ContentResolver#openInputStream}.
          */
-        public @Nullable ParcelFileDescriptor getFd() {
-            return mFd;
+        public @Nullable Uri getUri() {
+            return mUri;
         }
 
         /**
          * @hide
          */
-        public void setFd(@NonNull ParcelFileDescriptor fd) {
-            mFd = fd;
+        public void setUri(@NonNull Uri uri) {
+            mUri = uri;
         }
 
         /**
@@ -269,11 +233,7 @@ public final class FontConfig implements Parcelable {
             mAxes = in.createTypedArray(Axis.CREATOR);
             mWeight = in.readInt();
             mIsItalic = in.readInt() == 1;
-            if (in.readInt() == 1) { /* has FD */
-                mFd = ParcelFileDescriptor.CREATOR.createFromParcel(in);
-            } else {
-                mFd = null;
-            }
+            mUri = in.readTypedObject(Uri.CREATOR);
         }
 
         @Override
@@ -283,10 +243,7 @@ public final class FontConfig implements Parcelable {
             out.writeTypedArray(mAxes, flag);
             out.writeInt(mWeight);
             out.writeInt(mIsItalic ? 1 : 0);
-            out.writeInt(mFd == null ? 0 : 1);
-            if (mFd != null) {
-                mFd.writeToParcel(out, flag);
-            }
+            out.writeTypedObject(mUri, flag);
         }
 
         @Override
@@ -422,22 +379,6 @@ public final class FontConfig implements Parcelable {
             mFonts = fonts;
             mLanguage = language;
             mVariant = variant;
-        }
-
-        /**
-         * For duplicating file descriptor underlying Font object.
-         *
-         * This copy constructor is not for deep copying.
-         * @hide
-         */
-        public Family(Family origin) {
-            mName = origin.mName;
-            mLanguage = origin.mLanguage;
-            mVariant = origin.mVariant;
-            mFonts = new Font[origin.mFonts.length];
-            for (int i = 0; i < origin.mFonts.length; ++i) {
-                mFonts[i] = new Font(origin.mFonts[i]);
-            }
         }
 
         /**
