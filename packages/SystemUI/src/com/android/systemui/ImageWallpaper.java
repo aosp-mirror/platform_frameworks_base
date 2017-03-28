@@ -405,17 +405,17 @@ public class ImageWallpaper extends WallpaperService {
                     }
                 } else {
                     drawWallpaperWithCanvas(sh, availw, availh, xPixels, yPixels);
+                    if (FIXED_SIZED_SURFACE) {
+                        // If the surface is fixed-size, we should only need to
+                        // draw it once and then we'll let the window manager
+                        // position it appropriately.  As such, we no longer needed
+                        // the loaded bitmap.  Yay!
+                        // hw-accelerated renderer retains bitmap for faster rotation
+                        unloadWallpaper(false /* forgetSize */);
+                    }
                 }
             } finally {
                 Trace.traceEnd(Trace.TRACE_TAG_VIEW);
-                if (FIXED_SIZED_SURFACE && !mIsHwAccelerated) {
-                    // If the surface is fixed-size, we should only need to
-                    // draw it once and then we'll let the window manager
-                    // position it appropriately.  As such, we no longer needed
-                    // the loaded bitmap.  Yay!
-                    // hw-accelerated renderer retains bitmap for faster rotation
-                    unloadWallpaper(false /* forgetSize */);
-                }
             }
         }
 
