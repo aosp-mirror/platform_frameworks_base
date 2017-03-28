@@ -3281,13 +3281,13 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     @Override
-    void dispatchMovedToDisplay(Display display) {
-        super.dispatchMovedToDisplay(display);
+    void dispatchMovedToDisplay(Display display, Configuration config) {
+        super.dispatchMovedToDisplay(display, config);
 
         final int count = mChildrenCount;
         final View[] children = mChildren;
         for (int i = 0; i < count; i++) {
-            children[i].dispatchMovedToDisplay(display);
+            children[i].dispatchMovedToDisplay(display, config);
         }
     }
 
