@@ -241,6 +241,7 @@ public abstract class PackageManagerInternal {
     public abstract void grantEphemeralAccess(int userId, Intent intent,
             int targetAppId, int ephemeralAppId);
 
+    public abstract boolean isInstantAppInstallerComponent(ComponentName component);
     /**
      * Prunes instant apps and state associated with uninstalled
      * instant apps according to the current platform policy.
