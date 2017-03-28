@@ -18,6 +18,7 @@ package android.webkit;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.Widget;
 import android.content.Context;
@@ -58,6 +59,7 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeProvider;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
+import android.view.textclassifier.TextClassifier;
 import android.widget.AbsoluteLayout;
 
 import java.io.BufferedWriter;
@@ -2249,6 +2251,23 @@ public class WebView extends AbsoluteLayout
     public boolean getRendererPriorityWaivedWhenNotVisible() {
         return mProvider.getRendererPriorityWaivedWhenNotVisible();
     }
+
+    /**
+     * Sets the {@link TextClassifier} for this WebView.
+     */
+    public void setTextClassifier(@Nullable TextClassifier textClassifier) {
+        mProvider.setTextClassifier(textClassifier);
+    }
+
+    /**
+     * Returns the {@link TextClassifier} used by this WebView.
+     * If no TextClassifier has been set, this WebView uses the default set by the system.
+     */
+    @NonNull
+    public TextClassifier getTextClassifier() {
+        return mProvider.getTextClassifier();
+    }
+
     //-------------------------------------------------------------------------
     // Interface for WebView providers
     //-------------------------------------------------------------------------
