@@ -82,6 +82,8 @@ import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.view.Display.INVALID_DISPLAY;
 
+import static com.android.server.am.TaskRecord.INVALID_TASK_ID;
+
 final class ActivityManagerShellCommand extends ShellCommand {
     public static final String NO_CLASS_ERROR_CODE = "Error type 3";
     private static final String SHELL_PACKAGE_NAME = "com.android.shell";
@@ -118,6 +120,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
     private boolean mStreaming;   // Streaming the profiling output to a file.
     private int mDisplayId;
     private int mStackId;
+    private int mTaskId;
+    private boolean mIsTaskOverlay;
 
     final boolean mDumping;
 
@@ -263,6 +267,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
         mUserId = defUser;
         mDisplayId = INVALID_DISPLAY;
         mStackId = INVALID_STACK_ID;
+        mTaskId = INVALID_TASK_ID;
+        mIsTaskOverlay = false;
 
         return Intent.parseCommandArgs(this, new Intent.CommandOptionHandler() {
             @Override
@@ -297,6 +303,10 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     mDisplayId = Integer.parseInt(getNextArgRequired());
                 } else if (opt.equals("--stack")) {
                     mStackId = Integer.parseInt(getNextArgRequired());
+                } else if (opt.equals("--task")) {
+                    mTaskId = Integer.parseInt(getNextArgRequired());
+                } else if (opt.equals("--task-overlay")) {
+                    mIsTaskOverlay = true;
                 } else {
                     return false;
                 }
@@ -379,6 +389,14 @@ final class ActivityManagerShellCommand extends ShellCommand {
             if (mStackId != INVALID_STACK_ID) {
                 options = ActivityOptions.makeBasic();
                 options.setLaunchStackId(mStackId);
+            }
+            if (mTaskId != INVALID_TASK_ID) {
+                options = ActivityOptions.makeBasic();
+                options.setLaunchTaskId(mTaskId);
+
+                if (mIsTaskOverlay) {
+                    options.setTaskOverlay(true, true /* canResume */);
+                }
             }
             if (mWaitOption) {
                 result = mInterface.startActivityAndWait(null, null, intent, mimeType,

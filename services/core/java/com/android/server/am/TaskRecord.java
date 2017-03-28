@@ -112,6 +112,7 @@ import static com.android.server.am.ActivityRecord.HOME_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityRecord.RECENTS_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityRecord.STARTING_WINDOW_SHOWN;
 import static com.android.server.am.ActivityStack.REMOVE_TASK_MODE_MOVING;
+import static com.android.server.am.ActivityStackSupervisor.PAUSE_IMMEDIATELY;
 import static com.android.server.am.ActivityStackSupervisor.PRESERVE_WINDOWS;
 
 import static java.lang.Integer.MAX_VALUE;
@@ -1280,6 +1281,26 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
         return false;
     }
 
+    /**
+     * @return whether or not there are ONLY task overlay activities in the stack.
+     *         If {@param excludeFinishing} is set, then ignore finishing activities in the check.
+     *         If there are no task overlay activities, this call returns false.
+     */
+    boolean onlyHasTaskOverlayActivities(boolean excludeFinishing) {
+        int count = 0;
+        for (int i = mActivities.size() - 1; i >= 0; i--) {
+            final ActivityRecord r = mActivities.get(i);
+            if (excludeFinishing && r.finishing) {
+                continue;
+            }
+            if (!r.mTaskOverlay) {
+                return false;
+            }
+            count++;
+        }
+        return count > 0;
+    }
+
     boolean autoRemoveFromRecents() {
         // We will automatically remove the task either if it has explicitly asked for
         // this, or it is empty and has never contained an activity that got shown to
@@ -1291,7 +1312,7 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
      * Completely remove all activities associated with an existing
      * task starting at a specified index.
      */
-    final void performClearTaskAtIndexLocked(int activityNdx) {
+    final void performClearTaskAtIndexLocked(int activityNdx, boolean pauseImmediately) {
         int numActivities = mActivities.size();
         for ( ; activityNdx < numActivities; ++activityNdx) {
             final ActivityRecord r = mActivities.get(activityNdx);
@@ -1304,8 +1325,8 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
                 mActivities.remove(activityNdx);
                 --activityNdx;
                 --numActivities;
-            } else if (mStack.finishActivityLocked(
-                    r, Activity.RESULT_CANCELED, null, "clear-task-index", false)) {
+            } else if (mStack.finishActivityLocked(r, Activity.RESULT_CANCELED, null,
+                    "clear-task-index", false, pauseImmediately)) {
                 --activityNdx;
                 --numActivities;
             }
@@ -1317,7 +1338,7 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
      */
     final void performClearTaskLocked() {
         mReuseTask = true;
-        performClearTaskAtIndexLocked(0);
+        performClearTaskAtIndexLocked(0, !PAUSE_IMMEDIATELY);
         mReuseTask = false;
     }
 
@@ -1401,9 +1422,9 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
         return taskThumbnail;
     }
 
-    void removeTaskActivitiesLocked() {
+    void removeTaskActivitiesLocked(boolean pauseImmediately) {
         // Just remove the entire task.
-        performClearTaskAtIndexLocked(0);
+        performClearTaskAtIndexLocked(0, pauseImmediately);
     }
 
     String lockTaskAuthToString() {
