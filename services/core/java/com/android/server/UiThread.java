@@ -31,8 +31,13 @@ public final class UiThread extends ServiceThread {
 
     private UiThread() {
         super("android.ui", Process.THREAD_PRIORITY_FOREGROUND, false /*allowIo*/);
+    }
+
+    @Override
+    public void run() {
         // Make sure UiThread is in the fg stune boost group
         Process.setThreadGroup(Process.myTid(), Process.THREAD_GROUP_TOP_APP);
+        super.run();
     }
 
     private static void ensureThreadLocked() {
