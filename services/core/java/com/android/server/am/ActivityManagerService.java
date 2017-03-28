@@ -3212,17 +3212,17 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
 
-        mWindowManager.setFocusedApp(r.appToken, true);
-
-        applyUpdateLockStateLocked(r);
-        applyUpdateVrModeLocked(r);
         if (mLastResumedActivity != null && r.userId != mLastResumedActivity.userId) {
             mHandler.removeMessages(FOREGROUND_PROFILE_CHANGED_MSG);
             mHandler.obtainMessage(
                     FOREGROUND_PROFILE_CHANGED_MSG, r.userId, 0).sendToTarget();
         }
-
         mLastResumedActivity = r;
+
+        mWindowManager.setFocusedApp(r.appToken, true);
+
+        applyUpdateLockStateLocked(r);
+        applyUpdateVrModeLocked(r);
 
         EventLogTags.writeAmSetResumedActivity(
                 r == null ? -1 : r.userId,
@@ -23596,6 +23596,21 @@ public class ActivityManagerService extends IActivityManager.Stub
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
+        }
+    }
+
+    /**
+     * Return the user id of the last resumed activity.
+     */
+    @Override
+    public @UserIdInt int getLastResumedActivityUserId() {
+        enforceCallingPermission(
+                permission.INTERACT_ACROSS_USERS_FULL, "getLastResumedActivityUserId()");
+        synchronized (this) {
+            if (mLastResumedActivity == null) {
+                return mUserController.getCurrentUserIdLocked();
+            }
+            return mLastResumedActivity.userId;
         }
     }
 
