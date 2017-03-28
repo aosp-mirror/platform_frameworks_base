@@ -4801,16 +4801,18 @@ public final class ActivityThread {
      *                      {@link ActivityClientRecord#overrideConfig}.
      * @param displayId The id of the display where the Activity currently resides.
      * @param movedToDifferentDisplay Indicates if the activity was moved to different display.
+     * @return {@link Configuration} instance sent to client, null if not sent.
      */
-    private void performConfigurationChangedForActivity(ActivityClientRecord r,
+    private Configuration performConfigurationChangedForActivity(ActivityClientRecord r,
             Configuration newBaseConfig, int displayId, boolean movedToDifferentDisplay) {
         r.tmpConfig.setTo(newBaseConfig);
         if (r.overrideConfig != null) {
             r.tmpConfig.updateFrom(r.overrideConfig);
         }
-        performActivityConfigurationChanged(r.activity, r.tmpConfig, r.overrideConfig, displayId,
-                movedToDifferentDisplay);
+        final Configuration reportedConfig = performActivityConfigurationChanged(r.activity,
+                r.tmpConfig, r.overrideConfig, displayId, movedToDifferentDisplay);
         freeTextLayoutCachesIfNeeded(r.activity.mCurrentConfig.diff(r.tmpConfig));
+        return reportedConfig;
     }
 
     /**
@@ -4864,9 +4866,11 @@ public final class ActivityThread {
      *                         ActivityManager.
      * @param displayId Id of the display where activity currently resides.
      * @param movedToDifferentDisplay Indicates if the activity was moved to different display.
+     * @return Configuration sent to client, null if no changes and not moved to different display.
      */
-    private void performActivityConfigurationChanged(Activity activity, Configuration newConfig,
-            Configuration amOverrideConfig, int displayId, boolean movedToDifferentDisplay) {
+    private Configuration performActivityConfigurationChanged(Activity activity,
+            Configuration newConfig, Configuration amOverrideConfig, int displayId,
+            boolean movedToDifferentDisplay) {
         if (activity == null) {
             throw new IllegalArgumentException("No activity provided.");
         }
@@ -4897,7 +4901,7 @@ public final class ActivityThread {
         }
         if (!shouldChangeConfig && !movedToDifferentDisplay) {
             // Nothing significant, don't proceed with updating and reporting.
-            return;
+            return null;
         }
 
         // Propagate the configuration change to ResourcesManager and Activity.
@@ -4920,22 +4924,22 @@ public final class ActivityThread {
         activity.mConfigChangeFlags = 0;
         activity.mCurrentConfig = new Configuration(newConfig);
 
+        // Apply the ContextThemeWrapper override if necessary.
+        // NOTE: Make sure the configurations are not modified, as they are treated as immutable
+        // in many places.
+        final Configuration configToReport = createNewConfigAndUpdateIfNotNull(newConfig,
+                contextThemeWrapperOverrideConfig);
+
         if (!REPORT_TO_ACTIVITY) {
             // Not configured to report to activity.
-            return;
+            return configToReport;
         }
 
         if (movedToDifferentDisplay) {
-            activity.dispatchMovedToDisplay(displayId);
+            activity.dispatchMovedToDisplay(displayId, configToReport);
         }
 
         if (shouldChangeConfig) {
-            // Apply the ContextThemeWrapper override if necessary.
-            // NOTE: Make sure the configurations are not modified, as they are treated as immutable
-            // in many places.
-            final Configuration configToReport = createNewConfigAndUpdateIfNotNull(
-                    newConfig, contextThemeWrapperOverrideConfig);
-
             activity.mCalled = false;
             activity.onConfigurationChanged(configToReport);
             if (!activity.mCalled) {
@@ -4943,6 +4947,8 @@ public final class ActivityThread {
                                 " did not call through to super.onConfigurationChanged()");
             }
         }
+
+        return configToReport;
     }
 
     public final void applyConfigurationToResources(Configuration config) {
@@ -5115,10 +5121,10 @@ public final class ActivityThread {
                     + r.activityInfo.name + ", displayId=" + displayId
                     + ", config=" + data.overrideConfig);
 
-            performConfigurationChangedForActivity(r, mCompatConfiguration, displayId,
-                    true /* movedToDifferentDisplay */);
+            final Configuration reportedConfig = performConfigurationChangedForActivity(r,
+                    mCompatConfiguration, displayId, true /* movedToDifferentDisplay */);
             if (viewRoot != null) {
-                viewRoot.onMovedToDisplay(displayId);
+                viewRoot.onMovedToDisplay(displayId, reportedConfig);
             }
         } else {
             if (DEBUG_CONFIGURATION) Slog.v(TAG, "Handle activity config changed: "
@@ -5128,7 +5134,7 @@ public final class ActivityThread {
         // Notify the ViewRootImpl instance about configuration changes. It may have initiated this
         // update to make sure that resources are updated before updating itself.
         if (viewRoot != null) {
-            viewRoot.updateConfiguration();
+            viewRoot.updateConfiguration(displayId);
         }
         mSomeActivitiesChanged = true;
     }
