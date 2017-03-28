@@ -37,7 +37,7 @@ public class BluetoothDeviceFilterUtils {
     private BluetoothDeviceFilterUtils() {}
 
     private static final boolean DEBUG = false;
-    private static final String LOG_TAG = "BluetoothDeviceFilterUtil";
+    private static final String LOG_TAG = "BluetoothDeviceFilterUtils";
 
     @Nullable
     static String patternToString(@Nullable Pattern p) {
@@ -50,8 +50,10 @@ public class BluetoothDeviceFilterUtils {
     }
 
     static boolean matches(ScanFilter filter, BluetoothDevice device) {
-        return matchesAddress(filter.getDeviceAddress(), device)
+        boolean result = matchesAddress(filter.getDeviceAddress(), device)
                 && matchesServiceUuid(filter.getServiceUuid(), filter.getServiceUuidMask(), device);
+        if (DEBUG) debugLogMatchResult(result, device, filter);
+        return result;
     }
 
     static boolean matchesAddress(String deviceAddress, BluetoothDevice device) {

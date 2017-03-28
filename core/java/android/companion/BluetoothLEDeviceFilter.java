@@ -31,6 +31,7 @@ import android.bluetooth.le.ScanResult;
 import android.os.Parcel;
 import android.provider.OneTimeUseBuilder;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.android.internal.util.BitUtils;
 import com.android.internal.util.ObjectUtils;
@@ -46,6 +47,9 @@ import java.util.regex.Pattern;
  * @see ScanFilter
  */
 public final class BluetoothLEDeviceFilter implements DeviceFilter<ScanResult> {
+
+    private static final boolean DEBUG = false;
+    private static final String LOG_TAG = "BluetoothLEDeviceFilter";
 
     private static final int RENAME_PREFIX_LENGTH_LIMIT = 10;
 
@@ -145,9 +149,13 @@ public final class BluetoothLEDeviceFilter implements DeviceFilter<ScanResult> {
     /** @hide */
     @Override
     public boolean matches(ScanResult device) {
-        return matches(device.getDevice())
-                && BitUtils.maskedEquals(device.getScanRecord().getBytes(),
-                        mRawDataFilter, mRawDataFilterMask);
+        boolean result = matches(device.getDevice())
+                && (mRawDataFilter == null
+                    || BitUtils.maskedEquals(device.getScanRecord().getBytes(),
+                            mRawDataFilter, mRawDataFilterMask));
+        if (DEBUG) Log.i(LOG_TAG, "matches(this = " + this + ", device = " + device +
+                ") -> " + result);
+        return result;
     }
 
     private boolean matches(BluetoothDevice device) {
