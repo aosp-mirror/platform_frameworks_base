@@ -180,6 +180,7 @@ import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.DeviceIdleController;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
+import com.android.server.ServiceThread;
 import com.android.server.SystemConfig;
 
 import com.android.server.power.BatterySaverPolicy.ServiceType;
@@ -310,6 +311,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private static final int MSG_SET_FIREWALL_RULES = 14;
     private static final int MSG_RESET_FIREWALL_RULES_BY_UID = 15;
 
+    private static final int UID_MSG_STATE_CHANGED = 100;
+    private static final int UID_MSG_GONE = 101;
+
     private final Context mContext;
     private final IActivityManager mActivityManager;
     private final INetworkStatsService mNetworkStats;
@@ -420,6 +424,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             mListeners = new RemoteCallbackList<>();
 
     final Handler mHandler;
+    final Handler mUidEventHandler;
+
+    private final ServiceThread mUidEventThread;
 
     @GuardedBy("allLocks")
     private final AtomicFile mPolicyFile;
@@ -470,6 +477,12 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         HandlerThread thread = new HandlerThread(TAG);
         thread.start();
         mHandler = new Handler(thread.getLooper(), mHandlerCallback);
+
+        // We create another thread for the UID events, which are more time-critical.
+        mUidEventThread = new ServiceThread(TAG + ".uid", Process.THREAD_PRIORITY_FOREGROUND,
+                /*allowIo=*/ false);
+        mUidEventThread.start();
+        mUidEventHandler = new Handler(mUidEventThread.getLooper(), mUidEventHandlerCallback);
 
         mSuppressDefaultPolicy = suppressDefaultPolicy;
 
@@ -774,26 +787,12 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     final private IUidObserver mUidObserver = new IUidObserver.Stub() {
         @Override public void onUidStateChanged(int uid, int procState,
                 long procStateSeq) throws RemoteException {
-            Trace.traceBegin(Trace.TRACE_TAG_NETWORK, "onUidStateChanged");
-            try {
-                synchronized (mUidRulesFirstLock) {
-                    // We received a uid state change callback, add it to the history so that it
-                    // will be useful for debugging.
-                    mObservedHistory.addProcStateSeqUL(uid, procStateSeq);
-                    // Now update the network policy rules as per the updated uid state.
-                    updateUidStateUL(uid, procState);
-                    // Updating the network rules is done, so notify AMS about this.
-                    mActivityManagerInternal.notifyNetworkPolicyRulesUpdated(uid, procStateSeq);
-                }
-            } finally {
-                Trace.traceEnd(Trace.TRACE_TAG_NETWORK);
-            }
+            mUidEventHandler.obtainMessage(UID_MSG_STATE_CHANGED,
+                    uid, procState, procStateSeq).sendToTarget();
         }
 
         @Override public void onUidGone(int uid, boolean disabled) throws RemoteException {
-            synchronized (mUidRulesFirstLock) {
-                removeUidStateUL(uid);
-            }
+            mUidEventHandler.obtainMessage(UID_MSG_GONE, uid, 0).sendToTarget();
         }
 
         @Override public void onUidActive(int uid) throws RemoteException {
@@ -3317,7 +3316,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
     }
 
-    private Handler.Callback mHandlerCallback = new Handler.Callback() {
+    private final Handler.Callback mHandlerCallback = new Handler.Callback() {
         @Override
         public boolean handleMessage(Message msg) {
             switch (msg.what) {
@@ -3441,8 +3440,60 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 }
             }
         }
+    };
+
+    private final Handler.Callback mUidEventHandlerCallback = new Handler.Callback() {
+        @Override
+        public boolean handleMessage(Message msg) {
+            switch (msg.what) {
+                case UID_MSG_STATE_CHANGED: {
+                    final int uid = msg.arg1;
+                    final int procState = msg.arg2;
+                    final long procStateSeq = (Long) msg.obj;
+
+                    handleUidChanged(uid, procState, procStateSeq);
+                    return true;
+                }
+                case UID_MSG_GONE: {
+                    final int uid = msg.arg1;
+                    handleUidGone(uid);
+                    return true;
+                }
+                default: {
+                    return false;
+                }
+            }
+        }
 
     };
+
+    void handleUidChanged(int uid, int procState, long procStateSeq) {
+        Trace.traceBegin(Trace.TRACE_TAG_NETWORK, "onUidStateChanged");
+        try {
+            synchronized (mUidRulesFirstLock) {
+                // We received a uid state change callback, add it to the history so that it
+                // will be useful for debugging.
+                mObservedHistory.addProcStateSeqUL(uid, procStateSeq);
+                // Now update the network policy rules as per the updated uid state.
+                updateUidStateUL(uid, procState);
+                // Updating the network rules is done, so notify AMS about this.
+                mActivityManagerInternal.notifyNetworkPolicyRulesUpdated(uid, procStateSeq);
+            }
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_NETWORK);
+        }
+    }
+
+    void handleUidGone(int uid) {
+        Trace.traceBegin(Trace.TRACE_TAG_NETWORK, "onUidGone");
+        try {
+            synchronized (mUidRulesFirstLock) {
+                removeUidStateUL(uid);
+            }
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_NETWORK);
+        }
+    }
 
     private void broadcastRestrictBackgroundChanged(int uid, Boolean changed) {
         final PackageManager pm = mContext.getPackageManager();
