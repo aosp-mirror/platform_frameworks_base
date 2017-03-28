@@ -79,15 +79,25 @@ public class DeviceChooserActivity extends Activity {
         }
 
         mPairButton = findViewById(R.id.button_pair);
-        mPairButton.setOnClickListener((view) ->
-                onPairTapped(getService().mSelectedDevice));
+        mPairButton.setOnClickListener(v -> onPairTapped(getService().mSelectedDevice));
         updatePairButtonEnabled();
 
         mCancelButton = findViewById(R.id.button_cancel);
-        mCancelButton.setOnClickListener((view) -> {
-            setResult(RESULT_CANCELED);
-            finish();
-        });
+        mCancelButton.setOnClickListener(v -> cancel());
+    }
+
+    private void cancel() {
+        getService().onCancel();
+        setResult(RESULT_CANCELED);
+        finish();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (!isFinishing()) {
+            cancel();
+        }
     }
 
     private CharSequence getCallingAppName() {
