@@ -52,6 +52,7 @@ import android.graphics.Region;
 import android.hardware.display.DisplayManager;
 import android.hardware.fingerprint.IFingerprintService;
 import android.hardware.input.InputManager;
+import android.media.AudioManagerInternal;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
@@ -75,6 +76,7 @@ import android.provider.SettingsStringUtil.ComponentNameSet;
 import android.provider.SettingsStringUtil.SettingStringHelper;
 import android.text.TextUtils;
 import android.text.TextUtils.SimpleStringSplitter;
+import android.util.IntArray;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
@@ -219,6 +221,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
     private final List<AccessibilityServiceInfo> mTempAccessibilityServiceInfoList =
             new ArrayList<>();
+
+    private final IntArray mTempIntArray = new IntArray(0);
 
     private final RemoteCallbackList<IAccessibilityManagerClient> mGlobalClients =
             new RemoteCallbackList<>();
@@ -1558,6 +1562,21 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             }
         }
 
+        final int count = userState.mBoundServices.size();
+        mTempIntArray.clear();
+        for (int i = 0; i < count; i++) {
+            final ResolveInfo resolveInfo =
+                    userState.mBoundServices.get(i).mAccessibilityServiceInfo.getResolveInfo();
+            if (resolveInfo != null) {
+                mTempIntArray.add(resolveInfo.serviceInfo.applicationInfo.uid);
+            }
+        }
+        // Calling out with lock held, but to a lower-level service
+        final AudioManagerInternal audioManager =
+                LocalServices.getService(AudioManagerInternal.class);
+        if (audioManager != null) {
+            audioManager.setAccessibilityServiceUids(mTempIntArray);
+        }
         updateAccessibilityEnabledSetting(userState);
     }
 
