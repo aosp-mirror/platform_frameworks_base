@@ -279,7 +279,7 @@ public final class AdvertisingSetParameters implements Parcelable {
          * When set to true, advertising set will advertise 4.x Spec compliant
          * advertisements.
          *
-         * @param isLegacy wether legacy advertising mode should be used.
+         * @param isLegacy whether legacy advertising mode should be used.
          */
         public Builder setLegacyMode(boolean isLegacy) {
             this.isLegacy = isLegacy;
@@ -287,12 +287,12 @@ public final class AdvertisingSetParameters implements Parcelable {
         }
 
         /**
-         * Set wether advertiser address should be ommited from all packets. If this
+         * Set whether advertiser address should be ommited from all packets. If this
          * mode is used, periodic advertising can't be enabled for this set.
          *
          * This is used only if legacy mode is not used.
          *
-         * @param isAnonymous wether anonymous advertising should be used.
+         * @param isAnonymous whether anonymous advertising should be used.
          */
         public Builder setAnonymous(boolean isAnonymous) {
             this.isAnonymous = isAnonymous;
@@ -300,11 +300,11 @@ public final class AdvertisingSetParameters implements Parcelable {
         }
 
         /**
-         * Set wether TX power should be included in the extended header.
+         * Set whether TX power should be included in the extended header.
          *
          * This is used only if legacy mode is not used.
          *
-         * @param includeTxPower wether TX power should be included in extended
+         * @param includeTxPower whether TX power should be included in extended
          * header
          */
         public Builder setIncludeTxPower(boolean includeTxPower) {
