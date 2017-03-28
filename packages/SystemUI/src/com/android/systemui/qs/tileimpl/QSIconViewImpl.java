@@ -89,7 +89,7 @@ public class QSIconViewImpl extends QSIconView {
                     : state.icon.getInvisibleDrawable(mContext) : null;
             int padding = state.icon != null ? state.icon.getPadding() : 0;
             if (d != null) {
-                d.setAutoMirrored(true);
+                d.setAutoMirrored(false);
             }
             iv.setImageDrawable(d);
             iv.setTag(R.id.qs_icon_tag, state.icon);
