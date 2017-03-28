@@ -3790,8 +3790,13 @@ public final class ActivityManagerService extends ActivityManagerNative
             if ((app.info.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
                 // Debuggable apps may include a wrapper script with their library directory.
                 String wrapperFileName = app.info.nativeLibraryDir + "/wrap.sh";
-                if (new File(wrapperFileName).exists()) {
-                    invokeWith = "/system/bin/logwrapper " + wrapperFileName;
+                StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskReads();
+                try {
+                    if (new File(wrapperFileName).exists()) {
+                        invokeWith = "/system/bin/logwrapper " + wrapperFileName;
+                    }
+                } finally {
+                    StrictMode.setThreadPolicy(oldPolicy);
                 }
             }
 
