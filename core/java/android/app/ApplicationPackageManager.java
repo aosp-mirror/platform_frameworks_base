@@ -2630,4 +2630,13 @@ public class ApplicationPackageManager extends PackageManager {
             throw e.rethrowAsRuntimeException();
         }
     }
+
+    @Override
+    public ComponentName getInstantAppResolverSettingsComponent() {
+        try {
+            return mPM.getInstantAppResolverSettingsComponent();
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
 }

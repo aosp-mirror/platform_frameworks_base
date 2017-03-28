@@ -6239,4 +6239,14 @@ public abstract class PackageManager {
      * @see {@link android.provider.Settings#ACTION_MANAGE_EXTERNAL_SOURCES}
      */
     public abstract boolean canRequestPackageInstalls();
+
+    /**
+     * Return the {@link ComponentName} of the activity providing Settings for the Instant App
+     * resolver.
+     *
+     * @see {@link android.content.intent#ACTION_EPHEMERAL_RESOLVER_SETTINGS}
+     * @hide
+     */
+    @SystemApi
+    public abstract ComponentName getInstantAppResolverSettingsComponent();
 }

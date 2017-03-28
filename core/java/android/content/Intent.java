@@ -1532,6 +1532,19 @@ public class Intent implements Parcelable, Cloneable {
             = "android.intent.action.RESOLVE_EPHEMERAL_PACKAGE";
 
     /**
+     * Activity Action: Launch ephemeral settings.
+     *
+     * <p class="note">
+     * This is a protected intent that can only be sent by the system.
+     * </p>
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_EPHEMERAL_RESOLVER_SETTINGS
+            = "android.intent.action.EPHEMERAL_RESOLVER_SETTINGS";
+
+    /**
      * Used as a string extra field with {@link #ACTION_INSTALL_PACKAGE} to install a
      * package.  Specifies the installer package name; this package will receive the
      * {@link #ACTION_APP_ERROR} intent.
