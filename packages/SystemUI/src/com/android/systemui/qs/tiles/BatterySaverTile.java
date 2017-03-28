@@ -41,8 +41,8 @@ import com.android.settingslib.graph.UsageView;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.plugins.qs.DetailAdapter;
-import com.android.systemui.qs.QSHost;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
+import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.policy.BatteryController;
 
@@ -102,7 +102,7 @@ public class BatterySaverTile extends QSTileImpl<BooleanState> implements
 
     @Override
     public CharSequence getTileLabel() {
-        return mContext.getString(R.string.battery);
+        return mContext.getString(R.string.battery_detail_switch_title);
     }
 
     @Override
