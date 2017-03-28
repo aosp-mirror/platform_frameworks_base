@@ -8232,9 +8232,14 @@ public final class Settings {
         * the open network(s) disappear, we remove the notification. When we
         * show the notification, we will not show it again for
         * {@link android.provider.Settings.Secure#WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY} time.
+        *
+        * @deprecated This feature is no longer controlled by this setting in
+        * {@link android.os.Build.VERSION_CODES#O}.
         */
+       @Deprecated
        public static final String WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON =
                "wifi_networks_available_notification_on";
+
        /**
         * {@hide}
         */
