@@ -80,6 +80,10 @@ public class DozeParameters {
         return getBoolean("doze.display.supported", R.bool.doze_display_state_supported);
     }
 
+    public boolean getDozeSuspendDisplayStateSupported() {
+        return mContext.getResources().getBoolean(R.bool.doze_suspend_display_state_supported);
+    }
+
     public int getPulseDuration(boolean pickup) {
         return getPulseInDuration(pickup) + getPulseVisibleDuration() + getPulseOutDuration();
     }
