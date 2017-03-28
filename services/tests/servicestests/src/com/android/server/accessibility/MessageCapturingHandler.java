@@ -42,6 +42,10 @@ public class MessageCapturingHandler extends Handler {
         return super.sendMessageAtTime(message, uptimeMillis);
     }
 
+    public void setCallback(Handler.Callback callback) {
+        mCallback = callback;
+    }
+
     public void sendOneMessage() {
         Message message = timedMessages.remove(0).first;
         removeMessages(message.what, message.obj);
