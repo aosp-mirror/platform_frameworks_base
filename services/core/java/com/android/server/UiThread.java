@@ -17,6 +17,7 @@
 package com.android.server;
 
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Process;
 import android.os.Trace;
 
@@ -26,6 +27,7 @@ import android.os.Trace;
  * on it to avoid UI jank.
  */
 public final class UiThread extends ServiceThread {
+    private static final long SLOW_DISPATCH_THRESHOLD_MS = 100;
     private static UiThread sInstance;
     private static Handler sHandler;
 
@@ -39,7 +41,9 @@ public final class UiThread extends ServiceThread {
         if (sInstance == null) {
             sInstance = new UiThread();
             sInstance.start();
-            sInstance.getLooper().setTraceTag(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+            final Looper looper = sInstance.getLooper();
+            looper.setTraceTag(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+            looper.setSlowDispatchThresholdMs(SLOW_DISPATCH_THRESHOLD_MS);
             sHandler = new Handler(sInstance.getLooper());
         }
     }
