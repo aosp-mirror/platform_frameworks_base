@@ -554,7 +554,7 @@ public class UsbDeviceManager {
                 boolean usbDataUnlocked) {
             if (DEBUG) {
                 Slog.d(TAG, "setEnabledFunctions functions=" + functions + ", "
-                        + "forceRestart=" + forceRestart);
+                        + "forceRestart=" + forceRestart + ", usbDataUnlocked=" + usbDataUnlocked);
             }
 
             if (usbDataUnlocked != mUsbDataUnlocked) {
@@ -878,7 +878,12 @@ public class UsbDeviceManager {
                     setEnabledFunctions(functions, false, msg.arg1 == 1);
                     break;
                 case MSG_UPDATE_USER_RESTRICTIONS:
-                    setEnabledFunctions(mCurrentFunctions, false, mUsbDataUnlocked);
+                    // Restart the USB stack if USB transfer is enabled but no longer allowed.
+                    final boolean forceRestart = mUsbDataUnlocked
+                            && isUsbDataTransferActive()
+                            && !isUsbTransferAllowed();
+                    setEnabledFunctions(
+                            mCurrentFunctions, forceRestart, mUsbDataUnlocked && !forceRestart);
                     break;
                 case MSG_SYSTEM_READY:
                     updateUsbNotification();
@@ -902,12 +907,10 @@ public class UsbDeviceManager {
                 case MSG_USER_SWITCHED: {
                     if (mCurrentUser != msg.arg1) {
                         // Restart the USB stack and re-apply user restrictions for MTP or PTP.
-                        final boolean active = UsbManager.containsFunction(mCurrentFunctions,
-                                UsbManager.USB_FUNCTION_MTP)
-                                || UsbManager.containsFunction(mCurrentFunctions,
-                                UsbManager.USB_FUNCTION_PTP);
-                        if (mUsbDataUnlocked && active && mCurrentUser != UserHandle.USER_NULL) {
-                            Slog.v(TAG, "Current user switched to " + mCurrentUser
+                        if (mUsbDataUnlocked
+                                && isUsbDataTransferActive()
+                                && mCurrentUser != UserHandle.USER_NULL) {
+                            Slog.v(TAG, "Current user switched to " + msg.arg1
                                     + "; resetting USB host stack for MTP or PTP");
                             // avoid leaking sensitive data from previous user
                             setEnabledFunctions(mCurrentFunctions, true, false);
@@ -926,6 +929,11 @@ public class UsbDeviceManager {
                     break;
                 }
             }
+        }
+
+        private boolean isUsbDataTransferActive() {
+            return UsbManager.containsFunction(mCurrentFunctions, UsbManager.USB_FUNCTION_MTP)
+                    || UsbManager.containsFunction(mCurrentFunctions, UsbManager.USB_FUNCTION_PTP);
         }
 
         public UsbAccessory getCurrentAccessory() {
