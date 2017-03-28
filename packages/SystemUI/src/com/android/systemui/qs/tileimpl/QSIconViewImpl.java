@@ -84,8 +84,10 @@ public class QSIconViewImpl extends QSIconView {
 
     protected void updateIcon(ImageView iv, State state) {
         if (!Objects.equals(state.icon, iv.getTag(R.id.qs_icon_tag))) {
+            boolean shouldAnimate = iv.isShown() && mAnimationEnabled
+                    && iv.getDrawable() != null;
             Drawable d = state.icon != null
-                    ? iv.isShown() && mAnimationEnabled ? state.icon.getDrawable(mContext)
+                    ? shouldAnimate ? state.icon.getDrawable(mContext)
                     : state.icon.getInvisibleDrawable(mContext) : null;
             int padding = state.icon != null ? state.icon.getPadding() : 0;
             if (d != null) {
@@ -114,7 +116,7 @@ public class QSIconViewImpl extends QSIconView {
         if (state.state != mState) {
             int color = getColor(state.state);
             mState = state.state;
-            if (iv.isShown()) {
+            if (iv.isShown() && mTint != 0) {
                 animateGrayScale(mTint, color, iv);
                 mTint = color;
             } else {
