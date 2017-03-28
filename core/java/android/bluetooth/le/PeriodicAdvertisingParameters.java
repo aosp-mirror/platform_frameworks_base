@@ -93,7 +93,7 @@ public final class PeriodicAdvertisingParameters implements Parcelable {
         private int interval = INTERVAL_MAX;
 
         /**
-         * Set wether the Periodic Advertising should be enabled for this set.
+         * Set whether the Periodic Advertising should be enabled for this set.
          */
         public Builder setEnable(boolean enable) {
             this.enable = enable;
