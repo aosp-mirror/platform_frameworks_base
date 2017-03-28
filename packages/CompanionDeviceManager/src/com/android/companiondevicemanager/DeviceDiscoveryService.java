@@ -110,6 +110,11 @@ public class DeviceDiscoveryService extends Service {
     private final ScanCallback mBLEScanCallback = new ScanCallback() {
         @Override
         public void onScanResult(int callbackType, ScanResult result) {
+            if (DEBUG) {
+                Log.i(LOG_TAG,
+                        "BLE.onScanResult(callbackType = " + callbackType + ", result = " + result
+                                + ")");
+            }
             final DeviceFilterPair<ScanResult> deviceFilterPair
                     = DeviceFilterPair.findMatch(result, mBLEFilters);
             if (deviceFilterPair == null) return;
@@ -126,6 +131,10 @@ public class DeviceDiscoveryService extends Service {
     private BroadcastReceiver mBluetoothDeviceFoundBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            if (DEBUG) {
+                Log.i(LOG_TAG,
+                        "BL.onReceive(context = " + context + ", intent = " + intent + ")");
+            }
             final BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
             final DeviceFilterPair<BluetoothDevice> deviceFilterPair
                     = DeviceFilterPair.findMatch(device, mBluetoothFilters);
@@ -191,7 +200,10 @@ public class DeviceDiscoveryService extends Service {
             mBLEScanFilters = CollectionUtils.map(mBLEFilters, BluetoothLEDeviceFilter::getScanFilter);
 
             reset();
-        }
+        } else if (DEBUG) Log.i(LOG_TAG, "startDiscovery: duplicate request: " + request);
+
+
+
         if (!ArrayUtils.isEmpty(mDevicesFound)) {
             onReadyToShowUI();
         }
@@ -221,6 +233,7 @@ public class DeviceDiscoveryService extends Service {
     }
 
     private void reset() {
+        if (DEBUG) Log.i(LOG_TAG, "reset()");
         mDevicesFound.clear();
         mSelectedDevice = null;
         mDevicesAdapter.notifyDataSetChanged();
@@ -369,8 +382,15 @@ public class DeviceDiscoveryService extends Service {
         public static <T extends Parcelable> DeviceFilterPair<T> findMatch(
                 T dev, @Nullable List<? extends DeviceFilter<T>> filters) {
             if (isEmpty(filters)) return new DeviceFilterPair<>(dev, null);
-            final DeviceFilter<T> matchingFilter = CollectionUtils.find(filters, (f) -> f.matches(dev));
-            return matchingFilter != null ? new DeviceFilterPair<>(dev, matchingFilter) : null;
+            final DeviceFilter<T> matchingFilter
+                    = CollectionUtils.find(filters, f -> f.matches(dev));
+
+            DeviceFilterPair<T> result = matchingFilter != null
+                    ? new DeviceFilterPair<>(dev, matchingFilter)
+                    : null;
+            if (DEBUG) Log.i(LOG_TAG, "findMatch(dev = " + dev + ", filters = " + filters +
+                    ") -> " + result);
+            return result;
         }
 
         public String getDisplayName() {
