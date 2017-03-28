@@ -15,12 +15,15 @@
 package com.android.systemui.qs.tileimpl;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.content.res.ColorStateList;
 import android.graphics.drawable.Drawable;
+import android.service.quicksettings.Tile;
 import android.testing.AndroidTestingRunner;
 import android.testing.UiThreadTest;
 import android.widget.ImageView;
@@ -32,6 +35,7 @@ import com.android.systemui.plugins.qs.QSTile.State;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatcher;
 
 @RunWith(AndroidTestingRunner.class)
 @UiThreadTest
@@ -63,5 +67,17 @@ public class QSIconViewImplTest extends SysuiTestCase {
         mIconView.updateIcon(iv, s);
         verify(s.icon).getDrawable(any());
         verify(s.icon, never()).getInvisibleDrawable(any());
+    }
+
+    @Test
+    public void testNoFirstFade() {
+        ImageView iv = mock(ImageView.class);
+        State s = new State();
+        s.state = Tile.STATE_ACTIVE;
+        int desiredColor = mIconView.getColor(s.state);
+        when(iv.isShown()).thenReturn(true);
+
+        mIconView.setIcon(iv, s);
+        verify(iv).setImageTintList(argThat(stateList -> stateList.getColors()[0] == desiredColor));
     }
 }
