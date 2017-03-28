@@ -608,7 +608,7 @@ public class IpManager extends StateMachine {
     }
 
     public void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
-        if (args.length > 0 && DUMP_ARG_CONFIRM.equals(args[0])) {
+        if (args != null && args.length > 0 && DUMP_ARG_CONFIRM.equals(args[0])) {
             // Execute confirmConfiguration() and take no further action.
             confirmConfiguration();
             return;
