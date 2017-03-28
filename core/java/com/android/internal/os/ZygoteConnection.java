@@ -177,7 +177,7 @@ class ZygoteConnection {
 
             if (parsedArgs.preloadPackage != null) {
                 return handlePreloadPackage(parsedArgs.preloadPackage,
-                        parsedArgs.preloadPackageLibs);
+                        parsedArgs.preloadPackageLibs, parsedArgs.preloadPackageCacheKey);
             }
 
             if (parsedArgs.permittedCapabilities != 0 || parsedArgs.effectiveCapabilities != 0) {
@@ -314,7 +314,7 @@ class ZygoteConnection {
         return ZygoteInit.isPreloadComplete();
     }
 
-    protected boolean handlePreloadPackage(String packagePath, String libsPath) {
+    protected boolean handlePreloadPackage(String packagePath, String libsPath, String cacheKey) {
         throw new RuntimeException("Zyogte does not support package preloading");
     }
 
@@ -428,6 +428,7 @@ class ZygoteConnection {
          */
         String preloadPackage;
         String preloadPackageLibs;
+        String preloadPackageCacheKey;
 
         /**
          * Whether this is a request to start preloading the default resources and classes.
@@ -599,6 +600,7 @@ class ZygoteConnection {
                 } else if (arg.equals("--preload-package")) {
                     preloadPackage = args[++curArg];
                     preloadPackageLibs = args[++curArg];
+                    preloadPackageCacheKey = args[++curArg];
                 } else if (arg.equals("--preload-default")) {
                     preloadDefault = true;
                 } else {
