@@ -708,7 +708,8 @@ public class CameraDeviceImpl extends CameraDevice
         synchronized(mInterfaceLock) {
             int streamId = -1;
             for (int i = 0; i < mConfiguredOutputs.size(); i++) {
-                if (surface == mConfiguredOutputs.valueAt(i).getSurface()) {
+                final List<Surface> surfaces = mConfiguredOutputs.valueAt(i).getSurfaces();
+                if (surfaces.contains(surface)) {
                     streamId = mConfiguredOutputs.keyAt(i);
                     break;
                 }
@@ -2020,9 +2021,10 @@ public class CameraDeviceImpl extends CameraDevice
                 Log.w(TAG, "onPrepared invoked for unknown output Surface");
                 return;
             }
-            final Surface surface = output.getSurface();
-
-            sessionCallback.onSurfacePrepared(surface);
+            final List<Surface> surfaces = output.getSurfaces();
+            for (Surface surface : surfaces) {
+                sessionCallback.onSurfacePrepared(surface);
+            }
         }
 
         @Override

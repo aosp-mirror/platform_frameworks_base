@@ -118,6 +118,11 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      * the Surface provided to prepare must not be used as a target of a CaptureRequest submitted
      * to this session.</p>
      *
+     * <p>Note that if 2 surfaces share the same stream via {@link
+     * OutputConfiguration#enableSurfaceSharing} and {@link OutputConfiguration#addSurface},
+     * prepare() only needs to be called on one surface, and {link
+     * StateCallback#onSurfacePrepared} will be triggered for both surfaces.</p>
+     *
      * <p>{@link android.hardware.camera2.CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY LEGACY}
      * devices cannot pre-allocate output buffers; for those devices,
      * {@link StateCallback#onSurfacePrepared} will be immediately called, and no preallocation is
