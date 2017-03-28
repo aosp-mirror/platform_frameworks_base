@@ -137,7 +137,15 @@ public abstract class UtteranceProgressListener {
      * @param end The end index of the range (exclusive) in the utterance text.
      * @param frame The position in frames in the audio of the request where this range is spoken.
      */
-    public void onRangeStart(String utteranceId, int start, int end, int frame) {}
+    public void onRangeStart(String utteranceId, int start, int end, int frame) {
+        onUtteranceRangeStart(utteranceId, start, end);
+    }
+
+    /**
+     * @deprecated Due to internal API changes. Remove when apps catch up.
+     */
+    public void onUtteranceRangeStart(String utteranceId, int start, int end) {
+    }
 
     /**
      * Wraps an old deprecated OnUtteranceCompletedListener with a shiny new progress listener.
