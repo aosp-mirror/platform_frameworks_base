@@ -2441,6 +2441,8 @@ final public class MediaCodec {
             }
         };
 
+        private final Pattern zeroPattern = new Pattern(0, 0);
+
         /**
          * The pattern applicable to the protected data in each subsample.
          */
@@ -2463,7 +2465,7 @@ final public class MediaCodec {
             key = newKey;
             iv = newIV;
             mode = newMode;
-            pattern = new Pattern(0, 0);
+            pattern = zeroPattern;
         }
 
         /**
