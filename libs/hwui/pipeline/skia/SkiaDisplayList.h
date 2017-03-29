@@ -60,7 +60,7 @@ public:
      * Use the linear allocator to create any SkDrawables needed by the display
      * list. This could be dangerous as these objects are ref-counted, so we
      * need to monitor that they don't extend beyond the lifetime of the class
-     * that creates them.
+     * that creates them. Allocator dtor invokes all SkDrawable dtors.
      */
     template<class T, typename... Params>
     SkDrawable* allocateDrawable(Params&&... params) {
