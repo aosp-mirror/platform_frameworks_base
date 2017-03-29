@@ -610,8 +610,8 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
             if (mIncompatibleAppToastView == null) {
                 mIncompatibleAppToastView = Utilities.findViewStubById(this,
                         R.id.incompatible_app_toast_stub).inflate();
-                TextView msg = (TextView) findViewById(com.android.internal.R.id.message);
-                msg.setText(R.string.recents_incompatible_app_message);
+                TextView msg = findViewById(com.android.internal.R.id.message);
+                msg.setText(R.string.dock_non_resizeble_failed_to_dock_text);
             }
             mIncompatibleAppToastView.setVisibility(View.VISIBLE);
         } else if (mIncompatibleAppToastView != null) {
