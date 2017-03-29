@@ -81,7 +81,7 @@ public class PipMenuActivity extends Activity {
     private static final long MENU_FADE_DURATION = 125;
 
     private static final float MENU_BACKGROUND_ALPHA = 0.3f;
-    private static final float DISMISS_BACKGROUND_ALPHA = 0.8f;
+    private static final float DISMISS_BACKGROUND_ALPHA = 0.6f;
 
     private static final float DISABLED_ACTION_ALPHA = 0.54f;
 

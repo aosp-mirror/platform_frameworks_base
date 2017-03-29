@@ -67,7 +67,7 @@ public class PipMotionHelper {
     // The fraction of the stack width that the user has to drag offscreen to minimize the PiP
     private static final float MINIMIZE_OFFSCREEN_FRACTION = 0.3f;
     // The fraction of the stack height that the user has to drag offscreen to dismiss the PiP
-    private static final float DISMISS_OFFSCREEN_FRACTION = 0.15f;
+    private static final float DISMISS_OFFSCREEN_FRACTION = 0.3f;
 
     private Context mContext;
     private IActivityManager mActivityManager;
@@ -201,7 +201,7 @@ public class PipMotionHelper {
      */
     boolean shouldDismissPip() {
         Point displaySize = new Point();
-        mContext.getDisplay().getRealSize(displaySize);
+        mContext.getDisplay().getSize(displaySize);
         if (mBounds.bottom > displaySize.y) {
             float offscreenFraction = (float) (mBounds.bottom - displaySize.y) / mBounds.height();
             return offscreenFraction >= DISMISS_OFFSCREEN_FRACTION;
@@ -327,12 +327,14 @@ public class PipMotionHelper {
     /**
      * Animates the dismissal of the PiP off the edge of the screen.
      */
-    Rect animateDragToEdgeDismiss(Rect pipBounds, AnimatorUpdateListener listener) {
+    Rect animateDismiss(Rect pipBounds, float velocityX, float velocityY,
+            AnimatorUpdateListener listener) {
         cancelAnimations();
-        Point displaySize = new Point();
-        mContext.getDisplay().getRealSize(displaySize);
+        final float velocity = PointF.length(velocityX, velocityY);
+        final boolean isFling = velocity > mFlingAnimationUtils.getMinVelocityPxPerSecond();
+        Point p = getDismissEndPoint(pipBounds, velocityX, velocityY, isFling);
         Rect toBounds = new Rect(pipBounds);
-        toBounds.offset(0, displaySize.y - pipBounds.top);
+        toBounds.offsetTo(p.x, p.y);
         mBoundsAnimator = createAnimationToBounds(mBounds, toBounds, DRAG_TO_DISMISS_STACK_DURATION,
                 FAST_OUT_LINEAR_IN, mUpdateBoundsListener);
         mBoundsAnimator.addListener(new AnimatorListenerAdapter() {
@@ -341,31 +343,13 @@ public class PipMotionHelper {
                 dismissPip();
             }
         });
+        if (isFling) {
+            mFlingAnimationUtils.apply(mBoundsAnimator, 0,
+                    distanceBetweenRectOffsets(mBounds, toBounds), velocity);
+        }
         if (listener != null) {
             mBoundsAnimator.addUpdateListener(listener);
         }
-        mBoundsAnimator.start();
-        return toBounds;
-    }
-
-    /**
-     * Animates the dismissal of the PiP over the dismiss target bounds.
-     */
-    Rect animateDragToTargetDismiss(Rect dismissBounds) {
-        cancelAnimations();
-        Rect toBounds = new Rect(dismissBounds.centerX(),
-                dismissBounds.centerY(),
-                dismissBounds.centerX() + 1,
-                dismissBounds.centerY() + 1);
-        mBoundsAnimator = createAnimationToBounds(mBounds, toBounds,
-                DRAG_TO_TARGET_DISMISS_STACK_DURATION,
-                FAST_OUT_LINEAR_IN, mUpdateBoundsListener);
-        mBoundsAnimator.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                dismissPip();
-            }
-        });
         mBoundsAnimator.start();
         return toBounds;
     }
@@ -435,6 +419,30 @@ public class PipMotionHelper {
                     Log.e(TAG, "Could not animate resize pinned stack to bounds: " + toBounds, e);
                 }
             });
+        }
+    }
+
+    /**
+     * @return the coordinates the PIP should animate to based on the direction of velocity when
+     *         dismissing.
+     */
+    private Point getDismissEndPoint(Rect pipBounds, float velX, float velY, boolean isFling) {
+        Point displaySize = new Point();
+        mContext.getDisplay().getRealSize(displaySize);
+        final float bottomBound = displaySize.y + pipBounds.height() * .1f;
+        if (isFling && velX != 0 && velY != 0) {
+            // Line is defined by: y = mx + b, m = slope, b = y-intercept
+            // Find the slope
+            final float slope = velY / velX;
+            // Sub in slope and PiP position to solve for y-intercept: b = y - mx
+            final float yIntercept = pipBounds.top - slope * pipBounds.left;
+            // Now find the point on this line when y = bottom bound: x = (y - b) / m
+            final float x = (bottomBound - yIntercept) / slope;
+            return new Point((int) x, (int) bottomBound);
+        } else {
+            // If it wasn't a fling the velocity on 'up' is not reliable for direction of movement,
+            // just animate downwards.
+            return new Point(pipBounds.left, (int) bottomBound);
         }
     }
 

@@ -730,8 +730,11 @@
          loading full resolution screenshots. -->
     <dimen name="recents_fast_fling_velocity">600dp</dimen>
 
-    <!-- The size of the PIP drag-to-dismiss target. -->
-    <dimen name="pip_dismiss_target_size">48dp</dimen>
+    <!-- The height of the gradient indicating the dismiss edge when moving a PIP. -->
+    <dimen name="pip_dismiss_gradient_height">196dp</dimen>
+
+    <!-- The bottom margin of the PIP drag to dismiss info text shown when moving a PIP. -->
+    <dimen name="pip_dismiss_text_bottom_margin">36dp</dimen>
 
     <!-- The shortest-edge size of the expanded PiP. -->
     <dimen name="pip_expanded_shortest_edge_size">160dp</dimen>
