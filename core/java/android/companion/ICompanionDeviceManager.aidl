@@ -29,7 +29,7 @@ interface ICompanionDeviceManager {
         in IFindDeviceCallback callback,
         in String callingPackage);
 
-    List<String> getAssociations(String callingPackage);
+    List<String> getAssociations(String callingPackage, int userId);
     void disassociate(String deviceMacAddress, String callingPackage);
 
     //TODO add these
