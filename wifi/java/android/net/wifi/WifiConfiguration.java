@@ -367,12 +367,12 @@ public class WifiConfiguration implements Parcelable {
     public WifiEnterpriseConfig enterpriseConfig;
 
     /**
-     * Fully qualified domain name of a passpoint configuration
+     * Fully qualified domain name of a Passpoint configuration
      */
     public String FQDN;
 
     /**
-     * Name of passpoint credential provider
+     * Name of Passpoint credential provider
      */
     public String providerFriendlyName;
 
@@ -385,8 +385,8 @@ public class WifiConfiguration implements Parcelable {
     public boolean isHomeProviderNetwork;
 
     /**
-     * Roaming Consortium Id list for passpoint credential; identifies a set of networks where
-     * passpoint credential will be considered valid
+     * Roaming Consortium Id list for Passpoint credential; identifies a set of networks where
+     * Passpoint credential will be considered valid
      */
     public long[] roamingConsortiumIds;
 
@@ -1425,7 +1425,7 @@ public class WifiConfiguration implements Parcelable {
     }
 
     /**
-     * Identify if this configuration represents a passpoint network
+     * Identify if this configuration represents a Passpoint network
      */
     public boolean isPasspoint() {
         return !TextUtils.isEmpty(FQDN)

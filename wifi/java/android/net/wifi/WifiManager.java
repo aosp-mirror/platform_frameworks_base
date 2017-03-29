@@ -962,7 +962,7 @@ public class WifiManager {
      *
      * An {@link IllegalArgumentException} will be thrown on failure.
      *
-     * @param fqdn The FQDN of the passpoint configuration to be removed
+     * @param fqdn The FQDN of the Passpoint configuration to be removed
      */
     public void removePasspointConfiguration(String fqdn) {
         try {
@@ -1254,7 +1254,7 @@ public class WifiManager {
     }
 
     /**
-     * @return true if this adapter supports passpoint
+     * @return true if this adapter supports Passpoint
      * @hide
      */
     public boolean isPasspointSupported() {
