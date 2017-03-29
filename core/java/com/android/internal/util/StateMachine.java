@@ -2070,8 +2070,6 @@ public class StateMachine {
      * @param args
      */
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        // Cannot just invoke pw.println(this.toString()) because if the
-        // resulting string is to long it won't be displayed.
         pw.println(getName() + ":");
         pw.println(" total records=" + getLogRecCount());
         for (int i = 0; i < getLogRecSize(); i++) {
@@ -2083,12 +2081,15 @@ public class StateMachine {
 
     @Override
     public String toString() {
-        StringWriter sr = new StringWriter();
-        PrintWriter pr = new PrintWriter(sr);
-        dump(null, pr, null);
-        pr.flush();
-        pr.close();
-        return sr.toString();
+        String name = "(null)";
+        String state = "(null)";
+        try {
+            name = mName.toString();
+            state = mSmHandler.getCurrentState().getName().toString();
+        } catch (NullPointerException npe) {
+            // Will use default(s) initialized above.
+        }
+        return "name=" + name + " state=" + state;
     }
 
     /**
