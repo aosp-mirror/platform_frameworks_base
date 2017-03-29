@@ -102,7 +102,8 @@ final class OverlayManagerServiceImpl {
 
                 if (oi == null) {
                     // This overlay does not exist in our settings.
-                    if (mDefaultOverlays.contains(overlayPackage.packageName)) {
+                    if (overlayPackage.isStaticOverlay ||
+                            mDefaultOverlays.contains(overlayPackage.packageName)) {
                         // Enable this overlay by default.
                         mSettings.setEnabled(overlayPackage.packageName, newUserId, true);
                     }
