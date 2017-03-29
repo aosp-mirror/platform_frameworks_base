@@ -1003,21 +1003,22 @@ public class Typeface {
             Map<String, ByteBuffer> bufferForPath) {
         FontFamily fontFamily = new FontFamily(family.getLanguage(), family.getVariant());
         for (FontConfig.Font font : family.getFonts()) {
-            ByteBuffer fontBuffer = bufferForPath.get(font.getFontName());
+            String fullPathName = "/system/fonts/" + font.getFontName();
+            ByteBuffer fontBuffer = bufferForPath.get(fullPathName);
             if (fontBuffer == null) {
-                try (FileInputStream file = new FileInputStream(font.getFontName())) {
+                try (FileInputStream file = new FileInputStream(fullPathName)) {
                     FileChannel fileChannel = file.getChannel();
                     long fontSize = fileChannel.size();
                     fontBuffer = fileChannel.map(FileChannel.MapMode.READ_ONLY, 0, fontSize);
-                    bufferForPath.put(font.getFontName(), fontBuffer);
+                    bufferForPath.put(fullPathName, fontBuffer);
                 } catch (IOException e) {
-                    Log.e(TAG, "Error mapping font file " + font.getFontName());
+                    Log.e(TAG, "Error mapping font file " + fullPathName);
                     continue;
                 }
             }
             if (!fontFamily.addFontFromBuffer(fontBuffer, font.getTtcIndex(), font.getAxes(),
                     font.getWeight(), font.isItalic() ? Builder.ITALIC : Builder.NORMAL)) {
-                Log.e(TAG, "Error creating font " + font.getFontName() + "#" + font.getTtcIndex());
+                Log.e(TAG, "Error creating font " + fullPathName + "#" + font.getTtcIndex());
             }
         }
         fontFamily.freeze();
