@@ -189,9 +189,8 @@ public class FontListParser {
                 skip(parser);
             }
         }
-        String fullFilename = "/system/fonts/" +
-                FILENAME_WHITESPACE_PATTERN.matcher(filename).replaceAll("");
-        return new FontConfig.Font(fullFilename, index,
+        String sanitizedName = FILENAME_WHITESPACE_PATTERN.matcher(filename).replaceAll("");
+        return new FontConfig.Font(sanitizedName, index,
                 axes.toArray(new FontConfig.Axis[axes.size()]), weight, isItalic);
     }
 
