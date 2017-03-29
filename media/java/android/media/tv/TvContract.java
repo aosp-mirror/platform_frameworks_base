@@ -1802,8 +1802,9 @@ public final class TvContract {
          * {@link #TYPE_OTHER},
          * {@link #TYPE_PAL},
          * {@link #TYPE_SECAM},
-         * {@link #TYPE_S_DMB}, and
-         * {@link #TYPE_T_DMB}.
+         * {@link #TYPE_S_DMB},
+         * {@link #TYPE_T_DMB}, and
+         * {@link #TYPE_PREVIEW}.
          *
          * <p>This value cannot be changed once it's set. Trying to modify it will make the update
          * fail.
