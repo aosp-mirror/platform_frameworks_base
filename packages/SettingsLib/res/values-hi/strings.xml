@@ -34,7 +34,7 @@
     <string name="saved_network" msgid="4352716707126620811">"<xliff:g id="NAME">%1$s</xliff:g> के द्वारा सहेजा गया"</string>
     <!-- no translation found for connected_via_network_scorer (5713793306870815341) -->
     <skip />
-    <!-- no translation found for connected_via_network_scorer_default (8430960324014668989) -->
+    <!-- no translation found for connected_via_network_scorer_default (7867260222020343104) -->
     <skip />
     <string name="connected_via_passpoint" msgid="2826205693803088747">"%1$s के द्वारा उपलब्ध"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"%1$s के द्वारा उपलब्ध"</string>
@@ -141,7 +141,8 @@
     <item msgid="5194774745031751806">"अत्यधिक तीव्र"</item>
     <item msgid="9085102246155045744">"सबसे तेज़"</item>
   </string-array>
-    <string name="choose_profile" msgid="8229363046053568878">"प्रोफ़ाइल चुनें"</string>
+    <!-- no translation found for choose_profile (6921016979430278661) -->
+    <skip />
     <string name="category_personal" msgid="1299663247844969448">"व्यक्तिगत"</string>
     <string name="category_work" msgid="8699184680584175622">"कार्यालय"</string>
     <string name="development_settings_title" msgid="215179176067683667">"डेवलपर विकल्प"</string>
@@ -353,8 +354,10 @@
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"चार्ज नहीं हो रही है"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"पूरी"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"व्यवस्थापक द्वारा नियंत्रित"</string>
-    <string name="enabled_by_admin" msgid="2386503803463071894">"व्यवस्थापक द्वारा सक्षम किया गया"</string>
-    <string name="disabled_by_admin" msgid="3669999613095206948">"व्यवस्थापक द्वारा अक्षम किया गया"</string>
+    <!-- no translation found for enabled_by_admin (5302986023578399263) -->
+    <skip />
+    <!-- no translation found for disabled_by_admin (8505398946020816620) -->
+    <skip />
     <string name="home" msgid="3256884684164448244">"सेटिंग होम"</string>
   <string-array name="battery_labels">
     <item msgid="8494684293649631252">"0%"</item>

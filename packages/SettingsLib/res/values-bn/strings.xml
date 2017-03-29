@@ -32,9 +32,8 @@
     <string name="wifi_no_internet_no_reconnect" msgid="5724903347310541706">"স্বয়ংক্রিয়ভাবে সংযোগ করবে না"</string>
     <string name="wifi_no_internet" msgid="3880396223819116454">"কোনো ইন্টারনেট অ্যাক্সেস নেই"</string>
     <string name="saved_network" msgid="4352716707126620811">"<xliff:g id="NAME">%1$s</xliff:g> দ্বারা সংরক্ষিত"</string>
-    <!-- no translation found for connected_via_network_scorer (5713793306870815341) -->
-    <skip />
-    <!-- no translation found for connected_via_network_scorer_default (8430960324014668989) -->
+    <string name="connected_via_network_scorer" msgid="5713793306870815341">"স্বয়ংক্রিয়ভাবে %1$s এর মাধ্যমে সংযুক্ত হয়েছে"</string>
+    <!-- no translation found for connected_via_network_scorer_default (7867260222020343104) -->
     <skip />
     <string name="connected_via_passpoint" msgid="2826205693803088747">"%1$s মাধ্যমে সংযুক্ত হয়েছে"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"%1$s এর মাধ্যমে উপলব্ধ"</string>
@@ -141,7 +140,8 @@
     <item msgid="5194774745031751806">"খুব দ্রুত"</item>
     <item msgid="9085102246155045744">"দ্রুততম"</item>
   </string-array>
-    <string name="choose_profile" msgid="8229363046053568878">"প্রোফাইল বেছে নিন"</string>
+    <!-- no translation found for choose_profile (6921016979430278661) -->
+    <skip />
     <string name="category_personal" msgid="1299663247844969448">"ব্যক্তিগত"</string>
     <string name="category_work" msgid="8699184680584175622">"কর্মক্ষেত্র"</string>
     <string name="development_settings_title" msgid="215179176067683667">"বিকাশকারী বিকল্পগুলি"</string>
@@ -170,16 +170,12 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"নেটওয়ার্কিং"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"ওয়্যারলেস ডিসপ্লে সার্টিফিকেশন"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"ওয়াই-ফাই ভারবোস লগিং সক্ষম করুন"</string>
-    <!-- no translation found for wifi_aggressive_handover (5309131983693661320) -->
-    <skip />
+    <string name="wifi_aggressive_handover" msgid="5309131983693661320">"ওয়াই-ফাই থেকে মোবাইলে তৎপর হস্তান্তর"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"সর্বদা Wifi রোম স্ক্যানকে অনুমতি দিন"</string>
-    <!-- no translation found for mobile_data_always_on (8774857027458200434) -->
-    <skip />
+    <string name="mobile_data_always_on" msgid="8774857027458200434">"মোবাইল ডেটা সব সময় সক্রিয় থাক"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"চূড়ান্ত ভলিউম অক্ষম করুন"</string>
-    <!-- no translation found for bluetooth_select_avrcp_version_string (3750059931120293633) -->
-    <skip />
-    <!-- no translation found for bluetooth_select_avrcp_version_dialog_title (7277329668298705702) -->
-    <skip />
+    <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"ব্লুটুথ AVRCP সংস্করণ"</string>
+    <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"ব্লুটুথ AVRCP সংস্করণ বেছে নিন"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"ব্লুটুথ অডিও কোডেক"</string>
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="4558347981670553665">"ব্লুটুথ অডিও কোডেক বেছে নিন"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"ব্লুটুথ অডিওর নমুনা হার"</string>
@@ -193,8 +189,7 @@
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"স্ট্রিমিং: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"ওয়্যারলেস প্রদর্শন সার্টিফিকেশন জন্য বিকল্পগুলি দেখান"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"ওয়াই-ফাই লগিং স্তর বাড়ান, ওয়াই-ফাই চয়নকারীতে SSID RSSI অনুযায়ী দেখান"</string>
-    <!-- no translation found for wifi_aggressive_handover_summary (7266329646559808827) -->
-    <skip />
+    <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"সক্ষম করা থাকলে, ওয়াই ফাই সিগন্যালের মান খারাপ হলে ডেটা সংযোগ মোবাইলের কাছে হস্তান্তর করার জন্য ওয়াই ফাই আরো বেশি তৎপর হবে।"</string>
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"ইন্টারফেসে উপস্থিত ডেটা ট্রাফিকের পরিমাণের উপরে ভিত্তি করে ওয়াই-ফাই রোম স্ক্যানকে অনুমোদিত/অননুমোদিত করুন"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"লগার বাফারের আকারগুলি"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"লগ বাফার প্রতি অপেক্ষাকৃত বড় আকারগুলির নির্বাচন করুন"</string>
@@ -325,21 +320,16 @@
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"<xliff:g id="TITLE">%1$s</xliff:g> এর দ্বারা ওভাররাইড করা হয়েছে"</string>
     <string name="power_remaining_duration_only" msgid="4400068916452346544">"প্রায় <xliff:g id="TIME">%1$s</xliff:g> বাকী আছে"</string>
     <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">%1$s</xliff:g> বাকী আছে"</string>
-    <!-- no translation found for power_discharging_duration (2843747179907396142) -->
-    <skip />
+    <string name="power_discharging_duration" msgid="2843747179907396142">"<xliff:g id="LEVEL">%1$s</xliff:g> - প্রায় <xliff:g id="TIME">%2$s</xliff:g> বাকি আছে"</string>
     <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> বাকী আছে"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_charging_duration (4676999980973411875) -->
-    <skip />
+    <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> - সম্পূর্ণ চার্জ হতে <xliff:g id="TIME">%2$s</xliff:g> লাগবে"</string>
     <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_charging_duration_ac (7341243578143555689) -->
-    <skip />
+    <string name="power_charging_duration_ac" msgid="7341243578143555689">"<xliff:g id="LEVEL">%1$s</xliff:g> - AC তে সম্পূর্ণ চার্জ হতে <xliff:g id="TIME">%2$s</xliff:g> লাগবে"</string>
     <string name="power_charging_duration_ac_short" msgid="7895864687218765582">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_charging_duration_usb (3720632890882121805) -->
-    <skip />
+    <string name="power_charging_duration_usb" msgid="3720632890882121805">"<xliff:g id="LEVEL">%1$s</xliff:g> - USB এর মাধ্যমে সম্পূর্ণ চার্জ হতে <xliff:g id="TIME">%2$s</xliff:g> লাগবে"</string>
     <string name="power_charging_duration_usb_short" msgid="941854728040426399">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_charging_duration_wireless (5768338238751562058) -->
-    <skip />
+    <string name="power_charging_duration_wireless" msgid="5768338238751562058">"<xliff:g id="LEVEL">%1$s</xliff:g> - ওয়্যারলেস এর মাধ্যমে সম্পূর্ণ চার্জ হতে <xliff:g id="TIME">%2$s</xliff:g> সময় লাগবে"</string>
     <string name="power_charging_duration_wireless_short" msgid="1642664799869599476">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"অজানা"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"চার্জ হচ্ছে"</string>
@@ -353,8 +343,10 @@
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"চার্জ হচ্ছে না"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"পূর্ণ"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"প্রশাসকের দ্বারা নিয়ন্ত্রিত"</string>
-    <string name="enabled_by_admin" msgid="2386503803463071894">"প্রশাসক সক্ষম করেছেন"</string>
-    <string name="disabled_by_admin" msgid="3669999613095206948">"প্রশাসক অক্ষম করেছেন"</string>
+    <!-- no translation found for enabled_by_admin (5302986023578399263) -->
+    <skip />
+    <!-- no translation found for disabled_by_admin (8505398946020816620) -->
+    <skip />
     <string name="home" msgid="3256884684164448244">"সেটিংস হোম"</string>
   <string-array name="battery_labels">
     <item msgid="8494684293649631252">"০%"</item>

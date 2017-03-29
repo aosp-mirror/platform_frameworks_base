@@ -32,9 +32,8 @@
     <string name="wifi_no_internet_no_reconnect" msgid="5724903347310541706">"Non verrà eseguita la connessione automatica"</string>
     <string name="wifi_no_internet" msgid="3880396223819116454">"Nessun accesso a Internet"</string>
     <string name="saved_network" msgid="4352716707126620811">"Salvata da <xliff:g id="NAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for connected_via_network_scorer (5713793306870815341) -->
-    <skip />
-    <!-- no translation found for connected_via_network_scorer_default (8430960324014668989) -->
+    <string name="connected_via_network_scorer" msgid="5713793306870815341">"Collegato automaticamente tramite %1$s"</string>
+    <!-- no translation found for connected_via_network_scorer_default (7867260222020343104) -->
     <skip />
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Collegato tramite %1$s"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"Disponibile tramite %1$s"</string>
@@ -141,7 +140,8 @@
     <item msgid="5194774745031751806">"Molto rapida"</item>
     <item msgid="9085102246155045744">"Massima velocità"</item>
   </string-array>
-    <string name="choose_profile" msgid="8229363046053568878">"Scegli profilo"</string>
+    <!-- no translation found for choose_profile (6921016979430278661) -->
+    <skip />
     <string name="category_personal" msgid="1299663247844969448">"Personali"</string>
     <string name="category_work" msgid="8699184680584175622">"Lavoro"</string>
     <string name="development_settings_title" msgid="215179176067683667">"Opzioni sviluppatore"</string>
@@ -170,16 +170,12 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Reti"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Certificazione display wireless"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Attiva registrazione dettagliata Wi-Fi"</string>
-    <!-- no translation found for wifi_aggressive_handover (5309131983693661320) -->
-    <skip />
+    <string name="wifi_aggressive_handover" msgid="5309131983693661320">"Wi‑Fi aggressivo per passaggio a cellulare"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Consenti sempre scansioni roaming Wi-Fi"</string>
-    <!-- no translation found for mobile_data_always_on (8774857027458200434) -->
-    <skip />
+    <string name="mobile_data_always_on" msgid="8774857027458200434">"Dati mobili sempre attivi"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Disattiva volume assoluto"</string>
-    <!-- no translation found for bluetooth_select_avrcp_version_string (3750059931120293633) -->
-    <skip />
-    <!-- no translation found for bluetooth_select_avrcp_version_dialog_title (7277329668298705702) -->
-    <skip />
+    <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Versione Bluetooth AVRCP"</string>
+    <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Seleziona versione Bluetooth AVRCP"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Codec audio Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="4558347981670553665">"Seleziona il codec audio Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Frequenza di campionamento audio Bluetooth"</string>
@@ -193,8 +189,7 @@
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Streaming: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Mostra opzioni per la certificazione display wireless"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Aumenta il livello di registrazione Wi-Fi, mostrando il SSID RSSI nel selettore Wi-Fi"</string>
-    <!-- no translation found for wifi_aggressive_handover_summary (7266329646559808827) -->
-    <skip />
+    <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"Con questa impostazione attivata, il Wi-Fi è più aggressivo nel passare la connessione dati al cellulare, con segnale Wi-Fi basso"</string>
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"Consenti/vieta scansioni roaming Wi-Fi basate sulla quantità di traffico dati presente a livello di interfaccia"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Dimensioni buffer Logger"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Seleziona dimensioni Logger per buffer log"</string>
@@ -325,21 +320,16 @@
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"Valore sostituito da <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="4400068916452346544">"Circa <xliff:g id="TIME">%1$s</xliff:g> rimanenti"</string>
     <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"Tempo rimanente: <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_discharging_duration (2843747179907396142) -->
-    <skip />
+    <string name="power_discharging_duration" msgid="2843747179907396142">"<xliff:g id="LEVEL">%1$s</xliff:g> - ancora circa <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">%1$s</xliff:g> - Tempo rimanente: <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_charging_duration (4676999980973411875) -->
-    <skip />
+    <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> alla carica completa"</string>
     <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_charging_duration_ac (7341243578143555689) -->
-    <skip />
+    <string name="power_charging_duration_ac" msgid="7341243578143555689">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> alla carica completa tramite CA"</string>
     <string name="power_charging_duration_ac_short" msgid="7895864687218765582">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_charging_duration_usb (3720632890882121805) -->
-    <skip />
+    <string name="power_charging_duration_usb" msgid="3720632890882121805">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> alla carica completa tramite USB"</string>
     <string name="power_charging_duration_usb_short" msgid="941854728040426399">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_charging_duration_wireless (5768338238751562058) -->
-    <skip />
+    <string name="power_charging_duration_wireless" msgid="5768338238751562058">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> alla carica completa con wireless"</string>
     <string name="power_charging_duration_wireless_short" msgid="1642664799869599476">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"Sconosciuta"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"In carica"</string>
@@ -353,8 +343,10 @@
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"Non in carica"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"Carica"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"Gestita dall\'amministratore"</string>
-    <string name="enabled_by_admin" msgid="2386503803463071894">"Attivata dall\'amministratore"</string>
-    <string name="disabled_by_admin" msgid="3669999613095206948">"Disattivata dall\'amministratore"</string>
+    <!-- no translation found for enabled_by_admin (5302986023578399263) -->
+    <skip />
+    <!-- no translation found for disabled_by_admin (8505398946020816620) -->
+    <skip />
     <string name="home" msgid="3256884684164448244">"Home page Impostazioni"</string>
   <string-array name="battery_labels">
     <item msgid="8494684293649631252">"0%"</item>
