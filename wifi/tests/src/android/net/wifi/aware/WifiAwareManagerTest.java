@@ -688,7 +688,6 @@ public class WifiAwareManagerTest {
         collector.checkThat("mServiceName", subscribeConfig.mServiceName, equalTo(null));
         collector.checkThat("mSubscribeType", subscribeConfig.mSubscribeType,
                 equalTo(SubscribeConfig.SUBSCRIBE_TYPE_PASSIVE));
-        collector.checkThat("mSubscribeCount", subscribeConfig.mSubscribeCount, equalTo(0));
         collector.checkThat("mTtlSec", subscribeConfig.mTtlSec, equalTo(0));
         collector.checkThat("mMatchStyle", subscribeConfig.mMatchStyle,
                 equalTo(SubscribeConfig.MATCH_STYLE_ALL));
@@ -711,7 +710,7 @@ public class WifiAwareManagerTest {
                 .setServiceSpecificInfo(serviceSpecificInfo.getBytes()).setMatchFilter(
                         new TlvBufferUtils.TlvIterable(0, 1, matchFilter).toList())
                 .setSubscribeType(subscribeType)
-                .setSubscribeCount(subscribeCount).setTtlSec(subscribeTtl).setMatchStyle(matchStyle)
+                .setTtlSec(subscribeTtl).setMatchStyle(matchStyle)
                 .setTerminateNotificationEnabled(enableTerminateNotification).build();
 
         collector.checkThat("mServiceName", serviceName.getBytes(),
@@ -721,8 +720,6 @@ public class WifiAwareManagerTest {
         collector.checkThat("mMatchFilter", matchFilter, equalTo(subscribeConfig.mMatchFilter));
         collector.checkThat("mSubscribeType", subscribeType,
                 equalTo(subscribeConfig.mSubscribeType));
-        collector.checkThat("mSubscribeCount", subscribeCount,
-                equalTo(subscribeConfig.mSubscribeCount));
         collector.checkThat("mTtlSec", subscribeTtl, equalTo(subscribeConfig.mTtlSec));
         collector.checkThat("mMatchStyle", matchStyle, equalTo(subscribeConfig.mMatchStyle));
         collector.checkThat("mEnableTerminateNotification", enableTerminateNotification,
@@ -744,7 +741,7 @@ public class WifiAwareManagerTest {
                 .setServiceSpecificInfo(serviceSpecificInfo.getBytes()).setMatchFilter(
                         new TlvBufferUtils.TlvIterable(0, 1, matchFilter).toList())
                 .setSubscribeType(subscribeType)
-                .setSubscribeCount(subscribeCount).setTtlSec(subscribeTtl).setMatchStyle(matchStyle)
+                .setTtlSec(subscribeTtl).setMatchStyle(matchStyle)
                 .setTerminateNotificationEnabled(enableTerminateNotification).build();
 
         Parcel parcelW = Parcel.obtain();
@@ -763,11 +760,6 @@ public class WifiAwareManagerTest {
     @Test(expected = IllegalArgumentException.class)
     public void testSubscribeConfigBuilderBadSubscribeType() {
         new SubscribeConfig.Builder().setSubscribeType(10);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testSubscribeConfigBuilderNegativeCount() {
-        new SubscribeConfig.Builder().setSubscribeCount(-1);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -794,7 +786,6 @@ public class WifiAwareManagerTest {
         collector.checkThat("mServiceName", publishConfig.mServiceName, equalTo(null));
         collector.checkThat("mPublishType", publishConfig.mPublishType,
                 equalTo(PublishConfig.PUBLISH_TYPE_UNSOLICITED));
-        collector.checkThat("mPublishCount", publishConfig.mPublishCount, equalTo(0));
         collector.checkThat("mTtlSec", publishConfig.mTtlSec, equalTo(0));
         collector.checkThat("mEnableTerminateNotification",
                 publishConfig.mEnableTerminateNotification, equalTo(true));
@@ -814,7 +805,7 @@ public class WifiAwareManagerTest {
                 .setServiceSpecificInfo(serviceSpecificInfo.getBytes()).setMatchFilter(
                         new TlvBufferUtils.TlvIterable(0, 1, matchFilter).toList())
                 .setPublishType(publishType)
-                .setPublishCount(publishCount).setTtlSec(publishTtl)
+                .setTtlSec(publishTtl)
                 .setTerminateNotificationEnabled(enableTerminateNotification).build();
 
         collector.checkThat("mServiceName", serviceName.getBytes(),
@@ -823,7 +814,6 @@ public class WifiAwareManagerTest {
                 serviceSpecificInfo.getBytes(), equalTo(publishConfig.mServiceSpecificInfo));
         collector.checkThat("mMatchFilter", matchFilter, equalTo(publishConfig.mMatchFilter));
         collector.checkThat("mPublishType", publishType, equalTo(publishConfig.mPublishType));
-        collector.checkThat("mPublishCount", publishCount, equalTo(publishConfig.mPublishCount));
         collector.checkThat("mTtlSec", publishTtl, equalTo(publishConfig.mTtlSec));
         collector.checkThat("mEnableTerminateNotification", enableTerminateNotification,
                 equalTo(publishConfig.mEnableTerminateNotification));
@@ -843,7 +833,7 @@ public class WifiAwareManagerTest {
                 .setServiceSpecificInfo(serviceSpecificInfo.getBytes()).setMatchFilter(
                         new TlvBufferUtils.TlvIterable(0, 1, matchFilter).toList())
                 .setPublishType(publishType)
-                .setPublishCount(publishCount).setTtlSec(publishTtl)
+                .setTtlSec(publishTtl)
                 .setTerminateNotificationEnabled(enableTerminateNotification).build();
 
         Parcel parcelW = Parcel.obtain();
@@ -862,11 +852,6 @@ public class WifiAwareManagerTest {
     @Test(expected = IllegalArgumentException.class)
     public void testPublishConfigBuilderBadPublishType() {
         new PublishConfig.Builder().setPublishType(5);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testPublishConfigBuilderNegativeCount() {
-        new PublishConfig.Builder().setPublishCount(-4);
     }
 
     @Test(expected = IllegalArgumentException.class)
