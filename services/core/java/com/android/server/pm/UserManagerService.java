@@ -3389,6 +3389,12 @@ public class UserManagerService extends IUserManager.Stub {
                         pw.print(" <partial>");
                     }
                     pw.println();
+                    pw.print("    State: ");
+                    final int state;
+                    synchronized (mUserStates) {
+                        state = mUserStates.get(userId, -1);
+                    }
+                    pw.println(UserState.stateToString(state));
                     pw.print("    Created: ");
                     if (userInfo.creationTime == 0) {
                         pw.println("<unknown>");
