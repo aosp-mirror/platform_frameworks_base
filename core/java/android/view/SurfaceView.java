@@ -137,7 +137,10 @@ public class SurfaceView extends View {
                 } break;
                 case DRAW_FINISHED_MSG: {
                     mDrawFinished = true;
-                    invalidate();
+                    if (mAttachedToWindow) {
+                        notifyDrawFinished();
+                        invalidate();
+                    }
                 } break;
             }
         }
@@ -188,8 +191,11 @@ public class SurfaceView extends View {
     private Translator mTranslator;
 
     private boolean mGlobalListenersAdded;
+    private boolean mAttachedToWindow;
 
     private int mSurfaceFlags = SurfaceControl.HIDDEN;
+
+    private int mPendingReportDraws;
 
     public SurfaceView(Context context) {
         this(context, null);
@@ -227,6 +233,7 @@ public class SurfaceView extends View {
         mViewVisibility = getVisibility() == VISIBLE;
         mRequestedVisible = mViewVisibility && mWindowVisibility;
 
+        mAttachedToWindow = true;
         if (!mGlobalListenersAdded) {
             ViewTreeObserver observer = getViewTreeObserver();
             observer.addOnScrollChangedListener(mScrollChangedListener);
@@ -261,13 +268,26 @@ public class SurfaceView extends View {
         updateSurface();
     }
 
+    void notifyDrawFinished() {
+        ViewRootImpl viewRoot = getViewRootImpl();
+        if (viewRoot != null) {
+            viewRoot.pendingDrawFinished();
+        }
+        mPendingReportDraws--;
+    }
+
     @Override
     protected void onDetachedFromWindow() {
+        mAttachedToWindow = false;
         if (mGlobalListenersAdded) {
             ViewTreeObserver observer = getViewTreeObserver();
             observer.removeOnScrollChangedListener(mScrollChangedListener);
             observer.removeOnPreDrawListener(mDrawListener);
             mGlobalListenersAdded = false;
+        }
+
+        while (mPendingReportDraws > 0) {
+            notifyDrawFinished();
         }
 
         mRequestedVisible = false;
@@ -618,6 +638,9 @@ public class SurfaceView extends View {
                             if (callbacks == null) {
                                 callbacks = getSurfaceCallbacks();
                             }
+
+                            mPendingReportDraws++;
+                            viewRoot.drawPending();
                             SurfaceCallbackHelper sch =
                                     new SurfaceCallbackHelper(this::onDrawFinished);
                             sch.dispatchSurfaceRedrawNeededAsync(mSurfaceHolder, callbacks);
