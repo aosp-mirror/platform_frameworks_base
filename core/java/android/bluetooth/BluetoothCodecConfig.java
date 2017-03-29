@@ -63,7 +63,7 @@ public final class BluetoothCodecConfig implements Parcelable {
     public static final int CHANNEL_MODE_STEREO = 0x1 << 1;
 
     private final int mCodecType;
-    private final int mCodecPriority;
+    private int mCodecPriority;
     private final int mSampleRate;
     private final int mBitsPerSample;
     private final int mChannelMode;
@@ -280,6 +280,15 @@ public final class BluetoothCodecConfig implements Parcelable {
     }
 
     /**
+     * Checks whether the codec is mandatory.
+     *
+     * @return true if the codec is mandatory, otherwise false.
+     */
+    public boolean isMandatoryCodec() {
+        return mCodecType == SOURCE_CODEC_TYPE_SBC;
+    }
+
+    /**
      * Gets the codec selection priority.
      * The codec selection priority is relative to other codecs: larger value
      * means higher priority. If 0, reset to default.
@@ -288,6 +297,17 @@ public final class BluetoothCodecConfig implements Parcelable {
      */
     public int getCodecPriority() {
         return mCodecPriority;
+    }
+
+    /**
+     * Sets the codec selection priority.
+     * The codec selection priority is relative to other codecs: larger value
+     * means higher priority. If 0, reset to default.
+     *
+     * @param codecPriority the codec priority
+     */
+    public void setCodecPriority(int codecPriority) {
+        mCodecPriority = codecPriority;
     }
 
     /**
