@@ -242,6 +242,7 @@ import java.util.List;
  *   You can provide multiple intents for a single shortcut so that the last defined activity is launched
  *   with the other activities in the <a href="/guide/components/tasks-and-back-stack.html">back stack</a>.
  *   See {@link android.app.TaskStackBuilder} for details.
+ *   <p><b>Note:</b> String resources may not be used within an {@code <intent>} element.
  *   </dd>
  *   <dt>{@code categories}</dt>
  *   <dd>Specify shortcut categories.  Currently only
