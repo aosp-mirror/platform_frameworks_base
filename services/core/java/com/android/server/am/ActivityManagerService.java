@@ -6591,6 +6591,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             mBatteryStatsService.noteProcessFinish(app.processName, app.info.uid);
             if (app.isolated) {
                 mBatteryStatsService.removeIsolatedUid(app.uid, app.info.uid);
+                getPackageManagerInternalLocked().removeIsolatedUid(app.uid);
             }
             boolean willRestart = false;
             if (app.persistent && !app.isolated) {
@@ -12084,6 +12085,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 // the uid of the isolated process is specified by the caller.
                 uid = isolatedUid;
             }
+            getPackageManagerInternalLocked().addIsolatedUid(uid, info.uid);
 
             // Register the isolated UID with this application so BatteryStats knows to
             // attribute resource usage to the application.
