@@ -22,6 +22,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageParser;
 import android.os.Environment;
+import android.os.FileUtils;
 import android.os.PowerManager;
 import android.os.UserHandle;
 import android.os.WorkSource;
@@ -256,9 +257,11 @@ public class PackageDexOptimizer {
             String compilerFilter, boolean isUsedByOtherApps) {
         int dexoptFlags = getDexFlags(info, compilerFilter) | DEXOPT_SECONDARY_DEX;
         // Check the app storage and add the appropriate flags.
-        if (info.dataDir.equals(info.deviceProtectedDataDir)) {
+        if (info.deviceProtectedDataDir != null &&
+                FileUtils.contains(info.deviceProtectedDataDir, path)) {
             dexoptFlags |= DEXOPT_STORAGE_DE;
-        } else if (info.dataDir.equals(info.credentialProtectedDataDir)) {
+        } else if (info.credentialProtectedDataDir != null &&
+                FileUtils.contains(info.credentialProtectedDataDir, path)) {
             dexoptFlags |= DEXOPT_STORAGE_CE;
         } else {
             Slog.e(TAG, "Could not infer CE/DE storage for package " + info.packageName);
