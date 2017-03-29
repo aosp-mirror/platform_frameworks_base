@@ -114,6 +114,12 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         mCurrentSpecs = newSpecs;
     }
 
+    public void resetTileSpecs(QSTileHost host, List<String> specs) {
+        // Notify the host so the tiles get removed callbacks.
+        host.changeTiles(mCurrentSpecs, specs);
+        setTileSpecs(specs);
+    }
+
     public void setTileSpecs(List<String> currentSpecs) {
         if (currentSpecs.equals(mCurrentSpecs)) {
             return;
