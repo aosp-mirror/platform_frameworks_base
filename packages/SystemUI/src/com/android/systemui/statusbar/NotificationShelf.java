@@ -133,6 +133,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
             mViewInvertHelper.update(dark);
         }
         mShelfIcons.setAmbient(dark);
+        updateInteractiveness();
     }
 
     @Override
@@ -576,7 +577,8 @@ public class NotificationShelf extends ActivatableNotificationView implements
     }
 
     private void updateInteractiveness() {
-        mInteractive = mStatusBarState == StatusBarState.KEYGUARD && mHasItemsInStableShelf;
+        mInteractive = mStatusBarState == StatusBarState.KEYGUARD && mHasItemsInStableShelf
+                && !mDark;
         setClickable(mInteractive);
         setFocusable(mInteractive);
         setImportantForAccessibility(mInteractive ? View.IMPORTANT_FOR_ACCESSIBILITY_YES
