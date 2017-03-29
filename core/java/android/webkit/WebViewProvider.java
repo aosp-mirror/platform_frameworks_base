@@ -16,6 +16,8 @@
 
 package android.webkit;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.content.res.Configuration;
 import android.content.Intent;
@@ -41,6 +43,7 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeProvider;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
+import android.view.textclassifier.TextClassifier;
 import android.webkit.WebView.HitTestResult;
 import android.webkit.WebView.PictureListener;
 import android.webkit.WebView.VisualStateCallback;
@@ -274,6 +277,12 @@ public interface WebViewProvider {
     public int getRendererRequestedPriority();
 
     public boolean getRendererPriorityWaivedWhenNotVisible();
+
+    @SuppressWarnings("unused")
+    public default void setTextClassifier(@Nullable TextClassifier textClassifier) {}
+
+    @NonNull
+    public default TextClassifier getTextClassifier() { return TextClassifier.NO_OP; }
 
     //-------------------------------------------------------------------------
     // Provider internal methods
