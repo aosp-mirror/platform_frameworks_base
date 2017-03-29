@@ -93,6 +93,15 @@ public:
     static WARN_UNUSED_RESULT Canvas* create_recording_canvas(int width, int height,
             uirenderer::RenderNode* renderNode = nullptr);
 
+    enum class XformToSRGB {
+        // Transform any Bitmaps to the sRGB color space before drawing.
+        kImmediate,
+
+        // Draw the Bitmap as is.  This likely means that we are recording and that the
+        // transform can be handled at playback time.
+        kDefer,
+    };
+
     /**
      *  Create a new Canvas object which delegates to an SkCanvas.
      *
@@ -100,10 +109,12 @@ public:
      *      delegated to this object. This function will call ref() on the
      *      SkCanvas, and the returned Canvas will unref() it upon
      *      destruction.
+     *  @param xformToSRGB Indicates if bitmaps should be xformed to the sRGB
+     *      color space before drawing.
      *  @return new non-null Canvas Object.  The type of DisplayList produced by this canvas is
      *      determined based on  Properties::getRenderPipelineType().
      */
-    static Canvas* create_canvas(SkCanvas* skiaCanvas);
+    static Canvas* create_canvas(SkCanvas* skiaCanvas, XformToSRGB xformToSRGB);
 
     /**
      *  Provides a Skia SkCanvas interface that acts as a proxy to this Canvas.
