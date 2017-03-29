@@ -16,11 +16,22 @@
 
 package com.android.settingslib.drawer;
 
-import android.app.ActivityManager;
+import static com.google.common.truth.Truth.assertThat;
+
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.argThat;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
-import android.content.IContentProvider;
+import static org.mockito.Mockito.when;
+
+import android.app.ActivityManager;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.IContentProvider;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
@@ -40,33 +51,22 @@ import android.util.Pair;
 
 import com.android.settingslib.SuggestionParser;
 import com.android.settingslib.TestConfig;
-import com.android.settingslib.drawer.TileUtilsTest;
-import static org.mockito.Mockito.atLeastOnce;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.shadows.ShadowApplication;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-
-import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.argThat;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
-import org.mockito.ArgumentCaptor;
 
 
 @RunWith(RobolectricTestRunner.class)
@@ -179,7 +179,11 @@ public class TileUtilsTest {
                 false /* checkCategory */);
 
         assertThat(outTiles.size()).isEqualTo(1);
-        SuggestionParser parser = new SuggestionParser(mContext, null);
+        SuggestionParser parser = new SuggestionParser(
+                mContext,
+                null,
+                Collections.emptyList(),
+                "0,10");
         parser.filterSuggestions(outTiles, 0, false);
         assertThat(outTiles.size()).isEqualTo(0);
     }
