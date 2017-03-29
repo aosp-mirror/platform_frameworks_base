@@ -73,7 +73,9 @@ import android.net.ConnectivityThread;
 import android.net.EthernetManager;
 import android.net.IConnectivityManager;
 import android.net.IEthernetManager;
+import android.net.IIpSecService;
 import android.net.INetworkPolicyManager;
+import android.net.IpSecManager;
 import android.net.NetworkPolicyManager;
 import android.net.NetworkScoreManager;
 import android.net.nsd.INsdManager;
@@ -237,6 +239,15 @@ final class SystemServiceRegistry {
                 IBinder b = ServiceManager.getService(Context.CONNECTIVITY_SERVICE);
                 IConnectivityManager service = IConnectivityManager.Stub.asInterface(b);
                 return new ConnectivityManager(context, service);
+            }});
+
+        registerService(Context.IPSEC_SERVICE, IpSecManager.class,
+                new StaticServiceFetcher<IpSecManager>() {
+            @Override
+            public IpSecManager createService() {
+                IBinder b = ServiceManager.getService(Context.IPSEC_SERVICE);
+                IIpSecService service = IIpSecService.Stub.asInterface(b);
+                return new IpSecManager(service);
             }});
 
         registerService(Context.COUNTRY_DETECTOR, CountryDetector.class,
