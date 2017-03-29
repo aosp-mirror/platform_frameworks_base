@@ -398,9 +398,9 @@ public class DialogFragment extends Fragment
 
     /** @hide */
     @Override
-    public LayoutInflater onGetLayoutInflater(Bundle savedInstanceState) {
+    public LayoutInflater getLayoutInflater(Bundle savedInstanceState) {
         if (!mShowsDialog) {
-            return super.onGetLayoutInflater(savedInstanceState);
+            return super.getLayoutInflater(savedInstanceState);
         }
 
         mDialog = onCreateDialog(savedInstanceState);
