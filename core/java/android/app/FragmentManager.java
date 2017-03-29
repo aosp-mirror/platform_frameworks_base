@@ -2725,7 +2725,15 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
             for (int i = 0; i < count; i++) {
                 Fragment f = nonConfigFragments.get(i);
                 if (DEBUG) Log.v(TAG, "restoreAllState: re-attaching retained " + f);
-                FragmentState fs = fms.mActive[f.mIndex];
+                int index = 0; // index of f in fms.mActive
+                while (index < fms.mActive.length && fms.mActive[index].mIndex != f.mIndex) {
+                    index++;
+                }
+                if (index == fms.mActive.length) {
+                    throwException(new IllegalStateException("Could not find active fragment "
+                            + "with index " + f.mIndex));
+                }
+                FragmentState fs = fms.mActive[index];
                 fs.mInstance = f;
                 f.mSavedViewState = null;
                 f.mBackStackNesting = 0;
