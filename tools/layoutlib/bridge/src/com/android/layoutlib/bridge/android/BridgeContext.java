@@ -648,6 +648,10 @@ public class BridgeContext extends Context {
             return null;
         }
 
+        if (AUDIO_SERVICE.equals(service)) {
+            return null;
+        }
+
         throw new UnsupportedOperationException("Unsupported Service: " + service);
     }
 
