@@ -75,9 +75,6 @@ public final class PublishConfig implements Parcelable {
     public final int mPublishType;
 
     /** @hide */
-    public final int mPublishCount;
-
-    /** @hide */
     public final int mTtlSec;
 
     /** @hide */
@@ -85,12 +82,11 @@ public final class PublishConfig implements Parcelable {
 
     /** @hide */
     public PublishConfig(byte[] serviceName, byte[] serviceSpecificInfo, byte[] matchFilter,
-            int publishType, int publichCount, int ttlSec, boolean enableTerminateNotification) {
+            int publishType, int ttlSec, boolean enableTerminateNotification) {
         mServiceName = serviceName;
         mServiceSpecificInfo = serviceSpecificInfo;
         mMatchFilter = matchFilter;
         mPublishType = publishType;
-        mPublishCount = publichCount;
         mTtlSec = ttlSec;
         mEnableTerminateNotification = enableTerminateNotification;
     }
@@ -100,8 +96,8 @@ public final class PublishConfig implements Parcelable {
         return "PublishConfig [mServiceName='" + mServiceName + ", mServiceSpecificInfo='" + (
                 (mServiceSpecificInfo == null) ? "null" : HexEncoding.encode(mServiceSpecificInfo))
                 + ", mMatchFilter=" + (new TlvBufferUtils.TlvIterable(0, 1,
-                mMatchFilter)).toString() + ", mPublishType=" + mPublishType + ", mPublishCount="
-                + mPublishCount + ", mTtlSec=" + mTtlSec + ", mEnableTerminateNotification="
+                mMatchFilter)).toString() + ", mPublishType=" + mPublishType
+                + ", mTtlSec=" + mTtlSec + ", mEnableTerminateNotification="
                 + mEnableTerminateNotification + "]";
     }
 
@@ -116,7 +112,6 @@ public final class PublishConfig implements Parcelable {
         dest.writeByteArray(mServiceSpecificInfo);
         dest.writeByteArray(mMatchFilter);
         dest.writeInt(mPublishType);
-        dest.writeInt(mPublishCount);
         dest.writeInt(mTtlSec);
         dest.writeInt(mEnableTerminateNotification ? 1 : 0);
     }
@@ -133,11 +128,10 @@ public final class PublishConfig implements Parcelable {
             byte[] ssi = in.createByteArray();
             byte[] matchFilter = in.createByteArray();
             int publishType = in.readInt();
-            int publishCount = in.readInt();
             int ttlSec = in.readInt();
             boolean enableTerminateNotification = in.readInt() != 0;
 
-            return new PublishConfig(serviceName, ssi, matchFilter, publishType, publishCount,
+            return new PublishConfig(serviceName, ssi, matchFilter, publishType,
                     ttlSec, enableTerminateNotification);
         }
     };
@@ -156,7 +150,7 @@ public final class PublishConfig implements Parcelable {
 
         return Arrays.equals(mServiceName, lhs.mServiceName) && Arrays.equals(mServiceSpecificInfo,
                 lhs.mServiceSpecificInfo) && Arrays.equals(mMatchFilter, lhs.mMatchFilter)
-                && mPublishType == lhs.mPublishType && mPublishCount == lhs.mPublishCount
+                && mPublishType == lhs.mPublishType
                 && mTtlSec == lhs.mTtlSec
                 && mEnableTerminateNotification == lhs.mEnableTerminateNotification;
     }
@@ -169,7 +163,6 @@ public final class PublishConfig implements Parcelable {
         result = 31 * result + Arrays.hashCode(mServiceSpecificInfo);
         result = 31 * result + Arrays.hashCode(mMatchFilter);
         result = 31 * result + mPublishType;
-        result = 31 * result + mPublishCount;
         result = 31 * result + mTtlSec;
         result = 31 * result + (mEnableTerminateNotification ? 1 : 0);
 
@@ -192,9 +185,6 @@ public final class PublishConfig implements Parcelable {
         }
         if (mPublishType < PUBLISH_TYPE_UNSOLICITED || mPublishType > PUBLISH_TYPE_SOLICITED) {
             throw new IllegalArgumentException("Invalid publishType - " + mPublishType);
-        }
-        if (mPublishCount < 0) {
-            throw new IllegalArgumentException("Invalid publishCount - must be non-negative");
         }
         if (mTtlSec < 0) {
             throw new IllegalArgumentException("Invalid ttlSec - must be non-negative");
@@ -229,7 +219,6 @@ public final class PublishConfig implements Parcelable {
         private byte[] mServiceSpecificInfo;
         private byte[] mMatchFilter;
         private int mPublishType = PUBLISH_TYPE_UNSOLICITED;
-        private int mPublishCount = 0;
         private int mTtlSec = 0;
         private boolean mEnableTerminateNotification = true;
 
@@ -317,30 +306,6 @@ public final class PublishConfig implements Parcelable {
         }
 
         /**
-         * Sets the number of times an unsolicited (configured using
-         * {@link PublishConfig.Builder#setPublishType(int)}) publish session
-         * will be broadcast. When the count is reached an event will be
-         * generated for {@link DiscoverySessionCallback#onSessionTerminated()}
-         * [unless {@link #setTerminateNotificationEnabled(boolean)} disables the callback].
-         * <p>
-         *     Optional. 0 by default - indicating the session doesn't terminate on its own.
-         *     Session will be terminated when {@link DiscoverySession#destroy()} is
-         *     called.
-         *
-         * @param publishCount Number of publish packets to broadcast.
-         *
-         * @return The builder to facilitate chaining
-         *         {@code builder.setXXX(..).setXXX(..)}.
-         */
-        public Builder setPublishCount(int publishCount) {
-            if (publishCount < 0) {
-                throw new IllegalArgumentException("Invalid publishCount - must be non-negative");
-            }
-            mPublishCount = publishCount;
-            return this;
-        }
-
-        /**
          * Sets the time interval (in seconds) an unsolicited (
          * {@link PublishConfig.Builder#setPublishType(int)}) publish session
          * will be alive - broadcasting a packet. When the TTL is reached
@@ -387,7 +352,7 @@ public final class PublishConfig implements Parcelable {
          */
         public PublishConfig build() {
             return new PublishConfig(mServiceName, mServiceSpecificInfo, mMatchFilter, mPublishType,
-                    mPublishCount, mTtlSec, mEnableTerminateNotification);
+                    mTtlSec, mEnableTerminateNotification);
         }
     }
 }
