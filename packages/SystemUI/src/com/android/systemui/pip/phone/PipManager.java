@@ -172,7 +172,8 @@ public class PipManager implements BasePipManager {
                 mInputConsumerController);
         mTouchHandler = new PipTouchHandler(context, mActivityManager, mMenuController,
                 mInputConsumerController);
-        mNotificationController = new PipNotificationController(context, mActivityManager);
+        mNotificationController = new PipNotificationController(context, mActivityManager,
+                mTouchHandler.getMotionHelper());
     }
 
     /**
