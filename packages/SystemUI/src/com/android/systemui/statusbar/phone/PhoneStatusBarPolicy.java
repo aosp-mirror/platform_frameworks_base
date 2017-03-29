@@ -127,7 +127,6 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
     private boolean mVolumeVisible;
     private boolean mCurrentUserSetup;
 
-    private boolean mManagedProfileFocused = false;
     private boolean mManagedProfileIconVisible = false;
     private boolean mManagedProfileInQuietMode = false;
 
@@ -439,45 +438,30 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
         }
     }
 
-    private void profileChanged(int userId) {
-        UserInfo user = null;
-        if (userId == UserHandle.USER_CURRENT) {
-            try {
-                user = ActivityManager.getService().getCurrentUser();
-            } catch (RemoteException e) {
-                // Ignore
-            }
-        } else {
-            user = mUserManager.getUserInfo(userId);
-        }
-
-        mManagedProfileFocused = user != null && user.isManagedProfile();
-        if (DEBUG) Log.v(TAG, "profileChanged: mManagedProfileFocused: " + mManagedProfileFocused);
-        // Actually update the icon later when transition starts.
-    }
-
     private void updateManagedProfile() {
-        if (DEBUG) {
-            Log.v(TAG, "updateManagedProfile: mManagedProfileFocused: "
-                    + mManagedProfileFocused);
-        }
-        final boolean showIcon;
-        if (mManagedProfileFocused && !mKeyguardMonitor.isShowing()) {
-            showIcon = true;
-            mIconController.setIcon(mSlotManagedProfile,
-                    R.drawable.stat_sys_managed_profile_status,
-                    mContext.getString(R.string.accessibility_managed_profile));
-        } else if (mManagedProfileInQuietMode) {
-            showIcon = true;
-            mIconController.setIcon(mSlotManagedProfile,
-                    R.drawable.stat_sys_managed_profile_status_off,
-                    mContext.getString(R.string.accessibility_managed_profile));
-        } else {
-            showIcon = false;
-        }
-        if (mManagedProfileIconVisible != showIcon) {
-            mIconController.setIconVisibility(mSlotManagedProfile, showIcon);
-            mManagedProfileIconVisible = showIcon;
+        try {
+            final boolean showIcon;
+            final int userId = ActivityManager.getService().getLastResumedActivityUserId();
+            if (mUserManager.isManagedProfile(userId) && !mKeyguardMonitor.isShowing()) {
+                showIcon = true;
+                mIconController.setIcon(mSlotManagedProfile,
+                        R.drawable.stat_sys_managed_profile_status,
+                        mContext.getString(R.string.accessibility_managed_profile));
+            } else if (mManagedProfileInQuietMode) {
+                showIcon = true;
+                mIconController.setIcon(mSlotManagedProfile,
+                        R.drawable.stat_sys_managed_profile_status_off,
+                        mContext.getString(R.string.accessibility_managed_profile));
+            } else {
+                showIcon = false;
+            }
+            if (mManagedProfileIconVisible != showIcon) {
+                mIconController.setIconVisibility(mSlotManagedProfile, showIcon);
+                mManagedProfileIconVisible = showIcon;
+            }
+        } catch (RemoteException ex) {
+            Log.w(TAG, "updateManagedProfile: ", ex);
+            // ignore
         }
     }
 
@@ -556,35 +540,16 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
             new SynchronousUserSwitchObserver() {
                 @Override
                 public void onUserSwitching(int newUserId) throws RemoteException {
-                    mHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            mUserInfoController.reloadUserInfo();
-                        }
-                    });
+                    mHandler.post(() -> mUserInfoController.reloadUserInfo());
                 }
 
                 @Override
                 public void onUserSwitchComplete(int newUserId) throws RemoteException {
-                    mHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            updateAlarm();
-                            profileChanged(newUserId);
-                            updateQuietState();
-                            updateManagedProfile();
-                            updateForegroundInstantApps();
-                        }
-                    });
-                }
-
-                @Override
-                public void onForegroundProfileSwitch(int newProfileId) {
-                    mHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            profileChanged(newProfileId);
-                        }
+                    mHandler.post(() -> {
+                        updateAlarm();
+                        updateQuietState();
+                        updateManagedProfile();
+                        updateForegroundInstantApps();
                     });
                 }
             };
