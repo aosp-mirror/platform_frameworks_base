@@ -629,6 +629,11 @@ interface IActivityManager {
      */
     void setDisablePreviewScreenshots(IBinder token, boolean disable);
 
+    /**
+     * Return the user id of last resumed activity.
+     */
+    int getLastResumedActivityUserId();
+
     // WARNING: when these transactions are updated, check if they are any callers on the native
     // side. If so, make sure they are using the correct transaction ids and arguments.
     // If a transaction which will also be used on the native side is being inserted, add it
