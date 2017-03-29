@@ -1321,9 +1321,7 @@ public final class TvContract {
          *
          * <p>Type: INTEGER (boolean)
          * @see Channels#COLUMN_TRANSIENT
-         * @hide
          */
-        @SystemApi
         public static final String COLUMN_TRANSIENT = "transient";
 
         /**
@@ -2164,10 +2162,9 @@ public final class TvContract {
          * specified, this value is set to 0 (not transient) by default.
          *
          * <p>Type: INTEGER (boolean)
-         * @see Programs#COLUMN_TRANSIENT
-         * @hide
+         * @see PreviewPrograms#COLUMN_TRANSIENT
+         * @see WatchNextPrograms#COLUMN_TRANSIENT
          */
-        @SystemApi
         public static final String COLUMN_TRANSIENT = "transient";
 
         /**
