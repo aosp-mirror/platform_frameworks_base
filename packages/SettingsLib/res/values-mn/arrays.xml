@@ -58,12 +58,16 @@
     <item msgid="3878793616631049349">"HDCP шалгахыг зөвхөн DRM контентэд ашиглах"</item>
     <item msgid="45075631231212732">"Байнга HDCP шалгахыг ашиглах"</item>
   </string-array>
-    <!-- no translation found for bluetooth_avrcp_versions:0 (5347678900838034763) -->
-    <!-- no translation found for bluetooth_avrcp_versions:1 (2089555299377409443) -->
-    <!-- no translation found for bluetooth_avrcp_versions:2 (2895327394279434278) -->
-    <!-- no translation found for bluetooth_avrcp_version_values:0 (2838624067805073303) -->
-    <!-- no translation found for bluetooth_avrcp_version_values:1 (1913619118958233129) -->
-    <!-- no translation found for bluetooth_avrcp_version_values:2 (7142710449249088270) -->
+  <string-array name="bluetooth_avrcp_versions">
+    <item msgid="5347678900838034763">"AVRCP 1.4 (Өгөгдмөл)"</item>
+    <item msgid="2089555299377409443">"AVRCP 1.5"</item>
+    <item msgid="2895327394279434278">"AVRCP 1.6"</item>
+  </string-array>
+  <string-array name="bluetooth_avrcp_version_values">
+    <item msgid="2838624067805073303">"avrcp14"</item>
+    <item msgid="1913619118958233129">"avrcp15"</item>
+    <item msgid="7142710449249088270">"avrcp16"</item>
+  </string-array>
   <string-array name="bluetooth_a2dp_codec_titles">
     <item msgid="7065842274271279580">"Системийн сонголтыг ашиглах (Өгөгдмөл)"</item>
     <item msgid="7539690996561263909">"SBC"</item>
@@ -116,16 +120,8 @@
     <item msgid="8900559293912978337">"Моно"</item>
     <item msgid="8883739882299884241">"Стерео"</item>
   </string-array>
-  <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_titles">
-    <item msgid="7158319962230727476">"Аудио чанарт тааруулсан (990кб/цаг/909кб/цаг)"</item>
-    <item msgid="2921767058740704969">"Аудио, холболтын чанарыг тэнцүүлсэн (660кб/цаг/606кб/цаг)"</item>
-    <item msgid="8860982705384396512">"Холболтын чанарт тааруулсан (330кб/цаг/303кб/цаг)"</item>
-  </string-array>
-  <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_summaries">
-    <item msgid="6398189564246596868">"Аудио чанарт тааруулсан"</item>
-    <item msgid="4327143584633311908">"Аудио, холболтын чанарыг тэнцүүлсэн"</item>
-    <item msgid="4681409244565426925">"Холболтын чанарт тааруулсан"</item>
-  </string-array>
+    <!-- no translation found for bluetooth_a2dp_codec_ldac_playback_quality_titles:3 (4414060457677684127) -->
+    <!-- no translation found for bluetooth_a2dp_codec_ldac_playback_quality_summaries:3 (364670732877872677) -->
   <string-array name="select_logd_size_titles">
     <item msgid="8665206199209698501">"Идэвхгүй"</item>
     <item msgid="1593289376502312923">"64000"</item>
