@@ -40,6 +40,14 @@ TEST(ResourceTableTest, FailToAddResourceWithBadName) {
       test::GetDiagnostics()));
 }
 
+TEST(ResourceTableTest, AddResourceWithWeirdNameWhenAddingMangledResources) {
+  ResourceTable table;
+
+  EXPECT_TRUE(table.AddResourceAllowMangled(
+      test::ParseNameOrDie("android:id/heythere       "), ConfigDescription{}, "",
+      test::ValueBuilder<Id>().SetSource("test.xml", 21u).Build(), test::GetDiagnostics()));
+}
+
 TEST(ResourceTableTest, AddOneResource) {
   ResourceTable table;
 
@@ -130,7 +138,7 @@ TEST(ResourceTableTest, ProductVaryingValues) {
       table.FindResource(test::ParseNameOrDie("android:string/foo"));
   AAPT_ASSERT_TRUE(sr);
   std::vector<ResourceConfigValue*> values =
-      sr.value().entry->findAllValues(test::ParseConfigOrDie("land"));
+      sr.value().entry->FindAllValues(test::ParseConfigOrDie("land"));
   ASSERT_EQ(2u, values.size());
   EXPECT_EQ(std::string("phone"), values[0]->product);
   EXPECT_EQ(std::string("tablet"), values[1]->product);
