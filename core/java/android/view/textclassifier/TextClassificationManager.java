@@ -44,8 +44,6 @@ public final class TextClassificationManager {
     private final Object mLangIdLock = new Object();
 
     private final Context mContext;
-    // TODO: Implement a way to close the file descriptors.
-    private ParcelFileDescriptor mSmartSelectionFd;
     private ParcelFileDescriptor mLangIdFd;
     private TextClassifier mDefault;
     private LangId mLangId;
@@ -61,15 +59,7 @@ public final class TextClassificationManager {
     public TextClassifier getDefaultTextClassifier() {
         synchronized (mTextClassifierLock) {
             if (mDefault == null) {
-                try {
-                    mSmartSelectionFd = ParcelFileDescriptor.open(
-                            new File("/etc/textclassifier/textclassifier.smartselection.en.model"),
-                            ParcelFileDescriptor.MODE_READ_ONLY);
-                    mDefault = new TextClassifierImpl(mContext, mSmartSelectionFd);
-                } catch (FileNotFoundException e) {
-                    Log.e(LOG_TAG, "Error accessing 'text classifier selection' model file.", e);
-                    mDefault = TextClassifier.NO_OP;
-                }
+                mDefault = new TextClassifierImpl(mContext);
             }
             return mDefault;
         }
