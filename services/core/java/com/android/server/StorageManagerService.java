@@ -98,6 +98,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IMediaContainerService;
 import com.android.internal.os.AppFuseMount;
 import com.android.internal.os.FuseAppLoop;
+import com.android.internal.os.FuseUnavailableMountException;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.os.Zygote;
 import com.android.internal.util.ArrayUtils;
@@ -3007,32 +3008,36 @@ class StorageManagerService extends IStorageManager.Stub
         }
     }
 
-    private ParcelFileDescriptor mountAppFuse(int uid, int mountId)
-            throws NativeDaemonConnectorException {
-        final NativeDaemonEvent event = StorageManagerService.this.mConnector.execute(
-                "appfuse", "mount", uid, Process.myPid(), mountId);
-        if (event.getFileDescriptors() == null ||
-            event.getFileDescriptors().length == 0) {
-            throw new NativeDaemonConnectorException("Cannot obtain device FD");
-        }
-        return new ParcelFileDescriptor(event.getFileDescriptors()[0]);
-    }
-
     class AppFuseMountScope extends AppFuseBridge.MountScope {
-        public AppFuseMountScope(int uid, int pid, int mountId)
-                throws NativeDaemonConnectorException {
-            super(uid, pid, mountId, mountAppFuse(uid, mountId));
+        boolean opened = false;
+
+        public AppFuseMountScope(int uid, int pid, int mountId) {
+            super(uid, pid, mountId);
+        }
+
+        @Override
+        public ParcelFileDescriptor open() throws NativeDaemonConnectorException {
+            final NativeDaemonEvent event = StorageManagerService.this.mConnector.execute(
+                    "appfuse", "mount", uid, Process.myPid(), mountId);
+            opened = true;
+            if (event.getFileDescriptors() == null ||
+                event.getFileDescriptors().length == 0) {
+                throw new NativeDaemonConnectorException("Cannot obtain device FD");
+            }
+            return new ParcelFileDescriptor(event.getFileDescriptors()[0]);
         }
 
         @Override
         public void close() throws Exception {
-            super.close();
-            mConnector.execute("appfuse", "unmount", uid, Process.myPid(), mountId);
+            if (opened) {
+                mConnector.execute("appfuse", "unmount", uid, Process.myPid(), mountId);
+                opened = false;
+            }
         }
     }
 
     @Override
-    public AppFuseMount mountProxyFileDescriptorBridge() throws RemoteException {
+    public @Nullable AppFuseMount mountProxyFileDescriptorBridge() {
         Slog.v(TAG, "mountProxyFileDescriptorBridge");
         final int uid = Binder.getCallingUid();
         final int pid = Binder.getCallingPid();
@@ -3049,12 +3054,12 @@ class StorageManagerService extends IStorageManager.Stub
                     final int name = mNextAppFuseName++;
                     try {
                         return new AppFuseMount(
-                            name,
-                            mAppFuseBridge.addBridge(new AppFuseMountScope(uid, pid, name)));
-                    } catch (AppFuseBridge.BridgeException e) {
+                            name, mAppFuseBridge.addBridge(new AppFuseMountScope(uid, pid, name)));
+                    } catch (FuseUnavailableMountException e) {
                         if (newlyCreated) {
                             // If newly created bridge fails, it's a real error.
-                            throw new RemoteException(e.getMessage());
+                            Slog.e(TAG, "", e);
+                            return null;
                         }
                         // It seems the thread of mAppFuseBridge has already been terminated.
                         mAppFuseBridge = null;
@@ -3067,19 +3072,21 @@ class StorageManagerService extends IStorageManager.Stub
     }
 
     @Override
-    public ParcelFileDescriptor openProxyFileDescriptor(int mountId, int fileId, int mode)
-            throws RemoteException {
-        Slog.v(TAG, "mountProxyFileDescriptorBridge");
+    public @Nullable ParcelFileDescriptor openProxyFileDescriptor(
+            int mountId, int fileId, int mode) {
+        Slog.v(TAG, "mountProxyFileDescriptor");
         final int pid = Binder.getCallingPid();
         try {
             synchronized (mAppFuseLock) {
                 if (mAppFuseBridge == null) {
-                    throw new RemoteException("Cannot find mount point");
+                    Slog.e(TAG, "FuseBridge has not been created");
+                    return null;
                 }
                 return mAppFuseBridge.openFile(pid, mountId, fileId, mode);
             }
-        } catch (FileNotFoundException | SecurityException | InterruptedException error) {
-            throw new RemoteException(error.getMessage());
+        } catch (FuseUnavailableMountException | InterruptedException error) {
+            Slog.v(TAG, "The mount point has already been invalid", error);
+            return null;
         }
     }
 

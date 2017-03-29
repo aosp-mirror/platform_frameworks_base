@@ -21,7 +21,9 @@ import android.system.ErrnoException;
 import android.system.Os;
 import android.util.SparseArray;
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.os.FuseUnavailableMountException;
 import com.android.internal.util.Preconditions;
+import com.android.server.NativeDaemonConnectorException;
 import libcore.io.IoUtils;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -54,17 +56,17 @@ public class AppFuseBridge implements Runnable {
     }
 
     public ParcelFileDescriptor addBridge(MountScope mountScope)
-            throws BridgeException {
+            throws FuseUnavailableMountException, NativeDaemonConnectorException {
         try {
             synchronized (this) {
                 Preconditions.checkArgument(mScopes.indexOfKey(mountScope.mountId) < 0);
                 if (mNativeLoop == 0) {
-                    throw new BridgeException("The thread has already been terminated");
+                    throw new FuseUnavailableMountException(mountScope.mountId);
                 }
                 final int fd = native_add_bridge(
-                        mNativeLoop, mountScope.mountId, mountScope.deviceFd.detachFd());
+                        mNativeLoop, mountScope.mountId, mountScope.open().detachFd());
                 if (fd == -1) {
-                    throw new BridgeException("Failed to invoke native_add_bridge");
+                    throw new FuseUnavailableMountException(mountScope.mountId);
                 }
                 final ParcelFileDescriptor result = ParcelFileDescriptor.adoptFd(fd);
                 mScopes.put(mountScope.mountId, mountScope);
@@ -86,12 +88,12 @@ public class AppFuseBridge implements Runnable {
     }
 
     public ParcelFileDescriptor openFile(int pid, int mountId, int fileId, int mode)
-            throws FileNotFoundException, SecurityException, InterruptedException {
+            throws FuseUnavailableMountException, InterruptedException {
         final MountScope scope;
         synchronized (this) {
             scope = mScopes.get(mountId);
             if (scope == null) {
-                throw new FileNotFoundException("Cannot find mount point");
+                throw new FuseUnavailableMountException(mountId);
             }
         }
         if (scope.pid != pid) {
@@ -99,17 +101,14 @@ public class AppFuseBridge implements Runnable {
         }
         final boolean result = scope.waitForMount();
         if (result == false) {
-            throw new FileNotFoundException("Mount failed");
+            throw new FuseUnavailableMountException(mountId);
         }
         try {
-            if (Os.stat(scope.mountPoint.getPath()).st_ino != 1) {
-                throw new FileNotFoundException("Could not find bridge mount point.");
-            }
-        } catch (ErrnoException e) {
-            throw new FileNotFoundException(
-                    "Failed to stat mount point: " + scope.mountPoint.getParent());
+            return ParcelFileDescriptor.open(
+                    new File(scope.mountPoint, String.valueOf(fileId)), mode);
+        } catch (FileNotFoundException error) {
+            throw new FuseUnavailableMountException(mountId);
         }
-        return ParcelFileDescriptor.open(new File(scope.mountPoint, String.valueOf(fileId)), mode);
     }
 
     // Used by com_android_server_storage_AppFuse.cpp.
@@ -130,20 +129,18 @@ public class AppFuseBridge implements Runnable {
         }
     }
 
-    public static class MountScope implements AutoCloseable {
+    public static abstract class MountScope implements AutoCloseable {
         public final int uid;
         public final int pid;
         public final int mountId;
-        public final ParcelFileDescriptor deviceFd;
         public final File mountPoint;
         private final CountDownLatch mMounted = new CountDownLatch(1);
         private boolean mMountResult = false;
 
-        public MountScope(int uid, int pid, int mountId, ParcelFileDescriptor deviceFd) {
+        public MountScope(int uid, int pid, int mountId) {
             this.uid = uid;
             this.pid = pid;
             this.mountId = mountId;
-            this.deviceFd = deviceFd;
             this.mountPoint = new File(String.format(APPFUSE_MOUNT_NAME_TEMPLATE,  uid, mountId));
         }
 
@@ -161,16 +158,7 @@ public class AppFuseBridge implements Runnable {
             return mMountResult;
         }
 
-        @Override
-        public void close() throws Exception {
-            deviceFd.close();
-        }
-    }
-
-    public static class BridgeException extends Exception {
-        public BridgeException(String message) {
-            super(message);
-        }
+        public abstract ParcelFileDescriptor open() throws NativeDaemonConnectorException;
     }
 
     private native long native_new();
