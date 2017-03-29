@@ -940,8 +940,8 @@ public class WifiEnterpriseConfig implements Parcelable {
     }
 
     /**
-     * Set realm for passpoint credential; realm identifies a set of networks where your
-     * passpoint credential can be used
+     * Set realm for Passpoint credential; realm identifies a set of networks where your
+     * Passpoint credential can be used
      * @param realm the realm
      */
     public void setRealm(String realm) {
@@ -949,7 +949,7 @@ public class WifiEnterpriseConfig implements Parcelable {
     }
 
     /**
-     * Get realm for passpoint credential; see {@link #setRealm(String)} for more information
+     * Get realm for Passpoint credential; see {@link #setRealm(String)} for more information
      * @return the realm
      */
     public String getRealm() {
@@ -957,7 +957,7 @@ public class WifiEnterpriseConfig implements Parcelable {
     }
 
     /**
-     * Set plmn (Public Land Mobile Network) of the provider of passpoint credential
+     * Set plmn (Public Land Mobile Network) of the provider of Passpoint credential
      * @param plmn the plmn value derived from mcc (mobile country code) & mnc (mobile network code)
      */
     public void setPlmn(String plmn) {
@@ -965,7 +965,7 @@ public class WifiEnterpriseConfig implements Parcelable {
     }
 
     /**
-     * Get plmn (Public Land Mobile Network) for passpoint credential; see {@link #setPlmn
+     * Get plmn (Public Land Mobile Network) for Passpoint credential; see {@link #setPlmn
      * (String)} for more information
      * @return the plmn
      */
