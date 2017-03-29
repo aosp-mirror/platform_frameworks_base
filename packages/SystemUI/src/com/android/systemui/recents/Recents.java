@@ -474,7 +474,7 @@ public class Recents extends SystemUI
                 return true;
             } else {
                 EventBus.getDefault().send(new ShowUserToastEvent(
-                        R.string.recents_incompatible_app_message, Toast.LENGTH_SHORT));
+                        R.string.dock_non_resizeble_failed_to_dock_text, Toast.LENGTH_SHORT));
                 return false;
             }
         } else {
