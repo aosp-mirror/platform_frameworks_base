@@ -29,8 +29,8 @@ public abstract class PluginFragment extends Fragment implements Plugin {
     }
 
     @Override
-    public LayoutInflater getLayoutInflater(Bundle savedInstanceState) {
-        return super.getLayoutInflater(savedInstanceState).cloneInContext(getContext());
+    public LayoutInflater onGetLayoutInflater(Bundle savedInstanceState) {
+        return super.onGetLayoutInflater(savedInstanceState).cloneInContext(getContext());
     }
 
     @Override
