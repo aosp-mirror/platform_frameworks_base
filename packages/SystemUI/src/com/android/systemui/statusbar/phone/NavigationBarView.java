@@ -417,7 +417,10 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
             getHomeButton().setImageDrawable(mHomeDefaultIcon);
         }
 
-        final boolean showImeButton = ((hints & StatusBarManager.NAVIGATION_HINT_IME_SHOWN) != 0);
+        // The Accessibility button always overrides the appearance of the IME switcher
+        final boolean showImeButton =
+                !mShowAccessibilityButton && ((hints & StatusBarManager.NAVIGATION_HINT_IME_SHOWN)
+                        != 0);
         getImeSwitchButton().setVisibility(showImeButton ? View.VISIBLE : View.INVISIBLE);
         getImeSwitchButton().setImageDrawable(mImeIcon);
 
@@ -545,8 +548,9 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         mShowAccessibilityButton = visible;
         mLongClickableAccessibilityButton = longClickable;
         if (visible) {
-            // Accessibility button overrides Menu button.
+            // Accessibility button overrides Menu and IME switcher buttons.
             setMenuVisibility(false, true);
+            getImeSwitchButton().setVisibility(View.INVISIBLE);
         }
 
         getAccessibilityButton().setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
