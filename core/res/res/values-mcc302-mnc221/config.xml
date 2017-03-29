@@ -27,9 +27,9 @@
          Or string format of ApnSettingV3.
          note that empty fields can be ommitted: "name,apn,,,,,,,,,310,260,,DUN" -->
     <string-array translatable="false" name="config_tether_apndata">
-        <item>[ApnSettingV3]TELUS ISP,isp.telus.com,,,,,,,,,302,221,,DUN,,,true,0,,,,,,,gid,54</item>
-        <item>[ApnSettingV3]Tethered PC Mobile,isp.mb.com,,,,,,,,,302,221,,DUN,,,true,0,,,,,,,gid,50</item>
-        <item>[ApnSettingV3]Koodo,sp.koodo.com,,,,,,,,,302,221,,DUN,,,true,0,,,,,,,gid,4B</item>
+        <item>[ApnSettingV3]TELUS ISP,isp.telus.com,,,,,,,,,302,221,,DUN,,,true,0,,,,,,,gid,5455</item>
+        <item>[ApnSettingV3]Tethered PC Mobile,isp.mb.com,,,,,,,,,302,221,,DUN,,,true,0,,,,,,,gid,5043</item>
+        <item>[ApnSettingV3]Koodo,sp.koodo.com,,,,,,,,,302,221,,DUN,,,true,0,,,,,,,gid,4B4F</item>
     </string-array>
 
     <!-- Values for GPS configuration (Telus) -->
