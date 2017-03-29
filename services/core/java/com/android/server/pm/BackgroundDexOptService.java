@@ -49,8 +49,6 @@ public class BackgroundDexOptService extends JobService {
 
     private static final boolean DEBUG = false;
 
-    private static final long RETRY_LATENCY = 4 * AlarmManager.INTERVAL_HOUR;
-
     private static final int JOB_IDLE_OPTIMIZE = 800;
     private static final int JOB_POST_BOOT_UPDATE = 801;
 
@@ -292,8 +290,8 @@ public class BackgroundDexOptService extends JobService {
                             PackageManagerService.REASON_BACKGROUND_DEXOPT,
                             /* force */ false)
                     : pm.performDexOptSecondary(pkg,
-                            PackageManagerServiceCompilerMapping.getFullCompilerFilter(),
-                            /* force */ true);
+                            PackageManagerService.REASON_BACKGROUND_DEXOPT,
+                            /* force */ false);
             if (success) {
                 // Dexopt succeeded, remove package from the list of failing ones.
                 synchronized (failedPackageNames) {
