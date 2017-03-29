@@ -307,7 +307,7 @@ public final class IpSecTransform implements AutoCloseable {
          * <p>Care should be chosen when selecting an SPI to ensure that is is as unique as
          * possible. Random number generation is a reasonable approach to selecting an SPI. For
          * outbound SPIs, they must be reserved by calling {@link
-         * IpSecManager#reserveSecurityParameterIndex(InetAddress, int)}. Otherwise, Transforms will
+         * IpSecManager#reserveSecurityParameterIndex(int, InetAddress, int)}. Otherwise, Transforms will
          * fail to build.
          *
          * <p>Unless an SPI is set for a given direction, traffic in that direction will be
@@ -329,7 +329,7 @@ public final class IpSecTransform implements AutoCloseable {
          * <p>Care should be chosen when selecting an SPI to ensure that is is as unique as
          * possible. Random number generation is a reasonable approach to selecting an SPI. For
          * outbound SPIs, they must be reserved by calling {@link
-         * IpSecManager#reserveSecurityParameterIndex(InetAddress, int)}. Otherwise, Transforms will
+         * IpSecManager#reserveSecurityParameterIndex(int, InetAddress, int)}. Otherwise, Transforms will
          * fail to activate.
          *
          * <p>Unless an SPI is set for a given direction, traffic in that direction will be
