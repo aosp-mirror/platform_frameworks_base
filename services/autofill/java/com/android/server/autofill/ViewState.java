@@ -17,9 +17,9 @@
 package com.android.server.autofill;
 
 import android.annotation.Nullable;
-import android.content.Intent;
 import android.graphics.Rect;
 import android.service.autofill.FillResponse;
+import android.util.DebugUtils;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillValue;
 
@@ -40,47 +40,84 @@ final class ViewState {
                 @Nullable AutofillValue value);
     }
 
-    final AutofillId mId;
+    // NOTE: state constants must be public because of flagstoString().
+    public static final int STATE_UNKNOWN = 0x00;
+    /** Initial state. */
+    public static final int STATE_INITIAL = 0x01;
+    /** View id is present in a dataset returned by the service. */
+    public static final int STATE_FILLABLE = 0x02;
+    /** View was autofilled after user selected a dataset. */
+    public static final int STATE_AUTOFILLED = 0x04;
+    /** View value was changed, but not by the service. */
+    public static final int STATE_CHANGED = 0x08;
+    /** Set only in the View that started a session . */
+    public static final int STATE_STARTED_SESSION = 0x10;
+
+    public final AutofillId id;
     private final Listener mListener;
-    // TODO(b/33197203): would not need a reference to response and session if it was an inner
-    // class of Session...
     private final Session mSession;
     private FillResponse mResponse;
-    private Intent mAuthIntent;
 
-    // TODO(b/33197203): encapsulate access so it's not called by UI
-    AutofillValue mAutofillValue;
+    private AutofillValue mCurrentValue;
+    private Rect mVirtualBounds;
 
-    // TODO(b/33197203): encapsulate access so it's not called by UI
-    // Bounds if a virtual view, null otherwise
-    Rect mVirtualBounds;
+    private int mState;
 
-    boolean mValueUpdated;
-
-    ViewState(Session session, AutofillId id, Listener listener) {
+    ViewState(Session session, AutofillId id, Listener listener, int state) {
         mSession = session;
-        mId = id;
+        this.id = id;
         mListener = listener;
+        mState = state;
     }
 
     /**
-     * Response should only be set once.
+     * Gets the boundaries of the virtual view, or {@code null} if the the view is not virtual.
      */
+    @Nullable
+    Rect getVirtualBounds() {
+        return mVirtualBounds;
+    }
+
+    /**
+     * Gets the current value of the view.
+     */
+    @Nullable
+    AutofillValue getCurrentValue() {
+        return mCurrentValue;
+    }
+
     void setResponse(FillResponse response) {
         mResponse = response;
-        maybeCallOnFillReady();
     }
 
-    /**
-     * Used when a {@link FillResponse} requires authentication to be unlocked.
-     */
-    void setResponse(FillResponse response, Intent authIntent) {
-        mAuthIntent = authIntent;
-        setResponse(response);
+    FillResponse getResponse() {
+        return mResponse;
     }
 
     CharSequence getServiceName() {
         return mSession.getServiceName();
+    }
+
+    boolean isChanged() {
+        return (mState & STATE_CHANGED) != 0;
+    }
+
+    int getState() {
+        return mState;
+    }
+
+    String getStateAsString() {
+        return DebugUtils.flagsToString(ViewState.class, "STATE_", mState);
+    }
+
+    void setCurrentValue(AutofillValue value) {
+        mCurrentValue = value;
+    }
+
+    void setState(int state) {
+        // TODO(b/33197203 , b/35707731): currently it's always setting one state, but once it
+        // supports partitioning it will need to 'or' some of them..
+        mState = state;
     }
 
     // TODO(b/33197203): need to refactor / rename / document this method to make it clear that
@@ -88,7 +125,7 @@ final class ViewState {
     // directly sets mAutoFilLValue to use encapsulation.
     void update(@Nullable AutofillValue autofillValue, @Nullable Rect virtualBounds) {
         if (autofillValue != null) {
-            mAutofillValue = autofillValue;
+            mCurrentValue = autofillValue;
         }
         if (virtualBounds != null) {
             mVirtualBounds = virtualBounds;
@@ -103,23 +140,31 @@ final class ViewState {
      * fill UI is ready to be displayed (i.e. when response and bounds are set).
      */
     void maybeCallOnFillReady() {
-        if (mResponse != null && (mResponse.getAuthentication() != null
-                || mResponse.getDatasets() != null)) {
-            mListener.onFillReady(mResponse, mId, mAutofillValue);
+        // First try the current response associated with this View.
+        if (mResponse != null) {
+            if (mResponse.getDatasets() != null) {
+                mListener.onFillReady(mResponse, this.id, mCurrentValue);
+            }
+            return;
+        }
+        // Then checks if the session has a response waiting authentication; if so, uses it instead.
+        final FillResponse currentResponse = mSession.getCurrentResponse();
+        if (currentResponse.getAuthentication() != null) {
+            mListener.onFillReady(currentResponse, this.id, mCurrentValue);
         }
     }
 
     @Override
     public String toString() {
-        return "ViewState: [id=" + mId + ", value=" + mAutofillValue + ", bounds=" + mVirtualBounds
-                + ", updated = " + mValueUpdated + "]";
+        return "ViewState: [id=" + id + ", currentValue=" + mCurrentValue
+                + ", bounds=" + mVirtualBounds + ", state=" + getStateAsString() +"]";
     }
 
     void dump(String prefix, PrintWriter pw) {
-        pw.print(prefix); pw.print("id:" ); pw.println(mId);
-        pw.print(prefix); pw.print("value:" ); pw.println(mAutofillValue);
-        pw.print(prefix); pw.print("updated:" ); pw.println(mValueUpdated);
+        pw.print(prefix); pw.print("id:" ); pw.println(this.id);
+        pw.print(prefix); pw.print("state:" ); pw.println(getStateAsString());
+        pw.print(prefix); pw.print("has response:" ); pw.println(mResponse != null);
+        pw.print(prefix); pw.print("currentValue:" ); pw.println(mCurrentValue);
         pw.print(prefix); pw.print("virtualBounds:" ); pw.println(mVirtualBounds);
-        pw.print(prefix); pw.print("authIntent:" ); pw.println(mAuthIntent);
     }
 }
