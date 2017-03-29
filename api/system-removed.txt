@@ -374,6 +374,14 @@ package android.view {
 
 }
 
+package android.view.textclassifier {
+
+  public final class TextClassificationManager {
+    method public android.view.textclassifier.TextClassifier getDefaultTextClassifier();
+  }
+
+}
+
 package android.webkit {
 
   public class WebViewClient {

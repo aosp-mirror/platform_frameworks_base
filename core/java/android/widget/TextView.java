@@ -10769,7 +10769,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             TextClassificationManager tcm =
                     mContext.getSystemService(TextClassificationManager.class);
             if (tcm != null) {
-                mTextClassifier = tcm.getDefaultTextClassifier();
+                mTextClassifier = tcm.getTextClassifier();
             } else {
                 mTextClassifier = TextClassifier.NO_OP;
             }
