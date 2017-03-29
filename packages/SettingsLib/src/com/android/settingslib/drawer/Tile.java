@@ -23,6 +23,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.UserHandle;
 import android.text.TextUtils;
+import android.widget.RemoteViews;
 
 import java.util.ArrayList;
 
@@ -84,6 +85,11 @@ public class Tile implements Parcelable {
      */
     public String key;
 
+    /**
+     * Optional remote view which will be displayed instead of the regular title-summary item.
+     */
+    public RemoteViews remoteViews;
+
     public Tile() {
         // Empty
     }
@@ -119,6 +125,7 @@ public class Tile implements Parcelable {
         dest.writeInt(priority);
         dest.writeBundle(metaData);
         dest.writeString(key);
+        dest.writeParcelable(remoteViews, flags);
     }
 
     public void readFromParcel(Parcel in) {
@@ -139,6 +146,7 @@ public class Tile implements Parcelable {
         priority = in.readInt();
         metaData = in.readBundle();
         key = in.readString();
+        remoteViews = in.readParcelable(RemoteViews.class.getClassLoader());
     }
 
     Tile(Parcel in) {
