@@ -21,10 +21,11 @@ package android.net;
  *
  * Applications cannot instantiate this class by themselves, but can obtain instances of
  * subclasses of this class via other APIs.
- *
- * @hide
  */
 public abstract class NetworkSpecifier {
+    /** @hide */
+    public NetworkSpecifier() {}
+
     /**
      * Returns true if a request with this {@link NetworkSpecifier} is satisfied by a network
      * with the given NetworkSpecifier.
