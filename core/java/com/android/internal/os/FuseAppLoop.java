@@ -19,16 +19,16 @@ package com.android.internal.os;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.ProxyFileDescriptorCallback;
+import android.os.Handler;
 import android.os.ParcelFileDescriptor;
 import android.system.ErrnoException;
 import android.system.OsConstants;
 import android.util.Log;
 import android.util.SparseArray;
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
-
-import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ThreadFactory;
 
 public class FuseAppLoop {
@@ -42,13 +42,20 @@ public class FuseAppLoop {
             return new Thread(r, TAG);
         }
     };
+    private static final int FUSE_OK = 0;
 
     private final Object mLock = new Object();
     private final int mMountPointId;
     private final Thread mThread;
+    private final Handler mDefaultHandler;
+
+    private static final int CMD_FSYNC = 1;
 
     @GuardedBy("mLock")
     private final SparseArray<CallbackEntry> mCallbackMap = new SparseArray<>();
+
+    @GuardedBy("mLock")
+    private final BytesMap mBytesMap = new BytesMap();
 
     /**
      * Sequential number can be used as file name and inode in AppFuse.
@@ -57,38 +64,40 @@ public class FuseAppLoop {
     @GuardedBy("mLock")
     private int mNextInode = MIN_INODE;
 
-    private FuseAppLoop(
+    @GuardedBy("mLock")
+    private long mInstance;
+
+    public FuseAppLoop(
             int mountPointId, @NonNull ParcelFileDescriptor fd, @Nullable ThreadFactory factory) {
         mMountPointId = mountPointId;
-        final int rawFd = fd.detachFd();
         if (factory == null) {
             factory = sDefaultThreadFactory;
         }
-        mThread = factory.newThread(new Runnable() {
-            @Override
-            public void run() {
-                // rawFd is closed by native_start_loop. Java code does not need to close it.
-                native_start_loop(rawFd);
+        mInstance = native_new(fd.detachFd());
+        mThread = factory.newThread(() -> {
+            native_start(mInstance);
+            synchronized (mLock) {
+                native_delete(mInstance);
+                mInstance = 0;
+                mBytesMap.clear();
             }
         });
+        mThread.start();
+        mDefaultHandler = null;
     }
 
-    public static @NonNull FuseAppLoop open(int mountPointId, @NonNull ParcelFileDescriptor fd,
-            @Nullable ThreadFactory factory) {
-        Preconditions.checkNotNull(fd);
-        final FuseAppLoop loop = new FuseAppLoop(mountPointId, fd, factory);
-        loop.mThread.start();
-        return loop;
-    }
-
-    public int registerCallback(@NonNull ProxyFileDescriptorCallback callback)
-            throws UnmountedException, IOException {
-        if (mThread.getState() == Thread.State.TERMINATED) {
-            throw new UnmountedException();
-        }
+    public int registerCallback(@NonNull ProxyFileDescriptorCallback callback,
+            @NonNull Handler handler) throws FuseUnavailableMountException {
         synchronized (mLock) {
-            if (mCallbackMap.size() >= Integer.MAX_VALUE - MIN_INODE) {
-                throw new IOException("Too many opened files.");
+            Preconditions.checkNotNull(callback);
+            Preconditions.checkNotNull(handler);
+            Preconditions.checkState(
+                    mCallbackMap.size() < Integer.MAX_VALUE - MIN_INODE, "Too many opened files.");
+            Preconditions.checkArgument(
+                    Thread.currentThread().getId() != handler.getLooper().getThread().getId(),
+                    "Handler must be different from the current thread");
+            if (mInstance == 0) {
+                throw new FuseUnavailableMountException(mMountPointId);
             }
             int id;
             while (true) {
@@ -101,118 +110,171 @@ public class FuseAppLoop {
                     break;
                 }
             }
-            mCallbackMap.put(id, new CallbackEntry(callback));
+            mCallbackMap.put(id, new CallbackEntry(callback, handler));
             return id;
         }
     }
 
     public void unregisterCallback(int id) {
-        mCallbackMap.remove(id);
+        synchronized (mLock) {
+            mCallbackMap.remove(id);
+        }
     }
 
     public int getMountPointId() {
         return mMountPointId;
     }
 
-    private CallbackEntry getCallbackEntryOrThrowLocked(long inode) throws ErrnoException {
-        final CallbackEntry entry = mCallbackMap.get(checkInode(inode));
-        if (entry != null) {
-            return entry;
-        } else {
-            throw new ErrnoException("getCallbackEntry", OsConstants.ENOENT);
-        }
-    }
+    // Defined in fuse.h
+    private static final int FUSE_LOOKUP = 1;
+    private static final int FUSE_GETATTR = 3;
+    private static final int FUSE_OPEN = 14;
+    private static final int FUSE_READ = 15;
+    private static final int FUSE_WRITE = 16;
+    private static final int FUSE_RELEASE = 18;
+    private static final int FUSE_FSYNC = 20;
+
+    // Defined in FuseBuffer.h
+    private static final int FUSE_MAX_WRITE = 256 * 1024;
 
     // Called by JNI.
     @SuppressWarnings("unused")
-    private long onGetSize(long inode) {
+    private void onCommand(int command, long unique, long inode, long offset, int size,
+            byte[] data) {
         synchronized(mLock) {
             try {
-                return getCallbackEntryOrThrowLocked(inode).callback.onGetSize();
-            } catch (ErrnoException exp) {
-                return getError(exp);
+                final CallbackEntry entry = getCallbackEntryOrThrowLocked(inode);
+                entry.postRunnable(() -> {
+                    try {
+                        switch (command) {
+                            case FUSE_LOOKUP: {
+                                final long fileSize = entry.callback.onGetSize();
+                                synchronized (mLock) {
+                                    if (mInstance != 0) {
+                                        native_replyLookup(mInstance, unique, inode, fileSize);
+                                    }
+                                }
+                                break;
+                            }
+                            case FUSE_GETATTR: {
+                                final long fileSize = entry.callback.onGetSize();
+                                synchronized (mLock) {
+                                    if (mInstance != 0) {
+                                        native_replyGetAttr(mInstance, unique, inode, fileSize);
+                                    }
+                                }
+                                break;
+                            }
+                            case FUSE_READ:
+                                final int readSize = entry.callback.onRead(offset, size, data);
+                                synchronized (mLock) {
+                                    if (mInstance != 0) {
+                                        native_replyRead(mInstance, unique, readSize, data);
+                                    }
+                                }
+                                break;
+                            case FUSE_WRITE:
+                                final int writeSize = entry.callback.onWrite(offset, size, data);
+                                synchronized (mLock) {
+                                    if (mInstance != 0) {
+                                        native_replyWrite(mInstance, unique, writeSize);
+                                    }
+                                }
+                                break;
+                            case FUSE_FSYNC:
+                                entry.callback.onFsync();
+                                synchronized (mLock) {
+                                    if (mInstance != 0) {
+                                        native_replySimple(mInstance, unique, FUSE_OK);
+                                    }
+                                }
+                                break;
+                            case FUSE_RELEASE:
+                                entry.callback.onRelease();
+                                synchronized (mLock) {
+                                    if (mInstance != 0) {
+                                        native_replySimple(mInstance, unique, FUSE_OK);
+                                    }
+                                    mBytesMap.stopUsing(entry.getThreadId());
+                                }
+                                break;
+                            default:
+                                throw new IllegalArgumentException(
+                                        "Unknown FUSE command: " + command);
+                        }
+                    } catch (Exception error) {
+                        Log.e(TAG, "", error);
+                        replySimple(unique, getError(error));
+                    }
+                });
+            } catch (ErrnoException error) {
+                Log.e(TAG, "", error);
+                replySimpleLocked(unique, getError(error));
             }
         }
     }
 
     // Called by JNI.
     @SuppressWarnings("unused")
-    private int onOpen(long inode) {
-        synchronized(mLock) {
+    private byte[] onOpen(long unique, long inode) {
+        synchronized (mLock) {
             try {
                 final CallbackEntry entry = getCallbackEntryOrThrowLocked(inode);
                 if (entry.opened) {
                     throw new ErrnoException("onOpen", OsConstants.EMFILE);
                 }
-                entry.opened = true;
-                // Use inode as file handle. It's OK because AppFuse does not allow to open the same
-                // file twice.
-                return (int) inode;
-            } catch (ErrnoException exp) {
-                return getError(exp);
+                if (mInstance != 0) {
+                    native_replyOpen(mInstance, unique, /* fh */ inode);
+                    entry.opened = true;
+                    return mBytesMap.startUsing(entry.getThreadId());
+                }
+            } catch (ErrnoException error) {
+                replySimpleLocked(unique, getError(error));
             }
+            return null;
         }
     }
 
-    // Called by JNI.
-    @SuppressWarnings("unused")
-    private int onFsync(long inode) {
-        synchronized(mLock) {
-            try {
-                getCallbackEntryOrThrowLocked(inode).callback.onFsync();
-                return 0;
-            } catch (ErrnoException exp) {
-                return getError(exp);
+    private static int getError(@NonNull Exception error) {
+        if (error instanceof ErrnoException) {
+            final int errno = ((ErrnoException) error).errno;
+            if (errno != OsConstants.ENOSYS) {
+                return -errno;
             }
+        }
+        return -OsConstants.EBADF;
+    }
+
+    private CallbackEntry getCallbackEntryOrThrowLocked(long inode) throws ErrnoException {
+        final CallbackEntry entry = mCallbackMap.get(checkInode(inode));
+        if (entry == null) {
+            throw new ErrnoException("getCallbackEntryOrThrowLocked", OsConstants.ENOENT);
+        }
+        return entry;
+    }
+
+    private void replySimple(long unique, int result) {
+        synchronized (mLock) {
+            replySimpleLocked(unique, result);
         }
     }
 
-    // Called by JNI.
-    @SuppressWarnings("unused")
-    private int onRelease(long inode) {
-        synchronized(mLock) {
-            try {
-                getCallbackEntryOrThrowLocked(inode).callback.onRelease();
-                return 0;
-            } catch (ErrnoException exp) {
-                return getError(exp);
-            } finally {
-                mCallbackMap.remove(checkInode(inode));
-            }
+    private void replySimpleLocked(long unique, int result) {
+        if (mInstance != 0) {
+            native_replySimple(mInstance, unique, result);
         }
     }
 
-    // Called by JNI.
-    @SuppressWarnings("unused")
-    private int onRead(long inode, long offset, int size, byte[] bytes) {
-        synchronized(mLock) {
-            try {
-                return getCallbackEntryOrThrowLocked(inode).callback.onRead(offset, size, bytes);
-            } catch (ErrnoException exp) {
-                return getError(exp);
-            }
-        }
-    }
+    native long native_new(int fd);
+    native void native_delete(long ptr);
+    native void native_start(long ptr);
 
-    // Called by JNI.
-    @SuppressWarnings("unused")
-    private int onWrite(long inode, long offset, int size, byte[] bytes) {
-        synchronized(mLock) {
-            try {
-                return getCallbackEntryOrThrowLocked(inode).callback.onWrite(offset, size, bytes);
-            } catch (ErrnoException exp) {
-                return getError(exp);
-            }
-        }
-    }
-
-    private static int getError(@NonNull ErrnoException exp) {
-        // Should not return ENOSYS because the kernel stops
-        // dispatching the FUSE action once FUSE implementation returns ENOSYS for the action.
-        return exp.errno != OsConstants.ENOSYS ? -exp.errno : -OsConstants.EIO;
-    }
-
-    native boolean native_start_loop(int fd);
+    native void native_replySimple(long ptr, long unique, int result);
+    native void native_replyOpen(long ptr, long unique, long fh);
+    native void native_replyLookup(long ptr, long unique, long inode, long size);
+    native void native_replyGetAttr(long ptr, long unique, long inode, long size);
+    native void native_replyWrite(long ptr, long unique, int size);
+    native void native_replyRead(long ptr, long unique, int size, byte[] bytes);
 
     private static int checkInode(long inode) {
         Preconditions.checkArgumentInRange(inode, MIN_INODE, Integer.MAX_VALUE, "checkInode");
@@ -223,10 +285,61 @@ public class FuseAppLoop {
 
     private static class CallbackEntry {
         final ProxyFileDescriptorCallback callback;
+        final Handler handler;
         boolean opened;
-        CallbackEntry(ProxyFileDescriptorCallback callback) {
-            Preconditions.checkNotNull(callback);
-            this.callback = callback;
+
+        CallbackEntry(ProxyFileDescriptorCallback callback, Handler handler) {
+            this.callback = Preconditions.checkNotNull(callback);
+            this.handler = Preconditions.checkNotNull(handler);
+        }
+
+        long getThreadId() {
+            return handler.getLooper().getThread().getId();
+        }
+
+        void postRunnable(Runnable runnable) throws ErrnoException {
+            final boolean result = handler.post(runnable);
+            if (!result) {
+                throw new ErrnoException("postRunnable", OsConstants.EBADF);
+            }
+        }
+    }
+
+    /**
+     * Entry for bytes map.
+     */
+    private static class BytesMapEntry {
+        int counter = 0;
+        byte[] bytes = new byte[FUSE_MAX_WRITE];
+    }
+
+    /**
+     * Map between Thread ID and byte buffer.
+     */
+    private static class BytesMap {
+        final Map<Long, BytesMapEntry> mEntries = new HashMap<>();
+
+        byte[] startUsing(long threadId) {
+            BytesMapEntry entry = mEntries.get(threadId);
+            if (entry == null) {
+                entry = new BytesMapEntry();
+                mEntries.put(threadId, entry);
+            }
+            entry.counter++;
+            return entry.bytes;
+        }
+
+        void stopUsing(long threadId) {
+            final BytesMapEntry entry = mEntries.get(threadId);
+            Preconditions.checkNotNull(entry);
+            entry.counter--;
+            if (entry.counter <= 0) {
+                mEntries.remove(threadId);
+            }
+        }
+
+        void clear() {
+            mEntries.clear();
         }
     }
 }
