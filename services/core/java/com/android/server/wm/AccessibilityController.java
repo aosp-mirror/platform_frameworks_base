@@ -222,11 +222,10 @@ final class AccessibilityController {
                 || mWindowsForAccessibilityObserver != null);
     }
 
-    /** NOTE: This has to be called within a surface transaction. */
     public void setForceShowMagnifiableBoundsLocked(boolean show) {
         if (mDisplayMagnifier != null) {
             mDisplayMagnifier.setForceShowMagnifiableBoundsLocked(show);
-            mDisplayMagnifier.drawMagnifiedRegionBorderIfNeededLocked();
+            mDisplayMagnifier.showMagnificationBoundsIfNeeded();
         }
     }
 
@@ -438,6 +437,12 @@ final class AccessibilityController {
 
         public void destroyLocked() {
             mMagnifedViewport.destroyWindow();
+        }
+
+        // Can be called outside of a surface transaction
+        public void showMagnificationBoundsIfNeeded() {
+            mHandler.obtainMessage(MyHandler.MESSAGE_SHOW_MAGNIFIED_REGION_BOUNDS_IF_NEEDED)
+                    .sendToTarget();
         }
 
         /** NOTE: This has to be called within a surface transaction. */
