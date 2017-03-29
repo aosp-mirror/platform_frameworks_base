@@ -789,8 +789,6 @@
     <string name="recents_launch_disabled_message"><xliff:g id="app" example="Calendar">%s</xliff:g> is disabled in safe-mode.</string>
     <!-- Recents: Stack action button string. [CHAR LIMIT=NONE] -->
     <string name="recents_stack_action_button_label">Clear all</string>
-    <!-- Recents: Incompatible task message. [CHAR LIMIT=NONE] -->
-    <string name="recents_incompatible_app_message">App doesn\'t support split screen</string>
     <!-- Recents: Hint text that shows on the drop targets to start multiwindow. [CHAR LIMIT=NONE] -->
     <string name="recents_drag_hint_message">Drag here to use split screen</string>
 
