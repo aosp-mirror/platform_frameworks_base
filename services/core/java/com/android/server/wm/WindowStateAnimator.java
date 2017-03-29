@@ -591,6 +591,17 @@ class WindowStateAnimator {
         }
     }
 
+    private int getLayerStack() {
+        return mWin.getDisplayContent().getDisplay().getLayerStack();
+    }
+
+    void updateLayerStackInTransaction() {
+        if (mSurfaceController != null) {
+            mSurfaceController.setLayerStackInTransaction(
+                    getLayerStack());
+        }
+    }
+
     WindowSurfaceController createSurfaceLocked(int windowType, int ownerUid) {
         final WindowState w = mWin;
         if (w.restoreSavedSurface()) {
@@ -703,8 +714,7 @@ class WindowStateAnimator {
         }
 
         // Start a new transaction and apply position & offset.
-        final int layerStack = w.getDisplayContent().getDisplay().getLayerStack();
-        mSurfaceController.setPositionAndLayer(mTmpSize.left, mTmpSize.top, layerStack, mAnimLayer);
+        mSurfaceController.setPositionAndLayer(mTmpSize.left, mTmpSize.top, getLayerStack(), mAnimLayer);
         mLastHidden = true;
 
         if (WindowManagerService.localLOGV) Slog.v(TAG, "Created surface " + this);
@@ -1435,7 +1445,6 @@ class WindowStateAnimator {
                     WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER);
             w.applyDimLayerIfNeeded();
         }
-
     }
 
     void prepareSurfaceLocked(final boolean recoveringMemory) {
