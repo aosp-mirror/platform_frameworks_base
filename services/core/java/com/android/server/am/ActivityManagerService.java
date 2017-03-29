@@ -573,10 +573,11 @@ public class ActivityManagerService extends IActivityManager.Stub
     // Determines whether to take full screen screenshots
     static final boolean TAKE_FULLSCREEN_SCREENSHOTS = true;
 
+    // STOPSHIP: Update default to a smaller value.
     /**
      * Default value for {@link Settings.Global#NETWORK_ACCESS_TIMEOUT_MS}.
      */
-    private static final long NETWORK_ACCESS_TIMEOUT_DEFAULT_MS = 0; // 0 sec
+    private static final long NETWORK_ACCESS_TIMEOUT_DEFAULT_MS = 2000; // 2 sec
 
     /**
      * State indicating that there is no need for any blocking for network.
