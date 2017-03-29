@@ -893,9 +893,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         final int lastOrientation = mLastOrientation;
         final boolean oldAltOrientation = mAltOrientation;
         int rotation = mService.mPolicy.rotationForOrientationLw(lastOrientation, oldRotation);
-        final boolean rotateSeamlessly;
+        final boolean rotateSeamlessly = mService.mPolicy.shouldRotateSeamlessly(oldRotation,
+                rotation);
 
-        if (mService.mPolicy.shouldRotateSeamlessly(oldRotation, rotation)) {
+        if (rotateSeamlessly) {
             final WindowState seamlessRotated = getWindow((w) -> w.mSeamlesslyRotated);
             if (seamlessRotated != null) {
                 // We can't rotate (seamlessly or not) while waiting for the last seamless rotation
@@ -904,27 +905,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 // window-removal.
                 return false;
             }
-
-            final WindowState cantSeamlesslyRotate = getWindow((w) ->
-                    w.isChildWindow() && w.isVisibleNow()
-                            && !w.mWinAnimator.mSurfaceController.getTransformToDisplayInverse());
-            if (cantSeamlesslyRotate != null) {
-                // In what can only be called an unfortunate workaround we require seamlessly
-                // rotated child windows to have the TRANSFORM_TO_DISPLAY_INVERSE flag. Due to
-                // limitations in the client API, there is no way for the client to set this flag in
-                // a race free fashion. If we seamlessly rotate a window which does not have this
-                // flag, but then gains it, we will get an incorrect visual result
-                // (rotated viewfinder). This means if we want to support seamlessly rotating
-                // windows which could gain this flag, we can't rotate windows without it. This
-                // limits seamless rotation in N to camera framework users, windows without
-                // children, and native code. This is unfortunate but having the camera work is our
-                // primary goal.
-                rotateSeamlessly = false;
-            } else {
-                rotateSeamlessly = true;
-            }
-        } else {
-            rotateSeamlessly = false;
         }
 
         // TODO: Implement forced rotation changes.

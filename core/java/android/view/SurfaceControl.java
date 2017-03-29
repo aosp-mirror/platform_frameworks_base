@@ -451,10 +451,6 @@ public class SurfaceControl {
         return nativeGetHandle(mNativeObject);
     }
 
-    public boolean getTransformToDisplayInverse() {
-        return nativeGetTransformToDisplayInverse(mNativeObject);
-    }
-
     /** flag the transaction as an animation */
     public static void setAnimationTransaction() {
         nativeSetAnimationTransaction();
