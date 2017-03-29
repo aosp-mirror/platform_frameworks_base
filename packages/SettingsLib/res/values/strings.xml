@@ -76,7 +76,7 @@
     <!-- Status message of Wi-Fi when it is automatically connected by a network recommendation provider. [CHAR LIMIT=NONE] -->
     <string name="connected_via_network_scorer">Automatically connected via %1$s</string>
     <!-- Status message of Wi-Fi when it is automatically connected by a default network recommendation provider. [CHAR LIMIT=NONE] -->
-    <string name="connected_via_network_scorer_default">Automatically connected via Network Quality Scorer</string>
+    <string name="connected_via_network_scorer_default">Automatically connected via network rating provider</string>
     <!-- Status message of Wi-Fi when it is connected by Passpoint configuration. [CHAR LIMIT=NONE] -->
     <string name="connected_via_passpoint">Connected via %1$s</string>
     <!-- Status message of Wi-Fi when network has matching passpoint credentials. [CHAR LIMIT=NONE] -->
