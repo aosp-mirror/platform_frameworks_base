@@ -16,7 +16,6 @@
 
 package com.android.systemui.pip.phone;
 
-import static android.app.NotificationManager.IMPORTANCE_MIN;
 import static android.app.PendingIntent.FLAG_CANCEL_CURRENT;
 import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
@@ -24,7 +23,6 @@ import static android.provider.Settings.ACTION_PICTURE_IN_PICTURE_SETTINGS;
 
 import android.app.IActivityManager;
 import android.app.Notification;
-import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.ComponentName;
@@ -40,6 +38,7 @@ import android.util.Log;
 
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
+import com.android.systemui.util.NotificationChannels;
 
 /**
  * Manages the BTW notification that shows whenever an activity enters or leaves picture-in-picture.
@@ -47,8 +46,8 @@ import com.android.systemui.SystemUI;
 public class PipNotificationController {
     private static final String TAG = PipNotificationController.class.getSimpleName();
 
-    private static final String CHANNEL_ID = PipNotificationController.class.getName();
-    private static final int BTW_NOTIFICATION_ID = 0;
+    private static final String NOTIFICATION_TAG = PipNotificationController.class.getName();
+    private static final int NOTIFICATION_ID = 0;
 
     private Context mContext;
     private IActivityManager mActivityManager;
@@ -58,25 +57,25 @@ public class PipNotificationController {
         mContext = context;
         mActivityManager = activityManager;
         mNotificationManager = NotificationManager.from(context);
-        createNotificationChannel();
     }
 
     public void onActivityPinned(String packageName) {
         // Clear any existing notification
-        mNotificationManager.cancel(CHANNEL_ID, BTW_NOTIFICATION_ID);
+        mNotificationManager.cancel(NOTIFICATION_TAG, NOTIFICATION_ID);
 
         // Build a new notification
-        final Notification.Builder builder = new Notification.Builder(mContext, CHANNEL_ID)
-                .setLocalOnly(true)
-                .setOngoing(true)
-                .setSmallIcon(R.drawable.pip_notification_icon)
-                .setColor(mContext.getColor(
-                        com.android.internal.R.color.system_notification_accent_color));
+        final Notification.Builder builder =
+                new Notification.Builder(mContext, NotificationChannels.GENERAL)
+                        .setLocalOnly(true)
+                        .setOngoing(true)
+                        .setSmallIcon(R.drawable.pip_notification_icon)
+                        .setColor(mContext.getColor(
+                                com.android.internal.R.color.system_notification_accent_color));
         if (updateNotificationForApp(builder, packageName)) {
             SystemUI.overrideNotificationAppName(mContext, builder);
 
             // Show the new notification
-            mNotificationManager.notify(CHANNEL_ID, BTW_NOTIFICATION_ID, builder.build());
+            mNotificationManager.notify(NOTIFICATION_TAG, NOTIFICATION_ID, builder.build());
         }
     }
 
@@ -85,23 +84,8 @@ public class PipNotificationController {
         if (topPipActivity != null) {
             onActivityPinned(topPipActivity.getPackageName());
         } else {
-            mNotificationManager.cancel(CHANNEL_ID, BTW_NOTIFICATION_ID);
+            mNotificationManager.cancel(NOTIFICATION_TAG, NOTIFICATION_ID);
         }
-    }
-
-    /**
-     * Create the notification channel for the PiP BTW notifications if necessary.
-     */
-    private NotificationChannel createNotificationChannel() {
-        NotificationChannel channel = mNotificationManager.getNotificationChannel(CHANNEL_ID);
-        if (channel == null) {
-            channel = new NotificationChannel(CHANNEL_ID,
-                    mContext.getString(R.string.pip_notification_channel_name), IMPORTANCE_MIN);
-            channel.enableLights(false);
-            channel.enableVibration(false);
-            mNotificationManager.createNotificationChannel(channel);
-        }
-        return channel;
     }
 
     /**
