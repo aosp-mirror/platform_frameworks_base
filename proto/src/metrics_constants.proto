@@ -3892,6 +3892,11 @@ message MetricsEvent {
     // ACTION: QS -> Click date
     ACTION_QS_DATE = 930;
 
+    // OPEN: Settings > Storage > Movies & TV
+    // CATEGORY: SETTINGS
+    // OS: O
+    APPLICATIONS_STORAGE_MOVIES = 931;
+
     // ---- End O Constants, all O constants go above this line ----
 
     // Add new aosp constants above this line.
