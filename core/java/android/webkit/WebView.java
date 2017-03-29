@@ -2646,7 +2646,7 @@ public class WebView extends AbsoluteLayout
      *       <li>Otherwise, the class name should be {@code HTML.iframe}.
      *   </ol>
      *   <li>The W3C autofill field ({@code autocomplete} tag attribute) maps to
-     *       {@link ViewStructure#setAutofillHint(String[])}.
+     *       {@link ViewStructure#setAutofillHints(String[])}.
      *   <li>The {@code type} attribute of {@code INPUT} tags maps to
      *       {@link ViewStructure#setInputType(int)}.
      *   <li>The {@code name} attribute maps to {@link ViewStructure#setIdEntry(String)}.

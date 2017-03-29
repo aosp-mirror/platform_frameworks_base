@@ -306,10 +306,10 @@ public abstract class ViewStructure {
     public abstract void setAutofillType(@View.AutofillType int type);
 
     /**
-     * Sets the a hint that helps the autofill service to select the appropriate data to fill the
+     * Sets the a hints that helps the autofill service to select the appropriate data to fill the
      * view.
      */
-    public abstract void setAutofillHint(@Nullable String[] hint);
+    public abstract void setAutofillHints(@Nullable String[] hint);
 
     /**
      * Sets the {@link AutofillValue} representing the current value of this node.
