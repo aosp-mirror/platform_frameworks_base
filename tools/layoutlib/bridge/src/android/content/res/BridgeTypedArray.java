@@ -772,8 +772,20 @@ public final class BridgeTypedArray extends TypedArray {
      */
     @Override
     public boolean getValue(int index, TypedValue outValue) {
-        String s = getString(index);
-        return s != null && ResourceHelper.parseFloatAttribute(mNames[index], s, outValue, false);
+        // TODO: more switch cases for other types.
+        outValue.type = getType(index);
+        switch (outValue.type) {
+            case TYPE_NULL:
+                return false;
+            case TYPE_STRING:
+                outValue.string = getString(index);
+                return true;
+            default:
+                // For back-compatibility, parse as float.
+                String s = getString(index);
+                return s != null &&
+                        ResourceHelper.parseFloatAttribute(mNames[index], s, outValue, false);
+        }
     }
 
     @Override
