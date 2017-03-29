@@ -244,10 +244,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
     // FillServiceCallbacks
     @Override
-    public void authenticate(IntentSender intent) {
+    public void authenticate(IntentSender intent, Bundle extras) {
         final Intent fillInIntent;
         synchronized (mLock) {
-            fillInIntent = createAuthFillInIntent(mStructure);
+            fillInIntent = createAuthFillInIntent(mStructure, extras);
         }
         mHandlerCaller.getHandler().post(() -> startAuthentication(intent, fillInIntent));
     }
@@ -313,7 +313,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         if (mCurrentResponse == null || data == null) {
             removeSelf();
         } else {
-            Parcelable result = data.getParcelable(
+            final Parcelable result = data.getParcelable(
                     AutofillManager.EXTRA_AUTHENTICATION_RESULT);
             if (result instanceof FillResponse) {
                 mMetricsLogger.action(MetricsEvent.AUTOFILL_AUTHENTICATED, mPackageName);
@@ -321,7 +321,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 mCurrentResponse = (FillResponse) result;
                 processResponseLocked(mCurrentResponse);
             } else if (result instanceof Dataset) {
-                Dataset dataset = (Dataset) result;
+                final Dataset dataset = (Dataset) result;
                 final int index = mCurrentResponse.getDatasets().indexOf(mAutoFilledDataset);
                 if (index >= 0) {
                     mCurrentResponse.getDatasets().set(index, dataset);
@@ -614,7 +614,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
         if (mCurrentResponse.getAuthentication() != null) {
             // Handle authentication.
-            final Intent fillInIntent = createAuthFillInIntent(mStructure);
+            final Intent fillInIntent = createAuthFillInIntent(mStructure,
+                    mCurrentResponse.getExtras());
             mCurrentViewState.setResponse(mCurrentResponse, fillInIntent);
             return;
         }
@@ -640,7 +641,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             }
 
             // ...or handle authentication.
-            Intent fillInIntent = createAuthFillInIntent(mStructure);
+            final Intent fillInIntent = createAuthFillInIntent(mStructure, null);
             startAuthentication(dataset.getAuthentication(), fillInIntent);
         }
     }
@@ -649,9 +650,12 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         return mService.getServiceName();
     }
 
-    private Intent createAuthFillInIntent(AssistStructure structure) {
-        Intent fillInIntent = new Intent();
+    private Intent createAuthFillInIntent(AssistStructure structure, Bundle extras) {
+        final Intent fillInIntent = new Intent();
         fillInIntent.putExtra(AutofillManager.EXTRA_ASSIST_STRUCTURE, structure);
+        if (extras != null) {
+            fillInIntent.putExtra(AutofillManager.EXTRA_DATA_EXTRAS, extras);
+        }
         return fillInIntent;
     }
 
