@@ -35,6 +35,7 @@ This is an optimized layout for a screen with a toolbar enabled.
         android:layout_alignParentTop="true"
         style="?attr/actionBarStyle"
         android:transitionName="android:action_bar"
+        android:touchscreenBlocksFocus="true"
         android:keyboardNavigationCluster="true"
         android:gravity="top">
         <Toolbar

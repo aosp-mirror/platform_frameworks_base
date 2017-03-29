@@ -18,6 +18,7 @@ package android.view;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.pm.PackageManager;
 import android.graphics.Rect;
 import android.util.ArrayMap;
 import android.util.SparseArray;
@@ -88,8 +89,9 @@ public class FocusFinder {
 
     private View findNextFocus(ViewGroup root, View focused, Rect focusedRect, int direction) {
         View next = null;
+        ViewGroup effectiveRoot = getEffectiveRoot(root, focused);
         if (focused != null) {
-            next = findNextUserSpecifiedFocus(root, focused, direction);
+            next = findNextUserSpecifiedFocus(effectiveRoot, focused, direction);
         }
         if (next != null) {
             return next;
@@ -97,14 +99,43 @@ public class FocusFinder {
         ArrayList<View> focusables = mTempList;
         try {
             focusables.clear();
-            root.addFocusables(focusables, direction);
+            effectiveRoot.addFocusables(focusables, direction);
             if (!focusables.isEmpty()) {
-                next = findNextFocus(root, focused, focusedRect, direction, focusables);
+                next = findNextFocus(effectiveRoot, focused, focusedRect, direction, focusables);
             }
         } finally {
             focusables.clear();
         }
         return next;
+    }
+
+    /**
+     * Returns the "effective" root of a view. The "effective" root is the closest ancestor
+     * within-which focus should cycle.
+     * <p>
+     * For example: normal focus navigation would stay within a ViewGroup marked as
+     * touchscreenBlocksFocus and keyboardNavigationCluster until a cluster-jump out.
+     * @return the "effective" root of {@param focused}
+     */
+    private ViewGroup getEffectiveRoot(ViewGroup root, View focused) {
+        if (focused == null) {
+            return root;
+        }
+        ViewParent effective = focused.getParent();
+        do {
+            if (effective == root) {
+                return root;
+            }
+            ViewGroup vg = (ViewGroup) effective;
+            if (vg.getTouchscreenBlocksFocus()
+                    && focused.getContext().getPackageManager().hasSystemFeature(
+                            PackageManager.FEATURE_TOUCHSCREEN)
+                    && vg.isKeyboardNavigationCluster()) {
+                return vg;
+            }
+            effective = effective.getParent();
+        } while (effective != null);
+        return root;
     }
 
     /**
