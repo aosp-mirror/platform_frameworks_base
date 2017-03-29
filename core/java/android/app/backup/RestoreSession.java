@@ -54,7 +54,9 @@ public class RestoreSession {
     public int getAvailableRestoreSets(RestoreObserver observer, BackupManagerMonitor monitor) {
         int err = -1;
         RestoreObserverWrapper obsWrapper = new RestoreObserverWrapper(mContext, observer);
-        BackupManagerMonitorWrapper monitorWrapper = new BackupManagerMonitorWrapper(monitor);
+        BackupManagerMonitorWrapper monitorWrapper = monitor == null
+                ? null
+                : new BackupManagerMonitorWrapper(monitor);
         try {
             err = mBinder.getAvailableRestoreSets(obsWrapper, monitorWrapper);
         } catch (RemoteException e) {
@@ -99,7 +101,9 @@ public class RestoreSession {
             return -1;
         }
         mObserver = new RestoreObserverWrapper(mContext, observer);
-        BackupManagerMonitorWrapper monitorWrapper = new BackupManagerMonitorWrapper(monitor);
+        BackupManagerMonitorWrapper monitorWrapper = monitor == null
+                ? null
+                : new BackupManagerMonitorWrapper(monitor);
         try {
             err = mBinder.restoreAll(token, mObserver, monitorWrapper);
         } catch (RemoteException e) {
@@ -154,7 +158,9 @@ public class RestoreSession {
             return -1;
         }
         mObserver = new RestoreObserverWrapper(mContext, observer);
-        BackupManagerMonitorWrapper monitorWrapper = new BackupManagerMonitorWrapper(monitor);
+        BackupManagerMonitorWrapper monitorWrapper = monitor == null
+                ? null
+                : new BackupManagerMonitorWrapper(monitor);
         try {
             err = mBinder.restoreSome(token, mObserver, monitorWrapper, packages);
         } catch (RemoteException e) {
@@ -212,8 +218,9 @@ public class RestoreSession {
             return -1;
         }
         mObserver = new RestoreObserverWrapper(mContext, observer);
-        BackupManagerMonitorWrapper monitorWrapper = new BackupManagerMonitorWrapper(monitor);
-
+        BackupManagerMonitorWrapper monitorWrapper = monitor == null
+                ? null
+                : new BackupManagerMonitorWrapper(monitor);
         try {
             err = mBinder.restorePackage(packageName, mObserver, monitorWrapper);
         } catch (RemoteException e) {
