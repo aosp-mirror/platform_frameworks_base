@@ -90,6 +90,7 @@ import android.media.AudioManagerInternal;
 import android.media.IRingtonePlayer;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -3126,8 +3127,9 @@ public class NotificationManagerService extends SystemService {
                     + ", incomingUserId=" + incomingUserId
                     + ", notificationUid=" + notificationUid
                     + ", notification=" + notification;
-            // STOPSHIP TODO: should throw instead of logging.
-            // throw new IllegalArgumentException(noChannelStr);
+            if (Build.IS_DEBUGGABLE) {
+                throw new IllegalArgumentException(noChannelStr);
+            }
             Log.e(TAG, noChannelStr);
             return;
         }
