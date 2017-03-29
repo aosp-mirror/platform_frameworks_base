@@ -7226,6 +7226,10 @@
         <!-- Whether to use single line for the preference title text. By default, preference title
              will be constrained to one line, so the default value of this attribute is true. -->
         <attr name="singleLineTitle" format="boolean" />
+        <!-- Whether the space for the preference icon view will be reserved. By default, preference
+             icon view visibility will be set to GONE when there is no icon provided, so the default
+             value of this attribute is false. -->
+        <attr name="iconSpaceReserved" format="boolean" />
     </declare-styleable>
 
     <!-- Base attributes available to CheckBoxPreference. -->

@@ -83,6 +83,7 @@ import java.util.Set;
  * @attr ref android.R.styleable#Preference_shouldDisableView
  * @attr ref android.R.styleable#Preference_recycleEnabled
  * @attr ref android.R.styleable#Preference_singleLineTitle
+ * @attr ref android.R.styleable#Preference_iconSpaceReserved
  */
 public class Preference implements Comparable<Preference> {
     /**
@@ -135,6 +136,7 @@ public class Preference implements Comparable<Preference> {
     private boolean mParentDependencyMet = true;
     private boolean mRecycleEnabled = true;
     private boolean mSingleLineTitle = true;
+    private boolean mIconSpaceReserved;
 
     /**
      * @see #setShouldDisableView(boolean)
@@ -302,7 +304,11 @@ public class Preference implements Comparable<Preference> {
                 case com.android.internal.R.styleable.Preference_singleLineTitle:
                     mSingleLineTitle = a.getBoolean(attr, mSingleLineTitle);
                     break;
-            }
+
+                case com.android.internal.R.styleable.Preference_iconSpaceReserved:
+                    mIconSpaceReserved = a.getBoolean(attr, mIconSpaceReserved);
+                    break;
+           }
         }
         a.recycle();
     }
@@ -631,7 +637,11 @@ public class Preference implements Comparable<Preference> {
                     imageView.setImageDrawable(mIcon);
                 }
             }
-            imageView.setVisibility(mIcon != null ? View.VISIBLE : View.GONE);
+            if (mIcon != null) {
+                imageView.setVisibility(View.VISIBLE);
+            } else {
+                imageView.setVisibility(mIconSpaceReserved ? View.INVISIBLE : View.GONE);
+            }
         }
 
         final View imageFrame = view.findViewById(com.android.internal.R.id.icon_frame);
@@ -930,6 +940,25 @@ public class Preference implements Comparable<Preference> {
         return mSingleLineTitle;
     }
 
+    /**
+     * Sets whether to reserve the space of this Preference icon view when no icon is provided.
+     *
+     * @param iconSpaceReserved set {@code true} if the space for the icon view should be reserved
+     */
+    public void setIconSpaceReserved(boolean iconSpaceReserved) {
+        mIconSpaceReserved = iconSpaceReserved;
+        notifyChanged();
+    }
+
+    /**
+     * Gets whether the space this preference icon view is reserved.
+     *
+     * @see #setIconSpaceReserved(boolean)
+     * @return {@code true} if the space of this preference icon view is reserved
+     */
+    public boolean isIconSpaceReserved() {
+        return mIconSpaceReserved;
+    }
     /**
      * Returns a unique ID for this Preference.  This ID should be unique across all
      * Preference objects in a hierarchy.
