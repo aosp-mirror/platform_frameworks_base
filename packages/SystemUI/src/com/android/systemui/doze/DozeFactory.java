@@ -50,7 +50,8 @@ public class DozeFactory {
         WakeLock wakeLock = WakeLock.createPartial(context, "Doze");
 
         DozeMachine machine = new DozeMachine(
-                DozeScreenStatePreventingAdapter.wrapIfNeeded(dozeService, params),
+                DozeSuspendScreenStatePreventingAdapter.wrapIfNeeded(
+                        DozeScreenStatePreventingAdapter.wrapIfNeeded(dozeService, params), params),
                 config,
                 wakeLock);
         machine.setParts(new DozeMachine.Part[]{

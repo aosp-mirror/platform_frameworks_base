@@ -87,8 +87,9 @@ public class DozeMachine {
                 case DOZE:
                     return Display.STATE_OFF;
                 case DOZE_PULSING:
+                    return Display.STATE_DOZE;
                 case DOZE_AOD:
-                    return Display.STATE_DOZE; // TODO: use STATE_ON if appropriate.
+                    return Display.STATE_DOZE_SUSPEND;
                 default:
                     return Display.STATE_UNKNOWN;
             }

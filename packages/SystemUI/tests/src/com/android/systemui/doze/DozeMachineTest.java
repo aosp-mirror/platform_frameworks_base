@@ -228,7 +228,7 @@ public class DozeMachineTest {
 
         mMachine.requestState(DOZE_AOD);
 
-        assertEquals(Display.STATE_DOZE, mServiceFake.screenState);
+        assertEquals(Display.STATE_DOZE_SUSPEND, mServiceFake.screenState);
     }
 
     @Test
@@ -258,7 +258,7 @@ public class DozeMachineTest {
         mMachine.requestState(DOZE_AOD);
         mMachine.requestState(DOZE_REQUEST_PULSE);
 
-        assertEquals(Display.STATE_DOZE, mServiceFake.screenState);
+        assertEquals(Display.STATE_DOZE_SUSPEND, mServiceFake.screenState);
     }
 
     @Test
