@@ -377,7 +377,34 @@ public class PackageDexUsage extends AbstractStatsBase<Void> {
     }
 
     /**
+     * Clears the {@code usesByOtherApps} marker for the package {@code packageName}.
+     * @return true if the package usage info was updated.
+     */
+    public boolean clearUsedByOtherApps(String packageName) {
+        synchronized (mPackageUseInfoMap) {
+            PackageUseInfo packageUseInfo = mPackageUseInfoMap.get(packageName);
+            if (packageUseInfo == null || !packageUseInfo.mIsUsedByOtherApps) {
+                return false;
+            }
+            packageUseInfo.mIsUsedByOtherApps = false;
+            return true;
+        }
+    }
+
+    /**
+     * Remove the usage data associated with package {@code packageName}.
+     * @return true if the package usage was found and removed successfully.
+     */
+    public boolean removePackage(String packageName) {
+        synchronized (mPackageUseInfoMap) {
+            return mPackageUseInfoMap.remove(packageName) != null;
+        }
+    }
+
+    /**
      * Remove all the records about package {@code packageName} belonging to user {@code userId}.
+     * If the package is left with no records of secondary dex usage and is not used by other
+     * apps it will be removed as well.
      * @return true if the record was found and actually deleted,
      *         false if the record doesn't exist
      */
@@ -396,6 +423,12 @@ public class PackageDexUsage extends AbstractStatsBase<Void> {
                     dIt.remove();
                     updated = true;
                 }
+            }
+            // If no secondary dex info is left and the package is not used by other apps
+            // remove the data since it is now useless.
+            if (packageUseInfo.mDexUseInfoMap.isEmpty() && !packageUseInfo.mIsUsedByOtherApps) {
+                mPackageUseInfoMap.remove(packageName);
+                updated = true;
             }
             return updated;
         }

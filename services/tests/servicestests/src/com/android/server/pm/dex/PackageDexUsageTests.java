@@ -257,6 +257,30 @@ public class PackageDexUsageTests {
     }
 
     @Test
+    public void testRemovePackage() {
+        // Record Bar secondaries for two different users.
+        assertTrue(record(mBarSecondary1User0));
+        assertTrue(record(mBarSecondary2User1));
+
+        // Remove the package.
+        assertTrue(mPackageDexUsage.removePackage(mBarSecondary1User0.mPackageName));
+        // Assert that we can't find the package anymore.
+        assertNull(mPackageDexUsage.getPackageUseInfo(mBarSecondary1User0.mPackageName));
+    }
+
+    @Test
+    public void testRemoveNonexistentPackage() {
+        // Record Bar secondaries for two different users.
+        assertTrue(record(mBarSecondary1User0));
+
+        // Remove the package.
+        assertTrue(mPackageDexUsage.removePackage(mBarSecondary1User0.mPackageName));
+        // Remove the package again. It should return false because the package no longer
+        // has a record in the use info.
+        assertFalse(mPackageDexUsage.removePackage(mBarSecondary1User0.mPackageName));
+    }
+
+    @Test
     public void testRemoveUserPackage() {
         // Record Bar secondaries for two different users.
         assertTrue(record(mBarSecondary1User0));
@@ -280,6 +304,32 @@ public class PackageDexUsageTests {
                 mBarSecondary1User0.mDexFile, mBarSecondary1User0.mOwnerUserId));
         // Assert that only user 1 files are there.
         assertPackageDexUsage(null, mBarSecondary2User1);
+    }
+
+    @Test
+    public void testClearUsedByOtherApps() {
+        // Write a package which is used by other apps.
+        assertTrue(record(mFooSplit2UsedByOtherApps0));
+        assertTrue(mPackageDexUsage.clearUsedByOtherApps(mFooSplit2UsedByOtherApps0.mPackageName));
+
+        // Check that the package is no longer used by other apps.
+        TestData noLongerUsedByOtherApps = new TestData(
+            mFooSplit2UsedByOtherApps0.mPackageName,
+            mFooSplit2UsedByOtherApps0.mDexFile,
+            mFooSplit2UsedByOtherApps0.mOwnerUserId,
+            mFooSplit2UsedByOtherApps0.mLoaderIsa,
+            /*mIsUsedByOtherApps*/false,
+            mFooSplit2UsedByOtherApps0.mPrimaryOrSplit);
+        assertPackageDexUsage(noLongerUsedByOtherApps);
+    }
+
+    @Test
+    public void testClearUsedByOtherAppsNonexistent() {
+        // Write a package which is used by other apps.
+        assertTrue(record(mFooSplit2UsedByOtherApps0));
+        assertTrue(mPackageDexUsage.clearUsedByOtherApps(mFooSplit2UsedByOtherApps0.mPackageName));
+        // Clearing again should return false as there should be no update on the use info.
+        assertFalse(mPackageDexUsage.clearUsedByOtherApps(mFooSplit2UsedByOtherApps0.mPackageName));
     }
 
     private void assertPackageDexUsage(TestData primary, TestData... secondaries) {
