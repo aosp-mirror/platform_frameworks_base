@@ -50,6 +50,7 @@ import com.android.server.LocalServices;
 
 import org.mockito.ArgumentCaptor;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
@@ -247,6 +248,25 @@ public class AppWidgetServiceImplTest extends InstrumentationTestCase {
                 mMockHost, mPkgName, HOST_ID, new int[]{widgetId, widgetId2}).getList();
         // 3 updates for first widget and 4 for second
         assertEquals(7, updates.size());
+    }
+
+    public void testGetInstalledProvidersForPackage() {
+        List<AppWidgetProviderInfo> allProviders = mManager.getInstalledProviders();
+        assertTrue(!allProviders.isEmpty());
+        String packageName = allProviders.get(0).provider.getPackageName();
+        List<AppWidgetProviderInfo> providersForPackage = mManager.getInstalledProvidersForPackage(
+                packageName, null);
+        // Remove providers from allProviders that don't have the given package name.
+        Iterator<AppWidgetProviderInfo> iter = allProviders.iterator();
+        while (iter.hasNext()) {
+            if (!iter.next().provider.getPackageName().equals(packageName)) {
+                iter.remove();
+            }
+        }
+        assertEquals(allProviders.size(), providersForPackage.size());
+        for (int i = 0; i < allProviders.size(); i++) {
+            assertEquals(allProviders.get(i).provider, providersForPackage.get(i).provider);
+        }
     }
 
     private int setupHostAndWidget() {

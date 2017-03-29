@@ -55,8 +55,8 @@ interface IAppWidgetService {
             in RemoteViews views);
     void updateAppWidgetProvider(in ComponentName provider, in RemoteViews views);
     void notifyAppWidgetViewDataChanged(String packageName, in int[] appWidgetIds, int viewId);
-    ParceledListSlice getInstalledProvidersForProfile(int categoryFilter,
-            int profileId);
+    ParceledListSlice getInstalledProvidersForProfile(int categoryFilter, int profileId,
+            String packageName);
     AppWidgetProviderInfo getAppWidgetInfo(String callingPackage, int appWidgetId);
     boolean hasBindAppWidgetPermission(in String packageName, int userId);
     void setBindAppWidgetPermission(in String packageName, int userId, in boolean permission);
