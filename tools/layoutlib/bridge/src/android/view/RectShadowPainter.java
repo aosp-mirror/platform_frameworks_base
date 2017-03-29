@@ -37,7 +37,8 @@ public class RectShadowPainter {
             @NonNull Canvas canvas) {
         Rect outline = new Rect();
         if (!viewOutline.getRect(outline)) {
-            throw new IllegalArgumentException("Outline is not a rect shadow");
+            assert false : "Outline is not a rect shadow";
+            return;
         }
 
         Rect originCanvasRect = canvas.getClipBounds();

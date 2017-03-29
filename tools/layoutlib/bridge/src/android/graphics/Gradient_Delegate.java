@@ -49,21 +49,19 @@ public abstract class Gradient_Delegate extends Shader_Delegate {
      */
     protected Gradient_Delegate(long nativeMatrix, int colors[], float positions[]) {
         super(nativeMatrix);
-        if (colors.length < 2) {
-            throw new IllegalArgumentException("needs >= 2 number of colors");
-        }
-        if (positions != null && colors.length != positions.length) {
-            throw new IllegalArgumentException("color and position arrays must be of equal length");
-        }
+        assert colors.length >= 2 : "needs >= 2 number of colors";
 
         if (positions == null) {
             float spacing = 1.f / (colors.length - 1);
             positions = new float[colors.length];
             positions[0] = 0.f;
-            positions[colors.length-1] = 1.f;
-            for (int i = 1; i < colors.length - 1 ; i++) {
+            positions[colors.length - 1] = 1.f;
+            for (int i = 1; i < colors.length - 1; i++) {
                 positions[i] = spacing * i;
             }
+        } else {
+            assert colors.length == positions.length :
+                    "color and position " + "arrays must be of equal length";
         }
 
         mColors = colors;

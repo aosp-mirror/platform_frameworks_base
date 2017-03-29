@@ -61,10 +61,8 @@ public class RoundRectangle extends RectangularShape {
      * ellipse that corner is a quarter of.
      */
     public RoundRectangle(float x, float y, float width, float height, float[] cornerDimensions) {
-        if (cornerDimensions.length != 8) {
-            throw new IllegalArgumentException("The array of corner dimensions must have eight " +
-                    "elements");
-        }
+        assert cornerDimensions.length == 8 : "The array of corner dimensions must have eight " +
+                    "elements";
 
         this.x = x;
         this.y = y;
