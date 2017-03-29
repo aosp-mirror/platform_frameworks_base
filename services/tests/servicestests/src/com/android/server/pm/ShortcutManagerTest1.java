@@ -17,7 +17,6 @@ package com.android.server.pm;
 
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.anyOrNull;
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.anyStringOrNull;
-import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertAllChooser;
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertAllDisabled;
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertAllDynamic;
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertAllDynamicOrPinned;
@@ -58,7 +57,6 @@ import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -259,9 +257,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                 icon1,
                 makeIntent(Intent.ACTION_ASSIST, ShortcutActivity2.class,
                         "key1", "val1", "nest", makeBundle("key", 123)),
-                /* weight */ 10,
-                /* chooserFilter=*/ null,
-                /* chooserComponentNames=*/ null);
+                /* weight */ 10);
 
         final ShortcutInfo si2 = makeShortcut(
                 "shortcut2",
@@ -269,18 +265,14 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                 /* activity */ null,
                 icon2,
                 makeIntent(Intent.ACTION_ASSIST, ShortcutActivity3.class),
-                /* weight */ 12,
-                /* chooserFilter=*/ null,
-                /* chooserComponentNames=*/ null);
+                /* weight */ 12);
         final ShortcutInfo si3 = makeShortcut(
                 "shortcut3",
                 "Title 3",
                 /* activity */ null,
                 icon3,
                 makeIntent(Intent.ACTION_ASSIST, ShortcutActivity3.class),
-                /* weight */ 13,
-                /* chooserFilter=*/ null,
-                /* chooserComponentNames=*/ null);
+                /* weight */ 13);
 
         assertTrue(mManager.setDynamicShortcuts(list(si1, si2, si3)));
         assertShortcutIds(assertAllNotKeyFieldsOnly(
@@ -991,10 +983,8 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                     makeShortcut("s2"),
                     makeShortcut("s3"),
                     makeShortcut("s4"),
-                    makeShortcut("s5"),
-                    makeChooserShortcut("s6", 2, true),
-                    makeChooserShortcut("s7", 2, true),
-                    makeChooserShortcut("s8", 1, true))));
+                    makeShortcut("s5")
+            )));
         });
         runWithCaller(CALLING_PACKAGE_2, UserHandle.USER_SYSTEM, () -> {
             assertTrue(mManager.setDynamicShortcuts(list(
@@ -1002,13 +992,11 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                     makeShortcut("s2"),
                     makeShortcut("s3"),
                     makeShortcut("s4"),
-                    makeShortcut("s5"),
-                    makeChooserShortcut("s6", 2, true),
-                    makeChooserShortcut("s7", 2, true),
-                    makeChooserShortcut("s8", 1, true))));
+                    makeShortcut("s5")
+            )));
         });
         runWithCaller(LAUNCHER_1, UserHandle.USER_SYSTEM, () -> {
-            mLauncherApps.pinShortcuts(CALLING_PACKAGE_1, list("s2", "s3", "s6"),
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE_1, list("s2", "s3"),
                     getCallingUser());
             mLauncherApps.pinShortcuts(CALLING_PACKAGE_2, list("s4", "s5"),
                     getCallingUser());
@@ -1021,20 +1009,19 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
             mManager.removeDynamicShortcuts(list("s1"));
             mManager.removeDynamicShortcuts(list("s3"));
             mManager.removeDynamicShortcuts(list("s5"));
-            mManager.removeDynamicShortcuts(list("s7"));
         });
         runWithCaller(CALLING_PACKAGE_1, UserHandle.USER_SYSTEM, () -> {
             assertShortcutIds(assertAllDynamic(
                     mManager.getDynamicShortcuts()),
-                    "s3", "s4", "s5", "s6", "s7", "s8");
+                    "s3", "s4", "s5");
             assertShortcutIds(assertAllPinned(
                     mManager.getPinnedShortcuts()),
-                    "s2", "s3", "s6");
+                    "s2", "s3");
         });
         runWithCaller(CALLING_PACKAGE_2, UserHandle.USER_SYSTEM, () -> {
             assertShortcutIds(assertAllDynamic(
                     mManager.getDynamicShortcuts()),
-                    "s2", "s4", "s6", "s8");
+                    "s2", "s4");
             assertShortcutIds(assertAllPinned(
                     mManager.getPinnedShortcuts()),
                     "s4", "s5");
@@ -1071,10 +1058,10 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         runWithCaller(CALLING_PACKAGE_1, UserHandle.USER_SYSTEM, () -> {
             assertShortcutIds(assertAllDynamic(
                     mManager.getDynamicShortcuts()),
-                    "s3", "s4", "s5", "s6", "s7", "s8");
+                    "s3", "s4", "s5");
             assertShortcutIds(assertAllPinned(
                     mManager.getPinnedShortcuts()),
-                    "s2", "s3", "s6");
+                    "s2", "s3");
 
             ShortcutInfo s = getCallerShortcut("s2");
             assertTrue(s.hasIconResource());
@@ -1090,7 +1077,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         runWithCaller(CALLING_PACKAGE_2, UserHandle.USER_SYSTEM, () -> {
             assertShortcutIds(assertAllDynamic(
                     mManager.getDynamicShortcuts()),
-                    "s2", "s4", "s6", "s8");
+                    "s2", "s4");
             assertShortcutIds(assertAllPinned(
                     mManager.getPinnedShortcuts()),
                     "s4", "s5");
@@ -1187,46 +1174,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         });
     }
 
-    public void testUpdateShortcuts_chooser() {
-        runWithCaller(CALLING_PACKAGE_1, UserHandle.USER_SYSTEM, () -> {
-            assertTrue(mManager.setDynamicShortcuts(list(
-                    makeShortcut("s1"),
-                    makeChooserShortcut("s2", 2, false),
-                    makeChooserShortcut("s3", 2, false)
-            )));
-
-            assertFalse(getCallerShortcut("s1").isChooser());
-            assertTrue(getCallerShortcut("s2").isChooser());
-            assertTrue(getCallerShortcut("s3").isChooser());
-
-            ShortcutInfo s = getCallerShortcut("s1");
-            assertNull(s.getChooserIntentFilters());
-            assertNull(s.getChooserComponentNames());
-
-            assertTrue(getCallerShortcut("s1").isDynamic());
-            assertFalse(getCallerShortcut("s2").isDynamic());
-            assertFalse(getCallerShortcut("s3").isDynamic());
-
-
-            // Replace 2 with a chooser shortcut
-            mManager.updateShortcuts(list(makeChooserShortcut("s1", 2, true)));
-
-            s = getCallerShortcut("s1");
-            assertEquals(2, s.getChooserIntentFilters().length);
-            assertEquals(2, s.getChooserComponentNames().length);
-
-            assertShortcutIds(assertAllChooser(
-                    mManager.getDynamicShortcuts()),
-                    "s1", "s2", "s3");
-
-            assertTrue(getCallerShortcut("s1").isDynamic());
-            assertFalse(getCallerShortcut("s2").isDynamic());
-            assertFalse(getCallerShortcut("s3").isDynamic());
-        });
-    }
-
-
-            // === Test for launcher side APIs ===
+    // === Test for launcher side APIs ===
 
     public void testGetShortcuts() {
 
@@ -1537,17 +1485,15 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                 /* icon =*/ null,
                 makeIntent(Intent.ACTION_ASSIST, ShortcutActivity2.class,
                         "key1", "val1", "nest", makeBundle("key", 123)),
-                        /* weight */ 10, /* chooserFilter=*/ null,
-                        /* chooserComponentNames=*/ null);
+                /* weight */ 10);
 
         final ShortcutInfo s1_2 = makeShortcut(
-                "s2", "Title 2",
+                "s2",
+                "Title 2",
                 /* activity */ null,
                 /* icon =*/ null,
                 makeIntent(Intent.ACTION_ASSIST, ShortcutActivity3.class),
-                /* weight */ 12,
-                /* chooserFilter=*/ null,
-                /* chooserComponentNames=*/ null);
+                /* weight */ 12);
 
         assertTrue(mManager.setDynamicShortcuts(list(s1_1, s1_2)));
         dumpsysOnLogcat();
@@ -1560,9 +1506,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                 /* icon =*/ null,
                 makeIntent(Intent.ACTION_ANSWER, ShortcutActivity2.class,
                         "key1", "val1", "nest", makeBundle("key", 123)),
-                /* weight */ 10,
-                /* chooserFilter=*/ null,
-                /* chooserComponentNames=*/ null);
+                /* weight */ 10);
         assertTrue(mManager.setDynamicShortcuts(list(s2_1)));
         dumpsysOnLogcat();
 
@@ -2731,12 +2675,10 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
             final ShortcutInfo s1_2 = makeShortcut(
                     "s2",
                     "Title 2",
-                    /* activity */ null,
-                    /* icon =*/ null,
+            /* activity */ null,
+            /* icon =*/ null,
                     makeIntent(Intent.ACTION_ASSIST, ShortcutActivity3.class),
-                    /* rank */ 12,
-                    /* chooserFilter=*/ null,
-                    /* chooserComponentNames=*/ null);
+            /* rank */ 12);
 
             final ShortcutInfo s1_3 = makeShortcut("s3");
 
@@ -2751,9 +2693,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                     /* icon =*/ null,
                     makeIntent(Intent.ACTION_ANSWER, ShortcutActivity.class,
                             "key1", "val1", "nest", makeBundle("key", 123)),
-                    /* weight */ 10,
-                    /* chooserFilter=*/ null,
-                    /* chooserComponentNames=*/ null);
+                    /* weight */ 10);
             assertTrue(mManager.setDynamicShortcuts(list(s2_1)));
         });
 
@@ -3173,9 +3113,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                     icon1,
                     makeIntent(Intent.ACTION_ASSIST, ShortcutActivity2.class,
                             "key1", "val1", "nest", makeBundle("key", 123)),
-                        /* weight */ 10,
-                    /* chooserFilter=*/ null,
-                    /* chooserComponentNames=*/ null);
+                        /* weight */ 10);
 
             final ShortcutInfo si2 = makeShortcut(
                     "s2",
@@ -3183,9 +3121,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                         /* activity */ null,
                     icon2,
                     makeIntent(Intent.ACTION_ASSIST, ShortcutActivity3.class),
-                        /* weight */ 12,
-                    /* chooserFilter=*/ null,
-                    /* chooserComponentNames=*/ null);
+                        /* weight */ 12);
 
             assertTrue(mManager.setDynamicShortcuts(list(si1, si2)));
 
@@ -3203,8 +3139,8 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                     makeComponent(ShortcutActivity.class),
                     icon1,
                     makeIntent(Intent.ACTION_ASSIST, ShortcutActivity2.class,
-                            "key1", "val1", "nest", makeBundle("key", 123)), /* weight */ 10,
-                            /* chooserFilter=*/ null, /* chooserComponentNames=*/ null);
+                            "key1", "val1", "nest", makeBundle("key", 123)),
+                        /* weight */ 10);
 
             final ShortcutInfo si2 = makeShortcut(
                     "s2",
@@ -3212,8 +3148,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                         /* activity */ null,
                     icon2,
                     makeIntent(Intent.ACTION_ASSIST, ShortcutActivity3.class),
-                        /* weight */ 12, /* chooserFilter=*/ null,
-                        /* chooserComponentNames=*/ null);
+                        /* weight */ 12);
 
             assertTrue(mManager.setDynamicShortcuts(list(si1, si2)));
 
@@ -3235,8 +3170,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                     icon1,
                     makeIntent(Intent.ACTION_ASSIST, ShortcutActivity2.class,
                             "key1", "val1", "nest", makeBundle("key", 123)),
-                            /* weight */ 10, /* chooserFilter=*/ null,
-                            /* chooserComponentNames=*/ null);
+                        /* weight */ 10);
 
             final ShortcutInfo si2 = makeShortcut(
                     "s2",
@@ -3244,8 +3178,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                         /* activity */ null,
                     icon2,
                     makeIntent(Intent.ACTION_ASSIST, ShortcutActivity3.class),
-                            /* weight */ 12, /* chooserFilter=*/ null,
-                            /* chooserComponentNames=*/ null);
+                        /* weight */ 12);
 
             assertTrue(mManager.setDynamicShortcuts(list(si1, si2)));
 
@@ -6870,12 +6803,10 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
             mManager.setDynamicShortcuts(list(
                     makeShortcut("ms1", "title1",
                             new ComponentName(CALLING_PACKAGE_1, ShortcutActivity.class.getName()),
-                            /* icon */ null, new Intent("action1"), /* rank */ 0,
-                            /* chooserFilter=*/ null, /* chooserComponentNames=*/ null),
+                    /* icon */ null, new Intent("action1"), /* rank */ 0),
                     makeShortcut("ms2", "title2",
                             new ComponentName(CALLING_PACKAGE_1, ShortcutActivity.class.getName()),
-                            /* icon */ null, new Intent("action1"), /* rank */ 0, /* chooserFilter=*/ null,
-                            /* chooserComponentNames=*/ null)));
+                    /* icon */ null, new Intent("action1"), /* rank */ 0)));
         });
 
         runWithCaller(LAUNCHER_1, USER_0, () -> {

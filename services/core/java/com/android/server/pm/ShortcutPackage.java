@@ -20,7 +20,6 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.content.ComponentName;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.PackageInfo;
 import android.content.pm.ShortcutInfo;
 import android.content.res.Resources;
@@ -32,7 +31,6 @@ import android.util.Log;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
 import com.android.server.pm.ShortcutService.ShortcutOperation;
@@ -70,9 +68,6 @@ class ShortcutPackage extends ShortcutPackageItem {
     private static final String TAG_EXTRAS = "extras";
     private static final String TAG_SHORTCUT = "shortcut";
     private static final String TAG_CATEGORIES = "categories";
-    private static final String TAG_CHOOSER_EXTRAS = "chooser-extras";
-    private static final String TAG_CHOOSER_INTENT_FILTERS = "chooser-intent-filters";
-    private static final String TAG_CHOOSER_COMPONENT_NAMES = "chooser-component-names";
 
     private static final String ATTR_NAME = "name";
     private static final String ATTR_CALL_COUNT = "call-count";
@@ -96,7 +91,6 @@ class ShortcutPackage extends ShortcutPackageItem {
     private static final String ATTR_ICON_RES_ID = "icon-res";
     private static final String ATTR_ICON_RES_NAME = "icon-resname";
     private static final String ATTR_BITMAP_PATH = "bitmap-path";
-    private static final String ATTR_COMPONENT_NAMES = "component-names";
 
     private static final String NAME_CATEGORIES = "categories";
 
@@ -206,7 +200,7 @@ class ShortcutPackage extends ShortcutPackageItem {
         if (shortcut != null) {
             mShortcutUser.mService.removeIcon(getPackageUserId(), shortcut);
             shortcut.clearFlags(ShortcutInfo.FLAG_DYNAMIC | ShortcutInfo.FLAG_PINNED
-                    | ShortcutInfo.FLAG_MANIFEST | ShortcutInfo.FLAG_CHOOSER);
+                    | ShortcutInfo.FLAG_MANIFEST);
         }
         return shortcut;
     }
@@ -232,7 +226,7 @@ class ShortcutPackage extends ShortcutPackageItem {
         Preconditions.checkArgument(newShortcut.isEnabled(),
                 "add/setDynamicShortcuts() cannot publish disabled shortcuts");
 
-        addCorrectDynamicFlags(newShortcut);
+        newShortcut.addFlags(ShortcutInfo.FLAG_DYNAMIC);
 
         final ShortcutInfo oldShortcut = mShortcuts.get(newShortcut.getId());
 
@@ -254,17 +248,6 @@ class ShortcutPackage extends ShortcutPackageItem {
         }
 
         addShortcutInner(newShortcut);
-    }
-
-    // TODO: Sample code & JavaDoc for ShortcutManager needs updating to reflect the fact that
-    //       Chooser shortcuts are not always dynamic.
-    public void addCorrectDynamicFlags(@NonNull ShortcutInfo shortcut) {
-        if (shortcut.getIntent() != null) {
-            shortcut.addFlags(ShortcutInfo.FLAG_DYNAMIC);
-        }
-        if (!ArrayUtils.isEmpty(shortcut.getChooserIntentFilters())) {
-            shortcut.addFlags(ShortcutInfo.FLAG_CHOOSER);
-        }
     }
 
     /**
@@ -299,11 +282,11 @@ class ShortcutPackage extends ShortcutPackageItem {
         boolean changed = false;
         for (int i = mShortcuts.size() - 1; i >= 0; i--) {
             final ShortcutInfo si = mShortcuts.valueAt(i);
-            if (si.isDynamic() || si.isChooser()) {
+            if (si.isDynamic()) {
                 changed = true;
 
                 si.setTimestamp(now);
-                si.clearFlags(ShortcutInfo.FLAG_DYNAMIC | ShortcutInfo.FLAG_CHOOSER);
+                si.clearFlags(ShortcutInfo.FLAG_DYNAMIC);
                 si.setRank(0); // It may still be pinned, so clear the rank.
             }
         }
@@ -372,8 +355,7 @@ class ShortcutPackage extends ShortcutPackageItem {
         if (oldShortcut.isPinned()) {
 
             oldShortcut.setRank(0);
-            oldShortcut.clearFlags(ShortcutInfo.FLAG_DYNAMIC | ShortcutInfo.FLAG_MANIFEST
-                    | ShortcutInfo.FLAG_CHOOSER);
+            oldShortcut.clearFlags(ShortcutInfo.FLAG_DYNAMIC | ShortcutInfo.FLAG_MANIFEST);
             if (disable) {
                 oldShortcut.addFlags(ShortcutInfo.FLAG_DISABLED);
             }
@@ -1142,8 +1124,8 @@ class ShortcutPackage extends ShortcutPackageItem {
                     // Don't adjust ranks for manifest shortcuts.
                     continue;
                 }
-                // At this point, it must be dynamic or a chooser.
-                if (!si.isDynamicOrChooser()) {
+                // At this point, it must be dynamic.
+                if (!si.isDynamic()) {
                     s.wtf("Non-dynamic shortcut found.");
                     continue;
                 }
@@ -1320,7 +1302,7 @@ class ShortcutPackage extends ShortcutPackageItem {
             ShortcutService.writeAttr(out, ATTR_FLAGS,
                     si.getFlags() &
                             ~(ShortcutInfo.FLAG_HAS_ICON_FILE | ShortcutInfo.FLAG_HAS_ICON_RES
-                            | ShortcutInfo.FLAG_DYNAMIC | ShortcutInfo.FLAG_CHOOSER));
+                            | ShortcutInfo.FLAG_DYNAMIC));
         } else {
             // When writing for backup, ranks shouldn't be saved, since shortcuts won't be restored
             // as dynamic.
@@ -1343,36 +1325,15 @@ class ShortcutPackage extends ShortcutPackageItem {
         }
         final Intent[] intentsNoExtras = si.getIntentsNoExtras();
         final PersistableBundle[] intentsExtras = si.getIntentPersistableExtrases();
-        if (intentsNoExtras != null) {
-            final int numIntents = intentsNoExtras.length;
-            for (int i = 0; i < numIntents; i++) {
-                out.startTag(null, TAG_INTENT);
-                ShortcutService.writeAttr(out, ATTR_INTENT_NO_EXTRA, intentsNoExtras[i]);
-                ShortcutService.writeTagExtra(out, TAG_EXTRAS, intentsExtras[i]);
-                out.endTag(null, TAG_INTENT);
-            }
+        final int numIntents = intentsNoExtras.length;
+        for (int i = 0; i < numIntents; i++) {
+            out.startTag(null, TAG_INTENT);
+            ShortcutService.writeAttr(out, ATTR_INTENT_NO_EXTRA, intentsNoExtras[i]);
+            ShortcutService.writeTagExtra(out, TAG_EXTRAS, intentsExtras[i]);
+            out.endTag(null, TAG_INTENT);
         }
+
         ShortcutService.writeTagExtra(out, TAG_EXTRAS, si.getExtras());
-
-        ShortcutService.writeTagExtra(out, TAG_CHOOSER_EXTRAS, si.getChooserExtras());
-
-        final IntentFilter[] intentFilters = si.getChooserIntentFilters();
-        if (intentFilters != null) {
-            for (int i = 0; i < intentFilters.length; i++) {
-                out.startTag(null, TAG_CHOOSER_INTENT_FILTERS);
-                intentFilters[i].writeToXml(out);
-                out.endTag(null, TAG_CHOOSER_INTENT_FILTERS);
-            }
-        }
-
-        final ComponentName[] componentNames = si.getChooserComponentNames();
-        if (componentNames != null) {
-            for (int i = 0; i < componentNames.length; i++) {
-                out.startTag(null, TAG_CHOOSER_COMPONENT_NAMES);
-                ShortcutService.writeAttr(out, ATTR_COMPONENT_NAMES, componentNames[i]);
-                out.endTag(null, TAG_CHOOSER_COMPONENT_NAMES);
-            }
-        }
 
         out.endTag(null, TAG_SHORTCUT);
     }
@@ -1445,9 +1406,6 @@ class ShortcutPackage extends ShortcutPackageItem {
         String iconResName;
         String bitmapPath;
         ArraySet<String> categories = null;
-        PersistableBundle chooserExtras;
-        List<IntentFilter> chooserIntentFilters = new ArrayList<>();
-        List<ComponentName> chooserComponentNames = new ArrayList<>();
 
         id = ShortcutService.parseStringAttribute(parser, ATTR_ID);
         activityComponent = ShortcutService.parseComponentNameAttribute(parser,
@@ -1507,18 +1465,6 @@ class ShortcutPackage extends ShortcutPackageItem {
                             categories.add(ar[i]);
                         }
                     }
-                    continue;
-                case TAG_CHOOSER_EXTRAS:
-                    chooserExtras = PersistableBundle.restoreFromXml(parser);
-                    continue;
-                case TAG_CHOOSER_COMPONENT_NAMES:
-                    chooserComponentNames.add(ShortcutService.parseComponentNameAttribute(parser,
-                            ATTR_ACTIVITY));
-                    continue;
-                case TAG_CHOOSER_INTENT_FILTERS:
-                    IntentFilter toAdd = new IntentFilter();
-                    toAdd.readFromXml(parser);
-                    chooserIntentFilters.add(toAdd);
                     continue;
             }
             throw ShortcutService.throwForInvalidTag(depth, tag);
@@ -1613,10 +1559,10 @@ class ShortcutPackage extends ShortcutPackageItem {
         // Verify each shortcut's status.
         for (int i = mShortcuts.size() - 1; i >= 0; i--) {
             final ShortcutInfo si = mShortcuts.valueAt(i);
-            if (!(si.isDeclaredInManifest() || si.isDynamicOrChooser() || si.isPinned())) {
+            if (!(si.isDeclaredInManifest() || si.isDynamic() || si.isPinned())) {
                 failed = true;
                 Log.e(TAG_VERIFY, "Package " + getPackageName() + ": shortcut " + si.getId()
-                        + " is not manifest, dynamic, chooser or pinned.");
+                        + " is not manifest, dynamic or pinned.");
             }
             if (si.isDeclaredInManifest() && si.isDynamic()) {
                 failed = true;
@@ -1657,11 +1603,6 @@ class ShortcutPackage extends ShortcutPackageItem {
                 failed = true;
                 Log.e(TAG_VERIFY, "Package " + getPackageName() + ": shortcut " + si.getId()
                         + " has a dummy target activity");
-            }
-            if (si.getIntent() == null && !si.isChooser()) {
-                failed = true;
-                Log.e(TAG_VERIFY, "Package " + getPackageName() + ": shortcut " + si.getId()
-                        + " has a null intent, but is not a chooser");
             }
         }
 
