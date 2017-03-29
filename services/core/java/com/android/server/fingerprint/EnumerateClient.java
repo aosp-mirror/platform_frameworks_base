@@ -58,7 +58,7 @@ public abstract class EnumerateClient extends ClientMonitor {
     public int stop(boolean initiatedByClient) {
         IBiometricsFingerprint daemon = getFingerprintDaemon();
         if (daemon == null) {
-            Slog.w(TAG, "stopEnumeration: no fingerprint HAL!");
+            Slog.w(TAG, "stopAuthentication: no fingerprint HAL!");
             return ERROR_ESRCH;
         }
         try {
@@ -102,12 +102,12 @@ public abstract class EnumerateClient extends ClientMonitor {
     @Override
     public boolean onEnrollResult(int fingerId, int groupId, int rem) {
         if (DEBUG) Slog.w(TAG, "onEnrollResult() called for enumerate!");
-        return true; // Invalid for Enumerate.
+        return true; // Invalid for Remove
     }
 
     @Override
     public boolean onRemoved(int fingerId, int groupId, int remaining) {
         if (DEBUG) Slog.w(TAG, "onRemoved() called for enumerate!");
-        return true; // Invalid for Enumerate.
+        return true; // Invalid for Authenticate
     }
 }
