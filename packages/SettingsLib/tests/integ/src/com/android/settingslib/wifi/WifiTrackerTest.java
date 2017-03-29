@@ -20,9 +20,11 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -579,5 +581,41 @@ public class WifiTrackerTest {
         // a message to the dead work handler
         mWorkerThread.quit();
         updateScores();
+    }
+
+    /**
+     * Verify that tracking a Passpoint AP on a device with Passpoint disabled doesn't cause
+     * any crash.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void trackPasspointApWithPasspointDisabled() throws Exception {
+        WifiTracker tracker = createMockedWifiTracker();
+
+        // Add a Passpoint AP to the scan results.
+        List<ScanResult> results = new ArrayList<>();
+        ScanResult passpointAp = new ScanResult(
+                WifiSsid.createFromAsciiEncoded(SSID_1),
+                BSSID_1,
+                0, // hessid
+                0, //anqpDomainId
+                null, // osuProviders
+                "", // capabilities
+                RSSI_1,
+                0, // frequency
+                SystemClock.elapsedRealtime() * 1000 /* microsecond timestamp */);
+        passpointAp.setFlag(ScanResult.FLAG_PASSPOINT_NETWORK);
+        results.add(passpointAp);
+
+        // Update access point and verify UnsupportedOperationException is being caught for
+        // call to WifiManager#getMatchingWifiConfig.
+        when(mockWifiManager.getConfiguredNetworks())
+                .thenReturn(new ArrayList<WifiConfiguration>());
+        when(mockWifiManager.getScanResults()).thenReturn(results);
+        doThrow(new UnsupportedOperationException())
+                .when(mockWifiManager).getMatchingWifiConfig(any(ScanResult.class));
+        tracker.forceUpdate();
+        verify(mockWifiManager).getMatchingWifiConfig(any(ScanResult.class));
     }
 }
