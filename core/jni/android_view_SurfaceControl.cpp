@@ -735,16 +735,6 @@ static jobject nativeGetHandle(JNIEnv* env, jclass clazz, jlong nativeObject) {
     return javaObjectForIBinder(env, ctrl->getHandle());
 }
 
-static jboolean nativeGetTransformToDisplayInverse(JNIEnv* env, jclass clazz, jlong nativeObject) {
-    bool out = false;
-    auto ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
-    status_t status = ctrl->getTransformToDisplayInverse(&out);
-    if (status != NO_ERROR) {
-        return false;
-    }
-    return out;
-}
-
 static jobject nativeGetHdrCapabilities(JNIEnv* env, jclass clazz, jobject tokenObject) {
     sp<IBinder> token(ibinderForJavaObject(env, tokenObject));
     if (token == NULL) return NULL;
@@ -854,8 +844,6 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetOverrideScalingMode },
     {"nativeGetHandle", "(J)Landroid/os/IBinder;",
             (void*)nativeGetHandle },
-    {"nativeGetTransformToDisplayInverse", "(J)Z",
-     (void*)nativeGetTransformToDisplayInverse },
     {"nativeScreenshotToBuffer",
      "(Landroid/os/IBinder;Landroid/graphics/Rect;IIIIZZI)Landroid/graphics/GraphicBuffer;",
      (void*)nativeScreenshotToBuffer },
