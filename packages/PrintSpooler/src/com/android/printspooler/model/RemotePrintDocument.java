@@ -113,12 +113,14 @@ public final class RemotePrintDocument {
                             }
                             // Notify we are done.
                             mState = STATE_UPDATED;
+                            mDocumentInfo.updated = true;
                             notifyUpdateCompleted();
                         }
                     }
                 } else {
                     // We always notify after a write.
                     mState = STATE_UPDATED;
+                    mDocumentInfo.updated = true;
                     notifyUpdateCompleted();
                 }
                 runPendingCommand();
@@ -229,6 +231,7 @@ public final class RemotePrintDocument {
                   mDocumentInfo, oldAttributes, attributes, preview, mCommandResultCallback);
             scheduleCommand(command);
 
+            mDocumentInfo.updated = false;
             mState = STATE_UPDATING;
         // If no layout in progress and we don't have all pages - schedule a write.
         } else if ((!(mCurrentCommand instanceof LayoutCommand)
@@ -249,6 +252,7 @@ public final class RemotePrintDocument {
                     mDocumentInfo.fileProvider, mCommandResultCallback);
             scheduleCommand(command);
 
+            mDocumentInfo.updated = false;
             mState = STATE_UPDATING;
         } else {
             willUpdate = false;
@@ -396,7 +400,7 @@ public final class RemotePrintDocument {
 
     private void notifyUpdateFailed(CharSequence error) {
         if (DEBUG) {
-            Log.i(LOG_TAG, "[CALLING] onUpdateCompleted()");
+            Log.i(LOG_TAG, "[CALLING] notifyUpdateFailed()");
         }
         mUpdateCallbacks.onUpdateFailed(error);
     }
