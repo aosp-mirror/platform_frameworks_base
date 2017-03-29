@@ -16,11 +16,15 @@
 
 package com.android.systemui.pip.phone;
 
+import static android.app.AppOpsManager.MODE_ALLOWED;
+import static android.app.AppOpsManager.OP_PICTURE_IN_PICTURE;
 import static android.app.PendingIntent.FLAG_CANCEL_CURRENT;
 import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.provider.Settings.ACTION_PICTURE_IN_PICTURE_SETTINGS;
 
+import android.app.AppOpsManager;
+import android.app.AppOpsManager.OnOpChangedListener;
 import android.app.IActivityManager;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -51,12 +55,36 @@ public class PipNotificationController {
 
     private Context mContext;
     private IActivityManager mActivityManager;
+    private AppOpsManager mAppOpsManager;
     private NotificationManager mNotificationManager;
 
-    public PipNotificationController(Context context, IActivityManager activityManager) {
+    private PipMotionHelper mMotionHelper;
+
+    private AppOpsManager.OnOpChangedListener mAppOpsChangedListener = new OnOpChangedListener() {
+        @Override
+        public void onOpChanged(String op, String packageName) {
+            try {
+                // Dismiss the PiP once the user disables the app ops setting for that package
+                final ApplicationInfo appInfo = mContext.getPackageManager().getApplicationInfo(
+                        packageName, 0);
+                if (mAppOpsManager.checkOpNoThrow(OP_PICTURE_IN_PICTURE, appInfo.uid, packageName)
+                        != MODE_ALLOWED) {
+                    mMotionHelper.dismissPip();
+                }
+            } catch (NameNotFoundException e) {
+                // Unregister the listener if the package can't be found
+                unregisterAppOpsListener();
+            }
+        }
+    };
+
+    public PipNotificationController(Context context, IActivityManager activityManager,
+            PipMotionHelper motionHelper) {
         mContext = context;
         mActivityManager = activityManager;
+        mAppOpsManager = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
         mNotificationManager = NotificationManager.from(context);
+        mMotionHelper = motionHelper;
     }
 
     public void onActivityPinned(String packageName) {
@@ -77,9 +105,15 @@ public class PipNotificationController {
             // Show the new notification
             mNotificationManager.notify(NOTIFICATION_TAG, NOTIFICATION_ID, builder.build());
         }
+
+        // Register for changes to the app ops setting for this package while it is in PiP
+        registerAppOpsListener(packageName);
     }
 
     public void onActivityUnpinned() {
+        // Unregister for changes to the previously PiP'ed package
+        unregisterAppOpsListener();
+
         ComponentName topPipActivity = PipUtils.getTopPinnedActivity(mContext, mActivityManager);
         if (topPipActivity != null) {
             onActivityPinned(topPipActivity.getPackageName());
@@ -122,5 +156,14 @@ public class PipNotificationController {
             return true;
         }
         return false;
+    }
+
+    private void registerAppOpsListener(String packageName) {
+        mAppOpsManager.startWatchingMode(OP_PICTURE_IN_PICTURE, packageName,
+                mAppOpsChangedListener);
+    }
+
+    private void unregisterAppOpsListener() {
+        mAppOpsManager.stopWatchingMode(mAppOpsChangedListener);
     }
 }
