@@ -1149,21 +1149,27 @@ public class RadioManager {
      * {@link RadioTuner#getProgramInformation(RadioManager.ProgramInfo[])} */
     public static class ProgramInfo implements Parcelable {
 
+        // sourced from hardware/interfaces/broadcastradio/1.1/types.hal
+        private final static int FLAG_LIVE = 1 << 0;
+        private final static int FLAG_MUTED = 1 << 1;
+
         private final int mChannel;
         private final int mSubChannel;
         private final boolean mTuned;
         private final boolean mStereo;
         private final boolean mDigital;
+        private final int mFlags;
         private final int mSignalStrength;
         private final RadioMetadata mMetadata;
 
         ProgramInfo(int channel, int subChannel, boolean tuned, boolean stereo,
-                boolean digital, int signalStrength, RadioMetadata metadata) {
+                boolean digital, int signalStrength, RadioMetadata metadata, int flags) {
             mChannel = channel;
             mSubChannel = subChannel;
             mTuned = tuned;
             mStereo = stereo;
             mDigital = digital;
+            mFlags = flags;
             mSignalStrength = signalStrength;
             mMetadata = metadata;
         }
@@ -1199,6 +1205,30 @@ public class RadioManager {
         public boolean isDigital() {
             return mDigital;
         }
+
+        /**
+         * {@code true} if the program is currently playing live stream.
+         * This may result in a slightly altered reception parameters,
+         * usually targetted at reduced latency.
+         *
+         * @hide FutureFeature
+         */
+        public boolean isLive() {
+            return (mFlags & FLAG_LIVE) != 0;
+        }
+
+        /**
+         * {@code true} if radio stream is not playing, ie. due to bad reception
+         * conditions or buffering. In this state volume knob MAY be disabled to
+         * prevent user increasing volume too much.
+         * It does NOT mean the user has muted audio.
+         *
+         * @hide FutureFeature
+         */
+        public boolean isMuted() {
+            return (mFlags & FLAG_MUTED) != 0;
+        }
+
         /** Signal strength indicator from 0 (no signal) to 100 (excellent)
          * @return the signal strength indication.
          */
@@ -1225,6 +1255,7 @@ public class RadioManager {
             } else {
                 mMetadata = null;
             }
+            mFlags = in.readInt();
         }
 
         public static final Parcelable.Creator<ProgramInfo> CREATOR
@@ -1252,6 +1283,7 @@ public class RadioManager {
                 dest.writeByte((byte)1);
                 mMetadata.writeToParcel(dest, flags);
             }
+            dest.writeInt(mFlags);
         }
 
         @Override
@@ -1263,7 +1295,7 @@ public class RadioManager {
         public String toString() {
             return "ProgramInfo [mChannel=" + mChannel + ", mSubChannel=" + mSubChannel
                     + ", mTuned=" + mTuned + ", mStereo=" + mStereo + ", mDigital=" + mDigital
-                    + ", mSignalStrength=" + mSignalStrength
+                    + ", mFlags=" + mFlags + ", mSignalStrength=" + mSignalStrength
                     + ((mMetadata == null) ? "" : (", mMetadata=" + mMetadata.toString()))
                     + "]";
         }
@@ -1277,6 +1309,7 @@ public class RadioManager {
             result = prime * result + (mTuned ? 1 : 0);
             result = prime * result + (mStereo ? 1 : 0);
             result = prime * result + (mDigital ? 1 : 0);
+            result = prime * result + mFlags;
             result = prime * result + mSignalStrength;
             result = prime * result + ((mMetadata == null) ? 0 : mMetadata.hashCode());
             return result;
@@ -1298,6 +1331,8 @@ public class RadioManager {
             if (mStereo != other.isStereo())
                 return false;
             if (mDigital != other.isDigital())
+                return false;
+            if (mFlags != other.mFlags)
                 return false;
             if (mSignalStrength != other.getSignalStrength())
                 return false;
