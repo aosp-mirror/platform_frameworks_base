@@ -593,7 +593,7 @@ public class AssistStructure implements Parcelable {
         // fields (viewId and childId) of the field.
         AutofillId mAutofillId;
         @View.AutofillType int mAutofillType;
-        @Nullable String[] mAutofillHint;
+        @Nullable String[] mAutofillHints;
         AutofillValue mAutofillValue;
         String[] mAutofillOptions;
         boolean mSanitized;
@@ -685,7 +685,7 @@ public class AssistStructure implements Parcelable {
                 mSanitized = in.readInt() == 1;
                 mAutofillId = in.readParcelable(null);
                 mAutofillType = in.readInt();
-                mAutofillHint = in.readStringArray();
+                mAutofillHints = in.readStringArray();
                 mAutofillValue = in.readParcelable(null);
                 mAutofillOptions = in.readStringArray();
             }
@@ -830,7 +830,7 @@ public class AssistStructure implements Parcelable {
                 out.writeInt(mSanitized ? 1 : 0);
                 out.writeParcelable(mAutofillId, 0);
                 out.writeInt(mAutofillType);
-                out.writeStringArray(mAutofillHint);
+                out.writeStringArray(mAutofillHints);
                 final AutofillValue sanitizedValue = writeSensitive ? mAutofillValue : null;
                 out.writeParcelable(sanitizedValue,  0);
                 out.writeStringArray(mAutofillOptions);
@@ -973,10 +973,10 @@ public class AssistStructure implements Parcelable {
          * <p>It's only set when the {@link AssistStructure} is used for autofilling purposes, not
          * for assist.</p>
          *
-         * @return The hint for this view
+         * @return The hints for this view
          */
-        @Nullable public String[] getAutoFillHint() {
-            return mAutofillHint;
+        @Nullable public String[] getAutoFillHints() {
+            return mAutofillHints;
         }
 
         /**
@@ -1678,8 +1678,8 @@ public class AssistStructure implements Parcelable {
         }
 
         @Override
-        public void setAutofillHint(@Nullable String[] hint) {
-            mNode.mAutofillHint = hint;
+        public void setAutofillHints(@Nullable String[] hints) {
+            mNode.mAutofillHints = hints;
         }
 
         @Override
@@ -1836,7 +1836,7 @@ public class AssistStructure implements Parcelable {
                     + ", type=" + node.getAutofillType()
                     + ", options=" + Arrays.toString(node.getAutofillOptions())
                     + ", inputType=" + node.getInputType()
-                    + ", hint=" + Arrays.toString(node.getAutoFillHint())
+                    + ", hints=" + Arrays.toString(node.getAutoFillHints())
                     + ", value=" + node.getAutofillValue()
                     + ", sanitized=" + node.isSanitized());
         }
