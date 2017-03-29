@@ -17,6 +17,7 @@
 
 package com.android.server.print;
 
+import static com.android.internal.util.Preconditions.checkArgument;
 import static com.android.internal.util.Preconditions.checkNotNull;
 
 import android.Manifest;
@@ -50,6 +51,7 @@ import android.util.ExceptionUtils;
 import android.util.Slog;
 import android.util.Xml;
 
+import com.android.internal.app.IAppOpsService;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.CollectionUtils;
@@ -98,12 +100,15 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
     private IDeviceIdleController mIdleController;
     private IFindDeviceCallback mFindDeviceCallback;
     private ServiceConnection mServiceConnection;
+    private IAppOpsService mAppOpsManager;
 
     public CompanionDeviceManagerService(Context context) {
         super(context);
         mImpl = new CompanionDeviceManagerImpl();
         mIdleController = IDeviceIdleController.Stub.asInterface(
                 ServiceManager.getService(Context.DEVICE_IDLE_CONTROLLER));
+        mAppOpsManager = IAppOpsService.Stub.asInterface(
+                ServiceManager.getService(Context.APP_OPS_SERVICE));
         registerPackageMonitor();
     }
 
@@ -182,13 +187,14 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
         public void associate(
                 AssociationRequest request,
                 IFindDeviceCallback callback,
-                String callingPackage) {
+                String callingPackage) throws RemoteException {
             if (DEBUG) {
                 Slog.i(LOG_TAG, "associate(request = " + request + ", callback = " + callback
                         + ", callingPackage = " + callingPackage + ")");
             }
             checkNotNull(request, "Request cannot be null");
             checkNotNull(callback, "Callback cannot be null");
+            checkCallerIsSystemOr(callingPackage);
             final long callingIdentity = Binder.clearCallingIdentity();
             try {
                 //TODO bindServiceAsUser
@@ -203,20 +209,40 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
 
 
         @Override
-        public List<String> getAssociations(String callingPackage) {
+        public List<String> getAssociations(String callingPackage, int userId)
+                throws RemoteException {
+            checkCallerIsSystemOr(callingPackage, userId);
             return CollectionUtils.map(
-                    readAllAssociations(getUserId(), callingPackage),
+                    readAllAssociations(userId, callingPackage),
                     a -> a.deviceAddress);
         }
 
         @Override
-        public void disassociate(String deviceMacAddress, String callingPackage) {
-            updateAssociations((associations) -> ArrayUtils.remove(associations,
-                    new Association(getUserId(), checkNotNull(deviceMacAddress), callingPackage)));
+        public void disassociate(String deviceMacAddress, String callingPackage)
+                throws RemoteException {
+            checkNotNull(deviceMacAddress);
+            checkCallerIsSystemOr(callingPackage);
+            updateAssociations(associations -> ArrayUtils.remove(associations,
+                    new Association(getCallingUserId(), deviceMacAddress, callingPackage)));
+        }
+
+        private void checkCallerIsSystemOr(String pkg) throws RemoteException {
+            checkCallerIsSystemOr(pkg, getCallingUserId());
+        }
+
+        private void checkCallerIsSystemOr(String pkg, int userId) throws RemoteException {
+            if (getCallingUserId() == UserHandle.USER_SYSTEM) {
+                return;
+            }
+
+            checkArgument(getCallingUserId() == userId,
+                    "Must be called by either same user or system");
+
+            mAppOpsManager.checkPackage(Binder.getCallingUid(), pkg);
         }
     }
 
-    private int getUserId() {
+    private int getCallingUserId() {
         return UserHandle.getUserId(Binder.getCallingUid());
     }
 
@@ -320,11 +346,11 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
 
     private void recordAssociation(String priviledgedPackage, String deviceAddress) {
         updateAssociations((associations) -> ArrayUtils.add(associations,
-                new Association(getUserId(), deviceAddress, priviledgedPackage)));
+                new Association(getCallingUserId(), deviceAddress, priviledgedPackage)));
     }
 
     private void updateAssociations(Function<ArrayList<Association>, List<Association>> update) {
-        updateAssociations(update, getUserId());
+        updateAssociations(update, getCallingUserId());
     }
 
     private void updateAssociations(Function<ArrayList<Association>, List<Association>> update,
