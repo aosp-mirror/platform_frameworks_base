@@ -56,9 +56,9 @@ public final class AutofillManager {
 
     /**
      * Intent extra: The assist structure which captures the filled screen.
+     *
      * <p>
      * Type: {@link android.app.assist.AssistStructure}
-     * </p>
      */
     public static final String EXTRA_ASSIST_STRUCTURE =
             "android.view.autofill.extra.ASSIST_STRUCTURE";
@@ -72,10 +72,24 @@ public final class AutofillManager {
      * <p>
      * Type: {@link android.service.autofill.FillResponse} or a
      * {@link android.service.autofill.Dataset}
-     * </p>
      */
     public static final String EXTRA_AUTHENTICATION_RESULT =
             "android.view.autofill.extra.AUTHENTICATION_RESULT";
+
+    /**
+     * Intent extra: The optional extras provided by the
+     * {@link android.service.autofill.AutofillService}.
+     *
+     * <p>For example, when the service responds to a {@link
+     * android.service.autofill.FillCallback#onSuccess(android.service.autofill.FillResponse)} with
+     * a {@code FillResponse} that requires authentication, the Intent that launches the
+     * service authentication will contain the Bundle set by
+     * {@link android.service.autofill.FillResponse.Builder#setExtras(Bundle)} on this extra.
+     *
+     * <p>
+     * Type: {@link android.os.Bundle}
+     */
+    public static final String EXTRA_DATA_EXTRAS = "android.view.autofill.extra.DATA_EXTRAS";
 
     // Public flags start from the lowest bit
     /**
