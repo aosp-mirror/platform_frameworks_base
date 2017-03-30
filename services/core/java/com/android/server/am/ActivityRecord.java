@@ -1820,14 +1820,22 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     }
 
     @Override
-    public boolean keyDispatchingTimedOut(String reason) {
+    public boolean keyDispatchingTimedOut(String reason, int windowPid) {
         ActivityRecord anrActivity;
         ProcessRecord anrApp;
+        boolean windowFromSameProcessAsActivity;
         synchronized (service) {
             anrActivity = getWaitingHistoryRecordLocked();
             anrApp = app;
+            windowFromSameProcessAsActivity = app == null || app.pid == windowPid;
         }
-        return service.inputDispatchingTimedOut(anrApp, anrActivity, this, false, reason);
+        if (windowFromSameProcessAsActivity) {
+            return service.inputDispatchingTimedOut(anrApp, anrActivity, this, false, reason);
+        } else {
+            // In this case another process added windows using this activity token. So, we call the
+            // generic service input dispatch timed out method so that the right process is blamed.
+            return service.inputDispatchingTimedOut(windowPid, false /* aboveSystem */, reason) < 0;
+        }
     }
 
     private ActivityRecord getWaitingHistoryRecordLocked() {
