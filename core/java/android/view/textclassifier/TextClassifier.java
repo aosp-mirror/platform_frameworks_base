@@ -39,9 +39,10 @@ public interface TextClassifier {
     String TYPE_ADDRESS = "address";
     String TYPE_URL = "url";
 
+    /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({
-            TYPE_OTHER, TYPE_EMAIL, TYPE_PHONE, TYPE_ADDRESS
+            TYPE_OTHER, TYPE_EMAIL, TYPE_PHONE, TYPE_ADDRESS, TYPE_URL
     })
     @interface EntityType {}
 
