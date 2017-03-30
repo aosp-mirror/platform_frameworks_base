@@ -10057,6 +10057,9 @@ public class BatteryStatsImpl extends BatteryStats {
 
     public void setBatteryStateLocked(int status, int health, int plugType, int level,
             int temp, int volt, int chargeUAh, int chargeFullUAh) {
+        // Temperature is encoded without the signed bit, so clamp any negative temperatures to 0.
+        temp = Math.max(0, temp);
+
         final boolean onBattery = plugType == BATTERY_PLUGGED_NONE;
         final long uptime = mClocks.uptimeMillis();
         final long elapsedRealtime = mClocks.elapsedRealtime();
