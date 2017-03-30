@@ -5778,21 +5778,19 @@ public class StatusBar extends SystemUI implements DemoMode,
                 startAppNotificationSettingsActivity(pkg, appUid, channel);
             };
             final View.OnClickListener onDoneClick = (View v) -> {
+                saveAndCloseNotificationMenu(info, row, guts, v);
+            };
+            final NotificationInfo.CheckSaveListener checkSaveListener = (Runnable saveImportance) -> {
                 // If the user has security enabled, show challenge if the setting is changed.
-                if (info.hasImportanceChanged()
-                        && isLockscreenPublicMode(userHandle.getIdentifier())
+                if (isLockscreenPublicMode(userHandle.getIdentifier())
                         && (mState == StatusBarState.KEYGUARD
                                 || mState == StatusBarState.SHADE_LOCKED)) {
-                    OnDismissAction dismissAction = new OnDismissAction() {
-                        @Override
-                        public boolean onDismiss() {
-                            saveAndCloseNotificationMenu(info, row, guts, v);
-                            return true;
-                        }
-                    };
-                    onLockedNotificationImportanceChange(dismissAction);
+                    onLockedNotificationImportanceChange(() -> {
+                        saveImportance.run();
+                        return true;
+                    });
                 } else {
-                    saveAndCloseNotificationMenu(info, row, guts, v);
+                    saveImportance.run();
                 }
             };
 
@@ -5815,7 +5813,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             }
             try {
                 info.bindNotification(pmUser, iNotificationManager, pkg, new ArrayList(channels),
-                        onSettingsClick, onDoneClick, mNonBlockablePkgs);
+                        onSettingsClick, onDoneClick, checkSaveListener, mNonBlockablePkgs);
             } catch (RemoteException e) {
                 Log.e(TAG, e.toString());
             }
