@@ -113,8 +113,7 @@ class ResourceEntry {
                                  const android::StringPiece& product);
   ResourceConfigValue* FindOrCreateValue(const ConfigDescription& config,
                                          const android::StringPiece& product);
-  std::vector<ResourceConfigValue*> findAllValues(
-      const ConfigDescription& config);
+  std::vector<ResourceConfigValue*> FindAllValues(const ConfigDescription& config);
   std::vector<ResourceConfigValue*> FindValuesIf(
       const std::function<bool(ResourceConfigValue*)>& f);
 
@@ -189,8 +188,7 @@ class ResourceTable {
    * When a collision of resources occurs, this method decides which value to
    * keep.
    */
-  static CollisionResult ResolveValueCollision(Value* existing,
-                                               Value* incoming);
+  static CollisionResult ResolveValueCollision(Value* existing, Value* incoming);
 
   bool AddResource(const ResourceNameRef& name, const ConfigDescription& config,
                    const android::StringPiece& product, std::unique_ptr<Value> value,
@@ -274,20 +272,24 @@ class ResourceTable {
   std::map<size_t, std::string> included_packages_;
 
  private:
+  // The function type that validates a symbol name. Returns a non-empty StringPiece representing
+  // the offending character (which may be more than one byte in UTF-8). Returns an empty string
+  // if the name was valid.
+  using NameValidator = android::StringPiece(const android::StringPiece&);
+
   ResourceTablePackage* FindOrCreatePackage(const android::StringPiece& name);
 
   bool AddResourceImpl(const ResourceNameRef& name, const ResourceId& res_id,
                        const ConfigDescription& config, const android::StringPiece& product,
-                       std::unique_ptr<Value> value, const char* valid_chars,
+                       std::unique_ptr<Value> value, NameValidator name_validator,
                        const CollisionResolverFunc& conflict_resolver, IDiagnostics* diag);
 
   bool AddFileReferenceImpl(const ResourceNameRef& name, const ConfigDescription& config,
                             const Source& source, const android::StringPiece& path, io::IFile* file,
-                            const char* valid_chars, IDiagnostics* diag);
+                            NameValidator name_validator, IDiagnostics* diag);
 
   bool SetSymbolStateImpl(const ResourceNameRef& name, const ResourceId& res_id,
-                          const Symbol& symbol, const char* valid_chars,
-                          IDiagnostics* diag);
+                          const Symbol& symbol, NameValidator name_validator, IDiagnostics* diag);
 
   DISALLOW_COPY_AND_ASSIGN(ResourceTable);
 };
