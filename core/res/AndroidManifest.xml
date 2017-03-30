@@ -3128,6 +3128,15 @@
     <permission android:name="android.permission.BIND_CHOOSER_TARGET_SERVICE"
         android:protectionLevel="signature" />
 
+    <!-- @SystemApi Must be required by services that extend
+         {@link android.service.resolver.ResolverRankerService}, to ensure that only the system can
+         bind to them.
+         <p>Protection level: signature
+         @hide
+    -->
+    <permission android:name="android.permission.BIND_RESOLVER_RANKER_SERVICE"
+        android:protectionLevel="signature" />
+
     <!-- Must be required by a {@link
          android.service.notification.ConditionProviderService},
          to ensure that only the system can bind to it.
@@ -3633,6 +3642,14 @@
                  android:permission="android.permission.BIND_JOB_SERVICE" >
         </service>
 
+        <service android:name="com.android.internal.app.LRResolverRankerService"
+            android:permission="android.permission.BIND_RESOLVER_RANKER_SERVICE"
+            android:exported="false"
+            android:priority="-1" >
+            <intent-filter>
+                <action android:name="android.service.resolver.ResolverRankerService" />
+            </intent-filter>
+        </service>
     </application>
 
 </manifest>

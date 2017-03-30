@@ -320,6 +320,8 @@ LOCAL_SRC_FILES += \
 	core/java/android/service/wallpaper/IWallpaperService.aidl \
 	core/java/android/service/chooser/IChooserTargetService.aidl \
 	core/java/android/service/chooser/IChooserTargetResult.aidl \
+	core/java/android/service/resolver/IResolverRankerService.aidl \
+	core/java/android/service/resolver/IResolverRankerResult.aidl \
 	core/java/android/text/ITextClassificationService.aidl \
 	core/java/android/view/accessibility/IAccessibilityInteractionConnection.aidl\
 	core/java/android/view/accessibility/IAccessibilityInteractionConnectionCallback.aidl\
@@ -729,6 +731,7 @@ aidl_files := \
 	frameworks/base/core/java/android/service/notification/SnoozeCriterion.aidl \
 	frameworks/base/core/java/android/service/notification/StatusBarNotification.aidl \
 	frameworks/base/core/java/android/service/chooser/ChooserTarget.aidl \
+	frameworks/base/core/java/android/service/resolver/ResolverTarget.aidl \
 	frameworks/base/core/java/android/speech/tts/Voice.aidl \
 	frameworks/base/core/java/android/app/usage/CacheQuotaHint.aidl \
 	frameworks/base/core/java/android/app/usage/ExternalStorageStats.aidl \
