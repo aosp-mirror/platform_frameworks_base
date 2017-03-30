@@ -638,6 +638,7 @@ public final class BluetoothAdapter {
      * <p>
      * Use {@link #isLePeriodicAdvertisingSupported()} to check whether LE Periodic Advertising is
      * supported on this device before calling this method.
+     * @hide
      */
     public PeriodicAdvertisingManager getPeriodicAdvertisingManager() {
       if (!getLeAccess())
