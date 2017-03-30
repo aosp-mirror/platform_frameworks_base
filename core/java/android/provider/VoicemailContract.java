@@ -112,7 +112,7 @@ public class VoicemailContract {
     /** @hide */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_VOICEMAIL_SMS_RECEIVED =
-            "android.intent.action.VOICEMAIL_SMS_RECEIVED";
+            "com.android.internal.provider.action.VOICEMAIL_SMS_RECEIVED";
 
     /**
      * Extra in {@link #ACTION_VOICEMAIL_SMS_RECEIVED} indicating the content of the SMS.

@@ -444,6 +444,7 @@
     <protected-broadcast android:name="android.telecom.action.PHONE_ACCOUNT_UNREGISTERED" />
     <protected-broadcast android:name="android.telecom.action.SHOW_MISSED_CALLS_NOTIFICATION" />
     <protected-broadcast android:name="android.telephony.action.CARRIER_CONFIG_CHANGED" />
+    <protected-broadcast android:name="android.telephony.action.SHOW_VOICEMAIL_NOTIFICATION" />
 
     <protected-broadcast android:name="com.android.bluetooth.btservice.action.ALARM_WAKEUP" />
     <protected-broadcast android:name="com.android.server.action.NETWORK_STATS_POLL" />
