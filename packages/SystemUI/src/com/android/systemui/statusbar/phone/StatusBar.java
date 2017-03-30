@@ -2996,8 +2996,9 @@ public class StatusBar extends SystemUI implements DemoMode,
         mStatusBarWindowManager.setPanelVisible(false);
         mStatusBarWindowManager.setForceStatusBarVisible(false);
 
-        // Close any "App info" popups that might have snuck on-screen
-        dismissPopups();
+        // Close any guts that might be visible
+        closeAndSaveGuts(true /* removeLeavebehind */, true /* force */, true /* removeControls */,
+                -1 /* x */, -1 /* y */, true /* resetMenu */);
 
         runPostCollapseRunnables();
         setInteracting(StatusBarManager.WINDOW_STATUS_BAR, false);
@@ -4617,6 +4618,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     public void onDragDownReset() {
         mStackScroller.setDimmed(true /* dimmed */, true /* animated */);
         mStackScroller.resetScrollPosition();
+        mStackScroller.resetCheckSnoozeLeavebehind();
     }
 
     @Override
@@ -4627,6 +4629,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     @Override
     public void onTouchSlopExceeded() {
         mStackScroller.removeLongPressCallback();
+        mStackScroller.checkSnoozeLeavebehind();
     }
 
     @Override
@@ -5800,8 +5803,10 @@ public class StatusBar extends SystemUI implements DemoMode,
             if (!g.willBeRemoved() && !row.isRemoved()) {
                 mStackScroller.onHeightChanged(row, !isPanelFullyCollapsed() /* needsAnimation */);
             }
-            mNotificationGutsExposed = null;
-            mGutsMenuItem = null;
+            if (mNotificationGutsExposed == g) {
+                mNotificationGutsExposed = null;
+                mGutsMenuItem = null;
+            }
         });
 
         View gutsView = item.getGutsView();
@@ -5897,7 +5902,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         final int centerY = done.getHeight() / 2;
         final int x = doneLocation[0] - rowLocation[0] + centerX;
         final int y = doneLocation[1] - rowLocation[1] + centerY;
-        dismissPopups(x, y);
+        closeAndSaveGuts(false /* removeLeavebehind */, false /* force */,
+                true /* removeControls */, x, y, true /* resetMenu */);
     }
 
     protected SwipeHelper.LongPressListener getNotificationLongClicker() {
@@ -5917,18 +5923,18 @@ public class StatusBar extends SystemUI implements DemoMode,
                 if (row.isDark()) {
                     return false;
                 }
+                if (row.areGutsExposed()) {
+                    closeAndSaveGuts(false /* removeLeavebehind */, false /* force */,
+                            true /* removeControls */, -1 /* x */, -1 /* y */,
+                            true /* resetMenu */);
+                    return false;
+                }
                 bindGuts(row, item);
                 NotificationGuts guts = row.getGuts();
 
                 // Assume we are a status_bar_notification_row
                 if (guts == null) {
                     // This view has no guts. Examples are the more card or the dismiss all view
-                    return false;
-                }
-
-                // Already showing?
-                if (guts.getVisibility() == View.VISIBLE) {
-                    dismissPopups(x, y);
                     return false;
                 }
 
@@ -5945,8 +5951,9 @@ public class StatusBar extends SystemUI implements DemoMode,
                                     + "window");
                             return;
                         }
-                        dismissPopups(-1 /* x */, -1 /* y */, false /* resetMenu */,
-                                false /* animate */);
+                        closeAndSaveGuts(true /* removeLeavebehind */, true /* force */,
+                                true /* removeControls */, -1 /* x */, -1 /* y */,
+                                false /* resetMenu */);
                         guts.setVisibility(View.VISIBLE);
                         final double horz = Math.max(guts.getWidth() - x, x);
                         final double vert = Math.max(guts.getHeight() - y, y);
@@ -5986,20 +5993,23 @@ public class StatusBar extends SystemUI implements DemoMode,
         return mNotificationGutsExposed;
     }
 
-    public void dismissPopups() {
-        dismissPopups(-1 /* x */, -1 /* y */, true /* resetMenu */, false /* animate */);
-    }
-
-    private void dismissPopups(int x, int y) {
-        dismissPopups(x, y, true /* resetMenu */, false /* animate */);
-    }
-
-    public void dismissPopups(int x, int y, boolean resetMenu, boolean animate) {
+    /**
+     * Closes guts or notification menus that might be visible and saves any changes.
+     *
+     * @param removeLeavebehinds true if leavebehinds (e.g. snooze) should be closed.
+     * @param force true if guts should be closed regardless of state (used for snooze only).
+     * @param removeControls true if controls (e.g. info) should be closed.
+     * @param x if closed based on touch location, this is the x touch location.
+     * @param y if closed based on touch location, this is the y touch location.
+     * @param resetMenu if any notification menus that might be revealed should be closed.
+     */
+    public void closeAndSaveGuts(boolean removeLeavebehinds, boolean force, boolean removeControls,
+            int x, int y, boolean resetMenu) {
         if (mNotificationGutsExposed != null) {
-            mNotificationGutsExposed.closeControls(x, y, true /* save */);
+            mNotificationGutsExposed.closeControls(removeLeavebehinds, removeControls, x, y, force);
         }
         if (resetMenu) {
-            mStackScroller.resetExposedMenuView(animate, true /* force */);
+            mStackScroller.resetExposedMenuView(false /* animate */, true /* force */);
         }
     }
 
@@ -6521,7 +6531,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         if (mVisible != visible) {
             mVisible = visible;
             if (!visible) {
-                dismissPopups();
+                closeAndSaveGuts(true /* removeLeavebehind */, true /* force */,
+                        true /* removeControls */, -1 /* x */, -1 /* y */, true /* resetMenu */);
             }
         }
         updateVisibleToUser();

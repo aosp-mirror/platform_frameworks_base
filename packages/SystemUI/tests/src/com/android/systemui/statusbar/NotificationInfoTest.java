@@ -497,7 +497,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mNotificationChannel.getImportance(), mSbn, null, null, null,
                 null, null);
 
-        mNotificationInfo.handleCloseControls(true);
+        mNotificationInfo.handleCloseControls(true, false);
         verify(mMockINotificationManager, never()).updateNotificationChannelForPackage(
                 anyString(), anyInt(), any());
     }
@@ -511,7 +511,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mNotificationChannel.getImportance(), mSbn, null, null, null,
                 null, null);
 
-        mNotificationInfo.handleCloseControls(true);
+        mNotificationInfo.handleCloseControls(true, false);
         verify(mMockINotificationManager, never()).updateNotificationChannelForPackage(
                 anyString(), anyInt(), any());
     }
@@ -571,7 +571,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 TEST_PACKAGE_NAME, Arrays.asList(mNotificationChannel),
                 mNotificationChannel.getImportance(), mSbn, null, null, null,
                 null, Collections.singleton(TEST_PACKAGE_NAME));
-        mNotificationInfo.handleCloseControls(true);
+        mNotificationInfo.handleCloseControls(true, false);
         verify(mMockINotificationManager, never()).updateNotificationChannelForPackage(
                 anyString(), anyInt(), any());
     }
@@ -586,7 +586,7 @@ public class NotificationInfoTest extends SysuiTestCase {
 
         Switch enabledSwitch = mNotificationInfo.findViewById(R.id.channel_enabled_switch);
         enabledSwitch.setChecked(false);
-        mNotificationInfo.handleCloseControls(true);
+        mNotificationInfo.handleCloseControls(true, false);
 
         ArgumentCaptor<NotificationChannel> updated =
                 ArgumentCaptor.forClass(NotificationChannel.class);
@@ -606,7 +606,7 @@ public class NotificationInfoTest extends SysuiTestCase {
 
         Switch enabledSwitch = (Switch) mNotificationInfo.findViewById(R.id.channel_enabled_switch);
         enabledSwitch.setChecked(false);
-        mNotificationInfo.handleCloseControls(false);
+        mNotificationInfo.handleCloseControls(false, false);
         verify(mMockINotificationManager, never()).updateNotificationChannelForPackage(
                 eq(TEST_PACKAGE_NAME), anyInt(), eq(mNotificationChannel));
     }
@@ -623,7 +623,7 @@ public class NotificationInfoTest extends SysuiTestCase {
 
         Switch enabledSwitch = (Switch) mNotificationInfo.findViewById(R.id.channel_enabled_switch);
         enabledSwitch.setChecked(false);
-        mNotificationInfo.handleCloseControls(true);
+        mNotificationInfo.handleCloseControls(true, false);
         verify(mMockINotificationManager, never()).updateNotificationChannelForPackage(
                 eq(TEST_PACKAGE_NAME), anyInt(), eq(mNotificationChannel));
     }
@@ -641,7 +641,7 @@ public class NotificationInfoTest extends SysuiTestCase {
 
         Switch enabledSwitch = (Switch) mNotificationInfo.findViewById(R.id.channel_enabled_switch);
         enabledSwitch.setChecked(false);
-        mNotificationInfo.handleCloseControls(true);
+        mNotificationInfo.handleCloseControls(true, false);
         verify(mMockINotificationManager, times(1)).updateNotificationChannelForPackage(
                 eq(TEST_PACKAGE_NAME), anyInt(), eq(mNotificationChannel));
     }

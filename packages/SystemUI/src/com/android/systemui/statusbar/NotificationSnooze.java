@@ -103,6 +103,18 @@ public class NotificationSnooze extends LinearLayout
         createOptionViews();
     }
 
+    public boolean isExpanded() {
+        return mExpanded;
+    }
+
+    public void setSnoozeListener(NotificationSwipeActionHelper listener) {
+        mSnoozeListener = listener;
+    }
+
+    public void setStatusBarNotification(StatusBarNotification sbn) {
+        mSbn = sbn;
+    }
+
     private ArrayList<SnoozeOption> getDefaultSnoozeOptions() {
         ArrayList<SnoozeOption> options = new ArrayList<>();
         options.add(createOption(R.string.snooze_option_15_min, 15));
@@ -201,7 +213,7 @@ public class NotificationSnooze extends LinearLayout
             final int x = targetLoc[0] - parentLoc[0] + centerX;
             final int y = targetLoc[1] - parentLoc[1] + centerY;
             showSnoozeOptions(false);
-            mGutsContainer.closeControls(x, y, false /* save */);
+            mGutsContainer.closeControls(x, y, false /* save */, false /* force */);
         }
     }
 
@@ -222,29 +234,31 @@ public class NotificationSnooze extends LinearLayout
         return this;
     }
 
-    public void setStatusBarNotification(StatusBarNotification sbn) {
-        mSbn = sbn;
-    }
-
     @Override
     public void setGutsParent(NotificationGuts guts) {
         mGutsContainer = guts;
     }
 
-    public void setSnoozeListener(NotificationSwipeActionHelper listener) {
-        mSnoozeListener = listener;
-    }
-
     @Override
-    public boolean handleCloseControls(boolean save) {
-        // When snooze is closed (i.e. there was interaction outside of the notification)
-        // then we commit the snooze action.
-        if (mSnoozeListener != null && mSelectedOption != null) {
+    public boolean handleCloseControls(boolean save, boolean force) {
+        if (mExpanded && !force) {
+            // Collapse expanded state on outside touch
+            showSnoozeOptions(false);
+            return true;
+        } else if (mSnoozeListener != null && mSelectedOption != null) {
+            // Snooze option selected so commit it
             mSnoozing = true;
             mSnoozeListener.snooze(mSbn, mSelectedOption);
             return true;
+        } else {
+            // The view should actually be closed
+            setSelected(mSnoozeOptions.get(0));
+            return false; // Return false here so that guts handles closing the view
         }
-        // The view should be closed
-        return false;
+    }
+
+    @Override
+    public boolean isLeavebehind() {
+        return true;
     }
 }
