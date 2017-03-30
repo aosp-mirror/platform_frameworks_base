@@ -562,12 +562,10 @@ public final class DisplayInfo implements Parcelable {
         outMetrics.xdpi = outMetrics.noncompatXdpi = physicalXDpi;
         outMetrics.ydpi = outMetrics.noncompatYdpi = physicalYDpi;
 
-        width = (configuration != null
-                && configuration.screenWidthDp != Configuration.SCREEN_WIDTH_DP_UNDEFINED)
-                ? (int)((configuration.screenWidthDp * outMetrics.density) + 0.5f) : width;
-        height = (configuration != null
-                && configuration.screenHeightDp != Configuration.SCREEN_HEIGHT_DP_UNDEFINED)
-                ? (int)((configuration.screenHeightDp * outMetrics.density) + 0.5f) : height;
+        width = configuration != null && configuration.appBounds != null
+                ? configuration.appBounds.width() : width;
+        height = configuration != null && configuration.appBounds != null
+                ? configuration.appBounds.height() : height;
 
         outMetrics.noncompatWidthPixels  = outMetrics.widthPixels = width;
         outMetrics.noncompatHeightPixels = outMetrics.heightPixels = height;

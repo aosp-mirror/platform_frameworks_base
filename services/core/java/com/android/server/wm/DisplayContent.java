@@ -1134,6 +1134,13 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         config.screenHeightDp =
                 (int)(mService.mPolicy.getConfigDisplayHeight(dw, dh, displayInfo.rotation,
                         config.uiMode, mDisplayId) / mDisplayMetrics.density);
+
+        mService.mPolicy.getNonDecorInsetsLw(displayInfo.rotation, dw, dh, mTmpRect);
+        final int leftInset = mTmpRect.left;
+        final int topInset = mTmpRect.top;
+        // appBounds at the root level should mirror the app screen size.
+        config.setAppBounds(leftInset /*left*/, topInset /*top*/, leftInset + displayInfo.appWidth /*right*/,
+                topInset + displayInfo.appHeight /*bottom*/);
         final boolean rotated = (displayInfo.rotation == Surface.ROTATION_90
                 || displayInfo.rotation == Surface.ROTATION_270);
 

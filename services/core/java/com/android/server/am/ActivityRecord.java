@@ -2080,23 +2080,31 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         return true;
     }
 
-    /** Computes the override configuration for this activity */
+    /**
+     * Computes the bounds to fit the Activity within the bounds of the {@link Configuration}.
+     */
     // TODO(b/36505427): Consider moving this method and similar ones to ConfigurationContainer.
     private void computeBounds(Rect outBounds) {
         outBounds.setEmpty();
         final float maxAspectRatio = info.maxAspectRatio;
         final ActivityStack stack = getStack();
-        if ((task != null && !task.mFullscreen) || maxAspectRatio == 0 || stack == null) {
+        if (task == null || stack == null || !task.mFullscreen || maxAspectRatio == 0) {
             // We don't set override configuration if that activity task isn't fullscreen. I.e. the
             // activity is in multi-window mode. Or, there isn't a max aspect ratio specified for
-            // the activity.
+            // the activity. This is indicated by an empty {@link outBounds}.
             return;
         }
 
-        stack.getDisplaySize(mTmpPoint);
-        int maxActivityWidth = mTmpPoint.x;
-        int maxActivityHeight = mTmpPoint.y;
-        if (mTmpPoint.x < mTmpPoint.y) {
+        // We must base this on the parent configuration, because we set our override
+        // configuration's appBounds based on the result of this method. If we used our own
+        // configuration, it would be influenced by past invocations.
+        final Configuration configuration = getParent().getConfiguration();
+        final int containingAppWidth = configuration.appBounds.width();
+        final int containingAppHeight = configuration.appBounds.height();
+        int maxActivityWidth = containingAppWidth;
+        int maxActivityHeight = containingAppHeight;
+
+        if (containingAppWidth < containingAppHeight) {
             // Width is the shorter side, so we use that to figure-out what the max. height should
             // be given the aspect ratio.
             maxActivityHeight = (int) ((maxActivityWidth * maxAspectRatio) + 0.5f);
@@ -2106,8 +2114,14 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             maxActivityWidth = (int) ((maxActivityHeight * maxAspectRatio) + 0.5f);
         }
 
-        if (mTmpPoint.x <= maxActivityWidth && mTmpPoint.y <= maxActivityHeight) {
+        if (containingAppWidth <= maxActivityWidth && containingAppHeight <= maxActivityHeight) {
             // The display matches or is less than the activity aspect ratio, so nothing else to do.
+            // Return the existing bounds. If this method is running for the first time,
+            // {@link mBounds} will be empty (representing no override). If the method has run
+            // before, then effect of {@link mBounds} will already have been applied to the
+            // value returned from {@link getConfiguration}. Refer to
+            // {@link TaskRecord#computeOverrideConfiguration}.
+            outBounds.set(mBounds);
             return;
         }
 
