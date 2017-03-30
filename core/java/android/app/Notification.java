@@ -971,6 +971,7 @@ public class Notification implements Parcelable
      * Only available to notifications coming from the android package.
      * @hide
      */
+    @SystemApi
     public static final String EXTRA_ALLOW_DURING_SETUP = "android.allowDuringSetup";
 
     /**
