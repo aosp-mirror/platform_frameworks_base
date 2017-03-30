@@ -369,8 +369,10 @@ public class UserManager {
     public static final String DISALLOW_ADD_MANAGED_PROFILE = "no_add_managed_profile";
 
     /**
-     * Specifies if a user is disallowed from disabling application
-     * verification. The default value is <code>false</code>.
+     * Specifies if a user is disallowed from disabling application verification.
+     * Starting from {@link android.os.Build.VERSION_CODES#O}, application verification
+     * is enforced across all users on the device if a profile owner or device owner sets
+     * this restriction to <code>true</code>. The default value is <code>false</code>.
      *
      * <p>Key for user restrictions.
      * <p>Type: Boolean
