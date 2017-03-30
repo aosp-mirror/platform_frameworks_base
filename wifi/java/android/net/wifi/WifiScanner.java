@@ -934,46 +934,13 @@ public class WifiScanner {
 
         /** Implement the Parcelable interface {@hide} */
         public void writeToParcel(Parcel dest, int flags) {
-            dest.writeInt(rssiSampleSize);
-            dest.writeInt(lostApSampleSize);
-            dest.writeInt(unchangedSampleSize);
-            dest.writeInt(minApsBreachingThreshold);
-            dest.writeInt(periodInMs);
-            if (bssidInfos != null) {
-                dest.writeInt(bssidInfos.length);
-                for (int i = 0; i < bssidInfos.length; i++) {
-                    BssidInfo info = bssidInfos[i];
-                    dest.writeString(info.bssid);
-                    dest.writeInt(info.low);
-                    dest.writeInt(info.high);
-                    dest.writeInt(info.frequencyHint);
-                }
-            } else {
-                dest.writeInt(0);
-            }
         }
 
         /** Implement the Parcelable interface {@hide} */
         public static final Creator<WifiChangeSettings> CREATOR =
                 new Creator<WifiChangeSettings>() {
                     public WifiChangeSettings createFromParcel(Parcel in) {
-                        WifiChangeSettings settings = new WifiChangeSettings();
-                        settings.rssiSampleSize = in.readInt();
-                        settings.lostApSampleSize = in.readInt();
-                        settings.unchangedSampleSize = in.readInt();
-                        settings.minApsBreachingThreshold = in.readInt();
-                        settings.periodInMs = in.readInt();
-                        int len = in.readInt();
-                        settings.bssidInfos = new BssidInfo[len];
-                        for (int i = 0; i < len; i++) {
-                            BssidInfo info = new BssidInfo();
-                            info.bssid = in.readString();
-                            info.low = in.readInt();
-                            info.high = in.readInt();
-                            info.frequencyHint = in.readInt();
-                            settings.bssidInfos[i] = info;
-                        }
-                        return settings;
+                        return new WifiChangeSettings();
                     }
 
                     public WifiChangeSettings[] newArray(int size) {
@@ -998,20 +965,10 @@ public class WifiScanner {
             int unchangedSampleSize,                        /* samples to confirm no change */
             int minApsBreachingThreshold,                   /* change threshold to trigger event */
             int periodInMs,                                 /* period of scan */
-            BssidInfo[] bssidInfos                          /* signal thresholds to crosss */
+            BssidInfo[] bssidInfos                          /* signal thresholds to cross */
             )
     {
-        validateChannel();
-
-        WifiChangeSettings settings = new WifiChangeSettings();
-        settings.rssiSampleSize = rssiSampleSize;
-        settings.lostApSampleSize = lostApSampleSize;
-        settings.unchangedSampleSize = unchangedSampleSize;
-        settings.minApsBreachingThreshold = minApsBreachingThreshold;
-        settings.periodInMs = periodInMs;
-        settings.bssidInfos = bssidInfos;
-
-        configureWifiChange(settings);
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -1034,11 +991,7 @@ public class WifiScanner {
      *                 provided on {@link #stopTrackingWifiChange}
      */
     public void startTrackingWifiChange(WifiChangeListener listener) {
-        Preconditions.checkNotNull(listener, "listener cannot be null");
-        int key = addListener(listener);
-        if (key == INVALID_KEY) return;
-        validateChannel();
-        mAsyncChannel.sendMessage(CMD_START_TRACKING_CHANGE, 0, key);
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -1047,17 +1000,13 @@ public class WifiScanner {
      * #stopTrackingWifiChange}
      */
     public void stopTrackingWifiChange(WifiChangeListener listener) {
-        int key = removeListener(listener);
-        if (key == INVALID_KEY) return;
-        validateChannel();
-        mAsyncChannel.sendMessage(CMD_STOP_TRACKING_CHANGE, 0, key);
+        throw new UnsupportedOperationException();
     }
 
     /** @hide */
     @SystemApi
     public void configureWifiChange(WifiChangeSettings settings) {
-        validateChannel();
-        mAsyncChannel.sendMessage(CMD_CONFIGURE_WIFI_CHANGE, 0, 0, settings);
+        throw new UnsupportedOperationException();
     }
 
     /** interface to receive hotlist events on; use this on {@link #setHotlist} */
@@ -1085,20 +1034,6 @@ public class WifiScanner {
 
         /** Implement the Parcelable interface {@hide} */
         public void writeToParcel(Parcel dest, int flags) {
-            dest.writeInt(apLostThreshold);
-
-            if (bssidInfos != null) {
-                dest.writeInt(bssidInfos.length);
-                for (int i = 0; i < bssidInfos.length; i++) {
-                    BssidInfo info = bssidInfos[i];
-                    dest.writeString(info.bssid);
-                    dest.writeInt(info.low);
-                    dest.writeInt(info.high);
-                    dest.writeInt(info.frequencyHint);
-                }
-            } else {
-                dest.writeInt(0);
-            }
         }
 
         /** Implement the Parcelable interface {@hide} */
@@ -1106,17 +1041,6 @@ public class WifiScanner {
                 new Creator<HotlistSettings>() {
                     public HotlistSettings createFromParcel(Parcel in) {
                         HotlistSettings settings = new HotlistSettings();
-                        settings.apLostThreshold = in.readInt();
-                        int n = in.readInt();
-                        settings.bssidInfos = new BssidInfo[n];
-                        for (int i = 0; i < n; i++) {
-                            BssidInfo info = new BssidInfo();
-                            info.bssid = in.readString();
-                            info.low = in.readInt();
-                            info.high = in.readInt();
-                            info.frequencyHint = in.readInt();
-                            settings.bssidInfos[i] = info;
-                        }
                         return settings;
                     }
 
@@ -1135,14 +1059,7 @@ public class WifiScanner {
      */
     public void startTrackingBssids(BssidInfo[] bssidInfos,
                                     int apLostThreshold, BssidListener listener) {
-        Preconditions.checkNotNull(listener, "listener cannot be null");
-        int key = addListener(listener);
-        if (key == INVALID_KEY) return;
-        validateChannel();
-        HotlistSettings settings = new HotlistSettings();
-        settings.bssidInfos = bssidInfos;
-        settings.apLostThreshold = apLostThreshold;
-        mAsyncChannel.sendMessage(CMD_SET_HOTLIST, 0, key, settings);
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -1150,11 +1067,7 @@ public class WifiScanner {
      * @param listener same object provided in {@link #startTrackingBssids}
      */
     public void stopTrackingBssids(BssidListener listener) {
-        Preconditions.checkNotNull(listener, "listener cannot be null");
-        int key = removeListener(listener);
-        if (key == INVALID_KEY) return;
-        validateChannel();
-        mAsyncChannel.sendMessage(CMD_RESET_HOTLIST, 0, key);
+        throw new UnsupportedOperationException();
     }
 
 
@@ -1177,19 +1090,9 @@ public class WifiScanner {
     /** @hide */
     public static final int CMD_SCAN_RESULT                 = BASE + 5;
     /** @hide */
-    public static final int CMD_SET_HOTLIST                 = BASE + 6;
-    /** @hide */
-    public static final int CMD_RESET_HOTLIST               = BASE + 7;
-    /** @hide */
     public static final int CMD_AP_FOUND                    = BASE + 9;
     /** @hide */
     public static final int CMD_AP_LOST                     = BASE + 10;
-    /** @hide */
-    public static final int CMD_START_TRACKING_CHANGE       = BASE + 11;
-    /** @hide */
-    public static final int CMD_STOP_TRACKING_CHANGE        = BASE + 12;
-    /** @hide */
-    public static final int CMD_CONFIGURE_WIFI_CHANGE       = BASE + 13;
     /** @hide */
     public static final int CMD_WIFI_CHANGE_DETECTED        = BASE + 15;
     /** @hide */
