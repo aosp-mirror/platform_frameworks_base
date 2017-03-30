@@ -244,6 +244,32 @@ public abstract class RadioTuner {
     public abstract @NonNull List<RadioManager.ProgramInfo> getProgramList(@Nullable String filter);
 
     /**
+     * Checks, if the analog playback is forced, see setAnalogForced.
+     *
+     * @throws IllegalStateException if the switch is not supported at current
+     *         configuration.
+     * @return {@code true} if analog is forced, {@code false} otherwise.
+     * @hide FutureFeature
+     */
+    public abstract boolean isAnalogForced();
+
+    /**
+     * Forces the analog playback for the supporting radio technology.
+     *
+     * User may disable digital playback for FM HD Radio or hybrid FM/DAB with
+     * this option. This is purely user choice, ie. does not reflect digital-
+     * analog handover managed from the HAL implementation side.
+     *
+     * Some radio technologies may not support this, ie. DAB.
+     *
+     * @param isForced {@code true} to force analog, {@code false} for a default behaviour.
+     * @throws IllegalStateException if the switch is not supported at current
+     *         configuration.
+     * @hide FutureFeature
+     */
+    public abstract void setAnalogForced(boolean isForced);
+
+    /**
      * Get current antenna connection state for current configuration.
      * Only valid if a configuration has been applied.
      * @return {@code true} if the antenna is connected, {@code false} otherwise.
