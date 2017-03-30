@@ -597,7 +597,8 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
                 service.stopJob(mParams);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Error sending onStopJob to client.", e);
-                closeAndCleanupJobH(false /* reschedule */);
+                // The job's host app apparently crashed during the job, so we should reschedule.
+                closeAndCleanupJobH(true /* reschedule */);
             }
         }
 
