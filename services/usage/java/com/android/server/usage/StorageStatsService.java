@@ -162,6 +162,9 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
             return FileUtils.roundStorageSize(mStorage.getPrimaryStorageSize());
         } else {
             final VolumeInfo vol = mStorage.findVolumeByUuid(volumeUuid);
+            if (vol == null) {
+                throw new IllegalStateException("Volume was unexpected null");
+            }
             return FileUtils.roundStorageSize(vol.disk.size);
         }
     }
@@ -185,6 +188,9 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
             return Environment.getDataDirectory().getUsableSpace() + cacheBytes;
         } else {
             final VolumeInfo vol = mStorage.findVolumeByUuid(volumeUuid);
+            if (vol == null) {
+                throw new IllegalStateException("Volume was unexpected null");
+            }
             return vol.getPath().getUsableSpace() + cacheBytes;
         }
     }

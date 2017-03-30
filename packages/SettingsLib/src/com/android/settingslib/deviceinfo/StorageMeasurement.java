@@ -151,8 +151,15 @@ public class StorageMeasurement {
         final MeasurementDetails details = new MeasurementDetails();
         if (mVolume == null) return details;
 
-        details.totalSize = mStats.getTotalBytes(mVolume.fsUuid);
-        details.availSize = mStats.getFreeBytes(mVolume.fsUuid);
+        try {
+            details.totalSize = mStats.getTotalBytes(mVolume.fsUuid);
+            details.availSize = mStats.getFreeBytes(mVolume.fsUuid);
+        } catch (IllegalStateException e) {
+            // The storage volume became null while we were measuring it.
+            Log.w(TAG, e);
+            return details;
+        }
+
 
         final long finishTotal = SystemClock.elapsedRealtime();
         Log.d(TAG, "Measured total storage in " + (finishTotal - start) + "ms");
