@@ -288,7 +288,8 @@ public class PipTouchHandler implements TunerService.Tunable {
     }
 
     private void onAccessibilityShowMenu() {
-        mMenuController.showMenu(mMotionHelper.getBounds(), mMovementBounds);
+        mMenuController.showMenu(mMotionHelper.getBounds(), mMovementBounds,
+                false /* allowMenuTimeout */);
     }
 
     private boolean handleTouchEvent(MotionEvent ev) {
@@ -617,7 +618,8 @@ public class PipTouchHandler implements TunerService.Tunable {
                 // If the menu is still visible, and we aren't minimized, then just poke the menu
                 // so that it will timeout after the user stops touching it
                 if (mMenuController.isMenuVisible()) {
-                    mMenuController.showMenu(mMotionHelper.getBounds(), mMovementBounds);
+                    mMenuController.showMenu(mMotionHelper.getBounds(), mMovementBounds,
+                            true /* allowMenuTimeout */);
                 }
 
                 if (isFling) {
@@ -631,7 +633,8 @@ public class PipTouchHandler implements TunerService.Tunable {
                 mMotionHelper.animateToClosestSnapTarget(mMovementBounds, null /* listener */);
                 setMinimizedStateInternal(false);
             } else if (!mIsMenuVisible) {
-                mMenuController.showMenu(mMotionHelper.getBounds(), mMovementBounds);
+                mMenuController.showMenu(mMotionHelper.getBounds(), mMovementBounds,
+                        true /* allowMenuTimeout */);
             } else {
                 mMotionHelper.expandPip();
             }

@@ -17,6 +17,7 @@
 package com.android.systemui.pip.phone;
 
 import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_ACTIONS;
+import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_ALLOW_TIMEOUT;
 import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_CONTROLLER_MESSENGER;
 import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_DISMISS_FRACTION;
 import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_MOVEMENT_BOUNDS;
@@ -75,8 +76,8 @@ public class PipMenuActivity extends Activity {
     public static final int MESSAGE_UPDATE_ACTIONS = 4;
     public static final int MESSAGE_UPDATE_DISMISS_FRACTION = 5;
 
-    private static final long INITIAL_DISMISS_DELAY = 2000;
-    private static final long POST_INTERACTION_DISMISS_DELAY = 1500;
+    private static final long INITIAL_DISMISS_DELAY = 3500;
+    private static final long POST_INTERACTION_DISMISS_DELAY = 2000;
     private static final long MENU_FADE_DURATION = 125;
 
     private static final float MENU_BACKGROUND_ALPHA = 0.3f;
@@ -116,7 +117,8 @@ public class PipMenuActivity extends Activity {
                 case MESSAGE_SHOW_MENU: {
                     final Bundle data = (Bundle) msg.obj;
                     showMenu(data.getParcelable(EXTRA_STACK_BOUNDS),
-                            data.getParcelable(EXTRA_MOVEMENT_BOUNDS));
+                            data.getParcelable(EXTRA_MOVEMENT_BOUNDS),
+                            data.getBoolean(EXTRA_ALLOW_TIMEOUT));
                     break;
                 }
                 case MESSAGE_POKE_MENU:
@@ -252,7 +254,7 @@ public class PipMenuActivity extends Activity {
         // Do nothing
     }
 
-    private void showMenu(Rect stackBounds, Rect movementBounds) {
+    private void showMenu(Rect stackBounds, Rect movementBounds, boolean allowMenuTimeout) {
         if (!mMenuVisible) {
             updateActionViews(stackBounds);
             if (mMenuContainerAnimator != null) {
@@ -265,18 +267,22 @@ public class PipMenuActivity extends Activity {
                     mMenuContainer.getAlpha(), 1f);
             mMenuContainerAnimator.setInterpolator(Interpolators.ALPHA_IN);
             mMenuContainerAnimator.setDuration(MENU_FADE_DURATION);
-            mMenuContainerAnimator.addListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    repostDelayedFinish(INITIAL_DISMISS_DELAY);
-                }
-            });
+            if (allowMenuTimeout) {
+                mMenuContainerAnimator.addListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        repostDelayedFinish(INITIAL_DISMISS_DELAY);
+                    }
+                });
+            }
             mMenuContainerAnimator.addUpdateListener(mMenuBgUpdateListener);
             mMenuContainerAnimator.start();
         } else {
             // If we are already visible, then just start the delayed dismiss and unregister any
             // existing input consumers from the previous drag
-            repostDelayedFinish(POST_INTERACTION_DISMISS_DELAY);
+            if (allowMenuTimeout) {
+                repostDelayedFinish(POST_INTERACTION_DISMISS_DELAY);
+            }
             notifyUnregisterInputConsumer();
         }
     }
@@ -320,7 +326,8 @@ public class PipMenuActivity extends Activity {
         if (intent.getBooleanExtra(EXTRA_SHOW_MENU, false)) {
             Rect stackBounds = intent.getParcelableExtra(EXTRA_STACK_BOUNDS);
             Rect movementBounds = intent.getParcelableExtra(EXTRA_MOVEMENT_BOUNDS);
-            showMenu(stackBounds, movementBounds);
+            boolean allowMenuTimeout = intent.getBooleanExtra(EXTRA_ALLOW_TIMEOUT, true);
+            showMenu(stackBounds, movementBounds, allowMenuTimeout);
         }
     }
 
