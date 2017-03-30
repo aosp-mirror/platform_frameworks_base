@@ -584,16 +584,15 @@ public abstract class CompoundButton extends Button implements Checkable {
     }
 
     @Override
-    public boolean autofill(AutofillValue value) {
-        if (!isEnabled()) return false;
+    public void autofill(AutofillValue value) {
+        if (!isEnabled()) return;
 
-        if (value.isToggle()) {
-            setChecked(value.getToggleValue());
-        } else {
+        if (!value.isToggle()) {
             Log.w(LOG_TAG, value + " could not be autofilled into " + this);
+            return;
         }
 
-        return true;
+        setChecked(value.getToggleValue());
     }
 
     @Override

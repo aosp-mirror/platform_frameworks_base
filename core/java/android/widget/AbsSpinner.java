@@ -526,15 +526,15 @@ public abstract class AbsSpinner extends AdapterView<SpinnerAdapter> {
     }
 
     @Override
-    public boolean autofill(AutofillValue value) {
-        if (!isEnabled()) return false;
+    public void autofill(AutofillValue value) {
+        if (!isEnabled()) return;
 
-        if (value.isList()) {
-            setSelection(value.getListValue());
-        } else {
+        if (!value.isList()) {
             Log.w(LOG_TAG, value + " could not be autofilled into " + this);
+            return;
         }
-        return true;
+
+        setSelection(value.getListValue());
     }
 
     @Override
