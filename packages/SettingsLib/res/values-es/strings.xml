@@ -170,7 +170,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Redes"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Certificación de pantalla inalámbrica"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Habilitar registro Wi-Fi detallado"</string>
-    <string name="wifi_aggressive_handover" msgid="5309131983693661320">"Transferencia total de Wi-Fi a móvil"</string>
+    <string name="wifi_aggressive_handover" msgid="5309131983693661320">"Transferencia agresiva de Wi-Fi a móvil"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Permitir siempre búsquedas de Wi-Fi"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Datos móviles siempre activos"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Inhabilitar volumen absoluto"</string>
@@ -189,7 +189,7 @@
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Streaming: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Mostrar opciones para la certificación de la pantalla inalámbrica"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Aumentar el nivel de logging de Wi-Fi, mostrar por SSID RSSI en el selector Wi-Fi"</string>
-    <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"Si está habilitada, la conexión Wi-Fi será más agresiva al transferir la conexión de datos al móvil (si la señal Wi-Fi es baja)"</string>
+    <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"Si se activa esta opción, la conexión Wi-Fi será más agresiva al pasar la conexión a datos móviles (si la señal Wi-Fi es débil)"</string>
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"Permitir/No permitir búsquedas de Wi-Fi basadas en la cantidad de tráfico de datos presente en la interfaz"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Tamaños de búfer de registrador"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Elige el tamaño del Logger por búfer"</string>
