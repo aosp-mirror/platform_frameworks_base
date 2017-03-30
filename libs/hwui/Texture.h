@@ -19,6 +19,13 @@
 
 #include "GpuMemoryTracker.h"
 #include "hwui/Bitmap.h"
+#include "utils/Color.h"
+
+#include <memory>
+
+#include <math/mat3.h>
+
+#include <ui/ColorSpace.h>
 
 #include <GLES2/gl2.h>
 #include <EGL/egl.h>
@@ -42,8 +49,7 @@ class Texture : public GpuMemoryTracker {
 public:
     static SkBitmap uploadToN32(const SkBitmap& bitmap,
             bool hasLinearBlending, sk_sp<SkColorSpace> sRGB);
-    static bool hasUnsupportedColorType(const SkImageInfo& info,
-            bool hasLinearBlending, SkColorSpace* sRGB);
+    static bool hasUnsupportedColorType(const SkImageInfo& info, bool hasLinearBlending);
     static void colorTypeToGlFormatAndType(const Caches& caches, SkColorType colorType,
             bool needSRGB, GLint* outInternalFormat, GLint* outFormat, GLint* outType);
 
@@ -130,9 +136,26 @@ public:
     }
 
     /**
+     * Returns nullptr if this texture does not require color space conversion
+     * to sRGB, or a valid pointer to a ColorSpaceConnector if a conversion
+     * is required.
+     */
+    constexpr const ColorSpaceConnector* getColorSpaceConnector() const {
+        return mConnector.get();
+    }
+
+    constexpr bool hasColorSpaceConversion() const {
+        return mConnector.get() != nullptr;
+    }
+
+    TransferFunctionType getTransferFunctionType() const;
+
+    /**
      * Returns true if this texture uses a linear encoding format.
      */
-    bool isLinear() const;
+    constexpr bool isLinear() const {
+        return mInternalFormat == GL_RGBA16F;
+    }
 
     /**
      * Generation of the backing bitmap,
@@ -171,8 +194,8 @@ private:
     // and external texture wrapper
     friend class GlLayer;
 
-    // Returns true if the size changed, false if it was the same
-    bool updateSize(uint32_t width, uint32_t height, GLint internalFormat,
+    // Returns true if the texture layout (size, format, etc.) changed, false if it was the same
+    bool updateLayout(uint32_t width, uint32_t height, GLint internalFormat,
             GLint format, GLenum target);
     void uploadHardwareBitmapToTexture(GraphicBuffer* buffer);
     void resetCachedParams();
@@ -196,6 +219,8 @@ private:
     GLenum mMagFilter = GL_LINEAR;
 
     Caches& mCaches;
+
+    std::unique_ptr<ColorSpaceConnector> mConnector;
 }; // struct Texture
 
 class AutoTexture {
