@@ -530,16 +530,14 @@ public class TimePicker extends FrameLayout {
     }
 
     @Override
-    public boolean autofill(AutofillValue value) {
-        if (!isEnabled()) return false;
+    public void autofill(AutofillValue value) {
+        if (!isEnabled()) return;
 
-        if (value.isDate()) {
-            mDelegate.setDate(value.getDateValue());
-        } else {
+        if (!value.isDate()) {
             Log.w(LOG_TAG, value + " could not be autofilled into " + this);
         }
 
-        return true;
+        mDelegate.setDate(value.getDateValue());
     }
 
     @Override

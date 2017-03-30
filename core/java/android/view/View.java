@@ -7447,11 +7447,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * </pre>
      *
      * @param value value to be autofilled.
-     *
-     * @return {@code true} if the view was successfully autofilled, {@code false} otherwise
      */
-    public boolean autofill(@SuppressWarnings("unused") AutofillValue value) {
-        return false;
+    public void autofill(@SuppressWarnings("unused") AutofillValue value) {
     }
 
     /**
@@ -7461,12 +7458,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@link #onProvideAutofillVirtualStructure(ViewStructure, int)} for more info.
      *
      * @param values map of values to be autofilled, keyed by virtual child id.
-     *
-     * @return {@code true} if the view was successfully autofilled, {@code false} otherwise
      */
-    public boolean autofill(
-            @NonNull @SuppressWarnings("unused") SparseArray<AutofillValue>values) {
-        return false;
+    public void autofill(@NonNull @SuppressWarnings("unused") SparseArray<AutofillValue> values) {
     }
 
     /**

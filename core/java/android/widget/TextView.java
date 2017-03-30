@@ -10050,17 +10050,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     @Override
-    public boolean autofill(AutofillValue value) {
-        if (value.isText()) {
-            if (isTextEditable()) {
-                setText(value.getTextValue(), mBufferType, true, 0);
-                return true;
-            }
-        } else {
+    public void autofill(AutofillValue value) {
+        if (!value.isText() || !isTextEditable()) {
             Log.w(LOG_TAG, value + " could not be autofilled into " + this);
+            return;
         }
 
-        return false;
+        setText(value.getTextValue(), mBufferType, true, 0);
     }
 
     @Override
