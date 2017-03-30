@@ -81,7 +81,7 @@ public final class IpSecManager {
 
     public static final class SecurityParameterIndex implements AutoCloseable {
         private final IIpSecService mService;
-        private final InetAddress mDestinationAddress;
+        private final InetAddress mRemoteAddress;
         private final CloseGuard mCloseGuard = CloseGuard.get();
         private int mSpi;
 
@@ -91,10 +91,10 @@ public final class IpSecManager {
         }
 
         private SecurityParameterIndex(
-                IIpSecService service, InetAddress destinationAddress, int spi)
+                IIpSecService service, int direction, InetAddress remoteAddress, int spi)
                 throws ResourceUnavailableException, SpiUnavailableException {
             mService = service;
-            mDestinationAddress = destinationAddress;
+            mRemoteAddress = remoteAddress;
             mSpi = spi;
             mCloseGuard.open("open");
         }
@@ -102,13 +102,9 @@ public final class IpSecManager {
         /**
          * Release an SPI that was previously reserved.
          *
-         * <p>Release an SPI for use by other users in the system. This will fail if the SPI is
-         * currently in use by an IpSecTransform.
-         *
-         * @param destinationAddress SPIs must be unique for each combination of SPI and destination
-         *     address. Thus, the destinationAddress to which the SPI will communicate must be
-         *     supplied.
-         * @param spi the previously reserved SPI to be freed.
+         * <p>Release an SPI for use by other users in the system. If a SecurityParameterIndex is
+         * applied to an IpSecTransform, it will become unusable for future transforms but should
+         * still be closed to ensure system resources are released.
          */
         @Override
         public void close() {
@@ -134,13 +130,13 @@ public final class IpSecManager {
     public static final int INVALID_SECURITY_PARAMETER_INDEX = 0;
 
     /**
-     * Reserve an SPI for traffic bound towards the specified destination address.
+     * Reserve an SPI for traffic bound towards the specified remote address.
      *
      * <p>If successful, this SPI is guaranteed available until released by a call to {@link
      * SecurityParameterIndex#close()}.
      *
-     * @param destinationAddress SPIs must be unique for each combination of SPI and destination
-     *     address.
+     * @param direction {@link IpSecTransform#DIRECTION_IN} or {@link IpSecTransform#DIRECTION_OUT}
+     * @param remoteAddress address of the remote. SPIs must be unique for each remoteAddress.
      * @param requestedSpi the requested SPI, or '0' to allocate a random SPI.
      * @return the reserved SecurityParameterIndex
      * @throws ResourceUnavailableException indicating that too many SPIs are currently allocated
@@ -148,9 +144,9 @@ public final class IpSecManager {
      * @throws SpiUnavailableException indicating that a particular SPI cannot be reserved
      */
     public SecurityParameterIndex reserveSecurityParameterIndex(
-            InetAddress destinationAddress, int requestedSpi)
+            int direction, InetAddress remoteAddress, int requestedSpi)
             throws SpiUnavailableException, ResourceUnavailableException {
-        return new SecurityParameterIndex(mService, destinationAddress, requestedSpi);
+        return new SecurityParameterIndex(mService, direction, remoteAddress, requestedSpi);
     }
 
     /**
