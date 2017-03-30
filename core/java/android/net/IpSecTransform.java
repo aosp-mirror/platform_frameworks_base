@@ -305,32 +305,9 @@ public final class IpSecTransform implements AutoCloseable {
          * given destination address.
          *
          * <p>Care should be chosen when selecting an SPI to ensure that is is as unique as
-         * possible. Random number generation is a reasonable approach to selecting an SPI. For
-         * outbound SPIs, they must be reserved by calling {@link
-         * IpSecManager#reserveSecurityParameterIndex(int, InetAddress, int)}. Otherwise, Transforms will
-         * fail to build.
-         *
-         * <p>Unless an SPI is set for a given direction, traffic in that direction will be
-         * sent/received without any IPsec applied.
-         *
-         * @param direction either {@link #DIRECTION_IN or #DIRECTION_OUT}
-         * @param spi a unique 32-bit integer to identify transformed traffic
-         */
-        public IpSecTransform.Builder setSpi(@TransformDirection int direction, int spi) {
-            mConfig.flow[direction].spi = spi;
-            return this;
-        }
-
-        /**
-         * Set the SPI, which uniquely identifies a particular IPsec session from others. Because
-         * IPsec operates at the IP layer, this 32-bit identifier uniquely identifies packets to a
-         * given destination address.
-         *
-         * <p>Care should be chosen when selecting an SPI to ensure that is is as unique as
-         * possible. Random number generation is a reasonable approach to selecting an SPI. For
-         * outbound SPIs, they must be reserved by calling {@link
-         * IpSecManager#reserveSecurityParameterIndex(int, InetAddress, int)}. Otherwise, Transforms will
-         * fail to activate.
+         * possible. To reserve a value call {@link IpSecManager#reserveSecurityParameterIndex(int,
+         * InetAddress, int)}. Otherwise, SPI collisions would prevent a transform from being
+         * activated. IpSecManager#reserveSecurityParameterIndex(int, InetAddres$s, int)}.
          *
          * <p>Unless an SPI is set for a given direction, traffic in that direction will be
          * sent/received without any IPsec applied.
@@ -447,7 +424,6 @@ public final class IpSecTransform implements AutoCloseable {
          *     properties is invalid.
          * @hide
          */
-        @SystemApi
         public IpSecTransform buildTunnelModeTransform(
                 InetAddress localAddress, InetAddress remoteAddress) {
             //FIXME: argument validation here
