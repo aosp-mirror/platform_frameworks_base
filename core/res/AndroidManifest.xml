@@ -3464,7 +3464,7 @@
             android:theme="@style/Theme.NoDisplay"
             android:excludeFromRecents="true">
             <intent-filter>
-                <action android:name="android.intent.action.ACTION_REQUEST_SHUTDOWN" />
+                <action android:name="com.android.internal.intent.action.REQUEST_SHUTDOWN" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
             <intent-filter>
