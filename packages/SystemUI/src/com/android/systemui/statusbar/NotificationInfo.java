@@ -386,4 +386,9 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         }
         return false;
     }
+
+    @Override
+    public int getActualHeight() {
+        return getHeight();
+    }
 }

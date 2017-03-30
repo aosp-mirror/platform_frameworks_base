@@ -5774,6 +5774,9 @@ public class StatusBar extends SystemUI implements DemoMode,
             snoozeGuts.setSnoozeListener(mStackScroller.getSwipeActionHelper());
             snoozeGuts.setStatusBarNotification(sbn);
             snoozeGuts.setSnoozeOptions(row.getEntry().snoozeCriteria);
+            guts.setHeightChangedListener((NotificationGuts g) -> {
+                mStackScroller.onHeightChanged(row, row.isShown() /* needsAnimation */);
+            });
         }
 
         if (gutsView instanceof NotificationInfo) {

@@ -73,7 +73,8 @@ public class NotificationGuts extends FrameLayout {
     private Handler mHandler;
     private Runnable mFalsingCheck;
     private boolean mNeedsFalsingProtection;
-    private OnGutsClosedListener mListener;
+    private OnGutsClosedListener mClosedListener;
+    private OnHeightChangedListener mHeightListener;
 
     private GutsContent mGutsContent;
 
@@ -85,6 +86,11 @@ public class NotificationGuts extends FrameLayout {
          * @return the view to be shown in the notification guts.
          */
         public View getContentView();
+
+        /**
+         * @return the actual height of the content.
+         */
+        public int getActualHeight();
 
         /**
          * Called when the guts view have been told to close, typically after an outside
@@ -100,6 +106,10 @@ public class NotificationGuts extends FrameLayout {
 
     public interface OnGutsClosedListener {
         public void onGutsClosed(NotificationGuts guts);
+    }
+
+    public interface OnHeightChangedListener {
+        public void onHeightChanged(NotificationGuts guts);
     }
 
     interface OnSettingsClickListener {
@@ -125,7 +135,6 @@ public class NotificationGuts extends FrameLayout {
 
     public NotificationGuts(Context context) {
         this(context, null);
-
     }
 
     public void setGutsContent(GutsContent content) {
@@ -189,8 +198,8 @@ public class NotificationGuts extends FrameLayout {
 
     public void closeControls(int x, int y, boolean save) {
         if (getWindowToken() == null) {
-            if (mListener != null) {
-                mListener.onGutsClosed(this);
+            if (mClosedListener != null) {
+                mClosedListener.onGutsClosed(this);
             }
             return;
         }
@@ -198,8 +207,8 @@ public class NotificationGuts extends FrameLayout {
             animateClose(x, y);
         }
         setExposed(false, mNeedsFalsingProtection);
-        if (mListener != null) {
-            mListener.onGutsClosed(this);
+        if (mClosedListener != null) {
+            mClosedListener.onGutsClosed(this);
         }
     }
 
@@ -234,6 +243,10 @@ public class NotificationGuts extends FrameLayout {
         return mActualHeight;
     }
 
+    public int getIntrinsicHeight() {
+        return mGutsContent != null && mExposed ? mGutsContent.getActualHeight() : getHeight();
+    }
+
     public void setClipTopAmount(int clipTopAmount) {
         mClipTopAmount = clipTopAmount;
         invalidate();
@@ -251,7 +264,17 @@ public class NotificationGuts extends FrameLayout {
     }
 
     public void setClosedListener(OnGutsClosedListener listener) {
-        mListener = listener;
+        mClosedListener = listener;
+    }
+
+    public void setHeightChangedListener(OnHeightChangedListener listener) {
+        mHeightListener = listener;
+    }
+
+    protected void onHeightChanged() {
+        if (mHeightListener != null) {
+            mHeightListener.onHeightChanged(this);
+        }
     }
 
     public void setExposed(boolean exposed, boolean needsFalsingProtection) {
