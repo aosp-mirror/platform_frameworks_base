@@ -45,6 +45,7 @@ import android.security.KeyChain;
 import android.text.InputType;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.DragEvent;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -57,6 +58,7 @@ import android.view.ViewTreeObserver;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeProvider;
+import android.view.autofill.AutofillValue;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.textclassifier.TextClassifier;
@@ -2704,6 +2706,11 @@ public class WebView extends AbsoluteLayout
     @Override
     public void onProvideAutofillVirtualStructure(ViewStructure structure, int flags) {
         mProvider.getViewDelegate().onProvideAutofillVirtualStructure(structure, flags);
+    }
+
+    @Override
+    public void autofill(SparseArray<AutofillValue>values) {
+        mProvider.getViewDelegate().autofill(values);
     }
 
     /** @hide */
