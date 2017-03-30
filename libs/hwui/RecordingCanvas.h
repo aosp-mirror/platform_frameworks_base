@@ -191,9 +191,8 @@ public:
     virtual bool drawTextAbsolutePos() const override { return false; }
 
 protected:
-    virtual void drawGlyphs(const uint16_t* text, const float* positions, int count,
-            const SkPaint& paint, float x, float y,
-            float boundsLeft, float boundsTop, float boundsRight, float boundsBottom,
+    virtual void drawGlyphs(ReadGlyphFunc glyphFunc, int count, const SkPaint& paint, float x,
+            float y, float boundsLeft, float boundsTop, float boundsRight, float boundsBottom,
             float totalAdvance) override;
     virtual void drawLayoutOnPath(const minikin::Layout& layout, float hOffset, float vOffset,
             const SkPaint& paint, const SkPath& path, size_t start, size_t end) override;
