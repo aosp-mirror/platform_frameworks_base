@@ -22,7 +22,10 @@
 #include "renderthread/CanvasContext.h"
 #include "renderthread/EglManager.h"
 #include "utils/GLUtils.h"
+
 #include <algorithm>
+
+#include <ui/ColorSpace.h>
 
 namespace android {
 namespace uirenderer {
@@ -358,6 +361,40 @@ void RenderState::render(const Glop& glop, const Matrix4& orthoMatrix) {
     Texture* texture = (fill.skiaShaderData.skiaShaderType & kBitmap_SkiaShaderType) ?
             fill.skiaShaderData.bitmapData.bitmapTexture : nullptr;
     const AutoTexture autoCleanup(texture);
+
+    // If we have a shader and a base texture, the base texture is assumed to be an alpha mask
+    // which means the color space conversion applies to the shader's bitmap
+    Texture* colorSpaceTexture = texture != nullptr ? texture : fill.texture.texture;
+    if (colorSpaceTexture != nullptr) {
+        if (colorSpaceTexture->hasColorSpaceConversion()) {
+            const ColorSpaceConnector* connector = colorSpaceTexture->getColorSpaceConnector();
+            glUniformMatrix3fv(fill.program->getUniform("colorSpaceMatrix"), 1,
+                    GL_FALSE, connector->getTransform().asArray());
+        }
+
+        TransferFunctionType transferFunction = colorSpaceTexture->getTransferFunctionType();
+        if (transferFunction != TransferFunctionType::None) {
+            const ColorSpaceConnector* connector = colorSpaceTexture->getColorSpaceConnector();
+            const ColorSpace& source = connector->getSource();
+
+            switch (transferFunction) {
+                case TransferFunctionType::None:
+                    break;
+                case TransferFunctionType::Full:
+                    glUniform1fv(fill.program->getUniform("transferFunction"), 7,
+                            reinterpret_cast<const float*>(&source.getTransferParameters().g));
+                    break;
+                case TransferFunctionType::Limited:
+                    glUniform1fv(fill.program->getUniform("transferFunction"), 5,
+                            reinterpret_cast<const float*>(&source.getTransferParameters().g));
+                    break;
+                case TransferFunctionType::Gamma:
+                    glUniform1f(fill.program->getUniform("transferFunctionGamma"),
+                            source.getTransferParameters().g);
+                    break;
+            }
+        }
+    }
 
     // ------------------------------------
     // ---------- GL state setup ----------
