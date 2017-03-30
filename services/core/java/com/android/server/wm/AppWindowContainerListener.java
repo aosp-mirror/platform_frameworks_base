@@ -33,6 +33,10 @@ public interface AppWindowContainerListener extends WindowContainerListener {
     /**
      * Called when the key dispatching to a window associated with the app window container
      * timed-out.
+     *
+     * @param reason The reason for the key dispatching time out.
+     * @param windowPid The pid of the window key dispatching timed out on.
+     * @return True if input dispatching should be aborted.
      */
-    boolean keyDispatchingTimedOut(String reason);
+    boolean keyDispatchingTimedOut(String reason, int windowPid);
 }
