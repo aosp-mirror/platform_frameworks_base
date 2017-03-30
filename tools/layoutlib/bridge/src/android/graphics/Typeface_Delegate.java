@@ -233,7 +233,8 @@ public final class Typeface_Delegate {
             Map<String, ByteBuffer> bufferForPath) {
         FontFamily fontFamily = new FontFamily(family.getLanguage(), family.getVariant());
         for (FontConfig.Font font : family.getFonts()) {
-            FontFamily_Delegate.addFont(fontFamily.mBuilderPtr, font.getFontName(),
+            String fullPathName = "/system/fonts/" + font.getFontName();
+            FontFamily_Delegate.addFont(fontFamily.mBuilderPtr, fullPathName,
                     font.getWeight(), font.isItalic());
         }
         fontFamily.freeze();
