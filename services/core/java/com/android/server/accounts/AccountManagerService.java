@@ -1597,17 +1597,11 @@ public class AccountManagerService
                 @Override
                 public void run() throws RemoteException {
                     // Confirm that the owner's account still exists before this step.
-                    UserAccounts owner = getUserAccounts(parentUserId);
-                    synchronized (owner.dbLock) {
-                        synchronized (owner.cacheLock) {
-                            for (Account acc : getAccounts(parentUserId,
-                                    mContext.getOpPackageName())) {
-                                if (acc.equals(account)) {
-                                    mAuthenticator.addAccountFromCredentials(
-                                            this, account, accountCredentials);
-                                    break;
-                                }
-                            }
+                    for (Account acc : getAccounts(parentUserId, mContext.getOpPackageName())) {
+                        if (acc.equals(account)) {
+                            mAuthenticator.addAccountFromCredentials(
+                                    this, account, accountCredentials);
+                            break;
                         }
                     }
                 }
