@@ -734,8 +734,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         boolean forceEphemeralUsers = false; // Can only be set by a device owner.
         boolean isNetworkLoggingEnabled = false; // Can only be set by a device owner.
 
-        // one notification after enabling + 3 more after reboots
-        static final int DEF_MAXIMUM_NETWORK_LOGGING_NOTIFICATIONS_SHOWN = 4;
+        // one notification after enabling + one more after reboots
+        static final int DEF_MAXIMUM_NETWORK_LOGGING_NOTIFICATIONS_SHOWN = 2;
         int numNetworkLoggingNotifications = 0;
         long lastNetworkLoggingNotificationTimeMs = 0; // Time in milliseconds since epoch
 
