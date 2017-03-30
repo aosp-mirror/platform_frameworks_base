@@ -515,10 +515,6 @@ class WindowSurfaceController {
         return mSurfaceControl.getHandle();
     }
 
-    boolean getTransformToDisplayInverse() {
-        return mSurfaceControl.getTransformToDisplayInverse();
-    }
-
     void getSurface(Surface outSurface) {
         outSurface.copyFrom(mSurfaceControl);
     }
