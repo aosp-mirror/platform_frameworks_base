@@ -22,6 +22,7 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.content.IntentSender;
 import android.metrics.LogMaker;
+import android.os.Bundle;
 import android.os.Handler;
 import android.service.autofill.Dataset;
 import android.service.autofill.FillResponse;
@@ -63,7 +64,7 @@ public final class AutoFillUI {
     private final MetricsLogger mMetricsLogger = new MetricsLogger();
 
     public interface AutoFillUiCallback {
-        void authenticate(@NonNull IntentSender intent);
+        void authenticate(@NonNull IntentSender intent, @Nullable Bundle extras);
         void fill(@NonNull Dataset dataset);
         void save();
         void cancelSave();
@@ -156,7 +157,7 @@ public final class AutoFillUI {
                     log.setType(MetricsProto.MetricsEvent.TYPE_DETAIL);
                     hideFillUiUiThread();
                     if (mCallback != null) {
-                        mCallback.authenticate(response.getAuthentication());
+                        mCallback.authenticate(response.getAuthentication(), response.getExtras());
                     }
                 }
 
