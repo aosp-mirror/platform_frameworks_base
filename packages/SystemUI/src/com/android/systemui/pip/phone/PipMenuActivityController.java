@@ -33,7 +33,6 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Log;
-import android.util.Pair;
 import android.view.IWindowManager;
 
 import com.android.systemui.pip.phone.PipMediaController.ActionListener;
@@ -56,6 +55,7 @@ public class PipMenuActivityController {
     public static final String EXTRA_ACTIONS = "actions";
     public static final String EXTRA_STACK_BOUNDS = "stack_bounds";
     public static final String EXTRA_MOVEMENT_BOUNDS = "movement_bounds";
+    public static final String EXTRA_ALLOW_TIMEOUT = "allow_timeout";
     public static final String EXTRA_SHOW_MENU = "show_menu";
     public static final String EXTRA_DISMISS_FRACTION = "dismiss_fraction";
 
@@ -105,7 +105,8 @@ public class PipMenuActivityController {
     private ParceledListSlice mMediaActions;
     private boolean mMenuVisible;
 
-    private Bundle mTmpData = new Bundle();
+    // The dismiss fraction update is sent frequently, so use a temporary bundle for the message
+    private Bundle mTmpDismissFractionData = new Bundle();
 
     private boolean mStartActivityRequested;
     private Messenger mToActivityMessenger;
@@ -195,11 +196,11 @@ public class PipMenuActivityController {
      */
     public void setDismissFraction(float fraction) {
         if (mToActivityMessenger != null) {
-            mTmpData.clear();
-            mTmpData.putFloat(EXTRA_DISMISS_FRACTION, fraction);
+            mTmpDismissFractionData.clear();
+            mTmpDismissFractionData.putFloat(EXTRA_DISMISS_FRACTION, fraction);
             Message m = Message.obtain();
             m.what = PipMenuActivity.MESSAGE_UPDATE_DISMISS_FRACTION;
-            m.obj = mTmpData;
+            m.obj = mTmpDismissFractionData;
             try {
                 mToActivityMessenger.send(m);
             } catch (RemoteException e) {
@@ -207,28 +208,29 @@ public class PipMenuActivityController {
             }
         } else if (!mStartActivityRequested) {
             startMenuActivity(null /* stackBounds */, null /* movementBounds */,
-                    false /* showMenu */);
+                    false /* showMenu */, false /* allowMenuTimeout */);
         }
     }
 
     /**
      * Shows the menu activity.
      */
-    public void showMenu(Rect stackBounds, Rect movementBounds) {
+    public void showMenu(Rect stackBounds, Rect movementBounds, boolean allowMenuTimeout) {
         if (mToActivityMessenger != null) {
-            mTmpData.clear();
-            mTmpData.putParcelable(EXTRA_STACK_BOUNDS, stackBounds);
-            mTmpData.putParcelable(EXTRA_MOVEMENT_BOUNDS, movementBounds);
+            Bundle data = new Bundle();
+            data.putParcelable(EXTRA_STACK_BOUNDS, stackBounds);
+            data.putParcelable(EXTRA_MOVEMENT_BOUNDS, movementBounds);
+            data.putBoolean(EXTRA_ALLOW_TIMEOUT, allowMenuTimeout);
             Message m = Message.obtain();
             m.what = PipMenuActivity.MESSAGE_SHOW_MENU;
-            m.obj = mTmpData;
+            m.obj = data;
             try {
                 mToActivityMessenger.send(m);
             } catch (RemoteException e) {
                 Log.e(TAG, "Could not notify menu to show", e);
             }
         } else if (!mStartActivityRequested) {
-            startMenuActivity(stackBounds, movementBounds, true /* showMenu */);
+            startMenuActivity(stackBounds, movementBounds, true /* showMenu */, allowMenuTimeout);
         }
     }
 
@@ -290,7 +292,8 @@ public class PipMenuActivityController {
     /**
      * Starts the menu activity on the top task of the pinned stack.
      */
-    private void startMenuActivity(Rect stackBounds, Rect movementBounds, boolean showMenu) {
+    private void startMenuActivity(Rect stackBounds, Rect movementBounds, boolean showMenu,
+            boolean allowMenuTimeout) {
         try {
             StackInfo pinnedStackInfo = mActivityManager.getStackInfo(PINNED_STACK_ID);
             if (pinnedStackInfo != null && pinnedStackInfo.taskIds != null &&
@@ -305,6 +308,7 @@ public class PipMenuActivityController {
                     intent.putExtra(EXTRA_MOVEMENT_BOUNDS, movementBounds);
                 }
                 intent.putExtra(EXTRA_SHOW_MENU, showMenu);
+                intent.putExtra(EXTRA_ALLOW_TIMEOUT, allowMenuTimeout);
                 ActivityOptions options = ActivityOptions.makeCustomAnimation(mContext, 0, 0);
                 options.setLaunchTaskId(
                         pinnedStackInfo.taskIds[pinnedStackInfo.taskIds.length - 1]);
@@ -336,12 +340,12 @@ public class PipMenuActivityController {
                 Log.e(TAG, "Error showing PIP menu activity", e);
             }
 
-            mTmpData.clear();
-            mTmpData.putParcelable(EXTRA_STACK_BOUNDS, stackBounds);
-            mTmpData.putParcelable(EXTRA_ACTIONS, resolveMenuActions());
+            Bundle data = new Bundle();
+            data.putParcelable(EXTRA_STACK_BOUNDS, stackBounds);
+            data.putParcelable(EXTRA_ACTIONS, resolveMenuActions());
             Message m = Message.obtain();
             m.what = PipMenuActivity.MESSAGE_UPDATE_ACTIONS;
-            m.obj = mTmpData;
+            m.obj = data;
             try {
                 mToActivityMessenger.send(m);
             } catch (RemoteException e) {
