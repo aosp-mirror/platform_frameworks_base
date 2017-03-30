@@ -19,10 +19,12 @@ package com.android.server.notification;
 import static android.content.Context.BIND_ALLOW_WHITELIST_MANAGEMENT;
 import static android.content.Context.BIND_AUTO_CREATE;
 import static android.content.Context.BIND_FOREGROUND_SERVICE;
+import static android.content.Context.DEVICE_POLICY_SERVICE;
 
 import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.PendingIntent;
+import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -39,6 +41,7 @@ import android.content.pm.ServiceInfo;
 import android.content.pm.UserInfo;
 import android.database.ContentObserver;
 import android.net.Uri;
+import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
@@ -889,7 +892,9 @@ abstract public class ManagedServices {
             if (this.userid == UserHandle.USER_ALL) return true;
             if (this.isSystem) return true;
             if (nid == UserHandle.USER_ALL || nid == this.userid) return true;
-            return supportsProfiles() && mUserProfiles.isCurrentProfile(nid);
+            return supportsProfiles()
+                    && mUserProfiles.isCurrentProfile(nid)
+                    && isPermittedForProfile(nid);
         }
 
         public boolean supportsProfiles() {
@@ -900,7 +905,7 @@ abstract public class ManagedServices {
         public void binderDied() {
             if (DEBUG) Slog.d(TAG, "binderDied");
             // Remove the service, but don't unbind from the service. The system will bring the
-            // service back up, and the onServiceConnected handler will readd the service with the
+            // service back up, and the onServiceConnected handler will read the service with the
             // new binding. If this isn't a bound service, and is just a registered
             // service, just removing it from the list is all we need to do anyway.
             removeServiceImpl(this.service, this.userid);
@@ -911,6 +916,26 @@ abstract public class ManagedServices {
             if (this.isSystem) return true;
             if (this.connection == null) return false;
             return mEnabledServicesForCurrentProfiles.contains(this.component);
+        }
+
+        /**
+         * Returns true if this service is allowed to receive events for the given userId. A
+         * managed profile owner can disallow non-system services running outside of the profile
+         * from receiving events from the profile.
+         */
+        public boolean isPermittedForProfile(int userId) {
+            if (!mUserProfiles.isManagedProfile(userId)) {
+                return true;
+            }
+            DevicePolicyManager dpm =
+                    (DevicePolicyManager) mContext.getSystemService(DEVICE_POLICY_SERVICE);
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                return dpm.isNotificationListenerServicePermitted(
+                        component.getPackageName(), userId);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
         }
     }
 
@@ -951,6 +976,13 @@ abstract public class ManagedServices {
         public boolean isCurrentProfile(int userId) {
             synchronized (mCurrentProfiles) {
                 return mCurrentProfiles.get(userId) != null;
+            }
+        }
+
+        public boolean isManagedProfile(int userId) {
+            synchronized (mCurrentProfiles) {
+                UserInfo user = mCurrentProfiles.get(userId);
+                return user != null && user.isManagedProfile();
             }
         }
     }
