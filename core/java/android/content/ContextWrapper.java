@@ -781,6 +781,11 @@ public class ContextWrapper extends Context {
     }
 
     @Override
+    public void revokeUriPermission(String targetPackage, Uri uri, int modeFlags) {
+        mBase.revokeUriPermission(targetPackage, uri, modeFlags);
+    }
+
+    @Override
     public int checkUriPermission(Uri uri, int pid, int uid, int modeFlags) {
         return mBase.checkUriPermission(uri, pid, uid, modeFlags);
     }

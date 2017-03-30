@@ -1659,6 +1659,12 @@ public class BridgeContext extends Context {
     }
 
     @Override
+    public void revokeUriPermission(String arg0, Uri arg1, int arg2) {
+        // pass
+
+    }
+
+    @Override
     public void sendBroadcast(Intent arg0) {
         // pass
 

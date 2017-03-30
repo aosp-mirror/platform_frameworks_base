@@ -653,6 +653,11 @@ public class MockContext extends Context {
     }
 
     @Override
+    public void revokeUriPermission(String targetPackage, Uri uri, int modeFlags) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public int checkUriPermission(Uri uri, int pid, int uid, int modeFlags) {
         throw new UnsupportedOperationException();
     }

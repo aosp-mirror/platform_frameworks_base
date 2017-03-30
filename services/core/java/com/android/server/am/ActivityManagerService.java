@@ -2386,7 +2386,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             } break;
             case DELETE_DUMPHEAP_MSG: {
                 revokeUriPermission(ActivityThread.currentActivityThread().getApplicationThread(),
-                        DumpHeapActivity.JAVA_URI,
+                        null, DumpHeapActivity.JAVA_URI,
                         Intent.FLAG_GRANT_READ_URI_PERMISSION
                                 | Intent.FLAG_GRANT_WRITE_URI_PERMISSION,
                         UserHandle.myUserId());
@@ -8944,7 +8944,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-    private void revokeUriPermissionLocked(int callingUid, GrantUri grantUri, final int modeFlags) {
+    private void revokeUriPermissionLocked(String targetPackage, int callingUid, GrantUri grantUri,
+            final int modeFlags) {
         if (DEBUG_URI_PERMISSION) Slog.v(TAG_URI_PERMISSION,
                 "Revoking all granted permissions to " + grantUri);
 
@@ -8965,8 +8966,11 @@ public class ActivityManagerService extends IActivityManager.Stub
             final ArrayMap<GrantUri, UriPermission> perms = mGrantedUriPermissions.get(callingUid);
             if (perms != null) {
                 boolean persistChanged = false;
-                for (Iterator<UriPermission> it = perms.values().iterator(); it.hasNext();) {
-                    final UriPermission perm = it.next();
+                for (int i = perms.size()-1; i >= 0; i--) {
+                    final UriPermission perm = perms.valueAt(i);
+                    if (targetPackage != null && !targetPackage.equals(perm.targetPkg)) {
+                        continue;
+                    }
                     if (perm.uri.sourceUserId == grantUri.sourceUserId
                             && perm.uri.uri.isPathPrefixMatch(grantUri.uri)) {
                         if (DEBUG_URI_PERMISSION) Slog.v(TAG_URI_PERMISSION,
@@ -8975,7 +8979,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         persistChanged |= perm.revokeModes(
                                 modeFlags | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION, false);
                         if (perm.modeFlags == 0) {
-                            it.remove();
+                            perms.removeAt(i);
                         }
                     }
                 }
@@ -8992,29 +8996,30 @@ public class ActivityManagerService extends IActivityManager.Stub
         boolean persistChanged = false;
 
         // Go through all of the permissions and remove any that match.
-        int N = mGrantedUriPermissions.size();
-        for (int i = 0; i < N; i++) {
+        for (int i = mGrantedUriPermissions.size()-1; i >= 0; i--) {
             final int targetUid = mGrantedUriPermissions.keyAt(i);
             final ArrayMap<GrantUri, UriPermission> perms = mGrantedUriPermissions.valueAt(i);
 
-            for (Iterator<UriPermission> it = perms.values().iterator(); it.hasNext();) {
-                final UriPermission perm = it.next();
+            for (int j = perms.size()-1; j >= 0; j--) {
+                final UriPermission perm = perms.valueAt(j);
+                if (targetPackage != null && !targetPackage.equals(perm.targetPkg)) {
+                    continue;
+                }
                 if (perm.uri.sourceUserId == grantUri.sourceUserId
                         && perm.uri.uri.isPathPrefixMatch(grantUri.uri)) {
                     if (DEBUG_URI_PERMISSION) Slog.v(TAG_URI_PERMISSION,
                                 "Revoking " + perm.targetUid + " permission to " + perm.uri);
                     persistChanged |= perm.revokeModes(
-                            modeFlags | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION, true);
+                            modeFlags | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION,
+                            targetPackage == null);
                     if (perm.modeFlags == 0) {
-                        it.remove();
+                        perms.removeAt(j);
                     }
                 }
             }
 
             if (perms.isEmpty()) {
-                mGrantedUriPermissions.remove(targetUid);
-                N--;
-                i--;
+                mGrantedUriPermissions.removeAt(i);
             }
         }
 
@@ -9028,8 +9033,8 @@ public class ActivityManagerService extends IActivityManager.Stub
      * @param userId The userId in which the uri is to be resolved.
      */
     @Override
-    public void revokeUriPermission(IApplicationThread caller, Uri uri, final int modeFlags,
-            int userId) {
+    public void revokeUriPermission(IApplicationThread caller, String targetPackage, Uri uri,
+            final int modeFlags, int userId) {
         enforceNotIsolatedCaller("revokeUriPermission");
         synchronized(this) {
             final ProcessRecord r = getRecordForAppLocked(caller);
@@ -9056,7 +9061,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 return;
             }
 
-            revokeUriPermissionLocked(r.uid, new GrantUri(userId, uri, false), modeFlags);
+            revokeUriPermissionLocked(targetPackage, r.uid, new GrantUri(userId, uri, false),
+                    modeFlags);
         }
     }
 
@@ -21164,7 +21170,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         public void run() {
                             revokeUriPermission(ActivityThread.currentActivityThread()
                                             .getApplicationThread(),
-                                    DumpHeapActivity.JAVA_URI,
+                                    null, DumpHeapActivity.JAVA_URI,
                                     Intent.FLAG_GRANT_READ_URI_PERMISSION
                                             | Intent.FLAG_GRANT_WRITE_URI_PERMISSION,
                                     UserHandle.myUserId());
