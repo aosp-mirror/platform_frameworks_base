@@ -161,17 +161,61 @@ const char* gFS_Uniforms_HasRoundRectClip =
         "uniform vec4 roundRectInnerRectLTRB;\n"
         "uniform float roundRectRadius;\n";
 
-const char* gFS_OETF[2] = {
-         "\nvec4 OETF(const vec4 linear) {\n"
-         "    return linear;\n"
-         "}\n",
-          // We expect linear data to be scRGB so we mirror the gamma function
-         "\nvec4 OETF(const vec4 linear) {"
-          "    return vec4(sign(linear.rgb) * OETF_sRGB(abs(linear.rgb)), linear.a);\n"
-          "}\n",
+const char* gFS_Uniforms_ColorSpaceConversion =
+        // TODO: Should we use a 3D LUT to combine the matrix and transfer functions?
+        // 32x32x32 fp16 LUTs (for scRGB output) are large and heavy to generate...
+        "uniform mat3 colorSpaceMatrix;\n";
+
+const char* gFS_Uniforms_TransferFunction[4] = {
+        // In this order: g, a, b, c, d, e, f
+        // See ColorSpace::TransferParameters
+        // We'll use hardware sRGB conversion as much as possible
+        "",
+        "uniform float transferFunction[7];\n",
+        "uniform float transferFunction[5];\n",
+        "uniform float transferFunctionGamma;\n"
 };
 
-const char* gFS_Transfer_Functions = R"__SHADER__(
+const char* gFS_OETF[2] = {
+        R"__SHADER__(
+        vec4 OETF(const vec4 linear) {
+            return linear;
+        }
+        )__SHADER__",
+        // We expect linear data to be scRGB so we mirror the gamma function
+        R"__SHADER__(
+        vec4 OETF(const vec4 linear) {
+            return vec4(sign(linear.rgb) * OETF_sRGB(abs(linear.rgb)), linear.a);
+        }
+        )__SHADER__"
+};
+
+const char* gFS_ColorConvert[3] = {
+        // Just OETF
+        R"__SHADER__(
+        vec4 colorConvert(const vec4 color) {
+            return OETF(color);
+        }
+        )__SHADER__",
+        // Full color conversion for opaque bitmaps
+        R"__SHADER__(
+        vec4 colorConvert(const vec4 color) {
+            return OETF(vec4(colorSpaceMatrix * EOTF_Parametric(color.rgb), color.a));
+        }
+        )__SHADER__",
+        // Full color conversion for translucent bitmaps
+        // Note: 0.5/256=0.0019
+        R"__SHADER__(
+        vec4 colorConvert(in vec4 color) {
+            color.rgb /= color.a + 0.0019;
+            color = OETF(vec4(colorSpaceMatrix * EOTF_Parametric(color.rgb), color.a));
+            color.rgb *= color.a + 0.0019;
+            return color;
+        }
+        )__SHADER__",
+};
+
+const char* gFS_sRGB_TransferFunctions = R"__SHADER__(
         float OETF_sRGB(const float linear) {
             // IEC 61966-2-1:1999
             return linear <= 0.0031308 ? linear * 12.92 : (pow(linear, 1.0 / 2.4) * 1.055) - 0.055;
@@ -187,12 +231,56 @@ const char* gFS_Transfer_Functions = R"__SHADER__(
         }
 )__SHADER__";
 
+const char* gFS_TransferFunction[4] = {
+        // Conversion done by the texture unit (sRGB)
+        R"__SHADER__(
+        vec3 EOTF_Parametric(const vec3 x) {
+            return x;
+        }
+        )__SHADER__",
+        // Full transfer function
+        // TODO: We should probably use a 1D LUT (256x1 with texelFetch() since input is 8 bit)
+        // TODO: That would cause 3 dependent texture fetches. Is it worth it?
+        R"__SHADER__(
+        float EOTF_Parametric(float x) {
+            return x <= transferFunction[4]
+                  ? transferFunction[3] * x + transferFunction[6]
+                  : pow(transferFunction[1] * x + transferFunction[2], transferFunction[0])
+                          + transferFunction[5];
+        }
+
+        vec3 EOTF_Parametric(const vec3 x) {
+            return vec3(EOTF_Parametric(x.r), EOTF_Parametric(x.g), EOTF_Parametric(x.b));
+        }
+        )__SHADER__",
+        // Limited transfer function, e = f = 0.0
+        R"__SHADER__(
+        float EOTF_Parametric(float x) {
+            return x <= transferFunction[4]
+                  ? transferFunction[3] * x
+                  : pow(transferFunction[1] * x + transferFunction[2], transferFunction[0]);
+        }
+
+        vec3 EOTF_Parametric(const vec3 x) {
+            return vec3(EOTF_Parametric(x.r), EOTF_Parametric(x.g), EOTF_Parametric(x.b));
+        }
+        )__SHADER__",
+        // Gamma transfer function, e = f = 0.0
+        R"__SHADER__(
+        vec3 EOTF_Parametric(const vec3 x) {
+            return vec3(pow(x.r, transferFunctionGamma),
+                        pow(x.g, transferFunctionGamma),
+                        pow(x.b, transferFunctionGamma));
+        }
+        )__SHADER__"
+};
+
 // Dithering must be done in the quantization space
 // When we are writing to an sRGB framebuffer, we must do the following:
 //     EOTF(OETF(color) + dither)
 // The dithering pattern is generated with a triangle noise generator in the range [-1.0,1.0]
 // TODO: Handle linear fp16 render targets
-const char* gFS_Gradient_Functions = R"__SHADER__(
+const char* gFS_GradientFunctions = R"__SHADER__(
         float triangleNoise(const highp vec2 n) {
             highp vec2 p = fract(n * vec2(5.3987, 5.4421));
             p += dot(p.yx, p.xy + vec2(21.5351, 14.3137));
@@ -200,7 +288,8 @@ const char* gFS_Gradient_Functions = R"__SHADER__(
             return fract(xy * 95.4307) + fract(xy * 75.04961) - 1.0;
         }
 )__SHADER__";
-const char* gFS_Gradient_Preamble[2] = {
+
+const char* gFS_GradientPreamble[2] = {
         // Linear framebuffer
         R"__SHADER__(
         vec4 dither(const vec4 color) {
@@ -259,9 +348,9 @@ const char* gFS_Main_ApplyVertexAlphaShadowInterp =
         "    fragColor *= texture2D(baseSampler, vec2(alpha, 0.5)).a;\n";
 const char* gFS_Main_FetchTexture[2] = {
         // Don't modulate
-        "    fragColor = OETF(texture2D(baseSampler, outTexCoords));\n",
+        "    fragColor = colorConvert(texture2D(baseSampler, outTexCoords));\n",
         // Modulate
-        "    fragColor = color * texture2D(baseSampler, outTexCoords);\n"
+        "    fragColor = color * colorConvert(texture2D(baseSampler, outTexCoords));\n"
 };
 const char* gFS_Main_FetchA8Texture[4] = {
         // Don't modulate
@@ -290,9 +379,9 @@ const char* gFS_Main_FetchGradient[6] = {
         "    vec4 gradientColor = gradientMix(startColor, endColor, clamp(index - floor(index), 0.0, 1.0));\n"
 };
 const char* gFS_Main_FetchBitmap =
-        "    vec4 bitmapColor = OETF(texture2D(bitmapSampler, outBitmapTexCoords));\n";
+        "    vec4 bitmapColor = colorConvert(texture2D(bitmapSampler, outBitmapTexCoords));\n";
 const char* gFS_Main_FetchBitmapNpot =
-        "    vec4 bitmapColor = OETF(texture2D(bitmapSampler, wrap(outBitmapTexCoords)));\n";
+        "    vec4 bitmapColor = colorConvert(texture2D(bitmapSampler, wrap(outBitmapTexCoords)));\n";
 const char* gFS_Main_BlendShadersBG =
         "    fragColor = blendShaders(gradientColor, bitmapColor)";
 const char* gFS_Main_BlendShadersGB =
@@ -627,6 +716,11 @@ String8 ProgramCache::generateFragmentShader(const ProgramDescription& descripti
     }
     shader.append(gFS_Uniforms_ColorOp[static_cast<int>(description.colorOp)]);
 
+    if (description.hasColorSpaceConversion) {
+        shader.append(gFS_Uniforms_ColorSpaceConversion);
+    }
+    shader.append(gFS_Uniforms_TransferFunction[static_cast<int>(description.transferFunction)]);
+
     // Generate required functions
     if (description.hasGradient && description.hasBitmap) {
         generateBlend(shader, "blendShaders", description.shadersMode);
@@ -640,16 +734,21 @@ String8 ProgramCache::generateFragmentShader(const ProgramDescription& descripti
     if (description.useShaderBasedWrap) {
         generateTextureWrap(shader, description.bitmapWrapS, description.bitmapWrapT);
     }
-    if (description.hasGradient || description.hasLinearTexture) {
-        shader.append(gFS_Transfer_Functions);
+    if (description.hasGradient || description.hasLinearTexture
+            || description.hasColorSpaceConversion) {
+        shader.append(gFS_sRGB_TransferFunctions);
     }
     if (description.hasBitmap || ((description.hasTexture || description.hasExternalTexture) &&
             !description.hasAlpha8Texture)) {
-        shader.append(gFS_OETF[description.hasLinearTexture && !mHasLinearBlending]);
+        shader.append(gFS_TransferFunction[static_cast<int>(description.transferFunction)]);
+        shader.append(gFS_OETF[(description.hasLinearTexture || description.hasColorSpaceConversion)
+                && !mHasLinearBlending]);
+        shader.append(gFS_ColorConvert[description.hasColorSpaceConversion
+                ? 1 + description.hasTranslucentConversion : 0]);
     }
     if (description.hasGradient) {
-        shader.append(gFS_Gradient_Functions);
-        shader.append(gFS_Gradient_Preamble[mHasLinearBlending]);
+        shader.append(gFS_GradientFunctions);
+        shader.append(gFS_GradientPreamble[mHasLinearBlending]);
     }
 
     // Begin the shader

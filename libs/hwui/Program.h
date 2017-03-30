@@ -28,6 +28,7 @@
 #include "FloatColor.h"
 #include "Matrix.h"
 #include "Properties.h"
+#include "utils/Color.h"
 
 namespace android {
 namespace uirenderer {
@@ -56,10 +57,10 @@ namespace uirenderer {
 #define PROGRAM_KEY_BITMAP_NPOT         0x80
 #define PROGRAM_KEY_BITMAP_EXTERNAL    0x100
 
-#define PROGRAM_KEY_SWAP_SRC_DST      0x2000
-
 #define PROGRAM_KEY_BITMAP_WRAPS_MASK  0x600
 #define PROGRAM_KEY_BITMAP_WRAPT_MASK 0x1800
+
+#define PROGRAM_KEY_SWAP_SRC_DST_SHIFT 13
 
 // Encode the xfermodes on 6 bits
 #define PROGRAM_MAX_XFERMODE 0x1f
@@ -89,6 +90,10 @@ namespace uirenderer {
 #define PROGRAM_HAS_GAMMA_CORRECTION 44
 #define PROGRAM_HAS_LINEAR_TEXTURE 45
 
+#define PROGRAM_HAS_COLOR_SPACE_CONVERSION 46
+#define PROGRAM_TRANSFER_FUNCTION 47 // 2 bits for transfer function
+#define PROGRAM_HAS_TRANSLUCENT_CONVERSION 49
+
 ///////////////////////////////////////////////////////////////////////////////
 // Types
 ///////////////////////////////////////////////////////////////////////////////
@@ -105,13 +110,13 @@ typedef uint64_t programid;
  * A ProgramDescription must be used in conjunction with a ProgramCache.
  */
 struct ProgramDescription {
-    enum class ColorFilterMode {
+    enum class ColorFilterMode : int8_t {
         None = 0,
         Matrix,
         Blend
     };
 
-    enum Gradient {
+    enum Gradient : int8_t {
         kGradientLinear = 0,
         kGradientCircular,
         kGradientSweep
@@ -168,6 +173,11 @@ struct ProgramDescription {
     // Set when sampling an image in linear space
     bool hasLinearTexture;
 
+    bool hasColorSpaceConversion;
+    TransferFunctionType transferFunction;
+    // Indicates whether the bitmap to convert between color spaces is translucent
+    bool hasTranslucentConversion;
+
     /**
      * Resets this description. All fields are reset back to the default
      * values they hold after building a new instance.
@@ -210,6 +220,10 @@ struct ProgramDescription {
 
         hasGammaCorrection = false;
         hasLinearTexture = false;
+
+        hasColorSpaceConversion = false;
+        transferFunction = TransferFunctionType::None;
+        hasTranslucentConversion = false;
     }
 
     /**
@@ -263,24 +277,27 @@ struct ProgramDescription {
                 break;
             case ColorFilterMode::Blend:
                 key |= PROGRAM_KEY_COLOR_BLEND;
-                key |= ((int)colorMode & PROGRAM_MAX_XFERMODE) << PROGRAM_XFERMODE_COLOR_OP_SHIFT;
+                key |= ((int) colorMode & PROGRAM_MAX_XFERMODE) << PROGRAM_XFERMODE_COLOR_OP_SHIFT;
                 break;
             case ColorFilterMode::None:
                 break;
         }
-        key |= ((int)framebufferMode & PROGRAM_MAX_XFERMODE) << PROGRAM_XFERMODE_FRAMEBUFFER_SHIFT;
-        if (swapSrcDst) key |= PROGRAM_KEY_SWAP_SRC_DST;
-        if (modulate) key |= programid(0x1) << PROGRAM_MODULATE_SHIFT;
-        if (hasVertexAlpha) key |= programid(0x1) << PROGRAM_HAS_VERTEX_ALPHA_SHIFT;
-        if (useShadowAlphaInterp) key |= programid(0x1) << PROGRAM_USE_SHADOW_ALPHA_INTERP_SHIFT;
-        if (hasExternalTexture) key |= programid(0x1) << PROGRAM_HAS_EXTERNAL_TEXTURE_SHIFT;
-        if (hasTextureTransform) key |= programid(0x1) << PROGRAM_HAS_TEXTURE_TRANSFORM_SHIFT;
-        if (isSimpleGradient) key |= programid(0x1) << PROGRAM_IS_SIMPLE_GRADIENT;
-        if (hasColors) key |= programid(0x1) << PROGRAM_HAS_COLORS;
-        if (hasDebugHighlight) key |= programid(0x1) << PROGRAM_HAS_DEBUG_HIGHLIGHT;
-        if (hasRoundRectClip) key |= programid(0x1) << PROGRAM_HAS_ROUND_RECT_CLIP;
-        if (hasGammaCorrection) key |= programid(0x1) << PROGRAM_HAS_GAMMA_CORRECTION;
-        if (hasLinearTexture) key |= programid(0x1) << PROGRAM_HAS_LINEAR_TEXTURE;
+        key |= ((int) framebufferMode & PROGRAM_MAX_XFERMODE) << PROGRAM_XFERMODE_FRAMEBUFFER_SHIFT;
+        key |= programid(swapSrcDst) << PROGRAM_KEY_SWAP_SRC_DST_SHIFT;
+        key |= programid(modulate) << PROGRAM_MODULATE_SHIFT;
+        key |= programid(hasVertexAlpha) << PROGRAM_HAS_VERTEX_ALPHA_SHIFT;
+        key |= programid(useShadowAlphaInterp) << PROGRAM_USE_SHADOW_ALPHA_INTERP_SHIFT;
+        key |= programid(hasExternalTexture) << PROGRAM_HAS_EXTERNAL_TEXTURE_SHIFT;
+        key |= programid(hasTextureTransform) << PROGRAM_HAS_TEXTURE_TRANSFORM_SHIFT;
+        key |= programid(isSimpleGradient) << PROGRAM_IS_SIMPLE_GRADIENT;
+        key |= programid(hasColors) << PROGRAM_HAS_COLORS;
+        key |= programid(hasDebugHighlight) << PROGRAM_HAS_DEBUG_HIGHLIGHT;
+        key |= programid(hasRoundRectClip) << PROGRAM_HAS_ROUND_RECT_CLIP;
+        key |= programid(hasGammaCorrection) << PROGRAM_HAS_GAMMA_CORRECTION;
+        key |= programid(hasLinearTexture) << PROGRAM_HAS_LINEAR_TEXTURE;
+        key |= programid(hasColorSpaceConversion) << PROGRAM_HAS_COLOR_SPACE_CONVERSION;
+        key |= programid(transferFunction) << PROGRAM_TRANSFER_FUNCTION;
+        key |= programid(hasTranslucentConversion) << PROGRAM_HAS_TRANSLUCENT_CONVERSION;
         return key;
     }
 
