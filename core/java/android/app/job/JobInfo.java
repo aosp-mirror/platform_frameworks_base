@@ -83,6 +83,9 @@ public class JobInfo implements Parcelable {
     /* Minimum flex for a periodic job, in milliseconds. */
     private static final long MIN_FLEX_MILLIS = 5 * 60 * 1000L; // 5 minutes
 
+    /* Minimum backoff interval for a job, in milliseconds */
+    private static final long MIN_BACKOFF_MILLIS = 10 * 1000L;      // 10 seconds
+
     /**
      * Query the minimum interval allowed for periodic scheduled jobs.  Attempting
      * to declare a smaller period that this when scheduling a job will result in a
@@ -103,6 +106,14 @@ public class JobInfo implements Parcelable {
      */
     public static final long getMinFlexMillis() {
         return MIN_FLEX_MILLIS;
+    }
+
+    /**
+     * Query the minimum automatic-reschedule backoff interval permitted for jobs.
+     * @hide
+     */
+    public static final long getMinBackoffMillis() {
+        return MIN_BACKOFF_MILLIS;
     }
 
     /**
@@ -361,7 +372,8 @@ public class JobInfo implements Parcelable {
      * job does not recur periodically.
      */
     public long getIntervalMillis() {
-        return intervalMillis >= getMinPeriodMillis() ? intervalMillis : getMinPeriodMillis();
+        final long minInterval = getMinPeriodMillis();
+        return intervalMillis >= minInterval ? intervalMillis : minInterval;
     }
 
     /**
@@ -381,7 +393,8 @@ public class JobInfo implements Parcelable {
      * to 5 seconds.
      */
     public long getInitialBackoffMillis() {
-        return initialBackoffMillis;
+        final long minBackoff = getMinBackoffMillis();
+        return initialBackoffMillis >= minBackoff ? initialBackoffMillis : minBackoff;
     }
 
     /**
