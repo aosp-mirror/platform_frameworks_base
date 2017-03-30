@@ -276,6 +276,12 @@ class WindowSurfaceController {
         }
     }
 
+    void setLayerStackInTransaction(int layerStack) {
+        if (mSurfaceControl != null) {
+            mSurfaceControl.setLayerStack(layerStack);
+        }
+    }
+
     void setPositionInTransaction(float left, float top, boolean recoveringMemory) {
         final boolean surfaceMoved = mSurfaceX != left || mSurfaceY != top;
         if (surfaceMoved) {
@@ -357,7 +363,8 @@ class WindowSurfaceController {
         return false;
     }
 
-    boolean prepareToShowInTransaction(float alpha, int layer, float dsdx, float dtdx, float dsdy,
+    boolean prepareToShowInTransaction(float alpha, int layer,
+            float dsdx, float dtdx, float dsdy,
             float dtdy, boolean recoveringMemory) {
         if (mSurfaceControl != null) {
             try {
@@ -371,7 +378,6 @@ class WindowSurfaceController {
                 mLastDtdy = dtdy;
                 mSurfaceControl.setMatrix(
                         dsdx, dtdx, dsdy, dtdy);
-
             } catch (RuntimeException e) {
                 Slog.w(TAG, "Error updating surface in " + title, e);
                 if (!recoveringMemory) {
