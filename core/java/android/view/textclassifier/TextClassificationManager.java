@@ -17,6 +17,7 @@
 package android.view.textclassifier;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
@@ -45,7 +46,7 @@ public final class TextClassificationManager {
 
     private final Context mContext;
     private ParcelFileDescriptor mLangIdFd;
-    private TextClassifier mDefault;
+    private TextClassifier mTextClassifier;
     private LangId mLangId;
 
     /** @hide */
@@ -53,15 +54,32 @@ public final class TextClassificationManager {
         mContext = Preconditions.checkNotNull(context);
     }
 
-    /**
-     * Returns the default text classifier.
-     */
+    // TODO: Remove.
+    /** @removed */
     public TextClassifier getDefaultTextClassifier() {
+        return getTextClassifier();
+    }
+
+    /**
+     * Returns the text classifier.
+     */
+    public TextClassifier getTextClassifier() {
         synchronized (mTextClassifierLock) {
-            if (mDefault == null) {
-                mDefault = new TextClassifierImpl(mContext);
+            if (mTextClassifier == null) {
+                mTextClassifier = new TextClassifierImpl(mContext);
             }
-            return mDefault;
+            return mTextClassifier;
+        }
+    }
+
+    /**
+     * Sets the text classifier.
+     * Set to null to use the system default text classifier.
+     * Set to {@link TextClassifier#NO_OP} to disable text classifier features.
+     */
+    public void setTextClassifier(@Nullable TextClassifier textClassifier) {
+        synchronized (mTextClassifierLock) {
+            mTextClassifier = textClassifier;
         }
     }
 
