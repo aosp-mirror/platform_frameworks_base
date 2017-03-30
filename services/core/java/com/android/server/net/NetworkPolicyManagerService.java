@@ -432,7 +432,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             mListeners = new RemoteCallbackList<>();
 
     final Handler mHandler;
-    final Handler mUidEventHandler;
+    @VisibleForTesting
+    public final Handler mUidEventHandler;
 
     private final ServiceThread mUidEventThread;
 
