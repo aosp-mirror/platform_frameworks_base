@@ -223,10 +223,15 @@ public class NetworkPolicyManagerServiceTest {
 
     private IUidObserver mUidObserver;
     private INetworkManagementEventObserver mNetworkObserver;
-    private PowerManagerInternal mPowerManagerInternal;
 
     private NetworkPolicyListenerAnswer mPolicyListener;
     private NetworkPolicyManagerService mService;
+
+    /**
+     * In some of the tests while initializing NetworkPolicyManagerService,
+     * ACTION_RESTRICT_BACKGROUND_CHANGED is broadcasted. This is for capturing that broadcast.
+     */
+    private FutureIntent mFutureIntent;
 
     private long mStartTime;
     private long mElapsedRealtime;
@@ -257,14 +262,13 @@ public class NetworkPolicyManagerServiceTest {
 
     public final @Rule NetPolicyMethodRule mNetPolicyXmlRule = new NetPolicyMethodRule();
 
-    @BeforeClass
-    public static void registerLocalServices() {
-        final PowerManagerInternal powerManager = addLocalServiceMock(PowerManagerInternal.class);
-        when(powerManager.getLowPowerState(anyInt())).thenReturn(mock(PowerSaveState.class));
+    private void registerLocalServices() {
         addLocalServiceMock(DeviceIdleController.LocalService.class);
+
         final UsageStatsManagerInternal usageStats =
                 addLocalServiceMock(UsageStatsManagerInternal.class);
         when(usageStats.getIdleUidsForUser(anyInt())).thenReturn(new int[]{});
+
         mActivityManagerInternal = addLocalServiceMock(ActivityManagerInternal.class);
 
         final PowerSaveState state = new PowerSaveState.Builder()
@@ -281,6 +285,7 @@ public class NetworkPolicyManagerServiceTest {
 
         setCurrentTimeMillis(TEST_START);
 
+        registerLocalServices();
         // Intercept various broadcasts, and pretend that uids have packages.
         // Also return mock service instances for a few critical services.
         mServiceContext = new BroadcastInterceptingContext(context) {
@@ -322,6 +327,7 @@ public class NetworkPolicyManagerServiceTest {
         }).when(mActivityManager).registerUidObserver(any(), anyInt(),
                 eq(ActivityManager.PROCESS_STATE_UNKNOWN), isNull(String.class));
 
+        mFutureIntent = newRestrictBackgroundChangedFuture();
         mService = new NetworkPolicyManagerService(mServiceContext, mActivityManager, mStatsService,
                 mNetworkManager, mIpm, mTime, mPolicyDir, true);
         mService.bindConnectivityManager(mConnManager);
@@ -379,6 +385,12 @@ public class NetworkPolicyManagerServiceTest {
     public void unregisterLocalServices() throws Exception {
         // Registered by NetworkPolicyManagerService's constructor.
         LocalServices.removeServiceForTest(NetworkPolicyManagerInternal.class);
+
+        // Added in registerLocalServices()
+        LocalServices.removeServiceForTest(ActivityManagerInternal.class);
+        LocalServices.removeServiceForTest(PowerManagerInternal.class);
+        LocalServices.removeServiceForTest(DeviceIdleController.LocalService.class);
+        LocalServices.removeServiceForTest(UsageStatsManagerInternal.class);
     }
 
     @Test
@@ -393,6 +405,7 @@ public class NetworkPolicyManagerServiceTest {
     @NetPolicyXml("restrict-background-on.xml")
     public void testTurnRestrictBackgroundOff() throws Exception {
         assertRestrictBackgroundOn(); // Sanity check.
+        assertRestrictBackgroundChangedReceived(mFutureIntent, null);
         final FutureIntent futureIntent = newRestrictBackgroundChangedFuture();
         setRestrictBackground(false);
         assertRestrictBackgroundChangedReceived(futureIntent, null);
@@ -405,6 +418,7 @@ public class NetworkPolicyManagerServiceTest {
     @NetPolicyXml("restrict-background-on.xml")
     public void testAddRestrictBackgroundWhitelist_restrictBackgroundOn() throws Exception {
         assertRestrictBackgroundOn(); // Sanity check.
+        assertRestrictBackgroundChangedReceived(mFutureIntent, null);
         addRestrictBackgroundWhitelist(true);
     }
 
@@ -445,6 +459,7 @@ public class NetworkPolicyManagerServiceTest {
     @NetPolicyXml("uidA-whitelisted-restrict-background-on.xml")
     public void testRemoveRestrictBackgroundWhitelist_restrictBackgroundOn() throws Exception {
         assertRestrictBackgroundOn(); // Sanity check.
+        assertRestrictBackgroundChangedReceived(mFutureIntent, null);
         removeRestrictBackgroundWhitelist(true);
     }
 
@@ -564,6 +579,7 @@ public class NetworkPolicyManagerServiceTest {
     @NetPolicyXml("restrict-background-on.xml")
     public void testAddRestrictBackgroundBlacklist_restrictBackgroundOn() throws Exception {
         assertRestrictBackgroundOn(); // Sanity check.
+        assertRestrictBackgroundChangedReceived(mFutureIntent, null);
         addRestrictBackgroundBlacklist(false);
     }
 
@@ -600,6 +616,7 @@ public class NetworkPolicyManagerServiceTest {
     @NetPolicyXml("uidA-blacklisted-restrict-background-on.xml")
     public void testRemoveRestrictBackgroundBlacklist_restrictBackgroundOn() throws Exception {
         assertRestrictBackgroundOn(); // Sanity check.
+        assertRestrictBackgroundChangedReceived(mFutureIntent, null);
         removeRestrictBackgroundBlacklist(false);
     }
 
@@ -635,6 +652,7 @@ public class NetworkPolicyManagerServiceTest {
     public void testBlacklistedAppIsNotNotifiedWhenRestrictBackgroundIsOn() throws Exception {
         // Sanity checks.
         assertRestrictBackgroundOn();
+        assertRestrictBackgroundChangedReceived(mFutureIntent, null);
         assertUidPolicy(UID_A, POLICY_REJECT_METERED_BACKGROUND);
 
         final FutureIntent futureIntent = newRestrictBackgroundChangedFuture();
@@ -647,6 +665,7 @@ public class NetworkPolicyManagerServiceTest {
     public void testWhitelistedAppIsNotNotifiedWhenRestrictBackgroundIsOn() throws Exception {
         // Sanity checks.
         assertRestrictBackgroundOn();
+        assertRestrictBackgroundChangedReceived(mFutureIntent, null);
         assertWhitelistUids(UID_A);
 
         final FutureIntent futureIntent = newRestrictBackgroundChangedFuture();
@@ -659,6 +678,7 @@ public class NetworkPolicyManagerServiceTest {
     public void testWhitelistedAppIsNotifiedWhenBlacklisted() throws Exception {
         // Sanity checks.
         assertRestrictBackgroundOn();
+        assertRestrictBackgroundChangedReceived(mFutureIntent, null);
         assertWhitelistUids(UID_A);
 
         final FutureIntent futureIntent = newRestrictBackgroundChangedFuture();
@@ -741,19 +761,19 @@ public class NetworkPolicyManagerServiceTest {
     @Test
     public void testUidForeground() throws Exception {
         // push all uids into background
-        mUidObserver.onUidStateChanged(UID_A, ActivityManager.PROCESS_STATE_SERVICE, 0);
-        mUidObserver.onUidStateChanged(UID_B, ActivityManager.PROCESS_STATE_SERVICE, 0);
+        callOnUidStateChanged(UID_A, ActivityManager.PROCESS_STATE_SERVICE, 0);
+        callOnUidStateChanged(UID_B, ActivityManager.PROCESS_STATE_SERVICE, 0);
         assertFalse(mService.isUidForeground(UID_A));
         assertFalse(mService.isUidForeground(UID_B));
 
         // push one of the uids into foreground
-        mUidObserver.onUidStateChanged(UID_A, ActivityManager.PROCESS_STATE_TOP, 0);
+        callOnUidStateChanged(UID_A, ActivityManager.PROCESS_STATE_TOP, 0);
         assertTrue(mService.isUidForeground(UID_A));
         assertFalse(mService.isUidForeground(UID_B));
 
         // and swap another uid into foreground
-        mUidObserver.onUidStateChanged(UID_A, ActivityManager.PROCESS_STATE_SERVICE, 0);
-        mUidObserver.onUidStateChanged(UID_B, ActivityManager.PROCESS_STATE_TOP, 0);
+        callOnUidStateChanged(UID_A, ActivityManager.PROCESS_STATE_SERVICE, 0);
+        callOnUidStateChanged(UID_B, ActivityManager.PROCESS_STATE_TOP, 0);
         assertFalse(mService.isUidForeground(UID_A));
         assertTrue(mService.isUidForeground(UID_B));
     }
@@ -1111,8 +1131,7 @@ public class NetworkPolicyManagerServiceTest {
     @Test
     public void testOnUidStateChanged_notifyAMS() throws Exception {
         final long procStateSeq = 222;
-        mUidObserver.onUidStateChanged(UID_A, ActivityManager.PROCESS_STATE_SERVICE,
-                procStateSeq);
+        callOnUidStateChanged(UID_A, ActivityManager.PROCESS_STATE_SERVICE, procStateSeq);
         verify(mActivityManagerInternal).notifyNetworkPolicyRulesUpdated(UID_A, procStateSeq);
 
         final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -1122,6 +1141,16 @@ public class NetworkPolicyManagerServiceTest {
         writer.flush();
         assertEquals(ProcStateSeqHistory.getString(UID_A, procStateSeq),
                 outputStream.toString().trim());
+    }
+
+    private void callOnUidStateChanged(int uid, int procState, long procStateSeq)
+            throws Exception {
+        mUidObserver.onUidStateChanged(uid, procState, procStateSeq);
+        final CountDownLatch latch = new CountDownLatch(1);
+        mService.mUidEventHandler.post(() -> {
+            latch.countDown();
+        });
+        latch.await(2, TimeUnit.SECONDS);
     }
 
     @Test
@@ -1425,7 +1454,7 @@ public class NetworkPolicyManagerServiceTest {
     private static NetworkPolicy buildFakeMobilePolicy(int cycleDay, long warningBytes,
             long limitBytes, boolean inferred){
         final NetworkTemplate template = buildTemplateMobileAll(FAKE_SUBSCRIBER_ID);
-        return new NetworkPolicy(template, cycleDay, "America/Los_Angeles", warningBytes,
+        return new NetworkPolicy(template, cycleDay, new Time().timezone, warningBytes,
                 limitBytes, SNOOZE_NEVER, SNOOZE_NEVER, true, inferred);
     }
 
