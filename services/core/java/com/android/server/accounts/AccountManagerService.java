@@ -1407,14 +1407,10 @@ public class AccountManagerService
         long identityToken = clearCallingIdentity();
         try {
             UserAccounts accounts = getUserAccounts(userId);
-            synchronized (accounts.dbLock) {
-                synchronized (accounts.cacheLock) {
-                    if (!accountExistsCacheLocked(accounts, account)) {
-                        return null;
-                    }
-                    return readUserDataInternalLocked(accounts, account, key);
-                }
+            if (!accountExistsCache(accounts, account)) {
+                return null;
             }
+            return readUserDataInternal(accounts, account, key);
         } finally {
             restoreCallingIdentity(identityToken);
         }
@@ -2509,54 +2505,53 @@ public class AccountManagerService
         long identityToken = clearCallingIdentity();
         try {
             UserAccounts accounts = getUserAccounts(userId);
-            synchronized (accounts.dbLock) {
-                synchronized (accounts.cacheLock) {
-                    if (!accountExistsCacheLocked(accounts, account)) {
-                        return;
-                    }
-                    setUserdataInternalLocked(accounts, account, key, value);
-                }
+            if (!accountExistsCache(accounts, account)) {
+                return;
             }
+            setUserdataInternal(accounts, account, key, value);
         } finally {
             restoreCallingIdentity(identityToken);
         }
     }
 
-    private boolean accountExistsCacheLocked(UserAccounts accounts, Account account) {
-        if (accounts.accountCache.containsKey(account.type)) {
-            for (Account acc : accounts.accountCache.get(account.type)) {
-                if (acc.name.equals(account.name)) {
-                    return true;
+    private boolean accountExistsCache(UserAccounts accounts, Account account) {
+        synchronized (accounts.cacheLock) {
+            if (accounts.accountCache.containsKey(account.type)) {
+                for (Account acc : accounts.accountCache.get(account.type)) {
+                    if (acc.name.equals(account.name)) {
+                        return true;
+                    }
                 }
             }
         }
         return false;
     }
 
-    private void setUserdataInternalLocked(UserAccounts accounts, Account account, String key,
+    private void setUserdataInternal(UserAccounts accounts, Account account, String key,
             String value) {
-        if (account == null || key == null) {
-            return;
-        }
-        accounts.accountsDb.beginTransaction();
-        try {
-            long accountId = accounts.accountsDb.findDeAccountId(account);
-            if (accountId < 0) {
-                return;
-            }
-            long extrasId = accounts.accountsDb.findExtrasIdByAccountId(accountId, key);
-            if (extrasId < 0) {
-                extrasId = accounts.accountsDb.insertExtra(accountId, key, value);
-                if (extrasId < 0) {
+        synchronized (accounts.dbLock) {
+            accounts.accountsDb.beginTransaction();
+            try {
+                long accountId = accounts.accountsDb.findDeAccountId(account);
+                if (accountId < 0) {
                     return;
                 }
-            } else if (!accounts.accountsDb.updateExtra(extrasId, value)) {
-                return;
+                long extrasId = accounts.accountsDb.findExtrasIdByAccountId(accountId, key);
+                if (extrasId < 0) {
+                    extrasId = accounts.accountsDb.insertExtra(accountId, key, value);
+                    if (extrasId < 0) {
+                        return;
+                    }
+                } else if (!accounts.accountsDb.updateExtra(extrasId, value)) {
+                    return;
+                }
+                accounts.accountsDb.setTransactionSuccessful();
+            } finally {
+                accounts.accountsDb.endTransaction();
             }
-            writeUserDataIntoCacheLocked(accounts, account, key, value);
-            accounts.accountsDb.setTransactionSuccessful();
-        } finally {
-            accounts.accountsDb.endTransaction();
+            synchronized (accounts.cacheLock) {
+                writeUserDataIntoCacheLocked(accounts, account, key, value);
+            }
         }
     }
 
@@ -5628,6 +5623,7 @@ public class AccountManagerService
         }
     }
 
+    /** protected by the {@code dbLock}, {@code cacheLock} */
     protected void writeUserDataIntoCacheLocked(UserAccounts accounts,
             Account account, String key, String value) {
         Map<String, String> userDataForAccount = accounts.userDataCache.get(account);
@@ -5694,13 +5690,24 @@ public class AccountManagerService
         }
     }
 
-    protected String readUserDataInternalLocked(
-            UserAccounts accounts, Account account, String key) {
-        Map<String, String> userDataForAccount = accounts.userDataCache.get(account);
+    private String readUserDataInternal(UserAccounts accounts, Account account, String key) {
+        Map<String, String> userDataForAccount;
+        // Fast path - check if data is already cached
+        synchronized (accounts.cacheLock) {
+            userDataForAccount = accounts.userDataCache.get(account);
+        }
+        // If not cached yet - do slow path and sync with db if necessary
         if (userDataForAccount == null) {
-            // need to populate the cache for this account
-            userDataForAccount = accounts.accountsDb.findUserExtrasForAccount(account);
-            accounts.userDataCache.put(account, userDataForAccount);
+            synchronized (accounts.dbLock) {
+                synchronized (accounts.cacheLock) {
+                    userDataForAccount = accounts.userDataCache.get(account);
+                    if (userDataForAccount == null) {
+                        // need to populate the cache for this account
+                        userDataForAccount = accounts.accountsDb.findUserExtrasForAccount(account);
+                        accounts.userDataCache.put(account, userDataForAccount);
+                    }
+                }
+            }
         }
         return userDataForAccount.get(key);
     }
