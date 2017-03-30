@@ -537,9 +537,8 @@ public class PackageManagerService extends IPackageManager.Stub {
     public static final int REASON_INSTALL = 2;
     public static final int REASON_BACKGROUND_DEXOPT = 3;
     public static final int REASON_AB_OTA = 4;
-    public static final int REASON_NON_SYSTEM_LIBRARY = 5;
-    public static final int REASON_SHARED_APK = 6;
-    public static final int REASON_FORCED_DEXOPT = 7;
+    public static final int REASON_SHARED_APK = 5;
+    public static final int REASON_FORCED_DEXOPT = 6;
 
     public static final int REASON_LAST = REASON_FORCED_DEXOPT;
 
@@ -8461,19 +8460,23 @@ public class PackageManagerService extends IPackageManager.Stub {
                 ? new PackageDexOptimizer.ForcedUpdatePackageDexOptimizer(mPackageDexOptimizer)
                 : mPackageDexOptimizer;
 
-        // Optimize all dependencies first. Note: we ignore the return value and march on
+        // Dexopt all dependencies first. Note: we ignore the return value and march on
         // on errors.
+        // Note that we are going to call performDexOpt on those libraries as many times as
+        // they are referenced in packages. When we do a batch of performDexOpt (for example
+        // at boot, or background job), the passed 'targetCompilerFilter' stays the same,
+        // and the first package that uses the library will dexopt it. The
+        // others will see that the compiled code for the library is up to date.
         Collection<PackageParser.Package> deps = findSharedNonSystemLibraries(p);
         final String[] instructionSets = getAppDexInstructionSets(p.applicationInfo);
         if (!deps.isEmpty()) {
             for (PackageParser.Package depPackage : deps) {
                 // TODO: Analyze and investigate if we (should) profile libraries.
-                // Currently this will do a full compilation of the library by default.
                 pdo.performDexOpt(depPackage, null /* sharedLibraries */, instructionSets,
                         false /* checkProfiles */,
-                        getCompilerFilterForReason(REASON_NON_SYSTEM_LIBRARY),
+                        targetCompilerFilter,
                         getOrCreateCompilerPackageStats(depPackage),
-                        mDexManager.isUsedByOtherApps(p.packageName));
+                        true /* isUsedByOtherApps */);
             }
         }
         return pdo.performDexOpt(p, p.usesLibraryFiles, instructionSets, checkProfiles,
