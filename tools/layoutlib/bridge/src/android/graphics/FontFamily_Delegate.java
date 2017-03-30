@@ -252,7 +252,8 @@ public class FontFamily_Delegate {
     /*package*/ static boolean addFont(FontFamily thisFontFamily, String path, int ttcIndex,
             FontConfig.Axis[] axes, int weight, int italic) {
         if (thisFontFamily.mBuilderPtr == 0) {
-            throw new IllegalStateException("Unable to call addFont after freezing.");
+            assert false : "Unable to call addFont after freezing.";
+            return false;
         }
         final FontFamily_Delegate delegate = getDelegate(thisFontFamily.mBuilderPtr);
         return delegate != null && delegate.addFont(path, ttcIndex, weight, italic);

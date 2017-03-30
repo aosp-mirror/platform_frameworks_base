@@ -43,6 +43,7 @@ import android.content.res.GradientColor;
 import android.content.res.Resources.Theme;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap_Delegate;
+import android.graphics.Color;
 import android.graphics.NinePatch_Delegate;
 import android.graphics.Rect;
 import android.graphics.Typeface;
@@ -184,7 +185,8 @@ public final class ResourceHelper {
                     }
 
                     if (type != XmlPullParser.START_TAG) {
-                        throw new XmlPullParserException("No start tag found");
+                        assert false : "No start tag found";
+                        return null;
                     }
 
                     final String name = blockParser.getName();
