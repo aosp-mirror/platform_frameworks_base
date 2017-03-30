@@ -24,6 +24,7 @@ import java.util.Objects;
 
 /**
  * PeriodicAdvertisingReport for Bluetooth LE synchronized advertising.
+ * @hide
  */
 public final class PeriodicAdvertisingReport implements Parcelable {
 

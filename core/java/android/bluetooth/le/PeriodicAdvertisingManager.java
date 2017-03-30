@@ -37,6 +37,7 @@ import java.util.Map;
  * <p>
  * <b>Note:</b> Most of the methods here require
  * {@link android.Manifest.permission#BLUETOOTH_ADMIN} permission.
+ * @hide
  */
 public final class PeriodicAdvertisingManager {
 
