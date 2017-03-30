@@ -76,11 +76,19 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
     private TextView mNumChannelsView;
     private View mChannelDisabledView;
     private Switch mChannelEnabledSwitch;
+    private CheckSaveListener mCheckSaveListener;
 
     private NotificationGuts mGutsContainer;
 
     public NotificationInfo(Context context, AttributeSet attrs) {
         super(context, attrs);
+    }
+
+    // Specify a CheckSaveListener to override when/if the user's changes are committed.
+    public interface CheckSaveListener {
+        // Invoked when importance has changed and the NotificationInfo wants to try to save it.
+        // Listener should run saveImportance unless the change should be canceled.
+        void checkSave(Runnable saveImportance);
     }
 
     public interface OnSettingsClickListener {
@@ -92,11 +100,14 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
             final String pkg,
             final List<NotificationChannel> notificationChannels,
             OnSettingsClickListener onSettingsClick,
-            OnClickListener onDoneClick, final Set<String> nonBlockablePkgs)
+            OnClickListener onDoneClick,
+            CheckSaveListener checkSaveListener,
+            final Set<String> nonBlockablePkgs)
             throws RemoteException {
         mINotificationManager = iNotificationManager;
         mPkg = pkg;
         mNotificationChannels = notificationChannels;
+        mCheckSaveListener = checkSaveListener;
         boolean isSingleDefaultChannel = false;
         if (mNotificationChannels.isEmpty()) {
             throw new IllegalArgumentException("bindNotification requires at least one channel");
@@ -238,7 +249,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         doneButton.setOnClickListener(onDoneClick);
     }
 
-    public boolean hasImportanceChanged() {
+    private boolean hasImportanceChanged() {
         return mSingleNotificationChannel != null &&
                 mStartingUserImportance != getSelectedImportance();
     }
@@ -316,8 +327,12 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
 
     @Override
     public boolean handleCloseControls(boolean save) {
-        if (save) {
-            saveImportance();
+        if (save && hasImportanceChanged()) {
+            if (mCheckSaveListener != null) {
+                mCheckSaveListener.checkSave(() -> { saveImportance(); });
+            } else {
+                saveImportance();
+            }
         }
         return false;
     }
