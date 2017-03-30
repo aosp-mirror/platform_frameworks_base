@@ -751,7 +751,12 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         @Override
         public void setActive(boolean active) {
             mIsActive = active;
-            mService.updateSession(MediaSessionRecord.this);
+            final long token = Binder.clearCallingIdentity();
+            try {
+                mService.updateSession(MediaSessionRecord.this);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
             mHandler.post(MessageHandler.MSG_UPDATE_SESSION_STATE);
         }
 
@@ -862,7 +867,12 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
                 }
             }
             if (typeChanged) {
-                mService.onSessionPlaybackTypeChanged(MediaSessionRecord.this);
+                final long token = Binder.clearCallingIdentity();
+                try {
+                    mService.onSessionPlaybackTypeChanged(MediaSessionRecord.this);
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                }
                 mHandler.post(MessageHandler.MSG_UPDATE_VOLUME);
             }
         }
@@ -877,7 +887,12 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
                 mMaxVolume = max;
             }
             if (typeChanged) {
-                mService.onSessionPlaybackTypeChanged(MediaSessionRecord.this);
+                final long token = Binder.clearCallingIdentity();
+                try {
+                    mService.onSessionPlaybackTypeChanged(MediaSessionRecord.this);
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                }
                 mHandler.post(MessageHandler.MSG_UPDATE_VOLUME);
             }
         }
