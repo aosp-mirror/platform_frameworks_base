@@ -49,4 +49,7 @@
         <!-- Note: must be dp to fit in status bar -->
         <item name="android:textSize">14dp</item>
     </style>
+
+    <!-- Phyisical Keyboard Dialog style -->
+    <style name="KeyboardShortcutsDialog" parent="@*android:style/Theme.DeviceDefault.Light" />
 </resources>
