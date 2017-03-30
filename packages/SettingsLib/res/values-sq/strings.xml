@@ -32,9 +32,8 @@
     <string name="wifi_no_internet_no_reconnect" msgid="5724903347310541706">"Nuk do të lidhet automatikisht"</string>
     <string name="wifi_no_internet" msgid="3880396223819116454">"Nuk ka qsaje në internet"</string>
     <string name="saved_network" msgid="4352716707126620811">"E ruajtur nga <xliff:g id="NAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for connected_via_network_scorer (5713793306870815341) -->
-    <skip />
-    <!-- no translation found for connected_via_network_scorer_default (8430960324014668989) -->
+    <string name="connected_via_network_scorer" msgid="5713793306870815341">"Lidhur automatikisht përmes %1$s"</string>
+    <!-- no translation found for connected_via_network_scorer_default (7867260222020343104) -->
     <skip />
     <string name="connected_via_passpoint" msgid="2826205693803088747">"E lidhur përmes %1$s"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"E mundshme përmes %1$s"</string>
@@ -141,7 +140,8 @@
     <item msgid="5194774745031751806">"Shumë e shpejtë"</item>
     <item msgid="9085102246155045744">"Më e shpejta"</item>
   </string-array>
-    <string name="choose_profile" msgid="8229363046053568878">"Zgjidh profilin"</string>
+    <!-- no translation found for choose_profile (6921016979430278661) -->
+    <skip />
     <string name="category_personal" msgid="1299663247844969448">"Personale"</string>
     <string name="category_work" msgid="8699184680584175622">"Punë"</string>
     <string name="development_settings_title" msgid="215179176067683667">"Opsionet e zhvilluesit"</string>
@@ -170,16 +170,12 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Rrjetet"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Certifikimi i ekranit valor"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Aktivizo hyrjen Wi-Fi Verbose"</string>
-    <!-- no translation found for wifi_aggressive_handover (5309131983693661320) -->
-    <skip />
+    <string name="wifi_aggressive_handover" msgid="5309131983693661320">"Dorëzimi agresiv i Wi‑Fi te rrjeti celular"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Lejo gjithmonë skanimet për Wi-Fi edhe kur je në lëvizje"</string>
-    <!-- no translation found for mobile_data_always_on (8774857027458200434) -->
-    <skip />
+    <string name="mobile_data_always_on" msgid="8774857027458200434">"Të dhënat celulare gjithmonë aktive"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Çaktivizo volumin absolut"</string>
-    <!-- no translation found for bluetooth_select_avrcp_version_string (3750059931120293633) -->
-    <skip />
-    <!-- no translation found for bluetooth_select_avrcp_version_dialog_title (7277329668298705702) -->
-    <skip />
+    <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Versioni AVRCP i Bluetooth-it"</string>
+    <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Zgjidh versionin AVRCP të Bluetooth-it"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Kodeku Bluetooth Audio"</string>
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="4558347981670553665">"Zgjidh kodekun e audios së Bluetooth-it"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Shpejtësia e shembullit të Bluetooth Audio"</string>
@@ -193,8 +189,7 @@
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Transmetimi: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Shfaq opsionet për certifikimin e ekranit valor"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Rrit nivelin regjistrues të Wi‑Fi duke shfaqur SSID RSSI-në te Zgjedhësi i Wi‑Fi"</string>
-    <!-- no translation found for wifi_aggressive_handover_summary (7266329646559808827) -->
-    <skip />
+    <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"Kur ky funksion aktivizohet, Wi‑Fi bëhet më agresiv në kalimin e lidhjes së të dhënave te rrjeti celular, në rastet kur sinjali Wi‑Fi është i dobët"</string>
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"Lejo/Ndalo skanimet për Wi‑Fi në roaming, bazuar në sasinë e trafikut të të dhënave të pranishme në ndërfaqe"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Madhësitë e regjistruesit"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Përzgjidh madhësitë e regjistruesit"</string>
@@ -325,21 +320,16 @@
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"Mbivendosur nga <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="4400068916452346544">"Afërsisht <xliff:g id="TIME">%1$s</xliff:g> të mbetura"</string>
     <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">%1$s</xliff:g> të mbetura"</string>
-    <!-- no translation found for power_discharging_duration (2843747179907396142) -->
-    <skip />
+    <string name="power_discharging_duration" msgid="2843747179907396142">"<xliff:g id="LEVEL">%1$s</xliff:g> - rreth <xliff:g id="TIME">%2$s</xliff:g> të mbetura"</string>
     <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> të mbetura"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_charging_duration (4676999980973411875) -->
-    <skip />
+    <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> derisa të mbushet plotësisht"</string>
     <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_charging_duration_ac (7341243578143555689) -->
-    <skip />
+    <string name="power_charging_duration_ac" msgid="7341243578143555689">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> derisa të mbushet plotësisht përmes rrymës së alternuar"</string>
     <string name="power_charging_duration_ac_short" msgid="7895864687218765582">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_charging_duration_usb (3720632890882121805) -->
-    <skip />
+    <string name="power_charging_duration_usb" msgid="3720632890882121805">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> derisa të mbushet plotësisht përmes USB-së"</string>
     <string name="power_charging_duration_usb_short" msgid="941854728040426399">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_charging_duration_wireless (5768338238751562058) -->
-    <skip />
+    <string name="power_charging_duration_wireless" msgid="5768338238751562058">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> derisa të mbushet plotësisht me valë"</string>
     <string name="power_charging_duration_wireless_short" msgid="1642664799869599476">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"I panjohur"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"Po ngarkohet"</string>
@@ -353,8 +343,10 @@
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"Nuk po ngarkohet"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"E mbushur"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"Kontrolluar nga administratori"</string>
-    <string name="enabled_by_admin" msgid="2386503803463071894">"Aktivizuar nga administratori"</string>
-    <string name="disabled_by_admin" msgid="3669999613095206948">"Çaktivizuar nga administratori"</string>
+    <!-- no translation found for enabled_by_admin (5302986023578399263) -->
+    <skip />
+    <!-- no translation found for disabled_by_admin (8505398946020816620) -->
+    <skip />
     <string name="home" msgid="3256884684164448244">"Kreu i cilësimeve"</string>
   <string-array name="battery_labels">
     <item msgid="8494684293649631252">"0%"</item>
