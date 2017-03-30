@@ -70,7 +70,7 @@ public class CommandQueue extends IStatusBar.Stub {
     private static final int MSG_START_ASSIST                  = 23 << MSG_SHIFT;
     private static final int MSG_CAMERA_LAUNCH_GESTURE         = 24 << MSG_SHIFT;
     private static final int MSG_TOGGLE_KEYBOARD_SHORTCUTS     = 25 << MSG_SHIFT;
-    private static final int MSG_SHOW_TV_PICTURE_IN_PICTURE_MENU = 26 << MSG_SHIFT;
+    private static final int MSG_SHOW_PICTURE_IN_PICTURE_MENU  = 26 << MSG_SHIFT;
     private static final int MSG_ADD_QS_TILE                   = 27 << MSG_SHIFT;
     private static final int MSG_REMOVE_QS_TILE                = 28 << MSG_SHIFT;
     private static final int MSG_CLICK_QS_TILE                 = 29 << MSG_SHIFT;
@@ -128,7 +128,7 @@ public class CommandQueue extends IStatusBar.Stub {
         default void showAssistDisclosure() { }
         default void startAssist(Bundle args) { }
         default void onCameraLaunchGestureDetected(int source) { }
-        default void showTvPictureInPictureMenu() { }
+        default void showPictureInPictureMenu() { }
 
         default void addQsTile(ComponentName tile) { }
         default void remQsTile(ComponentName tile) { }
@@ -307,10 +307,10 @@ public class CommandQueue extends IStatusBar.Stub {
     }
 
     @Override
-    public void showTvPictureInPictureMenu() {
+    public void showPictureInPictureMenu() {
         synchronized (mLock) {
-            mHandler.removeMessages(MSG_SHOW_TV_PICTURE_IN_PICTURE_MENU);
-            mHandler.obtainMessage(MSG_SHOW_TV_PICTURE_IN_PICTURE_MENU).sendToTarget();
+            mHandler.removeMessages(MSG_SHOW_PICTURE_IN_PICTURE_MENU);
+            mHandler.obtainMessage(MSG_SHOW_PICTURE_IN_PICTURE_MENU).sendToTarget();
         }
     }
 
@@ -570,9 +570,9 @@ public class CommandQueue extends IStatusBar.Stub {
                         mCallbacks.get(i).onCameraLaunchGestureDetected(msg.arg1);
                     }
                     break;
-                case MSG_SHOW_TV_PICTURE_IN_PICTURE_MENU:
+                case MSG_SHOW_PICTURE_IN_PICTURE_MENU:
                     for (int i = 0; i < mCallbacks.size(); i++) {
-                        mCallbacks.get(i).showTvPictureInPictureMenu();
+                        mCallbacks.get(i).showPictureInPictureMenu();
                     }
                     break;
                 case MSG_ADD_QS_TILE:

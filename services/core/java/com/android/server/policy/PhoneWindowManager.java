@@ -508,7 +508,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     volatile boolean mCameraGestureTriggeredDuringGoingToSleep;
     volatile boolean mGoingToSleep;
     volatile boolean mRecentsVisible;
-    volatile boolean mTvPictureInPictureVisible;
+    volatile boolean mPictureInPictureVisible;
     // Written by vr manager thread, only read in this class
     volatile boolean mPersistentVrModeEnabled;
 
@@ -813,7 +813,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private static final int MSG_POWER_LONG_PRESS = 14;
     private static final int MSG_UPDATE_DREAMING_SLEEP_TOKEN = 15;
     private static final int MSG_REQUEST_TRANSIENT_BARS = 16;
-    private static final int MSG_SHOW_TV_PICTURE_IN_PICTURE_MENU = 17;
+    private static final int MSG_SHOW_PICTURE_IN_PICTURE_MENU = 17;
     private static final int MSG_BACK_LONG_PRESS = 18;
     private static final int MSG_DISPOSE_INPUT_CONSUMER = 19;
     private static final int MSG_BACK_DELAYED_PRESS = 20;
@@ -880,8 +880,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         requestTransientBars(targetBar);
                     }
                     break;
-                case MSG_SHOW_TV_PICTURE_IN_PICTURE_MENU:
-                    showTvPictureInPictureMenuInternal();
+                case MSG_SHOW_PICTURE_IN_PICTURE_MENU:
+                    showPictureInPictureMenuInternal();
                     break;
                 case MSG_BACK_LONG_PRESS:
                     backLongPress();
@@ -1726,18 +1726,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
-    private void showTvPictureInPictureMenu(KeyEvent event) {
-        if (DEBUG_INPUT) Log.d(TAG, "showTvPictureInPictureMenu event=" + event);
-        mHandler.removeMessages(MSG_SHOW_TV_PICTURE_IN_PICTURE_MENU);
-        Message msg = mHandler.obtainMessage(MSG_SHOW_TV_PICTURE_IN_PICTURE_MENU);
+    private void showPictureInPictureMenu(KeyEvent event) {
+        if (DEBUG_INPUT) Log.d(TAG, "showPictureInPictureMenu event=" + event);
+        mHandler.removeMessages(MSG_SHOW_PICTURE_IN_PICTURE_MENU);
+        Message msg = mHandler.obtainMessage(MSG_SHOW_PICTURE_IN_PICTURE_MENU);
         msg.setAsynchronous(true);
         msg.sendToTarget();
     }
 
-    private void showTvPictureInPictureMenuInternal() {
+    private void showPictureInPictureMenuInternal() {
         StatusBarManagerInternal statusbar = getStatusBarManagerInternal();
         if (statusbar != null) {
-            statusbar.showTvPictureInPictureMenu();
+            statusbar.showPictureInPictureMenu();
         }
     }
 
@@ -4115,8 +4115,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     @Override
-    public void setTvPipVisibilityLw(boolean visible) {
-        mTvPictureInPictureVisible = visible;
+    public void setPipVisibilityLw(boolean visible) {
+        mPictureInPictureVisible = visible;
     }
 
     @Override
@@ -6049,13 +6049,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
             case KeyEvent.KEYCODE_WINDOW: {
                 if (mShortPressWindowBehavior == SHORT_PRESS_WINDOW_PICTURE_IN_PICTURE) {
-                    if (mTvPictureInPictureVisible) {
-                        // Consumes the key only if picture-in-picture is visible
-                        // to show picture-in-picture control menu.
-                        // This gives a chance to the foreground activity
-                        // to customize PIP key behavior.
+                    if (mPictureInPictureVisible) {
+                        // Consumes the key only if picture-in-picture is visible to show
+                        // picture-in-picture control menu. This gives a chance to the foreground
+                        // activity to customize PIP key behavior.
                         if (!down) {
-                            showTvPictureInPictureMenu(event);
+                            showPictureInPictureMenu(event);
                         }
                         result &= ~ACTION_PASS_TO_USER;
                     }

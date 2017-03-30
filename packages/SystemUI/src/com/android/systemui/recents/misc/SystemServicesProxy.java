@@ -1215,9 +1215,9 @@ public class SystemServicesProxy {
     /**
      * Updates the visibility of the picture-in-picture.
      */
-    public void setTvPipVisibility(boolean visible) {
+    public void setPipVisibility(boolean visible) {
         try {
-            mIwm.setTvPipVisibility(visible);
+            mIwm.setPipVisibility(visible);
         } catch (RemoteException e) {
             Log.e(TAG, "Unable to reach window manager", e);
         }

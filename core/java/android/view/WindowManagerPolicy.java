@@ -1517,7 +1517,7 @@ public interface WindowManagerPolicy {
     /**
      * Called by System UI to notify of changes to the visibility of PIP.
      */
-    public void setTvPipVisibilityLw(boolean visible);
+    void setPipVisibilityLw(boolean visible);
 
     /**
      * Specifies whether there is an on-screen navigation bar separate from the status bar.

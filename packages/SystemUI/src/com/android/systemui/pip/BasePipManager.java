@@ -22,6 +22,7 @@ import java.io.PrintWriter;
 
 public interface  BasePipManager {
     void initialize(Context context);
+    void showPictureInPictureMenu();
     void onConfigurationChanged();
     void dump(PrintWriter pw);
 }

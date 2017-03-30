@@ -102,9 +102,9 @@ oneway interface IStatusBar
     void onCameraLaunchGestureDetected(int source);
 
     /**
-     * Shows the TV's picture-in-picture menu if an activity is in picture-in-picture mode.
+     * Shows the picture-in-picture menu if an activity is in picture-in-picture mode.
      */
-    void showTvPictureInPictureMenu();
+    void showPictureInPictureMenu();
 
     /**
      * Shows the global actions menu.
