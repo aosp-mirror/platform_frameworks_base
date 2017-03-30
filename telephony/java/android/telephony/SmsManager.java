@@ -387,8 +387,8 @@ public final class SmsManager {
     /**
      * Inject an SMS PDU into the android application framework.
      *
-     * The caller should have carrier privileges.
-     * @see android.telephony.TelephonyManager#hasCarrierPrivileges
+     * <p>Requires permission: {@link android.Manifest.permission#MODIFY_PHONE_STATE} or carrier
+     * privileges. @see android.telephony.TelephonyManager#hasCarrierPrivileges
      *
      * @param pdu is the byte array of pdu to be injected into android application framework
      * @param format is the format of SMS pdu (3gpp or 3gpp2)
