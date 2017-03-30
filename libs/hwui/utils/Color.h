@@ -19,6 +19,7 @@
 #include <math.h>
 
 #include <SkColor.h>
+#include <SkColorSpace.h>
 
 namespace android {
 namespace uirenderer {
@@ -82,6 +83,13 @@ namespace uirenderer {
     };
     static constexpr int BrightColorsCount = sizeof(BrightColors) / sizeof(Color::Color);
 
+    enum class TransferFunctionType : int8_t {
+        None = 0,
+        Full,
+        Limited,
+        Gamma
+    };
+
     // Opto-electronic conversion function for the sRGB color space
     // Takes a linear sRGB value and converts it to a gamma-encoded sRGB value
     static constexpr float OECF_sRGB(float linear) {
@@ -118,6 +126,11 @@ namespace uirenderer {
         return srgb;
 #endif
     }
+
+    // Returns whether the specified color space's transfer function can be
+    // approximated with the native sRGB transfer function. This method
+    // returns true for sRGB, gamma 2.2 and Display P3 for instance
+    bool transferFunctionCloseToSRGB(const SkColorSpace* colorSpace);
 } /* namespace uirenderer */
 } /* namespace android */
 
