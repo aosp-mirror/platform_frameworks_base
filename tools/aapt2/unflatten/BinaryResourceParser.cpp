@@ -168,10 +168,11 @@ bool BinaryResourceParser::ParseTable(const ResChunk_header* chunk) {
 }
 
 bool BinaryResourceParser::ParsePackage(const ResChunk_header* chunk) {
-  const ResTable_package* package_header = ConvertTo<ResTable_package>(chunk);
+  constexpr size_t kMinPackageSize =
+      sizeof(ResTable_package) - sizeof(ResTable_package::typeIdOffset);
+  const ResTable_package* package_header = ConvertTo<ResTable_package, kMinPackageSize>(chunk);
   if (!package_header) {
-    context_->GetDiagnostics()->Error(DiagMessage(source_)
-                                      << "corrupt ResTable_package chunk");
+    context_->GetDiagnostics()->Error(DiagMessage(source_) << "corrupt ResTable_package chunk");
     return false;
   }
 
@@ -498,8 +499,14 @@ std::unique_ptr<Value> BinaryResourceParser::ParseMapEntry(
       return ParseArray(name, config, map);
     case ResourceType::kPlurals:
       return ParsePlural(name, config, map);
+    case ResourceType::kId:
+      // Special case: An ID is not a bag, but some apps have defined the auto-generated
+      // IDs that come from declaring an enum value in an attribute as an empty map...
+      // We can ignore the value here.
+      return util::make_unique<Id>();
     default:
-      LOG(FATAL) << "unknown map type";
+      context_->GetDiagnostics()->Error(DiagMessage() << "illegal map type '" << ToString(name.type)
+                                                      << "' (" << (int)name.type << ")");
       break;
   }
   return {};

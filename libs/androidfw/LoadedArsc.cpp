@@ -416,7 +416,9 @@ std::unique_ptr<LoadedPackage> LoadedPackage::Load(const Chunk& chunk) {
   ATRACE_CALL();
   std::unique_ptr<LoadedPackage> loaded_package{new LoadedPackage()};
 
-  const ResTable_package* header = chunk.header<ResTable_package>();
+  constexpr size_t kMinPackageSize =
+      sizeof(ResTable_package) - sizeof(ResTable_package::typeIdOffset);
+  const ResTable_package* header = chunk.header<ResTable_package, kMinPackageSize>();
   if (header == nullptr) {
     LOG(ERROR) << "Chunk RES_TABLE_PACKAGE_TYPE is too small.";
     return {};
