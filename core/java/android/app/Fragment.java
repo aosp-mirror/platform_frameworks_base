@@ -31,7 +31,6 @@ import android.content.res.TypedArray;
 import android.os.Build;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.Looper;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -1357,11 +1356,16 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
     }
 
     /**
-     * @hide Hack so that DialogFragment can make its Dialog before creating
-     * its views, and the view construction can use the dialog's context for
-     * inflation.  Maybe this should become a public API. Note sure.
+     * Returns the LayoutInflater used to inflate Views of this Fragment. The default
+     * implementation will throw an exception if the Fragment is not attached.
+     *
+     * @return The LayoutInflater used to inflate Views of this Fragment.
      */
-    public LayoutInflater getLayoutInflater(Bundle savedInstanceState) {
+    public LayoutInflater onGetLayoutInflater(Bundle savedInstanceState) {
+        if (mHost == null) {
+            throw new IllegalStateException("onGetLayoutInflater() cannot be executed until the "
+                    + "Fragment is attached to the FragmentManager.");
+        }
         final LayoutInflater result = mHost.onGetLayoutInflater();
         if (mHost.onUseFragmentManagerInflaterFactory()) {
             getChildFragmentManager(); // Init if needed; use raw implementation below.
