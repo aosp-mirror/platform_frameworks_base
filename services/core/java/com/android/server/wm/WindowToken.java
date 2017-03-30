@@ -30,6 +30,7 @@ import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_NORMAL;
 import android.os.Debug;
 import android.os.IBinder;
 import android.util.Slog;
+import android.view.SurfaceControl;
 
 import java.io.PrintWriter;
 
@@ -245,6 +246,18 @@ class WindowToken extends WindowContainer<WindowState> {
     void onDisplayChanged(DisplayContent dc) {
         dc.reParentWindowToken(this);
         mDisplayContent = dc;
+
+        // TODO(b/36740756): One day this should perhaps be hooked
+        // up with goodToGo, so we don't move a window
+        // to another display before the window behind
+        // it is ready.
+        SurfaceControl.openTransaction();
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            final WindowState win = mChildren.get(i);
+            win.mWinAnimator.updateLayerStackInTransaction();
+        }
+        SurfaceControl.closeTransaction();
+
         super.onDisplayChanged(dc);
     }
 
