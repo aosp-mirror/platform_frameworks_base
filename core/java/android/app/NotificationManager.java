@@ -1171,8 +1171,11 @@ public class NotificationManager
      * @return If the service is being started or is already running, the
      *      {@link ComponentName} of the actual service that was started is
      *      returned; else if the service does not exist null is returned.
+     *
+     * @deprecated STOPSHIP transition away from this for O
      */
     @Nullable
+    @Deprecated
     public ComponentName startServiceInForeground(Intent service,
             int id, Notification notification) {
         return mContext.startServiceInForeground(service, id, notification);
