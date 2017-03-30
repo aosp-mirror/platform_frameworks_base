@@ -202,6 +202,10 @@ interface IDevicePolicyManager {
     List getPermittedInputMethodsForCurrentUser();
     boolean isInputMethodPermittedByAdmin(in ComponentName admin, String packageName, int userId);
 
+    boolean setPermittedCrossProfileNotificationListeners(in ComponentName admin, in List<String> packageList);
+    List<String> getPermittedCrossProfileNotificationListeners(in ComponentName admin);
+    boolean isNotificationListenerServicePermitted(in String packageName, int userId);
+
     Intent createAdminSupportIntent(in String restriction);
     boolean setApplicationHidden(in ComponentName admin, in String callerPackage, in String packageName, boolean hidden);
     boolean isApplicationHidden(in ComponentName admin, in String callerPackage, in String packageName);

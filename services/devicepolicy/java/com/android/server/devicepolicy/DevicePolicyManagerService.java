@@ -663,6 +663,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         private static final String TAG_GLOBAL_PROXY_SPEC = "global-proxy-spec";
         private static final String TAG_SPECIFIES_GLOBAL_PROXY = "specifies-global-proxy";
         private static final String TAG_PERMITTED_IMES = "permitted-imes";
+        private static final String TAG_PERMITTED_NOTIFICATION_LISTENERS =
+                "permitted-notification-listeners";
         private static final String TAG_MAX_FAILED_PASSWORD_WIPE = "max-failed-password-wipe";
         private static final String TAG_MAX_TIME_TO_UNLOCK = "max-time-to-unlock";
         private static final String TAG_STRONG_AUTH_UNLOCK_TIMEOUT = "strong-auth-unlock-timeout";
@@ -769,6 +771,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         // Null means all input methods are allowed, empty means none except system imes are
         // allowed.
         List<String> permittedInputMethods;
+
+        // The list of packages allowed to use a NotificationListenerService to receive events for
+        // notifications from this user. Null means that all packages are allowed. Empty list means
+        // that only packages from the system are allowed.
+        List<String> permittedNotificationListeners;
 
         // List of package names to keep cached.
         List<String> keepUninstalledPackages;
@@ -1016,6 +1023,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             writePackageListToXml(out, TAG_PERMITTED_ACCESSIBILITY_SERVICES,
                     permittedAccessiblityServices);
             writePackageListToXml(out, TAG_PERMITTED_IMES, permittedInputMethods);
+            writePackageListToXml(out, TAG_PERMITTED_NOTIFICATION_LISTENERS,
+                    permittedNotificationListeners);
             writePackageListToXml(out, TAG_KEEP_UNINSTALLED_PACKAGES, keepUninstalledPackages);
             if (hasUserRestrictions()) {
                 UserRestrictionsUtils.writeRestrictions(
@@ -1187,6 +1196,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     permittedAccessiblityServices = readPackageList(parser, tag);
                 } else if (TAG_PERMITTED_IMES.equals(tag)) {
                     permittedInputMethods = readPackageList(parser, tag);
+                } else if (TAG_PERMITTED_NOTIFICATION_LISTENERS.equals(tag)) {
+                    permittedNotificationListeners = readPackageList(parser, tag);
                 } else if (TAG_KEEP_UNINSTALLED_PACKAGES.equals(tag)) {
                     keepUninstalledPackages = readPackageList(parser, tag);
                 } else if (TAG_USER_RESTRICTIONS.equals(tag)) {
@@ -1406,6 +1417,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             if (permittedInputMethods != null) {
                 pw.print(prefix); pw.print("permittedInputMethods=");
                     pw.println(permittedInputMethods);
+            }
+            if (permittedNotificationListeners != null) {
+                pw.print(prefix); pw.print("permittedNotificationListeners=");
+                pw.println(permittedNotificationListeners);
             }
             if (keepUninstalledPackages != null) {
                 pw.print(prefix); pw.print("keepUninstalledPackages=");
@@ -7792,14 +7807,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             if (admin.permittedAccessiblityServices == null) {
                 return true;
             }
-            return checkPackagesInPermittedListOrSystem(Arrays.asList(packageName),
+            return checkPackagesInPermittedListOrSystem(Collections.singletonList(packageName),
                     admin.permittedAccessiblityServices, userHandle);
         }
     }
 
     private boolean checkCallerIsCurrentUserOrProfile() {
-        int callingUserId = UserHandle.getCallingUserId();
-        long token = mInjector.binderClearCallingIdentity();
+        final int callingUserId = UserHandle.getCallingUserId();
+        final long token = mInjector.binderClearCallingIdentity();
         try {
             UserInfo currentUser;
             UserInfo callingUser = getUserInfo(callingUserId);
@@ -7839,6 +7854,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return false;
         }
 
+        final int callingUserId = mInjector.userHandleGetCallingUserId();
         if (packageList != null) {
             // InputMethodManager fetches input methods for current user.
             // So this can only be set when calling user is the current user
@@ -7853,7 +7869,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     enabledPackages.add(ime.getPackageName());
                 }
                 if (!checkPackagesInPermittedListOrSystem(enabledPackages, packageList,
-                        mInjector.binderGetCallingUserHandle().getIdentifier())) {
+                        callingUserId)) {
                     Slog.e(LOG_TAG, "Cannot set permitted input methods, "
                             + "because it contains already enabled input method.");
                     return false;
@@ -7865,7 +7881,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             ActiveAdmin admin = getActiveAdminForCallerLocked(who,
                     DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
             admin.permittedInputMethods = packageList;
-            saveSettingsLocked(UserHandle.getCallingUserId());
+            saveSettingsLocked(callingUserId);
         }
         return true;
     }
@@ -7964,10 +7980,69 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             if (admin.permittedInputMethods == null) {
                 return true;
             }
-            return checkPackagesInPermittedListOrSystem(Arrays.asList(packageName),
+            return checkPackagesInPermittedListOrSystem(Collections.singletonList(packageName),
                     admin.permittedInputMethods, userHandle);
         }
     }
+
+    @Override
+    public boolean setPermittedCrossProfileNotificationListeners(
+            ComponentName who, List<String> packageList) {
+        if (!mHasFeature) {
+            return false;
+        }
+        Preconditions.checkNotNull(who, "ComponentName is null");
+
+        final int callingUserId = mInjector.userHandleGetCallingUserId();
+        if (!isManagedProfile(callingUserId)) {
+            return false;
+        }
+
+        synchronized (this) {
+            ActiveAdmin admin = getActiveAdminForCallerLocked(
+                    who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+            admin.permittedNotificationListeners = packageList;
+            saveSettingsLocked(callingUserId);
+        }
+        return true;
+    }
+
+    @Override
+    public List<String> getPermittedCrossProfileNotificationListeners(ComponentName who) {
+        if (!mHasFeature) {
+            return null;
+        }
+        Preconditions.checkNotNull(who, "ComponentName is null");
+
+        synchronized (this) {
+            ActiveAdmin admin = getActiveAdminForCallerLocked(
+                    who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+            return admin.permittedNotificationListeners;
+        }
+    }
+
+    @Override
+    public boolean isNotificationListenerServicePermitted(String packageName, int userId) {
+        if (!mHasFeature) {
+            return true;
+        }
+
+        Preconditions.checkStringNotEmpty(packageName, "packageName is null or empty");
+        if (!isCallerWithSystemUid()) {
+            throw new SecurityException(
+                    "Only the system can query if a notification listener service is permitted");
+        }
+        synchronized (this) {
+            ActiveAdmin profileOwner = getProfileOwnerAdminLocked(userId);
+            if (profileOwner == null || profileOwner.permittedNotificationListeners == null) {
+                return true;
+            }
+            return checkPackagesInPermittedListOrSystem(Collections.singletonList(packageName),
+                    profileOwner.permittedNotificationListeners, userId);
+
+        }
+    }
+
 
     private void sendAdminEnabledBroadcastLocked(int userHandle) {
         DevicePolicyData policyData = getUserData(userHandle);
