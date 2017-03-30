@@ -314,4 +314,17 @@ public abstract class PackageManagerInternal {
      */
     public abstract ResolveInfo resolveIntent(Intent intent, String resolvedType,
             int flags, int userId);
+
+    /**
+     * Track the creator of a new isolated uid.
+     * @param isolatedUid The newly created isolated uid.
+     * @param ownerUid The uid of the app that created the isolated process.
+     */
+    public abstract void addIsolatedUid(int isolatedUid, int ownerUid);
+
+    /**
+     * Track removal of an isolated uid.
+     * @param isolatedUid isolated uid that is no longer being used.
+     */
+    public abstract void removeIsolatedUid(int isolatedUid);
 }

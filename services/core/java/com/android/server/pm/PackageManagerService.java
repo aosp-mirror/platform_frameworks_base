@@ -651,6 +651,11 @@ public class PackageManagerService extends IPackageManager.Stub {
     final ArrayMap<String, Set<String>> mKnownCodebase =
             new ArrayMap<String, Set<String>>();
 
+    // Keys are isolated uids and values are the uid of the application
+    // that created the isolated proccess.
+    @GuardedBy("mPackages")
+    final SparseIntArray mIsolatedOwners = new SparseIntArray();
+
     // List of APK paths to load for each user and package. This data is never
     // persisted by the package manager. Instead, the overlay manager will
     // ensure the data is up-to-date in runtime.
@@ -6175,6 +6180,10 @@ public class PackageManagerService extends IPackageManager.Stub {
      * instant, returns {@code null}.
      */
     private String getInstantAppPackageName(int callingUid) {
+        // If the caller is an isolated app use the owner's uid for the lookup.
+        if (Process.isIsolated(callingUid)) {
+            callingUid = mIsolatedOwners.get(callingUid);
+        }
         final int appId = UserHandle.getAppId(callingUid);
         synchronized (mPackages) {
             final Object obj = mSettings.getUserIdLPr(appId);
@@ -7347,17 +7356,22 @@ public class PackageManagerService extends IPackageManager.Stub {
         if (HIDE_EPHEMERAL_APIS || isEphemeralDisabled()) {
             return false;
         }
+        int uid = Binder.getCallingUid();
+        if (Process.isIsolated(uid)) {
+            uid = mIsolatedOwners.get(uid);
+        }
 
         synchronized (mPackages) {
             final PackageSetting ps = mSettings.mPackages.get(packageName);
+            PackageParser.Package pkg = mPackages.get(packageName);
             final boolean returnAllowed =
                     ps != null
-                    && (isCallerSameApp(packageName)
+                    && (isCallerSameApp(packageName, uid)
                             || mContext.checkCallingOrSelfPermission(
                                     android.Manifest.permission.ACCESS_INSTANT_APPS)
                                             == PERMISSION_GRANTED
                             || mInstantAppRegistry.isInstantAccessGranted(
-                                    userId, UserHandle.getAppId(Binder.getCallingUid()), ps.appId));
+                                    userId, UserHandle.getAppId(uid), ps.appId));
             if (returnAllowed) {
                 return ps.getInstantApp(userId);
             }
@@ -7374,7 +7388,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         enforceCrossUserPermission(Binder.getCallingUid(), userId,
                 true /* requireFullPermission */, false /* checkShell */,
                 "getInstantAppCookie");
-        if (!isCallerSameApp(packageName)) {
+        if (!isCallerSameApp(packageName, Binder.getCallingUid())) {
             return null;
         }
         synchronized (mPackages) {
@@ -7392,7 +7406,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         enforceCrossUserPermission(Binder.getCallingUid(), userId,
                 true /* requireFullPermission */, true /* checkShell */,
                 "setInstantAppCookie");
-        if (!isCallerSameApp(packageName)) {
+        if (!isCallerSameApp(packageName, Binder.getCallingUid())) {
             return false;
         }
         synchronized (mPackages) {
@@ -7420,10 +7434,10 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-    private boolean isCallerSameApp(String packageName) {
+    private boolean isCallerSameApp(String packageName, int uid) {
         PackageParser.Package pkg = mPackages.get(packageName);
         return pkg != null
-                && UserHandle.getAppId(Binder.getCallingUid()) == pkg.applicationInfo.uid;
+                && UserHandle.getAppId(uid) == pkg.applicationInfo.uid;
     }
 
     @Override
@@ -23186,6 +23200,21 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                 int flags, int userId) {
             return resolveIntentInternal(
                     intent, resolvedType, flags, userId, true /*includeInstantApp*/);
+        }
+
+
+        @Override
+        public void addIsolatedUid(int isolatedUid, int ownerUid) {
+            synchronized (mPackages) {
+                mIsolatedOwners.put(isolatedUid, ownerUid);
+            }
+        }
+
+        @Override
+        public void removeIsolatedUid(int isolatedUid) {
+            synchronized (mPackages) {
+                mIsolatedOwners.delete(isolatedUid);
+            }
         }
     }
 
