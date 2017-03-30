@@ -554,9 +554,8 @@ public final class AutofillManager {
                 }
                 valuesByParent.put(id.getVirtualChildId(), value);
             } else {
-                if (view.autofill(value)) {
-                    numApplied++;
-                }
+                view.autofill(value);
+                numApplied++;
             }
         }
 
@@ -564,9 +563,8 @@ public final class AutofillManager {
             for (int i = 0; i < virtualValues.size(); i++) {
                 final View parent = virtualValues.keyAt(i);
                 final SparseArray<AutofillValue> childrenValues = virtualValues.valueAt(i);
-                if (parent.autofill(childrenValues)) {
-                    numApplied += childrenValues.size();
-                }
+                parent.autofill(childrenValues);
+                numApplied += childrenValues.size();
             }
         }
 

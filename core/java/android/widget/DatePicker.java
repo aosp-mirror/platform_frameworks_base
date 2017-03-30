@@ -775,16 +775,15 @@ public class DatePicker extends FrameLayout {
     }
 
     @Override
-    public boolean autofill(AutofillValue value) {
-        if (!isEnabled()) return false;
+    public void autofill(AutofillValue value) {
+        if (!isEnabled()) return;
 
-        if (value.isDate()) {
-            mDelegate.updateDate(value.getDateValue());
-        } else {
+        if (!value.isDate()) {
             Log.w(LOG_TAG, value + " could not be autofilled into " + this);
+            return;
         }
 
-        return true;
+        mDelegate.updateDate(value.getDateValue());
     }
 
     @Override
