@@ -32,9 +32,8 @@
     <string name="wifi_no_internet_no_reconnect" msgid="5724903347310541706">"Samodejna vnovična vzpostavitev povezave se ne bo izvedla"</string>
     <string name="wifi_no_internet" msgid="3880396223819116454">"Ni dostopa do interneta"</string>
     <string name="saved_network" msgid="4352716707126620811">"Shranil(-a): <xliff:g id="NAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for connected_via_network_scorer (5713793306870815341) -->
-    <skip />
-    <!-- no translation found for connected_via_network_scorer_default (8430960324014668989) -->
+    <string name="connected_via_network_scorer" msgid="5713793306870815341">"Samodejno vzpostavljena povezava prek: %1$s"</string>
+    <!-- no translation found for connected_via_network_scorer_default (7867260222020343104) -->
     <skip />
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Vzpostavljena povezava prek: %1$s"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"Na voljo prek: %1$s"</string>
@@ -141,7 +140,8 @@
     <item msgid="5194774745031751806">"Zelo naglo"</item>
     <item msgid="9085102246155045744">"Najhitreje"</item>
   </string-array>
-    <string name="choose_profile" msgid="8229363046053568878">"Izbira profila"</string>
+    <!-- no translation found for choose_profile (6921016979430278661) -->
+    <skip />
     <string name="category_personal" msgid="1299663247844969448">"Osebno"</string>
     <string name="category_work" msgid="8699184680584175622">"Služba"</string>
     <string name="development_settings_title" msgid="215179176067683667">"Možnosti za razvijalce"</string>
@@ -170,16 +170,12 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Omrežja"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Potrdilo brezžičnega zaslona"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Omogoči podrob. zapis. dnevnika za Wi-Fi"</string>
-    <!-- no translation found for wifi_aggressive_handover (5309131983693661320) -->
-    <skip />
+    <string name="wifi_aggressive_handover" msgid="5309131983693661320">"Odločen prehod iz Wi-Fi-ja v mobil. omr."</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Vedno omogoči iskanje omrežij Wi-Fi za gostovanje"</string>
-    <!-- no translation found for mobile_data_always_on (8774857027458200434) -->
-    <skip />
+    <string name="mobile_data_always_on" msgid="8774857027458200434">"Prenos podatkov v mobilnem omrežju je vedno aktiven"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Onemogočanje absolutnega praga glasnosti"</string>
-    <!-- no translation found for bluetooth_select_avrcp_version_string (3750059931120293633) -->
-    <skip />
-    <!-- no translation found for bluetooth_select_avrcp_version_dialog_title (7277329668298705702) -->
-    <skip />
+    <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Različica profila AVRCP za Bluetooth"</string>
+    <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Izberite različico profila AVRCP za Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Zvočni kodek za Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="4558347981670553665">"Izberi zvočni kodek za Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Hitrost vzorčenja zvoka prek Bluetootha"</string>
@@ -193,8 +189,7 @@
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Pretočno predvajanje: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Pokaži možnosti za potrdilo brezžičnega zaslona"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Povečaj raven zapis. dnev. za Wi-Fi; v izbir. Wi‑Fi-ja pokaži glede na SSID RSSI"</string>
-    <!-- no translation found for wifi_aggressive_handover_summary (7266329646559808827) -->
-    <skip />
+    <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"Če je ta možnost omogočena, Wi-Fi odločneje preda podatkovno povezavo mobilnemu omrežju, ko je signal Wi-Fi šibek."</string>
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"Omogoči/onemogoči iskanje omrežij Wi-Fi za gostovanje glede na količino podatkovnega prometa pri vmesniku"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Velikosti medpomn. zapisov. dnevnika"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Izberite velikost medpomnilnika dnevnika"</string>
@@ -325,21 +320,16 @@
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"Preglasila nastavitev: <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="4400068916452346544">"Še približno <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"Še <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_discharging_duration (2843747179907396142) -->
-    <skip />
+    <string name="power_discharging_duration" msgid="2843747179907396142">"<xliff:g id="LEVEL">%1$s</xliff:g> – še približno <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">%1$s</xliff:g> – še <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_charging_duration (4676999980973411875) -->
-    <skip />
+    <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> do napolnjenosti"</string>
     <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_charging_duration_ac (7341243578143555689) -->
-    <skip />
+    <string name="power_charging_duration_ac" msgid="7341243578143555689">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> do napolnjenosti prek vtičnice"</string>
     <string name="power_charging_duration_ac_short" msgid="7895864687218765582">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_charging_duration_usb (3720632890882121805) -->
-    <skip />
+    <string name="power_charging_duration_usb" msgid="3720632890882121805">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> do napolnjenosti prek USB-ja"</string>
     <string name="power_charging_duration_usb_short" msgid="941854728040426399">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_charging_duration_wireless (5768338238751562058) -->
-    <skip />
+    <string name="power_charging_duration_wireless" msgid="5768338238751562058">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> do napolnjenosti prek brezžič. poln."</string>
     <string name="power_charging_duration_wireless_short" msgid="1642664799869599476">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"Neznano"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"Polnjenje"</string>
@@ -353,8 +343,10 @@
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"Se ne polni"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"Poln"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"Nadzira skrbnik"</string>
-    <string name="enabled_by_admin" msgid="2386503803463071894">"Omogočil skrbnik"</string>
-    <string name="disabled_by_admin" msgid="3669999613095206948">"Onemogočil skrbnik"</string>
+    <!-- no translation found for enabled_by_admin (5302986023578399263) -->
+    <skip />
+    <!-- no translation found for disabled_by_admin (8505398946020816620) -->
+    <skip />
     <string name="home" msgid="3256884684164448244">"Začetna stran nastavitev"</string>
   <string-array name="battery_labels">
     <item msgid="8494684293649631252">"0 %"</item>
