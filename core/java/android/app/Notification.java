@@ -2714,7 +2714,7 @@ public class Notification implements Parcelable
          *
          * Note: This value might be ignored, for launchers that don't support badge icons.
          */
-        public Builder chooseBadgeIconType(int icon) {
+        public Builder setBadgeIconType(int icon) {
             mN.mBadgeIcon = icon;
             return this;
         }
