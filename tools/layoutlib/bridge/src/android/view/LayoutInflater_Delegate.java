@@ -16,6 +16,8 @@
 
 package android.view;
 
+import com.android.ide.common.rendering.api.LayoutLog;
+import com.android.layoutlib.bridge.Bridge;
 import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -104,8 +106,10 @@ public class LayoutInflater_Delegate {
             if (layout == 0) {
                 final String value = attrs.getAttributeValue(null, ATTR_LAYOUT);
                 if (value == null || value.length() <= 0) {
-                    throw new InflateException("You must specify a layout in the"
-                            + " include tag: <include layout=\"@layout/layoutID\" />");
+                    Bridge.getLog().error(LayoutLog.TAG_BROKEN, "You must specify a layout in the"
+                            + " include tag: <include layout=\"@layout/layoutID\" />", null);
+                    LayoutInflater.consumeChildElements(parser);
+                    return;
                 }
 
                 // Attempt to resolve the "?attr/name" string to an identifier.
@@ -125,11 +129,11 @@ public class LayoutInflater_Delegate {
             if (layout == 0) {
                 final String value = attrs.getAttributeValue(null, ATTR_LAYOUT);
                 if (value == null) {
-                    throw new InflateException("You must specifiy a layout in the"
-                            + " include tag: <include layout=\"@layout/layoutID\" />");
+                    Bridge.getLog().error(LayoutLog.TAG_BROKEN, "You must specify a layout in the"
+                            + " include tag: <include layout=\"@layout/layoutID\" />", null);
                 } else {
-                    throw new InflateException("You must specifiy a valid layout "
-                            + "reference. The layout ID " + value + " is not valid.");
+                    Bridge.getLog().error(LayoutLog.TAG_BROKEN, "You must specify a valid layout "
+                            + "reference. The layout ID " + value + " is not valid.", null);
                 }
             } else {
                 final XmlResourceParser childParser =
@@ -144,8 +148,11 @@ public class LayoutInflater_Delegate {
                     }
 
                     if (type != XmlPullParser.START_TAG) {
-                        throw new InflateException(childParser.getPositionDescription() +
-                                ": No start tag found!");
+                        Bridge.getLog().error(LayoutLog.TAG_BROKEN,
+                                childParser.getPositionDescription() + ": No start tag found!",
+                                null);
+                        LayoutInflater.consumeChildElements(parser);
+                        return;
                     }
 
                     final String childName = childParser.getName();
@@ -219,7 +226,9 @@ public class LayoutInflater_Delegate {
                 }
             }
         } else {
-            throw new InflateException("<include /> can only be used inside of a ViewGroup");
+            Bridge.getLog().error(LayoutLog.TAG_BROKEN,
+                    "<include /> can only be used inside of a ViewGroup",
+                    null);
         }
 
         LayoutInflater.consumeChildElements(parser);

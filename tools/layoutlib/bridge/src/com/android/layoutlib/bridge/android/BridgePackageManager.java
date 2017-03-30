@@ -49,6 +49,7 @@ import android.content.pm.VersionedPackage;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.graphics.Rect;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Handler;
@@ -307,7 +308,8 @@ public class BridgePackageManager extends PackageManager {
 
     @Override
     public Drawable getInstantAppIcon(String packageName) {
-        throw new UnsupportedOperationException();
+        assert false : "Unsupported operation";
+        return new ColorDrawable();
     }
 
     @Override

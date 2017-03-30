@@ -83,18 +83,18 @@ abstract class CustomBar extends LinearLayout {
         XmlPullParser parser;
         try {
             parser = ParserFactory.create(getClass().getResourceAsStream(layoutPath), name);
+
+            BridgeXmlBlockParser bridgeParser = new BridgeXmlBlockParser(parser, context, false);
+
+            try {
+                inflater.inflate(bridgeParser, this, true);
+            } finally {
+                bridgeParser.ensurePopped();
+            }
         } catch (XmlPullParserException e) {
             // Should not happen as the resource is bundled with the jar, and  ParserFactory should
             // have been initialized.
-            throw new AssertionError(e);
-        }
-
-        BridgeXmlBlockParser bridgeParser = new BridgeXmlBlockParser(parser, context, false);
-
-        try {
-            inflater.inflate(bridgeParser, this, true);
-        } finally {
-            bridgeParser.ensurePopped();
+            assert false;
         }
     }
 

@@ -88,8 +88,9 @@ public final class BlendComposite implements Composite {
 
     private void setAlpha(float alpha) {
         if (alpha < 0.0f || alpha > 1.0f) {
-            throw new IllegalArgumentException(
-                    "alpha must be comprised between 0.0f and 1.0f");
+            assert false : "alpha must be comprised between 0.0f and 1.0f";
+            alpha = Math.min(alpha, 1.0f);
+            alpha = Math.max(alpha, 0.0f);
         }
 
         this.alpha = alpha;
@@ -266,9 +267,21 @@ public final class BlendComposite implements Composite {
                             return result;
                         }
                     };
+                default:
+                    assert false : "Blender not implement for " + composite.getMode().name();
+
+                    // Ignore the blend
+                    return new Blender() {
+                        @Override
+                        public int[] blend(int[] src, int[] dst, int[] result) {
+                            result[0] = dst[0];
+                            result[1] = dst[1];
+                            result[2] = dst[2];
+                            result[3] = dst[3];
+                            return result;
+                        }
+                    };
             }
-            throw new IllegalArgumentException("Blender not implement for " +
-                                               composite.getMode().name());
         }
     }
 }
