@@ -20,6 +20,7 @@ import android.annotation.CheckResult;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import android.text.TextUtils;
 import java.io.PrintWriter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -170,6 +171,10 @@ public final class Rect implements Parcelable {
      * or null if the string is not of that form.
      */
     public static Rect unflattenFromString(String str) {
+        if (TextUtils.isEmpty(str)) {
+            return null;
+        }
+
         Matcher matcher = UnflattenHelper.getMatcher(str);
         if (!matcher.matches()) {
             return null;
@@ -179,7 +184,7 @@ public final class Rect implements Parcelable {
                 Integer.parseInt(matcher.group(3)),
                 Integer.parseInt(matcher.group(4)));
     }
-    
+
     /**
      * Print short representation to given writer.
      * @hide

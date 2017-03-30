@@ -270,6 +270,12 @@ public class StackWindowController
 
             int width;
             int height;
+
+            final Rect parentAppBounds = parentConfig.appBounds;
+
+            config.setAppBounds(!bounds.isEmpty() ? bounds : null);
+            boolean intersectParentBounds = false;
+
             if (StackId.tasksAreFloating(mStackId)) {
                 // Floating tasks should not be resized to the screen's bounds.
 
@@ -280,6 +286,7 @@ public class StackWindowController
                     // the fullscreen stack, without intersecting it with the display bounds
                     stableBounds.inset(mTmpStableInsets);
                     nonDecorBounds.inset(mTmpNonDecorInsets);
+                    intersectParentBounds = true;
                 }
                 width = (int) (stableBounds.width() / density);
                 height = (int) (stableBounds.height() / density);
@@ -299,6 +306,11 @@ public class StackWindowController
                         parentConfig.screenWidthDp);
                 height = Math.min((int) (stableBounds.height() / density),
                         parentConfig.screenHeightDp);
+                intersectParentBounds = true;
+            }
+
+            if (intersectParentBounds && config.appBounds != null) {
+                config.appBounds.intersect(parentAppBounds);
             }
 
             config.screenWidthDp = width;
