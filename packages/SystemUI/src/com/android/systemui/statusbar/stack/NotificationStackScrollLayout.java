@@ -72,6 +72,7 @@ import com.android.systemui.statusbar.DismissView;
 import com.android.systemui.statusbar.EmptyShadeView;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.ExpandableView;
+import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.NotificationGuts;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.StackScrollerDecorView;
@@ -86,6 +87,7 @@ import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.ScrollAdapter;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -331,7 +333,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
     };
     private PorterDuffXfermode mSrcMode = new PorterDuffXfermode(PorterDuff.Mode.SRC);
-    private boolean mPulsing;
+    private Collection<HeadsUpManager.HeadsUpEntry> mPulsing;
     private boolean mDrawBackgroundAsSrc;
     private boolean mFadingOut;
     private boolean mParentNotFullyVisible;
@@ -1917,15 +1919,19 @@ public class NotificationStackScrollLayout extends ViewGroup
         int numShownItems = 0;
         boolean finish = false;
         int maxDisplayedNotifications = mAmbientState.isDark()
-                ? (mPulsing ? 1 : 0)
+                ? (isPulsing() ? 1 : 0)
                 : mMaxDisplayedNotifications;
 
         for (int i = 0; i < getChildCount(); i++) {
             ExpandableView expandableView = (ExpandableView) getChildAt(i);
             if (expandableView.getVisibility() != View.GONE
                     && !expandableView.hasNoContentHeight()) {
-                if (maxDisplayedNotifications != -1
-                        && numShownItems >= maxDisplayedNotifications) {
+                boolean limitReached = maxDisplayedNotifications != -1
+                        && numShownItems >= maxDisplayedNotifications;
+                boolean notificationOnAmbientThatIsNotPulsing = isPulsing()
+                        && expandableView instanceof ExpandableNotificationRow
+                        && !isPulsing(((ExpandableNotificationRow) expandableView).getEntry());
+                if (limitReached || notificationOnAmbientThatIsNotPulsing) {
                     expandableView = mShelf;
                     finish = true;
                 }
@@ -1969,6 +1975,19 @@ public class NotificationStackScrollLayout extends ViewGroup
         mContentHeight = height + mTopPadding;
         updateScrollability();
         mAmbientState.setLayoutMaxHeight(mContentHeight);
+    }
+
+    private boolean isPulsing(NotificationData.Entry entry) {
+        for (HeadsUpManager.HeadsUpEntry e : mPulsing) {
+            if (e.entry == entry) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean isPulsing() {
+        return mPulsing != null;
     }
 
     private void updateScrollability() {
@@ -2784,7 +2803,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     private void updateNotificationAnimationStates() {
-        boolean running = mAnimationsEnabled || mPulsing;
+        boolean running = mAnimationsEnabled || isPulsing();
         mShelf.setAnimationsEnabled(running);
         int childCount = getChildCount();
         for (int i = 0; i < childCount; i++) {
@@ -2795,7 +2814,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     private void updateAnimationState(View child) {
-        updateAnimationState((mAnimationsEnabled || mPulsing)
+        updateAnimationState((mAnimationsEnabled || isPulsing())
                 && (mIsExpanded || isPinnedHeadsUp(child)), child);
     }
 
@@ -4055,12 +4074,12 @@ public class NotificationStackScrollLayout extends ViewGroup
         return mIsExpanded;
     }
 
-    public void setPulsing(boolean pulsing) {
-        if (mPulsing == pulsing) {
+    public void setPulsing(Collection<HeadsUpManager.HeadsUpEntry> pulsing) {
+        if (mPulsing == null && pulsing == null) {
             return;
         }
         mPulsing = pulsing;
-        mAmbientState.setPulsing(pulsing);
+        mAmbientState.setPulsing(isPulsing());
         updateNotificationAnimationStates();
         updateContentHeight();
         notifyHeightChangeListener(mShelf);

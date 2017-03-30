@@ -5014,23 +5014,25 @@ public class StatusBar extends SystemUI implements DemoMode,
                 @Override
                 public void onPulseStarted() {
                     callback.onPulseStarted();
-                    if (!mHeadsUpManager.getAllEntries().isEmpty()) {
+                    Collection<HeadsUpManager.HeadsUpEntry> pulsingEntries =
+                            mHeadsUpManager.getAllEntries();
+                    if (!pulsingEntries.isEmpty()) {
                         // Only pulse the stack scroller if there's actually something to show.
                         // Otherwise just show the always-on screen.
-                        setPulsing(true);
+                        setPulsing(pulsingEntries);
                     }
                 }
 
                 @Override
                 public void onPulseFinished() {
                     callback.onPulseFinished();
-                    setPulsing(false);
+                    setPulsing(null);
                 }
 
-                private void setPulsing(boolean pulsing) {
+                private void setPulsing(Collection<HeadsUpManager.HeadsUpEntry> pulsing) {
                     mStackScroller.setPulsing(pulsing);
-                    mNotificationPanel.setPulsing(pulsing);
-                    mVisualStabilityManager.setPulsing(pulsing);
+                    mNotificationPanel.setPulsing(pulsing != null);
+                    mVisualStabilityManager.setPulsing(pulsing != null);
                 }
             }, reason);
         }
