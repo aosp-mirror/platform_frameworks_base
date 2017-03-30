@@ -27,10 +27,12 @@ import android.annotation.UserIdInt;
 import android.app.AppOpsManager;
 import android.app.NotificationManager;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.net.NetworkInfo.DetailedState;
 import android.net.UidRange;
+import android.os.Build;
 import android.os.INetworkManagementService;
 import android.os.Looper;
 import android.os.UserHandle;
@@ -45,6 +47,7 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
 
+import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
@@ -87,12 +90,13 @@ public class VpnTest extends AndroidTestCase {
         }
     }
 
-    @Mock private Context mContext;
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS) private Context mContext;
     @Mock private UserManager mUserManager;
     @Mock private PackageManager mPackageManager;
     @Mock private INetworkManagementService mNetService;
     @Mock private AppOpsManager mAppOps;
     @Mock private NotificationManager mNotificationManager;
+    @Mock private Vpn.SystemServices mSystemServices;
 
     @Override
     public void setUp() throws Exception {
@@ -104,6 +108,12 @@ public class VpnTest extends AndroidTestCase {
         when(mContext.getSystemService(eq(Context.APP_OPS_SERVICE))).thenReturn(mAppOps);
         when(mContext.getSystemService(eq(Context.NOTIFICATION_SERVICE)))
                 .thenReturn(mNotificationManager);
+
+        // Used by {@link Notification.Builder}
+        ApplicationInfo applicationInfo = new ApplicationInfo();
+        applicationInfo.targetSdkVersion = Build.VERSION_CODES.CUR_DEVELOPMENT;
+        when(mContext.getApplicationInfo()).thenReturn(applicationInfo);
+
         doNothing().when(mNetService).registerObserver(any());
     }
 
@@ -111,7 +121,7 @@ public class VpnTest extends AndroidTestCase {
     public void testRestrictedProfilesAreAddedToVpn() {
         setMockedUsers(primaryUser, secondaryUser, restrictedProfileA, restrictedProfileB);
 
-        final Vpn vpn = spyVpn(primaryUser.id);
+        final Vpn vpn = createVpn(primaryUser.id);
         final Set<UidRange> ranges = vpn.createUserAndRestrictedProfilesRanges(primaryUser.id,
                 null, null);
 
@@ -125,7 +135,7 @@ public class VpnTest extends AndroidTestCase {
     public void testManagedProfilesAreNotAddedToVpn() {
         setMockedUsers(primaryUser, managedProfileA);
 
-        final Vpn vpn = spyVpn(primaryUser.id);
+        final Vpn vpn = createVpn(primaryUser.id);
         final Set<UidRange> ranges = vpn.createUserAndRestrictedProfilesRanges(primaryUser.id,
                 null, null);
 
@@ -138,7 +148,7 @@ public class VpnTest extends AndroidTestCase {
     public void testAddUserToVpnOnlyAddsOneUser() {
         setMockedUsers(primaryUser, restrictedProfileA, managedProfileA);
 
-        final Vpn vpn = spyVpn(primaryUser.id);
+        final Vpn vpn = createVpn(primaryUser.id);
         final Set<UidRange> ranges = new ArraySet<>();
         vpn.addUserToRanges(ranges, primaryUser.id, null, null);
 
@@ -149,7 +159,7 @@ public class VpnTest extends AndroidTestCase {
 
     @SmallTest
     public void testUidWhiteAndBlacklist() throws Exception {
-        final Vpn vpn = spyVpn(primaryUser.id);
+        final Vpn vpn = createVpn(primaryUser.id);
         final UidRange user = UidRange.createForUser(primaryUser.id);
         final String[] packages = {PKGS[0], PKGS[1], PKGS[2]};
 
@@ -174,7 +184,7 @@ public class VpnTest extends AndroidTestCase {
 
     @SmallTest
     public void testLockdownChangingPackage() throws Exception {
-        final Vpn vpn = spyVpn(primaryUser.id);
+        final Vpn vpn = createVpn(primaryUser.id);
         final UidRange user = UidRange.createForUser(primaryUser.id);
 
         // Default state.
@@ -209,7 +219,7 @@ public class VpnTest extends AndroidTestCase {
 
     @SmallTest
     public void testLockdownAddingAProfile() throws Exception {
-        final Vpn vpn = spyVpn(primaryUser.id);
+        final Vpn vpn = createVpn(primaryUser.id);
         setMockedUsers(primaryUser);
 
         // Make a copy of the restricted profile, as we're going to mark it deleted halfway through.
@@ -249,40 +259,41 @@ public class VpnTest extends AndroidTestCase {
 
     @SmallTest
     public void testNotificationShownForAlwaysOnApp() {
-        final Vpn vpn = spyVpn(primaryUser.id);
-        final InOrder order = inOrder(vpn);
+        final UserHandle userHandle = UserHandle.of(primaryUser.id);
+        final Vpn vpn = createVpn(primaryUser.id);
         setMockedUsers(primaryUser);
+
+        final InOrder order = inOrder(mNotificationManager);
 
         // Don't show a notification for regular disconnected states.
         vpn.updateState(DetailedState.DISCONNECTED, TAG);
-        order.verify(vpn).updateAlwaysOnNotificationInternal(false);
+        order.verify(mNotificationManager, atLeastOnce())
+                .cancelAsUser(anyString(), anyInt(), eq(userHandle));
 
         // Start showing a notification for disconnected once always-on.
         vpn.setAlwaysOnPackage(PKGS[0], false);
-        order.verify(vpn).updateAlwaysOnNotificationInternal(true);
+        order.verify(mNotificationManager)
+                .notifyAsUser(anyString(), anyInt(), any(), eq(userHandle));
 
         // Stop showing the notification once connected.
         vpn.updateState(DetailedState.CONNECTED, TAG);
-        order.verify(vpn).updateAlwaysOnNotificationInternal(false);
+        order.verify(mNotificationManager).cancelAsUser(anyString(), anyInt(), eq(userHandle));
 
         // Show the notification if we disconnect again.
         vpn.updateState(DetailedState.DISCONNECTED, TAG);
-        order.verify(vpn).updateAlwaysOnNotificationInternal(true);
+        order.verify(mNotificationManager)
+                .notifyAsUser(anyString(), anyInt(), any(), eq(userHandle));
 
         // Notification should be cleared after unsetting always-on package.
         vpn.setAlwaysOnPackage(null, false);
-        order.verify(vpn).updateAlwaysOnNotificationInternal(false);
+        order.verify(mNotificationManager).cancelAsUser(anyString(), anyInt(), eq(userHandle));
     }
 
     /**
      * Mock some methods of vpn object.
      */
-    private Vpn spyVpn(@UserIdInt int userId) {
-        final Vpn vpn = spy(new Vpn(Looper.myLooper(), mContext, mNetService, userId));
-
-        // Block calls to the NotificationManager or PendingIntent#getActivity.
-        doNothing().when(vpn).updateAlwaysOnNotificationInternal(anyBoolean());
-        return vpn;
+    private Vpn createVpn(@UserIdInt int userId) {
+        return new Vpn(Looper.myLooper(), mContext, mNetService, userId, mSystemServices);
     }
 
     private static void assertBlocked(Vpn vpn, int... uids) {

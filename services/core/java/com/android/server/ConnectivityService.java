@@ -3740,8 +3740,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 vpn.setAlwaysOnPackage(null, false);
                 return false;
             }
-
-            vpn.saveAlwaysOnPackage();
         }
         return true;
     }
@@ -3902,15 +3900,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
             }
             userVpn = new Vpn(mHandler.getLooper(), mContext, mNetd, userId);
             mVpns.put(userId, userVpn);
-
-            final ContentResolver cr = mContext.getContentResolver();
-            String alwaysOnPackage = Settings.Secure.getStringForUser(cr,
-                    Settings.Secure.ALWAYS_ON_VPN_APP, userId);
-            final boolean alwaysOnLockdown = Settings.Secure.getIntForUser(cr,
-                    Settings.Secure.ALWAYS_ON_VPN_LOCKDOWN, /* default */ 0, userId) != 0;
-            if (alwaysOnPackage != null) {
-                userVpn.setAlwaysOnPackage(alwaysOnPackage, alwaysOnLockdown);
-            }
         }
         if (mUserManager.getUserInfo(userId).isPrimary() && LockdownVpnTracker.isEnabled()) {
             updateLockdownVpn();
