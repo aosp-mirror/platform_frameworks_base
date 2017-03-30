@@ -526,6 +526,12 @@ public class MockContext extends Context {
     }
 
     @Override
+    public ComponentName startForegroundService(Intent service) {
+        throw new UnsupportedOperationException();
+    }
+
+    /** STOPSHIP remove when trial API is turned down */
+    @Override
     public ComponentName startServiceInForeground(Intent service,
             int id, Notification notification) {
         throw new UnsupportedOperationException();
@@ -543,6 +549,12 @@ public class MockContext extends Context {
     }
 
     /** @hide */
+    @Override
+    public ComponentName startForegroundServiceAsUser(Intent service, UserHandle user) {
+        throw new UnsupportedOperationException();
+    }
+
+    /** @hide STOPSHIP removed when trial API is turned down */
     @Override
     public ComponentName startServiceInForegroundAsUser(Intent service,
             int id, Notification notification, UserHandle user) {

@@ -405,6 +405,13 @@ public class ActivityManager {
      */
     public static final int INTENT_SENDER_SERVICE = 4;
 
+    /**
+     * Type for IActivityManaqer.getIntentSender: this PendingIntent is
+     * for a startForegroundService operation.
+     * @hide
+     */
+    public static final int INTENT_SENDER_FOREGROUND_SERVICE = 5;
+
     /** @hide User operation call: success! */
     public static final int USER_OP_SUCCESS = 0;
 

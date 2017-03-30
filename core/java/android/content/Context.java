@@ -2576,7 +2576,7 @@ public abstract class Context {
      * {@link ComponentName} of the actual service that was started is
      * returned; else if the service does not exist null is returned.
      *
-     * @throws SecurityException If the caller does not permission to access the service
+     * @throws SecurityException If the caller does not have permission to access the service
      * or the service can not be found.
      * @throws IllegalStateException If the application is in a state where the service
      * can not be started (such as not in the foreground in a state when services are allowed).
@@ -2588,11 +2588,47 @@ public abstract class Context {
     public abstract ComponentName startService(Intent service);
 
     /**
+     * Similar to {@link #startService(Intent)}, but with an implicit promise that the
+     * Service will call {@link android.app.Service#startForeground(int, Notification)
+     * startForeground(int, Notification)} once it begins running.  The service is given
+     * an amount of time comparable to the ANR interval to do this, otherwise the system
+     * will automatically stop the service and declare the app ANR.
+     *
+     * <p>Unlike the ordinary {@link #startService(Intent)}, this method can be used
+     * at any time, regardless of whether the app hosting the service is in a foreground
+     * state.
+     *
+     * @param service Identifies the service to be started.  The Intent must be
+     *      fully explicit (supplying a component name).  Additional values
+     *      may be included in the Intent extras to supply arguments along with
+     *      this specific start call.
+     *
+     * @return If the service is being started or is already running, the
+     * {@link ComponentName} of the actual service that was started is
+     * returned; else if the service does not exist null is returned.
+     *
+     * @throws SecurityException If the caller does not have permission to access the service
+     * or the service can not be found.
+     *
+     * @see #stopService
+     * @see android.app.Service#startForeground(int, Notification)
+     */
+    @Nullable
+    public abstract ComponentName startForegroundService(Intent service);
+
+    /**
+     * @hide like {@link #startForegroundService(Intent)} but for a specific user.
+     */
+    @Nullable
+    public abstract ComponentName startForegroundServiceAsUser(Intent service, UserHandle user);
+
+    /**
      * Start a service directly into the "foreground service" state.  Unlike {@link #startService},
      * this method can be used from within background operations like broadcast receivers
      * or scheduled jobs.  The API entry point for this is in NotificationManager in order to
      * preserve appropriate public package layering.
      * @hide
+     * @deprecated STOPSHIP remove in favor of two-step startForegroundService() + startForeground()
      */
     @Nullable
     public abstract ComponentName startServiceInForeground(Intent service,
@@ -2620,7 +2656,7 @@ public abstract class Context {
      * @return If there is a service matching the given Intent that is already
      * running, then it is stopped and {@code true} is returned; else {@code false} is returned.
      *
-     * @throws SecurityException If the caller does not permission to access the service
+     * @throws SecurityException If the caller does not have permission to access the service
      * or the service can not be found.
      * @throws IllegalStateException If the application is in a state where the service
      * can not be started (such as not in the foreground in a state when services are allowed).
@@ -2638,7 +2674,9 @@ public abstract class Context {
     /**
      * @hide like {@link #startServiceInForeground(Intent, int, Notification)}
      * but for a specific user.
+     * @deprecated STOPSHIP remove when trial API is turned off
      */
+    @Deprecated
     @Nullable
     public abstract ComponentName startServiceInForegroundAsUser(Intent service,
             int id, Notification notification, UserHandle user);
@@ -2685,7 +2723,7 @@ public abstract class Context {
      *         {@code false} is returned if the connection is not made so you will not
      *         receive the service object.
      *
-     * @throws SecurityException If the caller does not permission to access the service
+     * @throws SecurityException If the caller does not have permission to access the service
      * or the service can not be found.
      *
      * @see #unbindService
