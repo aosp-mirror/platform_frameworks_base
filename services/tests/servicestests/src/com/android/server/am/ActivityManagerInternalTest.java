@@ -105,9 +105,9 @@ public class ActivityManagerInternalTest {
         final UidRecord record2 = addActiveUidRecord(TEST_UID2, curProcStateSeq,
                 lastNetworkUpdatedProcStateSeq);
 
-        final CustomThread thread1 = new CustomThread(record1.lock);
+        final CustomThread thread1 = new CustomThread(record1.networkStateLock);
         thread1.startAndWait("Unexpected state for " + record1);
-        final CustomThread thread2 = new CustomThread(record2.lock);
+        final CustomThread thread2 = new CustomThread(record2.networkStateLock);
         thread2.startAndWait("Unexpected state for " + record2);
 
         mAmi.notifyNetworkPolicyRulesUpdated(TEST_UID1, expectedProcStateSeq);
