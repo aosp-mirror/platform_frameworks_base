@@ -62,6 +62,7 @@ void SkiaRecordingCanvas::drawRoundRect(uirenderer::CanvasPropertyPrimitive* lef
         uirenderer::CanvasPropertyPrimitive* top, uirenderer::CanvasPropertyPrimitive* right,
         uirenderer::CanvasPropertyPrimitive* bottom, uirenderer::CanvasPropertyPrimitive* rx,
         uirenderer::CanvasPropertyPrimitive* ry, uirenderer::CanvasPropertyPaint* paint) {
+    // Destructor of drawables created with allocateDrawable, will be invoked by ~LinearAllocator.
     drawDrawable(mDisplayList->allocateDrawable<AnimatedRoundRect>(left, top, right, bottom,
             rx, ry, paint));
 }
@@ -92,13 +93,14 @@ void SkiaRecordingCanvas::insertReorderBarrier(bool enableReorder) {
 void SkiaRecordingCanvas::drawLayer(uirenderer::DeferredLayerUpdater* layerUpdater) {
     if (layerUpdater != nullptr && layerUpdater->backingLayer() != nullptr) {
         uirenderer::Layer* layer = layerUpdater->backingLayer();
+        // Create a ref-counted drawable, which is kept alive by sk_sp in SkLiteDL.
         sk_sp<SkDrawable> drawable(new LayerDrawable(layer));
         drawDrawable(drawable.get());
     }
 }
 
 void SkiaRecordingCanvas::drawRenderNode(uirenderer::RenderNode* renderNode) {
-    // record the child node
+    // Record the child node. Drawable dtor will be invoked when mChildNodes deque is cleared.
     mDisplayList->mChildNodes.emplace_back(renderNode, asSkCanvas(), true, mCurrentBarrier);
     auto& renderNodeDrawable = mDisplayList->mChildNodes.back();
     drawDrawable(&renderNodeDrawable);
@@ -113,6 +115,7 @@ void SkiaRecordingCanvas::drawRenderNode(uirenderer::RenderNode* renderNode) {
 
 void SkiaRecordingCanvas::callDrawGLFunction(Functor* functor,
         uirenderer::GlFunctorLifecycleListener* listener) {
+    // Drawable dtor will be invoked when mChildFunctors deque is cleared.
     mDisplayList->mChildFunctors.emplace_back(functor, listener, asSkCanvas());
     drawDrawable(&mDisplayList->mChildFunctors.back());
 }
