@@ -12914,7 +12914,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         IActivityManager am = ActivityManager.getService();
         if (am != null) {
             try {
-                am.startService(null, intent, null, -1, null, mContext.getOpPackageName(),
+                am.startService(null, intent, null, -1, null, false, mContext.getOpPackageName(),
                         UserHandle.USER_SYSTEM);
             } catch (RemoteException e) {
             }

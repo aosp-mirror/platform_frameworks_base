@@ -175,6 +175,8 @@ final class PendingIntentRecord extends IIntentSender.Stub {
                     return "broadcastIntent";
                 case ActivityManager.INTENT_SENDER_SERVICE:
                     return "startService";
+                case ActivityManager.INTENT_SENDER_FOREGROUND_SERVICE:
+                    return "startForegroundService";
                 case ActivityManager.INTENT_SENDER_ACTIVITY_RESULT:
                     return "activityResult";
             }
@@ -318,9 +320,11 @@ final class PendingIntentRecord extends IIntentSender.Stub {
                         }
                         break;
                     case ActivityManager.INTENT_SENDER_SERVICE:
+                    case ActivityManager.INTENT_SENDER_FOREGROUND_SERVICE:
                         try {
-                            owner.startServiceInPackage(uid, finalIntent,
-                                    resolvedType, key.packageName, userId);
+                            owner.startServiceInPackage(uid, finalIntent, resolvedType,
+                                    key.type == ActivityManager.INTENT_SENDER_FOREGROUND_SERVICE,
+                                    key.packageName, userId);
                         } catch (RuntimeException e) {
                             Slog.w(TAG, "Unable to send startService intent", e);
                         } catch (TransactionTooLargeException e) {

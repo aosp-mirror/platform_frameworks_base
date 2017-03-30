@@ -1847,6 +1847,18 @@ public class BridgeContext extends Context {
     }
 
     @Override
+    public ComponentName startForegroundService(Intent service) {
+        // pass
+        return null;
+    }
+
+    @Override
+    public ComponentName startForegroundServiceAsUser(Intent service, UserHandle user) {
+        // pass
+        return null;
+    }
+
+    @Override
     public ComponentName startServiceInForeground(Intent service,
             int id, Notification notification) {
         // pass
