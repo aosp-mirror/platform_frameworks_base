@@ -26,7 +26,7 @@ import dalvik.system.DexFile;
 public class PackageManagerServiceCompilerMapping {
     // Names for compilation reasons.
     static final String REASON_STRINGS[] = {
-            "first-boot", "boot", "install", "bg-dexopt", "ab-ota", "shared-apk", "forced-dexopt"
+            "first-boot", "boot", "install", "bg-dexopt", "ab-ota", "forced-dexopt"
     };
 
     // Static block to ensure the strings array is of the right length.
@@ -56,7 +56,6 @@ public class PackageManagerServiceCompilerMapping {
 
         // Ensure that some reasons are not mapped to profile-guided filters.
         switch (reason) {
-            case PackageManagerService.REASON_SHARED_APK:
             case PackageManagerService.REASON_FORCED_DEXOPT:
                 if (DexFile.isProfileGuidedCompilerFilter(sysPropValue)) {
                     throw new IllegalStateException("\"" + sysPropValue + "\" is profile-guided, "
