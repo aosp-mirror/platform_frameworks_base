@@ -49,6 +49,7 @@ import static android.view.accessibility.AccessibilityNodeInfo.ACTION_LONG_CLICK
 
 public class KeyButtonView extends ImageView implements ButtonInterface {
 
+    private final boolean mPlaySounds;
     private int mContentDescriptionRes;
     private long mDownTime;
     private int mCode;
@@ -90,6 +91,7 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
         mCode = a.getInteger(R.styleable.KeyButtonView_keyCode, 0);
 
         mSupportsLongpress = a.getBoolean(R.styleable.KeyButtonView_keyRepeat, true);
+        mPlaySounds = a.getBoolean(R.styleable.KeyButtonView_playSound, true);
 
         TypedValue value = new TypedValue();
         if (a.getValue(R.styleable.KeyButtonView_android_contentDescription, value)) {
@@ -241,8 +243,9 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
     }
 
     public void playSoundEffect(int soundConstant) {
+        if (!mPlaySounds) return;
         mAudioManager.playSoundEffect(soundConstant, ActivityManager.getCurrentUser());
-    };
+    }
 
     public void sendEvent(int action, int flags) {
         sendEvent(action, flags, SystemClock.uptimeMillis());
