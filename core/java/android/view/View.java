@@ -25523,7 +25523,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * <p>
      * The tooltip will be displayed:
      * <ul>
-     * <li>On long click, unless is not handled otherwise (by OnLongClickListener or a context
+     * <li>On long click, unless it is handled otherwise (by OnLongClickListener or a context
      * menu). </li>
      * <li>On hover, after a brief delay since the pointer has stopped moving </li>
      * </ul>
