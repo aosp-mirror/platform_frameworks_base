@@ -706,8 +706,8 @@ public class AppWindowContainerController
     }
 
     /** Calls directly into activity manager so window manager lock shouldn't held. */
-    boolean keyDispatchingTimedOut(String reason) {
-        return mListener != null && mListener.keyDispatchingTimedOut(reason);
+    boolean keyDispatchingTimedOut(String reason, int windowPid) {
+        return mListener != null && mListener.keyDispatchingTimedOut(reason, windowPid);
     }
 
     @Override
