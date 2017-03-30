@@ -548,10 +548,11 @@ public final class Path_Delegate {
             case EVEN_ODD:
             case INVERSE_EVEN_ODD:
                 return GeneralPath.WIND_EVEN_ODD;
-        }
 
-        assert false;
-        throw new IllegalArgumentException();
+            default:
+                assert false;
+                return GeneralPath.WIND_NON_ZERO;
+        }
     }
 
     @NonNull

@@ -740,9 +740,11 @@ public final class BridgeTypedArray extends TypedArray {
         }
         int id = getResourceId(index, 0);
         String resIdMessage = id > 0 ? " (resource id 0x" + Integer.toHexString(id) + ')' : "";
-        throw new NotFoundException(
-                String.format("%1$s in %2$s%3$s is not a valid array resource.",
-                        resVal.getValue(), mNames[index], resIdMessage));
+        assert false :
+                String.format("%1$s in %2$s%3$s is not a valid array resource.", resVal.getValue(),
+                        mNames[index], resIdMessage);
+
+        return new CharSequence[0];
     }
 
     @Override

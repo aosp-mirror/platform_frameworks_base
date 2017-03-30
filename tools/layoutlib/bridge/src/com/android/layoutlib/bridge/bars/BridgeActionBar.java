@@ -21,6 +21,7 @@ import com.android.ide.common.rendering.api.ActionBarCallback.HomeButtonStyle;
 import com.android.ide.common.rendering.api.RenderResources;
 import com.android.ide.common.rendering.api.ResourceValue;
 import com.android.ide.common.rendering.api.SessionParams;
+import com.android.layoutlib.bridge.MockView;
 import com.android.layoutlib.bridge.android.BridgeContext;
 
 import android.annotation.NonNull;
@@ -53,35 +54,41 @@ public abstract class BridgeActionBar {
         mParams = params;
         mCallback = params.getLayoutlibCallback().getActionBarCallback();
         ResourceValue layoutName = getLayoutResource(context);
-        if (layoutName == null) {
-            throw new RuntimeException("Unable to find the layout for Action Bar.");
-        }
-        int layoutId;
-        if (layoutName.isFramework()) {
-            layoutId = context.getFrameworkResourceValue(layoutName.getResourceType(),
-                    layoutName.getName(), 0);
-        } else {
-            layoutId = context.getProjectResourceValue(layoutName.getResourceType(),
-                    layoutName.getName(), 0);
 
+        int layoutId = 0;
+        if (layoutName == null) {
+            assert false : "Unable to find the layout for Action Bar.";
+        }
+        else {
+            if (layoutName.isFramework()) {
+                layoutId = context.getFrameworkResourceValue(layoutName.getResourceType(),
+                        layoutName.getName(), 0);
+            } else {
+                layoutId = context.getProjectResourceValue(layoutName.getResourceType(),
+                        layoutName.getName(), 0);
+
+            }
         }
         if (layoutId == 0) {
-            throw new RuntimeException(
-                    String.format("Unable to resolve attribute \"%1$s\" of type \"%2$s\"",
-                            layoutName.getName(), layoutName.getResourceType()));
-        }
-        if (mCallback.isOverflowPopupNeeded()) {
-            // Create a RelativeLayout around the action bar, to which the overflow popup may be
-            // added.
-            mEnclosingLayout = new RelativeLayout(mBridgeContext);
-            setMatchParent(mEnclosingLayout);
-        } else {
+            assert false : String.format("Unable to resolve attribute \"%1$s\" of type \"%2$s\"",
+                    layoutName.getName(), layoutName.getResourceType());
+            mDecorContent = new MockView(context);
             mEnclosingLayout = null;
         }
+        else {
+            if (mCallback.isOverflowPopupNeeded()) {
+                // Create a RelativeLayout around the action bar, to which the overflow popup may be
+                // added.
+                mEnclosingLayout = new RelativeLayout(mBridgeContext);
+                setMatchParent(mEnclosingLayout);
+            } else {
+                mEnclosingLayout = null;
+            }
 
-        // Inflate action bar layout.
-        mDecorContent =
-                getInflater(context).inflate(layoutId, mEnclosingLayout, mEnclosingLayout != null);
+            // Inflate action bar layout.
+            mDecorContent = getInflater(context).inflate(layoutId, mEnclosingLayout,
+                    mEnclosingLayout != null);
+        }
     }
 
     /**

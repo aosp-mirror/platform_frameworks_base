@@ -164,7 +164,9 @@ public class StaticLayout_Delegate {
                         builder.mTabStopCalculator);
                 break;
             default:
-                throw new AssertionError("Unknown break strategy: " + builder.mBreakStrategy);
+                assert false : "Unknown break strategy: " + builder.mBreakStrategy;
+                builder.mLineBreaker = new GreedyLineBreaker(primitives, builder.mLineWidth,
+                        builder.mTabStopCalculator);
         }
         builder.mLineBreaker.computeBreaks(recycle);
         return recycle.breaks.length;

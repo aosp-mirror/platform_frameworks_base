@@ -648,7 +648,8 @@ public class BridgeContext extends Context {
             return null;
         }
 
-        throw new UnsupportedOperationException("Unsupported Service: " + service);
+        assert false : "Unsupported Service: " + service;
+        return null;
     }
 
     @Override
@@ -678,7 +679,9 @@ public class BridgeContext extends Context {
             }
 
             if (style == null) {
-                throw new Resources.NotFoundException();
+                Bridge.getLog().error(LayoutLog.TAG_RESOURCES_RESOLVE,
+                        "Failed to find style with " + resId, null);
+                return null;
             }
         }
 

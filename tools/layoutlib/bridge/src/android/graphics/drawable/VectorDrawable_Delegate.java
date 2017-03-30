@@ -585,8 +585,8 @@ public class VectorDrawable_Delegate {
                     return this::setTrimPathOffset;
             }
 
-            throw new IllegalArgumentException("Invalid VFullPath_Delegate property index "
-                    + propertyIdx);
+            assert false : ("Invalid VFullPath_Delegate property index " + propertyIdx);
+            return t -> {};
         }
 
         @NonNull
@@ -598,8 +598,8 @@ public class VectorDrawable_Delegate {
                     return this::setFillColor;
             }
 
-            throw new IllegalArgumentException("Invalid VFullPath_Delegate property index "
-                    + propertyIdx);
+            assert false : ("Invalid VFullPath_Delegate property index " + propertyIdx);
+            return t -> {};
         }
 
         /////////////////////////////////////////////////////
@@ -827,8 +827,8 @@ public class VectorDrawable_Delegate {
                     return this::setTranslateY;
             }
 
-            throw new IllegalArgumentException("Invalid VGroup_Delegate property index "
-                    + propertyIdx);
+            assert false : ("Invalid VGroup_Delegate property index " + propertyIdx);
+            return t -> {};
         }
 
         /////////////////////////////////////////////////////
