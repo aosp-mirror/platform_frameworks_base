@@ -39,6 +39,7 @@ import android.security.KeyChain;
 import android.security.KeyChain.KeyChainConnection;
 import android.util.Log;
 
+import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.R;
 
@@ -52,7 +53,7 @@ import java.util.Set;
 
 public class CertificateMonitor {
     protected static final String LOG_TAG = DevicePolicyManagerService.LOG_TAG;
-    protected static final int MONITORING_CERT_NOTIFICATION_ID = R.plurals.ssl_ca_cert_warning;
+    protected static final int MONITORING_CERT_NOTIFICATION_ID = SystemMessage.NOTE_SSL_CERT_INFO;
 
     private final DevicePolicyManagerService mService;
     private final DevicePolicyManagerService.Injector mInjector;

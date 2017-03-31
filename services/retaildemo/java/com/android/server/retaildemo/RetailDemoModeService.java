@@ -61,6 +61,8 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.KeyValueListParser;
 import android.util.Slog;
+
+import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.R;
@@ -621,8 +623,8 @@ public class RetailDemoModeService extends SystemService {
 
         if (!mIsCarrierDemoMode) {
             // Show reset notification (except in carrier demo mode).
-            mInjector.getNotificationManager().notifyAsUser(TAG,
-                    1, mInjector.createResetNotification(), UserHandle.of(userId));
+            mInjector.getNotificationManager().notifyAsUser(TAG, SystemMessage.NOTE_RETAIL_RESET,
+                    mInjector.createResetNotification(), UserHandle.of(userId));
 
             synchronized (mActivityLock) {
                 mUserUntouched = true;

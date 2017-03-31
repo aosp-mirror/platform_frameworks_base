@@ -66,6 +66,7 @@ import android.util.Log;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.telephony.TelephonyIntents;
@@ -618,29 +619,42 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
 
         if (usbTethered) {
             if (wifiTethered || bluetoothTethered) {
-                showTetheredNotification(com.android.internal.R.drawable.stat_sys_tether_general);
+                showTetheredNotification(SystemMessage.NOTE_TETHER_GENERAL);
             } else {
-                showTetheredNotification(com.android.internal.R.drawable.stat_sys_tether_usb);
+                showTetheredNotification(SystemMessage.NOTE_TETHER_USB);
             }
         } else if (wifiTethered) {
             if (bluetoothTethered) {
-                showTetheredNotification(com.android.internal.R.drawable.stat_sys_tether_general);
+                showTetheredNotification(SystemMessage.NOTE_TETHER_GENERAL);
             } else {
                 /* We now have a status bar icon for WifiTethering, so drop the notification */
                 clearTetheredNotification();
             }
         } else if (bluetoothTethered) {
-            showTetheredNotification(com.android.internal.R.drawable.stat_sys_tether_bluetooth);
+            showTetheredNotification(SystemMessage.NOTE_TETHER_BLUETOOTH);
         } else {
             clearTetheredNotification();
         }
     }
 
-    private void showTetheredNotification(int icon) {
+    private void showTetheredNotification(int id) {
         NotificationManager notificationManager =
                 (NotificationManager)mContext.getSystemService(Context.NOTIFICATION_SERVICE);
         if (notificationManager == null) {
             return;
+        }
+        int icon = 0;
+        switch(id) {
+          case SystemMessage.NOTE_TETHER_USB:
+            icon = com.android.internal.R.drawable.stat_sys_tether_usb;
+            break;
+          case SystemMessage.NOTE_TETHER_BLUETOOTH:
+            icon = com.android.internal.R.drawable.stat_sys_tether_bluetooth;
+            break;
+          case SystemMessage.NOTE_TETHER_GENERAL:
+          default:
+            icon = com.android.internal.R.drawable.stat_sys_tether_general;
+            break;
         }
 
         if (mLastNotificationId != 0) {
@@ -678,7 +692,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
                 .setContentTitle(title)
                 .setContentText(message)
                 .setContentIntent(pi);
-        mLastNotificationId = icon;
+        mLastNotificationId = id;
 
         notificationManager.notifyAsUser(null, mLastNotificationId,
                 mTetheredNotificationBuilder.build(), UserHandle.ALL);
