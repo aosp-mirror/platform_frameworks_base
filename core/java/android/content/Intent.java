@@ -3479,6 +3479,261 @@ public class Intent implements Parcelable, Cloneable {
     public static final String ACTION_SIM_STATE_CHANGED = "android.intent.action.SIM_STATE_CHANGED";
 
     /**
+     * Broadcast Action: indicate that the phone service state has changed.
+     * The intent will have the following extra values:</p>
+     * <p>
+     * @see #EXTRA_VOICE_REG_STATE
+     * @see #EXTRA_DATA_REG_STATE
+     * @see #EXTRA_VOICE_ROAMING_TYPE
+     * @see #EXTRA_DATA_ROAMING_TYPE
+     * @see #EXTRA_OPERATOR_ALPHA_LONG
+     * @see #EXTRA_OPERATOR_ALPHA_SHORT
+     * @see #EXTRA_OPERATOR_NUMERIC
+     * @see #EXTRA_DATA_OPERATOR_ALPHA_LONG
+     * @see #EXTRA_DATA_OPERATOR_ALPHA_SHORT
+     * @see #EXTRA_DATA_OPERATOR_NUMERIC
+     * @see #EXTRA_MANUAL
+     * @see #EXTRA_VOICE_RADIO_TECH
+     * @see #EXTRA_DATA_RADIO_TECH
+     * @see #EXTRA_CSS_INDICATOR
+     * @see #EXTRA_NETWORK_ID
+     * @see #EXTRA_SYSTEM_ID
+     * @see #EXTRA_CDMA_ROAMING_INDICATOR
+     * @see #EXTRA_CDMA_DEFAULT_ROAMING_INDICATOR
+     * @see #EXTRA_EMERGENCY_ONLY
+     * @see #EXTRA_IS_DATA_ROAMING_FROM_REGISTRATION
+     * @see #EXTRA_IS_USING_CARRIER_AGGREGATION
+     * @see #EXTRA_LTE_EARFCN_RSRP_BOOST
+     *
+     * <p class="note">
+     * Requires the READ_PHONE_STATE permission.
+     *
+     * <p class="note">This is a protected intent that can only be sent by the system.
+     * @hide
+     */
+    @Deprecated
+    @SystemApi
+    @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_SERVICE_STATE = "android.intent.action.SERVICE_STATE";
+
+    /**
+     * An int extra used with {@link #ACTION_SERVICE_STATE} which indicates voice registration
+     * state.
+     * @see android.telephony.ServiceState#STATE_EMERGENCY_ONLY
+     * @see android.telephony.ServiceState#STATE_IN_SERVICE
+     * @see android.telephony.ServiceState#STATE_OUT_OF_SERVICE
+     * @see android.telephony.ServiceState#STATE_POWER_OFF
+     * @hide
+     */
+    @Deprecated
+    @SystemApi
+    public static final String EXTRA_VOICE_REG_STATE = "voiceRegState";
+
+    /**
+     * An int extra used with {@link #ACTION_SERVICE_STATE} which indicates data registration state.
+     * @see android.telephony.ServiceState#STATE_EMERGENCY_ONLY
+     * @see android.telephony.ServiceState#STATE_IN_SERVICE
+     * @see android.telephony.ServiceState#STATE_OUT_OF_SERVICE
+     * @see android.telephony.ServiceState#STATE_POWER_OFF
+     * @hide
+     */
+    @Deprecated
+    @SystemApi
+    public static final String EXTRA_DATA_REG_STATE = "dataRegState";
+
+    /**
+     * An integer extra used with {@link #ACTION_SERVICE_STATE} which indicates the voice roaming
+     * type.
+     * @hide
+     */
+    @Deprecated
+    @SystemApi
+    public static final String EXTRA_VOICE_ROAMING_TYPE = "voiceRoamingType";
+
+    /**
+     * An integer extra used with {@link #ACTION_SERVICE_STATE} which indicates the data roaming
+     * type.
+     * @hide
+     */
+    @Deprecated
+    @SystemApi
+    public static final String EXTRA_DATA_ROAMING_TYPE = "dataRoamingType";
+
+    /**
+     * A string extra used with {@link #ACTION_SERVICE_STATE} which represents the current
+     * registered voice operator name in long alphanumeric format.
+     * {@code null} if the operator name is not known or unregistered.
+     * @hide
+     */
+    @Deprecated
+    @SystemApi
+    public static final String EXTRA_OPERATOR_ALPHA_LONG = "operator-alpha-long";
+
+    /**
+     * A string extra used with {@link #ACTION_SERVICE_STATE} which represents the current
+     * registered voice operator name in short alphanumeric format.
+     * {@code null} if the operator name is not known or unregistered.
+     * @hide
+     */
+    @Deprecated
+    @SystemApi
+    public static final String EXTRA_OPERATOR_ALPHA_SHORT = "operator-alpha-short";
+
+    /**
+     * A string extra used with {@link #ACTION_SERVICE_STATE} containing the MCC
+     * (Mobile Country Code, 3 digits) and MNC (Mobile Network code, 2-3 digits) for the mobile
+     * network.
+     * @hide
+     */
+    @Deprecated
+    @SystemApi
+    public static final String EXTRA_OPERATOR_NUMERIC = "operator-numeric";
+
+    /**
+     * A string extra used with {@link #ACTION_SERVICE_STATE} which represents the current
+     * registered data operator name in long alphanumeric format.
+     * {@code null} if the operator name is not known or unregistered.
+     * @hide
+     */
+    @Deprecated
+    @SystemApi
+    public static final String EXTRA_DATA_OPERATOR_ALPHA_LONG = "data-operator-alpha-long";
+
+    /**
+     * A string extra used with {@link #ACTION_SERVICE_STATE} which represents the current
+     * registered data operator name in short alphanumeric format.
+     * {@code null} if the operator name is not known or unregistered.
+     * @hide
+     */
+    @Deprecated
+    @SystemApi
+    public static final String EXTRA_DATA_OPERATOR_ALPHA_SHORT = "data-operator-alpha-short";
+
+    /**
+     * A string extra used with {@link #ACTION_SERVICE_STATE} containing the MCC
+     * (Mobile Country Code, 3 digits) and MNC (Mobile Network code, 2-3 digits) for the
+     * data operator.
+     * @hide
+     */
+    @Deprecated
+    @SystemApi
+    public static final String EXTRA_DATA_OPERATOR_NUMERIC = "data-operator-numeric";
+
+    /**
+     * A boolean extra used with {@link #ACTION_SERVICE_STATE} which indicates whether the current
+     * network selection mode is manual.
+     * Will be {@code true} if manual mode, {@code false} if automatic mode.
+     * @hide
+     */
+    @Deprecated
+    @SystemApi
+    public static final String EXTRA_MANUAL = "manual";
+
+    /**
+     * An integer extra used with {@link #ACTION_SERVICE_STATE} which represents the current voice
+     * radio technology.
+     * @hide
+     */
+    @Deprecated
+    @SystemApi
+    public static final String EXTRA_VOICE_RADIO_TECH = "radioTechnology";
+
+    /**
+     * An integer extra used with {@link #ACTION_SERVICE_STATE} which represents the current data
+     * radio technology.
+     * @hide
+     */
+    @Deprecated
+    @SystemApi
+    public static final String EXTRA_DATA_RADIO_TECH = "dataRadioTechnology";
+
+    /**
+     * A boolean extra used with {@link #ACTION_SERVICE_STATE} which represents concurrent service
+     * support on CDMA network.
+     * Will be {@code true} if support, {@code false} otherwise.
+     * @hide
+     */
+    @Deprecated
+    @SystemApi
+    public static final String EXTRA_CSS_INDICATOR = "cssIndicator";
+
+    /**
+     * An integer extra used with {@link #ACTION_SERVICE_STATE} which represents the CDMA network
+     * id. {@code Integer.MAX_VALUE} if unknown.
+     * @hide
+     */
+    @Deprecated
+    @SystemApi
+    public static final String EXTRA_NETWORK_ID = "networkId";
+
+    /**
+     * An integer extra used with {@link #ACTION_SERVICE_STATE} which represents the CDMA system id.
+     * {@code Integer.MAX_VALUE} if unknown.
+     * @hide
+     */
+    @Deprecated
+    @SystemApi
+    public static final String EXTRA_SYSTEM_ID = "systemId";
+
+    /**
+     * An integer extra used with {@link #ACTION_SERVICE_STATE} represents the TSB-58 roaming
+     * indicator if registered on a CDMA or EVDO system or {@code -1} if not.
+     * @hide
+     */
+    @Deprecated
+    @SystemApi
+    public static final String EXTRA_CDMA_ROAMING_INDICATOR = "cdmaRoamingIndicator";
+
+    /**
+     * An integer extra used with {@link #ACTION_SERVICE_STATE} represents the default roaming
+     * indicator from the PRL if registered on a CDMA or EVDO system {@code -1} if not.
+     * @hide
+     */
+    @Deprecated
+    @SystemApi
+    public static final String EXTRA_CDMA_DEFAULT_ROAMING_INDICATOR = "cdmaDefaultRoamingIndicator";
+
+    /**
+     * A boolean extra used with {@link #ACTION_SERVICE_STATE} which indicates if under emergency
+     * only mode.
+     * {@code true} if in emergency only mode, {@code false} otherwise.
+     * @hide
+     */
+    @Deprecated
+    @SystemApi
+    public static final String EXTRA_EMERGENCY_ONLY = "emergencyOnly";
+
+    /**
+     * A boolean extra used with {@link #ACTION_SERVICE_STATE} which indicates whether data network
+     * registration state is roaming.
+     * {@code true} if registration indicates roaming, {@code false} otherwise
+     * @hide
+     */
+    @Deprecated
+    @SystemApi
+    public static final String EXTRA_IS_DATA_ROAMING_FROM_REGISTRATION =
+            "isDataRoamingFromRegistration";
+
+    /**
+     * A boolean extra used with {@link #ACTION_SERVICE_STATE} which indicates if carrier
+     * aggregation is in use.
+     * {@code true} if carrier aggregation is in use, {@code false} otherwise.
+     * @hide
+     */
+    @Deprecated
+    @SystemApi
+    public static final String EXTRA_IS_USING_CARRIER_AGGREGATION = "isUsingCarrierAggregation";
+
+    /**
+     * An integer extra used with {@link #ACTION_SERVICE_STATE} representing the offset which
+     * is reduced from the rsrp threshold while calculating signal strength level.
+     * @hide
+     */
+    @Deprecated
+    @SystemApi
+    public static final String EXTRA_LTE_EARFCN_RSRP_BOOST = "LteEarfcnRsrpBoost";
+
+    /**
      * The name of the extra used to define the text to be processed, as a
      * CharSequence. Note that this may be a styled CharSequence, so you must use
      * {@link Bundle#getCharSequence(String) Bundle.getCharSequence()} to retrieve it.
