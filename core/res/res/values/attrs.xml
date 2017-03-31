@@ -3214,18 +3214,7 @@
              and subtype in order to provide the consistent user experience in switching
              between IMEs and subtypes. -->
         <attr name="supportsSwitchingToNextInputMethod" format="boolean" />
-        <!-- Set to true if this input method supports ways to dismiss the windows assigned to
-             the input method (for example, a dismiss button rendered by the input method itself).  The
-             System UI may optimize the UI by not showing system-level dismiss button if this
-             value is true.
-             <p> Must be a boolean value, either "true" or "false". The default value is "false".
-             <p> This may also be a reference to a resource (in the form "@[package:]type:name")
-             or theme attribute (in the form "?[package:]type:name") containing a value of this
-             type.
-             <p> A UI element that dismisses the input method window should report
-             {@link android.view.accessibility.AccessibilityNodeInfo#ACTION_DISMISS} action, so
-             that accessibility services can handle it accordingly. -->
-        <attr name="supportsDismissingWindow" format="boolean" />
+        <attr name="__removed2" format="boolean" />
     </declare-styleable>
 
     <!-- This is the subtype of InputMethod. Subtype can describe locales (for example, en_US and

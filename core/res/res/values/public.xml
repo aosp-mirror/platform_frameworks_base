@@ -2785,7 +2785,7 @@
         <public name="focusedByDefault" />
         <public name="appCategory" />
         <public name="autoSizeMaxTextSize" />
-        <public name="supportsDismissingWindow" />
+        <public name="__removed2" />
         <public name="restartOnConfigChanges" />
         <public name="certDigest" />
         <public name="splitName" />

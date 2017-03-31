@@ -51,12 +51,10 @@ public class InputMethodInfoTest {
         final InputMethodInfo imi = buildInputMethodForTest(R.xml.ime_meta);
 
         assertThat(imi.supportsSwitchingToNextInputMethod(), is(false));
-        assertThat(imi.supportsDismissingWindow(), is(false));
 
         final InputMethodInfo clone = cloneViaParcel(imi);
 
         assertThat(clone.supportsSwitchingToNextInputMethod(), is(false));
-        assertThat(clone.supportsDismissingWindow(), is(false));
     }
 
     @Test
@@ -68,17 +66,6 @@ public class InputMethodInfoTest {
         final InputMethodInfo clone = cloneViaParcel(imi);
 
         assertThat(clone.supportsSwitchingToNextInputMethod(), is(true));
-    }
-
-    @Test
-    public void testSupportsDismissingWindow() throws Exception {
-        final InputMethodInfo imi = buildInputMethodForTest(R.xml.ime_meta_dismiss);
-
-        assertThat(imi.supportsDismissingWindow(), is(true));
-
-        final InputMethodInfo clone = cloneViaParcel(imi);
-
-        assertThat(clone.supportsDismissingWindow(), is(true));
     }
 
     private InputMethodInfo buildInputMethodForTest(final @XmlRes int metaDataRes)
