@@ -259,7 +259,8 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
             // to abort dispatching or keep waiting.
             final AppWindowContainerController controller = appWindowToken.getController();
             final boolean abort = controller != null
-                    && controller.keyDispatchingTimedOut(reason, windowState.mSession.mPid);
+                    && controller.keyDispatchingTimedOut(reason,
+                            (windowState != null) ? windowState.mSession.mPid : -1);
             if (!abort) {
                 // The activity manager declined to abort dispatching.
                 // Wait a bit longer and timeout again later.
