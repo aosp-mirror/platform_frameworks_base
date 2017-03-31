@@ -40,6 +40,7 @@ import android.util.Slog;
 import libcore.io.IoUtils;
 
 import com.android.internal.os.IDropBoxManagerService;
+import com.android.internal.util.DumpUtils;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -350,11 +351,7 @@ public final class DropBoxManagerService extends SystemService {
     }
 
     public synchronized void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        if (getContext().checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
-                != PackageManager.PERMISSION_GRANTED) {
-            pw.println("Permission Denial: Can't dump DropBoxManagerService");
-            return;
-        }
+        if (!DumpUtils.checkDumpPermission(getContext(), TAG, pw)) return;
 
         try {
             init();

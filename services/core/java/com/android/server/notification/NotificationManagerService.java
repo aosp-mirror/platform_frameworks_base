@@ -144,6 +144,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.statusbar.NotificationVisibility;
+import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.Preconditions;
 import com.android.server.DeviceIdleController;
@@ -2451,14 +2452,7 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-            if (getContext().checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
-                    != PackageManager.PERMISSION_GRANTED) {
-                pw.println("Permission Denial: can't dump NotificationManager from pid="
-                        + Binder.getCallingPid()
-                        + ", uid=" + Binder.getCallingUid());
-                return;
-            }
-
+            if (!DumpUtils.checkDumpPermission(getContext(), TAG, pw)) return;
             final DumpFilter filter = DumpFilter.parseFromArguments(args);
             if (filter != null && filter.stats) {
                 dumpJson(pw, filter);

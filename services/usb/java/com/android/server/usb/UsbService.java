@@ -40,6 +40,7 @@ import android.os.UserManager;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.server.SystemService;
@@ -480,7 +481,7 @@ public class UsbService extends IUsbManager.Stub {
 
     @Override
     public void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DUMP, TAG);
+        if (!DumpUtils.checkDumpPermission(mContext, TAG, writer)) return;
 
         final IndentingPrintWriter pw = new IndentingPrintWriter(writer, "  ");
         final long ident = Binder.clearCallingIdentity();

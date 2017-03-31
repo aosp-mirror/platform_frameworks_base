@@ -37,6 +37,7 @@ import android.util.Slog;
 
 import com.android.internal.app.ResolverActivity;
 import com.android.internal.os.BackgroundThread;
+import com.android.internal.util.DumpUtils;
 
 import dalvik.system.DexFile;
 import dalvik.system.VMRuntime;
@@ -333,7 +334,7 @@ public final class PinnerService extends SystemService {
     private final class BinderService extends Binder {
         @Override
         protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-            mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DUMP, TAG);
+            if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
             pw.println("Pinned Files:");
             synchronized(this) {
                 for (int i = 0; i < mPinnedFiles.size(); i++) {

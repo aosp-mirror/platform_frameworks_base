@@ -21,6 +21,7 @@ import java.io.PrintWriter;
 import java.util.HashMap;
 
 import com.android.internal.os.BackgroundThread;
+import com.android.internal.util.DumpUtils;
 import com.android.server.location.ComprehensiveCountryDetector;
 
 import android.content.Context;
@@ -208,8 +209,7 @@ public class CountryDetectorService extends ICountryDetector.Stub implements Run
     @SuppressWarnings("unused")
     @Override
     protected void dump(FileDescriptor fd, PrintWriter fout, String[] args) {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DUMP, TAG);
-
+        if (!DumpUtils.checkDumpPermission(mContext, TAG, fout)) return;
         if (!DEBUG) return;
         try {
             final Printer p = new PrintWriterPrinter(fout);

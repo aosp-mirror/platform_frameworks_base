@@ -60,6 +60,7 @@ import android.util.SparseArray;
 import android.util.SparseIntArray;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
@@ -162,9 +163,7 @@ public final class ContentService extends IContentService.Stub {
 
     @Override
     protected synchronized void dump(FileDescriptor fd, PrintWriter pw_, String[] args) {
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.DUMP,
-                "caller doesn't have the DUMP permission");
-
+        if (!DumpUtils.checkDumpPermission(mContext, TAG, pw_)) return;
         final IndentingPrintWriter pw = new IndentingPrintWriter(pw_, "  ");
 
         // This makes it so that future permission checks will be in the context of this

@@ -56,6 +56,7 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.util.DumpUtils;
 import com.android.server.SystemServerInitThreadPool;
 import com.android.server.SystemService;
 
@@ -1071,13 +1072,7 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
 
         @Override // Binder call
         protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-            if (mContext.checkCallingOrSelfPermission(Manifest.permission.DUMP)
-                    != PackageManager.PERMISSION_GRANTED) {
-                pw.println("Permission Denial: can't dump Fingerprint from from pid="
-                        + Binder.getCallingPid()
-                        + ", uid=" + Binder.getCallingUid());
-                return;
-            }
+            if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
 
             final long ident = Binder.clearCallingIdentity();
             try {

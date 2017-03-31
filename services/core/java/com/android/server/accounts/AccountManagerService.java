@@ -92,6 +92,7 @@ import com.android.internal.content.PackageMonitor;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
@@ -4867,13 +4868,7 @@ public class AccountManagerService
 
     @Override
     protected void dump(FileDescriptor fd, PrintWriter fout, String[] args) {
-        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
-                != PackageManager.PERMISSION_GRANTED) {
-            fout.println("Permission Denial: can't dump AccountsManager from from pid="
-                    + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid()
-                    + " without permission " + android.Manifest.permission.DUMP);
-            return;
-        }
+        if (!DumpUtils.checkDumpPermission(mContext, TAG, fout)) return;
         final boolean isCheckinRequest = scanArgs(args, "--checkin") || scanArgs(args, "-c");
         final IndentingPrintWriter ipw = new IndentingPrintWriter(fout, "  ");
 

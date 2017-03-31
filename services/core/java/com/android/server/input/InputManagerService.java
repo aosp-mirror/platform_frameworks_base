@@ -27,6 +27,7 @@ import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.R;
+import com.android.internal.util.DumpUtils;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
 import com.android.server.DisplayThread;
@@ -1747,13 +1748,7 @@ public class InputManagerService extends IInputManager.Stub
 
     @Override
     public void dump(FileDescriptor fd, final PrintWriter pw, String[] args) {
-        if (mContext.checkCallingOrSelfPermission(Manifest.permission.DUMP)
-                != PackageManager.PERMISSION_GRANTED) {
-            pw.println("Permission Denial: can't dump InputManager from from pid="
-                    + Binder.getCallingPid()
-                    + ", uid=" + Binder.getCallingUid());
-            return;
-        }
+        if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
 
         pw.println("INPUT MANAGER (dumpsys input)\n");
         String dumpStr = nativeDump(mPtr);

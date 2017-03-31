@@ -60,6 +60,7 @@ import com.android.internal.telephony.IPhoneStateListener;
 import com.android.internal.telephony.PhoneConstantConversions;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.TelephonyIntents;
+import com.android.internal.util.DumpUtils;
 import com.android.server.am.BatteryStatsService;
 
 /**
@@ -1391,12 +1392,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
-                != PackageManager.PERMISSION_GRANTED) {
-            pw.println("Permission Denial: can't dump telephony.registry from from pid="
-                    + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid());
-            return;
-        }
+        if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
         synchronized (mRecords) {
             final int recordCount = mRecords.size();
             pw.println("last known state:");

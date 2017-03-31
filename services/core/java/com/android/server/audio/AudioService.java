@@ -114,6 +114,7 @@ import android.util.SparseIntArray;
 import android.view.KeyEvent;
 import android.view.accessibility.AccessibilityManager;
 
+import com.android.internal.util.DumpUtils;
 import com.android.internal.util.XmlUtils;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
@@ -6116,7 +6117,7 @@ public class AudioService extends IAudioService.Stub
 
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DUMP, TAG);
+        if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
 
         mMediaFocusControl.dump(pw);
         dumpStreamStates(pw);

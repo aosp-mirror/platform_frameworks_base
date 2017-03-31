@@ -16,6 +16,7 @@
 
 package com.android.server.media;
 
+import com.android.internal.util.DumpUtils;
 import com.android.server.Watchdog;
 
 import android.Manifest;
@@ -258,13 +259,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
     // Binder call
     @Override
     public void dump(FileDescriptor fd, final PrintWriter pw, String[] args) {
-        if (mContext.checkCallingOrSelfPermission(Manifest.permission.DUMP)
-                != PackageManager.PERMISSION_GRANTED) {
-            pw.println("Permission Denial: can't dump MediaRouterService from from pid="
-                    + Binder.getCallingPid()
-                    + ", uid=" + Binder.getCallingUid());
-            return;
-        }
+        if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
 
         pw.println("MEDIA ROUTER SERVICE (dumpsys media_router)");
         pw.println();

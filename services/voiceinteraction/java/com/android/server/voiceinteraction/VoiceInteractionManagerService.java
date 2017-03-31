@@ -62,6 +62,7 @@ import com.android.internal.app.IVoiceInteractionSessionShowCallback;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.BackgroundThread;
+import com.android.internal.util.DumpUtils;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.UiThread;
@@ -1117,13 +1118,7 @@ public class VoiceInteractionManagerService extends SystemService {
 
         @Override
         public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-            if (mContext.checkCallingOrSelfPermission(Manifest.permission.DUMP)
-                    != PackageManager.PERMISSION_GRANTED) {
-                pw.println("Permission Denial: can't dump voiceinteraction from from pid="
-                        + Binder.getCallingPid()
-                        + ", uid=" + Binder.getCallingUid());
-                return;
-            }
+            if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
             synchronized (this) {
                 pw.println("VOICE INTERACTION MANAGER (dumpsys voiceinteraction)");
                 pw.println("  mEnableService: " + mEnableService);

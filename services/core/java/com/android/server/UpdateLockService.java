@@ -29,6 +29,8 @@ import android.os.UpdateLock;
 import android.os.UserHandle;
 import android.util.Slog;
 
+import com.android.internal.util.DumpUtils;
+
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
@@ -112,14 +114,7 @@ public class UpdateLockService extends IUpdateLock.Stub {
 
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
-                != PackageManager.PERMISSION_GRANTED) {
-            pw.println("Permission Denial: can't dump update lock service from from pid="
-                    + Binder.getCallingPid()
-                    + ", uid=" + Binder.getCallingUid());
-            return;
-        }
-
+        if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
         mLocks.dump(pw);
     }
 }

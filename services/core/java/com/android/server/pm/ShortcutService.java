@@ -96,6 +96,7 @@ import android.view.IWindowManager;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.BackgroundThread;
+import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
@@ -3447,8 +3448,7 @@ public class ShortcutService extends IShortcutService.Stub {
 
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        enforceCallingOrSelfPermission(android.Manifest.permission.DUMP,
-                "can't dump by this caller");
+        if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
         boolean checkin = false;
         boolean clear = false;
         if (args != null) {

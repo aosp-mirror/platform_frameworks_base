@@ -20,6 +20,7 @@ import android.app.NotificationChannel;
 
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
+import com.android.internal.util.DumpUtils;
 import com.android.server.EventLogTags;
 import com.android.server.SystemService;
 import com.android.server.pm.InstructionSets;
@@ -467,15 +468,7 @@ public class DeviceStorageMonitorService extends SystemService {
     private final Binder mRemoteService = new Binder() {
         @Override
         protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-            if (getContext().checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
-                    != PackageManager.PERMISSION_GRANTED) {
-
-                pw.println("Permission Denial: can't dump " + SERVICE + " from from pid="
-                        + Binder.getCallingPid()
-                        + ", uid=" + Binder.getCallingUid());
-                return;
-            }
-
+            if (!DumpUtils.checkDumpPermission(getContext(), TAG, pw)) return;
             dumpImpl(fd, pw, args);
         }
 

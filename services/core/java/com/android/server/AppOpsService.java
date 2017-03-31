@@ -70,6 +70,7 @@ import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.IAppOpsCallback;
 import com.android.internal.os.Zygote;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
@@ -2028,13 +2029,7 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
-                != PackageManager.PERMISSION_GRANTED) {
-            pw.println("Permission Denial: can't dump ApOps service from from pid="
-                    + Binder.getCallingPid()
-                    + ", uid=" + Binder.getCallingUid());
-            return;
-        }
+        if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
 
         if (args != null) {
             for (int i=0; i<args.length; i++) {

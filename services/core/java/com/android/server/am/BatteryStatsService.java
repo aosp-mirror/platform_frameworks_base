@@ -59,6 +59,7 @@ import com.android.internal.app.IBatteryStats;
 import com.android.internal.os.BatteryStatsHelper;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.internal.os.PowerProfile;
+import com.android.internal.util.DumpUtils;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
 import com.android.server.power.BatterySaverPolicy.ServiceType;
@@ -1188,13 +1189,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
-                != PackageManager.PERMISSION_GRANTED) {
-            pw.println("Permission Denial: can't dump BatteryStats from from pid="
-                    + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid()
-                    + " without permission " + android.Manifest.permission.DUMP);
-            return;
-        }
+        if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
 
         int flags = 0;
         boolean useCheckinFormat = false;

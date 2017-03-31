@@ -33,6 +33,7 @@ import android.webkit.IWebViewUpdateService;
 import android.webkit.WebViewProviderInfo;
 import android.webkit.WebViewProviderResponse;
 
+import com.android.internal.util.DumpUtils;
 import com.android.server.SystemService;
 
 import java.io.FileDescriptor;
@@ -293,14 +294,7 @@ public class WebViewUpdateService extends SystemService {
 
         @Override
         protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-            if (getContext().checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
-                    != PackageManager.PERMISSION_GRANTED) {
-
-                pw.println("Permission Denial: can't dump webviewupdate service from pid="
-                        + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid());
-                return;
-            }
-
+            if (!DumpUtils.checkDumpPermission(getContext(), TAG, pw)) return;
             WebViewUpdateService.this.mImpl.dumpState(pw);
         }
     }

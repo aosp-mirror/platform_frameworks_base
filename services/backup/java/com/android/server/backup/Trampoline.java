@@ -35,6 +35,8 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.util.Slog;
 
+import com.android.internal.util.DumpUtils;
+
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.IOException;
@@ -372,7 +374,7 @@ public class Trampoline extends IBackupManager.Stub {
 
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DUMP, TAG);
+        if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
 
         BackupManagerService svc = mService;
         if (svc != null) {

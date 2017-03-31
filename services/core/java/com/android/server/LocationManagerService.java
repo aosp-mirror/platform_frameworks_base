@@ -26,6 +26,7 @@ import com.android.internal.location.ProviderProperties;
 import com.android.internal.location.ProviderRequest;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.DumpUtils;
 import com.android.server.location.ActivityRecognitionProxy;
 import com.android.server.location.FlpHardwareProvider;
 import com.android.server.location.FusedProxy;
@@ -3026,13 +3027,7 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
-                != PackageManager.PERMISSION_GRANTED) {
-            pw.println("Permission Denial: can't dump LocationManagerService from from pid="
-                    + Binder.getCallingPid()
-                    + ", uid=" + Binder.getCallingUid());
-            return;
-        }
+        if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
 
         synchronized (mLock) {
             pw.println("Current Location Manager state:");

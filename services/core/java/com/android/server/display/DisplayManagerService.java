@@ -23,6 +23,7 @@ import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_SECUR
 import static android.hardware.display.DisplayManager
         .VIRTUAL_DISPLAY_FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD;
 
+import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
 
 import android.Manifest;
@@ -1538,13 +1539,7 @@ public final class DisplayManagerService extends SystemService {
 
         @Override // Binder call
         public void dump(FileDescriptor fd, final PrintWriter pw, String[] args) {
-            if (mContext == null
-                    || mContext.checkCallingOrSelfPermission(Manifest.permission.DUMP)
-                            != PackageManager.PERMISSION_GRANTED) {
-                pw.println("Permission Denial: can't dump DisplayManager from from pid="
-                        + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid());
-                return;
-            }
+            if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
 
             final long token = Binder.clearCallingIdentity();
             try {

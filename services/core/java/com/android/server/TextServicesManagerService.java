@@ -25,6 +25,7 @@ import com.android.internal.textservice.ISpellCheckerSession;
 import com.android.internal.textservice.ISpellCheckerSessionListener;
 import com.android.internal.textservice.ITextServicesManager;
 import com.android.internal.textservice.ITextServicesSessionListener;
+import com.android.internal.util.DumpUtils;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -757,14 +758,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
 
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
-                != PackageManager.PERMISSION_GRANTED) {
-
-            pw.println("Permission Denial: can't dump TextServicesManagerService from from pid="
-                    + Binder.getCallingPid()
-                    + ", uid=" + Binder.getCallingUid());
-            return;
-        }
+        if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
 
         synchronized(mSpellCheckerMap) {
             pw.println("Current Text Services Manager state:");

@@ -122,6 +122,7 @@ import android.util.proto.ProtoOutputStream;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.net.VpnInfo;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FileRotator;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.EventLogTags;
@@ -1234,7 +1235,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
     @Override
     protected void dump(FileDescriptor fd, PrintWriter rawWriter, String[] args) {
-        mContext.enforceCallingOrSelfPermission(DUMP, TAG);
+        if (!DumpUtils.checkDumpPermission(mContext, TAG, rawWriter)) return;
 
         long duration = DateUtils.DAY_IN_MILLIS;
         final HashSet<String> argSet = new HashSet<String>();

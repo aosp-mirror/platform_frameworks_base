@@ -79,6 +79,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.DumpUtils;
 import com.android.internal.widget.ICheckCredentialProgressCallback;
 import com.android.internal.widget.ILockSettings;
 import com.android.internal.widget.LockPatternUtils;
@@ -2178,14 +2179,7 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args){
-        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
-                != PackageManager.PERMISSION_GRANTED) {
-
-            pw.println("Permission Denial: can't dump LockSettingsService from from pid="
-                    + Binder.getCallingPid()
-                    + ", uid=" + Binder.getCallingUid());
-            return;
-        }
+        if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
 
         synchronized (this) {
             pw.println("Current lock settings service state:");

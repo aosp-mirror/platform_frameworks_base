@@ -59,6 +59,7 @@ import android.util.SparseBooleanArray;
 import android.view.KeyEvent;
 import android.view.Surface;
 
+import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.SystemService;
 
@@ -549,12 +550,7 @@ class TvInputHardwareManager implements TvInputHal.Callback {
 
     public void dump(FileDescriptor fd, final PrintWriter writer, String[] args) {
         final IndentingPrintWriter pw = new IndentingPrintWriter(writer, "  ");
-        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
-                != PackageManager.PERMISSION_GRANTED) {
-            pw.println("Permission Denial: can't dump TvInputHardwareManager from pid="
-                    + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid());
-            return;
-        }
+        if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
 
         synchronized (mLock) {
             pw.println("TvInputHardwareManager Info:");

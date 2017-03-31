@@ -77,6 +77,7 @@ import android.view.Surface;
 
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.SomeArgs;
+import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.IoThread;
 import com.android.server.SystemService;
@@ -1912,12 +1913,7 @@ public final class TvInputManagerService extends SystemService {
         @SuppressWarnings("resource")
         protected void dump(FileDescriptor fd, final PrintWriter writer, String[] args) {
             final IndentingPrintWriter pw = new IndentingPrintWriter(writer, "  ");
-            if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
-                    != PackageManager.PERMISSION_GRANTED) {
-                pw.println("Permission Denial: can't dump TvInputManager from pid="
-                        + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid());
-                return;
-            }
+            if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
 
             synchronized (mLock) {
                 pw.println("User Ids (Current user: " + mCurrentUserId + "):");

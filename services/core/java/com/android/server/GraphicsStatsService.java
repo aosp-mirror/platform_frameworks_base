@@ -37,6 +37,8 @@ import android.util.Log;
 import android.view.IGraphicsStats;
 import android.view.IGraphicsStatsCallback;
 
+import com.android.internal.util.DumpUtils;
+
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.IOException;
@@ -345,7 +347,7 @@ public class GraphicsStatsService extends IGraphicsStats.Stub {
 
     @Override
     protected void dump(FileDescriptor fd, PrintWriter fout, String[] args) {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DUMP, TAG);
+        if (!DumpUtils.checkDumpPermission(mContext, TAG, fout)) return;
         boolean dumpProto = false;
         for (String str : args) {
             if ("--proto".equals(str)) {
