@@ -23,6 +23,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doAnswer;
 
+import android.content.pm.ActivityInfo;
 import android.os.PowerSaveState;
 import org.mockito.invocation.InvocationOnMock;
 
@@ -449,9 +450,8 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public boolean rotationHasCompatibleMetricsLw(int orientation,
-            int rotation) {
-        return false;
+    public boolean rotationHasCompatibleMetricsLw(int orientation, int rotation) {
+        return true;
     }
 
     @Override
