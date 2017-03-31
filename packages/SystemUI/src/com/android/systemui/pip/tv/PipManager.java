@@ -35,11 +35,9 @@ import android.os.Debug;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.SystemProperties;
-import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
-import android.view.Display;
 import android.view.IPinnedStackController;
 import android.view.IPinnedStackListener;
 import android.view.IWindowManager;
@@ -281,7 +279,7 @@ public class PipManager implements BasePipManager {
     /**
      * Shows the picture-in-picture menu if an activity is in picture-in-picture mode.
      */
-    public void showTvPictureInPictureMenu() {
+    public void showPictureInPictureMenu() {
         if (mState == STATE_PIP_OVERLAY) {
             resizePinnedStack(STATE_PIP_MENU);
         }
@@ -721,7 +719,7 @@ public class PipManager implements BasePipManager {
     }
 
     private void updatePipVisibility(final boolean visible) {
-        SystemServicesProxy.getInstance(mContext).setTvPipVisibility(visible);
+        SystemServicesProxy.getInstance(mContext).setPipVisibility(visible);
     }
 
     @Override

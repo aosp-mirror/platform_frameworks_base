@@ -188,6 +188,14 @@ public class PipTouchHandler implements TunerService.Tunable {
         mTouchState.setAllowTouches(enabled);
     }
 
+    public void showPictureInPictureMenu() {
+        // Only show the menu if the user isn't currently interacting with the PiP
+        if (!mTouchState.isUserInteracting()) {
+            mMenuController.showMenu(mMotionHelper.getBounds(), mMovementBounds,
+                    false /* allowMenuTimeout */);
+        }
+    }
+
     public void onActivityPinned() {
         // Reset some states once we are pinned
         if (mIsMenuVisible) {
@@ -197,6 +205,11 @@ public class PipTouchHandler implements TunerService.Tunable {
             setMinimizedStateInternal(false);
         }
         mDismissViewController.destroyDismissTarget();
+    }
+
+    public void onPinnedStackAnimationEnded() {
+        // Always synchronize the motion helper bounds once PiP animations finish
+        mMotionHelper.synchronizePinnedStackBounds();
     }
 
     @Override

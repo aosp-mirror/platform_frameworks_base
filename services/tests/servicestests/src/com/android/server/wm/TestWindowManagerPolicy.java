@@ -625,7 +625,7 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public void setTvPipVisibilityLw(boolean visible) {
+    public void setPipVisibilityLw(boolean visible) {
 
     }
 
