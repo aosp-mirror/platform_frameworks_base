@@ -23,7 +23,11 @@
     <string name="bugreport_updating_title" msgid="4423539949559634214">"Details toevoegen aan het bugrapport"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"Even geduld…"</string>
     <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"Het bugrapport wordt over enkele ogenblikken op de telefoon weergegeven"</string>
+    <!-- no translation found for bugreport_finished_text (5758325479058638893) -->
+    <skip />
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"Tik om je bugrapport te delen"</string>
+    <!-- no translation found for bugreport_finished_pending_screenshot_text (2343263822812016950) -->
+    <skip />
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"Tik om je bugrapport te delen zonder screenshot of wacht tot het screenshot is voltooid"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"Tik om je bugrapport te delen zonder screenshot of wacht tot het screenshot is voltooid"</string>
     <string name="bugreport_confirm" msgid="5917407234515812495">"Bugrapporten bevatten gegevens uit de verschillende logbestanden van het systeem, die gegevens kunnen bevatten die je als gevoelig beschouwt (zoals gegevens met betrekking tot app-gebruik en locatie). Deel bugrapporten alleen met mensen en apps die je vertrouwt."</string>

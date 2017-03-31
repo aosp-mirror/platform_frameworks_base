@@ -23,7 +23,11 @@
     <string name="bugreport_updating_title" msgid="4423539949559634214">"Lägger till information i felrapporten"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"Vänta …"</string>
     <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"Felrapporten visas på mobilen inom kort"</string>
+    <!-- no translation found for bugreport_finished_text (5758325479058638893) -->
+    <skip />
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"Tryck om du vill dela felrapporten"</string>
+    <!-- no translation found for bugreport_finished_pending_screenshot_text (2343263822812016950) -->
+    <skip />
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"Tryck om du vill dela felrapporten utan en skärmdump eller vänta tills skärmdumpen är klar"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"Tryck om du vill dela felrapporten utan en skärmdump eller vänta tills skärmdumpen är klar"</string>
     <string name="bugreport_confirm" msgid="5917407234515812495">"Felrapporter innehåller data från systemets olika loggfiler, vilka kan innehålla data som är känslig för dig (som appanvändning och platsdata). Dela bara felrapporter med personer du litar på."</string>

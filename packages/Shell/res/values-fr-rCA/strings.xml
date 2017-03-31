@@ -23,7 +23,11 @@
     <string name="bugreport_updating_title" msgid="4423539949559634214">"Ajout de détails au rapport de bogue"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"Veuillez patienter…"</string>
     <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"Le rapport de bogue s\'affichera bientôt sur le téléphone"</string>
+    <!-- no translation found for bugreport_finished_text (5758325479058638893) -->
+    <skip />
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"Touchez ici pour partager votre rapport de bogue"</string>
+    <!-- no translation found for bugreport_finished_pending_screenshot_text (2343263822812016950) -->
+    <skip />
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"Touchez pour partager le rapport de bogue sans saisie d\'écran ou attendez que la saisie soit prête"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"Touchez pour partager le rapport de bogue sans saisie d\'écran ou attendez que la saisie soit prête"</string>
     <string name="bugreport_confirm" msgid="5917407234515812495">"Les rapports de bogue contiennent des données des fichiers journaux du système, y compris des données que vous considérez comme sensibles (comme des renseignements sur l\'utilisation des applications et des données de localisation). Ne partagez les rapports de bogue qu\'avec les applications et les personnes en qui vous avez confiance."</string>
