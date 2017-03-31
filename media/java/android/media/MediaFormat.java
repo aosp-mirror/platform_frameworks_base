@@ -767,6 +767,29 @@ public final class MediaFormat {
      */
     public static final String KEY_TRACK_ID = "track-id";
 
+    /**
+     * A key describing the system id of the conditional access system used to scramble
+     * a media track.
+     * <p>
+     * This key is set by {@link MediaExtractor} if the track is scrambled with a conditional
+     * access system.
+     * <p>
+     * The associated value is an integer.
+     * @hide
+     */
+    public static final String KEY_CA_SYSTEM_ID = "ca-system-id";
+
+    /**
+     * A key describing the {@link MediaCas.Session} object associated with a media track.
+     * <p>
+     * This key is set by {@link MediaExtractor} if the track is scrambled with a conditional
+     * access system.
+     * <p>
+     * The associated value is a ByteBuffer.
+     * @hide
+     */
+    public static final String KEY_CA_SESSION_ID = "ca-session-id";
+
     /* package private */ MediaFormat(Map<String, Object> map) {
         mMap = map;
     }
