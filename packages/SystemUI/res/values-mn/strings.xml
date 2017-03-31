@@ -73,7 +73,8 @@
     <string name="screenshot_failed_title" msgid="705781116746922771">"Дэлгэцийн агшинг авч чадсангүй."</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"Дэлгэцийн агшинг хадгалахад алдаа гарлаа."</string>
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"Хадгалах сангийн багтаамж бага байгаа тул дэлгэцийн авсан зургийг хадгалах боломжгүй байна."</string>
-    <string name="screenshot_failed_to_capture_text" msgid="7602391003979898374">"Дэлгэцийн зураг авахыг апп эсвэл танай байгууллагаас зөвшөөрөөгүй байна."</string>
+    <!-- no translation found for screenshot_failed_to_capture_text (173674476457581486) -->
+    <skip />
     <string name="usb_preference_title" msgid="6551050377388882787">"USB файл шилжүүлэх сонголт"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Медиа тоглуулагч(MTP) болгон залгах"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Камер болгон(PTP) залгах"</string>
@@ -88,7 +89,8 @@
     <string name="accessibility_phone_button" msgid="6738112589538563574">"Утас"</string>
     <string name="accessibility_voice_assist_button" msgid="487611083884852965">"Дуут туслах"</string>
     <string name="accessibility_unlock_button" msgid="128158454631118828">"Тайлах"</string>
-    <string name="accessibility_unlock_button_fingerprint" msgid="8214125623493923751">"Toвчлуурыг онгойлгоно уу. Хурууны хээг хүлээж байна"</string>
+    <!-- no translation found for accessibility_waiting_for_fingerprint (4808860050517462885) -->
+    <skip />
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"Хурууны хээ ашиглалгүйгээр түгжээг тайлаарай"</string>
     <string name="unlock_label" msgid="8779712358041029439">"тайлах"</string>
     <string name="phone_label" msgid="2320074140205331708">"утас нээх"</string>
@@ -234,8 +236,7 @@
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="650231949881093289">"Өгөгдөл хамгаалагчийг унтраасан."</string>
     <string name="accessibility_quick_settings_data_saver_changed_on" msgid="4218725402373934151">"Өгөгдөл хамгаалагчийг асаасан."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"Дэлгэцийн гэрэлтэлт"</string>
-    <!-- no translation found for accessibility_ambient_display_charging (9084521679384069087) -->
-    <skip />
+    <string name="accessibility_ambient_display_charging" msgid="9084521679384069087">"Цэнэглэж байна"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G-3G дата-г түр зогсоосон байна"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G дата-г түр зогсоосон байна"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"Гар утасны дата-г түр зогсоосон байна"</string>
@@ -275,7 +276,8 @@
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Тодрол"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Автоматаар эргэх"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"Дэлгэцийг автоматаар эргүүлэх"</string>
-    <string name="accessibility_quick_settings_rotation_value" msgid="1428962304214992318">"<xliff:g id="ID_1">%s</xliff:g> гэж тохируулсан"</string>
+    <!-- no translation found for accessibility_quick_settings_rotation_value (8187398200140760213) -->
+    <skip />
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"Эргэлтийг түгжсэн"</string>
     <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"Босоо"</string>
     <string name="quick_settings_rotation_locked_landscape_label" msgid="8553157770061178719">"Хэвтээ"</string>
@@ -333,7 +335,6 @@
     <string name="recents_launch_error_message" msgid="2969287838120550506">"<xliff:g id="APP">%s</xliff:g>-г эхлүүлж чадсангүй."</string>
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g>-г аюулгүй горимд идэвхгүй болгосон."</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Бүгдийг арилгах"</string>
-    <string name="recents_incompatible_app_message" msgid="5075812958564082451">"Апп дэлгэц хуваах тохиргоог дэмждэггүй"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"Хуваагдсан дэлгэцийг ашиглахын тулд энд чирэх"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Хэвтээ чиглэлд хуваах"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Босоо чиглэлд хуваах"</string>
@@ -359,7 +360,7 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Яаралтай биш мэдэгдлүүдийг доор"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Нээхийн тулд дахин товшино уу"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Түгжээг тайлах бол шудрана уу"</string>
-    <string name="do_disclosure_generic" msgid="8498005633306135779">"Энэ төхөөрөмжийг удирдаж байна"</string>
+    <string name="do_disclosure_generic" msgid="5615898451805157556">"Энэ төхөөрөмжийг таны байгууллага удирдаж байна"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"Энэ төхөөрөмжийг <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> удирддаг"</string>
     <string name="phone_hint" msgid="4872890986869209950">"Утсыг гаргахын тулд дүрс тэмдгээс шудрах"</string>
     <string name="voice_hint" msgid="8939888732119726665">"Дуут туслахыг нээхийн тулд дүрс тэмдгээс шудрах"</string>
@@ -412,13 +413,68 @@
     <string name="profile_owned_footer" msgid="8021888108553696069">"Профайлыг хянаж байж болзошгүй"</string>
     <string name="vpn_footer" msgid="2388611096129106812">"Сүлжээ хянагдаж байж болзошгүй"</string>
     <string name="branded_vpn_footer" msgid="2168111859226496230">"Сүлжээг хянаж байж болзошгүй"</string>
+    <!-- no translation found for quick_settings_disclosure_management_monitoring (6645176135063957394) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_management_monitoring (370622174777570853) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_management_named_vpn (1085137869053332307) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_management_named_vpn (6290456493852584017) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_management (3294967280853150271) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_management (1059403025094542908) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_management_vpns (3698767349925266482) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_management_vpns (7777821385318891527) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_managed_profile_monitoring (5125463987558278215) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_managed_profile_monitoring (8973606847896650284) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_monitoring (679658227269205728) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_vpns (8170318392053156330) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_managed_profile_named_vpn (3494535754792751741) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_personal_profile_named_vpn (4467456202486569906) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_vpn (6943724064780847080) -->
+    <skip />
     <string name="monitoring_title_device_owned" msgid="7121079311903859610">"Төхөөрөмжийн хяналт"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"Профайл хяналт"</string>
     <string name="monitoring_title" msgid="169206259253048106">"Сүлжээний хяналт"</string>
     <string name="monitoring_subtitle_vpn" msgid="876537538087857300">"VPN"</string>
-    <string name="monitoring_subtitle_network_logging" msgid="5569072711320784030">"Сүлжээний лог"</string>
+    <!-- no translation found for monitoring_subtitle_network_logging (3341264304793193386) -->
+    <skip />
+    <!-- no translation found for monitoring_subtitle_ca_certificate (3874151893894355988) -->
+    <skip />
     <string name="disable_vpn" msgid="4435534311510272506">"VPN идэвхгүйжүүлэх"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"VPN таслах"</string>
+    <!-- no translation found for monitoring_button_view_policies (100913612638514424) -->
+    <skip />
+    <!-- no translation found for monitoring_description_named_management (4872859182820011954) -->
+    <skip />
+    <!-- no translation found for monitoring_description_management (3115563193381106341) -->
+    <skip />
+    <!-- no translation found for monitoring_description_management_ca_certificate (5202023784131001751) -->
+    <skip />
+    <!-- no translation found for monitoring_description_managed_profile_ca_certificate (4683248196789897964) -->
+    <skip />
+    <!-- no translation found for monitoring_description_ca_certificate (7886985418413598352) -->
+    <skip />
+    <!-- no translation found for monitoring_description_management_network_logging (7184005419733060736) -->
+    <skip />
+    <!-- no translation found for monitoring_description_named_vpn (639013857356724268) -->
+    <skip />
+    <!-- no translation found for monitoring_description_two_named_vpns (4479748971871539316) -->
+    <skip />
+    <!-- no translation found for monitoring_description_managed_profile_named_vpn (1427905889862420559) -->
+    <skip />
+    <!-- no translation found for monitoring_description_personal_profile_named_vpn (3133980926929069283) -->
+    <skip />
     <string name="monitoring_description_do_header_generic" msgid="96588491028288691">"Таны төхөөрөмжийг <xliff:g id="DEVICE_OWNER_APP">%1$s</xliff:g> удирддаг."</string>
     <string name="monitoring_description_do_header_with_name" msgid="5511133708978206460">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> таны төхөөрөмжийг удирдахын тулд <xliff:g id="DEVICE_OWNER_APP">%2$s</xliff:g>-г ашигладаг."</string>
     <string name="monitoring_description_do_body" msgid="3639594537660975895">"Таны админ тохиргоо, байгууллагын хандалт, апп, төхөөрөмжтэй холбоотой өгөгдөл болон таны төхөөрөмжийн байршлын мэдээллийг хянах, удирдах боломжтой."</string>
@@ -427,16 +483,23 @@
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"Таны имэйл, апп, вэб хуудас зэрэг сүлжээний үйл ажиллагааг хянах боломжтой <xliff:g id="VPN_APP">%1$s</xliff:g>-д холбогдсон байна."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"VPN тохиргоог нээх"</string>
+    <!-- no translation found for monitoring_description_ca_cert_settings_separator (4987350385906393626) -->
+    <skip />
+    <!-- no translation found for monitoring_description_ca_cert_settings (5489969458872997092) -->
+    <skip />
     <string name="monitoring_description_network_logging" msgid="7223505523384076027">"Таны админ төхөөрөмжийн ачааллыг хянадаг сүлжээний логийг асаасан байна.\n\nДэлгэрэнгүй мэдээлэл авах бол админтайгаа холбогдоно уу."</string>
     <string name="monitoring_description_vpn" msgid="4445150119515393526">"Та апп-д VPN холболт хийхийг зөвшөөрсөн байна.\n\nЭнэхүү апп нь таны имэйл, апп, вэбсайт зэрэг төхөөрөмж болон сүлжээний үйл ажиллагааг хянах боломжтой."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="2958019119161161530">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> таны ажлын профайлыг удирддаг.\n\nТаны админ имэйл, апп болон вэб хуудас зэрэг сүлжээний үйл ажиллагааг хянах боломжтой.\n\nДэлгэрэнгүй мэдээлэл авах бол админтайгаа холбогдоно уу.\n\nТа сүлжээний үйл ажиллагааг хянах боломжтой VPN-д холбогдсон байна."</string>
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
-    <string name="monitoring_description_app" msgid="6259179342284742878">"Та <xliff:g id="APPLICATION">%1$s</xliff:g>-д холбогдсон бөгөөд энэ нь таны имэйл, апп, вэбсайт зэрэг сүлжээний үйл ажиллагааг хянах боломжтой."</string>
+    <!-- no translation found for monitoring_description_app (1828472472674709532) -->
+    <skip />
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"Та <xliff:g id="APPLICATION">%1$s</xliff:g>-д холбогдсон бөгөөд энэ нь таны имэйл, апп, вэбсайт зэрэг сүлжээний хувийн үйл ажиллагааг хянах боломжтой."</string>
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"Та имэйл, апп, вэб хуудас зэрэг хувийн сүлжээнийхээ үйл ажиллагааг хянах боломжтой <xliff:g id="APPLICATION">%1$s</xliff:g>-д холбогдсон байна."</string>
-    <string name="monitoring_description_app_work" msgid="7777228449969022305">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> таны ажлын профайлыг удирддаг. Энэ нь таны имэйл, апп, вэб хуудас зэрэг ажлын сүлжээний үйл ажиллагааг хянах боломжтой <xliff:g id="APPLICATION">%2$s</xliff:g>-тэй холбогдсон.\n\nДэлгэрэнгүй мэдээлэл авах бол админтайгаа холбогдоно уу."</string>
-    <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"Таны ажлын профайлыг <xliff:g id="ORGANIZATION">%1$s</xliff:g> удирддаг. Энэ нь <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>-тай холбогдсон бөгөөд таны имэйл, апп, вэбсайт зэрэг ажлын сүлжээний үйл ажиллагааг хянах боломжтой.\n\nМөн та <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>-д холбогдсон бөгөөд энэ нь таны сүлжээний хувийн үйл ажиллагааг хянаж чадна."</string>
-    <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Таныг гараар онгойлгох хүртэл төхөөрөмж түгжээтэй байх болно"</string>
+    <!-- no translation found for monitoring_description_app_work (4612997849787922906) -->
+    <skip />
+    <!-- no translation found for monitoring_description_app_personal_work (5664165460056859391) -->
+    <skip />
+    <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Таныг гараар нээх хүртэл төхөөрөмж түгжээтэй байх болно"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Мэдэгдлийг хурдан авах"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Түгжээг тайлахын өмнө үзнэ үү"</string>
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"Үгүй"</string>
@@ -466,10 +529,8 @@
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. Дууг нь нээхийн тулд товшино уу."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. Чичиргээнд тохируулахын тулд товшино уу. Хүртээмжийн үйлчилгээний дууг хаасан."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Дууг нь хаахын тулд товшино уу. Хүртээмжийн үйлчилгээний дууг хаасан."</string>
-    <!-- no translation found for volume_stream_content_description_vibrate_a11y (6427727603978431301) -->
-    <skip />
-    <!-- no translation found for volume_stream_content_description_mute_a11y (8995013018414535494) -->
-    <skip />
+    <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s. Чичиргээнд тохируулахын тулд товшино уу."</string>
+    <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. Дууг хаахын тулд товшино уу."</string>
     <!-- String.format failed for translation -->
     <!-- no translation found for volume_dialog_accessibility_shown_message (1834631467074259998) -->
     <skip />
@@ -522,9 +583,14 @@
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Тэжээлийн мэдэгдлийн удирдлагын тусламжтайгаар та апп-н мэдэгдэлд 0-5 хүртэлх ач холбогдлын түвшин тогтоох боломжтой. \n\n"<b>"5-р түвшин"</b>" \n- Мэдэгдлийн жагсаалтын хамгийн дээр харуулна \n- Бүтэн дэлгэцэд саад болно \n- Дэлгэцэд тогтмол гарч ирнэ \n\n"<b>"4-р түвшин"</b>" \n- Бүтэн дэлгэцэд саад болохоос сэргийлнэ \n- Дэлгэцэд тогтмол гарч ирнэ \n\n"<b>"3-р түвшин"</b>" \n- Бүтэн дэлгэцэд саад болохоос сэргийлнэ \n- Дэлгэцэд хэзээ ч гарч ирэхгүй \n\n"<b>"2-р түвшин"</b>" \n- Бүтэн дэлгэцэд саад болохоос сэргийлнэ \n- Дэлгэцэд хэзээ ч гарч ирэхгүй \n- Дуу болон чичиргээ хэзээ ч гаргахгүй \n\n"<b>"1-р түвшин"</b>" \n- Бүтэн дэлгэцэд саад болохоос сэргийлнэ \n- Дэлгэцэд хэзээ ч гарч ирэхгүй \n- Дуу болон чичиргээ хэзээ ч гаргахгүй \n- Түгжигдсэн дэлгэц болон статусын самбараас нууна \n- Мэдэгдлийн жагсаалтын доор харуулна \n\n"<b>"0-р түвшин"</b>" \n- Энэ апп-н бүх мэдэгдлийг блоклоно"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Мэдэгдэл"</string>
     <string name="notification_channel_disabled" msgid="5805874247999578073">"Ta цаашид мэдэгдэл авахгүй."</string>
-    <plurals name="notification_num_channels_desc" formatted="false" msgid="8808748716499517938">
-      <item quantity="other">энэ аппын <xliff:g id="NUMBER_1">%d</xliff:g>-с 1 ангилал</item>
-      <item quantity="one">энэ аппын <xliff:g id="NUMBER_0">%d</xliff:g>-с 1 ангилал</item>
+    <string name="notification_num_channels" msgid="2048144408999179471">"<xliff:g id="NUMBER">%d</xliff:g> мэдэгдлийн ангилал"</string>
+    <!-- no translation found for notification_default_channel_desc (2506053815870808359) -->
+    <skip />
+    <!-- no translation found for notification_num_channels_desc (5492793452274077663) -->
+    <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>"</string>
+    <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">
+      <item quantity="other"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g>, бусад <xliff:g id="NUMBER_5">%3$d</xliff:g></item>
+      <item quantity="one"><xliff:g id="CHANNEL_NAME_1_0">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_1">%2$s</xliff:g>, бусад <xliff:g id="NUMBER_2">%3$d</xliff:g></item>
     </plurals>
     <string name="notification_all_categories" msgid="5407190218055113282">"Бүх ангилал"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Бусад тохиргоо"</string>
@@ -535,7 +601,7 @@
     <string name="snooze_option_15_min" msgid="1068727451405610715">"15 минут"</string>
     <string name="snooze_option_30_min" msgid="867081342535195788">"30 минут"</string>
     <string name="snooze_option_1_hour" msgid="1098086401880077154">"1 цаг"</string>
-    <string name="snooze_option_dont_snooze" msgid="655446566007801922">"Түр хойшлуулахгүй"</string>
+    <string name="snooze_option_dont_snooze" msgid="2252098379349499668">"Цуцлах"</string>
     <string name="snooze_undo" msgid="6074877317002985129">"БУЦААХ"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"<xliff:g id="TIME_AMOUNT">%1$s</xliff:g>-д түр хойшлуулсан"</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"Тэжээл ашиглалт"</string>
@@ -677,6 +743,9 @@
     <string name="pip_phone_expand" msgid="5889780005575693909">"Дэлгэх"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Багасгах"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Хаах"</string>
+    <string name="pip_menu_title" msgid="3328510504196964712">"Зургийн цэсэнд байгаа зураг"</string>
+    <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> зураг доторх зурганд байна"</string>
+    <string name="pip_notification_message" msgid="4171698133469539591">"Та <xliff:g id="NAME">%s</xliff:g>-г энэ онцлогийг ашиглахыг хүсэхгүй байвал тохиргоог нээгээд, үүнийг унтраана уу."</string>
     <string name="high_temp_title" msgid="4589508026407318374">"Утас халж эхэлж байна"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Таны утас хөрж байх зуур зарим онцлогийг хязгаарласан"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"Таны утас автоматаар хөрөх болно. Та утсаа ашиглаж болох хэдий ч удаан ажиллаж болзошгүй.\n\nТаны утас хөрсний дараагаар хэвийн ажиллана."</string>
@@ -699,8 +768,6 @@
     <string name="notification_channel_general" msgid="4525309436693914482">"Энгийн зурвас"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"Хадгалах сан"</string>
     <string name="instant_apps" msgid="6647570248119804907">"Шуурхай апп"</string>
-    <!-- no translation found for pip_menu_title (3328510504196964712) -->
-    <skip />
     <string name="instant_apps_message" msgid="8116608994995104836">"Шуурхай аппыг суулгах шаардлагагүй."</string>
     <string name="app_info" msgid="6856026610594615344">"Апп-н мэдээлэл"</string>
     <string name="mobile_data" msgid="7094582042819250762">"Мобайл дата"</string>

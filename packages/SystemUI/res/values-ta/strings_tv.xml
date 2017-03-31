@@ -27,7 +27,4 @@
     <string name="pip_onboarding_title" msgid="7850436557670253991">"பிக்ச்சர் இன் பிக்ச்சர்"</string>
     <string name="pip_onboarding_description" msgid="4028124563309465267">"இது நீங்கள் அடுத்த வீடியோவை இயக்கும் வரை தற்போதுள்ள வீடியோவை வைத்திருக்கும். அதைக் கட்டுப்படுத்த, "<b>"முகப்பு"</b>" என்பதை அழுத்திப் பிடிக்கவும்."</string>
     <string name="pip_onboarding_button" msgid="3957426748484904611">"சரி"</string>
-    <string name="recents_tv_dismiss" msgid="3555093879593377731">"நிராகரி"</string>
-  <string-array name="recents_tv_blacklist_array">
-  </string-array>
 </resources>

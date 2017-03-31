@@ -62,8 +62,8 @@
     <string name="kg_sim_pin_instructions_multi" msgid="1586316574649150223">"Unesite PIN kôd za SIM karticu operatera \"<xliff:g id="CARRIER">%1$s</xliff:g>\""</string>
     <string name="kg_pin_instructions" msgid="4069609316644030034">"Unesite PIN kôd"</string>
     <string name="kg_password_instructions" msgid="136952397352976538">"Unesite lozinku"</string>
-    <string name="kg_puk_enter_puk_hint" msgid="2288964170039899277">"SIM kartica je sada onemogućena. Unesite PUK kôd da nastavite. Obratite se operateru za detalje."</string>
-    <string name="kg_puk_enter_puk_hint_multi" msgid="1373131883510840794">"Operater SIM kartice \"<xliff:g id="CARRIER">%1$s</xliff:g>\" sada je onemogućen. Unesite PUK kôd da nastavite. Za više detalja obratite se operateru."</string>
+    <string name="kg_puk_enter_puk_hint" msgid="2288964170039899277">"SIM kartica je sada onemogućena. Unesite PUK kôd da nastavite. Za više informacija obratite se operateru."</string>
+    <string name="kg_puk_enter_puk_hint_multi" msgid="1373131883510840794">"Operater SIM kartice \"<xliff:g id="CARRIER">%1$s</xliff:g>\" sada je onemogućen. Unesite PUK kôd da nastavite. Za više informacija obratite se operateru."</string>
     <string name="kg_puk_enter_pin_hint" msgid="3137789674920391087">"Unesite željeni PIN kôd"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="3089485999116759671">"Potvrdite željeni PIN kôd"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="4471738151810900114">"Otključavanje SIM kartice…"</string>
@@ -116,7 +116,8 @@
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3398054847288438444">"Potreban je uzorak nakon prelaska na drugi profil"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="7426368139226961699">"Potreban je PIN kôd nakon prelaska na drugi profil"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="8383831046318421845">"Potrebna je lozinka nakon prelaska na drugi profil"</string>
-    <string name="kg_prompt_reason_device_admin" msgid="2438626748767361010">"Administrator je zaključao uređaj."</string>
+    <!-- no translation found for kg_prompt_reason_device_admin (3452168247888906179) -->
+    <skip />
     <string name="kg_prompt_reason_user_request" msgid="8236951765212462286">"Uređaj je ručno zaključan"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="71299470072448533">
       <item quantity="one">Uređaj nije otključavan <xliff:g id="NUMBER_1">%d</xliff:g> sat. Potvrdite uzorak.</item>

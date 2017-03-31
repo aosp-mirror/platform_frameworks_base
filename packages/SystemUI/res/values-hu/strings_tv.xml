@@ -27,7 +27,4 @@
     <string name="pip_onboarding_title" msgid="7850436557670253991">"Kép a képben"</string>
     <string name="pip_onboarding_description" msgid="4028124563309465267">"A következő lejátszásáig ezt a videót tartja előtérben. A vezérléshez tartsa nyomva a "<b>"HOME"</b>" gombot."</string>
     <string name="pip_onboarding_button" msgid="3957426748484904611">"Rendben"</string>
-    <string name="recents_tv_dismiss" msgid="3555093879593377731">"Elvetés"</string>
-  <string-array name="recents_tv_blacklist_array">
-  </string-array>
 </resources>

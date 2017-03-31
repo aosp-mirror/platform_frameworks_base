@@ -27,7 +27,4 @@
     <string name="pip_onboarding_title" msgid="7850436557670253991">"Resim içinde resim"</string>
     <string name="pip_onboarding_description" msgid="4028124563309465267">"Bu işlev, videonuzu, başka bir video oynatılıncaya kadar görünür tutar. Bu işlevi kontrol etmek için "<b>"ANA EKRAN"</b>" tuşunu basılı tutun."</string>
     <string name="pip_onboarding_button" msgid="3957426748484904611">"Anladım"</string>
-    <string name="recents_tv_dismiss" msgid="3555093879593377731">"Kapat"</string>
-  <string-array name="recents_tv_blacklist_array">
-  </string-array>
 </resources>

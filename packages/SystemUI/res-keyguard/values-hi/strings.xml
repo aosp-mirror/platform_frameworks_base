@@ -114,7 +114,8 @@
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3398054847288438444">"प्रोफ़ाइल स्विच करते समय पैटर्न ज़रूरी है"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="7426368139226961699">"प्रोफ़ाइल स्विच करते समय पिन ज़रूरी है"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="8383831046318421845">"प्रोफ़ाइल स्विच करते समय पासवर्ड ज़रूरी है"</string>
-    <string name="kg_prompt_reason_device_admin" msgid="2438626748767361010">"डिवाइस व्यवस्थापक ने डिवाइस को लॉक कर दिया है"</string>
+    <!-- no translation found for kg_prompt_reason_device_admin (3452168247888906179) -->
+    <skip />
     <string name="kg_prompt_reason_user_request" msgid="8236951765212462286">"डिवाइस को मैन्युअल रूप से लॉक किया गया था"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="71299470072448533">
       <item quantity="one">डिवाइस को <xliff:g id="NUMBER_1">%d</xliff:g> घंटों से अनलॉक नहीं किया गया है. पैटर्न की पुष्टि करें.</item>

@@ -27,7 +27,4 @@
     <string name="pip_onboarding_title" msgid="7850436557670253991">"Ảnh trong ảnh"</string>
     <string name="pip_onboarding_description" msgid="4028124563309465267">"Màn hình này sẽ giữ video của bạn ở chế độ xem cho đến khi bạn phát video khác. Nhấn và giữ "<b>"HOME"</b>" để điều khiển màn hình."</string>
     <string name="pip_onboarding_button" msgid="3957426748484904611">"OK"</string>
-    <string name="recents_tv_dismiss" msgid="3555093879593377731">"Loại bỏ"</string>
-  <string-array name="recents_tv_blacklist_array">
-  </string-array>
 </resources>

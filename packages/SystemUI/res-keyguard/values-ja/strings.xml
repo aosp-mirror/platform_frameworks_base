@@ -68,7 +68,7 @@
     <string name="kg_enter_confirm_pin_hint" msgid="3089485999116759671">"必要な PIN コードを確認してください"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="4471738151810900114">"SIM カードのロックを解除しています…"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="3057533256729513335">"PIN は 4～8 桁の数字で入力してください。"</string>
-    <string name="kg_invalid_sim_puk_hint" msgid="6003602401368264144">"PUK コードは 8 桁以上の数字で入力してください。"</string>
+    <string name="kg_invalid_sim_puk_hint" msgid="6003602401368264144">"PUK コードは 8 桁以下の数字で入力してください。"</string>
     <string name="kg_invalid_puk" msgid="5399287873762592502">"正しい PUK コードを再入力してください。誤入力を繰り返すと、SIM が完全に無効になる恐れがあります。"</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="5672736555427444330">"PIN コードが一致しません"</string>
     <string name="kg_login_too_many_attempts" msgid="6604574268387867255">"パターンの入力を所定の回数以上間違えました"</string>
@@ -114,7 +114,8 @@
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3398054847288438444">"プロファイルを切り替えるにはパターンが必要です"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="7426368139226961699">"プロファイルを切り替えるには PIN が必要です"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="8383831046318421845">"プロファイルを切り替えるにはパスワードが必要です"</string>
-    <string name="kg_prompt_reason_device_admin" msgid="2438626748767361010">"端末管理アプリが端末をロックしました"</string>
+    <!-- no translation found for kg_prompt_reason_device_admin (3452168247888906179) -->
+    <skip />
     <string name="kg_prompt_reason_user_request" msgid="8236951765212462286">"端末は手動でロックされました"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="71299470072448533">
       <item quantity="other">端末のロックが <xliff:g id="NUMBER_1">%d</xliff:g> 時間、解除されていません。パターンを確認してください。</item>

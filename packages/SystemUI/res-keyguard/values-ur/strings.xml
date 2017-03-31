@@ -114,7 +114,8 @@
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3398054847288438444">"جب آپ پروفائل سوئچ کرتے ہیں تو پیٹرن درکار ہوتا ہے"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="7426368139226961699">"‏جب آپ پروفائل سوئچ کرتے ہیں تو PIN درکار ہوتا ہے"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="8383831046318421845">"جب آپ پروفائل سوئچ کرتے ہیں تو پاسورڈ درکار ہوتا ہے"</string>
-    <string name="kg_prompt_reason_device_admin" msgid="2438626748767361010">"آلہ کے منتظم نے آلہ مقفل کر دیا"</string>
+    <!-- no translation found for kg_prompt_reason_device_admin (3452168247888906179) -->
+    <skip />
     <string name="kg_prompt_reason_user_request" msgid="8236951765212462286">"آلہ کو دستی طور پر مقفل کیا گیا تھا"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="71299470072448533">
       <item quantity="other">آلہ <xliff:g id="NUMBER_1">%d</xliff:g> گھنٹوں سے غیر مقفل نہیں کیا گیا۔ پیٹرن کی توثیق کریں۔</item>
