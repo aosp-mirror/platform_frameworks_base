@@ -27,7 +27,4 @@
     <string name="pip_onboarding_title" msgid="7850436557670253991">"Imagem na imagem"</string>
     <string name="pip_onboarding_description" msgid="4028124563309465267">"Esta opção mantém o vídeo visível até reproduzir outro vídeo. Prima sem soltar "<b>"HOME"</b>" para o controlar."</string>
     <string name="pip_onboarding_button" msgid="3957426748484904611">"Compreendi"</string>
-    <string name="recents_tv_dismiss" msgid="3555093879593377731">"Ignorar"</string>
-  <string-array name="recents_tv_blacklist_array">
-  </string-array>
 </resources>

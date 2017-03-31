@@ -118,7 +118,8 @@
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3398054847288438444">"После смены профиля необходимо ввести графический ключ"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="7426368139226961699">"После смены профиля необходимо ввести PIN-код"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="8383831046318421845">"После смены профиля необходимо ввести пароль"</string>
-    <string name="kg_prompt_reason_device_admin" msgid="2438626748767361010">"Устройство заблокировано администратором"</string>
+    <!-- no translation found for kg_prompt_reason_device_admin (3452168247888906179) -->
+    <skip />
     <string name="kg_prompt_reason_user_request" msgid="8236951765212462286">"Устройство было заблокировано вручную"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="71299470072448533">
       <item quantity="one">Устройство не разблокировалось в течение <xliff:g id="NUMBER_1">%d</xliff:g> часа. Подтвердите графический ключ.</item>

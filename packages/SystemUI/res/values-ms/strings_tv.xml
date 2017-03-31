@@ -27,7 +27,4 @@
     <string name="pip_onboarding_title" msgid="7850436557670253991">"Gambar dalam gambar"</string>
     <string name="pip_onboarding_description" msgid="4028124563309465267">"Tindakan ini memastikan video anda sentiasa dipaparkan sehingga anda memainkan video lain. Tekan dan tahan "<b>"SKRIN UTAMA"</b>" untuk mengawalnya."</string>
     <string name="pip_onboarding_button" msgid="3957426748484904611">"OK"</string>
-    <string name="recents_tv_dismiss" msgid="3555093879593377731">"Ketepikan"</string>
-  <string-array name="recents_tv_blacklist_array">
-  </string-array>
 </resources>

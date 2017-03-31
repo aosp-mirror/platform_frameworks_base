@@ -27,7 +27,4 @@
     <string name="pip_onboarding_title" msgid="7850436557670253991">"Picture-in-picture"</string>
     <string name="pip_onboarding_description" msgid="4028124563309465267">"Esse recurso faz com que seu vídeo continue sendo exibido até que você reproduza outro. Mantenha "<b>"INÍCIO"</b>" pressionado para controlá-lo."</string>
     <string name="pip_onboarding_button" msgid="3957426748484904611">"Entendi"</string>
-    <string name="recents_tv_dismiss" msgid="3555093879593377731">"Dispensar"</string>
-  <string-array name="recents_tv_blacklist_array">
-  </string-array>
 </resources>

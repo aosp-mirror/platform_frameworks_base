@@ -27,7 +27,4 @@
     <string name="pip_onboarding_title" msgid="7850436557670253991">"Bild-i-bild"</string>
     <string name="pip_onboarding_description" msgid="4028124563309465267">"Då visas videon tills du spelar upp en annan. Tryck länge på "<b>"startknappen"</b>" om du vill styra uppspelningen."</string>
     <string name="pip_onboarding_button" msgid="3957426748484904611">"OK"</string>
-    <string name="recents_tv_dismiss" msgid="3555093879593377731">"Ignorera"</string>
-  <string-array name="recents_tv_blacklist_array">
-  </string-array>
 </resources>

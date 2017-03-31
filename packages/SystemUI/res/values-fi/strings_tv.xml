@@ -27,7 +27,4 @@
     <string name="pip_onboarding_title" msgid="7850436557670253991">"Kuva kuvassa (PIP-tila)"</string>
     <string name="pip_onboarding_description" msgid="4028124563309465267">"Videosi pysyy näkyvissä, kunnes toistat toisen videon. Hallinnoi tilaa painamalla "<b>"HOME"</b>"-painiketta pitkään."</string>
     <string name="pip_onboarding_button" msgid="3957426748484904611">"Selvä"</string>
-    <string name="recents_tv_dismiss" msgid="3555093879593377731">"Hylkää"</string>
-  <string-array name="recents_tv_blacklist_array">
-  </string-array>
 </resources>

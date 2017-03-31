@@ -114,7 +114,8 @@
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3398054847288438444">"Beim Profilwechsel ist die Eingabe des Musters erforderlich"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="7426368139226961699">"Beim Profilwechsel ist die Eingabe der PIN erforderlich"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="8383831046318421845">"Beim Profilwechsel ist die Eingabe des Passworts erforderlich"</string>
-    <string name="kg_prompt_reason_device_admin" msgid="2438626748767361010">"Gerät von Geräteadministrator gesperrt"</string>
+    <!-- no translation found for kg_prompt_reason_device_admin (3452168247888906179) -->
+    <skip />
     <string name="kg_prompt_reason_user_request" msgid="8236951765212462286">"Gerät manuell gesperrt"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="71299470072448533">
       <item quantity="other">Das Gerät wurde seit <xliff:g id="NUMBER_1">%d</xliff:g> Stunden nicht mehr entsperrt. Bitte bestätige das Muster.</item>

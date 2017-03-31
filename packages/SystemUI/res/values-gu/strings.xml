@@ -75,7 +75,8 @@
     <string name="screenshot_failed_title" msgid="705781116746922771">"સ્ક્રીનશોટ કેપ્ચર કરી શકાયો નથી."</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"સ્ક્રીનશૉટ સાચવવામાં સમસ્યા આવી."</string>
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"મર્યાદિત સંગ્રહ સ્થાનને કારણે સ્ક્રીનશોટ સાચવી શકાતો નથી."</string>
-    <string name="screenshot_failed_to_capture_text" msgid="7602391003979898374">"ઍપ્લિકેશન કે તમારી સંસ્થા દ્વારા સ્ક્રીનશોટ્સ લેવાની મંજૂરી નથી."</string>
+    <!-- no translation found for screenshot_failed_to_capture_text (173674476457581486) -->
+    <skip />
     <string name="usb_preference_title" msgid="6551050377388882787">"USB ફાઇલ ટ્રાન્સફર વિકલ્પો"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"મીડિયા પ્લેયર તરીકે માઉન્ટ કરો (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"કૅમેરા તરીકે માઉન્ટ કરો (PTP)"</string>
@@ -90,7 +91,8 @@
     <string name="accessibility_phone_button" msgid="6738112589538563574">"ફોન"</string>
     <string name="accessibility_voice_assist_button" msgid="487611083884852965">"વૉઇસ સહાય"</string>
     <string name="accessibility_unlock_button" msgid="128158454631118828">"અનલૉક કરો"</string>
-    <string name="accessibility_unlock_button_fingerprint" msgid="8214125623493923751">"અનલૉક બટન, ફિંગરપ્રિન્ટ માટે રાહ જોઈ રહ્યાં છીએ"</string>
+    <!-- no translation found for accessibility_waiting_for_fingerprint (4808860050517462885) -->
+    <skip />
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"તમારી ફિંગરપ્રિન્ટનો ઉપયોગ કર્યા વગર અનલૉક કરો"</string>
     <string name="unlock_label" msgid="8779712358041029439">"અનલૉક કરો"</string>
     <string name="phone_label" msgid="2320074140205331708">"ફોન ખોલો"</string>
@@ -236,8 +238,7 @@
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="650231949881093289">"ડેટા સેવર બંધ કર્યું."</string>
     <string name="accessibility_quick_settings_data_saver_changed_on" msgid="4218725402373934151">"ડેટા સેવર ચાલુ કર્યું."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"પ્રદર્શન તેજ"</string>
-    <!-- no translation found for accessibility_ambient_display_charging (9084521679384069087) -->
-    <skip />
+    <string name="accessibility_ambient_display_charging" msgid="9084521679384069087">"ચાર્જ થઈ રહ્યું છે"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G-3G ડેટા થોભાવ્યો છે"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G ડેટા થોભાવ્યો છે"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"સેલ્યુલર ડેટા થોભાવ્યો છે"</string>
@@ -277,7 +278,8 @@
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"તેજ"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"સ્વતઃ-ફેરવો"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"સ્ક્રીનને સ્વતઃ-ફેરવો"</string>
-    <string name="accessibility_quick_settings_rotation_value" msgid="1428962304214992318">"<xliff:g id="ID_1">%s</xliff:g> પર સેટ કરો"</string>
+    <!-- no translation found for accessibility_quick_settings_rotation_value (8187398200140760213) -->
+    <skip />
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"પરિભ્રમણ લૉક થયું"</string>
     <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"પોર્ટ્રેટ"</string>
     <string name="quick_settings_rotation_locked_landscape_label" msgid="8553157770061178719">"લેન્ડસ્કેપ"</string>
@@ -335,7 +337,6 @@
     <string name="recents_launch_error_message" msgid="2969287838120550506">"<xliff:g id="APP">%s</xliff:g> પ્રારંભ કરી શકાયું નથી."</string>
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"સુરક્ષિત મોડમાં <xliff:g id="APP">%s</xliff:g> અક્ષમ કરેલ છે."</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"બધું સાફ કરો"</string>
-    <string name="recents_incompatible_app_message" msgid="5075812958564082451">"ઍપ્લિકેશન સ્ક્રીન વિભાજનનું સમર્થન કરતી નથી"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"વિભાજિત સ્ક્રીનનો ઉપયોગ કરવા માટે અહીં ખેંચો"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"આડું વિભક્ત કરો"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"ઊભું વિભક્ત કરો"</string>
@@ -361,7 +362,7 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"નીચે ઓછી તાકીદની સૂચનાઓ"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"ખોલવા માટે ફરીથી ટૅપ કરો"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"અનલૉક કરવા માટે ઉપર સ્વાઇપ કરો"</string>
-    <string name="do_disclosure_generic" msgid="8498005633306135779">"આ ઉપકરણ સંચાલિત છે"</string>
+    <string name="do_disclosure_generic" msgid="5615898451805157556">"આ ઉપકરણ તમારી સંસ્થા દ્વારા સંચાલિત છે"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"આ ઉપકરણ <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> દ્વારા સંચાલિત થાય છે"</string>
     <string name="phone_hint" msgid="4872890986869209950">"ફોન માટે આયકનમાંથી સ્વાઇપ કરો"</string>
     <string name="voice_hint" msgid="8939888732119726665">"વૉઇસ સહાય માટે આયકનમાંથી સ્વાઇપ કરો"</string>
@@ -414,13 +415,68 @@
     <string name="profile_owned_footer" msgid="8021888108553696069">"પ્રોફાઇલ મૉનિટર કરી શકાય છે"</string>
     <string name="vpn_footer" msgid="2388611096129106812">"નેટવર્ક મૉનિટર કરી શકાય છે"</string>
     <string name="branded_vpn_footer" msgid="2168111859226496230">"નેટવર્ક મૉનિટર કરવામાં આવી શકે છે"</string>
+    <!-- no translation found for quick_settings_disclosure_management_monitoring (6645176135063957394) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_management_monitoring (370622174777570853) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_management_named_vpn (1085137869053332307) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_management_named_vpn (6290456493852584017) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_management (3294967280853150271) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_management (1059403025094542908) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_management_vpns (3698767349925266482) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_management_vpns (7777821385318891527) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_managed_profile_monitoring (5125463987558278215) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_managed_profile_monitoring (8973606847896650284) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_monitoring (679658227269205728) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_vpns (8170318392053156330) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_managed_profile_named_vpn (3494535754792751741) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_personal_profile_named_vpn (4467456202486569906) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_vpn (6943724064780847080) -->
+    <skip />
     <string name="monitoring_title_device_owned" msgid="7121079311903859610">"ઉપકરણ નિરીક્ષણ"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"પ્રોફાઇલ નિરીક્ષણ"</string>
     <string name="monitoring_title" msgid="169206259253048106">"નેટવર્ક મૉનિટરિંગ"</string>
     <string name="monitoring_subtitle_vpn" msgid="876537538087857300">"VPN"</string>
-    <string name="monitoring_subtitle_network_logging" msgid="5569072711320784030">"નેટવર્ક લૉગિંગ"</string>
+    <!-- no translation found for monitoring_subtitle_network_logging (3341264304793193386) -->
+    <skip />
+    <!-- no translation found for monitoring_subtitle_ca_certificate (3874151893894355988) -->
+    <skip />
     <string name="disable_vpn" msgid="4435534311510272506">"VPN અક્ષમ કરો"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"VPN ડિસ્કનેક્ટ કરો"</string>
+    <!-- no translation found for monitoring_button_view_policies (100913612638514424) -->
+    <skip />
+    <!-- no translation found for monitoring_description_named_management (4872859182820011954) -->
+    <skip />
+    <!-- no translation found for monitoring_description_management (3115563193381106341) -->
+    <skip />
+    <!-- no translation found for monitoring_description_management_ca_certificate (5202023784131001751) -->
+    <skip />
+    <!-- no translation found for monitoring_description_managed_profile_ca_certificate (4683248196789897964) -->
+    <skip />
+    <!-- no translation found for monitoring_description_ca_certificate (7886985418413598352) -->
+    <skip />
+    <!-- no translation found for monitoring_description_management_network_logging (7184005419733060736) -->
+    <skip />
+    <!-- no translation found for monitoring_description_named_vpn (639013857356724268) -->
+    <skip />
+    <!-- no translation found for monitoring_description_two_named_vpns (4479748971871539316) -->
+    <skip />
+    <!-- no translation found for monitoring_description_managed_profile_named_vpn (1427905889862420559) -->
+    <skip />
+    <!-- no translation found for monitoring_description_personal_profile_named_vpn (3133980926929069283) -->
+    <skip />
     <string name="monitoring_description_do_header_generic" msgid="96588491028288691">"તમારું ઉપકરણ <xliff:g id="DEVICE_OWNER_APP">%1$s</xliff:g> દ્વારા સંચાલિત થાય છે."</string>
     <string name="monitoring_description_do_header_with_name" msgid="5511133708978206460">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>, તમારા ઉપકરણનું સંચાલન કરવા માટે <xliff:g id="DEVICE_OWNER_APP">%2$s</xliff:g> નો ઉપયોગ કરે છે."</string>
     <string name="monitoring_description_do_body" msgid="3639594537660975895">"વ્યવસ્થાપક સેટિંગ્સ, કૉર્પોરેટ ઍક્સેસ, ઍપ્સ, તમારા ઉપકરણ સંબંદ્ધ ડેટા અને ઉપકરણની સ્થાન માહિતીનું નિરીક્ષણ અને સંચાલન કરી શકે છે."</string>
@@ -429,15 +485,22 @@
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"તમે <xliff:g id="VPN_APP">%1$s</xliff:g> સાથે કનેક્ટ થયાં છો, જે ઇમેઇલ્સ, ઍપ્લિકેશનો અને વેબસાઇટ્સ સહિત તમારી નેટવર્ક પ્રવૃત્તિને મૉનિટર કરી શકે છે."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"VPN સેટિંગ્સ ખોલો"</string>
+    <!-- no translation found for monitoring_description_ca_cert_settings_separator (4987350385906393626) -->
+    <skip />
+    <!-- no translation found for monitoring_description_ca_cert_settings (5489969458872997092) -->
+    <skip />
     <string name="monitoring_description_network_logging" msgid="7223505523384076027">"તમારા વ્યવસ્થાપકે નેટવર્ક લૉગિંગ ચાલુ કર્યુ છે, જે તમારા ઉપકરણ પર ટ્રાફિકનું નિરીક્ષણ કરે છે.\n\nવધુ માહિતી માટે, તમારા વ્યવસ્થાપકનો સંપર્ક કરો."</string>
     <string name="monitoring_description_vpn" msgid="4445150119515393526">"તમે VPN કનેક્શન સેટ કરવા માટે ઍપ્લિકેશન પરવાનગી આપી.\n\nઆ ઍપ્લિકેશન ઇમેઇલ્સ, ઍપ્લિકેશનો અને વેબસાઇટ્સ સહિત તમારા ઉપકરણ અને નેટવર્ક પ્રવૃત્તિને મૉનિટર કરી શકે છે."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="2958019119161161530">"તમારી કાર્ય પ્રોફાઇલનું સંચાલન <xliff:g id="ORGANIZATION">%1$s</xliff:g> દ્વારા કરવામાં આવે છે.\n\n તમારા વ્યવસ્થાપક ઇમેઇલ, ઍપ્લિકેશનો, અને વેબસાઇટો સહિતની તમારી કાર્ય નેટવર્ક પ્રવૃત્તિનું નિરીક્ષણ કરવામાં સક્ષમ છે.\n\nવધુ માહિતી માટે, તમારા વ્યવસ્થાપકનો સંપર્ક કરો.\n\nતમે VPN સાથે પણ કનેક્ટ કરેલ છે, જે તમારી નેટવર્ક પ્રવૃત્તિનું નિરીક્ષણ કરી શકે છે."</string>
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
-    <string name="monitoring_description_app" msgid="6259179342284742878">"તમે <xliff:g id="APPLICATION">%1$s</xliff:g> સાથે કનેક્ટ થયાં છો, જે ઇમેઇલ્સ, ઍપ્લિકેશનો અને વેબસાઇટ્સ સહિતની તમારી નેટવર્ક પ્રવૃત્તિને મૉનિટર કરી શકે છે."</string>
+    <!-- no translation found for monitoring_description_app (1828472472674709532) -->
+    <skip />
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"તમે <xliff:g id="APPLICATION">%1$s</xliff:g> સાથે કનેક્ટ થયાં છો, જે ઇમેઇલ્સ, ઍપ્લિકેશનો અને વેબસાઇટ્સ સહિતની તમારી વ્યક્તિગત નેટવર્ક પ્રવૃત્તિને મૉનિટર કરી શકે છે."</string>
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"તમે <xliff:g id="APPLICATION">%1$s</xliff:g> સાથે કનેક્ટ થયાં છો, જે ઇમેઇલ્સ, ઍપ્લિકેશનો અને વેબસાઇટ્સ સહિત તમારી વ્યક્તિગત નેટવર્ક પ્રવૃત્તિને મૉનિટર કરી શકે છે."</string>
-    <string name="monitoring_description_app_work" msgid="7777228449969022305">"તમારી કાર્ય પ્રોફાઇલનું સંચાલન <xliff:g id="ORGANIZATION">%1$s</xliff:g> દ્વારા કરવામાં આવે છે. તેને <xliff:g id="APPLICATION">%2$s</xliff:g> સાથે કનેક્ટ કરેલ છે, જે ઇમેઇલ, ઍપ્લિકેશનો અને વેબસાઇટો સહિતની તમારી કાર્ય નેટવર્ક પ્રવૃત્તિનું નિરીક્ષણ કરી શકે છે. \n\nવધુ માહિતી માટે, તમારા વ્યવસ્થાપકનો સંપર્ક કરો."</string>
-    <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"તમારી કાર્ય પ્રોફાઇલ <xliff:g id="ORGANIZATION">%1$s</xliff:g> દ્વારા સંચાલિત થાય છે. તે <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> સાથે કનેક્ટ થયેલ છે, જે ઇમેઇલ્સ, ઍપ્લિકેશનો અને વેબસાઇટ્સ સહિતની તમારી કાર્ય નેટવર્ક પ્રવૃત્તિને મૉનિટર કરી શકે છે.\n\nતમે <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> સાથે પણ કનેક્ટ થયેલ છો, જે તમારી વ્યક્તિગત નેટવર્ક પ્રવૃત્તિને મૉનિટર કરી શકે છે."</string>
+    <!-- no translation found for monitoring_description_app_work (4612997849787922906) -->
+    <skip />
+    <!-- no translation found for monitoring_description_app_personal_work (5664165460056859391) -->
+    <skip />
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"તમે ઉપકરણને મેન્યુઅલી અનલૉક કરશો નહીં ત્યાં સુધી તે લૉક રહેશે"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"વધુ ઝડપથી સૂચનાઓ મેળવો"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"તમે અનલૉક કરો તે પહેલાં તેમને જુઓ"</string>
@@ -468,10 +531,8 @@
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. અનમ્યૂટ કરવા માટે ટૅપ કરો."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. વાઇબ્રેટ પર સેટ કરવા માટે ટૅપ કરો. ઍક્સેસિબિલિટી સેવાઓ મ્યૂટ કરવામાં આવી શકે છે."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. મ્યૂટ કરવા માટે ટૅપ કરો. ઍક્સેસિબિલિટી સેવાઓ મ્યૂટ કરવામાં આવી શકે છે."</string>
-    <!-- no translation found for volume_stream_content_description_vibrate_a11y (6427727603978431301) -->
-    <skip />
-    <!-- no translation found for volume_stream_content_description_mute_a11y (8995013018414535494) -->
-    <skip />
+    <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s. કંપન પર સેટ કરવા માટે ટૅપ કરો."</string>
+    <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. મ્યૂટ કરવા માટે ટૅપ કરો."</string>
     <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"%s વૉલ્યૂમ નિયંત્રણ બતાવ્યાં. છોડી દેવા માટે સ્વાઇપ કરો."</string>
     <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"વૉલ્યૂમ નિયંત્રણ છુપાવ્યાં"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"સિસ્ટમ UI ટ્યૂનર"</string>
@@ -522,9 +583,14 @@
     <string name="power_notification_controls_description" msgid="4372459941671353358">"પાવર સૂચના નિયંત્રણો સાથે, તમે ઍપ્લિકેશનની સૂચનાઓ માટે 0 થી 5 સુધીના મહત્વના સ્તરને સેટ કરી શકો છો. \n\n"<b>"સ્તર 5"</b>" \n- સૂચના સૂચિની ટોચ પર બતાવો \n- પૂર્ણ સ્ક્રીન અવરોધની મંજૂરી આપો \n- હંમેશાં ત્વરિત દૃષ્ટિ કરો \n\n"<b>"સ્તર 4"</b>" \n- પૂર્ણ સ્ક્રીન અવરોધ અટકાવો \n- હંમેશાં ત્વરિત દૃષ્ટિ કરો \n\n"<b>"સ્તર 3"</b>" \n- પૂર્ણ સ્ક્રીન અવરોધ અટકાવો \n- ક્યારેય ત્વરિત દૃષ્ટિ કરશો નહીં \n\n"<b>"સ્તર 2"</b>" \n- પૂર્ણ સ્ક્રીન અવરોધ અટકાવો \n- ક્યારેય ત્વરિત દૃષ્ટિ કરશો નહીં \n- ક્યારેય અવાજ અને વાઇબ્રેશન કરશો નહીં \n\n"<b>"સ્તર 1"</b>" \n- પૂર્ણ સ્ક્રીન અવરોધ અટકાવો \n- ક્યારેય ત્વરિત દૃષ્ટિ કરશો નહીં \n- ક્યારેય અવાજ અથવા વાઇબ્રેટ કરશો નહીં \n- લૉક સ્ક્રીન અને સ્થિતિ બારથી છુપાવો \n- સૂચના સૂચિના તળિયા પર બતાવો \n\n"<b>"સ્તર 0"</b>" \n- ઍપ્લિકેશનની તમામ સૂચનાઓને અવરોધિત કરો"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"સૂચનાઓ"</string>
     <string name="notification_channel_disabled" msgid="5805874247999578073">"તમને હવે આ સૂચનાઓ મળશે નહીં."</string>
-    <plurals name="notification_num_channels_desc" formatted="false" msgid="8808748716499517938">
-      <item quantity="one">આ ઍપ્લિકેશન તરફથી <xliff:g id="NUMBER_1">%d</xliff:g> માંથી 1 કૅટેગરી</item>
-      <item quantity="other">આ ઍપ્લિકેશન તરફથી <xliff:g id="NUMBER_1">%d</xliff:g> માંથી 1 કૅટેગરી</item>
+    <string name="notification_num_channels" msgid="2048144408999179471">"<xliff:g id="NUMBER">%d</xliff:g> સૂચના કૅટેગરીઓ"</string>
+    <!-- no translation found for notification_default_channel_desc (2506053815870808359) -->
+    <skip />
+    <!-- no translation found for notification_num_channels_desc (5492793452274077663) -->
+    <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>"</string>
+    <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">
+      <item quantity="one"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g> અને અન્ય <xliff:g id="NUMBER_5">%3$d</xliff:g></item>
+      <item quantity="other"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g> અને અન્ય <xliff:g id="NUMBER_5">%3$d</xliff:g></item>
     </plurals>
     <string name="notification_all_categories" msgid="5407190218055113282">"બધી કૅટેગરી"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"વધુ સેટિંગ્સ"</string>
@@ -535,7 +601,7 @@
     <string name="snooze_option_15_min" msgid="1068727451405610715">"15 મિનિટ"</string>
     <string name="snooze_option_30_min" msgid="867081342535195788">"30 મિનિટ"</string>
     <string name="snooze_option_1_hour" msgid="1098086401880077154">"1 કલાક"</string>
-    <string name="snooze_option_dont_snooze" msgid="655446566007801922">"સ્નૂઝ કરશો નહીં"</string>
+    <string name="snooze_option_dont_snooze" msgid="2252098379349499668">"રદ કરો"</string>
     <string name="snooze_undo" msgid="6074877317002985129">"પૂર્વવત્ કરો"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"<xliff:g id="TIME_AMOUNT">%1$s</xliff:g> માટે સ્નૂઝ કરો"</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"બૅટરી વપરાશ"</string>
@@ -677,6 +743,9 @@
     <string name="pip_phone_expand" msgid="5889780005575693909">"વિસ્તૃત કરો"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"નાનું કરો"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"બંધ કરો"</string>
+    <string name="pip_menu_title" msgid="3328510504196964712">"ચિત્રમાં ચિત્ર મેનૂ"</string>
+    <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> ચિત્રમાં-ચિત્રની અંદર છે"</string>
+    <string name="pip_notification_message" msgid="4171698133469539591">"જો તમે નથી ઇચ્છતા કે <xliff:g id="NAME">%s</xliff:g> આ સુવિધાનો ઉપયોગ કરે, તો સેટિંગ્સ ખોલવા માટે ટૅપ કરો અને તેને બંધ કરો."</string>
     <string name="high_temp_title" msgid="4589508026407318374">"ફોન ગરમ થઈ રહ્યો છે"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"ફોન ઠંડો થાય ત્યાં સુધી કેટલીક સુવિધાઓ મર્યાદિત હોય છે"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"તમારો ફોન આપમેળે ઠંડો થવાનો પ્રયાસ કરશે. તમે હજી પણ તમારા ફોનનો ઉપયોગ કરી શકો છો, પરંતુ તે કદાચ થોડો ધીમો ચાલે.\n\nતમારો ફોન ઠંડો થઈ જવા પર, તે સામાન્ય રીતે ચાલશે."</string>
@@ -699,8 +768,6 @@
     <string name="notification_channel_general" msgid="4525309436693914482">"સામાન્ય સંદેશા"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"સ્ટોરેજ"</string>
     <string name="instant_apps" msgid="6647570248119804907">"ઝટપટ ઍપ્લિકેશનો"</string>
-    <!-- no translation found for pip_menu_title (3328510504196964712) -->
-    <skip />
     <string name="instant_apps_message" msgid="8116608994995104836">"ઝટપટ ઍપ્લિકેશનો માટે ઇન્સ્ટૉલેશનની જરૂર નથી."</string>
     <string name="app_info" msgid="6856026610594615344">"ઍપ્લિકેશન માહિતી"</string>
     <string name="mobile_data" msgid="7094582042819250762">"મોબાઇલ ડેટા"</string>

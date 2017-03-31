@@ -27,7 +27,4 @@
     <string name="pip_onboarding_title" msgid="7850436557670253991">"Slika v sliki"</string>
     <string name="pip_onboarding_description" msgid="4028124563309465267">"S tem videoposnetek ostane v pogledu, dokler ne predvajate drugega. Pridržite tipko "<b>"HOME"</b>", če ga želite upravljati."</string>
     <string name="pip_onboarding_button" msgid="3957426748484904611">"Razumem"</string>
-    <string name="recents_tv_dismiss" msgid="3555093879593377731">"Opusti"</string>
-  <string-array name="recents_tv_blacklist_array">
-  </string-array>
 </resources>

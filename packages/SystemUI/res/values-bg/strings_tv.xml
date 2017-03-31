@@ -27,7 +27,4 @@
     <string name="pip_onboarding_title" msgid="7850436557670253991">"Картина в картина"</string>
     <string name="pip_onboarding_description" msgid="4028124563309465267">"Видеоклипът ви ще остане видим, докато не пуснете друг. Натиснете и задръжте "<b>"HOME"</b>", за да контролирате функцията."</string>
     <string name="pip_onboarding_button" msgid="3957426748484904611">"Разбрах"</string>
-    <string name="recents_tv_dismiss" msgid="3555093879593377731">"Отхвърляне"</string>
-  <string-array name="recents_tv_blacklist_array">
-  </string-array>
 </resources>

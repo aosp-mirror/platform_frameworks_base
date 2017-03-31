@@ -27,7 +27,4 @@
     <string name="pip_onboarding_title" msgid="7850436557670253991">"畫中畫"</string>
     <string name="pip_onboarding_description" msgid="4028124563309465267">"這讓您繼續觀看影片，直至您播放下一部影片。按住"<b>"主按鈕"</b>"即可控制「畫中畫」。"</string>
     <string name="pip_onboarding_button" msgid="3957426748484904611">"知道了"</string>
-    <string name="recents_tv_dismiss" msgid="3555093879593377731">"關閉"</string>
-  <string-array name="recents_tv_blacklist_array">
-  </string-array>
 </resources>
