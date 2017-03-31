@@ -1827,7 +1827,8 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         synchronized (service) {
             anrActivity = getWaitingHistoryRecordLocked();
             anrApp = app;
-            windowFromSameProcessAsActivity = app == null || app.pid == windowPid;
+            windowFromSameProcessAsActivity =
+                    app == null || app.pid == windowPid || windowPid == -1;
         }
         if (windowFromSameProcessAsActivity) {
             return service.inputDispatchingTimedOut(anrApp, anrActivity, this, false, reason);
