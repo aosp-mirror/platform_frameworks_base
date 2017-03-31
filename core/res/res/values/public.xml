@@ -2802,7 +2802,7 @@
         <public name="secondaryContentAlpha" />
         <public name="requiredFeature" />
         <public name="requiredNotFeature" />
-        <public name="autofillHint" />
+        <public name="autofillHints" />
         <public name="fontProviderPackage" />
         <public name="importantForAutofill" />
         <public name="recycleEnabled"/>
