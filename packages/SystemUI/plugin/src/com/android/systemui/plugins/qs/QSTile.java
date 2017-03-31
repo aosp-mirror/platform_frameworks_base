@@ -105,6 +105,7 @@ public interface QSTile {
         public CharSequence dualLabelContentDescription;
         public boolean disabledByPolicy;
         public boolean dualTarget = false;
+        public boolean isTransient = false;
         public String expandedAccessibilityClassName;
 
         public boolean copyTo(State other) {
@@ -119,6 +120,7 @@ public interface QSTile {
                             expandedAccessibilityClassName)
                     || !Objects.equals(other.disabledByPolicy, disabledByPolicy)
                     || !Objects.equals(other.state, state)
+                    || !Objects.equals(other.isTransient, isTransient)
                     || !Objects.equals(other.dualTarget, dualTarget);
             other.icon = icon;
             other.label = label;
@@ -128,6 +130,7 @@ public interface QSTile {
             other.disabledByPolicy = disabledByPolicy;
             other.state = state;
             other.dualTarget = dualTarget;
+            other.isTransient = isTransient;
             return changed;
         }
 
@@ -145,6 +148,7 @@ public interface QSTile {
             sb.append(",expandedAccessibilityClassName=").append(expandedAccessibilityClassName);
             sb.append(",disabledByPolicy=").append(disabledByPolicy);
             sb.append(",dualTarget=").append(dualTarget);
+            sb.append(",isTransient=").append(isTransient);
             sb.append(",state=").append(state);
             return sb.append(']');
         }
