@@ -2,6 +2,7 @@ package com.android.server.vr;
 
 import static android.view.Display.INVALID_DISPLAY;
 
+import android.app.ActivityManagerInternal;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -48,6 +49,7 @@ class CompatibilityDisplay {
     private final static String DEBUG_EXTRA_SURFACE =
             "com.android.server.vr.CompatibilityDisplay.EXTRA_SURFACE";
 
+    private final ActivityManagerInternal mActivityManagerInternal;
     private final DisplayManager mDisplayManager;
     private final IVrManager mVrManager;
     private final Object mVdLock = new Object();
@@ -74,8 +76,10 @@ class CompatibilityDisplay {
     private boolean mIsVrModeOverrideEnabled;
     private boolean mIsVrModeEnabled;
 
-    public CompatibilityDisplay(DisplayManager displayManager, IVrManager vrManager) {
+    public CompatibilityDisplay(DisplayManager displayManager,
+           ActivityManagerInternal activityManagerInternal, IVrManager vrManager) {
         mDisplayManager = displayManager;
+        mActivityManagerInternal = activityManagerInternal;
         mVrManager = vrManager;
     }
 
@@ -200,6 +204,15 @@ class CompatibilityDisplay {
 
             mVirtualDisplay = mDisplayManager.createVirtualDisplay("VR 2D Display", WIDTH, HEIGHT,
                     DPI, null /* Surface */, 0 /* flags */);
+
+            if (mVirtualDisplay != null) {
+                mActivityManagerInternal.setVrCompatibilityDisplayId(
+                    mVirtualDisplay.getDisplay().getDisplayId());
+            } else {
+                Log.w(TAG, "Virtual display id is null after createVirtualDisplay");
+                mActivityManagerInternal.setVrCompatibilityDisplayId(INVALID_DISPLAY);
+                return;
+            }
         }
 
         if (DEBUG) {
@@ -222,6 +235,7 @@ class CompatibilityDisplay {
                     } else {
                         Log.i(TAG, "Stopping Virtual Display");
                         synchronized (mVdLock) {
+                            mActivityManagerInternal.setVrCompatibilityDisplayId(INVALID_DISPLAY);
                             setSurfaceLocked(null); // clean up and release the surface first.
                             if (mVirtualDisplay != null) {
                                 mVirtualDisplay.release();

@@ -18,6 +18,7 @@ package com.android.server.vr;
 import static android.view.Display.INVALID_DISPLAY;
 
 import android.Manifest;
+import android.app.ActivityManagerInternal;
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.app.NotificationManager;
@@ -54,6 +55,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.R;
+import com.android.server.LocalServices;
 import com.android.server.SystemConfig;
 import com.android.server.SystemService;
 import com.android.server.utils.ManagedApplicationService.PendingEvent;
@@ -594,7 +596,8 @@ public class VrManagerService extends SystemService implements EnabledComponentC
 
             DisplayManager dm =
                     (DisplayManager) getContext().getSystemService(Context.DISPLAY_SERVICE);
-            mCompatibilityDisplay = new CompatibilityDisplay(dm, mVrManager);
+            ActivityManagerInternal ami = LocalServices.getService(ActivityManagerInternal.class);
+            mCompatibilityDisplay = new CompatibilityDisplay(dm, ami, mVrManager);
             mCompatibilityDisplay.init(getContext());
         } else if (phase == SystemService.PHASE_THIRD_PARTY_APPS_CAN_START) {
             synchronized (mLock) {
