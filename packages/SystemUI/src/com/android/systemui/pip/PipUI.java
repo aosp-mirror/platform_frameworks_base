@@ -24,6 +24,7 @@ import android.content.res.Configuration;
 
 import com.android.systemui.SystemUI;
 import com.android.systemui.recents.misc.SystemServicesProxy;
+import com.android.systemui.statusbar.CommandQueue;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -31,7 +32,7 @@ import java.io.PrintWriter;
 /**
  * Controls the picture-in-picture window.
  */
-public class PipUI extends SystemUI {
+public class PipUI extends SystemUI implements CommandQueue.Callbacks {
 
     private BasePipManager mPipManager;
 
@@ -55,6 +56,13 @@ public class PipUI extends SystemUI {
                 ? com.android.systemui.pip.tv.PipManager.getInstance()
                 : com.android.systemui.pip.phone.PipManager.getInstance();
         mPipManager.initialize(mContext);
+
+        getComponent(CommandQueue.class).addCallbacks(this);
+    }
+
+    @Override
+    public void showPictureInPictureMenu() {
+        mPipManager.showPictureInPictureMenu();
     }
 
     @Override

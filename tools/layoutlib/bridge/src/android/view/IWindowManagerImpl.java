@@ -376,7 +376,7 @@ public class IWindowManagerImpl implements IWindowManager {
     }
 
     @Override
-    public void setTvPipVisibility(boolean visible) {
+    public void setPipVisibility(boolean visible) {
         // TODO Auto-generated method stub
     }
 

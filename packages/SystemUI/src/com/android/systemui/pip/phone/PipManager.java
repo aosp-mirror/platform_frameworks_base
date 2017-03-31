@@ -35,6 +35,7 @@ import android.view.WindowManagerGlobal;
 import com.android.systemui.pip.BasePipManager;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.misc.SystemServicesProxy.TaskStackListener;
+import com.android.systemui.statusbar.CommandQueue;
 
 import java.io.PrintWriter;
 
@@ -73,6 +74,8 @@ public class PipManager implements BasePipManager {
             mMediaController.onActivityPinned();
             mMenuController.onActivityPinned();
             mNotificationController.onActivityPinned(packageName);
+
+            SystemServicesProxy.getInstance(mContext).setPipVisibility(true);
         }
 
         @Override
@@ -81,7 +84,11 @@ public class PipManager implements BasePipManager {
                 return;
             }
 
-            mNotificationController.onActivityUnpinned();
+            ComponentName topPipActivity = PipUtils.getTopPinnedActivity(mContext,
+                    mActivityManager);
+            mNotificationController.onActivityUnpinned(topPipActivity);
+
+            SystemServicesProxy.getInstance(mContext).setPipVisibility(topPipActivity != null);
         }
 
         @Override
@@ -94,6 +101,7 @@ public class PipManager implements BasePipManager {
         public void onPinnedStackAnimationEnded() {
             // Re-enable touches after the animation completes
             mTouchHandler.setTouchEnabled(true);
+            mTouchHandler.onPinnedStackAnimationEnded();
         }
 
         @Override
@@ -181,6 +189,13 @@ public class PipManager implements BasePipManager {
      */
     public void onConfigurationChanged() {
         mTouchHandler.onConfigurationChanged();
+    }
+
+    /**
+     * Sent from KEYCODE_WINDOW handler in PhoneWindowManager, to request the menu to be shown.
+     */
+    public void showPictureInPictureMenu() {
+        mTouchHandler.showPictureInPictureMenu();
     }
 
     /**

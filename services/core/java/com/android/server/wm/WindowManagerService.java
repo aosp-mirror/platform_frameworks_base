@@ -6040,7 +6040,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
-    public void setTvPipVisibility(boolean visible) {
+    public void setPipVisibility(boolean visible) {
         if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.STATUS_BAR)
                 != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Caller does not hold permission "
@@ -6048,7 +6048,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         synchronized (mWindowMap) {
-            mPolicy.setTvPipVisibilityLw(visible);
+            mPolicy.setPipVisibilityLw(visible);
         }
     }
 

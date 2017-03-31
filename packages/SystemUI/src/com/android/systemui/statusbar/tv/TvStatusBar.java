@@ -16,13 +16,11 @@
 
 package com.android.systemui.statusbar.tv;
 
-import android.content.ComponentName;
 import android.content.Context;
 import android.graphics.Rect;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.service.notification.NotificationListenerService.RankingMap;
 
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.StatusBarIcon;
@@ -40,11 +38,6 @@ import java.util.ArrayList;
 public class TvStatusBar extends SystemUI implements Callbacks {
 
     private IStatusBarService mBarService;
-
-    @Override
-    public void showTvPictureInPictureMenu() {
-        PipManager.getInstance().showTvPictureInPictureMenu();
-    }
 
     @Override
     public void start() {
