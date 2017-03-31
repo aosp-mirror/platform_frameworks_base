@@ -60,7 +60,6 @@ public class PipTouchHandler implements TunerService.Tunable {
     private static final int SHOW_DISMISS_AFFORDANCE_DELAY = 200;
 
     // Allow dragging the PIP to a location to close it
-    private static final boolean ENABLE_DISMISS_DRAG_TO_TARGET = false;
     private static final boolean ENABLE_DISMISS_DRAG_TO_EDGE = true;
 
     private final Context mContext;
@@ -88,8 +87,8 @@ public class PipTouchHandler implements TunerService.Tunable {
     private Runnable mShowDismissAffordance = new Runnable() {
         @Override
         public void run() {
-            if (ENABLE_DISMISS_DRAG_TO_TARGET) {
-                mDismissViewController.showDismissTarget(mMotionHelper.getBounds());
+            if (ENABLE_DISMISS_DRAG_TO_EDGE) {
+                mDismissViewController.showDismissTarget();
             }
         }
     };
@@ -197,6 +196,7 @@ public class PipTouchHandler implements TunerService.Tunable {
         if (mIsMinimized) {
             setMinimizedStateInternal(false);
         }
+        mDismissViewController.destroyDismissTarget();
     }
 
     @Override
@@ -487,7 +487,7 @@ public class PipTouchHandler implements TunerService.Tunable {
                 mMenuController.pokeMenu();
             }
 
-            if (ENABLE_DISMISS_DRAG_TO_TARGET) {
+            if (ENABLE_DISMISS_DRAG_TO_EDGE) {
                 mDismissViewController.createDismissTarget();
                 mHandler.postDelayed(mShowDismissAffordance, SHOW_DISMISS_AFFORDANCE_DELAY);
             }
@@ -503,9 +503,9 @@ public class PipTouchHandler implements TunerService.Tunable {
                 mSavedSnapFraction = -1f;
             }
 
-            if (touchState.startedDragging() && ENABLE_DISMISS_DRAG_TO_TARGET) {
+            if (touchState.startedDragging() && ENABLE_DISMISS_DRAG_TO_EDGE) {
                 mHandler.removeCallbacks(mShowDismissAffordance);
-                mDismissViewController.showDismissTarget(mMotionHelper.getBounds());
+                mDismissViewController.showDismissTarget();
             }
 
             if (touchState.isDragging()) {
@@ -526,9 +526,6 @@ public class PipTouchHandler implements TunerService.Tunable {
                 mTmpBounds.offsetTo((int) left, (int) top);
                 mMotionHelper.movePip(mTmpBounds);
 
-                if (ENABLE_DISMISS_DRAG_TO_TARGET) {
-                    mDismissViewController.updateDismissTarget(mTmpBounds);
-                }
                 if (ENABLE_DISMISS_DRAG_TO_EDGE) {
                     updateDismissFraction();
                 }
@@ -555,21 +552,22 @@ public class PipTouchHandler implements TunerService.Tunable {
                 return false;
             }
 
-            if (ENABLE_DISMISS_DRAG_TO_TARGET) {
+            final PointF vel = touchState.getVelocity();
+            final boolean isHorizontal = Math.abs(vel.x) > Math.abs(vel.y);
+            final float velocity = PointF.length(vel.x, vel.y);
+            final boolean isFling = velocity > mFlingAnimationUtils.getMinVelocityPxPerSecond();
+            final boolean isFlingToBot = isFling
+                    && !isHorizontal && mMovementWithinDismiss && vel.y > 0;
+            if (ENABLE_DISMISS_DRAG_TO_EDGE) {
                 try {
                     mHandler.removeCallbacks(mShowDismissAffordance);
-                    PointF vel = mTouchState.getVelocity();
-                    final float velocity = PointF.length(vel.x, vel.y);
-                    if (touchState.isDragging()
-                            && velocity < mFlingAnimationUtils.getMinVelocityPxPerSecond()) {
-                        if (mDismissViewController.shouldDismiss(mMotionHelper.getBounds())) {
-                            Rect dismissBounds = mDismissViewController.getDismissBounds();
-                            mMotionHelper.animateDragToTargetDismiss(dismissBounds);
-                            MetricsLogger.action(mContext,
-                                    MetricsEvent.ACTION_PICTURE_IN_PICTURE_DISMISSED,
-                                    METRIC_VALUE_DISMISSED_BY_DRAG);
-                            return true;
-                        }
+                    if (mMotionHelper.shouldDismissPip() || isFlingToBot) {
+                        mMotionHelper.animateDismiss(mMotionHelper.getBounds(), vel.x,
+                            vel.y, mUpdateScrimListener);
+                        MetricsLogger.action(mContext,
+                                MetricsEvent.ACTION_PICTURE_IN_PICTURE_DISMISSED,
+                                METRIC_VALUE_DISMISSED_BY_DRAG);
+                        return true;
                     }
                 } finally {
                     mDismissViewController.destroyDismissTarget();
@@ -577,24 +575,9 @@ public class PipTouchHandler implements TunerService.Tunable {
             }
 
             if (touchState.isDragging()) {
-                final PointF vel = touchState.getVelocity();
-                final float velocity = PointF.length(vel.x, vel.y);
-                final boolean isFling = velocity > mFlingAnimationUtils.getMinVelocityPxPerSecond();
-                final boolean isHorizontal = Math.abs(vel.x) > Math.abs(vel.y);
-                final boolean isFlingToBot = isFling
-                        && !isHorizontal && mMovementWithinDismiss && vel.y > 0;
                 final boolean isFlingToEdge = isFling && isHorizontal && mMovementWithinMinimize
                         && (mStartedOnLeft ? vel.x < 0 : vel.x > 0);
-
-                if (ENABLE_DISMISS_DRAG_TO_EDGE
-                        && (mMotionHelper.shouldDismissPip() || isFlingToBot)) {
-                    mMotionHelper.animateDragToEdgeDismiss(mMotionHelper.getBounds(),
-                            mUpdateScrimListener);
-                    MetricsLogger.action(mContext,
-                            MetricsEvent.ACTION_PICTURE_IN_PICTURE_DISMISSED,
-                            METRIC_VALUE_DISMISSED_BY_DRAG);
-                    return true;
-                } else if (mEnableMinimize &&
+                if (mEnableMinimize &&
                         !mIsMinimized && (mMotionHelper.shouldMinimizePip() || isFlingToEdge)) {
                     // Pip should be minimized
                     setMinimizedStateInternal(true);
@@ -664,7 +647,7 @@ public class PipTouchHandler implements TunerService.Tunable {
         pw.println(innerPrefix + "mIsImeShowing=" + mIsImeShowing);
         pw.println(innerPrefix + "mImeHeight=" + mImeHeight);
         pw.println(innerPrefix + "mSavedSnapFraction=" + mSavedSnapFraction);
-        pw.println(innerPrefix + "mEnableDragToDismiss=" + ENABLE_DISMISS_DRAG_TO_TARGET);
+        pw.println(innerPrefix + "mEnableDragToEdgeDismiss=" + ENABLE_DISMISS_DRAG_TO_EDGE);
         pw.println(innerPrefix + "mEnableMinimize=" + mEnableMinimize);
         mSnapAlgorithm.dump(pw, innerPrefix);
         mTouchState.dump(pw, innerPrefix);
