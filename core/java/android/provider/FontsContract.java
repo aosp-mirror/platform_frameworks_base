@@ -448,15 +448,11 @@ public class FontsContract {
             int weight, boolean italic, @Nullable String fallbackFontName) {
         final Map<Uri, ByteBuffer> uriBuffer =
                 prepareFontData(context, fonts, cancellationSignal);
-        Typeface typeface = new Typeface.Builder(fonts, uriBuffer)
+        return new Typeface.Builder(fonts, uriBuffer)
+            .setFallback(fallbackFontName)
             .setWeight(weight)
             .setItalic(italic)
             .build();
-        // TODO: Use Typeface fallback instead.
-        if (typeface == null) {
-            typeface = Typeface.create(fallbackFontName, Typeface.NORMAL);
-        }
-        return typeface;
     }
 
     /**

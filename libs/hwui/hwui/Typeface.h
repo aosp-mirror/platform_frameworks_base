@@ -42,6 +42,8 @@ struct ANDROID_API Typeface {
 
     static Typeface* createFromTypeface(Typeface* src, SkTypeface::Style style);
 
+    static Typeface* createFromTypefaceWithStyle(Typeface* base, int weight, bool italic);
+
     static Typeface* createFromTypefaceWithVariation(Typeface* src,
             const std::vector<minikin::FontVariation>& variations);
 
