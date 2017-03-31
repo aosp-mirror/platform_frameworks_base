@@ -17,4 +17,6 @@ LOCAL_MODULE_TAGS := tests
 
 LOCAL_CERTIFICATE := platform
 
+LOCAL_COMPATIBILITY_SUITE := device-tests
+
 include $(BUILD_PACKAGE)
