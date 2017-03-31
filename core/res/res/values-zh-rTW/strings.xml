@@ -89,17 +89,24 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"預設顯示本機號碼，下一通電話也繼續顯示。"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"無法提供此服務。"</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"您無法變更來電顯示設定。"</string>
-    <string name="RestrictedOnData" msgid="8653794784690065540">"已封鎖數據傳輸服務。"</string>
-    <string name="RestrictedOnEmergency" msgid="6581163779072833665">"已封鎖緊急服務。"</string>
-    <string name="RestrictedOnNormal" msgid="4953867011389750673">"已封鎖語音服務。"</string>
-    <string name="RestrictedOnAllVoice" msgid="3396963652108151260">"已封鎖所有語音服務。"</string>
-    <string name="RestrictedOnSms" msgid="8314352327461638897">"已封鎖 SMS 服務。"</string>
-    <string name="RestrictedOnVoiceData" msgid="996636487106171320">"已封鎖語音/數據傳輸服務。"</string>
-    <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"已封鎖語音/SMS 服務。"</string>
-    <string name="RestrictedOnAll" msgid="5643028264466092821">"已封鎖所有語音/數據傳輸/簡訊服務。"</string>
-    <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"無法連上網路"</string>
-    <!-- no translation found for NetworkPreferenceSwitchSummary (4164230263214915351) -->
+    <!-- no translation found for RestrictedOnDataTitle (1322504692764166532) -->
     <skip />
+    <!-- no translation found for RestrictedOnEmergencyTitle (1236071219598685236) -->
+    <skip />
+    <!-- no translation found for RestrictedOnNormalTitle (3179574012752700984) -->
+    <skip />
+    <!-- no translation found for RestrictedOnAllVoiceTitle (158800171499150681) -->
+    <skip />
+    <!-- no translation found for RestrictedOnDataContent (8997474569390996587) -->
+    <skip />
+    <!-- no translation found for RestrictedOnEmergencyContent (4573217945494650061) -->
+    <skip />
+    <!-- no translation found for RestrictedOnNormalContent (1579434198284512182) -->
+    <skip />
+    <!-- no translation found for RestrictedOnAllVoiceContent (5243580774142557047) -->
+    <skip />
+    <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"無法連上網路"</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"如要改善收訊狀況，請依序開啟 [系統] &gt; [網路與網際網路] &gt; [行動網路] &gt; [偏好的網路類型]，然後選取其他網路類型。"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"通訊對象要求使用 TTY 的 FULL 模式"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"通訊對象要求使用 TTY 的 HCO 模式"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"通訊對象要求使用 TTY 的 VCO 模式"</string>
@@ -139,8 +146,7 @@
   </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"關閉"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi 優先"</string>
-    <!-- no translation found for wfc_mode_cellular_preferred_summary (1988279625335345908) -->
-    <skip />
+    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"行動網路優先"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"只限 Wi-Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>：未轉接"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -178,18 +184,21 @@
       <item quantity="one">已安裝憑證授權單位憑證</item>
     </plurals>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"受到不明的第三方監控"</string>
-    <string name="ssl_ca_cert_noti_by_administrator" msgid="550758088185764312">"受到您的 Work 設定檔管理員監控"</string>
+    <!-- no translation found for ssl_ca_cert_noti_by_administrator (3541729986326153557) -->
+    <skip />
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"受到 <xliff:g id="MANAGING_DOMAIN">%s</xliff:g> 監控"</string>
     <string name="work_profile_deleted" msgid="5005572078641980632">"Work 設定檔已遭刪除"</string>
-    <string name="work_profile_deleted_description" msgid="6305147513054341102">"Work 設定檔因管理員應用程式遺失而遭到刪除。"</string>
-    <string name="work_profile_deleted_details" msgid="226615743462361248">"Work 設定檔管理員應用程式遺失或已毀損，因此系統刪除了您的 Work 設定檔和相關資料。如需協助，請與您的管理員聯絡。"</string>
-    <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"您的 Work 設定檔已不在這台裝置上。"</string>
-    <!-- no translation found for network_logging_notification_title (6399790108123704477) -->
+    <!-- no translation found for work_profile_deleted_description (1100529432509639864) -->
     <skip />
-    <!-- no translation found for network_logging_notification_text (7930089249949354026) -->
+    <!-- no translation found for work_profile_deleted_details (6307630639269092360) -->
     <skip />
+    <!-- no translation found for work_profile_deleted_description_dpm_wipe (8823792115612348820) -->
+    <skip />
+    <string name="network_logging_notification_title" msgid="6399790108123704477">"裝置受到管理"</string>
+    <string name="network_logging_notification_text" msgid="7930089249949354026">"貴機構會管理這個裝置，且可能監控網路流量。輕觸即可瞭解詳情。"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"您的裝置資料將遭到清除"</string>
-    <string name="factory_reset_message" msgid="4905025204141900666">"管理員應用程式因遺失元件或已毀損而無法使用，您的裝置資料將隨即遭到清除。如需相關協助，請與您的管理員聯絡。"</string>
+    <!-- no translation found for factory_reset_message (7972496262232832457) -->
+    <skip />
     <string name="me" msgid="6545696007631404292">"我"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"平板電腦選項"</string>
     <string name="power_dialog" product="tv" msgid="6153888706430556356">"電視選項"</string>
@@ -551,7 +560,8 @@
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"允許應用程式讀取及寫入「零打擾」設定。"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"設定密碼規則"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"管理螢幕鎖定密碼和 PIN 碼支援的字元和長度上限。"</string>
-    <string name="policylab_watchLogin" msgid="914130646942199503">"監視螢幕解鎖嘗試次數"</string>
+    <!-- no translation found for policylab_watchLogin (5091404125971980158) -->
+    <skip />
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"監控螢幕解鎖時密碼輸入錯誤的次數；如果密碼輸入錯誤的次數過多，則會鎖住平板電腦或全部清除平板電腦中的資料。"</string>
     <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"螢幕鎖定時監測密碼輸入錯誤次數，並於密碼輸入錯誤次數過多時鎖定電視，或是將電視的資料全部清除。"</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"監控螢幕解鎖時密碼輸入錯誤的次數；如果密碼輸入錯誤的次數過多，則會鎖住手機或清除手機的所有資料。"</string>
@@ -970,8 +980,7 @@
     <string name="selectTextMode" msgid="1018691815143165326">"選取文字"</string>
     <string name="undo" msgid="7905788502491742328">"復原"</string>
     <string name="redo" msgid="7759464876566803888">"重做"</string>
-    <!-- no translation found for autofill (3035779615680565188) -->
-    <skip />
+    <string name="autofill" msgid="3035779615680565188">"自動填入"</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"選取文字"</string>
     <string name="addToDictionary" msgid="4352161534510057874">"加入字典"</string>
     <string name="deleteText" msgid="6979668428458199034">"刪除"</string>
@@ -1103,7 +1112,13 @@
     <string name="network_switch_metered" msgid="4671730921726992671">"已切換至<xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="5325661434777870353">"裝置會在無法連上 <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> 時切換至<xliff:g id="NEW_NETWORK">%1$s</xliff:g> (可能需要支付相關費用)。"</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"已從 <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> 切換至<xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
-    <!-- no translation found for network_switch_type_name:0 (3979506840912951943) -->
+  <string-array name="network_switch_type_name">
+    <item msgid="3979506840912951943">"行動數據"</item>
+    <item msgid="75483255295529161">"Wi-Fi"</item>
+    <item msgid="6862614801537202646">"藍牙"</item>
+    <item msgid="5447331121797802871">"乙太網路"</item>
+    <item msgid="8257233890381651999">"VPN"</item>
+  </string-array>
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"不明的網路類型"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"無法連線至 Wi-Fi"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" 的網際網路連線狀況不佳。"</string>
@@ -1173,7 +1188,8 @@
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"正在接收錯誤報告…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"要分享錯誤報告嗎？"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"正在分享錯誤報告…"</string>
-    <string name="share_remote_bugreport_notification_message_finished" msgid="8610614010660772643">"您的 IT 管理員要求您提供錯誤報告，以便排解這個裝置發生的問題。報告可能會揭露裝置中的應用程式和相關資料。"</string>
+    <!-- no translation found for share_remote_bugreport_notification_message_finished (6029609949340992866) -->
+    <skip />
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"分享"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"拒絕"</string>
     <string name="select_input_method" msgid="8547250819326693584">"變更鍵盤"</string>
@@ -1359,8 +1375,7 @@
     <string name="data_usage_warning_body" msgid="6660692274311972007">"輕觸即可查看用量和設定。"</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"已達到 2G-3G 數據流量上限"</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"已達到 4G 數據流量上限"</string>
-    <!-- no translation found for data_usage_mobile_limit_title (6561099244084267376) -->
-    <skip />
+    <string name="data_usage_mobile_limit_title" msgid="6561099244084267376">"已達到行動數據用量上限"</string>
     <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"已達到 Wi-Fi 數據流量上限"</string>
     <string name="data_usage_limit_body" msgid="291731708279614081">"已暫停使用數據連線，直到工作階段結束為止"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"已超過 2G-3G 數據上限"</string>
@@ -1459,18 +1474,29 @@
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"移除"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"要調高音量，比建議的音量更大聲嗎？\n\n長時間聆聽高分貝音量可能會使您的聽力受損。"</string>
-    <string name="accessibility_shortcut_warning_dialog_title" msgid="5998592821749881862">"協助工具捷徑已啟用"</string>
-    <string name="accessibility_shortcut_toogle_warning" msgid="2987297770937717543">"同時按住兩個音量按鈕 3 秒即可啟用或停用「<xliff:g id="SERVICE_NAME">%1$s</xliff:g>」。\n\n你可以在 [設定] &gt; [協助工具] 中變更這項服務。"</string>
-    <string name="disable_accessibility_shortcut" msgid="3683951963271793789">"停用捷徑"</string>
-    <string name="leave_accessibility_shortcut_on" msgid="8762106842437042969">"繼續啟用"</string>
+    <!-- no translation found for accessibility_shortcut_warning_dialog_title (8404780875025725199) -->
+    <skip />
+    <!-- no translation found for accessibility_shortcut_toogle_warning (7256507885737444807) -->
+    <skip />
+    <!-- no translation found for disable_accessibility_shortcut (627625354248453445) -->
+    <skip />
+    <!-- no translation found for leave_accessibility_shortcut_on (7653111894438512680) -->
+    <skip />
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"協助工具捷徑啟用了「<xliff:g id="SERVICE_NAME">%1$s</xliff:g>」"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"協助工具捷徑停用了「<xliff:g id="SERVICE_NAME">%1$s</xliff:g>」"</string>
+    <!-- no translation found for accessibility_button_prompt_text (4234556536456854251) -->
+    <skip />
+    <!-- no translation found for accessibility_button_instructional_text (6942300463612999993) -->
+    <skip />
+    <!-- no translation found for accessibility_magnification_chooser_text (1227146738764986237) -->
+    <skip />
     <string name="user_switched" msgid="3768006783166984410">"目前的使用者是 <xliff:g id="NAME">%1$s</xliff:g>。"</string>
     <string name="user_switching_message" msgid="2871009331809089783">"正在切換至<xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="8939524935808875155">"正在將<xliff:g id="NAME">%1$s</xliff:g>登出帳戶…"</string>
     <string name="owner_name" msgid="2716755460376028154">"擁有者"</string>
     <string name="error_message_title" msgid="4510373083082500195">"錯誤"</string>
-    <string name="error_message_change_not_allowed" msgid="1347282344200417578">"您的管理員不允許這項變更"</string>
+    <!-- no translation found for error_message_change_not_allowed (1238035947357923497) -->
+    <skip />
     <string name="app_not_found" msgid="3429141853498927379">"找不到支援此操作的應用程式"</string>
     <string name="revoke" msgid="5404479185228271586">"撤銷"</string>
     <string name="mediasize_iso_a0" msgid="1994474252931294172">"ISO A0"</string>
@@ -1562,7 +1588,8 @@
     <string name="reason_service_unavailable" msgid="7824008732243903268">"列印服務尚未啟用"</string>
     <string name="print_service_installed_title" msgid="2246317169444081628">"已安裝「<xliff:g id="NAME">%s</xliff:g>」服務"</string>
     <string name="print_service_installed_message" msgid="5897362931070459152">"輕觸啟用"</string>
-    <string name="restr_pin_enter_admin_pin" msgid="783643731895143970">"輸入管理員 PIN"</string>
+    <!-- no translation found for restr_pin_enter_admin_pin (8641662909467236832) -->
+    <skip />
     <string name="restr_pin_enter_pin" msgid="3395953421368476103">"輸入 PIN"</string>
     <string name="restr_pin_incorrect" msgid="8571512003955077924">"不正確"</string>
     <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"目前的 PIN"</string>
@@ -1590,16 +1617,21 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"公司<xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"第 2 項工作：<xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"第 3 項工作：<xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="7693684144593484">"如要取消固定這個畫面，請按住「返回」按鈕和「總覽」按鈕。"</string>
-    <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"應用程式已固定：無法在這部裝置取消固定。"</string>
+    <!-- no translation found for lock_to_app_toast (6820571533009838261) -->
+    <skip />
+    <!-- no translation found for lock_to_app_toast_locked (7849470948648628704) -->
+    <skip />
     <string name="lock_to_app_start" msgid="6643342070839862795">"已固定螢幕"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"已取消固定螢幕"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"取消固定時必須輸入 PIN"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"取消固定時必須畫出解鎖圖案"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"取消固定時必須輸入密碼"</string>
-    <string name="package_installed_device_owner" msgid="8420696545959087545">"已由管理員安裝"</string>
-    <string name="package_updated_device_owner" msgid="8856631322440187071">"由您的管理員更新"</string>
-    <string name="package_deleted_device_owner" msgid="7650577387493101353">"已遭管理員刪除"</string>
+    <!-- no translation found for package_installed_device_owner (6875717669960212648) -->
+    <skip />
+    <!-- no translation found for package_updated_device_owner (1847154566357862089) -->
+    <skip />
+    <!-- no translation found for package_deleted_device_owner (2307122077550236438) -->
+    <skip />
     <string name="battery_saver_description" msgid="1960431123816253034">"節約耗電量模式會透過降低裝置效能、震動限制、定位服務限制和大多數背景資料運作限制等方式，延長電池續航力。此外，如果未開啟電子郵件、簡訊和其他需要使用同步功能的應用程式，系統將不會自動更新這些應用程式。\n\n當您為裝置充電時，節約耗電量模式會自動關閉。"</string>
     <string name="data_saver_description" msgid="6015391409098303235">"「數據節省模式」可防止部分應用程式在背景收發資料，以節省數據用量。您目前使用的某個應用程式可以存取資料，但存取頻率可能不如平時高。舉例來說，圖片可能不會自動顯示，而必須由您輕觸後才會顯示。"</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"要開啟數據節省模式嗎？"</string>
@@ -1684,8 +1716,10 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"所有語言"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"所有地區"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"搜尋"</string>
-    <string name="work_mode_off_title" msgid="8954725060677558855">"Work 模式已關閉"</string>
-    <string name="work_mode_off_message" msgid="3286169091278094476">"啟用 Work 設定檔，包括應用程式、背景同步處理和相關功能。"</string>
+    <!-- no translation found for work_mode_off_title (2615362773958585967) -->
+    <skip />
+    <!-- no translation found for work_mode_off_message (2961559609199223594) -->
+    <skip />
     <string name="work_mode_turn_on" msgid="2062544985670564875">"開啟"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"您有新訊息"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"開啟簡訊應用程式來查看內容"</string>
@@ -1728,8 +1762,7 @@
     <string name="time_picker_prompt_label" msgid="7588093983899966783">"輸入時間"</string>
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"切換至文字輸入模式來輸入時間。"</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"切換至時鐘模式來輸入時間。"</string>
-    <!-- no translation found for autofill_picker_accessibility_title (8469043291648711535) -->
-    <skip />
+    <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"自動填入選項"</string>
     <string name="autofill_save_title" msgid="7081244500504163245">"要儲存到「<xliff:g id="LABEL">%1$s</xliff:g>」嗎？"</string>
     <string name="autofill_save_title_with_type" msgid="4977385733042555659">"要將<xliff:g id="TYPE">%1$s</xliff:g>儲存到「<xliff:g id="LABEL">%2$s</xliff:g>」嗎？"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"儲存"</string>
@@ -1737,13 +1770,17 @@
     <string name="autofill_save_type_password" msgid="5288448918465971568">"密碼"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"地址"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"信用卡"</string>
-    <!-- no translation found for etws_primary_default_message_earthquake (5541962250262769193) -->
-    <skip />
-    <!-- no translation found for etws_primary_default_message_tsunami (1887685943498368548) -->
-    <skip />
-    <!-- no translation found for etws_primary_default_message_earthquake_and_tsunami (998797956848445862) -->
-    <skip />
-    <!-- no translation found for etws_primary_default_message_test (2709597093560037455) -->
-    <skip />
+    <string name="etws_primary_default_message_earthquake" msgid="5541962250262769193">"請保持冷靜並尋找附近的避難地點。"</string>
+    <string name="etws_primary_default_message_tsunami" msgid="1887685943498368548">"請立即從沿海與河岸地區撤離，前往高地這類較安全的地點。"</string>
+    <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="998797956848445862">"請保持冷靜並尋找附近的避難地點。"</string>
+    <string name="etws_primary_default_message_test" msgid="2709597093560037455">"緊急訊息測試"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
+    <!-- no translation found for mmcc_authentication_reject (7729819349669603406) -->
+    <skip />
+    <!-- no translation found for mmcc_imsi_unknown_in_hlr (6321202257374418726) -->
+    <skip />
+    <!-- no translation found for mmcc_illegal_ms (2769452751852211112) -->
+    <skip />
+    <!-- no translation found for mmcc_illegal_me (4438696681169345015) -->
+    <skip />
 </resources>
