@@ -668,19 +668,17 @@ public class Intent implements Parcelable, Cloneable {
      * a URI or a list of URIs.
      * <p>Activities handling this intent action should handle the vast majority of
      * MIME types rather than only specific ones.
+     * <p>Quick viewers must render the quick view image locally, and must not send
+     * file content outside current device.
      * <p>Input: {@link #getData} is a mandatory content URI of the item to
      * preview. {@link #getClipData} contains an optional list of content URIs
      * if there is more than one item to preview. {@link #EXTRA_INDEX} is an
      * optional index of the URI in the clip data to show first.
-     * <p>By default quick viewers are supposed to be lightweight and focus on
-     * previewing the content only. They should not expose features such as printing,
-     * opening in an external app, deleting, rotating, casting, etc.
-     * However, if {@link #EXTRA_QUICK_VIEW_ADVANCED} is true, then the quick viewer
-     * may show advanced UI which includes convenience actions suitable for the passed
-     * Uris.
+     * {@link #EXTRA_QUICK_VIEW_FEATURES} is an optional extra indicating the features
+     * that can be shown in the quick view UI.
      * <p>Output: nothing.
-     * @see #EXTRA_QUICK_VIEW_ADVANCED
      * @see #EXTRA_INDEX
+     * @see #EXTRA_QUICK_VIEW_FEATURES
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_QUICK_VIEW = "android.intent.action.QUICK_VIEW";
@@ -4490,7 +4488,7 @@ public class Intent implements Parcelable, Cloneable {
      * Optional index with semantics depending on the intent action.
      *
      * <p>The value must be an integer greater or equal to 0.
-     * @see ACTION_QUICK_VIEW
+     * @see #ACTION_QUICK_VIEW
      */
     public static final String EXTRA_INDEX = "android.intent.extra.INDEX";
 
@@ -4500,10 +4498,36 @@ public class Intent implements Parcelable, Cloneable {
      * casting, etc.
      *
      * <p>The value is boolean. By default false.
-     * @see ACTION_QUICK_VIEW
+     * @see #ACTION_QUICK_VIEW
+     * @removed
      */
+    @Deprecated
     public static final String EXTRA_QUICK_VIEW_ADVANCED =
             "android.intent.extra.QUICK_VIEW_ADVANCED";
+
+    /**
+     * An optional extra of {@code String[]} indicating which quick view features should be made
+     * available to the user in the quick view UI while handing a
+     * {@link Intent#ACTION_QUICK_VIEW} intent.
+     * <li>Enumeration of features here is not meant to restrict capabilities of the quick viewer.
+     * Quick viewer can implement features not listed below.
+     * <li>Features included at this time are: {@link QuickViewConstants#FEATURE_VIEW},
+     * {@link QuickViewConstants#FEATURE_EDIT}, {@link QuickViewConstants#FEATURE_DOWNLOAD},
+     * {@link QuickViewConstants#FEATURE_SEND}, {@link QuickViewConstants#FEATURE_PRINT}.
+     * <p>
+     * Requirements:
+     * <li>Quick viewer shouldn't show a feature if the feature is absent in
+     * {@link #EXTRA_QUICK_VIEW_FEATURES}.
+     * <li>When {@link #EXTRA_QUICK_VIEW_FEATURES} is not present, quick viewer should follow
+     * internal policies.
+     * <li>Presence of an feature in {@link #EXTRA_QUICK_VIEW_FEATURES}, does not constitute a
+     * requirement that the feature be shown. Quick viewer may, according to its own policies,
+     * disable or hide features.
+     *
+     * @see #ACTION_QUICK_VIEW
+     */
+    public static final String EXTRA_QUICK_VIEW_FEATURES =
+            "android.intent.extra.QUICK_VIEW_FEATURES";
 
     /**
      * Optional boolean extra indicating whether quiet mode has been switched on or off.
