@@ -165,6 +165,14 @@ message SystemMessage {
     // Package: android
     NOTE_NET_LIMIT_SNOOZED = 36;
 
+    // Inform the user they need to sign in to an account
+    // Package: android, and others
+    NOTE_ACCOUNT_REQUIRE_SIGNIN = 37;
+
+    // Inform the user that there has been a permission request for an account
+    // Package: android
+    NOTE_ACCOUNT_CREDENTIAL_PERMISSION = 38;
+
     // ADD_NEW_IDS_ABOVE_THIS_LINE
     // Legacy IDs with arbitrary values appear below
     // Legacy IDs existed as stable non-conflicting constants prior to the O release
@@ -216,9 +224,5 @@ message SystemMessage {
     // Notify the user that data or apps are being moved to external storage.
     // Package: com.android.systemui
     NOTE_STORAGE_MOVE = 0x534d4f56;
-
-    // Account Manager allocates IDs sequentially, starting here.
-    // Package: android
-    ACCOUNT_MANAGER_BASE = 0x70000000;
   }
 }
