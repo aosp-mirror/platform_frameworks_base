@@ -149,10 +149,16 @@ public final class BluetoothLeAdvertiser {
                 parameters.setTxPowerLevel(1);
             }
 
+            int duration = 0;
+            int timeoutMillis = settings.getTimeout();
+            if (timeoutMillis > 0) {
+                duration = (timeoutMillis < 10) ? 1 : timeoutMillis/10;
+            }
+
             AdvertisingSetCallback wrapped = wrapOldCallback(callback, settings);
             mLegacyAdvertisers.put(callback, wrapped);
             startAdvertisingSet(parameters.build(), advertiseData, scanResponse, null, null,
-                                settings.getTimeout(), wrapped);
+                                duration, 0, wrapped);
         }
     }
 
@@ -214,8 +220,8 @@ public final class BluetoothLeAdvertiser {
      * @param advertiseData Advertisement data to be broadcasted. Size must not exceed
      *                     {@link BluetoothAdapter#getLeMaximumAdvertisingDataLength}. If the
      *                     advertisement is connectable, three bytes will be added for flags.
-     * @param scanResponse Scan response associated with the advertisement data. Size must not exceed
-     *                     {@link BluetoothAdapter#getLeMaximumAdvertisingDataLength}.
+     * @param scanResponse Scan response associated with the advertisement data. Size must not
+     *                     exceed {@link BluetoothAdapter#getLeMaximumAdvertisingDataLength}.
      * @param periodicParameters periodic advertisng parameters. If null, periodic advertising will
      *                     not be started.
      * @param periodicData Periodic advertising data. Size must not exceed
@@ -231,7 +237,7 @@ public final class BluetoothLeAdvertiser {
                                     PeriodicAdvertisingParameters periodicParameters,
                                     AdvertiseData periodicData, AdvertisingSetCallback callback) {
             startAdvertisingSet(parameters, advertiseData, scanResponse, periodicParameters,
-                            periodicData, 0, callback, new Handler(Looper.getMainLooper()));
+                            periodicData, 0, 0, callback, new Handler(Looper.getMainLooper()));
     }
 
     /**
@@ -243,8 +249,8 @@ public final class BluetoothLeAdvertiser {
      * @param advertiseData Advertisement data to be broadcasted. Size must not exceed
      *                     {@link BluetoothAdapter#getLeMaximumAdvertisingDataLength}. If the
      *                     advertisement is connectable, three bytes will be added for flags.
-     * @param scanResponse Scan response associated with the advertisement data. Size must not exceed
-     *                     {@link BluetoothAdapter#getLeMaximumAdvertisingDataLength}.
+     * @param scanResponse Scan response associated with the advertisement data. Size must not
+     *                     exceed {@link BluetoothAdapter#getLeMaximumAdvertisingDataLength}.
      * @param periodicParameters periodic advertisng parameters. If null, periodic advertising will
      *                     not be started.
      * @param periodicData Periodic advertising data. Size must not exceed
@@ -262,7 +268,7 @@ public final class BluetoothLeAdvertiser {
                                     AdvertiseData periodicData, AdvertisingSetCallback callback,
                                     Handler handler) {
         startAdvertisingSet(parameters, advertiseData, scanResponse, periodicParameters,
-                            periodicData, 0, callback, handler);
+                            periodicData, 0, 0, callback, handler);
     }
 
     /**
@@ -274,13 +280,18 @@ public final class BluetoothLeAdvertiser {
      * @param advertiseData Advertisement data to be broadcasted. Size must not exceed
      *                     {@link BluetoothAdapter#getLeMaximumAdvertisingDataLength}. If the
      *                     advertisement is connectable, three bytes will be added for flags.
-     * @param scanResponse Scan response associated with the advertisement data. Size must not exceed
-     *                     {@link BluetoothAdapter#getLeMaximumAdvertisingDataLength}.
+     * @param scanResponse Scan response associated with the advertisement data. Size must not
+     *                     exceed {@link BluetoothAdapter#getLeMaximumAdvertisingDataLength}.
      * @param periodicParameters periodic advertisng parameters. If null, periodic advertising will
      *                     not be started.
      * @param periodicData Periodic advertising data. Size must not exceed
      *                     {@link BluetoothAdapter#getLeMaximumAdvertisingDataLength}.
-     * @param timeoutMillis Advertising time limit. May not exceed 180000
+     * @param duration advertising duration, in 10ms unit. Valid range is from 1 (10ms) to
+     *                     65535 (655,350 ms). 0 means advertising should continue until stopped.
+     * @param maxExtendedAdvertisingEvents maximum number of extended advertising events the
+     *                     controller shall attempt to send prior to terminating the extended
+     *                     advertising, even if the duration has not expired. Valid range is
+     *                     from 1 to 255. 0 means no maximum.
      * @param callback Callback for advertising set.
      * @throws IllegalArgumentException when any of the data parameter exceed the maximum allowable
      *                     size, or unsupported advertising PHY is selected, or when attempt to use
@@ -290,10 +301,12 @@ public final class BluetoothLeAdvertiser {
     public void startAdvertisingSet(AdvertisingSetParameters parameters,
                                     AdvertiseData advertiseData, AdvertiseData scanResponse,
                                     PeriodicAdvertisingParameters periodicParameters,
-                                    AdvertiseData periodicData, int timeoutMillis,
+                                    AdvertiseData periodicData, int duration,
+                                    int maxExtendedAdvertisingEvents,
                                     AdvertisingSetCallback callback) {
         startAdvertisingSet(parameters, advertiseData, scanResponse, periodicParameters,
-                            periodicData, timeoutMillis, callback, new Handler(Looper.getMainLooper()));
+                            periodicData, duration, maxExtendedAdvertisingEvents, callback,
+                            new Handler(Looper.getMainLooper()));
     }
 
     /**
@@ -301,29 +314,36 @@ public final class BluetoothLeAdvertiser {
      * method returns immediately, the operation status is delivered through
      * {@code callback.onAdvertisingSetStarted()}.
      * <p>
-     * @param parameters advertising set parameters.
+     * @param parameters Advertising set parameters.
      * @param advertiseData Advertisement data to be broadcasted. Size must not exceed
      *                     {@link BluetoothAdapter#getLeMaximumAdvertisingDataLength}. If the
      *                     advertisement is connectable, three bytes will be added for flags.
-     * @param scanResponse Scan response associated with the advertisement data. Size must not exceed
-     *                     {@link BluetoothAdapter#getLeMaximumAdvertisingDataLength}
-     * @param periodicParameters periodic advertisng parameters. If null, periodic advertising will
+     * @param scanResponse Scan response associated with the advertisement data. Size must not
+     *                     exceed {@link BluetoothAdapter#getLeMaximumAdvertisingDataLength}
+     * @param periodicParameters Periodic advertisng parameters. If null, periodic advertising will
      *                     not be started.
      * @param periodicData Periodic advertising data. Size must not exceed
      *                     {@link BluetoothAdapter#getLeMaximumAdvertisingDataLength}
-     * @param timeoutMillis Advertising time limit. May not exceed 180000
+     * @param duration advertising duration, in 10ms unit. Valid range is from 1 (10ms) to
+     *                     65535 (655,350 ms). 0 means advertising should continue until stopped.
+     * @param maxExtendedAdvertisingEvents maximum number of extended advertising events the
+     *                     controller shall attempt to send prior to terminating the extended
+     *                     advertising, even if the duration has not expired. Valid range is
+     *                     from 1 to 255. 0 means no maximum.
      * @param callback Callback for advertising set.
-     * @param handler thread upon which the callbacks will be invoked.
-     * @throws IllegalArgumentException when any of the data parameter exceed the maximum allowable
+     * @param handler Thread upon which the callbacks will be invoked.
+     * @throws IllegalArgumentException When any of the data parameter exceed the maximum allowable
      *                     size, or unsupported advertising PHY is selected, or when attempt to use
      *                     Periodic Advertising feature is made when it's not supported by the
-     *                     controller.
+     *                     controller, or when maxExtendedAdvertisingEvents is used on a controller
+     *                     that doesn't support the LE Extended Advertising
      */
     public void startAdvertisingSet(AdvertisingSetParameters parameters,
                                     AdvertiseData advertiseData, AdvertiseData scanResponse,
                                     PeriodicAdvertisingParameters periodicParameters,
-                                    AdvertiseData periodicData, int timeoutMillis,
-                                    AdvertisingSetCallback callback, Handler handler) {
+                                    AdvertiseData periodicData, int duration,
+                                    int maxExtendedAdvertisingEvents, AdvertisingSetCallback callback,
+                                    Handler handler) {
         BluetoothLeUtils.checkAdapterStateOn(mBluetoothAdapter);
         if (callback == null) {
           throw new IllegalArgumentException("callback cannot be null");
@@ -372,6 +392,22 @@ public final class BluetoothLeAdvertiser {
             }
         }
 
+        if (maxExtendedAdvertisingEvents < 0 || maxExtendedAdvertisingEvents > 255) {
+            throw new IllegalArgumentException(
+                "maxExtendedAdvertisingEvents out of range: " + maxExtendedAdvertisingEvents);
+        }
+
+        if (maxExtendedAdvertisingEvents != 0 &&
+            !mBluetoothAdapter.isLePeriodicAdvertisingSupported()) {
+            throw new IllegalArgumentException(
+                "Can't use maxExtendedAdvertisingEvents with controller that don't support " +
+                "LE Extended Advertising");
+        }
+
+        if (duration < 0 || duration > 65535) {
+            throw new IllegalArgumentException("duration out of range: " + duration);
+        }
+
         IBluetoothGatt gatt;
         try {
           gatt = mBluetoothManager.getBluetoothGatt();
@@ -388,7 +424,7 @@ public final class BluetoothLeAdvertiser {
 
         try {
             gatt.startAdvertisingSet(parameters, advertiseData, scanResponse, periodicParameters,
-                                     periodicData, timeoutMillis, wrapped);
+                                     periodicData, duration, maxExtendedAdvertisingEvents, wrapped);
         } catch (RemoteException e) {
           Log.e(TAG, "Failed to start advertising set - ", e);
           throw new IllegalStateException("Failed to start advertising set");
