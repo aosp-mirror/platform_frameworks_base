@@ -27,7 +27,4 @@
     <string name="pip_onboarding_title" msgid="7850436557670253991">"Isithombe-phakathi-kwesithombe"</string>
     <string name="pip_onboarding_description" msgid="4028124563309465267">"Lokhu kugcina ividiyo yakho ibonakala uze udlale enye. Cindezela futhi ubambe okuthi "<b>"EKHAYA"</b>" ukuze uyilawule."</string>
     <string name="pip_onboarding_button" msgid="3957426748484904611">"Ngiyezwa"</string>
-    <string name="recents_tv_dismiss" msgid="3555093879593377731">"Cashisa"</string>
-  <string-array name="recents_tv_blacklist_array">
-  </string-array>
 </resources>

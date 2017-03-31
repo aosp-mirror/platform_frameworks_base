@@ -27,7 +27,4 @@
     <string name="pip_onboarding_title" msgid="7850436557670253991">"ચિત્ર-માં-ચિત્ર"</string>
     <string name="pip_onboarding_description" msgid="4028124563309465267">"તમે બીજી વિડિઓ ચલાવો નહીં ત્યાં સુધી આ તમારી વિડિઓને દૃશ્યક્ષમ રાખે છે. તેને નિયંત્રિત કરવા માટે "<b>"હોમ"</b>" દબાવી અને પકડી રાખો."</string>
     <string name="pip_onboarding_button" msgid="3957426748484904611">"સમજાઈ ગયું"</string>
-    <string name="recents_tv_dismiss" msgid="3555093879593377731">"છોડી દો"</string>
-  <string-array name="recents_tv_blacklist_array">
-  </string-array>
 </resources>

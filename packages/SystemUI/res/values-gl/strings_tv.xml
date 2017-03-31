@@ -27,7 +27,4 @@
     <string name="pip_onboarding_title" msgid="7850436557670253991">"Imaxe superposta"</string>
     <string name="pip_onboarding_description" msgid="4028124563309465267">"O vídeo manterase visible ata que reproduzas outro. Mantén premido "<b>"INICIO"</b>" para controlalo."</string>
     <string name="pip_onboarding_button" msgid="3957426748484904611">"De acordo"</string>
-    <string name="recents_tv_dismiss" msgid="3555093879593377731">"Ignorar"</string>
-  <string-array name="recents_tv_blacklist_array">
-  </string-array>
 </resources>

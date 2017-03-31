@@ -79,7 +79,8 @@
     <string name="screenshot_failed_title" msgid="705781116746922771">"تعذر التقاط لقطة الشاشة."</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"حدثت مشكلة أثناء حفظ لقطة الشاشة."</string>
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"يتعذر حفظ لقطة الشاشة نظرًا لأن مساحة التخزين المتاحة محدودة."</string>
-    <string name="screenshot_failed_to_capture_text" msgid="7602391003979898374">"غير مسموح بالتقاط لقطات شاشة نظرًا لإذن يتعلق بالتطبيق أو بالمؤسسة."</string>
+    <!-- no translation found for screenshot_failed_to_capture_text (173674476457581486) -->
+    <skip />
     <string name="usb_preference_title" msgid="6551050377388882787">"‏خيارات نقل الملفات عبر USB"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"‏تحميل كمشغل وسائط (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"‏تحميل ككاميرا (PTP)"</string>
@@ -94,7 +95,8 @@
     <string name="accessibility_phone_button" msgid="6738112589538563574">"الهاتف"</string>
     <string name="accessibility_voice_assist_button" msgid="487611083884852965">"المساعد الصوتي"</string>
     <string name="accessibility_unlock_button" msgid="128158454631118828">"إلغاء القفل"</string>
-    <string name="accessibility_unlock_button_fingerprint" msgid="8214125623493923751">"زر إلغاء القفل، في انتظار بصمة إصبع"</string>
+    <!-- no translation found for accessibility_waiting_for_fingerprint (4808860050517462885) -->
+    <skip />
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"إلغاء القفل دون استخدام بصمة إصبعك"</string>
     <string name="unlock_label" msgid="8779712358041029439">"إلغاء القفل"</string>
     <string name="phone_label" msgid="2320074140205331708">"فتح الهاتف"</string>
@@ -204,9 +206,9 @@
     <string name="accessibility_quick_settings_dnd_priority_on" msgid="1448402297221249355">"تم تشغيل \"عدم الإزعاج، الأولوية فقط\"."</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"تم تشغيل \"عدم الإزعاج، كتم الصوت تمامًا\"."</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"تم تشغيل \"عدم الإزعاج، التنبيهات فقط\"."</string>
-    <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"الرجاء عدم الإزعاج."</string>
-    <string name="accessibility_quick_settings_dnd_off" msgid="2371832603753738581">"تم تعطيل \"الرجاء عدم الإزعاج\"."</string>
-    <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"تم تعطيل \"الرجاء عدم الإزعاج\"."</string>
+    <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"عدم الإزعاج."</string>
+    <string name="accessibility_quick_settings_dnd_off" msgid="2371832603753738581">"تم تعطيل \"عدم الإزعاج\"."</string>
+    <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"تم تعطيل \"عدم الإزعاج\"."</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"تم تشغيل \"عدم الإزعاج\"."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="6341675755803320038">"البلوتوث."</string>
     <string name="accessibility_quick_settings_bluetooth_off" msgid="2133631372372064339">"إيقاف البلوتوث."</string>
@@ -240,8 +242,7 @@
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="650231949881093289">"تم تعطيل توفير البيانات."</string>
     <string name="accessibility_quick_settings_data_saver_changed_on" msgid="4218725402373934151">"تم تشغيل توفير البيانات."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"سطوع الشاشة"</string>
-    <!-- no translation found for accessibility_ambient_display_charging (9084521679384069087) -->
-    <skip />
+    <string name="accessibility_ambient_display_charging" msgid="9084521679384069087">"جارٍ الشحن"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"بيانات شبكات الجيل الثاني والثالث متوقفة مؤقتًا"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"تم إيقاف بيانات شبكة الجيل الرابع مؤقتًا"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"تم إيقاف بيانات شبكة الجوّال مؤقتًا"</string>
@@ -274,7 +275,7 @@
     <string name="dessert_case" msgid="1295161776223959221">"حالة الحلويات"</string>
     <string name="start_dreams" msgid="5640361424498338327">"شاشة التوقف"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
-    <string name="quick_settings_dnd_label" msgid="8735855737575028208">"الرجاء عدم الإزعاج"</string>
+    <string name="quick_settings_dnd_label" msgid="8735855737575028208">"عدم الإزعاج"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"الأولوية فقط"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"التنبيهات فقط"</string>
     <string name="quick_settings_dnd_none_label" msgid="5025477807123029478">"كتم الصوت تمامًا"</string>
@@ -285,7 +286,8 @@
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"السطوع"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"دوران تلقائي"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"التدوير التلقائي للشاشة"</string>
-    <string name="accessibility_quick_settings_rotation_value" msgid="1428962304214992318">"ضبط على <xliff:g id="ID_1">%s</xliff:g>"</string>
+    <!-- no translation found for accessibility_quick_settings_rotation_value (8187398200140760213) -->
+    <skip />
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"تم قفل التدوير"</string>
     <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"عمودي"</string>
     <string name="quick_settings_rotation_locked_landscape_label" msgid="8553157770061178719">"أفقي"</string>
@@ -343,7 +345,6 @@
     <string name="recents_launch_error_message" msgid="2969287838120550506">"تعذر بدء <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"تم تعطيل <xliff:g id="APP">%s</xliff:g> في الوضع الآمن."</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"مسح الكل"</string>
-    <string name="recents_incompatible_app_message" msgid="5075812958564082451">"لا تتوفر في التطبيق إمكانية تقسيم الشاشة"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"اسحب هنا لاستخدام وضع تقسيم الشاشة"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"تقسيم أفقي"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"تقسيم رأسي"</string>
@@ -369,7 +370,7 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"الإشعارات الأقل إلحاحًا أدناه"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"انقر مرة أخرى للفتح"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"مرر سريعًا لأعلى لإلغاء القفل"</string>
-    <string name="do_disclosure_generic" msgid="8498005633306135779">"تتم إدارة هذا الجهاز"</string>
+    <string name="do_disclosure_generic" msgid="5615898451805157556">"تتولى مؤسستك إدارة هذا الجهاز."</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"تتم إدارة هذا الجهاز بواسطة <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="phone_hint" msgid="4872890986869209950">"يمكنك التمرير سريعًا من الرمز لتشغيل الهاتف"</string>
     <string name="voice_hint" msgid="8939888732119726665">"يمكنك التمرير سريعًا من الرمز لتشغيل المساعد الصوتي"</string>
@@ -422,13 +423,68 @@
     <string name="profile_owned_footer" msgid="8021888108553696069">"ربما تتم مراقبة الملف الشخصي"</string>
     <string name="vpn_footer" msgid="2388611096129106812">"قد تكون الشبكة خاضعة للمراقبة"</string>
     <string name="branded_vpn_footer" msgid="2168111859226496230">"قد تكون الشبكة خاضعة للمراقبة"</string>
+    <!-- no translation found for quick_settings_disclosure_management_monitoring (6645176135063957394) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_management_monitoring (370622174777570853) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_management_named_vpn (1085137869053332307) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_management_named_vpn (6290456493852584017) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_management (3294967280853150271) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_management (1059403025094542908) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_management_vpns (3698767349925266482) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_management_vpns (7777821385318891527) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_managed_profile_monitoring (5125463987558278215) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_managed_profile_monitoring (8973606847896650284) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_monitoring (679658227269205728) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_vpns (8170318392053156330) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_managed_profile_named_vpn (3494535754792751741) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_personal_profile_named_vpn (4467456202486569906) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_vpn (6943724064780847080) -->
+    <skip />
     <string name="monitoring_title_device_owned" msgid="7121079311903859610">"مراقبة الأجهزة"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"مراقبة الملف الشخصي"</string>
     <string name="monitoring_title" msgid="169206259253048106">"مراقبة الشبكات"</string>
     <string name="monitoring_subtitle_vpn" msgid="876537538087857300">"‏شبكة ظاهرية خاصة (VPN)"</string>
-    <string name="monitoring_subtitle_network_logging" msgid="5569072711320784030">"تسجيل بيانات الشبكة"</string>
+    <!-- no translation found for monitoring_subtitle_network_logging (3341264304793193386) -->
+    <skip />
+    <!-- no translation found for monitoring_subtitle_ca_certificate (3874151893894355988) -->
+    <skip />
     <string name="disable_vpn" msgid="4435534311510272506">"تعطيل الشبكة الظاهرية الخاصة"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"‏قطع الاتصال بشبكة VPN"</string>
+    <!-- no translation found for monitoring_button_view_policies (100913612638514424) -->
+    <skip />
+    <!-- no translation found for monitoring_description_named_management (4872859182820011954) -->
+    <skip />
+    <!-- no translation found for monitoring_description_management (3115563193381106341) -->
+    <skip />
+    <!-- no translation found for monitoring_description_management_ca_certificate (5202023784131001751) -->
+    <skip />
+    <!-- no translation found for monitoring_description_managed_profile_ca_certificate (4683248196789897964) -->
+    <skip />
+    <!-- no translation found for monitoring_description_ca_certificate (7886985418413598352) -->
+    <skip />
+    <!-- no translation found for monitoring_description_management_network_logging (7184005419733060736) -->
+    <skip />
+    <!-- no translation found for monitoring_description_named_vpn (639013857356724268) -->
+    <skip />
+    <!-- no translation found for monitoring_description_two_named_vpns (4479748971871539316) -->
+    <skip />
+    <!-- no translation found for monitoring_description_managed_profile_named_vpn (1427905889862420559) -->
+    <skip />
+    <!-- no translation found for monitoring_description_personal_profile_named_vpn (3133980926929069283) -->
+    <skip />
     <string name="monitoring_description_do_header_generic" msgid="96588491028288691">"تتم إدارة جهازك بواسطة <xliff:g id="DEVICE_OWNER_APP">%1$s</xliff:g>."</string>
     <string name="monitoring_description_do_header_with_name" msgid="5511133708978206460">"تستخدم <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> تطبيق <xliff:g id="DEVICE_OWNER_APP">%2$s</xliff:g> لإدارة جهازك."</string>
     <string name="monitoring_description_do_body" msgid="3639594537660975895">"يمكن للمشرف مراقبة الإعدادات وإدارتها والدخول إلى المؤسسة والتطبيقات والبيانات المرتبطة بجهازك ومعلومات موقع الجهاز."</string>
@@ -437,15 +493,22 @@
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"لقد اتصلت بتطبيق <xliff:g id="VPN_APP">%1$s</xliff:g>، الذي يمكن أن يراقب نشاط الشبكة، بما في ذلك رسائل البريد الإلكتروني والتطبيقات والمواقع الإلكترونية."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"‏فتح إعدادات الشبكة الظاهرية الخاصة (VPN)"</string>
+    <!-- no translation found for monitoring_description_ca_cert_settings_separator (4987350385906393626) -->
+    <skip />
+    <!-- no translation found for monitoring_description_ca_cert_settings (5489969458872997092) -->
+    <skip />
     <string name="monitoring_description_network_logging" msgid="7223505523384076027">"شغَّل المشرف ميزة تسجيل بيانات الشبكة، والتي يتم من خلالها مراقبة حركة البيانات على جهازك.\n\nللحصول على المزيد من المعلومات، اتصل بالمشرف."</string>
     <string name="monitoring_description_vpn" msgid="4445150119515393526">"‏لقد منحت تطبيقًا الإذن لإعداد اتصال شبكة ظاهرية خاصة (VPN).\n\nيمكن لهذا التطبيق مراقبة أنشطتك على الجهاز والشبكة، بما في ذلك الرسائل الإلكترونية والتطبيقات ومواقع الويب."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="2958019119161161530">"تتم إدارة ملفك الشخصي للعمل بواسطة <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nويمكن للمشرف مراقبة نشاط الشبكة، بما في ذلك رسائل البريد الإلكتروني والتطبيقات والمواقع الإلكترونية.\n\nللحصول على المزيد من المعلومات، اتصل بالمشرف.\n\nوتجدر الإشارة إلى أنك متصل أيضًا بشبكة ظاهرية خاصة يمكن أن تراقب نشاط الشبكة."</string>
     <string name="legacy_vpn_name" msgid="6604123105765737830">"شبكة ظاهرية خاصة"</string>
-    <string name="monitoring_description_app" msgid="6259179342284742878">"أنت متصل بـ <xliff:g id="APPLICATION">%1$s</xliff:g>، الذي يمكنه مراقبة أنشطتك على الشبكة، بما في ذلك الرسائل الإلكترونية والتطبيقات ومواقع الويب."</string>
+    <!-- no translation found for monitoring_description_app (1828472472674709532) -->
+    <skip />
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"أنت متصل بـ <xliff:g id="APPLICATION">%1$s</xliff:g>، الذي يمكنه مراقبة أنشطتك الشخصية على الشبكة، بما في ذلك الرسائل الإلكترونية والتطبيقات ومواقع الويب."</string>
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"أنت متصل بـ <xliff:g id="APPLICATION">%1$s</xliff:g>، الذي يمكنه مراقبة أنشطتك الشخصية على الشبكة، بما في ذلك الرسائل الإلكترونية والتطبيقات ومواقع الويب."</string>
-    <string name="monitoring_description_app_work" msgid="7777228449969022305">"تتم إدارة ملفك الشخصي للعمل بواسطة <xliff:g id="ORGANIZATION">%1$s</xliff:g>، وهو متصل بتطبيق <xliff:g id="APPLICATION">%2$s</xliff:g>، الذي يمكن أن يراقب نشاطك على شبكة العمل، بما في ذلك رسائل البريد الإلكتروني والتطبيقات والمواقع الإلكترونية.\n\nللحصول على المزيد من المعلومات، اتصل بالمشرف."</string>
-    <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"تتم إدارة ملفك الشخصي للعمل عن طريق <xliff:g id="ORGANIZATION">%1$s</xliff:g>. وهذا الملف الشخصي للعمل متصل بـ <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>، الذي يمكنه مراقبة أنشطتك على شبكة العمل، بما في ذلك الرسائل الإلكترونية والتطبيقات ومواقع الويب.\n\nأنت متصل أيضًا بـ <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>، الذي يمكنه مراقبة أنشطتك الشخصية على الشبكة."</string>
+    <!-- no translation found for monitoring_description_app_work (4612997849787922906) -->
+    <skip />
+    <!-- no translation found for monitoring_description_app_personal_work (5664165460056859391) -->
+    <skip />
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"سيظل الجهاز مقفلاً إلى أن يتم إلغاء قفله يدويًا"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"الحصول على الإشعارات بشكل أسرع"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"الاطلاع عليها قبل إلغاء القفل"</string>
@@ -476,10 +539,8 @@
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"‏%1$s. انقر لإلغاء التجاهل."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"‏%1$s. انقر للتعيين على الاهتزاز. قد يتم تجاهل خدمات إمكانية الوصول."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"‏%1$s. انقر للتجاهل. قد يتم تجاهل خدمات إمكانية الوصول."</string>
-    <!-- no translation found for volume_stream_content_description_vibrate_a11y (6427727603978431301) -->
-    <skip />
-    <!-- no translation found for volume_stream_content_description_mute_a11y (8995013018414535494) -->
-    <skip />
+    <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"‏%1$s. انقر للتعيين على الاهتزاز."</string>
+    <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"‏%1$s. انقر لكتم الصوت."</string>
     <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"‏تم عرض %s عنصر تحكم في مستوى الصوت. يمكنك التمرير سريعًا لأعلى للتجاهل."</string>
     <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"تم إخفاء عناصر التحكم في مستوى الصوت"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"أداة ضبط واجهة مستخدم النظام"</string>
@@ -530,13 +591,18 @@
     <string name="power_notification_controls_description" msgid="4372459941671353358">"باستخدام عناصر التحكم في إشعار التشغيل، يمكنك تعيين مستوى الأهمية من 0 إلى 5 لإشعارات التطبيق. \n\n"<b>"المستوى 5"</b>" \n- العرض أعلى قائمة الإشعارات \n- يسمح بمقاطعة ملء الشاشة \n- الظهور الخاطف دائمًا \n\n"<b>"المستوى 4"</b>" \n- منع مقاطعة ملء الشاشة \n- الظهور الخاطف دائمًا \n\n"<b>"المستوى 3"</b>" \n- منع مقاطعة ملء الشاشة \n- عدم الظهور الخاطف أبدًا \n\n"<b>"المستوى 2"</b>" \n- منع مقاطعة ملء الشاشة \n- عدم الظهور الخاطف أبدًا \n- عدم إصدار أصوات واهتزاز \n\n"<b>"المستوى 1"</b>" \n- منع مقاطعة ملء الشاشة \n- عدم الظهور الخاطف أبدًا \n- عدم إصدار أصوات أو اهتزاز أبدًا \n- الإخفاء من شاشة التأمين وشريط الحالة \n- العرض أسفل قائمة الإشعارات \n\n"<b>"المستوى 0"</b>" \n- حظر جميع الإشعارات من التطبيق"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"الإشعارات"</string>
     <string name="notification_channel_disabled" msgid="5805874247999578073">"لن تتلقى هذه الإشعارات بعد الآن."</string>
-    <plurals name="notification_num_channels_desc" formatted="false" msgid="8808748716499517938">
-      <item quantity="zero">قناة واحدة من <xliff:g id="NUMBER_1">%d</xliff:g> فئة من هذا التطبيق</item>
-      <item quantity="two">قناة واحدة من فئتين (<xliff:g id="NUMBER_1">%d</xliff:g>) من هذا التطبيق</item>
-      <item quantity="few">قناة واحدة من <xliff:g id="NUMBER_1">%d</xliff:g> فئات من هذا التطبيق</item>
-      <item quantity="many">قناة واحدة من <xliff:g id="NUMBER_1">%d</xliff:g> فئة من هذا التطبيق</item>
-      <item quantity="other">قناة واحدة من <xliff:g id="NUMBER_1">%d</xliff:g> فئة من هذا التطبيق</item>
-      <item quantity="one">قناة واحدة من فئة واحدة (<xliff:g id="NUMBER_0">%d</xliff:g>) من هذا التطبيق</item>
+    <string name="notification_num_channels" msgid="2048144408999179471">"<xliff:g id="NUMBER">%d</xliff:g> فئة إشعار"</string>
+    <!-- no translation found for notification_default_channel_desc (2506053815870808359) -->
+    <skip />
+    <!-- no translation found for notification_num_channels_desc (5492793452274077663) -->
+    <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>، <xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>"</string>
+    <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">
+      <item quantity="zero"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g> و<xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g> و<xliff:g id="NUMBER_5">%3$d</xliff:g> أيضًا</item>
+      <item quantity="two"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g> و<xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g> و<xliff:g id="NUMBER_5">%3$d</xliff:g> أيضًا</item>
+      <item quantity="few"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g> و<xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g> و<xliff:g id="NUMBER_5">%3$d</xliff:g> أيضًا</item>
+      <item quantity="many"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g> و<xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g> و<xliff:g id="NUMBER_5">%3$d</xliff:g> أيضًا</item>
+      <item quantity="other"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g> و<xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g> و<xliff:g id="NUMBER_5">%3$d</xliff:g> أيضًا</item>
+      <item quantity="one"><xliff:g id="CHANNEL_NAME_1_0">%1$s</xliff:g> و<xliff:g id="CHANNEL_NAME_2_1">%2$s</xliff:g> و<xliff:g id="NUMBER_2">%3$d</xliff:g> أيضًا</item>
     </plurals>
     <string name="notification_all_categories" msgid="5407190218055113282">"كل الفئات"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"المزيد من الإعدادات"</string>
@@ -547,7 +613,7 @@
     <string name="snooze_option_15_min" msgid="1068727451405610715">"١٥ دقيقة"</string>
     <string name="snooze_option_30_min" msgid="867081342535195788">"٣۰ دقيقة"</string>
     <string name="snooze_option_1_hour" msgid="1098086401880077154">"ساعة واحدة"</string>
-    <string name="snooze_option_dont_snooze" msgid="655446566007801922">"عدم التأجيل"</string>
+    <string name="snooze_option_dont_snooze" msgid="2252098379349499668">"إلغاء"</string>
     <string name="snooze_undo" msgid="6074877317002985129">"تراجع"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"تم تأجيل الإشعار لمدة <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"استخدام البطارية"</string>
@@ -597,9 +663,9 @@
     <string name="keyboard_shortcut_group_applications_youtube" msgid="6555453761294723317">"YouTube"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="9043614299194991263">"التقويم"</string>
     <string name="tuner_full_zen_title" msgid="4540823317772234308">"عرض مع عناصر التحكم في مستوى الصوت"</string>
-    <string name="volume_and_do_not_disturb" msgid="3373784330208603030">"الرجاء عدم الإزعاج"</string>
+    <string name="volume_and_do_not_disturb" msgid="3373784330208603030">"عدم الإزعاج"</string>
     <string name="volume_dnd_silent" msgid="4363882330723050727">"اختصار أزرار مستوى الصوت"</string>
-    <string name="volume_up_silent" msgid="7141255269783588286">"تعطيل \"الرجاء عدم الإزعاج\" عند رفع مستوى الصوت"</string>
+    <string name="volume_up_silent" msgid="7141255269783588286">"تعطيل \"عدم الإزعاج\" عند رفع مستوى الصوت"</string>
     <string name="battery" msgid="7498329822413202973">"البطارية"</string>
     <string name="clock" msgid="7416090374234785905">"ساعة"</string>
     <string name="headset" msgid="4534219457597457353">"سماعة الرأس"</string>
@@ -689,6 +755,9 @@
     <string name="pip_phone_expand" msgid="5889780005575693909">"توسيع"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"تصغير"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"إغلاق"</string>
+    <string name="pip_menu_title" msgid="3328510504196964712">"قائمة صورة داخل صورة"</string>
+    <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> يظهر في صورة داخل صورة"</string>
+    <string name="pip_notification_message" msgid="4171698133469539591">"إذا كنت لا تريد أن يستخدم <xliff:g id="NAME">%s</xliff:g> هذه الميزة، فانقر لفتح الإعدادات، ثم اختر تعطيلها."</string>
     <string name="high_temp_title" msgid="4589508026407318374">"تزداد درجة حرارة الهاتف"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"يتم تقييد عمل بعض الميزات إلى أن تنخفض درجة حرارة الهاتف"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"سيحاول الهاتف تخفيض درجة حرارته تلقائيًا. سيظل بإمكانك استخدام هاتفك، ولكن قد يعمل بشكل أبطأ.\n\nبعد أن تنخفض درجة حرارة الهاتف، سيستعيد سرعته المعتادة."</string>
@@ -711,8 +780,6 @@
     <string name="notification_channel_general" msgid="4525309436693914482">"رسائل عامة"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"سعة التخزين"</string>
     <string name="instant_apps" msgid="6647570248119804907">"التطبيقات الفورية"</string>
-    <!-- no translation found for pip_menu_title (3328510504196964712) -->
-    <skip />
     <string name="instant_apps_message" msgid="8116608994995104836">"لا تتطلب التطبيقات الفورية إجراء التثبيت."</string>
     <string name="app_info" msgid="6856026610594615344">"معلومات عن التطبيق"</string>
     <string name="mobile_data" msgid="7094582042819250762">"بيانات الجوّال"</string>

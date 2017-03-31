@@ -27,7 +27,4 @@
     <string name="pip_onboarding_title" msgid="7850436557670253991">"画中画"</string>
     <string name="pip_onboarding_description" msgid="4028124563309465267">"这样会固定显示您的视频，直到您播放其他视频为止。按住"<b>"主屏幕"</b>"按钮即可控制该功能。"</string>
     <string name="pip_onboarding_button" msgid="3957426748484904611">"知道了"</string>
-    <string name="recents_tv_dismiss" msgid="3555093879593377731">"关闭"</string>
-  <string-array name="recents_tv_blacklist_array">
-  </string-array>
 </resources>

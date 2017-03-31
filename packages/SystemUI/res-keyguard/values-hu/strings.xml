@@ -114,7 +114,8 @@
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3398054847288438444">"Ha vált a profilok között, meg kell adni a mintát"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="7426368139226961699">"Ha vált a profilok között, meg kell adni a PIN-kódot"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="8383831046318421845">"Ha vált a profilok között, meg kell adni a jelszót"</string>
-    <string name="kg_prompt_reason_device_admin" msgid="2438626748767361010">"Az eszközadminisztrátor lezárta az eszközt"</string>
+    <!-- no translation found for kg_prompt_reason_device_admin (3452168247888906179) -->
+    <skip />
     <string name="kg_prompt_reason_user_request" msgid="8236951765212462286">"Az eszközt manuálisan lezárták"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="71299470072448533">
       <item quantity="other">Az eszköz zárolása <xliff:g id="NUMBER_1">%d</xliff:g> órája nem lett feloldva. Erősítse meg a mintát.</item>

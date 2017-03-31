@@ -27,7 +27,4 @@
     <string name="pip_onboarding_title" msgid="7850436557670253991">"PIP 모드"</string>
     <string name="pip_onboarding_description" msgid="4028124563309465267">"다른 동영상을 재생할 때까지 동영상이 계속 표시됩니다. 제어하려면 "<b>"홈"</b>"을 길게 누릅니다."</string>
     <string name="pip_onboarding_button" msgid="3957426748484904611">"확인"</string>
-    <string name="recents_tv_dismiss" msgid="3555093879593377731">"닫기"</string>
-  <string-array name="recents_tv_blacklist_array">
-  </string-array>
 </resources>

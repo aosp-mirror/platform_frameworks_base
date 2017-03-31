@@ -27,7 +27,4 @@
     <string name="pip_onboarding_title" msgid="7850436557670253991">"Слика во слика"</string>
     <string name="pip_onboarding_description" msgid="4028124563309465267">"Видеото се прикажува сѐ додека не пуштите друго. Притиснете и задржете "<b>"ПОЧЕТЕН ЕКРАН"</b>" за да го контролирате."</string>
     <string name="pip_onboarding_button" msgid="3957426748484904611">"Разбрав"</string>
-    <string name="recents_tv_dismiss" msgid="3555093879593377731">"Отфрли"</string>
-  <string-array name="recents_tv_blacklist_array">
-  </string-array>
 </resources>

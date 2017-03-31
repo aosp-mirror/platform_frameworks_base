@@ -114,7 +114,8 @@
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3398054847288438444">"ပရိုဖိုင်များကို ပြောင်းသည့်အခါ ပုံစံ လိုအပ်ပါသည်"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="7426368139226961699">"ပရိုဖိုင်များကို ပြောင်းသည့်အခါ ပင်နံပါတ် လိုအပ်ပါသည်"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="8383831046318421845">"ပရိုဖိုင်များကို ပြောင်းသည့်အခါ စကားဝှက် လိုအပ်ပါသည်"</string>
-    <string name="kg_prompt_reason_device_admin" msgid="2438626748767361010">"စက်ပစ္စည်းစီမံခန့်ခွဲသူသည် စက်ပစ္စည်းကို လော့ခ်ချထားသည်"</string>
+    <!-- no translation found for kg_prompt_reason_device_admin (3452168247888906179) -->
+    <skip />
     <string name="kg_prompt_reason_user_request" msgid="8236951765212462286">"စက်ပစ္စည်းကို ကိုယ်တိုင်ကိုယ်ကျ လော့ခ်ချထားခဲ့သည်"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="71299470072448533">
       <item quantity="other">စက်ပစ္စည်းကို <xliff:g id="NUMBER_1">%d</xliff:g> နာရီကြာ လော့ခ်ဖွင့်ခဲ့ခြင်း မရှိပါ။ ပုံစံအား အတည်ပြုပါ။</item>

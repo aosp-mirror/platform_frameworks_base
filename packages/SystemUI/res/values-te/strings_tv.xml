@@ -27,7 +27,4 @@
     <string name="pip_onboarding_title" msgid="7850436557670253991">"చిత్రంలో చిత్రం"</string>
     <string name="pip_onboarding_description" msgid="4028124563309465267">"ఇది మీరు మరొకటి ప్లే చేసే వరకు మీ వీడియోను వీక్షణలో ఉంచుతుంది. దాన్ని నియంత్రించడానికి "<b>"హోమ్"</b>" నొక్కి, పట్టుకోండి."</string>
     <string name="pip_onboarding_button" msgid="3957426748484904611">"అర్థమైంది"</string>
-    <string name="recents_tv_dismiss" msgid="3555093879593377731">"తీసివేస్తుంది"</string>
-  <string-array name="recents_tv_blacklist_array">
-  </string-array>
 </resources>

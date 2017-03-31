@@ -27,7 +27,4 @@
     <string name="pip_onboarding_title" msgid="7850436557670253991">"ചിത്രം-അതിനുള്ളിൽ-ചിത്രം"</string>
     <string name="pip_onboarding_description" msgid="4028124563309465267">"മറ്റൊരു വീഡിയോ പ്ലേ ചെയ്യുന്നത് വരെ നിങ്ങളുടെ വീഡിയോയെ ഇത് കാഴ്ചയിൽ നിലനിർത്തുന്നു. ഇത് നിയന്ത്രിക്കുന്നതിന് "<b>"ഹോം"</b>" അമർത്തിപ്പിടിക്കുക."</string>
     <string name="pip_onboarding_button" msgid="3957426748484904611">"മനസ്സിലായി"</string>
-    <string name="recents_tv_dismiss" msgid="3555093879593377731">"ഡിസ്മിസ് ചെയ്യുക"</string>
-  <string-array name="recents_tv_blacklist_array">
-  </string-array>
 </resources>

@@ -27,7 +27,4 @@
     <string name="pip_onboarding_title" msgid="7850436557670253991">"Bilde-i-bilde"</string>
     <string name="pip_onboarding_description" msgid="4028124563309465267">"Dette holder videoen din synlig frem til du spiller av en annen video. Trykk og hold inne "<b>"HOME"</b>" for å styre dette."</string>
     <string name="pip_onboarding_button" msgid="3957426748484904611">"Greit"</string>
-    <string name="recents_tv_dismiss" msgid="3555093879593377731">"Avvis"</string>
-  <string-array name="recents_tv_blacklist_array">
-  </string-array>
 </resources>
