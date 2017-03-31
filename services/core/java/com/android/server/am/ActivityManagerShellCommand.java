@@ -145,7 +145,12 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     return runStartActivity(pw);
                 case "startservice":
                 case "start-service":
-                    return runStartService(pw);
+                    return runStartService(pw, false);
+                case "startforegroundservice":
+                case "startfgservice":
+                case "start-foreground-service":
+                case "start-fg-service":
+                    return runStartService(pw, true);
                 case "stopservice":
                 case "stop-service":
                     return runStopService(pw);
@@ -504,7 +509,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
         return 0;
     }
 
-    int runStartService(PrintWriter pw) throws RemoteException {
+    int runStartService(PrintWriter pw, boolean asForeground) throws RemoteException {
         final PrintWriter err = getErrPrintWriter();
         Intent intent;
         try {
@@ -519,7 +524,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
         pw.println("Starting service: " + intent);
         pw.flush();
         ComponentName cn = mInterface.startService(null, intent, intent.getType(),
-                -1, null, false, SHELL_PACKAGE_NAME, mUserId);
+                -1, null, asForeground, SHELL_PACKAGE_NAME, mUserId);
         if (cn == null) {
             err.println("Error: Not found; no service started.");
             return -1;
