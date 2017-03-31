@@ -310,6 +310,18 @@ public final class PhoneAccount implements Parcelable {
         }
 
         /**
+         * Sets the label. See {@link PhoneAccount#getLabel()}.
+         *
+         * @param label The label of the phone account.
+         * @return The builder.
+         * @hide
+         */
+        public Builder setLabel(CharSequence label) {
+            this.mLabel = label;
+            return this;
+        }
+
+        /**
          * Sets the address. See {@link PhoneAccount#getAddress}.
          *
          * @param value The address of the phone account.
