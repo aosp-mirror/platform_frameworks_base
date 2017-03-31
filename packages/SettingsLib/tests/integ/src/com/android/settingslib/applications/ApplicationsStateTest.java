@@ -110,6 +110,70 @@ public class ApplicationsStateTest {
     }
 
     @Test
+    public void testDownloadAndLauncherAndInstantAcceptsCorrectApps() {
+        // should include instant apps
+        mEntry.isHomeApp = false;
+        mEntry.hasLauncherEntry = false;
+        when(mEntry.info.isInstantApp()).thenReturn(true);
+        assertThat(ApplicationsState.FILTER_DOWNLOADED_AND_LAUNCHER_AND_INSTANT.filterApp(mEntry))
+                .isTrue();
+
+        // should included updated system apps
+        when(mEntry.info.isInstantApp()).thenReturn(false);
+        mEntry.info.flags = ApplicationInfo.FLAG_UPDATED_SYSTEM_APP;
+        assertThat(ApplicationsState.FILTER_DOWNLOADED_AND_LAUNCHER_AND_INSTANT.filterApp(mEntry))
+                .isTrue();
+
+        // should not include system apps other than the home app
+        mEntry.info.flags = ApplicationInfo.FLAG_SYSTEM;
+        mEntry.isHomeApp = false;
+        mEntry.hasLauncherEntry = false;
+        assertThat(ApplicationsState.FILTER_DOWNLOADED_AND_LAUNCHER_AND_INSTANT.filterApp(mEntry))
+                .isFalse();
+
+        // should include the home app
+        mEntry.isHomeApp = true;
+        assertThat(ApplicationsState.FILTER_DOWNLOADED_AND_LAUNCHER_AND_INSTANT.filterApp(mEntry))
+                .isTrue();
+
+        // should include any System app with a launcher entry
+        mEntry.isHomeApp = false;
+        mEntry.hasLauncherEntry = true;
+        assertThat(ApplicationsState.FILTER_DOWNLOADED_AND_LAUNCHER_AND_INSTANT.filterApp(mEntry))
+                .isTrue();
+    }
+
+    @Test
+    public void testDownloadAndLauncherAcceptsCorrectApps() {
+        mEntry.isHomeApp = false;
+        mEntry.hasLauncherEntry = false;
+
+        // should included updated system apps
+        when(mEntry.info.isInstantApp()).thenReturn(false);
+        mEntry.info.flags = ApplicationInfo.FLAG_UPDATED_SYSTEM_APP;
+        assertThat(ApplicationsState.FILTER_DOWNLOADED_AND_LAUNCHER.filterApp(mEntry))
+                .isTrue();
+
+        // should not include system apps other than the home app
+        mEntry.info.flags = ApplicationInfo.FLAG_SYSTEM;
+        mEntry.isHomeApp = false;
+        mEntry.hasLauncherEntry = false;
+        assertThat(ApplicationsState.FILTER_DOWNLOADED_AND_LAUNCHER.filterApp(mEntry))
+                .isFalse();
+
+        // should include the home app
+        mEntry.isHomeApp = true;
+        assertThat(ApplicationsState.FILTER_DOWNLOADED_AND_LAUNCHER.filterApp(mEntry))
+                .isTrue();
+
+        // should include any System app with a launcher entry
+        mEntry.isHomeApp = false;
+        mEntry.hasLauncherEntry = true;
+        assertThat(ApplicationsState.FILTER_DOWNLOADED_AND_LAUNCHER.filterApp(mEntry))
+                .isTrue();
+    }
+
+    @Test
     public void testInstantFilterAcceptsInstantApp() {
         when(mEntry.info.isInstantApp()).thenReturn(true);
         assertThat(ApplicationsState.FILTER_INSTANT.filterApp(mEntry)).isTrue();

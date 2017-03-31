@@ -1394,7 +1394,9 @@ public class ApplicationsState {
 
         @Override
         public boolean filterApp(AppEntry entry) {
-            if ((entry.info.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0) {
+            if (AppUtils.isInstant(entry.info)) {
+                return false;
+            } else if ((entry.info.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0) {
                 return true;
             } else if ((entry.info.flags & ApplicationInfo.FLAG_SYSTEM) == 0) {
                 return true;
@@ -1405,6 +1407,23 @@ public class ApplicationsState {
             }
             return false;
         }
+    };
+
+    /**
+     * Displays a combined list with "downloaded" and "visible in launcher" apps only.
+     */
+    public static final AppFilter FILTER_DOWNLOADED_AND_LAUNCHER_AND_INSTANT = new AppFilter() {
+
+        @Override
+        public void init() {
+        }
+
+        @Override
+        public boolean filterApp(AppEntry entry) {
+            return AppUtils.isInstant(entry.info)
+                    || FILTER_DOWNLOADED_AND_LAUNCHER.filterApp(entry);
+        }
+
     };
 
     public static final AppFilter FILTER_THIRD_PARTY = new AppFilter() {
