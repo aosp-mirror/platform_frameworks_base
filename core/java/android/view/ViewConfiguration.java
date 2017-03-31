@@ -232,10 +232,16 @@ public class ViewConfiguration {
     private static final int OVERFLING_DISTANCE = 6;
 
     /**
-     * Amount to scroll in response to a {@link MotionEvent#ACTION_SCROLL} event, in dips per
-     * axis value.
+     * Amount to scroll in response to a horizontal {@link MotionEvent#ACTION_SCROLL} event,
+     * in dips per axis value.
      */
-    private static final int SCROLL_FACTOR = 64;
+    private static final float HORIZONTAL_SCROLL_FACTOR = 64;
+
+    /**
+     * Amount to scroll in response to a vertical {@link MotionEvent#ACTION_SCROLL} event,
+     * in dips per axis value.
+     */
+    private static final float VERTICAL_SCROLL_FACTOR = 64;
 
     /**
      * Default duration to hide an action mode for.
@@ -289,7 +295,8 @@ public class ViewConfiguration {
     private final int mOverflingDistance;
     private final boolean mFadingMarqueeEnabled;
     private final long mGlobalActionsKeyTimeout;
-    private final int mScrollFactor;
+    private final float mVerticalScrollFactor;
+    private final float mHorizontalScrollFactor;
 
     private boolean sHasPermanentMenuKey;
     private boolean sHasPermanentMenuKeySet;
@@ -319,7 +326,8 @@ public class ViewConfiguration {
         mOverflingDistance = OVERFLING_DISTANCE;
         mFadingMarqueeEnabled = true;
         mGlobalActionsKeyTimeout = GLOBAL_ACTIONS_KEY_TIMEOUT;
-        mScrollFactor = SCROLL_FACTOR;
+        mHorizontalScrollFactor = HORIZONTAL_SCROLL_FACTOR;
+        mVerticalScrollFactor = VERTICAL_SCROLL_FACTOR;
     }
 
     /**
@@ -406,8 +414,11 @@ public class ViewConfiguration {
                 com.android.internal.R.dimen.config_viewMaxFlingVelocity);
         mGlobalActionsKeyTimeout = res.getInteger(
                 com.android.internal.R.integer.config_globalActionsKeyTimeout);
-        mScrollFactor = res.getDimensionPixelSize(
-                com.android.internal.R.dimen.config_scrollFactor);
+
+        mHorizontalScrollFactor = res.getDimensionPixelSize(
+                com.android.internal.R.dimen.config_horizontalScrollFactor);
+        mVerticalScrollFactor = res.getDimensionPixelSize(
+                com.android.internal.R.dimen.config_verticalScrollFactor);
     }
 
     /**
@@ -730,9 +741,27 @@ public class ViewConfiguration {
     /**
      * @return Amount to scroll in response to a {@link MotionEvent#ACTION_SCROLL} event. Multiply
      * this by the event's axis value to obtain the number of pixels to be scrolled.
+     *
+     * @removed
      */
     public int getScaledScrollFactor() {
-        return mScrollFactor;
+        return (int) mVerticalScrollFactor;
+    }
+
+    /**
+     * @return Amount to scroll in response to a horizontal {@link MotionEvent#ACTION_SCROLL} event.
+     * Multiply this by the event's axis value to obtain the number of pixels to be scrolled.
+     */
+    public float getScaledHorizontalScrollFactor() {
+        return mHorizontalScrollFactor;
+    }
+
+    /**
+     * @return Amount to scroll in response to a vertical {@link MotionEvent#ACTION_SCROLL} event.
+     * Multiply this by the event's axis value to obtain the number of pixels to be scrolled.
+     */
+    public float getScaledVerticalScrollFactor() {
+        return mVerticalScrollFactor;
     }
 
     /**

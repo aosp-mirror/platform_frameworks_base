@@ -618,7 +618,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     private int mTouchSlop;
     private float mDensityScale;
 
-    private float mScrollFactor;
+    private float mVerticalScrollFactor;
 
     private InputConnection mDefInputConnection;
     private InputConnectionWrapper mPublicInputConnection;
@@ -877,7 +877,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
         final ViewConfiguration configuration = ViewConfiguration.get(mContext);
         mTouchSlop = configuration.getScaledTouchSlop();
-        mScrollFactor = configuration.getScaledScrollFactor();
+        mVerticalScrollFactor = configuration.getScaledVerticalScrollFactor();
         mMinimumVelocity = configuration.getScaledMinimumFlingVelocity();
         mMaximumVelocity = configuration.getScaledMaximumFlingVelocity();
         mOverscrollDistance = configuration.getScaledOverscrollDistance();
@@ -4225,7 +4225,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     axisValue = 0;
                 }
 
-                final int delta = Math.round(axisValue * mScrollFactor);
+                final int delta = Math.round(axisValue * mVerticalScrollFactor);
                 if (delta != 0) {
                     if (!trackMotionScroll(delta, delta)) {
                         return true;

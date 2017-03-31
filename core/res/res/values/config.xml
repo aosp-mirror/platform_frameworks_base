@@ -1885,8 +1885,16 @@
          Takes effect only if the scrollbar drawables have no intrinsic size. -->
     <dimen name="config_scrollbarSize">4dp</dimen>
 
-    <!-- Distance that should be scrolled in response to a {@link MotionEvent#ACTION_SCROLL event}
-         with an axis value of 1. -->
+    <!-- Distance that should be scrolled, per axis value, in response to a horizontal
+         {@link MotionEvent#ACTION_SCROLL} event. -->
+    <dimen name="config_horizontalScrollFactor">64dp</dimen>
+
+    <!-- Distance that should be scrolled, per axis value, in response to a vertical
+         {@link MotionEvent#ACTION_SCROLL} event. -->
+    <dimen name="config_verticalScrollFactor">64dp</dimen>
+
+    <!-- Obsolete. Distance that should be scrolled, per axis value, in response to a
+         {@link MotionEvent#ACTION_SCROLL} event. -->
     <dimen name="config_scrollFactor">64dp</dimen>
 
     <!-- Maximum number of grid columns permitted in the ResolverActivity

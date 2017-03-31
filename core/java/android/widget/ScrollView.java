@@ -135,7 +135,7 @@ public class ScrollView extends FrameLayout {
     private int mOverscrollDistance;
     private int mOverflingDistance;
 
-    private int mScrollFactor;
+    private float mVerticalScrollFactor;
 
     /**
      * ID of the active pointer. This is used to retain consistency during
@@ -250,7 +250,7 @@ public class ScrollView extends FrameLayout {
         mMaximumVelocity = configuration.getScaledMaximumFlingVelocity();
         mOverscrollDistance = configuration.getScaledOverscrollDistance();
         mOverflingDistance = configuration.getScaledOverflingDistance();
-        mScrollFactor = configuration.getScaledScrollFactor();
+        mVerticalScrollFactor = configuration.getScaledVerticalScrollFactor();
     }
 
     @Override
@@ -796,7 +796,7 @@ public class ScrollView extends FrameLayout {
                     axisValue = 0;
                 }
 
-                final int delta = Math.round(axisValue * mScrollFactor);
+                final int delta = Math.round(axisValue * mVerticalScrollFactor);
                 if (delta != 0) {
                     final int range = getScrollRange();
                     int oldScrollY = mScrollY;
@@ -1875,7 +1875,7 @@ public class ScrollView extends FrameLayout {
 
         @Override
         public String toString() {
-            return "HorizontalScrollView.SavedState{"
+            return "ScrollView.SavedState{"
                     + Integer.toHexString(System.identityHashCode(this))
                     + " scrollPosition=" + scrollPosition + "}";
         }
