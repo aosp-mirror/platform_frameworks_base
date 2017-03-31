@@ -25,7 +25,6 @@ import android.provider.Settings.Global;
 import android.service.quicksettings.Tile;
 import android.widget.Switch;
 
-import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
@@ -43,6 +42,7 @@ public class HotspotTile extends QSTileImpl<AirplaneBooleanState> {
     private final AnimationIcon mEnable =
             new AnimationIcon(R.drawable.ic_hotspot_enable_animation,
                     R.drawable.ic_hotspot_disable);
+    private final Icon mEnabledStatic = ResourceIcon.get(R.drawable.ic_hotspot_disable);
     private final AnimationIcon mDisable =
             new AnimationIcon(R.drawable.ic_hotspot_disable_animation,
                     R.drawable.ic_hotspot_enable);
@@ -124,10 +124,15 @@ public class HotspotTile extends QSTileImpl<AirplaneBooleanState> {
         } else {
             state.value = mController.isHotspotEnabled();
         }
-        state.icon = state.value ? mEnable : mDisable;
+        state.icon = !state.value ? mDisable
+                : state.isTransient ? mEnabledStatic
+                : mEnable;
         boolean wasAirplane = state.isAirplaneMode;
         state.isAirplaneMode = mAirplaneMode.getValue() != 0;
-        if (state.isAirplaneMode) {
+        state.isTransient = mController.isHotspotTransient();
+        if (state.isTransient) {
+            state.icon = ResourceIcon.get(R.drawable.ic_hotspot_transient_animation);
+        } else if (state.isAirplaneMode) {
             state.icon = mUnavailable;
         } else if (wasAirplane) {
             state.icon = mDisableNoAnimation;
@@ -135,7 +140,7 @@ public class HotspotTile extends QSTileImpl<AirplaneBooleanState> {
         state.expandedAccessibilityClassName = Switch.class.getName();
         state.contentDescription = state.label;
         state.state = state.isAirplaneMode ? Tile.STATE_UNAVAILABLE
-                : state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
+                : state.value || state.isTransient ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
     }
 
     @Override
