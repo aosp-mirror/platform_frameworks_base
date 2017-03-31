@@ -37,6 +37,9 @@ import com.android.internal.widget.LockPatternUtils;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Storage for the lock settings service.
@@ -440,6 +443,35 @@ class LockSettingsStorage {
             file.delete();
             mCache.putFile(path, null);
         }
+    }
+
+    public Map<Integer, List<Long>> listSyntheticPasswordHandlesForAllUsers(String stateName) {
+        Map<Integer, List<Long>> result = new ArrayMap<>();
+        final UserManager um = UserManager.get(mContext);
+        for (UserInfo user : um.getUsers(false)) {
+            result.put(user.id, listSyntheticPasswordHandlesForUser(stateName, user.id));
+        }
+        return result;
+    }
+
+    public List<Long> listSyntheticPasswordHandlesForUser(String stateName, int userId) {
+        File baseDir = getSyntheticPasswordDirectoryForUser(userId);
+        List<Long> result = new ArrayList<>();
+        File[] files = baseDir.listFiles();
+        if (files == null) {
+            return result;
+        }
+        for (File file : files) {
+            String[] parts = file.getName().split("\\.");
+            if (parts.length == 2 && parts[1].equals(stateName)) {
+                try {
+                    result.add(Long.parseUnsignedLong(parts[0], 16));
+                } catch (NumberFormatException e) {
+                    Slog.e(TAG, "Failed to parse handle " + parts[0]);
+                }
+            }
+        }
+        return result;
     }
 
     @VisibleForTesting

@@ -17,6 +17,7 @@
 package com.android.server;
 
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -82,6 +83,7 @@ public class BaseLockSettingsServiceTests extends AndroidTestCase {
     IActivityManager mActivityManager;
     DevicePolicyManager mDevicePolicyManager;
     KeyStore mKeyStore;
+    MockSyntheticPasswordManager mSpManager;
 
     @Override
     protected void setUp() throws Exception {
@@ -94,6 +96,7 @@ public class BaseLockSettingsServiceTests extends AndroidTestCase {
         mStorageManager = new MockStorageManager();
         mActivityManager = mock(IActivityManager.class);
         mDevicePolicyManager = mock(DevicePolicyManager.class);
+
         mContext = new MockLockSettingsContext(getContext(), mUserManager, mNotificationManager,
                 mDevicePolicyManager);
         mStorage = new LockSettingsStorageTestable(mContext,
@@ -105,12 +108,15 @@ public class BaseLockSettingsServiceTests extends AndroidTestCase {
             storageDir.mkdirs();
         }
 
+        mSpManager = new MockSyntheticPasswordManager(mStorage, mGateKeeperService);
         mService = new LockSettingsServiceTestable(mContext, mLockPatternUtils,
-                mStorage, mGateKeeperService, mKeyStore, mStorageManager, mActivityManager);
+                mStorage, mGateKeeperService, mKeyStore, mStorageManager, mActivityManager,
+                mSpManager);
         when(mUserManager.getUserInfo(eq(PRIMARY_USER_ID))).thenReturn(PRIMARY_USER_INFO);
         mPrimaryUserProfiles.add(PRIMARY_USER_INFO);
         installChildProfile(MANAGED_PROFILE_USER_ID);
         installQuietModeChildProfile(TURNED_OFF_PROFILE_USER_ID);
+        when(mUserManager.getUsers(anyBoolean())).thenReturn(mPrimaryUserProfiles);
         when(mUserManager.getProfiles(eq(PRIMARY_USER_ID))).thenReturn(mPrimaryUserProfiles);
         when(mUserManager.getUserInfo(eq(SECONDARY_USER_ID))).thenReturn(SECONDARY_USER_INFO);
         when(mUserManager.isUserRunning(eq(MANAGED_PROFILE_USER_ID))).thenReturn(true);
