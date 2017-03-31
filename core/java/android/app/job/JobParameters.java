@@ -17,6 +17,7 @@
 package android.app.job;
 
 import android.app.job.IJobCallback;
+import android.content.ClipData;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -44,6 +45,8 @@ public class JobParameters implements Parcelable {
     private final int jobId;
     private final PersistableBundle extras;
     private final Bundle transientExtras;
+    private final ClipData clipData;
+    private final int clipGrantFlags;
     private final IBinder callback;
     private final boolean overrideDeadlineExpired;
     private final Uri[] mTriggeredContentUris;
@@ -53,11 +56,14 @@ public class JobParameters implements Parcelable {
 
     /** @hide */
     public JobParameters(IBinder callback, int jobId, PersistableBundle extras,
-            Bundle transientExtras, boolean overrideDeadlineExpired, Uri[] triggeredContentUris,
+            Bundle transientExtras, ClipData clipData, int clipGrantFlags,
+            boolean overrideDeadlineExpired, Uri[] triggeredContentUris,
             String[] triggeredContentAuthorities) {
         this.jobId = jobId;
         this.extras = extras;
         this.transientExtras = transientExtras;
+        this.clipData = clipData;
+        this.clipGrantFlags = clipGrantFlags;
         this.callback = callback;
         this.overrideDeadlineExpired = overrideDeadlineExpired;
         this.mTriggeredContentUris = triggeredContentUris;
@@ -95,6 +101,24 @@ public class JobParameters implements Parcelable {
      */
     public Bundle getTransientExtras() {
         return transientExtras;
+    }
+
+    /**
+     * @return The clip you passed in when constructing this job with
+     * {@link android.app.job.JobInfo.Builder#setClipData(ClipData, int)}. Will be null
+     * if it was not set.
+     */
+    public ClipData getClipData() {
+        return clipData;
+    }
+
+    /**
+     * @return The clip grant flags you passed in when constructing this job with
+     * {@link android.app.job.JobInfo.Builder#setClipData(ClipData, int)}. Will be 0
+     * if it was not set.
+     */
+    public int getClipGrantFlags() {
+        return clipGrantFlags;
     }
 
     /**
@@ -140,6 +164,13 @@ public class JobParameters implements Parcelable {
         jobId = in.readInt();
         extras = in.readPersistableBundle();
         transientExtras = in.readBundle();
+        if (in.readInt() != 0) {
+            clipData = ClipData.CREATOR.createFromParcel(in);
+            clipGrantFlags = in.readInt();
+        } else {
+            clipData = null;
+            clipGrantFlags = 0;
+        }
         callback = in.readStrongBinder();
         overrideDeadlineExpired = in.readInt() == 1;
         mTriggeredContentUris = in.createTypedArray(Uri.CREATOR);
@@ -162,6 +193,13 @@ public class JobParameters implements Parcelable {
         dest.writeInt(jobId);
         dest.writePersistableBundle(extras);
         dest.writeBundle(transientExtras);
+        if (clipData != null) {
+            dest.writeInt(1);
+            clipData.writeToParcel(dest, flags);
+            dest.writeInt(clipGrantFlags);
+        } else {
+            dest.writeInt(0);
+        }
         dest.writeStrongBinder(callback);
         dest.writeInt(overrideDeadlineExpired ? 1 : 0);
         dest.writeTypedArray(mTriggeredContentUris, flags);

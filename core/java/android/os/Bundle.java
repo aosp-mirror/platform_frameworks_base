@@ -1209,4 +1209,18 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
         }
         return "Bundle[" + mMap.toString() + "]";
     }
+
+    /**
+     * @hide
+     */
+    public synchronized String toShortString() {
+        if (mParcelledData != null) {
+            if (isEmptyParcel()) {
+                return "EMPTY_PARCEL";
+            } else {
+                return "mParcelledData.dataSize=" + mParcelledData.dataSize();
+            }
+        }
+        return mMap.toString();
+    }
 }

@@ -4078,8 +4078,8 @@ public abstract class Context {
 
     /**
      * Remove all permissions to access a particular content provider Uri
-     * that were previously added with {@link #grantUriPermission}.  The given
-     * Uri will match all previously granted Uris that are the same or a
+     * that were previously added with {@link #grantUriPermission} or <em>any other</em> mechanism.
+     * The given Uri will match all previously granted Uris that are the same or a
      * sub-path of the given Uri.  That is, revoking "content://foo/target" will
      * revoke both "content://foo/target" and "content://foo/target/sub", but not
      * "content://foo".  It will not remove any prefix grants that exist at a
@@ -4089,9 +4089,15 @@ public abstract class Context {
      * regular permission access to a Uri, but had received access to it through
      * a specific Uri permission grant, you could not revoke that grant with this
      * function and a {@link SecurityException} would be thrown.  As of
-     * {@link android.os.Build.VERSION_CODES#LOLLIPOP}, this function will not throw a security exception,
-     * but will remove whatever permission grants to the Uri had been given to the app
+     * {@link android.os.Build.VERSION_CODES#LOLLIPOP}, this function will not throw a security
+     * exception, but will remove whatever permission grants to the Uri had been given to the app
      * (or none).</p>
+     *
+     * <p>Unlike {@link #revokeUriPermission(String, Uri, int)}, this method impacts all permission
+     * grants matching the given Uri, for any package they had been granted to, through any
+     * mechanism this had happened (such as indirectly through the clipboard, activity launch,
+     * service start, etc).  That means this can be potentially dangerous to use, as it can
+     * revoke grants that another app could be strongly expecting to stick around.</p>
      *
      * @param uri The Uri you would like to revoke access to.
      * @param modeFlags The desired access modes.  Any combination of
@@ -4103,6 +4109,34 @@ public abstract class Context {
      * @see #grantUriPermission
      */
     public abstract void revokeUriPermission(Uri uri, @Intent.AccessUriMode int modeFlags);
+
+    /**
+     * Remove permissions to access a particular content provider Uri
+     * that were previously added with {@link #grantUriPermission} for a specific target
+     * package.  The given Uri will match all previously granted Uris that are the same or a
+     * sub-path of the given Uri.  That is, revoking "content://foo/target" will
+     * revoke both "content://foo/target" and "content://foo/target/sub", but not
+     * "content://foo".  It will not remove any prefix grants that exist at a
+     * higher level.
+     *
+     * <p>Unlike {@link #revokeUriPermission(Uri, int)}, this method will <em>only</em>
+     * revoke permissions that had been explicitly granted through {@link #grantUriPermission}
+     * and only for the package specified.  Any matching grants that have happened through
+     * other mechanisms (clipboard, activity launching, service starting, etc) will not be
+     * removed.</p>
+     *
+     * @param toPackage The package you had previously granted access to.
+     * @param uri The Uri you would like to revoke access to.
+     * @param modeFlags The desired access modes.  Any combination of
+     * {@link Intent#FLAG_GRANT_READ_URI_PERMISSION
+     * Intent.FLAG_GRANT_READ_URI_PERMISSION} or
+     * {@link Intent#FLAG_GRANT_WRITE_URI_PERMISSION
+     * Intent.FLAG_GRANT_WRITE_URI_PERMISSION}.
+     *
+     * @see #grantUriPermission
+     */
+    public abstract void revokeUriPermission(String toPackage, Uri uri,
+            @Intent.AccessUriMode int modeFlags);
 
     /**
      * Determine whether a particular process and user ID has been granted

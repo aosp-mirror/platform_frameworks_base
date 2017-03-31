@@ -1789,7 +1789,18 @@ class ContextImpl extends Context {
     public void revokeUriPermission(Uri uri, int modeFlags) {
          try {
             ActivityManager.getService().revokeUriPermission(
-                    mMainThread.getApplicationThread(),
+                    mMainThread.getApplicationThread(), null,
+                    ContentProvider.getUriWithoutUserId(uri), modeFlags, resolveUserId(uri));
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @Override
+    public void revokeUriPermission(String targetPackage, Uri uri, int modeFlags) {
+        try {
+            ActivityManager.getService().revokeUriPermission(
+                    mMainThread.getApplicationThread(), targetPackage,
                     ContentProvider.getUriWithoutUserId(uri), modeFlags, resolveUserId(uri));
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();

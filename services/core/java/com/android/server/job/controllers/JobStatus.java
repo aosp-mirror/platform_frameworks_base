@@ -17,19 +17,25 @@
 package com.android.server.job.controllers;
 
 import android.app.AppGlobals;
+import android.app.IActivityManager;
 import android.app.job.JobInfo;
+import android.content.ClipData;
 import android.content.ComponentName;
+import android.content.ContentProvider;
+import android.content.Intent;
 import android.net.Uri;
-import android.os.Bundle;
-import android.os.PersistableBundle;
+import android.os.Binder;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.text.format.DateUtils;
 import android.util.ArraySet;
+import android.util.Slog;
 import android.util.TimeUtils;
 
 import java.io.PrintWriter;
+import java.util.Arrays;
 
 /**
  * Uniquely identifies a job internally.
@@ -43,6 +49,8 @@ import java.io.PrintWriter;
  * @hide
  */
 public final class JobStatus {
+    static final String TAG = "JobSchedulerService";
+
     public static final long NO_LATEST_RUNTIME = Long.MAX_VALUE;
     public static final long NO_EARLIEST_RUNTIME = 0L;
 
@@ -87,6 +95,9 @@ public final class JobStatus {
     final String sourceTag;
 
     final String tag;
+
+    private IBinder permissionOwner;
+    private boolean prepared;
 
     /**
      * Earliest point in the future at which this job will be eligible to run. A value of 0
@@ -241,6 +252,93 @@ public final class JobStatus {
                 earliestRunTimeElapsedMillis, latestRunTimeElapsedMillis);
     }
 
+    public void prepare(IActivityManager am) {
+        if (prepared) {
+            Slog.wtf(TAG, "Already prepared: " + this);
+            return;
+        }
+        prepared = true;
+        final ClipData clip = job.getClipData();
+        if (clip != null) {
+            final int N = clip.getItemCount();
+            for (int i = 0; i < N; i++) {
+                grantItemLocked(am, clip.getItemAt(i), sourceUid, sourcePackageName, sourceUserId);
+            }
+        }
+    }
+
+    public void unprepare(IActivityManager am) {
+        if (!prepared) {
+            Slog.wtf(TAG, "Hasn't been prepared: " + this);
+            return;
+        }
+        prepared = false;
+        if (permissionOwner != null) {
+            final ClipData clip = job.getClipData();
+            if (clip != null) {
+                final int N = clip.getItemCount();
+                for (int i = 0; i < N; i++) {
+                    revokeItemLocked(am, clip.getItemAt(i));
+                }
+            }
+        }
+    }
+
+    public boolean isPrepared() {
+        return prepared;
+    }
+
+    private final void grantUriLocked(IActivityManager am, Uri uri, int sourceUid,
+            String targetPackage, int targetUserId) {
+        try {
+            int sourceUserId = ContentProvider.getUserIdFromUri(uri,
+                    UserHandle.getUserId(sourceUid));
+            uri = ContentProvider.getUriWithoutUserId(uri);
+            if (permissionOwner == null) {
+                permissionOwner = am.newUriPermissionOwner("job: " + toShortString());
+            }
+            am.grantUriPermissionFromOwner(permissionOwner, sourceUid, targetPackage,
+                    uri, job.getClipGrantFlags(), sourceUserId, targetUserId);
+        } catch (RemoteException e) {
+            Slog.e("JobScheduler", "AM dead");
+        }
+    }
+
+    private final void grantItemLocked(IActivityManager am, ClipData.Item item, int sourceUid,
+            String targetPackage, int targetUserId) {
+        if (item.getUri() != null) {
+            grantUriLocked(am, item.getUri(), sourceUid, targetPackage, targetUserId);
+        }
+        Intent intent = item.getIntent();
+        if (intent != null && intent.getData() != null) {
+            grantUriLocked(am, intent.getData(), sourceUid, targetPackage, targetUserId);
+        }
+    }
+
+    private final void revokeUriLocked(IActivityManager am, Uri uri) {
+        int userId = ContentProvider.getUserIdFromUri(uri,
+                UserHandle.getUserId(Binder.getCallingUid()));
+        long ident = Binder.clearCallingIdentity();
+        try {
+            uri = ContentProvider.getUriWithoutUserId(uri);
+            am.revokeUriPermissionFromOwner(permissionOwner, uri,
+                    job.getClipGrantFlags(), userId);
+        } catch (RemoteException e) {
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    private final void revokeItemLocked(IActivityManager am, ClipData.Item item) {
+        if (item.getUri() != null) {
+            revokeUriLocked(am, item.getUri());
+        }
+        Intent intent = item.getIntent();
+        if (intent != null && intent.getData() != null) {
+            revokeUriLocked(am, intent.getData());
+        }
+    }
+
     public JobInfo getJob() {
         return job;
     }
@@ -293,14 +391,6 @@ public final class JobStatus {
 
     public String getTag() {
         return tag;
-    }
-
-    public PersistableBundle getExtras() {
-        return job.getExtras();
-    }
-
-    public Bundle getTransientExtras() {
-        return job.getTransientExtras();
     }
 
     public int getPriority() {
@@ -505,22 +595,64 @@ public final class JobStatus {
 
     @Override
     public String toString() {
-        return String.valueOf(hashCode()).substring(0, 3) + ".."
-                + ":[" + job.getService()
-                + ",jId=" + job.getId()
-                + ",u" + getUserId()
-                + ",suid=" + getSourceUid()
-                + ",R=(" + formatRunTime(earliestRunTimeElapsedMillis, NO_EARLIEST_RUNTIME)
-                + "," + formatRunTime(latestRunTimeElapsedMillis, NO_LATEST_RUNTIME) + ")"
-                + ",N=" + job.getNetworkType() + ",C=" + job.isRequireCharging()
-                + ",BL=" + job.isRequireBatteryNotLow()
-                + ",I=" + job.isRequireDeviceIdle()
-                + ",U=" + (job.getTriggerContentUris() != null)
-                + ",F=" + numFailures + ",P=" + job.isPersisted()
-                + ",ANI=" + ((satisfiedConstraints&CONSTRAINT_APP_NOT_IDLE) != 0)
-                + ",DND=" + ((satisfiedConstraints&CONSTRAINT_DEVICE_NOT_DOZING) != 0)
-                + (isReady() ? "(READY)" : "")
-                + "]";
+        StringBuilder sb = new StringBuilder(128);
+        sb.append("JobStatus{");
+        sb.append(Integer.toHexString(System.identityHashCode(this)));
+        sb.append(" #");
+        UserHandle.formatUid(sb, callingUid);
+        sb.append("/");
+        sb.append(job.getId());
+        sb.append(' ');
+        sb.append(batteryName);
+        sb.append(" u=");
+        sb.append(getUserId());
+        sb.append(" s=");
+        sb.append(getSourceUid());
+        if (earliestRunTimeElapsedMillis != NO_EARLIEST_RUNTIME
+                || latestRunTimeElapsedMillis != NO_LATEST_RUNTIME) {
+            sb.append(" TIME=");
+            sb.append(formatRunTime(earliestRunTimeElapsedMillis, NO_EARLIEST_RUNTIME));
+            sb.append("-");
+            sb.append(formatRunTime(latestRunTimeElapsedMillis, NO_EARLIEST_RUNTIME));
+        }
+        if (job.getNetworkType() != JobInfo.NETWORK_TYPE_NONE) {
+            sb.append(" NET=");
+            sb.append(job.getNetworkType());
+        }
+        if (job.isRequireCharging()) {
+            sb.append(" CHARGING");
+        }
+        if (job.isRequireBatteryNotLow()) {
+            sb.append(" BATNOTLOW");
+        }
+        if (job.isRequireStorageNotLow()) {
+            sb.append(" STORENOTLOW");
+        }
+        if (job.isRequireDeviceIdle()) {
+            sb.append(" IDLE");
+        }
+        if (job.isPersisted()) {
+            sb.append(" PERSISTED");
+        }
+        if ((satisfiedConstraints&CONSTRAINT_APP_NOT_IDLE) == 0) {
+            sb.append(" WAIT:APP_NOT_IDLE");
+        }
+        if ((satisfiedConstraints&CONSTRAINT_DEVICE_NOT_DOZING) == 0) {
+            sb.append(" WAIT:DEV_NOT_DOZING");
+        }
+        if (job.getTriggerContentUris() != null) {
+            sb.append(" URIS=");
+            sb.append(Arrays.toString(job.getTriggerContentUris()));
+        }
+        if (numFailures != 0) {
+            sb.append(" failures=");
+            sb.append(numFailures);
+        }
+        if (isReady()) {
+            sb.append(" READY");
+        }
+        sb.append("}");
+        return sb.toString();
     }
 
     private String formatRunTime(long runtime, long  defaultValue) {
@@ -613,8 +745,9 @@ public final class JobStatus {
         pw.print(" user="); pw.print(getSourceUserId());
         pw.print(" pkg="); pw.println(getSourcePackageName());
         if (full) {
-            pw.print(prefix); pw.println("JobInfo:"); pw.print(prefix);
-            pw.print("  Service: "); pw.println(job.getService().flattenToShortString());
+            pw.print(prefix); pw.println("JobInfo:");
+            pw.print(prefix); pw.print("  Service: ");
+            pw.println(job.getService().flattenToShortString());
             if (job.isPeriodic()) {
                 pw.print(prefix); pw.print("  PERIODIC: interval=");
                 TimeUtils.formatDuration(job.getIntervalMillis(), pw);
@@ -653,6 +786,20 @@ public final class JobStatus {
                     TimeUtils.formatDuration(job.getTriggerContentMaxDelay(), pw);
                     pw.println();
                 }
+            }
+            if (job.getExtras() != null && !job.getExtras().maybeIsEmpty()) {
+                pw.print(prefix); pw.print("  Extras: ");
+                pw.println(job.getExtras().toShortString());
+            }
+            if (job.getTransientExtras() != null && !job.getTransientExtras().maybeIsEmpty()) {
+                pw.print(prefix); pw.print("  Transient extras: ");
+                pw.println(job.getTransientExtras().toShortString());
+            }
+            if (job.getClipData() != null) {
+                pw.print(prefix); pw.print("  Clip data: ");
+                StringBuilder b = new StringBuilder(128);
+                job.getClipData().toShortString(b);
+                pw.println(b);
             }
             if (job.getNetworkType() != JobInfo.NETWORK_TYPE_NONE) {
                 pw.print(prefix); pw.print("  Network type: "); pw.println(job.getNetworkType());

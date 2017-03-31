@@ -20,6 +20,7 @@ import static android.util.TimeUtils.formatDuration;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.ClipData;
 import android.content.ComponentName;
 import android.net.Uri;
 import android.os.Bundle;
@@ -208,6 +209,8 @@ public class JobInfo implements Parcelable {
     private final int jobId;
     private final PersistableBundle extras;
     private final Bundle transientExtras;
+    private final ClipData clipData;
+    private final int clipGrantFlags;
     private final ComponentName service;
     private final int constraintFlags;
     private final TriggerContentUri[] triggerContentUris;
@@ -248,6 +251,21 @@ public class JobInfo implements Parcelable {
      */
     public Bundle getTransientExtras() {
         return transientExtras;
+    }
+
+    /**
+     * ClipData of information that is returned to your application at execution time,
+     * but not persisted by the system.
+     */
+    public ClipData getClipData() {
+        return clipData;
+    }
+
+    /**
+     * Permission grants that go along with {@link #getClipData}.
+     */
+    public int getClipGrantFlags() {
+        return clipGrantFlags;
     }
 
     /**
@@ -428,6 +446,13 @@ public class JobInfo implements Parcelable {
         jobId = in.readInt();
         extras = in.readPersistableBundle();
         transientExtras = in.readBundle();
+        if (in.readInt() != 0) {
+            clipData = ClipData.CREATOR.createFromParcel(in);
+            clipGrantFlags = in.readInt();
+        } else {
+            clipData = null;
+            clipGrantFlags = 0;
+        }
         service = in.readParcelable(null);
         constraintFlags = in.readInt();
         triggerContentUris = in.createTypedArray(TriggerContentUri.CREATOR);
@@ -452,6 +477,8 @@ public class JobInfo implements Parcelable {
         jobId = b.mJobId;
         extras = b.mExtras.deepCopy();
         transientExtras = b.mTransientExtras.deepCopy();
+        clipData = b.mClipData;
+        clipGrantFlags = b.mClipGrantFlags;
         service = b.mJobService;
         constraintFlags = b.mConstraintFlags;
         triggerContentUris = b.mTriggerContentUris != null
@@ -484,6 +511,13 @@ public class JobInfo implements Parcelable {
         out.writeInt(jobId);
         out.writePersistableBundle(extras);
         out.writeBundle(transientExtras);
+        if (clipData != null) {
+            out.writeInt(1);
+            clipData.writeToParcel(out, flags);
+            out.writeInt(clipGrantFlags);
+        } else {
+            out.writeInt(0);
+        }
         out.writeParcelable(service, flags);
         out.writeInt(constraintFlags);
         out.writeTypedArray(triggerContentUris, flags);
@@ -610,6 +644,8 @@ public class JobInfo implements Parcelable {
         private final ComponentName mJobService;
         private PersistableBundle mExtras = PersistableBundle.EMPTY;
         private Bundle mTransientExtras = Bundle.EMPTY;
+        private ClipData mClipData;
+        private int mClipGrantFlags;
         private int mPriority = PRIORITY_DEFAULT;
         private int mFlags;
         // Requirements.
@@ -678,6 +714,34 @@ public class JobInfo implements Parcelable {
          */
         public Builder setTransientExtras(Bundle extras) {
             mTransientExtras = extras;
+            return this;
+        }
+
+        /**
+         * Set a {@link ClipData} associated with this Job.
+         *
+         * <p>The main purpose of providing a ClipData is to allow granting of
+         * URI permissions for data associated with the clip.  The exact kind
+         * of permission grant to perform is specified through <var>grantFlags</var>.
+         *
+         * <p>If the ClipData contains items that are Intents, any
+         * grant flags in those Intents will be ignored.  Only flags provided as an argument
+         * to this method are respected, and will be applied to all Uri or
+         * Intent items in the clip (or sub-items of the clip).
+         *
+         * <p>Because setting this property is not compatible with persisted
+         * jobs, doing so will throw an {@link java.lang.IllegalArgumentException} when
+         * {@link android.app.job.JobInfo.Builder#build()} is called.</p>
+         *
+         * @param clip The new clip to set.  May be null to clear the current clip.
+         * @param grantFlags The desired permissions to grant for any URIs.  This should be
+         * a combination of {@link android.content.Intent#FLAG_GRANT_READ_URI_PERMISSION},
+         * {@link android.content.Intent#FLAG_GRANT_WRITE_URI_PERMISSION}, and
+         * {@link android.content.Intent#FLAG_GRANT_PREFIX_URI_PERMISSION}.
+         */
+        public Builder setClipData(ClipData clip, int grantFlags) {
+            mClipData = clip;
+            mClipGrantFlags = grantFlags;
             return this;
         }
 
@@ -905,25 +969,33 @@ public class JobInfo implements Parcelable {
                         "constraints, this is not allowed.");
             }
             // Check that a deadline was not set on a periodic job.
-            if (mIsPeriodic && (mMaxExecutionDelayMillis != 0L)) {
-                throw new IllegalArgumentException("Can't call setOverrideDeadline() on a " +
-                        "periodic job.");
+            if (mIsPeriodic) {
+                if (mMaxExecutionDelayMillis != 0L) {
+                    throw new IllegalArgumentException("Can't call setOverrideDeadline() on a " +
+                            "periodic job.");
+                }
+                if (mMinLatencyMillis != 0L) {
+                    throw new IllegalArgumentException("Can't call setMinimumLatency() on a " +
+                            "periodic job");
+                }
+                if (mTriggerContentUris != null) {
+                    throw new IllegalArgumentException("Can't call addTriggerContentUri() on a " +
+                            "periodic job");
+                }
             }
-            if (mIsPeriodic && (mMinLatencyMillis != 0L)) {
-                throw new IllegalArgumentException("Can't call setMinimumLatency() on a " +
-                        "periodic job");
-            }
-            if (mIsPeriodic && (mTriggerContentUris != null)) {
-                throw new IllegalArgumentException("Can't call addTriggerContentUri() on a " +
-                        "periodic job");
-            }
-            if (mIsPersisted && (mTriggerContentUris != null)) {
-                throw new IllegalArgumentException("Can't call addTriggerContentUri() on a " +
-                        "persisted job");
-            }
-            if (mIsPersisted && !mTransientExtras.isEmpty()) {
-                throw new IllegalArgumentException("Can't call setTransientExtras() on a " +
-                        "persisted job");
+            if (mIsPersisted) {
+                if (mTriggerContentUris != null) {
+                    throw new IllegalArgumentException("Can't call addTriggerContentUri() on a " +
+                            "persisted job");
+                }
+                if (!mTransientExtras.isEmpty()) {
+                    throw new IllegalArgumentException("Can't call setTransientExtras() on a " +
+                            "persisted job");
+                }
+                if (mClipData != null) {
+                    throw new IllegalArgumentException("Can't call setClipData() on a " +
+                            "persisted job");
+                }
             }
             if (mBackoffPolicySet && (mConstraintFlags & CONSTRAINT_FLAG_DEVICE_IDLE) != 0) {
                 throw new IllegalArgumentException("An idle mode job will not respect any" +
