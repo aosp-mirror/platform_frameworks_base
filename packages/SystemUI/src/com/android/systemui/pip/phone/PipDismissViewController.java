@@ -41,21 +41,9 @@ public class PipDismissViewController {
     private static final int SHOW_TARGET_DELAY = 100;
     private static final int SHOW_TARGET_DURATION = 200;
 
-    private static final float DISMISS_TEXT_MAX_SCALE = 2f;
-    private static final float DISMISS_GRADIENT_MIN_HEIGHT_PERCENT = 0.33f;
-    private static final float DISMISS_GRADIENT_MAX_HEIGHT_PERCENT = 0.5f;
-    private static final float DISMISS_THRESHOLD = 0.55f;
-
     private Context mContext;
     private WindowManager mWindowManager;
-
     private View mDismissView;
-    private Rect mDismissTargetScreenBounds = new Rect();
-
-    private View mDismissContainer;
-    private View mGradientView;
-    private float mMinHeight;
-    private float mMaxHeight;
 
     public PipDismissViewController(Context context) {
         mContext = context;
@@ -67,42 +55,29 @@ public class PipDismissViewController {
      */
     public void createDismissTarget() {
         if (mDismissView == null) {
-            // Determine sizes for the gradient
+            // Determine sizes for the view
             final Rect stableInsets = new Rect();
             SystemServicesProxy.getInstance(mContext).getStableInsets(stableInsets);
             final Point windowSize = new Point();
             mWindowManager.getDefaultDisplay().getRealSize(windowSize);
-            mMinHeight = windowSize.y * DISMISS_GRADIENT_MIN_HEIGHT_PERCENT;
-            mMaxHeight = windowSize.y * DISMISS_GRADIENT_MAX_HEIGHT_PERCENT;
+            final int gradientHeight = mContext.getResources().getDimensionPixelSize(
+                    R.dimen.pip_dismiss_gradient_height);
+            final int bottomMargin = mContext.getResources().getDimensionPixelSize(
+                    R.dimen.pip_dismiss_text_bottom_margin);
 
             // Create a new view for the dismiss target
             LayoutInflater inflater = LayoutInflater.from(mContext);
             mDismissView = inflater.inflate(R.layout.pip_dismiss_view, null);
-            mGradientView = mDismissView.findViewById(R.id.gradient_view);
-            FrameLayout.LayoutParams glp =
-                    (FrameLayout.LayoutParams) mGradientView.getLayoutParams();
-            glp.height = (int) mMaxHeight;
-            mGradientView.setLayoutParams(glp);
-            mGradientView.setPivotY(windowSize.y);
-            mGradientView.setScaleY(mMaxHeight / mMinHeight); // Set to min height via scaling
-            mDismissContainer = mDismissView.findViewById(R.id.pip_dismiss_container);
-            FrameLayout.LayoutParams clp =
-                    (FrameLayout.LayoutParams) mDismissContainer.getLayoutParams();
-            clp.bottomMargin = stableInsets.bottom;
-            mDismissContainer.addOnLayoutChangeListener(new OnLayoutChangeListener() {
-                @Override
-                public void onLayoutChange(View v, int left, int top, int right, int bottom,
-                        int oldLeft, int oldTop, int oldRight, int oldBottom) {
-                    if (mDismissContainer != null) {
-                        mDismissContainer.getBoundsOnScreen(mDismissTargetScreenBounds);
-                    }
-                }
-            });
+
+            // Adjust bottom margins of the text
+            View text = mDismissView.findViewById(R.id.pip_dismiss_text);
+            FrameLayout.LayoutParams tlp = (FrameLayout.LayoutParams) text.getLayoutParams();
+            tlp.bottomMargin = stableInsets.bottom + bottomMargin;
 
             // Add the target to the window
             LayoutParams lp =  new LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT, (int) mMaxHeight,
-                    0, windowSize.y - (int) mMaxHeight,
+                    ViewGroup.LayoutParams.MATCH_PARENT, gradientHeight,
+                    0, windowSize.y - gradientHeight,
                     LayoutParams.TYPE_SYSTEM_DIALOG,
                     LayoutParams.FLAG_LAYOUT_IN_SCREEN
                             | LayoutParams.FLAG_LAYOUT_NO_LIMITS
@@ -118,8 +93,7 @@ public class PipDismissViewController {
     /**
      * Shows the dismiss target.
      */
-    public void showDismissTarget(Rect pinnedStack) {
-        updateDismissTarget(pinnedStack);
+    public void showDismissTarget() {
         mDismissView.animate()
                 .alpha(1f)
                 .setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN)
@@ -147,49 +121,5 @@ public class PipDismissViewController {
                     })
                     .start();
         }
-    }
-
-    /**
-     * Updates the appearance of the dismiss target based on how close the PIP is.
-     */
-    public void updateDismissTarget(Rect pinnedStack) {
-        // As PIP moves over / away from delete target it grows / shrinks
-        final float scalePercent = calculateDistancePercent(pinnedStack);
-        final float newScale = 1 + (DISMISS_TEXT_MAX_SCALE - 1) * scalePercent;
-        final float minGradientScale = mMinHeight / mMaxHeight;
-        final float newHeight = Math.max(minGradientScale, scalePercent);
-        mGradientView.setScaleY(newHeight);
-        mDismissContainer.setScaleX(newScale);
-        mDismissContainer.setScaleY(newScale);
-    }
-
-    /**
-     * @return the percentage of distance the PIP is away from the dismiss target point.
-     */
-    private float calculateDistancePercent(Rect pinnedStack) {
-        final int distance = mDismissTargetScreenBounds.height();
-        final int textX = mDismissTargetScreenBounds.centerX();
-        final int textY = mDismissTargetScreenBounds.bottom;
-        final float pipCurrX = pinnedStack.centerX();
-        final float pipCurrY = pinnedStack.bottom;
-        final float currentDistance = PointF.length(pipCurrX - textX, pipCurrY - textY);
-        if (currentDistance <= distance) {
-            return 1 - (currentDistance / distance);
-        }
-        return 0;
-    }
-
-    /**
-     * @return the dismiss target screen bounds.
-     */
-    public Rect getDismissBounds() {
-        return mDismissTargetScreenBounds;
-    }
-
-    /**
-     * @return whether the PIP is positioned on the dismiss target enough to be dismissed.
-     */
-    public boolean shouldDismiss(Rect pinnedStack) {
-        return calculateDistancePercent(pinnedStack) >= DISMISS_THRESHOLD;
     }
 }
