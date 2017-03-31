@@ -3036,13 +3036,14 @@ public class PackageManagerService extends IPackageManager.Stub {
             return null;
         }
 
+        final int callingUid = Binder.getCallingUid();
         final int resolveFlags =
                 MATCH_DIRECT_BOOT_AWARE
                 | MATCH_DIRECT_BOOT_UNAWARE
                 | (!Build.IS_DEBUGGABLE ? MATCH_SYSTEM_ONLY : 0);
         final Intent resolverIntent = new Intent(Intent.ACTION_RESOLVE_EPHEMERAL_PACKAGE);
         final List<ResolveInfo> resolvers = queryIntentServicesInternal(resolverIntent, null,
-                resolveFlags, UserHandle.USER_SYSTEM);
+                resolveFlags, UserHandle.USER_SYSTEM, callingUid, false /*includeInstantApps*/);
 
         final int N = resolvers.size();
         if (N == 0) {
@@ -4021,12 +4022,12 @@ public class PackageManagerService extends IPackageManager.Stub {
      * action and a {@code android.intent.category.BROWSABLE} category</li>
      * </ul>
      */
-    int updateFlagsForResolve(int flags, int userId, Intent intent, boolean includeInstantApp) {
+    int updateFlagsForResolve(int flags, int userId, Intent intent, int callingUid,
+            boolean includeInstantApps) {
         // Safe mode means we shouldn't match any third-party components
         if (mSafeMode) {
             flags |= PackageManager.MATCH_SYSTEM_ONLY;
         }
-        final int callingUid = Binder.getCallingUid();
         if (getInstantAppPackageName(callingUid) != null) {
             // But, ephemeral apps see both ephemeral and exposed, non-ephemeral components
             flags |= PackageManager.MATCH_VISIBLE_TO_INSTANT_APP_ONLY;
@@ -4038,7 +4039,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     || callingUid == Process.SHELL_UID
                     || callingUid == 0;
             final boolean allowMatchInstant =
-                    (includeInstantApp
+                    (includeInstantApps
                             && Intent.ACTION_VIEW.equals(intent.getAction())
                             && intent.hasCategory(Intent.CATEGORY_BROWSABLE)
                             && hasWebURI(intent))
@@ -5588,22 +5589,23 @@ public class PackageManagerService extends IPackageManager.Stub {
     public ResolveInfo resolveIntent(Intent intent, String resolvedType,
             int flags, int userId) {
         return resolveIntentInternal(
-                intent, resolvedType, flags, userId, false /*includeInstantApp*/);
+                intent, resolvedType, flags, userId, false /*includeInstantApps*/);
     }
 
     private ResolveInfo resolveIntentInternal(Intent intent, String resolvedType,
-            int flags, int userId, boolean includeInstantApp) {
+            int flags, int userId, boolean includeInstantApps) {
         try {
             Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "resolveIntent");
 
             if (!sUserManager.exists(userId)) return null;
-            flags = updateFlagsForResolve(flags, userId, intent, includeInstantApp);
-            enforceCrossUserPermission(Binder.getCallingUid(), userId,
+            final int callingUid = Binder.getCallingUid();
+            flags = updateFlagsForResolve(flags, userId, intent, callingUid, includeInstantApps);
+            enforceCrossUserPermission(callingUid, userId,
                     false /*requireFullPermission*/, false /*checkShell*/, "resolve intent");
 
             Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "queryIntentActivities");
             final List<ResolveInfo> query = queryIntentActivitiesInternal(intent, resolvedType,
-                    flags, userId, includeInstantApp);
+                    flags, userId, includeInstantApps);
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
 
             final ResolveInfo bestChoice =
@@ -5623,9 +5625,11 @@ public class PackageManagerService extends IPackageManager.Stub {
         if (!sUserManager.exists(userId)) {
             return null;
         }
+        final int callingUid = Binder.getCallingUid();
         intent = updateIntentForResolve(intent);
         final String resolvedType = intent.resolveTypeIfNeeded(mContext.getContentResolver());
-        final int flags = updateFlagsForResolve(0, userId, intent, false);
+        final int flags = updateFlagsForResolve(
+                0, userId, intent, callingUid, false /*includeInstantApps*/);
         final List<ResolveInfo> query = queryIntentActivitiesInternal(intent, resolvedType, flags,
                 userId);
         synchronized (mPackages) {
@@ -5914,7 +5918,9 @@ public class PackageManagerService extends IPackageManager.Stub {
             List<ResolveInfo> query, int priority, boolean always,
             boolean removeMatches, boolean debug, int userId) {
         if (!sUserManager.exists(userId)) return null;
-        flags = updateFlagsForResolve(flags, userId, intent, false);
+        final int callingUid = Binder.getCallingUid();
+        flags = updateFlagsForResolve(
+                flags, userId, intent, callingUid, false /*includeInstantApps*/);
         intent = updateIntentForResolve(intent);
         // writer
         synchronized (mPackages) {
@@ -6080,9 +6086,11 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
         if (hasWebURI(intent)) {
             // cross-profile app linking works only towards the parent.
+            final int callingUid = Binder.getCallingUid();
             final UserInfo parent = getProfileParent(sourceUserId);
             synchronized(mPackages) {
-                int flags = updateFlagsForResolve(0, parent.id, intent, false);
+                int flags = updateFlagsForResolve(0, parent.id, intent, callingUid,
+                        false /*includeInstantApps*/);
                 CrossProfileDomainInfo xpDomainInfo = getCrossProfileDomainPreferredLpr(
                         intent, resolvedType, flags, sourceUserId, parent.id);
                 return xpDomainInfo != null;
@@ -6149,11 +6157,12 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     private @NonNull List<ResolveInfo> queryIntentActivitiesInternal(Intent intent,
-            String resolvedType, int flags, int userId, boolean includeInstantApp) {
+            String resolvedType, int flags, int userId, boolean includeInstantApps) {
         if (!sUserManager.exists(userId)) return Collections.emptyList();
-        final String instantAppPkgName = getInstantAppPackageName(Binder.getCallingUid());
-        flags = updateFlagsForResolve(flags, userId, intent, includeInstantApp);
-        enforceCrossUserPermission(Binder.getCallingUid(), userId,
+        final int callingUid = Binder.getCallingUid();
+        final String instantAppPkgName = getInstantAppPackageName(callingUid);
+        flags = updateFlagsForResolve(flags, userId, intent, callingUid, includeInstantApps);
+        enforceCrossUserPermission(callingUid, userId,
                 false /* requireFullPermission */, false /* checkShell */,
                 "query intent activities");
         ComponentName comp = intent.getComponent();
@@ -6783,9 +6792,11 @@ public class PackageManagerService extends IPackageManager.Stub {
             Intent[] specifics, String[] specificTypes, Intent intent,
             String resolvedType, int flags, int userId) {
         if (!sUserManager.exists(userId)) return Collections.emptyList();
-        flags = updateFlagsForResolve(flags, userId, intent, false);
-        enforceCrossUserPermission(Binder.getCallingUid(), userId,
-                false /* requireFullPermission */, false /* checkShell */,
+        final int callingUid = Binder.getCallingUid();
+        flags = updateFlagsForResolve(flags, userId, intent, callingUid,
+                false /*includeInstantApps*/);
+        enforceCrossUserPermission(callingUid, userId,
+                false /*requireFullPermission*/, false /*checkShell*/,
                 "query intent activity options");
         final String resultsAction = intent.getAction();
 
@@ -6963,7 +6974,9 @@ public class PackageManagerService extends IPackageManager.Stub {
     private @NonNull List<ResolveInfo> queryIntentReceiversInternal(Intent intent,
             String resolvedType, int flags, int userId) {
         if (!sUserManager.exists(userId)) return Collections.emptyList();
-        flags = updateFlagsForResolve(flags, userId, intent, false);
+        final int callingUid = Binder.getCallingUid();
+        flags = updateFlagsForResolve(flags, userId, intent, callingUid,
+                false /*includeInstantApps*/);
         ComponentName comp = intent.getComponent();
         if (comp == null) {
             if (intent.getSelector() != null) {
@@ -6999,9 +7012,17 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     @Override
     public ResolveInfo resolveService(Intent intent, String resolvedType, int flags, int userId) {
+        final int callingUid = Binder.getCallingUid();
+        return resolveServiceInternal(
+                intent, resolvedType, flags, userId, callingUid, false /*includeInstantApps*/);
+    }
+
+    private ResolveInfo resolveServiceInternal(Intent intent, String resolvedType, int flags,
+            int userId, int callingUid, boolean includeInstantApps) {
         if (!sUserManager.exists(userId)) return null;
-        flags = updateFlagsForResolve(flags, userId, intent, false);
-        List<ResolveInfo> query = queryIntentServicesInternal(intent, resolvedType, flags, userId);
+        flags = updateFlagsForResolve(flags, userId, intent, callingUid, includeInstantApps);
+        List<ResolveInfo> query = queryIntentServicesInternal(
+                intent, resolvedType, flags, userId, callingUid, includeInstantApps);
         if (query != null) {
             if (query.size() >= 1) {
                 // If there is more than one service with the same priority,
@@ -7015,14 +7036,17 @@ public class PackageManagerService extends IPackageManager.Stub {
     @Override
     public @NonNull ParceledListSlice<ResolveInfo> queryIntentServices(Intent intent,
             String resolvedType, int flags, int userId) {
-        return new ParceledListSlice<>(
-                queryIntentServicesInternal(intent, resolvedType, flags, userId));
+        final int callingUid = Binder.getCallingUid();
+        return new ParceledListSlice<>(queryIntentServicesInternal(
+                intent, resolvedType, flags, userId, callingUid, false /*includeInstantApps*/));
     }
 
     private @NonNull List<ResolveInfo> queryIntentServicesInternal(Intent intent,
-            String resolvedType, int flags, int userId) {
+            String resolvedType, int flags, int userId, int callingUid,
+            boolean includeInstantApps) {
         if (!sUserManager.exists(userId)) return Collections.emptyList();
-        flags = updateFlagsForResolve(flags, userId, intent, false);
+        final String instantAppPkgName = getInstantAppPackageName(callingUid);
+        flags = updateFlagsForResolve(flags, userId, intent, callingUid, includeInstantApps);
         ComponentName comp = intent.getComponent();
         if (comp == null) {
             if (intent.getSelector() != null) {
@@ -7034,9 +7058,27 @@ public class PackageManagerService extends IPackageManager.Stub {
             final List<ResolveInfo> list = new ArrayList<ResolveInfo>(1);
             final ServiceInfo si = getServiceInfo(comp, flags, userId);
             if (si != null) {
-                final ResolveInfo ri = new ResolveInfo();
-                ri.serviceInfo = si;
-                list.add(ri);
+                // When specifying an explicit component, we prevent the service from being
+                // used when either 1) the service is in an instant application and the
+                // caller is not the same instant application or 2) the calling package is
+                // ephemeral and the activity is not visible to ephemeral applications.
+                final boolean matchVisibleToInstantAppOnly =
+                        (flags & PackageManager.MATCH_VISIBLE_TO_INSTANT_APP_ONLY) != 0;
+                final boolean isCallerInstantApp =
+                        instantAppPkgName != null;
+                final boolean isTargetSameInstantApp =
+                        comp.getPackageName().equals(instantAppPkgName);
+                final boolean isTargetHiddenFromInstantApp =
+                        (si.flags & ServiceInfo.FLAG_VISIBLE_TO_EPHEMERAL) == 0;
+                final boolean blockResolution =
+                        !isTargetSameInstantApp
+                        && ((matchVisibleToInstantAppOnly && isCallerInstantApp
+                                        && isTargetHiddenFromInstantApp));
+                if (!blockResolution) {
+                    final ResolveInfo ri = new ResolveInfo();
+                    ri.serviceInfo = si;
+                    list.add(ri);
+                }
             }
             return list;
         }
@@ -7045,15 +7087,65 @@ public class PackageManagerService extends IPackageManager.Stub {
         synchronized (mPackages) {
             String pkgName = intent.getPackage();
             if (pkgName == null) {
-                return mServices.queryIntent(intent, resolvedType, flags, userId);
+                return applyPostServiceResolutionFilter(
+                        mServices.queryIntent(intent, resolvedType, flags, userId),
+                        instantAppPkgName);
             }
             final PackageParser.Package pkg = mPackages.get(pkgName);
             if (pkg != null) {
-                return mServices.queryIntentForPackage(intent, resolvedType, flags, pkg.services,
-                        userId);
+                return applyPostServiceResolutionFilter(
+                        mServices.queryIntentForPackage(intent, resolvedType, flags, pkg.services,
+                                userId),
+                        instantAppPkgName);
             }
             return Collections.emptyList();
         }
+    }
+
+    private List<ResolveInfo> applyPostServiceResolutionFilter(List<ResolveInfo> resolveInfos,
+            String instantAppPkgName) {
+        // TODO: When adding on-demand split support for non-instant apps, remove this check
+        // and always apply post filtering
+        if (instantAppPkgName == null) {
+            return resolveInfos;
+        }
+        for (int i = resolveInfos.size() - 1; i >= 0; i--) {
+            final ResolveInfo info = resolveInfos.get(i);
+            final boolean isEphemeralApp = info.serviceInfo.applicationInfo.isInstantApp();
+            // allow services that are defined in the provided package
+            if (isEphemeralApp && instantAppPkgName.equals(info.serviceInfo.packageName)) {
+                if (info.serviceInfo.splitName != null
+                        && !ArrayUtils.contains(info.serviceInfo.applicationInfo.splitNames,
+                                info.serviceInfo.splitName)) {
+                    // requested service is defined in a split that hasn't been installed yet.
+                    // add the installer to the resolve list
+                    if (DEBUG_EPHEMERAL) {
+                        Slog.v(TAG, "Adding ephemeral installer to the ResolveInfo list");
+                    }
+                    final ResolveInfo installerInfo = new ResolveInfo(mInstantAppInstallerInfo);
+                    installerInfo.auxiliaryInfo = new AuxiliaryResolveInfo(
+                            info.serviceInfo.packageName, info.serviceInfo.splitName,
+                            info.serviceInfo.applicationInfo.versionCode);
+                    // make sure this resolver is the default
+                    installerInfo.isDefault = true;
+                    installerInfo.match = IntentFilter.MATCH_CATEGORY_SCHEME_SPECIFIC_PART
+                            | IntentFilter.MATCH_ADJUSTMENT_NORMAL;
+                    // add a non-generic filter
+                    installerInfo.filter = new IntentFilter();
+                    // load resources from the correct package
+                    installerInfo.resolvePackageName = info.getComponentInfo().packageName;
+                    resolveInfos.set(i, installerInfo);
+                }
+                continue;
+            }
+            // allow services that have been explicitly exposed to ephemeral apps
+            if (!isEphemeralApp
+                    && ((info.serviceInfo.flags & ActivityInfo.FLAG_VISIBLE_TO_EPHEMERAL) != 0)) {
+                continue;
+            }
+            resolveInfos.remove(i);
+        }
+        return resolveInfos;
     }
 
     @Override
@@ -7066,7 +7158,9 @@ public class PackageManagerService extends IPackageManager.Stub {
     private @NonNull List<ResolveInfo> queryIntentContentProvidersInternal(
             Intent intent, String resolvedType, int flags, int userId) {
         if (!sUserManager.exists(userId)) return Collections.emptyList();
-        flags = updateFlagsForResolve(flags, userId, intent, false);
+        final int callingUid = Binder.getCallingUid();
+        flags = updateFlagsForResolve(flags, userId, intent, callingUid,
+                false /*includeInstantApps*/);
         ComponentName comp = intent.getComponent();
         if (comp == null) {
             if (intent.getSelector() != null) {
@@ -12401,9 +12495,27 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (ps == null) {
                 return null;
             }
+            final PackageUserState userState = ps.readUserState(userId);
             ServiceInfo si = PackageParser.generateServiceInfo(service, mFlags,
-                    ps.readUserState(userId), userId);
+                    userState, userId);
             if (si == null) {
+                return null;
+            }
+            final boolean matchVisibleToInstantApp =
+                    (mFlags & PackageManager.MATCH_VISIBLE_TO_INSTANT_APP_ONLY) != 0;
+            final boolean isInstantApp = (mFlags & PackageManager.MATCH_INSTANT) != 0;
+            // throw out filters that aren't visible to ephemeral apps
+            if (matchVisibleToInstantApp
+                    && !(info.isVisibleToInstantApp() || userState.instantApp)) {
+                return null;
+            }
+            // throw out ephemeral filters if we're not explicitly requesting them
+            if (!isInstantApp && userState.instantApp) {
+                return null;
+            }
+            // throw out instant app filters if updates are available; will trigger
+            // instant app resolution
+            if (userState.instantApp && ps.isUpdateAvailable()) {
                 return null;
             }
             final ResolveInfo res = new ResolveInfo();
@@ -23146,10 +23258,18 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
             }
         }
 
+        @Override
         public ResolveInfo resolveIntent(Intent intent, String resolvedType,
                 int flags, int userId) {
             return resolveIntentInternal(
-                    intent, resolvedType, flags, userId, true /*includeInstantApp*/);
+                    intent, resolvedType, flags, userId, true /*includeInstantApps*/);
+        }
+
+        @Override
+        public ResolveInfo resolveService(Intent intent, String resolvedType,
+                int flags, int userId, int callingUid) {
+            return resolveServiceInternal(
+                    intent, resolvedType, flags, userId, callingUid, true /*includeInstantApps*/);
         }
 
 
