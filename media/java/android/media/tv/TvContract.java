@@ -161,6 +161,38 @@ public final class TvContract {
             "android.media.tv.extra.WATCH_NEXT_PROGRAM_ID";
 
     /**
+     * The key for a bundle parameter containing the result code of a method call as an integer.
+     *
+     * @see #RESULT_OK
+     * @see #RESULT_ERROR_IO
+     * @see #RESULT_ERROR_INVALID_ARGUMENT
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_RESULT_CODE = "android.media.tv.extra.RESULT_CODE";
+
+    /**
+     * The result code for a successful execution without error.
+     * @hide
+     */
+    @SystemApi
+    public static final int RESULT_OK = 0;
+
+    /**
+     * The result code for a failure from I/O operation.
+     * @hide
+     */
+    @SystemApi
+    public static final int RESULT_ERROR_IO = 1;
+
+    /**
+     * The result code for a failure from invalid argument.
+     * @hide
+     */
+    @SystemApi
+    public static final int RESULT_ERROR_INVALID_ARGUMENT = 2;
+
+    /**
      * The method name to get existing columns in the given table of the specified content provider.
      *
      * <p>The method caller must provide the following parameter:
@@ -209,6 +241,78 @@ public final class TvContract {
     public static final String METHOD_ADD_COLUMN = "add_column";
 
     /**
+     * The method name to get all the blocked packages. When a package is blocked, all the data for
+     * preview programs/channels and watch next programs belonging to this package in the content
+     * provider will be cleared. Once a package is blocked, {@link SecurityException} will be thrown
+     * for all the requests to preview programs/channels and watch next programs via
+     * {@link android.content.ContentProvider} from it.
+     *
+     * <p>The returned {@link android.os.Bundle} will include all the blocked package names with the
+     * key {@link #EXTRA_BLOCKED_PACKAGES}.
+     *
+     * @see ContentResolver#call(Uri, String, String, Bundle)
+     * @see #EXTRA_BLOCKED_PACKAGES
+     * @see #METHOD_BLOCK_PACKAGE
+     * @see #METHOD_UNBLOCK_PACKAGE
+     * @hide
+     */
+    @SystemApi
+    public static final String METHOD_GET_BLOCKED_PACKAGES = "get_blocked_packages";
+
+    /**
+     * The method name to block the access from the given package. When a package is blocked, all
+     * the data for preview programs/channels and watch next programs belonging to this package in
+     * the content provider will be cleared. Once a package is blocked, {@link SecurityException}
+     * will be thrown for all the requests to preview programs/channels and watch next programs via
+     * {@link android.content.ContentProvider} from it.
+     *
+     * <p>The method caller must provide the following parameter:
+     * <ul>
+     *     <li>{@code arg}: The package name to be added as blocked package {@link String}.</li>
+     * </ul>
+     *
+     * <p>The returned {@link android.os.Bundle} will include an integer code denoting whether the
+     * execution is successful or not with the key {@link #EXTRA_RESULT_CODE}. If {@code arg} is
+     * empty, the result code will be {@link #RESULT_ERROR_INVALID_ARGUMENT}. If success, the result
+     * code will be {@link #RESULT_OK}. Otherwise, the result code will be {@link #RESULT_ERROR_IO}.
+     *
+     * @see ContentResolver#call(Uri, String, String, Bundle)
+     * @see #EXTRA_RESULT_CODE
+     * @see #METHOD_GET_BLOCKED_PACKAGES
+     * @see #METHOD_UNBLOCK_PACKAGE
+     * @hide
+     */
+    @SystemApi
+    public static final String METHOD_BLOCK_PACKAGE = "block_package";
+
+    /**
+     * The method name to unblock the access from the given package. When a package is blocked, all
+     * the data for preview programs/channels and watch next programs belonging to this package in
+     * the content provider will be cleared. Once a package is blocked, {@link SecurityException}
+     * will be thrown for all the requests to preview programs/channels and watch next programs via
+     * {@link android.content.ContentProvider} from it.
+     *
+     * <p>The method caller must provide the following parameter:
+     * <ul>
+     *     <li>{@code arg}: The package name to be removed from blocked list as a {@link String}.
+     *     </li>
+     * </ul>
+     *
+     * <p>The returned {@link android.os.Bundle} will include an integer code denoting whether the
+     * execution is successful or not with the key {@link #EXTRA_RESULT_CODE}. If {@code arg} is
+     * empty, the result code will be {@link #RESULT_ERROR_INVALID_ARGUMENT}. If success, the result
+     * code will be {@link #RESULT_OK}. Otherwise, the result code will be {@link #RESULT_ERROR_IO}.
+     *
+     * @see ContentResolver#call(Uri, String, String, Bundle)
+     * @see #EXTRA_RESULT_CODE
+     * @see #METHOD_GET_BLOCKED_PACKAGES
+     * @see #METHOD_BLOCK_PACKAGE
+     * @hide
+     */
+    @SystemApi
+    public static final String METHOD_UNBLOCK_PACKAGE = "unblock_package";
+
+    /**
      * The key for a returned {@link Bundle} value containing existing column names in the given
      * table as an {@link ArrayList} of {@link String}.
      *
@@ -251,6 +355,16 @@ public final class TvContract {
      */
     @SystemApi
     public static final String EXTRA_DEFAULT_VALUE = "android.media.tv.extra.DEFAULT_VALUE";
+
+    /**
+     * The key for a returned {@link Bundle} value containing all the blocked package names as an
+     * {@link ArrayList} of {@link String}.
+     *
+     * @see #METHOD_GET_BLOCKED_PACKAGES
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_BLOCKED_PACKAGES = "android.media.tv.extra.BLOCKED_PACKAGES";
 
     /**
      * An optional query, update or delete URI parameter that allows the caller to specify TV input
@@ -2183,19 +2297,6 @@ public final class TvContract {
          * @see WatchNextPrograms#COLUMN_TRANSIENT
          */
         public static final String COLUMN_TRANSIENT = "transient";
-
-        /**
-         * The flag indicating whether this TV channel is approved to be shown by the system.
-         *
-         * <p>A value of 1 indicates that the channel is approved to be shown by the system, and a
-         * value of 0 indicates that the channel is blocked by system. If not specified, this value
-         * is set to 0 (not approved) by default.
-         *
-         * <p>Type: INTEGER (boolean)
-         * @hide
-         */
-        @SystemApi
-        public static final String COLUMN_SYSTEM_APPROVED = "system_approved";
 
         private Channels() {}
 
