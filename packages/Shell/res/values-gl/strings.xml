@@ -23,7 +23,11 @@
     <string name="bugreport_updating_title" msgid="4423539949559634214">"Engadindo detalles ao informe de erro"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"Agarda..."</string>
     <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"O informe de erros aparecerá no teléfono en breve"</string>
+    <!-- no translation found for bugreport_finished_text (5758325479058638893) -->
+    <skip />
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"Toca para compartir o teu informe de erros"</string>
+    <!-- no translation found for bugreport_finished_pending_screenshot_text (2343263822812016950) -->
+    <skip />
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"Toca para compartir o informe de erros sen captura de pantalla ou agarda a que finalice a captura"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"Toca para compartir o informe de erros sen captura de pantalla ou agarda a que finalice a captura"</string>
     <string name="bugreport_confirm" msgid="5917407234515812495">"Os informes de erros conteñen datos dos distintos ficheiros de rexistro do sistema, os cales poden incluír datos que consideres confidenciais (coma o uso de aplicacións e os datos de localización). Comparte os informes de erros só coas persoas e aplicacións nas que confíes."</string>

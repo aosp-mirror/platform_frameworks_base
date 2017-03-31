@@ -23,7 +23,11 @@
     <string name="bugreport_updating_title" msgid="4423539949559634214">"세부정보를 버그 보고서에 추가"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"잠시 기다려 주세요..."</string>
     <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"곧 버그 보고서가 휴대전화에 표시됩니다."</string>
+    <!-- no translation found for bugreport_finished_text (5758325479058638893) -->
+    <skip />
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"버그 신고를 공유하려면 탭하세요."</string>
+    <!-- no translation found for bugreport_finished_pending_screenshot_text (2343263822812016950) -->
+    <skip />
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"스크린샷 없이 버그 신고서를 공유하려면 탭하고 그렇지 않으면 스크린샷이 완료될 때까지 기다려 주세요."</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"스크린샷 없이 버그 신고서를 공유하려면 탭하고 그렇지 않으면 스크린샷이 완료될 때까지 기다려 주세요."</string>
     <string name="bugreport_confirm" msgid="5917407234515812495">"버그 신고서에는 시스템의 다양한 로그 파일 데이터가 포함되며 여기에는 사용자가 중요하다고 생각하는 데이터(예: 앱 사용 및 위치 데이터)가 포함되었을 수 있습니다. 신뢰할 수 있는 앱과 사용자에게만 버그 신고서를 공유하세요."</string>
