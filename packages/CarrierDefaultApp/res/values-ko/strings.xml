@@ -7,12 +7,8 @@
     <string name="no_data_notification_id" msgid="668400731803969521">"모바일 데이터가 비활성화되었습니다."</string>
     <string name="portal_notification_detail" msgid="2295729385924660881">"%s 웹사이트를 방문하려면 탭하세요."</string>
     <string name="no_data_notification_detail" msgid="3112125343857014825">"서비스 제공업체 %s에 문의하세요."</string>
-    <!-- no translation found for action_bar_label (4290345990334377177) -->
-    <skip />
-    <!-- no translation found for ssl_error_warning (3127935140338254180) -->
-    <skip />
-    <!-- no translation found for ssl_error_example (6188711843183058764) -->
-    <skip />
-    <!-- no translation found for ssl_error_continue (1138548463994095584) -->
-    <skip />
+    <string name="action_bar_label" msgid="4290345990334377177">"모바일 네트워크에 로그인"</string>
+    <string name="ssl_error_warning" msgid="3127935140338254180">"가입하려는 네트워크에 보안 문제가 있습니다."</string>
+    <string name="ssl_error_example" msgid="6188711843183058764">"예를 들어 로그인 페이지가 표시된 조직에 속하지 않을 수 있습니다."</string>
+    <string name="ssl_error_continue" msgid="1138548463994095584">"브라우저를 통해 계속하기"</string>
 </resources>
