@@ -455,8 +455,8 @@ public class StatusBarIconView extends AnimatedImageView {
         CharSequence title = n.extras.getCharSequence(Notification.EXTRA_TITLE);
         CharSequence ticker = n.tickerText;
 
-        CharSequence desc = !TextUtils.isEmpty(ticker) ? ticker
-                : !TextUtils.isEmpty(title) ? title : "";
+        CharSequence desc = !TextUtils.isEmpty(title) ? title
+                : !TextUtils.isEmpty(ticker) ? ticker : "";
 
         return c.getString(R.string.accessibility_desc_notification_icon, appName, desc);
     }
