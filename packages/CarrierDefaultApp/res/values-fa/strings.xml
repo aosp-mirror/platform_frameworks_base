@@ -9,12 +9,8 @@
     <!-- String.format failed for translation -->
     <!-- no translation found for no_data_notification_detail (3112125343857014825) -->
     <skip />
-    <!-- no translation found for action_bar_label (4290345990334377177) -->
-    <skip />
-    <!-- no translation found for ssl_error_warning (3127935140338254180) -->
-    <skip />
-    <!-- no translation found for ssl_error_example (6188711843183058764) -->
-    <skip />
-    <!-- no translation found for ssl_error_continue (1138548463994095584) -->
-    <skip />
+    <string name="action_bar_label" msgid="4290345990334377177">"ورود به سیستم شبکه تلفن همراه"</string>
+    <string name="ssl_error_warning" msgid="3127935140338254180">"شبکه‌ای که می‌خواهید به آن بپیوندید مشکلات امنیتی دارد."</string>
+    <string name="ssl_error_example" msgid="6188711843183058764">"به عنوان مثال، صفحه ورود به سیستم ممکن است متعلق به سازمان نشان داده شده نباشد."</string>
+    <string name="ssl_error_continue" msgid="1138548463994095584">"درهر صورت ازطریق مرورگر ادامه یابد"</string>
 </resources>

@@ -7,12 +7,8 @@
     <string name="no_data_notification_id" msgid="668400731803969521">"Ձեր բջջային ինտերնետն ապակտիվացված է"</string>
     <string name="portal_notification_detail" msgid="2295729385924660881">"Հպեք՝ %s կայք այցելելու համար"</string>
     <string name="no_data_notification_detail" msgid="3112125343857014825">"Դիմեք ձեր ծառայություններ մատուցողին %s"</string>
-    <!-- no translation found for action_bar_label (4290345990334377177) -->
-    <skip />
-    <!-- no translation found for ssl_error_warning (3127935140338254180) -->
-    <skip />
-    <!-- no translation found for ssl_error_example (6188711843183058764) -->
-    <skip />
-    <!-- no translation found for ssl_error_continue (1138548463994095584) -->
-    <skip />
+    <string name="action_bar_label" msgid="4290345990334377177">"Մուտք գործել բջջային ցանց"</string>
+    <string name="ssl_error_warning" msgid="3127935140338254180">"Ցանցը, որին փորձում եք միանալ, անվտանգության խնդիրներ ունի:"</string>
+    <string name="ssl_error_example" msgid="6188711843183058764">"Օրինակ՝ մուտքի էջը կարող է ցուցադրված կազմակերպության էջը չլինել:"</string>
+    <string name="ssl_error_continue" msgid="1138548463994095584">"Շարունակել դիտարկիչի միջոցով"</string>
 </resources>
