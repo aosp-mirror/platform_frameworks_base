@@ -23,7 +23,11 @@
     <string name="bugreport_updating_title" msgid="4423539949559634214">"Се додаваат детали на извештајот за грешка"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"Почекајте..."</string>
     <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"Извештајот за грешки наскоро ќе се појави на телефонот"</string>
+    <!-- no translation found for bugreport_finished_text (5758325479058638893) -->
+    <skip />
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"Допрете за да го споделите извештајот за грешки"</string>
+    <!-- no translation found for bugreport_finished_pending_screenshot_text (2343263822812016950) -->
+    <skip />
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"Допрете за споделување извештај за грешки без слика од екранот или почекајте да се подготви сликата"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"Допрете за споделување извештај за грешки без слика од екранот или почекајте да се подготви сликата"</string>
     <string name="bugreport_confirm" msgid="5917407234515812495">"Извештаите за грешка содржат податоци од разни датотеки за евиденција на системот, вклучувајќи и податоци што можеби ги сметате за чувствителни (како што се користење на апликациите и податоци за локацијата). Извештаите за грешки споделувајте ги само со апликации и луѓе во кои имате доверба."</string>
