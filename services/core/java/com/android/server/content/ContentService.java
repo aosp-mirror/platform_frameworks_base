@@ -163,7 +163,7 @@ public final class ContentService extends IContentService.Stub {
 
     @Override
     protected synchronized void dump(FileDescriptor fd, PrintWriter pw_, String[] args) {
-        if (!DumpUtils.checkDumpPermission(mContext, TAG, pw_)) return;
+        if (!DumpUtils.checkDumpAndUsageStatsPermission(mContext, TAG, pw_)) return;
         final IndentingPrintWriter pw = new IndentingPrintWriter(pw_, "  ");
 
         // This makes it so that future permission checks will be in the context of this
