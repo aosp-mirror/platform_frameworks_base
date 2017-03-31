@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<set
+    xmlns:android="http://schemas.android.com/apk/res/android" >
+    <set
+        android:ordering="sequentially" >
+        <objectAnimator
+            android:duration="133"
+            android:propertyName="fillAlpha"
+            android:valueFrom="1.0"
+            android:valueTo="1.0"
+            android:valueType="floatType"
+            android:interpolator="@android:interpolator/linear" />
+        <objectAnimator
+            android:duration="16"
+            android:propertyName="fillAlpha"
+            android:valueFrom="1.0"
+            android:valueTo="0.5"
+            android:valueType="floatType"
+            android:interpolator="@android:interpolator/linear" />
+        <objectAnimator
+            android:duration="433"
+            android:propertyName="fillAlpha"
+            android:valueFrom="0.5"
+            android:valueTo="0.5"
+            android:valueType="floatType"
+            android:interpolator="@android:interpolator/linear" />
+        <objectAnimator
+            android:duration="16"
+            android:propertyName="fillAlpha"
+            android:valueFrom="0.5"
+            android:valueTo="1.0"
+            android:valueType="floatType"
+            android:interpolator="@android:interpolator/linear" />
+    </set>
+</set>

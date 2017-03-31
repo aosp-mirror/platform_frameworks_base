@@ -22,6 +22,8 @@ import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.Animatable;
+import android.graphics.drawable.Animatable2;
+import android.graphics.drawable.Animatable2.AnimationCallback;
 import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.widget.ImageView;
@@ -96,11 +98,16 @@ public class QSIconViewImpl extends QSIconView {
             iv.setImageDrawable(d);
             iv.setTag(R.id.qs_icon_tag, state.icon);
             iv.setPadding(0, padding, 0, padding);
-            if (d instanceof Animatable && iv.isShown()) {
-                Animatable a = (Animatable) d;
+            if (d instanceof Animatable2) {
+                Animatable2 a = (Animatable2) d;
                 a.start();
-                if (!iv.isShown()) {
-                    a.stop(); // skip directly to end state
+                if (state.isTransient) {
+                    a.registerAnimationCallback(new AnimationCallback() {
+                        @Override
+                        public void onAnimationEnd(Drawable drawable) {
+                            a.start();
+                        }
+                    });
                 }
             }
         }
