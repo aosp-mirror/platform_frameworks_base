@@ -157,6 +157,18 @@ message SystemMessage {
     // Legacy IDs with arbitrary values appear below
     // Legacy IDs existed as stable non-conflicting constants prior to the O release
 
+    // Network status notes, previously decleared in metrics_constants with these values
+    // Package: android
+    //
+    // A captive portal was detected during network validation
+    NOTE_NETWORK_SIGN_IN = 740;
+    // An unvalidated network without Internet was selected by the user
+    NOTE_NETWORK_NO_INTERNET = 741;
+    // A validated network failed revalidation and lost Internet access
+    NOTE_NETWORK_LOST_INTERNET = 742;
+    // The system default network switched to a different network
+    NOTE_NETWORK_SWITCH = 743;
+
     // Notify the user that their work profile has been deleted
     // Package: android
     NOTE_PROFILE_WIPED = 1001;

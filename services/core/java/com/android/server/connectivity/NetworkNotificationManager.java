@@ -31,7 +31,7 @@ import android.util.SparseIntArray;
 import android.widget.Toast;
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
 
 import static android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET;
@@ -40,11 +40,12 @@ import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 
 public class NetworkNotificationManager {
 
+
     public static enum NotificationType {
-        LOST_INTERNET(MetricsEvent.NOTIFICATION_NETWORK_LOST_INTERNET),
-        NETWORK_SWITCH(MetricsEvent.NOTIFICATION_NETWORK_SWITCH),
-        NO_INTERNET(MetricsEvent.NOTIFICATION_NETWORK_NO_INTERNET),
-        SIGN_IN(MetricsEvent.NOTIFICATION_NETWORK_SIGN_IN);
+        LOST_INTERNET(SystemMessage.NOTE_NETWORK_LOST_INTERNET),
+        NETWORK_SWITCH(SystemMessage.NOTE_NETWORK_SWITCH),
+        NO_INTERNET(SystemMessage.NOTE_NETWORK_NO_INTERNET),
+        SIGN_IN(SystemMessage.NOTE_NETWORK_SIGN_IN);
 
         public final int eventId;
 
