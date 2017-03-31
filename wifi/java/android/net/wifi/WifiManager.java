@@ -82,6 +82,34 @@ public class WifiManager {
     public static final int ERROR_AUTHENTICATING = 1;
 
     /**
+     * The reason code if there is no error during authentication.
+     * It could also imply that there no authentication in progress,
+     * this reason code also serves as a reset value.
+     * @hide
+     */
+    public static final int ERROR_AUTH_FAILURE_NONE = 0;
+
+    /**
+     * The reason code if there was a timeout authenticating.
+     * @hide
+     */
+    public static final int ERROR_AUTH_FAILURE_TIMEOUT = 1;
+
+    /**
+     * The reason code if there was a wrong password while
+     * authenticating.
+     * @hide
+     */
+    public static final int ERROR_AUTH_FAILURE_WRONG_PSWD = 2;
+
+    /**
+     * The reason code if there was EAP failure while
+     * authenticating.
+     * @hide
+     */
+    public static final int ERROR_AUTH_FAILURE_EAP_FAILURE = 3;
+
+    /**
      * Broadcast intent action indicating whether Wi-Fi scanning is allowed currently
      * @hide
      */
@@ -495,6 +523,16 @@ public class WifiManager {
      * @see #ERROR_AUTHENTICATING
      */
     public static final String EXTRA_SUPPLICANT_ERROR = "supplicantError";
+
+    /**
+     * The lookup key for a {@link SupplicantState} describing the supplicant
+     * error reason if any
+     * Retrieve with
+     * {@link android.content.Intent#getIntExtra(String, int)}.
+     * @see #ERROR_AUTH_FAILURE_#REASON_CODE
+     * @hide
+     */
+    public static final String EXTRA_SUPPLICANT_ERROR_REASON = "supplicantErrorReason";
 
     /**
      * Broadcast intent action indicating that the configured networks changed.
