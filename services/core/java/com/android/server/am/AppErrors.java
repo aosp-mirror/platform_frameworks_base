@@ -829,6 +829,9 @@ class AppErrors {
                             if (r.persistent) {
                                 firstPids.add(pid);
                                 if (DEBUG_ANR) Slog.i(TAG, "Adding persistent proc: " + r);
+                            } else if (r.treatLikeActivity) {
+                                firstPids.add(pid);
+                                if (DEBUG_ANR) Slog.i(TAG, "Adding likely IME: " + r);
                             } else {
                                 lastPids.put(pid, Boolean.TRUE);
                                 if (DEBUG_ANR) Slog.i(TAG, "Adding ANR proc: " + r);
