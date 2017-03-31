@@ -28,6 +28,7 @@ import android.provider.Settings;
 import android.text.format.DateUtils;
 
 import com.android.internal.R;
+import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
 
 import java.lang.annotation.Retention;
@@ -38,7 +39,7 @@ import java.lang.annotation.RetentionPolicy;
  */
 class RemoteBugreportUtils {
 
-    static final int NOTIFICATION_ID = 678432343;
+    static final int NOTIFICATION_ID = SystemMessage.NOTE_REMOTE_BUGREPORT;
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({

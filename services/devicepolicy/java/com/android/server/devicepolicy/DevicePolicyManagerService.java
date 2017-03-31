@@ -165,6 +165,7 @@ import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.statusbar.IStatusBarService;
@@ -260,9 +261,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     private static final String ACTION_EXPIRED_PASSWORD_NOTIFICATION
             = "com.android.server.ACTION_EXPIRED_PASSWORD_NOTIFICATION";
-
-    private static final int PROFILE_WIPED_NOTIFICATION_ID = 1001;
-    private static final int NETWORK_LOGGING_NOTIFICATION_ID = 1002;
 
     private static final String ATTR_PERMISSION_PROVIDER = "permission-provider";
     private static final String ATTR_SETUP_COMPLETE = "setup-complete";
@@ -5301,11 +5299,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                         .setColor(mContext.getColor(R.color.system_notification_accent_color))
                         .setStyle(new Notification.BigTextStyle().bigText(contentText))
                         .build();
-        mInjector.getNotificationManager().notify(PROFILE_WIPED_NOTIFICATION_ID, notification);
+        mInjector.getNotificationManager().notify(SystemMessage.NOTE_PROFILE_WIPED, notification);
     }
 
     private void clearWipeProfileNotification() {
-        mInjector.getNotificationManager().cancel(PROFILE_WIPED_NOTIFICATION_ID);
+        mInjector.getNotificationManager().cancel(SystemMessage.NOTE_PROFILE_WIPED);
     }
 
     @Override
@@ -10624,7 +10622,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                             + " service not being available yet.");
                 }
                 mNetworkLogger = null;
-                mInjector.getNotificationManager().cancel(NETWORK_LOGGING_NOTIFICATION_ID);
+                mInjector.getNotificationManager().cancel(SystemMessage.NOTE_NETWORK_LOGGING);
             }
         } finally {
             mInjector.binderRestoreCallingIdentity(callingIdentity);
@@ -10751,7 +10749,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 .setStyle(new Notification.BigTextStyle()
                         .bigText(mContext.getString(R.string.network_logging_notification_text)))
                 .build();
-        mInjector.getNotificationManager().notify(NETWORK_LOGGING_NOTIFICATION_ID, notification);
+        mInjector.getNotificationManager().notify(SystemMessage.NOTE_NETWORK_LOGGING, notification);
         saveSettingsLocked(mOwners.getDeviceOwnerUserId());
     }
 
