@@ -33,6 +33,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.print.PrintDocumentAdapter;
+import android.util.SparseArray;
 import android.view.DragEvent;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -41,6 +42,7 @@ import android.view.ViewGroup.LayoutParams;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeProvider;
+import android.view.autofill.AutofillValue;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.textclassifier.TextClassifier;
@@ -329,6 +331,10 @@ public interface WebViewProvider {
         @SuppressWarnings("unused")
         public default void onProvideAutofillVirtualStructure(android.view.ViewStructure structure,
                 int flags) {
+        }
+
+        @SuppressWarnings("unused")
+        public default void autofill(SparseArray<AutofillValue>values) {
         }
 
         public AccessibilityNodeProvider getAccessibilityNodeProvider();
