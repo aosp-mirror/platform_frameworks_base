@@ -311,6 +311,20 @@ public class BaseBundle {
     }
 
     /**
+     * @hide this should probably be the implementation of isEmpty().  To do that we
+     * need to ensure we always use the special empty parcel form when the bundle is
+     * empty.  (This may already be the case, but to be safe we'll do this later when
+     * we aren't trying to stabilize.)
+     */
+    public boolean maybeIsEmpty() {
+        if (isParcelled()) {
+            return isEmptyParcel();
+        } else {
+            return isEmpty();
+        }
+    }
+
+    /**
      * Removes all elements from the mapping of this Bundle.
      */
     public void clear() {

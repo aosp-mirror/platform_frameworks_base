@@ -17,6 +17,7 @@
 package com.android.server.job;
 
 import android.app.ActivityManager;
+import android.app.job.JobInfo;
 import android.app.job.JobParameters;
 import android.app.job.IJobCallback;
 import android.app.job.IJobService;
@@ -187,9 +188,10 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
                 triggeredAuthorities = new String[job.changedAuthorities.size()];
                 job.changedAuthorities.toArray(triggeredAuthorities);
             }
-            mParams = new JobParameters(this, job.getJobId(), job.getExtras(),
-                    job.getTransientExtras(), isDeadlineExpired,
-                    triggeredUris, triggeredAuthorities);
+            final JobInfo ji = job.getJob();
+            mParams = new JobParameters(this, job.getJobId(), ji.getExtras(),
+                    ji.getTransientExtras(), ji.getClipData(), ji.getClipGrantFlags(),
+                    isDeadlineExpired, triggeredUris, triggeredAuthorities);
             mExecutionStartTimeElapsed = SystemClock.elapsedRealtime();
 
             mVerb = VERB_BINDING;

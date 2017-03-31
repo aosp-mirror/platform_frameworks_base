@@ -16,6 +16,8 @@
 
 package com.android.server.job;
 
+import android.app.ActivityManager;
+import android.app.IActivityManager;
 import android.content.ComponentName;
 import android.app.job.JobInfo;
 import android.content.Context;
@@ -294,7 +296,7 @@ public class JobStore {
                     addAttributesToJobTag(out, jobStatus);
                     writeConstraintsToXml(out, jobStatus);
                     writeExecutionCriteriaToXml(out, jobStatus);
-                    writeBundleToXml(jobStatus.getExtras(), out);
+                    writeBundleToXml(jobStatus.getJob().getExtras(), out);
                     out.endTag(null, "job");
                 }
                 out.endTag(null, "job-info");
@@ -449,8 +451,11 @@ public class JobStore {
                 synchronized (mLock) {
                     jobs = readJobMapImpl(fis);
                     if (jobs != null) {
+                        IActivityManager am = ActivityManager.getService();
                         for (int i=0; i<jobs.size(); i++) {
-                            this.jobSet.add(jobs.get(i));
+                            JobStatus js = jobs.get(i);
+                            js.prepare(am);
+                            this.jobSet.add(js);
                         }
                     }
                 }

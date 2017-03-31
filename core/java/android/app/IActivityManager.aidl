@@ -172,7 +172,8 @@ interface IActivityManager {
             in IBinder callerToken);
     void grantUriPermission(in IApplicationThread caller, in String targetPkg, in Uri uri,
             int mode, int userId);
-    void revokeUriPermission(in IApplicationThread caller, in Uri uri, int mode, int userId);
+    void revokeUriPermission(in IApplicationThread caller, in String targetPkg, in Uri uri,
+            int mode, int userId);
     void setActivityController(in IActivityController watcher, boolean imAMonkey);
     void showWaitingForDebugger(in IApplicationThread who, boolean waiting);
     /*
