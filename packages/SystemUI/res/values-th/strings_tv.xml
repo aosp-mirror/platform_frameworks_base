@@ -27,7 +27,4 @@
     <string name="pip_onboarding_title" msgid="7850436557670253991">"การแสดงผลหลายแหล่งพร้อมกัน"</string>
     <string name="pip_onboarding_description" msgid="4028124563309465267">"การตั้งค่านี้จะทำให้คุณมองเห็นวิดีโอนี้จนกว่าคุณจะเล่นวิดีโออีกรายการหนึ่ง กดปุ่ม"<b>"หน้าแรก"</b>"ค้างไว้เพื่อควบคุม"</string>
     <string name="pip_onboarding_button" msgid="3957426748484904611">"รับทราบ"</string>
-    <string name="recents_tv_dismiss" msgid="3555093879593377731">"ปิด"</string>
-  <string-array name="recents_tv_blacklist_array">
-  </string-array>
 </resources>

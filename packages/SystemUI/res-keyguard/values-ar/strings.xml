@@ -122,7 +122,8 @@
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3398054847288438444">"يجب رسم النقش عند تبديل الملفات الشخصية"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="7426368139226961699">"يجب إدخال رقم التعريف الشخصي عند تبديل الملفات الشخصية"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="8383831046318421845">"يجب إدخال كلمة المرور عند تبديل الملفات الشخصية."</string>
-    <string name="kg_prompt_reason_device_admin" msgid="2438626748767361010">"تم حظر الجهاز بواسطة المسؤول"</string>
+    <!-- no translation found for kg_prompt_reason_device_admin (3452168247888906179) -->
+    <skip />
     <string name="kg_prompt_reason_user_request" msgid="8236951765212462286">"تم حظر الجهاز يدويًا"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="71299470072448533">
       <item quantity="zero">لم يتم إلغاء تأمين الجهاز لمدة <xliff:g id="NUMBER_1">%d</xliff:g> ساعة. تأكيد النقش.</item>

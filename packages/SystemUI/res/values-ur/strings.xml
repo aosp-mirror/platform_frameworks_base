@@ -75,7 +75,8 @@
     <string name="screenshot_failed_title" msgid="705781116746922771">"اسکرین شاٹ کیپچر نہیں کر سکے۔"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"اسکرین شاٹ محفوظ کرتے وقت مسئلہ پیش آ گیا۔"</string>
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"محدود اسٹوریج جگہ کی وجہ سے اسکرین شاٹس نہیں لئے جا سکتے۔"</string>
-    <string name="screenshot_failed_to_capture_text" msgid="7602391003979898374">"ایپ یا آپ کی تنظیم کی جانب سے اسکرین شاٹس لینے کی اجازت نہیں ہے۔"</string>
+    <!-- no translation found for screenshot_failed_to_capture_text (173674476457581486) -->
+    <skip />
     <string name="usb_preference_title" msgid="6551050377388882787">"‏USB فائل منتقل کرنیکے اختیارات"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"‏ایک میڈیا پلیئر (MTP) کے بطور ماؤنٹ کریں"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"‏ایک کیمرہ (PTP) کے بطور ماؤنٹ کریں"</string>
@@ -90,7 +91,8 @@
     <string name="accessibility_phone_button" msgid="6738112589538563574">"فون"</string>
     <string name="accessibility_voice_assist_button" msgid="487611083884852965">"صوتی معاون"</string>
     <string name="accessibility_unlock_button" msgid="128158454631118828">"غیر مقفل کریں"</string>
-    <string name="accessibility_unlock_button_fingerprint" msgid="8214125623493923751">"بٹن غیر مقفل کریں، فنگر پرنٹ کا منتظر"</string>
+    <!-- no translation found for accessibility_waiting_for_fingerprint (4808860050517462885) -->
+    <skip />
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"فنگر پرنٹ استعمال کیے بغیرغیر مقفل کریں"</string>
     <string name="unlock_label" msgid="8779712358041029439">"غیر مقفل کریں"</string>
     <string name="phone_label" msgid="2320074140205331708">"فون کھولیں"</string>
@@ -236,8 +238,7 @@
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="650231949881093289">"ڈیٹا سیور آف ہو گیا۔"</string>
     <string name="accessibility_quick_settings_data_saver_changed_on" msgid="4218725402373934151">"ڈیٹا سرور آن ہو گیا۔"</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"ڈسپلے کی چمک"</string>
-    <!-- no translation found for accessibility_ambient_display_charging (9084521679384069087) -->
-    <skip />
+    <string name="accessibility_ambient_display_charging" msgid="9084521679384069087">"چارج ہو رہا ہے"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"‏2G-3G ڈیٹا موقوف کر دیا گیا"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"‏4G ڈیٹا موقوف کر دیا گیا"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"سیلولر ڈیٹا موقوف کر دیا گیا"</string>
@@ -277,7 +278,8 @@
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"چمکیلا پن"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"خود کار طور پر گھمائیں"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"اسکرین کو خود کار طور پر گھمائیں"</string>
-    <string name="accessibility_quick_settings_rotation_value" msgid="1428962304214992318">"<xliff:g id="ID_1">%s</xliff:g> پر سیٹ کریں"</string>
+    <!-- no translation found for accessibility_quick_settings_rotation_value (8187398200140760213) -->
+    <skip />
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"گردش مقفل ہے"</string>
     <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"پورٹریٹ"</string>
     <string name="quick_settings_rotation_locked_landscape_label" msgid="8553157770061178719">"لینڈ اسکیپ"</string>
@@ -335,7 +337,6 @@
     <string name="recents_launch_error_message" msgid="2969287838120550506">"<xliff:g id="APP">%s</xliff:g> کو شروع نہیں کیا جا سکا۔"</string>
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"محفوظ موڈ میں <xliff:g id="APP">%s</xliff:g> غیر فعال ہوتی ہے۔"</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"سبھی کو صاف کریں"</string>
-    <string name="recents_incompatible_app_message" msgid="5075812958564082451">"ایپ سپلٹ اسکرین کو سپورٹ نہیں کرتی"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"اسپلٹ اسکرین استعمال کرنے کیلئے یہاں گھسیٹیں"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"بلحاظ افقی الگ کریں"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"بلحاظ عمودی الگ کریں"</string>
@@ -361,7 +362,7 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"کم اہم اطلاعات ذیل میں ہیں"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"کھولنے کیلئے دوبارہ تھپتھپائیں"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"غیر مقفل کرنے کیلئے اوپر سوائپ کریں"</string>
-    <string name="do_disclosure_generic" msgid="8498005633306135779">"یہ آلہ زیر انتظام ہے"</string>
+    <string name="do_disclosure_generic" msgid="5615898451805157556">"یہ آلہ آپ کی تنظیم کے زیر انتظام ہے"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"یہ آلہ <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> کے زیر انتظام ہے"</string>
     <string name="phone_hint" msgid="4872890986869209950">"فون کیلئے آئیکن سے سوائپ کریں"</string>
     <string name="voice_hint" msgid="8939888732119726665">"صوتی معاون کیلئے آئیکن سے سوائپ کریں"</string>
@@ -414,13 +415,68 @@
     <string name="profile_owned_footer" msgid="8021888108553696069">"پروفائل کو مانیٹر کیا جا سکتا ہے"</string>
     <string name="vpn_footer" msgid="2388611096129106812">"نیٹ ورک کو مانیٹر کیا جا سکتا ہے"</string>
     <string name="branded_vpn_footer" msgid="2168111859226496230">"نیٹ ورک کو شاید مانیٹر کیا جائے"</string>
+    <!-- no translation found for quick_settings_disclosure_management_monitoring (6645176135063957394) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_management_monitoring (370622174777570853) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_management_named_vpn (1085137869053332307) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_management_named_vpn (6290456493852584017) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_management (3294967280853150271) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_management (1059403025094542908) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_management_vpns (3698767349925266482) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_management_vpns (7777821385318891527) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_managed_profile_monitoring (5125463987558278215) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_managed_profile_monitoring (8973606847896650284) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_monitoring (679658227269205728) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_vpns (8170318392053156330) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_managed_profile_named_vpn (3494535754792751741) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_personal_profile_named_vpn (4467456202486569906) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_vpn (6943724064780847080) -->
+    <skip />
     <string name="monitoring_title_device_owned" msgid="7121079311903859610">"آلہ کو مانیٹر کرنا"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"پروفائل کو مانیٹر کرنا"</string>
     <string name="monitoring_title" msgid="169206259253048106">"نیٹ ورک کو مانیٹر کرنا"</string>
     <string name="monitoring_subtitle_vpn" msgid="876537538087857300">"VPN"</string>
-    <string name="monitoring_subtitle_network_logging" msgid="5569072711320784030">"نیٹ ورک لاگنگ"</string>
+    <!-- no translation found for monitoring_subtitle_network_logging (3341264304793193386) -->
+    <skip />
+    <!-- no translation found for monitoring_subtitle_ca_certificate (3874151893894355988) -->
+    <skip />
     <string name="disable_vpn" msgid="4435534311510272506">"‏VPN کو غیر فعال کریں"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"‏VPN کو غیر منسلک کریں"</string>
+    <!-- no translation found for monitoring_button_view_policies (100913612638514424) -->
+    <skip />
+    <!-- no translation found for monitoring_description_named_management (4872859182820011954) -->
+    <skip />
+    <!-- no translation found for monitoring_description_management (3115563193381106341) -->
+    <skip />
+    <!-- no translation found for monitoring_description_management_ca_certificate (5202023784131001751) -->
+    <skip />
+    <!-- no translation found for monitoring_description_managed_profile_ca_certificate (4683248196789897964) -->
+    <skip />
+    <!-- no translation found for monitoring_description_ca_certificate (7886985418413598352) -->
+    <skip />
+    <!-- no translation found for monitoring_description_management_network_logging (7184005419733060736) -->
+    <skip />
+    <!-- no translation found for monitoring_description_named_vpn (639013857356724268) -->
+    <skip />
+    <!-- no translation found for monitoring_description_two_named_vpns (4479748971871539316) -->
+    <skip />
+    <!-- no translation found for monitoring_description_managed_profile_named_vpn (1427905889862420559) -->
+    <skip />
+    <!-- no translation found for monitoring_description_personal_profile_named_vpn (3133980926929069283) -->
+    <skip />
     <string name="monitoring_description_do_header_generic" msgid="96588491028288691">"آپ کا آلہ <xliff:g id="DEVICE_OWNER_APP">%1$s</xliff:g> کے زیر انتظام ہے۔"</string>
     <string name="monitoring_description_do_header_with_name" msgid="5511133708978206460">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> آپ کے آلہ کے نظم کیلئے <xliff:g id="DEVICE_OWNER_APP">%2$s</xliff:g> استعمال کرتا ہے۔"</string>
     <string name="monitoring_description_do_body" msgid="3639594537660975895">"آپ کا ایڈمن ترتیبات، کارپوریٹ رسائی، ایپس، آپ کے آلہ سے وابستہ ڈیٹا اور آپ کے آلہ کے مقام کی معلومات کو مانیٹر اور ان کا نظم کر سکتا ہے۔"</string>
@@ -429,15 +485,22 @@
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"آپ <xliff:g id="VPN_APP">%1$s</xliff:g> سے منسلک ہیں جو ای میلز، ایپس اور ویب سائٹس سمیت آپ کے نیٹ ورک کی سرگرمی مانیٹر کر سکتی ہے۔"</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"‏VPN کی ترتیبات کھولیں"</string>
+    <!-- no translation found for monitoring_description_ca_cert_settings_separator (4987350385906393626) -->
+    <skip />
+    <!-- no translation found for monitoring_description_ca_cert_settings (5489969458872997092) -->
+    <skip />
     <string name="monitoring_description_network_logging" msgid="7223505523384076027">"آپ کے ایڈمن نے نیٹ ورک لاگنگ آن کر دی ہے، جو آپ کے آلہ پر ٹریفک کو مانیٹر کرتی ہے۔\n\nمزید معلومات کیلئے اپنے ایڈمن سے رابطہ کریں۔"</string>
     <string name="monitoring_description_vpn" msgid="4445150119515393526">"‏آپ نے ایک ایپ کو VPN کنکشن ترتیب دینے کی اجازت دی ہے۔\n\nیہ ایپ ای میلز، ایپس اور ویب سائٹس سمیت آپ کے آلہ اور نیٹ ورک کی سرگرمی مانیٹر کر سکتی ہے۔"</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="2958019119161161530">"‏آپ کی دفتری پروفائل <xliff:g id="ORGANIZATION">%1$s</xliff:g> کے زیر نظم ہے۔\n\nآپ کا ایڈمن بشمول ای میلز، ایپس، اور ویب سائٹس، آپ کے نیٹ ورک کی سرگرمی کو مانیٹر کرنے کا اہل ہے۔\n\nمزید معلومات کے لیے اپنے ایڈمن سے رابطہ کریں۔\n\nآپ ایک VPN سے بھی منسلک ہیں، جو آپ کے نیٹ ورک کی سرگرمی کو مانیٹر کر سکتا ہے۔"</string>
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
-    <string name="monitoring_description_app" msgid="6259179342284742878">"آپ <xliff:g id="APPLICATION">%1$s</xliff:g> سے منسلک ہیں، جو ای میلز، ایپس اور ویب سائٹس سمیت آپ کے نیٹ ورک کی سرگرمی مانیٹر کر سکتی ہے۔"</string>
+    <!-- no translation found for monitoring_description_app (1828472472674709532) -->
+    <skip />
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"آپ <xliff:g id="APPLICATION">%1$s</xliff:g> سے منسلک ہیں، جو آپ کے نجی نیٹ ورک کی سرگرمی سمیت ای میلز، ایپس اور ویب سائٹس مانیٹر کر سکتی ہے۔"</string>
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"آپ <xliff:g id="APPLICATION">%1$s</xliff:g> سے منسلک ہیں، جو ای میلز، ایپس اور ویب سائٹس سمیت آپ کے نجی نیٹ ورک کی سرگرمی مانیٹر کر سکتی ہے۔"</string>
-    <string name="monitoring_description_app_work" msgid="7777228449969022305">"آپ کی دفتری پروفائل <xliff:g id="ORGANIZATION">%1$s</xliff:g> کے زیر نظم ہے۔ یہ <xliff:g id="APPLICATION">%2$s</xliff:g> سے منسلک ہے، جو بشمول ای میلز، ایپس اور ویب سائٹس، آپ کے دفتری نیٹ ورک کی سرگرمی کو مانیٹر کر سکتی ہے۔ \n\nمزید معلومات کے لیے، اپنے ایڈمن سے رابطہ کریں۔"</string>
-    <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"آپ کا دفتری پروفائل <xliff:g id="ORGANIZATION">%1$s</xliff:g> کے زیر انتظام ہے۔ یہ <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> سے منسلک ہے، جو ای میلز، ایپس اور ویب سائٹس سمیت آپ کے نیٹ ورک کی سرگرمی مانیٹر کر سکتی ہے۔\n\nآپ <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> سے بھی منسلک ہیں، جو آپ کے نجی نیٹ ورک کی سرگرمی کو مانیٹر کر سکتی ہے۔"</string>
+    <!-- no translation found for monitoring_description_app_work (4612997849787922906) -->
+    <skip />
+    <!-- no translation found for monitoring_description_app_personal_work (5664165460056859391) -->
+    <skip />
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"آلہ اس وقت تک مقفل رہے گا جب تک آپ دستی طور پر اسے غیر مقفل نہ کریں"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"تیزی سے اطلاعات حاصل کریں"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"غیر مقفل کرنے سے پہلے انہیں دیکھیں"</string>
@@ -468,10 +531,8 @@
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"‏‎%1$s۔ آواز چالو کرنے کیلئے تھپتھپائیں۔"</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"‏‎%1$s۔ ارتعاش پر سیٹ کرنے کیلئے تھپتھپائیں۔ ایکسیسبیلٹی سروسز شاید خاموش ہوں۔"</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"‏‎%1$s۔ خاموش کرنے کیلئے تھپتھپائیں۔ ایکسیسبیلٹی سروسز شاید خاموش ہوں۔"</string>
-    <!-- no translation found for volume_stream_content_description_vibrate_a11y (6427727603978431301) -->
-    <skip />
-    <!-- no translation found for volume_stream_content_description_mute_a11y (8995013018414535494) -->
-    <skip />
+    <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"‏‎%1$s۔ ارتعاش پر سیٹ کرنے کیلئے تھپتھپائیں۔"</string>
+    <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"‏‎%1$s۔ خاموش کرنے کیلئے تھپتھپائیں۔"</string>
     <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"‏%s والیوم کے کنٹرولز دکھائے جا رہے ہیں۔ برخاست کرنے کیلئے سوائپ کریں۔"</string>
     <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"والیوم کے کنٹرولز مخفی ہیں"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"‏سسٹم UI ٹیونر"</string>
@@ -522,9 +583,14 @@
     <string name="power_notification_controls_description" msgid="4372459941671353358">"پاور اطلاع کنٹرولز کے ساتھ آپ کسی ایپ کی اطلاعات کیلئے 0 سے 5 تک اہمیت کی سطح سیٹ کر سکتے ہیں۔ \n\n"<b>"سطح 5"</b>\n"- اطلاعات کی فہرست کے اوپر دکھائیں \n- پوری اسکرین کی مداخلت کی اجازت دیں \n- ہمیشہ جھانکنا\n\n"<b>"سطح 4"</b>\n"- پوری اسکرین کی مداخلت کو روکیں \n- ہمیشہ جھانکنا\n\n"<b>"سطح 3"</b>\n"- پوری اسکرین کی مداخلت کو روکیں \n- کبھی نہ جھانکنا \n\n"<b>"سطح 2"</b>\n"- پوری اسکرین کی مداخلت کو روکیں \n- کبھی نہ جھانکنا \n- کبھی آواز اور ارتعاش پیدا نہ کرنا \n\n"<b>" سطح 1"</b>\n"- پوری اسکرین کی مداخلت کو روکنا \n- کبھی نہ جھانکنا \n- کبھی بھی آواز یا ارتعاش پیدا نہ کرنا\n- مقفل اسکرین اور اسٹیٹس بار سے چھپانا \n - اطلاع کی فہرست کی نیچے دکھانا \n\n"<b>"سطح 0"</b>\n"- ایپ سے تمام اطلاعات مسدود کریں"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"اطلاعات"</string>
     <string name="notification_channel_disabled" msgid="5805874247999578073">"آپ کو یہ اطلاعات مزید نہیں ملیں گی۔"</string>
-    <plurals name="notification_num_channels_desc" formatted="false" msgid="8808748716499517938">
-      <item quantity="other"> اس ایپ کے <xliff:g id="NUMBER_1">%d</xliff:g> زمروں میں سے 1</item>
-      <item quantity="one"> اس ایپ کے <xliff:g id="NUMBER_0">%d</xliff:g> زمرہ میں سے 1</item>
+    <string name="notification_num_channels" msgid="2048144408999179471">"اطلاع کے <xliff:g id="NUMBER">%d</xliff:g> زمرے"</string>
+    <!-- no translation found for notification_default_channel_desc (2506053815870808359) -->
+    <skip />
+    <!-- no translation found for notification_num_channels_desc (5492793452274077663) -->
+    <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>، <xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>"</string>
+    <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">
+      <item quantity="other"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>، <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g> اور <xliff:g id="NUMBER_5">%3$d</xliff:g> دیگر</item>
+      <item quantity="one"><xliff:g id="CHANNEL_NAME_1_0">%1$s</xliff:g>، <xliff:g id="CHANNEL_NAME_2_1">%2$s</xliff:g> اور <xliff:g id="NUMBER_2">%3$d</xliff:g> دیگر</item>
     </plurals>
     <string name="notification_all_categories" msgid="5407190218055113282">"سبھی زمرے"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"مزید ترتیبات"</string>
@@ -535,7 +601,7 @@
     <string name="snooze_option_15_min" msgid="1068727451405610715">"15 منٹ"</string>
     <string name="snooze_option_30_min" msgid="867081342535195788">"30 منٹ"</string>
     <string name="snooze_option_1_hour" msgid="1098086401880077154">"1 گھنٹہ"</string>
-    <string name="snooze_option_dont_snooze" msgid="655446566007801922">"اسنوز نہ کريں"</string>
+    <string name="snooze_option_dont_snooze" msgid="2252098379349499668">"منسوخ کریں"</string>
     <string name="snooze_undo" msgid="6074877317002985129">"کالعدم کریں"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"<xliff:g id="TIME_AMOUNT">%1$s</xliff:g> کیلئے اسنوز کیا گیا"</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"بیٹری کا استعمال"</string>
@@ -677,6 +743,9 @@
     <string name="pip_phone_expand" msgid="5889780005575693909">"پھیلائیں"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"چھوٹی کریں"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"بند کریں"</string>
+    <string name="pip_menu_title" msgid="3328510504196964712">"تصویر کے مینو میں تصویر"</string>
+    <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> تصویر میں تصویر میں ہے"</string>
+    <string name="pip_notification_message" msgid="4171698133469539591">"اگر آپ نہیں چاہتے ہیں کہ <xliff:g id="NAME">%s</xliff:g> اس خصوصیت کا استعمال کرے تو ترتیبات کھولنے کیلئے تھپتھپائیں اور اسے آف کر دیں۔"</string>
     <string name="high_temp_title" msgid="4589508026407318374">"فون گرم ہو رہا ہے"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"فون کے ٹھنڈے ہو جانے تک کچھ خصوصیات محدود ہیں"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"آپ کا فون خودکار طور پر ٹھنڈا ہونے کی کوشش کرے گا۔ آپ ابھی بھی اپنا فون استعمال کر سکتے ہیں، مگر ہو سکتا ہے یہ سست چلے۔\n\nایک بار آپ کا فون ٹھنڈا ہوجائے تو یہ معمول کے مطابق چلے گا۔"</string>
@@ -699,8 +768,6 @@
     <string name="notification_channel_general" msgid="4525309436693914482">"عمومی پیغامات"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"اسٹوریج"</string>
     <string name="instant_apps" msgid="6647570248119804907">"فوری ایپس"</string>
-    <!-- no translation found for pip_menu_title (3328510504196964712) -->
-    <skip />
     <string name="instant_apps_message" msgid="8116608994995104836">"فوری ایپس کو انسٹالیشن کی ضرورت نہیں ہے۔"</string>
     <string name="app_info" msgid="6856026610594615344">"ایپ کی معلومات"</string>
     <string name="mobile_data" msgid="7094582042819250762">"موبائل ڈیٹا"</string>

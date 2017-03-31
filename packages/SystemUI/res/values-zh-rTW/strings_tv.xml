@@ -27,7 +27,4 @@
     <string name="pip_onboarding_title" msgid="7850436557670253991">"子母畫面"</string>
     <string name="pip_onboarding_description" msgid="4028124563309465267">"您的影片會一直顯示在畫面中，直到您播放其他影片為止。按住 [HOME] (主畫面) 按鈕即可控制子母畫面。"<b></b></string>
     <string name="pip_onboarding_button" msgid="3957426748484904611">"我知道了"</string>
-    <string name="recents_tv_dismiss" msgid="3555093879593377731">"關閉"</string>
-  <string-array name="recents_tv_blacklist_array">
-  </string-array>
 </resources>

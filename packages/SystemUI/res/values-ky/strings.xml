@@ -75,7 +75,8 @@
     <string name="screenshot_failed_title" msgid="705781116746922771">"Скриншот кылынбай жатат."</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"Скриншотту сактоо учурунда көйгөй пайда болду."</string>
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"Сактагычта бош орун аз болгондуктан скриншот сакталбай жатат."</string>
-    <string name="screenshot_failed_to_capture_text" msgid="7602391003979898374">"Скриншот тартууга колдонмо же ишканаңыз уруксат бербейт."</string>
+    <!-- no translation found for screenshot_failed_to_capture_text (173674476457581486) -->
+    <skip />
     <string name="usb_preference_title" msgid="6551050377388882787">"USB менен файл өткөрүү мүмкүнчүлүктөрү"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Медиа ойноткуч катары кошуу (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Камера катары кошуу (PTP)"</string>
@@ -90,7 +91,8 @@
     <string name="accessibility_phone_button" msgid="6738112589538563574">"Телефон"</string>
     <string name="accessibility_voice_assist_button" msgid="487611083884852965">"Үн жардамчысы"</string>
     <string name="accessibility_unlock_button" msgid="128158454631118828">"Кулпусун ачуу"</string>
-    <string name="accessibility_unlock_button_fingerprint" msgid="8214125623493923751">"Кулпуну ачуу баскычы, манжа изи күтүлүүдө"</string>
+    <!-- no translation found for accessibility_waiting_for_fingerprint (4808860050517462885) -->
+    <skip />
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"Манжа изиңизди колдонбостон эле кулпуну ачыңыз"</string>
     <string name="unlock_label" msgid="8779712358041029439">"кулпуну ачуу"</string>
     <string name="phone_label" msgid="2320074140205331708">"телефонду ачуу"</string>
@@ -236,8 +238,7 @@
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="650231949881093289">"Дайындарды үнөмдөгүч өчүрүлдү."</string>
     <string name="accessibility_quick_settings_data_saver_changed_on" msgid="4218725402373934151">"Дайындарды үнөмдөгүч күйгүзүлдү."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"Жарыктыгын көрсөтүү"</string>
-    <!-- no translation found for accessibility_ambient_display_charging (9084521679384069087) -->
-    <skip />
+    <string name="accessibility_ambient_display_charging" msgid="9084521679384069087">"Кубатталууда"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G-3G дайындары тындырылды."</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G дайындары тындырылды"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"Уюлдук дайындар тындырылды"</string>
@@ -277,7 +278,8 @@
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Жарыктыгы"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Автоматтык бурулуу"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"Экранды авто-тегеретүү"</string>
-    <string name="accessibility_quick_settings_rotation_value" msgid="1428962304214992318">"<xliff:g id="ID_1">%s</xliff:g> деп коюлду"</string>
+    <!-- no translation found for accessibility_quick_settings_rotation_value (8187398200140760213) -->
+    <skip />
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"Буруу аракети кулпуланган"</string>
     <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"Тигинен"</string>
     <string name="quick_settings_rotation_locked_landscape_label" msgid="8553157770061178719">"Туурасынан"</string>
@@ -335,7 +337,6 @@
     <string name="recents_launch_error_message" msgid="2969287838120550506">"<xliff:g id="APP">%s</xliff:g> баштай алган жок."</string>
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> коопсуз режиминде өчүрүлдү."</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Баарын тазалоо"</string>
-    <string name="recents_incompatible_app_message" msgid="5075812958564082451">"Колдонмодо экран бөлүнбөйт"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"Экранды бөлүү үчүн бул жерге сүйрөңүз"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Туурасынан бөлүү"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Тигинен бөлүү"</string>
@@ -361,7 +362,7 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Анчейин шашылыш эмес эскертмелер төмөндө"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Ачуу үчүн кайра таптап коюңуз"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Кулпуну ачуу үчүн серпип коюңуз"</string>
-    <string name="do_disclosure_generic" msgid="8498005633306135779">"Башкарылган түзмөк"</string>
+    <string name="do_disclosure_generic" msgid="5615898451805157556">"Бул түзмөк уюмуңуз тарабынан башкарылат"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"Бул түзмөк <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> тарабынан башкарылат"</string>
     <string name="phone_hint" msgid="4872890986869209950">"Сүрөтчөнү серпип телефонго өтүңүз"</string>
     <string name="voice_hint" msgid="8939888732119726665">"Сүрөтчөнү серпип үн жардамчысына өтүңүз"</string>
@@ -414,13 +415,68 @@
     <string name="profile_owned_footer" msgid="8021888108553696069">"Профилди көзөмөлдөсө болот"</string>
     <string name="vpn_footer" msgid="2388611096129106812">"Тармак көзөмөлдөнүшү мүмкүн"</string>
     <string name="branded_vpn_footer" msgid="2168111859226496230">"Тармак көзөмөлдөнүшү мүмкүн"</string>
+    <!-- no translation found for quick_settings_disclosure_management_monitoring (6645176135063957394) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_management_monitoring (370622174777570853) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_management_named_vpn (1085137869053332307) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_management_named_vpn (6290456493852584017) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_management (3294967280853150271) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_management (1059403025094542908) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_management_vpns (3698767349925266482) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_management_vpns (7777821385318891527) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_managed_profile_monitoring (5125463987558278215) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_managed_profile_monitoring (8973606847896650284) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_monitoring (679658227269205728) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_vpns (8170318392053156330) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_managed_profile_named_vpn (3494535754792751741) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_personal_profile_named_vpn (4467456202486569906) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_vpn (6943724064780847080) -->
+    <skip />
     <string name="monitoring_title_device_owned" msgid="7121079311903859610">"Түзмөккө көз салуу"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"Профилди көзөмөлдөө"</string>
     <string name="monitoring_title" msgid="169206259253048106">"Тармакка көз салуу"</string>
     <string name="monitoring_subtitle_vpn" msgid="876537538087857300">"VPN"</string>
-    <string name="monitoring_subtitle_network_logging" msgid="5569072711320784030">"Тармактын таржымалы алынууда"</string>
+    <!-- no translation found for monitoring_subtitle_network_logging (3341264304793193386) -->
+    <skip />
+    <!-- no translation found for monitoring_subtitle_ca_certificate (3874151893894355988) -->
+    <skip />
     <string name="disable_vpn" msgid="4435534311510272506">"VPN\'ди өчүрүү"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"VPN\'ди ажыратуу"</string>
+    <!-- no translation found for monitoring_button_view_policies (100913612638514424) -->
+    <skip />
+    <!-- no translation found for monitoring_description_named_management (4872859182820011954) -->
+    <skip />
+    <!-- no translation found for monitoring_description_management (3115563193381106341) -->
+    <skip />
+    <!-- no translation found for monitoring_description_management_ca_certificate (5202023784131001751) -->
+    <skip />
+    <!-- no translation found for monitoring_description_managed_profile_ca_certificate (4683248196789897964) -->
+    <skip />
+    <!-- no translation found for monitoring_description_ca_certificate (7886985418413598352) -->
+    <skip />
+    <!-- no translation found for monitoring_description_management_network_logging (7184005419733060736) -->
+    <skip />
+    <!-- no translation found for monitoring_description_named_vpn (639013857356724268) -->
+    <skip />
+    <!-- no translation found for monitoring_description_two_named_vpns (4479748971871539316) -->
+    <skip />
+    <!-- no translation found for monitoring_description_managed_profile_named_vpn (1427905889862420559) -->
+    <skip />
+    <!-- no translation found for monitoring_description_personal_profile_named_vpn (3133980926929069283) -->
+    <skip />
     <string name="monitoring_description_do_header_generic" msgid="96588491028288691">"Түзмөгүңүз <xliff:g id="DEVICE_OWNER_APP">%1$s</xliff:g> тарабынан башкарылат."</string>
     <string name="monitoring_description_do_header_with_name" msgid="5511133708978206460">"Түзмөгүңүздү башкаруу үчүн <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> уюму <xliff:g id="DEVICE_OWNER_APP">%2$s</xliff:g> колдонмосун колдонот."</string>
     <string name="monitoring_description_do_body" msgid="3639594537660975895">"Администраторуңуз жөндөөлөрдү, корпоративдик кирүү мүмкүнчүлүгүн, колдонмолорду, уруксаттарды жана ушул түзмөкө байланыштуу дайындарды, ошондой эле түзмөгүңүздүн жайгашкан жери тууралуу маалыматты көзөмөлдөп жана башкара алат."</string>
@@ -429,15 +485,22 @@
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"Электрондук почта, колдонмолор жана вебсайттар сыяктуу тармактагы аракеттериңизди тескей турган <xliff:g id="VPN_APP">%1$s</xliff:g> колдонмосуна туташып турасыз."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"VPN жөндөөлөрүн ачуу"</string>
+    <!-- no translation found for monitoring_description_ca_cert_settings_separator (4987350385906393626) -->
+    <skip />
+    <!-- no translation found for monitoring_description_ca_cert_settings (5489969458872997092) -->
+    <skip />
     <string name="monitoring_description_network_logging" msgid="7223505523384076027">"Администраторуңуз тармактын таржымалын алууну иштетти, андыктан түзмөгүңүздөгү трафик көзөмөлгө алынды.\n\nКеңири маалымат алуу үчүн администраторуңузга кайрылыңыз."</string>
     <string name="monitoring_description_vpn" msgid="4445150119515393526">"Колдонмого VPN туташуусун орнотууга уруксат бердиңиз.\n\nБул колдонмо түзмөгүңүздү жана электрондук почталар, колдонмолор жана вебсайттар сыяктуу тармактагы аракеттериңизди көзөмөлдөй алат."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="2958019119161161530">"Жумуш профилиңизди <xliff:g id="ORGANIZATION">%1$s</xliff:g> башкарат.\n\nАдминистраторуңуздун тармактагы аракетиңизди, анын ичинде электрондук почталар, колдонмолор жана вебсайттарды көзөмөлдөө мүмкүнчүлүгү бар.\n\nКөбүрөөк маалымат үчүн, администраторуңузга кайрылыңыз.\n\nСиз тармактагы жеке аракетиңизди көзөмөлдөй турган VPN\'ге да туташкансыз."</string>
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
-    <string name="monitoring_description_app" msgid="6259179342284742878">"Электрондук почта, колдонмолор жана вебсайттар сыяктуу тармактык аракеттерди көзөмөлдөй турган <xliff:g id="APPLICATION">%1$s</xliff:g> колдонмосуна туташып турасыз."</string>
+    <!-- no translation found for monitoring_description_app (1828472472674709532) -->
+    <skip />
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"Электрондук почта, колдонмолор жана вебсайттар сыяктуу тармактагы жеке аракеттериңизди көзөмөлдөй турган <xliff:g id="APPLICATION">%1$s</xliff:g> колдонмосуна туташып турасыз."</string>
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"Электрондук почта, колдонмолор жана вебсайттар сыяктуу тармактагы жеке аракеттериңизди тескей турган <xliff:g id="APPLICATION">%1$s</xliff:g> колдонмосуна туташып турасыз."</string>
-    <string name="monitoring_description_app_work" msgid="7777228449969022305">"Жумуш профилиңизди <xliff:g id="ORGANIZATION">%1$s</xliff:g> башкарат. Ал электрондук почта, колдонмолор жана вебсайттар сыяктуу жумуш тармагыңыздагы аракеттерди көзөмөлдөй турган <xliff:g id="APPLICATION">%2$s</xliff:g> менен туташкан.\n\nКөбүрөөк маалымат алуу үчүн администраторуңузга кайрылыңыз."</string>
-    <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"Жумуш профилиңизди <xliff:g id="ORGANIZATION">%1$s</xliff:g> башкарат. Ал электрондук почта, колдонмолор жана вебсайттар сыяктуу жумуш тармагыңыздагы аракеттерди көзөмөлдөй турган <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> менен туташкан.\n\nМындан тышкары, тармактагы жеке аракеттериңизди көзөмөлдөгөн <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> колдонмосуна туташып турасыз."</string>
+    <!-- no translation found for monitoring_description_app_work (4612997849787922906) -->
+    <skip />
+    <!-- no translation found for monitoring_description_app_personal_work (5664165460056859391) -->
+    <skip />
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Түзмөктүн кулпусу кол менен ачылмайынча кулпуланган бойдон алат"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Эскертмелерди тезирээк алуу"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Аларды кулпудан чыгараардан мурун көрүңүз"</string>
@@ -468,10 +531,8 @@
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. Үнүн чыгаруу үчүн таптап коюңуз."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. Дирилдөөгө коюу үчүн таптап коюңуз. Атайын мүмкүнчүлүктөр кызматынын үнүн өчүрүп койсо болот."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Үнүн өчүрүү үчүн таптап коюңуз. Атайын мүмкүнчүлүктөр кызматынын үнүн өчүрүп койсо болот."</string>
-    <!-- no translation found for volume_stream_content_description_vibrate_a11y (6427727603978431301) -->
-    <skip />
-    <!-- no translation found for volume_stream_content_description_mute_a11y (8995013018414535494) -->
-    <skip />
+    <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s. Дирилдөөгө коюу үчүн басыңыз."</string>
+    <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. Үнүн өчүрүү үчүн басыңыз."</string>
     <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"%s үндү башкаруу элементтери көрсөтүлгөн. Этибарга албоо үчүн өйдө серпип коюңуз."</string>
     <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"Үндү башкаруу элементтери жашырылган"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"System UI Tuner"</string>
@@ -522,9 +583,14 @@
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Бул функциянын жардамы менен ар бир колдонмо үчүн эскертменин маанилүүлүк деңгээлин 0дон 5ке чейин койсоңуз болот. \n\n"<b>"5-деңгээл"</b>" \n- Эскертмелер тизмесинин башында көрсөтүлсүн \n- Эскертмелер толук экранда көрсөтүлсүн \n- Калкып чыгуучу эскертмелерге уруксат берилсин \n\n"<b>"4-деңгээл"</b>" \n- Эскертмелер толук экранда көрсөтүлбөсүн \n- Калкып чыгуучу эскертмелерге уруксат берилсин \n\n"<b>"3-деңгээл"</b>" \n- Эскертмелер толук экранда көрсөтүлбөсүн \n- Калкып чыгуучу эскертмелерге тыюу салынсын \n\n"<b>"2-деңгээл"</b>" \n- Эскертмелер толук экранда көрсөтүлбөсүн \n- Калкып чыгуучу эскертмелерге тыюу салынсын \n- Эч качан добуш чыгып же дирилдебесин \n\n"<b>"1-деңгээл"</b>" \n- Эскертмелер толук экранда көрсөтүлбөсүн \n- Калкып чыгуучу эскертмелерге тыюу салынсын \n- Эч качан добуш чыгып же дирилдебесин \n- Кулпуланган экрандан жана абал тилкесинен жашырылсын \n- Эскертмелер тизмесинин аягында көрсөтүлсүн \n\n"<b>"0-деңгээл"</b>" \n- Колдонмодон алынган бардык эскертмелер бөгөттөлсүн"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Эскертмелер"</string>
     <string name="notification_channel_disabled" msgid="5805874247999578073">"Мындан ары бул эскертмелер сизге жөнөтүлбөйт."</string>
-    <plurals name="notification_num_channels_desc" formatted="false" msgid="8808748716499517938">
-      <item quantity="other">Бул колдонмодогу <xliff:g id="NUMBER_1">%d</xliff:g> категориянын ичинен 1 категория</item>
-      <item quantity="one">Бул колдонмодогу <xliff:g id="NUMBER_0">%d</xliff:g> категориянын ичинен 1 категория</item>
+    <string name="notification_num_channels" msgid="2048144408999179471">"Эскертмелердин <xliff:g id="NUMBER">%d</xliff:g> категориясы"</string>
+    <!-- no translation found for notification_default_channel_desc (2506053815870808359) -->
+    <skip />
+    <!-- no translation found for notification_num_channels_desc (5492793452274077663) -->
+    <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>"</string>
+    <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">
+      <item quantity="other"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g> жана дагы <xliff:g id="NUMBER_5">%3$d</xliff:g></item>
+      <item quantity="one"><xliff:g id="CHANNEL_NAME_1_0">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_1">%2$s</xliff:g> жана дагы <xliff:g id="NUMBER_2">%3$d</xliff:g></item>
     </plurals>
     <string name="notification_all_categories" msgid="5407190218055113282">"Бардык категориялар"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Дагы жөндөөлөр"</string>
@@ -535,7 +601,7 @@
     <string name="snooze_option_15_min" msgid="1068727451405610715">"15 мүнөт"</string>
     <string name="snooze_option_30_min" msgid="867081342535195788">"30 мүнөт"</string>
     <string name="snooze_option_1_hour" msgid="1098086401880077154">"1 саат"</string>
-    <string name="snooze_option_dont_snooze" msgid="655446566007801922">"Тындырылбасын"</string>
+    <string name="snooze_option_dont_snooze" msgid="2252098379349499668">"Жокко чыгаруу"</string>
     <string name="snooze_undo" msgid="6074877317002985129">"КАЙТАРУУ"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"<xliff:g id="TIME_AMOUNT">%1$s</xliff:g> тындырылды"</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"Батарея колдонулушу"</string>
@@ -677,6 +743,9 @@
     <string name="pip_phone_expand" msgid="5889780005575693909">"Жайып көрсөтүү"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Кичирейтүү"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Жабуу"</string>
+    <string name="pip_menu_title" msgid="3328510504196964712">"Сүрөт ичиндеги сүрөт менюсу"</string>
+    <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> – сүрөт ичиндеги сүрөт"</string>
+    <string name="pip_notification_message" msgid="4171698133469539591">"Эгер <xliff:g id="NAME">%s</xliff:g> колдонмосу бул функцияны пайдаланбасын десеңиз, жөндөөлөрдү ачып туруп, аны өчүрүп коюңуз."</string>
     <string name="high_temp_title" msgid="4589508026407318374">"Телефонуңуз ысып баратат"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Телефон сууганча айрым элементтердин иши чектелген"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"Телефонуңуз автоматтык түрдө сууйт. Аны колдоно берсеңиз болот, бирок ал жайыраак иштеп калат.\n\nТелефонуңуз суугандан кийин адаттагыдай эле иштеп баштайт."</string>
@@ -699,8 +768,6 @@
     <string name="notification_channel_general" msgid="4525309436693914482">"Жалпы билдирүүлөр"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"Сактагыч"</string>
     <string name="instant_apps" msgid="6647570248119804907">"Ыкчам ачылуучу колдонмолор"</string>
-    <!-- no translation found for pip_menu_title (3328510504196964712) -->
-    <skip />
     <string name="instant_apps_message" msgid="8116608994995104836">"Ыкчам ачылуучу колдонмолорду орнотуу талап кылынбайт."</string>
     <string name="app_info" msgid="6856026610594615344">"Колдонмо тууралуу"</string>
     <string name="mobile_data" msgid="7094582042819250762">"Мобилдик дайындар"</string>

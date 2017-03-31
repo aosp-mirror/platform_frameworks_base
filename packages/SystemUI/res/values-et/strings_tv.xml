@@ -27,7 +27,4 @@
     <string name="pip_onboarding_title" msgid="7850436557670253991">"Pilt pildis"</string>
     <string name="pip_onboarding_description" msgid="4028124563309465267">"See hoiab teie videot kuval, kuni esitate järgmise. Selle juhtimiseks vajutage pikalt nuppu "<b>"AVAEKRAAN"</b>"."</string>
     <string name="pip_onboarding_button" msgid="3957426748484904611">"Selge"</string>
-    <string name="recents_tv_dismiss" msgid="3555093879593377731">"Loobu"</string>
-  <string-array name="recents_tv_blacklist_array">
-  </string-array>
 </resources>

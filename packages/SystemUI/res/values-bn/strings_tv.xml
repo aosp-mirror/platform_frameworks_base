@@ -27,7 +27,4 @@
     <string name="pip_onboarding_title" msgid="7850436557670253991">"ছবির মধ্যে ছবি"</string>
     <string name="pip_onboarding_description" msgid="4028124563309465267">"আপনি অন্য একটি না প্লে করা পর্যন্ত এটি আপনার ভিডিও দেখা বজায় রাখে৷ এটিকে নিয়ন্ত্রণ করতে "<b>"হোম"</b>" টিপুন এবং ধরে রাখুন৷"</string>
     <string name="pip_onboarding_button" msgid="3957426748484904611">"বুঝেছি"</string>
-    <string name="recents_tv_dismiss" msgid="3555093879593377731">"খারিজ করুন"</string>
-  <string-array name="recents_tv_blacklist_array">
-  </string-array>
 </resources>

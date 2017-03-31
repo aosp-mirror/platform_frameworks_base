@@ -27,7 +27,4 @@
     <string name="pip_onboarding_title" msgid="7850436557670253991">"Prent-in-prent"</string>
     <string name="pip_onboarding_description" msgid="4028124563309465267">"Dit hou jou video in sig totdat jy \'n ander een speel. Druk en hou "<b>"HOME"</b>" om dit te beheer."</string>
     <string name="pip_onboarding_button" msgid="3957426748484904611">"Het dit"</string>
-    <string name="recents_tv_dismiss" msgid="3555093879593377731">"Maak toe"</string>
-  <string-array name="recents_tv_blacklist_array">
-  </string-array>
 </resources>

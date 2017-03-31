@@ -27,7 +27,4 @@
     <string name="pip_onboarding_title" msgid="7850436557670253991">"तस्बिरमा तस्बिर"</string>
     <string name="pip_onboarding_description" msgid="4028124563309465267">"तपाईँले अर्को भिडियोलाई प्ले नगरेसम्म यसले तपाईँको भिडियोलाई दृश्यमा राख्दछ। यसलाई नियन्त्रण गर्नका लागि "<b>"HOME"</b>" लाई थिचिरहनुहोस्।"</string>
     <string name="pip_onboarding_button" msgid="3957426748484904611">"बुझेँ"</string>
-    <string name="recents_tv_dismiss" msgid="3555093879593377731">"खारेज गर्नुहोस्"</string>
-  <string-array name="recents_tv_blacklist_array">
-  </string-array>
 </resources>

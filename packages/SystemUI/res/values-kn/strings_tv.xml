@@ -27,7 +27,4 @@
     <string name="pip_onboarding_title" msgid="7850436557670253991">"ಚಿತ್ರದಲ್ಲಿ ಚಿತ್ರ"</string>
     <string name="pip_onboarding_description" msgid="4028124563309465267">"ನೀವು ಮತ್ತೊಂದನ್ನು ಪ್ಲೇ ಮಾಡುವ ತನಕ ಇದು ನಿಮ್ಮ ವೀಡಿಯೋವನ್ನು ವೀಕ್ಷಣೆಯಲ್ಲಿರಿಸುತ್ತದೆ. ಅದನ್ನು ನಿಯಂತ್ರಿಸಲು "<b>"ಮುಖಪುಟ"</b>" ಅನ್ನು ಒತ್ತಿ ಹಿಡಿಯಿರಿ."</string>
     <string name="pip_onboarding_button" msgid="3957426748484904611">"ಅರ್ಥವಾಯಿತು"</string>
-    <string name="recents_tv_dismiss" msgid="3555093879593377731">"ವಜಾಗೊಳಿಸಿ"</string>
-  <string-array name="recents_tv_blacklist_array">
-  </string-array>
 </resources>

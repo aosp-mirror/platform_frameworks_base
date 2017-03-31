@@ -75,7 +75,8 @@
     <string name="screenshot_failed_title" msgid="705781116746922771">"ვერ მოხერხდა ეკრანის ანაბეჭდის გადაღება."</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"ეკრანის ანაბეჭდის შენახვისას წარმოიქმნა პრობლემა."</string>
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"ეკრანის ანაბეჭდის შენახვა ვერ მოხერხდა შეზღუდული მეხსიერების გამო."</string>
-    <string name="screenshot_failed_to_capture_text" msgid="7602391003979898374">"ეკრანის ანაბეჭდების შექმნა არ არის ნებადართული აპის ან თქვენი ორგანიზაციის მიერ."</string>
+    <!-- no translation found for screenshot_failed_to_capture_text (173674476457581486) -->
+    <skip />
     <string name="usb_preference_title" msgid="6551050377388882787">"USB ფაილის ტრანსფერის პარამეტრები"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"მედია-საკრავად (MTP) ჩართვა"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"მიუერთეთ როგორც კამერა (PTP)"</string>
@@ -90,7 +91,8 @@
     <string name="accessibility_phone_button" msgid="6738112589538563574">"ტელეფონი"</string>
     <string name="accessibility_voice_assist_button" msgid="487611083884852965">"ხმოვანი დახმარება"</string>
     <string name="accessibility_unlock_button" msgid="128158454631118828">"განბლოკვა"</string>
-    <string name="accessibility_unlock_button_fingerprint" msgid="8214125623493923751">"განბლოკვის ღილაკი, ელოდება თითის ანაბეჭდს"</string>
+    <!-- no translation found for accessibility_waiting_for_fingerprint (4808860050517462885) -->
+    <skip />
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"თქვენი თითის ანაბეჭდის გარეშე განბლოკვა"</string>
     <string name="unlock_label" msgid="8779712358041029439">"განბლოკვა"</string>
     <string name="phone_label" msgid="2320074140205331708">"ტელეფონის გახსნა"</string>
@@ -236,8 +238,7 @@
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="650231949881093289">"მონაცემთა დამზოგველი გამორთულია."</string>
     <string name="accessibility_quick_settings_data_saver_changed_on" msgid="4218725402373934151">"მონაცემთა დამზოგველი ჩართულია."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"ეკრანის სიკაშკაშე"</string>
-    <!-- no translation found for accessibility_ambient_display_charging (9084521679384069087) -->
-    <skip />
+    <string name="accessibility_ambient_display_charging" msgid="9084521679384069087">"იტენება"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G-3G მონაცემები შეჩერებულია"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G მონაცემები შეჩერებულია"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"ფიჭური მონაცემები შეჩერებულია"</string>
@@ -277,7 +278,8 @@
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"სიკაშკაშე"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"ავტოროტაცია"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"ეკრანის ავტომატური შეტრიალება"</string>
-    <string name="accessibility_quick_settings_rotation_value" msgid="1428962304214992318">"დაყენებულია: <xliff:g id="ID_1">%s</xliff:g>"</string>
+    <!-- no translation found for accessibility_quick_settings_rotation_value (8187398200140760213) -->
+    <skip />
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"როტაცია ჩაკეტილია"</string>
     <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"პორტრეტი"</string>
     <string name="quick_settings_rotation_locked_landscape_label" msgid="8553157770061178719">"პეიზაჟის რეჟიმი"</string>
@@ -335,7 +337,6 @@
     <string name="recents_launch_error_message" msgid="2969287838120550506">"<xliff:g id="APP">%s</xliff:g>-ის გამოძახება ვერ მოხერხდა."</string>
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> გათიშულია უსაფრთხო რეჟიმში."</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"ყველას გასუფთავება"</string>
-    <string name="recents_incompatible_app_message" msgid="5075812958564082451">"ეკრანის გაყოფა არ არის მხარდაჭერილი აპის მიერ"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"ეკრანის გასაყოფად, ჩავლებით გადმოიტანეთ აქ"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"ჰორიზონტალური გაყოფა"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"ვერტიკალური გაყოფა"</string>
@@ -361,7 +362,7 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"ქვემოთ მითითებულია ნაკლებად სასწრაფო შეტყობინებები"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"შეეხეთ ისევ გასახსნელად"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"გაასრიალეთ ზევით განსაბლოკად"</string>
-    <string name="do_disclosure_generic" msgid="8498005633306135779">"ეს მოწყობილობა მართულია"</string>
+    <string name="do_disclosure_generic" msgid="5615898451805157556">"ამ მოწყობილობას მართავს თქვენი ორგანიზაცია"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"ამ მოწყობილობას მართავს <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="phone_hint" msgid="4872890986869209950">"ტელეფონისთვის გადაფურცლეთ ხატულადან"</string>
     <string name="voice_hint" msgid="8939888732119726665">"ხმოვანი დახმარებისთვის გადაფურცლეთ ხატულადან"</string>
@@ -414,13 +415,68 @@
     <string name="profile_owned_footer" msgid="8021888108553696069">"შესაძლოა პროფილზე ხორციელდებოდეს მონიტორინგი"</string>
     <string name="vpn_footer" msgid="2388611096129106812">"შესაძლოა ქსელზე ხორციელდება მონიტორინგი"</string>
     <string name="branded_vpn_footer" msgid="2168111859226496230">"ქსელზე შესაძლოა მონიტორინგი ხორციელდებოდეს"</string>
+    <!-- no translation found for quick_settings_disclosure_management_monitoring (6645176135063957394) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_management_monitoring (370622174777570853) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_management_named_vpn (1085137869053332307) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_management_named_vpn (6290456493852584017) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_management (3294967280853150271) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_management (1059403025094542908) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_management_vpns (3698767349925266482) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_management_vpns (7777821385318891527) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_managed_profile_monitoring (5125463987558278215) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_managed_profile_monitoring (8973606847896650284) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_monitoring (679658227269205728) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_vpns (8170318392053156330) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_managed_profile_named_vpn (3494535754792751741) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_personal_profile_named_vpn (4467456202486569906) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_vpn (6943724064780847080) -->
+    <skip />
     <string name="monitoring_title_device_owned" msgid="7121079311903859610">"მოწყობილობის მონიტორინგი"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"პროფილის მონიტორინგი"</string>
     <string name="monitoring_title" msgid="169206259253048106">"ქსელის მონიტორინგი"</string>
     <string name="monitoring_subtitle_vpn" msgid="876537538087857300">"VPN"</string>
-    <string name="monitoring_subtitle_network_logging" msgid="5569072711320784030">"ქსელის ჟურნალირება"</string>
+    <!-- no translation found for monitoring_subtitle_network_logging (3341264304793193386) -->
+    <skip />
+    <!-- no translation found for monitoring_subtitle_ca_certificate (3874151893894355988) -->
+    <skip />
     <string name="disable_vpn" msgid="4435534311510272506">"VPN-ის გაუქმება"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"VPN-ის გათიშვა"</string>
+    <!-- no translation found for monitoring_button_view_policies (100913612638514424) -->
+    <skip />
+    <!-- no translation found for monitoring_description_named_management (4872859182820011954) -->
+    <skip />
+    <!-- no translation found for monitoring_description_management (3115563193381106341) -->
+    <skip />
+    <!-- no translation found for monitoring_description_management_ca_certificate (5202023784131001751) -->
+    <skip />
+    <!-- no translation found for monitoring_description_managed_profile_ca_certificate (4683248196789897964) -->
+    <skip />
+    <!-- no translation found for monitoring_description_ca_certificate (7886985418413598352) -->
+    <skip />
+    <!-- no translation found for monitoring_description_management_network_logging (7184005419733060736) -->
+    <skip />
+    <!-- no translation found for monitoring_description_named_vpn (639013857356724268) -->
+    <skip />
+    <!-- no translation found for monitoring_description_two_named_vpns (4479748971871539316) -->
+    <skip />
+    <!-- no translation found for monitoring_description_managed_profile_named_vpn (1427905889862420559) -->
+    <skip />
+    <!-- no translation found for monitoring_description_personal_profile_named_vpn (3133980926929069283) -->
+    <skip />
     <string name="monitoring_description_do_header_generic" msgid="96588491028288691">"თქვენს მოწყობილობას მართავს <xliff:g id="DEVICE_OWNER_APP">%1$s</xliff:g>."</string>
     <string name="monitoring_description_do_header_with_name" msgid="5511133708978206460">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> იყენებს <xliff:g id="DEVICE_OWNER_APP">%2$s</xliff:g>-ს თქვენი მოწყობილობის სამართავად."</string>
     <string name="monitoring_description_do_body" msgid="3639594537660975895">"თქვენს ადმინისტრატორს შეუძლია მოწყობილობასთან დაკავშირებული პარამეტრების, კორპორაციული წვდომის, აპებისა და მონაცემების (მათ შორის, თქვენი მოწყობილობის მდებარეობის ინფორმაციის) მონიტორინგი და მართვა."</string>
@@ -429,15 +485,22 @@
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"თქვენ დაუკავშირდით <xliff:g id="VPN_APP">%1$s</xliff:g>-ს, რომელსაც თქვენი ქსელის აქტივობის, მათ შორის, ელფოსტის, აპებისა და ვებსაიტების, მონიტორინგი შეუძლია."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"VPN-ის პარამეტრების გახსნა"</string>
+    <!-- no translation found for monitoring_description_ca_cert_settings_separator (4987350385906393626) -->
+    <skip />
+    <!-- no translation found for monitoring_description_ca_cert_settings (5489969458872997092) -->
+    <skip />
     <string name="monitoring_description_network_logging" msgid="7223505523384076027">"თქვენმა ადმინისტრატორმა ქსელის ჟურნალირება ჩართო, რომელიც თქვენი მოწყობილობის ტრაფიკის მონიტორინგს ახორციელებს.\n\nდამატებითი ინფორმაციისთვის დაუკავშირდით თქვენს ადმინისტრატორს."</string>
     <string name="monitoring_description_vpn" msgid="4445150119515393526">"თქვენ მიეცით ნებართვა აპს, დააყენოს VPN კავშირი.\n\nამ აპს შეუძლია თქვენი მოწყობილობის და ქსელის აქტივობის, მათ შორის, ელფოსტის, აპებისა და ვებსაიტების მონიტორინგი."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="2958019119161161530">"თქვენს სამსახურის პროფილს მართავს <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nთქვენს ადმინისტრატორს შეუძლია თქვენი ქსელის აქტივობის (მათ შორის, ელფოსტის, აპებისა და ვებსაიტების) მონიტორინგი.\n\nდამატებითი ინფორმაციისთვის დაუკავშირდით თქვენს ადმინისტრატორს.\n\nგარდა ამისა, თქვენ დაკავშირებული ხართ VPN-თან, რომელსაც ასევე შეუძლია თქვენი ქსელის აქტივობის მონიტორინგი."</string>
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
-    <string name="monitoring_description_app" msgid="6259179342284742878">"თქვენ დაუკავშირდით <xliff:g id="APPLICATION">%1$s</xliff:g>-ს, რომელსაც შეუძლია თქვენი ქსელის აქტივობის, მათ შორის, ელფოსტის, აპებისა და ვებსაიტების მონიტორინგი."</string>
+    <!-- no translation found for monitoring_description_app (1828472472674709532) -->
+    <skip />
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"თქვენ დაუკავშირდით <xliff:g id="APPLICATION">%1$s</xliff:g>-ს, რომელსაც შეუძლია თქვენი პირადი ქსელის აქტივობის, მათ შორის, ელფოსტის, აპებისა და ვებსაიტების მონიტორინგი."</string>
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"თქვენ დაუკავშირდით <xliff:g id="APPLICATION">%1$s</xliff:g>-ს, რომელსაც თქვენი პირადი ქსელის აქტივობის მონიტორინგი შეუძლია, მათ შორის, ელფოსტის, აპებისა და ვებსაიტების."</string>
-    <string name="monitoring_description_app_work" msgid="7777228449969022305">"თქვენს სამსახურის პროფილს მართავს <xliff:g id="ORGANIZATION">%1$s</xliff:g>. ის დაკავშირებულია <xliff:g id="APPLICATION">%2$s</xliff:g>-თან, რომელსაც თქვენი ქსელის აქტივობის (მათ შორის, ელფოსტის, აპებისა და ვებსაიტების) მონიტორინგი შეუძლია.\n\nდამატებითი ინფორმაციისთვის დაუკავშირდით თქვენს ადმინისტრატორს."</string>
-    <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"თქვენი სამუშაო პროფილი <xliff:g id="ORGANIZATION">%1$s</xliff:g>-ის მიერ იმართება. ის დაკავშირებულია <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>-თან, რომელსაც შეუძლია თქვენი სამსახურის ქსელის აქტივობის, მათ შორის, ელფოსტის, აპებისა და ვებსაიტების მონიტორინგი.\n\nასევე, დაკავშირებული ხართ <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>-თან, რომელსაც შეუძლია თქვენი პირადი ქსელის აქტივობის მონიტორინგი."</string>
+    <!-- no translation found for monitoring_description_app_work (4612997849787922906) -->
+    <skip />
+    <!-- no translation found for monitoring_description_app_personal_work (5664165460056859391) -->
+    <skip />
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"მოწყობილობის დარჩება ჩაკეტილი, სანამ ხელით არ გახსნით"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"შეტყობინებების უფრო სწრაფად მიღება"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"იხილეთ განბლოკვამდე"</string>
@@ -468,10 +531,8 @@
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. შეეხეთ დადუმების გასაუქმებლად."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. შეეხეთ ვიბრაციაზე დასაყენებლად. შეიძლება დადუმდეს მარტივი წვდომის სერვისებიც."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. შეეხეთ დასადუმებლად. შეიძლება დადუმდეს მარტივი წვდომის სერვისებიც."</string>
-    <!-- no translation found for volume_stream_content_description_vibrate_a11y (6427727603978431301) -->
-    <skip />
-    <!-- no translation found for volume_stream_content_description_mute_a11y (8995013018414535494) -->
-    <skip />
+    <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s. შეეხეთ ვიბრაციაზე დასაყენებლად."</string>
+    <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. შეეხეთ დასადუმებლად."</string>
     <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"%s-ის ხმის მართვის საშუალებები დამალულია. დასახურად, გადაფურცლეთ ზემოთ."</string>
     <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"ხმის მართვის საშუალებები დამალულია"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"სისტემის UI ტუნერი"</string>
@@ -522,9 +583,14 @@
     <string name="power_notification_controls_description" msgid="4372459941671353358">"შეტყობინებების მართვის საშუალებების მეშვეობით, შეგიძლიათ განსაზღვროთ აპის შეტყობინებების მნიშვნელობის დონე 0-დან 5-მდე დიაპაზონში. \n\n"<b>"დონე 5"</b>" \n— შეტყობინებათა სიის თავში ჩვენება \n— სრულეკრანიანი რეჟიმის შეფერხების დაშვება \n— ეკრანზე ყოველთვის გამოჩენა \n\n"<b>"დონე 4"</b>" \n— სრულეკრანიანი რეჟიმის შეფერხების აღკვეთა \n— ეკრანზე ყოველთვის გამოჩენა \n\n"<b>"დონე 3"</b>" \n— სრულეკრანიანი რეჟიმის შეფერხების აღკვეთა \n— ეკრანზე გამოჩენის აღკვეთა \n\n"<b>"დონე 2"</b>" \n— სრულეკრანიანი რეჟიმის შეფერხების აღკვეთა \n— ეკრანზე გამოჩენის აღკვეთა \n— ხმისა და ვიბრაციის აღკვეთა \n\n"<b>"დონე 1"</b>" \n— სრულეკრანიანი რეჟიმის შეფერხების აღკვეთა \n— ეკრანზე გამოჩენის აღკვეთა \n— ხმისა და ვიბრაციის აღკვეთა \n— ჩაკეტილი ეკრანიდან და სტატუსის ზოლიდან დამალვა \n— შეტყობინებათა სიის ბოლოში ჩვენება \n\n"<b>"დონე 0"</b>" \n— აპის ყველა შეტყობინების დაბლოკვა"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"შეტყობინებები"</string>
     <string name="notification_channel_disabled" msgid="5805874247999578073">"ამ შეტყობინებებს აღარ მიიღებთ."</string>
-    <plurals name="notification_num_channels_desc" formatted="false" msgid="8808748716499517938">
-      <item quantity="other"> ამ აპის <xliff:g id="NUMBER_1">%d</xliff:g> კატეგორიიდან 1</item>
-      <item quantity="one"> ამ აპის <xliff:g id="NUMBER_0">%d</xliff:g> კატეგორიიდან 1</item>
+    <string name="notification_num_channels" msgid="2048144408999179471">"შეტყობინებების <xliff:g id="NUMBER">%d</xliff:g> კატეგორია"</string>
+    <!-- no translation found for notification_default_channel_desc (2506053815870808359) -->
+    <skip />
+    <!-- no translation found for notification_num_channels_desc (5492793452274077663) -->
+    <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>"</string>
+    <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">
+      <item quantity="other"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g> და <xliff:g id="NUMBER_5">%3$d</xliff:g> სხვა</item>
+      <item quantity="one"><xliff:g id="CHANNEL_NAME_1_0">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_1">%2$s</xliff:g> და <xliff:g id="NUMBER_2">%3$d</xliff:g> სხვა</item>
     </plurals>
     <string name="notification_all_categories" msgid="5407190218055113282">"ყველა კატეგორია"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"დამატებითი პარამეტრები"</string>
@@ -535,7 +601,7 @@
     <string name="snooze_option_15_min" msgid="1068727451405610715">"15 წუთი"</string>
     <string name="snooze_option_30_min" msgid="867081342535195788">"30 წუთი"</string>
     <string name="snooze_option_1_hour" msgid="1098086401880077154">"1 საათი"</string>
-    <string name="snooze_option_dont_snooze" msgid="655446566007801922">"არ ჩაჩუმდეს"</string>
+    <string name="snooze_option_dont_snooze" msgid="2252098379349499668">"გაუქმება"</string>
     <string name="snooze_undo" msgid="6074877317002985129">"მოქმედების გაუქმება"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"ჩაჩუმებული იქნება <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"ბატარეის მოხმარება"</string>
@@ -677,6 +743,9 @@
     <string name="pip_phone_expand" msgid="5889780005575693909">"გაშლა"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"ჩაკეცვა"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"დახურვა"</string>
+    <string name="pip_menu_title" msgid="3328510504196964712">"მენიუ „გამოსახულება გამოსახულებაში“"</string>
+    <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> იყენებს რეჟიმს „გამოსახულება გამოსახულებაში“"</string>
+    <string name="pip_notification_message" msgid="4171698133469539591">"თუ არ გსურთ, რომ <xliff:g id="NAME">%s</xliff:g> ამ ფუნქციას იყენებდეს, აქ შეხებით შეგიძლიათ გახსნათ პარამეტრები და გამორთოთ."</string>
     <string name="high_temp_title" msgid="4589508026407318374">"ტელეფონი ცხელდება"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"ზოგიერთი ფუნქცია შეზღუდული იქნება, სანამ ტელეფონი გაგრილდება"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"თქვენი ტელეფონი გაგრილებას ავტომატურად შეეცდება. შეგიძლიათ გააგრძელოთ მისით სარგებლობა, თუმცა ტელეფონმა შეიძლება უფრო ნელა იმუშაოს.\n\nგაგრილების შემდგომ ის ჩვეულებრივად იმუშავებს."</string>
@@ -699,8 +768,6 @@
     <string name="notification_channel_general" msgid="4525309436693914482">"ზოგადი შეტყობინებები"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"მეხსიერება"</string>
     <string name="instant_apps" msgid="6647570248119804907">"მყისიერი აპები"</string>
-    <!-- no translation found for pip_menu_title (3328510504196964712) -->
-    <skip />
     <string name="instant_apps_message" msgid="8116608994995104836">"მყისიერი აპები ინსტალაციას არ საჭიროებს."</string>
     <string name="app_info" msgid="6856026610594615344">"აპის შესახებ"</string>
     <string name="mobile_data" msgid="7094582042819250762">"მობილური ინტერნეტი"</string>

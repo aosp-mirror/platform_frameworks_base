@@ -114,7 +114,8 @@
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3398054847288438444">"តម្រូវ​ឲ្យ​ប្រើ​លំនាំ​ នៅ​ពេល​ដែល​អ្នក​ប្តូរកម្រង​ព័ត៌មាន"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="7426368139226961699">"តម្រូវ​ឲ្យ​បញ្ចូល​កូដ PIN នៅ​ពេល​ដែល​អ្នក​ប្តូរ​កម្រង​ព័ត៌មាន"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="8383831046318421845">"តម្រូវ​ឲ្យ​បញ្ចូល​ពាក្យសម្ងាត់​ នៅ​ពេល​ដែល​អ្នក​ប្តូរ​កម្រង​ព័ត៌មាន"</string>
-    <string name="kg_prompt_reason_device_admin" msgid="2438626748767361010">"អ្នកគ្រប់គ្រងឧបករណ៍បានចាក់សោឧបករណ៍"</string>
+    <!-- no translation found for kg_prompt_reason_device_admin (3452168247888906179) -->
+    <skip />
     <string name="kg_prompt_reason_user_request" msgid="8236951765212462286">"ឧបករណ៍ត្រូវបានចាក់សោដោយអ្នកប្រើផ្ទាល់"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="71299470072448533">
       <item quantity="other">ឧបករណ៍​បាន​ជាប់​សោ​អស់រយៈ​ពេល <xliff:g id="NUMBER_1">%d</xliff:g> ម៉ោង​ហើយ។ សូម​បញ្ជាក់​លំនាំ។</item>
