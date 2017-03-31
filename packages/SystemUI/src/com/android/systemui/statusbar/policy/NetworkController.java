@@ -19,12 +19,10 @@ package com.android.systemui.statusbar.policy;
 import android.content.Context;
 import android.content.Intent;
 import android.telephony.SubscriptionInfo;
-import android.view.View;
 
 import com.android.settingslib.net.DataUsageController;
 import com.android.settingslib.wifi.AccessPoint;
 import com.android.systemui.DemoMode;
-import com.android.systemui.Dumpable;
 import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
 
 import java.util.List;
@@ -48,7 +46,7 @@ public interface NetworkController extends CallbackController<SignalCallback>, D
 
     public interface SignalCallback {
         default void setWifiIndicators(boolean enabled, IconState statusIcon, IconState qsIcon,
-                boolean activityIn, boolean activityOut, String description) {}
+                boolean activityIn, boolean activityOut, String description, boolean isTransient) {}
 
         default void setMobileDataIndicators(IconState statusIcon, IconState qsIcon, int statusType,
                 int qsType, boolean activityIn, boolean activityOut, String typeContentDescription,

@@ -114,7 +114,8 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
     protected void handleUpdateState(BooleanState state, Object arg) {
         final boolean enabled = mController.isBluetoothEnabled();
         final boolean connected = mController.isBluetoothConnected();
-        final boolean connecting = mController.isBluetoothConnecting();
+        state.isTransient = mController.isBluetoothConnecting()
+                || mController.getBluetoothState() == BluetoothAdapter.STATE_TURNING_ON;
         state.dualTarget = true;
         state.value = enabled;
         if (enabled) {
@@ -124,8 +125,8 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
                 state.label = mController.getLastDeviceName();
                 state.contentDescription = mContext.getString(
                         R.string.accessibility_bluetooth_name, state.label);
-            } else if (connecting) {
-                state.icon = ResourceIcon.get(R.drawable.ic_qs_bluetooth_connecting);
+            } else if (state.isTransient) {
+                state.icon = ResourceIcon.get(R.drawable.ic_bluetooth_transient_animation);
                 state.contentDescription = mContext.getString(
                         R.string.accessibility_quick_settings_bluetooth_connecting);
                 state.label = mContext.getString(R.string.quick_settings_bluetooth_label);

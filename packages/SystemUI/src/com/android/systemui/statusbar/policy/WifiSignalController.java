@@ -150,7 +150,7 @@ public class WifiSignalController extends
                 Utils.getWifiBadgeResource(mCurrentState.badgeEnum), contentDescription);
         callback.setWifiIndicators(mCurrentState.enabled, statusIcon, qsIcon,
                 ssidPresent && mCurrentState.activityIn, ssidPresent && mCurrentState.activityOut,
-                wifiDesc);
+                wifiDesc, mCurrentState.isTransient);
     }
 
     @Override
@@ -170,6 +170,9 @@ public class WifiSignalController extends
         mWifiTracker.handleBroadcast(intent);
         updateScoreCacheIfNecessary(previousNetworkKey);
 
+        mCurrentState.isTransient = mWifiTracker.state == WifiManager.WIFI_STATE_ENABLING
+                || mWifiTracker.state == WifiManager.WIFI_AP_STATE_DISABLING
+                || mWifiTracker.connecting;
         mCurrentState.enabled = mWifiTracker.enabled;
         mCurrentState.connected = mWifiTracker.connected;
         mCurrentState.ssid = mWifiTracker.ssid;
@@ -252,6 +255,7 @@ public class WifiSignalController extends
     static class WifiState extends SignalController.State {
         String ssid;
         int badgeEnum;
+        boolean isTransient;
 
         @Override
         public void copyFrom(State s) {
@@ -259,19 +263,23 @@ public class WifiSignalController extends
             WifiState state = (WifiState) s;
             ssid = state.ssid;
             badgeEnum = state.badgeEnum;
+            isTransient = state.isTransient;
         }
 
         @Override
         protected void toString(StringBuilder builder) {
             super.toString(builder);
             builder.append(',').append("ssid=").append(ssid);
+            builder.append(',').append("badgeEnum=").append(badgeEnum);
+            builder.append(',').append("isTransient=").append(isTransient);
         }
 
         @Override
         public boolean equals(Object o) {
             return super.equals(o)
                     && Objects.equals(((WifiState) o).ssid, ssid)
-                    && (((WifiState) o).badgeEnum == badgeEnum);
+                    && (((WifiState) o).badgeEnum == badgeEnum)
+                    && (((WifiState) o).isTransient == isTransient);
         }
     }
 }
