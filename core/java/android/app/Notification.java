@@ -103,8 +103,7 @@ public class Notification implements Parcelable
 
     /**
      * An activity that provides a user interface for adjusting notification preferences for its
-     * containing application. Optional but recommended for apps that post
-     * {@link android.app.Notification Notifications}.
+     * containing application.
      */
     @SdkConstant(SdkConstantType.INTENT_CATEGORY)
     public static final String INTENT_CATEGORY_NOTIFICATION_PREFERENCES
@@ -113,9 +112,23 @@ public class Notification implements Parcelable
     /**
      * Optional extra for {@link #INTENT_CATEGORY_NOTIFICATION_PREFERENCES}. If provided, will
      * contain a {@link NotificationChannel#getId() channel id} that can be used to narrow down
-     * what in app notifications settings should be shown.
+     * what settings should be shown in the target app.
      */
     public static final String EXTRA_CHANNEL_ID = "android.intent.extra.CHANNEL_ID";
+
+    /**
+     * Optional extra for {@link #INTENT_CATEGORY_NOTIFICATION_PREFERENCES}. If provided, will
+     * contain the tag provided to {@link NotificationManager#notify(String, int, Notification)}
+     * that can be used to narrow down what settings should be shown in the target app.
+     */
+    public static final String EXTRA_NOTIFICATION_TAG = "android.intent.extra.NOTIFICATION_TAG";
+
+    /**
+     * Optional extra for {@link #INTENT_CATEGORY_NOTIFICATION_PREFERENCES}. If provided, will
+     * contain the id provided to {@link NotificationManager#notify(String, int, Notification)}
+     * that can be used to narrow down what settings should be shown in the target app.
+     */
+    public static final String EXTRA_NOTIFICATION_ID = "android.intent.extra.NOTIFICATION_ID";
 
     /**
      * Use all default values (where applicable).
@@ -1082,6 +1095,7 @@ public class Notification implements Parcelable
     private long mTimeout;
 
     private String mShortcutId;
+    private CharSequence mSettingsText;
 
     /**
      * If this notification is being shown as a badge, always show as a number.
@@ -1851,6 +1865,10 @@ public class Notification implements Parcelable
         }
 
         mBadgeIcon = parcel.readInt();
+
+        if (parcel.readInt() != 0) {
+            mSettingsText = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(parcel);
+        }
     }
 
     @Override
@@ -1960,6 +1978,9 @@ public class Notification implements Parcelable
 
         that.mChannelId = this.mChannelId;
         that.mTimeout = this.mTimeout;
+        that.mShortcutId = this.mShortcutId;
+        that.mBadgeIcon = this.mBadgeIcon;
+        that.mSettingsText = this.mSettingsText;
 
         if (!heavy) {
             that.lightenPayload(); // will clean out extras
@@ -2229,6 +2250,13 @@ public class Notification implements Parcelable
         }
 
         parcel.writeInt(mBadgeIcon);
+
+        if (mSettingsText != null) {
+            parcel.writeInt(1);
+            TextUtils.writeToParcel(mSettingsText, parcel, flags);
+        } else {
+            parcel.writeInt(0);
+        }
     }
 
     /**
@@ -2456,6 +2484,14 @@ public class Notification implements Parcelable
      */
     public String getShortcutId() {
         return mShortcutId;
+    }
+
+
+    /**
+     * Returns the settings text provided to {@link Builder#setSettingsText(CharSequence)}.
+     */
+    public CharSequence getSettingsText() {
+        return mSettingsText;
     }
 
     /**
@@ -2883,6 +2919,24 @@ public class Notification implements Parcelable
          */
         public Builder setSubText(CharSequence text) {
             mN.extras.putCharSequence(EXTRA_SUB_TEXT, safeCharSequence(text));
+            return this;
+        }
+
+        /**
+         * Provides text that will appear as a link to your application's settings.
+         *
+         * <p>This text does not appear within notification {@link Style templates} but may
+         * appear when the user uses an affordance to learn more about the notification.
+         * Additionally, this text will not appear unless you provide a valid link target by
+         * handling {@link #INTENT_CATEGORY_NOTIFICATION_PREFERENCES}.
+         *
+         * <p>This text is meant to be concise description about what the user can customize
+         * when they click on this link. The recommended maximum length is 40 characters.
+         * @param text
+         * @return
+         */
+        public Builder setSettingsText(CharSequence text) {
+            mN.mSettingsText = safeCharSequence(text);
             return this;
         }
 
