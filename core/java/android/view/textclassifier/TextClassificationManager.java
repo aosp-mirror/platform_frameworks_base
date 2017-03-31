@@ -54,12 +54,6 @@ public final class TextClassificationManager {
         mContext = Preconditions.checkNotNull(context);
     }
 
-    // TODO: Remove.
-    /** @removed */
-    public TextClassifier getDefaultTextClassifier() {
-        return getTextClassifier();
-    }
-
     /**
      * Returns the text classifier.
      */
