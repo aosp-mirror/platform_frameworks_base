@@ -52,10 +52,11 @@ interface IBluetoothGatt {
 
     void startAdvertisingSet(in AdvertisingSetParameters parameters, in AdvertiseData advertiseData,
                                 in AdvertiseData scanResponse, in PeriodicAdvertisingParameters periodicParameters,
-                                in AdvertiseData periodicData, in int timeout, in IAdvertisingSetCallback callback);
+                                in AdvertiseData periodicData, in int duration, in int maxExtAdvEvents,
+                                in IAdvertisingSetCallback callback);
     void stopAdvertisingSet(in IAdvertisingSetCallback callback);
 
-    void enableAdvertisingSet(in int advertiserId, in boolean enable, in int timeout);
+    void enableAdvertisingSet(in int advertiserId, in boolean enable, in int duration, in int maxExtAdvEvents);
     void setAdvertisingData(in int advertiserId, in AdvertiseData data);
     void setScanResponseData(in int advertiserId, in AdvertiseData data);
     void setAdvertisingParameters(in int advertiserId, in AdvertisingSetParameters parameters);
