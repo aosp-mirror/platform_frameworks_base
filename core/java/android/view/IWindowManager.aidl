@@ -271,7 +271,7 @@ interface IWindowManager
     /**
      * Called by System UI to notify of changes to the visibility of PIP.
      */
-    oneway void setTvPipVisibility(boolean visible);
+    oneway void setPipVisibility(boolean visible);
 
     /**
      * Device has a software navigation bar (separate from the status bar).

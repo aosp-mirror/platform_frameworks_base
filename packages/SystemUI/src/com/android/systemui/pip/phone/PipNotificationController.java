@@ -110,11 +110,10 @@ public class PipNotificationController {
         registerAppOpsListener(packageName);
     }
 
-    public void onActivityUnpinned() {
+    public void onActivityUnpinned(ComponentName topPipActivity) {
         // Unregister for changes to the previously PiP'ed package
         unregisterAppOpsListener();
 
-        ComponentName topPipActivity = PipUtils.getTopPinnedActivity(mContext, mActivityManager);
         if (topPipActivity != null) {
             onActivityPinned(topPipActivity.getPackageName());
         } else {
