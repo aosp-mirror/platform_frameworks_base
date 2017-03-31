@@ -523,12 +523,21 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public static final int PRIVATE_FLAG_REQUIRED_FOR_SYSTEM_USER = 1 << 9;
 
     /**
-     * When set, the application explicitly requested that its activities by resizeable by default.
+     * When set, the application explicitly requested that its activities be resizeable by default.
      * @see android.R.styleable#AndroidManifestActivity_resizeableActivity
      *
      * @hide
      */
-    public static final int PRIVATE_FLAG_RESIZEABLE_ACTIVITIES_EXPLICITLY_SET = 1 << 10;
+    public static final int PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_RESIZEABLE = 1 << 10;
+
+    /**
+     * When set, the application explicitly requested that its activities *not* be resizeable by
+     * default.
+     * @see android.R.styleable#AndroidManifestActivity_resizeableActivity
+     *
+     * @hide
+     */
+    public static final int PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_UNRESIZEABLE = 1 << 11;
 
     /**
      * The application isn't requesting explicitly requesting for its activities to be resizeable or
@@ -542,7 +551,8 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      *
      * @hide
      */
-    public static final int PRIVATE_FLAG_RESIZEABLE_ACTIVITIES_VIA_SDK_VERSION = 1 << 11;
+    public static final int PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION =
+            1 << 12;
 
     /**
      * Value for {@link #privateFlags}: {@code true} means the OS should go ahead and
@@ -550,14 +560,14 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * foreground-equivalent run state.  Defaults to {@code false} if unspecified.
      * @hide
      */
-    public static final int PRIVATE_FLAG_BACKUP_IN_FOREGROUND = 1 << 12;
+    public static final int PRIVATE_FLAG_BACKUP_IN_FOREGROUND = 1 << 13;
 
     /**
      * Value for {@link #privateFlags}: {@code true} means this application
      * contains a static shared library. Defaults to {@code false} if unspecified.
      * @hide
      */
-    public static final int PRIVATE_FLAG_STATIC_SHARED_LIBRARY = 1 << 13;
+    public static final int PRIVATE_FLAG_STATIC_SHARED_LIBRARY = 1 << 14;
 
     /**
      * Value for {@linl #privateFlags}: When set, the application will only have its splits loaded
@@ -565,7 +575,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * {@link Context#createContextForSplit(String)} API.
      * @hide
      */
-    public static final int PRIVATE_FLAG_ISOLATED_SPLIT_LOADING = 1 << 14;
+    public static final int PRIVATE_FLAG_ISOLATED_SPLIT_LOADING = 1 << 15;
 
     /**
      * Private/hidden flags. See {@code PRIVATE_FLAG_...} constants.
