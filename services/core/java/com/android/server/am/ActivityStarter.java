@@ -966,7 +966,7 @@ class ActivityStarter {
             mService.mWindowManager.continueSurfaceLayout();
         }
 
-        postStartActivityProcessing(r, result, mSupervisor.mFocusedStack.mStackId,  mSourceRecord,
+        postStartActivityProcessing(r, result, mSupervisor.getLastStack().mStackId,  mSourceRecord,
                 mTargetStack);
 
         return result;
