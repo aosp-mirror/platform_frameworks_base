@@ -1178,6 +1178,7 @@ public class SubscriptionManager {
     public static void putPhoneIdAndSubIdExtra(Intent intent, int phoneId, int subId) {
         if (VDBG) logd("putPhoneIdAndSubIdExtra: phoneId=" + phoneId + " subId=" + subId);
         intent.putExtra(PhoneConstants.SUBSCRIPTION_KEY, subId);
+        intent.putExtra(Intent.EXTRA_SUBSCRIPTION_INDEX, subId);
         intent.putExtra(PhoneConstants.PHONE_KEY, phoneId);
         //FIXME this is using phoneId and slotIndex interchangeably
         //Eventually, this should be removed as it is not the slot id
