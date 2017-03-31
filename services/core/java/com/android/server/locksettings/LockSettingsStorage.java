@@ -18,6 +18,8 @@ package com.android.server.locksettings;
 
 import static android.content.Context.USER_SERVICE;
 
+import android.annotation.Nullable;
+import android.app.admin.DevicePolicyManager;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.pm.UserInfo;
@@ -25,6 +27,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Environment;
+import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.StorageManager;
 import android.util.ArrayMap;
@@ -33,8 +36,15 @@ import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.Preconditions;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.server.LocalServices;
+import com.android.server.PersistentDataBlockManagerInternal;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -79,12 +89,18 @@ class LockSettingsStorage {
     private final Cache mCache = new Cache();
     private final Object mFileWriteLock = new Object();
 
+    private PersistentDataBlockManagerInternal mPersistentDataBlockManagerInternal;
+
     @VisibleForTesting
     public static class CredentialHash {
         static final int VERSION_LEGACY = 0;
         static final int VERSION_GATEKEEPER = 1;
 
         private CredentialHash(byte[] hash, int type, int version) {
+            this(hash, type, version, false /* isBaseZeroPattern */);
+        }
+
+        private CredentialHash(byte[] hash, int type, int version, boolean isBaseZeroPattern) {
             if (type != LockPatternUtils.CREDENTIAL_TYPE_NONE) {
                 if (hash == null) {
                     throw new RuntimeException("Empty hash for CredentialHash");
@@ -97,14 +113,12 @@ class LockSettingsStorage {
             this.hash = hash;
             this.type = type;
             this.version = version;
-            this.isBaseZeroPattern = false;
+            this.isBaseZeroPattern = isBaseZeroPattern;
         }
 
-        private CredentialHash(byte[] hash, boolean isBaseZeroPattern) {
-            this.hash = hash;
-            this.type = LockPatternUtils.CREDENTIAL_TYPE_PATTERN;
-            this.version = VERSION_GATEKEEPER;
-            this.isBaseZeroPattern = isBaseZeroPattern;
+        private static CredentialHash createBaseZeroPattern(byte[] hash) {
+            return new CredentialHash(hash, LockPatternUtils.CREDENTIAL_TYPE_PATTERN,
+                    VERSION_GATEKEEPER, true /* isBaseZeroPattern */);
         }
 
         static CredentialHash create(byte[] hash, int type) {
@@ -123,6 +137,44 @@ class LockSettingsStorage {
         int type;
         int version;
         boolean isBaseZeroPattern;
+
+        public byte[] toBytes() {
+            Preconditions.checkState(!isBaseZeroPattern, "base zero patterns are not serializable");
+
+            try {
+                ByteArrayOutputStream os = new ByteArrayOutputStream();
+                DataOutputStream dos = new DataOutputStream(os);
+                dos.write(version);
+                dos.write(type);
+                if (hash != null && hash.length > 0) {
+                    dos.writeInt(hash.length);
+                    dos.write(hash);
+                } else {
+                    dos.writeInt(0);
+                }
+                dos.close();
+                return os.toByteArray();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        public static CredentialHash fromBytes(byte[] bytes) {
+            try {
+                DataInputStream is = new DataInputStream(new ByteArrayInputStream(bytes));
+                int version = is.read();
+                int type = is.read();
+                int hashSize = is.readInt();
+                byte[] hash = null;
+                if (hashSize > 0) {
+                    hash = new byte[hashSize];
+                    is.readFully(hash);
+                }
+                return new CredentialHash(hash, type, version);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
     public LockSettingsStorage(Context context) {
@@ -234,7 +286,7 @@ class LockSettingsStorage {
 
         stored = readFile(getBaseZeroLockPatternFilename(userId));
         if (!ArrayUtils.isEmpty(stored)) {
-            return new CredentialHash(stored, true);
+            return CredentialHash.createBaseZeroPattern(stored);
         }
 
         stored = readFile(getLegacyLockPatternFilename(userId));
@@ -549,6 +601,108 @@ class LockSettingsStorage {
     @VisibleForTesting
     void clearCache() {
         mCache.clear();
+    }
+
+    @Nullable
+    public PersistentDataBlockManagerInternal getPersistentDataBlock() {
+        if (mPersistentDataBlockManagerInternal == null) {
+            mPersistentDataBlockManagerInternal =
+                    LocalServices.getService(PersistentDataBlockManagerInternal.class);
+        }
+        return mPersistentDataBlockManagerInternal;
+    }
+
+    public void writePersistentDataBlock(int persistentType, int userId, int qualityForUi,
+            byte[] payload) {
+        PersistentDataBlockManagerInternal persistentDataBlock = getPersistentDataBlock();
+        if (persistentDataBlock == null) {
+            return;
+        }
+        persistentDataBlock.setFrpCredentialHandle(PersistentData.toBytes(
+                persistentType, userId, qualityForUi, payload));
+    }
+
+    public PersistentData readPersistentDataBlock() {
+        PersistentDataBlockManagerInternal persistentDataBlock = getPersistentDataBlock();
+        if (persistentDataBlock == null) {
+            return PersistentData.NONE;
+        }
+        return PersistentData.fromBytes(persistentDataBlock.getFrpCredentialHandle());
+    }
+
+    public static class PersistentData {
+        static final byte VERSION_1 = 1;
+        static final int VERSION_1_HEADER_SIZE = 1 + 1 + 4 + 4;
+
+        public static final int TYPE_NONE = 0;
+        public static final int TYPE_GATEKEEPER = 1;
+        public static final int TYPE_SP = 2;
+        public static final int TYPE_SP_WEAVER = 3;
+
+        public static final PersistentData NONE = new PersistentData(TYPE_NONE,
+                UserHandle.USER_NULL, DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED, null);
+
+        final int type;
+        final int userId;
+        final int qualityForUi;
+        final byte[] payload;
+
+        private PersistentData(int type, int userId, int qualityForUi, byte[] payload) {
+            this.type = type;
+            this.userId = userId;
+            this.qualityForUi = qualityForUi;
+            this.payload = payload;
+        }
+
+        public static PersistentData fromBytes(byte[] frpData) {
+            if (frpData == null || frpData.length == 0) {
+                return NONE;
+            }
+
+            DataInputStream is = new DataInputStream(new ByteArrayInputStream(frpData));
+            try {
+                byte version = is.readByte();
+                if (version == PersistentData.VERSION_1) {
+                    int type = is.readByte() & 0xFF;
+                    int userId = is.readInt();
+                    int qualityForUi = is.readInt();
+                    byte[] payload = new byte[frpData.length - VERSION_1_HEADER_SIZE];
+                    System.arraycopy(frpData, VERSION_1_HEADER_SIZE, payload, 0, payload.length);
+                    return new PersistentData(type, userId, qualityForUi, payload);
+                } else {
+                    Slog.wtf(TAG, "Unknown PersistentData version code: " + version);
+                    return null;
+                }
+            } catch (IOException e) {
+                Slog.wtf(TAG, "Could not parse PersistentData", e);
+                return null;
+            }
+        }
+
+        public static byte[] toBytes(int persistentType, int userId, int qualityForUi,
+                byte[] payload) {
+            if (persistentType == PersistentData.TYPE_NONE) {
+                Preconditions.checkArgument(payload == null,
+                        "TYPE_NONE must have empty payload");
+                return null;
+            }
+            Preconditions.checkArgument(payload != null && payload.length > 0,
+                    "empty payload must only be used with TYPE_NONE");
+
+            ByteArrayOutputStream os = new ByteArrayOutputStream(
+                    VERSION_1_HEADER_SIZE + payload.length);
+            DataOutputStream dos = new DataOutputStream(os);
+            try {
+                dos.writeByte(PersistentData.VERSION_1);
+                dos.writeByte(persistentType);
+                dos.writeInt(userId);
+                dos.writeInt(qualityForUi);
+                dos.write(payload);
+            } catch (IOException e) {
+                throw new RuntimeException("ByteArrayOutputStream cannot throw IOException");
+            }
+            return os.toByteArray();
+        }
     }
 
     public interface Callback {

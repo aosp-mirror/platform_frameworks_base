@@ -28,7 +28,7 @@ interface ILockSettings {
     boolean getBoolean(in String key, in boolean defaultValue, in int userId);
     long getLong(in String key, in long defaultValue, in int userId);
     String getString(in String key, in String defaultValue, in int userId);
-    void setLockCredential(in String credential, int type, in String savedCredential, int userId);
+    void setLockCredential(in String credential, int type, in String savedCredential, int requestedQuality, int userId);
     void resetKeyStore(int userId);
     VerifyCredentialResponse checkCredential(in String credential, int type, int userId,
             in ICheckCredentialProgressCallback progressCallback);
@@ -49,6 +49,7 @@ interface ILockSettings {
     long addEscrowToken(in byte[] token, int userId);
     boolean removeEscrowToken(long handle, int userId);
     boolean isEscrowTokenActive(long handle, int userId);
-    boolean setLockCredentialWithToken(String credential, int type, long tokenHandle, in byte[] token, int userId);
+    boolean setLockCredentialWithToken(String credential, int type, long tokenHandle,
+            in byte[] token, int requestedQuality, int userId);
     void unlockUserWithToken(long tokenHandle, in byte[] token, int userId);
 }

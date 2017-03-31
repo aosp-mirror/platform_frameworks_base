@@ -18,13 +18,15 @@ package com.android.server.locksettings;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.admin.DevicePolicyManager;
 import android.hardware.weaver.V1_0.IWeaver;
 import android.hardware.weaver.V1_0.WeaverConfig;
 import android.hardware.weaver.V1_0.WeaverReadResponse;
 import android.hardware.weaver.V1_0.WeaverReadStatus;
 import android.hardware.weaver.V1_0.WeaverStatus;
-import android.os.RemoteException;
 import android.security.GateKeeper;
+import android.os.RemoteException;
+import android.os.UserManager;
 import android.service.gatekeeper.GateKeeperResponse;
 import android.service.gatekeeper.IGateKeeperService;
 import android.util.ArrayMap;
@@ -33,8 +35,10 @@ import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.widget.ICheckCredentialProgressCallback;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.VerifyCredentialResponse;
+import com.android.server.locksettings.LockSettingsStorage.PersistentData;
 
 import libcore.util.HexEncoding;
 
@@ -253,8 +257,11 @@ public class SyntheticPasswordManager {
     private IWeaver mWeaver;
     private WeaverConfig mWeaverConfig;
 
-    public SyntheticPasswordManager(LockSettingsStorage storage) {
+    private final UserManager mUserManager;
+
+    public SyntheticPasswordManager(LockSettingsStorage storage, UserManager userManager) {
         mStorage = storage;
+        mUserManager = userManager;
     }
 
     @VisibleForTesting
@@ -557,7 +564,8 @@ public class SyntheticPasswordManager {
      * @see #clearSidForUser
      */
     public long createPasswordBasedSyntheticPassword(IGateKeeperService gatekeeper,
-            String credential, int credentialType, AuthenticationToken authToken, int userId)
+            String credential, int credentialType, AuthenticationToken authToken,
+            int requestedQuality, int userId)
                     throws RemoteException {
         if (credential == null || credentialType == LockPatternUtils.CREDENTIAL_TYPE_NONE) {
             credentialType = LockPatternUtils.CREDENTIAL_TYPE_NONE;
@@ -579,6 +587,7 @@ public class SyntheticPasswordManager {
                 return DEFAULT_HANDLE;
             }
             saveWeaverSlot(weaverSlot, handle, userId);
+            synchronizeWeaverFrpPassword(pwd, requestedQuality, userId, weaverSlot);
 
             pwd.passwordHandle = null;
             sid = GateKeeper.INVALID_SECURE_USER_ID;
@@ -598,12 +607,64 @@ public class SyntheticPasswordManager {
             sid = sidFromPasswordHandle(pwd.passwordHandle);
             applicationId = transformUnderSecdiscardable(pwdToken,
                     createSecdiscardable(handle, userId));
+            synchronizeFrpPassword(pwd, requestedQuality, userId);
         }
         saveState(PASSWORD_DATA_NAME, pwd.toBytes(), handle, userId);
 
         createSyntheticPasswordBlob(handle, SYNTHETIC_PASSWORD_PASSWORD_BASED, authToken,
                 applicationId, sid, userId);
         return handle;
+    }
+
+    public VerifyCredentialResponse verifyFrpCredential(IGateKeeperService gatekeeper,
+            String userCredential, int credentialType,
+            ICheckCredentialProgressCallback progressCallback) throws RemoteException {
+        PersistentData persistentData = mStorage.readPersistentDataBlock();
+        if (persistentData.type == PersistentData.TYPE_SP) {
+            PasswordData pwd = PasswordData.fromBytes(persistentData.payload);
+            byte[] pwdToken = computePasswordToken(userCredential, pwd);
+
+            GateKeeperResponse response = gatekeeper.verify(fakeUid(persistentData.userId),
+                    pwd.passwordHandle, passwordTokenToGkInput(pwdToken));
+            return VerifyCredentialResponse.fromGateKeeperResponse(response);
+        } else if (persistentData.type == PersistentData.TYPE_SP_WEAVER) {
+            PasswordData pwd = PasswordData.fromBytes(persistentData.payload);
+            byte[] pwdToken = computePasswordToken(userCredential, pwd);
+            int weaverSlot = persistentData.userId;
+
+            return weaverVerify(weaverSlot, passwordTokenToWeaverKey(pwdToken)).stripPayload();
+        } else {
+            Log.e(TAG, "persistentData.type must be TYPE_SP or TYPE_SP_WEAVER, but is "
+                    + persistentData.type);
+            return VerifyCredentialResponse.ERROR;
+        }
+    }
+
+
+    private void synchronizeFrpPassword(PasswordData pwd,
+            int requestedQuality, int userId) {
+        if (mStorage.getPersistentDataBlock() != null
+                && LockPatternUtils.userOwnsFrpCredential(mUserManager.getUserInfo(userId))) {
+            if (pwd.passwordType != LockPatternUtils.CREDENTIAL_TYPE_NONE) {
+                mStorage.writePersistentDataBlock(PersistentData.TYPE_SP, userId, requestedQuality,
+                        pwd.toBytes());
+            } else {
+                mStorage.writePersistentDataBlock(PersistentData.TYPE_NONE, userId, 0, null);
+            }
+        }
+    }
+
+    private void synchronizeWeaverFrpPassword(PasswordData pwd, int requestedQuality, int userId,
+            int weaverSlot) {
+        if (mStorage.getPersistentDataBlock() != null
+                && LockPatternUtils.userOwnsFrpCredential(mUserManager.getUserInfo(userId))) {
+            if (pwd.passwordType != LockPatternUtils.CREDENTIAL_TYPE_NONE) {
+                mStorage.writePersistentDataBlock(PersistentData.TYPE_SP_WEAVER, weaverSlot,
+                        requestedQuality, pwd.toBytes());
+            } else {
+                mStorage.writePersistentDataBlock(PersistentData.TYPE_NONE, 0, 0, null);
+            }
+        }
     }
 
     private ArrayMap<Integer, ArrayMap<Long, TokenData>> tokenMap = new ArrayMap<>();
@@ -730,6 +791,12 @@ public class SyntheticPasswordManager {
                     if (reenrollResponse.getResponseCode() == GateKeeperResponse.RESPONSE_OK) {
                         pwd.passwordHandle = reenrollResponse.getPayload();
                         saveState(PASSWORD_DATA_NAME, pwd.toBytes(), handle, userId);
+                        synchronizeFrpPassword(pwd,
+                                pwd.passwordType == LockPatternUtils.CREDENTIAL_TYPE_PATTERN
+                                ? DevicePolicyManager.PASSWORD_QUALITY_SOMETHING
+                                : DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC
+                                /* TODO(roosa): keep the same password quality */,
+                                userId);
                     } else {
                         Log.w(TAG, "Fail to re-enroll user password for user " + userId);
                         // continue the flow anyway

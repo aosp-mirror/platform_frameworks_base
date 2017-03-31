@@ -32,6 +32,7 @@ import android.util.Slog;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.Preconditions;
 
 import libcore.io.IoUtils;
 
@@ -71,8 +72,13 @@ public class PersistentDataBlockService extends SystemService {
     private static final int HEADER_SIZE = 8;
     // Magic number to mark block device as adhering to the format consumed by this service
     private static final int PARTITION_TYPE_MARKER = 0x19901873;
+    /** Size of the block reserved for FPR credential, including 4 bytes for the size header. */
+    private static final int FRP_CREDENTIAL_RESERVED_SIZE = 1000;
+    /** Maximum size of the FRP credential handle that can be stored. */
+    private static final int MAX_FRP_CREDENTIAL_HANDLE_SIZE = FRP_CREDENTIAL_RESERVED_SIZE - 4;
     // Limit to 100k as blocks larger than this might cause strain on Binder.
     private static final int MAX_DATA_BLOCK_SIZE = 1024 * 100;
+
     public static final int DIGEST_SIZE_BYTES = 32;
     private static final String OEM_UNLOCK_PROP = "sys.oem_unlock_allowed";
     private static final String FLASH_LOCK_PROP = "ro.boot.flash.locked";
@@ -136,6 +142,7 @@ public class PersistentDataBlockService extends SystemService {
                 Thread.currentThread().interrupt();
                 throw new IllegalStateException("Service " + TAG + " init interrupted", e);
             }
+            LocalServices.addService(PersistentDataBlockManagerInternal.class, mInternalService);
         }
         super.onBootPhase(phase);
     }
@@ -382,7 +389,7 @@ public class PersistentDataBlockService extends SystemService {
             enforceUid(Binder.getCallingUid());
 
             // Need to ensure we don't write over the last byte
-            long maxBlockSize = getBlockDeviceSize() - HEADER_SIZE - 1;
+            long maxBlockSize = getMaximumDataBlockSize();
             if (data.length > maxBlockSize) {
                 // partition is ~500k so shouldn't be a problem to downcast
                 return (int) -maxBlockSize;
@@ -562,8 +569,99 @@ public class PersistentDataBlockService extends SystemService {
 
         @Override
         public long getMaximumDataBlockSize() {
-            long actualSize = getBlockDeviceSize() - HEADER_SIZE - 1;
+            long actualSize = getBlockDeviceSize() - HEADER_SIZE - DIGEST_SIZE_BYTES
+                    - FRP_CREDENTIAL_RESERVED_SIZE - 1;
             return actualSize <= MAX_DATA_BLOCK_SIZE ? actualSize : MAX_DATA_BLOCK_SIZE;
+        }
+
+        @Override
+        public boolean hasFrpCredentialHandle() {
+            enforcePersistentDataBlockAccess();
+            return mInternalService.getFrpCredentialHandle() != null;
+        }
+    };
+
+    private PersistentDataBlockManagerInternal mInternalService =
+            new PersistentDataBlockManagerInternal() {
+
+        @Override
+        public void setFrpCredentialHandle(byte[] handle) {
+            Preconditions.checkArgument(handle == null || handle.length > 0,
+                    "handle must be null or non-empty");
+            Preconditions.checkArgument(handle == null
+                            || handle.length <= MAX_FRP_CREDENTIAL_HANDLE_SIZE,
+                    "handle must not be longer than " + MAX_FRP_CREDENTIAL_HANDLE_SIZE);
+
+            FileOutputStream outputStream;
+            try {
+                outputStream = new FileOutputStream(new File(mDataBlockFile));
+            } catch (FileNotFoundException e) {
+                Slog.e(TAG, "partition not available", e);
+                return;
+            }
+
+            ByteBuffer data = ByteBuffer.allocate(FRP_CREDENTIAL_RESERVED_SIZE);
+            data.putInt(handle == null ? 0 : handle.length);
+            if (handle != null) {
+                data.put(handle);
+            }
+            data.flip();
+
+            synchronized (mLock) {
+                if (!mIsWritable) {
+                    IoUtils.closeQuietly(outputStream);
+                    return;
+                }
+
+                try {
+                    FileChannel channel = outputStream.getChannel();
+
+                    channel.position(getBlockDeviceSize() - 1 - FRP_CREDENTIAL_RESERVED_SIZE);
+                    channel.write(data);
+                    outputStream.flush();
+                } catch (IOException e) {
+                    Slog.e(TAG, "unable to access persistent partition", e);
+                    return;
+                } finally {
+                    IoUtils.closeQuietly(outputStream);
+                }
+
+                computeAndWriteDigestLocked();
+            }
+        }
+
+        @Override
+        public byte[] getFrpCredentialHandle() {
+            if (!enforceChecksumValidity()) {
+                return null;
+            }
+
+            DataInputStream inputStream;
+            try {
+                inputStream = new DataInputStream(
+                        new FileInputStream(new File(mDataBlockFile)));
+            } catch (FileNotFoundException e) {
+                Slog.e(TAG, "partition not available");
+                return null;
+            }
+
+            try {
+                synchronized (mLock) {
+                    inputStream.skip(getBlockDeviceSize() - 1 - FRP_CREDENTIAL_RESERVED_SIZE);
+                    int length = inputStream.readInt();
+                    if (length <= 0 || length > MAX_FRP_CREDENTIAL_HANDLE_SIZE) {
+                        return null;
+                    }
+                    byte[] bytes = new byte[length];
+                    inputStream.readFully(bytes);
+                    return bytes;
+                }
+            } catch (IOException e) {
+                Slog.e(TAG, "unable to access persistent partition", e);
+                return null;
+            } finally {
+                IoUtils.closeQuietly(inputStream);
+            }
         }
     };
 }
