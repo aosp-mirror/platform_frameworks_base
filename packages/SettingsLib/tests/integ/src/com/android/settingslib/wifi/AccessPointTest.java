@@ -18,6 +18,8 @@ package com.android.settingslib.wifi;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 
+import static org.junit.Assert.assertTrue;
+
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -25,6 +27,8 @@ import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiSsid;
+import android.net.wifi.hotspot2.PasspointConfiguration;
+import android.net.wifi.hotspot2.pps.HomeSp;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.test.InstrumentationRegistry;
@@ -215,6 +219,17 @@ public class AccessPointTest {
         assertThat(ap.getRssi()).isEqualTo(expectedRssi);
     }
 
+    @Test
+    public void testCreateFromPasspointConfig() {
+        PasspointConfiguration config = new PasspointConfiguration();
+        HomeSp homeSp = new HomeSp();
+        homeSp.setFqdn("test.com");
+        homeSp.setFriendlyName("Test Provider");
+        config.setHomeSp(homeSp);
+        AccessPoint ap = new AccessPoint(mContext, config);
+        assertTrue(ap.isPasspointConfig());
+    }
+
     private AccessPoint createAccessPointWithScanResultCache() {
         Bundle bundle = new Bundle();
         ArrayList<ScanResult> scanResults = new ArrayList<>();
@@ -318,5 +333,16 @@ public class AccessPointTest {
         String name = "AmazingSsid!";
         AccessPoint namedAp = new TestAccessPointBuilder(mContext).setSsid(name).build();
         assertThat(namedAp.getSsidStr()).isEqualTo(name);
+    }
+
+    @Test
+    public void testBuilder_passpointConfig() {
+        String fqdn = "Test.com";
+        String providerFriendlyName = "Test Provider";
+        AccessPoint ap = new TestAccessPointBuilder(mContext).setFqdn(fqdn)
+                .setProviderFriendlyName(providerFriendlyName).build();
+        assertTrue(ap.isPasspointConfig());
+        assertThat(ap.getPasspointFqdn()).isEqualTo(fqdn);
+        assertThat(ap.getConfigName()).isEqualTo(providerFriendlyName);
     }
 }

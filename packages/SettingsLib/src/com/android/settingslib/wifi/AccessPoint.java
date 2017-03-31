@@ -37,6 +37,7 @@ import android.net.wifi.WifiConfiguration.KeyMgmt;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiNetworkScoreCache;
+import android.net.wifi.hotspot2.PasspointConfiguration;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -100,6 +101,8 @@ public class AccessPoint implements Comparable<AccessPoint> {
     static final String KEY_PSKTYPE = "key_psktype";
     static final String KEY_SCANRESULTCACHE = "key_scanresultcache";
     static final String KEY_CONFIG = "key_config";
+    static final String KEY_FQDN = "key_fqdn";
+    static final String KEY_PROVIDER_FRIENDLY_NAME = "key_provider_friendly_name";
     static final AtomicInteger sLastId = new AtomicInteger(0);
 
     /**
@@ -150,6 +153,13 @@ public class AccessPoint implements Comparable<AccessPoint> {
     // used to co-relate internal vs returned accesspoint.
     int mId;
 
+    /**
+     * Information associated with the {@link PasspointConfiguration}.  Only maintaining
+     * the relevant info to preserve spaces.
+     */
+    private String mFqdn;
+    private String mProviderFriendlyName;
+
     public AccessPoint(Context context, Bundle savedState) {
         mContext = context;
         mConfig = savedState.getParcelable(KEY_CONFIG);
@@ -177,27 +187,44 @@ public class AccessPoint implements Comparable<AccessPoint> {
                 mScanResultCache.put(result.BSSID, result);
             }
         }
+        if (savedState.containsKey(KEY_FQDN)) {
+            mFqdn = savedState.getString(KEY_FQDN);
+        }
+        if (savedState.containsKey(KEY_PROVIDER_FRIENDLY_NAME)) {
+            mProviderFriendlyName = savedState.getString(KEY_PROVIDER_FRIENDLY_NAME);
+        }
         update(mConfig, mInfo, mNetworkInfo);
         updateRssi();
         updateSeen();
         mId = sLastId.incrementAndGet();
     }
 
-    AccessPoint(Context context, ScanResult result) {
+    public AccessPoint(Context context, WifiConfiguration config) {
         mContext = context;
-        initWithScanResult(result);
+        loadConfig(config);
         mId = sLastId.incrementAndGet();
     }
 
-    AccessPoint(Context context, WifiConfiguration config) {
+    /**
+     * Initialize an AccessPoint object for a {@link PasspointConfiguration}.  This is mainly
+     * used by "Saved Networks" page for managing the saved {@link PasspointConfiguration}.
+     */
+    public AccessPoint(Context context, PasspointConfiguration config) {
         mContext = context;
-        loadConfig(config);
+        mFqdn = config.getHomeSp().getFqdn();
+        mProviderFriendlyName = config.getHomeSp().getFriendlyName();
         mId = sLastId.incrementAndGet();
     }
 
     AccessPoint(Context context, AccessPoint other) {
         mContext = context;
         copyFrom(other);
+    }
+
+    AccessPoint(Context context, ScanResult result) {
+        mContext = context;
+        initWithScanResult(result);
+        mId = sLastId.incrementAndGet();
     }
 
     /**
@@ -368,6 +395,10 @@ public class AccessPoint implements Comparable<AccessPoint> {
         return mConfig;
     }
 
+    public String getPasspointFqdn() {
+        return mFqdn;
+    }
+
     public void clearConfig() {
         mConfig = null;
         networkId = WifiConfiguration.INVALID_NETWORK_ID;
@@ -504,6 +535,8 @@ public class AccessPoint implements Comparable<AccessPoint> {
     public String getConfigName() {
         if (mConfig != null && mConfig.isPasspoint()) {
             return mConfig.providerFriendlyName;
+        } else if (mFqdn != null) {
+            return mProviderFriendlyName;
         } else {
             return ssid;
         }
@@ -778,8 +811,18 @@ public class AccessPoint implements Comparable<AccessPoint> {
                 mNetworkInfo != null && mNetworkInfo.getState() != State.DISCONNECTED;
     }
 
+    /**
+     * Return true if this AccessPoint represents a Passpoint AP.
+     */
     public boolean isPasspoint() {
         return mConfig != null && mConfig.isPasspoint();
+    }
+
+    /**
+     * Return true if this AccessPoint represents a Passpoint provider configuration.
+     */
+    public boolean isPasspointConfig() {
+        return mFqdn != null;
     }
 
     /**
@@ -856,6 +899,12 @@ public class AccessPoint implements Comparable<AccessPoint> {
                 new ArrayList<ScanResult>(mScanResultCache.values()));
         if (mNetworkInfo != null) {
             savedState.putParcelable(KEY_NETWORKINFO, mNetworkInfo);
+        }
+        if (mFqdn != null) {
+            savedState.putString(KEY_FQDN, mFqdn);
+        }
+        if (mProviderFriendlyName != null) {
+            savedState.putString(KEY_PROVIDER_FRIENDLY_NAME, mProviderFriendlyName);
         }
     }
 
