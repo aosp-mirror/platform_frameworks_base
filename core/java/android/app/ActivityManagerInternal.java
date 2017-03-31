@@ -241,4 +241,11 @@ public abstract class ActivityManagerInternal {
      * {@param procStateSeq}.
      */
     public abstract void notifyNetworkPolicyRulesUpdated(int uid, long procStateSeq);
+
+    /**
+     * Called after virtual display Id is updated by
+     * {@link com.android.server.vr.CompatibilityDisplay} with a specific
+     * {@param compatibilityDisplayId}.
+     */
+    public abstract void setVrCompatibilityDisplayId(int vrCompatibilityDisplayId);
 }
