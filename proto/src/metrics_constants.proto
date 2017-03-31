@@ -3892,12 +3892,21 @@ message MetricsEvent {
     // ACTION: QS -> Click date
     ACTION_QS_DATE = 930;
 
+    // ACTION: Event on nav button
+    ACTION_NAV_BUTTON_EVENT = 931;
+
+    // FIELD: Flags for a nav button event
+    FIELD_FLAGS = 932;
+
+    // FIELD: Action for a nav button event
+    FIELD_NAV_ACTION = 933;
+
+    // ---- End O Constants, all O constants go above this line ----
+
     // OPEN: Settings > Storage > Movies & TV
     // CATEGORY: SETTINGS
     // OS: O
-    APPLICATIONS_STORAGE_MOVIES = 931;
-
-    // ---- End O Constants, all O constants go above this line ----
+    APPLICATIONS_STORAGE_MOVIES = 1000;
 
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
