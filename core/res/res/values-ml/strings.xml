@@ -89,17 +89,24 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"നിയന്ത്രിക്കേണ്ടതല്ലാത്ത സ്ഥിര കോളർ ഐഡികൾ. അടുത്ത കോൾ: നിയന്ത്രിച്ചിട്ടില്ല"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"സേവനം വ്യവസ്ഥ ചെയ്‌തിട്ടില്ല."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"നിങ്ങൾക്ക് കോളർ ഐഡി ക്രമീകരണം മാറ്റാനാവില്ല."</string>
-    <string name="RestrictedOnData" msgid="8653794784690065540">"ഡാറ്റ സേവനം തടഞ്ഞു."</string>
-    <string name="RestrictedOnEmergency" msgid="6581163779072833665">"അടിയന്തര സേവനം തടഞ്ഞു."</string>
-    <string name="RestrictedOnNormal" msgid="4953867011389750673">"വോയ്‌സ് സേവനം തടഞ്ഞു."</string>
-    <string name="RestrictedOnAllVoice" msgid="3396963652108151260">"എല്ലാ വോയ്‌സ് സേവനങ്ങളും തടഞ്ഞു."</string>
-    <string name="RestrictedOnSms" msgid="8314352327461638897">"SMS സേവനം തടഞ്ഞു."</string>
-    <string name="RestrictedOnVoiceData" msgid="996636487106171320">"വോയ്‌സ്/ഡാറ്റ സേവനങ്ങൾ തടഞ്ഞു."</string>
-    <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"വോയ്‌സ്/SMS സേവനങ്ങൾ തടഞ്ഞു."</string>
-    <string name="RestrictedOnAll" msgid="5643028264466092821">"എല്ലാ വോയ്‌സ്/ഡാറ്റ/SMS സേവനങ്ങളും തടഞ്ഞു."</string>
-    <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"നെറ്റ്‌വർക്കിലേക്ക് കണക്റ്റുചെയ്യാനാവുന്നില്ല"</string>
-    <!-- no translation found for NetworkPreferenceSwitchSummary (4164230263214915351) -->
+    <!-- no translation found for RestrictedOnDataTitle (1322504692764166532) -->
     <skip />
+    <!-- no translation found for RestrictedOnEmergencyTitle (1236071219598685236) -->
+    <skip />
+    <!-- no translation found for RestrictedOnNormalTitle (3179574012752700984) -->
+    <skip />
+    <!-- no translation found for RestrictedOnAllVoiceTitle (158800171499150681) -->
+    <skip />
+    <!-- no translation found for RestrictedOnDataContent (8997474569390996587) -->
+    <skip />
+    <!-- no translation found for RestrictedOnEmergencyContent (4573217945494650061) -->
+    <skip />
+    <!-- no translation found for RestrictedOnNormalContent (1579434198284512182) -->
+    <skip />
+    <!-- no translation found for RestrictedOnAllVoiceContent (5243580774142557047) -->
+    <skip />
+    <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"നെറ്റ്‌വർക്കിലേക്ക് കണക്റ്റുചെയ്യാനാവുന്നില്ല"</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"സ്വീകരണം മെച്ചപ്പെടുത്തുന്നതിന് സിസ്റ്റം &gt; നെറ്റ്‌വർക്കും ഇന്റർനെറ്റും &gt; മൊബൈൽ നെറ്റ്‌വർക്കുകൾ &gt; തിരഞ്ഞെടുത്ത നെറ്റ്‌വർക്ക് തരം എന്നതിൽ തിരഞ്ഞെടുത്തിരിക്കുന്ന തരം മാറ്റിക്കൊണ്ട് ശ്രമിച്ചുനോക്കുക."</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"പിയർ അഭ്യർത്ഥിച്ച TTY മോഡ് \'ഫുൾ\'"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"പിയർ അഭ്യർത്ഥിച്ച TTY മോഡ് HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"പിയർ അഭ്യർത്ഥിച്ച TTY മോഡ് VCO"</string>
@@ -139,8 +146,7 @@
   </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"ഓഫ്"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"വൈഫൈ തിരഞ്ഞെടുത്തിരിക്കുന്നു"</string>
-    <!-- no translation found for wfc_mode_cellular_preferred_summary (1988279625335345908) -->
-    <skip />
+    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"മൊബൈൽ ഡാറ്റ ഉപയോഗിക്കാൻ താൽപ്പര്യപ്പെടുന്നു"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"വൈഫൈ മാത്രം"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: കൈമാറിയില്ല"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -178,18 +184,21 @@
       <item quantity="one">സർട്ടിഫിക്കറ്റ് അതോറിറ്റി ഇൻസ്റ്റാൾ ചെയ്തു</item>
     </plurals>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"അജ്ഞാത മൂന്നാം കക്ഷി നിരീക്ഷിക്കാം"</string>
-    <string name="ssl_ca_cert_noti_by_administrator" msgid="550758088185764312">"നിങ്ങളുടെ ഔദ്യോഗിക പ്രൊഫൈൽ അഡ്‌മിനിസ്‌ട്രേറ്റർ"</string>
+    <!-- no translation found for ssl_ca_cert_noti_by_administrator (3541729986326153557) -->
+    <skip />
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"<xliff:g id="MANAGING_DOMAIN">%s</xliff:g> നിരീക്ഷിക്കാം"</string>
     <string name="work_profile_deleted" msgid="5005572078641980632">"ഔദ്യോഗിക പ്രൊഫൈൽ ഇല്ലാതാക്കി"</string>
-    <string name="work_profile_deleted_description" msgid="6305147513054341102">"അഡ്‌മിൻ അപ്ലിക്കേഷൻ നഷ്‌ടപ്പെട്ടതിനാൽ ഔദ്യോഗിക പ്രൊഫൈൽ ഇല്ലാതാക്കി."</string>
-    <string name="work_profile_deleted_details" msgid="226615743462361248">"ഔദ്യോഗിക പ്രൊഫൈൽ അഡ്‌മിൻ അപ്ലിക്കേഷൻ നഷ്‌ടപ്പെട്ടതോ കേടായതോ ആണ്. അക്കാരണത്താൽ നിങ്ങളുടെ ഔദ്യോഗിക പ്രൊഫൈലും ബന്ധപ്പെട്ട വിവരവും ഇല്ലാതാക്കിയിരിക്കുന്നു. സഹായത്തിന് അഡ്‌മിനിസ്‌ട്രേറ്ററുമായി ബന്ധപ്പെടുക."</string>
-    <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"ഈ ഉപകരണത്തിൽ തുടർന്നങ്ങോട്ട് നിങ്ങളുടെ ഔദ്യോഗിക പ്രൊഫൈൽ ലഭ്യമല്ല."</string>
-    <!-- no translation found for network_logging_notification_title (6399790108123704477) -->
+    <!-- no translation found for work_profile_deleted_description (1100529432509639864) -->
     <skip />
-    <!-- no translation found for network_logging_notification_text (7930089249949354026) -->
+    <!-- no translation found for work_profile_deleted_details (6307630639269092360) -->
     <skip />
+    <!-- no translation found for work_profile_deleted_description_dpm_wipe (8823792115612348820) -->
+    <skip />
+    <string name="network_logging_notification_title" msgid="6399790108123704477">"ഉപകരണം മാനേജുചെയ്യുന്നുണ്ട്"</string>
+    <string name="network_logging_notification_text" msgid="7930089249949354026">"നിങ്ങളുടെ സ്ഥാപനമാണ് ഈ ഉപകരണം മാനേജുചെയ്യുന്നത്, നെറ്റ്‌വർക്ക് ട്രാഫിക്ക് നിരീക്ഷിക്കുകയും ചെയ്തേക്കാം, വിശദാംശങ്ങൾ അറിയാൻ ടാപ്പുചെയ്യുക."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"നിങ്ങളുടെ ഉപകരണം മായ്‌ക്കും"</string>
-    <string name="factory_reset_message" msgid="4905025204141900666">"അഡ്‌മിൻ അപ്ലിക്കേഷൻ, ഘടകഭാഗങ്ങൾ നഷ്‌ടപ്പെട്ടതോ കേടായതോ ആണെങ്കിൽ ഉപയോഗിക്കാനാവില്ല. നിങ്ങളുടെ ഉപകരണം ഇപ്പോൾ ഇല്ലാതാക്കും. സഹായത്തിന് നിങ്ങളുടെ അഡ്‌മിനിസ്‌ട്രേറ്ററെ ബന്ധപ്പെടുക."</string>
+    <!-- no translation found for factory_reset_message (7972496262232832457) -->
+    <skip />
     <string name="me" msgid="6545696007631404292">"ഞാന്‍"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"ടാബ്‌ലെറ്റ് ഓപ്‌ഷനുകൾ"</string>
     <string name="power_dialog" product="tv" msgid="6153888706430556356">"ടിവി ഓപ്‌ഷനുകൾ"</string>
@@ -551,7 +560,8 @@
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"\'ശല്യപ്പെടുത്തരുത്\' കോൺഫിഗറേഷൻ വായിക്കുന്നതിനും എഴുതുന്നതിനും ആപ്പിനെ അനുവദിക്കുന്നു."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"പാസ്‌വേഡ് നിയമങ്ങൾ സജ്ജീകരിക്കുക"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"സ്‌ക്രീൻ ലോക്ക് പാസ്‌വേഡുകളിലും PIN-കളിലും അനുവദിച്ചിരിക്കുന്ന ദൈർഘ്യവും പ്രതീകങ്ങളും നിയന്ത്രിക്കുക."</string>
-    <string name="policylab_watchLogin" msgid="914130646942199503">"സ്‌ക്രീൻ അൺലോക്ക് ശ്രമങ്ങൾ നിരീക്ഷിക്കുക"</string>
+    <!-- no translation found for policylab_watchLogin (5091404125971980158) -->
+    <skip />
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"സ്ക്രീൻ അൺലോക്കുചെയ്യുമ്പോൾ തെറ്റായി ടൈപ്പുചെയ്‌ത പാസ്‌വേഡുകളുടെ എണ്ണം നിരീക്ഷിക്കുക, വളരെയധികം തെറ്റായ പാസ്‌വ്ഡുകൾ ടൈപ്പുചെയ്‌തിട്ടുണ്ടെങ്കിൽ ടാബ്‌ലെറ്റ് ലോക്കുചെയ്യുകയോ ടാബ്‌ലെറ്റിലെ എല്ലാ ഡാറ്റയും മായ്ക്കുകയോ ചെയ്യുക."</string>
     <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"സ്‌ക്രീൻ അൺലോക്കുചെയ്യുമ്പോൾ തെറ്റായി ടൈപ്പുചെയ്‌ത പാസ്‌വേഡുകളുടെ എണ്ണം നിരീക്ഷിക്കുകയും നിരവധി തവണ പാസ്‌വേഡ് തെറ്റായി നൽകിയിട്ടുണ്ടെങ്കിൽ ടിവി ലോക്കുചെയ്യുകയോ ടിവിയുടെ എല്ലാ വിവരവും മായ്‌ക്കുകയോ ചെയ്യുക."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"സ്ക്രീൻ അൺലോക്കുചെയ്യുമ്പോൾ തെറ്റായി ടൈപ്പുചെയ്‌ത പാസ്‌വേഡുകളുടെ എണ്ണം നിരീക്ഷിക്കുക, വളരെയധികം തെറ്റായ പാസ്‌വ്ഡുകൾ ടൈപ്പുചെയ്‌തിട്ടുണ്ടെങ്കിൽ ഫോൺ ലോക്കുചെയ്യുകയോ ഫോണിലെ എല്ലാ ഡാറ്റയും മായ്ക്കുകയോചെയ്യുക."</string>
@@ -970,8 +980,7 @@
     <string name="selectTextMode" msgid="1018691815143165326">"ടെക്‌സ്‌റ്റ് തിരഞ്ഞെടുക്കുക"</string>
     <string name="undo" msgid="7905788502491742328">"പഴയപടിയാക്കുക"</string>
     <string name="redo" msgid="7759464876566803888">"വീണ്ടും ചെയ്യുക"</string>
-    <!-- no translation found for autofill (3035779615680565188) -->
-    <skip />
+    <string name="autofill" msgid="3035779615680565188">"സ്വയമേവ പൂരിപ്പിക്കൽ"</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"ടെക്‌സ്റ്റ് തിരഞ്ഞെടുക്കൽ"</string>
     <string name="addToDictionary" msgid="4352161534510057874">"നിഘണ്ടുവിൽ ചേർക്കുക"</string>
     <string name="deleteText" msgid="6979668428458199034">"ഇല്ലാതാക്കുക"</string>
@@ -1103,7 +1112,13 @@
     <string name="network_switch_metered" msgid="4671730921726992671">"<xliff:g id="NETWORK_TYPE">%1$s</xliff:g> എന്നതിലേക്ക് മാറി"</string>
     <string name="network_switch_metered_detail" msgid="5325661434777870353">"<xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> നെറ്റ്‌വർക്കിന് ഇന്റർനെറ്റ് ആക്സസ്സ് ഇല്ലാത്തപ്പോൾ ഉപകരണം <xliff:g id="NEW_NETWORK">%1$s</xliff:g> ഉപയോഗിക്കുന്നു. നിരക്കുകൾ ബാധകമായേക്കാം."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> നെറ്റ്‌വർക്കിൽ നിന്ന് <xliff:g id="NEW_NETWORK">%2$s</xliff:g> നെറ്റ്‌വർക്കിലേക്ക് മാറി"</string>
-    <!-- no translation found for network_switch_type_name:0 (3979506840912951943) -->
+  <string-array name="network_switch_type_name">
+    <item msgid="3979506840912951943">"മൊബൈൽ ഡാറ്റ"</item>
+    <item msgid="75483255295529161">"വൈഫൈ"</item>
+    <item msgid="6862614801537202646">"Bluetooth"</item>
+    <item msgid="5447331121797802871">"ഇതര്‍നെറ്റ്"</item>
+    <item msgid="8257233890381651999">"VPN"</item>
+  </string-array>
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"തിരിച്ചറിയാനാകാത്ത ഒരു നെറ്റ്‌വർക്ക് തരം"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Wi-Fi-ലേക്ക് കണക്‌റ്റുചെയ്യാൻ കഴിഞ്ഞില്ല"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" മോശം ഇന്റർനെറ്റ് കണക്ഷനാണുള്ളത്."</string>
@@ -1174,7 +1189,8 @@
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"ബഗ് റിപ്പോർട്ട് എടുക്കുന്നു…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"ബഗ് റിപ്പോർട്ട് പങ്കിടണോ?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"ബഗ് റിപ്പോർട്ട് പങ്കിടുന്നു…"</string>
-    <string name="share_remote_bugreport_notification_message_finished" msgid="8610614010660772643">"ഈ ഉപകരണത്തിലെ പ്രശ്നം പരിഹരിക്കുന്നതിന് നിങ്ങളുടെ ഐടി അഡ്‌മിൻ ഒരു ബഗ് റിപ്പോർട്ട് അഭ്യർത്ഥിച്ചു. ആപ്‌സും ഡാറ്റയും പങ്കിടപ്പെട്ടേക്കും."</string>
+    <!-- no translation found for share_remote_bugreport_notification_message_finished (6029609949340992866) -->
+    <skip />
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"പങ്കിടുക"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"നിരസിക്കുക"</string>
     <string name="select_input_method" msgid="8547250819326693584">"കീബോഡ് മാറ്റുക"</string>
@@ -1360,8 +1376,7 @@
     <string name="data_usage_warning_body" msgid="6660692274311972007">"ഉപയോഗവും ക്രമീകരണവും കാണാൻ ടാപ്പുചെയ്യുക."</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"2G-3G ഡാറ്റ പരിധിയിലെത്തി"</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"4G ഡാറ്റ പരിധിയിലെത്തി"</string>
-    <!-- no translation found for data_usage_mobile_limit_title (6561099244084267376) -->
-    <skip />
+    <string name="data_usage_mobile_limit_title" msgid="6561099244084267376">"മൊബൈൽ ഡാറ്റ പരിധി എത്തി"</string>
     <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"വൈഫൈ ഡാറ്റ പരിധിയിലെത്തി"</string>
     <string name="data_usage_limit_body" msgid="291731708279614081">"ശേഷിക്കുന്ന പ്രവർത്തനങ്ങൾക്കായി ഡാറ്റ താൽക്കാലികമായി നിർത്തി"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"2G-3G ഡാറ്റ പരിധി കവിഞ്ഞു"</string>
@@ -1460,18 +1475,29 @@
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"നീക്കംചെയ്യുക"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"മുകളിൽക്കൊടുത്തിരിക്കുന്ന ശുപാർശചെയ്‌ത ലെവലിലേക്ക് വോളിയം വർദ്ധിപ്പിക്കണോ?\n\nഉയർന്ന വോളിയത്തിൽ ദീർഘനേരം കേൾക്കുന്നത് നിങ്ങളുടെ ശ്രവണ ശേഷിയെ ദോഷകരമായി ബാധിക്കാം."</string>
-    <string name="accessibility_shortcut_warning_dialog_title" msgid="5998592821749881862">"ഉപയോഗസഹായിക്കുള്ള കുറുക്കുവഴി ഓൺ ആണ്"</string>
-    <string name="accessibility_shortcut_toogle_warning" msgid="2987297770937717543">"രണ്ട് ശബ്ദ ‌ബട്ടണുകളും 3 സെക്കന്റ് നേരം അമർത്തിപ്പിടിച്ച് <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ഓൺ അല്ലെങ്കിൽ ഓഫ് ചെയ്യുക.\n\nക്രമീകരണങ്ങൾ&gt; ഉപയോഗസഹായി എന്നതിലൂടെ നിങ്ങൾക്ക് സേവനം മാറ്റാൻ കഴിയും."</string>
-    <string name="disable_accessibility_shortcut" msgid="3683951963271793789">"കുറുക്കുവഴി ‌ഓഫാക്കുക"</string>
-    <string name="leave_accessibility_shortcut_on" msgid="8762106842437042969">"ഓണാക്കിയിടുക"</string>
+    <!-- no translation found for accessibility_shortcut_warning_dialog_title (8404780875025725199) -->
+    <skip />
+    <!-- no translation found for accessibility_shortcut_toogle_warning (7256507885737444807) -->
+    <skip />
+    <!-- no translation found for disable_accessibility_shortcut (627625354248453445) -->
+    <skip />
+    <!-- no translation found for leave_accessibility_shortcut_on (7653111894438512680) -->
+    <skip />
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"ഉപയോഗസഹായിക്കുള്ള കുറുക്കുവഴി <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ഓൺ ചെയ്തിരിക്കുന്നു"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"ഉപയോഗസഹായിക്കുള്ള കുറുക്കുവഴി <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ഓഫ് ചെയ്തിരിക്കുന്നു"</string>
+    <!-- no translation found for accessibility_button_prompt_text (4234556536456854251) -->
+    <skip />
+    <!-- no translation found for accessibility_button_instructional_text (6942300463612999993) -->
+    <skip />
+    <!-- no translation found for accessibility_magnification_chooser_text (1227146738764986237) -->
+    <skip />
     <string name="user_switched" msgid="3768006783166984410">"നിലവിലെ ഉപയോക്താവ് <xliff:g id="NAME">%1$s</xliff:g> ആണ്."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"<xliff:g id="NAME">%1$s</xliff:g> എന്ന ഉപയോക്താവിലേക്ക് മാറുന്നു…"</string>
     <string name="user_logging_out_message" msgid="8939524935808875155">"<xliff:g id="NAME">%1$s</xliff:g> ലോഗൌട്ട് ചെയ്യുന്നു…"</string>
     <string name="owner_name" msgid="2716755460376028154">"ഉടമ"</string>
     <string name="error_message_title" msgid="4510373083082500195">"പിശക്"</string>
-    <string name="error_message_change_not_allowed" msgid="1347282344200417578">"ഈ മാറ്റം നിങ്ങളുടെ അഡ്‌മിനിസ്‌ട്രേറ്റർ അനുവദിച്ചതല്ല"</string>
+    <!-- no translation found for error_message_change_not_allowed (1238035947357923497) -->
+    <skip />
     <string name="app_not_found" msgid="3429141853498927379">"ഈ പ്രവർത്തനം കൈകാര്യം ചെയ്യുന്ന അപ്ലിക്കേഷനുകളൊന്നും കണ്ടെത്തിയില്ല"</string>
     <string name="revoke" msgid="5404479185228271586">"റദ്ദാക്കുക"</string>
     <string name="mediasize_iso_a0" msgid="1994474252931294172">"ISO A0"</string>
@@ -1563,7 +1589,8 @@
     <string name="reason_service_unavailable" msgid="7824008732243903268">"പ്രിന്റ് സേവനം പ്രവർത്തനക്ഷമമല്ല"</string>
     <string name="print_service_installed_title" msgid="2246317169444081628">"<xliff:g id="NAME">%s</xliff:g> സേവനം ഇൻസ്റ്റാളുചെയ്‌തു"</string>
     <string name="print_service_installed_message" msgid="5897362931070459152">"പ്രവർത്തനക്ഷമമാക്കാൻ ടാപ്പുചെയ്യുക"</string>
-    <string name="restr_pin_enter_admin_pin" msgid="783643731895143970">"അഡ്‌മിനിസ്‌ട്രേറ്റർ പിൻ നൽകുക"</string>
+    <!-- no translation found for restr_pin_enter_admin_pin (8641662909467236832) -->
+    <skip />
     <string name="restr_pin_enter_pin" msgid="3395953421368476103">"പിൻ നൽകുക"</string>
     <string name="restr_pin_incorrect" msgid="8571512003955077924">"തെറ്റാണ്"</string>
     <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"നിലവിലെ പിൻ"</string>
@@ -1591,16 +1618,21 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"ഔദ്യോഗികം <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"രണ്ടാമത്തെ ഔദ്യോഗിക <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"മൂന്നാമത്തെ ഔദ്യോഗിക <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="7693684144593484">"ഈ സ്‌ക്രീൻ അൺപിൻ ചെയ്യാൻ, ബാക്കും ചുരുക്കവിവരണവും സ്‌പർശിച്ച് പിടിക്കുക."</string>
-    <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"അപ്ലിക്കേഷൻ പിൻ ചെയ്‌തു: ഈ ഉപകരണത്തിൽ അൺപിൻ ചെയ്യാനാവില്ല."</string>
+    <!-- no translation found for lock_to_app_toast (6820571533009838261) -->
+    <skip />
+    <!-- no translation found for lock_to_app_toast_locked (7849470948648628704) -->
+    <skip />
     <string name="lock_to_app_start" msgid="6643342070839862795">"സ്ക്രീൻ പിൻ ചെയ്തു"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"സ്ക്രീൻ അൺപിൻ ചെയ്തു"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"ചെയ്യുംമുമ്പ് പിൻ ചോദിക്കൂ"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"അൺപിന്നിനുമുമ്പ് അൺലോക്ക് പാറ്റേൺ ആവശ്യപ്പെടൂ"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"അൺപിന്നിനുമുമ്പ് പാസ്‌വേഡ് ആവശ്യപ്പെടൂ"</string>
-    <string name="package_installed_device_owner" msgid="8420696545959087545">"നിങ്ങളുടെ അഡ്‌മിനിസ്‌ട്രേറ്റർ ഇൻസ്റ്റാളുചെയ്‌തു"</string>
-    <string name="package_updated_device_owner" msgid="8856631322440187071">"നിങ്ങളുടെ അഡ്‌മിനിസ്‌ട്രേറ്റർ അപ്‌ഡേറ്റുചെയ്‌തു"</string>
-    <string name="package_deleted_device_owner" msgid="7650577387493101353">"നിങ്ങളുടെ അഡ്‌മിനിസ്‌ട്രേറ്റർ ഇല്ലാതാക്കി"</string>
+    <!-- no translation found for package_installed_device_owner (6875717669960212648) -->
+    <skip />
+    <!-- no translation found for package_updated_device_owner (1847154566357862089) -->
+    <skip />
+    <!-- no translation found for package_deleted_device_owner (2307122077550236438) -->
+    <skip />
     <string name="battery_saver_description" msgid="1960431123816253034">"ബാറ്ററി ആയുസ്സ് മെച്ചപ്പെടുത്താൻ സഹായിക്കുന്നതിന്, ബാറ്ററി സേവർ നിങ്ങളുടെ ഉപകരണത്തിന്റെ പ്രകടനത്തെ കുറയ്‌ക്കുകയും വൈബ്രേഷനെയും മിക്ക പശ്ചാത്തല വിവരത്തെയും പരിമിതപ്പെടുത്തുകയും ചെയ്യുന്നു. ഇമെയിൽ, സന്ദേശമയയ്‌ക്കൽ, സമന്വയിപ്പിക്കലിനെ ആശ്രയിച്ചുള്ള മറ്റ് അപ്ലിക്കേഷനുകൾ എന്നിവ നിങ്ങൾ തുറക്കുന്നതുവരെ അപ്‌ഡേറ്റുചെയ്യാനിടയില്ല.\n\nനിങ്ങളുടെ ഉപകരണം ചാർജ്ജുചെയ്യുമ്പോൾ ബാറ്ററി സേവർ സ്വയം ഓഫാകും."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"ഡാറ്റാ ഉപയോഗം കുറയ്ക്കാൻ സഹായിക്കുന്നതിന്, പശ്ചാത്തലത്തിൽ ഡാറ്റ അയയ്ക്കുകയോ സ്വീകരിക്കുകയോ ചെയ്യുന്നതിൽ നിന്ന് ചില ആപ്‌സിനെ ഡാറ്റ സേവർ തടയുന്നു. നിങ്ങൾ നിലവിൽ ഉപയോഗിക്കുന്ന ഒരു ആപ്പിന് ഡാറ്റ ആക്സസ്സ് ചെയ്യാൻ കഴിയും, എന്നാൽ കുറഞ്ഞ ആവൃത്തിയിലാണിത് നടക്കുക. ഇതിനർത്ഥം, നിങ്ങൾ ടാപ്പുചെയ്യുന്നത് വരെ ചിത്രങ്ങൾ കാണിക്കുകയില്ല എന്നാണ്."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"ഡാറ്റ സേവർ ഓണാക്കണോ?"</string>
@@ -1685,8 +1717,10 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"എല്ലാ ഭാഷകളും"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"എല്ലാ പ്രദേശങ്ങളും"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"തിരയുക"</string>
-    <string name="work_mode_off_title" msgid="8954725060677558855">"ഔദ്യോഗിക മോഡ് ഓഫാണ്"</string>
-    <string name="work_mode_off_message" msgid="3286169091278094476">"ആപ്സും, പശ്ചാത്തല സമന്വയവും ബന്ധപ്പെട്ട ഫീച്ചറുകളും ഉൾപ്പെടെ, ഔദ്യോഗിക പ്രൊഫൈലിനെ പ്രവർത്തിക്കാൻ അനുവദിക്കുക."</string>
+    <!-- no translation found for work_mode_off_title (2615362773958585967) -->
+    <skip />
+    <!-- no translation found for work_mode_off_message (2961559609199223594) -->
+    <skip />
     <string name="work_mode_turn_on" msgid="2062544985670564875">"ഓണാക്കുക"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"നിങ്ങൾക്ക് പുതിയ സന്ദേശങ്ങൾ ഉണ്ട്"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"കാണുന്നതിന് SMS ആപ്പ് തുറക്കുക"</string>
@@ -1729,8 +1763,7 @@
     <string name="time_picker_prompt_label" msgid="7588093983899966783">"സമയത്തിൽ ടൈപ്പുചെയ്യുക"</string>
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"സമയം നൽകുന്നതിന് ടെക്സ്റ്റ് ഇൻപുട്ട് ‌മോ‌ഡിലേക്ക് ‌മാറുക."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"‌സമയം നൽകുന്നതിന് ക്ലോക്ക് മോഡിലേക്ക് ‌മാറുക."</string>
-    <!-- no translation found for autofill_picker_accessibility_title (8469043291648711535) -->
-    <skip />
+    <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"സ്വയമേവ പൂരിപ്പിക്കൽ ഓപ്ഷനുകൾ"</string>
     <string name="autofill_save_title" msgid="7081244500504163245">"<xliff:g id="LABEL">%1$s</xliff:g> എന്നതിലേക്ക് സംരക്ഷിക്കണോ?"</string>
     <string name="autofill_save_title_with_type" msgid="4977385733042555659">"<xliff:g id="TYPE">%1$s</xliff:g> <xliff:g id="LABEL">%2$s</xliff:g> എന്നതിലേക്ക് സംരക്ഷിക്കണോ?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"സംരക്ഷിക്കുക"</string>
@@ -1738,13 +1771,17 @@
     <string name="autofill_save_type_password" msgid="5288448918465971568">"പാസ്‌വേഡ്"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"വിലാസം"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"ക്രെഡിറ്റ് കാർഡ്"</string>
-    <!-- no translation found for etws_primary_default_message_earthquake (5541962250262769193) -->
-    <skip />
-    <!-- no translation found for etws_primary_default_message_tsunami (1887685943498368548) -->
-    <skip />
-    <!-- no translation found for etws_primary_default_message_earthquake_and_tsunami (998797956848445862) -->
-    <skip />
-    <!-- no translation found for etws_primary_default_message_test (2709597093560037455) -->
-    <skip />
+    <string name="etws_primary_default_message_earthquake" msgid="5541962250262769193">"പരിഭ്രമിക്കാതിരിക്കുക, അടുത്തുള്ള അഭയകേന്ദ്രം തേടുക."</string>
+    <string name="etws_primary_default_message_tsunami" msgid="1887685943498368548">"തീരപ്രദേശങ്ങളിൽ നിന്നും നദിക്കരകളിൽ നിന്നും ആളുകളെ ഉടനടി ഒഴിപ്പിച്ച് ഉയർന്ന ഭൂമിയിൽ എത്തിക്കുക."</string>
+    <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="998797956848445862">"പരിഭ്രമിക്കാതിരിക്കുക, അടുത്തുള്ള അഭയകേന്ദ്രം തേടുക."</string>
+    <string name="etws_primary_default_message_test" msgid="2709597093560037455">"അടിയന്തര സന്ദേശ ടെസ്റ്റ്"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
+    <!-- no translation found for mmcc_authentication_reject (7729819349669603406) -->
+    <skip />
+    <!-- no translation found for mmcc_imsi_unknown_in_hlr (6321202257374418726) -->
+    <skip />
+    <!-- no translation found for mmcc_illegal_ms (2769452751852211112) -->
+    <skip />
+    <!-- no translation found for mmcc_illegal_me (4438696681169345015) -->
+    <skip />
 </resources>
