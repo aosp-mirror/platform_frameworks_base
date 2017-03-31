@@ -118,7 +118,7 @@ public class FadeTransitionTest extends ActivityInstrumentationTestCase2<Animato
         TransitionLatch outLatch = setVisibilityInTransition(fadeOut, R.id.square1, View.INVISIBLE);
         assertTrue(outLatch.startLatch.await(200, TimeUnit.MILLISECONDS));
 
-        assertEquals(fadeOutValueCheck.pauseTransitionAlpha, fadeInValueCheck.startTransitionAlpha);
+        assertEquals(fadeInValueCheck.pauseTransitionAlpha, fadeOutValueCheck.startTransitionAlpha);
         assertTrue("expecting transitionAlpha to be between 0 and 1. Was " +
                         fadeInValueCheck.pauseTransitionAlpha,
                 fadeInValueCheck.pauseTransitionAlpha > 0 &&
