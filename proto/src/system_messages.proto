@@ -24,6 +24,9 @@ message SystemMessage {
 
   // System message IDs
   // These are non-consecutive in order to preserve some existing, ad hoc IDs.
+  // It is OK to use skipped IDs.
+  // Prefer to add new IDs consecutively from zero, search for ADD_NEW_IDS_ABOVE_THIS_LINE.
+  // Most of these IDs only became meaningful with the O release.
   enum ID {
     // Unknown
     NOTE_UNKNOWN = 0;
@@ -56,6 +59,112 @@ message SystemMessage {
     // Package: com.android.systemui
     NOTE_INSTANT_APPS = 7;
 
+    // Notify the user that they should select an input method
+    // Package: android
+    NOTE_SELECT_INPUT_METHOD = 8;
+
+    // Notify the user about limited functionality before decryption
+    // Package: android
+    NOTE_FBE_ENCRYPTED_NOTIFICATION = 9;
+
+    // Give the user a way out of car mode
+    // Package: android
+    NOTE_CAR_MODE_DISABLE = 10;
+
+    // Notification to tell the user that a heavy-weight application is running.
+    // Package: android
+    NOTE_HEAVY_WEIGHT_NOTIFICATION = 11;
+
+    // Notification to tell the user that a process has exceeded its memory limit.
+    // Package: android
+    NOTE_DUMP_HEAP_NOTIFICATION = 12;
+
+    // Notification that is shown when finishing a system upgrade
+    // Package: android
+    NOTE_SYSTEM_UPGRADING = 13;
+
+    // Notify the user that tethering is active.
+    // Package: android
+    NOTE_TETHER_GENERAL = 14;
+    NOTE_TETHER_USB = 15;
+    NOTE_TETHER_BLUETOOTH = 16;
+
+    // Notify the user that always-on VPN has disconnected.
+    // Package: android
+    NOTE_VPN_DISCONNECTED = 17;
+
+    // Notify the user about a sync error.
+    // Package: android
+    NOTE_SYNC_ERROR = 18;
+
+    // Ask the user to select a keyboard language and layout
+    // Package: android
+    NOTE_SELECT_KEYBOARD_LAYOUT = 19;
+
+    // Update the user about the status of the VPN
+    // Package: android
+    NOTE_VPN_STATUS = 20;
+
+    // Package manager either installed or deleted a package
+    // Package: android
+    NOTE_PACKAGE_STATE = 21;
+
+    // Tell the user that storage space is low
+    // Package: android
+    NOTE_LOW_STORAGE = 23;
+
+    // Confirm that the user wants to reset out of retail demo mode
+    // Package: android
+    NOTE_RETAIL_RESET = 24;
+
+    // Entice the use to tap to share files
+    // Package: android
+    NOTE_USB_MTP_TAP = 25;
+
+    // Display the Android Debug Protocol status
+    // Package: android
+    NOTE_ADB_ACTIVE = 26;
+
+    // Inform that USB is configured for Media Transfer Protocol
+    // Package: android
+    NOTE_USB_MTP = 27;
+
+    // Inform that USB is configured for Picture Transfer Protocol
+    // Package: android
+    NOTE_USB_PTP = 28;
+
+    // Inform that USB is configured as a Musical Instrument Digital Interface
+    // Package: android
+    NOTE_USB_MIDI = 29;
+
+    // Inform that USB is configured in host mode
+    // Package: android
+    NOTE_USB_ACCESSORY = 30;
+
+    // Inform the user that the device is supplying power to another device.
+    // Package: android
+    NOTE_USB_SUPPLYING = 31;
+
+    // Inform the user that the device is consuming power from another device.
+    // Package: android
+    NOTE_USB_CHARGING = 32;
+
+    // Inform the user that a certificate authority is managing SSL
+    // Package: android
+    NOTE_SSL_CERT_INFO = 33;
+
+    // ADD_NEW_IDS_ABOVE_THIS_LINE
+    // Legacy IDs with arbitrary values appear below
+    // Legacy IDs existed as stable non-conflicting constants prior to the O release
+
+    // Notify the user that their work profile has been deleted
+    // Package: android
+    NOTE_PROFILE_WIPED = 1001;
+
+    // Warn the user that their org can monitor the network
+    // Package: android
+    NOTE_NETWORK_LOGGING = 1002;
+
     // Confirm that the user wants to remove the guest account.
     // Package: com.android.systemui
     NOTE_REMOVE_GUEST = 1010;
@@ -64,9 +173,13 @@ message SystemMessage {
     // Package: com.android.systemui
     NOTE_LOGOUT_USER = 1011;
 
+    // Communicate to the user about remote bugreports.
+    // Package: android
+    NOTE_REMOTE_BUGREPORT = 678432343;
+
     // Notify the user about public volume state changes..
     // Package: com.android.systemui
-    NOTE_STORAGE_PUBLIC = 0x53505542;
+    NOTE_STORAGE_PUBLIC = 0x53505542;  // 1397773634
 
     // Notify the user about private volume state changes.
     // Package: com.android.systemui
@@ -79,5 +192,9 @@ message SystemMessage {
     // Notify the user that data or apps are being moved to external storage.
     // Package: com.android.systemui
     NOTE_STORAGE_MOVE = 0x534d4f56;
+
+    // Account Manager allocates IDs sequentially, starting here.
+    // Package: android
+    ACCOUNT_MANAGER_BASE = 0x70000000;
   }
 }

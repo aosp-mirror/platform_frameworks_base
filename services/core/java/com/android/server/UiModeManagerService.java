@@ -58,6 +58,7 @@ import java.util.Collections;
 
 import com.android.internal.R;
 import com.android.internal.app.DisableCarModeActivity;
+import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.server.power.ShutdownThread;
 import com.android.server.twilight.TwilightListener;
@@ -710,10 +711,10 @@ final class UiModeManagerService extends SystemService {
                                 PendingIntent.getActivityAsUser(context, 0, carModeOffIntent, 0,
                                         null, UserHandle.CURRENT));
                 mNotificationManager.notifyAsUser(null,
-                        R.string.car_mode_disable_notification_title, n.build(), UserHandle.ALL);
+                        SystemMessage.NOTE_CAR_MODE_DISABLE, n.build(), UserHandle.ALL);
             } else {
                 mNotificationManager.cancelAsUser(null,
-                        R.string.car_mode_disable_notification_title, UserHandle.ALL);
+                        SystemMessage.NOTE_CAR_MODE_DISABLE, UserHandle.ALL);
             }
         }
     }

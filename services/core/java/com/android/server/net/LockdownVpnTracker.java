@@ -45,6 +45,7 @@ import android.text.TextUtils;
 import android.util.Slog;
 
 import com.android.internal.R;
+import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.net.VpnConfig;
 import com.android.internal.net.VpnProfile;
 import com.android.internal.notification.SystemNotificationChannels;
@@ -344,10 +345,11 @@ public class LockdownVpnTracker {
                         .setColor(mContext.getColor(
                                 com.android.internal.R.color.system_notification_accent_color));
 
-        NotificationManager.from(mContext).notify(TAG, 0, builder.build());
+        NotificationManager.from(mContext).notify(null, SystemMessage.NOTE_VPN_STATUS,
+                builder.build());
     }
 
     private void hideNotification() {
-        NotificationManager.from(mContext).cancel(TAG, 0);
+        NotificationManager.from(mContext).cancel(null, SystemMessage.NOTE_VPN_STATUS);
     }
 }

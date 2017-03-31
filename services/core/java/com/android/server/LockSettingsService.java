@@ -76,6 +76,7 @@ import android.util.Log;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.widget.ICheckCredentialProgressCallback;
@@ -127,7 +128,6 @@ import javax.crypto.spec.GCMParameterSpec;
 public class LockSettingsService extends ILockSettings.Stub {
     private static final String TAG = "LockSettingsService";
     private static final String PERMISSION = ACCESS_KEYGUARD_SECURE_STORAGE;
-    private static final int FBE_ENCRYPTED_NOTIFICATION = 0;
     private static final boolean DEBUG = false;
 
     private static final int PROFILE_KEY_IV_SIZE = 12;
@@ -461,12 +461,14 @@ public class LockSettingsService extends ILockSettings.Stub {
                         .setVisibility(Notification.VISIBILITY_PUBLIC)
                         .setContentIntent(intent)
                         .build();
-        mNotificationManager.notifyAsUser(null, FBE_ENCRYPTED_NOTIFICATION, notification, user);
+        mNotificationManager.notifyAsUser(null, SystemMessage.NOTE_FBE_ENCRYPTED_NOTIFICATION,
+            notification, user);
     }
 
     private void hideEncryptionNotification(UserHandle userHandle) {
         if (DEBUG) Slog.v(TAG, "hide encryption notification, user: " + userHandle.getIdentifier());
-        mNotificationManager.cancelAsUser(null, FBE_ENCRYPTED_NOTIFICATION, userHandle);
+        mNotificationManager.cancelAsUser(null, SystemMessage.NOTE_FBE_ENCRYPTED_NOTIFICATION,
+            userHandle);
     }
 
     public void onCleanupUser(int userId) {

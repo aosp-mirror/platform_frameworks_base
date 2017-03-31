@@ -31,6 +31,7 @@ import android.hardware.usb.UsbInterface;
 import android.hardware.usb.UsbManager;
 import android.os.UserHandle;
 
+import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
 
 /**
@@ -101,11 +102,13 @@ class MtpNotificationManager {
         notification.flags |= Notification.FLAG_LOCAL_ONLY;
 
         mContext.getSystemService(NotificationManager.class).notify(
-                TAG, device.getDeviceId(), notification);
+                Integer.toString(device.getDeviceId()), SystemMessage.NOTE_USB_MTP_TAP,
+                notification);
     }
 
     void hideNotification(int deviceId) {
-        mContext.getSystemService(NotificationManager.class).cancel(TAG, deviceId);
+        mContext.getSystemService(NotificationManager.class).cancel(
+                Integer.toString(deviceId), SystemMessage.NOTE_USB_MTP_TAP);
     }
 
     private class Receiver extends BroadcastReceiver {

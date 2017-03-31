@@ -51,6 +51,7 @@ import android.util.Pair;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.IndentingPrintWriter;
@@ -60,8 +61,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Scanner;
@@ -949,35 +948,46 @@ public class UsbDeviceManager {
                 return;
             }
             int id = 0;
+            int titleRes = 0;
             Resources r = mContext.getResources();
             if (mConnected) {
                 if (!mUsbDataUnlocked) {
                     if (mSourcePower) {
-                        id = com.android.internal.R.string.usb_supplying_notification_title;
+                        titleRes = com.android.internal.R.string.usb_supplying_notification_title;
+                        id = SystemMessage.NOTE_USB_SUPPLYING;
                     } else {
-                        id = com.android.internal.R.string.usb_charging_notification_title;
+                        titleRes = com.android.internal.R.string.usb_charging_notification_title;
+                        id = SystemMessage.NOTE_USB_CHARGING;
                     }
                 } else if (UsbManager.containsFunction(mCurrentFunctions,
                         UsbManager.USB_FUNCTION_MTP)) {
-                    id = com.android.internal.R.string.usb_mtp_notification_title;
+                    titleRes = com.android.internal.R.string.usb_mtp_notification_title;
+                    id = SystemMessage.NOTE_USB_MTP;
                 } else if (UsbManager.containsFunction(mCurrentFunctions,
                         UsbManager.USB_FUNCTION_PTP)) {
-                    id = com.android.internal.R.string.usb_ptp_notification_title;
+                    titleRes = com.android.internal.R.string.usb_ptp_notification_title;
+                    id = SystemMessage.NOTE_USB_PTP;
                 } else if (UsbManager.containsFunction(mCurrentFunctions,
                         UsbManager.USB_FUNCTION_MIDI)) {
-                    id = com.android.internal.R.string.usb_midi_notification_title;
+                    titleRes = com.android.internal.R.string.usb_midi_notification_title;
+                    id = SystemMessage.NOTE_USB_MIDI;
                 } else if (UsbManager.containsFunction(mCurrentFunctions,
                         UsbManager.USB_FUNCTION_ACCESSORY)) {
-                    id = com.android.internal.R.string.usb_accessory_notification_title;
+                    titleRes = com.android.internal.R.string.usb_accessory_notification_title;
+                    id = SystemMessage.NOTE_USB_ACCESSORY;
                 } else if (mSourcePower) {
-                    id = com.android.internal.R.string.usb_supplying_notification_title;
+                    titleRes = com.android.internal.R.string.usb_supplying_notification_title;
+                    id = SystemMessage.NOTE_USB_SUPPLYING;
                 } else {
-                    id = com.android.internal.R.string.usb_charging_notification_title;
+                    titleRes = com.android.internal.R.string.usb_charging_notification_title;
+                    id = SystemMessage.NOTE_USB_CHARGING;
                 }
             } else if (mSourcePower) {
-                id = com.android.internal.R.string.usb_supplying_notification_title;
+                titleRes = com.android.internal.R.string.usb_supplying_notification_title;
+                id = SystemMessage.NOTE_USB_SUPPLYING;
             } else if (mHostConnected && mSinkPower && mUsbCharging) {
-                id = com.android.internal.R.string.usb_charging_notification_title;
+                titleRes = com.android.internal.R.string.usb_charging_notification_title;
+                id = SystemMessage.NOTE_USB_CHARGING;
             }
             if (id != mUsbNotificationId) {
                 // clear notification if title needs changing
@@ -989,7 +999,7 @@ public class UsbDeviceManager {
                 if (id != 0) {
                     CharSequence message = r.getText(
                             com.android.internal.R.string.usb_notification_message);
-                    CharSequence title = r.getText(id);
+                    CharSequence title = r.getText(titleRes);
 
                     Intent intent = Intent.makeRestartActivityTask(
                             new ComponentName("com.android.settings",
@@ -1021,7 +1031,7 @@ public class UsbDeviceManager {
 
         private void updateAdbNotification() {
             if (mNotificationManager == null) return;
-            final int id = com.android.internal.R.string.adb_active_notification_title;
+            final int id = SystemMessage.NOTE_ADB_ACTIVE;
             if (mAdbEnabled && mConnected) {
                 if ("0".equals(SystemProperties.get("persist.adb.notify"))) return;
 
