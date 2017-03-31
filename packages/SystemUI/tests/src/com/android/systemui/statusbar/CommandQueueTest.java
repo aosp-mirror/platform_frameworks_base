@@ -229,10 +229,10 @@ public class CommandQueueTest extends SysuiTestCase {
     }
 
     @Test
-    public void testShowTvPipMenu() {
-        mCommandQueue.showTvPictureInPictureMenu();
+    public void testShowPipMenu() {
+        mCommandQueue.showPictureInPictureMenu();
         waitForIdleSync();
-        verify(mCallbacks).showTvPictureInPictureMenu();
+        verify(mCallbacks).showPictureInPictureMenu();
     }
 
     @Test

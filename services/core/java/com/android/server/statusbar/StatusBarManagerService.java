@@ -266,10 +266,10 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
         }
 
         @Override
-        public void showTvPictureInPictureMenu() {
+        public void showPictureInPictureMenu() {
             if (mBar != null) {
                 try {
-                    mBar.showTvPictureInPictureMenu();
+                    mBar.showPictureInPictureMenu();
                 } catch (RemoteException ex) {}
             }
         }

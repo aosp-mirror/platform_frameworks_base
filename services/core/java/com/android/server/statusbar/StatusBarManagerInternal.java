@@ -38,9 +38,9 @@ public interface StatusBarManagerInternal {
     void toggleKeyboardShortcutsMenu(int deviceId);
 
     /**
-     * Show TV picture-in-picture menu.
+     * Show picture-in-picture menu.
      */
-    void showTvPictureInPictureMenu();
+    void showPictureInPictureMenu();
 
     void setWindowState(int window, int state);
 

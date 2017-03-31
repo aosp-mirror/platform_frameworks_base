@@ -138,6 +138,7 @@ import com.android.systemui.doze.DozeLog;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.fragments.PluginFragmentListener;
 import com.android.systemui.keyguard.KeyguardViewMediator;
+import com.android.systemui.pip.phone.PipManager;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper.SnoozeOption;
@@ -4949,11 +4950,6 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mLaunchCameraOnScreenTurningOn = true;
             }
         }
-    }
-
-    @Override
-    public void showTvPictureInPictureMenu() {
-        // no-op.
     }
 
     public void notifyFpAuthModeChanged() {
