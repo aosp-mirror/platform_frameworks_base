@@ -1032,12 +1032,13 @@ public class UsbDeviceManager {
         private void updateAdbNotification() {
             if (mNotificationManager == null) return;
             final int id = SystemMessage.NOTE_ADB_ACTIVE;
+            final int titleRes = com.android.internal.R.string.adb_active_notification_title;
             if (mAdbEnabled && mConnected) {
                 if ("0".equals(SystemProperties.get("persist.adb.notify"))) return;
 
                 if (!mAdbNotificationShown) {
                     Resources r = mContext.getResources();
-                    CharSequence title = r.getText(id);
+                    CharSequence title = r.getText(titleRes);
                     CharSequence message = r.getText(
                             com.android.internal.R.string.adb_active_notification_message);
 
