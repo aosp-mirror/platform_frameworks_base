@@ -58,6 +58,8 @@ import org.hamcrest.Matcher;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatcher;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.mockito.hamcrest.MockitoHamcrest;
 
@@ -731,6 +733,14 @@ public class ShortcutManagerTestUtils {
             }
         }
         fail("Timed out for: " + message);
+    }
+
+    public static final <T> T anyOrNull(Class<T> clazz) {
+        return ArgumentMatchers.argThat(value -> true);
+    }
+
+    public static final String anyStringOrNull() {
+        return ArgumentMatchers.argThat(value -> true);
     }
 
     public static ShortcutListAsserter assertWith(List<ShortcutInfo> list) {

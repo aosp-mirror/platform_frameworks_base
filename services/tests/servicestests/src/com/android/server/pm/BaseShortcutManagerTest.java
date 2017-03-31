@@ -15,6 +15,8 @@
  */
 package com.android.server.pm;
 
+import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.anyOrNull;
+import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.anyStringOrNull;
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.cloneShortcutList;
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.hashSet;
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.list;
@@ -884,7 +886,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
                     entryName = ShortcutInfo.getResourceEntryName(entryName);
                 }
                 return Integer.parseInt(entryName.substring(1)) + ressIdOffset;
-            }).when(res).getIdentifier(anyString(), anyString(), anyString());
+            }).when(res).getIdentifier(anyStringOrNull(), anyStringOrNull(), anyStringOrNull());
             return res;
         }).when(mMockPackageManager).getResourcesForApplicationAsUser(anyString(), anyInt());
     }
@@ -1612,7 +1614,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
                 eq(packageName),
                 eq(userId),
                 intentsCaptor.capture(),
-                any(Bundle.class));
+                anyOrNull(Bundle.class));
         return intentsCaptor.getValue();
     }
 
@@ -1671,7 +1673,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
                 anyString(),
                 anyInt(),
                 any(Intent[].class),
-                any(Bundle.class));
+                anyOrNull(Bundle.class));
     }
 
     protected void assertStartShortcutThrowsException(@NonNull String packageName,

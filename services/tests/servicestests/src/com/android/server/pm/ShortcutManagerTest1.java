@@ -15,6 +15,8 @@
  */
 package com.android.server.pm;
 
+import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.anyOrNull;
+import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.anyStringOrNull;
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertAllChooser;
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertAllDisabled;
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertAllDynamic;
@@ -2832,7 +2834,8 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
             // Not launchable.
             doReturn(ActivityManager.START_CLASS_NOT_FOUND)
                     .when(mMockActivityManagerInternal).startActivitiesAsPackage(
-                            anyString(), anyInt(), any(Intent[].class), any(Bundle.class));
+                            anyStringOrNull(), anyInt(),
+                            anyOrNull(Intent[].class), anyOrNull(Bundle.class));
             assertStartShortcutThrowsException(CALLING_PACKAGE_1, "s1", USER_0,
                     ActivityNotFoundException.class);
 
@@ -2840,7 +2843,8 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
             doReturn(ActivityManager.START_CLASS_NOT_FOUND)
                     .when(mMockActivityManagerInternal)
                     .startActivitiesAsPackage(
-                            anyString(), anyInt(), any(Intent[].class), any(Bundle.class));
+                            anyStringOrNull(), anyInt(),
+                            anyOrNull(Intent[].class), anyOrNull(Bundle.class));
             assertStartShortcutThrowsException(CALLING_PACKAGE_1, "s1", USER_0,
                     ActivityNotFoundException.class);
         });
