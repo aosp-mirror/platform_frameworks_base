@@ -15,6 +15,7 @@
  */
 package com.android.server.pm;
 
+import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.anyOrNull;
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertExpectException;
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertForLauncherCallbackNoThrow;
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertWith;
@@ -775,7 +776,7 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
                     /* resultIntent=*/ null));
 
             // The intent should be sent right away.
-            verify(mServiceContext, times(1)).sendIntentSender(any(IntentSender.class));
+            verify(mServiceContext, times(1)).sendIntentSender(anyOrNull(IntentSender.class));
         });
     }
 
