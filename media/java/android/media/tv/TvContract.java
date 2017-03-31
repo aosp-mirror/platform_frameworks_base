@@ -572,6 +572,36 @@ public final class TvContract {
      * @hide
      */
     interface ProgramColumns {
+        /** @hide */
+        @IntDef({
+                REVIEW_RATING_STYLE_STARS,
+                REVIEW_RATING_STYLE_THUMBS_UP_DOWN,
+                REVIEW_RATING_STYLE_PERCENTAGE,
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        @interface ReviewRatingStyle {}
+
+        /**
+         * The review rating style for five star rating.
+         *
+         * @see #COLUMN_REVIEW_RATING_STYLE
+         */
+        int REVIEW_RATING_STYLE_STARS = 0;
+
+        /**
+         * The review rating style for thumbs-up and thumbs-down rating.
+         *
+         * @see #COLUMN_REVIEW_RATING_STYLE
+         */
+        int REVIEW_RATING_STYLE_THUMBS_UP_DOWN = 1;
+
+        /**
+         * The review rating style for 0 to 100 point system.
+         *
+         * @see #COLUMN_REVIEW_RATING_STYLE
+         */
+        int REVIEW_RATING_STYLE_PERCENTAGE = 2;
+
         /**
          * The title of this TV program.
          *
@@ -834,6 +864,33 @@ public final class TvContract {
          * <p>Type: INTEGER
          */
         String COLUMN_VERSION_NUMBER = "version_number";
+
+        /**
+         * The review rating score style used for {@link #COLUMN_REVIEW_RATING}.
+         *
+         * <p> The value should match one of the followings: {@link #REVIEW_RATING_STYLE_STARS},
+         * {@link #REVIEW_RATING_STYLE_THUMBS_UP_DOWN}, and {@link #REVIEW_RATING_STYLE_PERCENTAGE}.
+         *
+         * <p>Type: INTEGER
+         * @see #COLUMN_REVIEW_RATING
+         */
+        String COLUMN_REVIEW_RATING_STYLE = "review_rating_style";
+
+        /**
+         * The review rating score for this program.
+         *
+         * <p>The format of the value is dependent on {@link #COLUMN_REVIEW_RATING_STYLE}. If the
+         * style is {@link #REVIEW_RATING_STYLE_STARS}, the value should be a real number between
+         * 0.0 and 5.0. (e.g. "4.5") If the style is {@link #REVIEW_RATING_STYLE_THUMBS_UP_DOWN},
+         * the value should be two integers, one for thumbs-up count and the other for thumbs-down
+         * count, with a comma between them. (e.g. "200,40") If the style is
+         * {@link #REVIEW_RATING_STYLE_PERCENTAGE}, the value shoule be a real number between 0 and
+         * 100. (e.g. "99.9")
+         *
+         * <p>Type: TEXT
+         * @see #COLUMN_REVIEW_RATING_STYLE
+         */
+        String COLUMN_REVIEW_RATING = "review_rating";
     }
 
     /**
@@ -1078,36 +1135,6 @@ public final class TvContract {
          * @see #COLUMN_INTERACTION_TYPE
          */
         int INTERACTION_TYPE_VIEWERS = 6;
-
-        /** @hide */
-        @IntDef({
-                REVIEW_RATING_STYLE_STARS,
-                REVIEW_RATING_STYLE_THUMBS_UP_DOWN,
-                REVIEW_RATING_STYLE_PERCENTAGE,
-        })
-        @Retention(RetentionPolicy.SOURCE)
-        public @interface ReviewRatingStyle {}
-
-        /**
-         * The review rating style for five star rating.
-         *
-         * @see #COLUMN_REVIEW_RATING_STYLE
-         */
-        int REVIEW_RATING_STYLE_STARS = 0;
-
-        /**
-         * The review rating style for thumbs-up and thumbs-down rating.
-         *
-         * @see #COLUMN_REVIEW_RATING_STYLE
-         */
-        int REVIEW_RATING_STYLE_THUMBS_UP_DOWN = 1;
-
-        /**
-         * The review rating style for 0 to 100 point system.
-         *
-         * @see #COLUMN_REVIEW_RATING_STYLE
-         */
-        int REVIEW_RATING_STYLE_PERCENTAGE = 2;
 
         /**
          * The type of this program content.
@@ -1356,33 +1383,6 @@ public final class TvContract {
          * <p>Type: TEXT
          */
         String COLUMN_AUTHOR = "author";
-
-        /**
-         * The review rating score style used for {@link #COLUMN_REVIEW_RATING}.
-         *
-         * <p> The value should match one of the followings: {@link #REVIEW_RATING_STYLE_STARS},
-         * {@link #REVIEW_RATING_STYLE_THUMBS_UP_DOWN}, and {@link #REVIEW_RATING_STYLE_PERCENTAGE}.
-         *
-         * <p>Type: INTEGER
-         * @see #COLUMN_REVIEW_RATING
-         */
-        String COLUMN_REVIEW_RATING_STYLE = "review_rating_style";
-
-        /**
-         * The review rating score for this program.
-         *
-         * <p>The format of the value is dependent on {@link #COLUMN_REVIEW_RATING_STYLE}. If the
-         * style is {@link #REVIEW_RATING_STYLE_STARS}, the value should be a real number between
-         * 0.0 and 5.0. (e.g. "4.5") If the style is {@link #REVIEW_RATING_STYLE_THUMBS_UP_DOWN},
-         * the value should be two integers, one for thumbs-up count and the other for thumbs-down
-         * count, with a comma between them. (e.g. "200,40") If the style is
-         * {@link #REVIEW_RATING_STYLE_PERCENTAGE}, the value shoule be a real number between 0 and
-         * 100. (e.g. "99.9")
-         *
-         * <p>Type: TEXT
-         * @see #COLUMN_REVIEW_RATING_STYLE
-         */
-        String COLUMN_REVIEW_RATING = "review_rating";
 
         /**
          * The flag indicating whether this TV program is browsable or not.
