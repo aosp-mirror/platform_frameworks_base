@@ -89,17 +89,24 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"ਪ੍ਰਤਿਬੰਧਿਤ ਨਾ ਕਰਨ ਲਈ ਕਾਲਰ ID ਡਿਫੌਲਟਸ। ਅਗਲੀ ਕਾਲ: ਪ੍ਰਤਿਬੰਧਿਤ ਨਹੀਂ"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"ਸੇਵਾ ਪ੍ਰਬੰਧਿਤ ਨਹੀਂ ਹੈ।"</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"ਤੁਸੀਂ ਕਾਲਰ ID ਸੈਟਿੰਗ ਨਹੀਂ ਬਦਲ ਸਕਦੇ।"</string>
-    <string name="RestrictedOnData" msgid="8653794784690065540">"ਡੈਟਾ ਸੇਵਾ ਬਲੌਕ ਕੀਤੀ ਹੋਈ ਹੈ।"</string>
-    <string name="RestrictedOnEmergency" msgid="6581163779072833665">"ਐਮਰਜੈਂਸੀ ਸੇਵਾ ਬਲੌਕ ਕੀਤੀ ਹੋਈ ਹੈ।"</string>
-    <string name="RestrictedOnNormal" msgid="4953867011389750673">"ਵੌਇਸ ਸੇਵਾ ਬਲੌਕ ਕੀਤੀ ਹੋਈ ਹੈ।"</string>
-    <string name="RestrictedOnAllVoice" msgid="3396963652108151260">"ਸਾਰੀਆਂ ਵੌਇਸ ਸੇਵਾਵਾਂ ਬਲੌਕ ਕੀਤੀਆਂ ਗਈਆਂ ਹਨ।"</string>
-    <string name="RestrictedOnSms" msgid="8314352327461638897">"SMS ਸੇਵਾ ਬੰਦ ਕੀਤੀ ਹੋਈ ਹੈ।"</string>
-    <string name="RestrictedOnVoiceData" msgid="996636487106171320">"ਵੌਇਸ/ਡੈਟਾ ਸੇਵਾਵਾਂ ਬਲੌਕ ਕੀਤੀਆਂ ਹੋਈਆਂ ਹਨ।"</string>
-    <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"ਵੌਇਸ/SMS ਸੇਵਾਵਾਂ ਬਲੌਕ ਕੀਤੀਆਂ ਗਈਆਂ ਹਨ।"</string>
-    <string name="RestrictedOnAll" msgid="5643028264466092821">"ਸਾਰੀਆਂ ਵੌਇਸ/ਡੈਟਾ/SMS ਸੇਵਾਵਾਂ ਬਲੌਕ ਕੀਤੀਆਂ ਗਈਆਂ ਹਨ।"</string>
-    <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"ਨੈੱਟਵਰਕ ਤੱਕ ਪਹੁੰਚ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ"</string>
-    <!-- no translation found for NetworkPreferenceSwitchSummary (4164230263214915351) -->
+    <!-- no translation found for RestrictedOnDataTitle (1322504692764166532) -->
     <skip />
+    <!-- no translation found for RestrictedOnEmergencyTitle (1236071219598685236) -->
+    <skip />
+    <!-- no translation found for RestrictedOnNormalTitle (3179574012752700984) -->
+    <skip />
+    <!-- no translation found for RestrictedOnAllVoiceTitle (158800171499150681) -->
+    <skip />
+    <!-- no translation found for RestrictedOnDataContent (8997474569390996587) -->
+    <skip />
+    <!-- no translation found for RestrictedOnEmergencyContent (4573217945494650061) -->
+    <skip />
+    <!-- no translation found for RestrictedOnNormalContent (1579434198284512182) -->
+    <skip />
+    <!-- no translation found for RestrictedOnAllVoiceContent (5243580774142557047) -->
+    <skip />
+    <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"ਨੈੱਟਵਰਕ ਤੱਕ ਪਹੁੰਚ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ"</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"ਸਿਗਨਲ ਪ੍ਰਾਪਤੀ ਨੂੰ ਬਿਹਤਰ ਬਣਾਉਣ ਲਈ, ਸਿਸਟਮ &gt; ਨੈੱਟਵਰਕ ਅਤੇ ਇੰਟਰਨੈੱਟ &gt; ਮੋਬਾਈਲ ਨੈੱਟਵਰਕ &gt; ਤਰਜੀਹੀ ਨੈੱਟਵਰਕ ਦੀ ਕਿਸਮ \'ਤੇ ਚੁਣੀ ਗਈ ਕਿਸਮ ਨੂੰ ਬਦਲਣ ਦੀ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"ਪੀਅਰ ਨੇ TTY Mode FULL ਦੀ ਬੇਨਤੀ ਕੀਤੀ"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"ਪੀਅਰ ਨੇ TTY Mode HCO ਦੀ ਬੇਨਤੀ ਕੀਤੀ"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"ਪੀਅਰ ਨੇ TTY Mode VCO ਦੀ ਬੇਨਤੀ ਕੀਤੀ"</string>
@@ -139,8 +146,7 @@
   </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"ਬੰਦ"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"ਤਰਜੀਹੀ Wi-Fi"</string>
-    <!-- no translation found for wfc_mode_cellular_preferred_summary (1988279625335345908) -->
-    <skip />
+    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"ਮੋਬਾਈਲ ਨੂੰ ਤਰਜੀਹ ਹੈ"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"ਕੇਵਲ Wi-Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ਅੱਗੇ ਨਹੀਂ ਭੇਜਿਆ ਗਿਆ"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -178,18 +184,21 @@
       <item quantity="other">ਪ੍ਰਮਾਣ-ਪੱਤਰ ਅਥਾਰਿਟੀਆਂ ਸਥਾਪਤ ਕੀਤੀਆਂ ਗਈਆਂ</item>
     </plurals>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"ਇੱਕ ਅਗਿਆਤ ਤੀਜੀ ਪਾਰਟੀ ਵੱਲੋਂ"</string>
-    <string name="ssl_ca_cert_noti_by_administrator" msgid="550758088185764312">"ਤੁਹਾਡੇ ਕੰਮ ਪ੍ਰੋਫਾਈਲ ਪ੍ਰਬੰਧਕ ਵੱਲੋਂ"</string>
+    <!-- no translation found for ssl_ca_cert_noti_by_administrator (3541729986326153557) -->
+    <skip />
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"<xliff:g id="MANAGING_DOMAIN">%s</xliff:g> ਮੁਤਾਬਕ"</string>
     <string name="work_profile_deleted" msgid="5005572078641980632">"ਕੰਮ ਪ੍ਰੋਫਾਈਲ ਮਿਟਾਈ ਗਈ"</string>
-    <string name="work_profile_deleted_description" msgid="6305147513054341102">"ਕੰਮ ਪ੍ਰੋਫਾਈਲ ਐਡਮਿਨ ਐਪ ਦੇ ਕਾਰਨ ਮਿਟਾਈ ਗਈ।"</string>
-    <string name="work_profile_deleted_details" msgid="226615743462361248">"ਕੰਮ ਪ੍ਰੋਫਾਈਲ ਐਡਮਿਨ ਐਪ ਜਾਂ ਤਾਂ ਲੁਪਤ ਹੈ ਜਾਂ ਕਰਪਟ ਹੈ। ਇੱਕ ਸਿੱਟੇ ਦੇ ਤੌਰ ਤੇ, ਤੁਹਾਡੀ ਕੰਮ ਪ੍ਰੋਫਾਈਲ ਅਤੇ ਸੰਬੰਧਿਤ ਡੈਟਾ ਮਿਟਾਇਆ ਗਿਆ ਹੈ। ਸਹਾਇਤਾ ਲਈ ਆਪਣੇ ਪ੍ਰਬੰਧਕ ਨੂੰ ਸੰਪਰਕ ਕਰੋ।"</string>
-    <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"ਤੁਹਾਡੀ ਕੰਮ ਪ੍ਰੋਫਾਈਲ ਹੁਣ ਇਸ ਡੀਵਾਈਸ ਤੇ ਉਪਲਬਧ ਨਹੀਂ ਹੈ।"</string>
-    <!-- no translation found for network_logging_notification_title (6399790108123704477) -->
+    <!-- no translation found for work_profile_deleted_description (1100529432509639864) -->
     <skip />
-    <!-- no translation found for network_logging_notification_text (7930089249949354026) -->
+    <!-- no translation found for work_profile_deleted_details (6307630639269092360) -->
     <skip />
+    <!-- no translation found for work_profile_deleted_description_dpm_wipe (8823792115612348820) -->
+    <skip />
+    <string name="network_logging_notification_title" msgid="6399790108123704477">"ਡੀਵਾਈਸ ਪ੍ਰਬੰਧਨ ਅਧੀਨ ਹੈ"</string>
+    <string name="network_logging_notification_text" msgid="7930089249949354026">"ਤੁਹਾਡਾ ਸੰਗਠਨ ਇਸ ਡੀਵਾਈਸ ਦਾ ਪ੍ਰਬੰਧਨ ਕਰਦਾ ਹੈ ਅਤੇ ਨੈੱਟਵਰਕ ਟਰੈਫਿਕ ਦੀ ਨਿਗਰਾਨੀ ਕਰ ਸਕਦਾ ਹੈ। ਵੇਰਵਿਆਂ ਲਈ ਟੈਪ ਕਰੋ।"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"ਤੁਹਾਡੀ ਡੀਵਾਈਸ ਮਿਟਾਈ ਜਾਏਗੀ"</string>
-    <string name="factory_reset_message" msgid="4905025204141900666">"ਐਡਮਿਨ ਐਪ ਲੁਪਤ ਕੰਪੋਨੈਂਟ ਜਾਂ ਕਰਪਟ ਹੈ ਅਤੇ ਇਸਦੀ ਵਰਤੋਂ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ। ਹੁਣ ਤੁਹਾਡੀ ਡੀਵਾਈਸ ਮਿਟਾ ਦਿੱਤੀ ਜਾਏਗੀ। ਸਹਾਇਤਾ ਲਈ ਆਪਣੇ ਪ੍ਰਬੰਧਕ ਨੂੰ ਸੰਪਰਕ ਕਰੋ।"</string>
+    <!-- no translation found for factory_reset_message (7972496262232832457) -->
+    <skip />
     <string name="me" msgid="6545696007631404292">"ਮੈਂ"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"ਟੈਬਲੇਟ ਚੋਣਾਂ"</string>
     <string name="power_dialog" product="tv" msgid="6153888706430556356">"TV ਚੋਣਾਂ"</string>
@@ -551,7 +560,8 @@
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"ਐਪ ਨੂੰ ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ ਕੌਂਫਿਗਰੇਸ਼ਨ ਨੂੰ ਪੜ੍ਹਨ ਅਤੇ ਲਿਖਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"ਪਾਸਵਰਡ ਨਿਯਮ ਸੈੱਟ ਕਰੋ"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"ਸਕ੍ਰੀਨ ਲੌਕ ਪਾਸਵਰਡਾਂ ਅਤੇ PIN ਵਿੱਚ ਆਗਿਆ ਦਿੱਤੀ ਲੰਮਾਈ ਅਤੇ ਅੱਖਰਾਂ ਤੇ ਨਿਯੰਤਰਣ ਪਾਓ।"</string>
-    <string name="policylab_watchLogin" msgid="914130646942199503">"ਸਕ੍ਰੀਨ-ਅਨਲੌਕ ਸੈਟਿੰਗਾਂ ਦਾ ਨਿਰੀਖਣ ਕਰੋ"</string>
+    <!-- no translation found for policylab_watchLogin (5091404125971980158) -->
+    <skip />
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"ਸਕ੍ਰੀਨ ਨੂੰ ਅਨਲੌਕ ਕਰਦੇ ਸਮੇਂ ਟਾਈਪ ਕੀਤੇ ਗ਼ਲਤ ਪਾਸਵਰਡਾਂ ਦੀ ਸੰਖਿਆ ਦਾ ਨਿਰੀਖਣ ਕਰੋ ਅਤੇ ਟੈਬਲੇਟ ਨੂੰ ਲੌਕ ਕਰੋ ਜਾਂ ਟੈਬਲੇਟ ਦਾ ਸਾਰਾ ਡੈਟਾ ਮਿਟਾਓ ਜੇਕਰ ਬਹੁਤ ਜ਼ਿਆਦਾ ਗ਼ਲਤ ਪਾਸਵਰਡ ਟਾਈਪ ਕੀਤੇ ਹਨ।"</string>
     <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"ਸਕ੍ਰੀਨ ਨੂੰ ਅਨਲੌਕ ਕਰਦੇ ਸਮੇਂ ਟਾਈਪ ਕੀਤੇ ਗ਼ਲਤ ਪਾਸਵਰਡਾਂ ਦੀ ਸੰਖਿਆ ਦਾ ਨਿਰੀਖਣ ਕਰੋ ਅਤੇ TV ਨੂੰ ਲੌਕ ਕਰੋ ਜਾਂ TV ਦਾ ਸਾਰਾ ਡੈਟਾ ਮਿਟਾਓ ਜੇਕਰ ਬਹੁਤ ਜ਼ਿਆਦਾ ਗ਼ਲਤ ਪਾਸਵਰਡ ਟਾਈਪ ਕੀਤੇ ਹਨ।"</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"ਸਕ੍ਰੀਨ ਨੂੰ ਅਨਲੌਕ ਕਰਦੇ ਸਮੇਂ ਟਾਈਪ ਕੀਤੇ ਗ਼ਲਤ ਪਾਸਵਰਡਾਂ ਦੀ ਸੰਖਿਆ ਦਾ ਨਿਰੀਖਣ ਕਰੋ ਅਤੇ ਫੋਨ ਨੂੰ ਲੌਕ ਕਰੋ ਜਾਂ ਫੋਨ ਦਾ ਸਾਰਾ ਡੈਟਾ ਮਿਟਾਓ ਜੇਕਰ ਬਹੁਤ ਜ਼ਿਆਦਾ ਗ਼ਲਤ ਪਾਸਵਰਡ ਟਾਈਪ ਕੀਤੇ ਹਨ।"</string>
@@ -970,8 +980,7 @@
     <string name="selectTextMode" msgid="1018691815143165326">"ਟੈਕਸਟ ਚੁਣੋ"</string>
     <string name="undo" msgid="7905788502491742328">"ਅਣਕੀਤਾ ਕਰੋ"</string>
     <string name="redo" msgid="7759464876566803888">"ਮੁੜ-ਓਹੀ ਕਰੋ"</string>
-    <!-- no translation found for autofill (3035779615680565188) -->
-    <skip />
+    <string name="autofill" msgid="3035779615680565188">"ਆਟੋਫਿਲ"</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"ਟੈਕਸਟ ਚੋਣ"</string>
     <string name="addToDictionary" msgid="4352161534510057874">"ਸ਼ਬਦਕੋਸ਼ ਵਿੱਚ ਜੋੜੋ"</string>
     <string name="deleteText" msgid="6979668428458199034">"ਮਿਟਾਓ"</string>
@@ -1103,7 +1112,13 @@
     <string name="network_switch_metered" msgid="4671730921726992671">"ਬਦਲਕੇ <xliff:g id="NETWORK_TYPE">%1$s</xliff:g> ਲਿਆਂਦਾ ਗਿਆ"</string>
     <string name="network_switch_metered_detail" msgid="5325661434777870353">"<xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> ਦੀ ਇੰਟਰਨੈੱਟ \'ਤੇ ਪਹੁੰਚ ਨਾ ਹੋਣ \'ਤੇ ਡੀਵਾਈਸ <xliff:g id="NEW_NETWORK">%1$s</xliff:g> ਦੀ ਵਰਤੋਂ ਕਰਦੀ ਹੈ। ਖਰਚੇ ਲਾਗੂ ਹੋ ਸਕਦੇ ਹਨ।"</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> ਤੋਂ ਬਦਲਕੇ <xliff:g id="NEW_NETWORK">%2$s</xliff:g> \'ਤੇ ਕੀਤਾ ਗਿਆ"</string>
-    <!-- no translation found for network_switch_type_name:0 (3979506840912951943) -->
+  <string-array name="network_switch_type_name">
+    <item msgid="3979506840912951943">"ਮੋਬਾਈਲ ਡੈਟਾ"</item>
+    <item msgid="75483255295529161">"Wi-Fi"</item>
+    <item msgid="6862614801537202646">"ਬਲੂਟੁੱਥ"</item>
+    <item msgid="5447331121797802871">"ਈਥਰਨੈੱਟ"</item>
+    <item msgid="8257233890381651999">"VPN"</item>
+  </string-array>
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"ਇੱਕ ਅਗਿਆਤ ਨੈੱਟਵਰਕ ਕਿਸਮ"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Wi-Fi ਨਾਲ ਕਨੈਕਟ ਨਹੀਂ ਕਰ ਸਕਿਆ"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" ਇਸਦਾ ਇੱਕ ਖ਼ਰਾਬ ਇੰਟਰਨੈਟ ਕਨੈਕਸ਼ਨ ਹੈ।"</string>
@@ -1174,7 +1189,8 @@
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"ਬੱਗ ਰਿਪਰੋਟ ਪ੍ਰਾਪਤ ਕੀਤੀ ਜਾ ਰਹੀ ਹੈ..."</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"ਕੀ ਬੱਗ ਰਿਪੋਰਟ ਸਾਂਝੀ ਕਰਨੀ ਹੈ?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"ਬੱਗ ਰਿਪੋਰਟ ਸਾਂਝੀ ਕੀਤੀ ਜਾ ਰਹੀ ਹੈ…"</string>
-    <string name="share_remote_bugreport_notification_message_finished" msgid="8610614010660772643">"ਤੁਹਾਡੇ IT ਪ੍ਰਸ਼ਾਸਕ ਨੇ ਇਸ ਡੀਵਾਈਸ ਦੀ ਸਮੱਸਿਆ ਨੂੰ ਠੀਕ ਕਰਨ ਵਿੱੱਚ ਮਦਦ ਲਈ ਬੱਗ ਰਿਪੋਰਟ ਦੀ ਬੇਨਤੀ ਕੀਤੀ ਹੈ। ਐਪਾਂ ਅਤੇ ਡੈਟੇ ਨੂੰ ਸਾਂਝਾ ਕੀਤਾ ਜਾ ਸਕਦਾ ਹੈ।"</string>
+    <!-- no translation found for share_remote_bugreport_notification_message_finished (6029609949340992866) -->
+    <skip />
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"ਸਾਂਝਾ ਕਰੋ"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"ਅਸਵੀਕਾਰ ਕਰੋ"</string>
     <string name="select_input_method" msgid="8547250819326693584">"ਕੀ-ਬੋਰਡ ਬਦਲੋ"</string>
@@ -1360,8 +1376,7 @@
     <string name="data_usage_warning_body" msgid="6660692274311972007">"ਵਰਤੋਂ ਅਤੇ ਸੈਟਿੰਗਾਂ ਨੂੰ ਵੇਖਣ ਲਈ ਟੈਪ ਕਰੋ।"</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"2G-3G ਡੈਟਾ ਸੀਮਾ ਪੂਰੀ ਹੋ ਗਈ"</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"4G ਡੈਟਾ ਸੀਮਾ ਪੂਰੀ ਹੋਈ"</string>
-    <!-- no translation found for data_usage_mobile_limit_title (6561099244084267376) -->
-    <skip />
+    <string name="data_usage_mobile_limit_title" msgid="6561099244084267376">"ਮੋਬਾਈਲ ਡੈਟਾ ਸੀਮਾ ਸਮਾਪਤ ਹੋਈ"</string>
     <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"Wi-Fi ਡੈਟਾ ਸੀਮਾ ਪੂਰੀ ਹੋ ਗਈ"</string>
     <string name="data_usage_limit_body" msgid="291731708279614081">"ਬਾਕੀ ਸਾਇਕਲ ਲਈ ਡੈਟਾ ਰੁਕ ਗਿਆ"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"2G-3G ਡੈਟਾ ਸੀਮਾ ਵਧ ਗਈ"</string>
@@ -1460,18 +1475,29 @@
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"ਹਟਾਓ"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"ਕੀ ਵੌਲਿਊਮ ਸਿਫਾਰਿਸ਼ ਕੀਤੇ ਪੱਧਰ ਤੋਂ ਵਧਾਉਣੀ ਹੈ?\n\nਲੰਮੇ ਸਮੇਂ ਤੱਕ ਉੱਚ ਵੌਲਿਊਮ ਤੇ ਸੁਣਨ ਨਾਲ ਤੁਹਾਡੀ ਸੁਣਨ ਸ਼ਕਤੀ ਨੂੰ ਨੁਕਸਾਨ ਪਹੁੰਚ ਸਕਦਾ ਹੈ।"</string>
-    <string name="accessibility_shortcut_warning_dialog_title" msgid="5998592821749881862">"ਪਹੁੰਚਯੋਗਤਾ ਸ਼ਾਰਟਕੱਟ ਚਾਲੂ ਹੈ"</string>
-    <string name="accessibility_shortcut_toogle_warning" msgid="2987297770937717543">"ਦੋਵੇਂ ਵੌਲਿਊਮ ਬਟਨਾਂ ਨੂੰ 3 ਸਕਿੰਟਾਂ ਲਈ ਦਬਾਕੇ ਰੱਖਣ ਦੁਆਰਾ <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ਨੂੰ ਚਾਲੂ ਜਾਂ ਬੰਦ ਕਰੋ।\n\nਤੁਸੀਂ ਸੈਟਿੰਗਾਂ &gt; ਪਹੁੰਚਯੋਗਤਾ ਵਿੱਚ ਜਾਕੇ ਸੇਵਾ ਨੂੰ ਬਦਲ ਸਕਦੇ ਹੋ।"</string>
-    <string name="disable_accessibility_shortcut" msgid="3683951963271793789">"ਸ਼ਾਰਟਕੱਟ ਬੰਦ ਕਰੋ"</string>
-    <string name="leave_accessibility_shortcut_on" msgid="8762106842437042969">"ਚਾਲੂ ਛੱਡੋ"</string>
+    <!-- no translation found for accessibility_shortcut_warning_dialog_title (8404780875025725199) -->
+    <skip />
+    <!-- no translation found for accessibility_shortcut_toogle_warning (7256507885737444807) -->
+    <skip />
+    <!-- no translation found for disable_accessibility_shortcut (627625354248453445) -->
+    <skip />
+    <!-- no translation found for leave_accessibility_shortcut_on (7653111894438512680) -->
+    <skip />
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"ਪਹੁੰਚਯੋਗਤਾ ਸ਼ਾਰਟਕੱਟ ਨੇ <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ਨੂੰ ਚਾਲੂ ਕੀਤਾ"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"ਪਹੁੰਚਯੋਗਤਾ ਸ਼ਾਰਟਕੱਟ ਨੇ <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ਨੂੰ ਬੰਦ ਕੀਤਾ"</string>
+    <!-- no translation found for accessibility_button_prompt_text (4234556536456854251) -->
+    <skip />
+    <!-- no translation found for accessibility_button_instructional_text (6942300463612999993) -->
+    <skip />
+    <!-- no translation found for accessibility_magnification_chooser_text (1227146738764986237) -->
+    <skip />
     <string name="user_switched" msgid="3768006783166984410">"ਮੌਜੂਦਾ ਉਪਭੋਗਤਾ <xliff:g id="NAME">%1$s</xliff:g>।"</string>
     <string name="user_switching_message" msgid="2871009331809089783">"<xliff:g id="NAME">%1$s</xliff:g> ਤੇ ਸਵਿਚ ਕਰ ਰਿਹਾ ਹੈ…"</string>
     <string name="user_logging_out_message" msgid="8939524935808875155">"<xliff:g id="NAME">%1$s</xliff:g> ਨੂੰ ਲਾਗ-ਆਉਟ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ …"</string>
     <string name="owner_name" msgid="2716755460376028154">"ਮਾਲਕ"</string>
     <string name="error_message_title" msgid="4510373083082500195">"ਅਸ਼ੁੱਧੀ"</string>
-    <string name="error_message_change_not_allowed" msgid="1347282344200417578">"ਤੁਹਾਡੇ ਪ੍ਰਬੰਧਕ ਵੱਲੋਂ ਇਸ ਬਦਲਾਵ ਦੀ ਆਗਿਆ ਨਹੀਂ ਹੈ।"</string>
+    <!-- no translation found for error_message_change_not_allowed (1238035947357923497) -->
+    <skip />
     <string name="app_not_found" msgid="3429141853498927379">"ਇਸ ਕਿਰਿਆ ਨੂੰ ਸੰਭਾਲਣ ਲਈ ਕੋਈ ਐਪਲੀਕੇਸ਼ਨ ਨਹੀਂ ਮਿਲੀ।"</string>
     <string name="revoke" msgid="5404479185228271586">"ਰੱਦ ਕਰੋ"</string>
     <string name="mediasize_iso_a0" msgid="1994474252931294172">"ISO A0"</string>
@@ -1563,7 +1589,8 @@
     <string name="reason_service_unavailable" msgid="7824008732243903268">"ਪ੍ਰਿੰਟ ਸੇਵਾ ਸਮਰਥਿਤ ਨਹੀਂ"</string>
     <string name="print_service_installed_title" msgid="2246317169444081628">"<xliff:g id="NAME">%s</xliff:g> ਸੇਵਾ ਇੰਸਟੌਲ ਕੀਤੀ"</string>
     <string name="print_service_installed_message" msgid="5897362931070459152">"ਸਮਰੱਥ ਬਣਾਉਣ ਲਈ ਟੈਪ ਕਰੋ"</string>
-    <string name="restr_pin_enter_admin_pin" msgid="783643731895143970">"ਪ੍ਰਬੰਧਕ PIN ਦਾਖਲ ਕਰੋ"</string>
+    <!-- no translation found for restr_pin_enter_admin_pin (8641662909467236832) -->
+    <skip />
     <string name="restr_pin_enter_pin" msgid="3395953421368476103">"PIN ਦਾਖਲ ਕਰੋ"</string>
     <string name="restr_pin_incorrect" msgid="8571512003955077924">"ਗ਼ਲਤ"</string>
     <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"ਮੌਜੂਦਾ PIN"</string>
@@ -1591,16 +1618,21 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"ਕੰਮ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"ਦੂਸਰੀ ਕਾਰਜ-ਸਥਾਨ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"ਤੀਸਰੀ ਕਾਰਜ-ਸਥਾਨ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="7693684144593484">"ਇਸ ਸਕ੍ਰੀਨ ਨੂੰ ਅਨਪਿੰਨ ਕਰਨ ਲਈ, \'ਪਿੱਛੇ\' ਅਤੇ \'ਰੂਪ-ਰੇਖਾ\' ਨੂੰ ਸਪੱਰਸ਼ ਕਰੋ ਅਤੇ ਦਬਾ ਕੇ ਰੱਖੋ।"</string>
-    <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"ਐਪ ਪਿੰਨਡ ਹੈ: ਇਸ ਡੀਵਾਈਸ ਤੇ ਅਨਪਿਨ ਕਰਨ ਦੀ ਆਗਿਆ ਨਹੀਂ ਹੈ।"</string>
+    <!-- no translation found for lock_to_app_toast (6820571533009838261) -->
+    <skip />
+    <!-- no translation found for lock_to_app_toast_locked (7849470948648628704) -->
+    <skip />
     <string name="lock_to_app_start" msgid="6643342070839862795">"ਸਕ੍ਰੀਨ ਪਿੰਨ ਕੀਤੀ"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"ਸਕ੍ਰੀਨ ਅਨਪਿਨ ਕੀਤੀ"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"ਅਨਪਿਨ ਕਰਨ ਤੋਂ ਪਹਿਲਾਂ PIN ਮੰਗੋ"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"ਅਨਪਿਨ ਕਰਨ ਤੋਂ ਪਹਿਲਾਂ ਅਨਲੌਕ ਪੈਟਰਨ ਵਾਸਤੇ ਪੁੱਛੋ"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"ਅਨਪਿਨ ਕਰਨ ਤੋਂ ਪਹਿਲਾਂ ਪਾਸਵਰਡ ਮੰਗੋ"</string>
-    <string name="package_installed_device_owner" msgid="8420696545959087545">"ਤੁਹਾਡੇ ਪ੍ਰਬੰਧਕ ਵੱਲੋਂ ਇੰਸਟੌਲ ਕੀਤਾ ਗਿਆ"</string>
-    <string name="package_updated_device_owner" msgid="8856631322440187071">"ਤੁਹਾਡੇ ਪ੍ਰਸ਼ਾਸਕ ਦੁਆਰਾ ਅਪਡੇਟ ਕੀਤਾ ਗਿਆ"</string>
-    <string name="package_deleted_device_owner" msgid="7650577387493101353">"ਤੁਹਾਡੇ ਪ੍ਰਬੰਧਕ ਵੱਲੋਂ ਮਿਟਾਇਆ ਗਿਆ"</string>
+    <!-- no translation found for package_installed_device_owner (6875717669960212648) -->
+    <skip />
+    <!-- no translation found for package_updated_device_owner (1847154566357862089) -->
+    <skip />
+    <!-- no translation found for package_deleted_device_owner (2307122077550236438) -->
+    <skip />
     <string name="battery_saver_description" msgid="1960431123816253034">"ਬੈਟਰੀ ਸਮਰੱਥਾ ਨੂੰ ਬਿਹਤਰ ਸਹਾਇਤਾ ਕਰਨ ਲਈ, ਬੈਟਰੀ ਸੇਵਰ ਤੁਹਾਡੀ ਡੀਵਾਈਸ ਦਾ ਪ੍ਰਦਰਸ਼ਨ ਘਟਾਉਂਦਾ ਹੈ ਅਤੇ ਵਾਈਬ੍ਰੇਸ਼ਨ, ਨਿਰਧਾਰਿਤ ਸਥਾਨ ਸੇਵਾਵਾਂ ਅਤੇ ਜ਼ਿਆਦਾਤਰ ਪਿਛੋਕੜ ਡੈਟਾ ਨੂੰ ਸੀਮਿਤ ਕਰਦਾ ਹੈ। ਈਮੇਲ, ਮੈਸੇਜਿੰਗ ਅਤੇ ਹੋਰ ਐਪਸ, ਜੋ ਸਿੰਕਿੰਗ ਤੇ ਨਿਰਭਰ ਹਨ, ਉਹ ਉਦੋਂ ਤੱਕ ਅਪਡੇਟ ਨਹੀਂ ਕੀਤੇ ਜਾ ਸਕਦੇ ਜਦੋਂ ਤੱਕ ਤੁਸੀਂ ਉਹਨਾਂ ਨੂੰ ਖੋਲ੍ਹਦੇ ਨਹੀਂ।\n\nਬੈਟਰੀ ਸੇਵਰ ਆਟੋਮੈਟਿਕਲੀ ਬੰਦ ਹੁੰਦਾ ਹੈ ਜਦੋਂ ਤੁਹਾਡੀ ਡੀਵਾਈਸ ਚਾਰਜ ਹੋ ਰਹੀ ਹੁੰਦੀ ਹੈ।"</string>
     <string name="data_saver_description" msgid="6015391409098303235">"ਡੈਟਾ ਉਪਯੋਗ ਘਟਾਉਣ ਵਿੱਚ ਮਦਦ ਲਈ, ਡੈਟਾ ਸੇਵਰ ਕੁਝ ਐਪਾਂ ਨੂੰ ਬੈਕਗ੍ਰਾਊਂਡ ਵਿੱਚ ਡੈਟਾ ਭੇਜਣ ਜਾਂ ਪ੍ਰਾਪਤ ਕਰਨ ਤੋਂ ਰੋਕਦਾ ਹੈ। ਤੁਹਾਡੇ ਵੱਲੋਂ ਵਰਤਮਾਨ ਤੌਰ \'ਤੇ ਵਰਤੀ ਜਾ ਰਹੀ ਐਪ ਡੈਟੇ \'ਤੇ ਪਹੁੰਚ ਕਰ ਸਕਦੀ ਹੈ, ਪਰ ਉਹ ਇੰਝ ਕਦੇ-ਕਦਾਈਂ ਕਰ ਸਕਦੀ ਹੈ। ਉਦਾਹਰਨ ਲਈ, ਇਸ ਦਾ ਮਤਲਬ ਇਹ ਹੋ ਸਕਦਾ ਹੈ ਕਿ ਚਿਤਰ ਤਦ ਤੱਕ ਨਹੀਂ ਵਿਖਾਏ ਜਾਂਦੇ, ਜਦੋਂ ਤੱਕ ਤੁਸੀਂ ਉਹਨਾਂ \'ਤੇ ਟੈਪ ਨਹੀਂ ਕਰਦੇ।"</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"ਕੀ ਡੈਟਾ ਸੇਵਰ ਚਾਲੂ ਕਰਨਾ ਹੈ?"</string>
@@ -1685,8 +1717,10 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"ਸਾਰੀਆਂ ਭਾਸ਼ਾਵਾਂ"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"ਸਾਰੇ ਖੇਤਰ"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"ਖੋਜ"</string>
-    <string name="work_mode_off_title" msgid="8954725060677558855">"ਕੰਮ ਮੋਡ ਬੰਦ ਹੈ"</string>
-    <string name="work_mode_off_message" msgid="3286169091278094476">"ਐਪਾਂ, ਬੈਕਗ੍ਰਾਊਂਡ ਸਮਕਾਲੀਕਰਨ, ਅਤੇ ਸਬੰਧਿਤ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਸ਼ਾਮਲ ਕਰਦੇ ਹੋਏ ਕੰਮ ਪ੍ਰੋਫਾਈਲ ਨੂੰ ਕੰਮ ਕਰਨ ਦੀ ਮਨਜ਼ੂਰੀ ਦਿਓ।"</string>
+    <!-- no translation found for work_mode_off_title (2615362773958585967) -->
+    <skip />
+    <!-- no translation found for work_mode_off_message (2961559609199223594) -->
+    <skip />
     <string name="work_mode_turn_on" msgid="2062544985670564875">"ਚਾਲੂ ਕਰੋ"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"ਤੁਹਾਨੂੰ ਨਵੇਂ ਸੁਨੇਹੇ ਪ੍ਰਾਪਤ ਹੋਏ ਹਨ"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"ਵੇਖਣ ਲਈ SMS ਐਪ ਖੋਲ੍ਹੋ"</string>
@@ -1729,8 +1763,7 @@
     <string name="time_picker_prompt_label" msgid="7588093983899966783">"ਸਮਾਂ ਟਾਈਪ ਕਰੋ"</string>
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"ਸਮਾਂ ਇਨਪੁੱਟ ਕਰਨ ਲਈ ਲਿਖਤ ਇਨਪੁੱਟ ਮੋਡ \'ਤੇ ਬਦਲੀ ਕਰੋ।"</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"ਸਮਾਂ ਇਨਪੁੱਟ ਕਰਨ ਲਈ ਘੜੀ ਮੋਡ \'ਤੇ ਬਦਲੀ ਕਰੋ।"</string>
-    <!-- no translation found for autofill_picker_accessibility_title (8469043291648711535) -->
-    <skip />
+    <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"ਆਟੋਫਿਲ ਵਿਕਲਪ"</string>
     <string name="autofill_save_title" msgid="7081244500504163245">"<xliff:g id="LABEL">%1$s</xliff:g> ਵਿੱਚ ਰੱਖਿਅਤ ਕਰੀਏ?"</string>
     <string name="autofill_save_title_with_type" msgid="4977385733042555659">"<xliff:g id="TYPE">%1$s</xliff:g> ਨੂੰ <xliff:g id="LABEL">%2$s</xliff:g> ਵਿੱਚ ਰੱਖਿਅਤ ਕਰੀਏ?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"ਰੱਖਿਅਤ ਕਰੋ"</string>
@@ -1738,13 +1771,17 @@
     <string name="autofill_save_type_password" msgid="5288448918465971568">"ਪਾਸਵਰਡ"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"ਪਤਾ"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"ਕ੍ਰੈਡਿਟ ਕਾਰਡ"</string>
-    <!-- no translation found for etws_primary_default_message_earthquake (5541962250262769193) -->
-    <skip />
-    <!-- no translation found for etws_primary_default_message_tsunami (1887685943498368548) -->
-    <skip />
-    <!-- no translation found for etws_primary_default_message_earthquake_and_tsunami (998797956848445862) -->
-    <skip />
-    <!-- no translation found for etws_primary_default_message_test (2709597093560037455) -->
-    <skip />
+    <string name="etws_primary_default_message_earthquake" msgid="5541962250262769193">"ਸ਼ਾਂਤ ਰਹੋ ਅਤੇ ਆਸ-ਪਾਸ ਪਨਾਹ ਮੰਗੋ।"</string>
+    <string name="etws_primary_default_message_tsunami" msgid="1887685943498368548">"ਤੁਰੰਤ ਤੱਟੀ ਖੇਤਰਾਂ ਅਤੇ ਨਦੀ ਦੇ ਕਿਨਾਰੇ ਵਾਲੇ ਖੇਤਰਾਂ ਨੂੰ ਖਾਲੀ ਕਰ ਕੇ ਕਿਸੇ ਸੁਰੱਖਿਅਤ ਸਥਾਨ \'ਤੇ ਚਲੇ ਜਾਓ ਜਿਵੇਂ ਕਿ ਉੱਚੀ ਜ਼ਮੀਨ।"</string>
+    <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="998797956848445862">"ਸ਼ਾਂਤ ਰਹੋ ਅਤੇ ਆਸ-ਪਾਸ ਪਨਾਹ ਮੰਗੋ।"</string>
+    <string name="etws_primary_default_message_test" msgid="2709597093560037455">"ਸੰਕਟਕਾਲੀਨ ਸੰਦੇਸ਼ ਟੈਸਟ"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
+    <!-- no translation found for mmcc_authentication_reject (7729819349669603406) -->
+    <skip />
+    <!-- no translation found for mmcc_imsi_unknown_in_hlr (6321202257374418726) -->
+    <skip />
+    <!-- no translation found for mmcc_illegal_ms (2769452751852211112) -->
+    <skip />
+    <!-- no translation found for mmcc_illegal_me (4438696681169345015) -->
+    <skip />
 </resources>
