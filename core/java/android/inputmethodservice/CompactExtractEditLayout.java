@@ -17,6 +17,7 @@
 package android.inputmethodservice;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.annotation.FractionRes;
 import android.util.AttributeSet;
@@ -24,6 +25,7 @@ import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowInsets;
 import android.widget.LinearLayout;
 
 /**
@@ -109,9 +111,25 @@ public class CompactExtractEditLayout extends LinearLayout {
         super.onAttachedToWindow();
         if (mPerformLayoutChanges) {
             Resources res = getResources();
+            Configuration cfg = res.getConfiguration();
             DisplayMetrics dm = res.getDisplayMetrics();
-            int heightPixels = dm.heightPixels;
             int widthPixels = dm.widthPixels;
+            int heightPixels = dm.heightPixels;
+
+            // Percentages must be based on the pixel height of the full (apparent) display height
+            // which is sometimes different from display metrics.
+            //
+            // On a round device, a display height smaller than width indicates a chin (cropped
+            // edge of the display) for which there is no screen buffer allocated. This is
+            // typically 25-35px in height.
+            //
+            // getRootWindowInsets() does not function for InputMethod windows (always null).
+            // Instead just set height to match width if less. This is safe because round wear
+            // devices are by definition 1:1 aspect ratio.
+
+            if (cfg.isScreenRound() && heightPixels < widthPixels) {
+                heightPixels = widthPixels;
+            }
             applyProportionalLayout(widthPixels, heightPixels);
         }
     }
