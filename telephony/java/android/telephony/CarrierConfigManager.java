@@ -1166,6 +1166,13 @@ public class CarrierConfigManager {
     public static final String KEY_BOOSTED_LTE_EARFCNS_STRING_ARRAY =
             "boosted_lte_earfcns_string_array";
 
+    /**
+     * Key identifying if voice call barring notification is required to be shown to the user.
+     * @hide
+     */
+    public static final String KEY_DISABLE_VOICE_BARRING_NOTIFICATION_BOOL =
+            "disable_voice_barring_notification_bool";
+
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
 
@@ -1376,6 +1383,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_NOTIFY_INTERNATIONAL_CALL_ON_WFC_BOOL, false);
         sDefaults.putInt(KEY_LTE_EARFCNS_RSRP_BOOST_INT, 0);
         sDefaults.putStringArray(KEY_BOOSTED_LTE_EARFCNS_STRING_ARRAY, null);
+        sDefaults.putBoolean(KEY_DISABLE_VOICE_BARRING_NOTIFICATION_BOOL, false);
     }
 
     /**
