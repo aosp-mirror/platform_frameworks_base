@@ -53,13 +53,11 @@ public:
         mEnv(env), mSelf(self) {}
 
     void OnLookup(uint64_t unique, uint64_t inode) override {
-        mEnv->CallVoidMethod(mSelf, gOnCommandMethod, FUSE_LOOKUP, unique, inode, 0, 0, nullptr);
-        CHECK(!mEnv->ExceptionCheck());
+        CallOnCommand(FUSE_LOOKUP, unique, inode, 0, 0, nullptr);
     }
 
     void OnGetAttr(uint64_t unique, uint64_t inode) override {
-        mEnv->CallVoidMethod(mSelf, gOnCommandMethod, FUSE_GETATTR, unique, inode, 0, 0, nullptr);
-        CHECK(!mEnv->ExceptionCheck());
+        CallOnCommand(FUSE_GETATTR, unique, inode, 0, 0, nullptr);
     }
 
     void OnOpen(uint64_t unique, uint64_t inode) override {
@@ -75,14 +73,12 @@ public:
     }
 
     void OnFsync(uint64_t unique, uint64_t inode) override {
-        mEnv->CallVoidMethod(mSelf, gOnCommandMethod, FUSE_FSYNC, unique, inode, 0, 0, nullptr);
-        CHECK(!mEnv->ExceptionCheck());
+        CallOnCommand(FUSE_FSYNC, unique, inode, 0, 0, nullptr);
     }
 
     void OnRelease(uint64_t unique, uint64_t inode) override {
         mBuffers.erase(inode);
-        mEnv->CallVoidMethod(mSelf, gOnCommandMethod, FUSE_RELEASE, unique, inode, 0, 0, nullptr);
-        CHECK(!mEnv->ExceptionCheck());
+        CallOnCommand(FUSE_RELEASE, unique, inode, 0, 0, nullptr);
     }
 
     void OnRead(uint64_t unique, uint64_t inode, uint64_t offset, uint32_t size) override {
@@ -91,10 +87,7 @@ public:
         auto it = mBuffers.find(inode);
         CHECK(it != mBuffers.end());
 
-        mEnv->CallVoidMethod(
-                mSelf, gOnCommandMethod, FUSE_READ, unique, inode, offset, size,
-                it->second->get());
-        CHECK(!mEnv->ExceptionCheck());
+        CallOnCommand(FUSE_READ, unique, inode, offset, size, it->second->get());
     }
 
     void OnWrite(uint64_t unique, uint64_t inode, uint64_t offset, uint32_t size,
@@ -109,8 +102,14 @@ public:
         mEnv->SetByteArrayRegion(javaBuffer, 0, size, static_cast<const jbyte*>(buffer));
         CHECK(!mEnv->ExceptionCheck());
 
-        mEnv->CallVoidMethod(
-                mSelf, gOnCommandMethod, FUSE_WRITE, unique, inode, offset, size, javaBuffer);
+        CallOnCommand(FUSE_WRITE, unique, inode, offset, size, javaBuffer);
+    }
+
+private:
+    // Helper function to make sure we invoke CallVoidMethod with correct size of integer arguments.
+    void CallOnCommand(jint command, jlong unique, jlong inode, jlong offset, jint size,
+                       jobject bytes) {
+        mEnv->CallVoidMethod(mSelf, gOnCommandMethod, command, unique, inode, offset, size, bytes);
         CHECK(!mEnv->ExceptionCheck());
     }
 };
