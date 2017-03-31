@@ -58,28 +58,20 @@
     <item msgid="3878793616631049349">"HDCP जांच का उपयोग केवल DRM सामग्री के लिए करें"</item>
     <item msgid="45075631231212732">"हमेशा HDCP जांच का उपयोग करें"</item>
   </string-array>
-    <!-- no translation found for bluetooth_avrcp_versions:0 (5347678900838034763) -->
-    <!-- no translation found for bluetooth_avrcp_versions:1 (2089555299377409443) -->
-    <!-- no translation found for bluetooth_avrcp_versions:2 (2895327394279434278) -->
-    <!-- no translation found for bluetooth_avrcp_version_values:0 (2838624067805073303) -->
-    <!-- no translation found for bluetooth_avrcp_version_values:1 (1913619118958233129) -->
-    <!-- no translation found for bluetooth_avrcp_version_values:2 (7142710449249088270) -->
-  <string-array name="bluetooth_a2dp_codec_titles">
-    <item msgid="7065842274271279580">"सिस्टम चयन का उपयोग करें (डिफ़ॉल्ट)"</item>
-    <item msgid="7539690996561263909">"SBC"</item>
-    <item msgid="686685526567131661">"AAC"</item>
-    <item msgid="8910200421843557332">"aptX"</item>
-    <item msgid="8434403964359457768">"aptX HD"</item>
-    <item msgid="6751080638867012696">"LDAC"</item>
+  <string-array name="bluetooth_avrcp_versions">
+    <item msgid="5347678900838034763">"AVRCP 1.4 (डिफ़ॉल्ट)"</item>
+    <item msgid="2089555299377409443">"AVRCP 1.5"</item>
+    <item msgid="2895327394279434278">"AVRCP 1.6"</item>
   </string-array>
-  <string-array name="bluetooth_a2dp_codec_summaries">
-    <item msgid="5062108632402595000">"सिस्टम चयन का उपयोग करें (डिफ़ॉल्ट)"</item>
-    <item msgid="6898329690939802290">"SBC"</item>
-    <item msgid="6839647709301342559">"AAC"</item>
-    <item msgid="2279916056363477395">"aptX"</item>
-    <item msgid="6641171061200063516">"aptX HD"</item>
-    <item msgid="7950781694447359344">"LDAC"</item>
+  <string-array name="bluetooth_avrcp_version_values">
+    <item msgid="2838624067805073303">"avrcp14"</item>
+    <item msgid="1913619118958233129">"avrcp15"</item>
+    <item msgid="7142710449249088270">"avrcp16"</item>
   </string-array>
+    <!-- no translation found for bluetooth_a2dp_codec_titles:6 (723675059572222462) -->
+    <!-- no translation found for bluetooth_a2dp_codec_titles:7 (3304843301758635896) -->
+    <!-- no translation found for bluetooth_a2dp_codec_summaries:6 (2209680154067241740) -->
+    <!-- no translation found for bluetooth_a2dp_codec_summaries:7 (741805482892725657) -->
   <string-array name="bluetooth_a2dp_codec_sample_rate_titles">
     <item msgid="3093023430402746802">"सिस्टम चयन का उपयोग करें (डिफ़ॉल्ट)"</item>
     <item msgid="8895532488906185219">"44.1 kHz"</item>
