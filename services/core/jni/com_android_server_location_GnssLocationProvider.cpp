@@ -1457,33 +1457,44 @@ static jstring android_location_GnssLocationProvider_get_internal_state(JNIEnv* 
     /*
      * TODO(b/33089503) : Create a jobject to represent GnssDebug.
      */
-    if (gnssDebugIface != nullptr) {
+
+    std::stringstream internalState;
+
+    if (gnssDebugIface == nullptr) {
+        internalState << "Gnss Debug Interface not available"  << std::endl;
+    } else {
         IGnssDebug::DebugData data;
         gnssDebugIface->getDebugData([&data](const IGnssDebug::DebugData& debugData) {
             data = debugData;
         });
 
-        std::stringstream internalState;
-        if (data.position.valid) {
-            internalState << "Gnss Location Data:: LatitudeDegrees: " << data.position.latitudeDegrees
+        internalState << "Gnss Location Data:: ";
+        if (!data.position.valid) {
+            internalState << "not valid";
+        } else {
+            internalState << "LatitudeDegrees: " << data.position.latitudeDegrees
                           << ", LongitudeDegrees: " << data.position.longitudeDegrees
                           << ", altitudeMeters: " << data.position.altitudeMeters
                           << ", speedMetersPerSecond: " << data.position.speedMetersPerSec
                           << ", bearingDegrees: " << data.position.bearingDegrees
-                          << ", horizontalAccuracyMeters: " << data.position.horizontalAccuracyMeters
+                          << ", horizontalAccuracyMeters: "
+                          << data.position.horizontalAccuracyMeters
                           << ", verticalAccuracyMeters: " << data.position.verticalAccuracyMeters
-                          << ", speedAccuracyMetersPerSecond: " << data.position.speedAccuracyMetersPerSecond
+                          << ", speedAccuracyMetersPerSecond: "
+                          << data.position.speedAccuracyMetersPerSecond
                           << ", bearingAccuracyDegrees: " << data.position.bearingAccuracyDegrees
-                          << ", ageSeconds: " << data.position.ageSeconds << std::endl;
+                          << ", ageSeconds: " << data.position.ageSeconds;
         }
+        internalState << std::endl;
 
-        if (data.time.valid) {
-            internalState << "Gnss Time Data:: timeEstimate: " << data.time.timeEstimate
-                          << ", timeUncertaintyNs: " << data.time.timeUncertaintyNs << std::endl;
-        }
+        internalState << "Gnss Time Data:: timeEstimate: " << data.time.timeEstimate
+                      << ", timeUncertaintyNs: " << data.time.timeUncertaintyNs
+                      << ", frequencyUncertaintyNsPerSec: "
+                      << data.time.frequencyUncertaintyNsPerSec << std::endl;
 
         if (data.satelliteDataArray.size() != 0) {
-            internalState << "Satellite Data:: ";
+            internalState << "Satellite Data for " << data.satelliteDataArray.size()
+                          << " satellites:: " << std::endl;
         }
 
         for (size_t i = 0; i < data.satelliteDataArray.size(); i++) {
@@ -1492,11 +1503,20 @@ static jstring android_location_GnssLocationProvider_get_internal_state(JNIEnv* 
                           << static_cast<uint32_t>(data.satelliteDataArray[i].constellation)
                           << ", ephemerisType: "
                           << static_cast<uint32_t>(data.satelliteDataArray[i].ephemerisType)
+                          << ", ephemerisSource: "
+                          << static_cast<uint32_t>(data.satelliteDataArray[i].ephemerisSource)
+                          << ", ephemerisHealth: "
+                          << static_cast<uint32_t>(data.satelliteDataArray[i].ephemerisHealth)
+                          << ", serverPredictionIsAvailable: "
+                          << data.satelliteDataArray[i].serverPredictionIsAvailable
+                          << ", serverPredictionAgeSeconds: "
+                          << data.satelliteDataArray[i].serverPredictionAgeSeconds
                           << ", ephemerisAgeSeconds: "
                           << data.satelliteDataArray[i].ephemerisAgeSeconds << std::endl;
         }
-        result = env->NewStringUTF(internalState.str().c_str());
     }
+
+    result = env->NewStringUTF(internalState.str().c_str());
     return result;
 }
 
