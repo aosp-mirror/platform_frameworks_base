@@ -2447,7 +2447,8 @@ public class Intent implements Parcelable, Cloneable {
      *
      * {@hide}
      */
-    public static final String ACTION_REQUEST_SHUTDOWN = "android.intent.action.ACTION_REQUEST_SHUTDOWN";
+    public static final String ACTION_REQUEST_SHUTDOWN
+            = "com.android.internal.intent.action.REQUEST_SHUTDOWN";
     /**
      * Broadcast Action: A sticky broadcast that indicates low storage space
      * condition on the device
