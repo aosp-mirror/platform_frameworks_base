@@ -19,11 +19,13 @@ import android.Manifest;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.app.Dialog;
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.drawable.Icon;
 import android.os.Handler;
 import android.os.IBinder;
@@ -33,6 +35,8 @@ import android.os.RemoteException;
 import android.view.View;
 import android.view.View.OnAttachStateChangeListener;
 import android.view.WindowManager;
+
+import com.android.internal.R;
 
 /**
  * A TileService provides the user a tile that can be added to Quick Settings.
@@ -422,6 +426,15 @@ public class TileService extends Service {
                     break;
             }
         }
+    }
+
+    /**
+     * @return True if the device supports quick settings and its assocated APIs.
+     * @hide
+     */
+    @TestApi
+    public static boolean isQuickSettingsSupported() {
+        return Resources.getSystem().getBoolean(R.bool.config_quickSettingsSupported);
     }
 
     /**
