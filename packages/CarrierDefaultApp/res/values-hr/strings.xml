@@ -7,12 +7,8 @@
     <string name="no_data_notification_id" msgid="668400731803969521">"Mobilni su podaci deaktivirani"</string>
     <string name="portal_notification_detail" msgid="2295729385924660881">"Dodirnite da biste posjetili web-lokaciju tvrtke %s"</string>
     <string name="no_data_notification_detail" msgid="3112125343857014825">"Obratite se svojem davatelju usluga %s"</string>
-    <!-- no translation found for action_bar_label (4290345990334377177) -->
-    <skip />
-    <!-- no translation found for ssl_error_warning (3127935140338254180) -->
-    <skip />
-    <!-- no translation found for ssl_error_example (6188711843183058764) -->
-    <skip />
-    <!-- no translation found for ssl_error_continue (1138548463994095584) -->
-    <skip />
+    <string name="action_bar_label" msgid="4290345990334377177">"Prijava na mobilnu mrežu"</string>
+    <string name="ssl_error_warning" msgid="3127935140338254180">"Mreža kojoj se pokušavate pridružiti ima sigurnosne poteškoće."</string>
+    <string name="ssl_error_example" msgid="6188711843183058764">"Na primjer, stranica za prijavu možda ne pripada prikazanoj organizaciji."</string>
+    <string name="ssl_error_continue" msgid="1138548463994095584">"Ipak nastavi putem preglednika"</string>
 </resources>

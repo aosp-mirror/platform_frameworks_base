@@ -7,12 +7,8 @@
     <string name="no_data_notification_id" msgid="668400731803969521">"ඔබගේ ජංගම දත්ත අක්‍රිය කර ඇත"</string>
     <string name="portal_notification_detail" msgid="2295729385924660881">"%s වෙබ් අඩවිය වෙත යාමට තට්ටු කරන්න"</string>
     <string name="no_data_notification_detail" msgid="3112125343857014825">"කරුණාකර ඔබගේ සේවා සැපයුම්කරු %s අමතන්න"</string>
-    <!-- no translation found for action_bar_label (4290345990334377177) -->
-    <skip />
-    <!-- no translation found for ssl_error_warning (3127935140338254180) -->
-    <skip />
-    <!-- no translation found for ssl_error_example (6188711843183058764) -->
-    <skip />
-    <!-- no translation found for ssl_error_continue (1138548463994095584) -->
-    <skip />
+    <string name="action_bar_label" msgid="4290345990334377177">"ජංගම ජාලය වෙත පුරනය වෙන්න"</string>
+    <string name="ssl_error_warning" msgid="3127935140338254180">"ඔබ සම්බන්ධ වීමට උත්සහ කරන ජාලයේ ආරක්ෂක ගැටළු ඇත."</string>
+    <string name="ssl_error_example" msgid="6188711843183058764">"උදාහරණයක් ලෙස, පුරනය වන පිටුව පෙන්වා ඇති සංවිධානයට අයිති නැති විය හැක."</string>
+    <string name="ssl_error_continue" msgid="1138548463994095584">"කෙසේ වුවත් බ්‍රවුසරය හරහා ඉදිරියට යන්න"</string>
 </resources>
