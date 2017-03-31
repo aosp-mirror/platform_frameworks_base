@@ -181,6 +181,18 @@ public class TelecomManager {
             "android.telecom.extra.START_CALL_WITH_VIDEO_STATE";
 
     /**
+     * Optional extra for {@link #addNewIncomingCall(PhoneAccountHandle, Bundle)} containing an
+     * integer that determines the requested video state for an incoming call.
+     * Valid options:
+     * {@link VideoProfile#STATE_AUDIO_ONLY},
+     * {@link VideoProfile#STATE_BIDIRECTIONAL},
+     * {@link VideoProfile#STATE_RX_ENABLED},
+     * {@link VideoProfile#STATE_TX_ENABLED}.
+     */
+    public static final String EXTRA_INCOMING_VIDEO_STATE =
+            "android.telecom.extra.INCOMING_VIDEO_STATE";
+
+    /**
      * The extra used with an {@link android.content.Intent#ACTION_CALL} and
      * {@link android.content.Intent#ACTION_DIAL} {@code Intent} to specify a
      * {@link PhoneAccountHandle} to use when making the call.
@@ -383,7 +395,11 @@ public class TelecomManager {
      * <p>
      * An {@link InCallService} which receives self-managed calls is free to view and control the
      * state of calls in the self-managed {@link ConnectionService}.  An example use-case is
-     * exposing these calls to a wearable or automotive device via its companion app.
+     * exposing these calls to an automotive device via its companion app.
+     * <p>
+     * This meta-data can only be set for an {@link InCallService} which also sets
+     * {@link #METADATA_IN_CALL_SERVICE_UI}. Only the default phone/dialer app, or a car-mode
+     * {@link InCallService} can see self-managed calls.
      * <p>
      * See also {@link Connection#PROPERTY_SELF_MANAGED}.
      */
@@ -1276,6 +1292,10 @@ public class TelecomManager {
      * the user must have enabled the corresponding {@link PhoneAccount}.  This can be checked using
      * {@link #getPhoneAccount}. Self-managed {@link ConnectionService}s must have
      * {@link android.Manifest.permission#MANAGE_OWN_CALLS} to add a new incoming call.
+     * <p>
+     * The incoming call you are adding is assumed to have a video state of
+     * {@link VideoProfile#STATE_AUDIO_ONLY}, unless the extra value
+     * {@link #EXTRA_INCOMING_VIDEO_STATE} is specified.
      * <p>
      * Once invoked, this method will cause the system to bind to the {@link ConnectionService}
      * associated with the {@link PhoneAccountHandle} and request additional information about the
