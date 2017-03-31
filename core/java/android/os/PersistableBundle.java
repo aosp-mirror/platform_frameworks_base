@@ -309,4 +309,16 @@ public final class PersistableBundle extends BaseBundle implements Cloneable, Pa
         }
         return "PersistableBundle[" + mMap.toString() + "]";
     }
+
+    /** @hide */
+    synchronized public String toShortString() {
+        if (mParcelledData != null) {
+            if (isEmptyParcel()) {
+                return "EMPTY_PARCEL";
+            } else {
+                return "mParcelledData.dataSize=" + mParcelledData.dataSize();
+            }
+        }
+        return mMap.toString();
+    }
 }

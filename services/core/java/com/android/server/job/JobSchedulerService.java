@@ -616,6 +616,9 @@ public final class JobSchedulerService extends com.android.server.SystemService
                 }
             }
 
+            // This may throw a SecurityException.
+            jobStatus.prepare(ActivityManager.getService());
+
             toCancel = mJobs.getJobByUidAndJobId(uId, job.getId());
             if (toCancel != null) {
                 cancelJobImpl(toCancel, jobStatus);
@@ -712,6 +715,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
 
     private void cancelJobImpl(JobStatus cancelled, JobStatus incomingJob) {
         if (DEBUG) Slog.d(TAG, "CANCEL: " + cancelled.toShortString());
+        cancelled.unprepare(ActivityManager.getService());
         stopTrackingJob(cancelled, incomingJob, true /* writeBack */);
         synchronized (mLock) {
             // Remove from pending queue.
@@ -892,6 +896,9 @@ public final class JobSchedulerService extends com.android.server.SystemService
      */
     private void startTrackingJob(JobStatus jobStatus, JobStatus lastJob) {
         synchronized (mLock) {
+            if (!jobStatus.isPrepared()) {
+                Slog.wtf(TAG, "Not yet prepared when started tracking: " + jobStatus);
+            }
             final boolean update = mJobs.add(jobStatus);
             if (mReadyToRock) {
                 for (int i = 0; i < mControllers.size(); i++) {
@@ -1078,11 +1085,22 @@ public final class JobSchedulerService extends com.android.server.SystemService
         // that may cause ordering problems if the app removes jobStatus while in here.
         if (needsReschedule) {
             JobStatus rescheduled = getRescheduleJobForFailure(jobStatus);
+            try {
+                rescheduled.prepare(ActivityManager.getService());
+            } catch (SecurityException e) {
+                Slog.w(TAG, "Unable to regrant job permissions for " + rescheduled);
+            }
             startTrackingJob(rescheduled, jobStatus);
         } else if (jobStatus.getJob().isPeriodic()) {
             JobStatus rescheduledPeriodic = getRescheduleJobForPeriodic(jobStatus);
+            try {
+                rescheduledPeriodic.prepare(ActivityManager.getService());
+            } catch (SecurityException e) {
+                Slog.w(TAG, "Unable to regrant job permissions for " + rescheduledPeriodic);
+            }
             startTrackingJob(rescheduledPeriodic, jobStatus);
         }
+        jobStatus.unprepare(ActivityManager.getService());
         reportActive();
         mHandler.obtainMessage(MSG_CHECK_JOB_GREEDY).sendToTarget();
     }
