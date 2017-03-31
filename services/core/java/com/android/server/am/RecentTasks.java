@@ -41,6 +41,7 @@ import android.graphics.Bitmap;
 import android.os.Environment;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
@@ -104,13 +105,29 @@ class RecentTasks extends ArrayList<TaskRecord> {
      * @param userId the user Id
      */
     void loadUserRecentsLocked(int userId) {
-        if (!mUsersWithRecentsLoaded.get(userId)) {
-            // Load the task ids if not loaded.
-            loadPersistedTaskIdsForUserLocked(userId);
-            Slog.i(TAG, "Loading recents for user " + userId + " into memory.");
-            addAll(mTaskPersister.restoreTasksForUserLocked(userId));
-            cleanupLocked(userId);
-            mUsersWithRecentsLoaded.put(userId, true);
+        if (mUsersWithRecentsLoaded.get(userId)) {
+            return;
+        }
+
+        // Load the task ids if not loaded.
+        loadPersistedTaskIdsForUserLocked(userId);
+
+        // Check if any tasks are added before recents is loaded
+        final SparseBooleanArray preaddedTasks = new SparseBooleanArray();
+        for (final TaskRecord task : this) {
+            if (task.userId == userId && shouldPersistTaskLocked(task)) {
+                preaddedTasks.put(task.taskId, true);
+            }
+        }
+
+        Slog.i(TAG, "Loading recents for user " + userId + " into memory.");
+        addAll(mTaskPersister.restoreTasksForUserLocked(userId, preaddedTasks));
+        cleanupLocked(userId);
+        mUsersWithRecentsLoaded.put(userId, true);
+
+        // If we have tasks added before loading recents, we need to update persistent task IDs.
+        if (preaddedTasks.size() != 0) {
+            syncPersistentTaskIdsLocked();
         }
     }
 
@@ -149,8 +166,7 @@ class RecentTasks extends ArrayList<TaskRecord> {
         }
         for (int i = size() - 1; i >= 0; i--) {
             final TaskRecord task = get(i);
-            final ActivityStack stack = task.getStack();
-            if (task.isPersistable && (stack == null || !stack.isHomeOrRecentsStack())) {
+            if (shouldPersistTaskLocked(task)) {
                 // Set of persisted taskIds for task.userId should not be null here
                 // TODO Investigate why it can happen. For now initialize with an empty set
                 if (mPersistedTaskIds.get(task.userId) == null) {
@@ -163,6 +179,10 @@ class RecentTasks extends ArrayList<TaskRecord> {
         }
     }
 
+    private static boolean shouldPersistTaskLocked(TaskRecord task) {
+        final ActivityStack<?> stack = task.getStack();
+        return task.isPersistable && (stack == null || !stack.isHomeOrRecentsStack());
+    }
 
     void onSystemReadyLocked() {
         clear();
