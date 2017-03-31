@@ -23,6 +23,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.wifi.WifiManager;
+import android.os.Handler;
 import android.os.UserManager;
 import android.util.Log;
 
@@ -41,6 +42,7 @@ public class HotspotControllerImpl implements HotspotController {
     private final Context mContext;
 
     private int mHotspotState;
+    private boolean mWaitingForCallback;
 
     public HotspotControllerImpl(Context context) {
         mContext = context;
@@ -101,22 +103,20 @@ public class HotspotControllerImpl implements HotspotController {
         return mHotspotState == WifiManager.WIFI_AP_STATE_ENABLED;
     }
 
-    static final class OnStartTetheringCallback extends
-            ConnectivityManager.OnStartTetheringCallback {
-        @Override
-        public void onTetheringStarted() {}
-        @Override
-        public void onTetheringFailed() {
-          // TODO: Show error.
-        }
+    @Override
+    public boolean isHotspotTransient() {
+        return mWaitingForCallback || (mHotspotState == WifiManager.WIFI_AP_STATE_ENABLING);
     }
 
     @Override
     public void setHotspotEnabled(boolean enabled) {
         if (enabled) {
             OnStartTetheringCallback callback = new OnStartTetheringCallback();
+            mWaitingForCallback = true;
+            if (DEBUG) Log.d(TAG, "Starting tethering");
             mConnectivityManager.startTethering(
                     ConnectivityManager.TETHERING_WIFI, false, callback);
+            fireCallback(isHotspotEnabled());
         } else {
             mConnectivityManager.stopTethering(ConnectivityManager.TETHERING_WIFI);
         }
@@ -127,6 +127,24 @@ public class HotspotControllerImpl implements HotspotController {
             for (Callback callback : mCallbacks) {
                 callback.onHotspotChanged(isEnabled);
             }
+        }
+    }
+
+    private final class OnStartTetheringCallback extends
+            ConnectivityManager.OnStartTetheringCallback {
+        @Override
+        public void onTetheringStarted() {
+            if (DEBUG) Log.d(TAG, "onTetheringStarted");
+            mWaitingForCallback = false;
+            // Don't fire a callback here, instead wait for the next update from wifi.
+        }
+
+        @Override
+        public void onTetheringFailed() {
+            if (DEBUG) Log.d(TAG, "onTetheringFailed");
+            mWaitingForCallback = false;
+            fireCallback(isHotspotEnabled());
+          // TODO: Show error.
         }
     }
 
@@ -149,9 +167,9 @@ public class HotspotControllerImpl implements HotspotController {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (DEBUG) Log.d(TAG, "onReceive " + intent.getAction());
             int state = intent.getIntExtra(
                     WifiManager.EXTRA_WIFI_AP_STATE, WifiManager.WIFI_AP_STATE_FAILED);
+            if (DEBUG) Log.d(TAG, "onReceive " + state);
             mHotspotState = state;
             fireCallback(mHotspotState == WifiManager.WIFI_AP_STATE_ENABLED);
         }
