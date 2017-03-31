@@ -238,7 +238,6 @@ public class SettingsHelper {
         // these features working after the restore.
         switch (name) {
             case Settings.Secure.ACCESSIBILITY_ENABLED:
-            case Settings.Secure.ACCESSIBILITY_SCRIPT_INJECTION:
             case Settings.Secure.ACCESSIBILITY_SPEAK_PASSWORD:
             case Settings.Secure.TOUCH_EXPLORATION_ENABLED:
             case Settings.Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED:

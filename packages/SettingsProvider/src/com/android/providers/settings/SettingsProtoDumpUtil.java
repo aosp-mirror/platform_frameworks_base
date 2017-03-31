@@ -1057,15 +1057,6 @@ class SettingsProtoDumpUtil {
                 Settings.Secure.ACCESSIBILITY_HIGH_TEXT_CONTRAST_ENABLED,
                 SecureSettingsProto.ACCESSIBILITY_HIGH_TEXT_CONTRAST_ENABLED);
         dumpSetting(s, p,
-                Settings.Secure.ACCESSIBILITY_SCRIPT_INJECTION,
-                SecureSettingsProto.ACCESSIBILITY_SCRIPT_INJECTION);
-        dumpSetting(s, p,
-                Settings.Secure.ACCESSIBILITY_SCREEN_READER_URL,
-                SecureSettingsProto.ACCESSIBILITY_SCREEN_READER_URL);
-        dumpSetting(s, p,
-                Settings.Secure.ACCESSIBILITY_WEB_CONTENT_KEY_BINDINGS,
-                SecureSettingsProto.ACCESSIBILITY_WEB_CONTENT_KEY_BINDINGS);
-        dumpSetting(s, p,
                 Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_ENABLED,
                 SecureSettingsProto.ACCESSIBILITY_DISPLAY_MAGNIFICATION_ENABLED);
         dumpSetting(s, p,
