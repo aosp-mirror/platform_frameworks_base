@@ -217,6 +217,12 @@ public class CallLog {
         /** Call was pulled externally. */
         public static final int FEATURES_PULLED_EXTERNALLY = 0x2;
 
+        /** Call was HD. */
+        public static final int FEATURES_HD_CALL = 0x4;
+
+        /** Call was WIFI call. */
+        public static final int FEATURES_WIFI = 0x8;
+
         /**
          * The phone number as the user entered it.
          * <P>Type: TEXT</P>
