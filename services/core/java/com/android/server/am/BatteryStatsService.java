@@ -149,9 +149,11 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
                 case MSG_WRITE_TO_DISK:
                     updateExternalStatsSync("write", UPDATE_ALL);
+                    Slog.d(TAG, "begin writeAsyncLocked");
                     synchronized (mStats) {
                         mStats.writeAsyncLocked();
                     }
+                    Slog.d(TAG, "end writeAsyncLocked");
                     break;
             }
         }
@@ -191,19 +193,24 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
     @Override
     public String getPlatformLowPowerStats() {
-        mUtf8BufferStat.clear();
-        mUtf16BufferStat.clear();
-        mDecoderStat.reset();
-        int bytesWritten = getPlatformLowPowerStats(mUtf8BufferStat);
-        if (bytesWritten < 0) {
-            return null;
-        } else if (bytesWritten == 0) {
-            return "Empty";
+        Slog.d(TAG, "begin getPlatformLowPowerStats");
+        try {
+            mUtf8BufferStat.clear();
+            mUtf16BufferStat.clear();
+            mDecoderStat.reset();
+            int bytesWritten = getPlatformLowPowerStats(mUtf8BufferStat);
+            if (bytesWritten < 0) {
+                return null;
+            } else if (bytesWritten == 0) {
+                return "Empty";
+            }
+            mUtf8BufferStat.limit(bytesWritten);
+            mDecoderStat.decode(mUtf8BufferStat, mUtf16BufferStat, true);
+            mUtf16BufferStat.flip();
+            return mUtf16BufferStat.toString();
+        } finally {
+            Slog.d(TAG, "end getPlatformLowPowerStats");
         }
-        mUtf8BufferStat.limit(bytesWritten);
-        mDecoderStat.decode(mUtf8BufferStat, mUtf16BufferStat, true);
-        mUtf16BufferStat.flip();
-        return mUtf16BufferStat.toString();
     }
 
     BatteryStatsService(File systemDir, Handler handler) {
@@ -551,9 +558,11 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         
     public void noteScreenState(int state) {
         enforceCallingPermission();
+        Slog.d(TAG, "begin noteScreenState");
         synchronized (mStats) {
             mStats.noteScreenStateLocked(state);
         }
+        Slog.d(TAG, "end noteScreenState");
     }
     
     public void noteScreenBrightness(int brightness) {
@@ -706,9 +715,11 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
     public void noteStartCamera(int uid) {
         enforceCallingPermission();
+        Slog.d(TAG, "begin noteStartCamera");
         synchronized (mStats) {
             mStats.noteCameraOnLocked(uid);
         }
+        Slog.d(TAG, "end noteStartCamera");
     }
 
     public void noteStopCamera(int uid) {
@@ -1009,24 +1020,32 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         mHandler.post(new Runnable() {
             @Override
             public void run() {
-                synchronized (mStats) {
-                    final boolean onBattery = plugType == BatteryStatsImpl.BATTERY_PLUGGED_NONE;
-                    if (mStats.isOnBattery() == onBattery) {
-                        // The battery state has not changed, so we don't need to sync external
-                        // stats immediately.
-                        mStats.setBatteryStateLocked(status, health, plugType, level, temp, volt,
-                                chargeUAh, chargeFullUAh);
-                        return;
+                Slog.d(TAG, "begin setBatteryStateLocked");
+                try {
+                    synchronized (mStats) {
+                        final boolean onBattery = plugType == BatteryStatsImpl.BATTERY_PLUGGED_NONE;
+                        if (mStats.isOnBattery() == onBattery) {
+                            // The battery state has not changed, so we don't need to sync external
+                            // stats immediately.
+                            mStats.setBatteryStateLocked(status, health, plugType, level, temp,
+                                    volt,
+                                    chargeUAh, chargeFullUAh);
+                            return;
+                        }
                     }
+                } finally {
+                    Slog.d(TAG, "end setBatteryStateLocked");
                 }
 
                 // Sync external stats first as the battery has changed states. If we don't sync
                 // immediately here, we may not collect the relevant data later.
                 updateExternalStatsSync("battery-state", BatteryStatsImpl.ExternalStatsSync.UPDATE_ALL);
+                Slog.d(TAG, "begin setBatteryStateLocked");
                 synchronized (mStats) {
                     mStats.setBatteryStateLocked(status, health, plugType, level, temp, volt,
                             chargeUAh, chargeFullUAh);
                 }
+                Slog.d(TAG, "end setBatteryStateLocked");
             }
         });
     }
@@ -1326,19 +1345,23 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                     }
                 }
             }
+            Slog.d(TAG, "begin dumpCheckinLocked from UID " + Binder.getCallingUid());
             synchronized (mStats) {
                 mStats.dumpCheckinLocked(mContext, pw, apps, flags, historyStart);
                 if (writeData) {
                     mStats.writeAsyncLocked();
                 }
             }
+            Slog.d(TAG, "end dumpCheckinLocked");
         } else {
+            Slog.d(TAG, "begin dumpLocked from UID " + Binder.getCallingUid());
             synchronized (mStats) {
                 mStats.dumpLocked(mContext, pw, flags, reqUid, historyStart);
                 if (writeData) {
                     mStats.writeAsyncLocked();
                 }
             }
+            Slog.d(TAG, "end dumpLocked");
         }
     }
 
@@ -1460,9 +1483,11 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         SynchronousResultReceiver bluetoothReceiver = null;
         SynchronousResultReceiver modemReceiver = null;
 
+        Slog.d(TAG, "begin updateExternalStatsSync reason=" + reason);
         synchronized (mExternalStatsLock) {
             if (mContext == null) {
                 // Don't do any work yet.
+                Slog.d(TAG, "end updateExternalStatsSync");
                 return;
             }
 
@@ -1559,6 +1584,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                 }
             }
         }
+        Slog.d(TAG, "end updateExternalStatsSync");
     }
 
     /**
