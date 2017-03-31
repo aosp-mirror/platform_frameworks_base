@@ -31,6 +31,10 @@ package android.content {
     method public abstract java.io.File getSharedPreferencesPath(java.lang.String);
   }
 
+  public class Intent implements java.lang.Cloneable android.os.Parcelable {
+    field public static final deprecated java.lang.String EXTRA_QUICK_VIEW_ADVANCED = "android.intent.extra.QUICK_VIEW_ADVANCED";
+  }
+
 }
 
 package android.content.pm {
