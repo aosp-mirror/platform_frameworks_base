@@ -1193,8 +1193,7 @@ public class UsbDeviceManager {
                         newFunction = UsbManager.addFunction(overrideFunctions.second,
                                 UsbManager.USB_FUNCTION_ADB);
                     } else {
-                        newFunction = UsbManager.addFunction(UsbManager.USB_FUNCTION_NONE,
-                                UsbManager.USB_FUNCTION_ADB);
+                        newFunction = overrideFunctions.second;
                     }
                     Slog.d(TAG, "OEM USB override persisting: " + newFunction + "in prop: "
                             + UsbDeviceManager.getPersistProp(false));
