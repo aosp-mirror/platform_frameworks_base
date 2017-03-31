@@ -326,13 +326,15 @@ static jint convertProgramInfoFromNative(JNIEnv *env,
     ALOGV("%s channel %d tuned %d", __FUNCTION__, nProgramInfo->channel, nProgramInfo->tuned);
 
     int flags = 0;  // TODO(b/32621193): pass from the HAL
+    jstring jVendorExension = env->NewStringUTF("");  // TODO(b/32621193): pass from the HAL
     *jProgramInfo = env->NewObject(gRadioProgramInfoClass, gRadioProgramInfoCstor,
                                   nProgramInfo->channel, nProgramInfo->sub_channel,
                                   nProgramInfo->tuned, nProgramInfo->stereo,
                                   nProgramInfo->digital, nProgramInfo->signal_strength,
-                                  jMetadata, flags);
+                                  jMetadata, flags, jVendorExension);
 
     env->DeleteLocalRef(jMetadata);
+    env->DeleteLocalRef(jVendorExension);
     return (jint)RADIO_STATUS_OK;
 }
 
@@ -444,19 +446,22 @@ android_hardware_Radio_listModules(JNIEnv *env, jobject clazz,
         jstring jProduct = env->NewStringUTF(nModules[i].product);
         jstring jVersion = env->NewStringUTF(nModules[i].version);
         jstring jSerial = env->NewStringUTF(nModules[i].serial);
+        bool isBgscanSupported = false;  // TODO(b/32621193): pass from the HAL
+        jstring jVendorExension = env->NewStringUTF("");  // TODO(b/32621193): pass from the HAL
         jobject jModule = env->NewObject(gModulePropertiesClass, gModulePropertiesCstor,
                                                nModules[i].handle, nModules[i].class_id,
                                                jImplementor, jProduct, jVersion, jSerial,
                                                nModules[i].num_tuners,
                                                nModules[i].num_audio_sources,
                                                nModules[i].supports_capture,
-                                               jBands);
+                                               jBands, isBgscanSupported, jVendorExension);
 
         env->DeleteLocalRef(jImplementor);
         env->DeleteLocalRef(jProduct);
         env->DeleteLocalRef(jVersion);
         env->DeleteLocalRef(jSerial);
         env->DeleteLocalRef(jBands);
+        env->DeleteLocalRef(jVendorExension);
         if (jModule == NULL) {
             continue;
         }
@@ -883,7 +888,7 @@ int register_android_hardware_Radio(JNIEnv *env)
     jclass modulePropertiesClass = FindClassOrDie(env, kModulePropertiesClassPathName);
     gModulePropertiesClass = MakeGlobalRefOrDie(env, modulePropertiesClass);
     gModulePropertiesCstor = GetMethodIDOrDie(env, modulePropertiesClass, "<init>",
-            "(IILjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;IIZ[Landroid/hardware/radio/RadioManager$BandDescriptor;)V");
+            "(IILjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;IIZ[Landroid/hardware/radio/RadioManager$BandDescriptor;ZLjava/lang/String;)V");
 
     jclass bandDescriptorClass = FindClassOrDie(env, kRadioBandDescriptorClassPathName);
     gRadioBandDescriptorClass = MakeGlobalRefOrDie(env, bandDescriptorClass);
@@ -933,7 +938,7 @@ int register_android_hardware_Radio(JNIEnv *env)
     jclass programInfoClass = FindClassOrDie(env, kRadioProgramInfoClassPathName);
     gRadioProgramInfoClass = MakeGlobalRefOrDie(env, programInfoClass);
     gRadioProgramInfoCstor = GetMethodIDOrDie(env, programInfoClass, "<init>",
-            "(IIZZZILandroid/hardware/radio/RadioMetadata;I)V");
+            "(IIZZZILandroid/hardware/radio/RadioMetadata;ILjava/lang/String;)V");
 
     jclass metadataClass = FindClassOrDie(env, kRadioMetadataClassPathName);
     gRadioMetadataClass = MakeGlobalRefOrDie(env, metadataClass);

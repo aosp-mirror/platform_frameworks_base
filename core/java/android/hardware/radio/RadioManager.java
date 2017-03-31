@@ -16,11 +16,13 @@
 
 package android.hardware.radio;
 
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
 import java.util.List;
 import java.util.Arrays;
 
@@ -108,10 +110,12 @@ public class RadioManager {
         private final int mNumAudioSources;
         private final boolean mIsCaptureSupported;
         private final BandDescriptor[] mBands;
+        private final boolean mIsBgScanSupported;
+        private final String mVendorExension;
 
         ModuleProperties(int id, int classId, String implementor, String product, String version,
                 String serial, int numTuners, int numAudioSources, boolean isCaptureSupported,
-                BandDescriptor[] bands) {
+                BandDescriptor[] bands, boolean isBgScanSupported, String vendorExension) {
             mId = id;
             mClassId = classId;
             mImplementor = implementor;
@@ -122,6 +126,8 @@ public class RadioManager {
             mNumAudioSources = numAudioSources;
             mIsCaptureSupported = isCaptureSupported;
             mBands = bands;
+            mIsBgScanSupported = isBgScanSupported;
+            mVendorExension = vendorExension;
         }
 
 
@@ -206,7 +212,23 @@ public class RadioManager {
          * @hide FutureFeature
          */
         public boolean isBackgroundScanningSupported() {
-            return false;
+            return mIsBgScanSupported;
+        }
+
+        /**
+         * Opaque vendor-specific string, passed from HAL without changes.
+         * Format of this string can vary across vendors.
+         *
+         * It may be used for extra features, that's not supported by a platform,
+         * for example: "preset-slots=6;ultra-hd-capable=false".
+         *
+         * Client application MUST verify vendor/product name from the
+         * ModuleProperties class before doing any interpretation of this value.
+         *
+         * @hide FutureFeature
+         */
+        public @NonNull String getVendorExension() {
+            return mVendorExension == null ? "" : mVendorExension;
         }
 
         /** List of descriptors for all bands supported by this module.
@@ -231,6 +253,8 @@ public class RadioManager {
             for (int i = 0; i < tmp.length; i++) {
                 mBands[i] = (BandDescriptor) tmp[i];
             }
+            mIsBgScanSupported = in.readInt() == 1;
+            mVendorExension = in.readString();
         }
 
         public static final Parcelable.Creator<ModuleProperties> CREATOR
@@ -256,6 +280,8 @@ public class RadioManager {
             dest.writeInt(mNumAudioSources);
             dest.writeInt(mIsCaptureSupported ? 1 : 0);
             dest.writeParcelableArray(mBands, flags);
+            dest.writeInt(mIsBgScanSupported ? 1 : 0);
+            dest.writeString(mVendorExension);
         }
 
         @Override
@@ -271,6 +297,7 @@ public class RadioManager {
                     + ", mNumTuners=" + mNumTuners
                     + ", mNumAudioSources=" + mNumAudioSources
                     + ", mIsCaptureSupported=" + mIsCaptureSupported
+                    + ", mIsBgScanSupported=" + mIsBgScanSupported
                     + ", mBands=" + Arrays.toString(mBands) + "]";
         }
 
@@ -288,6 +315,8 @@ public class RadioManager {
             result = prime * result + mNumAudioSources;
             result = prime * result + (mIsCaptureSupported ? 1 : 0);
             result = prime * result + Arrays.hashCode(mBands);
+            result = prime * result + (mIsBgScanSupported ? 1 : 0);
+            result = prime * result + ((mVendorExension == null) ? 0 : mVendorExension.hashCode());
             return result;
         }
 
@@ -329,6 +358,10 @@ public class RadioManager {
             if (mIsCaptureSupported != other.isCaptureSupported())
                 return false;
             if (!Arrays.equals(mBands, other.getBands()))
+                return false;
+            if (mIsBgScanSupported != other.isBackgroundScanningSupported())
+                return false;
+            if (!TextUtils.equals(mVendorExension, other.mVendorExension))
                 return false;
             return true;
         }
@@ -1161,9 +1194,11 @@ public class RadioManager {
         private final int mFlags;
         private final int mSignalStrength;
         private final RadioMetadata mMetadata;
+        private final String mVendorExension;
 
         ProgramInfo(int channel, int subChannel, boolean tuned, boolean stereo,
-                boolean digital, int signalStrength, RadioMetadata metadata, int flags) {
+                boolean digital, int signalStrength, RadioMetadata metadata, int flags,
+                String vendorExension) {
             mChannel = channel;
             mSubChannel = subChannel;
             mTuned = tuned;
@@ -1172,6 +1207,7 @@ public class RadioManager {
             mFlags = flags;
             mSignalStrength = signalStrength;
             mMetadata = metadata;
+            mVendorExension = vendorExension;
         }
 
         /** Main channel expressed in units according to band type.
@@ -1243,6 +1279,22 @@ public class RadioManager {
             return mMetadata;
         }
 
+        /**
+         * Opaque vendor-specific string, passed from HAL without changes.
+         * Format of this string can vary across vendors.
+         *
+         * It may be used for extra features, that's not supported by a platform,
+         * for example: "paid-service=true;bitrate=320kbps".
+         *
+         * Client application MUST verify vendor/product name from the
+         * ModuleProperties class before doing any interpretation of this value.
+         *
+         * @hide FutureFeature
+         */
+        public @NonNull String getVendorExension() {
+            return mVendorExension == null ? "" : mVendorExension;
+        }
+
         private ProgramInfo(Parcel in) {
             mChannel = in.readInt();
             mSubChannel = in.readInt();
@@ -1256,6 +1308,7 @@ public class RadioManager {
                 mMetadata = null;
             }
             mFlags = in.readInt();
+            mVendorExension = in.readString();
         }
 
         public static final Parcelable.Creator<ProgramInfo> CREATOR
@@ -1284,6 +1337,7 @@ public class RadioManager {
                 mMetadata.writeToParcel(dest, flags);
             }
             dest.writeInt(mFlags);
+            dest.writeString(mVendorExension);
         }
 
         @Override
@@ -1312,6 +1366,7 @@ public class RadioManager {
             result = prime * result + mFlags;
             result = prime * result + mSignalStrength;
             result = prime * result + ((mMetadata == null) ? 0 : mMetadata.hashCode());
+            result = prime * result + ((mVendorExension == null) ? 0 : mVendorExension.hashCode());
             return result;
         }
 
@@ -1340,6 +1395,8 @@ public class RadioManager {
                 if (other.getMetadata() != null)
                     return false;
             } else if (!mMetadata.equals(other.getMetadata()))
+                return false;
+            if (!TextUtils.equals(mVendorExension, other.mVendorExension))
                 return false;
             return true;
         }
