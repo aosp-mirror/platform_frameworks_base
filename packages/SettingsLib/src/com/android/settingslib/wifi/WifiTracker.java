@@ -67,6 +67,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class WifiTracker {
     // TODO(sghuman): Document remaining methods with @UiThread and @WorkerThread where possible.
     // TODO(sghuman): Refactor to avoid calling certain methods on the UiThread.
+    // TODO(b/36733768): Remove flag includeSaved and includePasspoints.
 
     private static final String TAG = "WifiTracker";
     private static final boolean DBG = Log.isLoggable(TAG, Log.DEBUG);
