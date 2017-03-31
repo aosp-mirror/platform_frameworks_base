@@ -906,6 +906,7 @@ public class WifiScanner {
     }
 
     /** specifies information about an access point of interest */
+    @Deprecated
     public static class BssidInfo {
         /** bssid of the access point; in XX:XX:XX:XX:XX:XX format */
         public String bssid;
@@ -919,6 +920,7 @@ public class WifiScanner {
 
     /** @hide */
     @SystemApi
+    @Deprecated
     public static class WifiChangeSettings implements Parcelable {
         public int rssiSampleSize;                          /* sample size for RSSI averaging */
         public int lostApSampleSize;                        /* samples to confirm AP's loss */
@@ -959,6 +961,7 @@ public class WifiScanner {
      * @param periodInMs indicates period of scan to find changes
      * @param bssidInfos access points to watch
      */
+    @Deprecated
     public void configureWifiChange(
             int rssiSampleSize,                             /* sample size for RSSI averaging */
             int lostApSampleSize,                           /* samples to confirm AP's loss */
@@ -974,6 +977,7 @@ public class WifiScanner {
     /**
      * interface to get wifi change events on; use this on {@link #startTrackingWifiChange}
      */
+    @Deprecated
     public interface WifiChangeListener extends ActionListener {
         /** indicates that changes were detected in wifi environment
          * @param results indicate the access points that exhibited change
@@ -990,6 +994,7 @@ public class WifiScanner {
      * @param listener object to report events on; this object must be unique and must also be
      *                 provided on {@link #stopTrackingWifiChange}
      */
+    @Deprecated
     public void startTrackingWifiChange(WifiChangeListener listener) {
         throw new UnsupportedOperationException();
     }
@@ -999,17 +1004,20 @@ public class WifiScanner {
      * @param listener object that was provided to report events on {@link
      * #stopTrackingWifiChange}
      */
+    @Deprecated
     public void stopTrackingWifiChange(WifiChangeListener listener) {
         throw new UnsupportedOperationException();
     }
 
     /** @hide */
     @SystemApi
+    @Deprecated
     public void configureWifiChange(WifiChangeSettings settings) {
         throw new UnsupportedOperationException();
     }
 
     /** interface to receive hotlist events on; use this on {@link #setHotlist} */
+    @Deprecated
     public static interface BssidListener extends ActionListener {
         /** indicates that access points were found by on going scans
          * @param results list of scan results, one for each access point visible currently
@@ -1023,6 +1031,7 @@ public class WifiScanner {
 
     /** @hide */
     @SystemApi
+    @Deprecated
     public static class HotlistSettings implements Parcelable {
         public BssidInfo[] bssidInfos;
         public int apLostThreshold;
@@ -1057,6 +1066,7 @@ public class WifiScanner {
      * @param listener object provided to report events on; this object must be unique and must
      *                 also be provided on {@link #stopTrackingBssids}
      */
+    @Deprecated
     public void startTrackingBssids(BssidInfo[] bssidInfos,
                                     int apLostThreshold, BssidListener listener) {
         throw new UnsupportedOperationException();
@@ -1066,6 +1076,7 @@ public class WifiScanner {
      * remove tracking of interesting access points
      * @param listener same object provided in {@link #startTrackingBssids}
      */
+    @Deprecated
     public void stopTrackingBssids(BssidListener listener) {
         throw new UnsupportedOperationException();
     }
