@@ -153,6 +153,18 @@ message SystemMessage {
     // Package: android
     NOTE_SSL_CERT_INFO = 33;
 
+    // Warn the user they are approaching their data limit.
+    // Package: android
+    NOTE_NET_WARNING = 34;
+
+    // Warn the user they have reached their data limit.
+    // Package: android
+    NOTE_NET_LIMIT = 35;
+
+    // Warn the user they have exceeded their data limit.
+    // Package: android
+    NOTE_NET_LIMIT_SNOOZED = 36;
+
     // ADD_NEW_IDS_ABOVE_THIS_LINE
     // Legacy IDs with arbitrary values appear below
     // Legacy IDs existed as stable non-conflicting constants prior to the O release
