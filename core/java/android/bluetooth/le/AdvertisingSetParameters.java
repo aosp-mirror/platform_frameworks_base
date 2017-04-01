@@ -16,6 +16,7 @@
 
 package android.bluetooth.le;
 
+import android.bluetooth.BluetoothAdapter;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -279,7 +280,7 @@ public final class AdvertisingSetParameters implements Parcelable {
          * When set to true, advertising set will advertise 4.x Spec compliant
          * advertisements.
          *
-         * @param isLegacy wether legacy advertising mode should be used.
+         * @param isLegacy whether legacy advertising mode should be used.
          */
         public Builder setLegacyMode(boolean isLegacy) {
             this.isLegacy = isLegacy;
@@ -287,12 +288,12 @@ public final class AdvertisingSetParameters implements Parcelable {
         }
 
         /**
-         * Set wether advertiser address should be ommited from all packets. If this
+         * Set whether advertiser address should be ommited from all packets. If this
          * mode is used, periodic advertising can't be enabled for this set.
          *
          * This is used only if legacy mode is not used.
          *
-         * @param isAnonymous wether anonymous advertising should be used.
+         * @param isAnonymous whether anonymous advertising should be used.
          */
         public Builder setAnonymous(boolean isAnonymous) {
             this.isAnonymous = isAnonymous;
@@ -300,12 +301,12 @@ public final class AdvertisingSetParameters implements Parcelable {
         }
 
         /**
-         * Set wether TX power should be included in the extended header.
+         * Set whether TX power should be included in the extended header.
          *
          * This is used only if legacy mode is not used.
          *
-         * @param includeTxPower wether TX power should be included in extended
-         * header
+         * @param includeTxPower whether TX power should be included in extended
+         *            header
          */
         public Builder setIncludeTxPower(boolean includeTxPower) {
             this.includeTxPower = includeTxPower;
@@ -317,6 +318,8 @@ public final class AdvertisingSetParameters implements Parcelable {
          *
          * This is used only if legacy mode is not used.
          *
+         * Use {@link BluetoothAdapter#isLeCodedPhySupported} to determine if LE Coded PHY is
+         * supported on this device.
          * @param primaryPhy Primary advertising physical channel, can only be
          *            {@link AdvertisingSetParameters#PHY_LE_1M} or
          *            {@link AdvertisingSetParameters#PHY_LE_CODED}.
@@ -334,6 +337,10 @@ public final class AdvertisingSetParameters implements Parcelable {
          * Set the secondary physical channel used for this advertising set.
          *
          * This is used only if legacy mode is not used.
+         *
+         * Use {@link BluetoothAdapter#isLeCodedPhySupported} and
+         * {@link BluetoothAdapter#isLe2MPhySupported} to determine if LE Coded PHY or 2M PHY is
+         * supported on this device.
          *
          * @param secondaryPhy Secondary advertising physical channel, can only be
          *            one of {@link AdvertisingSetParameters#PHY_LE_1M},
@@ -393,6 +400,32 @@ public final class AdvertisingSetParameters implements Parcelable {
          * Build the {@link AdvertisingSetParameters} object.
          */
         public AdvertisingSetParameters build() {
+            if (isLegacy) {
+                if (isAnonymous) {
+                    throw new IllegalArgumentException("Legacy advertising can't be anonymous");
+                }
+
+                if (connectable == true && scannable == false) {
+                    throw new IllegalArgumentException(
+                        "Legacy advertisement can't be connectable and non-scannable");
+                }
+
+                if (includeTxPower) {
+                    throw new IllegalArgumentException(
+                        "Legacy advertising can't include TX power level in header");
+                }
+            } else {
+                if (connectable && scannable) {
+                    throw new IllegalArgumentException(
+                        "Advertising can't be both connectable and scannable");
+                }
+
+                if (isAnonymous && connectable) {
+                    throw new IllegalArgumentException(
+                        "Advertising can't be both connectable and anonymous");
+                }
+            }
+
             return new AdvertisingSetParameters(connectable, scannable, isLegacy, isAnonymous,
                                                 includeTxPower, primaryPhy,
                                                 secondaryPhy, interval, txPowerLevel);

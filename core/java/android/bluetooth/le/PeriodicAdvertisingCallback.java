@@ -23,6 +23,7 @@ import android.bluetooth.BluetoothDevice;
  * advertising operation status.
  *
  * @see PeriodicAdvertisingManager#createSync
+ * @hide
  */
 public abstract class PeriodicAdvertisingCallback {
 
