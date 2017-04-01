@@ -20,7 +20,7 @@
 
     <option name="test-suite-tag" value="apct" />
     <option name="test-tag" value="FrameworksCoreTests" />
-    <test class="com.android.tradefed.testtype.InstrumentationTest" >
+    <test class="com.android.tradefed.testtype.AndroidJUnitTest" >
         <option name="package" value="com.android.frameworks.coretests" />
         <option name="runner" value="android.support.test.runner.AndroidJUnitRunner" />
     </test>
