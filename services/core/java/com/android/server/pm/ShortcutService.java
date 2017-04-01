@@ -1575,15 +1575,15 @@ public class ShortcutService extends IShortcutService.Stub {
      * - Write to file
      */
     void packageShortcutsChanged(@NonNull String packageName, @UserIdInt int userId) {
-        if (DEBUG) {
-            Slog.d(TAG, String.format(
-                    "Shortcut changes: package=%s, user=%d", packageName, userId));
-        }
         notifyListeners(packageName, userId);
         scheduleSaveUser(userId);
     }
 
     private void notifyListeners(@NonNull String packageName, @UserIdInt int userId) {
+        if (DEBUG) {
+            Slog.d(TAG, String.format(
+                    "Shortcut changes: package=%s, user=%d", packageName, userId));
+        }
         injectPostToHandler(() -> {
             try {
                 final ArrayList<ShortcutChangeListener> copy;
@@ -2896,6 +2896,11 @@ public class ShortcutService extends IShortcutService.Stub {
     }
 
     private void handlePackageChanged(String packageName, int packageUserId) {
+        if (!isPackageInstalled(packageName, packageUserId)) {
+            // Probably disabled, which is the same thing as uninstalled.
+            handlePackageRemoved(packageName, packageUserId);
+            return;
+        }
         if (DEBUG) {
             Slog.d(TAG, String.format("handlePackageChanged: %s user=%d", packageName,
                     packageUserId));
@@ -3111,7 +3116,7 @@ public class ShortcutService extends IShortcutService.Stub {
     }
 
     private static boolean isInstalled(@Nullable ApplicationInfo ai) {
-        return (ai != null) && (ai.flags & ApplicationInfo.FLAG_INSTALLED) != 0;
+        return (ai != null) && ai.enabled && (ai.flags & ApplicationInfo.FLAG_INSTALLED) != 0;
     }
 
     private static boolean isEphemeralApp(@Nullable ApplicationInfo ai) {
