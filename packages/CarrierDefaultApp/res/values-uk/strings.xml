@@ -7,12 +7,8 @@
     <string name="no_data_notification_id" msgid="668400731803969521">"Мобільний трафік дезактивовано"</string>
     <string name="portal_notification_detail" msgid="2295729385924660881">"Торкніться, щоб перейти на веб-сайт %s"</string>
     <string name="no_data_notification_detail" msgid="3112125343857014825">"Зв’яжіться зі своїм постачальником послуг %s"</string>
-    <!-- no translation found for action_bar_label (4290345990334377177) -->
-    <skip />
-    <!-- no translation found for ssl_error_warning (3127935140338254180) -->
-    <skip />
-    <!-- no translation found for ssl_error_example (6188711843183058764) -->
-    <skip />
-    <!-- no translation found for ssl_error_continue (1138548463994095584) -->
-    <skip />
+    <string name="action_bar_label" msgid="4290345990334377177">"Під’єднайте пристрій до мобільної мережі"</string>
+    <string name="ssl_error_warning" msgid="3127935140338254180">"У мережі, до якої ви намагаєтеся під’єднатись, є проблеми з безпекою."</string>
+    <string name="ssl_error_example" msgid="6188711843183058764">"Наприклад, сторінка входу може не належати вказаній організації."</string>
+    <string name="ssl_error_continue" msgid="1138548463994095584">"Усе одно продовжити у веб-переглядачі"</string>
 </resources>

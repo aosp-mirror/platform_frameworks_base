@@ -7,12 +7,8 @@
     <string name="no_data_notification_id" msgid="668400731803969521">"ನಿಮ್ಮ ಮೊಬೈಲ್ ಡೇಟಾ ನಿಷ್ಕ್ರಿಯಗೊಂಡಿದೆ"</string>
     <string name="portal_notification_detail" msgid="2295729385924660881">"%s ವೆಬ್‌ಸೈಟ್‌ಗೆ ಭೇಟಿ ನೀಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="no_data_notification_detail" msgid="3112125343857014825">"ನಿಮಗೆ ಸೇವೆ ಒದಗಿಸುವವರನ್ನು ದಯವಿಟ್ಟು ಸಂಪರ್ಕಿಸಿ %s"</string>
-    <!-- no translation found for action_bar_label (4290345990334377177) -->
-    <skip />
-    <!-- no translation found for ssl_error_warning (3127935140338254180) -->
-    <skip />
-    <!-- no translation found for ssl_error_example (6188711843183058764) -->
-    <skip />
-    <!-- no translation found for ssl_error_continue (1138548463994095584) -->
-    <skip />
+    <string name="action_bar_label" msgid="4290345990334377177">"ಮೊಬೈಲ್ ನೆಟ್‌ವರ್ಕ್‌ಗೆ ಸೈನ್ ಇನ್ ಮಾಡಿ"</string>
+    <string name="ssl_error_warning" msgid="3127935140338254180">"ನೀವು ಸೇರಬೇಕೆಂದಿರುವ ನೆಟ್‌ವರ್ಕ್, ಭದ್ರತೆ ಸಮಸ್ಯೆಗಳನ್ನು ಹೊಂದಿದೆ."</string>
+    <string name="ssl_error_example" msgid="6188711843183058764">"ಉದಾಹರಣೆಗೆ, ಲಾಗಿನ್ ಪುಟವು ತೋರಿಸಲಾಗಿರುವ ಸಂಸ್ಥೆಗೆ ಸಂಬಂಧಿಸಿಲ್ಲದಿರಬಹುದು."</string>
+    <string name="ssl_error_continue" msgid="1138548463994095584">"ಪರವಾಗಿಲ್ಲ, ಬ್ರೌಸರ್ ಮೂಲಕ ಮುಂದುವರಿಸಿ"</string>
 </resources>
