@@ -633,7 +633,7 @@ class GlobalScreenshot {
                         mWindowManager.removeView(mScreenshotLayout);
                         final Rect rect = view.getSelectionRect();
                         if (rect != null) {
-                            if (rect.left > 0 && rect.top > 0 && rect.width() != 0 && rect.height() != 0) {
+                            if (rect.left >= 0 && rect.top >= 0 && rect.width() != 0 && rect.height() != 0) {
                                 // Need mScreenshotLayout to handle it after the view disappears
                                 mScreenshotLayout.post(new Runnable() {
                                     public void run() {
