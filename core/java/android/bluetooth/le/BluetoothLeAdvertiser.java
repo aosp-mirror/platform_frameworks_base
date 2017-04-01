@@ -56,7 +56,6 @@ public final class BluetoothLeAdvertiser {
     // Flags field will be set by system.
     private static final int FLAGS_FIELD_BYTES = 3;
     private static final int MANUFACTURER_SPECIFIC_DATA_LENGTH = 2;
-    private static final int SERVICE_DATA_UUID_LENGTH = 2;
 
     private final IBluetoothManager mBluetoothManager;
     private final Handler mHandler;
@@ -383,7 +382,8 @@ public final class BluetoothLeAdvertiser {
             }
         }
         for (ParcelUuid uuid : data.getServiceData().keySet()) {
-            size += OVERHEAD_BYTES_PER_FIELD + SERVICE_DATA_UUID_LENGTH
+            int uuidLen = BluetoothUuid.uuidToBytes(uuid).length;
+            size += OVERHEAD_BYTES_PER_FIELD + uuidLen
                     + byteLength(data.getServiceData().get(uuid));
         }
         for (int i = 0; i < data.getManufacturerSpecificData().size(); ++i) {
