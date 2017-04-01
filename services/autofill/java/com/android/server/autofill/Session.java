@@ -29,6 +29,7 @@ import static com.android.server.autofill.Helper.VERBOSE;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.assist.AssistStructure;
+import android.app.assist.AssistStructure.AutofillOverlay;
 import android.app.assist.AssistStructure.ViewNode;
 import android.app.assist.AssistStructure.WindowNode;
 import android.content.ComponentName;
@@ -100,7 +101,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     @NonNull private final String mPackageName;
 
     @GuardedBy("mLock")
-    private final Map<AutofillId, ViewState> mViewStates = new ArrayMap<>();
+    private final ArrayMap<AutofillId, ViewState> mViewStates = new ArrayMap<>();
 
     /**
      * Id of the View currently being displayed.
@@ -517,10 +518,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 if (DEBUG) {
                     Slog.d(TAG, "Creating viewState for " + id + " on " + getFlagAsString(flags));
                 }
-                viewState = new ViewState(this, id, this, ViewState.STATE_INITIAL);
+                viewState = new ViewState(this, id, value, this, ViewState.STATE_INITIAL);
                 mViewStates.put(id, viewState);
             } else if ((flags & FLAG_VIEW_ENTERED) != 0) {
-                viewState = startPartitionLocked(id);
+                viewState = startPartitionLocked(id, value);
             } else {
                 if (VERBOSE) Slog.v(TAG, "Ignored " + getFlagAsString(flags) + " for " + id);
                 return;
@@ -584,25 +585,45 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         Slog.w(TAG, "updateLocked(): unknown flags " + flags + ": " + getFlagAsString(flags));
     }
 
-    private ViewState startPartitionLocked(AutofillId id) {
+    private ViewState startPartitionLocked(AutofillId id, AutofillValue value) {
         if (DEBUG) {
             Slog.d(TAG, "Starting partition for view id " + id);
         }
-        final ViewState viewState =
-                new ViewState(this, id, this,ViewState.STATE_STARTED_PARTITION);
-        mViewStates.put(id, viewState);
+        final ViewState newViewState =
+                new ViewState(this, id, value, this,ViewState.STATE_STARTED_PARTITION);
+        mViewStates.put(id, newViewState);
 
         /*
          * TODO(b/33197203 , b/35707731): when start a new partition, it should
          *
-         * - add autofilled fields as sanitized
-         * - set focus on ViewStructure that triggered it
          * - pass the first onFillRequest() bundle
          * - optional: perhaps add a new flag onFilLRequest() to indicate it's a new partition?
          */
+
+        // Must update value of nodes so:
+        // - proper node is focused
+        // - autofillValue is sent back to service when it was previously autofilled
+        for (int i = 0; i < mViewStates.size(); i++) {
+            final ViewState viewState = mViewStates.valueAt(i);
+
+            final ViewNode node = findViewNodeByIdLocked(viewState.id);
+            if (node == null) {
+                Slog.w(TAG, "startPartitionLocked(): no node for " + viewState.id);
+                continue;
+            }
+
+            final AutofillValue initialValue = viewState.getInitialValue();
+            final AutofillValue filledValue = viewState.getAutofilledValue();
+            final AutofillOverlay overlay = new AutofillOverlay();
+            if (filledValue != null && !filledValue.equals(initialValue)) {
+                overlay.value = filledValue;
+            }
+            overlay.focused = id.equals(viewState.id);
+            node.setAutofillOverlay(overlay);
+        }
         mRemoteFillService.onFillRequest(mStructure, null, 0);
 
-        return viewState;
+        return newViewState;
     }
 
     @Override
@@ -695,7 +716,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             if (viewState != null)  {
                 viewState.setState(state);
             } else {
-                viewState = new ViewState(this, id, this, state);
+                viewState = new ViewState(this, id, null, this, state);
                 if (DEBUG) { // TODO(b/33197203): change to VERBOSE once stable
                     Slog.d(TAG, "Adding autofillable view with id " + id + " and state " + state);
                 }
