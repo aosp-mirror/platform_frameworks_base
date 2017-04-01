@@ -143,7 +143,7 @@ import java.util.function.DoubleUnaryOperator;
  *     .render();
  * </pre>
  * <p>
- *     <img src="{@docRoot}reference/android/images/graphics/colorspace_renderer.png" />
+ *     <img style="display: block; margin: 0 auto;" src="{@docRoot}reference/android/images/graphics/colorspace_renderer.png" />
  *     <figcaption style="text-align: center;">DCI-P3 vs ProPhoto RGB</figcaption>
  * </p>
  *
@@ -281,7 +281,7 @@ public abstract class ColorSpace {
          *     <tr><td>Range</td><td colspan="4">\([0..1]\)</td></tr>
          * </table>
          * <p>
-         *     <img src="{@docRoot}reference/android/images/graphics/colorspace_srgb.png" />
+         *     <img style="display: block; margin: 0 auto;" src="{@docRoot}reference/android/images/graphics/colorspace_srgb.png" />
          *     <figcaption style="text-align: center;">sRGB</figcaption>
          * </p>
          */
@@ -308,7 +308,7 @@ public abstract class ColorSpace {
          *     <tr><td>Range</td><td colspan="4">\([0..1]\)</td></tr>
          * </table>
          * <p>
-         *     <img src="{@docRoot}reference/android/images/graphics/colorspace_srgb.png" />
+         *     <img style="display: block; margin: 0 auto;" src="{@docRoot}reference/android/images/graphics/colorspace_srgb.png" />
          *     <figcaption style="text-align: center;">sRGB</figcaption>
          * </p>
          */
@@ -347,7 +347,7 @@ public abstract class ColorSpace {
          *     <tr><td>Range</td><td colspan="4">\([-0.799..2.399[\)</td></tr>
          * </table>
          * <p>
-         *     <img src="{@docRoot}reference/android/images/graphics/colorspace_scrgb.png" />
+         *     <img style="display: block; margin: 0 auto;" src="{@docRoot}reference/android/images/graphics/colorspace_scrgb.png" />
          *     <figcaption style="text-align: center;">Extended sRGB (orange) vs sRGB (white)</figcaption>
          * </p>
          */
@@ -374,7 +374,7 @@ public abstract class ColorSpace {
          *     <tr><td>Range</td><td colspan="4">\([-0.5..7.499[\)</td></tr>
          * </table>
          * <p>
-         *     <img src="{@docRoot}reference/android/images/graphics/colorspace_scrgb.png" />
+         *     <img style="display: block; margin: 0 auto;" src="{@docRoot}reference/android/images/graphics/colorspace_scrgb.png" />
          *     <figcaption style="text-align: center;">Extended sRGB (orange) vs sRGB (white)</figcaption>
          * </p>
          */
@@ -409,7 +409,7 @@ public abstract class ColorSpace {
          *     <tr><td>Range</td><td colspan="4">\([0..1]\)</td></tr>
          * </table>
          * <p>
-         *     <img src="{@docRoot}reference/android/images/graphics/colorspace_bt709.png" />
+         *     <img style="display: block; margin: 0 auto;" src="{@docRoot}reference/android/images/graphics/colorspace_bt709.png" />
          *     <figcaption style="text-align: center;">BT.709</figcaption>
          * </p>
          */
@@ -444,7 +444,7 @@ public abstract class ColorSpace {
          *     <tr><td>Range</td><td colspan="4">\([0..1]\)</td></tr>
          * </table>
          * <p>
-         *     <img src="{@docRoot}reference/android/images/graphics/colorspace_bt2020.png" />
+         *     <img style="display: block; margin: 0 auto;" src="{@docRoot}reference/android/images/graphics/colorspace_bt2020.png" />
          *     <figcaption style="text-align: center;">BT.2020 (orange) vs sRGB (white)</figcaption>
          * </p>
          */
@@ -471,7 +471,7 @@ public abstract class ColorSpace {
          *     <tr><td>Range</td><td colspan="4">\([0..1]\)</td></tr>
          * </table>
          * <p>
-         *     <img src="{@docRoot}reference/android/images/graphics/colorspace_dci_p3.png" />
+         *     <img style="display: block; margin: 0 auto;" src="{@docRoot}reference/android/images/graphics/colorspace_dci_p3.png" />
          *     <figcaption style="text-align: center;">DCI-P3 (orange) vs sRGB (white)</figcaption>
          * </p>
          */
@@ -506,7 +506,7 @@ public abstract class ColorSpace {
          *     <tr><td>Range</td><td colspan="4">\([0..1]\)</td></tr>
          * </table>
          * <p>
-         *     <img src="{@docRoot}reference/android/images/graphics/colorspace_display_p3.png" />
+         *     <img style="display: block; margin: 0 auto;" src="{@docRoot}reference/android/images/graphics/colorspace_display_p3.png" />
          *     <figcaption style="text-align: center;">Display P3 (orange) vs sRGB (white)</figcaption>
          * </p>
          */
@@ -541,7 +541,7 @@ public abstract class ColorSpace {
          *     <tr><td>Range</td><td colspan="4">\([0..1]\)</td></tr>
          * </table>
          * <p>
-         *     <img src="{@docRoot}reference/android/images/graphics/colorspace_ntsc_1953.png" />
+         *     <img style="display: block; margin: 0 auto;" src="{@docRoot}reference/android/images/graphics/colorspace_ntsc_1953.png" />
          *     <figcaption style="text-align: center;">NTSC 1953 (orange) vs sRGB (white)</figcaption>
          * </p>
          */
@@ -576,7 +576,7 @@ public abstract class ColorSpace {
          *     <tr><td>Range</td><td colspan="4">\([0..1]\)</td></tr>
          * </table>
          * <p>
-         *     <img src="{@docRoot}reference/android/images/graphics/colorspace_smpte_c.png" />
+         *     <img style="display: block; margin: 0 auto;" src="{@docRoot}reference/android/images/graphics/colorspace_smpte_c.png" />
          *     <figcaption style="text-align: center;">SMPTE-C (orange) vs sRGB (white)</figcaption>
          * </p>
          */
@@ -603,7 +603,7 @@ public abstract class ColorSpace {
          *     <tr><td>Range</td><td colspan="4">\([0..1]\)</td></tr>
          * </table>
          * <p>
-         *     <img src="{@docRoot}reference/android/images/graphics/colorspace_adobe_rgb.png" />
+         *     <img style="display: block; margin: 0 auto;" src="{@docRoot}reference/android/images/graphics/colorspace_adobe_rgb.png" />
          *     <figcaption style="text-align: center;">Adobe RGB (orange) vs sRGB (white)</figcaption>
          * </p>
          */
@@ -638,7 +638,7 @@ public abstract class ColorSpace {
          *     <tr><td>Range</td><td colspan="4">\([0..1]\)</td></tr>
          * </table>
          * <p>
-         *     <img src="{@docRoot}reference/android/images/graphics/colorspace_pro_photo_rgb.png" />
+         *     <img style="display: block; margin: 0 auto;" src="{@docRoot}reference/android/images/graphics/colorspace_pro_photo_rgb.png" />
          *     <figcaption style="text-align: center;">ProPhoto RGB (orange) vs sRGB (white)</figcaption>
          * </p>
          */
@@ -665,7 +665,7 @@ public abstract class ColorSpace {
          *     <tr><td>Range</td><td colspan="4">\([-65504.0, 65504.0]\)</td></tr>
          * </table>
          * <p>
-         *     <img src="{@docRoot}reference/android/images/graphics/colorspace_aces.png" />
+         *     <img style="display: block; margin: 0 auto;" src="{@docRoot}reference/android/images/graphics/colorspace_aces.png" />
          *     <figcaption style="text-align: center;">ACES (orange) vs sRGB (white)</figcaption>
          * </p>
          */
@@ -692,7 +692,7 @@ public abstract class ColorSpace {
          *     <tr><td>Range</td><td colspan="4">\([-65504.0, 65504.0]\)</td></tr>
          * </table>
          * <p>
-         *     <img src="{@docRoot}reference/android/images/graphics/colorspace_acescg.png" />
+         *     <img style="display: block; margin: 0 auto;" src="{@docRoot}reference/android/images/graphics/colorspace_acescg.png" />
          *     <figcaption style="text-align: center;">ACEScg (orange) vs sRGB (white)</figcaption>
          * </p>
          */
@@ -1931,7 +1931,7 @@ public abstract class ColorSpace {
      * are internally converted to xyY.</p>
      *
      * <p>
-     *     <img src="{@docRoot}reference/android/images/graphics/colorspace_srgb.png" />
+     *     <img style="display: block; margin: 0 auto;" src="{@docRoot}reference/android/images/graphics/colorspace_srgb.png" />
      *     <figcaption style="text-align: center;">sRGB primaries and white point</figcaption>
      * </p>
      *
@@ -1989,7 +1989,7 @@ public abstract class ColorSpace {
      * the range \([-65504, 65504]\).</p>
      *
      * <p>
-     *     <img src="{@docRoot}reference/android/images/graphics/colorspace_scrgb.png" />
+     *     <img style="display: block; margin: 0 auto;" src="{@docRoot}reference/android/images/graphics/colorspace_scrgb.png" />
      *     <figcaption style="text-align: center;">Extended sRGB and its large range</figcaption>
      * </p>
      *
@@ -3703,7 +3703,7 @@ public abstract class ColorSpace {
      *     .render();
      * </pre>
      * <p>
-     *     <img src="{@docRoot}reference/android/images/graphics/colorspace_clipped.png" />
+     *     <img style="display: block; margin: 0 auto;" src="{@docRoot}reference/android/images/graphics/colorspace_clipped.png" />
      *     <figcaption style="text-align: center;">sRGB vs DCI-P3</figcaption>
      * </p>
      *
@@ -3746,7 +3746,7 @@ public abstract class ColorSpace {
          *     .render();
          * </pre>
          * <p>
-         *     <img src="{@docRoot}reference/android/images/graphics/colorspace_comparison.png" />
+         *     <img style="display: block; margin: 0 auto;" src="{@docRoot}reference/android/images/graphics/colorspace_comparison.png" />
          *     <figcaption style="text-align: center;">Clipping disabled</figcaption>
          * </p>
          *
@@ -3759,7 +3759,7 @@ public abstract class ColorSpace {
          *     .render();
          * </pre>
          * <p>
-         *     <img src="{@docRoot}reference/android/images/graphics/colorspace_clipped.png" />
+         *     <img style="display: block; margin: 0 auto;" src="{@docRoot}reference/android/images/graphics/colorspace_clipped.png" />
          *     <figcaption style="text-align: center;">Clipping enabled</figcaption>
          * </p>
          *
@@ -3789,7 +3789,7 @@ public abstract class ColorSpace {
          *     .render();
          * </pre>
          * <p>
-         *     <img src="{@docRoot}reference/android/images/graphics/colorspace_ucs.png" />
+         *     <img style="display: block; margin: 0 auto;" src="{@docRoot}reference/android/images/graphics/colorspace_ucs.png" />
          *     <figcaption style="text-align: center;">CIE 1976 UCS diagram</figcaption>
          * </p>
          *
@@ -3847,7 +3847,7 @@ public abstract class ColorSpace {
          *     .render();
          * </pre>
          * <p>
-         *     <img src="{@docRoot}reference/android/images/graphics/colorspace_comparison.png" />
+         *     <img style="display: block; margin: 0 auto;" src="{@docRoot}reference/android/images/graphics/colorspace_comparison.png" />
          *     <figcaption style="text-align: center;">sRGB vs DCI-P3</figcaption>
          * </p>
          *
@@ -3863,7 +3863,7 @@ public abstract class ColorSpace {
          *     .render();
          * </pre>
          * <p>
-         *     <img src="{@docRoot}reference/android/images/graphics/colorspace_comparison2.png" />
+         *     <img style="display: block; margin: 0 auto;" src="{@docRoot}reference/android/images/graphics/colorspace_comparison2.png" />
          *     <figcaption style="text-align: center;">sRGB, DCI-P3, ACES and scRGB</figcaption>
          * </p>
          *
@@ -3901,7 +3901,7 @@ public abstract class ColorSpace {
          *     .render();
          * </pre>
          * <p>
-         *     <img src="{@docRoot}reference/android/images/graphics/colorspace_points.png" />
+         *     <img style="display: block; margin: 0 auto;" src="{@docRoot}reference/android/images/graphics/colorspace_points.png" />
          *     <figcaption style="text-align: center;">
          *         Locating colors on the chromaticity diagram
          *     </figcaption>

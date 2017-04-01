@@ -16,6 +16,12 @@
 
 package android.graphics;
 
+/**
+ * <p>Specialized implementation of {@link Paint}'s
+ * {@link Paint#setXfermode(Xfermode) transfer mode}. Refer to the
+ * documentation of the {@link PorterDuff.Mode} enum for more
+ * information on the available alpha compositing and blending modes.</p>
+ */
 public class PorterDuffXfermode extends Xfermode {
     /**
      * Create an xfermode that uses the specified porter-duff mode.

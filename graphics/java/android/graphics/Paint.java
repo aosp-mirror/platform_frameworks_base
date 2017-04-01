@@ -1067,19 +1067,23 @@ public class Paint {
     }
 
     /**
-     * Get the paint's xfermode object.
+     * Get the paint's transfer mode object.
      *
-     * @return the paint's xfermode (or null)
+     * @return the paint's transfer mode (or null)
      */
     public Xfermode getXfermode() {
         return mXfermode;
     }
 
     /**
-     * Set or clear the xfermode object.
+     * Set or clear the transfer mode object. A transfer mode defines how
+     * source pixels (generate by a drawing command) are composited with
+     * the destination pixels (content of the render target).
      * <p />
-     * Pass null to clear any previous xfermode.
+     * Pass null to clear any previous transfer mode.
      * As a convenience, the parameter passed is also returned.
+     * <p />
+     * {@link PorterDuffXfermode} is the most common transfer mode.
      *
      * @param xfermode May be null. The xfermode to be installed in the paint
      * @return         xfermode
