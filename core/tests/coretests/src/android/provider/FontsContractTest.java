@@ -94,7 +94,8 @@ public class FontsContractTest extends ProviderTestCase2<TestFontsProvider> {
         FontResult fontResult = resultList.get(0);
         assertEquals(TestFontsProvider.TTC_INDEX, fontResult.getTtcIndex());
         assertEquals(TestFontsProvider.VARIATION_SETTINGS, fontResult.getFontVariationSettings());
-        assertEquals(TestFontsProvider.STYLE, fontResult.getStyle());
+        assertEquals(TestFontsProvider.NORMAL_WEIGHT, fontResult.getWeight());
+        assertEquals(TestFontsProvider.ITALIC, fontResult.getItalic());
         assertNotNull(fontResult.getFileDescriptor());
     }
 
@@ -115,7 +116,8 @@ public class FontsContractTest extends ProviderTestCase2<TestFontsProvider> {
         FontResult fontResult = resultList.get(0);
         assertEquals(0, fontResult.getTtcIndex());
         assertNull(fontResult.getFontVariationSettings());
-        assertEquals(Typeface.NORMAL, fontResult.getStyle());
+        assertEquals(400, fontResult.getWeight());
+        assertFalse(fontResult.getItalic());
         assertNotNull(fontResult.getFileDescriptor());
     }
 
@@ -146,10 +148,10 @@ public class FontsContractTest extends ProviderTestCase2<TestFontsProvider> {
     public void testGetFontFromProvider_resultFontNotFoundSecondRow() {
         MatrixCursor cursor = new MatrixCursor(new String[] { FontsContract.Columns._ID,
                 FontsContract.Columns.TTC_INDEX, FontsContract.Columns.VARIATION_SETTINGS,
-                FontsContract.Columns.STYLE, FontsContract.Columns.RESULT_CODE });
-        cursor.addRow(new Object[] { 1, 0, null, Typeface.NORMAL,
-                FontsContract.Columns.RESULT_CODE_OK});
-        cursor.addRow(new Object[] { 1, 0, null, Typeface.NORMAL,
+                FontsContract.Columns.WEIGHT, FontsContract.Columns.ITALIC,
+                FontsContract.Columns.RESULT_CODE });
+        cursor.addRow(new Object[] { 1, 0, null, 400, 0, FontsContract.Columns.RESULT_CODE_OK});
+        cursor.addRow(new Object[] { 1, 0, null, 400, 0,
                 FontsContract.Columns.RESULT_CODE_FONT_NOT_FOUND});
         mProvider.setCustomCursor(cursor);
         mContract.getFontFromProvider(request, mResultReceiver, TestFontsProvider.AUTHORITY);
@@ -160,13 +162,12 @@ public class FontsContractTest extends ProviderTestCase2<TestFontsProvider> {
     public void testGetFontFromProvider_resultFontNotFoundOtherRow() {
         MatrixCursor cursor = new MatrixCursor(new String[] { FontsContract.Columns._ID,
                 FontsContract.Columns.TTC_INDEX, FontsContract.Columns.VARIATION_SETTINGS,
-                FontsContract.Columns.STYLE, FontsContract.Columns.RESULT_CODE });
-        cursor.addRow(new Object[] { 1, 0, null, Typeface.NORMAL,
-                FontsContract.Columns.RESULT_CODE_OK});
-        cursor.addRow(new Object[] { 1, 0, null, Typeface.NORMAL,
+                FontsContract.Columns.WEIGHT, FontsContract.Columns.ITALIC,
+                FontsContract.Columns.RESULT_CODE });
+        cursor.addRow(new Object[] { 1, 0, null, 400, 0, FontsContract.Columns.RESULT_CODE_OK});
+        cursor.addRow(new Object[] { 1, 0, null, 400, 0,
                 FontsContract.Columns.RESULT_CODE_FONT_NOT_FOUND});
-        cursor.addRow(new Object[] { 1, 0, null, Typeface.NORMAL,
-                FontsContract.Columns.RESULT_CODE_OK});
+        cursor.addRow(new Object[] { 1, 0, null, 400, 0, FontsContract.Columns.RESULT_CODE_OK});
         mProvider.setCustomCursor(cursor);
         mContract.getFontFromProvider(request, mResultReceiver, TestFontsProvider.AUTHORITY);
 
@@ -176,10 +177,10 @@ public class FontsContractTest extends ProviderTestCase2<TestFontsProvider> {
     public void testGetFontFromProvider_resultCodeIsNegativeNumber() {
         MatrixCursor cursor = new MatrixCursor(new String[] { FontsContract.Columns._ID,
                 FontsContract.Columns.TTC_INDEX, FontsContract.Columns.VARIATION_SETTINGS,
-                FontsContract.Columns.STYLE, FontsContract.Columns.RESULT_CODE });
-        cursor.addRow(new Object[] { 1, 0, null, Typeface.NORMAL,
-                FontsContract.Columns.RESULT_CODE_OK});
-        cursor.addRow(new Object[] { 1, 0, null, Typeface.NORMAL, -5});
+                FontsContract.Columns.WEIGHT, FontsContract.Columns.ITALIC,
+                FontsContract.Columns.RESULT_CODE });
+        cursor.addRow(new Object[] { 1, 0, null, 400, 0, FontsContract.Columns.RESULT_CODE_OK});
+        cursor.addRow(new Object[] { 1, 0, null, 400, 0, -5});
         mProvider.setCustomCursor(cursor);
         mContract.getFontFromProvider(request, mResultReceiver, TestFontsProvider.AUTHORITY);
 

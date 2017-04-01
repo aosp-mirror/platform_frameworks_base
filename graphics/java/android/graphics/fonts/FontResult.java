@@ -35,7 +35,8 @@ public final class FontResult implements Parcelable {
     private final ParcelFileDescriptor mFileDescriptor;
     private final int mTtcIndex;
     private final String mFontVariationSettings;
-    private final int mStyle;
+    private final int mWeight;
+    private final boolean mItalic;
 
     /**
      * Creates a FontResult with all the information needed about a provided font.
@@ -45,16 +46,16 @@ public final class FontResult implements Parcelable {
      *                       will fail to load in the client application.
      * @param ttcIndex If providing a TTC_INDEX file, the index to point to. Otherwise, 0.
      * @param fontVariationSettings If providing a variation font, the settings for it. May be null.
-     * @param style One of {@link android.graphics.Typeface#NORMAL},
-     *              {@link android.graphics.Typeface#BOLD}, {@link android.graphics.Typeface#ITALIC}
-     *              or {@link android.graphics.Typeface#BOLD_ITALIC}
+     * @param weight An integer that indicates the font weight.
+     * @param italic A boolean that indicates the font is italic style or not.
      */
     public FontResult(@NonNull ParcelFileDescriptor fileDescriptor, int ttcIndex,
-            @Nullable String fontVariationSettings, int style) {
+            @Nullable String fontVariationSettings, int weight, boolean italic) {
         mFileDescriptor = Preconditions.checkNotNull(fileDescriptor);
         mTtcIndex = ttcIndex;
         mFontVariationSettings = fontVariationSettings;
-        mStyle = style;
+        mWeight = weight;
+        mItalic = italic;
     }
 
     public ParcelFileDescriptor getFileDescriptor() {
@@ -69,8 +70,12 @@ public final class FontResult implements Parcelable {
         return mFontVariationSettings;
     }
 
-    public int getStyle() {
-        return mStyle;
+    public int getWeight() {
+        return mWeight;
+    }
+
+    public boolean getItalic() {
+        return mItalic;
     }
 
     @Override
@@ -83,14 +88,16 @@ public final class FontResult implements Parcelable {
         dest.writeParcelable(mFileDescriptor, flags);
         dest.writeInt(mTtcIndex);
         dest.writeString(mFontVariationSettings);
-        dest.writeInt(mStyle);
+        dest.writeInt(mWeight);
+        dest.writeBoolean(mItalic);
     }
 
     private FontResult(Parcel in) {
         mFileDescriptor = in.readParcelable(null);
         mTtcIndex = in.readInt();
         mFontVariationSettings = in.readString();
-        mStyle = in.readInt();
+        mWeight = in.readInt();
+        mItalic = in.readBoolean();
     }
 
     public static final Parcelable.Creator<FontResult> CREATOR =
