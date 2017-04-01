@@ -39,6 +39,7 @@ jfieldID gOptions_widthFieldID;
 jfieldID gOptions_heightFieldID;
 jfieldID gOptions_mimeFieldID;
 jfieldID gOptions_outConfigFieldID;
+jfieldID gOptions_outColorSpaceFieldID;
 jfieldID gOptions_mCancelID;
 jfieldID gOptions_bitmapFieldID;
 
@@ -49,6 +50,20 @@ jmethodID gInsetStruct_constructorMethodID;
 
 jclass gBitmapConfig_class;
 jmethodID gBitmapConfig_nativeToConfigMethodID;
+
+jclass gColorSpace_class;
+jmethodID gColorSpace_getMethodID;
+jmethodID gColorSpace_matchMethodID;
+
+jclass gColorSpaceRGB_class;
+jmethodID gColorSpaceRGB_constructorMethodID;
+
+jclass gColorSpace_Named_class;
+jfieldID gColorSpace_Named_sRGBFieldID;
+jfieldID gColorSpace_Named_LinearExtendedSRGBFieldID;
+
+jclass gTransferParameters_class;
+jmethodID gTransferParameters_constructorMethodID;
 
 using namespace android;
 
@@ -228,6 +243,70 @@ static bool needsFineScale(const SkISize fullSize, const SkISize decodedSize,
            needsFineScale(fullSize.height(), decodedSize.height(), sampleSize);
 }
 
+static jobject getColorSpace(JNIEnv* env,
+        sk_sp<SkColorSpace>& decodeColorSpace, SkColorType decodeColorType) {
+    jobject colorSpace = nullptr;
+
+    // No need to match, we know what the output color space will be
+    if (decodeColorType == kRGBA_F16_SkColorType) {
+        jobject linearExtendedSRGB = env->GetStaticObjectField(
+                gColorSpace_Named_class, gColorSpace_Named_LinearExtendedSRGBFieldID);
+        colorSpace = env->CallStaticObjectMethod(gColorSpace_class,
+                gColorSpace_getMethodID, linearExtendedSRGB);
+    } else {
+        // Same here, no need to match
+        if (decodeColorSpace->isSRGB()) {
+            jobject sRGB = env->GetStaticObjectField(
+                    gColorSpace_Named_class, gColorSpace_Named_sRGBFieldID);
+            colorSpace = env->CallStaticObjectMethod(gColorSpace_class,
+                    gColorSpace_getMethodID, sRGB);
+        } else if (decodeColorSpace.get() != nullptr) {
+            // Try to match against known RGB color spaces using the CIE XYZ D50
+            // conversion matrix and numerical transfer function parameters
+            SkMatrix44 xyzMatrix(SkMatrix44::kUninitialized_Constructor);
+            LOG_ALWAYS_FATAL_IF(!decodeColorSpace->toXYZD50(&xyzMatrix));
+
+            SkColorSpaceTransferFn transferParams;
+            // We can only handle numerical transfer functions at the moment
+            LOG_ALWAYS_FATAL_IF(!decodeColorSpace->isNumericalTransferFn(&transferParams));
+
+            jobject params = env->NewObject(gTransferParameters_class,
+                    gTransferParameters_constructorMethodID,
+                    transferParams.fA, transferParams.fB, transferParams.fC,
+                    transferParams.fD, transferParams.fE, transferParams.fF,
+                    transferParams.fG);
+
+            jfloatArray xyzArray = env->NewFloatArray(9);
+            jfloat xyz[9] = {
+                    xyzMatrix.getFloat(0, 0),
+                    xyzMatrix.getFloat(1, 0),
+                    xyzMatrix.getFloat(2, 0),
+                    xyzMatrix.getFloat(0, 1),
+                    xyzMatrix.getFloat(1, 1),
+                    xyzMatrix.getFloat(2, 1),
+                    xyzMatrix.getFloat(0, 2),
+                    xyzMatrix.getFloat(1, 2),
+                    xyzMatrix.getFloat(2, 2)
+            };
+            env->SetFloatArrayRegion(xyzArray, 0, 9, xyz);
+
+            colorSpace = env->CallStaticObjectMethod(gColorSpace_class,
+                    gColorSpace_matchMethodID, xyzArray, params);
+
+            if (colorSpace == nullptr) {
+                // We couldn't find an exact match, let's create a new color space
+                // instance with the 3x3 conversion matrix and transfer function
+                colorSpace = env->NewObject(gColorSpaceRGB_class,
+                        gColorSpaceRGB_constructorMethodID,
+                        env->NewStringUTF("Unknown"), xyzArray, params);
+            }
+
+            env->DeleteLocalRef(xyzArray);
+        }
+    }
+    return colorSpace;
+}
+
 static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding, jobject options) {
     // This function takes ownership of the input stream.  Since the SkAndroidCodec
     // will take ownership of the stream, we don't necessarily need to take ownership
@@ -263,6 +342,7 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
         env->SetIntField(options, gOptions_heightFieldID, -1);
         env->SetObjectField(options, gOptions_mimeFieldID, 0);
         env->SetObjectField(options, gOptions_outConfigFieldID, 0);
+        env->SetObjectField(options, gOptions_outColorSpaceFieldID, 0);
 
         jobject jconfig = env->GetObjectField(options, gOptions_configFieldID);
         prefColorType = GraphicsJNI::getNativeBitmapColorType(env, jconfig);
@@ -319,6 +399,7 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
 
     // Set the decode colorType
     SkColorType decodeColorType = codec->computeOutputColorType(prefColorType);
+    sk_sp<SkColorSpace> decodeColorSpace = codec->computeOutputColorSpace(decodeColorType);
 
     // Set the options and return if the client only wants the size.
     if (options != NULL) {
@@ -344,6 +425,9 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
         jobject config = env->CallStaticObjectMethod(gBitmapConfig_class,
                 gBitmapConfig_nativeToConfigMethodID, configID);
         env->SetObjectField(options, gOptions_outConfigFieldID, config);
+
+        env->SetObjectField(options, gOptions_outColorSpaceFieldID,
+                getColorSpace(env, decodeColorSpace, decodeColorType));
 
         if (onlyDecodeSize) {
             return nullptr;
@@ -412,7 +496,7 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
     SkAlphaType alphaType = codec->computeOutputAlphaType(requireUnpremultiplied);
 
     const SkImageInfo decodeInfo = SkImageInfo::Make(size.width(), size.height(),
-            decodeColorType, alphaType, codec->computeOutputColorSpace(decodeColorType));
+            decodeColorType, alphaType, decodeColorSpace);
 
     // For wide gamut images, we will leave the color space on the SkBitmap.  Otherwise,
     // use the default.
@@ -725,6 +809,8 @@ int register_android_graphics_BitmapFactory(JNIEnv* env) {
     gOptions_mimeFieldID = GetFieldIDOrDie(env, options_class, "outMimeType", "Ljava/lang/String;");
     gOptions_outConfigFieldID = GetFieldIDOrDie(env, options_class, "outConfig",
              "Landroid/graphics/Bitmap$Config;");
+    gOptions_outColorSpaceFieldID = GetFieldIDOrDie(env, options_class, "outColorSpace",
+             "Landroid/graphics/ColorSpace;");
     gOptions_mCancelID = GetFieldIDOrDie(env, options_class, "mCancel", "Z");
 
     jclass bitmap_class = FindClassOrDie(env, "android/graphics/Bitmap");
@@ -740,6 +826,29 @@ int register_android_graphics_BitmapFactory(JNIEnv* env) {
             "android/graphics/Bitmap$Config"));
     gBitmapConfig_nativeToConfigMethodID = GetStaticMethodIDOrDie(env, gBitmapConfig_class,
             "nativeToConfig", "(I)Landroid/graphics/Bitmap$Config;");
+
+    gColorSpace_class = MakeGlobalRefOrDie(env, FindClassOrDie(env, "android/graphics/ColorSpace"));
+    gColorSpace_getMethodID = GetStaticMethodIDOrDie(env, gColorSpace_class,
+            "get", "(Landroid/graphics/ColorSpace$Named;)Landroid/graphics/ColorSpace;");
+    gColorSpace_matchMethodID = GetStaticMethodIDOrDie(env, gColorSpace_class, "match",
+            "([FLandroid/graphics/ColorSpace$Rgb$TransferParameters;)Landroid/graphics/ColorSpace;");
+
+    gColorSpaceRGB_class = MakeGlobalRefOrDie(env,
+            FindClassOrDie(env, "android/graphics/ColorSpace$Rgb"));
+    gColorSpaceRGB_constructorMethodID = GetMethodIDOrDie(env, gColorSpaceRGB_class,
+            "<init>", "(Ljava/lang/String;[FLandroid/graphics/ColorSpace$Rgb$TransferParameters;)V");
+
+    gColorSpace_Named_class = MakeGlobalRefOrDie(env,
+            FindClassOrDie(env, "android/graphics/ColorSpace$Named"));
+    gColorSpace_Named_sRGBFieldID = GetStaticFieldIDOrDie(env,
+            gColorSpace_Named_class, "SRGB", "Landroid/graphics/ColorSpace$Named;");
+    gColorSpace_Named_LinearExtendedSRGBFieldID = GetStaticFieldIDOrDie(env,
+            gColorSpace_Named_class, "LINEAR_EXTENDED_SRGB", "Landroid/graphics/ColorSpace$Named;");
+
+    gTransferParameters_class = MakeGlobalRefOrDie(env, FindClassOrDie(env,
+            "android/graphics/ColorSpace$Rgb$TransferParameters"));
+    gTransferParameters_constructorMethodID = GetMethodIDOrDie(env, gTransferParameters_class,
+            "<init>", "(DDDDDDD)V");
 
     return android::RegisterMethodsOrDie(env, "android/graphics/BitmapFactory",
                                          gMethods, NELEM(gMethods));
