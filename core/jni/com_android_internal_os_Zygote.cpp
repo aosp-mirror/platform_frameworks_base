@@ -346,6 +346,11 @@ static bool MountEmulatedStorage(uid_t uid, jint mount_mode,
         return false;
     }
 
+    // Handle force_mount_namespace with MOUNT_EXTERNAL_NONE.
+    if (mount_mode == MOUNT_EXTERNAL_NONE) {
+        return true;
+    }
+
     if (TEMP_FAILURE_RETRY(mount(storageSource.string(), "/storage",
             NULL, MS_BIND | MS_REC | MS_SLAVE, NULL)) == -1) {
         ALOGW("Failed to mount %s to /storage: %s", storageSource.string(), strerror(errno));
