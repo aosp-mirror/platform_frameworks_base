@@ -1140,7 +1140,7 @@ public final class ActiveServices {
                 // Service is already running, so we can immediately
                 // publish the connection.
                 try {
-                    c.conn.connected(s.name, b.intent.binder);
+                    c.conn.connected(s.name, b.intent.binder, false);
                 } catch (Exception e) {
                     Slog.w(TAG, "Failure sending service " + s.shortName
                             + " to connection " + c.conn.asBinder()
@@ -1194,7 +1194,7 @@ public final class ActiveServices {
                             }
                             if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, "Publishing to: " + c);
                             try {
-                                c.conn.connected(r.name, service);
+                                c.conn.connected(r.name, service, false);
                             } catch (Exception e) {
                                 Slog.w(TAG, "Failure sending service " + r.name +
                                       " to connection " + c.conn.asBinder() +
@@ -2080,7 +2080,7 @@ public final class ActiveServices {
                 // being brought down.  Mark it as dead.
                 cr.serviceDead = true;
                 try {
-                    cr.conn.connected(r.name, null);
+                    cr.conn.connected(r.name, null, true);
                 } catch (Exception e) {
                     Slog.w(TAG, "Failure disconnecting service " + r.name +
                           " to connection " + c.get(i).conn.asBinder() +
