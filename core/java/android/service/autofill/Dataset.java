@@ -97,7 +97,7 @@ public final class Dataset implements Parcelable {
         if (!DEBUG) return super.toString();
 
         return new StringBuilder("Dataset [")
-                .append(", fieldIds=").append(mFieldIds)
+                .append("fieldIds=").append(mFieldIds)
                 .append(", fieldValues=").append(mFieldValues)
                 .append(", fieldPresentations=")
                 .append(mFieldPresentations == null ? 0 : mFieldPresentations.size())

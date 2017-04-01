@@ -16,13 +16,8 @@
 
 package com.android.server.autofill;
 
-import android.annotation.Nullable;
 import android.os.Bundle;
-import android.service.autofill.Dataset;
-import android.view.autofill.AutofillId;
-import android.view.autofill.AutofillValue;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Set;
@@ -52,24 +47,6 @@ final class Helper {
         final StringBuilder builder = new StringBuilder();
         append(builder, bundle);
         return builder.toString();
-    }
-
-    /**
-     * Gets the value of a {@link Dataset} field by its id, or {@code null} if not found.
-     */
-    @Nullable
-    static AutofillValue findValue(Dataset dataset, AutofillId id) {
-        if (dataset != null) {
-            final ArrayList<AutofillId> ids = dataset.getFieldIds();
-            final int size = ids.size();
-            for (int i = 0; i < size; i++) {
-                if (id.equals(ids.get(i))) {
-                    return dataset.getFieldValues().get(i);
-                }
-
-            }
-        }
-        return null;
     }
 
     private Helper() {

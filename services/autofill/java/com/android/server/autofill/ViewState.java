@@ -50,7 +50,7 @@ final class ViewState {
     public static final int STATE_AUTOFILLED = 0x04;
     /** View value was changed, but not by the service. */
     public static final int STATE_CHANGED = 0x08;
-    /** Set only in the View that started a session . */
+    /** Set only in the View that started a session. */
     public static final int STATE_STARTED_SESSION = 0x10;
 
     public final AutofillId id;
@@ -59,6 +59,7 @@ final class ViewState {
     private FillResponse mResponse;
 
     private AutofillValue mCurrentValue;
+    private AutofillValue mAutofilledValue;
     private Rect mVirtualBounds;
 
     private int mState;
@@ -86,20 +87,30 @@ final class ViewState {
         return mCurrentValue;
     }
 
-    void setResponse(FillResponse response) {
-        mResponse = response;
+    void setCurrentValue(AutofillValue value) {
+        mCurrentValue = value;
     }
 
+    @Nullable
+    AutofillValue getAutofilledValue() {
+        return mAutofilledValue;
+    }
+
+    void setAutofilledValue(AutofillValue value) {
+        mAutofilledValue = value;
+    }
+
+    @Nullable
     FillResponse getResponse() {
         return mResponse;
     }
 
-    CharSequence getServiceName() {
-        return mSession.getServiceName();
+    void setResponse(FillResponse response) {
+        mResponse = response;
     }
 
-    boolean isChanged() {
-        return (mState & STATE_CHANGED) != 0;
+    CharSequence getServiceName() {
+        return mSession.getServiceName();
     }
 
     int getState() {
@@ -108,10 +119,6 @@ final class ViewState {
 
     String getStateAsString() {
         return DebugUtils.flagsToString(ViewState.class, "STATE_", mState);
-    }
-
-    void setCurrentValue(AutofillValue value) {
-        mCurrentValue = value;
     }
 
     void setState(int state) {
@@ -165,6 +172,7 @@ final class ViewState {
         pw.print(prefix); pw.print("state:" ); pw.println(getStateAsString());
         pw.print(prefix); pw.print("has response:" ); pw.println(mResponse != null);
         pw.print(prefix); pw.print("currentValue:" ); pw.println(mCurrentValue);
+        pw.print(prefix); pw.print("autofilledValue:" ); pw.println(mAutofilledValue);
         pw.print(prefix); pw.print("virtualBounds:" ); pw.println(mVirtualBounds);
     }
 }
