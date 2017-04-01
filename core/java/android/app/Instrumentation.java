@@ -816,7 +816,7 @@ public class Instrumentation {
      * returned.  If the timeout expires, a null object is returned. 
      *
      * @param monitor The ActivityMonitor to wait for.
-     * @param timeOut The timeout value in secs.
+     * @param timeOut The timeout value in milliseconds.
      *
      * @return The Activity object that matched the monitor.
      */
