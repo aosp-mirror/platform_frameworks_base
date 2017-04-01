@@ -22,6 +22,7 @@
 #include "utils/misc.h"
 #include "utils/Log.h"
 #include "unicode/ubidi.h"
+#include <minikin/Emoji.h>
 
 namespace android {
 
@@ -38,6 +39,9 @@ static jint runBidi(JNIEnv* env, jobject obj, jint dir, jcharArray chsArray,
         if (info != NULL) {
             UErrorCode status = U_ZERO_ERROR;
             UBiDi* bidi = ubidi_openSized(n, 0, &status);
+            // Set callbacks to override bidi classes of new emoji
+            ubidi_setClassCallback(
+                    bidi, minikin::emojiBidiOverride, nullptr, nullptr, nullptr, &status);
             ubidi_setPara(bidi, chs, n, dir, NULL, &status);
             if (U_SUCCESS(status)) {
                 for (int i = 0; i < n; ++i) {
