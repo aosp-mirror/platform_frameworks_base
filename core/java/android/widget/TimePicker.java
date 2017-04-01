@@ -535,6 +535,7 @@ public class TimePicker extends FrameLayout {
 
         if (!value.isDate()) {
             Log.w(LOG_TAG, value + " could not be autofilled into " + this);
+            return;
         }
 
         mDelegate.setDate(value.getDateValue());

@@ -25,7 +25,6 @@ import static android.view.autofill.AutofillManager.FLAG_VIEW_EXITED;
 
 import static com.android.server.autofill.Helper.DEBUG;
 import static com.android.server.autofill.Helper.VERBOSE;
-import static com.android.server.autofill.Helper.findValue;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -120,9 +119,14 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     /**
      * Used to remember which {@link Dataset} filled the session.
      */
-    // TODO(b/33197203 , b/35707731): might need more than one once it supports partitioning
+    // TODO(b/33197203 , b/35707731): will be removed once it supports partitioning
     @GuardedBy("mLock")
     private Dataset mAutoFilledDataset;
+
+    /**
+     * Dataset that when tapped launched a service authentication request.
+     */
+    private Dataset mDatasetWaitingAuth;
 
     /**
      * Assist structure sent by the app; it will be updated (sanitized, change values for save)
@@ -326,10 +330,11 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 processResponseLocked(mCurrentResponse);
             } else if (result instanceof Dataset) {
                 final Dataset dataset = (Dataset) result;
-                final int index = mCurrentResponse.getDatasets().indexOf(mAutoFilledDataset);
+                final int index = mCurrentResponse.getDatasets().indexOf(mDatasetWaitingAuth);
                 if (index >= 0) {
                     mCurrentResponse.getDatasets().set(index, dataset);
                     autoFill(dataset);
+                    mDatasetWaitingAuth = null;
                 }
             }
         }
@@ -385,58 +390,49 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         boolean atLeastOneChanged = false;
         for (int i = 0; i < requiredIds.length; i++) {
             final AutofillId id = requiredIds[i];
-            final ViewState state = mViewStates.get(id);
-            if (state == null || state.getCurrentValue() == null
-                     || state.getCurrentValue().isEmpty()) {
-                final ViewNode node = findViewNodeByIdLocked(id);
-                if (node == null) {
-                    Slog.w(TAG, "Service passed invalid id on SavableInfo: " + id);
-                    allRequiredAreNotEmpty = false;
-                    break;
-                }
-                final AutofillValue initialValue = node.getAutofillValue();
-                if (initialValue == null || initialValue.isEmpty()) {
-                    if (DEBUG) {
-                        Slog.d(TAG, "finishSessionLocked(): empty initial value for " + id );
-                    }
-                    allRequiredAreNotEmpty = false;
-                    break;
-                }
+            final ViewState viewState = mViewStates.get(id);
+            if (viewState == null) {
+                Slog.w(TAG, "showSaveLocked(): no ViewState for required " + id);
+                continue;
             }
-            if (state.isChanged()) {
-                final AutofillValue filledValue = findValue(mAutoFilledDataset, id);
-                if (!state.getCurrentValue().equals(filledValue)) {
-                    if (DEBUG) {
-                        Slog.d(TAG, "finishSessionLocked(): found a change on " + id + ": "
-                                + filledValue + " => " + state.getCurrentValue());
-                    }
-                    atLeastOneChanged = true;
-                }
-            } else {
-                if (state.getCurrentValue() == null || state.getCurrentValue().isEmpty()) {
-                    if (DEBUG) {
-                        Slog.d(TAG, "finishSessionLocked(): empty value for " + id + ": "
-                                + state.getCurrentValue());
-                    }
-                    allRequiredAreNotEmpty = false;
-                    break;
 
+            final AutofillValue currentValue = viewState.getCurrentValue();
+            if (currentValue == null || currentValue.isEmpty()) {
+                if (DEBUG) {
+                    Slog.d(TAG, "showSaveLocked(): empty value for required " + id );
                 }
+                allRequiredAreNotEmpty = false;
+                break;
+            }
+            final AutofillValue filledValue = viewState.getAutofilledValue();
+
+            if (!currentValue.equals(filledValue)) {
+                if (DEBUG) {
+                    Slog.d(TAG, "showSaveLocked(): found a change on required " + id + ": "
+                            + filledValue + " => " + currentValue);
+                }
+                atLeastOneChanged = true;
             }
         }
 
+        final AutofillId[] optionalIds = saveInfo.getOptionalIds();
         if (allRequiredAreNotEmpty) {
-            if (!atLeastOneChanged && saveInfo.getOptionalIds() != null) {
-                for (int i = 0; i < saveInfo.getOptionalIds().length; i++) {
-                    final AutofillId id = saveInfo.getOptionalIds()[i];
-                    final ViewState state = mViewStates.get(id);
-                    if (state != null && state.getCurrentValue() != null && state.isChanged()) {
-                        final AutofillValue filledValue = findValue(mAutoFilledDataset, id);
-                        if (!state.getCurrentValue().equals(filledValue)) {
+            if (!atLeastOneChanged && optionalIds != null) {
+                // No change on required ids yet, look for changes on optional ids.
+                for (int i = 0; i < optionalIds.length; i++) {
+                    final AutofillId id = optionalIds[i];
+                    final ViewState viewState = mViewStates.get(id);
+                    if (viewState == null) {
+                        Slog.w(TAG, "showSaveLocked(): no ViewState for optional " + id);
+                        continue;
+                    }
+                    if ((viewState.getState() & ViewState.STATE_CHANGED) != 0) {
+                        final AutofillValue currentValue = viewState.getCurrentValue();
+                        final AutofillValue filledValue = viewState.getAutofilledValue();
+                        if (currentValue != null && !currentValue.equals(filledValue)) {
                             if (DEBUG) {
                                 Slog.d(TAG, "finishSessionLocked(): found a change on optional "
-                                        + id + ": " + filledValue + " => "
-                                        + state.getCurrentValue());
+                                        + id + ": " + filledValue + " => " + currentValue);
                             }
                             atLeastOneChanged = true;
                             break;
@@ -523,25 +519,18 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
         if ((flags & FLAG_VALUE_CHANGED) != 0) {
             if (value != null && !value.equals(viewState.getCurrentValue())) {
-
-                // TODO(b/33197203 , b/35707731): currently resets STATE_AUTOFILLED; should check
-                // first (doesn't make a difference now, but it will when it supports partitions)
-                viewState.setState(ViewState.STATE_CHANGED);
+                // Always update the internal state.
+                viewState.setCurrentValue(value);
 
                 // Must check if this update was caused by autofilling the view, in which
                 // case we just update the value, but not the UI.
-                if (mAutoFilledDataset != null) {
-                    final AutofillValue filledValue = findValue(mAutoFilledDataset, id);
-                    if (value.equals(filledValue)) {
-                        viewState.setCurrentValue(value);
-                        return;
-                    }
+                final AutofillValue filledValue = viewState.getAutofilledValue();
+                if (value.equals(filledValue)) {
+                    return;
                 }
-
-                // Change value
-                viewState.setCurrentValue(value);
-
-                // Update the chooser UI
+                // Update the internal state...
+                viewState.setState(ViewState.STATE_CHANGED);
+                // ... and the chooser UI.
                 if (value.isText()) {
                     getUiForShowing().filterFillUi(value.getTextValue().toString());
                 } else {
@@ -657,6 +646,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     private void setViewStatesLocked(@Nullable FillResponse response, @NonNull Dataset dataset,
             int state) {
         final ArrayList<AutofillId> ids = dataset.getFieldIds();
+        final ArrayList<AutofillValue> values = dataset.getFieldValues();
         for (int j = 0; j < ids.size(); j++) {
             final AutofillId id = ids.get(j);
             ViewState viewState = mViewStates.get(id);
@@ -669,6 +659,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 }
                 mViewStates.put(id, viewState);
             }
+            if ((state & ViewState.STATE_AUTOFILLED) != 0) {
+                viewState.setAutofilledValue(values.get(j));
+            }
+
             if (response != null) {
                 viewState.setResponse(response);
             }
@@ -686,6 +680,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             }
 
             // ...or handle authentication.
+            mDatasetWaitingAuth = dataset;
             final Intent fillInIntent = createAuthFillInIntent(mStructure, null);
             startAuthentication(dataset.getAuthentication(), fillInIntent);
         }
@@ -721,6 +716,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         pw.print(prefix); pw.print("mFlags: "); pw.println(mFlags);
         pw.print(prefix); pw.print("mCurrentResponse: "); pw.println(mCurrentResponse);
         pw.print(prefix); pw.print("mAutoFilledDataset: "); pw.println(mAutoFilledDataset);
+        pw.print(prefix); pw.print("mDatasetWaitingAuth: "); pw.println(mDatasetWaitingAuth);
         pw.print(prefix); pw.print("mCurrentViewId: "); pw.println(mCurrentViewId);
         pw.print(prefix); pw.print("mViewStates size: "); pw.println(mViewStates.size());
         final String prefix2 = prefix + "  ";
