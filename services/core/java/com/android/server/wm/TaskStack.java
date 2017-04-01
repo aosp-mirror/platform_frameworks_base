@@ -340,7 +340,7 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
      * @return the source bounds for the bounds animation.
      */
     void getAnimatingSourceBounds(Rect outBounds) {
-        if (mBoundsAnimationSourceBounds != null) {
+        if (!mBoundsAnimationSourceBounds.isEmpty()) {
             outBounds.set(mBoundsAnimationSourceBounds);
             return;
         }
@@ -419,6 +419,11 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
             // we can just update and return them here
             setBounds(mBounds);
             mBoundsAfterRotation.set(mBounds);
+
+            // Once we've set the bounds based on the rotation of the old bounds in the new
+            // orientation, clear the animation target bounds since they are obsolete
+            mBoundsAnimationTarget.setEmpty();
+            mBoundsAnimationSourceBounds.setEmpty();
             return true;
         }
 
