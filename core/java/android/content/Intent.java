@@ -1434,6 +1434,20 @@ public class Intent implements Parcelable, Cloneable {
     public static final String ACTION_POWER_USAGE_SUMMARY = "android.intent.action.POWER_USAGE_SUMMARY";
 
     /**
+     * Activity Action: Setup wizard action provided for OTA provisioning to determine if it needs
+     * to run.
+     * <p>Input: Nothing.
+     * <p>Output: Nothing.
+     * @deprecated As of {@link android.os.Build.VERSION_CODES#M}, setup wizard can be identified
+     * using {@link #ACTION_MAIN} and {@link #CATEGORY_SETUP_WIZARD}
+     * @hide
+     */
+    @Deprecated
+    @SystemApi
+    public static final String ACTION_DEVICE_INITIALIZATION_WIZARD =
+            "android.intent.action.DEVICE_INITIALIZATION_WIZARD";
+
+    /**
      * Activity Action: Setup wizard to launch after a platform update.  This
      * activity should have a string meta-data field associated with it,
      * {@link #METADATA_SETUP_VERSION}, which defines the current version of
@@ -1444,6 +1458,7 @@ public class Intent implements Parcelable, Cloneable {
      * <p>Output: Nothing.
      * @hide
      */
+    @SystemApi
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_UPGRADE_SETUP = "android.intent.action.UPGRADE_SETUP";
 
