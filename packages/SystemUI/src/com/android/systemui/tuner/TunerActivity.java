@@ -110,10 +110,35 @@ public class TunerActivity extends SettingsDrawerActivity implements
     }
 
     public static class SubSettingsFragment extends PreferenceFragment {
+        private PreferenceScreen mParentScreen;
+
         @Override
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
-            setPreferenceScreen((PreferenceScreen) ((PreferenceFragment) getTargetFragment())
-                    .getPreferenceScreen().findPreference(rootKey));
+            mParentScreen =
+                    (PreferenceScreen) ((PreferenceFragment) getTargetFragment())
+                            .getPreferenceScreen().findPreference(rootKey);
+            PreferenceScreen screen =
+                    getPreferenceManager().createPreferenceScreen(
+                            getPreferenceManager().getContext());
+            setPreferenceScreen(screen);
+            // Copy all the preferences over to this screen so they go into the attached state.
+            while (mParentScreen.getPreferenceCount() > 0) {
+                Preference p = mParentScreen.getPreference(0);
+                mParentScreen.removePreference(p);
+                screen.addPreference(p);
+            }
+        }
+
+        @Override
+        public void onDestroy() {
+            super.onDestroy();
+            // Copy all the preferences back so we don't lose them.
+            PreferenceScreen screen = getPreferenceScreen();
+            while (screen.getPreferenceCount() > 0) {
+                Preference p = screen.getPreference(0);
+                screen.removePreference(p);
+                mParentScreen.addPreference(p);
+            }
         }
     }
 
