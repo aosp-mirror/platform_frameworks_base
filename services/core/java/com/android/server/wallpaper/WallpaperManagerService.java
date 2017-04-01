@@ -111,10 +111,12 @@ import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 public class WallpaperManagerService extends IWallpaperManager.Stub {
     static final String TAG = "WallpaperManagerService";
     static final boolean DEBUG = false;
+    static final boolean DEBUG_LIVE = DEBUG || true;
 
     public static class Lifecycle extends SystemService {
         private WallpaperManagerService mService;
@@ -495,6 +497,11 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
      */
     final ComponentName mImageWallpaper;
 
+    /**
+     * Name of the default wallpaper component; might be different from mImageWallpaper
+     */
+    final ComponentName mDefaultWallpaperComponent;
+
     final SparseArray<WallpaperData> mWallpaperMap = new SparseArray<WallpaperData>();
     final SparseArray<WallpaperData> mLockWallpaperMap = new SparseArray<WallpaperData>();
 
@@ -581,6 +588,10 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
         boolean cropExists() {
             return cropFile.exists();
         }
+
+        boolean sourceExists() {
+            return wallpaperFile.exists();
+        }
     }
 
     int makeWallpaperIdLocked() {
@@ -595,7 +606,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
 
         /** Time in milliseconds until we expect the wallpaper to reconnect (unless we're in the
          *  middle of an update). If exceeded, the wallpaper gets reset to the system default. */
-        private static final long WALLPAPER_RECONNECT_TIMEOUT_MS = 5000;
+        private static final long WALLPAPER_RECONNECT_TIMEOUT_MS = 10000;
 
         final WallpaperInfo mInfo;
         final Binder mToken = new Binder();
@@ -611,7 +622,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
             synchronized (mLock) {
                 if (mShuttingDown) {
                     // Don't expect wallpaper services to relaunch during shutdown
-                    if (DEBUG) {
+                    if (DEBUG_LIVE) {
                         Slog.i(TAG, "Ignoring relaunch timeout during shutdown");
                     }
                     return;
@@ -619,8 +630,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
 
                 if (!mWallpaper.wallpaperUpdating
                         && mWallpaper.userId == mCurrentUserId) {
-                    Slog.w(TAG, "Wallpaper reconnect timed out, "
-                            + "reverting to built-in wallpaper!");
+                    Slog.w(TAG, "Wallpaper reconnect timed out for " + mWallpaper.wallpaperComponent
+                            + ", reverting to built-in wallpaper!");
                     clearWallpaperLocked(true, FLAG_SYSTEM, mWallpaper.userId,
                             null);
                 }
@@ -654,9 +665,14 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
                 mService = null;
                 mEngine = null;
                 if (mWallpaper.connection == this) {
-                    Slog.w(TAG, "Wallpaper service gone: " + mWallpaper.wallpaperComponent);
+                    // The wallpaper disappeared.  If this isn't a system-default one, track
+                    // crashes and fall back to default if it continues to misbehave.
+                    final ComponentName wpService = mWallpaper.wallpaperComponent;
+                    Slog.w(TAG, "Wallpaper service gone: " + wpService);
                     if (!mWallpaper.wallpaperUpdating
-                            && mWallpaper.userId == mCurrentUserId) {
+                            && mWallpaper.userId == mCurrentUserId
+                            && !Objects.equals(mDefaultWallpaperComponent, wpService)
+                            && !Objects.equals(mImageWallpaper, wpService)) {
                         // There is a race condition which causes
                         // {@link #mWallpaper.wallpaperUpdating} to be false even if it is
                         // currently updating since the broadcast notifying us is async.
@@ -676,6 +692,9 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
                             FgThread.getHandler().removeCallbacks(mResetRunnable);
                             FgThread.getHandler().postDelayed(mResetRunnable,
                                     WALLPAPER_RECONNECT_TIMEOUT_MS);
+                            if (DEBUG_LIVE) {
+                                Slog.i(TAG, "Started wallpaper reconnect timeout for " + wpService);
+                            }
                         }
                         final String flattened = name.flattenToString();
                         EventLog.writeEvent(EventLogTags.WP_WALLPAPER_CRASHED,
@@ -744,14 +763,17 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
                 }
                 WallpaperData wallpaper = mWallpaperMap.get(mCurrentUserId);
                 if (wallpaper != null) {
-                    if (wallpaper.wallpaperComponent != null
-                            && wallpaper.wallpaperComponent.getPackageName().equals(packageName)) {
+                    final ComponentName wpService = wallpaper.wallpaperComponent;
+                    if (wpService != null && wpService.getPackageName().equals(packageName)) {
+                        if (DEBUG_LIVE) {
+                            Slog.i(TAG, "Wallpaper " + wpService + " update has finished");
+                        }
                         wallpaper.wallpaperUpdating = false;
-                        ComponentName comp = wallpaper.wallpaperComponent;
                         clearWallpaperComponentLocked(wallpaper);
-                        if (!bindWallpaperComponentLocked(comp, false, false,
+                        if (!bindWallpaperComponentLocked(wpService, false, false,
                                 wallpaper, null)) {
-                            Slog.w(TAG, "Wallpaper no longer available; reverting to default");
+                            Slog.w(TAG, "Wallpaper " + wpService
+                                    + " no longer available; reverting to default");
                             clearWallpaperLocked(false, FLAG_SYSTEM, wallpaper.userId, null);
                         }
                     }
@@ -786,6 +808,10 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
                 if (wallpaper != null) {
                     if (wallpaper.wallpaperComponent != null
                             && wallpaper.wallpaperComponent.getPackageName().equals(packageName)) {
+                        if (DEBUG_LIVE) {
+                            Slog.i(TAG, "Wallpaper service " + wallpaper.wallpaperComponent
+                                    + " is updating");
+                        }
                         wallpaper.wallpaperUpdating = true;
                         if (wallpaper.connection != null) {
                             FgThread.getHandler().removeCallbacks(
@@ -880,6 +906,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
         mShuttingDown = false;
         mImageWallpaper = ComponentName.unflattenFromString(
                 context.getResources().getString(R.string.image_wallpaper_component));
+        mDefaultWallpaperComponent = WallpaperManager.getDefaultWallpaperComponent(context);
         mIWindowManager = IWindowManager.Stub.asInterface(
                 ServiceManager.getService(Context.WINDOW_SERVICE));
         mIPackageManager = AppGlobals.getPackageManager();
@@ -1583,7 +1610,9 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
 
     boolean bindWallpaperComponentLocked(ComponentName componentName, boolean force,
             boolean fromUser, WallpaperData wallpaper, IRemoteCallback reply) {
-        if (DEBUG) Slog.v(TAG, "bindWallpaperComponentLocked: componentName=" + componentName);
+        if (DEBUG_LIVE) {
+            Slog.v(TAG, "bindWallpaperComponentLocked: componentName=" + componentName);
+        }
         // Has the component changed?
         if (!force) {
             if (wallpaper.connection != null) {
@@ -1603,13 +1632,13 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
 
         try {
             if (componentName == null) {
-                componentName = WallpaperManager.getDefaultWallpaperComponent(mContext);
+                componentName = mDefaultWallpaperComponent;
                 if (componentName == null) {
                     // Fall back to static image wallpaper
                     componentName = mImageWallpaper;
                     //clearWallpaperComponentLocked();
                     //return;
-                    if (DEBUG) Slog.v(TAG, "Using image wallpaper");
+                    if (DEBUG_LIVE) Slog.v(TAG, "No default component; using image wallpaper");
                 }
             }
             int serviceUserId = wallpaper.userId;
@@ -1987,7 +2016,11 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
             wallpaper.allowBackup = true;
             mWallpaperMap.put(userId, wallpaper);
             if (!wallpaper.cropExists()) {
-                generateCrop(wallpaper);
+                if (wallpaper.sourceExists()) {
+                    generateCrop(wallpaper);
+                } else {
+                    Slog.i(TAG, "No static wallpaper imagery; defaults will be shown");
+                }
             }
         }
         boolean success = false;
