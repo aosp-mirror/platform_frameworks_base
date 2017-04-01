@@ -708,8 +708,6 @@ class ShortcutPackage extends ShortcutPackageItem {
 
         getPackageInfo().updateVersionInfo(pi);
 
-        boolean changed = false;
-
         // For existing shortcuts, update timestamps if they have any resources.
         // Also check if shortcuts' activities are still main activities.  Otherwise, disable them.
         if (!isNewApp) {
@@ -733,7 +731,6 @@ class ShortcutPackage extends ShortcutPackageItem {
                         }
                         // Still pinned, so fall-through and possibly update the resources.
                     }
-                    changed = true;
                 }
 
                 if (si.hasAnyResources()) {
@@ -750,29 +747,23 @@ class ShortcutPackage extends ShortcutPackageItem {
                         // non-manifest at the moment, but icons can still be resources.)
                         si.lookupAndFillInResourceIds(publisherRes);
                     }
-                    changed = true;
                     si.setTimestamp(s.injectCurrentTimeMillis());
                 }
             }
         }
 
         // (Re-)publish manifest shortcut.
-        changed |= publishManifestShortcuts(newManifestShortcutList);
+        publishManifestShortcuts(newManifestShortcutList);
 
         if (newManifestShortcutList != null) {
-            changed |= pushOutExcessShortcuts();
+            pushOutExcessShortcuts();
         }
 
         s.verifyStates();
 
-        if (changed) {
-            // This will send a notification to the launcher, and also save .
-            s.packageShortcutsChanged(getPackageName(), getPackageUserId());
-        } else {
-            // Still save the version code.
-            s.scheduleSaveUser(getPackageUserId());
-        }
-        return changed;
+        // This will send a notification to the launcher, and also save .
+        s.packageShortcutsChanged(getPackageName(), getPackageUserId());
+        return true; // true means changed.
     }
 
     private boolean publishManifestShortcuts(List<ShortcutInfo> newManifestShortcutList) {

@@ -26,6 +26,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyList;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
@@ -1096,7 +1097,7 @@ public class ShortcutManagerTestUtils {
         public ShortcutListAsserter assertCallbackCalledForPackageAndUser(
                 String publisherPackageName, UserHandle publisherUserHandle) {
             final ArgumentCaptor<List> shortcuts = ArgumentCaptor.forClass(List.class);
-            verify(mCallback, times(1)).onShortcutsChanged(
+            verify(mCallback, atLeastOnce()).onShortcutsChanged(
                     eq(publisherPackageName),
                     shortcuts.capture(),
                     eq(publisherUserHandle));

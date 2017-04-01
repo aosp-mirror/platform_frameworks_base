@@ -569,6 +569,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
     protected Map<String, PackageInfo> mInjectedPackages;
 
     protected Set<PackageWithUser> mUninstalledPackages;
+    protected Set<PackageWithUser> mDisabledPackages;
     protected Set<PackageWithUser> mEphemeralPackages;
     protected Set<String> mSystemPackages;
 
@@ -740,6 +741,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
                 pi -> pi.applicationInfo.flags &= ~ApplicationInfo.FLAG_ALLOW_BACKUP);
 
         mUninstalledPackages = new HashSet<>();
+        mDisabledPackages = new HashSet<>();
         mSystemPackages = new HashSet<>();
         mEphemeralPackages = new HashSet<>();
 
@@ -1026,7 +1028,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
 
     protected void uninstallPackage(int userId, String packageName) {
         if (ENABLE_DUMP) {
-            Log.v(TAG, "Unnstall package " + packageName + " / " + userId);
+            Log.v(TAG, "Uninstall package " + packageName + " / " + userId);
         }
         mUninstalledPackages.add(PackageWithUser.of(userId, packageName));
     }
@@ -1036,6 +1038,20 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
             Log.v(TAG, "Install package " + packageName + " / " + userId);
         }
         mUninstalledPackages.remove(PackageWithUser.of(userId, packageName));
+    }
+
+    protected void disablePackage(int userId, String packageName) {
+        if (ENABLE_DUMP) {
+            Log.v(TAG, "Disable package " + packageName + " / " + userId);
+        }
+        mDisabledPackages.add(PackageWithUser.of(userId, packageName));
+    }
+
+    protected void enablePackage(int userId, String packageName) {
+        if (ENABLE_DUMP) {
+            Log.v(TAG, "Enable package " + packageName + " / " + userId);
+        }
+        mDisabledPackages.remove(PackageWithUser.of(userId, packageName));
     }
 
     PackageInfo getInjectedPackageInfo(String packageName, @UserIdInt int userId,
@@ -1061,6 +1077,8 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         if (mSystemPackages.contains(packageName)) {
             ret.applicationInfo.flags |= ApplicationInfo.FLAG_SYSTEM;
         }
+        ret.applicationInfo.enabled =
+                !mDisabledPackages.contains(PackageWithUser.of(userId, packageName));
 
         if (getSignatures) {
             ret.signatures = pi.signatures;
