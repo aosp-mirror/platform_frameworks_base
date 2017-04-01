@@ -35,6 +35,7 @@ class LockSettingsShellCommand extends ShellCommand {
     private static final String COMMAND_SET_PASSWORD = "set-password";
     private static final String COMMAND_CLEAR = "clear";
     private static final String COMMAND_SP = "sp";
+    private static final String COMMAND_SET_DISABLED = "set-disabled";
 
     private int mCurrentUserId;
     private final LockPatternUtils mLockPatternUtils;
@@ -71,6 +72,9 @@ class LockSettingsShellCommand extends ShellCommand {
                     break;
                 case COMMAND_SP:
                     runEnableSp();
+                    break;
+                case COMMAND_SET_DISABLED:
+                    runSetDisabled();
                     break;
                 default:
                     getErrPrintWriter().println("Unknown command: " + cmd);
@@ -130,6 +134,12 @@ class LockSettingsShellCommand extends ShellCommand {
     private void runClear() throws RemoteException {
         mLockPatternUtils.clearLock(mOld, mCurrentUserId);
         getOutPrintWriter().println("Lock credential cleared");
+    }
+
+    private void runSetDisabled() throws RemoteException {
+        final boolean disabled = Boolean.parseBoolean(mNew);
+        mLockPatternUtils.setLockScreenDisabled(disabled, mCurrentUserId);
+        getOutPrintWriter().println("Lock screen disabled set to " + disabled);
     }
 
     private boolean checkCredential() throws RemoteException, RequestThrottledException {
