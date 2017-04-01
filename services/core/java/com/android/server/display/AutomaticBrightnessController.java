@@ -32,8 +32,8 @@ import android.os.SystemClock;
 import android.text.format.DateUtils;
 import android.util.EventLog;
 import android.util.MathUtils;
-import android.util.Spline;
 import android.util.Slog;
+import android.util.Spline;
 import android.util.TimeUtils;
 
 import java.io.PrintWriter;
@@ -229,12 +229,12 @@ class AutomaticBrightnessController {
         // debugging purposes.
         mDozing = dozing;
         boolean changed = setLightSensorEnabled(enable && !dozing);
+        if (enable && !dozing && userInitiatedChange) {
+            prepareBrightnessAdjustmentSample();
+        }
         changed |= setScreenAutoBrightnessAdjustment(adjustment);
         if (changed) {
             updateAutoBrightness(false /*sendUpdate*/);
-        }
-        if (enable && !dozing && userInitiatedChange) {
-            prepareBrightnessAdjustmentSample();
         }
     }
 
