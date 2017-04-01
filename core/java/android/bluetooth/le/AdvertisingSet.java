@@ -63,11 +63,18 @@ public final class AdvertisingSet {
      * Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}
      *
      * @param enable whether the advertising should be enabled (true), or disabled (false)
-     * @param timeoutMillis duration for which that advertising set is enabled.
+     * @param duration advertising duration, in 10ms unit. Valid range is from 1 (10ms) to
+     *                     65535 (655,350 ms)
+     * @param maxExtendedAdvertisingEvents maximum number of extended advertising events the
+     *                     controller shall attempt to send prior to terminating the extended
+     *                     advertising, even if the duration has not expired. Valid range is
+     *                     from 1 to 255.
      */
-    public void enableAdvertising(boolean enable, int timeout) {
+    public void enableAdvertising(boolean enable, int duration,
+            int maxExtendedAdvertisingEvents) {
         try {
-            gatt.enableAdvertisingSet(this.advertiserId, enable, timeout);
+            gatt.enableAdvertisingSet(this.advertiserId, enable, duration,
+                                      maxExtendedAdvertisingEvents);
         } catch (RemoteException e) {
             Log.e(TAG, "remote exception - ", e);
         }
