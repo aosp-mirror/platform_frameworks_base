@@ -361,6 +361,15 @@ public class BitmapFactory {
         public Bitmap.Config outConfig;
 
         /**
+         * If known, the color space the decoded bitmap will have. Note that the
+         * output color space is not guaranteed to be the color space the bitmap
+         * is encoded with. If not known (when the config is
+         * {@link Bitmap.Config#ALPHA_8} for instance), or there is an error,
+         * it is set to null.
+         */
+        public ColorSpace outColorSpace;
+
+        /**
          * Temp storage to use for decoding.  Suggest 16K or so.
          */
         public byte[] inTempStorage;
