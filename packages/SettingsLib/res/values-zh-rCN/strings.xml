@@ -25,10 +25,12 @@
     <string name="wifi_remembered" msgid="4955746899347821096">"已保存"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"已停用"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"IP 配置失败"</string>
+    <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"网络质量较差，因此未连接"</string>
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"WLAN 连接失败"</string>
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"身份验证出现问题"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"不在范围内"</string>
-    <string name="wifi_no_internet" msgid="9151470775868728896">"未检测到任何互联网连接，因此不会自动重新连接。"</string>
+    <string name="wifi_no_internet_no_reconnect" msgid="2211781637653149657">"未检测到任何互联网连接，系统无法自动为您重新连接。"</string>
+    <string name="wifi_no_internet" msgid="5011955173375805204">"无法连接到互联网。"</string>
     <string name="saved_network" msgid="4352716707126620811">"已通过<xliff:g id="NAME">%1$s</xliff:g>保存"</string>
     <string name="connected_via_wfa" msgid="3805736726317410714">"已连接（通过 WLAN 助手）"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"已通过%1$s连接"</string>
@@ -91,7 +93,7 @@
     <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"蓝牙网络共享"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"网络共享"</string>
     <string name="tether_settings_title_all" msgid="8356136101061143841">"网络共享与便携式热点"</string>
-    <string name="managed_user_title" msgid="8101244883654409696">"工作资料"</string>
+    <string name="managed_user_title" msgid="8109605045406748842">"所有工作应用"</string>
     <string name="user_guest" msgid="8475274842845401871">"访客"</string>
     <string name="unknown" msgid="1592123443519355854">"未知"</string>
     <string name="running_process_item_user_label" msgid="3129887865552025943">"用户：<xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
@@ -101,6 +103,8 @@
     <string name="tts_settings_title" msgid="1237820681016639683">"文字转语音 (TTS) 输出"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"语速"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"文字转换成语音后的播放速度"</string>
+    <string name="tts_default_pitch_title" msgid="6135942113172488671">"音高"</string>
+    <string name="tts_default_pitch_summary" msgid="1944885882882650009">"会影响合成语音的音调"</string>
     <string name="tts_default_lang_title" msgid="8018087612299820556">"语言"</string>
     <string name="tts_lang_use_system" msgid="2679252467416513208">"使用系统语言"</string>
     <string name="tts_lang_not_selected" msgid="7395787019276734765">"未选择语言"</string>
@@ -121,6 +125,8 @@
     <string name="tts_engine_settings_button" msgid="1030512042040722285">"进行引擎设置"</string>
     <string name="tts_engine_preference_section_title" msgid="448294500990971413">"首选引擎"</string>
     <string name="tts_general_section_title" msgid="4402572014604490502">"常规"</string>
+    <string name="tts_reset_speech_pitch_title" msgid="5789394019544785915">"重置语音音调"</string>
+    <string name="tts_reset_speech_pitch_summary" msgid="8700539616245004418">"将文字的读出音调重置为默认值。"</string>
   <string-array name="tts_rate_entries">
     <item msgid="6695494874362656215">"很慢"</item>
     <item msgid="4795095314303559268">"慢"</item>
@@ -128,8 +134,8 @@
     <item msgid="164347302621392996">"快"</item>
     <item msgid="5794028588101562009">"较快"</item>
     <item msgid="7163942783888652942">"非常快"</item>
-    <item msgid="7831712693748700507">"迅速"</item>
-    <item msgid="5194774745031751806">"很迅速"</item>
+    <item msgid="7831712693748700507">"超快"</item>
+    <item msgid="5194774745031751806">"极快"</item>
     <item msgid="9085102246155045744">"最快"</item>
   </string-array>
     <string name="choose_profile" msgid="8229363046053568878">"选择个人资料"</string>
@@ -163,28 +169,45 @@
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"启用WLAN详细日志记录功能"</string>
     <string name="wifi_aggressive_handover" msgid="9194078645887480917">"主动从WLAN网络切换到移动数据网络"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"一律允许WLAN漫游扫描"</string>
-    <string name="legacy_dhcp_client" msgid="694426978909127287">"使用旧版 DHCP 客户端"</string>
     <string name="mobile_data_always_on" msgid="7745605759775320362">"始终开启移动数据网络"</string>
+    <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"停用绝对音量功能"</string>
+    <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"蓝牙 AVRCP 版本"</string>
+    <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"选择蓝牙 AVRCP 版本"</string>
+    <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"蓝牙音频编解码器"</string>
+    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="4558347981670553665">"选择蓝牙音频编解码器"</string>
+    <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"蓝牙音频采样率"</string>
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5628790207448471613">"选择蓝牙音频编解码器：\n采样率"</string>
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"蓝牙音频每样本位数"</string>
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4546131401358681321">"选择蓝牙音频编解码器：\n每样本位数"</string>
+    <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"蓝牙音频声道模式"</string>
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="9133545781346216071">"选择蓝牙音频编解码器：\n声道模式"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"蓝牙音频 LDAC 编解码器：播放质量"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"选择蓝牙音频 LDAC 编解码器：\n播放质量"</string>
+    <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"正在流式传输：<xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"显示无线显示认证选项"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"提升WLAN日志记录级别（在WLAN选择器中显示每个SSID的RSSI）"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"开启此设置后，系统会在WLAN信号较弱时，主动将网络模式从WLAN网络切换到移动数据网络"</string>
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"根据接口中目前的数据流量允许/禁止WLAN漫游扫描"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"日志记录器缓冲区大小"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"选择每个日志缓冲区的日志记录器大小"</string>
+    <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"要清除永久存储的日志记录器数据吗？"</string>
+    <string name="dev_logpersist_clear_warning_message" msgid="2256582531342994562">"当我们不再使用永久日志记录器进行监控时，我们需要清除保存在您设备上的日志记录器数据。"</string>
+    <string name="select_logpersist_title" msgid="7530031344550073166">"在设备上永久存储日志记录器数据"</string>
+    <string name="select_logpersist_dialog_title" msgid="4003400579973269060">"选择要在设备上永久存储的日志缓冲区"</string>
     <string name="select_usb_configuration_title" msgid="2649938511506971843">"选择USB配置"</string>
     <string name="select_usb_configuration_dialog_title" msgid="6385564442851599963">"选择USB配置"</string>
     <string name="allow_mock_location" msgid="2787962564578664888">"允许模拟位置"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"允许模拟位置"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"启用视图属性检查功能"</string>
-    <string name="legacy_dhcp_client_summary" msgid="163383566317652040">"使用 Lollipop 的 DHCP 客户端，而不是新的 Android DHCP 客户端。"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"始终开启移动数据网络，即使 WLAN 网络已开启（便于快速切换网络）。"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"是否允许USB调试？"</string>
-    <string name="adb_warning_message" msgid="7316799925425402244">"USB调试仅适用于开发工作。该功能可用于在您的计算机和设备之间复制数据、在您的设备上安装应用而不发送通知以及读取日志数据。"</string>
+    <string name="adb_warning_message" msgid="7316799925425402244">"USB 调试仅用于开发目的。该功能可用于在您的计算机和设备之间复制数据、在您的设备上安装应用（事先不发通知）以及读取日志数据。"</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"是否针对您之前授权的所有计算机撤消USB调试的访问权限？"</string>
     <string name="dev_settings_warning_title" msgid="7244607768088540165">"允许开发设置？"</string>
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"这些设置仅适用于开发工作。一旦启用，会导致您的设备以及设备上的应用崩溃或出现异常。"</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"通过USB验证应用"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"通过 ADB/ADT 检查安装的应用是否存在有害行为。"</string>
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"停用蓝牙绝对音量功能，即可避免在连接到远程设备时出现音量问题（例如音量高得让人无法接受或无法控制音量等）。"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"本地终端"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"启用终端应用，以便在本地访问 Shell"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP 检查"</string>
@@ -206,8 +229,8 @@
     <string name="strict_mode_summary" msgid="142834318897332338">"应用在主线程上执行长时间操作时闪烁屏幕"</string>
     <string name="pointer_location" msgid="6084434787496938001">"指针位置"</string>
     <string name="pointer_location_summary" msgid="840819275172753713">"屏幕叠加层显示当前触摸数据"</string>
-    <string name="show_touches" msgid="1356420386500834339">"显示触摸操作"</string>
-    <string name="show_touches_summary" msgid="6684407913145150041">"为触摸操作提供视觉提示"</string>
+    <string name="show_touches" msgid="2642976305235070316">"显示点按操作反馈"</string>
+    <string name="show_touches_summary" msgid="6101183132903926324">"显示点按操作的视觉反馈"</string>
     <string name="show_screen_updates" msgid="5470814345876056420">"显示面 (surface) 更新"</string>
     <string name="show_screen_updates_summary" msgid="2569622766672785529">"窗口中的面 (surface) 更新时全部闪烁"</string>
     <string name="show_hw_screen_updates" msgid="5036904558145941590">"显示 GPU 视图更新"</string>
@@ -225,8 +248,6 @@
     <string name="debug_layout_summary" msgid="2001775315258637682">"显示剪辑边界、边距等。"</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"强制使用从右到左的布局方向"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"强制将所有语言区域的屏幕布局方向改为从右到左"</string>
-    <string name="show_cpu_usage" msgid="2389212910758076024">"显示 CPU 使用情况"</string>
-    <string name="show_cpu_usage_summary" msgid="2113341923988958266">"屏幕叠加层显示当前 CPU 使用情况"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"强制进行 GPU 渲染"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"强制使用 GPU 进行 2D 绘图"</string>
     <string name="force_msaa" msgid="7920323238677284387">"强制启用 4x MSAA"</string>
@@ -244,14 +265,14 @@
     <string name="show_all_anrs" msgid="28462979638729082">"显示所有“应用无响应”(ANR)"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"为后台应用显示“应用无响应”对话框"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"强制允许将应用写入外部存储设备"</string>
-    <string name="force_allow_on_external_summary" msgid="3191952505860343233">"允许将任何应用写入外部存储设备（无论清单值是什么）"</string>
+    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"允许将任何应用写入外部存储设备（无论清单值是什么）"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"强制将活动设为可调整大小"</string>
-    <string name="force_resizable_activities_summary" msgid="4508217476997182216">"将所有活动设为可配合多窗口环境调整大小（无论清单值是什么）。"</string>
+    <string name="force_resizable_activities_summary" msgid="6667493494706124459">"将所有 Activity 设为可配合多窗口环境调整大小（忽略清单值）。"</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"启用可自由调整的窗口"</string>
-    <string name="enable_freeform_support_summary" msgid="2252563497485436534">"启用可自由调整的窗口这一实验性功能。"</string>
+    <string name="enable_freeform_support_summary" msgid="8247310463288834487">"启用可自由调整的窗口这一实验性功能。"</string>
     <string name="local_backup_password_title" msgid="3860471654439418822">"桌面备份密码"</string>
     <string name="local_backup_password_summary_none" msgid="6951095485537767956">"桌面完整备份当前未设置密码保护"</string>
-    <string name="local_backup_password_summary_change" msgid="2731163425081172638">"触摸可更改或删除用于桌面完整备份的密码"</string>
+    <string name="local_backup_password_summary_change" msgid="5376206246809190364">"点按即可更改或移除用于保护桌面完整备份的密码"</string>
     <string name="local_backup_password_toast_success" msgid="582016086228434290">"已设置了新的备份密码"</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"新密码和确认密码不一致"</string>
     <string name="local_backup_password_toast_validation_failure" msgid="5646377234895626531">"设置备份密码失败"</string>
@@ -266,18 +287,15 @@
     <item msgid="5363960654009010371">"针对数字内容优化的颜色"</item>
   </string-array>
     <string name="inactive_apps_title" msgid="1317817863508274533">"未启用的应用"</string>
-    <string name="inactive_app_inactive_summary" msgid="6768756967594202411">"未启用。触摸即可切换。"</string>
-    <string name="inactive_app_active_summary" msgid="4512911571954375968">"已启用。触摸即可切换。"</string>
+    <string name="inactive_app_inactive_summary" msgid="5091363706699855725">"未启用。点按即可切换。"</string>
+    <string name="inactive_app_active_summary" msgid="4174921824958516106">"已启用。点按即可切换。"</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"正在运行的服务"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"查看和控制当前正在运行的服务"</string>
-    <string name="night_mode_title" msgid="2594133148531256513">"夜间模式"</string>
-    <string name="night_mode_summary" msgid="9196605054622017193">"%s"</string>
-    <string name="night_mode_no" msgid="9171772244775838901">"已停用"</string>
-    <string name="night_mode_yes" msgid="2218157265997633432">"始终开启"</string>
-    <string name="night_mode_auto" msgid="7508348175804304327">"自动"</string>
+    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"多进程 WebView"</string>
+    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"单独运行 WebView 渲染程序"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView 实现"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"设置 WebView 实现"</string>
-    <string name="select_webview_provider_confirmation_text" msgid="6671472080671066972">"所选的 WebView 实现已停用，您必须先启用 WebView 实现才能加以使用。要启用该 WebView 实现吗？"</string>
+    <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"此选项已失效，请重试。"</string>
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"转换为文件加密"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"转换…"</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"文件已加密"</string>
@@ -294,19 +312,50 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"色彩校正"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"此功能为实验性功能，可能会影响性能。"</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"已被“<xliff:g id="TITLE">%1$s</xliff:g>”覆盖"</string>
+    <string name="power_remaining_duration_only" msgid="4400068916452346544">"还剩大约 <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"还可用 <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharging_duration" msgid="1605929174734600590">"<xliff:g id="LEVEL">%1$s</xliff:g> - 还可用大约<xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">%1$s</xliff:g> - 还可用 <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="2853265177761520490">"<xliff:g id="LEVEL">%1$s</xliff:g> - 还需<xliff:g id="TIME">%2$s</xliff:g>充满"</string>
+    <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging_duration_ac" msgid="3969186192576594254">"<xliff:g id="LEVEL">%1$s</xliff:g> - 还需<xliff:g id="TIME">%2$s</xliff:g>充满（交流电充电）"</string>
+    <string name="power_charging_duration_ac_short" msgid="7895864687218765582">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging_duration_usb" msgid="182405645340976546">"<xliff:g id="LEVEL">%1$s</xliff:g> - 还需<xliff:g id="TIME">%2$s</xliff:g>充满（USB充电）"</string>
+    <string name="power_charging_duration_usb_short" msgid="941854728040426399">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging_duration_wireless" msgid="1829295708243159464">"<xliff:g id="LEVEL">%1$s</xliff:g> - 还需<xliff:g id="TIME">%2$s</xliff:g>充满（无线充电）"</string>
+    <string name="power_charging_duration_wireless_short" msgid="1642664799869599476">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"未知"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"正在充电"</string>
     <string name="battery_info_status_charging_ac" msgid="2909861890674399949">"正在通过交流电源充电"</string>
+    <string name="battery_info_status_charging_ac_short" msgid="7431401092096415502">"正在充电"</string>
     <string name="battery_info_status_charging_usb" msgid="2207489369680923929">"正在通过USB充电"</string>
+    <string name="battery_info_status_charging_usb_short" msgid="6733371990319101366">"正在充电"</string>
     <string name="battery_info_status_charging_wireless" msgid="3574032603735446573">"正在无线充电"</string>
+    <string name="battery_info_status_charging_wireless_short" msgid="752569941028903610">"正在充电"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"未在充电"</string>
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"未在充电"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"电量充足"</string>
-    <string name="disabled_by_admin_summary_text" msgid="7787027069207263048">"已被管理员禁用"</string>
+    <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"由管理员控制"</string>
+    <string name="enabled_by_admin" msgid="2386503803463071894">"已被管理员启用"</string>
+    <string name="disabled_by_admin" msgid="3669999613095206948">"已被管理员禁用"</string>
+    <string name="home" msgid="3256884684164448244">"设置主屏幕"</string>
+  <string-array name="battery_labels">
+    <item msgid="8494684293649631252">"0%"</item>
+    <item msgid="8934126114226089439">"50%"</item>
+    <item msgid="1286113608943010849">"100%"</item>
+  </string-array>
+    <string name="charge_length_format" msgid="8978516217024434156">"<xliff:g id="ID_1">%1$s</xliff:g>前"</string>
+    <string name="remaining_length_format" msgid="7886337596669190587">"还剩 <xliff:g id="ID_1">%1$s</xliff:g>"</string>
+    <string name="screen_zoom_summary_small" msgid="5867245310241621570">"小"</string>
+    <string name="screen_zoom_summary_default" msgid="2247006805614056507">"默认"</string>
+    <string name="screen_zoom_summary_large" msgid="4835294730065424084">"大"</string>
+    <string name="screen_zoom_summary_very_large" msgid="7108563375663670067">"较大"</string>
+    <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"最大"</string>
+    <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"自定义 (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
+    <string name="help_feedback_label" msgid="6815040660801785649">"帮助和反馈"</string>
+    <string name="content_description_menu_button" msgid="8182594799812351266">"菜单"</string>
+    <string name="retail_demo_reset_message" msgid="118771671364131297">"输入密码即可在演示模式下恢复出厂设置"</string>
+    <string name="retail_demo_reset_next" msgid="8356731459226304963">"下一步"</string>
+    <string name="retail_demo_reset_title" msgid="696589204029930100">"需要输入密码"</string>
 </resources>

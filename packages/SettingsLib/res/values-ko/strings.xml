@@ -25,10 +25,12 @@
     <string name="wifi_remembered" msgid="4955746899347821096">"저장됨"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"사용 중지됨"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"IP 설정 실패"</string>
+    <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"저품질 네트워크로 인해 연결되지 않음"</string>
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"Wi-Fi 연결 실패"</string>
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"인증 문제"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"범위 내에 없음"</string>
-    <string name="wifi_no_internet" msgid="9151470775868728896">"감지된 인터넷 액세스가 없으며 자동으로 다시 연결되지 않습니다."</string>
+    <string name="wifi_no_internet_no_reconnect" msgid="2211781637653149657">"감지된 인터넷 액세스가 없으며 자동으로 다시 연결되지 않습니다."</string>
+    <string name="wifi_no_internet" msgid="5011955173375805204">"인터넷에 연결되어 있지 않습니다."</string>
     <string name="saved_network" msgid="4352716707126620811">"<xliff:g id="NAME">%1$s</xliff:g>(으)로 저장됨"</string>
     <string name="connected_via_wfa" msgid="3805736726317410714">"Wi‑Fi 도우미를 통해 연결됨"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"%1$s을(를) 통해 연결됨"</string>
@@ -91,7 +93,7 @@
     <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"블루투스 테더링"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"테더링"</string>
     <string name="tether_settings_title_all" msgid="8356136101061143841">"테더링 및 휴대용 핫스팟"</string>
-    <string name="managed_user_title" msgid="8101244883654409696">"직장 프로필"</string>
+    <string name="managed_user_title" msgid="8109605045406748842">"모든 직장 앱"</string>
     <string name="user_guest" msgid="8475274842845401871">"손님"</string>
     <string name="unknown" msgid="1592123443519355854">"알 수 없음"</string>
     <string name="running_process_item_user_label" msgid="3129887865552025943">"사용자: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
@@ -101,6 +103,8 @@
     <string name="tts_settings_title" msgid="1237820681016639683">"TTS 출력"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"말하는 속도"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"텍스트를 읽어주는 속도"</string>
+    <string name="tts_default_pitch_title" msgid="6135942113172488671">"피치"</string>
+    <string name="tts_default_pitch_summary" msgid="1944885882882650009">"합성 음성의 어조에 영향을 미침"</string>
     <string name="tts_default_lang_title" msgid="8018087612299820556">"언어"</string>
     <string name="tts_lang_use_system" msgid="2679252467416513208">"시스템 언어 사용"</string>
     <string name="tts_lang_not_selected" msgid="7395787019276734765">"언어가 선택되지 않음"</string>
@@ -121,6 +125,8 @@
     <string name="tts_engine_settings_button" msgid="1030512042040722285">"엔진 설정 실행"</string>
     <string name="tts_engine_preference_section_title" msgid="448294500990971413">"기본 엔진"</string>
     <string name="tts_general_section_title" msgid="4402572014604490502">"기본설정"</string>
+    <string name="tts_reset_speech_pitch_title" msgid="5789394019544785915">"말하는 속도 재설정"</string>
+    <string name="tts_reset_speech_pitch_summary" msgid="8700539616245004418">"텍스트를 읽어주는 속도를 기본값으로 재설정합니다."</string>
   <string-array name="tts_rate_entries">
     <item msgid="6695494874362656215">"매우 느리게"</item>
     <item msgid="4795095314303559268">"느리게"</item>
@@ -163,20 +169,36 @@
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Wi-Fi 상세 로깅 사용"</string>
     <string name="wifi_aggressive_handover" msgid="9194078645887480917">"Wi-Fi-셀룰러 적극 핸드오버"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Wi‑Fi 로밍 스캔 항상 허용"</string>
-    <string name="legacy_dhcp_client" msgid="694426978909127287">"이전 DHCP 클라이언트 사용"</string>
     <string name="mobile_data_always_on" msgid="7745605759775320362">"모바일 데이터 항상 활성화"</string>
+    <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"절대 볼륨 사용 안함"</string>
+    <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"블루투스 AVRCP 버전"</string>
+    <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"블루투스 AVRCP 버전 선택"</string>
+    <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"블루투스 오디오 코덱"</string>
+    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="4558347981670553665">"블루투스 오디오 코덱 선택"</string>
+    <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"블루투스 오디오 샘플링 비율"</string>
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5628790207448471613">"블루투스 오디오 코덱 선택:\n샘플링 비율"</string>
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"블루투스 오디오 샘플당 비트"</string>
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4546131401358681321">"블루투스 오디오 코덱 선택:\n샘플당 비트"</string>
+    <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"블루투스 오디오 채널 모드"</string>
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="9133545781346216071">"블루투스 오디오 코덱 선택:\n채널 모드"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"블루투스 오디오 LDAC 코덱: 재생 품질"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"블루투스 오디오 LDAC 코덱 선택:\n재생 품질"</string>
+    <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"스트리밍: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"무선 디스플레이 인증서 옵션 표시"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Wi‑Fi 로깅 수준을 높이고, Wi‑Fi 선택도구에서 SSID RSSI당 값을 표시합니다."</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"사용 설정하면 Wi-Fi 신호가 약할 때 데이터 연결을 Wi-Fi에서 데이터 네트워크로 더욱 적극적으로 핸드오버합니다."</string>
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"인터페이스에 표시되는 데이터 트래픽의 양을 기반으로 Wi-Fi 로밍 스캔을 허용하거나 허용하지 않습니다."</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"로거 버퍼 크기"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"로그 버퍼당 로거 크기 선택"</string>
+    <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"로거 영구 저장소를 삭제하시겠습니까?"</string>
+    <string name="dev_logpersist_clear_warning_message" msgid="2256582531342994562">"영구 로거로 더 이상 모니터링하지 않는 경우 기기에 있는 로거 데이터를 삭제해야 합니다."</string>
+    <string name="select_logpersist_title" msgid="7530031344550073166">"로거 데이터를 기기에 영구 저장"</string>
+    <string name="select_logpersist_dialog_title" msgid="4003400579973269060">"기기에 영구 저장할 로그 버퍼 선택"</string>
     <string name="select_usb_configuration_title" msgid="2649938511506971843">"USB 설정 선택"</string>
     <string name="select_usb_configuration_dialog_title" msgid="6385564442851599963">"USB 설정 선택"</string>
     <string name="allow_mock_location" msgid="2787962564578664888">"모의 위치 허용"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"모의 위치 허용"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"보기 속성 검사 사용"</string>
-    <string name="legacy_dhcp_client_summary" msgid="163383566317652040">"새로운 Android DHCP 클라이언트 대신 Lollipop의 DHCP 클라이언트 사용"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Wi‑Fi가 활성화되어 있을 때에도 빠른 네트워크 전환을 위하여 항상 모바일 데이터를 활성 상태로 유지합니다."</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"USB 디버깅을 허용하시겠습니까?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"USB 디버깅은 개발용으로만 설계되었습니다. 이 기능을 사용하면 컴퓨터와 기기 간에 데이터를 복사하고 알림 없이 기기에 앱을 설치하며 로그 데이터를 읽을 수 있습니다."</string>
@@ -185,6 +207,7 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"이 설정은 개발자용으로만 설계되었습니다. 이 설정을 사용하면 기기 및 애플리케이션에 예기치 않은 중단이나 오류가 발생할 수 있습니다."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"USB를 통해 설치된 앱 확인"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"ADB/ADT을 통해 설치된 앱에 유해한 동작이 있는지 확인"</string>
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"참기 어려울 정도로 볼륨이 크거나 제어가 되지 않는 등 원격 기기에서 볼륨 문제가 발생할 경우 블루투스 절대 볼륨 기능을 사용 중지합니다."</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"로컬 터미널"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"로컬 셸 액세스를 제공하는 터미널 앱 사용"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP 확인"</string>
@@ -206,8 +229,8 @@
     <string name="strict_mode_summary" msgid="142834318897332338">"앱이 기본 스레드에서 오래 작업하면 화면 깜박이기"</string>
     <string name="pointer_location" msgid="6084434787496938001">"포인터 위치"</string>
     <string name="pointer_location_summary" msgid="840819275172753713">"현재 터치 데이터 오버레이 표시"</string>
-    <string name="show_touches" msgid="1356420386500834339">"터치한 항목 표시"</string>
-    <string name="show_touches_summary" msgid="6684407913145150041">"터치한 항목에 대해 시각적으로 표시"</string>
+    <string name="show_touches" msgid="2642976305235070316">"탭한 항목 표시"</string>
+    <string name="show_touches_summary" msgid="6101183132903926324">"탭한 항목에 대해 시각적인 의견 표시"</string>
     <string name="show_screen_updates" msgid="5470814345876056420">"표면 업데이트 표시"</string>
     <string name="show_screen_updates_summary" msgid="2569622766672785529">"전체 창 표면이 업데이트되었을 때 플래시 처리"</string>
     <string name="show_hw_screen_updates" msgid="5036904558145941590">"GPU 보기 업데이트 표시"</string>
@@ -225,8 +248,6 @@
     <string name="debug_layout_summary" msgid="2001775315258637682">"클립 경계, 여백 등을 표시"</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"RTL 레이아웃 방향 강제 적용"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"모든 언어에 대해 화면 레이아웃 방향을 RTL로 강제 적용"</string>
-    <string name="show_cpu_usage" msgid="2389212910758076024">"CPU 사용량 표시"</string>
-    <string name="show_cpu_usage_summary" msgid="2113341923988958266">"현재 CPU 사용량 오버레이 표시"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"GPU 렌더링 강제 설정"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"2D 드로잉용으로 GPU 강제 사용"</string>
     <string name="force_msaa" msgid="7920323238677284387">"4x MSAA 강제 사용"</string>
@@ -244,14 +265,14 @@
     <string name="show_all_anrs" msgid="28462979638729082">"모든 ANR 보기"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"백그라운드 앱에 대해 앱 응답 없음 대화상자 표시"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"외부에서 앱 강제 허용"</string>
-    <string name="force_allow_on_external_summary" msgid="3191952505860343233">"매니페스트 값에 관계없이 앱을 외부 저장소에 작성"</string>
+    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"매니페스트 값과 관계없이 모든 앱이 외부 저장소에 작성되도록 허용"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"활동의 크기가 조정 가능하도록 설정"</string>
-    <string name="force_resizable_activities_summary" msgid="4508217476997182216">"모든 활동을 매니페스트 값에 관계없이 멀티 윈도우용으로 크기 조정 가능하도록 설정"</string>
+    <string name="force_resizable_activities_summary" msgid="6667493494706124459">"모든 활동을 매니페스트 값에 관계없이 멀티 윈도우용으로 크기 조정 가능하도록 설정"</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"자유 형식 창 사용"</string>
-    <string name="enable_freeform_support_summary" msgid="2252563497485436534">"자유 형식 창(베타) 지원 사용"</string>
+    <string name="enable_freeform_support_summary" msgid="8247310463288834487">"자유 형식 창 지원 사용"</string>
     <string name="local_backup_password_title" msgid="3860471654439418822">"데스크톱 백업 비밀번호"</string>
     <string name="local_backup_password_summary_none" msgid="6951095485537767956">"데스크톱 전체 백업에 비밀번호가 설정되어 있지 않음"</string>
-    <string name="local_backup_password_summary_change" msgid="2731163425081172638">"데스크톱 전체 백업에 대한 비밀번호를 변경하거나 삭제하려면 터치하세요."</string>
+    <string name="local_backup_password_summary_change" msgid="5376206246809190364">"데스크톱 전체 백업에 대한 비밀번호를 변경하거나 삭제하려면 탭하세요."</string>
     <string name="local_backup_password_toast_success" msgid="582016086228434290">"새 백업 비밀번호가 설정되었습니다."</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"새 비밀번호와 확인한 비밀번호가 일치하지 않습니다."</string>
     <string name="local_backup_password_toast_validation_failure" msgid="5646377234895626531">"백업 비밀번호를 설정하지 못했습니다."</string>
@@ -266,18 +287,15 @@
     <item msgid="5363960654009010371">"디지털 콘텐츠에 최적화된 색상"</item>
   </string-array>
     <string name="inactive_apps_title" msgid="1317817863508274533">"비활성 앱"</string>
-    <string name="inactive_app_inactive_summary" msgid="6768756967594202411">"비활성 상태입니다. 전환하려면 터치하세요."</string>
-    <string name="inactive_app_active_summary" msgid="4512911571954375968">"활성 상태입니다. 전환하려면 터치하세요."</string>
+    <string name="inactive_app_inactive_summary" msgid="5091363706699855725">"비활성화 상태입니다. 전환하려면 탭하세요."</string>
+    <string name="inactive_app_active_summary" msgid="4174921824958516106">"활성화되었습니다. 전환하려면 탭하세요."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"실행 중인 서비스"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"현재 실행 중인 서비스 보기 및 제어"</string>
-    <string name="night_mode_title" msgid="2594133148531256513">"야간 모드"</string>
-    <string name="night_mode_summary" msgid="9196605054622017193">"%s"</string>
-    <string name="night_mode_no" msgid="9171772244775838901">"사용 안함"</string>
-    <string name="night_mode_yes" msgid="2218157265997633432">"항상 사용"</string>
-    <string name="night_mode_auto" msgid="7508348175804304327">"자동"</string>
+    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"멀티 프로세스 WebView"</string>
+    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"개별적으로 WebView 렌더기 실행"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView 구현"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"WebView 구현 설정"</string>
-    <string name="select_webview_provider_confirmation_text" msgid="6671472080671066972">"선택한 WebView 구현이 사용 중지되어 있습니다. 사용하려면 사용 설정해야 합니다. 사용 설정하시겠습니까?"</string>
+    <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"선택이 더 이상 유효하지 않습니다. 다시 시도하세요."</string>
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"파일 암호화로 변환"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"변환..."</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"파일이 이미 암호화됨"</string>
@@ -294,19 +312,50 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"색보정"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"실험실 기능이며 성능에 영향을 줄 수 있습니다."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"<xliff:g id="TITLE">%1$s</xliff:g> 우선 적용됨"</string>
+    <string name="power_remaining_duration_only" msgid="4400068916452346544">"약 <xliff:g id="TIME">%1$s</xliff:g> 남음"</string>
+    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">%1$s</xliff:g> 남음"</string>
     <string name="power_discharging_duration" msgid="1605929174734600590">"<xliff:g id="LEVEL">%1$s</xliff:g> - 대략 <xliff:g id="TIME">%2$s</xliff:g> 남음"</string>
+    <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> 남음"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="2853265177761520490">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> 후 충전 완료"</string>
+    <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging_duration_ac" msgid="3969186192576594254">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> 후 충전 완료(AC 전원)"</string>
+    <string name="power_charging_duration_ac_short" msgid="7895864687218765582">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging_duration_usb" msgid="182405645340976546">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> 후 충전 완료(USB)"</string>
+    <string name="power_charging_duration_usb_short" msgid="941854728040426399">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging_duration_wireless" msgid="1829295708243159464">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> 후 충전 완료(무선)"</string>
+    <string name="power_charging_duration_wireless_short" msgid="1642664799869599476">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"알 수 없음"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"충전 중"</string>
     <string name="battery_info_status_charging_ac" msgid="2909861890674399949">"충전 중(AC 전원)"</string>
+    <string name="battery_info_status_charging_ac_short" msgid="7431401092096415502">"충전 중"</string>
     <string name="battery_info_status_charging_usb" msgid="2207489369680923929">"충전 중(USB)"</string>
+    <string name="battery_info_status_charging_usb_short" msgid="6733371990319101366">"충전 중"</string>
     <string name="battery_info_status_charging_wireless" msgid="3574032603735446573">"충전 중(무선)"</string>
+    <string name="battery_info_status_charging_wireless_short" msgid="752569941028903610">"충전 중"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"충전 안함"</string>
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"충전 안함"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"충전 완료"</string>
-    <string name="disabled_by_admin_summary_text" msgid="7787027069207263048">"관리자가 사용 중지함"</string>
+    <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"관리자가 제어"</string>
+    <string name="enabled_by_admin" msgid="2386503803463071894">"관리자가 사용 설정함"</string>
+    <string name="disabled_by_admin" msgid="3669999613095206948">"관리자가 사용 중지함"</string>
+    <string name="home" msgid="3256884684164448244">"설정 홈"</string>
+  <string-array name="battery_labels">
+    <item msgid="8494684293649631252">"0%"</item>
+    <item msgid="8934126114226089439">"50%"</item>
+    <item msgid="1286113608943010849">"100%"</item>
+  </string-array>
+    <string name="charge_length_format" msgid="8978516217024434156">"<xliff:g id="ID_1">%1$s</xliff:g> 전"</string>
+    <string name="remaining_length_format" msgid="7886337596669190587">"<xliff:g id="ID_1">%1$s</xliff:g> 남음"</string>
+    <string name="screen_zoom_summary_small" msgid="5867245310241621570">"작게"</string>
+    <string name="screen_zoom_summary_default" msgid="2247006805614056507">"기본"</string>
+    <string name="screen_zoom_summary_large" msgid="4835294730065424084">"크게"</string>
+    <string name="screen_zoom_summary_very_large" msgid="7108563375663670067">"더 크게"</string>
+    <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"가장 크게"</string>
+    <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"맞춤(<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
+    <string name="help_feedback_label" msgid="6815040660801785649">"고객센터"</string>
+    <string name="content_description_menu_button" msgid="8182594799812351266">"메뉴"</string>
+    <string name="retail_demo_reset_message" msgid="118771671364131297">"데모 모드에서 초기화하려면 비밀번호 입력"</string>
+    <string name="retail_demo_reset_next" msgid="8356731459226304963">"다음"</string>
+    <string name="retail_demo_reset_title" msgid="696589204029930100">"비밀번호 입력 필요"</string>
 </resources>

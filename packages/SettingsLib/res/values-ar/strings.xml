@@ -25,10 +25,12 @@
     <string name="wifi_remembered" msgid="4955746899347821096">"تم الحفظ"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"معطلة"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"‏أخفقت تهيئة عنوان IP"</string>
-    <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"‏أخفق اتصال WiFi"</string>
+    <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"الجهاز غير متصل بسبب انخفاض جودة الشبكة"</string>
+    <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"‏تعذّر اتصال WiFi"</string>
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"حدثت مشكلة في المصادقة"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"ليست في النطاق"</string>
-    <string name="wifi_no_internet" msgid="9151470775868728896">"لم يتم اكتشاف اتصال بالإنترنت."</string>
+    <string name="wifi_no_internet_no_reconnect" msgid="2211781637653149657">"لم يتم اكتشاف اتصال بالإنترنت، ولن تتم إعادة الاتصال تلقائيًا."</string>
+    <string name="wifi_no_internet" msgid="5011955173375805204">"لا يتوفر اتصال بالإنترنت."</string>
     <string name="saved_network" msgid="4352716707126620811">"تم الحفظ بواسطة <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="connected_via_wfa" msgid="3805736726317410714">"‏تم التوصيل عبر مساعد Wi-Fi"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"‏تم الاتصال عبر %1$s"</string>
@@ -91,7 +93,7 @@
     <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"ربط البلوتوث"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"ربط"</string>
     <string name="tether_settings_title_all" msgid="8356136101061143841">"الربط ونقطة الاتصال المحمولة"</string>
-    <string name="managed_user_title" msgid="8101244883654409696">"الملف الشخصي للعمل"</string>
+    <string name="managed_user_title" msgid="8109605045406748842">"كل تطبيقات العمل"</string>
     <string name="user_guest" msgid="8475274842845401871">"مدعو"</string>
     <string name="unknown" msgid="1592123443519355854">"غير معروف"</string>
     <string name="running_process_item_user_label" msgid="3129887865552025943">"المستخدم: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
@@ -101,6 +103,8 @@
     <string name="tts_settings_title" msgid="1237820681016639683">"إخراج تحويل النص إلى كلام"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"معدل سرعة الكلام"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"سرعة نطق الكلام"</string>
+    <string name="tts_default_pitch_title" msgid="6135942113172488671">"درجة الصوت"</string>
+    <string name="tts_default_pitch_summary" msgid="1944885882882650009">"للتأثير في نبرة الكلام المُرَكَّب"</string>
     <string name="tts_default_lang_title" msgid="8018087612299820556">"اللغة"</string>
     <string name="tts_lang_use_system" msgid="2679252467416513208">"استخدام لغة النظام"</string>
     <string name="tts_lang_not_selected" msgid="7395787019276734765">"اللغة غير محددة"</string>
@@ -121,6 +125,8 @@
     <string name="tts_engine_settings_button" msgid="1030512042040722285">"تشغيل إعدادات المحرك"</string>
     <string name="tts_engine_preference_section_title" msgid="448294500990971413">"المحرك المفضل"</string>
     <string name="tts_general_section_title" msgid="4402572014604490502">"عامة"</string>
+    <string name="tts_reset_speech_pitch_title" msgid="5789394019544785915">"إعادة ضبط طبقة صوت الكلام"</string>
+    <string name="tts_reset_speech_pitch_summary" msgid="8700539616245004418">"إعادة ضبط طبقة الصوت التي يتم نطق النص بها على الإعداد الافتراضي."</string>
   <string-array name="tts_rate_entries">
     <item msgid="6695494874362656215">"بطيء جدًا"</item>
     <item msgid="4795095314303559268">"بطيء"</item>
@@ -163,20 +169,36 @@
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"‏تمكين تسجيل Wi‑Fi Verbose"</string>
     <string name="wifi_aggressive_handover" msgid="9194078645887480917">"‏تسليم Wi-Fi حاد إلى خلوي"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"‏السماح دائمًا بعمليات فحص Wi-Fi للتجوال"</string>
-    <string name="legacy_dhcp_client" msgid="694426978909127287">"‏استخدام برنامج DHCP القديم"</string>
     <string name="mobile_data_always_on" msgid="7745605759775320362">"بيانات الجوّال نشطة دائمًا"</string>
+    <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"تعطيل مستوى الصوت المطلق"</string>
+    <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"‏إصدار Bluetooth AVRCP"</string>
+    <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"‏اختيار إصدار Bluetooth AVRCP"</string>
+    <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"ترميز صوت بلوتوث"</string>
+    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="4558347981670553665">"اختيار برنامج الترميز لصوت البلوتوث"</string>
+    <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"معدّل عيّنة صوت بلوتوث"</string>
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5628790207448471613">"اختيار برنامج ترميز صوت البلوتوث:\nمعدل العينة"</string>
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"وحدات البت لكل عيّنة في صوت بلوتوث"</string>
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4546131401358681321">"اختيار برنامج ترميز صوت البلوتوث:\nوحدات بت لكل عينة"</string>
+    <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"وضع قناة صوت بلوتوث"</string>
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="9133545781346216071">"اختيار برنامج ترميز صوت البلوتوث:\nوضع القناة"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"‏برنامج ترميز LDAC لصوت البلوتوث: جودة التشغيل"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"‏اختيار برنامج ترميز LDAC لصوت البلوتوث:\nجودة التشغيل"</string>
+    <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"البث: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"عرض خيارات شهادة عرض شاشة لاسلكي"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"‏زيادة مستوى تسجيل Wi-Fi، وعرض لكل SSID RSSI في منتقي Wi-Fi"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"‏عند تمكينه، سيكون Wi-Fi أكثر حدة في تسليم اتصال البيانات إلى الشبكة الخلوية، وذلك عندما تكون إشارة WiFi منخفضة"</string>
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"‏السماح/عدم السماح بعمليات فحص Wi-Fi للتجوال بناءً على حجم حركة البيانات في الواجهة"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"أحجام ذاكرة التخزين المؤقت للتسجيل"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"حدد أحجامًا أكبر لكل ذاكرة تخزين مؤقت للتسجيل"</string>
+    <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"هل تريد محو سعة التخزين الدائمة للمسجِّل؟"</string>
+    <string name="dev_logpersist_clear_warning_message" msgid="2256582531342994562">"عندما نتوقف عن رصد أي أخطاء باستخدام المسجِّل الدائم مرة أخرى، يتعين علينا محو بيانات المسجِّل الموجودة على جهازك."</string>
+    <string name="select_logpersist_title" msgid="7530031344550073166">"تخزين بيانات المسجِّل باستمرار على الجهاز"</string>
+    <string name="select_logpersist_dialog_title" msgid="4003400579973269060">"تحديد مخازن السجلات المؤقتة المراد تخزينها باستمرار على الجهاز"</string>
     <string name="select_usb_configuration_title" msgid="2649938511506971843">"‏حدد تهيئة USB"</string>
     <string name="select_usb_configuration_dialog_title" msgid="6385564442851599963">"‏حدد تهيئة USB"</string>
     <string name="allow_mock_location" msgid="2787962564578664888">"السماح بمواقع وهمية"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"السماح بمواقع وهمية"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"تمكين فحص سمة العرض"</string>
-    <string name="legacy_dhcp_client_summary" msgid="163383566317652040">"‏يمكنك استخدام برنامج DHCP من Lollipop بدلاً من برنامج DHCP الجديد على Android."</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"‏اجعل بيانات الجوّال نشطة دائمًا، حتى عندما يكون اتصال Wi‑Fi نشطًا (لتبديل الشبكة بسرعة)."</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"‏هل تريد السماح بتصحيح أخطاء USB؟"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"‏تم تصميم تصحيح أخطاء USB لأغراض التطوير فقط. يمكن استخدامه لنسخ البيانات بين الكمبيوتر والجهاز، وتثبيت التطبيقات على جهازك بدون تنبيه، وقراءة بيانات السجل."</string>
@@ -185,6 +207,7 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"هذه الإعدادات مخصصة لاستخدام التطوير فقط. قد يتسبب هذا في حدوث أعطال أو خلل في أداء الجهاز والتطبيقات المثبتة عليه."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"‏التحقق من التطبيقات عبر USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"‏التحقق من التطبيقات المثبتة عبر ADB/ADT لكشف السلوك الضار"</string>
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"لتعطيل ميزة مستوى الصوت المطلق للبلوتوث في حالة حدوث مشكلات متعلقة بمستوى الصوت مع الأجهزة البعيدة مثل مستوى صوت عالٍ بشكل غير مقبول أو نقص إمكانية التحكم في الصوت."</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"تطبيق طرفي محلي"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"تمكين تطبيق طرفي يوفر إمكانية الدخول إلى واجهة النظام المحلية"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"‏التحقق من HDCP"</string>
@@ -206,8 +229,8 @@
     <string name="strict_mode_summary" msgid="142834318897332338">"وميض الشاشة عند إجراء التطبيقات عمليات طويلة في سلسلة المحادثات الرئيسية"</string>
     <string name="pointer_location" msgid="6084434787496938001">"موقع المؤشر"</string>
     <string name="pointer_location_summary" msgid="840819275172753713">"عرض تراكب الشاشة لبيانات اللمس الحالية"</string>
-    <string name="show_touches" msgid="1356420386500834339">"عرض مرات اللمس"</string>
-    <string name="show_touches_summary" msgid="6684407913145150041">"عرض تعليقات مرئية لمرات اللمس"</string>
+    <string name="show_touches" msgid="2642976305235070316">"عرض النقرات"</string>
+    <string name="show_touches_summary" msgid="6101183132903926324">"عرض التعليقات المرئية للنقرات"</string>
     <string name="show_screen_updates" msgid="5470814345876056420">"عرض تحديثات السطح"</string>
     <string name="show_screen_updates_summary" msgid="2569622766672785529">"وميض أسطح النوافذ بالكامل عندما يتم تحديثها"</string>
     <string name="show_hw_screen_updates" msgid="5036904558145941590">"‏إظهار تحديثات عرض GPU"</string>
@@ -225,8 +248,6 @@
     <string name="debug_layout_summary" msgid="2001775315258637682">"عرض حدود وهوامش المقطع وما إلى ذلك."</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"فرض اتجاه التنسيق ليكون من اليمين إلى اليسار"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"فرض اتجاه تنسيق الشاشة ليكون من اليمين إلى اليسار لجميع اللغات"</string>
-    <string name="show_cpu_usage" msgid="2389212910758076024">"‏عرض استخدام CPU"</string>
-    <string name="show_cpu_usage_summary" msgid="2113341923988958266">"‏عرض تراكب الشاشة لاستخدام CPU الحالي"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"‏فرض عرض رسومات GPU"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"فرض استخدام وحدة معالجة الرسومات للرسم ثنائي الأبعاد"</string>
     <string name="force_msaa" msgid="7920323238677284387">"‏فرض 4x MSAA"</string>
@@ -244,17 +265,17 @@
     <string name="show_all_anrs" msgid="28462979638729082">"‏عرض جميع رسائل ANR"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"عرض مربع الحوار \"التطبيق لا يستجيب\" مع تطبيقات الخلفية"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"فرض السماح للتطبيقات على الخارجي"</string>
-    <string name="force_allow_on_external_summary" msgid="3191952505860343233">"تأهيل أي تطبيق بحيث تتم كتابته على سعة تخزين خارجية، بغض النظر عن قيم البيان"</string>
+    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"تأهيل أي تطبيق بحيث تتم كتابته على وحدة تخزين خارجية، بغض النظر عن قيم البيان"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"فرض إمكانية تغيير على الأنشطة"</string>
-    <string name="force_resizable_activities_summary" msgid="4508217476997182216">"لتمكين تغيير حجم جميع الأنشطة لتناسب تعدد النوافذ، بغض النظر عن قيم البيان."</string>
+    <string name="force_resizable_activities_summary" msgid="6667493494706124459">"تمكين تغيير حجم جميع الأنشطة لتناسب تعدد النوافذ، بغض النظر عن قيم البيان."</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"تمكين النوافذ الحرة"</string>
-    <string name="enable_freeform_support_summary" msgid="2252563497485436534">"لتمكين إتاحة استخدام النوافذ الحرة التجريبية."</string>
+    <string name="enable_freeform_support_summary" msgid="8247310463288834487">"تمكين إتاحة استخدام النوافذ الحرة التجريبية."</string>
     <string name="local_backup_password_title" msgid="3860471654439418822">"كلمة مرور احتياطية للكمبيوتر"</string>
     <string name="local_backup_password_summary_none" msgid="6951095485537767956">"النسخ الاحتياطية الكاملة لسطح المكتب غير محمية في الوقت الحالي"</string>
-    <string name="local_backup_password_summary_change" msgid="2731163425081172638">"المس لتغيير كلمة مرور النسخ الاحتياطية الكاملة لسطح المكتب أو إزالتها"</string>
+    <string name="local_backup_password_summary_change" msgid="5376206246809190364">"انقر لتغيير كلمة مرور النسخ الاحتياطية الكاملة لسطح المكتب أو إزالتها."</string>
     <string name="local_backup_password_toast_success" msgid="582016086228434290">"تم تعيين كلمة مرور احتياطية جديدة"</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"كلمة المرور الجديدة وتأكيدها لا يتطابقان"</string>
-    <string name="local_backup_password_toast_validation_failure" msgid="5646377234895626531">"أخفق تعيين كلمة مرور احتياطية"</string>
+    <string name="local_backup_password_toast_validation_failure" msgid="5646377234895626531">"تعذّر تعيين كلمة مرور احتياطية"</string>
   <string-array name="color_mode_names">
     <item msgid="2425514299220523812">"نابض بالحياة (افتراضي)"</item>
     <item msgid="8446070607501413455">"طبيعي"</item>
@@ -266,18 +287,15 @@
     <item msgid="5363960654009010371">"الألوان المحسَّنة للمحتوى الرقمي"</item>
   </string-array>
     <string name="inactive_apps_title" msgid="1317817863508274533">"التطبيقات غير النشطة"</string>
-    <string name="inactive_app_inactive_summary" msgid="6768756967594202411">"غير نشط. المس للتبديل."</string>
-    <string name="inactive_app_active_summary" msgid="4512911571954375968">"نشط. المس للتبديل."</string>
+    <string name="inactive_app_inactive_summary" msgid="5091363706699855725">"غير نشط، انقر للتبديل."</string>
+    <string name="inactive_app_active_summary" msgid="4174921824958516106">"نشط، انقر للتبديل."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"الخدمات قيد التشغيل"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"عرض الخدمات قيد التشغيل في الوقت الحالي والتحكم فيها"</string>
-    <string name="night_mode_title" msgid="2594133148531256513">"الوضع الليلي"</string>
-    <string name="night_mode_summary" msgid="9196605054622017193">"%s"</string>
-    <string name="night_mode_no" msgid="9171772244775838901">"معطَّل"</string>
-    <string name="night_mode_yes" msgid="2218157265997633432">"التشغيل دائمًا"</string>
-    <string name="night_mode_auto" msgid="7508348175804304327">"تلقائيًا"</string>
+    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"‏WebView متعدد العمليات"</string>
+    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"‏تشغيل أجهزة عرض WebView بشكل منفصل"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"‏تطبيق WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"‏تعيين تطبيق WebView"</string>
-    <string name="select_webview_provider_confirmation_text" msgid="6671472080671066972">"‏إن تنفيذ ميزة WebView التي تم اختيارها معطَّل، ويجب تمكين هذه الميزة ليتسنى استخدامها، فهل تريد تمكينها؟"</string>
+    <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"لم يعد هذا الاختيار صالحًا. أعد المحاولة."</string>
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"التحويل إلى تشفير ملفات"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"تحويل…"</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"تم استخدام تشفير ملفات من قبل"</string>
@@ -294,19 +312,50 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"تصحيح الألوان"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"هذه الميزة تجريبية وقد تؤثر في الأداء."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"تم الاستبدال بـ <xliff:g id="TITLE">%1$s</xliff:g>"</string>
+    <string name="power_remaining_duration_only" msgid="4400068916452346544">"يتبقى <xliff:g id="TIME">%1$s</xliff:g> تقريبًا"</string>
+    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"يتبقى <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharging_duration" msgid="1605929174734600590">"<xliff:g id="LEVEL">%1$s</xliff:g> - تبقى <xliff:g id="TIME">%2$s</xliff:g> تقريبًا"</string>
+    <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">%1$s</xliff:g> - يتبقى <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="2853265177761520490">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> حتى الاكتمال"</string>
+    <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging_duration_ac" msgid="3969186192576594254">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> حتى الاكتمال باستخدام التيار المتردد"</string>
+    <string name="power_charging_duration_ac_short" msgid="7895864687218765582">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging_duration_usb" msgid="182405645340976546">"‏<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> حتى الاكتمال عبر USB"</string>
+    <string name="power_charging_duration_usb_short" msgid="941854728040426399">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging_duration_wireless" msgid="1829295708243159464">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> حتى الاكتمال بالشحن اللاسلكي"</string>
+    <string name="power_charging_duration_wireless_short" msgid="1642664799869599476">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"غير معروف"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"شحن"</string>
     <string name="battery_info_status_charging_ac" msgid="2909861890674399949">"جارٍ الشحن بتيار متردد"</string>
+    <string name="battery_info_status_charging_ac_short" msgid="7431401092096415502">"جارٍ الشحن"</string>
     <string name="battery_info_status_charging_usb" msgid="2207489369680923929">"‏جارٍ الشحن عبر USB"</string>
+    <string name="battery_info_status_charging_usb_short" msgid="6733371990319101366">"جارٍ الشحن"</string>
     <string name="battery_info_status_charging_wireless" msgid="3574032603735446573">"جارٍ الشحن لاسلكيًا"</string>
+    <string name="battery_info_status_charging_wireless_short" msgid="752569941028903610">"جارٍ الشحن"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"لا يتم الشحن"</string>
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"لا يتم الشحن"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"ممتلئة"</string>
-    <string name="disabled_by_admin_summary_text" msgid="7787027069207263048">"تم التعطيل بواسطة المشرف"</string>
+    <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"إعدادات يتحكم فيها المشرف"</string>
+    <string name="enabled_by_admin" msgid="2386503803463071894">"تم التمكين بواسطة المشرف"</string>
+    <string name="disabled_by_admin" msgid="3669999613095206948">"تم التعطيل بواسطة المشرف"</string>
+    <string name="home" msgid="3256884684164448244">"الشاشة الرئيسية للإعدادات"</string>
+  <string-array name="battery_labels">
+    <item msgid="8494684293649631252">"٠‏٪"</item>
+    <item msgid="8934126114226089439">"٥٠٪"</item>
+    <item msgid="1286113608943010849">"٪۱۰۰"</item>
+  </string-array>
+    <string name="charge_length_format" msgid="8978516217024434156">"قبل <xliff:g id="ID_1">%1$s</xliff:g>"</string>
+    <string name="remaining_length_format" msgid="7886337596669190587">"يتبقى <xliff:g id="ID_1">%1$s</xliff:g>"</string>
+    <string name="screen_zoom_summary_small" msgid="5867245310241621570">"صغير"</string>
+    <string name="screen_zoom_summary_default" msgid="2247006805614056507">"افتراضي"</string>
+    <string name="screen_zoom_summary_large" msgid="4835294730065424084">"كبير"</string>
+    <string name="screen_zoom_summary_very_large" msgid="7108563375663670067">"أكبر"</string>
+    <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"أكبر مستوى"</string>
+    <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"مخصص (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
+    <string name="help_feedback_label" msgid="6815040660801785649">"المساعدة والتعليقات"</string>
+    <string name="content_description_menu_button" msgid="8182594799812351266">"القائمة"</string>
+    <string name="retail_demo_reset_message" msgid="118771671364131297">"إدخال كلمة المرور لإعادة الضبط بحسب بيانات المصنع في الوضع التجريبي"</string>
+    <string name="retail_demo_reset_next" msgid="8356731459226304963">"التالي"</string>
+    <string name="retail_demo_reset_title" msgid="696589204029930100">"يلزم توفر كلمة مرور"</string>
 </resources>

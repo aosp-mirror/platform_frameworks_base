@@ -23,18 +23,20 @@
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"Haiwezi kutambaza mitandao"</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"Hamna"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"Imehifadhiwa"</string>
-    <string name="wifi_disabled_generic" msgid="4259794910584943386">"Imelemazwa"</string>
+    <string name="wifi_disabled_generic" msgid="4259794910584943386">"Imezimwa"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"Haikuweza Kusanidi IP"</string>
+    <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"Haijaunganishwa kwa sababu intaneti si thabiti"</string>
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"Haikuweza Kuunganisha kwenye WiFi"</string>
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"Tatizo la uthibitishaji"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"Haiko karibu"</string>
-    <string name="wifi_no_internet" msgid="9151470775868728896">"Hakuna Ufikiaji kwa Intaneti Uliogunduliwa, haitaweza kuunganisha kiotomatiki."</string>
+    <string name="wifi_no_internet_no_reconnect" msgid="2211781637653149657">"Haikupata Muunganisho wa Intaneti. Haitaweza kuunganisha tena kiotomatiki."</string>
+    <string name="wifi_no_internet" msgid="5011955173375805204">"Hakuna Muunganisho wa Intaneti."</string>
     <string name="saved_network" msgid="4352716707126620811">"Ilihifadhiwa na <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="connected_via_wfa" msgid="3805736726317410714">"Imeunganishwa kupitia Kisaidizi cha Wi-Fi"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Imeunganishwa kupitia %1$s"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"Inapatikana kupitia %1$s"</string>
     <string name="wifi_connected_no_internet" msgid="3149853966840874992">"Imeunganishwa, hakuna Intaneti"</string>
-    <string name="bluetooth_disconnected" msgid="6557104142667339895">"Imetenganishwa"</string>
+    <string name="bluetooth_disconnected" msgid="6557104142667339895">"Haijaunganishwa"</string>
     <string name="bluetooth_disconnecting" msgid="8913264760027764974">"Inatenganisha..."</string>
     <string name="bluetooth_connecting" msgid="8555009514614320497">"Inaunganisha…"</string>
     <string name="bluetooth_connected" msgid="6038755206916626419">"Umeunganishwa"</string>
@@ -91,7 +93,7 @@
     <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Shiriki intaneti kwa Bluetooth"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"Inazuia"</string>
     <string name="tether_settings_title_all" msgid="8356136101061143841">"Kushiriki na kusambaza intaneti"</string>
-    <string name="managed_user_title" msgid="8101244883654409696">"Wasifu wa kazi"</string>
+    <string name="managed_user_title" msgid="8109605045406748842">"Programu zote za kazini"</string>
     <string name="user_guest" msgid="8475274842845401871">"Aliyealikwa"</string>
     <string name="unknown" msgid="1592123443519355854">"Haijulikani"</string>
     <string name="running_process_item_user_label" msgid="3129887865552025943">"Mtumiaji: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
@@ -101,6 +103,8 @@
     <string name="tts_settings_title" msgid="1237820681016639683">"Kubadilisha maandishi hadi usemi"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"Kiwango cha usemaji"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"Kasi ya kutamkwa kwa maneno"</string>
+    <string name="tts_default_pitch_title" msgid="6135942113172488671">"Giza"</string>
+    <string name="tts_default_pitch_summary" msgid="1944885882882650009">"Huathiri sauti ya matamshi yaliyounganishwa"</string>
     <string name="tts_default_lang_title" msgid="8018087612299820556">"Lugha"</string>
     <string name="tts_lang_use_system" msgid="2679252467416513208">"Tumia lugha ya mfumo"</string>
     <string name="tts_lang_not_selected" msgid="7395787019276734765">"Lugha haijachaguliwa"</string>
@@ -121,6 +125,8 @@
     <string name="tts_engine_settings_button" msgid="1030512042040722285">"Zindua mipangilio ya injini"</string>
     <string name="tts_engine_preference_section_title" msgid="448294500990971413">"Injini inayofaa"</string>
     <string name="tts_general_section_title" msgid="4402572014604490502">"Kwa ujumla"</string>
+    <string name="tts_reset_speech_pitch_title" msgid="5789394019544785915">"Weka upya mipangilio ya ubora wa matamshi"</string>
+    <string name="tts_reset_speech_pitch_summary" msgid="8700539616245004418">"Rejesha mipangilio ya ubora wa matamshi kuwa ya chaguo-msingi."</string>
   <string-array name="tts_rate_entries">
     <item msgid="6695494874362656215">"Polepole sana"</item>
     <item msgid="4795095314303559268">"Polepole"</item>
@@ -163,20 +169,36 @@
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Washa Uwekaji kumbukumbu za WiFi kutumia Sauti"</string>
     <string name="wifi_aggressive_handover" msgid="9194078645887480917">"Ukabidhi kutoka Wifi kwenda Mtandao wa Simu"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Ruhusu Uchanganuzi wa Matumizi ya Mitandao mingine"</string>
-    <string name="legacy_dhcp_client" msgid="694426978909127287">"Tumia kiteja cha DHCP kilichopitwa na wakati"</string>
     <string name="mobile_data_always_on" msgid="7745605759775320362">"Data ya kifaa cha mkononi inatumika kila wakati"</string>
+    <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Zima sauti kamili"</string>
+    <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Toleo la Bluetooth AVRCP"</string>
+    <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Chagua Toleo la Bluetooth AVRCP"</string>
+    <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Kodeki ya Sauti ya Bluetooth"</string>
+    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="4558347981670553665">"Chagua Kodeki ya Sauti ya Bluetooth"</string>
+    <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Kiwango cha Sampuli ya Sauti ya Bluetooth"</string>
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5628790207448471613">"Chagua Kodeki ya Sauti ya Bluetooth:\nKiwango cha Sampuli"</string>
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"Biti za Sauti ya Bluetooth kwa Kila Sampuli"</string>
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4546131401358681321">"Chagua Kodeki ya Sauti ya Bluetooth:\nBiti kwa Kila Sampuli"</string>
+    <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"Hali ya Mkondo wa Sauti ya Bluetooth"</string>
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="9133545781346216071">"Chagua Kodeki ya Sauti ya Bluetooth:\nHali ya Kituo"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Kodeki ya LDAC ya Sauti ya Bluetooth: Ubora wa Kucheza"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"Chagua Kodeki ya LDAC ya Sauti ya Bluetooth:\nUbora wa Kucheza"</string>
+    <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Kutiririsha: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Onyesha chaguo za cheti cha kuonyesha pasiwaya"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Ongeza hatua ya uwekaji kumbukumbu ya Wi-Fi, onyesha kwa kila SSID RSSI kwenye Kichukuzi cha Wi-Fi"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"Ikiwashwa, Wifi itakabidhi kwa hima muunganisho wa data kwa mtandao wa Simu za Mkononi, mawimbi ya Wifi yanapokuwa hafifu"</string>
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"Ruhusu au Zuia Uchanganuzi wa Matumizi ya Mitandao mingine ya Wifi kulingana na kiasi cha trafiki ya data kilicho kwenye kiolesura"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Ukubwa wa kiweka bafa ya kumbukumbu"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Chagua ukubwa wa kila Kumbukumbu"</string>
+    <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"Ungependa kufuta data iliyo kwenye hifadhi ya kiweka kumbukumbu za mara kwa mara?"</string>
+    <string name="dev_logpersist_clear_warning_message" msgid="2256582531342994562">"Tunapoacha kufuatilia kwa kutumia kiweka kumbukumbu za mara kwa mara, tunapaswa kufuta data yote ya kiweka kumbukumbu iliyo kwenye kifaa chako."</string>
+    <string name="select_logpersist_title" msgid="7530031344550073166">"Hifadhi data ya kiweka kumbukumbu kwenye kifaa mara kwa mara"</string>
+    <string name="select_logpersist_dialog_title" msgid="4003400579973269060">"Chagua akiba za kumbukumbu ili uhifadhi data kwenye kifaa mara kwa mara"</string>
     <string name="select_usb_configuration_title" msgid="2649938511506971843">"Chagua Usanidi wa USB"</string>
     <string name="select_usb_configuration_dialog_title" msgid="6385564442851599963">"Chagua Usanidi wa USB"</string>
     <string name="allow_mock_location" msgid="2787962564578664888">"Ruhusu maeneo ya jaribio"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Ruhusu maeneo ya majaribio"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Washa ukaguzi wa sifa ya onyesho"</string>
-    <string name="legacy_dhcp_client_summary" msgid="163383566317652040">"Tumia kiteja cha DHCP kutoka Lollipop badala ya kiteja kipya cha DHCP cha Android."</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Washa kila wakati data ya kifaa cha mkononi, hata kama Wi-Fi inatumika (katika uzimaji wa haraka wa mtandao)."</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"Ruhusu utatuaji USB?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"Ueuaji wa USB umekusudiwa kwa malengo ya utengenezaji tu. Itumi kunakili data kati ya kompyuta yako na kifaa chako, kusanidi programu kwa kifaa chako bila arifa, na kusoma data ya rajisi."</string>
@@ -185,6 +207,7 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"Mipangilio hii imekusudiwa kwa matumizi ya usanidi tu. Inaweza kusababisha kifaa chako na programu zilizoko kuvunjika au kutofanya kazi vizuri."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Thibitisha programu kupitia USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Kagua programu zilizosakinishwa kupitia ADB/ADT kwa tabia ya kudhuru."</string>
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Huzima kipengele cha Bluetooth cha sauti kamili kunapotokea matatizo ya sauti katika vifaa vya mbali kama vile sauti ya juu mno au inaposhindikana kuidhibiti."</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Kituo cha karibu"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Washa programu ya mwisho inayotoa ufikiaji mkuu wa karibu"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"Inakagua HDCP"</string>
@@ -206,8 +229,8 @@
     <string name="strict_mode_summary" msgid="142834318897332338">"Mulika skrini wakati programu zinafanya uendeshaji mrefu kwenye mnyororo mkuu"</string>
     <string name="pointer_location" msgid="6084434787496938001">"Mahali pa pointa"</string>
     <string name="pointer_location_summary" msgid="840819275172753713">"Kuegeshwa kwa skrini ikionyesha data ya mguso ya sasa"</string>
-    <string name="show_touches" msgid="1356420386500834339">"Onyesha miguso"</string>
-    <string name="show_touches_summary" msgid="6684407913145150041">"Onyesha mwitikio wa kuonekana wa miguso"</string>
+    <string name="show_touches" msgid="2642976305235070316">"Onyesha unapogonga"</string>
+    <string name="show_touches_summary" msgid="6101183132903926324">"Onyesha maoni ya picha unapogonga"</string>
     <string name="show_screen_updates" msgid="5470814345876056420">"Onyesha masasisho ya sehemu"</string>
     <string name="show_screen_updates_summary" msgid="2569622766672785529">"Angaza dirisha lote zitakaposasisha"</string>
     <string name="show_hw_screen_updates" msgid="5036904558145941590">"Onyesha sasisho za mtazamo wa GPU"</string>
@@ -225,8 +248,6 @@
     <string name="debug_layout_summary" msgid="2001775315258637682">"Onyesha mipaka ya picha, kingo, nk."</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Lazimisha uelekezaji wa muundo wa RTL"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Lazimisha uelekezaji wa muundo wa skrini kwa RTL kwa lugha zote"</string>
-    <string name="show_cpu_usage" msgid="2389212910758076024">"Onyesha matumizi ya CPU"</string>
-    <string name="show_cpu_usage_summary" msgid="2113341923988958266">"Kuegeshwa kwa skrini ikionyesha matumizi ya sasa ya CPU"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"Lazimisha kutungiliza  GPU"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"Lazimisha matumizi ya GPU kwa uchoraji wa 2d"</string>
     <string name="force_msaa" msgid="7920323238677284387">"Lazimisha 4x MSAA"</string>
@@ -244,14 +265,14 @@
     <string name="show_all_anrs" msgid="28462979638729082">"Onyesha ANR zote"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"Onyesha kisanduku kidadisi cha Programu Haiitikii kwa programu za usuli"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Lazima uruhusu programu kwenye hifadhi ya nje"</string>
-    <string name="force_allow_on_external_summary" msgid="3191952505860343233">"Huweka programu kwenye hifadhi ya nje, bila kujali maelezo"</string>
+    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Huruhusu programu yoyote iwekwe kwenye hifadhi ya nje, bila kujali thamani za faili ya maelezo"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Lazimisha shughuli ziweze kubadilishwa ukubwa"</string>
-    <string name="force_resizable_activities_summary" msgid="4508217476997182216">"Fanya shughuli zote ziweze kubadilishwa ukubwa kwa ajili ya dirisha nyingi, bila kujali thamani za faili ya maelezo."</string>
+    <string name="force_resizable_activities_summary" msgid="6667493494706124459">"Fanya shughuli zote ziweze kubadilishwa ukubwa kwenye madirisha mengi, bila kuzingatia thamani za faili ya maelezo."</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"Washa madirisha yenye muundo huru"</string>
-    <string name="enable_freeform_support_summary" msgid="2252563497485436534">"Huwasha uwezo wa kutumia madirisha ya majaribio yenye muundo huru."</string>
+    <string name="enable_freeform_support_summary" msgid="8247310463288834487">"Ruhusu uwezo wa kutumia madirisha ya majaribio yenye muundo huru."</string>
     <string name="local_backup_password_title" msgid="3860471654439418822">"Nenosiri la hifadhi rudufu ya eneo kazi"</string>
     <string name="local_backup_password_summary_none" msgid="6951095485537767956">"Hifadhi rudufu kamili za eneo kazi hazijalindwa kwa sasa"</string>
-    <string name="local_backup_password_summary_change" msgid="2731163425081172638">"Gusa ili ubadilishe au uondoe nenosiri la hifadhi rudufu kamili za eneo kazi"</string>
+    <string name="local_backup_password_summary_change" msgid="5376206246809190364">"Gonga ili ubadilishe au uondoe nenosiri la hifadhi rudufu kamili za eneo kazi"</string>
     <string name="local_backup_password_toast_success" msgid="582016086228434290">"Nenosiri jipya la hifadhi rudufu limewekwa"</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"Nenosiri jipya na uthibitisho havioani"</string>
     <string name="local_backup_password_toast_validation_failure" msgid="5646377234895626531">"Imeshindwa kuweka nenosiri la hifadhi rudufu"</string>
@@ -266,18 +287,15 @@
     <item msgid="5363960654009010371">"Rangi zilizoboreshwa kwa ajili ya maudhui dijitali"</item>
   </string-array>
     <string name="inactive_apps_title" msgid="1317817863508274533">"Programu zilizozimwa"</string>
-    <string name="inactive_app_inactive_summary" msgid="6768756967594202411">"Imezimwa. Gusa ili ubadilishe."</string>
-    <string name="inactive_app_active_summary" msgid="4512911571954375968">"Imewashwa. Gusa ili ubadilishe."</string>
+    <string name="inactive_app_inactive_summary" msgid="5091363706699855725">"Haitumika. Gonga ili ugeuze."</string>
+    <string name="inactive_app_active_summary" msgid="4174921824958516106">"Inatumika. Gonga ili ugeuze."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Huduma zinazoendeshwa"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"Onyesha na dhibiti huduma zinazoendeshwa kwa sasa"</string>
-    <string name="night_mode_title" msgid="2594133148531256513">"Hali ya usiku"</string>
-    <string name="night_mode_summary" msgid="9196605054622017193">"%s"</string>
-    <string name="night_mode_no" msgid="9171772244775838901">"Imezimwa"</string>
-    <string name="night_mode_yes" msgid="2218157265997633432">"Imewashwa kila wakati"</string>
-    <string name="night_mode_auto" msgid="7508348175804304327">"Otomatiki"</string>
+    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"Mwonekano wa Wavuti wa michakato mingi"</string>
+    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"Tekeleza vitoaji huduma vya Mwonekano wa Wavuti kando"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"Utekelezaji wa WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Weka utekelezaji wa WebView"</string>
-    <string name="select_webview_provider_confirmation_text" msgid="6671472080671066972">"Kipengee ulichochagua cha utekelezaji wa WebView kimezimwa. Ni lazima ukiwashe ili kitumike. Ungependa kukiwasha?"</string>
+    <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Chaguo hili halipo tena. Jaribu tena."</string>
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"Badilisha kuwa usimbaji fiche wa faili"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"Badilisha..."</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"Tayari faili imesimbwa kwa njia fiche"</string>
@@ -292,21 +310,52 @@
     <string name="daltonizer_mode_protanomaly" msgid="8424148009038666065">"Protanomaly (nyekundu-kijani)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="481725854987912389">"Tritanomaly (samawati-manjano)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"Usahihishaji wa rangi"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Kipengele hiki ni cha majaribio na huenda kikaathiri utendaji."</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Kipengele hiki ni cha majaribio na huenda kikaathiri utendaji wa kifaa chako."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"Imetanguliwa na <xliff:g id="TITLE">%1$s</xliff:g>"</string>
+    <string name="power_remaining_duration_only" msgid="4400068916452346544">"Zimesalia takribani <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"Zimesalia <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharging_duration" msgid="1605929174734600590">"<xliff:g id="LEVEL">%1$s</xliff:g> - imesalia takriban <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="power_discharging_duration_short" msgid="4192244429001842403">"Imechaji <xliff:g id="LEVEL">%1$s</xliff:g> - Zimesalia <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="2853265177761520490">"<xliff:g id="LEVEL">%1$s</xliff:g> - imesalia <xliff:g id="TIME">%2$s</xliff:g> hadi ijae"</string>
+    <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging_duration_ac" msgid="3969186192576594254">"<xliff:g id="LEVEL">%1$s</xliff:g> - imesalia <xliff:g id="TIME">%2$s</xliff:g> hadi ijae kwa kutumia AC"</string>
+    <string name="power_charging_duration_ac_short" msgid="7895864687218765582">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging_duration_usb" msgid="182405645340976546">"<xliff:g id="LEVEL">%1$s</xliff:g>%% - imesalia <xliff:g id="TIME">%2$s</xliff:g> hadi ijae kwa kutumia USB"</string>
+    <string name="power_charging_duration_usb_short" msgid="941854728040426399">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging_duration_wireless" msgid="1829295708243159464">"<xliff:g id="LEVEL">%1$s</xliff:g> - imesalia <xliff:g id="TIME">%2$s</xliff:g> hadi ijae kwa isiyotumia waya"</string>
+    <string name="power_charging_duration_wireless_short" msgid="1642664799869599476">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"Haijulikani"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"Inachaji"</string>
     <string name="battery_info_status_charging_ac" msgid="2909861890674399949">"Inachaji kupitia AC"</string>
+    <string name="battery_info_status_charging_ac_short" msgid="7431401092096415502">"Inachaji"</string>
     <string name="battery_info_status_charging_usb" msgid="2207489369680923929">"Inachaji kupitia USB"</string>
+    <string name="battery_info_status_charging_usb_short" msgid="6733371990319101366">"Inachaji"</string>
     <string name="battery_info_status_charging_wireless" msgid="3574032603735446573">"Inachaji bila kutumia waya"</string>
+    <string name="battery_info_status_charging_wireless_short" msgid="752569941028903610">"Inachaji"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"Haichaji"</string>
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"Haichaji"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"Imejaa"</string>
-    <string name="disabled_by_admin_summary_text" msgid="7787027069207263048">"Msimamizi amezima mapendeleo ya mipangilio"</string>
+    <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"Imedhibitiwa na msimamizi"</string>
+    <string name="enabled_by_admin" msgid="2386503803463071894">"Msimamizi amewasha mapendeleo ya mipangilio"</string>
+    <string name="disabled_by_admin" msgid="3669999613095206948">"Msimamizi amezima mapendeleo ya mipangilio"</string>
+    <string name="home" msgid="3256884684164448244">"Ukurasa wa Kwanza wa Mipangilio"</string>
+  <string-array name="battery_labels">
+    <item msgid="8494684293649631252">"0%"</item>
+    <item msgid="8934126114226089439">"50%"</item>
+    <item msgid="1286113608943010849">"100%"</item>
+  </string-array>
+    <string name="charge_length_format" msgid="8978516217024434156">"Zimepita <xliff:g id="ID_1">%1$s</xliff:g>"</string>
+    <string name="remaining_length_format" msgid="7886337596669190587">"Zimesalia <xliff:g id="ID_1">%1$s</xliff:g>"</string>
+    <string name="screen_zoom_summary_small" msgid="5867245310241621570">"Ndogo"</string>
+    <string name="screen_zoom_summary_default" msgid="2247006805614056507">"Chaguo-msingi"</string>
+    <string name="screen_zoom_summary_large" msgid="4835294730065424084">"Kubwa"</string>
+    <string name="screen_zoom_summary_very_large" msgid="7108563375663670067">"Kubwa kiasi"</string>
+    <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"Kubwa zaidi"</string>
+    <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"Kiwango maalum (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
+    <string name="help_feedback_label" msgid="6815040660801785649">"Usaidizi na maoni"</string>
+    <string name="content_description_menu_button" msgid="8182594799812351266">"Menyu"</string>
+    <string name="retail_demo_reset_message" msgid="118771671364131297">"Weka nenosiri ili urejeshe mipangilio ya kiwandani ikiwa katika hali ya onyesho."</string>
+    <string name="retail_demo_reset_next" msgid="8356731459226304963">"Inayofuata"</string>
+    <string name="retail_demo_reset_title" msgid="696589204029930100">"Nenosiri linahitajika"</string>
 </resources>

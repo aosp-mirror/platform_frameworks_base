@@ -25,10 +25,12 @@
     <string name="wifi_remembered" msgid="4955746899347821096">"ಉಳಿಸಲಾಗಿದೆ"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"IP ಕಾನ್ಫಿಗರೇಶನ್ ವಿಫಲತೆ"</string>
+    <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"ಕಡಿಮೆ ಗುಣಮಟ್ಟದ ನೆಟ್‌ವರ್ಕ್‌ನಿಂದಾಗಿ ಸಂಪರ್ಕ ಸಾಧಿಸಿಲ್ಲ"</string>
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"WiFi ಸಂಪರ್ಕ ವಿಫಲತೆ"</string>
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"ಪ್ರಮಾಣೀಕರಣ ಸಮಸ್ಯೆ"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"ವ್ಯಾಪ್ತಿಯಲ್ಲಿಲ್ಲ"</string>
-    <string name="wifi_no_internet" msgid="9151470775868728896">"ಯಾವುದೇ ಇಂಟರ್ನೆಟ್‌ ಪ್ರವೇಶ ಪತ್ತೆಯಾಗಿಲ್ಲ, ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಮರುಸಂಪರ್ಕಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ."</string>
+    <string name="wifi_no_internet_no_reconnect" msgid="2211781637653149657">"ಯಾವುದೇ ಇಂಟರ್ನೆಟ್‌ ಪ್ರವೇಶ ಪತ್ತೆಯಾಗಿಲ್ಲ, ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಮರುಸಂಪರ್ಕಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ."</string>
+    <string name="wifi_no_internet" msgid="5011955173375805204">"ಯಾವುದೇ ಇಂಟರ್ನೆಟ್ ಪ್ರವೇಶವಿಲ್ಲ."</string>
     <string name="saved_network" msgid="4352716707126620811">"<xliff:g id="NAME">%1$s</xliff:g> ರಿಂದ ಉಳಿಸಲಾಗಿದೆ"</string>
     <string name="connected_via_wfa" msgid="3805736726317410714">"Wi‑Fi ಸಹಾಯಕದ ಮೂಲಕ ಸಂಪರ್ಕಿತಗೊಳಿಸಲಾಗಿದೆ"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"%1$s ಮೂಲಕ ಸಂಪರ್ಕಗೊಂಡಿದೆ"</string>
@@ -71,7 +73,7 @@
     <string name="bluetooth_hid_profile_summary_use_for" msgid="232727040453645139">"ಇನ್‌ಪುಟ್‌ಗಾಗಿ ಬಳಸು"</string>
     <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"ಜೋಡಿ"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="6061699265220789149">"ಜೋಡಿ ಮಾಡು"</string>
-    <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"ರದ್ದುಮಾಡು"</string>
+    <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"ರದ್ದುಮಾಡಿ"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="4982239145676394429">"ಸಂಪರ್ಕಪಡಿಸಿದಾಗ, ಜೋಡಿಸುವಿಕೆಯು ನಿಮ್ಮ ಸಂಪರ್ಕಗಳು ಮತ್ತು ಕರೆ ಇತಿಹಾಸಕ್ಕೆ ಪ್ರವೇಶವನ್ನು ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="bluetooth_pairing_error_message" msgid="3748157733635947087">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> ಜೊತೆಗೆ ಜೋಡಣೆ ಮಾಡಲಾಗಲಿಲ್ಲ."</string>
     <string name="bluetooth_pairing_pin_error_message" msgid="8337234855188925274">"ತಪ್ಪಾಗಿರುವ ಪಿನ್‌ ಅಥವಾ ಪಾಸ್‌ಕೀ ಕಾರಣದಿಂದಾಗಿ <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ಜೊತೆಗೆ ಜೋಡಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ."</string>
@@ -91,9 +93,9 @@
     <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"ಬ್ಲೂಟೂತ್‌‌ ಟೆಥರಿಂಗ್‌"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"ಟೆಥರಿಂಗ್‌"</string>
     <string name="tether_settings_title_all" msgid="8356136101061143841">"ಟೆಥರಿಂಗ್ &amp; ಪೋರ್ಟಬಲ್ ಹಾಟ್‌ಸ್ಪಾಟ್"</string>
-    <string name="managed_user_title" msgid="8101244883654409696">"ಕೆಲಸದ ಪ್ರೊಫೈಲ್"</string>
+    <string name="managed_user_title" msgid="8109605045406748842">"ಎಲ್ಲ ಕೆಲಸದ ಅಪ್ಲಿಕೇಶನ್‌ಗಳು"</string>
     <string name="user_guest" msgid="8475274842845401871">"ಅತಿಥಿ"</string>
-    <string name="unknown" msgid="1592123443519355854">"ಅಜ್ಞಾತ"</string>
+    <string name="unknown" msgid="1592123443519355854">"ಅಪರಿಚಿತ"</string>
     <string name="running_process_item_user_label" msgid="3129887865552025943">"ಬಳಕೆದಾರ: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="313159469856372621">"ಕೆಲವು ಡೀಫಾಲ್ಟ್‌ಗಳನ್ನು ಹೊಂದಿಸಲಾಗಿದೆ"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"ಡೀಫಾಲ್ಟ್‌ಗಳನ್ನು ಹೊಂದಿಸಲಾಗಿಲ್ಲ"</string>
@@ -101,6 +103,8 @@
     <string name="tts_settings_title" msgid="1237820681016639683">"ಧ್ವನಿಗೆ-ಪಠ್ಯದ ಔಟ್‌ಪುಟ್‌"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"ಧ್ವನಿಯ ದರ"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"ಪಠ್ಯವನ್ನು ಹೇಳಿದ ವೇಗ"</string>
+    <string name="tts_default_pitch_title" msgid="6135942113172488671">"ಪಿಚ್"</string>
+    <string name="tts_default_pitch_summary" msgid="1944885882882650009">"ಸಂಯೋಜಿತ ಧ್ವನಿಯ ಟೋನ್ ಮೇಲೆ ಪರಿಣಾಮ ಬೀರುತ್ತದೆ"</string>
     <string name="tts_default_lang_title" msgid="8018087612299820556">"ಭಾಷೆ"</string>
     <string name="tts_lang_use_system" msgid="2679252467416513208">"ಸಿಸ್ಟಂ ಭಾಷೆಯನ್ನು ಬಳಸು"</string>
     <string name="tts_lang_not_selected" msgid="7395787019276734765">"ಭಾಷೆಯನ್ನು ಆಯ್ಕೆಮಾಡಲಾಗಿಲ್ಲ"</string>
@@ -121,6 +125,8 @@
     <string name="tts_engine_settings_button" msgid="1030512042040722285">"ಎಂಜಿನ್ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ಪ್ರಾರಂಭಿಸು"</string>
     <string name="tts_engine_preference_section_title" msgid="448294500990971413">"ಪ್ರಾಶಸ್ತ್ಯದ ಎಂಜಿನ್"</string>
     <string name="tts_general_section_title" msgid="4402572014604490502">"ಸಾಮಾನ್ಯ"</string>
+    <string name="tts_reset_speech_pitch_title" msgid="5789394019544785915">"ಉಚ್ಛಾರಣೆ ಪಿಚ್‌ ಅನ್ನು ಮರುಹೊಂದಿಸಿ"</string>
+    <string name="tts_reset_speech_pitch_summary" msgid="8700539616245004418">"ಡೀಫಾಲ್ಟ್‌ಗೆ ಪಠ್ಯವನ್ನು ಉಚ್ಛರಿಸುವ ರೀತಿಯಲ್ಲಿ ಪಿಚ್‌ ಅನ್ನು ಮರುಹೊಂದಿಸಿ."</string>
   <string-array name="tts_rate_entries">
     <item msgid="6695494874362656215">"ತುಂಬಾ ನಿಧಾನ"</item>
     <item msgid="4795095314303559268">"ನಿಧಾನ"</item>
@@ -150,7 +156,7 @@
     <string name="keep_screen_on" msgid="1146389631208760344">"ಎಚ್ಚರವಾಗಿರು"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"ಚಾರ್ಜ್ ಮಾಡುವಾಗ ಪರದೆಯು ಎಂದಿಗೂ ನಿದ್ರಾವಸ್ಥೆಗೆ ಹೋಗುವುದಿಲ್ಲ"</string>
     <string name="bt_hci_snoop_log" msgid="3340699311158865670">"ಬ್ಲೂಟೂತ್‌‌ HCI ಸ್ನೂಪ್‌ಲಾಗ್"</string>
-    <string name="bt_hci_snoop_log_summary" msgid="730247028210113851">"ಫೈಲ್‌ನಲ್ಲಿ ಎಲ್ಲ bluetooth HCI ಪ್ಯಾಕೆಟ್‌ಗಳನ್ನು ಸೆರೆಹಿಡಿಯಿರಿ"</string>
+    <string name="bt_hci_snoop_log_summary" msgid="730247028210113851">"ಫೈಲ್‌ನಲ್ಲಿ ಎಲ್ಲ ಬ್ಲೂಟೂತ್ HCI ಪ್ಯಾಕೆಟ್‌ಗಳನ್ನು ಸೆರೆಹಿಡಿಯಿರಿ"</string>
     <string name="oem_unlock_enable" msgid="6040763321967327691">"OEM ಅನ್‌ಲಾಕ್‌ ಮಾಡಲಾಗುತ್ತಿದೆ"</string>
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"ಬೂಟ್‌ಲೋಡರ್‌ ಅನ್‌ಲಾಕ್‌ ಮಾಡಲು ಅನುಮತಿಸಿ"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"OEM ಅನ್‌ಲಾಕ್‌ ಮಾಡುವಿಕೆಯನ್ನು ಅನುಮತಿಸುವುದೇ?"</string>
@@ -162,22 +168,38 @@
     <string name="wifi_display_certification" msgid="8611569543791307533">"ವೈರ್‌ಲೆಸ್ ಪ್ರದರ್ಶನ ಪ್ರಮಾಣೀಕರಣ"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Wi‑Fi ವೆರ್ಬೋಸ್ ಲಾಗಿಂಗ್ ಸಕ್ರಿಯಗೊಳಿಸಿ"</string>
     <string name="wifi_aggressive_handover" msgid="9194078645887480917">"ಸೆಲ್ಯುಲರ್‌ ಹಸ್ತಾಂತರಿಸಲು ಆಕ್ರಮಣಕಾರಿ Wi‑Fi"</string>
-    <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Wi-Fi ರೋಮ್ ಸ್ಕ್ಯಾನ್‌ಗಳನ್ನು ಯಾವಾಗಲೂ ಅನುಮತಿಸಿ"</string>
-    <string name="legacy_dhcp_client" msgid="694426978909127287">"ಹಿಂದಿನ DHCP ಕ್ಲೈಂಟ್ ಬಳಸಿ"</string>
+    <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"ವೈ-ಫೈ ರೋಮ್ ಸ್ಕ್ಯಾನ್‌ಗಳನ್ನು ಯಾವಾಗಲೂ ಅನುಮತಿಸಿ"</string>
     <string name="mobile_data_always_on" msgid="7745605759775320362">"ಸೆಲ್ಯುಲರ್ ಡೇಟಾ ಯಾವಾಗಲೂ ಸಕ್ರಿಯ"</string>
+    <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"ಸಂಪೂರ್ಣ ವಾಲ್ಯೂಮ್‌ ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ"</string>
+    <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"ಬ್ಲೂಟೂತ್ AVRCP ಆವೃತ್ತಿ"</string>
+    <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"ಬ್ಲೂಟೂತ್ AVRCP ಆವೃತ್ತಿಯನ್ನು ಆಯ್ಕೆ ಮಾಡಿ"</string>
+    <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"ಬ್ಲೂಟೂತ್ ಆಡಿಯೋ ಕೋಡೆಕ್"</string>
+    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="4558347981670553665">"ಬ್ಲೂಟೂತ್‌ ಆಡಿಯೊ ಕೋಡೆಕ್ ಆಯ್ಕೆ ಮಾಡಿ"</string>
+    <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"ಬ್ಲೂಟೂತ್ ಆಡಿಯೋ ಮಾದರಿ ದರ"</string>
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5628790207448471613">"ಬ್ಲೂಟೂತ್‌ ಆಡಿಯೋ ಕೋಡೆಕ್:\nಮಾದರಿ ದರ ಆಯ್ಕೆ ಮಾಡಿ"</string>
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"ಬ್ಲೂಟೂತ್‌ ಆಡಿಯೊ ಬಿಟ್ಸ್‌‌ನ ಪ್ರತಿ ಮಾದರಿ"</string>
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4546131401358681321">"ಬ್ಲೂಟೂತ್‌ ಆಡಿಯೋ ಕೋಡೆಕ್‌:\nಬಿಟ್ಸ್ ಪ್ರತಿ ಮಾದರಿ ಆಯ್ಕೆ ಮಾಡಿ"</string>
+    <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"ಬ್ಲೂಟೂತ್ ಆಡಿಯೋ ಚಾನೆಲ್ ಮೋಡ್"</string>
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="9133545781346216071">"ಬ್ಲೂಟೂತ್‌ ಆಡಿಯೋ ಕೋಡೆಕ್:\nಚಾನೆಲ್ ಮೋಡ್ ಆಯ್ಕೆ ಮಾಡಿ"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"ಬ್ಲೂಟೂತ್‌ ಆಡಿಯೊ LDAC ಕೋಡೆಕ್: ಪ್ಲೇಬ್ಯಾಕ್ ಗುಣಮಟ್ಟ"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"ಬ್ಲೂಟೂತ್‌ ಆಡಿಯೊ LDAC ಕೋಡೆಕ್:\nಪ್ಲೇಬ್ಯಾಕ್‌ ಗುಣಮಟ್ಟ ಆಯ್ಕೆ ಮಾಡಿ"</string>
+    <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"ಸ್ಟ್ರೀಮಿಂಗ್: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"ವೈರ್‌ಲೆಸ್‌‌‌ ಪ್ರದರ್ಶನ ಪ್ರಮಾಣೀಕರಣಕ್ಕಾಗಿ ಆಯ್ಕೆಗಳನ್ನು ತೋರಿಸು"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Wi‑Fi ಲಾಗಿಂಗ್ ಮಟ್ಟನ್ನು ಹೆಚ್ಚಿಸಿ, Wi‑Fi ಆಯ್ಕೆಯಲ್ಲಿ ಪ್ರತಿಯೊಂದು SSID RSSI ತೋರಿಸಿ"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"ಸಕ್ರಿಯಗೊಂಡರೆ, Wi‑Fi ಸಿಗ್ನಲ್ ದುರ್ಬಲವಾಗಿದ್ದರೂ ಕೂಡ, ಸೆಲ್ಯುಲರ್‌ಗೆ ಡೇಟಾ ಸಂಪರ್ಕವನ್ನು ಹಸ್ತಾಂತರಿಸುವಲ್ಲಿ Wi‑Fi ಹೆಚ್ಚು ಆಕ್ರಮಣಕಾರಿಯಾಗಿರುತ್ತದೆ"</string>
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"ಇಂಟರ್‌ಫೇಸ್‌ನಲ್ಲಿ ಲಭ್ಯವಿರುವ ಡೇಟಾ ಟ್ರಾಫಿಕ್ ಆಧಾರದ ಮೇಲೆ Wi‑Fi ರೋಮ್ ಸ್ಕ್ಯಾನ್‌ಗಳನ್ನು ಅನುಮತಿಸಿ/ನಿರಾಕರಿಸಿ"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"ಲಾಗರ್ ಬಫರ್ ಗಾತ್ರಗಳು"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"ಪ್ರತಿ ಲಾಗ್ ಬಫರ್‌ಗೆ ಲಾಗರ್ ಗಾತ್ರಗಳನ್ನು ಆಯ್ಕೆಮಾಡಿ"</string>
+    <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"ಶಾಶ್ವತವಾಗಿರುವ ಸಂಗ್ರಹಣೆ ಲಾಗರ್ ಅನ್ನು ತೆರವುಗೊಳಿಸುವುದೇ?"</string>
+    <string name="dev_logpersist_clear_warning_message" msgid="2256582531342994562">"ನಾವು ನಿರಂತರವಾಗಿ ಲಾಗರ್ ಮೂಲಕ ಮೇಲ್ವಿಚಾರಣೆ ಮಾಡದಿರುವಾಗ, ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಸಂಗ್ರಹವಾಗಿರುವಂತಹ ಲಾಗರ್ ಡೇಟಾವನ್ನು ಅಳಿಸುವುದು ನಮಗೆ ಅಗತ್ಯವಿರುತ್ತದೆ."</string>
+    <string name="select_logpersist_title" msgid="7530031344550073166">"ಲಾಗರ್ ಡೇಟಾವನ್ನು ಸಾಧನದಲ್ಲಿ ನಿರಂತರವಾಗಿ ಸಂಗ್ರಹಿಸಿ"</string>
+    <string name="select_logpersist_dialog_title" msgid="4003400579973269060">"ಸಾಧನದಲ್ಲಿ ನಿರಂತರವಾಗಿ ಸಂಗ್ರಹಿಸಲು ಲಾಗ್ ಬಫರ್‌ಗಳನ್ನು ಆಯ್ಕೆಮಾಡಿ"</string>
     <string name="select_usb_configuration_title" msgid="2649938511506971843">"USB ಕಾನ್ಫಿಗರೇಶನ್ ಆಯ್ಕೆಮಾಡಿ"</string>
     <string name="select_usb_configuration_dialog_title" msgid="6385564442851599963">"USB ಕಾನ್ಫಿಗರೇಶನ್ ಆಯ್ಕೆಮಾಡಿ"</string>
     <string name="allow_mock_location" msgid="2787962564578664888">"ಅಣಕು ಸ್ಥಾನಗಳನ್ನು ಅನುಮತಿಸು"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"ಅಣಕು ಸ್ಥಾನಗಳನ್ನು ಅನುಮತಿಸು"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"ವೀಕ್ಷಣೆ ಆಟ್ರಿಬ್ಯೂಟ್ ಪರಿಶೀಲನೆ"</string>
-    <string name="legacy_dhcp_client_summary" msgid="163383566317652040">"ಹೊಸ Android DHCP ಕ್ಲೈಂಟ್ ಬದಲಾಗಿ Lollipop ನಿಂದ DHCP ಕ್ಲೈಂಟ್ ಬಳಸಿ."</string>
-    <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Wi-Fi ಸಕ್ರಿಯವಾಗಿರುವಾಗಲೂ, ಯಾವಾಗಲೂ ಮೊಬೈಲ್‌ ಡೇಟಾ ಸಕ್ರಿಯವಾಗಿರಿಸಿ (ವೇಗವಾಗಿ ನೆಟ್‌ವರ್ಕ್‌ ಬದಲಾಯಿಸಲು)."</string>
+    <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"ವೈ-ಫೈ ಸಕ್ರಿಯವಾಗಿರುವಾಗಲೂ, ಯಾವಾಗಲೂ ಮೊಬೈಲ್‌ ಡೇಟಾ ಸಕ್ರಿಯವಾಗಿರಿಸಿ (ವೇಗವಾಗಿ ನೆಟ್‌ವರ್ಕ್‌ ಬದಲಾಯಿಸಲು)."</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"USB ಡೀಬಗ್ ಮಾಡುವಿಕೆಯನ್ನು ಅನುಮತಿಸುವುದೇ?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"USB ಡೀಬಗ್ ಮಾಡುವಿಕೆಯು ಅಭಿವೃದ್ಧಿ ಉದ್ದೇಶಗಳಿಗೆ ಮಾತ್ರ ಆಗಿದೆ. ನಿಮ್ಮ ಕಂಪ್ಯೂಟರ್ ಮತ್ತು ನಿಮ್ಮ ಸಾಧನದ ನಡುವೆ ಡೇಟಾವನ್ನು ನಕಲಿಸಲು, ಅಧಿಸೂಚನೆ ಇಲ್ಲದೆ ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ಸ್ಥಾಪಿಸಲು ಮತ್ತು ಲಾಗ್ ಡೇಟಾ ಓದಲು ಅದನ್ನು ಬಳಸಿ."</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"ನೀವು ಹಿಂದೆ ಅಧಿಕೃತಗೊಳಿಸಿದ ಎಲ್ಲ ಕಂಪ್ಯೂಟರ್‌ಗಳಿಂದ USB ಡೀಬಗ್‌ಗೆ ಪ್ರವೇಶವನ್ನು ರದ್ದುಗೊಳಿಸುವುದೇ?"</string>
@@ -185,6 +207,7 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"ಈ ಸೆಟ್ಟಿಂಗ್‌ಗಳು ಅಭಿವೃದ್ಧಿಯ ಬಳಕೆಗೆ ಮಾತ್ರ. ಅವುಗಳು ನಿಮ್ಮ ಸಾಧನ ಮತ್ತು ಅಪ್ಲಿಕೇಶನ್‌‌ಗಳಿಗೆ ಧಕ್ಕೆ ಮಾಡಬಹುದು ಅಥವಾ ಅವು ಸರಿಯಾಗಿ ಕಾರ್ಯನಿರ್ವಹಿಸದಿರುವಂತೆ ಮಾಡಬಹುದು."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"USB ಮೂಲಕ ಆಪ್‌ ಪರಿಶೀಲಿಸಿ"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"ಹಾನಿಮಾಡುವಂತಹ ವರ್ತನೆಗಾಗಿ ADB/ADT ಮೂಲಕ ಸ್ಥಾಪಿಸಲಾದ ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ಪರಿಶೀಲಿಸಿ."</string>
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"ರಿಮೋಟ್ ಸಾಧನಗಳೊಂದಿಗೆ ಒಪ್ಪಲಾಗದ ಜೋರಾದ ವಾಲ್ಯೂಮ್ ಅಥವಾ ನಿಯಂತ್ರಣದ ಕೊರತೆಯಂತಹ ವಾಲ್ಯೂಮ್ ಸಮಸ್ಯೆಗಳಂತಹ ಸಂದರ್ಭದಲ್ಲಿ ಬ್ಲೂಟೂತ್ ಸಂಪೂರ್ಣ ವಾಲ್ಯೂಮ್ ವೈಶಿಷ್ಟ್ಯವನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಬಹುದು."</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"ಸ್ಥಳೀಯ ಟರ್ಮಿನಲ್"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"ಸ್ಥಳೀಯ ಶೆಲ್ ಪ್ರವೇಶವನ್ನು ಒದಗಿಸುವ ಟರ್ಮಿನಲ್ ಅಪ್ಲಿಕೇಶನ್ ಸಕ್ರಿಯಗೊಳಿಸಿ"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP ಪರೀಕ್ಷಿಸುವಿಕೆ"</string>
@@ -206,8 +229,8 @@
     <string name="strict_mode_summary" msgid="142834318897332338">"ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ಮುಖ್ಯ ಥ್ರೆಡ್‌ನಲ್ಲಿ ದೀರ್ಘ ಕಾರ್ಯಾಚರಣೆ ನಿರ್ವಹಿಸಿದಾಗ ಪರದೆಯನ್ನು ಫ್ಲ್ಯಾಶ್ ಮಾಡು"</string>
     <string name="pointer_location" msgid="6084434787496938001">"ಪಾಯಿಂಟರ್ ಸ್ಥಾನ"</string>
     <string name="pointer_location_summary" msgid="840819275172753713">"ಪ್ರಸ್ತುತ ಸ್ಪರ್ಶ ಡೇಟಾ ತೋರಿಸುವ ಪರದೆಯ ಓವರ್‌ಲೇ"</string>
-    <string name="show_touches" msgid="1356420386500834339">"ಸ್ಪರ್ಶಗಳನ್ನು ತೋರಿಸು"</string>
-    <string name="show_touches_summary" msgid="6684407913145150041">"ಸ್ಪರ್ಶಗಳಿಗಾಗಿ ದೃಶ್ಯ ಪ್ರತ್ಯುತ್ತರವನ್ನು ತೋರಿಸು"</string>
+    <string name="show_touches" msgid="2642976305235070316">"ಟ್ಯಾಪ್‌ಗಳನ್ನು ತೋರಿಸು"</string>
+    <string name="show_touches_summary" msgid="6101183132903926324">"ಟ್ಯಾಪ್‌ಗಳಿಗೆ ದೃಶ್ಯ ಪ್ರತಿಕ್ರಿಯೆ ತೋರಿಸು"</string>
     <string name="show_screen_updates" msgid="5470814345876056420">"ಸರ್ಫೇಸ್‌‌ ಅಪ್‌ಡೇಟ್‌"</string>
     <string name="show_screen_updates_summary" msgid="2569622766672785529">"ಅಪ್‌ಡೇಟ್‌ ಆಗುವಾಗ ವಿಂಡೋದ ಸರ್ಫೇಸ್‌ ಫ್ಲ್ಯಾಶ್ ಆಗುತ್ತದೆ"</string>
     <string name="show_hw_screen_updates" msgid="5036904558145941590">"GPU ವೀಕ್ಷಣೆ ಅಪ್‌ಡೇಟ್‌"</string>
@@ -225,8 +248,6 @@
     <string name="debug_layout_summary" msgid="2001775315258637682">"ಕ್ಲಿಪ್‌ನ ಗಡಿಗಳು, ಅಂಚುಗಳು, ಇತ್ಯಾದಿ ತೋರಿಸು."</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"RTL ಲೇಔಟ್‌ ಪರಿಮಿತಿ ಬಲಗೊಳಿಸಿ"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"ಎಲ್ಲ ಸ್ಥಳಗಳಿಗಾಗಿ RTL ಗೆ ಸ್ಕ್ರೀನ್‌ ಲೇಔಟ್‌ ದಿಕ್ಕನ್ನು ಪ್ರಬಲಗೊಳಿಸಿ"</string>
-    <string name="show_cpu_usage" msgid="2389212910758076024">"CPU ಬಳಕೆಯನ್ನು ತೋರಿಸು"</string>
-    <string name="show_cpu_usage_summary" msgid="2113341923988958266">"ಪ್ರಸ್ತುತ CPU ಬಳಕೆಯನ್ನು ತೋರಿಸುತ್ತಿರುವ ಪರದೆಯ ಓವರ್‌ಲೇ"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"GPU ನೀಡುವಿಕೆ ಬಲಗೊಳಿಸು"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"2d ಚಿತ್ರಕಲೆಗಾಗಿ GPU ಬಳಕೆ ಬಲಗೊಳಿಸಿ"</string>
     <string name="force_msaa" msgid="7920323238677284387">"4x MSAA ಪ್ರಬಲಗೊಳಿಸಿ"</string>
@@ -244,14 +265,14 @@
     <string name="show_all_anrs" msgid="28462979638729082">"ಎಲ್ಲ ANR ಗಳನ್ನು ತೋರಿಸು"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"ಹಿನ್ನೆಲೆ ಅಪ್ಲಿಕೇಶನ್‌ಗಳಿಗಾಗಿ ಅಪ್ಲಿಕೇಶನ್ ಪ್ರತಿಕ್ರಿಯಿಸುತ್ತಿಲ್ಲ ಎಂಬ ಸಂಭಾಷಣೆ ತೋರಿಸು"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"ಬಾಹ್ಯವಾಗಿ ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ಒತ್ತಾಯವಾಗಿ ಅನುಮತಿಸಿ"</string>
-    <string name="force_allow_on_external_summary" msgid="3191952505860343233">"ಮ್ಯಾನಿಫೆಸ್ಟ್ ಮೌಲ್ಯಗಳನ್ನು ಪರಿಗಣಿಸದೇ, ಯಾವುದೇ ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಬಾಹ್ಯ ಸಂಗ್ರಹಣೆಗೆ ಬರೆಯಲು ಅರ್ಹಗೊಳಿಸುತ್ತದೆ"</string>
+    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"ಮ್ಯಾನಿಫೆಸ್ಟ್ ಮೌಲ್ಯಗಳು ಯಾವುದೇ ಆಗಿದ್ದರೂ, ಬಾಹ್ಯ ಸಂಗ್ರಹಣೆಗೆ ಬರೆಯಲು ಯಾವುದೇ ಅಪ್ಲಿಕೇಶನ್‌ ಅನ್ನು ಅರ್ಹಗೊಳಿಸುತ್ತದೆ"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"ಚಟುವಟಿಕೆಗಳನ್ನು ಮರುಗಾತ್ರಗೊಳಿಸುವಂತೆ ಒತ್ತಾಯ ಮಾಡಿ"</string>
-    <string name="force_resizable_activities_summary" msgid="4508217476997182216">"ಮ್ಯಾನಿಫೆಸ್ಟ್ ಮೌಲ್ಯಗಳನ್ನು ಪರಿಗಣಿಸದೇ, ಬಹು-ವಿಂಡೊಗೆ ಎಲ್ಲಾ ಚಟುವಟಿಕೆಗಳನ್ನು ಮರುಗಾತ್ರಗೊಳಿಸುವಂತೆ ಮಾಡುತ್ತದೆ."</string>
+    <string name="force_resizable_activities_summary" msgid="6667493494706124459">"ಮ್ಯಾನಿಫೆಸ್ಟ್ ಮೌಲ್ಯಗಳನ್ನು ಪರಿಗಣಿಸದೇ, ಬಹು-ವಿಂಡೊಗೆ ಎಲ್ಲಾ ಚಟುವಟಿಕೆಗಳನ್ನು ಮರುಗಾತ್ರಗೊಳಿಸುವಂತೆ ಮಾಡಿ."</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"ಮುಕ್ತಸ್ವರೂಪದ ವಿಂಡೊಗಳನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿ"</string>
-    <string name="enable_freeform_support_summary" msgid="2252563497485436534">"ಪ್ರಾಯೋಗಿಕ ಮುಕ್ತಸ್ವರೂಪದ ವಿಂಡೊಗಳಿಗೆ ಬೆಂಬಲವನ್ನು ಸಕ್ರಿಯಗೊಳಿಸುತ್ತದೆ."</string>
+    <string name="enable_freeform_support_summary" msgid="8247310463288834487">"ಪ್ರಾಯೋಗಿಕ ಫ್ರೀಫಾರ್ಮ್ ವಿಂಡೊಗಳಿಗೆ ಬೆಂಬಲವನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿ."</string>
     <string name="local_backup_password_title" msgid="3860471654439418822">"ಡೆಸ್ಕ್‌ಟಾಪ್ ಬ್ಯಾಕಪ್ ಪಾಸ್‌ವರ್ಡ್"</string>
     <string name="local_backup_password_summary_none" msgid="6951095485537767956">"ಡೆಸ್ಕ್‌ಟಾಪ್‌‌ನ ಪೂರ್ಣ ಬ್ಯಾಕಪ್‌‌ಗಳನ್ನು ಪ್ರಸ್ತುತ ರಕ್ಷಿಸಲಾಗಿಲ್ಲ"</string>
-    <string name="local_backup_password_summary_change" msgid="2731163425081172638">"ಡೆಸ್ಕ್‌ಟಾಪ್‌ನ ಪೂರ್ಣ ಬ್ಯಾಕಪ್‌ಗಳಿಗೆ ಪಾಸ್‌ವರ್ಡ್‌ ಅನ್ನು ಬದಲಾಯಿಸಲು ಅಥವಾ ತೆಗೆದುಹಾಕಲು ಸ್ಪರ್ಶಿಸಿ"</string>
+    <string name="local_backup_password_summary_change" msgid="5376206246809190364">"ಡೆಸ್ಕ್‌ಟಾಪ್‌ನ ಪೂರ್ಣ ಬ್ಯಾಕಪ್‌ಗಳಿಗೆ ಪಾಸ್‌ವರ್ಡ್‌ ಬದಲಾಯಿಸಲು ಅಥವಾ ತೆಗೆದುಹಾಕಲು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="local_backup_password_toast_success" msgid="582016086228434290">"ಹೊಸ ಬ್ಯಾಕಪ್ ಪಾಸ್‌ವರ್ಡ್‌ ಹೊಂದಿಸಲಾಗಿದೆ"</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"ಹೊಸ ಪಾಸ್‌ವರ್ಡ್‌ ಮತ್ತು ದೃಢೀಕರಣ ಹೊಂದಾಣಿಕೆಯಾಗುತ್ತಿಲ್ಲ"</string>
     <string name="local_backup_password_toast_validation_failure" msgid="5646377234895626531">"ಬ್ಯಾಕಪ್‌ ಪಾಸ್‌ವರ್ಡ್‌ ಹೊಂದಿಕೆ ವಿಫಲಗೊಂಡಿದೆ"</string>
@@ -266,18 +287,15 @@
     <item msgid="5363960654009010371">"ಡಿಜಿಟಲ್ ವಿಷಯಕ್ಕಾಗಿ ಆಪ್ಟಿಮೈಜ್ ಮಾಡಲಾಗಿರುವ ಬಣ್ಣಗಳು"</item>
   </string-array>
     <string name="inactive_apps_title" msgid="1317817863508274533">"ನಿಷ್ಕ್ರಿಯ ಅಪ್ಲಿಕೇಶನ್‌ಗಳು"</string>
-    <string name="inactive_app_inactive_summary" msgid="6768756967594202411">"ನಿಷ್ಕ್ರಿಯವಾಗಿದೆ. ಟಾಗಲ್ ಮಾಡಲು ಸ್ಪರ್ಶಿಸಿ."</string>
-    <string name="inactive_app_active_summary" msgid="4512911571954375968">"ಸಕ್ರಿಯವಾಗಿದೆ. ಟಾಗಲ್ ಮಾಡಲು ಸ್ಪರ್ಶಿಸಿ."</string>
+    <string name="inactive_app_inactive_summary" msgid="5091363706699855725">"ನಿಷ್ಕ್ರಿಯ. ಟಾಗಲ್ ಮಾಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
+    <string name="inactive_app_active_summary" msgid="4174921824958516106">"ಸಕ್ರಿಯ. ಟಾಗಲ್ ಮಾಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"ರನ್‌ ಆಗುತ್ತಿರುವ ಸೇವೆಗಳು"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"ಈಗ ರನ್‌ ಆಗುತ್ತಿರುವ ಸೇವೆಗಳನ್ನು ವೀಕ್ಷಿಸಿ ಮತ್ತು ನಿಯಂತ್ರಿಸಿ"</string>
-    <string name="night_mode_title" msgid="2594133148531256513">"ರಾತ್ರಿ ಮೋಡ್"</string>
-    <string name="night_mode_summary" msgid="9196605054622017193">"%s"</string>
-    <string name="night_mode_no" msgid="9171772244775838901">"ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ"</string>
-    <string name="night_mode_yes" msgid="2218157265997633432">"ಯಾವಾಗಲೂ ಆನ್"</string>
-    <string name="night_mode_auto" msgid="7508348175804304327">"ಸ್ವಯಂಚಾಲಿತ"</string>
+    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"ಬಹುಪ್ರಕ್ರಿಯೆ WebView"</string>
+    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"WebView ರೆಂಡರರ್‌‌‌ಗಳನ್ನು ಪ್ರತ್ಯೇಕವಾಗಿ ರನ್‌ ಮಾಡಿ"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView ಅನುಷ್ಠಾನಗೊಳಿಸುವಿಕೆ"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"WebView ಅನುಷ್ಠಾನಗೊಳಿಸುವಿಕೆಯನ್ನು ಹೊಂದಿಸಿ"</string>
-    <string name="select_webview_provider_confirmation_text" msgid="6671472080671066972">"ಆಯ್ಕೆಮಾಡಲಾದ WebView ಅನುಷ್ಠಾನಗೊಳಿಸುವಿಕೆಯನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ ಮತ್ತು ಬಳಸಲು ಸಕ್ರಿಯಗೊಳಿಸಬೇಕಾಗಿದೆ, ಇದನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಲು ನೀವು ಬಯಸುತ್ತೀರಾ?"</string>
+    <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"ಈ ಆಯ್ಕೆಯು ಇನ್ನು ಮುಂದೆ ಮಾನ್ಯವಾಗಿರುವುದಿಲ್ಲ. ಮತ್ತೊಮ್ಮೆ ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"ಫೈಲ್ ಎನ್‌ಕ್ರಿಪ್ಶನ್‌ಗೆ ಪರಿವರ್ತಿಸು"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"ಪರಿವರ್ತಿಸು…"</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"ಫೈಲ್ ಈಗಾಗಲೇ ಎನ್‌ಕ್ರಿಪ್ಟ್ ಮಾಡಲಾಗಿದೆ"</string>
@@ -294,19 +312,50 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"ಬಣ್ಣದ ತಿದ್ದುಪಡಿ"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"ಇದು ಪ್ರಾಯೋಗಿಕ ವೈಶಿಷ್ಟ್ಯವಾಗಿದೆ. ಕಾರ್ಯಕ್ಷಮತೆ ಮೇಲೆ ಪರಿಣಾಮ ಬೀರಬಹುದು."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"<xliff:g id="TITLE">%1$s</xliff:g> ಮೂಲಕ ಅತಿಕ್ರಮಿಸುತ್ತದೆ"</string>
+    <string name="power_remaining_duration_only" msgid="4400068916452346544">"ಸುಮಾರು <xliff:g id="TIME">%1$s</xliff:g> ಉಳಿದಿದೆ"</string>
+    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">%1$s</xliff:g> ಉಳಿದಿದೆ"</string>
     <string name="power_discharging_duration" msgid="1605929174734600590">"ಸುಮಾರು <xliff:g id="LEVEL">%1$s</xliff:g> <xliff:g id="TIME">%2$s</xliff:g> ಉಳಿದಿದೆ"</string>
+    <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> ಉಳಿದಿದೆ"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="2853265177761520490">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> ಪೂರ್ಣವಾಗುವವರೆಗೆ"</string>
+    <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging_duration_ac" msgid="3969186192576594254">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> AC ನಲ್ಲಿ ಪೂರ್ಣವಾಗುವವರೆಗೆ"</string>
+    <string name="power_charging_duration_ac_short" msgid="7895864687218765582">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging_duration_usb" msgid="182405645340976546">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> USB ಮೂಲಕ ಪೂರ್ಣವಾಗುವವರೆಗೆ"</string>
+    <string name="power_charging_duration_usb_short" msgid="941854728040426399">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging_duration_wireless" msgid="1829295708243159464">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> ವೈರ್‌‌ಲೆಸ್‌ನಿಂದ ಪೂರ್ಣವಾಗುವವರೆಗೆ"</string>
-    <string name="battery_info_status_unknown" msgid="196130600938058547">"ಅಜ್ಞಾತ"</string>
+    <string name="power_charging_duration_wireless_short" msgid="1642664799869599476">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="battery_info_status_unknown" msgid="196130600938058547">"ಅಪರಿಚಿತ"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"ಚಾರ್ಜ್ ಆಗುತ್ತಿದೆ"</string>
     <string name="battery_info_status_charging_ac" msgid="2909861890674399949">"AC ನಲ್ಲಿ ಚಾರ್ಜ್‌"</string>
+    <string name="battery_info_status_charging_ac_short" msgid="7431401092096415502">"ಚಾರ್ಜ್ ಆಗುತ್ತಿದೆ"</string>
     <string name="battery_info_status_charging_usb" msgid="2207489369680923929">"USB ಮೂಲಕ ಚಾರ್ಜ್‌"</string>
+    <string name="battery_info_status_charging_usb_short" msgid="6733371990319101366">"ಚಾರ್ಜ್ ಆಗುತ್ತಿದೆ"</string>
     <string name="battery_info_status_charging_wireless" msgid="3574032603735446573">"ನಿಸ್ತಂತುವಾಗಿ ಚಾರ್ಜ್‌"</string>
+    <string name="battery_info_status_charging_wireless_short" msgid="752569941028903610">"ಚಾರ್ಜ್ ಆಗುತ್ತಿದೆ"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"ಚಾರ್ಜ್‌ ಆಗುತ್ತಿಲ್ಲ"</string>
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"ಚಾರ್ಜ್ ಆಗುತ್ತಿಲ್ಲ"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"ಭರ್ತಿ"</string>
-    <string name="disabled_by_admin_summary_text" msgid="7787027069207263048">"ನಿರ್ವಾಹಕರಿಂದ ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ"</string>
+    <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"ನಿರ್ವಾಹಕರ ಮೂಲಕ ನಿಯಂತ್ರಿಸಲಾಗಿದೆ"</string>
+    <string name="enabled_by_admin" msgid="2386503803463071894">"ನಿರ್ವಾಹಕರಿಂದ ಸಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ"</string>
+    <string name="disabled_by_admin" msgid="3669999613095206948">"ನಿರ್ವಾಹಕರಿಂದ ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ"</string>
+    <string name="home" msgid="3256884684164448244">"ಸೆಟ್ಟಿಂಗ್‌ಗಳ ಮುಖಪುಟ"</string>
+  <string-array name="battery_labels">
+    <item msgid="8494684293649631252">"0%"</item>
+    <item msgid="8934126114226089439">"50%"</item>
+    <item msgid="1286113608943010849">"100%"</item>
+  </string-array>
+    <string name="charge_length_format" msgid="8978516217024434156">"<xliff:g id="ID_1">%1$s</xliff:g> ಹಿಂದೆ"</string>
+    <string name="remaining_length_format" msgid="7886337596669190587">"<xliff:g id="ID_1">%1$s</xliff:g> ಉಳಿದಿದೆ"</string>
+    <string name="screen_zoom_summary_small" msgid="5867245310241621570">"ಸಣ್ಣದು"</string>
+    <string name="screen_zoom_summary_default" msgid="2247006805614056507">"ಡಿಫಾಲ್ಟ್"</string>
+    <string name="screen_zoom_summary_large" msgid="4835294730065424084">"ದೊಡ್ಡದು"</string>
+    <string name="screen_zoom_summary_very_large" msgid="7108563375663670067">"ಸ್ವಲ್ಪ ದೊಡ್ಡ"</string>
+    <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"ದೊಡ್ಡ"</string>
+    <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"ಕಸ್ಟಮ್ (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
+    <string name="help_feedback_label" msgid="6815040660801785649">"ಸಹಾಯ ಮತ್ತು ಪ್ರತಿಕ್ರಿಯೆ"</string>
+    <string name="content_description_menu_button" msgid="8182594799812351266">"ಮೆನು"</string>
+    <string name="retail_demo_reset_message" msgid="118771671364131297">"ಫ್ಯಾಕ್ಟರಿ ರಿಸೆಟ್‌ಗೆ ಪಾಸ್‌ವರ್ಡ್ ನಮೂದಿಸಿ"</string>
+    <string name="retail_demo_reset_next" msgid="8356731459226304963">"ಮುಂದೆ"</string>
+    <string name="retail_demo_reset_title" msgid="696589204029930100">"ಪಾಸ್‌ವರ್ಡ್ ಅಗತ್ಯವಿದೆ"</string>
 </resources>

@@ -25,10 +25,12 @@
     <string name="wifi_remembered" msgid="4955746899347821096">"Αποθηκευμένο"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"Απενεργοποιημένο"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"Αποτυχία διαμόρφωσης διεύθυνσης IP"</string>
+    <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"Δεν υπάρχει σύνδεση λόγω χαμηλής ποιότητας δικτύου"</string>
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"Αποτυχία σύνδεσης Wi-Fi"</string>
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"Πρόβλημα ελέγχου ταυτότητας"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"Εκτός εμβέλειας"</string>
-    <string name="wifi_no_internet" msgid="9151470775868728896">"Δεν εντοπίστηκε καμία πρόσβαση στο διαδίκτυο, δεν θα γίνει αυτόματη επανασύνδεση."</string>
+    <string name="wifi_no_internet_no_reconnect" msgid="2211781637653149657">"Δεν εντοπίστηκε πρόσβαση στο διαδίκτυο. Δεν θα πραγματοποιηθεί αυτόματη επανασύνδεση."</string>
+    <string name="wifi_no_internet" msgid="5011955173375805204">"Δεν υπάρχει πρόσβαση στο διαδίκτυο."</string>
     <string name="saved_network" msgid="4352716707126620811">"Αποθηκεύτηκε από <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="connected_via_wfa" msgid="3805736726317410714">"Σύνδεση μέσω βοηθού Wi‑Fi"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Συνδέθηκε μέσω %1$s"</string>
@@ -91,7 +93,7 @@
     <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Πρόσδεση Bluetooth"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"Πρόσδεση"</string>
     <string name="tether_settings_title_all" msgid="8356136101061143841">"Πρόσ. και φορητό σημ. πρόσβ."</string>
-    <string name="managed_user_title" msgid="8101244883654409696">"Προφίλ εργασίας"</string>
+    <string name="managed_user_title" msgid="8109605045406748842">"Όλες οι εφαρμ. εργασίας"</string>
     <string name="user_guest" msgid="8475274842845401871">"Επισκέπτης"</string>
     <string name="unknown" msgid="1592123443519355854">"Άγνωστο"</string>
     <string name="running_process_item_user_label" msgid="3129887865552025943">"Χρήστης: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
@@ -101,6 +103,8 @@
     <string name="tts_settings_title" msgid="1237820681016639683">"Έξοδος μετατροπής κειμένου σε ομιλία"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"Ταχύτητα λόγου"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"Ταχύτητα με την οποία εκφωνείται το κείμενο"</string>
+    <string name="tts_default_pitch_title" msgid="6135942113172488671">"Τόνος"</string>
+    <string name="tts_default_pitch_summary" msgid="1944885882882650009">"Επηρεάζει τον τόνο της σύνθεσης ομιλίας"</string>
     <string name="tts_default_lang_title" msgid="8018087612299820556">"Γλώσσα"</string>
     <string name="tts_lang_use_system" msgid="2679252467416513208">"Χρήση γλώσσας συστήματος"</string>
     <string name="tts_lang_not_selected" msgid="7395787019276734765">"Δεν έχει επιλεγεί γλώσσα"</string>
@@ -121,6 +125,8 @@
     <string name="tts_engine_settings_button" msgid="1030512042040722285">"Εκκίνηση ρυθμίσεων μηχανής"</string>
     <string name="tts_engine_preference_section_title" msgid="448294500990971413">"Προτεινόμενη μηχανή"</string>
     <string name="tts_general_section_title" msgid="4402572014604490502">"Γενικά"</string>
+    <string name="tts_reset_speech_pitch_title" msgid="5789394019544785915">"Επαναφορά τόνου ομιλίας"</string>
+    <string name="tts_reset_speech_pitch_summary" msgid="8700539616245004418">"Επαναφέρετε τον τόνο στον οποίο εκφωνείται το κείμενο στον προεπιλεγμένο."</string>
   <string-array name="tts_rate_entries">
     <item msgid="6695494874362656215">"Πολύ αργή"</item>
     <item msgid="4795095314303559268">"Αργή"</item>
@@ -163,20 +169,36 @@
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Ενεργοποίηση λεπτομερ. καταγραφής Wi-Fi"</string>
     <string name="wifi_aggressive_handover" msgid="9194078645887480917">"Επιθ.μεταβ. Wi-Fi σε δίκτυο κιν.τηλ."</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Να επιτρέπεται πάντα η σάρωση Wi-Fi κατά την περιαγωγή"</string>
-    <string name="legacy_dhcp_client" msgid="694426978909127287">"Χρήση εφαρμογής-πελάτη DHCP παλαιού τύπου"</string>
     <string name="mobile_data_always_on" msgid="7745605759775320362">"Πάντα ενεργά δεδομένα κινητής τηλεφωνίας"</string>
+    <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Απενεργοποίηση απόλυτης έντασης"</string>
+    <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Έκδοση AVRCP Bluetooth"</string>
+    <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Επιλογή έκδοσης AVRCP Bluetooth"</string>
+    <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Κωδικοποιητής ήχου Bluetooth"</string>
+    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="4558347981670553665">"Επιλογή κωδικοποιητή ήχου Bluetooth"</string>
+    <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Ρυθμός δειγματοληψίας ήχου Bluetooth"</string>
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5628790207448471613">"Επιλογή κωδικοποιητή ήχου Bluetooth:\nΠοσοστό δείγματος"</string>
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"Bit ανά δείγμα ήχου Bluetooth"</string>
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4546131401358681321">"Επιλογή κωδικοποιητή ήχου Bluetooth:\nBit ανά δείγμα"</string>
+    <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"Λειτουργία καναλιού ήχου Bluetooth"</string>
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="9133545781346216071">"Επιλογή κωδικοποιητή ήχου Bluetooth:\nΛειτουργία καναλιού"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Κωδικοποιητής LDAC ήχου Bluetooth: Ποιότητα αναπαραγωγής"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"Επιλογή κωδικοποιητή LDAC ήχου Bluetooth:\nΠοιότητα αναπαραγωγής"</string>
+    <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Ροή: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Εμφάνιση επιλογών για πιστοποίηση ασύρματης οθόνης"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Αύξηση επιπέδου καταγ. Wi-Fi, εμφάνιση ανά SSID RSSI στο εργαλείο επιλογής Wi-Fi"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"Όταν είναι ενεργό, το Wi-Fi θα μεταβιβάζει πιο επιθετικά τη σύνδ.δεδομένων σε δίκτυο κινητής τηλ., όταν το σήμα Wi-Fi είναι χαμηλό"</string>
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"Να επιτρέπεται/να μην επιτρέπεται η σάρωση Wi-Fi κατά την περιαγωγή, βάσει της ποσότητας επισκεψιμότητας δεδομένων στη διεπαφή"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Μέγεθος προσωρινής μνήμης για τη λειτουργία καταγραφής"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Μέγεθος αρχείων κατ/φής ανά προ/νή μνήμη αρχείου κατ/φής"</string>
+    <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"Διαγραφή αποθηκευτικού χώρου μόνιμων αρχείων καταγραφής;"</string>
+    <string name="dev_logpersist_clear_warning_message" msgid="2256582531342994562">"Όταν δεν γίνεται πλέον παρακολούθηση με μόνιμο αρχείο καταγραφής, θα πρέπει να διαγραφούν τα δεδομένα του αρχείου καταγραφής στη συσκευή σας."</string>
+    <string name="select_logpersist_title" msgid="7530031344550073166">"Αποθ.δεδ.αρχείων κατ.μόνιμα στη συσκ."</string>
+    <string name="select_logpersist_dialog_title" msgid="4003400579973269060">"Επιλογή αρχείων καταγραφής προσωρινής μνήμης για αποθήκευση μόνιμα στη συσκευή"</string>
     <string name="select_usb_configuration_title" msgid="2649938511506971843">"Επιλογή διαμόρφωσης USB"</string>
     <string name="select_usb_configuration_dialog_title" msgid="6385564442851599963">"Επιλογή διαμόρφωσης USB"</string>
     <string name="allow_mock_location" msgid="2787962564578664888">"Να επιτρέπονται ψευδείς τοποθεσίες"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Να επιτρέπονται ψευδείς τοποθεσίες"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Ενεργοποίηση του ελέγχου χαρακτηριστικών προβολής"</string>
-    <string name="legacy_dhcp_client_summary" msgid="163383566317652040">"Χρήση εφαρμογής-πελάτη DHCP παλαιού τύπου από το Lollipop αντί για τη νέα εφαρμογή-πελάτη DHCP Android."</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Τα δεδομένα κινητής τηλεφωνίας να διατηρούνται πάντα ενεργά, ακόμα και όταν είναι ενεργό το Wi-Fi (για γρήγορη εναλλαγή δικτύου)."</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"Να επιτρέπεται ο εντοπισμός σφαλμάτων USB;"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"Ο εντοπισμός σφαλμάτων USB προορίζεται μόνο για σκοπούς προγραμματισμού. Χρησιμοποιήστε τον για αντιγραφή δεδομένων μεταξύ του υπολογιστή και της συσκευής σας, για την εγκατάσταση εφαρμογών στη συσκευή σας χωρίς προειδοποίηση και για την ανάγνωση δεδομένων καταγραφής."</string>
@@ -185,6 +207,7 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"Αυτές οι ρυθμίσεις προορίζονται για χρήση κατά την ανάπτυξη. Μπορούν να προκαλέσουν προβλήματα στη λειτουργία της συσκευής και των εφαρμογών σας."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Επαλήθευση εφαρμογών μέσω USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Έλεγχος εφαρμογών που έχουν εγκατασταθεί μέσω ADB/ADT για επιβλαβή συμπεριφορά."</string>
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Απενεργοποιεί τη δυνατότητα απόλυτης έντασης του Bluetooth σε περίπτωση προβλημάτων έντασης με απομακρυσμένες συσκευές, όπως όταν υπάρχει μη αποδεκτά υψηλή ένταση ή απουσία ελέγχου."</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Τοπική τερματική εφαρμογή"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Ενεργοπ.τερμ.εφαρμογής που προσφέρει πρόσβαση στο τοπικό κέλυφος"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"Έλεγχος HDCP"</string>
@@ -206,8 +229,8 @@
     <string name="strict_mode_summary" msgid="142834318897332338">"Αναβ. οθόνη σε εκτέλεση μεγάλων λειτ.σε κύριο νήμα"</string>
     <string name="pointer_location" msgid="6084434787496938001">"Θέση δείκτη"</string>
     <string name="pointer_location_summary" msgid="840819275172753713">"Επικάλ.οθόνης για προβολή τρεχόντων δεδ/νων αφής"</string>
-    <string name="show_touches" msgid="1356420386500834339">"Εμφάνιση αγγιγμάτων"</string>
-    <string name="show_touches_summary" msgid="6684407913145150041">"Εμφάνιση οπτικών σχολίων για αγγίγματα"</string>
+    <string name="show_touches" msgid="2642976305235070316">"Εμφάνιση πατημάτων"</string>
+    <string name="show_touches_summary" msgid="6101183132903926324">"Εμφάνιση οπτικών σχολίων για πατήματα"</string>
     <string name="show_screen_updates" msgid="5470814345876056420">"Εμφάνιση ενημερώσεων επιφάνειας"</string>
     <string name="show_screen_updates_summary" msgid="2569622766672785529">"Προβολή Flash ολόκλ. των επιφ παραθ. όταν ενημερ."</string>
     <string name="show_hw_screen_updates" msgid="5036904558145941590">"Εμφάνιση των ενημερώσεων προβολής GPU"</string>
@@ -225,8 +248,6 @@
     <string name="debug_layout_summary" msgid="2001775315258637682">"Εμφάνιση ορίων κλιπ, περιθωρίων, κλπ."</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Επιβολή κατ. διάταξης RTL"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Επιβολή διάταξης οθόν. RTL για όλες τις τοπ. ρυθμ."</string>
-    <string name="show_cpu_usage" msgid="2389212910758076024">"Προβολή χρήσης CPU"</string>
-    <string name="show_cpu_usage_summary" msgid="2113341923988958266">"Επικάλυψη οθόνης για προβολή τρέχουσας χρήσης CPU"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"Αναγκαστική απόδοση GPU"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"Αναγκαστική χρήση του GPU για σχέδιο 2D"</string>
     <string name="force_msaa" msgid="7920323238677284387">"Αναγκαστικά 4x MSAA"</string>
@@ -244,14 +265,14 @@
     <string name="show_all_anrs" msgid="28462979638729082">"Εμφάνιση όλων των ANR"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"Εμφ.του παραθ. \"Η εφαρμ.δεν αποκρ.\" για εφ.παρασκ."</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Να επιτρέπονται υποχρεωτικά εφαρμογές σε εξωτ.συσ."</string>
-    <string name="force_allow_on_external_summary" msgid="3191952505860343233">"Κάνει κάθε εφαρμογή κατάλληλη για εγγραφή σε εξωτερικό χώρο αποθήκευσης, ανεξάρτητα από τις τιμές του μανιφέστου"</string>
+    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Κάνει κάθε εφαρμογή κατάλληλη για εγγραφή σε εξωτερικό αποθηκευτικό χώρο, ανεξάρτητα από τις τιμές του μανιφέστου"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Αναγκαστική δυνατότητα αλλαγής μεγέθους δραστηριοτήτων"</string>
-    <string name="force_resizable_activities_summary" msgid="4508217476997182216">"Να έχουν όλες οι δραστηριότητες δυνατότητα αλλαγής μεγέθους για την προβολή πολλαπλών παραθύρων, ανεξάρτητα από τις τιμές του μανιφέστου."</string>
+    <string name="force_resizable_activities_summary" msgid="6667493494706124459">"Να έχουν όλες οι δραστηριότητες δυνατότητα αλλαγής μεγέθους για την προβολή πολλαπλών παραθύρων, ανεξάρτητα από τις τιμές του μανιφέστου."</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"Ενεργοποίηση παραθύρων ελεύθερης μορφής"</string>
-    <string name="enable_freeform_support_summary" msgid="2252563497485436534">"Ενεργοποιεί την υποστήριξη για πειραματικά παράθυρα ελεύθερης μορφής."</string>
+    <string name="enable_freeform_support_summary" msgid="8247310463288834487">"Ενεργοποίηση υποστήριξης για πειραματικά παράθυρα ελεύθερης μορφής."</string>
     <string name="local_backup_password_title" msgid="3860471654439418822">"Εφ/κός κωδικός desktop"</string>
     <string name="local_backup_password_summary_none" msgid="6951095485537767956">"Τα πλήρη αντίγραφα ασφαλείας επιφάνειας εργασίας δεν προστατεύονται αυτήν τη στιγμή"</string>
-    <string name="local_backup_password_summary_change" msgid="2731163425081172638">"Αγγίξτε για αλλαγή ή κατάργηση του κωδικού πρόσβασης για τα πλήρη αντίγραφα ασφαλείας επιφάνειας εργασίας"</string>
+    <string name="local_backup_password_summary_change" msgid="5376206246809190364">"Πατήστε για αλλαγή ή κατάργηση του κωδικού πρόσβασης για τα πλήρη αντίγραφα ασφαλείας επιφάνειας εργασίας"</string>
     <string name="local_backup_password_toast_success" msgid="582016086228434290">"Ορίστηκε νέος εφεδρικός κωδικός πρόσβασης"</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"Ο νέος κωδικός πρόσβασης και η επιβεβαίωση δεν ταιριάζουν"</string>
     <string name="local_backup_password_toast_validation_failure" msgid="5646377234895626531">"Αποτυχία κατά τον ορισμό εφεδρικού κωδικού πρόσβασης"</string>
@@ -266,24 +287,21 @@
     <item msgid="5363960654009010371">"Βελτιστοποιημένα χρώματα για ψηφιακό περιεχόμενο"</item>
   </string-array>
     <string name="inactive_apps_title" msgid="1317817863508274533">"Ανενεργές εφαρμογές"</string>
-    <string name="inactive_app_inactive_summary" msgid="6768756967594202411">"Ανενεργή. Αγγίξτε για εναλλαγή."</string>
-    <string name="inactive_app_active_summary" msgid="4512911571954375968">"Ενεργή. Αγγίξτε για εναλλαγή."</string>
+    <string name="inactive_app_inactive_summary" msgid="5091363706699855725">"Ανενεργό. Πατήστε για εναλλαγή."</string>
+    <string name="inactive_app_active_summary" msgid="4174921824958516106">"Ενεργό. Πατήστε για εναλλαγή."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Υπηρεσίες που εκτελούνται"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"Προβολή και έλεγχος των εφαρμογών που εκτελούνται αυτή τη στιγμή"</string>
-    <string name="night_mode_title" msgid="2594133148531256513">"Λειτουργία νύχτας"</string>
-    <string name="night_mode_summary" msgid="9196605054622017193">"%s"</string>
-    <string name="night_mode_no" msgid="9171772244775838901">"Ανενεργό"</string>
-    <string name="night_mode_yes" msgid="2218157265997633432">"Πάντα ενεργό"</string>
-    <string name="night_mode_auto" msgid="7508348175804304327">"Αυτόματο"</string>
+    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"WebView πολλαπλών διεργασιών"</string>
+    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"Εκτέλεση λειτουργικών απόδοσης WebView ξεχωριστά"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"Υλοποίηση WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Ορισμός υλοποίησης WebView"</string>
-    <string name="select_webview_provider_confirmation_text" msgid="6671472080671066972">"Η επιλεγμένη ενσωμάτωση WebView είναι απενεργοποιημένη και θα πρέπει να ενεργοποιηθεί για να χρησιμοποιηθεί. Θέλετε να την ενεργοποιήσετε;"</string>
+    <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Αυτή η επιλογή δεν είναι πια έγκυρη. Δοκιμάστε ξανά."</string>
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"Μετατροπή σε κρυπτογράφηση αρχείου"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"Μετατροπή…"</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"Με κρυπτογράφηση αρχείου"</string>
     <string name="title_convert_fbe" msgid="1263622876196444453">"Μετατροπή σε κρυπτογράφηση βάσει αρχείου…"</string>
-    <string name="convert_to_fbe_warning" msgid="6139067817148865527">"Μετατροπή τμήματος δεδομένων σε κρυπτογράφηση βάσει αρχείου.\n !!Προσοχή!! Με αυτήν την ενέργεια, θα διαγραφούν όλα τα δεδομένα σας.\n Αυτή η λειτουργία βρίσκεται σε δοκιμαστικό στάδιο alpha και ενδέχεται να μην λειτουργεί σωστά.\n Πατήστε \"Εκκαθάριση και μετατροπή…\" για να συνεχίσετε."</string>
-    <string name="button_convert_fbe" msgid="5152671181309826405">"Εκκαθάριση και μετατροπή…"</string>
+    <string name="convert_to_fbe_warning" msgid="6139067817148865527">"Μετατροπή τμήματος δεδομένων σε κρυπτογράφηση βάσει αρχείου.\n !!Προσοχή!! Με αυτήν την ενέργεια, θα διαγραφούν όλα τα δεδομένα σας.\n Αυτή η λειτουργία βρίσκεται σε δοκιμαστικό στάδιο alpha και ενδέχεται να μην λειτουργεί σωστά.\n Πατήστε \"Διαγραφή και μετατροπή…\" για να συνεχίσετε."</string>
+    <string name="button_convert_fbe" msgid="5152671181309826405">"Διαγραφή και μετατροπή…"</string>
     <string name="picture_color_mode" msgid="4560755008730283695">"Λειτουργία χρώματος εικόνας"</string>
     <string name="picture_color_mode_desc" msgid="1141891467675548590">"Χρήση sRGB"</string>
     <string name="daltonizer_mode_disabled" msgid="7482661936053801862">"Απενεργοποιημένο"</string>
@@ -294,19 +312,50 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"Διόρθωση χρωμάτων"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Αυτή η λειτουργία είναι πειραματική και ενδεχομένως να επηρεάσει τις επιδόσεις."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"Αντικαταστάθηκε από <xliff:g id="TITLE">%1$s</xliff:g>"</string>
+    <string name="power_remaining_duration_only" msgid="4400068916452346544">"Απομένουν περίπου <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"Απομένει/ουν <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharging_duration" msgid="1605929174734600590">"<xliff:g id="LEVEL">%1$s</xliff:g> - απομένουν περίπου <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">%1$s</xliff:g> - απομένει/ουν <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="2853265177761520490">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> για πλήρη φόρτιση"</string>
+    <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging_duration_ac" msgid="3969186192576594254">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> για πλήρη φόρτιση με φορτιστή AC"</string>
+    <string name="power_charging_duration_ac_short" msgid="7895864687218765582">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging_duration_usb" msgid="182405645340976546">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> για πλήρη φόρτιση μέσω USB"</string>
+    <string name="power_charging_duration_usb_short" msgid="941854728040426399">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging_duration_wireless" msgid="1829295708243159464">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> για πλήρη ασύρματη φόρτιση"</string>
+    <string name="power_charging_duration_wireless_short" msgid="1642664799869599476">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"Άγνωστο"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"Φόρτιση"</string>
     <string name="battery_info_status_charging_ac" msgid="2909861890674399949">"Φόρτιση με AC"</string>
+    <string name="battery_info_status_charging_ac_short" msgid="7431401092096415502">"Φόρτιση"</string>
     <string name="battery_info_status_charging_usb" msgid="2207489369680923929">"Φόρτιση μέσω USB"</string>
+    <string name="battery_info_status_charging_usb_short" msgid="6733371990319101366">"Φόρτιση"</string>
     <string name="battery_info_status_charging_wireless" msgid="3574032603735446573">"Ασύρματη φόρτιση"</string>
+    <string name="battery_info_status_charging_wireless_short" msgid="752569941028903610">"Φόρτιση"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"Δεν φορτίζει"</string>
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"Δεν φορτίζει"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"Πλήρης"</string>
-    <string name="disabled_by_admin_summary_text" msgid="7787027069207263048">"Απενεργοποιήθηκε από το διαχειριστή"</string>
+    <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"Ελέγχονται από το διαχειριστή"</string>
+    <string name="enabled_by_admin" msgid="2386503803463071894">"Ενεργοποιήθηκε από το διαχειριστή"</string>
+    <string name="disabled_by_admin" msgid="3669999613095206948">"Απενεργοποιήθηκε από το διαχειριστή"</string>
+    <string name="home" msgid="3256884684164448244">"Αρχική σελίδα ρυθμίσεων"</string>
+  <string-array name="battery_labels">
+    <item msgid="8494684293649631252">"0%"</item>
+    <item msgid="8934126114226089439">"50%"</item>
+    <item msgid="1286113608943010849">"100%"</item>
+  </string-array>
+    <string name="charge_length_format" msgid="8978516217024434156">"Πριν από <xliff:g id="ID_1">%1$s</xliff:g>"</string>
+    <string name="remaining_length_format" msgid="7886337596669190587">"Απομένουν <xliff:g id="ID_1">%1$s</xliff:g>"</string>
+    <string name="screen_zoom_summary_small" msgid="5867245310241621570">"Μικρά"</string>
+    <string name="screen_zoom_summary_default" msgid="2247006805614056507">"Προεπιλογή"</string>
+    <string name="screen_zoom_summary_large" msgid="4835294730065424084">"Μεγάλα"</string>
+    <string name="screen_zoom_summary_very_large" msgid="7108563375663670067">"Πιο μεγάλα"</string>
+    <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"Μεγαλύτερα"</string>
+    <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"Προσαρμοσμένη (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
+    <string name="help_feedback_label" msgid="6815040660801785649">"Βοήθεια και σχόλια"</string>
+    <string name="content_description_menu_button" msgid="8182594799812351266">"Μενού"</string>
+    <string name="retail_demo_reset_message" msgid="118771671364131297">"Εισαγάγετε κωδικό πρόσβασης για επαναφορά εργοστασιακών ρυθμίσεων στη λειτουργία επίδειξης"</string>
+    <string name="retail_demo_reset_next" msgid="8356731459226304963">"Επόμενο"</string>
+    <string name="retail_demo_reset_title" msgid="696589204029930100">"Απαιτείται κωδικός πρόσβασης"</string>
 </resources>

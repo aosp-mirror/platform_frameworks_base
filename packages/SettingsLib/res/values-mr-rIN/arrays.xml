@@ -58,6 +58,68 @@
     <item msgid="3878793616631049349">"केवळ DRM सामग्रीसाठी HDCP तपासणी वापरा"</item>
     <item msgid="45075631231212732">"नेहमी HDCP तपासणी वापरा"</item>
   </string-array>
+  <string-array name="bluetooth_avrcp_versions">
+    <item msgid="5347678900838034763">"AVRCP 1.4 (डीफॉल्ट)"</item>
+    <item msgid="2089555299377409443">"AVRCP 1.5"</item>
+    <item msgid="2895327394279434278">"AVRCP 1.6"</item>
+  </string-array>
+  <string-array name="bluetooth_avrcp_version_values">
+    <item msgid="2838624067805073303">"avrcp14"</item>
+    <item msgid="1913619118958233129">"avrcp15"</item>
+    <item msgid="7142710449249088270">"avrcp16"</item>
+  </string-array>
+    <!-- no translation found for bluetooth_a2dp_codec_titles:6 (723675059572222462) -->
+    <!-- no translation found for bluetooth_a2dp_codec_titles:7 (3304843301758635896) -->
+    <!-- no translation found for bluetooth_a2dp_codec_summaries:6 (2209680154067241740) -->
+    <!-- no translation found for bluetooth_a2dp_codec_summaries:7 (741805482892725657) -->
+  <string-array name="bluetooth_a2dp_codec_sample_rate_titles">
+    <item msgid="3093023430402746802">"प्रणाली निवड वापरा (डीफॉल्ट)"</item>
+    <item msgid="8895532488906185219">"44.1 kHz"</item>
+    <item msgid="2909915718994807056">"48.0 kHz"</item>
+    <item msgid="3347287377354164611">"88.2 kHz"</item>
+    <item msgid="1234212100239985373">"96.0 kHz"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_sample_rate_summaries">
+    <item msgid="3214516120190965356">"प्रणाली निवड वापरा (डीफॉल्ट)"</item>
+    <item msgid="4482862757811638365">"44.1 kHz"</item>
+    <item msgid="354495328188724404">"48.0 kHz"</item>
+    <item msgid="7329816882213695083">"88.2 kHz"</item>
+    <item msgid="6967397666254430476">"96.0 kHz"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_bits_per_sample_titles">
+    <item msgid="2684127272582591429">"प्रणाली निवड वापरा (डीफॉल्ट)"</item>
+    <item msgid="5618929009984956469">"16 बिट/नमुना"</item>
+    <item msgid="3412640499234627248">"24 बिट/नमुना"</item>
+    <item msgid="121583001492929387">"32 बिट/नमुना"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_bits_per_sample_summaries">
+    <item msgid="1081159789834584363">"प्रणाली निवड वापरा (डीफॉल्ट)"</item>
+    <item msgid="4726688794884191540">"16 बिट/नमुना"</item>
+    <item msgid="305344756485516870">"24 बिट/नमुना"</item>
+    <item msgid="244568657919675099">"32 बिट/नमुना"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_channel_mode_titles">
+    <item msgid="5226878858503393706">"प्रणाली निवड वापरा (डीफॉल्ट)"</item>
+    <item msgid="4106832974775067314">"मोनो"</item>
+    <item msgid="5571632958424639155">"स्टिरिओ"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_channel_mode_summaries">
+    <item msgid="4118561796005528173">"प्रणाली निवड वापरा (डीफॉल्ट)"</item>
+    <item msgid="8900559293912978337">"मोनो"</item>
+    <item msgid="8883739882299884241">"स्टिरिओ"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_titles">
+    <item msgid="7158319962230727476">"ऑडिओ गुणवत्ता (990kbps/909kbps) साठी ऑप्टिमाइझ केली"</item>
+    <item msgid="2921767058740704969">"संतुलित ऑडिओ आणि कनेक्शन गुणवत्ता (660kbps/606kbps)"</item>
+    <item msgid="8860982705384396512">"कनेक्शन गुणवत्ता (330kbps/303kbps) साठी ऑप्टिमाइझ केली"</item>
+    <item msgid="4414060457677684127">"सर्वोत्तम प्रयत्न (अनुकूल बिट दर)"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_summaries">
+    <item msgid="6398189564246596868">"ऑडिओ गुणवत्तेसाठी ऑप्टिमाइझ केले"</item>
+    <item msgid="4327143584633311908">"संतुलित ऑडिओ आणि कनेक्शन गुणवत्ता"</item>
+    <item msgid="4681409244565426925">"कनेक्शन गुणवत्तेसाठी ऑप्टिमाइझ केले"</item>
+    <item msgid="364670732877872677">"सर्वोत्तम प्रयत्न (अनुकूल बिट दर)"</item>
+  </string-array>
   <string-array name="select_logd_size_titles">
     <item msgid="8665206199209698501">"बंद"</item>
     <item msgid="1593289376502312923">"64K"</item>
@@ -79,6 +141,18 @@
     <item msgid="1314234299552254621">"प्रति लॉग बफर 1M"</item>
     <item msgid="3606047780792894151">"प्रति लॉग बफर 4M"</item>
     <item msgid="5431354956856655120">"प्रति लॉग बफर 16M"</item>
+  </string-array>
+  <string-array name="select_logpersist_titles">
+    <item msgid="1744840221860799971">"बंद"</item>
+    <item msgid="3054662377365844197">"सर्व"</item>
+    <item msgid="688870735111627832">"सर्व परंतु रेडिओ"</item>
+    <item msgid="2850427388488887328">"फक्त कर्नेल"</item>
+  </string-array>
+  <string-array name="select_logpersist_summaries">
+    <item msgid="2216470072500521830">"बंद"</item>
+    <item msgid="172978079776521897">"सर्व लॉग बफर"</item>
+    <item msgid="3873873912383879240">"सर्व परंतु रेडिओ लॉग बफर"</item>
+    <item msgid="8489661142527693381">"फक्त कर्नेल लॉग बफर"</item>
   </string-array>
   <string-array name="window_animation_scale_entries">
     <item msgid="8134156599370824081">"अॅनिमेशन बंद"</item>

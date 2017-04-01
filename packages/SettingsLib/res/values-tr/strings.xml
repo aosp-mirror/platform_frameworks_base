@@ -25,10 +25,12 @@
     <string name="wifi_remembered" msgid="4955746899347821096">"Kaydedildi"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"Devre dışı"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"IP Yapılandırması Hatası"</string>
+    <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"Ağ kalitesi düşük olduğundan bağlanamadı"</string>
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"Kablosuz Bağlantı Hatası"</string>
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"Kimlik doğrulama sorunu"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"Kapsama alanı dışında"</string>
-    <string name="wifi_no_internet" msgid="9151470775868728896">"İnternet Erişimi algılanmadı, otomatik olarak tekrar bağlanmayacak."</string>
+    <string name="wifi_no_internet_no_reconnect" msgid="2211781637653149657">"İnternet Erişimi Algılanmadı, otomatik olarak tekrar bağlanmayacak."</string>
+    <string name="wifi_no_internet" msgid="5011955173375805204">"İnternet Erişimi Yok."</string>
     <string name="saved_network" msgid="4352716707126620811">"<xliff:g id="NAME">%1$s</xliff:g> tarafından kaydedildi"</string>
     <string name="connected_via_wfa" msgid="3805736726317410714">"Kablosuz bağlantı yardımcısıyla bağlandı"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"%1$s üzerinden bağlı"</string>
@@ -83,7 +85,7 @@
     <string name="accessibility_wifi_two_bars" msgid="3569851234710034416">"Kablosuz sinyal gücü iki çubuk."</string>
     <string name="accessibility_wifi_three_bars" msgid="8134185644861380311">"Kablosuz sinyal gücü üç çubuk."</string>
     <string name="accessibility_wifi_signal_full" msgid="7061045677694702">"Kablosuz sinyal gücü tam."</string>
-    <string name="process_kernel_label" msgid="3916858646836739323">"Android İS"</string>
+    <string name="process_kernel_label" msgid="3916858646836739323">"Android OS"</string>
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"Kaldırılan uygulamalar"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"Kaldırılmış kullanıcılar ve uygulamalar"</string>
     <string name="tether_settings_title_usb" msgid="6688416425801386511">"USB tethering"</string>
@@ -91,7 +93,7 @@
     <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Bluetooth tethering"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"Tethering"</string>
     <string name="tether_settings_title_all" msgid="8356136101061143841">"Tethering ve taşnblr hotspot"</string>
-    <string name="managed_user_title" msgid="8101244883654409696">"İş profili"</string>
+    <string name="managed_user_title" msgid="8109605045406748842">"Tüm iş uygulamaları"</string>
     <string name="user_guest" msgid="8475274842845401871">"Misafir"</string>
     <string name="unknown" msgid="1592123443519355854">"Bilinmiyor"</string>
     <string name="running_process_item_user_label" msgid="3129887865552025943">"Kullanıcı: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
@@ -101,6 +103,8 @@
     <string name="tts_settings_title" msgid="1237820681016639683">"Metin-konuşma çıktısı"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"Konuşma hızı"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"Metnin konuşulduğu hız"</string>
+    <string name="tts_default_pitch_title" msgid="6135942113172488671">"Perde"</string>
+    <string name="tts_default_pitch_summary" msgid="1944885882882650009">"Sentezlenmiş konuşma sesini etkiler"</string>
     <string name="tts_default_lang_title" msgid="8018087612299820556">"Dil"</string>
     <string name="tts_lang_use_system" msgid="2679252467416513208">"Sistemin dilini kullan"</string>
     <string name="tts_lang_not_selected" msgid="7395787019276734765">"Dil seçilmedi"</string>
@@ -121,6 +125,8 @@
     <string name="tts_engine_settings_button" msgid="1030512042040722285">"Motor ayarlarını başlat"</string>
     <string name="tts_engine_preference_section_title" msgid="448294500990971413">"Tercih edilen motor"</string>
     <string name="tts_general_section_title" msgid="4402572014604490502">"Genel"</string>
+    <string name="tts_reset_speech_pitch_title" msgid="5789394019544785915">"Ses tonunu sıfırla"</string>
+    <string name="tts_reset_speech_pitch_summary" msgid="8700539616245004418">"Metin sesli okuma tonunu varsayılan ayara sıfırlayın."</string>
   <string-array name="tts_rate_entries">
     <item msgid="6695494874362656215">"Çok yavaş"</item>
     <item msgid="4795095314303559268">"Yavaş"</item>
@@ -163,20 +169,36 @@
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Kablosuz Ayrıntılı Günlük Kaydını etkinleştir"</string>
     <string name="wifi_aggressive_handover" msgid="9194078645887480917">"Kablosuz\'dan Hücresel Ağa agresif geçiş"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Kablosuz Dolaşım Taramalarına daima izin ver"</string>
-    <string name="legacy_dhcp_client" msgid="694426978909127287">"Eski DHCP istemcisini kullan"</string>
     <string name="mobile_data_always_on" msgid="7745605759775320362">"Hücresel veri her zaman etkin"</string>
+    <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Mutlak sesi iptal et"</string>
+    <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Bluetooth AVRCP Sürümü"</string>
+    <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Bluetooth AVRCP Sürümünü seçin"</string>
+    <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Bluetooth Ses Codec\'i"</string>
+    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="4558347981670553665">"Bluetooth Ses Codec\'ini Seçin"</string>
+    <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Bluetooth Ses Örnek Hızı"</string>
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5628790207448471613">"Bluetooth Ses Codec\'ini Seçin:\nÖrnek Hızı"</string>
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"Bluetooth Ses Örnek Başına Bit Sayısı"</string>
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4546131401358681321">"Bluetooth Ses Codec\'ini Seçin:\nÖrnek Başına Bit Sayısı"</string>
+    <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"Bluetooth Ses Kanalı Modu"</string>
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="9133545781346216071">"Bluetooth Ses Codec\'ini Seçin:\nKanal Modu"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Bluetooth Ses LDAC Codec\'i: Oynatma Kalitesi"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"Bluetooth Ses LDAC Codec\'ini Seçin:\nOynatma Kalitesi"</string>
+    <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Akış: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Kablosuz ekran sertifikası seçeneklerini göster"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Kablosuz günlük kaydı seviyesini artır. Kablosuz Seçici\'de her bir SSID RSSI için göster."</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"Etkinleştirildiğinde, Kablosuz ağ sinyali zayıfken veri bağlantısının Hücresel ağa geçirilmesinde daha agresif olunur"</string>
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"Arayüzde mevcut veri trafiği miktarına bağlı olarak Kablosuz Dolaşım Taramalarına İzin Verin/Vermeyin"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Günlük Kaydedici arabellek boyutları"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Gün. arabel. başına Gün. Kayd. boyutunu seç"</string>
+    <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"Günlük kaydedici kalıcı depolama alanı silinsin mi?"</string>
+    <string name="dev_logpersist_clear_warning_message" msgid="2256582531342994562">"Kalıcı günlük kaydediciyle artık izlemediğimizde, cihazınızda bulunan günlük kaydedici verilerini silmemiz gerekmektedir."</string>
+    <string name="select_logpersist_title" msgid="7530031344550073166">"Günlük kaydedici verilerini bu cihazda kalıcı olarak depola"</string>
+    <string name="select_logpersist_dialog_title" msgid="4003400579973269060">"Cihazda kalıcı olarak depolanacak günlük arabelleklerini seçin"</string>
     <string name="select_usb_configuration_title" msgid="2649938511506971843">"USB Yapılandırmasını seç"</string>
     <string name="select_usb_configuration_dialog_title" msgid="6385564442851599963">"USB Yapılandırmasını seç"</string>
     <string name="allow_mock_location" msgid="2787962564578664888">"Sahte konumlara izin ver"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Sahte konumlara izin ver"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Görünüm özelliği incelemeyi etkinleştir"</string>
-    <string name="legacy_dhcp_client_summary" msgid="163383566317652040">"Yeni Android DHCP istemcisi yerine Lollipop DHCP istemcisini kullan."</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Kablosuz bağlantı etkin bile olsa mobil veri kullanımını her zaman etkin tut (ağlar arasında hızlı geçiş yapmak için)."</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"USB hata ayıklamasına izin verilsin mi?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"USB hata ayıklaması yalnızca geliştirme amaçlıdır. Verileri bilgisayarınızla cihazınız arasında kopyalamak, bildirim göndermeksizin uygulamaları cihazınıza yüklemek ve günlük verilerini okumak için kullanın."</string>
@@ -185,6 +207,7 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"Bu ayarlar yalnızca geliştirme amaçlıdır. Cihazınızın veya cihazdaki uygulamaların bozulmasına veya hatalı çalışmasına neden olabilir."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"USB\'den yüklenen uygulamaları doğrula"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"ADB/ADT üzerinden yüklenen uygulamaları zararlı davranışlara karşı denetle."</string>
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Uzak cihazda sesin aşırı yüksek olması veya kontrol edilememesi gibi ses sorunları olması ihtimaline karşı Bluetooh mutlak ses özelliğini iptal eder."</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Yerel terminal"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Yerel kabuk erişimi sunan terminal uygulamasını etkinleştir"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP denetimi"</string>
@@ -206,8 +229,8 @@
     <string name="strict_mode_summary" msgid="142834318897332338">"Uyg. ana işlem parçasında uzun işlem yap. ekr. yakıp söndür"</string>
     <string name="pointer_location" msgid="6084434787496938001">"İşaretçi konumu"</string>
     <string name="pointer_location_summary" msgid="840819275172753713">"Mevcut dokunmatik verilerini gösteren yer paylaşımı"</string>
-    <string name="show_touches" msgid="1356420386500834339">"Dokunmaları göster"</string>
-    <string name="show_touches_summary" msgid="6684407913145150041">"Dokunmalarda görsel geri bildirim göster"</string>
+    <string name="show_touches" msgid="2642976305235070316">"Hafifçe dokunmayı göster"</string>
+    <string name="show_touches_summary" msgid="6101183132903926324">"Hafifçe dokunmalarda görsel geri bildirim göster"</string>
     <string name="show_screen_updates" msgid="5470814345876056420">"Yüzey güncellemelerini göster"</string>
     <string name="show_screen_updates_summary" msgid="2569622766672785529">"Güncelleme sırasında tüm pencere yüzeylerini çiz"</string>
     <string name="show_hw_screen_updates" msgid="5036904558145941590">"GPU görünüm güncellemelerini göster"</string>
@@ -225,8 +248,6 @@
     <string name="debug_layout_summary" msgid="2001775315258637682">"Klip sınırlarını, kenar boşluklarını vb. göster"</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Sağdan sola düzenini zorla"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Tüm yerel ayarlar için sağdan sola ekran düzenini zorlar"</string>
-    <string name="show_cpu_usage" msgid="2389212910758076024">"CPU kullanımını göster"</string>
-    <string name="show_cpu_usage_summary" msgid="2113341923988958266">"Mevcut CPU kullanımını gösteren yer paylaşımı"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"GPU oluşturmayı zorla"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"2D çizimde GPU kullanımını zorla"</string>
     <string name="force_msaa" msgid="7920323238677284387">"4x MSAA\'yı zorla"</string>
@@ -244,14 +265,14 @@
     <string name="show_all_anrs" msgid="28462979638729082">"Tüm ANR\'leri göster"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"Arka plan uygulamalar için Uygulama Yanıt Vermiyor mesajını göster"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Harici birimdeki uygulamalara izin vermeye zorla"</string>
-    <string name="force_allow_on_external_summary" msgid="3191952505860343233">"Bildirilen değerlerden bağımsız olarak uygulamaları harici depolamaya yazmak için uygun hale getirir"</string>
+    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Manifest değerlerinden bağımsız olarak uygulamaları harici depolamaya yazmak için uygun hale getirir"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Etkinlikleri yeniden boyutlandırılabilmeye zorla"</string>
-    <string name="force_resizable_activities_summary" msgid="4508217476997182216">"Manifest değerlerinden bağımsız olarak, tüm etkinlikleri birden fazla pencerede yeniden boyutlandırılabilir hale getirir."</string>
+    <string name="force_resizable_activities_summary" msgid="6667493494706124459">"Manifest değerlerinden bağımsız olarak, tüm etkinlikleri birden fazla pencerede yeniden boyutlandırılabilir yap."</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"Serbest biçimli pencereleri etkinleştir"</string>
-    <string name="enable_freeform_support_summary" msgid="2252563497485436534">"Deneysel serbest biçimli pencereleri etkinleştirir."</string>
+    <string name="enable_freeform_support_summary" msgid="8247310463288834487">"Deneysel serbest biçimli pencere desteğini etkinleştir."</string>
     <string name="local_backup_password_title" msgid="3860471654439418822">"Masaüstü yedekleme şifresi"</string>
     <string name="local_backup_password_summary_none" msgid="6951095485537767956">"Masaüstü tam yedeklemeleri şu an korunmuyor"</string>
-    <string name="local_backup_password_summary_change" msgid="2731163425081172638">"Masaüstü tam yedeklemelerinin şifresini değiştirmek veya kaldırmak için dokunun"</string>
+    <string name="local_backup_password_summary_change" msgid="5376206246809190364">"Masaüstü tam yedeklemelerinin şifresini değiştirmek veya kaldırmak için hafifçe dokunun"</string>
     <string name="local_backup_password_toast_success" msgid="582016086228434290">"Yeni yedekleme şifresi ayarlandı"</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"Yeni şifre ve onayı eşleşmiyor."</string>
     <string name="local_backup_password_toast_validation_failure" msgid="5646377234895626531">"Yedekleme şifresi ayarlanamadı"</string>
@@ -266,18 +287,15 @@
     <item msgid="5363960654009010371">"Dijital içerik için optimize edilmiş renkler"</item>
   </string-array>
     <string name="inactive_apps_title" msgid="1317817863508274533">"Devre dışı uygulamalar"</string>
-    <string name="inactive_app_inactive_summary" msgid="6768756967594202411">"Devre dışı. Değiştirmek için dokunun."</string>
-    <string name="inactive_app_active_summary" msgid="4512911571954375968">"Etkin. Değiştirmek için dokunun."</string>
+    <string name="inactive_app_inactive_summary" msgid="5091363706699855725">"Etkin değil. Geçiş yapmak için hafifçe dokunun."</string>
+    <string name="inactive_app_active_summary" msgid="4174921824958516106">"Etkin. Geçiş yapmak için hafifçe dokunun."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Çalışan hizmetler"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"Şu anda çalışan hizmetleri görüntüle ve denetle"</string>
-    <string name="night_mode_title" msgid="2594133148531256513">"Gece modu"</string>
-    <string name="night_mode_summary" msgid="9196605054622017193">"%s"</string>
-    <string name="night_mode_no" msgid="9171772244775838901">"Devre dışı"</string>
-    <string name="night_mode_yes" msgid="2218157265997633432">"Her zaman açık"</string>
-    <string name="night_mode_auto" msgid="7508348175804304327">"Otomatik"</string>
+    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"Çoklu İşlem WebView"</string>
+    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"WebView oluşturucularını ayrı ayrı çalıştır"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView kullanımı"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"WebView kullanımını ayarla"</string>
-    <string name="select_webview_provider_confirmation_text" msgid="6671472080671066972">"Seçilen WebView uygulama şekli devre dışı. Bu uygulama şeklinin kullanılabilmesi için etkinleştirilmesi gerekir. Etkinleştirmek istiyor musunuz?"</string>
+    <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Bu seçenek artık geçerli değil. Tekrar deneyin."</string>
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"Dosya şifrelemeye dönüştür"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"Dönüştür…"</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"Dosya şifreleme zaten uygulandı"</string>
@@ -294,19 +312,50 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"Renk düzeltme"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Bu özellik deneyseldir ve performansı etkileyebilir."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"<xliff:g id="TITLE">%1$s</xliff:g> tarafından geçersiz kılındı"</string>
+    <string name="power_remaining_duration_only" msgid="4400068916452346544">"Yaklaşık <xliff:g id="TIME">%1$s</xliff:g> kaldı"</string>
+    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">%1$s</xliff:g> kaldı"</string>
     <string name="power_discharging_duration" msgid="1605929174734600590">"<xliff:g id="LEVEL">%1$s</xliff:g> - yaklaşık <xliff:g id="TIME">%2$s</xliff:g> kaldı"</string>
+    <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> kaldı"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="2853265177761520490">"<xliff:g id="LEVEL">%1$s</xliff:g> - tam şarj olmasına <xliff:g id="TIME">%2$s</xliff:g> var"</string>
+    <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging_duration_ac" msgid="3969186192576594254">"<xliff:g id="LEVEL">%1$s</xliff:g> - prize takılı, tam şarj olmasına <xliff:g id="TIME">%2$s</xliff:g> var"</string>
+    <string name="power_charging_duration_ac_short" msgid="7895864687218765582">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging_duration_usb" msgid="182405645340976546">"<xliff:g id="LEVEL">%1$s</xliff:g> - USB üzerinden şarj olmasına <xliff:g id="TIME">%2$s</xliff:g> var"</string>
+    <string name="power_charging_duration_usb_short" msgid="941854728040426399">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging_duration_wireless" msgid="1829295708243159464">"<xliff:g id="LEVEL">%1$s</xliff:g> - kablosuzdan tam şarj olmasına <xliff:g id="TIME">%2$s</xliff:g> var"</string>
+    <string name="power_charging_duration_wireless_short" msgid="1642664799869599476">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"Bilinmiyor"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"Şarj oluyor"</string>
     <string name="battery_info_status_charging_ac" msgid="2909861890674399949">"AC ile şarj oluyor"</string>
+    <string name="battery_info_status_charging_ac_short" msgid="7431401092096415502">"Şarj oluyor"</string>
     <string name="battery_info_status_charging_usb" msgid="2207489369680923929">"USB ile şarj oluyor"</string>
+    <string name="battery_info_status_charging_usb_short" msgid="6733371990319101366">"Şarj oluyor"</string>
     <string name="battery_info_status_charging_wireless" msgid="3574032603735446573">"Kablosuz şarj oluyor"</string>
+    <string name="battery_info_status_charging_wireless_short" msgid="752569941028903610">"Şarj oluyor"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"Şarj olmuyor"</string>
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"Şarj etmiyor"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"Dolu"</string>
-    <string name="disabled_by_admin_summary_text" msgid="7787027069207263048">"Yönetici tarafından devre dışı bırakıldı"</string>
+    <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"Yönetici tarafından denetleniyor"</string>
+    <string name="enabled_by_admin" msgid="2386503803463071894">"Yönetici tarafından etkinleştirildi"</string>
+    <string name="disabled_by_admin" msgid="3669999613095206948">"Yönetici tarafından devre dışı bırakıldı"</string>
+    <string name="home" msgid="3256884684164448244">"Ayarlar Ana Sayfası"</string>
+  <string-array name="battery_labels">
+    <item msgid="8494684293649631252">"%0"</item>
+    <item msgid="8934126114226089439">"%50"</item>
+    <item msgid="1286113608943010849">"%100"</item>
+  </string-array>
+    <string name="charge_length_format" msgid="8978516217024434156">"<xliff:g id="ID_1">%1$s</xliff:g> önce"</string>
+    <string name="remaining_length_format" msgid="7886337596669190587">"<xliff:g id="ID_1">%1$s</xliff:g> kaldı"</string>
+    <string name="screen_zoom_summary_small" msgid="5867245310241621570">"Küçük"</string>
+    <string name="screen_zoom_summary_default" msgid="2247006805614056507">"Varsayılan"</string>
+    <string name="screen_zoom_summary_large" msgid="4835294730065424084">"Büyük"</string>
+    <string name="screen_zoom_summary_very_large" msgid="7108563375663670067">"Daha büyük"</string>
+    <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"En büyük"</string>
+    <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"Özel (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
+    <string name="help_feedback_label" msgid="6815040660801785649">"Yardım ve geri bildirim"</string>
+    <string name="content_description_menu_button" msgid="8182594799812351266">"Menü"</string>
+    <string name="retail_demo_reset_message" msgid="118771671364131297">"Demo modunda sıfırlamak için şifreyi girin"</string>
+    <string name="retail_demo_reset_next" msgid="8356731459226304963">"Sonraki"</string>
+    <string name="retail_demo_reset_title" msgid="696589204029930100">"Şifre gerekli"</string>
 </resources>

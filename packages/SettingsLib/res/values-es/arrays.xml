@@ -29,7 +29,7 @@
     <item msgid="4221763391123233270">"Conexión establecida"</item>
     <item msgid="624838831631122137">"Suspendida"</item>
     <item msgid="7979680559596111948">"Desconectando..."</item>
-    <item msgid="1634960474403853625">"Desconectada"</item>
+    <item msgid="1634960474403853625">"Desconectado"</item>
     <item msgid="746097431216080650">"Con error"</item>
     <item msgid="6367044185730295334">"Bloqueada"</item>
     <item msgid="503942654197908005">"Inhabilitando conexión inestable temporalmente..."</item>
@@ -58,6 +58,74 @@
     <item msgid="3878793616631049349">"Utilizar comprobación de HDCP solo para contenido DRM"</item>
     <item msgid="45075631231212732">"Utilizar siempre comprobación de HDCP"</item>
   </string-array>
+  <string-array name="bluetooth_avrcp_versions">
+    <item msgid="5347678900838034763">"AVRCP 1.4 (Predeterminada)"</item>
+    <item msgid="2089555299377409443">"AVRCP 1.5"</item>
+    <item msgid="2895327394279434278">"AVRCP 1.6"</item>
+  </string-array>
+  <string-array name="bluetooth_avrcp_version_values">
+    <item msgid="2838624067805073303">"avrcp14"</item>
+    <item msgid="1913619118958233129">"avrcp15"</item>
+    <item msgid="7142710449249088270">"avrcp16"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_titles">
+    <item msgid="7065842274271279580">"Usar preferencia del sistema (predeter.)"</item>
+    <item msgid="7539690996561263909">"SBC"</item>
+    <item msgid="686685526567131661">"AAC"</item>
+    <item msgid="8910200421843557332">"aptX"</item>
+    <item msgid="8434403964359457768">"aptX HD"</item>
+    <item msgid="6751080638867012696">"LDAC"</item>
+    <item msgid="723675059572222462">"Habilitar códecs opcionales"</item>
+    <item msgid="3304843301758635896">"Inhabilitar códecs opcionales"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_summaries">
+    <item msgid="5062108632402595000">"Usar preferencia del sistema (predeter.)"</item>
+    <item msgid="6898329690939802290">"SBC"</item>
+    <item msgid="6839647709301342559">"AAC"</item>
+    <item msgid="2279916056363477395">"aptX"</item>
+    <item msgid="6641171061200063516">"aptX HD"</item>
+    <item msgid="7950781694447359344">"LDAC"</item>
+    <item msgid="2209680154067241740">"Habilitar códecs opcionales"</item>
+    <item msgid="741805482892725657">"Inhabilitar códecs opcionales"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_sample_rate_titles">
+    <item msgid="3093023430402746802">"Usar preferencia del sistema (predeter.)"</item>
+    <item msgid="8895532488906185219">"44,1 kHz"</item>
+    <item msgid="2909915718994807056">"48 kHz"</item>
+    <item msgid="3347287377354164611">"88,2 kHz"</item>
+    <item msgid="1234212100239985373">"96 kHz"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_sample_rate_summaries">
+    <item msgid="3214516120190965356">"Usar preferencia del sistema (predeter.)"</item>
+    <item msgid="4482862757811638365">"44,1 kHz"</item>
+    <item msgid="354495328188724404">"48 kHz"</item>
+    <item msgid="7329816882213695083">"88,2 kHz"</item>
+    <item msgid="6967397666254430476">"96 kHz"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_bits_per_sample_titles">
+    <item msgid="2684127272582591429">"Usar preferencia del sistema (predeter.)"</item>
+    <item msgid="5618929009984956469">"16 bits por muestra"</item>
+    <item msgid="3412640499234627248">"24 bits por muestra"</item>
+    <item msgid="121583001492929387">"32 bits por muestra"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_bits_per_sample_summaries">
+    <item msgid="1081159789834584363">"Usar preferencia del sistema (predeter.)"</item>
+    <item msgid="4726688794884191540">"16 bits por muestra"</item>
+    <item msgid="305344756485516870">"24 bits por muestra"</item>
+    <item msgid="244568657919675099">"32 bits por muestra"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_channel_mode_titles">
+    <item msgid="5226878858503393706">"Usar preferencia del sistema (predeter.)"</item>
+    <item msgid="4106832974775067314">"Mono"</item>
+    <item msgid="5571632958424639155">"Estéreo"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_channel_mode_summaries">
+    <item msgid="4118561796005528173">"Usar preferencia del sistema (predeter.)"</item>
+    <item msgid="8900559293912978337">"Mono"</item>
+    <item msgid="8883739882299884241">"Estéreo"</item>
+  </string-array>
+    <!-- no translation found for bluetooth_a2dp_codec_ldac_playback_quality_titles:3 (4414060457677684127) -->
+    <!-- no translation found for bluetooth_a2dp_codec_ldac_playback_quality_summaries:3 (364670732877872677) -->
   <string-array name="select_logd_size_titles">
     <item msgid="8665206199209698501">"No"</item>
     <item msgid="1593289376502312923">"64 K"</item>
@@ -79,6 +147,18 @@
     <item msgid="1314234299552254621">"1 M/búfer registro"</item>
     <item msgid="3606047780792894151">"4 M/búfer registro"</item>
     <item msgid="5431354956856655120">"16 M/búfer registro"</item>
+  </string-array>
+  <string-array name="select_logpersist_titles">
+    <item msgid="1744840221860799971">"No"</item>
+    <item msgid="3054662377365844197">"Todo"</item>
+    <item msgid="688870735111627832">"Todo menos señal móvil"</item>
+    <item msgid="2850427388488887328">"solo kernel"</item>
+  </string-array>
+  <string-array name="select_logpersist_summaries">
+    <item msgid="2216470072500521830">"No"</item>
+    <item msgid="172978079776521897">"Todos los búferes de registro"</item>
+    <item msgid="3873873912383879240">"Todo excepto búferes de registro de señal móvil"</item>
+    <item msgid="8489661142527693381">"solo búfer de registro del kernel"</item>
   </string-array>
   <string-array name="window_animation_scale_entries">
     <item msgid="8134156599370824081">"Animación desactivada"</item>

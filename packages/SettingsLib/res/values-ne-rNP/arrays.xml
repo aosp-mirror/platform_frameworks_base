@@ -58,6 +58,58 @@
     <item msgid="3878793616631049349">"DRM सामग्रीको लागि मात्र HDCP जाँचको प्रयोग गर्नुहोस्"</item>
     <item msgid="45075631231212732">"सधैँ HDCP जाँच प्रयोग गर्नुहोस्"</item>
   </string-array>
+  <string-array name="bluetooth_avrcp_versions">
+    <item msgid="5347678900838034763">"AVRCP १.४ (पूर्वनिर्धारित)"</item>
+    <item msgid="2089555299377409443">"AVRCP १.५"</item>
+    <item msgid="2895327394279434278">"AVRCP १.६"</item>
+  </string-array>
+  <string-array name="bluetooth_avrcp_version_values">
+    <item msgid="2838624067805073303">"avrcp14"</item>
+    <item msgid="1913619118958233129">"avrcp15"</item>
+    <item msgid="7142710449249088270">"avrcp16"</item>
+  </string-array>
+    <!-- no translation found for bluetooth_a2dp_codec_titles:6 (723675059572222462) -->
+    <!-- no translation found for bluetooth_a2dp_codec_titles:7 (3304843301758635896) -->
+    <!-- no translation found for bluetooth_a2dp_codec_summaries:6 (2209680154067241740) -->
+    <!-- no translation found for bluetooth_a2dp_codec_summaries:7 (741805482892725657) -->
+  <string-array name="bluetooth_a2dp_codec_sample_rate_titles">
+    <item msgid="3093023430402746802">"प्रणालीको चयन प्रयोग गर्नुहोस् (पूर्वनिर्धारित)"</item>
+    <item msgid="8895532488906185219">"४४.१ kHz"</item>
+    <item msgid="2909915718994807056">"४८.० kHz"</item>
+    <item msgid="3347287377354164611">"८८.२ kHz"</item>
+    <item msgid="1234212100239985373">"९६.० kHz"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_sample_rate_summaries">
+    <item msgid="3214516120190965356">"प्रणालीको चयन प्रयोग गर्नुहोस् (पूर्वनिर्धारित)"</item>
+    <item msgid="4482862757811638365">"४४.१ kHz"</item>
+    <item msgid="354495328188724404">"४८.० kHz"</item>
+    <item msgid="7329816882213695083">"८८.२ kHz"</item>
+    <item msgid="6967397666254430476">"९६.० kHz"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_bits_per_sample_titles">
+    <item msgid="2684127272582591429">"प्रणालीको चयन प्रयोग गर्नुहोस् (पूर्वनिर्धारित)"</item>
+    <item msgid="5618929009984956469">"१६ बिट/नमूना"</item>
+    <item msgid="3412640499234627248">"२४ बिट/नमूना"</item>
+    <item msgid="121583001492929387">"३२ बिट/नमूना"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_bits_per_sample_summaries">
+    <item msgid="1081159789834584363">"प्रणालीको चयन प्रयोग गर्नुहोस् (पूर्वनिर्धारित)"</item>
+    <item msgid="4726688794884191540">"१६ बिट/नमूना"</item>
+    <item msgid="305344756485516870">"२४ बिट/नमूना"</item>
+    <item msgid="244568657919675099">"३२ बिट/नमूना"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_channel_mode_titles">
+    <item msgid="5226878858503393706">"प्रणालीको चयन प्रयोग गर्नुहोस् (पूर्वनिर्धारित)"</item>
+    <item msgid="4106832974775067314">"मोनो"</item>
+    <item msgid="5571632958424639155">"स्टेरियो"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_channel_mode_summaries">
+    <item msgid="4118561796005528173">"प्रणालीको चयन प्रयोग गर्नुहोस् (पूर्वनिर्धारित)"</item>
+    <item msgid="8900559293912978337">"मोनो"</item>
+    <item msgid="8883739882299884241">"स्टेरियो"</item>
+  </string-array>
+    <!-- no translation found for bluetooth_a2dp_codec_ldac_playback_quality_titles:3 (4414060457677684127) -->
+    <!-- no translation found for bluetooth_a2dp_codec_ldac_playback_quality_summaries:3 (364670732877872677) -->
   <string-array name="select_logd_size_titles">
     <item msgid="8665206199209698501">"निष्क्रिय गर्नुहोस्"</item>
     <item msgid="1593289376502312923">"६४के"</item>
@@ -79,6 +131,18 @@
     <item msgid="1314234299552254621">"१एम प्रति लग बफर"</item>
     <item msgid="3606047780792894151">"४एम प्रति लग बफर"</item>
     <item msgid="5431354956856655120">"१६एम प्रति लग बफर"</item>
+  </string-array>
+  <string-array name="select_logpersist_titles">
+    <item msgid="1744840221860799971">"निष्क्रिय"</item>
+    <item msgid="3054662377365844197">"सबै"</item>
+    <item msgid="688870735111627832">"रेडियो बाहेक सबै"</item>
+    <item msgid="2850427388488887328">"कर्नेल मात्र"</item>
+  </string-array>
+  <string-array name="select_logpersist_summaries">
+    <item msgid="2216470072500521830">"निष्क्रिय"</item>
+    <item msgid="172978079776521897">"सबै लग सम्बन्धी बफरहरू"</item>
+    <item msgid="3873873912383879240">"रेडियो सम्बन्धी लगका बफरहरू बाहेक सबै"</item>
+    <item msgid="8489661142527693381">"कर्नेलको लग सम्बन्धी बफर मात्र"</item>
   </string-array>
   <string-array name="window_animation_scale_entries">
     <item msgid="8134156599370824081">"सजीविकरण बन्द"</item>
