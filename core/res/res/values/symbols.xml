@@ -2890,6 +2890,7 @@
 
   <!-- android.service.trust -->
   <java-symbol type="bool" name="config_allowEscrowTokenForTrustAgent"/>
+  <java-symbol type="string" name="config_defaultTrustAgent" />
 
   <!-- Time picker -->
   <java-symbol type="id" name="toggle_mode"/>
