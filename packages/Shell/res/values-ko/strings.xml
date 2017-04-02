@@ -17,23 +17,27 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"셸"</string>
-    <string name="bugreport_in_progress_title" msgid="7409917338223386637">"버그 신고 생성 중"</string>
-    <string name="bugreport_finished_title" msgid="2293711546892863898">"버그 신고서 캡처됨"</string>
+    <string name="bugreport_in_progress_title" msgid="4311705936714972757">"버그 신고 <xliff:g id="ID">#%d</xliff:g> 생성 중"</string>
+    <string name="bugreport_finished_title" msgid="4429132808670114081">"버그 신고 <xliff:g id="ID">#%d</xliff:g> 캡처됨"</string>
     <string name="bugreport_updating_title" msgid="4423539949559634214">"세부정보를 버그 보고서에 추가"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"잠시 기다려 주세요..."</string>
-    <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"왼쪽으로 스와이프하여 버그 신고서를 공유하세요."</string>
-    <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"버그 신고서를 공유하려면 터치하세요."</string>
-    <string name="bugreport_confirm" msgid="5130698467795669780">"버그 신고서는 시스템의 다양한 로그 파일 데이터(예: 개인 및 비공개 정보)를 포함합니다. 신뢰할 수 있는 앱과 사용자에게만 버그 신고서를 공유하세요."</string>
-    <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"다음에 이 메시지 표시"</string>
+    <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"곧 버그 보고서가 휴대전화에 표시됩니다."</string>
+    <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"버그 신고를 공유하려면 탭하세요."</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"스크린샷 없이 버그 신고서를 공유하려면 탭하고 그렇지 않으면 스크린샷이 완료될 때까지 기다려 주세요."</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"스크린샷 없이 버그 신고서를 공유하려면 탭하고 그렇지 않으면 스크린샷이 완료될 때까지 기다려 주세요."</string>
+    <string name="bugreport_confirm" msgid="5917407234515812495">"버그 신고서에는 시스템의 다양한 로그 파일 데이터가 포함되며 여기에는 사용자가 중요하다고 생각하는 데이터(예: 앱 사용 및 위치 데이터)가 포함되었을 수 있습니다. 신뢰할 수 있는 앱과 사용자에게만 버그 신고서를 공유하세요."</string>
+    <string name="bugreport_confirm_dont_repeat" msgid="6179945398364357318">"다시 표시 안함"</string>
     <string name="bugreport_storage_title" msgid="5332488144740527109">"버그 신고"</string>
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"버그 신고 파일을 읽을 수 없습니다."</string>
+    <string name="bugreport_add_details_to_zip_failed" msgid="1302931926486712371">"zip 파일에 버그 신고 세부정보를 추가할 수 없습니다."</string>
     <string name="bugreport_unnamed" msgid="2800582406842092709">"이름 없음"</string>
     <string name="bugreport_info_action" msgid="2158204228510576227">"세부정보"</string>
     <string name="bugreport_screenshot_action" msgid="8677781721940614995">"스크린샷"</string>
-    <string name="bugreport_screenshot_taken" msgid="7175343181767429088">"스크린샷을 찍었습니다."</string>
+    <string name="bugreport_screenshot_taken" msgid="5684211273096253120">"스크린샷을 찍었습니다."</string>
     <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"스크린샷을 찍을 수 없습니다."</string>
-    <string name="bugreport_info_dialog_title" msgid="3113549839798564645">"버그 신고 세부정보"</string>
+    <string name="bugreport_info_dialog_title" msgid="1355948594292983332">"버그 신고 <xliff:g id="ID">#%d</xliff:g> 세부정보"</string>
     <string name="bugreport_info_name" msgid="4414036021935139527">"파일 이름"</string>
-    <string name="bugreport_info_title" msgid="5599558206004371052">"제목"</string>
-    <string name="bugreport_info_description" msgid="4117088998733546784">"자세한 설명"</string>
+    <string name="bugreport_info_title" msgid="2306030793918239804">"버그 제목"</string>
+    <string name="bugreport_info_description" msgid="5072835127481627722">"버그 요약"</string>
+    <string name="save" msgid="4781509040564835759">"저장"</string>
 </resources>
