@@ -197,7 +197,6 @@ public final class IpSecManager {
      * @param transform an {@link IpSecTransform}, which must be an active Tunnel Mode transform.
      * @hide
      */
-    @SystemApi
     public void applyTunnelModeTransform(Network net, IpSecTransform transform) {}
 
     /**
@@ -242,7 +241,6 @@ public final class IpSecManager {
      *     network
      * @hide
      */
-    @SystemApi
     public void removeTunnelModeTransform(Network net, IpSecTransform transform) {}
 
     /**
