@@ -46,6 +46,7 @@
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Problema de conexión o código incorrecto de MMI."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"La operación está limitada a números de marcación fija."</string>
+    <string name="mmiErrorWhileRoaming" msgid="762488890299284230">"No se puede cambiar la configuración de reenvío de llamadas de tu teléfono mientras usas el servicio de roaming."</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"Se ha activado el servicio."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"Se activó el servicio para:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"Se ha desactivado el servicio."</string>
@@ -88,15 +89,24 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"El Identificador de llamadas está predeterminado en no restringido. Llamada siguiente: no restringido"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Servicio no suministrado."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"No puedes cambiar la configuración del identificador de llamadas."</string>
-    <string name="RestrictedChangedTitle" msgid="5592189398956187498">"Se ha cambiado el acceso restringido"</string>
-    <string name="RestrictedOnData" msgid="8653794784690065540">"El servicio de datos está bloqueado."</string>
-    <string name="RestrictedOnEmergency" msgid="6581163779072833665">"El servicio de emergencias está bloqueado."</string>
-    <string name="RestrictedOnNormal" msgid="4953867011389750673">"El servicio de voz está bloqueado."</string>
-    <string name="RestrictedOnAllVoice" msgid="3396963652108151260">"Todos los servicios de voz están bloqueados."</string>
-    <string name="RestrictedOnSms" msgid="8314352327461638897">"El servicio de SMS está bloqueado."</string>
-    <string name="RestrictedOnVoiceData" msgid="996636487106171320">"Los servicios de voz o datos están bloqueados."</string>
-    <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"Los servicios de voz/SMS están bloqueados."</string>
-    <string name="RestrictedOnAll" msgid="5643028264466092821">"Todos los servicios de voz, datos o SMS están bloqueados."</string>
+    <!-- no translation found for RestrictedOnDataTitle (1322504692764166532) -->
+    <skip />
+    <!-- no translation found for RestrictedOnEmergencyTitle (1236071219598685236) -->
+    <skip />
+    <!-- no translation found for RestrictedOnNormalTitle (3179574012752700984) -->
+    <skip />
+    <!-- no translation found for RestrictedOnAllVoiceTitle (158800171499150681) -->
+    <skip />
+    <!-- no translation found for RestrictedOnDataContent (8997474569390996587) -->
+    <skip />
+    <!-- no translation found for RestrictedOnEmergencyContent (4573217945494650061) -->
+    <skip />
+    <!-- no translation found for RestrictedOnNormalContent (1579434198284512182) -->
+    <skip />
+    <!-- no translation found for RestrictedOnAllVoiceContent (5243580774142557047) -->
+    <skip />
+    <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"No se puede establecer conexión con la red"</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="7335915397439759249">"Para mejorar la recepción, intenta cambiar el tipo de red seleccionado en Configuración &gt; Redes móviles &gt; Tipo de red preferido."</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"El dispositivo del mismo nivel solicitó el modo TTY FULL."</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"El dispositivo del mismo nivel solicitó el modo TTY HCO."</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"El dispositivo del mismo nivel solicitó el modo TTY VCO."</string>
@@ -125,11 +135,15 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"Buscando servicio"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Llamada por Wi-Fi"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
+    <item msgid="2254967670088539682">"Para realizar llamadas o enviar mensajes por Wi-Fi, primero solicítale al proveedor que instale el servicio. Luego, vuelve a activar las llamadas por Wi-Fi desde Configuración."</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="6177300162212449033">"Regístrate con tu proveedor."</item>
   </string-array>
-    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
-    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
+  <string-array name="wfcSpnFormats">
+    <item msgid="6830082633573257149">"%s"</item>
+    <item msgid="4397097370387921767">"Llamada por Wi-Fi de %s"</item>
+  </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Desactivada"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Red Wi-Fi preferida"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Red móvil preferida"</string>
@@ -165,7 +179,10 @@
     <string name="low_memory" product="watch" msgid="4415914910770005166">"El almacenamiento del reloj está completo. Elimina algunos archivos para liberar espacio."</string>
     <string name="low_memory" product="tv" msgid="516619861191025923">"El almacenamiento de la TV está completo. Elimina algunos archivos para liberar espacio."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Se ha agotado el espacio de almacenamiento del dispositivo. Elimina algunos archivos para liberar espacio."</string>
-    <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Es posible que la red esté supervisada"</string>
+    <plurals name="ssl_ca_cert_warning" formatted="false" msgid="5106721205300213569">
+      <item quantity="other">Se instalaron las autoridades de certificación</item>
+      <item quantity="one">Se instaló la autoridad de certificación</item>
+    </plurals>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Por un tercero desconocido"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="550758088185764312">"Por el administrador del perfil de trabajo"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"Por <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
@@ -173,6 +190,8 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Se eliminó el perfil de trabajo debido a la falta de una aplicación de administración."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"La aplicación de administración de perfil de trabajo no se encuentra o está dañada. Por lo tanto, se eliminaron tu perfil de trabajo y los datos relacionados. Para obtener asistencia, comunícate con el administrador."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Tu perfil de trabajo ya no está disponible en este dispositivo."</string>
+    <string name="network_logging_notification_title" msgid="1805392571290161924">"Se está controlando el tráfico de red"</string>
+    <string name="network_logging_notification_text" msgid="2671761001956320094">"Presiona para obtener más información"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Se borrarán los datos del dispositivo"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"La aplicación de administración no cuenta con algunos componentes o está dañada, de modo que no puede usarse. Se borrarán los datos del dispositivo. Para obtener asistencia, comunícate con el administrador."</string>
     <string name="me" msgid="6545696007631404292">"Yo"</string>
@@ -208,13 +227,14 @@
     <string name="global_actions" product="default" msgid="2406416831541615258">"Opciones de dispositivo"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Bloqueo de pantalla"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Apagar"</string>
+    <string name="global_action_emergency" msgid="7112311161137421166">"Emergencias"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Informe de errores"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Iniciar informe de errores"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Se recopilará información sobre el estado actual de tu dispositivo, que se enviará por correo. Pasarán unos minutos desde que se inicie el informe de errores hasta que se envíe, por lo que te recomendamos que tengas paciencia."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Informe interactivo"</string>
-    <string name="bugreport_option_interactive_summary" msgid="8180152634022797629">"Usa esta opción en la mayoría de los casos. Te permite ingresar más detalles acerca del problema y realizar un seguimiento del progreso del informe. Es posible que se omitan secciones menos usadas cuyos informes demoran más en completarse."</string>
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Usa esta opción en la mayoría de los casos. Te permite realizar un seguimiento del progreso del informe, ingresar más detalles acerca del problema y tomar capturas de pantalla. Es posible que se omitan secciones menos usadas cuyos informes demoran más en completarse."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"Informe completo"</string>
-    <string name="bugreport_option_full_summary" msgid="6687306111256813257">"Usa esta opción para reducir al mínimo la interferencia cuando tu dispositivo no responde o funciona muy lento, o cuando necesitas todas las secciones. No permite tomar una captura de pantalla ni ingresar más detalles."</string>
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"Usa esta opción para reducir al mínimo la interferencia del sistema cuando tu dispositivo no responde o funciona muy lento, o cuando necesitas todas las secciones del informe. No permite ingresar más detalles ni tomar capturas de pantalla adicionales."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="other">Se tomará una captura de pantalla para el informe de errores en <xliff:g id="NUMBER_1">%d</xliff:g> segundos.</item>
       <item quantity="one">Se tomará una captura de pantalla para el informe de errores en <xliff:g id="NUMBER_0">%d</xliff:g> segundo.</item>
@@ -230,17 +250,16 @@
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Asistente voz"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"Bloquear ahora"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
-    <string name="notification_children_count_bracketed" msgid="1769425473168347839">"(<xliff:g id="NOTIFICATIONCOUNT">%d</xliff:g>)"</string>
     <string name="notification_hidden_text" msgid="1135169301897151909">"Contenidos ocultos"</string>
     <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"Contenido oculto debido a la política"</string>
     <string name="safeMode" msgid="2788228061547930246">"Modo seguro"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Sistema Android"</string>
-    <string name="user_owner_label" msgid="2804351898001038951">"Personal"</string>
-    <string name="managed_profile_label" msgid="6260850669674791528">"Trabajo"</string>
+    <string name="user_owner_label" msgid="1119010402169916617">"Cambiar al perfil personal"</string>
+    <string name="managed_profile_label" msgid="5289992269827577857">"Cambiar al perfil de trabajo"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Contactos"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"acceder a los contactos"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Ubicación"</string>
-    <string name="permgroupdesc_location" msgid="1346617465127855033">"acceso a la ubicación de este dispositivo"</string>
+    <string name="permgroupdesc_location" msgid="1346617465127855033">"acceder a la ubicación de este dispositivo"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Calendario"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"acceder al calendario"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
@@ -258,7 +277,7 @@
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Recuperar el contenido de las ventanas"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Inspecciona el contenido de la ventana con la que estés interactuando."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Activar la Exploración táctil"</string>
-    <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"Los elementos que toques se dirán en voz alta, y podrás explorar la pantalla mediante gestos."</string>
+    <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Los elementos que presiones se dirán en voz alta y podrás explorar la pantalla mediante gestos."</string>
     <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Activar la accesibilidad web mejorada"</string>
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Es posible que se instalen secuencias de comandos para que el contenido de las aplicaciones sea más accesible."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Observar el texto que escribes"</string>
@@ -371,6 +390,8 @@
     <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"Permite que la aplicación utilice el servicio IMS para hacer llamadas sin tu intervención."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"leer la identidad y el estado del dispositivo"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Permite que la aplicación acceda a las funciones de teléfono del dispositivo. La aplicación puede utilizar este permiso para descubrir identificadores de dispositivos y números de teléfono, para saber si una llamada está activa y para conocer el número remoto con el que se ha establecido conexión mediante una llamada."</string>
+    <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"Transmite llamadas a través del sistema"</string>
+    <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Permite que la app transmita las llamadas a través del sistema para mejorar la experiencia de llamadas."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"evitar que el tablet entre en estado de inactividad"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"evitar que la TV entre en suspensión"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"evitar que el dispositivo entre en estado de inactividad"</string>
@@ -472,7 +493,7 @@
     <string name="permdesc_connection_manager" msgid="5925480810356483565">"Permite que la aplicación administre las conexiones de telecomunicaciones."</string>
     <string name="permlab_bind_incall_service" msgid="6773648341975287125">"interactuar con la pantalla de llamada"</string>
     <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"Permite que la aplicación controle cuándo y cómo el usuario ve la pantalla de llamada."</string>
-    <string name="permlab_bind_connection_service" msgid="3557341439297014940">"interaccionar con servicios de telefonía"</string>
+    <string name="permlab_bind_connection_service" msgid="3557341439297014940">"interactuar con servicios de telefonía"</string>
     <string name="permdesc_bind_connection_service" msgid="4008754499822478114">"Permite que la aplicación interaccione con servicios de telefonía para hacer y recibir llamadas."</string>
     <string name="permlab_control_incall_experience" msgid="9061024437607777619">"ofrecer una experiencia de usuario de llamada"</string>
     <string name="permdesc_control_incall_experience" msgid="915159066039828124">"Permite que la aplicación proporcione una experiencia de usuario de llamada."</string>
@@ -590,9 +611,9 @@
     <string name="phoneTypeFaxHome" msgid="2067265972322971467">"Fax personal"</string>
     <string name="phoneTypePager" msgid="7582359955394921732">"Localizador"</string>
     <string name="phoneTypeOther" msgid="1544425847868765990">"Otro"</string>
-    <string name="phoneTypeCallback" msgid="2712175203065678206">"Devolución de llamada"</string>
+    <string name="phoneTypeCallback" msgid="2712175203065678206">"Devolver llamada"</string>
     <string name="phoneTypeCar" msgid="8738360689616716982">"Automóvil"</string>
-    <string name="phoneTypeCompanyMain" msgid="540434356461478916">"Empresa principal"</string>
+    <string name="phoneTypeCompanyMain" msgid="540434356461478916">"Empresa (principal)"</string>
     <string name="phoneTypeIsdn" msgid="8022453193171370337">"ISDN"</string>
     <string name="phoneTypeMain" msgid="6766137010628326916">"Principal"</string>
     <string name="phoneTypeOtherFax" msgid="8587657145072446565">"Otro fax"</string>
@@ -657,7 +678,7 @@
     <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"Escribe el código PUK y un nuevo código PIN."</string>
     <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"Código PUK"</string>
     <string name="keyguard_password_enter_pin_prompt" msgid="8027680321614196258">"Nuevo código PIN"</string>
-    <string name="keyguard_password_entry_touch_hint" msgid="7858547464982981384"><font size="17">"Toca para ingresar la contraseña"</font></string>
+    <string name="keyguard_password_entry_touch_hint" msgid="2644215452200037944"><font size="17">"Presiona e ingresa contraseña"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"Ingresar contraseña para desbloquear"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"Ingresa el PIN para desbloquear"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"Código PIN incorrecto"</string>
@@ -673,6 +694,7 @@
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Correcto"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Vuelve a intentarlo."</string>
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Volver a intentarlo"</string>
+    <string name="lockscreen_storage_locked" msgid="9167551160010625200">"Desbloquea para acceder a funciones y datos"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Se superó el máximo de intentos permitido para el desbloqueo facial del dispositivo."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Sin tarjeta SIM"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"No hay tarjeta SIM en el tablet."</string>
@@ -785,12 +807,12 @@
     <string name="autofill_parish" msgid="8202206105468820057">"Circunscripción"</string>
     <string name="autofill_area" msgid="3547409050889952423">"Área"</string>
     <string name="autofill_emirate" msgid="2893880978835698818">"Emirato"</string>
-    <string name="permlab_readHistoryBookmarks" msgid="3775265775405106983">"leer tus marcadores web y el historial"</string>
-    <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"Permite que la aplicación consulte el historial de todas las URL visitadas por el navegador, y todos sus marcadores. Nota: Este permiso no puede ser utilizado por navegadores externos ni otras aplicaciones que tengan funciones de navegación por Internet."</string>
-    <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"escribir marcadores web e historial"</string>
-    <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"Permite que la aplicación modifique el historial o los marcadores del navegador almacenados en la tablet. La aplicación puede utilizar este permiso para borrar o modificar datos del navegador. Nota: Este permiso no puede ser utilizado por navegadores externos ni otras aplicaciones que tengan funciones de navegación por Internet."</string>
-    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="7007393823197766548">"Permite que la aplicación modifique el historial o los marcadores del navegador almacenados en la TV. Esta opción puede permitir que la aplicación borre o modifique los datos del navegador. Ten en cuenta que este permiso no puede ser usado por navegadores de terceros ni otras aplicaciones con capacidades de navegación web."</string>
-    <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Permite que la aplicación modifique el historial o los marcadores del navegador almacenados en el dispositivo. La aplicación puede utilizar este permiso para borrar o modificar los datos del navegador. Nota: Este permiso no puede ser utilizado por navegadores externos ni otras aplicaciones que tengan funciones de navegación por Internet."</string>
+    <string name="permlab_readHistoryBookmarks" msgid="3775265775405106983">"leer tus favoritos web y el historial"</string>
+    <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"Permite que la aplicación consulte el historial de todas las URL visitadas por el navegador, y todos sus favoritos. Nota: Este permiso no puede ser utilizado por navegadores externos ni otras aplicaciones que tengan funciones de navegación por Internet."</string>
+    <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"escribir favoritos web e historial"</string>
+    <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"Permite que la aplicación modifique el historial o los favoritos del navegador almacenados en la tablet. La aplicación puede utilizar este permiso para borrar o modificar datos del navegador. Nota: Este permiso no puede ser utilizado por navegadores externos ni otras aplicaciones que tengan funciones de navegación por Internet."</string>
+    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="7007393823197766548">"Permite que la aplicación modifique el historial o los favoritos del navegador almacenados en la TV. Esta opción puede permitir que la aplicación borre o modifique los datos del navegador. Ten en cuenta que este permiso no puede ser usado por navegadores de terceros ni otras aplicaciones con capacidades de navegación web."</string>
+    <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Permite que la aplicación modifique el historial o los favoritos del navegador almacenados en el dispositivo. La aplicación puede utilizar este permiso para borrar o modificar los datos del navegador. Nota: Este permiso no puede ser utilizado por navegadores externos ni otras aplicaciones que tengan funciones de navegación por Internet."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"programar una alarma"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Permite que la aplicación establezca una alarma en una aplicación de alarma instalada. Es posible que algunas aplicaciones de alarma no incluyan esta función."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"agregar correo de voz"</string>
@@ -811,7 +833,7 @@
     <string name="search_go" msgid="8298016669822141719">"Buscar"</string>
     <string name="search_hint" msgid="1733947260773056054">"Buscar…"</string>
     <string name="searchview_description_search" msgid="6749826639098512120">"Buscar"</string>
-    <string name="searchview_description_query" msgid="5911778593125355124">"Consulta de búsqueda"</string>
+    <string name="searchview_description_query" msgid="5911778593125355124">"Búsqueda"</string>
     <string name="searchview_description_clear" msgid="1330281990951833033">"Eliminar la consulta"</string>
     <string name="searchview_description_submit" msgid="2688450133297983542">"Enviar consulta"</string>
     <string name="searchview_description_voice" msgid="2453203695674994440">"Búsqueda por voz"</string>
@@ -853,6 +875,71 @@
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> horas</item>
       <item quantity="one">1 hora</item>
     </plurals>
+    <string name="now_string_shortest" msgid="8912796667087856402">"ahora"</string>
+    <plurals name="duration_minutes_shortest" formatted="false" msgid="3957499975064245495">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> min</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> min</item>
+    </plurals>
+    <plurals name="duration_hours_shortest" formatted="false" msgid="3552182110578602356">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> h</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> h</item>
+    </plurals>
+    <plurals name="duration_days_shortest" formatted="false" msgid="5213655532597081640">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> d</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> d</item>
+    </plurals>
+    <plurals name="duration_years_shortest" formatted="false" msgid="7848711145196397042">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> a</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> a</item>
+    </plurals>
+    <plurals name="duration_minutes_shortest_future" formatted="false" msgid="3277614521231489951">
+      <item quantity="other">en <xliff:g id="COUNT_1">%d</xliff:g> min</item>
+      <item quantity="one">en <xliff:g id="COUNT_0">%d</xliff:g> min</item>
+    </plurals>
+    <plurals name="duration_hours_shortest_future" formatted="false" msgid="2152452368397489370">
+      <item quantity="other">en <xliff:g id="COUNT_1">%d</xliff:g> h</item>
+      <item quantity="one">en <xliff:g id="COUNT_0">%d</xliff:g> h</item>
+    </plurals>
+    <plurals name="duration_days_shortest_future" formatted="false" msgid="8088331502820295701">
+      <item quantity="other">en <xliff:g id="COUNT_1">%d</xliff:g> d</item>
+      <item quantity="one">en <xliff:g id="COUNT_0">%d</xliff:g> d</item>
+    </plurals>
+    <plurals name="duration_years_shortest_future" formatted="false" msgid="2317006667145250301">
+      <item quantity="other">en <xliff:g id="COUNT_1">%d</xliff:g> años</item>
+      <item quantity="one">en <xliff:g id="COUNT_0">%d</xliff:g> año</item>
+    </plurals>
+    <plurals name="duration_minutes_relative" formatted="false" msgid="3178131706192980192">
+      <item quantity="other">hace <xliff:g id="COUNT_1">%d</xliff:g> minutos</item>
+      <item quantity="one">hace <xliff:g id="COUNT_0">%d</xliff:g> minuto</item>
+    </plurals>
+    <plurals name="duration_hours_relative" formatted="false" msgid="676894109982008411">
+      <item quantity="other">hace <xliff:g id="COUNT_1">%d</xliff:g> horas</item>
+      <item quantity="one">hace <xliff:g id="COUNT_0">%d</xliff:g> hora</item>
+    </plurals>
+    <plurals name="duration_days_relative" formatted="false" msgid="2203515825765397130">
+      <item quantity="other">hace <xliff:g id="COUNT_1">%d</xliff:g> días</item>
+      <item quantity="one">hace <xliff:g id="COUNT_0">%d</xliff:g> día</item>
+    </plurals>
+    <plurals name="duration_years_relative" formatted="false" msgid="4820062134188885734">
+      <item quantity="other">hace <xliff:g id="COUNT_1">%d</xliff:g> años</item>
+      <item quantity="one">hace <xliff:g id="COUNT_0">%d</xliff:g> año</item>
+    </plurals>
+    <plurals name="duration_minutes_relative_future" formatted="false" msgid="4655043589817680966">
+      <item quantity="other">en <xliff:g id="COUNT_1">%d</xliff:g> minutos</item>
+      <item quantity="one">en <xliff:g id="COUNT_0">%d</xliff:g> minuto</item>
+    </plurals>
+    <plurals name="duration_hours_relative_future" formatted="false" msgid="8084579714205223891">
+      <item quantity="other">en <xliff:g id="COUNT_1">%d</xliff:g> horas</item>
+      <item quantity="one">en <xliff:g id="COUNT_0">%d</xliff:g> hora</item>
+    </plurals>
+    <plurals name="duration_days_relative_future" formatted="false" msgid="333215369363433992">
+      <item quantity="other">en <xliff:g id="COUNT_1">%d</xliff:g> días</item>
+      <item quantity="one">en <xliff:g id="COUNT_0">%d</xliff:g> día</item>
+    </plurals>
+    <plurals name="duration_years_relative_future" formatted="false" msgid="8644862986413104011">
+      <item quantity="other">en <xliff:g id="COUNT_1">%d</xliff:g> años</item>
+      <item quantity="one">en <xliff:g id="COUNT_0">%d</xliff:g> año</item>
+    </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"Problemas de video"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"No es posible transmitir este video al dispositivo."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"No se puede reproducir el video."</string>
@@ -884,7 +971,7 @@
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Es posible que algunas funciones del sistema no estén disponibles."</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"No hay espacio suficiente para el sistema. Asegúrate de que haya 250 MB libres y reinicia el dispositivo."</string>
     <string name="app_running_notification_title" msgid="8718335121060787914">"<xliff:g id="APP_NAME">%1$s</xliff:g> se está ejecutando"</string>
-    <string name="app_running_notification_text" msgid="4653586947747330058">"Toca para obtener más información o para detener la aplicación."</string>
+    <string name="app_running_notification_text" msgid="1197581823314971177">"Presiona para obtener más información o detener la app."</string>
     <string name="ok" msgid="5970060430562524910">"Aceptar"</string>
     <string name="cancel" msgid="6442560571259935130">"Cancelar"</string>
     <string name="yes" msgid="5362982303337969312">"Aceptar"</string>
@@ -895,14 +982,25 @@
     <string name="capital_off" msgid="6815870386972805832">"No"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Completar la acción mediante"</string>
     <string name="whichApplicationNamed" msgid="8260158865936942783">"Completar acción con %1$s"</string>
+    <string name="whichApplicationLabel" msgid="7425855495383818784">"Completar acción"</string>
     <string name="whichViewApplication" msgid="3272778576700572102">"Abrir con"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"Abrir con %1$s"</string>
+    <string name="whichViewApplicationLabel" msgid="2666774233008808473">"Abrir"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"Editar con"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Editar con %1$s"</string>
+    <string name="whichEditApplicationLabel" msgid="7183524181625290300">"Editar"</string>
     <string name="whichSendApplication" msgid="6902512414057341668">"Compartir con"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Compartir con %1$s"</string>
+    <string name="whichSendApplicationLabel" msgid="4579076294675975354">"Compartir"</string>
+    <string name="whichSendToApplication" msgid="8272422260066642057">"Enviar con"</string>
+    <string name="whichSendToApplicationNamed" msgid="7768387871529295325">"Enviar con %1$s"</string>
+    <string name="whichSendToApplicationLabel" msgid="8878962419005813500">"Enviar"</string>
     <string name="whichHomeApplication" msgid="4307587691506919691">"Seleccionar una aplicación de la pantalla principal"</string>
     <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"Utilizar %1$s como aplicación de la pantalla principal"</string>
+    <string name="whichHomeApplicationLabel" msgid="809529747002918649">"Capturar imagen"</string>
+    <string name="whichImageCaptureApplication" msgid="3680261417470652882">"Capturar imagen con"</string>
+    <string name="whichImageCaptureApplicationNamed" msgid="8619384150737825003">"Capturar imagen con %1$s"</string>
+    <string name="whichImageCaptureApplicationLabel" msgid="6390303445371527066">"Capturar imagen"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Utilizar de manera predeterminada en esta acción."</string>
     <string name="use_a_different_app" msgid="8134926230585710243">"Utilizar una aplicación diferente"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Eliminar valores predeterminados en Configuración del sistema &gt; Aplicaciones &gt; Descargas."</string>
@@ -913,11 +1011,10 @@
     <string name="aerr_process" msgid="6201597323218674729">"<xliff:g id="PROCESS">%1$s</xliff:g> se detuvo"</string>
     <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> continúa fallando"</string>
     <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> continúa fallando"</string>
-    <string name="aerr_restart" msgid="9001379185665886595">"Reiniciar app"</string>
-    <string name="aerr_reset" msgid="7645427603514220451">"Restablecer y reiniciar la app"</string>
+    <string name="aerr_restart" msgid="7581308074153624475">"Volver a abrir la app"</string>
     <string name="aerr_report" msgid="5371800241488400617">"Enviar comentarios"</string>
     <string name="aerr_close" msgid="2991640326563991340">"Cerrar"</string>
-    <string name="aerr_mute" msgid="7698966346654789433">"Silenciar"</string>
+    <string name="aerr_mute" msgid="1974781923723235953">"Silenciar hasta que se reinicie el dispositivo"</string>
     <string name="aerr_wait" msgid="3199956902437040261">"Esperar"</string>
     <string name="aerr_close_app" msgid="3269334853724920302">"Cerrar app"</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
@@ -935,17 +1032,22 @@
     <string name="screen_compat_mode_scale" msgid="3202955667675944499">"Escala"</string>
     <string name="screen_compat_mode_show" msgid="4013878876486655892">"Mostrar siempre"</string>
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"Volver a activar Configuración del sistema &gt; Aplicaciones &gt; Descargas"</string>
+    <string name="unsupported_display_size_message" msgid="6545327290756295232">"<xliff:g id="APP_NAME">%1$s</xliff:g> no es compatible con la configuración del tamaño de pantalla actual. Es posible que no se comporte de manera correcta."</string>
+    <string name="unsupported_display_size_show" msgid="7969129195360353041">"Mostrar siempre"</string>
     <string name="smv_application" msgid="3307209192155442829">"La aplicación <xliff:g id="APPLICATION">%1$s</xliff:g> (proceso <xliff:g id="PROCESS">%2$s</xliff:g>) ha infringido su política StrictMode de aplicación automática."</string>
     <string name="smv_process" msgid="5120397012047462446">"El proceso <xliff:g id="PROCESS">%1$s</xliff:g> ha violado su política StrictMode autoimpuesta."</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android se está actualizando..."</string>
     <string name="android_start_title" msgid="8418054686415318207">"Iniciando Android…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Optimizando almacenamiento"</string>
+    <string name="android_upgrading_notification_title" msgid="8428357096969413169">"Finalizando actualización de Android…"</string>
+    <string name="android_upgrading_notification_body" msgid="5761201379457064286">"Es posible que algunas apps no funcionen correctamente hasta que termine la actualización"</string>
+    <string name="app_upgrading_toast" msgid="3008139776215597053">"Se está actualizando <xliff:g id="APPLICATION">%1$s</xliff:g>…"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Optimizando la aplicación <xliff:g id="NUMBER_0">%1$d</xliff:g> de <xliff:g id="NUMBER_1">%2$d</xliff:g>"</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"Preparando <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Iniciando aplicaciones"</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"Finalizando el inicio"</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> en ejecución"</string>
-    <string name="heavy_weight_notification_detail" msgid="1721681741617898865">"Toca para cambiar a la aplicación"</string>
+    <string name="heavy_weight_notification_detail" msgid="867643381388543170">"Presiona para cambiar a la app"</string>
     <string name="heavy_weight_switcher_title" msgid="7153167085403298169">"¿Deseas cambiar aplicaciones?"</string>
     <string name="heavy_weight_switcher_text" msgid="7022631924534406403">"Ya se está ejecutando una aplicación que debe detenerse antes de iniciar una nueva."</string>
     <string name="old_app_action" msgid="493129172238566282">"Regresar a <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
@@ -953,7 +1055,7 @@
     <string name="new_app_action" msgid="5472756926945440706">"Inicio <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
     <string name="new_app_description" msgid="1932143598371537340">"Interrumpe la aplicación anterior sin guardar los cambios."</string>
     <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> superó el límite de memoria."</string>
-    <string name="dump_heap_notification_detail" msgid="2075673362317481664">"Se recopiló el volcado de pila. Toca para compartir."</string>
+    <string name="dump_heap_notification_detail" msgid="6901391084243999274">"Se recopiló el volcado de pila. Presiona para compartir."</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"¿Compartir volcado de pila?"</string>
     <string name="dump_heap_text" msgid="4809417337240334941">"El proceso <xliff:g id="PROC">%1$s</xliff:g> superó el límite de memoria de proceso de <xliff:g id="SIZE">%2$s</xliff:g>. Hay un volcado de pila disponible para que puedas compartirlo con el programador. Ten cuidado, este volcado de pila puede contener información personal a la que la aplicación tiene acceso."</string>
     <string name="sendText" msgid="5209874571959469142">"Seleccionar una acción para el texto"</string>
@@ -971,25 +1073,28 @@
     <string name="volume_icon_description_incall" msgid="8890073218154543397">"Volumen de la llamada"</string>
     <string name="volume_icon_description_media" msgid="4217311719665194215">"Volumen de los medios"</string>
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"Volumen de notificación"</string>
-    <string name="ringtone_default" msgid="3789758980357696936">"Tono de llamada predeterminado"</string>
-    <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Tono de llamada predeterminado (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
+    <string name="ringtone_default" msgid="3789758980357696936">"Tono predeterminado"</string>
+    <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Tono predeterminado (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="7937634392408977062">"Ninguno"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"Tonos de llamada"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"Tono de llamada desconocido"</string>
-    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
-      <item quantity="other">redes de Wi-Fi disponibles</item>
-      <item quantity="one">red de Wi-Fi disponible</item>
-    </plurals>
-    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
-      <item quantity="other">Abrir redes de Wi-Fi disponibles</item>
-      <item quantity="one">Abrir red de Wi-Fi disponible</item>
-    </plurals>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Accede a una red Wi-Fi."</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Acceder a la red"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
     <string name="wifi_no_internet" msgid="8451173622563841546">"La red Wi-Fi no tiene acceso a Internet"</string>
-    <string name="wifi_no_internet_detailed" msgid="7593858887662270131">"Toca la pantalla para ver las opciones"</string>
+    <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Presiona para ver opciones"</string>
+    <string name="network_switch_metered" msgid="4671730921726992671">"Se cambió a <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
+    <string name="network_switch_metered_detail" msgid="5325661434777870353">"El dispositivo usa <xliff:g id="NEW_NETWORK">%1$s</xliff:g> cuando <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> no tiene acceso a Internet. Es posible que se apliquen cargos."</string>
+    <string name="network_switch_metered_toast" msgid="5779283181685974304">"Se cambió de <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> a <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
+  <string-array name="network_switch_type_name">
+    <item msgid="2952042958050315394">"datos móviles"</item>
+    <item msgid="75483255295529161">"Wi-Fi"</item>
+    <item msgid="6862614801537202646">"Bluetooth"</item>
+    <item msgid="5447331121797802871">"Ethernet"</item>
+    <item msgid="8257233890381651999">"VPN"</item>
+  </string-array>
+    <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"un tipo de red desconocido"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"No se pudo conectar a la red Wi-Fi."</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" tiene una mala conexión a Internet."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"¿Permitir la conexión?"</string>
@@ -999,7 +1104,7 @@
     <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Iniciar Wi-Fi Direct. Se desactivará el funcionamiento de la zona o del cliente Wi-Fi."</string>
     <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"No se pudo iniciar Wi-Fi Direct."</string>
     <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Se activó Wi-Fi Direct."</string>
-    <string name="wifi_p2p_enabled_notification_message" msgid="1638949953993894335">"Tocar para ajustar los parámetros de configuración"</string>
+    <string name="wifi_p2p_enabled_notification_message" msgid="8064677407830620023">"Presiona para ver la configuración"</string>
     <string name="accept" msgid="1645267259272829559">"Aceptar"</string>
     <string name="decline" msgid="2112225451706137894">"Rechazar"</string>
     <string name="wifi_p2p_invitation_sent_title" msgid="1318975185112070734">"Se envió la invitación."</string>
@@ -1045,37 +1150,36 @@
     <string name="no_permissions" msgid="7283357728219338112">"No se requieren permisos"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"esto puede costarte dinero"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"Aceptar"</string>
-    <string name="usb_charging_notification_title" msgid="4004114449249406402">"USB solo para realizar cargas"</string>
+    <string name="usb_charging_notification_title" msgid="6895185153353640787">"Este dispositivo se está cargando mediante USB"</string>
+    <string name="usb_supplying_notification_title" msgid="5310642257296510271">"El dispositivo conectado se está cargando mediante USB"</string>
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"USB para transferir archivos"</string>
     <string name="usb_ptp_notification_title" msgid="1347328437083192112">"USB para transferir fotos"</string>
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB para MIDI"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Conectado a un accesorio USB"</string>
-    <string name="usb_notification_message" msgid="7347368030849048437">"Toca para ver más opciones."</string>
+    <string name="usb_notification_message" msgid="3370903770828407960">"Presiona para ver más opciones."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Depuración por USB conectada"</string>
-    <string name="adb_active_notification_message" msgid="1016654627626476142">"Toca para desactivar la depuración por USB."</string>
-    <string name="share_remote_bugreport_notification_title" msgid="3116061729914615290">"¿Quieres compartir el informe de errores con el administrador?"</string>
-    <string name="share_remote_bugreport_notification_message" msgid="1310517845557771773">"El administrador de TI solicitó un informe de errores para ayudar a solucionar el problema"</string>
-    <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"ACEPTAR"</string>
-    <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"RECHAZAR"</string>
-    <string name="remote_bugreport_progress_notification_title" msgid="2785600634417078622">"Realizando un informe de errores…"</string>
-    <string name="remote_bugreport_progress_notification_message_can_cancel" msgid="5743435483005099451">"Toca para cancelar"</string>
+    <string name="adb_active_notification_message" msgid="4948470599328424059">"Presiona para inhabilitar la depuración por USB."</string>
+    <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Realizando un informe de errores…"</string>
+    <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"¿Compartir informe de errores?"</string>
+    <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Compartiendo informe de errores…"</string>
+    <string name="share_remote_bugreport_notification_message_finished" msgid="8610614010660772643">"El administrador de TI solicitó un informe de errores para solucionar los problemas de este dispositivo. Es posible que se compartan apps y datos."</string>
+    <string name="share_remote_bugreport_action" msgid="6249476773913384948">"COMPARTIR"</string>
+    <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"RECHAZAR"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Cambiar el teclado"</string>
-    <string name="configure_input_methods" msgid="4769971288371946846">"Seleccionar teclados"</string>
     <string name="show_ime" msgid="2506087537466597099">"Mantener en la pantalla cuando el teclado físico está activo"</string>
     <string name="hardware" msgid="194658061510127999">"Mostrar teclado virtual"</string>
-    <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"Selecciona un diseño de teclado"</string>
-    <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"Toca para seleccionar un diseño de teclado."</string>
+    <string name="select_keyboard_layout_notification_title" msgid="597189518763083494">"Configura el teclado físico"</string>
+    <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Presiona para seleccionar el idioma y el diseño"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="candidates_style" msgid="4333913089637062257"><u>"candidatos"</u></string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"Preparando el medio <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Verificando errores"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"Se detectó un nuevo medio (<xliff:g id="NAME">%s</xliff:g>)."</string>
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Para transferir fotos y contenido multimedia"</string>
     <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"<xliff:g id="NAME">%s</xliff:g> está dañado"</string>
-    <string name="ext_media_unmountable_notification_message" msgid="1586311304430052169">"<xliff:g id="NAME">%s</xliff:g> está dañado. Toca la pantalla para solucionar el problema."</string>
+    <string name="ext_media_unmountable_notification_message" msgid="2343202057122495773">"<xliff:g id="NAME">%s</xliff:g> está dañado. Presiona para solucionar el problema."</string>
     <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"<xliff:g id="NAME">%s</xliff:g> no es compatible"</string>
-    <string name="ext_media_unsupported_notification_message" msgid="8789610369456474891">"El dispositivo no es compatible con <xliff:g id="NAME">%s</xliff:g>. Toca la pantalla para configurarlo en un formato compatible."</string>
+    <string name="ext_media_unsupported_notification_message" msgid="6121601473787888589">"El dispositivo no es compatible con <xliff:g id="NAME">%s</xliff:g>. Presiona la pantalla para configurarlo en un formato compatible."</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"Se extrajo <xliff:g id="NAME">%s</xliff:g> de forma inesperada."</string>
     <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"Para evitar que se pierdan datos, desactiva el dispositivo <xliff:g id="NAME">%s</xliff:g> antes de extraerlo."</string>
     <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"Se extrajo el medio <xliff:g id="NAME">%s</xliff:g>"</string>
@@ -1111,7 +1215,9 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Permite que una aplicación lea sesiones de instalación. Esto le permite ver detalles acerca de instalaciones de paquetes activas."</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"solicitar la instalación de paquetes"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Permite que una aplicación solicite la instalación de paquetes."</string>
-    <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Toca dos veces para acceder al control de zoom."</string>
+    <string name="permlab_requestIgnoreBatteryOptimizations" msgid="8021256345643918264">"solicitar permiso para ignorar las optimizaciones de la batería"</string>
+    <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="8359147856007447638">"Permite que una app solicite permiso para ignorar las optimizaciones de la batería."</string>
+    <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"Presiona dos veces para obtener el control del zoom"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"No se pudo agregar el widget."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Ir"</string>
     <string name="ime_action_search" msgid="658110271822807811">"Buscar"</string>
@@ -1137,24 +1243,26 @@
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Papel tapiz"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Cambiar fondo de pantalla"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"Agente de escucha de notificaciones"</string>
+    <string name="vr_listener_binding_label" msgid="4316591939343607306">"Procesador de realidad virtual"</string>
     <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"Proveedor de condiciones"</string>
-    <string name="notification_assistant_binding_label" msgid="909456055569102952">"Asistente de notificaciones"</string>
+    <string name="notification_ranker_binding_label" msgid="774540592299064747">"Servicio de clasificación de notificaciones"</string>
     <string name="vpn_title" msgid="19615213552042827">"VPN activada"</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"VPN está activado por <xliff:g id="APP">%s</xliff:g>"</string>
-    <string name="vpn_text" msgid="3011306607126450322">"Toca para administrar la red."</string>
-    <string name="vpn_text_long" msgid="6407351006249174473">"Conectado a <xliff:g id="SESSION">%s</xliff:g>. Toca para administrar la red."</string>
+    <string name="vpn_text" msgid="1610714069627824309">"Pulsa para gestionar la red."</string>
+    <string name="vpn_text_long" msgid="4907843483284977618">"Conectado a <xliff:g id="SESSION">%s</xliff:g>. Pulsa para gestionar la red."</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Estableciendo conexión con la VPN siempre activada..."</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Se estableció conexión con la VPN siempre activada."</string>
+    <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"Se desconectó la VPN siempre activada"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"Se produjo un error al establecer conexión con la VPN siempre activada."</string>
-    <string name="vpn_lockdown_config" msgid="6415899150671537970">"Toca para configurar."</string>
+    <string name="vpn_lockdown_config" msgid="5099330695245008680">"Presiona para configurar"</string>
     <string name="upload_file" msgid="2897957172366730416">"Elegir archivo"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"No se seleccionó un archivo."</string>
     <string name="reset" msgid="2448168080964209908">"Restablecer"</string>
     <string name="submit" msgid="1602335572089911941">"Enviar"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Modo Auto habilitado"</string>
-    <string name="car_mode_disable_notification_message" msgid="8035230537563503262">"Toca para salir del modo Auto."</string>
+    <string name="car_mode_disable_notification_message" msgid="6301524980144350051">"Presiona para salir del modo auto."</string>
     <string name="tethered_notification_title" msgid="3146694234398202601">"Anclaje a red o zona activa conectados"</string>
-    <string name="tethered_notification_message" msgid="6857031760103062982">"Toca para configurar."</string>
+    <string name="tethered_notification_message" msgid="2113628520792055377">"Presiona para configurar."</string>
     <string name="back_button_label" msgid="2300470004503343439">"Atrás"</string>
     <string name="next_button_label" msgid="1080555104677992408">"Siguiente"</string>
     <string name="skip_button_label" msgid="1275362299471631819">"Omitir"</string>
@@ -1184,10 +1292,10 @@
     <string name="sync_do_nothing" msgid="3743764740430821845">"No hacer nada por ahora"</string>
     <string name="choose_account_label" msgid="5655203089746423927">"Seleccionar una cuenta"</string>
     <string name="add_account_label" msgid="2935267344849993553">"Agregar una cuenta"</string>
-    <string name="add_account_button_label" msgid="3611982894853435874">"Agregar una cuenta"</string>
+    <string name="add_account_button_label" msgid="3611982894853435874">"Agregar cuenta"</string>
     <string name="number_picker_increment_button" msgid="2412072272832284313">"Aumentar"</string>
     <string name="number_picker_decrement_button" msgid="476050778386779067">"Reducir"</string>
-    <string name="number_picker_increment_scroll_mode" msgid="3073101067441638428">"Mantén presionado <xliff:g id="VALUE">%s</xliff:g>."</string>
+    <string name="number_picker_increment_scroll_mode" msgid="5259126567490114216">"Mantén presionado <xliff:g id="VALUE">%s</xliff:g>."</string>
     <string name="number_picker_increment_scroll_action" msgid="9101473045891835490">"Desliza el dedo hacia arriba para aumentar los valores y hacia abajo para reducirlos."</string>
     <string name="time_picker_increment_minute_button" msgid="8865885114028614321">"Aumentar minutos"</string>
     <string name="time_picker_decrement_minute_button" msgid="6246834937080684791">"Reducir minutos"</string>
@@ -1223,15 +1331,15 @@
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Más opciones"</string>
     <string name="action_bar_home_description_format" msgid="7965984360903693903">"%1$s, %2$s"</string>
     <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s, %2$s, %3$s"</string>
-    <string name="storage_internal" msgid="4891916833657929263">"Almacenamiento interno"</string>
+    <string name="storage_internal" msgid="3570990907910199483">"Almacenamiento interno compartido"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"Tarjeta SD"</string>
     <string name="storage_sd_card_label" msgid="6347111320774379257">"Tarjeta SD de <xliff:g id="MANUFACTURER">%s</xliff:g>"</string>
     <string name="storage_usb_drive" msgid="6261899683292244209">"Unidad USB"</string>
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"Unidad USB de <xliff:g id="MANUFACTURER">%s</xliff:g>"</string>
     <string name="storage_usb" msgid="3017954059538517278">"Almacenamiento USB"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Editar"</string>
-    <string name="data_usage_warning_title" msgid="1955638862122232342">"Advertencia de uso de datos"</string>
-    <string name="data_usage_warning_body" msgid="2814673551471969954">"Toca para ver uso y config."</string>
+    <string name="data_usage_warning_title" msgid="3620440638180218181">"Alerta por el uso de datos"</string>
+    <string name="data_usage_warning_body" msgid="6660692274311972007">"Presiona para uso y opciones."</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"Límite de datos 2G-3G alcanzado"</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"Límite de datos 4G alcanzado"</string>
     <string name="data_usage_mobile_limit_title" msgid="557158376602636112">"Límite datos móviles alcanzado"</string>
@@ -1243,7 +1351,7 @@
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Límite de datos Wi-Fi superado"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"Límite superado en <xliff:g id="SIZE">%s</xliff:g>"</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"Datos de referencia restringidos"</string>
-    <string name="data_usage_restricted_body" msgid="6741521330997452990">"Toca para eliminar la restricc."</string>
+    <string name="data_usage_restricted_body" msgid="469866376337242726">"Presiona y quita la restricción."</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"Certificado de seguridad"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"Este certificado es válido."</string>
     <string name="issued_to" msgid="454239480274921032">"Emitido a:"</string>
@@ -1459,20 +1567,20 @@
     <string name="select_year" msgid="7952052866994196170">"Seleccionar año"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> borrado"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> de trabajo"</string>
-    <string name="lock_to_app_toast" msgid="7570091317001980053">"Para dejar de fijar esta pantalla, mantén presionados los botones para volver y Recientes al mismo tiempo."</string>
-    <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Para dejar de fijar esta pantalla, mantén presionado el botón Recientes."</string>
+    <string name="lock_to_app_toast" msgid="7693684144593484">"Para dejar de fijar esta pantalla, mantén presionados Atrás y Recientes."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"La aplicación está fijada, no se puede anular la fijación en este dispositivo."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Pantalla fija"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Pantalla no fija"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Solicitar PIN para quitar fijación"</string>
-    <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Solicitar patrón de desbloqueo para quitar fijación"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Solicitar desbloqueo para quitar fijación"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Solicitar contraseña para quitar fijación"</string>
-    <string name="dock_cropped_windows_text" msgid="6378424064779004428">"No se puede modificar el tamaño de la app. Desplázala con dos dedos."</string>
-    <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"La app no es compatible con la función de pantalla dividida."</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Lo instaló el administrador."</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Actualizado por el administrador"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Lo eliminó el administrador."</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Para ayudar a mejorar la duración de la batería, el ahorro de batería reduce el rendimiento del dispositivo y limita la vibración, los servicios de ubicación y la mayoría de los datos en segundo plano. Es posible que el correo electrónico, la mensajería y otras aplicaciones que se basan en la sincronización no puedan actualizarse, a menos que los abras.\n\nEl ahorro de batería se desactiva de forma automática cuando el dispositivo se está cargando."</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"Para reducir el uso de datos, \"Reducir datos\" evita que algunas apps envíen y reciban datos en segundo plano. La app que estés usando podrá acceder a los datos, pero con menor frecuencia. De esta forma, por ejemplo, las imágenes no se mostrarán hasta que las presiones."</string>
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"¿Activar Ahorro de datos?"</string>
+    <string name="data_saver_enable_button" msgid="7147735965247211818">"Activar"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">Durante %1$d minutos hasta la(s) <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g></item>
       <item quantity="one">Durante 1 minuto; hasta la(s) <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g></item>
@@ -1526,6 +1634,8 @@
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"La solicitud SS cambió por una solicitud USSD."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"La solicitud SS cambió por una nueva solicitud SS."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Perfil de trabajo"</string>
+    <string name="expand_button_content_description" msgid="5855955413376384681">"Botón Expandir"</string>
+    <string name="expand_action_accessibility" msgid="5307730695723718254">"activar o desactivar la expansión"</string>
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Puerto USB de periféricos Android"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"Puerto USB de periféricos"</string>
@@ -1533,34 +1643,61 @@
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Cerrar la barra de herramientas flotante adicional"</string>
     <string name="maximize_button_text" msgid="7543285286182446254">"Maximizar"</string>
     <string name="close_button_text" msgid="3937902162644062866">"Cerrar"</string>
+    <string name="notification_messaging_title_template" msgid="3452480118762691020">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> elementos seleccionados</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> elemento seleccionado</item>
     </plurals>
-    <string name="default_notification_topic_label" msgid="227586145791870829">"Varios"</string>
-    <string name="importance_from_topic" msgid="3572280439880023233">"Estableciste la importancia de estas notificaciones."</string>
+    <string name="importance_from_user" msgid="7318955817386549931">"Estableciste la importancia de estas notificaciones."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Es importante debido a las personas involucradas."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"¿Quieres permitir que <xliff:g id="APP">%1$s</xliff:g> cree un usuario nuevo con <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"¿Quieres permitir que <xliff:g id="APP">%1$s</xliff:g> cree un usuario nuevo con <xliff:g id="ACCOUNT">%2$s</xliff:g>? (Ya existe un usuario con esta cuenta)"</string>
-    <string name="language_selection_title" msgid="7181332986330337171">"Preferencia de idioma"</string>
+    <string name="language_selection_title" msgid="2680677278159281088">"Agregar un idioma"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Preferencia de región"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"Nombre del idioma"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"Sugeridos"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"Todos los idiomas"</string>
+    <string name="region_picker_section_all" msgid="8966316787153001779">"Todas las regiones"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Búsqueda"</string>
     <string name="work_mode_off_title" msgid="8954725060677558855">"Modo de trabajo DESACTIVADO"</string>
     <string name="work_mode_off_message" msgid="3286169091278094476">"Permite que se active el perfil de trabajo, incluidas las apps, la sincronización en segundo plano y las funciones relacionadas."</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Activar"</string>
-    <string name="suspended_package_title" msgid="3408150347778524435">"Se inhabilitó %1$s"</string>
-    <string name="suspended_package_message" msgid="6341091587106868601">"El administrador de %1$s lo inhabilitó. Comunícate con él para obtener más información."</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Tienes mensajes nuevos"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Abrir app de SMS para ver el mensaje"</string>
-    <string name="user_encrypted_title" msgid="7664361246988454307">"Funciones no disponibles"</string>
-    <string name="user_encrypted_message" msgid="7504541494700807850">"Tocar para continuar"</string>
-    <string name="user_encrypted_detail" msgid="979981584766912935">"Perfil de usuario bloqueado"</string>
+    <string name="user_encrypted_title" msgid="9054897468831672082">"Funciones limitadas"</string>
+    <string name="user_encrypted_message" msgid="4923292604515744267">"Presiona para desbloquear"</string>
+    <string name="user_encrypted_detail" msgid="5708447464349420392">"Datos del usuario bloqueados"</string>
+    <string name="profile_encrypted_detail" msgid="3700965619978314974">"Perfil de trabajo bloqueado"</string>
+    <string name="profile_encrypted_message" msgid="6964994232310195874">"Presiona para desbloquear"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"Conectado a <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"Presiona para ver archivos"</string>
     <string name="pin_target" msgid="3052256031352291362">"Fijar"</string>
     <string name="unpin_target" msgid="3556545602439143442">"No fijar"</string>
     <string name="app_info" msgid="6856026610594615344">"Información de la app"</string>
+    <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="reset_retail_demo_mode_title" msgid="2370249087943803584">"¿Deseas restablecer el dispositivo?"</string>
+    <string name="reset_retail_demo_mode_text" msgid="5481925817590883246">"Presiona para restablecer el dispositivo"</string>
+    <string name="demo_starting_message" msgid="5268556852031489931">"Iniciando demostración…"</string>
+    <string name="demo_restarting_message" msgid="952118052531642451">"Restableciendo dispositivo…"</string>
+    <string name="demo_user_inactivity_timeout_title" msgid="6596109959002331334">"¿Deseas restablecer el dispositivo?"</string>
+    <string name="demo_user_inactivity_timeout_countdown" msgid="5675588824402569506">"Se perderán los cambios y la demostración volverá a iniciarse en <xliff:g id="TIMEOUT">%1$s</xliff:g> segundos…"</string>
+    <string name="demo_user_inactivity_timeout_left_button" msgid="5314271347014802475">"Cancelar"</string>
+    <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"Restablecer ahora"</string>
+    <string name="audit_safemode_notification" msgid="6416076898350685856">"Restablece la configuración de fábrica para usar este dispositivo sin restricciones"</string>
+    <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Toca para obtener más información."</string>
+    <string name="suspended_widget_accessibility" msgid="6712143096475264190">"Se inhabilitó <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="conference_call" msgid="3751093130790472426">"Conferencia"</string>
+    <string name="etws_primary_default_message_earthquake" msgid="5541962250262769193">"Mantén la calma y busca un refugio cercano."</string>
+    <string name="etws_primary_default_message_tsunami" msgid="1887685943498368548">"Evacúa inmediatamente las regiones costeras y ribereñas en busca de un lugar seguro, como un terreno elevado."</string>
+    <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="998797956848445862">"Mantén la calma y busca un refugio cercano."</string>
+    <string name="etws_primary_default_message_test" msgid="2709597093560037455">"Prueba de mensajes de emergencia"</string>
+    <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
+    <!-- no translation found for mmcc_authentication_reject (7729819349669603406) -->
+    <skip />
+    <!-- no translation found for mmcc_imsi_unknown_in_hlr (6321202257374418726) -->
+    <skip />
+    <!-- no translation found for mmcc_illegal_ms (2769452751852211112) -->
+    <skip />
+    <!-- no translation found for mmcc_illegal_me (4438696681169345015) -->
+    <skip />
 </resources>
