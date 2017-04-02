@@ -24,7 +24,7 @@
     <item msgid="1922181315419294640"></item>
     <item msgid="8934131797783724664">"اسکن کردن..."</item>
     <item msgid="8513729475867537913">"در حال اتصال…"</item>
-    <item msgid="515055375277271756">"در حال تأیید اعتبار..."</item>
+    <item msgid="515055375277271756">"در حال راستی‌آزمایی..."</item>
     <item msgid="1943354004029184381">"‏در حال دریافت آدرس IP..."</item>
     <item msgid="4221763391123233270">"متصل"</item>
     <item msgid="624838831631122137">"معلق"</item>
@@ -38,7 +38,7 @@
     <item msgid="7714855332363650812"></item>
     <item msgid="8878186979715711006">"اسکن کردن..."</item>
     <item msgid="355508996603873860">"در حال اتصال به <xliff:g id="NETWORK_NAME">%1$s</xliff:g>…"</item>
-    <item msgid="554971459996405634">"در حال تأیید اعتبار با <xliff:g id="NETWORK_NAME">%1$s</xliff:g>..."</item>
+    <item msgid="554971459996405634">"در حال راستی‌آزمایی با <xliff:g id="NETWORK_NAME">%1$s</xliff:g>..."</item>
     <item msgid="7928343808033020343">"‏در حال دریافت آدرس IP از <xliff:g id="NETWORK_NAME">%1$s</xliff:g>..."</item>
     <item msgid="8937994881315223448">"متصل شد به <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</item>
     <item msgid="1330262655415760617">"معلق"</item>
@@ -58,6 +58,58 @@
     <item msgid="3878793616631049349">"‏استفاده از بررسی HDCP فقط برای محتوای DRM"</item>
     <item msgid="45075631231212732">"‏همیشه از بررسی HDCP استفاده شود"</item>
   </string-array>
+  <string-array name="bluetooth_avrcp_versions">
+    <item msgid="5347678900838034763">"‏AVRCP نسخه ۱.۴ (پیش‌فرض)"</item>
+    <item msgid="2089555299377409443">"‏AVRCP نسخه ۱.۵"</item>
+    <item msgid="2895327394279434278">"‏AVRCP نسخه ۱.۶"</item>
+  </string-array>
+  <string-array name="bluetooth_avrcp_version_values">
+    <item msgid="2838624067805073303">"‏avrcp نسخه ۱۴"</item>
+    <item msgid="1913619118958233129">"‏avrcp نسخه ۱۵"</item>
+    <item msgid="7142710449249088270">"‏avrcp نسخه ۱۶"</item>
+  </string-array>
+    <!-- no translation found for bluetooth_a2dp_codec_titles:6 (723675059572222462) -->
+    <!-- no translation found for bluetooth_a2dp_codec_titles:7 (3304843301758635896) -->
+    <!-- no translation found for bluetooth_a2dp_codec_summaries:6 (2209680154067241740) -->
+    <!-- no translation found for bluetooth_a2dp_codec_summaries:7 (741805482892725657) -->
+  <string-array name="bluetooth_a2dp_codec_sample_rate_titles">
+    <item msgid="3093023430402746802">"استفاده از انتخاب سیستم (پیش‌فرض)"</item>
+    <item msgid="8895532488906185219">"۴۴٫۱ کیلوهرتز"</item>
+    <item msgid="2909915718994807056">"۴۸٫۰ کیلوهرتز"</item>
+    <item msgid="3347287377354164611">"۸۸٫۲ کیلوهرتز"</item>
+    <item msgid="1234212100239985373">"۹۶٫۰ کیلوهرتز"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_sample_rate_summaries">
+    <item msgid="3214516120190965356">"استفاده از انتخاب سیستم (پیش‌فرض)"</item>
+    <item msgid="4482862757811638365">"۴۴٫۱ کیلوهرتز"</item>
+    <item msgid="354495328188724404">"۴۸٫۰ کیلوهرتز"</item>
+    <item msgid="7329816882213695083">"۸۸٫۲ کیلوهرتز"</item>
+    <item msgid="6967397666254430476">"۹۶٫۰ کیلوهرتز"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_bits_per_sample_titles">
+    <item msgid="2684127272582591429">"استفاده از انتخاب سیستم (پیش‌فرض)"</item>
+    <item msgid="5618929009984956469">"۱۶ بیت در هر نمونه"</item>
+    <item msgid="3412640499234627248">"۲۴ بیت در هر نمونه"</item>
+    <item msgid="121583001492929387">"۳۲ بیت در هر نمونه"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_bits_per_sample_summaries">
+    <item msgid="1081159789834584363">"استفاده از انتخاب سیستم (پیش‌فرض)"</item>
+    <item msgid="4726688794884191540">"۱۶ بیت در هر نمونه"</item>
+    <item msgid="305344756485516870">"۲۴ بیت در هر نمونه"</item>
+    <item msgid="244568657919675099">"۳۲ بیت در هر نمونه"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_channel_mode_titles">
+    <item msgid="5226878858503393706">"استفاده از انتخاب سیستم (پیش‌فرض)"</item>
+    <item msgid="4106832974775067314">"مونو"</item>
+    <item msgid="5571632958424639155">"استریو"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_channel_mode_summaries">
+    <item msgid="4118561796005528173">"استفاده از انتخاب سیستم (پیش‌فرض)"</item>
+    <item msgid="8900559293912978337">"مونو"</item>
+    <item msgid="8883739882299884241">"استریو"</item>
+  </string-array>
+    <!-- no translation found for bluetooth_a2dp_codec_ldac_playback_quality_titles:3 (4414060457677684127) -->
+    <!-- no translation found for bluetooth_a2dp_codec_ldac_playback_quality_summaries:3 (364670732877872677) -->
   <string-array name="select_logd_size_titles">
     <item msgid="8665206199209698501">"خاموش"</item>
     <item msgid="1593289376502312923">"۶۴ هزار"</item>
@@ -79,6 +131,18 @@
     <item msgid="1314234299552254621">"۱ میلیون در هر بافر گزارش"</item>
     <item msgid="3606047780792894151">"۴ میلیون در هر بافر گزارش"</item>
     <item msgid="5431354956856655120">"۱۶ میلیون در هر بافر گزارش"</item>
+  </string-array>
+  <string-array name="select_logpersist_titles">
+    <item msgid="1744840221860799971">"خاموش"</item>
+    <item msgid="3054662377365844197">"همه"</item>
+    <item msgid="688870735111627832">"همه به‌جز رادیو"</item>
+    <item msgid="2850427388488887328">"فقط هسته اصلی"</item>
+  </string-array>
+  <string-array name="select_logpersist_summaries">
+    <item msgid="2216470072500521830">"خاموش"</item>
+    <item msgid="172978079776521897">"همه بافرهای گزارش"</item>
+    <item msgid="3873873912383879240">"همه به‌جز بافرهای گزارش رادیو"</item>
+    <item msgid="8489661142527693381">"فقط بافر گزارش هسته اصلی"</item>
   </string-array>
   <string-array name="window_animation_scale_entries">
     <item msgid="8134156599370824081">"پویانمایی خاموش"</item>

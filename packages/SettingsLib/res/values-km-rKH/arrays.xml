@@ -58,6 +58,58 @@
     <item msgid="3878793616631049349">"ប្រើ​ការ​ពិនិត្យ HDCP សម្រាប់​តែ​មាតិកា DRM ប៉ុណ្ណោះ"</item>
     <item msgid="45075631231212732">"ប្រើ​ការ​ពិនិត្យ HDCP ជា​និច្ច"</item>
   </string-array>
+  <string-array name="bluetooth_avrcp_versions">
+    <item msgid="5347678900838034763">"AVRCP 1.4 (លំនាំដើម)"</item>
+    <item msgid="2089555299377409443">"AVRCP 1.5"</item>
+    <item msgid="2895327394279434278">"AVRCP 1.6"</item>
+  </string-array>
+  <string-array name="bluetooth_avrcp_version_values">
+    <item msgid="2838624067805073303">"avrcp14"</item>
+    <item msgid="1913619118958233129">"avrcp15"</item>
+    <item msgid="7142710449249088270">"avrcp16"</item>
+  </string-array>
+    <!-- no translation found for bluetooth_a2dp_codec_titles:6 (723675059572222462) -->
+    <!-- no translation found for bluetooth_a2dp_codec_titles:7 (3304843301758635896) -->
+    <!-- no translation found for bluetooth_a2dp_codec_summaries:6 (2209680154067241740) -->
+    <!-- no translation found for bluetooth_a2dp_codec_summaries:7 (741805482892725657) -->
+  <string-array name="bluetooth_a2dp_codec_sample_rate_titles">
+    <item msgid="3093023430402746802">"ប្រើ​ការ​ជ្រើសរើស​ប្រព័ន្ធ (លំនាំ​ដើម)"</item>
+    <item msgid="8895532488906185219">"44.1 kHz"</item>
+    <item msgid="2909915718994807056">"48.0 kHz"</item>
+    <item msgid="3347287377354164611">"88.2 kHz"</item>
+    <item msgid="1234212100239985373">"96.0 kHz"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_sample_rate_summaries">
+    <item msgid="3214516120190965356">"ប្រើ​ការ​ជ្រើសរើស​ប្រព័ន្ធ (លំនាំ​ដើម)"</item>
+    <item msgid="4482862757811638365">"44.1 kHz"</item>
+    <item msgid="354495328188724404">"48.0 kHz"</item>
+    <item msgid="7329816882213695083">"88.2 kHz"</item>
+    <item msgid="6967397666254430476">"96.0 kHz"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_bits_per_sample_titles">
+    <item msgid="2684127272582591429">"ប្រើ​ការ​ជ្រើសរើស​ប្រព័ន្ធ (លំនាំ​ដើម)"</item>
+    <item msgid="5618929009984956469">"16 ប៊ីត​/​គំរូ"</item>
+    <item msgid="3412640499234627248">"24 ប៊ីត​/​គំរូ"</item>
+    <item msgid="121583001492929387">"32 ប៊ីត​/​គំរូ"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_bits_per_sample_summaries">
+    <item msgid="1081159789834584363">"ប្រើ​ការ​ជ្រើសរើស​ប្រព័ន្ធ (លំនាំ​ដើម)"</item>
+    <item msgid="4726688794884191540">"16 ប៊ីត​/​គំរូ"</item>
+    <item msgid="305344756485516870">"24 ប៊ីត​/​គំរូ"</item>
+    <item msgid="244568657919675099">"32 ប៊ីត​/​គំរូ"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_channel_mode_titles">
+    <item msgid="5226878858503393706">"ប្រើ​ការ​ជ្រើសរើស​ប្រព័ន្ធ (លំនាំ​ដើម)"</item>
+    <item msgid="4106832974775067314">"ម៉ូ​ណូ"</item>
+    <item msgid="5571632958424639155">"ស្តេរ៉េអូ"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_channel_mode_summaries">
+    <item msgid="4118561796005528173">"ប្រើ​ការ​ជ្រើសរើស​ប្រព័ន្ធ (លំនាំ​ដើម)"</item>
+    <item msgid="8900559293912978337">"ម៉ូ​ណូ"</item>
+    <item msgid="8883739882299884241">"ស្តេរ៉េអូ"</item>
+  </string-array>
+    <!-- no translation found for bluetooth_a2dp_codec_ldac_playback_quality_titles:3 (4414060457677684127) -->
+    <!-- no translation found for bluetooth_a2dp_codec_ldac_playback_quality_summaries:3 (364670732877872677) -->
   <string-array name="select_logd_size_titles">
     <item msgid="8665206199209698501">"បិទ"</item>
     <item msgid="1593289376502312923">"64K"</item>
@@ -79,6 +131,18 @@
     <item msgid="1314234299552254621">"1M per log buffer"</item>
     <item msgid="3606047780792894151">"4M per log buffer"</item>
     <item msgid="5431354956856655120">"16M per log buffer"</item>
+  </string-array>
+  <string-array name="select_logpersist_titles">
+    <item msgid="1744840221860799971">"បិទ"</item>
+    <item msgid="3054662377365844197">"ទាំង​អស់"</item>
+    <item msgid="688870735111627832">"ទាំងអស់ក្រៅពីវិទ្យុ"</item>
+    <item msgid="2850427388488887328">"kernel តែប៉ុណ្ណោះ"</item>
+  </string-array>
+  <string-array name="select_logpersist_summaries">
+    <item msgid="2216470072500521830">"បិទ"</item>
+    <item msgid="172978079776521897">"អង្គចងចាំកំណត់ហេតុបណ្តោះអាសន្នទាំងអស់"</item>
+    <item msgid="3873873912383879240">"ទាំងអស់ក្រៅពីអង្គចងចាំកំណត់ហេតុវិទ្យុបណ្តោះអាសន្ន"</item>
+    <item msgid="8489661142527693381">"អង្គចងចាំបណ្ដោះអាសន្នកំណត់ហេតុ kernel តែប៉ុណ្ណោះ"</item>
   </string-array>
   <string-array name="window_animation_scale_entries">
     <item msgid="8134156599370824081">"បិទ​ចលនា"</item>

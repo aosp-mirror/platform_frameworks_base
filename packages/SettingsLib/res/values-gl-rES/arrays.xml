@@ -58,6 +58,74 @@
     <item msgid="3878793616631049349">"Utiliza a comprobación HDCP só para contido DRM"</item>
     <item msgid="45075631231212732">"Utilizar sempre a comprobación HDCP"</item>
   </string-array>
+  <string-array name="bluetooth_avrcp_versions">
+    <item msgid="5347678900838034763">"AVRCP 1.4 (predeterminado)"</item>
+    <item msgid="2089555299377409443">"AVRCP 1.5"</item>
+    <item msgid="2895327394279434278">"AVRCP 1.6"</item>
+  </string-array>
+  <string-array name="bluetooth_avrcp_version_values">
+    <item msgid="2838624067805073303">"avrcp14"</item>
+    <item msgid="1913619118958233129">"avrcp15"</item>
+    <item msgid="7142710449249088270">"avrcp16"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_titles">
+    <item msgid="7065842274271279580">"Usar selección sistema (predeterminado)"</item>
+    <item msgid="7539690996561263909">"SBC"</item>
+    <item msgid="686685526567131661">"AAC"</item>
+    <item msgid="8910200421843557332">"aptX"</item>
+    <item msgid="8434403964359457768">"aptX HD"</item>
+    <item msgid="6751080638867012696">"LDAC"</item>
+    <item msgid="723675059572222462">"Activar códecs opcionais"</item>
+    <item msgid="3304843301758635896">"Desactivar códecs opcionais"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_summaries">
+    <item msgid="5062108632402595000">"Usa selección sistema (predeterminado)"</item>
+    <item msgid="6898329690939802290">"SBC"</item>
+    <item msgid="6839647709301342559">"AAC"</item>
+    <item msgid="2279916056363477395">"aptX"</item>
+    <item msgid="6641171061200063516">"aptX HD"</item>
+    <item msgid="7950781694447359344">"LDAC"</item>
+    <item msgid="2209680154067241740">"Activa os códecs opcionais"</item>
+    <item msgid="741805482892725657">"Desactiva os códecs opcionais"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_sample_rate_titles">
+    <item msgid="3093023430402746802">"Usar selección sistema (predeterminado)"</item>
+    <item msgid="8895532488906185219">"44,1 kHz"</item>
+    <item msgid="2909915718994807056">"48,0 kHz"</item>
+    <item msgid="3347287377354164611">"88,2 kHz"</item>
+    <item msgid="1234212100239985373">"96,0 kHz"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_sample_rate_summaries">
+    <item msgid="3214516120190965356">"Usa selección sistema (predeterminado)"</item>
+    <item msgid="4482862757811638365">"44,1 kHz"</item>
+    <item msgid="354495328188724404">"48,0 kHz"</item>
+    <item msgid="7329816882213695083">"88,2 kHz"</item>
+    <item msgid="6967397666254430476">"96,0 kHz"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_bits_per_sample_titles">
+    <item msgid="2684127272582591429">"Usar selección sistema (predeterminado)"</item>
+    <item msgid="5618929009984956469">"16 bits/mostra"</item>
+    <item msgid="3412640499234627248">"24 bits/mostra"</item>
+    <item msgid="121583001492929387">"32 bits/mostra"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_bits_per_sample_summaries">
+    <item msgid="1081159789834584363">"Usa selección sistema (predeterminado)"</item>
+    <item msgid="4726688794884191540">"16 bits/mostra"</item>
+    <item msgid="305344756485516870">"24 bits/mostra"</item>
+    <item msgid="244568657919675099">"32 bits/mostra"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_channel_mode_titles">
+    <item msgid="5226878858503393706">"Usar selección sistema (predeterminado)"</item>
+    <item msgid="4106832974775067314">"Mono"</item>
+    <item msgid="5571632958424639155">"Estéreo"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_channel_mode_summaries">
+    <item msgid="4118561796005528173">"Usa selección sistema (predeterminado)"</item>
+    <item msgid="8900559293912978337">"Mono"</item>
+    <item msgid="8883739882299884241">"Estéreo"</item>
+  </string-array>
+    <!-- no translation found for bluetooth_a2dp_codec_ldac_playback_quality_titles:3 (4414060457677684127) -->
+    <!-- no translation found for bluetooth_a2dp_codec_ldac_playback_quality_summaries:3 (364670732877872677) -->
   <string-array name="select_logd_size_titles">
     <item msgid="8665206199209698501">"Desactivado"</item>
     <item msgid="1593289376502312923">"64 K"</item>
@@ -79,6 +147,18 @@
     <item msgid="1314234299552254621">"1 M por búfer de rexistro"</item>
     <item msgid="3606047780792894151">"4 M por búfer de rexistro"</item>
     <item msgid="5431354956856655120">"16 M por búfer de rexistro"</item>
+  </string-array>
+  <string-array name="select_logpersist_titles">
+    <item msgid="1744840221860799971">"Desactivado"</item>
+    <item msgid="3054662377365844197">"Todo"</item>
+    <item msgid="688870735111627832">"Agás radio"</item>
+    <item msgid="2850427388488887328">"só kernel"</item>
+  </string-array>
+  <string-array name="select_logpersist_summaries">
+    <item msgid="2216470072500521830">"Desactivado"</item>
+    <item msgid="172978079776521897">"Todos os búfers de rexistro"</item>
+    <item msgid="3873873912383879240">"Todo agás os búfers de rexistro de radio"</item>
+    <item msgid="8489661142527693381">"só búfer do rexistro do kernel"</item>
   </string-array>
   <string-array name="window_animation_scale_entries">
     <item msgid="8134156599370824081">"Animación desactivada"</item>
@@ -115,10 +195,10 @@
     <item msgid="3414540279805870511">"720 p (seguro)"</item>
     <item msgid="9039818062847141551">"1080 p"</item>
     <item msgid="4939496949750174834">"1080 p (seguro)"</item>
-    <item msgid="1833612718524903568">"4 K"</item>
-    <item msgid="238303513127879234">"4 K (seguro)"</item>
-    <item msgid="3547211260846843098">"4 K (mellorado)"</item>
-    <item msgid="5411365648951414254">"4 K (mellorado e seguro)"</item>
+    <item msgid="1833612718524903568">"4K"</item>
+    <item msgid="238303513127879234">"4K (seguro)"</item>
+    <item msgid="3547211260846843098">"4K (mellorado)"</item>
+    <item msgid="5411365648951414254">"4K (mellorado e seguro)"</item>
     <item msgid="1311305077526792901">"720 p, 1080 p (pantalla dual)"</item>
   </string-array>
   <string-array name="enable_opengl_traces_entries">
@@ -139,7 +219,7 @@
   </string-array>
   <string-array name="debug_hw_overdraw_entries">
     <item msgid="8190572633763871652">"Desactivado"</item>
-    <item msgid="7688197031296835369">"Mostrar áreas sobredebuxadas"</item>
+    <item msgid="7688197031296835369">"Mostrar áreas superpostas"</item>
     <item msgid="2290859360633824369">"Mostrar áreas de deuteranomalía"</item>
   </string-array>
   <string-array name="app_process_limit_entries">

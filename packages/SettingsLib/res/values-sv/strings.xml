@@ -25,10 +25,12 @@
     <string name="wifi_remembered" msgid="4955746899347821096">"Sparat"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"Inaktiverad"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"IP-konfigurationsfel"</string>
+    <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"Ingen anslutning på grund av låg kvalitet på nätverket"</string>
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"Wi-Fi-anslutningsfel"</string>
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"Autentiseringsproblem"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"Utom räckhåll"</string>
-    <string name="wifi_no_internet" msgid="9151470775868728896">"Ingen internetåtkomst hittades. Det går inte att återansluta automatiskt."</string>
+    <string name="wifi_no_internet_no_reconnect" msgid="2211781637653149657">"Ingen internetåtkomst hittades. Det går inte att återansluta automatiskt."</string>
+    <string name="wifi_no_internet" msgid="5011955173375805204">"Ingen internetåtkomst"</string>
     <string name="saved_network" msgid="4352716707126620811">"Sparades av <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="connected_via_wfa" msgid="3805736726317410714">"Ansluten via Wi-Fi-assistent"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Anslutet via %1$s"</string>
@@ -91,7 +93,7 @@
     <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Delning via Bluetooth"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"Internetdelning"</string>
     <string name="tether_settings_title_all" msgid="8356136101061143841">"Internetdelning och surfpunkt"</string>
-    <string name="managed_user_title" msgid="8101244883654409696">"Arbetsprofil"</string>
+    <string name="managed_user_title" msgid="8109605045406748842">"Alla jobbappar"</string>
     <string name="user_guest" msgid="8475274842845401871">"Gäst"</string>
     <string name="unknown" msgid="1592123443519355854">"Okänd"</string>
     <string name="running_process_item_user_label" msgid="3129887865552025943">"Användare: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
@@ -101,6 +103,8 @@
     <string name="tts_settings_title" msgid="1237820681016639683">"Text-till-tal"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"Talhastighet"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"Talhastighet för texten"</string>
+    <string name="tts_default_pitch_title" msgid="6135942113172488671">"Ton"</string>
+    <string name="tts_default_pitch_summary" msgid="1944885882882650009">"Påverkar tonen i det syntetiska talet"</string>
     <string name="tts_default_lang_title" msgid="8018087612299820556">"Språk"</string>
     <string name="tts_lang_use_system" msgid="2679252467416513208">"Använd systemspråk"</string>
     <string name="tts_lang_not_selected" msgid="7395787019276734765">"Inget språk valt"</string>
@@ -121,6 +125,8 @@
     <string name="tts_engine_settings_button" msgid="1030512042040722285">"Öppna inställningar för sökmotor"</string>
     <string name="tts_engine_preference_section_title" msgid="448294500990971413">"Prioriterad sökmotor"</string>
     <string name="tts_general_section_title" msgid="4402572014604490502">"Allmänt"</string>
+    <string name="tts_reset_speech_pitch_title" msgid="5789394019544785915">"Återställ tonhöjden för tal"</string>
+    <string name="tts_reset_speech_pitch_summary" msgid="8700539616245004418">"Återställ tonhöjden för talad text till standardinställningen."</string>
   <string-array name="tts_rate_entries">
     <item msgid="6695494874362656215">"Mycket långsamt"</item>
     <item msgid="4795095314303559268">"Långsamt"</item>
@@ -163,20 +169,36 @@
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Aktivera utförlig loggning för Wi-Fi"</string>
     <string name="wifi_aggressive_handover" msgid="9194078645887480917">"Aggressiv överlämning fr. Wi-Fi t. mobil"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Tillåt alltid sökning efter Wi-Fi-roaming"</string>
-    <string name="legacy_dhcp_client" msgid="694426978909127287">"Använd äldre DHCP-klient"</string>
     <string name="mobile_data_always_on" msgid="7745605759775320362">"Mobildata alltid aktiverad"</string>
+    <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Inaktivera Absolute volume"</string>
+    <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"AVRCP-version för Bluetooth"</string>
+    <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Välj AVRCP-version för Bluetooth"</string>
+    <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Ljudkodek för Bluetooth"</string>
+    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="4558347981670553665">"Välj Ljudkodek för Bluetooth"</string>
+    <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Samplingsfrekvens för Bluetooth-ljud"</string>
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5628790207448471613">"Välj Ljudkodek för Bluetooth:\nsamplingsfrekvens"</string>
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"Antar bitar per sampling för Bluetooth-ljud"</string>
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4546131401358681321">"Välj Ljudkodek för Bluetooth:\nbitar per sampling"</string>
+    <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"Kanalläge för Bluetooth-ljud"</string>
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="9133545781346216071">"Välj Ljudkodek för Bluetooth:\nkanalläge"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Bluetooth-ljud via LDAC-kodek: uppspelningskvalitet"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"Välj Bluetooth-ljud via LDAC-kodek:\nuppspelningskvalitet"</string>
+    <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Streaming: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Visa certifieringsalternativ för Wi-Fi-skärmdelning"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Öka loggningsnivån för Wi-Fi, visa per SSID RSSI i Wi‑Fi Picker"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"När funktionen har aktiverats kommer dataanslutningen lämnas över från Wi-Fi till mobilen på ett aggressivare sätt när Wi-Fi-signalen är svag"</string>
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"Tillåt/tillåt inte sökning efter Wi-Fi-roaming utifrån mängden datatrafik i gränssnittet"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Buffertstorlekar för logg"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Välj loggstorlekar per loggbuffert"</string>
+    <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"Vill du rensa lagringsutrymmet för loggar?"</string>
+    <string name="dev_logpersist_clear_warning_message" msgid="2256582531342994562">"När övervakningen inte längre görs med permanent loggning måste loggdata som finns på enheten raderas."</string>
+    <string name="select_logpersist_title" msgid="7530031344550073166">"Spara logg permanent på enheten"</string>
+    <string name="select_logpersist_dialog_title" msgid="4003400579973269060">"Välj vilka loggbuffertar som ska sparas permanent på enheten"</string>
     <string name="select_usb_configuration_title" msgid="2649938511506971843">"Välj USB-konfiguration"</string>
     <string name="select_usb_configuration_dialog_title" msgid="6385564442851599963">"Välj USB-konfiguration"</string>
     <string name="allow_mock_location" msgid="2787962564578664888">"Tillåt skenplatser"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Tillåt skenplatser"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Aktivera inspektion av visningsattribut"</string>
-    <string name="legacy_dhcp_client_summary" msgid="163383566317652040">"Använd DHCP-klienten från Lollipop i stället för den nya Android DHCP-klienten."</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Håll alltid mobildata aktiverad, även när Wi-Fi är aktiverat (så att du snabbt kan byta mellan nätverk)."</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"Ska USB-felsökning tillåtas?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"USB-felsökning ska endast användas i utvecklingssyfte. Använd den för att kopiera data mellan datorn och enheten, installera appar på enheten utan meddelanden och läsa loggdata."</string>
@@ -185,6 +207,7 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"Inställningarna är endast avsedda att användas för utvecklingsändamål. De kan orsaka problem med enheten eller apparna som finns installerade på den."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Verifiera appar via USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Kontrollera om appar som installeras via ADB/ADT kan vara skadliga."</string>
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Inaktivera Bluetooth-funktionen Absolute volume om det skulle uppstå problem med volymen på fjärrenheter, t.ex. alldeles för hög volym eller brist på kontroll."</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Lokal terminal"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Aktivera en terminalapp som ger åtkomst till hyllor lokalt"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP-kontroll"</string>
@@ -206,8 +229,8 @@
     <string name="strict_mode_summary" msgid="142834318897332338">"Tänd skärm när app gör omfattande åtgärd på huvudtråd"</string>
     <string name="pointer_location" msgid="6084434787496938001">"Pekarens plats"</string>
     <string name="pointer_location_summary" msgid="840819275172753713">"Överlägg på skärmen med aktuella skärmtryck"</string>
-    <string name="show_touches" msgid="1356420386500834339">"Visa tryckningar"</string>
-    <string name="show_touches_summary" msgid="6684407913145150041">"Visa visuell feedback för tryckningar"</string>
+    <string name="show_touches" msgid="2642976305235070316">"Visa tryck"</string>
+    <string name="show_touches_summary" msgid="6101183132903926324">"Visa visuell feedback för tryck"</string>
     <string name="show_screen_updates" msgid="5470814345876056420">"Visa ytuppdateringar"</string>
     <string name="show_screen_updates_summary" msgid="2569622766672785529">"Hela fönstret blinkar vid uppdatering"</string>
     <string name="show_hw_screen_updates" msgid="5036904558145941590">"Visa GPU-visningsuppdateringar"</string>
@@ -225,8 +248,6 @@
     <string name="debug_layout_summary" msgid="2001775315258637682">"Visa gränser för videoklipp, marginaler m.m."</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Tvinga fram RTL-layout"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Tvinga fram RTL-skärmlayout (hö–vä) för alla språk"</string>
-    <string name="show_cpu_usage" msgid="2389212910758076024">"Visa CPU-användning"</string>
-    <string name="show_cpu_usage_summary" msgid="2113341923988958266">"Överlägg på skärmen med aktuell CPU-användning"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"Framtvinga GPU-rendering"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"Tvingad användning av GPU för 2D-ritning"</string>
     <string name="force_msaa" msgid="7920323238677284387">"Force 4x MSAA"</string>
@@ -244,14 +265,14 @@
     <string name="show_all_anrs" msgid="28462979638729082">"Visa alla som inte svarar"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"Visa dialogrutan om att appen inte svarar för bakgrundsappar"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Tillåt appar i externt lagringsutrymme"</string>
-    <string name="force_allow_on_external_summary" msgid="3191952505860343233">"Appen kan skrivas till extern lagring, oavsett manifestvärden"</string>
+    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Allar appar kan skrivas till extern lagring, oavsett manifestvärden"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Framtvinga storleksanpassning för aktiviteter"</string>
-    <string name="force_resizable_activities_summary" msgid="4508217476997182216">"Detta gör det möjligt att ändra storleken på alla aktiviteter i flerfönsterläge, oavsett manifestvärden."</string>
+    <string name="force_resizable_activities_summary" msgid="6667493494706124459">"Gör det möjligt att ändra storleken på alla aktiviteter i flerfönsterläge, oavsett manifestvärden."</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"Aktivera frihandsfönster"</string>
-    <string name="enable_freeform_support_summary" msgid="2252563497485436534">"Aktiverar stöd för experimentella frihandsfönster."</string>
+    <string name="enable_freeform_support_summary" msgid="8247310463288834487">"Aktivera stöd för experimentella frihandsfönster."</string>
     <string name="local_backup_password_title" msgid="3860471654439418822">"Lösenord för säkerhetskopia av datorn"</string>
     <string name="local_backup_password_summary_none" msgid="6951095485537767956">"De fullständiga säkerhetskopiorna av datorn är för närvarande inte skyddade"</string>
-    <string name="local_backup_password_summary_change" msgid="2731163425081172638">"Tryck om du vill ändra eller ta bort lösenordet för fullständig säkerhetskopiering av datorn"</string>
+    <string name="local_backup_password_summary_change" msgid="5376206246809190364">"Tryck om du vill ändra eller ta bort lösenordet för fullständig säkerhetskopiering av datorn"</string>
     <string name="local_backup_password_toast_success" msgid="582016086228434290">"Ett nytt lösenord har angetts"</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"Det nya lösenordet och bekräftelsen stämmer inte överens"</string>
     <string name="local_backup_password_toast_validation_failure" msgid="5646377234895626531">"Det gick inte att ange lösenordet"</string>
@@ -266,18 +287,15 @@
     <item msgid="5363960654009010371">"Färger som har anpassats för digitalt innehåll"</item>
   </string-array>
     <string name="inactive_apps_title" msgid="1317817863508274533">"Inaktiva appar"</string>
-    <string name="inactive_app_inactive_summary" msgid="6768756967594202411">"Inaktiv. Aktivera genom att trycka."</string>
-    <string name="inactive_app_active_summary" msgid="4512911571954375968">"Aktiv. Inaktivera genom att trycka."</string>
+    <string name="inactive_app_inactive_summary" msgid="5091363706699855725">"Inaktiv. Tryck om du vill aktivera."</string>
+    <string name="inactive_app_active_summary" msgid="4174921824958516106">"Aktiv. Tryck om du vill inaktivera."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Aktiva tjänster"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"Visa och styr aktiva tjänster"</string>
-    <string name="night_mode_title" msgid="2594133148531256513">"Nattläge"</string>
-    <string name="night_mode_summary" msgid="9196605054622017193">"%s"</string>
-    <string name="night_mode_no" msgid="9171772244775838901">"Inaktiverad"</string>
-    <string name="night_mode_yes" msgid="2218157265997633432">"Alltid på"</string>
-    <string name="night_mode_auto" msgid="7508348175804304327">"Automatiskt"</string>
+    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"WebView-multibearbetning"</string>
+    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"Kör WebView-renderare separat"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView-implementering"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Ange WebView-implementering"</string>
-    <string name="select_webview_provider_confirmation_text" msgid="6671472080671066972">"Den valda WebView-implementeringen har inaktiverats och måste aktiveras om du ska kunna använda den. Vill du aktivera den?"</string>
+    <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Det här alternativet är inte längre giltigt. Försök igen."</string>
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"Konvertera till filkryptering"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"Konvertera …"</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"Filkryptering används redan"</string>
@@ -294,19 +312,50 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"Färgkorrigering"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Den här funktionen är experimentell och kan påverka prestandan."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"Har åsidosatts av <xliff:g id="TITLE">%1$s</xliff:g>"</string>
+    <string name="power_remaining_duration_only" msgid="4400068916452346544">"Ca <xliff:g id="TIME">%1$s</xliff:g> kvar"</string>
+    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">%1$s</xliff:g> kvar"</string>
     <string name="power_discharging_duration" msgid="1605929174734600590">"<xliff:g id="LEVEL">%1$s</xliff:g> – ca <xliff:g id="TIME">%2$s</xliff:g> kvar"</string>
+    <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> kvar"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="2853265177761520490">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> till fulladdat"</string>
+    <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging_duration_ac" msgid="3969186192576594254">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> till fulladdat via laddare"</string>
+    <string name="power_charging_duration_ac_short" msgid="7895864687218765582">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging_duration_usb" msgid="182405645340976546">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> till fulladdat via USB"</string>
+    <string name="power_charging_duration_usb_short" msgid="941854728040426399">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging_duration_wireless" msgid="1829295708243159464">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> till fulladdat via trådlös laddning"</string>
+    <string name="power_charging_duration_wireless_short" msgid="1642664799869599476">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"Okänd"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"Laddar"</string>
     <string name="battery_info_status_charging_ac" msgid="2909861890674399949">"Laddas via adapter"</string>
+    <string name="battery_info_status_charging_ac_short" msgid="7431401092096415502">"Laddar"</string>
     <string name="battery_info_status_charging_usb" msgid="2207489369680923929">"Laddas via USB"</string>
+    <string name="battery_info_status_charging_usb_short" msgid="6733371990319101366">"Laddar"</string>
     <string name="battery_info_status_charging_wireless" msgid="3574032603735446573">"Laddas trådlöst"</string>
+    <string name="battery_info_status_charging_wireless_short" msgid="752569941028903610">"Laddar"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"Laddar inte"</string>
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"Laddar inte"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"Fullt"</string>
-    <string name="disabled_by_admin_summary_text" msgid="7787027069207263048">"Har inaktiverats av administratören"</string>
+    <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"Strys av administratören"</string>
+    <string name="enabled_by_admin" msgid="2386503803463071894">"Har aktiverats av administratören"</string>
+    <string name="disabled_by_admin" msgid="3669999613095206948">"Har inaktiverats av administratören"</string>
+    <string name="home" msgid="3256884684164448244">"Startskärmen för inställningar"</string>
+  <string-array name="battery_labels">
+    <item msgid="8494684293649631252">"0 %"</item>
+    <item msgid="8934126114226089439">"50 %"</item>
+    <item msgid="1286113608943010849">"100 %"</item>
+  </string-array>
+    <string name="charge_length_format" msgid="8978516217024434156">"för <xliff:g id="ID_1">%1$s</xliff:g> sedan"</string>
+    <string name="remaining_length_format" msgid="7886337596669190587">"<xliff:g id="ID_1">%1$s</xliff:g> kvar"</string>
+    <string name="screen_zoom_summary_small" msgid="5867245310241621570">"Små"</string>
+    <string name="screen_zoom_summary_default" msgid="2247006805614056507">"Standardinställning"</string>
+    <string name="screen_zoom_summary_large" msgid="4835294730065424084">"Stor"</string>
+    <string name="screen_zoom_summary_very_large" msgid="7108563375663670067">"Större"</string>
+    <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"Störst"</string>
+    <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"Anpassad (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
+    <string name="help_feedback_label" msgid="6815040660801785649">"Hjälp och feedback"</string>
+    <string name="content_description_menu_button" msgid="8182594799812351266">"Meny"</string>
+    <string name="retail_demo_reset_message" msgid="118771671364131297">"Ange lösenord och utför fabriksåterställning i demoläge"</string>
+    <string name="retail_demo_reset_next" msgid="8356731459226304963">"Nästa"</string>
+    <string name="retail_demo_reset_title" msgid="696589204029930100">"Lösenord krävs"</string>
 </resources>

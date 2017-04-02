@@ -25,10 +25,12 @@
     <string name="wifi_remembered" msgid="4955746899347821096">"Disimpan"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"Nonaktif"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"Kegagalan Konfigurasi IP"</string>
+    <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"Tidak tersambung karena jaringan berkualitas rendah"</string>
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"Kegagalan Sambungan Wi-Fi"</string>
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"Masalah autentikasi"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"Tidak dalam jangkauan"</string>
-    <string name="wifi_no_internet" msgid="9151470775868728896">"Akses Internet Tidak Terdeteksi, tidak akan menyambung ulang secara otomatis."</string>
+    <string name="wifi_no_internet_no_reconnect" msgid="2211781637653149657">"Akses Internet Tidak Terdeteksi, tidak akan menyambung ulang secara otomatis."</string>
+    <string name="wifi_no_internet" msgid="5011955173375805204">"Tidak Ada Akses Internet."</string>
     <string name="saved_network" msgid="4352716707126620811">"Disimpan oleh <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="connected_via_wfa" msgid="3805736726317410714">"Terhubung melalui Asisten Wi-Fi"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Terhubung melalui %1$s"</string>
@@ -86,12 +88,12 @@
     <string name="process_kernel_label" msgid="3916858646836739323">"OS Android"</string>
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"Aplikasi dihapus"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"Aplikasi dan pengguna yang dihapus"</string>
-    <string name="tether_settings_title_usb" msgid="6688416425801386511">"Penambatan USB"</string>
+    <string name="tether_settings_title_usb" msgid="6688416425801386511">"Tethering USB"</string>
     <string name="tether_settings_title_wifi" msgid="3277144155960302049">"Hotspot portabel"</string>
-    <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Penambatan bluetooth"</string>
+    <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Tethering bluetooth"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"Menambatkan"</string>
-    <string name="tether_settings_title_all" msgid="8356136101061143841">"Menambatkan &amp; hotspot portabel"</string>
-    <string name="managed_user_title" msgid="8101244883654409696">"Profil kerja"</string>
+    <string name="tether_settings_title_all" msgid="8356136101061143841">"Tethering &amp; hotspot portabel"</string>
+    <string name="managed_user_title" msgid="8109605045406748842">"Semua aplikasi kerja"</string>
     <string name="user_guest" msgid="8475274842845401871">"Tamu"</string>
     <string name="unknown" msgid="1592123443519355854">"Tidak diketahui"</string>
     <string name="running_process_item_user_label" msgid="3129887865552025943">"Pengguna: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
@@ -101,8 +103,10 @@
     <string name="tts_settings_title" msgid="1237820681016639683">"Keluaran text-to-speech"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"Laju bicara"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"Kecepatan teks diucapkan"</string>
+    <string name="tts_default_pitch_title" msgid="6135942113172488671">"Tinggi nada"</string>
+    <string name="tts_default_pitch_summary" msgid="1944885882882650009">"Memengaruhi nada ucapan yang disintesis"</string>
     <string name="tts_default_lang_title" msgid="8018087612299820556">"Bahasa"</string>
-    <string name="tts_lang_use_system" msgid="2679252467416513208">"Gunakan bahasa sistem"</string>
+    <string name="tts_lang_use_system" msgid="2679252467416513208">"Menggunakan bahasa sistem"</string>
     <string name="tts_lang_not_selected" msgid="7395787019276734765">"Bahasa tidak dipilih"</string>
     <string name="tts_default_lang_summary" msgid="5219362163902707785">"Menyetel suara spesifik bahasa untuk teks lisan"</string>
     <string name="tts_play_example_title" msgid="7094780383253097230">"Dengarkan contoh"</string>
@@ -121,6 +125,8 @@
     <string name="tts_engine_settings_button" msgid="1030512042040722285">"Luncurkan setelan mesin"</string>
     <string name="tts_engine_preference_section_title" msgid="448294500990971413">"Mesin yang dipilih"</string>
     <string name="tts_general_section_title" msgid="4402572014604490502">"Umum"</string>
+    <string name="tts_reset_speech_pitch_title" msgid="5789394019544785915">"Setel ulang tinggi nada ucapan"</string>
+    <string name="tts_reset_speech_pitch_summary" msgid="8700539616245004418">"Setel ulang tinggi nada diucapkannya teks menjadi default."</string>
   <string-array name="tts_rate_entries">
     <item msgid="6695494874362656215">"Sangat lambat"</item>
     <item msgid="4795095314303559268">"Lambat"</item>
@@ -135,10 +141,10 @@
     <string name="choose_profile" msgid="8229363046053568878">"Pilih Profil"</string>
     <string name="category_personal" msgid="1299663247844969448">"Pribadi"</string>
     <string name="category_work" msgid="8699184680584175622">"Kantor"</string>
-    <string name="development_settings_title" msgid="215179176067683667">"Opsi pengembang"</string>
-    <string name="development_settings_enable" msgid="542530994778109538">"Aktifkan opsi pengembang"</string>
+    <string name="development_settings_title" msgid="215179176067683667">"Opsi developer"</string>
+    <string name="development_settings_enable" msgid="542530994778109538">"Aktifkan opsi developer"</string>
     <string name="development_settings_summary" msgid="1815795401632854041">"Menyetel opsi untuk pengembangan apl"</string>
-    <string name="development_settings_not_available" msgid="4308569041701535607">"Opsi pengembang tidak tersedia untuk pengguna ini"</string>
+    <string name="development_settings_not_available" msgid="4308569041701535607">"Opsi developer tidak tersedia untuk pengguna ini"</string>
     <string name="vpn_settings_not_available" msgid="956841430176985598">"Setelan VPN tidak tersedia untuk pengguna ini"</string>
     <string name="tethering_settings_not_available" msgid="6765770438438291012">"Setelan Penambatan tidak tersedia untuk pengguna ini"</string>
     <string name="apn_settings_not_available" msgid="7873729032165324000">"Setelan Nama Titik Akses tidak tersedia untuk pengguna ini"</string>
@@ -163,20 +169,36 @@
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Aktifkan Pencatatan Log Panjang Wi-Fi"</string>
     <string name="wifi_aggressive_handover" msgid="9194078645887480917">"Pengalihan Wi-Fi Agresif ke Seluler"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Selalu izinkan Pemindaian Roaming Wi-Fi"</string>
-    <string name="legacy_dhcp_client" msgid="694426978909127287">"Gunakan klien DHCP lawas"</string>
     <string name="mobile_data_always_on" msgid="7745605759775320362">"Data seluler selalu aktif"</string>
+    <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Nonaktifkan volume absolut"</string>
+    <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Versi AVRCP Bluetooth"</string>
+    <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Pilih Versi AVRCP Bluetooth"</string>
+    <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Codec Audio Bluetooth"</string>
+    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="4558347981670553665">"Pilih Codec Audio Bluetooth"</string>
+    <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Frekuensi Sampel Audio Bluetooth"</string>
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5628790207448471613">"Pilih Codec Audio Bluetooth:\nFrekuensi Sampel"</string>
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"Bit Per Sampel Audio Bluetooth"</string>
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4546131401358681321">"Pilih Codec Audio Bluetooth:\nBit Per Sampel"</string>
+    <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"Mode Channel Audio Bluetooth"</string>
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="9133545781346216071">"Pilih Codec Audio Bluetooth:\nMode Channel"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Codec LDAC Audio Bluetooth: Kualitas Pemutaran"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"Pilih Codec LDAC Audio Bluetooth:\nKualitas Pemutaran"</string>
+    <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Streaming: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Tampilkan opsi untuk sertifikasi layar nirkabel"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Tingkatkan level pencatatan log Wi-Fi, tampilkan per SSID RSSI di Pemilih Wi‑Fi"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"Jika diaktifkan, Wi-Fi akan menjadi lebih agresif dalam mengalihkan sambungan data ke Seluler saat sinyal Wi-Fi lemah"</string>
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"Izinkan/Larang Pemindaian Roaming Wi-Fi berdasarkan jumlah lalu lintas data yang ada di antarmuka"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Ukuran penyangga pencatat log"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Ukuran Pencatat Log per penyangga log"</string>
+    <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"Hapus penyimpanan tetap pencatat log?"</string>
+    <string name="dev_logpersist_clear_warning_message" msgid="2256582531342994562">"Jika kami tidak memantau lagi dengan pencatat log tetap, kami diwajibkan menghapus data pencatat log yang ada di perangkat Anda."</string>
+    <string name="select_logpersist_title" msgid="7530031344550073166">"Terus simpan data pencatat log di perangkat"</string>
+    <string name="select_logpersist_dialog_title" msgid="4003400579973269060">"Pilih penyangga log untuk terus menyimpan di perangkat"</string>
     <string name="select_usb_configuration_title" msgid="2649938511506971843">"Pilih Konfigurasi USB"</string>
     <string name="select_usb_configuration_dialog_title" msgid="6385564442851599963">"Pilih Konfigurasi USB"</string>
     <string name="allow_mock_location" msgid="2787962564578664888">"Mengizinkan lokasi palsu"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Mengizinkan lokasi palsu"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Aktifkan inspeksi atribut tampilan"</string>
-    <string name="legacy_dhcp_client_summary" msgid="163383566317652040">"Gunakan klien DHCP dari Lollipop alih-alih klien DHCP Android baru."</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Selalu aktifkan data seluler, meski Wi-Fi aktif (agar jaringan beralih dengan cepat)."</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"Izinkan melakukan debug USB?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"Debugging USB dimaksudkan untuk tujuan pengembangan saja. Gunakan untuk menyalin data antara komputer dan perangkat Anda, memasang apl pada perangkat tanpa notifikasi, dan membaca data log."</string>
@@ -185,6 +207,7 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"Setelan ini hanya dimaksudkan untuk penggunaan pengembangan. Setelan dapat menyebabkan perangkat dan aplikasi yang menerapkannya rusak atau tidak berfungsi semestinya."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Verifikasi aplikasi melalui USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Periksa perilaku membahayakan dalam aplikasi yang terpasang melalui ADB/ADT."</string>
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Menonaktifkan fitur volume absolut Bluetooth jika ada masalah volume dengan perangkat jarak jauh, misalnya volume terlalu keras atau kurangnya kontrol."</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Terminal lokal"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Aktifkan aplikasi terminal yang menawarkan akses kerangka lokal"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"Pemeriksaan HDCP"</string>
@@ -206,8 +229,8 @@
     <string name="strict_mode_summary" msgid="142834318897332338">"Kedipkan layar saat apl beroperasi lama pada utas utama"</string>
     <string name="pointer_location" msgid="6084434787496938001">"Lokasi penunjuk"</string>
     <string name="pointer_location_summary" msgid="840819275172753713">"Hamparan layar menampilkan data sentuhan saat ini"</string>
-    <string name="show_touches" msgid="1356420386500834339">"Tampilkan sentuhan"</string>
-    <string name="show_touches_summary" msgid="6684407913145150041">"Tampilkan masukan visual untuk sentuhan"</string>
+    <string name="show_touches" msgid="2642976305235070316">"Tampilkan ketukan"</string>
+    <string name="show_touches_summary" msgid="6101183132903926324">"Tampilkan masukan visual untuk ketukan"</string>
     <string name="show_screen_updates" msgid="5470814345876056420">"Lihat pembaruan permukaan"</string>
     <string name="show_screen_updates_summary" msgid="2569622766672785529">"Sorot seluruh permukaan jendela saat diperbarui"</string>
     <string name="show_hw_screen_updates" msgid="5036904558145941590">"Tampilkan pembaruan tampilan GPU"</string>
@@ -225,8 +248,6 @@
     <string name="debug_layout_summary" msgid="2001775315258637682">"Tampilkan batas klip, margin, dll."</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Paksa arah tata letak RTL"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Paksa arah tata letak layar RTL untuk semua lokal"</string>
-    <string name="show_cpu_usage" msgid="2389212910758076024">"Tampilkan penggunaan CPU"</string>
-    <string name="show_cpu_usage_summary" msgid="2113341923988958266">"Hamparan layar menampilkan penggunaan CPU saat ini"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"Paksa perenderan GPU"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"Paksa penggunaan GPU untuk gambar 2d"</string>
     <string name="force_msaa" msgid="7920323238677284387">"Force 4x MSAA"</string>
@@ -244,14 +265,14 @@
     <string name="show_all_anrs" msgid="28462979638729082">"Tampilkan semua ANR"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"Tmplkn dialog Apl Tidak Merespons utk apl ltr blkg"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Paksa izinkan aplikasi di eksternal"</string>
-    <string name="force_allow_on_external_summary" msgid="3191952505860343233">"Membuat semua aplikasi dapat ditulis ke penyimpanan eksterna"</string>
+    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Membuat semua aplikasi dapat ditulis ke penyimpanan eksternal, terlepas dari nilai manifes"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Paksa aktivitas agar ukurannya dapat diubah"</string>
-    <string name="force_resizable_activities_summary" msgid="4508217476997182216">"Membuat semua aktivitas dapat diubah ukurannya untuk banyak jendela, terlepas dari nilai manifes."</string>
+    <string name="force_resizable_activities_summary" msgid="6667493494706124459">"Buat semua aktivitas dapat diubah ukurannya untuk banyak jendela, terlepas dari nilai manifes."</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"Aktifkan jendela berformat bebas"</string>
-    <string name="enable_freeform_support_summary" msgid="2252563497485436534">"Mengaktifkan dukungan untuk jendela eksperimental berformat bebas."</string>
+    <string name="enable_freeform_support_summary" msgid="8247310463288834487">"Aktifkan dukungan untuk jendela eksperimental berformat bebas."</string>
     <string name="local_backup_password_title" msgid="3860471654439418822">"Sandi cadangan desktop"</string>
     <string name="local_backup_password_summary_none" msgid="6951095485537767956">"Saat ini cadangan desktop penuh tidak dilindungi"</string>
-    <string name="local_backup_password_summary_change" msgid="2731163425081172638">"Sentuh guna mengubah atau menghapus sandi untuk cadangan lengkap desktop"</string>
+    <string name="local_backup_password_summary_change" msgid="5376206246809190364">"Ketuk guna mengubah atau menghapus sandi untuk cadangan lengkap desktop"</string>
     <string name="local_backup_password_toast_success" msgid="582016086228434290">"Sandi cadangan baru telah disetel"</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"Sandi baru dan konfirmasinya tidak cocok."</string>
     <string name="local_backup_password_toast_validation_failure" msgid="5646377234895626531">"Gagal menyetel sandi cadangan"</string>
@@ -266,18 +287,15 @@
     <item msgid="5363960654009010371">"Warna yang dioptimalkan untuk konten digital"</item>
   </string-array>
     <string name="inactive_apps_title" msgid="1317817863508274533">"Aplikasi yang tidak aktif"</string>
-    <string name="inactive_app_inactive_summary" msgid="6768756967594202411">"Tidak aktif. Sentuh untuk mengalihkan."</string>
-    <string name="inactive_app_active_summary" msgid="4512911571954375968">"Aktif. Sentuh untuk mengalihkan."</string>
+    <string name="inactive_app_inactive_summary" msgid="5091363706699855725">"Tidak aktif. Ketuk untuk beralih."</string>
+    <string name="inactive_app_active_summary" msgid="4174921824958516106">"Aktif. Ketuk untuk beralih."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Layanan yang sedang berjalan"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"Melihat dan mengontrol layanan yang sedang berjalan"</string>
-    <string name="night_mode_title" msgid="2594133148531256513">"Mode malam"</string>
-    <string name="night_mode_summary" msgid="9196605054622017193">"%s"</string>
-    <string name="night_mode_no" msgid="9171772244775838901">"Dinonaktifkan"</string>
-    <string name="night_mode_yes" msgid="2218157265997633432">"Selalu aktif"</string>
-    <string name="night_mode_auto" msgid="7508348175804304327">"Otomatis"</string>
+    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"WebView Multiproses"</string>
+    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"Jalankan perender WebView secara terpisah"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"Penerapan WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Setel penerapan WebView"</string>
-    <string name="select_webview_provider_confirmation_text" msgid="6671472080671066972">"Implementasi WebView yang dipilih telah dinonaktifkan, dan harus diaktifkan agar dapat digunakan. Ingin mengaktifkannya?"</string>
+    <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Pilihan ini tidak valid lagi. Coba lagi."</string>
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"Konversi ke enkripsi file"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"Konversi..."</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"Sudah dienkripsi berbasis file"</string>
@@ -294,19 +312,50 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"Koreksi warna"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Fitur ini bersifat eksperimental dan dapat memengaruhi kinerja."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"Digantikan oleh <xliff:g id="TITLE">%1$s</xliff:g>"</string>
+    <string name="power_remaining_duration_only" msgid="4400068916452346544">"Kira-kira tersisa <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">%1$s</xliff:g> tersisa"</string>
     <string name="power_discharging_duration" msgid="1605929174734600590">"<xliff:g id="LEVEL">%1$s</xliff:g> - kira-kira tersisa. <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> tersisa"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="2853265177761520490">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> sampai penuh"</string>
+    <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging_duration_ac" msgid="3969186192576594254">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> sampai penuh pada AC"</string>
+    <string name="power_charging_duration_ac_short" msgid="7895864687218765582">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging_duration_usb" msgid="182405645340976546">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> sampai penuh melalui USB"</string>
+    <string name="power_charging_duration_usb_short" msgid="941854728040426399">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging_duration_wireless" msgid="1829295708243159464">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> sampai penuh dari nirkabel"</string>
+    <string name="power_charging_duration_wireless_short" msgid="1642664799869599476">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"Tidak diketahui"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"Mengisi daya"</string>
     <string name="battery_info_status_charging_ac" msgid="2909861890674399949">"Mengisi daya pada AC"</string>
+    <string name="battery_info_status_charging_ac_short" msgid="7431401092096415502">"Mengisi daya"</string>
     <string name="battery_info_status_charging_usb" msgid="2207489369680923929">"Isi daya lewat USB"</string>
+    <string name="battery_info_status_charging_usb_short" msgid="6733371990319101366">"Mengisi daya"</string>
     <string name="battery_info_status_charging_wireless" msgid="3574032603735446573">"Isi daya nirkabel"</string>
+    <string name="battery_info_status_charging_wireless_short" msgid="752569941028903610">"Mengisi daya"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"Tidak mengisi daya"</string>
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"Tidak mengisi daya"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"Penuh"</string>
-    <string name="disabled_by_admin_summary_text" msgid="7787027069207263048">"Dinonaktifkan oleh administrator"</string>
+    <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"Dikontrol oleh admin"</string>
+    <string name="enabled_by_admin" msgid="2386503803463071894">"Diaktifkan oleh administrator"</string>
+    <string name="disabled_by_admin" msgid="3669999613095206948">"Dinonaktifkan oleh administrator"</string>
+    <string name="home" msgid="3256884684164448244">"Layar Utama Setelan"</string>
+  <string-array name="battery_labels">
+    <item msgid="8494684293649631252">"0%"</item>
+    <item msgid="8934126114226089439">"50%"</item>
+    <item msgid="1286113608943010849">"100%"</item>
+  </string-array>
+    <string name="charge_length_format" msgid="8978516217024434156">"<xliff:g id="ID_1">%1$s</xliff:g> lalu"</string>
+    <string name="remaining_length_format" msgid="7886337596669190587">"Tersisa <xliff:g id="ID_1">%1$s</xliff:g>"</string>
+    <string name="screen_zoom_summary_small" msgid="5867245310241621570">"Kecil"</string>
+    <string name="screen_zoom_summary_default" msgid="2247006805614056507">"Default"</string>
+    <string name="screen_zoom_summary_large" msgid="4835294730065424084">"Besar"</string>
+    <string name="screen_zoom_summary_very_large" msgid="7108563375663670067">"Lebih besar"</string>
+    <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"Terbesar"</string>
+    <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"(<xliff:g id="DENSITYDPI">%d</xliff:g>) khusus"</string>
+    <string name="help_feedback_label" msgid="6815040660801785649">"Bantuan &amp; masukan"</string>
+    <string name="content_description_menu_button" msgid="8182594799812351266">"Menu"</string>
+    <string name="retail_demo_reset_message" msgid="118771671364131297">"Masukkan sandi untuk mengembalikan ke setelan pabrik dalam mode demo"</string>
+    <string name="retail_demo_reset_next" msgid="8356731459226304963">"Berikutnya"</string>
+    <string name="retail_demo_reset_title" msgid="696589204029930100">"Perlu sandi"</string>
 </resources>

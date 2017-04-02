@@ -25,16 +25,18 @@
     <string name="wifi_remembered" msgid="4955746899347821096">"Сохранено"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"Отключено"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"Ошибка IP-конфигурации"</string>
+    <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"Подключение невозможно из-за низкого качества сети"</string>
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"Ошибка подключения Wi-Fi"</string>
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"Ошибка аутентификации"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"Недоступна"</string>
-    <string name="wifi_no_internet" msgid="9151470775868728896">"Подключение к Интернету отсутствует и не будет восстановлено автоматически."</string>
+    <string name="wifi_no_internet_no_reconnect" msgid="2211781637653149657">"Отсутствует интернет-соединение. Повторное подключение к сети не будет выполняться автоматически."</string>
+    <string name="wifi_no_internet" msgid="5011955173375805204">"Отсутствует подключение к Интернету"</string>
     <string name="saved_network" msgid="4352716707126620811">"Кто сохранил: <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="connected_via_wfa" msgid="3805736726317410714">"Установлено подключение через Ассистента Wi-Fi"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Подключено к %1$s"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"Доступно через %1$s"</string>
     <string name="wifi_connected_no_internet" msgid="3149853966840874992">"Подключено, без Интернета"</string>
-    <string name="bluetooth_disconnected" msgid="6557104142667339895">"Отключено"</string>
+    <string name="bluetooth_disconnected" msgid="6557104142667339895">"Нет подключения"</string>
     <string name="bluetooth_disconnecting" msgid="8913264760027764974">"Отключение..."</string>
     <string name="bluetooth_connecting" msgid="8555009514614320497">"Подключение..."</string>
     <string name="bluetooth_connected" msgid="6038755206916626419">"Подключено"</string>
@@ -91,7 +93,7 @@
     <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Bluetooth-модем"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"Режим модема"</string>
     <string name="tether_settings_title_all" msgid="8356136101061143841">"Режим модема"</string>
-    <string name="managed_user_title" msgid="8101244883654409696">"Рабочий профиль"</string>
+    <string name="managed_user_title" msgid="8109605045406748842">"Корпоративные приложения"</string>
     <string name="user_guest" msgid="8475274842845401871">"Гость"</string>
     <string name="unknown" msgid="1592123443519355854">"Неизвестно"</string>
     <string name="running_process_item_user_label" msgid="3129887865552025943">"Пользователь: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
@@ -101,6 +103,8 @@
     <string name="tts_settings_title" msgid="1237820681016639683">"Синтез речи"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"Скорость речи"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"Скорость чтения текста"</string>
+    <string name="tts_default_pitch_title" msgid="6135942113172488671">"Тон"</string>
+    <string name="tts_default_pitch_summary" msgid="1944885882882650009">"Влияет на высоту синтезированной речи"</string>
     <string name="tts_default_lang_title" msgid="8018087612299820556">"Язык"</string>
     <string name="tts_lang_use_system" msgid="2679252467416513208">"Язык системы"</string>
     <string name="tts_lang_not_selected" msgid="7395787019276734765">"Язык не выбран"</string>
@@ -121,6 +125,8 @@
     <string name="tts_engine_settings_button" msgid="1030512042040722285">"Настройки синтеза речи"</string>
     <string name="tts_engine_preference_section_title" msgid="448294500990971413">"Система по умолчанию"</string>
     <string name="tts_general_section_title" msgid="4402572014604490502">"Общие"</string>
+    <string name="tts_reset_speech_pitch_title" msgid="5789394019544785915">"Тон по умолчанию"</string>
+    <string name="tts_reset_speech_pitch_summary" msgid="8700539616245004418">"Установить стандартный тон при озвучивании текста."</string>
   <string-array name="tts_rate_entries">
     <item msgid="6695494874362656215">"Очень медленная"</item>
     <item msgid="4795095314303559268">"Медленная"</item>
@@ -149,7 +155,7 @@
     <string name="bugreport_in_power_summary" msgid="1778455732762984579">"Показывать в меню кнопку для отправки отчета об ошибке"</string>
     <string name="keep_screen_on" msgid="1146389631208760344">"Не выключать экран"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"Во время зарядки экран будет всегда включен"</string>
-    <string name="bt_hci_snoop_log" msgid="3340699311158865670">"Включить журнал трансляции операций HCI Bluetooth"</string>
+    <string name="bt_hci_snoop_log" msgid="3340699311158865670">"Включить журнал HCI Bluetooth"</string>
     <string name="bt_hci_snoop_log_summary" msgid="730247028210113851">"Сохранять все пакеты HCI Bluetooth в файле"</string>
     <string name="oem_unlock_enable" msgid="6040763321967327691">"Заводская разблокировка"</string>
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"Разрешить разблокировку загрузчика ОС"</string>
@@ -163,28 +169,45 @@
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Подробный журнал Wi‑Fi"</string>
     <string name="wifi_aggressive_handover" msgid="9194078645887480917">"Переключаться на мобильную сеть"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Всегда включать поиск сетей Wi-Fi"</string>
-    <string name="legacy_dhcp_client" msgid="694426978909127287">"Использовать устаревший DHCP-клиент"</string>
     <string name="mobile_data_always_on" msgid="7745605759775320362">"Не отключать передачу данных"</string>
+    <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Отключить абсолютный уровень громкости"</string>
+    <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Версия Bluetooth AVRCP"</string>
+    <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Выберите версию Bluetooth AVRCP"</string>
+    <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Аудиокодек для передачи через Bluetooth"</string>
+    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="4558347981670553665">"Аудиокодек для Bluetooth"</string>
+    <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Частота дискретизации при передаче через Bluetooth"</string>
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5628790207448471613">"Аудиокодек для Bluetooth:\nчастота дискретизации"</string>
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"Глубина кодирования звука при передаче через Bluetooth"</string>
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4546131401358681321">"Аудиокодек для Bluetooth:\nразрядность"</string>
+    <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"Режим аудиоканала Bluetooth"</string>
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="9133545781346216071">"Аудиокодек для Bluetooth:\nрежим канала"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Аудиокодек LDAC для Bluetooth: качество воспроизведения"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"Аудиокодек LDAC для Bluetooth:\nкачество воспроизведения"</string>
+    <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Потоковая передача: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Показывать параметры сертификации беспроводных мониторов"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"При выборе Wi‑Fi указывать в журнале RSSI для каждого SSID"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"Принудительно переключаться на мобильную сеть, если сигнал Wi-Fi слабый"</string>
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"Включать или отключать поиск сетей Wi-Fi во время передачи данных в зависимости от объема трафика"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Размер буфера журнала"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Выберите размер буфера журнала"</string>
+    <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"Очистить постоянный диск журнала?"</string>
+    <string name="dev_logpersist_clear_warning_message" msgid="2256582531342994562">"Прекратив отслеживание постоянного журнала, мы будем обязаны удалить его данные, сохраненные на устройстве."</string>
+    <string name="select_logpersist_title" msgid="7530031344550073166">"Постоянно хранить данные журнала на устройстве"</string>
+    <string name="select_logpersist_dialog_title" msgid="4003400579973269060">"Выберите буферы журнала, которые будут постоянно храниться на устройстве"</string>
     <string name="select_usb_configuration_title" msgid="2649938511506971843">"Конфигурация USB"</string>
     <string name="select_usb_configuration_dialog_title" msgid="6385564442851599963">"Конфигурация USB"</string>
     <string name="allow_mock_location" msgid="2787962564578664888">"Фиктивные местоположения"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Разрешить использование фиктивных местоположений"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Включить проверку атрибутов"</string>
-    <string name="legacy_dhcp_client_summary" msgid="163383566317652040">"Использовать DHCP-клиент для Android 5.0, а не для новой версии."</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Не отключать передачу данных по мобильной сети даже при активном Wi-Fi-подключении (для быстрого переключения между сетями)."</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"Разрешить отладку USB?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"Отладка по USB – это режим, который позволяет использовать ваше устройство как внешний накопитель: перемещать файлы (с компьютера и на компьютер), напрямую устанавливать приложения, а также просматривать системные журналы."</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"Запретить доступ к USB-отладке для всех компьютеров, которым он был разрешен?"</string>
     <string name="dev_settings_warning_title" msgid="7244607768088540165">"Изменение настроек"</string>
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"Только для разработчиков. Изменение этих настроек может привести к сбоям или неправильной работе устройства и приложений."</string>
-    <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Установка через USB"</string>
-    <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Проверка безопасности приложений, устанавливаемых через ADB/ADT"</string>
+    <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Проверять приложения при установке"</string>
+    <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Выполнять проверку безопасности приложений при установке через ADB/ADT"</string>
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Отключить абсолютный уровень громкости Bluetooth при возникновении проблем на удаленных устройствах, например при слишком громком звучании или невозможности контролировать настройку."</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Локальный терминальный доступ"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Разрешить терминальный доступ к локальной оболочке"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"Проверка HDCP"</string>
@@ -197,19 +220,19 @@
     <string name="no_application" msgid="2813387563129153880">"Нет"</string>
     <string name="wait_for_debugger" msgid="1202370874528893091">"Подождите, пока подключится отладчик"</string>
     <string name="wait_for_debugger_summary" msgid="1766918303462746804">"Приложение ожидает подключения отладчика"</string>
-    <string name="debug_input_category" msgid="1811069939601180246">"Ввод текста"</string>
-    <string name="debug_drawing_category" msgid="6755716469267367852">"Рисование"</string>
+    <string name="debug_input_category" msgid="1811069939601180246">"Ввод"</string>
+    <string name="debug_drawing_category" msgid="6755716469267367852">"Отрисовка"</string>
     <string name="debug_hw_drawing_category" msgid="6220174216912308658">"Аппаратное ускорение визуализации"</string>
     <string name="media_category" msgid="4388305075496848353">"Мультимедиа"</string>
     <string name="debug_monitoring_category" msgid="7640508148375798343">"Мониторинг"</string>
-    <string name="strict_mode" msgid="1938795874357830695">"Включен строгий режим"</string>
+    <string name="strict_mode" msgid="1938795874357830695">"Строгий режим"</string>
     <string name="strict_mode_summary" msgid="142834318897332338">"Подсвечивать экран во время длительных операций"</string>
     <string name="pointer_location" msgid="6084434787496938001">"Отображать касания"</string>
     <string name="pointer_location_summary" msgid="840819275172753713">"Визуализировать на экране нажатия и жесты"</string>
-    <string name="show_touches" msgid="1356420386500834339">"Показывать нажатия"</string>
-    <string name="show_touches_summary" msgid="6684407913145150041">"Отображать точки в местах нажатия на экран"</string>
+    <string name="show_touches" msgid="2642976305235070316">"Визуальный отклик"</string>
+    <string name="show_touches_summary" msgid="6101183132903926324">"Показывать места нажатия на экране"</string>
     <string name="show_screen_updates" msgid="5470814345876056420">"Показ. обнов. поверхности"</string>
-    <string name="show_screen_updates_summary" msgid="2569622766672785529">"Подсвечивать окна полностью при их обновлении"</string>
+    <string name="show_screen_updates_summary" msgid="2569622766672785529">"Подсвечивать поверхности окон при обновлении"</string>
     <string name="show_hw_screen_updates" msgid="5036904558145941590">"Показывать обнов. экрана"</string>
     <string name="show_hw_screen_updates_summary" msgid="1115593565980196197">"Подсвечивать области экрана при отрисовке с GPU"</string>
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"Показ. аппаратные обновл."</string>
@@ -222,36 +245,34 @@
     <string name="usb_audio_disable_routing" msgid="8114498436003102671">"Откл. передачу аудио (USB)"</string>
     <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"Откл. автом. маршрутизацию на внеш. USB-устройства"</string>
     <string name="debug_layout" msgid="5981361776594526155">"Показывать границы элементов"</string>
-    <string name="debug_layout_summary" msgid="2001775315258637682">"Показывать границы клипа, поля и т. д."</string>
-    <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Написание справа налево"</string>
+    <string name="debug_layout_summary" msgid="2001775315258637682">"Показывать границы обрезки, поля и т. п."</string>
+    <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Отразить интерфейс"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Включить написание справа налево для всех языков"</string>
-    <string name="show_cpu_usage" msgid="2389212910758076024">"Показывать загрузку ЦП"</string>
-    <string name="show_cpu_usage_summary" msgid="2113341923988958266">"Экран, показывающий текущую загрузку ЦП"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"GPU-ускорение"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"Всегда использовать GPU для двухмерного рисования"</string>
     <string name="force_msaa" msgid="7920323238677284387">"Включить 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9123553203895817537">"Включить 4x MSAA в приложениях OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="505954950474595172">"Отладить операции непрямоугольного усечения"</string>
-    <string name="track_frame_time" msgid="6146354853663863443">"Запись времени работы GPU"</string>
+    <string name="track_frame_time" msgid="6146354853663863443">"Профилировать GPU-отрисовку"</string>
     <string name="window_animation_scale_title" msgid="6162587588166114700">"Анимация окон"</string>
     <string name="transition_animation_scale_title" msgid="387527540523595875">"Анимация переходов"</string>
     <string name="animator_duration_scale_title" msgid="3406722410819934083">"Длительность анимации"</string>
     <string name="overlay_display_devices_title" msgid="5364176287998398539">"Эмуляция доп. экранов"</string>
     <string name="debug_applications_category" msgid="4206913653849771549">"Приложения"</string>
-    <string name="immediately_destroy_activities" msgid="1579659389568133959">"Не сохранять действия"</string>
+    <string name="immediately_destroy_activities" msgid="1579659389568133959">"Вытеснение фоновых Activity"</string>
     <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"Удалять сводку действий после их завершения"</string>
     <string name="app_process_limit_title" msgid="4280600650253107163">"Лимит фоновых процессов"</string>
     <string name="show_all_anrs" msgid="28462979638729082">"Все ANR"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"Уведомлять о том, что приложение не отвечает"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Разрешить сохранение на внешние накопители"</string>
-    <string name="force_allow_on_external_summary" msgid="3191952505860343233">"Разрешает сохранение приложений на внешние накопители независимо от значения манифеста"</string>
+    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Разрешить сохранение приложений на внешних накопителях (независимо от значений в манифесте)"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Изменение размера в многооконном режиме"</string>
-    <string name="force_resizable_activities_summary" msgid="4508217476997182216">"Позволяет менять размер в многооконном режиме (независимо от значений манифеста)"</string>
+    <string name="force_resizable_activities_summary" msgid="6667493494706124459">"Разрешить изменение размера окон в многооконном режиме (независимо от значений в манифесте)"</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"Разрешить создание окон произвольной формы"</string>
-    <string name="enable_freeform_support_summary" msgid="2252563497485436534">"Включить экспериментальную функцию создания окон произвольной формы"</string>
+    <string name="enable_freeform_support_summary" msgid="8247310463288834487">"Включить экспериментальную функцию создания окон произвольной формы"</string>
     <string name="local_backup_password_title" msgid="3860471654439418822">"Пароль для резервного копирования"</string>
     <string name="local_backup_password_summary_none" msgid="6951095485537767956">"Полные резервные копии в настоящее время не защищены"</string>
-    <string name="local_backup_password_summary_change" msgid="2731163425081172638">"Изменить или удалить пароль для резервного копирования"</string>
+    <string name="local_backup_password_summary_change" msgid="5376206246809190364">"Нажмите, чтобы изменить или удалить пароль для резервного копирования"</string>
     <string name="local_backup_password_toast_success" msgid="582016086228434290">"Новый пароль для резервной копии установлен"</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"Пароли не совпадают"</string>
     <string name="local_backup_password_toast_validation_failure" msgid="5646377234895626531">"Не удалось установить пароль для резервной копии"</string>
@@ -266,18 +287,15 @@
     <item msgid="5363960654009010371">"Цвета, оптимизированные для цифрового контента"</item>
   </string-array>
     <string name="inactive_apps_title" msgid="1317817863508274533">"Неактивные приложения"</string>
-    <string name="inactive_app_inactive_summary" msgid="6768756967594202411">"Неактивно. Нажмите для переключения."</string>
-    <string name="inactive_app_active_summary" msgid="4512911571954375968">"Активно. Нажмите для переключения."</string>
+    <string name="inactive_app_inactive_summary" msgid="5091363706699855725">"Выключено. Нажмите, чтобы включить."</string>
+    <string name="inactive_app_active_summary" msgid="4174921824958516106">"Включено. Нажмите, чтобы отключить."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Работающие приложения"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"Просмотр и управление работающими приложениями"</string>
-    <string name="night_mode_title" msgid="2594133148531256513">"Ночной режим"</string>
-    <string name="night_mode_summary" msgid="9196605054622017193">"%s"</string>
-    <string name="night_mode_no" msgid="9171772244775838901">"Отключено"</string>
-    <string name="night_mode_yes" msgid="2218157265997633432">"Всегда включено"</string>
-    <string name="night_mode_auto" msgid="7508348175804304327">"Автоматическое переключение"</string>
+    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"Многопроцессный WebView"</string>
+    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"Запускать обработчики WebView в отдельных процессах"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"Сервис WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Настройки сервиса WebView"</string>
-    <string name="select_webview_provider_confirmation_text" msgid="6671472080671066972">"Чтобы использовать сервис WebView, включите его. Сделать это?"</string>
+    <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Вариант недействителен. Повторите попытку."</string>
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"Переход к шифрованию файлов"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"Перейти…"</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"Шифрование файлов уже включено"</string>
@@ -294,19 +312,50 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"Коррекция цвета"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Это экспериментальная функция, она может снизить производительность устройства."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"Новая настройка: <xliff:g id="TITLE">%1$s</xliff:g>"</string>
+    <string name="power_remaining_duration_only" msgid="4400068916452346544">"Осталось примерно <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"Осталось: <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharging_duration" msgid="1605929174734600590">"<xliff:g id="LEVEL">%1$s</xliff:g> – осталось около <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">%1$s</xliff:g>, осталось: <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="2853265177761520490">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> до полной зарядки"</string>
+    <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging_duration_ac" msgid="3969186192576594254">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> до полной зарядки (от сети)"</string>
+    <string name="power_charging_duration_ac_short" msgid="7895864687218765582">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging_duration_usb" msgid="182405645340976546">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> до полной зарядки (через USB)"</string>
+    <string name="power_charging_duration_usb_short" msgid="941854728040426399">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging_duration_wireless" msgid="1829295708243159464">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> до полной зарядки (беспроводная)"</string>
+    <string name="power_charging_duration_wireless_short" msgid="1642664799869599476">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"Неизвестно"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"Идет зарядка"</string>
     <string name="battery_info_status_charging_ac" msgid="2909861890674399949">"Зарядка от сети"</string>
+    <string name="battery_info_status_charging_ac_short" msgid="7431401092096415502">"Зарядка"</string>
     <string name="battery_info_status_charging_usb" msgid="2207489369680923929">"Зарядка через USB"</string>
+    <string name="battery_info_status_charging_usb_short" msgid="6733371990319101366">"Зарядка"</string>
     <string name="battery_info_status_charging_wireless" msgid="3574032603735446573">"Беспроводная зарядка"</string>
+    <string name="battery_info_status_charging_wireless_short" msgid="752569941028903610">"Зарядка"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"Не заряжается"</string>
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"Не заряжается"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"Батарея заряжена"</string>
-    <string name="disabled_by_admin_summary_text" msgid="7787027069207263048">"Отключено администратором"</string>
+    <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"Контролируется администратором"</string>
+    <string name="enabled_by_admin" msgid="2386503803463071894">"Включено администратором"</string>
+    <string name="disabled_by_admin" msgid="3669999613095206948">"Отключено администратором"</string>
+    <string name="home" msgid="3256884684164448244">"Настройки"</string>
+  <string-array name="battery_labels">
+    <item msgid="8494684293649631252">"0%"</item>
+    <item msgid="8934126114226089439">"50%"</item>
+    <item msgid="1286113608943010849">"100%"</item>
+  </string-array>
+    <string name="charge_length_format" msgid="8978516217024434156">"<xliff:g id="ID_1">%1$s</xliff:g> назад"</string>
+    <string name="remaining_length_format" msgid="7886337596669190587">"Осталось <xliff:g id="ID_1">%1$s</xliff:g>"</string>
+    <string name="screen_zoom_summary_small" msgid="5867245310241621570">"Мелкий"</string>
+    <string name="screen_zoom_summary_default" msgid="2247006805614056507">"По умолчанию"</string>
+    <string name="screen_zoom_summary_large" msgid="4835294730065424084">"Крупный"</string>
+    <string name="screen_zoom_summary_very_large" msgid="7108563375663670067">"Очень крупный"</string>
+    <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"Максимальный"</string>
+    <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"Другой (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
+    <string name="help_feedback_label" msgid="6815040660801785649">"Справка/отзыв"</string>
+    <string name="content_description_menu_button" msgid="8182594799812351266">"Меню"</string>
+    <string name="retail_demo_reset_message" msgid="118771671364131297">"Чтобы сбросить настройки в деморежиме, введите пароль."</string>
+    <string name="retail_demo_reset_next" msgid="8356731459226304963">"Далее"</string>
+    <string name="retail_demo_reset_title" msgid="696589204029930100">"Требуется пароль"</string>
 </resources>

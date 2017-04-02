@@ -25,10 +25,12 @@
     <string name="wifi_remembered" msgid="4955746899347821096">"Vistað"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"Óvirkt"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"IP-stillingarvilla"</string>
+    <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"Tenging er ekki til staðar því nettengingin er léleg"</string>
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"WiFi-tengingarvilla"</string>
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"Vandamál við auðkenningu"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"Ekkert samband"</string>
-    <string name="wifi_no_internet" msgid="9151470775868728896">"Enginn netaðgangur fannst; endurtengist ekki sjálfkrafa."</string>
+    <string name="wifi_no_internet_no_reconnect" msgid="2211781637653149657">"Enginn netaðgangur fannst, endurtengist ekki sjálfkrafa."</string>
+    <string name="wifi_no_internet" msgid="5011955173375805204">"Enginn netaðgangur."</string>
     <string name="saved_network" msgid="4352716707126620811">"<xliff:g id="NAME">%1$s</xliff:g> vistaði"</string>
     <string name="connected_via_wfa" msgid="3805736726317410714">"Tengt í gegnum Wi-Fi aðstoð"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Tengt í gegnum %1$s"</string>
@@ -91,7 +93,7 @@
     <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Bluetooth-tjóðrun"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"Tjóðrun"</string>
     <string name="tether_settings_title_all" msgid="8356136101061143841">"Tjóðrun og heitur reitur"</string>
-    <string name="managed_user_title" msgid="8101244883654409696">"Vinnusnið"</string>
+    <string name="managed_user_title" msgid="8109605045406748842">"Öll vinnuforrit"</string>
     <string name="user_guest" msgid="8475274842845401871">"Gestur"</string>
     <string name="unknown" msgid="1592123443519355854">"Óþekkt"</string>
     <string name="running_process_item_user_label" msgid="3129887865552025943">"Notandi: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
@@ -101,6 +103,8 @@
     <string name="tts_settings_title" msgid="1237820681016639683">"Úttak upplesturs"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"Talhraði"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"Hraði talaðs texta"</string>
+    <string name="tts_default_pitch_title" msgid="6135942113172488671">"Tónhæð"</string>
+    <string name="tts_default_pitch_summary" msgid="1944885882882650009">"Hefur áhrif á raddblæ talgervils"</string>
     <string name="tts_default_lang_title" msgid="8018087612299820556">"Tungumál"</string>
     <string name="tts_lang_use_system" msgid="2679252467416513208">"Nota tungumál kerfis"</string>
     <string name="tts_lang_not_selected" msgid="7395787019276734765">"Tungumál ekki valið"</string>
@@ -121,6 +125,8 @@
     <string name="tts_engine_settings_button" msgid="1030512042040722285">"Stillingar vélarræsingar"</string>
     <string name="tts_engine_preference_section_title" msgid="448294500990971413">"Valin vél"</string>
     <string name="tts_general_section_title" msgid="4402572014604490502">"Almennt"</string>
+    <string name="tts_reset_speech_pitch_title" msgid="5789394019544785915">"Endurstilla tónhæð raddar"</string>
+    <string name="tts_reset_speech_pitch_summary" msgid="8700539616245004418">"Stilla tónhæð á upplesnum texta aftur á sjálfgefna stillingu."</string>
   <string-array name="tts_rate_entries">
     <item msgid="6695494874362656215">"Mjög hægt"</item>
     <item msgid="4795095314303559268">"Hægt"</item>
@@ -163,20 +169,36 @@
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Kveikja á ítarlegri skráningu Wi-Fi"</string>
     <string name="wifi_aggressive_handover" msgid="9194078645887480917">"Ágeng yfirfærsla frá Wi-Fi til símkerfis"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Leyfa alltaf reikileit með Wi-Fi"</string>
-    <string name="legacy_dhcp_client" msgid="694426978909127287">"Nota gamlan DHCP-biðlara"</string>
     <string name="mobile_data_always_on" msgid="7745605759775320362">"Alltaf kveikt á farsímagögnum"</string>
+    <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Slökkva á samstillingu hljóðstyrks"</string>
+    <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Bluetooth AVRCP-útgáfa"</string>
+    <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Velja Bluetooth AVRCP-útgáfu"</string>
+    <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Bluetooth hljóðkóðari"</string>
+    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="4558347981670553665">"Velja Bluetooth-hljóðkóðara"</string>
+    <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Bluetooth hljóðtökutíðni"</string>
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5628790207448471613">"Velja hljóðkóðara Bluetooth:\ntökutíðni"</string>
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"Bluetooth hljóðbitar í úrtaki"</string>
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4546131401358681321">"Velja hljóðkóðara Bluetooth:\nbitar í úrtaki"</string>
+    <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"Hljóðrásarstilling Bluetooth"</string>
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="9133545781346216071">"Velja hljóðkóðara Bluetooth:\nstilling rásar"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Bluetooth LDAC-hljóðkóðari: gæði spilunar"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"Velja Bluetooth LDAC-hljóðkóðara:\ngæði spilunar"</string>
+    <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Streymi: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Sýna valkosti fyrir vottun þráðlausra skjáa"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Auka skráningarstig Wi-Fi, sýna RSSI fyrir hvert SSID í Wi-Fi vali"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"Þegar þetta er virkt mun Wi-Fi ganga harðar fram í að færa gagnatenginguna yfir til símkerfisins þegar Wi-Fi merkið er lélegt"</string>
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"Leyfa/banna reikileit með Wi-Fi á grunni þess hversu mikil gagnaumferð er fyrir hendi í viðmótinu"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Annálsritastærðir biðminna"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Veldu annálsritastærðir á biðminni"</string>
+    <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"Hreinsa varanlega geymslu annálsrita?"</string>
+    <string name="dev_logpersist_clear_warning_message" msgid="2256582531342994562">"Þegar við notum ekki lengur varanlegan annálsrita til að fylgjast með þá þurfum við að eyða annálsritanum af tækinu þínu."</string>
+    <string name="select_logpersist_title" msgid="7530031344550073166">"Geyma annálsgögn í tækinu"</string>
+    <string name="select_logpersist_dialog_title" msgid="4003400579973269060">"Veldu biðminni fyrir varanlega geymslu í tækinu"</string>
     <string name="select_usb_configuration_title" msgid="2649938511506971843">"Velja USB-stillingar"</string>
     <string name="select_usb_configuration_dialog_title" msgid="6385564442851599963">"Velja USB-stillingar"</string>
     <string name="allow_mock_location" msgid="2787962564578664888">"Leyfa gervistaðsetningar"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Leyfa gervistaðsetningar"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Virkja yfirlit skoðunar eiginda"</string>
-    <string name="legacy_dhcp_client_summary" msgid="163383566317652040">"Nota gamla DHCP-biðlarann úr Lollipop í staðinn fyrir nýja Android DHCP-biðlarann."</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Hafa alltaf kveikt á farsímagögnum, líka þegar kveikt er á Wi-Fi (til að skipta megi hratt milli kerfa)."</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"Leyfa USB-villuleit?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"USB-villuleit er aðeins ætluð til nota í þróunarskyni. Hana má nota til að afrita gögn á milli tölvu og tækis, setja forrit upp í tækinu án tilkynninga og lesa annálagögn."</string>
@@ -185,6 +207,7 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"Þessar stillingar eru einungis ætlaðar í þróunarskyni. Þær geta valdið því að tækið og forrit þess bili eða starfi á rangan hátt."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Staðfesta forrit gegnum USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Kanna skaðlega hegðun forrita sem sett eru upp frá ADB/ADT."</string>
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Slekkur á samstillingu Bluetooth-hljóðstyrks ef vandamál koma upp með hljóðstyrk hjá fjartengdum tækjum, svo sem of hár hljóðstyrkur eða erfiðleikar við stjórnun."</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Staðbundin skipanalína"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Virkja skipanalínuforrit sem leyfir staðbundinn skeljaraðgang"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP-athugun"</string>
@@ -206,8 +229,8 @@
     <string name="strict_mode_summary" msgid="142834318897332338">"Blikka skjá ef forrit gera tímafreka hluti á aðalþræði"</string>
     <string name="pointer_location" msgid="6084434787496938001">"Staðsetning bendils"</string>
     <string name="pointer_location_summary" msgid="840819275172753713">"Skjáyfirlögn sem sýnir rauntímagögn um snertingar"</string>
-    <string name="show_touches" msgid="1356420386500834339">"Sýna snertingar"</string>
-    <string name="show_touches_summary" msgid="6684407913145150041">"Sýna snertingar myndrænt"</string>
+    <string name="show_touches" msgid="2642976305235070316">"Sýna snertingar"</string>
+    <string name="show_touches_summary" msgid="6101183132903926324">"Sýna snertingar myndrænt"</string>
     <string name="show_screen_updates" msgid="5470814345876056420">"Sýna yfirborðsuppfærslur"</string>
     <string name="show_screen_updates_summary" msgid="2569622766672785529">"Láta allt yfirborð glugga blikka við uppfærslu"</string>
     <string name="show_hw_screen_updates" msgid="5036904558145941590">"Sýna uppfærslur skjákorts"</string>
@@ -221,18 +244,16 @@
     <string name="enable_opengl_traces_title" msgid="6790444011053219871">"Kveikja á OpenGL-rakningu"</string>
     <string name="usb_audio_disable_routing" msgid="8114498436003102671">"Slökkva á USB-hljóðbeiningu"</string>
     <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"Slökkva á sjálfvirkri beiningu til USB-hljóðtækja"</string>
-    <string name="debug_layout" msgid="5981361776594526155">"Sýna mörk í uppsetningu"</string>
+    <string name="debug_layout" msgid="5981361776594526155">"Sýna uppsetningarmörk"</string>
     <string name="debug_layout_summary" msgid="2001775315258637682">"Sýna skurðlínur, spássíur o.s.frv."</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Þvinga umbrot frá hægri til vinstri"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Þvinga umbrot skjás frá hægri til vinstri fyrir alla tungumálskóða"</string>
-    <string name="show_cpu_usage" msgid="2389212910758076024">"Sýna örgjörvanotkun"</string>
-    <string name="show_cpu_usage_summary" msgid="2113341923988958266">"Skjáyfirlögn sem sýnir núverandi örgjörvanotkun"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"Þvinga skjákortsteiknun"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"Þvinga notkun skjákorts fyrir tvívíða teikningu"</string>
     <string name="force_msaa" msgid="7920323238677284387">"Þvinga 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9123553203895817537">"Virkja 4x MSAA í OpenGL ES 2.0 forritum"</string>
     <string name="show_non_rect_clip" msgid="505954950474595172">"Villuleita klippt svæði sem ekki eru rétthyrnd"</string>
-    <string name="track_frame_time" msgid="6146354853663863443">"Greina teiknun skjákorts"</string>
+    <string name="track_frame_time" msgid="6146354853663863443">"Greina skjákortsteiknun"</string>
     <string name="window_animation_scale_title" msgid="6162587588166114700">"Kvarði gluggahreyfinga"</string>
     <string name="transition_animation_scale_title" msgid="387527540523595875">"Lengd hreyfiumbreytinga"</string>
     <string name="animator_duration_scale_title" msgid="3406722410819934083">"Tímalengd hreyfiáhrifa"</string>
@@ -244,14 +265,14 @@
     <string name="show_all_anrs" msgid="28462979638729082">"Öll forrit sem svara ekki"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"Sýna „Forrit svarar ekki“ fyrir bakgrunnsforrit"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Þvinga fram leyfi forrita í ytri geymslu"</string>
-    <string name="force_allow_on_external_summary" msgid="3191952505860343233">"Gerir hvaða forriti sem er kleift að skrifa í ytri geymslu, burtséð frá gildum í upplýsingaskrá"</string>
+    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Gerir öll forrit skrifanleg í ytra geymslurými, óháð gildum í upplýsingaskrá"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Þvinga breytanlega stærð virkni"</string>
-    <string name="force_resizable_activities_summary" msgid="4508217476997182216">"Gerir stærð allrar virkni breytanlega svo að hún henti fyrir marga glugga, óháð gildum í upplýsingaskrá."</string>
+    <string name="force_resizable_activities_summary" msgid="6667493494706124459">"Gera stærð allrar virkni breytanlega svo að hún henti fyrir marga glugga, óháð gildum í upplýsingaskrá."</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"Virkja glugga með frjálsu sniði"</string>
-    <string name="enable_freeform_support_summary" msgid="2252563497485436534">"Kveikir á stuðningi við glugga með frjálsu sniði á tilraunastigi."</string>
+    <string name="enable_freeform_support_summary" msgid="8247310463288834487">"Virkja stuðning við glugga með frjálsu sniði á tilraunastigi."</string>
     <string name="local_backup_password_title" msgid="3860471654439418822">"Aðgangsorð tölvuafritunar"</string>
     <string name="local_backup_password_summary_none" msgid="6951095485537767956">"Heildarafritun á tölvu er ekki varin sem stendur."</string>
-    <string name="local_backup_password_summary_change" msgid="2731163425081172638">"Snertu til að breyta eða fjarlægja aðgangsorðið fyrir heildarafritun á tölvu"</string>
+    <string name="local_backup_password_summary_change" msgid="5376206246809190364">"Ýttu til að breyta eða fjarlægja aðgangsorðið fyrir heildarafritun á tölvu"</string>
     <string name="local_backup_password_toast_success" msgid="582016086228434290">"Nýtt aðgangsorð fyrir afritun valið"</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"Nýja aðgangsorðið og staðfestingaraðgangsorðið eru ekki eins"</string>
     <string name="local_backup_password_toast_validation_failure" msgid="5646377234895626531">"Villa við að velja aðgangsorð fyrir afritun"</string>
@@ -266,18 +287,15 @@
     <item msgid="5363960654009010371">"Litir sérhannaðir fyrir stafrænt efni"</item>
   </string-array>
     <string name="inactive_apps_title" msgid="1317817863508274533">"Óvirk forrit"</string>
-    <string name="inactive_app_inactive_summary" msgid="6768756967594202411">"Óvirkt. Snertu til að breyta."</string>
-    <string name="inactive_app_active_summary" msgid="4512911571954375968">"Virkt. Snertu til að breyta."</string>
+    <string name="inactive_app_inactive_summary" msgid="5091363706699855725">"Óvirkt. Ýttu til að breyta."</string>
+    <string name="inactive_app_active_summary" msgid="4174921824958516106">"Virkt. Ýttu til að breyta."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Þjónustur í gangi"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"Skoða og stjórna þjónustum í gangi"</string>
-    <string name="night_mode_title" msgid="2594133148531256513">"Næturstilling"</string>
-    <string name="night_mode_summary" msgid="9196605054622017193">"%s"</string>
-    <string name="night_mode_no" msgid="9171772244775838901">"Óvirkt"</string>
-    <string name="night_mode_yes" msgid="2218157265997633432">"Alltaf kveikt"</string>
-    <string name="night_mode_auto" msgid="7508348175804304327">"Sjálfvirkt"</string>
+    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"WebView í fjölvinnslu"</string>
+    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"Keyra WebView teiknun í aðskildu lagi"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"Innleiðing WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Stilla innleiðingu WebView"</string>
-    <string name="select_webview_provider_confirmation_text" msgid="6671472080671066972">"Slökkt er á valinni innleiðingu WebView. Kveikja þarf á henni til að hægt sé að nota hana. Viltu gera það?"</string>
+    <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Þetta val er ekki lengur gilt. Reyndu aftur."</string>
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"Umbreyta í dulkóðun skráa"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"Umbreyta…"</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"Þegar dulkóðað á grundvelli skráa"</string>
@@ -294,19 +312,50 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"Litaleiðrétting"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Þessi eiginleiki er á tilraunastigi og getur haft áhrif á frammistöðu."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"Hnekkt af <xliff:g id="TITLE">%1$s</xliff:g>"</string>
+    <string name="power_remaining_duration_only" msgid="4400068916452346544">"Um það bil <xliff:g id="TIME">%1$s</xliff:g> eftir"</string>
+    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">%1$s</xliff:g> eftir"</string>
     <string name="power_discharging_duration" msgid="1605929174734600590">"<xliff:g id="LEVEL">%1$s</xliff:g> – u.þ.b. <xliff:g id="TIME">%2$s</xliff:g> eftir"</string>
+    <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> eftir"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="2853265177761520490">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> í fulla hleðslu"</string>
+    <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging_duration_ac" msgid="3969186192576594254">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> í fulla hleðslu með hleðslutæki"</string>
+    <string name="power_charging_duration_ac_short" msgid="7895864687218765582">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging_duration_usb" msgid="182405645340976546">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> í fulla hleðslu í gegnum USB"</string>
+    <string name="power_charging_duration_usb_short" msgid="941854728040426399">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging_duration_wireless" msgid="1829295708243159464">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> í fulla hleðslu þráðlaust"</string>
+    <string name="power_charging_duration_wireless_short" msgid="1642664799869599476">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"Óþekkt"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"Í hleðslu"</string>
     <string name="battery_info_status_charging_ac" msgid="2909861890674399949">"Hleðslutæki tengt"</string>
+    <string name="battery_info_status_charging_ac_short" msgid="7431401092096415502">"Í hleðslu"</string>
     <string name="battery_info_status_charging_usb" msgid="2207489369680923929">"Hleður um USB"</string>
+    <string name="battery_info_status_charging_usb_short" msgid="6733371990319101366">"Í hleðslu"</string>
     <string name="battery_info_status_charging_wireless" msgid="3574032603735446573">"Hleður þráðlaust"</string>
+    <string name="battery_info_status_charging_wireless_short" msgid="752569941028903610">"Í hleðslu"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"Ekki í hleðslu"</string>
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"Ekki í hleðslu"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"Fullhlaðin"</string>
-    <string name="disabled_by_admin_summary_text" msgid="7787027069207263048">"Stjórnandi gerði óvirkt"</string>
+    <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"Stjórnað af kerfisstjóra"</string>
+    <string name="enabled_by_admin" msgid="2386503803463071894">"Virkjað af stjórnanda"</string>
+    <string name="disabled_by_admin" msgid="3669999613095206948">"Stjórnandi gerði óvirkt"</string>
+    <string name="home" msgid="3256884684164448244">"Stillingar"</string>
+  <string-array name="battery_labels">
+    <item msgid="8494684293649631252">"0%"</item>
+    <item msgid="8934126114226089439">"50%"</item>
+    <item msgid="1286113608943010849">"100%"</item>
+  </string-array>
+    <string name="charge_length_format" msgid="8978516217024434156">"Fyrir <xliff:g id="ID_1">%1$s</xliff:g>"</string>
+    <string name="remaining_length_format" msgid="7886337596669190587">"<xliff:g id="ID_1">%1$s</xliff:g> eftir"</string>
+    <string name="screen_zoom_summary_small" msgid="5867245310241621570">"Lítið"</string>
+    <string name="screen_zoom_summary_default" msgid="2247006805614056507">"Sjálfgefið"</string>
+    <string name="screen_zoom_summary_large" msgid="4835294730065424084">"Stórt"</string>
+    <string name="screen_zoom_summary_very_large" msgid="7108563375663670067">"Stærra"</string>
+    <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"Stærst"</string>
+    <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"Sérsniðið (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
+    <string name="help_feedback_label" msgid="6815040660801785649">"Hjálp og ábendingar"</string>
+    <string name="content_description_menu_button" msgid="8182594799812351266">"Valmynd"</string>
+    <string name="retail_demo_reset_message" msgid="118771671364131297">"Sláðu inn aðgangsorð til að framkvæma núllstillingu í sýnisútgáfu"</string>
+    <string name="retail_demo_reset_next" msgid="8356731459226304963">"Áfram"</string>
+    <string name="retail_demo_reset_title" msgid="696589204029930100">"Aðgangsorðs krafist"</string>
 </resources>
