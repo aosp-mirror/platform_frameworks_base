@@ -22,6 +22,7 @@ import android.content.Loader;
 import android.os.Handler;
 import android.os.Message;
 import android.printservice.recommendation.RecommendationInfo;
+
 import com.android.internal.util.Preconditions;
 
 import java.util.List;
@@ -77,7 +78,7 @@ public class PrintServiceRecommendationsLoader extends Loader<List<Recommendatio
             }
         };
 
-        mPrintManager.addPrintServiceRecommendationsChangeListener(mListener);
+        mPrintManager.addPrintServiceRecommendationsChangeListener(mListener, null);
 
         // Immediately deliver a result
         deliverResult(mPrintManager.getPrintServiceRecommendations());

@@ -45,17 +45,17 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.print.IPrintDocumentAdapter;
 import android.print.IPrintJobStateChangeListener;
-import android.printservice.recommendation.IRecommendationsChangeListener;
 import android.print.IPrintServicesChangeListener;
 import android.print.IPrinterDiscoveryObserver;
 import android.print.PrintAttributes;
 import android.print.PrintJobId;
 import android.print.PrintJobInfo;
 import android.print.PrintManager;
-import android.printservice.recommendation.RecommendationInfo;
 import android.print.PrinterId;
 import android.print.PrinterInfo;
 import android.printservice.PrintServiceInfo;
+import android.printservice.recommendation.IRecommendationsChangeListener;
+import android.printservice.recommendation.RecommendationInfo;
 import android.provider.DocumentsContract;
 import android.provider.Settings;
 import android.text.TextUtils;
@@ -72,8 +72,9 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.SomeArgs;
 import com.android.server.print.RemotePrintService.PrintServiceCallbacks;
+import com.android.server.print.RemotePrintServiceRecommendationService
+        .RemotePrintServiceRecommendationServiceCallbacks;
 import com.android.server.print.RemotePrintSpooler.PrintSpoolerCallbacks;
-import com.android.server.print.RemotePrintServiceRecommendationService.RemotePrintServiceRecommendationServiceCallbacks;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -882,7 +883,7 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks,
                         + android.Manifest.permission.BIND_PRINT_SERVICE);
                 continue;
             }
-            tempPrintServices.add(PrintServiceInfo.create(installedService, mContext));
+            tempPrintServices.add(PrintServiceInfo.create(mContext, installedService));
         }
 
         mInstalledServices.clear();
