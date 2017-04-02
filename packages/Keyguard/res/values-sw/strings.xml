@@ -21,14 +21,14 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="719438068451601849">"Kilinda vitufe"</string>
-    <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"Ingiza msimbo wa PIN"</string>
-    <string name="keyguard_password_enter_puk_code" msgid="3035856550289724338">"Chapa PUK ya SIM na msimbo mpya wa PIN"</string>
+    <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"Weka nambari ya PIN"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="3035856550289724338">"Weka PUK na nambari mpya wa PIN ya SIM"</string>
     <string name="keyguard_password_enter_puk_prompt" msgid="1801941051094974609">"Msimbo wa PUK ya SIM"</string>
-    <string name="keyguard_password_enter_pin_prompt" msgid="3201151840570492538">"Msimbo mpya wa PIN ya SIM"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="3201151840570492538">"Nambari mpya ya PIN ya SIM"</string>
     <string name="keyguard_password_entry_touch_hint" msgid="7858547464982981384"><font size="17">"Gusa kuingiza nenosiri "</font></string>
     <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"Charaza nenosiri ili kufungua"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"Ingiza PIN ili kufungua"</string>
-    <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"Msimbo wa PIN usio sahihi."</string>
+    <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"Nambari ya PIN uliyoweka si sahihi."</string>
     <string name="keyguard_charged" msgid="3272223906073492454">"Betri imejaa"</string>
     <string name="keyguard_plugged_in" msgid="9087497435553252863">"Inachaji"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="6671162730167305479">"Inachaji kwa kasi"</string>
@@ -46,11 +46,6 @@
     <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"SIM kadi imefungwa."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"SIM kadi imefungwa na PUK."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"Inafungua SIM kadi..."</string>
-    <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Kufungua kwa ruwaza."</string>
-    <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Kufungua kwa PIN."</string>
-    <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Kufungua kwa nenosiri."</string>
-    <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Eneo la ruwaza."</string>
-    <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Eneo la slaidi."</string>
     <string name="keyguard_accessibility_pin_area" msgid="7903959476607833485">"Eneo la PIN"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="3887780775111719336">"Eneo la PIN ya SIM"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="1880823406954996207">"Eneo la PUK ya SIM"</string>
@@ -69,8 +64,8 @@
     <string name="kg_password_instructions" msgid="5753646556186936819">"Weka Nenosiri"</string>
     <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"SIM sasa imelemazwa. Ingiza msimbo wa PUK ili kuendelea. Wasiliana na mtoa huduma kwa maelezo."</string>
     <string name="kg_puk_enter_puk_hint_multi" msgid="363822494559783025">"SIM \"<xliff:g id="CARRIER">%1$s</xliff:g>\" sasa imezimwa. Weka msimbo wa PUK ili uendelee. Wasiliana na mtoa huduma kwa maelezo."</string>
-    <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"Ingiza msimbo wa PIN unaopendelewa"</string>
-    <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"Thibitisha msimbo wa PIN unaopendelewa"</string>
+    <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"Weka nambari yako ya PIN"</string>
+    <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"Thibitisha nambari ya PIN uliyoweka"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"Inafungua SIM kadi..."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Charaza PIN iliyo na tarakimu kati ya 4 na 8."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"Msimbo wa PUK unafaa kuwa na nambari 8 au zaidi."</string>
@@ -94,10 +89,10 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4951507352869831265">"Umekosea majaribio ya kufungua simu mara <xliff:g id="NUMBER">%d</xliff:g>. Wasifu wa kazini utaondolewa, hatua itakayofuta data yote ya wasifu."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Umekosea katika kuweka mchoro wako wa kufungua mara <xliff:g id="NUMBER_0">%1$d</xliff:g>. Baada ya majaribio <xliff:g id="NUMBER_1">%2$d</xliff:g> bila kufaulu, utaombwa kufungua kompyuta yako ndogo kwa kutumia akaunti yako ya barua pepe.\n\n Jaribu tena baada ya sekunde <xliff:g id="NUMBER_2">%3$d</xliff:g>."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Umekosea kuchora mchoro wako wa kufungua mara <xliff:g id="NUMBER_0">%1$d</xliff:g>. Baada ya majaribio <xliff:g id="NUMBER_1">%2$d</xliff:g> yasiyofaulu, utaombwa kufungua simu yako kwa kutumia akaunti ya barua pepe.\n\n Jaribu tena baada ya sekunde <xliff:g id="NUMBER_2">%3$d</xliff:g>."</string>
-    <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Msimbo wa PIN ya SIM usiosahihi sasa lazima uwasiliane na mtoa huduma wako ili ufungue kifaa chako."</string>
+    <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Nambari ya PIN ya SIM uliyoweka si sahihi. Lazima uwasiliane na mtoa huduma wako ili akufungulie kifaa chako."</string>
     <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="6721575017538162249">
-      <item quantity="other">Msimbo wa PIN ya SIM si sahihi, umebakisha majaribio <xliff:g id="NUMBER_1">%d</xliff:g>.</item>
-      <item quantity="one">Msimbo wa PIN ya SIM si sahihi, umebakisha majaribio <xliff:g id="NUMBER_0">%d</xliff:g> kabla ya kulazimika kuwasiliana na mtoa huduma wako ili afungue kifaa chako.</item>
+      <item quantity="other">Nambari ya PIN ya SIM si sahihi. Umebakisha nafasi zingine <xliff:g id="NUMBER_1">%d</xliff:g> za kujaribu.</item>
+      <item quantity="one">Nambari ya PIN ya SIM si sahihi. Umebakisha nafasi zingine <xliff:g id="NUMBER_0">%d</xliff:g> za kujaribu kabla ulazimike kuwasiliana na mtoa huduma wako ili akufungulie kifaa chako.</item>
     </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"SIM haiwezi kutumika. Wasiliana na mtoa huduma wako."</string>
     <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="7576227366999858780">
@@ -108,7 +103,7 @@
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"Utendakazi wa PUK ya SIM umeshindwa!"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"Msimbo Umekubaliwa!"</string>
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"Hakuna huduma."</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Swichi kitufe cha mbinu ingizi."</string>
+    <string name="accessibility_ime_switch_button" msgid="2829803408288433429">"Badilisha mbinu ya kuingiza data"</string>
     <string name="airplane_mode" msgid="3122107900897202805">"Hali ya ndegeni"</string>
     <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"Mchoro unahitajika baada ya kuanzisha kifaa upya"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="4411398237158448198">"PIN inahitajika baada ya kifaa kuanzishwa upya"</string>
@@ -119,6 +114,8 @@
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"Mchoro unahitajika unapobadili wasifu"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"PIN inahitajika unapobadili wasifu"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"Nenosiri linahitajika unapobadili wasifu"</string>
+    <string name="kg_prompt_reason_device_admin" msgid="5838877342219587193">"Msimamizi wa kifaa amekifunga"</string>
+    <string name="kg_prompt_reason_user_request" msgid="500999297306031595">"Umefunga kifaa mwenyewe"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
       <item quantity="other">Kifaa hakijafunguliwa kwa saa <xliff:g id="NUMBER_1">%d</xliff:g>. Thibitisha mchoro.</item>
       <item quantity="one">Kifaa hakijafunguliwa kwa saa <xliff:g id="NUMBER_0">%d</xliff:g>. Thibitisha mchoro.</item>

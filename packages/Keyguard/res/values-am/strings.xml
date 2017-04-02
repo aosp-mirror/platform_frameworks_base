@@ -46,11 +46,6 @@
     <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"ሲም ካርድ ተዘግቷል።"</string>
     <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"ሲም ካርድ በፒዩኬ ተዘግቷል።"</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"ሲም ካርዱን በመክፈት ላይ…"</string>
-    <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"በስርዓተ-ጥለት መክፈት።"</string>
-    <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"በፒን መክፈት።"</string>
-    <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"በይለፍ ቃል መክፈት።"</string>
-    <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"የስርዓተ-ጥለት አካባቢ።"</string>
-    <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"የማንሸራተቻ አካባቢ።"</string>
     <string name="keyguard_accessibility_pin_area" msgid="7903959476607833485">"የፒን አካባቢ"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="3887780775111719336">"የሲም ፒን አካባቢ"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="1880823406954996207">"የሲም PUK አካባቢ"</string>
@@ -108,7 +103,7 @@
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"የሲም PUK ክወና አልተሳካም!"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"ኮዱ ተቀባይነት አግኝቷል!"</string>
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"ከአገልግሎት መስጫ ክልል ውጪ።"</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"የግቤት ስልት አዝራር ቀይር"</string>
+    <string name="accessibility_ime_switch_button" msgid="2829803408288433429">"የግቤት ስልት ቀይር"</string>
     <string name="airplane_mode" msgid="3122107900897202805">"የአውሮፕላን ሁነታ"</string>
     <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"መሣሪያ ዳግም ከጀመረ በኋላ ሥርዓተ ጥለት ያስፈልጋል"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="4411398237158448198">"መሣሪያ ዳግም ከጀመረ በኋላ ፒን ያስፈልጋል"</string>
@@ -119,6 +114,8 @@
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"መገለጫዎችን በሚቀያይሯቸው ጊዜ ሥርዓተ ጥለት ያስፈልጋል"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"መገለጫዎችን በሚቀያይሯቸው ፒን ያስፈልጋል"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"መገለጫዎችን በሚቀያይሯቸው ጊዜ የይለፍ ቃል ያስፈልጋል"</string>
+    <string name="kg_prompt_reason_device_admin" msgid="5838877342219587193">"የመሣሪያ አስተዳዳሪ መሣሪያውን ቆልፏል"</string>
+    <string name="kg_prompt_reason_user_request" msgid="500999297306031595">"መሣሪያ በእጅ ተቆልፏል"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
       <item quantity="one">መሳሪያው ለ<xliff:g id="NUMBER_1">%d</xliff:g>ሰዓቶች አልተከፈተም ነበር። ስርዓተ ጥለት ያረጋግጡ።</item>
       <item quantity="other">መሳሪያው ለ<xliff:g id="NUMBER_1">%d</xliff:g>ሰዓቶች አልተከፈተም ነበር። ስርዓተ ጥለት ያረጋግጡ።</item>

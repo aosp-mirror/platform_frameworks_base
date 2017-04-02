@@ -42,20 +42,15 @@
     <string name="keyguard_missing_sim_instructions" msgid="5210891509995942250">"Maglagay ng SIM card."</string>
     <string name="keyguard_missing_sim_instructions_long" msgid="5968985489463870358">"Wala o hindi nababasa ang SIM card. Maglagay ng SIM card."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="8340813989586622356">"Hindi nagagamit na SIM card."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5892940909699723544">"Ang iyong SIM card ay permanenteng hindi pinagana.\n Makipag-ugnay sa iyong wireless service provider para sa isa pang SIM card."</string>
+    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5892940909699723544">"Ang iyong SIM card ay permanenteng naka-disable.\n Makipag-ugnay sa iyong wireless service provider para sa isa pang SIM card."</string>
     <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"Naka-lock ang SIM card."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"Naka-lock ang SIM card gamit ang PUK."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"Ina-unlock ang SIM card…"</string>
-    <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Pag-unlock ng pattern."</string>
-    <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Pag-unlock ng pin."</string>
-    <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Pag-unlock ng password."</string>
-    <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Bahagi ng pattern."</string>
-    <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Bahagi ng slide."</string>
     <string name="keyguard_accessibility_pin_area" msgid="7903959476607833485">"Lugar ng PIN"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="3887780775111719336">"Lugar ng PIN ng SIM"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="1880823406954996207">"Lugar ng PUK ng SIM"</string>
     <string name="keyguard_accessibility_next_alarm" msgid="7269583073750518672">"Nakatakda ang susunod na alarm para sa <xliff:g id="ALARM">%1$s</xliff:g>"</string>
-    <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Tanggalin"</string>
+    <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"I-delete"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Enter"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Nakalimutan ang Pattern"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Maling Pattern"</string>
@@ -108,7 +103,7 @@
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"Nabigo ang operasyon ng SIM PUK!"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"Tinanggap ang Code!"</string>
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"Walang serbisyo."</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Ilipat ang button na pamamaraan ng pag-input."</string>
+    <string name="accessibility_ime_switch_button" msgid="2829803408288433429">"Magpalit ng pamamaraan ng pag-input"</string>
     <string name="airplane_mode" msgid="3122107900897202805">"Airplane mode"</string>
     <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"Kinakailangan ang pattern pagkatapos mag-restart ng device"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="4411398237158448198">"Kinakailangan ang PIN pagkatapos mag-restart ng device"</string>
@@ -119,6 +114,8 @@
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"Kinakailangan ang pattern kapag nagpalit ka ng profile"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"Kinakailangan ang PIN kapag nagpalit ka ng profile"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"Kinakailangan ang password kapag nagpalit ka ng profile"</string>
+    <string name="kg_prompt_reason_device_admin" msgid="5838877342219587193">"Ang device ay na-lock na ng administrator ng device"</string>
+    <string name="kg_prompt_reason_user_request" msgid="500999297306031595">"Manual na na-lock ang device"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
       <item quantity="one">Hindi na-unlock ang device sa loob ng <xliff:g id="NUMBER_1">%d</xliff:g> oras.. Kumpirmahin ang pattern.</item>
       <item quantity="other">Hindi na-unlock ang device sa loob ng <xliff:g id="NUMBER_1">%d</xliff:g> na oras. Kumpirmahin ang pattern.</item>

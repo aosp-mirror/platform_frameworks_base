@@ -46,11 +46,6 @@
     <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"ស៊ីម​កាត​​ជាប់​សោ។"</string>
     <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"ស៊ីម​កាត​ជាប់​កូដ​​ PUK ។"</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"កំពុង​ដោះ​សោ​ស៊ីម​កាត..."</string>
-    <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"លំនាំ​ដោះ​សោ​។"</string>
-    <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"កូដ PIN ដោះ​សោ។"</string>
-    <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"ពាក្យ​សម្ងាត់​ដោះ​សោ​។"</string>
-    <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"ផ្ទៃ​លំនាំ។"</string>
-    <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"ផ្ទៃ​រុញ។"</string>
     <string name="keyguard_accessibility_pin_area" msgid="7903959476607833485">"ប្រអប់លេខសម្ងាត់"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="3887780775111719336">"ប្រអប់លេខសម្ងាត់ស៊ីម"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="1880823406954996207">"ប្រអប់ PUK ស៊ីម"</string>
@@ -108,7 +103,7 @@
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"បាន​បរាជ័យ​ក្នុង​ការ​ប្រតិបត្តិ​​លេខ​កូដ PUK ស៊ីម!"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"បាន​ទទួល​យក​លេខ​កូដ​!"</string>
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"គ្មាន​សេវា​"</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"ប្ដូរ​ប៊ូតុង​វិធីសាស្ត្រ​បញ្ចូល។"</string>
+    <string name="accessibility_ime_switch_button" msgid="2829803408288433429">"ប្ដូរ​វិធីសាស្ត្រ​បញ្ចូល"</string>
     <string name="airplane_mode" msgid="3122107900897202805">"របៀបក្នុងយន្តហោះ"</string>
     <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"តម្រូវឲ្យប្រើលំនាំបន្ទាប់ពីឧបករណ៍ចាប់ផ្តើមឡើងវិញ"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="4411398237158448198">"តម្រូវឲ្យបញ្ចូលកូដ PIN បន្ទាប់ពីឧបករណ៍ចាប់ផ្តើមឡើងវិញ"</string>
@@ -119,6 +114,8 @@
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"តម្រូវឲ្យប្រើលំនាំនៅពេលដែលអ្នកប្តូរប្រវត្តិរូប"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"តម្រូវឲ្យបញ្ចូលកូដ PIN នៅពេលដែលអ្នកប្តូរប្រវត្តិរូប"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"តម្រូវឲ្យបញ្ចូលពាក្យសម្ងាត់នៅពេលដែលអ្នកប្តូរប្រវត្តិរូប"</string>
+    <string name="kg_prompt_reason_device_admin" msgid="5838877342219587193">"អ្នកគ្រប់គ្រងឧបករណ៍បានចាក់សោឧបករណ៍"</string>
+    <string name="kg_prompt_reason_user_request" msgid="500999297306031595">"ឧបករណ៍ត្រូវបានចាក់សោដោយអ្នកប្រើផ្ទាល់"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
       <item quantity="other">ឧបករណ៍មិនបានដោះសោអស់រយៈពេល <xliff:g id="NUMBER_1">%d</xliff:g> ម៉ោងហើយ។ បញ្ជាប់លំនាំ។</item>
       <item quantity="one">ឧបករណ៍មិនបានដោះសោអស់រយៈពេល <xliff:g id="NUMBER_0">%d</xliff:g> ម៉ោងហើយ។ បញ្ជាក់លំនាំ។</item>

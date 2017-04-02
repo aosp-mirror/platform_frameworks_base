@@ -46,11 +46,6 @@
     <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"SIM-kortet er låst."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"SIM-kort er låst med PUK-koden."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"SIM-kortet låses op…"</string>
-    <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Lås op med mønster."</string>
-    <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Lås op med pinkode."</string>
-    <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Lås op med adgangskode."</string>
-    <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Mønsterområde."</string>
-    <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Strygeområde."</string>
     <string name="keyguard_accessibility_pin_area" msgid="7903959476607833485">"Område for pinkoden"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="3887780775111719336">"Område for pinkoden til simkortet"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="1880823406954996207">"Område for PUK-koden til simkortet"</string>
@@ -63,7 +58,7 @@
     <string name="kg_wrong_pin" msgid="1131306510833563801">"Forkert pinkode"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"Prøv igen om <xliff:g id="NUMBER">%d</xliff:g> sekunder."</string>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"Tegn dit mønster"</string>
-    <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Indtast pinkode til SIM"</string>
+    <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Indtast pinkode til SIM-kort"</string>
     <string name="kg_sim_pin_instructions_multi" msgid="7818515973197201434">"Indtast SIM-pinkoden for \"<xliff:g id="CARRIER">%1$s</xliff:g>\""</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"Indtast pinkode"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"Angiv adgangskode"</string>
@@ -108,17 +103,19 @@
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"PUK-koden til SIM-kortet blev afvist."</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"Koden blev accepteret."</string>
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"Ingen dækning."</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Skift indtastningsmetode-knappen."</string>
+    <string name="accessibility_ime_switch_button" msgid="2829803408288433429">"Skift indtastningsmetode"</string>
     <string name="airplane_mode" msgid="3122107900897202805">"Flytilstand"</string>
-    <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"Du skal indtaste et mønster efter genstart af enheden"</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"Du skal angive et mønster efter genstart af enheden"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="4411398237158448198">"Der skal indtaste en pinkode efter genstart af enheden"</string>
     <string name="kg_prompt_reason_restart_password" msgid="6504585392626524695">"Du skal indtaste en adgangskode efter genstart af enheden"</string>
     <string name="kg_prompt_reason_timeout_pattern" msgid="3717506169674397620">"Der kræves et mønster som ekstra beskyttelse"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="6951483704195396341">"Der kræves en pinkode som ekstra beskyttelse"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="7306667546971345027">"Der kræves en adgangskode som ekstra beskyttelse"</string>
-    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"Du skal indtaste et mønster, når du skifter profil"</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"Du skal angive et mønster, når du skifter profil"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"Du skal indtaste en pinkode, når du skifter profil"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"Du skal indtaste en adgangskode, når du skifter profil"</string>
+    <string name="kg_prompt_reason_device_admin" msgid="5838877342219587193">"Enhedsadministratoren har låst enheden"</string>
+    <string name="kg_prompt_reason_user_request" msgid="500999297306031595">"Enheden blev låst manuelt"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
       <item quantity="one">Enheden blev sidst låst op for <xliff:g id="NUMBER_1">%d</xliff:g> timer siden. Bekræft mønsteret.</item>
       <item quantity="other">Enheden blev sidst låst op for <xliff:g id="NUMBER_1">%d</xliff:g> timer siden. Bekræft mønsteret.</item>
@@ -131,5 +128,5 @@
       <item quantity="one">Enheden blev sidst låst op for <xliff:g id="NUMBER_1">%d</xliff:g> timer siden. Bekræft adgangskoden.</item>
       <item quantity="other">Enheden blev sidst låst op for <xliff:g id="NUMBER_1">%d</xliff:g> timer siden. Bekræft adgangskoden.</item>
     </plurals>
-    <string name="fingerprint_not_recognized" msgid="2690661881608146617">"Kan ikke genkendes"</string>
+    <string name="fingerprint_not_recognized" msgid="2690661881608146617">"Ikke genkendt"</string>
 </resources>

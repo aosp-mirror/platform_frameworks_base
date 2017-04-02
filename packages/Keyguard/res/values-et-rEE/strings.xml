@@ -46,11 +46,6 @@
     <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"SIM-kaart on lukus."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"SIM-kaart on PUK-lukus."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"SIM-kaardi avamine ..."</string>
-    <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Mustriga avamine."</string>
-    <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"PIN-koodiga avamine."</string>
-    <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Parooliga avamine."</string>
-    <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Mustri ala."</string>
-    <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Lohistamisala."</string>
     <string name="keyguard_accessibility_pin_area" msgid="7903959476607833485">"PIN-koodi ala"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="3887780775111719336">"SIM-kaardi PIN-koodi ala"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="1880823406954996207">"SIM-kaardi PUK-koodi ala"</string>
@@ -108,7 +103,7 @@
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"SIM-i PUK-koodi toiming ebaõnnestus."</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"Kood on õige."</string>
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"Teenus puudub."</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Sisestusmeetodi vahetamise nupp."</string>
+    <string name="accessibility_ime_switch_button" msgid="2829803408288433429">"Vaheta sisestusmeetodit"</string>
     <string name="airplane_mode" msgid="3122107900897202805">"Lennukirežiim"</string>
     <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"Pärast seadme taaskäivitamist tuleb sisestada muster"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="4411398237158448198">"Pärast seadme taaskäivitamist tuleb sisestada PIN-kood"</string>
@@ -119,6 +114,8 @@
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"Profiilide vahetamisel tuleb sisestada muster"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"Profiilide vahetamisel tuleb sisestada PIN-kood"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"Profiilide vahetamisel tuleb sisestada parool"</string>
+    <string name="kg_prompt_reason_device_admin" msgid="5838877342219587193">"Seadme administraator lukustas seadme"</string>
+    <string name="kg_prompt_reason_user_request" msgid="500999297306031595">"Seade lukustati käsitsi"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
       <item quantity="other">Seadet pole avatud <xliff:g id="NUMBER_1">%d</xliff:g> tundi. Kinnitage muster.</item>
       <item quantity="one">Seadet pole avatud <xliff:g id="NUMBER_0">%d</xliff:g> tund. Kinnitage muster.</item>
