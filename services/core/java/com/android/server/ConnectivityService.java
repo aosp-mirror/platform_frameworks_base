@@ -396,6 +396,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
      */
     private static final int EVENT_REGISTER_NETWORK_LISTENER_WITH_INTENT = 31;
 
+    private static String eventName(int what) {
+        return sMagicDecoderRing.get(what, Integer.toString(what));
+    }
+
     /** Handler thread used for both of the handlers below. */
     @VisibleForTesting
     protected final HandlerThread mHandlerThread;
@@ -408,14 +412,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private Intent mInitialBroadcast;
 
     private PowerManager.WakeLock mNetTransitionWakeLock;
-    private String mNetTransitionWakeLockCausedBy = "";
     private int mNetTransitionWakeLockSerialNumber;
     private int mNetTransitionWakeLockTimeout;
     private final PowerManager.WakeLock mPendingIntentWakeLock;
-
-    // used in DBG mode to track inet condition reports
-    private static final int INET_CONDITION_LOG_MAX_SIZE = 15;
-    private ArrayList mInetLog;
 
     // track the current default http proxy - tell the world if we get a new one (real change)
     private volatile ProxyInfo mDefaultProxy = null;
@@ -458,9 +457,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private final LocalLog mNetworkRequestInfoLogs = new LocalLog(MAX_NETWORK_REQUEST_LOGS);
 
     // NetworkInfo blocked and unblocked String log entries
-    // TODO: consider reducing memory usage. Each log line is ~40 2B chars, for a total of ~8kB.
-    private static final int MAX_NETWORK_INFO_LOGS = 100;
+    private static final int MAX_NETWORK_INFO_LOGS = 40;
     private final LocalLog mNetworkInfoBlockingLogs = new LocalLog(MAX_NETWORK_INFO_LOGS);
+
+    private static final int MAX_WAKELOCK_LOGS = 20;
+    private final LocalLog mWakelockLogs = new LocalLog(MAX_WAKELOCK_LOGS);
 
     // Array of <Network,ReadOnlyLocalLogs> tracking network validation and results
     private static final int MAX_VALIDATION_LOGS = 10;
@@ -818,10 +819,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
             loge("Error registering observer :" + e);
         }
 
-        if (DBG) {
-            mInetLog = new ArrayList();
-        }
-
         mSettingsObserver = new SettingsObserver(mContext, mHandler);
         registerSettingsCallbacks();
 
@@ -1044,22 +1041,19 @@ public class ConnectivityService extends IConnectivityManager.Stub
         if (ni == null || !LOGD_BLOCKED_NETWORKINFO) {
             return;
         }
-        boolean removed = false;
-        boolean added = false;
+        final boolean blocked;
         synchronized (mBlockedAppUids) {
             if (ni.getDetailedState() == DetailedState.BLOCKED && mBlockedAppUids.add(uid)) {
-                added = true;
+                blocked = true;
             } else if (ni.isConnected() && mBlockedAppUids.remove(uid)) {
-                removed = true;
+                blocked = false;
+            } else {
+                return;
             }
         }
-        if (added) {
-            log("Returning blocked NetworkInfo to uid=" + uid);
-            mNetworkInfoBlockingLogs.log("BLOCKED " + uid);
-        } else if (removed) {
-            log("Returning unblocked NetworkInfo to uid=" + uid);
-            mNetworkInfoBlockingLogs.log("UNBLOCKED " + uid);
-        }
+        String action = blocked ? "BLOCKED" : "UNBLOCKED";
+        log(String.format("Returning %s NetworkInfo to uid=%d", action, uid));
+        mNetworkInfoBlockingLogs.log(action + " " + uid);
     }
 
     /**
@@ -2032,16 +2026,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         mLegacyTypeTracker.dump(pw);
 
-        synchronized (this) {
-            pw.print("mNetTransitionWakeLock: currently " +
-                    (mNetTransitionWakeLock.isHeld() ? "" : "not ") + "held");
-            if (!TextUtils.isEmpty(mNetTransitionWakeLockCausedBy)) {
-                pw.println(", last requested for " + mNetTransitionWakeLockCausedBy);
-            } else {
-                pw.println(", last requested never");
-            }
-        }
-
         pw.println();
         mTethering.dump(fd, pw, args);
 
@@ -2050,17 +2034,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         pw.println();
         dumpAvoidBadWifiSettings(pw);
-
-        pw.println();
-        if (mInetLog != null && mInetLog.size() > 0) {
-            pw.println();
-            pw.println("Inet condition reports:");
-            pw.increaseIndent();
-            for(int i = 0; i < mInetLog.size(); i++) {
-                pw.println(mInetLog.get(i));
-            }
-            pw.decreaseIndent();
-        }
 
         if (argsContain(args, "--short") == false) {
             pw.println();
@@ -2085,6 +2058,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
             pw.increaseIndent();
             mNetworkInfoBlockingLogs.reverseDump(fd, pw, args);
             pw.decreaseIndent();
+
+            pw.println();
+            pw.println("NetTransition WakeLock activity (most recent first):");
+            pw.increaseIndent();
+            mWakelockLogs.reverseDump(fd, pw, args);
+            pw.decreaseIndent();
         }
     }
 
@@ -2093,8 +2072,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         final NetworkAgentInfo officialNai = getNetworkAgentInfoForNetwork(nai.network);
         if (officialNai != null && officialNai.equals(nai)) return true;
         if (officialNai != null || VDBG) {
-            final String msg = sMagicDecoderRing.get(what, Integer.toString(what));
-            loge(msg + " - isLiveNetworkAgent found mismatched netId: " + officialNai +
+            loge(eventName(what) + " - isLiveNetworkAgent found mismatched netId: " + officialNai +
                 " - " + nai);
         }
         return false;
@@ -2131,8 +2109,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             NetworkAgentInfo nai = mNetworkAgentInfos.get(msg.replyTo);
             if (nai == null) {
                 if (VDBG) {
-                    final String what = sMagicDecoderRing.get(msg.what, Integer.toString(msg.what));
-                    log(String.format("%s from unknown NetworkAgent", what));
+                    log(String.format("%s from unknown NetworkAgent", eventName(msg.what)));
                 }
                 return;
             }
@@ -2869,25 +2846,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             switch (msg.what) {
                 case EVENT_EXPIRE_NET_TRANSITION_WAKELOCK:
                 case EVENT_CLEAR_NET_TRANSITION_WAKELOCK: {
-                    String causedBy = null;
-                    synchronized (ConnectivityService.this) {
-                        if (msg.arg1 == mNetTransitionWakeLockSerialNumber &&
-                                mNetTransitionWakeLock.isHeld()) {
-                            mNetTransitionWakeLock.release();
-                            causedBy = mNetTransitionWakeLockCausedBy;
-                        } else {
-                            break;
-                        }
-                    }
-                    if (VDBG) {
-                        if (msg.what == EVENT_EXPIRE_NET_TRANSITION_WAKELOCK) {
-                            log("Failed to find a new network - expiring NetTransition Wakelock");
-                        } else {
-                            log("NetTransition Wakelock (" +
-                                    (causedBy == null ? "unknown" : causedBy) +
-                                    " cleared because we found a replacement network");
-                        }
-                    }
+                    handleNetworkTransitionWakelockRelease(msg.what, msg.arg1);
                     break;
                 }
                 case EVENT_APPLY_GLOBAL_HTTP_PROXY: {
@@ -3126,12 +3085,38 @@ public class ConnectivityService extends IConnectivityManager.Stub
             if (mNetTransitionWakeLock.isHeld()) return;
             serialNum = ++mNetTransitionWakeLockSerialNumber;
             mNetTransitionWakeLock.acquire();
-            mNetTransitionWakeLockCausedBy = forWhom;
+            mWakelockLogs.log(String.format("ACQUIRE %d for %s", serialNum, forWhom));
         }
         mHandler.sendMessageDelayed(mHandler.obtainMessage(
                 EVENT_EXPIRE_NET_TRANSITION_WAKELOCK, serialNum, 0),
                 mNetTransitionWakeLockTimeout);
         return;
+    }
+
+    private void handleNetworkTransitionWakelockRelease(int eventId, int wantSerialNumber) {
+        final int serialNumber;
+        final boolean isHeld;
+        final boolean release;
+        synchronized (this) {
+            serialNumber = mNetTransitionWakeLockSerialNumber;
+            isHeld = mNetTransitionWakeLock.isHeld();
+            release = (wantSerialNumber == serialNumber) && isHeld;
+            if (release) {
+                mNetTransitionWakeLock.release();
+            }
+        }
+        final String result;
+        if (release) {
+            result = "released";
+        } else if (!isHeld) {
+            result = "already released";
+        } else {
+            result = String.format("not released (serial number was %d)", serialNumber);
+        }
+        String msg = String.format(
+                "RELEASE %d by %s: %s", wantSerialNumber, eventName(eventId), result);
+        mWakelockLogs.log(msg);
+        if (DBG) log(msg);
     }
 
     // 100 percent is full good, 0 is full bad.
