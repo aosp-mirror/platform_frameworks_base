@@ -30,6 +30,10 @@ import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.hardware.usb.UsbAccessory;
+import android.hardware.usb.UsbConfiguration;
+import android.hardware.usb.UsbConstants;
+import android.hardware.usb.UsbDevice;
+import android.hardware.usb.UsbInterface;
 import android.hardware.usb.UsbManager;
 import android.hardware.usb.UsbPort;
 import android.hardware.usb.UsbPortStatus;
@@ -61,6 +65,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Scanner;
@@ -125,9 +130,10 @@ public class UsbDeviceManager {
     private static final int MSG_BOOT_COMPLETED = 4;
     private static final int MSG_USER_SWITCHED = 5;
     private static final int MSG_UPDATE_USER_RESTRICTIONS = 6;
-    private static final int MSG_UPDATE_HOST_STATE = 7;
+    private static final int MSG_UPDATE_PORT_STATE = 7;
     private static final int MSG_ACCESSORY_MODE_ENTER_TIMEOUT = 8;
     private static final int MSG_UPDATE_CHARGING_STATE = 9;
+    private static final int MSG_UPDATE_HOST_STATE = 10;
 
     private static final int AUDIO_MODE_SOURCE = 1;
 
@@ -201,7 +207,7 @@ public class UsbDeviceManager {
         }
     };
 
-    private final BroadcastReceiver mHostReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver mPortReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             UsbPort port = intent.getParcelableExtra(UsbManager.EXTRA_PORT);
@@ -216,6 +222,19 @@ public class UsbDeviceManager {
             int chargePlug = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);
             boolean usbCharging = chargePlug == BatteryManager.BATTERY_PLUGGED_USB;
             mHandler.sendMessage(MSG_UPDATE_CHARGING_STATE, usbCharging);
+        }
+    };
+
+    private final BroadcastReceiver mHostReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Iterator devices = ((UsbManager) context.getSystemService(Context.USB_SERVICE))
+                    .getDeviceList().entrySet().iterator();
+            if (intent.getAction().equals(UsbManager.ACTION_USB_DEVICE_ATTACHED)) {
+                mHandler.sendMessage(MSG_UPDATE_HOST_STATE, devices, true);
+            } else {
+                mHandler.sendMessage(MSG_UPDATE_HOST_STATE, devices, false);
+            }
         }
     };
 
@@ -243,10 +262,15 @@ public class UsbDeviceManager {
         if (secureAdbEnabled && !dataEncrypted) {
             mDebuggingManager = new UsbDebuggingManager(context);
         }
-        mContext.registerReceiver(mHostReceiver,
+        mContext.registerReceiver(mPortReceiver,
                 new IntentFilter(UsbManager.ACTION_USB_PORT_CHANGED));
         mContext.registerReceiver(mChargingReceiver,
                 new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+
+        IntentFilter filter =
+                new IntentFilter(UsbManager.ACTION_USB_DEVICE_ATTACHED);
+        filter.addAction(UsbManager.ACTION_USB_DEVICE_DETACHED);
+        mContext.registerReceiver(mHostReceiver, filter);
     }
 
     private UsbProfileGroupSettingsManager getCurrentSettings() {
@@ -379,6 +403,7 @@ public class UsbDeviceManager {
         private int mCurrentUser = UserHandle.USER_NULL;
         private boolean mUsbCharging;
         private String mCurrentOemFunctions;
+        private boolean mHideUsbNotification;
 
         public UsbHandler(Looper looper) {
             super(looper);
@@ -492,8 +517,8 @@ public class UsbDeviceManager {
             args.argi2 = sourcePower ? 1 : 0;
             args.argi3 = sinkPower ? 1 : 0;
 
-            removeMessages(MSG_UPDATE_HOST_STATE);
-            Message msg = obtainMessage(MSG_UPDATE_HOST_STATE, args);
+            removeMessages(MSG_UPDATE_PORT_STATE);
+            Message msg = obtainMessage(MSG_UPDATE_PORT_STATE, args);
             // debounce rapid transitions of connect/disconnect on type-c ports
             sendMessageDelayed(msg, UPDATE_DELAY);
         }
@@ -855,7 +880,7 @@ public class UsbDeviceManager {
                         mPendingBootBroadcast = true;
                     }
                     break;
-                case MSG_UPDATE_HOST_STATE:
+                case MSG_UPDATE_PORT_STATE:
                     SomeArgs args = (SomeArgs) msg.obj;
                     mHostConnected = (args.argi1 == 1);
                     mSourcePower = (args.argi2 == 1);
@@ -870,6 +895,46 @@ public class UsbDeviceManager {
                     break;
                 case MSG_UPDATE_CHARGING_STATE:
                     mUsbCharging = (msg.arg1 == 1);
+                    updateUsbNotification();
+                    break;
+                case MSG_UPDATE_HOST_STATE:
+                    Iterator devices = (Iterator) msg.obj;
+                    boolean connected = (msg.arg1 == 1);
+
+                    if (DEBUG) {
+                        Slog.i(TAG, "HOST_STATE connected:" + connected);
+                    }
+
+                    if ((mHideUsbNotification && connected)
+                            || (!mHideUsbNotification && !connected)) {
+                        break;
+                    }
+
+                    mHideUsbNotification = false;
+                    while (devices.hasNext()) {
+                        Map.Entry pair = (Map.Entry) devices.next();
+                        if (DEBUG) {
+                            Slog.i(TAG, pair.getKey() + " = " + pair.getValue());
+                        }
+                        UsbDevice device = (UsbDevice) pair.getValue();
+                        int configurationCount = device.getConfigurationCount();
+                        while (configurationCount != 0) {
+                            UsbConfiguration config = device.getConfiguration(configurationCount);
+                            configurationCount--;
+                            int interfaceCount = config.getInterfaceCount();
+                            while (interfaceCount != 0) {
+                                UsbInterface intrface = config.getInterface(interfaceCount);
+                                interfaceCount--;
+                                if (intrface.getInterfaceClass() == UsbConstants.USB_CLASS_AUDIO) {
+                                    if (DEBUG) {
+                                        Slog.i(TAG, device + " is an Audio device");
+                                    }
+                                    mHideUsbNotification = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
                     updateUsbNotification();
                     break;
                 case MSG_ENABLE_ADB:
@@ -944,7 +1009,8 @@ public class UsbDeviceManager {
 
         private void updateUsbNotification() {
             if (mNotificationManager == null || !mUseUsbNotification
-                    || ("0".equals(SystemProperties.get("persist.charging.notify")))) {
+                    || ("0".equals(SystemProperties.get("persist.charging.notify")))
+                    || mHideUsbNotification) {
                 return;
             }
             int id = 0;
@@ -1097,6 +1163,7 @@ public class UsbDeviceManager {
             pw.println("  mSourcePower: " + mSourcePower);
             pw.println("  mSinkPower: " + mSinkPower);
             pw.println("  mUsbCharging: " + mUsbCharging);
+            pw.println("  mHideUsbNotification: " + mHideUsbNotification);
             try {
                 pw.println("  Kernel state: "
                         + FileUtils.readTextFile(new File(STATE_PATH), 0, null).trim());
