@@ -46,11 +46,6 @@
     <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"SIM-карта бөгөттөлгөн."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"SIM-карта PUK-бөгөттө."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"SIM-карта бөгөттөн чыгарылууда…"</string>
-    <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Үлгү менен ачуу."</string>
-    <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Пин код менен ачуу."</string>
-    <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Сырсөз менен ачуу."</string>
-    <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Үлгү аймагы."</string>
-    <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Жылмыштыруу аймагы."</string>
     <string name="keyguard_accessibility_pin_area" msgid="7903959476607833485">"PIN аймагы"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="3887780775111719336">"SIM PIN аймагы"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="1880823406954996207">"SIM PUK аймагы"</string>
@@ -58,7 +53,7 @@
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Жок кылуу"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Кирүү"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Үлгү унутулду"</string>
-    <string name="kg_wrong_pattern" msgid="1850806070801358830">"Үлгү туура эмес"</string>
+    <string name="kg_wrong_pattern" msgid="1850806070801358830">"Графикалык ачкыч туура эмес"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"Сырсөз туура эмес"</string>
     <string name="kg_wrong_pin" msgid="1131306510833563801">"PIN-код туура эмес"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"<xliff:g id="NUMBER">%d</xliff:g> секундадан кийин кайталаңыз."</string>
@@ -92,8 +87,8 @@
     <string name="kg_failed_attempts_almost_at_erase_profile" product="default" msgid="6853071165802933545">"Телефондун кулпусун ачууда <xliff:g id="NUMBER_0">%1$d</xliff:g> жолу туура эмес аракет кылдыңыз. Дагы <xliff:g id="NUMBER_1">%2$d</xliff:g> жолу туура эмес аракет кылсаңыз, жумуш профилиңиз чыгарылып салынып, профилдин бардык дайындары жок болот."</string>
     <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="4686386497449912146">"Планшеттин кулпусун ачууда <xliff:g id="NUMBER">%d</xliff:g> жолу туура эмес аракет кылдыңыз. Жумуш профили чыгарылып салынып, андагы бардык дайындар жок болот."</string>
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4951507352869831265">"Телефондун кулпусун ачууда <xliff:g id="NUMBER">%d</xliff:g> жолу туура эмес аракет кылдыңыз. Жумуш профили чыгарылып салынып, андагы бардык дайындар жок болот."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Сиз бөгөттөн чыгаруу үлгүсүн <xliff:g id="NUMBER_0">%1$d</xliff:g> жолу туура эмес көрсөттүңүз. Дагы <xliff:g id="NUMBER_1">%2$d</xliff:g> ийгиликсиз аракеттен кийин, планшетиңизди эмейл эсебиңиз аркылуу бөгөттөн чыгаруу талап кылынат.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> секундадан кийин кайра аракеттениңиз."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Сиз бөгөттөн чыгаруу үлгүсүн <xliff:g id="NUMBER_0">%1$d</xliff:g> жолу туура эмес көрсөттүңүз. Дагы <xliff:g id="NUMBER_1">%2$d</xliff:g> ийгиликсиз аракеттен кийин, телефонуңузду эмейл эсебиңиз аркылуу бөгөттөн чыгаруу талап кылынат.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> секундадан кийин кайра аракеттениңиз."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Графикалык ачкычты <xliff:g id="NUMBER_0">%1$d</xliff:g> жолу туура эмес көрсөттүңүз. <xliff:g id="NUMBER_1">%2$d</xliff:g> жолу туура эмес көрсөтүлгөндөн кийин, планшетиңиздин кулпусун ачуу үчүн Google каттоо эсебиңизге кирүүгө туура келет.\n\n<xliff:g id="NUMBER_2">%3$d</xliff:g> секундадан кийин кайталап көрсөңүз болот."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Графикалык ачкычты <xliff:g id="NUMBER_0">%1$d</xliff:g> жолу туура эмес көрсөттүңүз. <xliff:g id="NUMBER_1">%2$d</xliff:g> жолу туура эмес көрсөтүлгөндөн кийин, телефондун кулпусун ачуу үчүн Google каттоо эсебиңизге кирүүгө туура келет.\n\n<xliff:g id="NUMBER_2">%3$d</xliff:g> секундадан кийин кайталап көрсөңүз болот."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"SIM-карта PIN-коду туура эмес. Эми түзмөктү бөгөттөн чыгарыш үчүн операторуңузга кайрылышыңыз керек."</string>
     <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="6721575017538162249">
       <item quantity="other">SIM PIN-коду туура эмес, сизде <xliff:g id="NUMBER_1">%d</xliff:g> аракет калды.</item>
@@ -108,7 +103,7 @@
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"SIM-картанын PUK-кодун ачуу кыйрады!"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"Код кабыл алынды!"</string>
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"Байланыш жок."</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Киргизүү ыкмасын которуу баскычы."</string>
+    <string name="accessibility_ime_switch_button" msgid="2829803408288433429">"Киргизүү ыкмасын өзгөртүү"</string>
     <string name="airplane_mode" msgid="3122107900897202805">"Учак режими"</string>
     <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"Түзмөк кайра күйгүзүлгөндөн кийин графикалык ачкыч талап кылынат"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="4411398237158448198">"Түзмөк кайра күйгүзүлгөндөн кийин PIN код талап кылынат"</string>
@@ -119,6 +114,8 @@
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"Профилдерди которуштурганда графикалык ачкыч талап кылынат"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"Профилдерди которуштурганда PIN код талап кылынат"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"Профилдерди которуштурганда сырсөз талап кылынат"</string>
+    <string name="kg_prompt_reason_device_admin" msgid="5838877342219587193">"Түзмөк башкаргычы түзмөктү кулпулап койду"</string>
+    <string name="kg_prompt_reason_user_request" msgid="500999297306031595">"Түзмөк кол менен кулпуланды"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
       <item quantity="other">Түзмөктүн кулпусу <xliff:g id="NUMBER_1">%d</xliff:g> саат бою ачылган жок. Cүрөт үлгүсүн ырастаңыз.</item>
       <item quantity="one">Түзмөктүн кулпусу <xliff:g id="NUMBER_0">%d</xliff:g> саат бою ачылган жок. Cүрөт үлгүсүн ырастаңыз.</item>

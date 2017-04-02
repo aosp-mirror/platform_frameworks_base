@@ -46,29 +46,24 @@
     <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"SIM 卡處於鎖定狀態。"</string>
     <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"SIM 卡處於 PUK 鎖定狀態"</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"正在解除 SIM 卡鎖定..."</string>
-    <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"圖案解鎖。"</string>
-    <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"PIN 解鎖。"</string>
-    <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"密碼解鎖。"</string>
-    <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"圖形區域。"</string>
-    <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"滑動區域。"</string>
     <string name="keyguard_accessibility_pin_area" msgid="7903959476607833485">"PIN 區"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="3887780775111719336">"SIM 卡 PIN 區"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="1880823406954996207">"SIM 卡 PUK 區"</string>
     <string name="keyguard_accessibility_next_alarm" msgid="7269583073750518672">"已設定下一個鬧鐘時間：<xliff:g id="ALARM">%1$s</xliff:g>"</string>
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Delete 鍵"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Enter 鍵"</string>
-    <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"忘記圖形"</string>
-    <string name="kg_wrong_pattern" msgid="1850806070801358830">"圖形錯誤"</string>
+    <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"忘記圖案"</string>
+    <string name="kg_wrong_pattern" msgid="1850806070801358830">"圖案錯誤"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"密碼錯誤"</string>
     <string name="kg_wrong_pin" msgid="1131306510833563801">"PIN 錯誤"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"請在 <xliff:g id="NUMBER">%d</xliff:g> 秒後再試一次。"</string>
-    <string name="kg_pattern_instructions" msgid="398978611683075868">"畫出圖形"</string>
+    <string name="kg_pattern_instructions" msgid="398978611683075868">"畫出圖案"</string>
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"輸入 SIM PIN"</string>
     <string name="kg_sim_pin_instructions_multi" msgid="7818515973197201434">"輸入「<xliff:g id="CARRIER">%1$s</xliff:g>」的 SIM 卡 PIN"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"輸入 PIN"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"輸入密碼"</string>
-    <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"SIM 卡已遭停用，必須輸入 PUK 碼才能繼續使用。詳情請洽您的行動通訊業者。"</string>
-    <string name="kg_puk_enter_puk_hint_multi" msgid="363822494559783025">"SIM 卡「<xliff:g id="CARRIER">%1$s</xliff:g>」現已遭到停用，輸入 PUK 碼即可繼續使用。如需瞭解詳情，請與行動通訊業者聯絡。"</string>
+    <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"SIM 卡已遭停用，必須輸入 PUK 碼才能繼續使用。詳情請洽您的電信業者。"</string>
+    <string name="kg_puk_enter_puk_hint_multi" msgid="363822494559783025">"SIM 卡「<xliff:g id="CARRIER">%1$s</xliff:g>」現已遭到停用，輸入 PUK 碼即可繼續使用。如需瞭解詳情，請與電信業者聯絡。"</string>
     <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"輸入所需的 PIN 碼"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"確認所需的 PIN 碼"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"正在解除 SIM 卡鎖定..."</string>
@@ -76,7 +71,7 @@
     <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"PUK 碼至少必須為 8 碼。"</string>
     <string name="kg_invalid_puk" msgid="3638289409676051243">"重新輸入正確的 PUK 碼。如果錯誤次數過多，SIM 卡將會永久停用。"</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"PIN 碼不符"</string>
-    <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"圖形嘗試次數過多"</string>
+    <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"圖案嘗試次數過多"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"您的 PIN 已輸錯 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次。\n\n請在 <xliff:g id="NUMBER_1">%2$d</xliff:g> 秒後再試一次。"</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"您的密碼已輸錯 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次。\n\n請在 <xliff:g id="NUMBER_1">%2$d</xliff:g> 秒後再試一次。"</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"您的解鎖圖案已畫錯 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次。\n\n請在 <xliff:g id="NUMBER_1">%2$d</xliff:g> 秒後再試一次。"</string>
@@ -94,12 +89,12 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4951507352869831265">"您嘗試解鎖手機已失敗 <xliff:g id="NUMBER">%d</xliff:g> 次。您的 Work 設定檔將遭到移除，所有設定檔資料也會一併遭到刪除。"</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"您的解鎖圖案已畫錯 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次，如果再嘗試 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次仍未成功，系統就會要求您透過電子郵件帳戶解除平板電腦的鎖定狀態。\n\n請在 <xliff:g id="NUMBER_2">%3$d</xliff:g> 秒後再試一次。"</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"您的解鎖圖案已畫錯 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次，如果再嘗試 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次仍未成功，系統就會要求您透過電子郵件帳戶解除手機的鎖定狀態。\n\n請在 <xliff:g id="NUMBER_2">%3$d</xliff:g> 秒後再試一次。"</string>
-    <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"SIM 卡的 PIN 碼輸入錯誤，您現在必須請行動通訊業者為裝置解鎖。"</string>
+    <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"SIM 卡的 PIN 碼輸入錯誤，您現在必須請電信業者為裝置解鎖。"</string>
     <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="6721575017538162249">
       <item quantity="other">SIM 卡的 PIN 碼輸入錯誤，您還可以再試 <xliff:g id="NUMBER_1">%d</xliff:g> 次。</item>
-      <item quantity="one">SIM 卡的 PIN 碼輸入錯誤，您還可以再試 <xliff:g id="NUMBER_0">%d</xliff:g> 次。如果仍然失敗，就必須請行動通訊業者為裝置解鎖。</item>
+      <item quantity="one">SIM 卡的 PIN 碼輸入錯誤，您還可以再試 <xliff:g id="NUMBER_0">%d</xliff:g> 次。如果仍然失敗，就必須請電信業者為裝置解鎖。</item>
     </plurals>
-    <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"SIM 卡無法使用，請與您的行動通訊業者聯絡。"</string>
+    <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"SIM 卡無法使用，請與您的電信業者聯絡。"</string>
     <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="7576227366999858780">
       <item quantity="other">SIM 卡的 PUK 碼輸入錯誤，您還可以再試 <xliff:g id="NUMBER_1">%d</xliff:g> 次。如果仍然失敗，SIM 卡將永久無法使用。</item>
       <item quantity="one">SIM 卡的 PUK 碼輸入錯誤，您還可以再試 <xliff:g id="NUMBER_0">%d</xliff:g> 次。如果仍然失敗，SIM 卡將永久無法使用。</item>
@@ -108,7 +103,7 @@
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"SIM 卡 PUK 碼操作失敗！"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"密碼正確！"</string>
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"沒有服務。"</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"切換輸入法按鈕。"</string>
+    <string name="accessibility_ime_switch_button" msgid="2829803408288433429">"切換輸入法"</string>
     <string name="airplane_mode" msgid="3122107900897202805">"飛航模式"</string>
     <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"裝置重新啟動後需要畫出解鎖圖案"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="4411398237158448198">"裝置重新啟動後需要輸入 PIN 碼"</string>
@@ -119,6 +114,8 @@
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"切換設定檔時需要畫出解鎖圖案"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"切換設定檔時需要輸入 PIN 碼"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"切換設定檔時需要輸入密碼"</string>
+    <string name="kg_prompt_reason_device_admin" msgid="5838877342219587193">"裝置管理員已鎖定裝置"</string>
+    <string name="kg_prompt_reason_user_request" msgid="500999297306031595">"裝置已手動鎖定"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
       <item quantity="other">裝置已有 <xliff:g id="NUMBER_1">%d</xliff:g> 小時未解鎖。請確認圖案。</item>
       <item quantity="one">裝置已有 <xliff:g id="NUMBER_0">%d</xliff:g> 小時未解鎖。請確認圖案。</item>

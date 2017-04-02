@@ -46,11 +46,6 @@
     <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"SIM kartica je zaključana."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"SIM kartica zaključana je PUK-om."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"Otključavanje SIM kartice…"</string>
-    <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Uzorak za otključavanje."</string>
-    <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Otključavanje PIN-om."</string>
-    <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Otključavanje zaporkom."</string>
-    <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Područje uzorka."</string>
-    <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Područje klizanja."</string>
     <string name="keyguard_accessibility_pin_area" msgid="7903959476607833485">"Područje PIN-a"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="3887780775111719336">"Područje PIN-a za SIM"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="1880823406954996207">"Područje PUK-a za SIM"</string>
@@ -110,7 +105,7 @@
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"Operacija PUK-a SIM kartice nije uspjela!"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"Kôd je prihvaćen!"</string>
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"Nema usluge."</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Gumb za promjenu načina unosa."</string>
+    <string name="accessibility_ime_switch_button" msgid="2829803408288433429">"Promjena načina unosa"</string>
     <string name="airplane_mode" msgid="3122107900897202805">"Način rada u zrakoplovu"</string>
     <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"Nakon ponovnog pokretanja uređaja morate unijeti uzorak"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="4411398237158448198">"Nakon ponovnog pokretanja uređaja morate unijeti PIN"</string>
@@ -121,6 +116,8 @@
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"Za promjenu profila morate unijeti uzorak"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"Za promjenu profila morate unijeti PIN"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"Za promjenu profila morate unijeti zaporku"</string>
+    <string name="kg_prompt_reason_device_admin" msgid="5838877342219587193">"Administrator uređaja zaključao je uređaj"</string>
+    <string name="kg_prompt_reason_user_request" msgid="500999297306031595">"Uređaj je ručno zaključan"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
       <item quantity="one">Uređaj nije bio otključan <xliff:g id="NUMBER_1">%d</xliff:g> sat. Potvrdite uzorak.</item>
       <item quantity="few">Uređaj nije bio otključan <xliff:g id="NUMBER_1">%d</xliff:g> sata. Potvrdite uzorak.</item>

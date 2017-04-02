@@ -32,7 +32,7 @@
     <string name="keyguard_charged" msgid="3272223906073492454">"充電完了"</string>
     <string name="keyguard_plugged_in" msgid="9087497435553252863">"充電中"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="6671162730167305479">"急速充電中"</string>
-    <string name="keyguard_plugged_in_charging_slowly" msgid="1964714661071163229">"緩速充電中"</string>
+    <string name="keyguard_plugged_in_charging_slowly" msgid="1964714661071163229">"低速充電中"</string>
     <string name="keyguard_low_battery" msgid="8143808018719173859">"充電してください。"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="1332288268600329841">"メニューからロックを解除できます。"</string>
     <string name="keyguard_network_locked_message" msgid="9169717779058037168">"ネットワークがロックされました"</string>
@@ -46,11 +46,6 @@
     <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"SIMカードはロックされています。"</string>
     <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"SIMカードはPUKでロックされています。"</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"SIMカードをロック解除しています…"</string>
-    <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"パターンロックを解除します。"</string>
-    <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"PINロックを解除します。"</string>
-    <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"パスワードロックを解除します。"</string>
-    <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"パターンエリアです。"</string>
-    <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"スライドエリアです。"</string>
     <string name="keyguard_accessibility_pin_area" msgid="7903959476607833485">"PINエリア"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="3887780775111719336">"SIM PINエリア"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="1880823406954996207">"SIM PUKエリア"</string>
@@ -73,7 +68,7 @@
     <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"希望のPINコードを確認してください"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"SIMカードのロック解除中…"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"PINは4～8桁の数字で入力してください。"</string>
-    <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"PUKコードは8桁以上の番号です。"</string>
+    <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"PUKコードは8桁の番号です。"</string>
     <string name="kg_invalid_puk" msgid="3638289409676051243">"正しいPUKコードを再入力してください。誤入力を繰り返すと、SIMが永久に無効になるおそれがあります。"</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"PINコードが一致しません"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"パターンの入力を所定の回数以上間違えました。"</string>
@@ -93,7 +88,7 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="4686386497449912146">"タブレットのロック解除に<xliff:g id="NUMBER">%d</xliff:g>回失敗しました。仕事用プロファイルが削除され、プロファイルのデータがすべて削除されます。"</string>
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4951507352869831265">"スマートフォンのロック解除に<xliff:g id="NUMBER">%d</xliff:g>回失敗しました。仕事用プロファイルが削除され、プロファイルのデータがすべて削除されます。"</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"ロック解除パターンの入力を<xliff:g id="NUMBER_0">%1$d</xliff:g>回間違えました。あと<xliff:g id="NUMBER_1">%2$d</xliff:g>回間違えると、タブレットのロック解除にメールアカウントが必要になります。\n\n<xliff:g id="NUMBER_2">%3$d</xliff:g>秒後にもう一度お試しください。"</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"ロック解除パターンの入力を<xliff:g id="NUMBER_0">%1$d</xliff:g>回間違えました。あと<xliff:g id="NUMBER_1">%2$d</xliff:g>回間違えると、携帯端末のロック解除にメールアカウントが必要になります。\n\n<xliff:g id="NUMBER_2">%3$d</xliff:g>秒後にもう一度お試しください。"</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"ロック解除パターンの入力を<xliff:g id="NUMBER_0">%1$d</xliff:g>回間違えました。あと<xliff:g id="NUMBER_1">%2$d</xliff:g>回間違えると、モバイル端末のロック解除にメールアカウントが必要になります。\n\n<xliff:g id="NUMBER_2">%3$d</xliff:g>秒後にもう一度お試しください。"</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"SIM PINコードが無効です。お使いの端末をロック解除するには携帯通信会社にお問い合わせいただく必要があります。"</string>
     <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="6721575017538162249">
       <item quantity="other">SIM PINコードが無効です。入力できるのはあと<xliff:g id="NUMBER_1">%d</xliff:g>回です。</item>
@@ -108,17 +103,19 @@
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"SIM PUK操作に失敗しました。"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"コードが承認されました。"</string>
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"通信サービスはありません。"</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"入力方法の切り替えボタン。"</string>
+    <string name="accessibility_ime_switch_button" msgid="2829803408288433429">"入力方法の切り替え"</string>
     <string name="airplane_mode" msgid="3122107900897202805">"機内モード"</string>
-    <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"端末の再起動後にパターンの入力が必要となります"</string>
-    <string name="kg_prompt_reason_restart_pin" msgid="4411398237158448198">"端末の再起動後に PIN の入力が必要となります"</string>
-    <string name="kg_prompt_reason_restart_password" msgid="6504585392626524695">"端末の再起動後にパスワードの入力が必要となります"</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"端末の再起動後はパターンの入力が必要となります"</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="4411398237158448198">"端末の再起動後は PIN の入力が必要となります"</string>
+    <string name="kg_prompt_reason_restart_password" msgid="6504585392626524695">"端末の再起動後はパスワードの入力が必要となります"</string>
     <string name="kg_prompt_reason_timeout_pattern" msgid="3717506169674397620">"セキュリティを強化するにはパターンが必要です"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="6951483704195396341">"セキュリティを強化するには PIN が必要です"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="7306667546971345027">"セキュリティを強化するにはパスワードが必要です"</string>
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"プロファイルを切り替えるにはパターンが必要です"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"プロファイルを切り替えるには PIN が必要です"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"プロファイルを切り替えるにはパスワードが必要です"</string>
+    <string name="kg_prompt_reason_device_admin" msgid="5838877342219587193">"端末管理アプリが端末をロックしました"</string>
+    <string name="kg_prompt_reason_user_request" msgid="500999297306031595">"端末は手動でロックされました"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
       <item quantity="other">端末のロックが<xliff:g id="NUMBER_1">%d</xliff:g>時間、解除されていません。パターンを確認してください。</item>
       <item quantity="one">端末のロックが<xliff:g id="NUMBER_0">%d</xliff:g>時間、解除されていません。パターンを確認してください。</item>
