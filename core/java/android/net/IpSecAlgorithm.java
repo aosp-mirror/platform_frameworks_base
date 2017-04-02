@@ -164,6 +164,8 @@ public final class IpSecAlgorithm implements Parcelable {
 
     private static boolean isTruncationLengthValid(String algo, int truncLenBits) {
         switch (algo) {
+            case ALGO_CRYPT_AES_CBC:
+                return (truncLenBits == 128 || truncLenBits == 192 || truncLenBits == 256);
             case ALGO_AUTH_HMAC_MD5:
                 return (truncLenBits >= 96 && truncLenBits <= 128);
             case ALGO_AUTH_HMAC_SHA1:
