@@ -17,23 +17,27 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"Shell"</string>
-    <string name="bugreport_in_progress_title" msgid="7409917338223386637">"O relatório de erro está a ser criado"</string>
-    <string name="bugreport_finished_title" msgid="2293711546892863898">"Relatório de erros capturado"</string>
+    <string name="bugreport_in_progress_title" msgid="4311705936714972757">"O relatório de erro <xliff:g id="ID">#%d</xliff:g> está a ser criado"</string>
+    <string name="bugreport_finished_title" msgid="4429132808670114081">"Relatório de erro <xliff:g id="ID">#%d</xliff:g> criado"</string>
     <string name="bugreport_updating_title" msgid="4423539949559634214">"A adicionar detalhes ao relatório de erro"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"Aguarde..."</string>
-    <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"Deslizar rapidamente para a esquerda para partilhar o seu relatório de erros"</string>
-    <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"Toque para partilhar o relatório de erros"</string>
-    <string name="bugreport_confirm" msgid="5130698467795669780">"Os relatórios de erros incluem dados de vários ficheiros de registo do sistema, nomeadamente informações pessoais e privadas. Partilhe relatórios de erros apenas com aplicações e pessoas fidedignas."</string>
-    <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"Mostrar esta mensagem da próxima vez"</string>
+    <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"O relatório de erro será apresentado brevemente no telemóvel"</string>
+    <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"Toque para partilhar o relatório de erro"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"Toque para partilhar o relatório de erro sem uma captura de ecrã ou aguarde a conclusão da mesma"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"Toque para partilhar o relatório de erro sem uma captura de ecrã ou aguarde a conclusão da mesma"</string>
+    <string name="bugreport_confirm" msgid="5917407234515812495">"Os relatórios de erros contêm dados de vários ficheiros de registo do sistema, que podem incluir dados que considere confidenciais (tais como dados de utilização de aplicações e de localização). Partilhe os relatórios de erros apenas com aplicações fidedignas e pessoas em quem confia."</string>
+    <string name="bugreport_confirm_dont_repeat" msgid="6179945398364357318">"Não mostrar de novo"</string>
     <string name="bugreport_storage_title" msgid="5332488144740527109">"Relatórios de erros"</string>
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"Não foi possível ler o ficheiro de relatório de erro"</string>
+    <string name="bugreport_add_details_to_zip_failed" msgid="1302931926486712371">"Não foi possível adicionar os detalhes do relatório de erro ao ficheiro ZIP"</string>
     <string name="bugreport_unnamed" msgid="2800582406842092709">"sem nome"</string>
     <string name="bugreport_info_action" msgid="2158204228510576227">"Detalhes"</string>
     <string name="bugreport_screenshot_action" msgid="8677781721940614995">"Captura de ecrã"</string>
-    <string name="bugreport_screenshot_taken" msgid="7175343181767429088">"Captura de ecrã tirada com êxito."</string>
+    <string name="bugreport_screenshot_taken" msgid="5684211273096253120">"Captura de ecrã tirada com êxito."</string>
     <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"Não foi possível tirar a captura de ecrã."</string>
-    <string name="bugreport_info_dialog_title" msgid="3113549839798564645">"Detalhes do relatório de erro"</string>
+    <string name="bugreport_info_dialog_title" msgid="1355948594292983332">"Detalhes do relatório de erro <xliff:g id="ID">#%d</xliff:g>"</string>
     <string name="bugreport_info_name" msgid="4414036021935139527">"Nome do ficheiro"</string>
-    <string name="bugreport_info_title" msgid="5599558206004371052">"Título"</string>
-    <string name="bugreport_info_description" msgid="4117088998733546784">"Descrição detalhada"</string>
+    <string name="bugreport_info_title" msgid="2306030793918239804">"Título do erro"</string>
+    <string name="bugreport_info_description" msgid="5072835127481627722">"Resumo de erros"</string>
+    <string name="save" msgid="4781509040564835759">"Guardar"</string>
 </resources>

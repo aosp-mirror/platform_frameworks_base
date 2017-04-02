@@ -17,23 +17,27 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"Shell"</string>
-    <string name="bugreport_in_progress_title" msgid="7409917338223386637">"Fejlrapport genereres"</string>
-    <string name="bugreport_finished_title" msgid="2293711546892863898">"Fejlrapporten er registreret"</string>
+    <string name="bugreport_in_progress_title" msgid="4311705936714972757">"Fejlrapporten <xliff:g id="ID">#%d</xliff:g> genereres"</string>
+    <string name="bugreport_finished_title" msgid="4429132808670114081">"Fejrapporten <xliff:g id="ID">#%d</xliff:g> blev gemt"</string>
     <string name="bugreport_updating_title" msgid="4423539949559634214">"Tilføjelse af oplysninger til fejlrapporten"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"Vent et øjeblik…"</string>
-    <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"Stryg til venstre for at dele din fejlrapport"</string>
-    <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"Tryk for at dele din fejlrapport"</string>
-    <string name="bugreport_confirm" msgid="5130698467795669780">"Fejlrapporter indeholder data fra systemets forskellige logfiler, f.eks. personlige og private oplysninger. Del kun fejlrapporter med apps og personer, du har tillid til."</string>
-    <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"Vis denne underretning næste gang"</string>
+    <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"Fejlrapporten vises på telefonen om et øjeblik"</string>
+    <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"Tryk for at dele din fejlrapport"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"Tryk for at dele din fejlrapport uden et screenshot, eller vent på, at screenshott fuldføres"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"Tryk for at dele din fejlrapport uden et screenshot, eller vent på, at screenshott fuldføres"</string>
+    <string name="bugreport_confirm" msgid="5917407234515812495">"Fejlrapporter indeholder data fra systemets forskellige logfiler, som kan være data, du mener er følsomme, f.eks. appforbrug og placeringsdata. Del kun fejlrapporter med personer og apps, du har tillid til."</string>
+    <string name="bugreport_confirm_dont_repeat" msgid="6179945398364357318">"Vis ikke igen"</string>
     <string name="bugreport_storage_title" msgid="5332488144740527109">"Fejlrapporter"</string>
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"Fejlrapportfilen kunne ikke læses"</string>
+    <string name="bugreport_add_details_to_zip_failed" msgid="1302931926486712371">"Oplysningerne i fejlrapporten kunne ikke føjes til zip-filen"</string>
     <string name="bugreport_unnamed" msgid="2800582406842092709">"ikke navngivet"</string>
     <string name="bugreport_info_action" msgid="2158204228510576227">"Oplysninger"</string>
-    <string name="bugreport_screenshot_action" msgid="8677781721940614995">"Skærmbillede"</string>
-    <string name="bugreport_screenshot_taken" msgid="7175343181767429088">"Der blev taget et skærmbillede."</string>
-    <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"Der kunne ikke tages et skærmbillede."</string>
-    <string name="bugreport_info_dialog_title" msgid="3113549839798564645">"Fejlrapportoplysninger"</string>
+    <string name="bugreport_screenshot_action" msgid="8677781721940614995">"Screenshot"</string>
+    <string name="bugreport_screenshot_taken" msgid="5684211273096253120">"Der blev taget et screenshot."</string>
+    <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"Der kunne ikke tages et screenshot."</string>
+    <string name="bugreport_info_dialog_title" msgid="1355948594292983332">"Oplysninger om fejlrapporten <xliff:g id="ID">#%d</xliff:g>"</string>
     <string name="bugreport_info_name" msgid="4414036021935139527">"Filnavn"</string>
-    <string name="bugreport_info_title" msgid="5599558206004371052">"Titel"</string>
-    <string name="bugreport_info_description" msgid="4117088998733546784">"Detaljeret beskrivelse"</string>
+    <string name="bugreport_info_title" msgid="2306030793918239804">"Fejlrapportens titel"</string>
+    <string name="bugreport_info_description" msgid="5072835127481627722">"Oversigt over fejl"</string>
+    <string name="save" msgid="4781509040564835759">"Gem"</string>
 </resources>
