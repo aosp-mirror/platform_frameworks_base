@@ -4549,9 +4549,13 @@ public class StatusBar extends SystemUI implements DemoMode,
         return getMaxKeyguardNotifications(false /* recompute */);
     }
 
-    // TODO: Figure out way to remove this.
+    // TODO: Figure out way to remove these.
     public NavigationBarView getNavigationBarView() {
         return (NavigationBarView) mNavigationBar.getView();
+    }
+
+    public KeyguardBottomAreaView getKeyguardBottomAreaView() {
+        return mKeyguardBottomArea;
     }
 
     // ---------------------- DragDownHelper.OnDragDownListener ------------------------------------
