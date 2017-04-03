@@ -18,7 +18,6 @@ package com.android.internal.app;
 
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
-import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
 
 import java.util.function.Function;
@@ -75,11 +74,6 @@ public class ChooserWrapperActivity extends ChooserActivity {
         return super.getPackageManager();
     }
 
-    @Override
-    public LauncherApps getLauncherApps() {
-        return sOverrides.launcherApps;
-    }
-
     /**
      * We cannot directly mock the activity created since instrumentation creates it.
      * <p>
@@ -88,7 +82,6 @@ public class ChooserWrapperActivity extends ChooserActivity {
     static class OverrideData {
         @SuppressWarnings("Since15")
         public Function<PackageManager, PackageManager> createPackageManager;
-        public LauncherApps launcherApps;
         public Function<TargetInfo, Boolean> onSafelyStartCallback;
         public ResolverListController resolverListController;
         public Boolean isVoiceInteraction;
@@ -97,7 +90,6 @@ public class ChooserWrapperActivity extends ChooserActivity {
             onSafelyStartCallback = null;
             isVoiceInteraction = null;
             createPackageManager = null;
-            launcherApps = mock(LauncherApps.class);
             resolverListController = mock(ResolverListController.class);
         }
     }

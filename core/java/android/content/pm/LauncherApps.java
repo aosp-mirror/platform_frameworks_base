@@ -275,11 +275,8 @@ public class LauncherApps {
         @Deprecated
         public static final int FLAG_GET_MANIFEST = FLAG_MATCH_MANIFEST;
 
-        /**
-         * Include chooser shortcuts in the result.
-         * STOPSHIP TODO: Unless explicitly requesting chooser fields, we should strip out chooser
-         *           relevant fields from the Shortcut. This should also be adequately documented.
-         */
+        /** @deprecated punted, don't use. */
+        @Deprecated
         public static final int FLAG_MATCH_CHOOSER = 1 << 4;
 
         /**
@@ -319,7 +316,6 @@ public class LauncherApps {
                         FLAG_MATCH_DYNAMIC,
                         FLAG_MATCH_PINNED,
                         FLAG_MATCH_MANIFEST,
-                        FLAG_MATCH_CHOOSER,
                         FLAG_GET_KEY_FIELDS_ONLY,
                 })
         @Retention(RetentionPolicy.SOURCE)
@@ -335,9 +331,6 @@ public class LauncherApps {
 
         @Nullable
         ComponentName mActivity;
-
-        @Nullable
-        Intent mIntent;
 
         @QueryFlags
         int mQueryFlags;
@@ -382,11 +375,9 @@ public class LauncherApps {
             return this;
         }
 
-        /**
-         * If non-null, returns only shortcuts with intent filters that match this intent.
-         */
+        /** @deprecated punted, don't use. */
+        @Deprecated
         public ShortcutQuery setIntent(@Nullable Intent intent) {
-            mIntent = intent;
             return this;
         }
 
@@ -704,7 +695,7 @@ public class LauncherApps {
         try {
             return mService.getShortcuts(mContext.getPackageName(),
                     query.mChangedSince, query.mPackage, query.mShortcutIds, query.mActivity,
-                    query.mIntent, query.mQueryFlags, user)
+                    query.mQueryFlags, user)
                     .getList();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
