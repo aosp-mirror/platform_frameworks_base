@@ -2955,4 +2955,5 @@
   <java-symbol type="string" name="etws_primary_default_message_test" />
 
   <java-symbol type="string" name="etws_primary_default_message_others" />
+  <java-symbol type="bool" name="config_quickSettingsSupported" />
 </resources>
