@@ -213,10 +213,10 @@ public class DisplayContentTests extends WindowTestsBase {
      */
     @Test
     public void testDefaultDisplayOverrideConfigUpdate() throws Exception {
-        final Configuration currentOverrideConfig = sDisplayContent.getOverrideConfiguration();
+        final Configuration currentConfig = sDisplayContent.getConfiguration();
 
         // Create new, slightly changed override configuration and apply it to the display.
-        final Configuration newOverrideConfig = new Configuration(currentOverrideConfig);
+        final Configuration newOverrideConfig = new Configuration(currentConfig);
         newOverrideConfig.densityDpi += 120;
         newOverrideConfig.fontScale += 0.3;
 
@@ -228,10 +228,10 @@ public class DisplayContentTests extends WindowTestsBase {
         assertEquals(newOverrideConfig.fontScale, globalConfig.fontScale, 0.1 /* delta */);
 
         // Return back to original values.
-        sWm.setNewDisplayOverrideConfiguration(currentOverrideConfig, DEFAULT_DISPLAY);
+        sWm.setNewDisplayOverrideConfiguration(currentConfig, DEFAULT_DISPLAY);
         globalConfig = sWm.mRoot.getConfiguration();
-        assertEquals(currentOverrideConfig.densityDpi, globalConfig.densityDpi);
-        assertEquals(currentOverrideConfig.fontScale, globalConfig.fontScale, 0.1 /* delta */);
+        assertEquals(currentConfig.densityDpi, globalConfig.densityDpi);
+        assertEquals(currentConfig.fontScale, globalConfig.fontScale, 0.1 /* delta */);
     }
 
     @Test
