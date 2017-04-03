@@ -474,7 +474,7 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
   // This would cause failures because the FDs are not whitelisted.
   //
   // Note that the zygote process is single threaded at this point.
-  if (sigprocmask(SIG_BLOCK, &sigchld, NULL) == -1) {
+  if (sigprocmask(SIG_BLOCK, &sigchld, nullptr) == -1) {
     ALOGE("sigprocmask(SIG_SETMASK, { SIGCHLD }) failed: %s", strerror(errno));
     RuntimeAbort(env, __LINE__, "Call to sigprocmask(SIG_BLOCK, { SIGCHLD }) failed.");
   }
@@ -510,7 +510,7 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
       RuntimeAbort(env, __LINE__, "Unable to reopen whitelisted descriptors.");
     }
 
-    if (sigprocmask(SIG_UNBLOCK, &sigchld, NULL) == -1) {
+    if (sigprocmask(SIG_UNBLOCK, &sigchld, nullptr) == -1) {
       ALOGE("sigprocmask(SIG_SETMASK, { SIGCHLD }) failed: %s", strerror(errno));
       RuntimeAbort(env, __LINE__, "Call to sigprocmask(SIG_UNBLOCK, { SIGCHLD }) failed.");
     }
@@ -647,8 +647,13 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
   } else if (pid > 0) {
     // the parent process
 
+#ifdef ENABLE_SCHED_BOOST
+    // unset scheduler knob
+    SetForkLoad(false);
+#endif
+
     // We blocked SIGCHLD prior to a fork, we unblock it here.
-    if (sigprocmask(SIG_UNBLOCK, &sigchld, NULL) == -1) {
+    if (sigprocmask(SIG_UNBLOCK, &sigchld, nullptr) == -1) {
       ALOGE("sigprocmask(SIG_SETMASK, { SIGCHLD }) failed: %s", strerror(errno));
       RuntimeAbort(env, __LINE__, "Call to sigprocmask(SIG_UNBLOCK, { SIGCHLD }) failed.");
     }
