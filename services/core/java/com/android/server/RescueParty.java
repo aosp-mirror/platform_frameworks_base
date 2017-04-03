@@ -18,14 +18,13 @@ package com.android.server;
 
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.pm.UserInfo;
 import android.os.Build;
+import android.os.Environment;
 import android.os.FileUtils;
 import android.os.RecoverySystem;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
-import android.os.UserManager;
 import android.provider.Settings;
 import android.text.format.DateUtils;
 import android.util.ExceptionUtils;
@@ -70,7 +69,7 @@ public class RescueParty {
 
     private static boolean isDisabled() {
         // Check if we're explicitly enabled for testing
-        if (SystemProperties.getBoolean(PROP_ENABLE_RESCUE, true)) {
+        if (SystemProperties.getBoolean(PROP_ENABLE_RESCUE, false)) {
             return false;
         }
 
@@ -203,7 +202,7 @@ public class RescueParty {
         } catch (Throwable t) {
             res = new RuntimeException("Failed to reset global settings", t);
         }
-        for (int userId : getAllUserIds(context)) {
+        for (int userId : getAllUserIds()) {
             try {
                 Settings.Secure.resetToDefaultsAsUser(resolver, null, mode, userId);
             } catch (Throwable t) {
@@ -314,13 +313,16 @@ public class RescueParty {
         @Override public void setStart(long start) { this.start = start; }
     }
 
-    private static int[] getAllUserIds(Context context) {
+    private static int[] getAllUserIds() {
         int[] userIds = { UserHandle.USER_SYSTEM };
         try {
-            final UserManager um = context.getSystemService(UserManager.class);
-            for (UserInfo user : um.getUsers()) {
-                if (user.id != UserHandle.USER_SYSTEM) {
-                    userIds = ArrayUtils.appendInt(userIds, user.id);
+            for (File file : FileUtils.listFilesOrEmpty(Environment.getDataSystemDeDirectory())) {
+                try {
+                    final int userId = Integer.parseInt(file.getName());
+                    if (userId != UserHandle.USER_SYSTEM) {
+                        userIds = ArrayUtils.appendInt(userIds, userId);
+                    }
+                } catch (NumberFormatException ignored) {
                 }
             }
         } catch (Throwable t) {
