@@ -16,6 +16,11 @@
 
 package android.content.res;
 
+import android.graphics.Point;
+import android.graphics.Rect;
+import android.util.DisplayMetrics;
+import android.view.Display;
+import android.view.DisplayInfo;
 import com.android.internal.util.XmlUtils;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -292,6 +297,16 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      * Multiple Screens</a> for more information.</p>
      */
     public int screenLayout;
+
+    /**
+     * @hide
+     * {@link android.graphics.Rect} defining app bounds. The dimensions override usages of
+     * {@link DisplayInfo#appHeight} and {@link DisplayInfo#appWidth} and mirrors these values at
+     * the display level. Lower levels can override these values to provide custom bounds to enforce
+     * features such as a max aspect ratio.
+     * TODO(b/36812336): Move appBounds out of {@link Configuration}.
+     */
+    public Rect appBounds;
 
     /** @hide */
     static public int resetScreenLayout(int curLayout) {
@@ -882,6 +897,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         compatScreenWidthDp = o.compatScreenWidthDp;
         compatScreenHeightDp = o.compatScreenHeightDp;
         compatSmallestScreenWidthDp = o.compatSmallestScreenWidthDp;
+        setAppBounds(o.appBounds);
         assetsSeq = o.assetsSeq;
         seq = o.seq;
     }
@@ -1032,6 +1048,9 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             case NAVIGATIONHIDDEN_YES: sb.append("/h"); break;
             default: sb.append("/"); sb.append(navigationHidden); break;
         }
+        if (appBounds != null) {
+            sb.append(" appBounds="); sb.append(appBounds);
+        }
         if (assetsSeq != 0) {
             sb.append(" as.").append(assetsSeq);
         }
@@ -1066,6 +1085,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         smallestScreenWidthDp = compatSmallestScreenWidthDp = SMALLEST_SCREEN_WIDTH_DP_UNDEFINED;
         densityDpi = DENSITY_DPI_UNDEFINED;
         assetsSeq = ASSETS_SEQ_UNDEFINED;
+        appBounds = null;
         seq = 0;
     }
 
@@ -1253,6 +1273,10 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         if (delta.compatSmallestScreenWidthDp != SMALLEST_SCREEN_WIDTH_DP_UNDEFINED) {
             compatSmallestScreenWidthDp = delta.compatSmallestScreenWidthDp;
         }
+        if (delta.appBounds != null && !delta.appBounds.equals(appBounds)) {
+            changed |= ActivityInfo.CONFIG_SCREEN_SIZE;
+            setAppBounds(delta.appBounds);
+        }
         if (delta.assetsSeq != ASSETS_SEQ_UNDEFINED) {
             changed |= ActivityInfo.CONFIG_ASSETS_PATHS;
             assetsSeq = delta.assetsSeq;
@@ -1399,6 +1423,13 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             changed |= ActivityInfo.CONFIG_ASSETS_PATHS;
         }
 
+        // Make sure that one of the values is not null and that they are not equal.
+        if ((compareUndefined || delta.appBounds != null)
+                && appBounds != delta.appBounds
+                && (appBounds == null || !appBounds.equals(delta.appBounds))) {
+            changed |= ActivityInfo.CONFIG_SCREEN_SIZE;
+        }
+
         return changed;
     }
 
@@ -1494,6 +1525,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         dest.writeInt(compatScreenWidthDp);
         dest.writeInt(compatScreenHeightDp);
         dest.writeInt(compatSmallestScreenWidthDp);
+        dest.writeValue(appBounds);
         dest.writeInt(assetsSeq);
         dest.writeInt(seq);
     }
@@ -1529,6 +1561,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         compatScreenWidthDp = source.readInt();
         compatScreenHeightDp = source.readInt();
         compatSmallestScreenWidthDp = source.readInt();
+        appBounds = (Rect) source.readValue(null);
         assetsSeq = source.readInt();
         seq = source.readInt();
     }
@@ -1701,6 +1734,33 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      */
     public void setLocale(@Nullable Locale loc) {
         setLocales(loc == null ? LocaleList.getEmptyLocaleList() : new LocaleList(loc));
+    }
+
+    /**
+     * @hide
+     *
+     * Helper method for setting the app bounds.
+     */
+    public void setAppBounds(Rect rect) {
+        if (rect == null) {
+            appBounds = null;
+            return;
+        }
+
+        setAppBounds(rect.left, rect.top, rect.right, rect.bottom);
+    }
+
+    /**
+     * @hide
+     *
+     * Helper method for setting the app bounds.
+     */
+    public void setAppBounds(int left, int top, int right, int bottom) {
+        if (appBounds == null) {
+            appBounds = new Rect();
+        }
+
+        appBounds.set(left, top, right, bottom);
     }
 
     /**
@@ -2212,6 +2272,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     private static final String XML_ATTR_SCREEN_HEIGHT = "height";
     private static final String XML_ATTR_SMALLEST_WIDTH = "sw";
     private static final String XML_ATTR_DENSITY = "density";
+    private static final String XML_ATTR_APP_BOUNDS = "app_bounds";
 
     /**
      * Reads the attributes corresponding to Configuration member fields from the Xml parser.
@@ -2261,6 +2322,8 @@ public final class Configuration implements Parcelable, Comparable<Configuration
                         SMALLEST_SCREEN_WIDTH_DP_UNDEFINED);
         configOut.densityDpi = XmlUtils.readIntAttribute(parser, XML_ATTR_DENSITY,
                 DENSITY_DPI_UNDEFINED);
+        configOut.appBounds =
+            Rect.unflattenFromString(XmlUtils.readStringAttribute(parser, XML_ATTR_APP_BOUNDS));
 
         // For persistence, we don't care about assetsSeq, so do not read it out.
     }
@@ -2330,6 +2393,11 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         }
         if (config.densityDpi != DENSITY_DPI_UNDEFINED) {
             XmlUtils.writeIntAttribute(xml, XML_ATTR_DENSITY, config.densityDpi);
+        }
+
+        if (config.appBounds != null) {
+            XmlUtils.writeStringAttribute(xml, XML_ATTR_APP_BOUNDS,
+                config.appBounds.flattenToString());
         }
 
         // For persistence, we do not care about assetsSeq, so do not write it out.
