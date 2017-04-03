@@ -1093,6 +1093,8 @@ public class Intent implements Parcelable, Cloneable {
      * <p>Output: nothing.
      * @hide
      */
+    @SystemApi
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_CALL_EMERGENCY = "android.intent.action.CALL_EMERGENCY";
     /**
      * Activity action: Perform a call to any number (emergency or not)
@@ -1102,6 +1104,8 @@ public class Intent implements Parcelable, Cloneable {
      * <p>Output: nothing.
      * @hide
      */
+    @SystemApi
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_CALL_PRIVILEGED = "android.intent.action.CALL_PRIVILEGED";
 
     /**
