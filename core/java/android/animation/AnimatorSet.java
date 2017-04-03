@@ -431,12 +431,10 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
 
     // Force all the animations to end when the duration scale is 0.
     private void forceToEnd() {
-        // TODO: Below is commented out to temp work around b/36241584, uncomment this when it's
-        // fixed.
-//        if (mEndCanBeCalled) {
-//            end();
-//            return;
-//        }
+        if (mEndCanBeCalled) {
+            end();
+            return;
+        }
 
         // Note: we don't want to combine this case with the end() method below because in
         // the case of developer calling end(), we still need to make sure end() is explicitly
