@@ -250,37 +250,57 @@ public class WindowFrameTests extends WindowTestsBase {
 
     @Test
     public void testLayoutNonfullscreenTask() {
-        final Rect taskBounds = new Rect(300, 300, 700, 700);
+        final DisplayInfo displayInfo = sWm.getDefaultDisplayContentLocked().getDisplayInfo();
+        final int logicalWidth = displayInfo.logicalWidth;
+        final int logicalHeight = displayInfo.logicalHeight;
+
+        final int taskLeft = logicalWidth / 4;
+        final int taskTop = logicalHeight / 4;
+        final int taskRight = logicalWidth / 4 * 3;
+        final int taskBottom = logicalHeight / 4 * 3;
+        final Rect taskBounds = new Rect(taskLeft, taskTop, taskRight, taskBottom);
         TaskWithBounds task = new TaskWithBounds(taskBounds);
         task.mFullscreenForTest = false;
         WindowState w = createWindow(task, FILL_PARENT, FILL_PARENT);
         w.mAttrs.gravity = Gravity.LEFT | Gravity.TOP;
 
-        final Rect pf = new Rect(0, 0, 1000, 1000);
+        final Rect pf = new Rect(0, 0, logicalWidth, logicalHeight);
         w.computeFrameLw(pf, pf, pf, pf, pf, pf, pf, null);
         // For non fullscreen tasks the containing frame is based off the
         // task bounds not the parent frame.
-        assertRect(w.mFrame, 300, 300, 700, 700);
-        assertRect(w.getContentFrameLw(), 300, 300, 700, 700);
+        assertRect(w.mFrame, taskLeft, taskTop, taskRight, taskBottom);
+        assertRect(w.getContentFrameLw(), taskLeft, taskTop, taskRight, taskBottom);
         assertRect(w.mContentInsets, 0, 0, 0, 0);
 
-        pf.set(0, 0, 1000, 1000);
+        pf.set(0, 0, logicalWidth, logicalHeight);
         // We still produce insets against the containing frame the same way.
-        final Rect cf = new Rect(0, 0, 500, 500);
+        final int cfRight = logicalWidth / 2;
+        final int cfBottom = logicalHeight / 2;
+        final Rect cf = new Rect(0, 0, cfRight, cfBottom);
         w.computeFrameLw(pf, pf, pf, cf, cf, pf, cf, null);
-        assertRect(w.mFrame, 300, 300, 700, 700);
-        assertRect(w.getContentFrameLw(), 300, 300, 500, 500);
-        assertRect(w.mContentInsets, 0, 0, 200, 200);
+        assertRect(w.mFrame, taskLeft, taskTop, taskRight, taskBottom);
+        int contentInsetRight = taskRight - cfRight;
+        int contentInsetBottom = taskBottom - cfBottom;
+        assertRect(w.mContentInsets, 0, 0, contentInsetRight, contentInsetBottom);
+        assertRect(w.getContentFrameLw(), taskLeft, taskTop, taskRight - contentInsetRight,
+                taskBottom - contentInsetBottom);
 
-        pf.set(0, 0, 1000, 1000);
+        pf.set(0, 0, logicalWidth, logicalHeight);
         // However if we set temp inset bounds, the insets will be computed
         // as if our window was laid out there,  but it will be laid out according to
         // the task bounds.
-        task.mInsetBounds.set(200, 200, 600, 600);
+        final int insetLeft = logicalWidth / 5;
+        final int insetTop = logicalHeight / 5;
+        final int insetRight = insetLeft + (taskRight - taskLeft);
+        final int insetBottom = insetTop + (taskBottom - taskTop);
+        task.mInsetBounds.set(insetLeft, insetTop, insetRight, insetBottom);
         w.computeFrameLw(pf, pf, pf, cf, cf, pf, cf, null);
-        assertRect(w.mFrame, 300, 300, 700, 700);
-        assertRect(w.getContentFrameLw(), 300, 300, 600, 600);
-        assertRect(w.mContentInsets, 0, 0, 100, 100);
+        assertRect(w.mFrame, taskLeft, taskTop, taskRight, taskBottom);
+        contentInsetRight = insetRight - cfRight;
+        contentInsetBottom = insetBottom - cfBottom;
+        assertRect(w.mContentInsets, 0, 0, contentInsetRight, contentInsetBottom);
+        assertRect(w.getContentFrameLw(), taskLeft, taskTop, taskRight - contentInsetRight,
+                taskBottom - contentInsetBottom);
     }
 
     @Test
@@ -289,13 +309,16 @@ public class WindowFrameTests extends WindowTestsBase {
                 new TaskWithBounds(null), FILL_PARENT, FILL_PARENT);
         w.mAttrs.gravity = Gravity.LEFT | Gravity.TOP;
 
-        final Rect pf = new Rect(0, 0, 1000, 1000);
+        final DisplayInfo displayInfo = w.getDisplayContent().getDisplayInfo();
+        final int logicalWidth = displayInfo.logicalWidth;
+        final int logicalHeight = displayInfo.logicalHeight;
+        final Rect pf = new Rect(0, 0, logicalWidth, logicalHeight);
         final Rect df = pf;
         final Rect of = df;
         final Rect cf = new Rect(pf);
         // Produce some insets
-        cf.top += 50;
-        cf.bottom -= 100;
+        cf.top += displayInfo.logicalWidth / 10;
+        cf.bottom -= displayInfo.logicalWidth / 5;
         final Rect vf = cf;
         final Rect sf = vf;
         // We use a decor content frame with insets to produce cropping.
@@ -308,35 +331,34 @@ public class WindowFrameTests extends WindowTestsBase {
         // If we were above system decor we wouldnt' get any cropping though
         w.mLayer = sWm.mSystemDecorLayer + 1;
         w.calculatePolicyCrop(policyCrop);
-        assertRect(policyCrop, 0, 0, 1000, 1000);
+        assertRect(policyCrop, 0, 0, logicalWidth, logicalHeight);
         w.mLayer = 1;
         dcf.setEmpty();
         // Likewise with no decor frame we would get no crop
         w.computeFrameLw(pf, df, of, cf, vf, dcf, sf, null);
         w.calculatePolicyCrop(policyCrop);
-        assertRect(policyCrop, 0, 0, 1000, 1000);
+        assertRect(policyCrop, 0, 0, logicalWidth, logicalHeight);
 
         // Now we set up a window which doesn't fill the entire decor frame.
         // Normally it would be cropped to it's frame but in the case of docked resizing
         // we need to account for the fact the windows surface will be made
         // fullscreen and thus also make the crop fullscreen.
         w.mAttrs.gravity = Gravity.LEFT | Gravity.TOP;
-        w.mAttrs.width = 500;
-        w.mAttrs.height = 500;
-        w.mRequestedWidth = 500;
-        w.mRequestedHeight = 500;
+        w.mAttrs.width = logicalWidth / 2;
+        w.mAttrs.height = logicalHeight / 2;
+        w.mRequestedWidth = logicalWidth / 2;
+        w.mRequestedHeight = logicalHeight / 2;
         w.computeFrameLw(pf, pf, pf, pf, pf, pf, pf, pf);
 
         w.calculatePolicyCrop(policyCrop);
         // Normally the crop is shrunk from the decor frame
         // to the computed window frame.
-        assertRect(policyCrop, 0, 0, 500, 500);
+        assertRect(policyCrop, 0, 0, logicalWidth / 2, logicalHeight / 2);
 
         w.mDockedResizingForTest = true;
         w.calculatePolicyCrop(policyCrop);
         // But if we are docked resizing it won't be, however we will still be
         // shrunk to the decor frame and the display.
-        final DisplayInfo displayInfo = w.getDisplayContent().getDisplayInfo();
         assertRect(policyCrop, 0, 0,
                 Math.min(pf.width(), displayInfo.logicalWidth),
                 Math.min(pf.height(), displayInfo.logicalHeight));
