@@ -21,7 +21,6 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.TaskStackBuilder;
 import android.content.ComponentName;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -40,12 +39,10 @@ import android.util.ArraySet;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.MemInfoReader;
 import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -99,14 +96,6 @@ public final class ShortcutInfo implements Parcelable {
     public static final int FLAG_ADAPTIVE_BITMAP = 1 << 9;
 
     /** @hide */
-    public static final int FLAG_CHOOSER = 1 << 10;
-
-    /**
-     * TODO: Add FLAG_CHOOSER_INFO_OMITTED to reflect that chooser info was omitted in the Shortcut
-     *       due to the context in which it was retrieved.
-     * TODO: Add a FLAG_LAUNCHABLE to reflect whether or not the Shortcut has a launchable intent
-     * @hide
-     */
     @IntDef(flag = true,
             value = {
             FLAG_DYNAMIC,
@@ -119,7 +108,6 @@ public final class ShortcutInfo implements Parcelable {
             FLAG_STRINGS_RESOLVED,
             FLAG_IMMUTABLE,
             FLAG_ADAPTIVE_BITMAP,
-            FLAG_CHOOSER,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ShortcutFlags {}
@@ -214,24 +202,6 @@ public final class ShortcutInfo implements Parcelable {
     @Nullable
     private PersistableBundle[] mIntentPersistableExtrases;
 
-    /**
-     * If used in a chooser, extras that should be added into the intent passed through.
-     */
-    @Nullable
-    private PersistableBundle mChooserExtras;
-
-    /**
-     * Intent filters to be used if the shortcut is to be used in a chooser context.
-     */
-    @Nullable
-    private IntentFilter[] mChooserIntentFilters;
-
-    /**
-     * Component names corresponding to the above intent filters.
-     */
-    @Nullable
-    private ComponentName[] mChooserComponentNames;
-
     private int mRank;
 
     /**
@@ -281,13 +251,6 @@ public final class ShortcutInfo implements Parcelable {
         mDisabledMessageResId = b.mDisabledMessageResId;
         mCategories = cloneCategories(b.mCategories);
         mIntents = cloneIntents(b.mIntents);
-        if (b.mChooserIntentFilters != null) {
-            mChooserIntentFilters = b.mChooserIntentFilters.toArray(new IntentFilter[0]);
-        }
-        if (b.mChooserComponentNames != null) {
-            mChooserComponentNames = b.mChooserComponentNames.toArray(new ComponentName[0]);
-        }
-        mChooserExtras = b.mChooserExtras;
         fixUpIntentExtras();
         mRank = b.mRank;
         mExtras = b.mExtras;
@@ -368,28 +331,8 @@ public final class ShortcutInfo implements Parcelable {
         if (mTitle == null && mTitleResId == 0) {
             throw new IllegalArgumentException("Short label must be provided");
         }
-
-        // For a shortcut to be valid, there should either be an Intent, or a non-empty set of
-        // intent filters.
-        if (mIntents == null || mIntents.length == 0) {
-            Preconditions.checkNotNull(mChooserIntentFilters,
-                    "Intent must be provided if not a chooser target");
-            Preconditions.checkNotNull(mChooserComponentNames,
-                    "Intent must be provided if not a chooser target");
-        }
-
-        // If ChooserIntentFilter are provided, they should match the length of the provided
-        // component names.
-        if (mChooserIntentFilters != null) {
-            if (mChooserComponentNames == null
-                    || mChooserIntentFilters.length != mChooserComponentNames.length) {
-                throw new IllegalArgumentException("Inconsistent intent filters and "
-                        + "component names given");
-            }
-            if (mChooserIntentFilters.length == 0 || mChooserComponentNames.length == 0) {
-                throw new IllegalArgumentException("Empty intent filter and component names given");
-            }
-        }
+        Preconditions.checkNotNull(mIntents, "Shortcut Intent must be provided");
+        Preconditions.checkArgument(mIntents.length > 0, "Shortcut Intent must be provided");
     }
 
     /**
@@ -434,10 +377,6 @@ public final class ShortcutInfo implements Parcelable {
                 mDisabledMessageResName = source.mDisabledMessageResName;
                 mIconResName = source.mIconResName;
             }
-            // TODO: Omit these by default and add a new clone flag.
-            mChooserIntentFilters = source.mChooserIntentFilters;
-            mChooserComponentNames = source.mChooserComponentNames;
-            mChooserExtras = source.mChooserExtras;
         } else {
             // Set this bit.
             mFlags |= FLAG_KEY_FIELDS_ONLY;
@@ -563,25 +502,6 @@ public final class ShortcutInfo implements Parcelable {
         }
         return fullResourceName.substring(p1 + 1);
     }
-
-    /**
-     * Whether the shortcut has any intentFilter matching the passed in one.
-     * @hide
-     */
-    @VisibleForTesting
-    public boolean hasMatchingFilter(ContentResolver resolver, Intent intent) {
-        if (mChooserIntentFilters == null) {
-            return false;
-        }
-        for (IntentFilter filter : mChooserIntentFilters) {
-            int match = filter.match(resolver, intent, false, TAG);
-            if (match > 0) {
-                return true;
-            }
-        }
-        return false;
-    }
-
 
     /**
      * Extract the entry name from a fully-donated resource name.
@@ -766,15 +686,6 @@ public final class ShortcutInfo implements Parcelable {
         if (source.mExtras != null) {
             mExtras = source.mExtras;
         }
-        if (source.mChooserExtras != null) {
-            mChooserExtras = source.mChooserExtras;
-        }
-        if (source.mChooserIntentFilters != null) {
-            mChooserIntentFilters = source.mChooserIntentFilters;
-        }
-        if (source.mChooserComponentNames != null) {
-            mChooserComponentNames = source.mChooserComponentNames;
-        }
     }
 
     /**
@@ -835,12 +746,6 @@ public final class ShortcutInfo implements Parcelable {
         private int mRank = RANK_NOT_SET;
 
         private PersistableBundle mExtras;
-
-        private PersistableBundle mChooserExtras;
-
-        private List<IntentFilter> mChooserIntentFilters;
-
-        private List<ComponentName> mChooserComponentNames;
 
         /**
          * Old style constructor.
@@ -1127,37 +1032,17 @@ public final class ShortcutInfo implements Parcelable {
             return this;
         }
 
-        /**
-         * Extras that can be added which will be added to the Intent used to launch the app if
-         * launched from a chooser context.
-         */
+        /** @deprecated punted, don't use. */
+        @Deprecated
         @NonNull
         public Builder setChooserExtras(@NonNull PersistableBundle extras) {
-            mChooserExtras = extras;
             return this;
         }
 
-        /**
-         * IntentFilters and the components that should resolve a match for a given chooser target.
-         * If multiple matches are found, the component corresponding to the closest match will be
-         * used.
-         *
-         * @param filter IntendFilter that if matched will have the intent forwarded to the given
-         *               component
-         * @param name The component that an intent that passes this filter will resolve to.
-         */
+        /** @deprecated punted, don't use. */
+        @Deprecated
         public Builder addChooserIntentFilter(@NonNull IntentFilter filter,
                 @NonNull ComponentName name) {
-            Preconditions.checkNotNull(filter, "intent filter cannot be null");
-            Preconditions.checkNotNull(name, "component name cannot be null");
-
-            if (mChooserIntentFilters == null || mChooserComponentNames == null) {
-                mChooserIntentFilters = new ArrayList<>();
-                mChooserComponentNames = new ArrayList<>();
-            }
-
-            mChooserIntentFilters.add(filter);
-            mChooserComponentNames.add(name);
             return this;
         }
 
@@ -1361,28 +1246,25 @@ public final class ShortcutInfo implements Parcelable {
         return mIntentPersistableExtrases;
     }
 
-    /**
-     * Retrieve the extras that will be added in to any intent launched through the chooser.
-     */
+    /** @deprecated punted, don't use. */
+    @Deprecated
     @NonNull
     public PersistableBundle getChooserExtras() {
-        return mChooserExtras;
+        return new PersistableBundle();
     }
 
-    /**
-     * Retrieve the list of intent filters for chooser targets.
-     */
+    /** @deprecated punted, don't use. */
+    @Deprecated
     @NonNull
     public IntentFilter[] getChooserIntentFilters() {
-        return mChooserIntentFilters;
+        return new IntentFilter[0];
     }
 
-    /**
-     * Retrieve the list of component names corresponding to the above intent filters.
-     */
+    /** @deprecated punted, don't use. */
+    @Deprecated
     @NonNull
     public ComponentName[] getChooserComponentNames() {
-        return mChooserComponentNames;
+        return new ComponentName[0];
     }
 
     /**
@@ -1506,9 +1388,10 @@ public final class ShortcutInfo implements Parcelable {
         return hasFlags(FLAG_PINNED);
     }
 
-    /** Return whether a shortcut can be shown in the chooser. */
+    /** @deprecated punted, don't use. */
+    @Deprecated
     public boolean isChooser() {
-        return hasFlags(FLAG_CHOOSER);
+        return false;
     }
 
     /**
@@ -1537,14 +1420,6 @@ public final class ShortcutInfo implements Parcelable {
      */
     public boolean isFloating() {
         return isPinned() && !(isDynamic() || isManifestShortcut());
-    }
-
-    /**
-     * @return true if pinned but neither static nor dynamic.
-     * @hide
-     */
-    public boolean isDynamicOrChooser() {
-        return hasFlags(FLAG_DYNAMIC) || hasFlags(FLAG_CHOOSER);
     }
 
     /** @hide */
@@ -1829,19 +1704,6 @@ public final class ShortcutInfo implements Parcelable {
                 mCategories.add(source.readString().intern());
             }
         }
-
-        // We put a placeholder empty array in to keep the parcelable order, but can do away with
-        // them at this point if they're empty.
-        mChooserComponentNames = source.readParcelableArray(cl, ComponentName.class);
-        if (mChooserComponentNames.length == 0) {
-            mChooserComponentNames = null;
-        }
-
-        mChooserIntentFilters = source.readParcelableArray(cl, IntentFilter.class);
-        if (mChooserIntentFilters.length == 0) {
-            mChooserIntentFilters = null;
-        }
-        mChooserExtras = source.readPersistableBundle(cl);
     }
 
     @Override
@@ -1888,17 +1750,6 @@ public final class ShortcutInfo implements Parcelable {
         } else {
             dest.writeInt(0);
         }
-        if (mChooserComponentNames != null) {
-            dest.writeParcelableArray(mChooserComponentNames, flags);
-        } else {
-            dest.writeParcelableArray(new ComponentName[0], flags);
-        }
-        if (mChooserIntentFilters != null) {
-            dest.writeParcelableArray(mChooserIntentFilters, flags);
-        } else {
-            dest.writeParcelableArray(new IntentFilter[0], flags);
-        }
-        dest.writePersistableBundle(mChooserExtras);
     }
 
     public static final Creator<ShortcutInfo> CREATOR =

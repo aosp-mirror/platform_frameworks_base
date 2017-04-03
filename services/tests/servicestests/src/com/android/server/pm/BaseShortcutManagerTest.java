@@ -36,7 +36,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -1345,23 +1344,20 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
     protected ShortcutInfo makeShortcut(String id) {
         return makeShortcut(
                 id, "Title-" + id, /* activity =*/ null, /* icon =*/ null,
-                makeIntent(Intent.ACTION_VIEW, ShortcutActivity.class), /* rank =*/ 0,
-                /* chooserFilter=*/ null, /* chooserComponentNames=*/ null);
+                makeIntent(Intent.ACTION_VIEW, ShortcutActivity.class), /* rank =*/ 0);
     }
 
     @Deprecated // Title was renamed to short label.
     protected ShortcutInfo makeShortcutWithTitle(String id, String title) {
         return makeShortcut(
                 id, title, /* activity =*/ null, /* icon =*/ null,
-                makeIntent(Intent.ACTION_VIEW, ShortcutActivity.class), /* rank =*/ 0,
-                /* chooserFilter=*/ null, /* chooserComponentNames=*/ null);
+                makeIntent(Intent.ACTION_VIEW, ShortcutActivity.class), /* rank =*/ 0);
     }
 
     protected ShortcutInfo makeShortcutWithShortLabel(String id, String shortLabel) {
         return makeShortcut(
                 id, shortLabel, /* activity =*/ null, /* icon =*/ null,
-                makeIntent(Intent.ACTION_VIEW, ShortcutActivity.class), /* rank =*/ 0,
-                /* chooserFilter=*/ null, /* chooserComponentNames=*/ null);
+                makeIntent(Intent.ACTION_VIEW, ShortcutActivity.class), /* rank =*/ 0);
     }
 
     /**
@@ -1370,8 +1366,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
     protected ShortcutInfo makeShortcutWithTimestamp(String id, long timestamp) {
         final ShortcutInfo s = makeShortcut(
                 id, "Title-" + id, /* activity =*/ null, /* icon =*/ null,
-                makeIntent(Intent.ACTION_VIEW, ShortcutActivity.class), /* rank =*/ 0,
-                /* chooserFilter=*/ null, /* chooserComponentNames=*/ null);
+                makeIntent(Intent.ACTION_VIEW, ShortcutActivity.class), /* rank =*/ 0);
         s.setTimestamp(timestamp);
         return s;
     }
@@ -1383,8 +1378,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
             ComponentName activity) {
         final ShortcutInfo s = makeShortcut(
                 id, "Title-" + id, activity, /* icon =*/ null,
-                makeIntent(Intent.ACTION_VIEW, ShortcutActivity.class), /* rank =*/ 0,
-                /* chooserFilter=*/ null, /* chooserComponentNames=*/ null);
+                makeIntent(Intent.ACTION_VIEW, ShortcutActivity.class), /* rank =*/ 0);
         s.setTimestamp(timestamp);
         return s;
     }
@@ -1395,27 +1389,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
     protected ShortcutInfo makeShortcutWithIcon(String id, Icon icon) {
         return makeShortcut(
                 id, "Title-" + id, /* activity =*/ null, icon,
-                makeIntent(Intent.ACTION_VIEW, ShortcutActivity.class), /* rank =*/ 0,
-                /* chooserFilter=*/ null, /* chooserComponentNames=*/ null);
-    }
-
-    protected ShortcutInfo makeChooserShortcut(String id, int i, boolean includeIntent) {
-        List<IntentFilter> filters = new ArrayList<>();
-        List<ComponentName> componentNames = new ArrayList<>();
-        for(int j = 0; j < i; j++) {
-            final IntentFilter filter = new IntentFilter();
-            filter.addAction("view");
-            filters.add(filter);
-
-            componentNames.add(new ComponentName("xxxx", "yy" + i));
-        }
-        Intent intent = null;
-        if (includeIntent) {
-            intent = makeIntent(Intent.ACTION_VIEW, ShortcutActivity.class);
-        }
-        return makeShortcut(
-                id, "Title-" + id, /* activity =*/ null, /* icon */ null,
-                intent, /* rank =*/ 0, filters, componentNames);
+                makeIntent(Intent.ACTION_VIEW, ShortcutActivity.class), /* rank =*/ 0);
     }
 
     protected ShortcutInfo makePackageShortcut(String packageName, String id) {
@@ -1424,8 +1398,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         setCaller(packageName);
         ShortcutInfo s = makeShortcut(
                 id, "Title-" + id, /* activity =*/ null, /* icon =*/ null,
-                makeIntent(Intent.ACTION_VIEW, ShortcutActivity.class), /* rank =*/ 0,
-                /* chooserFilter=*/ null, /* chooserComponentNames=*/ null);
+                makeIntent(Intent.ACTION_VIEW, ShortcutActivity.class), /* rank =*/ 0);
         setCaller(origCaller); // restore the caller
 
         return s;
@@ -1449,52 +1422,39 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
     protected ShortcutInfo makeShortcutWithActivity(String id, ComponentName activity) {
         return makeShortcut(
                 id, "Title-" + id, activity, /* icon =*/ null,
-                makeIntent(Intent.ACTION_VIEW, ShortcutActivity.class), /* rank =*/ 0,
-                /* chooserFilters =*/ null, /* chooserComponentNames =*/ null);
+                makeIntent(Intent.ACTION_VIEW, ShortcutActivity.class), /* rank =*/ 0);
     }
 
     protected ShortcutInfo makeShortcutWithIntent(String id, Intent intent) {
         return makeShortcut(
                 id, "Title-" + id, /* activity =*/ null, /* icon =*/ null,
-                intent, /* rank =*/ 0, /* chooserFilters =*/ null,
-                /* chooserComponentNames =*/ null);
-
+                intent, /* rank =*/ 0);
     }
 
     protected ShortcutInfo makeShortcutWithActivityAndTitle(String id, ComponentName activity,
             String title) {
         return makeShortcut(
                 id, title, activity, /* icon =*/ null,
-                makeIntent(Intent.ACTION_VIEW, ShortcutActivity.class), /* rank =*/ 0,
-                /* chooserFilters =*/ null, /* chooserComponentNames =*/ null);
+                makeIntent(Intent.ACTION_VIEW, ShortcutActivity.class), /* rank =*/ 0);
     }
 
     protected ShortcutInfo makeShortcutWithActivityAndRank(String id, ComponentName activity,
             int rank) {
         return makeShortcut(
                 id, "Title-" + id, activity, /* icon =*/ null,
-                makeIntent(Intent.ACTION_VIEW, ShortcutActivity.class), rank,
-                /* chooserFilters =*/ null, /* chooserComponentNames =*/ null);
+                makeIntent(Intent.ACTION_VIEW, ShortcutActivity.class), rank);
     }
 
     /**
      * Make a shortcut with details.
      */
     protected ShortcutInfo makeShortcut(String id, String title, ComponentName activity,
-            Icon icon, Intent intent, int rank, @Nullable List<IntentFilter> chooserFilters,
-            @Nullable List<ComponentName> chooserComponentNames) {
+            Icon icon, Intent intent, int rank) {
         final ShortcutInfo.Builder  b = new ShortcutInfo.Builder(mClientContext, id)
                 .setActivity(new ComponentName(mClientContext.getPackageName(), "main"))
                 .setShortLabel(title)
-                .setRank(rank);
-        if (intent != null) {
-            b.setIntent(intent);
-        }
-        if (chooserFilters != null) {
-            for (int i = 0; i < chooserFilters.size(); i++) {
-                b.addChooserIntentFilter(chooserFilters.get(i), chooserComponentNames.get(i));
-            }
-        }
+                .setRank(rank)
+                .setIntent(intent);
         if (icon != null) {
             b.setIcon(icon);
         }
