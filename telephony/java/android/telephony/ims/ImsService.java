@@ -16,7 +16,9 @@
 
 package android.telephony.ims;
 
+import android.annotation.SystemApi;
 import android.app.PendingIntent;
+import android.app.Service;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.IBinder;
@@ -72,26 +74,30 @@ import static android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE;
  *    {@link CarrierConfigManager#KEY_CONFIG_IMS_PACKAGE_OVERRIDE_STRING}.
  *
  * The features that are currently supported in an ImsService are:
- * - RCS_FEATURE: This ImsService implements the {@link RcsFeature} class.
- * - MMTEL_FEATURE: This ImsService implements the {@link MMTelFeature} class.
- * - EMERGENCY_MMTEL_FEATURE: This ImsService implements the {@link MMTelFeature} class and will be
+ * - RCS_FEATURE: This ImsService implements the RcsFeature class.
+ * - MMTEL_FEATURE: This ImsService implements the MMTelFeature class.
+ * - EMERGENCY_MMTEL_FEATURE: This ImsService implements the MMTelFeature class and will be
  *   available to place emergency calls at all times. This MUST be implemented by the default
  *   ImsService provided in the device overlay.
- *
- * @hide
+ *   @hide
  */
-public abstract class ImsService extends ImsServiceBase {
+@SystemApi
+public class ImsService extends Service {
 
     private static final String LOG_TAG = "ImsService";
 
     /**
      * The intent that must be defined as an intent-filter in the AndroidManifest of the ImsService.
+     * @hide
      */
     public static final String SERVICE_INTERFACE = "android.telephony.ims.ImsService";
 
     // A map of slot Id -> Set of features corresponding to that slot.
     private final SparseArray<SparseArray<ImsFeature>> mFeatures = new SparseArray<>();
 
+    /**
+     * @hide
+     */
     // Implements all supported features as a flat interface.
     protected final IBinder mImsServiceController = new IImsServiceController.Stub() {
 
@@ -328,6 +334,9 @@ public abstract class ImsService extends ImsServiceBase {
 
     };
 
+    /**
+     * @hide
+     */
     @Override
     public IBinder onBind(Intent intent) {
         if(SERVICE_INTERFACE.equals(intent.getAction())) {
@@ -409,12 +418,18 @@ public abstract class ImsService extends ImsServiceBase {
         return null;
     }
 
+    /**
+     * @hide
+     */
     @VisibleForTesting
     // Be sure to lock on mFeatures before accessing this method
     public SparseArray<ImsFeature> getImsFeatureMap(int slotId) {
         return mFeatures.get(slotId);
     }
 
+    /**
+     * @hide
+     */
     @VisibleForTesting
     // Be sure to lock on mFeatures before accessing this method
     public ImsFeature getImsFeatureFromType(SparseArray<ImsFeature> set, int featureType) {
@@ -451,17 +466,26 @@ public abstract class ImsService extends ImsServiceBase {
     /**
      * @return An implementation of MMTelFeature that will be used by the system for MMTel
      * functionality. Must be able to handle emergency calls at any time as well.
+     * @hide
      */
-    public abstract MMTelFeature onCreateEmergencyMMTelImsFeature(int slotId);
+    public MMTelFeature onCreateEmergencyMMTelImsFeature(int slotId) {
+        return null;
+    }
 
     /**
      * @return An implementation of MMTelFeature that will be used by the system for MMTel
      * functionality.
+     * @hide
      */
-    public abstract MMTelFeature onCreateMMTelImsFeature(int slotId);
+    public MMTelFeature onCreateMMTelImsFeature(int slotId) {
+        return null;
+    }
 
     /**
      * @return An implementation of RcsFeature that will be used by the system for RCS.
+     * @hide
      */
-    public abstract RcsFeature onCreateRcsFeature(int slotId);
+    public RcsFeature onCreateRcsFeature(int slotId) {
+        return null;
+    }
 }
