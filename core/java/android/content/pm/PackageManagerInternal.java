@@ -310,10 +310,16 @@ public abstract class PackageManagerInternal {
             List<String> overlayPackageNames);
 
     /**
-     * Resolves an intent, allowing instant apps to be resolved.
+     * Resolves an activity intent, allowing instant apps to be resolved.
      */
     public abstract ResolveInfo resolveIntent(Intent intent, String resolvedType,
             int flags, int userId);
+
+    /**
+    * Resolves a service intent, allowing instant apps to be resolved.
+    */
+   public abstract ResolveInfo resolveService(Intent intent, String resolvedType,
+           int flags, int userId, int callingUid);
 
     /**
      * Track the creator of a new isolated uid.
