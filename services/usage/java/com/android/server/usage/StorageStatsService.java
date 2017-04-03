@@ -398,7 +398,7 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
             super(looper);
             // TODO: Handle all private volumes.
             mStats = new StatFs(Environment.getDataDirectory().getAbsolutePath());
-            mPreviousBytes = mStats.getFreeBytes();
+            mPreviousBytes = mStats.getAvailableBytes();
             mMinimumThresholdBytes = mStats.getTotalBytes() * MINIMUM_CHANGE_DELTA;
         }
 
@@ -413,9 +413,9 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
 
             switch (msg.what) {
                 case MSG_CHECK_STORAGE_DELTA: {
-                    long bytesDelta = Math.abs(mPreviousBytes - mStats.getFreeBytes());
+                    long bytesDelta = Math.abs(mPreviousBytes - mStats.getAvailableBytes());
                     if (bytesDelta > mMinimumThresholdBytes) {
-                        mPreviousBytes = mStats.getFreeBytes();
+                        mPreviousBytes = mStats.getAvailableBytes();
                         recalculateQuotas(getInitializedStrategy());
                     }
                     sendEmptyMessageDelayed(MSG_CHECK_STORAGE_DELTA, DELAY_IN_MILLIS);
@@ -434,7 +434,7 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
 
                     // If errors occurred getting the quotas from disk, let's re-calc them.
                     if (mPreviousBytes < 0) {
-                        mPreviousBytes = mStats.getFreeBytes();
+                        mPreviousBytes = mStats.getAvailableBytes();
                         recalculateQuotas(strategy);
                     }
                     sendEmptyMessageDelayed(MSG_CHECK_STORAGE_DELTA, DELAY_IN_MILLIS);
