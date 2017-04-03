@@ -592,7 +592,18 @@ public final class BidiFormatter {
         static {
             DIR_TYPE_CACHE = new byte[DIR_TYPE_CACHE_SIZE];
             for (int i = 0; i < DIR_TYPE_CACHE_SIZE; i++) {
+                // Calling Character.getDirectionality() is OK here, since new emojis start after
+                // the end of our cache.
                 DIR_TYPE_CACHE[i] = Character.getDirectionality(i);
+            }
+        }
+
+        private static byte getDirectionality(int codePoint) {
+            if (Emoji.isNewEmoji(codePoint)) {
+                // TODO: Fix or remove once emoji-data.text 5.0 is in ICU or update to 6.0.
+                return Character.DIRECTIONALITY_OTHER_NEUTRALS;
+            } else {
+                return Character.getDirectionality(codePoint);
             }
         }
 
@@ -809,7 +820,7 @@ public final class BidiFormatter {
          * cache.
          */
         private static byte getCachedDirectionality(char c) {
-            return c < DIR_TYPE_CACHE_SIZE ? DIR_TYPE_CACHE[c] : Character.getDirectionality(c);
+            return c < DIR_TYPE_CACHE_SIZE ? DIR_TYPE_CACHE[c] : getDirectionality(c);
         }
 
         /**
@@ -826,7 +837,7 @@ public final class BidiFormatter {
             if (Character.isHighSurrogate(lastChar)) {
                 int codePoint = Character.codePointAt(text, charIndex);
                 charIndex += Character.charCount(codePoint);
-                return Character.getDirectionality(codePoint);
+                return getDirectionality(codePoint);
             }
             charIndex++;
             byte dirType = getCachedDirectionality(lastChar);
@@ -856,7 +867,7 @@ public final class BidiFormatter {
             if (Character.isLowSurrogate(lastChar)) {
                 int codePoint = Character.codePointBefore(text, charIndex);
                 charIndex -= Character.charCount(codePoint);
-                return Character.getDirectionality(codePoint);
+                return getDirectionality(codePoint);
             }
             charIndex--;
             byte dirType = getCachedDirectionality(lastChar);
