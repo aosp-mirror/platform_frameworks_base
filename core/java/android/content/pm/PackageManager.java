@@ -6243,7 +6243,7 @@ public abstract class PackageManager {
      * Return the {@link ComponentName} of the activity providing Settings for the Instant App
      * resolver.
      *
-     * @see {@link android.content.intent#ACTION_EPHEMERAL_RESOLVER_SETTINGS}
+     * @see {@link android.content.intent#ACTION_INSTANT_APP_RESOLVER_SETTINGS}
      * @hide
      */
     @SystemApi

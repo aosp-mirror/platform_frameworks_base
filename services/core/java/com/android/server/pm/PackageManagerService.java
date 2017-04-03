@@ -3047,7 +3047,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 MATCH_DIRECT_BOOT_AWARE
                 | MATCH_DIRECT_BOOT_UNAWARE
                 | (!Build.IS_DEBUGGABLE ? MATCH_SYSTEM_ONLY : 0);
-        final Intent resolverIntent = new Intent(Intent.ACTION_RESOLVE_EPHEMERAL_PACKAGE);
+        final Intent resolverIntent = new Intent(Intent.ACTION_RESOLVE_INSTANT_APP_PACKAGE);
         final List<ResolveInfo> resolvers = queryIntentServicesInternal(resolverIntent, null,
                 resolveFlags, UserHandle.USER_SYSTEM, callingUid, false /*includeInstantApps*/);
 
@@ -3089,7 +3089,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     private @Nullable ActivityInfo getEphemeralInstallerLPr() {
-        final Intent intent = new Intent(Intent.ACTION_INSTALL_EPHEMERAL_PACKAGE);
+        final Intent intent = new Intent(Intent.ACTION_INSTALL_INSTANT_APP_PACKAGE);
         intent.addCategory(Intent.CATEGORY_DEFAULT);
         intent.setDataAndType(Uri.fromFile(new File("foo.apk")), PACKAGE_MIME_TYPE);
 
@@ -3123,7 +3123,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     private @Nullable ComponentName getEphemeralResolverSettingsLPr(
             @NonNull ComponentName resolver) {
-        final Intent intent =  new Intent(Intent.ACTION_EPHEMERAL_RESOLVER_SETTINGS)
+        final Intent intent =  new Intent(Intent.ACTION_INSTANT_APP_RESOLVER_SETTINGS)
                 .addCategory(Intent.CATEGORY_DEFAULT)
                 .setPackage(resolver.getPackageName());
         final int resolveFlags = MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE;

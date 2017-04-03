@@ -65,7 +65,7 @@ final class EphemeralResolverConnection {
 
     public EphemeralResolverConnection(Context context, ComponentName componentName) {
         mContext = context;
-        mIntent = new Intent(Intent.ACTION_RESOLVE_EPHEMERAL_PACKAGE).setComponent(componentName);
+        mIntent = new Intent(Intent.ACTION_RESOLVE_INSTANT_APP_PACKAGE).setComponent(componentName);
     }
 
     public final List<InstantAppResolveInfo> getInstantAppResolveInfoList(int hashPrefix[],
