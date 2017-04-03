@@ -334,9 +334,11 @@ public class TelephonyIntents {
      * <ul>
      *   <li><em>subscription</em> - A int, the current default subscription.</li>
      * </ul>
+     * @deprecated Use {@link Intent#ACTION_DEFAULT_SUBSCRIPTION_CHANGED}
      */
+    @Deprecated
     public static final String ACTION_DEFAULT_SUBSCRIPTION_CHANGED
-            = "android.intent.action.ACTION_DEFAULT_SUBSCRIPTION_CHANGED";
+            = Intent.ACTION_DEFAULT_SUBSCRIPTION_CHANGED;
 
     /**
      * Broadcast Action: The default data subscription has changed.  This has the following
@@ -364,9 +366,11 @@ public class TelephonyIntents {
      * <ul>
      *   <li><em>subscription</em> - A int, the current sms default subscription.</li>
      * </ul>
+     * @deprecated Use {@link Intent#ACTION_DEFAULT_SMS_SUBSCRIPTION_CHANGED}
      */
+    @Deprecated
     public static final String ACTION_DEFAULT_SMS_SUBSCRIPTION_CHANGED
-            = "android.intent.action.ACTION_DEFAULT_SMS_SUBSCRIPTION_CHANGED";
+            = Intent.ACTION_DEFAULT_SMS_SUBSCRIPTION_CHANGED;
 
     /*
      * Broadcast Action: An attempt to set phone radio type and access technology has changed.
