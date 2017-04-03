@@ -26,6 +26,8 @@ import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.Path.Direction;
+import android.graphics.Path.FillType;
 import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
@@ -36,8 +38,9 @@ import com.android.settingslib.Utils;
 
 public class BatteryMeterDrawableBase extends Drawable {
 
-    private static final float ASPECT_RATIO = 9.5f / 14.5f;
+    private static final float ASPECT_RATIO = .58f;
     public static final String TAG = BatteryMeterDrawableBase.class.getSimpleName();
+    private static final float RADIUS_RATIO = 1.75f / 17f;
 
     protected final Context mContext;
     protected final Paint mFramePaint;
@@ -302,28 +305,20 @@ public class BatteryMeterDrawableBase extends Drawable {
         final int width = (int) (ASPECT_RATIO * mHeight);
         int px = (mWidth - width) / 2;
 
-        final int buttonHeight = (int) (height * mButtonHeightFraction);
+        final int buttonHeight = Math.round(height * mButtonHeightFraction);
 
         mFrame.set(0, 0, width, height);
         mFrame.offset(px, 0);
 
         // button-frame: area above the battery body
         mButtonFrame.set(
-                mFrame.left + Math.round(width * 0.25f),
+                mFrame.left + Math.round(width * 0.3f),
                 mFrame.top,
-                mFrame.right - Math.round(width * 0.25f),
+                mFrame.right - Math.round(width * 0.3f),
                 mFrame.top + buttonHeight);
-
-        mButtonFrame.top += mSubpixelSmoothingLeft;
-        mButtonFrame.left += mSubpixelSmoothingLeft;
-        mButtonFrame.right -= mSubpixelSmoothingRight;
 
         // frame: battery body area
         mFrame.top += buttonHeight;
-        mFrame.left += mSubpixelSmoothingLeft;
-        mFrame.top += mSubpixelSmoothingLeft;
-        mFrame.right -= mSubpixelSmoothingRight;
-        mFrame.bottom -= mSubpixelSmoothingRight;
 
         // set the battery charging color
         mBatteryPaint.setColor(mCharging ? mChargeColor : getColorForLevel(level));
@@ -339,15 +334,10 @@ public class BatteryMeterDrawableBase extends Drawable {
 
         // define the battery shape
         mShapePath.reset();
-        mShapePath.moveTo(mButtonFrame.left, mButtonFrame.top);
-        mShapePath.lineTo(mButtonFrame.right, mButtonFrame.top);
-        mShapePath.lineTo(mButtonFrame.right, mFrame.top);
-        mShapePath.lineTo(mFrame.right, mFrame.top);
-        mShapePath.lineTo(mFrame.right, mFrame.bottom);
-        mShapePath.lineTo(mFrame.left, mFrame.bottom);
-        mShapePath.lineTo(mFrame.left, mFrame.top);
-        mShapePath.lineTo(mButtonFrame.left, mFrame.top);
-        mShapePath.lineTo(mButtonFrame.left, mButtonFrame.top);
+        final float radius = RADIUS_RATIO * (mFrame.height() + buttonHeight);
+        mShapePath.setFillType(FillType.WINDING);
+        mShapePath.addRoundRect(mFrame, radius, radius, Direction.CW);
+        mShapePath.addRect(mButtonFrame, Direction.CW);
 
         if (mCharging) {
             // define the bolt shape
