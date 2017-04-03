@@ -287,7 +287,9 @@ final class ProcessRecord {
                 pw.print(" setSchedGroup="); pw.print(setSchedGroup);
                 pw.print(" systemNoUi="); pw.print(systemNoUi);
                 pw.print(" trimMemoryLevel="); pw.println(trimMemoryLevel);
-        pw.print(prefix); pw.print("vrThreadTid="); pw.print(vrThreadTid);
+        if (vrThreadTid != 0) {
+            pw.print(prefix); pw.print("vrThreadTid="); pw.println(vrThreadTid);
+        }
         pw.print(prefix); pw.print("curProcState="); pw.print(curProcState);
                 pw.print(" repProcState="); pw.print(repProcState);
                 pw.print(" pssProcState="); pw.print(pssProcState);

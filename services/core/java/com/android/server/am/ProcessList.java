@@ -350,58 +350,58 @@ final class ProcessList {
         String procState;
         switch (curProcState) {
             case ActivityManager.PROCESS_STATE_PERSISTENT:
-                procState = "P ";
+                procState = "PER ";
                 break;
             case ActivityManager.PROCESS_STATE_PERSISTENT_UI:
-                procState = "PU";
+                procState = "PERU";
                 break;
             case ActivityManager.PROCESS_STATE_TOP:
-                procState = "T ";
+                procState = "TOP";
                 break;
             case ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE:
-                procState = "SB";
+                procState = "BFGS";
                 break;
             case ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE:
-                procState = "SF";
+                procState = "FGS ";
                 break;
             case ActivityManager.PROCESS_STATE_TOP_SLEEPING:
-                procState = "TS";
+                procState = "TPSL";
                 break;
             case ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND:
-                procState = "IF";
+                procState = "IMPF";
                 break;
             case ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND:
-                procState = "IB";
+                procState = "IMPB";
                 break;
             case ActivityManager.PROCESS_STATE_BACKUP:
-                procState = "BU";
+                procState = "BKUP";
                 break;
             case ActivityManager.PROCESS_STATE_HEAVY_WEIGHT:
-                procState = "HW";
+                procState = "HVY ";
                 break;
             case ActivityManager.PROCESS_STATE_SERVICE:
-                procState = "S ";
+                procState = "SVC ";
                 break;
             case ActivityManager.PROCESS_STATE_RECEIVER:
-                procState = "R ";
+                procState = "RCVR";
                 break;
             case ActivityManager.PROCESS_STATE_HOME:
-                procState = "HO";
+                procState = "HOME";
                 break;
             case ActivityManager.PROCESS_STATE_LAST_ACTIVITY:
-                procState = "LA";
+                procState = "LAST";
                 break;
             case ActivityManager.PROCESS_STATE_CACHED_ACTIVITY:
-                procState = "CA";
+                procState = "CAC ";
                 break;
             case ActivityManager.PROCESS_STATE_CACHED_ACTIVITY_CLIENT:
-                procState = "Ca";
+                procState = "CACC";
                 break;
             case ActivityManager.PROCESS_STATE_CACHED_EMPTY:
-                procState = "CE";
+                procState = "CEM ";
                 break;
             case ActivityManager.PROCESS_STATE_NONEXISTENT:
-                procState = "N ";
+                procState = "NONE";
                 break;
             default:
                 procState = "??";
