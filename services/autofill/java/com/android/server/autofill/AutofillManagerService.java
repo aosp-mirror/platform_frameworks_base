@@ -23,7 +23,6 @@ import static com.android.server.autofill.Helper.DEBUG;
 import static com.android.server.autofill.Helper.VERBOSE;
 import static com.android.server.autofill.Helper.bundleToString;
 
-import android.Manifest;
 import android.annotation.NonNull;
 import android.app.ActivityManagerInternal;
 import android.content.BroadcastReceiver;
@@ -36,7 +35,6 @@ import android.content.pm.UserInfo;
 import android.database.ContentObserver;
 import android.graphics.Rect;
 import android.net.Uri;
-import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
