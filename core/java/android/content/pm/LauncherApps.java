@@ -419,7 +419,7 @@ public class LauncherApps {
      */
     private void logErrorForInvalidProfileAccess(@NonNull UserHandle target) {
         if (UserHandle.myUserId() != target.getIdentifier() && mUserManager.isManagedProfile()) {
-            Log.e(TAG, "Accessing other profiles/users from managed profile is no longer allowed.");
+            Log.w(TAG, "Accessing other profiles/users from managed profile is no longer allowed.");
         }
     }
 
