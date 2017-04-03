@@ -68,6 +68,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.SystemService;
 import com.android.server.hdmi.HdmiAnnotations.ServiceThreadOnly;
@@ -1677,7 +1678,7 @@ public final class HdmiControlService extends SystemService {
 
         @Override
         protected void dump(FileDescriptor fd, final PrintWriter writer, String[] args) {
-            getContext().enforceCallingOrSelfPermission(android.Manifest.permission.DUMP, TAG);
+            if (!DumpUtils.checkDumpPermission(getContext(), TAG, writer)) return;
             final IndentingPrintWriter pw = new IndentingPrintWriter(writer, "  ");
 
             pw.println("mHdmiControlEnabled: " + mHdmiControlEnabled);

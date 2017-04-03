@@ -39,6 +39,7 @@ import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.Slog;
 
+import com.android.internal.util.DumpUtils;
 import com.android.server.SystemService;
 
 import java.io.FileDescriptor;
@@ -314,14 +315,7 @@ public final class MediaProjectionManagerService extends SystemService
 
         @Override // Binder call
         public void dump(FileDescriptor fd, final PrintWriter pw, String[] args) {
-            if (mContext == null
-                    || mContext.checkCallingOrSelfPermission(Manifest.permission.DUMP)
-                    != PackageManager.PERMISSION_GRANTED) {
-                pw.println("Permission Denial: can't dump MediaProjectionManager from from pid="
-                        + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid());
-                return;
-            }
-
+            if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
             final long token = Binder.clearCallingIdentity();
             try {
                 MediaProjectionManagerService.this.dump(pw);

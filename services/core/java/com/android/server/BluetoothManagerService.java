@@ -60,6 +60,7 @@ import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.util.Slog;
 
+import com.android.internal.util.DumpUtils;
 import com.android.server.pm.PackageManagerService;
 
 import java.io.FileDescriptor;
@@ -2084,7 +2085,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
 
     @Override
     public void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DUMP, TAG);
+        if (!DumpUtils.checkDumpPermission(mContext, TAG, writer)) return;
         String errorMsg = null;
 
         boolean protoOut = (args.length > 0) && args[0].startsWith("--proto");

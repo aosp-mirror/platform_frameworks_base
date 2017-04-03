@@ -54,6 +54,7 @@ import android.media.AudioAttributes;
 
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.IBatteryStats;
+import com.android.internal.util.DumpUtils;
 import com.android.server.power.BatterySaverPolicy.ServiceType;
 
 import java.io.FileDescriptor;
@@ -874,14 +875,8 @@ public class VibratorService extends IVibratorService.Stub
 
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
-                != PackageManager.PERMISSION_GRANTED) {
+        if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
 
-            pw.println("Permission Denial: can't dump vibrator service from from pid="
-                    + Binder.getCallingPid()
-                    + ", uid=" + Binder.getCallingUid());
-            return;
-        }
         pw.println("Previous vibrations:");
         synchronized (mLock) {
             for (VibrationInfo info : mPreviousVibrations) {

@@ -24,6 +24,7 @@ import android.os.ResultReceiver;
 import android.os.ShellCallback;
 import android.os.ShellCommand;
 import com.android.internal.app.IBatteryStats;
+import com.android.internal.util.DumpUtils;
 import com.android.server.am.BatteryStatsService;
 import com.android.server.lights.Light;
 import com.android.server.lights.LightsManager;
@@ -945,14 +946,7 @@ public final class BatteryService extends SystemService {
 
     private final class BinderService extends Binder {
         @Override protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-            if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
-                    != PackageManager.PERMISSION_GRANTED) {
-
-                pw.println("Permission Denial: can't dump Battery service from from pid="
-                        + Binder.getCallingPid()
-                        + ", uid=" + Binder.getCallingUid());
-                return;
-            }
+            if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
 
             if (args.length > 0 && "--proto".equals(args[0])) {
                 dumpProto(fd);

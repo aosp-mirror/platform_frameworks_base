@@ -181,6 +181,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.DeviceIdleController;
@@ -2585,7 +2586,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     @Override
     protected void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
-        mContext.enforceCallingOrSelfPermission(DUMP, TAG);
+        if (!DumpUtils.checkDumpPermission(mContext, TAG, writer)) return;
 
         final IndentingPrintWriter fout = new IndentingPrintWriter(writer, "  ");
 

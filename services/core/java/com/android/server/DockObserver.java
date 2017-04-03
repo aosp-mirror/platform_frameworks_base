@@ -35,6 +35,8 @@ import android.provider.Settings;
 import android.util.Log;
 import android.util.Slog;
 
+import com.android.internal.util.DumpUtils;
+
 import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -252,14 +254,7 @@ final class DockObserver extends SystemService {
     private final class BinderService extends Binder {
         @Override
         protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-            if (getContext().checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
-                    != PackageManager.PERMISSION_GRANTED) {
-                pw.println("Permission Denial: can't dump dock observer service from from pid="
-                        + Binder.getCallingPid()
-                        + ", uid=" + Binder.getCallingUid());
-                return;
-            }
-
+            if (!DumpUtils.checkDumpPermission(getContext(), TAG, pw)) return;
             final long ident = Binder.clearCallingIdentity();
             try {
                 synchronized (mLock) {

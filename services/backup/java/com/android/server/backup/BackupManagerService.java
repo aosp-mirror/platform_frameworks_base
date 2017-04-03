@@ -117,6 +117,7 @@ import android.util.StringBuilderPrinter;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.backup.IBackupTransport;
 import com.android.internal.backup.IObbBackupService;
+import com.android.internal.util.DumpUtils;
 import com.android.server.AppWidgetBackupBridge;
 import com.android.server.EventLogTags;
 import com.android.server.SystemConfig;
@@ -11138,7 +11139,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
     }
 
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DUMP, TAG);
+        if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
 
         long identityToken = Binder.clearCallingIdentity();
         try {

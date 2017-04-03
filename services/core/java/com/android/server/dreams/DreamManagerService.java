@@ -479,14 +479,7 @@ public final class DreamManagerService extends SystemService {
     private final class BinderService extends IDreamManager.Stub {
         @Override // Binder call
         protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-            if (mContext.checkCallingOrSelfPermission(Manifest.permission.DUMP)
-                    != PackageManager.PERMISSION_GRANTED) {
-                pw.println("Permission Denial: can't dump DreamManager from from pid="
-                        + Binder.getCallingPid()
-                        + ", uid=" + Binder.getCallingUid());
-                return;
-            }
-
+            if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
             final long ident = Binder.clearCallingIdentity();
             try {
                 dumpInternal(pw);

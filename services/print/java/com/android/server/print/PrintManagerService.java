@@ -19,7 +19,6 @@ package com.android.server.print;
 import static android.content.pm.PackageManager.GET_SERVICES;
 import static android.content.pm.PackageManager.MATCH_DEBUG_TRIAGED_MISSING;
 
-import android.Manifest;
 import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.content.ComponentName;
@@ -40,22 +39,23 @@ import android.os.UserManager;
 import android.print.IPrintDocumentAdapter;
 import android.print.IPrintJobStateChangeListener;
 import android.print.IPrintManager;
-import android.printservice.recommendation.IRecommendationsChangeListener;
 import android.print.IPrintServicesChangeListener;
 import android.print.IPrinterDiscoveryObserver;
 import android.print.PrintAttributes;
 import android.print.PrintJobId;
 import android.print.PrintJobInfo;
 import android.print.PrintManager;
-import android.printservice.recommendation.RecommendationInfo;
 import android.print.PrinterId;
 import android.printservice.PrintServiceInfo;
+import android.printservice.recommendation.IRecommendationsChangeListener;
+import android.printservice.recommendation.RecommendationInfo;
 import android.provider.Settings;
 import android.util.Log;
 import android.util.SparseArray;
 
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.BackgroundThread;
+import com.android.internal.util.DumpUtils;
 import com.android.internal.util.Preconditions;
 import com.android.server.SystemService;
 
@@ -628,13 +628,7 @@ public final class PrintManagerService extends SystemService {
             fd = Preconditions.checkNotNull(fd);
             pw = Preconditions.checkNotNull(pw);
 
-            if (mContext.checkCallingOrSelfPermission(Manifest.permission.DUMP)
-                    != PackageManager.PERMISSION_GRANTED) {
-                pw.println("Permission Denial: can't dump PrintManager from from pid="
-                        + Binder.getCallingPid()
-                        + ", uid=" + Binder.getCallingUid());
-                return;
-            }
+            if (!DumpUtils.checkDumpPermission(mContext, LOG_TAG, pw)) return;
 
             synchronized (mLock) {
                 final long identity = Binder.clearCallingIdentity();

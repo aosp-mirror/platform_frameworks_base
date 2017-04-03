@@ -124,6 +124,7 @@ import com.android.internal.net.VpnConfig;
 import com.android.internal.net.VpnInfo;
 import com.android.internal.net.VpnProfile;
 import com.android.internal.util.AsyncChannel;
+import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.MessageUtils;
 import com.android.internal.util.WakeupMessage;
@@ -1925,14 +1926,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     @Override
     protected void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
         final IndentingPrintWriter pw = new IndentingPrintWriter(writer, "  ");
-        if (mContext.checkCallingOrSelfPermission(
-                android.Manifest.permission.DUMP)
-                != PackageManager.PERMISSION_GRANTED) {
-            pw.println("Permission Denial: can't dump ConnectivityService " +
-                    "from from pid=" + Binder.getCallingPid() + ", uid=" +
-                    Binder.getCallingUid());
-            return;
-        }
+        if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
 
         if (argsContain(args, "--diag")) {
             dumpNetworkDiagnostics(pw);

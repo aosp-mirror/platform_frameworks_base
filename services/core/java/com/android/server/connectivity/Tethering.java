@@ -70,6 +70,7 @@ import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.telephony.TelephonyIntents;
+import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.MessageUtils;
 import com.android.internal.util.Protocol;
@@ -1585,13 +1586,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
         // Binder.java closes the resource for us.
         @SuppressWarnings("resource")
         final IndentingPrintWriter pw = new IndentingPrintWriter(writer, "  ");
-        if (mContext.checkCallingOrSelfPermission(
-                android.Manifest.permission.DUMP) != PackageManager.PERMISSION_GRANTED) {
-            pw.println("Permission Denial: can't dump ConnectivityService.Tether " +
-                    "from from pid=" + Binder.getCallingPid() + ", uid=" +
-                    Binder.getCallingUid());
-                    return;
-        }
+        if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
 
         pw.println("Tethering:");
         pw.increaseIndent();

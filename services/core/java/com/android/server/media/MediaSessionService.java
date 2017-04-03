@@ -71,6 +71,7 @@ import android.util.SparseIntArray;
 import android.view.KeyEvent;
 import android.view.ViewConfiguration;
 
+import com.android.internal.util.DumpUtils;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.Watchdog;
@@ -1283,13 +1284,7 @@ public class MediaSessionService extends SystemService implements Monitor {
 
         @Override
         public void dump(FileDescriptor fd, final PrintWriter pw, String[] args) {
-            if (getContext().checkCallingOrSelfPermission(Manifest.permission.DUMP)
-                    != PackageManager.PERMISSION_GRANTED) {
-                pw.println("Permission Denial: can't dump MediaSessionService from from pid="
-                        + Binder.getCallingPid()
-                        + ", uid=" + Binder.getCallingUid());
-                return;
-            }
+            if (!DumpUtils.checkDumpPermission(getContext(), TAG, pw)) return;
 
             pw.println("MEDIA SESSION SERVICE (dumpsys media_session)");
             pw.println();

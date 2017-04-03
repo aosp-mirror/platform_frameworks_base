@@ -616,13 +616,8 @@ public final class ProcessStatsService extends IProcessStats.Stub {
 
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        if (mAm.checkCallingPermission(android.Manifest.permission.DUMP)
-                != PackageManager.PERMISSION_GRANTED) {
-            pw.println("Permission Denial: can't dump procstats from from pid="
-                    + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid()
-                    + " without permission " + android.Manifest.permission.DUMP);
-            return;
-        }
+        if (!com.android.internal.util.DumpUtils.checkDumpPermission(mAm.mContext,
+                TAG, pw)) return;
 
         long ident = Binder.clearCallingIdentity();
         try {

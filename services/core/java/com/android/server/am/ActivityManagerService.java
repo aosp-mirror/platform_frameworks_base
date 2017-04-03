@@ -350,6 +350,7 @@ import com.android.internal.os.Zygote;
 import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.MemInfoReader;
@@ -2656,14 +2657,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         @Override
         protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-            if (mActivityManagerService.checkCallingPermission(android.Manifest.permission.DUMP)
-                    != PackageManager.PERMISSION_GRANTED) {
-                pw.println("Permission Denial: can't dump meminfo from from pid="
-                        + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid()
-                        + " without permission " + android.Manifest.permission.DUMP);
-                return;
-            }
-
+            if (!DumpUtils.checkDumpPermission(mActivityManagerService.mContext,
+                    "meminfo", pw)) return;
             mActivityManagerService.dumpApplicationMemoryUsage(fd, pw, "  ", args, false, null);
         }
     }
@@ -2676,14 +2671,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         @Override
         protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-            if (mActivityManagerService.checkCallingPermission(android.Manifest.permission.DUMP)
-                    != PackageManager.PERMISSION_GRANTED) {
-                pw.println("Permission Denial: can't dump gfxinfo from from pid="
-                        + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid()
-                        + " without permission " + android.Manifest.permission.DUMP);
-                return;
-            }
-
+            if (!DumpUtils.checkDumpPermission(mActivityManagerService.mContext,
+                    "gfxinfo", pw)) return;
             mActivityManagerService.dumpGraphicsHardwareUsage(fd, pw, args);
         }
     }
@@ -2696,14 +2685,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         @Override
         protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-            if (mActivityManagerService.checkCallingPermission(android.Manifest.permission.DUMP)
-                    != PackageManager.PERMISSION_GRANTED) {
-                pw.println("Permission Denial: can't dump dbinfo from from pid="
-                        + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid()
-                        + " without permission " + android.Manifest.permission.DUMP);
-                return;
-            }
-
+            if (!DumpUtils.checkDumpPermission(mActivityManagerService.mContext,
+                    "dbinfo", pw)) return;
             mActivityManagerService.dumpDbInfo(fd, pw, args);
         }
     }
@@ -2716,14 +2699,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         @Override
         protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-            if (mActivityManagerService.checkCallingPermission(android.Manifest.permission.DUMP)
-                    != PackageManager.PERMISSION_GRANTED) {
-                pw.println("Permission Denial: can't dump cpuinfo from from pid="
-                        + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid()
-                        + " without permission " + android.Manifest.permission.DUMP);
-                return;
-            }
-
+            if (!DumpUtils.checkDumpPermission(mActivityManagerService.mContext,
+                    "cpuinfo", pw)) return;
             synchronized (mActivityManagerService.mProcessCpuTracker) {
                 pw.print(mActivityManagerService.mProcessCpuTracker.printCurrentLoad());
                 pw.print(mActivityManagerService.mProcessCpuTracker.printCurrentState(
@@ -14758,15 +14735,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        if (checkCallingPermission(android.Manifest.permission.DUMP)
-                != PackageManager.PERMISSION_GRANTED) {
-            pw.println("Permission Denial: can't dump ActivityManager from from pid="
-                    + Binder.getCallingPid()
-                    + ", uid=" + Binder.getCallingUid()
-                    + " without permission "
-                    + android.Manifest.permission.DUMP);
-            return;
-        }
+        if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
 
         boolean dumpAll = false;
         boolean dumpClient = false;
