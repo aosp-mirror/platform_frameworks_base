@@ -398,7 +398,7 @@ public final class ActiveServices {
         r.delayedStop = false;
         r.fgRequired = fgRequired;
         r.pendingStarts.add(new ServiceRecord.StartItem(r, false, r.makeNextStartId(),
-                service, neededGrants));
+                service, neededGrants, callingUid));
 
         final ServiceMap smap = getServiceMapLocked(r.userId);
         boolean addToStarting = false;
@@ -1355,10 +1355,10 @@ public final class ActiveServices {
         if (r == null) {
             try {
                 // TODO: come back and remove this assumption to triage all services
-                ResolveInfo rInfo = AppGlobals.getPackageManager().resolveService(service,
+                ResolveInfo rInfo = mAm.getPackageManagerInternalLocked().resolveService(service,
                         resolvedType, ActivityManagerService.STOCK_PM_FLAGS
                                 | PackageManager.MATCH_DEBUG_TRIAGED_MISSING,
-                        userId);
+                        userId, callingUid);
                 ServiceInfo sInfo =
                     rInfo != null ? rInfo.serviceInfo : null;
                 if (sInfo == null) {
@@ -1927,7 +1927,7 @@ public final class ActiveServices {
         // be called.
         if (r.startRequested && r.callStart && r.pendingStarts.size() == 0) {
             r.pendingStarts.add(new ServiceRecord.StartItem(r, false, r.makeNextStartId(),
-                    null, null));
+                    null, null, 0));
         }
 
         sendServiceArgsLocked(r, execInFg, true);
@@ -1979,7 +1979,8 @@ public final class ActiveServices {
                     mAm.grantUriPermissionUncheckedFromIntentLocked(si.neededGrants,
                             si.getUriPermissionsLocked());
                 }
-                // TODO b/34123112; Insert ephemeral grant here
+                mAm.grantEphemeralAccessLocked(r.userId, si.intent,
+                        r.appInfo.uid, UserHandle.getAppId(si.callingId));
                 bumpServiceExecutingLocked(r, execInFg, "start");
                 if (!oomAdjusted) {
                     oomAdjusted = true;
@@ -2591,7 +2592,7 @@ public final class ActiveServices {
                     stopServiceLocked(sr);
                 } else {
                     sr.pendingStarts.add(new ServiceRecord.StartItem(sr, true,
-                            sr.makeNextStartId(), baseIntent, null));
+                            sr.makeNextStartId(), baseIntent, null, 0));
                     if (sr.app != null && sr.app.thread != null) {
                         // We always run in the foreground, since this is called as
                         // part of the "remove task" UI operation.
