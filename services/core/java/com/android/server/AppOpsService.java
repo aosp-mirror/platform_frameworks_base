@@ -2029,7 +2029,7 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
+        if (!DumpUtils.checkDumpAndUsageStatsPermission(mContext, TAG, pw)) return;
 
         if (args != null) {
             for (int i=0; i<args.length; i++) {

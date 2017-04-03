@@ -1466,7 +1466,7 @@ public class UsageStatsService extends SystemService implements
 
         @Override
         protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-            if (!DumpUtils.checkDumpPermission(getContext(), TAG, pw)) return;
+            if (!DumpUtils.checkDumpAndUsageStatsPermission(getContext(), TAG, pw)) return;
             UsageStatsService.this.dump(args, pw);
         }
 
