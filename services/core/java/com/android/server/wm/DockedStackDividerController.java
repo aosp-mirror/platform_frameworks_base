@@ -225,14 +225,25 @@ public class DockedStackDividerController implements DimLayerUser {
             mService.mPolicy.getStableInsetsLw(rotation, dw, dh, mTmpRect);
             config.unset();
             config.orientation = (dw <= dh) ? ORIENTATION_PORTRAIT : ORIENTATION_LANDSCAPE;
+
+            final int displayId = mDisplayContent.getDisplayId();
+            final int appWidth = mService.mPolicy.getNonDecorDisplayWidth(dw, dh, rotation,
+                baseConfig.uiMode, displayId);
+            final int appHeight = mService.mPolicy.getNonDecorDisplayHeight(dw, dh, rotation,
+                baseConfig.uiMode, displayId);
+            mService.mPolicy.getNonDecorInsetsLw(rotation, dw, dh, mTmpRect);
+            final int leftInset = mTmpRect.left;
+            final int topInset = mTmpRect.top;
+
+            config.setAppBounds(leftInset /*left*/, topInset /*top*/, leftInset + appWidth /*right*/,
+                    topInset + appHeight /*bottom*/);
+
             config.screenWidthDp = (int)
                     (mService.mPolicy.getConfigDisplayWidth(dw, dh, rotation, baseConfig.uiMode,
-                            mDisplayContent.getDisplayId()) /
-                            mDisplayContent.getDisplayMetrics().density);
+                            displayId) / mDisplayContent.getDisplayMetrics().density);
             config.screenHeightDp = (int)
                     (mService.mPolicy.getConfigDisplayHeight(dw, dh, rotation, baseConfig.uiMode,
-                            mDisplayContent.getDisplayId()) /
-                            mDisplayContent.getDisplayMetrics().density);
+                            displayId) / mDisplayContent.getDisplayMetrics().density);
             final Context rotationContext = mService.mContext.createConfigurationContext(config);
             mSnapAlgorithmForRotation[rotation] = new DividerSnapAlgorithm(
                     rotationContext.getResources(), dw, dh, getContentWidth(),
