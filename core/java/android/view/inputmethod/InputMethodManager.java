@@ -1018,9 +1018,20 @@ public final class InputMethodManager {
         }
     }
 
-    /** @hide */
+    /**
+     * This method is still kept for a while until android.support.v7.widget.SearchView ver. 26.0
+     * is publicly released because previous implementations of that class had relied on this method
+     * via reflection.
+     *
+     * @deprecated This is a hidden API. You should never use this.
+     * @hide
+     */
+    @Deprecated
     public void showSoftInputUnchecked(int flags, ResultReceiver resultReceiver) {
         try {
+            Log.w(TAG, "showSoftInputUnchecked() is a hidden method, which will be removed "
+                    + "soon. If you are using android.support.v7.widget.SearchView, please update "
+                    + "to version 26.0 or newer version.");
             mService.showSoftInput(mClient, flags, resultReceiver);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
