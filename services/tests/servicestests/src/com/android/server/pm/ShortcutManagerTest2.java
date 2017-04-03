@@ -2040,16 +2040,6 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         assertEquals(expected, dumpCheckin());
     }
 
-    public void testDumpsysNoPermission() {
-        assertExpectException(SecurityException.class, "android.permission.DUMP",
-                () -> mService.dump(null, new PrintWriter(new StringWriter()), null));
-
-        // System can call it without the permission.
-        runWithSystemUid(() -> {
-            mService.dump(null, new PrintWriter(new StringWriter()), null);
-        });
-    }
-
     /**
      * Make sure the legacy file format that only supported a single intent per shortcut
      * can still be read.
