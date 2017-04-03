@@ -3346,7 +3346,8 @@
                 android:documentLaunchMode="never"
                 android:relinquishTaskIdentity="true"
                 android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboard|keyboardHidden"
-                android:process=":ui">
+                android:process=":ui"
+                android:visibleToInstantApps="true">
             <intent-filter>
                 <action android:name="android.intent.action.CHOOSER" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -3360,7 +3361,8 @@
                   android:documentLaunchMode="never"
                   android:relinquishTaskIdentity="true"
                   android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboard|keyboardHidden"
-                  android:process=":ui">
+                  android:process=":ui"
+                  android:visibleToInstantApps="true">
             <intent-filter>
                 <action android:name="android.intent.action.CHOOSE_ACCESSIBILITY_BUTTON" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -3421,7 +3423,8 @@
                 android:exported="true"
                 android:theme="@style/Theme.DeviceDefault.Light.Dialog"
                 android:label="@string/choose_account_label"
-                android:process=":ui">
+                android:process=":ui"
+                android:visibleToInstantApps="true">
         </activity>
 
         <activity android:name="android.accounts.ChooseTypeAndAccountActivity"
@@ -3429,14 +3432,16 @@
                 android:exported="true"
                 android:theme="@style/Theme.DeviceDefault.Light.Dialog"
                 android:label="@string/choose_account_label"
-                android:process=":ui">
+                android:process=":ui"
+                android:visibleToInstantApps="true">
         </activity>
 
         <activity android:name="android.accounts.ChooseAccountTypeActivity"
                 android:excludeFromRecents="true"
                 android:theme="@style/Theme.DeviceDefault.Light.Dialog"
                 android:label="@string/choose_account_label"
-                android:process=":ui">
+                android:process=":ui"
+                android:visibleToInstantApps="true">
         </activity>
 
         <activity android:name="android.accounts.CantAddAccountActivity"
@@ -3450,7 +3455,8 @@
                 android:excludeFromRecents="true"
                 android:exported="true"
                 android:theme="@style/Theme.DeviceDefault.Light.DialogWhenLarge"
-                android:process=":ui">
+                android:process=":ui"
+                android:visibleToInstantApps="true">
         </activity>
 
         <activity android:name="android.content.SyncActivityTooManyDeletes"
