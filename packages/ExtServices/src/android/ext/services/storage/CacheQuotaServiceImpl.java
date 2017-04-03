@@ -1,4 +1,3 @@
-
 /*
  * Copyright (C) 2017 The Android Open Source Project
  *
@@ -123,10 +122,10 @@ public class CacheQuotaServiceImpl extends CacheQuotaService {
         StorageManager storageManager = getSystemService(StorageManager.class);
         long freeBytes = 0;
         if (uuid == StorageManager.UUID_PRIVATE_INTERNAL) { // regular equals because of null
-            freeBytes = Environment.getDataDirectory().getFreeSpace();
+            freeBytes = Environment.getDataDirectory().getUsableSpace();
         } else {
             final VolumeInfo vol = storageManager.findVolumeByUuid(uuid);
-            freeBytes = vol.getPath().getFreeSpace();
+            freeBytes = vol.getPath().getUsableSpace();
         }
         return Math.round(freeBytes * CACHE_RESERVE_RATIO);
     }
