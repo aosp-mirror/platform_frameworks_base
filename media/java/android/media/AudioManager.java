@@ -2540,6 +2540,44 @@ public class AudioManager {
 
     /**
      * @hide
+     * Notifies an application with a focus listener of gain or loss of audio focus.
+     * This method can only be used by owners of an {@link AudioPolicy} configured with
+     * {@link AudioPolicy.Builder#setIsAudioFocusPolicy(boolean)} set to true.
+     * @param afi the recipient of the focus change, that has previously requested audio focus, and
+     *     that was received by the {@code AudioPolicy} through
+     *     {@link AudioPolicy.AudioPolicyFocusListener#onAudioFocusRequest(AudioFocusInfo, int)}.
+     * @param focusChange one of focus gain types ({@link #AUDIOFOCUS_GAIN},
+     *     {@link #AUDIOFOCUS_GAIN_TRANSIENT}, {@link #AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK} or
+     *     {@link #AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE})
+     *     or one of the focus loss types ({@link AudioManager#AUDIOFOCUS_LOSS},
+     *     {@link AudioManager#AUDIOFOCUS_LOSS_TRANSIENT},
+     *     or {@link AudioManager#AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK}).
+     *     <br>For the focus gain, the change type should be the same as the app requested.
+     * @param ap a valid registered {@link AudioPolicy} configured as a focus policy.
+     * @return {@link #AUDIOFOCUS_REQUEST_GRANTED} if the dispatch was successfully sent, or
+     *     {@link #AUDIOFOCUS_REQUEST_FAILED} if the focus client didn't have a listener, or
+     *     if there was an error sending the request.
+     * @throws NullPointerException if the {@link AudioFocusInfo} or {@link AudioPolicy} are null.
+     */
+    @SystemApi
+    public int dispatchAudioFocusChange(@NonNull AudioFocusInfo afi, int focusChange,
+            @NonNull AudioPolicy ap) {
+        if (afi == null) {
+            throw new NullPointerException("Illegal null AudioFocusInfo");
+        }
+        if (ap == null) {
+            throw new NullPointerException("Illegal null AudioPolicy");
+        }
+        final IAudioService service = getService();
+        try {
+            return service.dispatchFocusChange(afi, focusChange, ap.cb());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
      * Used internally by telephony package to abandon audio focus, typically after a call or
      * when ringing ends and the call is rejected or not answered.
      * Should match one or more calls to {@link #requestAudioFocusForCall(int, int)}.
@@ -2548,7 +2586,7 @@ public class AudioManager {
         final IAudioService service = getService();
         try {
             service.abandonAudioFocus(null, AudioSystem.IN_VOICE_COMM_FOCUS_ID,
-                    null /*AudioAttributes, legacy behavior*/);
+                    null /*AudioAttributes, legacy behavior*/, getContext().getOpPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2579,7 +2617,7 @@ public class AudioManager {
         final IAudioService service = getService();
         try {
             status = service.abandonAudioFocus(mAudioFocusDispatcher,
-                    getIdForAudioFocusListener(l), aa);
+                    getIdForAudioFocusListener(l), aa, getContext().getOpPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2787,7 +2825,7 @@ public class AudioManager {
         final IAudioService service = getService();
         try {
             String regId = service.registerAudioPolicy(policy.getConfig(), policy.cb(),
-                    policy.hasFocusListener());
+                    policy.hasFocusListener(), policy.isFocusPolicy());
             if (regId == null) {
                 return ERROR;
             } else {

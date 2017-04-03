@@ -55,6 +55,7 @@ import android.hardware.hdmi.HdmiTvClient;
 import android.hardware.usb.UsbManager;
 import android.media.AudioAttributes;
 import android.media.AudioDevicePort;
+import android.media.AudioFocusInfo;
 import android.media.AudioSystem;
 import android.media.AudioFormat;
 import android.media.AudioManager;
@@ -5633,8 +5634,9 @@ public class AudioService extends IAudioService.Stub
                 clientId, callingPackageName, flags);
     }
 
-    public int abandonAudioFocus(IAudioFocusDispatcher fd, String clientId, AudioAttributes aa) {
-        return mMediaFocusControl.abandonAudioFocus(fd, clientId, aa);
+    public int abandonAudioFocus(IAudioFocusDispatcher fd, String clientId, AudioAttributes aa,
+            String callingPackageName) {
+        return mMediaFocusControl.abandonAudioFocus(fd, clientId, aa, callingPackageName);
     }
 
     public void unregisterAudioFocusClient(String clientId) {
@@ -5649,6 +5651,7 @@ public class AudioService extends IAudioService.Stub
         return mMediaFocusControl.getFocusRampTimeMs(focusGain, attr);
     }
 
+    //==========================================================================================
     private boolean readCameraSoundForced() {
         return SystemProperties.getBoolean("audio.camerasound.force", false) ||
                 mContext.getResources().getBoolean(
@@ -6429,7 +6432,7 @@ public class AudioService extends IAudioService.Stub
     // Audio policy management
     //==========================================================================================
     public String registerAudioPolicy(AudioPolicyConfig policyConfig, IAudioPolicyCallback pcb,
-            boolean hasFocusListener) {
+            boolean hasFocusListener, boolean isFocusPolicy) {
         AudioSystem.setDynamicPolicyCallback(mDynPolicyCallback);
 
         if (DEBUG_AP) Log.d(TAG, "registerAudioPolicy for " + pcb.asBinder()
@@ -6451,7 +6454,8 @@ public class AudioService extends IAudioService.Stub
                     Slog.e(TAG, "Cannot re-register policy");
                     return null;
                 }
-                AudioPolicyProxy app = new AudioPolicyProxy(policyConfig, pcb, hasFocusListener);
+                AudioPolicyProxy app = new AudioPolicyProxy(policyConfig, pcb, hasFocusListener,
+                        isFocusPolicy);
                 pcb.asBinder().linkToDeath(app, 0/*flags*/);
                 regId = app.getRegistrationId();
                 mAudioPolicies.put(pcb.asBinder(), app);
@@ -6649,15 +6653,21 @@ public class AudioService extends IAudioService.Stub
          * is handling ducking for audio focus.
          */
         int mFocusDuckBehavior = AudioPolicy.FOCUS_POLICY_DUCKING_DEFAULT;
+        boolean mIsFocusPolicy = false;
 
         AudioPolicyProxy(AudioPolicyConfig config, IAudioPolicyCallback token,
-                boolean hasFocusListener) {
+                boolean hasFocusListener, boolean isFocusPolicy) {
             super(config);
             setRegistration(new String(config.hashCode() + ":ap:" + mAudioPolicyCounter++));
             mPolicyCallback = token;
             mHasFocusListener = hasFocusListener;
             if (mHasFocusListener) {
                 mMediaFocusControl.addFocusFollower(mPolicyCallback);
+                // can only ever be true if there is a focus listener
+                if (isFocusPolicy) {
+                    mIsFocusPolicy = true;
+                    mMediaFocusControl.setFocusPolicy(mPolicyCallback);
+                }
             }
             connectMixes();
         }
@@ -6675,6 +6685,9 @@ public class AudioService extends IAudioService.Stub
         }
 
         void release() {
+            if (mIsFocusPolicy) {
+                mMediaFocusControl.unsetFocusPolicy(mPolicyCallback);
+            }
             if (mFocusDuckBehavior == AudioPolicy.FOCUS_POLICY_DUCKING_IN_POLICY) {
                 mMediaFocusControl.setDuckingInExtPolicyAvailable(false);
             }
@@ -6689,6 +6702,22 @@ public class AudioService extends IAudioService.Stub
         }
     };
 
+    //======================
+    // Audio policy: focus
+    //======================
+    /**  */
+    public int dispatchFocusChange(AudioFocusInfo afi, int focusChange, IAudioPolicyCallback pcb) {
+        synchronized (mAudioPolicies) {
+            if (!mAudioPolicies.containsKey(pcb.asBinder())) {
+                throw new IllegalStateException("Unregistered AudioPolicy for focus dispatch");
+            }
+            return mMediaFocusControl.dispatchFocusChange(afi, focusChange);
+        }
+    }
+
+    //======================
+    // misc
+    //======================
     private HashMap<IBinder, AudioPolicyProxy> mAudioPolicies =
             new HashMap<IBinder, AudioPolicyProxy>();
     private int mAudioPolicyCounter = 0; // always accessed synchronized on mAudioPolicies
