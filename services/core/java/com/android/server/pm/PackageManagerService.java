@@ -842,11 +842,11 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     /** The service connection to the ephemeral resolver */
     final EphemeralResolverConnection mInstantAppResolverConnection;
+    /** Component used to show resolver settings for Instant Apps */
+    final ComponentName mInstantAppResolverSettingsComponent;
 
     /** Component used to install ephemeral applications */
     ComponentName mInstantAppInstallerComponent;
-    /** Component used to show resolver settings for Instant Apps */
-    ComponentName mInstantAppResolverSettingsComponent;
     ActivityInfo mInstantAppInstallerActivity;
     final ResolveInfo mInstantAppInstallerInfo = new ResolveInfo();
 
@@ -2807,11 +2807,13 @@ public class PackageManagerService extends IPackageManager.Stub {
                 }
                 mInstantAppResolverConnection =
                         new EphemeralResolverConnection(mContext, ephemeralResolverComponent);
+                mInstantAppResolverSettingsComponent =
+                        getEphemeralResolverSettingsLPr(ephemeralResolverComponent);
             } else {
                 mInstantAppResolverConnection = null;
+                mInstantAppResolverSettingsComponent = null;
             }
             updateInstantAppInstallerLocked();
-            mInstantAppResolverSettingsComponent = getEphemeralResolverSettingsLPr();
 
             // Read and update the usage of dex files.
             // Do this at the end of PM init so that all the packages have their
@@ -3119,35 +3121,18 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-    private @Nullable ComponentName getEphemeralResolverSettingsLPr() {
-        final Intent intent = new Intent(Intent.ACTION_EPHEMERAL_RESOLVER_SETTINGS);
-        intent.addCategory(Intent.CATEGORY_DEFAULT);
-        final int resolveFlags =
-                MATCH_DIRECT_BOOT_AWARE
-                | MATCH_DIRECT_BOOT_UNAWARE
-                | (!Build.IS_DEBUGGABLE ? MATCH_SYSTEM_ONLY : 0);
-        final List<ResolveInfo> matches = queryIntentActivitiesInternal(intent, null,
-                resolveFlags, UserHandle.USER_SYSTEM);
-        Iterator<ResolveInfo> iter = matches.iterator();
-        while (iter.hasNext()) {
-            final ResolveInfo rInfo = iter.next();
-            final PackageSetting ps = mSettings.mPackages.get(rInfo.activityInfo.packageName);
-            if (ps != null) {
-                final PermissionsState permissionsState = ps.getPermissionsState();
-                if (permissionsState.hasPermission(Manifest.permission.ACCESS_INSTANT_APPS, 0)) {
-                    continue;
-                }
-            }
-            iter.remove();
-        }
-        if (matches.size() == 0) {
+    private @Nullable ComponentName getEphemeralResolverSettingsLPr(
+            @NonNull ComponentName resolver) {
+        final Intent intent =  new Intent(Intent.ACTION_EPHEMERAL_RESOLVER_SETTINGS)
+                .addCategory(Intent.CATEGORY_DEFAULT)
+                .setPackage(resolver.getPackageName());
+        final int resolveFlags = MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE;
+        final List<ResolveInfo> matches = queryIntentActivitiesInternal(intent, null, resolveFlags,
+                UserHandle.USER_SYSTEM);
+        if (matches.isEmpty()) {
             return null;
-        } else if (matches.size() == 1) {
-            return matches.get(0).getComponentInfo().getComponentName();
-        } else {
-            throw new RuntimeException(
-                    "There must be at most one ephemeral resolver settings; found " + matches);
         }
+        return matches.get(0).getComponentInfo().getComponentName();
     }
 
     private void primeDomainVerificationsLPw(int userId) {
