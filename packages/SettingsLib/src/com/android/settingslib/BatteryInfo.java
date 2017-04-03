@@ -171,9 +171,11 @@ public class BatteryInfo {
                 info.mChargeLabelString = resources.getString(resId, info.batteryPercentString,
                         timeString);
             } else {
+                final String chargeStatusLabel = resources.getString(
+                        R.string.battery_info_status_charging_lower);
                 info.remainingLabel = null;
                 info.mChargeLabelString = resources.getString(
-                        R.string.power_charging, info.batteryPercentString, info.statusLabel);
+                        R.string.power_charging, info.batteryPercentString, chargeStatusLabel);
             }
         }
         return info;
