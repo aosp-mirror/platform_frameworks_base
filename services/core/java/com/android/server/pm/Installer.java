@@ -66,6 +66,7 @@ public class Installer extends SystemService {
     public static final int FLAG_FREE_CACHE_V2 = 1 << 13;
     public static final int FLAG_FREE_CACHE_V2_DEFY_QUOTA = 1 << 14;
     public static final int FLAG_FREE_CACHE_NOOP = 1 << 15;
+    public static final int FLAG_FORCE = 1 << 16;
 
     private final boolean mIsolated;
 
@@ -197,6 +198,15 @@ public class Installer extends SystemService {
         if (!checkBeforeRemote()) return;
         try {
             mInstalld.destroyAppData(uuid, packageName, userId, flags, ceDataInode);
+        } catch (Exception e) {
+            throw InstallerException.from(e);
+        }
+    }
+
+    public void fixupAppData(String uuid, int flags) throws InstallerException {
+        if (!checkBeforeRemote()) return;
+        try {
+            mInstalld.fixupAppData(uuid, flags);
         } catch (Exception e) {
             throw InstallerException.from(e);
         }
