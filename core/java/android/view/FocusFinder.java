@@ -118,7 +118,7 @@ public class FocusFinder {
      * @return the "effective" root of {@param focused}
      */
     private ViewGroup getEffectiveRoot(ViewGroup root, View focused) {
-        if (focused == null) {
+        if (focused == null || focused == root) {
             return root;
         }
         ViewParent effective = focused.getParent();
