@@ -3421,6 +3421,11 @@ public class ShortcutService extends IShortcutService.Stub {
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (!DumpUtils.checkDumpAndUsageStatsPermission(mContext, TAG, pw)) return;
+        dumpNoCheck(fd, pw, args);
+    }
+
+    @VisibleForTesting
+    void dumpNoCheck(FileDescriptor fd, PrintWriter pw, String[] args) {
         boolean checkin = false;
         boolean clear = false;
         if (args != null) {

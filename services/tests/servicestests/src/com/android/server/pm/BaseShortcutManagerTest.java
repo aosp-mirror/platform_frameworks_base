@@ -1275,7 +1275,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         try {
             final ByteArrayOutputStream out = new ByteArrayOutputStream();
             final PrintWriter pw = new PrintWriter(out);
-            mService.dump(/* fd */ null, pw, args);
+            mService.dumpNoCheck(/* fd */ null, pw, args);
             pw.close();
 
             return out.toString();
