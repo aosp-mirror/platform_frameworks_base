@@ -311,7 +311,6 @@ public class RenderTestBase {
         sFrameworkRepo = null;
         sProjectResources = null;
         sLogger = null;
-        sBridge.dispose();
         sBridge = null;
 
         TestUtils.gc();
@@ -329,7 +328,6 @@ public class RenderTestBase {
         RenderSession session = sBridge.createSession(params);
 
         try {
-
             if (frameTimeNanos != -1) {
                 session.setElapsedFrameTimeNanos(frameTimeNanos);
             }
@@ -338,11 +336,13 @@ public class RenderTestBase {
                 getLogger().error(session.getResult().getException(),
                         session.getResult().getErrorMessage());
             }
-            // Render the session with a timeout of 50s.
-            Result renderResult = session.render(50000);
-            if (!renderResult.isSuccess()) {
-                getLogger().error(session.getResult().getException(),
-                        session.getResult().getErrorMessage());
+            else {
+                // Render the session with a timeout of 50s.
+                Result renderResult = session.render(50000);
+                if (!renderResult.isSuccess()) {
+                    getLogger().error(session.getResult().getException(),
+                            session.getResult().getErrorMessage());
+                }
             }
 
             return RenderResult.getFromSession(session);
