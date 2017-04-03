@@ -140,7 +140,6 @@ import android.os.storage.StorageManager;
 import android.provider.ContactsContract.QuickContact;
 import android.provider.ContactsInternal;
 import android.provider.Settings;
-import android.security.Credentials;
 import android.security.IKeyChainAliasCallback;
 import android.security.IKeyChainService;
 import android.security.KeyChain;
@@ -194,7 +193,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -365,6 +363,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     final UserManagerInternal mUserManagerInternal;
     final TelephonyManager mTelephonyManager;
     private final LockPatternUtils mLockPatternUtils;
+    private final DeviceAdminServiceController mDeviceAdminServiceController;
 
     /**
      * Contains (package-user) pairs to remove. An entry (p, u) implies that removal of package p
@@ -459,7 +458,17 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         @Override
         public void onStartUser(int userHandle) {
-            mService.onStartUser(userHandle);
+            mService.handleStartUser(userHandle);
+        }
+
+        @Override
+        public void onUnlockUser(int userHandle) {
+            mService.handleUnlockUser(userHandle);
+        }
+
+        @Override
+        public void onStopUser(int userHandle) {
+            mService.handleStopUser(userHandle);
         }
     }
 
@@ -1420,7 +1429,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
-    private void handlePackagesChanged(String packageName, int userHandle) {
+    private void handlePackagesChanged(@Nullable String packageName, int userHandle) {
         boolean removedAdmin = false;
         if (VERBOSE_LOG) Slog.d(LOG_TAG, "Handling package changes for user " + userHandle);
         DevicePolicyData policy = getUserData(userHandle);
@@ -1434,9 +1443,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     if (packageName == null || packageName.equals(adminPackage)) {
                         if (mIPackageManager.getPackageInfo(adminPackage, 0, userHandle) == null
                                 || mIPackageManager.getReceiverInfo(aa.info.getComponent(),
-                                        PackageManager.MATCH_DIRECT_BOOT_AWARE
-                                                | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
-                                        userHandle) == null) {
+                                PackageManager.MATCH_DIRECT_BOOT_AWARE
+                                        | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
+                                userHandle) == null) {
                             removedAdmin = true;
                             policy.mAdminList.remove(i);
                             policy.mAdminMap.remove(aa.info.getComponent());
@@ -1459,6 +1468,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     policy.mDelegationMap.removeAt(i);
                     removedDelegate = true;
                 }
+            }
+
+            // If it's an owner package, we may need to refresh the bound connection.
+            final ComponentName owner = getOwnerComponent(userHandle);
+            if ((packageName != null) && (owner != null)
+                    && (owner.getPackageName().equals(packageName))) {
+                startOwnerService(userHandle, "package-broadcast");
             }
 
             // Persist updates if the removed package was an admin or delegate.
@@ -1790,6 +1806,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         // Needed when mHasFeature == false, because it controls the certificate warning text.
         mCertificateMonitor = new CertificateMonitor(this, mInjector, mBackgroundHandler);
+
+        mDeviceAdminServiceController = new DeviceAdminServiceController(this);
 
         if (!mHasFeature) {
             // Skip the rest of the initialization
@@ -2943,7 +2961,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         loadOwners();
         cleanUpOldUsers();
         ensureUnknownSourcesRestrictionForProfileOwners();
-        onStartUser(UserHandle.USER_SYSTEM);
+        handleStartUser(UserHandle.USER_SYSTEM);
 
         // Register an observer for watching for user setup complete and settings changes.
         mSetupContentObserver.register();
@@ -2990,10 +3008,32 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
-    private void onStartUser(int userId) {
+    void handleStartUser(int userId) {
         updateScreenCaptureDisabledInWindowManager(userId,
                 getScreenCaptureDisabled(null, userId));
         pushUserRestrictions(userId);
+
+        startOwnerService(userId, "start-user");
+    }
+
+    void handleUnlockUser(int userId) {
+        startOwnerService(userId, "unlock-user");
+    }
+
+    void handleStopUser(int userId) {
+        stopOwnerService(userId, "stop-user");
+    }
+
+    private void startOwnerService(int userId, String actionForLog) {
+        final ComponentName owner = getOwnerComponent(userId);
+        if (owner != null) {
+            mDeviceAdminServiceController.startServiceForOwner(
+                    owner.getPackageName(), userId, actionForLog);
+        }
+    }
+
+    private void stopOwnerService(int userId, String actionForLog) {
+        mDeviceAdminServiceController.stopServiceForOwner(userId, actionForLog);
     }
 
     private void cleanUpOldUsers() {
@@ -5078,7 +5118,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      * @param callerPackage the name of the calling package. Required if {@code who} is
      *            {@code null}.
      * @param reqPolicy the policy used in the API whose access permission is being checked.
-     * @param scoppe the delegation scope corresponding to the API being checked.
+     * @param scope the delegation scope corresponding to the API being checked.
      * @throws SecurityException if {@code who} is given and is not an owner for {@code reqPolicy};
      *            or when {@code who} is {@code null} and {@code callerPackage} is not a delegate
      *            of {@code scope}.
@@ -6460,6 +6500,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             } finally {
                 mInjector.binderRestoreCallingIdentity(ident);
             }
+            mDeviceAdminServiceController.startServiceForOwner(
+                    admin.getPackageName(), userId, "set-device-owner");
+
             Slog.i(LOG_TAG, "Device owner set: " + admin + " on user " + userId);
             return true;
         }
@@ -6615,6 +6658,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     private void clearDeviceOwnerLocked(ActiveAdmin admin, int userId) {
+        mDeviceAdminServiceController.stopServiceForOwner(userId, "clear-device-owner");
+
         if (admin != null) {
             admin.disableCamera = false;
             admin.userRestrictions = null;
@@ -6692,6 +6737,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             } finally {
                 mInjector.binderRestoreCallingIdentity(id);
             }
+            mDeviceAdminServiceController.startServiceForOwner(
+                    who.getPackageName(), userHandle, "set-profile-owner");
             return true;
         }
     }
@@ -6723,6 +6770,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     public void clearProfileOwnerLocked(ActiveAdmin admin, int userId) {
+        mDeviceAdminServiceController.stopServiceForOwner(userId, "clear-profile-owner");
+
         if (admin != null) {
             admin.disableCamera = false;
             admin.userRestrictions = null;
@@ -7275,6 +7324,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         synchronized (this) {
             pw.println("Current Device Policy Manager state:");
             mOwners.dump("  ", pw);
+            mDeviceAdminServiceController.dump("  ", pw);
             int userCount = mUserData.size();
             for (int u = 0; u < userCount; u++) {
                 DevicePolicyData policy = getUserData(mUserData.keyAt(u));
@@ -9620,6 +9670,21 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
         if (isProfileOwnerPackage(packageName, userId)) {
             return mOwners.getProfileOwnerComponent(userId);
+        }
+        return null;
+    }
+
+    /**
+     * Return device owner or profile owner set on a given user.
+     */
+    private @Nullable ComponentName getOwnerComponent(int userId) {
+        synchronized (this) {
+            if (mOwners.getDeviceOwnerUserId() == userId) {
+                return mOwners.getDeviceOwnerComponent();
+            }
+            if (mOwners.hasProfileOwner(userId)) {
+                return mOwners.getProfileOwnerComponent(userId);
+            }
         }
         return null;
     }
