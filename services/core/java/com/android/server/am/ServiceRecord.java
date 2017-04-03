@@ -124,6 +124,7 @@ final class ServiceRecord extends Binder {
         final ServiceRecord sr;
         final boolean taskRemoved;
         final int id;
+        final int callingId;
         final Intent intent;
         final ActivityManagerService.NeededUriGrants neededGrants;
         long deliveredTime;
@@ -134,12 +135,13 @@ final class ServiceRecord extends Binder {
         String stringName;      // caching of toString
 
         StartItem(ServiceRecord _sr, boolean _taskRemoved, int _id, Intent _intent,
-                ActivityManagerService.NeededUriGrants _neededGrants) {
+                ActivityManagerService.NeededUriGrants _neededGrants, int _callingId) {
             sr = _sr;
             taskRemoved = _taskRemoved;
             id = _id;
             intent = _intent;
             neededGrants = _neededGrants;
+            callingId = _callingId;
         }
 
         UriPermissionOwner getUriPermissionsLocked() {
