@@ -417,17 +417,17 @@ public class PipMenuActivity extends Activity {
     }
 
     private void updateDismissFraction(float fraction) {
-        setDecorViewVisibility(true);
         int alpha;
         if (mMenuVisible) {
-            mMenuContainer.setAlpha(1-fraction);
+            mMenuContainer.setAlpha(1 - fraction);
             final float interpolatedAlpha =
                     MENU_BACKGROUND_ALPHA * (1.0f - fraction) + DISMISS_BACKGROUND_ALPHA * fraction;
-            alpha = (int) (interpolatedAlpha*255);
+            alpha = (int) (interpolatedAlpha * 255);
         } else {
-            alpha = (int) (fraction*DISMISS_BACKGROUND_ALPHA*255);
+            alpha = (int) (fraction * DISMISS_BACKGROUND_ALPHA * 255);
         }
         mBackgroundDrawable.setAlpha(alpha);
+        setDecorViewVisibility(alpha > 0);
     }
 
     private void notifyRegisterInputConsumer() {
