@@ -16,13 +16,17 @@
 
 package com.android.mtp;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.Notification;
 import android.app.Service;
 import android.app.NotificationManager;
-import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
+import android.os.Parcelable;
 import android.service.notification.StatusBarNotification;
+import android.util.Log;
+import com.android.internal.util.Preconditions;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -33,7 +37,8 @@ import java.util.Set;
  */
 public class MtpDocumentsService extends Service {
     static final String ACTION_UPDATE_NOTIFICATION = "com.android.mtp.UPDATE_NOTIFICATION";
-    static final String EXTRA_DEVICE = "device";
+    static final String EXTRA_DEVICE_IDS = "deviceIds";
+    static final String EXTRA_DEVICE_NOTIFICATIONS = "deviceNotifications";
 
     private NotificationManager mNotificationManager;
 
@@ -53,7 +58,12 @@ public class MtpDocumentsService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         // If intent is null, the service was restarted.
         if (intent == null || ACTION_UPDATE_NOTIFICATION.equals(intent.getAction())) {
-            return updateForegroundState() ? START_STICKY : START_NOT_STICKY;
+            final int[] ids = intent.hasExtra(EXTRA_DEVICE_IDS) ?
+                    intent.getExtras().getIntArray(EXTRA_DEVICE_IDS) : null;
+            final Notification[] notifications = intent.hasExtra(EXTRA_DEVICE_NOTIFICATIONS) ?
+                    castToNotifications(intent.getExtras().getParcelableArray(
+                            EXTRA_DEVICE_NOTIFICATIONS)) : null;
+            return updateForegroundState(ids, notifications) ? START_STICKY : START_NOT_STICKY;
         }
         return START_NOT_STICKY;
     }
@@ -62,35 +72,38 @@ public class MtpDocumentsService extends Service {
      * Updates the foreground state of the service.
      * @return Whether the service is foreground or not.
      */
-    private boolean updateForegroundState() {
-        final MtpDocumentsProvider provider = MtpDocumentsProvider.getInstance();
+    private boolean updateForegroundState(
+            @Nullable int[] ids, @Nullable Notification[] notifications) {
         final Set<Integer> openedNotification = new HashSet<>();
-        boolean hasForegroundNotification = false;
+        final int size = ids != null ? ids.length : 0;
+        if (size != 0) {
+            Preconditions.checkArgument(ids != null);
+            Preconditions.checkArgument(notifications != null);
+            Preconditions.checkArgument(ids.length == notifications.length);
+        }
+
+        for (int i = 0; i < size; i++) {
+            if (i == 0) {
+                // Mark this service as foreground with the notification so that the process is
+                // not killed by the system while a MTP device is opened.
+                startForeground(ids[i], notifications[i]);
+            } else {
+                // Only one notification can be shown as a foreground notification. We need to
+                // show the rest as normal notification.
+                mNotificationManager.notify(ids[i], notifications[i]);
+            }
+            openedNotification.add(ids[i]);
+        }
 
         final StatusBarNotification[] activeNotifications =
                 mNotificationManager.getActiveNotifications();
-
-        for (final MtpDeviceRecord record : provider.getOpenedDeviceRecordsCache()) {
-            openedNotification.add(record.deviceId);
-            if (!hasForegroundNotification) {
-                // Mark this service as foreground with the notification so that the process is not
-                // killed by the system while a MTP device is opened.
-                startForeground(record.deviceId, createNotification(this, record));
-                hasForegroundNotification = true;
-            } else {
-                // Only one notification can be shown as a foreground notification. We need to show
-                // the rest as normal notification.
-                mNotificationManager.notify(record.deviceId, createNotification(this, record));
-            }
-        }
-
         for (final StatusBarNotification notification : activeNotifications) {
             if (!openedNotification.contains(notification.getId())) {
                 mNotificationManager.cancel(notification.getId());
             }
         }
 
-        if (!hasForegroundNotification) {
+        if (size == 0) {
             // There is no opened device.
             stopForeground(true /* removeNotification */);
             stopSelf();
@@ -100,17 +113,12 @@ public class MtpDocumentsService extends Service {
         return true;
     }
 
-    public static Notification createNotification(Context context, MtpDeviceRecord device) {
-        final String title = context.getResources().getString(
-                R.string.accessing_notification_title,
-                device.name);
-        return new Notification.Builder(context)
-                .setLocalOnly(true)
-                .setContentTitle(title)
-                .setSmallIcon(com.android.internal.R.drawable.stat_sys_data_usb)
-                .setCategory(Notification.CATEGORY_SYSTEM)
-                .setPriority(Notification.PRIORITY_LOW)
-                .setFlag(Notification.FLAG_NO_CLEAR, true)
-                .build();
+    private static @NonNull Notification[] castToNotifications(@NonNull Parcelable[] src) {
+        Preconditions.checkNotNull(src);
+        final Notification[] notifications = new Notification[src.length];
+        for (int i = 0; i < src.length; i++) {
+            notifications[i] = (Notification) src[i];
+        }
+        return notifications;
     }
 }
