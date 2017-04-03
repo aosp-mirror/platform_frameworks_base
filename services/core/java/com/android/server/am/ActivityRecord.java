@@ -284,6 +284,10 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     boolean frozenBeforeDestroy;// has been frozen but not yet destroyed.
     boolean immersive;      // immersive mode (don't interrupt if possible)
     boolean forceNewConfig; // force re-create with new config next time
+    private boolean mInMultiWindowMode; // whether or not this activity is currently in multi-window
+                                        // mode (default false)
+    private boolean mInPictureInPictureMode; // whether or not this activity is currently in
+                                             // picture-in-picture mode (default false)
     boolean supportsPictureInPictureWhilePausing;  // This flag is set by the system to indicate
         // that the activity can enter picture in picture while pausing (ie. only when another
         // task is brought to front or started)
@@ -615,25 +619,51 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         }
     }
 
-    void scheduleMultiWindowModeChanged() {
+    void updateMultiWindowMode() {
         if (task == null || task.getStack() == null || app == null || app.thread == null) {
             return;
         }
+
+        // An activity is considered to be in multi-window mode if its task isn't fullscreen.
+        final boolean inMultiWindowMode = !task.mFullscreen;
+        if (inMultiWindowMode != mInMultiWindowMode) {
+            mInMultiWindowMode = inMultiWindowMode;
+            scheduleMultiWindowModeChanged(getConfiguration());
+        }
+    }
+
+    private void scheduleMultiWindowModeChanged(Configuration overrideConfig) {
         try {
-            // An activity is considered to be in multi-window mode if its task isn't fullscreen.
-            app.thread.scheduleMultiWindowModeChanged(appToken, !task.mFullscreen);
+            app.thread.scheduleMultiWindowModeChanged(appToken, mInMultiWindowMode,
+                    overrideConfig);
         } catch (Exception e) {
             // If process died, I don't care.
         }
     }
 
-    void schedulePictureInPictureModeChanged() {
+    void updatePictureInPictureMode(Rect targetStackBounds) {
         if (task == null || task.getStack() == null || app == null || app.thread == null) {
             return;
         }
+
+        final boolean inPictureInPictureMode = (task.getStackId() == PINNED_STACK_ID) &&
+                (targetStackBounds != null);
+        if (inPictureInPictureMode != mInPictureInPictureMode) {
+            // Picture-in-picture mode changes also trigger a multi-window mode change as well, so
+            // update that here in order
+            mInPictureInPictureMode = inPictureInPictureMode;
+            mInMultiWindowMode = inPictureInPictureMode;
+            final Configuration newConfig = task.computeNewOverrideConfigurationForBounds(
+                    targetStackBounds, null);
+            schedulePictureInPictureModeChanged(newConfig);
+            scheduleMultiWindowModeChanged(newConfig);
+        }
+    }
+
+    private void schedulePictureInPictureModeChanged(Configuration overrideConfig) {
         try {
-            app.thread.schedulePictureInPictureModeChanged(
-                    appToken, task.getStackId() == PINNED_STACK_ID);
+            app.thread.schedulePictureInPictureModeChanged(appToken, mInPictureInPictureMode,
+                    overrideConfig);
         } catch (Exception e) {
             // If process died, no one cares.
         }

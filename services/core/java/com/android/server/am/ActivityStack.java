@@ -342,7 +342,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     private final Rect mTmpRect2 = new Rect();
 
     /** Run all ActivityStacks through this */
-    private final ActivityStackSupervisor mStackSupervisor;
+    protected final ActivityStackSupervisor mStackSupervisor;
 
     private final LaunchingTaskPositioner mTaskPositioner;
 
@@ -5074,7 +5074,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     }
 
     void addTask(final TaskRecord task, final boolean toTop, String reason) {
-        addTask(task, toTop ? MAX_VALUE : 0, reason);
+        addTask(task, toTop ? MAX_VALUE : 0, true /* schedulePictureInPictureModeChange */, reason);
         if (toTop) {
             // TODO: figure-out a way to remove this call.
             mWindowContainerController.positionChildAtTop(task.getWindowContainerController(),
@@ -5084,7 +5084,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
 
     // TODO: This shouldn't allow automatic reparenting. Remove the call to preAddTask and deal
     // with the fall-out...
-    void addTask(final TaskRecord task, int position, String reason) {
+    void addTask(final TaskRecord task, int position, boolean schedulePictureInPictureModeChange,
+            String reason) {
         // TODO: Is this remove really needed? Need to look into the call path for the other addTask
         mTaskHistory.remove(task);
         position = getAdjustedPositionForTask(task, position, null /* starting */);
@@ -5100,7 +5101,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
 
         updateTaskMovement(task, toTop);
 
-        postAddTask(task, prevStack);
+        postAddTask(task, prevStack, schedulePictureInPictureModeChange);
     }
 
     void positionChildAt(TaskRecord task, int index) {
@@ -5116,7 +5117,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         final boolean wasResumed = topRunningActivity == task.getStack().mResumedActivity;
         insertTaskAtPosition(task, index);
         task.setStack(this);
-        postAddTask(task, null /* prevStack */);
+        postAddTask(task, null /* prevStack */, true /* schedulePictureInPictureModeChange */);
 
         if (wasResumed) {
             if (mResumedActivity != null) {
@@ -5142,9 +5143,15 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         return prevStack;
     }
 
-    private void postAddTask(TaskRecord task, ActivityStack prevStack) {
-        if (prevStack != null) {
-            mStackSupervisor.scheduleReportPictureInPictureModeChangedIfNeeded(task, prevStack);
+    /**
+     * @param schedulePictureInPictureModeChange specifies whether or not to schedule the PiP mode
+     *            change. Callers may set this to false if they are explicitly scheduling PiP mode
+     *            changes themselves, like during the PiP animation
+     */
+    private void postAddTask(TaskRecord task, ActivityStack prevStack,
+            boolean schedulePictureInPictureModeChange) {
+        if (schedulePictureInPictureModeChange && prevStack != null) {
+            mStackSupervisor.scheduleUpdatePictureInPictureModeIfNeeded(task, prevStack);
         } else if (task.voiceSession != null) {
             try {
                 task.voiceSession.taskStarted(task.intent, task.taskId);

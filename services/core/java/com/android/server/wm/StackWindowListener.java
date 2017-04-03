@@ -26,4 +26,10 @@ public interface StackWindowListener extends WindowContainerListener {
 
     /** Called when the stack container would like its controller to resize. */
     void requestResize(Rect bounds);
+
+    /**
+     * Called when the stack container pinned stack animation will change the picture-in-picture
+     * mode. This is a direct call into ActivityManager.
+     */
+    default void updatePictureInPictureModeForPinnedStackAnimation(Rect targetStackBounds) {}
 }
