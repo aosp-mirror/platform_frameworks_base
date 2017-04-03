@@ -3303,16 +3303,17 @@ public abstract class BatteryStats implements Parcelable {
             final int wifiScanCount = u.getWifiScanCount(which);
             final int wifiScanCountBg = u.getWifiScanBackgroundCount(which);
             // Note that 'ActualTime' are unpooled and always since reset (regardless of 'which')
-            final long wifiScanActualTime = u.getWifiScanActualTime(rawRealtime);
-            final long wifiScanActualTimeBg = u.getWifiScanBackgroundTime(rawRealtime);
+            final long wifiScanActualTimeMs = (u.getWifiScanActualTime(rawRealtime) + 500) / 1000;
+            final long wifiScanActualTimeMsBg = (u.getWifiScanBackgroundTime(rawRealtime) + 500)
+                    / 1000;
             final long uidWifiRunningTime = u.getWifiRunningTime(rawRealtime, which);
             if (fullWifiLockOnTime != 0 || wifiScanTime != 0 || wifiScanCount != 0
-                    || wifiScanCountBg != 0 || wifiScanActualTime != 0 || wifiScanActualTimeBg != 0
-                    || uidWifiRunningTime != 0) {
+                    || wifiScanCountBg != 0 || wifiScanActualTimeMs != 0
+                    || wifiScanActualTimeMsBg != 0 || uidWifiRunningTime != 0) {
                 dumpLine(pw, uid, category, WIFI_DATA, fullWifiLockOnTime, wifiScanTime,
                         uidWifiRunningTime, wifiScanCount,
                         /* legacy fields follow, keep at 0 */ 0, 0, 0,
-                        wifiScanCountBg, wifiScanActualTime, wifiScanActualTimeBg);
+                        wifiScanCountBg, wifiScanActualTimeMs, wifiScanActualTimeMsBg);
             }
 
             dumpControllerActivityLine(pw, uid, category, WIFI_CONTROLLER_DATA,
