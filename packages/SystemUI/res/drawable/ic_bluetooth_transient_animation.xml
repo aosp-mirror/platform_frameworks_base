@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animated-vector
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:drawable="@drawable/ic_bluetooth_transient" >
+    <target
+        android:name="group_1"
+        android:animation="@anim/ic_bluetooth_transient_group_1_animation" />
+    <target
+        android:name="group_2"
+        android:animation="@anim/ic_bluetooth_transient_group_2_animation" />
+</animated-vector>

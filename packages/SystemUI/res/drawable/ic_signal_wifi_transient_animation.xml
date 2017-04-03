@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animated-vector
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:drawable="@drawable/ic_signal_wifi_transient" >
+    <target
+        android:name="wifi_1"
+        android:animation="@anim/ic_signal_wifi_transient_wifi_1_animation" />
+</animated-vector>

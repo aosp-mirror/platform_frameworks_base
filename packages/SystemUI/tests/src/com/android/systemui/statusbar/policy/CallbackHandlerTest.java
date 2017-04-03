@@ -79,7 +79,7 @@ public class CallbackHandlerTest {
         boolean in = true;
         boolean out = true;
         String description = "Test";
-        mHandler.setWifiIndicators(enabled, status, qs, in, out, description);
+        mHandler.setWifiIndicators(enabled, status, qs, in, out, description, true);
         waitForCallbacks();
 
         ArgumentCaptor<Boolean> enableArg = ArgumentCaptor.forClass(Boolean.class);
@@ -88,15 +88,17 @@ public class CallbackHandlerTest {
         ArgumentCaptor<Boolean> inArg = ArgumentCaptor.forClass(Boolean.class);
         ArgumentCaptor<Boolean> outArg = ArgumentCaptor.forClass(Boolean.class);
         ArgumentCaptor<String> descArg = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<Boolean> isTransient = ArgumentCaptor.forClass(Boolean.class);
         Mockito.verify(mSignalCallback).setWifiIndicators(enableArg.capture(),
                 statusArg.capture(), qsArg.capture(), inArg.capture(), outArg.capture(),
-                descArg.capture());
+                descArg.capture(), isTransient.capture());
         assertEquals(enabled, (boolean) enableArg.getValue());
         assertEquals(status, statusArg.getValue());
         assertEquals(qs, qsArg.getValue());
         assertEquals(in, (boolean) inArg.getValue());
         assertEquals(out, (boolean) outArg.getValue());
         assertEquals(description, descArg.getValue());
+        assertTrue(isTransient.getValue());
     }
 
     @Test
