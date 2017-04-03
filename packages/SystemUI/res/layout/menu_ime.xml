@@ -27,6 +27,7 @@
         android:layout_marginEnd="2dp"
         android:scaleType="centerInside"
         systemui:keyCode="82"
+        systemui:playSound="false"
         android:visibility="invisible"
         android:contentDescription="@string/accessibility_menu"
         />
