@@ -178,6 +178,7 @@ import android.util.Xml;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.util.ArrayUtils;
@@ -213,6 +214,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Calendar;
+import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -269,11 +271,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             ActivityManager.isLowRamDeviceStatic() ? 50 : 200;
 
     @VisibleForTesting
-    public static final int TYPE_WARNING = 0x1;
+    public static final int TYPE_WARNING = SystemMessage.NOTE_NET_WARNING;
     @VisibleForTesting
-    public static final int TYPE_LIMIT = 0x2;
+    public static final int TYPE_LIMIT = SystemMessage.NOTE_NET_LIMIT;
     @VisibleForTesting
-    public static final int TYPE_LIMIT_SNOOZED = 0x3;
+    public static final int TYPE_LIMIT_SNOOZED = SystemMessage.NOTE_NET_LIMIT_SNOOZED;
 
     private static final String TAG_POLICY_LIST = "policy-list";
     private static final String TAG_NETWORK_POLICY = "network-policy";
@@ -420,7 +422,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     /** Set of currently active {@link Notification} tags. */
     @GuardedBy("mNetworkPoliciesSecondLock")
-    private final ArraySet<String> mActiveNotifs = new ArraySet<String>();
+    private final ArraySet<NotificationId> mActiveNotifs = new ArraySet<>();
 
     /** Foreground at UID granularity. */
     @GuardedBy("mUidRulesFirstLock")
@@ -1055,7 +1057,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         if (LOGV) Slog.v(TAG, "updateNotificationsNL()");
 
         // keep track of previously active notifications
-        final ArraySet<String> beforeNotifs = new ArraySet<String>(mActiveNotifs);
+        final ArraySet<NotificationId> beforeNotifs = new ArraySet<NotificationId>(mActiveNotifs);
         mActiveNotifs.clear();
 
         // TODO: when switching to kernel notifications, compute next future
@@ -1092,9 +1094,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
         // cancel stale notifications that we didn't renew above
         for (int i = beforeNotifs.size()-1; i >= 0; i--) {
-            final String tag = beforeNotifs.valueAt(i);
-            if (!mActiveNotifs.contains(tag)) {
-                cancelNotification(tag);
+            final NotificationId notificationId = beforeNotifs.valueAt(i);
+            if (!mActiveNotifs.contains(notificationId)) {
+                cancelNotification(notificationId);
             }
         }
     }
@@ -1142,19 +1144,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     /**
-     * Build unique tag that identifies an active {@link NetworkPolicy}
-     * notification of a specific type, like {@link #TYPE_LIMIT}.
-     */
-    private String buildNotificationTag(NetworkPolicy policy, int type) {
-        return TAG + ":" + policy.template.hashCode() + ":" + type;
-    }
-
-    /**
      * Show notification for combined {@link NetworkPolicy} and specific type,
      * like {@link #TYPE_LIMIT}. Okay to call multiple times.
      */
     private void enqueueNotification(NetworkPolicy policy, int type, long totalBytes) {
-        final String tag = buildNotificationTag(policy, type);
+        final NotificationId notificationId = new NotificationId(policy, type);
         final Notification.Builder builder =
                 new Notification.Builder(mContext, SystemNotificationChannels.NETWORK_STATUS);
         builder.setOnlyAlertOnce(true);
@@ -1262,25 +1256,26 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         try {
             final String packageName = mContext.getPackageName();
             final int[] idReceived = new int[1];
-            if(!TextUtils.isEmpty(body)) {
+            if (!TextUtils.isEmpty(body)) {
                 builder.setStyle(new Notification.BigTextStyle()
                         .bigText(body));
             }
             mNotifManager.enqueueNotificationWithTag(
-                    packageName, packageName, tag, 0x0, builder.build(), idReceived,
-                    UserHandle.USER_ALL);
-            mActiveNotifs.add(tag);
+                    packageName, packageName, notificationId.getTag(), notificationId.getId(),
+                    builder.build(), idReceived, UserHandle.USER_ALL);
+            mActiveNotifs.add(notificationId);
         } catch (RemoteException e) {
             // ignored; service lives in system_server
         }
     }
 
-    private void cancelNotification(String tag) {
+    private void cancelNotification(NotificationId notificationId) {
         // TODO: move to NotificationManager once we can mock it
         try {
             final String packageName = mContext.getPackageName();
             mNotifManager.cancelNotificationWithTag(
-                    packageName, tag, 0x0, UserHandle.USER_ALL);
+                    packageName, notificationId.getTag(), notificationId.getId(),
+                    UserHandle.USER_ALL);
         } catch (RemoteException e) {
             // ignored; service lives in system_server
         }
@@ -4123,6 +4118,45 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 next = mMaxCapacity - 1;
             }
             return next;
+        }
+    }
+
+    private class NotificationId {
+        private final String mTag;
+        private final int mId;
+
+        NotificationId(NetworkPolicy policy, int type) {
+            mTag = buildNotificationTag(policy, type);
+            mId = type;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof NotificationId)) return false;
+            NotificationId that = (NotificationId) o;
+            return Objects.equals(mTag, that.mTag);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(mTag);
+        }
+
+        /**
+         * Build unique tag that identifies an active {@link NetworkPolicy}
+         * notification of a specific type, like {@link #TYPE_LIMIT}.
+         */
+        private String buildNotificationTag(NetworkPolicy policy, int type) {
+            return TAG + ":" + policy.template.hashCode() + ":" + type;
+        }
+
+        public String getTag() {
+            return mTag;
+        }
+
+        public int getId() {
+            return mId;
         }
     }
 }
