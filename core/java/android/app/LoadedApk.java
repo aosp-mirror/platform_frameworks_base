@@ -88,8 +88,8 @@ final class ServiceConnectionLeaked extends AndroidRuntimeException {
  * @hide
  */
 public final class LoadedApk {
-
-    private static final String TAG = "LoadedApk";
+    static final String TAG = "LoadedApk";
+    static final boolean DEBUG = false;
 
     private final ActivityThread mActivityThread;
     final String mPackageName;
@@ -641,8 +641,7 @@ public final class LoadedApk {
         final String zip = (zipPaths.size() == 1) ? zipPaths.get(0) :
                 TextUtils.join(File.pathSeparator, zipPaths);
 
-        if (ActivityThread.localLOGV)
-            Slog.v(ActivityThread.TAG, "Class path: " + zip +
+        if (DEBUG) Slog.v(ActivityThread.TAG, "Class path: " + zip +
                     ", JNI path: " + librarySearchPath);
 
         boolean needToSetupJitProfiles = false;
@@ -1371,12 +1370,14 @@ public final class LoadedApk {
             LoadedApk.ServiceDispatcher sd = null;
             ArrayMap<ServiceConnection, LoadedApk.ServiceDispatcher> map = mServices.get(context);
             if (map != null) {
+                if (DEBUG) Slog.d(TAG, "Returning existing dispatcher " + sd + " for conn " + c);
                 sd = map.get(c);
             }
             if (sd == null) {
                 sd = new ServiceDispatcher(c, context, handler, flags);
+                if (DEBUG) Slog.d(TAG, "Creating new dispatcher " + sd + " for conn " + c);
                 if (map == null) {
-                    map = new ArrayMap<ServiceConnection, LoadedApk.ServiceDispatcher>();
+                    map = new ArrayMap<>();
                     mServices.put(context, map);
                 }
                 map.put(c, sd);
@@ -1396,6 +1397,7 @@ public final class LoadedApk {
             if (map != null) {
                 sd = map.get(c);
                 if (sd != null) {
+                    if (DEBUG) Slog.d(TAG, "Removing dispatcher " + sd + " for conn " + c);
                     map.remove(c);
                     sd.doForget();
                     if (map.size() == 0) {
@@ -1461,10 +1463,11 @@ public final class LoadedApk {
                 mDispatcher = new WeakReference<LoadedApk.ServiceDispatcher>(sd);
             }
 
-            public void connected(ComponentName name, IBinder service) throws RemoteException {
+            public void connected(ComponentName name, IBinder service, boolean dead)
+                    throws RemoteException {
                 LoadedApk.ServiceDispatcher sd = mDispatcher.get();
                 if (sd != null) {
-                    sd.connected(name, service);
+                    sd.connected(name, service, dead);
                 }
             }
         }
@@ -1533,23 +1536,23 @@ public final class LoadedApk {
             return mUnbindLocation;
         }
 
-        public void connected(ComponentName name, IBinder service) {
+        public void connected(ComponentName name, IBinder service, boolean dead) {
             if (mActivityThread != null) {
-                mActivityThread.post(new RunConnection(name, service, 0));
+                mActivityThread.post(new RunConnection(name, service, 0, dead));
             } else {
-                doConnected(name, service);
+                doConnected(name, service, dead);
             }
         }
 
         public void death(ComponentName name, IBinder service) {
             if (mActivityThread != null) {
-                mActivityThread.post(new RunConnection(name, service, 1));
+                mActivityThread.post(new RunConnection(name, service, 1, false));
             } else {
                 doDeath(name, service);
             }
         }
 
-        public void doConnected(ComponentName name, IBinder service) {
+        public void doConnected(ComponentName name, IBinder service, boolean dead) {
             ServiceDispatcher.ConnectionInfo old;
             ServiceDispatcher.ConnectionInfo info;
 
@@ -1594,6 +1597,9 @@ public final class LoadedApk {
             if (old != null) {
                 mConnection.onServiceDisconnected(name);
             }
+            if (dead) {
+                mConnection.onBindingDead(name);
+            }
             // If there is a new service, it is now connected.
             if (service != null) {
                 mConnection.onServiceConnected(name, service);
@@ -1616,15 +1622,16 @@ public final class LoadedApk {
         }
 
         private final class RunConnection implements Runnable {
-            RunConnection(ComponentName name, IBinder service, int command) {
+            RunConnection(ComponentName name, IBinder service, int command, boolean dead) {
                 mName = name;
                 mService = service;
                 mCommand = command;
+                mDead = dead;
             }
 
             public void run() {
                 if (mCommand == 0) {
-                    doConnected(mName, mService);
+                    doConnected(mName, mService, mDead);
                 } else if (mCommand == 1) {
                     doDeath(mName, mService);
                 }
@@ -1633,6 +1640,7 @@ public final class LoadedApk {
             final ComponentName mName;
             final IBinder mService;
             final int mCommand;
+            final boolean mDead;
         }
 
         private final class DeathMonitor implements IBinder.DeathRecipient
