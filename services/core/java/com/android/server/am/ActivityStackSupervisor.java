@@ -2506,9 +2506,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                         fullscreenStack.getStackVisibilityLocked(null) == STACK_VISIBLE;
                 for (int i = 0; i < tasks.size(); i++) {
                     // Insert the task either at the top of the fullscreen stack if it is hidden,
-                    // or just under the top task if it is currently visible
-                    final int insertPosition = isFullscreenStackVisible
-                            ? Math.max(0, fullscreenStack.getChildCount() - 1)
+                    // or to the bottom if it is currently visible
+                    final int insertPosition = isFullscreenStackVisible ? 0
                             : fullscreenStack.getChildCount();
                     final TaskRecord task = tasks.get(i);
                     // Defer resume until we remove all the tasks

@@ -113,6 +113,7 @@ public class PipManager implements BasePipManager {
     private IWindowManager mWindowManager;
     private MediaSessionManager mMediaSessionManager;
     private int mState = STATE_NO_PIP;
+    private int mResumeResizePinnedStackRunnable = STATE_NO_PIP;
     private final Handler mHandler = new Handler();
     private List<Listener> mListeners = new ArrayList<>();
     private List<MediaListener> mMediaListeners = new ArrayList<>();
@@ -133,7 +134,7 @@ public class PipManager implements BasePipManager {
     private final Runnable mResizePinnedStackRunnable = new Runnable() {
         @Override
         public void run() {
-            resizePinnedStack(mState);
+            resizePinnedStack(mResumeResizePinnedStackRunnable);
         }
     };
     private final Runnable mClosePipRunnable = new Runnable() {
@@ -364,16 +365,17 @@ public class PipManager implements BasePipManager {
     void resizePinnedStack(int state) {
         if (DEBUG) Log.d(TAG, "resizePinnedStack() state=" + state);
         boolean wasStateNoPip = (mState == STATE_NO_PIP);
-        mState = state;
+        mResumeResizePinnedStackRunnable = state;
         for (int i = mListeners.size() - 1; i >= 0; --i) {
             mListeners.get(i).onPipResizeAboutToStart();
         }
         if (mSuspendPipResizingReason != 0) {
-            if (DEBUG) Log.d(TAG,
-                    "resizePinnedStack() deferring mSuspendPipResizingReason=" +
-                            mSuspendPipResizingReason);
+            if (DEBUG) Log.d(TAG, "resizePinnedStack() deferring"
+                    + " mSuspendPipResizingReason=" + mSuspendPipResizingReason
+                    + " mResumeResizePinnedStackRunnable=" + mResumeResizePinnedStackRunnable);
             return;
         }
+        mState = state;
         switch (mState) {
             case STATE_NO_PIP:
                 mCurrentPipBounds = null;
