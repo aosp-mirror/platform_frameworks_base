@@ -193,7 +193,9 @@ void SkiaCanvasProxy::onDrawVerticesObject(const SkVertices* vertices, SkBlendMo
     const float* vArray = (const float*)vertices->positions();
     const float* tArray = (const float*)vertices->texCoords();
     const int* cArray = (const int*)vertices->colors();
-    mCanvas->drawVertices(vertices->mode(), floatCount, vArray, tArray, cArray,
+    // Can remove this cast after changing to SkVertices::VertexMode
+    SkCanvas::VertexMode vmode = static_cast<SkCanvas::VertexMode>(vertices->mode());
+    mCanvas->drawVertices(vmode, floatCount, vArray, tArray, cArray,
             vertices->indices(), vertices->indexCount(), paint);
 }
 
