@@ -31,6 +31,8 @@ import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.util.Log;
 
+import com.android.internal.util.DumpUtils;
+
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.nio.ByteBuffer;
@@ -242,11 +244,7 @@ public class ContextHubService extends IContextHubService.Stub {
 
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        if (mContext.checkCallingOrSelfPermission("android.permission.DUMP")
-            != PackageManager.PERMISSION_GRANTED) {
-            pw.println("Permission Denial: can't dump contexthub service");
-            return;
-        }
+        if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
 
         pw.println("Dumping ContextHub Service");
 

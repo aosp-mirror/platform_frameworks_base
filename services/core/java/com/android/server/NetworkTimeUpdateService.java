@@ -40,6 +40,7 @@ import android.util.TimeUtils;
 import android.util.TrustedTime;
 
 import com.android.internal.telephony.TelephonyIntents;
+import com.android.internal.util.DumpUtils;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -323,15 +324,7 @@ public class NetworkTimeUpdateService extends Binder {
 
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
-                != PackageManager.PERMISSION_GRANTED) {
-            pw.println("Permission Denial: can't dump NetworkTimeUpdateService from from pid="
-                    + Binder.getCallingPid()
-                    + ", uid=" + Binder.getCallingUid()
-                    + " without permission "
-                    + android.Manifest.permission.DUMP);
-            return;
-        }
+        if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
         pw.print("PollingIntervalMs: ");
         TimeUtils.formatDuration(mPollingIntervalMs, pw);
         pw.print("\nPollingIntervalShorterMs: ");

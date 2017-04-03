@@ -55,6 +55,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.R;
+import com.android.internal.util.DumpUtils;
 import com.android.server.LocalServices;
 import com.android.server.SystemConfig;
 import com.android.server.SystemService;
@@ -444,12 +445,8 @@ public class VrManagerService extends SystemService implements EnabledComponentC
 
         @Override
         protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-            if (getContext().checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
-                    != PackageManager.PERMISSION_GRANTED) {
-                pw.println("Permission Denial: can't dump VrManagerService from pid="
-                        + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid());
-                return;
-            }
+            if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
+
             pw.println("********* Dump of VrManagerService *********");
             pw.println("VR mode is currently: " + ((mVrModeAllowed) ? "allowed" : "disallowed"));
             pw.println("Persistent VR mode is currently: " +

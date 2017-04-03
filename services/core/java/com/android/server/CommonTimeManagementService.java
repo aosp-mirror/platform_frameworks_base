@@ -37,6 +37,7 @@ import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.util.Log;
 
+import com.android.internal.util.DumpUtils;
 import com.android.server.net.BaseNetworkObserver;
 
 /**
@@ -177,13 +178,7 @@ class CommonTimeManagementService extends Binder {
 
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
-                != PackageManager.PERMISSION_GRANTED) {
-            pw.println(String.format(
-                        "Permission Denial: can't dump CommonTimeManagement service from from " +
-                        "pid=%d, uid=%d", Binder.getCallingPid(), Binder.getCallingUid()));
-            return;
-        }
+        if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
 
         if (!mDetectedAtStartup) {
             pw.println("Native Common Time service was not detected at startup.  " +

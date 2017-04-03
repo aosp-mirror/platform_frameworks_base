@@ -60,6 +60,7 @@ import android.view.autofill.IAutoFillManagerClient;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.IResultReceiver;
+import com.android.internal.util.DumpUtils;
 import com.android.internal.util.Preconditions;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
@@ -418,13 +419,7 @@ public final class AutofillManagerService extends SystemService {
 
         @Override
         public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-            if (mContext.checkCallingPermission(
-                    Manifest.permission.DUMP) != PackageManager.PERMISSION_GRANTED) {
-                pw.println("Permission Denial: can't dump autofill from from pid="
-                        + Binder.getCallingPid()
-                        + ", uid=" + Binder.getCallingUid());
-                return;
-            }
+            if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
             synchronized (mLock) {
                 pw.print("Disabled users: "); pw.println(mDisabledUsers);
                 final int size = mServicesCache.size();

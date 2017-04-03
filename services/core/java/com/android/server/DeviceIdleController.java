@@ -81,6 +81,7 @@ import android.view.Display;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.os.AtomicFile;
 import com.android.internal.os.BackgroundThread;
+import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.XmlUtils;
 import com.android.server.am.BatteryStatsService;
@@ -2879,13 +2880,7 @@ public class DeviceIdleController extends SystemService
     }
 
     void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        if (getContext().checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
-                != PackageManager.PERMISSION_GRANTED) {
-            pw.println("Permission Denial: can't dump DeviceIdleController from from pid="
-                    + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid()
-                    + " without permission " + android.Manifest.permission.DUMP);
-            return;
-        }
+        if (!DumpUtils.checkDumpPermission(getContext(), TAG, pw)) return;
 
         if (args != null) {
             int userId = UserHandle.USER_SYSTEM;

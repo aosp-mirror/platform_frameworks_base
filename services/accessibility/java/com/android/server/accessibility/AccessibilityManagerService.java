@@ -104,6 +104,7 @@ import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.SomeArgs;
+import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IntPair;
 import com.android.server.LocalServices;
 import com.android.server.policy.AccessibilityShortcutController;
@@ -2360,7 +2361,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
     @Override
     public void dump(FileDescriptor fd, final PrintWriter pw, String[] args) {
-        mSecurityPolicy.enforceCallingPermission(Manifest.permission.DUMP, FUNCTION_DUMP);
+        if (!DumpUtils.checkDumpPermission(mContext, LOG_TAG, pw)) return;
         synchronized (mLock) {
             pw.println("ACCESSIBILITY MANAGER (dumpsys accessibility)");
             pw.println();
@@ -3658,7 +3659,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
         @Override
         public void dump(FileDescriptor fd, final PrintWriter pw, String[] args) {
-            mSecurityPolicy.enforceCallingPermission(Manifest.permission.DUMP, FUNCTION_DUMP);
+            if (!DumpUtils.checkDumpPermission(mContext, LOG_TAG, pw)) return;
             synchronized (mLock) {
                 pw.append("Service[label=" + mAccessibilityServiceInfo.getResolveInfo()
                         .loadLabel(mContext.getPackageManager()));

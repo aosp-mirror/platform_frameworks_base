@@ -59,6 +59,7 @@ import android.view.IWindowManager;
 import android.view.WindowManagerGlobal;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.content.PackageMonitor;
+import com.android.internal.util.DumpUtils;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.SystemService;
 import java.io.FileDescriptor;
@@ -849,8 +850,7 @@ public class TrustManagerService extends SystemService {
 
         @Override
         protected void dump(FileDescriptor fd, final PrintWriter fout, String[] args) {
-            mContext.enforceCallingPermission(Manifest.permission.DUMP,
-                    "dumping TrustManagerService");
+            if (!DumpUtils.checkDumpPermission(mContext, TAG, fout)) return;
             if (isSafeMode()) {
                 fout.println("disabled because the system is in safe mode.");
                 return;

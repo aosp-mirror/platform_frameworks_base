@@ -72,6 +72,7 @@ import android.util.TimeUtils;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.app.procstats.ProcessStats;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.DumpUtils;
 import com.android.server.DeviceIdleController;
 import com.android.server.LocalServices;
 import com.android.server.job.JobStore.JobStatusFunctor;
@@ -1790,7 +1791,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
          */
         @Override
         public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-            getContext().enforceCallingOrSelfPermission(android.Manifest.permission.DUMP, TAG);
+            if (!DumpUtils.checkDumpPermission(getContext(), TAG, pw)) return;
 
             long identityToken = Binder.clearCallingIdentity();
             try {

@@ -27,6 +27,7 @@ import android.database.ContentObserver;
 import android.os.SystemProperties;
 import android.provider.Settings;
 import com.android.internal.os.SamplingProfilerIntegration;
+import com.android.internal.util.DumpUtils;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -96,7 +97,7 @@ public class SamplingProfilerService extends Binder {
 
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DUMP, TAG);
+        if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
 
         pw.println("SamplingProfilerService:");
         pw.println("Watching directory: " + SNAPSHOT_DIR);

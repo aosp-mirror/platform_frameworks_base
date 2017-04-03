@@ -169,6 +169,7 @@ import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.statusbar.IStatusBarService;
+import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.JournaledFile;
 import com.android.internal.util.Preconditions;
@@ -7269,14 +7270,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
-                != PackageManager.PERMISSION_GRANTED) {
-
-            pw.println("Permission Denial: can't dump DevicePolicyManagerService from from pid="
-                    + mInjector.binderGetCallingPid()
-                    + ", uid=" + mInjector.binderGetCallingUid());
-            return;
-        }
+        if (!DumpUtils.checkDumpPermission(mContext, LOG_TAG, pw)) return;
 
         synchronized (this) {
             pw.println("Current Device Policy Manager state:");
