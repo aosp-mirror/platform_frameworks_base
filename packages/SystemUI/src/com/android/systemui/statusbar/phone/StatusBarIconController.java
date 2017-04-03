@@ -15,6 +15,7 @@
 package com.android.systemui.statusbar.phone;
 
 import android.content.Context;
+import android.support.annotation.VisibleForTesting;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.view.Gravity;
@@ -22,6 +23,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.LinearLayout.LayoutParams;
 
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.systemui.Dependency;
@@ -71,13 +73,18 @@ public interface StatusBarIconController {
         }
 
         @Override
-        protected void onIconAdded(int index, String slot, boolean blocked, StatusBarIcon icon) {
-            StatusBarIconView view = new StatusBarIconView(mContext, slot, null, blocked);
+        protected void onIconAdded(int index, String slot, boolean blocked,
+                StatusBarIcon icon) {
+            StatusBarIconView v = addIcon(index, slot, blocked, icon);
+            mDarkIconDispatcher.addDarkReceiver(v);
+        }
+
+        @Override
+        protected LayoutParams onCreateLayoutParams() {
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
                     ViewGroup.LayoutParams.WRAP_CONTENT, mIconSize);
             lp.setMargins(mIconHPadding, 0, mIconHPadding, 0);
-            mGroup.addView(view, index, lp);
-            mDarkIconDispatcher.addDarkReceiver(view);
+            return lp;
         }
 
         @Override
@@ -116,11 +123,26 @@ public interface StatusBarIconController {
                     com.android.internal.R.dimen.status_bar_icon_size);
         }
 
-        protected void onIconAdded(int index, String slot, boolean blocked, StatusBarIcon icon) {
-            StatusBarIconView view = new StatusBarIconView(mContext, slot, null, blocked);
+        protected void onIconAdded(int index, String slot, boolean blocked,
+                StatusBarIcon icon) {
+            addIcon(index, slot, blocked, icon);
+        }
+
+        protected StatusBarIconView addIcon(int index, String slot, boolean blocked,
+                StatusBarIcon icon) {
+            StatusBarIconView view = onCreateStatusBarIconView(slot, blocked);
             view.set(icon);
-            mGroup.addView(view, index, new LinearLayout.LayoutParams(
-                    ViewGroup.LayoutParams.WRAP_CONTENT, mIconSize));
+            mGroup.addView(view, index, onCreateLayoutParams());
+            return view;
+        }
+
+        @VisibleForTesting
+        protected StatusBarIconView onCreateStatusBarIconView(String slot, boolean blocked) {
+            return new StatusBarIconView(mContext, slot, null, blocked);
+        }
+
+        protected LinearLayout.LayoutParams onCreateLayoutParams() {
+            return new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, mIconSize);
         }
 
         protected void destroy() {
