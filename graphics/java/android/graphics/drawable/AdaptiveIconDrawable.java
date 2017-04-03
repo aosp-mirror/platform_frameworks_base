@@ -304,6 +304,9 @@ public class AdaptiveIconDrawable extends Drawable implements Drawable.Callback 
 
     @Override
     public void draw(Canvas canvas) {
+        if (mLayersBitmap == null) {
+            return;
+        }
         if (mLayersShader == null) {
             mCanvas.setBitmap(mLayersBitmap);
             for (int i = 0; i < mLayerState.N_CHILDREN; i++) {
