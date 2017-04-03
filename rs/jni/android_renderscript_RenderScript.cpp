@@ -1282,7 +1282,9 @@ nAllocationSetSurface(JNIEnv *_env, jobject _this, jlong con, jlong alloc, jobje
 
     ANativeWindow *anw = nullptr;
     if (sur != 0) {
+        // Connect the native window handle to buffer queue.
         anw = ANativeWindow_fromSurface(_env, sur);
+        native_window_api_connect(anw, NATIVE_WINDOW_API_CPU);
     }
 
     rsAllocationSetSurface((RsContext)con, (RsAllocation)alloc, anw);
