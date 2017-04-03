@@ -21,6 +21,6 @@ import android.content.ComponentName;
 
 /** @hide */
 oneway interface IServiceConnection {
-    void connected(in ComponentName name, IBinder service);
+    void connected(in ComponentName name, IBinder service, boolean dead);
 }
 
