@@ -95,20 +95,15 @@ class CompatibilityDisplay {
      * Creates and Destroys the virtual display depending on the current state of VrMode.
      */
     private void updateVirtualDisplay() {
-        boolean createVirtualDisplay = "true".equals(SystemProperties.get("vr_virtualdisplay"));
         if (DEBUG) {
-            Log.i(TAG, "isVrMode: " + mIsVrModeEnabled + ", createVD: " + createVirtualDisplay +
-                    ", override: " + mIsVrModeOverrideEnabled);
+            Log.i(TAG, "isVrMode: " + mIsVrModeEnabled + ", override: " + mIsVrModeOverrideEnabled);
         }
 
-        if (mIsVrModeEnabled || (createVirtualDisplay && mIsVrModeOverrideEnabled)) {
+        if (mIsVrModeEnabled || mIsVrModeOverrideEnabled) {
             // TODO: Consider not creating the display until ActivityManager needs one on
             // which to display a 2D application.
-            // TODO: STOPSHIP Remove createVirtualDisplay conditional before launching.
-            if (createVirtualDisplay) {
-                startVirtualDisplay();
-                startImageReader();
-            }
+            startVirtualDisplay();
+            startImageReader();
         } else {
             // Stop virtual display to test exit condition
             stopVirtualDisplay();
