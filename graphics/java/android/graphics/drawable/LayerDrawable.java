@@ -986,6 +986,11 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
         if (mSuspendChildInvalidation) {
             mChildRequestedInvalidation = true;
         } else {
+            // This may have been called as the result of a tint changing, in
+            // which case we may need to refresh the cached statefulness or
+            // opacity.
+            mLayerState.invalidateCache();
+
             invalidateSelf();
         }
     }
@@ -2121,7 +2126,10 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
             return true;
         }
 
-        public void invalidateCache() {
+        /**
+         * Invalidates the cached opacity and statefulness.
+         */
+        void invalidateCache() {
             mCheckedOpacity = false;
             mCheckedStateful = false;
         }

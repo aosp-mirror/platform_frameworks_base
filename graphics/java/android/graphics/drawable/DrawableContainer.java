@@ -88,7 +88,9 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
     }
 
     @Override
-    public @Config int getChangingConfigurations() {
+    public
+    @Config
+    int getChangingConfigurations() {
         return super.getChangingConfigurations()
                 | mDrawableContainerState.getChangingConfigurations();
     }
@@ -210,6 +212,7 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
     /**
      * Change the global fade duration when a new drawable is entering
      * the scene.
+     *
      * @param ms The amount of time to fade in milliseconds.
      */
     public void setEnterFadeDuration(int ms) {
@@ -219,6 +222,7 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
     /**
      * Change the global fade duration when a new drawable is leaving
      * the scene.
+     *
      * @param ms The amount of time to fade in milliseconds.
      */
     public void setExitFadeDuration(int ms) {
@@ -375,6 +379,13 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
 
     @Override
     public void invalidateDrawable(@NonNull Drawable who) {
+        // This may have been called as the result of a tint changing, in
+        // which case we may need to refresh the cached statefulness or
+        // opacity.
+        if (mDrawableContainerState != null) {
+            mDrawableContainerState.invalidateCache();
+        }
+
         if (who == mCurrDrawable && getCallback() != null) {
             getCallback().invalidateDrawable(this);
         }
@@ -822,8 +833,8 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
             mDrawables[pos] = dr;
             mNumChildren++;
             mChildrenChangingConfigurations |= dr.getChangingConfigurations();
-            mCheckedStateful = false;
-            mCheckedOpacity = false;
+
+            invalidateCache();
 
             mConstantPadding = null;
             mCheckedPadding = false;
@@ -831,6 +842,14 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
             mCheckedConstantState = false;
 
             return pos;
+        }
+
+        /**
+         * Invalidates the cached opacity and statefulness.
+         */
+        void invalidateCache() {
+            mCheckedOpacity = false;
+            mCheckedStateful = false;
         }
 
         final int getCapacity() {
