@@ -122,7 +122,7 @@ public class NetworkControllerWifiTest extends NetworkControllerBaseTest {
         ArgumentCaptor<IconState> iconArg = ArgumentCaptor.forClass(IconState.class);
         Mockito.verify(mCallbackHandler, Mockito.atLeastOnce()).setWifiIndicators(
                 anyBoolean(), iconArg.capture(), any(), anyBoolean(), anyBoolean(),
-                any());
+                any(), anyBoolean());
         IconState iconState = iconArg.getValue();
 
         assertEquals("Badged Wifi Resource is set",
@@ -269,7 +269,7 @@ public class NetworkControllerWifiTest extends NetworkControllerBaseTest {
         ArgumentCaptor<Boolean> outArg = ArgumentCaptor.forClass(Boolean.class);
 
         Mockito.verify(mCallbackHandler, Mockito.atLeastOnce()).setWifiIndicators(
-                anyBoolean(), any(), any(), inArg.capture(), outArg.capture(), any());
+                anyBoolean(), any(), any(), inArg.capture(), outArg.capture(), any(), anyBoolean());
         assertEquals("WiFi data in, in quick settings", in, (boolean) inArg.getValue());
         assertEquals("WiFi data out, in quick settings", out, (boolean) outArg.getValue());
     }
@@ -282,7 +282,7 @@ public class NetworkControllerWifiTest extends NetworkControllerBaseTest {
 
         Mockito.verify(mCallbackHandler, Mockito.atLeastOnce()).setWifiIndicators(
                 enabledArg.capture(), any(), iconArg.capture(), anyBoolean(),
-                anyBoolean(),  descArg.capture());
+                anyBoolean(),  descArg.capture(), anyBoolean());
         IconState iconState = iconArg.getValue();
         assertEquals("WiFi enabled, in quick settings", enabled, (boolean) enabledArg.getValue());
         assertEquals("WiFi connected, in quick settings", connected, iconState.visible);
@@ -295,7 +295,7 @@ public class NetworkControllerWifiTest extends NetworkControllerBaseTest {
 
         Mockito.verify(mCallbackHandler, Mockito.atLeastOnce()).setWifiIndicators(
                 anyBoolean(), iconArg.capture(), any(), anyBoolean(), anyBoolean(),
-                any());
+                any(), anyBoolean());
         IconState iconState = iconArg.getValue();
         assertEquals("WiFi visible, in status bar", visible, iconState.visible);
         assertEquals("WiFi signal, in status bar", icon, iconState.icon);

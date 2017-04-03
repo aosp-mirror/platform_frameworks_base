@@ -180,7 +180,7 @@ public class CellularTile extends QSTileImpl<SignalState> {
         private final CallbackInfo mInfo = new CallbackInfo();
         @Override
         public void setWifiIndicators(boolean enabled, IconState statusIcon, IconState qsIcon,
-                boolean activityIn, boolean activityOut, String description) {
+                boolean activityIn, boolean activityOut, String description, boolean isTransient) {
             mInfo.wifiEnabled = enabled;
             refreshState(mInfo);
         }
