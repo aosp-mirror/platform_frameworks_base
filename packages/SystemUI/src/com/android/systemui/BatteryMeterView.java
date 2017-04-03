@@ -98,6 +98,8 @@ public class BatteryMeterView extends LinearLayout implements
         addView(mBatteryIconView, mlp);
 
         updateShowPercent();
+        // Init to not dark at all.
+        onDarkChanged(new Rect(), 0, DarkIconDispatcher.DEFAULT_ICON_TINT);
     }
 
     public void setForceShowPercent(boolean show) {
