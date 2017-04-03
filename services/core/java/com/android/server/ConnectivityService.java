@@ -413,7 +413,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private Intent mInitialBroadcast;
 
     private PowerManager.WakeLock mNetTransitionWakeLock;
-    private int mNetTransitionWakeLockSerialNumber;
     private int mNetTransitionWakeLockTimeout;
     private final PowerManager.WakeLock mPendingIntentWakeLock;
 
@@ -2384,7 +2383,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             if (nai.isSatisfyingRequest(mDefaultRequest.requestId)) {
                 removeDataActivityTracking(nai);
                 notifyLockdownVpn(nai);
-                requestNetworkTransitionWakelock(nai.name());
+                ensureNetworkTransitionWakelock(nai.name());
             }
             mLegacyTypeTracker.remove(nai, wasDefault);
             rematchAllNetworksAndRequests(null, 0);
@@ -2843,7 +2842,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             switch (msg.what) {
                 case EVENT_EXPIRE_NET_TRANSITION_WAKELOCK:
                 case EVENT_CLEAR_NET_TRANSITION_WAKELOCK: {
-                    handleNetworkTransitionWakelockRelease(msg.what, msg.arg1);
+                    handleReleaseNetworkTransitionWakelock(msg.what);
                     break;
                 }
                 case EVENT_APPLY_GLOBAL_HTTP_PROXY: {
@@ -3076,44 +3075,46 @@ public class ConnectivityService extends IConnectivityManager.Stub
     // This will automatically be cleared after X seconds or a new default network
     // becomes CONNECTED, whichever happens first.  The timer is started by the
     // first caller and not restarted by subsequent callers.
-    private void requestNetworkTransitionWakelock(String forWhom) {
-        int serialNum = 0;
+    private void ensureNetworkTransitionWakelock(String forWhom) {
         synchronized (this) {
-            if (mNetTransitionWakeLock.isHeld()) return;
-            serialNum = ++mNetTransitionWakeLockSerialNumber;
+            if (mNetTransitionWakeLock.isHeld()) {
+                return;
+            }
             mNetTransitionWakeLock.acquire();
-            mWakelockLogs.log(String.format("ACQUIRE %d for %s", serialNum, forWhom));
         }
-        mHandler.sendMessageDelayed(mHandler.obtainMessage(
-                EVENT_EXPIRE_NET_TRANSITION_WAKELOCK, serialNum, 0),
-                mNetTransitionWakeLockTimeout);
-        return;
+        mWakelockLogs.log("ACQUIRE for " + forWhom);
+        Message msg = mHandler.obtainMessage(EVENT_EXPIRE_NET_TRANSITION_WAKELOCK);
+        mHandler.sendMessageDelayed(msg, mNetTransitionWakeLockTimeout);
     }
 
-    private void handleNetworkTransitionWakelockRelease(int eventId, int wantSerialNumber) {
-        final int serialNumber;
-        final boolean isHeld;
-        final boolean release;
+    // Called when we gain a new default network to release the network transition wakelock in a
+    // second, to allow a grace period for apps to reconnect over the new network. Pending expiry
+    // message is cancelled.
+    private void scheduleReleaseNetworkTransitionWakelock() {
         synchronized (this) {
-            serialNumber = mNetTransitionWakeLockSerialNumber;
-            isHeld = mNetTransitionWakeLock.isHeld();
-            release = (wantSerialNumber == serialNumber) && isHeld;
-            if (release) {
-                mNetTransitionWakeLock.release();
+            if (!mNetTransitionWakeLock.isHeld()) {
+                return; // expiry message released the lock first.
             }
         }
-        final String result;
-        if (release) {
-            result = "released";
-        } else if (!isHeld) {
-            result = "already released";
-        } else {
-            result = String.format("not released (serial number was %d)", serialNumber);
+        // Cancel self timeout on wakelock hold.
+        mHandler.removeMessages(EVENT_EXPIRE_NET_TRANSITION_WAKELOCK);
+        Message msg = mHandler.obtainMessage(EVENT_CLEAR_NET_TRANSITION_WAKELOCK);
+        mHandler.sendMessageDelayed(msg, 1000);
+    }
+
+    // Called when either message of ensureNetworkTransitionWakelock or
+    // scheduleReleaseNetworkTransitionWakelock is processed.
+    private void handleReleaseNetworkTransitionWakelock(int eventId) {
+        String event = eventName(eventId);
+        synchronized (this) {
+            if (!mNetTransitionWakeLock.isHeld()) {
+                mWakelockLogs.log(String.format("RELEASE: already released (%s)", event));
+                Slog.w(TAG, "expected Net Transition WakeLock to be held");
+                return;
+            }
+            mNetTransitionWakeLock.release();
         }
-        String msg = String.format(
-                "RELEASE %d by %s: %s", wantSerialNumber, eventName(eventId), result);
-        mWakelockLogs.log(msg);
-        if (DBG) log(msg);
+        mWakelockLogs.log(String.format("RELEASE (%s)", event));
     }
 
     // 100 percent is full good, 0 is full bad.
@@ -4945,17 +4946,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
             makeDefault(newNetwork);
             // Log 0 -> X and Y -> X default network transitions, where X is the new default.
             logDefaultNetworkEvent(newNetwork, oldDefaultNetwork);
-            synchronized (ConnectivityService.this) {
-                // have a new default network, release the transition wakelock in
-                // a second if it's held.  The second pause is to allow apps
-                // to reconnect over the new network
-                if (mNetTransitionWakeLock.isHeld()) {
-                    mHandler.sendMessageDelayed(mHandler.obtainMessage(
-                            EVENT_CLEAR_NET_TRANSITION_WAKELOCK,
-                            mNetTransitionWakeLockSerialNumber, 0),
-                            1000);
-                }
-            }
+            // Have a new default network, release the transition wakelock in
+            scheduleReleaseNetworkTransitionWakelock();
         }
 
         if (!newNetwork.networkCapabilities.equalRequestableCapabilities(nc)) {
