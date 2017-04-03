@@ -2819,4 +2819,7 @@
          density will be scaled accordingly to maintain aspect ratio. A value of 0 indicates no
          constraint will be enforced. -->
     <integer name="config_maxUiWidth">0</integer>
+
+    <!-- Whether the device supports quick settings and its associated APIs -->
+    <bool name="config_quickSettingsSupported">true</bool>
 </resources>
