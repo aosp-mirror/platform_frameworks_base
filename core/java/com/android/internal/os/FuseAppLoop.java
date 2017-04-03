@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.ProxyFileDescriptorCallback;
 import android.os.Handler;
+import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.system.ErrnoException;
 import android.system.OsConstants;
@@ -28,10 +29,11 @@ import android.util.SparseArray;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.concurrent.ThreadFactory;
 
-public class FuseAppLoop {
+public class FuseAppLoop implements Handler.Callback {
     private static final String TAG = "FuseAppLoop";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     public static final int ROOT_INODE = 1;
@@ -43,19 +45,20 @@ public class FuseAppLoop {
         }
     };
     private static final int FUSE_OK = 0;
+    private static final int ARGS_POOL_SIZE = 50;
 
     private final Object mLock = new Object();
     private final int mMountPointId;
     private final Thread mThread;
-    private final Handler mDefaultHandler;
-
-    private static final int CMD_FSYNC = 1;
 
     @GuardedBy("mLock")
     private final SparseArray<CallbackEntry> mCallbackMap = new SparseArray<>();
 
     @GuardedBy("mLock")
     private final BytesMap mBytesMap = new BytesMap();
+
+    @GuardedBy("mLock")
+    private final LinkedList<Args> mArgsPool = new LinkedList<>();
 
     /**
      * Sequential number can be used as file name and inode in AppFuse.
@@ -83,7 +86,6 @@ public class FuseAppLoop {
             }
         });
         mThread.start();
-        mDefaultHandler = null;
     }
 
     public int registerCallback(@NonNull ProxyFileDescriptorCallback callback,
@@ -110,7 +112,8 @@ public class FuseAppLoop {
                     break;
                 }
             }
-            mCallbackMap.put(id, new CallbackEntry(callback, handler));
+            mCallbackMap.put(id, new CallbackEntry(
+                    callback, new Handler(handler.getLooper(), this)));
             return id;
         }
     }
@@ -137,78 +140,113 @@ public class FuseAppLoop {
     // Defined in FuseBuffer.h
     private static final int FUSE_MAX_WRITE = 256 * 1024;
 
+    @Override
+    public boolean handleMessage(Message msg) {
+        final Args args = (Args) msg.obj;
+        final CallbackEntry entry = args.entry;
+        final long inode = args.inode;
+        final long unique = args.unique;
+        final int size = args.size;
+        final long offset = args.offset;
+        final byte[] data = args.data;
+
+        try {
+            switch (msg.what) {
+                case FUSE_LOOKUP: {
+                    final long fileSize = entry.callback.onGetSize();
+                    synchronized (mLock) {
+                        if (mInstance != 0) {
+                            native_replyLookup(mInstance, unique, inode, fileSize);
+                        }
+                        recycleLocked(args);
+                    }
+                    break;
+                }
+                case FUSE_GETATTR: {
+                    final long fileSize = entry.callback.onGetSize();
+                    synchronized (mLock) {
+                        if (mInstance != 0) {
+                            native_replyGetAttr(mInstance, unique, inode, fileSize);
+                        }
+                        recycleLocked(args);
+                    }
+                    break;
+                }
+                case FUSE_READ:
+                    final int readSize = entry.callback.onRead(
+                            offset, size, data);
+                    synchronized (mLock) {
+                        if (mInstance != 0) {
+                            native_replyRead(mInstance, unique, readSize, data);
+                        }
+                        recycleLocked(args);
+                    }
+                    break;
+                case FUSE_WRITE:
+                    final int writeSize = entry.callback.onWrite(offset, size, data);
+                    synchronized (mLock) {
+                        if (mInstance != 0) {
+                            native_replyWrite(mInstance, unique, writeSize);
+                        }
+                        recycleLocked(args);
+                    }
+                    break;
+                case FUSE_FSYNC:
+                    entry.callback.onFsync();
+                    synchronized (mLock) {
+                        if (mInstance != 0) {
+                            native_replySimple(mInstance, unique, FUSE_OK);
+                        }
+                        recycleLocked(args);
+                    }
+                    break;
+                case FUSE_RELEASE:
+                    entry.callback.onRelease();
+                    synchronized (mLock) {
+                        if (mInstance != 0) {
+                            native_replySimple(mInstance, unique, FUSE_OK);
+                        }
+                        mBytesMap.stopUsing(entry.getThreadId());
+                        recycleLocked(args);
+                    }
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unknown FUSE command: " + msg.what);
+            }
+        } catch (Exception error) {
+            synchronized (mLock) {
+                Log.e(TAG, "", error);
+                replySimpleLocked(unique, getError(error));
+                recycleLocked(args);
+            }
+        }
+
+        return true;
+    }
+
     // Called by JNI.
     @SuppressWarnings("unused")
     private void onCommand(int command, long unique, long inode, long offset, int size,
             byte[] data) {
-        synchronized(mLock) {
+        synchronized (mLock) {
             try {
-                final CallbackEntry entry = getCallbackEntryOrThrowLocked(inode);
-                entry.postRunnable(() -> {
-                    try {
-                        switch (command) {
-                            case FUSE_LOOKUP: {
-                                final long fileSize = entry.callback.onGetSize();
-                                synchronized (mLock) {
-                                    if (mInstance != 0) {
-                                        native_replyLookup(mInstance, unique, inode, fileSize);
-                                    }
-                                }
-                                break;
-                            }
-                            case FUSE_GETATTR: {
-                                final long fileSize = entry.callback.onGetSize();
-                                synchronized (mLock) {
-                                    if (mInstance != 0) {
-                                        native_replyGetAttr(mInstance, unique, inode, fileSize);
-                                    }
-                                }
-                                break;
-                            }
-                            case FUSE_READ:
-                                final int readSize = entry.callback.onRead(offset, size, data);
-                                synchronized (mLock) {
-                                    if (mInstance != 0) {
-                                        native_replyRead(mInstance, unique, readSize, data);
-                                    }
-                                }
-                                break;
-                            case FUSE_WRITE:
-                                final int writeSize = entry.callback.onWrite(offset, size, data);
-                                synchronized (mLock) {
-                                    if (mInstance != 0) {
-                                        native_replyWrite(mInstance, unique, writeSize);
-                                    }
-                                }
-                                break;
-                            case FUSE_FSYNC:
-                                entry.callback.onFsync();
-                                synchronized (mLock) {
-                                    if (mInstance != 0) {
-                                        native_replySimple(mInstance, unique, FUSE_OK);
-                                    }
-                                }
-                                break;
-                            case FUSE_RELEASE:
-                                entry.callback.onRelease();
-                                synchronized (mLock) {
-                                    if (mInstance != 0) {
-                                        native_replySimple(mInstance, unique, FUSE_OK);
-                                    }
-                                    mBytesMap.stopUsing(entry.getThreadId());
-                                }
-                                break;
-                            default:
-                                throw new IllegalArgumentException(
-                                        "Unknown FUSE command: " + command);
-                        }
-                    } catch (Exception error) {
-                        Log.e(TAG, "", error);
-                        replySimple(unique, getError(error));
-                    }
-                });
-            } catch (ErrnoException error) {
-                Log.e(TAG, "", error);
+                final Args args;
+                if (mArgsPool.size() == 0) {
+                    args = new Args();
+                } else {
+                    args = mArgsPool.pop();
+                }
+                args.unique = unique;
+                args.inode = inode;
+                args.offset = offset;
+                args.size = size;
+                args.data = data;
+                args.entry = getCallbackEntryOrThrowLocked(inode);
+                if (!args.entry.handler.sendMessage(
+                        Message.obtain(args.entry.handler, command, 0, 0, args))) {
+                    throw new ErrnoException("onCommand", OsConstants.EBADF);
+                }
+            } catch (Exception error) {
                 replySimpleLocked(unique, getError(error));
             }
         }
@@ -253,9 +291,9 @@ public class FuseAppLoop {
         return entry;
     }
 
-    private void replySimple(long unique, int result) {
-        synchronized (mLock) {
-            replySimpleLocked(unique, result);
+    private void recycleLocked(Args args) {
+        if (mArgsPool.size() < ARGS_POOL_SIZE) {
+            mArgsPool.add(args);
         }
     }
 
@@ -296,13 +334,6 @@ public class FuseAppLoop {
         long getThreadId() {
             return handler.getLooper().getThread().getId();
         }
-
-        void postRunnable(Runnable runnable) throws ErrnoException {
-            final boolean result = handler.post(runnable);
-            if (!result) {
-                throw new ErrnoException("postRunnable", OsConstants.EBADF);
-            }
-        }
     }
 
     /**
@@ -341,5 +372,14 @@ public class FuseAppLoop {
         void clear() {
             mEntries.clear();
         }
+    }
+
+    private static class Args {
+        long unique;
+        long inode;
+        long offset;
+        int size;
+        byte[] data;
+        CallbackEntry entry;
     }
 }
