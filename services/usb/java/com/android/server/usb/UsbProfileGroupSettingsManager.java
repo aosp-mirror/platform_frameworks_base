@@ -1039,18 +1039,34 @@ class UsbProfileGroupSettingsManager {
      * Start the appropriate package when an device/accessory got attached.
      *
      * @param intent The intent to start the package
-     * @param matches The available resolutions of the intent
+     * @param rawMatches The available resolutions of the intent
      * @param defaultActivity The default activity for the device (if set)
      * @param device The device if a device was attached
      * @param accessory The accessory if a device was attached
      */
-    private void resolveActivity(@NonNull Intent intent, @NonNull ArrayList<ResolveInfo> matches,
+    private void resolveActivity(@NonNull Intent intent, @NonNull ArrayList<ResolveInfo> rawMatches,
             @Nullable ActivityInfo defaultActivity, @Nullable UsbDevice device,
             @Nullable UsbAccessory accessory) {
-        int count = matches.size();
+        final int numRawMatches = rawMatches.size();
+
+        // The raw matches contain the activities that can be started but also the intents to switch
+        // between the profiles
+        int numParentActivityMatches = 0;
+        int numNonParentActivityMatches = 0;
+        for (int i = 0; i < numRawMatches; i++) {
+            final ResolveInfo rawMatch = rawMatches.get(i);
+            if (!rawMatch.getComponentInfo().name.equals(FORWARD_INTENT_TO_MANAGED_PROFILE)) {
+                if (UserHandle.getUserHandleForUid(
+                        rawMatch.activityInfo.applicationInfo.uid).equals(mParentUser)) {
+                    numParentActivityMatches++;
+                } else {
+                    numNonParentActivityMatches++;
+                }
+            }
+        }
 
         // don't show the resolver activity if there are no choices available
-        if (count == 0) {
+        if (numParentActivityMatches + numNonParentActivityMatches == 0) {
             if (accessory != null) {
                 String uri = accessory.getUri();
                 if (uri != null && uri.length() > 0) {
@@ -1071,6 +1087,21 @@ class UsbProfileGroupSettingsManager {
 
             // do nothing
             return;
+        }
+
+        // If only one profile has activity matches, we need to remove all switch intents
+        ArrayList<ResolveInfo> matches;
+        if (numParentActivityMatches == 0 || numNonParentActivityMatches == 0) {
+            matches = new ArrayList<>(numParentActivityMatches + numNonParentActivityMatches);
+
+            for (int i = 0; i < numRawMatches; i++) {
+                ResolveInfo rawMatch = rawMatches.get(i);
+                if (!rawMatch.getComponentInfo().name.equals(FORWARD_INTENT_TO_MANAGED_PROFILE)) {
+                    matches.add(rawMatch);
+                }
+            }
+        } else {
+            matches = rawMatches;
         }
 
         if (defaultActivity != null) {
@@ -1101,7 +1132,7 @@ class UsbProfileGroupSettingsManager {
             resolverIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             UserHandle user;
 
-            if (count == 1) {
+            if (matches.size() == 1) {
                 ResolveInfo rInfo = matches.get(0);
 
                 // start UsbConfirmActivity if there is only one choice
