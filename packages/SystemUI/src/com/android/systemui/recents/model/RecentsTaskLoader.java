@@ -37,8 +37,6 @@ import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.RecentsDebugFlags;
 import com.android.systemui.recents.events.activity.PackagesChangedEvent;
 import com.android.systemui.recents.misc.SystemServicesProxy;
-import com.android.systemui.recents.misc.Utilities;
-import com.android.systemui.recents.model.Task.TaskKey;
 
 import java.io.PrintWriter;
 import java.util.Map;
@@ -245,11 +243,11 @@ public class RecentsTaskLoader {
     private final TaskResourceLoadQueue mLoadQueue;
     private final BackgroundTaskLoader mLoader;
     private final HighResThumbnailLoader mHighResThumbnailLoader;
-
+    private final TaskKeyStrongCache<ThumbnailData> mThumbnailCache = new TaskKeyStrongCache<>();
+    private final TaskKeyStrongCache<ThumbnailData> mTempCache = new TaskKeyStrongCache<>();
     private final int mMaxThumbnailCacheSize;
     private final int mMaxIconCacheSize;
     private int mNumVisibleTasksLoaded;
-    private int mNumVisibleThumbnailsLoaded;
 
     int mDefaultTaskBarBackgroundColor;
     int mDefaultTaskViewBackgroundColor;
@@ -332,10 +330,19 @@ public class RecentsTaskLoader {
         if (opts == null) {
             throw new RuntimeException("Requires load options");
         }
-        plan.executePlan(opts, this, mLoadQueue);
+        if (opts.onlyLoadForCache && opts.loadThumbnails) {
+
+            // If we are loading for the cache, we'd like to have the real cache only include the
+            // visible thumbnails. However, we also don't want to reload already cached thumbnails.
+            // Thus, we copy over the current entries into a second cache, and clear the real cache,
+            // such that the real cache only contains visible thumbnails.
+            mTempCache.copyEntries(mThumbnailCache);
+            mThumbnailCache.evictAll();
+        }
+        plan.executePlan(opts, this);
+        mTempCache.evictAll();
         if (!opts.onlyLoadForCache) {
             mNumVisibleTasksLoaded = opts.numVisibleTasks;
-            mNumVisibleThumbnailsLoaded = opts.numVisibleTaskThumbnails;
 
             // Start the loader
             mLoader.start(context);
@@ -349,7 +356,7 @@ public class RecentsTaskLoader {
         Drawable icon = mIconCache.getAndInvalidateIfModified(t.key);
         icon = icon != null ? icon : mDefaultIcon;
         mLoadQueue.addTask(t);
-        t.notifyTaskDataLoaded(null, icon);
+        t.notifyTaskDataLoaded(t.thumbnail, icon);
     }
 
     /** Releases the task resource data back into the pool. */
@@ -404,6 +411,7 @@ public class RecentsTaskLoader {
                 // The cache is small, only clear the label cache when we are critical
                 mActivityLabelCache.evictAll();
                 mContentDescriptionCache.evictAll();
+                mThumbnailCache.evictAll();
                 break;
             default:
                 break;
@@ -500,15 +508,31 @@ public class RecentsTaskLoader {
     /**
      * Returns the cached thumbnail if the task key is not expired, updating the cache if it is.
      */
-    ThumbnailData getAndUpdateThumbnail(Task.TaskKey taskKey, boolean loadIfNotCached) {
+    ThumbnailData getAndUpdateThumbnail(Task.TaskKey taskKey, boolean loadIfNotCached,
+            boolean storeInCache) {
         SystemServicesProxy ssp = Recents.getSystemServices();
+
+        ThumbnailData cached = mThumbnailCache.getAndInvalidateIfModified(taskKey);
+        if (cached != null) {
+            return cached;
+        }
+
+        cached = mTempCache.getAndInvalidateIfModified(taskKey);
+        if (cached != null) {
+            mThumbnailCache.put(taskKey, cached);
+            return cached;
+        }
 
         if (loadIfNotCached) {
             RecentsConfiguration config = Recents.getConfiguration();
             if (config.svelteLevel < RecentsConfiguration.SVELTE_DISABLE_LOADING) {
                 // Load the thumbnail from the system
-                ThumbnailData thumbnailData = ssp.getTaskThumbnail(taskKey.id, true /* reducedResolution */);
+                ThumbnailData thumbnailData = ssp.getTaskThumbnail(taskKey.id,
+                        true /* reducedResolution */);
                 if (thumbnailData.thumbnail != null) {
+                    if (storeInCache) {
+                        mThumbnailCache.put(taskKey, thumbnailData);
+                    }
                     return thumbnailData;
                 }
             }
@@ -590,5 +614,6 @@ public class RecentsTaskLoader {
         writer.print(prefix); writer.println(TAG);
         writer.print(prefix); writer.println("Icon Cache");
         mIconCache.dump(innerPrefix, writer);
+        mThumbnailCache.dump(innerPrefix, writer);
     }
 }
