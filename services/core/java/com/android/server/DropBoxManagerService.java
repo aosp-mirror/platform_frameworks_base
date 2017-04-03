@@ -351,7 +351,7 @@ public final class DropBoxManagerService extends SystemService {
     }
 
     public synchronized void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        if (!DumpUtils.checkDumpPermission(getContext(), TAG, pw)) return;
+        if (!DumpUtils.checkDumpAndUsageStatsPermission(getContext(), TAG, pw)) return;
 
         try {
             init();

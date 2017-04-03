@@ -616,7 +616,7 @@ public final class ProcessStatsService extends IProcessStats.Stub {
 
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        if (!com.android.internal.util.DumpUtils.checkDumpPermission(mAm.mContext,
+        if (!com.android.internal.util.DumpUtils.checkDumpAndUsageStatsPermission(mAm.mContext,
                 TAG, pw)) return;
 
         long ident = Binder.clearCallingIdentity();

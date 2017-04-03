@@ -63,7 +63,7 @@ public class DiskStatsService extends Binder {
 
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
+        if (!DumpUtils.checkDumpAndUsageStatsPermission(mContext, TAG, pw)) return;
 
         // Run a quick-and-dirty performance test: write 512 bytes
         byte[] junk = new byte[512];
