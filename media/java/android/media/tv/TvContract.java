@@ -1299,18 +1299,17 @@ public final class TvContract {
         String COLUMN_DURATION_MILLIS = "duration_millis";
 
         /**
-         * The intent URI which is launched when the preview video is selected.
+         * The intent URI which is launched when the preview program is selected.
          *
          * <p>The URI is created using {@link Intent#toUri} with {@link Intent#URI_INTENT_SCHEME}
          * and converted back to the original intent with {@link Intent#parseUri}. The intent is
-         * launched when the user selects the preview video item.
+         * launched when the user selects the preview program item.
          *
          * <p>Can be empty.
          *
          * <p>Type: TEXT
          */
-        String COLUMN_APP_LINK_INTENT_URI =
-                "app_link_intent_uri";
+        String COLUMN_INTENT_URI = "intent_uri";
 
         /**
          * The flag indicating whether this program is transient or not.
