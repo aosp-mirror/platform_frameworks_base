@@ -44,6 +44,10 @@ public class AccessPointPreference extends Preference {
             R.attr.state_encrypted
     };
 
+    private static final int[] STATE_METERED = {
+            R.attr.state_metered
+    };
+
     private static final int[] wifi_friction_attributes = { R.attr.wifi_friction };
 
     private final StateListDrawable mFrictionSld;
@@ -179,6 +183,8 @@ public class AccessPointPreference extends Preference {
         }
         if (mAccessPoint.getSecurity() != AccessPoint.SECURITY_NONE) {
             mFrictionSld.setState(STATE_SECURED);
+        } else if (mAccessPoint.getConfig() != null && mAccessPoint.getConfig().meteredHint) {
+            mFrictionSld.setState(STATE_METERED);
         }
         Drawable drawable = mFrictionSld.getCurrent();
         frictionImageView.setImageDrawable(drawable);
