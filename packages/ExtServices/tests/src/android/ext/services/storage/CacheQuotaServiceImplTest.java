@@ -61,7 +61,7 @@ public class CacheQuotaServiceImplTest extends ServiceTestCase<CacheQuotaService
         setContext(mContext);
         when(mContext.getSystemService(Context.STORAGE_SERVICE)).thenReturn(mStorageManager);
 
-        when(mFile.getFreeSpace()).thenReturn(10000L);
+        when(mFile.getUsableSpace()).thenReturn(10000L);
         when(mVolume.getPath()).thenReturn(mFile);
         when(mStorageManager.findVolumeByUuid(sTestVolUuid)).thenReturn(mVolume);
         when(mStorageManager.findVolumeByUuid(sSecondTestVolUuid)).thenReturn(mVolume);

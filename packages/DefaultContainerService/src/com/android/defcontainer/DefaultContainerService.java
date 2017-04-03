@@ -220,14 +220,8 @@ public class DefaultContainerService extends IntentService {
         public long[] getFileSystemStats(String path) {
             Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
 
-            try {
-                final StructStatVfs stat = Os.statvfs(path);
-                final long totalSize = stat.f_blocks * stat.f_bsize;
-                final long availSize = stat.f_bavail * stat.f_bsize;
-                return new long[] { totalSize, availSize };
-            } catch (ErrnoException e) {
-                throw new IllegalStateException(e);
-            }
+            final File file = new File(path);
+            return new long[] { file.getTotalSpace(), file.getUsableSpace() };
         }
 
         @Override

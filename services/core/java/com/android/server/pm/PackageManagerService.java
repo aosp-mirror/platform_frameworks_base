@@ -22238,7 +22238,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         if (DEBUG_INSTALL) Slog.d(TAG, "Measured code size " + stats.codeSize + ", data size "
                 + stats.dataSize);
 
-        final long startFreeBytes = measurePath.getFreeSpace();
+        final long startFreeBytes = measurePath.getUsableSpace();
         final long sizeBytes;
         if (moveCompleteApp) {
             sizeBytes = stats.codeSize + stats.dataSize;
@@ -22302,7 +22302,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                         } catch (InterruptedException ignored) {
                         }
 
-                        final long deltaFreeBytes = startFreeBytes - measurePath.getFreeSpace();
+                        final long deltaFreeBytes = startFreeBytes - measurePath.getUsableSpace();
                         final int progress = 10 + (int) MathUtils.constrain(
                                 ((deltaFreeBytes * 80) / sizeBytes), 0, 80);
                         mMoveCallbacks.notifyStatusChanged(moveId, progress);

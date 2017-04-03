@@ -386,7 +386,7 @@ public class ExternalStorageProvider extends FileSystemProvider {
                 row.add(Root.COLUMN_TITLE, root.title);
                 row.add(Root.COLUMN_DOCUMENT_ID, root.docId);
                 row.add(Root.COLUMN_AVAILABLE_BYTES,
-                        root.reportAvailableBytes ? root.path.getFreeSpace() : -1);
+                        root.reportAvailableBytes ? root.path.getUsableSpace() : -1);
             }
         }
         return result;
