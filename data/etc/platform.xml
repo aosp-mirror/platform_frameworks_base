@@ -181,6 +181,9 @@
     <allow-in-power-save package="com.android.cellbroadcastreceiver" />
     <allow-in-power-save package="com.android.shell" />
 
+    <!-- STOPSHIP(b/36856786): Revert this once it is fixed properly -->
+    <allow-in-power-save package="com.google.android.apps.enterprise.dmagent" />
+
     <!-- These are the packages that are white-listed to be able to run as system user -->
     <system-user-whitelisted-app package="com.android.settings" />
 
