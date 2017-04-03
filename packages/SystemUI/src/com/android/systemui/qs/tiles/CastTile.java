@@ -20,22 +20,29 @@ import android.content.Context;
 import android.content.Intent;
 import android.provider.Settings;
 import android.service.quicksettings.Tile;
+import android.support.v7.app.MediaRouteChooserDialog;
+import android.support.v7.app.MediaRouteControllerDialog;
+import android.support.v7.media.MediaControlIntent;
+import android.support.v7.media.MediaRouteSelector;
 import android.util.Log;
+import android.view.ContextThemeWrapper;
 import android.view.View;
 import android.view.View.OnAttachStateChangeListener;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.Button;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.R.style;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.DetailAdapter;
+import com.android.systemui.plugins.qs.QSTile.BooleanState;
 import com.android.systemui.qs.QSDetailItems;
 import com.android.systemui.qs.QSDetailItems.Item;
 import com.android.systemui.qs.QSHost;
-import com.android.systemui.plugins.qs.QSTile.BooleanState;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.CastController.CastDevice;
@@ -109,11 +116,33 @@ public class CastTile extends QSTileImpl<BooleanState> {
         if (mKeyguard.isSecure() && !mKeyguard.canSkipBouncer()) {
             mActivityStarter.postQSRunnableDismissingKeyguard(() -> {
                 showDetail(true);
-                mHost.openPanels();
             });
             return;
         }
         showDetail(true);
+    }
+
+    @Override
+    public void showDetail(boolean show) {
+        mUiHandler.post(() -> {
+            Context context = new ContextThemeWrapper(mContext,
+                    R.style.Theme_AppCompat_Light_Dialog_Alert);
+            if (mState.value) {
+                MediaRouteControllerDialog dialog = new MediaRouteControllerDialog(context);
+                dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL);
+                dialog.show();
+            } else {
+                // Instead of showing detail, show standard media routing UI.
+                MediaRouteChooserDialog dialog = new MediaRouteChooserDialog(context);
+                MediaRouteSelector selector = new MediaRouteSelector.Builder()
+                        .addControlCategory(MediaControlIntent.CATEGORY_LIVE_VIDEO)
+                        .build();
+                dialog.setRouteSelector(selector);
+                dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL);
+                dialog.show();
+            }
+            mHost.collapsePanels();
+        });
     }
 
     @Override
