@@ -19,10 +19,8 @@ oneway interface IMediaBrowserService {
 
     void addSubscriptionDeprecated(String uri, IMediaBrowserServiceCallbacks callbacks);
     void removeSubscriptionDeprecated(String uri, IMediaBrowserServiceCallbacks callbacks);
-    void getMediaItem(String uri, in ResultReceiver cb, IMediaBrowserServiceCallbacks callbacks);
-    void search(String query, in Bundle extras, in ResultReceiver cb,
-            IMediaBrowserServiceCallbacks callbacks);
 
+    void getMediaItem(String uri, in ResultReceiver cb, IMediaBrowserServiceCallbacks callbacks);
     void addSubscription(String uri, in IBinder token, in Bundle options,
             IMediaBrowserServiceCallbacks callbacks);
     void removeSubscription(String uri, in IBinder token, IMediaBrowserServiceCallbacks callbacks);
