@@ -2044,6 +2044,7 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
 
         config.unset();
         final Configuration parentConfig = getParent().getConfiguration();
+
         final float density = parentConfig.densityDpi * DisplayMetrics.DENSITY_DEFAULT_SCALE;
 
         if (mStack != null) {
@@ -2052,11 +2053,7 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
                     mTmpNonDecorBounds, mTmpStableBounds, overrideWidth, overrideHeight, density,
                     config, parentConfig);
         } else {
-            // No stack, give some default values
-            config.smallestScreenWidthDp =
-                    mService.mStackSupervisor.mDefaultMinSizeOfResizeableTask;
-            config.screenWidthDp = config.screenHeightDp = config.smallestScreenWidthDp;
-            Slog.wtf(TAG, "Expected stack when calculating override config");
+            throw new IllegalArgumentException("Expected stack when calculating override config");
         }
 
         config.orientation = (config.screenWidthDp <= config.screenHeightDp)
