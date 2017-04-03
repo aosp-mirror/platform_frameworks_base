@@ -18,6 +18,7 @@ package android.net;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
 
 import java.util.Objects;
 
@@ -259,10 +260,28 @@ public class NetworkRequest implements Parcelable {
          *                         networks.
          */
         public Builder setNetworkSpecifier(String networkSpecifier) {
-            if (NetworkCapabilities.MATCH_ALL_REQUESTS_NETWORK_SPECIFIER.equals(networkSpecifier)) {
-                throw new IllegalArgumentException("Invalid network specifier - must not be '"
-                        + NetworkCapabilities.MATCH_ALL_REQUESTS_NETWORK_SPECIFIER + "'");
-            }
+            /*
+             * A StringNetworkSpecifier does not accept null or empty ("") strings. When network
+             * specifiers were strings a null string and an empty string were considered equivalent.
+             * Hence no meaning is attached to a null or empty ("") string.
+             */
+            return setNetworkSpecifier(TextUtils.isEmpty(networkSpecifier) ? null
+                    : new StringNetworkSpecifier(networkSpecifier));
+        }
+
+        /**
+         * Sets the optional bearer specific network specifier.
+         * This has no meaning if a single transport is also not specified, so calling
+         * this without a single transport set will generate an exception, as will
+         * subsequently adding or removing transports after this is set.
+         * </p>
+         *
+         * @param networkSpecifier A concrete, parcelable framework class that extends
+         *                         NetworkSpecifier.
+         * @hide
+         */
+        public Builder setNetworkSpecifier(NetworkSpecifier networkSpecifier) {
+            MatchAllNetworkSpecifier.checkNotMatchAllNetworkSpecifier(networkSpecifier);
             mNetworkCapabilities.setNetworkSpecifier(networkSpecifier);
             return this;
         }
