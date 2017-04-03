@@ -1182,7 +1182,6 @@ public class PackageManagerService extends IPackageManager.Stub {
     // Stores a list of users whose package restrictions file needs to be updated
     private ArraySet<Integer> mDirtyUsers = new ArraySet<Integer>();
 
-    static final long DEFAULT_CONTAINER_WHITELIST_DURATION = 10 * 60 * 1000;
     final private DefaultContainerConnection mDefContainerConn =
             new DefaultContainerConnection();
     class DefaultContainerConnection implements ServiceConnection {
@@ -12916,9 +12915,6 @@ public class PackageManagerService extends IPackageManager.Stub {
         IActivityManager am = ActivityManager.getService();
         if (am != null) {
             try {
-                getDeviceIdleController().addPowerSaveTempWhitelistApp(Process.SYSTEM_UID,
-                        DEFAULT_CONTAINER_PACKAGE, DEFAULT_CONTAINER_WHITELIST_DURATION,
-                        UserHandle.USER_SYSTEM, false, "cleaning packages");
                 am.startService(null, intent, null, -1, null, false, mContext.getOpPackageName(),
                         UserHandle.USER_SYSTEM);
             } catch (RemoteException e) {
