@@ -2158,7 +2158,6 @@ public abstract class PackageManager {
      * {@link #hasSystemFeature}: The device supports only leanback UI. Only
      * applications designed for this experience should be run, though this is
      * not enforced by the system.
-     * @hide
      */
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_LEANBACK_ONLY = "android.software.leanback_only";
