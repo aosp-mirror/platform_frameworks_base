@@ -266,7 +266,7 @@ public class SignalClusterView extends LinearLayout implements NetworkController
 
     @Override
     public void setWifiIndicators(boolean enabled, IconState statusIcon, IconState qsIcon,
-            boolean activityIn, boolean activityOut, String description) {
+            boolean activityIn, boolean activityOut, String description, boolean isTransient) {
         mWifiVisible = statusIcon.visible && !mBlockWifi;
         mWifiStrengthId = statusIcon.icon;
         mWifiBadgeId = statusIcon.iconOverlay;
