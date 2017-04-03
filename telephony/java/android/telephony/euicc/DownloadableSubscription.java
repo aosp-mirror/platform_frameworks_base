@@ -1,0 +1,153 @@
+/*
+ * Copyright (C) 2017 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package android.telephony.euicc;
+
+import android.annotation.Nullable;
+import android.os.Parcel;
+import android.os.Parcelable;
+
+import com.android.internal.util.Preconditions;
+
+/**
+ * Information about a subscription which is available for download.
+ *
+ * TODO(b/35851809): Make this public.
+ * @hide
+ */
+public final class DownloadableSubscription implements Parcelable {
+
+    public static final Creator<DownloadableSubscription> CREATOR =
+            new Creator<DownloadableSubscription>() {
+                @Override
+                public DownloadableSubscription createFromParcel(Parcel in) {
+                    return new DownloadableSubscription(in);
+                }
+
+                @Override
+                public DownloadableSubscription[] newArray(int size) {
+                    return new DownloadableSubscription[size];
+                }
+            };
+
+    /**
+     * Activation code. May be null for subscriptions which are not based on activation codes, e.g.
+     * to download a default subscription assigned to this device.
+     * @hide
+     *
+     * TODO(b/35851809): Make this a SystemApi.
+     */
+    @Nullable
+    public final String encodedActivationCode;
+
+    // see getCarrierName and setCarrierName
+    @Nullable
+    private String carrierName;
+    // see isConsentGranted and setConsentGranted
+    private boolean consentGranted;
+
+    /** @hide */
+    private DownloadableSubscription(String encodedActivationCode) {
+        this.encodedActivationCode = encodedActivationCode;
+    }
+
+    private DownloadableSubscription(Parcel in) {
+        encodedActivationCode = in.readString();
+        carrierName = in.readString();
+        consentGranted = in.readInt() == 1;
+    }
+
+    /**
+     * Create a DownloadableSubscription for the given activation code.
+     *
+     * @param encodedActivationCode the activation code to use. Must not be null.
+     * @return the {@link DownloadableSubscription} which may be passed to
+     *     {@link EuiccManager#downloadSubscription}.
+     */
+    public static DownloadableSubscription forActivationCode(String encodedActivationCode) {
+        Preconditions.checkNotNull(encodedActivationCode, "Activation code may not be null");
+        return new DownloadableSubscription(encodedActivationCode);
+    }
+
+    /**
+     * Set the user-visible carrier name.
+     * @hide
+     *
+     * TODO(b/35851809): Make this a SystemApi.
+     */
+    public void setCarrierName(String carrierName) {
+        this.carrierName = carrierName;
+    }
+
+    /**
+     * Returns the user-visible carrier name.
+     *
+     * <p>Only present for downloadable subscriptions that were queried from a server (as opposed to
+     * those created with {@link #forActivationCode}). May be populated with
+     * {@link EuiccManager#getDownloadableSubscriptionMetadata}.
+     * @hide
+     *
+     * TODO(b/35851809): Make this a SystemApi.
+     */
+    @Nullable
+    public String getCarrierName() {
+        return this.carrierName;
+    }
+
+
+    /**
+     * Mark this download as being consented to by the user.
+     * @hide
+     */
+    public void setConsentGranted() {
+        this.consentGranted = true;
+    }
+
+    /**
+     * Returns whether the user has granted consent to download this subscription.
+     *
+     * <p>The {@link android.service.euicc.EuiccService} implementation should permit a subscription
+     * download if this is set, even if the calling app doesn't have permission to download it.
+     * @hide
+     *
+     * TODO(b/35851809): Make this a SystemApi.
+     */
+    public boolean isConsentGranted() {
+        return this.consentGranted;
+    }
+
+    /**
+     * Unset any untrusted fields.
+     *
+     * <p>Should be called by the platform whenever an instance is received from an untrusted
+     * source to reset any secure fields that may only be set by the platform.
+     * @hide
+     */
+    public final void clearUntrustedFields() {
+        this.consentGranted = false;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(encodedActivationCode);
+        dest.writeString(carrierName);
+        dest.writeInt(consentGranted ? 1 : 0);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+}
