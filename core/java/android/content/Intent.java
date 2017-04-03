@@ -16,8 +16,6 @@
 
 package android.content;
 
-import static android.content.ContentProvider.maybeAddUserId;
-
 import android.annotation.AnyRes;
 import android.annotation.BroadcastBehavior;
 import android.annotation.IntDef;
@@ -43,6 +41,7 @@ import android.os.ResultReceiver;
 import android.os.ShellCommand;
 import android.os.StrictMode;
 import android.os.UserHandle;
+import android.os.storage.StorageManager;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsProvider;
 import android.provider.MediaStore;
@@ -50,9 +49,7 @@ import android.provider.OpenableColumns;
 import android.util.ArraySet;
 import android.util.AttributeSet;
 import android.util.Log;
-
 import com.android.internal.util.XmlUtils;
-
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
@@ -69,6 +66,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
+
+import static android.content.ContentProvider.maybeAddUserId;
 
 /**
  * An intent is an abstract description of an operation to be performed.  It
@@ -3913,23 +3912,9 @@ public class Intent implements Parcelable, Cloneable {
     public static final String EXTRA_HTML_TEXT = "android.intent.extra.HTML_TEXT";
 
     /**
-     * A content: URI holding a stream of data associated with the Intent, used
-     * with {@link #ACTION_SEND} to supply the data being sent.
-     * <p>
-     * Starting in {@link android.os.Build.VERSION_CODES#JELLY_BEAN} this value
-     * will be automatically promoted to {@link Intent#setClipData(ClipData)}
-     * when that value is not already defined.
-     * <p>
-     * Starting in {@link android.os.Build.VERSION_CODES#O} this value will be
-     * automatically demoted from {@link Intent#getClipData()} when this value
-     * is not already defined.
-     *
-     * @deprecated apps should use {@link Intent#setClipData(ClipData)} and
-     *             {@link Intent#getClipData()} instead of this extra, since
-     *             only those APIs can extend temporary permission grants to the
-     *             underlying resource.
+     * A content: URI holding a stream of data associated with the Intent,
+     * used with {@link #ACTION_SEND} to supply the data being sent.
      */
-    @Deprecated
     public static final String EXTRA_STREAM = "android.intent.extra.STREAM";
 
     /**
@@ -9472,21 +9457,6 @@ public class Intent implements Parcelable, Cloneable {
             if (UserHandle.getAppId(Process.myUid()) != Process.SYSTEM_UID) {
                 fixUris(mContentUserHint);
                 mContentUserHint = UserHandle.USER_CURRENT;
-            }
-        }
-
-        // If someone is sending us ClipData, but not EXTRA_STREAM, offer to
-        // downgrade that content for older apps to find
-        if (mClipData != null && mClipData.getItemCount() > 0 && !hasExtra(EXTRA_STREAM)) {
-            final String action = getAction();
-            if (ACTION_SEND.equals(action)) {
-                putExtra(EXTRA_STREAM, mClipData.getItemAt(0).getUri());
-            } else if (ACTION_SEND_MULTIPLE.equals(action)) {
-                final ArrayList<Uri> list = new ArrayList<>();
-                for (int i = 0; i < mClipData.getItemCount(); i++) {
-                    list.add(mClipData.getItemAt(i).getUri());
-                }
-                putExtra(EXTRA_STREAM, list);
             }
         }
     }
