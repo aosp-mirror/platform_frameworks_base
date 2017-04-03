@@ -20,10 +20,8 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <!-- Suffix added to a number to signify size in bytes. -->
     <string name="byteShort">B</string>
-    <!-- Suffix added to a number to signify size in kilobytes (1000 bytes).
-        If you retain the Latin script for the localization, please use the lowercase
-        'k', as it signifies 1000 bytes as opposed to 1024 bytes. -->
-    <string name="kilobyteShort">kB</string>
+    <!-- Suffix added to a number to signify size in kilobytes (1000 bytes). -->
+    <string name="kilobyteShort">KB</string>
     <!-- Suffix added to a number to signify size in megabytes. -->
     <string name="megabyteShort">MB</string>
     <!-- Suffix added to a number to signify size in gigabytes. -->
