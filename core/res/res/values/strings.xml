@@ -1092,9 +1092,9 @@
         order to improve the calling experience.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_readPhoneNumber">read phone number</string>
+    <string name="permlab_readPhoneNumbers">read phone numbers</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_readPhoneNumber">Allows the app to access the phone number of the device.</string>
+    <string name="permdesc_readPhoneNumbers">Allows the app to access the phone numbers of the device.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_wakeLock" product="tablet">prevent tablet from sleeping</string>

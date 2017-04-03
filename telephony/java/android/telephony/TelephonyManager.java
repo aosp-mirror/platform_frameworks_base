@@ -2395,7 +2395,7 @@ public class TelephonyManager {
      *   OR
      *   {@link android.Manifest.permission#READ_SMS}
      *   OR
-     *   {@link android.Manifest.permission#READ_PHONE_NUMBER}
+     *   {@link android.Manifest.permission#READ_PHONE_NUMBERS}
      * <p>
      * The default SMS app can also use this.
      */
@@ -2412,7 +2412,7 @@ public class TelephonyManager {
      *   OR
      *   {@link android.Manifest.permission#READ_SMS}
      *   OR
-     *   {@link android.Manifest.permission#READ_PHONE_NUMBER}
+     *   {@link android.Manifest.permission#READ_PHONE_NUMBERS}
      * <p>
      * The default SMS app can also use this.
      *
