@@ -3188,21 +3188,21 @@ message MetricsEvent {
     // ACTION: Logged when a provisioning session has completed
     PROVISIONING_SESSION_COMPLETED = 735;
 
-    // ACTION: An app requested the permission READ_PHONE_NUMBER
+    // ACTION: An app requested the permission READ_PHONE_NUMBERS
     // PACKAGE: The package name of the app requesting the permission
-    ACTION_PERMISSION_REQUEST_READ_PHONE_NUMBER = 736;
+    ACTION_PERMISSION_REQUEST_READ_PHONE_NUMBERS = 736;
 
-    // ACTION: An app was granted the permission READ_PHONE_NUMBER
+    // ACTION: An app was granted the permission READ_PHONE_NUMBERS
     // PACKAGE: The package name of the app that was granted the permission
-    ACTION_PERMISSION_GRANT_READ_PHONE_NUMBER = 737;
+    ACTION_PERMISSION_GRANT_READ_PHONE_NUMBERS = 737;
 
-    // ACTION: An app requested the permission READ_PHONE_NUMBER and the request was denied
+    // ACTION: An app requested the permission READ_PHONE_NUMBERS and the request was denied
     // PACKAGE: The package name of the app requesting the permission
-    ACTION_PERMISSION_DENIED_READ_PHONE_NUMBER = 738;
+    ACTION_PERMISSION_DENIED_READ_PHONE_NUMBERS = 738;
 
-    // ACTION: The permission READ_PHONE_NUMBER was revoked for an app
+    // ACTION: The permission READ_PHONE_NUMBERS was revoked for an app
     // PACKAGE: The package name of the app the permission was revoked for
-    ACTION_PERMISSION_REVOKE_READ_PHONE_NUMBER = 739;
+    ACTION_PERMISSION_REVOKE_READ_PHONE_NUMBERS = 739;
 
     // ACTION: QS Brightness Slider (with auto brightness disabled, and VR enabled)
     //   SUBTYPE: slider value

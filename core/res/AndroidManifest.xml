@@ -798,13 +798,13 @@
         android:description="@string/permdesc_readPhoneState"
         android:protectionLevel="dangerous" />
 
-    <!-- Allows read access to the device's phone number. This is a subset of the capabilities
+    <!-- Allows read access to the device's phone number(s). This is a subset of the capabilities
          granted by {@link #READ_PHONE_STATE} but is exposed to ephemeral applications.
          <p>Protection level: dangerous-->
-    <permission android:name="android.permission.READ_PHONE_NUMBER"
+    <permission android:name="android.permission.READ_PHONE_NUMBERS"
         android:permissionGroup="android.permission-group.PHONE"
         android:label="@string/permlab_readPhoneNumber"
-        android:description="@string/permdesc_readPhoneNumber"
+        android:description="@string/permdesc_readPhoneNumbers"
         android:protectionLevel="dangerous|ephemeral" />
 
     <!-- Allows an application to initiate a phone call without going through
