@@ -115,10 +115,10 @@ public final class MapClientProfile implements LocalBluetoothProfile {
     public boolean connect(BluetoothDevice device) {
         if (mService == null) return false;
         List<BluetoothDevice> connectedDevices = getConnectedDevices();
-        if (connectedDevices != null) {
-            for (BluetoothDevice connectedDevice : connectedDevices) {
-                mService.disconnect(connectedDevice);
-            }
+        if (connectedDevices != null && connectedDevices.contains(device)) {
+            // Connect to same device, Ignore it
+            Log.d(TAG,"Ignoring Connect");
+            return true;
         }
         return mService.connect(device);
     }
