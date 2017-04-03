@@ -282,7 +282,7 @@ public class RankingHelper implements RankingConfig {
         for (int i = 0; i < size; i++) {
             final NotificationChannel notificationChannel = r.channels.valueAt(i);
             if (notificationChannel != null &&
-                    notificationChannel.getId() != NotificationChannel.DEFAULT_CHANNEL_ID) {
+                    !notificationChannel.getId().equals(NotificationChannel.DEFAULT_CHANNEL_ID)) {
                 hasCreatedAChannel = true;
                 break;
             }
