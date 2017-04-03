@@ -16,7 +16,6 @@
 
 package com.android.server.wm;
 
-import static com.android.server.wm.AppTransition.DEFAULT_APP_TRANSITION_DURATION;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
@@ -32,7 +31,6 @@ import android.util.ArrayMap;
 import android.util.Slog;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
-import android.view.animation.LinearInterpolator;
 import android.view.WindowManagerInternal;
 
 /**
@@ -111,10 +109,15 @@ public class BoundsAnimationController {
         private final boolean mMoveToFullScreen;
         // True if this this animation was cancelled and will be replaced the another animation from
         // the same {@link #AnimateBoundsUser} target.
-        private boolean mWillReplace;
-        // True to true if this animation replaced a previous animation of the same
+        private boolean mSkipAnimationEnd;
+        // True if this animation replaced a previous animation of the same
         // {@link #AnimateBoundsUser} target.
-        private final boolean mReplacement;
+        private final boolean mSkipAnimationStart;
+        // True if this animation is not replacing a previous animation, or if the previous
+        // animation is animating to a different fullscreen state than the current animation.
+        // We use this to ensure that we always provide a consistent set/order of callbacks when we
+        // transition to/from PiP.
+        private final boolean mAnimatingToNewFullscreenState;
 
         // Depending on whether we are animating from
         // a smaller to a larger size
@@ -122,13 +125,14 @@ public class BoundsAnimationController {
         private final int mFrozenTaskHeight;
 
         BoundsAnimator(AnimateBoundsUser target, Rect from, Rect to, boolean moveToFullScreen,
-                boolean replacement) {
+                boolean replacingExistingAnimation, boolean animatingToNewFullscreenState) {
             super();
             mTarget = target;
             mFrom.set(from);
             mTo.set(to);
             mMoveToFullScreen = moveToFullScreen;
-            mReplacement = replacement;
+            mSkipAnimationStart = replacingExistingAnimation;
+            mAnimatingToNewFullscreenState = animatingToNewFullscreenState;
             addUpdateListener(this);
             addListener(this);
 
@@ -145,11 +149,32 @@ public class BoundsAnimationController {
             }
         }
 
-        boolean animatingToLargerSize() {
-            if (mFrom.width() * mFrom.height() > mTo.width() * mTo.height()) {
-                return false;
+        @Override
+        public void onAnimationStart(Animator animation) {
+            if (DEBUG) Slog.d(TAG, "onAnimationStart: mTarget=" + mTarget
+                    + " mSkipAnimationStart=" + mSkipAnimationStart);
+            mFinishAnimationAfterTransition = false;
+            mTmpRect.set(mFrom.left, mFrom.top, mFrom.left + mFrozenTaskWidth,
+                    mFrom.top + mFrozenTaskHeight);
+
+            // Ensure that we have prepared the target for animation before
+            // we trigger any size changes, so it can swap surfaces
+            // in to appropriate modes, or do as it wishes otherwise.
+            if (!mSkipAnimationStart) {
+                mTarget.onAnimationStart(mMoveToFullScreen);
             }
-            return true;
+
+            // If we are animating to a new fullscreen state (either to/from fullscreen), then
+            // notify the target of the change with the new frozen task bounds
+            if (mAnimatingToNewFullscreenState) {
+                mTarget.updatePictureInPictureMode(mMoveToFullScreen ? null : mTo);
+            }
+
+            // Immediately update the task bounds if they have to become larger, but preserve
+            // the starting position so we don't jump at the beginning of the animation.
+            if (animatingToLargerSize()) {
+                mTarget.setPinnedStackSize(mFrom, mTmpRect);
+            }
         }
 
         @Override
@@ -174,32 +199,11 @@ public class BoundsAnimationController {
             }
         }
 
-
-        @Override
-        public void onAnimationStart(Animator animation) {
-            if (DEBUG) Slog.d(TAG, "onAnimationStart: mTarget=" + mTarget
-                    + " mReplacement=" + mReplacement);
-            mFinishAnimationAfterTransition = false;
-            // Ensure that we have prepared the target for animation before
-            // we trigger any size changes, so it can swap surfaces
-            // in to appropriate modes, or do as it wishes otherwise.
-            if (!mReplacement) {
-                mTarget.onAnimationStart(mMoveToFullScreen);
-            }
-
-            // Immediately update the task bounds if they have to become larger, but preserve
-            // the starting position so we don't jump at the beginning of the animation.
-            if (animatingToLargerSize()) {
-                mTmpRect.set(mFrom.left, mFrom.top,
-                        mFrom.left + mFrozenTaskWidth, mFrom.top + mFrozenTaskHeight);
-                mTarget.setPinnedStackSize(mFrom, mTmpRect);
-            }
-        }
-
         @Override
         public void onAnimationEnd(Animator animation) {
             if (DEBUG) Slog.d(TAG, "onAnimationEnd: mTarget=" + mTarget
-                    + " mMoveToFullScreen=" + mMoveToFullScreen + " mWillReplace=" + mWillReplace);
+                    + " mMoveToFullScreen=" + mMoveToFullScreen
+                    + " mSkipAnimationEnd=" + mSkipAnimationEnd);
 
             // There could be another animation running. For example in the
             // move to fullscreen case, recents will also be closing while the
@@ -214,7 +218,7 @@ public class BoundsAnimationController {
             finishAnimation();
 
             mTarget.setPinnedStackSize(mTo, null);
-            if (mMoveToFullScreen && !mWillReplace) {
+            if (mMoveToFullScreen && !mSkipAnimationEnd) {
                 mTarget.moveToFullscreen();
             }
         }
@@ -226,20 +230,27 @@ public class BoundsAnimationController {
 
         @Override
         public void cancel() {
-            mWillReplace = true;
+            mSkipAnimationEnd = true;
             if (DEBUG) Slog.d(TAG, "cancel: willReplace mTarget=" + mTarget);
             super.cancel();
         }
 
         /** Returns true if the animation target is the same as the input bounds. */
-        public boolean isAnimatingTo(Rect bounds) {
+        boolean isAnimatingTo(Rect bounds) {
             return mTo.equals(bounds);
+        }
+
+        private boolean animatingToLargerSize() {
+            if (mFrom.width() * mFrom.height() > mTo.width() * mTo.height()) {
+                return false;
+            }
+            return true;
         }
 
         private void finishAnimation() {
             if (DEBUG) Slog.d(TAG, "finishAnimation: mTarget=" + mTarget
                     + " callers" + Debug.getCallers(2));
-            if (!mWillReplace) {
+            if (!mSkipAnimationEnd) {
                 mTarget.onAnimationEnd();
             }
             removeListener(this);
@@ -249,7 +260,7 @@ public class BoundsAnimationController {
 
         @Override
         public void onAnimationRepeat(Animator animation) {
-
+            // Do nothing
         }
     }
 
@@ -266,12 +277,25 @@ public class BoundsAnimationController {
         boolean setSize(Rect bounds);
         /**
          * Behaves as setSize, but freezes the bounds of any tasks in the target at taskBounds,
-         * to allow for more flexibility during resizing. Only
-         * works for the pinned stack at the moment.
+         * to allow for more flexibility during resizing. Only works for the pinned stack at the
+         * moment.
          */
         boolean setPinnedStackSize(Rect bounds, Rect taskBounds);
 
+        /**
+         * Callback for the target to inform it that the animation has started, so it can do some
+         * necessary preparation.
+         */
         void onAnimationStart(boolean toFullscreen);
+
+        /**
+         * Callback for the target to inform it that the animation is going to a new fullscreen
+         * state and should update the picture-in-picture mode accordingly.
+         *
+         * @param targetStackBounds the target stack bounds we are animating to, can be null if
+         *                          we are animating to fullscreen
+         */
+        void updatePictureInPictureMode(Rect targetStackBounds);
 
         /**
          * Callback for the target to inform it that the animation has ended, so it can do some
@@ -286,9 +310,12 @@ public class BoundsAnimationController {
             boolean moveToFullscreen) {
         final BoundsAnimator existing = mRunningAnimations.get(target);
         final boolean replacing = existing != null;
+        final boolean animatingToNewFullscreenState = (existing == null) ||
+                (existing.mMoveToFullScreen != moveToFullscreen);
 
         if (DEBUG) Slog.d(TAG, "animateBounds: target=" + target + " from=" + from + " to=" + to
-                + " moveToFullscreen=" + moveToFullscreen + " replacing=" + replacing);
+                + " moveToFullscreen=" + moveToFullscreen + " replacing=" + replacing
+                + " animatingToNewFullscreenState=" + animatingToNewFullscreenState);
 
         if (replacing) {
             if (existing.isAnimatingTo(to)) {
@@ -300,8 +327,8 @@ public class BoundsAnimationController {
             }
             existing.cancel();
         }
-        final BoundsAnimator animator =
-                new BoundsAnimator(target, from, to, moveToFullscreen, replacing);
+        final BoundsAnimator animator = new BoundsAnimator(target, from, to, moveToFullscreen,
+                replacing, animatingToNewFullscreenState);
         mRunningAnimations.put(target, animator);
         animator.setFloatValues(0f, 1f);
         animator.setDuration((animationDuration != -1 ? animationDuration

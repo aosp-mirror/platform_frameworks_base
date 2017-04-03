@@ -12294,13 +12294,17 @@ public class ActivityManagerService extends IActivityManager.Stub
         mRecentTasks.notifyTaskPersisterLocked(task, flush);
     }
 
-    /** Notifies all listeners when the pinned stack animation starts. */
+    /**
+     * Notifies all listeners when the pinned stack animation starts.
+     */
     @Override
     public void notifyPinnedStackAnimationStarted() {
         mTaskChangeNotificationController.notifyPinnedStackAnimationStarted();
     }
 
-    /** Notifies all listeners when the pinned stack animation ends. */
+    /**
+     * Notifies all listeners when the pinned stack animation ends.
+     */
     @Override
     public void notifyPinnedStackAnimationEnded() {
         mTaskChangeNotificationController.notifyPinnedStackAnimationEnded();
@@ -19787,6 +19791,10 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
+    /**
+     * NOTE: For the pinned stack, this method is only called after the bounds animation has
+     *       animated the stack to the fullscreen.
+     */
     @Override
     public void moveTasksToFullscreenStack(int fromStackId, boolean onTop) {
         enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "moveTasksToFullscreenStack()");
