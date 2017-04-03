@@ -1844,6 +1844,10 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
         }
         synchronized (this) {
             if (mDestroyed || mHost == null) {
+                if (allowStateLoss) {
+                    // This FragmentManager isn't attached, so drop the entire transaction.
+                    return;
+                }
                 throw new IllegalStateException("Activity has been destroyed");
             }
             if (mPendingActions == null) {
@@ -1960,6 +1964,10 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
     }
 
     public void execSingleAction(OpGenerator action, boolean allowStateLoss) {
+        if (allowStateLoss && (mHost == null || mDestroyed)) {
+            // This FragmentManager isn't attached, so drop the entire transaction.
+            return;
+        }
         ensureExecReady(allowStateLoss);
         if (action.generateOps(mTmpRecords, mTmpIsPop)) {
             mExecutingActions = true;
