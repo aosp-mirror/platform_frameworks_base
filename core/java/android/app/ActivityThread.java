@@ -1411,15 +1411,23 @@ public final class ActivityThread {
         }
 
         @Override
-        public void scheduleMultiWindowModeChanged(IBinder token, boolean isInMultiWindowMode)
-                throws RemoteException {
-            sendMessage(H.MULTI_WINDOW_MODE_CHANGED, token, isInMultiWindowMode ? 1 : 0);
+        public void scheduleMultiWindowModeChanged(IBinder token, boolean isInMultiWindowMode,
+                Configuration overrideConfig) throws RemoteException {
+            SomeArgs args = SomeArgs.obtain();
+            args.arg1 = token;
+            args.arg2 = overrideConfig;
+            args.argi1 = isInMultiWindowMode ? 1 : 0;
+            sendMessage(H.MULTI_WINDOW_MODE_CHANGED, args);
         }
 
         @Override
-        public void schedulePictureInPictureModeChanged(IBinder token, boolean isInPipMode)
-                throws RemoteException {
-            sendMessage(H.PICTURE_IN_PICTURE_MODE_CHANGED, token, isInPipMode ? 1 : 0);
+        public void schedulePictureInPictureModeChanged(IBinder token, boolean isInPipMode,
+                Configuration overrideConfig) throws RemoteException {
+            SomeArgs args = SomeArgs.obtain();
+            args.arg1 = token;
+            args.arg2 = overrideConfig;
+            args.argi1 = isInPipMode ? 1 : 0;
+            sendMessage(H.PICTURE_IN_PICTURE_MODE_CHANGED, args);
         }
 
         @Override
@@ -1816,10 +1824,14 @@ public final class ActivityThread {
                     handleStopBinderTrackingAndDump((ParcelFileDescriptor) msg.obj);
                     break;
                 case MULTI_WINDOW_MODE_CHANGED:
-                    handleMultiWindowModeChanged((IBinder) msg.obj, msg.arg1 == 1);
+                    handleMultiWindowModeChanged((IBinder) ((SomeArgs) msg.obj).arg1,
+                            ((SomeArgs) msg.obj).argi1 == 1,
+                            (Configuration) ((SomeArgs) msg.obj).arg2);
                     break;
                 case PICTURE_IN_PICTURE_MODE_CHANGED:
-                    handlePictureInPictureModeChanged((IBinder) msg.obj, msg.arg1 == 1);
+                    handlePictureInPictureModeChanged((IBinder) ((SomeArgs) msg.obj).arg1,
+                            ((SomeArgs) msg.obj).argi1 == 1,
+                            (Configuration) ((SomeArgs) msg.obj).arg2);
                     break;
                 case LOCAL_VOICE_INTERACTION_STARTED:
                     handleLocalVoiceInteractionStarted((IBinder) ((SomeArgs) msg.obj).arg1,
@@ -3119,17 +3131,27 @@ public final class ActivityThread {
         }
     }
 
-    private void handleMultiWindowModeChanged(IBinder token, boolean isInMultiWindowMode) {
+    private void handleMultiWindowModeChanged(IBinder token, boolean isInMultiWindowMode,
+            Configuration overrideConfig) {
         final ActivityClientRecord r = mActivities.get(token);
         if (r != null) {
-            r.activity.dispatchMultiWindowModeChanged(isInMultiWindowMode);
+            final Configuration newConfig = new Configuration(mConfiguration);
+            if (overrideConfig != null) {
+                newConfig.updateFrom(overrideConfig);
+            }
+            r.activity.dispatchMultiWindowModeChanged(isInMultiWindowMode, newConfig);
         }
     }
 
-    private void handlePictureInPictureModeChanged(IBinder token, boolean isInPipMode) {
+    private void handlePictureInPictureModeChanged(IBinder token, boolean isInPipMode,
+            Configuration overrideConfig) {
         final ActivityClientRecord r = mActivities.get(token);
         if (r != null) {
-            r.activity.dispatchPictureInPictureModeChanged(isInPipMode);
+            final Configuration newConfig = new Configuration(mConfiguration);
+            if (overrideConfig != null) {
+                newConfig.updateFrom(overrideConfig);
+            }
+            r.activity.dispatchPictureInPictureModeChanged(isInPipMode, newConfig);
         }
     }
 

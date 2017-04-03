@@ -1889,11 +1889,32 @@ public class Activity extends ContextThemeWrapper
 
     /**
      * Called by the system when the activity changes from fullscreen mode to multi-window mode and
-     * visa-versa.
+     * visa-versa. This method provides the same configuration that will be sent in the following
+     * {@link #onConfigurationChanged(Configuration)} call after the activity enters this mode.
+     *
      * @see android.R.attr#resizeableActivity
      *
      * @param isInMultiWindowMode True if the activity is in multi-window mode.
+     * @param newConfig The new configuration of the activity with the state
+     *                  {@param isInMultiWindowMode}.
      */
+    public void onMultiWindowModeChanged(boolean isInMultiWindowMode, Configuration newConfig) {
+        // Left deliberately empty. There should be no side effects if a direct
+        // subclass of Activity does not call super.
+        onMultiWindowModeChanged(isInMultiWindowMode);
+    }
+
+    /**
+     * Called by the system when the activity changes from fullscreen mode to multi-window mode and
+     * visa-versa.
+     *
+     * @see android.R.attr#resizeableActivity
+     *
+     * @param isInMultiWindowMode True if the activity is in multi-window mode.
+     *
+     * @deprecated Use {@link #onMultiWindowModeChanged(boolean, Configuration)} instead.
+     */
+    @Deprecated
     public void onMultiWindowModeChanged(boolean isInMultiWindowMode) {
         // Left deliberately empty. There should be no side effects if a direct
         // subclass of Activity does not call super.
@@ -1914,11 +1935,33 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * Called by the system when the activity changes to and from picture-in-picture mode.
+     * Called by the system when the activity changes to and from picture-in-picture mode. This
+     * method provides the same configuration that will be sent in the following
+     * {@link #onConfigurationChanged(Configuration)} call after the activity enters this mode.
+     *
      * @see android.R.attr#supportsPictureInPicture
      *
      * @param isInPictureInPictureMode True if the activity is in picture-in-picture mode.
+     * @param newConfig The new configuration of the activity with the state
+     *                  {@param isInPictureInPictureMode}.
      */
+    public void onPictureInPictureModeChanged(boolean isInPictureInPictureMode,
+            Configuration newConfig) {
+        // Left deliberately empty. There should be no side effects if a direct
+        // subclass of Activity does not call super.
+        onPictureInPictureModeChanged(isInPictureInPictureMode);
+    }
+
+    /**
+     * Called by the system when the activity changes to and from picture-in-picture mode.
+     *
+     * @see android.R.attr#supportsPictureInPicture
+     *
+     * @param isInPictureInPictureMode True if the activity is in picture-in-picture mode.
+     *
+     * @deprecated Use {@link #onPictureInPictureModeChanged(boolean, Configuration)} instead.
+     */
+    @Deprecated
     public void onPictureInPictureModeChanged(boolean isInPictureInPictureMode) {
         // Left deliberately empty. There should be no side effects if a direct
         // subclass of Activity does not call super.
@@ -6993,21 +7036,25 @@ public class Activity extends ContextThemeWrapper
         }
     }
 
-    final void dispatchMultiWindowModeChanged(boolean isInMultiWindowMode) {
+    final void dispatchMultiWindowModeChanged(boolean isInMultiWindowMode,
+            Configuration newConfig) {
         if (DEBUG_LIFECYCLE) Slog.v(TAG,
-                "dispatchMultiWindowModeChanged " + this + ": " + isInMultiWindowMode);
-        mFragments.dispatchMultiWindowModeChanged(isInMultiWindowMode);
+                "dispatchMultiWindowModeChanged " + this + ": " + isInMultiWindowMode
+                        + " " + newConfig);
+        mFragments.dispatchMultiWindowModeChanged(isInMultiWindowMode, newConfig);
         if (mWindow != null) {
             mWindow.onMultiWindowModeChanged();
         }
-        onMultiWindowModeChanged(isInMultiWindowMode);
+        onMultiWindowModeChanged(isInMultiWindowMode, newConfig);
     }
 
-    final void dispatchPictureInPictureModeChanged(boolean isInPictureInPictureMode) {
+    final void dispatchPictureInPictureModeChanged(boolean isInPictureInPictureMode,
+            Configuration newConfig) {
         if (DEBUG_LIFECYCLE) Slog.v(TAG,
-                "dispatchPictureInPictureModeChanged " + this + ": " + isInPictureInPictureMode);
-        mFragments.dispatchPictureInPictureModeChanged(isInPictureInPictureMode);
-        onPictureInPictureModeChanged(isInPictureInPictureMode);
+                "dispatchPictureInPictureModeChanged " + this + ": " + isInPictureInPictureMode
+                        + " " + newConfig);
+        mFragments.dispatchPictureInPictureModeChanged(isInPictureInPictureMode, newConfig);
+        onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig);
     }
 
     /**

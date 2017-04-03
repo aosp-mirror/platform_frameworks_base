@@ -1716,11 +1716,44 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
     /**
      * Called when the Fragment's activity changes from fullscreen mode to multi-window mode and
      * visa-versa. This is generally tied to {@link Activity#onMultiWindowModeChanged} of the
+     * containing Activity. This method provides the same configuration that will be sent in the
+     * following {@link #onConfigurationChanged(Configuration)} call after the activity enters this
+     * mode.
+     *
+     * @param isInMultiWindowMode True if the activity is in multi-window mode.
+     * @param newConfig The new configuration of the activity with the state
+     *                  {@param isInMultiWindowMode}.
+     */
+    public void onMultiWindowModeChanged(boolean isInMultiWindowMode, Configuration newConfig) {
+        onMultiWindowModeChanged(isInMultiWindowMode);
+    }
+
+    /**
+     * Called when the Fragment's activity changes from fullscreen mode to multi-window mode and
+     * visa-versa. This is generally tied to {@link Activity#onMultiWindowModeChanged} of the
      * containing Activity.
      *
      * @param isInMultiWindowMode True if the activity is in multi-window mode.
+     *
+     * @deprecated Use {@link #onMultiWindowModeChanged(boolean, Configuration)} instead.
      */
+    @Deprecated
     public void onMultiWindowModeChanged(boolean isInMultiWindowMode) {
+    }
+
+    /**
+     * Called by the system when the activity changes to and from picture-in-picture mode. This is
+     * generally tied to {@link Activity#onPictureInPictureModeChanged} of the containing Activity.
+     * This method provides the same configuration that will be sent in the following
+     * {@link #onConfigurationChanged(Configuration)} call after the activity enters this mode.
+     *
+     * @param isInPictureInPictureMode True if the activity is in picture-in-picture mode.
+     * @param newConfig The new configuration of the activity with the state
+     *                  {@param isInPictureInPictureMode}.
+     */
+    public void onPictureInPictureModeChanged(boolean isInPictureInPictureMode,
+            Configuration newConfig) {
+        onPictureInPictureModeChanged(isInPictureInPictureMode);
     }
 
     /**
@@ -1728,7 +1761,10 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * generally tied to {@link Activity#onPictureInPictureModeChanged} of the containing Activity.
      *
      * @param isInPictureInPictureMode True if the activity is in picture-in-picture mode.
+     *
+     * @deprecated Use {@link #onPictureInPictureModeChanged(boolean, Configuration)} instead.
      */
+    @Deprecated
     public void onPictureInPictureModeChanged(boolean isInPictureInPictureMode) {
     }
 
@@ -2572,6 +2608,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
         }
     }
 
+    @Deprecated
     void performMultiWindowModeChanged(boolean isInMultiWindowMode) {
         onMultiWindowModeChanged(isInMultiWindowMode);
         if (mChildFragmentManager != null) {
@@ -2579,10 +2616,27 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
         }
     }
 
+    void performMultiWindowModeChanged(boolean isInMultiWindowMode, Configuration newConfig) {
+        onMultiWindowModeChanged(isInMultiWindowMode, newConfig);
+        if (mChildFragmentManager != null) {
+            mChildFragmentManager.dispatchMultiWindowModeChanged(isInMultiWindowMode, newConfig);
+        }
+    }
+
+    @Deprecated
     void performPictureInPictureModeChanged(boolean isInPictureInPictureMode) {
         onPictureInPictureModeChanged(isInPictureInPictureMode);
         if (mChildFragmentManager != null) {
             mChildFragmentManager.dispatchPictureInPictureModeChanged(isInPictureInPictureMode);
+        }
+    }
+
+    void performPictureInPictureModeChanged(boolean isInPictureInPictureMode,
+            Configuration newConfig) {
+        onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig);
+        if (mChildFragmentManager != null) {
+            mChildFragmentManager.dispatchPictureInPictureModeChanged(isInPictureInPictureMode,
+                    newConfig);
         }
     }
 
