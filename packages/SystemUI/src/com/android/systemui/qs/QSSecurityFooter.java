@@ -1,3 +1,4 @@
+
 /*
  * Copyright (C) 2014 The Android Open Source Project
  *
@@ -358,9 +359,8 @@ public class QSSecurityFooter implements OnClickListener, DialogInterface.OnClic
         @Override
         public void onClick(View widget) {
             final Intent intent = new Intent(Settings.ACTION_ENTERPRISE_PRIVACY_SETTINGS);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
             mDialog.dismiss();
-            mContext.startActivity(intent);
+            mActivityStarter.postStartActivityDismissingKeyguard(intent, 0);
         }
 
         @Override
@@ -373,9 +373,8 @@ public class QSSecurityFooter implements OnClickListener, DialogInterface.OnClic
         @Override
         public void onClick(View widget) {
             final Intent intent = new Intent(Settings.ACTION_VPN_SETTINGS);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
             mDialog.dismiss();
-            mContext.startActivity(intent);
+            mActivityStarter.postStartActivityDismissingKeyguard(intent, 0);
         }
     }
 }
