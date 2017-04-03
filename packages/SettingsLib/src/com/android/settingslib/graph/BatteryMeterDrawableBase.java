@@ -63,7 +63,7 @@ public class BatteryMeterDrawableBase extends Drawable {
             mPlusPaint;
     private float mTextHeight, mWarningTextHeight;
     private int mIconTint = Color.WHITE;
-    private float mOldDarkIntensity = 0f;
+    private float mOldDarkIntensity = -1f;
 
     private int mHeight;
     private int mWidth;
