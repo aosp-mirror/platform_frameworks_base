@@ -38,6 +38,8 @@
 #include <utils/Log.h>
 #include <utils/SystemClock.h>
 
+#include <android-base/properties.h>
+
 #include <ui/PixelFormat.h>
 #include <ui/Rect.h>
 #include <ui/Region.h>
@@ -67,6 +69,9 @@ namespace android {
 static const char OEM_BOOTANIMATION_FILE[] = "/oem/media/bootanimation.zip";
 static const char SYSTEM_BOOTANIMATION_FILE[] = "/system/media/bootanimation.zip";
 static const char SYSTEM_ENCRYPTED_BOOTANIMATION_FILE[] = "/system/media/bootanimation-encrypted.zip";
+static const char OEM_SHUTDOWNANIMATION_FILE[] = "/oem/media/shutdownanimation.zip";
+static const char SYSTEM_SHUTDOWNANIMATION_FILE[] = "/system/media/shutdownanimation.zip";
+
 static const char SYSTEM_DATA_DIR_PATH[] = "/data/system";
 static const char SYSTEM_TIME_DIR_NAME[] = "time";
 static const char SYSTEM_TIME_DIR_PATH[] = "/data/system/time";
@@ -106,7 +111,13 @@ BootAnimation::BootAnimation() : Thread(false), mClockEnabled(true), mTimeIsAccu
     mSession = new SurfaceComposerClient();
 
     // If the system has already booted, the animation is not being used for a boot.
-    mSystemBoot = !property_get_bool(BOOT_COMPLETED_PROP_NAME, 0);
+    mSystemBoot = !android::base::GetBoolProperty(BOOT_COMPLETED_PROP_NAME, false);
+    std::string powerCtl = android::base::GetProperty("sys.powerctl", "");
+    if (powerCtl.empty()) {
+        mShuttingDown = false;
+    } else {
+        mShuttingDown = true;
+    }
 }
 
 void BootAnimation::onFirstRef() {
@@ -314,16 +325,23 @@ status_t BootAnimation::readyToRun() {
     char decrypt[PROPERTY_VALUE_MAX];
     property_get("vold.decrypt", decrypt, "");
 
-    bool encryptedAnimation = atoi(decrypt) != 0 || !strcmp("trigger_restart_min_framework", decrypt);
+    bool encryptedAnimation = atoi(decrypt) != 0 ||
+        !strcmp("trigger_restart_min_framework", decrypt);
 
-    if (encryptedAnimation && (access(SYSTEM_ENCRYPTED_BOOTANIMATION_FILE, R_OK) == 0)) {
+    if (!mShuttingDown && encryptedAnimation &&
+        (access(SYSTEM_ENCRYPTED_BOOTANIMATION_FILE, R_OK) == 0)) {
         mZipFileName = SYSTEM_ENCRYPTED_BOOTANIMATION_FILE;
+        return NO_ERROR;
     }
-    else if (access(OEM_BOOTANIMATION_FILE, R_OK) == 0) {
-        mZipFileName = OEM_BOOTANIMATION_FILE;
-    }
-    else if (access(SYSTEM_BOOTANIMATION_FILE, R_OK) == 0) {
-        mZipFileName = SYSTEM_BOOTANIMATION_FILE;
+    static const char* bootFiles[] = {OEM_BOOTANIMATION_FILE, SYSTEM_BOOTANIMATION_FILE};
+    static const char* shutdownFiles[] =
+        {OEM_SHUTDOWNANIMATION_FILE, SYSTEM_SHUTDOWNANIMATION_FILE};
+
+    for (const char* f : (!mShuttingDown ? bootFiles : shutdownFiles)) {
+        if (access(f, R_OK) == 0) {
+            mZipFileName = f;
+            return NO_ERROR;
+        }
     }
     return NO_ERROR;
 }
@@ -1047,7 +1065,9 @@ bool BootAnimation::playSoundsAllowed() const {
     if (!mSystemBoot) {
         return false;
     }
-
+    if (mShuttingDown) { // no audio while shutting down
+        return false;
+    }
     // Read the system property to see if we should play the sound.
     // If it's not present, default to allowed.
     if (!property_get_bool(PLAY_SOUND_PROP_NAME, 1)) {
@@ -1073,7 +1093,7 @@ bool BootAnimation::updateIsTimeAccurate() {
     if (mTimeIsAccurate) {
         return true;
     }
-
+    if (mShuttingDown) return true;
     struct stat statResult;
 
     if(stat(TIME_FORMAT_12_HOUR_FLAG_FILE_PATH, &statResult) == 0) {
