@@ -289,7 +289,7 @@ import java.util.function.DoubleUnaryOperator;
  * and <code>(1.0, 0.0, 0.0, 0.5)</code>.</p>
  */
 @AnyThread
-public final class Color {
+public class Color {
     @ColorInt public static final int BLACK       = 0xFF000000;
     @ColorInt public static final int DKGRAY      = 0xFF444444;
     @ColorInt public static final int GRAY        = 0xFF888888;
