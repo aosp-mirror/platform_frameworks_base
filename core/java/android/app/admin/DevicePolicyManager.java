@@ -1515,6 +1515,16 @@ public class DevicePolicyManager {
     public @interface ProvisioningPreCondition {}
 
     /**
+     * Service action: Action for a service that device owner and profile owner can optionally
+     * own.  If a device owner or a profile owner has such a service, the system tries to keep
+     * a bound connection to it, in order to keep their process always running.
+     * The service must not be exported.
+     */
+    @SdkConstant(SdkConstantType.SERVICE_ACTION)
+    public static final String ACTION_DEVICE_ADMIN_SERVICE
+            = "android.app.action.DEVICE_ADMIN_SERVICE";
+
+    /**
      * Return true if the given administrator component is currently active (enabled) in the system.
      *
      * @param admin The administrator component to check for.
