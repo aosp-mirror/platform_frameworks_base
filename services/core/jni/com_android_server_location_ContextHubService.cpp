@@ -929,15 +929,15 @@ jobject constructJContextHubInfo(JNIEnv *env, const ContextHub &hub) {
                                   db.jniInfo.contextHubInfoCtor);
     env->CallVoidMethod(jHub, db.jniInfo.contextHubInfoSetId, hub.hubId);
 
-    jstrBuf = env->NewStringUTF(hub.name);
+    jstrBuf = env->NewStringUTF(hub.name.c_str());
     env->CallVoidMethod(jHub, db.jniInfo.contextHubInfoSetName, jstrBuf);
     env->DeleteLocalRef(jstrBuf);
 
-    jstrBuf = env->NewStringUTF(hub.vendor);
+    jstrBuf = env->NewStringUTF(hub.vendor.c_str());
     env->CallVoidMethod(jHub, db.jniInfo.contextHubInfoSetVendor, jstrBuf);
     env->DeleteLocalRef(jstrBuf);
 
-    jstrBuf = env->NewStringUTF(hub.toolchain);
+    jstrBuf = env->NewStringUTF(hub.toolchain.c_str());
     env->CallVoidMethod(jHub, db.jniInfo.contextHubInfoSetToolchain, jstrBuf);
     env->DeleteLocalRef(jstrBuf);
 
