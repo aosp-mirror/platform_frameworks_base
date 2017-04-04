@@ -2717,6 +2717,15 @@ public class PackageManagerService extends IPackageManager.Stub {
                     UserHandle.USER_SYSTEM, storageFlags, true /* migrateAppData */,
                     true /* onlyCoreApps */);
             mPrepareAppDataFuture = SystemServerInitThreadPool.get().submit(() -> {
+                Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "fixup");
+                try {
+                    mInstaller.fixupAppData(StorageManager.UUID_PRIVATE_INTERNAL,
+                            StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE);
+                } catch (InstallerException e) {
+                    Slog.w(TAG, "Trouble fixing GIDs", e);
+                }
+                Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+
                 if (deferPackages == null || deferPackages.isEmpty()) {
                     return;
                 }
