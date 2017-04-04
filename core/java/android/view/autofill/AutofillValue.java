@@ -26,6 +26,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
 import android.view.View;
 
 import com.android.internal.util.Preconditions;
@@ -257,7 +258,8 @@ public final class AutofillValue implements Parcelable {
      * <p>See {@link View#AUTOFILL_TYPE_TEXT} for more info.
      */
     public static AutofillValue forText(@Nullable CharSequence value) {
-        return value == null ? null : new AutofillValue(AUTOFILL_TYPE_TEXT, value);
+        return value == null ? null : new AutofillValue(AUTOFILL_TYPE_TEXT,
+                TextUtils.trimNoCopySpans(value));
     }
 
     /**
