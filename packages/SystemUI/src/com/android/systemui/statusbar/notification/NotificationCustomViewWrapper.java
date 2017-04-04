@@ -18,7 +18,7 @@ package com.android.systemui.statusbar.notification;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.animation.ValueAnimator;
+import android.content.Context;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
 import android.view.View;
@@ -38,8 +38,8 @@ public class NotificationCustomViewWrapper extends NotificationViewWrapper {
     private boolean mIsLegacy;
     private int mLegacyColor;
 
-    protected NotificationCustomViewWrapper(View view, ExpandableNotificationRow row) {
-        super(view, row);
+    protected NotificationCustomViewWrapper(Context ctx, View view, ExpandableNotificationRow row) {
+        super(ctx, view, row);
         mInvertHelper = new ViewInvertHelper(view, NotificationPanelView.DOZE_ANIMATION_DURATION);
         mLegacyColor = row.getContext().getColor(R.color.notification_legacy_background_color);
     }
@@ -67,13 +67,11 @@ public class NotificationCustomViewWrapper extends NotificationViewWrapper {
     }
 
     protected void fadeGrayscale(final boolean dark, long delay) {
-        startIntensityAnimation(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                updateGrayscaleMatrix((float) animation.getAnimatedValue());
-                mGreyPaint.setColorFilter(new ColorMatrixColorFilter(mGrayscaleColorMatrix));
-                mView.setLayerPaint(mGreyPaint);
-            }
+        getDozer().startIntensityAnimation(animation -> {
+            getDozer().updateGrayscaleMatrix((float) animation.getAnimatedValue());
+            mGreyPaint.setColorFilter(
+                    new ColorMatrixColorFilter(getDozer().getGrayscaleColorMatrix()));
+            mView.setLayerPaint(mGreyPaint);
         }, dark, delay, new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
@@ -86,9 +84,9 @@ public class NotificationCustomViewWrapper extends NotificationViewWrapper {
 
     protected void updateGrayscale(boolean dark) {
         if (dark) {
-            updateGrayscaleMatrix(1f);
+            getDozer().updateGrayscaleMatrix(1f);
             mGreyPaint.setColorFilter(
-                    new ColorMatrixColorFilter(mGrayscaleColorMatrix));
+                    new ColorMatrixColorFilter(getDozer().getGrayscaleColorMatrix()));
             mView.setLayerPaint(mGreyPaint);
         }
     }
