@@ -21,8 +21,6 @@ key 0x125    DPAD_RIGHT
 key 0x126    DPAD_DOWN
 key 0x127    DPAD_LEFT
 
-key 0x120    BUTTON_SELECT
-key 0x123    BUTTON_START
 key 0x12e    BUTTON_A
 key 0x12d    BUTTON_B
 key 0x12f    BUTTON_X
@@ -33,9 +31,6 @@ key 0x128    BUTTON_L2
 key 0x129    BUTTON_R2
 key 0x121    BUTTON_THUMBL
 key 0x122    BUTTON_THUMBR
-
-# PS key
-key 0x2d0    BUTTON_MODE
 
 # Left Analog Stick
 axis 0x00    X
@@ -74,3 +69,11 @@ axis 0x31   RTRIGGER
 
 # Square
 # axis 0x37
+
+# Mapping according to https://www.kernel.org/doc/Documentation/input/gamepad.txt
+# Select
+key 0x120    BUTTON_SELECT
+# Start
+key 0x123    BUTTON_START
+# PS key
+key 0x2d0    BUTTON_MODE
