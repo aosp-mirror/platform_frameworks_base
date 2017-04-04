@@ -529,6 +529,18 @@ public final class Choreographer {
         }
     }
 
+    /**
+     * Like {@link #getLastFrameTimeNanos}, but always returns the last frame time, not matter
+     * whether callbacks are currently running.
+     * @return The frame start time of the last frame, in the {@link System#nanoTime()} time base.
+     * @hide
+     */
+    public long getLastFrameTimeNanos() {
+        synchronized (mLock) {
+            return USE_FRAME_TIME ? mLastFrameTimeNanos : System.nanoTime();
+        }
+    }
+
     private void scheduleFrameLocked(long now) {
         if (!mFrameScheduled) {
             mFrameScheduled = true;
