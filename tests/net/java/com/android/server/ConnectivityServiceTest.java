@@ -80,6 +80,7 @@ import com.android.server.connectivity.NetworkAgentInfo;
 import com.android.server.connectivity.NetworkMonitor;
 import com.android.server.connectivity.NetworkMonitor.CaptivePortalProbeResult;
 import com.android.server.net.NetworkPinner;
+import com.android.server.net.NetworkPolicyManagerInternal;
 
 import java.net.InetAddress;
 import java.util.ArrayList;
@@ -713,6 +714,9 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         }
 
         mServiceContext = new MockContext(getContext());
+        LocalServices.removeServiceForTest(NetworkPolicyManagerInternal.class);
+        LocalServices.addService(
+                NetworkPolicyManagerInternal.class, mock(NetworkPolicyManagerInternal.class));
         mService = new WrappedConnectivityService(mServiceContext,
                 mock(INetworkManagementService.class),
                 mock(INetworkStatsService.class),
