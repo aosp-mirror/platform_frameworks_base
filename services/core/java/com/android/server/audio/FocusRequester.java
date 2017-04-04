@@ -33,7 +33,7 @@ import java.io.PrintWriter;
  * @hide
  * Class to handle all the information about a user of audio focus. The lifecycle of each
  * instance is managed by android.media.MediaFocusControl, from its addition to the audio focus
- * stack to its release.
+ * stack, or the map of focus owners for an external focus policy, to its release.
  */
 public class FocusRequester {
 
@@ -101,6 +101,21 @@ public class FocusRequester {
         mFocusController = ctlr;
     }
 
+    FocusRequester(AudioFocusInfo afi, IAudioFocusDispatcher afl,
+             IBinder source, AudioFocusDeathHandler hdlr, @NonNull MediaFocusControl ctlr) {
+        mAttributes = afi.getAttributes();
+        mClientId = afi.getClientId();
+        mPackageName = afi.getPackageName();
+        mCallingUid = afi.getClientUid();
+        mFocusGainRequest = afi.getGainRequest();
+        mFocusLossReceived = AudioManager.AUDIOFOCUS_NONE;
+        mGrantFlags = afi.getFlags();
+
+        mFocusDispatcher = afl;
+        mSourceRef = source;
+        mDeathHandler = hdlr;
+        mFocusController = ctlr;
+    }
 
     boolean hasSameClient(String otherClient) {
         try {
@@ -116,6 +131,10 @@ public class FocusRequester {
 
     boolean hasSameBinder(IBinder ib) {
         return (mSourceRef != null) && mSourceRef.equals(ib);
+    }
+
+    boolean hasSameDispatcher(IAudioFocusDispatcher fd) {
+        return (mFocusDispatcher != null) && mFocusDispatcher.equals(fd);
     }
 
     boolean hasSamePackage(String pack) {
@@ -367,6 +386,35 @@ public class FocusRequester {
         } catch (android.os.RemoteException e) {
             Log.e(TAG, "Failure to signal loss of audio focus due to:", e);
         }
+    }
+
+    int dispatchFocusChange(int focusChange) {
+        if (mFocusDispatcher == null) {
+            if (MediaFocusControl.DEBUG) { Log.v(TAG, "dispatchFocusChange: no focus dispatcher"); }
+            return AudioManager.AUDIOFOCUS_REQUEST_FAILED;
+        }
+        if (focusChange == AudioManager.AUDIOFOCUS_NONE) {
+            if (MediaFocusControl.DEBUG) { Log.v(TAG, "dispatchFocusChange: AUDIOFOCUS_NONE"); }
+            return AudioManager.AUDIOFOCUS_REQUEST_FAILED;
+        } else if ((focusChange == AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK
+                || focusChange == AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE
+                || focusChange == AudioManager.AUDIOFOCUS_GAIN_TRANSIENT
+                || focusChange == AudioManager.AUDIOFOCUS_GAIN)
+                && (mFocusGainRequest != focusChange)){
+            Log.w(TAG, "focus gain was requested with " + mFocusGainRequest
+                    + ", dispatching " + focusChange);
+        } else if (focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK
+                || focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT
+                || focusChange == AudioManager.AUDIOFOCUS_LOSS) {
+            mFocusLossReceived = focusChange;
+        }
+        try {
+            mFocusDispatcher.dispatchAudioFocusChange(focusChange, mClientId);
+        } catch (android.os.RemoteException e) {
+            Log.v(TAG, "dispatchFocusChange: error talking to focus listener", e);
+            return AudioManager.AUDIOFOCUS_REQUEST_FAILED;
+        }
+        return AudioManager.AUDIOFOCUS_REQUEST_GRANTED;
     }
 
     AudioFocusInfo toAudioFocusInfo() {

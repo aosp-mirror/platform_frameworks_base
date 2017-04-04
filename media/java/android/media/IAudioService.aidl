@@ -20,6 +20,7 @@ import android.app.PendingIntent;
 import android.bluetooth.BluetoothDevice;
 import android.content.ComponentName;
 import android.media.AudioAttributes;
+import android.media.AudioFocusInfo;
 import android.media.AudioPlaybackConfiguration;
 import android.media.AudioRecordingConfiguration;
 import android.media.AudioRoutesInfo;
@@ -122,7 +123,8 @@ interface IAudioService {
             IAudioFocusDispatcher fd, String clientId, String callingPackageName, int flags,
             IAudioPolicyCallback pcb);
 
-    int abandonAudioFocus(IAudioFocusDispatcher fd, String clientId, in AudioAttributes aa);
+    int abandonAudioFocus(IAudioFocusDispatcher fd, String clientId, in AudioAttributes aa,
+            in String callingPackageName);
 
     void unregisterAudioFocusClient(String clientId);
 
@@ -164,7 +166,7 @@ interface IAudioService {
     boolean isHdmiSystemAudioSupported();
 
     String registerAudioPolicy(in AudioPolicyConfig policyConfig,
-            in IAudioPolicyCallback pcb, boolean hasFocusListener);
+            in IAudioPolicyCallback pcb, boolean hasFocusListener, boolean isFocusPolicy);
 
     oneway void unregisterAudioPolicyAsync(in IAudioPolicyCallback pcb);
 
@@ -195,6 +197,9 @@ interface IAudioService {
     void disableRingtoneSync(in int userId);
 
     int getFocusRampTimeMs(in int focusGain, in AudioAttributes attr);
+
+    int dispatchFocusChange(in AudioFocusInfo afi, in int focusChange,
+            in IAudioPolicyCallback pcb);
 
     // WARNING: read warning at top of file, it is recommended to add new methods at the end
 }
