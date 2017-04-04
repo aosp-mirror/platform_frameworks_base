@@ -675,5 +675,65 @@ std::string BuildResourceFileName(const ResourceFile& res_file,
   return out.str();
 }
 
+std::unique_ptr<Item> ParseBinaryResValue(const ResourceType& type, const ConfigDescription& config,
+                                          const android::ResStringPool& src_pool,
+                                          const android::Res_value& res_value,
+                                          StringPool* dst_pool) {
+  if (type == ResourceType::kId) {
+    return util::make_unique<Id>();
+  }
+
+  const uint32_t data = util::DeviceToHost32(res_value.data);
+  switch (res_value.dataType) {
+    case android::Res_value::TYPE_STRING: {
+      const std::string str = util::GetString(src_pool, data);
+      const android::ResStringPool_span* spans = src_pool.styleAt(data);
+
+      // Check if the string has a valid style associated with it.
+      if (spans != nullptr && spans->name.index != android::ResStringPool_span::END) {
+        StyleString style_str = {str};
+        while (spans->name.index != android::ResStringPool_span::END) {
+          style_str.spans.push_back(Span{util::GetString(src_pool, spans->name.index),
+                                         spans->firstChar, spans->lastChar});
+          spans++;
+        }
+        return util::make_unique<StyledString>(dst_pool->MakeRef(
+            style_str, StringPool::Context(StringPool::Context::kStylePriority, config)));
+      } else {
+        if (type != ResourceType::kString && util::StartsWith(str, "res/")) {
+          // This must be a FileReference.
+          return util::make_unique<FileReference>(dst_pool->MakeRef(
+              str, StringPool::Context(StringPool::Context::kHighPriority, config)));
+        }
+
+        // There are no styles associated with this string, so treat it as a simple string.
+        return util::make_unique<String>(dst_pool->MakeRef(str, StringPool::Context(config)));
+      }
+    } break;
+
+    case android::Res_value::TYPE_REFERENCE:
+    case android::Res_value::TYPE_ATTRIBUTE:
+    case android::Res_value::TYPE_DYNAMIC_REFERENCE:
+    case android::Res_value::TYPE_DYNAMIC_ATTRIBUTE: {
+      Reference::Type ref_type = Reference::Type::kResource;
+      if (res_value.dataType == android::Res_value::TYPE_ATTRIBUTE ||
+          res_value.dataType == android::Res_value::TYPE_DYNAMIC_ATTRIBUTE) {
+        ref_type = Reference::Type::kAttribute;
+      }
+
+      if (data == 0) {
+        // A reference of 0, must be the magic @null reference.
+        return util::make_unique<BinaryPrimitive>(android::Res_value::TYPE_REFERENCE, 0u);
+      }
+
+      // This is a normal reference.
+      return util::make_unique<Reference>(data, ref_type);
+    } break;
+  }
+
+  // Treat this as a raw binary primitive.
+  return util::make_unique<BinaryPrimitive>(res_value);
+}
+
 }  // namespace ResourceUtils
 }  // namespace aapt

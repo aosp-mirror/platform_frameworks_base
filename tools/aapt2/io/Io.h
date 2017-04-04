@@ -87,10 +87,6 @@ class OutputStream {
   virtual bool HadError() const = 0;
 };
 
-// Copies the data from in to out. Returns false if there was an error.
-// If there was an error, check the individual streams' HadError/GetError methods.
-bool Copy(OutputStream* out, InputStream* in);
-
 }  // namespace io
 }  // namespace aapt
 

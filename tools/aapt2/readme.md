@@ -1,5 +1,10 @@
 # Android Asset Packaging Tool 2.0 (AAPT2) release notes
 
+## Version 2.13
+### `aapt2 optimize ...`
+- aapt2 optimize can now split a binary APK with the same --split parameters as the link
+  phase.
+
 ## Version 2.12
 ### `aapt2 optimize ...`
 - aapt2 optimize now understands map (complex) values under the type `id`. It ignores their

@@ -31,13 +31,12 @@ using android::StringPiece;
 
 namespace aapt {
 
-void DumpCompiledFile(const pb::CompiledFile& pb_file, const void* data,
-                      size_t len, const Source& source, IAaptContext* context) {
+void DumpCompiledFile(const pb::CompiledFile& pb_file, const void* data, size_t len,
+                      const Source& source, IAaptContext* context) {
   std::unique_ptr<ResourceFile> file =
       DeserializeCompiledFileFromPb(pb_file, source, context->GetDiagnostics());
   if (!file) {
-    context->GetDiagnostics()->Warn(DiagMessage()
-                                    << "failed to read compiled file");
+    context->GetDiagnostics()->Warn(DiagMessage() << "failed to read compiled file");
     return;
   }
 
@@ -50,27 +49,24 @@ void TryDumpFile(IAaptContext* context, const std::string& file_path) {
   std::unique_ptr<ResourceTable> table;
 
   std::string err;
-  std::unique_ptr<io::ZipFileCollection> zip =
-      io::ZipFileCollection::Create(file_path, &err);
+  std::unique_ptr<io::ZipFileCollection> zip = io::ZipFileCollection::Create(file_path, &err);
   if (zip) {
     io::IFile* file = zip->FindFile("resources.arsc.flat");
     if (file) {
       std::unique_ptr<io::IData> data = file->OpenAsData();
       if (!data) {
-        context->GetDiagnostics()->Error(
-            DiagMessage(file_path) << "failed to open resources.arsc.flat");
+        context->GetDiagnostics()->Error(DiagMessage(file_path)
+                                         << "failed to open resources.arsc.flat");
         return;
       }
 
       pb::ResourceTable pb_table;
       if (!pb_table.ParseFromArray(data->data(), data->size())) {
-        context->GetDiagnostics()->Error(DiagMessage(file_path)
-                                         << "invalid resources.arsc.flat");
+        context->GetDiagnostics()->Error(DiagMessage(file_path) << "invalid resources.arsc.flat");
         return;
       }
 
-      table = DeserializeTableFromPb(pb_table, Source(file_path),
-                                     context->GetDiagnostics());
+      table = DeserializeTableFromPb(pb_table, Source(file_path), context->GetDiagnostics());
       if (!table) {
         return;
       }
@@ -87,8 +83,8 @@ void TryDumpFile(IAaptContext* context, const std::string& file_path) {
         }
 
         table = util::make_unique<ResourceTable>();
-        BinaryResourceParser parser(context, table.get(), Source(file_path),
-                                    data->data(), data->size());
+        BinaryResourceParser parser(context, table.get(), Source(file_path), data->data(),
+                                    data->size());
         if (!parser.Parse()) {
           return;
         }
@@ -107,16 +103,13 @@ void TryDumpFile(IAaptContext* context, const std::string& file_path) {
 
     // Try as a compiled table.
     pb::ResourceTable pb_table;
-    if (pb_table.ParseFromArray(file_map->getDataPtr(),
-                                file_map->getDataLength())) {
-      table = DeserializeTableFromPb(pb_table, Source(file_path),
-                                     context->GetDiagnostics());
+    if (pb_table.ParseFromArray(file_map->getDataPtr(), file_map->getDataLength())) {
+      table = DeserializeTableFromPb(pb_table, Source(file_path), context->GetDiagnostics());
     }
 
     if (!table) {
       // Try as a compiled file.
-      CompiledFileInputStream input(file_map->getDataPtr(),
-                                    file_map->getDataLength());
+      CompiledFileInputStream input(file_map->getDataPtr(), file_map->getDataLength());
 
       uint32_t num_files = 0;
       if (!input.ReadLittleEndian32(&num_files)) {
@@ -126,20 +119,17 @@ void TryDumpFile(IAaptContext* context, const std::string& file_path) {
       for (uint32_t i = 0; i < num_files; i++) {
         pb::CompiledFile compiled_file;
         if (!input.ReadCompiledFile(&compiled_file)) {
-          context->GetDiagnostics()->Warn(DiagMessage()
-                                          << "failed to read compiled file");
+          context->GetDiagnostics()->Warn(DiagMessage() << "failed to read compiled file");
           return;
         }
 
         uint64_t offset, len;
         if (!input.ReadDataMetaData(&offset, &len)) {
-          context->GetDiagnostics()->Warn(DiagMessage()
-                                          << "failed to read meta data");
+          context->GetDiagnostics()->Warn(DiagMessage() << "failed to read meta data");
           return;
         }
 
-        const void* data =
-            static_cast<const uint8_t*>(file_map->getDataPtr()) + offset;
+        const void* data = static_cast<const uint8_t*>(file_map->getDataPtr()) + offset;
         DumpCompiledFile(compiled_file, data, len, Source(file_path), context);
       }
     }
@@ -154,7 +144,9 @@ void TryDumpFile(IAaptContext* context, const std::string& file_path) {
 
 class DumpContext : public IAaptContext {
  public:
-  IDiagnostics* GetDiagnostics() override { return &diagnostics_; }
+  IDiagnostics* GetDiagnostics() override {
+    return &diagnostics_;
+  }
 
   NameMangler* GetNameMangler() override {
     abort();
@@ -166,18 +158,26 @@ class DumpContext : public IAaptContext {
     return empty;
   }
 
-  uint8_t GetPackageId() override { return 0; }
+  uint8_t GetPackageId() override {
+    return 0;
+  }
 
   SymbolTable* GetExternalSymbols() override {
     abort();
     return nullptr;
   }
 
-  bool IsVerbose() override { return verbose_; }
+  bool IsVerbose() override {
+    return verbose_;
+  }
 
-  void SetVerbose(bool val) { verbose_ = val; }
+  void SetVerbose(bool val) {
+    verbose_ = val;
+  }
 
-  int GetMinSdkVersion() override { return 0; }
+  int GetMinSdkVersion() override {
+    return 0;
+  }
 
  private:
   StdErrDiagnostics diagnostics_;
@@ -189,8 +189,7 @@ class DumpContext : public IAaptContext {
  */
 int Dump(const std::vector<StringPiece>& args) {
   bool verbose = false;
-  Flags flags =
-      Flags().OptionalSwitch("-v", "increase verbosity of output", &verbose);
+  Flags flags = Flags().OptionalSwitch("-v", "increase verbosity of output", &verbose);
   if (!flags.Parse("aapt2 dump", args, &std::cerr)) {
     return 1;
   }

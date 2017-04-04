@@ -15,11 +15,12 @@
 //
 
 toolSources = [
-    "compile/Compile.cpp",
-    "diff/Diff.cpp",
-    "dump/Dump.cpp",
-    "link/Link.cpp",
-    "optimize/Optimize.cpp",
+    "cmd/Compile.cpp",
+    "cmd/Diff.cpp",
+    "cmd/Dump.cpp",
+    "cmd/Link.cpp",
+    "cmd/Optimize.cpp",
+    "cmd/Util.cpp",
 ]
 
 cc_defaults {
@@ -90,7 +91,7 @@ cc_library_host_static {
         "io/BigBufferStreams.cpp",
         "io/File.cpp",
         "io/FileSystem.cpp",
-        "io/Io.cpp",
+        "io/Util.cpp",
         "io/ZipArchive.cpp",
         "link/AutoVersioner.cpp",
         "link/ManifestFixer.cpp",

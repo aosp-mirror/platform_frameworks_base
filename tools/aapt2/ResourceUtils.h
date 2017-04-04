@@ -20,11 +20,13 @@
 #include <functional>
 #include <memory>
 
+#include "androidfw/ResourceTypes.h"
 #include "androidfw/StringPiece.h"
 
 #include "NameMangler.h"
 #include "Resource.h"
 #include "ResourceValues.h"
+#include "StringPool.h"
 
 namespace aapt {
 namespace ResourceUtils {
@@ -199,6 +201,13 @@ uint32_t AndroidTypeToAttributeTypeMask(uint16_t type);
  */
 std::string BuildResourceFileName(const ResourceFile& res_file,
                                   const NameMangler* mangler = nullptr);
+
+// Parses the binary form of a resource value. `type` is used as a hint to know when a value is
+// an ID versus a False boolean value, etc. `config` is for sorting strings in the string pool.
+std::unique_ptr<Item> ParseBinaryResValue(const ResourceType& type, const ConfigDescription& config,
+                                          const android::ResStringPool& src_pool,
+                                          const android::Res_value& res_value,
+                                          StringPool* dst_pool);
 
 }  // namespace ResourceUtils
 }  // namespace aapt
