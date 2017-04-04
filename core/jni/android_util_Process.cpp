@@ -176,6 +176,22 @@ void android_os_Process_setThreadGroup(JNIEnv* env, jobject clazz, int tid, jint
     }
 }
 
+void android_os_Process_setThreadGroupAndCpuset(JNIEnv* env, jobject clazz, int tid, jint grp)
+{
+    ALOGV("%s tid=%d grp=%" PRId32, __func__, tid, grp);
+    SchedPolicy sp = (SchedPolicy) grp;
+    int res = set_sched_policy(tid, sp);
+
+    if (res != NO_ERROR) {
+        signalExceptionForGroupError(env, -res, tid);
+    }
+
+    res = set_cpuset_policy(tid, sp);
+    if (res != NO_ERROR) {
+        signalExceptionForGroupError(env, -res, tid);
+    }
+}
+
 void android_os_Process_setProcessGroup(JNIEnv* env, jobject clazz, int pid, jint grp)
 {
     ALOGV("%s pid=%d grp=%" PRId32, __func__, pid, grp);
@@ -1207,6 +1223,7 @@ static const JNINativeMethod methods[] = {
     {"getThreadPriority",   "(I)I", (void*)android_os_Process_getThreadPriority},
     {"getThreadScheduler",   "(I)I", (void*)android_os_Process_getThreadScheduler},
     {"setThreadGroup",      "(II)V", (void*)android_os_Process_setThreadGroup},
+    {"setThreadGroupAndCpuset", "(II)V", (void*)android_os_Process_setThreadGroupAndCpuset},
     {"setProcessGroup",     "(II)V", (void*)android_os_Process_setProcessGroup},
     {"getProcessGroup",     "(I)I", (void*)android_os_Process_getProcessGroup},
     {"getExclusiveCores",   "()[I", (void*)android_os_Process_getExclusiveCores},
