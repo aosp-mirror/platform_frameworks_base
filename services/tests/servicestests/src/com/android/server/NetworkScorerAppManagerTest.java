@@ -22,6 +22,7 @@ import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 
 import static org.junit.Assert.assertFalse;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
@@ -170,6 +171,7 @@ public class NetworkScorerAppManagerTest {
         mockScoreNetworksGranted(recoComponent.getPackageName());
         mockRecommendationServiceAvailable(recoComponent, 924 /* packageUid */,
                 enableUseOpenWifiComponent.getPackageName());
+        mockEnableUseOpenWifiActivity(enableUseOpenWifiComponent);
 
         final NetworkScorerAppData activeScorer = mNetworkScorerAppManager.getActiveScorer();
         assertNotNull(activeScorer);
@@ -348,6 +350,173 @@ public class NetworkScorerAppManagerTest {
 
         verify(mSettingsFacade, never()).putString(any(),
                 eq(Settings.Global.NETWORK_RECOMMENDATIONS_PACKAGE), any());
+    }
+
+    @Test
+    public void testMigrateNetworkScorerAppSettingIfNeeded_networkScorerAppIsNull()
+            throws Exception {
+        when(mSettingsFacade.getString(mMockContext,
+                Settings.Global.NETWORK_SCORER_APP)).thenReturn(null);
+
+        mNetworkScorerAppManager.migrateNetworkScorerAppSettingIfNeeded();
+
+        verify(mSettingsFacade, never()).putString(eq(mMockContext),
+                eq(Settings.Global.USE_OPEN_WIFI_PACKAGE), anyString());
+    }
+
+    @Test
+    public void testMigrateNetworkScorerAppSettingIfNeeded_networkScorerAppIsEmpty()
+            throws Exception {
+        when(mSettingsFacade.getString(mMockContext,
+                Settings.Global.NETWORK_SCORER_APP)).thenReturn("");
+
+        mNetworkScorerAppManager.migrateNetworkScorerAppSettingIfNeeded();
+
+        verify(mSettingsFacade, never()).putString(eq(mMockContext),
+                eq(Settings.Global.USE_OPEN_WIFI_PACKAGE), anyString());
+    }
+
+    @Test
+    public void testMigrateNetworkScorerAppSettingIfNeeded_networkScorerIsNotActive()
+            throws Exception {
+        when(mSettingsFacade.getString(mMockContext,
+                Settings.Global.NETWORK_SCORER_APP)).thenReturn("com.foo.package");
+        // Make getActiveScorer() return null.
+        setRecommendationsEnabledSetting(NetworkScoreManager.RECOMMENDATIONS_ENABLED_FORCED_OFF);
+
+        mNetworkScorerAppManager.migrateNetworkScorerAppSettingIfNeeded();
+
+        verify(mSettingsFacade, never()).putString(eq(mMockContext),
+                eq(Settings.Global.USE_OPEN_WIFI_PACKAGE), anyString());
+    }
+
+    @Test
+    public void testMigrateNetworkScorerAppSettingIfNeeded_useOpenWifiSettingIsNotEmpty()
+            throws Exception {
+        final ComponentName recoComponent = new ComponentName("package1", "class1");
+        final ComponentName enableUseOpenWifiComponent = new ComponentName("package2", "class2");
+        setNetworkRecoPackageSetting(recoComponent.getPackageName());
+        mockScoreNetworksGranted(recoComponent.getPackageName());
+        mockRecommendationServiceAvailable(recoComponent, 924 /* packageUid */,
+                enableUseOpenWifiComponent.getPackageName());
+        mockEnableUseOpenWifiActivity(enableUseOpenWifiComponent);
+        when(mSettingsFacade.getString(mMockContext,
+                Settings.Global.NETWORK_SCORER_APP))
+                .thenReturn(enableUseOpenWifiComponent.getPackageName());
+        // The setting has a value so the migration shouldn't touch it.
+        when(mSettingsFacade.getString(mMockContext,
+                Settings.Global.USE_OPEN_WIFI_PACKAGE))
+                .thenReturn(enableUseOpenWifiComponent.getPackageName());
+
+        mNetworkScorerAppManager.migrateNetworkScorerAppSettingIfNeeded();
+
+        verify(mSettingsFacade, never()).putString(eq(mMockContext),
+                eq(Settings.Global.USE_OPEN_WIFI_PACKAGE), anyString());
+        verify(mSettingsFacade).putString(eq(mMockContext),
+                eq(Settings.Global.NETWORK_SCORER_APP), eq(null));
+    }
+
+    @Test
+    public void testMigrateNetworkScorerAppSettingIfNeeded_useOpenWifiActivityNotAvail()
+            throws Exception {
+        final ComponentName recoComponent = new ComponentName("package1", "class1");
+        final ComponentName enableUseOpenWifiComponent = new ComponentName("package2", "class2");
+        setNetworkRecoPackageSetting(recoComponent.getPackageName());
+        mockScoreNetworksGranted(recoComponent.getPackageName());
+        // The active component doesn't have an open wifi activity so the migration shouldn't
+        // set USE_OPEN_WIFI_PACKAGE.
+        mockRecommendationServiceAvailable(recoComponent, 924 /* packageUid */,
+                null /*useOpenWifiActivityPackage*/);
+        when(mSettingsFacade.getString(mMockContext,
+                Settings.Global.NETWORK_SCORER_APP))
+                .thenReturn(enableUseOpenWifiComponent.getPackageName());
+        when(mSettingsFacade.getString(mMockContext,
+                Settings.Global.USE_OPEN_WIFI_PACKAGE)).thenReturn(null);
+
+        mNetworkScorerAppManager.migrateNetworkScorerAppSettingIfNeeded();
+
+        verify(mSettingsFacade, never()).putString(eq(mMockContext),
+                eq(Settings.Global.USE_OPEN_WIFI_PACKAGE), anyString());
+        verify(mSettingsFacade).putString(eq(mMockContext),
+                eq(Settings.Global.NETWORK_SCORER_APP), eq(null));
+    }
+
+    @Test
+    public void testMigrateNetworkScorerAppSettingIfNeeded_packageMismatch_activity()
+            throws Exception {
+        final ComponentName recoComponent = new ComponentName("package1", "class1");
+        final ComponentName enableUseOpenWifiComponent = new ComponentName("package2", "class2");
+        setNetworkRecoPackageSetting(recoComponent.getPackageName());
+        mockScoreNetworksGranted(recoComponent.getPackageName());
+        mockRecommendationServiceAvailable(recoComponent, 924 /* packageUid */,
+                enableUseOpenWifiComponent.getPackageName());
+        mockEnableUseOpenWifiActivity(enableUseOpenWifiComponent);
+        // The older network scorer app setting doesn't match the new use open wifi activity package
+        // so the migration shouldn't set USE_OPEN_WIFI_PACKAGE.
+        when(mSettingsFacade.getString(mMockContext,
+                Settings.Global.NETWORK_SCORER_APP))
+                .thenReturn(enableUseOpenWifiComponent.getPackageName() + ".diff");
+        when(mSettingsFacade.getString(mMockContext,
+                Settings.Global.USE_OPEN_WIFI_PACKAGE)).thenReturn(null);
+
+        mNetworkScorerAppManager.migrateNetworkScorerAppSettingIfNeeded();
+
+        verify(mSettingsFacade, never()).putString(eq(mMockContext),
+                eq(Settings.Global.USE_OPEN_WIFI_PACKAGE), anyString());
+        verify(mSettingsFacade).putString(eq(mMockContext),
+                eq(Settings.Global.NETWORK_SCORER_APP), eq(null));
+    }
+
+    @Test
+    public void testMigrateNetworkScorerAppSettingIfNeeded_packageMismatch_service()
+            throws Exception {
+        final ComponentName recoComponent = new ComponentName("package1", "class1");
+        final ComponentName enableUseOpenWifiComponent = new ComponentName("package2", "class2");
+        setNetworkRecoPackageSetting(recoComponent.getPackageName());
+        mockScoreNetworksGranted(recoComponent.getPackageName());
+        mockRecommendationServiceAvailable(recoComponent, 924 /* packageUid */,
+                enableUseOpenWifiComponent.getPackageName());
+        mockEnableUseOpenWifiActivity(enableUseOpenWifiComponent);
+        // The older network scorer app setting doesn't match the active package so the migration
+        // shouldn't set USE_OPEN_WIFI_PACKAGE.
+        when(mSettingsFacade.getString(mMockContext,
+                Settings.Global.NETWORK_SCORER_APP))
+                .thenReturn(recoComponent.getPackageName() + ".diff");
+        when(mSettingsFacade.getString(mMockContext,
+                Settings.Global.USE_OPEN_WIFI_PACKAGE)).thenReturn(null);
+
+        mNetworkScorerAppManager.migrateNetworkScorerAppSettingIfNeeded();
+
+        verify(mSettingsFacade, never()).putString(eq(mMockContext),
+                eq(Settings.Global.USE_OPEN_WIFI_PACKAGE), anyString());
+        verify(mSettingsFacade).putString(eq(mMockContext),
+                eq(Settings.Global.NETWORK_SCORER_APP), eq(null));
+    }
+
+    @Test
+    public void testMigrateNetworkScorerAppSettingIfNeeded_packageMatch_activity()
+            throws Exception {
+        final ComponentName recoComponent = new ComponentName("package1", "class1");
+        final ComponentName enableUseOpenWifiComponent = new ComponentName("package2", "class2");
+        setNetworkRecoPackageSetting(recoComponent.getPackageName());
+        mockScoreNetworksGranted(recoComponent.getPackageName());
+        mockRecommendationServiceAvailable(recoComponent, 924 /* packageUid */,
+                enableUseOpenWifiComponent.getPackageName());
+        mockEnableUseOpenWifiActivity(enableUseOpenWifiComponent);
+        // Old setting matches the new activity package, migration should happen.
+        when(mSettingsFacade.getString(mMockContext,
+                Settings.Global.NETWORK_SCORER_APP))
+                .thenReturn(enableUseOpenWifiComponent.getPackageName());
+        when(mSettingsFacade.getString(mMockContext,
+                Settings.Global.USE_OPEN_WIFI_PACKAGE)).thenReturn(null);
+
+        mNetworkScorerAppManager.migrateNetworkScorerAppSettingIfNeeded();
+
+        verify(mSettingsFacade).putString(eq(mMockContext),
+                eq(Settings.Global.USE_OPEN_WIFI_PACKAGE),
+                eq(enableUseOpenWifiComponent.getPackageName()));
+        verify(mSettingsFacade).putString(eq(mMockContext),
+                eq(Settings.Global.NETWORK_SCORER_APP), eq(null));
     }
 
     private void setRecommendationsEnabledSetting(int value) {
