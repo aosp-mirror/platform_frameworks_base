@@ -3897,15 +3897,6 @@ message MetricsEvent {
     // OS: O
     APPLICATIONS_STORAGE_MOVIES = 931;
 
-    // ACTION: Counts the number of emergency contacts
-    // Value 0: No contacts
-    // Value 1: One emergency contact set
-    // Value 2: Two emergency contacts set
-    // Value 3: Three or more emergency contacts set
-    // CATEGORY: SETTINGS
-    // OS: O
-    ACTION_NUMBER_EMERGENCY_CONTACTS = 932;
-
     // ---- End O Constants, all O constants go above this line ----
 
     // Add new aosp constants above this line.
