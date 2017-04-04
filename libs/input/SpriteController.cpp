@@ -220,13 +220,13 @@ void SpriteController::doUpdateSprites() {
 
                 if (outBuffer.width > update.state.icon.bitmap.width()) {
                     paint.setColor(0); // transparent fill color
-                    surfaceCanvas.drawRectCoords(update.state.icon.bitmap.width(), 0,
-                            outBuffer.width, update.state.icon.bitmap.height(), paint);
+                    surfaceCanvas.drawRect(SkRect::MakeLTRB(update.state.icon.bitmap.width(), 0,
+                            outBuffer.width, update.state.icon.bitmap.height()), paint);
                 }
                 if (outBuffer.height > update.state.icon.bitmap.height()) {
                     paint.setColor(0); // transparent fill color
-                    surfaceCanvas.drawRectCoords(0, update.state.icon.bitmap.height(),
-                            outBuffer.width, outBuffer.height, paint);
+                    surfaceCanvas.drawRect(SkRect::MakeLTRB(0, update.state.icon.bitmap.height(),
+                            outBuffer.width, outBuffer.height), paint);
                 }
 
                 status = surface->unlockAndPost();
