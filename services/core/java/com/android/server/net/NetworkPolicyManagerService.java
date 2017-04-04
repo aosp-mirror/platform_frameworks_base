@@ -248,8 +248,8 @@ import java.util.concurrent.TimeUnit;
  */
 public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     static final String TAG = "NetworkPolicy";
-    private static final boolean LOGD = false;
-    private static final boolean LOGV = false;
+    private static final boolean LOGD = true; // UNDO
+    private static final boolean LOGV = true; // UNDO
 
     private static final int VERSION_INIT = 1;
     private static final int VERSION_ADDED_SNOOZE = 2;
@@ -427,9 +427,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     /** Foreground at UID granularity. */
     @GuardedBy("mUidRulesFirstLock")
     final SparseIntArray mUidState = new SparseIntArray();
-
-    /** Higher priority listener before general event dispatch */
-    private INetworkPolicyListener mConnectivityListener;
 
     private final RemoteCallbackList<INetworkPolicyListener>
             mListeners = new RemoteCallbackList<>();
@@ -2237,15 +2234,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     @Override
-    public void setConnectivityListener(INetworkPolicyListener listener) {
-        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
-        if (mConnectivityListener != null) {
-            throw new IllegalStateException("Connectivity listener already registered");
-        }
-        mConnectivityListener = listener;
-    }
-
-    @Override
     public void registerListener(INetworkPolicyListener listener) {
         // TODO: create permission for observing network policy
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
@@ -3556,7 +3544,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 case MSG_RULES_CHANGED: {
                     final int uid = msg.arg1;
                     final int uidRules = msg.arg2;
-                    dispatchUidRulesChanged(mConnectivityListener, uid, uidRules);
                     final int length = mListeners.beginBroadcast();
                     for (int i = 0; i < length; i++) {
                         final INetworkPolicyListener listener = mListeners.getBroadcastItem(i);
@@ -3567,7 +3554,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 }
                 case MSG_METERED_IFACES_CHANGED: {
                     final String[] meteredIfaces = (String[]) msg.obj;
-                    dispatchMeteredIfacesChanged(mConnectivityListener, meteredIfaces);
                     final int length = mListeners.beginBroadcast();
                     for (int i = 0; i < length; i++) {
                         final INetworkPolicyListener listener = mListeners.getBroadcastItem(i);
@@ -3598,7 +3584,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 }
                 case MSG_RESTRICT_BACKGROUND_CHANGED: {
                     final boolean restrictBackground = msg.arg1 != 0;
-                    dispatchRestrictBackgroundChanged(mConnectivityListener, restrictBackground);
                     final int length = mListeners.beginBroadcast();
                     for (int i = 0; i < length; i++) {
                         final INetworkPolicyListener listener = mListeners.getBroadcastItem(i);
@@ -3616,7 +3601,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     final int policy = msg.arg2;
                     final Boolean notifyApp = (Boolean) msg.obj;
                     // First notify internal listeners...
-                    dispatchUidPoliciesChanged(mConnectivityListener, uid, policy);
                     final int length = mListeners.beginBroadcast();
                     for (int i = 0; i < length; i++) {
                         final INetworkPolicyListener listener = mListeners.getBroadcastItem(i);
@@ -4049,6 +4033,74 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 }
             }
         }
+
+        /**
+         * @return true if the given uid is restricted from doing networking on metered networks.
+         */
+        @Override
+        public boolean isUidRestrictedOnMeteredNetworks(int uid) {
+            final int uidRules;
+            final boolean isBackgroundRestricted;
+            synchronized (mUidRulesFirstLock) {
+                uidRules = mUidRules.get(uid, RULE_ALLOW_ALL);
+                isBackgroundRestricted = mRestrictBackground;
+            }
+            return isBackgroundRestricted
+                    && !hasRule(uidRules, RULE_ALLOW_METERED)
+                    && !hasRule(uidRules, RULE_TEMPORARY_ALLOW_METERED);
+        }
+
+        /**
+         * @return true if networking is blocked on the given interface for the given uid according
+         * to current networking policies.
+         */
+        @Override
+        public boolean isUidNetworkingBlocked(int uid, String ifname) {
+            final int uidRules;
+            final boolean isBackgroundRestricted;
+            final boolean isNetworkMetered;
+            synchronized (mUidRulesFirstLock) {
+                uidRules = mUidRules.get(uid, RULE_NONE);
+                isBackgroundRestricted = mRestrictBackground;
+                synchronized (mNetworkPoliciesSecondLock) {
+                    isNetworkMetered = mMeteredIfaces.contains(ifname);
+                }
+            }
+            if (hasRule(uidRules, RULE_REJECT_ALL)) {
+                if (LOGV) logUidStatus(uid, "blocked by power restrictions");
+                return true;
+            }
+            if (!isNetworkMetered) {
+                if (LOGV) logUidStatus(uid, "allowed on unmetered network");
+                return false;
+            }
+            if (hasRule(uidRules, RULE_REJECT_METERED)) {
+                if (LOGV) logUidStatus(uid, "blacklisted on metered network");
+                return true;
+            }
+            if (hasRule(uidRules, RULE_ALLOW_METERED)) {
+                if (LOGV) logUidStatus(uid, "whitelisted on metered network");
+                return false;
+            }
+            if (hasRule(uidRules, RULE_TEMPORARY_ALLOW_METERED)) {
+                if (LOGV) logUidStatus(uid, "temporary whitelisted on metered network");
+                return false;
+            }
+            if (isBackgroundRestricted) {
+                if (LOGV) logUidStatus(uid, "blocked when background is restricted");
+                return true;
+            }
+            if (LOGV) logUidStatus(uid, "allowed by default");
+            return false;
+        }
+    }
+
+    private static boolean hasRule(int uidRules, int rule) {
+        return (uidRules & rule) != 0;
+    }
+
+    private static void logUidStatus(int uid, String descr) {
+        Slog.d(TAG, String.format("uid %d is %s", uid, descr));
     }
 
     /**
