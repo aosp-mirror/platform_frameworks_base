@@ -1258,14 +1258,17 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             return;
         }
 
-        final int count = mChildrenCount;
-        final View[] children = mChildren;
-
-        for (int i = 0; i < count; i++) {
-            final View child = children[i];
+        int count = 0;
+        final View[] visibleChildren = new View[mChildrenCount];
+        for (int i = 0; i < mChildrenCount; ++i) {
+            final View child = mChildren[i];
             if ((child.mViewFlags & VISIBILITY_MASK) == VISIBLE) {
-                child.addKeyboardNavigationClusters(views, direction);
+                visibleChildren[count++] = child;
             }
+        }
+        Arrays.sort(visibleChildren, 0, count, FocusFinder.getFocusComparator(this, false));
+        for (int i = 0; i < count; ++i) {
+            visibleChildren[i].addKeyboardNavigationClusters(views, direction);
         }
     }
 
