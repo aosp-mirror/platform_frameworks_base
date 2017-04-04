@@ -86,6 +86,7 @@ public class PipMenuActivity extends Activity {
     private static final float DISABLED_ACTION_ALPHA = 0.54f;
 
     private boolean mMenuVisible;
+    private boolean mAllowMenuTimeout = true;
     private final List<RemoteAction> mActions = new ArrayList<>();
     private View mViewRoot;
     private Drawable mBackgroundDrawable;
@@ -190,7 +191,9 @@ public class PipMenuActivity extends Activity {
 
     @Override
     public void onUserInteraction() {
-        repostDelayedFinish(POST_INTERACTION_DISMISS_DELAY);
+        if (mAllowMenuTimeout) {
+            repostDelayedFinish(POST_INTERACTION_DISMISS_DELAY);
+        }
     }
 
     @Override
@@ -255,6 +258,7 @@ public class PipMenuActivity extends Activity {
     }
 
     private void showMenu(Rect stackBounds, Rect movementBounds, boolean allowMenuTimeout) {
+        mAllowMenuTimeout = allowMenuTimeout;
         if (!mMenuVisible) {
             updateActionViews(stackBounds);
             if (mMenuContainerAnimator != null) {
