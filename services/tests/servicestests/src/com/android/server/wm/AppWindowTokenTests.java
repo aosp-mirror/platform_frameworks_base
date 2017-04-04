@@ -51,7 +51,8 @@ public class AppWindowTokenTests extends WindowTestsBase {
 
     @Test
     public void testAddWindow_Order() throws Exception {
-        final TestAppWindowToken token = new TestAppWindowToken(sDisplayContent);
+        final WindowTestUtils.TestAppWindowToken token =
+                new WindowTestUtils.TestAppWindowToken(sDisplayContent);
 
         assertEquals(0, token.getWindowsCount());
 
@@ -78,7 +79,8 @@ public class AppWindowTokenTests extends WindowTestsBase {
 
     @Test
     public void testFindMainWindow() throws Exception {
-        final TestAppWindowToken token = new TestAppWindowToken(sDisplayContent);
+        final WindowTestUtils.TestAppWindowToken token =
+                new WindowTestUtils.TestAppWindowToken(sDisplayContent);
 
         assertNull(token.findMainWindow());
 
@@ -102,12 +104,13 @@ public class AppWindowTokenTests extends WindowTestsBase {
         // Create an app window with token on a display.
         final TaskStack stack = createTaskStackOnDisplay(sDisplayContent);
         final Task task = createTaskInStack(stack, 0 /* userId */);
-        final TestAppWindowToken appWindowToken = new TestAppWindowToken(sDisplayContent);
+        final WindowTestUtils.TestAppWindowToken appWindowToken =
+                new WindowTestUtils.TestAppWindowToken(sDisplayContent);
         task.addChild(appWindowToken, 0);
         final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(
                 TYPE_BASE_APPLICATION);
         attrs.setTitle("AppWindow");
-        final TestWindowState appWindow = new TestWindowState(attrs, appWindowToken);
+        final WindowTestUtils.TestWindowState appWindow = createWindowState(attrs, appWindowToken);
         appWindowToken.addWindow(appWindow);
 
         // Set initial orientation and update.
@@ -137,12 +140,13 @@ public class AppWindowTokenTests extends WindowTestsBase {
         final DisplayContent defaultDisplayContent = sWm.getDefaultDisplayContentLocked();
         final TaskStack stack = createTaskStackOnDisplay(defaultDisplayContent);
         final Task task = createTaskInStack(stack, 0 /* userId */);
-        final TestAppWindowToken appWindowToken = new TestAppWindowToken(defaultDisplayContent);
+        final WindowTestUtils.TestAppWindowToken appWindowToken =
+                new WindowTestUtils.TestAppWindowToken(defaultDisplayContent);
         task.addChild(appWindowToken, 0);
         final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(
                 TYPE_BASE_APPLICATION);
         attrs.setTitle("AppWindow");
-        final TestWindowState appWindow = new TestWindowState(attrs, appWindowToken);
+        final WindowTestUtils.TestWindowState appWindow = createWindowState(attrs, appWindowToken);
         appWindowToken.addWindow(appWindow);
 
         // Set initial orientation and update.
@@ -165,7 +169,8 @@ public class AppWindowTokenTests extends WindowTestsBase {
 
     @Test
     public void testGetOrientation() throws Exception {
-        final TestAppWindowToken token = new TestAppWindowToken(sDisplayContent);
+        final WindowTestUtils.TestAppWindowToken token =
+                new WindowTestUtils.TestAppWindowToken(sDisplayContent);
         token.setOrientation(SCREEN_ORIENTATION_LANDSCAPE);
 
         token.setFillsParent(false);

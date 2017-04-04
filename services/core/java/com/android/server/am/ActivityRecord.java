@@ -229,7 +229,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     private int theme;              // resource identifier of activity's theme.
     private int realTheme;          // actual theme resource we will use, never 0.
     private int windowFlags;        // custom window flags for preview window.
-    TaskRecord task;        // the task this is in.
+    private TaskRecord task;        // the task this is in.
     private long createTime = System.currentTimeMillis();
     long displayStartTime;  // when we started launching this activity
     long fullyDrawnStartTime; // when we started launching this activity
@@ -686,7 +686,46 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
 
     @Override
     protected ConfigurationContainer getParent() {
+        return getTask();
+    }
+
+    TaskRecord getTask() {
         return task;
+    }
+
+    /**
+     * Sets reference to the {@link TaskRecord} the {@link ActivityRecord} will treat as its parent.
+     * Note that this does not actually add the {@link ActivityRecord} as a {@link TaskRecord}
+     * children. However, this method will clean up references to this {@link ActivityRecord} in
+     * {@link ActivityStack}.
+     * @param task The new parent {@link TaskRecord}.
+     */
+    void setTask(TaskRecord task) {
+        setTask(task, false /*reparenting*/);
+    }
+
+    /**
+     * This method should only be called by {@link TaskRecord#removeActivity(ActivityRecord)}.
+     */
+    void setTask(TaskRecord task, boolean reparenting) {
+        // Do nothing if the {@link TaskRecord} is the same as the current {@link getTask}.
+        if (task != null && task == getTask()) {
+            return;
+        }
+
+        final ActivityStack stack = getStack();
+
+        // If the new {@link TaskRecord} is from a different {@link ActivityStack}, remove this
+        // {@link ActivityRecord} from its current {@link ActivityStack}.
+        if (!reparenting && stack != null && (task == null || stack != task.getStack())) {
+            stack.onActivityRemovedFromStack(this);
+        }
+
+        this.task = task;
+
+        if (!reparenting) {
+            onParentChanged();
+        }
     }
 
     static class Token extends IApplicationToken.Stub {
@@ -925,8 +964,8 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         // Must reparent first in window manager
         mWindowContainerController.reparent(newTask.getWindowContainerController(), position);
 
-        // Remove the activity from the old task and add it to the new task
-        prevTask.removeActivity(this);
+        // Remove the activity from the old task and add it to the new task.
+        prevTask.removeActivity(this, true /*reparenting*/);
 
         newTask.addActivityAtIndex(position, this);
     }

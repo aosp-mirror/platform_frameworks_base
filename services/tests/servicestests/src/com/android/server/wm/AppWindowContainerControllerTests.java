@@ -44,7 +44,8 @@ public class AppWindowContainerControllerTests extends WindowTestsBase {
 
     @Test
     public void testRemoveContainer() throws Exception {
-        final TestAppWindowContainerController controller = createAppWindowController();
+        final WindowTestUtils.TestAppWindowContainerController controller =
+                createAppWindowController();
 
         // Assert token was added to display.
         assertNotNull(sDisplayContent.getWindowToken(controller.mToken.asBinder()));
@@ -61,7 +62,8 @@ public class AppWindowContainerControllerTests extends WindowTestsBase {
 
     @Test
     public void testSetOrientation() throws Exception {
-        final TestAppWindowContainerController controller = createAppWindowController();
+        final WindowTestUtils.TestAppWindowContainerController controller =
+                createAppWindowController();
 
         // Assert orientation is unspecified to start.
         assertEquals(SCREEN_ORIENTATION_UNSPECIFIED, controller.getOrientation());
@@ -92,7 +94,8 @@ public class AppWindowContainerControllerTests extends WindowTestsBase {
 
     @Test
     public void testCreateRemoveStartingWindow() throws Exception {
-        final TestAppWindowContainerController controller = createAppWindowController();
+        final WindowTestUtils.TestAppWindowContainerController controller =
+                createAppWindowController();
         controller.addStartingWindow(InstrumentationRegistry.getContext().getPackageName(),
                 android.R.style.Theme, null, "Test", 0, 0, 0, 0, null, true, true, false);
         waitUntilHandlerIdle();
@@ -105,8 +108,10 @@ public class AppWindowContainerControllerTests extends WindowTestsBase {
 
     @Test
     public void testTransferStartingWindow() throws Exception {
-        final TestAppWindowContainerController controller1 = createAppWindowController();
-        final TestAppWindowContainerController controller2 = createAppWindowController();
+        final WindowTestUtils.TestAppWindowContainerController controller1 =
+                createAppWindowController();
+        final WindowTestUtils.TestAppWindowContainerController controller2 =
+                createAppWindowController();
         controller1.addStartingWindow(InstrumentationRegistry.getContext().getPackageName(),
                 android.R.style.Theme, null, "Test", 0, 0, 0, 0, null, true, true, false);
         waitUntilHandlerIdle();
@@ -120,8 +125,10 @@ public class AppWindowContainerControllerTests extends WindowTestsBase {
 
     @Test
     public void testTransferStartingWindowWhileCreating() throws Exception {
-        final TestAppWindowContainerController controller1 = createAppWindowController();
-        final TestAppWindowContainerController controller2 = createAppWindowController();
+        final WindowTestUtils.TestAppWindowContainerController controller1 =
+                createAppWindowController();
+        final WindowTestUtils.TestAppWindowContainerController controller2 =
+                createAppWindowController();
         sPolicy.setRunnableWhenAddingSplashScreen(() -> {
 
             // Surprise, ...! Transfer window in the middle of the creation flow.
@@ -140,16 +147,16 @@ public class AppWindowContainerControllerTests extends WindowTestsBase {
     public void testReparent() throws Exception {
         final StackWindowController stackController =
             createStackControllerOnDisplay(sDisplayContent);
-        final TestTaskWindowContainerController taskController1 =
-                new TestTaskWindowContainerController(stackController);
-        final TestAppWindowContainerController appWindowController1 = createAppWindowController(
-                taskController1);
-        final TestTaskWindowContainerController taskController2 =
-                new TestTaskWindowContainerController(stackController);
-        final TestAppWindowContainerController appWindowController2 = createAppWindowController(
-                taskController2);
-        final TestTaskWindowContainerController taskController3 =
-                new TestTaskWindowContainerController(stackController);
+        final WindowTestUtils.TestTaskWindowContainerController taskController1 =
+                new WindowTestUtils.TestTaskWindowContainerController(stackController);
+        final WindowTestUtils.TestAppWindowContainerController appWindowController1 =
+                createAppWindowController(taskController1);
+        final WindowTestUtils.TestTaskWindowContainerController taskController2 =
+                new WindowTestUtils.TestTaskWindowContainerController(stackController);
+        final WindowTestUtils.TestAppWindowContainerController appWindowController2 =
+                createAppWindowController(taskController2);
+        final WindowTestUtils.TestTaskWindowContainerController taskController3 =
+                new WindowTestUtils.TestTaskWindowContainerController(stackController);
 
         try {
             appWindowController1.reparent(taskController1, 0);
@@ -169,16 +176,18 @@ public class AppWindowContainerControllerTests extends WindowTestsBase {
         // Reparent the app window and ensure that it is moved
         appWindowController1.reparent(taskController2, 0);
         assertEquals(taskController2.mContainer, appWindowController1.mContainer.getParent());
-        assertEquals(0, ((TestAppWindowToken) appWindowController1.mContainer).positionInParent());
-        assertEquals(1, ((TestAppWindowToken) appWindowController2.mContainer).positionInParent());
+        assertEquals(0, ((WindowTestUtils.TestAppWindowToken) appWindowController1.mContainer)
+                .positionInParent());
+        assertEquals(1, ((WindowTestUtils.TestAppWindowToken) appWindowController2.mContainer)
+                .positionInParent());
     }
 
-    private TestAppWindowContainerController createAppWindowController() {
-        return createAppWindowController(new TestTaskWindowContainerController());
+    private WindowTestUtils.TestAppWindowContainerController createAppWindowController() {
+        return createAppWindowController(new WindowTestUtils.TestTaskWindowContainerController());
     }
 
-    private TestAppWindowContainerController createAppWindowController(
-            TestTaskWindowContainerController taskController) {
-        return new TestAppWindowContainerController(taskController);
+    private WindowTestUtils.TestAppWindowContainerController createAppWindowController(
+            WindowTestUtils.TestTaskWindowContainerController taskController) {
+        return new WindowTestUtils.TestAppWindowContainerController(taskController);
     }
 }
