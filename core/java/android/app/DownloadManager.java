@@ -18,6 +18,7 @@ package android.app;
 
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
+import android.annotation.SystemApi;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.content.ContentResolver;
 import android.content.ContentUris;
@@ -320,6 +321,11 @@ public class DownloadManager {
      * Intent using {@link android.content.Intent#getLongArrayExtra(String)}.
      */
     public static final String EXTRA_NOTIFICATION_CLICK_DOWNLOAD_IDS = "extra_click_download_ids";
+
+    /** {@hide} */
+    @SystemApi
+    public static final String ACTION_DOWNLOAD_COMPLETED =
+            "android.intent.action.DOWNLOAD_COMPLETED";
 
     /**
      * columns to request from DownloadProvider.
