@@ -2945,6 +2945,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
                 mStatusBar = win;
                 mStatusBarController.setWindow(win);
+                setKeyguardOccludedLw(mKeyguardOccluded, true /* force */);
                 break;
             case TYPE_NAVIGATION_BAR:
                 mContext.enforceCallingOrSelfPermission(
@@ -3832,7 +3833,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mPendingKeyguardOccluded = occluded;
             mKeyguardOccludedChanged = true;
         } else {
-            setKeyguardOccludedLw(occluded);
+            setKeyguardOccludedLw(occluded, false /* force */);
         }
     }
 
@@ -3841,7 +3842,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             if (DEBUG_KEYGUARD) Slog.d(TAG, "transition/occluded changed occluded="
                     + mPendingKeyguardOccluded);
             mKeyguardOccludedChanged = false;
-            if (setKeyguardOccludedLw(mPendingKeyguardOccluded)) {
+            if (setKeyguardOccludedLw(mPendingKeyguardOccluded, false /* force */)) {
                 return FINISH_LAYOUT_REDO_LAYOUT | FINISH_LAYOUT_REDO_WALLPAPER;
             }
         }
@@ -5472,23 +5473,27 @@ public class PhoneWindowManager implements WindowManagerPolicy {
      *
      * @return Whether the flags have changed and we have to redo the layout.
      */
-    private boolean setKeyguardOccludedLw(boolean isOccluded) {
+    private boolean setKeyguardOccludedLw(boolean isOccluded, boolean force) {
         if (DEBUG_KEYGUARD) Slog.d(TAG, "setKeyguardOccluded occluded=" + isOccluded);
         boolean wasOccluded = mKeyguardOccluded;
         boolean showing = mKeyguardDelegate.isShowing();
         if (wasOccluded && !isOccluded && showing) {
             mKeyguardOccluded = false;
             mKeyguardDelegate.setOccluded(false, true /* animate */);
-            mStatusBar.getAttrs().privateFlags |= PRIVATE_FLAG_KEYGUARD;
-            if (!mKeyguardDelegate.hasLockscreenWallpaper()) {
-                mStatusBar.getAttrs().flags |= FLAG_SHOW_WALLPAPER;
+            if (mStatusBar != null) {
+                mStatusBar.getAttrs().privateFlags |= PRIVATE_FLAG_KEYGUARD;
+                if (!mKeyguardDelegate.hasLockscreenWallpaper()) {
+                    mStatusBar.getAttrs().flags |= FLAG_SHOW_WALLPAPER;
+                }
             }
             return true;
         } else if (!wasOccluded && isOccluded && showing) {
             mKeyguardOccluded = true;
             mKeyguardDelegate.setOccluded(true, false /* animate */);
-            mStatusBar.getAttrs().privateFlags &= ~PRIVATE_FLAG_KEYGUARD;
-            mStatusBar.getAttrs().flags &= ~FLAG_SHOW_WALLPAPER;
+            if (mStatusBar != null) {
+                mStatusBar.getAttrs().privateFlags &= ~PRIVATE_FLAG_KEYGUARD;
+                mStatusBar.getAttrs().flags &= ~FLAG_SHOW_WALLPAPER;
+            }
             return true;
         } else if (wasOccluded != isOccluded) {
             mKeyguardOccluded = isOccluded;
