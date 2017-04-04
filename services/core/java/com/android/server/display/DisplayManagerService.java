@@ -253,6 +253,17 @@ public final class DisplayManagerService extends SystemService {
 
         PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         mGlobalDisplayBrightness = pm.getDefaultScreenBrightnessSetting();
+
+    }
+
+    public void setupSchedulerPolicies() {
+	/*
+	 * android.display is critical to user experience and we should
+	 * make sure it is not in the default foregroup groups, add it to
+	 * top-app to make sure it uses all the cores and scheduling
+	 * settings for top-app when it runs.
+	 */
+	Process.setThreadGroupAndCpuset(DisplayThread.get().getThreadId(), Process.THREAD_GROUP_TOP_APP);
     }
 
     @Override
