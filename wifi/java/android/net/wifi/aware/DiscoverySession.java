@@ -128,8 +128,11 @@ public class DiscoverySession {
     @Override
     protected void finalize() throws Throwable {
         try {
-            if (!mTerminated) {
+            if (mCloseGuard != null) {
                 mCloseGuard.warnIfOpen();
+            }
+
+            if (!mTerminated) {
                 destroy();
             }
         } finally {

@@ -159,7 +159,10 @@ public final class MidiInputPort extends MidiReceiver implements Closeable {
     @Override
     protected void finalize() throws Throwable {
         try {
-            mGuard.warnIfOpen();
+            if (mGuard != null) {
+                mGuard.warnIfOpen();
+            }
+
             // not safe to make binder calls from finalize()
             mDeviceServer = null;
             close();

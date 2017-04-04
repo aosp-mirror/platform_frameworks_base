@@ -429,7 +429,10 @@ public final class MidiDeviceServer implements Closeable {
     @Override
     protected void finalize() throws Throwable {
         try {
-            mGuard.warnIfOpen();
+            if (mGuard != null) {
+                mGuard.warnIfOpen();
+            }
+
             close();
         } finally {
             super.finalize();

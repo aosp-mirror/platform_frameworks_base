@@ -552,8 +552,11 @@ public final class PageAdapter extends Adapter<ViewHolder> {
     @Override
     protected void finalize() throws Throwable {
         try {
-            if (mState != STATE_DESTROYED) {
+            if (mCloseGuard != null) {
                 mCloseGuard.warnIfOpen();
+            }
+
+            if (mState != STATE_DESTROYED) {
                 destroy(null);
             }
         } finally {

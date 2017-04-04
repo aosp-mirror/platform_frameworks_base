@@ -158,7 +158,10 @@ public final class MemoryIntArray implements Parcelable, Closeable {
     @Override
     protected void finalize() throws Throwable {
         try {
-            mCloseGuard.warnIfOpen();
+            if (mCloseGuard != null) {
+                mCloseGuard.warnIfOpen();
+            }
+
             IoUtils.closeQuietly(this);
         } finally {
             super.finalize();

@@ -233,7 +233,10 @@ public class MtpDatabase implements AutoCloseable {
     @Override
     protected void finalize() throws Throwable {
         try {
-            mCloseGuard.warnIfOpen();
+            if (mCloseGuard != null) {
+                mCloseGuard.warnIfOpen();
+            }
+
             close();
         } finally {
             super.finalize();

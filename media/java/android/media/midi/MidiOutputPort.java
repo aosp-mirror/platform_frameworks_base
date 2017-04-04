@@ -145,7 +145,10 @@ public final class MidiOutputPort extends MidiSender implements Closeable {
     @Override
     protected void finalize() throws Throwable {
         try {
-            mGuard.warnIfOpen();
+            if (mGuard != null) {
+                mGuard.warnIfOpen();
+            }
+
             // not safe to make binder calls from finalize()
             mDeviceServer = null;
             close();
