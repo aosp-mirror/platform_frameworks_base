@@ -42,7 +42,6 @@ import java.util.List;
  *
  * @hide
  */
-@VisibleForTesting
 public class NetworkScorerAppManager {
     private static final String TAG = "NetworkScorerAppManager";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
@@ -64,8 +63,7 @@ public class NetworkScorerAppManager {
      * Returns the list of available scorer apps. The list will be empty if there are
      * no valid scorers.
      */
-    @VisibleForTesting
-    public List<NetworkScorerAppData> getAllValidScorers() {
+    List<NetworkScorerAppData> getAllValidScorers() {
         if (VERBOSE) Log.v(TAG, "getAllValidScorers()");
         final PackageManager pm = mContext.getPackageManager();
         final Intent serviceIntent = new Intent(NetworkScoreManager.ACTION_RECOMMEND_NETWORKS);
@@ -170,8 +168,7 @@ public class NetworkScorerAppManager {
      *     it was disabled or uninstalled).
      */
     @Nullable
-    @VisibleForTesting
-    public NetworkScorerAppData getActiveScorer() {
+    NetworkScorerAppData getActiveScorer() {
         final int enabledSetting = getNetworkRecommendationsEnabledSetting();
         if (enabledSetting == NetworkScoreManager.RECOMMENDATIONS_ENABLED_FORCED_OFF) {
             return null;
@@ -214,8 +211,7 @@ public class NetworkScorerAppManager {
      * @return true if the scorer was changed, or false if the package is not a valid scorer or
      *         a valid network recommendation provider exists.
      */
-    @VisibleForTesting
-    public boolean setActiveScorer(String packageName) {
+    boolean setActiveScorer(String packageName) {
         final String oldPackageName = getNetworkRecommendationsPackage();
 
         if (TextUtils.equals(oldPackageName, packageName)) {
@@ -250,8 +246,7 @@ public class NetworkScorerAppManager {
      * is no longer valid then {@link Settings.Global#NETWORK_RECOMMENDATIONS_ENABLED} will be set
      * to <code>0</code> (disabled).
      */
-    @VisibleForTesting
-    public void updateState() {
+    void updateState() {
         final int enabledSetting = getNetworkRecommendationsEnabledSetting();
         if (enabledSetting == NetworkScoreManager.RECOMMENDATIONS_ENABLED_FORCED_OFF) {
             // Don't change anything if it's forced off.
@@ -283,6 +278,56 @@ public class NetworkScorerAppManager {
                 setNetworkRecommendationsEnabledSetting(
                         NetworkScoreManager.RECOMMENDATIONS_ENABLED_OFF);
             }
+        }
+    }
+
+    /**
+     * Migrates the NETWORK_SCORER_APP Setting to the USE_OPEN_WIFI_PACKAGE Setting.
+     */
+    void migrateNetworkScorerAppSettingIfNeeded() {
+        final String scorerAppPkgNameSetting =
+                mSettingsFacade.getString(mContext, Settings.Global.NETWORK_SCORER_APP);
+        if (TextUtils.isEmpty(scorerAppPkgNameSetting)) {
+            // Early exit, nothing to do.
+            return;
+        }
+
+        final NetworkScorerAppData currentAppData = getActiveScorer();
+        if (currentAppData == null) {
+            // Don't touch anything until we have an active scorer to work with.
+            return;
+        }
+
+        if (DEBUG) {
+            Log.d(TAG, "Migrating Settings.Global.NETWORK_SCORER_APP "
+                    + "(" + scorerAppPkgNameSetting + ")...");
+        }
+
+        // If the new (useOpenWifi) Setting isn't set and the old Setting's value matches the
+        // new metadata value then update the new Setting with the old value. Otherwise it's a
+        // mismatch so we shouldn't enable the Setting automatically.
+        final ComponentName enableUseOpenWifiActivity =
+                currentAppData.getEnableUseOpenWifiActivity();
+        final String useOpenWifiSetting =
+                mSettingsFacade.getString(mContext, Settings.Global.USE_OPEN_WIFI_PACKAGE);
+        if (TextUtils.isEmpty(useOpenWifiSetting)
+                && enableUseOpenWifiActivity != null
+                && scorerAppPkgNameSetting.equals(enableUseOpenWifiActivity.getPackageName())) {
+            mSettingsFacade.putString(mContext, Settings.Global.USE_OPEN_WIFI_PACKAGE,
+                    scorerAppPkgNameSetting);
+            if (DEBUG) {
+                Log.d(TAG, "Settings.Global.USE_OPEN_WIFI_PACKAGE set to "
+                        + "'" + scorerAppPkgNameSetting + "'.");
+            }
+        }
+
+        // Clear out the old setting so we don't run through the migration code again.
+        mSettingsFacade.putString(mContext, Settings.Global.NETWORK_SCORER_APP, null);
+        if (DEBUG) {
+            Log.d(TAG, "Settings.Global.NETWORK_SCORER_APP migration complete.");
+            final String setting =
+                    mSettingsFacade.getString(mContext, Settings.Global.USE_OPEN_WIFI_PACKAGE);
+            Log.d(TAG, "Settings.Global.USE_OPEN_WIFI_PACKAGE is: '" + setting + "'.");
         }
     }
 
