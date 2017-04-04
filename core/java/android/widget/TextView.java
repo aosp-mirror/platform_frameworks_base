@@ -610,7 +610,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     private int mBreakStrategy;
     private int mHyphenationFrequency;
-    private boolean mJustify;
+    private int mJustificationMode;
 
     private int mMaximum = Integer.MAX_VALUE;
     private int mMaxMode = LINES;
@@ -821,7 +821,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         String fontFeatureSettings = null;
         mBreakStrategy = Layout.BREAK_STRATEGY_SIMPLE;
         mHyphenationFrequency = Layout.HYPHENATION_FREQUENCY_NONE;
-        mJustify = false;
+        mJustificationMode = Layout.JUSTIFICATION_MODE_NONE;
 
         final Resources.Theme theme = context.getTheme();
 
@@ -3738,14 +3738,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * Enables or disables full justification. The default value is false. If the last line is too
-     * short for justification, the last line will be displayed with the alignment set by
-     * {@link android.view.View#setTextAlignment}.
+     * Set justification mode. The default value is {@link Layout#JUSTIFICATION_MODE_NONE}. If the
+     * last line is too short for justification, the last line will be displayed with the
+     * alignment set by {@link android.view.View#setTextAlignment}.
      *
-     * @see #getJustify()
+     * @see #getJustificationMode()
      */
-    public void setJustify(boolean justify) {
-        mJustify = justify;
+    @Layout.JustificationMode
+    public void setJustificationMode(@Layout.JustificationMode int justificationMode) {
+        mJustificationMode = justificationMode;
         if (mLayout != null) {
             nullLayouts();
             requestLayout();
@@ -3754,12 +3755,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * @return true if currently paragraph justification is enabled.
+     * @return true if currently paragraph justification mode.
      *
-     * @see #setJustify(boolean)
+     * @see #setJustificationMode(int)
      */
-    public boolean getJustify() {
-        return mJustify;
+    public @Layout.JustificationMode int getJustificationMode() {
+        return mJustificationMode;
     }
 
     /**
@@ -7683,7 +7684,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         .setIncludePad(mIncludePad)
                         .setBreakStrategy(mBreakStrategy)
                         .setHyphenationFrequency(mHyphenationFrequency)
-                        .setJustify(mJustify)
+                        .setJustificationMode(mJustificationMode)
                         .setMaxLines(mMaxMode == LINES ? mMaximum : Integer.MAX_VALUE);
                 if (shouldEllipsize) {
                     builder.setEllipsize(mEllipsize)
@@ -7725,7 +7726,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (mText instanceof Spannable) {
             result = new DynamicLayout(mText, mTransformed, mTextPaint, wantWidth,
                     alignment, mTextDir, mSpacingMult, mSpacingAdd, mIncludePad,
-                    mBreakStrategy, mHyphenationFrequency, mJustify,
+                    mBreakStrategy, mHyphenationFrequency, mJustificationMode,
                     getKeyListener() == null ? effectiveEllipsize : null, ellipsisWidth);
         } else {
             if (boring == UNKNOWN_BORING) {
@@ -7775,7 +7776,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     .setIncludePad(mIncludePad)
                     .setBreakStrategy(mBreakStrategy)
                     .setHyphenationFrequency(mHyphenationFrequency)
-                    .setJustify(mJustify)
+                    .setJustificationMode(mJustificationMode)
                     .setMaxLines(mMaxMode == LINES ? mMaximum : Integer.MAX_VALUE);
             if (shouldEllipsize) {
                 builder.setEllipsize(effectiveEllipsize)
@@ -8115,7 +8116,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     .setIncludePad(getIncludeFontPadding())
                     .setBreakStrategy(getBreakStrategy())
                     .setHyphenationFrequency(getHyphenationFrequency())
-                    .setJustify(getJustify())
+                    .setJustificationMode(getJustificationMode())
                     .setMaxLines(mMaxMode == LINES ? mMaximum : Integer.MAX_VALUE)
                     .setTextDirection(getTextDirectionHeuristic());
 
