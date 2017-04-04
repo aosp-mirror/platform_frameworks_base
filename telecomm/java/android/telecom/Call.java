@@ -348,6 +348,7 @@ public final class Call {
         private final StatusHints mStatusHints;
         private final Bundle mExtras;
         private final Bundle mIntentExtras;
+        private final long mCreationTimeMillis;
 
         /**
          * Whether the supplied capabilities  supports the specified capability.
@@ -570,9 +571,12 @@ public final class Call {
         }
 
         /**
-         * @return The time the {@code Call} has been connected. This information is updated
-         * periodically, but user interfaces should not rely on this to display any "call time
-         * clock".
+         * Returns the time the {@link Call} connected (i.e. became active).  This information is
+         * updated periodically, but user interfaces should not rely on this to display the "call
+         * time clock".  For the time when the call was first added to Telecom, see
+         * {@link #getCreationTimeMillis()}.
+         *
+         * @return The time the {@link Call} connected in milliseconds since the epoch.
          */
         public final long getConnectTimeMillis() {
             return mConnectTimeMillis;
@@ -614,6 +618,18 @@ public final class Call {
             return mIntentExtras;
         }
 
+        /**
+         * Returns the time when the call was first created and added to Telecom.  This is the same
+         * time that is logged as the start time in the Call Log (see
+         * {@link android.provider.CallLog.Calls#DATE}).  To determine when the call was connected
+         * (became active), see {@link #getConnectTimeMillis()}.
+         *
+         * @return The creation time of the call, in millis since the epoch.
+         */
+        public long getCreationTimeMillis() {
+            return mCreationTimeMillis;
+        }
+
         @Override
         public boolean equals(Object o) {
             if (o instanceof Details) {
@@ -633,28 +649,29 @@ public final class Call {
                         Objects.equals(mVideoState, d.mVideoState) &&
                         Objects.equals(mStatusHints, d.mStatusHints) &&
                         areBundlesEqual(mExtras, d.mExtras) &&
-                        areBundlesEqual(mIntentExtras, d.mIntentExtras);
+                        areBundlesEqual(mIntentExtras, d.mIntentExtras) &&
+                        Objects.equals(mCreationTimeMillis, d.mCreationTimeMillis);
             }
             return false;
         }
 
         @Override
         public int hashCode() {
-            return
-                    Objects.hashCode(mHandle) +
-                    Objects.hashCode(mHandlePresentation) +
-                    Objects.hashCode(mCallerDisplayName) +
-                    Objects.hashCode(mCallerDisplayNamePresentation) +
-                    Objects.hashCode(mAccountHandle) +
-                    Objects.hashCode(mCallCapabilities) +
-                    Objects.hashCode(mCallProperties) +
-                    Objects.hashCode(mDisconnectCause) +
-                    Objects.hashCode(mConnectTimeMillis) +
-                    Objects.hashCode(mGatewayInfo) +
-                    Objects.hashCode(mVideoState) +
-                    Objects.hashCode(mStatusHints) +
-                    Objects.hashCode(mExtras) +
-                    Objects.hashCode(mIntentExtras);
+            return Objects.hash(mHandle,
+                            mHandlePresentation,
+                            mCallerDisplayName,
+                            mCallerDisplayNamePresentation,
+                            mAccountHandle,
+                            mCallCapabilities,
+                            mCallProperties,
+                            mDisconnectCause,
+                            mConnectTimeMillis,
+                            mGatewayInfo,
+                            mVideoState,
+                            mStatusHints,
+                            mExtras,
+                            mIntentExtras,
+                            mCreationTimeMillis);
         }
 
         /** {@hide} */
@@ -673,7 +690,8 @@ public final class Call {
                 int videoState,
                 StatusHints statusHints,
                 Bundle extras,
-                Bundle intentExtras) {
+                Bundle intentExtras,
+                long creationTimeMillis) {
             mTelecomCallId = telecomCallId;
             mHandle = handle;
             mHandlePresentation = handlePresentation;
@@ -689,6 +707,7 @@ public final class Call {
             mStatusHints = statusHints;
             mExtras = extras;
             mIntentExtras = intentExtras;
+            mCreationTimeMillis = creationTimeMillis;
         }
 
         /** {@hide} */
@@ -708,7 +727,8 @@ public final class Call {
                     parcelableCall.getVideoState(),
                     parcelableCall.getStatusHints(),
                     parcelableCall.getExtras(),
-                    parcelableCall.getIntentExtras());
+                    parcelableCall.getIntentExtras(),
+                    parcelableCall.getCreationTimeMillis());
         }
 
         @Override
