@@ -290,7 +290,8 @@ final class AutofillManagerServiceImpl {
                 + " f=" + flags;
         mRequestsHistory.log(historyItem);
 
-        // TODO(b/33197203): Handle partitioning
+        // TODO(b/33197203): Handle scenario when user forced autofill after app was already
+        // autofilled.
         final Session session = mSessions.get(activityToken);
         if (session != null) {
             // Already started...
