@@ -7739,13 +7739,6 @@
         <attr name="settingsActivity" />
     </declare-styleable>
 
-    <!--  TODO(b/35956626): temporary until clients change to AutofillService -->
-    <declare-styleable name="AutoFillService">
-        <!-- Fully qualified class name of an activity that allows the user to modify
-             the settings for this service. -->
-        <attr name="settingsActivity" />
-    </declare-styleable>
-
     <!-- =============================== -->
     <!-- Contacts meta-data attributes -->
     <!-- =============================== -->

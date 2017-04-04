@@ -27,9 +27,6 @@ import android.view.ViewStructure.HtmlInfo;
 import android.view.ViewStructure.HtmlInfo.Builder;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
-import android.view.autofill.AutoFillId;
-import android.view.autofill.AutoFillType;
-import android.view.autofill.AutoFillValue;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillValue;
 
@@ -920,15 +917,6 @@ public class AssistStructure implements Parcelable {
         }
 
         /**
-         * @hide
-         * @deprecated TODO(b/35956626): remove once clients use getAutoFilltype
-         */
-        @Deprecated
-        public AutoFillId getAutoFillId() {
-            return AutoFillId.forDaRealId(mAutofillId);
-        }
-
-        /**
          * Gets the id that can be used to autofill the view contents.
          *
          * <p>It's only set when the {@link AssistStructure} is used for autofilling purposes, not
@@ -936,26 +924,6 @@ public class AssistStructure implements Parcelable {
          */
         public AutofillId getAutofillId() {
             return mAutofillId;
-        }
-
-        /**
-         * @hide
-         * @deprecated TODO(b/35956626): remove once clients use getAutoFilltype()
-         */
-        @Deprecated
-        public AutoFillType getAutoFillType() {
-            switch (getAutofillType()) {
-                case View.AUTOFILL_TYPE_TEXT:
-                    return AutoFillType.forText();
-                case View.AUTOFILL_TYPE_TOGGLE:
-                    return AutoFillType.forToggle();
-                case View.AUTOFILL_TYPE_LIST:
-                    return AutoFillType.forList();
-                case View.AUTOFILL_TYPE_DATE:
-                    return AutoFillType.forDate();
-                default:
-                    return null;
-            }
         }
 
         /**
@@ -979,15 +947,6 @@ public class AssistStructure implements Parcelable {
          */
         @Nullable public String[] getAutoFillHints() {
             return mAutofillHints;
-        }
-
-        /**
-         * @hide
-         * @deprecated TODO(b/35956626): remove once clients use getAutoFilltype
-         */
-        @Deprecated
-        public AutoFillValue getAutoFillValue() {
-            return AutoFillValue.forDaRealValue(mAutofillValue);
         }
 
         /**

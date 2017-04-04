@@ -23,8 +23,6 @@ import android.annotation.Nullable;
 import android.content.IntentSender;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.view.autofill.AutoFillId;
-import android.view.autofill.AutoFillValue;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillValue;
 import android.widget.RemoteViews;
@@ -172,15 +170,6 @@ public final class Dataset implements Parcelable {
             throwIfDestroyed();
             mAuthentication = authentication;
             return this;
-        }
-
-        /**
-         * @hide
-         * @deprecated TODO(b/35956626): remove once clients use other setValue()
-         */
-       @Deprecated
-        public @NonNull Builder setValue(@NonNull AutoFillId id, @NonNull AutoFillValue value) {
-            return setValue(id.getDaRealId(), value.getDaRealValue());
         }
 
         /**

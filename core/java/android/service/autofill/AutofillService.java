@@ -71,7 +71,7 @@ public abstract class AutofillService extends Service {
      * Name under which a AutoFillService component publishes information about itself.
      * This meta-data should reference an XML resource containing a
      * <code>&lt;{@link
-     * android.R.styleable#AutoFillService autofill-service}&gt;</code> tag.
+     * android.R.styleable#AutofillService autofill-service}&gt;</code> tag.
      * This is a a sample XML file configuring an AutoFillService:
      * <pre> &lt;autofill-service
      *     android:settingsActivity="foo.bar.SettingsActivity"
