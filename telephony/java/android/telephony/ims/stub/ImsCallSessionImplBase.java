@@ -345,4 +345,29 @@ public class ImsCallSessionImplBase extends IImsCallSession.Stub {
     public boolean isMultiparty() throws RemoteException {
         return false;
     }
+
+    /**
+     * Device issues RTT modify request
+     * @param toProfile The profile with requested changes made
+     */
+    @Override
+    public void sendRttModifyRequest(ImsCallProfile toProfile) {
+    }
+
+    /**
+     * Device responds to Remote RTT modify request
+     * @param status true  Accepted the request
+     *                false  Declined the request
+     */
+    @Override
+    public void sendRttModifyResponse(boolean status) {
+    }
+
+    /**
+     * Device sends RTT message
+     * @param rttMessage RTT message to be sent
+     */
+    @Override
+    public void sendRttMessage(String rttMessage) {
+    }
 }
