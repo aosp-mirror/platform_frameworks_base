@@ -183,20 +183,10 @@ void SkiaCanvasProxy::onDrawImageLattice(const SkImage* image, const Lattice& la
 
 void SkiaCanvasProxy::onDrawVerticesObject(const SkVertices* vertices, SkBlendMode bmode,
         const SkPaint& paint) {
-    // TODO: should we pass through blendmode
     if (mFilterHwuiCalls) {
         return;
     }
-    // convert the SkPoints into floats
-    static_assert(sizeof(SkPoint) == sizeof(float)*2, "SkPoint is no longer two floats");
-    const int floatCount = vertices->vertexCount() << 1;
-    const float* vArray = (const float*)vertices->positions();
-    const float* tArray = (const float*)vertices->texCoords();
-    const int* cArray = (const int*)vertices->colors();
-    // Can remove this cast after changing to SkVertices::VertexMode
-    SkCanvas::VertexMode vmode = static_cast<SkCanvas::VertexMode>(vertices->mode());
-    mCanvas->drawVertices(vmode, floatCount, vArray, tArray, cArray,
-            vertices->indices(), vertices->indexCount(), paint);
+    mCanvas->drawVertices(vertices, bmode, paint);
 }
 
 sk_sp<SkSurface> SkiaCanvasProxy::onNewSurface(const SkImageInfo&, const SkSurfaceProps&) {
@@ -470,19 +460,13 @@ void SkiaCanvasProxy::onDrawPatch(const SkPoint cubics[12], const SkColor colors
     if (mFilterHwuiCalls) {
         return;
     }
-    SkPatchUtils::VertexData data;
-
     SkMatrix matrix;
     mCanvas->getMatrix(&matrix);
     SkISize lod = SkPatchUtils::GetLevelOfDetail(cubics, &matrix);
 
-    // It automatically adjusts lodX and lodY in case it exceeds the number of indices.
-    // If it fails to generate the vertices, then we do not draw.
-    if (SkPatchUtils::getVertexData(&data, cubics, colors, texCoords, lod.width(), lod.height())) {
-        this->drawVertices(SkCanvas::kTriangles_VertexMode, data.fVertexCount, data.fPoints,
-                           data.fTexCoords, data.fColors, bmode, data.fIndices, data.fIndexCount,
-                           paint);
-    }
+    mCanvas->drawVertices(SkPatchUtils::MakeVertices(cubics, colors, texCoords,
+                                                     lod.width(), lod.height()).get(),
+                          bmode, paint);
 }
 
 void SkiaCanvasProxy::onClipRect(const SkRect& rect, SkClipOp op, ClipEdgeStyle) {

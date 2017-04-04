@@ -168,9 +168,7 @@ public:
     virtual void drawArc(float left, float top, float right, float bottom,
             float startAngle, float sweepAngle, bool useCenter, const SkPaint& paint) override;
     virtual void drawPath(const SkPath& path, const SkPaint& paint) override;
-    virtual void drawVertices(SkCanvas::VertexMode vertexMode, int vertexCount,
-            const float* verts, const float* tex, const int* colors,
-            const uint16_t* indices, int indexCount, const SkPaint& paint) override
+    virtual void drawVertices(const SkVertices*, SkBlendMode, const SkPaint& paint) override
         { /* RecordingCanvas does not support drawVertices(); ignore */ }
 
     virtual void drawVectorDrawable(VectorDrawableRoot* tree) override;

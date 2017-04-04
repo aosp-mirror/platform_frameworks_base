@@ -486,12 +486,12 @@ void Bitmap::getSkBitmap(SkBitmap* outBitmap) {
         return;
     }
     outBitmap->setInfo(info(), rowBytes());
-    outBitmap->setPixelRef(this);
+    outBitmap->setPixelRef(sk_ref_sp(this), 0, 0);
 }
 
 void Bitmap::getSkBitmapForShaders(SkBitmap* outBitmap) {
     outBitmap->setInfo(info(), rowBytes());
-    outBitmap->setPixelRef(this);
+    outBitmap->setPixelRef(sk_ref_sp(this), 0, 0);
     outBitmap->setHasHardwareMipMap(mHasHardwareMipMap);
 }
 
