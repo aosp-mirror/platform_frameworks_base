@@ -20,6 +20,7 @@
 #include <android/native_window.h>
 #include <system/window.h>
 
+#include <gui/Surface.h>
 #include <utils/StrongPointer.h>
 
 #include <android_runtime/android_view_Surface.h>
@@ -32,4 +33,12 @@ ANativeWindow* ANativeWindow_fromSurface(JNIEnv* env, jobject surface) {
         win->incStrong((void*)ANativeWindow_fromSurface);
     }
     return win.get();
+}
+
+jobject ANativeWindow_toSurface(JNIEnv* env, ANativeWindow* window) {
+    if (window == NULL) {
+        return NULL;
+    }
+    sp<Surface> surface = static_cast<Surface*>(window);
+    return android_view_Surface_createFromSurface(env, surface);
 }
