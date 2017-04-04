@@ -204,11 +204,12 @@ public abstract class AutofillService extends Service {
      * to notify the result of the request.
      *
      * @param structure {@link Activity}'s view structure.
-     * @param data bundle containing data passed by the service on previous calls to fill.
-     *     This bundle allows your service to keep state between fill and save requests
-     *     as well as when filling different sections of the UI as the system will try to
-     *     aggressively unbind from the service to conserve resources. See {@link
-     *     FillResponse} Javadoc for examples of multiple-sections requests.
+     * @param data bundle containing data passed by the service in a last call to
+     *        {@link FillResponse.Builder#setExtras(Bundle)}, if any. This bundle allows your
+     *        service to keep state between fill and save requests as well as when filling different
+     *        sections of the UI as the system will try to aggressively unbind from the service to
+     *        conserve resources.
+     *        See {@link FillResponse} for examples of multiple-sections requests.
      * @param flags either {@code 0} or {@link AutofillManager#FLAG_MANUAL_REQUEST}.
      * @param cancellationSignal signal for observing cancellation requests. The system will use
      *     this to notify you that the fill result is no longer needed and you should stop
@@ -242,11 +243,12 @@ public abstract class AutofillService extends Service {
      * to notify the result of the request.
      *
      * @param structure {@link Activity}'s view structure.
-     * @param data bundle containing data passed by the service on previous calls to fill.
-     *     This bundle allows your service to keep state between fill and save requests
-     *     as well as when filling different sections of the UI as the system will try to
-     *     aggressively unbind from the service to conserve resources. See {@link
-     *     FillResponse} Javadoc for examples of multiple-sections requests.
+     * @param data bundle containing data passed by the service in a last call to
+     *        {@link FillResponse.Builder#setExtras(Bundle)}, if any. This bundle allows your
+     *        service to keep state between fill and save requests as well as when filling different
+     *        sections of the UI as the system will try to aggressively unbind from the service to
+     *        conserve resources.
+     *        See {@link FillResponse} for examples of multiple-sections requests.
      * @param callback object used to notify the result of the request.
      */
     public abstract void onSaveRequest(@NonNull AssistStructure structure, @Nullable Bundle data,
