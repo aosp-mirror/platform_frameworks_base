@@ -8566,6 +8566,11 @@
         <!-- @hide From Theme.colorBackground, used for the TaskDescription background
                    color. -->
         <attr name="colorBackground" />
+        <!-- @hide From Theme.statusBarColor, used for the TaskDescription status bar color. -->
+        <attr name="statusBarColor"/>
+        <!-- @hide From Theme.navigationBarColor, used for the TaskDescription navigation bar
+                   color. -->
+        <attr name="navigationBarColor"/>
     </declare-styleable>
 
     <declare-styleable name="Shortcut">
