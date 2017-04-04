@@ -101,17 +101,7 @@ sp<Surface> android_view_Surface_getSurface(JNIEnv* env, jobject surfaceObj) {
     return sur;
 }
 
-jobject android_view_Surface_createFromIGraphicBufferProducer(JNIEnv* env,
-        const sp<IGraphicBufferProducer>& bufferProducer) {
-    if (bufferProducer == NULL) {
-        return NULL;
-    }
-
-    sp<Surface> surface(new Surface(bufferProducer, true));
-    if (surface == NULL) {
-        return NULL;
-    }
-
+jobject android_view_Surface_createFromSurface(JNIEnv* env, const sp<Surface>& surface) {
     jobject surfaceObj = env->NewObject(gSurfaceClassInfo.clazz,
             gSurfaceClassInfo.ctor, (jlong)surface.get());
     if (surfaceObj == NULL) {
@@ -124,6 +114,16 @@ jobject android_view_Surface_createFromIGraphicBufferProducer(JNIEnv* env,
     }
     surface->incStrong(&sRefBaseOwner);
     return surfaceObj;
+}
+
+jobject android_view_Surface_createFromIGraphicBufferProducer(JNIEnv* env,
+        const sp<IGraphicBufferProducer>& bufferProducer) {
+    if (bufferProducer == NULL) {
+        return NULL;
+    }
+
+    sp<Surface> surface(new Surface(bufferProducer, true));
+    return android_view_Surface_createFromSurface(env, surface);
 }
 
 int android_view_Surface_mapPublicFormatToHalFormat(PublicFormat f) {
