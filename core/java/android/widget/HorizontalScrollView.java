@@ -1443,7 +1443,7 @@ public class HorizontalScrollView extends FrameLayout {
 
     @Override
     public void requestChildFocus(View child, View focused) {
-        if (focused.getRevealOnFocusHint()) {
+        if (focused != null && focused.getRevealOnFocusHint()) {
             if (!mIsLayoutDirty) {
                 scrollToChild(focused);
             } else {
