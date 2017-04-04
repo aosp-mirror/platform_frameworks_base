@@ -697,8 +697,8 @@ public class DevicePolicyManager {
             "android.app.extra.PROVISIONING_ORGANIZATION_NAME";
 
     /**
-     * A String extra holding a url to the website of the device's provider. The website can be
-     * opened in a browser during provisioning.
+     * A String extra holding a url to the website of the device provider so the user can open it
+     * during provisioning. If the url is not HTTPS, an error will be shown.
      *
      * <p>Use in an intent with action {@link #ACTION_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE}
      *
