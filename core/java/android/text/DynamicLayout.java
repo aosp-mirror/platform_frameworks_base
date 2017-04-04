@@ -85,7 +85,7 @@ public class DynamicLayout extends Layout
         this(base, display, paint, width, align, TextDirectionHeuristics.FIRSTSTRONG_LTR,
                 spacingmult, spacingadd, includepad,
                 StaticLayout.BREAK_STRATEGY_SIMPLE, StaticLayout.HYPHENATION_FREQUENCY_NONE,
-                false /* justify */, ellipsize, ellipsizedWidth);
+                Layout.JUSTIFICATION_MODE_NONE, ellipsize, ellipsizedWidth);
     }
 
     /**
@@ -102,7 +102,7 @@ public class DynamicLayout extends Layout
                          int width, Alignment align, TextDirectionHeuristic textDir,
                          float spacingmult, float spacingadd,
                          boolean includepad, int breakStrategy, int hyphenationFrequency,
-                         boolean justify, TextUtils.TruncateAt ellipsize,
+                         int justificationMode, TextUtils.TruncateAt ellipsize,
                          int ellipsizedWidth) {
         super((ellipsize == null)
                 ? display
@@ -128,7 +128,7 @@ public class DynamicLayout extends Layout
 
         mIncludePad = includepad;
         mBreakStrategy = breakStrategy;
-        mJustify = justify;
+        mJustificationMode = justificationMode;
         mHyphenationFrequency = hyphenationFrequency;
 
         /*
@@ -303,7 +303,7 @@ public class DynamicLayout extends Layout
                 .setEllipsize(mEllipsizeAt)
                 .setBreakStrategy(mBreakStrategy)
                 .setHyphenationFrequency(mHyphenationFrequency)
-                .setJustify(mJustify);
+                .setJustificationMode(mJustificationMode);
         reflowed.generate(b, false, true);
         int n = reflowed.getLineCount();
         // If the new layout has a blank line at the end, but it is not
@@ -811,7 +811,7 @@ public class DynamicLayout extends Layout
     private TextUtils.TruncateAt mEllipsizeAt;
     private int mBreakStrategy;
     private int mHyphenationFrequency;
-    private boolean mJustify;
+    private int mJustificationMode;
 
     private PackedIntVector mInts;
     private PackedObjectVector<Directions> mObjects;
