@@ -26,6 +26,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.res.AssetManager;
 import android.content.res.BridgeAssetManager;
+import android.graphics.fonts.FontVariationAxis;
 import android.text.FontConfig;
 
 import java.awt.Font;
@@ -250,7 +251,7 @@ public class FontFamily_Delegate {
     // ---- delegate methods ----
     @LayoutlibDelegate
     /*package*/ static boolean addFont(FontFamily thisFontFamily, String path, int ttcIndex,
-            FontConfig.Axis[] axes, int weight, int italic) {
+            FontVariationAxis[] axes, int weight, int italic) {
         if (thisFontFamily.mBuilderPtr == 0) {
             assert false : "Unable to call addFont after freezing.";
             return false;

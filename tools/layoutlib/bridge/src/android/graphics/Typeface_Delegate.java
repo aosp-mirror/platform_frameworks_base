@@ -23,6 +23,7 @@ import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
 import android.annotation.NonNull;
 import android.graphics.FontFamily_Delegate.FontVariant;
+import android.graphics.fonts.FontVariationAxis;
 import android.text.FontConfig;
 
 import java.awt.Font;
@@ -163,7 +164,7 @@ public final class Typeface_Delegate {
 
     @LayoutlibDelegate
     /*package*/ static synchronized long nativeCreateFromTypefaceWithVariation(long native_instance,
-            List<FontConfig.Axis> axes) {
+            List<FontVariationAxis> axes) {
         long newInstance = nativeCreateFromTypeface(native_instance, 0);
 
         if (newInstance != 0) {

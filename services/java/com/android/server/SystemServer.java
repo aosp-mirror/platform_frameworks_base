@@ -1027,12 +1027,6 @@ public final class SystemServer {
                 Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
             }
 
-            if (!disableNonCoreServices) {
-                traceBeginAndSlog("StartFontServiceManager");
-                mSystemServiceManager.startService(FontManagerService.Lifecycle.class);
-                traceEnd();
-            }
-
             if (!disableNonCoreServices && !disableTextServices) {
                 traceBeginAndSlog("StartTextServicesManager");
                 mSystemServiceManager.startService(TextServicesManagerService.Lifecycle.class);

@@ -55,7 +55,7 @@ void init_FontUtils(JNIEnv* env) {
     gListClassInfo.mGet = GetMethodIDOrDie(env, listClass, "get", "(I)Ljava/lang/Object;");
     gListClassInfo.mSize = GetMethodIDOrDie(env, listClass, "size", "()I");
 
-    jclass axisClass = FindClassOrDie(env, "android/text/FontConfig$Axis");
+    jclass axisClass = FindClassOrDie(env, "android/graphics/fonts/FontVariationAxis");
     gAxisClassInfo.mTag = GetFieldIDOrDie(env, axisClass, "mTag", "I");
     gAxisClassInfo.mStyleValue = GetFieldIDOrDie(env, axisClass, "mStyleValue", "F");
 }

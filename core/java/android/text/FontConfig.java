@@ -21,7 +21,7 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.graphics.FontListParser;
+import android.graphics.fonts.FontVariationAxis;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -31,6 +31,7 @@ import java.lang.annotation.Retention;
 
 /**
  * Font configuration descriptions for System fonts.
+ * @hide
  */
 public final class FontConfig implements Parcelable {
     private final @NonNull Family[] mFamilies;
@@ -84,78 +85,12 @@ public final class FontConfig implements Parcelable {
     };
 
     /**
-     * Class that holds information about a Font axis.
-     */
-    public static final class Axis implements Parcelable {
-        private final int mTag;
-        private final float mStyleValue;
-
-        public Axis(int tag, float styleValue) {
-            mTag = tag;
-            mStyleValue = styleValue;
-        }
-
-        public Axis(@NonNull String tagString, float styleValue) {
-            if (!FontListParser.isValidTag(tagString)) {
-                throw new IllegalArgumentException("Invalid tag pattern: " + tagString);
-            }
-            mTag = FontListParser.makeTag(tagString);
-            mStyleValue = styleValue;
-        }
-
-        /**
-         * Returns the variable font axis tag associated to this axis.
-         */
-        public int getTag() {
-            return mTag;
-        }
-
-        /**
-         * Returns the style value associated to the given axis for this font.
-         */
-        public float getStyleValue() {
-            return mStyleValue;
-        }
-
-        /**
-         * @hide
-         */
-        public Axis(Parcel in) {
-            mTag = in.readInt();
-            mStyleValue = in.readFloat();
-        }
-
-        @Override
-        public void writeToParcel(Parcel out, int flag) {
-            out.writeInt(mTag);
-            out.writeFloat(mStyleValue);
-        }
-
-        @Override
-        public int describeContents() {
-            return 0;
-        }
-
-        public static final Creator<Axis> CREATOR = new Creator<Axis>() {
-            @Override
-            public Axis createFromParcel(Parcel in) {
-                return new Axis(in);
-            }
-
-            @Override
-            public Axis[] newArray(int size) {
-                return new Axis[size];
-            }
-        };
-    }
-
-    /**
      * Class that holds information about a Font.
      */
     public static final class Font implements Parcelable {
         private final @NonNull String mFontName;
         private final int mTtcIndex;
-        private final @NonNull Axis[] mAxes;
+        private final @NonNull FontVariationAxis[] mAxes;
         private final int mWeight;
         private final boolean mIsItalic;
         private Uri mUri;
@@ -163,8 +98,8 @@ public final class FontConfig implements Parcelable {
         /**
          * @hide
          */
-        public Font(@NonNull String fontName, int ttcIndex, @NonNull Axis[] axes, int weight,
-                boolean isItalic) {
+        public Font(@NonNull String fontName, int ttcIndex, @NonNull FontVariationAxis[] axes,
+                int weight, boolean isItalic) {
             mFontName = fontName;
             mTtcIndex = ttcIndex;
             mAxes = axes;
@@ -189,7 +124,7 @@ public final class FontConfig implements Parcelable {
         /**
          * Returns the list of axes associated to this font.
          */
-        public @NonNull Axis[] getAxes() {
+        public @NonNull FontVariationAxis[] getAxes() {
             return mAxes;
         }
 
@@ -230,7 +165,7 @@ public final class FontConfig implements Parcelable {
         public Font(Parcel in) {
             mFontName = in.readString();
             mTtcIndex = in.readInt();
-            mAxes = in.createTypedArray(Axis.CREATOR);
+            mAxes = in.createTypedArray(FontVariationAxis.CREATOR);
             mWeight = in.readInt();
             mIsItalic = in.readInt() == 1;
             mUri = in.readTypedObject(Uri.CREATOR);

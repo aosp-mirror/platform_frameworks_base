@@ -4061,7 +4061,6 @@ android.text.FontConfig$Family
 android.text.FontConfig$Family$1
 android.text.FontConfig$Font
 android.text.FontConfig$Font$1
-android.text.FontManager
 android.text.GetChars
 android.text.GraphicsOperations
 android.text.Html
@@ -5501,8 +5500,6 @@ com.android.internal.content.PackageHelper
 com.android.internal.content.PackageMonitor
 com.android.internal.content.ReferrerIntent
 com.android.internal.content.ReferrerIntent$1
-com.android.internal.font.IFontManager
-com.android.internal.font.IFontManager$Stub
 com.android.internal.graphics.drawable.AnimationScaleListDrawable
 com.android.internal.graphics.drawable.AnimationScaleListDrawable$AnimationScaleListState
 com.android.internal.hardware.AmbientDisplayConfiguration
