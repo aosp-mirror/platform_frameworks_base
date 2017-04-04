@@ -26,6 +26,8 @@ import android.widget.ImageView;
 import com.android.systemui.Interpolators;
 import com.android.systemui.statusbar.phone.NotificationPanelView;
 
+import java.util.function.Consumer;
+
 public class NotificationDozeHelper {
     private final ColorMatrix mGrayscaleColorMatrix = new ColorMatrix();
 
@@ -68,6 +70,16 @@ public class NotificationDozeHelper {
             animator.addListener(listener);
         }
         animator.start();
+    }
+
+    public void setIntensityDark(Consumer<Float> listener, boolean dark,
+            boolean animate, long delay) {
+        if (animate) {
+            startIntensityAnimation(a -> listener.accept((Float) a.getAnimatedValue()), dark, delay,
+                    null /* listener */);
+        } else {
+            listener.accept(dark ? 1f : 0f);
+        }
     }
 
     public void updateGrayscaleMatrix(float intensity) {
