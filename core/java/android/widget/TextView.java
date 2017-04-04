@@ -56,6 +56,7 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
+import android.graphics.fonts.FontVariationAxis;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.LocaleList;
@@ -3808,10 +3809,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      *         TextView. This function also returns true for empty settings string. Otherwise
      *         returns false.
      *
+     * @throws FontVariationAxis.InvalidFormatException
+     *         If given string is not a valid font variation settings format.
+     *
      * @see #getFontVariationSettings()
      * @see Paint#getFontVariationSettings() Paint.getFontVariationSettings()
      */
-    public boolean setFontVariationSettings(@Nullable String fontVariationSettings) {
+    public boolean setFontVariationSettings(@Nullable String fontVariationSettings)
+            throws FontVariationAxis.InvalidFormatException {
         final String existingSettings = mTextPaint.getFontVariationSettings();
         if (fontVariationSettings == existingSettings
                 || (fontVariationSettings != null

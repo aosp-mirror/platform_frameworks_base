@@ -1817,7 +1817,6 @@ android.text.FontConfig$Family
 android.text.FontConfig$Family$1
 android.text.FontConfig$Font
 android.text.FontConfig$Font$1
-android.text.FontManager
 android.text.GetChars
 android.text.GraphicsOperations
 android.text.Html
