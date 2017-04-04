@@ -69,6 +69,10 @@ extern bool android_view_Surface_isInstanceOf(JNIEnv* env, jobject obj);
 /* Gets the underlying Surface from a Surface Java object. */
 extern sp<Surface> android_view_Surface_getSurface(JNIEnv* env, jobject surfaceObj);
 
+/* Creates a Surface from an android::Surface. */
+extern jobject android_view_Surface_createFromSurface(JNIEnv* env,
+        const sp<Surface>& surface);
+
 /* Creates a Surface from an IGraphicBufferProducer. */
 extern jobject android_view_Surface_createFromIGraphicBufferProducer(JNIEnv* env,
         const sp<IGraphicBufferProducer>& bufferProducer);
