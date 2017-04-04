@@ -941,3 +941,67 @@ TEST(RenderNodeDrawable, renderNode) {
     EXPECT_EQ(2, canvas.mDrawCounter);
 }
 
+
+TEST(ReorderBarrierDrawable, testShadowMatrix) {
+    static const int CANVAS_WIDTH = 100;
+    static const int CANVAS_HEIGHT = 100;
+    static const float TRANSLATE_X = 11.0f;
+    static const float TRANSLATE_Y = 22.0f;
+    static const float CASTER_X = 40.0f;
+    static const float CASTER_Y = 40.0f;
+    static const float CASTER_WIDTH = 20.0f;
+    static const float CASTER_HEIGHT = 20.0f;
+
+
+    class ShadowTestCanvas : public SkCanvas {
+    public:
+        ShadowTestCanvas(int width, int height) : SkCanvas(width, height) {}
+        int getIndex() { return mDrawCounter; }
+
+        virtual void onDrawDrawable(SkDrawable* drawable, const SkMatrix* matrix) override {
+            // expect to draw 2 RenderNodeDrawable, 1 StartReorderBarrierDrawable,
+            // 1 EndReorderBarrierDrawable
+            mDrawCounter++;
+            SkCanvas::onDrawDrawable(drawable, matrix);
+        }
+
+        virtual void didTranslate(SkScalar dx, SkScalar dy) override {
+            mDrawCounter++;
+            EXPECT_EQ(dx, TRANSLATE_X);
+            EXPECT_EQ(dy, TRANSLATE_Y);
+        }
+
+        virtual void didConcat(const SkMatrix& matrix) override {
+            // This function is invoked by EndReorderBarrierDrawable::drawShadow to apply shadow
+            // matrix.
+            mDrawCounter++;
+            EXPECT_EQ(SkMatrix::MakeTrans(CASTER_X, CASTER_Y), matrix);
+            EXPECT_EQ(SkMatrix::MakeTrans(CASTER_X+TRANSLATE_X, CASTER_Y+TRANSLATE_Y),
+                    getTotalMatrix());
+        }
+    protected:
+        int mDrawCounter = 0;
+    };
+
+    auto parent = TestUtils::createSkiaNode(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT,
+            [](RenderProperties& props, SkiaRecordingCanvas& canvas) {
+        canvas.translate(TRANSLATE_X, TRANSLATE_Y);
+        canvas.insertReorderBarrier(true);
+
+        auto node = TestUtils::createSkiaNode(CASTER_X, CASTER_Y, CASTER_X + CASTER_WIDTH,
+                CASTER_Y + CASTER_HEIGHT,
+                [](RenderProperties& props, SkiaRecordingCanvas& canvas) {
+                    props.setElevation(42);
+                    props.mutableOutline().setRoundRect(0, 0, 20, 20, 5, 1);
+                    props.mutableOutline().setShouldClip(true);
+                });
+        canvas.drawRenderNode(node.get());
+        canvas.insertReorderBarrier(false);
+    });
+
+    //create a canvas not backed by any device/pixels, but with dimensions to avoid quick rejection
+    ShadowTestCanvas canvas(CANVAS_WIDTH, CANVAS_HEIGHT);
+    RenderNodeDrawable drawable(parent.get(), &canvas, false);
+    canvas.drawDrawable(&drawable);
+    EXPECT_EQ(6, canvas.getIndex());
+}
