@@ -102,6 +102,7 @@ import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManager.TaskSnapshot;
 import android.app.ActivityManagerInternal;
+import android.app.ActivityThread;
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
 import android.content.BroadcastReceiver;
@@ -3196,19 +3197,25 @@ public class WindowManagerService extends IWindowManager.Stub
     // Called by window manager policy.  Not exposed externally.
     @Override
     public void shutdown(boolean confirm) {
-        ShutdownThread.shutdown(mContext, PowerManager.SHUTDOWN_USER_REQUESTED, confirm);
+        // Pass in the UI context, since ShutdownThread requires it (to show UI).
+        ShutdownThread.shutdown(ActivityThread.currentActivityThread().getSystemUiContext(),
+                PowerManager.SHUTDOWN_USER_REQUESTED, confirm);
     }
 
     // Called by window manager policy.  Not exposed externally.
     @Override
     public void reboot(boolean confirm) {
-        ShutdownThread.reboot(mContext, PowerManager.SHUTDOWN_USER_REQUESTED, confirm);
+        // Pass in the UI context, since ShutdownThread requires it (to show UI).
+        ShutdownThread.reboot(ActivityThread.currentActivityThread().getSystemUiContext(),
+                PowerManager.SHUTDOWN_USER_REQUESTED, confirm);
     }
 
     // Called by window manager policy.  Not exposed externally.
     @Override
     public void rebootSafeMode(boolean confirm) {
-        ShutdownThread.rebootSafeMode(mContext, confirm);
+        // Pass in the UI context, since ShutdownThread requires it (to show UI).
+        ShutdownThread.rebootSafeMode(ActivityThread.currentActivityThread().getSystemUiContext(),
+                confirm);
     }
 
     public void setCurrentProfileIds(final int[] currentProfileIds) {

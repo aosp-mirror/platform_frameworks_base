@@ -1352,7 +1352,7 @@ public class ApplicationPackageManager extends PackageManager {
     public Resources getResourcesForApplication(@NonNull ApplicationInfo app)
             throws NameNotFoundException {
         if (app.packageName.equals("system")) {
-            return mContext.mMainThread.getSystemContext().getResources();
+            return mContext.mMainThread.getSystemUiContext().getResources();
         }
         final boolean sameUid = (app.uid == Process.myUid());
         final Resources r = mContext.mMainThread.getTopLevelResources(
@@ -1383,7 +1383,7 @@ public class ApplicationPackageManager extends PackageManager {
                     "Call does not support special user #" + userId);
         }
         if ("system".equals(appPackageName)) {
-            return mContext.mMainThread.getSystemContext().getResources();
+            return mContext.mMainThread.getSystemUiContext().getResources();
         }
         try {
             ApplicationInfo ai = mPM.getApplicationInfo(appPackageName, sDefaultFlags, userId);

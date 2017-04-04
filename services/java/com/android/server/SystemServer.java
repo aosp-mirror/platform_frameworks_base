@@ -475,6 +475,9 @@ public final class SystemServer {
         ActivityThread activityThread = ActivityThread.systemMain();
         mSystemContext = activityThread.getSystemContext();
         mSystemContext.setTheme(DEFAULT_SYSTEM_THEME);
+
+        final Context systemUiContext = activityThread.getSystemUiContext();
+        systemUiContext.setTheme(DEFAULT_SYSTEM_THEME);
     }
 
     /**

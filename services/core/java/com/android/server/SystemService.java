@@ -16,6 +16,7 @@
 
 package com.android.server;
 
+import android.app.ActivityThread;
 import android.content.Context;
 import android.os.IBinder;
 import android.os.ServiceManager;
@@ -101,6 +102,16 @@ public abstract class SystemService {
      */
     public final Context getContext() {
         return mContext;
+    }
+
+    /**
+     * Get the system UI context. This context is to be used for displaying UI. It is themable,
+     * which means resources can be overridden at runtime. Do not use to retrieve properties that
+     * configure the behavior of the device that is not UX related.
+     */
+    public final Context getUiContext() {
+        // This has already been set up by the time any SystemServices are created.
+        return ActivityThread.currentActivityThread().getSystemUiContext();
     }
 
     /**
