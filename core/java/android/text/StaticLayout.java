@@ -94,7 +94,7 @@ public class StaticLayout extends Layout {
             b.mMaxLines = Integer.MAX_VALUE;
             b.mBreakStrategy = Layout.BREAK_STRATEGY_SIMPLE;
             b.mHyphenationFrequency = Layout.HYPHENATION_FREQUENCY_NONE;
-            b.mJustify = false;
+            b.mJustificationMode = Layout.JUSTIFICATION_MODE_NONE;
 
             b.mMeasuredText = MeasuredText.obtain();
             return b;
@@ -321,15 +321,15 @@ public class StaticLayout extends Layout {
         }
 
         /**
-         * Enables or disables paragraph justification. The default value is disabled (false).
-         * If the last line is too short for justification, the last line will be displayed with
-         * the alignment set by {@link #setAlignment}.
+         * Set paragraph justification mode. The default value is
+         * {@link Layout#JUSTIFICATION_MODE_NONE}. If the last line is too short for justification,
+         * the last line will be displayed with the alignment set by {@link #setAlignment}.
          *
-         * @param justify true for enabling and false for disabling paragraph justification.
+         * @param justificationMode justification mode for the paragraph.
          * @return this builder, useful for chaining.
          */
-        public Builder setJustify(boolean justify) {
-            mJustify = justify;
+        public Builder setJustificationMode(@JustificationMode int justificationMode) {
+            mJustificationMode = justificationMode;
             return this;
         }
 
@@ -418,7 +418,7 @@ public class StaticLayout extends Layout {
         int mHyphenationFrequency;
         int[] mLeftIndents;
         int[] mRightIndents;
-        boolean mJustify;
+        int mJustificationMode;
 
         Paint.FontMetricsInt mFontMetricsInt = new Paint.FontMetricsInt();
 
@@ -572,7 +572,7 @@ public class StaticLayout extends Layout {
 
         mLeftIndents = b.mLeftIndents;
         mRightIndents = b.mRightIndents;
-        setJustify(b.mJustify);
+        setJustificationMode(b.mJustificationMode);
 
         generate(b, b.mIncludePad, b.mIncludePad);
     }
@@ -693,7 +693,8 @@ public class StaticLayout extends Layout {
             nSetupParagraph(b.mNativePtr, chs, paraEnd - paraStart,
                     firstWidth, firstWidthLineCount, restWidth,
                     variableTabStops, TAB_INCREMENT, b.mBreakStrategy, b.mHyphenationFrequency,
-                    b.mJustify);
+                    // TODO: Support more justification mode, e.g. letter spacing, stretching.
+                    b.mJustificationMode != Layout.JUSTIFICATION_MODE_NONE);
             if (mLeftIndents != null || mRightIndents != null) {
                 // TODO(raph) performance: it would be better to do this once per layout rather
                 // than once per paragraph, but that would require a change to the native

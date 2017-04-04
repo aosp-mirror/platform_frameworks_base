@@ -103,6 +103,21 @@ public abstract class Layout {
     private static final ParagraphStyle[] NO_PARA_SPANS =
         ArrayUtils.emptyArray(ParagraphStyle.class);
 
+    /** @hide */
+    @IntDef({JUSTIFICATION_MODE_NONE, JUSTIFICATION_MODE_INTER_WORD})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface JustificationMode {}
+
+    /**
+     * Value for justification mode indicating no justification.
+     */
+    public static final int JUSTIFICATION_MODE_NONE = 0;
+
+    /**
+     * Value for justification mode indicating the text is justified by stretching word spacing.
+     */
+    public static final int JUSTIFICATION_MODE_INTER_WORD = 1;
+
     /**
      * Return how wide a layout must be in order to display the specified text with one line per
      * paragraph.
@@ -219,8 +234,8 @@ public abstract class Layout {
     }
 
     /** @hide */
-    protected void setJustify(boolean justify) {
-        mJustify = justify;
+    protected void setJustificationMode(@JustificationMode int justificationMode) {
+        mJustificationMode = justificationMode;
     }
 
     /**
@@ -272,7 +287,7 @@ public abstract class Layout {
     }
 
     private boolean isJustificationRequired(int lineNum) {
-        if (!mJustify) return false;
+        if (mJustificationMode == JUSTIFICATION_MODE_NONE) return false;
         final int lineEnd = getLineEnd(lineNum);
         return lineEnd < mText.length() && mText.charAt(lineEnd - 1) != '\n';
     }
@@ -2229,7 +2244,7 @@ public abstract class Layout {
     private boolean mSpannedText;
     private TextDirectionHeuristic mTextDir;
     private SpanSet<LineBackgroundSpan> mLineBackgroundSpans;
-    private boolean mJustify;
+    private int mJustificationMode;
 
     public static final int DIR_LEFT_TO_RIGHT = 1;
     public static final int DIR_RIGHT_TO_LEFT = -1;
