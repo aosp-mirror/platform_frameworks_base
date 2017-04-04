@@ -54,8 +54,9 @@ public class TelephonyIntents {
      *
      * <p class="note">This is a protected intent that can only be sent
      * by the system.
+     * @deprecated use {@link Intent#ACTION_SERVICE_STATE}
      */
-    public static final String ACTION_SERVICE_STATE_CHANGED = "android.intent.action.SERVICE_STATE";
+    public static final String ACTION_SERVICE_STATE_CHANGED = Intent.ACTION_SERVICE_STATE;
 
     /**
      * <p>Broadcast Action: The radio technology has changed. The intent will have the following
