@@ -4777,7 +4777,7 @@ final class Settings {
             pw.print(" notLaunched=");
             pw.print(ps.getNotLaunched(user.id));
             pw.print(" enabled=");
-            pw.println(ps.getEnabled(user.id));
+            pw.print(ps.getEnabled(user.id));
             pw.print(" instant=");
             pw.println(ps.getInstantApp(user.id));
             String lastDisabledAppCaller = ps.getLastDisabledAppCaller(user.id);
