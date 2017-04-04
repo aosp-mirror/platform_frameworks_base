@@ -181,7 +181,7 @@ public class BatterySaverTile extends QSTileImpl<BooleanState> implements
                 return;
             }
             mDrawable.setBatteryLevel(100);
-            mDrawable.setPluggedIn(false);
+            mDrawable.setCharging(false);
             mDrawable.setPowerSave(true);
             mDrawable.setShowPercent(false);
             ((ImageView) mCurrentView.findViewById(android.R.id.icon)).setImageDrawable(mDrawable);
