@@ -411,8 +411,16 @@ public abstract class WebSettings {
     public abstract  boolean getUseWebViewBackgroundForOverscrollBackground();
 
     /**
-     * Sets whether the WebView should save form data. The default is true.
+     * Sets whether the WebView should save form data. In Android O, the
+     * platform has implemented a fully functional Autofill feature to store
+     * form data. Therefore, the Webview form data save feature is disabled.
+     *
+     * Note that the feature will continue to be supported on older versions of
+     * Android as before.
+     *
+     * This function does not have any effect.
      */
+    @Deprecated
     public abstract  void setSaveFormData(boolean save);
 
     /**
@@ -421,6 +429,7 @@ public abstract class WebSettings {
      * @return whether the WebView saves form data
      * @see #setSaveFormData
      */
+    @Deprecated
     public abstract boolean getSaveFormData();
 
     /**
