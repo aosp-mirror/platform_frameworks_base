@@ -7344,6 +7344,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
     /** @hide */
     protected void onSetLayoutParams(View child, LayoutParams layoutParams) {
+        requestLayout();
     }
 
     /** @hide */
