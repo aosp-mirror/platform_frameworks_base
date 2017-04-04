@@ -27,5 +27,7 @@ LOCAL_SHARED_LIBRARIES += \
     libft2 \
     libminikin \
     libandroidfw \
-    libRScpp \
+    libRScpp
+
+LOCAL_STATIC_LIBRARIES += \
     libplatformprotos
