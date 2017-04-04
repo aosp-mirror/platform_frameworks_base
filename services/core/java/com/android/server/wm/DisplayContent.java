@@ -180,11 +180,23 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     // Mapping from a token IBinder to a WindowToken object on this display.
     private final HashMap<IBinder, WindowToken> mTokenMap = new HashMap();
 
+    // Initial display metrics.
     int mInitialDisplayWidth = 0;
     int mInitialDisplayHeight = 0;
     int mInitialDisplayDensity = 0;
+
+    /**
+     * Overridden display size. Initialized with {@link #mInitialDisplayWidth}
+     * and {@link #mInitialDisplayHeight}, but can be set via shell command "adb shell wm size".
+     * @see WindowManagerService#setForcedDisplaySize(int, int, int)
+     */
     int mBaseDisplayWidth = 0;
     int mBaseDisplayHeight = 0;
+    /**
+     * Overridden display density for current user. Initialized with {@link #mInitialDisplayDensity}
+     * but can be set from Settings or via shell command "adb shell wm density".
+     * @see WindowManagerService#setForcedDisplayDensityForUser(int, int, int)
+     */
     int mBaseDisplayDensity = 0;
     boolean mDisplayScalingDisabled;
     private final DisplayInfo mDisplayInfo = new DisplayInfo();
@@ -1497,8 +1509,12 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     void updateDisplayInfo() {
+        // Check if display metrics changed and update base values if needed.
+        updateBaseDisplayMetricsIfNeeded();
+
         mDisplay.getDisplayInfo(mDisplayInfo);
         mDisplay.getMetrics(mDisplayMetrics);
+
         for (int i = mTaskStackContainers.size() - 1; i >= 0; --i) {
             mTaskStackContainers.get(i).updateDisplayInfo(null);
         }
@@ -1514,10 +1530,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             }
         }
 
-        mBaseDisplayWidth = mInitialDisplayWidth = mDisplayInfo.logicalWidth;
-        mBaseDisplayHeight = mInitialDisplayHeight = mDisplayInfo.logicalHeight;
-        mBaseDisplayDensity = mInitialDisplayDensity = mDisplayInfo.logicalDensityDpi;
-        mBaseDisplayRect.set(0, 0, mBaseDisplayWidth, mBaseDisplayHeight);
+        updateBaseDisplayMetrics(mDisplayInfo.logicalWidth, mDisplayInfo.logicalHeight,
+                mDisplayInfo.logicalDensityDpi);
+        mInitialDisplayWidth = mDisplayInfo.logicalWidth;
+        mInitialDisplayHeight = mDisplayInfo.logicalHeight;
+        mInitialDisplayDensity = mDisplayInfo.logicalDensityDpi;
     }
 
     void getLogicalDisplayRect(Rect out) {
@@ -1544,6 +1561,42 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             mTmpRectF.set(out);
             mTmpMatrix.mapRect(mTmpRectF);
             mTmpRectF.round(out);
+        }
+    }
+
+    /**
+     * If display metrics changed, overrides are not set and it's not just a rotation - update base
+     * values.
+     */
+    private void updateBaseDisplayMetricsIfNeeded() {
+        // Get real display metrics without overrides from WM.
+        mService.mDisplayManagerInternal.getNonOverrideDisplayInfo(mDisplayId, mDisplayInfo);
+        final int orientation = mDisplayInfo.rotation;
+        final boolean rotated = (orientation == ROTATION_90 || orientation == ROTATION_270);
+        final int newWidth = rotated ? mDisplayInfo.logicalHeight : mDisplayInfo.logicalWidth;
+        final int newHeight = rotated ? mDisplayInfo.logicalWidth : mDisplayInfo.logicalHeight;
+        final int newDensity = mDisplayInfo.logicalDensityDpi;
+
+        final boolean displayMetricsChanged = mInitialDisplayWidth != newWidth
+                || mInitialDisplayHeight != newHeight
+                || mInitialDisplayDensity != mDisplayInfo.logicalDensityDpi;
+
+        if (displayMetricsChanged) {
+            // Check if display size or density is forced.
+            final boolean isDisplaySizeForced = mBaseDisplayWidth != mInitialDisplayWidth
+                    || mBaseDisplayHeight != mInitialDisplayHeight;
+            final boolean isDisplayDensityForced = mBaseDisplayDensity != mInitialDisplayDensity;
+
+            // If there is an override set for base values - use it, otherwise use new values.
+            updateBaseDisplayMetrics(isDisplaySizeForced ? mBaseDisplayWidth : newWidth,
+                    isDisplaySizeForced ? mBaseDisplayHeight : newHeight,
+                    isDisplayDensityForced ? mBaseDisplayDensity : newDensity);
+
+            // Real display metrics changed, so we should also update initial values.
+            mInitialDisplayWidth = newWidth;
+            mInitialDisplayHeight = newHeight;
+            mInitialDisplayDensity = newDensity;
+            mService.reconfigureDisplayLocked(this);
         }
     }
 

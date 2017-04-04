@@ -102,6 +102,16 @@ public abstract class DisplayManagerInternal {
             int displayId, DisplayInfo info);
 
     /**
+     * Get current display info without override from WindowManager.
+     * Current implementation of LogicalDisplay#getDisplayInfoLocked() always returns display info
+     * with overrides from WM if set. This method can be used for getting real display size without
+     * overrides to determine if real changes to display metrics happened.
+     * @param displayId Id of the target display.
+     * @param outInfo {@link DisplayInfo} to fill.
+     */
+    public abstract void getNonOverrideDisplayInfo(int displayId, DisplayInfo outInfo);
+
+    /**
      * Called by the window manager to perform traversals while holding a
      * surface flinger transaction.
      */
