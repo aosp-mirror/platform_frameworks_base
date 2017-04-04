@@ -162,7 +162,7 @@ void EndReorderBarrierDrawable::drawShadow(SkCanvas* canvas, RenderNodeDrawable*
     SkAutoCanvasRestore acr(canvas, true);
 
     SkMatrix shadowMatrix;
-    mat4 hwuiMatrix(caster->getRecordedMatrix());
+    mat4 hwuiMatrix;
     // TODO we don't pass the optional boolean to treat it as a 4x4 matrix
     caster->getRenderNode()->applyViewPropertyTransforms(hwuiMatrix);
     hwuiMatrix.copyTo(shadowMatrix);
