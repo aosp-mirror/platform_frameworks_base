@@ -1962,4 +1962,31 @@
     <!-- Quick settings tile for toggling mobile data [CHAR LIMIT=20] -->
     <string name="mobile_data">Mobile data</string>
 
+    <!-- Label for when wifi is off in QS detail panel [CHAR LIMIT=NONE] -->
+    <string name="wifi_is_off">Wi-Fi is off</string>
+
+    <!-- Label for when bluetooth is off in QS detail panel [CHAR LIMIT=NONE] -->
+    <string name="bt_is_off">Bluetooth is off</string>
+
+    <!-- Label for when Do not disturb is off in QS detail panel [CHAR LIMIT=NONE] -->
+    <string name="dnd_is_off">Do Not Disturb is off</string>
+
+    <!-- Prompt for when Do not disturb is on from automatic rule in QS [CHAR LIMIT=NONE] -->
+    <string name="qs_dnd_prompt_auto_rule">Do Not Disturb was turned on by an automatic rule (<xliff:g name="rule">%s</xliff:g>). Keep current settings?</string>
+
+    <!-- Prompt for when Do not disturb is on from app in QS [CHAR LIMIT=NONE] -->
+    <string name="qs_dnd_prompt_app">Do Not Disturb was turned on by an app (<xliff:g name="app">%s</xliff:g>). Keep current settings?</string>
+
+    <!-- Prompt for when Do not disturb is on from automatic rule or app in QS [CHAR LIMIT=NONE] -->
+    <string name="qs_dnd_prompt_auto_rule_app">Do Not Disturb was turned on by an automatic rule or app. Keep current settings?</string>
+
+    <!-- Description of Do Not Disturb option in QS that ends at the specified time[CHAR LIMIT=20] -->
+    <string name="qs_dnd_until">Until <xliff:g name="time">%s</xliff:g></string>
+
+    <!-- Do Not Disturb button to keep the current settings [CHAR LIMIT=20] -->
+    <string name="qs_dnd_keep">Keep</string>
+
+    <!-- Do Not Disturb button to change the current settings [CHAR LIMIT=20] -->
+    <string name="qs_dnd_replace">Replace</string>
+
 </resources>
