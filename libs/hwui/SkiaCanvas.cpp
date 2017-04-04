@@ -476,7 +476,7 @@ void SkiaCanvas::drawLines(const float* points, int count, const SkPaint& paint)
 void SkiaCanvas::drawRect(float left, float top, float right, float bottom,
         const SkPaint& paint) {
     if (CC_UNLIKELY(paint.nothingToDraw())) return;
-    mCanvas->drawRectCoords(left, top, right, bottom, paint);
+    mCanvas->drawRect({left, top, right, bottom}, paint);
 
 }
 
