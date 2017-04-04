@@ -189,7 +189,7 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
-public class BackupManagerService {
+public class BackupManagerService implements IBackupManagerService {
 
     private static final String TAG = "BackupManagerService";
     static final boolean DEBUG = true;
@@ -1728,6 +1728,7 @@ public class BackupManagerService {
         return false;
     }
 
+    @Override
     public boolean setBackupPassword(String currentPw, String newPw) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
                 "setBackupPassword");
@@ -1808,6 +1809,7 @@ public class BackupManagerService {
         return false;
     }
 
+    @Override
     public boolean hasBackupPassword() {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
                 "hasBackupPassword");
@@ -2368,6 +2370,7 @@ public class BackupManagerService {
 
     // Get the restore-set token for the best-available restore set for this package:
     // the active set if possible, else the ancestral one.  Returns zero if none available.
+    @Override
     public long getAvailableRestoreToken(String packageName) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
                 "getAvailableRestoreToken");
@@ -2385,10 +2388,12 @@ public class BackupManagerService {
         return token;
     }
 
+    @Override
     public int requestBackup(String[] packages, IBackupObserver observer, int flags) {
         return requestBackup(packages, observer, null, flags);
     }
 
+    @Override
     public int requestBackup(String[] packages, IBackupObserver observer,
             IBackupManagerMonitor monitor, int flags) {
         mContext.enforceCallingPermission(android.Manifest.permission.BACKUP, "requestBackup");
@@ -2460,6 +2465,7 @@ public class BackupManagerService {
     }
 
     // Cancel all running backups.
+    @Override
     public void cancelBackups(){
         mContext.enforceCallingPermission(android.Manifest.permission.BACKUP, "cancelBackups");
         if (MORE_DEBUG) {
@@ -9866,6 +9872,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
 
     // ----- IBackupManager binder interface -----
 
+    @Override
     public void dataChanged(final String packageName) {
         final int callingUserHandle = UserHandle.getCallingUserId();
         if (callingUserHandle != UserHandle.USER_SYSTEM) {
@@ -9896,6 +9903,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
     }
 
     // Clear the given package's backup data from the current transport
+    @Override
     public void clearBackupData(String transportName, String packageName) {
         if (DEBUG) Slog.v(TAG, "clearBackupData() of " + packageName + " on " + transportName);
         PackageInfo info;
@@ -9953,6 +9961,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
 
     // Run a backup pass immediately for any applications that have declared
     // that they have pending updates.
+    @Override
     public void backupNow() {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP, "backupNow");
 
@@ -9989,6 +9998,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
     //
     // This is the variant used by 'adb backup'; it requires on-screen confirmation
     // by the user because it can be used to offload data over untrusted USB.
+    @Override
     public void adbBackup(ParcelFileDescriptor fd, boolean includeApks, boolean includeObbs,
             boolean includeShared, boolean doWidgets, boolean doAllApps, boolean includeSystem,
             boolean compress, boolean doKeyValue, String[] pkgList) {
@@ -10064,6 +10074,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
         }
     }
 
+    @Override
     public void fullTransportBackup(String[] pkgNames) {
         mContext.enforceCallingPermission(android.Manifest.permission.BACKUP,
                 "fullTransportBackup");
@@ -10113,6 +10124,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
         }
     }
 
+    @Override
     public void adbRestore(ParcelFileDescriptor fd) {
         mContext.enforceCallingPermission(android.Manifest.permission.BACKUP, "adbRestore");
 
@@ -10211,6 +10223,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
 
     // Confirm that the previously-requested full backup/restore operation can proceed.  This
     // is used to require a user-facing disclosure about the operation.
+    @Override
     public void acknowledgeAdbBackupOrRestore(int token, boolean allow,
             String curPassword, String encPpassword, IFullBackupRestoreObserver observer) {
         if (DEBUG) Slog.d(TAG, "acknowledgeAdbBackupOrRestore : token=" + token
@@ -10311,6 +10324,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
     }
 
     // Enable/disable backups
+    @Override
     public void setBackupEnabled(boolean enable) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
                 "setBackupEnabled");
@@ -10358,6 +10372,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
     }
 
     // Enable/disable automatic restore of app data at install time
+    @Override
     public void setAutoRestore(boolean doAutoRestore) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
                 "setAutoRestore");
@@ -10377,6 +10392,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
     }
 
     // Mark the backup service as having been provisioned
+    @Override
     public void setBackupProvisioned(boolean available) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
                 "setBackupProvisioned");
@@ -10386,12 +10402,14 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
     }
 
     // Report whether the backup mechanism is currently enabled
+    @Override
     public boolean isBackupEnabled() {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP, "isBackupEnabled");
         return mEnabled;    // no need to synchronize just to read it
     }
 
     // Report the name of the currently active transport
+    @Override
     public String getCurrentTransport() {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
                 "getCurrentTransport");
@@ -10401,18 +10419,21 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
     }
 
     // Report all known, available backup transports
+    @Override
     public String[] listAllTransports() {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP, "listAllTransports");
 
         return mTransportManager.getBoundTransportNames();
     }
 
+    @Override
     public ComponentName[] listAllTransportComponents() {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
                 "listAllTransportComponents");
         return mTransportManager.getAllTransportCompenents();
     }
 
+    @Override
     public String[] getTransportWhitelist() {
         // No permission check, intentionally.
         Set<ComponentName> whitelistedComponents = mTransportManager.getTransportWhitelist();
@@ -10426,6 +10447,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
     }
 
     // Select which transport to use for the next backup operation.
+    @Override
     public String selectBackupTransport(String transport) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
                 "selectBackupTransport");
@@ -10443,6 +10465,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
         }
     }
 
+    @Override
     public void selectBackupTransportAsync(final ComponentName transport,
             final ISelectBackupTransportCallback listener) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
@@ -10485,6 +10508,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
     // Supply the configuration Intent for the given transport.  If the name is not one
     // of the available transports, or if the transport does not supply any configuration
     // UI, the method returns null.
+    @Override
     public Intent getConfigurationIntent(String transportName) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
                 "getConfigurationIntent");
@@ -10510,6 +10534,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
     // summary / destination string, the method can return null.
     //
     // This string is used VERBATIM as the summary text of the relevant Settings item!
+    @Override
     public String getDestinationString(String transportName) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
                 "getDestinationString");
@@ -10530,6 +10555,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
     }
 
     // Supply the manage-data intent for the given transport.
+    @Override
     public Intent getDataManagementIntent(String transportName) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
                 "getDataManagementIntent");
@@ -10552,6 +10578,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
 
     // Supply the menu label for affordances that fire the manage-data intent
     // for the given transport.
+    @Override
     public String getDataManagementLabel(String transportName) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
                 "getDataManagementLabel");
@@ -10573,6 +10600,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
 
     // Callback: a requested backup agent has been instantiated.  This should only
     // be called from the Activity Manager.
+    @Override
     public void agentConnected(String packageName, IBinder agentBinder) {
         synchronized(mAgentConnectLock) {
             if (Binder.getCallingUid() == Process.SYSTEM_UID) {
@@ -10591,6 +10619,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
     // Callback: a backup agent has failed to come up, or has unexpectedly quit.
     // If the agent failed to come up in the first place, the agentBinder argument
     // will be null.  This should only be called from the Activity Manager.
+    @Override
     public void agentDisconnected(String packageName) {
         // TODO: handle backup being interrupted
         synchronized(mAgentConnectLock) {
@@ -10607,6 +10636,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
 
     // An application being installed will need a restore pass, then the Package Manager
     // will need to be told when the restore is finished.
+    @Override
     public void restoreAtInstall(String packageName, int token) {
         if (Binder.getCallingUid() != Process.SYSTEM_UID) {
             Slog.w(TAG, "Non-system process uid=" + Binder.getCallingUid()
@@ -10674,6 +10704,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
     }
 
     // Hand off a restore session
+    @Override
     public IRestoreSession beginRestoreSession(String packageName, String transport) {
         if (DEBUG) Slog.v(TAG, "beginRestoreSession: pkg=" + packageName
                 + " transport=" + transport);
@@ -10737,6 +10768,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
 
     // Note that a currently-active backup agent has notified us that it has
     // completed the given outstanding asynchronous backup/restore operation.
+    @Override
     public void opComplete(int token, long result) {
         if (MORE_DEBUG) {
             Slog.v(TAG, "opComplete: " + Integer.toHexString(token) + " result=" + result);
@@ -10774,6 +10806,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
         }
     }
 
+    @Override
     public boolean isAppEligibleForBackup(String packageName) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
                 "isAppEligibleForBackup");
@@ -11138,6 +11171,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
         }
     }
 
+    @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (!DumpUtils.checkDumpAndUsageStatsPermission(mContext, TAG, pw)) return;
 
