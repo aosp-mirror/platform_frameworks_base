@@ -27,6 +27,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.IBinder.DeathRecipient;
 import android.os.IRemoteCallback;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -47,7 +48,7 @@ import java.util.concurrent.TimeoutException;
  * service and handling all interactions in a timely manner.
  * @hide
  */
-final class EphemeralResolverConnection {
+final class EphemeralResolverConnection implements DeathRecipient {
     // This is running in a critical section and the timeout must be sufficiently low
     private static final long BIND_SERVICE_TIMEOUT_MS =
             ("eng".equals(Build.TYPE)) ? 300 : 200;
@@ -171,6 +172,15 @@ final class EphemeralResolverConnection {
         }
     }
 
+    @Override
+    public void binderDied() {
+        if (mRemoteInstance != null) {
+            mRemoteInstance.asBinder().unlinkToDeath(this, 0 /*flags*/);
+        }
+        mRemoteInstance = null;
+        mBindRequested = false;
+    }
+
     /**
      * Asynchronous callback when results come back from ephemeral resolution phase two.
      */
@@ -183,7 +193,11 @@ final class EphemeralResolverConnection {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             synchronized (mLock) {
-                mRemoteInstance = IInstantAppResolver.Stub.asInterface(service);
+                try {
+                    service.linkToDeath(EphemeralResolverConnection.this, 0 /*flags*/);
+                    mRemoteInstance = IInstantAppResolver.Stub.asInterface(service);
+                } catch (RemoteException e) {
+                }
                 mLock.notifyAll();
             }
         }
