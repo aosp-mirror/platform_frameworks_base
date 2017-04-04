@@ -79,7 +79,7 @@ public final class ShutdownThread extends Thread {
     private static final int SHUTDOWN_VIBRATE_MS = 500;
 
     // state tracking
-    private static Object sIsStartedGuard = new Object();
+    private static final Object sIsStartedGuard = new Object();
     private static boolean sIsStarted = false;
 
     private static boolean mReboot;
@@ -121,7 +121,8 @@ public final class ShutdownThread extends Thread {
      * state etc.  Must be called from a Looper thread in which its UI
      * is shown.
      *
-     * @param context Context used to display the shutdown progress dialog.
+     * @param context Context used to display the shutdown progress dialog. This must be a context
+     *                suitable for displaying UI (aka Themable).
      * @param reason code to pass to android_reboot() (e.g. "userrequested"), or null.
      * @param confirm true if user confirmation is needed before shutting down.
      */
@@ -132,7 +133,11 @@ public final class ShutdownThread extends Thread {
         shutdownInner(context, confirm);
     }
 
-    static void shutdownInner(final Context context, boolean confirm) {
+    private static void shutdownInner(final Context context, boolean confirm) {
+        // ShutdownThread is called from many places, so best to verify here that the context passed
+        // in is themed.
+        context.assertRuntimeOverlayThemable();
+
         // ensure that only one thread is trying to power down.
         // any additional calls are just returned
         synchronized (sIsStartedGuard) {
@@ -204,7 +209,8 @@ public final class ShutdownThread extends Thread {
      * state etc.  Must be called from a Looper thread in which its UI
      * is shown.
      *
-     * @param context Context used to display the shutdown progress dialog.
+     * @param context Context used to display the shutdown progress dialog. This must be a context
+     *                suitable for displaying UI (aka Themable).
      * @param reason code to pass to the kernel (e.g. "recovery"), or null.
      * @param confirm true if user confirmation is needed before shutting down.
      */
@@ -220,7 +226,8 @@ public final class ShutdownThread extends Thread {
      * Request a reboot into safe mode.  Must be called from a Looper thread in which its UI
      * is shown.
      *
-     * @param context Context used to display the shutdown progress dialog.
+     * @param context Context used to display the shutdown progress dialog. This must be a context
+     *                suitable for displaying UI (aka Themable).
      * @param confirm true if user confirmation is needed before shutting down.
      */
     public static void rebootSafeMode(final Context context, boolean confirm) {

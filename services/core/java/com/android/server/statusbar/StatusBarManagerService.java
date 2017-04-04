@@ -16,6 +16,7 @@
 
 package com.android.server.statusbar;
 
+import android.app.ActivityThread;
 import android.app.StatusBarManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -61,6 +62,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
     private static final boolean SPEW = false;
 
     private final Context mContext;
+
     private final WindowManagerService mWindowManager;
     private Handler mHandler = new Handler();
     private NotificationDelegate mNotificationDelegate;
@@ -777,10 +779,12 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
         long identity = Binder.clearCallingIdentity();
         try {
             mHandler.post(() -> {
+                // ShutdownThread displays UI, so give it a UI context.
+                Context uiContext = ActivityThread.currentActivityThread().getSystemUiContext();
                 if (safeMode) {
-                    ShutdownThread.rebootSafeMode(mContext, false);
+                    ShutdownThread.rebootSafeMode(uiContext, false);
                 } else {
-                    ShutdownThread.reboot(mContext, PowerManager.SHUTDOWN_USER_REQUESTED, false);
+                    ShutdownThread.reboot(uiContext, PowerManager.SHUTDOWN_USER_REQUESTED, false);
                 }
             });
         } finally {
