@@ -245,8 +245,7 @@ static jboolean FontFamily_addFontFromAssetManager(JNIEnv* env, jobject, jlong b
     }
 
     sk_sp<SkData> data(SkData::MakeWithProc(buf, asset->getLength(), releaseAsset, asset));
-    addSkTypeface(builder, std::move(data), ttcIndex, weight, isItalic);
-    return true;
+    return addSkTypeface(builder, std::move(data), ttcIndex, weight, isItalic);
 }
 
 static void FontFamily_addAxisValue(jlong builderPtr, jint tag, jfloat value) {
