@@ -1128,8 +1128,13 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
             newState = Fragment.CREATED;
         }
         if (f.mRemoving && newState > f.mState) {
-            // While removing a fragment, we can't change it to a higher state.
-            newState = f.mState;
+            if (f.mState == Fragment.INITIALIZING && f.isInBackStack()) {
+                // Allow the fragment to be created so that it can be saved later.
+                newState = Fragment.CREATED;
+            } else {
+                // While removing a fragment, we can't change it to a higher state.
+                newState = f.mState;
+            }
         }
         // Defer start if requested; don't allow it to move to STARTED or higher
         // if it's not already started.
