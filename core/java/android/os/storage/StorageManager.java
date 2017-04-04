@@ -59,19 +59,14 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.os.AppFuseMount;
 import com.android.internal.os.FuseAppLoop;
-import com.android.internal.os.FuseAppLoop.UnmountedException;
 import com.android.internal.os.FuseUnavailableMountException;
 import com.android.internal.os.RoSystemProperties;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.Preconditions;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileDescriptor;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
@@ -84,7 +79,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
-import libcore.io.IoUtils;
 
 /**
  * StorageManager is the interface to the systems storage service. The storage
@@ -185,15 +179,6 @@ public class StorageManager {
     public static final int ENCRYPTION_STATE_ERROR_CORRUPT = -4;
 
     private static volatile IStorageManager sStorageManager = null;
-
-    // TODO: the location of the primary storage block varies from device to device, so we need to
-    // try the most likely candidates - a long-term solution would be a device-specific vold
-    // function that returns the calculated size.
-    private static final String[] INTERNAL_STORAGE_SIZE_PATHS = {
-            "/sys/block/mmcblk0/size",
-            "/sys/block/sda/size"
-    };
-    private static final int INTERNAL_STORAGE_SECTOR_SIZE = 512;
 
     private final Context mContext;
     private final ContentResolver mResolver;
@@ -1011,38 +996,13 @@ public class StorageManager {
 
     /** {@hide} */
     public static Pair<String, Long> getPrimaryStoragePathAndSize() {
-        for (String path : INTERNAL_STORAGE_SIZE_PATHS) {
-            final long numberBlocks = readLong(path);
-            if (numberBlocks > 0) {
-                return new Pair<>(path,
-                        FileUtils.roundStorageSize(numberBlocks * INTERNAL_STORAGE_SECTOR_SIZE));
-            }
-        }
-        return null;
+        return Pair.create(null,
+                FileUtils.roundStorageSize(Environment.getDataDirectory().getTotalSpace()));
     }
-
 
     /** {@hide} */
     public long getPrimaryStorageSize() {
-        final Pair<String, Long> pair = getPrimaryStoragePathAndSize();
-        return pair == null ? 0 : pair.second.longValue();
-    }
-
-    private static long readLong(String path) {
-        try (final FileInputStream fis = new FileInputStream(path);
-                final BufferedReader reader = new BufferedReader(new InputStreamReader(fis));) {
-            return Long.parseLong(reader.readLine());
-        } catch (FileNotFoundException e) {
-            // This is expected since we are trying to parse multiple paths.
-            Slog.i(TAG, "readLong(): Path doesn't exist: " + path + ": " + e);
-            return 0;
-        } catch (NumberFormatException e) {
-            Slog.e(TAG, "readLong(): Could not parse " + path + ": " + e);
-            return 0;
-        } catch (Exception e) {
-            Slog.e(TAG, "readLong(): Unknown exception while opening " + path + ": " + e);
-            return 0;
-       }
+        return FileUtils.roundStorageSize(Environment.getDataDirectory().getTotalSpace());
     }
 
     /** @removed */
