@@ -16,6 +16,7 @@
 
 package android.telecom;
 
+import android.annotation.TestApi;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -311,6 +312,7 @@ public final class ConnectionRequest implements Parcelable {
      * if this connection request is not requesting an RTT session upon connection establishment.
      * @hide
      */
+    @TestApi
     public Connection.RttTextStream getRttTextStream() {
         if (isRequestingRtt()) {
             return new Connection.RttTextStream(mRttPipeToInCall, mRttPipeFromInCall);
@@ -324,6 +326,7 @@ public final class ConnectionRequest implements Parcelable {
      * @return {@code true} if RTT is requested, {@code false} otherwise.
      * @hide
      */
+    @TestApi
     public boolean isRequestingRtt() {
         return mRttPipeFromInCall != null && mRttPipeToInCall != null;
     }
