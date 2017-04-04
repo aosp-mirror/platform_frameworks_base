@@ -130,6 +130,16 @@ public final class SaveInfo implements Parcelable {
      */
     public static final int SAVE_DATA_TYPE_CREDIT_CARD = 3;
 
+    /**
+     * Type used when the {@link FillResponse} represents just an username, without a password.
+     */
+    public static final int SAVE_DATA_TYPE_USERNAME = 4;
+
+    /**
+     * Type used when the {@link FillResponse} represents just an email address, without a password.
+     */
+    public static final int SAVE_DATA_TYPE_EMAIL_ADDRESS = 5;
+
     private final @SaveDataType int mType;
     private final CharSequence mNegativeActionTitle;
     private final IntentSender mNegativeActionListener;
@@ -223,6 +233,8 @@ public final class SaveInfo implements Parcelable {
                 case SAVE_DATA_TYPE_PASSWORD:
                 case SAVE_DATA_TYPE_ADDRESS:
                 case SAVE_DATA_TYPE_CREDIT_CARD:
+                case SAVE_DATA_TYPE_USERNAME:
+                case SAVE_DATA_TYPE_EMAIL_ADDRESS:
                     mType = type;
                     break;
                 default:

@@ -117,6 +117,12 @@ final class SaveUi {
             case SaveInfo.SAVE_DATA_TYPE_CREDIT_CARD:
                 type = context.getString(R.string.autofill_save_type_credit_card);
                 break;
+            case SaveInfo.SAVE_DATA_TYPE_USERNAME:
+                type = context.getString(R.string.autofill_save_type_username);
+                break;
+            case SaveInfo.SAVE_DATA_TYPE_EMAIL_ADDRESS:
+                type = context.getString(R.string.autofill_save_type_email_address);
+                break;
             default:
                 type = null;
         }

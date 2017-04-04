@@ -4600,6 +4600,10 @@
     <string name="autofill_save_type_address">address</string>
     <!-- Label for the type of data being saved for autofill when it represents a credit card [CHAR LIMIT=NONE] -->
     <string name="autofill_save_type_credit_card">credit card</string>
+    <!-- Label for the type of data being saved for autofill when it represents an username [CHAR LIMIT=NONE] -->
+    <string name="autofill_save_type_username">username</string>
+    <!-- Label for the type of data being saved for autofill when it represents an email address [CHAR LIMIT=NONE] -->
+    <string name="autofill_save_type_email_address">email address</string>
 
     <!-- Primary ETWS (Earthquake and Tsunami Warning System) default message for earthquake -->
     <string name="etws_primary_default_message_earthquake">Stay calm and seek shelter nearby.</string>
