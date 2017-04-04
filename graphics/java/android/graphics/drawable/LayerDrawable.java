@@ -32,6 +32,7 @@ import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.LayoutDirection;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 
@@ -66,6 +67,8 @@ import java.io.IOException;
  * @attr ref android.R.styleable#LayerDrawableItem_id
 */
 public class LayerDrawable extends Drawable implements Drawable.Callback {
+    private static final String LOG_TAG = "LayerDrawable";
+
     /**
      * Padding mode used to nest each layer inside the padding of the previous
      * layer.
@@ -89,6 +92,7 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
      */
     public static final int INSET_UNDEFINED = Integer.MIN_VALUE;
 
+    @NonNull
     LayerState mLayerState;
 
     private int[] mPaddingL;
@@ -170,13 +174,9 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
             throws XmlPullParserException, IOException {
         super.inflate(r, parser, attrs, theme);
 
-        final LayerState state = mLayerState;
-        if (state == null) {
-            return;
-        }
-
         // The density may have changed since the last update. This will
         // apply scaling to any existing constant state properties.
+        final LayerState state = mLayerState;
         final int density = Drawable.resolveDensity(r, 0);
         state.setDensity(density);
 
@@ -202,10 +202,6 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
         super.applyTheme(t);
 
         final LayerState state = mLayerState;
-        if (state == null) {
-            return;
-        }
-
         final int density = Drawable.resolveDensity(t.getResources(), 0);
         state.setDensity(density);
 
@@ -403,7 +399,7 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
 
     @Override
     public boolean canApplyTheme() {
-        return (mLayerState != null && mLayerState.canApplyTheme()) || super.canApplyTheme();
+        return mLayerState.canApplyTheme() || super.canApplyTheme();
     }
 
     /**
@@ -986,6 +982,11 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
         if (mSuspendChildInvalidation) {
             mChildRequestedInvalidation = true;
         } else {
+            // This may have been called as the result of a tint changing, in
+            // which case we may need to refresh the cached statefulness or
+            // opacity.
+            mLayerState.invalidateCache();
+
             invalidateSelf();
         }
     }
@@ -1842,15 +1843,24 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
                 final ConstantState cs = dr.getConstantState();
                 if (cs == null) {
                     clone = dr;
+                    if (dr.getCallback() != null) {
+                        // This drawable already has an owner.
+                        Log.w(LOG_TAG, "Invalid drawable added to LayerDrawable! Drawable already "
+                                + "belongs to another owner but does not expose a constant state.",
+                                new RuntimeException());
+                    }
                 } else if (res != null) {
                     clone = cs.newDrawable(res);
                 } else {
                     clone = cs.newDrawable();
                 }
-                clone.setCallback(owner);
                 clone.setLayoutDirection(dr.getLayoutDirection());
                 clone.setBounds(dr.getBounds());
                 clone.setLevel(dr.getLevel());
+
+                // Set the callback last to prevent invalidation from
+                // propagating before the constant state has been set.
+                clone.setCallback(owner);
             } else {
                 clone = null;
             }
@@ -2139,7 +2149,10 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
             return true;
         }
 
-        public void invalidateCache() {
+        /**
+         * Invalidates the cached opacity and statefulness.
+         */
+        void invalidateCache() {
             mCheckedOpacity = false;
             mCheckedStateful = false;
         }
