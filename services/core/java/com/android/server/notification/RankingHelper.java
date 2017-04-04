@@ -715,12 +715,12 @@ public class RankingHelper implements RankingConfig {
         return new ParceledListSlice<>(new ArrayList<>(groups.values()));
     }
 
-    public List<String> deleteNotificationChannelGroup(String pkg, int uid,
+    public List<NotificationChannel> deleteNotificationChannelGroup(String pkg, int uid,
             String groupId) {
-        List<String> deletedChannelIds = new ArrayList<>();
+        List<NotificationChannel> deletedChannels = new ArrayList<>();
         Record r = getRecord(pkg, uid);
         if (r == null || TextUtils.isEmpty(groupId)) {
-            return deletedChannelIds;
+            return deletedChannels;
         }
 
         r.groups.remove(groupId);
@@ -730,11 +730,11 @@ public class RankingHelper implements RankingConfig {
             final NotificationChannel nc = r.channels.valueAt(i);
             if (groupId.equals(nc.getGroup())) {
                 nc.setDeleted(true);
-                deletedChannelIds.add(nc.getId());
+                deletedChannels.add(nc);
             }
         }
         updateConfig();
-        return deletedChannelIds;
+        return deletedChannels;
     }
 
     @Override

@@ -19,6 +19,12 @@ package com.android.server.notification;
 import static android.app.NotificationManager.IMPORTANCE_NONE;
 import static android.content.pm.PackageManager.FEATURE_LEANBACK;
 import static android.content.pm.PackageManager.FEATURE_TELEVISION;
+import static android.service.notification.NotificationListenerService
+        .NOTIFICATION_CHANNEL_OR_GROUP_ADDED;
+import static android.service.notification.NotificationListenerService
+        .NOTIFICATION_CHANNEL_OR_GROUP_DELETED;
+import static android.service.notification.NotificationListenerService
+        .NOTIFICATION_CHANNEL_OR_GROUP_UPDATED;
 import static android.service.notification.NotificationListenerService.REASON_APP_CANCEL;
 import static android.service.notification.NotificationListenerService.REASON_APP_CANCEL_ALL;
 import static android.service.notification.NotificationListenerService.REASON_CHANNEL_BANNED;
@@ -70,6 +76,7 @@ import android.app.PendingIntent;
 import android.app.StatusBarManager;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageStatsManagerInternal;
+import android.companion.ICompanionDeviceManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -100,6 +107,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
@@ -144,6 +152,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.statusbar.NotificationVisibility;
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.Preconditions;
@@ -260,6 +269,7 @@ public class NotificationManagerService extends SystemService {
     Vibrator mVibrator;
     private WindowManagerInternal mWindowManagerInternal;
     private AlarmManager mAlarmManager;
+    private ICompanionDeviceManager mCompanionManager;
 
     final IBinder mForegroundToken = new Binder();
     private Handler mHandler;
@@ -1004,7 +1014,8 @@ public class NotificationManagerService extends SystemService {
     // TODO: Tests should call onStart instead once the methods above are removed.
     @VisibleForTesting
     void init(Looper looper, IPackageManager packageManager, PackageManager packageManagerClient,
-            LightsManager lightsManager, NotificationListeners notificationListeners) {
+            LightsManager lightsManager, NotificationListeners notificationListeners,
+            ICompanionDeviceManager companionManager) {
         Resources resources = getContext().getResources();
         mMaxPackageEnqueueRate = Settings.Global.getFloat(getContext().getContentResolver(),
                 Settings.Global.MAX_NOTIFICATION_ENQUEUE_RATE,
@@ -1017,6 +1028,7 @@ public class NotificationManagerService extends SystemService {
         mVibrator = (Vibrator) getContext().getSystemService(Context.VIBRATOR_SERVICE);
         mAppUsageStats = LocalServices.getService(UsageStatsManagerInternal.class);
         mAlarmManager = (AlarmManager) getContext().getSystemService(Context.ALARM_SERVICE);
+        mCompanionManager = companionManager;
 
         mHandler = new WorkerHandler(looper);
         mRankingThread.start();
@@ -1192,7 +1204,8 @@ public class NotificationManagerService extends SystemService {
     @Override
     public void onStart() {
         init(Looper.myLooper(), AppGlobals.getPackageManager(), getContext().getPackageManager(),
-                getLocalService(LightsManager.class), new NotificationListeners());
+                getLocalService(LightsManager.class), new NotificationListeners(),
+                null);
         publishBinderService(Context.NOTIFICATION_SERVICE, mService);
         publishLocalService(NotificationManagerInternal.class, mInternalService);
     }
@@ -1294,7 +1307,8 @@ public class NotificationManagerService extends SystemService {
         sendRegisteredOnlyBroadcast(NotificationManager.ACTION_EFFECTS_SUPPRESSOR_CHANGED);
     }
 
-    private void updateNotificationChannelInt(String pkg, int uid, NotificationChannel channel) {
+    private void updateNotificationChannelInt(String pkg, int uid, NotificationChannel channel,
+            boolean fromListener) {
         if (channel.getImportance() == NotificationManager.IMPORTANCE_NONE) {
             // cancel
             cancelAllNotificationsInt(MY_UID, MY_PID, pkg, channel.getId(), 0, 0, true,
@@ -1302,6 +1316,14 @@ public class NotificationManagerService extends SystemService {
                     null);
         }
         mRankingHelper.updateNotificationChannel(pkg, uid, channel);
+
+        final NotificationChannel modifiedChannel =
+                mRankingHelper.getNotificationChannel(pkg, uid, channel.getId(), false);
+
+        if (!fromListener) {
+            mListeners.notifyNotificationChannelChanged(
+                    pkg, modifiedChannel, NOTIFICATION_CHANNEL_OR_GROUP_UPDATED);
+        }
 
         synchronized (mNotificationLock) {
             final int N = mNotificationList.size();
@@ -1311,8 +1333,7 @@ public class NotificationManagerService extends SystemService {
                         && r.sbn.getUid() == uid
                         && channel.getId() != null
                         && channel.getId().equals(r.getChannel().getId())) {
-                    r.updateNotificationChannel(mRankingHelper.getNotificationChannel(
-                            pkg, uid, channel.getId(), false));
+                    r.updateNotificationChannel(modifiedChannel);
                 }
             }
         }
@@ -1626,6 +1647,8 @@ public class NotificationManagerService extends SystemService {
                 Preconditions.checkNotNull(group, "group in list is null");
                 mRankingHelper.createNotificationChannelGroup(pkg, Binder.getCallingUid(), group,
                         true /* fromTargetApp */);
+                mListeners.notifyNotificationChannelGroupChanged(pkg, group,
+                        NOTIFICATION_CHANNEL_OR_GROUP_ADDED);
             }
             savePolicyFile();
         }
@@ -1639,6 +1662,9 @@ public class NotificationManagerService extends SystemService {
                 Preconditions.checkNotNull(channel, "channel in list is null");
                 mRankingHelper.createNotificationChannel(pkg, uid, channel,
                         true /* fromTargetApp */);
+                mListeners.notifyNotificationChannelChanged(pkg,
+                        mRankingHelper.getNotificationChannel(pkg, uid, channel.getId(), false),
+                        NOTIFICATION_CHANNEL_OR_GROUP_ADDED);
             }
             savePolicyFile();
         }
@@ -1674,12 +1700,16 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void deleteNotificationChannel(String pkg, String channelId) {
             checkCallerIsSystemOrSameApp(pkg);
+            final int callingUid = Binder.getCallingUid();
             if (NotificationChannel.DEFAULT_CHANNEL_ID.equals(channelId)) {
                 throw new IllegalArgumentException("Cannot delete default channel");
             }
             cancelAllNotificationsInt(MY_UID, MY_PID, pkg, channelId, 0, 0, true,
-                    UserHandle.getUserId(Binder.getCallingUid()), REASON_CHANNEL_BANNED, null);
-            mRankingHelper.deleteNotificationChannel(pkg, Binder.getCallingUid(), channelId);
+                    UserHandle.getUserId(callingUid), REASON_CHANNEL_BANNED, null);
+            mRankingHelper.deleteNotificationChannel(pkg, callingUid, channelId);
+            mListeners.notifyNotificationChannelChanged(pkg,
+                    mRankingHelper.getNotificationChannel(pkg, callingUid, channelId, true),
+                    NOTIFICATION_CHANNEL_OR_GROUP_DELETED);
             savePolicyFile();
         }
 
@@ -1692,16 +1722,28 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
-        public void deleteNotificationChannelGroup(String pkg, String channelGroupId) {
+        public void deleteNotificationChannelGroup(String pkg, String groupId) {
             checkCallerIsSystemOrSameApp(pkg);
 
-            List<String> deletedChannelIds = mRankingHelper.deleteNotificationChannelGroup(
-                    pkg, Binder.getCallingUid(), channelGroupId);
-            for (int i = 0; i < deletedChannelIds.size(); i++) {
-                cancelAllNotificationsInt(MY_UID, MY_PID, pkg, deletedChannelIds.get(i), 0, 0, true,
-                        UserHandle.getUserId(Binder.getCallingUid()), REASON_CHANNEL_BANNED, null);
+            final int callingUid = Binder.getCallingUid();
+            NotificationChannelGroup groupToDelete =
+                    mRankingHelper.getNotificationChannelGroup(groupId, pkg, callingUid);
+            if (groupToDelete != null) {
+                List<NotificationChannel> deletedChannels =
+                        mRankingHelper.deleteNotificationChannelGroup(pkg, callingUid, groupId);
+                for (int i = 0; i < deletedChannels.size(); i++) {
+                    final NotificationChannel deletedChannel = deletedChannels.get(i);
+                    cancelAllNotificationsInt(MY_UID, MY_PID, pkg, deletedChannel.getId(), 0, 0,
+                            true,
+                            UserHandle.getUserId(Binder.getCallingUid()), REASON_CHANNEL_BANNED,
+                            null);
+                    mListeners.notifyNotificationChannelChanged(pkg, deletedChannel,
+                            NOTIFICATION_CHANNEL_OR_GROUP_DELETED);
+                }
+                mListeners.notifyNotificationChannelGroupChanged(
+                        pkg, groupToDelete, NOTIFICATION_CHANNEL_OR_GROUP_DELETED);
+                savePolicyFile();
             }
-            savePolicyFile();
         }
 
         @Override
@@ -1709,7 +1751,7 @@ public class NotificationManagerService extends SystemService {
                 NotificationChannel channel) {
             enforceSystemOrSystemUI("Caller not system or systemui");
             Preconditions.checkNotNull(channel);
-            updateNotificationChannelInt(pkg, uid, channel);
+            updateNotificationChannelInt(pkg, uid, channel, false);
         }
 
         @Override
@@ -2645,6 +2687,41 @@ public class NotificationManagerService extends SystemService {
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
+        }
+
+        @Override
+        public void updateNotificationChannelFromPrivilegedListener(INotificationListener token,
+                String pkg, NotificationChannel channel) throws RemoteException {
+            Preconditions.checkNotNull(channel);
+
+            ManagedServiceInfo info = mListeners.checkServiceTokenLocked(token);
+            checkHasCompanionDevice(info);
+
+            int uid = mPackageManager.getPackageUid(pkg, 0, info.userid);
+            updateNotificationChannelInt(pkg, uid, channel, true);
+        }
+
+        @Override
+        public ParceledListSlice<NotificationChannel> getNotificationChannelsFromPrivilegedListener(
+                INotificationListener token, String pkg) throws RemoteException {
+            ManagedServiceInfo info = mListeners.checkServiceTokenLocked(token);
+            checkHasCompanionDevice(info);
+
+            int uid = mPackageManager.getPackageUid(pkg, 0, info.userid);
+            return mRankingHelper.getNotificationChannels(pkg, uid, false /* includeDeleted */);
+        }
+
+        @Override
+        public ParceledListSlice<NotificationChannelGroup>
+                getNotificationChannelGroupsFromPrivilegedListener(
+                INotificationListener token, String pkg) throws RemoteException {
+            ManagedServiceInfo info = mListeners.checkServiceTokenLocked(token);
+            checkHasCompanionDevice(info);
+
+            List<NotificationChannelGroup> groups = new ArrayList<>();
+            int uid = mPackageManager.getPackageUid(pkg, 0, info.userid);
+            groups.addAll(mRankingHelper.getNotificationChannelGroups(pkg, uid));
+            return new ParceledListSlice<>(groups);
         }
     };
 
@@ -4437,11 +4514,11 @@ public class NotificationManagerService extends SystemService {
         return (appid == Process.SYSTEM_UID || appid == Process.PHONE_UID || uid == 0);
     }
 
-    private boolean isCallerSystem() {
+    protected boolean isCallerSystem() {
         return isUidSystem(Binder.getCallingUid());
     }
 
-    protected void checkCallerIsSystem() {
+    private void checkCallerIsSystem() {
         if (isCallerSystem()) {
             return;
         }
@@ -4570,6 +4647,17 @@ public class NotificationManagerService extends SystemService {
                 channels, overridePeople, snoozeCriteria, showBadge);
     }
 
+    private void checkHasCompanionDevice(ManagedServiceInfo info) throws RemoteException {
+        if (mCompanionManager == null) {
+            mCompanionManager = ICompanionDeviceManager.Stub.asInterface(
+                    ServiceManager.getService(Context.COMPANION_DEVICE_SERVICE));
+        }
+        if (ArrayUtils.isEmpty(mCompanionManager.getAssociations(
+                info.component.getPackageName(), info.userid))) {
+            throw new SecurityException("Disallowed call from " + info.component);
+        }
+    }
+
     private boolean isVisibleToListener(StatusBarNotification sbn, ManagedServiceInfo listener) {
         if (!listener.enabledAndUserMatches(sbn.getUserId())) {
             return false;
@@ -4656,7 +4744,6 @@ public class NotificationManagerService extends SystemService {
             final StatusBarNotification sbn = r.sbn;
             TrimCache trimCache = new TrimCache(sbn);
 
-            // mServices is the list inside ManagedServices of all the assistants,
             // There should be only one, but it's a list, so while we enforce
             // singularity elsewhere, we keep it general here, to avoid surprises.
             for (final ManagedServiceInfo info : NotificationAssistants.this.mServices) {
@@ -4895,6 +4982,58 @@ public class NotificationManagerService extends SystemService {
             }
         }
 
+        protected void notifyNotificationChannelChanged(final String pkg,
+                final NotificationChannel channel, final int modificationType) {
+            if (channel == null) {
+                return;
+            }
+            for (final ManagedServiceInfo serviceInfo : getServices()) {
+                if (!serviceInfo.isEnabledForCurrentProfiles()) {
+                    continue;
+                }
+                try {
+                    checkHasCompanionDevice(serviceInfo);
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            notifyNotificationChannelChanged(serviceInfo, pkg, channel,
+                                    modificationType);
+                        }
+                    });
+                } catch (SecurityException se) {
+                    // Not a privileged listener; do not notify
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Cannot reach companion device service", e);
+                }
+            }
+        }
+
+        protected void notifyNotificationChannelGroupChanged(final String pkg,
+                final NotificationChannelGroup group, final int modificationType) {
+            if (group == null) {
+                return;
+            }
+            for (final ManagedServiceInfo serviceInfo : getServices()) {
+                if (!serviceInfo.isEnabledForCurrentProfiles()) {
+                    continue;
+                }
+                try {
+                    checkHasCompanionDevice(serviceInfo);
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            notifyNotificationChannelGroupChanged(serviceInfo, pkg, group,
+                                    modificationType);
+                        }
+                    });
+                } catch (SecurityException se) {
+                    // Not a privileged listener; do not notify
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Cannot reach companion device service", e);
+                }
+            }
+        }
+
         private void notifyPosted(final ManagedServiceInfo info,
                 final StatusBarNotification sbn, NotificationRankingUpdate rankingUpdate) {
             final INotificationListener listener = (INotificationListener) info.service;
@@ -4946,6 +5085,28 @@ public class NotificationManagerService extends SystemService {
                 listener.onInterruptionFilterChanged(interruptionFilter);
             } catch (RemoteException ex) {
                 Log.e(TAG, "unable to notify listener (interruption filter): " + listener, ex);
+            }
+        }
+
+        void notifyNotificationChannelChanged(ManagedServiceInfo info,
+                final String pkg, final NotificationChannel channel,
+                final int modificationType) {
+            final INotificationListener listener = (INotificationListener) info.service;
+            try {
+                listener.onNotificationChannelModification(pkg, channel, modificationType);
+            } catch (RemoteException ex) {
+                Log.e(TAG, "unable to notify listener (channel changed): " + listener, ex);
+            }
+        }
+
+        private void notifyNotificationChannelGroupChanged(ManagedServiceInfo info,
+                final String pkg, final NotificationChannelGroup group,
+                final int modificationType) {
+            final INotificationListener listener = (INotificationListener) info.service;
+            try {
+                listener.onNotificationChannelGroupModification(pkg, group, modificationType);
+            } catch (RemoteException ex) {
+                Log.e(TAG, "unable to notify listener (channel group changed): " + listener, ex);
             }
         }
 
