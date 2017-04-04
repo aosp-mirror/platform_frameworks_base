@@ -78,9 +78,8 @@ public class TaskPersister {
     /** Special value for mWriteTime to mean don't wait, just write */
     private static final long FLUSH_QUEUE = -1;
 
-    private static final String RECENTS_FILENAME = "_task";
     private static final String TASKS_DIRNAME = "recent_tasks";
-    private static final String TASK_EXTENSION = ".xml";
+    private static final String TASK_FILENAME_SUFFIX = "_task.xml";
     private static final String IMAGES_DIRNAME = "recent_images";
     private static final String PERSISTED_TASK_IDS_FILENAME = "persisted_taskIds.txt";
     static final String IMAGE_EXTENSION = ".png";
@@ -412,7 +411,7 @@ public class TaskPersister {
         return null;
     }
 
-    List<TaskRecord> restoreTasksForUserLocked(final int userId) {
+    List<TaskRecord> restoreTasksForUserLocked(final int userId, SparseBooleanArray preaddedTasks) {
         final ArrayList<TaskRecord> tasks = new ArrayList<TaskRecord>();
         ArraySet<Integer> recoveredTaskIds = new ArraySet<Integer>();
 
@@ -430,6 +429,22 @@ public class TaskPersister {
                 Slog.d(TAG, "restoreTasksForUserLocked: userId=" + userId
                         + ", taskFile=" + taskFile.getName());
             }
+
+            if (!taskFile.getName().endsWith(TASK_FILENAME_SUFFIX)) {
+                continue;
+            }
+            try {
+                final int taskId = Integer.parseInt(taskFile.getName().substring(
+                        0, taskFile.getName().length() - TASK_FILENAME_SUFFIX.length()));
+                if (preaddedTasks.get(taskId, false)) {
+                    Slog.w(TAG, "Task #" + taskId + " has already been created so we don't restore"
+                            + " again");
+                    continue;
+                }
+            } catch (NumberFormatException e) {
+                continue;
+            }
+
             BufferedReader reader = null;
             boolean deleteFile = false;
             try {
@@ -744,13 +759,11 @@ public class TaskPersister {
                         try {
                             atomicFile = new AtomicFile(new File(
                                     getUserTasksDir(task.userId),
-                                    String.valueOf(task.taskId) + RECENTS_FILENAME
-                                    + TASK_EXTENSION));
+                                    String.valueOf(task.taskId) + TASK_FILENAME_SUFFIX));
                             file = atomicFile.startWrite();
                             file.write(stringWriter.toString().getBytes());
                             file.write('\n');
                             atomicFile.finishWrite(file);
-
                         } catch (IOException e) {
                             if (file != null) {
                                 atomicFile.failWrite(file);
