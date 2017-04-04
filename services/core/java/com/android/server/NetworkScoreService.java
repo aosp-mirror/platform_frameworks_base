@@ -280,6 +280,7 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
         if (DBG) Log.d(TAG, "refreshBinding()");
         // Make sure the scorer is up-to-date
         mNetworkScorerAppManager.updateState();
+        mNetworkScorerAppManager.migrateNetworkScorerAppSettingIfNeeded();
         registerPackageMonitorIfNeeded();
         bindToScoringServiceIfNeeded();
     }
