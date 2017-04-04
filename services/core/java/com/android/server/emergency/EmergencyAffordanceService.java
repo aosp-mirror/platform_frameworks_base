@@ -219,6 +219,7 @@ public class EmergencyAffordanceService extends SystemService {
         List<SubscriptionInfo> activeSubscriptionInfoList =
                 mSubscriptionManager.getActiveSubscriptionInfoList();
         if (activeSubscriptionInfoList == null) {
+            setSimNeedsEmergencyAffordance(neededNow);
             return neededNow;
         }
         for (SubscriptionInfo info : activeSubscriptionInfoList) {
