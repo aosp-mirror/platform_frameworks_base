@@ -2395,6 +2395,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (requestAnim) {
             mService.scheduleAnimationLocked();
         }
+        if ((mAttrs.flags & FLAG_NOT_FOCUSABLE) == 0) {
+            mService.updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL, false /* updateImWindows */);
+        }
         return true;
     }
 
@@ -2436,6 +2439,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
         if (requestAnim) {
             mService.scheduleAnimationLocked();
+        }
+        if (mService.mCurrentFocus == this) {
+            mService.updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL, false /* updateImWindows */);
         }
         return true;
     }
