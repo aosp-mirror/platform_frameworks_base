@@ -679,11 +679,10 @@ void SkiaCanvas::drawVectorDrawable(VectorDrawableRoot* vectorDrawable) {
 // Canvas draw operations: Text
 // ----------------------------------------------------------------------------
 
-void SkiaCanvas::drawGlyphs(const uint16_t* text, const float* positions, int count,
-        const SkPaint& paint, float x, float y,
-        float boundsLeft, float boundsTop, float boundsRight, float boundsBottom,
+void SkiaCanvas::drawGlyphs(ReadGlyphFunc glyphFunc, int count, const SkPaint& paint, float x,
+        float y, float boundsLeft, float boundsTop, float boundsRight, float boundsBottom,
         float totalAdvance) {
-     if (!text || !positions || count <= 0 || paint.nothingToDraw()) return;
+    if (count <= 0 || paint.nothingToDraw()) return;
     // Set align to left for drawing, as we don't want individual
     // glyphs centered or right-aligned; the offset above takes
     // care of all alignment.
@@ -695,10 +694,7 @@ void SkiaCanvas::drawGlyphs(const uint16_t* text, const float* positions, int co
 
     SkTextBlobBuilder builder;
     const SkTextBlobBuilder::RunBuffer& buffer = builder.allocRunPos(paintCopy, count, &bounds);
-    // TODO: we could reduce the number of memcpy's if the this were exposed further up
-    //       in the architecture.
-    memcpy(buffer.glyphs, text, count * sizeof(uint16_t));
-    memcpy(buffer.pos, positions, (count << 1) * sizeof(float));
+    glyphFunc(buffer.glyphs, buffer.pos);
 
     sk_sp<SkTextBlob> textBlob(builder.make());
     mCanvas->drawTextBlob(textBlob, 0, 0, paintCopy);

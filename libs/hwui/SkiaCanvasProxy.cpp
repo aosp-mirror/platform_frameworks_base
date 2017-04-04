@@ -288,7 +288,6 @@ void SkiaCanvasProxy::onDrawText(const void* text, size_t byteLength, SkScalar x
     GlyphIDConverter glyphs(text, byteLength, origPaint);
 
     // compute the glyph positions
-    std::unique_ptr<SkPoint[]> pointStorage(new SkPoint[glyphs.count]);
     std::unique_ptr<SkScalar[]> glyphWidths(new SkScalar[glyphs.count]);
     glyphs.paint.getTextWidths(glyphs.glyphIDs, glyphs.count << 1, glyphWidths.get());
 
@@ -322,22 +321,33 @@ void SkiaCanvasProxy::onDrawText(const void* text, size_t byteLength, SkScalar x
         xBaseline = x;
         yBaseline = y;
     }
-    pointStorage[0].set(xBaseline, yBaseline);
-
-    // setup the remaining glyph positions
-    if (glyphs.paint.isVerticalText()) {
-        for (int i = 1; i < glyphs.count; i++) {
-            pointStorage[i].set(xBaseline, glyphWidths[i-1] + pointStorage[i-1].fY);
-        }
-    } else {
-        for (int i = 1; i < glyphs.count; i++) {
-            pointStorage[i].set(glyphWidths[i-1] + pointStorage[i-1].fX, yBaseline);
-        }
-    }
 
     static_assert(sizeof(SkPoint) == sizeof(float)*2, "SkPoint is no longer two floats");
-    mCanvas->drawGlyphs(glyphs.glyphIDs, &pointStorage[0].fX, glyphs.count, glyphs.paint,
-                      x, y, bounds.fLeft, bounds.fTop, bounds.fRight, bounds.fBottom, 0);
+    auto glyphFunc = [&] (uint16_t* text, float* positions) {
+        memcpy(text, glyphs.glyphIDs, glyphs.count*sizeof(uint16_t));
+        size_t posIndex = 0;
+        // setup the first glyph position
+        positions[posIndex++] = xBaseline;
+        positions[posIndex++] = yBaseline;
+        // setup the remaining glyph positions
+        if (glyphs.paint.isVerticalText()) {
+            float yPosition = yBaseline;
+            for (int i = 1; i < glyphs.count; i++) {
+                positions[posIndex++] = xBaseline;
+                yPosition += glyphWidths[i-1];
+                positions[posIndex++] = yPosition;
+            }
+        } else {
+            float xPosition = xBaseline;
+            for (int i = 1; i < glyphs.count; i++) {
+                xPosition += glyphWidths[i-1];
+                positions[posIndex++] = xPosition;
+                positions[posIndex++] = yBaseline;
+            }
+        }
+    };
+    mCanvas->drawGlyphs(glyphFunc, glyphs.count, glyphs.paint, x, y, bounds.fLeft, bounds.fTop,
+            bounds.fRight, bounds.fBottom, 0);
 }
 
 void SkiaCanvasProxy::onDrawPosText(const void* text, size_t byteLength, const SkPoint pos[],
@@ -347,21 +357,12 @@ void SkiaCanvasProxy::onDrawPosText(const void* text, size_t byteLength, const S
 
     // convert to relative positions if necessary
     int x, y;
-    const SkPoint* posArray;
-    std::unique_ptr<SkPoint[]> pointStorage;
     if (mCanvas->drawTextAbsolutePos()) {
         x = 0;
         y = 0;
-        posArray = pos;
     } else {
         x = pos[0].fX;
         y = pos[0].fY;
-        pointStorage.reset(new SkPoint[glyphs.count]);
-        for (int i = 0; i < glyphs.count; i++) {
-            pointStorage[i].fX = pos[i].fX - x;
-            pointStorage[i].fY = pos[i].fY - y;
-        }
-        posArray = pointStorage.get();
     }
 
     // Compute conservative bounds.  If the content has already been processed
@@ -377,8 +378,19 @@ void SkiaCanvasProxy::onDrawPosText(const void* text, size_t byteLength, const S
     }
 
     static_assert(sizeof(SkPoint) == sizeof(float)*2, "SkPoint is no longer two floats");
-    mCanvas->drawGlyphs(glyphs.glyphIDs, &posArray[0].fX, glyphs.count, glyphs.paint, x, y,
-                      bounds.fLeft, bounds.fTop, bounds.fRight, bounds.fBottom, 0);
+    auto glyphFunc = [&] (uint16_t* text, float* positions) {
+        memcpy(text, glyphs.glyphIDs, glyphs.count*sizeof(uint16_t));
+        if (mCanvas->drawTextAbsolutePos()) {
+            memcpy(positions, pos, 2*glyphs.count*sizeof(float));
+        } else {
+            for (int i = 0, posIndex = 0; i < glyphs.count; i++) {
+                positions[posIndex++] = pos[i].fX - x;
+                positions[posIndex++] = pos[i].fY - y;
+            }
+        }
+    };
+    mCanvas->drawGlyphs(glyphFunc, glyphs.count, glyphs.paint, x, y, bounds.fLeft, bounds.fTop,
+            bounds.fRight, bounds.fBottom, 0);
 }
 
 void SkiaCanvasProxy::onDrawPosTextH(const void* text, size_t byteLength, const SkScalar xpos[],

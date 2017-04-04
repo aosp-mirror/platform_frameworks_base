@@ -540,12 +540,13 @@ void RecordingCanvas::drawNinePatch(Bitmap& bitmap, const android::Res_png_9patc
 }
 
 // Text
-void RecordingCanvas::drawGlyphs(const uint16_t* glyphs, const float* positions, int glyphCount,
-            const SkPaint& paint, float x, float y, float boundsLeft, float boundsTop,
-            float boundsRight, float boundsBottom, float totalAdvance) {
-    if (!glyphs || !positions || glyphCount <= 0 || paint.nothingToDraw()) return;
-    glyphs = refBuffer<glyph_t>(glyphs, glyphCount);
-    positions = refBuffer<float>(positions, glyphCount * 2);
+void RecordingCanvas::drawGlyphs(ReadGlyphFunc glyphFunc, int glyphCount, const SkPaint& paint,
+        float x, float y, float boundsLeft, float boundsTop, float boundsRight, float boundsBottom,
+        float totalAdvance) {
+    if (glyphCount <= 0 || paint.nothingToDraw()) return;
+    uint16_t* glyphs = (glyph_t*)alloc().alloc<glyph_t>(glyphCount * sizeof(glyph_t));
+    float* positions = (float*)alloc().alloc<float>(2 * glyphCount * sizeof(float));
+    glyphFunc(glyphs, positions);
 
     // TODO: either must account for text shadow in bounds, or record separate ops for text shadows
     addOp(alloc().create_trivial<TextOp>(

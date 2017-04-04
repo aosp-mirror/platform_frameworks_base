@@ -80,13 +80,11 @@ static void simplifyPaint(int color, SkPaint* paint) {
 
 class DrawTextFunctor {
 public:
-    DrawTextFunctor(const minikin::Layout& layout, Canvas* canvas, uint16_t* glyphs, float* pos,
+    DrawTextFunctor(const minikin::Layout& layout, Canvas* canvas,
             const SkPaint& paint, float x, float y, minikin::MinikinRect& bounds,
             float totalAdvance)
         : layout(layout)
         , canvas(canvas)
-        , glyphs(glyphs)
-        , pos(pos)
         , paint(paint)
         , x(x)
         , y(y)
@@ -95,19 +93,21 @@ public:
     }
 
     void operator()(size_t start, size_t end) {
-        if (canvas->drawTextAbsolutePos()) {
-            for (size_t i = start; i < end; i++) {
-                glyphs[i] = layout.getGlyphId(i);
-                pos[2 * i] = x + layout.getX(i);
-                pos[2 * i + 1] = y + layout.getY(i);
+        auto glyphFunc = [&] (uint16_t* text, float* positions) {
+            if (canvas->drawTextAbsolutePos()) {
+                for (size_t i = start, textIndex = 0, posIndex = 0; i < end; i++) {
+                    text[textIndex++] = layout.getGlyphId(i);
+                    positions[posIndex++] = x + layout.getX(i);
+                    positions[posIndex++] = y + layout.getY(i);
+                }
+            } else {
+                for (size_t i = start, textIndex = 0, posIndex = 0; i < end; i++) {
+                    text[textIndex++] = layout.getGlyphId(i);
+                    positions[posIndex++] = layout.getX(i);
+                    positions[posIndex++] = layout.getY(i);
+                }
             }
-        } else {
-            for (size_t i = start; i < end; i++) {
-                glyphs[i] = layout.getGlyphId(i);
-                pos[2 * i] = layout.getX(i);
-                pos[2 * i + 1] = layout.getY(i);
-            }
-        }
+        };
 
         size_t glyphCount = end - start;
 
@@ -121,26 +121,24 @@ public:
             SkPaint outlinePaint(paint);
             simplifyPaint(darken ? SK_ColorWHITE : SK_ColorBLACK, &outlinePaint);
             outlinePaint.setStyle(SkPaint::kStrokeAndFill_Style);
-            canvas->drawGlyphs(glyphs + start, pos + (2 * start), glyphCount, outlinePaint, x, y,
-                    bounds.mLeft, bounds.mTop, bounds.mRight, bounds.mBottom, totalAdvance);
+            canvas->drawGlyphs(glyphFunc, glyphCount, outlinePaint, x, y, bounds.mLeft, bounds.mTop,
+                    bounds.mRight, bounds.mBottom, totalAdvance);
 
             // inner
             SkPaint innerPaint(paint);
             simplifyPaint(darken ? SK_ColorBLACK : SK_ColorWHITE, &innerPaint);
             innerPaint.setStyle(SkPaint::kFill_Style);
-            canvas->drawGlyphs(glyphs + start, pos + (2 * start), glyphCount, innerPaint, x, y,
-                    bounds.mLeft, bounds.mTop, bounds.mRight, bounds.mBottom, totalAdvance);
+            canvas->drawGlyphs(glyphFunc, glyphCount, innerPaint, x, y, bounds.mLeft, bounds.mTop,
+                    bounds.mRight, bounds.mBottom, totalAdvance);
         } else {
             // standard draw path
-            canvas->drawGlyphs(glyphs + start, pos + (2 * start), glyphCount, paint, x, y,
-                    bounds.mLeft, bounds.mTop, bounds.mRight, bounds.mBottom, totalAdvance);
+            canvas->drawGlyphs(glyphFunc, glyphCount, paint, x, y, bounds.mLeft, bounds.mTop,
+                    bounds.mRight, bounds.mBottom, totalAdvance);
         }
     }
 private:
     const minikin::Layout& layout;
     Canvas* canvas;
-    uint16_t* glyphs;
-    float* pos;
     const SkPaint& paint;
     float x;
     float y;
@@ -156,10 +154,6 @@ void Canvas::drawText(const uint16_t* text, int start, int count, int contextCou
     minikin::Layout layout = MinikinUtils::doLayout(
             &paint, bidiFlags, typeface, text, start, count, contextCount);
 
-    size_t nGlyphs = layout.nGlyphs();
-    std::unique_ptr<uint16_t[]> glyphs(new uint16_t[nGlyphs]);
-    std::unique_ptr<float[]> pos(new float[nGlyphs * 2]);
-
     x += MinikinUtils::xOffsetForTextAlign(&paint, layout);
 
     minikin::MinikinRect bounds;
@@ -173,8 +167,7 @@ void Canvas::drawText(const uint16_t* text, int start, int count, int contextCou
     // care of all alignment.
     paint.setTextAlign(Paint::kLeft_Align);
 
-    DrawTextFunctor f(layout, this, glyphs.get(), pos.get(),
-            paint, x, y, bounds, layout.getAdvance());
+    DrawTextFunctor f(layout, this, paint, x, y, bounds, layout.getAdvance());
     MinikinUtils::forFontRun(layout, &paint, f);
 }
 
