@@ -707,13 +707,16 @@ import java.util.function.Predicate;
  * @attr ref android.R.styleable#View_isScrollContainer
  * @attr ref android.R.styleable#View_focusable
  * @attr ref android.R.styleable#View_focusableInTouchMode
+ * @attr ref android.R.styleable#View_focusedByDefault
  * @attr ref android.R.styleable#View_hapticFeedbackEnabled
  * @attr ref android.R.styleable#View_keepScreenOn
+ * @attr ref android.R.styleable#View_keyboardNavigationCluster
  * @attr ref android.R.styleable#View_layerType
  * @attr ref android.R.styleable#View_layoutDirection
  * @attr ref android.R.styleable#View_longClickable
  * @attr ref android.R.styleable#View_minHeight
  * @attr ref android.R.styleable#View_minWidth
+ * @attr ref android.R.styleable#View_nextClusterForward
  * @attr ref android.R.styleable#View_nextFocusDown
  * @attr ref android.R.styleable#View_nextFocusLeft
  * @attr ref android.R.styleable#View_nextFocusRight
@@ -4076,7 +4079,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     int mNextFocusForwardId = View.NO_ID;
 
     /**
-     * User-specified next keyboard navigation cluster.
+     * User-specified next keyboard navigation cluster in the {@link #FOCUS_FORWARD} direction.
+     *
+     * @see #findUserSetNextKeyboardNavigationCluster(View, int)
      */
     int mNextClusterForwardId = View.NO_ID;
 
@@ -9963,6 +9968,29 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                         return t.mNextFocusForwardId == id;
                     }
                 });
+            }
+        }
+        return null;
+    }
+
+    /**
+     * If a user manually specified the next keyboard-navigation cluster for a particular direction,
+     * use the root to look up the view.
+     *
+     * @param root the root view of the hierarchy containing this view
+     * @param direction {@link #FOCUS_FORWARD} or {@link #FOCUS_BACKWARD}
+     * @return the user-specified next cluster, or {@code null} if there is none
+     */
+    View findUserSetNextKeyboardNavigationCluster(View root, @FocusDirection int direction) {
+        switch (direction) {
+            case FOCUS_FORWARD:
+                if (mNextClusterForwardId == View.NO_ID) return null;
+                return findViewInsideOutShouldExist(root, mNextClusterForwardId);
+            case FOCUS_BACKWARD: {
+                if (mID == View.NO_ID) return null;
+                final int id = mID;
+                return root.findViewByPredicateInsideOut(this,
+                        (Predicate<View>) t -> t.mNextClusterForwardId == id);
             }
         }
         return null;
