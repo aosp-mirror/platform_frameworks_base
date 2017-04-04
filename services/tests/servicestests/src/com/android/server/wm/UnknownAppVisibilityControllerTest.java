@@ -46,7 +46,7 @@ public class UnknownAppVisibilityControllerTest extends WindowTestsBase {
 
     @Test
     public void testFlow() throws Exception {
-        final AppWindowToken token = new TestAppWindowToken(sDisplayContent);
+        final AppWindowToken token = new WindowTestUtils.TestAppWindowToken(sDisplayContent);
         sWm.mUnknownAppVisibilityController.notifyLaunched(token);
         sWm.mUnknownAppVisibilityController.notifyAppResumedFinished(token);
         sWm.mUnknownAppVisibilityController.notifyRelayouted(token);
@@ -58,8 +58,8 @@ public class UnknownAppVisibilityControllerTest extends WindowTestsBase {
 
     @Test
     public void testMultiple() throws Exception {
-        final AppWindowToken token1 = new TestAppWindowToken(sDisplayContent);
-        final AppWindowToken token2 = new TestAppWindowToken(sDisplayContent);
+        final AppWindowToken token1 = new WindowTestUtils.TestAppWindowToken(sDisplayContent);
+        final AppWindowToken token2 = new WindowTestUtils.TestAppWindowToken(sDisplayContent);
         sWm.mUnknownAppVisibilityController.notifyLaunched(token1);
         sWm.mUnknownAppVisibilityController.notifyAppResumedFinished(token1);
         sWm.mUnknownAppVisibilityController.notifyLaunched(token2);
@@ -74,7 +74,7 @@ public class UnknownAppVisibilityControllerTest extends WindowTestsBase {
 
     @Test
     public void testClear() throws Exception {
-        final AppWindowToken token = new TestAppWindowToken(sDisplayContent);
+        final AppWindowToken token = new WindowTestUtils.TestAppWindowToken(sDisplayContent);
         sWm.mUnknownAppVisibilityController.notifyLaunched(token);
         sWm.mUnknownAppVisibilityController.clear();;
         assertTrue(sWm.mUnknownAppVisibilityController.allResolved());
@@ -82,7 +82,7 @@ public class UnknownAppVisibilityControllerTest extends WindowTestsBase {
 
     @Test
     public void testAppRemoved() throws Exception {
-        final AppWindowToken token = new TestAppWindowToken(sDisplayContent);
+        final AppWindowToken token = new WindowTestUtils.TestAppWindowToken(sDisplayContent);
         sWm.mUnknownAppVisibilityController.notifyLaunched(token);
         sWm.mUnknownAppVisibilityController.appRemoved(token);
         assertTrue(sWm.mUnknownAppVisibilityController.allResolved());

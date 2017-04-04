@@ -46,7 +46,8 @@ public class WindowTokenTests extends WindowTestsBase {
 
     @Test
     public void testAddWindow() throws Exception {
-        final TestWindowToken token = new TestWindowToken(0, sDisplayContent);
+        final WindowTestUtils.TestWindowToken token =
+                new WindowTestUtils.TestWindowToken(0, sDisplayContent);
 
         assertEquals(0, token.getWindowsCount());
 
@@ -76,7 +77,7 @@ public class WindowTokenTests extends WindowTestsBase {
     @Test
     public void testChildRemoval() throws Exception {
         final DisplayContent dc = sDisplayContent;
-        final TestWindowToken token = new TestWindowToken(0, dc);
+        final WindowTestUtils.TestWindowToken token = new WindowTestUtils.TestWindowToken(0, dc);
 
         assertEquals(token, dc.getWindowToken(token.token));
 
@@ -95,7 +96,8 @@ public class WindowTokenTests extends WindowTestsBase {
 
     @Test
     public void testAdjustAnimLayer() throws Exception {
-        final TestWindowToken token = new TestWindowToken(0, sDisplayContent);
+        final WindowTestUtils.TestWindowToken token =
+                new WindowTestUtils.TestWindowToken(0, sDisplayContent);
         final WindowState window1 = createWindow(null, TYPE_APPLICATION, token, "window1");
         final WindowState window11 = createWindow(window1, FIRST_SUB_WINDOW, token, "window11");
         final WindowState window12 = createWindow(window1, FIRST_SUB_WINDOW, token, "window12");
@@ -135,8 +137,9 @@ public class WindowTokenTests extends WindowTestsBase {
      */
     @Test
     public void testTokenRemovalProcess() throws Exception {
-        final TestWindowToken token =
-                new TestWindowToken(TYPE_TOAST, sDisplayContent, true /* persistOnEmpty */);
+        final WindowTestUtils.TestWindowToken token =
+                new WindowTestUtils.TestWindowToken(TYPE_TOAST, sDisplayContent,
+                        true /* persistOnEmpty */);
 
         // Verify that the token is on the display
         assertNotNull(sDisplayContent.getWindowToken(token.token));

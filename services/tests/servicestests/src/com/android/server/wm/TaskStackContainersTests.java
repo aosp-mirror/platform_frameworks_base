@@ -56,7 +56,7 @@ public class TaskStackContainersTests extends WindowTestsBase {
         // Stack should contain visible app window to be considered visible.
         final Task pinnedTask = createTaskInStack(mPinnedStack, 0 /* userId */);
         assertFalse(mPinnedStack.isVisible());
-        final TestAppWindowToken pinnedApp = new TestAppWindowToken(sDisplayContent);
+        final WindowTestUtils.TestAppWindowToken pinnedApp = new WindowTestUtils.TestAppWindowToken(sDisplayContent);
         pinnedTask.addChild(pinnedApp, 0 /* addPos */);
         assertTrue(mPinnedStack.isVisible());
     }

@@ -16,9 +16,6 @@
 
 package com.android.server.wm;
 
-import android.content.pm.ActivityInfo;
-import android.view.WindowManager;
-import android.view.WindowManager.LayoutParams;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -67,12 +64,14 @@ public class TaskStackTests extends WindowTestsBase {
     public void testClosingAppDifferentStackOrientation() throws Exception {
         final TaskStack stack = createTaskStackOnDisplay(sDisplayContent);
         final Task task1 = createTaskInStack(stack, 0 /* userId */);
-        TestAppWindowToken appWindowToken1 = new TestAppWindowToken(sDisplayContent);
+        WindowTestUtils.TestAppWindowToken appWindowToken1 =
+                new WindowTestUtils.TestAppWindowToken(sDisplayContent);
         task1.addChild(appWindowToken1, 0);
         appWindowToken1.setOrientation(SCREEN_ORIENTATION_LANDSCAPE);
 
         final Task task2 = createTaskInStack(stack, 1 /* userId */);
-        TestAppWindowToken appWindowToken2 = new TestAppWindowToken(sDisplayContent);
+        WindowTestUtils.TestAppWindowToken appWindowToken2 =
+                new WindowTestUtils.TestAppWindowToken(sDisplayContent);
         task2.addChild(appWindowToken2, 0);
         appWindowToken2.setOrientation(SCREEN_ORIENTATION_PORTRAIT);
 
@@ -85,12 +84,14 @@ public class TaskStackTests extends WindowTestsBase {
     public void testMoveTaskToBackDifferentStackOrientation() throws Exception {
         final TaskStack stack = createTaskStackOnDisplay(sDisplayContent);
         final Task task1 = createTaskInStack(stack, 0 /* userId */);
-        TestAppWindowToken appWindowToken1 = new TestAppWindowToken(sDisplayContent);
+        WindowTestUtils.TestAppWindowToken appWindowToken1 =
+                new WindowTestUtils.TestAppWindowToken(sDisplayContent);
         task1.addChild(appWindowToken1, 0);
         appWindowToken1.setOrientation(SCREEN_ORIENTATION_LANDSCAPE);
 
         final Task task2 = createTaskInStack(stack, 1 /* userId */);
-        TestAppWindowToken appWindowToken2 = new TestAppWindowToken(sDisplayContent);
+        WindowTestUtils.TestAppWindowToken appWindowToken2 =
+                new WindowTestUtils.TestAppWindowToken(sDisplayContent);
         task2.addChild(appWindowToken2, 0);
         appWindowToken2.setOrientation(SCREEN_ORIENTATION_PORTRAIT);
 

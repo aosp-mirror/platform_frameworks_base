@@ -16,12 +16,7 @@
 
 package com.android.server.wm;
 
-import static android.view.DisplayAdjustments.DEFAULT_DISPLAY_ADJUSTMENTS;
-
 import android.graphics.Rect;
-import android.hardware.display.DisplayManagerGlobal;
-import android.view.Display;
-import android.view.DisplayInfo;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -48,8 +43,8 @@ public class StackWindowControllerTests extends WindowTestsBase {
     public void testRemoveContainer() throws Exception {
         final StackWindowController stackController =
                 createStackControllerOnDisplay(sDisplayContent);
-        final TestTaskWindowContainerController taskController =
-                new TestTaskWindowContainerController(stackController);
+        final WindowTestUtils.TestTaskWindowContainerController taskController =
+                new WindowTestUtils.TestTaskWindowContainerController(stackController);
 
         final TaskStack stack = stackController.mContainer;
         final Task task = taskController.mContainer;
@@ -68,11 +63,11 @@ public class StackWindowControllerTests extends WindowTestsBase {
     public void testRemoveContainer_deferRemoval() throws Exception {
         final StackWindowController stackController =
                 createStackControllerOnDisplay(sDisplayContent);
-        final TestTaskWindowContainerController taskController =
-                new TestTaskWindowContainerController(stackController);
+        final WindowTestUtils.TestTaskWindowContainerController taskController =
+                new WindowTestUtils.TestTaskWindowContainerController(stackController);
 
         final TaskStack stack = stackController.mContainer;
-        final TestTask task = (TestTask) taskController.mContainer;
+        final WindowTestUtils.TestTask task = (WindowTestUtils.TestTask) taskController.mContainer;
         // Stack removal is deferred if one of its child is animating.
         task.setLocalIsAnimating(true);
 
@@ -96,9 +91,9 @@ public class StackWindowControllerTests extends WindowTestsBase {
         final StackWindowController stack1Controller =
                 createStackControllerOnDisplay(sDisplayContent);
         final TaskStack stack1 = stack1Controller.mContainer;
-        final TestTaskWindowContainerController taskController =
-                new TestTaskWindowContainerController(stack1Controller);
-        final TestTask task1 = (TestTask) taskController.mContainer;
+        final WindowTestUtils.TestTaskWindowContainerController taskController =
+                new WindowTestUtils.TestTaskWindowContainerController(stack1Controller);
+        final WindowTestUtils.TestTask task1 = (WindowTestUtils.TestTask) taskController.mContainer;
         task1.mOnDisplayChangedCalled = false;
 
         // Create second display and put second stack on it.
