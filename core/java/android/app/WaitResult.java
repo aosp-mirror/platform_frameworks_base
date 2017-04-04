@@ -20,6 +20,8 @@ import android.content.ComponentName;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.io.PrintWriter;
+
 /**
  * Information returned after waiting for an activity start.
  *
@@ -68,5 +70,14 @@ public class WaitResult implements Parcelable {
         who = ComponentName.readFromParcel(source);
         thisTime = source.readLong();
         totalTime = source.readLong();
+    }
+
+    public void dump(PrintWriter pw, String prefix) {
+        pw.println(prefix + "WaitResult:");
+        pw.println(prefix + "  result=" + result);
+        pw.println(prefix + "  timeout=" + timeout);
+        pw.println(prefix + "  who=" + who);
+        pw.println(prefix + "  thisTime=" + thisTime);
+        pw.println(prefix + "  totalTime=" + totalTime);
     }
 }

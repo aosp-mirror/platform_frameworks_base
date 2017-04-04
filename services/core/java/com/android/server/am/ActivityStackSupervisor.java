@@ -153,6 +153,7 @@ import android.provider.MediaStore;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.service.voice.IVoiceInteractionSession;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.EventLog;
@@ -164,7 +165,6 @@ import android.view.Display;
 import android.view.InputEvent;
 import android.view.Surface;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.ReferrerIntent;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
@@ -174,7 +174,6 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.LocalServices;
 import com.android.server.am.ActivityStack.ActivityState;
-import com.android.server.wm.StackWindowController;
 import com.android.server.wm.WindowManagerService;
 
 import java.io.FileDescriptor;
@@ -346,10 +345,12 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
     /** List of activities that are waiting for a new activity to become visible before completing
      * whatever operation they are supposed to do. */
-    final ArrayList<ActivityRecord> mWaitingVisibleActivities = new ArrayList<>();
+    // TODO: Remove mActivitiesWaitingForVisibleActivity list and just remove activity from
+    // mStoppingActivities when something else comes up.
+    final ArrayList<ActivityRecord> mActivitiesWaitingForVisibleActivity = new ArrayList<>();
 
-    /** List of processes waiting to find out about the next visible activity. */
-    final ArrayList<WaitResult> mWaitingActivityVisible = new ArrayList<>();
+    /** List of processes waiting to find out when a specific activity becomes visible. */
+    private final ArrayList<WaitInfo> mWaitingForActivityVisible = new ArrayList<>();
 
     /** List of processes waiting to find out about the next launched activity. */
     final ArrayList<WaitResult> mWaitingActivityLaunched = new ArrayList<>();
@@ -1003,7 +1004,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 final ActivityStack stack = stacks.get(stackNdx);
                 final ActivityRecord r = stack.mResumedActivity;
                 if (r != null) {
-                    if (!r.nowVisible || mWaitingVisibleActivities.contains(r)) {
+                    if (!r.nowVisible || mActivitiesWaitingForVisibleActivity.contains(r)) {
                         return false;
                     }
                     foundResumed = true;
@@ -1083,22 +1084,41 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         }
     }
 
+    void waitActivityVisible(ComponentName name, WaitResult result) {
+        final WaitInfo waitInfo = new WaitInfo(name, result);
+        mWaitingForActivityVisible.add(waitInfo);
+    }
+
+    void cleanupActivity(ActivityRecord r) {
+        // Make sure this record is no longer in the pending finishes list.
+        // This could happen, for example, if we are trimming activities
+        // down to the max limit while they are still waiting to finish.
+        mFinishingActivities.remove(r);
+        mActivitiesWaitingForVisibleActivity.remove(r);
+
+        for (int i = mWaitingForActivityVisible.size() - 1; i >= 0; --i) {
+            if (mWaitingForActivityVisible.get(i).matches(r)) {
+                mWaitingForActivityVisible.remove(i);
+            }
+        }
+    }
+
     void reportActivityVisibleLocked(ActivityRecord r) {
         sendWaitingVisibleReportLocked(r);
     }
 
     void sendWaitingVisibleReportLocked(ActivityRecord r) {
         boolean changed = false;
-        for (int i = mWaitingActivityVisible.size()-1; i >= 0; i--) {
-            WaitResult w = mWaitingActivityVisible.get(i);
-            if (w.who == null) {
+        for (int i = mWaitingForActivityVisible.size() - 1; i >= 0; --i) {
+            final WaitInfo w = mWaitingForActivityVisible.get(i);
+            if (w.matches(r)) {
+                final WaitResult result = w.getResult();
                 changed = true;
-                w.timeout = false;
-                if (r != null) {
-                    w.who = new ComponentName(r.info.packageName, r.info.name);
-                }
-                w.totalTime = SystemClock.uptimeMillis() - w.thisTime;
-                w.thisTime = w.totalTime;
+                result.timeout = false;
+                result.who = w.getComponent();
+                result.totalTime = SystemClock.uptimeMillis() - result.thisTime;
+                result.thisTime = result.totalTime;
+                mWaitingForActivityVisible.remove(w);
             }
         }
         if (changed) {
@@ -3412,13 +3432,11 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         final boolean nowVisible = allResumedActivitiesVisible();
         for (int activityNdx = mStoppingActivities.size() - 1; activityNdx >= 0; --activityNdx) {
             ActivityRecord s = mStoppingActivities.get(activityNdx);
-            // TODO: Remove mWaitingVisibleActivities list and just remove activity from
-            // mStoppingActivities when something else comes up.
-            boolean waitingVisible = mWaitingVisibleActivities.contains(s);
+            boolean waitingVisible = mActivitiesWaitingForVisibleActivity.contains(s);
             if (DEBUG_STATES) Slog.v(TAG, "Stopping " + s + ": nowVisible=" + nowVisible
                     + " waitingVisible=" + waitingVisible + " finishing=" + s.finishing);
             if (waitingVisible && nowVisible) {
-                mWaitingVisibleActivities.remove(s);
+                mActivitiesWaitingForVisibleActivity.remove(s);
                 waitingVisible = false;
                 if (s.finishing) {
                     // If this activity is finishing, it is sitting on top of
@@ -3511,6 +3529,13 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 pw.print(":"); pw.println(Arrays.toString(packages.valueAt(i)));
             }
         }
+        if (!mWaitingForActivityVisible.isEmpty()) {
+            pw.print(prefix); pw.println("mWaitingForActivityVisible=");
+            for (int i = 0; i < mWaitingForActivityVisible.size(); ++i) {
+                pw.print(prefix); pw.print(prefix); mWaitingForActivityVisible.get(i).dump(pw, prefix);
+            }
+        }
+
         pw.println(" mLockTaskModeTasks" + mLockTaskModeTasks);
         mKeyguardController.dump(pw, prefix);
     }
@@ -3633,9 +3658,9 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 false, dumpPackage, true, "  Activities waiting to finish:", null);
         printed |= dumpHistoryList(fd, pw, mStoppingActivities, "  ", "Stop", false, !dumpAll,
                 false, dumpPackage, true, "  Activities waiting to stop:", null);
-        printed |= dumpHistoryList(fd, pw, mWaitingVisibleActivities, "  ", "Wait", false, !dumpAll,
-                false, dumpPackage, true, "  Activities waiting for another to become visible:",
-                null);
+        printed |= dumpHistoryList(fd, pw, mActivitiesWaitingForVisibleActivity, "  ", "Wait",
+                false, !dumpAll, false, dumpPackage, true,
+                "  Activities waiting for another to become visible:", null);
         printed |= dumpHistoryList(fd, pw, mGoingToSleepActivities, "  ", "Sleep", false, !dumpAll,
                 false, dumpPackage, true, "  Activities waiting to sleep:", null);
         printed |= dumpHistoryList(fd, pw, mGoingToSleepActivities, "  ", "Sleep", false, !dumpAll,
@@ -4985,5 +5010,39 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             }
         }
         return topActivityTokens;
+    }
+
+    /**
+     * Internal container to store a match qualifier alongside a WaitResult.
+     */
+    static class WaitInfo {
+        private final ComponentName mTargetComponent;
+        private final WaitResult mResult;
+
+        public WaitInfo(ComponentName targetComponent, WaitResult result) {
+            this.mTargetComponent = targetComponent;
+            this.mResult = result;
+        }
+
+        public boolean matches(ActivityRecord record) {
+            return mTargetComponent == null ||
+                    (TextUtils.equals(mTargetComponent.getPackageName(), record.info.packageName)
+                            && TextUtils.equals(mTargetComponent.getClassName(), record.info.name));
+        }
+
+        public WaitResult getResult() {
+            return mResult;
+        }
+
+        public ComponentName getComponent() {
+            return mTargetComponent;
+        }
+
+        public void dump(PrintWriter pw, String prefix) {
+            pw.println(prefix + "WaitInfo:");
+            pw.println(prefix + "  mTargetComponent=" + mTargetComponent);
+            pw.println(prefix + "  mResult=");
+            mResult.dump(pw, prefix);
+        }
     }
 }

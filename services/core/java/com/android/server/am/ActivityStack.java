@@ -116,7 +116,6 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.server.Watchdog;
@@ -1349,7 +1348,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             } else if (prev.app != null) {
                 if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "Enqueue pending stop if needed: " + prev
                         + " wasStopping=" + wasStopping + " visible=" + prev.visible);
-                if (mStackSupervisor.mWaitingVisibleActivities.remove(prev)) {
+                if (mStackSupervisor.mActivitiesWaitingForVisibleActivity.remove(prev)) {
                     if (DEBUG_SWITCH || DEBUG_PAUSE) Slog.v(TAG_PAUSE,
                             "Complete pause, no longer waiting: " + prev);
                 }
@@ -2262,7 +2261,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         mStackSupervisor.mStoppingActivities.remove(next);
         mStackSupervisor.mGoingToSleepActivities.remove(next);
         next.sleeping = false;
-        mStackSupervisor.mWaitingVisibleActivities.remove(next);
+        mStackSupervisor.mActivitiesWaitingForVisibleActivity.remove(next);
 
         if (DEBUG_SWITCH) Slog.v(TAG_SWITCH, "Resuming " + next);
 
@@ -2324,9 +2323,9 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         }
 
         if (prev != null && prev != next) {
-            if (!mStackSupervisor.mWaitingVisibleActivities.contains(prev)
+            if (!mStackSupervisor.mActivitiesWaitingForVisibleActivity.contains(prev)
                     && next != null && !next.nowVisible) {
-                mStackSupervisor.mWaitingVisibleActivities.add(prev);
+                mStackSupervisor.mActivitiesWaitingForVisibleActivity.add(prev);
                 if (DEBUG_SWITCH) Slog.v(TAG_SWITCH,
                         "Resuming top, waiting visible to hide: " + prev);
             } else {
@@ -2342,13 +2341,13 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                     prev.setVisibility(false);
                     if (DEBUG_SWITCH) Slog.v(TAG_SWITCH,
                             "Not waiting for visible to hide: " + prev + ", waitingVisible="
-                            + mStackSupervisor.mWaitingVisibleActivities.contains(prev)
+                            + mStackSupervisor.mActivitiesWaitingForVisibleActivity.contains(prev)
                             + ", nowVisible=" + next.nowVisible);
                 } else {
                     if (DEBUG_SWITCH) Slog.v(TAG_SWITCH,
                             "Previous already visible but still waiting to hide: " + prev
                             + ", waitingVisible="
-                            + mStackSupervisor.mWaitingVisibleActivities.contains(prev)
+                            + mStackSupervisor.mActivitiesWaitingForVisibleActivity.contains(prev)
                             + ", nowVisible=" + next.nowVisible);
                 }
             }
@@ -3617,8 +3616,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         mWindowManager.prepareAppTransition(transit, false);
         r.setVisibility(false);
         mWindowManager.executeAppTransition();
-        if (!mStackSupervisor.mWaitingVisibleActivities.contains(r)) {
-            mStackSupervisor.mWaitingVisibleActivities.add(r);
+        if (!mStackSupervisor.mActivitiesWaitingForVisibleActivity.contains(r)) {
+            mStackSupervisor.mActivitiesWaitingForVisibleActivity.add(r);
         }
     }
 
@@ -3650,7 +3649,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         // make sure the record is cleaned out of other places.
         mStackSupervisor.mStoppingActivities.remove(r);
         mStackSupervisor.mGoingToSleepActivities.remove(r);
-        mStackSupervisor.mWaitingVisibleActivities.remove(r);
+        mStackSupervisor.mActivitiesWaitingForVisibleActivity.remove(r);
         if (mResumedActivity == r) {
             mResumedActivity = null;
         }
@@ -3870,11 +3869,9 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             r.app = null;
         }
 
-        // Make sure this record is no longer in the pending finishes list.
-        // This could happen, for example, if we are trimming activities
-        // down to the max limit while they are still waiting to finish.
-        mStackSupervisor.mFinishingActivities.remove(r);
-        mStackSupervisor.mWaitingVisibleActivities.remove(r);
+        // Inform supervisor the activity has been removed.
+        mStackSupervisor.cleanupActivity(r);
+
 
         // Remove any pending results.
         if (r.finishing && r.pendingResults != null) {
@@ -4253,8 +4250,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 "mStoppingActivities");
         removeHistoryRecordsForAppLocked(mStackSupervisor.mGoingToSleepActivities, app,
                 "mGoingToSleepActivities");
-        removeHistoryRecordsForAppLocked(mStackSupervisor.mWaitingVisibleActivities, app,
-                "mWaitingVisibleActivities");
+        removeHistoryRecordsForAppLocked(mStackSupervisor.mActivitiesWaitingForVisibleActivity, app,
+                "mActivitiesWaitingForVisibleActivity");
         removeHistoryRecordsForAppLocked(mStackSupervisor.mFinishingActivities, app,
                 "mFinishingActivities");
 
