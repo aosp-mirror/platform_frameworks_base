@@ -1475,6 +1475,12 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
         return mLayerState.isStateful();
     }
 
+    /** @hide */
+    @Override
+    public boolean hasFocusStateSpecified() {
+        return mLayerState.hasFocusStateSpecified();
+    }
+
     @Override
     protected boolean onStateChange(int[] state) {
         boolean changed = false;
@@ -2105,6 +2111,18 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
             mIsStateful = isStateful;
             mCheckedStateful = true;
             return isStateful;
+        }
+
+        public final boolean hasFocusStateSpecified() {
+            final int N = mNumChildren;
+            final ChildDrawable[] array = mChildren;
+            for (int i = 0; i < N; i++) {
+                final Drawable dr = array[i].mDrawable;
+                if (dr != null && dr.hasFocusStateSpecified()) {
+                    return true;
+                }
+            }
+            return false;
         }
 
         public final boolean canConstantState() {

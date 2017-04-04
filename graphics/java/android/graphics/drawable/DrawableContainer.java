@@ -240,6 +240,18 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
         return mDrawableContainerState.isStateful();
     }
 
+    /** @hide */
+    @Override
+    public boolean hasFocusStateSpecified() {
+        if (mCurrDrawable != null) {
+            return mCurrDrawable.hasFocusStateSpecified();
+        }
+        if (mLastDrawable != null) {
+            return mLastDrawable.hasFocusStateSpecified();
+        }
+        return false;
+    }
+
     @Override
     public void setAutoMirrored(boolean mirrored) {
         if (mDrawableContainerState.mAutoMirrored != mirrored) {

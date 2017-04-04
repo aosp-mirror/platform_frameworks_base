@@ -987,6 +987,15 @@ public class GradientDrawable extends Drawable {
                 || (s.mTint != null && s.mTint.isStateful());
     }
 
+    /** @hide */
+    @Override
+    public boolean hasFocusStateSpecified() {
+        final GradientState s = mGradientState;
+        return (s.mSolidColors != null && s.mSolidColors.hasFocusStateSpecified())
+                || (s.mStrokeColors != null && s.mStrokeColors.hasFocusStateSpecified())
+                || (s.mTint != null && s.mTint.hasFocusStateSpecified());
+    }
+
     @Override
     public @Config int getChangingConfigurations() {
         return super.getChangingConfigurations() | mGradientState.getChangingConfigurations();

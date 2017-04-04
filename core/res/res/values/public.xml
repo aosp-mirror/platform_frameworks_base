@@ -2814,6 +2814,7 @@
         <public name="iconTintMode" />
         <public name="maxAspectRatio"/>
         <public name="iconSpaceReserved"/>
+        <public name="defaultFocusHighlightEnabled" />
     </public-group>
 
     <public-group type="style" first-id="0x010302e0">
