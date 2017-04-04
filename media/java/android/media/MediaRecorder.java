@@ -746,14 +746,19 @@ public class MediaRecorder
     }
 
     /**
-     * Sets the video encoding profile for recording. Call this method before prepare().
-     * Prepare() may perform additional checks on the parameter to make sure whether the
-     * specified profile and level are applicable, and sometimes the passed profile or
-     * level will be discarded due to codec capablity or to ensure the video recording
-     * can proceed smoothly based on the capabilities of the platform.
-     * @hide
+     * Sets the desired video encoding profile and level for recording. The profile and level
+     * must be valid for the video encoder set by {@link #setVideoEncoder}. This method can
+     * called before or after {@link #setVideoEncoder} but it must be called before {@link #prepare}.
+     * {@code prepare()} may perform additional checks on the parameter to make sure that the specified
+     * profile and level are applicable, and sometimes the passed profile or level will be
+     * discarded due to codec capablity or to ensure the video recording can proceed smoothly
+     * based on the capabilities of the platform. <br>Application can also use the
+     * {@link MediaCodecInfo.CodecCapabilities#profileLevels} to query applicable combination of profile
+     * and level for the corresponding format. Note that the requested profile/level may not be supported by
+     * the codec that is actually being used by this MediaRecorder instance.
      * @param profile declared in {@link MediaCodecInfo.CodecProfileLevel}.
      * @param level declared in {@link MediaCodecInfo.CodecProfileLevel}.
+     * @throws IllegalArgumentException when an invalid profile or level value is used.
      */
     public void setVideoEncodingProfileLevel(int profile, int level) {
         if (profile <= 0)  {
@@ -1281,3 +1286,4 @@ public class MediaRecorder
     @Override
     protected void finalize() { native_finalize(); }
 }
+
