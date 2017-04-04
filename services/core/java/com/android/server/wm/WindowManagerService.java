@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import static android.Manifest.permission.MANAGE_APP_TOKENS;
+import static android.Manifest.permission.READ_FRAME_BUFFER;
 import static android.Manifest.permission.REGISTER_WINDOW_MANAGER_LISTENERS;
 import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
@@ -25,6 +26,11 @@ import static android.app.StatusBarManager.DISABLE_MASK;
 import static android.app.admin.DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED;
 import static android.content.Intent.ACTION_USER_REMOVED;
 import static android.content.Intent.EXTRA_USER_HANDLE;
+import static android.os.Process.ROOT_UID;
+import static android.os.Process.SHELL_UID;
+import static android.os.Process.SYSTEM_UID;
+import static android.os.Process.THREAD_PRIORITY_DISPLAY;
+import static android.os.Process.myPid;
 import static android.os.UserHandle.USER_NULL;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.DOCKED_INVALID;
@@ -60,6 +66,8 @@ import static android.view.WindowManagerGlobal.RELAYOUT_DEFER_SURFACE_DESTROY;
 import static android.view.WindowManagerGlobal.RELAYOUT_RES_SURFACE_CHANGED;
 import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT;
 import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
+import static com.android.server.LockGuard.INDEX_WINDOW;
+import static com.android.server.LockGuard.installLock;
 import static com.android.server.wm.AppTransition.TRANSIT_UNSET;
 import static com.android.server.wm.AppWindowAnimator.PROLONG_ANIMATION_AT_END;
 import static com.android.server.wm.AppWindowAnimator.PROLONG_ANIMATION_AT_START;
@@ -125,7 +133,6 @@ import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManagerInternal;
 import android.hardware.input.InputManager;
 import android.net.Uri;
-import android.os.PowerSaveState;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -139,7 +146,7 @@ import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.PowerManager;
 import android.os.PowerManagerInternal;
-import android.os.Process;
+import android.os.PowerSaveState;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.StrictMode;
@@ -151,10 +158,10 @@ import android.os.UserHandle;
 import android.os.WorkSource;
 import android.provider.Settings;
 import android.util.ArraySet;
-import android.util.MergedConfiguration;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
+import android.util.MergedConfiguration;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -215,7 +222,7 @@ import com.android.server.DisplayThread;
 import com.android.server.EventLogTags;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
-import com.android.server.LockGuard;
+import com.android.server.ThreadPriorityBooster;
 import com.android.server.UiThread;
 import com.android.server.Watchdog;
 import com.android.server.input.InputManagerService;
@@ -239,10 +246,7 @@ import java.net.Socket;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-
-import static android.Manifest.permission.READ_FRAME_BUFFER;
 /** {@hide} */
 public class WindowManagerService extends IWindowManager.Stub
         implements Watchdog.Monitor, WindowManagerPolicy.WindowManagerFuncs {
@@ -408,7 +412,7 @@ public class WindowManagerService extends IWindowManager.Stub
      * This is also used as the lock for all of our state.
      * NOTE: Never call into methods that lock ActivityManagerService while holding this object.
      */
-    final HashMap<IBinder, WindowState> mWindowMap = new HashMap<>();
+    final WindowHashMap mWindowMap = new WindowHashMap();
 
     /**
      * List of window tokens that have finished starting their application,
@@ -848,6 +852,16 @@ public class WindowManagerService extends IWindowManager.Stub
     // since they won't be notified through the app window animator.
     final List<IBinder> mNoAnimationNotifyOnTransitionFinished = new ArrayList<>();
 
+    private static ThreadPriorityBooster sThreadPriorityBooster = new ThreadPriorityBooster(
+            THREAD_PRIORITY_DISPLAY, INDEX_WINDOW);
+
+    static void boostPriorityForLockedSection() {
+        sThreadPriorityBooster.boost();
+    }
+
+    static void resetPriorityAfterLockedSection() {
+        sThreadPriorityBooster.reset();
+    }
 
     void openSurfaceTransaction() {
         synchronized (mWindowMap) {
@@ -936,7 +950,7 @@ public class WindowManagerService extends IWindowManager.Stub
     private WindowManagerService(Context context, InputManagerService inputManager,
             boolean haveInputMethods, boolean showBootMsgs, boolean onlyCore,
             WindowManagerPolicy policy) {
-        LockGuard.installLock(this, LockGuard.INDEX_WINDOW);
+        installLock(this, INDEX_WINDOW);
         mRoot = new RootWindowContainer(this);
         mContext = context;
         mHaveInputMethods = haveInputMethods;
@@ -1581,7 +1595,7 @@ public class WindowManagerService extends IWindowManager.Stub
     @Override
     public void enableSurfaceTrace(ParcelFileDescriptor pfd) {
         final int callingUid = Binder.getCallingUid();
-        if (callingUid != Process.SHELL_UID && callingUid != Process.ROOT_UID) {
+        if (callingUid != SHELL_UID && callingUid != ROOT_UID) {
             throw new SecurityException("Only shell can call enableSurfaceTrace");
         }
 
@@ -1593,8 +1607,8 @@ public class WindowManagerService extends IWindowManager.Stub
     @Override
     public void disableSurfaceTrace() {
         final int callingUid = Binder.getCallingUid();
-        if (callingUid != Process.SHELL_UID && callingUid != Process.ROOT_UID &&
-            callingUid != Process.SYSTEM_UID) {
+        if (callingUid != SHELL_UID && callingUid != ROOT_UID &&
+            callingUid != SYSTEM_UID) {
             throw new SecurityException("Only shell can call disableSurfaceTrace");
         }
         synchronized (mWindowMap) {
@@ -1608,7 +1622,7 @@ public class WindowManagerService extends IWindowManager.Stub
     @Override
     public void setScreenCaptureDisabled(int userId, boolean disabled) {
         int callingUid = Binder.getCallingUid();
-        if (callingUid != Process.SYSTEM_UID) {
+        if (callingUid != SYSTEM_UID) {
             throw new SecurityException("Only system can call setScreenCaptureDisabled.");
         }
 
@@ -2264,7 +2278,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     boolean checkCallingPermission(String permission, String func) {
         // Quick check: if the calling permission is me, it's all okay.
-        if (Binder.getCallingPid() == Process.myPid()) {
+        if (Binder.getCallingPid() == myPid()) {
             return true;
         }
 
@@ -2917,7 +2931,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
         // If this isn't coming from the system then don't allow disabling the lockscreen
         // to bypass security.
-        if (Binder.getCallingUid() != Process.SYSTEM_UID && isKeyguardSecure()) {
+        if (Binder.getCallingUid() != SYSTEM_UID && isKeyguardSecure()) {
             Log.d(TAG_WM, "current mode is SecurityMode, ignore disableKeyguard");
             return;
         }
@@ -7058,7 +7072,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     throw new IllegalStateException("Magnification callbacks not set!");
                 }
             }
-            if (Binder.getCallingPid() != android.os.Process.myPid()) {
+            if (Binder.getCallingPid() != myPid()) {
                 spec.recycle();
             }
         }

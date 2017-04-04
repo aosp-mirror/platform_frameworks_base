@@ -33,7 +33,7 @@ class WindowContainerController<E extends WindowContainer, I extends WindowConta
 
     final WindowManagerService mService;
     final RootWindowContainer mRoot;
-    final HashMap<IBinder, WindowState> mWindowMap;
+    final WindowHashMap mWindowMap;
 
     // The window container this controller owns.
     E mContainer;
