@@ -114,7 +114,7 @@ public final class Downloads {
          * download's content: uri is specified in the intent's data.
          */
         public static final String ACTION_DOWNLOAD_COMPLETED =
-                "android.intent.action.DOWNLOAD_COMPLETED";
+                DownloadManager.ACTION_DOWNLOAD_COMPLETED;
 
         /**
          * Broadcast Action: this is sent by the download manager to the app
@@ -127,7 +127,7 @@ public final class Downloads {
          * successfully.
          */
         public static final String ACTION_NOTIFICATION_CLICKED =
-                "android.intent.action.DOWNLOAD_NOTIFICATION_CLICKED";
+                DownloadManager.ACTION_NOTIFICATION_CLICKED;
 
         /**
          * The name of the column containing the URI of the data being downloaded.
