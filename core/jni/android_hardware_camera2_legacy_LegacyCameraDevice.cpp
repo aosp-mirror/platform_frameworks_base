@@ -182,7 +182,7 @@ static status_t produceFrame(const sp<ANativeWindow>& anw,
     err = native_window_dequeue_buffer_and_wait(anw.get(), &anb);
     if (err != NO_ERROR) return err;
 
-    sp<GraphicBuffer> buf(new GraphicBuffer(anb, /*keepOwnership*/false));
+    sp<GraphicBuffer> buf(GraphicBuffer::from(anb));
     uint32_t grallocBufWidth = buf->getWidth();
     uint32_t grallocBufHeight = buf->getHeight();
     uint32_t grallocBufStride = buf->getStride();
