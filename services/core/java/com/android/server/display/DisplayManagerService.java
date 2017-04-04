@@ -339,6 +339,18 @@ public final class DisplayManagerService extends SystemService {
         }
     }
 
+    /**
+     * @see DisplayManagerInternal#getNonOverrideDisplayInfo(int, DisplayInfo)
+     */
+    private void getNonOverrideDisplayInfoInternal(int displayId, DisplayInfo outInfo) {
+        synchronized (mSyncRoot) {
+            final LogicalDisplay display = mLogicalDisplays.get(displayId);
+            if (display != null) {
+                display.getNonOverrideDisplayInfoLocked(outInfo);
+            }
+        }
+    }
+
     private void performTraversalInTransactionFromWindowManagerInternal() {
         synchronized (mSyncRoot) {
             if (!mPendingTraversal) {
@@ -1660,6 +1672,11 @@ public final class DisplayManagerService extends SystemService {
         @Override
         public void setDisplayInfoOverrideFromWindowManager(int displayId, DisplayInfo info) {
             setDisplayInfoOverrideFromWindowManagerInternal(displayId, info);
+        }
+
+        @Override
+        public void getNonOverrideDisplayInfo(int displayId, DisplayInfo outInfo) {
+            getNonOverrideDisplayInfoInternal(displayId, outInfo);
         }
 
         @Override
