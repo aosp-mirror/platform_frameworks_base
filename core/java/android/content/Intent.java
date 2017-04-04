@@ -3184,6 +3184,32 @@ public class Intent implements Parcelable, Cloneable {
     public static final String
             ACTION_DYNAMIC_SENSOR_CHANGED = "android.intent.action.DYNAMIC_SENSOR_CHANGED";
 
+    /**
+     * Broadcast Action: The default subscription has changed.  This has the following
+     * extra values:</p>
+     * The {@link #EXTRA_SUBSCRIPTION_INDEX} extra indicates the current default subscription index
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_DEFAULT_SUBSCRIPTION_CHANGED
+            = "android.intent.action.ACTION_DEFAULT_SUBSCRIPTION_CHANGED";
+
+    /**
+     * Broadcast Action: The default sms subscription has changed.  This has the following
+     * extra values:</p>
+     * {@link #EXTRA_SUBSCRIPTION_INDEX} extra indicates the current default sms
+     * subscription index
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_DEFAULT_SMS_SUBSCRIPTION_CHANGED
+            = "android.intent.action.ACTION_DEFAULT_SMS_SUBSCRIPTION_CHANGED";
+
+    /**
+     * Integer extra used with {@link #ACTION_DEFAULT_SUBSCRIPTION_CHANGED} and
+     * {@link #ACTION_DEFAULT_SMS_SUBSCRIPTION_CHANGED} to indicate the subscription
+     * which has changed.
+     */
+    public static final String EXTRA_SUBSCRIPTION_INDEX = "android.intent.extra.SUBSCRIPTION_INDEX";
+
     /** {@hide} */
     public static final String ACTION_MASTER_CLEAR = "android.intent.action.MASTER_CLEAR";
 
