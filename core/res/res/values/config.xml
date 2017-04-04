@@ -2812,6 +2812,11 @@
     <!-- TODO(b/35230407) complete the link field -->
     <bool name="config_allowEscrowTokenForTrustAgent">false</bool>
 
+    <!-- A flattened ComponentName which corresponds to the only trust agent that should be enabled
+         by default. If the default value is used, or set to an empty string, the restriction will
+         not be applied. -->
+    <string name="config_defaultTrustAgent" translatable="false"></string>
+
     <!-- Colon separated list of package names that should be granted Notification Listener access -->
     <string name="config_defaultListenerAccessPackages" translatable="false"></string>
 
