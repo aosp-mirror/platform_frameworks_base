@@ -928,4 +928,18 @@
          [CHAR LIMIT=35] -->
     <string name="use_system_language_to_select_input_method_subtypes">Use system languages</string>
 
+    <!-- Toast that settings for an application is failed to open. -->
+    <string name="failed_to_open_app_settings_toast">Failed to open settings for <xliff:g id="spell_application_name">%1$s</xliff:g></string>
+
+    <!-- Warning message about security implications of enabling an input method, displayed as a dialog
+         message when the user selects to enable an IME. -->
+    <string name="ime_security_warning">This input method may be able to collect
+        all the text you type, including personal data like passwords and credit
+        card numbers.  It comes from the app
+        <xliff:g id="ime_application_name">%1$s</xliff:g>.
+        Use this input method?</string>
+
+    <!-- [CHAR LIMIT=NONE] Dialog body explaining that the app just selected by the user will not work after a reboot until until after the user enters their credentials, such as a PIN or password. -->
+    <string name="direct_boot_unaware_dialog_message">Note: After a reboot, this app can\'t start until you unlock your phone</string>
+
 </resources>
