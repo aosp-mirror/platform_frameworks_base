@@ -18,7 +18,6 @@ package android.media.session;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.pm.ParceledListSlice;
-import android.media.MediaDescription;
 import android.media.MediaMetadata;
 import android.media.Rating;
 import android.media.session.ISessionControllerCallback;
@@ -52,11 +51,6 @@ interface ISessionController {
     MediaMetadata getMetadata();
     PlaybackState getPlaybackState();
     ParceledListSlice getQueue();
-    void addQueueItem(in MediaDescription description);
-    void addQueueItemAt(in MediaDescription description, int index);
-    void removeQueueItem(in MediaDescription description);
-    void removeQueueItemAt(int index);
-
     CharSequence getQueueTitle();
     Bundle getExtras();
     int getRatingType();
