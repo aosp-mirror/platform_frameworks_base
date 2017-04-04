@@ -429,14 +429,13 @@ public class AccountManagerService
     public boolean addAccountExplicitlyWithVisibility(Account account, String password,
             Bundle extras, Map packageToVisibility) {
         Bundle.setDefusable(extras, true);
-
-        final int callingUid = Binder.getCallingUid();
+        int callingUid = Binder.getCallingUid();
+        int userId = UserHandle.getCallingUserId();
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             Log.v(TAG, "addAccountExplicitly: " + account + ", caller's uid " + callingUid
                     + ", pid " + Binder.getCallingPid());
         }
         Preconditions.checkNotNull(account, "account cannot be null");
-        int userId = UserHandle.getCallingUserId();
         if (!isAccountManagedByCaller(account.type, callingUid, userId)) {
             String msg = String.format("uid %s cannot explicitly add accounts of type: %s",
                     callingUid, account.type);
@@ -463,9 +462,9 @@ public class AccountManagerService
     public Map<Account, Integer> getAccountsAndVisibilityForPackage(String packageName,
             String accountType) {
         int callingUid = Binder.getCallingUid();
+        int userId = UserHandle.getCallingUserId();
         boolean isSystemUid = UserHandle.isSameApp(callingUid, Process.SYSTEM_UID);
-        List<String> managedTypes =
-                getTypesForCaller(callingUid, UserHandle.getUserId(callingUid), isSystemUid);
+        List<String> managedTypes = getTypesForCaller(callingUid, userId, isSystemUid);
 
         if ((accountType != null && !managedTypes.contains(accountType))
                 || (accountType == null && !isSystemUid)) {
@@ -480,8 +479,9 @@ public class AccountManagerService
 
         long identityToken = clearCallingIdentity();
         try {
+            UserAccounts accounts = getUserAccounts(userId);
             return getAccountsAndVisibilityForPackage(packageName, managedTypes, callingUid,
-                    getUserAccounts(UserHandle.getUserId(callingUid)));
+                    accounts);
         } finally {
             restoreCallingIdentity(identityToken);
         }
@@ -492,12 +492,8 @@ public class AccountManagerService
      */
     private Map<Account, Integer> getAccountsAndVisibilityForPackage(String packageName,
             List<String> accountTypes, Integer callingUid, UserAccounts accounts) {
-        int uid = 0;
-        try {
-            uid = mPackageManager.getPackageUidAsUser(packageName,
-                    UserHandle.getUserId(callingUid));
-        } catch (NameNotFoundException e) {
-            Log.d(TAG, "Package not found " + e.getMessage());
+        if (!packageExistsForUser(packageName, accounts.userId)) {
+            Log.d(TAG, "Package not found " + packageName);
             return new LinkedHashMap<>();
         }
 
@@ -522,19 +518,26 @@ public class AccountManagerService
     public Map<String, Integer> getPackagesAndVisibilityForAccount(Account account) {
         Preconditions.checkNotNull(account, "account cannot be null");
         int callingUid = Binder.getCallingUid();
-        int userId = UserHandle.getUserId(callingUid);
-        UserAccounts accounts = getUserAccounts(userId);
+        int userId = UserHandle.getCallingUserId();
         if (!isAccountManagedByCaller(account.type, callingUid, userId)
                 && !isSystemUid(callingUid)) {
             String msg =
                     String.format("uid %s cannot get secrets for account %s", callingUid, account);
             throw new SecurityException(msg);
         }
-        synchronized (accounts.dbLock) {
-            synchronized (accounts.cacheLock) {
-                return getPackagesAndVisibilityForAccountLocked(account, accounts);
+
+        long identityToken = clearCallingIdentity();
+        try {
+            UserAccounts accounts = getUserAccounts(userId);
+            synchronized (accounts.dbLock) {
+                synchronized (accounts.cacheLock) {
+                    return getPackagesAndVisibilityForAccountLocked(account, accounts);
+                }
             }
+        } finally {
+            restoreCallingIdentity(identityToken);
         }
+
     }
 
     /**
@@ -562,8 +565,8 @@ public class AccountManagerService
         Preconditions.checkNotNull(account, "account cannot be null");
         Preconditions.checkNotNull(packageName, "packageName cannot be null");
         int callingUid = Binder.getCallingUid();
-        UserAccounts accounts = getUserAccounts(UserHandle.getUserId(callingUid));
-        if (!isAccountManagedByCaller(account.type, callingUid, accounts.userId)
+        int userId = UserHandle.getCallingUserId();
+        if (!isAccountManagedByCaller(account.type, callingUid, userId)
             && !isSystemUid(callingUid)) {
             String msg = String.format(
                     "uid %s cannot get secrets for accounts of type: %s",
@@ -571,7 +574,13 @@ public class AccountManagerService
                     account.type);
             throw new SecurityException(msg);
         }
-        return resolveAccountVisibility(account, packageName, accounts);
+        long identityToken = clearCallingIdentity();
+        try {
+            UserAccounts accounts = getUserAccounts(userId);
+            return resolveAccountVisibility(account, packageName, accounts);
+        } finally {
+            restoreCallingIdentity(identityToken);
+        }
     }
 
     /**
@@ -712,8 +721,8 @@ public class AccountManagerService
         Preconditions.checkNotNull(account, "account cannot be null");
         Preconditions.checkNotNull(packageName, "packageName cannot be null");
         int callingUid = Binder.getCallingUid();
-        UserAccounts accounts = getUserAccounts(UserHandle.getUserId(callingUid));
-        if (!isAccountManagedByCaller(account.type, callingUid, accounts.userId)
+        int userId = UserHandle.getCallingUserId();
+        if (!isAccountManagedByCaller(account.type, callingUid, userId)
             && !isSystemUid(callingUid)) {
             String msg = String.format(
                     "uid %s cannot get secrets for accounts of type: %s",
@@ -721,8 +730,14 @@ public class AccountManagerService
                     account.type);
             throw new SecurityException(msg);
         }
-        return setAccountVisibility(account, packageName, newVisibility, true /* notify */,
+        long identityToken = clearCallingIdentity();
+        try {
+            UserAccounts accounts = getUserAccounts(userId);
+            return setAccountVisibility(account, packageName, newVisibility, true /* notify */,
                 accounts);
+        } finally {
+            restoreCallingIdentity(identityToken);
+        }
     }
 
     /**
@@ -809,8 +824,15 @@ public class AccountManagerService
     public void registerAccountListener(String[] accountTypes, String opPackageName) {
         int callingUid = Binder.getCallingUid();
         mAppOpsManager.checkPackage(callingUid, opPackageName);
-        registerAccountListener(accountTypes, opPackageName,
-            getUserAccounts(UserHandle.getUserId(callingUid)));
+
+        int userId = UserHandle.getCallingUserId();
+        long identityToken = clearCallingIdentity();
+        try {
+            UserAccounts accounts = getUserAccounts(userId);
+            registerAccountListener(accountTypes, opPackageName, accounts);
+        } finally {
+            restoreCallingIdentity(identityToken);
+        }
     }
 
     private void registerAccountListener(String[] accountTypes, String opPackageName,
@@ -836,7 +858,18 @@ public class AccountManagerService
     public void unregisterAccountListener(String[] accountTypes, String opPackageName) {
         int callingUid = Binder.getCallingUid();
         mAppOpsManager.checkPackage(callingUid, opPackageName);
-        UserAccounts accounts = getUserAccounts(UserHandle.getUserId(callingUid));
+        int userId = UserHandle.getCallingUserId();
+        long identityToken = clearCallingIdentity();
+        try {
+            UserAccounts accounts = getUserAccounts(userId);
+            unregisterAccountListener(accountTypes, opPackageName, accounts);
+        } finally {
+            restoreCallingIdentity(identityToken);
+        }
+    }
+
+    private void unregisterAccountListener(String[] accountTypes, String opPackageName,
+            UserAccounts accounts) {
         synchronized (accounts.mReceiversForType) {
             if (accountTypes == null) {
                 // null for any type
@@ -907,7 +940,7 @@ public class AccountManagerService
             long identityToken = clearCallingIdentity();
             try {
                 mPackageManager.getPackageUidAsUser(packageName, userId);
-                return true; // package exist
+                return true;
             } finally {
                 restoreCallingIdentity(identityToken);
             }
