@@ -984,7 +984,7 @@ public class ResourcesManager {
                 final ResourcesKey key = mResourceImpls.keyAt(i);
                 final WeakReference<ResourcesImpl> weakImplRef = mResourceImpls.valueAt(i);
                 final ResourcesImpl impl = weakImplRef != null ? weakImplRef.get() : null;
-                if (impl != null && key.mResDir != null && key.mResDir.equals(baseCodePath)) {
+                if (impl != null && (key.mResDir == null || key.mResDir.equals(baseCodePath))) {
                     updatedResourceKeys.put(impl, new ResourcesKey(
                             key.mResDir,
                             key.mSplitResDirs,

@@ -4642,4 +4642,18 @@ public abstract class Context {
     public Handler getMainThreadHandler() {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
+
+    /**
+     * Throws an exception if the Context is using system resources,
+     * which are non-runtime-overlay-themable and may show inconsistent UI.
+     * @hide
+     */
+    public void assertRuntimeOverlayThemable() {
+        // Resources.getSystem() is a singleton and the only Resources not managed by
+        // ResourcesManager; therefore Resources.getSystem() is not themable.
+        if (getResources() == Resources.getSystem()) {
+            throw new IllegalArgumentException("Non-UI context used to display UI; "
+                    + "get a UI context from ActivityThread#getSystemUiContext()");
+        }
+    }
 }
