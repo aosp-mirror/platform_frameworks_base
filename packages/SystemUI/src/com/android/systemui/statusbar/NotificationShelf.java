@@ -167,7 +167,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
             openedAmount = Math.min(1.0f, openedAmount);
             mShelfState.openedAmount = openedAmount;
             mShelfState.clipTopAmount = 0;
-            mShelfState.alpha = 1.0f;
+            mShelfState.alpha = mAmbientState.isPulsing() ? 0 : 1;
             mShelfState.belowSpeedBump = mAmbientState.getSpeedBumpIndex() == 0;
             mShelfState.shadowAlpha = 1.0f;
             mShelfState.hideSensitive = false;
@@ -599,6 +599,11 @@ public class NotificationShelf extends ActivatableNotificationView implements
             // we need to wait with enabling the animations until the first frame has passed
             mShelfIcons.setAnimationsEnabled(false);
         }
+    }
+
+    @Override
+    public boolean hasOverlappingRendering() {
+        return false;  // Shelf only uses alpha for transitions where the difference can't be seen.
     }
 
     @Override

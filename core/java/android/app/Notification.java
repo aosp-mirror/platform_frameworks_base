@@ -3793,9 +3793,9 @@ public class Notification implements Parcelable
                 // Ambient view does not have these
                 bindHeaderText(contentView);
                 bindHeaderChronometerAndTime(contentView);
-                bindExpandButton(contentView);
                 bindProfileBadge(contentView);
             }
+            bindExpandButton(contentView);
         }
 
         private void bindExpandButton(RemoteViews contentView) {

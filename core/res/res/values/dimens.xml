@@ -165,6 +165,9 @@
     -->
     <dimen name="notification_content_plus_picture_margin_end">72dp</dimen>
 
+    <!-- The additional margin on the sides of the ambient view. -->
+    <dimen name="notification_extra_margin_ambient">16dp</dimen>
+
     <!-- The height of the notification action list -->
     <dimen name="notification_action_list_height">56dp</dimen>
 

@@ -89,7 +89,6 @@ import android.os.Vibrator;
 import android.provider.Settings;
 import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.StatusBarNotification;
-import android.support.annotation.VisibleForTesting;
 import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
@@ -242,7 +241,6 @@ import com.android.systemui.RecentsComponent;
 import com.android.systemui.SwipeHelper;
 import com.android.systemui.SystemUI;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin.MenuItem;
-import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.statusbar.policy.RemoteInputView;
 import com.android.systemui.statusbar.stack.StackStateAnimator;
@@ -5015,16 +5013,20 @@ public class StatusBar extends SystemUI implements DemoMode,
                     if (!mHeadsUpManager.getAllEntries().isEmpty()) {
                         // Only pulse the stack scroller if there's actually something to show.
                         // Otherwise just show the always-on screen.
-                        mStackScroller.setPulsing(true);
-                        mVisualStabilityManager.setPulsing(true);
+                        setPulsing(true);
                     }
                 }
 
                 @Override
                 public void onPulseFinished() {
                     callback.onPulseFinished();
-                    mStackScroller.setPulsing(false);
-                    mVisualStabilityManager.setPulsing(false);
+                    setPulsing(false);
+                }
+
+                private void setPulsing(boolean pulsing) {
+                    mStackScroller.setPulsing(pulsing);
+                    mNotificationPanel.setPulsing(pulsing);
+                    mVisualStabilityManager.setPulsing(pulsing);
                 }
             }, reason);
         }
