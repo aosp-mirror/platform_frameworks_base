@@ -178,7 +178,8 @@ public class EuiccManager {
             return;
         }
         try {
-            mController.downloadSubscription(subscription, switchAfterDownload, callbackIntent);
+            mController.downloadSubscription(subscription, switchAfterDownload,
+                    mContext.getOpPackageName(), callbackIntent);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

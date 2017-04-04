@@ -25,5 +25,5 @@ interface IEuiccController {
         in PendingIntent callbackIntent);
     String getEid();
     oneway void downloadSubscription(in DownloadableSubscription subscription,
-        boolean switchAfterDownload, in PendingIntent callbackIntent);
+        boolean switchAfterDownload, String callingPackage, in PendingIntent callbackIntent);
 }
