@@ -543,11 +543,9 @@ public class WifiTracker {
             }
         }
 
-        if (mNetworkScoringUiEnabled) {
-            requestScoresForNetworkKeys(scoresToRequest);
-            for (AccessPoint ap : accessPoints) {
-                ap.updateScores(mScoreCache);
-            }
+        requestScoresForNetworkKeys(scoresToRequest);
+        for (AccessPoint ap : accessPoints) {
+            ap.update(mScoreCache, mNetworkScoringUiEnabled);
         }
 
         // Pre-sort accessPoints to speed preference insertion
@@ -648,7 +646,7 @@ public class WifiTracker {
             if (ap.update(connectionConfig, mLastInfo, mLastNetworkInfo)) {
                 reorder = true;
             }
-            if (mNetworkScoringUiEnabled && ap.updateScores(mScoreCache)) {
+            if (ap.update(mScoreCache, mNetworkScoringUiEnabled)) {
                 reorder = true;
             }
         }
@@ -659,15 +657,11 @@ public class WifiTracker {
     }
 
     /**
-     * Update all the internal access points rankingScores and badge.
+     * Update all the internal access points rankingScores, badge and metering.
      *
      * <p>Will trigger a resort and notify listeners of changes if applicable.
      */
     private void updateNetworkScores() {
-        if (!mNetworkScoringUiEnabled) {
-            return;
-        }
-
         // Lock required to prevent accidental copying of AccessPoint states while the modification
         // is in progress. see #copyAndNotifyListeners
         long before = System.currentTimeMillis();
@@ -679,7 +673,7 @@ public class WifiTracker {
 
         boolean reorder = false;
         for (int i = 0; i < mInternalAccessPoints.size(); i++) {
-            if (mInternalAccessPoints.get(i).updateScores(mScoreCache)) {
+            if (mInternalAccessPoints.get(i).update(mScoreCache, mNetworkScoringUiEnabled)) {
                 reorder = true;
             }
         }
