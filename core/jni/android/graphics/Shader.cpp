@@ -10,6 +10,14 @@
 
 using namespace android::uirenderer;
 
+/**
+ * By default Skia gradients will interpolate their colors in unpremul space
+ * and then premultiply each of the results. We must set this flag to preserve
+ * backwards compatiblity by premultiplying the colors of the gradient first,
+ * and then interpolating between them.
+ */
+static const uint32_t sGradientShaderFlags = SkGradientShader::kInterpolateColorsInPremul_Flag;
+
 static void ThrowIAE_IfNull(JNIEnv* env, void* ptr) {
     if (NULL == ptr) {
         doThrowIAE(env);
@@ -89,7 +97,7 @@ static jlong LinearGradient_create1(JNIEnv* env, jobject o, jlong matrixPtr,
 
     SkShader* shader = SkGradientShader::MakeLinear(pts,
             reinterpret_cast<const SkColor*>(colorValues), pos, count,
-            static_cast<SkShader::TileMode>(tileMode), /* flags */ 0, matrix).release();
+            static_cast<SkShader::TileMode>(tileMode), sGradientShaderFlags, matrix).release();
 
     env->ReleaseIntArrayElements(colorArray, const_cast<jint*>(colorValues), JNI_ABORT);
     ThrowIAE_IfNull(env, shader);
@@ -109,7 +117,7 @@ static jlong LinearGradient_create2(JNIEnv* env, jobject o, jlong matrixPtr,
     colors[1] = color1;
 
     SkShader* s = SkGradientShader::MakeLinear(pts, colors, NULL, 2,
-            (SkShader::TileMode)tileMode, /* flags */ 0, matrix).release();
+            static_cast<SkShader::TileMode>(tileMode), sGradientShaderFlags, matrix).release();
 
     ThrowIAE_IfNull(env, s);
     return reinterpret_cast<jlong>(s);
@@ -135,7 +143,7 @@ static jlong RadialGradient_create1(JNIEnv* env, jobject, jlong matrixPtr, jfloa
 
     SkShader* shader = SkGradientShader::MakeRadial(center, radius,
             reinterpret_cast<const SkColor*>(colorValues), pos, count,
-            static_cast<SkShader::TileMode>(tileMode), /* flags */ 0, matrix).release();
+            static_cast<SkShader::TileMode>(tileMode), sGradientShaderFlags, matrix).release();
     env->ReleaseIntArrayElements(colorArray, const_cast<jint*>(colorValues),
                                  JNI_ABORT);
 
@@ -154,7 +162,7 @@ static jlong RadialGradient_create2(JNIEnv* env, jobject, jlong matrixPtr, jfloa
     colors[1] = color1;
 
     SkShader* s = SkGradientShader::MakeRadial(center, radius, colors, NULL, 2,
-            (SkShader::TileMode)tileMode, /* flags */ 0, matrix).release();
+            static_cast<SkShader::TileMode>(tileMode), sGradientShaderFlags, matrix).release();
     ThrowIAE_IfNull(env, s);
     return reinterpret_cast<jlong>(s);
 }
@@ -174,8 +182,8 @@ static jlong SweepGradient_create1(JNIEnv* env, jobject, jlong matrixPtr, jfloat
     #error Need to convert float array to SkScalar array before calling the following function.
 #endif
 
-    SkShader* shader = SkGradientShader::MakeSweep(x, y,
-            reinterpret_cast<const SkColor*>(colors), pos, count, /* flags */ 0, matrix).release();
+    SkShader* shader = SkGradientShader::MakeSweep(x, y, reinterpret_cast<const SkColor*>(colors),
+            pos, count, sGradientShaderFlags, matrix).release();
     env->ReleaseIntArrayElements(jcolors, const_cast<jint*>(colors),
                                  JNI_ABORT);
     ThrowIAE_IfNull(env, shader);
@@ -189,7 +197,7 @@ static jlong SweepGradient_create2(JNIEnv* env, jobject, jlong matrixPtr, jfloat
     colors[0] = color0;
     colors[1] = color1;
     SkShader* s = SkGradientShader::MakeSweep(x, y, colors, NULL, 2,
-            /* flags */ 0, matrix).release();
+            sGradientShaderFlags, matrix).release();
     ThrowIAE_IfNull(env, s);
     return reinterpret_cast<jlong>(s);
 }
