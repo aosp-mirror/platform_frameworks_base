@@ -156,7 +156,7 @@ final class ViewState {
         }
         // Then checks if the session has a response waiting authentication; if so, uses it instead.
         final FillResponse currentResponse = mSession.getCurrentResponse();
-        if (currentResponse.getAuthentication() != null) {
+        if (currentResponse != null && currentResponse.getAuthentication() != null) {
             mListener.onFillReady(currentResponse, this.id, mCurrentValue);
         }
     }
