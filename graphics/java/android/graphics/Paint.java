@@ -20,6 +20,7 @@ import android.annotation.ColorInt;
 import android.annotation.NonNull;
 import android.annotation.Size;
 import android.graphics.FontListParser;
+import android.graphics.fonts.FontVariationAxis;
 import android.os.LocaleList;
 import android.text.FontConfig;
 import android.text.GraphicsOperations;
@@ -1551,8 +1552,11 @@ public class Paint {
      * @return true if the given settings is effective to at least one font file underlying this
      *         typeface. This function also returns true for empty settings string. Otherwise
      *         returns false
+     * @throws FontVariationAxis.InvalidFormatException
+     *         If given string is not a valid font variation settings format.
      */
-    public boolean setFontVariationSettings(String settings) {
+    public boolean setFontVariationSettings(String settings)
+            throws FontVariationAxis.InvalidFormatException {
         settings = TextUtils.nullIfEmpty(settings);
         if (settings == mFontVariationSettings
                 || (settings != null && settings.equals(mFontVariationSettings))) {
@@ -1566,11 +1570,10 @@ public class Paint {
             return true;
         }
 
-        final ArrayList<FontConfig.Axis> axes = FontListParser.parseFontVariationSettings(settings);
-        final ArrayList<FontConfig.Axis> filteredAxes = new ArrayList<FontConfig.Axis>();
-        for (int i = 0; i < axes.size(); ++i) {
-            final FontConfig.Axis axis = axes.get(i);
-            if (mTypeface.isSupportedAxes(axis.getTag())) {
+        FontVariationAxis[] axes = FontVariationAxis.fromFontVariationSettings(settings);
+        final ArrayList<FontVariationAxis> filteredAxes = new ArrayList<FontVariationAxis>();
+        for (final FontVariationAxis axis : axes) {
+            if (mTypeface.isSupportedAxes(axis.getOpenTypeTagValue())) {
                 filteredAxes.add(axis);
             }
         }
