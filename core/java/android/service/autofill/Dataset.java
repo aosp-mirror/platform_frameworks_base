@@ -78,11 +78,6 @@ public final class Dataset implements Parcelable {
     }
 
     /** @hide */
-    public @Nullable RemoteViews getPresentation() {
-        return mPresentation;
-    }
-
-    /** @hide */
     public @Nullable IntentSender getAuthentication() {
         return mAuthentication;
     }
