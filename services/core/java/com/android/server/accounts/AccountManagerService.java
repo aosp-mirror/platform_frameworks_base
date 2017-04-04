@@ -123,7 +123,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -191,17 +190,14 @@ public class AccountManagerService
     }
 
     private final LinkedHashMap<String, Session> mSessions = new LinkedHashMap<String, Session>();
-    private final AtomicInteger mNotificationIds =
-            new AtomicInteger(SystemMessage.ACCOUNT_MANAGER_BASE);
 
     static class UserAccounts {
         private final int userId;
         final AccountsDb accountsDb;
-        private final HashMap<Pair<Pair<Account, String>, Integer>, Integer>
-                credentialsPermissionNotificationIds =
-                new HashMap<Pair<Pair<Account, String>, Integer>, Integer>();
-        private final HashMap<Account, Integer> signinRequiredNotificationIds =
-                new HashMap<Account, Integer>();
+        private final HashMap<Pair<Pair<Account, String>, Integer>, NotificationId>
+                credentialsPermissionNotificationIds = new HashMap<>();
+        private final HashMap<Account, NotificationId> signinRequiredNotificationIds
+                = new HashMap<>();
         final Object cacheLock = new Object();
         final Object dbLock = new Object(); // if needed, dbLock must be obtained before cacheLock
         /** protected by the {@link #cacheLock} */
@@ -1863,12 +1859,12 @@ public class AccountManagerService
          */
         cancelNotification(
                 getSigninRequiredNotificationId(accounts, accountToRename),
-                 new UserHandle(accounts.userId));
+                new UserHandle(accounts.userId));
         synchronized(accounts.credentialsPermissionNotificationIds) {
             for (Pair<Pair<Account, String>, Integer> pair:
                     accounts.credentialsPermissionNotificationIds.keySet()) {
                 if (accountToRename.equals(pair.first.first)) {
-                    int id = accounts.credentialsPermissionNotificationIds.get(pair);
+                    NotificationId id = accounts.credentialsPermissionNotificationIds.get(pair);
                     cancelNotification(id, new UserHandle(accounts.userId));
                 }
             }
@@ -2021,7 +2017,7 @@ public class AccountManagerService
             for (Pair<Pair<Account, String>, Integer> pair:
                 accounts.credentialsPermissionNotificationIds.keySet()) {
                 if (account.equals(pair.first.first)) {
-                    int id = accounts.credentialsPermissionNotificationIds.get(pair);
+                    NotificationId id = accounts.credentialsPermissionNotificationIds.get(pair);
                     cancelNotification(id, user);
                 }
             }
@@ -2912,8 +2908,8 @@ public class AccountManagerService
             // the intent from a non-Activity context. This is the default behavior.
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         }
-        intent.addCategory(String.valueOf(getCredentialPermissionNotificationId(account,
-                authTokenType, uid) + (packageName != null ? packageName : "")));
+        intent.addCategory(getCredentialPermissionNotificationId(account,
+                authTokenType, uid).mTag + (packageName != null ? packageName : ""));
         intent.putExtra(GrantCredentialsPermissionActivity.EXTRAS_ACCOUNT, account);
         intent.putExtra(GrantCredentialsPermissionActivity.EXTRAS_AUTH_TOKEN_TYPE, authTokenType);
         intent.putExtra(GrantCredentialsPermissionActivity.EXTRAS_RESPONSE, response);
@@ -2922,33 +2918,39 @@ public class AccountManagerService
         return intent;
     }
 
-    private Integer getCredentialPermissionNotificationId(Account account, String authTokenType,
-            int uid) {
-        Integer id;
+    private NotificationId getCredentialPermissionNotificationId(Account account,
+            String authTokenType, int uid) {
+        NotificationId nId;
         UserAccounts accounts = getUserAccounts(UserHandle.getUserId(uid));
         synchronized (accounts.credentialsPermissionNotificationIds) {
             final Pair<Pair<Account, String>, Integer> key =
                     new Pair<Pair<Account, String>, Integer>(
                             new Pair<Account, String>(account, authTokenType), uid);
-            id = accounts.credentialsPermissionNotificationIds.get(key);
-            if (id == null) {
-                id = mNotificationIds.incrementAndGet();
-                accounts.credentialsPermissionNotificationIds.put(key, id);
+            nId = accounts.credentialsPermissionNotificationIds.get(key);
+            if (nId == null) {
+                String tag = TAG + ":" + SystemMessage.NOTE_ACCOUNT_CREDENTIAL_PERMISSION
+                        + ":" + account.hashCode() + ":" + authTokenType.hashCode();
+                int id = SystemMessage.NOTE_ACCOUNT_CREDENTIAL_PERMISSION;
+                nId = new NotificationId(tag, id);
+                accounts.credentialsPermissionNotificationIds.put(key, nId);
             }
         }
-        return id;
+        return nId;
     }
 
-    private Integer getSigninRequiredNotificationId(UserAccounts accounts, Account account) {
-        Integer id;
+    private NotificationId getSigninRequiredNotificationId(UserAccounts accounts, Account account) {
+        NotificationId nId;
         synchronized (accounts.signinRequiredNotificationIds) {
-            id = accounts.signinRequiredNotificationIds.get(account);
-            if (id == null) {
-                id = mNotificationIds.incrementAndGet();
-                accounts.signinRequiredNotificationIds.put(account, id);
+            nId = accounts.signinRequiredNotificationIds.get(account);
+            if (nId == null) {
+                String tag = TAG + ":" + SystemMessage.NOTE_ACCOUNT_REQUIRE_SIGNIN
+                        + ":" + account.hashCode();
+                int id = SystemMessage.NOTE_ACCOUNT_REQUIRE_SIGNIN;
+                nId = new NotificationId(tag, id);
+                accounts.signinRequiredNotificationIds.put(account, nId);
             }
         }
-        return id;
+        return nId;
     }
 
     @Override
@@ -4931,8 +4933,8 @@ public class AccountManagerService
                 createNoCredentialsPermissionNotification(account, intent, packageName, userId);
             } else {
                 Context contextForUser = getContextForUser(new UserHandle(userId));
-                final Integer notificationId = getSigninRequiredNotificationId(accounts, account);
-                intent.addCategory(String.valueOf(notificationId));
+                final NotificationId id = getSigninRequiredNotificationId(accounts, account);
+                intent.addCategory(id.mTag);
 
                 final String notificationTitleFormat =
                         contextForUser.getText(R.string.notification_title).toString();
@@ -4948,21 +4950,21 @@ public class AccountManagerService
                                 mContext, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT,
                                 null, new UserHandle(userId)))
                         .build();
-                installNotification(notificationId, n, packageName, userId);
+                installNotification(id, n, packageName, userId);
             }
         } finally {
             restoreCallingIdentity(identityToken);
         }
     }
 
-    private void installNotification(int notificationId, final Notification notification,
+    private void installNotification(NotificationId id, final Notification notification,
             String packageName, int userId) {
         final long token = clearCallingIdentity();
         try {
             INotificationManager notificationManager = mInjector.getNotificationManager();
             try {
-                notificationManager.enqueueNotificationWithTag(packageName, packageName, null,
-                        notificationId, notification, new int[1], userId);
+                notificationManager.enqueueNotificationWithTag(packageName, packageName,
+                        id.mTag, id.mId, notification, new int[1], userId);
             } catch (RemoteException e) {
                 /* ignore - local call */
             }
@@ -4971,15 +4973,15 @@ public class AccountManagerService
         }
     }
 
-    private void cancelNotification(int id, UserHandle user) {
+    private void cancelNotification(NotificationId id, UserHandle user) {
         cancelNotification(id, mContext.getPackageName(), user);
     }
 
-    private void cancelNotification(int id, String packageName, UserHandle user) {
+    private void cancelNotification(NotificationId id, String packageName, UserHandle user) {
         long identityToken = clearCallingIdentity();
         try {
             INotificationManager service = mInjector.getNotificationManager();
-            service.cancelNotificationWithTag(packageName, null, id, user.getIdentifier());
+            service.cancelNotificationWithTag(packageName, id.mTag, id.mId, user.getIdentifier());
         } catch (RemoteException e) {
             /* ignore - local call */
         } finally {
@@ -5891,6 +5893,16 @@ public class AccountManagerService
 
         INotificationManager getNotificationManager() {
             return NotificationManager.getService();
+        }
+    }
+
+    private class NotificationId {
+        final String mTag;
+        private final int mId;
+
+        NotificationId(String tag, int type) {
+            mTag = tag;
+            mId = type;
         }
     }
 }
