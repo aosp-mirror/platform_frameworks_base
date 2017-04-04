@@ -143,6 +143,7 @@ public abstract class WebViewDatabase {
      * @return whether there is any saved data for web forms
      * @see #clearFormData
      */
+    @Deprecated
     public abstract boolean hasFormData();
 
     /**
@@ -150,5 +151,6 @@ public abstract class WebViewDatabase {
      *
      * @see #hasFormData
      */
+    @Deprecated
     public abstract void clearFormData();
 }
