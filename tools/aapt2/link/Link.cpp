@@ -1913,7 +1913,7 @@ int Link(const std::vector<StringPiece>& args) {
   std::vector<std::string> overlay_arg_list;
   std::vector<std::string> extra_java_packages;
   Maybe<std::string> package_id;
-  Maybe<std::string> configs;
+  std::vector<std::string> configs;
   Maybe<std::string> preferred_density;
   Maybe<std::string> product_list;
   bool legacy_x_flag = false;
@@ -1971,7 +1971,7 @@ int Link(const std::vector<StringPiece>& args) {
                           &legacy_x_flag)
           .OptionalSwitch("-z", "Require localization of strings marked 'suggested'",
                           &require_localization)
-          .OptionalFlag("-c",
+          .OptionalFlagList("-c",
                         "Comma separated list of configurations to include. The default\n"
                         "is all configurations",
                         &configs)
@@ -2151,28 +2151,29 @@ int Link(const std::vector<StringPiece>& args) {
   }
 
   AxisConfigFilter filter;
-  if (configs) {
-    for (const StringPiece& config_str : util::Tokenize(configs.value(), ',')) {
-      ConfigDescription config;
-      LocaleValue lv;
-      if (lv.InitFromFilterString(config_str)) {
-        lv.WriteTo(&config);
-      } else if (!ConfigDescription::Parse(config_str, &config)) {
-        context.GetDiagnostics()->Error(DiagMessage() << "invalid config '"
-                                                      << config_str
-                                                      << "' for -c option");
-        return 1;
-      }
+  if (configs.empty()) {
+    for (const std::string& config_arg : configs) {
+      for (const StringPiece& config_str : util::Tokenize(config_arg, ',')) {
+        ConfigDescription config;
+        LocaleValue lv;
+        if (lv.InitFromFilterString(config_str)) {
+          lv.WriteTo(&config);
+        } else if (!ConfigDescription::Parse(config_str, &config)) {
+          context.GetDiagnostics()->Error(DiagMessage() << "invalid config '"
+                                                        << config_str
+                                                        << "' for -c option");
+          return 1;
+        }
 
-      if (config.density != 0) {
-        context.GetDiagnostics()->Warn(DiagMessage() << "ignoring density '"
-                                                     << config
-                                                     << "' for -c option");
-      } else {
-        filter.AddConfig(config);
+        if (config.density != 0) {
+          context.GetDiagnostics()->Warn(DiagMessage() << "ignoring density '"
+                                                       << config
+                                                       << "' for -c option");
+        } else {
+          filter.AddConfig(config);
+        }
       }
     }
-
     options.table_splitter_options.config_filter = &filter;
   }
 
