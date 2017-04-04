@@ -1461,8 +1461,7 @@ LOCAL_PROTOC_FLAGS := \
 LOCAL_SRC_FILES := \
     $(call all-proto-files-under, core/proto) \
     $(call all-proto-files-under, libs/incident/proto)
-LOCAL_SHARED_LIBRARIES := libprotobuf-cpp-full
-include $(BUILD_SHARED_LIBRARY)
+include $(BUILD_STATIC_LIBRARY)
 
 # ====  c++ proto host library  ==============================
 include $(CLEAR_VARS)
