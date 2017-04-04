@@ -2385,6 +2385,10 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             final VersionInfo ver = mSettings.getInternalVersion();
             mIsUpgrade = !Build.FINGERPRINT.equals(ver.fingerprint);
+            if (mIsUpgrade) {
+                logCriticalInfo(Log.INFO,
+                        "Upgrading from " + ver.fingerprint + " to " + Build.FINGERPRINT);
+            }
 
             // when upgrading from pre-M, promote system app permissions from install to runtime
             mPromoteSystemApps =
