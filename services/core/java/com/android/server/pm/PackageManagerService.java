@@ -608,6 +608,10 @@ public class PackageManagerService extends IPackageManager.Stub {
     final boolean mIsPreNUpgrade;
     final boolean mIsPreNMR1Upgrade;
 
+    // Have we told the Activity Manager to whitelist the default container service by uid yet?
+    @GuardedBy("mPackages")
+    boolean mDefaultContainerWhitelisted = false;
+
     @GuardedBy("mPackages")
     private boolean mDexOptDialogShown;
 
@@ -13024,7 +13028,18 @@ public class PackageManagerService extends IPackageManager.Stub {
         intent.setComponent(DEFAULT_CONTAINER_COMPONENT);
         IActivityManager am = ActivityManager.getService();
         if (am != null) {
+            int dcsUid = -1;
+            synchronized (mPackages) {
+                if (!mDefaultContainerWhitelisted) {
+                    mDefaultContainerWhitelisted = true;
+                    PackageSetting ps = mSettings.mPackages.get(DEFAULT_CONTAINER_PACKAGE);
+                    dcsUid = UserHandle.getUid(UserHandle.USER_SYSTEM, ps.appId);
+                }
+            }
             try {
+                if (dcsUid > 0) {
+                    am.backgroundWhitelistUid(dcsUid);
+                }
                 am.startService(null, intent, null, -1, null, false, mContext.getOpPackageName(),
                         UserHandle.USER_SYSTEM);
             } catch (RemoteException e) {
