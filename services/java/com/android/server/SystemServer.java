@@ -96,6 +96,7 @@ import com.android.server.pm.UserManagerService;
 import com.android.server.policy.PhoneWindowManager;
 import com.android.server.power.PowerManagerService;
 import com.android.server.power.ShutdownThread;
+import com.android.server.radio.RadioService;
 import com.android.server.restrictions.RestrictionsManagerService;
 import com.android.server.retaildemo.RetailDemoModeService;
 import com.android.server.security.KeyAttestationApplicationIdProviderService;
@@ -711,6 +712,8 @@ public final class SystemServer {
         boolean disableVrManager = SystemProperties.getBoolean("config.disable_vrmanager", false);
         boolean disableCameraService = SystemProperties.getBoolean("config.disable_cameraservice",
                 false);
+        // TODO(b/36863239): Remove when transitioned from native service.
+        boolean enableRadioService = SystemProperties.getBoolean("config.enable_java_radio", false);
 
         boolean isEmulator = SystemProperties.get("ro.kernel.qemu").equals("1");
 
@@ -1210,6 +1213,13 @@ public final class SystemServer {
             traceBeginAndSlog("StartAudioService");
             mSystemServiceManager.startService(AudioService.Lifecycle.class);
             traceEnd();
+
+            if (enableRadioService &&
+                    mPackageManager.hasSystemFeature(PackageManager.FEATURE_RADIO)) {
+                traceBeginAndSlog("StartRadioService");
+                mSystemServiceManager.startService(RadioService.class);
+                traceEnd();
+            }
 
             if (!disableNonCoreServices) {
                 traceBeginAndSlog("StartDockObserver");

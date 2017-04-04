@@ -216,6 +216,8 @@ LOCAL_SRC_FILES += \
 	core/java/android/hardware/location/IGeofenceHardwareMonitorCallback.aidl \
 	core/java/android/hardware/location/IContextHubCallback.aidl \
 	core/java/android/hardware/location/IContextHubService.aidl \
+	core/java/android/hardware/radio/IRadioService.aidl \
+	core/java/android/hardware/radio/ITuner.aidl \
 	core/java/android/hardware/soundtrigger/IRecognitionStatusCallback.aidl \
 	core/java/android/hardware/usb/IUsbManager.aidl \
 	core/java/android/net/ICaptivePortal.aidl \
@@ -674,6 +676,7 @@ aidl_files := \
 	frameworks/base/core/java/android/print/PrinterInfo.aidl \
 	frameworks/base/core/java/android/print/PrintJobId.aidl \
 	frameworks/base/core/java/android/printservice/recommendation/RecommendationInfo.aidl \
+	frameworks/base/core/java/android/hardware/radio/RadioManager.aidl \
 	frameworks/base/core/java/android/hardware/usb/UsbDevice.aidl \
 	frameworks/base/core/java/android/hardware/usb/UsbInterface.aidl \
 	frameworks/base/core/java/android/hardware/usb/UsbEndpoint.aidl \

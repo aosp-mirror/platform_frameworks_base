@@ -1829,6 +1829,14 @@ public abstract class PackageManager {
     public static final String FEATURE_VULKAN_HARDWARE_VERSION = "android.hardware.vulkan.version";
 
     /**
+     * The device includes broadcast radio tuner.
+     *
+     * @hide FutureFeature
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_RADIO = "android.hardware.radio";
+
+    /**
      * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device includes an accelerometer.
      */
