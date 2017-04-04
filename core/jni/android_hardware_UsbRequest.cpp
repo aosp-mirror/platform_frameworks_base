@@ -167,7 +167,7 @@ android_hardware_UsbRequest_queue_direct(JNIEnv *env, jobject thiz,
 }
 
 static jboolean
-android_hardware_UsbRequest_enqueue(JNIEnv *env, jobject thiz, jobject buffer, jint offset,
+android_hardware_UsbRequest_queue(JNIEnv *env, jobject thiz, jobject buffer, jint offset,
         jint length)
 {
     struct usb_request* request = get_request_from_object(env, thiz);
@@ -226,8 +226,8 @@ static const JNINativeMethod method_table[] = {
     {"native_init",             "(Landroid/hardware/usb/UsbDeviceConnection;IIII)Z",
                                             (void *)android_hardware_UsbRequest_init},
     {"native_close",            "()V",      (void *)android_hardware_UsbRequest_close},
-    {"native_enqueue",         "(Ljava/nio/ByteBuffer;II)Z",
-                                            (void *)android_hardware_UsbRequest_enqueue},
+    {"native_queue",            "(Ljava/nio/ByteBuffer;II)Z",
+                                            (void *)android_hardware_UsbRequest_queue},
     {"native_queue_array",      "([BIZ)Z",  (void *)android_hardware_UsbRequest_queue_array},
     {"native_dequeue_array",    "([BIZ)I",  (void *)android_hardware_UsbRequest_dequeue_array},
     {"native_queue_direct",     "(Ljava/nio/ByteBuffer;IZ)Z",

@@ -60,9 +60,11 @@ public class UsbRequest {
     // Prevent the connection from being finalized
     private UsbDeviceConnection mConnection;
 
-    /** Whether this buffer was {@link #enqueue enqueued (new behavior)} or {@link #queue queued
-     * (deprecared behavior)}. */
-    private boolean mIsUsingEnqueue;
+    /**
+     * Whether this buffer was {@link #queue(ByteBuffer) queued using the new behavior} or
+     * {@link #queue(ByteBuffer, int) queued using the deprecated behavior}.
+     */
+    private boolean mIsUsingNewQueue;
 
     /** Temporary buffer than might be used while buffer is enqueued */
     private ByteBuffer mTempBuffer;
@@ -172,7 +174,7 @@ public class UsbRequest {
      *
      * @return true if the queueing operation succeeded
      *
-     * @deprecated Use {@link #enqueue(ByteBuffer)} instead.
+     * @deprecated Use {@link #queue(ByteBuffer)} instead.
      */
     @Deprecated
     public boolean queue(ByteBuffer buffer, int length) {
@@ -219,23 +221,23 @@ public class UsbRequest {
      *
      * @return true if the queueing operation succeeded
      */
-    public boolean enqueue(@Nullable ByteBuffer buffer) {
+    public boolean queue(@Nullable ByteBuffer buffer) {
         // Request need to be initialized
         Preconditions.checkState(mNativeContext != 0, "request is not initialized");
 
-        // Request can not be currently enqueued
-        Preconditions.checkState(!mIsUsingEnqueue, "request is currently enqueued");
+        // Request can not be currently queued
+        Preconditions.checkState(!mIsUsingNewQueue, "this request is currently queued");
 
         boolean isSend = (mEndpoint.getDirection() == UsbConstants.USB_DIR_OUT);
-        boolean wasEnqueued;
+        boolean wasQueued;
 
         synchronized (mLock) {
             mBuffer = buffer;
 
             if (buffer == null) {
                 // Null buffers enqueue empty USB requests which is supported
-                mIsUsingEnqueue = true;
-                wasEnqueued = native_enqueue(null, 0, 0);
+                mIsUsingNewQueue = true;
+                wasQueued = native_queue(null, 0, 0);
             } else {
                 // Can only send/receive MAX_USBFS_BUFFER_SIZE bytes at once
                 Preconditions.checkArgumentInRange(buffer.remaining(), 0, MAX_USBFS_BUFFER_SIZE,
@@ -260,18 +262,18 @@ public class UsbRequest {
                     buffer = mTempBuffer;
                 }
 
-                mIsUsingEnqueue = true;
-                wasEnqueued = native_enqueue(buffer, buffer.position(), buffer.remaining());
+                mIsUsingNewQueue = true;
+                wasQueued = native_queue(buffer, buffer.position(), buffer.remaining());
             }
         }
 
-        if (!wasEnqueued) {
-            mIsUsingEnqueue = false;
+        if (!wasQueued) {
+            mIsUsingNewQueue = false;
             mTempBuffer = null;
             mBuffer = null;
         }
 
-        return wasEnqueued;
+        return wasQueued;
     }
 
     /* package */ void dequeue() {
@@ -279,9 +281,9 @@ public class UsbRequest {
         int bytesTransferred;
 
         synchronized (mLock) {
-            if (mIsUsingEnqueue) {
+            if (mIsUsingNewQueue) {
                 bytesTransferred = native_dequeue_direct();
-                mIsUsingEnqueue = false;
+                mIsUsingNewQueue = false;
 
                 if (mBuffer == null) {
                     // Nothing to do
@@ -332,7 +334,7 @@ public class UsbRequest {
     private native boolean native_init(UsbDeviceConnection connection, int ep_address,
             int ep_attributes, int ep_max_packet_size, int ep_interval);
     private native void native_close();
-    private native boolean native_enqueue(ByteBuffer buffer, int offset, int length);
+    private native boolean native_queue(ByteBuffer buffer, int offset, int length);
     private native boolean native_queue_array(byte[] buffer, int length, boolean out);
     private native int native_dequeue_array(byte[] buffer, int length, boolean out);
     private native boolean native_queue_direct(ByteBuffer buffer, int length, boolean out);
