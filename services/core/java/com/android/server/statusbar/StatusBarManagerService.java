@@ -763,8 +763,10 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
         enforceStatusBarService();
         long identity = Binder.clearCallingIdentity();
         try {
+            // ShutdownThread displays UI, so give it a UI context.
             mHandler.post(() ->
-                    ShutdownThread.shutdown(mContext, PowerManager.SHUTDOWN_USER_REQUESTED, false));
+                    ShutdownThread.shutdown(getUiContext(),
+                        PowerManager.SHUTDOWN_USER_REQUESTED, false));
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
@@ -780,11 +782,11 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
         try {
             mHandler.post(() -> {
                 // ShutdownThread displays UI, so give it a UI context.
-                Context uiContext = ActivityThread.currentActivityThread().getSystemUiContext();
                 if (safeMode) {
-                    ShutdownThread.rebootSafeMode(uiContext, false);
+                    ShutdownThread.rebootSafeMode(getUiContext(), false);
                 } else {
-                    ShutdownThread.reboot(uiContext, PowerManager.SHUTDOWN_USER_REQUESTED, false);
+                    ShutdownThread.reboot(getUiContext(),
+                            PowerManager.SHUTDOWN_USER_REQUESTED, false);
                 }
             });
         } finally {
@@ -1017,5 +1019,9 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
                 pw.println();
             }
         }
+    }
+
+    private static final Context getUiContext() {
+        return ActivityThread.currentActivityThread().getSystemUiContext();
     }
 }
