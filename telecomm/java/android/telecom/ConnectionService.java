@@ -1603,6 +1603,7 @@ public abstract class ConnectionService extends Service {
         Log.d(this, "stopRtt(%s)", callId);
         if (mConnectionById.containsKey(callId)) {
             findConnectionForAction(callId, "stopRtt").onStopRtt();
+            findConnectionForAction(callId, "stopRtt").unsetRttProperty();
         } else if (mConferenceById.containsKey(callId)) {
             Log.w(this, "stopRtt called on a conference.");
         }
