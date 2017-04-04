@@ -20854,13 +20854,6 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                 mSettings.dumpRestoredPermissionGrantsLPr(pw, dumpState);
             }
 
-            if (!checkin && dumpState.isDumping(DumpState.DUMP_INSTALLS) && packageName == null) {
-                // XXX should handle packageName != null by dumping only install data that
-                // the given package is involved with.
-                if (dumpState.onTitlePrinted()) pw.println();
-                mInstallerService.dump(new IndentingPrintWriter(pw, "  ", 120));
-            }
-
             if (!checkin && dumpState.isDumping(DumpState.DUMP_FROZEN) && packageName == null) {
                 // XXX should handle packageName != null by dumping only install data that
                 // the given package is involved with.
@@ -20930,6 +20923,14 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                     IoUtils.closeQuietly(in);
                 }
             }
+        }
+
+        // PackageInstaller should be called outside of mPackages lock
+        if (!checkin && dumpState.isDumping(DumpState.DUMP_INSTALLS) && packageName == null) {
+            // XXX should handle packageName != null by dumping only install data that
+            // the given package is involved with.
+            if (dumpState.onTitlePrinted()) pw.println();
+            mInstallerService.dump(new IndentingPrintWriter(pw, "  ", 120));
         }
     }
 
