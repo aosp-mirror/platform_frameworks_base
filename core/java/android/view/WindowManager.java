@@ -19,6 +19,7 @@ package android.view;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.app.KeyguardManager;
 import android.app.Presentation;
 import android.content.Context;
@@ -1278,7 +1279,9 @@ public interface WindowManager extends ViewManager {
         /**
          * Never animate position changes of the window.
          *
-         * {@hide} */
+         * {@hide}
+         */
+        @TestApi
         public static final int PRIVATE_FLAG_NO_MOVE_ANIMATION = 0x00000040;
 
         /** Window flag: special flag to limit the size of the window to be
@@ -1387,6 +1390,7 @@ public interface WindowManager extends ViewManager {
          * Control flags that are private to the platform.
          * @hide
          */
+        @TestApi
         public int privateFlags;
 
         /**
