@@ -86,22 +86,18 @@ public abstract class InstantAppResolver {
         final List<InstantAppResolveInfo> instantAppResolveInfoList =
                 connection.getInstantAppResolveInfoList(shaPrefix, token);
 
-        final AuxiliaryResolveInfo resolveInfo;
         if (instantAppResolveInfoList == null || instantAppResolveInfoList.size() == 0) {
             // No hash prefix match; there are no instant apps for this domain.
             if (DEBUG_EPHEMERAL) {
                 Log.d(TAG, "No results returned");
             }
-            resolveInfo = null;
-        } else {
-            resolveInfo = InstantAppResolver.filterInstantAppIntent(instantAppResolveInfoList,
-                    intent, requestObj.resolvedType, requestObj.userId,
-                    intent.getPackage(), digest, token);
+            return null;
         }
-
+        final AuxiliaryResolveInfo resolveInfo = InstantAppResolver.filterInstantAppIntent(
+                instantAppResolveInfoList, intent, requestObj.resolvedType, requestObj.userId,
+                intent.getPackage(), digest, token);
         logMetrics(ACTION_INSTANT_APP_RESOLUTION_PHASE_ONE, startTime, token,
-                resolveInfo != null ? RESOLUTION_SUCCESS : RESOLUTION_FAILURE);
-
+                RESOLUTION_SUCCESS);
         return resolveInfo;
     }
 
