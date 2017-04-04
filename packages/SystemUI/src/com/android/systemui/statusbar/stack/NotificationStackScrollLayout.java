@@ -4060,9 +4060,11 @@ public class NotificationStackScrollLayout extends ViewGroup
             return;
         }
         mPulsing = pulsing;
+        mAmbientState.setPulsing(pulsing);
         updateNotificationAnimationStates();
         updateContentHeight();
         notifyHeightChangeListener(mShelf);
+        requestChildrenUpdate();
     }
 
     public void setFadingOut(boolean fadingOut) {

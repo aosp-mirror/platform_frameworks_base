@@ -34,9 +34,11 @@ import android.widget.GridLayout;
 import android.widget.TextClock;
 import android.widget.TextView;
 
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.ChargingView;
 
+import java.util.Arrays;
 import java.util.Locale;
 
 public class KeyguardStatusView extends GridLayout {
@@ -52,6 +54,10 @@ public class KeyguardStatusView extends GridLayout {
     private TextView mOwnerInfo;
     private ViewGroup mClockContainer;
     private ChargingView mBatteryDoze;
+
+    private View[] mVisibleInDoze;
+    private boolean mPulsing;
+    private boolean mDark;
 
     private KeyguardUpdateMonitorCallback mInfoCallback = new KeyguardUpdateMonitorCallback() {
 
@@ -117,6 +123,7 @@ public class KeyguardStatusView extends GridLayout {
         mClockView.setShowCurrentUserTime(true);
         mOwnerInfo = (TextView) findViewById(R.id.owner_info);
         mBatteryDoze = (ChargingView) findViewById(R.id.battery_doze);
+        mVisibleInDoze = new View[]{mBatteryDoze, mClockView};
 
         boolean shouldMarquee = KeyguardUpdateMonitor.getInstance(mContext).isDeviceInteractive();
         setEnableMarquee(shouldMarquee);
@@ -273,14 +280,28 @@ public class KeyguardStatusView extends GridLayout {
     }
 
     public void setDark(boolean dark) {
+        mDark = dark;
+
         final int N = mClockContainer.getChildCount();
         for (int i = 0; i < N; i++) {
             View child = mClockContainer.getChildAt(i);
-            if (child == mClockView || child == mBatteryDoze) {
+            if (ArrayUtils.contains(mVisibleInDoze, child)) {
                 continue;
             }
             child.setAlpha(dark ? 0 : 1);
         }
+        updateDozeVisibleViews();
         mBatteryDoze.setDark(dark);
+    }
+
+    public void setPulsing(boolean pulsing) {
+        mPulsing = pulsing;
+        updateDozeVisibleViews();
+    }
+
+    private void updateDozeVisibleViews() {
+        for (View child : mVisibleInDoze) {
+            child.setAlpha(mDark && mPulsing ? 0.5f : 1);
+        }
     }
 }
