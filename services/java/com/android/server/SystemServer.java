@@ -614,6 +614,10 @@ public final class SystemServer {
         mActivityManagerService.setSystemProcess();
         traceEnd();
 
+        // DisplayManagerService needs to setup android.display scheduling related policies
+        // since setSystemProcess() would have overridden policies due to setProcessGroup
+        mDisplayManagerService.setupSchedulerPolicies();
+
         // Manages Overlay packages
         traceBeginAndSlog("StartOverlayManagerService");
         mSystemServiceManager.startService(new OverlayManagerService(mSystemContext, installer));
