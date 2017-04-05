@@ -34,6 +34,7 @@ LOCAL_SHARED_LIBRARIES := \
     libutils \
     libbinder \
     libmedia \
+    libmediametrics \
     libmediadrm \
     libmidi \
     libskia \
