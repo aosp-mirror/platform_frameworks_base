@@ -1014,13 +1014,13 @@ public final class MediaDrm {
      * Set a DRM engine plugin String property value.
      */
     public native void setPropertyString(
-            @StringProperty String propertyName, @NonNull String value);
+            String propertyName, @NonNull String value);
 
     /**
      * Set a DRM engine plugin byte array property value.
      */
     public native void setPropertyByteArray(
-            @ArrayProperty String propertyName, @NonNull byte[] value);
+            String propertyName, @NonNull byte[] value);
 
     private static final native void setCipherAlgorithmNative(
             @NonNull MediaDrm drm, @NonNull byte[] sessionId, @NonNull String algorithm);
