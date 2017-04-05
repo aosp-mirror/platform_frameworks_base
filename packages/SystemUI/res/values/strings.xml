@@ -1902,6 +1902,12 @@
     <!-- PiP minimize description. [CHAR LIMIT=NONE] -->
     <string name="pip_minimize_description" translatable="false">Drag or fling the PIP to the edges of the screen to minimize it.</string>
 
+    <!-- PiP fling to dismiss title. [CHAR LIMIT=NONE]-->
+    <string name="pip_fling_dismiss_title" translatable="false">Fling to dismiss</string>
+
+    <!-- PiP fling to dismiss description. [CHAR LIMIT=NONE] -->
+    <string name="pip_fling_dismiss_description" translatable="false">Fling from anywhere on the screen to the bottom of the screen to dismiss the PIP.</string>
+
     <!-- Button to play the current media on picture-in-picture (PIP) [CHAR LIMIT=30] -->
     <string name="pip_play">Play</string>
 

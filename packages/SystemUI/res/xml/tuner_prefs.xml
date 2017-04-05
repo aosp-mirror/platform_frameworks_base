@@ -131,6 +131,12 @@
         android:summary="@string/pip_minimize_description"
         sysui:defValue="false" />
 
+      <com.android.systemui.tuner.TunerSwitch
+        android:key="pip_fling_dismiss"
+        android:title="@string/pip_fling_dismiss_title"
+        android:summary="@string/pip_fling_dismiss_description"
+        sysui:defValue="false" />
+
     </PreferenceScreen>
 
     <PreferenceScreen
