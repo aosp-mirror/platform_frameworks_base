@@ -149,7 +149,7 @@ public class AccountsDbTest {
         // 2nd account
         Account account2 = new Account("name", "example2.com");
         long accId2 = mAccountsDb.insertCeAccount(account2, "password");
-        mAccountsDb.insertDeAccount(account2, accId);
+        mAccountsDb.insertDeAccount(account2, accId2);
         mAccountsDb.insertAuthToken(accId2, "type", "token");
 
         mAccountsDb.deleteAuthTokensByAccountId(accId2);
