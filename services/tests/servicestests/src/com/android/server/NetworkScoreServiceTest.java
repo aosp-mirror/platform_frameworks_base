@@ -645,20 +645,6 @@ public class NetworkScoreServiceTest {
     }
 
     @Test
-    public void testDump_noDumpPermission() {
-        doThrow(new SecurityException()).when(mContext).enforceCallingOrSelfPermission(
-                eq(permission.DUMP), anyString());
-
-        try {
-            mNetworkScoreService.dump(
-                    new FileDescriptor(), new PrintWriter(new StringWriter()), new String[0]);
-            fail("SecurityException expected");
-        } catch (SecurityException e) {
-            // expected
-        }
-    }
-
-    @Test
     public void testDump_doesNotCrash() {
         when(mNetworkScorerAppManager.getActiveScorer()).thenReturn(NEW_SCORER);
         StringWriter stringWriter = new StringWriter();

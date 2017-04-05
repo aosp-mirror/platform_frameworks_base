@@ -42,6 +42,7 @@ import java.util.List;
  *
  * @hide
  */
+@VisibleForTesting
 public class NetworkScorerAppManager {
     private static final String TAG = "NetworkScorerAppManager";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
@@ -63,7 +64,8 @@ public class NetworkScorerAppManager {
      * Returns the list of available scorer apps. The list will be empty if there are
      * no valid scorers.
      */
-    List<NetworkScorerAppData> getAllValidScorers() {
+    @VisibleForTesting
+    public List<NetworkScorerAppData> getAllValidScorers() {
         if (VERBOSE) Log.v(TAG, "getAllValidScorers()");
         final PackageManager pm = mContext.getPackageManager();
         final Intent serviceIntent = new Intent(NetworkScoreManager.ACTION_RECOMMEND_NETWORKS);
@@ -168,7 +170,8 @@ public class NetworkScorerAppManager {
      *     it was disabled or uninstalled).
      */
     @Nullable
-    NetworkScorerAppData getActiveScorer() {
+    @VisibleForTesting
+    public NetworkScorerAppData getActiveScorer() {
         final int enabledSetting = getNetworkRecommendationsEnabledSetting();
         if (enabledSetting == NetworkScoreManager.RECOMMENDATIONS_ENABLED_FORCED_OFF) {
             return null;
@@ -211,7 +214,8 @@ public class NetworkScorerAppManager {
      * @return true if the scorer was changed, or false if the package is not a valid scorer or
      *         a valid network recommendation provider exists.
      */
-    boolean setActiveScorer(String packageName) {
+    @VisibleForTesting
+    public boolean setActiveScorer(String packageName) {
         final String oldPackageName = getNetworkRecommendationsPackage();
 
         if (TextUtils.equals(oldPackageName, packageName)) {
@@ -246,7 +250,8 @@ public class NetworkScorerAppManager {
      * is no longer valid then {@link Settings.Global#NETWORK_RECOMMENDATIONS_ENABLED} will be set
      * to <code>0</code> (disabled).
      */
-    void updateState() {
+    @VisibleForTesting
+    public void updateState() {
         final int enabledSetting = getNetworkRecommendationsEnabledSetting();
         if (enabledSetting == NetworkScoreManager.RECOMMENDATIONS_ENABLED_FORCED_OFF) {
             // Don't change anything if it's forced off.
@@ -284,7 +289,8 @@ public class NetworkScorerAppManager {
     /**
      * Migrates the NETWORK_SCORER_APP Setting to the USE_OPEN_WIFI_PACKAGE Setting.
      */
-    void migrateNetworkScorerAppSettingIfNeeded() {
+    @VisibleForTesting
+    public void migrateNetworkScorerAppSettingIfNeeded() {
         final String scorerAppPkgNameSetting =
                 mSettingsFacade.getString(mContext, Settings.Global.NETWORK_SCORER_APP);
         if (TextUtils.isEmpty(scorerAppPkgNameSetting)) {
