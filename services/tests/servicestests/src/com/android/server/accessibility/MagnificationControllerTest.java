@@ -20,11 +20,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
-import static org.mockito.Matchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -48,6 +49,7 @@ import android.view.WindowManagerInternal;
 import android.view.WindowManagerInternal.MagnificationCallbacks;
 
 import com.android.internal.R;
+
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Description;
 import org.hamcrest.TypeSafeMatcher;
@@ -471,9 +473,10 @@ public class MagnificationControllerTest {
     public void testResetIfNeeded_doesWhatItSays() {
         mMagnificationController.register();
         zoomIn2xToMiddle();
+        reset(mMockAms);
         assertTrue(mMagnificationController.resetIfNeeded(false));
         verify(mMockAms).notifyMagnificationChanged(
-                eq(INITIAL_MAGNIFICATION_REGION), eq(1.0f), anyInt(), anyInt());
+                eq(INITIAL_MAGNIFICATION_REGION), eq(1.0f), anyFloat(), anyFloat());
         assertFalse(mMagnificationController.isMagnifying());
         assertFalse(mMagnificationController.resetIfNeeded(false));
     }
