@@ -24,6 +24,7 @@ import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
+import android.os.RemoteException;
 
 /**
  * Contains the parameters used to configure/identify your job. You do not create this object
@@ -153,6 +154,53 @@ public class JobParameters implements Parcelable {
      */
     public String[] getTriggeredContentAuthorities() {
         return mTriggeredContentAuthorities;
+    }
+
+    /**
+     * Dequeue the next pending {@link JobWorkItem} from these JobParameters associated with their
+     * currently running job.  Calling this method when there is no more work available and all
+     * previously dequeued work has been completed will result in the system taking care of
+     * stopping the job for you --
+     * you should not call {@link JobService#jobFinished(JobParameters, boolean)} yourself
+     * (otherwise you risk losing an upcoming JobWorkItem that is being enqueued at the same time).
+     *
+     * @return Returns a new {@link JobWorkItem} if there is one pending, otherwise null.
+     * If null is returned, the system will also stop the job if all work has also been completed.
+     * (This means that for correct operation, you must always call dequeueWork() after you have
+     * completed other work, to check either for more work or allow the system to stop the job.)
+     */
+    public JobWorkItem dequeueWork() {
+        try {
+            return getCallback().dequeueWork(getJobId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Report the completion of executing a {@link JobWorkItem} previously returned by
+     * {@link #dequeueWork()}.  This tells the system you are done with the
+     * work associated with that item, so it will not be returned again.  Note that if this
+     * is the last work in the queue, completing it here will <em>not</em> finish the overall
+     * job -- for that to happen, you still need to call {@link #dequeueWork()}
+     * again.
+     *
+     * <p>If you are enqueueing work into a job, you must call this method for each piece
+     * of work you process.  Do <em>not</em> call
+     * {@link JobService#jobFinished(JobParameters, boolean)}
+     * or else you can lose work in your queue.</p>
+     *
+     * @param work The work you have completed processing, as previously returned by
+     * {@link #dequeueWork()}
+     */
+    public void completeWork(JobWorkItem work) {
+        try {
+            if (!getCallback().completeWork(getJobId(), work.getWorkId())) {
+                throw new IllegalArgumentException("Given work is not active: " + work);
+            }
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /** @hide */

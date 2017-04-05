@@ -454,7 +454,7 @@ public class JobStore {
                         IActivityManager am = ActivityManager.getService();
                         for (int i=0; i<jobs.size(); i++) {
                             JobStatus js = jobs.get(i);
-                            js.prepare(am);
+                            js.prepareLocked(am);
                             this.jobSet.add(js);
                         }
                     }

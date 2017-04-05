@@ -61,7 +61,7 @@ public abstract class StateController {
     /**
      * Called when a new job is being created to reschedule an old failed job.
      */
-    public void rescheduleForFailure(JobStatus newJob, JobStatus failureToReschedule) {
+    public void rescheduleForFailureLocked(JobStatus newJob, JobStatus failureToReschedule) {
     }
 
     public abstract void dumpControllerStateLocked(PrintWriter pw, int filterUid);

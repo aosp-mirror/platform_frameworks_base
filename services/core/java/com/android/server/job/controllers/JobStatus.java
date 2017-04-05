@@ -19,6 +19,7 @@ package com.android.server.job.controllers;
 import android.app.AppGlobals;
 import android.app.IActivityManager;
 import android.app.job.JobInfo;
+import android.app.job.JobWorkItem;
 import android.content.ClipData;
 import android.content.ComponentName;
 import android.content.ContentProvider;
@@ -35,6 +36,7 @@ import android.util.Slog;
 import android.util.TimeUtils;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
@@ -125,6 +127,14 @@ public final class JobStatus {
     public ArraySet<String> changedAuthorities;
 
     public int lastEvaluatedPriority;
+
+    // If non-null, this is work that has been enqueued for the job.
+    public ArrayList<JobWorkItem> pendingWork;
+
+    // If non-null, this is work that is currently being executed.
+    public ArrayList<JobWorkItem> executingWork;
+
+    public int nextPendingWorkId = 1;
 
     // Used by shell commands
     public int overrideState = 0;
@@ -256,7 +266,59 @@ public final class JobStatus {
                 earliestRunTimeElapsedMillis, latestRunTimeElapsedMillis);
     }
 
-    public void prepare(IActivityManager am) {
+    public void enqueueWorkLocked(JobWorkItem work) {
+        if (pendingWork == null) {
+            pendingWork = new ArrayList<>();
+        }
+        work.setWorkId(nextPendingWorkId);
+        nextPendingWorkId++;
+        pendingWork.add(work);
+    }
+
+    public JobWorkItem dequeueWorkLocked() {
+        if (pendingWork != null && pendingWork.size() > 0) {
+            JobWorkItem work = pendingWork.remove(0);
+            if (work != null) {
+                if (executingWork == null) {
+                    executingWork = new ArrayList<>();
+                }
+                executingWork.add(work);
+            }
+            return work;
+        }
+        return null;
+    }
+
+    public boolean hasExecutingWorkLocked() {
+        return executingWork != null && executingWork.size() > 0;
+    }
+
+    public boolean completeWorkLocked(int workId) {
+        if (executingWork != null) {
+            final int N = executingWork.size();
+            for (int i = 0; i < N; i++) {
+                if (executingWork.get(i).getWorkId() == workId) {
+                    executingWork.remove(i);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public void stopTrackingJobLocked(JobStatus incomingJob) {
+        if (incomingJob != null) {
+            // We are replacing with a new job -- transfer the work!
+            incomingJob.pendingWork = pendingWork;
+            pendingWork = null;
+            incomingJob.nextPendingWorkId = nextPendingWorkId;
+        } else {
+            // We are completely stopping the job...  need to clean up work.
+            // XXX remove perms when that is impl.
+        }
+    }
+
+    public void prepareLocked(IActivityManager am) {
         if (prepared) {
             Slog.wtf(TAG, "Already prepared: " + this);
             return;
@@ -271,7 +333,7 @@ public final class JobStatus {
         }
     }
 
-    public void unprepare(IActivityManager am) {
+    public void unprepareLocked(IActivityManager am) {
         if (!prepared) {
             Slog.wtf(TAG, "Hasn't been prepared: " + this);
             return;
@@ -288,7 +350,7 @@ public final class JobStatus {
         }
     }
 
-    public boolean isPrepared() {
+    public boolean isPreparedLocked() {
         return prepared;
     }
 
@@ -852,6 +914,22 @@ public final class JobStatus {
                 for (int i=0; i<changedUris.size(); i++) {
                     pw.print(prefix); pw.print("  "); pw.println(changedUris.valueAt(i));
                 }
+            }
+        }
+        if (pendingWork != null && pendingWork.size() > 0) {
+            pw.print(prefix); pw.println("Pending work:");
+            for (int i = 0; i < pendingWork.size(); i++) {
+                JobWorkItem work = pendingWork.get(i);
+                pw.print(prefix); pw.print("  #"); pw.print(i); pw.print(": #");
+                pw.print(work.getWorkId()); pw.print(" "); pw.println(work.getIntent());
+            }
+        }
+        if (executingWork != null && executingWork.size() > 0) {
+            pw.print(prefix); pw.println("Executing work:");
+            for (int i = 0; i < executingWork.size(); i++) {
+                JobWorkItem work = executingWork.get(i);
+                pw.print(prefix); pw.print("  #"); pw.print(i); pw.print(": #");
+                pw.print(work.getWorkId()); pw.print(" "); pw.println(work.getIntent());
             }
         }
         pw.print(prefix); pw.print("Earliest run time: ");
