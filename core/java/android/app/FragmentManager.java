@@ -695,6 +695,9 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
     // This is dangerous, but we want to keep from breaking old applications.
     boolean mAllowOldReentrantBehavior;
 
+    // Saved FragmentManagerNonConfig during saveAllState() and cleared in noteStateNotSaved()
+    FragmentManagerNonConfig mSavedNonConfig;
+
     Runnable mExecCommit = new Runnable() {
         @Override
         public void run() {
@@ -2518,6 +2521,35 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
     }
 
     FragmentManagerNonConfig retainNonConfig() {
+        setRetaining(mSavedNonConfig);
+        return mSavedNonConfig;
+    }
+
+    /**
+     * Recurse the FragmentManagerNonConfig fragments and set the mRetaining to true. This
+     * was previously done while saving the non-config state, but that has been moved to
+     * {@link #saveNonConfig()} called from {@link #saveAllState()}. If mRetaining is set too
+     * early, the fragment won't be destroyed when the FragmentManager is destroyed.
+     */
+    private static void setRetaining(FragmentManagerNonConfig nonConfig) {
+        if (nonConfig == null) {
+            return;
+        }
+        List<Fragment> fragments = nonConfig.getFragments();
+        if (fragments != null) {
+            for (Fragment fragment : fragments) {
+                fragment.mRetaining = true;
+            }
+        }
+        List<FragmentManagerNonConfig> children = nonConfig.getChildNonConfigs();
+        if (children != null) {
+            for (FragmentManagerNonConfig child : children) {
+                setRetaining(child);
+            }
+        }
+    }
+
+    void saveNonConfig() {
         ArrayList<Fragment> fragments = null;
         ArrayList<FragmentManagerNonConfig> childFragments = null;
         if (mActive != null) {
@@ -2529,13 +2561,13 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
                             fragments = new ArrayList<>();
                         }
                         fragments.add(f);
-                        f.mRetaining = true;
                         f.mTargetIndex = f.mTarget != null ? f.mTarget.mIndex : -1;
                         if (DEBUG) Log.v(TAG, "retainNonConfig: keeping retained " + f);
                     }
                     boolean addedChild = false;
                     if (f.mChildFragmentManager != null) {
-                        FragmentManagerNonConfig child = f.mChildFragmentManager.retainNonConfig();
+                        f.mChildFragmentManager.saveNonConfig();
+                        FragmentManagerNonConfig child = f.mChildFragmentManager.mSavedNonConfig;
                         if (child != null) {
                             if (childFragments == null) {
                                 childFragments = new ArrayList<>();
@@ -2554,9 +2586,10 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
             }
         }
         if (fragments == null && childFragments == null) {
-            return null;
+            mSavedNonConfig = null;
+        } else {
+            mSavedNonConfig = new FragmentManagerNonConfig(fragments, childFragments);
         }
-        return new FragmentManagerNonConfig(fragments, childFragments);
     }
     
     void saveFragmentViewState(Fragment f) {
@@ -2617,6 +2650,7 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
         execPendingActions();
 
         mStateSaved = true;
+        mSavedNonConfig = null;
 
         if (mActive == null || mActive.size() <= 0) {
             return null;
@@ -2717,6 +2751,7 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
         if (mPrimaryNav != null) {
             fms.mPrimaryNavActiveIndex = mPrimaryNav.mIndex;
         }
+        saveNonConfig();
         return fms;
     }
     
@@ -2892,6 +2927,7 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
     }
 
     public void noteStateNotSaved() {
+        mSavedNonConfig = null;
         mStateSaved = false;
         final int addedCount = mAdded == null ? 0 : mAdded.size();
         for (int i = 0; i < addedCount; i++) {
