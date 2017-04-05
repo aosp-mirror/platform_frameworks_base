@@ -101,20 +101,24 @@ TEST_F(ResourceParserTest, ParseStyledString) {
   // Use a surrogate pair unicode point so that we can verify that the span
   // indices use UTF-16 length and not UTF-8 length.
   std::string input =
-      "<string name=\"foo\">This is my aunt\u2019s <b>string</b></string>";
+      "<string name=\"foo\">This is my aunt\u2019s <b>fickle <small>string</small></b></string>";
   ASSERT_TRUE(TestParse(input));
 
   StyledString* str = test::GetValue<StyledString>(&table_, "string/foo");
   ASSERT_NE(nullptr, str);
 
-  const std::string expected_str = "This is my aunt\u2019s string";
+  const std::string expected_str = "This is my aunt\u2019s fickle string";
   EXPECT_EQ(expected_str, *str->value->str);
-  EXPECT_EQ(1u, str->value->spans.size());
+  EXPECT_EQ(2u, str->value->spans.size());
   EXPECT_TRUE(str->untranslatable_sections.empty());
 
   EXPECT_EQ(std::string("b"), *str->value->spans[0].name);
   EXPECT_EQ(17u, str->value->spans[0].first_char);
-  EXPECT_EQ(23u, str->value->spans[0].last_char);
+  EXPECT_EQ(30u, str->value->spans[0].last_char);
+
+  EXPECT_EQ(std::string("small"), *str->value->spans[1].name);
+  EXPECT_EQ(24u, str->value->spans[1].first_char);
+  EXPECT_EQ(30u, str->value->spans[1].last_char);
 }
 
 TEST_F(ResourceParserTest, ParseStringWithWhitespace) {

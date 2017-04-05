@@ -155,7 +155,10 @@ bool ResourceParser::FlattenXmlSubtree(
     xml::XmlPullParser* parser, std::string* out_raw_string, StyleString* out_style_string,
     std::vector<UntranslatableSection>* out_untranslatable_sections) {
   // Keeps track of formatting tags (<b>, <i>) and the range of characters for which they apply.
-  std::vector<Span> span_stack;
+  // The stack elements refer to the indices in out_style_string->spans.
+  // By first adding to the out_style_string->spans vector, and then using the stack to refer
+  // to this vector, the original order of tags is preserved in cases such as <b><i>hello</b></i>.
+  std::vector<size_t> span_stack;
 
   // Clear the output variables.
   out_raw_string->clear();
@@ -192,7 +195,9 @@ bool ResourceParser::FlattenXmlSubtree(
           return false;
         }
 
-        span_stack.push_back(Span{std::move(span_name), static_cast<uint32_t>(builder.Utf16Len())});
+        out_style_string->spans.push_back(
+            Span{std::move(span_name), static_cast<uint32_t>(builder.Utf16Len())});
+        span_stack.push_back(out_style_string->spans.size() - 1);
       } else if (parser->element_namespace() == sXliffNamespaceUri) {
         if (parser->element_name() == "g") {
           if (untranslatable_start_depth) {
@@ -233,9 +238,8 @@ bool ResourceParser::FlattenXmlSubtree(
       if (parser->element_namespace().empty()) {
         // This is an HTML tag which we encode as a span. Update the span
         // stack and pop the top entry.
-        Span& top_span = span_stack.back();
+        Span& top_span = out_style_string->spans[span_stack.back()];
         top_span.last_char = builder.Utf16Len() - 1;
-        out_style_string->spans.push_back(std::move(top_span));
         span_stack.pop_back();
       } else if (untranslatable_start_depth == make_value(depth)) {
         // This is the end of an untranslatable section. Use UTF8 indices/lengths.
