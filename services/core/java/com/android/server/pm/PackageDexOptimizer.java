@@ -151,6 +151,7 @@ public class PackageDexOptimizer {
         // TODO(calin,jeffhao): shared library paths should be adjusted to include previous code
         // paths (b/34169257).
         final String sharedLibrariesPath = getSharedLibrariesPath(sharedLibraries);
+        // Get the dexopt flags after getRealCompilerFilter to make sure we get the correct flags.
         final int dexoptFlags = getDexFlags(pkg, compilerFilter);
 
         int result = DEX_OPT_SKIPPED;
@@ -254,6 +255,8 @@ public class PackageDexOptimizer {
     @GuardedBy("mInstallLock")
     private int dexOptSecondaryDexPathLI(ApplicationInfo info, String path, Set<String> isas,
             String compilerFilter, boolean isUsedByOtherApps) {
+        compilerFilter = getRealCompilerFilter(info, compilerFilter, isUsedByOtherApps);
+        // Get the dexopt flags after getRealCompilerFilter to make sure we get the correct flags.
         int dexoptFlags = getDexFlags(info, compilerFilter) | DEXOPT_SECONDARY_DEX;
         // Check the app storage and add the appropriate flags.
         if (info.dataDir.equals(info.deviceProtectedDataDir)) {
@@ -264,7 +267,6 @@ public class PackageDexOptimizer {
             Slog.e(TAG, "Could not infer CE/DE storage for package " + info.packageName);
             return DEX_OPT_FAILED;
         }
-        compilerFilter = getRealCompilerFilter(info, compilerFilter, isUsedByOtherApps);
         Log.d(TAG, "Running dexopt on: " + path
                 + " pkg=" + info.packageName + " isa=" + isas
                 + " dexoptFlags=" + printDexoptFlags(dexoptFlags)
