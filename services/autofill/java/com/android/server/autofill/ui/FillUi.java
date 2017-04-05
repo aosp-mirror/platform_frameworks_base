@@ -101,8 +101,9 @@ final class FillUi {
             content.measure(widthMeasureSpec, heightMeasureSpec);
             content.setOnClickListener(v -> mCallback.onResponsePicked(response));
             content.setElevation(context.getResources().getDimension(R.dimen.floating_window_z));
-            mContentWidth = content.getMeasuredWidth();
-            mContentHeight = content.getMeasuredHeight();
+            // TODO(b/33197203 , b/36660292): temporary limiting maximum height and minimum width
+            mContentWidth = Math.max(content.getMeasuredWidth(), 1000);
+            mContentHeight = Math.min(content.getMeasuredHeight(), 500);
 
             mWindow = new AnchoredWindow(content);
             mCallback.requestShowFillUi(mContentWidth, mContentHeight, mWindowPresenter);
