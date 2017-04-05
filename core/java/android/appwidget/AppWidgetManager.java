@@ -710,9 +710,9 @@ public class AppWidgetManager {
      * user may have a corporate profile. In this case the parent user profile has a
      * child profile, the corporate one.
      *
-     * @param profile The profile for which to get providers. Passing null is equivaled
-     *         to passing only the current user handle.
-     * @return The intalled providers.
+     * @param profile The profile for which to get providers. Passing null is equivalent
+     *        to querying for only the calling user.
+     * @return The installed providers.
      *
      * @see android.os.Process#myUserHandle()
      * @see android.os.UserManager#getUserProfiles()
@@ -722,7 +722,31 @@ public class AppWidgetManager {
             return Collections.emptyList();
         }
         return getInstalledProvidersForProfile(AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN,
-                profile);
+                profile, null);
+    }
+
+    /**
+     * Gets the AppWidget providers for the given package and user profile. User
+     * profile can only be the current user or a profile of the current user. For
+     * example, the current user may have a corporate profile. In this case the
+     * parent user profile has a child profile, the corporate one.
+     *
+     * @param packageName The package for which to get providers. If null, this method is
+     *        equivalent to {@link #getInstalledProvidersForProfile(UserHandle)}.
+     * @param profile The profile for which to get providers. Passing null is equivalent
+     *        to querying for only the calling user.
+     * @return The installed providers.
+     *
+     * @see android.os.Process#myUserHandle()
+     * @see android.os.UserManager#getUserProfiles()
+     */
+    public List<AppWidgetProviderInfo> getInstalledProvidersForPackage(@Nullable String packageName,
+            @Nullable UserHandle profile) {
+        if (mService == null) {
+            return Collections.emptyList();
+        }
+        return getInstalledProvidersForProfile(AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN,
+                profile, packageName);
     }
 
     /**
@@ -733,7 +757,7 @@ public class AppWidgetManager {
             return Collections.emptyList();
         }
         return getInstalledProvidersForProfile(AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN,
-                null);
+                null, null);
     }
 
     /**
@@ -752,7 +776,7 @@ public class AppWidgetManager {
         if (mService == null) {
             return Collections.emptyList();
         }
-        return getInstalledProvidersForProfile(categoryFilter, null);
+        return getInstalledProvidersForProfile(categoryFilter, null, null);
     }
 
     /**
@@ -766,6 +790,7 @@ public class AppWidgetManager {
      * @param profile A profile of the current user which to be queried. The user
      *        is itself also a profile. If null, the providers only for the current user
      *        are returned.
+     * @param packageName If specified, will only return providers from the given package.
      * @return The intalled providers.
      *
      * @see android.os.Process#myUserHandle()
@@ -774,7 +799,7 @@ public class AppWidgetManager {
      * @hide
      */
     public List<AppWidgetProviderInfo> getInstalledProvidersForProfile(int categoryFilter,
-            UserHandle profile) {
+            @Nullable UserHandle profile, @Nullable String packageName) {
         if (mService == null) {
             return Collections.emptyList();
         }
@@ -785,7 +810,7 @@ public class AppWidgetManager {
 
         try {
             ParceledListSlice<AppWidgetProviderInfo> providers = mService.getInstalledProvidersForProfile(
-                    categoryFilter, profile.getIdentifier());
+                    categoryFilter, profile.getIdentifier(), packageName);
             if (providers == null) {
                 return Collections.emptyList();
             }
