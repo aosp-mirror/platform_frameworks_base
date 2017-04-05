@@ -57,6 +57,7 @@ import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillValue;
 import android.view.autofill.IAutoFillManagerClient;
 
+import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.HandlerCaller;
 import com.android.internal.os.IResultReceiver;
@@ -431,8 +432,11 @@ final class AutofillManagerServiceImpl {
     void dumpLocked(String prefix, PrintWriter pw) {
         final String prefix2 = prefix + "  ";
 
+        pw.print(prefix); pw.print("User :"); pw.println(mUserId);
         pw.print(prefix); pw.print("Component:"); pw.println(mInfo != null
                 ? mInfo.getServiceInfo().getComponentName() : null);
+        pw.print(prefix); pw.print("Default component: ");
+            pw.println(mContext.getString(R.string.config_defaultAutofillService));
         pw.print(prefix); pw.print("Disabled:"); pw.println(mDisabled);
 
         if (VERBOSE && mInfo != null) {
