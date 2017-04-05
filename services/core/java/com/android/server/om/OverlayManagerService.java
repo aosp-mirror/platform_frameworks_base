@@ -193,12 +193,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * </ul>
  */
 public final class OverlayManagerService extends SystemService {
-
     static final String TAG = "OverlayManager";
 
     static final boolean DEBUG = false;
-
-    static final String PERMISSION_DENIED = "Operation not permitted for user shell";
 
     /**
      * The system property that specifies the default overlays to apply.
@@ -234,7 +231,7 @@ public final class OverlayManagerService extends SystemService {
         IdmapManager im = new IdmapManager(installer);
         mSettings = new OverlayManagerSettings();
         mImpl = new OverlayManagerServiceImpl(mPackageManager, im, mSettings,
-                getDefaultOverlayPackages());
+                getDefaultOverlayPackages(), new OverlayChangeListener());
         mInitCompleteSignal = SystemServerInitThreadPool.get().submit(() -> {
             final IntentFilter packageFilter = new IntentFilter();
             packageFilter.addAction(ACTION_PACKAGE_ADDED);
@@ -251,9 +248,6 @@ public final class OverlayManagerService extends SystemService {
 
             restoreSettings();
             onSwitchUser(UserHandle.USER_SYSTEM);
-            schedulePersistSettings();
-
-            mSettings.addChangeListener(new OverlayChangeListener());
 
             publishBinderService(Context.OVERLAY_SERVICE, mService);
             publishLocalService(OverlayManagerService.class, this);
@@ -281,8 +275,9 @@ public final class OverlayManagerService extends SystemService {
         final List<String> targets;
         synchronized (mLock) {
             targets = mImpl.onSwitchUser(newUserId);
+            updateAssetsLocked(newUserId, targets);
         }
-        updateAssets(newUserId, targets);
+        schedulePersistSettings();
     }
 
     private static Set<String> getDefaultOverlayPackages() {
@@ -348,7 +343,8 @@ public final class OverlayManagerService extends SystemService {
                 @NonNull final int[] userIds) {
             for (final int userId : userIds) {
                 synchronized (mLock) {
-                    final PackageInfo pi = mPackageManager.getPackageInfo(packageName, userId, false);
+                    final PackageInfo pi = mPackageManager.getPackageInfo(packageName, userId,
+                            false);
                     if (pi != null) {
                         mPackageManager.cachePackageInfo(packageName, userId, pi);
                         if (!isOverlayPackage(pi)) {
@@ -365,7 +361,8 @@ public final class OverlayManagerService extends SystemService {
                 @NonNull final int[] userIds) {
             for (int userId : userIds) {
                 synchronized (mLock) {
-                    final PackageInfo pi = mPackageManager.getPackageInfo(packageName, userId, false);
+                    final PackageInfo pi = mPackageManager.getPackageInfo(packageName, userId,
+                            false);
                     if (pi != null) {
                         mPackageManager.cachePackageInfo(packageName, userId, pi);
                         if (!isOverlayPackage(pi)) {
@@ -397,7 +394,8 @@ public final class OverlayManagerService extends SystemService {
                 @NonNull final int[] userIds) {
             for (int userId : userIds) {
                 synchronized (mLock) {
-                    final PackageInfo pi = mPackageManager.getPackageInfo(packageName, userId, false);
+                    final PackageInfo pi = mPackageManager.getPackageInfo(packageName, userId,
+                            false);
                     if (pi != null) {
                         mPackageManager.cachePackageInfo(packageName, userId, pi);
                         if (!isOverlayPackage(pi)) {
@@ -449,8 +447,7 @@ public final class OverlayManagerService extends SystemService {
 
     private final IBinder mService = new IOverlayManager.Stub() {
         @Override
-        public Map<String, List<OverlayInfo>> getAllOverlays(int userId)
-                throws RemoteException {
+        public Map<String, List<OverlayInfo>> getAllOverlays(int userId) throws RemoteException {
             userId = handleIncomingUser(userId, "getAllOverlays");
 
             synchronized (mLock) {
@@ -508,14 +505,14 @@ public final class OverlayManagerService extends SystemService {
                 int userId) throws RemoteException {
             enforceChangeOverlayPackagesPermission("setEnabled");
             userId = handleIncomingUser(userId, "setEnabled");
-            if (packageName == null) {
+            if (packageName == null || !enable) {
                 return false;
             }
 
             final long ident = Binder.clearCallingIdentity();
             try {
                 synchronized (mLock) {
-                    return mImpl.setEnabledExclusive(packageName, enable, userId);
+                    return mImpl.setEnabledExclusive(packageName, userId);
                 }
             } finally {
                 Binder.restoreCallingIdentity(ident);
@@ -643,68 +640,24 @@ public final class OverlayManagerService extends SystemService {
         return pi != null && pi.overlayTarget != null;
     }
 
-    private final class OverlayChangeListener implements OverlayManagerSettings.ChangeListener {
+    private final class OverlayChangeListener
+            implements OverlayManagerServiceImpl.OverlayChangeListener {
         @Override
-        public void onSettingsChanged() {
+        public void onOverlaysChanged(@NonNull final String targetPackageName, final int userId) {
             schedulePersistSettings();
-        }
-
-        @Override
-        public void onOverlayAdded(@NonNull final OverlayInfo oi) {
-            scheduleBroadcast(Intent.ACTION_OVERLAY_ADDED, oi, oi.isEnabled());
-        }
-
-        @Override
-        public void onOverlayRemoved(@NonNull final OverlayInfo oi) {
-            scheduleBroadcast(Intent.ACTION_OVERLAY_REMOVED, oi, oi.isEnabled());
-        }
-
-        @Override
-        public void onOverlayChanged(@NonNull final OverlayInfo oi,
-                @NonNull final OverlayInfo oldOi) {
-            scheduleBroadcast(Intent.ACTION_OVERLAY_CHANGED, oi, oi.isEnabled() != oldOi.isEnabled());
-        }
-
-        @Override
-        public void onOverlayPriorityChanged(@NonNull final OverlayInfo oi) {
-            scheduleBroadcast(Intent.ACTION_OVERLAY_PRIORITY_CHANGED, oi, oi.isEnabled());
-        }
-
-        private void scheduleBroadcast(@NonNull final String action, @NonNull final OverlayInfo oi,
-                final boolean doUpdate) {
-            FgThread.getHandler().post(new BroadcastRunnable(action, oi, doUpdate));
-        }
-
-        private final class BroadcastRunnable implements Runnable {
-            private final String mAction;
-            private final OverlayInfo mOverlayInfo;
-            private final boolean mDoUpdate;
-
-            BroadcastRunnable(@NonNull final String action, @NonNull final OverlayInfo oi,
-                    final boolean doUpdate) {
-                mAction = action;
-                mOverlayInfo = oi;
-                mDoUpdate = doUpdate;
-            }
-
-            @Override
-            public void run() {
-                if (mDoUpdate) {
-                    updateAssets(mOverlayInfo.userId, mOverlayInfo.targetPackageName);
+            FgThread.getHandler().post(() -> {
+                synchronized (mLock) {
+                    updateAssetsLocked(userId, targetPackageName);
                 }
-                sendBroadcast(mAction, mOverlayInfo.targetPackageName, mOverlayInfo.packageName,
-                        mOverlayInfo.userId);
-            }
 
-            private void sendBroadcast(@NonNull final String action,
-                    @NonNull final String targetPackageName, @NonNull final String packageName,
-                    final int userId) {
-                final Intent intent = new Intent(action, Uri.fromParts("package",
-                            String.format("%s/%s", targetPackageName, packageName), null));
+                final Intent intent = new Intent(Intent.ACTION_OVERLAY_CHANGED,
+                        Uri.fromParts("package", targetPackageName, null));
                 intent.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+
                 if (DEBUG) {
-                    Slog.d(TAG, String.format("send broadcast %s", intent));
+                    Slog.d(TAG, "send broadcast " + intent);
                 }
+
                 try {
                     ActivityManager.getService().broadcastIntent(null, intent, null, null, 0,
                             null, null, null, android.app.AppOpsManager.OP_NONE, null, false, false,
@@ -712,18 +665,20 @@ public final class OverlayManagerService extends SystemService {
                 } catch (RemoteException e) {
                     // Intentionally left empty.
                 }
-            }
-
+            });
         }
     }
 
-    private void updateAssets(final int userId, final String targetPackageName) {
+    private void updateAssetsLocked(final int userId, final String targetPackageName) {
         final List<String> list = new ArrayList<>();
         list.add(targetPackageName);
-        updateAssets(userId, list);
+        updateAssetsLocked(userId, list);
     }
 
-    private void updateAssets(final int userId, List<String> targetPackageNames) {
+    private void updateAssetsLocked(final int userId, List<String> targetPackageNames) {
+        if (DEBUG) {
+            Slog.d(TAG, "Updating overlay assets");
+        }
         final PackageManagerInternal pm = LocalServices.getService(PackageManagerInternal.class);
         final boolean updateFrameworkRes = targetPackageNames.contains("android");
         if (updateFrameworkRes) {
@@ -743,6 +698,12 @@ public final class OverlayManagerService extends SystemService {
         final int N = targetPackageNames.size();
         for (int i = 0; i < N; i++) {
             final String targetPackageName = targetPackageNames.get(i);
+            if (DEBUG) {
+                Slog.d(TAG, "-> Updating overlay: target=" + targetPackageName + " overlays=["
+                        + TextUtils.join(",", pendingChanges.get(targetPackageName))
+                        + "] userId=" + userId);
+            }
+
             if (!pm.setEnabledOverlayPackages(
                         userId, targetPackageName, pendingChanges.get(targetPackageName))) {
                 Slog.e(TAG, String.format("Failed to change enabled overlays for %s user %d",
@@ -762,20 +723,20 @@ public final class OverlayManagerService extends SystemService {
         if (mPersistSettingsScheduled.getAndSet(true)) {
             return;
         }
-        IoThread.getHandler().post(new Runnable() {
-            @Override
-            public void run() {
-                mPersistSettingsScheduled.set(false);
-                synchronized (mLock) {
-                    FileOutputStream stream = null;
-                    try {
-                        stream = mSettingsFile.startWrite();
-                        mSettings.persist(stream);
-                        mSettingsFile.finishWrite(stream);
-                    } catch (IOException | XmlPullParserException e) {
-                        mSettingsFile.failWrite(stream);
-                        Slog.e(TAG, "failed to persist overlay state", e);
-                    }
+        IoThread.getHandler().post(() -> {
+            mPersistSettingsScheduled.set(false);
+            if (DEBUG) {
+                Slog.d(TAG, "Writing overlay settings");
+            }
+            synchronized (mLock) {
+                FileOutputStream stream = null;
+                try {
+                    stream = mSettingsFile.startWrite();
+                    mSettings.persist(stream);
+                    mSettingsFile.finishWrite(stream);
+                } catch (IOException | XmlPullParserException e) {
+                    mSettingsFile.failWrite(stream);
+                    Slog.e(TAG, "failed to persist overlay state", e);
                 }
             }
         });
@@ -862,7 +823,8 @@ public final class OverlayManagerService extends SystemService {
             // The package manager does not support different versions of packages
             // to be installed for different users: ignore userId for now.
             try {
-                return mPackageManager.checkSignatures(packageName1, packageName2) == SIGNATURE_MATCH;
+                return mPackageManager.checkSignatures(
+                        packageName1, packageName2) == SIGNATURE_MATCH;
             } catch (RemoteException e) {
                 // Intentionally left blank
             }
