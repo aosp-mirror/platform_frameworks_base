@@ -576,7 +576,7 @@ public class CallerInfo {
      * @return a geographical description string for the specified number.
      * @see com.android.i18n.phonenumbers.PhoneNumberOfflineGeocoder
      */
-    private static String getGeoDescription(Context context, String number) {
+    public static String getGeoDescription(Context context, String number) {
         if (VDBG) Rlog.v(TAG, "getGeoDescription('" + number + "')...");
 
         if (TextUtils.isEmpty(number)) {
