@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.notification;
 
-import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Color;
 import android.service.notification.StatusBarNotification;
@@ -46,7 +45,8 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
     private int mContentHeight;
     private int mMinHeightHint;
 
-    protected NotificationTemplateViewWrapper(Context ctx, View view, ExpandableNotificationRow row) {
+    protected NotificationTemplateViewWrapper(Context ctx, View view,
+            ExpandableNotificationRow row) {
         super(ctx, view, row);
         mTransformationHelper.setCustomTransformation(
                 new ViewTransformationHelper.CustomTransformation() {
@@ -154,16 +154,20 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
         // This also clears the existing types
         super.updateTransformedTypes();
         if (mTitle != null) {
-            mTransformationHelper.addTransformedView(TransformableView.TRANSFORMING_VIEW_TITLE, mTitle);
+            mTransformationHelper.addTransformedView(TransformableView.TRANSFORMING_VIEW_TITLE,
+                    mTitle);
         }
         if (mText != null) {
-            mTransformationHelper.addTransformedView(TransformableView.TRANSFORMING_VIEW_TEXT, mText);
+            mTransformationHelper.addTransformedView(TransformableView.TRANSFORMING_VIEW_TEXT,
+                    mText);
         }
         if (mPicture != null) {
-            mTransformationHelper.addTransformedView(TransformableView.TRANSFORMING_VIEW_IMAGE, mPicture);
+            mTransformationHelper.addTransformedView(TransformableView.TRANSFORMING_VIEW_IMAGE,
+                    mPicture);
         }
         if (mProgressBar != null) {
-            mTransformationHelper.addTransformedView(TransformableView.TRANSFORMING_VIEW_PROGRESS, mProgressBar);
+            mTransformationHelper.addTransformedView(TransformableView.TRANSFORMING_VIEW_PROGRESS,
+                    mProgressBar);
         }
     }
 
@@ -173,7 +177,7 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
             return;
         }
         super.setDark(dark, fade, delay);
-        setPictureGrayscale(dark, fade, delay);
+        setPictureDark(dark, fade, delay);
         setProgressBarDark(dark, fade, delay);
     }
 
@@ -188,12 +192,9 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
     }
 
     private void fadeProgressDark(final ProgressBar target, final boolean dark, long delay) {
-        startIntensityAnimation(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                float t = (float) animation.getAnimatedValue();
-                updateProgressDark(target, t);
-            }
+        getDozer().startIntensityAnimation(animation -> {
+            float t = (float) animation.getAnimatedValue();
+            updateProgressDark(target, t);
         }, dark, delay, null /* listener */);
     }
 
@@ -207,13 +208,9 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
         updateProgressDark(target, dark ? 1f : 0f);
     }
 
-    protected void setPictureGrayscale(boolean grayscale, boolean fade, long delay) {
+    private void setPictureDark(boolean dark, boolean fade, long delay) {
         if (mPicture != null) {
-            if (fade) {
-                fadeGrayscale(mPicture, grayscale, delay);
-            } else {
-                updateGrayscale(mPicture, grayscale);
-            }
+            getDozer().setImageDark(mPicture, dark, fade, delay, true /* useGrayscale */);
         }
     }
 
