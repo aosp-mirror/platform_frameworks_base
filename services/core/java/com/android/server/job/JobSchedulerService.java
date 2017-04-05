@@ -2035,27 +2035,35 @@ public final class JobSchedulerService extends com.android.server.SystemService
                     pw.print("    Evaluated priority: "); pw.println(priority);
                 }
                 pw.print("    Tag: "); pw.println(job.getTag());
+                pw.print("    Enq: ");
+                TimeUtils.formatDuration(now - job.madePending, pw);
+                pw.println(" ago");
             }
             pw.println();
             pw.println("Active jobs:");
             for (int i=0; i<mActiveServices.size(); i++) {
                 JobServiceContext jsc = mActiveServices.get(i);
                 pw.print("  Slot #"); pw.print(i); pw.print(": ");
-                if (jsc.getRunningJob() == null) {
+                final JobStatus job = jsc.getRunningJob();
+                if (job == null) {
                     pw.println("inactive");
                     continue;
                 } else {
-                    pw.println(jsc.getRunningJob().toShortString());
+                    pw.println(job.toShortString());
                     pw.print("    Running for: ");
                     TimeUtils.formatDuration(now - jsc.getExecutionStartTimeElapsed(), pw);
                     pw.print(", timeout at: ");
                     TimeUtils.formatDuration(jsc.getTimeoutElapsed() - now, pw);
                     pw.println();
-                    jsc.getRunningJob().dump(pw, "    ", false);
+                    job.dump(pw, "    ", false);
                     int priority = evaluateJobPriorityLocked(jsc.getRunningJob());
                     if (priority != JobInfo.PRIORITY_DEFAULT) {
                         pw.print("    Evaluated priority: "); pw.println(priority);
                     }
+                    pw.print("    Active at "); pw.println(job.madeActive);
+                    pw.print("    Pending for ");
+                    TimeUtils.formatDuration(job.madeActive - job.madePending, pw);
+                    pw.println();
                 }
             }
             if (filterUid == -1) {

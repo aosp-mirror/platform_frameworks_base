@@ -129,6 +129,10 @@ public final class JobStatus {
     // Used by shell commands
     public int overrideState = 0;
 
+    // Metrics about queue latency
+    public long madePending;
+    public long madeActive;
+
     /**
      * For use only by ContentObserverController: state it is maintaining about content URIs
      * being observed.
