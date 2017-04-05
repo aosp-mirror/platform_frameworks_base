@@ -383,7 +383,7 @@ public final class DisplayManagerGlobal {
 
     public VirtualDisplay createVirtualDisplay(Context context, MediaProjection projection,
             String name, int width, int height, int densityDpi, Surface surface, int flags,
-            VirtualDisplay.Callback callback, Handler handler) {
+            VirtualDisplay.Callback callback, Handler handler, String uniqueId) {
         if (TextUtils.isEmpty(name)) {
             throw new IllegalArgumentException("name must be non-null and non-empty");
         }
@@ -397,7 +397,8 @@ public final class DisplayManagerGlobal {
         int displayId;
         try {
             displayId = mDm.createVirtualDisplay(callbackWrapper, projectionToken,
-                    context.getPackageName(), name, width, height, densityDpi, surface, flags);
+                    context.getPackageName(), name, width, height, densityDpi, surface, flags,
+                    uniqueId);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }

@@ -113,6 +113,13 @@ final class DisplayDeviceInfo {
     public static final int TOUCH_EXTERNAL = 2;
 
     /**
+     * Touch attachment: Touch input is via an input device matching {@link VirtualDisplay}'s
+     * uniqueId.
+     * @hide
+     */
+    public static final int TOUCH_VIRTUAL = 3;
+
+    /**
      * Diff result: The {@link #state} fields differ.
      */
     public static final int DIFF_STATE = 1 << 0;
@@ -391,6 +398,8 @@ final class DisplayDeviceInfo {
                 return "INTERNAL";
             case TOUCH_EXTERNAL:
                 return "EXTERNAL";
+            case TOUCH_VIRTUAL:
+                return "VIRTUAL";
             default:
                 return Integer.toString(touch);
         }
