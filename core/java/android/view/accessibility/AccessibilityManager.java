@@ -112,7 +112,7 @@ public final class AccessibilityManager {
      */
     @SdkConstant(SdkConstant.SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_CHOOSE_ACCESSIBILITY_BUTTON =
-            "android.intent.action.CHOOSE_ACCESSIBILITY_BUTTON";
+            "com.android.internal.intent.action.CHOOSE_ACCESSIBILITY_BUTTON";
 
     static final Object sInstanceSync = new Object();
 
