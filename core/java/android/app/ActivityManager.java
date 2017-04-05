@@ -30,6 +30,7 @@ import android.graphics.GraphicBuffer;
 import android.graphics.Matrix;
 import android.graphics.Point;
 import android.os.BatteryStats;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 
@@ -600,6 +601,9 @@ public class ActivityManager {
      */
     public static final int COMPAT_MODE_TOGGLE = 2;
 
+    private static final boolean DEVELOPMENT_FORCE_LOW_RAM =
+            SystemProperties.getBoolean("debug.force_low_ram", false);
+
     /** @hide */
     public static class StackId {
         /** Invalid stack ID. */
@@ -1055,7 +1059,8 @@ public class ActivityManager {
 
     /** @hide */
     public static boolean isLowRamDeviceStatic() {
-        return RoSystemProperties.CONFIG_LOW_RAM;
+        return RoSystemProperties.CONFIG_LOW_RAM ||
+                (Build.IS_DEBUGGABLE && DEVELOPMENT_FORCE_LOW_RAM);
     }
 
     /**
