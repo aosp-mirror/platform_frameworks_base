@@ -39,7 +39,7 @@ public class NotificationViewWrapperTest {
 
     @Test
     public void constructor_doesntUseViewContext() throws Exception {
-        new TestableNotificationViewWrapper(mContext, new View(null /* context */), null /* row */);
+        new TestableNotificationViewWrapper(mContext, null /* view */, null /* row */);
     }
 
     static class TestableNotificationViewWrapper extends NotificationViewWrapper {
