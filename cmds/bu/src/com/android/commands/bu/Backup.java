@@ -101,8 +101,10 @@ public final class Backup {
                     doCompress = true;
                 } else if ("-nocompress".equals(arg)) {
                     doCompress = false;
-                } else if ("-includekeyvalue".equals(arg)) {
+                } else if ("-keyvalue".equals(arg)) {
                     doKeyValue = true;
+                } else if ("-nokeyvalue".equals(arg)) {
+                    doKeyValue = false;
                 } else {
                     Log.w(TAG, "Unknown backup flag " + arg);
                     continue;
