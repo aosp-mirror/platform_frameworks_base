@@ -183,6 +183,9 @@
     <!-- to control accessibility volume -->
     <uses-permission android:name="android.permission.CHANGE_ACCESSIBILITY_VOLUME" />
 
+    <!-- to access ResolverRankerServices -->
+    <uses-permission android:name="android.permission.BIND_RESOLVER_RANKER_SERVICE" />
+
     <application
         android:name=".SystemUIApplication"
         android:persistent="true"
