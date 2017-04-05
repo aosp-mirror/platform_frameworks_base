@@ -25,7 +25,6 @@ import android.content.IntentSender;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.view.autofill.AutoFillId;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillValue;
@@ -265,26 +264,6 @@ public final class SaveInfo implements Parcelable {
             throwIfDestroyed();
             if (ids != null && ids.length != 0) {
                 mOptionalIds = ids;
-            }
-            return this;
-        }
-
-
-        /**
-         * @hide
-         */
-        // TODO(b/33197203): temporary fix to runtime crash
-        public @NonNull Builder addSavableIds(@Nullable AutoFillId... ids) {
-            throwIfDestroyed();
-
-            if (ids == null || ids.length == 0) {
-                return this;
-            }
-            if (mRequiredIds == null) {
-                mRequiredIds = new AutofillId[ids.length];
-            }
-            for (int i = 0; i < ids.length; i++) {
-                mRequiredIds[i] = ids[i].getDaRealId();
             }
             return this;
         }
