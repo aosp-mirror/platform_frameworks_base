@@ -342,7 +342,7 @@ static void ImageWriter_dequeueImage(JNIEnv* env, jobject thiz, jlong nativeCtx,
     }
     // New GraphicBuffer object doesn't own the handle, thus the native buffer
     // won't be freed when this object is destroyed.
-    sp<GraphicBuffer> buffer(new GraphicBuffer(anb, /*keepOwnership*/false));
+    sp<GraphicBuffer> buffer(GraphicBuffer::from(anb));
 
     // Note that:
     // 1. No need to lock buffer now, will only lock it when the first getPlanes() is called.
