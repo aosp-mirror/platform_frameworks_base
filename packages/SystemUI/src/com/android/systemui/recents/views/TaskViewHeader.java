@@ -524,7 +524,7 @@ public class TaskViewHeader extends FrameLayout
      * changes.
      */
     public void onTaskDataLoaded() {
-        if (mTask.icon != null) {
+        if (mTask != null && mTask.icon != null) {
             mIconView.setImageDrawable(mTask.icon);
         }
     }
