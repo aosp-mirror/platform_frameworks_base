@@ -22,6 +22,7 @@ import android.text.InputType;
 import android.view.KeyEvent;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.ArrayUtils;
 
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -37,10 +38,13 @@ import java.util.Locale;
 public class DateTimeKeyListener extends NumberKeyListener
 {
     public int getInputType() {
-        return InputType.TYPE_CLASS_DATETIME
-                | InputType.TYPE_DATETIME_VARIATION_NORMAL;
+        if (mNeedsAdvancedInput) {
+            return InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_NORMAL;
+        } else {
+            return InputType.TYPE_CLASS_DATETIME | InputType.TYPE_DATETIME_VARIATION_NORMAL;
+        }
     }
-    
+
     @Override
     @NonNull
     protected char[] getAcceptedChars()
@@ -70,7 +74,13 @@ public class DateTimeKeyListener extends NumberKeyListener
                               chars, locale, SKELETON_12HOUR, SYMBOLS_TO_IGNORE)
                           && NumberKeyListener.addFormatCharsFromSkeleton(
                               chars, locale, SKELETON_24HOUR, SYMBOLS_TO_IGNORE);
-        mCharacters = success ? NumberKeyListener.collectionToArray(chars) : CHARACTERS;
+        if (success) {
+            mCharacters = NumberKeyListener.collectionToArray(chars);
+            mNeedsAdvancedInput = !ArrayUtils.containsAll(CHARACTERS, mCharacters);
+        } else {
+            mCharacters = CHARACTERS;
+            mNeedsAdvancedInput = false;
+        }
     }
 
     /**
@@ -114,6 +124,7 @@ public class DateTimeKeyListener extends NumberKeyListener
         };
 
     private final char[] mCharacters;
+    private final boolean mNeedsAdvancedInput;
 
     private static final Object sLock = new Object();
     @GuardedBy("sLock")

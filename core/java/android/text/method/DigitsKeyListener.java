@@ -27,6 +27,7 @@ import android.text.Spanned;
 import android.view.KeyEvent;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.ArrayUtils;
 
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -42,8 +43,12 @@ import java.util.Locale;
 public class DigitsKeyListener extends NumberKeyListener
 {
     private char[] mAccepted;
+    private boolean mNeedsAdvancedInput;
     private final boolean mSign;
     private final boolean mDecimal;
+    private final boolean mStringMode;
+    @Nullable
+    private final Locale mLocale;
 
     private static final String DEFAULT_DECIMAL_POINT_CHARS = ".";
     private static final String DEFAULT_SIGN_CHARS = "-+";
@@ -112,11 +117,17 @@ public class DigitsKeyListener extends NumberKeyListener
         this(locale, false, false);
     }
 
-    private void setToCompat(boolean sign, boolean decimal) {
+    private void setToCompat() {
         mDecimalPointChars = DEFAULT_DECIMAL_POINT_CHARS;
         mSignChars = DEFAULT_SIGN_CHARS;
-        final int kind = (sign ? SIGN : 0) | (decimal ? DECIMAL : 0);
+        final int kind = (mSign ? SIGN : 0) | (mDecimal ? DECIMAL : 0);
         mAccepted = COMPATIBILITY_CHARACTERS[kind];
+        mNeedsAdvancedInput = false;
+    }
+
+    private void calculateNeedForAdvancedInput() {
+        final int kind = (mSign ? SIGN : 0) | (mDecimal ? DECIMAL : 0);
+        mNeedsAdvancedInput = !ArrayUtils.containsAll(COMPATIBILITY_CHARACTERS[kind], mAccepted);
     }
 
     // Takes a sign string and strips off its bidi controls, if any.
@@ -144,14 +155,16 @@ public class DigitsKeyListener extends NumberKeyListener
     public DigitsKeyListener(@Nullable Locale locale, boolean sign, boolean decimal) {
         mSign = sign;
         mDecimal = decimal;
+        mStringMode = false;
+        mLocale = locale;
         if (locale == null) {
-            setToCompat(sign, decimal);
+            setToCompat();
             return;
         }
         LinkedHashSet<Character> chars = new LinkedHashSet<>();
         final boolean success = NumberKeyListener.addDigits(chars, locale);
         if (!success) {
-            setToCompat(sign, decimal);
+            setToCompat();
             return;
         }
         if (sign || decimal) {
@@ -161,7 +174,7 @@ public class DigitsKeyListener extends NumberKeyListener
                 final String plusString = stripBidiControls(symbols.getPlusSignString());
                 if (minusString.length() > 1 || plusString.length() > 1) {
                     // non-BMP and multi-character signs are not supported.
-                    setToCompat(sign, decimal);
+                    setToCompat();
                     return;
                 }
                 final char minus = minusString.charAt(0);
@@ -181,7 +194,7 @@ public class DigitsKeyListener extends NumberKeyListener
                 final String separatorString = symbols.getDecimalSeparatorString();
                 if (separatorString.length() > 1) {
                     // non-BMP and multi-character decimal separators are not supported.
-                    setToCompat(sign, decimal);
+                    setToCompat();
                     return;
                 }
                 final Character separatorChar = Character.valueOf(separatorString.charAt(0));
@@ -190,13 +203,19 @@ public class DigitsKeyListener extends NumberKeyListener
             }
         }
         mAccepted = NumberKeyListener.collectionToArray(chars);
+        calculateNeedForAdvancedInput();
     }
 
     private DigitsKeyListener(@NonNull final String accepted) {
         mSign = false;
         mDecimal = false;
+        mStringMode = true;
+        mLocale = null;
         mAccepted = new char[accepted.length()];
         accepted.getChars(0, accepted.length(), mAccepted, 0);
+        // Theoretically we may need advanced input, but for backward compatibility, we don't change
+        // the input type.
+        mNeedsAdvancedInput = false;
     }
 
     /**
@@ -280,13 +299,38 @@ public class DigitsKeyListener extends NumberKeyListener
         return result;
     }
 
-    public int getInputType() {
-        int contentType = InputType.TYPE_CLASS_NUMBER;
-        if (mSign) {
-            contentType |= InputType.TYPE_NUMBER_FLAG_SIGNED;
+    /**
+     * Returns a DigitsKeyListener based on an the settings of a existing DigitsKeyListener, with
+     * the locale modified.
+     *
+     * @hide
+     */
+    @NonNull
+    public static DigitsKeyListener getInstance(
+            @Nullable Locale locale,
+            @NonNull DigitsKeyListener listener) {
+        if (listener.mStringMode) {
+            return listener; // string-mode DigitsKeyListeners have no locale.
+        } else {
+            return getInstance(locale, listener.mSign, listener.mDecimal);
         }
-        if (mDecimal) {
-            contentType |= InputType.TYPE_NUMBER_FLAG_DECIMAL;
+    }
+
+    /**
+     * Returns the input type for the listener.
+     */
+    public int getInputType() {
+        int contentType;
+        if (mNeedsAdvancedInput) {
+            contentType = InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_NORMAL;
+        } else {
+            contentType = InputType.TYPE_CLASS_NUMBER;
+            if (mSign) {
+                contentType |= InputType.TYPE_NUMBER_FLAG_SIGNED;
+            }
+            if (mDecimal) {
+                contentType |= InputType.TYPE_NUMBER_FLAG_DECIMAL;
+            }
         }
         return contentType;
     }
