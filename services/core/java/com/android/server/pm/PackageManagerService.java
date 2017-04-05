@@ -2813,15 +2813,17 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
 
             mInstallerService = new PackageInstallerService(context, this);
-            final ComponentName ephemeralResolverComponent = getEphemeralResolverLPr();
-            if (ephemeralResolverComponent != null) {
+            final Pair<ComponentName, String> instantAppResolverComponent =
+                    getInstantAppResolverLPr();
+            if (instantAppResolverComponent != null) {
                 if (DEBUG_EPHEMERAL) {
-                    Slog.d(TAG, "Set ephemeral resolver: " + ephemeralResolverComponent);
+                    Slog.d(TAG, "Set ephemeral resolver: " + instantAppResolverComponent);
                 }
-                mInstantAppResolverConnection =
-                        new EphemeralResolverConnection(mContext, ephemeralResolverComponent);
+                mInstantAppResolverConnection = new EphemeralResolverConnection(
+                        mContext, instantAppResolverComponent.first,
+                        instantAppResolverComponent.second);
                 mInstantAppResolverSettingsComponent =
-                        getEphemeralResolverSettingsLPr(ephemeralResolverComponent);
+                        getInstantAppResolverSettingsLPr(instantAppResolverComponent.first);
             } else {
                 mInstantAppResolverConnection = null;
                 mInstantAppResolverSettingsComponent = null;
@@ -2868,7 +2870,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     private void updateInstantAppInstallerLocked() {
         final ComponentName oldInstantAppInstallerComponent = mInstantAppInstallerComponent;
-        final ActivityInfo newInstantAppInstaller = getEphemeralInstallerLPr();
+        final ActivityInfo newInstantAppInstaller = getInstantAppInstallerLPr();
         ComponentName newInstantAppInstallerComponent = newInstantAppInstaller == null
                 ? null : newInstantAppInstaller.getComponentName();
 
@@ -3045,7 +3047,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-    private @Nullable ComponentName getEphemeralResolverLPr() {
+    private @Nullable Pair<ComponentName, String> getInstantAppResolverLPr() {
         final String[] packageArray =
                 mContext.getResources().getStringArray(R.array.config_ephemeralResolverPackage);
         if (packageArray.length == 0 && !Build.IS_DEBUGGABLE) {
@@ -3060,7 +3062,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                 MATCH_DIRECT_BOOT_AWARE
                 | MATCH_DIRECT_BOOT_UNAWARE
                 | (!Build.IS_DEBUGGABLE ? MATCH_SYSTEM_ONLY : 0);
-        final Intent resolverIntent = new Intent(Intent.ACTION_RESOLVE_INSTANT_APP_PACKAGE);
+        String actionName = Intent.ACTION_RESOLVE_INSTANT_APP_PACKAGE;
+        final Intent resolverIntent = new Intent(actionName);
         List<ResolveInfo> resolvers = queryIntentServicesInternal(resolverIntent, null,
                 resolveFlags, UserHandle.USER_SYSTEM, callingUid, false /*includeInstantApps*/);
         // temporarily look for the old action
@@ -3068,7 +3071,8 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (DEBUG_EPHEMERAL) {
                 Slog.d(TAG, "Ephemeral resolver not found with new action; try old one");
             }
-            resolverIntent.setAction(Intent.ACTION_RESOLVE_EPHEMERAL_PACKAGE);
+            actionName = Intent.ACTION_RESOLVE_EPHEMERAL_PACKAGE;
+            resolverIntent.setAction(actionName);
             resolvers = queryIntentServicesInternal(resolverIntent, null,
                     resolveFlags, UserHandle.USER_SYSTEM, callingUid, false /*includeInstantApps*/);
         }
@@ -3101,7 +3105,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 Slog.v(TAG, "Ephemeral resolver found;"
                         + " pkg: " + packageName + ", info:" + info);
             }
-            return new ComponentName(packageName, info.serviceInfo.name);
+            return new Pair<>(new ComponentName(packageName, info.serviceInfo.name), actionName);
         }
         if (DEBUG_EPHEMERAL) {
             Slog.v(TAG, "Ephemeral resolver NOT found");
@@ -3109,7 +3113,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         return null;
     }
 
-    private @Nullable ActivityInfo getEphemeralInstallerLPr() {
+    private @Nullable ActivityInfo getInstantAppInstallerLPr() {
         final Intent intent = new Intent(Intent.ACTION_INSTALL_INSTANT_APP_PACKAGE);
         intent.addCategory(Intent.CATEGORY_DEFAULT);
         intent.setDataAndType(Uri.fromFile(new File("foo.apk")), PACKAGE_MIME_TYPE);
@@ -3151,7 +3155,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-    private @Nullable ComponentName getEphemeralResolverSettingsLPr(
+    private @Nullable ComponentName getInstantAppResolverSettingsLPr(
             @NonNull ComponentName resolver) {
         final Intent intent =  new Intent(Intent.ACTION_INSTANT_APP_RESOLVER_SETTINGS)
                 .addCategory(Intent.CATEGORY_DEFAULT)
