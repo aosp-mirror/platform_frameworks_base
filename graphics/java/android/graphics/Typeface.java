@@ -357,8 +357,8 @@ public class Typeface {
                 long fontSize = fileChannel.size();
                 ByteBuffer fontBuffer = fileChannel.map(
                         FileChannel.MapMode.READ_ONLY, 0, fontSize);
-                int style = result.getStyle();
-                int weight = (style & BOLD) != 0 ? 700 : 400;
+                int weight = result.getWeight();
+                int italic = result.getItalic() ? Builder.ITALIC : Builder.NORMAL;
                 FontVariationAxis[] axes = null;
                 try {
                     axes = FontVariationAxis.fromFontVariationSettings(
@@ -366,8 +366,8 @@ public class Typeface {
                 } catch (FontVariationAxis.InvalidFormatException e) {
                     // TODO: Nice to pass FontVariationAxis[] directly instead of string.
                 }
-                if (!fontFamily.addFontFromBuffer(fontBuffer, result.getTtcIndex(), axes, weight,
-                        (style & ITALIC) == 0 ? Builder.NORMAL : Builder.ITALIC)) {
+                if (!fontFamily.addFontFromBuffer(fontBuffer, result.getTtcIndex(),
+                        axes, weight, italic)) {
                     Log.e(TAG, "Error creating font " + request.getQuery());
                     callback.onTypefaceRequestFailed(
                             FontRequestCallback.FAIL_REASON_FONT_LOAD_ERROR);
