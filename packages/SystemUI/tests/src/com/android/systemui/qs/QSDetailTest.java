@@ -100,4 +100,10 @@ public class QSDetailTest extends SysuiTestCase {
         ViewUtils.detachView(mQsDetail);
         mTestableLooper.processAllMessages();
     }
+
+    @Test
+    public void testNullAdapterClick() {
+        mQsDetail.setupDetailFooter(mock(DetailAdapter.class));
+        mQsDetail.findViewById(android.R.id.button2).performClick();
+    }
 }
