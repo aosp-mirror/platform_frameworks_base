@@ -251,6 +251,15 @@ public final class DisplayManager {
      */
     public static final int VIRTUAL_DISPLAY_FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD = 1 << 5;
 
+    /**
+     * Virtual display flag: Specifies that the virtual display can be associated with a
+     * touchpad device that matches its uniqueId.
+     *
+     * @see #createVirtualDisplay
+     * @hide
+     */
+    public static final int VIRTUAL_DISPLAY_FLAG_SUPPORTS_TOUCH = 1 << 6;
+
     /** @hide */
     public DisplayManager(Context context) {
         mContext = context;
@@ -542,16 +551,17 @@ public final class DisplayManager {
     public VirtualDisplay createVirtualDisplay(@NonNull String name,
             int width, int height, int densityDpi, @Nullable Surface surface, int flags,
             @Nullable VirtualDisplay.Callback callback, @Nullable Handler handler) {
-        return createVirtualDisplay(null,
-                name, width, height, densityDpi, surface, flags, callback, handler);
+        return createVirtualDisplay(null /* projection */, name, width, height, densityDpi, surface,
+                flags, callback, handler, null /* uniqueId */);
     }
 
     /** @hide */
     public VirtualDisplay createVirtualDisplay(@Nullable MediaProjection projection,
             @NonNull String name, int width, int height, int densityDpi, @Nullable Surface surface,
-            int flags, @Nullable VirtualDisplay.Callback callback, @Nullable Handler handler) {
+            int flags, @Nullable VirtualDisplay.Callback callback, @Nullable Handler handler,
+            @Nullable String uniqueId) {
         return mGlobal.createVirtualDisplay(mContext, projection,
-                name, width, height, densityDpi, surface, flags, callback, handler);
+                name, width, height, densityDpi, surface, flags, callback, handler, uniqueId);
     }
 
     /**
