@@ -5773,12 +5773,16 @@ public class StatusBar extends SystemUI implements DemoMode,
                     ServiceManager.getService(Context.NOTIFICATION_SERVICE));
             final String pkg = sbn.getPackageName();
             NotificationInfo info = (NotificationInfo) gutsView;
-            final NotificationInfo.OnSettingsClickListener onSettingsClick = (View v,
-                    NotificationChannel channel, int appUid) -> {
-                mMetricsLogger.action(MetricsEvent.ACTION_NOTE_INFO);
-                guts.resetFalsingCheck();
-                startAppNotificationSettingsActivity(pkg, appUid, channel);
-            };
+            // Settings link is only valid for notifications that specify a user, unless this is the
+            // system user.
+            NotificationInfo.OnSettingsClickListener onSettingsClick = null;
+            if (!userHandle.equals(UserHandle.ALL) || mCurrentUserId == UserHandle.USER_SYSTEM) {
+                onSettingsClick = (View v, NotificationChannel channel, int appUid) -> {
+                    mMetricsLogger.action(MetricsEvent.ACTION_NOTE_INFO);
+                    guts.resetFalsingCheck();
+                    startAppNotificationSettingsActivity(pkg, appUid, channel);
+                };
+            }
             final View.OnClickListener onDoneClick = (View v) -> {
                 saveAndCloseNotificationMenu(info, row, guts, v);
             };

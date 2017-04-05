@@ -228,6 +228,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         // Settings button.
         final TextView settingsButton = (TextView) findViewById(R.id.more_settings);
         if (mAppUid >= 0 && onSettingsClick != null) {
+            settingsButton.setVisibility(View.VISIBLE);
             final int appUidF = mAppUid;
             settingsButton.setOnClickListener(
                     (View view) -> {
