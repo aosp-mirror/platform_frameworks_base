@@ -21,6 +21,7 @@ import static android.companion.BluetoothDeviceFilterUtils.patternFromString;
 import static android.companion.BluetoothDeviceFilterUtils.patternToString;
 
 import static com.android.internal.util.Preconditions.checkArgument;
+import static com.android.internal.util.Preconditions.checkState;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -61,12 +62,14 @@ public final class BluetoothLEDeviceFilter implements DeviceFilter<ScanResult> {
     private final String mRenameSuffix;
     private final int mRenameBytesFrom;
     private final int mRenameBytesTo;
+    private final int mRenameNameFrom;
+    private final int mRenameNameTo;
     private final boolean mRenameBytesReverseOrder;
 
     private BluetoothLEDeviceFilter(Pattern namePattern, ScanFilter scanFilter,
             byte[] rawDataFilter, byte[] rawDataFilterMask, String renamePrefix,
             String renameSuffix, int renameBytesFrom, int renameBytesTo,
-            boolean renameBytesReverseOrder) {
+            int renameNameFrom, int renameNameTo, boolean renameBytesReverseOrder) {
         mNamePattern = namePattern;
         mScanFilter = ObjectUtils.firstNotNull(scanFilter, ScanFilter.EMPTY);
         mRawDataFilter = rawDataFilter;
@@ -75,6 +78,8 @@ public final class BluetoothLEDeviceFilter implements DeviceFilter<ScanResult> {
         mRenameSuffix = renameSuffix;
         mRenameBytesFrom = renameBytesFrom;
         mRenameBytesTo = renameBytesTo;
+        mRenameNameFrom = renameNameFrom;
+        mRenameNameTo = renameNameTo;
         mRenameBytesReverseOrder = renameBytesReverseOrder;
     }
 
@@ -133,15 +138,23 @@ public final class BluetoothLEDeviceFilter implements DeviceFilter<ScanResult> {
     @Override
     @Nullable
     public String getDeviceDisplayName(ScanResult sr) {
-        if (mRenameBytesFrom < 0) return getDeviceDisplayNameInternal(sr.getDevice());
-        final byte[] bytes = sr.getScanRecord().getBytes();
+        if (mRenameBytesFrom < 0 && mRenameNameFrom < 0) {
+            return getDeviceDisplayNameInternal(sr.getDevice());
+        }
         final StringBuilder sb = new StringBuilder(TextUtils.emptyIfNull(mRenamePrefix));
-        int startInclusive = mRenameBytesFrom;
-        int endInclusive = mRenameBytesTo - 1;
-        int initial = mRenameBytesReverseOrder ? endInclusive : startInclusive;
-        int step = mRenameBytesReverseOrder ? -1 : 1;
-        for (int i = initial; startInclusive <= i && i <= endInclusive; i+=step) {
-            sb.append(Byte.toHexString(bytes[i], true));
+        if (mRenameBytesFrom >= 0) {
+            final byte[] bytes = sr.getScanRecord().getBytes();
+            int startInclusive = mRenameBytesFrom;
+            int endInclusive = mRenameBytesTo - 1;
+            int initial = mRenameBytesReverseOrder ? endInclusive : startInclusive;
+            int step = mRenameBytesReverseOrder ? -1 : 1;
+            for (int i = initial; startInclusive <= i && i <= endInclusive; i += step) {
+                sb.append(Byte.toHexString(bytes[i], true));
+            }
+        } else {
+            sb.append(
+                    getDeviceDisplayNameInternal(sr.getDevice())
+                            .substring(mRenameNameFrom, mRenameNameTo));
         }
         return sb.append(TextUtils.emptyIfNull(mRenameSuffix)).toString();
     }
@@ -202,6 +215,8 @@ public final class BluetoothLEDeviceFilter implements DeviceFilter<ScanResult> {
         dest.writeString(mRenameSuffix);
         dest.writeInt(mRenameBytesFrom);
         dest.writeInt(mRenameBytesTo);
+        dest.writeInt(mRenameNameFrom);
+        dest.writeInt(mRenameNameTo);
         dest.writeBoolean(mRenameBytesReverseOrder);
     }
 
@@ -226,9 +241,16 @@ public final class BluetoothLEDeviceFilter implements DeviceFilter<ScanResult> {
             String suffix = in.readString();
             int bytesFrom = in.readInt();
             int bytesTo = in.readInt();
+            int nameFrom = in.readInt();
+            int nameTo = in.readInt();
             boolean bytesReverseOrder = in.readBoolean();
             if (renamePrefix != null) {
-                builder.setRename(renamePrefix, suffix, bytesFrom, bytesTo, bytesReverseOrder);
+                if (bytesFrom >= 0) {
+                    builder.setRenameFromBytes(renamePrefix, suffix, bytesFrom, bytesTo,
+                            bytesReverseOrder);
+                } else {
+                    builder.setRenameFromName(renamePrefix, suffix, nameFrom, nameTo);
+                }
             }
             return builder.build();
         }
@@ -255,6 +277,8 @@ public final class BluetoothLEDeviceFilter implements DeviceFilter<ScanResult> {
         private String mRenameSuffix;
         private int mRenameBytesFrom = -1;
         private int mRenameBytesTo;
+        private int mRenameNameFrom = -1;
+        private int mRenameNameTo;
         private boolean mRenameBytesReverseOrder = false;
 
         /**
@@ -320,17 +344,57 @@ public final class BluetoothLEDeviceFilter implements DeviceFilter<ScanResult> {
          * @return self for chaining
          */
         @NonNull
-        public Builder setRename(@NonNull String prefix, @NonNull String suffix,
+        public Builder setRenameFromBytes(@NonNull String prefix, @NonNull String suffix,
                 int bytesFrom, int bytesTo, boolean bytesReverseOrder) {
-            checkNotUsed();
-            checkArgument(TextUtils.length(prefix) >= getRenamePrefixLengthLimit(),
-                    "Prefix is too short");
-            mRenamePrefix = prefix;
-            mRenameSuffix = suffix;
-            checkArgument(bytesFrom < bytesTo, "Byte range must be non-empty");
+            checkRenameNotSet();
+            checkRangeNotEmpty(bytesFrom, bytesTo);
             mRenameBytesFrom = bytesFrom;
             mRenameBytesTo = bytesTo;
             mRenameBytesReverseOrder = bytesReverseOrder;
+            return setRename(prefix, suffix);
+        }
+
+        /**
+         * Rename the devices shown in the list, using specific characters from the advertised name,
+         * as well as a custom prefix/suffix around them
+         *
+         * Note that the prefix length is limited to {@link #getRenamePrefixLengthLimit} characters
+         * to ensure that there's enough space to display the byte data
+         *
+         * The range of name characters to be displayed cannot be empty
+         *
+         * @param prefix to be displayed before the byte data
+         * @param suffix to be displayed after the byte data
+         * @param nameFrom the start name character index to be displayed (inclusive)
+         * @param nameTo the end name character index to be displayed (exclusive)
+         * @return self for chaining
+         */
+        @NonNull
+        public Builder setRenameFromName(@NonNull String prefix, @NonNull String suffix,
+                int nameFrom, int nameTo) {
+            checkRenameNotSet();
+            checkRangeNotEmpty(nameFrom, nameTo);
+            mRenameNameFrom = nameFrom;
+            mRenameNameTo = nameTo;
+            mRenameBytesReverseOrder = false;
+            return setRename(prefix, suffix);
+        }
+
+        private void checkRenameNotSet() {
+            checkState(mRenamePrefix == null, "Renaming rule can only be set once");
+        }
+
+        private void checkRangeNotEmpty(int bytesFrom, int bytesTo) {
+            checkArgument(bytesFrom < bytesTo, "Range must be non-empty");
+        }
+
+        @NonNull
+        private Builder setRename(@NonNull String prefix, @NonNull String suffix) {
+            checkNotUsed();
+            checkArgument(TextUtils.length(prefix) <= getRenamePrefixLengthLimit(),
+                    "Prefix is too long");
+            mRenamePrefix = prefix;
+            mRenameSuffix = suffix;
             return this;
         }
 
@@ -342,7 +406,9 @@ public final class BluetoothLEDeviceFilter implements DeviceFilter<ScanResult> {
             return new BluetoothLEDeviceFilter(mNamePattern, mScanFilter,
                     mRawDataFilter, mRawDataFilterMask,
                     mRenamePrefix, mRenameSuffix,
-                    mRenameBytesFrom, mRenameBytesTo, mRenameBytesReverseOrder);
+                    mRenameBytesFrom, mRenameBytesTo,
+                    mRenameNameFrom, mRenameNameTo,
+                    mRenameBytesReverseOrder);
         }
     }
 }
