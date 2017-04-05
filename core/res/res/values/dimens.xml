@@ -191,6 +191,9 @@
     <!-- size (width and height) of the icon in the notification header -->
     <dimen name="notification_header_icon_size">18dp</dimen>
 
+    <!-- size (width and height) of the icon in the notification header -->
+    <dimen name="notification_header_icon_size_ambient">20dp</dimen>
+
     <!-- Height of a small notification in the status bar -->
     <dimen name="notification_min_height">92dp</dimen>
 
