@@ -17643,6 +17643,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         int removedAppId = -1;
         int[] origUsers;
         int[] removedUsers = null;
+        int[] broadcastUsers = null;
         SparseArray<Integer> installReasons;
         boolean isRemovedPackageSystemUpdate = false;
         boolean isUpdate;
@@ -17716,16 +17717,16 @@ public class PackageManagerService extends IPackageManager.Stub {
             extras.putBoolean(Intent.EXTRA_REMOVED_FOR_ALL_USERS, removedForAllUsers);
             if (removedPackage != null) {
                 sendPackageBroadcast(Intent.ACTION_PACKAGE_REMOVED, removedPackage,
-                        extras, 0, null, null, removedUsers);
+                        extras, 0, null, null, broadcastUsers);
                 if (dataRemoved && !isRemovedPackageSystemUpdate) {
                     sendPackageBroadcast(Intent.ACTION_PACKAGE_FULLY_REMOVED,
                             removedPackage, extras, Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND,
-                            null, null, removedUsers);
+                            null, null, broadcastUsers);
                 }
             }
             if (removedAppId >= 0) {
                 sendPackageBroadcast(Intent.ACTION_UID_REMOVED, null, extras, 0, null, null,
-                        removedUsers);
+                        broadcastUsers);
             }
         }
     }
@@ -17754,6 +17755,20 @@ public class PackageManagerService extends IPackageManager.Stub {
                 outInfo.removedUsers = deletedPs != null
                         ? deletedPs.queryInstalledUsers(sUserManager.getUserIds(), true)
                         : null;
+                if (outInfo.removedUsers == null) {
+                    outInfo.broadcastUsers = null;
+                } else {
+                    outInfo.broadcastUsers = EMPTY_INT_ARRAY;
+                    int[] allUsers = outInfo.removedUsers;
+                    for (int i = allUsers.length - 1; i >= 0; --i) {
+                        final int userId = allUsers[i];
+                        if (deletedPs.getInstantApp(userId)) {
+                            continue;
+                        }
+                        outInfo.broadcastUsers =
+                                ArrayUtils.appendInt(outInfo.broadcastUsers, userId);
+                    }
+                }
             }
         }
 
