@@ -23,10 +23,12 @@ import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_SECUR
 import static android.hardware.display.DisplayManager
         .VIRTUAL_DISPLAY_FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
 
 import android.Manifest;
+import android.annotation.NonNull;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.hardware.SensorManager;
@@ -213,6 +215,7 @@ public final class DisplayManagerService extends SystemService {
     // input from an external source.  Used by the input system.
     private final DisplayViewport mDefaultViewport = new DisplayViewport();
     private final DisplayViewport mExternalTouchViewport = new DisplayViewport();
+    private final ArrayList<DisplayViewport> mVirtualTouchViewports = new ArrayList<>();
 
     // Persistent data store for all internal settings maintained by the display manager service.
     private final PersistentDataStore mPersistentDataStore = new PersistentDataStore();
@@ -228,6 +231,7 @@ public final class DisplayManagerService extends SystemService {
     // input system.  May be used outside of the lock but only on the handler thread.
     private final DisplayViewport mTempDefaultViewport = new DisplayViewport();
     private final DisplayViewport mTempExternalTouchViewport = new DisplayViewport();
+    private final ArrayList<DisplayViewport> mTempVirtualTouchViewports = new ArrayList<>();
 
     // The default color mode for default displays. Overrides the usual
     // Display.Display.COLOR_MODE_DEFAULT for displays with the
@@ -242,8 +246,16 @@ public final class DisplayManagerService extends SystemService {
     // Lists of UIDs that are present on the displays. Maps displayId -> array of UIDs.
     private final SparseArray<IntArray> mDisplayAccessUIDs = new SparseArray<>();
 
+    private final Injector mInjector;
+
     public DisplayManagerService(Context context) {
+        this(context, new Injector());
+    }
+
+    @VisibleForTesting
+    DisplayManagerService(Context context, Injector injector) {
         super(context);
+        mInjector = injector;
         mContext = context;
         mHandler = new DisplayManagerHandler(DisplayThread.get().getLooper());
         mUiHandler = UiThread.getHandler();
@@ -326,6 +338,11 @@ public final class DisplayManagerService extends SystemService {
         mHandler.sendEmptyMessage(MSG_REGISTER_ADDITIONAL_DISPLAY_ADAPTERS);
     }
 
+    @VisibleForTesting
+    Handler getDisplayHandler() {
+        return mHandler;
+    }
+
     private void registerDisplayTransactionListenerInternal(
             DisplayTransactionListener listener) {
         // List is self-synchronized copy-on-write.
@@ -363,7 +380,8 @@ public final class DisplayManagerService extends SystemService {
         }
     }
 
-    private void performTraversalInTransactionFromWindowManagerInternal() {
+    @VisibleForTesting
+    void performTraversalInTransactionFromWindowManagerInternal() {
         synchronized (mSyncRoot) {
             if (!mPendingTraversal) {
                 return;
@@ -601,8 +619,8 @@ public final class DisplayManagerService extends SystemService {
     }
 
     private int createVirtualDisplayInternal(IVirtualDisplayCallback callback,
-            IMediaProjection projection, int callingUid, String packageName,
-            String name, int width, int height, int densityDpi, Surface surface, int flags) {
+            IMediaProjection projection, int callingUid, String packageName, String name, int width,
+            int height, int densityDpi, Surface surface, int flags, String uniqueId) {
         synchronized (mSyncRoot) {
             if (mVirtualDisplayAdapter == null) {
                 Slog.w(TAG, "Rejecting request to create private virtual display "
@@ -611,8 +629,8 @@ public final class DisplayManagerService extends SystemService {
             }
 
             DisplayDevice device = mVirtualDisplayAdapter.createVirtualDisplayLocked(
-                    callback, projection, callingUid, packageName,
-                    name, width, height, densityDpi, surface, flags);
+                    callback, projection, callingUid, packageName, name, width, height, densityDpi,
+                    surface, flags, uniqueId);
             if (device == null) {
                 return -1;
             }
@@ -702,8 +720,8 @@ public final class DisplayManagerService extends SystemService {
     }
 
     private void registerVirtualDisplayAdapterLocked() {
-        mVirtualDisplayAdapter = new VirtualDisplayAdapter(
-                mSyncRoot, mContext, mHandler, mDisplayAdapterListener);
+        mVirtualDisplayAdapter = mInjector.getVirtualDisplayAdapter(mSyncRoot, mContext, mHandler,
+                mDisplayAdapterListener);
         registerDisplayAdapterLocked(mVirtualDisplayAdapter);
     }
 
@@ -995,6 +1013,7 @@ public final class DisplayManagerService extends SystemService {
     private void clearViewportsLocked() {
         mDefaultViewport.valid = false;
         mExternalTouchViewport.valid = false;
+        mVirtualTouchViewports.clear();
     }
 
     private void configureDisplayInTransactionLocked(DisplayDevice device) {
@@ -1033,6 +1052,28 @@ public final class DisplayManagerService extends SystemService {
                 && info.touch == DisplayDeviceInfo.TOUCH_EXTERNAL) {
             setViewportLocked(mExternalTouchViewport, display, device);
         }
+
+        if (info.touch == DisplayDeviceInfo.TOUCH_VIRTUAL && !TextUtils.isEmpty(info.uniqueId)) {
+            final DisplayViewport viewport = getVirtualTouchViewportLocked(info.uniqueId);
+            setViewportLocked(viewport, display, device);
+        }
+    }
+
+    /** Gets the virtual device viewport or creates it if not yet created. */
+    private DisplayViewport getVirtualTouchViewportLocked(@NonNull String uniqueId) {
+        DisplayViewport viewport;
+        final int count = mVirtualTouchViewports.size();
+        for (int i = 0; i < count; i++) {
+            viewport = mVirtualTouchViewports.get(i);
+            if (uniqueId.equals(viewport.uniqueId)) {
+                return viewport;
+            }
+        }
+
+        viewport = new DisplayViewport();
+        viewport.uniqueId = uniqueId;
+        mVirtualTouchViewports.add(viewport);
+        return viewport;
     }
 
     private static void setViewportLocked(DisplayViewport viewport,
@@ -1113,6 +1154,7 @@ public final class DisplayManagerService extends SystemService {
             pw.println("  mNextNonDefaultDisplayId=" + mNextNonDefaultDisplayId);
             pw.println("  mDefaultViewport=" + mDefaultViewport);
             pw.println("  mExternalTouchViewport=" + mExternalTouchViewport);
+            pw.println("  mVirtualTouchViewports=" + mVirtualTouchViewports);
             pw.println("  mDefaultDisplayDefaultColorMode=" + mDefaultDisplayDefaultColorMode);
             pw.println("  mSingleDisplayDemoMode=" + mSingleDisplayDemoMode);
             pw.println("  mWifiDisplayScanRequestCount=" + mWifiDisplayScanRequestCount);
@@ -1171,6 +1213,14 @@ public final class DisplayManagerService extends SystemService {
     public static final class SyncRoot {
     }
 
+    @VisibleForTesting
+    static class Injector {
+        VirtualDisplayAdapter getVirtualDisplayAdapter(SyncRoot syncRoot, Context context,
+                Handler handler, DisplayAdapter.Listener displayAdapterListener) {
+            return new VirtualDisplayAdapter(syncRoot, context, handler, displayAdapterListener);
+        }
+    }
+
     private final class DisplayManagerHandler extends Handler {
         public DisplayManagerHandler(Looper looper) {
             super(looper, null, true /*async*/);
@@ -1199,9 +1249,15 @@ public final class DisplayManagerService extends SystemService {
                     synchronized (mSyncRoot) {
                         mTempDefaultViewport.copyFrom(mDefaultViewport);
                         mTempExternalTouchViewport.copyFrom(mExternalTouchViewport);
+                        if (!mTempVirtualTouchViewports.equals(mVirtualTouchViewports)) {
+                          mTempVirtualTouchViewports.clear();
+                          for (DisplayViewport d : mVirtualTouchViewports) {
+                              mTempVirtualTouchViewports.add(d.makeCopy());
+                          }
+                        }
                     }
-                    mInputManagerInternal.setDisplayViewports(
-                            mTempDefaultViewport, mTempExternalTouchViewport);
+                    mInputManagerInternal.setDisplayViewports(mTempDefaultViewport,
+                            mTempExternalTouchViewport, mTempVirtualTouchViewports);
                     break;
                 }
             }
@@ -1264,7 +1320,8 @@ public final class DisplayManagerService extends SystemService {
         }
     }
 
-    private final class BinderService extends IDisplayManager.Stub {
+    @VisibleForTesting
+    final class BinderService extends IDisplayManager.Stub {
         /**
          * Returns information about the specified logical display.
          *
@@ -1458,7 +1515,8 @@ public final class DisplayManagerService extends SystemService {
         @Override // Binder call
         public int createVirtualDisplay(IVirtualDisplayCallback callback,
                 IMediaProjection projection, String packageName, String name,
-                int width, int height, int densityDpi, Surface surface, int flags) {
+                int width, int height, int densityDpi, Surface surface, int flags,
+                String uniqueId) {
             final int callingUid = Binder.getCallingUid();
             if (!validatePackageName(callingUid, packageName)) {
                 throw new SecurityException("packageName must match the calling uid");
@@ -1520,8 +1578,8 @@ public final class DisplayManagerService extends SystemService {
 
             final long token = Binder.clearCallingIdentity();
             try {
-                return createVirtualDisplayInternal(callback, projection, callingUid,
-                        packageName, name, width, height, densityDpi, surface, flags);
+                return createVirtualDisplayInternal(callback, projection, callingUid, packageName,
+                        name, width, height, densityDpi, surface, flags, uniqueId);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }

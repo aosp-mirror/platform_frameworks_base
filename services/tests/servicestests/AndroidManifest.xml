@@ -191,7 +191,7 @@
     </application>
 
     <instrumentation
-    	android:name="android.support.test.runner.AndroidJUnitRunner"
-    	android:targetPackage="com.android.frameworks.servicestests"
-    	android:label="Frameworks Services Tests" />
+        android:name="android.support.test.runner.AndroidJUnitRunner"
+        android:targetPackage="com.android.frameworks.servicestests"
+        android:label="Frameworks Services Tests" />
 </manifest>
