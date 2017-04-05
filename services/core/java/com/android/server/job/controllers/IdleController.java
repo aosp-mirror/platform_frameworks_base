@@ -147,7 +147,6 @@ public class IdleController extends StateController {
         @Override
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
-
             if (action.equals(Intent.ACTION_SCREEN_ON)
                     || action.equals(Intent.ACTION_DREAMING_STOPPED)) {
                 if (DEBUG) {
@@ -183,6 +182,11 @@ public class IdleController extends StateController {
                     }
                     mIdle = true;
                     reportNewIdleState(mIdle);
+                } else {
+                    if (DEBUG) {
+                        Slog.v(TAG, "TRIGGER_IDLE received but not changing state; idle="
+                                + mIdle + " screen=" + mScreenOn);
+                    }
                 }
             }
         }
@@ -191,7 +195,7 @@ public class IdleController extends StateController {
     @Override
     public void dumpControllerStateLocked(PrintWriter pw, int filterUid) {
         pw.print("Idle: ");
-        pw.println(mIdleTracker.isIdle() ? "true" : "false");
+        pw.println(mIdleTracker.isIdle());
         pw.print("Tracking ");
         pw.print(mTrackedTasks.size());
         pw.println(":");
