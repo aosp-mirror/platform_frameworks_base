@@ -6172,6 +6172,7 @@ public class PackageParser {
             cpuAbiOverride = dest.readString();
             use32bitAbi = (dest.readInt() == 1);
             restrictUpdateHash = dest.createByteArray();
+            visibleToInstantApps = dest.readInt() == 1;
         }
 
         private static void internStringArrayList(List<String> list) {
@@ -6286,6 +6287,7 @@ public class PackageParser {
             dest.writeString(cpuAbiOverride);
             dest.writeInt(use32bitAbi ? 1 : 0);
             dest.writeByteArray(restrictUpdateHash);
+            dest.writeInt(visibleToInstantApps ? 1 : 0);
         }
 
 
