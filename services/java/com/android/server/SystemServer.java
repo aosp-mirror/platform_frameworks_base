@@ -1696,17 +1696,17 @@ public final class SystemServer {
             } catch (Throwable e) {
                 reportWtf("making Network Managment Service ready", e);
             }
-            Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "MakeIpSecServiceReady");
-            try {
-                if (ipSecServiceF != null) ipSecServiceF.systemReady();
-            } catch (Throwable e) {
-                reportWtf("making IpSec Service ready", e);
-            }
-            Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
             CountDownLatch networkPolicyInitReadySignal = null;
             if (networkPolicyF != null) {
                 networkPolicyInitReadySignal = networkPolicyF
                         .networkScoreAndNetworkManagementServiceReady();
+            }
+            traceEnd();
+            traceBeginAndSlog("MakeIpSecServiceReady");
+            try {
+                if (ipSecServiceF != null) ipSecServiceF.systemReady();
+            } catch (Throwable e) {
+                reportWtf("making IpSec Service ready", e);
             }
             traceEnd();
             traceBeginAndSlog("MakeNetworkStatsServiceReady");
