@@ -1079,6 +1079,27 @@
          to reduce it to preserve the battery. Value of 100% means no scaling. -->
     <fraction name="config_screenAutoBrightnessDozeScaleFactor">100%</fraction>
 
+    <!-- What percentage of possible ambient light sensor values below the current ambient lux
+         calculation count count as valid samples. If a new lux sample is below
+         (current ambient lux) * (threshold), the light sample is saved in a separate dark light
+         buffer. When enough samples have accumulated continuously based off of the current light
+         sensor rate and config_autoBrightnessDarkAmbientLightHorizon, the current ambient
+         lux and screen brightness are recalculated; otherwise, the dark light buffer is cleared.
+         This is useful for devices where the ambient light sensor can expect regular light
+         obstruction, e.g. if the sensor is under the screen and a finger moves directly over the
+         relevant area.
+
+         This should be used with config_autoBrightnessDarkAmbientLightHorizon set to greater
+         than 0 and set to a value less than 100% to be enabled. -->
+    <fraction name="config_autoBrightnessDarkHorizonThresholdFactor">100%</fraction>
+
+    <!-- The amount of time that the dark light buffer should hold samples for in milliseconds;
+         see the description of config_autoBrightnessDarkHorizonThresholdFactor for details. This
+         should be used with config_autoBrightnessDarkHorizonThresholdFactor.
+
+         Set this to 0 to disable this feature. -->
+    <integer name="config_autoBrightnessDarkAmbientLightHorizon">0</integer>
+
     <!-- When the screen is turned on, the previous estimate of the ambient light level at the time
          the screen was turned off is restored and is used to determine the initial screen
          brightness.

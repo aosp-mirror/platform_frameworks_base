@@ -35,11 +35,13 @@ import android.os.SystemClock;
 import android.text.format.DateUtils;
 import android.util.EventLog;
 import android.util.MathUtils;
+import android.util.Pair;
 import android.util.Spline;
 import android.util.Slog;
 import android.util.TimeUtils;
 
 import java.io.PrintWriter;
+import java.util.ArrayDeque;
 
 class AutomaticBrightnessController {
     private static final String TAG = "AutomaticBrightnessController";
@@ -111,6 +113,9 @@ class AutomaticBrightnessController {
     // Period of time in which to consider light samples in milliseconds.
     private final int mAmbientLightHorizon;
 
+    // Period of time in which to consider light samples below the current ambient lux threshold.
+    private final int mDarkAmbientLightHorizon;
+
     // The intercept used for the weighting calculation. This is used in order to keep all possible
     // weighting values positive.
     private final int mWeightingIntercept;
@@ -139,6 +144,10 @@ class AutomaticBrightnessController {
     private float mBrighteningLuxThreshold;
     private float mDarkeningLuxThreshold;
 
+    // The percentage of possible values below the current ambient lux which we put in the dark
+    // ambient light buffer.
+    private final float mDarkHorizonThresholdFactor;
+
     // The most recent light sample.
     private float mLastObservedLux;
 
@@ -147,6 +156,14 @@ class AutomaticBrightnessController {
 
     // The number of light samples collected since the light sensor was enabled.
     private int mRecentLightSamples;
+
+    // The number of light samples that will be held in the deque before being moved to the
+    // light ring buffer.
+    private int mDarkAmbientLightSampleSize;
+
+    // A deque containing the light sensor readings below the current ambient lux threshold
+    // when the display is not dozing.
+    private ArrayDeque<Pair<Long, Float>> mDarkAmbientLightDeque;
 
     // A ring buffer containing all of the recent ambient light sensor readings.
     private AmbientLightRingBuffer mAmbientLightRingBuffer;
@@ -203,7 +220,7 @@ class AutomaticBrightnessController {
             long darkeningLightDebounceConfig, boolean resetAmbientLuxAfterWarmUpConfig,
             int ambientLightHorizon, float autoBrightnessAdjustmentMaxGamma,
             boolean activeDozeLightSensor, boolean useNewSensorSamplesForDoze,
-            LuxLevels luxLevels) {
+            float darkHorizonThresholdFactor, int darkAmbientLightHorizon, LuxLevels luxLevels) {
         mCallbacks = callbacks;
         mTwilight = LocalServices.getService(TwilightManager.class);
         mSensorManager = sensorManager;
@@ -223,6 +240,8 @@ class AutomaticBrightnessController {
         mScreenAutoBrightnessAdjustmentMaxGamma = autoBrightnessAdjustmentMaxGamma;
         mUseNewSensorSamplesForDoze = useNewSensorSamplesForDoze;
         mUseActiveDozeLightSensorConfig = activeDozeLightSensor;
+        mDarkHorizonThresholdFactor = darkHorizonThresholdFactor;
+        mDarkAmbientLightHorizon = darkAmbientLightHorizon;
         mLuxLevels = luxLevels;
 
         mHandler = new AutomaticBrightnessHandler(looper);
@@ -230,6 +249,10 @@ class AutomaticBrightnessController {
             new AmbientLightRingBuffer(mNormalLightSensorRate, mAmbientLightHorizon);
         mInitialHorizonAmbientLightRingBuffer =
             new AmbientLightRingBuffer(mNormalLightSensorRate, mAmbientLightHorizon);
+
+        mDarkAmbientLightSampleSize =
+                (int) Math.ceil(darkAmbientLightHorizon / mNormalLightSensorRate);
+        mDarkAmbientLightDeque = new ArrayDeque<>();
 
         if (!DEBUG_PRETEND_LIGHT_SENSOR_ABSENT) {
             mLightSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
@@ -344,6 +367,7 @@ class AutomaticBrightnessController {
                 mCurrentLightSensorRate = -1;
                 mHandler.removeMessages(MSG_UPDATE_AMBIENT_LUX);
                 mSensorManager.unregisterListener(mLightSensorListener);
+                mDarkAmbientLightDeque.clear();
             }
         }
         return false;
@@ -375,12 +399,41 @@ class AutomaticBrightnessController {
         if (time <= mLightSensorEnableTime + mAmbientLightHorizon) {
             mInitialHorizonAmbientLightRingBuffer.push(time, lux);
         }
-        mAmbientLightRingBuffer.prune(time - mAmbientLightHorizon);
-        mAmbientLightRingBuffer.push(time, lux);
 
-        // Remember this sample value.
-        mLastObservedLux = lux;
-        mLastObservedLuxTime = time;
+        // Only consider light samples for the dark light deque when not dozing.
+        // and once we've collected enough samples regularly.
+        if (mDarkAmbientLightHorizon > 0
+                && !mDozing
+                && mRecentLightSamples >= mDarkAmbientLightSampleSize
+                && mAmbientLux * mDarkHorizonThresholdFactor >= lux) {
+            mDarkAmbientLightDeque.addLast(new Pair(time, lux));
+            if (DEBUG) {
+                Slog.d(TAG, "applyLightSensorMeasurement: light sample filtered to deque: "
+                        + mDarkAmbientLightDeque.size() + " / " + mDarkAmbientLightSampleSize);
+            }
+            if (mDarkAmbientLightSampleSize <= mDarkAmbientLightDeque.size()) {
+                if (DEBUG) {
+                    Slog.d(TAG, "applyLightSensorMeasurement: moving filtered samples from the "
+                            + "deque to the light ring buffer.");
+                }
+                for (Pair<Long, Float> lightSample : mDarkAmbientLightDeque) {
+                    mAmbientLightRingBuffer.push(lightSample.first, lightSample.second);
+                }
+                mDarkAmbientLightDeque.clear();
+                mLastObservedLux = lux;
+                mLastObservedLuxTime = time;
+                updateAmbientLux();
+            }
+        } else {
+            mAmbientLightRingBuffer.prune(time - mAmbientLightHorizon);
+            mAmbientLightRingBuffer.push(time, lux);
+            mDarkAmbientLightDeque.clear();
+
+            // Remember this sample value.
+            mLastObservedLux = lux;
+            mLastObservedLuxTime = time;
+        }
+
     }
 
     private void adjustLightSensorRate(int lightSensorRate) {

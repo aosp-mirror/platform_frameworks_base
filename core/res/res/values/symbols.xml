@@ -1736,8 +1736,10 @@
   <java-symbol type="dimen" name="default_minimal_size_resizable_task" />
   <java-symbol type="fraction" name="config_screenAutoBrightnessDozeScaleFactor" />
   <java-symbol type="fraction" name="config_autoBrightnessAdjustmentMaxGamma" />
+  <java-symbol type="fraction" name="config_autoBrightnessDarkHorizonThresholdFactor" />
   <java-symbol type="integer" name="config_autoBrightnessAmbientLightHorizon"/>
   <java-symbol type="integer" name="config_autoBrightnessBrighteningLightDebounce"/>
+  <java-symbol type="integer" name="config_autoBrightnessDarkAmbientLightHorizon"/>
   <java-symbol type="integer" name="config_autoBrightnessDarkeningLightDebounce"/>
   <java-symbol type="integer" name="config_autoBrightnessInitialLightSensorRate"/>
   <java-symbol type="integer" name="config_autoBrightnessLightSensorRate"/>
