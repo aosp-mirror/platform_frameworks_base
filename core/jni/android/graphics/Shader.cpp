@@ -68,11 +68,18 @@ static jlong BitmapShader_constructor(JNIEnv* env, jobject o, jlong matrixPtr, j
     }
 
     sk_sp<SkImage> image = SkMakeImageFromRasterBitmap(bitmap, kNever_SkCopyPixelsMode);
-    sk_sp<SkShader> shader = image->makeShader(
-            (SkShader::TileMode)tileModeX, (SkShader::TileMode)tileModeY, matrix);
+    sk_sp<SkShader> baseShader = image->makeShader(
+            (SkShader::TileMode)tileModeX, (SkShader::TileMode)tileModeY);
 
-    ThrowIAE_IfNull(env, shader.get());
-    return reinterpret_cast<jlong>(shader.release());
+    SkShader* shader;
+    if (matrix) {
+        shader = baseShader->makeWithLocalMatrix(*matrix).release();
+    } else {
+        shader = baseShader.release();
+    }
+
+    ThrowIAE_IfNull(env, shader);
+    return reinterpret_cast<jlong>(shader);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -95,9 +102,16 @@ static jlong LinearGradient_create1(JNIEnv* env, jobject o, jlong matrixPtr,
     #error Need to convert float array to SkScalar array before calling the following function.
 #endif
 
-    SkShader* shader = SkGradientShader::MakeLinear(pts,
+    sk_sp<SkShader> baseShader(SkGradientShader::MakeLinear(pts,
             reinterpret_cast<const SkColor*>(colorValues), pos, count,
-            static_cast<SkShader::TileMode>(tileMode), sGradientShaderFlags, matrix).release();
+            static_cast<SkShader::TileMode>(tileMode), sGradientShaderFlags, NULL));
+
+    SkShader* shader;
+    if (matrix) {
+        shader = baseShader->makeWithLocalMatrix(*matrix).release();
+    } else {
+        shader = baseShader.release();
+    }
 
     env->ReleaseIntArrayElements(colorArray, const_cast<jint*>(colorValues), JNI_ABORT);
     ThrowIAE_IfNull(env, shader);
@@ -116,8 +130,15 @@ static jlong LinearGradient_create2(JNIEnv* env, jobject o, jlong matrixPtr,
     colors[0] = color0;
     colors[1] = color1;
 
-    SkShader* s = SkGradientShader::MakeLinear(pts, colors, NULL, 2,
-            static_cast<SkShader::TileMode>(tileMode), sGradientShaderFlags, matrix).release();
+    sk_sp<SkShader> baseShader(SkGradientShader::MakeLinear(pts, colors, NULL, 2,
+            static_cast<SkShader::TileMode>(tileMode), sGradientShaderFlags, NULL));
+
+    SkShader* s;
+    if (matrix) {
+        s = baseShader->makeWithLocalMatrix(*matrix).release();
+    } else {
+        s = baseShader.release();
+    }
 
     ThrowIAE_IfNull(env, s);
     return reinterpret_cast<jlong>(s);
@@ -141,9 +162,17 @@ static jlong RadialGradient_create1(JNIEnv* env, jobject, jlong matrixPtr, jfloa
     #error Need to convert float array to SkScalar array before calling the following function.
 #endif
 
-    SkShader* shader = SkGradientShader::MakeRadial(center, radius,
+    sk_sp<SkShader> baseShader = SkGradientShader::MakeRadial(center, radius,
             reinterpret_cast<const SkColor*>(colorValues), pos, count,
-            static_cast<SkShader::TileMode>(tileMode), sGradientShaderFlags, matrix).release();
+            static_cast<SkShader::TileMode>(tileMode), sGradientShaderFlags, NULL);
+
+    SkShader* shader;
+    if (matrix) {
+        shader = baseShader->makeWithLocalMatrix(*matrix).release();
+    } else {
+        shader = baseShader.release();
+    }
+
     env->ReleaseIntArrayElements(colorArray, const_cast<jint*>(colorValues),
                                  JNI_ABORT);
 
@@ -161,10 +190,17 @@ static jlong RadialGradient_create2(JNIEnv* env, jobject, jlong matrixPtr, jfloa
     colors[0] = color0;
     colors[1] = color1;
 
-    SkShader* s = SkGradientShader::MakeRadial(center, radius, colors, NULL, 2,
-            static_cast<SkShader::TileMode>(tileMode), sGradientShaderFlags, matrix).release();
-    ThrowIAE_IfNull(env, s);
-    return reinterpret_cast<jlong>(s);
+    sk_sp<SkShader> baseShader = SkGradientShader::MakeRadial(center, radius, colors, NULL, 2,
+            static_cast<SkShader::TileMode>(tileMode), sGradientShaderFlags, NULL);
+
+    SkShader* shader;
+    if (matrix) {
+        shader = baseShader->makeWithLocalMatrix(*matrix).release();
+    } else {
+        shader = baseShader.release();
+    }
+    ThrowIAE_IfNull(env, shader);
+    return reinterpret_cast<jlong>(shader);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -182,8 +218,17 @@ static jlong SweepGradient_create1(JNIEnv* env, jobject, jlong matrixPtr, jfloat
     #error Need to convert float array to SkScalar array before calling the following function.
 #endif
 
-    SkShader* shader = SkGradientShader::MakeSweep(x, y, reinterpret_cast<const SkColor*>(colors),
-            pos, count, sGradientShaderFlags, matrix).release();
+    sk_sp<SkShader> baseShader = SkGradientShader::MakeSweep(x, y,
+            reinterpret_cast<const SkColor*>(colors), pos, count,
+            sGradientShaderFlags, NULL);
+
+    SkShader* shader;
+    if (matrix) {
+        shader = baseShader->makeWithLocalMatrix(*matrix).release();
+    } else {
+        shader = baseShader.release();
+    }
+
     env->ReleaseIntArrayElements(jcolors, const_cast<jint*>(colors),
                                  JNI_ABORT);
     ThrowIAE_IfNull(env, shader);
@@ -196,10 +241,18 @@ static jlong SweepGradient_create2(JNIEnv* env, jobject, jlong matrixPtr, jfloat
     SkColor colors[2];
     colors[0] = color0;
     colors[1] = color1;
-    SkShader* s = SkGradientShader::MakeSweep(x, y, colors, NULL, 2,
-            sGradientShaderFlags, matrix).release();
-    ThrowIAE_IfNull(env, s);
-    return reinterpret_cast<jlong>(s);
+
+    sk_sp<SkShader> baseShader = SkGradientShader::MakeSweep(x, y, colors,
+            NULL, 2, sGradientShaderFlags, NULL);
+
+    SkShader* shader;
+    if (matrix) {
+        shader = baseShader->makeWithLocalMatrix(*matrix).release();
+    } else {
+        shader = baseShader.release();
+    }
+    ThrowIAE_IfNull(env, shader);
+    return reinterpret_cast<jlong>(shader);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
