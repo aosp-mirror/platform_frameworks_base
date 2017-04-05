@@ -69,7 +69,7 @@ public abstract class NotificationViewWrapper implements TransformableView {
     }
 
     protected NotificationDozeHelper createDozer(Context ctx) {
-        return new NotificationIconDozeHelper(mView.getContext());
+        return new NotificationDozeHelper();
     }
 
     protected NotificationDozeHelper getDozer() {

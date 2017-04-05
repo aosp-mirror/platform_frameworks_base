@@ -669,7 +669,7 @@ public class StatusBarIconView extends AnimatedImageView {
     }
 
     public void setDark(boolean dark, boolean fade, long delay) {
-        mDozer.setImageDark(this, dark, fade, delay, mIconColor != NO_COLOR);
+        mDozer.setImageDark(this, dark, fade, delay, mIconColor == NO_COLOR);
         mDozer.setIntensityDark(f -> {
             mDarkAmount = f;
             updateDecorColor();
