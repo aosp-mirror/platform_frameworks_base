@@ -745,7 +745,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     }
 
     /**
-     * Returns a {@link TaskRecord} for the input id if available. Null otherwise.
+     * Returns a {@link TaskRecord} for the input id if available. {@code null} otherwise.
      * @param id Id of the task we would like returned.
      * @param matchMode The mode to match the given task id in.
      * @param stackId The stack to restore the task to (default launch stack will be used if
@@ -765,7 +765,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             ArrayList<ActivityStack> stacks = mActivityDisplays.valueAt(displayNdx).mStacks;
             for (int stackNdx = stacks.size() - 1; stackNdx >= 0; --stackNdx) {
                 ActivityStack stack = stacks.get(stackNdx);
-                TaskRecord task = stack.taskForIdLocked(id);
+                final TaskRecord task = stack.taskForIdLocked(id);
                 if (task != null) {
                     return task;
                 }
@@ -780,11 +780,17 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         // Otherwise, check the recent tasks and return if we find it there and we are not restoring
         // the task from recents
         if (DEBUG_RECENTS) Slog.v(TAG_RECENTS, "Looking for task id=" + id + " in recents");
-        TaskRecord task = mRecentTasks.taskForIdLocked(id);
-        if (matchMode == MATCH_TASK_IN_STACKS_OR_RECENT_TASKS) {
-            if (DEBUG_RECENTS && task == null) {
+        final TaskRecord task = mRecentTasks.taskForIdLocked(id);
+
+        if (task == null) {
+            if (DEBUG_RECENTS) {
                 Slog.d(TAG_RECENTS, "\tDidn't find task id=" + id + " in recents");
             }
+
+            return null;
+        }
+
+        if (matchMode == MATCH_TASK_IN_STACKS_OR_RECENT_TASKS) {
             return task;
         }
 
