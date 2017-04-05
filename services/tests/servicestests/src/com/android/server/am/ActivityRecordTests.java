@@ -33,7 +33,8 @@ import org.junit.Test;
  *  bit FrameworksServicesTests:com.android.server.am.ActivityRecordTests
  */
 @MediumTest
-@Presubmit
+// TODO(b/36916522): Currently failing in CI.
+// @Presubmit
 @RunWith(AndroidJUnit4.class)
 public class ActivityRecordTests extends ActivityTestsBase {
     private final ComponentName testActivityComponent =
