@@ -34,11 +34,16 @@ public class StatFs {
      * class.
      *
      * @param path path in the desired file system to stat.
+     *
+     * @throws IllegalArgumentException if the file system access fails
      */
     public StatFs(String path) {
         mStat = doStat(path);
     }
 
+    /**
+     * @throws IllegalArgumentException if the file system access fails
+     */
     private static StructStatVfs doStat(String path) {
         try {
             return Os.statvfs(path);
@@ -51,6 +56,8 @@ public class StatFs {
      * Perform a restat of the file system referenced by this object. This is
      * the same as re-constructing the object with the same file system path,
      * and the new stat values are available upon return.
+     *
+     * @throws IllegalArgumentException if the file system access fails
      */
     public void restat(String path) {
         mStat = doStat(path);
