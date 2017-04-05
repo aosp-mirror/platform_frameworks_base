@@ -44,7 +44,8 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.FrameLayout.LayoutParams;
 
-public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnClickListener {
+public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnClickListener,
+        ExpandableNotificationRow.LayoutListener {
 
     private static final boolean DEBUG = false;
     private static final String TAG = "swipe";
@@ -167,13 +168,14 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
 
     @Override
     public void onConfigurationChanged() {
-        mParent.post(new Runnable() {
-            @Override
-            public void run() {
-                mIconsPlaced = false; // Force icons to be re-placed
-                setMenuLocation();
-            }
-        });
+        mParent.setLayoutListener(this);
+    }
+
+    @Override
+    public void onLayout() {
+        mIconsPlaced = false; // Force icons to be re-placed
+        setMenuLocation();
+        mParent.removeListener();
     }
 
     private void createMenuViews() {
