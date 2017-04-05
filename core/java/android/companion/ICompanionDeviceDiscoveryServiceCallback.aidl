@@ -19,4 +19,5 @@ package android.companion;
 /** @hide */
 interface ICompanionDeviceDiscoveryServiceCallback {
     oneway void onDeviceSelected(String packageName, int userId, String deviceAddress);
+    oneway void onDeviceSelectionCancel();
 }
