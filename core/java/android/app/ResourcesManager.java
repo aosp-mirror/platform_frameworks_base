@@ -945,7 +945,7 @@ public class ResourcesManager {
                 final ResourcesKey key = mResourceImpls.keyAt(i);
                 final WeakReference<ResourcesImpl> weakImplRef = mResourceImpls.valueAt(i);
                 final ResourcesImpl impl = weakImplRef != null ? weakImplRef.get() : null;
-                if (impl != null && key.mResDir.equals(assetPath)) {
+                if (impl != null && Objects.equals(key.mResDir, assetPath)) {
                     if (!ArrayUtils.contains(key.mLibDirs, libAsset)) {
                         final int newLibAssetCount = 1 +
                                 (key.mLibDirs != null ? key.mLibDirs.length : 0);
