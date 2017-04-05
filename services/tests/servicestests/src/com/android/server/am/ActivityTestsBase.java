@@ -25,7 +25,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
-import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.Looper;
 import android.support.test.InstrumentationRegistry;
 import com.android.server.AttributeCache;
@@ -34,6 +34,7 @@ import com.android.server.wm.StackWindowController;
 
 import com.android.server.wm.WindowManagerService;
 import com.android.server.wm.WindowTestUtils;
+import org.junit.After;
 import org.junit.Before;
 import org.mockito.MockitoAnnotations;
 
@@ -42,8 +43,7 @@ import org.mockito.MockitoAnnotations;
  */
 public class ActivityTestsBase {
     private final Context mContext = InstrumentationRegistry.getContext();
-    private static boolean sLooperPrepared;
-    private Handler mHandler;
+    private HandlerThread mHandlerThread;
 
     // Grabbing an instance of {@link WindowManagerService} creates it if not present so this must
     // be called at before any tests.
@@ -52,11 +52,13 @@ public class ActivityTestsBase {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
+        mHandlerThread = new HandlerThread("ActivityTestsBaseThread");
+        mHandlerThread.start();
+    }
 
-        if (!sLooperPrepared) {
-            sLooperPrepared = true;
-            Looper.prepare();
-        }
+    @After
+    public void tearDown() {
+        mHandlerThread.quitSafely();
     }
 
     protected ActivityManagerService createActivityManagerService() {
@@ -126,7 +128,7 @@ public class ActivityTestsBase {
 
         @Override
         protected ActivityStackSupervisor createStackSupervisor() {
-            return new TestActivityStackSupervisor(this, new Handler().getLooper());
+            return new TestActivityStackSupervisor(this, mHandlerThread.getLooper());
         }
     }
 
