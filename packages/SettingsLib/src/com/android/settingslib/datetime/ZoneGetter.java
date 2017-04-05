@@ -211,7 +211,16 @@ public class ZoneGetter {
         if (preferLongName) {
             displayName = getZoneLongName(timeZoneNames, tz, now);
         } else {
-            displayName = timeZoneNames.getExemplarLocationName(tz.getID());
+            // Canonicalize the zone ID for ICU. It will only return valid strings for zone IDs
+            // that match ICUs zone IDs (which are similar but not guaranteed the same as those
+            // in timezones.xml). timezones.xml and related files uses the IANA IDs. ICU IDs are
+            // stable and IANA IDs have changed over time so they have drifted.
+            // See http://bugs.icu-project.org/trac/ticket/13070 / http://b/36469833.
+            String canonicalZoneId = android.icu.util.TimeZone.getCanonicalID(tz.getID());
+            if (canonicalZoneId == null) {
+                canonicalZoneId = tz.getID();
+            }
+            displayName = timeZoneNames.getExemplarLocationName(canonicalZoneId);
             if (displayName == null || displayName.isEmpty()) {
                 // getZoneExemplarLocation can return null. Fall back to the long name.
                 displayName = getZoneLongName(timeZoneNames, tz, now);
