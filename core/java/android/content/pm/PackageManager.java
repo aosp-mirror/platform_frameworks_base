@@ -1688,6 +1688,10 @@ public abstract class PackageManager {
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_CONSUMER_IR = "android.hardware.consumerir";
 
+    /** {@hide} */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_CTS = "android.software.cts";
+
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device supports one or more methods of
