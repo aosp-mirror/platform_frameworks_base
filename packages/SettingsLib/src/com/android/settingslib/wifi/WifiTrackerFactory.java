@@ -17,6 +17,7 @@ package com.android.settingslib.wifi;
 
 import android.content.Context;
 import android.os.Looper;
+import android.support.annotation.Keep;
 
 /**
  * Factory method used to inject WifiTracker instances.
@@ -26,14 +27,7 @@ public class WifiTrackerFactory {
 
     private static WifiTracker sTestingWifiTracker;
 
-    public static void enableTestingMode() {
-        sTestingMode = true;
-    }
-
-    public static void disableTestingMode() {
-        sTestingMode = false;
-    }
-
+    @Keep
     public static void setTestingWifiTracker(WifiTracker tracker) {
         sTestingWifiTracker = tracker;
     }
