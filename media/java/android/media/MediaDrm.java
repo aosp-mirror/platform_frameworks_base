@@ -474,6 +474,9 @@ public final class MediaDrm {
     /**
      * This event type indicates that the licensed usage duration for keys in a session
      * has expired.  The keys are no longer valid.
+     * @deprecated Use {@link OnKeyStatusChangeListener#onKeyStatusChange}
+     * and check for {@link MediaDrm.KeyStatus#STATUS_EXPIRED} in the {@link MediaDrm.KeyStatus}
+     * instead.
      */
     public static final int EVENT_KEY_EXPIRED = 3;
 
