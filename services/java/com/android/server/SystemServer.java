@@ -1024,7 +1024,7 @@ public final class SystemServer {
                 } catch (Throwable e) {
                     reportWtf("starting IpSec Service", e);
                 }
-                Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
+                traceEnd();
             }
 
             if (!disableNonCoreServices && !disableTextServices) {
