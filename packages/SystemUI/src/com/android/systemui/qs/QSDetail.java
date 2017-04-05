@@ -242,7 +242,7 @@ public class QSDetail extends LinearLayout {
         mDetailSettingsButton.setVisibility(settingsIntent != null ? VISIBLE : GONE);
         mDetailSettingsButton.setOnClickListener(v -> {
             Dependency.get(MetricsLogger.class).action(ACTION_QS_MORE_SETTINGS,
-                    mDetailAdapter.getMetricsCategory());
+                    adapter.getMetricsCategory());
             Dependency.get(ActivityStarter.class)
                     .postStartActivityDismissingKeyguard(settingsIntent, 0);
         });
