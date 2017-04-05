@@ -34,6 +34,7 @@ import android.graphics.fonts.FontRequest;
 import android.graphics.fonts.FontResult;
 import android.graphics.fonts.FontVariationAxis;
 import android.graphics.fonts.FontVariationAxis.InvalidFormatException;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.ParcelFileDescriptor;
@@ -509,6 +510,10 @@ public class Typeface {
      * </p>
      */
     public static final class Builder {
+        /** @hide */
+        public static final int NORMAL_WEIGHT = 400;
+        /** @hide */
+        public static final int BOLD_WEIGHT = 700;
 
         private int mTtcIndex;
         private FontVariationAxis[] mAxes;
@@ -516,6 +521,10 @@ public class Typeface {
         private AssetManager mAssetManager;
         private String mPath;
         private FileDescriptor mFd;
+
+        private FontsContract.FontInfo[] mFonts;
+        private Map<Uri, ByteBuffer> mFontBuffers;
+        private String mFallbackFamilyName;
 
         private int mWeight = RESOLVE_BY_FONT_TABLE;
         private int mItalic = RESOLVE_BY_FONT_TABLE;
@@ -559,6 +568,25 @@ public class Typeface {
         }
 
         /**
+         * Constracts a builder from an array of FontsContract.FontInfo.
+         *
+         * Since {@link FontsContract.FontInfo} holds information about TTC indices and
+         * variation settings, there is no need to call {@link #setTtcIndex} or
+         * {@link #setFontVariationSettings}. Similary, {@link FontsContract.FontInfo} holds
+         * weight and italic information, so {@link #setWeight} and {@link #setItalic} are used
+         * for style matching during font selection.
+         *
+         * @param results The array of {@link FontsContract.FontInfo}
+         * @param buffers The mapping from URI to buffers to be used during building.
+         * @hide
+         */
+        public Builder(@NonNull FontsContract.FontInfo[] fonts,
+                @NonNull Map<Uri, ByteBuffer> buffers) {
+            mFonts = fonts;
+            mFontBuffers = buffers;
+        }
+
+        /**
          * Sets weight of the font.
          *
          * Tells the system the weight of the given font. If not provided, the system will resolve
@@ -590,6 +618,10 @@ public class Typeface {
          *                 collection, do not call this method or specify 0.
          */
         public Builder setTtcIndex(@IntRange(from = 0) int ttcIndex) {
+            if (mFonts != null) {
+                throw new IllegalArgumentException(
+                        "TTC index can not be specified for FontResult source.");
+            }
             mTtcIndex = ttcIndex;
             return this;
         }
@@ -603,6 +635,13 @@ public class Typeface {
          */
         public Builder setFontVariationSettings(@Nullable String variationSettings)
                 throws InvalidFormatException {
+            if (mFonts != null) {
+                throw new IllegalArgumentException(
+                        "Font variation settings can not be specified for FontResult source.");
+            }
+            if (mAxes != null) {
+                throw new IllegalStateException("Font variation settings are already set.");
+            }
             mAxes = FontVariationAxis.fromFontVariationSettings(variationSettings);
             return this;
         }
@@ -613,6 +652,13 @@ public class Typeface {
          * @param axes An array of font variation axis tag-value pairs.
          */
         public Builder setFontVariationSettings(@Nullable FontVariationAxis[] axes) {
+            if (mFonts != null) {
+                throw new IllegalArgumentException(
+                        "Font variation settings can not be specified for FontResult source.");
+            }
+            if (mAxes != null) {
+                throw new IllegalStateException("Font variation settings are already set.");
+            }
             mAxes = axes;
             return this;
         }
@@ -692,6 +738,32 @@ public class Typeface {
             } else if (mPath != null) {  // set source by setSourceFromFile(File)
                 final FontFamily fontFamily = new FontFamily();
                 if (!fontFamily.addFont(mPath, mTtcIndex, mAxes, mWeight, mItalic)) {
+                    fontFamily.abortCreation();
+                    return null;
+                }
+                fontFamily.freeze();
+                FontFamily[] families = { fontFamily };
+                return createFromFamiliesWithDefault(families);
+            } else if (mFonts != null) {
+                final FontFamily fontFamily = new FontFamily();
+                boolean atLeastOneFont = false;
+                for (FontsContract.FontInfo font : mFonts) {
+                    final ByteBuffer fontBuffer = mFontBuffers.get(font.getUri());
+                    if (fontBuffer == null) {
+                        continue;  // skip
+                    }
+                    final boolean success = fontFamily.addFontFromBuffer(fontBuffer,
+                            font.getTtcIndex(), font.getAxes(), font.getWeight(),
+                            font.isItalic() ? STYLE_ITALIC : STYLE_NORMAL);
+                    if (!success) {
+                        fontFamily.abortCreation();
+                        return null;
+                    }
+                    atLeastOneFont = true;
+                }
+                if (!atLeastOneFont) {
+                    // No fonts are avaialble. No need to create new Typeface and returns fallback
+                    // Typeface instead.
                     fontFamily.abortCreation();
                     return null;
                 }
