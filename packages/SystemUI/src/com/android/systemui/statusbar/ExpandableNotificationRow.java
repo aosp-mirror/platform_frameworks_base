@@ -25,6 +25,7 @@ import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Resources;
+import android.content.res.Configuration;
 import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.ColorDrawable;
@@ -834,6 +835,13 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         }
         mNotificationInflater.onDensityOrFontScaleChanged();
         onNotificationUpdated();
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        if (mMenuRow.getMenuView() != null) {
+            mMenuRow.onConfigurationChanged();
+        }
     }
 
     public void setContentBackground(int customBackgroundColor, boolean animate,
