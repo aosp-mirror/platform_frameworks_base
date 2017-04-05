@@ -28,6 +28,7 @@
 #include "SkDrawFilter.h"
 #include "SkGraphics.h"
 #include "SkRegion.h"
+#include "SkVertices.h"
 
 namespace android {
 
@@ -311,15 +312,15 @@ static void drawPath(JNIEnv* env, jobject, jlong canvasHandle, jlong pathHandle,
 }
 
 static void drawVertices(JNIEnv* env, jobject, jlong canvasHandle,
-                         jint modeHandle, jint vertexCount,
+                         jint modeHandle, jint floatCount,
                          jfloatArray jverts, jint vertIndex,
                          jfloatArray jtexs, jint texIndex,
                          jintArray jcolors, jint colorIndex,
                          jshortArray jindices, jint indexIndex,
                          jint indexCount, jlong paintHandle) {
-    AutoJavaFloatArray  vertA(env, jverts, vertIndex + vertexCount);
-    AutoJavaFloatArray  texA(env, jtexs, texIndex + vertexCount);
-    AutoJavaIntArray    colorA(env, jcolors, colorIndex + vertexCount);
+    AutoJavaFloatArray  vertA(env, jverts, vertIndex + floatCount);
+    AutoJavaFloatArray  texA(env, jtexs, texIndex + floatCount);
+    AutoJavaIntArray    colorA(env, jcolors, colorIndex + floatCount);
     AutoJavaShortArray  indexA(env, jindices, indexIndex + indexCount);
 
     const float* verts = vertA.ptr() + vertIndex;
@@ -334,10 +335,15 @@ static void drawVertices(JNIEnv* env, jobject, jlong canvasHandle,
         indices = (const uint16_t*)(indexA.ptr() + indexIndex);
     }
 
-    SkCanvas::VertexMode mode = static_cast<SkCanvas::VertexMode>(modeHandle);
+    int vertexCount = floatCount >> 1;  // 2 floats per SkPoint
+    SkVertices::VertexMode mode = static_cast<SkVertices::VertexMode>(modeHandle);
     const Paint* paint = reinterpret_cast<Paint*>(paintHandle);
-    get_canvas(canvasHandle)->drawVertices(mode, vertexCount, verts, texs, colors,
-                                           indices, indexCount, *paint);
+    get_canvas(canvasHandle)->drawVertices(SkVertices::MakeCopy(mode, vertexCount,
+                                           reinterpret_cast<const SkPoint*>(verts),
+                                           reinterpret_cast<const SkPoint*>(texs),
+                                           reinterpret_cast<const SkColor*>(colors),
+                                           indexCount, indices).get(),
+                                           SkBlendMode::kModulate, *paint);
 }
 
 static void drawNinePatch(JNIEnv* env, jobject, jlong canvasHandle, jlong bitmapHandle,

@@ -117,9 +117,7 @@ public:
     virtual void drawArc(float left, float top, float right, float bottom,
             float startAngle, float sweepAngle, bool useCenter, const SkPaint& paint) override;
     virtual void drawPath(const SkPath& path, const SkPaint& paint) override;
-    virtual void drawVertices(SkCanvas::VertexMode vertexMode, int vertexCount,
-            const float* verts, const float* tex, const int* colors,
-            const uint16_t* indices, int indexCount, const SkPaint& paint) override;
+    virtual void drawVertices(const SkVertices*, SkBlendMode, const SkPaint& paint) override;
 
     virtual void drawBitmap(Bitmap& bitmap, float left, float top, const SkPaint* paint) override;
     virtual void drawBitmap(Bitmap& bitmap, const SkMatrix& matrix, const SkPaint* paint) override;

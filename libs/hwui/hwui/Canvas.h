@@ -27,6 +27,8 @@
 #include <SkCanvas.h>
 #include <SkMatrix.h>
 
+class SkVertices;
+
 namespace minikin {
     class Layout;
 }
@@ -214,9 +216,7 @@ public:
     virtual void drawArc(float left, float top, float right, float bottom,
             float startAngle, float sweepAngle, bool useCenter, const SkPaint& paint) = 0;
     virtual void drawPath(const SkPath& path, const SkPaint& paint) = 0;
-    virtual void drawVertices(SkCanvas::VertexMode vertexMode, int vertexCount,
-                              const float* verts, const float* tex, const int* colors,
-                              const uint16_t* indices, int indexCount, const SkPaint& paint) = 0;
+    virtual void drawVertices(const SkVertices*, SkBlendMode, const SkPaint& paint) = 0;
 
     // Bitmap-based
     virtual void drawBitmap(Bitmap& bitmap, float left, float top,

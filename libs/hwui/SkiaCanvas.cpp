@@ -515,17 +515,8 @@ void SkiaCanvas::drawPath(const SkPath& path, const SkPaint& paint) {
     mCanvas->drawPath(path, paint);
 }
 
-void SkiaCanvas::drawVertices(SkCanvas::VertexMode vertexMode, int vertexCount,
-                              const float* verts, const float* texs, const int* colors,
-                              const uint16_t* indices, int indexCount, const SkPaint& paint) {
-#ifndef SK_SCALAR_IS_FLOAT
-    SkDEBUGFAIL("SkScalar must be a float for these conversions to be valid");
-#endif
-    const int ptCount = vertexCount >> 1;
-    mCanvas->drawVertices(SkVertices::MakeCopy(vertexMode, ptCount, (SkPoint*)verts,
-                                               (SkPoint*)texs, (SkColor*)colors,
-                                               indexCount, indices),
-                          SkBlendMode::kModulate, paint);
+void SkiaCanvas::drawVertices(const SkVertices* vertices, SkBlendMode mode, const SkPaint& paint) {
+    mCanvas->drawVertices(vertices, mode, paint);
 }
 
 // ----------------------------------------------------------------------------
@@ -566,7 +557,7 @@ void SkiaCanvas::drawBitmapMesh(Bitmap& hwuiBitmap, int meshWidth, int meshHeigh
     if (colors) {
         flags |= SkVertices::kHasColors_BuilderFlag;
     }
-    SkVertices::Builder builder(SkCanvas::kTriangles_VertexMode, ptCount, indexCount, flags);
+    SkVertices::Builder builder(SkVertices::kTriangles_VertexMode, ptCount, indexCount, flags);
     memcpy(builder.positions(), vertices, ptCount * sizeof(SkPoint));
     if (colors) {
         memcpy(builder.colors(), colors, ptCount * sizeof(SkColor));
