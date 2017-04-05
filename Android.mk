@@ -913,8 +913,7 @@ endef
 # FRAMEWORKS_BASE_SUBDIRS comes from build/core/pathmap.mk
 dirs_to_document := \
 	$(dirs_to_check_apis) \
-  $(addprefix ../../, $(FRAMEWORKS_DATA_BINDING_JAVA_SRC_DIRS)) \
-  $(addprefix ../../, $(FRAMEWORKS_SUPPORT_JAVA_SRC_DIRS)) \
+	$(addprefix ../../, $(FRAMEWORKS_DATA_BINDING_JAVA_SRC_DIRS))
 
 patterns_to_not_document := \
 	$(call find-no-docs-pattern, $(dirs_to_document))
@@ -962,6 +961,8 @@ framework_docs_LOCAL_API_CHECK_JAVA_LIBRARIES := \
 	framework \
 	voip-common
 
+# Platform docs can refer to Support Library APIs, but we don't actually build
+# them as part of the docs target, so we need to include them on the classpath.
 framework_docs_LOCAL_JAVA_LIBRARIES := \
 	$(framework_docs_LOCAL_API_CHECK_JAVA_LIBRARIES) \
 	$(FRAMEWORKS_SUPPORT_JAVA_LIBRARIES)
@@ -1008,16 +1009,11 @@ framework_docs_LOCAL_DROIDDOC_OPTIONS := \
     -werror -hide 111 -hide 113 -hide 121 \
     -overview $(LOCAL_PATH)/core/java/overview.html \
 
-# Allow the support library to add its own droiddoc options.
-include $(LOCAL_PATH)/../support/droiddoc.mk
-
 framework_docs_LOCAL_API_CHECK_ADDITIONAL_JAVA_DIR:= \
 	$(call intermediates-dir-for,JAVA_LIBRARIES,framework,,COMMON)
 
 framework_docs_LOCAL_ADDITIONAL_JAVA_DIR:= \
-	$(framework_docs_LOCAL_API_CHECK_ADDITIONAL_JAVA_DIR) \
-	$(foreach lib,$(FRAMEWORKS_SUPPORT_JAVA_LIBRARIES),$(call intermediates-dir-for,JAVA_LIBRARIES,$(lib),,COMMON)) \
-	$(foreach lib,$(FRAMEWORKS_SUPPORT_JAVA_LIBRARIES),$(call intermediates-dir-for,JAVA_LIBRARIES,$(lib)-res,,COMMON))
+	$(framework_docs_LOCAL_API_CHECK_ADDITIONAL_JAVA_DIR)
 
 framework_docs_LOCAL_ADDITIONAL_DEPENDENCIES := \
     frameworks/base/docs/knowntags.txt \
@@ -1059,6 +1055,11 @@ framework_docs_LOCAL_DROIDDOC_OPTIONS += \
 		-hdf sdk.preview 0 \
 		-resourcesdir $(LOCAL_PATH)/docs/html/reference/images/ \
 		-resourcesoutdir reference/android/images/
+
+# Federate Support Library references against local API file.
+framework_docs_LOCAL_DROIDDOC_OPTIONS += \
+		-federate SupportLib https://developer.android.com \
+		-federationapi SupportLib prebuilts/sdk/current/support-api.txt
 
 # ====  the api stubs and current.xml ===========================
 include $(CLEAR_VARS)
