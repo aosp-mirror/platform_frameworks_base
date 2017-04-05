@@ -434,7 +434,8 @@ public class NotificationShelf extends ActivatableNotificationView implements
                 iconState.scaleY = 1.0f;
                 iconState.hidden = false;
             }
-            if (row.isAboveShelf() || (!row.isInShelf() && isLastChild && row.areGutsExposed())) {
+            if (row.isAboveShelf() || (!row.isInShelf() && (isLastChild && row.areGutsExposed()
+                    || row.getTranslationZ() > mAmbientState.getBaseZHeight()))) {
                 iconState.hidden = true;
             }
             int shelfColor = icon.getStaticDrawableColor();
