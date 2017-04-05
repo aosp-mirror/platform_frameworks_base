@@ -16,6 +16,7 @@
 
 package com.android.settingslib.deviceinfo;
 
+import android.app.usage.StorageStatsManager;
 import android.os.storage.StorageManager;
 import android.os.storage.VolumeInfo;
 
@@ -45,5 +46,15 @@ public class StorageManagerVolumeProvider implements StorageVolumeProvider {
     @Override
     public VolumeInfo findEmulatedForPrivate(VolumeInfo privateVolume) {
         return mStorageManager.findEmulatedForPrivate(privateVolume);
+    }
+
+    @Override
+    public long getTotalBytes(StorageStatsManager stats, VolumeInfo volume) {
+        return stats.getTotalBytes(volume.getFsUuid());
+    }
+
+    @Override
+    public long getFreeBytes(StorageStatsManager stats, VolumeInfo volume) {
+        return stats.getFreeBytes(volume.getFsUuid());
     }
 }

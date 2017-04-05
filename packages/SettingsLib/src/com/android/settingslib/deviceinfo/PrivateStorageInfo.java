@@ -41,8 +41,8 @@ public class PrivateStorageInfo {
         long privateTotalBytes = 0;
         for (VolumeInfo info : sm.getVolumes()) {
             if (info.getType() == VolumeInfo.TYPE_PRIVATE && info.isMountedReadable()) {
-                privateTotalBytes += stats.getTotalBytes(info.getFsUuid());
-                privateFreeBytes += stats.getFreeBytes(info.getFsUuid());
+                privateTotalBytes += sm.getTotalBytes(stats, info);
+                privateFreeBytes += sm.getFreeBytes(stats, info);
             }
         }
         return new PrivateStorageInfo(privateFreeBytes, privateTotalBytes);
