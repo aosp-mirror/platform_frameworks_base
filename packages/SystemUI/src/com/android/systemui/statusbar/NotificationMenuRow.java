@@ -120,6 +120,9 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
     @Override
     public void createMenu(ViewGroup parent) {
         mParent = (ExpandableNotificationRow) parent;
+        if (mMenuContainer != null) {
+            mMenuContainer.removeAllViews();
+        }
         mMenuContainer = new FrameLayout(mContext);
         for (int i = 0; i < mMenuItems.size(); i++) {
             addMenuView(mMenuItems.get(i), mMenuContainer);
