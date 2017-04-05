@@ -529,6 +529,7 @@
     <protected-broadcast android:name="com.android.internal.autofill.action.REQUEST_AUTOFILL" />
     <protected-broadcast android:name="android.app.action.APPLICATION_DELEGATION_SCOPES_CHANGED" />
     <protected-broadcast android:name="com.android.server.wm.ACTION_REVOKE_SYSTEM_ALERT_WINDOW_PERMISSION" />
+    <protected-broadcast android:name="android.media.tv.action.PARENTAL_CONTROLS_ENABLED_CHANGED" />
 
     <protected-broadcast android:name="android.content.pm.action.SESSION_COMMITTED" />
     <protected-broadcast android:name="android.os.action.USER_RESTRICTIONS_CHANGED" />
