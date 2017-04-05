@@ -159,6 +159,7 @@ extern int register_android_os_HwRemoteBinder(JNIEnv *env);
 extern int register_android_os_MessageQueue(JNIEnv* env);
 extern int register_android_os_Parcel(JNIEnv* env);
 extern int register_android_os_SELinux(JNIEnv* env);
+extern int register_android_os_VintfObject(JNIEnv *env);
 extern int register_android_os_seccomp(JNIEnv* env);
 extern int register_android_os_SystemProperties(JNIEnv *env);
 extern int register_android_os_SystemClock(JNIEnv* env);
@@ -1302,6 +1303,7 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_os_HwBlob),
     REG_JNI(register_android_os_HwParcel),
     REG_JNI(register_android_os_HwRemoteBinder),
+    REG_JNI(register_android_os_VintfObject),
     REG_JNI(register_android_nio_utils),
     REG_JNI(register_android_graphics_Canvas),
     REG_JNI(register_android_graphics_Graphics),
