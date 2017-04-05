@@ -189,7 +189,7 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
-public class BackupManagerService implements IBackupManagerService {
+public class BackupManagerService implements BackupManagerServiceInterface {
 
     private static final String TAG = "BackupManagerService";
     static final boolean DEBUG = true;

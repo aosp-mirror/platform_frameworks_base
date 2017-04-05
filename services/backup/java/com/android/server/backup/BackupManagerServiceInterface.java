@@ -34,7 +34,7 @@ import java.io.PrintWriter;
  * Current and future implementations of BackupManagerService should use this interface, so that
  * Trampoline is able to switch between them.
  */
-public interface IBackupManagerService {
+public interface BackupManagerServiceInterface {
 
   boolean setBackupPassword(String currentPw, String newPw);
 
