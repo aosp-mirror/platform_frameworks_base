@@ -9785,6 +9785,14 @@ public final class Settings {
                 "location_settings_link_to_permissions_enabled";
 
         /**
+         * Flag to enable use of RefactoredBackupManagerService.
+         *
+         * @hide
+         */
+        public static final String BACKUP_REFACTORED_SERVICE_DISABLED =
+            "backup_refactored_service_disabled";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *

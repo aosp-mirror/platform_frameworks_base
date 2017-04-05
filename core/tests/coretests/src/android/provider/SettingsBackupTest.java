@@ -101,6 +101,7 @@ public class SettingsBackupTest {
                     Settings.Global.APP_IDLE_CONSTANTS,
                     Settings.Global.ASSISTED_GPS_ENABLED,
                     Settings.Global.AUDIO_SAFE_VOLUME_STATE,
+                    Settings.Global.BACKUP_REFACTORED_SERVICE_DISABLED,
                     Settings.Global.BATTERY_DISCHARGE_DURATION_THRESHOLD,
                     Settings.Global.BATTERY_DISCHARGE_THRESHOLD,
                     Settings.Global.BLE_SCAN_ALWAYS_AVAILABLE,
