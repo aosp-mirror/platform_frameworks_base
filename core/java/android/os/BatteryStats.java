@@ -182,7 +182,7 @@ public abstract class BatteryStats implements Parcelable {
      * New in version 19:
      *   - Wakelock data (wl) gets current and max times.
      * New in version 20:
-     *   - Sensor, BluetoothScan, WifiScan get background timers and counter.
+     *   - Background timers and counters for: Sensor, BluetoothScan, WifiScan, Jobs.
      */
     static final String CHECKIN_VERSION = "20";
 
@@ -389,6 +389,16 @@ public abstract class BatteryStats implements Parcelable {
          */
         public long getTotalDurationMsLocked(long elapsedRealtimeMs) {
             return -1;
+        }
+
+        /**
+         * Returns the secondary Timer held by the Timer, if one exists. This secondary timer may be
+         * used, for example, for tracking background usage. Secondary timers are never pooled.
+         *
+         * Not all Timer subclasses have a secondary timer; those that don't return null.
+         */
+        public Timer getSubTimer() {
+            return null;
         }
 
         /**
@@ -3393,9 +3403,13 @@ public abstract class BatteryStats implements Parcelable {
                 // Convert from microseconds to milliseconds with rounding
                 final long totalTime = (timer.getTotalTimeLocked(rawRealtime, which) + 500) / 1000;
                 final int count = timer.getCountLocked(which);
+                final Timer bgTimer = timer.getSubTimer();
+                final long bgTime = bgTimer != null ?
+                        (bgTimer.getTotalTimeLocked(rawRealtime, which) + 500) / 1000 : -1;
+                final int bgCount = bgTimer != null ? bgTimer.getCountLocked(which) : -1;
                 if (totalTime != 0) {
                     dumpLine(pw, uid, category, JOB_DATA, "\"" + jobs.keyAt(ij) + "\"",
-                            totalTime, count);
+                            totalTime, count, bgTime, bgCount);
                 }
             }
 
@@ -4616,6 +4630,10 @@ public abstract class BatteryStats implements Parcelable {
                 // Convert from microseconds to milliseconds with rounding
                 final long totalTime = (timer.getTotalTimeLocked(rawRealtime, which) + 500) / 1000;
                 final int count = timer.getCountLocked(which);
+                final Timer bgTimer = timer.getSubTimer();
+                final long bgTime = bgTimer != null ?
+                        (bgTimer.getTotalTimeLocked(rawRealtime, which) + 500) / 1000 : -1;
+                final int bgCount = bgTimer != null ? bgTimer.getCountLocked(which) : -1;
                 sb.setLength(0);
                 sb.append(prefix);
                 sb.append("    Job ");
@@ -4626,6 +4644,13 @@ public abstract class BatteryStats implements Parcelable {
                     sb.append("realtime (");
                     sb.append(count);
                     sb.append(" times)");
+                    if (bgTime > 0) {
+                        sb.append(", ");
+                        formatTimeMs(sb, bgTime);
+                        sb.append("background (");
+                        sb.append(bgCount);
+                        sb.append(" times)");
+                    }
                 } else {
                     sb.append("(not used)");
                 }

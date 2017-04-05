@@ -114,7 +114,7 @@ public class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    private static final int VERSION = 152 + (USE_OLD_HISTORY ? 1000 : 0);
+    private static final int VERSION = 153 + (USE_OLD_HISTORY ? 1000 : 0);
 
     // Maximum number of items we will record in the history.
     private static final int MAX_HISTORY_ITEMS = 2000;
@@ -2006,107 +2006,92 @@ public class BatteryStatsImpl extends BatteryStats {
      * State for keeping track of two DurationTimers with different TimeBases, presumably where one
      * TimeBase is effectively a subset of the other.
      */
-    public static class DualTimer {
-        // mMainTimer typically tracks the total time. May be pooled (but since it's a durationTimer,
-        // it also has the unpooled getTotalDurationMsLocked() for STATS_SINCE_CHARGED).
-        private final DurationTimer mMainTimer;
+    public static class DualTimer extends DurationTimer {
+        // This class both is a DurationTimer and also holds a second DurationTimer.
+        // The main timer (this) typically tracks the total time. It may be pooled (but since it's a
+        // durationTimer, it also has the unpooled getTotalDurationMsLocked() for
+        // STATS_SINCE_CHARGED).
         // mSubTimer typically tracks only part of the total time, such as background time, as
         // determined by a subTimeBase. It is NOT pooled.
         private final DurationTimer mSubTimer;
 
         /**
-         * Creates a DualTimer to hold a mMainTimer and a mSubTimer.
-         * The mMainTimer is based on the given timeBase and timerPool.
+         * Creates a DualTimer to hold a main timer (this) and a mSubTimer.
+         * The main timer (this) is based on the given timeBase and timerPool.
          * The mSubTimer is based on the given subTimeBase. The mSubTimer is not pooled, even if
-         * the mMainTimer is.
+         * the main timer is.
          */
         public DualTimer(Clocks clocks, Uid uid, int type, ArrayList<StopwatchTimer> timerPool,
                 TimeBase timeBase, TimeBase subTimeBase, Parcel in) {
-            mMainTimer = new DurationTimer(clocks, uid, type, timerPool, timeBase, in);
+            super(clocks, uid, type, timerPool, timeBase, in);
             mSubTimer = new DurationTimer(clocks, uid, type, null, subTimeBase, in);
         }
 
         /**
-         * Creates a DualTimer to hold a mMainTimer and a mSubTimer.
-         * The mMainTimer is based on the given timeBase and timerPool.
+         * Creates a DualTimer to hold a main timer (this) and a mSubTimer.
+         * The main timer (this) is based on the given timeBase and timerPool.
          * The mSubTimer is based on the given subTimeBase. The mSubTimer is not pooled, even if
-         * the mMainTimer is.
+         * the main timer is.
          */
         public DualTimer(Clocks clocks, Uid uid, int type, ArrayList<StopwatchTimer> timerPool,
                 TimeBase timeBase, TimeBase subTimeBase) {
-            mMainTimer = new DurationTimer(clocks, uid, type, timerPool, timeBase);
+            super(clocks, uid, type, timerPool, timeBase);
             mSubTimer = new DurationTimer(clocks, uid, type, null, subTimeBase);
         }
 
-        /** Get the main timer. */
-        public DurationTimer getMainTimer() {
-            return mMainTimer;
-        }
-
         /** Get the secondary timer. */
+        @Override
         public DurationTimer getSubTimer() {
             return mSubTimer;
         }
 
+        @Override
         public void startRunningLocked(long elapsedRealtimeMs) {
-            mMainTimer.startRunningLocked(elapsedRealtimeMs);
+            super.startRunningLocked(elapsedRealtimeMs);
             mSubTimer.startRunningLocked(elapsedRealtimeMs);
         }
 
+        @Override
         public void stopRunningLocked(long elapsedRealtimeMs) {
-            mMainTimer.stopRunningLocked(elapsedRealtimeMs);
+            super.stopRunningLocked(elapsedRealtimeMs);
             mSubTimer.stopRunningLocked(elapsedRealtimeMs);
         }
 
+        @Override
         public void stopAllRunningLocked(long elapsedRealtimeMs) {
-            mMainTimer.stopAllRunningLocked(elapsedRealtimeMs);
+            super.stopAllRunningLocked(elapsedRealtimeMs);
             mSubTimer.stopAllRunningLocked(elapsedRealtimeMs);
         }
 
-        public void setMark(long elapsedRealtimeMs) {
-            mMainTimer.setMark(elapsedRealtimeMs);
-            mSubTimer.setMark(elapsedRealtimeMs);
-        }
-
+        @Override
         public boolean reset(boolean detachIfReset) {
             boolean active = false;
-            active |= !mMainTimer.reset(detachIfReset);
+            active |= !super.reset(detachIfReset);
             active |= !mSubTimer.reset(detachIfReset);
             return !active;
         }
 
+        @Override
         public void detach() {
-            mMainTimer.detach();
+            super.detach();
             mSubTimer.detach();
         }
 
-        /**
-         * Writes a possibly null DualTimer to a Parcel.
-         *
-         * @param out the Parcel to which to write.
-         * @param t a DualTimer, or null.
-         */
-        public static void writeDualTimerToParcel(Parcel out, DualTimer t, long elapsedRealtimeUs) {
-            if (t != null) {
-                out.writeInt(1);
-                t.writeToParcel(out, elapsedRealtimeUs);
-            } else {
-                out.writeInt(0);
-            }
-        }
-
+        @Override
         public void writeToParcel(Parcel out, long elapsedRealtimeUs) {
-            mMainTimer.writeToParcel(out, elapsedRealtimeUs);
+            super.writeToParcel(out, elapsedRealtimeUs);
             mSubTimer.writeToParcel(out, elapsedRealtimeUs);
         }
 
+        @Override
         public void writeSummaryFromParcelLocked(Parcel out, long elapsedRealtimeUs) {
-            mMainTimer.writeSummaryFromParcelLocked(out, elapsedRealtimeUs);
+            super.writeSummaryFromParcelLocked(out, elapsedRealtimeUs);
             mSubTimer.writeSummaryFromParcelLocked(out, elapsedRealtimeUs);
         }
 
+        @Override
         public void readSummaryFromParcelLocked(Parcel in) {
-            mMainTimer.readSummaryFromParcelLocked(in);
+            super.readSummaryFromParcelLocked(in);
             mSubTimer.readSummaryFromParcelLocked(in);
         }
     }
@@ -5488,7 +5473,7 @@ public class BatteryStatsImpl extends BatteryStats {
         /**
          * The statistics we have collected for this uid's jobs.
          */
-        final OverflowArrayMap<StopwatchTimer> mJobStats;
+        final OverflowArrayMap<DualTimer> mJobStats;
 
         /**
          * The statistics we have collected for this uid's sensor activations.
@@ -5533,10 +5518,10 @@ public class BatteryStatsImpl extends BatteryStats {
                             mBsi.mOnBatteryTimeBase);
                 }
             };
-            mJobStats = mBsi.new OverflowArrayMap<StopwatchTimer>(uid) {
-                @Override public StopwatchTimer instantiateObject() {
-                    return new StopwatchTimer(mBsi.mClocks, Uid.this, JOB, null,
-                            mBsi.mOnBatteryTimeBase);
+            mJobStats = mBsi.new OverflowArrayMap<DualTimer>(uid) {
+                @Override public DualTimer instantiateObject() {
+                    return new DualTimer(mBsi.mClocks, Uid.this, JOB, null,
+                            mBsi.mOnBatteryTimeBase, mOnBatteryBackgroundTimeBase);
                 }
             };
 
@@ -5918,7 +5903,7 @@ public class BatteryStatsImpl extends BatteryStats {
             if (mWifiScanTimer == null) {
                 return 0;
             }
-            return mWifiScanTimer.getMainTimer().getTotalTimeLocked(elapsedRealtimeUs, which);
+            return mWifiScanTimer.getTotalTimeLocked(elapsedRealtimeUs, which);
         }
 
         @Override
@@ -5926,12 +5911,12 @@ public class BatteryStatsImpl extends BatteryStats {
             if (mWifiScanTimer == null) {
                 return 0;
             }
-            return mWifiScanTimer.getMainTimer().getCountLocked(which);
+            return mWifiScanTimer.getCountLocked(which);
         }
 
         @Override
         public int getWifiScanBackgroundCount(int which) {
-            if (mWifiScanTimer == null) {
+            if (mWifiScanTimer == null || mWifiScanTimer.getSubTimer() == null) {
                 return 0;
             }
             return mWifiScanTimer.getSubTimer().getCountLocked(which);
@@ -5943,12 +5928,12 @@ public class BatteryStatsImpl extends BatteryStats {
                 return 0;
             }
             final long elapsedRealtimeMs = (elapsedRealtimeUs + 500) / 1000;
-            return mWifiScanTimer.getMainTimer().getTotalDurationMsLocked(elapsedRealtimeMs) * 1000;
+            return mWifiScanTimer.getTotalDurationMsLocked(elapsedRealtimeMs) * 1000;
         }
 
         @Override
         public long getWifiScanBackgroundTime(final long elapsedRealtimeUs) {
-            if (mWifiScanTimer == null) {
+            if (mWifiScanTimer == null || mWifiScanTimer.getSubTimer() == null) {
                 return 0;
             }
             final long elapsedRealtimeMs = (elapsedRealtimeUs + 500) / 1000;
@@ -6008,10 +5993,7 @@ public class BatteryStatsImpl extends BatteryStats {
 
         @Override
         public Timer getBluetoothScanTimer() {
-            if (mBluetoothScanTimer == null) {
-                return null;
-            }
-            return mBluetoothScanTimer.getMainTimer();
+            return mBluetoothScanTimer;
         }
 
         @Override
@@ -6361,9 +6343,9 @@ public class BatteryStatsImpl extends BatteryStats {
                 }
             }
             mSyncStats.cleanup();
-            final ArrayMap<String, StopwatchTimer> jobStats = mJobStats.getMap();
+            final ArrayMap<String, DualTimer> jobStats = mJobStats.getMap();
             for (int ij=jobStats.size()-1; ij>=0; ij--) {
-                StopwatchTimer timer = jobStats.valueAt(ij);
+                DualTimer timer = jobStats.valueAt(ij);
                 if (timer.reset(false)) {
                     jobStats.removeAt(ij);
                     timer.detach();
@@ -6531,12 +6513,12 @@ public class BatteryStatsImpl extends BatteryStats {
                 Timer.writeTimerToParcel(out, timer, elapsedRealtimeUs);
             }
 
-            final ArrayMap<String, StopwatchTimer> jobStats = mJobStats.getMap();
+            final ArrayMap<String, DualTimer> jobStats = mJobStats.getMap();
             int NJ = jobStats.size();
             out.writeInt(NJ);
             for (int ij=0; ij<NJ; ij++) {
                 out.writeString(jobStats.keyAt(ij));
-                StopwatchTimer timer = jobStats.valueAt(ij);
+                DualTimer timer = jobStats.valueAt(ij);
                 Timer.writeTimerToParcel(out, timer, elapsedRealtimeUs);
             }
 
@@ -6756,8 +6738,8 @@ public class BatteryStatsImpl extends BatteryStats {
             for (int j = 0; j < numJobs; j++) {
                 String jobName = in.readString();
                 if (in.readInt() != 0) {
-                    mJobStats.add(jobName, new StopwatchTimer(mBsi.mClocks, Uid.this, JOB, null,
-                                timeBase, in));
+                    mJobStats.add(jobName, new DualTimer(mBsi.mClocks, Uid.this, JOB, null,
+                            mBsi.mOnBatteryTimeBase, mOnBatteryBackgroundTimeBase, in));
                 }
             }
 
@@ -7196,15 +7178,12 @@ public class BatteryStatsImpl extends BatteryStats {
             }
 
             void writeToParcelLocked(Parcel out, long elapsedRealtimeUs) {
-                DualTimer.writeDualTimerToParcel(out, mTimer, elapsedRealtimeUs);
+                Timer.writeTimerToParcel(out, mTimer, elapsedRealtimeUs);
             }
 
             @Override
             public Timer getSensorTime() {
-                if (mTimer == null) {
-                    return null;
-                }
-                return mTimer.getMainTimer();
+                return mTimer;
             }
 
             @Override
@@ -8023,7 +8002,7 @@ public class BatteryStatsImpl extends BatteryStats {
         }
 
         public void readJobSummaryFromParcelLocked(String name, Parcel in) {
-            StopwatchTimer timer = mJobStats.instantiateObject();
+            DualTimer timer = mJobStats.instantiateObject();
             timer.readSummaryFromParcelLocked(in);
             mJobStats.add(name, timer);
         }
@@ -8084,14 +8063,14 @@ public class BatteryStatsImpl extends BatteryStats {
         }
 
         public void noteStartJobLocked(String name, long elapsedRealtimeMs) {
-            StopwatchTimer t = mJobStats.startObject(name);
+            DualTimer t = mJobStats.startObject(name);
             if (t != null) {
                 t.startRunningLocked(elapsedRealtimeMs);
             }
         }
 
         public void noteStopJobLocked(String name, long elapsedRealtimeMs) {
-            StopwatchTimer t = mJobStats.stopObject(name);
+            DualTimer t = mJobStats.stopObject(name);
             if (t != null) {
                 t.stopRunningLocked(elapsedRealtimeMs);
             }
@@ -9149,7 +9128,7 @@ public class BatteryStatsImpl extends BatteryStats {
                 final Uid uid = mUidStats.valueAt(i);
 
                 // Sum the total scan power for all apps.
-                totalScanTimeMs += uid.mWifiScanTimer.getMainTimer().getTimeSinceMarkLocked(
+                totalScanTimeMs += uid.mWifiScanTimer.getTimeSinceMarkLocked(
                         elapsedRealtimeMs * 1000) / 1000;
 
                 // Sum the total time holding wifi lock for all apps.
@@ -9170,7 +9149,7 @@ public class BatteryStatsImpl extends BatteryStats {
             for (int i = 0; i < uidStatsSize; i++) {
                 final Uid uid = mUidStats.valueAt(i);
 
-                long scanTimeSinceMarkMs = uid.mWifiScanTimer.getMainTimer().getTimeSinceMarkLocked(
+                long scanTimeSinceMarkMs = uid.mWifiScanTimer.getTimeSinceMarkLocked(
                         elapsedRealtimeMs * 1000) / 1000;
                 if (scanTimeSinceMarkMs > 0) {
                     // Set the new mark so that next time we get new data since this point.
@@ -9444,7 +9423,7 @@ public class BatteryStatsImpl extends BatteryStats {
                 continue;
             }
 
-            totalScanTimeMs += u.mBluetoothScanTimer.getMainTimer().getTimeSinceMarkLocked(
+            totalScanTimeMs += u.mBluetoothScanTimer.getTimeSinceMarkLocked(
                     elapsedRealtimeMs * 1000) / 1000;
         }
 
@@ -9465,7 +9444,7 @@ public class BatteryStatsImpl extends BatteryStats {
                 continue;
             }
 
-            long scanTimeSinceMarkMs = u.mBluetoothScanTimer.getMainTimer().getTimeSinceMarkLocked(
+            long scanTimeSinceMarkMs = u.mBluetoothScanTimer.getTimeSinceMarkLocked(
                     elapsedRealtimeMs * 1000) / 1000;
             if (scanTimeSinceMarkMs > 0) {
                 // Set the new mark so that next time we get new data since this point.
@@ -11526,7 +11505,7 @@ public class BatteryStatsImpl extends BatteryStats {
                 syncStats.valueAt(is).writeSummaryFromParcelLocked(out, NOWREAL_SYS);
             }
 
-            final ArrayMap<String, StopwatchTimer> jobStats = u.mJobStats.getMap();
+            final ArrayMap<String, DualTimer> jobStats = u.mJobStats.getMap();
             int NJ = jobStats.size();
             out.writeInt(NJ);
             for (int ij=0; ij<NJ; ij++) {
