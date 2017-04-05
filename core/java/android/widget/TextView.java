@@ -8148,35 +8148,29 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         mTempTextPaint.set(getPaint());
         mTempTextPaint.setTextSize(suggestedSizeInPx);
 
-        if ((mLayout instanceof BoringLayout) && BoringLayout.isBoring(
-                text, mTempTextPaint, getTextDirectionHeuristic(), mBoring) != null) {
-            return mTempTextPaint.getFontSpacing() <= availableSpace.bottom
-                    && mTempTextPaint.measureText(text, 0, text.length()) <= availableSpace.right;
-        } else {
-            final StaticLayout.Builder layoutBuilder = StaticLayout.Builder.obtain(
-                    text, 0, text.length(),  mTempTextPaint,
-                    getMeasuredWidth() - getTotalPaddingLeft() - getTotalPaddingRight());
+        final StaticLayout.Builder layoutBuilder = StaticLayout.Builder.obtain(
+                text, 0, text.length(),  mTempTextPaint,
+                getMeasuredWidth() - getTotalPaddingLeft() - getTotalPaddingRight());
 
-            layoutBuilder.setAlignment(getLayoutAlignment())
-                    .setLineSpacing(getLineSpacingExtra(), getLineSpacingMultiplier())
-                    .setIncludePad(getIncludeFontPadding())
-                    .setBreakStrategy(getBreakStrategy())
-                    .setHyphenationFrequency(getHyphenationFrequency())
-                    .setJustificationMode(getJustificationMode())
-                    .setMaxLines(mMaxMode == LINES ? mMaximum : Integer.MAX_VALUE)
-                    .setTextDirection(getTextDirectionHeuristic());
+        layoutBuilder.setAlignment(getLayoutAlignment())
+                .setLineSpacing(getLineSpacingExtra(), getLineSpacingMultiplier())
+                .setIncludePad(getIncludeFontPadding())
+                .setBreakStrategy(getBreakStrategy())
+                .setHyphenationFrequency(getHyphenationFrequency())
+                .setJustificationMode(getJustificationMode())
+                .setMaxLines(mMaxMode == LINES ? mMaximum : Integer.MAX_VALUE)
+                .setTextDirection(getTextDirectionHeuristic());
 
-            final StaticLayout layout = layoutBuilder.build();
+        final StaticLayout layout = layoutBuilder.build();
 
-            // Lines overflow.
-            if (maxLines != -1 && layout.getLineCount() > maxLines) {
-                return false;
-            }
+        // Lines overflow.
+        if (maxLines != -1 && layout.getLineCount() > maxLines) {
+            return false;
+        }
 
-            // Height overflow.
-            if (layout.getHeight() > availableSpace.bottom) {
-                return false;
-            }
+        // Height overflow.
+        if (layout.getHeight() > availableSpace.bottom) {
+            return false;
         }
 
         return true;
