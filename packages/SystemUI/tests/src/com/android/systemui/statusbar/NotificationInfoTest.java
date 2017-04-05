@@ -206,6 +206,29 @@ public class NotificationInfoTest extends SysuiTestCase {
     }
 
     @Test
+    public void testBindNotification_SettingsButtonInvisibleWhenNoClickListener() throws Exception {
+        mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
+                TEST_PACKAGE_NAME, Arrays.asList(mNotificationChannel),
+                null, null, null, null);
+        final TextView settingsButton =
+                (TextView) mNotificationInfo.findViewById(R.id.more_settings);
+        assertTrue(settingsButton.getVisibility() != View.VISIBLE);
+    }
+
+    @Test
+    public void testBindNotification_SettingsButtonReappersAfterSecondBind() throws Exception {
+        mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
+                TEST_PACKAGE_NAME, Arrays.asList(mNotificationChannel),
+                null, null, null, null);
+        mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
+                TEST_PACKAGE_NAME, Arrays.asList(mNotificationChannel),
+                (View v, NotificationChannel c, int appUid) -> {}, null, null, null);
+        final TextView settingsButton =
+                (TextView) mNotificationInfo.findViewById(R.id.more_settings);
+        assertEquals(View.VISIBLE, settingsButton.getVisibility());
+    }
+
+    @Test
     public void testOnClickListenerPassesNullChannelForBundle() throws Exception {
         final CountDownLatch latch = new CountDownLatch(1);
         mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
