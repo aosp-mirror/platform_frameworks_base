@@ -61,17 +61,21 @@ public class BoundsAnimationController {
             extends WindowManagerInternal.AppTransitionListener implements Runnable {
 
         public void onAppTransitionCancelledLocked() {
+            if (DEBUG) Slog.d(TAG, "onAppTransitionCancelledLocked:"
+                    + " mFinishAnimationAfterTransition=" + mFinishAnimationAfterTransition);
             animationFinished();
         }
         public void onAppTransitionFinishedLocked(IBinder token) {
+            if (DEBUG) Slog.d(TAG, "onAppTransitionFinishedLocked:"
+                    + " mFinishAnimationAfterTransition=" + mFinishAnimationAfterTransition);
             animationFinished();
         }
         private void animationFinished() {
             if (mFinishAnimationAfterTransition) {
                 mHandler.removeCallbacks(this);
-                // This might end up calling into activity manager which will be bad since we have the
-                // window manager lock held at this point. Post a message to take care of the processing
-                // so we don't deadlock.
+                // This might end up calling into activity manager which will be bad since we have
+                // the window manager lock held at this point. Post a message to take care of the
+                // processing so we don't deadlock.
                 mHandler.post(this);
             }
         }
@@ -195,6 +199,7 @@ public class BoundsAnimationController {
             if (!mTarget.setPinnedStackSize(mTmpRect, mTmpTaskBounds)) {
                 // Whoops, the target doesn't feel like animating anymore. Let's immediately finish
                 // any further animation.
+                if (DEBUG) Slog.d(TAG, "animateUpdate: cancelled");
                 animation.cancel();
             }
         }
@@ -203,7 +208,9 @@ public class BoundsAnimationController {
         public void onAnimationEnd(Animator animation) {
             if (DEBUG) Slog.d(TAG, "onAnimationEnd: mTarget=" + mTarget
                     + " mMoveToFullScreen=" + mMoveToFullScreen
-                    + " mSkipAnimationEnd=" + mSkipAnimationEnd);
+                    + " mSkipAnimationEnd=" + mSkipAnimationEnd
+                    + " mFinishAnimationAfterTransition=" + mFinishAnimationAfterTransition
+                    + " mAppTransitionIsRunning=" + mAppTransition.isRunning());
 
             // There could be another animation running. For example in the
             // move to fullscreen case, recents will also be closing while the
