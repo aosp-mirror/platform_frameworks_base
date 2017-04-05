@@ -19,6 +19,7 @@ package android.os;
 import android.app.ActivityThread;
 import android.content.Context;
 import android.media.AudioAttributes;
+import android.util.Log;
 
 /**
  * Class that operates the vibrator on the device.
@@ -30,6 +31,7 @@ import android.media.AudioAttributes;
  * {@link Context#getSystemService} with {@link Context#VIBRATOR_SERVICE} as the argument.
  */
 public abstract class Vibrator {
+    private static final String TAG = "Vibrator";
 
     private final String mPackageName;
 
@@ -90,9 +92,14 @@ public abstract class Vibrator {
      */
     @Deprecated
     public void vibrate(long milliseconds, AudioAttributes attributes) {
-        VibrationEffect effect =
-                VibrationEffect.createOneShot(milliseconds, VibrationEffect.DEFAULT_AMPLITUDE);
-        vibrate(effect, attributes);
+        try {
+            // This ignores all exceptions to stay compatible with pre-O implementations.
+            VibrationEffect effect =
+                    VibrationEffect.createOneShot(milliseconds, VibrationEffect.DEFAULT_AMPLITUDE);
+            vibrate(effect, attributes);
+        } catch (IllegalArgumentException iae) {
+            Log.e(TAG, "Failed to create VibrationEffect", iae);
+        }
     }
 
     /**
@@ -150,12 +157,17 @@ public abstract class Vibrator {
      */
     @Deprecated
     public void vibrate(long[] pattern, int repeat, AudioAttributes attributes) {
-        // This call needs to continue throwing ArrayIndexOutOfBoundsException for compatibility
-        // purposes, whereas VibrationEffect throws an IllegalArgumentException.
+        // This call needs to continue throwing ArrayIndexOutOfBoundsException but ignore all other
+        // exceptions for compatibility purposes
         if (repeat < -1 || repeat >= pattern.length) {
             throw new ArrayIndexOutOfBoundsException();
         }
-        vibrate(VibrationEffect.createWaveform(pattern, repeat), attributes);
+
+        try {
+            vibrate(VibrationEffect.createWaveform(pattern, repeat), attributes);
+        } catch (IllegalArgumentException iae) {
+            Log.e(TAG, "Failed to create VibrationEffect", iae);
+        }
     }
 
     public void vibrate(VibrationEffect vibe) {
