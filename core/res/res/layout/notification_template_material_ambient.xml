@@ -23,7 +23,8 @@
     android:paddingStart="@dimen/notification_extra_margin_ambient"
     android:paddingEnd="@dimen/notification_extra_margin_ambient"
     >
-    <include layout="@layout/notification_template_header" />
+    <include layout="@layout/notification_template_header"
+        android:theme="@style/Theme.Material.Notification.Ambient" />
 
     <LinearLayout
             android:id="@+id/notification_action_list_margin_target"

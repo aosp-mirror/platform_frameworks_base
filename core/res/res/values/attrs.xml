@@ -8638,5 +8638,12 @@
         <attr name="stackFromEnd" format="boolean" />
     </declare-styleable>
 
+    <!-- @hide -->
+    <declare-styleable name="NotificationTheme">
+        <attr name="notificationHeaderStyle" format="reference" />
+        <attr name="notificationHeaderTextAppearance" format="reference" />
+        <attr name="notificationHeaderIconSize" format="dimension" />
+    </declare-styleable>
+
     <attr name="lockPatternStyle" format="reference" />
 </resources>
