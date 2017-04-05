@@ -16,6 +16,8 @@
 
 package com.android.systemui.pip.phone;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.app.IActivityManager;
@@ -391,7 +393,10 @@ public class PipTouchHandler implements TunerService.Tunable {
                 final float distance = bounds.bottom - target;
                 fraction = Math.min(distance / bounds.height(), 1f);
             }
-            mMenuController.setDismissFraction(fraction);
+            if (Float.compare(fraction, 0f) != 0 || mMenuController.isMenuVisible()) {
+                // Update if the fraction > 0, or if fraction == 0 and the menu was already visible
+                mMenuController.setDismissFraction(fraction);
+            }
         }
     }
 
@@ -611,22 +616,34 @@ public class PipTouchHandler implements TunerService.Tunable {
                     setMinimizedStateInternal(false);
                 }
 
-                // If the menu is still visible, and we aren't minimized, then just poke the menu
-                // so that it will timeout after the user stops touching it
+                AnimatorListenerAdapter postAnimationCallback = null;
                 if (mMenuController.isMenuVisible()) {
+                    // If the menu is still visible, and we aren't minimized, then just poke the
+                    // menu so that it will timeout after the user stops touching it
                     mMenuController.showMenu(mMotionHelper.getBounds(), mMovementBounds,
                             true /* allowMenuTimeout */);
+                } else {
+                    // If the menu is not visible, then we can still be showing the activity for the
+                    // dismiss overlay, so just finish it after the animation completes
+                    postAnimationCallback = new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            mMenuController.hideMenu();
+                        }
+                    };
                 }
 
                 if (isFling) {
                     mMotionHelper.flingToSnapTarget(velocity, vel.x, vel.y, mMovementBounds,
-                            mUpdateScrimListener);
+                            mUpdateScrimListener, postAnimationCallback);
                 } else {
-                    mMotionHelper.animateToClosestSnapTarget(mMovementBounds, mUpdateScrimListener);
+                    mMotionHelper.animateToClosestSnapTarget(mMovementBounds, mUpdateScrimListener,
+                            postAnimationCallback);
                 }
             } else if (mIsMinimized) {
                 // This was a tap, so no longer minimized
-                mMotionHelper.animateToClosestSnapTarget(mMovementBounds, null /* listener */);
+                mMotionHelper.animateToClosestSnapTarget(mMovementBounds, null /* updateListener */,
+                        null /* animatorListener */);
                 setMinimizedStateInternal(false);
             } else if (!mIsMenuVisible) {
                 mMenuController.showMenu(mMotionHelper.getBounds(), mMovementBounds,
