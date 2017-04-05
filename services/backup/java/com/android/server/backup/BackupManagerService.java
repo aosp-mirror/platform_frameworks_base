@@ -306,6 +306,7 @@ public class BackupManagerService implements BackupManagerServiceInterface {
     private PowerManager mPowerManager;
     private AlarmManager mAlarmManager;
     private IStorageManager mStorageManager;
+
     IBackupManager mBackupManagerBinder;
 
     private final TransportManager mTransportManager;
@@ -763,7 +764,8 @@ public class BackupManagerService implements BackupManagerServiceInterface {
     ArrayList<FullBackupEntry> mFullBackupQueue;
 
     // Utility: build a new random integer token
-    int generateToken() {
+    @Override
+    public int generateRandomIntegerToken() {
         int token;
         do {
             synchronized (mTokenGenerator) {
@@ -2274,7 +2276,8 @@ public class BackupManagerService implements BackupManagerServiceInterface {
     }
 
     // fire off a backup agent, blocking until it attaches or times out
-    IBackupAgent bindToAgentSynchronous(ApplicationInfo app, int mode) {
+    @Override
+    public IBackupAgent bindToAgentSynchronous(ApplicationInfo app, int mode) {
         IBackupAgent agent = null;
         synchronized(mAgentConnectLock) {
             mConnecting = true;
@@ -2495,22 +2498,9 @@ public class BackupManagerService implements BackupManagerServiceInterface {
         }
     }
 
-    // -----
-    // Interface and methods used by the asynchronous-with-timeout backup/restore operations
-
-    interface BackupRestoreTask {
-        // Execute one tick of whatever state machine the task implements
-        void execute();
-
-        // An operation that wanted a callback has completed
-        void operationComplete(long result);
-
-        // An operation that wanted a callback has timed out
-        void handleCancel(boolean cancelAll);
-    }
-
-    void prepareOperationTimeout(int token, long interval, BackupRestoreTask callback,
-            int operationType) {
+    @Override
+    public void prepareOperationTimeout(int token, long interval, BackupRestoreTask callback,
+        int operationType) {
         if (operationType != OP_TYPE_BACKUP_WAIT && operationType != OP_TYPE_RESTORE_WAIT) {
             Slog.wtf(TAG, "prepareOperationTimeout() doesn't support operation " +
                     Integer.toHexString(token) + " of type " + operationType);
@@ -2554,7 +2544,8 @@ public class BackupManagerService implements BackupManagerServiceInterface {
     }
 
     // synchronous waiter case
-    boolean waitUntilOperationComplete(int token) {
+    @Override
+    public boolean waitUntilOperationComplete(int token) {
         if (MORE_DEBUG) Slog.i(TAG, "Blocking until operation complete for "
                 + Integer.toHexString(token));
         int finalState = OP_PENDING;
@@ -2716,7 +2707,7 @@ public class BackupManagerService implements BackupManagerServiceInterface {
             mNonIncremental = nonIncremental;
 
             mStateDir = new File(mBaseStateDir, dirName);
-            mCurrentOpToken = generateToken();
+            mCurrentOpToken = generateRandomIntegerToken();
 
             mFinished = false;
 
@@ -3174,7 +3165,7 @@ public class BackupManagerService implements BackupManagerServiceInterface {
             mNewState = null;
 
             boolean callingAgent = false;
-            mEphemeralOpToken = generateToken();
+            mEphemeralOpToken = generateRandomIntegerToken();
             try {
                 // Look up the package info & signatures.  This is first so that if it
                 // throws an exception, there's no file setup yet that would need to
@@ -3671,7 +3662,7 @@ public class BackupManagerService implements BackupManagerServiceInterface {
             ParcelFileDescriptor[] pipes = null;
             try {
                 pipes = ParcelFileDescriptor.createPipe();
-                int token = generateToken();
+                int token = generateRandomIntegerToken();
                 prepareOperationTimeout(token, TIMEOUT_FULL_BACKUP_INTERVAL,
                         null, OP_TYPE_BACKUP_WAIT);
                 mService.backupObbs(pkg.packageName, pipes[1], token, mBackupManagerBinder);
@@ -3757,7 +3748,8 @@ public class BackupManagerService implements BackupManagerServiceInterface {
         }
     }
 
-    void tearDownAgentAndKill(ApplicationInfo app) {
+    @Override
+    public void tearDownAgentAndKill(ApplicationInfo app) {
         if (app == null) {
             // Null means the system package, so just quietly move on.  :)
             return;
@@ -4204,7 +4196,7 @@ public class BackupManagerService implements BackupManagerServiceInterface {
                 String curPassword, String encryptPassword, boolean doAllApps, boolean doSystem,
                 boolean doCompress, boolean doKeyValue, String[] packages, AtomicBoolean latch) {
             super(observer);
-            mCurrentOpToken = generateToken();
+            mCurrentOpToken = generateRandomIntegerToken();
             mLatch = latch;
 
             mOutputFile = fd;
@@ -4654,8 +4646,8 @@ public class BackupManagerService implements BackupManagerServiceInterface {
             mBackupObserver = backupObserver;
             mMonitor = monitor;
             mUserInitiated = userInitiated;
-            mCurrentOpToken = generateToken();
-            mBackupRunnerOpToken = generateToken();
+            mCurrentOpToken = generateRandomIntegerToken();
+            mBackupRunnerOpToken = generateRandomIntegerToken();
 
             if (isBackupOperationInProgress()) {
                 if (DEBUG) {
@@ -5248,7 +5240,7 @@ public class BackupManagerService implements BackupManagerServiceInterface {
                 mOutput = ParcelFileDescriptor.dup(output.getFileDescriptor());
                 mTarget = target;
                 mCurrentOpToken = currentOpToken;
-                mEphemeralToken = generateToken();
+                mEphemeralToken = generateRandomIntegerToken();
                 mPreflight = new SinglePackageBackupPreflight(transport, quota, mEphemeralToken);
                 mPreflightLatch = new CountDownLatch(1);
                 mBackupLatch = new CountDownLatch(1);
@@ -5478,7 +5470,8 @@ public class BackupManagerService implements BackupManagerServiceInterface {
      * @return Whether ongoing work will continue.  The return value here will be passed
      *         along as the return value to the scheduled job's onStartJob() callback.
      */
-    boolean beginFullBackup(FullBackupJob scheduledJob) {
+    @Override
+    public boolean beginFullBackup(FullBackupJob scheduledJob) {
         long now = System.currentTimeMillis();
         FullBackupEntry entry = null;
         long latency = MIN_FULL_BACKUP_INTERVAL;
@@ -5636,7 +5629,8 @@ public class BackupManagerService implements BackupManagerServiceInterface {
 
     // The job scheduler says our constraints don't hold any more,
     // so tear down any ongoing backup task right away.
-    void endFullBackup() {
+    @Override
+    public void endFullBackup() {
         synchronized (mQueueLock) {
             if (mRunningFullBackupTask != null) {
                 if (DEBUG_SCHEDULING) {
@@ -5693,30 +5687,6 @@ public class BackupManagerService implements BackupManagerServiceInterface {
     }
 
     // ----- Full restore from a file/socket -----
-
-    // Description of a file in the restore datastream
-    static class FileMetadata {
-        String packageName;             // name of the owning app
-        String installerPackageName;    // name of the market-type app that installed the owner
-        int type;                       // e.g. BackupAgent.TYPE_DIRECTORY
-        String domain;                  // e.g. FullBackup.DATABASE_TREE_TOKEN
-        String path;                    // subpath within the semantic domain
-        long mode;                      // e.g. 0666 (actually int)
-        long mtime;                     // last mod time, UTC time_t (actually int)
-        long size;                      // bytes of content
-
-        @Override
-        public String toString() {
-            StringBuilder sb = new StringBuilder(128);
-            sb.append("FileMetadata{");
-            sb.append(packageName); sb.append(',');
-            sb.append(type); sb.append(',');
-            sb.append(domain); sb.append(':'); sb.append(path); sb.append(',');
-            sb.append(size);
-            sb.append('}');
-            return sb.toString();
-        }
-    }
 
     enum RestorePolicy {
         IGNORE,
@@ -7564,7 +7534,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                         if (okay) {
                             boolean agentSuccess = true;
                             long toCopy = info.size;
-                            final int token = generateToken();
+                            final int token = generateRandomIntegerToken();
                             try {
                                 prepareOperationTimeout(token, TIMEOUT_RESTORE_INTERVAL, null,
                                         OP_TYPE_RESTORE_WAIT);
@@ -7708,7 +7678,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                 try {
                     // In the adb restore case, we do restore-finished here
                     if (doRestoreFinished) {
-                        final int token = generateToken();
+                        final int token = generateRandomIntegerToken();
                         final AdbRestoreFinishedLatch latch = new AdbRestoreFinishedLatch(token);
                         prepareOperationTimeout(token, TIMEOUT_FULL_BACKUP_INTERVAL, latch,
                                 OP_TYPE_RESTORE_WAIT);
@@ -8587,7 +8557,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
         PerformUnifiedRestoreTask(IBackupTransport transport, IRestoreObserver observer,
                 IBackupManagerMonitor monitor, long restoreSetToken, PackageInfo targetPackage,
                 int pmToken, boolean isFullSystemRestore, String[] filterSet) {
-            mEphemeralOpToken = generateToken();
+            mEphemeralOpToken = generateRandomIntegerToken();
             mState = UnifiedRestoreState.INITIAL;
             mStartRealtime = SystemClock.elapsedRealtime();
 
@@ -9217,7 +9187,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
             private final int mEphemeralOpToken;
 
             public StreamFeederThread() throws IOException {
-                mEphemeralOpToken = generateToken();
+                mEphemeralOpToken = generateRandomIntegerToken();
                 mTransportPipes = ParcelFileDescriptor.createPipe();
                 mEnginePipes = ParcelFileDescriptor.createPipe();
                 setRunning(true);
@@ -10039,7 +10009,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
             AdbBackupParams params = new AdbBackupParams(fd, includeApks, includeObbs,
                     includeShared, doWidgets, doAllApps, includeSystem, compress, doKeyValue,
                     pkgList);
-            final int token = generateToken();
+            final int token = generateRandomIntegerToken();
             synchronized (mAdbBackupRestoreConfirmations) {
                 mAdbBackupRestoreConfirmations.put(token, params);
             }
@@ -10147,7 +10117,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
             Slog.i(TAG, "Beginning restore...");
 
             AdbRestoreParams params = new AdbRestoreParams(fd);
-            final int token = generateToken();
+            final int token = generateRandomIntegerToken();
             synchronized (mAdbBackupRestoreConfirmations) {
                 mAdbBackupRestoreConfirmations.put(token, params);
             }
@@ -11397,4 +11367,10 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
         }
         return null;
     }
+
+    @Override
+    public IBackupManager getBackupManagerBinder() {
+        return mBackupManagerBinder;
+    }
+
 }

@@ -55,7 +55,7 @@ public class Trampoline extends IBackupManager.Stub {
     final Context mContext;
     final File mSuppressFile;   // existence testing & creating synchronized on 'this'
     final boolean mGlobalDisable;
-    volatile BackupManagerService mService;
+    volatile BackupManagerServiceInterface mService;
 
     public Trampoline(Context context) {
         mContext = context;
@@ -387,12 +387,12 @@ public class Trampoline extends IBackupManager.Stub {
     // Full backup/restore entry points - non-Binder; called directly
     // by the full-backup scheduled job
     /* package */ boolean beginFullBackup(FullBackupJob scheduledJob) {
-        BackupManagerService svc = mService;
+        BackupManagerServiceInterface svc = mService;
         return (svc != null) ? svc.beginFullBackup(scheduledJob) : false;
     }
 
     /* package */ void endFullBackup() {
-        BackupManagerService svc = mService;
+        BackupManagerServiceInterface svc = mService;
         if (svc != null) {
             svc.endFullBackup();
         }
