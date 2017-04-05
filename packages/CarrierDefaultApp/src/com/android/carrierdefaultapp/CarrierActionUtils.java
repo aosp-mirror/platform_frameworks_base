@@ -16,6 +16,7 @@
 package com.android.carrierdefaultapp;
 
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -35,6 +36,7 @@ public class CarrierActionUtils {
 
     private static final String PORTAL_NOTIFICATION_TAG = "CarrierDefault.Portal.Notification";
     private static final String NO_DATA_NOTIFICATION_TAG = "CarrierDefault.NoData.Notification";
+    private static final String NOTIFICATION_CHANNEL_ID_MOBILE_DATA_STATUS = "mobile_data_status";
     private static final int PORTAL_NOTIFICATION_ID = 0;
     private static final int NO_DATA_NOTIFICATION_ID = 1;
     private static boolean ENABLE = true;
@@ -150,9 +152,18 @@ public class CarrierActionUtils {
     private static Notification getNotification(Context context, int titleId, int textId,
                                          PendingIntent pendingIntent) {
         final TelephonyManager telephonyMgr = context.getSystemService(TelephonyManager.class);
+        final NotificationManager notificationManager = context.getSystemService(
+                NotificationManager.class);
         final Resources resources = context.getResources();
         final Bundle extras = Bundle.forPair(Notification.EXTRA_SUBSTITUTE_APP_NAME,
                 resources.getString(R.string.android_system_label));
+        /* Creates the notification channel and registers it with NotificationManager. If a channel
+         * with the same ID is already registered, NotificationManager will ignore this call.
+         */
+        notificationManager.createNotificationChannel(new NotificationChannel(
+                NOTIFICATION_CHANNEL_ID_MOBILE_DATA_STATUS,
+                resources.getString(R.string.mobile_data_status_notification_channel_name),
+                NotificationManager.IMPORTANCE_DEFAULT));
         Notification.Builder builder = new Notification.Builder(context)
                 .setContentTitle(resources.getString(titleId))
                 .setContentText(String.format(resources.getString(textId),
@@ -167,7 +178,8 @@ public class CarrierActionUtils {
                 .setLocalOnly(true)
                 .setWhen(System.currentTimeMillis())
                 .setShowWhen(false)
-                .setExtras(extras);
+                .setExtras(extras)
+                .setChannel(NOTIFICATION_CHANNEL_ID_MOBILE_DATA_STATUS);
 
         if (pendingIntent != null) {
             builder.setContentIntent(pendingIntent);
