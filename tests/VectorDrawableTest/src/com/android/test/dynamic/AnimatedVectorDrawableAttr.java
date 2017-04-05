@@ -25,7 +25,7 @@ public class AnimatedVectorDrawableAttr extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_animated_vector_drawable_attr);
 
-        ImageView avdIv = (ImageView) findViewById(R.id.avd);
+        ImageView avdIv = findViewById(R.id.avd);
         AnimatedVectorDrawable avd = (AnimatedVectorDrawable) avdIv.getDrawable();
         avd.start();
     }

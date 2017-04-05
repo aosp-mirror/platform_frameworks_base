@@ -46,10 +46,10 @@ public class ListFilter extends ListActivity implements OnClickListener {
         getListView().setTextFilterEnabled(true);
         mFrame = findViewById(R.id.frame);
         
-        mHide = (Button) findViewById(R.id.hide);
+        mHide = findViewById(R.id.hide);
         mHide.setOnClickListener(this);
         
-        mShow = (Button) findViewById(R.id.show);
+        mShow = findViewById(R.id.show);
         mShow.setOnClickListener(this);
     }
     

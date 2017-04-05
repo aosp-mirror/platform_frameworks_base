@@ -40,13 +40,13 @@ public class DescendantFocusability extends Activity {
 
         setContentView(R.layout.descendant_focusability);
 
-        beforeDescendants = (ViewGroup) findViewById(R.id.beforeDescendants);
+        beforeDescendants = findViewById(R.id.beforeDescendants);
         beforeDescendantsChild = (Button) beforeDescendants.getChildAt(0);
 
-        afterDescendants = (ViewGroup) findViewById(R.id.afterDescendants);
+        afterDescendants = findViewById(R.id.afterDescendants);
         afterDescendantsChild = (Button) afterDescendants.getChildAt(0);
 
-        blocksDescendants = (ViewGroup) findViewById(R.id.blocksDescendants);
+        blocksDescendants = findViewById(R.id.blocksDescendants);
         blocksDescendantsChild = (Button) blocksDescendants.getChildAt(0);
     }
 

@@ -117,8 +117,8 @@ public class UserDetailItemView extends LinearLayout {
 
     @Override
     protected void onFinishInflate() {
-        mAvatar = (UserAvatarView) findViewById(R.id.user_picture);
-        mName = (TextView) findViewById(R.id.user_name);
+        mAvatar = findViewById(R.id.user_picture);
+        mName = findViewById(R.id.user_name);
         if (mRegularTypeface == null) {
             mRegularTypeface = mName.getTypeface();
         }

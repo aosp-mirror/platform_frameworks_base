@@ -94,7 +94,7 @@ public class ActivityTransition extends AppCompatActivity {
         setupHero();
 
         // Ensure that all images are visible regardless of orientation.
-        GridLayout gridLayout = (GridLayout) findViewById(R.id.transition_grid_layout);
+        GridLayout gridLayout = findViewById(R.id.transition_grid_layout);
         boolean isPortrait =
                 getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
         gridLayout.setRowCount(isPortrait ? 4 : 2);
@@ -105,7 +105,7 @@ public class ActivityTransition extends AppCompatActivity {
         String name = getIntent().getStringExtra(KEY_ID);
         mHero = null;
         if (name != null) {
-            mHero = (ImageView) findViewById(getIdForKey(name));
+            mHero = findViewById(getIdForKey(name));
             setEnterSharedElementCallback(new SharedElementCallback() {
                 @Override
                 public void onMapSharedElements(List<String> names,

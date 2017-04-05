@@ -63,9 +63,9 @@ public class NotificationSnooze extends LinearLayout
         createOptionViews();
 
         // Snackbar
-        mSelectedOptionText = (TextView) findViewById(R.id.snooze_option_default);
+        mSelectedOptionText = findViewById(R.id.snooze_option_default);
         mSelectedOptionText.setOnClickListener(this);
-        mUndoButton = (TextView) findViewById(R.id.undo);
+        mUndoButton = findViewById(R.id.undo);
         mUndoButton.setOnClickListener(this);
 
         // Default to first option in list
@@ -102,7 +102,7 @@ public class NotificationSnooze extends LinearLayout
     }
 
     private void createOptionViews() {
-        mSnoozeOptionView = (ViewGroup) findViewById(R.id.snooze_options);
+        mSnoozeOptionView = findViewById(R.id.snooze_options);
         mSnoozeOptionView.removeAllViews();
         mSnoozeOptionView.setVisibility(View.GONE);
         final Resources res = getResources();

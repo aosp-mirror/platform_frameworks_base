@@ -49,21 +49,21 @@ public class ClientTest extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
-        Button addpbtn = (Button) findViewById(R.id.addpkg);
-        Button procbtn = (Button) findViewById(R.id.procmsg);
-        Button delbtn = (Button) findViewById(R.id.delpkg);
+        Button addpbtn = findViewById(R.id.addpkg);
+        Button procbtn = findViewById(R.id.procmsg);
+        Button delbtn = findViewById(R.id.delpkg);
 
         Log.v(LOG_TAG, "activity created!!");
 
         addpbtn.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
-                    EditText app_id = (EditText) findViewById(R.id.app_id);
-                    EditText cont = (EditText) findViewById(R.id.cont);
-                    EditText pkg = (EditText) findViewById(R.id.pkg);
-                    EditText cls = (EditText) findViewById(R.id.cls);
-                    RadioButton act = (RadioButton) findViewById(R.id.act);
-                    CheckBox sig = (CheckBox) findViewById(R.id.sig);
-                    CheckBox ftr = (CheckBox) findViewById(R.id.ftr);
+                    EditText app_id = findViewById(R.id.app_id);
+                    EditText cont = findViewById(R.id.cont);
+                    EditText pkg = findViewById(R.id.pkg);
+                    EditText cls = findViewById(R.id.cls);
+                    RadioButton act = findViewById(R.id.act);
+                    CheckBox sig = findViewById(R.id.sig);
+                    CheckBox ftr = findViewById(R.id.ftr);
 
                     try {
                         if (!mWapPushMan.addPackage(
@@ -93,11 +93,11 @@ public class ClientTest extends Activity {
 
         delbtn.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
-                    EditText app_id = (EditText) findViewById(R.id.app_id);
-                    EditText cont = (EditText) findViewById(R.id.cont);
-                    EditText pkg = (EditText) findViewById(R.id.pkg);
-                    EditText cls = (EditText) findViewById(R.id.cls);
-                    // CheckBox delall = (CheckBox) findViewById(R.id.delall);
+                    EditText app_id = findViewById(R.id.app_id);
+                    EditText cont = findViewById(R.id.cont);
+                    EditText pkg = findViewById(R.id.pkg);
+                    EditText cls = findViewById(R.id.cls);
+                    // CheckBox delall = findViewById(R.id.delall);
                     // Log.d(LOG_TAG, "button clicked");
 
                     try {
@@ -115,9 +115,9 @@ public class ClientTest extends Activity {
 
         procbtn.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
-                    EditText pdu = (EditText) findViewById(R.id.pdu);
-                    EditText app_id = (EditText) findViewById(R.id.app_id);
-                    EditText cont = (EditText) findViewById(R.id.cont);
+                    EditText pdu = findViewById(R.id.pdu);
+                    EditText app_id = findViewById(R.id.app_id);
+                    EditText cont = findViewById(R.id.cont);
 
                     // WapPushOverSms wap = new WapPushOverSms();
                     // wap.dispatchWapPdu(strToHex(pdu.getText().toString()));

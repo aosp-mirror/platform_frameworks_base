@@ -134,7 +134,7 @@ public final class SelectPrinterActivity extends Activity implements
                 LOADER_ID_PRINT_REGISTRY_INT);
 
         // Hook up the list view.
-        mListView = (ListView) findViewById(android.R.id.list);
+        mListView = findViewById(android.R.id.list);
         final DestinationAdapter adapter = new DestinationAdapter();
         adapter.registerDataSetObserver(new DataSetObserver() {
             @Override
@@ -411,7 +411,7 @@ public final class SelectPrinterActivity extends Activity implements
             View emptyView = findViewById(R.id.empty_print_state);
             mListView.setEmptyView(emptyView);
         }
-        TextView titleView = (TextView) findViewById(R.id.title);
+        TextView titleView = findViewById(R.id.title);
         View progressBar = findViewById(R.id.progress_bar);
         if (mEnabledPrintServices.size() == 0) {
             titleView.setText(R.string.print_no_print_services);

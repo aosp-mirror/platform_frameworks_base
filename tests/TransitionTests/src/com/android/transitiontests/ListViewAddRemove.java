@@ -47,9 +47,9 @@ public class ListViewAddRemove extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.list_view_add_remove);
 
-        final LinearLayout container = (LinearLayout) findViewById(R.id.container);
+        final LinearLayout container = findViewById(R.id.container);
 
-        final ListView listview = (ListView) findViewById(R.id.listview);
+        final ListView listview = findViewById(R.id.listview);
         for (int i = 0; i < 200; ++i) {
             numList.add(Integer.toString(i));
         }

@@ -34,11 +34,11 @@ public class FadingHierarchy extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.fading_hierarchy);
 
-        mContainer = (ViewGroup) findViewById(R.id.container);
-        mRemovingContainer = (ViewGroup) findViewById(R.id.removingContainer);
+        mContainer = findViewById(R.id.container);
+        mRemovingContainer = findViewById(R.id.removingContainer);
         mInnerContainerParent = (ViewGroup) mRemovingContainer.getParent();
 
-        mRemovingButton = (Button) findViewById(R.id.removingButton);
+        mRemovingButton = findViewById(R.id.removingButton);
     }
 
     public void sendMessage(View view) {

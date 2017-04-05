@@ -325,7 +325,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         // Set the Recents layout
         setContentView(R.layout.recents);
         takeKeyEvents(true);
-        mRecentsView = (RecentsView) findViewById(R.id.recents_view);
+        mRecentsView = findViewById(R.id.recents_view);
         mRecentsView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
                 View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
                 View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);

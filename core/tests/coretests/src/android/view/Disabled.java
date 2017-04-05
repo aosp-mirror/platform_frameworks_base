@@ -34,16 +34,16 @@ public class Disabled extends Activity implements OnClickListener {
         setContentView(R.layout.disabled);
 
         // Find our buttons
-        Button disabledButton = (Button) findViewById(R.id.disabledButton);
+        Button disabledButton = findViewById(R.id.disabledButton);
         disabledButton.setEnabled(false);
         
         // Find our buttons
-        Button disabledButtonA = (Button) findViewById(R.id.disabledButtonA);
+        Button disabledButtonA = findViewById(R.id.disabledButtonA);
         disabledButtonA.setOnClickListener(this);
     }
 
     public void onClick(View v) {
-        Button disabledButtonB = (Button) findViewById(R.id.disabledButtonB);
+        Button disabledButtonB = findViewById(R.id.disabledButtonB);
         disabledButtonB.setEnabled(!disabledButtonB.isEnabled());
     }
 }

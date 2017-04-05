@@ -94,8 +94,8 @@ public class NotificationHeaderView extends ViewGroup {
         super.onFinishInflate();
         mAppName = findViewById(com.android.internal.R.id.app_name_text);
         mHeaderText = findViewById(com.android.internal.R.id.header_text);
-        mExpandButton = (ImageView) findViewById(com.android.internal.R.id.expand_button);
-        mIcon = (CachingIconView) findViewById(com.android.internal.R.id.icon);
+        mExpandButton = findViewById(com.android.internal.R.id.expand_button);
+        mIcon = findViewById(com.android.internal.R.id.icon);
         mProfileBadge = findViewById(com.android.internal.R.id.profile_badge);
     }
 
