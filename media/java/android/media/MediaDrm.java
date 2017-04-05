@@ -753,9 +753,12 @@ public final class MediaDrm {
      * @param init container-specific data, its meaning is interpreted based on the
      * mime type provided in the mimeType parameter.  It could contain, for example,
      * the content ID, key ID or other data obtained from the content metadata that is
-     * required in generating the key request. init may be null when keyType is
-     * KEY_TYPE_RELEASE.
-     * @param mimeType identifies the mime type of the content
+     * required in generating the key request. May be null when keyType is
+     * KEY_TYPE_RELEASE or if the request is a renewal, i.e. not the first key
+     * request for the session.
+     * @param mimeType identifies the mime type of the content. May be null if the
+     * keyType is KEY_TYPE_RELEASE or if the request is a renewal, i.e. not the
+     * first key request for the session.
      * @param keyType specifes the type of the request. The request may be to acquire
      * keys for streaming or offline content, or to release previously acquired
      * keys, which are identified by a keySetId.
