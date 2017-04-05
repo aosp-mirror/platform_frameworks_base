@@ -96,4 +96,7 @@ public interface NotificationMenuRowPlugin extends Plugin {
     public default boolean useDefaultMenuItems() {
         return false;
     }
+
+    public default void onConfigurationChanged() {
+    }
 }

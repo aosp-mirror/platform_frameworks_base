@@ -24,6 +24,8 @@ import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.content.res.Resources;
+import android.content.res.Configuration;
 import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.ColorDrawable;
@@ -84,6 +86,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private static final int COLORED_DIVIDER_ALPHA = 0x7B;
     private static final int MENU_VIEW_INDEX = 0;
 
+    public interface LayoutListener {
+        public void onLayout();
+    }
+
+    private LayoutListener mLayoutListener;
     private final NotificationInflater mNotificationInflater;
     private int mIconTransformContentShift;
     private int mIconTransformContentShiftNoIcon;
@@ -833,6 +840,13 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         onNotificationUpdated();
     }
 
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        if (mMenuRow.getMenuView() != null) {
+            mMenuRow.onConfigurationChanged();
+        }
+    }
+
     public void setContentBackground(int customBackgroundColor, boolean animate,
             NotificationContentView notificationContentView) {
         if (getShowingLayout() == notificationContentView) {
@@ -1578,6 +1592,14 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         mIsSystemChildExpanded = expanded;
     }
 
+    public void setLayoutListener(LayoutListener listener) {
+        mLayoutListener = listener;
+    }
+
+    public void removeListener() {
+        mLayoutListener = null;
+    }
+
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
@@ -1586,6 +1608,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             mMenuRow.onHeightUpdate();
         }
         updateContentShiftHeight();
+        if (mLayoutListener != null) {
+            mLayoutListener.onLayout();
+        }
     }
 
     /**
