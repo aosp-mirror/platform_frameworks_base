@@ -36,7 +36,6 @@ import com.android.internal.R;
 
 import java.io.IOException;
 
-// TODO(b/33197203 , b/33802548): add CTS tests
 /**
  * {@link ServiceInfo} and meta-data about an {@link AutofillService}.
  *
@@ -75,15 +74,8 @@ public final class AutofillServiceInfo {
         mServiceInfo = si;
         final TypedArray metaDataArray = getMetaDataArray(pm, si);
         if (metaDataArray != null) {
-            // TODO(b/35956626): inline newSettingsActivity once clients migrate
-            final String newSettingsActivity =
-                    metaDataArray.getString(R.styleable.AutofillService_settingsActivity);
-            if (newSettingsActivity != null) {
-                mSettingsActivity = newSettingsActivity;
-            } else {
-                mSettingsActivity =
-                        metaDataArray.getString(R.styleable.AutoFillService_settingsActivity);
-            }
+            mSettingsActivity = metaDataArray
+                    .getString(R.styleable.AutofillService_settingsActivity);
             metaDataArray.recycle();
         } else {
             mSettingsActivity = null;
@@ -96,15 +88,10 @@ public final class AutofillServiceInfo {
     @Nullable
     private static TypedArray getMetaDataArray(PackageManager pm, ServiceInfo si) {
         // Check for permissions.
-        // TODO(b/35956626): remove check for BIND_AUTO_FILL once clients migrate
-        if (!Manifest.permission.BIND_AUTOFILL.equals(si.permission)
-                && !Manifest.permission.BIND_AUTO_FILL.equals(si.permission)) {
+        if (!Manifest.permission.BIND_AUTOFILL.equals(si.permission)) {
             Log.e(TAG, "Service does not require permission " + Manifest.permission.BIND_AUTOFILL);
             return null;
         }
-
-        // TODO(b/35956626): remove once clients migrate
-        final boolean oldStyle = !Manifest.permission.BIND_AUTOFILL.equals(si.permission);
 
         // Get the AutoFill metadata, if declared.
         XmlResourceParser parser = si.loadXmlMetaData(pm, AutofillService.SERVICE_META_DATA);
@@ -141,8 +128,7 @@ public final class AutofillServiceInfo {
                 return null;
             }
 
-            return oldStyle ? res.obtainAttributes(attrs, R.styleable.AutoFillService)
-                    : res.obtainAttributes(attrs, R.styleable.AutofillService);
+            return res.obtainAttributes(attrs, R.styleable.AutofillService);
         } finally {
             parser.close();
         }
