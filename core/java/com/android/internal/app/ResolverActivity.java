@@ -530,9 +530,6 @@ public class ResolverActivity extends Activity {
             getMainThreadHandler().removeCallbacks(mPostListReadyRunnable);
             mPostListReadyRunnable = null;
         }
-        if (mAdapter != null && mAdapter.mResolverListController != null) {
-            mAdapter.mResolverListController.destroy();
-        }
     }
 
     @Override
