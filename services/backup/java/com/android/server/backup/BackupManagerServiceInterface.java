@@ -16,6 +16,8 @@
 
 package com.android.server.backup;
 
+import android.app.IBackupAgent;
+import android.app.backup.IBackupManager;
 import android.app.backup.IBackupManagerMonitor;
 import android.app.backup.IBackupObserver;
 import android.app.backup.IFullBackupRestoreObserver;
@@ -23,6 +25,7 @@ import android.app.backup.IRestoreSession;
 import android.app.backup.ISelectBackupTransportCallback;
 import android.content.ComponentName;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import java.io.FileDescriptor;
@@ -36,9 +39,15 @@ import java.io.PrintWriter;
  */
 public interface BackupManagerServiceInterface {
 
+  // Utility: build a new random integer token
+  int generateRandomIntegerToken();
+
   boolean setBackupPassword(String currentPw, String newPw);
 
   boolean hasBackupPassword();
+
+  // fire off a backup agent, blocking until it attaches or times out
+  IBackupAgent bindToAgentSynchronous(ApplicationInfo app, int mode);
 
   // Get the restore-set token for the best-available restore set for this package:
   // the active set if possible, else the ancestral one.  Returns zero if none available.
@@ -51,6 +60,20 @@ public interface BackupManagerServiceInterface {
 
   // Cancel all running backups.
   void cancelBackups();
+
+  void prepareOperationTimeout(int token, long interval, BackupRestoreTask callback,
+      int operationType);
+
+  // synchronous waiter case
+  boolean waitUntilOperationComplete(int token);
+
+  void tearDownAgentAndKill(ApplicationInfo app);
+
+  boolean beginFullBackup(FullBackupJob scheduledJob);
+
+  // The job scheduler says our constraints don't hold any more,
+  // so tear down any ongoing backup task right away.
+  void endFullBackup();
 
   void dataChanged(String packageName);
 
@@ -150,4 +173,6 @@ public interface BackupManagerServiceInterface {
   boolean isAppEligibleForBackup(String packageName);
 
   void dump(FileDescriptor fd, PrintWriter pw, String[] args);
+
+  IBackupManager getBackupManagerBinder();
 }
