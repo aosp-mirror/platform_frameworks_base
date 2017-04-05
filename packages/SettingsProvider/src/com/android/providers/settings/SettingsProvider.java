@@ -994,6 +994,15 @@ public class SettingsProvider extends ContentProvider {
         return false;
     }
 
+    private PackageInfo getCallingPackageInfo(int userId) {
+        try {
+            return mPackageManager.getPackageInfo(getCallingPackage(),
+                    PackageManager.GET_SIGNATURES, userId);
+        } catch (RemoteException e) {
+            throw new IllegalStateException("Package " + getCallingPackage() + " doesn't exist");
+        }
+    }
+
     private Cursor getAllSecureSettings(int userId, String[] projection) {
         if (DEBUG) {
             Slog.v(LOG_TAG, "getAllSecureSettings(" + userId + ")");
@@ -1001,6 +1010,13 @@ public class SettingsProvider extends ContentProvider {
 
         // Resolve the userId on whose behalf the call is made.
         final int callingUserId = resolveCallingUserIdEnforcingPermissionsLocked(userId);
+
+        // The relevant "calling package" userId will be the owning userId for some
+        // profiles, and we can't do the lookup inside our [lock held] loop, so work out
+        // up front who the effective "new SSAID" user ID for that settings name will be.
+        final int ssaidUserId = resolveOwningUserIdForSecureSettingLocked(callingUserId,
+                Settings.Secure.ANDROID_ID);
+        final PackageInfo ssaidCallingPkg = getCallingPackageInfo(ssaidUserId);
 
         synchronized (mLock) {
             List<String> names = getSettingsNamesLocked(SETTINGS_TYPE_SECURE, callingUserId);
@@ -1026,7 +1042,7 @@ public class SettingsProvider extends ContentProvider {
                 // SETTINGS_FILE_SSAID, unless accessed by a system process.
                 final Setting setting;
                 if (isNewSsaidSetting(name)) {
-                    setting = getSsaidSettingLocked(owningUserId);
+                    setting = getSsaidSettingLocked(ssaidCallingPkg, owningUserId);
                 } else {
                     setting = mSettingsRegistry.getSettingLocked(SETTINGS_TYPE_SECURE, owningUserId,
                             name);
@@ -1060,14 +1076,17 @@ public class SettingsProvider extends ContentProvider {
             return settings != null ? settings.getNullSetting() : null;
         }
 
-        // Get the value.
-        synchronized (mLock) {
-            // As of Android O, the SSAID is read from an app-specific entry in table
-            // SETTINGS_FILE_SSAID, unless accessed by a system process.
-            if (isNewSsaidSetting(name)) {
-                return getSsaidSettingLocked(owningUserId);
+        // As of Android O, the SSAID is read from an app-specific entry in table
+        // SETTINGS_FILE_SSAID, unless accessed by a system process.
+        if (isNewSsaidSetting(name)) {
+            PackageInfo callingPkg = getCallingPackageInfo(owningUserId);
+            synchronized (mLock) {
+                return getSsaidSettingLocked(callingPkg, owningUserId);
             }
+        }
 
+        // Not the SSAID; do a straight lookup
+        synchronized (mLock) {
             return mSettingsRegistry.getSettingLocked(SETTINGS_TYPE_SECURE,
                     owningUserId, name);
         }
@@ -1078,7 +1097,7 @@ public class SettingsProvider extends ContentProvider {
                 && UserHandle.getAppId(Binder.getCallingUid()) >= Process.FIRST_APPLICATION_UID;
     }
 
-    private Setting getSsaidSettingLocked(int owningUserId) {
+    private Setting getSsaidSettingLocked(PackageInfo callingPkg, int owningUserId) {
         // Get uid of caller (key) used to store ssaid value
         String name = Integer.toString(
                 UserHandle.getUid(owningUserId, UserHandle.getAppId(Binder.getCallingUid())));
@@ -1093,7 +1112,7 @@ public class SettingsProvider extends ContentProvider {
 
         // Lazy initialize ssaid if not yet present in ssaid table.
         if (ssaid == null || ssaid.isNull() || ssaid.getValue() == null) {
-            return mSettingsRegistry.generateSsaidLocked(getCallingPackage(), owningUserId);
+            return mSettingsRegistry.generateSsaidLocked(callingPkg, owningUserId);
         }
 
         return ssaid;
@@ -2070,15 +2089,7 @@ public class SettingsProvider extends ContentProvider {
             return ByteBuffer.allocate(4).putInt(data.length).array();
         }
 
-        public Setting generateSsaidLocked(String packageName, int userId) {
-            final PackageInfo packageInfo;
-            try {
-                packageInfo = mPackageManager.getPackageInfo(packageName,
-                        PackageManager.GET_SIGNATURES, userId);
-            } catch (RemoteException e) {
-                throw new IllegalStateException("Package info doesn't exist");
-            }
-
+        public Setting generateSsaidLocked(PackageInfo callingPkg, int userId) {
             // Read the user's key from the ssaid table.
             Setting userKeySetting = getSettingLocked(SETTINGS_TYPE_SSAID, userId, SSAID_USER_KEY);
             if (userKeySetting == null || userKeySetting.isNull()
@@ -2113,11 +2124,12 @@ public class SettingsProvider extends ContentProvider {
             }
 
             // Mac the package name and each of the signatures.
-            byte[] packageNameBytes = packageInfo.packageName.getBytes(StandardCharsets.UTF_8);
+            final String packageName = callingPkg.packageName;
+            byte[] packageNameBytes = packageName.getBytes(StandardCharsets.UTF_8);
             m.update(getLengthPrefix(packageNameBytes), 0, 4);
             m.update(packageNameBytes);
-            for (int i = 0; i < packageInfo.signatures.length; i++) {
-                byte[] sig = packageInfo.signatures[i].toByteArray();
+            for (int i = 0; i < callingPkg.signatures.length; i++) {
+                byte[] sig = callingPkg.signatures[i].toByteArray();
                 m.update(getLengthPrefix(sig), 0, 4);
                 m.update(sig);
             }
@@ -2127,7 +2139,7 @@ public class SettingsProvider extends ContentProvider {
                     .toLowerCase(Locale.US);
 
             // Save the ssaid in the ssaid table.
-            final String uid = Integer.toString(packageInfo.applicationInfo.uid);
+            final String uid = Integer.toString(callingPkg.applicationInfo.uid);
             final SettingsState ssaidSettings = getSettingsLocked(SETTINGS_TYPE_SSAID, userId);
             final boolean success = ssaidSettings.insertSettingLocked(uid, ssaid, null, true,
                     packageName);
