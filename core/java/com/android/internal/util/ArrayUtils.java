@@ -236,6 +236,29 @@ public class ArrayUtils {
         return false;
     }
 
+    public static boolean contains(@Nullable char[] array, char value) {
+        if (array == null) return false;
+        for (char element : array) {
+            if (element == value) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Test if all {@code check} items are contained in {@code array}.
+     */
+    public static <T> boolean containsAll(@Nullable char[] array, char[] check) {
+        if (check == null) return true;
+        for (char checkItem : check) {
+            if (!contains(array, checkItem)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public static long total(@Nullable long[] array) {
         long total = 0;
         if (array != null) {
