@@ -2798,7 +2798,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 143;
+            private static final int SETTINGS_VERSION = 144;
 
             private final int mUserId;
 
@@ -3324,7 +3324,7 @@ public class SettingsProvider extends ContentProvider {
                 }
 
                 if (currentVersion == 141) {
-                    // Version 141: We added the notion of a default and whether the system set
+                    // Version 142: We added the notion of a default and whether the system set
                     // the setting. This is used for resetting the internal state and we need
                     // to make sure this value is updated for the existing settings, otherwise
                     // we would delete system set settings while they should stay unmodified.
@@ -3344,7 +3344,7 @@ public class SettingsProvider extends ContentProvider {
                 }
 
                 if (currentVersion == 142) {
-                    // Version 142: Set a default value for Wi-Fi wakeup feature.
+                    // Version 143: Set a default value for Wi-Fi wakeup feature.
                     if (userId == UserHandle.USER_SYSTEM) {
                         final SettingsState globalSettings = getGlobalSettingsLocked();
                         Setting currentSetting = globalSettings.getSettingLocked(
@@ -3361,6 +3361,27 @@ public class SettingsProvider extends ContentProvider {
                     currentVersion = 143;
                 }
 
+                if (currentVersion == 143) {
+                    // Version 144: Set a default value for Autofill service.
+                    final SettingsState secureSettings = getSecureSettingsLocked(userId);
+                    final Setting currentSetting = secureSettings
+                            .getSettingLocked(Settings.Secure.AUTOFILL_SERVICE);
+                    if (currentSetting.isNull()) {
+                        final String defaultValue = getContext().getResources().getString(
+                                com.android.internal.R.string.config_defaultAutofillService);
+                        if (defaultValue != null) {
+                            Slog.d(LOG_TAG, "Setting [" + defaultValue + "] as Autofill Service "
+                                    + "for user " + userId);
+                            secureSettings.insertSettingLocked(Settings.Secure.AUTOFILL_SERVICE,
+                                    defaultValue, null, true, SettingsState.SYSTEM_PACKAGE_NAME);
+                        }
+                    }
+
+                    currentVersion = 144;
+                }
+
+                // vXXX: Add new settings above this point.
+
                 if (currentVersion != newVersion) {
                     Slog.wtf("SettingsProvider", "warning: upgrading settings database to version "
                             + newVersion + " left it at "
@@ -3371,8 +3392,6 @@ public class SettingsProvider extends ContentProvider {
                         throw new RuntimeException("db upgrade error");
                     }
                 }
-
-                // vXXX: Add new settings above this point.
 
                 // Return the current version.
                 return currentVersion;

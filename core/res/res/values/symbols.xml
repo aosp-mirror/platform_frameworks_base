@@ -2945,6 +2945,7 @@
   <java-symbol type="string" name="notification_channel_alerts" />
   <java-symbol type="string" name="notification_channel_retail_mode" />
   <java-symbol type="string" name="notification_channel_usb" />
+  <java-symbol type="string" name="config_defaultAutofillService" />
 
   <!-- ETWS primary messages -->
   <java-symbol type="string" name="etws_primary_default_message_earthquake" />
