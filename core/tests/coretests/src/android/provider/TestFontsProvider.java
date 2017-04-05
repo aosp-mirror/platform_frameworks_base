@@ -37,7 +37,8 @@ public class TestFontsProvider extends ContentProvider {
     static final String AUTHORITY = "android.provider.TestFontsProvider";
     static final int TTC_INDEX = 2;
     static final String VARIATION_SETTINGS = "'wdth' 1";
-    static final int STYLE = Typeface.BOLD;
+    static final int NORMAL_WEIGHT = 400;
+    static final boolean ITALIC = false;
 
     private ParcelFileDescriptor mPfd;
     private boolean mReturnAllFields = true;
@@ -81,8 +82,9 @@ public class TestFontsProvider extends ContentProvider {
         if (mReturnAllFields) {
             cursor = new MatrixCursor(new String[] { FontsContract.Columns._ID,
                     FontsContract.Columns.TTC_INDEX, FontsContract.Columns.VARIATION_SETTINGS,
-                    FontsContract.Columns.STYLE, FontsContract.Columns.RESULT_CODE });
-            cursor.addRow(new Object[] { 1, TTC_INDEX, VARIATION_SETTINGS, STYLE, mResultCode });
+                    FontsContract.Columns.WEIGHT, FontsContract.Columns.ITALIC,
+                    FontsContract.Columns.RESULT_CODE });
+            cursor.addRow(new Object[] { 1, TTC_INDEX, VARIATION_SETTINGS, 400, 0, mResultCode });
         } else {
             cursor = new MatrixCursor(new String[] { FontsContract.Columns._ID });
             cursor.addRow(new Object[] { 1 });

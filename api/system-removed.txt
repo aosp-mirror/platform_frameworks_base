@@ -290,6 +290,10 @@ package android.provider {
     field public static final deprecated java.lang.String TIMESTAMP = "timestamp";
   }
 
+  public static final class FontsContract.Columns implements android.provider.BaseColumns {
+    field public static final java.lang.String STYLE = "font_style";
+  }
+
   public static final class Settings.Global extends android.provider.Settings.NameValueTable {
     field public static final deprecated java.lang.String CONTACT_METADATA_SYNC = "contact_metadata_sync";
   }

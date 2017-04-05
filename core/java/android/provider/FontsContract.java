@@ -72,13 +72,26 @@ public class FontsContract {
          */
         public static final String VARIATION_SETTINGS = "font_variation_settings";
         /**
-         * Constant used to request data from a font provider. The cursor returned from the query
-         * should have this column populated with the int style for the resulting font. This should
-         * be one of {@link android.graphics.Typeface#NORMAL},
-         * {@link android.graphics.Typeface#BOLD}, {@link android.graphics.Typeface#ITALIC} or
-         * {@link android.graphics.Typeface#BOLD_ITALIC}
+         * DO NOT USE THIS COLUMN.
+         * This column is kept for preventing demo apps.
+         * TODO: Remove once nobody uses this column.
+         * @hide
+         * @removed
          */
         public static final String STYLE = "font_style";
+        /**
+         * Constant used to request data from a font provider. The cursor returned from the query
+         * should have this column populated with the int weight for the resulting font. This value
+         * should be between 100 and 900. The most common values are 400 for regular weight and 700
+         * for bold weight.
+         */
+        public static final String WEIGHT = "font_weight";
+        /**
+         * Constant used to request data from a font provider. The cursor returned from the query
+         * should have this column populated with the int italic for the resulting font. This should
+         * be 0 for regular style and 1 for italic.
+         */
+        public static final String ITALIC = "font_italic";
         /**
          * Constant used to request data from a font provider. The cursor returned from the query
          * should have this column populated to indicate the result status of the
@@ -274,7 +287,7 @@ public class FontsContract {
                 .build();
         try (Cursor cursor = mContext.getContentResolver().query(uri, new String[] { Columns._ID,
                         Columns.TTC_INDEX, Columns.VARIATION_SETTINGS, Columns.STYLE,
-                        Columns.RESULT_CODE },
+                        Columns.WEIGHT, Columns.ITALIC, Columns.RESULT_CODE },
                 "query = ?", new String[] { request.getQuery() }, null);) {
             // TODO: Should we restrict the amount of fonts that can be returned?
             // TODO: Write documentation explaining that all results should be from the same family.
@@ -285,6 +298,8 @@ public class FontsContract {
                 final int idColumnIndex = cursor.getColumnIndexOrThrow(Columns._ID);
                 final int ttcIndexColumnIndex = cursor.getColumnIndex(Columns.TTC_INDEX);
                 final int vsColumnIndex = cursor.getColumnIndex(Columns.VARIATION_SETTINGS);
+                final int weightColumnIndex = cursor.getColumnIndex(Columns.WEIGHT);
+                final int italicColumnIndex = cursor.getColumnIndex(Columns.ITALIC);
                 final int styleColumnIndex = cursor.getColumnIndex(Columns.STYLE);
                 while (cursor.moveToNext()) {
                     resultCode = resultCodeColumnIndex != -1
@@ -313,9 +328,22 @@ public class FontsContract {
                                 ? cursor.getInt(ttcIndexColumnIndex) : 0;
                         final String variationSettings = vsColumnIndex != -1
                                 ? cursor.getString(vsColumnIndex) : null;
-                        final int style = styleColumnIndex != -1
-                                ? cursor.getInt(styleColumnIndex) : Typeface.NORMAL;
-                        result.add(new FontResult(pfd, ttcIndex, variationSettings, style));
+                        // TODO: Stop using STYLE column and enforce WEIGHT/ITALIC column.
+                        int weight;
+                        boolean italic;
+                        if (weightColumnIndex != -1 && italicColumnIndex != -1) {
+                            weight = cursor.getInt(weightColumnIndex);
+                            italic = cursor.getInt(italicColumnIndex) == 1;
+                        } else if (styleColumnIndex != -1) {
+                            final int style = cursor.getInt(styleColumnIndex);
+                            weight = (style & Typeface.BOLD) != 0 ? 700 : 400;
+                            italic = (style & Typeface.ITALIC) != 0;
+                        } else {
+                            weight = 400;
+                            italic = false;
+                        }
+                        result.add(
+                                new FontResult(pfd, ttcIndex, variationSettings, weight, italic));
                     } catch (FileNotFoundException e) {
                         Log.e(TAG, "FileNotFoundException raised when interacting with content "
                                 + "provider " + authority, e);
