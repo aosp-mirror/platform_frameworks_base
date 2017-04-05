@@ -23,7 +23,6 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.android.internal.widget.CachingIconView;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.ViewInvertHelper;
@@ -127,12 +126,8 @@ public class NotificationShelf extends ActivatableNotificationView implements
         super.setDark(dark, fade, delay);
         if (mDark == dark) return;
         mDark = dark;
-        if (fade) {
-            mViewInvertHelper.fade(dark, delay);
-        } else {
-            mViewInvertHelper.update(dark);
-        }
-        mShelfIcons.setAmbient(dark);
+        mShelfIcons.setDark(dark, fade, delay);
+        updateInteractiveness();
     }
 
     @Override
@@ -576,7 +571,8 @@ public class NotificationShelf extends ActivatableNotificationView implements
     }
 
     private void updateInteractiveness() {
-        mInteractive = mStatusBarState == StatusBarState.KEYGUARD && mHasItemsInStableShelf;
+        mInteractive = mStatusBarState == StatusBarState.KEYGUARD && mHasItemsInStableShelf
+                && !mDark;
         setClickable(mInteractive);
         setFocusable(mInteractive);
         setImportantForAccessibility(mInteractive ? View.IMPORTANT_FOR_ACCESSIBILITY_YES
