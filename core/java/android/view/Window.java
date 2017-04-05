@@ -1308,15 +1308,22 @@ public abstract class Window {
     }
 
     /**
-     * Finds a view that was identified by the id attribute from the XML that
-     * was processed in {@link android.app.Activity#onCreate}.  This will
-     * implicitly call {@link #getDecorView} for you, with all of the
-     * associated side-effects.
+     * Finds a view that was identified by the {@code android:id} XML attribute
+     * that was processed in {@link android.app.Activity#onCreate}. This will
+     * implicitly call {@link #getDecorView} with all of the associated
+     * side-effects.
+     * <p>
+     * <strong>Note:</strong> In most cases -- depending on compiler support --
+     * the resulting view is automatically cast to the target class type. If
+     * the target class type is unconstrained, an explicit cast may be
+     * necessary.
      *
-     * @return The view if found or null otherwise.
+     * @param id the ID to search for
+     * @return a view with given ID if found, or {@code null} otherwise
+     * @see View#findViewById(int)
      */
     @Nullable
-    public View findViewById(@IdRes int id) {
+    public <T extends View> T findViewById(@IdRes int id) {
         return getDecorView().findViewById(id);
     }
 
