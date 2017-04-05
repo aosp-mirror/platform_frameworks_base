@@ -38,6 +38,7 @@ import android.content.pm.InstrumentationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.ParceledListSlice;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ServiceInfo;
 import android.content.res.AssetManager;
@@ -869,16 +870,20 @@ public final class ActivityThread {
             sendMessage(H.UNBIND_SERVICE, s);
         }
 
-        public final void scheduleServiceArgs(IBinder token, boolean taskRemoved, int startId,
-            int flags ,Intent args) {
-            ServiceArgsData s = new ServiceArgsData();
-            s.token = token;
-            s.taskRemoved = taskRemoved;
-            s.startId = startId;
-            s.flags = flags;
-            s.args = args;
+        public final void scheduleServiceArgs(IBinder token, ParceledListSlice args) {
+            List<ServiceStartArgs> list = args.getList();
 
-            sendMessage(H.SERVICE_ARGS, s);
+            for (int i = 0; i < list.size(); i++) {
+                ServiceStartArgs ssa = list.get(i);
+                ServiceArgsData s = new ServiceArgsData();
+                s.token = token;
+                s.taskRemoved = ssa.taskRemoved;
+                s.startId = ssa.startId;
+                s.flags = ssa.flags;
+                s.args = ssa.args;
+
+                sendMessage(H.SERVICE_ARGS, s);
+            }
         }
 
         public final void scheduleStopService(IBinder token) {

@@ -25,6 +25,7 @@ import android.content.IIntentReceiver;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.ParceledListSlice;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ServiceInfo;
 import android.content.res.CompatibilityInfo;
@@ -86,8 +87,7 @@ oneway interface IApplicationThread {
             in Bundle coreSettings, in String buildSerial);
     void scheduleExit();
     void scheduleConfigurationChanged(in Configuration config);
-    void scheduleServiceArgs(IBinder token, boolean taskRemoved, int startId,
-            int flags, in Intent args);
+    void scheduleServiceArgs(IBinder token, in ParceledListSlice args);
     void updateTimeZone();
     void processInBackground();
     void scheduleBindService(IBinder token,
