@@ -3057,9 +3057,17 @@ public class PackageManagerService extends IPackageManager.Stub {
                 | MATCH_DIRECT_BOOT_UNAWARE
                 | (!Build.IS_DEBUGGABLE ? MATCH_SYSTEM_ONLY : 0);
         final Intent resolverIntent = new Intent(Intent.ACTION_RESOLVE_INSTANT_APP_PACKAGE);
-        final List<ResolveInfo> resolvers = queryIntentServicesInternal(resolverIntent, null,
+        List<ResolveInfo> resolvers = queryIntentServicesInternal(resolverIntent, null,
                 resolveFlags, UserHandle.USER_SYSTEM, callingUid, false /*includeInstantApps*/);
-
+        // temporarily look for the old action
+        if (resolvers.size() == 0) {
+            if (DEBUG_EPHEMERAL) {
+                Slog.d(TAG, "Ephemeral resolver not found with new action; try old one");
+            }
+            resolverIntent.setAction(Intent.ACTION_RESOLVE_EPHEMERAL_PACKAGE);
+            resolvers = queryIntentServicesInternal(resolverIntent, null,
+                    resolveFlags, UserHandle.USER_SYSTEM, callingUid, false /*includeInstantApps*/);
+        }
         final int N = resolvers.size();
         if (N == 0) {
             if (DEBUG_EPHEMERAL) {
@@ -3106,8 +3114,17 @@ public class PackageManagerService extends IPackageManager.Stub {
                 MATCH_DIRECT_BOOT_AWARE
                 | MATCH_DIRECT_BOOT_UNAWARE
                 | (!Build.IS_DEBUGGABLE ? MATCH_SYSTEM_ONLY : 0);
-        final List<ResolveInfo> matches = queryIntentActivitiesInternal(intent, PACKAGE_MIME_TYPE,
+        List<ResolveInfo> matches = queryIntentActivitiesInternal(intent, PACKAGE_MIME_TYPE,
                 resolveFlags, UserHandle.USER_SYSTEM);
+        // temporarily look for the old action
+        if (matches.isEmpty()) {
+            if (DEBUG_EPHEMERAL) {
+                Slog.d(TAG, "Ephemeral installer not found with new action; try old one");
+            }
+            intent.setAction(Intent.ACTION_INSTALL_EPHEMERAL_PACKAGE);
+            matches = queryIntentActivitiesInternal(intent, PACKAGE_MIME_TYPE,
+                    resolveFlags, UserHandle.USER_SYSTEM);
+        }
         Iterator<ResolveInfo> iter = matches.iterator();
         while (iter.hasNext()) {
             final ResolveInfo rInfo = iter.next();
@@ -3136,8 +3153,17 @@ public class PackageManagerService extends IPackageManager.Stub {
                 .addCategory(Intent.CATEGORY_DEFAULT)
                 .setPackage(resolver.getPackageName());
         final int resolveFlags = MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE;
-        final List<ResolveInfo> matches = queryIntentActivitiesInternal(intent, null, resolveFlags,
+        List<ResolveInfo> matches = queryIntentActivitiesInternal(intent, null, resolveFlags,
                 UserHandle.USER_SYSTEM);
+        // temporarily look for the old action
+        if (matches.isEmpty()) {
+            if (DEBUG_EPHEMERAL) {
+                Slog.d(TAG, "Ephemeral resolver settings not found with new action; try old one");
+            }
+            intent.setAction(Intent.ACTION_EPHEMERAL_RESOLVER_SETTINGS);
+            matches = queryIntentActivitiesInternal(intent, null, resolveFlags,
+                    UserHandle.USER_SYSTEM);
+        }
         if (matches.isEmpty()) {
             return null;
         }
