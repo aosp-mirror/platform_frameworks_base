@@ -158,6 +158,7 @@ public class SystemUIApplication extends Application implements SysUiServiceProv
      * the main process.
      * <p>This method must only be called from the main thread.</p>
      */
+
     public void startServicesIfNeeded() {
         startServicesIfNeeded(SERVICES);
     }
