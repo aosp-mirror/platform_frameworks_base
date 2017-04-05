@@ -40,8 +40,8 @@ import com.android.internal.R;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -98,11 +98,10 @@ public class ChooseTypeAndAccountActivity extends Activity
             "alwaysPromptForAccount";
 
     /**
-     * If set then this string willb e used as the description rather than
+     * If set then this string will be used as the description rather than
      * the default.
      */
-    public static final String EXTRA_DESCRIPTION_TEXT_OVERRIDE =
-            "descriptionTextOverride";
+    public static final String EXTRA_DESCRIPTION_TEXT_OVERRIDE = "descriptionTextOverride";
 
     public static final int REQUEST_NULL = 0;
     public static final int REQUEST_CHOOSE_TYPE = 1;
@@ -112,7 +111,8 @@ public class ChooseTypeAndAccountActivity extends Activity
     private static final String KEY_INSTANCE_STATE_EXISTING_ACCOUNTS = "existingAccounts";
     private static final String KEY_INSTANCE_STATE_SELECTED_ACCOUNT_NAME = "selectedAccountName";
     private static final String KEY_INSTANCE_STATE_SELECTED_ADD_ACCOUNT = "selectedAddAccount";
-    private static final String KEY_INSTANCE_STATE_ACCOUNT_LIST = "accountAndVisibilityList";
+    private static final String KEY_INSTANCE_STATE_ACCOUNTS_LIST = "accountsList";
+    private static final String KEY_INSTANCE_STATE_VISIBILITY_LIST = "visibilityList";
 
     private static final int SELECTED_ITEM_NONE = -1;
 
@@ -122,7 +122,7 @@ public class ChooseTypeAndAccountActivity extends Activity
     private boolean mSelectedAddNewAccount = false;
     private String mDescriptionOverride;
 
-    private Map<Account, Integer> mAccounts;
+    private LinkedHashMap<Account, Integer> mAccounts;
     // TODO Redesign flow to show NOT_VISIBLE accounts
     // and display a warning if they are selected.
     // Currently NOT_VISBILE accounts are not shown at all.
@@ -164,6 +164,10 @@ public class ChooseTypeAndAccountActivity extends Activity
         // save some items we use frequently
         final Intent intent = getIntent();
 
+        mSetOfAllowableAccounts = getAllowableAccountSet(intent);
+        mSetOfRelevantAccountTypes = getReleventAccountTypes(intent);
+        mDescriptionOverride = intent.getStringExtra(EXTRA_DESCRIPTION_TEXT_OVERRIDE);
+
         if (savedInstanceState != null) {
             mPendingRequest = savedInstanceState.getInt(KEY_INSTANCE_STATE_PENDING_REQUEST);
             mExistingAccounts =
@@ -174,8 +178,15 @@ public class ChooseTypeAndAccountActivity extends Activity
                     savedInstanceState.getString(KEY_INSTANCE_STATE_SELECTED_ACCOUNT_NAME);
             mSelectedAddNewAccount =
                     savedInstanceState.getBoolean(KEY_INSTANCE_STATE_SELECTED_ADD_ACCOUNT, false);
-            mAccounts = (Map<Account, Integer>) savedInstanceState
-                    .getSerializable(KEY_INSTANCE_STATE_ACCOUNT_LIST);
+            // restore mAccounts
+            Parcelable[] accounts =
+                savedInstanceState.getParcelableArray(KEY_INSTANCE_STATE_ACCOUNTS_LIST);
+            ArrayList<Integer> visibility =
+                savedInstanceState.getIntegerArrayList(KEY_INSTANCE_STATE_VISIBILITY_LIST);
+            mAccounts = new LinkedHashMap<>();
+            for (int i = 0; i < accounts.length; i++) {
+                mAccounts.put((Account) accounts[i], visibility.get(i));
+            }
         } else {
             mPendingRequest = REQUEST_NULL;
             mExistingAccounts = null;
@@ -185,20 +196,21 @@ public class ChooseTypeAndAccountActivity extends Activity
             if (selectedAccount != null) {
                 mSelectedAccountName = selectedAccount.name;
             }
+            mAccounts = getAcceptableAccountChoices(AccountManager.get(this));
         }
 
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             Log.v(TAG, "selected account name is " + mSelectedAccountName);
         }
 
+        mPossiblyVisibleAccounts = new ArrayList<>(mAccounts.size());
+        for (Map.Entry<Account, Integer> entry : mAccounts.entrySet()) {
+            if (AccountManager.VISIBILITY_NOT_VISIBLE != entry.getValue()) {
+                mPossiblyVisibleAccounts.add(entry.getKey());
+            }
+        }
 
-        mSetOfAllowableAccounts = getAllowableAccountSet(intent);
-        mSetOfRelevantAccountTypes = getReleventAccountTypes(intent);
-        mDescriptionOverride = intent.getStringExtra(EXTRA_DESCRIPTION_TEXT_OVERRIDE);
-
-        mAccounts = getAcceptableAccountChoices(AccountManager.get(this));
-        if (mAccounts.isEmpty()
-                && mDisallowAddAccounts) {
+        if (mPossiblyVisibleAccounts.isEmpty() && mDisallowAddAccounts) {
             requestWindowFeature(Window.FEATURE_NO_TITLE);
             setContentView(R.layout.app_not_authorized);
             mDontShowPicker = true;
@@ -216,7 +228,7 @@ public class ChooseTypeAndAccountActivity extends Activity
         if (mPendingRequest == REQUEST_NULL) {
             // If there are no relevant accounts and only one relevant account type go directly to
             // add account. Otherwise let the user choose.
-            if (mAccounts.isEmpty()) {
+            if (mPossiblyVisibleAccounts.isEmpty()) {
                 setNonLabelThemeAndCallSuperCreate(savedInstanceState);
                 if (mSetOfRelevantAccountTypes.size() == 1) {
                     runAddAccountForAuthenticator(mSetOfRelevantAccountTypes.iterator().next());
@@ -226,12 +238,6 @@ public class ChooseTypeAndAccountActivity extends Activity
             }
         }
 
-        mPossiblyVisibleAccounts = new ArrayList<>(mAccounts.size());
-        for (Map.Entry<Account, Integer> entry : mAccounts.entrySet()) {
-            if (AccountManager.VISIBILITY_NOT_VISIBLE != entry.getValue()) {
-                mPossiblyVisibleAccounts.add(entry.getKey());
-            }
-        }
         String[] listItems = getListOfDisplayableOptions(mPossiblyVisibleAccounts);
         mSelectedItemIndex = getItemIndexToSelect(mPossiblyVisibleAccounts, mSelectedAccountName,
                 mSelectedAddNewAccount);
@@ -270,10 +276,16 @@ public class ChooseTypeAndAccountActivity extends Activity
                         mPossiblyVisibleAccounts.get(mSelectedItemIndex).name);
             }
         }
-        // should be HashMap by default.
-        HashMap<Account, Integer> accountsHashMap = (mAccounts instanceof HashMap)
-                ? (HashMap) mAccounts : new HashMap<Account, Integer>(mAccounts);
-        outState.putSerializable(KEY_INSTANCE_STATE_ACCOUNT_LIST, accountsHashMap);
+        // save mAccounts
+        Parcelable[] accounts = new Parcelable[mAccounts.size()];
+        ArrayList<Integer> visibility = new ArrayList<>(mAccounts.size());
+        int i = 0;
+        for (Map.Entry<Account, Integer> e : mAccounts.entrySet()) {
+            accounts[i++] = e.getKey();
+            visibility.add(e.getValue());
+        }
+        outState.putParcelableArray(KEY_INSTANCE_STATE_ACCOUNTS_LIST, accounts);
+        outState.putIntegerArrayList(KEY_INSTANCE_STATE_VISIBILITY_LIST, visibility);
     }
 
     public void onCancelButtonClicked(View view) {
@@ -308,7 +320,7 @@ public class ChooseTypeAndAccountActivity extends Activity
         if (resultCode == RESULT_CANCELED) {
             // if canceling out of addAccount and the original state caused us to skip this,
             // finish this activity
-            if (mAccounts.isEmpty()) {
+            if (mPossiblyVisibleAccounts.isEmpty()) {
                 setResult(Activity.RESULT_CANCELED);
                 finish();
             }
@@ -428,17 +440,19 @@ public class ChooseTypeAndAccountActivity extends Activity
     private void setResultAndFinish(final String accountName, final String accountType) {
         // Mark account as visible since user chose it.
         Account account = new Account(accountName, accountType);
-        Integer oldVisibility = mAccounts.get(account);
-        // oldVisibility is null if new account was added
-        if (oldVisibility == null) {
-            Map<Account, Integer> accountsAndVisibility = AccountManager.get(this)
-                    .getAccountsAndVisibilityForPackage(mCallingPackage, null /* type */);
-            oldVisibility = accountsAndVisibility.get(account);
-        }
+        Integer oldVisibility =
+            AccountManager.get(this).getAccountVisibility(account, mCallingPackage);
         if (oldVisibility != null
                 && oldVisibility == AccountManager.VISIBILITY_USER_MANAGED_NOT_VISIBLE) {
             AccountManager.get(this).setAccountVisibility(account, mCallingPackage,
                     AccountManager.VISIBILITY_USER_MANAGED_VISIBLE);
+        }
+
+        if (oldVisibility != null && oldVisibility == AccountManager.VISIBILITY_NOT_VISIBLE) {
+            // Added account is not visible to caller.
+            setResult(Activity.RESULT_CANCELED);
+            finish();
+            return;
         }
         Bundle bundle = new Bundle();
         bundle.putString(AccountManager.KEY_ACCOUNT_NAME, accountName);
@@ -448,6 +462,7 @@ public class ChooseTypeAndAccountActivity extends Activity
             Log.v(TAG, "ChooseTypeAndAccountActivity.setResultAndFinish: selected account "
                     + accountName + ", " + accountType);
         }
+
         finish();
     }
 
@@ -509,22 +524,24 @@ public class ChooseTypeAndAccountActivity extends Activity
      * that don't match the allowable types, if provided, or that don't match the allowable
      * accounts, if provided.
      */
-    private Map<Account, Integer> getAcceptableAccountChoices(AccountManager accountManager) {
-        Map<Account, Integer> accountsAndVisibility =
-                accountManager.getAccountsAndVisibilityForPackage(mCallingPackage, null /* type */);
-
-        Map<Account, Integer> accountsToPopulate =
-                new HashMap<Account, Integer>(accountsAndVisibility.size());
-        for (Map.Entry<Account, Integer> entry : accountsAndVisibility.entrySet()) {
+    private LinkedHashMap<Account, Integer> getAcceptableAccountChoices(AccountManager accountManager) {
+        Map<Account, Integer> accountsAndVisibilityForCaller =
+                accountManager.getAccountsAndVisibilityForPackage(mCallingPackage, null);
+        Account[] allAccounts = accountManager.getAccounts();
+        LinkedHashMap<Account, Integer> accountsToPopulate =
+                new LinkedHashMap<>(accountsAndVisibilityForCaller.size());
+        for (Account account : allAccounts) {
             if (mSetOfAllowableAccounts != null
-                    && !mSetOfAllowableAccounts.contains(entry.getKey())) {
+                    && !mSetOfAllowableAccounts.contains(account)) {
                 continue;
             }
             if (mSetOfRelevantAccountTypes != null
-                    && !mSetOfRelevantAccountTypes.contains(entry.getKey().type)) {
+                    && !mSetOfRelevantAccountTypes.contains(account.type)) {
                 continue;
             }
-            accountsToPopulate.put(entry.getKey(), entry.getValue());
+            if (accountsAndVisibilityForCaller.get(account) != null) {
+                accountsToPopulate.put(account, accountsAndVisibilityForCaller.get(account));
+            }
         }
         return accountsToPopulate;
     }
