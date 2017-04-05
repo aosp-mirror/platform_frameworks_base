@@ -345,6 +345,7 @@ public final class JobPackageTracker {
 
     public void notePending(JobStatus job) {
         final long now = SystemClock.uptimeMillis();
+        job.madePending = now;
         rebatchIfNeeded(now);
         mCurDataSet.incPending(job.getSourceUid(), job.getSourcePackageName(), now);
     }
@@ -357,6 +358,7 @@ public final class JobPackageTracker {
 
     public void noteActive(JobStatus job) {
         final long now = SystemClock.uptimeMillis();
+        job.madeActive = now;
         rebatchIfNeeded(now);
         if (job.lastEvaluatedPriority >= JobInfo.PRIORITY_TOP_APP) {
             mCurDataSet.incActiveTop(job.getSourceUid(), job.getSourcePackageName(), now);
