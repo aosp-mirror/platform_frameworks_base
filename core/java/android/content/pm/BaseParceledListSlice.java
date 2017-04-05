@@ -50,6 +50,8 @@ abstract class BaseParceledListSlice<T> implements Parcelable {
 
     private final List<T> mList;
 
+    private int mInlineCountLimit = Integer.MAX_VALUE;
+
     public BaseParceledListSlice(List<T> list) {
         mList = list;
     }
@@ -135,6 +137,14 @@ abstract class BaseParceledListSlice<T> implements Parcelable {
     }
 
     /**
+     * Set a limit on the maximum number of entries in the array that will be included
+     * inline in the initial parcelling of this object.
+     */
+    public void setInlineCountLimit(int maxCount) {
+        mInlineCountLimit = maxCount;
+    }
+
+    /**
      * Write this to another Parcel. Note that this discards the internal Parcel
      * and should not be used anymore. This is so we can pass this to a Binder
      * where we won't have a chance to call recycle on this.
@@ -149,7 +159,7 @@ abstract class BaseParceledListSlice<T> implements Parcelable {
             final Class<?> listElementClass = mList.get(0).getClass();
             writeParcelableCreator(mList.get(0), dest);
             int i = 0;
-            while (i < N && dest.dataSize() < MAX_IPC_SIZE) {
+            while (i < N && i < mInlineCountLimit && dest.dataSize() < MAX_IPC_SIZE) {
                 dest.writeInt(1);
 
                 final T parcelable = mList.get(i);
