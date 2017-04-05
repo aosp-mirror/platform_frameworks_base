@@ -18,7 +18,6 @@ package com.android.server.am;
 
 import static org.junit.Assert.assertNull;
 
-import android.os.Debug;
 import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.MediumTest;
 import android.support.test.runner.AndroidJUnit4;
@@ -45,7 +44,6 @@ public class ActivityStackSupervisorTests extends ActivityTestsBase {
      */
     @Test
     public void testRestoringInvalidTask() throws Exception {
-        Debug.waitForDebugger();
         final ActivityManagerService service = createActivityManagerService();
         TaskRecord task = service.mStackSupervisor.anyTaskForIdLocked(0 /*taskId*/,
                 MATCH_TASK_IN_STACKS_OR_RECENT_TASKS_AND_RESTORE, 0 /*stackId*/);
