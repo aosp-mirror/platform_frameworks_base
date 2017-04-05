@@ -2768,9 +2768,11 @@ public class DevicePolicyManager {
      * or clears the lockscreen password.
      * <p>
      * <em>This token is highly sensitive and should be treated at the same level as user
-     * credentials. In particular, NEVER store this token on device in plaintext, especially in
-     * Device-Encrypted storage if the token will be used to reset password on FBE devices before
-     * user unlocks.
+     * credentials. In particular, NEVER store this token on device in plaintext. Do not store
+     * the plaintext token in device-encrypted storage if it will be needed to reset password on
+     * file-based encryption devices before user unlocks. Consider carefully how any password token
+     * will be stored on your server and who will need access to them. Tokens may be the subject of
+     * legal access requests.
      * </em>
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
