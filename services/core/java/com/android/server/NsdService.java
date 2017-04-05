@@ -252,20 +252,17 @@ public class NsdService extends INsdManager.Stub {
             public boolean processMessage(Message msg) {
                 ClientInfo clientInfo;
                 NsdServiceInfo servInfo;
-                boolean result = HANDLED;
                 int id;
                 switch (msg.what) {
-                  case AsyncChannel.CMD_CHANNEL_HALF_CONNECTED:
+                    case AsyncChannel.CMD_CHANNEL_HALF_CONNECTED:
                         //First client
                         if (msg.arg1 == AsyncChannel.STATUS_SUCCESSFUL &&
                                 mClients.size() == 0) {
                             startMDnsDaemon();
                         }
-                        result = NOT_HANDLED;
-                        break;
+                        return NOT_HANDLED;
                     case AsyncChannel.CMD_CHANNEL_DISCONNECTED:
-                        result = NOT_HANDLED;
-                        break;
+                        return NOT_HANDLED;
                     case NsdManager.DISABLE:
                         //TODO: cleanup clients
                         transitionTo(mDisabledState);
@@ -376,26 +373,23 @@ public class NsdService extends INsdManager.Stub {
                     case NsdManager.NATIVE_DAEMON_EVENT:
                         NativeEvent event = (NativeEvent) msg.obj;
                         if (!handleNativeEvent(event.code, event.raw, event.cooked)) {
-                            result = NOT_HANDLED;
+                            return NOT_HANDLED;
                         }
                         break;
                     default:
-                        result = NOT_HANDLED;
-                        break;
+                        return NOT_HANDLED;
                 }
-                return result;
+                return HANDLED;
             }
 
             private boolean handleNativeEvent(int code, String raw, String[] cooked) {
-                boolean handled = true;
                 NsdServiceInfo servInfo;
                 int id = Integer.parseInt(cooked[1]);
                 ClientInfo clientInfo = mIdToClientInfoMap.get(id);
                 if (clientInfo == null) {
                     String name = NativeResponseCode.nameOf(code);
                     Slog.e(TAG, String.format("id %d for %s has no client mapping", id, name));
-                    handled = false;
-                    return handled;
+                    return false;
                 }
 
                 /* This goes in response as msg.arg2 */
@@ -408,8 +402,7 @@ public class NsdService extends INsdManager.Stub {
                     Slog.d(TAG, String.format(
                             "Notification %s for listener id %d that is no longer active",
                             name, id));
-                    handled = false;
-                    return handled;
+                    return false;
                 }
                 if (DBG) {
                     String name = NativeResponseCode.nameOf(code);
@@ -517,10 +510,9 @@ public class NsdService extends INsdManager.Stub {
                         clientInfo.mResolvedService = null;
                         break;
                     default:
-                        handled = false;
-                        break;
+                        return false;
                 }
-                return handled;
+                return true;
             }
        }
     }
