@@ -56,45 +56,26 @@ public class NsdService extends INsdManager.Stub {
     private static final String TAG = "NsdService";
     private static final String MDNS_TAG = "mDnsConnector";
 
-    private static final boolean DBG = false;
+    private static final boolean DBG = true;
 
-    private Context mContext;
-    private ContentResolver mContentResolver;
-    private NsdStateMachine mNsdStateMachine;
+    private final Context mContext;
+    private final ContentResolver mContentResolver;
+    private final NsdStateMachine mNsdStateMachine;
+    private final NativeDaemonConnector mNativeConnector;
+    private final CountDownLatch mNativeDaemonConnected = new CountDownLatch(1);
 
     /**
      * Clients receiving asynchronous messages
      */
-    private HashMap<Messenger, ClientInfo> mClients = new HashMap<Messenger, ClientInfo>();
+    private final HashMap<Messenger, ClientInfo> mClients = new HashMap<>();
 
     /* A map from unique id to client info */
-    private SparseArray<ClientInfo> mIdToClientInfoMap= new SparseArray<ClientInfo>();
+    private final SparseArray<ClientInfo> mIdToClientInfoMap= new SparseArray<>();
 
-    private AsyncChannel mReplyChannel = new AsyncChannel();
+    private final AsyncChannel mReplyChannel = new AsyncChannel();
 
-    private int INVALID_ID = 0;
+    private static final int INVALID_ID = 0;
     private int mUniqueId = 1;
-
-    private static final int BASE = Protocol.BASE_NSD_MANAGER;
-    private static final int CMD_TO_STRING_COUNT = NsdManager.RESOLVE_SERVICE - BASE + 1;
-    private static String[] sCmdToString = new String[CMD_TO_STRING_COUNT];
-
-    static {
-        sCmdToString[NsdManager.DISCOVER_SERVICES - BASE] = "DISCOVER";
-        sCmdToString[NsdManager.STOP_DISCOVERY - BASE] = "STOP-DISCOVER";
-        sCmdToString[NsdManager.REGISTER_SERVICE - BASE] = "REGISTER";
-        sCmdToString[NsdManager.UNREGISTER_SERVICE - BASE] = "UNREGISTER";
-        sCmdToString[NsdManager.RESOLVE_SERVICE - BASE] = "RESOLVE";
-    }
-
-    private static String cmdToString(int cmd) {
-        cmd -= BASE;
-        if ((cmd >= 0) && (cmd < sCmdToString.length)) {
-            return sCmdToString[cmd];
-        } else {
-            return null;
-        }
-    }
 
     private class NsdStateMachine extends StateMachine {
 
@@ -104,7 +85,7 @@ public class NsdService extends INsdManager.Stub {
 
         @Override
         protected String getWhatToString(int what) {
-            return cmdToString(what);
+            return NsdManager.nameOf(what);
         }
 
         /**
@@ -113,13 +94,13 @@ public class NsdService extends INsdManager.Stub {
         private void registerForNsdSetting() {
             ContentObserver contentObserver = new ContentObserver(this.getHandler()) {
                 @Override
-                    public void onChange(boolean selfChange) {
-                        if (isNsdEnabled()) {
-                            mNsdStateMachine.sendMessage(NsdManager.ENABLE);
-                        } else {
-                            mNsdStateMachine.sendMessage(NsdManager.DISABLE);
-                        }
+                public void onChange(boolean selfChange) {
+                    if (isNsdEnabled()) {
+                        mNsdStateMachine.sendMessage(NsdManager.ENABLE);
+                    } else {
+                        mNsdStateMachine.sendMessage(NsdManager.DISABLE);
                     }
+                }
             };
 
             mContext.getContentResolver().registerContentObserver(
@@ -411,7 +392,8 @@ public class NsdService extends INsdManager.Stub {
                 int id = Integer.parseInt(cooked[1]);
                 ClientInfo clientInfo = mIdToClientInfoMap.get(id);
                 if (clientInfo == null) {
-                    Slog.e(TAG, "Unique id with no client mapping: " + id);
+                    String name = NativeResponseCode.nameOf(code);
+                    Slog.e(TAG, String.format("id %d for %s has no client mapping", id, name));
                     handled = false;
                     return handled;
                 }
@@ -422,42 +404,43 @@ public class NsdService extends INsdManager.Stub {
                     // This can happen because of race conditions. For example,
                     // SERVICE_FOUND may race with STOP_SERVICE_DISCOVERY,
                     // and we may get in this situation.
-                    Slog.d(TAG, "Notification for a listener that is no longer active: " + id);
+                    String name = NativeResponseCode.nameOf(code);
+                    Slog.d(TAG, String.format(
+                            "Notification %s for listener id %d that is no longer active",
+                            name, id));
                     handled = false;
                     return handled;
                 }
-
+                if (DBG) {
+                    String name = NativeResponseCode.nameOf(code);
+                    Slog.d(TAG, String.format("Native daemon message %s: %s", name, raw));
+                }
                 switch (code) {
                     case NativeResponseCode.SERVICE_FOUND:
                         /* NNN uniqueId serviceName regType domain */
-                        if (DBG) Slog.d(TAG, "SERVICE_FOUND Raw: " + raw);
                         servInfo = new NsdServiceInfo(cooked[2], cooked[3]);
                         clientInfo.mChannel.sendMessage(NsdManager.SERVICE_FOUND, 0,
                                 clientId, servInfo);
                         break;
                     case NativeResponseCode.SERVICE_LOST:
                         /* NNN uniqueId serviceName regType domain */
-                        if (DBG) Slog.d(TAG, "SERVICE_LOST Raw: " + raw);
                         servInfo = new NsdServiceInfo(cooked[2], cooked[3]);
                         clientInfo.mChannel.sendMessage(NsdManager.SERVICE_LOST, 0,
                                 clientId, servInfo);
                         break;
                     case NativeResponseCode.SERVICE_DISCOVERY_FAILED:
                         /* NNN uniqueId errorCode */
-                        if (DBG) Slog.d(TAG, "SERVICE_DISC_FAILED Raw: " + raw);
                         clientInfo.mChannel.sendMessage(NsdManager.DISCOVER_SERVICES_FAILED,
                                 NsdManager.FAILURE_INTERNAL_ERROR, clientId);
                         break;
                     case NativeResponseCode.SERVICE_REGISTERED:
                         /* NNN regId serviceName regType */
-                        if (DBG) Slog.d(TAG, "SERVICE_REGISTERED Raw: " + raw);
                         servInfo = new NsdServiceInfo(cooked[2], null);
                         clientInfo.mChannel.sendMessage(NsdManager.REGISTER_SERVICE_SUCCEEDED,
                                 id, clientId, servInfo);
                         break;
                     case NativeResponseCode.SERVICE_REGISTRATION_FAILED:
                         /* NNN regId errorCode */
-                        if (DBG) Slog.d(TAG, "SERVICE_REGISTER_FAILED Raw: " + raw);
                         clientInfo.mChannel.sendMessage(NsdManager.REGISTER_SERVICE_FAILED,
                                NsdManager.FAILURE_INTERNAL_ERROR, clientId);
                         break;
@@ -469,7 +452,6 @@ public class NsdService extends INsdManager.Stub {
                         break;
                     case NativeResponseCode.SERVICE_RESOLVED:
                         /* NNN resolveId fullName hostName port txtlen txtdata */
-                        if (DBG) Slog.d(TAG, "SERVICE_RESOLVED Raw: " + raw);
                         int index = 0;
                         while (index < cooked[2].length() && cooked[2].charAt(index) != '.') {
                             if (cooked[2].charAt(index) == '\\') {
@@ -506,7 +488,6 @@ public class NsdService extends INsdManager.Stub {
                         break;
                     case NativeResponseCode.SERVICE_RESOLUTION_FAILED:
                         /* NNN resolveId errorCode */
-                        if (DBG) Slog.d(TAG, "SERVICE_RESOLVE_FAILED Raw: " + raw);
                         stopResolveService(id);
                         removeRequestMap(clientId, id, clientInfo);
                         clientInfo.mResolvedService = null;
@@ -518,13 +499,11 @@ public class NsdService extends INsdManager.Stub {
                         stopGetAddrInfo(id);
                         removeRequestMap(clientId, id, clientInfo);
                         clientInfo.mResolvedService = null;
-                        if (DBG) Slog.d(TAG, "SERVICE_RESOLVE_FAILED Raw: " + raw);
                         clientInfo.mChannel.sendMessage(NsdManager.RESOLVE_SERVICE_FAILED,
                                 NsdManager.FAILURE_INTERNAL_ERROR, clientId);
                         break;
                     case NativeResponseCode.SERVICE_GET_ADDR_SUCCESS:
                         /* NNN resolveId hostname ttl addr */
-                        if (DBG) Slog.d(TAG, "SERVICE_GET_ADDR_SUCCESS Raw: " + raw);
                         try {
                             clientInfo.mResolvedService.setHost(InetAddress.getByName(cooked[4]));
                             clientInfo.mChannel.sendMessage(NsdManager.RESOLVE_SERVICE_SUCCEEDED,
@@ -569,9 +548,6 @@ public class NsdService extends INsdManager.Stub {
         }
         return sb.toString();
     }
-
-    private NativeDaemonConnector mNativeConnector;
-    private final CountDownLatch mNativeDaemonConnected = new CountDownLatch(1);
 
     private NsdService(Context context) {
         mContext = context;
@@ -633,7 +609,7 @@ public class NsdService extends INsdManager.Stub {
     }
 
     /* These should be in sync with system/netd/server/ResponseCode.h */
-    class NativeResponseCode {
+    static final class NativeResponseCode {
         public static final int SERVICE_DISCOVERY_FAILED    =   602;
         public static final int SERVICE_FOUND               =   603;
         public static final int SERVICE_LOST                =   604;
@@ -649,6 +625,29 @@ public class NsdService extends INsdManager.Stub {
 
         public static final int SERVICE_GET_ADDR_FAILED     =   611;
         public static final int SERVICE_GET_ADDR_SUCCESS    =   612;
+
+        private static final SparseArray<String> CODE_NAMES = new SparseArray<>();
+        static {
+            CODE_NAMES.put(SERVICE_DISCOVERY_FAILED, "SERVICE_DISCOVERY_FAILED");
+            CODE_NAMES.put(SERVICE_FOUND, "SERVICE_FOUND");
+            CODE_NAMES.put(SERVICE_LOST, "SERVICE_LOST");
+            CODE_NAMES.put(SERVICE_REGISTRATION_FAILED, "SERVICE_REGISTRATION_FAILED");
+            CODE_NAMES.put(SERVICE_REGISTERED, "SERVICE_REGISTERED");
+            CODE_NAMES.put(SERVICE_RESOLUTION_FAILED, "SERVICE_RESOLUTION_FAILED");
+            CODE_NAMES.put(SERVICE_RESOLVED, "SERVICE_RESOLVED");
+            CODE_NAMES.put(SERVICE_UPDATED, "SERVICE_UPDATED");
+            CODE_NAMES.put(SERVICE_UPDATE_FAILED, "SERVICE_UPDATE_FAILED");
+            CODE_NAMES.put(SERVICE_GET_ADDR_FAILED, "SERVICE_GET_ADDR_FAILED");
+            CODE_NAMES.put(SERVICE_GET_ADDR_SUCCESS, "SERVICE_GET_ADDR_SUCCESS");
+        }
+
+        static String nameOf(int code) {
+            String name = CODE_NAMES.get(code);
+            if (name == null) {
+                return Integer.toString(code);
+            }
+            return name;
+        }
     }
 
     private class NativeEvent {
@@ -868,10 +867,10 @@ public class NsdService extends INsdManager.Stub {
         private NsdServiceInfo mResolvedService;
 
         /* A map from client id to unique id sent to mDns */
-        private SparseArray<Integer> mClientIds = new SparseArray<Integer>();
+        private final SparseArray<Integer> mClientIds = new SparseArray<>();
 
         /* A map from client id to the type of the request we had received */
-        private SparseArray<Integer> mClientRequests = new SparseArray<Integer>();
+        private final SparseArray<Integer> mClientRequests = new SparseArray<>();
 
         private ClientInfo(AsyncChannel c, Messenger m) {
             mChannel = c;
