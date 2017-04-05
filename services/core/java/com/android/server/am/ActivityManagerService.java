@@ -12143,6 +12143,24 @@ public class ActivityManagerService extends IActivityManager.Stub
         return false;
     }
 
+    @Override
+    public void backgroundWhitelistUid(final int uid) {
+        if (Binder.getCallingUid() != Process.SYSTEM_UID) {
+            throw new SecurityException("Only the OS may call backgroundWhitelistUid()");
+        }
+
+        if (DEBUG_BACKGROUND_CHECK) {
+            Slog.i(TAG, "Adding uid " + uid + " to bg uid whitelist");
+        }
+        synchronized (this) {
+            final int N = mBackgroundUidWhitelist.length;
+            int[] newList = new int[N+1];
+            System.arraycopy(mBackgroundUidWhitelist, 0, newList, 0, N);
+            newList[N] = uid;
+            mBackgroundUidWhitelist = newList;
+        }
+    }
+
     final ProcessRecord addAppLocked(ApplicationInfo info, String customProcess, boolean isolated,
             String abiOverride) {
         ProcessRecord app;
