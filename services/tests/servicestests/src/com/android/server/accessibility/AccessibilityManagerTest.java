@@ -14,18 +14,24 @@
  * limitations under the License.
  */
 
-package com.android.server;
+package com.android.server.accessibility;
 
+import static junit.framework.TestCase.assertFalse;
+import static junit.framework.TestCase.assertSame;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
+import android.app.Instrumentation;
+import android.os.Looper;
 import android.os.UserHandle;
-import android.test.AndroidTestCase;
-import android.test.suitebuilder.annotation.LargeTest;
-import android.test.suitebuilder.annotation.MediumTest;
+import android.support.test.InstrumentationRegistry;
+import android.support.test.runner.AndroidJUnit4;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.IAccessibilityManager;
@@ -33,6 +39,10 @@ import android.view.accessibility.IAccessibilityManagerClient;
 
 import com.android.internal.util.IntPair;
 
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -40,44 +50,48 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Tests for the AccessibilityManager which mocking the backing service.
+ * Tests for the AccessibilityManager by mocking the backing service.
  */
-public class AccessibilityManagerTest extends AndroidTestCase {
+@RunWith(AndroidJUnit4.class)
+public class AccessibilityManagerTest {
+    private static final boolean WITH_A11Y_ENABLED = true;
+    private static final boolean WITH_A11Y_DISABLED = false;
 
-    /**
-     * Timeout required for pending Binder calls or event processing to
-     * complete.
-     */
-    public static final long TIMEOUT_BINDER_CALL = 50;
+    @Mock private IAccessibilityManager mMockService;
+    private MessageCapturingHandler mHandler;
+    private Instrumentation mInstrumentation;
 
-    @Mock
-    private IAccessibilityManager mMockService;
+    @BeforeClass
+    public static void oneTimeInitialization() {
+        if (Looper.myLooper() == null) {
+            Looper.prepare();
+        }
+    }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
+        mHandler = new MessageCapturingHandler(null);
+        mInstrumentation = InstrumentationRegistry.getInstrumentation();
     }
 
     private AccessibilityManager createManager(boolean enabled) throws Exception {
-        if (enabled) {
-            when(mMockService.addClient(any(IAccessibilityManagerClient.class), anyInt()))
-                    .thenReturn(
-                            IntPair.of(AccessibilityManager.STATE_FLAG_ACCESSIBILITY_ENABLED,
-                                    AccessibilityEvent.TYPES_ALL_MASK));
-        } else {
-            when(mMockService.addClient(any(IAccessibilityManagerClient.class), anyInt()))
-                    .thenReturn(IntPair.of(0, AccessibilityEvent.TYPES_ALL_MASK));
-        }
+        long serviceReturnValue = IntPair.of(
+                (enabled) ? AccessibilityManager.STATE_FLAG_ACCESSIBILITY_ENABLED : 0,
+                AccessibilityEvent.TYPES_ALL_MASK);
+        when(mMockService.addClient(any(IAccessibilityManagerClient.class), anyInt()))
+                .thenReturn(serviceReturnValue);
 
         AccessibilityManager manager =
-                new AccessibilityManager(mContext, mMockService, UserHandle.USER_CURRENT);
+                new AccessibilityManager(mHandler, mMockService, UserHandle.USER_CURRENT);
 
         verify(mMockService).addClient(any(IAccessibilityManagerClient.class), anyInt());
-
+        mHandler.setCallback(manager.getCallback());
+        mHandler.sendAllMessages();
         return manager;
     }
 
-    @MediumTest
+    @Test
     public void testGetAccessibilityServiceList() throws Exception {
         // create a list of installed accessibility services the mock service returns
         List<AccessibilityServiceInfo> expectedServices = new ArrayList<>();
@@ -99,59 +113,50 @@ public class AccessibilityManagerTest extends AndroidTestCase {
         assertEquals("All expected services must be returned", expectedServices, receivedServices);
     }
 
-    @MediumTest
+    @Test
     public void testInterrupt() throws Exception {
-        AccessibilityManager manager = createManager(true);
+        AccessibilityManager manager = createManager(WITH_A11Y_ENABLED);
         manager.interrupt();
 
         verify(mMockService).interrupt(UserHandle.USER_CURRENT);
     }
 
-    @LargeTest
+    @Test
     public void testIsEnabled() throws Exception {
-        // invoke the method under test
-        AccessibilityManager manager = createManager(true);
-        boolean isEnabledServiceEnabled = manager.isEnabled();
+        // Create manager with a11y enabled
+        AccessibilityManager manager = createManager(WITH_A11Y_ENABLED);
+        assertTrue("Must be enabled since the mock service is enabled", manager.isEnabled());
 
-        // check expected result
-        assertTrue("Must be enabled since the mock service is enabled", isEnabledServiceEnabled);
-
-        // disable accessibility
+        // Disable accessibility
         manager.getClient().setState(0);
-
-        // wait for the asynchronous IBinder call to complete
-        Thread.sleep(TIMEOUT_BINDER_CALL);
-
-        // invoke the method under test
-        boolean isEnabledServcieDisabled = manager.isEnabled();
-
-        // check expected result
-        assertFalse("Must be disabled since the mock service is disabled",
-                isEnabledServcieDisabled);
+        mHandler.sendAllMessages();
+        assertFalse("Must be disabled since the mock service is disabled", manager.isEnabled());
     }
 
-    @MediumTest
+    @Test
     public void testSendAccessibilityEvent_AccessibilityEnabled() throws Exception {
-        AccessibilityEvent sentEvent = AccessibilityEvent.obtain();
+        AccessibilityEvent sentEvent = AccessibilityEvent.obtain(
+                AccessibilityEvent.TYPE_ANNOUNCEMENT);
 
-        AccessibilityManager manager = createManager(true);
+        AccessibilityManager manager = createManager(WITH_A11Y_ENABLED);
         manager.sendAccessibilityEvent(sentEvent);
 
         assertSame("The event should be recycled.", sentEvent, AccessibilityEvent.obtain());
     }
 
-    @MediumTest
+    @Test
     public void testSendAccessibilityEvent_AccessibilityDisabled() throws Exception {
         AccessibilityEvent sentEvent = AccessibilityEvent.obtain();
 
-        AccessibilityManager manager = createManager(false  /* disabled */);
-
-        try {
-            manager.sendAccessibilityEvent(sentEvent);
-            fail("No accessibility events are sent if accessibility is disabled");
-        } catch (IllegalStateException ise) {
-            // check expected result
-            assertEquals("Accessibility off. Did you forget to check that?", ise.getMessage());
-        }
+        AccessibilityManager manager = createManager(WITH_A11Y_DISABLED);
+        mInstrumentation.runOnMainSync(() -> {
+            try {
+                manager.sendAccessibilityEvent(sentEvent);
+                fail("No accessibility events are sent if accessibility is disabled");
+            } catch (IllegalStateException ise) {
+                // check expected result
+                assertEquals("Accessibility off. Did you forget to check that?", ise.getMessage());
+            }
+        });
     }
 }
