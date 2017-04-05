@@ -917,12 +917,12 @@ public class UsbDeviceManager {
                             Slog.i(TAG, pair.getKey() + " = " + pair.getValue());
                         }
                         UsbDevice device = (UsbDevice) pair.getValue();
-                        int configurationCount = device.getConfigurationCount();
-                        while (configurationCount != 0) {
+                        int configurationCount = device.getConfigurationCount() - 1;
+                        while (configurationCount >= 0) {
                             UsbConfiguration config = device.getConfiguration(configurationCount);
                             configurationCount--;
-                            int interfaceCount = config.getInterfaceCount();
-                            while (interfaceCount != 0) {
+                            int interfaceCount = config.getInterfaceCount() - 1;
+                            while (interfaceCount >= 0) {
                                 UsbInterface intrface = config.getInterface(interfaceCount);
                                 interfaceCount--;
                                 if (intrface.getInterfaceClass() == UsbConstants.USB_CLASS_AUDIO) {
